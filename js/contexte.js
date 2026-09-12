@@ -126,8 +126,8 @@ function changerCoursDepuisEntete(id, estGroupeCours) {
             const infoCours = {
                 id: gcSelectionne.id,
                 trimestreId: gcSelectionne.trimestreId || trimestreActif.id,
-                sigle: coursInfo.codeCours || '',
-                codeCours: coursInfo.codeCours || '',
+                sigle: coursInfo.codeCours || (coursInfo.nature === 'service' ? coursInfo.nomCours : '') || '',
+                codeCours: coursInfo.codeCours || (coursInfo.nature === 'service' ? coursInfo.nomCours : '') || '',
                 titre: coursInfo.nomCours || '',
                 nomCours: coursInfo.nomCours || '',
                 groupe: gcSelectionne.groupeNum || '00001',

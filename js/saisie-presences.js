@@ -1027,6 +1027,14 @@ function verifierConfigurationFormatHoraire() {
     // révèle ou on le masque, sans le réécrire. L'innerHTML retiré ici tenait un
     // SECOND message, divergent de celui du HTML, avec son propre lien.
     alerteDiv.classList.toggle('u-hide', aDesSeances);
+
+    // Cadrage « Rencontres » (12 sept. 2026) : sur un SERVICE sans horaire, le bandeau dit le
+    // bon motif (la présence se note dans la rencontre) au lieu de réclamer un horaire.
+    const estService = typeof contexteActifEstService === 'function' && contexteActifEstService();
+    const pService = document.getElementById('alerteFormatHoraire-service');
+    const pCours = document.getElementById('alerteFormatHoraire-cours');
+    if (pService) pService.classList.toggle('u-hide', !estService);
+    if (pCours) pCours.classList.toggle('u-hide', estService);
 }
 
 /* ===============================

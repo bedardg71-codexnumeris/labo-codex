@@ -211,7 +211,8 @@ function _obtenirCodeCoursSelectionne() {
     if (!coursId) return '';
     const cours = db.getSync('cours', []);
     const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
-    return coursObj?.codeCours || coursObj?.sigle || coursObj?.code || '';
+    // Cadrage « Rencontres » : le nom d'un service entre dans le nom du groupe-cours, à la place du code.
+    return coursObj?.codeCours || coursObj?.sigle || coursObj?.code || (coursObj?.nature === 'service' ? coursObj.nomCours : '') || '';
 }
 
 function _obtenirResumeHoraireSelectionne() {
@@ -264,7 +265,23 @@ function obtenirPeriodeJournee(heure) {
  *   du select HORAIRE (choix manuel à respecter) d'un changement de GROUPE
  *   (qui auto-associe l'horaire).
  */
+/** Cadrage « Rencontres » : le cours choisi dans le formulaire du groupe-cours est-il un service ? */
+function _coursSelectionneEstServiceV2() {
+    const coursId = document.getElementById('v2-gc-cours')?.value;
+    if (!coursId) return false;
+    const coursObj = (db.getSync('cours', []) || []).find(c => c && c.id === coursId);
+    return !!coursObj && coursObj.nature === 'service';
+}
+
 function mettreAJourNomGroupeCoursV2(triggerEl) {
+    // Cadrage « Rencontres » (12 sept. 2026) : pour un service, l'horaire est facultatif — le
+    // formulaire le dit à la place de l'astérisque, sans attendre le refus à l'enregistrement.
+    const estService = _coursSelectionneEstServiceV2();
+    const marqueRequis = document.getElementById('v2-gc-horaireRequis');
+    const marqueFacultatif = document.getElementById('v2-gc-horaireFacultatif');
+    if (marqueRequis) marqueRequis.classList.toggle('u-hide', estService);
+    if (marqueFacultatif) marqueFacultatif.classList.toggle('u-hide', !estService);
+
     const groupeNum = document.getElementById('v2-gc-groupe')?.value;
     const horaireHidden = document.getElementById('v2-gc-horaire');
     const horaireNomSpan = document.getElementById('v2-gc-horaireNom');
@@ -353,7 +370,9 @@ function _resoudreCoursPourCarteGC(gc) {
     const cours = db.getSync('cours', []);
     const coursObj = cours.find(c => c.id === gc.coursId || c.sigle === gc.coursId || c.codeCours === gc.coursId || c.code === gc.coursId);
     const coursNom = coursObj
-        ? (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || '')
+        ? (coursObj.nature === 'service'
+            ? (coursObj.nomCours || '') + ' - Service'
+            : (coursObj.codeCours || coursObj.sigle || coursObj.code || '') + ' - ' + (coursObj.nomCours || coursObj.nom || coursObj.titre || ''))
         : '—';
     return { coursObj, coursNom };
 }
@@ -380,13 +399,15 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const { coursObj, coursNom } = _resoudreCoursPourCarteGC(gc);
     const horaires = db.getSync(cle('horaires'), []);
     const horaireObj = horaires.find(h => h.id === gc.horaireId);
-    const horaireNom = horaireObj?.nom || '—';
+    // Cadrage « Rencontres » : un service sans horaire le dit, au lieu d'un tiret qui ressemble à un oubli.
+    const horaireNom = horaireObj?.nom || (coursObj?.nature === 'service' && !gc.horaireId ? 'Aucun — la présence se note dans la rencontre' : '—');
     const enseignantNom = _resoudreEnseignantPourCarteGC(gc);
 
     let score = 0;
     if (gc.coursId && coursObj) score++;
     if (gc.groupeNum) score++;
-    if (gc.horaireId && horaireObj) score++;
+    // Un service sans horaire est complet : l'horaire n'est pas attendu (cadrage « Rencontres »).
+    if ((gc.horaireId && horaireObj) || (coursObj && coursObj.nature === 'service' && !gc.horaireId)) score++;
     if (gc.enseignantId) score++;
     if (gc.pratiqueId) score++;
 
@@ -609,7 +630,9 @@ function sauvegarderGroupeCoursV2() {
         notifications.erreur('Veuillez sélectionner un groupe d\'étudiants');
         return;
     }
-    if (!horaireId) {
+    // Cadrage « Rencontres » (12 sept. 2026) : un groupe-cours de SERVICE peut n'avoir aucun
+    // horaire — ses rencontres ont chacune leur date. Pour un cours ordinaire, rien ne change.
+    if (!horaireId && !_coursSelectionneEstServiceV2()) {
         notifications.erreur('Veuillez sélectionner un horaire');
         return;
     }
@@ -690,7 +713,7 @@ function sauvegarderGroupeCoursV2() {
             trimestreId,  // Beta 95.2
             coursId,
             groupeNum,
-            horaireId,
+            horaireId: horaireId || null,
             enseignantId,
             pratiqueId,   // Beta 95.3
             dateModification: new Date().toISOString()
@@ -707,7 +730,7 @@ function sauvegarderGroupeCoursV2() {
             trimestreId,  // Beta 95.2
             coursId,
             groupeNum,
-            horaireId,
+            horaireId: horaireId || null,
             enseignantId,
             pratiqueId,   // Beta 95.3
             dateCreation: new Date().toISOString(),
@@ -829,7 +852,8 @@ function ouvrirModalBibliothequeGroupeCours() {
 
         const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
         const groupe = gc.groupeNum || '00001';
-        const titreNu = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
+        const titreNu = codeCours ? `${codeCours} — Groupe ${groupe}`
+            : (coursInfo?.nature === 'service' ? `${coursInfo.nomCours || 'Service'} — Service` : `Groupe ${groupe}`);
         const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '';
         const nomHor = hor?.nom || '';
         const estActif = gcActif && gc.id === gcActif.id;

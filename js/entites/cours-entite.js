@@ -28,6 +28,12 @@ const CLE_COURS = 'cours';
  * @property {string} elementsCompetence - Éléments de compétence
  * @property {number|null} heuresContact - Heures d'enseignement attendues du cours (RREC). Source de vérité de la conformité.
  * @property {string} ponderation - Pondération « théorie-labo-perso » (ex. "2-2-3"). Métadonnée de saisie ; propose heuresContact et le repère d'unités.
+ * @property {string} [nature] - 'cours' (défaut ; absent = cours) ou 'service' (cadrage « Rencontres », 12 sept. 2026).
+ *   Un SERVICE EST UN COURS : même enregistrement, même magasin, aucun troisième chemin de données. Il n'a ni
+ *   code, ni discipline, ni pondération, ni compétence — seul `nomCours` est requis — et un groupe-cours qui le
+ *   porte peut n'avoir aucun horaire. Ce qui affiche un code vide affiche son nom (règle appliquée site par site,
+ *   sans changer l'affichage d'un cours qui a un code). Le mot « orthopédagogie » n'apparaît nulle part : un
+ *   enseignant qui reçoit des élèves à son bureau a le même service.
  * @property {string} dateCreation - Date de création ISO
  * @property {string} dateModification - Date de dernière modification ISO
  */
@@ -95,6 +101,7 @@ async function creerCours(donnees, options) {
         elementsCompetence: donnees.elementsCompetence || '',
         heuresContact: (donnees.heuresContact === 0 || donnees.heuresContact) ? donnees.heuresContact : null,
         ponderation: donnees.ponderation || '',
+        nature: donnees.nature === 'service' ? 'service' : 'cours',
         // #458 (19 août 2026) : une fiche que tu crées est dans ta sélection.
         // Sans ce champ, la Bibliothèque (filtres stricts ===true/===false) ne
         // la montrait dans AUCUNE section avant le prochain rechargement — la
@@ -222,7 +229,7 @@ async function mettreAJourCours(coursId, modifications, options) {
     }
 
     // Mettre à jour les champs (sauf id et dateCreation)
-    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'heuresContact', 'ponderation'];
+    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'heuresContact', 'ponderation', 'nature'];
 
     champsModifiables.forEach(champ => {
         if (modifications[champ] !== undefined) {

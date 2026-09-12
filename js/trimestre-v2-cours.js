@@ -186,7 +186,8 @@ function chargerDropdownCoursV2() {
     const obtenirTexteCours = (c) => {
         const sigle = c.codeCours || c.sigle || c.code || c.numero || '';
         const titre = c.nomCours || c.titre || c.nom || '';
-        const texte = `${sigle} ${titre}`.trim();
+        // Un service se distingue par son mot, pas par une couleur (cadrage « Rencontres »).
+        const texte = c.nature === 'service' ? `${titre} — Service`.trim() : `${sigle} ${titre}`.trim();
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
@@ -318,7 +319,7 @@ function changerCoursSelectionneV2(coursId) {
     if (coursSelectionne) {
         // Afficher le formulaire en mode édition
         coursEnEditionV2 = coursId;
-        _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
+        _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code || coursSelectionne.nomCours);
         _mettreAJourBoutonActiverCours(coursId);
         if (etatVide) etatVide.classList.add('u-hide');
         if (formulaire) formulaire.classList.remove('u-hide');
@@ -358,7 +359,7 @@ async function supprimerCoursV2() {
         return;
     }
 
-    const nomCours = coursObj.codeCours || coursObj.sigle || coursObj.code || coursObj.id;
+    const nomCours = coursObj.codeCours || coursObj.sigle || coursObj.code || coursObj.nomCours || coursObj.id;
     const titreCours = coursObj.nomCours || coursObj.nom || coursObj.titre || '';
 
     // #449 (19 août 2026) : le Cadre passe par le MÊME garde que la
@@ -462,6 +463,22 @@ function afficherDetailsCoursV2(cours) {
 
     // Éléments de compétence (afficher seulement si présents)
     const elementsCompetence = cours.elementsCompetence || '';
+
+    // Un service n'a ni code, ni discipline, ni compétence : on montre sa nature et son nom, rien d'autre.
+    if (cours.nature === 'service') {
+        conteneur.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <label class="text-muted">Nature</label>
+                <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">Service</div>
+            </div>
+            <div>
+                <label class="text-muted">Nom du service</label>
+                <div style="font-weight: 600;">${echapperHtml(nomCours)}</div>
+            </div>
+        </div>`;
+        return;
+    }
 
     conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
@@ -610,7 +627,7 @@ async function modifierCoursSelectionneV2() {
     }
 
     coursEnEditionV2 = coursId;
-    _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code);
+    _afficherBandeauEdition(coursSelectionne.codeCours || coursSelectionne.sigle || coursSelectionne.code || coursSelectionne.nomCours);
     _mettreAJourBoutonActiverCours(coursId);
 
     const formulaire = document.getElementById('v2-formulaireCours');
@@ -699,6 +716,8 @@ function dupliquerCoursSelectionneV2() {
  * Gère différents formats de données (Beta 95)
  */
 function _remplirChampsInfosCours(cours) {
+    setValue('v2-natureCours', cours.nature === 'service' ? 'service' : 'cours');
+    changerNatureCoursV2();
     setValue('v2-codeCours', cours.codeCours || cours.sigle || cours.code || '');
     setValue('v2-nomCours', cours.titre || cours.nomCours || '');
     setValue('v2-numeroCompetence', cours.numeroCompetence || '');
@@ -967,6 +986,15 @@ function afficherSyntheseCours(cours) {
     const estActif = infoCours && infoCours.id === cours.id;
     const badgeActif = estActif ? '<div class="apercu-badge-actif">Cours actif</div>' : '';
 
+    if (cours.nature === 'service') {
+        sidebar.innerHTML = `
+        ${badgeActif}
+        <div class="apercu-titre">${echapperHtml(nom)}</div>
+        <div class="apercu-code">Service</div>
+    `;
+        return;
+    }
+
     sidebar.innerHTML = `
         ${badgeActif}
         <div class="apercu-titre">${echapperHtml(nom)}</div>
@@ -1127,7 +1155,8 @@ function afficherSyntheseGroupeCours(gc) {
     // Construire le libellé
     const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
     const groupe = gc.groupeNum || '00001';
-    const titre = codeCours ? `${codeCours} — Groupe ${groupe}` : `Groupe ${groupe}`;
+    const titre = codeCours ? `${codeCours} — Groupe ${groupe}`
+        : (coursInfo?.nature === 'service' ? `${coursInfo.nomCours || 'Service'} — Service` : `Groupe ${groupe}`);
 
     const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
     const nbSeances = hor?.seances?.length || 0;
@@ -1181,8 +1210,33 @@ function reinitialiserFormCoursV2() {
         'v2-elementsCompetence', 'v2-heuresEnseignement', 'v2-ponderation'
     ];
     champs.forEach(id => setValue(id, ''));
+    setValue('v2-natureCours', 'cours');
+    changerNatureCoursV2();
     majRepereUnitesCours();
     majRepereHeuresCours();
+}
+
+/**
+ * Cadrage « Rencontres » (12 sept. 2026) — la nature du cours commande le formulaire.
+ * Un service n'a que son nom : les blocs ministériels (code, compétence, pondération,
+ * discipline) se cachent, et « Nom du cours » devient « Nom du service », requis.
+ * Rien n'est effacé : revenir à « Cours » remontre les champs tels qu'ils étaient.
+ */
+function changerNatureCoursV2() {
+    const nature = document.getElementById('v2-natureCours')?.value === 'service' ? 'service' : 'cours';
+    const service = nature === 'service';
+    ['v2-champCodeCours', 'v2-ligneCompetence', 'v2-lignePonderation', 'v2-ligneDiscipline'].forEach(id => {
+        const bloc = document.getElementById(id);
+        if (bloc) bloc.classList.toggle('u-hide', service);
+    });
+    const label = document.getElementById('v2-labelNomCours');
+    if (label) {
+        label.innerHTML = service
+            ? 'Nom du service <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span>'
+            : 'Nom du cours';
+    }
+    const nom = document.getElementById('v2-nomCours');
+    if (nom) nom.placeholder = service ? 'Ex: Aide à la réussite en français' : 'Ex: Écriture et littérature';
 }
 
 /**
@@ -1221,6 +1275,7 @@ function annulerFormCoursV2() {
 function _lireChampsInfosCoursDOM() {
     const heuresBrut = document.getElementById('v2-heuresEnseignement')?.value?.trim();
     return {
+        nature: document.getElementById('v2-natureCours')?.value === 'service' ? 'service' : 'cours',
         codeCours: document.getElementById('v2-codeCours')?.value?.trim(),
         nomCours: document.getElementById('v2-nomCours')?.value?.trim(),
         discipline: document.getElementById('v2-disciplineCours')?.value?.trim(),
@@ -1273,7 +1328,8 @@ function _activerSiPremierCours(coursSauve) {
 }
 
 function _postSauvegardeCoursV2(cours) {
-    notifications.succes(coursEnEditionV2 ? 'Cours modifié avec succès' : 'Cours créé avec succès');
+    const motNature = cours && cours.nature === 'service' ? 'Service' : 'Cours';
+    notifications.succes(coursEnEditionV2 ? motNature + ' modifié avec succès' : motNature + ' créé avec succès');
     annulerFormCoursV2();
     chargerDropdownCoursV2();
     const selectCours = document.getElementById('v2-selectCours');
@@ -1288,6 +1344,44 @@ function _postSauvegardeCoursV2(cours) {
 
 async function sauvegarderCoursV2() {
     const d = _lireDonneesFormCoursV2();
+
+    // Cadrage « Rencontres » (12 sept. 2026) — un SERVICE n'a que son nom. Les trois
+    // exigences #540 ci-dessous (code, discipline, pondération) décrivent un devis
+    // ministériel ; un service n'en a pas. Ses champs restent vides en base, et la
+    // garde de doublon par code (#455) ne le voit pas : son identité n'est pas un code.
+    if (d.nature === 'service') {
+        if (!d.nomCours) {
+            notifications.erreur('Nom du service requis',
+                'C\'est le seul champ d\'un service : il s\'affiche partout où un cours montre son code.');
+            return;
+        }
+        d.codeCours = '';
+        d.discipline = '';
+        d.ponderation = '';
+        d.numeroCompetence = '';
+        d.competence = '';
+        d.elementsCompetence = '';
+        d.heuresContact = null;
+        let coursService;
+        if (coursEnEditionV2) {
+            coursService = await CoursEntite.mettreAJour(coursEnEditionV2, d);
+            if (!coursService) {
+                notifications.erreur('Service introuvable',
+                    'La fiche a peut-être été supprimée depuis un autre onglet. Recharge la page.');
+                return;
+            }
+            _resyncInfoCoursSiActif(coursService);
+        } else {
+            coursService = await CoursEntite.creer(d);
+            if (!coursService) {
+                notifications.erreur('Création refusée', 'Le service n\'a pas pu être enregistré.');
+                return;
+            }
+            _activerSiPremierCours(coursService);
+        }
+        _postSauvegardeCoursV2(coursService);
+        return;
+    }
 
     // #540 (26 août 2026) — TROIS champs requis, et tous les trois le DISENT désormais
     // à l'écran (astérisque `champ-requis`, légende sous le formulaire). Le code et la
@@ -1436,6 +1530,8 @@ window._fusionnerListeCoursDansCours = _fusionnerListeCoursDansCours;
 // Famille connue du projet : [[feedback-exports-orphelins-grep-window]].
 window.proposerHeuresEnseignementDepuisPonderation = proposerHeuresEnseignementDepuisPonderation;
 window.normaliserPonderationCoursV2 = normaliserPonderationCoursV2;
+// Cadrage « Rencontres » (12 sept. 2026) : `data-on-change` sur #v2-natureCours, résolu sur window par main.js.
+window.changerNatureCoursV2 = changerNatureCoursV2;
 
 // Helpers purs exportés pour être testés DIRECTEMENT par la sentinelle #540 —
 // même raison que `_fusionnerListeCoursDansCours` : vérifier l'export réel, pas

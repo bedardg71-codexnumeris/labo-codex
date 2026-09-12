@@ -6585,19 +6585,30 @@
                                                 Nouveau cours
                                             </h4>
 
+                                            <!-- Nature (cadrage « Rencontres », 12 sept. 2026) : un service EST un cours,
+                                                 sans code, sans discipline, sans compétence. Seul le nom est requis. -->
+                                            <div class="groupe-form u-mb-15">
+                                                <label>Nature</label>
+                                                <select id="v2-natureCours" class="controle-form" data-on-change="changerNatureCoursV2">
+                                                    <option value="cours">Cours</option>
+                                                    <option value="service">Service</option>
+                                                </select>
+                                                <span class="u-texte-075 u-texte-gris">Un service (aide, rencontres) n'a ni code, ni discipline, ni compétence : seul son nom est requis.</span>
+                                            </div>
+
                                             <!-- Informations générales -->
                                             <div class="grille-form-2col u-mb-15">
-                                                <div class="groupe-form">
+                                                <div class="groupe-form" id="v2-champCodeCours">
                                                     <label>Code du cours <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                                                     <input type="text" id="v2-codeCours" class="controle-form" placeholder="Ex: 601-101-MQ">
                                                 </div>
                                                 <div class="groupe-form">
-                                                    <label>Nom du cours</label>
+                                                    <label id="v2-labelNomCours">Nom du cours</label>
                                                     <input type="text" id="v2-nomCours" class="controle-form" placeholder="Ex: Écriture et littérature">
                                                 </div>
                                             </div>
 
-                                            <div class="grille-form-2col u-mb-15" data-tooltip="reglages-cours-competence">
+                                            <div class="grille-form-2col u-mb-15" id="v2-ligneCompetence" data-tooltip="reglages-cours-competence">
                                                 <div class="groupe-form">
                                                     <label>N° de la compétence</label>
                                                     <input type="text" id="v2-numeroCompetence" class="controle-form" placeholder="Ex: 4EF0">
@@ -6608,7 +6619,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grille-form-2col u-mb-15" data-tooltip="reglages-cours-ponderation-heures">
+                                            <div class="grille-form-2col u-mb-15" id="v2-lignePonderation" data-tooltip="reglages-cours-ponderation-heures">
                                                 <div class="groupe-form">
                                                     <label>Pondération <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> <button class="btn-aide-contextuelle" data-aide="cadre-cours-balises" aria-label="Aide : les balises du cours"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></label>
                                                     <input type="text" id="v2-ponderation" class="controle-form" placeholder="Ex: 2-2-3" data-on-input="proposerHeuresEnseignementDepuisPonderation" data-on-change="normaliserPonderationCoursV2">
@@ -6622,7 +6633,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grille-form-2col u-mb-15">
+                                            <div class="grille-form-2col u-mb-15" id="v2-ligneDiscipline">
                                                 <div class="groupe-form">
                                                     <label>Discipline <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                                                     <select id="v2-disciplineCours" class="controle-form">
@@ -7425,7 +7436,7 @@
                                                 </select>
                                             </div>
                                             <div class="groupe-form">
-                                                <label>4. Horaire <span class="champ-requis">*</span></label>
+                                                <label>4. Horaire <span class="champ-requis" id="v2-gc-horaireRequis">*</span> <span class="u-texte-075 u-texte-gris u-hide" id="v2-gc-horaireFacultatif">(facultatif pour un service)</span></label>
                                                 <select id="v2-gc-horaire" class="controle-form" data-on-change="mettreAJourNomGroupeCoursV2">
                                                     <option value="">— Choisir un horaire —</option>
                                                 </select>
@@ -7956,7 +7967,12 @@
                          d'une configuration retirée depuis. -->
                     <div id="alerteFormatHoraire" class="alerte alerte-attention u-hide">
                         <h4><img src="icons/icons8-high-priority.svg" alt="" class="alerte-icone"> Configuration incomplète</h4>
-                        <p>
+                        <!-- Cadrage « Rencontres » (12 sept. 2026) : un service sans horaire n'est pas une configuration
+                             incomplète — la présence se note dans la rencontre. Mots proposés, à valider par Grégoire. -->
+                        <p id="alerteFormatHoraire-service" class="u-hide">
+                            Ce service n'a pas d'horaire : la présence se note dans la rencontre (Suivi › Rencontres).
+                        </p>
+                        <p id="alerteFormatHoraire-cours">
                             Aucune séance n'est rattachée à l'horaire de ce cours. Sans séances, il n'y a
                             pas de présences à saisir.
                             <br><a href="#"
@@ -14398,7 +14414,7 @@
     <script src="js/navigation.js?v=20260910c"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=20260911a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
-    <script src="js/modes.js?v=20260911a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
+    <script src="js/modes.js?v=20260911k"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260615a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
@@ -14423,16 +14439,16 @@
     <script src="js/trimestre-v2-enseignants.js?v=20260824a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260827a"></script> <!-- #306 Lot 1 (3 juil.) : création d'horaire = « Créer » (séance garde « Ajouter ») -->
     <script src="js/trimestre-v2-liste.js?v=20260821a"></script> <!-- Fusion #374 : appel chargerJourneesSansCoursV2 (5 août) -->
-    <script src="js/trimestre-v2-cours.js?v=20260827a"></script> <!-- #306 Lot 1 (3 juil.) : création de cours = « Créer » -->
+    <script src="js/trimestre-v2-cours.js?v=20260911k"></script> <!-- #306 Lot 1 (3 juil.) : création de cours = « Créer » -->
     <script src="js/trimestre-v2-etudiants.js?v=20260911a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
-    <script src="js/trimestre-v2-groupes-cours.js?v=20260824a"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
-    <script src="js/trimestre-v2-orchestre.js?v=20260821a"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
+    <script src="js/trimestre-v2-groupes-cours.js?v=20260911k"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
+    <script src="js/trimestre-v2-orchestre.js?v=20260911k"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
-    <script src="js/entites/cours-entite.js?v=20260824a"></script>
+    <script src="js/entites/cours-entite.js?v=20260911k"></script>
     <script src="js/entites/enseignants.js?v=2026010601"></script>
     <script src="js/entites/horaires.js?v=2026010601"></script>
-    <script src="js/entites/groupe-cours.js?v=20260821a"></script>
+    <script src="js/entites/groupe-cours.js?v=20260911k"></script>
     <script src="js/entites/reconciliation-evaluations.js?v=2026062801"></script> <!-- #360 : prévention des doublons d'évals note-égale -->
     <script src="js/entites/production-diagnostique.js?v=20260908b"></script> <!-- #790 : la production de repérage, hors des quatre calculs — chargée AVANT productions.js, les pratiques et le profil, qui la consultent tous -->
     <script src="js/entites/signalement-depistage.js?v=20260908b"></script> <!-- #790 : le signalement, recalculé à la volée depuis les gabarits — jamais stocké -->
@@ -14469,8 +14485,8 @@
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20260904b"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260901a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
-    <script src="js/cours.js?v=20260823a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
-    <script src="js/contexte.js?v=2026062701"></script> <!-- Beta 95.2 : Support groupe-cours -->
+    <script src="js/cours.js?v=20260911k"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
+    <script src="js/contexte.js?v=20260911k"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=20260910c"></script>
@@ -14516,7 +14532,7 @@
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260911a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20260911c"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20260911k"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260905a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -14579,12 +14595,12 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260909a"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
+    <script src="js/travaux-ui.js?v=20260911k"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
     <script src="js/actions-rlo.js?v=20260808b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
-    <script src="js/horaire.js?v=20260911a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
+    <script src="js/horaire.js?v=20260911k"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
     <script src="js/groupe.js?v=20260908b"></script>
     <script src="js/interventions.js?v=20260906a"></script>
 
