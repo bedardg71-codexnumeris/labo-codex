@@ -83,6 +83,31 @@ describe('A · « Planifier » n\'écrit rien ; « Enregistrer » écrit, une fo
         expect(b.store.test_interventions.map(i => i.id)).toEqual([id]);
     });
 
+    // Relecture croisée de Cowork (12 sept. 2026, 13 h 10) : « Intervention enregistrée » s'affichait même quand rien n'était écrit.
+    it('un id ni en base ni en brouillon : zéro écriture, AUCUNE notification de succès, une erreur qui le dit', () => {
+        const erreurConsole = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const b = banc({ interventions: [intervention({ id: 'I_OK' })] });
+        b.win.sauvegarderPresencesIntervention('I_INCONNU');
+        expect(b.ecritures()).toBe(0);
+        expect(b.notifs.filter(n => n.type === 'succes')).toEqual([]);
+        expect(b.notifs.filter(n => n.type === 'erreur').map(n => n.t)).toEqual(['Intervention non trouvée.']);
+        expect(erreurConsole).toHaveBeenCalled();
+        expect(b.store.test_interventions.map(i => i.id)).toEqual(['I_OK']);
+    });
+
+    it('« Enregistrer » sur un brouillon déjà annulé : rien n\'est écrit, rien n\'est annoncé comme enregistré', () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        const b = banc({ vue: 'rencontres' });
+        b.win.afficherFormulaireIntervention();
+        const id = b.idDuFormulaire();
+        b.win.annulerNouvelleIntervention(id);
+        b.win.sauvegarderPresencesIntervention(id);
+        expect(b.ecritures()).toBe(0);
+        expect(b.store.test_interventions).toEqual([]);
+        expect(b.notifs.filter(n => n.type === 'succes')).toEqual([]);
+        expect(b.notifs.filter(n => n.type === 'erreur').map(n => n.t)).toEqual(['Rencontre introuvable.']);
+    });
+
     it('changer d\'onglet sans enregistrer : la liste ré-affichée ne montre rien, et rien n\'a été écrit', () => {
         const b = banc({ interventions: [intervention({ id: 'I_OK', titre: 'Déjà là' })] });
         b.win.afficherFormulaireIntervention();
@@ -213,6 +238,9 @@ describe('D · le code retiré reste retiré (cliquet)', () => {
 //   M11 le DA affiché en anonymisation                                   → 1 rouge
 //   M12 la mention « (n'est plus dans le groupe) » retirée               → 2 rouges
 //   M13 cliquet : completerIntervention ressuscitée                      → 1 rouge
+// Relecture croisée de Cowork (13 h 10) — la garde d'un id introuvable, deux essais neufs :
+//   M14 la garde neutralisée (`if (false)`)                              → 2 rouges
+//   M15 le code d'avant : la liste et « enregistrée » sans écriture       → 2 rouges
 // NON COUVERT, nommé : la pré-coche des critères en défi sur un brouillon (`mettreAJourCriteresCibles`, même
 // condition qu'avant — `jamaisSauvegardee` devenu `_estBrouillon`) ; le compteur des notes qui comptait une entrée
 // VIDE (#772 efface déjà une note vidée à l'enregistrement : mutation équivalente sur les données réelles).

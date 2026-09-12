@@ -83,7 +83,7 @@ individuelles » la comptait quand même (#748). Ta décision du 11 septembre : 
 
 | | Question | Ta réponse (écris-la) |
 |---|---|---|
-| **3.1** | Le titre de l'entrée 1.139 dans « Nouvelles » (tes collègues le liront) : **« Interventions : rien n'est écrit avant « Enregistrer » »** — de mon choix, la consigne ne donnait que la phrase de l'item. Tel quel, ou lequel ? | _______ |
+| **3.1** | Le titre de l'entrée 1.139 dans « Nouvelles » (tes collègues le liront). **Livré** : « Interventions : rien n'est écrit avant « Enregistrer » » (de Claude Code ; la consigne ne donnait que la phrase de l'item). ⚠ Relecture de Cowork (13 h 10) : sur un service, l'onglet « Interventions » n'existe plus depuis 1.138.0 — l'orthopédagogue lirait le nom d'un écran qu'elle n'a pas. **Proposition de Cowork** : « Planifier n'enregistre plus rien avant que tu cliques ». Tel quel, la proposition de Cowork, ou autre ? (Un autre titre part dans une version corrective.) | _______ |
 
 ---
 
