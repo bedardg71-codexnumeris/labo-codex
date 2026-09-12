@@ -119,7 +119,8 @@ async function hydraterGroupeCours(groupeCours) {
  * @returns {string}
  */
 function genererLibelleGroupeCours(gc, cours, enseignant, horaire) {
-    const codeCours = cours?.codeCours || cours?.code || cours?.sigle || null;
+    // Cadrage « Rencontres » : un service n'a pas de code, son nom tient lieu de sigle.
+    const codeCours = cours?.codeCours || cours?.code || cours?.sigle || (cours?.nature === 'service' ? cours.nomCours : null);
     const groupe = gc?.groupeNum || '00001';
     const nomEns = enseignant ? `${enseignant.prenom?.[0] || ''}. ${enseignant.nom || ''}` : '';
     const nomHor = horaire?.nom || '';
@@ -196,7 +197,9 @@ async function synchroniserInfoCours(trimestreId) {
     // Construire un objet infoCours compatible avec l'ancien format
     const infoCours = {
         id: gcComplet.id,
-        codeCours: gcComplet.cours?.codeCours || '',
+        // Cadrage « Rencontres » : pour un service (sans code), le miroir porte le nom — même règle
+        // que `_definirInfoCoursModeGroupeCours` (trimestre-v2-orchestre.js).
+        codeCours: gcComplet.cours?.codeCours || (gcComplet.cours?.nature === 'service' ? gcComplet.cours.nomCours : '') || '',
         nomCours: gcComplet.cours?.nomCours || '',
         discipline: gcComplet.cours?.discipline || '',
         numeroCompetence: gcComplet.cours?.numeroCompetence || '',

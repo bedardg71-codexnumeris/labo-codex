@@ -507,6 +507,37 @@ window.anonymiserNomFichier = anonymiserNomFichier;
  * mode démo (dont le `infoCours.id` ne correspond à aucun groupe-cours réel).
  * Non destructif : retourne une copie, n'écrit rien.
  */
+/**
+ * Cadrage « Rencontres » (12 sept. 2026) — LA fiche de cours du contexte actif, ou null.
+ * Résolution : le groupe-cours actif (pointeur `groupeCoursActif.coursId`) d'abord, puis
+ * `infoCours.id` (qui est le coursId dans le chemin de l'orchestre, mais l'id du
+ * groupe-cours dans celui de l'entité — d'où l'ordre). Lecture seule.
+ */
+function coursDuContexteActif() {
+    const cours = db.getSync('cours', []) || [];
+    if (!Array.isArray(cours) || cours.length === 0) return null;
+    const gcActif = db.getSync('groupeCoursActif', null);
+    if (gcActif && gcActif.coursId) {
+        const parGC = cours.find(c => c && c.id === gcActif.coursId);
+        if (parGC) return parGC;
+    }
+    const infoCours = db.getSync('infoCours', null);
+    if (infoCours && infoCours.id) {
+        return cours.find(c => c && c.id === infoCours.id) || null;
+    }
+    return null;
+}
+
+/** Un service EST un cours (`nature: 'service'`) : sans code, sans discipline, sans horaire obligatoire. */
+function estCoursService(cours) {
+    return !!cours && cours.nature === 'service';
+}
+
+/** Vrai quand le contexte actif (groupe-cours ou cours) porte un service. Point unique — ne pas recopier le test. */
+function contexteActifEstService() {
+    return estCoursService(coursDuContexteActif());
+}
+
 function obtenirContexteCoursActif() {
     const infoCours = db.getSync('infoCours', null);
     if (!infoCours || !infoCours.id) return infoCours;
@@ -1298,6 +1329,10 @@ function obtenirPratiqueActiveGroupeCours() {
 // Exporter les nouvelles fonctions
 window.obtenirEtudiantsCoursActif = obtenirEtudiantsCoursActif;
 window.normaliserNumeroGroupe = normaliserNumeroGroupe;
+// Cadrage « Rencontres » (12 sept. 2026) : le contexte de service, lu à un seul endroit.
+window.coursDuContexteActif = coursDuContexteActif;
+window.estCoursService = estCoursService;
+window.contexteActifEstService = contexteActifEstService;
 window.etudiantDansCoursActif = etudiantDansCoursActif;
 window.obtenirPratiqueActiveGroupeCours = obtenirPratiqueActiveGroupeCours;
 

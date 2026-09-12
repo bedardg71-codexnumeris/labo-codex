@@ -169,6 +169,16 @@ function obtenirSeancesHoraire(coursId) {
                 : null;
             // SSOT si le GC y figure ; copie en dernier recours sinon
             const horaireId = gc ? gc.horaireId : groupeCoursActif.horaireId;
+            // Cadrage « Rencontres » (12 sept. 2026) — un groupe-cours de SERVICE peut n'avoir
+            // aucun horaire (mesure 2 du 11 sept. : la présence se note dans la rencontre).
+            // Sans ce retour, les replis 2-4 ci-dessous lui serviraient l'horaire du DERNIER
+            // groupe-cours activé dans le même trimestre (miroirs `horaireHebdo` /
+            // `seancesHoraire`, écrits par l'activation) : un calendrier étranger, en silence.
+            // Un service sans horaire rend vide, et les écrans le disent. Un groupe-cours
+            // ORDINAIRE sans horaireId garde ses replis : rien ne bouge pour l'enseignant.
+            if (gc && !horaireId && typeof contexteActifEstService === 'function' && contexteActifEstService()) {
+                return [];
+            }
             if (horaireId) {
                 const horaires = db.getSync(cle('horaires'), []);
                 const horaire = horaires.find(h => h.id === horaireId);

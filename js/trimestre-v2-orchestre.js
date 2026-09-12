@@ -89,7 +89,8 @@ async function peuplerDropdownGroupeCoursActif() {
             const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
-            const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || null;
+            // Cadrage « Rencontres » : un service n'a pas de code, son nom tient lieu de sigle.
+            const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || (coursInfo?.nature === 'service' ? coursInfo.nomCours : null);
             const groupe = gc.groupeNum || '00001';
             const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
             const nomHor = hor.nom || '';
@@ -112,7 +113,7 @@ async function peuplerDropdownGroupeCoursActif() {
             options += '<optgroup label="Cours (tous groupes)">';
             coursMap.forEach((gcs, coursId) => {
                 const coursInfo = cours.find(c => c.id === coursId);
-                const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
+                const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || (coursInfo?.nature === 'service' ? coursInfo.nomCours : null) || coursId;
                 const nbGroupes = gcs.length;
                 const label = nbGroupes > 1 ? `${sigle} (${nbGroupes} groupes)` : sigle;
                 const selected = gcActif && gcActif.modeCours && gcActif.coursId === coursId ? ' selected' : '';
@@ -175,7 +176,7 @@ async function changerGroupeCoursDepuisHeader(groupeCoursId) {
 function _definirInfoCoursModeCours(coursId, trimestreActif) {
     const cours = db.getSync('cours', []);
     const coursInfo = cours.find(c => c.id === coursId);
-    const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || coursId;
+    const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || (coursInfo?.nature === 'service' ? coursInfo.nomCours : null) || coursId;
 
     db.setSync('groupeCoursActif', {
         modeCours: true,
@@ -224,7 +225,11 @@ async function _definirInfoCoursModeGroupeCours(gc, trimestreActif, groupesCours
     // ✅ CORRIGÉ (11 jan 2026) : Mettre à jour infoCours directement (évite problèmes timing IndexedDB)
     const cours = db.getSync('cours', []);
     const coursInfo = cours.find(c => c.id === gc.coursId);
-    const sigleGC = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || '';
+    // Cadrage « Rencontres » (12 sept. 2026) : pour un SERVICE (sans code), `infoCours.codeCours`
+    // porte le NOM du service. `infoCours` est un miroir d'affichage, pas la source : tous ses
+    // lecteurs (Suivi du groupe, profil, horaire, captures, export, rapport de bug) montrent
+    // « le code » — ils montrent donc le nom, sans qu'aucun d'eux ne change.
+    const sigleGC = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || (coursInfo?.nature === 'service' ? coursInfo.nomCours : null) || '';
 
     // ✅ Utiliser setSync car infoCours doit être lu de manière synchrone par obtenirEtudiantsCoursActif
     db.setSync('infoCours', {

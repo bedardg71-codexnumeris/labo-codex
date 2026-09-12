@@ -294,7 +294,9 @@ async function ouvrirModalBibliothequeCours() {
     } else {
         coursDansBibliotheque.forEach(cours => {
             const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
-            const titre = echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours) + actifBadge;
+            const titre = (cours.nature === 'service'
+                ? echapperHtml(cours.nomCours) + ' - Service'
+                : echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours)) + actifBadge;
             const ens = (echapperHtml(cours.prenomEnseignant || '') + ' ' + echapperHtml(cours.nomEnseignant || '')).trim();
             const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
             const meta = [ens, sess].filter(Boolean).join(' • ');
@@ -330,7 +332,9 @@ async function ouvrirModalBibliothequeCours() {
         contenuSection2 = '<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours disponible</p>';
     } else {
         coursDisponibles.forEach(cours => {
-            const titre = echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours);
+            const titre = cours.nature === 'service'
+                ? echapperHtml(cours.nomCours) + ' - Service'
+                : echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours);
             const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
             contenuSection2 += BibliothequeUI.renderCarteDisponible({
                 nom: titre,
