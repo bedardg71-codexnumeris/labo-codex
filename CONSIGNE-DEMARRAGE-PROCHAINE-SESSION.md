@@ -1,6 +1,8 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 22 h 10 (Toronto), à la clôture du chantier
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 8 h 05 (Toronto), à la clôture du lot « les étiquettes »
+> (commit `fa27b531`, release `1.136.0` due après la relecture croisée de Cowork).** Voir le premier bloc « ÉTAT MESURÉ » ci-dessous.
+> Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 22 h 10 (Toronto), à la clôture du chantier
 > « Rencontres » (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi »), NON RELEASÉ, NON POUSSÉ — exprès.** Le MANDAT
 > ci-dessous (Cowork, 17 h 08, cadrage 11) est **en pause** par décision de Grégoire (11 sept., 20 h, dans la consigne du jour) :
 > le chantier « Rencontres » passe avant ; **la prochaine session commence par la relecture croisée puis la release `1.135.0`**
@@ -40,7 +42,27 @@
 
 ---
 
-## ÉTAT MESURÉ — 12 SEPTEMBRE 2026, 6 h 26 (TORONTO, `date`)
+## ÉTAT MESURÉ — 12 SEPTEMBRE 2026, 8 h 05 (TORONTO, `TZ=America/Toronto date`)
+
+▣ **Remesuré par Claude Code après l'exécution de la consigne du jour de Cowork (7 h 40) — « les étiquettes », lots A à D.**
+
+- **Version `1.135.1`, INCHANGÉE** (`473f3d75`, en ligne) — le lot est commité (`fa27b531` : code + sentinelle + changelog 1.136 + jetons +
+  porte), **ni releasé ni poussé, exprès** : la consigne (§ 5) veut UNE livraison `minor` (`1.136.0`) après la relecture croisée de Cowork.
+  `git rev-list --count origin/main..HEAD` = 2 (le commit de code et ce relais). `origin/main` = `473f3d75`.
+- **La marche restante** : (1) relecture croisée de Cowork sur `fa27b531` ; toute reprise se commite AVANT ; (2) `node scripts/release.mjs
+  minor` (le changelog est écrit : entrée 1.136) ; (3) commit ; (4) `cd tests && npm run test:unit` ; (5) verdict Playwright **Cowork fermé**
+  (PROTOCOLE règle 8, non commise) ; (6) `scripts/pousser.sh`. ⚠ Vitest APRÈS le commit du bump (sentinelle anti-cache).
+- **Vitest : 545 fichiers / 5 959 essais, 0 échec** après le commit de code. Break-tests : 8 mutations, 8 rouges, remises vérifiées par empreinte.
+- **Harnais pack démo** rebâti (jetable, scratchpad — non versionné, se rejoue en ~1 min) : 54 feuilles AVANT/APRÈS, zéro valeur ne bouge.
+- **Arbre** : `BACKLOG.md` (#839, #840 par Cowork), `PROTOCOLE.md` (règle 8) et `plans de travail/CONSIGNE-DU-JOUR.md` modifiés par Cowork
+  pendant la session (non commités par moi) ; quatre `Formation/*.html` et deux `_ancienne-*` non suivis ; la capture du 9 sept. supprimée
+  non commise — à Grégoire.
+- **Ce qui remonte à Grégoire** (porte § 3) : le libellé de l'ONGLET « Rencontres (ortho.) » vit dans `js/config.js:70` — zone protégée,
+  NON touchée, une ligne sur autorisation ; le texte de la carte sur un groupe-cours ordinaire ; les mots laissés exprès.
+
+---
+
+## ÉTAT MESURÉ — 12 SEPTEMBRE 2026, 6 h 26 (TORONTO, `date`) — *périmé : 1.135.1 releasée `473f3d75` et poussée à 6 h 35*
 
 ▣ **Remesuré par Claude Code après l'exécution de la consigne du jour de Cowork (6 h 15) — lots A et B.**
 

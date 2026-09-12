@@ -1,4 +1,24 @@
-> ▣ **NOTE DU 12 SEPTEMBRE, 6 h 26 (Claude Code, exécution de ta consigne du jour « dans un service, un élève appartient par son service »).**
+> ▣ **NOTE DU 12 SEPTEMBRE, 8 h 05 (Claude Code, exécution de ta consigne du jour « les étiquettes »).**
+> **Lots A à D livrés** en un commit de code sur `main` local, **`fa27b531`** — **ni releasé, ni poussé** : ta consigne (§ 5) veut la release
+> `minor` `1.136.0` APRÈS ta relecture croisée, et un push déploie. **À toi** : relire `git show fa27b531` (`js/mots-nature.js` — LE point
+> unique ; `trimestre-v2-cours.js`, `trimestre-v2-groupes-cours.js`, `trimestre-v2-orchestre.js` (`appliquerMotsNatureCadre`), `contexte.js`,
+> `rencontres.js`, `cours.js`, `accompagnement-contenu-hover.js`, `index.html` ; la sentinelle `sentinelle-etiquettes-nature-un-point-unique`),
+> puis la session Claude Code suivante fait `node scripts/release.mjs minor`, commit, Vitest, verdict Playwright, `scripts/pousser.sh`. Le
+> changelog est écrit (entrée 1.136, trois items). **Puis l'artefact jumeau** de `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md`
+> (dix rangées, quatre décisions au § 3 avec champ de saisie, bouton « Copier mes résultats »).
+> ⚠ **Ce que la mesure a corrigé de ta consigne** : la liste des sites (§ 2 A) était incomplète — `js/cours.js:298` et `:336` (la bibliothèque
+> des cours) écrivaient aussi « - Service » ; le verrou structurel de la sentinelle l'a attrapé. Et `trimestre-v2-cours.js:190, 473, 476,
+> 993, 1159, 1235, 1331, 1354`, `trimestre-v2-groupes-cours.js:373, 426, 429, 856`, `rencontres.js` (quatre sites + notification + porte),
+> `index.html:6593-6594` : tous migrés. **Compte : 22 sites avant → 0 mot en dur après, 1 point unique.**
+> ⛔ **Non livré, exprès** : « Rencontres (ortho.) » sur l'ONGLET — le libellé vit dans `js/config.js:70` (zone protégée, interdite par ta
+> consigne). Le titre de la section (`index.html`) le dit. Une ligne à autoriser par Grégoire (porte § 3.1).
+> **Ce qui remonte à Grégoire** (porte § 3) : le libellé de l'onglet ; le texte de la carte sur un groupe-cours ordinaire ; les mots
+> « Orthopédagogie » / « service d’orthopédagogie » ; ce que le Cadre dit encore avec les mots de l'enseignement, laissé exprès (« Modifier
+> le cours », « Dupliquer le cours » — la sentinelle #306 les verrouille —, le bandeau d'édition, l'infobulle du groupe-cours, « 5 éléments
+> obligatoires … horaire » qui est faux pour un service mais la phrase est conditionnelle, pas un mot). `BACKLOG.md`, `PROTOCOLE.md` et
+> `CONSIGNE-DU-JOUR.md` ont bougé sur le disque pendant la session (les tiens : #839, #840 inscrits) : non commités par moi, rien ajouté.
+
+> ▣ **NOTE DU 12 SEPTEMBRE, 6 h 26 (Claude Code, exécution de ta consigne du jour « dans un service, un élève appartient par son service »).** *(Périmée : 1.135.1 releasée `473f3d75` et poussée à 6 h 35 ; relecture passée vers 7 h.)*
 > **Lots A et B livrés** en un commit de code sur `main` local, **`06868a06`** — **ni releasé, ni poussé** : ta consigne (§ 5) veut la release
 > `1.135.1` APRÈS ta relecture croisée, et un push déploie. **À toi** : relire `git show 06868a06` (modes.js, rencontres.js, la sentinelle
 > `sentinelle-834-service-appartenance-par-le-service`), puis la session Claude Code suivante fait `node scripts/release.mjs patch`,

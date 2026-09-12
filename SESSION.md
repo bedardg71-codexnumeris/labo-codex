@@ -7,6 +7,29 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 44 — 12 SEPTEMBRE 2026, 7 H 40 → 8 H 05 (Toronto) : LA CONSIGNE DU JOUR DE COWORK « LES ÉTIQUETTES :
+     L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE » (lots A à D), à partir de `473f3d75` (1.135.1, en ligne).
+     Rituel (subagent) : aucun écart avec la prémisse ; trois relais périmés d'une release (corrigés ici).
+     ▣ LIVRÉ (`fa27b531`, NI RELEASÉ NI POUSSÉ — consigne § 5, release `minor` 1.136.0 après la relecture de Cowork) :
+       (A) `js/mots-nature.js` = LE point unique (nature, objet, objetLong, personne, profil, choisirPersonne…), chargé juste
+       après db.js ; 22 sites migrés (trimestre-v2-cours ×8, groupes-cours ×4, orchestre ×2, rencontres ×6, hover ×2,
+       cours.js ×2 — ABSENT de la liste de la consigne, attrapé par le verrou —, index.html options VIDES libellées par
+       `changerNatureCoursV2`). (B) Les mots du § 2 B tels quels ; carte sur un GC ordinaire proposée (porte § 3.2).
+       (C) `data-mot-nature` sur 8 éléments d'index.html + `appliquerMotsNatureCadre` (orchestre), posé par
+       `mettreAJourContexteEntete` (contexte.js) → démarrage + activations ; option vide des deux sélecteurs suit aussi.
+       (D) Sentinelle 13 essais, 8 mutations / 8 rouges (empreintes vérifiées). Harnais pack démo REBÂTI (54 feuilles,
+       3 contextes : GC_DEMO, service par les trois questions, retour) : ZÉRO valeur ne bouge ; 9 feuilles de texte = les
+       mots du lot. `charger-script.js` fournit le vrai mots-nature.js aux harnais (précédent obtenirIdContexteActif).
+       Vitest 545 / 5 959. Changelog 1.136 (3 items). Jetons 20260912b ×8. Porte : 10 rangées, § 3 à 4 décisions.
+     ⚠ CE QUE LA MESURE A CORRIGÉ DE LA CONSIGNE : liste de sites incomplète (cours.js) ; « Modifier/Dupliquer le cours »
+       fait suivre la nature → refusé par la sentinelle #306 et hors « ne réécris que ce qui est faux » → remis, listé.
+     ⛔ ZONE PROTÉGÉE : le libellé de l'onglet « Rencontres » vit dans js/config.js:70 → non touché, remonté (porte § 3.1) ;
+       le titre de la section (index.html) dit « Rencontres (ortho.) ».
+     ⚠ Cowork a écrit BACKLOG.md (#839, #840 — dont le second axe du partage, § 3 de la consigne : donc rien inscrit par
+       moi), PROTOCOLE.md (règle 8 : verdict Playwright Cowork fermé) et CONSIGNE-DU-JOUR.md pendant la session : non commités.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 43 — 12 SEPTEMBRE 2026, 5 H 55 → 6 H 30 (horloge du Mac, `date`) : LE PUSH DE 1.135.0, PUIS LA CONSIGNE
      DU JOUR DE COWORK (6 h 15) — « DANS UN SERVICE, UN ÉLÈVE APPARTIENT PAR SON SERVICE, PAS PAR UN NUMÉRO DE GROUPE ».
      Périmètre : à partir de `68f92188`. (1) Le push de 1.135.0 n'avait PAS eu lieu (verdict rendu sur 68f92188, push
