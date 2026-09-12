@@ -15,7 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-🟡 **À LIVRER EN 1.138.0 (12 SEPTEMBRE 2026, 10 h 55 — code `e011ed64` sur `main` local, NI RELEASÉ NI POUSSÉ : la release `minor` attend la relecture croisée de Cowork) — L'ACCUEIL PARLE AUX DEUX MÉTIERS, LE CHAMP 2 NE SE CONTREDIT PLUS, LES RENCONTRES NE DEMANDENT PLUS DE CIBLER DES CRITÈRES** (consigne du jour de Cowork, 10 h 25, révisée à 10 h 35 ; ta phrase de 7 h 35 : « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »).
+🟡 **À LIVRER EN 1.138.0 (12 SEPTEMBRE 2026, 11 h — code `e011ed64` (lots A-C) + `62f24316` (lot D) sur `main` local, NI RELEASÉ NI POUSSÉ : la release `minor` attend la relecture croisée de Cowork) — L'ACCUEIL PARLE AUX DEUX MÉTIERS, LE CHAMP 2 NE SE CONTREDIT PLUS, LES RENCONTRES NE DEMANDENT PLUS DE CIBLER DES CRITÈRES, ET SES PROCHAINS RENDEZ-VOUS S'AFFICHENT EN TÊTE** (consigne du jour de Cowork, 10 h 25, révisée à 10 h 35 puis à 10 h 50 ; ta phrase de 7 h 35 : « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »).
+**Lot D, ce que tu verras** : dans `Suivi › Rencontres`, sur un service, sous « + Nouvelle rencontre », le bloc **« Tes prochains rendez-vous »** —
+au plus quatre rencontres à venir, la plus proche en premier (date, heure si notée, titre, individuelle ou en sous-groupe) ; la liste
+dessous garde son ordre. Sans rencontre à venir : « Aucun rendez-vous à venir. Tes rencontres passées restent dans la liste ci-dessous. »
+Sans aucune rencontre : pas de bloc (mon choix : la phrase serait fausse sous une liste vide). **Vérifié comment** : une sentinelle de 13
+essais, dix fois cassée exprès, dix rouges ; le harnais du pack démo ne voit aucune différence de plus (listes hors service identiques).
+⚠ **Ce que la mesure a corrigé** : le bloc devait se poser à l'ouverture de Rencontres ; il aurait disparu dès qu'on ouvre puis referme une
+rencontre — il est donc refait avec la liste, à chaque fois.
 **Ce que tu verras** : sur l'accueil, sous le bandeau « Bienvenue » et au-dessus des tâches, une carte blanche **« Tu es orthopédagogue ? »** —
 « Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre. » — et **« Commencer → »**, qui mène à Suivi ›
 Rencontres par le même chemin que le sous-onglet. Les huit tâches sont toutes là. Dans le bandeau, **« Par où commencer ? »** répond en deux
