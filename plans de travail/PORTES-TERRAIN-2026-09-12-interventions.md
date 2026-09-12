@@ -1,6 +1,6 @@
 # Portes terrain — 12 septembre 2026 (Suivi › Interventions : rien n'est écrit avant « Enregistrer », lot 5 du cadrage 11, 1.139.0)
 
-> **Version à l'écran attendue : `1.139.0`** (le build est écrit par la release ; lis-le en bas de page).
+> **Version à l'écran attendue : `1.139.0`**, build `0912-1259` (lis-le en bas de page ; il n'est en ligne qu'une fois poussé).
 > Couvre : « Planifier une intervention » (et « + Nouvelle rencontre », même formulaire) qui n'écrit plus rien avant
 > « Enregistrer » ; la note d'un élève qui n'est plus dans le groupe, qui reste visible, grisée.
 > **Sans porte, parce qu'une machine y répond** (règle 1 du skill, ta règle du 24 août) : les lettres du bilan avant / après
