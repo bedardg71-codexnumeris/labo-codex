@@ -44,11 +44,24 @@ Chaque constat porte une disposition, comme CLAUDE.md l'exige d'un audit. Contre
 fiche au code et au journal git avant d'écrire (les commits cités sont tous sur `main`).
 
 - **14 fermetures manquées** — *appliqué* : les 14 cases cochées dans `BACKLOG.md`, chacune avec sa
-  preuve et sa phrase « contre-vérifié » en fin de ligne (255 → 241 cases ouvertes). Deux précisions
-  que la contre-vérification ajoute : #366 est livré par `9217a9cf`, un commit qui nomme #436 et pas
-  #366 (le retrait du bandeau y est un item parmi cinq) ; #632 est fermé PARCE QUE les grilles ont été
-  recréées sous leurs identifiants d'origine — le champ `pratique.configuration.grilleId` résout donc
-  sans que l'outil 831 l'ait touché.
+  preuve et sa phrase « contre-vérifié » en fin de ligne (255 → 241 cases ouvertes). « 241 » compte
+  les cases vides de PREMIER niveau ; `BACKLOG.md` en porte 243 au total, dont 2 en sous-item.
+  Deux précisions que la contre-vérification ajoute :
+  - **Huit fiches sur quatorze seulement sont fermées par un commit qui les nomme** (#403, #495, #530,
+    #577, #581, #599, #661, #674). Trois le sont par un commit qui nomme D'AUTRES numéros : #366 par
+    `9217a9cf`, qui nomme #436 (le retrait du bandeau y est un item parmi cinq) ; #789 par `cf9f2591`,
+    qui nomme #540 et #773 — « 789 » n'apparaît nulle part dans le message complet (trois essais #540
+    et un essai #773 font bien les quatre specs rouges de la fiche) ; #539 par `7092ce42`, qui nomme
+    #754, #752 et #833. Trois n'ont AUCUN commit qui les nomme : #631 et #632 (réparés en ligne,
+    tracés sous le bug 831) et #427 (fermé par `REFERMAGE-2026-09-01-cloudflare-access.md` §7).
+    Et dans l'autre sens, le troisième commit cité pour #581, `1b06b1ba`, porte « #581 » dans son
+    sujet sous la forme « sans #581 » : un grep le compte, à tort. Méthode : `#N` extraits du message
+    complet de chaque commit cité (`git log -1 --format=%B`) ; `git log --all --grep` pour #427, #631,
+    #632 (zéro). Cowork comptait dix fiches nominatives sur quatorze : l'écart tient aux trois fiches
+    sans commit, qu'il ne rangeait pas parmi les non nominatives. Cette proportion EST la démonstration
+    de la thèse du rapport : six fermetures sur quatorze étaient invisibles à une recherche par numéro.
+  - #632 est fermé PARCE QUE les grilles ont été recréées sous leurs identifiants d'origine — le champ
+    `pratique.configuration.grilleId` résout donc sans que l'outil 831 l'ait touché.
 - **#599, annotation fausse** — *appliqué* : paragraphe « NE PAS COCHER » remplacé par une annotation
   « ↻ retirée », l'ancienne phrase citée, la preuve à côté.
 - **#674, « RIEN N'EST CODÉ »** — *appliqué* : ligne remplacée par « ↻ périmé depuis 1.111.0 ».

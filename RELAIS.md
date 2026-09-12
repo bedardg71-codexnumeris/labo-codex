@@ -7,6 +7,14 @@
 
 ---
 
+## AMENDEMENT — 12 SEPT. 2026, SOIR (Toronto), APRÈS LA CONTRE-VÉRIFICATION DE COWORK : QUATRE CORRECTIONS DOCUMENTAIRES, NON POUSSÉ
+
+> Troisième commit de documents devant `origin/main` (`e29f734c`), après `85cd24b1` et `eca024fa` : **les trois attendent le MÊME verdict Playwright local** avant le push (§4.5 de fin-de-session). Aucun fichier de `js/` touché. Corrigés : la PROPOSITION de numérotation (123 homonymes et non 81 ; 407 commits nomment un numéro de bug, dont 382 un homonyme, et non 649 ; méthode écrite dans le rapport) ; les dispositions de la RÉCONCILIATION (8 fiches sur 14 fermées par un commit qui les nomme, les 6 autres nommées une à une) ; la ligne de #366 au BACKLOG (le grep rend zéro, pas un). **Aucune option de numérotation appliquée** : SUIVI-BUGS et la ligne « Dernier ID » sont intacts, la décision reste à Grégoire. Les 14 coches, les annotations « ↻ » de #599 et #674 et le blocage des 32 partiels ne bougent pas.
+>
+> **CI GitHub, mesurée (correction 4)** : run `34712643286` (workflow `Tests`, SHA `e29f734c`) — Vitest vert ; job `Playwright (WebKit)` de 18:58:29Z à 19:43:29Z, conclu `The operation was canceled.`, soit **annulé après 45 min**. Source : `gh run view 34712643286`. Cause NON établie : le job porte `timeout-minutes: 40` (`.github/workflows/tests.yml:232`) et aucun push ultérieur sur `main` n'a pu l'annuler par concurrence, mais 45 min ne coïncide pas exactement avec le plafond. Conséquence : GitHub n'a pas jugé 1.139.0, seul le verdict local tient. L'affirmation ne figurait dans aucun fichier de relais commité (grep) ; elle est posée ici avec sa source. Fichiers de Cowork dans le working tree : 15 non suivis (et non 16), 1 supprimé, 1 modifié, tous laissés tels quels.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, SOIR (Toronto) : BACKLOG RÉCONCILIÉ (14 coches), DOCS SEULEMENT, NON POUSSÉ
 
 > Sur `main` local, devant `origin/main` (`e29f734c`) : `85cd24b1` (relais de 14 h 56) et le commit de ce soir — `BACKLOG.md` : 14 fiches cochées avec preuve contre-vérifiée (#631, #632, #366, #403, #427, #495, #530, #539, #577, #581, #599, #661, #674, #789 ; 255 → 241 cases ouvertes), deux annotations fausses corrigées (#599, #674) ; dispositions au pied de `Rapports/RECONCILIATION-backlog-2026-09-12.md` ; proposition `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`. **Aucun code touché** ; Vitest 551 / 6 034 au rituel de début. **Deux choses dues à Grégoire** : (1) trancher la numérotation (question fermée en fin de proposition, recommandation C + règle du lien) ; (2) déposer dans le dépôt la liste des 32 partiels avec « ce qui reste » — elle n'est que dans la trace de session de Cowork, et sans elle le point 4 du relais reste bloqué. Le working tree garde les fichiers de Cowork non commités (porte Interventions relevée à 15 h, 16 non suivis) : pas à moi de les commettre.
