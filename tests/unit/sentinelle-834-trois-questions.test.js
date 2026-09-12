@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // SENTINELLE #834 — LOT C DU CADRAGE « RENCONTRES » (12 sept. 2026) : LES TROIS QUESTIONS.
 //
@@ -61,6 +66,7 @@ function monter(store, opts = {}) {
         contexteActifEstService: () => { const info = store.infoCours; const c = info && (store.cours || []).find(x => x.id === info.id); return !!c && c.nature === 'service'; },
         definirVocabulaireInterventions: (v) => { appels.vocabulaire.push(v); },
         afficherListeInterventions: () => { appels.listes++; },
+        estEnModeDemo: () => !!opts.demo,
     };
     chargerScript('js/rencontres.js', base, win);
     return { win, store, journal, appels, elements };
@@ -110,6 +116,19 @@ describe('#834 lot C · « Créer mon service » sur un poste vide', () => {
         expect(gc.trimestreId).toBe('a2026');
         expect(b.appels.activations).toEqual([gc.id]);
         expect(b.appels.notifs.some(x => x.type === 'succes' && /Service créé/.test(x.t) && /1 déjà présent/.test(x.m))).toBe(true);
+    });
+    it('en DÉMONSTRATION : le service (clé globale `cours`) est marqué pour être retiré à la désactivation ; hors démo, aucun marqueur', async () => {
+        const v = { 'rencontres-nomService': 'Aide', 'rencontres-eleves': 'Léa Tremblay' };
+        const demo = monter({ trimestres: [{ id: 'demo', nom: 'Démonstration', actif: true, isDemo: true }], cours: [] }, { valeurs: v, demo: true });
+        await demo.win.creerMonService();
+        expect(demo.store.cours[0]).toMatchObject({ nature: 'service', isDemo: true, creeEnDemonstration: true });
+        const reel = monter({ trimestres: [{ id: 'a2026', actif: true }], cours: [] }, { valeurs: v });
+        await reel.win.creerMonService();
+        expect(reel.store.cours[0].isDemo).toBeUndefined();
+        expect(reel.store.cours[0].creeEnDemonstration).toBeUndefined();
+        // Et la désactivation de la démo sait retirer ce marqueur (demo-activation.js) — verrou de source.
+        const src = readFileSync(path.join(RACINE, 'js', 'demo-activation.js'), 'utf8');
+        expect(src).toMatch(/c\.creeEnDemonstration === true\) && estItemDemo\(c\)/);
     });
     it('avec un trimestre actif, aucun trimestre n\'est créé ni activé ; le service y entre', async () => {
         const b = monter({ trimestres: [{ id: 'h2027', nom: 'Hiver 2027', actif: true }], cours: [], enseignants: [] }, { valeurs: { 'rencontres-nomService': 'Aide', 'rencontres-eleves': 'Léa Tremblay' } });
@@ -174,4 +193,6 @@ describe('#834 lot C · ce que montre le sous-onglet', () => {
 //   4. le nom du service n'est plus requis                            → 1 rouge
 //   5. la liste s'affiche même sans contexte                          → 1 rouge
 //   6. « Prénom Nom » lu à l'envers                                   → 2 rouges
-// 8/8 verts une fois restauré.
+//   7. démo : le service créé n'est plus marqué (22 h)                 → 1 rouge
+//   8. demo-activation.js : le marqueur n'est plus retiré (verrou)     → 1 rouge
+// 9/9 verts une fois restauré.
