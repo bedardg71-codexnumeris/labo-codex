@@ -28,6 +28,7 @@
                 '<strong>L\'accueil nomme les deux usages de l\'application.</strong> Dans le bandeau «&nbsp;Bienvenue&nbsp;», «&nbsp;Par où commencer&nbsp;?&nbsp;» répond à l\'enseignant·e et à l\'orthopédagogue, chacun par son chemin ; les paragraphes sur les guides et sur le courriel mensuel sont plus courts.',
                 '<strong>Une orthopédagogue trouve sa porte dès l\'accueil</strong>&nbsp;: la carte «&nbsp;Tu es orthopédagogue&nbsp;?&nbsp;», au-dessus des tâches, mène en un geste à Suivi › Rencontres, où son service se décrit en trois questions.',
                 '<strong>Les rencontres d\'orthopédagogie ne demandent plus de cibler des critères d\'évaluation.</strong> Sur un service, le formulaire d\'une rencontre n\'affiche plus «&nbsp;Critères ciblés&nbsp;», «&nbsp;Objectif visé&nbsp;» ni «&nbsp;Suggérer&nbsp;», et le bilan dit simplement «&nbsp;Ce que tu retiens de la rencontre.&nbsp;» Sur un cours, le formulaire d\'une intervention ne change pas.',
+                '<strong>Les prochains rendez-vous d\'une orthopédagogue s\'affichent en tête de sa liste.</strong> Dans Suivi › Rencontres, sur un service, «&nbsp;Tes prochains rendez-vous&nbsp;» montre les quatre rencontres à venir les plus proches, la plus proche en premier&nbsp;: la date, l\'heure si elle est notée, le titre, individuelle ou en sous-groupe. La liste des rencontres, dessous, ne change pas d\'ordre.',
             ]
         },
         {

@@ -3,6 +3,8 @@
 > **Écrite le samedi 12 septembre 2026 à 10 h 25 (Toronto) par Cowork**, au retour de la porte de la section Cours (**6/7**, rangée 1
 > échouée, trois décisions « tel quel »).
 > État mesuré : **`1.137.0`**, build `0912-0935`, `main` = `origin/main` = `305bb4c8`, `rev-list` = **0**.
+> ⚠ **Révisée une seconde fois à 10 h 50 : un LOT D s'ajoute** (§ 2 ter) — « Tes prochains rendez-vous » en tête de
+> `Suivi › Rencontres`, affichage seul.
 > ⚠ **Révisée le 12 septembre à 10 h 35 : un LOT C s'ajoute** (§ 2 bis) — la carte « Critères ciblés / Objectif visé » ne
 > s'affiche pas chez l'orthopédagogue. Demandé par Grégoire, mesuré par Cowork, tranché par lui.
 > Elle remplace la consigne de la section Cours, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-12-section-cours.md`.
@@ -18,7 +20,7 @@
 
 ## 0 · L'INTENTION
 
-Trois choses, toutes déjà tranchées par Grégoire — les deux premières sont des mots, la troisième est un bloc qu'on masque. C'est le **dernier lot avant lundi**, jour où
+Quatre choses, toutes déjà tranchées par Grégoire : deux sont des mots, une est un bloc qu'on masque, la dernière est un bloc qu'on ajoute — et qui ne fait qu'afficher. C'est le **dernier lot avant lundi**, jour où
 l'orthopédagogue ouvre l'application, et avant mardi, jour où vingt personnes de la communauté de pratique la découvrent.
 
 Dans ses mots (12 sept., 7 h 35) : **« Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »** L'accueil est le
@@ -138,6 +140,46 @@ non-participants motivés (voir l'en-tête « VOCABULAIRE ET CONTENEUR » de `in
 
 ---
 
+## 2 ter · LOT D — « Tes prochains rendez-vous », en tête de `Suivi › Rencontres`
+
+**Demandé par Grégoire le 12 sept. à 10 h 45**, après la mesure du lot 3 (les présences). **C'est de l'AFFICHAGE seul** :
+aucune donnée neuve, aucun réglage, aucune décision didactique prise à la place de l'orthopédagogue.
+
+**Ce qui existe déjà, mesuré** :
+- Une rencontre porte `date`, `heure`, `duree`, `titre`, `type` (`'groupe'` / `'individuel'`), `statut`
+  (`'planifiee'` / `'completee'`) et `groupeCoursId` (`interventions.js`, ≈ l. 180-205).
+- `interventionsDuContexteActif()` filtre déjà par contexte : **rien à écrire** pour éviter de mêler les rencontres d'un autre service.
+- `afficherRencontres()` (`rencontres.js`, ≈ l. 78-82) pose le conteneur avant d'appeler `afficherListeInterventions()` :
+  **c'est le point d'insertion**, et il est déjà gardé par `contexteActifEstService()`.
+
+⛔ **Ce que ce lot n'est PAS** : la vue calendrier mensuelle. Mesuré : `calendrier-vue.js` sait superposer une couche de badges
+par date (`construireMapEcheancesProductions` → `genererHtmlMois`), **mais cet écran vit dans `Cadre`** — l'onglet dont tout ce
+chantier dispense l'orthopédagogue. Le mois en grille est un candidat pour plus tard, après ses retours. **Ne l'ouvre pas ici.**
+
+**Ce qui s'affiche** :
+- Un bloc **en tête de la liste des rencontres, sur un service seulement**.
+- Les rencontres dont la date est **≥ aujourd'hui**, **la plus proche en premier**. ⚠ La liste existante trie à l'envers
+  (plus récentes d'abord) : **ne touche pas à son tri**, ce bloc a le sien.
+- **Au plus quatre lignes.** Une ligne = la date en toutes lettres, l'heure si elle est renseignée, le titre, et
+  « individuelle » ou « en sous-groupe » (le mot vient de `type`, pas d'une seconde écriture).
+- Aucune rencontre à venir → **une phrase, pas un bloc vide**.
+
+**Les mots — ARRÊTÉS par Grégoire le 12 sept. à 10 h 52 (« tel quel »). Livre-les tels quels.**
+
+| | Texte |
+|---|---|
+| Titre du bloc | **Tes prochains rendez-vous** |
+| Quand il n'y en a aucun | **Aucun rendez-vous à venir. Tes rencontres passées restent dans la liste ci-dessous.** |
+
+### Sentinelle, avec break-test rouge
+1. Sur un service, trois rencontres (une passée, deux à venir) : le bloc montre **les deux à venir, la plus proche en premier** ;
+   la liste du dessous, elle, les montre **toutes les trois, la plus récente en premier**.
+2. **Hors service** : le bloc n'existe pas — `Suivi › Interventions` est identique à `1.137.0`, au pixel de texte près.
+3. Une rencontre née dans un **autre** service n'apparaît pas dans le bloc (le filtre de contexte, déjà là).
+4. **Aucune écriture** : ouvrir `Rencontres` ne modifie aucune intervention en base (le bloc lit, il ne sauvegarde pas).
+
+---
+
 ## 3 · CE QUI REMONTE À GRÉGOIRE
 - **Rien des mots** : ils sont tous arrêtés, et deux d'entre eux l'ont été deux fois. Si tu crois devoir en changer un, **inscris et
   demande**, ne livre pas ta version.
@@ -150,17 +192,19 @@ non-participants motivés (voir l'en-tête « VOCABULAIRE ET CONTENEUR » de `in
 
 ## 5 · LIVRER — `minor` (`1.138.0`)
 Une carte neuve sur l'écran d'entrée de tous les utilisateurs. Une seule livraison, après la relecture croisée de Cowork. Changelog :
-trois lignes — l'accueil nomme désormais les deux usages, une orthopédagogue y trouve sa porte, et ses rencontres ne lui
-demandent plus de cibler des critères d'évaluation.
+quatre lignes — l'accueil nomme désormais les deux usages, une orthopédagogue y trouve sa porte, ses rencontres ne lui
+demandent plus de cibler des critères d'évaluation, et ses prochains rendez-vous s'affichent en tête de sa liste.
 
 ## 6 · LA PORTE TERRAIN
-Courte, cinq rangées (`PORTES-TERRAIN-2026-09-12-accueil.md`), markdown par toi, artefact par Cowork :
+Courte, six rangées (`PORTES-TERRAIN-2026-09-12-accueil.md`), markdown par toi, artefact par Cowork :
 1. L'accueil, hors démo : la carte est là, au-dessus des tâches, blanche comme les autres ; **les huit tâches sont toutes là**.
 2. Clique « Commencer → » : tu arrives sur les trois questions (ou sur la liste des rencontres si un service est actif).
 3. Déplie le bandeau « Bienvenue » : les quatre paragraphes sont ceux du § 2, dans cet ordre.
 4. Le reste de l'accueil et `Cadre › Groupe-cours` sur un service : le champ 2 dit **« Cours ou service »** ; tout le reste identique à `1.137.0`.
 5. `Suivi › Rencontres` sur un service, une rencontre ouverte : **pas de bloc « Critères ciblés » ni « Objectif visé »**. Puis
    `Suivi › Interventions` sur ton 601-101-MQ : le bloc est là, tes cinq critères aussi, « Suggérer » répond.
+6. `Suivi › Rencontres` sur un service, avec au moins une rencontre datée plus tard qu'aujourd'hui : **« Tes prochains rendez-vous »**
+   en tête, la plus proche en premier ; la liste du dessous n'a pas changé d'ordre.
 
 ## 7 · RAPPORT
 Les autres libellés du même cas que #846, s'il y en a ; où vivent les mots de l'accueil ; ce que tu as laissé exprès. Fin de course :

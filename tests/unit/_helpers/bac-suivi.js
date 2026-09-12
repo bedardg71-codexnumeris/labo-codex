@@ -110,6 +110,9 @@ export function monter(store, opts = {}) {
         obtenirCoursActifId: () => store.infoCours && store.infoCours.id,
         genererIdUnique: (p) => p + 'BANC' + (++compteurIds), alert: (m) => { avertissements.push(m); }, confirm: (m) => { confirmations.push(m); return opts.confirmer !== false; },
         setTimeout: win.setTimeout, clearTimeout() {}, MutationObserver: win.MutationObserver, requestAnimationFrame: win.requestAnimationFrame,
+        // Lot D du 12 sept. 2026 (« Tes prochains rendez-vous ») : interventions.js lit la date du jour par dateLocaleYMD
+        // (js/date-utils.js, chargé tôt dans l'app) — le banc la fournit aux modules, pas seulement à son window.
+        dateLocaleYMD: win.dateLocaleYMD,
         formaterDateComplete: (d) => String(d), formaterNbEtudiants: (n) => n + ' étudiant·e' + (n > 1 ? 's' : ''),
         afficherSection() {}, afficherSousSection() {}, naviguerVers() {}, afficherListeEtudiantsConsultation() {}, afficherNotificationCopiee() {}, toggleDisplay() {}, toggleAccordeonV2() {},
         COULEURS: { indices: { A: '#1976D2', C: '#FF6B35', P: '#4CAF50' } }

@@ -417,6 +417,11 @@ function afficherListeInterventions() {
         return;
     }
 
+    // Consigne du 12 sept., 10 h 50 (lot D) : « Tes prochains rendez-vous », sur un service, en tête de la liste.
+    // Rendu ICI et non dans afficherRencontres : ouvrir une rencontre remplace le conteneur, et le retour ne
+    // reconstruit que la liste — un bloc posé ailleurs disparaîtrait, et ne suivrait pas un Enregistrer.
+    if (_enVueRencontres() && _surService()) html += _blocProchainsRendezVous(interventions);
+
     interventions.forEach(intervention => {
         const badgeStatut = genererBadgeStatut(intervention.statut);
         const ctx = intervention.contexte || '';
@@ -427,7 +432,7 @@ function afficherListeInterventions() {
         else if (intervention.type === 'individuel' || intervention.niveauRai === 3) badgeType = 'Hors classe';
         else badgeType = intervention.type === 'groupe' ? 'Groupe' : 'Individuel';
         // Vue Rencontres : deux formes, individuelle ou en sous-groupe ; le palier RàI n'est pas affiché.
-        if (_enVueRencontres()) badgeType = (intervention.type === 'individuel' || intervention.niveauRai === 3) ? 'Individuelle' : 'En sous-groupe';
+        if (_enVueRencontres()) badgeType = _formeRencontre(intervention);
         const badgeNiveau = _enVueRencontres() ? '' : `Niveau ${intervention.niveauRai}`;
 
         html += `
@@ -509,6 +514,39 @@ function _estampillesAcceptees(gcActif) {
         });
     }
     return acceptes;
+}
+
+/** Lot D (12 sept. 2026) — la forme d'une rencontre, lue dans VOCABULAIRES.rencontres (pas une seconde écriture) ;
+ *  même prédicat que le badge de la liste, pour que le bloc et la liste ne se contredisent jamais. */
+function _formeRencontre(intervention) {
+    const v = VOCABULAIRES.rencontres;
+    return (intervention.type === 'individuel' || intervention.niveauRai === 3) ? v.niveau3 : v.niveau2;
+}
+
+/**
+ * Lot D (consigne du 12 sept., 10 h 50 ; mots arrêtés par Grégoire à 10 h 52) — « Tes prochains rendez-vous » :
+ * les rencontres déjà filtrées par contexte dont la date est ≥ aujourd'hui (date LOCALE, dateLocaleYMD — #398),
+ * la plus proche en premier (date, puis heure), quatre au plus. Lecture seule ; son tri porte sur une copie :
+ * celui de la liste (plus récentes d'abord) ne bouge pas. Appelé seulement quand la liste n'est pas vide.
+ * @param {Array} interventions - la liste du contexte actif, sans les fantômes
+ * @returns {string} HTML du bloc
+ */
+function _blocProchainsRendezVous(interventions) {
+    const aujourdhui = dateLocaleYMD();
+    const cleTri = (i) => i.date + ' ' + (i.heure || '00:00');
+    const aVenir = interventions
+        .filter(function(i) { return i.date && i.date >= aujourdhui; })
+        .sort(function(a, b) { return cleTri(a).localeCompare(cleTri(b)); })
+        .slice(0, 4);
+    const corps = aVenir.length === 0
+        ? '<p class="text-muted u-m-0">Aucun rendez-vous à venir. Tes rencontres passées restent dans la liste ci-dessous.</p>'
+        : '<ul style="margin: 0; padding-left: 20px;">' + aVenir.map(function(i) {
+            return '<li><strong>' + echapperHtml(formaterDateLisible(i.date)) + '</strong>'
+                + (i.heure ? ' à ' + echapperHtml(i.heure) : '')
+                + ' — ' + echapperHtml(i.titre) + ' · ' + _formeRencontre(i).toLowerCase() + '</li>';
+        }).join('') + '</ul>';
+    return '<div class="carte u-mb-15" id="prochainsRendezVous">'
+        + '<h4 class="intervention-titre u-mb-10">Tes prochains rendez-vous</h4>' + corps + '</div>';
 }
 
 /**
