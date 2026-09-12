@@ -10,6 +10,26 @@
 
 ---
 
+## ✅ RELEVÉ FINAL — 12 septembre 2026, 12 h 02, **sur `https://app.codexnumeris.org`**, `1.138.0` build `0912-1116`
+
+**7 passées · 0 échec · 0 non traitée.** Les sept rangées du §2 sont closes, dont la 2 refaite sur le site comme demandé
+(le relevé partiel de 11 h 38, fait depuis le clone, est conservé plus bas comme trace).
+
+⮕ **Aucun item de backlog n'est né de cette porte.** Les cinq lots de `1.138.0` sont vus et tenus à l'écran de Grégoire.
+
+▣ **LES DEUX DÉCISIONS DU §3 SONT TRANCHÉES — 12 sept., 12 h 05, par Grégoire** (« ok » à la recommandation de Cowork) :
+
+- **3.1 (#848) → A : les DEUX cessent de suivre le contexte actif.** Motif retenu : le cas (b) — la phrase des éléments
+  obligatoires — est le seul des deux qui **casse un enregistrement** (elle annonce l'horaire facultatif, la validation le
+  réclame) ; (a) n'est qu'un mot inexact. La correction est celle de #846 : la phrase suit le **cours choisi au champ 2**,
+  pas le contexte actif — elle devient vraie sans qu'aucun comportement change.
+- **3.2 → TEL QUEL** : « — Choisir un cours ou un service — » reste. Il dit exactement ce que le libellé du champ annonce ;
+  un mot plus court rouvrirait l'écart que #846 vient de fermer.
+
+⮕ **LA PORTE EST CLOSE.** Ce qu'elle laisse : #848 à faire, en A.
+
+---
+
 ## ▣ RELEVÉ PARTIEL — 12 septembre 2026, 11 h 38, **depuis le CLONE en `file://`**, pas depuis le site
 
 > ⚠ **Fait avant la mise en ligne**, sur `file:///Users/kuekatsheu/Documents/GitHub/Monitorage_v6/index.html`, qui portait déjà
