@@ -274,6 +274,8 @@ function monter(jeu, opts = {}) {
         obtenirEtudiantsCoursActif: winModes.obtenirEtudiantsCoursActif, obtenirContexteCoursActif: winModes.obtenirContexteCoursActif,
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture, invaliderCacheLecture: winModes.invaliderCacheLecture,
         filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule,
+        // #834 lot E (cadrage « Rencontres », 12 sept. 2026) : l'identifiant du contexte, point unique de modes.js.
+        obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService,
         // Aiguillages vers les exports réels, résolus à l'appel.
         obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours')
         // (Le pont `obtenirDetailsAssiduite` que le banc prêtait à rapport.js n'a plus lieu d'être : #732 l'exporte — mesure B5.)
@@ -735,19 +737,21 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         const id = b.win.creerIntervention(Object.assign({ date: '2026-02-09', duree: 2, niveauRai: 2, titre: 'Rattrapage banc', contexte: 'rattrapage', marquerNonParticipantsMotives: true, seanceConcernee: '2026-02-09' }, extra || {}));
         return id;
     }
-    it('E1 · les clés sont namespacées par trimestre ; l\'intervention ne porte AUCUN groupe-cours : elle apparaît dans tous les groupes-cours du trimestre', () => {
+    it('E1 · les clés sont namespacées par trimestre ; l\'intervention ne portait AUCUN groupe-cours (constat du 5) — depuis #834 lot D, elle porte son groupe-cours de naissance et la liste ne la montre plus sous un autre (valeur d\'après)', () => {
         const b = monter(jeuBase());
+        const naissance = b.store.infoCours._groupeCoursId || b.store.infoCours.id;
         const id = creer(b);
         const cleEcrite = b.ecritures.filter(k => /interventions/.test(k));
-        // Changer de groupe-cours actif (GC2) : la liste des interventions est-elle la même ?
+        // Changer de groupe-cours actif (GC2) : le magasin du trimestre est le même, la LISTE ne l'est plus.
         b.store.infoCours = { id: 'GC2', nom: 'Autre cours', groupe: '02', _groupeCoursId: 'GC2' };
         b.store.groupeCoursActif = { id: 'GC2', trimestreId: 'test' };
         const sousGC2 = b.win.obtenirInterventions();
-        noter('E1', { cleEcrite, champsCours: Object.keys(sousGC2[0]).filter(k => /cours|groupe/i.test(k)), visibleSousGC2: sousGC2.length });
+        noter('E1', { cleEcrite, champsCours: Object.keys(sousGC2[0]).filter(k => /cours|groupe/i.test(k)), stockSousGC2: sousGC2.length, visiblesSousGC2: b.win.interventionsDuContexteActif(sousGC2).length });
         expect(cleEcrite).toEqual(['test_interventions']);
         expect(sousGC2.length).toBe(1);
         expect(sousGC2[0].id).toBe(id);
-        expect(Object.keys(sousGC2[0]).filter(k => /coursId|groupeCoursId/.test(k))).toEqual([]);
+        expect(sousGC2[0].groupeCoursId).toBe(naissance);
+        expect(b.win.interventionsDuContexteActif(sousGC2).length).toBe(0);
     });
 
     it('E2 · le transfert des présences d\'un rattrapage : l\'absent présent au rattrapage passe de 40 à 50 % ; un rattrapage hors séance ne compte pas ; un présent le jour même est ignoré', () => {

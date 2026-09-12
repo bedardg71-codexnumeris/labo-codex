@@ -271,7 +271,7 @@ function calculerCorrelationsLongitudinales() {
             infoCours = db.getSync('infoCours', null);
             cadre = db.getSync(cle('cadreCalendrier'), {});
         }
-        var gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+        var gcId = obtenirIdContexteActif(infoCours);
 
         // Borne inférieure du semestre
         var dateDebutSem = (cadre && cadre.dateDebut) || '';

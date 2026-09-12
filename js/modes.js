@@ -528,6 +528,29 @@ function coursDuContexteActif() {
     return null;
 }
 
+/**
+ * Lot E du cadrage « Rencontres » (12 sept. 2026) — L'IDENTIFIANT DU CONTEXTE ACTIF, À UN SEUL ENDROIT.
+ *
+ * Mesuré le 11 sept. (Cowork, puis grep de la session) : dix-neuf sites recalculaient eux-mêmes
+ * `infoCours._groupeCoursId || infoCours.id || null` pour lire ou écrire des données par
+ * groupe-cours (échéances par groupe, captures, production diagnostique, corrélations…).
+ * Un troisième mode de contexte se serait codé dix-neuf fois. Une fonction, vingt appels ;
+ * ZÉRO changement de valeur (sentinelle-834-point-unique-contexte compare l'ancienne
+ * expression et celle-ci sur la même grille d'`infoCours`).
+ *
+ * `_groupeCoursId` est fiable : unique par groupe-cours dans les deux chemins d'écriture
+ * d'`infoCours` (orchestre et entité). `id` est le repli : selon le chemin, c'est le coursId
+ * (partagé entre groupes) ou l'id du groupe-cours.
+ *
+ * @param {Object|null} [infoCours] - l'objet déjà lu par l'appelant ; absent = lu ici
+ * @returns {string|null}
+ */
+function obtenirIdContexteActif(infoCours) {
+    const info = (infoCours === undefined) ? db.getSync('infoCours', null) : infoCours;
+    if (!info) return null;
+    return info._groupeCoursId || info.id || null;
+}
+
 /** Un service EST un cours (`nature: 'service'`) : sans code, sans discipline, sans horaire obligatoire. */
 function estCoursService(cours) {
     return !!cours && cours.nature === 'service';
@@ -1330,6 +1353,7 @@ function obtenirPratiqueActiveGroupeCours() {
 window.obtenirEtudiantsCoursActif = obtenirEtudiantsCoursActif;
 window.normaliserNumeroGroupe = normaliserNumeroGroupe;
 // Cadrage « Rencontres » (12 sept. 2026) : le contexte de service, lu à un seul endroit.
+window.obtenirIdContexteActif = obtenirIdContexteActif;
 window.coursDuContexteActif = coursDuContexteActif;
 window.estCoursService = estCoursService;
 window.contexteActifEstService = contexteActifEstService;

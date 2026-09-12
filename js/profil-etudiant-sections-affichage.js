@@ -2668,7 +2668,7 @@ function _trouverEvaluationActive(evaluationsEleve, productionId) {
 function _calculerEcheanceFormateeProduction(production) {
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
     const infoCours = db.getSync('infoCours', null);
-    const gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+    const gcId = obtenirIdContexteActif(infoCours);
     const echeance = (typeof obtenirEcheanceEffective === 'function')
         ? obtenirEcheanceEffective(production, gcId).date
         : production.dateEcheance;

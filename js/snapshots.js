@@ -75,12 +75,9 @@
  * Fallback : id (peut être coursId partagé entre groupes selon le code path)
  */
 function obtenirCoursIdPourSnapshots() {
-    const infoCours = db.getSync('infoCours', null);
-    if (!infoCours) return null;
-    // _groupeCoursId est fiable : unique par groupe-cours dans les deux chemins
-    // (changerGroupeCoursActifV2 et synchroniserInfoCours)
-    // infoCours.id peut être le coursId (partagé entre groupes) dans changerGroupeCoursActifV2
-    return infoCours._groupeCoursId || infoCours.id || null;
+    // Lot E du cadrage « Rencontres » (12 sept. 2026) : la règle vit dans modes.js
+    // (`obtenirIdContexteActif`), ce helper n'est plus qu'un nom local pour ses trois appelants.
+    return obtenirIdContexteActif();
 }
 
 /**

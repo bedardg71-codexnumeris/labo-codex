@@ -38,6 +38,9 @@
  *   observations: 'Notes prises durant la rencontre...',
  *   notesIndividuelles: { '1234567': 'Excellente participation...', '7654321': 'A besoin de...' },
  *   statut: 'planifiee' | 'en-cours' | 'completee',
+ *   groupeCoursId: 'GC_…' | null,  // lot D du cadrage « Rencontres » (12 sept. 2026) : le contexte de NAISSANCE
+ *                                  // (obtenirIdContexteActif). Absent sur les interventions d'avant : elles restent
+ *                                  // visibles dans tous les contextes et sont estampillées au prochain Enregistrer.
  *   dateCreation: timestamp,
  *   dateModification: timestamp
  * }
@@ -132,6 +135,10 @@ function creerIntervention(data) {
         objectifVise: data.objectifVise || '',
         bilan: null,
         jamaisSauvegardee: data.jamaisSauvegardee || false,
+        // Lot D (cadrage « Rencontres », 12 sept. 2026) — une intervention SAIT dans quel
+        // groupe-cours elle est née (constat de l'audit du 5 sept. : « les interventions ne
+        // portent pas leur groupe-cours »). Un seul point de lecture : obtenirIdContexteActif.
+        groupeCoursId: data.groupeCoursId !== undefined ? data.groupeCoursId : obtenirIdContexteActif(),
         statut: 'planifiee',
         dateCreation: now,
         dateModification: now
@@ -303,6 +310,10 @@ function afficherListeInterventions() {
     if (interventions.length !== avantPurge) {
         sauvegarderInterventions(interventions);
     }
+    // Lot D (cadrage « Rencontres ») : la liste ne mêle plus les interventions d'un autre
+    // groupe-cours. Une intervention sans contexte (d'avant le lot) reste visible partout —
+    // aucune purge, aucun semis : elle prend son contexte au prochain Enregistrer.
+    interventions = interventionsDuContexteActif(interventions);
 
     const container = document.getElementById('listeInterventions');
 
@@ -396,6 +407,18 @@ function afficherListeInterventions() {
     });
 
     container.innerHTML = html;
+}
+
+/**
+ * Lot D — les interventions visibles dans le contexte actif : celles nées ici, et celles
+ * d'avant le lot (sans `groupeCoursId`). Sans contexte actif, tout est visible.
+ * @param {Array} interventions
+ * @returns {Array}
+ */
+function interventionsDuContexteActif(interventions) {
+    const gcActif = obtenirIdContexteActif();
+    if (!gcActif) return interventions;
+    return interventions.filter(function(i) { return !i.groupeCoursId || i.groupeCoursId === gcActif; });
 }
 
 /**
@@ -1334,6 +1357,13 @@ function sauvegarderPresencesIntervention(interventionId) {
         // Effacer le flag fantôme (l'intervention est maintenant sauvegardée par l'utilisateur)
         interventions[index].jamaisSauvegardee = false;
 
+        // Lot D : une intervention d'avant le lot prend son contexte au premier Enregistrer
+        // qui la touche — celui où l'enseignant la rouvre. Jamais réécrite en masse.
+        if (!interventions[index].groupeCoursId) {
+            const contexteNaissance = obtenirIdContexteActif();
+            if (contexteNaissance) interventions[index].groupeCoursId = contexteNaissance;
+        }
+
         interventions[index].dateModification = Date.now();
         sauvegarderInterventions(interventions);
         // Si l'intervention vient d'être marquée comme complétée, transférer les présences
@@ -1563,6 +1593,7 @@ window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
 window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
 window.supprimerInterventionEtRafraichir = supprimerInterventionEtRafraichir;
+window.interventionsDuContexteActif = interventionsDuContexteActif;
 window.afficherAnalyseTempsReel = afficherAnalyseTempsReel;
 
 

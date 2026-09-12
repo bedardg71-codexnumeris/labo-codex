@@ -567,7 +567,7 @@ function genererApercuProductions(productions) {
     productions.forEach(p => {
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
         const infoCoursExp = db.getSync('infoCours', null);
-        const gcIdExp = infoCoursExp ? (infoCoursExp._groupeCoursId || infoCoursExp.id || null) : null;
+        const gcIdExp = obtenirIdContexteActif(infoCoursExp);
         const dateEcheanceExp = (typeof obtenirEcheanceEffective === 'function')
             ? obtenirEcheanceEffective(p, gcIdExp).date : p.dateEcheance;
         const dateFormatee = dateEcheanceExp ? new Date(dateEcheanceExp).toLocaleDateString('fr-CA') : '—';
@@ -666,7 +666,7 @@ async function exporterProductionsPDF(productions, options = {}) {
     // Tableau des productions
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
     const infoCoursExpPdf = db.getSync('infoCours', null);
-    const gcIdExpPdf = infoCoursExpPdf ? (infoCoursExpPdf._groupeCoursId || infoCoursExpPdf.id || null) : null;
+    const gcIdExpPdf = obtenirIdContexteActif(infoCoursExpPdf);
     const donnees = productions.map(p => {
         const dateEch = (typeof obtenirEcheanceEffective === 'function')
             ? obtenirEcheanceEffective(p, gcIdExpPdf).date : p.dateEcheance;
@@ -1125,7 +1125,7 @@ async function exporterReferentielCompletPDF(options = {}) {
         const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
         const infoCoursExpFull = db.getSync('infoCours', null);
-        const gcIdExpFull = infoCoursExpFull ? (infoCoursExpFull._groupeCoursId || infoCoursExpFull.id || null) : null;
+        const gcIdExpFull = obtenirIdContexteActif(infoCoursExpFull);
         const donnees = productions.map(p => {
             const dateEch = (typeof obtenirEcheanceEffective === 'function')
                 ? obtenirEcheanceEffective(p, gcIdExpFull).date : p.dateEcheance;

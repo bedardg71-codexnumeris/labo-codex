@@ -593,7 +593,7 @@ function obtenirArtefactsParDateSeance(snapshots) {
             ? obtenirDonneesSelonMode('productions') || []
             : [];
         const infoCours = db.getSync('infoCours', null);
-        const gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+        const gcId = obtenirIdContexteActif(infoCours);
         const cadre = db.getSync(cle('cadreCalendrier'), {});
         const dateDebutSem = cadre.dateDebut || '';
 
@@ -818,7 +818,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
         try {
             const productions = obtenirDonneesSelonMode('productions') || [];
             const infoCoursIndiv = db.getSync('infoCours', null);
-            gcIdIndiv = infoCoursIndiv ? (infoCoursIndiv._groupeCoursId || infoCoursIndiv.id || null) : null;
+            gcIdIndiv = obtenirIdContexteActif(infoCoursIndiv);
             productionsFiltreesIndiv = productions.filter(p => {
                 if (p.facultatif || p.type === 'portfolio') return false;
                 if (typeof obtenirEcheanceEffective === 'function') {
@@ -1420,7 +1420,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
             try {
                 const productions = obtenirDonneesSelonMode('productions') || [];
                 const infoCoursGraph = db.getSync('infoCours', null);
-                gcIdGraph = infoCoursGraph ? (infoCoursGraph._groupeCoursId || infoCoursGraph.id || null) : null;
+                gcIdGraph = obtenirIdContexteActif(infoCoursGraph);
                 productionsFiltreesGraph = productions.filter(p => {
                     if (p.facultatif || p.type === 'portfolio') return false;
                     if (typeof obtenirEcheanceEffective === 'function') {
@@ -3617,7 +3617,7 @@ function chargerProductionsTrajectoires() {
     });
 
     const infoCours = db.getSync('infoCours', null);
-    const gcId = infoCours ? (infoCours._groupeCoursId || infoCours.id || null) : null;
+    const gcId = obtenirIdContexteActif(infoCours);
     artefacts.sort((a, b) => {
         const dA = (typeof obtenirEcheanceEffective === 'function')
             ? (obtenirEcheanceEffective(a, gcId).date || '9999')

@@ -326,7 +326,7 @@ class PratiquePANStandards {
         // Fonction helper pour obtenir dateEcheance de la production
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
         const infoCoursPan = db.getSync('infoCours', null);
-        const gcIdPan = infoCoursPan ? (infoCoursPan._groupeCoursId || infoCoursPan.id || null) : null;
+        const gcIdPan = obtenirIdContexteActif(infoCoursPan);
         const obtenirDateEcheance = (evaluation) => {
             const production = productions.find(p => p.id === evaluation.productionId);
             if (!production) {
@@ -556,7 +556,7 @@ class PratiquePANStandards {
         // 1. Identifier les travaux ASSIGNÉS (ont une dateEcheance et ne sont pas facultatifs)
         // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
         const infoCoursC = db.getSync('infoCours', null);
-        const gcIdC = infoCoursC ? (infoCoursC._groupeCoursId || infoCoursC.id || null) : null;
+        const gcIdC = obtenirIdContexteActif(infoCoursC);
         const travauxAssignes = productions.filter(p => {
             if (p.facultatif || p.type === 'portfolio') return false;
             if (typeof obtenirEcheanceEffective === 'function') {

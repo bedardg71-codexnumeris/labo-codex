@@ -154,6 +154,8 @@ function monter(store, opts = {}) {
         filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule, obtenirPratiqueActiveGroupeCours: winModes.obtenirPratiqueActiveGroupeCours,
         // #749 lot 2 : la normalisation partagée vit dans modes.js ; le libellé de statut dans main.js (non chargé ici).
         normaliserNumeroGroupe: winModes.normaliserNumeroGroupe,
+        // #834 lot E (cadrage « Rencontres », 12 sept. 2026) : l'identifiant du contexte, point unique de modes.js.
+        obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService,
         libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || '')
     });
     Object.assign(globaux, opts.globaux || {});
