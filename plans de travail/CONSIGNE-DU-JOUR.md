@@ -11,6 +11,11 @@
 > plus possible l'application pour elle, pour lundi, quitte à poursuivre le développement dans la semaine ou le mois » (20 h 10).
 > **But de la journée** : lundi 14, l'orthopédagogue ouvre l'application, répond à trois questions, et tient ses rencontres dedans.
 >
+> ▣ **ORDRE TRANCHÉ PAR GRÉGOIRE, 11 sept., 20 h** : ce chantier passe **avant** la suite du cadrage 11. **Le lot 5 (Interventions,
+> `CONSIGNE-SUIVANTE-lot-5-interventions.md`) est EN PAUSE** jusqu'à la fin du chantier « Rencontres » ; il ne se fait pas demain, même si
+> le temps reste (§ G passe avant). Quand il reprendra, il remesurera `js/interventions.js` après ce lot (estampille D, vocabulaire C).
+> Les lots 6 et 7 ne se croisent pas avec celui-ci et attendent aussi. **Une seule session Claude Code écrit dans `js/` demain : celle-ci.**
+>
 > **AVANT TOUT — un commit documentaire séparé** : l'archivage de la consigne du lot 4, la présente, le cadrage « Rencontres », l'entrée 11
 > de `00-CADRAGES-OUVERTS.md`, `Rapports/INVENTAIRE-2026-09-11-orthopedagogie-dans-l-app-et-la-doc.md`. `git add` ciblé.
 >
