@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 9 H 45 (Toronto) : « LA SECTION COURS DU CADRE » RELEASÉ EN 1.137.0 (`5563b233`), POUSSÉ PAR `scripts/pousser.sh` APRÈS LE VERDICT
+
+> ✅ **Tout est sur `main`** : code `7b4beac2` (relu par Cowork), relais `95923700`, release `5563b233` (1.137.0, build 0912-0935), puis ce relais. **Si tu lis ceci sur `origin/main`, le push a eu lieu** ; sinon, `scripts/.verdict-playwright.json` dit sur quel SHA le verdict a été rendu. Vitest 546 / 5 976 après le bump. Décisions de Grégoire du 12 sept. (9 h 35-9 h 40) : 3.2 et 3.3 de la porte des étiquettes « tel quel » ; hors service, le menu des profils dit « Sélectionner un enseignant·e » — tel que livré. **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md` (cinq rangées, trois décisions : le mot du titre, #843, les mots neufs) et son artefact jumeau par Cowork ; `CONSIGNE-DU-JOUR.md` + archives (Cowork) non commités ; le lot 5 du cadrage 11 en pause.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 9 H 25 (Toronto) : « LA SECTION COURS DU CADRE » (#841 / #842) COMMITÉ SUR `main` LOCAL, RELEASE 1.137.0 DUE APRÈS LA RELECTURE DE COWORK
 
 > **Le travail le plus récent est sur `main` LOCAL, deux commits devant `origin/main` (`e8374bc6` = relais de 1.136.0, en ligne), rien de poussé — exprès** (consigne du 12 sept., 8 h 55, § 6 : une seule livraison `minor` après la relecture croisée de Cowork ; un push déploie).

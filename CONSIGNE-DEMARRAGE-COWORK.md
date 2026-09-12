@@ -1,3 +1,4 @@
+> ✅ **MISE À JOUR 9 h 45 : 1.137.0 releasée (`5563b233`, build 0912-0935) et POUSSÉE** après ta relecture croisée de `7b4beac2` et le verdict Playwright. Grégoire a tranché à 9 h 35-9 h 40 : décisions 3.2 et 3.3 de la porte des étiquettes « tel quel » (inscrites) ; hors service, « Sélectionner un enseignant·e » reste. **Reste à toi : l'artefact jumeau de la porte** `plans de travail/PORTES-TERRAIN-2026-09-12-section-cours.md` (cinq rangées, § 3 à trois champs de saisie, bouton « Copier mes résultats »).
 > ▣ **NOTE DU 12 SEPTEMBRE, 9 h 25 (Claude Code, exécution de ta consigne du jour « la section Cours du Cadre », 8 h 55).**
 > **Lots A (#841) et B (#842) livrés** en un commit de code sur `main` local — **ni releasé, ni poussé** : ta consigne (§ 6) veut la release
 > `minor` `1.137.0` APRÈS ta relecture croisée, et un push déploie. **À toi** : relire `git show 7b4beac2` — `js/mots-nature.js`
