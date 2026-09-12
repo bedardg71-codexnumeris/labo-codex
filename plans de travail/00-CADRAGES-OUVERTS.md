@@ -182,6 +182,8 @@ forme (`1.130.0`, sur sa maquette `MAQUETTE-2026-09-11-outils-observation.html`,
 10 h 48 : l'écran reste dans Labo, relié depuis Suivi par deux liens — consigne du jour en exécution avec `#824`. Toutes les
 décisions sont datées dans le cadrage. ⮕ **Quand la clôture est livrée et vue, cette entrée quitte la liste** ; le dossier
 dépistage continue par l'onglet Suivi (rien de cadré — Cowork écrit un cadrage avant toute consigne).
+↻ **12 septembre 2026, 12 h 31 (Claude Code) — l'onglet Suivi (cadrage 11) : lots 1 à 4 livrés (1.131.0 → 1.134.0), lot 5
+(Interventions) commité `9ceca4ff`, `1.139.0` due après la relecture de Cowork, porte avant lundi. Lot suivant : 6, l'Animation.**
 ⏳ **Ce qui restait au 10 au soir, dans l'ordre qu'il avait arrêté (trier, puis déplacer)** : (3) **les mots de l'écran** —
 l'IDME écrite de trois façons, les deux nomenclatures du bloc « Seuils d'interprétation », les deux
 textes faux et « cueillette » (`#823`) : **ses mots, son arbitrage** ; (4) **la forme** — une grammaire

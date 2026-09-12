@@ -316,6 +316,8 @@ Toutes passent par `db.setSync` direct sauf `indicesAssiduite` : **aucune n'est 
 
 ## 5 · Interventions — `#suivi-interventions` (`index.html:8132-8147`, tout est généré), `js/interventions.js` ; `js/consolidation.js` **n'appartient pas à ce sous-onglet** (il s'affiche dans Labo › Études, `index.html:9270-9298`, et ne lit jamais `interventions`)
 
+↻ **12 sept. 2026 — lot 5 du cadrage 11 livré (`9ceca4ff`, 1.139.0 à releaser)** : I-1 (le brouillon naît en mémoire, « Planifier » n'écrit plus rien ; la double écriture de « Enregistrer » réduite à une), I-5 (lettres du bilan par les seuils `idme.*`), I-7 (`#748`, la note d'un élève parti reste, grisée), code mort retiré (avec `creerIntervention` et `marquerPresences`, sans appelant après le lot), I-6 commenté. Cités, non traités ici : `#736` (portes hors du mode anonymisation), `#746` (fait par le lot D des Rencontres), les 2 cibles tactiles (lot 7), le pack démo sans intervention.
+
 ### 5.1 Tableau des gestes (11 attributs générés, aucun filtre, aucun tri réglable — tri décroissant par date codé en dur `:315-319`)
 
 | Geste (ligne du template) | Fonction | Effet mesuré | Écrit ? |
