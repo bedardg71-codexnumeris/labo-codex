@@ -167,6 +167,7 @@ const TOOLTIPS_SOUS_NAV = {
     'suivi-saisie': 'nav-suivi-saisie',
     'suivi-profil': 'nav-suivi-profil',
     'suivi-interventions': 'nav-suivi-interventions',
+    'suivi-rencontres': 'nav-suivi-rencontres',   // cadrage « Rencontres », 12 sept. 2026 (autorisation de Grégoire)
     'suivi-animation': 'nav-suivi-animation',
     // Évaluations
     'evaluations-importer': 'nav-eval-importer',
@@ -268,6 +269,13 @@ const INITIALISATEURS_SOUS_SECTION = {
         }
     },
     // suivi-saisie : pas d'initialisation spécifique requise
+    // Cadrage « Rencontres » (12 sept. 2026, autorisation de Grégoire pour cette zone protégée) :
+    // rencontres.js décide entre les trois questions et la liste des rencontres du contexte.
+    'suivi-rencontres': function () {
+        if (typeof afficherRencontres === 'function') {
+            afficherRencontres();
+        }
+    },
     'suivi-animation': function () {
         if (typeof initialiserTirage === 'function') {
             setTimeout(initialiserTirage, 100);

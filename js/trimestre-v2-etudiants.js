@@ -704,30 +704,44 @@ function previsualiserDonneesV2() {
 /**
  * Traite les données importées pour prévisualisation
  */
-function traiterDonneesImportV2(contenu) {
-    const lignes = contenu.trim().split('\n');
-    donneesImportEnAttenteV2 = [];
+/**
+ * Découpe UNE ligne collée en colonnes : séparateur détecté (tabulation, point-virgule, virgule),
+ * format Excel `="valeur"` et guillemets retirés. Pure ; partagée avec le sous-onglet Rencontres
+ * (cadrage « Rencontres », 12 sept. 2026) — la même règle de lecture, pas un second parseur.
+ * @param {string} ligne
+ * @returns {string[]}
+ */
+function decouperLigneCollee(ligne) {
+    const separateur = ligne.includes('\t') ? '\t' : (ligne.includes(';') ? ';' : ',');
+    return ligne.split(separateur).map(c => {
+        // Nettoyer format Excel ="valeur" (préserve zéros en tête)
+        let val = c.trim();
+        if (val.startsWith('="') && val.endsWith('"')) {
+            val = val.slice(2, -1);
+        } else if (val.startsWith('"') && val.endsWith('"')) {
+            val = val.slice(1, -1);
+        }
+        return val.trim();
+    });
+}
 
-    lignes.forEach(ligne => {
-        // Détecter le séparateur (tab, point-virgule ou virgule)
-        const separateur = ligne.includes('\t') ? '\t' : (ligne.includes(';') ? ';' : ',');
-        const colonnes = ligne.split(separateur).map(c => {
-            // Nettoyer format Excel ="valeur" (préserve zéros en tête)
-            let val = c.trim();
-            if (val.startsWith('="') && val.endsWith('"')) {
-                val = val.slice(2, -1);
-            } else if (val.startsWith('"') && val.endsWith('"')) {
-                val = val.slice(1, -1);
-            }
-            return val.trim();
-        });
-
+/**
+ * Lit une liste collée au format Omnivox (DA, groupe, nom, prénom, programme, [vide], SA) et rend
+ * les fiches à importer. Pure ; les lignes de moins de quatre colonnes sont ignorées, comme avant.
+ * Extraite de `traiterDonneesImportV2` pour le sous-onglet Rencontres — zéro changement de lecture.
+ * @param {string} contenu
+ * @returns {Array<{da:string, groupe:string, nom:string, prenom:string, programme:string, sa:string}>}
+ */
+function analyserListeEtudiantsCollee(contenu) {
+    const fiches = [];
+    String(contenu || '').trim().split('\n').forEach(ligne => {
+        const colonnes = decouperLigneCollee(ligne);
         if (colonnes.length >= 4) {
             // FIX #49 (1er fév 2026) : SA peut être en colonne 5 ou 6 selon le format Omnivox
             const saValue = (colonnes[5]?.trim() || colonnes[6]?.trim() || '').toUpperCase();
             const sa = (saValue === 'OUI' || saValue === 'SA' || saValue === 'X') ? 'Oui' : '';
 
-            donneesImportEnAttenteV2.push({
+            fiches.push({
                 da: colonnes[0] || '',
                 groupe: normaliserNumeroGroupe(colonnes[1] || '00001'),   // L-9 : padé à l'écriture
                 nom: colonnes[2] || '',
@@ -737,6 +751,11 @@ function traiterDonneesImportV2(contenu) {
             });
         }
     });
+    return fiches;
+}
+
+function traiterDonneesImportV2(contenu) {
+    donneesImportEnAttenteV2 = analyserListeEtudiantsCollee(contenu);
 
     if (donneesImportEnAttenteV2.length === 0) {
         alert('Aucune donnée valide trouvée. Vérifie le format.');
@@ -1050,5 +1069,8 @@ window.exporterEtudiantsV2 = exporterEtudiantsV2;
 window.reinitialiserEtudiantsV2 = reinitialiserEtudiantsV2;
 window.supprimerGroupeSelectionneV2 = supprimerGroupeSelectionneV2;
 window.viderListeEtudiantsV2 = viderListeEtudiantsV2;
+// Cadrage « Rencontres » (12 sept. 2026) : la lecture d'une liste collée, partagée avec rencontres.js.
+window.decouperLigneCollee = decouperLigneCollee;
+window.analyserListeEtudiantsCollee = analyserListeEtudiantsCollee;
 
 })();

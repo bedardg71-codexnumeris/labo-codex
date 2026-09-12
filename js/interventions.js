@@ -57,6 +57,65 @@
  */
 
 /* ===============================
+   VOCABULAIRE ET CONTENEUR — lot C du cadrage « Rencontres » (12 sept. 2026)
+
+   Le sous-onglet Suivi › Rencontres montre LES MÊMES interventions, dans le MÊME
+   module, avec le vocabulaire « rencontre » (mots tranchés par Grégoire le 11 sept.,
+   19 h 35). Pas de copie du module : un paramètre de vocabulaire et un conteneur.
+   `rencontres.js` pose le vocabulaire avant d'afficher ; l'observateur de la sous-
+   section Interventions le remet. Sur un SERVICE (contexteActifEstService), le champ
+   « séance concernée » et la case « non-participants motivés » sont cachés : ils
+   supposent une séance de groupe.
+   =============================== */
+const VOCABULAIRES = {
+    interventions: {
+        boutonNouvelle: 'Planifier une intervention',
+        titreNouvelle: 'Planifier une intervention',
+        vide: 'Aucune intervention planifiée ou complétée.',
+        videAide: 'Clique sur «Planifier une intervention» pour commencer.',
+        introuvable: 'Intervention non trouvée.',
+        supprimer: 'Supprimer cette intervention ?',
+        enregistree: 'Intervention enregistrée',
+        labelNiveau: 'Niveau R\u00e0I :',
+        niveau2: 'Niveau 2 (Groupe cibl\u00e9)',
+        niveau3: 'Niveau 3 (Individuel)',
+        placeholderTitre: 'Ex. Intervention Rigueur et Nuance',
+        titreApercu: 'Aperçu du sous-groupe',
+        titrePresences: 'Marquer les présences et notes individuelles',
+        aidePresences: 'Coche les étudiant·es présent·es et documente tes observations spécifiques.',
+        titreBilan: 'Bilan post-intervention',
+        aideBilan: 'Comparaison automatique des critères ciblés avant et après l\'intervention.'
+    },
+    rencontres: {
+        boutonNouvelle: '+ Nouvelle rencontre',
+        titreNouvelle: 'Nouvelle rencontre',
+        vide: 'Aucune rencontre.',
+        videAide: 'Clique sur « + Nouvelle rencontre » pour en créer une.',
+        introuvable: 'Rencontre introuvable.',
+        supprimer: 'Supprimer cette rencontre ?',
+        enregistree: 'Rencontre enregistrée',
+        labelNiveau: 'Rencontre :',
+        niveau2: 'En sous-groupe',
+        niveau3: 'Individuelle',
+        placeholderTitre: 'Ex. Planifier une dissertation',
+        titreApercu: 'Aperçu des participants',
+        titrePresences: 'Participants et notes',
+        aidePresences: 'Coche les élèves présents à la rencontre et note tes observations pour chacun.',
+        titreBilan: 'Bilan de la rencontre',
+        aideBilan: 'Comparaison des critères ciblés avant et après la rencontre.'
+    }
+};
+let _vocabulaireActif = 'interventions';
+function definirVocabulaireInterventions(nom) {
+    _vocabulaireActif = VOCABULAIRES[nom] ? nom : 'interventions';
+}
+function V() { return VOCABULAIRES[_vocabulaireActif]; }
+function _enVueRencontres() { return _vocabulaireActif === 'rencontres'; }
+function _idConteneurPrincipal() { return _enVueRencontres() ? 'conteneurRencontres' : 'conteneurPrincipal'; }
+function _idListe() { return _enVueRencontres() ? 'listeRencontres' : 'listeInterventions'; }
+function _surService() { return typeof contexteActifEstService === 'function' && contexteActifEstService(); }
+
+/* ===============================
    FONCTIONS D'ACCÈS AUX DONNÉES
    =============================== */
 
@@ -293,13 +352,13 @@ function supprimerIntervention(interventionId) {
 function afficherListeInterventions() {
 
     // S'assurer que le conteneur principal existe et contient le bon HTML
-    const conteneurPrincipal = document.getElementById('conteneurPrincipal');
+    const conteneurPrincipal = document.getElementById(_idConteneurPrincipal());
     if (conteneurPrincipal) {
-        // Vérifier si #listeInterventions existe, sinon le recréer
-        let container = document.getElementById('listeInterventions');
+        // Vérifier si le conteneur de liste existe, sinon le recréer
+        let container = document.getElementById(_idListe());
         if (!container) {
-            conteneurPrincipal.innerHTML = '<div id="listeInterventions"></div>';
-            container = document.getElementById('listeInterventions');
+            conteneurPrincipal.innerHTML = '<div id="' + _idListe() + '"></div>'; // security-ok: _idListe() rend l'un de deux identifiants littéraux du module, jamais une donnée
+            container = document.getElementById(_idListe());
         }
     }
 
@@ -315,10 +374,10 @@ function afficherListeInterventions() {
     // aucune purge, aucun semis : elle prend son contexte au prochain Enregistrer.
     interventions = interventionsDuContexteActif(interventions);
 
-    const container = document.getElementById('listeInterventions');
+    const container = document.getElementById(_idListe());
 
     if (!container) {
-        console.error('❌ Conteneur #listeInterventions introuvable');
+        console.error('❌ Conteneur #' + _idListe() + ' introuvable');
         return;
     }
 
@@ -337,7 +396,7 @@ function afficherListeInterventions() {
     let html = `
         <div class="actions-principales">
             <button data-action="afficherFormulaireIntervention" class="btn btn-principal" data-tooltip="interv-btn-planifier">
-                Planifier une intervention
+                ${V().boutonNouvelle}
             </button>
             ${raiActif ? `<button data-action="ouvrirGuidePedagogique" data-param="rai" class="btn btn-secondaire" title="Guide RàI">
                 <img src="icons/icon-book.svg" alt="" class="btn-inline-icon"> Guide RàI
@@ -348,8 +407,8 @@ function afficherListeInterventions() {
     if (interventions.length === 0) {
         html += `
             <div class="message-vide">
-                <p>Aucune intervention planifiée ou complétée.</p>
-                <p class="message-vide-aide">Clique sur «Planifier une intervention» pour commencer.</p>
+                <p>${V().vide}</p>
+                <p class="message-vide-aide">${V().videAide}</p>
             </div>
         `;
         container.innerHTML = html;
@@ -365,7 +424,9 @@ function afficherListeInterventions() {
         else if (ctx === 'mio' || intervention.type === 'mio') badgeType = 'MIO';
         else if (intervention.type === 'individuel' || intervention.niveauRai === 3) badgeType = 'Hors classe';
         else badgeType = intervention.type === 'groupe' ? 'Groupe' : 'Individuel';
-        const badgeNiveau = `Niveau ${intervention.niveauRai}`;
+        // Vue Rencontres : deux formes, individuelle ou en sous-groupe ; le palier RàI n'est pas affiché.
+        if (_enVueRencontres()) badgeType = (intervention.type === 'individuel' || intervention.niveauRai === 3) ? 'Individuelle' : 'En sous-groupe';
+        const badgeNiveau = _enVueRencontres() ? '' : `Niveau ${intervention.niveauRai}`;
 
         html += `
             <div class="carte intervention-item u-mb-15">
@@ -375,7 +436,7 @@ function afficherListeInterventions() {
                         <div class="intervention-badges">
                             <span>${badgeStatut}</span>
                             <span class="badge-type-intervention">${badgeType}</span>
-                            <span class="badge-rai-${intervention.niveauRai}">${badgeNiveau}</span>
+                            ${badgeNiveau ? `<span class="badge-rai-${intervention.niveauRai}">${badgeNiveau}</span>` : ''}
                         </div>
                     </div>
                     <div class="intervention-actions">
@@ -389,7 +450,7 @@ function afficherListeInterventions() {
                 <p class="intervention-description">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(intervention.description || '', null) : (intervention.description || ''))} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${echapperHtml(intervention.heure)}` : ''}</span></p>
 
                 ${(intervention.analyse || (intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0)) ? `
-                    <h4 class="intervention-titre u-mb-10 u-mt-10">Aperçu du sous-groupe (${formaterNbEtudiants(intervention.analyse ? intervention.analyse.nbEtudiants : 0)})</h4>
+                    <h4 class="intervention-titre u-mb-10 u-mt-10">${V().titreApercu} (${formaterNbEtudiants(intervention.analyse ? intervention.analyse.nbEtudiants : 0)})</h4>
                     <div class="intervention-cartes-row">
                         ${intervention.analyse ? genererAffichageAnalyseCartes(intervention.analyse) : ''}
                         ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
@@ -593,6 +654,14 @@ function gererVisibiliteContexteIntervention() {
 
     if (!niveau || !contexteBloc || !absencesBloc) return;
 
+    // Sur un service : ni contexte de classe, ni séance concernée — ces deux blocs supposent
+    // une séance de groupe (cadrage « Rencontres », § C).
+    if (_surService()) {
+        contexteBloc.style.display = 'none';
+        absencesBloc.style.display = 'none';
+        return;
+    }
+
     var val = parseInt(niveau.value);
 
     if (val === 2) {
@@ -623,11 +692,12 @@ function gererVisibiliteContexteIntervention() {
  * @param {string} [daPreselectionne] - DA de l'étudiant à pré-cocher (depuis profil)
  */
 function afficherFormulaireIntervention(daPreselectionne) {
-    var container = document.getElementById('conteneurPrincipal');
+    var container = document.getElementById(_idConteneurPrincipal());
     if (!container) return;
 
-    // Déterminer le niveau RàI initial si un DA est pré-sélectionné
-    var niveauInitial = 2;
+    // Déterminer le niveau RàI initial si un DA est pré-sélectionné.
+    // Vue Rencontres : individuelle par défaut (`type: 'individuel'`, cadrage § C).
+    var niveauInitial = _enVueRencontres() ? 3 : 2;
     if (daPreselectionne && typeof determinerNiveauRaiPedagogique === 'function') {
         var niveauRai = determinerNiveauRaiPedagogique(daPreselectionne);
         if (niveauRai && niveauRai.niveau >= 3) niveauInitial = 3;
@@ -667,11 +737,11 @@ function ouvrirIntervention(interventionId, options) {
     const intervention = obtenirIntervention(interventionId);
 
     if (!intervention) {
-        alert('Intervention non trouvée.');
+        alert(V().introuvable);
         return;
     }
 
-    const container = document.getElementById('conteneurPrincipal');
+    const container = document.getElementById(_idConteneurPrincipal());
     if (!container) return;
 
     // Obtenir la liste des étudiants (filtrée par groupe-cours actif)
@@ -755,7 +825,7 @@ function ouvrirIntervention(interventionId, options) {
 
     container.innerHTML = `
         <div class="carte">
-            <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? 'Planifier une intervention' : echapperHtml(intervention.titre)}</h3>
+            <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? V().titreNouvelle : echapperHtml(intervention.titre)}</h3>
 
             <!-- Section informations éditables -->
             <div class="intervention-grid-1-09">
@@ -766,15 +836,15 @@ function ouvrirIntervention(interventionId, options) {
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionTitre" class="label-formulaire">Titre :</label>
                             <input type="text" id="interventionTitre" class="controle-form" required
-                                   value="${echapperHtml(intervention.titre)}" placeholder="Ex. Intervention Rigueur et Nuance">
+                                   value="${echapperHtml(intervention.titre)}" placeholder="${V().placeholderTitre}">
                         </div>
 
                         <div class="champ-formulaire u-m-0">
-                            <label for="interventionNiveau" class="label-formulaire">Niveau R\u00e0I :</label>
+                            <label for="interventionNiveau" class="label-formulaire">${V().labelNiveau}</label>
                             <select id="interventionNiveau" class="controle-form" required
                                     data-on-change="gererVisibiliteContexteIntervention">
-                                <option value="2" ${intervention.niveauRai === 2 ? 'selected' : ''}>Niveau 2 (Groupe cibl\u00e9)</option>
-                                <option value="3" ${intervention.niveauRai === 3 ? 'selected' : ''}>Niveau 3 (Individuel)</option>
+                                <option value="2" ${intervention.niveauRai === 2 ? 'selected' : ''}>${V().niveau2}</option>
+                                <option value="3" ${intervention.niveauRai === 3 ? 'selected' : ''}>${V().niveau3}</option>
                             </select>
                         </div>
                     </div>
@@ -855,7 +925,7 @@ function ouvrirIntervention(interventionId, options) {
             <div style="display: grid; grid-template-columns: 40fr 60fr; gap: 20px; align-items: start; margin-bottom: 20px;">
                 <!-- Colonne gauche: Aperçu du sous-groupe (40%) -->
                 <div>
-                    <h4 data-tooltip="interv-apercu-sous-groupe">Aperçu du sous-groupe</h4>
+                    <h4 data-tooltip="interv-apercu-sous-groupe">${V().titreApercu}</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
                         Cette agrégation des profils des étudiant·es vise à éclairer ta préparation.
                     </p>
@@ -864,9 +934,9 @@ function ouvrirIntervention(interventionId, options) {
 
                 <!-- Colonne droite: Liste des étudiants avec notes (60%) -->
                 <div>
-                    <h4 data-tooltip="interv-presences-notes">Marquer les présences et notes individuelles</h4>
+                    <h4 data-tooltip="interv-presences-notes">${V().titrePresences}</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                        Coche les étudiant·es présent·es et documente tes observations spécifiques.
+                        ${V().aidePresences}
                     </p>
 
                     <div id="listeEtudiantsIntervention" class="liste-etudiants-intervention">
@@ -965,8 +1035,8 @@ function ouvrirIntervention(interventionId, options) {
 
                 var bilan = intervention.bilan || {};
                 return '<div class="carte" style="margin-bottom: 20px;">' +
-                    '<h4 class="intervention-mt-0" data-tooltip="interv-bilan">Bilan post-intervention</h4>' +
-                    '<p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">Comparaison automatique des critères ciblés avant et après l\'intervention.</p>' +
+                    '<h4 class="intervention-mt-0" data-tooltip="interv-bilan">' + V().titreBilan + '</h4>' +
+                    '<p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">' + V().aideBilan + '</p>' +
                     bilanTableau +
                     '<div style="margin-bottom: 15px;">' +
                         '<label class="label-formulaire">Objectif atteint ?</label>' +
@@ -1273,7 +1343,8 @@ function sauvegarderPresencesIntervention(interventionId) {
         // Dériver contexte, type et absences depuis le formulaire
         var niveauSave = parseInt(document.getElementById('interventionNiveau').value);
         var contexteElSave = document.getElementById('interventionContexte');
-        var contexteSave = (niveauSave === 2 && contexteElSave) ? contexteElSave.value : 'hors-classe';
+        // Sur un service, le contexte de classe n'existe pas : hors-classe, quel que soit le niveau (cadrage § C).
+        var contexteSave = (niveauSave === 2 && contexteElSave && !_surService()) ? contexteElSave.value : 'hors-classe';
         var typeSave = 'groupe';
         if (contexteSave === 'mio') typeSave = 'mio';
         else if (niveauSave === 3) typeSave = 'individuel';
@@ -1380,7 +1451,7 @@ function sauvegarderPresencesIntervention(interventionId) {
     afficherListeInterventions();
 
     // Notification de succès
-    notifications.succes('Intervention enregistrée');
+    notifications.succes(V().enregistree);
 
 }
 
@@ -1493,6 +1564,7 @@ function initialiserModuleInterventions() {
     const observer = new MutationObserver(() => {
         const sousSection = document.getElementById('suivi-interventions');
         if (sousSection && sousSection.classList.contains('active')) {
+            definirVocabulaireInterventions('interventions');
             afficherListeInterventions();
         }
     });
@@ -1505,6 +1577,7 @@ function initialiserModuleInterventions() {
     // Afficher la liste si la sous-section est déjà active
     const sousSection = document.getElementById('suivi-interventions');
     if (sousSection && sousSection.classList.contains('active')) {
+        definirVocabulaireInterventions('interventions');
         afficherListeInterventions();
     }
 
@@ -1562,7 +1635,7 @@ function obtenirAbsencesMotiveesParDate(date) {
 
 /** Supprimer intervention avec confirmation + rafraichir liste */
 function supprimerInterventionEtRafraichir(interventionId) {
-    if (confirm('Supprimer cette intervention ?')) {
+    if (confirm(V().supprimer)) {
         supprimerIntervention(interventionId);
         afficherListeInterventions();
     }
@@ -1594,6 +1667,7 @@ window.genererBadgeStatut = genererBadgeStatut;
 window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
 window.supprimerInterventionEtRafraichir = supprimerInterventionEtRafraichir;
 window.interventionsDuContexteActif = interventionsDuContexteActif;
+window.definirVocabulaireInterventions = definirVocabulaireInterventions;
 window.afficherAnalyseTempsReel = afficherAnalyseTempsReel;
 
 
