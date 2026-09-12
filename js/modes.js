@@ -734,12 +734,18 @@ function obtenirDonneesSelonMode(cle) {
             const avantFiltre = donnees;
             // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
             const estModeCours = coursActif._modeCours || coursActif.groupe === null;
+            // Cadrage « Rencontres », lot A (12 sept. 2026) — dans un SERVICE, un élève appartient
+            // par son coursId ; le numéro de groupe ne départage rien (un service n'a qu'un
+            // groupe-cours), et une fiche sans coursId n'est pas la sienne (un service n'a pas
+            // d'historique). Hors service, rien ne change : la garde se pose sur le service.
+            const estService = (cleBase === 'groupeEtudiants') && contexteActifEstService();
 
             donnees = donnees.filter(item => {
                 // Compatibilité : ancien format sans coursId
                 if (!item.coursId) {
                     // Pour étudiants : vérifier groupe (sauf en mode cours)
                     if (cleBase === 'groupeEtudiants') {
+                        if (estService) return false;
                         // En mode cours, accepter tous les étudiants (pas de filtre groupe)
                         if (estModeCours) {
                             return true;
@@ -1235,7 +1241,16 @@ function obtenirEtudiantsCoursActif() {
     // 🆕 BETA 95.3 : Mode cours = tous les groupes fusionnés
     const estModeCours = coursActif._modeCours || coursActif.groupe === null;
 
-    // DEBUG (11 jan 2026)
+    // Cadrage « Rencontres », lot A (12 sept. 2026) — mesuré sur la porte, rangée 9 : trois
+    // élèves écrits dans un service, DEUX rendus. La fiche collée d'Omnivox portait le groupe
+    // d'origine du collège (« 00007 ») ; le groupe-cours du service porte « 00001 » ; la
+    // comparaison de groupe ci-dessous la faisait tomber, sans un mot. Dans un SERVICE,
+    // l'appartenance se conclut sur le coursId seul (un service n'a qu'un groupe-cours). Une
+    // fiche SANS coursId n'est pas la sienne (un service n'a pas d'historique) — tranché dans
+    // `obtenirDonneesSelonMode`, d'où vient `tousEtudiants` : ici, elle n'arrive jamais (une
+    // garde de plus serait morte, break-test du 12 sept. : 0 rouge). Hors service, RIEN ne
+    // change — ce filtre est lu par tous les écrans de tous les enseignants.
+    const estService = contexteActifEstService();
 
     // Filtrer par coursId (et optionnellement par groupe)
     const etudiantsFiltres = tousEtudiants.filter(e => {
@@ -1263,8 +1278,8 @@ function obtenirEtudiantsCoursActif() {
             return false; // Pas le bon cours
         }
 
-        // Si mode cours (tous groupes), retourner tous les étudiants du cours
-        if (estModeCours) {
+        // Si mode cours (tous groupes), ou un service : tous les élèves du cours
+        if (estModeCours || estService) {
             return true;
         }
 
@@ -1273,11 +1288,6 @@ function obtenirEtudiantsCoursActif() {
         if (!groupeCours) return true; // Pas de groupe spécifié = tous
         return normaliserNumeroGroupe(groupeEtudiant) === normaliserNumeroGroupe(groupeCours);
     });
-
-    const modeLabel = estModeCours ? 'tous groupes' : `groupe ${coursActif.groupe}`;
-
-    // DEBUG (11 jan 2026) : Afficher les groupes distincts des étudiants
-    const groupesDistincts = [...new Set(tousEtudiants.map(e => e.groupe))];
 
     // Appliquer le filtrage par mode (exclure groupe 9999 en mode normal)
     return filtrerEtudiantsParMode(etudiantsFiltres);

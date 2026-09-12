@@ -185,6 +185,13 @@ function afficherTroisQuestions(conteneur, options) {
    =============================== */
 
 const _DA_RE = /^\d{5,}$/;
+/**
+ * Le numéro de groupe d'un service — le seul. Un service n'a qu'un groupe-cours ; le numéro
+ * d'origine d'une ligne Omnivox (« 00007 », le groupe du collège) n'y départage rien, et
+ * afficherait dans Suivi › Liste un chiffre différent par élève (lot A du 12 sept. 2026).
+ * Écrit sur chaque fiche ET sur le groupe-cours ; la lecture (modes.js) n'en dépend plus.
+ */
+const GROUPE_SERVICE = '00001';
 let _compteurDaProvisoire = 0;
 
 /** Un DA provisoire, à sept chiffres, reconnaissable à son « 9 » de tête — quand la liste n'en donne pas. */
@@ -197,18 +204,37 @@ function _daProvisoire() {
  * Lit une liste tapée ou collée. Les lignes de quatre colonnes ou plus passent par la
  * lecture Omnivox partagée (`analyserListeEtudiantsCollee`, trimestre-v2-etudiants.js) ;
  * les lignes plus courtes sont lues ici : « Prénom Nom », « Nom ; Prénom », « DA ; Nom ; Prénom »,
- * « DA Prénom Nom ». Pure.
+ * « DA Prénom Nom ». Pure. Le groupe de chaque fiche est `GROUPE_SERVICE`, quel que soit le
+ * numéro lu dans une ligne Omnivox (lot A, 12 sept. 2026).
+ *
+ * Lot B (12 sept. 2026) — mesuré sur la porte : trois lignes collées EN UNE avaient donné un
+ * élève fantôme (DA « Léa Tremblay, 1234567 », groupe « Gagnon », prénom « 00007 »), sans un
+ * mot : toute ligne de quatre colonnes ou plus partait au lecteur Omnivox, qui prend la
+ * première colonne pour le DA sans en vérifier la forme. Désormais une telle ligne dont la
+ * première colonne n'a pas la forme d'un DA, ou dont aucun nom ne se lit, est REFUSÉE et
+ * NOMMÉE (`refusees`) ; l'appelant décide quoi en dire. Jamais une fiche inventée en silence.
  * @param {string} contenu
- * @returns {Array<{da:string, nom:string, prenom:string, groupe:string, programme:string, sa:string, daProvisoire:boolean}>}
+ * @returns {{fiches: Array<{da:string, nom:string, prenom:string, groupe:string, programme:string, sa:string, daProvisoire:boolean}>,
+ *            refusees: Array<{numero:number, texte:string, motif:string}>}}
  */
 function analyserListeEleves(contenu) {
     const fiches = [];
-    String(contenu || '').split('\n').forEach(ligneBrute => {
+    const refusees = [];
+    String(contenu || '').split('\n').forEach((ligneBrute, index) => {
         const ligne = ligneBrute.trim();
         if (!ligne) return;
         const colonnes = (typeof decouperLigneCollee === 'function') ? decouperLigneCollee(ligne) : ligne.split(/[\t;,]/).map(c => c.trim());
         if (colonnes.length >= 4 && typeof analyserListeEtudiantsCollee === 'function') {
-            analyserListeEtudiantsCollee(ligne).forEach(f => fiches.push(Object.assign({ daProvisoire: false }, f)));
+            if (!_DA_RE.test(colonnes[0])) {
+                refusees.push({ numero: index + 1, texte: ligne, motif: 'ne commence pas par un numéro de DA' });
+                return;
+            }
+            const lues = analyserListeEtudiantsCollee(ligne).filter(f => f.nom || f.prenom);
+            if (lues.length === 0) {
+                refusees.push({ numero: index + 1, texte: ligne, motif: 'aucun nom après le numéro de DA' });
+                return;
+            }
+            lues.forEach(f => fiches.push(Object.assign({ daProvisoire: false }, f, { groupe: GROUPE_SERVICE })));
             return;
         }
         let da = '', nom = '', prenom = '';
@@ -222,7 +248,7 @@ function analyserListeEleves(contenu) {
                 da = cols[0];
                 const mots = cols[1].split(/\s+/);
                 nom = mots.length > 1 ? mots.pop() : mots[0]; prenom = mots.join(' ');
-            } else { nom = cols[0]; prenom = cols[1]; }
+            } else { nom = cols[0]; prenom = cols[1]; }   // « Prénom Nom ; DA » (DA en second) se lit nom / prénom : vrai, pas vécu, laissé (12 sept. 2026)
         } else if (cols.length === 1) {
             const mots = cols[0].split(/\s+/);
             if (_DA_RE.test(mots[0])) da = mots.shift();
@@ -231,9 +257,23 @@ function analyserListeEleves(contenu) {
         }
         if (!nom && !prenom) return;
         const provisoire = !da;
-        fiches.push({ da: da || _daProvisoire(), nom, prenom, groupe: '00001', programme: '', sa: '', daProvisoire: provisoire });
+        fiches.push({ da: da || _daProvisoire(), nom, prenom, groupe: GROUPE_SERVICE, programme: '', sa: '', daProvisoire: provisoire });
     });
-    return fiches;
+    return { fiches, refusees };
+}
+
+/**
+ * Le mot du refus (lot B) — titre et message d'une notification, en `textContent`.
+ * Proposé à Grégoire le 12 sept. 2026 (consigne § 4) ; livré tel quel, il corrigera.
+ */
+function _motDuRefus(refusees) {
+    const n = refusees.length;
+    const titre = n > 1 ? `${n} lignes n'ont pas pu être lues` : 'Une ligne n\'a pas pu être lue';
+    const detail = refusees.slice(0, 3).map(r => {
+        const extrait = r.texte.length > 40 ? r.texte.slice(0, 40) + '…' : r.texte;
+        return `Ligne ${r.numero} (« ${extrait} ») : ${r.motif}.`;
+    }).join(' ');
+    return { titre, message: detail + ' Une ligne par élève : Prénom Nom, ou DA ; Nom ; Prénom, ou la ligne Omnivox telle quelle.' };
 }
 
 /* ===============================
@@ -262,9 +302,16 @@ async function creerMonService() {
         document.getElementById('rencontres-nomService')?.focus();
         return;
     }
-    const fiches = analyserListeEleves(contenuEleves);
+    const lecture = analyserListeEleves(contenuEleves);
+    const fiches = lecture.fiches;
     if (fiches.length === 0) {
-        notifications.erreur('Aucun élève lu', 'Une ligne par élève : Prénom Nom, ou DA ; Nom ; Prénom.');
+        // Lot B : rien de valide — le service ne se crée pas, et la ligne refusée est nommée.
+        if (lecture.refusees.length > 0) {
+            const mot = _motDuRefus(lecture.refusees);
+            notifications.erreur(mot.titre, mot.message);
+        } else {
+            notifications.erreur('Aucun élève lu', 'Une ligne par élève : Prénom Nom, ou DA ; Nom ; Prénom.');
+        }
         document.getElementById('rencontres-eleves')?.focus();
         return;
     }
@@ -324,7 +371,7 @@ async function creerMonService() {
         fiches.forEach(f => {
             if (dasPresents.has(String(f.da))) { nbDejaPresents++; return; }
             dasPresents.add(String(f.da));
-            etudiants.push({ da: f.da, nom: f.nom, prenom: f.prenom, groupe: f.groupe || '00001', programme: f.programme || '', sa: f.sa || '', coursId: service.id });
+            etudiants.push({ da: f.da, nom: f.nom, prenom: f.prenom, groupe: GROUPE_SERVICE, programme: f.programme || '', sa: f.sa || '', coursId: service.id });
             nbAjoutes++;
         });
         return etudiants;
@@ -338,10 +385,10 @@ async function creerMonService() {
     const nomTrimestre = trimestre.nom || trimestre.id;
     const gc = {
         id: genererIdUnique('GC_'),
-        nom: `${nomTrimestre} - ${nomService} - 00001`,
+        nom: `${nomTrimestre} - ${nomService} - ${GROUPE_SERVICE}`,
         trimestreId: trimestre.id,
         coursId: service.id,
-        groupeNum: '00001',
+        groupeNum: GROUPE_SERVICE,
         horaireId: null,
         enseignantId: enseignantId,
         pratiqueId: null,
@@ -361,6 +408,11 @@ async function creerMonService() {
         + (nbDejaPresents > 0 ? `, ${nbDejaPresents} déjà présent${nbDejaPresents > 1 ? 's' : ''}` : '')
         + (nbProvisoires > 0 ? ` (${nbProvisoires} sans DA : numéro provisoire)` : '')
         + '. Tes rencontres se tiennent ici ; Cadre montre le service tel quel.');
+    // Lot B : le service est créé avec les lignes valides ; celles qui ne l'étaient pas sont nommées.
+    if (lecture.refusees.length > 0) {
+        const mot = _motDuRefus(lecture.refusees);
+        notifications.warning(mot.titre, mot.message);
+    }
 
     afficherRencontres();
 }
