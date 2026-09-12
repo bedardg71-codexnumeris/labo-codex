@@ -452,7 +452,9 @@ async function peuplerDropdownEnseignants() {
         enseignants = await EnseignantsEntite.obtenirTous();
     }
 
-    let options = '<option value="">Sélectionner un enseignant·e</option>';
+    // Consigne du 12 sept. 2026 : le mot de la personne suit la nature du contexte actif (point unique).
+    const estService = typeof contexteActifEstService === 'function' && contexteActifEstService();
+    let options = '<option value="">' + motsNature(estService ? 'service' : 'cours').choisirPersonne + '</option>';
     enseignants.forEach(ens => {
         const libelle = typeof EnseignantsEntite !== 'undefined'
             ? EnseignantsEntite.genererLibelle(ens)
@@ -464,6 +466,30 @@ async function peuplerDropdownEnseignants() {
     if (selectGC) {
         selectGC.innerHTML = options.replace('Sélectionner', '-- Sélectionner');
     }
+}
+
+/**
+ * Consigne du 12 sept. 2026 (les étiquettes) — le Cadre comme porte principale.
+ * Quand le contexte actif est un service, les mots qui nomment l'enseignant·e dans le Cadre
+ * (fil d'Ariane, accordéon, sélecteur de profil, formulaire de groupe-cours) disent
+ * « orthopédagogue » ; sur un cours, ils redisent « enseignant·e ». Un mot, pas un champ :
+ * chaque élément porte `data-mot-nature="<clé>"`, la clé est lue dans js/mots-nature.js.
+ * Appelé par `mettreAJourContexteEntete` (contexte.js) : au démarrage et à chaque activation.
+ */
+function appliquerMotsNatureCadre() {
+    if (typeof document.querySelectorAll !== 'function') return;
+    const estService = typeof contexteActifEstService === 'function' && contexteActifEstService();
+    const mots = motsNature(estService ? 'service' : 'cours');
+    document.querySelectorAll('[data-mot-nature]').forEach(el => {
+        const cle = el.getAttribute('data-mot-nature');
+        if (Object.prototype.hasOwnProperty.call(mots, cle)) el.textContent = mots[cle];
+    });
+    // L'option vide du sélecteur de profil suit aussi (le reste des options = les profils).
+    ['v2-selectEnseignant', 'v2-gc-enseignant'].forEach(id => {
+        const sel = document.getElementById(id);
+        const vide = sel && sel.options && Array.from(sel.options).find(o => o.value === '');
+        if (vide) vide.textContent = (id === 'v2-gc-enseignant' ? '-- ' : '') + mots.choisirPersonne;
+    });
 }
 
 /**
@@ -542,6 +568,7 @@ window.peuplerDropdownGroupeCoursActif = peuplerDropdownGroupeCoursActif;
 window.changerGroupeCoursDepuisHeader = changerGroupeCoursDepuisHeader;
 window.changerGroupeCoursActifV2 = changerGroupeCoursActifV2;
 window.peuplerDropdownEnseignants = peuplerDropdownEnseignants;
+window.appliquerMotsNatureCadre = appliquerMotsNatureCadre; // consigne du 12 sept. 2026 (les étiquettes)
 window.changerEnseignantSelectionneV2 = changerEnseignantSelectionneV2;
 window.afficherFormGroupeCoursV2 = afficherFormGroupeCoursV2;
 

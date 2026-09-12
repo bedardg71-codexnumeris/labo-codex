@@ -131,7 +131,8 @@ describe('A2 · le formulaire du Cadre : un service avec le seul nom passe ; un 
         expect(b.appels[0].codeCours).toBe('');
         expect(b.appels[0].discipline).toBe('');
         expect(b.appels[0].ponderation).toBe('');
-        expect(b.n.j.some(x => x.type === 'succes' && /Service créé/.test(x.t))).toBe(true);
+        // Consigne du 12 sept. 2026 : le mot vient du point unique (« Service d’orthopédagogie créé »).
+        expect(b.n.j.some(x => x.type === 'succes' && /Service d’orthopédagogie créé/.test(x.t))).toBe(true);
     });
     it('service SANS nom → refusé, rien n\'est créé', async () => {
         const b = monterForm({ 'v2-natureCours': 'service', 'v2-nomCours': '' });

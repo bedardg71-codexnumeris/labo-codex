@@ -17,11 +17,13 @@
       part, aucun troisième chemin de données : `obtenirEtudiantsCoursActif()` rend la
       liste du service par le chemin commun.
 
-   Le mot « orthopédagogie » n'apparaît nulle part : un enseignant qui reçoit des élèves
-   à son bureau a le même sous-onglet.
+   Les mots qui nomment le service (« service d'orthopédagogie », « Orthopédagogie ») viennent
+   du point unique js/mots-nature.js — tranché par Grégoire le 12 sept. (7 h 35) : « il s'agit
+   d'un type d'utilisateur complètement différent d'un enseignant », l'orthopédagogie se nomme.
+   Le jour où d'autres services existent, le mot change LÀ, pas ici.
 
-   ⚠ Mots à l'écran : proposés par la session du 11 sept. au soir, à valider par
-   Grégoire (règle 3 de CLAUDE.md — ce que ses collègues et leurs élèves liront).
+   ⚠ Mots à l'écran : ceux du § 2 B de la consigne du 12 sept. (relevé de la porte) ; la carte
+   sur un groupe-cours ordinaire est proposée par cette session, à corriger par Grégoire.
    =============================== */
 
 (function() {
@@ -98,14 +100,15 @@ function afficherPorteVersUnService(conteneur, trimestre) {
     const liens = services.map(s =>
         '<li><button type="button" class="lien-reglages" data-action="activerServiceRencontres" data-param="' + echapperHtml(s.id) + '">'
         + echapperHtml(s.nom) + '</button></li>').join('');
+    const mots = motsNature('service');
     conteneur.innerHTML = `
         <div class="carte">
-            <p class="text-muted">Les rencontres se tiennent dans un <strong>service</strong> — un cours de nature « Service », sans code ni horaire. Le groupe-cours actif est un cours ordinaire : ses interventions sont sous <strong>Suivi › Interventions</strong>.</p>
+            <p class="text-muted">Les rencontres d'orthopédagogie se tiennent dans un <strong>${mots.objetLong}</strong> — dans Cadre, un cours de nature « ${mots.nature} », sans code ni horaire. Le groupe-cours actif est un cours d'enseignement : ses interventions sont sous <strong>Suivi › Interventions</strong>.</p>
             ${services.length > 0 ? `
-            <p class="u-mb-10">Un service existe déjà dans ce trimestre. Active-le pour tenir tes rencontres :</p>
+            <p class="u-mb-10">Un ${mots.objetLong} existe déjà dans ce trimestre. Active-le pour tenir tes rencontres :</p>
             <ul class="u-mb-15">${liens}</ul>` : ''}
-            <p class="text-muted u-texte-09 u-mb-10">Tu reçois des élèves hors d'un groupe-cours ?
-                <button type="button" class="lien-reglages" data-action="afficherTroisQuestionsRencontres">Créer un service</button></p>
+            <p class="text-muted u-texte-09 u-mb-10">Tu es orthopédagogue et tu reçois des élèves hors d'un groupe-cours ?
+                <button type="button" class="lien-reglages" data-action="afficherTroisQuestionsRencontres">Créer un ${mots.objetLong}</button></p>
         </div>`;
 }
 
@@ -130,6 +133,7 @@ function afficherTroisQuestionsRencontres() {
  */
 function afficherTroisQuestions(conteneur, options) {
     options = options || {};
+    const mots = motsNature('service');
     const trimestre = _trimestreActifOuNull();
     const questionTrimestre = options.sansTrimestre
         ? `
@@ -150,18 +154,18 @@ function afficherTroisQuestions(conteneur, options) {
         : `
             <div class="carte u-mb-15">
                 <h4 class="intervention-mt-0">1. Ton trimestre</h4>
-                <p class="text-muted u-texte-09">Le service sera créé dans le trimestre actif : <strong>${echapperHtml(trimestre.nom || trimestre.id)}</strong>.</p>
+                <p class="text-muted u-texte-09">Le ${mots.objet} sera créé dans le trimestre actif : <strong>${echapperHtml(trimestre.nom || trimestre.id)}</strong>.</p>
             </div>`;
 
     conteneur.innerHTML = `
         <div class="carte">
-            <p class="text-muted">Pour tenir tes rencontres ici, l'application a besoin de trois choses. Elle crée ensuite ton service, visible dans Cadre, tel quel.</p>
+            <p class="text-muted">Pour tenir tes rencontres ici, l'application a besoin de trois choses. Elle crée ensuite ton ${mots.objetLong}, visible dans Cadre, tel quel.</p>
             ${questionTrimestre}
             <div class="carte u-mb-15">
-                <h4 class="intervention-mt-0">2. Le nom de ton service</h4>
+                <h4 class="intervention-mt-0">2. Le nom de ton ${mots.objet}</h4>
                 <p class="text-muted u-texte-09">C'est le seul nom qu'on te demandera : ni code de cours, ni discipline, ni compétence.</p>
                 <div class="champ-formulaire u-m-0">
-                    <label for="rencontres-nomService" class="label-formulaire">Nom du service :</label>
+                    <label for="rencontres-nomService" class="label-formulaire">Nom du ${mots.objet} :</label>
                     <input type="text" id="rencontres-nomService" class="controle-form" required placeholder="Ex. Aide à la réussite en français">
                 </div>
             </div>
@@ -175,7 +179,7 @@ function afficherTroisQuestions(conteneur, options) {
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 ${options.retourPossible ? '<button type="button" data-action="afficherRencontres" class="btn btn-secondaire">Annuler</button>' : ''}
-                <button type="button" data-action="creerMonService" class="btn btn-principal">Créer mon service</button>
+                <button type="button" data-action="creerMonService" class="btn btn-principal">Créer mon ${mots.objetLong}</button>
             </div>
         </div>`;
 }
@@ -297,8 +301,9 @@ function _sessionDepuisDate(dateYMD) {
 async function creerMonService() {
     const nomService = (document.getElementById('rencontres-nomService')?.value || '').trim();
     const contenuEleves = document.getElementById('rencontres-eleves')?.value || '';
+    const mots = motsNature('service');
     if (!nomService) {
-        notifications.erreur('Nom du service requis', 'Un nom suffit : il s\'affiche partout où un cours montre son code.');
+        notifications.erreur('Nom du ' + mots.objet + ' requis', 'Un nom suffit : il s\'affiche partout où un cours montre son code.');
         document.getElementById('rencontres-nomService')?.focus();
         return;
     }
@@ -352,7 +357,7 @@ async function creerMonService() {
     // 2. Le service : un cours de nature « service » (lot A).
     const service = await CoursEntite.creer({ nature: 'service', nomCours: nomService });
     if (!service) {
-        notifications.erreur('Service non créé', 'La fiche n\'a pas pu être enregistrée.');
+        notifications.erreur(mots.ObjetLong + ' non créé', 'La fiche n\'a pas pu être enregistrée.');
         return;
     }
     // ⚠ `cours` est une clé GLOBALE, pas namespacée (mesuré le 11 sept. au soir) : un service créé
@@ -403,11 +408,11 @@ async function creerMonService() {
     if (typeof peuplerDropdownGroupeCoursActif === 'function') { try { await peuplerDropdownGroupeCoursActif(); } catch (e) { console.warn('[Rencontres] en-tête non rafraîchi :', e); } }
 
     const nbProvisoires = fiches.filter(f => f.daProvisoire).length;
-    notifications.succes('Service créé',
+    notifications.succes(mots.ObjetLong + ' créé',
         `${nbAjoutes} élève${nbAjoutes > 1 ? 's' : ''} ajouté${nbAjoutes > 1 ? 's' : ''}`
         + (nbDejaPresents > 0 ? `, ${nbDejaPresents} déjà présent${nbDejaPresents > 1 ? 's' : ''}` : '')
         + (nbProvisoires > 0 ? ` (${nbProvisoires} sans DA : numéro provisoire)` : '')
-        + '. Tes rencontres se tiennent ici ; Cadre montre le service tel quel.');
+        + '. Tes rencontres d\'orthopédagogie se tiennent ici ; Cadre montre le ' + mots.objet + ' tel quel.');
     // Lot B : le service est créé avec les lignes valides ; celles qui ne l'étaient pas sont nommées.
     if (lecture.refusees.length > 0) {
         const mot = _motDuRefus(lecture.refusees);

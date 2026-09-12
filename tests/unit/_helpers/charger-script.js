@@ -114,6 +114,18 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
         });
     }
 
+    // Consigne du 12 sept. 2026 (les étiquettes) — `motsNature` / `motNature` (js/mots-nature.js) est
+    // LE point unique du mot de chaque nature de cours ; le formulaire du Cadre, les cartes de
+    // groupe-cours, l'orchestre, Rencontres et les infobulles l'appellent. Comme pour
+    // `obtenirIdContexteActif` : fourni au harnais quand il ne le donne pas — et c'est le VRAI
+    // module qui est chargé (aucune copie des mots ici), fidèle à l'ordre de chargement de
+    // index.html (mots-nature.js vient juste après db.js).
+    if (typeof globaux.motsNature !== 'function') {
+        const winMots = {};
+        new Function('window', readFileSync(path.join(racineProjet, 'js/mots-nature.js'), 'utf8'))(winMots);
+        globaux = Object.assign({}, globaux, { motsNature: winMots.motsNature, motNature: winMots.motNature, MOTS_NATURE: winMots.MOTS_NATURE });
+    }
+
     const { document: documentOverride, localStorage: localStorageOverride, ...autresGlobaux } = globaux;
     const noms = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autresGlobaux)];
     const valeurs = [fauxWindow, documentOverride || fauxDocument, console, localStorageOverride || fauxStorage(), fauxStorage(), ...Object.values(autresGlobaux)];

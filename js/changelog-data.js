@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.136',
+            couleur: 'vert',
+            titre: 'Deux usages nommés dans le Cadre : l\'enseignement et l\'orthopédagogie',
+            items: [
+                '<strong>Dans Cadre › Cours, le menu «&nbsp;Nature&nbsp;» dit désormais «&nbsp;Enseignement&nbsp;» ou «&nbsp;Orthopédagogie&nbsp;»</strong> (à la place de «&nbsp;Cours&nbsp;» / «&nbsp;Service&nbsp;»). L\'application connaît deux façons de l\'utiliser, et le dit à la porte principale&nbsp;: un cours d\'enseignement porte le devis ministériel&nbsp;; un service d\'orthopédagogie n\'a que son nom. Rien d\'autre ne change&nbsp;: tes cours, tes champs, tes données sont intacts.',
+                '<strong>Quand le contexte actif est un service d\'orthopédagogie, le Cadre parle d\'orthopédagogue</strong> là où il parle d\'enseignant·e (le profil, le formulaire de groupe-cours, la carte du groupe-cours)&nbsp;; sur un cours, il redit «&nbsp;enseignant·e&nbsp;». Un mot suit le contexte, aucun champ ne bouge.',
+                '<strong>Dans Suivi, les rencontres se disent d\'orthopédagogie</strong>&nbsp;: les trois questions créent «&nbsp;ton service d\'orthopédagogie&nbsp;», le bouton dit «&nbsp;Créer mon service d\'orthopédagogie&nbsp;», et sur un groupe-cours ordinaire la carte nomme l\'orthopédagogie directement.',
+            ]
+        },
+        {
             version: '1.135',
             couleur: 'vert',
             titre: 'Rencontres : un service est un cours, un sous-onglet pour tenir ses rencontres, une intervention qui sait où elle est née',

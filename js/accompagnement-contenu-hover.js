@@ -57,8 +57,11 @@ const TOOLTIPS = {
 
     'reglages-gestion-trimestres':
         'Ton calendrier du trimestre. Les dates que tu entres ici (début, fin, congés, imprévus) génèrent automatiquement la grille de toutes tes séances.',
+    // Consigne du 12 sept. 2026 (les étiquettes) : deux natures, nommées par le point unique js/mots-nature.js.
     'reglages-cours':
-        'Ton cours : code, compétence et éléments de compétence — les mêmes informations que sur le devis ministériel ou le plan-cadre.',
+        'Ton cours ou ton ' + motsNature('service').objetLong + ' — ce que l’application affiche partout. Un cours d’' +
+        motsNature('cours').nature.toLowerCase() + ' porte les informations du devis ministériel (code, compétence, pondération) ; un ' +
+        motsNature('service').objetLong + ' n’a que son nom.',
     'reglages-enseignant':
         'Ton profil. Ton nom apparaîtra dans le sélecteur de groupe-cours et sur les ressources que tu partages.',
     'reglages-groupe-etudiants':
@@ -712,7 +715,7 @@ const TOOLTIPS = {
     'nav-suivi-interventions':
         'Planifie et documente les interventions RàI de niveaux 2 (préventif) et 3 (intensif).',
     'nav-suivi-rencontres':
-        'Tiens tes rencontres individuelles ou en sous-groupe : date, participants, notes par élève, bilan. Un service se crée ici en trois questions.',
+        'Tiens tes rencontres d’orthopédagogie, individuelles ou en sous-groupe : date, participants, notes par élève, bilan. Un ' + motsNature('service').objetLong + ' se crée ici en trois questions.',
     'nav-labo-etudes':
         'Analyse les résultats de ta démarche pédagogique : graphiques de progression, corrélations et trajectoires.',
     'nav-labo-rythme':

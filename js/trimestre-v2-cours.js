@@ -186,8 +186,9 @@ function chargerDropdownCoursV2() {
     const obtenirTexteCours = (c) => {
         const sigle = c.codeCours || c.sigle || c.code || c.numero || '';
         const titre = c.nomCours || c.titre || c.nom || '';
-        // Un service se distingue par son mot, pas par une couleur (cadrage « Rencontres »).
-        const texte = c.nature === 'service' ? `${titre} — Service`.trim() : `${sigle} ${titre}`.trim();
+        // Un service se distingue par son mot, pas par une couleur (cadrage « Rencontres ») ;
+        // le mot vient du point unique (js/mots-nature.js, consigne du 12 sept. 2026).
+        const texte = c.nature === 'service' ? `${titre} — ${motNature(c)}`.trim() : `${sigle} ${titre}`.trim();
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
@@ -466,14 +467,15 @@ function afficherDetailsCoursV2(cours) {
 
     // Un service n'a ni code, ni discipline, ni compétence : on montre sa nature et son nom, rien d'autre.
     if (cours.nature === 'service') {
+        const mots = motsNature(cours);
         conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
                 <label class="text-muted">Nature</label>
-                <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">Service</div>
+                <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">${mots.nature}</div>
             </div>
             <div>
-                <label class="text-muted">Nom du service</label>
+                <label class="text-muted">Nom du ${mots.objet}</label>
                 <div style="font-weight: 600;">${echapperHtml(nomCours)}</div>
             </div>
         </div>`;
@@ -555,7 +557,7 @@ function activerCoursV2() {
     db.setSync('cours', tousLesCours);
     db.setSync('infoCours', cible);
 
-    notifications.succes('Cours activé', cible.codeCours || cible.nomCours || cible.id);
+    notifications.succes(motsNature(cible).ObjetLong + ' activé', cible.codeCours || cible.nomCours || cible.id);
 
     _mettreAJourBoutonActiverCours(coursEnEditionV2);
     if (typeof chargerDropdownCoursV2 === 'function') chargerDropdownCoursV2();
@@ -984,13 +986,13 @@ function afficherSyntheseCours(cours) {
 
     const infoCours = db.getSync('infoCours', null);
     const estActif = infoCours && infoCours.id === cours.id;
-    const badgeActif = estActif ? '<div class="apercu-badge-actif">Cours actif</div>' : '';
+    const badgeActif = estActif ? `<div class="apercu-badge-actif">${motsNature(cours).ObjetLong} actif</div>` : '';
 
     if (cours.nature === 'service') {
         sidebar.innerHTML = `
         ${badgeActif}
         <div class="apercu-titre">${echapperHtml(nom)}</div>
-        <div class="apercu-code">Service</div>
+        <div class="apercu-code">${motNature(cours)}</div>
     `;
         return;
     }
@@ -1156,7 +1158,7 @@ function afficherSyntheseGroupeCours(gc) {
     const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
     const groupe = gc.groupeNum || '00001';
     const titre = codeCours ? `${codeCours} — Groupe ${groupe}`
-        : (coursInfo?.nature === 'service' ? `${coursInfo.nomCours || 'Service'} — Service` : `Groupe ${groupe}`);
+        : (coursInfo?.nature === 'service' ? `${coursInfo.nomCours || motsNature(coursInfo).Objet} — ${motNature(coursInfo)}` : `Groupe ${groupe}`);
 
     const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
     const nbSeances = hor?.seances?.length || 0;
@@ -1220,23 +1222,43 @@ function reinitialiserFormCoursV2() {
  * Cadrage « Rencontres » (12 sept. 2026) — la nature du cours commande le formulaire.
  * Un service n'a que son nom : les blocs ministériels (code, compétence, pondération,
  * discipline) se cachent, et « Nom du cours » devient « Nom du service », requis.
- * Rien n'est effacé : revenir à « Cours » remontre les champs tels qu'ils étaient.
+ * Rien n'est effacé : revenir à « Enseignement » remontre les champs tels qu'ils étaient.
+ *
+ * Consigne du 12 sept. 2026 (les étiquettes) : les MOTS du menu Nature et des libellés
+ * viennent du point unique js/mots-nature.js — posés ici à chaque ouverture du formulaire,
+ * jamais écrits en dur dans index.html. Les VALEURS restent 'cours' / 'service'.
  */
 function changerNatureCoursV2() {
-    const nature = document.getElementById('v2-natureCours')?.value === 'service' ? 'service' : 'cours';
+    const select = document.getElementById('v2-natureCours');
+    _libellerMenuNatureCoursV2(select);
+    const nature = select?.value === 'service' ? 'service' : 'cours';
     const service = nature === 'service';
+    const mots = motsNature(nature);
     ['v2-champCodeCours', 'v2-ligneCompetence', 'v2-lignePonderation', 'v2-ligneDiscipline'].forEach(id => {
         const bloc = document.getElementById(id);
         if (bloc) bloc.classList.toggle('u-hide', service);
     });
     const label = document.getElementById('v2-labelNomCours');
     if (label) {
+        // security-ok: `mots.objet` est une constante de js/mots-nature.js, pas une donnée utilisateur
         label.innerHTML = service
-            ? 'Nom du service <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span>'
-            : 'Nom du cours';
+            ? 'Nom du ' + mots.objet + ' <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span>'
+            : 'Nom du ' + mots.objet;
     }
     const nom = document.getElementById('v2-nomCours');
     if (nom) nom.placeholder = service ? 'Ex: Aide à la réussite en français' : 'Ex: Écriture et littérature';
+}
+
+/** Les options du menu Nature et sa phrase d'aide : le mot de chaque nature, depuis le point unique. */
+function _libellerMenuNatureCoursV2(select) {
+    if (select && select.options) {
+        Array.from(select.options).forEach(opt => { opt.textContent = motNature(opt.value); });
+    }
+    const aide = document.getElementById('v2-aideNatureCours');
+    if (aide) {
+        const s = motsNature('service');
+        aide.textContent = 'Un ' + s.objetLong + ' n\'a ni code, ni discipline, ni compétence : seul son nom est requis.';
+    }
 }
 
 /**
@@ -1328,8 +1350,8 @@ function _activerSiPremierCours(coursSauve) {
 }
 
 function _postSauvegardeCoursV2(cours) {
-    const motNature = cours && cours.nature === 'service' ? 'Service' : 'Cours';
-    notifications.succes(coursEnEditionV2 ? motNature + ' modifié avec succès' : motNature + ' créé avec succès');
+    const objet = motsNature(cours).ObjetLong;
+    notifications.succes(coursEnEditionV2 ? objet + ' modifié avec succès' : objet + ' créé avec succès');
     annulerFormCoursV2();
     chargerDropdownCoursV2();
     const selectCours = document.getElementById('v2-selectCours');
@@ -1351,8 +1373,9 @@ async function sauvegarderCoursV2() {
     // garde de doublon par code (#455) ne le voit pas : son identité n'est pas un code.
     if (d.nature === 'service') {
         if (!d.nomCours) {
-            notifications.erreur('Nom du service requis',
-                'C\'est le seul champ d\'un service : il s\'affiche partout où un cours montre son code.');
+            const mots = motsNature('service');
+            notifications.erreur('Nom du ' + mots.objet + ' requis',
+                'C\'est le seul champ d\'un ' + mots.objetLong + ' : il s\'affiche partout où un cours montre son code.');
             return;
         }
         d.codeCours = '';
