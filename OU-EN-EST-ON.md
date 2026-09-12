@@ -15,7 +15,32 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-🔧 **À LIVRER EN 1.135.1 (12 SEPTEMBRE 2026, 6 h 26) — DANS UN SERVICE, UN ÉLÈVE APPARTIENT PAR SON SERVICE, PAS PAR UN NUMÉRO DE GROUPE** (consigne du jour de Cowork, lots A et B ; commit `06868a06` sur `main` local, ni releasé ni poussé : la release attend la relecture croisée de Cowork).
+🔧 **À LIVRER EN 1.136.0 (12 SEPTEMBRE 2026, 8 h 05) — LES ÉTIQUETTES : L'ORTHOPÉDAGOGUE ENTRE PAR LE CADRE, COMME TOUT LE MONDE** (consigne du jour de Cowork, 7 h 40 ; commit `fa27b531` sur `main` local, ni releasé ni poussé : la release `minor` attend la relecture croisée de Cowork, consigne § 5).
+**Ce que tu verras** : dans `Cadre › Cours`, le menu **Nature** dit **« Enseignement »** ou **« Orthopédagogie »** (à la place de « Cours » /
+« Service ») — tes champs, tes fiches, tes données sont intacts ; en base, la nature vaut toujours `'cours'` ou `'service'`, aucune
+migration. Le mot vit à **un seul endroit** (`js/mots-nature.js`) : le jour où d'autres services existent, il se change là, et nulle part
+ailleurs. Quand le contexte actif est un service d'orthopédagogie, le Cadre dit **« Orthopédagogue »** partout où il disait
+« Enseignant·e » (fil d'Ariane, accordéon, « Profil orthopédagogue », « 2. Service d’orthopédagogie », « 5. Orthopédagogue », la carte du
+groupe-cours « Service » / « Ortho. ») ; sur un cours, tout redit enseignant·e. Dans Suivi, le titre de la section dit **« Rencontres
+(ortho.) »**, les trois questions créent « ton service d’orthopédagogie », le bouton dit « Créer mon service d’orthopédagogie », la
+notification « Service d’orthopédagogie créé … Tes rencontres d'orthopédagogie se tiennent ici », et sur ton 601-101-MQ la carte nomme
+l'orthopédagogie directement (texte proposé, à corriger : porte § 3.2). ⚠ **Le libellé de l'ONGLET « Rencontres » n'a pas changé** : il vit
+dans `js/config.js`, zone protégée que ta consigne interdisait d'ouvrir — une ligne, sur ton autorisation (porte § 3.1).
+**Vérifié comment** : une sentinelle de 13 essais (le point unique et un **verrou structurel** — aucun module de `js/` n'écrit plus
+« Service » / « Enseignement » / « Orthopédagogie » en dur, les options d'index.html sont vides et libellées par le code, les mots par
+défaut d'index.html sont ceux du point unique ; **l'aller-retour complet du formulaire** — créer un service, le sélectionner, Modifier,
+Enregistrer, relire — laisse `'service'` en base ; le libellé de la personne dans les deux sens ; la carte du groupe-cours ; Rencontres ;
+les deux infobulles), **huit fois cassée exprès, huit rouges**, code remis (empreintes identiques). Le pack démo capturé AVANT et rejoué
+APRÈS : 54 feuilles (valeurs de `cours`, `groupesCours`, `groupeEtudiants`, `infoCours`, `groupeCoursActif` ; textes du Cadre, de cinq
+sous-onglets de Suivi et de cinq profils, sur le groupe-cours démo, sur un service créé par les trois questions, et au retour) —
+**zéro valeur ne bouge** (seules différences : deux identifiants générés et un DA provisoire), 9 feuilles de texte diffèrent, toutes sur
+les mots du lot. Vitest 545 fichiers / 5 959 essais après le commit. ⚠ **Ce que la mesure a corrigé de la consigne** : sa liste des
+sites était incomplète — `js/cours.js` (la bibliothèque des cours, deux cartes) écrivait aussi « - Service » ; le verrou l'a attrapé au
+premier passage. **Laissé exprès** (perfectible, pas faux : un service EST un cours dans le Cadre) : « Modifier le cours », « Dupliquer le
+cours », le bandeau « Mode modification — Cours », l'infobulle du groupe-cours, « 5 éléments obligatoires … horaire » (porte § 3.4).
+**Pas vérifié** : ton écran (porte `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md`, dix rangées), Safari, tes deux groupes.
+
+✅ **FAIT EN 1.135.1 (12 SEPTEMBRE 2026, 6 h 35 — release `473f3d75`, poussée, `main` = `origin/main` mesuré au rituel de 7 h 45 ; relecture croisée de Cowork passée vers 7 h) — DANS UN SERVICE, UN ÉLÈVE APPARTIENT PAR SON SERVICE, PAS PAR UN NUMÉRO DE GROUPE** (consigne du jour de Cowork, lots A et B ; commit `06868a06`).
 **Ce que tu verras** : dans un service, `Suivi › Liste des étudiant·es` montre **tous** les élèves saisis, y compris ceux dont la
 ligne collée d'Omnivox portait le numéro de groupe du collège (ta rangée 9 de ce matin : trois saisis, deux affichés) — corrigé à la
 lecture, **rien n'est réécrit chez toi**, l'élève réapparaît (la colonne « Groupe » de sa fiche garde son « 00007 » ; une fiche créée

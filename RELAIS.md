@@ -7,6 +7,13 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 8 H 05 (Toronto) : « LES ÉTIQUETTES » COMMITÉ SUR `main` LOCAL (`fa27b531`), RELEASE 1.136.0 DUE APRÈS LA RELECTURE DE COWORK
+
+> **Le travail le plus récent est sur `main` LOCAL, deux commits devant `origin/main` (`473f3d75` = 1.135.1, en ligne), rien de poussé — exprès** (consigne du 12 sept. § 5 : une seule livraison `minor` après la relecture croisée de Cowork ; un push déploie).
+> **Livré** (`fa27b531`) : `js/mots-nature.js`, LE point unique du mot de chaque nature de cours (« Enseignement » / « Orthopédagogie », l'objet, la personne) ; 22 sites migrés dans `trimestre-v2-cours.js`, `trimestre-v2-groupes-cours.js`, `trimestre-v2-orchestre.js` (`appliquerMotsNatureCadre`, posé par `mettreAJourContexteEntete`), `cours.js`, `rencontres.js`, `accompagnement-contenu-hover.js`, `index.html` (options vides + `data-mot-nature`) ; sentinelle `sentinelle-etiquettes-nature-un-point-unique` (13 essais, verrou structurel) ; changelog 1.136 ; porte `plans de travail/PORTES-TERRAIN-2026-09-12-etiquettes.md`. **Aucune valeur en base ne change.** Version inchangée : 1.135.1. Vitest 545 / 5 959.
+> **Marche à suivre** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, premier bloc « ÉTAT MESURÉ » (relecture → `release.mjs minor` → commit → Vitest → verdict Playwright Cowork fermé → `scripts/pousser.sh` → artefact de la porte par Cowork).
+> **Ce qui attend Grégoire** (porte § 3) : autoriser une ligne dans `js/config.js` (l'onglet « Rencontres (ortho.) », zone protégée, non touchée) ; le texte de la carte sur un groupe-cours ordinaire ; les mots laissés exprès. Fichiers de Cowork modifiés pendant la session (BACKLOG, PROTOCOLE, CONSIGNE-DU-JOUR), à committer par lui.
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 SEPT. 2026, 21 H 50 (horloge du Mac) : « RENCONTRES » RELEASÉ EN 1.135.0 SUR `main`, POUSSÉ PAR `scripts/pousser.sh` APRÈS LE VERDICT
 
 > **Le travail le plus récent est sur `main`** : commit de reprises `ea90c376` (les deux points de la relecture croisée de Cowork) puis release `538fbb92` (1.135.0), puis ce relais. **Si tu lis ceci sur `origin/main`, le push a eu lieu** ; sinon, `scripts/.verdict-playwright.json` dit sur quel SHA le verdict a été rendu.
