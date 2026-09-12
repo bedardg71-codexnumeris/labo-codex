@@ -1,8 +1,9 @@
 # Portes terrain — 12 septembre 2026 (« Rencontres » : l'orthopédagogue entre par Suivi — lots 1 et 2 du cadrage, à livrer en 1.135.0)
 
-> **Version à l'écran attendue : `1.135.0`** (la release n'est PAS faite au moment où cette porte est écrite — 11 sept., 22 h : quatre
-> commits de code sur `main` local, non poussés, exprès : la consigne du jour demande une seule livraison après ton coup d'œil et la
-> relecture croisée de Cowork. **Tant que la version lue en bas de page est `1.134.0`, cette liste ne juge rien.**)
+> **Version à l'écran attendue : `1.135.0`** (écrite le 11 sept. à 22 h avant la release ; **mesuré le 12 à 1 h 50 : les quatre commits
+> de code étaient DÉJÀ sur `origin/main` depuis 21 h 36 le 11**, donc en ligne sous le numéro `1.134.0` sans changelog — la release
+> 1.135.0 emporte les deux reprises de la relecture croisée de Cowork. **Tant que la version lue en bas de page est `1.134.0`, cette
+> liste ne juge rien.**)
 > Couvre : un cours de nature « Service » dans Cadre (lot A) ; un groupe-cours sans horaire (lot B) ; le sous-onglet **Suivi › Rencontres**
 > avec les trois questions et la liste des rencontres (lot C, `config.js` et `navigation.js` touchés avec ton autorisation) ; une
 > intervention qui porte son groupe-cours de naissance (lot D) ; le point unique de l'identifiant du contexte (lot E, invisible).
@@ -66,10 +67,11 @@ question 1 (les dates) **ne s'affiche pas** — elle ne s'affiche que sur un pos
 
 | | Geste | Attendu |
 |---|---|---|
-| **8** | Active la démonstration, `Suivi › Rencontres` | la liste (vide) avec **« + Nouvelle rencontre »**, précédée de la ligne « Tu reçois des élèves hors d'un groupe-cours ? **Créer un service** » |
+| **8** | Active la démonstration, `Suivi › Rencontres` | **PAS de liste** (tranché le 12 : « Rencontres » ne liste que les services ; le groupe-cours démo est un cours ordinaire) : une carte qui dit que les rencontres se tiennent dans un service et que les interventions du groupe sont sous Suivi › Interventions, puis la ligne « Tu reçois des élèves hors d'un groupe-cours ? **Créer un service** » |
 | **9** | Clique **Créer un service** : « 1. Ton trimestre : Démonstration » (pas de dates), nom du service, puis colle trois lignes — `Léa Tremblay`, `1234567 ; Gagnon ; Noah`, et une ligne Omnivox de ta liste réelle (DA, groupe, nom, prénom…) — puis **« Créer mon service »** | notification « Service créé — 3 élèves ajoutés (1 sans DA : numéro provisoire) » ; l'en-tête bascule sur **« Aide à la réussite… gr.00001 »** ; l'écran passe à la liste des rencontres |
 | **10** | `Cadre › Trimestre` : accordéon Cours, puis Groupe-cours | le cours **« … — Service (actif) »** dans le menu, sa fiche montre **Nature : Service** et le nom, rien d'autre ; le groupe-cours **« Démonstration - … - 00001 »**, carte : **Horaire : Aucun — la présence se note dans la rencontre**, 4/5 configurés |
-| **11** | `Suivi › Liste des étudiant·es`, puis `Suivi › Rencontres` › **+ Nouvelle rencontre** | la Liste montre **tes trois élèves saisis** (rien du pack) ; le formulaire s'intitule **« Nouvelle rencontre »**, « Rencontre : Individuelle » par défaut, **sans** « Contexte de l'intervention » ni « Séance concernée » ; coche un élève, écris une note, Enregistre : « Rencontre enregistrée », la carte porte **« Individuelle »** (pas de « Niveau 3 ») ; la même rencontre apparaît aussi sous `Suivi › Interventions` (« Hors classe · Niveau 3 ») — **c'est le chevauchement nommé dans le rapport, à trancher** |
+| **11** | `Suivi › Liste des étudiant·es`, puis `Suivi › Rencontres` › **+ Nouvelle rencontre** | la Liste montre **tes trois élèves saisis** (rien du pack) ; le formulaire s'intitule **« Nouvelle rencontre »**, « Rencontre : Individuelle » par défaut, **sans** « Contexte de l'intervention » ni « Séance concernée » ; coche un élève, écris une note, Enregistre : « Rencontre enregistrée », la carte porte **« Individuelle »** (pas de « Niveau 3 ») ; la même rencontre apparaît aussi sous `Suivi › Interventions` (« Hors classe · Niveau 3 ») — **voulu** : « Interventions » reste ce qu'il est (tranché le 12), la fusion se rejuge après le mois d'usage |
+| **11b** | Rebascule sur le groupe-cours de la démo (en-tête), puis `Suivi › Rencontres` | **pas de liste** : la carte de la rangée 8, avec en plus « Un service existe déjà dans ce trimestre. Active-le… » et le nom de ton service en lien ; clique-le : l'en-tête revient sur le service et la liste des rencontres s'affiche, avec ta rencontre |
 | **12** | Quitte la démonstration, `Cadre › Trimestre` › Cours | **le service n'est plus dans ta liste de cours** ; tes deux groupes réels sont revenus |
 
 ---
@@ -83,7 +85,7 @@ question 1 (les dates) **ne s'affiche pas** — elle ne s'affiche que sur un pos
 | Cadre › Groupe-cours | « (facultatif pour un service) » à la place de l'astérisque ; carte : « Horaire : Aucun — la présence se note dans la rencontre » | _______ |
 | Saisie des présences, bandeau, sur un service | « Ce service n'a pas d'horaire : la présence se note dans la rencontre (Suivi › Rencontres). » | _______ |
 | Rencontres, écran des trois questions | « Pour tenir tes rencontres ici, l'application a besoin de trois choses. Elle crée ensuite ton service, visible dans Cadre, tel quel. » — « 1. Les dates de ton trimestre » / « 1. Ton trimestre » — « 2. Le nom de ton service — C'est le seul nom qu'on te demandera… » — « 3. Tes élèves — Une ligne par élève : Prénom Nom, ou DA ; Nom ; Prénom, ou la liste Omnivox collée… Sans numéro de DA, un numéro provisoire est attribué. » — bouton « Créer mon service » | _______ |
-| Rencontres, sous un groupe-cours ordinaire | « Tu reçois des élèves hors d'un groupe-cours ? Créer un service » | _______ |
+| Rencontres, sous un groupe-cours ordinaire | « Les rencontres se tiennent dans un service — un cours de nature « Service », sans code ni horaire. Le groupe-cours actif est un cours ordinaire : ses interventions sont sous Suivi › Interventions. » — « Un service existe déjà dans ce trimestre. Active-le pour tenir tes rencontres : » — « Tu reçois des élèves hors d'un groupe-cours ? Créer un service » | _______ |
 | Rencontres, liste et formulaire | « + Nouvelle rencontre », « Nouvelle rencontre », « Aucune rencontre. », « Rencontre : En sous-groupe / Individuelle », « Participants et notes », « Aperçu des participants », « Bilan de la rencontre », « Rencontre enregistrée », « Supprimer cette rencontre ? » | _______ |
 | Notification de création | « Service créé — n élèves ajoutés (…) Tes rencontres se tiennent ici ; Cadre montre le service tel quel. » | _______ |
 | Non renommé, à dire si tu le veux | « Durée (périodes) » dans le formulaire de rencontre ; le bouton « Guide RàI » ; les cartes « Patterns d'apprentissage / Niveaux RàI » de l'aperçu | _______ |
@@ -105,6 +107,7 @@ question 1 (les dates) **ne s'affiche pas** — elle ne s'affiche que sur un pos
 | 9 | | |
 | 10 | | |
 | 11 | | |
+| 11b | | |
 | 12 | | |
 
 **Relevée le** : _______ · **Version lue en bas de page** : _______ · **Échecs → BACKLOG** : _______

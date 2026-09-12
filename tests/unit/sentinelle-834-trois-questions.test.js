@@ -18,8 +18,10 @@ const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 //      « service » avec le seul nom, les élèves dans la liste du trimestre (un DA déjà présent
 //      n'est pas dupliqué), un groupe-cours SANS horaire — puis l'activation du groupe-cours ;
 //   3. avec un trimestre actif, aucun trimestre n'est créé ; sans nom ou sans élève, RIEN n'est écrit ;
-//   4. `afficherRencontres` montre les trois questions sans trimestre ou sans contexte, et la liste
-//      (vocabulaire « rencontres ») dès qu'un contexte existe.
+//   4. `afficherRencontres` montre les trois questions sans trimestre ou sans contexte ; sur un
+//      groupe-cours ORDINAIRE, la porte seulement (créer un service, ou activer celui du trimestre —
+//      tranché par Grégoire le 12 sept. : « Rencontres » ne liste que les services) ; la liste
+//      (vocabulaire « rencontres ») seulement sur un service actif.
 //
 // BREAK-TESTS VÉRIFIÉS le 11 septembre 2026 au soir — journal en fin de fichier.
 
@@ -175,12 +177,33 @@ describe('#834 lot C · ce que montre le sous-onglet', () => {
         expect(b.elements.conteneurRencontres.innerHTML).toContain('id="listeRencontres"');
         expect(b.elements.conteneurRencontres.innerHTML).not.toContain('Créer un service');
     });
-    it('avec un groupe-cours ordinaire : la même liste, et la porte « Créer un service »', () => {
-        const b = monter({ trimestres: [{ id: 'a2026', actif: true }], cours: [{ id: 'C1', codeCours: '601-101-MQ' }], infoCours: { id: 'C1', _groupeCoursId: 'GC1' } });
+    it('avec un groupe-cours ordinaire : la PORTE seulement — aucune liste, aucun vocabulaire posé (tranché le 12 sept.)', () => {
+        const b = monter({ trimestres: [{ id: 'a2026', actif: true }], cours: [{ id: 'C1', codeCours: '601-101-MQ' }], test_groupesCours: [{ id: 'GC1', coursId: 'C1', trimestreId: 'a2026' }], infoCours: { id: 'C1', _groupeCoursId: 'GC1' } });
         b.win.afficherRencontres();
+        expect(b.appels.vocabulaire).toEqual([]);
+        expect(b.appels.listes).toBe(0);
+        expect(b.elements.conteneurRencontres.innerHTML).not.toContain('id="listeRencontres"');
+        expect(b.elements.conteneurRencontres.innerHTML).toContain('Créer un service');
+        expect(b.elements.conteneurRencontres.innerHTML).not.toContain('activerServiceRencontres');
+    });
+    it('avec un groupe-cours ordinaire et un service déjà dans le trimestre : le lien pour l\'activer, et l\'activation mène à la liste', async () => {
+        const b = monter({
+            trimestres: [{ id: 'a2026', actif: true }],
+            cours: [{ id: 'C1', codeCours: '601-101-MQ' }, { id: 'S1', nature: 'service', nomCours: 'Aide à la réussite' }, { id: 'S2', nature: 'service', nomCours: 'Autre trimestre' }],
+            test_groupesCours: [{ id: 'GC1', coursId: 'C1', trimestreId: 'a2026' }, { id: 'GC_S1', coursId: 'S1', trimestreId: 'a2026' }, { id: 'GC_S2', coursId: 'S2', trimestreId: 'h2026' }],
+            infoCours: { id: 'C1', _groupeCoursId: 'GC1' }
+        });
+        b.win.afficherRencontres();
+        const html = b.elements.conteneurRencontres.innerHTML;
+        expect(html).toContain('data-action="activerServiceRencontres" data-param="GC_S1"');
+        expect(html).toContain('Aide à la réussite');
+        expect(html).not.toContain('GC_S2'); // un service d'un autre trimestre n'est pas offert
+        expect(b.appels.listes).toBe(0);
+        await b.win.activerServiceRencontres('GC_S1');
+        expect(b.appels.activations).toEqual(['GC_S1']);
         expect(b.appels.vocabulaire).toEqual(['rencontres']);
         expect(b.appels.listes).toBe(1);
-        expect(b.elements.conteneurRencontres.innerHTML).toContain('Créer un service');
+        expect(b.elements.conteneurRencontres.innerHTML).toContain('id="listeRencontres"');
     });
 });
 
@@ -196,3 +219,9 @@ describe('#834 lot C · ce que montre le sous-onglet', () => {
 //   7. démo : le service créé n'est plus marqué (22 h)                 → 1 rouge
 //   8. demo-activation.js : le marqueur n'est plus retiré (verrou)     → 1 rouge
 // 9/9 verts une fois restauré.
+//
+// 12 septembre 2026 (« Rencontres » ne liste que les services, tranché par Grégoire) — js/rencontres.js :
+//   9. la liste s'affiche aussi sur un groupe-cours ordinaire (ancien comportement) → 2 rouges
+//  10. un service d'un autre trimestre est offert à l'activation                   → 1 rouge
+//  11. l'activation n'active rien                                                   → 1 rouge
+// 10/10 verts une fois restauré, empreinte identique.

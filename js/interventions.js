@@ -473,13 +473,40 @@ function afficherListeInterventions() {
 /**
  * Lot D — les interventions visibles dans le contexte actif : celles nées ici, et celles
  * d'avant le lot (sans `groupeCoursId`). Sans contexte actif, tout est visible.
+ *
+ * Relecture croisée de Cowork (12 sept. 2026) : l'estampille n'a pas la même granularité
+ * selon le mode — `obtenirIdContexteActif` rend l'id du groupe-cours en mode groupe-cours,
+ * mais le coursId en mode cours fusionné (`_definirInfoCoursModeCours` n'écrit pas
+ * `_groupeCoursId`). Un enseignant qui passe d'un mode à l'autre (Grégoire a deux groupes du
+ * même cours) aurait vu disparaître une intervention née dans l'autre mode. Le filtre accepte
+ * donc aussi (a) une estampille égale au coursId du contexte actif, et (b) en mode cours,
+ * toute estampille qui est l'id d'un groupe-cours de ce cours. En mode groupe-cours, une
+ * intervention née dans l'AUTRE groupe du même cours reste cachée : c'est l'objet du lot.
  * @param {Array} interventions
  * @returns {Array}
  */
 function interventionsDuContexteActif(interventions) {
     const gcActif = obtenirIdContexteActif();
     if (!gcActif) return interventions;
-    return interventions.filter(function(i) { return !i.groupeCoursId || i.groupeCoursId === gcActif; });
+    const acceptes = _estampillesAcceptees(gcActif);
+    return interventions.filter(function(i) { return !i.groupeCoursId || acceptes.has(i.groupeCoursId); });
+}
+
+/** Les estampilles visibles depuis le contexte actif (voir `interventionsDuContexteActif`). Lecture seule. */
+function _estampillesAcceptees(gcActif) {
+    const acceptes = new Set([gcActif]);
+    const gca = db.getSync('groupeCoursActif', null);
+    const infoCours = db.getSync('infoCours', null);
+    const modeCours = !!(gca && gca.modeCours) || !!(infoCours && infoCours._modeCours);
+    const coursId = (gca && gca.coursId) || (modeCours && infoCours && infoCours.id) || null;
+    if (!coursId) return acceptes;
+    acceptes.add(coursId);
+    if (modeCours) {
+        (db.getSync(cle('groupesCours'), []) || []).forEach(function(g) {
+            if (g && g.id && g.coursId === coursId) acceptes.add(g.id);
+        });
+    }
+    return acceptes;
 }
 
 /**
