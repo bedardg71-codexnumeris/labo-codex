@@ -3,6 +3,22 @@
 > **Écrite le samedi 12 septembre 2026 à 10 h 25 (Toronto) par Cowork**, au retour de la porte de la section Cours (**6/7**, rangée 1
 > échouée, trois décisions « tel quel »).
 > État mesuré : **`1.137.0`**, build `0912-0935`, `main` = `origin/main` = `305bb4c8`, `rev-list` = **0**.
+> ═══════════════════════════════════════════════════════════════════════════════════════════════════
+> ▣ **ÉTAT AU 12 SEPT., 11 h 10 — LES LOTS A, B, C ET D SONT FAITS, COMMITÉS ET RELUS.**
+> `e011ed64` (A, B, C) et `62f24316` (D) sur `main` local, `rev-list` = 4, ni releasé ni poussé.
+> **La relecture croisée de Cowork est PASSÉE** (11 h 08) : appelants vérifiés sur les quatre fonctions neuves,
+> `formaterDateLisible` / `dateLocaleYMD` définies et chargées avant, les quatre classes CSS définies, le lien de
+> la carte passe par `naviguerAccueilCarte` (mécanisme partagé), zéro-dette tenu — `objetGroupeCours` et
+> `choisirObjetGC` ne sont plus lus nulle part. **Ses deux corrections de la consigne sont justes**, dont celle que
+> Cowork avait manquée : `objetVise` était effacé comme `criteresCibles`.
+>
+> ⮕ **IL RESTE LE SEUL LOT E (§ 2 quater), écrit à 11 h 03 — après que tu aies lu cette consigne.**
+> ▣ **Décision de Grégoire, 11 h 10 : on livre LES CINQ D'UN COUP.** Fais le lot E, puis la release `1.138.0`
+> (minor) avec A à E. ⛔ Ne refais pas A à D, ne les rejuge pas : ils sont relus.
+> ═══════════════════════════════════════════════════════════════════════════════════════════════════
+>
+> ⚠ **Révisée une troisième fois à 11 h 00 : un LOT E s'ajoute** (§ 2 quater) — sur un service, l'onglet « Interventions »
+> ne s'affiche pas. **Zone protégée `js/navigation.js` : autorisation donnée par Grégoire.**
 > ⚠ **Révisée une seconde fois à 10 h 50 : un LOT D s'ajoute** (§ 2 ter) — « Tes prochains rendez-vous » en tête de
 > `Suivi › Rencontres`, affichage seul.
 > ⚠ **Révisée le 12 septembre à 10 h 35 : un LOT C s'ajoute** (§ 2 bis) — la carte « Critères ciblés / Objectif visé » ne
@@ -20,7 +36,7 @@
 
 ## 0 · L'INTENTION
 
-Quatre choses, toutes déjà tranchées par Grégoire : deux sont des mots, une est un bloc qu'on masque, la dernière est un bloc qu'on ajoute — et qui ne fait qu'afficher. C'est le **dernier lot avant lundi**, jour où
+Cinq choses, toutes déjà tranchées par Grégoire : deux sont des mots, deux sont des blocs qu'on masque, une est un bloc qu'on ajoute — et qui ne fait qu'afficher. **Aucun comportement, aucune donnée, aucune règle ne change.** C'est le **dernier lot avant lundi**, jour où
 l'orthopédagogue ouvre l'application, et avant mardi, jour où vingt personnes de la communauté de pratique la découvrent.
 
 Dans ses mots (12 sept., 7 h 35) : **« Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »** L'accueil est le
@@ -180,6 +196,40 @@ chantier dispense l'orthopédagogue. Le mois en grille est un candidat pour plus
 
 ---
 
+## 2 quater · LOT E — sur un service, l'onglet « Interventions » ne s'affiche pas
+
+**Autorisé par Grégoire le 12 sept. à 10 h 58**, après la mesure ci-dessous. **Zone protégée : autorisation explicite donnée.**
+
+**Le symptôme, mesuré** : les sept sous-onglets de `Suivi` sont une liste fixe (`js/config.js`, `configurationsOnglets['suivi']`),
+sans condition de contexte. Or `Rencontres` et `Interventions` sont **le même module, le même formulaire, la même liste** — seule
+la table `VOCABULAIRES` (`interventions.js`) change les mots. Sur un service, l'orthopédagogue verrait donc **deux onglets montrant
+la même liste sous deux noms**, dont l'un lui parle de niveaux RàI et d'interventions.
+
+**⚠ Ce n'est PAS `js/config.js` qu'il faut ouvrir** — et le motif exact existe déjà : `afficherSousNavigation`
+(`js/navigation.js`, ≈ l. 370-379) filtre déjà **une COPIE** de la configuration pour masquer le comparateur (`#345`,
+flag `COMPARATEUR_VISIBLE`). ⮕ **Même geste, même endroit** : sur `'suivi'`, quand `contexteActifEstService()` est vrai, retirer
+l'entrée `'interventions'` de la copie. `configurationsOnglets` n'est **jamais muté** — c'est la règle du précédent, tiens-la.
+
+### Deux pièges, à traiter dans le lot
+1. **L'onglet peut disparaître sous les pieds de quelqu'un.** Si l'utilisateur est sur `Suivi › Interventions` et bascule vers un
+   service, la sous-navigation se reconstruit et le premier onglet devient actif. **Mesure le comportement réel avant de livrer** :
+   il doit atterrir sur un écran qui existe, jamais sur un conteneur vide. Si ce n'est pas déjà le cas, c'est ce lot qui le règle.
+2. **Le registre des identifiants valides** est construit depuis `configurationsOnglets` (`navigation.js`, ≈ l. 468). Le filtre
+   porte sur **l'AFFICHAGE de la barre**, pas sur ce registre : `suivi-interventions` doit rester un identifiant valide, sinon un
+   lien direct ou un état restauré casse.
+
+### Sentinelle, avec break-test rouge
+1. Contexte = service : la barre de `Suivi` compte **six** boutons, sans « Interventions ». Contexte = groupe-cours ordinaire :
+   **sept**, dans l'ordre de `1.137.0`.
+2. `configurationsOnglets['suivi']` est **inchangé** après un rendu sur un service (le filtre agit sur une copie — casse-le pour
+   le prouver).
+3. `suivi-interventions` reste un identifiant reconnu par la navigation, même sur un service.
+
+⛔ **Ce lot ne fusionne rien.** La fusion des deux sous-onglets reste jugée après le mois d'usage (décision de Grégoire du
+11 sept., 21 h 02, qu'il a confirmée le 12).
+
+---
+
 ## 3 · CE QUI REMONTE À GRÉGOIRE
 - **Rien des mots** : ils sont tous arrêtés, et deux d'entre eux l'ont été deux fois. Si tu crois devoir en changer un, **inscris et
   demande**, ne livre pas ta version.
@@ -191,12 +241,13 @@ chantier dispense l'orthopédagogue. Le mois en grille est un candidat pour plus
 - ⛔ #839 à #845 ne sont pas ce lot. #843 reste inscrit (décision 3.2 : « tel quel »).
 
 ## 5 · LIVRER — `minor` (`1.138.0`)
+⮕ **Au 11 h 10 : A à D sont faits et relus ; seul le LOT E reste à écrire. Release après lui, les cinq ensemble.**
 Une carte neuve sur l'écran d'entrée de tous les utilisateurs. Une seule livraison, après la relecture croisée de Cowork. Changelog :
 quatre lignes — l'accueil nomme désormais les deux usages, une orthopédagogue y trouve sa porte, ses rencontres ne lui
-demandent plus de cibler des critères d'évaluation, et ses prochains rendez-vous s'affichent en tête de sa liste.
+demandent plus de cibler des critères d'évaluation, et ses prochains rendez-vous s'affichent en tête de sa liste. ⚠ Le masquage de l'onglet « Interventions » sur un service ne s'annonce PAS au changelog des enseignants : rien ne change chez eux.
 
 ## 6 · LA PORTE TERRAIN
-Courte, six rangées (`PORTES-TERRAIN-2026-09-12-accueil.md`), markdown par toi, artefact par Cowork :
+Courte, sept rangées (`PORTES-TERRAIN-2026-09-12-accueil.md`), markdown par toi, artefact par Cowork :
 1. L'accueil, hors démo : la carte est là, au-dessus des tâches, blanche comme les autres ; **les huit tâches sont toutes là**.
 2. Clique « Commencer → » : tu arrives sur les trois questions (ou sur la liste des rencontres si un service est actif).
 3. Déplie le bandeau « Bienvenue » : les quatre paragraphes sont ceux du § 2, dans cet ordre.
@@ -205,6 +256,8 @@ Courte, six rangées (`PORTES-TERRAIN-2026-09-12-accueil.md`), markdown par toi,
    `Suivi › Interventions` sur ton 601-101-MQ : le bloc est là, tes cinq critères aussi, « Suggérer » répond.
 6. `Suivi › Rencontres` sur un service, avec au moins une rencontre datée plus tard qu'aujourd'hui : **« Tes prochains rendez-vous »**
    en tête, la plus proche en premier ; la liste du dessous n'a pas changé d'ordre.
+7. Sur un service, la barre de `Suivi` n'a **plus d'onglet « Interventions »** ; sur ton 601-101-MQ, les sept sont là, dans le
+   même ordre qu'avant.
 
 ## 7 · RAPPORT
 Les autres libellés du même cas que #846, s'il y en a ; où vivent les mots de l'accueil ; ce que tu as laissé exprès. Fin de course :

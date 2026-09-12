@@ -367,16 +367,62 @@ const INITIALISATEURS_SOUS_SECTION = {
     }
 };
 
-function afficherSousNavigation(nomOnglet) {
-    const conteneurSousNav = document.getElementById('sous-navigation');
+/**
+ * La configuration AFFICHÉE d'une section : une COPIE filtrée. `configurationsOnglets` (config.js, protégé)
+ * n'est jamais muté, et le registre des identifiants valides (afficherSousSection) continue de le lire en entier.
+ * - #345 : masquage réversible du comparateur (flag COMPARATEUR_VISIBLE, config.js).
+ * - Lot E (consigne du 12 sept. 2026, 11 h ; autorisation de Grégoire pour cette zone protégée) : sur un service,
+ *   Suivi n'affiche pas « Interventions » — c'est la même liste que « Rencontres », sous un second nom et avec
+ *   les mots de l'enseignement. Rien n'est fusionné (jugé après le mois d'usage).
+ */
+function _configurationVisible(nomOnglet) {
     let configuration = configurationsOnglets[nomOnglet];
-
-    // #345 — masquage réversible du comparateur (flag COMPARATEUR_VISIBLE, config.js).
-    // On filtre une COPIE : configurationsOnglets (protégé) n'est jamais muté.
     if (configuration && nomOnglet === 'labo'
         && typeof COMPARATEUR_VISIBLE !== 'undefined' && !COMPARATEUR_VISIBLE) {
         configuration = configuration.filter(item => item.id !== 'comparateur');
     }
+    if (configuration && nomOnglet === 'suivi' && _interventionsMasqueesSurService()) {
+        configuration = configuration.filter(item => item.id !== 'interventions');
+    }
+    return configuration;
+}
+
+/** Lot E : vrai quand le contexte actif est un service — « Interventions » n'y a pas d'onglet. */
+function _interventionsMasqueesSurService() {
+    return typeof contexteActifEstService === 'function' && contexteActifEstService();
+}
+
+/** Pose les boutons de la barre ; celui dont l'id complet vaut `idActif` reçoit la classe « actif ». */
+function _poserBoutonsSousNav(conteneurSousNav, nomOnglet, configuration, idActif) {
+    const boutonsHtml = configuration.map((item) => {
+        const sousOngletId = `${nomOnglet}-${item.id}`;
+        const classeActive = sousOngletId === idActif ? ' class="actif"' : '';
+        const tooltipAttr = TOOLTIPS_SOUS_NAV[sousOngletId] ? ` data-tooltip="${TOOLTIPS_SOUS_NAV[sousOngletId]}"` : '';
+        return `<button data-sous-onglet="${sousOngletId}"${classeActive}${tooltipAttr}>${item.label}</button>`;
+    }).join('');
+
+    conteneurSousNav.innerHTML = boutonsHtml;
+    conteneurSousNav.className = `sous-navigation section-${nomOnglet}`;
+    conteneurSousNav.style.display = '';
+
+    // Ajouter les événements aux sous-boutons
+    conteneurSousNav.querySelectorAll('button').forEach(bouton => {
+        bouton.addEventListener('click', function () {
+            const idSousOnglet = this.getAttribute('data-sous-onglet');
+            afficherSousSection(idSousOnglet);
+
+            // Mettre à jour l'état actif
+            conteneurSousNav.querySelectorAll('button').forEach(b => {
+                b.classList.remove('actif');
+            });
+            this.classList.add('actif');
+        });
+    });
+}
+
+function afficherSousNavigation(nomOnglet) {
+    const conteneurSousNav = document.getElementById('sous-navigation');
+    const configuration = _configurationVisible(nomOnglet);
 
     if (!configuration || configuration.length === 0) {
         // Pas de sous-navigation pour cette section — masquer le conteneur
@@ -385,37 +431,29 @@ function afficherSousNavigation(nomOnglet) {
         conteneurSousNav.style.display = 'none';
         sousSectionActive = null;
     } else {
-        // Créer les boutons de sous-navigation
-        const boutonsHtml = configuration.map((item, index) => {
-            const classeActive = index === 0 ? ' class="actif"' : '';
-            const sousOngletId = `${nomOnglet}-${item.id}`;
-            const tooltipAttr = TOOLTIPS_SOUS_NAV[sousOngletId] ? ` data-tooltip="${TOOLTIPS_SOUS_NAV[sousOngletId]}"` : '';
-            return `<button data-sous-onglet="${sousOngletId}"${classeActive}${tooltipAttr}>${item.label}</button>`;
-        }).join('');
+        // Créer les boutons de sous-navigation, le premier actif, puis afficher la première sous-section
+        const premiereSousSection = `${nomOnglet}-${configuration[0].id}`;
+        _poserBoutonsSousNav(conteneurSousNav, nomOnglet, configuration, premiereSousSection);
+        afficherSousSection(premiereSousSection);
+    }
+}
 
-        conteneurSousNav.innerHTML = boutonsHtml;
-        conteneurSousNav.className = `sous-navigation section-${nomOnglet}`;
-        conteneurSousNav.style.display = '';
-
-        // Ajouter les événements aux sous-boutons
-        conteneurSousNav.querySelectorAll('button').forEach(bouton => {
-            bouton.addEventListener('click', function () {
-                const idSousOnglet = this.getAttribute('data-sous-onglet');
-                afficherSousSection(idSousOnglet);
-
-                // Mettre à jour l'état actif
-                conteneurSousNav.querySelectorAll('button').forEach(b => {
-                    b.classList.remove('actif');
-                });
-                this.classList.add('actif');
-            });
-        });
-
-        // Afficher la première sous-section par défaut
-        if (configuration.length > 0) {
-            const premiereSousSection = `${nomOnglet}-${configuration[0].id}`;
-            afficherSousSection(premiereSousSection);
-        }
+/**
+ * Lot E (consigne du 12 sept. 2026) — la barre de Suivi suit le contexte actif. Appelé par mettreAJourContexteEntete
+ * (contexte.js), à chaque activation : mesuré, une bascule de contexte ne repasse PAS par afficherSection
+ * (changerGroupeCoursActifV2 et changerCoursDepuisEntete ne rechargent ni ne reconstruisent la barre).
+ * Ne déplace personne : l'onglet actif reste actif. Seul celui qui vient de disparaître (« Interventions », en
+ * passant sur un service) cède la place à « Rencontres » — la même liste, dans les mots de l'orthopédagogie.
+ */
+function rafraichirSousNavigationSelonContexte() {
+    if (sectionActive !== 'suivi') return;
+    const conteneurSousNav = document.getElementById('sous-navigation');
+    const configuration = _configurationVisible('suivi');
+    if (!conteneurSousNav || !configuration || configuration.length === 0) return;
+    const encoreVisible = configuration.some(item => 'suivi-' + item.id === sousSectionActive);
+    _poserBoutonsSousNav(conteneurSousNav, 'suivi', configuration, encoreVisible ? sousSectionActive : null);
+    if (!encoreVisible) {
+        afficherSousSection(sousSectionActive === 'suivi-interventions' ? 'suivi-rencontres' : 'suivi-' + configuration[0].id);
     }
 }
 
