@@ -1,5 +1,9 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 13 h (Toronto) : relecture croisée de Cowork sur `9ceca4ff` (13 h 10) —
+> « passe, une correction » — faite (`6c8c91a9` : un Enregistrer introuvable n'annonce plus « enregistrée »). `1.139.0` RELEASÉE (build
+> `0912-1259`), NON POUSSÉE. Vitest 551 / 6 034 après le bump. Marche restante du bloc de 12 h 31 : (4) verdict Playwright Cowork fermé sur le
+> SHA exact, (5) `scripts/pousser.sh`, (6) porte avant lundi (décision 3.1 : titre de l'entrée « Nouvelles », proposition de Cowork jointe).**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026 à 12 h 31 (Toronto) : le chantier de l'orthopédagogie est CLOS (porte de
 > l'accueil 7/7, relevé de Cowork de 12 h 02, commité `5af8cc8e`). Le lot 5 du cadrage 11 (Suivi › Interventions) est EXÉCUTÉ — `9ceca4ff` sur
 > `main` local, NI RELEASÉ NI POUSSÉ. `origin/main` = `61b5c883` ; devant lui : `1b36c338` (relais de 11 h 52), `5af8cc8e`, `9ceca4ff`, ce relais.

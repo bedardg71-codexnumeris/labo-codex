@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 13 H (Toronto) : 1.139.0 RELEASÉE (build 0912-1259) — NON POUSSÉE
+
+> Sur `main` local, devant `origin/main` (`61b5c883`) : `1b36c338`, `5af8cc8e`, `9ceca4ff` (lot 5), `2893fbab` (relais), `6c8c91a9` (correctif de la relecture croisée de Cowork, 13 h 10), la release 1.139.0, puis ce relais. Vitest 551 / 6 034 après le commit du bump. **Reste** : verdict Playwright **Cowork fermé** sur le SHA exact de ce relais (`cd tests && node ../scripts/verifier-playwright.mjs`) → `scripts/pousser.sh` → porte `PORTES-TERRAIN-2026-09-12-interventions.md` + artefact par Cowork, **avant lundi** ; décision 3.1 (titre de l'entrée « Nouvelles ») à Grégoire.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, 12 H 31 (Toronto) : LOT 5 DU CADRAGE 11 COMMITÉ (`9ceca4ff`) — NI RELEASÉ NI POUSSÉ
 
 > Tout est sur `main` local ; `origin/main` = `61b5c883`. Devant lui : `1b36c338` (relais de 11 h 52), `5af8cc8e` (fichiers de Cowork qui closent l'orthopédagogie), `9ceca4ff` (lot 5 : Suivi › Interventions), puis ce relais. **Reste** : relecture croisée de Cowork sur `9ceca4ff` → `release.mjs minor` (1.139.0) → Vitest → verdict Playwright **Cowork fermé** → `scripts/pousser.sh` → porte `PORTES-TERRAIN-2026-09-12-interventions.md` + artefact, **avant lundi**.
