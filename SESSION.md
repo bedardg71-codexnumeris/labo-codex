@@ -7,6 +7,33 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 41 — 11 SEPTEMBRE 2026 AU SOIR (19 h 51 → 22 h 10, Toronto) : « RENCONTRES », L'ORTHOPÉDAGOGUE
+     ENTRE PAR SUIVI — lots 1 et 2 du cadrage du 11 (entrée 11), À LIVRER EN 1.135.0.
+     Périmètre : à partir de `7092ce42` (1.134.0). Cinq commits sur `main` local, NON POUSSÉS, exprès (consigne § 3 :
+     une seule livraison après le coup d'œil de Grégoire et la relecture croisée) : relais Cowork 20 h 25, lots A+B,
+     lots E+D, lot C, fix démo, puis le commit de relais. Version INCHANGÉE (1.134.0). Vitest 543 / 5 928.
+     Point d'entrée : « Lis plans de travail/CONSIGNE-DU-JOUR.md et exécute-la. J'autorise la modification de
+     js/config.js et js/navigation.js pour le sous-onglet « Rencontres » (§ C). »
+     (La session 40 — lots 1 à 4 du cadrage 11, 1.129 → 1.134 — n'a pas de bloc ici : ses traces sont dans BACKLOG.md
+     « État courant », OU-EN-EST-ON.md et les messages de release ; constaté par l'audit de début de session.)
+
+     ▣ CE QUI EST LIVRÉ : voir OU-EN-EST-ON.md (bloc « À livrer en 1.135.0 ») et BACKLOG #834 ; la marche de la
+       livraison dans CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md (« Ce que la prochaine session fait d'abord »).
+     ▣ LA MÉTHODE QUI A PORTÉ : le harnais du pack démo capturé AVANT le premier commit (1 284 feuilles ; rendu
+       déterministe en figeant Math.random, les identifiants générés et l'horodatage « Indices calculés à »), rejoué
+       après chaque lot : 0 différence de valeur à chaque fois. Un service sans horaire créé dans le trimestre démo
+       et treize écrans visités avant de promettre quoi que ce soit (mesure B) ; le parcours des trois questions joué
+       dans WebKit sur un poste vide avant de l'écrire dans la porte.
+     ⚠ CE QUE LA MESURE A CORRIGÉ DE LA CONSIGNE : huit sites annoncés pour le point unique du contexte → DIX-NEUF
+       (plus snapshots) ; un groupe-cours de service sans horaire aurait reçu l'horaire du dernier groupe ordinaire
+       activé (miroirs par trimestre) → court-circuit ; `cours` est une clé GLOBALE → un service créé en démo restait
+       dans la vraie liste (marqué, retiré) ; G refusé (le registre ne renomme pas les saisies) → #835.
+     ⚠ CE QUI REMONTE À GRÉGOIRE : douze mots (porte § 3), le chevauchement Interventions / Rencontres, A = 100 % d'un
+       élève de service (#836). Autorisation reçue et utilisée : config.js (un sous-onglet), navigation.js (une
+       correspondance de survol, un initialisateur).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 39 — 9 SEPTEMBRE 2026 AU SOIR (jusqu'au 10 après minuit) : TROIS RAPPORTS DE GRÉGOIRE,
      ET UNE SUPPRESSION QUI DÉBORDAIT DE L'ÉCRAN QU'IL AVAIT CAPTURÉ.
      Périmètre couvert : à partir de `e91bba1b`. RIEN N'EST COMMITÉ à l'écriture de ce bloc.

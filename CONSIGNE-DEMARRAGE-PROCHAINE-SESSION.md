@@ -1,6 +1,11 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 19 h 25 (Toronto), à la clôture de
+> ↻ **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 22 h 10 (Toronto), à la clôture du chantier
+> « Rencontres » (lots 1 et 2 du cadrage « l'orthopédagogue entre par Suivi »), NON RELEASÉ, NON POUSSÉ — exprès.** Le MANDAT
+> ci-dessous (Cowork, 17 h 08, cadrage 11) est **en pause** par décision de Grégoire (11 sept., 20 h, dans la consigne du jour) :
+> le chantier « Rencontres » passe avant ; **la prochaine session commence par la relecture croisée puis la release `1.135.0`**
+> (voir « CE QUE LA PROCHAINE SESSION FAIT D'ABORD » sous l'état mesuré).
+> Version précédente : **ÉTAT MESURÉ remesuré par Claude Code le 11 septembre 2026 à 19 h 25 (Toronto), à la clôture de
 > `1.134.0` (lot 4 du cadrage 11, les Profils individuels).** Le MANDAT de Cowork (17 h 08) est **consommé pour le lot 4** ;
 > le lot 5 a sa consigne en file (`plans de travail/CONSIGNE-SUIVANTE-lot-5-interventions.md`, Cowork 17 h 45) — Cowork la promeut
 > quand le lot 4 est VU (porte `plans de travail/PORTES-TERRAIN-2026-09-11-profils-individuels.md`, huit rangées).
@@ -54,7 +59,65 @@ il n'y avait **aucune consigne du jour en attente** au matin du 10.
 
 ---
 
-## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 19 H 25 (TORONTO)
+## ÉTAT MESURÉ — 11 SEPTEMBRE 2026, 22 H 10 (TORONTO)
+
+▣ **Remesuré par Claude Code à la clôture du chantier « Rencontres » — chaque ligne avec la commande qui la produit.**
+Le bloc de 19 h 25 reste dessous, pour l'histoire de la journée. ⚠ **Un état mesuré vieillit en heures. Remesure, ne recopie pas.**
+
+- **Version `1.134.0`** (`cat version.json`) — **INCHANGÉE** : le chantier est committé, pas releasé. `main` local est **en avance de
+  cinq commits sur `origin/main`** (`git fetch && git rev-list --count origin/main..HEAD`) : le relais documentaire de Cowork
+  (20 h 25), puis quatre commits de code — lots A+B, lots E+D, lot C, un fix démo — plus le commit de relais de cette clôture.
+  ⚠ **Le SHA n'est pas écrit ici, exprès.** `git log --oneline -6`. **Rien n'est poussé** : la consigne du jour (§ 3) demande UNE
+  livraison, après le coup d'œil de Grégoire et la relecture croisée de Cowork sur les commits ; et un push déploie (Netlify,
+  `publish = "."`) — pousser sans release aurait mis lundi en ligne sous le numéro d'hier.
+- **Arbre** : quatre `Formation/*.html` non suivis, la suppression non commise de la capture du 9 sept., `docs/orthopedagogie/`
+  non suivi (Cowork), et trois fichiers de Cowork modifiés pendant la session (`CONSIGNE-DEMARRAGE-COWORK.md`, le cadrage
+  « Rencontres » — idée de la vue calendrier —, `CONSIGNE-DU-JOUR.md` — ordre tranché à 20 h) : **à lui de les committer**, pas à
+  cette session (`git status --porcelain -uall`).
+- **Vitest : 543 fichiers / 5 928 essais, 0 échec** (`cd tests && npm run test:unit`, ~30 s) sur le dernier commit.
+- **Playwright : la suite complète a été lancée en arrière-plan à la clôture** (`npx playwright test`, journal dans le scratchpad de la
+  session) — **ce n'est PAS le verdict** : `scripts/.verdict-playwright.json` porte encore le SHA de `1.134.0`. Le verdict se prend
+  APRÈS le commit de release, par `node scripts/verifier-playwright.mjs` ou `scripts/pousser.sh` (règle 4.5 du rituel).
+- **CI GitHub** : rien de nouveau sur `main` (rien poussé) ; `#833` (run de `c816d0cc`) reste à relire au prochain push.
+- **Harnais pack démo** : 1 284 feuilles, **0 différence de valeur** entre HEAD du matin et l'arbre livré (script jetable dans le
+  scratchpad, non versionné ; les captures AVANT/FINAL non plus). Ce chiffre ne se recopie pas : il se rejoue.
+
+**Ce que le 11 septembre au soir a livré, et ce que la mesure a corrigé de la consigne** :
+
+| Lot | Livré | ⚠ Ce que la mesure a corrigé |
+|---|---|---|
+| A+B (un commit) | `cours.nature: 'service'` (entité + formulaire de Cadre, seul le nom requis, blocs ministériels cachés, #540 tient) ; le nom à la place d'un code vide (dropdowns, cartes, nom du GC, bibliothèque, **miroir `infoCours.codeCours`** aux deux chemins d'écriture) ; horaire facultatif pour un GC de service (`horaireId: null`, carte « Aucun — la présence se note dans la rencontre ») ; `obtenirSeancesHoraire` vide pour un service sans horaire ; bandeau de la Saisie ; `coursDuContexteActif` / `estCoursService` / `contexteActifEstService` (modes.js) ; sentinelle 17 essais / 5 break-tests | **B : sans court-circuit, un GC de service sans horaire recevait l'horaire du dernier GC ordinaire activé** (replis `horaireHebdo` / `seancesHoraire`, miroirs par trimestre) — un calendrier étranger, en silence ; **13 écrans + 6 sections du profil sans exception** : le repli « horaire de service » n'a pas été nécessaire ; `infoCours.id` = coursId (orchestre) OU id du GC (entité) → la fiche se cherche par `groupeCoursActif.coursId` d'abord |
+| E+D (un commit) | `obtenirIdContexteActif` (modes.js) ; **19 sites** + snapshots (Cowork en comptait 8) ; verrou structurel ; `intervention.groupeCoursId`, `interventionsDuContexteActif`, estampille au prochain Enregistrer ; sentinelles 5 + 6 essais / 3 + 5 break-tests ; bancs du 5 (E1) et du 6 à l'après ; global fourni aux harnais (bac-suivi, charger-script, deux bancs) | quinze fichiers de tests rougissaient faute du nouveau global (règle : tout global appelé par js/ est fourni aux harnais) ; **#532** lit le lien du bandeau dans ses 900 premiers caractères → le paragraphe du service placé APRÈS |
+| C | `config.js` + `navigation.js` (autorisés) ; `suivi-rencontres` ; `js/rencontres.js` (trois questions / liste) ; vocabulaire dans `interventions.js` (`definirVocabulaireInterventions`, conteneur, service) ; lecture Omnivox extraite en pure (`analyserListeEtudiantsCollee`) ; sentinelle 9 essais / 8 break-tests ; #768 à l'après | **`cours` est une clé GLOBALE** : un service créé pendant la démo restait dans la vraie liste de cours après la démo (la désactivation ne retire que les items du pack) → marqué `creeEnDemonstration`, retiré par `retirerItemsDemoDesGlobaux` (fix, quatrième commit) ; le hook Défense J refuse un innerHTML de constantes → `// security-ok` sur la ligne |
+| G | **non livré** | le registre ne renomme pas les libellés des saisies (en dur dans evaluation-chargement.js, grilles.js) et « erreurs » y est un compte de codes posés, pas un nombre saisi → **#835**, à concevoir |
+
+⮕ **Ce qui remonte à Grégoire** (consigne § 2) : les mots — douze, dans la porte § 3 (silence = tel quel) ; le **chevauchement
+Interventions / Rencontres** (les deux sous-onglets montrent les mêmes items d'un groupe-cours ordinaire ; « ne fusionne rien ») ;
+le A = 100 % d'un élève de service sans séance (#836, laissé exprès).
+
+---
+
+## CE QUE LA PROCHAINE SESSION FAIT D'ABORD — la livraison de « Rencontres »
+
+1. **Relecture croisée par Cowork** des cinq commits (`git log --oneline -6`, `git show --stat`), règle 2 de `PROTOCOLE.md`. Toute
+   reprise se committe AVANT le verdict.
+2. **Le coup d'œil de Grégoire** — sans release, il ne peut le prendre qu'en local (`python3 -m http.server` à la racine, ou
+   `file://index.html`) ; ou il accepte la porte APRÈS la release (rangées 1-7 sur ses données, 8-12 en démo).
+3. **Release `minor` → `1.135.0`** (`node scripts/release.mjs minor --dry-run`, puis sans `--dry-run`), après le changelog. Trois
+   lignes proposées pour `js/changelog-data.js` (entrée `1.135`, couleur `vert`, sans le mot « orthopédagogue ») :
+   - « **Un sous-onglet « Rencontres » dans Suivi.** Tiens tes rencontres individuelles ou en sous-groupe (date, heure, participants, notes par élève, bilan) — ce sont tes interventions, dites avec le mot « rencontre ». Sur un poste sans trimestre, trois questions suffisent : les dates, le nom de ton service, ta liste d'élèves ; l'application crée le reste, visible dans Cadre. »
+   - « **Un cours peut être un « Service ».** Dans Cadre › Cours, le choix « Nature : Cours / Service » : un service n'a ni code, ni discipline, ni compétence — seul son nom est requis — et son groupe-cours peut n'avoir aucun horaire ; la présence se note dans la rencontre. »
+   - « **Une intervention sait dans quel groupe-cours elle est née.** La liste des interventions d'un groupe-cours ne mêle plus celles d'un autre ; celles d'avant restent visibles partout et prennent leur contexte au prochain Enregistrer. »
+   ⚠ Ordre du 3 sept. (mémoire) : changelog → `release.mjs` → commit → Vitest → verdict → `scripts/pousser.sh`.
+4. **Verdict Playwright sur le SHA de la release** (`node scripts/verifier-playwright.mjs`, > 10 min, détaché), puis
+   **`scripts/pousser.sh`**. Le push déploie (Netlify).
+5. **La porte** `plans de travail/PORTES-TERRAIN-2026-09-12-rencontres.md` (12 rangées) — Cowork publie l'artefact jumeau
+   (`CLAUDE.md`, « une porte terrain a DEUX livrables »). Rangée 3 de la consigne § 4 : **lundi, l'orthopédagogue sur son poste** ;
+   ce que Cowork lui écrit dimanche part de ce qui est livré (l'écran des trois questions, tel qu'il est), pas de la consigne.
+6. Ensuite seulement : le lot 5 du cadrage 11 (Interventions) reprend, en remesurant `js/interventions.js` après ce lot
+   (vocabulaire C, estampille D).
+
+
 
 ▣ **Remesuré par Claude Code à la clôture de `1.134.0` — chaque ligne avec la commande qui la
 produit.** La version précédente de ce bloc (11 septembre 17 h 29, 1.133.0) est remplacée, pas corrigée.
