@@ -7,6 +7,12 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, SOIR (Toronto) : BACKLOG RÉCONCILIÉ (14 coches), DOCS SEULEMENT, NON POUSSÉ
+
+> Sur `main` local, devant `origin/main` (`e29f734c`) : `85cd24b1` (relais de 14 h 56) et le commit de ce soir — `BACKLOG.md` : 14 fiches cochées avec preuve contre-vérifiée (#631, #632, #366, #403, #427, #495, #530, #539, #577, #581, #599, #661, #674, #789 ; 255 → 241 cases ouvertes), deux annotations fausses corrigées (#599, #674) ; dispositions au pied de `Rapports/RECONCILIATION-backlog-2026-09-12.md` ; proposition `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`. **Aucun code touché** ; Vitest 551 / 6 034 au rituel de début. **Deux choses dues à Grégoire** : (1) trancher la numérotation (question fermée en fin de proposition, recommandation C + règle du lien) ; (2) déposer dans le dépôt la liste des 32 partiels avec « ce qui reste » — elle n'est que dans la trace de session de Cowork, et sans elle le point 4 du relais reste bloqué. Le working tree garde les fichiers de Cowork non commités (porte Interventions relevée à 15 h, 16 non suivis) : pas à moi de les commettre.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 12 SEPT. 2026, APRÈS 13 H (Toronto) : 1.139.0 POUSSÉE — `origin/main` = `e29f734c`
 
 > ✅ Tout est sur `main` = `origin/main` jusqu'à `e29f734c` (fichiers de Cowork : porte du lot 4 relevée 10/10). Verdict Playwright local vert sur ce SHA, Cowork fermé (huit specs de Conception vertes au second essai, #685 si l'une revient) ; push par `scripts/pousser.sh`. Ce relais-ci est un commit de documents POSTÉRIEUR, local, non poussé (le hook exige un verdict sur chaque SHA). **Reste** : la porte `PORTES-TERRAIN-2026-09-12-interventions.md` + son artefact par Cowork, **avant lundi** (décision 3.1 : le titre de l'entrée « Nouvelles ») ; puis le lot 6 du cadrage 11, l'Animation.
