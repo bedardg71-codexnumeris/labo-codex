@@ -7,6 +7,29 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 43 — 12 SEPTEMBRE 2026, 5 H 55 → 6 H 30 (horloge du Mac, `date`) : LE PUSH DE 1.135.0, PUIS LA CONSIGNE
+     DU JOUR DE COWORK (6 h 15) — « DANS UN SERVICE, UN ÉLÈVE APPARTIENT PAR SON SERVICE, PAS PAR UN NUMÉRO DE GROUPE ».
+     Périmètre : à partir de `68f92188`. (1) Le push de 1.135.0 n'avait PAS eu lieu (verdict rendu sur 68f92188, push
+     absent ; origin/main = af574fd2) : fichiers de Cowork commités à la demande de Grégoire (`6727ed93`), verdict
+     Playwright sur ce SHA (0 rougeur), `scripts/pousser.sh` → origin/main = 6727ed93, 1.135.0 en ligne.
+     (2) Lots A et B de la consigne : UN commit de code `06868a06`, NI RELEASÉ NI POUSSÉ, exprès (consigne § 5 : release
+     `1.135.1` après la relecture croisée de Cowork ; un push déploie). Puis ce relais.
+     ▣ LIVRÉ : (A) `obtenirEtudiantsCoursActif` conclut sur le coursId seul quand `contexteActifEstService()` ; la fiche
+       sans coursId est écartée dans `obtenirDonneesSelonMode` ; `GROUPE_SERVICE` ('00001') à l'écriture (fiche + GC) ;
+       (B) `analyserListeEleves` rend `{ fiches, refusees }`, ligne ≥ 4 colonnes sans DA en tête (ou sans nom) refusée
+       et nommée, création avec les valides (warning) ou refus (erreur, rien d'écrit). Sentinelle 13 essais, 8 mutations
+       (7 rouges, 1 doublure nommée). Harnais pack démo REBÂTI (celui du 11 était dans un scratchpad perdu) : 90 feuilles
+       hors service AVANT/APRÈS, 0 différence ; service 2/3 → 3/3. Vitest 544 / 5 945 après le commit. Changelog : un
+       item dans l'entrée 1.135. Porte : § 2.3 (rangées 13-14) + le mot du refus (§ 3). #837 inscrit (§ 7 de la consigne).
+     ⚠ CE QUE LA MESURE A CORRIGÉ DE LA CONSIGNE : le défaut n'était PAS à `modes.js:754` (`obtenirDonneesSelonMode` ne
+       compare le groupe qu'aux fiches SANS coursId ; le harnais rendait 3/3 par ce chemin) — seulement dans le goulot ;
+       une garde « sans coursId » posée AUSSI dans le goulot rendait 0 rouge au break-test (inatteignable) → retirée ;
+       la sentinelle anti-cache a rougi sur mes jetons « 20260912 » (jour du build = 0911) → séquence « 20260911n/q/l ».
+     ⚠ CE QUI REMONTE À GRÉGOIRE : le mot du refus ; #837 ; rangées 13-14 sur 1.135.1. PROTOCOLE.md et CONSIGNE-DU-JOUR.md
+       modifiés par Cowork pendant la session, non commités par moi.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 42 — 11 SEPTEMBRE 2026, 21 H 30 → 21 H 55 (horloge du Mac, `date`) : LA LIVRAISON DE « RENCONTRES », 1.135.0.
      Périmètre : à partir de `af574fd2`. Point d'entrée : « exécute la marche : les deux reprises de la relecture croisée de
      Cowork (étape 1), puis la livraison 1.135.0 ». Commits : reprises `ea90c376`, release `538fbb92`, puis ce relais ; verdict

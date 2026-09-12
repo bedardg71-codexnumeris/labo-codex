@@ -74,6 +74,18 @@ question 1 (les dates) **ne s'affiche pas** — elle ne s'affiche que sur un pos
 | **11b** | Rebascule sur le groupe-cours de la démo (en-tête), puis `Suivi › Rencontres` | **pas de liste** : la carte de la rangée 8, avec en plus « Un service existe déjà dans ce trimestre. Active-le… » et le nom de ton service en lien ; clique-le : l'en-tête revient sur le service et la liste des rencontres s'affiche, avec ta rencontre |
 | **12** | Quitte la démonstration, `Cadre › Trimestre` › Cours | **le service n'est plus dans ta liste de cours** ; tes deux groupes réels sont revenus |
 
+### 2.3 · Le correctif `1.135.1` — dans un service, un élève appartient par son service (consigne du 12 sept., lots A et B)
+
+**Pourquoi.** Ta rangée 9 de ce matin : trois élèves saisis, **deux affichés**. La ligne Omnivox portait le groupe de ton collège
+(« 00007 »), le service porte « 00001 », et la Liste exigeait l'égalité. Corrigé **à la lecture** : rien n'est réécrit chez toi,
+l'élève réapparaît. Le harnais du pack démo le prouve hors de tes données (90 feuilles hors service, 0 différence ; dans le service,
+2/3 → 3/3) ; ces deux rangées sont ce que seul ton écran tranche. **Version attendue en bas de page pour 13 et 14 : `1.135.1`.**
+
+| | Geste | Attendu |
+|---|---|---|
+| **13** | En démo, sur le service créé ce matin (rangée 9), **sans rien ressaisir** : `Suivi › Liste des étudiant·es` | **les trois élèves**, dont celui de la ligne Omnivox — la preuve que le stock est réparé par la lecture. Sa colonne « Groupe » montre encore « 00007 » : le stock n'est pas réécrit (une fiche créée après 1.135.1 porte « 00001 ») |
+| **14** | Hors démo, sur **tes deux groupes réels** : Liste, Suivi du groupe, un profil | **identiques à ce matin** |
+
 ---
 
 ## §3 · Les mots proposés — silence = tel quel (règle du 11)
@@ -89,6 +101,7 @@ question 1 (les dates) **ne s'affiche pas** — elle ne s'affiche que sur un pos
 | Rencontres, liste et formulaire | « + Nouvelle rencontre », « Nouvelle rencontre », « Aucune rencontre. », « Rencontre : En sous-groupe / Individuelle », « Participants et notes », « Aperçu des participants », « Bilan de la rencontre », « Rencontre enregistrée », « Supprimer cette rencontre ? » | _______ |
 | Notification de création | « Service créé — n élèves ajoutés (…) Tes rencontres se tiennent ici ; Cadre montre le service tel quel. » | _______ |
 | Non renommé, à dire si tu le veux | « Durée (périodes) » dans le formulaire de rencontre ; le bouton « Guide RàI » ; les cartes « Patterns d'apprentissage / Niveaux RàI » de l'aperçu | _______ |
+| **Refus d'une ligne illisible** (1.135.1, lot B — notification, en erreur si rien n'est valide, en avertissement après « Service créé » sinon) | « Une ligne n'a pas pu être lue » / « 2 lignes n'ont pas pu être lues » — « Ligne 1 (« Léa Tremblay, 1234567, Gagnon, 00007, No… ») : ne commence pas par un numéro de DA. Une ligne par élève : Prénom Nom, ou DA ; Nom ; Prénom, ou la ligne Omnivox telle quelle. » (second motif possible : « aucun nom après le numéro de DA ») | _______ |
 
 ---
 
@@ -109,5 +122,7 @@ question 1 (les dates) **ne s'affiche pas** — elle ne s'affiche que sur un pos
 | 11 | | |
 | 11b | | |
 | 12 | | |
+| 13 (1.135.1) | | |
+| 14 (1.135.1) | | |
 
 **Relevée le** : _______ · **Version lue en bas de page** : _______ · **Échecs → BACKLOG** : _______
