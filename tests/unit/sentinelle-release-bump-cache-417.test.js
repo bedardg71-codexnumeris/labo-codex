@@ -31,8 +31,21 @@ const scriptRelease = path.join(racineProjet, 'scripts', 'release.mjs');
 
 let bac; // dépôt git jetable
 
+// #856 (13 sept. 2026) — AUCUNE VARIABLE GIT_* NE PASSE AU DÉPÔT JETABLE.
+// Lancé par le hook pré-push, ce banc hérite de GIT_DIR : git la pose pendant un
+// hook, et depuis un worktree elle est ABSOLUE, donc elle désigne le vrai dépôt
+// quel que soit `cwd`. Le 13 sept., à 12 h 05, un push fait depuis un worktree a
+// ainsi écrit `core.bare = true` et `[user] Test` dans le .git/config partagé :
+// git refusait tout, dans tous les arbres. Seul le `core.bare` posé par
+// `git init` a empêché `git add -A` / `git commit` d'entrer un commit « base »
+// dans le vrai `main` (reproduit sur un dépôt leurre : le commit y entre).
+// Le dépôt jetable doit être trouvé depuis `bac`, et lui seul.
+const ENV_SANS_GIT = Object.fromEntries(
+    Object.entries(process.env).filter(([cle]) => !cle.startsWith('GIT_'))
+);
+
 function git(...args) {
-    execFileSync('git', args, { cwd: bac, stdio: ['ignore', 'pipe', 'pipe'] });
+    execFileSync('git', args, { cwd: bac, stdio: ['ignore', 'pipe', 'pipe'], env: ENV_SANS_GIT });
 }
 
 beforeAll(() => {
@@ -78,7 +91,7 @@ beforeAll(() => {
     writeFileSync(path.join(bac, 'js', 'module-ordinaire.js'), '// v2 — le correctif du jour\n');
     writeFileSync(path.join(bac, 'styles.css'), '/* v2 — le correctif CSS du jour */\n');
 
-    execFileSync('node', [scriptRelease, 'patch', '--root', bac], { encoding: 'utf8' });
+    execFileSync('node', [scriptRelease, 'patch', '--root', bac], { encoding: 'utf8', env: ENV_SANS_GIT });
 });
 
 afterAll(() => {
@@ -131,7 +144,7 @@ describe('#417 · release.mjs bumpe le ?v= de ce qu’il embarque', () => {
         // c'est justement les jours de correctif qu'on livre plusieurs fois.
         const avant = paramDe('js/main.js');
         writeFileSync(path.join(bac, 'js', 'module-ordinaire.js'), '// v3\n');
-        execFileSync('node', [scriptRelease, 'patch', '--root', bac], { encoding: 'utf8' });
+        execFileSync('node', [scriptRelease, 'patch', '--root', bac], { encoding: 'utf8', env: ENV_SANS_GIT });
         expect(paramDe('js/main.js')).not.toBe(avant);
     });
 });
