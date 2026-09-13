@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.139.1 RELEASÉE (build `0913-0743`, `d9e45280`) — NON POUSSÉE
+
+> Sur `main` local, devant `origin/main` (`a06997a9`) : la release 1.139.1 (`d9e45280`) puis ce relais. **Contenu** : #849 et #850, du rapport de Grégoire de 7 h 23 (`BUG_"grégoire"_2026-09-13_07-23-02.txt` + capture) — le bandeau de version affichait 1.135.0 quand la carte « Nouveautés » affichait 1.139.0. `js/init-inline.js` : l'identité vient de `version.js` (`etablirVersionChargee`, `chargerVersionJSON` retirée) et `version.json` n'annonce plus qu'une version PLUS RÉCENTE (`versionPlusRecente`) ; les repères `monitorage-build-vu` / `monitorage-version-vue` sont lus et écrits par `db` (`lireRepereVu` / `ecrireRepereVu`) — chez Grégoire, le repère valait `"0807-1529"`, réécrit en JSON par la réhydratation de `db.js`, ce qui ramenait le bandeau à chaque ouverture. Stock : aucune écriture d'office. Sentinelle `tests/unit/sentinelle-849-850-version-chargee.test.js` (4 essais, 4 break-tests rouges) ; `bandeau-maj-chargement.spec.js` relit le repère par `db.getSync`. Vitest 552 / 6 038 après le commit du bump ; Playwright ciblé vert (16 cas). Changelog : un item dans l'entrée 1.139 (texte choisi par Claude Code, à relire par Grégoire).
+>
+> **Reste** : (1) verdict Playwright complet sur le SHA de ce relais (`cd tests && node ../scripts/verifier-playwright.mjs`, lancé à la suite), puis push — décision de Grégoire ; (2) **pas établi** : la source du `version.json` périmé de 7 h 16 (Netlify ou Cloudflare ; `cf-cache-status: DYNAMIC` à 7 h 25, requête en `no-store`) — effet neutralisé, source non ; (3) trouvaille sans suite : la règle `no-store` de `netlify.toml` pour `/version.json` n'est pas celle que le serveur renvoie (`public,max-age=0,must-revalidate`, celle de `/*.json`) — aucun effet observable, non inscrite ; (4) le reste du bloc du 12 au soir vaut tel quel. **Prochain numéro, fiche OU bug : #851.**
+
+---
+
 ## 12 SEPT. 2026, SOIR (Toronto) — DOCUMENTS SEULEMENT, APRÈS `5519864d`
 
 > Claude Code, à la demande de Grégoire : **tri des 37 fiches ouvertes des audits** Cadre, Conception, Évaluation et pratique de
