@@ -70,4 +70,28 @@ describe('Aide — la pratique de Grégoire reste un exemple, jamais la règle',
             expect(m[0]).toMatch(/Exemple|Pédagogie collégiale|\(20\d\d\)/);
         }
     });
+
+    // #847 (13 sept. 2026, relecture croisée de Cowork) — GARDE DE NON-VIDE. Une assertion NÉGATIVE sur une
+    // tranche vide est vraie par construction : sans ce garde, le cas 3 ci-dessus et le cas #847 des chaînes
+    // retirées resteraient verts si la découpe ne trouvait plus ses bornes. Plancher mesuré le 13 sept. :
+    // la tranche fait 337 577 caractères ; 100 000 laisse l'Aide grandir ou maigrir sans jamais passer une
+    // découpe tronquée.
+    it('la tranche AIDE est bien découpée : ses deux bornes existent, et elle n\'est pas vide', () => {
+        expect(DEB, 'la borne de début id="section-aide" a disparu').not.toBe(-1);
+        expect(FIN, 'la borne de fin « fin section-aide » a disparu').not.toBe(-1);
+        expect(FIN, 'les bornes sont inversées').toBeGreaterThan(DEB);
+        expect(AIDE.length, 'la tranche AIDE est vide ou tronquée').toBeGreaterThan(100000);
+    });
+
+    // #847 — l'exemple de titre d'une intervention ne nomme plus les critères de Grégoire. Texte approuvé par
+    // lui (13 sept.), lu par les collègues de la communauté de pratique. Les deux autres sites de #847
+    // (js/interventions.js) sont figés par sentinelle-rencontre-sans-criteres-cibles-lot-c.
+    it('#847 — l\'Aide donne l\'exemple de titre approuvé', () => {
+        expect(AIDE).toContain('<li>Titre (ex: « Intervention sur deux critères ciblés »)</li>');
+    });
+
+    it('#847 — les deux exemples retirés ne reviennent pas dans l\'Aide', () => {
+        expect(AIDE).not.toContain('Intervention Rigueur et Nuance');
+        expect(AIDE).not.toContain('Amener Structure au seuil D');
+    });
 });
