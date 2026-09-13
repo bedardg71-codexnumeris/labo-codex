@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 16 H 45 (Toronto) : 1.140.6 RELEASÉE (build `0913-1642`, `c0c89e57`) — NON POUSSÉE ; #858 ET #801 LIVRÉS
+
+> Sur `main`, au-dessus de `2bc43ed1` (`origin/main`) : `1ace8d6d` (#858, tests/ seulement), `3f2dade5` (#801), `c0c89e57` (release 1.140.6, intention **patch** ; « Nouvelles » : un item au bloc 1.140), puis ce relais. Vitest 559 / 6 346 après le commit du bump ; spec `bandeau-maj-chargement` 6/6 sous WebKit.
+>
+> **#858** : 2 tranches MORTES trouvées par une sonde, toutes deux dans des découpes écrites sur deux lignes que le grep de la consigne ne voyait pas — `sentinelle-poignee-redimension-noeud` (essai retiré : son objet a disparu avec #418) et `sentinelle-enseignement-explicite` (tranche inversée, réancrée). 48 découpes routées ; cliquet de compte : 113 découpes dans 62 fichiers.
+>
+> **#801 — à Grégoire, deux choses renversables en une ligne** : le texte local « Nouvelle version chargée. Tes données persistent. » (mots de Cowork), et la supposition que l'ouverture des nouveautés referme le bandeau local.
+>
+> **Reste** : (1) relecture croisée de Cowork ; (2) verdict Playwright complet sur le SHA de ce relais, Cowork fermé ; (3) push. Fichiers de Cowork NON commités par ce relais : `plans de travail/CONSIGNE-DU-JOUR.md` (modifié), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-13-520-ancien-systeme-echelles.md` et `plans de travail/CONSIGNE-SUIVANTE-echelles.md` (neufs).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 16 H (Toronto) : LOT SANS CODE — #803 COCHÉE, #801 LAISSÉE OUVERTE, SESSION.md RATTRAPÉ ; RELECTURE CROISÉE VERTE, POUSSÉ
 
 > Au-dessus de `d07e963d` : `7b68d9a4` (consigne de démarrage de Cowork), `873ffe2c` (le lot : documents seulement) et la retouche de la relecture croisée. Aucun code, aucun texte de l'application, pas de release.
