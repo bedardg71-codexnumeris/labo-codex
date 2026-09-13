@@ -63,7 +63,31 @@ CODE=$?
 if [ $CODE -ne 0 ]; then
     printf "\n${ROUGE}✗ Hook pré-push : la suite Vitest a échoué — push bloqué.${RAZ}\n\n"
     printf '%s\n' "$SORTIE"
-    printf "\n${ROUGE}Corrige les tests rouges avant de pousser.${RAZ}\n"
+
+    # #600 (13 sept. 2026) — LE CODE DE SORTIE NE DIT PAS POURQUOI. `vitest run`
+    # sort en 1 dès qu'il y a une erreur NON GÉRÉE, tous les tests verts : le
+    # résumé porte alors « Tests 4153 passed » ET « Errors 3 errors ». Ce hook
+    # disait « Corrige les tests rouges » quand aucun ne l'était (30 août), et on
+    # cherche un test rouge qui n'existe pas. On lit donc le résumé, couleurs
+    # retirées, et on nomme ce qu'il dit.
+    RESUME=$(printf '%s\n' "$SORTIE" | perl -pe 's/\e\[[0-9;]*m//g' 2>/dev/null || printf '%s\n' "$SORTIE")
+    LIGNE_ERREURS=$(printf '%s\n' "$RESUME" | grep -E '^[[:space:]]*Errors[[:space:]]+[0-9]+' | head -1)
+    LIGNE_ROUGES=$(printf '%s\n' "$RESUME" | grep -E '^[[:space:]]*Tests[[:space:]].*[0-9]+ failed' | head -1)
+
+    printf "\n"
+    if [ -n "$LIGNE_ROUGES" ]; then
+        printf "${ROUGE}Corrige les tests rouges avant de pousser.${RAZ}  (%s)\n" "$(printf '%s' "$LIGNE_ROUGES" | sed 's/^[[:space:]]*//')"
+    fi
+    if [ -n "$LIGNE_ERREURS" ]; then
+        printf "${ROUGE}Erreur(s) NON GÉRÉE(S) hors essais${RAZ}  (%s)" "$(printf '%s' "$LIGNE_ERREURS" | sed 's/^[[:space:]]*//')"
+        if [ -z "$LIGNE_ROUGES" ]; then printf " — ${ROUGE}aucun test n'est rouge${RAZ}"; fi
+        printf "\n  Cherche « Unhandled » dans la sortie ci-dessus : souvent un rejet au chargement\n"
+        printf "  d'un module, dans un banc dont le stub est incomplet (#600).\n"
+    fi
+    if [ -z "$LIGNE_ROUGES" ] && [ -z "$LIGNE_ERREURS" ]; then
+        printf "${ROUGE}Vitest est sorti en %s sans test rouge ni erreur non gérée dans son résumé${RAZ} :\n" "$CODE"
+        printf "  lis la sortie ci-dessus — ce hook ne sait pas dire pourquoi.\n"
+    fi
     printf "Bypass d'urgence (déconseillé) : ${JAUNE}git push --no-verify${RAZ}\n"
     exit 1
 fi

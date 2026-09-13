@@ -4,6 +4,8 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { chargementsDynamiques, referencesSansJeton } from '../../scripts/verifier-anticache-stage.mjs';
+
 // SENTINELLE #825 — L'OUVERTURE IMMUABLE : UNE URL NE SERT JAMAIS DEUX CONTENUS.
 //
 // LE SYMPTÔME, mesuré par Grégoire le 11 septembre 2026 (Chrome, Network) :
@@ -98,31 +100,16 @@ describe('#825 · index.html — chaque script et feuille de style porte un ?v='
 // 2. js/*.js : tout chargement dynamique porte un ?v=
 // ---------------------------------------------------------------------------
 
-/**
- * Les chargements dynamiques d'un source : `.src = 'js/…'` (script créé) et
- * `new Worker('js/…')`. Les chaînes de commentaire sont écartées avant lecture,
- * sinon « Source : js/pack-demo-10.js » compterait comme une URL nue.
- * @returns {{site: string, avecJeton: boolean}[]}
- */
-export function chargementsDynamiques(source) {
-    const sansCommentaires = source
-        .replace(/\/\*[\s\S]*?\*\//g, '')
-        .replace(/(^|[^:'"])\/\/[^\n]*/g, '$1');
-    const motif = /(?:\.src\s*=\s*|new Worker\(\s*)(['"])(js\/[^'"]+)\1/g;
-    const sites = [];
-    let m;
-    while ((m = motif.exec(sansCommentaires)) !== null) {
-        sites.push({ site: m[2], avecJeton: m[2].includes('?v=') });
-    }
-    return sites;
-}
-
+// La lecture des chargements dynamiques vit dans le garde pre-commit
+// (`scripts/verifier-anticache-stage.mjs`) : une seule lecture pour les deux
+// filets. Deux copies avaient déjà divergé une fois — celle d'ici ne voyait ni
+// `importScripts` ni `workerSrc` (#602, 13 sept. 2026).
 describe('#825 · js/ — les chargements hors index.html portent un ?v=', () => {
     const dossierJs = path.join(racineProjet, 'js');
     const fichiers = readdirSync(dossierJs).filter((f) => f.endsWith('.js'));
     const tous = [];
     for (const f of fichiers) {
-        for (const s of chargementsDynamiques(readFileSync(path.join(dossierJs, f), 'utf8'))) {
+        for (const s of chargementsDynamiques(readFileSync(path.join(dossierJs, f), 'utf8'), 'js/' + f)) {
             tous.push({ fichier: 'js/' + f, ...s });
         }
     }
@@ -133,9 +120,35 @@ describe('#825 · js/ — les chargements hors index.html portent un ?v=', () =>
         expect(sites.some((s) => s.startsWith('js/heic-worker.js'))).toBe(true);
     });
 
-    it('zéro chargement dynamique sans jeton', () => {
-        const nus = tous.filter((t) => !t.avecJeton).map((t) => t.fichier + ' → ' + t.site);
+    it('#602 · la lecture voit aussi workerSrc et importScripts (témoin)', () => {
+        const chemins = tous.map((t) => t.chemin);
+        expect(chemins, 'workerSrc de travaux-visionneuse.js').toContain('libs/pdf.worker.min.js');
+        expect(chemins, 'importScripts de heic-worker.js, résolu depuis js/').toContain('libs/libheif-bundle.js');
+    });
+
+    it('zéro chargement dynamique sans jeton dans les dossiers immuables (js/, css/)', () => {
+        const nus = tous.filter((t) => /^(js|css)\//.test(t.chemin) && !t.avecJeton)
+            .map((t) => t.fichier + ' → ' + t.site);
         expect(nus, 'chargements sans ?v= : ' + nus.join(', ')).toEqual([]);
+    });
+
+    it('#602 · CE QUE CES FILETS NE COUVRENT PAS, nommé : les bibliothèques de libs/ chargées sans jeton', () => {
+        // Hors périmètre VOLONTAIREMENT (netlify.toml : `libs/` sans règle,
+        // donc revalidé à chaque ouverture) : aucun filet ne peut dire si leur
+        // contenu a changé sous la même URL. Leur poser un jeton change le
+        // chemin de chargement de la visionneuse PDF, des graphiques et des
+        // exports PDF — des écrans à vérifier chez Grégoire, hors de ce lot.
+        // Cette liste est un CONSTAT, pas une permission : si elle change, c'est
+        // qu'on a posé un jeton (la retirer ici) ou ajouté une bibliothèque
+        // nue (la nommer ici, ou mieux, lui donner un jeton).
+        const dynNus = tous.filter((t) => !/^(js|css)\//.test(t.chemin) && !t.avecJeton).map((t) => t.chemin);
+        expect(dynNus.sort()).toEqual(['libs/pdf.worker.min.js']);
+        expect([...referencesSansJeton(indexHtml)].sort()).toEqual([
+            'libs/chart.min.js',
+            'libs/chartjs-plugin-annotation.min.js',
+            'libs/jspdf-autotable.min.js',
+            'libs/jspdf.umd.min.js',
+        ]);
     });
 
     it('le jeton des deux sites est le build courant, avec un repli — jamais une URL nue', () => {
@@ -238,7 +251,8 @@ function git(args) {
 
 /**
  * Le commit de la release précédente : le dernier qui a touché version.json.
- * Même repère que `fichiersModifies` dans scripts/release.mjs.
+ * Au pre-push, c'est la release qu'on pousse. (`release.mjs`, lui, tourne AVANT
+ * le commit de release et remonte d'un cran — #675, 13 sept. 2026.)
  */
 function commitDeLaDerniereRelease() {
     try { return git(['log', '-1', '--format=%H', '--', 'version.json']).trim() || null; }
@@ -287,4 +301,12 @@ describe('#825 · pre-push — un fichier à jeton de build ne change pas sans r
 //   e. commit jetable touchant `js/heic-worker.js` (commentaire) après la release
 //      1.130.2 : « sont ceux de la dernière release » ROUGE, nomme le fichier.
 //      `git reset --soft HEAD~1` + restauration, arbre propre.
+//
+// 13 septembre 2026 (#602, lecture seule) :
+//   f. lecture partagée ramenée à `.src =` et `new Worker(` (l'état d'avant) :
+//      « la lecture voit aussi workerSrc et importScripts » ROUGE, « CE QUE CES
+//      FILETS NE COUVRENT PAS » ROUGE. Remis.
+//   g. `?v=4.4.0` posé sur `libs/chart.min.js` dans index.html : « CE QUE CES
+//      FILETS NE COUVRENT PAS » ROUGE — la liste est un constat à tenir à jour.
+//      Remis.
 // ---------------------------------------------------------------------------

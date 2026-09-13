@@ -183,35 +183,66 @@ function prochainParamCache(actuel, dateDuJour) {
 // La parade : ne plus faire confiance a un seul point de vue. On reunit
 //   (a) l'arbre de travail   — le chantier pas encore commite ;
 //   (b) tout ce qui a change DEPUIS LA RELEASE PRECEDENTE — le chantier deja
-//       commite. Le repere est le dernier commit qui a touche `version.json`,
-//       c'est-a-dire la release d'avant, par construction.
+//       commite. Le repere est l'AVANT-DERNIER commit qui a touche
+//       `version.json` : le meme que la sentinelle `anticache-fichiers-modifies`.
 // L'ordre de travail n'a plus d'importance.
+//
+// #675 (13 sept. 2026) — POURQUOI L'AVANT-DERNIER, ET PAS LE DERNIER.
+// Le dernier commit qui touche `version.json` n'est pas toujours une release :
+// le 1er septembre, `24eeaa89` (un correctif) l'avait touche, le script est
+// parti de lui, et 18 fichiers modifies entre la release 1.106.13 et ce
+// correctif sont restes sous leur ancienne URL. La sentinelle, partie de
+// l'avant-dernier, les reclamait — et c'est elle qui avait raison. Le conseil
+// qu'elle affiche (« relancer --build-only ») ne reparait rien, puisque le
+// script recalculait depuis le meme mauvais repere.
+// Remonter d'un cran de trop ne coute que des bumps en plus (une URL neuve
+// pour un contenu deja servi ailleurs : un telechargement de trop, jamais un
+// fichier perime). Un cran de moins coute un fichier perime. D'ou le choix.
+// ⮕ L'ancien filet ne pinait que la chaine `--format=%H -- version.json`,
+// vraie avec `-1` comme avec `-2` : il est remplace par un banc qui execute
+// ce script sur un depot jetable (sentinelle-anticache-fichiers-modifies).
+//
+// #602 (13 sept. 2026) — CE QUE CE BALAYAGE NE COUVRE PAS, ET QU'IL DIT.
+// Il ne regarde que `js/`, `styles.css` et `css/`. `libs/` en est exclu : ses
+// jetons sont des numeros de version de bibliotheque, pas des jours de build,
+// et quatre d'entre elles sont chargees sans jeton (index.html), une par
+// `workerSrc` (travaux-visionneuse.js), une par `importScripts` a jeton pose a
+// la main (heic-worker.js). Ce n'est pas bumpe ici — c'est NOMME au rapport.
 function fichiersModifies(racine) {
   const git = (args) => execFileSync('git', args, {
     cwd: racine, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
   });
+  const lignes = (s) => s.split('\n').map((l) => l.trim()).filter(Boolean);
   const retenir = (liste) => liste
     .filter((f) => (f.endsWith('.js') || f.endsWith('.css')) && !f.includes('_archives/'));
 
   try {
     // (a) arbre de travail
-    const travail = git(['status', '--porcelain', '--', 'js', 'styles.css', 'css'])
+    const statut = (chemins) => git(['status', '--porcelain', '--', ...chemins])
       .split('\n').map((l) => l.slice(3).trim()).filter(Boolean);
+    const travail = statut(['js', 'styles.css', 'css']);
+    const libsTravail = statut(['libs']);
 
     // (b) depuis la release precedente
     let depuisRelease = [];
+    let libsDepuis = [];
     try {
-      const repere = git(['log', '-1', '--format=%H', '--', 'version.json']).trim();
+      const commits = lignes(git(['log', '-2', '--format=%H', '--', 'version.json']));
+      // Un seul commit (depot jeune) : on part de lui, faute de mieux.
+      const repere = commits[1] || commits[0];
       if (repere) {
-        depuisRelease = git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css'])
-          .split('\n').map((l) => l.trim()).filter(Boolean);
+        depuisRelease = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css']));
+        libsDepuis = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'libs']));
       }
     } catch {
       // Depot sans historique de version.json (premier commit, greffe) :
       // l'arbre de travail reste une base valable, on ne bloque pas.
     }
 
-    return [...new Set(retenir([...travail, ...depuisRelease]))];
+    return {
+      aBumper: [...new Set(retenir([...travail, ...depuisRelease]))],
+      horsPerimetre: [...new Set([...libsTravail, ...libsDepuis])].sort(),
+    };
   } catch {
     // Pas de git (archive, tarball) : on ne bloque pas la release, mais on ne
     // fait pas semblant non plus — l'appelant affiche l'avertissement.
@@ -297,7 +328,7 @@ const modifies = fichiersModifies(root);
 const gitIndisponible = modifies === null;
 // `init-inline.js` et `main.js` sont reecrits par ce script : ils sont toujours
 // de la partie, meme si git ne les signale pas encore comme modifies.
-const aBumper = [...new Set(['js/init-inline.js', 'js/main.js', ...(modifies || [])])].sort();
+const aBumper = [...new Set(['js/init-inline.js', 'js/main.js', ...(modifies ? modifies.aBumper : [])])].sort();
 
 let indexNew = indexRaw;
 const bumpes = [];
@@ -328,6 +359,12 @@ console.log('Anti-cache index.html : ' + bumpes.length + ' fichier(s) bumpe(s) (
 for (const ligne of bumpes) console.log('  · ' + ligne);
 if (absents.length) {
   console.log('  (non references dans index.html, ignores : ' + absents.join(', ') + ')');
+}
+if (modifies && modifies.horsPerimetre.length) {
+  console.log('  ⚠ libs/ modifie(s), NON bumpe(s) — hors perimetre de ce script (#602) : '
+    + modifies.horsPerimetre.join(', '));
+  console.log('    Jeton a poser a la main s\'il y en a un (index.html, importScripts de js/heic-worker.js) ;');
+  console.log('    chargees sans jeton, elles ne tiennent qu\'a la revalidation de netlify.toml.');
 }
 if (gitIndisponible) {
   console.log('  ⚠ git indisponible : seuls init-inline.js et main.js ont ete bumpes.');

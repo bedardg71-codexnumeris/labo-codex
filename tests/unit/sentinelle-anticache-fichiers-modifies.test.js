@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,6 +34,16 @@ import { fileURLToPath } from 'node:url';
 //
 // BREAK-TEST (fait le 23 août 2026) — remettre `js/bibliotheque-ui.js?v=`
 // à `20260821a` dans index.html → le test rougit en nommant le fichier.
+//
+// CE QU'ELLE NE COUVRE PAS (#602, 13 sept. 2026) : son `git diff` est borné à
+// `js/`, `styles.css` et `css/`. Les bibliothèques de `libs/` (jetons = numéros
+// de version, ou pas de jeton du tout) et les chargements par `importScripts` ou
+// `workerSrc` lui échappent. Le garde pre-commit (`verifier-anticache-stage.mjs`)
+// les NOMME au moment du commit ; `release.mjs` les nomme à la release.
+//
+// BREAK-TEST #675 (13 sept. 2026) — `-2` remis à `-1` dans `release.mjs` :
+// « bumpe le fichier du chantier », « bumpe le fichier de js/ que porte ce
+// commit » ROUGES ; l'ancien essai par chaîne, lui, restait vert. Remis.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -174,12 +185,102 @@ describe('anti-cache · un fichier modifié ne peut pas être servi sous son anc
         ).toEqual([]);
     });
 
-    it('release.mjs ne se fie plus au seul arbre de travail', () => {
-        // La régression serait de revenir à `git status` seul : le script
-        // redeviendrait aveugle à un chantier déjà commité, sans rien dire.
-        const src = readFileSync(path.join(racineProjet, 'scripts', 'release.mjs'), 'utf8');
-        expect(src, 'release.mjs doit comparer à la release précédente, pas seulement à l\'arbre de travail')
-            .toMatch(/--format=%H'?\s*,\s*'--'\s*,\s*'version\.json'/);
-        expect(src).toMatch(/diff'?\s*,\s*'--name-only'/);
+    // L'essai « release.mjs ne se fie plus au seul arbre de travail » pinait la
+    // chaîne `--format=%H', '--', 'version.json'` : vraie avec `-1` comme avec
+    // `-2`, il est resté VERT sous la mutation de #675 (13 sept.). Remplacé par
+    // le banc ci-dessous, qui exécute le script — et couvre le même risque :
+    // le chantier y est commité, l'arbre propre.
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #675 — LE REPÈRE DE release.mjs, ÉPROUVÉ SUR UN DÉPÔT JETABLE (13 sept. 2026)
+//
+// L'incident du 1er sept. : un commit qui touche `version.json` SANS être une
+// release (`24eeaa89`, un correctif) devient le repère de `release.mjs`, qui
+// prenait le DERNIER commit touchant ce fichier. Les fichiers modifiés entre la
+// release précédente et ce correctif sortent du bump : 18 fichiers ce jour-là.
+//
+// Le montage qui isole le contrôle : le dernier commit touchant `version.json`
+// porte AUSSI un fichier de `js/`, et HEAD est ce commit. Avec `-1`, le repère
+// vaut HEAD, le `git diff` rend le vide, l'arbre est propre : rien d'autre que
+// les deux fichiers réécrits par le script n'est bumpé. Un banc qui ne pinnerait
+// que la chaîne `--format=%H -- version.json` resterait vert (vraie avec `-1`
+// comme avec `-2`) : il faut exécuter le script.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('#675 · release.mjs part de la release PRÉCÉDENTE, pas du dernier commit de version.json', () => {
+    let bac;
+    let sortie;
+    // ⚠ ISOLEMENT (incident du 13 sept., 12 h 05) : sous le hook pre-push d'un
+    // worktree, `GIT_DIR` hérité fait écrire ce dépôt « jetable » dans le VRAI
+    // `.git/config`. Aucune variable `GIT_*` ne passe — ni à git, ni à release.mjs.
+    const ENV_SANS_GIT = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GIT_')));
+    const gitBac = (...args) => execFileSync('git', args, { cwd: bac, env: ENV_SANS_GIT, stdio: ['ignore', 'pipe', 'pipe'] });
+    const ecrire = (rel, contenu) => writeFileSync(path.join(bac, rel), contenu);
+    const jetonDe = (rel) => {
+        const m = new RegExp(rel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\?v=([A-Za-z0-9]+)')
+            .exec(readFileSync(path.join(bac, 'index.html'), 'utf8'));
+        return m ? m[1] : null;
+    };
+
+    beforeAll(() => {
+        bac = mkdtempSync(path.join(os.tmpdir(), 'release-675-'));
+        mkdirSync(path.join(bac, 'js'));
+        mkdirSync(path.join(bac, 'libs'));
+        ecrire('version.json', JSON.stringify({ build: '0101-0900', beta: '1.0.0' }) + '\n');
+        ecrire('js/init-inline.js', "let VERSION_MAJEURE = '1.0.0';\nlet BUILD_ID = '0101-0900';\n");
+        ecrire('js/main.js', "window._SCRIPT_BUILD_main = '0101-0900';\n");
+        for (const f of ['a', 'b', 'c']) ecrire(`js/${f}.js`, `// ${f} v1\n`);
+        ecrire('libs/pdf.worker.min.js', '/* 3.11.174 */\n');
+        ecrire('index.html', [
+            '<script src="version.js?v=01010900"></script>',
+            '<script src="js/init-inline.js?v=20260101a"></script>',
+            '<script src="js/main.js?v=20260101a"></script>',
+            '<script src="js/a.js?v=20260101a"></script>',
+            '<script src="js/b.js?v=20260101a"></script>',
+            '<script src="js/c.js?v=20260101a"></script>',
+            '',
+        ].join('\n'));
+        gitBac('init', '-q');
+        gitBac('config', 'user.email', 'test@example.invalid');
+        gitBac('config', 'user.name', 'Test');
+        gitBac('add', '-A');
+        gitBac('commit', '-qm', 'release 1.0.0');
+
+        // Le chantier, commité avant la release — l'ordre du 23 août.
+        ecrire('js/a.js', '// a v2 — le chantier\n');
+        ecrire('libs/pdf.worker.min.js', '/* 3.11.175 */\n');
+        gitBac('commit', '-qam', 'chantier');
+
+        // Le commit qui fausse le repère : il touche version.json ET un fichier
+        // de js/, sans être une release (le cas de 24eeaa89).
+        ecrire('version.json', JSON.stringify({ build: '0102-0900', beta: '1.0.0' }) + '\n');
+        ecrire('js/b.js', '// b v2 — le correctif\n');
+        gitBac('commit', '-qam', 'fix touchant version.json');
+
+        sortie = execFileSync('node', [path.join(racineProjet, 'scripts', 'release.mjs'), 'patch', '--root', bac],
+            { encoding: 'utf8', env: ENV_SANS_GIT });
+    });
+
+    afterAll(() => {
+        if (bac) rmSync(bac, { recursive: true, force: true });
+    });
+
+    it('bumpe le fichier du chantier, commité AVANT le commit qui a touché version.json', () => {
+        // Le cœur de #675 : avec `-1`, le repère vaut HEAD et a.js reste à 20260101a.
+        expect(jetonDe('js/a.js'), sortie).not.toBe('20260101a');
+    });
+
+    it('bumpe le fichier de js/ que porte ce commit lui-même', () => {
+        expect(jetonDe('js/b.js'), sortie).not.toBe('20260101a');
+    });
+
+    it('ne bumpe pas ce qui n\'a pas bougé — le repère n\'est pas « tout »', () => {
+        expect(jetonDe('js/c.js')).toBe('20260101a');
+    });
+
+    it('#602 · NOMME la bibliothèque modifiée qu\'il ne bumpe pas', () => {
+        expect(sortie).toMatch(/libs\/pdf\.worker\.min\.js/);
+        expect(sortie).toMatch(/NON bumpe/);
     });
 });
