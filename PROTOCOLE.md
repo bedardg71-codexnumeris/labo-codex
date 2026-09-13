@@ -496,3 +496,17 @@ rapport, le verdict local est le seul, d'où l'importance de le prendre dans de 
 2. **Le lien** : une ligne de SUIVI-BUGS qui répare ce que décrit une fiche NOMME la fiche (« ferme #631 »), et la case de la fiche
    se coche dans le même commit.
 3. Les 123 homonymes anciens sont listés en tête de SUIVI-BUGS ; on ne les renumérote pas.
+
+## Règle 10 — une assertion négative se porte sur une tranche dont on a prouvé qu'elle n'est pas vide (13 septembre 2026)
+
+*Promue depuis la consigne de démarrage (§7), écrite le 13 septembre à partir de deux cas trouvés le même jour, sur deux lots sans rapport.*
+
+**Une assertion négative sur une tranche vide est vraie par construction.** Un banc qui découpe un fichier avant d'y chercher une ABSENCE ne prouve rien tant qu'il n'a pas montré que sa tranche contient quelque chose. Le défaut se voit d'autant moins que le banc reste VERT : c'est la seule famille de défauts qui ne peut pas se signaler.
+
+⮕ **Tout `not.toContain` ou `not.toMatch` porté sur une tranche porte, dans le même essai, un garde de non-vide** — `expect(tranche.length).toBeGreaterThan(N)`, avec un N choisi pour ce que la tranche doit contenir, jamais zéro.
+
+⚠ **L'idiome qui produit le défaut est toujours le même** : `source.slice(source.indexOf(début), source.indexOf(fin))`. Un marqueur qui disparaît rend −1 ; la tranche est vide ou inversée, et tout ce qui suit passe. **Le marqueur est précisément ce qu'un refactor déplace** — c'est-à-dire le moment où l'on a le plus besoin du banc.
+
+**Mesuré le 13 septembre sur les 665 fichiers d'essai** : 142 tranches portent une assertion négative de texte ; **82 ont leur garde, 60 ne l'ont pas**, et 30 de celles-là sont découpées par `indexOf`. La règle n'est donc pas neuve, elle est appliquée une fois sur deux. La réparation des 30 et le cliquet qui rendra la règle mécanique sont à #858.
+
+**Ce qu'elle coûte** : une ligne par essai. **Ce qu'elle rend** : qu'un vert veuille dire quelque chose. Un cas a vécu du 10 au 13 septembre sans que personne le sache.
