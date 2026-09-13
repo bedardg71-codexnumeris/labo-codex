@@ -3207,27 +3207,6 @@ function genererSectionProgression(da) {
     // Générer un ID unique pour le canvas
     const canvasId = `graphique-progression-${da}`;
 
-    // ✨ AMÉLIORATION (8 déc 2025) : Lire dynamiquement l'échelle de performance configurée
-    const echelles = db.getSync(cle('echellesTemplates'), []);
-    const echelleActive = echelles.find(e => e.active) || echelles[0];
-
-    let texteZones = 'Zones colorées basées sur l\'échelle IDME par défaut';
-    if (echelleActive && echelleActive.niveaux && echelleActive.niveaux.length > 0) {
-        texteZones = echelleActive.niveaux.map(niveau => {
-            const nom = niveau.nom;
-            const min = niveau.min;
-            const max = niveau.max;
-
-            if (min === 0) {
-                return `${nom} < ${max}%`;
-            } else if (max === 100) {
-                return `${nom} ≥ ${min}%`;
-            } else {
-                return `${nom} ${min}-${max}%`;
-            }
-        }).join(', ');
-    }
-
     // Vérifier si l'étudiant a des jetons de reprise (pour afficher la checkbox)
     let aDesJetonsReprise = false;
     try {

@@ -5,7 +5,7 @@
  * Inspiré des modèles de graphiques du tableur Numbers
  *
  * Types de graphiques :
- * 1. Graphique individuel : Courbes A-C-P-E d'un étudiant avec zones colorées
+ * 1. Graphique individuel : Courbes A-C-P-E d'un étudiant, sans zones de niveaux (#575)
  * 2. Graphique groupe moyennes : Moyennes A-C-P-E du groupe
  * 3. Graphique groupe spaghetti : Tous les étudiants avec zones colorées
  *
@@ -763,7 +763,8 @@ const pluginEtiquettesCourbes = {
 
 /**
  * Crée un graphique d'évolution pour un étudiant spécifique
- * Affiche les courbes A-C-P-E avec zones colorées en arrière-plan
+ * Affiche les courbes A-C-P-E — sans zones de niveaux : un indice agrégé ne se situe
+ * pas dans une échelle de performance (#575, 13 sept. 2026)
  *
  * @param {string} canvasId - ID de l'élément canvas
  * @param {string} da - Numéro DA de l'étudiant
@@ -1035,8 +1036,14 @@ function creerGraphiqueIndividuel(canvasId, da) {
         // Configuration du graphique
         const config = {
             type: 'line',
-            // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, ...(obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginInterventionsIndiv],
+            // #575, septième site (13 sept. 2026) : AUCUNE zone de niveaux sur ce graphique.
+            // Une échelle de performance juge UNE production ; A, C et P sont des mesures
+            // agrégées en pourcentage sur le trimestre. Leurs paliers superposés aux courbes
+            // donnaient un repère qui avait l'air de dire quelque chose et ne disait rien
+            // (décision de Grégoire). Ne pas réintroduire `pluginEtiquettesZones` ici — ni la
+            // marge droite qui portait ses étiquettes. Le graphique par critère (#752) garde
+            // les siennes : ses points SONT des niveaux d'évaluations.
+            plugins: [pluginInterventionsIndiv],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1044,9 +1051,6 @@ function creerGraphiqueIndividuel(canvasId, da) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: {
-                    padding: { right: 25 }
-                },
                 plugins: {
                     title: {
                         display: false

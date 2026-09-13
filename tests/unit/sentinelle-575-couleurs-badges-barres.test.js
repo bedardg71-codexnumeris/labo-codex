@@ -110,24 +110,22 @@ describe('#575 · les tables IDME et les échelles devinées ne reviennent pas',
         expect(code).not.toMatch(/#ff9800/);
     });
 
-    it('CONSTAT MESURÉ, PAS CORRIGÉ : il reste UN site qui devine l\'échelle', () => {
-        // ⮕ Trouvé PAR cette sentinelle, le 27 août 2026 : le graphique de
-        // progression (`genererGraphiqueProgression`) lit encore
-        // `echelles.find(e => e.active) || echelles[0]` pour décrire ses zones
-        // colorées, et annonce « Zones colorées basées sur l'échelle IDME par
-        // défaut » quand il n'en trouve pas. Ni le plan SOLO ni l'audit du
-        // 27 août ne l'avaient relevé. Il est inscrit au backlog sous #575.
-        //
-        // Ce test verrouille l'état connu : UNE occurrence, pas deux. Il rougit
-        // si on en ajoute — et il rougit aussi le jour où on la corrige, ce qui
-        // est le signal attendu.
+    it('RETIRÉ LE 13 SEPT. 2026 : le profil ne devine plus aucune échelle pour décrire des zones', () => {
+        // ⮕ Ce test verrouillait depuis le 27 août le dernier site qui devinait
+        // l'échelle : `genererSectionProgression` lisait
+        // `echelles.find(e => e.active) || echelles[0]` pour composer « Zones
+        // colorées basées sur l'échelle IDME par défaut ». Cette phrase n'était
+        // plus affichée depuis le 21 mars (`4e38bcce`), et les zones du graphique
+        // A-C-P sont RETIRÉES (#575, décision de Grégoire : un indice agrégé ne se
+        // situe pas dans une échelle de performance). Il constate désormais le
+        // retrait : il rougit si une lecture d'échelle devinée ou la phrase revient.
         const code = sansCommentaires(lire('js/profil-etudiant-sections-affichage.js'));
-        const restants = (code.match(/echelles\.find\(e => e\.active\)/g) || []).length;
-        expect(restants).toBe(1);
-        // (Le littéral porte une apostrophe échappée dans la source : on ancre
-        // sur la partie stable de la phrase.)
-        expect(code).toContain('Zones colorées basées sur l');
-        expect(code).toContain('IDME par défaut');
+        expect(code.length).toBeGreaterThan(50000);   // règle 10 : la tranche lue n'est pas vide
+        expect(code).toContain('function genererSectionProgression');   // ni le mauvais fichier
+        expect(code).not.toMatch(/echelles\.find\(e => e\.active\)/);
+        expect(code).not.toContain('Zones colorées');
+        expect(code).not.toContain('IDME par défaut');
+        expect(code).not.toContain('texteZones');
     });
 
     it('l\'artefact transporte l\'échelle de son évaluation', () => {
