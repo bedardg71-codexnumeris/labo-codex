@@ -7,6 +7,21 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 48 — 13 SEPTEMBRE 2026, ≈ 12 H 45 → 13 H 50 (Toronto) : DEUX CONSIGNES DE COWORK, à partir de `f1898c0a` (1.140.1).
+     ⚠ Aucune entrée n'a été écrite ici pour les sessions du matin du 13 (1.139.3 → 1.140.1) : leur trace est dans RELAIS.md.
+     ▣ LOT #746 + #551 (`07f0d74d`, 1.140.2, worktree) : obtenirInterventionsEtudiant filtre par le contexte actif (huit lecteurs
+       suivent) ; la suggestion d'objectif ne remplace plus un seuil idme.* à 0. Banc neuf sentinelle-746-551 (mode groupe-cours
+       strict, contre-épreuve sur le compteur RÉEL de la Liste) + cliquet de forme 555 cas 5 bis ; 7 break-tests rouges. BACKLOG :
+       #542 fermée, #742 goulot corrigé, #746 cochée, #857 inscrite.
+     ▣ LOT #847 (`a27b71af`, 1.140.3) : trois exemples gris, textes de Grégoire. Le banc lot-c assertait l'ancienne chaîne POUR
+       ELLE-MÊME (gel des mots de 1.137.0) : il suit les mots neufs. 2 break-tests rouges. Fichiers de Cowork de plans de travail/ commités.
+     ▣ RETOUCHE DE COWORK (`269fe347`, sans bump) : l'Aide n'avait aucun banc — lot-E gagne l'assertion #847 ET un garde de non-vide
+       de sa tranche (une négative sur tranche vide est vraie par construction : vu de nos yeux, mutation 3). 3 break-tests rouges.
+     Vitest 557 / 6 135. Verdict Playwright Cowork vert → POUSSÉ (`f1898c0a..269fe347`). Rituel (subagent) arrivé en fin de session :
+     il a pris cette session pour une autre ; retenu de lui : la CI de f1898c0a a vu Playwright annulé à 34 min 31 s, cause non établie.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 47 — 12 SEPTEMBRE 2026, 11 H 55 → 12 H 31 (Toronto) : LOT 5 DU CADRAGE 11 (SUIVI › INTERVENTIONS), à partir de `1b36c338`
      (1.138.0 en ligne). Chantier de l'orthopédagogie clos : fichiers de Cowork commités tels quels (`5af8cc8e`). Code `9ceca4ff` : le brouillon
      naît en mémoire (I-1), une seule écriture par « Enregistrer », lettres du bilan par les seuils idme.* (I-5), note d'un élève parti grisée
