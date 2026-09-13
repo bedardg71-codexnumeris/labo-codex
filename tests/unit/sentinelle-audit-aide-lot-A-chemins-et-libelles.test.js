@@ -160,7 +160,7 @@ describe('Aide — les chiffres qu\'elle cite sont ceux du code', () => {
         };
     }
 
-    // L'Aide mêle texte brut et entités (« 20 &eacute;tudiant·es ») : on décode
+    // L'Aide mêle texte brut et entités (« 10 &eacute;tudiant·es ») : on décode
     // avant de comparer, sinon le banc rougit sur la forme et non sur le fond.
     const AIDE_DECODEE = AIDE_TXT
         .replace(/&eacute;/g, 'é').replace(/&egrave;/g, 'è').replace(/&agrave;/g, 'à')

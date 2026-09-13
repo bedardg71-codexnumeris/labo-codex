@@ -92,7 +92,7 @@
             items: [
                 '<strong>Dans Suivi › Saisie des présences, verrouiller une date ne vaut plus que pour le groupe-cours et le trimestre où tu le fais.</strong> Jusqu\'ici, une date verrouillée dans un groupe l\'était dans tous les autres, et le restait d\'un trimestre à l\'autre. Les dates verrouillées avant cette version restent verrouillées dans chacun de tes groupes&nbsp;; rien n\'est changé au passé.',
                 '<strong>La date, le sous-groupe, le tri et la recherche de l\'écran appartiennent au trimestre.</strong> La démonstration ne prend plus ta date et te la rend au retour&nbsp;; un trimestre neuf part à vide.',
-                '<strong>La démonstration n\'annonce plus une configuration incomplète.</strong> Elle ouvre la saisie sur la dernière séance passée, avec ses vingt élèves. Sans date mémorisée, l\'écran ouvre de lui-même sur la dernière séance, et «&nbsp;← Précédent&nbsp;» y va aussi.',
+                '<strong>La démonstration n\'annonce plus une configuration incomplète.</strong> Elle ouvre la saisie sur la dernière séance passée, avec ses élèves. Sans date mémorisée, l\'écran ouvre de lui-même sur la dernière séance, et «&nbsp;← Précédent&nbsp;» y va aussi.',
             ]
         },
         {
