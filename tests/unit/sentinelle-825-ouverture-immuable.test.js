@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 // contenu — donc si chaque référence porte un `?v=` que les filets existants
 // (garde pre-commit #547, `release.mjs`) font bouger avec le fichier. Ces
 // filets ne lisent qu'`index.html` : trois fichiers leur échappaient
-// (`repertoires-bibliotheque.js` sans jeton ; `pack-demo-20.js` et
+// (`repertoires-bibliotheque.js` sans jeton ; `pack-demo-10.js` et
 // `heic-worker.js` chargés dynamiquement, hors d'`index.html`).
 //
 // CE QUI EST VERROUILLÉ ICI, en trois invariants :
@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 //      irréversible de ce lot ; `styles.css` est chargée SANS jeton par
 //      `design-system.html` et ses 17 modules, servis eux aussi) ;
 //      `/version.json` reste `no-store` ;
-//   4. les deux fichiers à jeton de build (`pack-demo-20.js`, `heic-worker.js`)
+//   4. les deux fichiers à jeton de build (`pack-demo-10.js`, `heic-worker.js`)
 //      n'ont PAS changé depuis la release précédente : leur URL ne bouge qu'avec
 //      le build, donc un commit qui les touche sans release servirait un contenu
 //      neuf sous une URL immuable. Jugé au pre-push (hook `test:unit`), là où le
@@ -101,7 +101,7 @@ describe('#825 · index.html — chaque script et feuille de style porte un ?v='
 /**
  * Les chargements dynamiques d'un source : `.src = 'js/…'` (script créé) et
  * `new Worker('js/…')`. Les chaînes de commentaire sont écartées avant lecture,
- * sinon « Source : js/pack-demo-20.js » compterait comme une URL nue.
+ * sinon « Source : js/pack-demo-10.js » compterait comme une URL nue.
  * @returns {{site: string, avecJeton: boolean}[]}
  */
 export function chargementsDynamiques(source) {
@@ -129,7 +129,7 @@ describe('#825 · js/ — les chargements hors index.html portent un ?v=', () =>
 
     it('la lecture voit les deux sites connus (pack démo, worker HEIC)', () => {
         const sites = tous.map((t) => t.site);
-        expect(sites.some((s) => s.startsWith('js/pack-demo-20.js'))).toBe(true);
+        expect(sites.some((s) => s.startsWith('js/pack-demo-10.js'))).toBe(true);
         expect(sites.some((s) => s.startsWith('js/heic-worker.js'))).toBe(true);
     });
 
@@ -227,7 +227,7 @@ describe('#825 · netlify.toml — immuable un an, sauf la porte d\'entrée', ()
 // 4. Les deux fichiers à jeton de build n'ont pas changé depuis la release
 // ---------------------------------------------------------------------------
 
-const FICHIERS_A_JETON_DE_BUILD = ['js/pack-demo-20.js', 'js/heic-worker.js'];
+const FICHIERS_A_JETON_DE_BUILD = ['js/pack-demo-10.js', 'js/heic-worker.js'];
 
 function git(args) {
     return execFileSync('git', args, {
@@ -262,7 +262,7 @@ describe('#825 · pre-push — un fichier à jeton de build ne change pas sans r
         expect(repere, 'aucun commit ne touche version.json').toBeTruthy();
     });
 
-    it('pack-demo-20.js et heic-worker.js sont ceux de la dernière release', () => {
+    it('pack-demo-10.js et heic-worker.js sont ceux de la dernière release', () => {
         // Leur URL est `?v=<build>` : sans release, le build ne bouge pas, et un
         // navigateur qui a déjà l'ancien contenu sous cette URL le garde un an.
         // Un commit qui les touche doit donc être une release, ou la précéder

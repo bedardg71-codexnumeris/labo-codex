@@ -46,7 +46,7 @@ function listerJs(dossier) {
     for (const entree of readdirSync(dossier)) {
         const complet = path.join(dossier, entree);
         if (statSync(complet).isDirectory()) out.push(...listerJs(complet));
-        else if (entree.endsWith('.js') && entree !== 'pack-demo-20.js') out.push(complet);
+        else if (entree.endsWith('.js') && entree !== 'pack-demo-10.js') out.push(complet);
     }
     return out;
 }

@@ -11440,9 +11440,9 @@
 
                             <p class="text-105-mt15"><strong>Ce que contiennent les données de démonstration :</strong></p>
                             <ul>
-                                <li><strong>20 étudiant·es</strong> aux profils variés</li>
+                                <li><strong>10 étudiant·es</strong> aux profils variés</li>
                                 <li><strong>11 productions</strong> (1 portfolio, 9 artefacts et une évaluation terminale)</li>
-                                <li><strong>Plus de 200 évaluations</strong> avec notes et rétroactions</li>
+                                <li><strong>Plus de 100 évaluations</strong> avec notes et rétroactions</li>
                                 <li><strong>Une session complète de présences</strong> (32 dates, du 25 août au 10 décembre)</li>
                                 <li><strong>3 grilles de critères</strong>, 2 échelles de performance, 3 cartouches de rétroaction</li>
                                 <li><strong>1 carte d'alignement</strong> pédagogique complète</li>
@@ -14010,7 +14010,7 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Bac &agrave; sable (D&eacute;mo)</dt>
-                                <dd class="ml-20-mb-10">Mode d'exploration qui charge des donn&eacute;es fictives (20 &eacute;tudiants, &eacute;valuations, pr&eacute;sences) pour d&eacute;couvrir l'application sans risque. S'active via la case &agrave; cocher sur la page d'accueil. Les vraies donn&eacute;es sont mises de c&ocirc;t&eacute; et restaur&eacute;es automatiquement en quittant la d&eacute;mo.</dd>
+                                <dd class="ml-20-mb-10">Mode d'exploration qui charge des donn&eacute;es fictives (10 &eacute;tudiants, &eacute;valuations, pr&eacute;sences) pour d&eacute;couvrir l'application sans risque. S'active via la case &agrave; cocher sur la page d'accueil. Les vraies donn&eacute;es sont mises de c&ocirc;t&eacute; et restaur&eacute;es automatiquement en quittant la d&eacute;mo.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">C</h4>
@@ -14487,11 +14487,11 @@
 
     <!-- PLAN 1 — Autonomisation Phase 1 : namespace demo_* permanent
          (idempotent via flag demo-version-installee) -->
-    <script src="js/demo-namespace.js?v=20260911a"></script>
+    <script src="js/demo-namespace.js?v=20260913a"></script>
     <!-- PLAN 1 — Autonomisation Phases 5.B, 5.C et 5.D : seule source de
          vérité pour l'activation/désactivation du mode démo. Le legacy
          js/donnees-demo.js a été retiré en Phase 5.D.
-         pack-demo-20.js est lazy-loadé par demo-namespace.js si nécessaire. -->
+         pack-demo-10.js est lazy-loadé par demo-namespace.js si nécessaire. -->
     <script src="js/demo-activation.js?v=20260911o"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
@@ -14583,7 +14583,7 @@
     <script src="js/pratiques/construction-attributs.js?v=20260909i"></script>
 
     <!-- Générateur de profils-types (#326 R2) — corpus fictif déterministe dérivé de l'échelle (banc de décision). Pur. -->
-    <script src="js/pratiques/profils-types-generateur.js?v=2026061701"></script>
+    <script src="js/pratiques/profils-types-generateur.js?v=20260913a"></script>
 
     <!-- Licence Creative Commons (Beta 91.5 - Import/Export) -->
     <script src="js/cc-license.js?v=20260902f"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #264 — renommage "Nom de ta pratique" → "Titre de ce partage" -->
@@ -14676,7 +14676,7 @@
          labo-codex-partage-v1 + signature ECDSA (Défense F, D2) + confiance TOFU (D3).
          Ordre requis : après cc-license.js et bibliotheque-ui.js, avant import-export.js ;
          signature.js avant partage-format.js (construirePackageSigne). -->
-    <script src="js/partage-schemas.js?v=20260903d"></script>
+    <script src="js/partage-schemas.js?v=20260913a"></script>
     <script src="js/partage-validation.js?v=20260901a"></script>
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=20260902f"></script>
@@ -14712,7 +14712,7 @@
     <!-- Page d'accueil (Chantier 3) -->
     <script src="js/accueil.js?v=20260912g"></script> <!-- Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
-    <script src="js/guidage-demo.js?v=20260831b"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
+    <script src="js/guidage-demo.js?v=20260913a"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
     <script src="js/changelog-data.js?v=20260913a"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
@@ -14729,7 +14729,7 @@
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=20260912e"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260911a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260913a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260911a"></script>
     <script src="js/guides-pedagogiques.js?v=20260911a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260909i"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->

@@ -8,7 +8,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // #749 lot 3 (11 sept. 2026, S-6) — LA DÉMONSTRATION OUVRE UNE SAISIE DES PRÉSENCES
 // QUI SE SAISIT : aucun bandeau « Configuration incomplète », une date posée, la
-// grille des 20 élèves.
+// grille des 10 élèves (20 jusqu'à la réduction du pack, #852).
 //
 // CE QU'UN COLLÈGUE VOYAIT LE 6 SEPTEMBRE (audit, § 3, S-6, capture
 // demo_1024x768_saisie.png) : il activait la démonstration depuis l'Accueil, ouvrait
@@ -44,7 +44,7 @@ function brancherEcouteurs(page) {
     return erreurs;
 }
 
-test('démo · activer, ouvrir Saisie des présences : aucun bandeau, une date posée, vingt élèves', async ({ page }) => {
+test('démo · activer, ouvrir Saisie des présences : aucun bandeau, une date posée, dix élèves', async ({ page }) => {
     test.setTimeout(90000);
     const erreurs = brancherEcouteurs(page);
 
@@ -109,7 +109,7 @@ test('démo · activer, ouvrir Saisie des présences : aucun bandeau, une date p
     expect(r.apres.bandeauVisible, 'LE CAS DU 6 SEPTEMBRE : la démo affichait « Configuration incomplète »').toBe(false);
     expect(r.apres.date, 'la date doit être posée (avant : vide, « Sélectionne une date »)').toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(r.apres.date <= r.aujourdhui, 'la date posée est ≤ aujourd\'hui').toBe(true);
-    expect(r.apres.lignes, 'la grille doit montrer les 20 élèves de la démo (avant : 0 étudiant·e)').toBe(20);
+    expect(r.apres.lignes, 'la grille doit montrer les 10 élèves de la démo (avant : 0 étudiant·e)').toBe(10);
     // La préférence est celle du trimestre démo, pas une clé nue.
     expect(r.datePreferenceDemo).toBe(r.apres.date);
     expect(r.verrouNu, 'aucune clé nue datesVerrouillees n\'est écrite').toBe(null);
@@ -117,7 +117,7 @@ test('démo · activer, ouvrir Saisie des présences : aucun bandeau, une date p
     // « ← Précédent » : une autre date, posée, toujours une grille.
     expect(r.apresPrecedent.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(r.apresPrecedent.date < r.apres.date).toBe(true);
-    expect(r.apresPrecedent.lignes).toBe(20);
+    expect(r.apresPrecedent.lignes).toBe(10);
 
     expect(erreurs, 'erreurs de page inattendues').toEqual([]);
 });

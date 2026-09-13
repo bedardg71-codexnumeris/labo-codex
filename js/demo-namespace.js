@@ -3,7 +3,7 @@
  * Chargement permanent des données démo dans le namespace demo_*
  *
  * Plan 1 Phase 1 du chantier PLAN-AUTONOMISATION-UTILISATEUR.md (21 avril 2026).
- * Source : js/pack-demo-20.js (PACK_DEMARRAGE).
+ * Source : js/pack-demo-10.js (PACK_DEMARRAGE).
  * Cible  : clés localStorage/IDB préfixées demo_*.
  * Flag version : localStorage.demo-version-installee (lit PACK._metadata.version).
  *
@@ -127,16 +127,16 @@ function chargerPackDemarrage() {
         // reçue. Ce chemin n'est dans aucune balise <script> d'index.html,
         // donc ni release.mjs ni le garde #547 ne le voient : le jeton est le
         // BUILD courant (version.js, chargé en premier). Il change à chaque
-        // release même si le pack n'a pas bougé — 1,1 Mo, seulement chez qui
+        // release même si le pack n'a pas bougé — 0,6 Mo, seulement chez qui
         // active la démo ; assumé, contre un régime de lecture de plus dans
         // release.mjs. Repli `Date.now()` si version.js manque : jamais une
         // URL nue. La sentinelle #825 refuse un chargement dynamique sans `?v=`.
-        script.src = 'js/pack-demo-20.js?v=' + jetonAntiCache();
+        script.src = 'js/pack-demo-10.js?v=' + jetonAntiCache();
         script.onload = function() {
             resolve(typeof PACK_DEMARRAGE !== 'undefined' ? PACK_DEMARRAGE : null);
         };
         script.onerror = function() {
-            console.error('[DEMO-INIT] Échec chargement pack-demo-20.js');
+            console.error('[DEMO-INIT] Échec chargement pack-demo-10.js');
             resolve(null);
         };
         document.head.appendChild(script);

@@ -62,7 +62,7 @@ describe('Sentinelle SSOT · miroir modalitesEvaluation (L2-a, statique)', () =>
     });
 
     it('le seed démo ne porte plus les champs miroirs morts', () => {
-        const seed = fs.readFileSync(path.join(dossierJs, 'pack-demo-20.js'), 'utf8');
+        const seed = fs.readFileSync(path.join(dossierJs, 'pack-demo-10.js'), 'utf8');
         expect(seed.includes('"pratiqueId": "demo-std-litt"')).toBe(false);
         expect(seed.includes('"approcheEvaluation": "par-artefacts"')).toBe(false);
     });

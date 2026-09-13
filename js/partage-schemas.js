@@ -187,7 +187,7 @@
     // ------------------------------------------------------------------
     // Schémas fermés par type d'entité
     // ------------------------------------------------------------------
-    // Inventaires relevés sur les formes RÉELLES (pack-demo-20.js v20.3+,
+    // Inventaires relevés sur les formes RÉELLES (pack-demo-10.js v20.3+,
     // grilles.js, echelles.js, wizard-pratique-v2.js, 10 juin 2026). La spec
     // d'avril résumait des shapes périmées (ex. cartouche « descripteurs ») —
     // ces schémas-ci font foi, l'écart est documenté dans SESSION.md.
@@ -305,7 +305,7 @@
                             schema: {
                                 id: { type: 'chaine', max: 100 },
                                 // Chaîne dans les DEUX sources réelles mesurées
-                                // (`grilles.js:4090`, `pack-demo-20.js:14093`).
+                                // (`grilles.js:4090`, `pack-demo-10.js:14093`).
                                 // Un code numérique ferait rejeter le package —
                                 // bruyamment, ce qui vaut mieux qu'un silence.
                                 code: { type: 'chaine', max: 20 },

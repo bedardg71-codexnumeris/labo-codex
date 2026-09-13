@@ -384,7 +384,7 @@ sentinelle dédiée (`sentinelle-cache-busting-main`), parce qu'il porte les
 migrations au boot. Depuis #825, `/js/*` et `/css/*` sont servis **immuables un
 an** : la sentinelle `sentinelle-825-ouverture-immuable` refuse en plus toute
 référence sans `?v=` (dans `index.html` comme dans les deux chargements
-dynamiques, `pack-demo-20.js` et `heic-worker.js`, jeton = build).
+dynamiques, `pack-demo-10.js` et `heic-worker.js`, jeton = build).
 
 Ce qui reste vrai : un fichier peut arriver **périmé** dans un navigateur sans
 aucun signal si son jeton n'a pas bougé — Grégoire a jugé Safari sur du code qui

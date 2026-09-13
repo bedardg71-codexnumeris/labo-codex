@@ -135,7 +135,7 @@ describe('Aide — les chiffres qu\'elle cite sont ceux du code', () => {
     // Le pack de démo est la source : les nombres sont COMPTÉS ici, jamais
     // recopiés. Ajouter un artefact au pack rougit ce banc.
     function packDemo() {
-        const src = readFileSync(path.join(racine, 'js/pack-demo-20.js'), 'utf8');
+        const src = readFileSync(path.join(racine, 'js/pack-demo-10.js'), 'utf8');
         const bloc = (cle, ouvre, ferme) => {
             const i = src.indexOf(`"${cle}": ${ouvre}`) + `"${cle}": `.length;
             let prof = 0, j = i, dansChaine = false;
@@ -147,7 +147,7 @@ describe('Aide — les chiffres qu\'elle cite sont ceux du code', () => {
                     else if (c === ferme && --prof === 0) return JSON.parse(src.slice(i, j + 1));
                 }
             }
-            throw new Error(`bloc « ${cle} » illisible dans pack-demo-20.js`);
+            throw new Error(`bloc « ${cle} » illisible dans pack-demo-10.js`);
         };
         return {
             productions: bloc('productions', '[', ']'),

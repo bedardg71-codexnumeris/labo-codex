@@ -35,7 +35,7 @@
  *    commentaires, c'est la relecture qui l'a fait, pas une machine — et
  *    c'est ce qu'il faudra refaire la prochaine fois. Les trois mentions qui
  *    restent dans js/ sont le témoin : un zéro là serait un défaut.
- * 2. LE PACK DE DÉMONSTRATION EST HORS PÉRIMÈTRE (#351). `pack-demo-20.js` et
+ * 2. LE PACK DE DÉMONSTRATION EST HORS PÉRIMÈTRE (#351). `pack-demo-10.js` et
  *    `demo-namespace.js` portent des noms d'élèves FICTIFS, choisis exprès parmi
  *    des figures historiques et culturelles. Ce sont des données de démonstration
  *    assumées, pas des personnes réelles.
@@ -60,7 +60,7 @@ const PRENOMS = ['bruno', 'michel', 'isabelle', 'xavier', 'hélène', 'helene',
     'marie-hélène', 'marie-helene', 'étienne', 'etienne', 'olivier', 'jordan',
     'françois', 'francois', 'voisard'];
 
-const HORS_PERIMETRE = new Set(['pack-demo-20.js', 'demo-namespace.js', 'config.js']);
+const HORS_PERIMETRE = new Set(['pack-demo-10.js', 'demo-namespace.js', 'config.js']);
 
 function fichiersJs(dossier, acc = []) {
     for (const e of readdirSync(dossier, { withFileTypes: true })) {

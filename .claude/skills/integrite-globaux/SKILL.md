@@ -85,7 +85,7 @@ dans `CLES_GLOBALES` :
 > `CLES_TEMPLATES_ARCHIVES`, mécanisme `cartouches_*`).
 
 Ces clés reçoivent des items de **plusieurs sources** : items utilisateur
-(Grégoire), items du pack démo (`pack-demo-20.js` → `PACK_DEMARRAGE`),
+(Grégoire), items du pack démo (`pack-demo-10.js` → `PACK_DEMARRAGE`),
 items importés (export Beta 91, futur partage CC Plan 2), copies d'archivage.
 Aucun invariant n'est garanti sur la coexistence de ces sources : IDs qui
 se chevauchent, flags `estDemo`/`isDemo` parfois présents par héritage
@@ -126,12 +126,12 @@ lecteurs.
 
 **Incident** : le 24 avril 2026, 3 grilles d'évaluation H2026 de Grégoire
 ont disparu silencieusement (restauration nécessaire depuis Codex USB du
-18 avril). Cause racine : le pack `js/pack-demo-20.js` était initialement
+18 avril). Cause racine : le pack `js/pack-demo-10.js` était initialement
 construit à partir du matériel pédagogique réel de Grégoire ; les IDs des
 grilles, échelles et cartouches du pack étaient **identiques** aux
 ressources personnelles encore présentes dans le storage.
 
-**État actuel du pack** : `pack-demo-20.js` (version interne `20.8`) a
+**État actuel du pack** : `pack-demo-10.js` (version interne `21.0`) a
 refondu ses IDs avec un préfixe `GRILLE_DEMO_*`, `ECH_DEMO_*`,
 `cartouches_GRILLE_DEMO_*`. Le préfixage est en place côté pack.
 
@@ -223,7 +223,7 @@ exécution.
 
 ### 4.1 Pack démo
 
-- `pack-demo-20.js` (version interne `20.8`) utilise des IDs préfixés
+- `pack-demo-10.js` (version interne `21.0`) utilise des IDs préfixés
   (`GRILLE_DEMO_*`, `ECH_DEMO_*`, `cartouches_GRILLE_DEMO_*`). Réduction
   du risque de collision, pas garantie.
 - `js/demo-activation.js` : `fusionnerDemoVersGlobaux` (push sans replace)

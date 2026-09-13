@@ -30,7 +30,7 @@ const GUIDAGE_TEXTES = {
     },
     'suivi-apercu-legacy': {
         titre: 'Pr\u00e9sences \u2014 Aper\u00e7u',
-        texte: 'Vue synth\u00e9tique de l\u2019assiduit\u00e9 du groupe\u00a0: taux de pr\u00e9sence global, tendances hebdomadaires et \u00e9tudiants \u00e0 surveiller. Les 627\u00a0pr\u00e9sences de la d\u00e9mo couvrent une session compl\u00e8te.'
+        texte: 'Vue synth\u00e9tique de l\u2019assiduit\u00e9 du groupe\u00a0: taux de pr\u00e9sence global, tendances hebdomadaires et \u00e9tudiants \u00e0 surveiller. Les 313\u00a0pr\u00e9sences de la d\u00e9mo couvrent une session compl\u00e8te.'
     },
     'calendrier-vue': {
         titre: 'Calendrier scolaire',
