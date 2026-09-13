@@ -1,10 +1,10 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 13 sept. à 14 h 30** – six lots menés : cinq livrés et poussés, le sixième commité (`d21d320f`) et en attente de sa relecture, de sa release et de son push. Comptes remesurés sur `BACKLOG.md` **de `main`** (`291216b7`) : **228 fiches ouvertes** (`grep -c '^- \[ \]'` = 229, moins le gabarit de la section « Notes »).
-> ⚠ **Le compte annoncé le 13 en début d'après-midi (234) était FAUX de 2** : il comptait les cases `- [ ]` sans distinguer les fiches des sous-cases indentées. Le bon compte se prend à la racine – `grep -c '^- \[ \]'` – moins le gabarit de la section « Notes ». L'artefact jumeau en annonçait 241, faux lui aussi : il comptait les fiches déjà livrées.
-> ⚠ **Le compte de 230 annoncé plus tôt le 13 portait une unité de trop** : la soustraction du gabarit n'avait pas été refaite. Deux entrées ont par ailleurs été corrigées à 14 h 30 – **#657** était encore listée ouverte alors qu'elle est partie en 1.140.4, et **#857** sort du document, fusionnée dans #553.
-> ⚠ **Ce document et l'artefact listent 230 entrées ouvertes, soit deux de plus que le backlog** : #575b et #575c y sont détaillées à part alors qu'elles partagent la case de #575. L'écart est voulu et mesuré ; il n'est pas une dérive du compte.
+> **Mis à jour le 13 sept. à 18 h 15** – **dix lots menés, et les dix sont en ligne.** Le serveur qui sert l'application publie `e3eafe1a` depuis 18 h 05 (mesuré chez l'hébergeur, pas dans le dépôt) : 1.140.6 et le lot des échelles sont donc ce que l'orthopédagogue ouvrira lundi.
+> **Compte : 224 fiches ouvertes**, remesuré sur `BACKLOG.md` de `main` (`e3eafe1a`). ⚠ **La soustraction est refaite, pas recopiée** : 225 cases `- [ ]` à la racine, dont **224 portent un numéro de fiche** ; la 225e est le gabarit `#XX` de la section « Notes », retrouvé par son contenu et non par la mémoire d'une version précédente.
+> ⚠ **Sept comptes annoncés dans la journée — 234, 241, 230, 228, 227, 226, 224 — et pas un n'a changé une décision.** Les premiers comptaient des sous-cases indentées ou des fiches déjà livrées. ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : dix lots, en ligne.
+> ⚠ **Ce document et l'artefact listent 226 entrées ouvertes, soit deux de plus que le backlog** : #575b et #575c y sont détaillées à part alors qu'elles partagent la case de #575. L'écart est voulu et mesuré ; il n'est pas une dérive du compte. La vérification se fait dans ce sens-là : 226 − 2 = 224, et c'est le même nombre que le backlog rend par un autre chemin.
 > ⛔ `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md` est **périmé** : les quatre questions sont closes depuis le 13. Ne pas le resservir.
 
 ## Journal des lots
@@ -43,11 +43,43 @@ Relecture croisée : les deux mutations reposées, chacune rougit une fois. **Un
 
 ⮕ **Ce que la retouche a trouvé en plus, et qui vaut pour tout le filet** : la tranche de l'Aide n'avait aucun garde de non-vide. Tant que ses assertions étaient positives, ça ne se voyait pas ; une assertion NÉGATIVE sur une tranche vide est vraie par construction. Un cas existant depuis le 10 sept. (l'export d'une échelle) était dans ce cas sans que personne le sache. Le garde ferme les deux.
 
-### Lot 6 – « la suggestion d'objectif ne nomme plus une lettre d'échelle » ⏳ COMMITÉ, PAS EN LIGNE
+### Lot 6 – « la suggestion d'objectif ne nomme plus une lettre d'échelle » ✅ LIVRÉ en 1.140.5
 
-Les trois chaînes de `js/interventions.js`, l'entrée de « Nouvelles », le commentaire de `scripts/release.mjs` et les deux bancs sont dans `main` (`d21d320f`, 13 sept.). **Reste dû, dans cet ordre** : la relecture croisée, la release patch avec son entrée « Nouvelles », le verdict Playwright pris Cowork fermé, le push. `main` a deux commits d'avance sur `origin/main` ; `version.json` est resté en `1.140.4` / `0913-1400`.
+Les trois chaînes de `js/interventions.js`, l'entrée de « Nouvelles », le commentaire de `scripts/release.mjs` et les deux bancs. **Relecture croisée verte, aucune retouche.** La question ouverte – le couplage bilan / suggestion passait par la lettre qui disparaît – est tranchée par la mesure : la mutation décisive (le premier seuil figé à 0,64) rougit, et elle rougit sur l'assertion *dérivée* avant la chaîne figée. **La preuve vit.**
 
-⚠ **Ce que la relecture doit regarder en premier** : le bloc B de `sentinelle-lot-5-interventions-cadrage-11` prouvait que le bilan et la suggestion bougent ENSEMBLE quand un seuil se déplace. Ce couplage passait par la lettre, qui disparaît. S'il ne tient plus que sur une chaîne remplacée, le cas survit mais la preuve est morte.
+⮕ Une de mes suppositions est tombée au passage : je croyais l'entrée « Nouvelles » mal placée ; la convention du fichier est « une entrée par version mineure », et un correctif n'ouvre pas de bloc.
+
+### Lot 7 – l'ancien éditeur d'échelles quitte `index.html` ✅ LIVRÉ, sans release (#520)
+
+Choisi parce qu'il ne demande ni arbitrage ni vérification à l'écran : le bloc visé était caché et mort à la lecture. Identifiants dupliqués dans le document : **8 → 0**, et une machine le vérifie seule désormais.
+
+**Ce que la mesure a corrigé de la fiche** : elle nommait cinq identifiants, et l'un d'eux (`btnDupliquerEchelle`) n'était pas dupliqué du tout. **Ce que la mesure a corrigé de MON compte** : j'annonçais cinq balises à double attribut `class` sur dix-sept ; la sentinelle en compte **six sur dix-neuf** – une balise porte ses deux `class` sur deux lignes, et mon `grep` ne la voyait pas. #787 est ramenée à treize cas.
+
+### Lot 8 – deux fiches relues contre leur livraison ✅ LIVRÉ (#803 cochée, #801 laissée ouverte)
+
+Aucun code. #803 est cochée. **#801 est restée OUVERTE, et c'est moi qui l'ai tranché** : deux de ses trois gestes étaient livrés, mais le défaut qui avait fait naître la fiche – le bandeau qui dit où sont les nouveautés au lieu d'y mener – était toujours à l'écran. La cocher aurait été prendre l'affirmation pour la preuve.
+
+⮕ De ce lot sort la **règle 10 du PROTOCOLE** et la fiche #858 : trente assertions négatives passaient sans rien éprouver.
+
+### Lot 9 – les assertions qui ne pouvaient pas échouer ✅ LIVRÉ en 1.140.6 (#858)
+
+Un banc qui cherche une absence dans une tranche de fichier est vrai par construction si la tranche est vide. Une fonction de découpe qui **refuse** de rendre une tranche vide remplace l'idiome, et un cliquet fige les découpes restantes. **Deux assertions étaient mortes pour de bon**, trouvées en observant l'exécution.
+
+**Ce que la mesure a corrigé de ma consigne** : mon compte de 112 découpes était faux – il y en avait **167**, et les deux mortes étaient précisément parmi les 55 que ma commande ne voyait pas, parce qu'elles s'écrivent sur deux lignes. Même cause que l'erreur du matin, le même jour.
+
+### Lot 10 – les huit conteneurs vides que le code remplissait ✅ LIVRÉ, sans release (#658 et #659)
+
+Dernier lot de la grappe des échelles. L'ancien éditeur de niveaux – celui qui dessinait ses boutons dans des boîtes que personne ne voyait – quitte l'application : huit conteneurs, ≈ 930 lignes de `js/echelles.js`, 18 règles de style. **Rien ne change à l'écran.** Deux clés de données cessent d'être écrites.
+
+**#659 s'est fermée par la mesure, sans une ligne de code** : sa chaîne d'écriture était déjà coupée par le lot 7. La fiche prévoyait un correctif ; il n'avait plus d'objet.
+
+**Relecture croisée verte, et pour la première fois PAR EXÉCUTION.** Le §5 de `CONSIGNE-DEMARRAGE-COWORK.md` affirmait que Cowork ne peut pas lancer la suite ; c'est faux depuis un clone partagé avec `npm install` à neuf dans `tests/`. Mesuré : 559 fichiers, 6 337 essais verts, puis les mutations reposées une à une – chacune rouge, témoin vert après restauration.
+
+⮕ **Le geste le plus risqué du lot, et il tient** : un banc a été supprimé. Son remplaçant n'est pas un autre banc, c'est la disparition de son sujet – les six fonctions dont il éprouvait la sérialisation n'existent plus nulle part, vérifié **par le contenu** (lecture entière de 1 031 fichiers) et non par le nom du fichier, l'erreur payée plus tôt dans la journée.
+
+⮕ **Ce que la mesure a corrigé de MON compte, troisième fois dans la journée** : j'ai signalé une règle de style `.outils-rangee` orpheline. Elle n'existe pas – la seule trace restante est un commentaire, et mon balayage ne distinguait pas le commentaire du code. Claude Code l'a relevé.
+
+⛔ **Ce qui revient à Grégoire sur ce lot** : l'écran des échelles n'a été regardé ni sur Safari ni sur iPad ; le **stock** déjà écrit dans sa base n'a pas été lu (`localStorage.getItem('configEchelle')`), et ne se répare pas d'office. Le verdict Playwright a été pris (code 0), mais **Cowork n'était pas fermé** : la condition habituelle n'est pas garantie.
 
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 
