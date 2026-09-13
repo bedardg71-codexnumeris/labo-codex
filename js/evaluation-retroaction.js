@@ -548,12 +548,11 @@ function genererRetroactionSpecifique() {
 // chemin unique de #542 lot 3 — celui qui connaît aussi l'échelle embarquée
 // d'une pratique configurable.
 //
-// ⚠ CE QUI RESTE, ET QUI NE PEUT PAS ÊTRE FAIT ICI : ce module teste encore les
-// codes EN TOUTES LETTRES à huit endroits — `=== 'I' || === 'D'` pour les défis,
-// `=== 'M' || === 'E'` pour « tous maîtrisés ». L'ORDRE se dérive d'une échelle ;
-// « quel niveau est faible » et « quel niveau est maîtrisé », non — c'est la
-// marque de maîtrise de #555. Le faire sans elle remplacerait un arbitrage codé
-// en dur par un autre. Même butée que B10 (`synthese-retroaction-data.js`).
+// ⮕ La MARQUE de maîtrise se lit elle aussi dans l'échelle depuis le lot 2 de
+// #555 (`79d913f3`, 28 août 2026) : les huit sites passent par `zoneDuNiveau`
+// (`_lecteurZoneBilan`). Ce module ne compare plus aucun code en toutes lettres ;
+// l'essai « le compte est ZÉRO » de `sentinelle-575-ordre-niveaux-derive-echelle`
+// le verrouille.
 
 /**
  * Le niveau d'un code dans l'échelle du bilan en cours — nom et rang.
