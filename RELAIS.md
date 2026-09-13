@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 14 H (Toronto) : 1.140.4 RELEASÉE (build `0913-1400`, `c189e97f`) — NON POUSSÉE ; #657, UN FICHIER js/ NEUF NE PEUT PLUS ENTRER SANS ÊTRE CHARGÉ
+
+> Sur `main`, au-dessus de `7247c20f` (`origin/main`) : `325dabcd` (le lot), `901ac297` (retouche de la relecture croisée de Cowork), `c189e97f` (release 1.140.4, intention **patch** : rien à l'écran), puis ce relais. **Contenu** — seulement `tests/` et `BACKLOG.md`, rien dans `index.html` ni `js/` hors du bump : `tests/unit/sentinelle-scripts-parsables.test.js` renommé `sentinelle-scripts-atteints-et-parsables.test.js`, second `describe` : tout `.js` du disque est atteint par un `<script src>` d'`index.html` OU par un littéral de chaîne du CODE d'un autre fichier `js/` (commentaires retirés par esbuild, désormais déclaré dans `tests/package.json`) ; `js/_archives/` hors périmètre par dossier ; une seule exception nommée (`pratique-interface.js`), gardée contre l'élargissement et la péremption. Break-tests : 3 mutations + contre-épreuve, toutes rouges, reposées à l'identique par Cowork. Vitest 557 / 6 332 après le commit du bump. **Pas d'entrée « Nouvelles ».** #657 cochée. Le bump a aussi avancé le jeton de `js/interventions.js` (b → c) sans que le fichier ait changé depuis 1.140.3 : un rechargement de plus, sans effet ; inférence, non vérifiée : `release.mjs` compare à l'avant-dernier commit de `version.json` (#675).
+>
+> **Reste** : (1) verdict Playwright complet sur le SHA de ce relais, **Cowork fermé**, puis push — feu vert de Grégoire ; (2) trou latent écrit en tête de `scriptsCharges`, non inscrit au BACKLOG (aucun symptôme) : le sens 1 compterait une balise `<script>` commentée comme un chargement — aucune aujourd'hui ; (3) le bloc 13 h 50 ci-dessous vaut tel quel (CI de `f1898c0a`, #551, #857, #602, #854). **Prochain numéro, fiche OU bug : #858.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 13 H 50 (Toronto) : 1.140.3 EN LIGNE (build `0913-1334`, `269fe347`) — POUSSÉE ; #746 + #551 (1.140.2) ET #847 (1.140.3)
 
 > **Poussé sur `origin/main`** au feu vert de Grégoire, après le verdict Playwright de Cowork (vert, Cowork fermé) : `f1898c0a..269fe347`. Sur `main`, en avance rapide : `07f0d74d` (1.140.2, fait dans un worktree retiré depuis), `a27b71af` (1.140.3), `269fe347` (retouche de la relecture croisée de Cowork, sans bump). ⚠ **Les « NON POUSSÉE » des blocs 1.140.1, 1.140.0 et 1.139.4 ci-dessous sont PÉRIMÉS** : tout est sur `origin/main`.
