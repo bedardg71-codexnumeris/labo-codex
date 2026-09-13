@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MIDI (Toronto) : 1.140.1 RELEASÉE (build `0913-1244`, `2102cd1a`) — NON POUSSÉE ; LOT « LA CHAÎNE ANTI-CACHE DIT LA VÉRITÉ SUR CE QU'ELLE A VÉRIFIÉ »
+
+> Sur `main` (avance rapide depuis `claude/lot-anticache-verite`, travaillée dans un worktree), au-dessus de `c2e5a1cf` (#856, poussé par l'autre session, `origin/main`) : `7d4cc62d` (le lot), `d16a61c4` (retouches de la relecture croisée de Cowork), `2102cd1a` (release 1.140.1, intention **patch** : rien à l'écran), puis ce relais. **Contenu** — seulement `scripts/` et `tests/`, aucun fichier de `js/` hors du bump : (1) #675 `release.mjs` part de l'avant-dernier commit de `version.json`, repli sur la racine ; (2) #600 le garde pre-commit dit « rien de stagé — RIEN VÉRIFIÉ », le `pre-push` distingue test rouge et erreur non gérée (premier banc de ce hook) ; (3) #547 le refus propose un jeton du jour du build ; (4) #826 un jeton déjà servi avec un autre contenu est refusé (toutes branches) ; (5) #602, moitié lecture : `importScripts`/`workerSrc` lus, chargements sans jeton NOMMÉS. Bancs sur dépôts jetables isolés de `GIT_*` (leçon #856, preuve sur leurre). Break-tests : 16 mutations, toutes rouges ; relecture Cowork : 7 mutations, aucune verte, publiable après une retouche (faite). Vitest 556 / 6 124 après le commit du bump. **Pas d'entrée « Nouvelles »** (invisible à l'usage).
+>
+> **Reste** : (1) verdict Playwright complet sur le SHA de ce relais, **Cowork fermé**, puis push — feu vert de Grégoire ; (2) **#602 reste OUVERTE** : poser les jetons de `libs/` (écrans à vérifier chez Grégoire) ; (3) #854 toujours ouverte (bloc 1.140.0 ci-dessous). **Prochain numéro, fiche OU bug : #857.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.140.0 RELEASÉE (build `0913-1042`, `05200d82`) — NON POUSSÉE ; UN SEUL PUSH POUR 1.139.3, 1.139.4 ET 1.140.0
 
 > **Décision de Grégoire** (relayée par l'autre session) : la fusion et la release de #853 sont confiées à cette session ; tout part dans UN push, à son feu vert, après un verdict Playwright complet pris **Cowork fermé**. Sur `main`, au-dessus du relais 1.139.4 (`140c0490`) : la branche `claude/853-delai-sur-reprise` en avance rapide (`76e4ee9a`, `9f3adc4d`, `a43af694`, `8ff669c0`), `05200d82` (release 1.140.0, intention **minor** : un réglage ajouté à la pratique), puis ce relais. Fait dans un worktree (`main` extrait hors de l'arbre principal).
