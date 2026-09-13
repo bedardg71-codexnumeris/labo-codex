@@ -4582,7 +4582,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
     Sentinelle `sentinelle-575-b10-ordre-synthese-pdf` (16 cas, **12 mutations, 12 rouges**), montée sur des
     échelles qui REPRENNENT les lettres I/D/M/E **dans un autre ordre** — le seul montage où une table en dur
     et une lecture d'échelle donnent des réponses opposées.
-  - [ ] **B10b · les six butées de #555 dans le même module** ⚠ **BUTE SUR #555** (rapport §3 n° 9).
+  - [x] **B10b · les six butées de #555 dans le même module** — LIVRÉ le 28 août 2026 par le lot 2 de #555 : `170db4c6` (ce module) et `79d913f3` (les huit lignes jumelles d'`evaluation-retroaction.js`). **La butée « à reprendre APRÈS #555 » est levée.** Constaté le 13 sept. 2026 par deux méthodes : l'historique (`git log -p`, lignes de CODE comparant à une lettre, commentaires écartés : 5 retirées en `170db4c6`, 8 en `79d913f3`, zéro depuis) et l'exécution (16 mutations réintroduisant un test de lettre, 16 rouges). (rapport §3 n° 9). Texte d'origine :
     Ce qui RESTE après B10a, mesuré au grep le 28 août : **six sites, quatorze comparaisons** en toutes
     lettres — `=== 'I' || === 'D'` pour les défis (`:509`, `:682`, `:899`), `=== 'M' || === 'E'` pour
     « tous maîtrisés » (`:517`, `:528`, `:682`), et `!== 'M' && !== 'E'` dans `construireForce` (`:587`).
@@ -4622,6 +4622,13 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
     l'avaient relevé. L'état connu est **verrouillé** par un test « exactement UNE occurrence restante » : il
     rougira le jour où on le corrigera, ce qui est le signal attendu. ⚠ Vérifier aussi les zones colorées du
     graphique lui-même (Chart.js), non auditées.
+    ⮕ **Mesuré le 13 sept. 2026 : la phrase n'est plus à l'écran depuis le 21 mars.** `4e38bcce` a retiré
+    `Zones colorées : ${texteZones}` de `profil-etudiant.js` ; le calcul a survécu au déménagement vers
+    `profil-etudiant-sections-affichage.js` sans jamais être rendu (deux occurrences : déclaration, affectation).
+    Le défaut VIVANT est dans les zones DESSINÉES : `creerGraphiqueIndividuel` ne pose pas `_zonesParCanvas`
+    (#752), donc `zonesPourChart` retombe sur l'échelle du trimestre (`obtenirEchelleUtilisateur`,
+    `find(e => e.parDefaut) || [0]`), et sur `ZONES_IDME` quand il n'y en a aucune. Périmètre à recadrer
+    avant la consigne.
   - [x] **Bilan de rétroaction** (rapport §3 n° 10) — LIVRÉ le 28 août 2026.
     `_NOMS_NIV_BILAN` et `_ORDRE_NIV_BILAN` (`evaluation-retroaction.js`) sont retirées. Elles
     imposaient l'échelle de Grégoire au bilan **remis à l'élève** : hors IDME, le libellé du niveau
@@ -4672,6 +4679,9 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   comparaisons** (`=== 'I' || === 'D'` pour les défis, `=== 'M' || === 'E'` pour « tous maîtrisés »).
   L'ORDRE se dérive d'une échelle ; « faible » et « maîtrisé », non. Un test CONSTATE ce compte de 18 :
   il rougira le jour où **#555** les retirera, et c'est le signal voulu.
+  ⮕ **13 sept. 2026 : B10b est LIVRÉ** (lot 2 de #555, `170db4c6` et `79d913f3`) ; les deux constats de
+  compte ci-dessus sont devenus des essais « le compte est ZÉRO ». Reste du lot 4 : le **septième site**
+  seul, recadré à sa sous-case.
 
 - [x] **#576 — Le bilan de rétroaction est VIDE quand la grille d'origine est introuvable, alors que le panneau d'à côté sait s'en passer.**
   **Trouvé par la porte terrain 2.6 du 28 août 2026, sur les données réelles d'H2026 de Grégoire** (captures

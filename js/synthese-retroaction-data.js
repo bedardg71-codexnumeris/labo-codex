@@ -30,12 +30,11 @@
     // `valeurCalcul`. Un code que l'échelle ne connaît pas n'a PAS de rang, et
     // l'appelant le dit plutôt que d'en inventer un.
     //
-    // ⚠ CE QUI RESTE, ET QUI NE PEUT PAS ÊTRE FAIT ICI : ce module teste encore
-    // les codes EN TOUTES LETTRES — `=== 'I' || === 'D'` pour les défis,
-    // `=== 'M' || === 'E'` pour « tous maîtrisés ». L'ORDRE se dérive d'une
-    // échelle ; « quel niveau est faible » et « quel niveau est maîtrisé », non.
-    // C'est la marque de maîtrise de #555. Le faire sans elle remplacerait un
-    // arbitrage codé en dur par un autre. Même butée que `evaluation-retroaction.js`.
+    // ⮕ La MARQUE de maîtrise se lit elle aussi dans l'échelle depuis le lot 2 de
+    // #555 (`170db4c6`, 28 août 2026) : « quel niveau est faible » et « quel niveau
+    // est maîtrisé » passent par `zoneDuNiveau` — voir « La zone d'un code » plus
+    // bas. Ce module ne compare plus aucun code en toutes lettres ; l'essai « le
+    // compte est ZÉRO » de `sentinelle-575-b10-ordre-synthese-pdf` le verrouille.
 
     // ⮕ #575 (lot 4 du plan SOLO) — `SCALE_FALLBACK` A ÉTÉ SUPPRIMÉE.
     //
