@@ -81,7 +81,7 @@ const VOCABULAIRES = {
         labelNiveau: 'Niveau R\u00e0I :',
         niveau2: 'Niveau 2 (Groupe cibl\u00e9)',
         niveau3: 'Niveau 3 (Individuel)',
-        placeholderTitre: 'Ex. Intervention Rigueur et Nuance',
+        placeholderTitre: 'Ex. Intervention sur deux critères ciblés',
         titreApercu: 'Aperçu du sous-groupe',
         titrePresences: 'Marquer les présences et notes individuelles',
         aidePresences: 'Coche les étudiant·es présent·es et documente tes observations spécifiques.',
@@ -1060,7 +1060,7 @@ function ouvrirIntervention(interventionId, options) {
                 <div style="display: flex; gap: 10px; align-items: start;">
                     <input type="text" id="objectifVise" class="controle-form" style="flex: 1;"
                            value="${echapperHtml(intervention.objectifVise || '')}"
-                           placeholder="Ex. Amener Structure au seuil D (65%)">
+                           placeholder="Ex. Amener un critère au seuil visé">
                     <button data-action="suggererObjectifIntervention" data-param="${interventionId}" class="btn btn-secondaire" style="white-space: nowrap;">Suggérer</button>
                 </div>
             </div>
