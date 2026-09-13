@@ -3576,6 +3576,12 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   « Stabiliser <critère> au-dessus de 75 % » (textes approuvés) ; seuils, noms `idme.*`, branches inchangés. **Stock nommé,
   non réparé** : les objectifs déjà enregistrés gardent l'ancienne phrase, lettre comprise — non mesuré chez Grégoire
   (ses données vivent dans son navigateur) ; 0 dans le pack démo. **La fiche reste OUVERTE.**
+  ⚠ **Fragilité NOMMÉE à la relecture croisée de Cowork (13 sept., 14 h 56), non corrigée à dessein** :
+  la protection contre un re-durcissement du premier seuil tient sur la SEULE assertion « déplacé à
+  0,66 » du bloc B de `sentinelle-lot-5-interventions-cadrage-11`. Dans `sentinelle-746-551` (a),
+  `seuils` vaut `null` et le repli EST 0,64 : un 0,64 figé y est indiscernable. Si le bloc B est un jour
+  allégé, le défaut revient en silence. (Mutation Mf de Cowork : rouge sur l'assertion dérivée de
+  lot-5 B, l. 187 — le couplage bilan/suggestion par le nombre est porteur.)
 
   ### ⚠ LA MESURE DU 27 AOÛT (après-midi) CORRIGE CET ITEM SUR DEUX POINTS
 
