@@ -83,7 +83,9 @@ describe('2 · hors service, la carte est là, telle qu\'en 1.137.0', () => {
         expect(html).toContain('Sur quoi porte l\'intervention ? Pré-cochés selon les défis communs du sous-groupe.');
         expect(html).toContain('<h4 class="intervention-mt-0" data-tooltip="interv-objectif-vise">Objectif visé</h4>');
         expect(html).toContain('Qu\'espères-tu voir changer à la suite de cette intervention ?');
-        expect(html).toContain('placeholder="Ex. Amener Structure au seuil D (65%)"');
+        // ↻ #847 (13 sept. 2026) : les exemples gris ne citent plus les critères de Grégoire — textes approuvés par lui.
+        expect(html).toContain('placeholder="Ex. Amener un critère au seuil visé"');
+        expect(html).toContain('placeholder="Ex. Intervention sur deux critères ciblés"');
         expect(html).toContain('value="Relire son plan"');
         expect(html).toMatch(/<button data-action="suggererObjectifIntervention" data-param="I1" class="btn btn-secondaire" style="white-space: nowrap;">Suggérer<\/button>/);
         const cases = [...html.matchAll(/<input type="checkbox" class="critere-cible-cb" value="([^"]+)" (checked)?/g)].map(m => [m[1], !!m[2]]);
@@ -149,3 +151,6 @@ describe('4 · le sous-titre du bilan', () => {
 //   C3 objectif réécrit à '' quand son champ est absent (le code de 1.137.0)             → 1 rouge (le stock)
 //   C4 l'ancien sous-titre du bilan d'une rencontre                                      → 1 rouge
 //   C5 condition du masque à `true` (la carte masquée pour tout le monde)                → 3 rouges (bloc 2 ×2, témoin)
+// 13 septembre 2026 (#847, exemples gris) — même procédure :
+//   C6 l'ancien exemple de l'objectif (« Amener Structure au seuil D (65%) »)            → 1 rouge (bloc 2)
+//   C7 l'ancien exemple du titre (« Intervention Rigueur et Nuance »)                    → 1 rouge (bloc 2)
