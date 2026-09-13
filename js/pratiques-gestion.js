@@ -1292,6 +1292,13 @@ function remplirFormulairePratique(pratique) {
     }
     setCheckbox('mat-jeton-ciblee-actif', jetons.cibleeActif !== false);
     setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || ''); // 🆕 Beta 95.7 : Pas de défaut, l'utilisateur doit choisir
+    // #853 (relecture de Cowork) : jetons réglés à la création (assistant, import) → ce formulaire
+    // est inerte pour le moteur. On le DIT, et on désactive ses champs, au lieu de laisser cocher en vain.
+    const jetonsAilleurs = jetonsReglesAilleurs(pratique);
+    const noteAilleurs = document.getElementById('mat-jetons-regles-ailleurs');
+    if (noteAilleurs) noteAilleurs.classList.toggle('u-hide', !jetonsAilleurs);
+    CHAMPS_JETONS_MAT.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = jetonsAilleurs; });
+    document.querySelectorAll('input[name="mat-reprise-originale"]').forEach(r => { r.disabled = jetonsAilleurs; });
 
     // 🆕 Beta 95.4 : Afficher le panneau métadonnées CC
     const panneauMeta = document.getElementById('panneauMetadonneesPratique');
@@ -1325,6 +1332,21 @@ function getCheckbox(id) {
     const el = document.getElementById(id);
     return el ? el.checked : false;
 }
+
+/**
+ * #853 (relecture de Cowork, 13 sept. 2026) — la pratique porte-t-elle des jetons réglés
+ * AILLEURS que dans ce formulaire ? Le moteur (`obtenirConfigJetonsPratique`) lit
+ * `configuration.jetons` (assistant), puis `config.jetons`, et seulement ensuite le bloc plat
+ * `jetons` que ce formulaire écrit. Si l'un des deux premiers existe, le formulaire est inerte :
+ * on le dit à l'écran et on n'écrit rien (cause profonde : #854).
+ */
+function jetonsReglesAilleurs(pratique) {
+    return !!(pratique && ((pratique.configuration && pratique.configuration.jetons)
+        || (pratique.config && pratique.config.jetons)));
+}
+
+const CHAMPS_JETONS_MAT = ['mat-jetons-actif', 'mat-jetons-nombre', 'mat-jeton-delai-actif', 'mat-delai-duree',
+    'mat-delai-sur-reprise', 'mat-jeton-reprise-actif', 'mat-jeton-ciblee-actif', 'mat-ciblee-plafond'];
 
 /**
  * Affiche la description taxonomique selon le type de pratique
@@ -1631,6 +1653,9 @@ function appliquerFormulaireDansCollection(lues) {
     configurations[index].configuration.echelleId = getValeurChamp('mat-echelle-id');
 
     // Système de jetons
+    // #853 (relecture de Cowork) : jetons réglés ailleurs (assistant, import) → le moteur ne lit pas le
+    // bloc plat ; on n'en fabrique pas un qu'il ignorerait (cause profonde : #854).
+    if (!jetonsReglesAilleurs(configurations[index])) {
     const repriseOriginale = document.querySelector('input[name="mat-reprise-originale"]:checked');
     configurations[index].jetons = {
         actif: getCheckbox('mat-jetons-actif'),
@@ -1643,6 +1668,7 @@ function appliquerFormulaireDansCollection(lues) {
         cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),
         cibleePlafond: getValeurChamp('mat-ciblee-plafond') || ''  // 🆕 Beta 95.7 : pas de défaut
     };
+    }
 
     // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
     if (typeof ajouterContributeurSiNecessaire === 'function') {
