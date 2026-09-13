@@ -26,6 +26,7 @@
             titre: 'Interventions : rien n\'est écrit avant «&nbsp;Enregistrer&nbsp;»',
             items: [
                 'Dans Suivi › Interventions, planifier n\'enregistre plus rien tant que tu n\'as pas cliqué Enregistrer ; le bilan avant / après lit les mêmes seuils que le reste de l\'application.',
+                'Le bandeau de nouvelle version affiche le même numéro que la carte «&nbsp;Nouveautés&nbsp;», et une fois fermé, il ne revient plus à chaque ouverture.',
             ]
         },
         {

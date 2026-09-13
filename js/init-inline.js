@@ -98,10 +98,11 @@ function definirModeExpertFromEl(el) {
  */
 
 // === CONFIGURATION ===
-// VERSION_MAJEURE et BUILD_ID sont lus depuis version.json au chargement (source unique)
-// Les valeurs ici servent de fallback si version.json n'est pas disponible
-let VERSION_MAJEURE = '1.139.0';
-let BUILD_ID = '0912-1259';
+// VERSION_MAJEURE et BUILD_ID sont lus depuis version.js au chargement : la version du
+// code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
+// version.js manque ; release.mjs les tient à jour.
+let VERSION_MAJEURE = '1.139.1';
+let BUILD_ID = '0913-0743';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -110,11 +111,44 @@ const CLE_VERSION_VUE = 'monitorage-version-vue';
 const CLE_BUILD_VU = 'monitorage-build-vu';
 
 /**
+ * #850 (13 sept. 2026) — LES DEUX REPÈRES « VU » PASSENT PAR `db`.
+ *
+ * `db.js` réhydrate localStorage depuis IDB à chaque démarrage, en JSON. Une clé
+ * passée un jour par IDB y revient donc sous la forme `"0807-1529"`, guillemets
+ * compris (mesuré chez Grégoire : repère du 7 août). Lue brute, elle ne valait
+ * aucun build : bandeau « Nouvelle version chargée » à CHAQUE ouverture, pastille
+ * toujours rouge. Écrite brute à la fermeture, elle était écrasée au démarrage
+ * suivant par la copie IDB. `db.getSync` relit les deux formes (JSON et brute) ;
+ * `db.setSync` atteint IDB, même avant la fin de l'init (#392).
+ */
+function lireRepereVu(cle) {
+    try {
+        if (window.db && typeof window.db.getSync === 'function') {
+            const valeur = window.db.getSync(cle, null);
+            return typeof valeur === 'string' ? valeur : null;
+        }
+        return localStorage.getItem(cle);
+    } catch (e) {
+        return null;
+    }
+}
+
+function ecrireRepereVu(cle, valeur) {
+    try {
+        if (window.db && typeof window.db.setSync === 'function') {
+            window.db.setSync(cle, valeur);
+        } else {
+            localStorage.setItem(cle, valeur);
+        }
+    } catch (e) { /* stockage indisponible */ }
+}
+
+/**
  * Vérifie s'il y a des nouveautés non vues
  */
 function verifierNouveautes() {
-    const versionVue = localStorage.getItem(CLE_VERSION_VUE);
-    const buildVu = localStorage.getItem(CLE_BUILD_VU);
+    const versionVue = lireRepereVu(CLE_VERSION_VUE);
+    const buildVu = lireRepereVu(CLE_BUILD_VU);
 
     const nouvelleVersionMajeure = versionVue !== VERSION_MAJEURE;
     const nouveauBuild = buildVu !== BUILD_ID;
@@ -153,8 +187,8 @@ function afficherModalNouveautes() {
             modal.classList.add('actif');
         }
         // Marquer version ET build comme vus
-        localStorage.setItem(CLE_VERSION_VUE, VERSION_MAJEURE);
-        localStorage.setItem(CLE_BUILD_VU, BUILD_ID);
+        ecrireRepereVu(CLE_VERSION_VUE, VERSION_MAJEURE);
+        ecrireRepereVu(CLE_BUILD_VU, BUILD_ID);
     } else {
         // Juste un nouveau build → ouvrir aussi le modal (avec section testeurs)
         const modal = document.getElementById('modalNouveautes');
@@ -162,7 +196,7 @@ function afficherModalNouveautes() {
             modal.classList.add('actif');
         }
         // Marquer le build comme vu
-        localStorage.setItem(CLE_BUILD_VU, BUILD_ID);
+        ecrireRepereVu(CLE_BUILD_VU, BUILD_ID);
     }
 
     mettreAJourPastille();
@@ -193,7 +227,8 @@ function fermerModalNouveautes() {
 }
 
 /**
- * Affiche le numéro de build dans l'entête
+ * Affiche la version chargée partout où elle s'écrit : l'entête, Réglages ›
+ * À propos, et la page À propos de l'aide.
  */
 function afficherBuildNumero() {
     const spanVersion = document.getElementById('version-entete');
@@ -204,45 +239,60 @@ function afficherBuildNumero() {
     if (span) {
         span.textContent = `(Build ${BUILD_ID})`;
     }
+    [['apropos-version-beta', 'apropos-version-build'],
+     ['aide-apropos-version-beta', 'aide-apropos-version-build']].forEach(function (ids) {
+        const elBeta = document.getElementById(ids[0]);
+        const elBuild = document.getElementById(ids[1]);
+        if (elBeta) elBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
+        if (elBuild) elBuild.textContent = BUILD_ID;
+    });
 }
 
 /**
- * Charge version.json pour synchroniser VERSION_MAJEURE et BUILD_ID
- * puis rafraîchit l'en-tête. Source unique de vérité.
+ * #849 (13 sept. 2026) — LA VERSION AFFICHÉE EST CELLE DU CODE CHARGÉ.
  *
- * Sur file:// : utilise XMLHttpRequest (fetch est bloqué par CORS dans Chrome,
- * mais XHR fonctionne sur Safari). Détecte les scripts périmés et tente
- * un rechargement automatique.
+ * Rapport de Grégoire, 7 h 16 : le bandeau disait « 1.135.0 (Build 0911-2145) »,
+ * la carte « Nouveautés » « 1.139.0 (Build 0912-1259) », et le code en ligne
+ * était 1.139.0. Sur le site, cette fonction lisait `version.json` et en
+ * ÉCRASAIT VERSION_MAJEURE et BUILD_ID : la carte, dessinée avant la réponse,
+ * montrait le code chargé ; le bandeau et le rapport de bug, après, montraient
+ * ce que `version.json` avait répondu — une copie périmée ce matin-là (source
+ * non établie : la requête est pourtant en `no-store`).
+ *
+ * ⮕ L'identité vient de `version.js`, chargé par `index.html` avec le même jeton
+ * `?v=` que les autres scripts : il décrit le code qui tourne, sur le site comme
+ * en file://. `version.json` ne sert plus qu'à détecter une version PLUS RÉCENTE
+ * sur le serveur (`verifierMiseAJourDistante`) ; il n'écrit plus la version.
+ * Sans `version.js`, les valeurs de repli ci-dessus (tenues par release.mjs).
  */
-async function chargerVersionJSON() {
+function etablirVersionChargee() {
+    // ⚠⚠ #495 (26 août 2026) — LE COMMENTAIRE PRÉCÉDENT ÉTAIT FAUX.
+    //
+    // Il disait « XHR synchrone (fonctionne sur Safari file://) ». Mesuré sous
+    // WebKit ce jour-là : il ne fonctionne pas. Ni lui, ni le XHR asynchrone,
+    // ni `fetch` — les trois échouent sur un fichier local et émettent
+    // « … due to access control checks ». `version.json` n'a donc JAMAIS été lu
+    // sur le Safari ni l'iPad de Grégoire : l'application tournait sur les
+    // valeurs de repli ci-dessus, que `release.mjs` tient à jour.
+    //
+    // Ça marchait — mais ça privait #285 de sa référence : comparer le snapshot
+    // d'un script à un BUILD_ID qui vient du script lui-même ne détecte rien.
+    //
+    // ⮕ `version.js` est un SCRIPT, et un script local se charge sans
+    // restriction (vérifié sous WebKit, zéro erreur). Il est généré par
+    // `release.mjs` en même temps que `version.json` : les deux ne peuvent pas
+    // diverger, puisqu'ils sont écrits ensemble.
+    if (window.__VERSION__) {
+        if (window.__VERSION__.beta) VERSION_MAJEURE = window.__VERSION__.beta;
+        if (window.__VERSION__.build) BUILD_ID = window.__VERSION__.build;
+    }
+    window.VERSION_MAJEURE = VERSION_MAJEURE;
+    window.BUILD_ID = BUILD_ID;
+
     if (window.location.protocol === 'file:') {
-        // ⚠⚠ #495 (26 août 2026) — LE COMMENTAIRE PRÉCÉDENT ÉTAIT FAUX.
-        //
-        // Il disait « XHR synchrone (fonctionne sur Safari file://) ». Mesuré sous
-        // WebKit ce jour-là : il ne fonctionne pas. Ni lui, ni le XHR asynchrone,
-        // ni `fetch` — les trois échouent sur un fichier local et émettent
-        // « … due to access control checks ». `version.json` n'a donc JAMAIS été lu
-        // sur le Safari ni l'iPad de Grégoire : l'application tournait sur les
-        // valeurs de repli ci-dessus, que `release.mjs` tient à jour.
-        //
-        // Ça marchait — mais ça privait #285 de sa référence : comparer le snapshot
-        // d'un script à un BUILD_ID qui vient du script lui-même ne détecte rien.
-        //
-        // ⮕ `version.js` est un SCRIPT, et un script local se charge sans
-        // restriction (vérifié sous WebKit, zéro erreur). Il est généré par
-        // `release.mjs` en même temps que `version.json` : les deux ne peuvent pas
-        // diverger, puisqu'ils sont écrits ensemble.
-        if (window.__VERSION__) {
-            if (window.__VERSION__.beta) VERSION_MAJEURE = window.__VERSION__.beta;
-            if (window.__VERSION__.build) BUILD_ID = window.__VERSION__.build;
-        }
-
-        window.VERSION_MAJEURE = VERSION_MAJEURE;
-        window.BUILD_ID = BUILD_ID;
-
         // BACKLOG #285 — Détecter les scripts périmés en cache Safari file://.
         // Chaque script critique inscrit dans cet objet doit embarquer un snapshot
-        // du build. Comparer chaque snapshot au BUILD_ID lu depuis version.json :
+        // du build. Comparer chaque snapshot au BUILD_ID lu depuis version.js :
         // - snapshot != BUILD_ID → périmé
         // - snapshot absent (undefined) → AUSSI considéré périmé, car le script
         //   est attendu dans la liste mais n'a pas exposé son snapshot. C'est
@@ -287,49 +337,9 @@ async function chargerVersionJSON() {
                 }
             } catch (e) { /* ignore */ }
         }
-
-        afficherBuildNumero();
-        var spanBeta = document.getElementById('apropos-version-beta');
-        var spanBuild = document.getElementById('apropos-version-build');
-        if (spanBeta) spanBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
-        if (spanBuild) spanBuild.textContent = BUILD_ID;
-        var spanBetaAide = document.getElementById('aide-apropos-version-beta');
-        var spanBuildAide = document.getElementById('aide-apropos-version-build');
-        if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
-        if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
-        signalerBuildChargeSiNouveau();
-        return;
     }
 
-    // === Protocole HTTP/HTTPS — fetch normal ===
-    try {
-        const r = await fetch('version.json', { cache: 'no-store' });
-        if (!r.ok) return;
-        const data = await r.json();
-        if (data.beta) VERSION_MAJEURE = data.beta;
-        if (data.build) BUILD_ID = data.build;
-        window.VERSION_MAJEURE = VERSION_MAJEURE;
-        window.BUILD_ID = BUILD_ID;
-        afficherBuildNumero();
-        var spanBeta = document.getElementById('apropos-version-beta');
-        var spanBuild = document.getElementById('apropos-version-build');
-        if (spanBeta) spanBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
-        if (spanBuild) spanBuild.textContent = BUILD_ID;
-        var spanBetaAide = document.getElementById('aide-apropos-version-beta');
-        var spanBuildAide = document.getElementById('aide-apropos-version-build');
-        if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
-        if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
-    } catch (e) {
-        // Hors-ligne : on garde les valeurs fallback
-        var spanBeta = document.getElementById('apropos-version-beta');
-        var spanBuild = document.getElementById('apropos-version-build');
-        if (spanBeta) spanBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
-        if (spanBuild) spanBuild.textContent = BUILD_ID;
-        var spanBetaAide = document.getElementById('aide-apropos-version-beta');
-        var spanBuildAide = document.getElementById('aide-apropos-version-build');
-        if (spanBetaAide) spanBetaAide.textContent = 'Bêta publique ' + VERSION_MAJEURE;
-        if (spanBuildAide) spanBuildAide.textContent = BUILD_ID;
-    }
+    afficherBuildNumero();
     signalerBuildChargeSiNouveau();
 }
 
@@ -351,11 +361,8 @@ document.addEventListener('DOMContentLoaded', function() {
         conteneur.innerHTML = genererChangelogHTML();
     }
 
-    // Afficher le numéro de build dans l'entête (fallback immédiat)
-    afficherBuildNumero();
-
-    // Puis synchroniser depuis version.json (source de vérité)
-    chargerVersionJSON();
+    // Version du code chargé (#849), puis bandeau si ce build n'a pas encore été vu
+    etablirVersionChargee();
 
     // Mettre à jour l'affichage de la pastille (no-op si accueil pas encore rendu)
     mettreAJourPastille();
@@ -415,7 +422,7 @@ function fermerBandeauMiseAJour() {
     // Un bandeau « au chargement » fermé = ce build est vu. Le distant, lui, n'est
     // pas encore chargé : le marquer vu ferait taire le bandeau du prochain démarrage.
     if (bandeauBuildLocal) {
-        try { localStorage.setItem(CLE_BUILD_VU, bandeauBuildLocal); } catch (e) { /* stockage indisponible */ }
+        ecrireRepereVu(CLE_BUILD_VU, bandeauBuildLocal);
         bandeauBuildLocal = null;
         mettreAJourPastille();
     }
@@ -423,19 +430,33 @@ function fermerBandeauMiseAJour() {
 
 /**
  * Au chargement : signaler le build si ce n'est pas le dernier VU.
- * Appelée une fois BUILD_ID établi (les deux branches de chargerVersionJSON).
+ * Appelée une fois BUILD_ID établi (etablirVersionChargee).
  */
 function signalerBuildChargeSiNouveau() {
-    let buildVu = null;
-    try { buildVu = localStorage.getItem(CLE_BUILD_VU); } catch (e) { return; }
+    const buildVu = lireRepereVu(CLE_BUILD_VU);
     if (buildVu === null) {
         // Première visite : rien à annoncer, on prend le repère.
-        try { localStorage.setItem(CLE_BUILD_VU, BUILD_ID); } catch (e) { /* ignore */ }
+        ecrireRepereVu(CLE_BUILD_VU, BUILD_ID);
         return;
     }
     if (buildVu !== BUILD_ID) {
         afficherBandeauVersion(VERSION_MAJEURE, BUILD_ID, false);
     }
+}
+
+/**
+ * Vrai si le numéro `a` (« 1.139.0 ») est plus récent que `b`. Comparaison
+ * numérique, champ par champ : « 1.10.0 » est plus récent que « 1.9.0 ».
+ */
+function versionPlusRecente(a, b) {
+    const pa = String(a).split('.').map(Number);
+    const pb = String(b).split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const x = pa[i] || 0;
+        const y = pb[i] || 0;
+        if (x !== y) return x > y;
+    }
+    return false;
 }
 
 /**
@@ -448,17 +469,20 @@ async function verifierMiseAJourDistante() {
         const reponse = await fetch('version.json', { cache: 'no-store' });
         if (!reponse.ok) return;
         const data = await reponse.json();
-        if (data.build && data.build !== BUILD_ID) {
+        // #849 — seulement une version PLUS RÉCENTE que le code chargé : une
+        // réponse périmée (1.135.0 servie à un code 1.139.0, le 13 sept.) ne
+        // s'annonce pas comme une mise à jour.
+        if (data.beta && versionPlusRecente(data.beta, VERSION_MAJEURE)) {
             miseAJourDejaSignalee = true;
-            afficherBandeauVersion(data.beta || VERSION_MAJEURE, data.build, true);
+            afficherBandeauVersion(data.beta, data.build || '', true);
         }
     } catch (e) {
         // Silencieux si hors-ligne ou erreur réseau
     }
 }
 
-// Au chargement : pas de bandeau (le build chargé est déjà actif). Seul le polling
-// distant peut le déclencher, pour une vraie mise à jour déployée pendant la session.
+// Une mise à jour déployée PENDANT la session : seul le polling la voit. Le bandeau
+// « au chargement » est posé par signalerBuildChargeSiNouveau.
 document.addEventListener('DOMContentLoaded', function() {
     // Polling distant : première vérif après 30s, puis toutes les 5 min
     setTimeout(verifierMiseAJourDistante, 30000);
