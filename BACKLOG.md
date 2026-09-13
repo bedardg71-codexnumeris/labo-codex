@@ -2314,7 +2314,12 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   **Break-tests** (script en série, « mutation posée » vérifiée avant chaque lecture, restauration `cmp` identique) : un
   `<div id="tableauNiveaux">` reposé ⮕ 658 A (×2) et 520 B rouges ; un `getElementById('tableauNiveaux')` reposé ⮕ 658 B
   rouge ; un `db.get('niveauxEchelle')` ⮕ 658 C rouge ; un `db.set('configEchelle')` ⮕ 520 C rouge ; `afficherTableauNiveaux`
-  redéfinie ⮕ 658 D rouge. Cinq sur cinq ; témoin vert après restauration. Vitest 559 / 6 337.
+  redéfinie ⮕ 658 D rouge. Cinq sur cinq ; témoin vert après restauration. Puis, au rituel de fin de session, trois
+  mutations sur les bancs réancrés : une règle du coin retirée de `styles.css` ⮕ lot-C E.b rouge ; une écriture de plus
+  par la file ⮕ 522-lot2b C.c rouge ; une découpe `slice(indexOf(` ajoutée au lot C ⮕ cliquet 858 rouge. **Total : huit
+  mutations, huit rouges.** Vitest 559 / 6 337. Verdict Playwright pris par `scripts/pousser.sh` sur `f17bfa27` : code 0.
+  **Relecture croisée de Cowork (≈ 17 h 40) : verte par EXÉCUTION** — Vitest 559 / 6 337 dans un clone neuf, cinq
+  break-tests reposés par elle (sept essais rouges), suppression de `522-lot2a` vérifiée par le contenu entier.
   ⚠ **Restent, hors lot, et c'est délibéré** : `dupliquerEchelle` et `supprimerEchelle` n'avaient de déclencheur que dans
   le rendu caché — AVANT ce lot. Leurs sentinelles (transport, #555, #468, caractérisation #476) relèvent du chantier
   duplication : l'arbitrage de #586 du 28 août (option B, au titre de #476) tient, et ce lot ne l'a pas rouvert.
