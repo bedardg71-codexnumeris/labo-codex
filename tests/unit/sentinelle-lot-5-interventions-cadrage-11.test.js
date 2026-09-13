@@ -9,7 +9,8 @@
  *   A'. Le STOCK : une intervention `jamaisSauvegardee: true` d'avant le lot n'est ni rendue ni comptée (liste, compte
  *      par élève), elle est dite en console, et elle n'est JAMAIS effacée — pas même par l'Enregistrer d'une voisine.
  *   B. Le bilan avant / après : avec les seuils par défaut, 0,645 → « D 65 % », et la suggestion d'objectif du même
- *      écran le traite en D (« au seuil M ») ; un seuil déplacé déplace les deux ensemble.
+ *      écran le traite en D (elle vise la borne haute de D, 75 %) ; un seuil déplacé déplace les deux ensemble.
+ *      Depuis #551 (13 sept.), la suggestion ne nomme plus de lettre : le couplage se vérifie par le NOMBRE.
  *   C. Les notes individuelles (décision de Grégoire, 11 sept., 17 h 47) : l'élève parti du groupe reste, grisé,
  *      « (n'est plus dans le groupe) » — son nom si sa fiche est encore au trimestre, son DA sinon, « --- » en
  *      anonymisation ; le compteur compte les lignes rendues.
@@ -162,18 +163,29 @@ describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', ()
         return b.document.getElementById('objectifVise').value;
     };
 
-    it('seuils par défaut : 0,645 → « D 65 % » avant ET après ; la suggestion le traite en D (« au seuil M »)', () => {
+    // Le couplage : la suggestion vise le seuil qui borne PAR LE HAUT le niveau que le bilan affiche. Il passait par la
+    // lettre (« D » au bilan ⇔ « au seuil M ») ; la lettre retirée de la suggestion (#551), il passe par le nombre : la
+    // cible attendue se DÉDUIT de la lettre lue dans le bilan et des seuils du banc, pas d'une chaîne recopiée.
+    const cibleAuDessusDe = (lettre, seuils) => ({ I: seuils['idme.insuffisant'], D: seuils['idme.developpement'] })[lettre];
+    const suggestionAttendue = (bilan, seuils) => 'Amener Structure à ' + Math.round(cibleAuDessusDe(bilan[0][0], seuils) * 100) + ' %';
+
+    it('seuils par défaut : 0,645 → « D 65 % » avant ET après ; la suggestion vise la borne haute de D (75 %)', () => {
         const b = banc({ interventions: [complete()] });
         b.win.ouvrirIntervention('I_B');
-        expect(cellules(b.conteneur().innerHTML)).toEqual(['D 65', 'D 65']);
-        expect(suggerer(b)).toBe('Amener Structure au seuil M (75%)');
+        const bilan = cellules(b.conteneur().innerHTML);
+        expect(bilan).toEqual(['D 65', 'D 65']);
+        expect(suggerer(b)).toBe(suggestionAttendue(bilan, SEUILS_DEFAUT));
+        expect(suggerer(b)).toBe('Amener Structure à 75 %');   // le texte approuvé, figé
     });
 
-    it('idme.insuffisant déplacé à 0,66 : le bilan dit « I 65 % » et la suggestion vise le seuil D (66 %) — les deux ensemble', () => {
-        const b = banc({ interventions: [complete()], seuils: Object.assign({}, SEUILS_DEFAUT, { 'idme.insuffisant': 0.66 }) });
+    it('idme.insuffisant déplacé à 0,66 : le bilan dit « I 65 % » et la suggestion vise 66 % — les deux ensemble', () => {
+        const seuils = Object.assign({}, SEUILS_DEFAUT, { 'idme.insuffisant': 0.66 });
+        const b = banc({ interventions: [complete()], seuils });
         b.win.ouvrirIntervention('I_B');
-        expect(cellules(b.conteneur().innerHTML)).toEqual(['I 65', 'I 65']);
-        expect(suggerer(b)).toBe('Amener Structure au seuil D (66%)');
+        const bilan = cellules(b.conteneur().innerHTML);
+        expect(bilan).toEqual(['I 65', 'I 65']);
+        expect(suggerer(b)).toBe(suggestionAttendue(bilan, seuils));
+        expect(suggerer(b)).toBe('Amener Structure à 66 %');
     });
 
     it('la lettre suit le pourcentage affiché : 0,8449 s\'affiche « 84 % » et se lit M ; 0,845 s\'affiche « 85 % » et se lit E', () => {

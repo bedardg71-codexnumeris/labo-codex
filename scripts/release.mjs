@@ -238,6 +238,14 @@ function fichiersModifies(racine) {
       // La racine tient les deux cas : si elle EST ce commit unique, rien de ce
       // qu'il porte n'a jamais ete servi sous une autre URL.
       const racines = lignes(git(['rev-list', '--max-parents=0', 'HEAD']));
+      // ⚠ CONSEQUENCE VISIBLE, ET VOULUE : quand ce script tourne, le bump neuf
+      // n'est pas encore commite ; commits[0] est donc la release PRECEDENTE et
+      // commits[1] celle d'avant. Chaque release re-bumpe ainsi les jetons des
+      // fichiers deja bumpes par la precedente (mesure : 1.140.4 a avance
+      // js/interventions.js, intouche depuis 1.140.3). Ce n'est PAS un
+      // off-by-one a corriger : commits[0] rouvre #675 mot pour mot quand ce
+      // commit EST HEAD. Sur-bumper coute un rechargement ; sous-bumper sert un
+      // fichier perime en silence (relecture Cowork, 13 sept. 2026).
       const repere = commits[1] || racines[racines.length - 1];
       depuisRelease = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css']));
       libsDepuis = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'libs']));
