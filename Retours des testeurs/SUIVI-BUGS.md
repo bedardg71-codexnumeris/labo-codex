@@ -133,6 +133,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (13 septembre 2026, suite — la vue « Cours (tous groupes) » fond de nouveau les groupes)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 851 | Grégoire (`BUG_"grégoire"_2026-09-13_08-47-10.txt`) | 13 sept. 2026, 8 h 47 | 13 sept. 2026 | à renseigner au bump | Entête « Cours (tous groupes) » : Suivi n'affiche que le groupe précédent | 2.1 filtrage : `obtenirContexteCoursActif` (`js/modes.js`) rabattait la vue fusionnée sur le groupe-cours resté `actif` (correction #130, depuis le 3 juin) → court-circuit quand `infoCours._modeCours === true` ; lecture seule, aucun stock. Sentinelle `sentinelle-851-vue-tous-groupes.test.js` (break-test rouge) ; spec #130 vert |
+
 ## Corrigés (13 septembre 2026 — le bandeau de version dit la version du code chargé, et se tait une fois fermé)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
