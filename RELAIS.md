@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 17 H 15 (Toronto) : 1.140.6 EN LIGNE (build `0913-1642`) — POUSSÉE `2bc43ed1..d7e88b5c` DEPUIS UN CLONE PROPRE ; UNE AUTRE SESSION TRAVAILLE DANS L'ARBRE PRINCIPAL
+
+> **Poussé sur `origin/main`** : `1ace8d6d` (#858), `3f2dade5` (#801), `c0c89e57` (release 1.140.6), `264d47cf` et `d7e88b5c` (relais). **Verdict Playwright local complet sur `d7e88b5c`, Cowork fermé : code 0**, aucune rougeur nouvelle, 0 échec connu (16 h 57 → 17 h 07).
+>
+> ⚠ **LE PUSH EST PARTI D'UN CLONE PARTAGÉ (`git clone --shared`), PAS DE L'ARBRE PRINCIPAL : LE HOOK PRE-PUSH N'A DONC PAS TOURNÉ. Autorisé par Grégoire.** Motif : une autre session Claude Code (`monitorage-v6-ef`) a du travail NON COMMITÉ dans l'arbre principal depuis 17 h 07 min 49 s — `js/echelles.js`, `index.html`, `styles.css`, des bancs, `PROTOCOLE.md` : apparemment la grappe `js/echelles.js` (#658). Le hook teste l'ARBRE DE TRAVAIL, pas le commit poussé : il rougissait sur son lot en cours (15 échecs, dont `sentinelle-522-lot2b` et `lot-C`). **Compensé** : Vitest 559 / 6 346 vert dans le clone, sur `d7e88b5c` exact, arbre vierge. Le verdict Playwright a fini 8 secondes AVANT les premières écritures de code de l'autre session — inférence forte par les heures de modification ; pendant le verdict, seul `PROTOCOLE.md` (documentation, que Playwright ne lit pas) avait changé.
+>
+> **À `monitorage-v6-ef`, ou à qui reprendra son travail** : ton arbre porte 18 fichiers non commités qui ne sont pas de ce lot ; rien n'y a été touché. Ton pre-push restera rouge tant que ton lot n'est pas vert. Ce relais-ci est commité et poussé depuis le clone, puis l'arbre principal est avancé en avance rapide : seul `RELAIS.md` y change.
+>
+> **Reste** : la grappe `js/echelles.js` — déjà ouverte par l'autre session ; #859 (niveau 2, sans symptôme vécu).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 16 H 45 (Toronto) : 1.140.6 RELEASÉE (build `0913-1642`, `c0c89e57`) — NON POUSSÉE ; #858 ET #801 LIVRÉS
 
 > Sur `main`, au-dessus de `2bc43ed1` (`origin/main`) : `1ace8d6d` (#858, tests/ seulement), `3f2dade5` (#801), `c0c89e57` (release 1.140.6, intention **patch** ; « Nouvelles » : un item au bloc 1.140), puis ce relais. Vitest 559 / 6 346 après le commit du bump ; spec `bandeau-maj-chargement` 6/6 sous WebKit.
