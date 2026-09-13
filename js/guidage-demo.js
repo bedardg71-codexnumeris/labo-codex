@@ -14,7 +14,7 @@
 const GUIDAGE_TEXTES = {
     'apercu-contenu': {
         titre: 'Tableau de bord \u2014 \u00c9tat des lieux',
-        texte: 'Ce tableau pr\u00e9sente les indicateurs ACPE (Assiduit\u00e9, Compl\u00e9tion, Performance, Engagement) pour tes 20\u00a0\u00e9tudiants fictifs. Les barres gradu\u00e9es montrent la distribution du groupe. Survole un point pour voir le profil d\u2019un \u00e9tudiant.'
+        texte: 'Ce tableau pr\u00e9sente les indicateurs ACPE (Assiduit\u00e9, Compl\u00e9tion, Performance, Engagement) pour tes 10\u00a0\u00e9tudiants fictifs. Les barres gradu\u00e9es montrent la distribution du groupe. Survole un point pour voir le profil d\u2019un \u00e9tudiant.'
     },
     'suivi-liste': {
         titre: 'Liste des individus',

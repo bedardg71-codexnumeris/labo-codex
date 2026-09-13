@@ -7,7 +7,7 @@
 
 ## 1. Rôle
 
-Fournir un jeu complet de données de démonstration (20 étudiants, 11 productions, 200 évaluations, 627 présences, 3 grilles, 2 échelles, 1 carte mentale d'alignement) publié sous licence **CC BY-NC-SA 4.0** et exposé via un toggle sur l'accueil. Le matériel sert de modèle pédagogique (modélisation → pratique guidée → autonomie) et peut être dupliqué par l'utilisateur pour devenir la base de ses propres documents, avec attribution « Inspiré de » conservée automatiquement.
+Fournir un jeu complet de données de démonstration (10 étudiants, 11 productions, 101 évaluations, 313 présences, 3 grilles, 2 échelles, 1 carte mentale d'alignement) publié sous licence **CC BY-NC-SA 4.0** et exposé via un toggle sur l'accueil. Le matériel sert de modèle pédagogique (modélisation → pratique guidée → autonomie) et peut être dupliqué par l'utilisateur pour devenir la base de ses propres documents, avec attribution « Inspiré de » conservée automatiquement.
 
 ---
 
@@ -119,8 +119,8 @@ db.getSync('demo-actif', null)                     // 'true' en démo, null sino
 db.getSync('trimestreActif', null)                 // 'demo' en démo
 db.getSync('infoCours', null)                      // cours démo en démo, cours réel sinon
 db.getSync('groupeCoursActif', null).id            // 'GC_DEMO' en démo
-db.getSync('demo_groupeEtudiants', []).length      // doit être 20 (toujours)
-db.getSync('demo_presences', []).length            // doit être 627 (toujours)
+db.getSync('demo_groupeEtudiants', []).length      // doit être 10 (toujours, depuis #852)
+db.getSync('demo_presences', []).length            // doit être 313 (toujours, depuis #852)
 Array.isArray(db.getSync('demo_presences'))        // doit être true
 db.getSync('migration-phase5-done', null)          // '1' après le premier boot post-5.E
 ```

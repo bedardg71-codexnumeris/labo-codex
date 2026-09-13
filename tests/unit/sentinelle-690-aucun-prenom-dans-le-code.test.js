@@ -99,7 +99,7 @@ describe('#690 · aucun nom de personne dans le code applicatif', () => {
     //
     // ⮕ POURQUOI PAS LE PACK DE DÉMONSTRATION COMME TÉMOIN. C'était l'idée de
     // départ, et la mesure du 2 septembre l'a écartée : le pack ne contient AUCUN
-    // de ces prénoms. Ses vingt élèves fictifs sont des figures historiques et
+    // de ces prénoms. Ses dix élèves fictifs sont des figures historiques et
     // culturelles (#351), pas les collègues dont ce lot retire les noms. Un
     // témoin qu'on n'a pas mesuré est une supposition de plus.
 
