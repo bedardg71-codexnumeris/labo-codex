@@ -16,7 +16,17 @@
 > **Le verrou `.git/index.lock`** (0 octet, 17 h 10 min 06 s) signalé par `monitorage-v6-bb` : aucun processus git vivant, retiré à 17 h 33 ; l'arbre avancé en avance rapide sur `4fe96394` avant le commit.
 > Fichiers de Cowork laissés hors du commit : `PROTOCOLE.md`, `CONSIGNE-DEMARRAGE-COWORK.md`, `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-15h35.md`.
 >
-> **Reste** : #859 (niveau 2) ; la lecture de `configEchelle` dans la base réelle de Grégoire, s'il veut décider du stock.
+> **POUSSÉ** : `4fe96394..f17bfa27`. Verdict Playwright pris par le script sur `f17bfa27` : code 0, 0 échec connu, 0 instable
+> (17 h 28 → 17 h 32). ⚠ Cowork n'a pas été fermé pour ce verdict : la condition « Cowork fermé » n'est pas garantie.
+> **Relecture croisée de Cowork (≈ 17 h 40) : VERTE PAR EXÉCUTION** — Vitest 559 / 6 337 dans un clone neuf (`git clone
+> --shared`, `npm install` dans `tests/`), cinq break-tests reposés par elle (sept essais rouges), retrait de `522-lot2a`
+> vérifié sur le contenu entier. Écart de compte réconcilié : la fiche #658 dit maintenant huit mutations, huit rouges.
+> La règle `.outils-rangee` qu'elle croyait orpheline n'est qu'un commentaire (`styles.css:17420`). Ses trouvailles de
+> niveau 3 (commentaires périmés : `cartouches.js:48`, `:3372`, `evaluation.js:56`, `travaux-outils.js:99`) sont à corriger
+> seulement au passage.
+>
+> **Reste** : #859 (niveau 2) ; la lecture de `configEchelle` dans la base réelle de Grégoire, s'il veut décider du stock ;
+> l'écran des échelles sur Safari et iPad.
 
 ---
 
