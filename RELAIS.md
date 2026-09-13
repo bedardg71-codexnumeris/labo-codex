@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.139.2 RELEASÉE (build `0913-0858`, `9b705951`) — PACK DÉMO À 10 ÉLÈVES (#852)
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.139.3 RELEASÉE (build `0913-0924`, `15f389f1`) — VUE « TOUS GROUPES » (#851) ET LOT « LES JETONS DE REPRISE NE MENTENT PLUS » (#725, #617, #724, #720)
+
+> Sur `main`, au-dessus de `105dd995` (poussé par l'autre session) : `03f3db4a` (#851), la fusion `0c2c58c1` de la branche `claude/lot-jetons-reprise` (`828618b1`, lot fait dans un worktree retiré depuis ; branche gardée), `1c17f5dd` (retouches de tests de la relecture croisée de Cowork + fiche #853), `15f389f1` (release 1.139.3), puis ce relais. **Contenu** : (1) #851 — `obtenirContexteCoursActif` (`js/modes.js`) rabattait la vue « Cours (tous groupes) » sur le groupe-cours resté `actif` (correction #130, depuis le 3 juin) → court-circuit sur `infoCours._modeCours === true`, lecture seule ; (2) le lot des jetons — un seul fichier de `js/` (`js/evaluation-jetons.js`) : persistance stricte `=== true` (les refus `'quota'`/`'error'` passaient pour des succès), succès et corbeille APRÈS l'écriture dans `retirerJetonReprise`, `delier` après l'écriture dans `appliquerJetonReprise`, garde d'entrée sur `remplaceeParId`/`reconcilieParDoublon`, reprise née sans les champs hérités. Sentinelles `sentinelle-851-vue-tous-groupes`, `sentinelle-725-617-724-720-jetons-de-reprise` (17 essais) ; G2/G3/G5/G6 du banc d'audit retournés. Break-tests : 7 mutations au total, toutes rouges (dont M-c′ et M-f après la relecture). Vitest 554 / 6 057 après le commit du bump. Stock compté en lecture seule sur le pack démo : 0 sur les trois défauts ; rien d'écrit chez personne.
+>
+> **Reste** : (1) verdict Playwright complet sur le SHA de ce relais, **Cowork fermé** (PROTOCOLE règle 8), puis push ; (2) **#853 à Grégoire** — un délai peut-il être accordé SUR une reprise ? (`appliquerJetonDelai` refuse sur `repriseDeId`) ; (3) #721 (jetons personnalisés, clé nue) attend toujours Grégoire, hors lot ; (4) les fichiers de Cowork (`CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md`) restent non commités, à Grégoire. **Prochain numéro, fiche OU bug : #854.**
+
+---
+
+## 13 SEPT. 2026, MATIN (Toronto) : 1.139.2 RELEASÉE (build `0913-0858`, `9b705951`) — PACK DÉMO À 10 ÉLÈVES (#852)
 
 > Sur `main` : `2408a809` (lot #852) puis `9b705951` (release 1.139.2) puis ce relais ; push après le verdict Playwright complet, rendu dans un worktree détaché propre (jeton déposé via `VERDICT_PLAYWRIGHT` dans `scripts/.verdict-playwright.json` de l'arbre principal). **Contenu** : `js/pack-demo-20.js` → `js/pack-demo-10.js` (version interne 21.0) ; garde DEMO004, 006, 007, 010, 011, 015, 016, 017, 019, 020 ; DEMO007 → Félix Leclerc, DEMO010 → Gabrielle Roy (quatre champs, prose comprise). 10 élèves, 101 évaluations, 313 lignes de présence sur 32 dates. Références, comptes de l'Aide, du glossaire, du guidage et de la popup, six sentinelles, la spec de la saisie en démo : à jour. Jetons `?v=` de `js/modes.js` remis à la main après `release.mjs` (fichier modifié, non commité, par une autre session : son #851 part avec sa propre release).
 >
