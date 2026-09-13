@@ -871,24 +871,26 @@ describe('G · reprise, retrait, héritage', () => {
         expect(ok).toBe(true); expect(avant).toBe(87.43); expect(apres).toBe(63.66);   // avant #706 : 86.57 → 63.04
         expect(orig.remplaceeParId).toBeUndefined(); expect(orig.archivee).toBeUndefined();
     });
-    it('G2 · (N2) la reprise HÉRITE de `jetonDelaiApplique` : après un jeton de délai puis une reprise, l\'élève a « 2 » délais utilisés pour un seul accordé', () => {
+    it('G2 · (N2, ↻ #720) la reprise ne recopie plus `jetonDelaiApplique` : après un jeton de délai puis une reprise, l\'élève a « 1 » délai utilisé pour un accordé (avant #720 : 2)', () => {
         const jeu = jeuSOM(); jeu.evaluations = [ev('EV_ORIG', DA.SOM, 'P1', 60, 'D', { jetonDelaiApplique: true, delaiAccorde: true })];
         const b = monter(jeu, { avecJetons: true });
         const avant = b.win.compterJetonsUtilises(DA.SOM, 'delai');
         const reprise = b.win.appliquerJetonReprise('EV_ORIG');
         const apres = b.win.compterJetonsUtilises(DA.SOM, 'delai');
         noter('G2', { avant, apres, repriseHerite: reprise && reprise.jetonDelaiApplique, repriseNote: reprise && reprise.noteFinale, repriseVerrou: reprise && reprise.verrouillee });
-        expect(avant).toBe(1); expect(apres).toBe(2);
+        expect(avant).toBe(1); expect(apres).toBe(1);   // avant #720 : 2
+        expect(reprise.jetonDelaiApplique).toBeUndefined(); expect(reprise.delaiAccorde).toBeUndefined();
         expect(reprise.noteFinale).toBe(60); expect(reprise.verrouillee).toBe(false);
     });
-    it('G3 · (N5) une originale déjà « remplacée » par réconciliation (#360) reçoit un jeton de reprise : la reprise naît avec `remplaceeParId` hérité — invisible au calcul', () => {
+    it('G3 · (N5, ↻ #724) une originale déjà « remplacée » par réconciliation (#360) ne reçoit plus de jeton de reprise : refus, rien d\'écrit (avant #724 : reprise créée avec `remplaceeParId` hérité — invisible au calcul)', () => {
         const jeu = jeuSOM(); jeu.evaluations = [ev('EV_SURV', DA.SOM, 'P1', 80, 'M'), ev('EV_DOUBLON', DA.SOM, 'P1', 80, 'M', { remplaceeParId: 'EV_SURV', reconcilieParDoublon: true })];
         const b = monter(jeu, { avecJetons: true });
         const reprise = b.win.appliquerJetonReprise('EV_DOUBLON');
         const p = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
-        noter('G3', { repriseCreee: !!reprise, repriseRemplaceePar: reprise && reprise.remplaceeParId, repriseReconciliee: reprise && reprise.reconcilieParDoublon, P: p });
-        expect(reprise).toBeTruthy();
-        expect(reprise.remplaceeParId).toBe('EV_SURV');
+        noter('G3', { repriseCreee: !!reprise, nbEvals: b.store.test_evaluationsSauvegardees.length, notifs: b.notifs.map(n => n.type + ':' + n.t), P: p });
+        expect(reprise).toBeNull();   // avant #724 : reprise créée, remplaceeParId === 'EV_SURV'
+        expect(b.store.test_evaluationsSauvegardees.map(e => e.id)).toEqual(['EV_SURV', 'EV_DOUBLON']);
+        expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
     });
     it('G4 · (N8) `archiverOriginale: false` supprime l\'originale et laisse `repriseDeId` pointer un id disparu ; retirer ensuite le jeton nettoie sans restaurer', () => {
         const jeu = jeuSOM(); jeu.evaluations = [ev('EV_ORIG', DA.SOM, 'P1', 60, 'D')];
@@ -901,19 +903,19 @@ describe('G · reprise, retrait, héritage', () => {
         expect(reprise.repriseDeId).toBe('EV_ORIG'); expect(origSubsiste).toBe(false);
         expect(apres.repriseDeId).toBeUndefined(); expect(apres.noteFinale).toBe(60);
     });
-    it('G5 · (H2, #563) écriture refusée au retrait : « succès » notifié AVANT l\'échec, puis « Modification non enregistrée »', () => {
+    it('G5 · (H2, #563, ↻ #725) écriture refusée au retrait : SEULE « Modification non enregistrée » est notifiée (avant #725 : « succès » d\'abord, puis l\'erreur)', () => {
         const b = monter(jeuSOM(), { avecJetons: true, refuserEcriture: true });
         const ok = b.win.retirerJetonReprise('EV_S2_NEW');
         noter('G5', { ok, notifs: b.notifs.map(n => n.type + ':' + n.t) });
         expect(ok).toBe(false);
-        expect(b.notifs.map(n => n.type)).toEqual(['succes', 'erreur']);
+        expect(b.notifs.map(n => n.type)).toEqual(['erreur']);   // avant #725 : ['succes', 'erreur']
     });
-    it('G6 · (#617) les fichiers de la reprise partent à la corbeille AVANT l\'écriture ; écriture refusée → fichier à la corbeille, évaluation intacte', () => {
+    it('G6 · (↻ #617) écriture refusée au retrait : le fichier de la reprise RESTE actif, l\'évaluation aussi (avant #617 : fichier à la corbeille, évaluation intacte)', () => {
         const b = monter(jeuSOM(), { avecJetons: true, refuserEcriture: true, avecFichiers: true, store: { test_fichiersTravaux: [{ id: 'F_REP', evaluationId: 'EV_S2_NEW', etudiantDA: DA.SOM, productionId: 'P2' }] } });
         b.win.retirerJetonReprise('EV_S2_NEW');
         const repriseSubsiste = !!b.store.test_evaluationsSauvegardees.find(e => e.id === 'EV_S2_NEW');
         noter('G6', { fichiers: b.fichiers, repriseSubsiste });
-        expect(b.fichiers).toEqual([{ id: 'F_REP', geste: 'corbeille' }]);
+        expect(b.fichiers).toEqual([]);   // avant #617 : [{ id: 'F_REP', geste: 'corbeille' }]
         expect(repriseSubsiste).toBe(true);
     });
     it('G7 · (N6, N7, H3) lire le statut des jetons ÉCRIT la clé NUE `jetonsEtudiants` ; « attribuer » un jeton prédéfini y écrit aussi, sans que le compte affiché en tienne compte', () => {
