@@ -1,19 +1,28 @@
 /**
- * SENTINELLE #520 — `index.html` NE PORTE AUCUN IDENTIFIANT DUPLIQUÉ.
+ * SENTINELLE #520 — `index.html` NE PORTE AUCUN IDENTIFIANT DUPLIQUÉ, ET LA
+ * CONFIGURATION D'ÉCHELLE N'EST PLUS APLATIE EN SILENCE.
  *
  * Jusqu'au 13 sept. 2026, un bloc `u-hide` « ANCIEN SYSTÈME (Caché par défaut,
- * gardé pour compatibilité) » doublait huit identifiants de l'éditeur
- * d'échelles : apercuEchelle, champAutreEchelle, nomEchelleContainer,
- * nomEchelleTemplate, selectEchelleTemplate, seuilReussite, tableauNiveaux,
- * typeEchelle. `getElementById` rend la PREMIÈRE occurrence : c'était l'éditeur
- * vivant, mais seulement par l'ordre du fichier — une mine au premier
- * réordonnancement. Le bloc est retiré : 8 identifiants dupliqués → 0.
+ * gardé pour compatibilité) » doublait huit identifiants : apercuEchelle,
+ * champAutreEchelle, nomEchelleContainer, nomEchelleTemplate,
+ * selectEchelleTemplate, seuilReussite, tableauNiveaux, typeEchelle.
+ * `getElementById` rend la PREMIÈRE occurrence. ⚠ Ce n'était PAS l'éditeur
+ * vivant, sauf pour `nomEchelleTemplate` (le champ Nom) : les sept autres
+ * étaient des `<div>` VIDES d'un autre bloc caché, « Conteneurs cachés pour
+ * compatibilité ». L'éditeur vivant porte d'autres ids (tableauNiveauxEchelle,
+ * apercuEchelleNiveaux, conteneurEditionEchelle…). Les deux blocs étaient morts,
+ * le second doublement. Le premier est retiré : 8 identifiants dupliqués → 0.
  *
- * ⮕ Le cliquet est à zéro : un identifiant dupliqué, où qu'il soit dans le
- *   fichier, rougit en se nommant.
+ * ⚠⚠ CE N'ÉTAIT PAS INOFFENSIF. `#typeEchelle` étant un `<div>`, `changerTypeEchelle`
+ * appelait `sauvegarderConfigEchelle`, qui réécrivait la clé nue `configEchelle`
+ * aplatie (`notePassage` et `codesPersonnalises` vides, `typeEchelle` perdu s'il
+ * n'avait jamais été posé) juste après que `chargerEchelleTemplate` y eut copié
+ * `echelle.config`. L'ablation emporte `#notePassageContainer` : la garde mordait
+ * désormais à chaque appel, et les deux fonctions sont retirées. SOURCE TARIE ;
+ * le stock déjà aplati n'est pas réparé (fiche #520).
  *
- * BREAK-TEST attendu : réintroduire un second `id="nomEchelleTemplate"` n'importe
- * où → A rougit en le nommant ; B aussi (compte 2 au lieu de 1).
+ * BREAK-TESTS attendus : un second `id="nomEchelleTemplate"` → A et B rougissent ;
+ * une seconde écriture de `configEchelle` → C rougit.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -23,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const HTML = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
+const ECHELLES = readFileSync(path.join(racineProjet, 'js/echelles.js'), 'utf8');
 
 /** Compte des attributs `id` des balises ouvrantes (pas `data-id`, pas `aria-*`). */
 function compterIds() {
@@ -46,12 +56,32 @@ describe('#520 · A — aucun identifiant dupliqué dans index.html', () => {
 });
 
 describe('#520 · B — les huit ex-doublons survivent, une fois chacun', () => {
-    it('l\'éditeur vivant (et ses conteneurs de compatibilité) garde ses huit ids', () => {
+    it('le champ Nom de l\'éditeur et les sept conteneurs de compatibilité gardent leur id', () => {
         const compte = compterIds();
         for (const id of HUIT) expect(compte.get(id) || 0, id).toBe(1);
     });
 
     it('le bloc « ANCIEN SYSTÈME » des échelles est parti', () => {
         expect(HTML).not.toContain('ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité)');
+    });
+});
+
+describe('#520 · C — la clé nue `configEchelle` n\'est plus aplatie', () => {
+    it('un seul écrivain reste : `chargerEchelleTemplate`, qui y copie `echelle.config`', () => {
+        const ecritures = [...ECHELLES.matchAll(/db\.(?:set|setSync|modifier)\(\s*'configEchelle'/g)];
+        expect(ecritures.length, 'écritures de configEchelle dans echelles.js').toBe(1);
+        const debut = ECHELLES.indexOf('async function chargerEchelleTemplate(');
+        const fin = ECHELLES.indexOf('\nasync function ', debut + 1);
+        // Règle 10 : la tranche doit exister avant qu'on y situe quoi que ce soit —
+        // un marqueur renommé rendrait −1 et la position passerait à vide.
+        expect(debut, 'chargerEchelleTemplate introuvable dans echelles.js').toBeGreaterThanOrEqual(0);
+        expect(fin - debut, 'le corps de chargerEchelleTemplate').toBeGreaterThan(1500);
+        expect(ecritures[0].index > debut && ecritures[0].index < fin,
+            'l\'écriture restante doit être celle de chargerEchelleTemplate').toBe(true);
+    });
+
+    it('les deux fonctions qui l\'aplatissaient sont parties', () => {
+        expect(ECHELLES).not.toMatch(/function\s+sauvegarderConfigEchelle\s*\(/);
+        expect(ECHELLES).not.toMatch(/function\s+changerTypeEchelle\s*\(/);
     });
 });
