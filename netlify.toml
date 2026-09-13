@@ -72,7 +72,7 @@
 #      ou `.css` modifié depuis la release précédente, arbre de travail compris ;
 #   3. la sentinelle #825 (`tests/unit/sentinelle-825-ouverture-immuable.test.js`)
 #      refuse une référence sans `?v=` — dans `index.html` comme dans les deux
-#      chargements dynamiques (`pack-demo-20.js`, `heic-worker.js`, jeton = build)
+#      chargements dynamiques (`pack-demo-10.js`, `heic-worker.js`, jeton = build)
 #      — et refuse, au pre-push, que ces deux fichiers-là changent sans release
 #      (leur jeton est le build : sans release, même URL, contenu neuf).
 # Un fichier modifié change donc d'URL ; l'ancienne peut rester en cache un an,

@@ -1170,7 +1170,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Labo Codex embarque un jeu complet de données de démonstration : un cours fictif « Écriture et littérature », 20 étudiants, 11 productions, 200 évaluations, 627 présences, 3 grilles, 2 échelles et une carte mentale d'alignement pédagogique. Coche la case « Données démo » sur l'accueil pour activer ce matériel et explorer l'outil sans toucher à tes vraies données."
+                contenu: "Labo Codex embarque un jeu complet de données de démonstration : un cours fictif « Écriture et littérature », 10 étudiants, 11 productions, 101 évaluations, 313 présences, 3 grilles, 2 échelles et une carte mentale d'alignement pédagogique. Coche la case « Données démo » sur l'accueil pour activer ce matériel et explorer l'outil sans toucher à tes vraies données."
             },
             {
                 type: 'texte',

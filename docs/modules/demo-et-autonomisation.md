@@ -15,7 +15,7 @@ Fournir un jeu complet de données de démonstration (20 étudiants, 11 producti
 
 | Fichier | Rôle |
 |---|---|
-| `js/pack-demo-20.js` | Pack de données démo (`PACK_DEMARRAGE`) — 1.14 Mo, 14 clés top-level. Lazy-loadé par `demo-namespace.js`. |
+| `js/pack-demo-10.js` | Pack de données démo (`PACK_DEMARRAGE`) — 0,63 Mo (10 élèves depuis #852), 16 clés top-level. Lazy-loadé par `demo-namespace.js`. |
 | `js/demo-namespace.js` | Phase 1 : peuple `demo_*` en permanence au boot (idempotent via flag `demo-version-installee`). Contient aussi la constante `CARTE_DEMO_ALIGNEMENT`. |
 | `js/demo-activation.js` | Phases 5.B/5.C/5.D/5.E : pilote le toggle de l'accueil. Seule source de vérité pour l'activation/désactivation. |
 

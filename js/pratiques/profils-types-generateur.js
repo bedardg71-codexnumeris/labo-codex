@@ -21,7 +21,7 @@
      la distinction « jetons sur exercices, pas sur les terminales » reste invisible (§2).
 
    SORTIE : { profils, productions, evaluations } — forme calée sur les enregistrements
-   réels (cf. pack-demo-20.js) pour être consommée TELLE QUELLE par le moteur via
+   réels (cf. pack-demo-10.js) pour être consommée TELLE QUELLE par le moteur via
    l'injection mémoire de simulerIndices (#326 R2/Étape 2).
 
    ⚠️ Le corpus produit des productions de type 'artefact-portfolio' (+ 1 'terminale') :

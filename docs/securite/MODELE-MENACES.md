@@ -1221,7 +1221,7 @@ Pas de payload exécutable, pas de destruction de données, pas de fuite. Une at
 
 ##### Récit narratif condensé
 
-Un attaquant fabrique un fichier `pack-demo-21.js` (numéro plausible suite à `pack-demo-20.js`) qui imite la structure officielle, mais ajoute des grilles modifiées ou un payload. Il distribue le fichier comme « mise à jour officielle du pack démo », par exemple via un faux courriel imitant la communication Labo Codex. Un enseignant qui sait qu'une mise à jour est attendue télécharge et installe.
+Un attaquant fabrique un fichier `pack-demo-11.js` (numéro plausible suite à `pack-demo-10.js`) qui imite la structure officielle, mais ajoute des grilles modifiées ou un payload. Il distribue le fichier comme « mise à jour officielle du pack démo », par exemple via un faux courriel imitant la communication Labo Codex. Un enseignant qui sait qu'une mise à jour est attendue télécharge et installe.
 
 ##### Fiche technique
 
