@@ -37,7 +37,6 @@
    - #tableauNiveaux : Conteneur du tableau des niveaux
    - #apercuEchelle : Conteneur de l'aperçu visuel
    - #btnDupliquerEchelle : Bouton dupliquer
-   - #codesPersonnalises : Input pour codes personnalisés
    
    LocalStorage utilisé:
    - 'echellesTemplates' : Array des échelles sauvegardées
@@ -782,7 +781,6 @@ async function initialiserModuleEchelles() {
  * 
  * UTILISÉ PAR:
  * - initialiserModuleEchelles()
- * - await enregistrerCommeEchelle()
  */
 async function chargerEchellesTemplates() {
     const select = document.getElementById('selectEchelleTemplate');
@@ -968,88 +966,6 @@ async function sauvegarderNomEchelle() {
 }
 
 /**
- * Enregistre l'échelle actuelle comme template
- * Sauvegarde complète dans localStorage
- * 
- * FONCTIONNEMENT:
- * 1. Validation du nom (obligatoire)
- * 2. Récupération des niveaux et config actuels
- * 3. Création ou mise à jour de l'échelle
- * 4. Sauvegarde dans localStorage
- * 5. Mise à jour de l'interface
- * 
- * UTILISÉ PAR:
- * - Bouton «Enregistrer comme échelle»
- * 
- * VALIDATION:
- * - Nom obligatoire
- * - Niveaux valides (via localStorage)
- */
-async function enregistrerCommeEchelle() {
-    const nomEchelle = document.getElementById('nomEchelleTemplate')?.value?.trim();
-
-    if (!nomEchelle) {
-        alert('Le nom de l\'échelle est obligatoire');
-        return;
-    }
-
-    await db.modifier(cle('echellesTemplates'), async (lues) => {
-        const echelles = lues || [];
-
-        // Vérifier si on modifie une échelle existante
-        if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
-            // Mise à jour d'une échelle existante
-            const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
-            if (index !== -1) {
-                // CRITIQUE: Utiliser echelleTemplateActuelle.niveaux (version à jour avec modifications récentes)
-                // au lieu de db.getSync('niveauxEchelle') (ancienne version obsolète)
-                echelles[index] = {
-                    ...echelleTemplateActuelle,
-                    nom: nomEchelle,
-                    niveaux: echelleTemplateActuelle.niveaux.map(n => ({ ...n })),
-                    dateModification: new Date().toISOString()
-                };
-            }
-        } else {
-            // Nouvelle échelle - utiliser niveauxEchelle de localStorage (comportement normal pour création)
-            const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
-            const config = await db.get('configEchelle') ||  {};
-
-            const nouvelleEchelle = {
-                id: genererIdUnique('ECH_'),
-                nom: nomEchelle,
-                niveaux: niveaux.map(n => ({ ...n })),
-                config: { ...config },
-                dateCreation: new Date().toISOString(),
-                dateModification: new Date().toISOString(),
-                dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle échelle dans bibliothèque par défaut
-            };
-
-            echelles.push(nouvelleEchelle);
-            echelleTemplateActuelle = nouvelleEchelle;
-        }
-
-        return echelles;
-    }, []);
-
-    // Recharger le select et sélectionner l'échelle actuelle
-    await chargerEchellesTemplates();
-    await afficherToutesLesEchellesNiveaux();
-
-    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
-    await afficherListeEchelles();
-
-    document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
-
-    notifications.succes(`Échelle "${nomEchelle}" sauvegardée !`);
-
-    // Retourner à l'accueil après la sauvegarde
-    setTimeout(() => {
-        annulerEditionEchelle();
-    }, 1500); // Attendre 1.5s pour que l'utilisateur voie la notification
-}
-
-/**
  * Supprime une échelle template
  * 
  * FONCTIONNEMENT:
@@ -1140,7 +1056,6 @@ async function chargerConfigurationEchelle() {
  * 
  * APPELÉE PAR:
  * - Changement dans les champs de configuration
- * - await enregistrerCommeEchelle()
  * 
  * CONFIG SAUVEGARDÉE:
  * - typeEchelle
@@ -1638,50 +1553,6 @@ async function reinitialiserNiveauxDefaut() {
     notifications.succes('Échelle réinitialisée aux valeurs par défaut');
 }
 
-/**
- * Sauvegarde les niveaux avec validation
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les niveaux depuis localStorage
- * 2. Valide la cohérence (code, nom, min<max)
- * 3. Affiche les erreurs si nécessaire
- * 4. Confirme si valide
- * 
- * UTILISÉ PAR:
- * - Bouton «Sauvegarder les niveaux»
- * 
- * VALIDATION:
- * - Code et nom obligatoires
- * - Min doit être < Max
- * - Tous les niveaux vérifiés
- * 
- * RETOUR:
- * - Alerte avec liste d'erreurs si invalide
- * - Notification de succès si valide
- */
-async function sauvegarderNiveaux() {
-    const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
-
-    // Vérifier la cohérence
-    let erreurs = [];
-    niveaux.forEach((niveau, i) => {
-        if (!niveau.code || !niveau.nom) {
-            erreurs.push(`Niveau ${i + 1}: Code et nom obligatoires`);
-        }
-        // Permettre min === max seulement pour le niveau 0 (min=0, max=0)
-        if (niveau.min > niveau.max || (niveau.min === niveau.max && niveau.min !== 0)) {
-            erreurs.push(`Niveau ${i + 1}: Min doit être < Max (sauf pour niveau 0: min=0, max=0)`);
-        }
-    });
-
-    if (erreurs.length > 0) {
-        alert('Erreurs à corriger:\n' + erreurs.join('\n'));
-        return;
-    }
-
-    notifications.succes('Échelle de performance sauvegardée !');
-}
-
 /* ===============================
    🎨 APERÇU VISUEL
    =============================== */
@@ -1723,72 +1594,6 @@ function afficherApercuEchelle(niveaux) {
             <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
         </div>
     `).join('');
-}
-
-/* ===============================
-   🔄 GÉNÉRATION DE NIVEAUX PERSONNALISÉS
-   =============================== */
-
-/**
- * Génère automatiquement des niveaux à partir de codes
- * Permet de créer rapidement une échelle personnalisée
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les codes séparés par virgules
- * 2. Crée un niveau pour chaque code
- * 3. Répartit automatiquement les pourcentages
- * 4. Applique une couleur par défaut
- * 5. Affiche et sauvegarde
- * 
- * UTILISÉ PAR:
- * - Bouton «Générer» après le champ codes personnalisés
- * 
- * FORMAT ATTENDU:
- * - Codes séparés par virgules
- * - Ex: «A, B, C, D, F» ou «Excellent, Bon, Moyen, Faible»
- * 
- * GÉNÉRATION AUTOMATIQUE:
- * - Code: 3 premiers caractères en majuscules
- * - Nom: Code complet
- * - Plage: répartie uniformément sur 0-100%
- * - Couleur: bleu moyen par défaut
- * 
- * EXEMPLE:
- * Input: «Excellent, Bon, Moyen, Faible»
- * Génère:
- * - EXC: Excellent (0-25%)
- * - BON: Bon (25-50%)
- * - MOY: Moyen (50-75%)
- * - FAI: Faible (75-100%)
- */
-async function genererNiveauxPersonnalises() {
-    const codes = document.getElementById('codesPersonnalises').value
-        .split(',')
-        .map(c => c.trim())
-        .filter(c => c);
-
-    if (codes.length === 0) return;
-
-    const niveaux = codes.map((code, i) => {
-        const min = Math.floor(i * 100 / codes.length);
-        const max = Math.floor((i + 1) * 100 / codes.length);
-        const valeurCalcul = (min + max) / 2;
-
-        return {
-            code: code.substring(0, 3).toUpperCase(),
-            nom: code,
-            description: '',
-            min: min,
-            max: max,
-            valeurCalcul: valeurCalcul,
-            couleur: 'var(--bleu-moyen)'
-        };
-    });
-
-    await db.set('niveauxEchelle',  niveaux);
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-    await sauvegarderConfigEchelle();
 }
 
 /* ===============================
@@ -2311,7 +2116,6 @@ window._sonder574 = _sonder574;   // sonde console #574 (lecture seule)
 window.chargerEchellesTemplates = chargerEchellesTemplates;
 window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;
-window.enregistrerCommeEchelle = enregistrerCommeEchelle;
 window.sauvegarderNomEchelle = sauvegarderNomEchelle;
 window.sauvegarderConfigEchelle = sauvegarderConfigEchelle;
 window.changerTypeEchelle = changerTypeEchelle;
@@ -3746,8 +3550,9 @@ function blocReperesEchelle(echelle, options) {
  * sur la même case, et le dernier commentaire écrase les autres. Sans un mot.
  *
  * ⚠ Une validation disait déjà « Code et nom obligatoires » — dans
- * `sauvegarderNiveaux()`, dont le bouton vit dans le bloc « ANCIEN SYSTÈME »
- * masqué, et qui écrit dans `#tableauNiveaux` quand l'éditeur vivant est
+ * `sauvegarderNiveaux()`, dont le bouton vivait dans le bloc « ANCIEN SYSTÈME »
+ * masqué (retirés tous deux par #520, 13 sept. 2026), et qui écrivait dans
+ * `#tableauNiveaux` quand l'éditeur vivant est
  * `#tableauNiveauxEchelle`. La garde existait, sur un chemin que personne
  * n'emprunte : c'est le motif AP-2, le même que #516 le matin même, sur l'écran
  * voisin. Deux fois en un jour, ce n'est plus un accident.
@@ -4850,8 +4655,6 @@ window.supprimerEchelleDepuisSidebar = supprimerEchelleDepuisSidebar;
 window.dupliquerEchelleActive = dupliquerEchelleActive;
 window.supprimerEchelleActive = supprimerEchelleActive;
 window.sauvegarderEchelleComplete = sauvegarderEchelleComplete;
-window.genererNiveauxPersonnalises = genererNiveauxPersonnalises;
-window.sauvegarderNiveaux = sauvegarderNiveaux;
 window.deplacerNiveauHaut = deplacerNiveauHaut;
 window.deplacerNiveauBas = deplacerNiveauBas;
 window.deplacerNiveauEchelleHaut = deplacerNiveauEchelleHaut;

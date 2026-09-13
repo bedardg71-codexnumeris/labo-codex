@@ -51,10 +51,13 @@ function signaturesDoubleClass() {
 /** La dette connue au 7 septembre 2026, après la réparation de #779.
  *  ↻ 11 sept. 2026 : trois cas de moins — les trois curseurs de seuils de
  *  Labo › Outils d'observation (`input|controle-form|u-w-100`) sont devenus des
- *  champs chiffrés à un seul `class` (forme de l'écran, 1.130.0). */
+ *  champs chiffrés à un seul `class` (forme de l'écran, 1.130.0).
+ *  ↻ 13 sept. 2026 : six cas de moins (19 → 13) — ils vivaient dans le bloc
+ *  « ANCIEN SYSTÈME » masqué des échelles, retiré par #520 : les deux
+ *  `button|…|flex-1`, `groupe-form|max-w-400-mb20`, `groupe-form|max-w-400-mb20-hidden`,
+ *  `groupe-form|mt-15`, `btn-groupe|mt-20-justify-between`. Aucun rendu ne change :
+ *  le bloc était caché. */
 const DETTE_CONNUE = [
-    'button|btn btn-principal|flex-1',
-    'button|btn btn-principal|flex-1',
     'button|btn btn-principal|u-texte-09 u-w-100',
     'button|btn btn-principal|whitespace-nowrap',
     'div|alerte alerte-attention|mt-10',
@@ -63,11 +66,7 @@ const DETTE_CONNUE = [
     'div|alerte alerte-info|mt-20',
     'div|alerte alerte-succes|mt-10',
     'div|alerte alerte-succes|mt-15',
-    'div|btn-groupe|mt-20-justify-between',
     'div|groupe-boutons-colonne|mb-15',
-    'div|groupe-form|max-w-400-mb20',
-    'div|groupe-form|max-w-400-mb20-hidden',
-    'div|groupe-form|mt-15',
     'table|tableau|mt-10',
     'table|tableau|mt-10',
     'table|tableau|mt-15',

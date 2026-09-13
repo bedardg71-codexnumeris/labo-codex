@@ -282,17 +282,18 @@ describe('#522 lot 2a · C — la course ne peut pas se rouvrir en silence', () 
         }
     });
 
-    it('C.c les trois écritures restantes sont NOMMÉES, et ce sont des remplacements complets', () => {
+    it('C.c les deux écritures restantes sont NOMMÉES, et ce sont des remplacements complets', () => {
         // Elles ne lisent pas la clé avant de l'écrire : elles posent une liste
-        // venue d'ailleurs (l'échelle chargée, les niveaux par défaut, le
-        // formulaire relu). Aucune course — mais la liste reste FERMÉE : une
-        // quatrième écriture directe doit se justifier ici, ou passer par la file.
+        // venue d'ailleurs (l'échelle chargée, les niveaux par défaut). Aucune
+        // course — mais la liste reste FERMÉE : une troisième écriture directe
+        // doit se justifier ici, ou passer par la file.
+        // ↻ 13 sept. 2026 : `genererNiveauxPersonnalises` est partie avec le bloc
+        // « ANCIEN SYSTÈME » d'index.html, son seul appelant (#520).
         const noms = [...source.matchAll(/db\.set\('niveauxEchelle'/g)]
             .map((m) => fonctionContenant(source, m.index))
             .sort();
         expect(noms).toEqual([
             'chargerEchelleTemplate',
-            'genererNiveauxPersonnalises',
             'reinitialiserNiveauxDefaut'
         ]);
     });

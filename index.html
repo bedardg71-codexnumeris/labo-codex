@@ -5230,161 +5230,6 @@
 
                     </div><!-- Fin layout-sidebar-2col -->
 
-                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
-                        <div class="u-hide">
-
-                        <!-- Sélecteur d'échelle -->
-                        <div class="groupe-form" class="max-w-400-mb20">
-                            <label>Créer ou modifier une échelle de performance :</label>
-                            <select id="selectEchelleTemplate" class="controle-form"
-                                data-on-change="chargerEchelleTemplate">
-                                <option value="">-- Nouvelle échelle --</option>
-                                <option value="new"> Créer une nouvelle échelle</option>
-                            </select>
-                        </div>
-
-                        <!-- Nom de l'échelle (visible uniquement en création/édition) -->
-                        <div id="nomEchelleContainer" class="groupe-form"
-                            class="max-w-400-mb20-hidden">
-                            <label>Nom de l'échelle <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
-                            <input type="text" id="nomEchelleTemplate" class="controle-form"
-                                placeholder="Ex: Échelle standard A-F" data-on-change="sauvegarderNomEchelle">
-                        </div>
-
-                        <!-- IMPORT/EXPORT ÉCHELLES -->
-                        <div class="d-flex-gap10-mb20-info">
-                            <button class="btn btn-principal" data-action="exporterEchelles" class="flex-1">
-                                Exporter l'échelle
-                            </button>
-                            <button class="btn btn-principal" data-action="ouvrirImportEchellesLocal" class="flex-1">
-                                Importer une échelle
-                            </button>
-                            <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" data-on-change="importerEchelles">
-                        </div>
-
-                        <!-- Note explicative -->
-                        <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 20px; padding: 12px;
-             background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                            <strong>Note :</strong> Cette échelle s'applique uniquement aux pratiques alternatives
-                            de
-                            notation
-                            (PAN).
-                            La note finale sera convertie en pourcentage pour respecter le RREC. C'est à cette fin
-                            que
-                            servent les plages de notes et les valeurs ponctuelles.
-                        </div>
-
-                        <!-- CONFIGURATION GLOBALE -->
-                        <div
-                            class="carte-bleu-tres-pale-mb20">
-                            <h4 class="titre-bleu-mb-15">Configuration globale
-                            </h4>
-
-                            <div class="grid-2-gap15">
-                                <div class="groupe-form">
-                                    <label>Type d'échelle</label>
-                                    <select id="typeEchelle" class="controle-form" data-on-change="changerTypeEchelle">
-                                        <option value="lettres">Lettres (A, B, C...)</option>
-                                        <option value="pourcentage">Pourcentage (%)</option>
-                                        <option value="autre">Autre (personnalisé)</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Seuil de réussite (%)</label>
-                                    <input type="number" id="seuilReussite" class="controle-form" value="60" min="0"
-                                        max="100" data-on-change="sauvegarderConfigEchelle">
-                                </div>
-                            </div>
-
-                            <!-- Champ conditionnel pour type "autre" -->
-                            <div id="champAutreEchelle" class="hidden-mt15">
-                                <div class="groupe-form">
-                                    <label>Note de passage personnalisée :</label>
-                                    <div id="notePassageContainer">
-                                        <!-- Input sera inséré ici par changerTypeEchelle() -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Génération de niveaux personnalisés -->
-                            <div class="groupe-form" class="mt-15">
-                                <label>Générer des niveaux personnalisés (codes séparés par virgules) :</label>
-                                <div class="d-flex-gap-10">
-                                    <input type="text" id="codesPersonnalises" class="controle-form"
-                                        placeholder="Ex: Excellent, Bon, Moyen, Faible"
-                                        data-on-change="sauvegarderConfigEchelle">
-                                    <button class="btn btn-principal" data-action="genererNiveauxPersonnalises">Générer</button>
-                                </div>
-                                <small
-                                    class="u-mt-5" style="color: var(--bleu-leger); font-size: 0.8rem; display: block">
-                                    Les niveaux seront créés automatiquement avec répartition uniforme des
-                                    pourcentages
-                                </small>
-                            </div>
-                        </div>
-
-                        <!-- TABLEAU DES NIVEAUX -->
-                        <div
-                            class="carte-white-border">
-                            <h4 class="titre-bleu-mb-15">Niveaux de performance
-                            </h4>
-
-                            <div id="tableauNiveaux">
-                                <!-- Le tableau sera généré ici par afficherTableauNiveaux() -->
-                            </div>
-
-                            <!-- Boutons d'actions -->
-                            <div class="btn-groupe" class="mt-20-justify-between">
-                                <div class="d-flex-gap-10">
-                                    <button class="btn btn-principal" data-action="sauvegarderNiveaux">
-                                        Sauvegarder les niveaux
-                                    </button>
-                                    <button class="btn btn-annuler" data-action="reinitialiserNiveauxDefaut">
-                                        Réinitialiser par défaut
-                                    </button>
-                                </div>
-                                <div class="d-flex-gap-10">
-                                    <button class="btn btn-confirmer" data-action="enregistrerCommeEchelle">
-                                        Enregistrer comme échelle
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Visualisation de l'échelle -->
-                        <div style="margin-top: 20px; padding: 15px; background: var(--vert-pale); 
-             border-radius: 6px; border: 1px solid var(--vert-leger);">
-                            <h5 class="text-vert-leger-mb10">Aperçu de l'échelle</h5>
-                            <div id="apercuEchelle" style="display: flex; justify-content: space-between; 
-                 align-items: center; padding: 10px; background: var(--surface-carte, #1a3040); border-radius: var(--radius-moyen);">
-                                <!-- L'aperçu sera généré ici par afficherApercuEchelle() -->
-                            </div>
-                        </div>
-
-                        <!-- Toggle Conseil pratique -->
-                        <details class="mb-20">
-                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
-                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen);
-                                color: var(--accent-primaire); user-select: none; display: flex;
-                                justify-content: space-between; align-items: center;">
-                                <span></span>
-                                <span class="text-12">💡</span>
-                            </summary>
-                            <div class="td-sm-muted-lh">
-                                <strong>Conseil pratique - Aide à la configuration :</strong>
-                                <ul class="m-8-0-pl20-lh16">
-                                    <li><strong>Code</strong> : 1 à 3 caractères (ex: I, D, M, E)</li>
-                                    <li><strong>Nom</strong> : Titre du niveau (ex: Maîtrise)</li>
-                                    <li><strong>Description</strong> : Contexte pédagogique (optionnel)</li>
-                                    <li><strong>Min/Max</strong> : Plage de % (0-100%)</li>
-                                    <li><strong>Valeur ponctuelle</strong> : Note utilisée pour les calculs (ex: 75%)</li>
-                                    <li><strong>Couleur</strong> : Choisir dans la palette</li>
-                                </ul>
-                            </div>
-                        </details>
-
-                        </div><!-- Fin ANCIEN SYSTÈME -->
-
                 </div><!--fin sous-section echelle-performance-->
 
                 <div id="conception-retroactions" class="sous-section">
@@ -14559,7 +14404,7 @@
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/grilles.js?v=20260909b"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20260911a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
+    <script src="js/echelles.js?v=20260913a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20260904b"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260911m"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
@@ -14749,7 +14594,7 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260913k"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260913l"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
