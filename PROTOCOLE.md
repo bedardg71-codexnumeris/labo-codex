@@ -71,7 +71,7 @@ Mesure du 13 septembre : **sur trois lots ouverts, trois fiches se sont révél�
 5. **ÉPROUVER** (Claude Code). Suite complète, verdict Playwright pris **Cowork fermé** (règle 8).
 6. **LIVRER** (Grégoire). Le `git push`.
 
-⚠ **Le temps 6 se fait depuis le Mac de Grégoire, et par une seule des deux sessions.** **Claude Code pousse**, par `scripts/pousser.sh`, à la demande de Grégoire. **Cowork ne pousse pas** : son shell n'atteint pas le dépôt en SSH (« Host key verification failed », mesuré le 13). ⮕ **Corrigé le 13 au soir, après une affirmation fausse de Cowork** qui avait écrit que personne n'avait la clé : il avait mesuré son propre environnement et conclu sur le rôle. La règle 5 (« aucune session ne pousse ») date du 8 août et ne vaut plus.
+⚠ **Le temps 6 se fait depuis le Mac de Grégoire, et par une seule des deux sessions.** **Claude Code pousse**, par `scripts/pousser.sh`, à la demande de Grégoire. **Cowork ne pousse pas** : son shell n'atteint pas le dépôt en SSH (« Host key verification failed », mesuré le 13). ⮕ **Corrigé le 13 au soir, après une affirmation fausse de Cowork** qui avait écrit que personne n'avait la clé : il avait mesuré son propre environnement et conclu sur le rôle. La règle 5, qui disait depuis le 8 août « aucune session ne pousse », est corrigée dans ce sens.
 
 ### La boucle — qui passe quoi à qui, et par quoi
 
@@ -320,9 +320,9 @@ tient la carte.
 `styles.css`, rien d'autre ». Un mandat qui ne nomme pas ses fichiers ne peut pas
 être vérifié disjoint.
 
-**5. Aucune session ne pousse. La coordinatrice pousse.** C'est le 8 août en une
-ligne : deux sessions parties du même commit, deux « 1.55.0 », les mêmes
-identifiants.
+**5. Une seule session pousse : Claude Code, à la demande de Grégoire** (`scripts/pousser.sh`) ;
+Cowork ne pousse pas (corrigé le 13 sept. 2026). Motif d'origine, le 8 août : deux sessions
+parties du même commit, deux « 1.55.0 », les mêmes identifiants.
 
 **6. Une trouvaille hors de ses fichiers ne se corrige JAMAIS.** Elle remonte à la
 coordinatrice, qui l'inscrit. C'est l'issue 2 de `CLAUDE.md` appliquée au
