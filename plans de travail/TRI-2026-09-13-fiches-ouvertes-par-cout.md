@@ -1,7 +1,9 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 13 sept. en début d'après-midi** – trois lots menés, deux livrés. Comptes vérifiés sur `BACKLOG.md` **de `main`** : 235 cases ouvertes moins le gabarit de la section « Notes » = **234 fiches**, concordance exacte.
+> **Mis à jour le 13 sept. au milieu de l'après-midi** – cinq lots menés, tous livrés. Comptes remesurés sur `BACKLOG.md` **de `main`** (`269fe347`) : **230 fiches ouvertes**.
+> ⚠ **Le compte annoncé le 13 en début d'après-midi (234) était FAUX de 2** : il comptait les cases `- [ ]` sans distinguer les fiches des sous-cases indentées. Le bon compte se prend à la racine – `grep -c '^- \[ \]'` – moins le gabarit de la section « Notes ». L'artefact jumeau en annonçait 241, faux lui aussi : il comptait les fiches déjà livrées.
+> ⚠ **Ce document et l'artefact listent 232 entrées ouvertes, soit deux de plus que le backlog** : #575b et #575c y sont détaillées à part alors qu'elles partagent la case de #575. L'écart est voulu et mesuré ; il n'est pas une dérive du compte.
 > Les questions qui attendent une réponse de Grégoire ne sont pas dans ce document : elles sont dans `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md`, fermées et chiffrées.
 
 ## Journal des lots
@@ -24,11 +26,21 @@ Relecture croisée : sept mutations posées indépendamment, **aucune ne survit*
 
 ⮕ Relu au **sommet de la branche**, pas au commit nommé : elle avait avancé de deux commits, dont le correctif d'un incident où un banc de test écrivait dans le vrai `.git/config` sous le hook pré-push (#856). Config du dépôt vérifiée saine après coup.
 
-### Lot 3 – les interventions ▣ CONSIGNE PRÊTE, PAS ENGAGÉ
+### Lot 3 – les interventions ✅ LIVRÉ en 1.140.2
 
 Demandé comme « le lot qui touche `js/interventions.js` (6/6) ». **La mesure au code l'a réduit à deux gestes dans un seul fichier, sans une seule question** : les interventions d'un élève suivent son groupe-cours dans son profil comme elles le font déjà dans la liste, et un seuil de dépistage réglé à zéro cesse d'être remplacé en douce par la valeur du projet.
 
 Ce que la mesure a corrigé de ma propre grille – **deux des six fiches ne sont plus dans ce fichier** : les seuils d'alerte ont déménagé le 10 sept. (#742 vit maintenant dans `js/contexte-qualification.js`) et le dépistage SOLO le 27 août. **#542 doit être cochée** : ses deux derniers pas sont livrés et verrouillés par des bancs, ses traînes de données sont portées par trois autres fiches, et son unique reste est la question de #551 dite une seconde fois. #836 attend son mois d'usage, pas un arbitrage. #847 est une décision d'une phrase, pas un défaut.
+
+### Lot 4 – « les exemples gris ne citent plus les critères de Grégoire » ✅ LIVRÉ en 1.140.3
+
+Choisi parce qu'il avait une DATE : vingt collègues lisent ces mots le 15. La fiche (#847) annonçait deux exemples ; **la mesure en a trouvé trois** – le troisième dans l'Aide (`index.html`), absent de la fiche – et un quatrième qu'il ne fallait PAS toucher, le vocabulaire `rencontres`, déjà propre : l'écran que l'orthopédagogue ouvre le 14 ne citait aucun critère. Grégoire a approuvé les deux textes de remplacement tels quels ; le troisième a reçu les mêmes mots.
+
+Ce que la mesure a corrigé de ma propre consigne : j'écrivais qu'un banc existant tenait peut-être à l'ancienne chaîne « comme repère de rendu ». **Faux** – son bloc 2 est un gel de mots assumé (« la carte, telle qu'en 1.137.0 »). Claude Code l'a lu juste, l'a fait suivre les mots neufs, et y a ajouté l'exemple du titre, que rien ne couvrait.
+
+Relecture croisée : les deux mutations reposées, chacune rougit une fois. **Un trou trouvé** – le troisième site n'était couvert par AUCUN banc : l'ancien texte de l'Aide remis, la suite entière restait verte (557 fichiers, 6 132 essais). Retouché avant le push (`269fe347`), dans `sentinelle-audit-aide-lot-E`, qui découpe déjà la section Aide.
+
+⮕ **Ce que la retouche a trouvé en plus, et qui vaut pour tout le filet** : la tranche de l'Aide n'avait aucun garde de non-vide. Tant que ses assertions étaient positives, ça ne se voyait pas ; une assertion NÉGATIVE sur une tranche vide est vraie par construction. Un cas existant depuis le 10 sept. (l'export d'une échelle) était dans ce cas sans que personne le sache. Le garde ferme les deux.
 
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 
@@ -54,13 +66,14 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 
 | | fiches |
 |---|---:|
-| Q – rapides | 43 |
+| Q – rapides | 42 |
 | I – intermédiaires | 85 |
-| L – laborieuses | 101 |
+| L – laborieuses | 100 |
 | indécidables en l'état | 5 |
-| **encore ouvertes, en tout** | **234** |
+| **entrées ouvertes de ce tri** | **232** |
+| **fiches ouvertes au backlog de `main`** | **230** |
 | dont en attente d'un arbitrage | 80 |
-| ✅ livrées depuis le tri | 9 |
+| ✅ livrées depuis le tri | 12 |
 
 Portée des arbitrages en attente : 17 se règlent par une phrase, 25 demandent un écran ou ses données, 13 ouvrent un chantier.
 
@@ -100,9 +113,11 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 - **L** Les niveaux d'échelle sont partagés entre tous les trimestres – données déjà écrites ; à revérifier (#601)
 - **L** Des noms venus d'un fichier partagé s'affichent sans être échappés – trois modules et plus (#467)
 
-### `js/profil-etudiant-calculs.js` – 9 ouvertes sur 9
+### `js/profil-etudiant-calculs.js` – 10 ouvertes sur 10
 
-*note globale au profil · Suivi › Profil (barres et IPB) et 7 autres écrans*
+*note globale au profil · Suivi › Profil (barres et IPB) et 8 autres écrans*
+
+- **L** Un nom de critère écrit en dur écrase la clé de calcul – à Grégoire : pédagogie, à froid ; trois modules et plus *(inscrite le 13 sept. pendant #746/#551 ; la fiche dit « trois fois dans `interventions.js` », la mesure dit **huit sites dans quatre fichiers**, et le normalisateur canonique `_normaliserNomCritereIPB` vit ICI – le corriger dans `interventions.js` seul casserait la correspondance des clés)* (#857)
 
 - **I** Sans texte de rétroaction, la note globale n'affiche aucun niveau (#718)
 - **I** Un critère noté en points est lu comme un niveau approximatif – à Grégoire : pédagogie, une phrase (#739)
@@ -158,15 +173,19 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 - **L** Un enregistrement raté peut afficher « enregistré » – trois modules et plus (#786)
 - **L** « Enregistré » s'affiche alors que rien n'a été écrit – trois modules et plus (#618)
 
-### `js/interventions.js` – 5 ouvertes sur 5
+### `js/interventions.js` – 2 ouvertes sur 5
 
 *Suivi › Interventions · Suivi › Rencontres et 3 autres écrans*
 
-- **Q** Deux exemples du formulaire citent les critères de Grégoire (#847)
+⚠ **Ce point du code n'est plus un lot.** Trois de ses cinq fiches sont parties le 13 (#746 et #542 en 1.140.2, #847 en 1.140.3) ; des deux qui restent, l'une attend un mois d'usage et l'autre une réponse de Grégoire. **Mesuré le 13 au milieu de l'après-midi : il ne reste rien de codable ici qui ne passe pas par lui.**
+
 - **L** Restes du chantier Rencontres à trancher après un mois d'usage – à Grégoire : choix de produit, un chantier ; trois modules et plus (#836)
-- **L** Les interventions d'un groupe affichent celles de tous les groupes – trois modules et plus, données déjà écrites *(moitié « liste » livrée le 12 sept. ; moitié « profil » dans le lot 3)* (#746)
-- **L** Le risque d'un élève se calcule sur les seuils d'un autre enseignant – à Grégoire : pédagogie, un chantier ; trois modules et plus *(garde seule dans le lot 3 ; le renommage attend une réponse)* (#551)
-- **L** Le dépistage suppose l'échelle de Grégoire – à Grégoire : arbitrage à préciser ; trois modules et plus *(à cocher : pas 3 et 4 livrés, son reste EST la question de #551)* (#542)
+- **L** Le risque d'un élève se calcule sur les seuils d'un autre enseignant – à Grégoire : pédagogie, un chantier ; trois modules et plus *(garde seule livrée en 1.140.2 ; le renommage attend une réponse)* (#551)
+- ✅ Les interventions d'un groupe affichent celles de tous les groupes – **livrée en 1.140.2** (#746)
+- ✅ Le dépistage suppose l'échelle de Grégoire – **livrée en 1.140.2**, son reste transféré à #551 (#542)
+- ✅ Deux exemples du formulaire citent les critères de Grégoire – **livrée en 1.140.3**, trois sites et non deux (#847)
+
+⮕ **#857, inscrite le 13, ne vit PAS ici** malgré son énoncé : la mesure a trouvé le nom de critère écrit en dur **huit fois dans quatre fichiers**, et le normalisateur canonique (`_normaliserNomCritereIPB`) vit dans `js/profil-etudiant-calculs.js`. Le corriger dans `interventions.js` seul casserait la correspondance des clés. Elle est rangée sous ce fichier-là.
 
 ### `js/bibliotheque-ui.js` – 4 ouvertes sur 4
 
