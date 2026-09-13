@@ -565,6 +565,11 @@ function obtenirContexteCoursActif() {
     const infoCours = db.getSync('infoCours', null);
     if (!infoCours || !infoCours.id) return infoCours;
     if (typeof window.cle !== 'function') return infoCours;
+    // #851 (13 sept. 2026) : la vue « Cours (tous groupes) » de l'entête écrit `_modeCours: true`
+    // (trimestre-v2-orchestre.js, seul écrivain) et laisse le dernier groupe-cours marqué actif.
+    // La correction #130 ci-dessous le retrouvait (même coursId) et rabattait le contexte sur SON
+    // groupe : depuis le 3 juin, « tous groupes » n'affichait que le groupe précédent.
+    if (infoCours._modeCours === true) return infoCours;
 
     const listeGC = db.getSync(window.cle('groupesCours'), []);
     if (!Array.isArray(listeGC)) return infoCours;
