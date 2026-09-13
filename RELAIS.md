@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 16 H (Toronto) : LOT SANS CODE — #803 COCHÉE, #801 LAISSÉE OUVERTE, SESSION.md RATTRAPÉ ; COMMITÉ SUR `main`, NON POUSSÉ
+
+> Au-dessus de `d07e963d` (`origin/main`) : un commit de documents seulement (`BACKLOG.md`, `SESSION.md`, `RELAIS.md`). Aucun code, aucun texte de l'application, pas de release.
+>
+> **#801 n'est PAS cochée, contrairement à la consigne** : gestes 1 et 3 livrés (`1a7205ee`), geste 2 écarté par la fiche elle-même ; le défaut d'origine (`js/init-inline.js:406`, le bandeau qui dit où sont les nouveautés au lieu d'y mener) n'est ni livré ni écarté. Détail dans la fiche. Si Grégoire juge que la phrase suffit, la cocher en l'écrivant ; sinon, c'est un petit lot de code (un bouton `afficherModalNouveautes`, seul dans le bandeau « au chargement »).
+>
+> **Compte du BACKLOG** : 227 (228 avant ; 226 si #801 avait été cochée).
+>
+> **Reste** : (1) relecture de Cowork, puis push ; (2) trancher #801 ; (3) #858, prochain lot codable sans Grégoire. La consigne de Cowork pour ce lot n'était pas sur le disque à 15 h 51 : ce commit n'embarque aucun de ses fichiers, ni `CONSIGNE-DEMARRAGE-COWORK.md` (modifié par elle).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 15 H 46 (Toronto) : #520 EN LIGNE SANS RELEASE (`eecaa703`, version inchangée 1.140.5) — POUSSÉ ; RÈGLE 10 DU PROTOCOLE ET FICHE #858 INSCRITES
 
 > **Poussé sur `origin/main`** après verdict Playwright local complet sur `eecaa703`, Cowork fermé (vert, aucune rougeur nouvelle, 0 échec) : `c5d0f366..eecaa703` — `7afa62b9` (#520 : le bloc « ANCIEN SYSTÈME » des échelles quitte `index.html`, ids dupliqués 8 → 0), `d4e2923f` (retouche de la relecture croisée de Cowork : les sept premières occurrences étaient des `<div>` vides de compatibilité, pas l'éditeur vivant ; `sauvegarderConfigEchelle` et `changerTypeEchelle` retirées ; bord C de la sentinelle), `eecaa703` (règle 10 du PROTOCOLE, fiche #858). Relecture croisée de Cowork VERTE sur `b07df06e` (15 h 31) ; `d4e2923f` n'en diffère que par quatre lignes de garde (règle 10) dans `sentinelle-520`. **Pas de release** : lot invisible (supposition de Cowork, renversable par Grégoire). Jetons : `echelles.js` 20260913b, `main.js` 20260913l. La branche `claude/520-ancien-systeme-echelles` et son worktree peuvent être retirés.
