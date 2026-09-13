@@ -6256,31 +6256,50 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   `selectEchelleTemplate`, `seuilReussite`, `tableauNiveaux`, `typeEchelle`. L'énoncé d'origine était
   faux des deux côtés : il en nommait cinq, annonçait `nomEchelleTemplate` ×3, et citait
   `btnDupliquerEchelle`, qui n'a jamais été dupliqué. ▣ **RIEN NE BOUGE À L'ÉCRAN** : la première
-  occurrence des huit précède le bloc (l'éditeur vivant et ses conteneurs de compatibilité,
-  5188–5226) ; `getElementById` ne lisait jamais les copies. ⚠ **Un effet invisible, nommé** : trois
-  ids n'existaient QUE dans le bloc (`codesPersonnalises`, `notePassageContainer`,
-  `fichier-import-echelles-local`). Sans `notePassageContainer`, `changerTypeEchelle` sort à sa garde
-  et cesse de réécrire la clé nue `configEchelle` — qu'aucun code vivant ne lit.
-  ▣ **RETIRÉ AVEC LE BLOC** (plus un seul appelant) : `enregistrerCommeEchelle`, `sauvegarderNiveaux`,
-  `genererNiveauxPersonnalises` (`js/echelles.js`), `ouvrirImportEchellesLocal` (`js/main.js`).
-  **GARDÉS, un appelant JS reste** : `exporterEchelles` et `importerEchelles` (la modale d'import /
-  export d'`echelles.js`), `chargerEchelleTemplate` (bouton de la liste des échelles),
-  `reinitialiserNiveauxDefaut` (par `chargerEchelleTemplate`), `changerTypeEchelle` (par
-  `chargerEchelleTemplate` et `chargerConfigurationEchelle`), `sauvegarderConfigEchelle` (par
-  `changerTypeEchelle`), `sauvegarderNomEchelle` (deux champs de l'éditeur vivant). ⚠ Les deux de
-  la configuration gardent un appelant mais plus d'effet (ci-dessus).
+  occurrence des huit précède le bloc — mais ⚠ ce n'est PAS l'éditeur vivant, sauf le champ Nom
+  (`nomEchelleTemplate`, 5188) : les sept autres sont des `<div>` VIDES d'un second bloc caché,
+  « Conteneurs cachés pour compatibilité » (5217–5227). L'éditeur vivant porte d'autres ids
+  (`tableauNiveauxEchelle`, `apercuEchelleNiveaux`, `conteneurEditionEchelle`). Les deux blocs étaient
+  morts, le second doublement. *(Corrigé à la relecture croisée de Cowork, 13 sept. 15 h 18 : la
+  consigne et la première version de cette fiche disaient « l'éditeur vivant ».)*
+  ⚠⚠ **UNE ÉCRITURE DANS LES DONNÉES CESSE — SOURCE TARIE, STOCK NON RÉPARÉ.** `#typeEchelle` étant un
+  `<div>`, `changerTypeEchelle` — appelée à chaque ouverture de la section
+  (`chargerConfigurationEchelle`) et après chaque chargement d'échelle (`chargerEchelleTemplate`) —
+  appelait `sauvegarderConfigEchelle`, qui réécrivait la clé nue `configEchelle` APLATIE juste après
+  que `chargerEchelleTemplate` y eut copié `echelle.config` : `notePassage` et `codesPersonnalises`
+  remis à vide, `seuilReussite` à 60 par défaut, `typeEchelle` perdu s'il n'avait jamais été posé
+  (sinon relu depuis une propriété que le code posait sur le `<div>`). Le retrait de
+  `#notePassageContainer` fait mordre la garde à chaque appel : **l'écriture cesse**.
+  ▣ **Mesuré, ce que le stock touche et ne touche pas** : l'aplatissement frappe la COPIE sous la clé
+  nue, pas l'échelle rangée dans `echellesTemplates` — le seul chemin qui recopiait la clé nue dans
+  une échelle était `enregistrerCommeEchelle`, derrière un bouton caché. Les `config` du pack démo
+  (`pack-demo-10.js` :7329, :7380) vivent dans `echellesTemplates`, et ce chemin ne les touche pas. Seul
+  lecteur de la clé nue : `chargerConfigurationEchelle`, qui la recopie dans des `<div>` cachés. ⚠ Elle
+  voyage pourtant : la sauvegarde Codex exporte toutes les clés (`codex.js:304`). ⛔ **Rien n'est
+  réparé** : les `configEchelle` déjà aplaties le restent chez qui les a — **à Grégoire de trancher**,
+  ce sont ses données.
+  ▣ **RETIRÉ AVEC LE BLOC** (plus un seul appelant atteignable) : `enregistrerCommeEchelle`,
+  `sauvegarderNiveaux`, `genererNiveauxPersonnalises`, puis — à la relecture de Cowork —
+  `sauvegarderConfigEchelle` et `changerTypeEchelle`, avec leurs deux appels (sa garde était devenue
+  un `return` inconditionnel, et le HTML qui portait l'autre appel n'était plus jamais généré)
+  (`js/echelles.js`) ; `ouvrirImportEchellesLocal` (`js/main.js`). **GARDÉS, un appelant JS reste** :
+  `exporterEchelles` et `importerEchelles` (la modale d'import / export d'`echelles.js`),
+  `chargerEchelleTemplate` (bouton de la liste des échelles), `reinitialiserNiveauxDefaut` (par
+  `chargerEchelleTemplate`), `sauvegarderNomEchelle` (les deux champs de l'éditeur vivant).
   ⚠⚠ **UNE TROISIÈME GARDE SUR DU CODE MORT** (après #516 et #524) : la sentinelle #506 prouvait
   l'astérisque de « Nom de l'échelle » par l'`alert` d'`enregistrerCommeEchelle`. Le refus vivant
   existait (`sauvegarderEchelleComplete`) : l'astérisque disait vrai, sa preuve regardait ailleurs.
-  Réancrée. ▣ **VÉRIFIÉ** : sentinelle `sentinelle-520-aucun-id-duplique` (cliquet à zéro, et les huit
-  présents une fois) ; trois mutations, trois rouges, source restaurée à l'empreinte — un second
-  `nomEchelleTemplate` (A et B), `typeEchelle` retiré (B seule), le refus vivant retiré (#506).
+  Réancrée. ▣ **VÉRIFIÉ** : sentinelle `sentinelle-520-aucun-id-duplique` — A, cliquet à zéro ; B, les
+  huit présents une fois ; C, `configEchelle` n'a plus qu'un écrivain (`chargerEchelleTemplate`) et les
+  deux fonctions qui l'aplatissaient sont parties. Cinq mutations, cinq rouges, source restaurée à
+  l'empreinte : un second `nomEchelleTemplate` (A et B), `typeEchelle` retiré (B seule), le refus
+  vivant retiré (#506), une seconde écriture de `configEchelle` (C), `changerTypeEchelle` ressuscitée (C).
   Comptes figés suivis : #779 bord B 19 → 13, #522 lot 2a C.c 3 → 2, #522 lot 2b C.c 22 → 21.
   ⚠ Les bancs unitaires qui nomment ces ids (#625, #555, #555-e, #505, #524, lot C) montent un faux
   DOM et ne lisent pas `index.html` : ils restaient verts sans rien éprouver de l'occurrence. Seule
   la spec `confirmations-conception-uniformes` écrit dans `#nomEchelleTemplate` sur le vrai fichier —
-  la première occurrence, désormais la seule. ⛔ **SOURCE, PAS STOCK** : aucune donnée touchée ; la
-  clé nue `configEchelle` reste, inerte, chez qui l'a.
+  la première occurrence, désormais la seule. ⛔ **SOURCE, PAS STOCK** : ce lot n'écrit dans aucune
+  donnée ; le stock aplati de `configEchelle` est décrit plus haut, et reste.
 
 - [x] **#521 TRANCHÉ 26 août 2026 — `coursId` reste NON transporté.** Verdict de Grégoire à la
   porte terrain (décision 3.2) : « tel quel ». Le rattachement au cours continue d'être décidé à

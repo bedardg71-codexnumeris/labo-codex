@@ -867,8 +867,6 @@ async function chargerEchelleTemplate(echelleId) {
                 if (echelle.config.seuilReussite !== undefined && elementSeuilReussite) {
                     elementSeuilReussite.value = echelle.config.seuilReussite;
                 }
-
-                changerTypeEchelle();
             }
 
             echelleTemplateActuelle = echelle;
@@ -1040,80 +1038,10 @@ async function chargerConfigurationEchelle() {
         elementCodesPersonnalises.value = config.codesPersonnalises;
     }
 
-    changerTypeEchelle();
-
     // Charger les niveaux
     const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
-}
-
-/**
- * Sauvegarde la configuration globale dans localStorage
- * 
- * FONCTIONNEMENT:
- * Récupère les valeurs des champs et les sauvegarde
- * 
- * APPELÉE PAR:
- * - Changement dans les champs de configuration
- * 
- * CONFIG SAUVEGARDÉE:
- * - typeEchelle
- * - seuilReussite
- * - notePassage (optionnel)
- * - codesPersonnalises (optionnel)
- */
-async function sauvegarderConfigEchelle() {
-    const config = {
-        typeEchelle: document.getElementById('typeEchelle').value,
-        seuilReussite: parseInt(document.getElementById('seuilReussite').value) || 60,
-        notePassage: document.getElementById('notePassage')?.value || '',
-        codesPersonnalises: document.getElementById('codesPersonnalises')?.value || ''
-    };
-
-    await db.set('configEchelle',  config);
-}
-
-/**
- * Gère le changement de type d'échelle
- * Adapte l'interface selon le type sélectionné
- *
- * FONCTIONNEMENT:
- * 1. Récupère le type sélectionné
- * 2. Affiche/masque les champs conditionnels
- * 3. Si type «autre»: affiche champ personnalisé
- * 4. Sauvegarde la configuration
- *
- * TYPES D'ÉCHELLE:
- * - lettres: A, B, C, D, E, F
- * - pourcentage: 0-100%
- * - autre: personnalisé
- *
- * APPELÉE PAR:
- * - Changement dans #typeEchelle
- */
-async function changerTypeEchelle() {
-    const elementType = document.getElementById('typeEchelle');
-    if (!elementType) return;
-
-    const type = elementType.value;
-    const champAutre = document.getElementById('champAutreEchelle');
-    const notePassageContainer = document.getElementById('notePassageContainer');
-
-    if (!champAutre || !notePassageContainer) return;
-
-    if (type === 'autre') {
-        champAutre.classList.remove('u-hide');
-        notePassageContainer.innerHTML = `
-            <input type="text" id="notePassage" class="controle-form"
-                   placeholder="Ex: Compétent" data-on-change="sauvegarderConfigEchelle">
-        `;
-    } else {
-        champAutre.classList.add('u-hide');
-        notePassageContainer.innerHTML = '';
-    }
-
-    await sauvegarderConfigEchelle();
 }
 
 /* ===============================
@@ -2117,8 +2045,6 @@ window.chargerEchellesTemplates = chargerEchellesTemplates;
 window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;
 window.sauvegarderNomEchelle = sauvegarderNomEchelle;
-window.sauvegarderConfigEchelle = sauvegarderConfigEchelle;
-window.changerTypeEchelle = changerTypeEchelle;
 window.afficherTableauNiveaux = afficherTableauNiveaux;
 window.afficherApercuEchelle = afficherApercuEchelle;
 window.ajouterNiveau = ajouterNiveau;
