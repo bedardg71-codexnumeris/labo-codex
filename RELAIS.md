@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.140.0 RELEASÉE (build `0913-1042`, `05200d82`) — NON POUSSÉE ; UN SEUL PUSH POUR 1.139.3, 1.139.4 ET 1.140.0
+
+> **Décision de Grégoire** (relayée par l'autre session) : la fusion et la release de #853 sont confiées à cette session ; tout part dans UN push, à son feu vert, après un verdict Playwright complet pris **Cowork fermé**. Sur `main`, au-dessus du relais 1.139.4 (`140c0490`) : la branche `claude/853-delai-sur-reprise` en avance rapide (`76e4ee9a`, `9f3adc4d`, `a43af694`, `8ff669c0`), `05200d82` (release 1.140.0, intention **minor** : un réglage ajouté à la pratique), puis ce relais. Fait dans un worktree (`main` extrait hors de l'arbre principal).
+>
+> **Contenu #853** : case « Permettre un délai sur une reprise » dans les jetons de la pratique (`js/evaluation-jetons.js`, `js/pratiques-gestion.js`, `js/wizard-pratique-v2.js`, `index.html`), décochée par défaut — rien ne change tant qu'elle n'est pas cochée ; sur une pratique dont les jetons ont été réglés à sa création, le formulaire le dit et reste inerte. Sentinelle `sentinelle-853-delai-sur-reprise` (12 mutations nommées, toutes rouges, selon l'autre session) ; relecture croisée de Cowork, 2e passe : publiable après deux retouches, faites (`8ff669c0`). Changelog : entrée 1.140 (deux items, texte de l'autre session). Vitest 555 / 6 092 sur `05200d82`.
+>
+> **Reste** : (1) verdict Playwright complet sur le SHA de ce relais, **Cowork fermé**, puis push — feu vert de Grégoire ; (2) **#854 reste OUVERT** : le formulaire des jetons est ignoré sur une pratique créée par l'assistant, et rééditer une pratique par l'assistant efface ses jetons ; (3) les blocs 1.139.4 et 1.139.3 ci-dessous valent tels quels, sauf leur point « verdict puis push », désormais couvert par celui-ci. **Prochain numéro, fiche OU bug : #856.**
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.139.4 RELEASÉE (build `0913-1013`, `d2650655`) — NON POUSSÉE ; ELLE PORTE 1.139.3 ET #855
 
 > **Décision de Grégoire** (relayée par l'autre session) : 1.139.3 et #855 partent dans UNE publication, 1.139.4, avec UN push, plus tard. #853 n'en fait pas partie (en retouche après la relecture de Cowork, branche `claude/853-delai-sur-reprise`, à rebaser sur ce relais). Sur `main`, au-dessus de `0414dfbd` (relais 1.139.3) : `510a943f` (#855), `b34e1026` (la démo dit dix élèves partout), `d2650655` (release 1.139.4), puis ce relais. Fait dans un worktree (`main` extrait hors de l'arbre principal, occupé par la branche #853).
