@@ -8,13 +8,14 @@
 
 <!-- =====================================================================
      SESSION 50 — 13 SEPTEMBRE 2026, ≈ 15 H 50 (Toronto) : LOT SANS CODE « DEUX FICHES LIVRÉES ET JAMAIS COCHÉES », à partir de `d07e963d`.
-     ⚠ La consigne annoncée (plans de travail/CONSIGNE-DU-JOUR.md) n'était pas sur le disque — c'était encore celle de #520 : exécuté
-       sur le mandat transmis par Grégoire. Rituel (subagent) : aucun autre écart ; Vitest 558 / 6 337.
+     ⚠ Consigne cherchée au mauvais endroit (plans de travail/CONSIGNE-DU-JOUR.md, encore celle de #520) : celle de Cowork vit à la
+       racine, CONSIGNE-DEMARRAGE-COWORK.md (`7b68d9a4`). Exécuté sur le mandat transmis par Grégoire. Rituel (subagent) : Vitest 558 / 6 337.
      ▣ #803 COCHÉE (`ad34f739`, 1.126.1 ; prolongée par `419e606f`, 1.127.6). Troisième point relu : la carte de l'indice P (l. 10055)
        a été réécrite dans ad34f739 et dit la même chose que le glossaire — rien à changer.
      ▣ #801 LAISSÉE OUVERTE : gestes 1 et 3 livrés (`1a7205ee`, 1.127.3), geste 2 écarté par la fiche elle-même ; mais le défaut
        d'origine — le bandeau qui décrit le chemin au lieu d'y mener, js/init-inline.js:406 — n'est ni livré ni écarté. Rien corrigé.
-     ▣ Compte BACKLOG (grep -c '^- \[ \]' BACKLOG.md, moins le gabarit de « Notes ») : 228 → 227, et non 226.
+     ▣ Relecture croisée de Cowork (`873ffe2c`) : VERTE sur #803, attestation ramenée à « plus aucune dans index.html » (trois libellés
+       de js/ portent encore les mots, hors fiche) ; #801 tranchée B — ouverte, petit lot de code après #858.
      ▣ Le bloc de la session 49, jamais écrit, est reconstitué ci-dessous.
      ===================================================================== -->
 

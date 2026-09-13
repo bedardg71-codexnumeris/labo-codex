@@ -7,15 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 16 H (Toronto) : LOT SANS CODE — #803 COCHÉE, #801 LAISSÉE OUVERTE, SESSION.md RATTRAPÉ ; COMMITÉ SUR `main`, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 16 H (Toronto) : LOT SANS CODE — #803 COCHÉE, #801 LAISSÉE OUVERTE, SESSION.md RATTRAPÉ ; RELECTURE CROISÉE VERTE, POUSSÉ
 
-> Au-dessus de `d07e963d` (`origin/main`) : un commit de documents seulement (`BACKLOG.md`, `SESSION.md`, `RELAIS.md`). Aucun code, aucun texte de l'application, pas de release.
+> Au-dessus de `d07e963d` : `7b68d9a4` (consigne de démarrage de Cowork), `873ffe2c` (le lot : documents seulement) et la retouche de la relecture croisée. Aucun code, aucun texte de l'application, pas de release.
 >
-> **#801 n'est PAS cochée, contrairement à la consigne** : gestes 1 et 3 livrés (`1a7205ee`), geste 2 écarté par la fiche elle-même ; le défaut d'origine (`js/init-inline.js:406`, le bandeau qui dit où sont les nouveautés au lieu d'y mener) n'est ni livré ni écarté. Détail dans la fiche. Si Grégoire juge que la phrase suffit, la cocher en l'écrivant ; sinon, c'est un petit lot de code (un bouton `afficherModalNouveautes`, seul dans le bandeau « au chargement »).
+> **#803 cochée** (`ad34f739`, prolongée par `419e606f`). **#801 reste ouverte** — tranché par Cowork (supposition renversable par Grégoire) : gestes 1 et 3 livrés (`1a7205ee`), geste 2 écarté par la fiche, mais le défaut d'origine survit (`js/init-inline.js:406`, le bandeau qui dit où sont les nouveautés au lieu d'y mener). Petit lot de code : un bouton du bandeau qui MÈNE à la carte « Nouveautés » (défilement + focus), plus un cas de `sentinelle-801` qui échoue si le bouton disparaît.
 >
-> **Compte du BACKLOG** : 227 (228 avant ; 226 si #801 avait été cochée).
->
-> **Reste** : (1) relecture de Cowork, puis push ; (2) trancher #801 ; (3) #858, prochain lot codable sans Grégoire. La consigne de Cowork pour ce lot n'était pas sur le disque à 15 h 51 : ce commit n'embarque aucun de ses fichiers, ni `CONSIGNE-DEMARRAGE-COWORK.md` (modifié par elle).
+> **Reste** : (1) **#858** (prochain lot codable sans Grégoire) ; (2) **#801**, après #858. La consigne de Cowork vit à la racine, `CONSIGNE-DEMARRAGE-COWORK.md`, pas dans `plans de travail/CONSIGNE-DU-JOUR.md`.
 
 ---
 
