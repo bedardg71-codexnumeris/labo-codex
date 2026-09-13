@@ -1,4 +1,4 @@
 /* GENERE PAR scripts/release.mjs — NE PAS EDITER A LA MAIN.
    Jumeau de version.json, lisible en file:// ou fetch et XHR sont refuses
    par WebKit (#495). Les deux fichiers sont ecrits ensemble. */
-window.__VERSION__ = {"build":"0913-0924","beta":"1.139.3"};
+window.__VERSION__ = {"build":"0913-1013","beta":"1.139.4"};

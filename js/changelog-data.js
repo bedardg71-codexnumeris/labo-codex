@@ -28,6 +28,7 @@
                 'Dans Suivi › Interventions, planifier n\'enregistre plus rien tant que tu n\'as pas cliqué Enregistrer ; le bilan avant / après lit les mêmes seuils que le reste de l\'application.',
                 'Le bandeau de nouvelle version affiche le même numéro que la carte «&nbsp;Nouveautés&nbsp;», et une fois fermé, il ne revient plus à chaque ouverture.',
                 'La démonstration compte maintenant dix élèves au lieu de vingt, avec des profils de suivi variés : elle se parcourt plus vite. Une démonstration déjà installée se met à jour d\'elle-même.',
+                'Dans la démonstration, l\'Artefact 9 est maintenant un plan de rédaction, et ses rétroactions en parlent comme tel.',
                 'Dans l\'en-tête, choisir un cours «&nbsp;(tous groupes)&nbsp;» affiche de nouveau les élèves de tous ses groupes dans une même liste, et non plus seulement ceux du dernier groupe choisi.',
                 'Retirer un jeton de reprise dont l\'enregistrement échoue affiche l\'échec, et rien ne bouge : plus de «&nbsp;Originale restaurée&nbsp;» trompeur, plus de fichier envoyé à la corbeille. Une reprise accordée part propre : elle ne recompte plus le délai déjà accordé sur l\'originale, et une copie déjà remplacée n\'en reçoit plus.',
             ]
