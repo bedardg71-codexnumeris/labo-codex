@@ -101,7 +101,7 @@ l'éditeur de grille l'après-midi (run 33902352824).*
 Sur le runner (WebKit Linux), un `page.click` ou `locator.click()` coûte de **2 à 9 secondes** —
 « waiting for element to be visible, enabled and stable » — et un spec qui en empile quatre ou
 cinq dépasse le budget de 30 s, alors qu'il passe en 10 s sur le Mac. La trace le montre ; le vert
-local ne le montre jamais (règle 7 de `PROTOCOLE.md`).
+local ne le montre jamais (skill `fin-de-session-labo-codex` §4.6.1, ex-règle 7 de `PROTOCOLE.md`).
 
 - **Un geste passe par l'événement DOM** : `locator.evaluate((el) => el.click())`, ou `page.evaluate`
   avec `el.click()` / `dispatchEvent(...)` — il traverse le même dispatcher que la souris

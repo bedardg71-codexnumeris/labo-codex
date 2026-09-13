@@ -10,6 +10,9 @@
 > **À lire au début de toute session, Cowork ou Claude Code.** C'est le fichier
 > de coordination de référence pour les deux.
 >
+> **Ne rien ajouter ici sans retirer autant. Plafond : 575 lignes** — ce qu'il pesait le 13 septembre 2026 au soir, règles 7 et 8 déplacées vers le rituel de fin de session (mesuré par `wc -l`, pas choisi). C'est le seul texte que les deux sessions lisent en entier à chaque démarrage ; il avait pris 110 lignes le 13.
+> Le critère de ce qui part : ce fichier dit QUI FAIT QUOI ET PAR QUEL CANAL ; un skill dit COMMENT BIEN FAIRE UN GESTE. Ce qui part laisse une ligne de renvoi qui nomme le skill.
+>
 > ↻ **Corrigé le 2 septembre 2026.** Ce fichier affirmait que « Cowork n'a pas
 > accès à `.claude/skills/` ». C'est faux quand le dépôt est monté : `ls
 > .claude/skills/` rend les quinze skills, lisibles. Témoin du périmètre : le
@@ -537,62 +540,12 @@ délibéré, pas une compression.
 
 ## Règle 7 — un vert local ne prouve rien sur ce que la CI exécute
 
-*Inscrite le 2 septembre 2026. **Trois occurrences le même jour**, ce qui est exactement le seuil
-que la règle 3 fixe pour faire monter une leçon.*
-
-| ce qui a cassé | sur le poste | sur le runner |
-|---|---|---|
-| un script de session (matin) | `zsh` | `bash` |
-| `sentinelle-635` (midi) | Node 24 expose `navigator` | Node 20 ne l'a pas |
-| la garde des essais non jugés (soir) | BSD `cut` accepte un séparateur multi-octet | GNU `cut` le refuse |
-
-▣ **Ce n'est pas trois défauts, c'est un angle mort unique** : le poste de Grégoire est plus
-permissif que le serveur, et il rend vert ce qui ne l'est pas. **Le vert local est la chose
-même qui a masqué les trois.**
-
-⮕ **La règle** : *ce que la CI exécute ne s'écrit pas avec les outils du poste.* Quand un calcul
-doit tourner là-bas, il va dans l'interpréteur le moins dépendant de la plateforme disponible —
-en pratique **`node`**, qui est déjà installé et dont la version est **déclarée dans le workflow**.
-⛔ **Pas de `cut`, `sed`, `awk`, `date`, `readlink`, `sort -V` dans une étape de CI** dès qu'un
-équivalent `node` existe. Leurs dialectes diffèrent silencieusement entre BSD et GNU.
-
-⮕ **Et le corollaire, qui vaut pour les tests** : un bac à sable qui n'énumère pas ses globals
-en emprunte à l'interpréteur. Le test réussit alors **pour une raison qui n'est pas la sienne**.
-⚠ Un test vert sur un global qu'il n'a pas déclaré est un test qui ne garde rien — il attend
-seulement une machine assez généreuse.
-
-▣ **Le témoin de la règle** : le 2 septembre, la correction retenue chaque fois a été la même —
-**déplacer le calcul dans `node`**, ou **déclarer le global manquant**. Jamais « ajuster pour que
-ça passe ici ».
-
-⮕ **Ajouté le 4 septembre 2026 (décision de Grégoire, consigne du jour §10)** : on ne retient plus
-un push pour laisser finir un run GitHub — le run annulé par `cancel-in-progress` n'est pas perdu,
-le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le verdict au jeton
-local (`scripts/pousser.sh`) reste le dernier geste avant chaque push, et le rituel d'ouverture lit
-les JOBS du dernier run (jugé vert, jugé rouge, non jugé).
+⮕ Déplacée le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.1 (geste de clôture).
 
 ## Règle 8 — le verdict Playwright local ne se prend pas à deux outils ouverts (12 septembre 2026)
 
-**Fait mesuré par Grégoire le 12 septembre au matin** : les redémarrages nocturnes des 9, 10 et 11 septembre sont des paniques
-noyau par chien de garde (`watchdog timeout`, `kernel_task`), précédées de vingt minutes de pression mémoire extrême sur 16 Go
-(Jetsam à 22 h 17 et 22 h 22 le 11 : ~7,5 Go compressés, 250 Mo libres, load average 20). Ce qui pesait : la VM Apple
-Virtualization de **Cowork** (~2,9 Go), WindowServer, cinq WebContent Safari, le renderer de Claude — **au moment où Claude Code
-lançait le verdict Playwright local** (navigateurs WebKit en série), juste après les commits de release de 21 h 44-21 h 49.
-Le 11, la marche a été coupée entre le verdict et le push : 1.135.0 committée, jamais poussée ; en ligne, l'état intermédiaire
-`af574fd2` sous un faux numéro.
-
-**La règle** :
-1. Le verdict Playwright local (`scripts/verifier-playwright.mjs`) **ne se lance pas pendant qu'une session Cowork est ouverte**.
-   Claude Code le dit avant de le lancer (« ferme Cowork, je lance le verdict »), et Grégoire rouvre Cowork après.
-2. En fin de journée, **la marche s'arrête AVANT le verdict** si Grégoire ferme ; le verdict et le push se prennent le lendemain
-   matin, Cowork fermé. Une livraison ne se termine pas la nuit, sans personne — c'est aussi la règle 6 (« une seule livraison par
-   séance, à la fin, et il regarde avant »).
-3. Quand le verdict doit quand même tourner à côté d'autre chose : `--workers=1` (plus lent, sans pic), et la pression mémoire du
-   Moniteur d'activité doit rester verte.
-4. Un push qui suit un verdict interrompu n'a pas de verdict : on le dit, on ne le suppose pas (`git reflog show origin/main` fait foi).
-
-**Ce qui ne change pas** : la CI GitHub reste le second verdict (règle 7) ; tant que `#833` la laisse rouge sur des specs sans
-rapport, le verdict local est le seul, d'où l'importance de le prendre dans de bonnes conditions.
+⮕ Le geste (quand le verdict se lance, et quand il attend le lendemain) est déplacé le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.2.
+**Reste ici, parce que c'est de la coordination : c'est GRÉGOIRE qui ferme Cowork, pas Cowork lui-même.** Claude Code le lui dit avant de lancer le verdict (« ferme Cowork, je lance le verdict »), et Grégoire rouvre Cowork après.
 
 ## Règle 9 — un seul compteur pour les fiches et les bugs, et le lien entre les deux (12 septembre 2026)
 

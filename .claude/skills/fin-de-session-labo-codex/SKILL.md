@@ -280,6 +280,73 @@ ressemble plus à un vert franc (#685).
 
 ---
 
+## 4.6 DEUX GARDES DU VERDICT (déplacées de `PROTOCOLE.md` le 13 septembre 2026)
+
+*Anciennes règles 7 et 8 du protocole. Elles sont ici parce que ce sont des gestes de clôture ;
+le protocole n'en garde qu'une ligne de renvoi, et la part de coordination de la seconde (qui
+ferme Cowork).*
+
+### 4.6.1 Un vert local ne prouve rien sur ce que la CI exécute (ex-règle 7, 2 septembre 2026)
+
+*Trois occurrences le même jour, ce qui est exactement le seuil que la règle 3 de `PROTOCOLE.md`
+fixe pour faire monter une leçon.*
+
+| ce qui a cassé | sur le poste | sur le runner |
+|---|---|---|
+| un script de session (matin) | `zsh` | `bash` |
+| `sentinelle-635` (midi) | Node 24 expose `navigator` | Node 20 ne l'a pas |
+| la garde des essais non jugés (soir) | BSD `cut` accepte un séparateur multi-octet | GNU `cut` le refuse |
+
+▣ **Ce n'est pas trois défauts, c'est un angle mort unique** : le poste de Grégoire est plus
+permissif que le serveur, et il rend vert ce qui ne l'est pas. **Le vert local est la chose
+même qui a masqué les trois.**
+
+⮕ **La règle** : *ce que la CI exécute ne s'écrit pas avec les outils du poste.* Quand un calcul
+doit tourner là-bas, il va dans l'interpréteur le moins dépendant de la plateforme disponible —
+en pratique **`node`**, qui est déjà installé et dont la version est **déclarée dans le workflow**.
+⛔ **Pas de `cut`, `sed`, `awk`, `date`, `readlink`, `sort -V` dans une étape de CI** dès qu'un
+équivalent `node` existe. Leurs dialectes diffèrent silencieusement entre BSD et GNU.
+
+⮕ **Et le corollaire, qui vaut pour les tests** : un bac à sable qui n'énumère pas ses globals
+en emprunte à l'interpréteur. Le test réussit alors **pour une raison qui n'est pas la sienne**.
+⚠ Un test vert sur un global qu'il n'a pas déclaré est un test qui ne garde rien — il attend
+seulement une machine assez généreuse.
+
+▣ **Le témoin de la règle** : le 2 septembre, la correction retenue chaque fois a été la même —
+**déplacer le calcul dans `node`**, ou **déclarer le global manquant**. Jamais « ajuster pour que
+ça passe ici ».
+
+⮕ **Ajouté le 4 septembre 2026 (décision de Grégoire, consigne du jour §10)** : on ne retient plus
+un push pour laisser finir un run GitHub — le run annulé par `cancel-in-progress` n'est pas perdu,
+le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le verdict au jeton
+local (`scripts/pousser.sh`) reste le dernier geste avant chaque push, et le rituel d'ouverture lit
+les JOBS du dernier run (jugé vert, jugé rouge, non jugé).
+
+### 4.6.2 Le verdict Playwright local ne se prend pas à deux outils ouverts (ex-règle 8, 12 septembre 2026)
+
+**Fait mesuré par Grégoire le 12 septembre au matin** : les redémarrages nocturnes des 9, 10 et 11 septembre sont des paniques
+noyau par chien de garde (`watchdog timeout`, `kernel_task`), précédées de vingt minutes de pression mémoire extrême sur 16 Go
+(Jetsam à 22 h 17 et 22 h 22 le 11 : ~7,5 Go compressés, 250 Mo libres, load average 20). Ce qui pesait : la VM Apple
+Virtualization de **Cowork** (~2,9 Go), WindowServer, cinq WebContent Safari, le renderer de Claude — **au moment où Claude Code
+lançait le verdict Playwright local** (navigateurs WebKit en série), juste après les commits de release de 21 h 44-21 h 49.
+Le 11, la marche a été coupée entre le verdict et le push : 1.135.0 committée, jamais poussée ; en ligne, l'état intermédiaire
+`af574fd2` sous un faux numéro.
+
+**La règle** :
+1. Le verdict Playwright local (`scripts/verifier-playwright.mjs`) **ne se lance pas pendant qu'une session Cowork est ouverte**.
+   Qui la ferme, et ce que Claude Code dit avant de lancer : `PROTOCOLE.md`, règle 8 (c'est de la coordination, elle y reste).
+2. En fin de journée, **la marche s'arrête AVANT le verdict** si Grégoire ferme ; le verdict et le push se prennent le lendemain
+   matin, Cowork fermé. Une livraison ne se termine pas la nuit, sans personne — c'est aussi la règle 6 de `PROTOCOLE.md`
+   (« une seule livraison par séance, à la fin, et il regarde avant »).
+3. Quand le verdict doit quand même tourner à côté d'autre chose : `--workers=1` (plus lent, sans pic), et la pression mémoire du
+   Moniteur d'activité doit rester verte.
+4. Un push qui suit un verdict interrompu n'a pas de verdict : on le dit, on ne le suppose pas (`git reflog show origin/main` fait foi).
+
+**Ce qui ne change pas** : la CI GitHub reste le second verdict (§4.6.1) ; tant que `#833` la laisse rouge sur des specs sans
+rapport, le verdict local est le seul, d'où l'importance de le prendre dans de bonnes conditions.
+
+---
+
 ## 5. VERSION : BUMP VIA LE SCRIPT DE RELEASE
 
 **Objectif** : si ce commit doit changer le numéro de version, le faire par
@@ -411,6 +478,10 @@ Vérification adverse :
     - [test tautologique] : reste vert sans le correctif → comportement non prouvé
     - [écart récit↔diff] : affirmation « … » non re-dérivée → reformuler en « non vérifié »
   — (aucun correctif données/sécurité/SSOT dans le diff → étape sans objet)
+  Skill `verification-adverse` chargé SEUL (sans qu'on le nomme) : [oui / non]
+    ⮕ Témoin de la condition de levée de la règle 10 de PROTOCOLE.md (13 sept. 2026) :
+      elle ne part vers ce skill qu'après DEUX « oui » ; avant, un skill qui ne se
+      charge pas la rendrait moins lue.
 
 Version :
   ✅ 4 points de vérité synchrones (X.Y.Z / MMJJ-HHMM)
@@ -474,3 +545,4 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 | 2026-05-11 | Création. Audit statique, tests, cohérence version, rapport sans modification automatique. |
 | 2026-06-11 | §4 réécrite : bump de version par `scripts/release.mjs` (4 points de vérité, `--dry-run`) au lieu de l'édition manuelle de `index.html` (fallbacks déplacés dans `init-inline.js`). Renvoi CLAUDE.md pour §2.1-2.3, dispatcher recité (`[data-action]` ≈ 780-836). |
 | 2026-06-14 | Nouveau §4 « Vérification adverse » (break-test des tests neufs/modifiés + confrontation récit↔diff + passe « connexions »), instanciant le skill `verification-adverse` (mode A). Renumérotation §4-6 → §5-7. Né des audits du 13-14 juin (7 break-tests, défaut transversal #340). |
+| 2026-09-13 | Nouveau §4.6 : les règles 7 et 8 de `PROTOCOLE.md` déplacées ici (gestes de clôture) ; le protocole garde le renvoi et « qui ferme Cowork ». Au rapport, le témoin « `verification-adverse` chargé seul », condition de levée de la règle 10. |
