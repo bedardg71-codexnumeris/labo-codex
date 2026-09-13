@@ -1,124 +1,163 @@
-# Consigne du jour – Retirer l'« ANCIEN SYSTÈME » des échelles d'`index.html` (#520)
+# Consigne du jour – La règle 10 posée dans le filet (#858), puis le bandeau qui mène (#801)
 
-> **Écrite par Cowork le dimanche 13 septembre 2026, 14 h 36 (Toronto).** Elle remplace la consigne #551, codée et commitée
-> dans `d21d320f`, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-551-suggestion-sans-lettre.md`.
+> **Écrite par Cowork le dimanche 13 septembre 2026, 16 h 20 (Toronto).** Elle remplace la consigne #520, livrée et poussée,
+> archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-520-ancien-systeme-echelles.md`.
 >
-> ⛔ **#551 N'EST PAS TERMINÉ.** Il lui manque la relecture croisée de Cowork, la release patch avec son entrée « Nouvelles »,
-> le verdict Playwright pris Cowork fermé, et le push (`main` a deux commits d'avance sur `origin/main` ; `version.json` est
-> resté en `1.140.4` / `0913-1400`). **Ce lot-ci vient APRÈS cette livraison, pas à sa place.**
+> ✅ **#520 est terminé** : `7afa62b9` puis `d4e2923f` sur `origin/main`, sans release (lot invisible). #551 est livré en
+> 1.140.5. `origin/main` porte 1.140.5 / `0913-1457`.
 >
-> ✅ **Aucune interdiction de la consigne précédente n'est renversée ici** : ce lot ne touche ni `js/interventions.js`, ni
-> aucune assertion du cadrage 11.
+> ⚠ **Deux commits de documentation attendent le push de Grégoire** (`7b68d9a4`, `873ffe2c`) : le dépôt est en SSH et aucune
+> de nos deux sessions n'a la clé. **Ne les recommite pas, ne les rebase pas** — ils partiront avec le tien.
+>
+> **DEUX LOTS, dans cet ordre.** Le second ne s'ouvre qu'une fois le premier commité. Aucun des deux ne demande à Grégoire
+> d'arbitrage ni de vérification à l'écran (règle de sélection du 13 sept.).
 
 ---
 
-## 0 · Ce que ce lot livre
+# LOT A · #858 — une découpe qui refuse de rendre une tranche vide
 
-**À l'écran : rien.** Le bloc visé porte `class="u-hide"` et ses champs sont des doublons morts. Ce qui change est invisible et
-mesurable : **`index.html` ne porte plus un seul identifiant dupliqué**, et l'ancien éditeur d'échelles cesse d'exister.
+## A.0 · Ce que ce lot livre
 
-C'est un lot qui ne demande à Grégoire **ni arbitrage ni vérification à l'écran** — la règle de sélection du 13 sept.
+**À l'écran : rien.** Le lot vit dans `tests/`. Ce qui change : trente assertions négatives qui passent aujourd'hui **sans
+rien éprouver** se mettent à pouvoir échouer, et l'idiome qui les rend muettes cesse de pouvoir entrer.
 
----
+C'est l'application de la **règle 10 du `PROTOCOLE.md`**, posée dans `eecaa703` le jour même.
 
-## 1 · Ce qui est mesuré (Cowork, le 13 sept. à 14 h 30, sur `291216b7`)
+## A.1 · Ce qui est mesuré (Cowork, le 13 sept. à 16 h, sur `873ffe2c`)
 
-Chaque compte est écrit avec la commande qui le produit.
+Chaque compte est écrit avec la commande qui le produit, depuis `tests/`.
 
-- `grep -oE 'id="[A-Za-z0-9_-]+"' index.html | sort | uniq -d` ⮕ **exactement 8 identifiants dupliqués**, chacun deux fois :
-  `apercuEchelle`, `champAutreEchelle`, `nomEchelleContainer`, `nomEchelleTemplate`, `selectEchelleTemplate`, `seuilReussite`,
-  `tableauNiveaux`, `typeEchelle`.
-- **Les huit viennent tous du même bloc**, et de lui seul : `index.html` **5233** (`<!-- ANCIEN SYSTÈME (Caché par défaut, gardé
-  pour compatibilité) -->`, suivi de `<div class="u-hide">`) à **5386** (`</div><!-- Fin ANCIEN SYSTÈME -->`) — 154 lignes.
-- **La PREMIÈRE occurrence des huit est en 5188–5226, donc AVANT le bloc.** `getElementById` rend déjà l'éditeur vivant ; les
-  copies du bloc ne sont jamais lues. ⮕ **L'ablation ne change aucun comportement.** (La fiche l'affirmait ; c'est mesuré.)
-- **Onze** `data-action` / `data-on-change` vivent dans le bloc. **Dix n'ont aucun autre appelant dans `index.html`** ; seul
-  `sauvegarderNomEchelle` en garde deux hors du bloc.
+- Corpus : **666 fichiers** `*.test.js` / `*.spec.js`.
+- L'idiome, toutes formes confondues :
+  `grep -rnE '\.slice\(\s*[A-Za-z_$][A-Za-z0-9_$.]*\.indexOf\(' --include='*.js' .`
+  ⮕ **112 occurrences dans 60 fichiers.**
+- `.substring(…indexOf(` ⮕ **0**. Inutile de le couvrir.
+- Sous-ensemble dangereux, celui de la fiche : **30 assertions négatives sans garde de non-vide, dans 23 fichiers**.
 
-### Ce que la mesure corrige de la fiche #520
+### ⚠ CE QUE LA MESURE CORRIGE DE LA FICHE #858
 
-La fiche nomme cinq identifiants et annonce `nomEchelleTemplate` **×3**. **Faux des deux côtés** : ils sont **huit**, chacun
-**×2**, et `btnDupliquerEchelle` — qu'elle cite — **n'est pas dupliqué du tout** (une seule occurrence dans le fichier).
-Reprends la liste ci-dessus, pas celle de la fiche.
+La fiche demande « un cliquet qui interdit `slice(indexOf(` dans `tests/` ». **Prise au mot, cette phrase porte sur 112 sites
+dans 60 fichiers, pas sur 30 dans 23.** C'est presque quatre fois le lot annoncé, et la plupart de ces 112 sont déjà gardés.
 
----
+⮕ **Décision de Cowork, technique, renversable par Grégoire** : le cliquet est **un cliquet de compte, pas une interdiction**.
 
-## 2 · Portée
+- Les **30 dangereuses** sont routées par la fonction qui refuse, et sortent du compte.
+- Les **82 déjà gardées** restent où elles sont, figées à leur compte du jour. Le cliquet ne peut que descendre.
+- Motif : réécrire 82 sites corrects pour la forme, c'est l'élargissement de scope que la révision du 1er sept. a fermé.
 
-**Le geste : supprimer `index.html` 5233–5386**, plus le code que cette suppression rend mort (§ 4).
+## A.2 · Le premier geste, AVANT tout code
 
-- ⛔ **Ne touche pas au second « ANCIEN SYSTÈME »** (à partir de la ligne **5487**) : c'est la zone des cartouches, elle ne
-  produit **aucun** identifiant dupliqué, et rien dans #520 ne la vise.
-- ⛔ **Ne rouvre pas #766.** Décision de Grégoire du 6 sept., 11 h : « laissé inscrit, pas de lot ; ne pas le reposer. »
-- ⛔ **Ne fusionne pas les autres doubles `class` de #787.** Ceux-là changent un rendu et se jugent à l'écran, avec Grégoire.
-  Seuls partent ceux que l'ablation emporte (§ 3).
+Pour chacune des 30, **vérifier que son marqueur existe encore dans le fichier qu'elle lit.**
 
----
+**Combien sont mortes aujourd'hui, et pas seulement fragiles, n'est pas mesuré.** C'est ce qui départage une réparation d'une
+prophylaxie, et ça ne s'estime pas. Écris le compte dans ton rapport, et cite les fichiers.
 
-## 3 · LE PIÈGE – la liste figée de la sentinelle #779
+⚠ Si l'une est morte, elle a cessé d'éprouver quelque chose que quelqu'un croyait tenu : **c'est une trouvaille de niveau 1**
+(corriger maintenant), pas de niveau 2 — la sentinelle concernée est à réancrer dans ce lot.
 
-`tests/unit/sentinelle-779-un-seul-attribut-class.test.js` (**bord B**) fige la liste des balises qui portent deux attributs
-`class`. **Cinq des dix-sept que compte `index.html` aujourd'hui sont DANS le bloc** — dont
-`<div class="groupe-form" class="max-w-400-mb20">`, ligne 5236.
+## A.3 · Le geste
 
-⮕ **Les retirer fait rougir la sentinelle par construction.** Ce n'est pas une régression : la fiche #787 le prévoit
-explicitement — « retirer un cas réparé de la liste fait partie du geste ». **Mets la liste à jour dans le MÊME commit**, et
-écris le compte avant / après dans le message de commit.
+1. Une fonction de découpe partagée — **elle jette en nommant le marqueur manquant**, elle ne rend jamais une tranche vide.
+   Emplacement, nom et signature : à toi. Zéro dette : on retire l'idiome, on ne le rapièce pas.
+2. Les 30 assertions routées à travers elle.
+3. Le cliquet de compte décrit en A.1.
 
-⚠ **#787 annonce vingt-deux cas ; `index.html` en mesure dix-sept aujourd'hui**
-(`grep -cE 'class="[^"]*"[^>]*class="' index.html`). Le chiffre de la fiche est périmé ou compte d'autres fichiers :
-**remesure avant de t'y fier.**
+## A.4 · Le cas déjà connu, à router avec les trente
 
----
+`tests/unit/sentinelle-520-aucun-id-duplique.test.js`, **bord C** : il découpe `echelles.js` par
+`indexOf('async function chargerEchelleTemplate(')` puis `indexOf('\nasync function ', …)`. Il porte **déjà** son garde de
+non-vide (ajouté à ma relecture croisée du 13, mutation « fonction renommée » : rouge). Il n'est pas dangereux — il est à
+router quand même, pour que la garde vive dans la fonction et pas dans le banc.
 
-## 4 · Le code que l'ablation rend mort
+## A.5 · ⛔ Ce qui N'entre PAS
 
-Dix handlers perdent leur seul appelant HTML : `enregistrerCommeEchelle`, `exporterEchelles`, `genererNiveauxPersonnalises`,
-`ouvrirImportEchellesLocal`, `reinitialiserNiveauxDefaut`, `sauvegarderNiveaux`, `changerTypeEchelle`,
-`chargerEchelleTemplate`, `importerEchelles`, `sauvegarderConfigEchelle`. Ils vivent dans `js/echelles.js`, sauf
-`ouvrirImportEchellesLocal` (`js/main.js`) et `importerEchelles` (aussi cité dans `js/echelles-bibliotheque.js`).
+- **La seconde famille : une preuve qui passe par du code mort** (`sentinelle-506` le 13 sept., après #516 et #524). Elle ne
+  se détecte pas par motif — il faut savoir ce qui est atteignable. **Non mesurée, donc non inscrite.** L'inscrire serait
+  inscrire un soupçon, et c'est l'erreur payée avec #857.
+- Tout fichier hors de `tests/`.
 
-⮕ **Mesure, pour chacun, s'il garde un appelant en JS** (`grep -rn` dans `js/`). Ceux qui n'en ont aucun **partent avec le
-bloc** — c'est le zéro-dette, et c'est le lot qui se termine, pas un élargissement. Ceux qui en gardent un **restent**, et tu
-**nommes lesquels et par qui** dans ton rapport.
+## A.6 · La preuve
 
-⚠ **`sauvegarderNomEchelle` reste** : deux appels hors du bloc.
+La règle 10 s'applique à elle-même : **toute assertion négative neuve de ce lot porte son garde de non-vide.**
+
+Le break-test qui compte : **prends une des 30, rends son marqueur introuvable, et montre que le banc ROUGIT maintenant alors
+qu'il restait vert avant.** Sans ce témoin, le lot n'a rien prouvé. Un par famille de découpe suffit.
 
 ---
 
-## 5 · La preuve
+# LOT B · #801 — le bandeau mène aux nouveautés au lieu de les décrire
 
-1. **Avant / après, la même commande** : `grep -oE 'id="[A-Za-z0-9_-]+"' index.html | sort | uniq -d | wc -l` ⮕ **8 avant,
-   0 après**. C'est la preuve principale, et une machine y répond seule.
-2. **Une sentinelle ratchet neuve** : `index.html` ne porte aucun identifiant dupliqué. **Casse-la exprès** (réintroduis un id
-   en double), vérifie qu'elle rougit, remets le fichier à l'identique.
-3. **Les bancs qui nomment ces identifiants** — `sentinelle-625-etats-edition-purges`, `sentinelle-555-reperes-maitrise-echelle`,
-   `sentinelle-505-rendus-blocs-executent`, `sentinelle-524-code-niveau-obligatoire`, `sentinelle-555-e-reperes-echelle-neuve`,
-   et les specs `confirmations-conception-uniformes` et `echelle-reperes-maitrise-rendu` : **vérifie qu'ils lisent bien la
-   première occurrence** (l'éditeur vivant) et non les copies du bloc. S'ils restent verts sans rien avoir éprouvé, dis-le.
-4. **La suite complète se prend dans le CLONE PARTAGÉ** (`git clone --shared`), jamais dans un banc monté par `git archive` :
-   sept essais y rougissent faute de `.git`. `npm install` dans le banc, `timeout 170`, en synchrone.
+⛔ **N'ouvre ce lot qu'une fois le LOT A commité.**
+
+## B.0 · Ce que ce lot livre
+
+Au chargement d'une version neuve, le bandeau porte **un bouton qui ouvre les nouveautés**, au lieu d'une phrase qui dit où
+elles sont. C'est le défaut d'origine de la fiche, jamais livré ni écarté, mesuré le 13 sept. sur `d07e963d`.
+
+Les gestes 1 et 3 de la fiche sont livrés (1.127.3, `1a7205ee`), le geste 2 est écarté à dessein. **Il ne reste que celui-ci.**
+
+## B.1 · ⚠ CE QUE LA MESURE CORRIGE DE MA PROPRE CONSIGNE
+
+À la relecture croisée du 13 sept., j'ai écrit que le bouton devait « MENER à la carte « Nouveautés » (défilement + focus) ».
+**C'est faux, et c'est ma supposition, pas une mesure.** `js/init-inline.js:180` définit `afficherModalNouveautes`, exposée en
+`:493`, et elle ouvre la **modale** `#modalNouveautes` (`index.html:4075`). La carte de l'accueil (`js/accueil.js:235`) ne fait
+rien d'autre que l'appeler.
+
+⮕ **Le bouton appelle `afficherModalNouveautes`. Il n'y a ni défilement ni focus à écrire.** Corrige la fiche en même temps.
+
+## B.2 · Où, exactement
+
+`index.html` **4058–4074** : `<div id="bandeau-mise-a-jour">`. Son pied (`bandeau-mise-a-jour-footer`, l. 4065–4070) porte
+déjà `<button data-action="rechargerPage" class="bandeau-mise-a-jour-btn">Recharger</button>`.
+
+**`js/init-inline.js:410-412` masque « Recharger » quand la mise à jour est LOCALE** (`btnRecharger.hidden = !distant`).
+
+## B.3 · La règle qui évite d'empiler
+
+La fiche porte un ⚠ « Ne pas empiler » : trois boutons dans une fenêtre transitoire, c'est trop.
+
+⮕ **Décision de Cowork, technique, renversable par Grégoire** : le bouton des nouveautés suit la règle inverse de
+« Recharger ». **Il ne paraît que dans le cas LOCAL**, celui où « Recharger » est masqué — donc **jamais deux boutons côte à
+côte**, et le pied n'en porte qu'un dans les deux cas. Le cas distant ne parle pas de nouveautés : son texte annonce un
+déploiement en arrière-plan, pas un changement déjà chargé.
+
+## B.4 · Le texte du bandeau
+
+Avec un bouton qui mène, la seconde moitié de la phrase ne sert plus.
+
+`js/init-inline.js:406`, cas local — proposé, **à corriger par Grégoire s'il veut d'autres mots** :
+
+> `Nouvelle version chargée. Tes données persistent.`
+
+Le cas distant (l. 405) ne change pas.
+
+⚠ Ce sont des mots que lisent ses collègues, pas ses élèves : je tranche, et je le nomme. S'il les reprend, c'est une ligne.
+
+## B.5 · La preuve
+
+`tests/unit/sentinelle-801-canal-de-retour-se-voit.test.js` **n'a pas à changer de portée** : elle interdit
+`ouvrirModalRapportBug` dans le bandeau, et cette interdiction tient.
+
+Elle **gagne un cas** : le bandeau porte un déclencheur de `afficherModalNouveautes`, et le banc rougit s'il disparaît.
+Mutation obligatoire : retire le bouton, montre le rouge.
+
+Un banc Playwright pour le comportement : version locale neuve ⮕ le bandeau paraît, « Recharger » est masqué, le bouton des
+nouveautés est là, un clic ouvre `#modalNouveautes`.
 
 ---
 
-## 6 · Écritures de backlog, dans le même commit
+# Écritures de backlog, dans le même commit
 
-- **#520 cochée**, avec la liste réelle des huit identifiants et le compte avant / après.
-- **#787 mise à jour** : les cas emportés par l'ablation retirés de son énoncé, le compte remesuré sur `index.html`.
+- **#858** : cocher, avec le compte des assertions mortes trouvées en A.2, et la décision A.1 (cliquet de compte) écrite noir
+  sur blanc. Si une sentinelle a été réancrée, la nommer.
+- **#801** : cocher, en citant le banc qui tient le bouton. **Corriger la ligne « défilement + focus »** de la disposition du
+  13 sept. — c'est une modale, pas une carte.
+- **Ne touche pas** à #766 (décision de Grégoire du 6 sept., 11 h : « laissé inscrit, pas de lot ; ne pas le reposer ») ni aux
+  autres doubles `class` de #787 : ceux-là changent un rendu et se jugent à l'écran, avec lui. **La grappe `index.html` se
+  réduit donc aujourd'hui à #801 seul**, et c'est voulu.
 
----
+# Livraison
 
-## 7 · Ce qu'on annonce
-
-**Rien dans « Nouvelles ».** Aucun geste d'utilisateur ne change, aucun écran ne bouge : une entrée de changelog dirait à vingt
-collègues qu'il s'est passé quelque chose qu'ils ne peuvent pas voir. *(Décidé par Cowork ; supposition nommée : que Grégoire ne
-veut pas de release pour un lot invisible. Une phrase de sa part la renverse.)*
-
----
-
-## 8 · Livraison
-
-Commit — **relecture croisée de Cowork** — verdict Playwright pris **Cowork fermé** — push. Dans cet ordre : « push réussi » ne
-vaut pas « suite complète verte », le hook pre-push ne lance que Vitest.
-
-⛔ **Et après la livraison de #551**, pas avant.
+Deux commits, un par lot. **Release : patch**, une seule, après le LOT B — le LOT A ne se voit pas, le LOT B se voit.
+`/fin-de-session` porte le rituel ; l'ordre du §4.5 tient (commit, relecture, verdict, push). ⚠ Le push part avec les deux
+commits de documentation déjà en attente : c'est Grégoire qui pousse.

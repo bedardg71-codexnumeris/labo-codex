@@ -13,9 +13,11 @@
 >
 > **#858** : 2 tranches MORTES trouvées par une sonde, toutes deux dans des découpes écrites sur deux lignes que le grep de la consigne ne voyait pas — `sentinelle-poignee-redimension-noeud` (essai retiré : son objet a disparu avec #418) et `sentinelle-enseignement-explicite` (tranche inversée, réancrée). 48 découpes routées ; cliquet de compte : 113 découpes dans 62 fichiers.
 >
-> **#801 — à Grégoire, deux choses renversables en une ligne** : le texte local « Nouvelle version chargée. Tes données persistent. » (mots de Cowork), et la supposition que l'ouverture des nouveautés referme le bandeau local.
+> **#801** : Grégoire garde les deux points renversables tels quels — le texte local « Nouvelle version chargée. Tes données persistent. », et la fermeture du bandeau local à l'ouverture des nouveautés (« ne pas empiler » appliqué dans le temps).
 >
-> **Reste** : (1) relecture croisée de Cowork ; (2) verdict Playwright complet sur le SHA de ce relais, Cowork fermé ; (3) push. Fichiers de Cowork NON commités par ce relais : `plans de travail/CONSIGNE-DU-JOUR.md` (modifié), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-13-520-ancien-systeme-echelles.md` et `plans de travail/CONSIGNE-SUIVANTE-echelles.md` (neufs).
+> **Relecture croisée de Cowork verte par lecture et remesure, break-tests NON reposés par elle** (≈ 17 h 30) : ses dépendances de `tests/` sont installées pour macOS, rollup n'y charge pas son binding natif. Remesuré par elle : 112/60 contre 167/77, le cliquet 113/62, l'essai retiré de la poignée tenu par `sentinelle-ablation-vue-lecon-filtrage:126` sur le fichier entier, `tranche()`, l'exclusion des deux boutons. **Le verdict Playwright Cowork fermé reste entier.** Trouvaille de sa relecture inscrite : **#859** (le repère « build vu » écrit deux fois par deux chemins).
+>
+> **Reste** : (1) verdict Playwright complet sur le SHA de ce relais, Cowork fermé ; (2) push, par Grégoire. Ce relais commite aussi les trois fichiers de Cowork : `plans de travail/CONSIGNE-DU-JOUR.md`, son archive `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-520-ancien-systeme-echelles.md`, et `CONSIGNE-SUIVANTE-echelles.md` (la grappe `js/echelles.js` — à n'ouvrir qu'après le push, mesures reprises sur le sommet du moment).
 
 ---
 
