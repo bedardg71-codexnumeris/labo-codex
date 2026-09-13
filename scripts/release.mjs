@@ -228,12 +228,19 @@ function fichiersModifies(racine) {
     let libsDepuis = [];
     try {
       const commits = lignes(git(['log', '-2', '--format=%H', '--', 'version.json']));
-      // Un seul commit (depot jeune) : on part de lui, faute de mieux.
-      const repere = commits[1] || commits[0];
-      if (repere) {
-        depuisRelease = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css']));
-        libsDepuis = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'libs']));
-      }
+      // Pas d'avant-dernier (depot jeune, greffe) : on part de la RACINE de
+      // l'historique. Se rabattre sur le seul commit trouve reproduisait #675
+      // mot pour mot quand ce commit EST HEAD et porte du js/ : repere = HEAD,
+      // diff vide, fichiers perimes en silence (relecture Cowork, 13 sept.).
+      // ⚠ Pas l'arbre vide : il bumpait TOUT, y compris les fichiers intouches
+      // quand ce commit unique est la release de base et le chantier dans
+      // l'arbre — l'invariant « le cache reste utile » du banc #417 a rougi.
+      // La racine tient les deux cas : si elle EST ce commit unique, rien de ce
+      // qu'il porte n'a jamais ete servi sous une autre URL.
+      const racines = lignes(git(['rev-list', '--max-parents=0', 'HEAD']));
+      const repere = commits[1] || racines[racines.length - 1];
+      depuisRelease = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'js', 'styles.css', 'css']));
+      libsDepuis = lignes(git(['diff', '--name-only', repere, 'HEAD', '--', 'libs']));
     } catch {
       // Depot sans historique de version.json (premier commit, greffe) :
       // l'arbre de travail reste une base valable, on ne bloque pas.
@@ -241,7 +248,8 @@ function fichiersModifies(racine) {
 
     return {
       aBumper: [...new Set(retenir([...travail, ...depuisRelease]))],
-      horsPerimetre: [...new Set([...libsTravail, ...libsDepuis])].sort(),
+      // Meme filtre d'extension : un `libs/VERSIONS.md` n'a pas d'URL a bumper.
+      horsPerimetre: [...new Set(retenir([...libsTravail, ...libsDepuis]))].sort(),
     };
   } catch {
     // Pas de git (archive, tarball) : on ne bloque pas la release, mais on ne
@@ -361,10 +369,10 @@ if (absents.length) {
   console.log('  (non references dans index.html, ignores : ' + absents.join(', ') + ')');
 }
 if (modifies && modifies.horsPerimetre.length) {
-  console.log('  ⚠ libs/ modifie(s), NON bumpe(s) — hors perimetre de ce script (#602) : '
+  console.warn('  ⚠ libs/ modifie(s), NON bumpe(s) — hors perimetre de ce script (#602) : '
     + modifies.horsPerimetre.join(', '));
-  console.log('    Jeton a poser a la main s\'il y en a un (index.html, importScripts de js/heic-worker.js) ;');
-  console.log('    chargees sans jeton, elles ne tiennent qu\'a la revalidation de netlify.toml.');
+  console.warn('    Jeton a poser a la main s\'il y en a un (index.html, importScripts de js/heic-worker.js) ;');
+  console.warn('    chargees sans jeton, elles ne tiennent qu\'a la revalidation de netlify.toml.');
 }
 if (gitIndisponible) {
   console.log('  ⚠ git indisponible : seuls init-inline.js et main.js ont ete bumpes.');

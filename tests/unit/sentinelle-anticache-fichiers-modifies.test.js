@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -44,6 +44,16 @@ import { fileURLToPath } from 'node:url';
 // BREAK-TEST #675 (13 sept. 2026) — `-2` remis à `-1` dans `release.mjs` :
 // « bumpe le fichier du chantier », « bumpe le fichier de js/ que porte ce
 // commit » ROUGES ; l'ancien essai par chaîne, lui, restait vert. Remis.
+//
+// RELECTURE CROISÉE DE COWORK (13 sept. 2026) — deux retouches, deux mutations :
+//   M7. repli sur la racine remis à `commits[1] || commits[0]` (le défaut §1 :
+//       un seul commit de version.json, qui est HEAD) → « dépôt jeune … bumpe
+//       les fichiers de js/ » ROUGE. Remis.
+//   ⚠ Un premier repli sur l'ARBRE VIDE a été essayé : il faisait rougir
+//       « un module INTOUCHÉ garde son ?v= » et « une feuille INTOUCHÉE » du
+//       banc #417 (tout était bumpé). D'où la racine de l'historique.
+//   M8. filtre d'extension retiré de `horsPerimetre` (§5a) → « ne nomme pas
+//       VERSIONS.md » ROUGE. Remis.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -250,6 +260,7 @@ describe('#675 · release.mjs part de la release PRÉCÉDENTE, pas du dernier co
         // Le chantier, commité avant la release — l'ordre du 23 août.
         ecrire('js/a.js', '// a v2 — le chantier\n');
         ecrire('libs/pdf.worker.min.js', '/* 3.11.175 */\n');
+        ecrire('libs/VERSIONS.md', '- pdf.js 3.11.175\n');
         gitBac('commit', '-qam', 'chantier');
 
         // Le commit qui fausse le repère : il touche version.json ET un fichier
@@ -258,8 +269,11 @@ describe('#675 · release.mjs part de la release PRÉCÉDENTE, pas du dernier co
         ecrire('js/b.js', '// b v2 — le correctif\n');
         gitBac('commit', '-qam', 'fix touchant version.json');
 
-        sortie = execFileSync('node', [path.join(racineProjet, 'scripts', 'release.mjs'), 'patch', '--root', bac],
+        // Sortie standard ET d'erreur : l'avertissement libs/ part en console.warn.
+        const r = spawnSync('node', [path.join(racineProjet, 'scripts', 'release.mjs'), 'patch', '--root', bac],
             { encoding: 'utf8', env: ENV_SANS_GIT });
+        if (r.status !== 0) throw new Error('release.mjs a échoué : ' + r.stderr);
+        sortie = r.stdout + r.stderr;
     });
 
     afterAll(() => {
@@ -282,5 +296,66 @@ describe('#675 · release.mjs part de la release PRÉCÉDENTE, pas du dernier co
     it('#602 · NOMME la bibliothèque modifiée qu\'il ne bumpe pas', () => {
         expect(sortie).toMatch(/libs\/pdf\.worker\.min\.js/);
         expect(sortie).toMatch(/NON bumpe/);
+    });
+
+    it('#602 · ne nomme pas un fichier de libs/ qui n\'a pas d\'URL (VERSIONS.md) — relecture Cowork §5a', () => {
+        expect(sortie).not.toMatch(/VERSIONS\.md/);
+    });
+});
+
+// Relecture croisée de Cowork (13 sept.), §1 : le repli du dépôt JEUNE. Un seul
+// commit touche `version.json`, il EST HEAD et porte du `js/` — la forme de
+// `24eeaa89`, sans avant-dernier. Se rabattre sur ce commit rendait un diff
+// vide : a.js et b.js restaient sous leur ancienne URL en silence.
+describe('#675 · dépôt jeune : un seul commit de version.json, qui est HEAD et porte du js/', () => {
+    let bac;
+    let sortie;
+    const ENV_SANS_GIT = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GIT_')));
+    const gitBac = (...args) => execFileSync('git', args, { cwd: bac, env: ENV_SANS_GIT, stdio: ['ignore', 'pipe', 'pipe'] });
+    const ecrire = (rel, contenu) => writeFileSync(path.join(bac, rel), contenu);
+    const jetonDe = (rel) => {
+        const m = new RegExp(rel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\?v=([A-Za-z0-9]+)')
+            .exec(readFileSync(path.join(bac, 'index.html'), 'utf8'));
+        return m ? m[1] : null;
+    };
+
+    beforeAll(() => {
+        bac = mkdtempSync(path.join(os.tmpdir(), 'release-675-jeune-'));
+        mkdirSync(path.join(bac, 'js'));
+        ecrire('js/init-inline.js', "let VERSION_MAJEURE = '1.0.0';\nlet BUILD_ID = '0101-0900';\n");
+        ecrire('js/main.js', "window._SCRIPT_BUILD_main = '0101-0900';\n");
+        for (const f of ['a', 'b']) ecrire(`js/${f}.js`, `// ${f} v1\n`);
+        ecrire('index.html', [
+            '<script src="version.js?v=01010900"></script>',
+            '<script src="js/init-inline.js?v=20260101a"></script>',
+            '<script src="js/main.js?v=20260101a"></script>',
+            '<script src="js/a.js?v=20260101a"></script>',
+            '<script src="js/b.js?v=20260101a"></script>',
+            '',
+        ].join('\n'));
+        gitBac('init', '-q');
+        gitBac('config', 'user.email', 'test@example.invalid');
+        gitBac('config', 'user.name', 'Test');
+        gitBac('add', '-A');
+        gitBac('commit', '-qm', 'base, sans version.json');
+
+        // Le SEUL commit qui touche version.json : il est HEAD et porte du js/.
+        ecrire('version.json', JSON.stringify({ build: '0102-0900', beta: '1.0.0' }) + '\n');
+        ecrire('js/a.js', '// a v2\n');
+        ecrire('js/b.js', '// b v2\n');
+        gitBac('add', '-A');
+        gitBac('commit', '-qm', 'version.json + js');
+
+        sortie = execFileSync('node', [path.join(racineProjet, 'scripts', 'release.mjs'), 'patch', '--root', bac],
+            { encoding: 'utf8', env: ENV_SANS_GIT });
+    });
+
+    afterAll(() => {
+        if (bac) rmSync(bac, { recursive: true, force: true });
+    });
+
+    it('bumpe les fichiers de js/ que porte ce commit unique', () => {
+        expect(jetonDe('js/a.js'), sortie).not.toBe('20260101a');
+        expect(jetonDe('js/b.js'), sortie).not.toBe('20260101a');
     });
 });
