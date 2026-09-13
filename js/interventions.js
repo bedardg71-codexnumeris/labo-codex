@@ -168,10 +168,13 @@ function obtenirIntervention(id) {
 /**
  * Obtenir les interventions d'un étudiant
  * @param {string} da - DA de l'étudiant
+ * #746 (13 sept. 2026) — même filtre de contexte que la liste (`interventionsDuContexteActif`) : le profil,
+ * l'historique, les graphiques et le compteur de la Liste ne montrent plus celles d'un autre groupe-cours.
+ * Une intervention sans `groupeCoursId` (écrite avant le 12 sept.) reste visible partout, comme dans la liste.
  * @returns {Array} Liste des interventions où l'étudiant était présent
  */
 function obtenirInterventionsEtudiant(da) {
-    const interventions = _interventionsLisibles(obtenirInterventions(), false);
+    const interventions = interventionsDuContexteActif(_interventionsLisibles(obtenirInterventions(), false));
     return interventions.filter(i => i.etudiants && i.etudiants.includes(da));
 }
 
@@ -1323,8 +1326,11 @@ function suggererObjectifIntervention(interventionId) {
         return;
     }
 
-    var seuilDeveloppement = (typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.developpement') : null) || 0.75;
-    var seuilInsuffisant = (typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.insuffisant') : null) || 0.64;
+    // #551, garde seule (13 sept. 2026) — la même séparation que `seuilDefi` plus haut (#555 lot 2) : la garde
+    // de chargement subsiste, le repli de valeur est retiré — un seuil délibérément réglé à 0 reste 0. Les 0,75
+    // et 0,64 MIROITENT `SEUILS_PAR_DEFAUT.idme`, verrouillés par la sentinelle #555 des replis.
+    var seuilDeveloppement = typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.developpement') : 0.75;
+    var seuilInsuffisant = typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.insuffisant') : 0.64;
 
     // Calculer la moyenne du sous-groupe pour chaque critère ciblé
     var plusFaible = null;

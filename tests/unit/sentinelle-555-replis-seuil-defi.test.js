@@ -122,6 +122,25 @@ describe('#555 lot 2 · le seuil de défi n\'a qu\'une source', () => {
         ).toBe(false);
     });
 
+    it('5 bis. (#551, 13 sept. 2026) les deux seuils idme.* de la suggestion d\'objectif : même séparation, mêmes miroirs', () => {
+        // Le filtre du cas 5 ne visait que `defiSpecifique` : `idme.developpement` et `idme.insuffisant`
+        // (suggererObjectifIntervention) portaient encore l'ancienne forme `: null) || 0.75`, qui écrase un 0
+        // délibéré. Le comportement (un 0 propagé) est éprouvé par la sentinelle #746-#551 ; ceci est le
+        // cliquet de FORME, et le miroir de dernier recours est comparé à la source, jamais codé ici.
+        const config = lireCodeSansCommentaires('js/interpretation-config.js');
+        const code = lireCodeSansCommentaires('js/interventions.js');
+        for (const cle of ['developpement', 'insuffisant']) {
+            const ancienneForme = new RegExp(`\\?\\s*obtenirSeuil\\(\\s*['"]idme\\.${cle}['"]\\s*\\)\\s*:\\s*null\\s*\\)\\s*\\|\\|`);
+            expect(ancienneForme.test(code), `\`idme.${cle}\` : la forme qui confond garde et repli est revenue`).toBe(false);
+            const repliDirect = new RegExp(`obtenirSeuil\\(\\s*['"]idme\\.${cle}['"]\\s*\\)\\s*\\|\\|\\s*[0-9]`);
+            expect(repliDirect.test(code), `\`idme.${cle}\` : un repli local masque la source`).toBe(false);
+            const garde = code.match(new RegExp(`typeof\\s+obtenirSeuil\\s*===\\s*['"]function['"]\\s*\\?\\s*obtenirSeuil\\(\\s*['"]idme\\.${cle}['"]\\s*\\)\\s*:\\s*([0-9.]+)`));
+            expect(garde, `la garde de \`idme.${cle}\` a disparu ou changé de forme`).not.toBeNull();
+            const source = config.match(new RegExp(`${cle}:\\s*([0-9.]+)`));
+            expect(parseFloat(garde[1]), `la garde de \`idme.${cle}\` diverge de SEUILS_PAR_DEFAUT`).toBe(parseFloat(source[1]));
+        }
+    });
+
     it('6. les deux autres valeurs de la table miroir concordent avec la source', () => {
         // `idme.insuffisant` et `idme.developpement` concordaient déjà au moment
         // du chantier : ce cas les EMPÊCHE de diverger à leur tour, sans rien
