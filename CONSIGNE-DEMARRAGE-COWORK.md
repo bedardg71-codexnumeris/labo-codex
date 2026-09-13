@@ -1,143 +1,147 @@
-# Consigne de démarrage — la session Cowork qui prend le relais
+# Consigne de démarrage – la session Cowork qui prend le relais
 
-> **Réécrite le samedi 12 septembre 2026 à 10 h 30 (Toronto)**, par la session Cowork du 12 (5 h 20 – 10 h 30), à la clôture d'une
-> matinée de **trois versions** (`1.135.1`, `1.136.0`, `1.137.0`), **trois portes terrain relevées** et **dix items inscrits**.
-> Elle REMPLACE toute version précédente.
->
-> ✅ **MISE À JOUR 11 h 52 : `1.138.0` POUSSÉE — `origin/main` = `61b5c883`.** Grégoire a fermé Cowork, le verdict Playwright local est vert sur
-> ce SHA (11 h 51, 0 échec), et il a décidé le push à 11 h 52. Ton relevé partiel de la porte (11 h 38) est commité tel quel (`61b5c883`),
-> AVANT le verdict, pour que le SHA poussé le porte. **À toi** : la relecture de `e239787f` (lot E) à froid — elle n'a pas été vue avant le push ;
-> l'artefact jumeau de la porte (sept rangées ; 5, 6, 7 et § 3 dus sur le site).
-> ▣ **MISE À JOUR 11 h 20 : lot E exécuté (`e239787f`) et `1.138.0` RELEASÉE (`a0ed0929`, build 0912-1116) — NON POUSSÉE.** À toi : relire
-> `git show e239787f` — `js/navigation.js` (`_configurationVisible`, `_interventionsMasqueesSurService`, `_poserBoutonsSousNav`,
-> `afficherSousNavigation` refactorisée sans changement de sortie, `rafraichirSousNavigationSelonContexte`) et `js/contexte.js` (l'appel dans
-> `mettreAJourContexteEntete`) ; la sentinelle `sentinelle-onglet-interventions-masque-sur-service-lot-e` (vm, vrais fichiers). ⚠ **Ce que la
-> mesure a corrigé** : ta consigne supposait que la sous-navigation se reconstruit à la bascule — elle ne se reconstruisait pas (seul appelant :
-> `afficherSection`) ; d'où le rafraîchissement, qui ne déplace personne. **Écarté** : rediriger `suivi-interventions` vers Rencontres — les deux
-> boutons du profil (`naviguerVersNouvelleIntervention` / `naviguerVersIntervention`) attendent `#conteneurPrincipal`, leur formulaire ne se
-> serait plus ouvert ; ils ouvrent donc encore la vue Interventions sur un service (laissé exprès, nommé). Puis : **verdict Playwright, toi
-> FERMÉ** (règle 8), `scripts/pousser.sh`, l'artefact de la porte (**sept** rangées).
-> ▣ **MISE À JOUR 11 h : ta révision de 10 h 50 (lot D) est exécutée — commit `62f24316`, à relire AVEC `e011ed64`.** Le bloc « Tes prochains
-> rendez-vous » est rendu par `afficherListeInterventions` (garde `_enVueRencontres() && _surService()`), **pas par `afficherRencontres`** :
-> mesuré, `ouvrirIntervention` remplace le conteneur et le retour (comme Enregistrer / Annuler / Supprimer) ne reconstruit que la liste — le bloc
-> y aurait disparu ; `rencontres.js` n'est pas touché. Sans aucune rencontre : pas de bloc (la phrase arrêtée serait fausse sous une liste vide).
-> `_formeRencontre` lit VOCABULAIRES.rencontres (le badge de la liste écrivait les deux mots une seconde fois). À relire aussi :
-> `tests/unit/_helpers/bac-suivi.js` (fournit `dateLocaleYMD` aux modules). Changelog : quatre items. Porte : **six** rangées.
-> ▣ **NOTE DU 12 SEPTEMBRE, 10 h 55 (Claude Code, exécution de ta consigne du jour, 10 h 25 révisée à 10 h 35).** **Lots A, B et C livrés**
-> en un commit de code sur `main` local, **`e011ed64`** — **ni releasé, ni poussé** : ta consigne (§ 5) veut la release `minor` `1.138.0`
-> APRÈS ta relecture croisée. **À toi** : relire `git show e011ed64` — `js/accueil.js` (la carte, le bandeau), le CSS de `.accueil-porte-ortho`
-> (`index.html`) et la règle « mode clair » (`styles.css`) ; `js/mots-nature.js` (deux clés retirées), `trimestre-v2.js`, l'orchestre
-> (`OPTIONS_VIDES`) ; `js/interventions.js` (le masque `_surService()` autour de la carte, la garde de `sauvegarderPresencesIntervention`,
-> `VOCABULAIRES.rencontres.aideBilan`) ; les deux sentinelles neuves. Puis la session Claude Code suivante : `node scripts/release.mjs minor`,
-> commit, Vitest, verdict Playwright (**toi fermé**, règle 8), `scripts/pousser.sh`. Changelog écrit (entrée 1.138, trois items).
-> **Puis l'artefact jumeau** de `plans de travail/PORTES-TERRAIN-2026-09-12-accueil.md` (cinq rangées, deux décisions au § 3 avec champ de saisie).
-> ⚠ **Ce que la mesure a corrigé ou ajouté** : (1) **`objectifVise`** : la conséquence 1 ne nommait que `criteresCibles`, mais l'objectif vit
-> dans la même carte et s'écrivait `''` quand son champ manque — garde étendue, verrouillée ; (2) « Commencer → » ne mène aux trois questions
-> que **sans trimestre** — sur un groupe-cours d'enseignement, à la porte « Créer un service » (porte, rangée 2) ; (3) **#847 était déjà pris
-> par toi** (les exemples gris) quand j'ai voulu inscrire ma trouvaille : elle est **#848** (deux autres libellés du même cas que #846, dont la
-> phrase des éléments obligatoires, liée au cours CHOISI par `_coursSelectionneEstServiceV2` — comportement, remonté au § 3.1 de la porte).
-> **Le relevé de la porte de la section Cours est inscrit** dans son markdown (6/7 ; 3.1-3.3 « tel quel »). `CONSIGNE-DU-JOUR.md` commitée avec
-> le lot (condition 2) ; ses trois archives, `Formation/`, `docs/orthopedagogie/` et la capture du 9 sept. supprimée : non commités, à Grégoire.
+> **Réécrite le dimanche 13 septembre 2026, 14 h 25 (Toronto)**, à la clôture d'une journée de **neuf versions** (`1.139.1` à
+> `1.140.4`), **six lots** dont cinq livrés et poussés, **huit relectures croisées**, et deux questions tranchées par Grégoire.
+> Elle REMPLACE toute version précédente ; celle de midi est archivée sous
+> `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-midi.md`.
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
-> ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées. Ce qui a survécu à trois
-> sessions monte dans `PROTOCOLE.md` et quitte ce fichier.
+> ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées.
 
 ---
 
 ## 1 · CE QUE TU ES, ET CE QUE TU N'ES PAS
 
-**Le dispositif est à trois, et les canaux ne se croisent pas.** Grégoire décide, relaie, et fait tourner l'application sur ses vraies
-données. **Toi, Cowork** : tu **mesures** le dépôt en lecture seule, tu **rédiges** les consignes, tu **relis** ce qui ne se reprend pas,
-tu publies les artefacts des portes et tu tiens ses fichiers de cadrage.
+**Le dispositif est à trois, et les canaux ne se croisent pas.** Grégoire décide, relaie, et fait tourner l'application sur ses
+vraies données. **Toi, Cowork** : tu **mesures** le dépôt en lecture seule, tu **rédiges** les consignes de lot, tu **relis** ce qui
+ne se reprend pas, tu publies les artefacts des portes et tu tiens ses fichiers de cadrage.
 
 ⛔ **TU NE PARLES PAS À CLAUDE CODE.** Une consigne va dans un FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`, l'ancienne archivée
-`_ancienne-CONSIGNE-DU-JOUR-<date>-<sujet>.md`) et Grégoire ne colle qu'une ligne, dans un **bloc de code** du message — jamais dans un
-artefact, jamais avec des retours à la ligne manuels. **Au-dessus du bloc, une ou deux phrases disent ce que la consigne va produire à
-l'écran.**
+`_ancienne-CONSIGNE-DU-JOUR-<date>-<sujet>.md`) **et** dans le message, dans un **bloc de code** – jamais dans un artefact, jamais
+avec des retours à la ligne manuels.
 
-⚠⚠ **NOUVEAU, 12 sept. : TU NE VOIS PAS LE CANAL ENTRE GRÉGOIRE ET CLAUDE CODE.** Il lui écrit directement, et il change d'avis. Devant
-un écart entre ce que tu as relayé et ce que le dépôt porte, **la première hypothèse est « il a tranché autrement depuis », pas « le
-relais a échoué »** — et ça se demande en une ligne au lieu de s'affirmer. Erreur payée ce matin : Cowork a écrit un patch pour
-« réparer » une décision que Grégoire avait lui-même révoquée.
+⚠⚠ **TU NE VOIS PAS LE CANAL ENTRE GRÉGOIRE ET CLAUDE CODE.** Arrivé deux fois le 13 : un lot mesuré « pas engagé » était livré
+quatre minutes plus tard, et 1.140.3 était en ligne pendant que je la croyais locale. **Devant un écart, remesure avant de
+conclure ; la première hypothèse est « ça a avancé », pas « le relais a échoué ».**
 
-⚠ **TU N'ÉCRIS PAS DANS `js/`.** Un fichier temporaire va dans `$HOME`. ⚠ **`git --no-optional-locks status`**, jamais `git status` nu.
-⚠ **Ce shell n'a pas de réseau** : `origin/main` est la dernière valeur connue de ce Mac. ⚠ **L'horloge du montage est en UTC** : toute
-heure s'écrit après `TZ=America/Toronto date`, dans la même commande que l'écriture.
-⚠ **Le PNG supprimé dans l'arbre** (`Retours des testeurs/grégoire/BUG_…journal-de-bord-sans-fond.png`, `D` non commis) est à Grégoire :
-ne le commets pas, ne le restaure pas.
+⚠ **TU N'ÉCRIS PAS DANS `js/`.** ⚠ **`git --no-optional-locks status`**, jamais `git status` nu.
+⚠ **L'horloge du montage est en UTC** : toute heure s'écrit après `TZ=America/Toronto date`, dans la même commande que l'écriture.
+✅ **Ce shell A un réseau** (corrigé le 13 : la consigne de midi disait le contraire ; `npm ping` répond). C'est ce qui permet
+d'installer `vitest` dans un banc jetable.
+
+### Monter un banc d'essai – DEUX méthodes, et la deuxième n'est pas optionnelle
+
+1. **`git archive <SHA> | tar -x -C "$HOME/rel"`** – l'arbre seul, sans `.git`.
+2. **`git clone --shared --branch main <dépôt> "$HOME/rel"`** – 400 Ko, instantané. ⛔ Lecture seule : aucun `gc`, `prune`, `push`.
+
+⚠⚠ **MESURÉ LE 13, ET ÇA A FAILLI ME FAIRE ANNONCER UN FAUX ROUGE** : la suite complète rend **7 essais rouges dans un banc sans
+`.git`** (sentinelles anti-cache, pre-push, `.gitignore`, icônes suivies par git). Dans le clone partagé, les mêmes 557 fichiers
+sont **verts**. ⮕ **Toute suite complète se prend dans le clone, jamais dans l'archive.**
+⚠ Le `tests/node_modules` du Mac porte des binaires macOS : `npm install` dans le banc (2 s), ne lie pas le sien.
+⛔ **N'utilise PAS `git worktree`** : l'entrée reste fantôme dans le `.git` de Grégoire.
+⚠ **Un `npx vitest` lancé en arrière-plan MEURT à la fin de l'appel** : chaque `device_bash` est un shell neuf. La suite complète
+tient en 30 s : lance-la en synchrone avec `timeout 170`.
 
 ---
 
 ## 2 · À LIRE D'ABORD, DANS CET ORDRE
 
-1. **`OU-EN-EST-ON.md`**, sa tête — où on en est, en gestes d'utilisateur.
-2. **`PROTOCOLE.md`** — les huit règles, dont la 6 (ce que tu fais à l'ouverture) et la 8 (verdict Playwright, Cowork fermé).
-3. **`plans de travail/CONSIGNE-DU-JOUR.md`** — l'accueil et #846, écrite à 10 h 25. **Si Claude Code ne l'a pas exécutée, redonne la
-   ligne** ; s'il l'a fait, relis son commit (§ 4).
-4. **`plans de travail/CADRAGE-2026-09-11-rencontres-l-orthopedagogue-entre-par-suivi.md`** — le chantier de la semaine, et les décisions
-   de Grégoire dans ses mots.
-5. **`BACKLOG.md`**, l'en-tête et les items **#836 à #846** seulement.
+1. **`OU-EN-EST-ON.md`**, sa tête – où on en est, en gestes d'utilisateur.
+2. **`PROTOCOLE.md`** – les règles, dont la 6 (ouverture) et la 8 (verdict Playwright, **Cowork fermé** : c'est GRÉGOIRE qui ferme,
+   CLAUDE CODE qui lance ; ta VM pesait 2,9 Go les soirs de panique noyau).
+3. **`plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md`** – le tri, et son **jumeau publié** (artefact « Tri du chantier
+   Labo Codex », `06cc946c-fb10-4e1c-aa3c-5409dceb0f55`). **Tenir les deux à jour après chaque lot.**
+4. **`plans de travail/CONSIGNE-DU-JOUR.md`** – le lot #551, **codé dans l'arbre, pas commité** (§ 4).
+5. **`BACKLOG.md`**, l'en-tête et les fiches nommées au § 4 seulement.
 
-⛔ **Ne lis PAS les 150 autres fichiers de `plans de travail/`.**
-
----
-
-## 3 · L'ÉTAT MESURÉ — le 12 septembre 2026 à 10 h 19 (Toronto), depuis le Mac, en lecture seule
-
-**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3` · `git rev-list --count origin/main..HEAD`
-· `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`.
-
-- **`1.137.0`, build `0912-0935`**, `main` = `origin/main` = `305bb4c8`, **`rev-list` = 0**. Tout est en ligne.
-- **Trois versions ce matin, les trois vues par lui** : `1.135.1` (dans un service, un élève appartient par son service — porte
-  « Rencontres » 17/17) ; `1.136.0` (les étiquettes Enseignement / Orthopédagogie, point unique `js/mots-nature.js` — porte 11/12) ;
-  `1.137.0` (la section « Cours et services » suit la nature, et la phrase des éléments obligatoires ne contredit plus le champ de
-  l'horaire — porte 6/7).
-- **Dix items inscrits** : #837 à #846. Les deux rouges à connaître : **#844** (une fiche de service est indélébile par les gestes de
-  l'app — une capture hebdomadaire VIDE bloque le garde, aucun écran ne la retire ; vécu par Grégoire sur ses données réelles) et
-  **#845** (`db.remove()` ne vide pas le cache mémoire : la clé supprimée continue d'être lue jusqu'au rechargement).
-- **Non commis, de Cowork (10 h 30)** : `BACKLOG.md` (#844, #845, #846), la consigne du jour et ses archives. **La consigne du jour dit
-  à Claude Code de les commettre.** Dans `docs/orthopedagogie/`, quatre brouillons de Cowork pour l'orthopédagogue, non commités exprès.
-- **Console « Les huit gestes »** : à remettre à jour au prochain relevé.
+⛔ **Ne lis PAS les 150 autres fichiers de `plans de travail/`.** ⛔ Jamais de `Read` par défaut sur `BACKLOG.md`, `SESSION.md`
+ou `RELAIS.md` : des centaines de milliers d'octets. En-tête, puis cibler.
 
 ---
 
-## 4 · CE QUI EST DÛ — dans l'ordre
+## 3 · L'ÉTAT MESURÉ – le 13 septembre 2026, 14 h 25 (Toronto)
 
-**a) À l'ouverture (règle 6)** : remesurer. Si `1.138.0` est livré, **relire le commit** (garde posée sur le contexte et jamais l'inverse ;
-aucune valeur bougée au harnais ; les mots viennent d'un seul endroit), puis publier l'artefact de la porte
-(`PORTES-TERRAIN-2026-09-12-accueil.md`, quatre rangées), attendre le relevé, verser les échecs au backlog. Si rien n'est livré :
-redonner la ligne avec sa phrase d'écran.
+**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` ·
+`git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`.
 
-**b) Les deux textes pour l'orthopédagogue** — `docs/orthopedagogie/2026-09-12 Pour elle — …(BROUILLON).md`, écrits et corrigés par
-Grégoire. ⚠ **Ils citent des mots de l'écran, et l'écran a changé trois fois ce matin.** Avant qu'il les lui envoie : **relire chaque mot
-cité contre l'application livrée**, pas contre les consignes. Puis retirer « BROUILLON » du nom.
-
-**c) La date qui compte : LUNDI 14** — l'orthopédagogue ouvre l'application sur son poste. Elle n'aura ni tes yeux ni les siens :
-ce qui casse chez elle se saura par un courriel, pas par une porte. **Et mardi, la communauté de pratique (une vingtaine) découvre
-l'accueil neuf.**
-
-**d) Ce qui attend son mois d'usage, et ne se rouvre pas avant** : #836 (tout est manuel pour un mois), #839 (un service ne devrait pas
-produire de note), #840 (le second axe du partage), #838 (un élève dans deux cours). C'est sa règle du 11 ; ne propose pas de les
-avancer.
+- **`main` = `origin/main` = `53eb0de9`, version `1.140.4`, build `0913-1400`. Rien en attente de push.** L'arbre est sur `main`.
+- **Neuf versions livrées le 13** : `1.139.1` à `1.139.4` (bandeau de version, pack démo à dix élèves, vue « tous groupes »,
+  jetons de reprise, Artefact 9) · `1.140.0` (#853) · `1.140.1` (chaîne anti-cache) · `1.140.2` (#746, #551 garde, #542) ·
+  `1.140.3` (#847, les exemples gris) · `1.140.4` (#657, un fichier `js/` neuf ne peut plus entrer sans être chargé).
+- **230 fiches ouvertes** au BACKLOG de `main`. ⚠ **Le compte se prend à la RACINE** : `grep -c '^- \[ \]'` moins le gabarit de la
+  section « Notes ». Compter les cases indentées donne 234, un faux que ce fichier et l'artefact ont porté une demi-journée.
+- **29 de ces 230 portent le verrou « après le 14 »**, posé par Grégoire lui-même.
+- **Dernier ID : #857**, et c'est un **doublon de #553** – voir § 5.
+- **Les quatre questions en attente sont toutes closes.** Q1 livrée (#847), Q3 répondue par le code (#746, le profil suit le
+  groupe), Q2 tranchée (#742, option C), Q4 tranchée (#551, « la quatrième voie »). `QUESTIONS-EN-ATTENTE-2026-09-13.md` est
+  périmé : **ne le ressers pas**.
 
 ---
 
-## 5 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE
+## 4 · CE QUI EST DÛ – dans l'ordre
 
-*Ce ne sont pas des préférences de style. Ce sont les conditions pour qu'il puisse décider.*
+**a) À l'ouverture (règle 6)** : remesurer, et vérifier sur quelle branche est l'arbre de travail.
 
-- ⚠⚠ **Ce qui le met en surcharge n'est PAS la quantité de travail d'une séance, c'est la quantité d'information par TOUR.** Une séance
-  peut avoir quarante tours et quatre lots ; **chaque tour n'a qu'un objet**.
-- **UNE SEULE IDÉE PAR RÉPONSE.** ⚠ C'est la règle qui se perd en session longue — **revérifie-la avant chaque réponse.**
+**b) LE LOT #551 EST DANS L'ARBRE, NON COMMITÉ** – mesuré à 14 h 23 : `js/interventions.js` (les trois chaînes, faites),
+`js/changelog-data.js`, `scripts/release.mjs` (le commentaire sur le repère de bump), et les deux bancs
+(`sentinelle-746-551`, `sentinelle-lot-5-interventions-cadrage-11`). **Il attend son commit, puis TA RELECTURE CROISÉE, puis la
+release patch AVEC entrée « Nouvelles », puis le verdict et le push.** La consigne est au § 4 de `CONSIGNE-DU-JOUR.md`.
+⚠ **À vérifier en priorité dans cette relecture** : le bloc B de `sentinelle-lot-5-interventions-cadrage-11` prouvait que le bilan
+et la suggestion bougent ENSEMBLE quand un seuil se déplace. Ce couplage passait par la lettre, qui disparaît. **S'il ne tient plus
+que sur une chaîne remplacée, le cas survit mais la preuve est morte.**
+
+**c) LES DEUX DATES** : **lundi 14**, l'orthopédagogue ouvre l'application sur son poste – ce qui casse chez elle se saura par un
+courriel, pas par une porte. **Mardi 15**, la communauté de pratique (une vingtaine) découvre l'accueil neuf. 1.140.4 est en ligne :
+ce qui avait une date est livré.
+
+**d) Ce qui attend son mois d'usage, et ne se rouvre pas** : #836, #838, #839, #840, plus les 29 fiches « après le 14 », plus
+**#742** (bornes d'alerte, verrou posé le 13 : elles ne deviennent réglables que si un usage réel le réclame). Ne propose pas de
+les avancer.
+
+**e) Tenir le tri à jour** – le markdown ET l'artefact jumeau, comptes repris sur `main`.
+
+---
+
+## 5 · LES ERREURS QUE J'AI PAYÉES LE 13 – ne les refais pas
+
+1. ⚠⚠ **J'AI FAIT INSCRIRE UN DOUBLON.** `#857` (le nom « français » écrit en dur) **est `#553`**, ouverte depuis le 27 août, avec
+   une mesure du 31 août qui va plus loin que la mienne : les normalisations sont DÉJÀ identiques, le désaccord est entre deux
+   chaînes SOURCE, et retirer le rabotage sans savoir d'où vient l'autre clé casserait l'appariement. ⮕ **Avant d'inscrire une
+   trouvaille, `grep` le backlog sur ses mots-clés.** Le compteur qui monte parce qu'on cherche mieux est ce que Grégoire déteste
+   le plus. *(La fusion de #857 dans #553 est dans la consigne du jour, § 6.)*
+2. **J'AI ANNONCÉ DEUX COMPTES FAUX** (234 ici, 241 dans l'artefact) en comptant des sous-cases indentées et des fiches livrées.
+   ⮕ Un compte s'écrit avec la commande qui le produit, à côté.
+3. **J'AI CADRÉ UN LOT SUR UNE PISTE QUE LA MESURE RÉFUTAIT.** Proposé à Grégoire de lire le niveau « dans l'échelle de chacun » ;
+   la grille de dépistage dit les CRITÈRES, pas l'échelle, et l'éditeur n'écrit jamais d'`echelleId` (mesuré sur ses trois
+   trimestres, `js/cartouches.js:438-450`). ⮕ **Mesurer la source d'une donnée AVANT de la promettre dans une question.**
+4. **J'AI ÉCRIT UNE INTERDICTION QUI A FAILLI BLOQUER LE LOT SUIVANT.** La consigne #847 disait « si ces assertions bougent,
+   RECULER » ; la consigne #551 exige précisément qu'elles bougent. ⮕ **Une interdiction de consigne vaut POUR SON LOT. Quand une
+   consigne renverse la précédente, écris-le en tête, en la citant** – sinon Claude Code s'arrête, et il a raison.
+5. **J'AI CRU UN JOURNAL DE BREAK-TESTS SUR UN COMPTE** (3 rouges annoncés, 2 mesurés). ⮕ La divergence venait de MA mutation, pas
+   du compte. **Repose la mutation à l'endroit exact où elle a été posée** avant d'annoncer un écart.
+
+### Ce qui a tenu, et qu'il faut refaire
+- **Mesurer avant de cadrer.** Sur six lots, la mesure a corrigé la fiche à chaque fois : #847 annonçait deux sites, il y en avait
+  trois ; #746 en nommait six, deux avaient déménagé ; #657 disait « aucun défaut », il y avait quatre cas à classer.
+- **Refaire les mutations soi-même**, et **regarder ce qui reste VERT** : c'est là qu'était la trouvaille du 13 (un cas vrai par
+  construction depuis le 10 sept., découvert parce qu'une assertion négative sur une tranche vide ne peut pas rougir).
+- **Dire quand une de ses propres hypothèses est réfutée.** Fait quatre fois le 13 ; chaque fois ça a coûté une ligne et évité un lot.
+
+---
+
+## 6 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE
+
+- ⚠⚠ **Ce qui le met en surcharge n'est PAS la quantité de travail, c'est la quantité d'information par TOUR.** Une séance peut
+  avoir quarante tours ; **chaque tour n'a qu'UN objet.** ⚠ C'est la règle qui se perd en session longue – **revérifie-la avant
+  chaque réponse.** Le 13, il a demandé deux questions d'un coup : je n'en ai posé qu'une, en disant pourquoi. C'était juste.
 - **Pose ta question au moment où elle se pose**, et **ne reviens jamais trois tours plus tard** sur un item présenté avant.
-- **Toujours une recommandation argumentée**, jamais un exposé d'options neutre. **Propose-lui un texte à corriger** plutôt que de lui
-  demander d'en composer un. Tutoiement, guillemets français, réponse courte d'abord.
-- **Les corrections se font le jour même**, pas après le 14.
-- ⚠ **Il corrige bien, et souvent contre toi** — quatre fois ce matin, dont deux où il avait raison sur le fond (le mot « Accompagnement »,
-  les irritants qu'on ne nomme pas sur un écran public). **Quand il propose un mot, cherche d'abord ce qui le rend juste, puis mesure
-  ce qui le rend faux.** Les deux fois où Cowork l'a contredit utilement, c'était sur une **mesure** (une collision de nom, une date qui
-  n'est pas celle qu'on croit), jamais sur un goût.
+- **Toujours une recommandation argumentée**, jamais un exposé d'options neutre. **Propose-lui un texte à corriger.** Tutoiement,
+  guillemets français, tiret demi-cadratin, réponse courte d'abord.
+- **RÈGLE DE SÉLECTION DES LOTS** : prendre ceux qui **ne lui demandent ni arbitrage ni vérification à l'écran**.
+  ⚠ **Mesuré le 13 : cette règle a épuisé le chantier.** Deux fichiers qu'il a nommés (`js/interventions.js`, puis
+  `js/profil-etudiant-calculs.js`) étaient VIDES de lots codables. ⮕ **Ne sonde plus fichier par fichier** : ça coûte un tour à
+  chaque fois pour la même réponse. Ce qui reste passe par lui ou par le 14.
+- ⚠ **Il corrige bien, et souvent contre toi.** Quand il propose un mot, cherche d'abord ce qui le rend juste.
 
 ### Ce qui remonte jusqu'à lui, et rien d'autre
 La **didactique** · ses **données réelles** · les **mots que ses élèves et ses collègues lisent** · ce qui **l'engage publiquement**.
@@ -145,35 +149,10 @@ La **didactique** · ses **données réelles** · les **mots que ses élèves et
 
 ---
 
-## 6 · LES ERREURS QUE COWORK A PAYÉES LE 12 SEPTEMBRE — ne les refais pas
+## 7 · DEUX LEÇONS DUES À `PROTOCOLE.md` (survivantes, à faire monter)
 
-Six en cinq heures, toutes de la même famille : **écrire à partir de la consigne plutôt qu'à partir de la mesure.**
+Elles ne périment pas, donc elles n'ont rien à faire ici. **À proposer à Grégoire au prochain moment calme :**
 
-1. **Une porte qui met une saisie multiligne en enfilade dans une phrase.** La rangée 9 de « Rencontres » demandait trois lignes,
-   séparées par des virgules dans le texte. Grégoire les a collées **en une seule ligne** ; la lecture a fabriqué **un élève fantôme**
-   (DA « Léa Tremblay, 1234567 », groupe « Gagnon »). Une heure perdue à chercher un défaut qui n'existait pas. ⮕ **Une saisie sur
-   plusieurs lignes se montre EMPILÉE dans un bloc**, jamais dans une phrase.
-2. **Une porte qui décrit un geste que l'application n'offre pas.** La rangée 2 de la section Cours disait « clique Modifier, puis
-   Dupliquer » : ces deux boutons **n'existent pas** (le code garde même deux références mortes vers eux). ⮕ **Une porte se relit contre
-   l'ÉCRAN, pas contre la consigne qui l'a produite.**
-3. **Une relecture croisée qui vérifie le contenu d'une fonction sans vérifier qu'elle a un appelant.** Cowork a validé le lot des
-   étiquettes en suivant la chaîne d'`appliquerMotsNatureCadre`, et n'a pas vu que `peuplerDropdownEnseignants`, qui posait l'autre
-   moitié des mots, **n'était appelée de nulle part**. C'est la rangée 5 qui l'a trouvé. ⮕ **Dans une relecture, une fonction qui pose un
-   mot se vérifie par son APPELANT.** Un `grep` de trois secondes.
-4. **Une consigne qui annonce un défaut à deux sites sans avoir mesuré le second.** `obtenirDonneesSelonMode` ne comparait le groupe
-   qu'aux fiches sans `coursId` : la garde qu'on y demandait était inatteignable, et le break-test l'a dit (0 rouge). ⮕ **Un site nommé
-   dans une consigne se mesure, sinon il se nomme comme hypothèse.**
-5. **Un libellé qu'on fait suivre au contexte actif alors qu'il nomme un CHOIX** (#846) : le champ 2 du groupe-cours dit « Service
-   d'orthopédagogie » et liste tous les cours. ⮕ **Avant de faire suivre un mot au contexte, demande-toi de quoi ce mot parle** : de là
-   où on est, ou de ce qu'on peut choisir ?
-6. **Une accusation de relais raté** — voir § 1.
-
-### Ce qui a tenu, et qu'il faut refaire
-- **Mesurer avant de cadrer** : trois fois ce matin, ce que la consigne s'apprêtait à demander **existait déjà** (le tri des champs du
-  formulaire de service, livré la veille) ou était **faux** (le second site du filtre). Le motif « ça existe déjà » en est à sa
-  quatorzième occurrence.
-- **Nommer une supposition plutôt que la taire** : les cinq fois où Cowork l'a fait, la correction a coûté dix secondes.
-- **Une sonde en console plutôt qu'une hypothèse** : la liste vide du matin a été tranchée par six lignes de sortie, pas par un
-  raisonnement.
-- **Refuser un mot sur une mesure** : « Accompagnement » écarté parce que c'est déjà le nom d'une section du profil ; la sarcelle
-  écartée parce que c'est la palette du mode démonstration. Dans les deux cas, Grégoire a suivi — parce que la raison était mesurée.
+1. **Une assertion NÉGATIVE sur une tranche vide est vraie par construction.** Tout banc qui découpe un fichier avant d'y chercher
+   une absence doit porter un garde de non-vide sur sa tranche. Mesuré le 13 : un cas vivait ainsi depuis le 10 septembre.
+2. **Avant d'inscrire une trouvaille au backlog, vérifier qu'elle n'y est pas déjà** (§ 5.1).
