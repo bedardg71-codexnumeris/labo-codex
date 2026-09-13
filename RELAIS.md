@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.139.1 RELEASÉE (build `0913-0743`, `d9e45280`) — NON POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, MATIN (Toronto) : 1.139.2 RELEASÉE (build `0913-0858`, `9b705951`) — PACK DÉMO À 10 ÉLÈVES (#852)
+
+> Sur `main` : `2408a809` (lot #852) puis `9b705951` (release 1.139.2) puis ce relais ; push après le verdict Playwright complet, rendu dans un worktree détaché propre (jeton déposé via `VERDICT_PLAYWRIGHT` dans `scripts/.verdict-playwright.json` de l'arbre principal). **Contenu** : `js/pack-demo-20.js` → `js/pack-demo-10.js` (version interne 21.0) ; garde DEMO004, 006, 007, 010, 011, 015, 016, 017, 019, 020 ; DEMO007 → Félix Leclerc, DEMO010 → Gabrielle Roy (quatre champs, prose comprise). 10 élèves, 101 évaluations, 313 lignes de présence sur 32 dates. Références, comptes de l'Aide, du glossaire, du guidage et de la popup, six sentinelles, la spec de la saisie en démo : à jour. Jetons `?v=` de `js/modes.js` remis à la main après `release.mjs` (fichier modifié, non commité, par une autre session : son #851 part avec sa propre release).
+>
+> **Décisions et constats** : (1) grille de référence du dépistage NON posée dans le pack — #749 lot 1 la résout déjà à la lecture en démo (sonde WebKit : 0 avertissement, « Défi spécifique » affiché) ; (2) les niveaux RàI calculés (3 / 6 / 1) ne sont pas ceux du motif de la sélection (7 / 2 / 1) — Grégoire garde la sélection ; (3) stock : après réinstallation, `demo_indicesCP` (10) et `demo_snapshots_demo-cours` (360) gardent des DA retirés, 0 à l'écran — laissé ; (4) faiblesse de la sentinelle de l'Aide : elle ne rougit que si les DEUX phrases (Aide et glossaire) se trompent — une seule phrase fausse passe ; non inscrite.
+>
+> **Reste** : le lot #851 de l'autre session (`js/modes.js`, sentinelle 851, BACKLOG ligne 5, SUIVI-BUGS) et son lot des jetons de reprise, à commiter par elle. **Prochain numéro, fiche OU bug : #853.**
+
+---
+
+## 13 SEPT. 2026, MATIN (Toronto) : 1.139.1 RELEASÉE (build `0913-0743`, `d9e45280`) — POUSSÉE ET JUGÉE VERTE (run 34756365066, mesuré au rituel de 8 h 30)
 
 > Sur `main` local, devant `origin/main` (`a06997a9`) : la release 1.139.1 (`d9e45280`) puis ce relais. **Contenu** : #849 et #850, du rapport de Grégoire de 7 h 23 (`BUG_"grégoire"_2026-09-13_07-23-02.txt` + capture) — le bandeau de version affichait 1.135.0 quand la carte « Nouveautés » affichait 1.139.0. `js/init-inline.js` : l'identité vient de `version.js` (`etablirVersionChargee`, `chargerVersionJSON` retirée) et `version.json` n'annonce plus qu'une version PLUS RÉCENTE (`versionPlusRecente`) ; les repères `monitorage-build-vu` / `monitorage-version-vue` sont lus et écrits par `db` (`lireRepereVu` / `ecrireRepereVu`) — chez Grégoire, le repère valait `"0807-1529"`, réécrit en JSON par la réhydratation de `db.js`, ce qui ramenait le bandeau à chaque ouverture. Stock : aucune écriture d'office. Sentinelle `tests/unit/sentinelle-849-850-version-chargee.test.js` (4 essais, 4 break-tests rouges) ; `bandeau-maj-chargement.spec.js` relit le repère par `db.getSync`. Vitest 552 / 6 038 après le commit du bump ; Playwright ciblé vert (16 cas). Changelog : un item dans l'entrée 1.139 (texte choisi par Claude Code, à relire par Grégoire).
 >
