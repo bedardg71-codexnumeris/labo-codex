@@ -6190,6 +6190,12 @@
                                             Les jetons sont des ressources limitées que l'étudiant·e peut utiliser pour adapter son parcours.
                                         </p>
 
+                                        <!-- #853 (relecture de Cowork, 13 sept. 2026) : affichée quand la pratique porte des jetons
+                                             réglés à sa création (assistant, ou import) — le moteur ne lit pas ce formulaire (#854). -->
+                                        <p id="mat-jetons-regles-ailleurs" class="u-hide u-mb-15 u-p-12 u-texte-09" style="background: var(--bleu-tres-pale); border-radius: 6px">
+                                            Les jetons de cette pratique ont été réglés à sa création : ce formulaire ne peut pas les modifier.
+                                        </p>
+
                                         <!-- Checkbox maître pour activer/désactiver le système -->
                                         <div class="groupe-form u-mb-20 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                                             <label class="u-flex-gap-10 u-texte-gras u-align-center" style="cursor: pointer">
@@ -14531,7 +14537,7 @@
     <script src="js/bibliotheque-ui.js?v=20260909a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js?v=20260911a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260903b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20260913a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
+    <script src="js/pratiques-gestion.js?v=20260913b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20260911a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260911a"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260911c"></script>
@@ -14702,7 +14708,7 @@
         <script src="js/impact-jetons.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation-jetons.js?v=20260913c"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 ; #725/#617/#724/#720 jetons de reprise -->
+    <script src="js/evaluation-jetons.js?v=20260913d"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 ; #725/#617/#724/#720 jetons de reprise -->
     <script src="js/evaluation-chargement.js?v=20260911a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260910c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260911a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->

@@ -364,7 +364,8 @@ function appliquerJetonDelai(evaluationId) {
     // #853 (13 sept. 2026) — un délai SUR une reprise dépend du réglage de la pratique
     // (`delai.surReprise`, absent = refus, comportement antérieur). Grégoire : « je ne veux pas
     // imposer ma pratique à moi ».
-    if (evaluation.repriseDeId && !(config.delai && config.delai.surReprise === true)) {
+    // (`config.delai` est toujours posé : les trois constructeurs de config et le défaut le portent.)
+    if (evaluation.repriseDeId && config.delai.surReprise !== true) {
         notifications.erreur('Conflit', 'Ta pratique ne permet pas de délai sur une reprise (réglage des jetons)');
         return false;
     }

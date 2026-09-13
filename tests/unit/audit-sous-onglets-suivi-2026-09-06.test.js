@@ -474,7 +474,11 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         b.win.afficherListeEtudiantsConsultation();
         const das = dasDuTbody(b);
         const lignes = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n');
-        const ligneIndex = lignes.findIndex((l, i) => i > 7700 && i < 7912 && /Les abandons/.test(l)) + 1;
+        // #853 (13 sept. 2026) : bornes par REPÈRE — la sous-section Liste, jusqu'à celle de la saisie —,
+        // plus par numéros de ligne fixes (7700-7912), que tout ajout plus haut dans index.html décale.
+        const debutListe = lignes.findIndex(l => /id="suivi-liste"/.test(l));
+        const debutSaisie = lignes.findIndex(l => /id="suivi-saisie"/.test(l));
+        const ligneIndex = lignes.findIndex((l, i) => i > debutListe && i < debutSaisie && /Les abandons/.test(l)) + 1;
         const phrase = (lignes[ligneIndex - 1] || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 260);
         const t = b.document.getElementById('tbody-suivi-liste');
         const ligneAbandon = t.children.find(tr => tr.classList.contains('etudiant-inactif'));
@@ -482,8 +486,9 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         expect(das).toEqual(['2000002', '2000001', '2000003']);   // tri par nom : Absent, Assidu, Silence — l'abandon (Absent) est là
         expect(ligneAbandon && ligneAbandon.dataset.statut).toBe('abandon');
         expect(ligneAbandon.innerHTML).toContain('(Abandon)');
-        expect(ligneIndex).toBeGreaterThan(7709);
-        expect(ligneIndex).toBeLessThan(7912);
+        expect(debutListe).toBeGreaterThan(0);
+        expect(ligneIndex).toBeGreaterThan(debutListe + 1);   // la phrase est DANS la sous-section Liste
+        expect(ligneIndex).toBeLessThan(debutSaisie + 1);
     });
 
     it('L-3 · La recherche par nom : insensible à la casse ET aux accents — valeur d\'après #749 lot 2 (constat d\'origine : « cesaire » ne trouvait pas Césaire)', () => {
