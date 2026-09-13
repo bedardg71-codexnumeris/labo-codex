@@ -133,6 +133,13 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (13 septembre 2026 — le bandeau de version dit la version du code chargé, et se tait une fois fermé)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 850 | Grégoire (même rapport, mesuré dans son espace) | 13 sept. 2026 | 13 sept. 2026 | 0913-0743 (1.139.1) | Le bandeau « Nouvelle version chargée » revient à chaque ouverture ; pastille « Nouveautés » toujours rouge | 2.3 clé : repère « vu » lu/écrit brut dans localStorage alors que db.js le réhydrate en JSON depuis IDB (`"0807-1529"`) → lecture/écriture par db (`js/init-inline.js`) ; stock relu tel quel, se tait à la première fermeture. Sentinelle `sentinelle-849-850-version-chargee.test.js` |
+| 849 | Grégoire (`BUG_"grégoire"_2026-09-13_07-23-02.txt` + capture) | 13 sept. 2026, 7 h 23 | 13 sept. 2026 | 0913-0743 (1.139.1) | Bandeau de version en 1.135.0 (0911-2145), carte « Nouveautés » en 1.139.0 (0912-1259) | 2.6 asynchrone : au chargement, la réponse de version.json (périmée ce matin-là, source non établie) écrasait la version du code chargé → identité lue dans version.js, version.json limité à annoncer une version plus récente (`js/init-inline.js`). Même sentinelle, 4 break-tests rouges |
+
 ## Corrigés (11 septembre 2026 — les grilles et l'échelle d'Hiver 2026 introuvables dans l'instance en ligne ; réparation de données, aucun code d'app)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |

@@ -13,6 +13,10 @@ const BUILD = JSON.parse(readFileSync(path.join(racineProjet, 'version.json'), '
 // du 8 juin (bandeau sans condition, « recharge pour l'activer », en boucle) reste
 // verrouillé : première visite silencieuse, une fois par nouveau build, jamais
 // après fermeture.
+//
+// #850 (13 sept. 2026) : le repère s'écrit par `db` (JSON en localStorage, copie
+// IDB) — il se relit donc par `db.getSync`, pas brut. Le semis brut de `ouvrir`
+// reste valable : c'est la forme qu'a laissée l'ancien code, et db la relit.
 
 async function ouvrir(page, buildVu) {
     await page.addInitScript((v) => {
@@ -28,7 +32,7 @@ test('première visite (aucun build vu) : PAS de bandeau, et le build est pris c
     const bandeau = page.locator('#bandeau-mise-a-jour');
     await expect(bandeau).toHaveCount(1);
     await expect(bandeau).not.toHaveClass(/\bvisible\b/);
-    expect(await page.evaluate(() => localStorage.getItem('monitorage-build-vu'))).toBe(BUILD);
+    expect(await page.evaluate(() => window.db.getSync('monitorage-build-vu'))).toBe(BUILD);
 });
 
 test('build vu différent : le bandeau s\'affiche, au présent, sans bouton Recharger', async ({ page }) => {
@@ -46,7 +50,7 @@ test('fermer le bandeau marque le build vu : au rechargement suivant, plus de ba
     await expect(page.locator('#bandeau-mise-a-jour')).toHaveClass(/\bvisible\b/);
     await page.locator('#bandeau-mise-a-jour .bandeau-mise-a-jour-close').click();
     await expect(page.locator('#bandeau-mise-a-jour')).not.toHaveClass(/\bvisible\b/);
-    expect(await page.evaluate(() => localStorage.getItem('monitorage-build-vu'))).toBe(BUILD);
+    expect(await page.evaluate(() => window.db.getSync('monitorage-build-vu'))).toBe(BUILD);
 
     // Une SECONDE page, sans script d'init : même stockage, aucun faux build réinjecté.
     // (`addInitScript` se rejoue à chaque navigation de `page` — un `reload` ici
@@ -55,7 +59,7 @@ test('fermer le bandeau marque le build vu : au rechargement suivant, plus de ba
     await page2.goto(indexHtml);
     await page2.waitForLoadState('domcontentloaded');
     await page2.waitForTimeout(800);
-    expect(await page2.evaluate(() => localStorage.getItem('monitorage-build-vu'))).toBe(BUILD);
+    expect(await page2.evaluate(() => window.db.getSync('monitorage-build-vu'))).toBe(BUILD);
     await expect(page2.locator('#bandeau-mise-a-jour')).not.toHaveClass(/\bvisible\b/);
 });
 
