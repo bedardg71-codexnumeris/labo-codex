@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            version: '1.140',
+            couleur: 'vert',
+            titre: 'Jetons : un délai sur une reprise, si ta pratique le permet',
+            items: [
+                'Dans les jetons de ta pratique, une nouvelle case, «&nbsp;Permettre un délai sur une reprise&nbsp;», décide si une copie reprise peut encore recevoir un délai. Décochée par défaut : rien ne change tant que tu ne la coches pas.',
+                'Sur une pratique dont les jetons ont été réglés à sa création, le formulaire le dit et ne laisse plus rien modifier en vain.',
+            ]
+        },
+        {
             version: '1.139',
             couleur: 'bleu',
             titre: 'Interventions : rien n\'est écrit avant «&nbsp;Enregistrer&nbsp;»',
