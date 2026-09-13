@@ -2251,7 +2251,20 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⮕ Portée AU-DELÀ de S10a : le motif « le travail est fait à chaque affichage, dans un élément que personne ne regarde »
   que le rapport Z3 §2.3 documente pour les productions **existe aussi côté échelles**. À verser au périmètre de S10b.
 
-- [ ] **#657 — CONSTAT (prévention) · Rien ne vérifie qu'un fichier `js/` neuf est DÉCLARÉ dans `index.html` : il entrerait sans bruit et ne se chargerait jamais**.
+- [x] **#657 — CONSTAT (prévention) · Rien ne vérifie qu'un fichier `js/` neuf est DÉCLARÉ dans `index.html` : il entrerait sans bruit et ne se chargerait jamais**.
+  **✓ LIVRÉ le 13 sept. 2026** — second `describe` de `tests/unit/sentinelle-scripts-atteints-et-parsables.test.js`
+  (renommé depuis `sentinelle-scripts-parsables.test.js`, qui faisait déjà le sens inverse). Régime retenu : le
+  **motif vérifiable**, pas la liste. Un fichier est atteint s'il est nommé dans un `<script src>` d'`index.html` OU dans
+  un littéral de chaîne du CODE d'un autre fichier `js/` (commentaires retirés par esbuild : sans ça, un commentaire
+  qui cite `js/_archives/entites-ui.js` entre accents graves l'aurait tamponné). **Les quatre cas mesurés le 13 sept.
+  (197 fichiers, 193 déclarés)** et ce que le contrôle en fait — aucun n'est un trou :
+  · `js/pack-demo-10.js` — atteint par le littéral `'js/pack-demo-10.js?v='` (`demo-namespace.js`, `script.src`).
+  · `js/heic-worker.js` — atteint par le littéral `'js/heic-worker.js?v='` (`heic-decodeur.js`, `new Worker`).
+  · `js/_archives/entites-ui.js` — dossier `js/_archives/` hors périmètre, PAR DOSSIER.
+  · `js/pratiques/pratique-interface.js` — l'UNIQUE exception nommée (documentation jamais servie, `export {}` illégal
+    en script) ; un garde exige qu'elle ne couvre que ce fichier et qu'il soit encore inatteint.
+  Break-test (banc jetable `$HOME/banc-657`) : fichier neuf non déclaré ⮕ rouge en le nommant ; liste du disque
+  vidée ⮕ rouge (verte si les deux gardes sautent) ; exception élargie à `js/pratiques/` ⮕ rouge.
   Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`. Sorti de S9a/#627 :
   le lot pose son propre cas pour son module, mais l'angle mort est GÉNÉRAL. **Aucun défaut ouvert aujourd'hui** — voir
   la mesure ci-dessous. C'est une prévention, pas une réparation.

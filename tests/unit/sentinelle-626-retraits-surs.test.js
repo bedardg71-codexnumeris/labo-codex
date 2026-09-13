@@ -248,7 +248,8 @@ describe('#626 · M5 — les écrivains morts sur DOM disparu sont retirés', ()
         // `js/pratiques/pratique-interface.js` n'est référencé NULLE PART — ni
         // dans index.html, ni par un autre `js/`. Ce n'est pas un orphelin : le
         // fichier EST le contrat `IPratique`, servi comme documentation, et
-        // `sentinelle-scripts-parsables.test.js:37` le nomme comme tel.
+        // `sentinelle-scripts-atteints-et-parsables.test.js` le nomme comme tel
+        // (c'est son unique exception nommée, #657).
         // Ne pas le supprimer parce qu'il ne se charge pas.
         //
         // Ce que ce bloc décrivait était faux sur ses trois champs : `pratique`
