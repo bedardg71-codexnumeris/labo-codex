@@ -1,0 +1,147 @@
+import { describe, it, expect } from 'vitest';
+import { chargerScript } from './_helpers/charger-script.js';
+
+// Lot « les jetons de reprise ne mentent plus » (13 sept. 2026) — #725, #617, #724, #720.
+//
+// GESTE 1 · retirerJetonReprise. `sauvegarderDonneesSelonMode` rend trois refus : `false`
+// (anonymisation), `'quota'` et `'error'` (l'écriture a levé) — les deux derniers sont truthy.
+// Avant : « Originale restaurée » était notifié (#725) et le fichier de la reprise mis à la
+// corbeille (#617) AVANT l'écriture ; sur `'quota'`/`'error'`, le refus passait même pour un succès.
+//
+// GESTE 2 · appliquerJetonReprise. Avant : aucune garde sur une évaluation déjà remplacée ou
+// réconciliée (#724), et la reprise recopiait tout l'état de l'originale — le délai accordé (un
+// second jeton au quota, #720), `remplaceeParId`/`archivee` (exclue de la note), la marque de
+// réconciliation.
+//
+// Ces essais TARISSENT la source ; le stock déjà écrit chez les gens n'est pas touché.
+
+const DA = '1111111';
+const P = 'PROD_1';
+const REFUS = [false, 'quota', 'error'];
+
+function creerStockage(fichiers) {
+    const actifs = fichiers.map(f => Object.assign({}, f));
+    const corbeille = [];
+    return {
+        _actifs: actifs, _corbeille: corbeille,
+        obtenirFichiersTravaux: () => actifs,
+        mettreAJourFichier: (id, modifs) => { const f = actifs.find(x => x.id === id); if (!f) return false; Object.assign(f, modifs); return true; },
+        deplacerEnCorbeille: (id) => { const i = actifs.findIndex(f => f.id === id); if (i === -1) return false; corbeille.push(actifs[i]); actifs.splice(i, 1); return true; }
+    };
+}
+
+/** evaluation-jetons.js RÉEL ; configuration des jetons = défauts du module (délai 2/élève, reprise 2, 1 par production). */
+function monter({ evaluations, fichiers = [], retourEcriture = true }) {
+    const stores = { evaluationsSauvegardees: evaluations.map(e => JSON.parse(JSON.stringify(e))) };
+    const travauxStockage = creerStockage(fichiers);
+    const notifs = [];
+    const globaux = {
+        db: { getSync: (k, d) => (k in stores ? JSON.parse(JSON.stringify(stores[k])) : (d !== undefined ? d : null)), setSync: () => {}, get: async () => null, set: async () => {} },
+        cle: (k) => k,
+        obtenirDonneesSelonMode: (k) => stores[k],
+        // Le faux magasin rend les TROIS refus de `modes.js` et n'écrit que sur `true`.
+        sauvegarderDonneesSelonMode: (k, v) => { if (retourEcriture !== true) return retourEcriture; stores[k] = v; return true; },
+        notifications: {
+            succes: (t, m) => notifs.push({ type: 'succes', t, m }), erreur: (t, m) => notifs.push({ type: 'erreur', t, m }),
+            info: () => {}, avertissement: () => {}
+        },
+        confirm: () => true,
+        genererIdUnique: (p) => p + 'NEUF',
+        travauxStockage
+    };
+    const win = chargerScript('js/evaluation-jetons.js', globaux);
+    return { win, stores, travauxStockage, notifs };
+}
+
+const ORIGINALE = { id: 'EVAL_A', etudiantDA: DA, productionId: P, noteFinale: 60,
+    remplaceeParId: 'EVAL_B', dateRemplacement: '2026-09-01', archivee: true, dateArchivage: '2026-09-01' };
+const REPRISE = { id: 'EVAL_B', etudiantDA: DA, productionId: P, noteFinale: 80,
+    repriseDeId: 'EVAL_A', jetonRepriseApplique: true, dateApplicationJetonReprise: '2026-09-01' };
+const F_REPRISE = { id: 'F_REPR', etudiantDA: DA, productionId: P, evaluationId: 'EVAL_B', estReprise: true };
+
+describe('Geste 1 · retirer une reprise : sur un refus d\'écriture, rien ne bouge et rien ne ment (#725, #617)', () => {
+    // Les deux portes : décocher sur la REPRISE (EVAL_B), ou restaurer depuis l'ORIGINALE (EVAL_A).
+    for (const porte of ['EVAL_B', 'EVAL_A']) {
+        for (const refus of REFUS) {
+            it(`porte ${porte}, retour ${JSON.stringify(refus)} : false, une seule notification (l'erreur), aucun fichier déplacé, évaluations intactes`, () => {
+                const b = monter({ evaluations: [ORIGINALE, REPRISE], fichiers: [F_REPRISE], retourEcriture: refus });
+                expect(b.win.retirerJetonReprise(porte)).toBe(false);
+                expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
+                expect(b.travauxStockage._corbeille).toEqual([]);
+                expect(b.travauxStockage._actifs.map(f => f.id)).toEqual(['F_REPR']);
+                expect(b.stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A', 'EVAL_B']);
+            });
+        }
+        it(`porte ${porte}, écriture acceptée : succès annoncé APRÈS, fichier de reprise à la corbeille, compte dit`, () => {
+            const b = monter({ evaluations: [ORIGINALE, REPRISE], fichiers: [F_REPRISE] });
+            expect(b.win.retirerJetonReprise(porte)).toBe(true);
+            expect(b.notifs.map(n => n.type)).toEqual(['succes']);
+            expect(b.notifs[0].t).toMatch(/originale restaurée/i);
+            expect(b.notifs[0].t).toMatch(/1 fichier\(s\) de reprise mis à la corbeille/);
+            expect(b.travauxStockage._corbeille.map(f => f.id)).toEqual(['F_REPR']);
+            expect(b.stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A']);
+        });
+    }
+
+    it('le point de persistance rend un BOOLÉEN : `\'quota\'` n\'arrive plus à l\'appelant comme un succès (retirerJetonDelai)', () => {
+        const b = monter({ evaluations: [{ id: 'E1', etudiantDA: DA, productionId: P, jetonDelaiApplique: true }], retourEcriture: 'quota' });
+        expect(b.win.retirerJetonDelai('E1')).toBe(false);
+        expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
+        expect(b.notifs[0].m).toMatch(/espace de stockage est plein/);
+    });
+});
+
+describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise née propre (#720)', () => {
+    it('une évaluation déjà remplacée par une reprise est refusée : null, rien d\'écrit', () => {
+        const b = monter({ evaluations: [ORIGINALE, REPRISE] });
+        expect(b.win.appliquerJetonReprise('EVAL_A')).toBeNull();
+        expect(b.stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A', 'EVAL_B']);
+        expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
+    });
+
+    it('un doublon réconcilié (#360) est refusé, même sans `remplaceeParId`', () => {
+        const b = monter({ evaluations: [{ id: 'EVAL_D', etudiantDA: DA, productionId: P, noteFinale: 70, reconcilieParDoublon: true }] });
+        expect(b.win.appliquerJetonReprise('EVAL_D')).toBeNull();
+        expect(b.stores.evaluationsSauvegardees).toHaveLength(1);
+    });
+
+    it('la reprise naît SANS délai, remplacement, archivage, réconciliation ni reprise ciblée hérités ; la note est conservée', () => {
+        const origine = { id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55,
+            jetonDelaiApplique: true, dateApplicationJetonDelai: '2026-09-02', delaiAccorde: true, dureeDelaiJours: 2,
+            jetonRepriseCibleeApplique: true, archivee: true, dateArchivage: '2026-09-02' };
+        const b = monter({ evaluations: [origine] });
+        const r = b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
+        expect(r).not.toBeNull();
+        for (const champ of ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
+            'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee', 'dateArchivage', 'reconcilieParDoublon']) {
+            expect(r[champ], champ).toBeUndefined();
+        }
+        expect(r.noteFinale).toBe(55);
+        expect(r.repriseDeId).toBe('EVAL_O');
+        expect(r.jetonRepriseApplique).toBe(true);
+        // L'originale, elle, garde son délai : c'est le jeton réellement accordé.
+        const o = b.stores.evaluationsSauvegardees.find(e => e.id === 'EVAL_O');
+        expect(o.jetonDelaiApplique).toBe(true);
+        expect(o.remplaceeParId).toBe(r.id);
+    });
+
+    it('quota de délais compté juste après une reprise : 1 utilisé sur 2, un nouveau délai reste possible ailleurs', () => {
+        const b = monter({ evaluations: [
+            { id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55, jetonDelaiApplique: true, delaiAccorde: true },
+            { id: 'EVAL_X', etudiantDA: DA, productionId: 'PROD_2', noteFinale: 70 }
+        ] });
+        b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
+        expect(b.win.compterJetonsUtilises(DA, 'delai')).toBe(1);   // avant #720 : 2
+        expect(b.win.verifierDisponibiliteJeton(DA, 'delai')).toBe(true);
+        expect(b.win.appliquerJetonDelai('EVAL_X')).toBe(true);
+    });
+
+    for (const refus of REFUS) {
+        it(`originale supprimée (archiverOriginale: false), retour ${JSON.stringify(refus)} : le fichier de l'originale n'est PAS délié`, () => {
+            const b = monter({ evaluations: [{ id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55 }],
+                fichiers: [{ id: 'F_ORIG', etudiantDA: DA, productionId: P, evaluationId: 'EVAL_O', estReprise: false }], retourEcriture: refus });
+            expect(b.win.appliquerJetonReprise('EVAL_O', false, { silencieux: true })).toBeNull();
+            expect(b.travauxStockage._actifs[0].evaluationId).toBe('EVAL_O');
+        });
+    }
+});

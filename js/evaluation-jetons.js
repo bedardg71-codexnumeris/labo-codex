@@ -230,13 +230,22 @@ function verifierDisponibiliteJeton(da, type) {
  *
  * @param {Array} evaluations - Le tableau complet à persister
  * @param {string} geste - Ce que l'utilisateur croyait faire, pour le message
- * @returns {boolean} true si l'écriture a bien eu lieu
+ * #617/#725 (13 sept. 2026) : `sauvegarderDonneesSelonMode` rend TROIS refus — `false`
+ * (anonymisation), `'quota'` et `'error'` (l'écriture a levé, `modes.js`). Les deux derniers
+ * sont des chaînes, donc truthy : l'ancien `return ok` les laissait passer pour un succès
+ * chez tous les appelants. Seul `true` est un succès — même contrat que `supprimerEvaluation`.
+ *
+ * @returns {boolean} true si l'écriture a bien eu lieu, false sinon (jamais une chaîne)
  */
 function _persisterEvaluationsJetons(evaluations, geste) {
-    const ok = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    const retour = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    const ok = retour === true;
     if (!ok) {
-        console.warn('[Jetons] Écriture refusée — ' + geste);
-        notifications.erreur('Modification non enregistrée', geste + " : l'écriture est bloquée (mode anonymisation).");
+        const cause = retour === false ? "l'écriture est bloquée (mode anonymisation)."
+            : retour === 'quota' ? "l'espace de stockage est plein."
+            : "le stockage a refusé l'écriture.";
+        console.warn('[Jetons] Écriture refusée (' + String(retour) + ') — ' + geste);
+        notifications.erreur('Modification non enregistrée', geste + ' : ' + cause);
     }
     return ok;
 }
@@ -272,8 +281,9 @@ function _compterFichiersDeEvaluation(evaluationId) {
  *    (`archiverOriginale: false`). L'élève a bien remis ce travail : on ne le
  *    jette pas, on coupe seulement son lien vers une évaluation disparue.
  *
- * À appeler AVANT `_persisterEvaluationsJetons` : les deux écritures sont
- * synchrones et doivent se suivre sans point d'attente entre elles.
+ * À appeler APRÈS `_persisterEvaluationsJetons`, et seulement s'il a rendu `true` (#617,
+ * 13 sept. 2026 — appelé avant, un refus d'écriture laissait le fichier à la corbeille et
+ * l'évaluation en place). Les deux écritures se suivent sans point d'attente entre elles.
  *
  * @param {string} evaluationId - ID de l'évaluation qui disparaît
  * @param {string} mode - 'corbeille' ou 'delier'
@@ -463,6 +473,16 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     const evaluationOriginale = evaluations[indexOriginal];
     const da = evaluationOriginale.etudiantDA;
 
+    // #724 (13 sept. 2026) — garde symétrique à celle d'`appliquerJetonDelai` : une évaluation
+    // déjà REMPLACÉE (par une reprise, ou par réconciliation d'un doublon #360) ne compte plus.
+    // En faire une reprise créait une copie qui héritait de `remplaceeParId` — donc exclue de tout
+    // calcul de note — et que la garde `maxParProduction` ne voyait pas (pas de jetonRepriseApplique).
+    // Une reprise de reprise reste permise : c'est `maxParProduction` qui la borne.
+    if (evaluationOriginale.remplaceeParId || evaluationOriginale.reconcilieParDoublon) {
+        if (!silencieux) notifications.erreur('Conflit', 'Cette évaluation est déjà remplacée : applique la reprise sur celle qui compte.');
+        return null;
+    }
+
     // Vérifier la disponibilité des jetons de reprise pour cet étudiant
     if (!verifierDisponibiliteJeton(da, 'reprise')) {
         const config = obtenirConfigJetons();
@@ -518,6 +538,13 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
         dateModification: undefined,
         heureModification: undefined
     };
+    // #720/#724 (13 sept. 2026) — la reprise naît PROPRE : elle ne recopie pas l'état que
+    // l'originale portait comme copie jugée. Le délai déjà accordé (qui comptait un second jeton
+    // au quota), le remplacement et l'archivage (qui l'excluaient de la note), la marque de
+    // réconciliation et la reprise ciblée retirée restent sur l'originale.
+    ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
+        'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee',
+        'dateArchivage', 'reconcilieParDoublon'].forEach(champ => { delete nouvelleEvaluation[champ]; });
 
 
     // Journal de bord — jeton de reprise (avant splice pour garder la bonne référence)
@@ -543,8 +570,6 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
         // est cohérent — retirer le jeton nettoie sans restaurer (`:692-699`), l'impact des
         // jetons rend `noteOriginale: null` — et la note du cours ne le lit pas. Commenté, pas de fiche.
         evaluations.splice(indexOriginal, 1);
-        // #607 — sans quoi le fichier de l'originale garde un evaluationId mort.
-        _detacherFichiersDeEvaluation(evaluationOriginaleId, 'delier');
     }
 
     // Ajouter la nouvelle évaluation
@@ -552,6 +577,11 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
     if (!_persisterEvaluationsJetons(evaluations, 'Application du jeton de reprise')) return null;
+
+    // #607 — sans quoi le fichier de l'originale supprimée garde un evaluationId mort.
+    // #617 (13 sept. 2026) : APRÈS l'écriture confirmée — délier avant, sur un refus, coupait le
+    // fichier d'une originale restée en place.
+    if (!archiverOriginale) _detacherFichiersDeEvaluation(evaluationOriginaleId, 'delier');
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -587,6 +617,15 @@ function retirerJetonReprise(evaluationId) {
 
     const evaluationReprise = evaluations[indexReprise];
 
+    // #725/#617 (13 sept. 2026) — les branches ci-dessous DÉCIDENT, elles n'agissent pas hors
+    // du tableau : la notification de succès, la mise à la corbeille des fichiers de reprise et
+    // le rechargement de l'originale attendent que l'écriture soit CONFIRMÉE (queue de fonction).
+    // Avant : « Originale restaurée » et la corbeille partaient, puis l'écriture échouait.
+    // Modèle : `retirerJetonDelai` (persister, puis dire).
+    let messageSucces = 'Jeton de reprise retiré';
+    let idFichiersACorbeille = null;
+    let idOriginaleARecharger = null;
+
     // #141 — appelée sur une ORIGINALE remplacée (et non sur la reprise) :
     // proposer la restauration au lieu de l'ancien no-op au message menteur
     // (« Jeton de reprise retiré » sans rien faire).
@@ -618,15 +657,12 @@ function retirerJetonReprise(evaluationId) {
         delete evaluationReprise.dateRemplacement;
         delete evaluationReprise.archivee;
         delete evaluationReprise.dateArchivage;
-        let nbFichiersLies = 0;
         if (indexRepriseLiee !== -1) {
             evaluations.splice(indexRepriseLiee, 1);
-            // #607 — le fichier remis pour la reprise part avec elle.
-            nbFichiersLies = _detacherFichiersDeEvaluation(idRepriseLiee, 'corbeille');
+            // #607 — le fichier remis pour la reprise part avec elle (après l'écriture, #617).
+            idFichiersACorbeille = idRepriseLiee;
         }
-        notifications.succes('Originale restaurée'
-            + (indexRepriseLiee !== -1 ? ', reprise supprimée' : '')
-            + (nbFichiersLies ? ' — ' + nbFichiersLies + ' fichier(s) de reprise mis à la corbeille' : ''));
+        messageSucces = 'Originale restaurée' + (indexRepriseLiee !== -1 ? ', reprise supprimée' : '');
     } else {
 
     // Trouver l'évaluation originale si elle existe
@@ -678,32 +714,36 @@ function retirerJetonReprise(evaluationId) {
         evaluations.splice(indexReprise, 1);
 
         // #607 — le fichier importé pour la reprise part avec elle, sinon il
-        // reste « le plus récent » et la ligne de l'originale l'ouvre.
-        const nbFichiersReprise = _detacherFichiersDeEvaluation(evaluationId, 'corbeille');
-
-        notifications.succes('Reprise supprimée, originale restaurée'
-            + (nbFichiersReprise ? ' — ' + nbFichiersReprise + ' fichier(s) de reprise mis à la corbeille' : ''));
-
-        // Recharger l'originale
-        if (window.evaluationEnCours?.idModification === evaluationId) {
-            setTimeout(() => {
-                if (typeof modifierEvaluation === 'function') {
-                    modifierEvaluation(evaluationOriginale.id);
-                }
-            }, 500);
-        }
+        // reste « le plus récent » et la ligne de l'originale l'ouvre (après l'écriture, #617).
+        idFichiersACorbeille = evaluationId;
+        messageSucces = 'Reprise supprimée, originale restaurée';
+        idOriginaleARecharger = evaluationOriginale.id;
     } else {
         // Pas d'originale trouvée, juste nettoyer les propriétés
         delete evaluationReprise.repriseDeId;
         delete evaluationReprise.jetonRepriseApplique;
         delete evaluationReprise.dateApplicationJetonReprise;
-
-        notifications.succes('Jeton de reprise retiré');
     }
     }
 
-    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation)
+    // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation).
+    // Refus (false, 'quota' ou 'error') → rien n'a bougé : ni succès annoncé, ni fichier déplacé.
     if (!_persisterEvaluationsJetons(evaluations, 'Retrait du jeton de reprise')) return false;
+
+    // #607 — l'écriture a eu lieu : le détachement la suit sans point d'attente.
+    const nbFichiersCorbeille = idFichiersACorbeille
+        ? _detacherFichiersDeEvaluation(idFichiersACorbeille, 'corbeille') : 0;
+    notifications.succes(messageSucces
+        + (nbFichiersCorbeille ? ' — ' + nbFichiersCorbeille + ' fichier(s) de reprise mis à la corbeille' : ''));
+
+    // Recharger l'originale
+    if (idOriginaleARecharger && window.evaluationEnCours?.idModification === evaluationId) {
+        setTimeout(() => {
+            if (typeof modifierEvaluation === 'function') {
+                modifierEvaluation(idOriginaleARecharger);
+            }
+        }, 500);
+    }
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
