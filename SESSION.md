@@ -7,6 +7,20 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 51 — 13 SEPTEMBRE 2026, ≈ 16 H 20 → 16 H 45 (Toronto) : CONSIGNE DU JOUR DE COWORK (16 h 20), DEUX LOTS, à partir de `2bc43ed1`.
+     ⚠ La consigne croyait `7b68d9a4` et `873ffe2c` en attente du push : la session 50 les avait déjà poussés (`d07e963d..2bc43ed1`).
+     ▣ LOT A #858 (`1ace8d6d`, tests/ seulement) : tranche() et position() (tests/unit/_helpers/tranche.js). 167 découpes mesurées sur
+       le contenu entier (le grep ligne à ligne en voyait 112). Sonde sur String.prototype.slice : 2 MORTES, toutes deux sur deux lignes —
+       poignée (essai retiré, son objet a disparu avec #418) et enseignement-explicite (tranche inversée, réancrée). 48 négatives sans
+       garde routées ; cliquet de COMPTE (décision de Cowork) : 113 découpes dans 62 fichiers. Break-tests : 5 familles + le cliquet.
+     ▣ LOT B #801 (`3f2dade5`) : « Voir les nouveautés » dans le bandeau local, « Recharger » dans le distant, jamais les deux ; texte
+       local de Cowork ; ouvrir les nouveautés referme le bandeau local (supposition nommée). sentinelle-801 +1 cas, 796 suit son
+       intention, spec du bandeau +2 (WebKit 6/6). 4 mutations, 4 rouges — un garde élargi après qu'une variante de casse l'a passé.
+     ▣ RELEASE 1.140.6 (`c0c89e57`, build 0913-1642, patch). Vitest 559 / 6 346 après le commit du bump.
+     NI RELECTURE CROISÉE, NI VERDICT PLAYWRIGHT COMPLET, NI PUSH : dans cet ordre, à Cowork puis à Grégoire.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 50 — 13 SEPTEMBRE 2026, ≈ 15 H 50 (Toronto) : LOT SANS CODE « DEUX FICHES LIVRÉES ET JAMAIS COCHÉES », à partir de `d07e963d`.
      ⚠ Consigne cherchée au mauvais endroit (plans de travail/CONSIGNE-DU-JOUR.md, encore celle de #520) : celle de Cowork vit à la
        racine, CONSIGNE-DEMARRAGE-COWORK.md (`7b68d9a4`). Exécuté sur le mandat transmis par Grégoire. Rituel (subagent) : Vitest 558 / 6 337.
