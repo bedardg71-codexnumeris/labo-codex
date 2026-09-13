@@ -55,7 +55,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const indexHtml = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
 
-/** Les `<script src="…">` locaux de index.html, sans leur paramètre anti-cache. */
+/**
+ * Les `<script src="…">` locaux de index.html, sans leur paramètre anti-cache.
+ * ⚠ Trou LATENT, miroir de celui que le sens 2 règle côté js/ : la regex lit le
+ * HTML brut, donc une balise dans un `<!-- … -->` compterait comme un
+ * chargement. Mesuré par Cowork le 13 sept. 2026 : aucune aujourd'hui.
+ */
 function scriptsCharges() {
     const trouves = [];
     const motif = /<script\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/gi;
