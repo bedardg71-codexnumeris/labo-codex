@@ -1,10 +1,11 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 13 sept. au milieu de l'après-midi** – cinq lots menés, tous livrés. Comptes remesurés sur `BACKLOG.md` **de `main`** (`269fe347`) : **230 fiches ouvertes**.
+> **Mis à jour le 13 sept. à 14 h 30** – six lots menés : cinq livrés et poussés, le sixième commité (`d21d320f`) et en attente de sa relecture, de sa release et de son push. Comptes remesurés sur `BACKLOG.md` **de `main`** (`291216b7`) : **228 fiches ouvertes** (`grep -c '^- \[ \]'` = 229, moins le gabarit de la section « Notes »).
 > ⚠ **Le compte annoncé le 13 en début d'après-midi (234) était FAUX de 2** : il comptait les cases `- [ ]` sans distinguer les fiches des sous-cases indentées. Le bon compte se prend à la racine – `grep -c '^- \[ \]'` – moins le gabarit de la section « Notes ». L'artefact jumeau en annonçait 241, faux lui aussi : il comptait les fiches déjà livrées.
-> ⚠ **Ce document et l'artefact listent 232 entrées ouvertes, soit deux de plus que le backlog** : #575b et #575c y sont détaillées à part alors qu'elles partagent la case de #575. L'écart est voulu et mesuré ; il n'est pas une dérive du compte.
-> Les questions qui attendent une réponse de Grégoire ne sont pas dans ce document : elles sont dans `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md`, fermées et chiffrées.
+> ⚠ **Le compte de 230 annoncé plus tôt le 13 portait une unité de trop** : la soustraction du gabarit n'avait pas été refaite. Deux entrées ont par ailleurs été corrigées à 14 h 30 – **#657** était encore listée ouverte alors qu'elle est partie en 1.140.4, et **#857** sort du document, fusionnée dans #553.
+> ⚠ **Ce document et l'artefact listent 230 entrées ouvertes, soit deux de plus que le backlog** : #575b et #575c y sont détaillées à part alors qu'elles partagent la case de #575. L'écart est voulu et mesuré ; il n'est pas une dérive du compte.
+> ⛔ `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md` est **périmé** : les quatre questions sont closes depuis le 13. Ne pas le resservir.
 
 ## Journal des lots
 
@@ -42,6 +43,12 @@ Relecture croisée : les deux mutations reposées, chacune rougit une fois. **Un
 
 ⮕ **Ce que la retouche a trouvé en plus, et qui vaut pour tout le filet** : la tranche de l'Aide n'avait aucun garde de non-vide. Tant que ses assertions étaient positives, ça ne se voyait pas ; une assertion NÉGATIVE sur une tranche vide est vraie par construction. Un cas existant depuis le 10 sept. (l'export d'une échelle) était dans ce cas sans que personne le sache. Le garde ferme les deux.
 
+### Lot 6 – « la suggestion d'objectif ne nomme plus une lettre d'échelle » ⏳ COMMITÉ, PAS EN LIGNE
+
+Les trois chaînes de `js/interventions.js`, l'entrée de « Nouvelles », le commentaire de `scripts/release.mjs` et les deux bancs sont dans `main` (`d21d320f`, 13 sept.). **Reste dû, dans cet ordre** : la relecture croisée, la release patch avec son entrée « Nouvelles », le verdict Playwright pris Cowork fermé, le push. `main` a deux commits d'avance sur `origin/main` ; `version.json` est resté en `1.140.4` / `0913-1400`.
+
+⚠ **Ce que la relecture doit regarder en premier** : le bloc B de `sentinelle-lot-5-interventions-cadrage-11` prouvait que le bilan et la suggestion bougent ENSEMBLE quand un seuil se déplace. Ce couplage passait par la lettre, qui disparaît. S'il ne tient plus que sur une chaîne remplacée, le cas survit mais la preuve est morte.
+
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 
 La contre-épreuve du matin avait déjà trouvé un goulot faux (#689). Le lot 3 en a trouvé **deux de plus**, et de la même cause : **le goulot a été lu dans la fiche, pas mesuré dans le code**. Une fiche ne suit pas le code quand celui-ci déménage.
@@ -62,7 +69,7 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 
 **Ce qu'un lot doit porter, appris des trois relectures** : pour chaque correctif, **la mutation qui ISOLE** le contrôle neuf. Un essai peut passer *pour la mauvaise raison* – un autre garde-fou intercepte avant celui qu'on croit éprouver – ou passer *à vide*, quand le harnais garantit lui-même ce que l'assertion prétend vérifier. Les trois lots ont chacun livré un cas des deux.
 
-## Les comptes – 13 septembre, début d'après-midi
+## Les comptes – 13 septembre, 14 h 30
 
 | | fiches |
 |---|---:|
@@ -70,10 +77,10 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 | I – intermédiaires | 85 |
 | L – laborieuses | 100 |
 | indécidables en l'état | 5 |
-| **entrées ouvertes de ce tri** | **232** |
-| **fiches ouvertes au backlog de `main`** | **230** |
+| **entrées ouvertes de ce tri** | **230** |
+| **fiches ouvertes au backlog de `main`** | **228** |
 | dont en attente d'un arbitrage | 80 |
-| ✅ livrées depuis le tri | 12 |
+| ✅ sorties du tri depuis son ouverture | 13 |
 
 Portée des arbitrages en attente : 17 se règlent par une phrase, 25 demandent un écran ou ses données, 13 ouvrent un chantier.
 
@@ -85,12 +92,12 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ## Les lots – même point du code
 
-### `index.html` – 9 ouvertes sur 9
+### `index.html` – 8 ouvertes sur 9
 
 *Aide › Référence rapide · chargement des fichiers et 7 autres écrans*
 
 - **Q** Le glossaire réduit la PAN à « garder les N meilleurs travaux » (#803)
-- **Q** Un fichier neuf peut entrer sans jamais être chargé, en silence (#657)
+- ✅ **Q** Un fichier neuf peut entrer sans jamais être chargé, en silence – **livrée en 1.140.4** (#657)
 - **I** Le style inline d'index.html écrase 13 classes de mise en forme – à Grégoire : choix de produit, à froid ; à revérifier (#766)
 - **I** 22 balises perdent en silence leur seconde classe de mise en forme – à Grégoire : choix de produit, à froid (#787)
 - **I** Le canal pour donner son avis existe, mais rien ne le laisse deviner (#801)
@@ -113,11 +120,11 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 - **L** Les niveaux d'échelle sont partagés entre tous les trimestres – données déjà écrites ; à revérifier (#601)
 - **L** Des noms venus d'un fichier partagé s'affichent sans être échappés – trois modules et plus (#467)
 
-### `js/profil-etudiant-calculs.js` – 10 ouvertes sur 10
+### `js/profil-etudiant-calculs.js` – 9 ouvertes sur 10
 
 *note globale au profil · Suivi › Profil (barres et IPB) et 8 autres écrans*
 
-- **L** Un nom de critère écrit en dur écrase la clé de calcul – à Grégoire : pédagogie, à froid ; trois modules et plus *(inscrite le 13 sept. pendant #746/#551 ; la fiche dit « trois fois dans `interventions.js` », la mesure dit **huit sites dans quatre fichiers**, et le normalisateur canonique `_normaliserNomCritereIPB` vit ICI – le corriger dans `interventions.js` seul casserait la correspondance des clés)* (#857)
+- ✅ Un nom de critère écrit en dur écrase la clé de calcul – **fusionnée dans #553 le 13 sept.** : doublon inscrit ce midi sans voir #553, ouverte depuis le 27 août. Le numéro n'est pas repris ; la mesure (huit sites dans quatre fichiers, normalisateur canonique `_normaliserNomCritereIPB` ici) est reportée dans #553 (#857)
 
 - **I** Sans texte de rétroaction, la note globale n'affiche aucun niveau (#718)
 - **I** Un critère noté en points est lu comme un niveau approximatif – à Grégoire : pédagogie, une phrase (#739)
@@ -127,7 +134,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 - **I** Sans donnée convertible, la moyenne affiche 0 au lieu de « rien » – à revérifier (#536)
 - **L** La note des standards se construit sur le portfolio, pas sur les cibles – à Grégoire : arbitrage à préciser ; trois modules et plus (#810)
 - **L** Trois façons de retrouver une échelle, trois résultats possibles – à Grégoire : arbitrage à préciser ; trois modules et plus (#590)
-- **L** Un critère dont le nom varie disparaît du dépistage – à Grégoire : arbitrage à préciser ; trois modules et plus ; à revérifier (#553)
+- **L** Un critère dont le nom varie disparaît du dépistage – à Grégoire : arbitrage à préciser ; trois modules et plus ; à revérifier *(a absorbé #857 le 13 sept.)* (#553)
 
 ### `js/evaluation-calcul.js` – 6 ouvertes sur 6
 
@@ -180,7 +187,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 ⚠ **Ce point du code n'est plus un lot.** Trois de ses cinq fiches sont parties le 13 (#746 et #542 en 1.140.2, #847 en 1.140.3) ; des deux qui restent, l'une attend un mois d'usage et l'autre une réponse de Grégoire. **Mesuré le 13 au milieu de l'après-midi : il ne reste rien de codable ici qui ne passe pas par lui.**
 
 - **L** Restes du chantier Rencontres à trancher après un mois d'usage – à Grégoire : choix de produit, un chantier ; trois modules et plus (#836)
-- **L** Le risque d'un élève se calcule sur les seuils d'un autre enseignant – à Grégoire : pédagogie, un chantier ; trois modules et plus *(garde seule livrée en 1.140.2 ; le renommage attend une réponse)* (#551)
+- **L** Le risque d'un élève se calcule sur les seuils d'un autre enseignant – à Grégoire : pédagogie, un chantier ; trois modules et plus *(garde livrée en 1.140.2 ; la suggestion sans lettre commitée le 13 dans `d21d320f`, pas encore relue ni en ligne)* (#551)
 - ✅ Les interventions d'un groupe affichent celles de tous les groupes – **livrée en 1.140.2** (#746)
 - ✅ Le dépistage suppose l'échelle de Grégoire – **livrée en 1.140.2**, son reste transféré à #551 (#542)
 - ✅ Deux exemples du formulaire citent les critères de Grégoire – **livrée en 1.140.3**, trois sites et non deux (#847)

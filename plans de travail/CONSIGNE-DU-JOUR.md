@@ -1,100 +1,124 @@
-# Consigne du jour – La suggestion d'objectif ne nomme plus une lettre d'échelle (#551, moitié affichée)
+# Consigne du jour – Retirer l'« ANCIEN SYSTÈME » des échelles d'`index.html` (#520)
 
-> **Écrite par Cowork le dimanche 13 septembre 2026, 14 h 05 (Toronto).** Elle remplace la consigne #847, exécutée et releasée
-> en `1.140.3`, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-847-exemples-gris.md`.
-> **Les trois textes sont approuvés par Grégoire** (13 sept., 14 h). Ce sont des mots qu'un collègue lit **et qui s'enregistrent
-> dans le dossier de son élève** – pas un exemple gris. Vingt collègues découvrent l'application **mardi 15**.
+> **Écrite par Cowork le dimanche 13 septembre 2026, 14 h 36 (Toronto).** Elle remplace la consigne #551, codée et commitée
+> dans `d21d320f`, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-551-suggestion-sans-lettre.md`.
 >
-> ⚠ **CETTE CONSIGNE RENVERSE UNE INTERDICTION DE LA PRÉCÉDENTE.** La consigne #847 disait : « ⛔ Ne touche à aucune des
-> assertions `'Amener Structure au seuil M (75%)'` / `'(66%)'` / `'(64%)'` : ce sont des SORTIES calculées. Si l'une d'elles
-> bouge, RECULER. » **Elle valait pour ce lot-là, où le calcul ne devait pas bouger.** Ici, ce sont précisément ces sorties
-> qu'on change. Les assertions doivent suivre, dans le même commit. Ne recule pas.
+> ⛔ **#551 N'EST PAS TERMINÉ.** Il lui manque la relecture croisée de Cowork, la release patch avec son entrée « Nouvelles »,
+> le verdict Playwright pris Cowork fermé, et le push (`main` a deux commits d'avance sur `origin/main` ; `version.json` est
+> resté en `1.140.4` / `0913-1400`). **Ce lot-ci vient APRÈS cette livraison, pas à sa place.**
+>
+> ✅ **Aucune interdiction de la consigne précédente n'est renversée ici** : ce lot ne touche ni `js/interventions.js`, ni
+> aucune assertion du cadrage 11.
 
 ---
 
 ## 0 · Ce que ce lot livre
 
-Le bouton « Suggérer » d'une intervention écrit aujourd'hui « Amener Structure **au seuil D** (64%) ». D et M sont les lettres de
-l'échelle de Grégoire. Après ce lot, le texte dit le pourcentage sans nommer de niveau. **Aucun calcul ne change** : les mêmes
-seuils, les mêmes branches, les mêmes nombres. **Release patch.**
+**À l'écran : rien.** Le bloc visé porte `class="u-hide"` et ses champs sont des doublons morts. Ce qui change est invisible et
+mesurable : **`index.html` ne porte plus un seul identifiant dupliqué**, et l'ancien éditeur d'échelles cesse d'exister.
 
-## 1 · Ce qui est mesuré (Cowork, le 13 sept. sur `325dabcd`)
+C'est un lot qui ne demande à Grégoire **ni arbitrage ni vérification à l'écran** — la règle de sélection du 13 sept.
 
-`suggererObjectifIntervention` (`js/interventions.js:1358-1368`) choisit entre trois phrases selon `scorePlusFaible` :
+---
 
-| aujourd'hui | après |
-|---|---|
-| `Amener <critère> au seuil D (64%)` | `Amener <critère> à 64 %` |
-| `Amener <critère> au seuil M (75%)` | `Amener <critère> à 75 %` |
-| `Stabiliser <critère> au-dessus du seuil M (75%)` | `Stabiliser <critère> au-dessus de 75 %` |
+## 1 · Ce qui est mesuré (Cowork, le 13 sept. à 14 h 30, sur `291216b7`)
 
-⛔ **N'invente pas de reformulation** : ces trois textes sont ceux que Grégoire a approuvés, au caractère près, y compris
-l'espace avant le `%`.
+Chaque compte est écrit avec la commande qui le produit.
+
+- `grep -oE 'id="[A-Za-z0-9_-]+"' index.html | sort | uniq -d` ⮕ **exactement 8 identifiants dupliqués**, chacun deux fois :
+  `apercuEchelle`, `champAutreEchelle`, `nomEchelleContainer`, `nomEchelleTemplate`, `selectEchelleTemplate`, `seuilReussite`,
+  `tableauNiveaux`, `typeEchelle`.
+- **Les huit viennent tous du même bloc**, et de lui seul : `index.html` **5233** (`<!-- ANCIEN SYSTÈME (Caché par défaut, gardé
+  pour compatibilité) -->`, suivi de `<div class="u-hide">`) à **5386** (`</div><!-- Fin ANCIEN SYSTÈME -->`) — 154 lignes.
+- **La PREMIÈRE occurrence des huit est en 5188–5226, donc AVANT le bloc.** `getElementById` rend déjà l'éditeur vivant ; les
+  copies du bloc ne sont jamais lues. ⮕ **L'ablation ne change aucun comportement.** (La fiche l'affirmait ; c'est mesuré.)
+- **Onze** `data-action` / `data-on-change` vivent dans le bloc. **Dix n'ont aucun autre appelant dans `index.html`** ; seul
+  `sauvegarderNomEchelle` en garde deux hors du bloc.
+
+### Ce que la mesure corrige de la fiche #520
+
+La fiche nomme cinq identifiants et annonce `nomEchelleTemplate` **×3**. **Faux des deux côtés** : ils sont **huit**, chacun
+**×2**, et `btnDupliquerEchelle` — qu'elle cite — **n'est pas dupliqué du tout** (une seule occurrence dans le fichier).
+Reprends la liste ci-dessus, pas celle de la fiche.
+
+---
 
 ## 2 · Portée
 
-`js/interventions.js`, les trois lignes de `suggestion = …`, et rien d'autre dans `js/`.
-⛔ Les seuils gardent leurs noms `idme.*`, leurs valeurs et leur calibrage : le renommage interne est **parqué** (réponse de
-Grégoire, 13 sept. : il ne sert plus à rien une fois les lettres retirées de l'écran).
-⛔ **Ne va PAS chercher le niveau dans l'échelle de l'utilisateur.** C'était ma première proposition ; la mesure l'a réfutée –
-la grille de dépistage dit les CRITÈRES, pas l'échelle, et l'éditeur de grille n'écrit jamais d'`echelleId` (mesuré sur les trois
-trimestres réels pendant le chantier des cartouches, `js/cartouches.js:438-450`). Il n'y a pas de source fiable ici. Parqué aussi.
+**Le geste : supprimer `index.html` 5233–5386**, plus le code que cette suppression rend mort (§ 4).
 
-## 3 · Stock – nommer, ne rien réparer
+- ⛔ **Ne touche pas au second « ANCIEN SYSTÈME »** (à partir de la ligne **5487**) : c'est la zone des cartouches, elle ne
+  produit **aucun** identifiant dupliqué, et rien dans #520 ne la vise.
+- ⛔ **Ne rouvre pas #766.** Décision de Grégoire du 6 sept., 11 h : « laissé inscrit, pas de lot ; ne pas le reposer. »
+- ⛔ **Ne fusionne pas les autres doubles `class` de #787.** Ceux-là changent un rendu et se jugent à l'écran, avec Grégoire.
+  Seuls partent ceux que l'ablation emporte (§ 3).
 
-Les objectifs **déjà enregistrés** portent l'ancienne phrase, lettre comprise. ⛔ **Aucune réécriture, aucune proposition d'en
-faire une** : ce sont les mots que Grégoire a mis dans le dossier de ses élèves. Dire dans le journal du commit combien il en
-reste si c'est mesurable sans écrire, sinon dire qu'on ne l'a pas mesuré.
+---
 
-## 4 · LE PIÈGE – quatre assertions figent les anciennes sorties
+## 3 · LE PIÈGE – la liste figée de la sentinelle #779
 
-⚠⚠ Elles rougiront toutes, et c'est attendu. **Elles se mettent à jour dans le même commit** :
+`tests/unit/sentinelle-779-un-seul-attribut-class.test.js` (**bord B**) fige la liste des balises qui portent deux attributs
+`class`. **Cinq des dix-sept que compte `index.html` aujourd'hui sont DANS le bloc** — dont
+`<div class="groupe-form" class="max-w-400-mb20">`, ligne 5236.
 
-- `tests/unit/sentinelle-746-551-interventions-suivent-le-groupe.test.js` – `:111`, `:112`, `:115`, `:118` (dont
-  `'Stabiliser Structure au-dessus du seuil M (0%)'`, le cas du seuil à zéro).
-- `tests/unit/sentinelle-lot-5-interventions-cadrage-11.test.js` – `:169` et `:176`.
+⮕ **Les retirer fait rougir la sentinelle par construction.** Ce n'est pas une régression : la fiche #787 le prévoit
+explicitement — « retirer un cas réparé de la liste fait partie du geste ». **Mets la liste à jour dans le MÊME commit**, et
+écris le compte avant / après dans le message de commit.
 
-⚠ **Le bloc B de `sentinelle-lot-5-interventions-cadrage-11` ne vérifie PAS un libellé : il vérifie que le bilan et la suggestion
-bougent ENSEMBLE quand on déplace un seuil** (`:165`, « 0,645 → D 65 % avant ET après »). Ce couplage passait par la lettre.
-**Il doit continuer de se vérifier, par le nombre.** Si tu te contentes de remplacer la chaîne attendue, tu gardes le cas mais tu
-perds ce qu'il prouvait : dis-le, et refais-le tenir sur le pourcentage.
+⚠ **#787 annonce vingt-deux cas ; `index.html` en mesure dix-sept aujourd'hui**
+(`grep -cE 'class="[^"]*"[^>]*class="' index.html`). Le chiffre de la fiche est périmé ou compte d'autres fichiers :
+**remesure avant de t'y fier.**
 
-⛔ **NE TOUCHE PAS** à `tests/unit/sentinelle-audit-aide-lot-E-exemples-restent-des-exemples.test.js:95`
-(`expect(AIDE).not.toContain('Amener Structure au seuil D')`) : elle porte sur l'AIDE, pas sur la sortie, et elle doit rester vraie.
+---
+
+## 4 · Le code que l'ablation rend mort
+
+Dix handlers perdent leur seul appelant HTML : `enregistrerCommeEchelle`, `exporterEchelles`, `genererNiveauxPersonnalises`,
+`ouvrirImportEchellesLocal`, `reinitialiserNiveauxDefaut`, `sauvegarderNiveaux`, `changerTypeEchelle`,
+`chargerEchelleTemplate`, `importerEchelles`, `sauvegarderConfigEchelle`. Ils vivent dans `js/echelles.js`, sauf
+`ouvrirImportEchellesLocal` (`js/main.js`) et `importerEchelles` (aussi cité dans `js/echelles-bibliotheque.js`).
+
+⮕ **Mesure, pour chacun, s'il garde un appelant en JS** (`grep -rn` dans `js/`). Ceux qui n'en ont aucun **partent avec le
+bloc** — c'est le zéro-dette, et c'est le lot qui se termine, pas un élargissement. Ceux qui en gardent un **restent**, et tu
+**nommes lesquels et par qui** dans ton rapport.
+
+⚠ **`sauvegarderNomEchelle` reste** : deux appels hors du bloc.
+
+---
 
 ## 5 · La preuve
 
-- **Mutation qui prouve** : remettre l'une des trois anciennes phrases ⮕ rouge, en nommant laquelle.
-- **Contre-épreuve de non-régression du calcul** : les seuils lus et les branches ne bougent pas. Le cas du seuil à zéro
-  (`:118`) doit continuer de distinguer le correctif de l'ancien code – s'il devient vert sous l'ancienne forme `|| 0.75`,
-  le lot a défait #551 : **RECULER**.
-- **Contre-épreuve d'exhaustivité** : après le lot, `grep -rn "au seuil D\|au seuil M" js/` ne rend plus rien.
-- ⛔ Un essai qui reste vert sous sa mutation ne compte pas : dis lequel et pourquoi.
+1. **Avant / après, la même commande** : `grep -oE 'id="[A-Za-z0-9_-]+"' index.html | sort | uniq -d | wc -l` ⮕ **8 avant,
+   0 après**. C'est la preuve principale, et une machine y répond seule.
+2. **Une sentinelle ratchet neuve** : `index.html` ne porte aucun identifiant dupliqué. **Casse-la exprès** (réintroduis un id
+   en double), vérifie qu'elle rougit, remets le fichier à l'identique.
+3. **Les bancs qui nomment ces identifiants** — `sentinelle-625-etats-edition-purges`, `sentinelle-555-reperes-maitrise-echelle`,
+   `sentinelle-505-rendus-blocs-executent`, `sentinelle-524-code-niveau-obligatoire`, `sentinelle-555-e-reperes-echelle-neuve`,
+   et les specs `confirmations-conception-uniformes` et `echelle-reperes-maitrise-rendu` : **vérifie qu'ils lisent bien la
+   première occurrence** (l'éditeur vivant) et non les copies du bloc. S'ils restent verts sans rien avoir éprouvé, dis-le.
+4. **La suite complète se prend dans le CLONE PARTAGÉ** (`git clone --shared`), jamais dans un banc monté par `git archive` :
+   sept essais y rougissent faute de `.git`. `npm install` dans le banc, `timeout 170`, en synchrone.
 
-Vitest complet. Puis `scripts/release.mjs patch`.
+---
 
 ## 6 · Écritures de backlog, dans le même commit
 
-- **#551** reste OUVERTE, et sa fiche reçoit la réponse de Grégoire du 13 sept. : *la moitié affichée est livrée (la suggestion ne
-  nomme plus de lettre d'échelle) ; le renommage interne des trois seuils est PARQUÉ – il ne sert plus à rien une fois les lettres
-  retirées de l'écran ; nommer le niveau dans l'échelle de chacun est parqué aussi, faute de source fiable ici, et se rouvre avec
-  la question de l'étiquetage SOLO.*
-- **#742** reçoit son verrou, réponse de Grégoire du 13 sept. (option C) : *ces bornes restent en dur et documentées comme bornes
-  d'alerte du projet. Elles ne deviennent réglables que si un usage réel le réclame – les siens à partir d'octobre, ou ceux d'un
-  collègue. Motif : trois seuils réglables existent déjà et n'ont encore servi à personne.* **La fiche reste ouverte, datée comme
-  #836.**
-- **#857 EST UN DOUBLON DE #553** – erreur de Cowork, inscrite ce midi sans voir que #553 portait déjà le même constat depuis le
-  27 août, avec une mesure du 31 août qui va plus loin (les normalisations sont déjà identiques ; le désaccord est entre deux
-  chaînes source ; un diagnostic est dû avant tout correctif). **Fusionner #857 dans #553** : reporter dans #553 les numéros de
-  ligne à jour (`js/interventions.js:1088`, `:1289`, `:1340` en 1.140.3 – ceux de #553 datent d'août), puis **cocher #857 en
-  renvoyant à #553**, sans reprendre son numéro.
+- **#520 cochée**, avec la liste réelle des huit identifiants et le compte avant / après.
+- **#787 mise à jour** : les cas emportés par l'ablation retirés de son énoncé, le compte remesuré sur `index.html`.
+
+---
 
 ## 7 · Ce qu'on annonce
 
-**Une entrée « Nouvelles »**, en un item : la suggestion d'objectif dit maintenant le pourcentage visé sans nommer de niveau.
-⮕ Contrairement à #847, ce texte s'enregistre dans les données : ça se voit, donc ça s'annonce.
+**Rien dans « Nouvelles ».** Aucun geste d'utilisateur ne change, aucun écran ne bouge : une entrée de changelog dirait à vingt
+collègues qu'il s'est passé quelque chose qu'ils ne peuvent pas voir. *(Décidé par Cowork ; supposition nommée : que Grégoire ne
+veut pas de release pour un lot invisible. Une phrase de sa part la renverse.)*
+
+---
 
 ## 8 · Livraison
 
-**RELECTURE CROISÉE DE COWORK AVANT LA RELEASE** ; verdict Playwright Cowork fermé (PROTOCOLE règle 8).
-⚠ **#657 passe AVANT** : il est commité (`325dabcd`) et attend sa release. Deux bumps concurrents se marchent dessus.
+Commit — **relecture croisée de Cowork** — verdict Playwright pris **Cowork fermé** — push. Dans cet ordre : « push réussi » ne
+vaut pas « suite complète verte », le hook pre-push ne lance que Vitest.
+
+⛔ **Et après la livraison de #551**, pas avant.

@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 15 H 12 (Toronto) : 1.140.5 EN LIGNE (build `0913-1457`, `62c663ba`) — POUSSÉE ; #551 (MOITIÉ AFFICHÉE) ; #520 COMMITÉ SUR SA BRANCHE, PAS SUR `main`
+
+> **Poussé sur `origin/main`** après verdict Playwright local complet sur `62c663ba`, Cowork fermé (vert, aucune rougeur nouvelle, 0 échec) : `53eb0de9..62c663ba` — `d21d320f` (#551, relecture croisée de Cowork VERTE à 14 h 56, mutation Mf reposée par elle), `291216b7` (cadrage de Cowork), `62c663ba` (release 1.140.5, intention **patch** ; l'entrée « Nouvelles » est celle de `d21d320f`, bloc 1.140). Jeton `main.js` à `20260913k` : le `j` proposé par `release.mjs` était déjà posé par `6fbd5414` (hook #826).
+>
+> **#520 — sur la branche `claude/520-ancien-systeme-echelles` (`6fbd5414`, worktree `.claude/worktrees/520-ancien-systeme`), NON FUSIONNÉ.** Ablation du bloc « ANCIEN SYSTÈME » des échelles d'`index.html` : ids dupliqués 8 → 0, sentinelle `sentinelle-520-aucun-id-duplique` (3 mutations, 3 rouges), #779 bord B 19 → 13, #506 réancrée sur `sauvegarderEchelleComplete` (sa preuve vivait dans du code mort), #522 lot 2a/2b recomptés. Vitest 558 fichiers / 6 335 essais verts sur la branche ; Playwright ciblé 7/7.
+>
+> **Reste** : (1) rebaser `6fbd5414` sur `main` — son jeton `main.js` passe à **`20260913l`** (`j` et `k` sont pris) ; (2) relecture croisée de Cowork sur #520, puis verdict Playwright Cowork fermé, puis push — pas de release (lot invisible, supposition de Cowork) ; (3) la fragilité de #551 nommée par Cowork est écrite dans la fiche, non corrigée à dessein ; (4) `SESSION.md` ne couvre ni #657, ni #551, ni #520 (dernier bloc : session 48).
+>
+> Ce commit de relais porte aussi les trois fichiers de Cowork restés sur le disque : `plans de travail/CONSIGNE-DU-JOUR.md` (consigne #520), `plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md` (228 fiches, #657 et #857 corrigées, lots 6 et 7), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-13-551-suggestion-sans-lettre.md` (archive).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 14 H (Toronto) : 1.140.4 RELEASÉE (build `0913-1400`, `c189e97f`) — NON POUSSÉE ; #657, UN FICHIER js/ NEUF NE PEUT PLUS ENTRER SANS ÊTRE CHARGÉ
 
 > Sur `main`, au-dessus de `7247c20f` (`origin/main`) : `325dabcd` (le lot), `901ac297` (retouche de la relecture croisée de Cowork), `c189e97f` (release 1.140.4, intention **patch** : rien à l'écran), puis ce relais. **Contenu** — seulement `tests/` et `BACKLOG.md`, rien dans `index.html` ni `js/` hors du bump : `tests/unit/sentinelle-scripts-parsables.test.js` renommé `sentinelle-scripts-atteints-et-parsables.test.js`, second `describe` : tout `.js` du disque est atteint par un `<script src>` d'`index.html` OU par un littéral de chaîne du CODE d'un autre fichier `js/` (commentaires retirés par esbuild, désormais déclaré dans `tests/package.json`) ; `js/_archives/` hors périmètre par dossier ; une seule exception nommée (`pratique-interface.js`), gardée contre l'élargissement et la péremption. Break-tests : 3 mutations + contre-épreuve, toutes rouges, reposées à l'identique par Cowork. Vitest 557 / 6 332 après le commit du bump. **Pas d'entrée « Nouvelles ».** #657 cochée. Le bump a aussi avancé le jeton de `js/interventions.js` (b → c) sans que le fichier ait changé depuis 1.140.3 : un rechargement de plus, sans effet ; inférence, non vérifiée : `release.mjs` compare à l'avant-dernier commit de `version.json` (#675).
