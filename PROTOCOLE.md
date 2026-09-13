@@ -46,6 +46,116 @@ appliquée au relais.
 
 ---
 
+## Le cycle d'un lot — la méthode, du backlog au push (13 septembre 2026)
+
+*Écrit par Cowork à la demande de Grégoire, pour que la journée du 13 septembre se reproduise. Chaque règle ci-dessous porte le fait qui l'a produite, ce jour-là. Ce qui n'a pas été mesuré est nommé comme tel.*
+
+### Ce que le cycle suppose
+
+**Une fiche du backlog est une HYPOTHÈSE datée, pas un article d'inventaire.** Elle décrit ce que quelqu'un a vu, le jour où il l'a vu, dans le fichier où il l'a vu. Trois choses lui arrivent entre son inscription et son ouverture : le défaut se déplace, le défaut meurt, ou Grégoire tranche sa portée sans que la fiche le sache.
+
+Mesure du 13 septembre : **sur trois lots ouverts, trois fiches se sont révélées fausses sur elles-mêmes.**
+
+- L'ablation de l'ancien éditeur (#520) nommait cinq identifiants dupliqués. Il y en avait **huit**, et l'un des cinq n'était **pas dupliqué du tout**.
+- La règle 10 (#858) annonçait trente assertions à router. Il y en avait **quarante-huit**.
+- Le périmètre du bandeau (#801), écrit par Cowork le matin même, disait « mener à la carte ». C'est une **modale**, et la carte ne fait que l'ouvrir.
+
+⮕ **Corollaire : aucun lot ne s'ouvre sur une fiche non remesurée.** Le premier livrable d'un lot n'est pas du code, c'est la mesure qui dément ou confirme sa fiche.
+
+### Les six temps
+
+1. **MESURER** (Cowork, lecture seule). Reprendre au code ce que la fiche affirme. Chaque compte s'écrit **avec la commande qui le produit**, pour qu'un tiers puisse le refaire.
+2. **CADRER** (Cowork). La consigne va dans un FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`), jamais dans un bloc à recopier. Elle porte : ce que le lot livre, ce que la mesure corrige de la fiche, la portée, les pièges connus, la preuve exigée, ce qui n'entre PAS, et les écritures de backlog dues.
+3. **CODER** (Claude Code). Un lot, un commit. Les trouvailles en chemin reçoivent l'une des trois issues de `CLAUDE.md`, nommées dans le rapport.
+4. **CONTRE-VÉRIFIER** (Cowork). Reprendre au code ce que le rapport affirme. Voir « Deux méthodes » ci-dessous.
+5. **ÉPROUVER** (Claude Code). Suite complète, verdict Playwright pris **Cowork fermé** (règle 8).
+6. **LIVRER** (Grégoire). Le `git push`.
+
+⚠ **Le temps 6 se fait depuis le Mac de Grégoire, et par une seule des deux sessions.** **Claude Code pousse**, par `scripts/pousser.sh`, à la demande de Grégoire. **Cowork ne pousse pas** : son shell n'atteint pas le dépôt en SSH (« Host key verification failed », mesuré le 13). ⮕ **Corrigé le 13 au soir, après une affirmation fausse de Cowork** qui avait écrit que personne n'avait la clé : il avait mesuré son propre environnement et conclu sur le rôle. La règle 5 (« aucune session ne pousse ») date du 8 août et ne vaut plus.
+
+### La boucle — qui passe quoi à qui, et par quoi
+
+**Grégoire est le seul canal.** Cowork et Claude Code ne se parlent pas : chaque passage est un copier-coller qu'il fait. Rien ne se propage s'il ne relaie pas — et rien ne se perd non plus sans qu'il le voie.
+
+Le tour complet, tel qu'il a tourné le 13 septembre :
+
+```
+   fiche du backlog
+        ↓
+   [1] Cowork MESURE le dépôt, et dément la fiche
+        ↓  fichier : plans de travail/CONSIGNE-DU-JOUR.md
+        ↓  bloc    : « lis la consigne, voici ce qui t'enverrait de travers »
+   [2] Claude Code CODE, commite, et RAPPORTE
+        ↓  bloc    : ce qu'il a mesuré, ce qu'il a supposé, ses écarts avec la consigne
+   [3] Cowork CONTRE-VÉRIFIE au code, et rend un verdict
+        ↓  bloc    : vert / retouches, et de quelle NATURE est le verdict
+   [4] Claude Code ÉPROUVE (suite complète, Cowork fermé) et commite
+        ↓
+   [5] Grégoire POUSSE
+```
+
+**Deux véhicules, deux emplois qui ne se confondent pas.**
+
+- **Le FICHIER** porte le mandat. Il est durable, versionné, relisible à froid, et c'est lui qui fait foi.
+- **Le BLOC** porte le passage. Il est jetable, il tient dans un message, et son seul travail est de **dire où est le fichier et de nommer ce qui enverrait le receveur de travers s'il l'ignorait.** Un bloc qui résume le fichier le rend redondant, et les deux divergent au tour suivant.
+
+**Trois obligations, à chaque passage :**
+
+1. **Nommer ce qu'on a mesuré ET ce qu'on a supposé.** Une supposition nommée se corrige en dix secondes ; une supposition tue se découvre trois jours plus tard.
+2. **Remesurer la prémisse reçue avant d'agir dessus.** Une prémisse est périmée par défaut. Mesuré le 13 septembre au démarrage : *tout* ce qu'un relais décrivait comme « restant dû » était déjà commité et poussé — la règle 10, la fiche #858, et jusqu'à la ligne de SHA qu'il demandait de corriger.
+3. **Écrire ses écarts avec la consigne reçue**, même quand ils l'améliorent. C'est par là que la consigne suivante s'écrit juste.
+
+### La boucle tourne aussi À REBOURS
+
+Ce n'est pas un cercle, c'est une spirale : **chaque passage corrige la source du passage précédent.**
+
+- La consigne corrige la fiche (trois fois sur trois, le 13 septembre).
+- Le rapport corrige la consigne — y compris quand la consigne vient de Cowork : le 13, Claude Code a démenti à la fois le périmètre de #801 (une modale, pas une carte) et le compte de #858 (167, pas 112), tous deux écrits par Cowork le matin même.
+- La contre-vérification corrige le rapport — ou se corrige elle-même : le même jour, Cowork a cherché le banc de remplacement dans le mauvais fichier et a dû se démentir.
+
+⮕ **Le relecteur se trompe autant que l'auteur.** La boucle ne vaut pas parce qu'un des trois aurait raison, mais parce qu'aucun des trois n'est cru sur parole. Ce qui circule, ce ne sont pas des verdicts : ce sont des mesures et les commandes qui les produisent.
+
+### Ce qui compose un lot : la GRAPPE, pas le palier
+
+Les fiches sont cotées **rapide / intermédiaire / laborieuse**. Ce palier estime un coût ; **il ne sélectionne rien.**
+
+Ce qui compose un lot, c'est la **grappe** : les fiches qui passent par le même point du code. Une grappe = une sentinelle, un harnais, un jeton. Ce qui décide de l'ORDRE, ce sont deux questions, dans cet ordre :
+
+1. **Est-ce que ça demande quelque chose à Grégoire ?** Un arbitrage, un écran à vérifier, ses données réelles. Si oui, ça attend un moment où il est disponible.
+2. **Est-ce que la fiche dit encore vrai ?** Sinon, le lot n'est pas celui qu'on croit.
+
+⚠ **Une grappe n'est pas un lot.** Le 13 septembre, la grappe `js/echelles.js` portait six fiches : une seule était un lot de code. Une était morte (sa source avait été tarie par le lot précédent, sans que personne la ferme), une était hors de portée par un arbitrage de Grégoire vieux de trois semaines, trois attendaient sa disponibilité.
+
+### Deux méthodes, pas deux lectures
+
+**La contre-vérification ne vaut que si elle emploie une méthode DIFFÉRENTE de celle qui a produit l'affirmation.**
+
+Mesure du 13 septembre, et c'est le fait le plus important de cette page : Cowork avait compté 112 découpes fautives avec un `grep` ligne à ligne. La vraie valeur était **167** — cinquante-cinq découpes sont écrites sur deux lignes, et **les deux seules assertions réellement mortes étaient parmi ces cinquante-cinq.** Claude Code l'a trouvé parce qu'il a mesuré **à l'exécution** (une sonde sur les découpes pendant toute la suite) au lieu de relire le texte.
+
+⮕ Si les deux côtés avaient lu le même texte de la même façon, l'erreur passait, et le lot aurait « corrigé » trente cas en laissant les deux vrais défauts en place.
+
+⮕ **Une mesure fausse est pire qu'une mesure absente : elle rassure.** Quand une contre-vérification confirme, elle doit dire par quel chemin — sinon elle n'a fait que relire.
+
+### Trois gestes qui demandent une garde particulière
+
+- **SUPPRIMER une assertion** est le geste le plus risqué d'un lot. Celui qui la retire **nomme son remplaçant, fichier et ligne** ; celui qui relit **vérifie que le remplaçant existe et qu'il ne porte pas lui-même sur une tranche**. Le 13 septembre, la justification était bonne et Cowork a d'abord cherché dans le mauvais fichier : c'est le relecteur qui s'était trompé, pas l'auteur.
+- **AJUSTER un banc pour qu'il repasse au vert** est interdit. Un banc qu'on ajuste a cessé de prouver quoi que ce soit. S'il doit changer, il se **réancre délibérément**, avec son motif écrit dans le fichier de test.
+- **RENDRE UN VERDICT** exige de dire lequel. Un verdict de **lecture et de mesure** n'est pas un verdict d'**exécution**, et les deux se rendent : le 13 au soir, une session Cowork a rendu #658 **verte par exécution**, une autre a rendu #801 **verte par lecture**, faute d'avoir pu lancer la suite depuis son environnement. ⮕ **N'écris jamais « vert » tout court : écris par quel chemin tu l'as obtenu.** Et ne conclus pas de ce que TON instrument ne peut pas faire à ce que ton RÔLE ne peut pas faire — Cowork s'est trompé deux fois là-dessus le 13.
+
+### Ce que le compte ne mesure pas
+
+Le nombre de fiches ouvertes a été remesuré **cinq fois** — 234, 241, 230, 228, 227 — **sans qu'une seule révision change une décision.** Il monte quand on cherche mieux.
+
+Ce qui se mesure, et ce que l'artefact de tri doit montrer en premier :
+
+1. **Les lots en ligne**, distincts des lots commités — un lot non poussé n'est pas livré.
+2. **Ce que la mesure a démenti** à chaque lot : c'est le rendement du dispositif, et c'est ce qui justifie le temps 1.
+3. **Ce qui attend Grégoire**, et ce qui n'attend rien de lui.
+
+Le tableau des fiches sert à composer les lots ; il s'adresse aux deux sessions. Le haut de la page s'adresse à Grégoire. Les deux ne se confondent pas.
+
+---
+
 ## Règle 1 — Aucune ancre sans sa preuve
 
 **(a) Tout chiffre rendu par un rituel, un audit ou un sous-agent est accompagné
