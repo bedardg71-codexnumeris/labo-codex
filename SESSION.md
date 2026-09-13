@@ -7,6 +7,35 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 50 — 13 SEPTEMBRE 2026, ≈ 15 H 50 (Toronto) : LOT SANS CODE « DEUX FICHES LIVRÉES ET JAMAIS COCHÉES », à partir de `d07e963d`.
+     ⚠ La consigne annoncée (plans de travail/CONSIGNE-DU-JOUR.md) n'était pas sur le disque — c'était encore celle de #520 : exécuté
+       sur le mandat transmis par Grégoire. Rituel (subagent) : aucun autre écart ; Vitest 558 / 6 337.
+     ▣ #803 COCHÉE (`ad34f739`, 1.126.1 ; prolongée par `419e606f`, 1.127.6). Troisième point relu : la carte de l'indice P (l. 10055)
+       a été réécrite dans ad34f739 et dit la même chose que le glossaire — rien à changer.
+     ▣ #801 LAISSÉE OUVERTE : gestes 1 et 3 livrés (`1a7205ee`, 1.127.3), geste 2 écarté par la fiche elle-même ; mais le défaut
+       d'origine — le bandeau qui décrit le chemin au lieu d'y mener, js/init-inline.js:406 — n'est ni livré ni écarté. Rien corrigé.
+     ▣ Compte BACKLOG (grep -c '^- \[ \]' BACKLOG.md, moins le gabarit de « Notes ») : 228 → 227, et non 226.
+     ▣ Le bloc de la session 49, jamais écrit, est reconstitué ci-dessous.
+     ===================================================================== -->
+
+<!-- =====================================================================
+     SESSION 49 — 13 SEPTEMBRE 2026, ≈ 13 H 50 → 15 H 46 (Toronto) : #657, #551 (MOITIÉ AFFICHÉE) ET #520, à partir de `7247c20f` (1.140.3).
+     ⚠ Bloc RECONSTITUÉ par la session 50, depuis RELAIS.md (blocs de 14 h, 15 h 12 et 15 h 46) et `git log` : la session qui a fait
+       ces lots ne l'a pas écrit. Ce qui suit est recopié, pas re-mesuré.
+     ▣ #657 (`325dabcd`, retouche de la relecture croisée de Cowork `901ac297`, release 1.140.4 `c189e97f`, patch, sans « Nouvelles ») :
+       tests/ seulement. sentinelle-scripts-atteints-et-parsables — tout .js du disque est atteint par un <script src> d'index.html OU
+       par un littéral du CODE d'un autre fichier js/ (commentaires retirés par esbuild, déclaré dans tests/package.json) ; une seule
+       exception nommée (pratique-interface.js). 3 mutations + contre-épreuve rouges. Trou latent écrit en tête de scriptsCharges.
+     ▣ #551 (`d21d320f`, release 1.140.5 `62c663ba`, build 0913-1457) : la suggestion d'objectif ne nomme plus une lettre d'échelle.
+       Relecture croisée de Cowork verte à 14 h 56. La fragilité qu'elle a nommée est écrite dans la fiche, non corrigée à dessein.
+     ▣ #520 (`7afa62b9`, rebasé depuis `6fbd5414` ; retouche de Cowork `d4e2923f` ; sans release, lot invisible) : le bloc « ANCIEN
+       SYSTÈME » des échelles quitte index.html, ids dupliqués 8 → 0 (sentinelle-520-aucun-id-duplique) ; #779 bord B 19 → 13 ; #506
+       réancrée sur le vivant ; sauvegarderConfigEchelle et changerTypeEchelle retirées. Source tarie, stock non réparé : la clé nue
+       configEchelle aplatie reste chez qui l'a. `eecaa703` : règle 10 du PROTOCOLE et fiche #858.
+     Tout est sur origin/main depuis 15 h 46 (`d07e963d`), chaque push après verdict Playwright local pris Cowork fermé.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 48 — 13 SEPTEMBRE 2026, ≈ 12 H 45 → 13 H 50 (Toronto) : DEUX CONSIGNES DE COWORK, à partir de `f1898c0a` (1.140.1).
      ⚠ Aucune entrée n'a été écrite ici pour les sessions du matin du 13 (1.139.3 → 1.140.1) : leur trace est dans RELAIS.md.
      ▣ LOT #746 + #551 (`07f0d74d`, 1.140.2, worktree) : obtenirInterventionsEtudiant filtre par le contexte actif (huit lecteurs
