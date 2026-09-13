@@ -1,11 +1,18 @@
-import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { describe, it, expect, afterAll } from 'vitest';
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
     extraireSuffixes,
     trouverSuffixesInchanges,
+    referencesSansJeton,
+    chargementsDynamiques,
+    lireHistoriqueJetons,
+    trouverJetonsDejaServis,
+    proposerJeton,
 } from '../../scripts/verifier-anticache-stage.mjs';
 
 // SENTINELLE #547 — L'ANTI-CACHE RAPPELÉ AU MOMENT DU COMMIT.
@@ -154,6 +161,242 @@ describe('#547 · le contrôle est réellement branché au hook', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 13 SEPT. 2026 — LE GARDE DIT LA VÉRITÉ SUR CE QU'IL A VÉRIFIÉ (#600, #547, #826, #602)
+//
+// ⚠ Chaque banc ci-dessous EXÉCUTE le script dans un dépôt jetable et LIT sa
+// sortie. Un banc qui n'assertait que le code de sortie resterait vert sous
+// les mutations de #600 et de #547 (ii) : il vaut 0 avant comme après.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const script = path.join(racineProjet, 'scripts', 'verifier-anticache-stage.mjs');
+// ⚠ ISOLEMENT (incident du 13 sept. 2026, 12 h 05). Lancé par le hook pre-push
+// d'un worktree, Vitest hérite de `GIT_DIR` : un `git init` / `git config`
+// « jetable » écrit alors dans le VRAI dépôt — `core.bare = true` et un
+// `[user] Test` y ont été posés, git refusait tout. Aucune variable `GIT_*` ne
+// passe dans les dépôts jetables.
+const ENV_SANS_GIT = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GIT_')));
+const bacs = [];
+afterAll(() => { for (const b of bacs) rmSync(b, { recursive: true, force: true }); });
+
+/** Dépôt jetable : `fichiers` commités en un premier commit. */
+function depot(fichiers) {
+    const bac = mkdtempSync(path.join(os.tmpdir(), 'garde-547-'));
+    bacs.push(bac);
+    const g = (...args) => execFileSync('git', args, { cwd: bac, env: ENV_SANS_GIT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    const ecrire = (map) => {
+        for (const [rel, contenu] of Object.entries(map)) {
+            mkdirSync(path.dirname(path.join(bac, rel)), { recursive: true });
+            writeFileSync(path.join(bac, rel), contenu);
+        }
+    };
+    g('init', '-q');
+    g('config', 'user.email', 'test@example.invalid');
+    g('config', 'user.name', 'Test');
+    ecrire(fichiers);
+    g('add', '-A');
+    g('commit', '-qm', 'base');
+    return {
+        bac, g, ecrire,
+        commit(map, msg) { ecrire(map); g('add', '-A'); g('commit', '-qm', msg); return g('rev-parse', 'HEAD').trim(); },
+        stager(map) { ecrire(map); g('add', '-A'); },
+        garde() {
+            const r = spawnSync('node', [script], { cwd: bac, encoding: 'utf8', env: { ...ENV_SANS_GIT, LABO_ANTICACHE_SKIP: '' } });
+            // eslint-disable-next-line no-control-regex
+            const net = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
+            return { code: r.status, out: net(r.stdout), err: net(r.stderr), tout: net(r.stdout + r.stderr) };
+        },
+    };
+}
+
+const indexAvec = (jeton) => `<script src="version.js?v=09131013"></script>\n<script src="js/a.js?v=${jeton}"></script>\n`;
+const VERSION = JSON.stringify({ build: '0913-1013', beta: '1.0.0' }) + '\n';
+
+describe('#600 · rien de stagé : le garde DIT qu\'il n\'a rien vérifié', () => {
+    it('index vide → une ligne « rien de stagé — RIEN VÉRIFIÉ », code 0', () => {
+        const d = depot({ 'index.html': indexAvec('20260912a'), 'js/a.js': '// v1\n', 'version.json': VERSION });
+        const r = d.garde();
+        expect(r.code).toBe(0);
+        expect(r.out).toMatch(/rien de stagé/);
+        expect(r.out).toMatch(/RIEN VÉRIFIÉ/);
+    });
+});
+
+describe('#547 (ii) · le refus conseille le JOUR DU BUILD, plus la lettre', () => {
+    const d = depot({ 'index.html': indexAvec('20260912a'), 'js/a.js': '// v1\n', 'version.json': VERSION });
+    d.stager({ 'js/a.js': '// v2\n' });
+    const r = d.garde();
+
+    it('refuse (code 1) le fichier modifié sous le même jeton — témoin du montage', () => {
+        expect(r.code).toBe(1);
+        expect(r.err).toMatch(/js\/a\.js\s+\?v=20260912a/);
+    });
+
+    it('nomme le build de version.json et le jour qu\'il impose', () => {
+        expect(r.err).toMatch(/JOUR DU BUILD/);
+        expect(r.err).toMatch(/0913-1013/);
+        expect(r.err).toMatch(/20\d\d0913\b/);
+    });
+
+    it('propose un jeton du jour du build, fichier par fichier', () => {
+        expect(r.err).toMatch(/js\/a\.js[^\n]*→ \?v=20\d\d0913a/);
+    });
+
+    it('n\'imprime plus « incrementer la lettre » (20260827a -> 20260827b) — la sentinelle refuserait', () => {
+        expect(r.err).not.toMatch(/20260827a -> 20260827b/);
+        expect(r.err).not.toMatch(/incrementer la lettre/);
+    });
+});
+
+describe('#826 · un jeton qui a DÉJÀ servi ce chemin avec un autre contenu est refusé', () => {
+    // Le montage qui isole le contrôle neuf : HEAD porte `20260910d`, le stagé
+    // repose `20260910a`, qui a servi PLUS HAUT dans l'historique. Avec un
+    // jeton égal à celui de HEAD, l'ancien garde refuserait déjà : l'essai ne
+    // prouverait rien.
+    const d = depot({ 'index.html': indexAvec('20260910a'), 'js/a.js': '// v1\n', 'version.json': VERSION });
+    const premier = d.g('rev-parse', 'HEAD').trim();
+    d.commit({ 'index.html': indexAvec('20260910d'), 'js/a.js': '// v2\n' }, 'bump d');
+
+    it('HEAD à 20260910d, stagé qui repose 20260910a sur un contenu neuf → refus qui nomme le commit', () => {
+        d.stager({ 'index.html': indexAvec('20260910a'), 'js/a.js': '// v3\n' });
+        const r = d.garde();
+        expect(r.code).toBe(1);
+        expect(r.err).toMatch(/DEJA servi/);
+        expect(r.err).toMatch(new RegExp('js/a\\.js\\s+\\?v=20260910a[^\\n]*' + premier.slice(0, 8)));
+        d.g('reset', '-q', '--hard');
+    });
+
+    it('le même jeton sur le MÊME contenu (un revert) passe — une URL, un contenu', () => {
+        d.stager({ 'index.html': indexAvec('20260910a'), 'js/a.js': '// v1\n' });
+        const r = d.garde();
+        expect(r.err).not.toMatch(/DEJA servi/);
+        expect(r.code).toBe(0);
+        d.g('reset', '-q', '--hard');
+    });
+
+    it('un jeton jamais servi passe (témoin)', () => {
+        d.stager({ 'index.html': indexAvec('20260910e'), 'js/a.js': '// v3\n' });
+        expect(d.garde().code).toBe(0);
+        d.g('reset', '-q', '--hard');
+    });
+
+    it('le jeton posé par une AUTRE branche du dépôt compte — le cas du 10 sept. (deux sessions)', () => {
+        d.g('checkout', '-q', '-b', 'session-parallele');
+        d.commit({ 'index.html': indexAvec('20260910e'), 'js/a.js': '// v3 — l\'autre session\n' }, 'autre session');
+        d.g('checkout', '-q', '-');
+        d.stager({ 'index.html': indexAvec('20260910e'), 'js/a.js': '// v3 — cette session\n' });
+        const r = d.garde();
+        expect(r.code).toBe(1);
+        expect(r.err).toMatch(/js\/a\.js\s+\?v=20260910e/);
+        d.g('reset', '-q', '--hard');
+    });
+});
+
+describe('#602 · les chargements hors index.html : couverts quand ils ont un jeton, NOMMÉS sinon', () => {
+    it('libs/pdf.worker.min.js modifié (workerSrc sans jeton) → nommé « HORS de ce contrôle », commit non bloqué', () => {
+        // La mutation de la consigne : modifier la bibliothèque sans toucher
+        // `js/travaux-visionneuse.js:71`. Avant le 13 sept., le garde se taisait.
+        const d = depot({
+            'index.html': indexAvec('20260912a'),
+            'js/a.js': '// v1\n',
+            'js/travaux-visionneuse.js': "pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';\n",
+            'libs/pdf.worker.min.js': '/* 3.11.174 */\n',
+            'version.json': VERSION,
+        });
+        d.stager({ 'libs/pdf.worker.min.js': '/* 3.11.175 */\n' });
+        const r = d.garde();
+        expect(r.code).toBe(0);
+        expect(r.err).toMatch(/HORS de ce contrôle/);
+        expect(r.err).toMatch(/libs\/pdf\.worker\.min\.js[^\n]*js\/travaux-visionneuse\.js/);
+    });
+
+    it('une bibliothèque qu\'index.html charge sans ?v= → nommée aussi', () => {
+        const d = depot({
+            'index.html': indexAvec('20260912a') + '<script src="libs/chart.min.js"></script>\n',
+            'js/a.js': '// v1\n', 'libs/chart.min.js': '/* 4.4 */\n', 'version.json': VERSION,
+        });
+        d.stager({ 'libs/chart.min.js': '/* 4.5 */\n' });
+        const r = d.garde();
+        expect(r.code).toBe(0);
+        expect(r.err).toMatch(/libs\/chart\.min\.js[^\n]*sans \?v=/);
+    });
+
+    it('importScripts à jeton ÉCRIT EN DUR : la bibliothèque modifiée sous le même jeton est REFUSÉE', () => {
+        const d = depot({
+            'index.html': indexAvec('20260912a'),
+            'js/a.js': '// v1\n',
+            'js/heic-worker.js': "importScripts('../libs/libheif-bundle.js?v=20260830a');\n",
+            'libs/libheif-bundle.js': '// 1.17\n',
+            'version.json': VERSION,
+        });
+        d.stager({ 'libs/libheif-bundle.js': '// 1.18\n' });
+        const r = d.garde();
+        expect(r.code).toBe(1);
+        expect(r.err).toMatch(/libs\/libheif-bundle\.js\s+\?v=20260830a/);
+    });
+});
+
+describe('#602 · chargementsDynamiques — les quatre formes, chemin résolu', () => {
+    it('lit workerSrc et importScripts, et résout importScripts depuis le worker', () => {
+        const src = "importScripts('../libs/libheif-bundle.js?v=20260830a');\n"
+            + "pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';\n";
+        const sites = chargementsDynamiques(src, 'js/heic-worker.js');
+        expect(sites.map((s) => [s.chemin, s.jeton])).toEqual([
+            ['libs/libheif-bundle.js', '20260830a'],
+            ['libs/pdf.worker.min.js', null],
+        ]);
+    });
+
+    it('distingue un jeton calculé au chargement d\'une URL nue', () => {
+        const [s] = chargementsDynamiques("_worker = new Worker('js/heic-worker.js?v=' + jetonAntiCache());", 'js/heic-decodeur.js');
+        expect(s).toMatchObject({ chemin: 'js/heic-worker.js', avecJeton: true, calcule: true, jeton: null });
+    });
+
+    it('ignore les commentaires et les URL qui ne sont pas des scripts', () => {
+        const src = "// Source : js/pack-demo-10.js\n/* importScripts('libs/x.js') */\nimg.src = 'images/logo.png';\n";
+        expect(chargementsDynamiques(src, 'js/a.js')).toEqual([]);
+    });
+
+    it('referencesSansJeton relève les scripts locaux nus, pas ceux à jeton ni les URL distantes', () => {
+        const html = '<script src="libs/chart.min.js"></script><script src="js/a.js?v=1"></script>'
+            + '<script src="https://cdn.example/x.js"></script><link href="styles.css">';
+        expect([...referencesSansJeton(html)]).toEqual(['libs/chart.min.js', 'styles.css']);
+    });
+});
+
+describe('#826 · lecture de l\'historique et proposition de jeton (fonctions pures)', () => {
+    const LOG = [
+        'commit aaaa1111',
+        '+++ b/index.html',
+        '+<script src="js/a.js?v=20260910a"></script>',
+        '-<script src="js/a.js?v=20260909c"></script>',
+        'commit bbbb2222',
+        '+<script src="js/a.js?v=20260910d"></script> <script src="js/b.js?v=20260910a"></script>',
+    ].join('\n');
+
+    it('lireHistoriqueJetons ne retient que les lignes AJOUTÉES, avec leur commit', () => {
+        const h = lireHistoriqueJetons(LOG);
+        expect([...h.get('js/a.js').keys()]).toEqual(['20260910a', '20260910d']);
+        expect([...h.get('js/a.js').get('20260910a')]).toEqual(['aaaa1111']);
+        expect(h.get('js/b.js').get('20260910a').has('bbbb2222')).toBe(true);
+    });
+
+    it('trouverJetonsDejaServis : refuse sur un autre contenu, pas sur le même, pas sur une inconnue', () => {
+        const h = lireHistoriqueJetons(LOG);
+        const candidats = new Map([['js/a.js', '20260910a'], ['js/b.js', '20260910a']]);
+        const autre = trouverJetonsDejaServis(candidats, h, (c, f) => (f === 'js/a.js' ? false : null));
+        expect(autre).toEqual([{ fichier: 'js/a.js', suffixe: '20260910a', commit: 'aaaa1111' }]);
+        expect(trouverJetonsDejaServis(candidats, h, () => true)).toEqual([]);
+    });
+
+    it('proposerJeton : jour du build, après le rang actuel, jamais un jeton déjà servi', () => {
+        expect(proposerJeton('20260913b', '20260913', new Set(['20260913c']))).toBe('20260913d');
+        expect(proposerJeton('20260912z', '20260913', new Set())).toBe('20260913a');
+        expect(proposerJeton('20260913z', '20260913', new Set())).toBe('20260913aa');
+        expect(proposerJeton('20260913a', null, new Set())).toBeNull();
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // JOURNAL DES BREAK-TESTS — 27 août 2026
 //
 // 1. `trouverSuffixesInchanges` rendant toujours `[]`
@@ -171,4 +414,29 @@ describe('#547 · le contrôle est réellement branché au hook', () => {
 // 6. Classe du suffixe ramenée à [A-Za-z0-9] (l'état d'avant la mesure)
 //    → 2 rouges : « relève les suffixes À POINTS », « SIGNALE une bibliothèque
 //      tierce repatchée ».
+//
+// 13 SEPTEMBRE 2026 — chaque mutation posée seule, fichier restauré après :
+// 7. #600 — `main()` muet sur index vide (écriture remplacée par `void`)
+//    → 1 rouge : « index vide → une ligne « rien de stagé » ». Le code de
+//      sortie vaut 0 avant comme après : seule la lecture de la sortie mord.
+// 8. #547 (ii) — la phrase « incrementer la lettre (20260827a -> 20260827b) »
+//    remise → 2 rouges : « nomme le build de version.json », « n'imprime plus
+//    incrementer la lettre ».
+// 9. #826 — `memeContenu(...) === false` remplacé par `false` → 3 rouges :
+//    « HEAD à 20260910d, stagé qui repose 20260910a », « le jeton posé par une
+//    AUTRE branche », et la fonction pure. Le montage isole le contrôle neuf :
+//    le jeton stagé DIFFÈRE de HEAD, l'ancien refus ne pouvait pas mordre.
+// 10. #602 — les non-couverts tus (`if (false)`) → 2 rouges : workerSrc et
+//    bibliothèque nue d'index.html.
+// 11. #602 — jeton en dur d'importScripts ignoré → 1 rouge : « importScripts à
+//    jeton ÉCRIT EN DUR ».
+// 12. #602 — la lecture ramenée à `.src =` et `new Worker(` → 3 rouges ici
+//    (plus 2 dans la sentinelle #825, qui lit par la même fonction).
+// 13. AVANT LE CORRECTIF (garde de c049633d, montage libs/pdf.worker.min.js
+//    stagé sans toucher travaux-visionneuse.js) : sortie VIDE, code 0 ; le
+//    garde neuf nomme le fichier. Le banc rougissait donc avant.
+// 14. ISOLEMENT — `env: ENV_SANS_GIT` retiré du dépôt jetable, suite lancée
+//    sous `GIT_DIR` pointé vers un dépôt LEURRE : 11 rouges, et le leurre
+//    reçoit `user.email = test@example.invalid` et 8 commits parasites. Avec
+//    le filtre : 36 verts, leurre intact (config locale vide, 1 commit).
 // ─────────────────────────────────────────────────────────────────────────────
