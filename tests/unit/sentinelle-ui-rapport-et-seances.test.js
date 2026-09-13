@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -23,7 +24,7 @@ const lire = (rel) => readFileSync(path.join(racineProjet, rel), 'utf8');
 
 describe('UI · la rangée de séance tient sur une seule ligne', () => {
     const css = lire('styles.css');
-    const bloc = css.slice(css.indexOf('.seance-horaire-ligne {'));
+    const bloc = tranche(css, '.seance-horaire-ligne {');
     const regle = bloc.slice(0, bloc.indexOf('}'));
 
     it('la grille déclare SIX colonnes, une par champ', () => {
@@ -68,7 +69,7 @@ describe('UI · le bouton « Rapport » vit dans la barre d\'actions', () => {
     });
 
     it('il a quitté l\'en-tête foncé « Enregistrement »', () => {
-        const entete = html.slice(html.indexOf('data-tooltip="presences-saisie"'));
+        const entete = tranche(html, 'data-tooltip="presences-saisie"');
         expect(entete.slice(0, 600)).not.toContain('ouvrirModaleRapportPresences');
     });
 

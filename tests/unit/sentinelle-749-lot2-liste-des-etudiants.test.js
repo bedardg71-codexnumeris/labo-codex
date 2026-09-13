@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE #749 LOT 2 — LA LISTE DES ÉTUDIANT·ES DIT VRAI (cadrage 11, 11 sept. 2026)
 //
@@ -248,7 +249,7 @@ describe('#749 lot 2 · D — une lettre tapée ne recalcule pas le groupe trois
         b.win.afficherListeEtudiantsConsultation();
         expect(b.compteurs).toEqual({ assiduite: 1, cp: 0 });
         const src = lire('js/etudiants.js');
-        const corps = src.slice(src.indexOf('function afficherListeEtudiantsConsultation()'), src.indexOf('\nfunction ', src.indexOf('function afficherListeEtudiantsConsultation()') + 10));
+        const corps = tranche(src, 'function afficherListeEtudiantsConsultation()', '\nfunction ');
         expect(corps).not.toMatch(/calculerEtStockerIndicesCP\(\)/);
     });
 

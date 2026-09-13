@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // Demande Grégoire (6 août soir) : le patron « PROTOTYPE » de Keynote — une
 // leçon modèle qu'on duplique puis dont on modifie le contenu librement.
@@ -243,9 +244,7 @@ describe('duplication de conteneur · copie indépendante en profondeur', () => 
         // fuir : si la copie profonde recopiait le `cloneSourceId` de ses
         // enfants, dupliquer une leçon fabriquerait des clones EN SILENCE —
         // exactement le défaut qu'on vient de corriger, par une autre porte.
-        const corps = sourceCarte.slice(
-            sourceCarte.indexOf('function dupliquerConteneurEnProfondeur'),
-            sourceCarte.indexOf('function detacherDeLaFamille'));
+        const corps = tranche(sourceCarte, 'function dupliquerConteneurEnProfondeur', 'function detacherDeLaFamille');
         const debut = corps.indexOf('function copier(');
         expect(debut, 'la fonction de copie profonde a disparu').toBeGreaterThan(-1);
         // ⚠ Fenêtre de taille fixe, et NON un découpage à la première accolade

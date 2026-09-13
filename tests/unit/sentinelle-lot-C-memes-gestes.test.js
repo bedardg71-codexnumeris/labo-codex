@@ -28,6 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { jetonAuMoins } from './_helpers/jeton-anticache.js';
+import { tranche } from './_helpers/tranche.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -168,7 +169,7 @@ describe('lot C · C — l\'éditeur d\'échelles : la table et les deux cartes'
             expect(coin).toMatch(new RegExp('data-action="supprimerNiveauEchelle" data-param="ECH_A" data-param2="' + i + '"'));
             expect(coin.indexOf('pipeline-btn-reorder')).toBeLessThan(coin.indexOf('icons8-trash.svg'));
             // La grille commence par le code : la première cellule n'est plus « Ordre ».
-            const grille = c.slice(c.indexOf('class="echelle-niveau-grille"'));
+            const grille = tranche(c, 'class="echelle-niveau-grille"');
             expect(grille.indexOf('data-champ="code"')).toBeLessThan(grille.indexOf('data-champ="nom"'));
             expect(grille).not.toContain('bloc-reordonner');
             // La carte laisse la place au coin.

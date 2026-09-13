@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // LA PAIRE DU 7 AOÛT — le sélecteur de semaine, et l'étiquette de contexte.
 //
@@ -214,10 +215,7 @@ describe('Sélecteur de semaine · les deux gestes ne peuvent pas diverger', () 
         // Si le sélecteur écrivait directement `definirSemaineLecon`, il
         // sauterait le calage sur le cadre ET le déplacement de séquence : les
         // deux gestes se mettraient à produire des résultats différents.
-        const bloc = sourceCarte.slice(
-            sourceCarte.indexOf("var selSemaine = el.querySelector('.planif-noeud-semaine')"),
-            sourceCarte.indexOf('// === POIGNÉE DE REDIMENSIONNEMENT')
-        );
+        const bloc = tranche(sourceCarte, "var selSemaine = el.querySelector('.planif-noeud-semaine')", '// === POIGNÉE DE REDIMENSIONNEMENT');
         expect(bloc).toMatch(/addEventListener\(\s*'change'/);
         expect(bloc).toContain('deposerDansGrille(donnees.type, id, cible)');
         expect(bloc).not.toContain('definirSemaineLecon');
@@ -226,10 +224,7 @@ describe('Sélecteur de semaine · les deux gestes ne peuvent pas diverger', () 
     it('la pression sur le sélecteur n’enclenche pas le déplacement du bloc', () => {
         // Au doigt, la pression et le glisser sont le même début de geste :
         // sans stopPropagation, le sélecteur serait inutilisable sur iPad.
-        const bloc = sourceCarte.slice(
-            sourceCarte.indexOf("var selSemaine = el.querySelector('.planif-noeud-semaine')"),
-            sourceCarte.indexOf('// === POIGNÉE DE REDIMENSIONNEMENT')
-        );
+        const bloc = tranche(sourceCarte, "var selSemaine = el.querySelector('.planif-noeud-semaine')", '// === POIGNÉE DE REDIMENSIONNEMENT');
         expect(bloc).toMatch(/'pointerdown', 'mousedown', 'click'[\s\S]{0,220}stopPropagation/);
     });
 });

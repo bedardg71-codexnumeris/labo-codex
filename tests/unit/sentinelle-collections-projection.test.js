@@ -24,6 +24,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { jetonAuMoins } from './_helpers/jeton-anticache.js';
+import { tranche } from './_helpers/tranche.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -225,9 +226,9 @@ describe('collections · C — la clé inscrite, le script chargé, la clé docu
         const t = source('js/trimestres.js');
         const namespacees = t.slice(t.indexOf('const CLES_NAMESPACEES = ['), t.indexOf('];', t.indexOf('const CLES_NAMESPACEES = [')));
         expect(namespacees).toContain("'collectionsProjection'");
-        const archives = t.slice(t.indexOf('const CLES_TEMPLATES_ARCHIVES = ['), t.indexOf('];', t.indexOf('const CLES_TEMPLATES_ARCHIVES = [')));
+        const archives = tranche(t, 'const CLES_TEMPLATES_ARCHIVES = [', '];');
         expect(archives).not.toContain('collectionsProjection');
-        const globales = t.slice(t.indexOf('const CLES_GLOBALES = ['), t.indexOf('];', t.indexOf('const CLES_GLOBALES = [')));
+        const globales = tranche(t, 'const CLES_GLOBALES = [', '];');
         expect(globales).not.toContain('collectionsProjection');
     });
 

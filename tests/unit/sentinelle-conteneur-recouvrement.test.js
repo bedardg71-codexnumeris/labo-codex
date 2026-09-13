@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // Frictions F6/F7 (terrain 601-101, 6 août 2026) :
 //
@@ -130,7 +131,7 @@ describe('F6/F7 · invariants statiques des gestes', () => {
     // ni ⌘+glisser. C'est le geste de Keynote/Figma/Miro.
 
     it('INVERSION : une feuille avec parent se saisit SEULE, sans rituel', () => {
-        const casB = sourceCarte.slice(sourceCarte.indexOf('// CAS B'), sourceCarte.indexOf('// CAS C'));
+        const casB = tranche(sourceCarte, '// CAS B', '// CAS C');
         // La garde est « feuille avec parent » — aucun mode requis.
         expect(casB).toMatch(/if \(donnees\.parent && !estConteneur\) \{/);
         // Elle DÉMÉNAGE vers le conteneur du relâchement (pas seulement détacher).
@@ -150,7 +151,7 @@ describe('F6/F7 · invariants statiques des gestes', () => {
     });
 
     it('⌘+clic est redevenu la multi-sélection immédiate (⌘+glisser retiré)', () => {
-        const meta = sourceCarte.slice(sourceCarte.indexOf('if (e.metaKey || e.ctrlKey) {'), sourceCarte.indexOf('if (e.altKey) {'));
+        const meta = tranche(sourceCarte, 'if (e.metaKey || e.ctrlKey) {', 'if (e.altKey) {');
         expect(meta).toMatch(/toggleMultiSelection\(id\);\s*\n\s*return;/);
         expect(meta).not.toMatch(/surMoveMeta|basculeDrag/);
     });
@@ -165,12 +166,12 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         // 1:1, « la leçon vient toujours avec », impossible d'en sortir.
         // Reproduit au glisser incrémental (25 pas de 30 px), invisible au
         // bond unique des sondes précédentes.
-        const casB = sourceCarte.slice(sourceCarte.indexOf('// CAS B'), sourceCarte.indexOf('// CAS C'));
-        const onMoveB = casB.slice(casB.indexOf('function onMoveB'), casB.indexOf('function onUpB'));
+        const casB = tranche(sourceCarte, '// CAS B', '// CAS C');
+        const onMoveB = tranche(casB, 'function onMoveB', 'function onUpB');
         expect(onMoveB).not.toMatch(/mettreAJourZoneConteneur/);
 
-        const casC = sourceCarte.slice(sourceCarte.indexOf('// CAS C'), sourceCarte.indexOf('// CAS D'));
-        const onMoveC = casC.slice(casC.indexOf('function onMoveC'), casC.indexOf('function onUpC'));
+        const casC = tranche(sourceCarte, '// CAS C', '// CAS D');
+        const onMoveC = tranche(casC, 'function onMoveC', 'function onUpC');
         expect(onMoveC).not.toMatch(/mettreAJourZoneConteneur/);
 
         // La zone se réajuste AU RELÂCHEMENT : CAS B via reLayoutAvecAnimation,
@@ -189,10 +190,7 @@ describe('F6/F7 · invariants statiques des gestes', () => {
     it('l’inspecteur offre « Dans la leçon » — le chemin SANS geste (iPad)', () => {
         // Gabarit du sélecteur : gardé par peutContenir('lecon', type), titres
         // échappés (règle innerHTML), déplacement par les portes uniques.
-        const bloc = sourceCarte.slice(
-            sourceCarte.indexOf("if (peutContenir('lecon', donnees.type)) {"),
-            sourceCarte.indexOf("if (donnees.type === 'sequence') {")
-        );
+        const bloc = tranche(sourceCarte, "if (peutContenir('lecon', donnees.type)) {", "if (donnees.type === 'sequence') {");
         expect(bloc.length).toBeGreaterThan(100);
         expect(bloc).toMatch(/id="planif-panneau-deplacer"/);
         expect(bloc).toMatch(/echapperHtml\(lc2\.titre \|\| 'Sans titre'\)/);
@@ -213,10 +211,7 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         expect(finPanneau).toMatch(/detacherDuConteneur\(id\)/);
         expect(finPanneau).toMatch(/enregistrerPourUndo\(\)/);
         // Et le gabarit, lui, n'attache RIEN (il serait perdu).
-        const blocGabarit = sourceCarte.slice(
-            sourceCarte.indexOf("if (peutContenir('lecon', donnees.type)) {"),
-            sourceCarte.indexOf("if (donnees.type === 'sequence') {")
-        );
+        const blocGabarit = tranche(sourceCarte, "if (peutContenir('lecon', donnees.type)) {", "if (donnees.type === 'sequence') {");
         expect(blocGabarit).not.toMatch(/addEventListener/);
     });
 });

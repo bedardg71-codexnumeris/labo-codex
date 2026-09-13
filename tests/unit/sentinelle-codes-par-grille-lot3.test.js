@@ -16,6 +16,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -115,7 +116,7 @@ describe('codes par grille · S.c — les sources du gabarit et de l\'écran de 
 
     it('S.c.2 décocher RETIRE le champ — `false` ne s\'écrit jamais (absent = repli)', () => {
         const s = grilles();
-        const h = s.slice(s.indexOf('async function modifierCodesDepuisSousCriteresHandler'), s.indexOf('function rendreBlocProjectionAlgo'));
+        const h = tranche(s, 'async function modifierCodesDepuisSousCriteresHandler', 'function rendreBlocProjectionAlgo');
         expect(h).toMatch(/delete critere\.codesDepuisSousCriteres/);
         expect(h).not.toMatch(/codesDepuisSousCriteres = false/);
     });

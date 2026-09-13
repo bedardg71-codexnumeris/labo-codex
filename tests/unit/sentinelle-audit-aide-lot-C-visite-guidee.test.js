@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -25,7 +26,7 @@ const HTML = lire('index.html');
 // recopiés : ajouter une huitième étape sans compléter les deux autres rougit.
 
 function nbEtapes() {
-    const bloc = ACC.slice(ACC.indexOf('const ETAPES_TOUR = ['));
+    const bloc = tranche(ACC, 'const ETAPES_TOUR = [');
     const corps = bloc.slice(0, bloc.indexOf('\n];'));
     return (corps.match(/^\s+id:\s*\d+,$/gm) || []).length;
 }
@@ -64,7 +65,7 @@ describe('Visite guidée — les trois tableaux parallèles restent alignés', (
 
     it('les sous-sections que les étapes reconnaissent existent', () => {
         const reelles = new Set([...HTML.matchAll(/<div id="([a-z0-9-]+)" class="sous-section"/g)].map(m => m[1]));
-        const bloc = ACC.slice(ACC.indexOf('const ETAPES_TOUR = ['));
+        const bloc = tranche(ACC, 'const ETAPES_TOUR = [');
         const corps = bloc.slice(0, bloc.indexOf('\n];'));
         // ids cités littéralement dans les fonctions correspond()
         const cites = [...corps.matchAll(/'((?:conception|calendrier|suivi|labo|evaluations)-[a-z-]+)'/g)].map(m => m[1]);
@@ -86,7 +87,7 @@ describe('Visite guidée — les trois tableaux parallèles restent alignés', (
         const j = HTML.indexOf('class="sous-section"', i + 40);
         expect(/tour|visite guid/i.test(HTML.slice(i, j))).toBe(false);
 
-        const bloc = ACC.slice(ACC.indexOf('const ETAPES_TOUR = ['));
+        const bloc = tranche(ACC, 'const ETAPES_TOUR = [');
         const etape0 = bloc.slice(0, bloc.indexOf('id: 1,'));
         expect(etape0).not.toMatch(/revenir depuis les Pr/);
         expect(HTML).toContain('data-param="tour-guide"');

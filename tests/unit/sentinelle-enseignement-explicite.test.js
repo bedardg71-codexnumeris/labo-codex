@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // ENSEIGNEMENT EXPLICITE — les étapes deviennent des nœuds (7 août 2026).
 //
@@ -181,11 +182,16 @@ describe('Palette · les descriptions sont devenues les titres', () => {
     it('les anciens slogans ont disparu de la PALETTE (le guide, lui, parle en prose)', () => {
         // Scoper au bloc de la palette : les mêmes mots peuvent vivre ailleurs
         // comme texte de guide — ce n'est pas la redondance visée.
-        const palette = sourceIndex.slice(
-            sourceIndex.indexOf('planif-palette-contenu'),
+        // #858 (13 sept.) : `<!-- #444` apparaît AUSSI plus haut que le début de
+        // la palette. Découpée par indexOf, la tranche était INVERSÉE — donc vide —
+        // et l'essai passait sans rien éprouver. tranche() cherche la fin APRÈS
+        // le début, et refuse une palette tronquée (9 331 caractères mesurés).
+        const palette = tranche(sourceIndex,
+            'planif-palette-contenu',
             // #444 : `planif-palette-bas-btns` a été retiré (boutons montés
             // dans la barre d'outils). La borne devient la fin de la palette.
-            sourceIndex.indexOf('<!-- #444')
+            '<!-- #444',
+            { longueurMin: 2000 }
         );
         for (const slogan of ['>Pourquoi enseigner<', '>Quoi enseigner<', '>Comment enseigner<', ">Vérifier l'apprentissage<", '>Conception<']) {
             expect(palette, slogan).not.toContain(slogan);

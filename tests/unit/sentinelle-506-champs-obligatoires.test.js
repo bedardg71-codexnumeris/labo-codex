@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // Sentinelle #506 (25 août 2026) — L'ASTÉRISQUE DIT VRAI, DANS LES DEUX SENS.
 //
@@ -180,7 +181,7 @@ describe('#507 · « recommandé » se distingue d\'« obligatoire »', () => {
         expect(css).toContain('.champ-recommande {');
         expect(css).toContain('.legende-marques {');
         // La marque recommandée ne doit pas emprunter le rouge de l'obligatoire.
-        const bloc = css.slice(css.indexOf('.champ-recommande {'), css.indexOf('.legende-marques {'));
+        const bloc = tranche(css, '.champ-recommande {', '.legende-marques {');
         expect(bloc, 'pas de rouge sur du recommandé').not.toMatch(/danger|#c0392b|red/i);
     });
 

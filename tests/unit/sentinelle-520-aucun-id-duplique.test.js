@@ -28,6 +28,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -70,14 +71,11 @@ describe('#520 · C — la clé nue `configEchelle` n\'est plus aplatie', () => 
     it('un seul écrivain reste : `chargerEchelleTemplate`, qui y copie `echelle.config`', () => {
         const ecritures = [...ECHELLES.matchAll(/db\.(?:set|setSync|modifier)\(\s*'configEchelle'/g)];
         expect(ecritures.length, 'écritures de configEchelle dans echelles.js').toBe(1);
-        const debut = ECHELLES.indexOf('async function chargerEchelleTemplate(');
-        const fin = ECHELLES.indexOf('\nasync function ', debut + 1);
-        // Règle 10 : la tranche doit exister avant qu'on y situe quoi que ce soit —
-        // un marqueur renommé rendrait −1 et la position passerait à vide.
-        expect(debut, 'chargerEchelleTemplate introuvable dans echelles.js').toBeGreaterThanOrEqual(0);
-        expect(fin - debut, 'le corps de chargerEchelleTemplate').toBeGreaterThan(1500);
-        expect(ecritures[0].index > debut && ecritures[0].index < fin,
-            'l\'écriture restante doit être celle de chargerEchelleTemplate').toBe(true);
+        // Règle 10 : tranche() refuse un corps introuvable ou tronqué — un marqueur
+        // renommé jette au lieu de rendre une tranche vide où « une écriture » passerait.
+        const corps = tranche(ECHELLES, 'async function chargerEchelleTemplate(', '\nasync function ', { longueurMin: 1500 });
+        expect(corps.match(/db\.(?:set|setSync|modifier)\(\s*'configEchelle'/g) || [],
+            'l\'écriture restante doit être celle de chargerEchelleTemplate').toHaveLength(1);
     });
 
     it('les deux fonctions qui l\'aplatissaient sont parties', () => {

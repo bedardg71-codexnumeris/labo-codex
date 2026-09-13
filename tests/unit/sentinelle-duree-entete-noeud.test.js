@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // =======================================================================
 // LA DURÉE DESCEND DANS L'EN-TÊTE DU NŒUD — 8 août 2026 (lot B)
@@ -229,10 +230,7 @@ describe('la remontée du total · la seule logique neuve du lot', () => {
     it('la remontée ne reconstruit PAS le DOM — sinon le focus serait perdu', () => {
         // Taper dans le champ de durée re-rendrait le nœud qu'on est en train
         // de remplir : le curseur sauterait à chaque caractère.
-        const corps = sourceCarte.slice(
-            sourceCarte.indexOf('function rafraichirRollupsAncetres'),
-            sourceCarte.indexOf('function selecteurSemaineHTML')
-        );
+        const corps = tranche(sourceCarte, 'function rafraichirRollupsAncetres', 'function selecteurSemaineHTML');
         expect(corps).not.toContain('reconstruireDOM');
     });
 });
@@ -284,10 +282,7 @@ describe('le champ dans l’en-tête · un contrôle vivant sur un bloc qui se g
         // Décision de Grégoire, cohérente avec la friction F1 : rendre la
         // fonction visible plutôt que devinable. Un placeholder tient lieu de
         // vide, aucun `display:none` conditionnel.
-        const corps = sourceCarte.slice(
-            sourceCarte.indexOf('function dureeControleHTML'),
-            sourceCarte.indexOf('function compteurDureeHTML')
-        );
+        const corps = tranche(sourceCarte, 'function dureeControleHTML', 'function compteurDureeHTML');
         expect(corps).toContain('placeholder="—"');
         expect(corps).not.toContain('display:none');
     });

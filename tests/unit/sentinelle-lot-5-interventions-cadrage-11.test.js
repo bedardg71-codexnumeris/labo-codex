@@ -21,6 +21,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
+import { tranche } from './_helpers/tranche.js';
 
 const SEUILS_DEFAUT = { 'idme.insuffisant': 0.64, 'idme.developpement': 0.75, 'idme.maitrise': 0.85, defiSpecifique: 0.70 };
 const globaux = (seuils, moyenne) => ({
@@ -198,7 +199,7 @@ describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', ()
 describe('C · la note d\'un élève parti du groupe reste, grisée', () => {
     const avecNotes = () => [intervention({ id: 'I_N', titre: 'Notes', etudiants: ['2000001', '2000004', '2999999'],
         notesIndividuelles: { 2000001: 'a', 2000004: 'd', 2999999: 'z' } })];
-    const blocNotes = (b) => { b.win.afficherListeInterventions(); const h = b.liste(); return h.slice(h.indexOf('Notes individuelles')); };
+    const blocNotes = (b) => { b.win.afficherListeInterventions(); const h = b.liste(); return tranche(h, 'Notes individuelles'); };
 
     it('dans le groupe : son nom ; parti vers un autre groupe du trimestre : son nom, grisé ; plus au trimestre : son DA, grisé ; compteur 3', () => {
         const bloc = blocNotes(banc({ interventions: avecNotes() }));

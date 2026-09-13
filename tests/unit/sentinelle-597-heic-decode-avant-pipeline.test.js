@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -81,18 +82,12 @@ describe('#597 — le HEIC est converti avant d\'entrer dans le pipeline', () =>
     });
 
     it('cas 3 — convertirSiHeic est idempotente (garde sur heicConverti)', () => {
-        const corps = importJs.slice(
-            importJs.indexOf('async function convertirSiHeic'),
-            importJs.indexOf('async function genererThumbnailQueue')
-        );
+        const corps = tranche(importJs, 'async function convertirSiHeic', 'async function genererThumbnailQueue');
         expect(corps).toMatch(/if\s*\(![^)]*\|\|\s*fichierPrepare\.heicConverti\)\s*return false/);
     });
 
     it('cas 4 — le blob HEIC est remplacé PARTOUT, fichierOriginal compris', () => {
-        const corps = importJs.slice(
-            importJs.indexOf('async function convertirSiHeic'),
-            importJs.indexOf('async function genererThumbnailQueue')
-        );
+        const corps = tranche(importJs, 'async function convertirSiHeic', 'async function genererThumbnailQueue');
         // `fichierOriginal` alimente l'aperçu « Originaux », qui fait un <img>
         // direct : l'oublier laisse la colonne de gauche vide.
         expect(corps).toContain('fichierPrepare.fichierOriginal = resultat.blob');
@@ -104,10 +99,7 @@ describe('#597 — le HEIC est converti avant d\'entrer dans le pipeline', () =>
         // Deux exigences opposées, et c'est le piège : le nom de la FILE est la
         // clé de correspondance de reattacherBlobs (l'utilisateur re-dépose un
         // .HEIC) ; le nom ARCHIVÉ voyage dans l'export et doit dire .jpg.
-        const corpsConversion = importJs.slice(
-            importJs.indexOf('async function convertirSiHeic'),
-            importJs.indexOf('async function genererThumbnailQueue')
-        );
+        const corpsConversion = tranche(importJs, 'async function convertirSiHeic', 'async function genererThumbnailQueue');
         expect(corpsConversion).not.toContain('fichierPrepare.nomFichier =');
 
         const corpsMeta = importJs.slice(importJs.indexOf('const metadonnees'));
@@ -192,7 +184,7 @@ describe('#597 — le HEIC est converti avant d\'entrer dans le pipeline', () =>
 
         // La CSP du dépôt reste sans `unsafe-eval`.
         const indexBrut = readFileSync(path.join(racineProjet, 'index.html'), 'utf-8');
-        const csp = indexBrut.slice(indexBrut.indexOf('Content-Security-Policy'), indexBrut.indexOf('Content-Security-Policy') + 400);
+        const csp = tranche(indexBrut, 'Content-Security-Policy', 400);
         expect(csp).not.toContain("'unsafe-eval'");
     });
 

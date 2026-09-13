@@ -38,13 +38,12 @@ describe('Poignée · rendue sur les feuilles ET les conteneurs, différemment',
         expect(css).toMatch(/\.planif-noeud-poignee--largeur\s*\{[^}]*cursor:\s*ew-resize/);
     });
 
-    it('la vue globale COMPACTE n’en porte pas (les séquences y sont résumées)', () => {
-        const brancheCompacte = carte.slice(
-            carte.indexOf('if (estCompact) {'),
-            carte.indexOf('} else if (estConteneur) {')
-        );
-        expect(brancheCompacte).not.toContain('planif-noeud-poignee');
-    });
+    // Ici vivait « la vue globale COMPACTE n'en porte pas ». #418 (8 août 2026,
+    // `637f03b1`) a retiré la compaction elle-même : les deux bornes de la tranche
+    // (`if (estCompact) {`, `} else if (estConteneur) {`) n'existaient plus, la
+    // tranche était VIDE, et l'essai passait sans rien éprouver (mesuré le 13 sept.,
+    // #858). Son objet a disparu : l'absence de la branche compacte est tenue, sur le
+    // fichier entier, par sentinelle-ablation-vue-lecon-filtrage (« plus de bloc compact »).
 
     it('la taille libre (largeur ET hauteur) reste réservée aux feuilles', () => {
         expect(carte).toMatch(/if \(!estConteneur && n\.metadata[\s\S]{0,320}metadata\.largeur\) el\.style\.width/);
