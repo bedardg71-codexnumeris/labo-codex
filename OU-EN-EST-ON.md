@@ -15,6 +15,10 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **FAIT EN 1.140.1, COMMITÉE (13 SEPTEMBRE 2026, midi — release `2102cd1a`, build `0913-1244` ; push à ton feu vert, verdict Playwright pris Cowork fermé) — LES CONTRÔLES QUI PROTÈGENT LES LIVRAISONS DISENT CE QU'ILS ONT VÉRIFIÉ.**
+**Ce que tu verras** : rien à l'écran. Ce sont les contrôles qui gardent chaque livraison. Ils ne se déclarent plus verts sans avoir rien vérifié, conseillent le bon geste quand ils refusent, empêchent qu'une même adresse de fichier serve deux contenus différents (le risque du 10 septembre, deux sessions en parallèle), et nomment ce qu'ils ne savent pas surveiller.
+**Vérifié comment** : chaque contrôle cassé exprès (seize mutations, toutes rouges) ; relecture croisée de Cowork (sept mutations, aucune verte ; une retouche, faite) ; Vitest 556 / 6 124 sur la release. **Pas encore réglé** : quelques bibliothèques (visionneuse PDF, graphiques, exports PDF) sont encore chargées sans jeton anti-cache — nommées, pas corrigées, parce que ce sont des écrans à vérifier chez toi. *(#675, #547, #600, #826 ; reste #602)*
+
 ✅ **FAIT EN 1.140.0, COMMITÉE (13 SEPTEMBRE 2026, matin — release `05200d82`, build `0913-1042` ; UN push avec 1.139.3 et 1.139.4, à ton feu vert, verdict Playwright pris Cowork fermé) — UN DÉLAI SUR UNE REPRISE, SEULEMENT SI TA PRATIQUE LE PERMET.**
 **Ce que tu verras** : dans les jetons de ta pratique, une case « Permettre un délai sur une reprise ». Décochée par défaut : rien ne change tant que tu ne la coches pas. Sur une pratique dont les jetons ont été réglés à sa création, le formulaire le dit et ne laisse plus rien modifier en vain.
 **Vérifié comment** : sentinelle du lot, cassée exprès (douze mutations, toutes rouges, restauration identique) ; relecture croisée de Cowork en deux passes ; Vitest 555 / 6 092 sur la release. **Pas vérifié** : ton écran. **Pas encore réglé** : sur une pratique créée par l'assistant, le formulaire des jetons est ignoré, et la rééditer par l'assistant efface ses jetons. *(#853 ; reste #854)*
