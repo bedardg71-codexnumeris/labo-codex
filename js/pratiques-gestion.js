@@ -1280,6 +1280,7 @@ function remplirFormulairePratique(pratique) {
     setValeurChamp('mat-jetons-nombre', jetons.nombre || 2);  // 🆕 Beta 95.7 : défaut 2
     setCheckbox('mat-jeton-delai-actif', jetons.delaiActif !== false);
     setValeurChamp('mat-delai-duree', jetons.delaiDuree || 2);  // 🆕 Beta 95.7 : défaut 2 jours
+    setCheckbox('mat-delai-sur-reprise', jetons.delaiSurReprise === true);  // #853 : absent = non (comportement antérieur)
     setCheckbox('mat-jeton-reprise-actif', jetons.repriseActif !== false);
     // Radio pour l'évaluation originale
     const radioArchiver = document.querySelector('input[name="mat-reprise-originale"][value="archiver"]');
@@ -1636,6 +1637,7 @@ function appliquerFormulaireDansCollection(lues) {
         nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 2,  // 🆕 Beta 95.7 : défaut 2
         delaiActif: getCheckbox('mat-jeton-delai-actif'),
         delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 2,  // 🆕 Beta 95.7 : défaut 2 jours
+        delaiSurReprise: getCheckbox('mat-delai-sur-reprise'),  // #853 : réglage de la pratique
         repriseActif: getCheckbox('mat-jeton-reprise-actif'),
         repriseOriginale: repriseOriginale ? repriseOriginale.value : 'archiver',
         cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),

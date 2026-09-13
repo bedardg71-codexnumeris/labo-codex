@@ -910,6 +910,13 @@ const ETAPES_WIZARD = {
                 default: 3
             },
             {
+                // #853 (13 sept. 2026) : réglage de la pratique ; non = comportement antérieur.
+                id: 'delaiSurReprise',
+                label: 'Permettre un délai sur une reprise ?',
+                type: 'toggle',
+                default: false
+            },
+            {
                 id: 'nbJetonsReprise',
                 label: 'Nombre de jetons reprise par étudiant',
                 type: 'number',
@@ -2775,10 +2782,12 @@ async function creerPratiqueV2() {
         if (r.utiliserJetons) {
             pratique.configuration.jetons = {
                 activer: true,
-                delai: {
+                // #853 : `surReprise` n'est écrit que coché — absent = non ; la pratique par
+                // défaut reste identique au golden master #319.
+                delai: Object.assign({
                     nombre: parseInt(r.nbJetonsDelai) || 3,
                     dureeJours: parseInt(r.dureeDelaiJours) || 3
-                },
+                }, r.delaiSurReprise === true ? { surReprise: true } : {}),
                 reprise: {
                     nombre: parseInt(r.nbJetonsReprise) || 2
                 }
