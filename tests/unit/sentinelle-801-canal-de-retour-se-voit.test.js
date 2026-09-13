@@ -72,4 +72,23 @@ describe('#801 · la porte annonce ce qu\'il y a derrière', () => {
         expect(bandeau).toContain('data-action="rechargerPage"'); // témoin : on lit bien le bandeau
         expect(bandeau).not.toContain('ouvrirModalRapportBug');
     });
+
+    it('LE DÉFAUT D\'ORIGINE : le bandeau « au chargement » MÈNE aux nouveautés, jamais à côté de « Recharger »', () => {
+        // Le bandeau disait OÙ étaient les nouveautés (« la carte Nouveautés, en bas
+        // de l'accueil ») au lieu d'y mener. Il porte maintenant le bouton qui ouvre
+        // la modale — c'est ce cas qui rougit si le bouton disparaît.
+        const bandeau = indexHtml.split('id="bandeau-mise-a-jour"')[1].split('<!-- MODAL NOUVEAUTÉS')[0];
+        expect(bandeau).toContain('data-action="rechargerPage"'); // témoin : on lit bien le bandeau
+        expect(bandeau).toMatch(/data-action="afficherModalNouveautes"[^>]*>\s*Voir les nouveautés\s*</);
+        // Règle inverse de « Recharger » : le pied n'en montre qu'un dans les deux cas.
+        const initInlineJs = lire('js/init-inline.js');
+        expect(initInlineJs).toContain('btnRecharger.hidden = !distant;');
+        expect(initInlineJs).toContain('btnNouveautes.hidden = distant;');
+        // Et la phrase qui décrivait le chemin est partie.
+        expect(initInlineJs.length).toBeGreaterThan(10000);
+        // Toutes les formes d'apostrophe, toutes les casses : une phrase remise en
+        // « En bas de l'accueil » ne doit pas passer (le premier garde, trop étroit,
+        // l'a laissée passer au break-test).
+        expect(initInlineJs).not.toMatch(/en bas de l(\\u2019|’|')accueil/i);
+    });
 });

@@ -25,12 +25,16 @@ describe('#796 · où le bandeau dit-il de trouver les nouveautés', () => {
     const initInline = lire('js/init-inline.js');
     const index = lire('index.html');
 
-    it('le bandeau nomme la carte « Nouveautés », plus « Réglages › À propos »', () => {
+    it('le bandeau MÈNE à la modale Nouveautés (#801), et ne nomme plus « Réglages › À propos »', () => {
         const m = /elTexte\.textContent = distant\s*\n\s*\?([^;]*);/.exec(initInline);
         expect(m, 'texte du bandeau introuvable').toBeTruthy();
         const textes = m[1];
-        expect(textes).toContain('Nouveautés');
+        expect(textes.length, 'les deux textes du bandeau').toBeGreaterThan(40);
         expect(textes).not.toMatch(/À propos/);
+        // #801 (13 sept.) : la phrase qui nommait la carte « Nouveautés » est
+        // remplacée par un bouton qui ouvre la modale — l'endroit où elles sont.
+        const bandeau = index.split('id="bandeau-mise-a-jour"')[1].split('<!-- MODAL NOUVEAUTÉS')[0];
+        expect(bandeau).toContain('data-action="afficherModalNouveautes"');
     });
 
     it('le changelog est bien dans la modale Nouveautés, pas dans À propos', () => {
