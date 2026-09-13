@@ -165,7 +165,7 @@ const TOLEREES = {
     'unit/sentinelle-grille-planificateur.test.js': 5,
     'unit/sentinelle-import-journalise-334B.test.js': 1,
     'unit/sentinelle-liens-routage.test.js': 4,
-    'unit/sentinelle-lot-C-memes-gestes.test.js': 2,
+    'unit/sentinelle-lot-C-memes-gestes.test.js': 1,   // 13 sept. : 2 → 1, le cas C.a est parti avec la table (#658)
     'unit/sentinelle-lot4-B-solo-aucun.test.js': 2,
     'unit/sentinelle-noop-groupe-cours-332.test.js': 1,
     'unit/sentinelle-objectif-lecon-metadata.test.js': 1,

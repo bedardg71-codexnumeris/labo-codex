@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260912g"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260913a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5210,7 +5210,7 @@
                                 <!-- Aperçu visuel -->
                                 <div id="apercuEchelleNiveaux" data-tooltip="cn-echelle-apercu" style="display: flex; gap: 10px; flex-wrap: wrap;
                      align-items: center; padding: 10px; background: var(--surface-carte, #1a3040); border-radius: var(--radius-moyen); margin-bottom: 20px;">
-                                    <!-- Généré par afficherApercuEchelle() -->
+                                    <!-- Généré par afficherNiveauxEchelle() et afficherNiveauxNouvelleEchelle() -->
                                 </div>
 
                                 </div><!-- /.panneau-formulaire -->
@@ -5219,18 +5219,6 @@
                                 <div id="panneauMetadonneesEchelle"></div>
 
                             </div><!-- Fin conteneurEditionEchelle -->
-
-                            <!-- Conteneurs cachés pour compatibilité -->
-                            <div class="u-hide">
-                                <div id="vueEchellesNiveaux"></div>
-                                <div id="selectEchelleTemplate"></div>
-                                <div id="nomEchelleContainer"></div>
-                                <div id="typeEchelle"></div>
-                                <div id="seuilReussite"></div>
-                                <div id="champAutreEchelle"></div>
-                                <div id="tableauNiveaux"></div>
-                                <div id="apercuEchelle"></div>
-                            </div>
 
                         </div><!-- Fin zone-principale -->
 
@@ -14410,7 +14398,7 @@
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/grilles.js?v=20260909b"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20260913c"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
+    <script src="js/echelles.js?v=20260913d"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20260904b"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260911m"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
@@ -14548,7 +14536,7 @@
     <script src="js/partage-export.js?v=20260901a"></script>
     <script src="js/partage-import.js?v=20260824b"></script>
     <script src="js/partage-section.js?v=20260901a"></script>
-    <script src="js/import-export.js?v=20260910c"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
+    <script src="js/import-export.js?v=20260913a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260909a"></script> <!-- #614 : la fusion valide les magic bytes ; la purge #336 ne recense plus la corbeille ni la modélisation -->
     <script src="js/liste-evaluations.js?v=20260907a"></script> <!-- #560 : supprimer une copie pour de bon dit ce qui part avec elle (annotations, évaluations du couple) -->
     <script src="js/journal.js?v=2026041706"></script>

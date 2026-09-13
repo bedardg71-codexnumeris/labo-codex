@@ -7,6 +7,19 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 17 H 35 (Toronto) : #658 LIVRÉ ET #659 FERMÉE, SANS RELEASE — POUSSÉ PAR `scripts/pousser.sh` DEPUIS L'ARBRE PRINCIPAL
+
+> Sur `main`, au-dessus de `4fe96394` : un commit (#658/#659, ce relais compris), poussé par cette session (`monitorage-v6-ef`) à la demande de Grégoire (17 h 30), par `scripts/pousser.sh` — qui prend le verdict Playwright AVANT d'ouvrir la connexion. Si ce relais est lu sur un `main` qui ne porte pas ce commit, le push a échoué : voir le jeton `scripts/.verdict-playwright.json`.
+>
+> **#658** : le bloc « Conteneurs cachés pour compatibilité » des échelles retiré d'`index.html`, avec l'ancien éditeur de niveaux qui ne rendait que là (≈ 930 lignes de `js/echelles.js`, 18 règles CSS). Invisible. Sentinelle `sentinelle-658-aucun-conteneur-de-compatibilite`. **#659** : fermée par la mesure ; le stock `configEchelle` / `niveauxEchelle` reste chez les gens, inerte, à Grégoire. Vitest 559 / 6 337 ; 8 break-tests, 8 rouges.
+>
+> **Le verrou `.git/index.lock`** (0 octet, 17 h 10 min 06 s) signalé par `monitorage-v6-bb` : aucun processus git vivant, retiré à 17 h 33 ; l'arbre avancé en avance rapide sur `4fe96394` avant le commit.
+> Fichiers de Cowork laissés hors du commit : `PROTOCOLE.md`, `CONSIGNE-DEMARRAGE-COWORK.md`, `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-15h35.md`.
+>
+> **Reste** : #859 (niveau 2) ; la lecture de `configEchelle` dans la base réelle de Grégoire, s'il veut décider du stock.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 17 H 15 (Toronto) : 1.140.6 EN LIGNE (build `0913-1642`) — POUSSÉE `2bc43ed1..d7e88b5c` DEPUIS UN CLONE PROPRE ; UNE AUTRE SESSION TRAVAILLE DANS L'ARBRE PRINCIPAL
 
 > **Poussé sur `origin/main`** : `1ace8d6d` (#858), `3f2dade5` (#801), `c0c89e57` (release 1.140.6), `264d47cf` et `d7e88b5c` (relais). **Verdict Playwright local complet sur `d7e88b5c`, Cowork fermé : code 0**, aucune rougeur nouvelle, 0 échec connu (16 h 57 → 17 h 07).

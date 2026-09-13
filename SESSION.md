@@ -7,6 +7,26 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 52 — 13 SEPTEMBRE 2026, ≈ 17 H → 17 H 25 (Toronto) : LA GRAPPE `js/echelles.js` (consigne de Cowork, 17 h), sur `d7e88b5c`.
+     Rotation : CONSIGNE-DU-JOUR (#858/#801) archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-858-801-regle-10-et-bandeau.md`,
+     CONSIGNE-SUIVANTE-echelles promue. ⚠ L'audit de début recommandait d'attendre verdict + push : écarté, la consigne s'ouvrait au
+     commit du lot B ; un verdict pris après ce commit juge #801 et #658 ensemble.
+     ▣ #659 FERMÉE PAR LA MESURE, sans code : sauvegarderConfigEchelle/changerTypeEchelle à 0 (parties avec #520) ; la seule écriture
+       restante suivait un choix sans déclencheur vivant. STOCK non réparé, à Grégoire : clé nue, ≤ 1 par base, inerte ; base réelle NON lue.
+     ▣ #658 LIVRÉ, invisible : bloc « Conteneurs cachés pour compatibilité » (8 div) retiré d'index.html + tout ce qui rendait dedans.
+       La mesure a ÉLARGI : l'ancien éditeur de niveaux entier (sélecteur, tableau, aperçu, 7 gestes) ne rendait QUE là ; parti, avec
+       paletteCouleurs, le miroir niveauxEchelle, 18 règles CSS + 2 sélecteurs .outils-rangee. Clés niveauxEchelle/configEchelle : 0 accès,
+       inscrites ORPHELINES dans DATA-OWNERSHIP. BORNE posée : dupliquerEchelle/supprimerEchelle restent (sans déclencheur AVANT le lot ;
+       leurs sentinelles relèvent de #476, arbitrage #586 tenu). Niveau 3 noté : mettreAJourOptionsEchelle, .echelle-w-120, .echelle-padding-compact.
+     ▣ Preuve : sentinelle-658 (A/B/C/D, gardes de non-vide). Réancrés avec motif écrit : 520 B et C (C = « aucun accès », pas 1 → 0),
+       505 c, lot-C C.a/D.b/E.b, 522-lot2b C.c (21 → 20), cliquet 858 (lot C 2 → 1). 522-lot2a retirée avec son sujet.
+       Break-tests : 8 mutations, 8 rouges, restauration cmp identique (un premier passage E.b muet : chemin de test faux dans le script,
+       rejoué rouge). Vitest 559 / 6 337 (30 s). Pas de release (la journée a emporté 1.140.6).
+     ⮕ RESTE : push par cette session via scripts/pousser.sh (verdict Playwright pris par le script), à la demande de Grégoire (17 h 30) ; arbre avancé sur 4fe96394 (push de 1.140.6 par monitorage-v6-bb, depuis un clone) après retrait d'un index.lock résiduel. Fichiers de Cowork NON commités :
+       PROTOCOLE.md, CONSIGNE-DEMARRAGE-COWORK.md, _ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-15h35.md.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 51 — 13 SEPTEMBRE 2026, ≈ 16 H 20 → 16 H 45 (Toronto) : CONSIGNE DU JOUR DE COWORK (16 h 20), DEUX LOTS, à partir de `2bc43ed1`.
      ⚠ La consigne croyait `7b68d9a4` et `873ffe2c` en attente du push : la session 50 les avait déjà poussés (`d07e963d..2bc43ed1`).
      ▣ LOT A #858 (`1ace8d6d`, tests/ seulement) : tranche() et position() (tests/unit/_helpers/tranche.js). 167 découpes mesurées sur

@@ -120,16 +120,10 @@ describe('#505 · les rendus de blocs produisent du HTML', () => {
         expect(rendu).toContain('pipeline-btn-reorder');
     });
 
-    it('c. afficherTableauNiveaux rend son tableau', () => {
-        const els = { apercuEchelleNiveaux: conteneur(), tableauNiveauxEchelle: conteneur() };
-        const win = charger('js/echelles.js', els);
-        expect(typeof win.afficherTableauNiveaux).toBe('function');
-        const html = win.afficherTableauNiveaux(NIVEAUX);
-        // Cette fonction RETOURNE son HTML au lieu de l'écrire.
-        if (typeof html === 'string') {
-            expect(html).toContain('pipeline-btn-reorder');
-        }
-    });
+    // ↻ 13 sept. 2026 (#658) : le cas « c. afficherTableauNiveaux » est retiré avec la
+    // fonction. Elle rendait l'ancien tableau de niveaux dans `#tableauNiveaux`, un
+    // conteneur caché d'index.html : aucun écran vivant ne l'affichait. L'éditeur vivant
+    // (a. et b. ci-dessus) rend dans `#tableauNiveauxEchelle`.
 
     it('d. afficherCriteresGrille rend ses critères', () => {
         // ↻ 4 sept. 2026 (lot 4) : `afficherCriteresGrille` est désormais exposée sur window —

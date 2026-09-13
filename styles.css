@@ -8692,15 +8692,8 @@ body.mode-clair .bloc-rlo-separateur {
 
 
 /* 🆕 BETA 91: Module echelles (optimisations Phase B) */
-.echelle-texte-mini-bleu {
-    font-size: 0.7rem;
-    color: var(--bleu-moyen);
-}
 
 
-.echelle-text-center {
-    text-align: center;
-}
 
 
 .echelle-texte-detail {
@@ -8708,95 +8701,35 @@ body.mode-clair .bloc-rlo-separateur {
     color: var(--texte-secondaire, #8aa4b0);
 }
 
-.echelle-p-15 {
-    padding: 15px;
-}
 
-.echelle-relative {
-    position: relative;
-}
 
-.echelle-grid-niveaux {
-    display: grid;
-    grid-template-columns: 80px 180px 1fr 80px 80px 120px;
-    gap: 10px;
-    align-items: center;
-}
 
-.echelle-flex-seuils {
-    display: flex;
-    gap: 5px;
-    height: 40px;
-}
 
 /* Nouveaux patterns Phase B (suite - 18 nov 2025) */
-.echelle-w-80 {
-    width: 80px;
-}
 
-.echelle-w-60 {
-    width: 60px;
-}
 
-.echelle-w-100 {
-    width: 100px;
-}
 
 .echelle-w-120 {
     width: 120px;
 }
 
-.echelle-w-150 {
-    width: 150px;
-}
 
-.echelle-w-180 {
-    width: 180px;
-}
 
 .echelle-padding-compact {
     padding: 4px 8px;
     font-size: 0.8rem;
 }
 
-.echelle-w-60-p4 {
-    width: 60px;
-    padding: 4px;
-}
 
-.echelle-w-full-p4 {
-    width: 100%;
-    padding: 4px;
-}
 
 .echelle-texte-petit-mt5 {
     font-size: 0.75rem;
     margin-top: 5px;
 }
 
-.echelle-input-full {
-    width: 100%;
-    padding: 4px;
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: var(--radius-moyen);
-}
 
-.echelle-position-right {
-    position: absolute;
-    right: 0;
-}
 
-.echelle-position-left {
-    position: absolute;
-    left: 0;
-}
 
-.echelle-zone-bleu-pale {
-    padding: 20px;
-    background: var(--bleu-tres-pale);
-    border-radius: var(--radius-moyen);
-    text-align: center;
-}
 
 /* 🆕 BETA 91: Module evaluation (optimisations Phase B) */
 .eval-texte-placeholder {
@@ -17471,11 +17404,6 @@ tr.etudiant-inactif td {
     align-items: center;
 }
 
-.bloc-reordonner-ligne {
-    flex-direction: row;
-    justify-content: center;
-    gap: 4px;
-}
 
 /* Le bouton de retrait d'un bloc, posé dans son coin. Il était en `position:
    absolute` avec un fond rouge plein ; l'icône nue tient la même place sans
@@ -17488,9 +17416,9 @@ tr.etudiant-inactif td {
 
 /* Lot C (5 sept. 2026) — LE COIN D'OUTILS, partout : les chevrons puis la corbeille,
    sur la même ligne, en haut à droite d'un bloc (`position: relative` sur le bloc,
-   qui laisse la place à droite). La rangée d'outils d'une ligne de tableau
-   (`.outils-rangee`) est le même assemblage, en ligne. Cibles tactiles ≥ 44 px
-   dans ces deux contextes — les pipelines gardent leurs chevrons de 20 px. */
+   qui laisse la place à droite). Cibles tactiles ≥ 44 px — les pipelines gardent
+   leurs chevrons de 20 px. (La rangée d'outils `.outils-rangee` de l'ancien tableau
+   de niveaux est partie avec lui, #658 : il rendait dans un conteneur caché.) */
 .bloc-coin-outils {
     position: absolute;
     top: 4px;
@@ -17502,8 +17430,6 @@ tr.etudiant-inactif td {
 
 .bloc-coin-outils .btn-icone-nu,
 .bloc-coin-outils .pipeline-btn-reorder,
-.outils-rangee .btn-icone-nu,
-.outils-rangee .pipeline-btn-reorder,
 .tableau td > .btn-icone-nu,
 .btn-icone-nu[data-action="BibliothequeUI.repertoires.supprimer"] {
     min-width: 44px;

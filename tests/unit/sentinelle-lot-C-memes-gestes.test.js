@@ -7,18 +7,20 @@
 // Les sites MESURÉS avant de toucher (`grep -n "✕" js/*.js`, `grep -n ">Ordre<" js/*.js`) :
 // le dossier de la bibliothèque (1), la pratique de notation v2 (3), l'éditeur d'échelles
 // (3 : la table et les deux cartes) — rendus ici par le code réel sur un DOM factice.
+// ↻ 13 sept. 2026 (#658) : la TABLE est retirée avec sa fonction. Elle rendait dans
+// `#tableauNiveaux`, un conteneur caché d'index.html que personne ne voyait. Restent les cartes.
 //
 //   A. la bibliothèque — le dossier : la corbeille, la confirmation intacte, plus de « ✕ » ;
 //   B. la pratique v2 — objectifs, types de production, forfaits : la corbeille, mêmes actions ;
-//   C. l'éditeur d'échelles — la table : plus de colonne « Ordre », les chevrons puis la corbeille
-//      (désactivée si verrouillé) puis le cadenas dans la rangée ; les deux cartes : le coin ;
+//   C. l'éditeur d'échelles — les deux cartes : le coin (la table est partie avec #658) ;
 //   D. les sources : aucun « ✕ » de suppression, aucun « Ordre », dans les fichiers touchés ;
 //   E. le CSS : la grille des niveaux à sept colonnes, le coin générique, 44 px, l'empilement
 //      sous 768 px pour les deux grilles, et plus de doublon de `.grille-form-2col` dans index.html.
 //
 // BREAK-TESTS (faits le 5 septembre 2026, chacun restauré, `cmp` identique) :
 //   · un « ✕ » réintroduit dans la pratique v2 → B.a et D.a rougissent ;
-//   · la colonne « Ordre » remise dans la table des niveaux → C.a et D.b rougissent ;
+//   · la colonne « Ordre » remise dans la table des niveaux → C.a et D.b rougissaient
+//     (C.a est parti avec la table, #658) ;
 //   · la règle d'empilement retirée → E.c rougit.
 
 import { describe, it, expect } from 'vitest';
@@ -123,35 +125,8 @@ describe('lot C · C — l\'éditeur d\'échelles : la table et les deux cartes'
         return m;
     }
 
-    it('C.a la table : plus de colonne « Ordre » ; dans la rangée, les chevrons puis la corbeille (désactivée si verrouillé) puis le cadenas ; mêmes actions, bornes respectées', () => {
-        const { win, document } = monterEchelles();
-        win.afficherTableauNiveaux(NIVEAUX());
-        const html = document.getElementById('tableauNiveaux').innerHTML;
-        expect(html).not.toContain('>Ordre<');
-        expect(html).not.toContain('btn-supprimer');
-        expect(html).not.toContain('>Supprimer<');
-        expect((html.match(/<th[ >]/g) || []).length).toBe(8);   // « <thead> » commence aussi par « <th »
-        expect(html).toContain('<th class="echelle-w-180">Actions</th>');
-        const rangees = html.split('<tr style="opacity').slice(1);
-        expect(rangees.length).toBe(3);
-        rangees.forEach((r, i) => {
-            const outils = r.slice(r.indexOf('outils-rangee'));
-            expect(outils, 'rangée ' + i).toMatch(new RegExp('data-action="deplacerNiveauHaut" data-param="' + i + '"' + (i === 0 ? ' disabled' : '')));
-            expect(outils, 'rangée ' + i).toMatch(new RegExp('data-action="deplacerNiveauBas" data-param="' + i + '"' + (i === 2 ? ' disabled' : '')));
-            expect(outils, 'rangée ' + i).toContain('icons8-trash.svg');
-            expect(outils, 'rangée ' + i).toContain('id="cadenas-niveau-' + i + '"');
-            expect(outils.indexOf('pipeline-btn-reorder')).toBeLessThan(outils.indexOf('icons8-trash.svg'));
-            expect(outils.indexOf('icons8-trash.svg')).toBeLessThan(outils.indexOf('cadenas-niveau'));
-        });
-        expect(rangees[1]).toMatch(/data-action="supprimerNiveau" data-param="1" disabled/);
-        expect(rangees[1]).toMatch(/aria-label="Déverrouillez d(?:'|&#x27;)abord pour supprimer"/);   // le harnais n'échappe pas l'apostrophe
-        expect(rangees[0]).toMatch(/data-action="supprimerNiveau" data-param="0"\s*>/);
-        // Un seul niveau : pas de corbeille, mais les chevrons (désactivés) et le cadenas restent.
-        win.afficherTableauNiveaux([NIVEAUX()[0]]);
-        const seul = document.getElementById('tableauNiveaux').innerHTML;
-        expect(seul).not.toContain('icons8-trash.svg');
-        expect(seul).toContain('data-action="deplacerNiveauHaut" data-param="0" disabled');
-    });
+    // ↻ 13 sept. 2026 (#658) : le cas « C.a la table » est retiré avec `afficherTableauNiveaux`,
+    // qui rendait dans `#tableauNiveaux`, un conteneur caché d'index.html. Aucun écran ne l'affichait.
 
     it('C.b la carte d\'ÉDITION : la cellule « Ordre » a disparu de la grille ; le coin porte les chevrons puis la corbeille, avec le couple (échelle, index)', () => {
         const { win, document } = monterEchelles();
@@ -213,7 +188,9 @@ describe('lot C · D — les sources des sites touchés', () => {
         expect(e).not.toContain('>Ordre<');
         expect(e).not.toContain('btn btn-supprimer btn-compact');
         expect((e.match(/class="bloc-coin-outils"/g) || []).length).toBe(2);
-        expect((e.match(/outils-rangee/g) || []).length).toBe(1);
+        // ↻ 13 sept. 2026 (#658) : l'assertion « une seule `outils-rangee` » est retirée avec son
+        // sujet. Cette rangée d'outils était celle de l'ancien tableau de niveaux
+        // (`afficherTableauNiveaux`), rendu dans un conteneur caché d'index.html et parti avec lui.
     });
 });
 
@@ -232,7 +209,9 @@ describe('lot C · E — les règles : sept colonnes, le coin, 44 px, l\'empilem
 
     it('E.b le coin d\'outils existe hors de l\'éditeur de grille, et ses cibles font 44 px', () => {
         expect(css).toMatch(/\n\.bloc-coin-outils \{\s*position: absolute;/);
-        expect(css).toMatch(/\.bloc-coin-outils \.btn-icone-nu,\s*\.bloc-coin-outils \.pipeline-btn-reorder,\s*\.outils-rangee \.btn-icone-nu,\s*\.outils-rangee \.pipeline-btn-reorder,\s*\.tableau td > \.btn-icone-nu,[\s\S]*?\{[^}]*min-width: 44px;[^}]*min-height: 44px/);
+        // ↻ 13 sept. 2026 (#658) : les deux sélecteurs `.outils-rangee …` sont partis de la règle avec
+        // la seule rangée qui les portait, celle de l'ancien tableau de niveaux (conteneur caché).
+        expect(css).toMatch(/\.bloc-coin-outils \.btn-icone-nu,\s*\.bloc-coin-outils \.pipeline-btn-reorder,\s*\.tableau td > \.btn-icone-nu,[\s\S]*?\{[^}]*min-width: 44px;[^}]*min-height: 44px/);
         // Les pipelines gardent leur taille.
         expect(css).toMatch(/\n\.pipeline-btn-reorder \{\s*width: 20px;/);
     });

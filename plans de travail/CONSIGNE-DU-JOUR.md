@@ -1,163 +1,133 @@
-# Consigne du jour – La règle 10 posée dans le filet (#858), puis le bandeau qui mène (#801)
+# Consigne SUIVANTE – La grappe `js/echelles.js` (#659 fermée par la mesure, #658 comme lot)
 
-> **Écrite par Cowork le dimanche 13 septembre 2026, 16 h 20 (Toronto).** Elle remplace la consigne #520, livrée et poussée,
-> archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-520-ancien-systeme-echelles.md`.
+> **Écrite par Cowork le dimanche 13 septembre 2026, 17 h (Toronto), PENDANT que le lot #858/#801 est en cours.**
 >
-> ✅ **#520 est terminé** : `7afa62b9` puis `d4e2923f` sur `origin/main`, sans release (lot invisible). #551 est livré en
-> 1.140.5. `origin/main` porte 1.140.5 / `0913-1457`.
+> ⛔ **Ce n'est pas la consigne du jour.** Ne l'ouvre pas avant d'avoir commité le LOT B (#801).
+> Quand ce sera le moment : archive `CONSIGNE-DU-JOUR.md`, renomme ce fichier à sa place, et reprends la mesure de §1 sur le
+> sommet du moment — les numéros de ligne ci-dessous datent de `873ffe2c` et ton propre lot va les bouger.
 >
-> ⚠ **Deux commits de documentation attendent le push de Grégoire** (`7b68d9a4`, `873ffe2c`) : le dépôt est en SSH et aucune
-> de nos deux sessions n'a la clé. **Ne les recommite pas, ne les rebase pas** — ils partiront avec le tien.
->
-> **DEUX LOTS, dans cet ordre.** Le second ne s'ouvre qu'une fois le premier commité. Aucun des deux ne demande à Grégoire
-> d'arbitrage ni de vérification à l'écran (règle de sélection du 13 sept.).
+> **Mesuré par Cowork le 13 sept. à 16 h 45 sur `873ffe2c`.** Tout compte ci-dessous est écrit avec sa commande.
 
 ---
 
-# LOT A · #858 — une découpe qui refuse de rendre une tranche vide
+## 0 · Ce que la mesure change du plan
 
-## A.0 · Ce que ce lot livre
+La grappe `js/echelles.js` porte six fiches. **Aujourd'hui il n'en reste qu'une qui soit un lot de code.**
 
-**À l'écran : rien.** Le lot vit dans `tests/`. Ce qui change : trente assertions négatives qui passent aujourd'hui **sans
-rien éprouver** se mettent à pouvoir échouer, et l'idiome qui les rend muettes cesse de pouvoir entrer.
-
-C'est l'application de la **règle 10 du `PROTOCOLE.md`**, posée dans `eecaa703` le jour même.
-
-## A.1 · Ce qui est mesuré (Cowork, le 13 sept. à 16 h, sur `873ffe2c`)
-
-Chaque compte est écrit avec la commande qui le produit, depuis `tests/`.
-
-- Corpus : **666 fichiers** `*.test.js` / `*.spec.js`.
-- L'idiome, toutes formes confondues :
-  `grep -rnE '\.slice\(\s*[A-Za-z_$][A-Za-z0-9_$.]*\.indexOf\(' --include='*.js' .`
-  ⮕ **112 occurrences dans 60 fichiers.**
-- `.substring(…indexOf(` ⮕ **0**. Inutile de le couvrir.
-- Sous-ensemble dangereux, celui de la fiche : **30 assertions négatives sans garde de non-vide, dans 23 fichiers**.
-
-### ⚠ CE QUE LA MESURE CORRIGE DE LA FICHE #858
-
-La fiche demande « un cliquet qui interdit `slice(indexOf(` dans `tests/` ». **Prise au mot, cette phrase porte sur 112 sites
-dans 60 fichiers, pas sur 30 dans 23.** C'est presque quatre fois le lot annoncé, et la plupart de ces 112 sont déjà gardés.
-
-⮕ **Décision de Cowork, technique, renversable par Grégoire** : le cliquet est **un cliquet de compte, pas une interdiction**.
-
-- Les **30 dangereuses** sont routées par la fonction qui refuse, et sortent du compte.
-- Les **82 déjà gardées** restent où elles sont, figées à leur compte du jour. Le cliquet ne peut que descendre.
-- Motif : réécrire 82 sites corrects pour la forme, c'est l'élargissement de scope que la révision du 1er sept. a fermé.
-
-## A.2 · Le premier geste, AVANT tout code
-
-Pour chacune des 30, **vérifier que son marqueur existe encore dans le fichier qu'elle lit.**
-
-**Combien sont mortes aujourd'hui, et pas seulement fragiles, n'est pas mesuré.** C'est ce qui départage une réparation d'une
-prophylaxie, et ça ne s'estime pas. Écris le compte dans ton rapport, et cite les fichiers.
-
-⚠ Si l'une est morte, elle a cessé d'éprouver quelque chose que quelqu'un croyait tenu : **c'est une trouvaille de niveau 1**
-(corriger maintenant), pas de niveau 2 — la sentinelle concernée est à réancrer dans ce lot.
-
-## A.3 · Le geste
-
-1. Une fonction de découpe partagée — **elle jette en nommant le marqueur manquant**, elle ne rend jamais une tranche vide.
-   Emplacement, nom et signature : à toi. Zéro dette : on retire l'idiome, on ne le rapièce pas.
-2. Les 30 assertions routées à travers elle.
-3. Le cliquet de compte décrit en A.1.
-
-## A.4 · Le cas déjà connu, à router avec les trente
-
-`tests/unit/sentinelle-520-aucun-id-duplique.test.js`, **bord C** : il découpe `echelles.js` par
-`indexOf('async function chargerEchelleTemplate(')` puis `indexOf('\nasync function ', …)`. Il porte **déjà** son garde de
-non-vide (ajouté à ma relecture croisée du 13, mutation « fonction renommée » : rouge). Il n'est pas dangereux — il est à
-router quand même, pour que la garde vive dans la fonction et pas dans le banc.
-
-## A.5 · ⛔ Ce qui N'entre PAS
-
-- **La seconde famille : une preuve qui passe par du code mort** (`sentinelle-506` le 13 sept., après #516 et #524). Elle ne
-  se détecte pas par motif — il faut savoir ce qui est atteignable. **Non mesurée, donc non inscrite.** L'inscrire serait
-  inscrire un soupçon, et c'est l'erreur payée avec #857.
-- Tout fichier hors de `tests/`.
-
-## A.6 · La preuve
-
-La règle 10 s'applique à elle-même : **toute assertion négative neuve de ce lot porte son garde de non-vide.**
-
-Le break-test qui compte : **prends une des 30, rends son marqueur introuvable, et montre que le banc ROUGIT maintenant alors
-qu'il restait vert avant.** Sans ce témoin, le lot n'a rien prouvé. Un par famille de découpe suffit.
+| Fiche | Ce qu'elle devient | Pourquoi |
+|---|---|---|
+| #659 | **fermée par la mesure, sans code** | sa source est tarie par #520 (§2) |
+| #658 | **LE LOT** | vivante, et la mesure l'élargit (§3) |
+| #586 | ⛔ **hors de portée** | arbitrage de Grégoire du 28 août (§5) |
+| #624, #601 | reportées | données déjà écrites chez Grégoire |
+| #574 | reportée | question de pédagogie, pas de code |
 
 ---
 
-# LOT B · #801 — le bandeau mène aux nouveautés au lieu de les décrire
+## 1 · Ce qui est mesuré
 
-⛔ **N'ouvre ce lot qu'une fois le LOT A commité.**
-
-## B.0 · Ce que ce lot livre
-
-Au chargement d'une version neuve, le bandeau porte **un bouton qui ouvre les nouveautés**, au lieu d'une phrase qui dit où
-elles sont. C'est le défaut d'origine de la fiche, jamais livré ni écarté, mesuré le 13 sept. sur `d07e963d`.
-
-Les gestes 1 et 3 de la fiche sont livrés (1.127.3, `1a7205ee`), le geste 2 est écarté à dessein. **Il ne reste que celui-ci.**
-
-## B.1 · ⚠ CE QUE LA MESURE CORRIGE DE MA PROPRE CONSIGNE
-
-À la relecture croisée du 13 sept., j'ai écrit que le bouton devait « MENER à la carte « Nouveautés » (défilement + focus) ».
-**C'est faux, et c'est ma supposition, pas une mesure.** `js/init-inline.js:180` définit `afficherModalNouveautes`, exposée en
-`:493`, et elle ouvre la **modale** `#modalNouveautes` (`index.html:4075`). La carte de l'accueil (`js/accueil.js:235`) ne fait
-rien d'autre que l'appeler.
-
-⮕ **Le bouton appelle `afficherModalNouveautes`. Il n'y a ni défilement ni focus à écrire.** Corrige la fiche en même temps.
-
-## B.2 · Où, exactement
-
-`index.html` **4058–4074** : `<div id="bandeau-mise-a-jour">`. Son pied (`bandeau-mise-a-jour-footer`, l. 4065–4070) porte
-déjà `<button data-action="rechargerPage" class="bandeau-mise-a-jour-btn">Recharger</button>`.
-
-**`js/init-inline.js:410-412` masque « Recharger » quand la mise à jour est LOCALE** (`btnRecharger.hidden = !distant`).
-
-## B.3 · La règle qui évite d'empiler
-
-La fiche porte un ⚠ « Ne pas empiler » : trois boutons dans une fenêtre transitoire, c'est trop.
-
-⮕ **Décision de Cowork, technique, renversable par Grégoire** : le bouton des nouveautés suit la règle inverse de
-« Recharger ». **Il ne paraît que dans le cas LOCAL**, celui où « Recharger » est masqué — donc **jamais deux boutons côte à
-côte**, et le pied n'en porte qu'un dans les deux cas. Le cas distant ne parle pas de nouveautés : son texte annonce un
-déploiement en arrière-plan, pas un changement déjà chargé.
-
-## B.4 · Le texte du bandeau
-
-Avec un bouton qui mène, la seconde moitié de la phrase ne sert plus.
-
-`js/init-inline.js:406`, cas local — proposé, **à corriger par Grégoire s'il veut d'autres mots** :
-
-> `Nouvelle version chargée. Tes données persistent.`
-
-Le cas distant (l. 405) ne change pas.
-
-⚠ Ce sont des mots que lisent ses collègues, pas ses élèves : je tranche, et je le nomme. S'il les reprend, c'est une ligne.
-
-## B.5 · La preuve
-
-`tests/unit/sentinelle-801-canal-de-retour-se-voit.test.js` **n'a pas à changer de portée** : elle interdit
-`ouvrirModalRapportBug` dans le bandeau, et cette interdiction tient.
-
-Elle **gagne un cas** : le bandeau porte un déclencheur de `afficherModalNouveautes`, et le banc rougit s'il disparaît.
-Mutation obligatoire : retire le bouton, montre le rouge.
-
-Un banc Playwright pour le comportement : version locale neuve ⮕ le bandeau paraît, « Recharger » est masqué, le bouton des
-nouveautés est là, un clic ouvre `#modalNouveautes`.
+- `index.html` **5217–5226** : le bloc `<!-- Conteneurs cachés pour compatibilité --> <div class="u-hide">` contient
+  **huit `<div>` vides** : `vueEchellesNiveaux`, `selectEchelleTemplate`, `nomEchelleContainer`, `typeEchelle`,
+  `seuilReussite`, `champAutreEchelle`, `tableauNiveaux`, `apercuEchelle`.
+- **Chacun de ces huit identifiants n'existe qu'UNE fois dans `index.html`, et cette fois-là est dans ce bloc.**
+  `grep -c 'id="typeEchelle"' index.html` ⮕ 1. ⮕ **Il n'y a pas d'éditeur vivant derrière ces identifiants. Il n'y en a plus.**
+- Lecteurs JS, `getElementById` : `selectEchelleTemplate` 4, `typeEchelle` 3, `seuilReussite` 2, `tableauNiveaux` 2,
+  `vueEchellesNiveaux` 1, `nomEchelleContainer` 1, `apercuEchelle` 1, **`champAutreEchelle` 0**.
+- `configEchelle` : **aucun lecteur hors `js/echelles.js`** (`grep -rn configEchelle js/ tests/`, hors le banc de #520).
+- `docs/DATA-OWNERSHIP.md` **ne porte d'entrée ni pour `configEchelle` ni pour `niveauxEchelle`**. Le registre est en retard
+  sur ces deux clés ; à corriger dans ce lot, quoi qu'il advienne du reste.
 
 ---
 
-# Écritures de backlog, dans le même commit
+## 2 · #659 — à FERMER, sans écrire une ligne de code
 
-- **#858** : cocher, avec le compte des assertions mortes trouvées en A.2, et la décision A.1 (cliquet de compte) écrite noir
-  sur blanc. Si une sentinelle a été réancrée, la nommer.
-- **#801** : cocher, en citant le banc qui tient le bouton. **Corriger la ligne « défilement + focus »** de la disposition du
-  13 sept. — c'est une modale, pas une carte.
-- **Ne touche pas** à #766 (décision de Grégoire du 6 sept., 11 h : « laissé inscrit, pas de lot ; ne pas le reposer ») ni aux
-  autres doubles `class` de #787 : ceux-là changent un rendu et se jugent à l'écran, avec lui. **La grappe `index.html` se
-  réduit donc aujourd'hui à #801 seul**, et c'est voulu.
+La chaîne que décrit la fiche est **coupée**. `sauvegarderConfigEchelle` et `changerTypeEchelle` **n'existent plus**
+(`grep -c 'function sauvegarderConfigEchelle' js/echelles.js` ⮕ 0) : elles sont parties avec #520 (`d4e2923f`).
 
-# Livraison
+`chargerConfigurationEchelle()` (`:1020`) ne fait plus que **lire** (`db.get('configEchelle')`) et poser des `.value`.
+L'écriture inconditionnelle au bout du chemin de lecture n'existe plus. La seule écriture restante est `:859`, dans
+`chargerEchelleTemplate` — elle suit **le choix d'une échelle**, c'est-à-dire un geste volontaire, pas l'entrée dans la section.
 
-Deux commits, un par lot. **Release : patch**, une seule, après le LOT B — le LOT A ne se voit pas, le LOT B se voit.
-`/fin-de-session` porte le rituel ; l'ordre du §4.5 tient (commit, relecture, verdict, push). ⚠ Le push part avec les deux
-commits de documentation déjà en attente : c'est Grégoire qui pousse.
+⮕ **Coche #659 en citant ces trois mesures.** Ne la traite pas comme un lot.
+
+### ⛔ Ce que tu ne fais PAS, et qui monte à Grégoire
+
+**TARIR N'EST PAS RÉPARER.** La source est tarie ; le stock ne l'est pas. Les bases où `configEchelle` a déjà été aplatie à
+`{typeEchelle: undefined, seuilReussite: 60}` le restent — **y compris la sienne**.
+
+⮕ **Mesure-le et écris-le dans la fiche : combien de clés, quelles valeurs, quel écran s'en sert.** Puis arrête-toi.
+Écrire dans ses données est un geste qui lui revient. Ne propose pas de script de réparation dans ce lot.
+
+---
+
+## 3 · #658 — LE LOT · le rendu qui s'adresse à personne
+
+La fiche dit : `afficherToutesLesEchellesNiveaux` (`js/echelles.js:213`) écrit dans `vueEchellesNiveaux`, qui est caché, donc
+le bouton « Modifier » qu'elle génère (`:323`, `data-action="chargerEchelleTemplate"`) est inatteignable.
+
+**C'est toujours vrai, et la mesure l'élargit** : ce n'est pas un conteneur caché, ce sont **les huit**.
+
+### Ce qu'il faut mesurer AVANT de couper
+
+Pour chacun des huit, et pour chaque lecteur JS recensé au §1 : **le code qui le lit fait-il quelque chose d'observable ?**
+Poser `.value` sur un `<div>` ne fait rien. Lire `.value` d'un `<div>` rend `undefined`. **Écris le verdict des huit, un par un.**
+
+⚠ **`chargerEchelleTemplate` (`:817`) est candidate à l'inatteignabilité complète** : ses deux appelants sont `:323` (le bouton
+rendu dans le conteneur caché) et `:356`, dans `ajouterNiveauAEchelle` que l'audit Z3 §2.4 classe sans appelant.
+**Mesure-le, ne le suppose pas** — et si c'est le cas, c'est du code mort qui part avec le lot, pas une trouvaille à inscrire.
+
+### Forme du lot
+
+Zéro dette : **on retire, on ne neutralise pas.** Pas de stub « au cas où » — c'est exactement ce que ce bloc est devenu.
+
+---
+
+## 4 · ⚠ LE PIÈGE — le bord C de la sentinelle de #520
+
+`tests/unit/sentinelle-520-aucun-id-duplique.test.js:71-72` compte les écritures de `configEchelle` dans `echelles.js` et
+**exige exactement 1**.
+
+- **Retirer les `.value` sur les stubs ne touche pas à ce compte** : l'écriture est à `:859`, les stubs sont à `:861-870`.
+- **Mais si ton lot conclut que la clé `configEchelle` n'a plus de lecteur et doit partir**, ce banc rougit à `0`.
+  Alors **réancre-le délibérément, et écris pourquoi dans le fichier de test** — ne le « répare » pas en changeant le nombre.
+  Un banc qu'on ajuste pour qu'il repasse au vert a cessé de prouver quoi que ce soit.
+
+⮕ Et applique la **règle 10** que tu viens de poser : toute assertion négative neuve de ce lot porte sa garde de non-vide.
+
+---
+
+## 5 · ⛔ CE QUI N'ENTRE PAS
+
+- **#586.** ✅ **Arbitré par Grégoire le 28 août 2026, option B** : les cinq familles de duplication ensemble, au titre de
+  **#476** — grilles, cartouches, productions, pratiques, échelles. Sa fiche le dit en toutes lettres : « **ne pas l'ouvrir
+  comme une retouche** ». Le faire ici renverserait son arbitrage. **Ne le propose même pas.**
+- **#624** (suppression et évaluations orphelines) et **#601** (niveaux partagés entre trimestres) : données déjà écrites.
+- **#574** (valeurs de départ d'un niveau neuf) : question de pédagogie.
+- Le second bloc « ANCIEN SYSTÈME », zone des cartouches : hors sujet, comme au lot #520.
+
+---
+
+## 6 · La preuve
+
+Une sentinelle : **`index.html` ne porte plus de conteneur de compatibilité pour les échelles**, et rien dans `js/echelles.js`
+ne rend dans un élément absent du document.
+
+Break-test obligatoire : **repose un des huit `<div>`, montre le rouge.** Sans ce témoin, le banc n'a rien prouvé.
+
+⚠ Le lot est **invisible à l'écran** — tout ce qui part est déjà caché. Il ne demande à Grégoire ni arbitrage ni
+vérification à l'écran. **Si, en mesurant, tu découvres qu'un de ces huit est lu par un écran vivant, le lot s'arrête et tu
+remontes** : ce ne serait plus un retrait, ce serait une régression.
+
+---
+
+## 7 · Écritures de backlog, dans le même commit
+
+- **#659** : cocher, avec les trois mesures du §2, et la question du stock écrite noir sur blanc — non réparée, à Grégoire.
+- **#658** : cocher, avec le verdict des huit conteneurs un par un.
+- **`docs/DATA-OWNERSHIP.md`** : inscrire `configEchelle` et `niveauxEchelle` avec leur propriétaire.
+- Ne touche ni à #586, ni à #624, ni à #601, ni à #574 — sinon pour écrire, sur #586, que l'arbitrage du 28 août tient.
+
+## 8 · Livraison
+
+Un commit. **Release : patch**, ou aucune si le lot du jour en a déjà emporté une — il n'y a rien à annoncer, rien ne change
+à l'écran. `/fin-de-session` porte le rituel. ⚠ **C'est Grégoire qui pousse** : le dépôt est en SSH.

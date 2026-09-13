@@ -9,7 +9,6 @@
    Contenu de ce module:
    - Définition des niveaux de performance par défaut
    - Gestion des échelles templates (création, édition, suppression)
-   - Configuration globale (type d'échelle, seuil de réussite)
    - Affichage du tableau des niveaux
    - Aperçu visuel de l'échelle
    - Conversion notes <-> niveaux
@@ -29,19 +28,14 @@
    - echapperHtml() (depuis 01-config.js)
    
    Éléments HTML requis:
-   - #selectEchelleTemplate : Select pour choisir une échelle
-   - #nomEchelleContainer : Conteneur du nom de l'échelle
    - #nomEchelleTemplate : Input pour le nom
-   - #typeEchelle : Select du type d'échelle
-   - #seuilReussite : Input du seuil de réussite
-   - #tableauNiveaux : Conteneur du tableau des niveaux
-   - #apercuEchelle : Conteneur de l'aperçu visuel
+   - #tableauNiveauxEchelle / #apercuEchelleNiveaux : éditeur de niveaux et son aperçu
    - #btnDupliquerEchelle : Bouton dupliquer
-   
+
    LocalStorage utilisé:
    - 'echellesTemplates' : Array des échelles sauvegardées
-   - 'niveauxEchelle' : Array des niveaux de l'échelle actuelle
-   - 'configEchelle' : Objet de configuration globale
+   (⚰ #658 : les clés nues 'niveauxEchelle' et 'configEchelle' n'ont plus ni
+   lecteur ni écrivain — le stock déjà écrit chez les gens reste, inerte.)
    =============================== */
 
 /* ===============================
@@ -126,37 +120,6 @@ const niveauxDefaut = [
 ];
 
 /* ===============================
-   🎨 PALETTE DE COULEURS
-   =============================== */
-
-/**
- * Palette de couleurs pour les niveaux
- * 20 couleurs organisées par teintes
- */
-const paletteCouleurs = [
-    { nom: 'Rouge critique', valeur: 'var(--niveau-attention-critique)' },
-    { nom: 'Rouge foncé', valeur: '#c0392b' },
-    { nom: 'Rouge', valeur: '#e74c3c' },
-    { nom: 'Orange critique', valeur: 'var(--niveau-attention-eleve)' },
-    { nom: 'Orange', valeur: '#e67e22' },
-    { nom: 'Orange clair', valeur: '#f39c12' },
-    { nom: 'Jaune modéré', valeur: 'var(--niveau-attention-modere)' },
-    { nom: 'Jaune', valeur: '#f1c40f' },
-    { nom: 'Jaune-vert', valeur: '#9b59b6' },
-    { nom: 'Vert minimal', valeur: 'var(--niveau-attention-minimal)' },
-    { nom: 'Vert', valeur: '#27ae60' },
-    { nom: 'Vert foncé', valeur: '#1e8449' },
-    { nom: 'Vert nul', valeur: 'var(--niveau-attention-nul)' },
-    { nom: 'Turquoise', valeur: '#16a085' },
-    { nom: 'Bleu clair', valeur: '#3498db' },
-    { nom: 'Bleu moyen', valeur: 'var(--bleu-moyen)' },
-    { nom: 'Bleu foncé', valeur: '#2c3e50' },
-    { nom: 'Violet', valeur: '#8e44ad' },
-    { nom: 'Gris', valeur: '#7f8c8d' },
-    { nom: 'Gris foncé', valeur: '#34495e' }
-];
-
-/* ===============================
    VARIABLE GLOBALE D'ÉTAT
    =============================== */
 
@@ -195,173 +158,18 @@ function genererIdCourtEchelle(id) {
     return BibliothequeUI.genererIdCourt(id);
 }
 
-/* ===============================
-   NOUVELLE VUE HIÉRARCHIQUE
-   Affichage toutes les échelles avec leurs niveaux
-   =============================== */
-
-/**
- * Affiche toutes les échelles avec leurs niveaux
- *
- * FONCTIONNEMENT:
- * - Utilise <details> pour sections repliables
- * - Chaque échelle montre ses niveaux
- * - Bouton contextuel pour ajouter un niveau à l'échelle
- * - Affiche aperçu visuel de l'échelle
- */
-async function afficherToutesLesEchellesNiveaux() {
-    const container = document.getElementById('vueEchellesNiveaux');
-    if (!container) return;
-
-    const echelles = await db.get(cle('echellesTemplates')) ||  [];
-
-    if (echelles.length === 0) {
-        container.innerHTML = `
-            <div class="echelle-zone-bleu-pale">
-                <p style="color: var(--bleu-leger);">Aucune échelle définie</p>
-                <small>Crée une échelle en utilisant le formulaire ci-dessous</small>
-            </div>
-        `;
-        return;
-    }
-
-    /**
-     * Fonction helper pour générer le HTML d'un niveau
-     */
-    function genererHtmlNiveau(niveau, echelleId) {
-        return `
-            <div class="item-liste" style="margin-bottom: 10px;">
-                <div class="echelle-grid-niveaux">
-                    <div>
-                        <label class="echelle-texte-mini-bleu">Code</label>
-                        <strong style="font-size: 1.1rem; color: var(--accent-primaire);">${echapperHtml(niveau.code)}</strong>
-                    </div>
-                    <div>
-                        <label class="echelle-texte-mini-bleu">Nom</label>
-                        <span class="u-texte-09">${echapperHtml(niveau.nom)}</span>
-                    </div>
-                    <div>
-                        <label class="echelle-texte-mini-bleu">Description</label>
-                        <span class="echelle-texte-detail">${echapperHtml(niveau.description || '')}</span>
-                    </div>
-                    <div>
-                        <label class="echelle-texte-mini-bleu">Min</label>
-                        <span class="u-texte-09">${niveau.min}%</span>
-                    </div>
-                    <div>
-                        <label class="echelle-texte-mini-bleu">Max</label>
-                        <span class="u-texte-09">${niveau.max}%</span>
-                    </div>
-                    <div class="echelle-text-center">
-                        <div style="width: 30px; height: 30px; background: ${niveau.couleur};
-                             border-radius: 4px; border: 1px solid var(--bordure-moyenne); display: inline-block;"></div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Construire le HTML
-    const html = echelles.map(echelle => {
-        const niveaux = echelle.niveaux || [];
-
-        return `
-            <details class="echelle-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
-                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
-                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
-                    <span>${echapperHtml(echelle.nom)}</span>
-                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
-                        ${niveaux.length} niveau${niveaux.length > 1 ? 'x' : ''}
-                    </span>
-                </summary>
-                <div class="echelle-p-15">
-                    ${niveaux.length > 0 ? `
-                        <div class="u-mb-15">
-                            ${niveaux.map(n => genererHtmlNiveau(n, echelle.id)).join('')}
-                        </div>
-
-                        <!-- Aperçu visuel de l'échelle -->
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                            <strong style="display: block; margin-bottom: 10px; color: var(--accent-primaire);">Aperçu visuel :</strong>
-                            <div class="echelle-relative">
-                                <div class="echelle-flex-seuils">
-                                    ${niveaux.map(n => {
-                                        const largeur = n.max - n.min + 1;
-                                        return `
-                                            <div style="flex: ${largeur}; background: ${n.couleur};
-                                                 border-radius: 4px; display: flex; align-items: center; justify-content: center;
-                                                 color: white; font-weight: bold; font-size: 0.9rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
-                                                ${n.code}
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                                <div style="display: flex; margin-top: 5px; font-size: 0.7rem; color: var(--gris-moyen); position: relative;">
-                                    <span class="echelle-position-left">0%</span>
-                                    ${niveaux.map((n, idx) => {
-                                        // Calculer la position de chaque séparateur
-                                        const position = ((n.max + 1) / 100) * 100; // Position en %
-                                        return idx < niveaux.length - 1 ? `
-                                            <span style="position: absolute; left: ${position}%; transform: translateX(-50%);">
-                                                ${n.max}% | ${n.max + 1}%
-                                            </span>
-                                        ` : '';
-                                    }).join('')}
-                                    <span class="echelle-position-right">100%</span>
-                                </div>
-                            </div>
-                        </div>
-                    ` : `
-                        <p style="color: var(--bleu-leger); font-style: italic; margin-bottom: 15px;">
-                            Aucun niveau pour cette échelle
-                        </p>
-                    `}
-
-                    <div class="u-flex-gap-10">
-                        <button class="btn btn-modifier" data-action="chargerEchelleTemplate" data-param="${echelle.id}">
-                            Modifier
-                        </button>
-                        <button class="btn btn-principal" data-action="dupliquerEchelle" data-param="${echelle.id}">
-                            Dupliquer
-                        </button>
-                        <button class="btn btn-supprimer" data-action="supprimerEchelle" data-param="${echelle.id}">
-                            Supprimer
-                        </button>
-                    </div>
-                </div>
-            </details>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-}
-
-/**
- * Ajoute un niveau à une échelle spécifique
- *
- * @param {string} echelleId - ID de l'échelle
- *
- * FONCTIONNEMENT:
- * 1. Charge l'échelle dans le select
- * 2. Affiche le formulaire de niveau
- * 3. Scroll vers le formulaire
- */
-async function ajouterNiveauAEchelle(echelleId) {
-    // Charger l'échelle dans le select
-    const select = document.getElementById('selectEchelleTemplate');
-    if (select) {
-        select.value = echelleId;
-        await chargerEchelleTemplate();
-    }
-
-    // Scroll vers le tableau des niveaux
-    const tableau = document.getElementById('tableauNiveaux');
-    if (tableau) {
-        tableau.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
+/* ⚰ #658 (13 sept. 2026) — LA « VUE HIÉRARCHIQUE » EST RETIRÉE, avec
+   `ajouterNiveauAEchelle`. Elle rendait dans `#vueEchellesNiveaux`, un <div> vide
+   du bloc « Conteneurs cachés pour compatibilité » d'index.html : son rendu, et
+   les boutons Modifier / Dupliquer / Supprimer qu'il portait, n'étaient vus par
+   personne. Le bloc est parti avec ses huit conteneurs et tout ce qui rendait
+   dedans : le sélecteur, le tableau et l'aperçu de l'ancien éditeur de niveaux,
+   et les clés nues `niveauxEchelle` et `configEchelle`. L'éditeur vivant est
+   celui de la barre latérale : `afficherNiveauxEchelle` → `#tableauNiveauxEchelle`.
+   ⚠ `dupliquerEchelle` et `supprimerEchelle`, ci-dessous, n'avaient plus de
+   déclencheur visible AVANT ce lot (leurs boutons étaient dans ce rendu caché).
+   Elles restent : leurs sentinelles relèvent du chantier duplication (#476,
+   arbitrage de #586 du 28 août 2026), pas de ce retrait. */
 
 /**
  * Duplique une échelle spécifique par son ID
@@ -429,10 +237,6 @@ async function dupliquerEchelle(echelleId) {
 
     if (!nouvelleEchelleCreee) return;
     const nouvelleEchelle = nouvelleEchelleCreee;
-
-    // Mettre à jour l'interface
-    await chargerEchellesTemplates();
-    await afficherToutesLesEchellesNiveaux();
 
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeEchelles();
@@ -749,147 +553,11 @@ async function initialiserModuleEchelles() {
     if (typeof afficherListeEchelles === 'function') {
         await afficherListeEchelles();
     }
-
-    // Vérifier que nous sommes dans la bonne section
-    const elementTypeEchelle = document.getElementById('typeEchelle');
-    if (!elementTypeEchelle) {
-        return;
-    }
-
-    // Charger les échelles templates
-    await chargerEchellesTemplates();
-
-    // Afficher la nouvelle vue hiérarchique
-    await afficherToutesLesEchellesNiveaux();
-
-    // Charger la configuration
-    await chargerConfigurationEchelle();
-
 }
 
 /* ===============================
    📂 GESTION DES ÉCHELLES TEMPLATES
    =============================== */
-
-/**
- * Charge la liste des échelles templates dans le select
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les échelles depuis localStorage
- * 2. Construit les options du select
- * 3. Ajoute les options standard (nouvelle, créer)
- * 
- * UTILISÉ PAR:
- * - initialiserModuleEchelles()
- */
-async function chargerEchellesTemplates() {
-    const select = document.getElementById('selectEchelleTemplate');
-    if (!select) return;
-
-    const echelles = await db.get(cle('echellesTemplates')) ||  [];
-
-    let options = '<option value="">-- Nouvelle échelle --</option>';
-    options += '<option value="new">+ Créer une nouvelle échelle</option>';
-
-    echelles.forEach(echelle => {
-        const nomEchappe = echapperHtml(echelle.nom);
-        options += `<option value="${echapperHtml(echelle.id)}">${nomEchappe}</option>`;
-    });
-
-    select.innerHTML = options;
-}
-
-/**
- * Charge une échelle template sélectionnée
- * Appelée lors du changement de sélection dans le select
- *
- * @param {string} echelleId - ID optionnel de l'échelle à charger
- *
- * FONCTIONNEMENT:
- * 1. Si "nouvelle" ou vide: réinitialise aux valeurs par défaut
- * 2. Si échelle existante: charge ses données
- * 3. Met à jour l'interface (nom, niveaux, config, aperçu)
- * 4. Affiche/masque le bouton dupliquer selon le cas
- *
- * GÈRE:
- * - Changement d'événement sur #selectEchelleTemplate
- */
-async function chargerEchelleTemplate(echelleId) {
-    const select = document.getElementById('selectEchelleTemplate');
-    const selectValue = echelleId || (select ? select.value : '');
-    const nomContainer = document.getElementById('nomEchelleContainer');
-    const btnDupliquer = document.getElementById('btnDupliquerEchelle');
-    const btnSupprimer = document.getElementById('btnSupprimerEchelle');
-
-    if (!selectValue || selectValue === 'new') {
-        // Nouvelle échelle
-        nomContainer.classList.remove('u-hide');
-        document.getElementById('nomEchelleTemplate').value = '';
-
-        // Réinitialiser aux valeurs par défaut
-        await reinitialiserNiveauxDefaut();
-        echelleTemplateActuelle = null;
-
-        // Note: Export/Import se font maintenant via la bibliothèque
-        // Masquer les boutons dupliquer et supprimer
-        if (btnDupliquer) btnDupliquer.classList.add('u-hide');
-        if (btnSupprimer) btnSupprimer.classList.add('u-hide');
-
-    } else {
-        // Charger une échelle existante
-        const echelles = await db.get(cle('echellesTemplates')) ||  [];
-        const echelle = echelles.find(e => e.id === selectValue);
-
-        if (echelle) {
-            // Mettre à jour le select si un ID a été passé en paramètre
-            if (echelleId && select) {
-                select.value = echelleId;
-            }
-
-            nomContainer.classList.remove('u-hide');
-            document.getElementById('nomEchelleTemplate').value = echelle.nom;
-
-            // Charger les niveaux
-            await db.set('niveauxEchelle',  echelle.niveaux);
-            afficherTableauNiveaux(echelle.niveaux);
-            afficherApercuEchelle(echelle.niveaux);
-
-            // Charger la configuration
-            if (echelle.config) {
-                await db.set('configEchelle',  echelle.config);
-
-                const elementTypeEchelle = document.getElementById('typeEchelle');
-                const elementSeuilReussite = document.getElementById('seuilReussite');
-
-                if (echelle.config.typeEchelle && elementTypeEchelle) {
-                    elementTypeEchelle.value = echelle.config.typeEchelle;
-                }
-                if (echelle.config.seuilReussite !== undefined && elementSeuilReussite) {
-                    elementSeuilReussite.value = echelle.config.seuilReussite;
-                }
-            }
-
-            echelleTemplateActuelle = echelle;
-
-            // Afficher les boutons dupliquer, exporter, importer et supprimer
-            if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
-            if (btnExporter) btnExporter.classList.remove('u-hide');
-            if (btnImporter) btnImporter.classList.remove('u-hide');
-            if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
-
-            // Scroll vers le formulaire pour que l'utilisateur voie le changement
-            const formulaire = document.getElementById('formEchelle');
-            if (formulaire) {
-                formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            // Afficher l'apercu PDF (Beta 95.7 - #30)
-            if (typeof window.afficherApercuEchelleSelectionnee === 'function') {
-                window.afficherApercuEchelleSelectionnee();
-            }
-        }
-    }
-}
 
 /**
  * Sauvegarde le nom de l'échelle actuelle
@@ -953,11 +621,9 @@ async function sauvegarderNomEchelle() {
             return false;
         }
 
-        // Recharger la sidebar ET le select pour afficher le nouveau nom
+        // Recharger la sidebar pour afficher le nouveau nom
         await afficherListeEchelles();
         await definirEchelleActive(echelleTemplateActuelle.id);
-        await chargerEchellesTemplates();
-        document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
         return true;
     }
     return false;
@@ -984,9 +650,6 @@ async function supprimerEchelle(echelleId) {
     const resultat = await supprimerOuRemplacerEchelle(echelleId, { questionSimple: 'Supprimer cette échelle ?' });
     if (!resultat.supprimee) return;
 
-    await chargerEchellesTemplates();
-    await afficherToutesLesEchellesNiveaux();
-
     // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
     await afficherListeEchelles();
 
@@ -995,533 +658,6 @@ async function supprimerEchelle(echelleId) {
     // ReferenceError juste AVANT la notification : l'échelle partait vraiment,
     // sans que l'utilisateur en soit averti. Retrait, pas réanimation.
     notifierEchelleSupprimee(resultat);
-}
-
-/* ===============================
-   CONFIGURATION GLOBALE
-   =============================== */
-
-/**
- * Charge la configuration globale depuis localStorage
- * 
- * FONCTIONNEMENT:
- * 1. Récupère la config depuis localStorage
- * 2. Applique les valeurs aux champs du formulaire
- * 3. Charge les niveaux et l'aperçu
- * 
- * UTILISÉ PAR:
- * - initialiserModuleEchelles()
- * 
- * CONFIG CHARGÉE:
- * - typeEchelle: lettres/pourcentage/autre
- * - seuilReussite: pourcentage (défaut: 60)
- * - codesPersonnalises: string (optionnel)
- */
-async function chargerConfigurationEchelle() {
-    const config = await db.get('configEchelle') ||  {};
-
-    // Charger le type d'échelle
-    const elementTypeEchelle = document.getElementById('typeEchelle');
-    if (config.typeEchelle && elementTypeEchelle) {
-        elementTypeEchelle.value = config.typeEchelle;
-    }
-
-    // Charger le seuil de réussite
-    const elementSeuilReussite = document.getElementById('seuilReussite');
-    if (config.seuilReussite !== undefined && elementSeuilReussite) {
-        elementSeuilReussite.value = config.seuilReussite;
-    }
-
-    // Charger les codes personnalisés
-    const elementCodesPersonnalises = document.getElementById('codesPersonnalises');
-    if (config.codesPersonnalises && elementCodesPersonnalises) {
-        elementCodesPersonnalises.value = config.codesPersonnalises;
-    }
-
-    // Charger les niveaux
-    const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-}
-
-/* ===============================
-   GESTION DES NIVEAUX
-   =============================== */
-
-/**
- * Affiche le tableau des niveaux de performance
- * 
- * FONCTIONNEMENT:
- * 1. Génère un tableau HTML avec les niveaux
- * 2. Chaque ligne est éditable (inputs inline)
- * 3. Boutons de modification/suppression par ligne
- * 4. Bouton d'ajout en bas du tableau
- * 
- * PARAMÈTRES:
- * @param {Array} niveaux - Array d'objets niveau
- * 
- * UTILISÉ PAR:
- * - await chargerConfigurationEchelle()
- * - await chargerEchelleTemplate()
- * - await modifierNiveau()
- * - await ajouterNiveau()
- * - await supprimerNiveau()
- * - await reinitialiserNiveauxDefaut()
- * 
- * STRUCTURE TABLEAU:
- * Code | Nom | Description | Min(%) | Max(%) | Couleur | Actions
- */
-function afficherTableauNiveaux(niveaux) {
-    const container = document.getElementById('tableauNiveaux');
-    if (!container) return;
-
-    container.innerHTML = `
-        <table class="tableau">
-<thead>
-    <tr>
-        <th class="echelle-w-80">Code</th>
-        <th class="echelle-w-180">Nom</th>
-        <th>Description</th>
-        <th class="echelle-w-80">Min (%)</th>
-        <th class="echelle-w-80">Max (%)</th>
-        <th class="echelle-w-100">Valeur ponctuelle</th>
-        <th class="echelle-w-150">Couleur</th>
-        <th class="echelle-w-180">Actions</th>
-    </tr>
-</thead>
-            <tbody>
-                ${niveaux.map((niveau, index) => `
-                    <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
-                        <td>
-                            <input type="text"
-                                   value="${echapperHtml(niveau.code)}"
-                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="code"
-                                   class="controle-form"
-                                   class="echelle-w-60-p4"
-                                   >
-                        </td>
-                        <td>
-                            <input type="text"
-                                   value="${echapperHtml(niveau.nom)}"
-                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="nom"
-                                   class="controle-form"
-                                   class="echelle-w-full-p4"
-                                   >
-                        </td>
-                        <td>
-                            <input type="text"
-                                   value="${echapperHtml(niveau.description || '')}"
-                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="description"
-                                   class="controle-form"
-                                   class="echelle-w-full-p4"
-                                   >
-                        </td>
-                        <td>
-                            <input type="number"
-                                   value="${echapperHtml(niveau.min)}"
-                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="min"
-                                   class="controle-form"
-                                   class="echelle-w-60-p4"
-                                   min="0" max="100"
-                                   >
-                        </td>
-<td>
-    <input type="number"
-           value="${echapperHtml(niveau.max)}"
-           data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="max"
-           class="echelle-w-60" min="0" max="100"
-           >
-</td>
-<td>
-                            <input type="number"
-                                   value="${niveau.valeurCalcul || ''}"
-                                   data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="valeurCalcul"
-                                   class="echelle-w-80" min="0" max="100" step="0.1"
-                                   placeholder="Ex: 32"
-                                   >
-                        </td>
-                        <td>
-    <select data-on-change="modifierNiveauHandler" data-niveau-index="${index}" data-champ="couleur"
-            class="echelle-input-full"
-            >
-        ${paletteCouleurs.map(c => `
-            <option value="${echapperHtml(c.valeur)}" ${niveau.couleur === c.valeur ? 'selected' : ''}>
-                ${c.nom}
-            </option>
-        `).join('')}
-    </select>
-    <div id="apercu-couleur-${index}" 
-         style="width: 30px; height: 30px; background: ${niveau.couleur}; 
-         border-radius: 4px; margin-top: 5px; border: 1px solid var(--bordure-moyenne);"></div>
-</td>
-                        <td class="echelle-text-center">
-                            ${/* Lot C (5 sept. 2026) — la colonne « Ordre » n'existe plus : ses flèches sont
-                                  les chevrons de la rangée, à côté de la corbeille (le seul bouton de
-                                  suppression), puis le cadenas. Mêmes fonctions, même ordre enregistré. */''}
-                            <div class="bloc-reordonner bloc-reordonner-ligne outils-rangee">
-                            ${window.boutonsReordonnerBloc({
-                                actionHaut: 'deplacerNiveauHaut', actionBas: 'deplacerNiveauBas',
-                                param: index, premier: index === 0,
-                                dernier: index === niveaux.length - 1, quoi: 'ce niveau'
-                            })}
-                            ${niveaux.length > 1 ? window.boutonRetirerBloc({
-                                action: 'supprimerNiveau', param: index, disabled: !!niveau.verrouille,
-                                titre: niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'
-                            }) : ''}
-                            <span id="cadenas-niveau-${index}"
-                                  data-action="basculerVerrouillageNiveau" data-param="${index}"
-                                  style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
-                                  title="${niveau.verrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                                ${niveau.verrouille ? '<img src="icons/icon-lock.svg" alt="Verrouillé" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">'}
-                            </span>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-        <button class="btn btn-confirmer mt-2" data-action="ajouterNiveau">
-            + Ajouter un niveau
-        </button>
-    `;
-}
-
-/**
- * Modifie un niveau dans le tableau
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les niveaux actuels depuis localStorage
- * 2. Modifie la valeur du champ spécifié
- * 3. Valide et convertit les types (int pour min/max)
- * 4. Sauvegarde dans localStorage
- * 5. Met à jour l'aperçu
- * 
- * PARAMÈTRES:
- * @param {number} index - Index du niveau à modifier
- * @param {string} champ - Nom du champ (code, nom, description, min, max, couleur)
- * @param {string} valeur - Nouvelle valeur
- * 
- * UTILISÉ PAR:
- * - Inputs dans le tableau des niveaux (onchange)
- * 
- * VALIDATION:
- * - min/max convertis en entiers
- * - Autres champs en string
- */
-async function modifierNiveau(index, champ, valeur) {
-    let niveauxApres = null;
-    await db.modifier('niveauxEchelle', (lus) => {
-        const niveaux = lus || niveauxDefaut;
-        // ⚠ Les bornes du niveau, pas seulement l'existence du tableau : sans ce
-        // test, un index hors bornes lève une TypeError au lieu de refuser.
-        if (!niveaux[index]) return undefined;
-        niveaux[index][champ] = valeur;
-        niveauxApres = niveaux;
-        return niveaux;
-    }, null);
-    if (!niveauxApres) return;
-    const niveaux = niveauxApres;
-
-    // ✅ FIX (10 jan 2026) : Synchroniser avec echelleTemplateActuelle et echellesTemplates
-    if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
-        echelleTemplateActuelle.niveaux = niveaux;
-        await db.modifier(cle('echellesTemplates'), (lues) => {
-            const echelles = lues || [];
-            const idx = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
-            if (idx === -1) return undefined;
-            echelles[idx].niveaux = niveaux;
-            echelles[idx].dateModification = new Date().toISOString();
-            return echelles;
-        }, []);
-    }
-
-    // Mise à jour immédiate de l'aperçu de couleur sans recharger tout le tableau
-    if (champ === 'couleur') {
-        const apercuDiv = document.getElementById(`apercu-couleur-${index}`);
-        if (apercuDiv) {
-            apercuDiv.style.background = valeur;
-        }
-    }
-
-    // Mettre à jour l'aperçu global de l'échelle
-    afficherApercuEchelle(niveaux);
-}
-
-/**
- * Ajoute un nouveau niveau à l'échelle
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les niveaux actuels
- * 2. Crée un nouveau niveau avec valeurs par défaut
- * 3. Ajoute à la fin du tableau
- * 4. Sauvegarde et met à jour l'affichage
- * 
- * UTILISÉ PAR:
- * - Bouton «+ Ajouter un niveau»
- * 
- * NIVEAU PAR DÉFAUT:
- * - Code: N1, N2, N3...
- * - Nom: «Nouveau niveau»
- * - Min/Max: 0-100
- * - Couleur: bleu moyen
- */
-async function ajouterNiveau() {
-    // ⚠️ REDIRECTION : Cette fonction est obsolète, utiliser await ajouterNiveauEchelle() à la place
-    console.warn('⚠️ await ajouterNiveau() est obsolète. Utilisez await ajouterNiveauEchelle() à la place.');
-
-    // Si on est dans le contexte d'une échelle de la sidebar, rediriger vers la nouvelle fonction
-    if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
-        await ajouterNiveauEchelle(echelleTemplateActuelle.id);
-        return;
-    }
-
-    // Sinon, comportement ancien (pour compatibilité)
-    let niveaux = null;
-    await db.modifier('niveauxEchelle', (lus) => {
-        const liste = lus || niveauxDefaut;
-
-        liste.push({
-            code: 'N',
-            nom: 'Nouveau niveau',
-            description: '',
-            min: 0,
-            max: 100,
-            valeurCalcul: 50,
-            couleur: 'var(--bleu-moyen)'
-        });
-
-        niveaux = liste;
-        return liste;
-    }, null);
-
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-}
-
-/**
- * Supprime un niveau de l'échelle
- * 
- * FONCTIONNEMENT:
- * 1. Demande confirmation
- * 2. Retire le niveau du tableau
- * 3. Sauvegarde et met à jour
- * 
- * PARAMÈTRES:
- * @param {number} index - Index du niveau à supprimer
- * 
- * UTILISÉ PAR:
- * - Bouton ✖ dans le tableau
- * 
- * SÉCURITÉ:
- * - Confirmation obligatoire
- * - Désactivé s'il reste un seul niveau (minimum requis)
- */
-async function supprimerNiveau(index) {
-    if (!confirm('Supprimer ce niveau ?')) return;
-
-    let niveaux = null;
-    await db.modifier('niveauxEchelle', (lus) => {
-        const liste = lus || niveauxDefaut;
-        if (!liste[index]) return undefined;
-        liste.splice(index, 1);
-        niveaux = liste;
-        return liste;
-    }, null);
-    if (!niveaux) return;
-
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-}
-
-/**
- * Déplace un niveau vers le haut dans la liste
- *
- * FONCTIONNEMENT:
- * 1. Récupère les niveaux depuis localStorage
- * 2. Échange le niveau avec celui du dessus
- * 3. Sauvegarde et met à jour l'affichage
- *
- * PARAMÈTRES:
- * @param {number} index - Index du niveau à déplacer
- *
- * UTILISÉ PAR:
- * - Bouton ↑ dans la colonne Ordre
- *
- * SÉCURITÉ:
- * - Désactivé pour le premier niveau (index 0)
- */
-async function deplacerNiveauHaut(index) {
-    if (index === 0) return;
-
-    let niveaux = null;
-    await db.modifier('niveauxEchelle', (lus) => {
-        const liste = lus || niveauxDefaut;
-        if (!liste[index] || !liste[index - 1]) return undefined;
-
-        // Échanger avec le niveau précédent
-        [liste[index - 1], liste[index]] = [liste[index], liste[index - 1]];
-
-        niveaux = liste;
-        return liste;
-    }, null);
-    if (!niveaux) return;
-
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-}
-
-/**
- * Déplace un niveau vers le bas dans la liste
- *
- * FONCTIONNEMENT:
- * 1. Récupère les niveaux depuis localStorage
- * 2. Échange le niveau avec celui du dessous
- * 3. Sauvegarde et met à jour l'affichage
- *
- * PARAMÈTRES:
- * @param {number} index - Index du niveau à déplacer
- *
- * UTILISÉ PAR:
- * - Bouton ↓ dans la colonne Ordre
- *
- * SÉCURITÉ:
- * - Désactivé pour le dernier niveau
- */
-async function deplacerNiveauBas(index) {
-    let niveaux = null;
-    await db.modifier('niveauxEchelle', (lus) => {
-        const liste = lus || niveauxDefaut;
-
-        // Le dernier niveau ne descend pas : refus, l'écriture est annulée.
-        if (!liste[index] || index === liste.length - 1) return undefined;
-
-        // Échanger avec le niveau suivant
-        [liste[index], liste[index + 1]] = [liste[index + 1], liste[index]];
-
-        niveaux = liste;
-        return liste;
-    }, null);
-    if (!niveaux) return;
-
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-}
-
-/**
- * Bascule le verrouillage d'un niveau
- *
- * FONCTIONNEMENT:
- * 1. Récupère les niveaux depuis localStorage
- * 2. Toggle la propriété verrouille du niveau
- * 3. Sauvegarde dans localStorage
- * 4. Met à jour le cadenas immédiatement dans le DOM
- * 5. Rafraîchit le tableau pour mettre à jour l'état disabled
- *
- * PARAMÈTRES:
- * @param {number} index - Index du niveau à verrouiller/déverrouiller
- *
- * UTILISÉ PAR:
- * - Clic sur le cadenas dans la colonne Actions
- *
- * EFFET VISUEL:
- * - Cadenas 🔓 → 🔒 (ou inverse)
- * - Inputs disabled si verrouillé
- * - Opacité réduite si verrouillé
- */
-async function basculerVerrouillageNiveau(index) {
-    let niveaux = null;
-    let estVerrouille = false;
-    await db.modifier('niveauxEchelle', (lus) => {
-        const liste = lus || niveauxDefaut;
-        if (!liste[index]) return undefined;
-
-        // Toggle le verrouillage
-        liste[index].verrouille = !liste[index].verrouille;
-        estVerrouille = liste[index].verrouille;
-
-        niveaux = liste;
-        return liste;
-    }, null);
-    if (!niveaux) return;
-
-    // Mettre à jour le cadenas dans le DOM immédiatement
-    const cadenasElement = document.getElementById(`cadenas-niveau-${index}`);
-    if (cadenasElement) {
-        cadenasElement.innerHTML = estVerrouille ? '<img src="icons/icon-lock.svg" alt="Verrouillé" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="Modifiable" class="btn-inline-icon">';
-        cadenasElement.title = estVerrouille ? 'Verrouillé - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller';
-    }
-
-    // Rafraîchir le tableau pour mettre à jour l'état disabled et l'opacité
-    afficherTableauNiveaux(niveaux);
-    afficherApercuEchelle(niveaux);
-}
-
-/**
- * Réinitialise l'échelle aux niveaux par défaut
- *
- * FONCTIONNEMENT:
- * 1. Demande confirmation
- * 2. Restaure les niveaux SOLO par défaut
- * 3. Met à jour l'affichage
- *
- * UTILISÉ PAR:
- * - Bouton «Réinitialiser»
- * - await chargerEchelleTemplate() (nouvelle échelle)
- *
- * SÉCURITÉ:
- * - Confirmation obligatoire
- * - Perte des modifications actuelles
- */
-async function reinitialiserNiveauxDefaut() {
-    if (!confirm('Réinitialiser aux niveaux par défaut ? Les modifications seront perdues.')) return;
-
-    await db.set('niveauxEchelle',  niveauxDefaut);
-    afficherTableauNiveaux(niveauxDefaut);
-    afficherApercuEchelle(niveauxDefaut);
-    notifications.succes('Échelle réinitialisée aux valeurs par défaut');
-}
-
-/* ===============================
-   🎨 APERÇU VISUEL
-   =============================== */
-
-/**
- * Affiche l'aperçu visuel de l'échelle
- * Bandeau horizontal avec les niveaux colorés
- * 
- * FONCTIONNEMENT:
- * 1. Génère une div par niveau
- * 2. Applique la couleur en background
- * 3. Affiche code et plage de pourcentages
- * 4. Mise en page flex horizontale
- * 
- * PARAMÈTRES:
- * @param {Array} niveaux - Array d'objets niveau
- * 
- * UTILISÉ PAR:
- * - await chargerConfigurationEchelle()
- * - await chargerEchelleTemplate()
- * - await modifierNiveau()
- * - await ajouterNiveau()
- * - await supprimerNiveau()
- * - await reinitialiserNiveauxDefaut()
- * 
- * STYLE VISUEL:
- * - Fond semi-transparent (couleur + 20 opacity)
- * - Code en gras et couleur pleine
- * - Plage en petit texte en dessous
- */
-function afficherApercuEchelle(niveaux) {
-    const container = document.getElementById('apercuEchelle');
-    if (!container) return;
-
-    container.innerHTML = niveaux.map(niveau => `
-        <div style="text-align: center; flex: 1; padding: 10px; 
-             background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
-            <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code)}</strong>
-            <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
-        </div>
-    `).join('');
 }
 
 /* ===============================
@@ -1594,8 +730,6 @@ function mettreAJourOptionsEchelle(niveaux) {
  * 
  * LOCALSTORAGE:
  * - 'echellesTemplates': Array des échelles sauvegardées
- * - 'niveauxEchelle': Array des niveaux de l'échelle actuelle (temporaire)
- * - 'configEchelle': Objet de configuration globale
  * 
  * MODULES DÉPENDANTS:
  * - 04-productions.js: Utilise les échelles pour l'évaluation
@@ -2032,26 +1166,14 @@ window.confirmerImportEchelles = async function(donnees) {
    EXPORTS GLOBAUX
    =============================== */
 
-// Exports des nouvelles fonctions hiérarchiques
-window.afficherToutesLesEchellesNiveaux = afficherToutesLesEchellesNiveaux;
-window.ajouterNiveauAEchelle = ajouterNiveauAEchelle;
 window.dupliquerEchelle = dupliquerEchelle;
 
 // Exports des fonctions existantes (pour compatibilité)
 window.initialiserModuleEchelles = initialiserModuleEchelles;
 // Exposée pour la sentinelle #358 (garde anti-resemage du global hérité).
 window._sonder574 = _sonder574;   // sonde console #574 (lecture seule)
-window.chargerEchellesTemplates = chargerEchellesTemplates;
-window.chargerEchelleTemplate = chargerEchelleTemplate;
 window.supprimerEchelle = supprimerEchelle;
 window.sauvegarderNomEchelle = sauvegarderNomEchelle;
-window.afficherTableauNiveaux = afficherTableauNiveaux;
-window.afficherApercuEchelle = afficherApercuEchelle;
-window.ajouterNiveau = ajouterNiveau;
-window.modifierNiveau = modifierNiveau;
-window.supprimerNiveau = supprimerNiveau;
-window.basculerVerrouillageNiveau = basculerVerrouillageNiveau;
-window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
 
 // Export/Import avec licence CC
 window.exporterEchelles = exporterEchelles;
@@ -3804,14 +2926,6 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
     // cette relecture pouvait justement rendre un instantané concurrent.
     echelleTemplateActuelle = echelleModifiee;
 
-    // Mettre à jour 'niveauxEchelle' si c'est l'échelle active (compatibilité
-    // ancienne logique). Lecture conditionnelle puis écriture : même sérialisation.
-    await db.modifier('niveauxEchelle', (lus) => {
-        const niveauxEchelle = lus || [];
-        if (niveauxEchelle.length === 0 || niveauxEchelle[0].echelleId !== echelleId) return undefined;
-        return echelleModifiee.niveaux;
-    }, []);
-
     // Réafficher pour mettre à jour l'aperçu visuel et les bordures colorées
     afficherNiveauxEchelle(echelleTemplateActuelle);
     return { ok: true };
@@ -4479,14 +3593,6 @@ async function sauvegarderEchelleComplete() {
    WRAPPERS DELEGATION (Phase 5)
    =============================== */
 
-/** Handler délégué pour modifierNiveau(index, champ, valeur) */
-function modifierNiveauHandler(el) {
-    var index = parseInt(el.dataset.niveauIndex);
-    var champ = el.dataset.champ;
-    var valeur = el.value;
-    modifierNiveau(index, champ, valeur);
-}
-
 /** Handler délégué pour modifierNiveauTemp(index, champ, valeur) */
 /**
  * #524 — le champ refusé se voit, et ne le dit qu'une fois (cf. #516).
@@ -4581,8 +3687,6 @@ window.supprimerEchelleDepuisSidebar = supprimerEchelleDepuisSidebar;
 window.dupliquerEchelleActive = dupliquerEchelleActive;
 window.supprimerEchelleActive = supprimerEchelleActive;
 window.sauvegarderEchelleComplete = sauvegarderEchelleComplete;
-window.deplacerNiveauHaut = deplacerNiveauHaut;
-window.deplacerNiveauBas = deplacerNiveauBas;
 window.deplacerNiveauEchelleHaut = deplacerNiveauEchelleHaut;
 window.deplacerNiveauEchelleBas = deplacerNiveauEchelleBas;
 window.ajouterNiveauEchelle = ajouterNiveauEchelle;
@@ -4635,7 +3739,6 @@ window.importerToutEchellesTrimestreModal = importerToutEchellesTrimestreModal;
 window.importerUneEchelleTrimestre = importerUneEchelleTrimestre;
 
 // Phase 5 : Exports wrappers délégation
-window.modifierNiveauHandler = modifierNiveauHandler;
 window.modifierNiveauTempHandler = modifierNiveauTempHandler;
 window.modifierNiveauEchelleHandler = modifierNiveauEchelleHandler;
 window.modifierRepereEchelleHandler = modifierRepereEchelleHandler;          // #555
@@ -4698,8 +3801,6 @@ window.importerEchellesExternes = function(nouvellesEchelles, options) {
         db.setSync(cle('echellesTemplates'), echelles);
 
         if (!options.silencieux) {
-            if (typeof chargerEchellesTemplates === 'function') chargerEchellesTemplates();
-            if (typeof afficherToutesLesEchellesNiveaux === 'function') afficherToutesLesEchellesNiveaux();
             if (typeof afficherListeEchelles === 'function') afficherListeEchelles();
         }
     }

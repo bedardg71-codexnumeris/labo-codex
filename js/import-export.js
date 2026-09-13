@@ -759,9 +759,10 @@ const SCHEMAS_IMPORT = {
                 // ⚠ LES DEUX VOYAGENT, ET CE N'EST PAS UNE REDONDANCE.
                 // `valeur` est le champ des échelles de CATALOGUE
                 // (`echelles-bibliotheque.js`) ; `valeurCalcul` est celui que
-                // les TROIS éditeurs d'echelles.js écrivent
-                // (`data-champ="valeurCalcul"` dans `afficherTableauNiveaux`,
-                // `afficherNiveauxNouvelleEchelle` et `afficherNiveauxEchelle`),
+                // les éditeurs d'echelles.js écrivent
+                // (`data-champ="valeurCalcul"` dans `afficherNiveauxNouvelleEchelle`
+                // et `afficherNiveauxEchelle` ; le troisième, `afficherTableauNiveaux`,
+                // rendait dans un conteneur caché et est parti avec #658),
                 // et que lisent `valeurNumeriqueDuNiveau` (echelles.js — LA règle
                 // depuis #525), `_tableDepuisNiveaux` (profil-etudiant-calculs.js)
                 // et `_construireConversion` (module Consolidation, retiré). Les données

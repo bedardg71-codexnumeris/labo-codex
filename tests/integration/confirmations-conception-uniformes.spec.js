@@ -65,7 +65,6 @@ test('PREUVE · échelle · Enregistrer produit UN bandeau glissant, zéro fenê
             id: 'ECH_T', nom: 'Échelle témoin', niveaux: [{ code: 'A', nom: 'Atteint', min: 60, max: 100 }],
             description: 'témoin', dansBibliotheque: true
         }]);
-        await chargerEchellesTemplates();
         await chargerEchellePourModif('ECH_T');
         await new Promise(res => setTimeout(res, 400));
         document.getElementById('nomEchelleTemplate').value = 'Échelle témoin';
@@ -120,7 +119,6 @@ test('PREUVE · #466/CO-16 · écriture refusée = bandeau rouge SEUL, aucun « 
             id: 'ECH_X', nom: 'Échelle du trimestre A', niveaux: [{ code: 'A', nom: 'A', min: 60, max: 100 }],
             dansBibliotheque: true
         }]);
-        await chargerEchellesTemplates();
         await chargerEchellePourModif('ECH_X');
         await new Promise(res => setTimeout(res, 400));
         // Reproduction directe de la condition gardée : l'échelle chargée dans
