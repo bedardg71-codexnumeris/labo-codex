@@ -1,9 +1,9 @@
 # Consigne de démarrage – la session Cowork qui prend le relais
 
-> **Réécrite le dimanche 13 septembre 2026, 14 h 25 (Toronto)**, à la clôture d'une journée de **neuf versions** (`1.139.1` à
-> `1.140.4`), **six lots** dont cinq livrés et poussés, **huit relectures croisées**, et deux questions tranchées par Grégoire.
-> Elle REMPLACE toute version précédente ; celle de midi est archivée sous
-> `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-midi.md`.
+> **Réécrite le dimanche 13 septembre 2026, 15 h 35 (Toronto)**, à la clôture d'une journée de **dix versions** (`1.139.1` à
+> `1.140.5`), **sept lots** dont six livrés et poussés, **onze relectures croisées**, et deux questions tranchées par Grégoire.
+> Elle REMPLACE toute version précédente ; celle de 14 h 25 est archivée sous
+> `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-14h25.md`.
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées.
@@ -20,38 +20,39 @@ ne se reprend pas, tu publies les artefacts des portes et tu tiens ses fichiers 
 `_ancienne-CONSIGNE-DU-JOUR-<date>-<sujet>.md`) **et** dans le message, dans un **bloc de code** – jamais dans un artefact, jamais
 avec des retours à la ligne manuels.
 
-⚠⚠ **TU NE VOIS PAS LE CANAL ENTRE GRÉGOIRE ET CLAUDE CODE.** Arrivé deux fois le 13 : un lot mesuré « pas engagé » était livré
-quatre minutes plus tard, et 1.140.3 était en ligne pendant que je la croyais locale. **Devant un écart, remesure avant de
-conclure ; la première hypothèse est « ça a avancé », pas « le relais a échoué ».**
+⚠⚠ **TU NE VOIS PAS LE CANAL ENTRE GRÉGOIRE ET CLAUDE CODE.** Arrivé **quatre fois** le 13 : un lot mesuré « pas engagé » était
+livré quatre minutes plus tard ; 1.140.3 était en ligne pendant qu'on la croyait locale ; le lot #551 attendait son commit et
+l'avait déjà ; et **le sommet de la branche #520 a changé de SHA après que j'aie rendu mon verdict dessus**. ⮕ **Devant un écart,
+remesure avant de conclure ; la première hypothèse est « ça a avancé », pas « le relais a échoué ». Et un verdict se rend sur un
+SHA : redis lequel, et revérifie qu'il est encore le sommet.**
 
-⚠ **TU N'ÉCRIS PAS DANS `js/`.** ⚠ **`git --no-optional-locks status`**, jamais `git status` nu.
+⚠ **TU N'ÉCRIS PAS DANS `js/`, ni dans `BACKLOG.md`, ni dans `PROTOCOLE.md`** – tu en proposes le texte, Claude Code l'écrit.
+⚠ **`git --no-optional-locks status`**, jamais `git status` nu.
 ⚠ **L'horloge du montage est en UTC** : toute heure s'écrit après `TZ=America/Toronto date`, dans la même commande que l'écriture.
-✅ **Ce shell A un réseau** (corrigé le 13 : la consigne de midi disait le contraire ; `npm ping` répond). C'est ce qui permet
-d'installer `vitest` dans un banc jetable.
+✅ **Ce shell A un réseau** (`npm ping` répond). C'est ce qui permet d'installer `vitest` dans un banc jetable.
 
 ### Monter un banc d'essai – DEUX méthodes, et la deuxième n'est pas optionnelle
 
 1. **`git archive <SHA> | tar -x -C "$HOME/rel"`** – l'arbre seul, sans `.git`.
-2. **`git clone --shared --branch main <dépôt> "$HOME/rel"`** – 400 Ko, instantané. ⛔ Lecture seule : aucun `gc`, `prune`, `push`.
+2. **`git clone --shared --branch <branche> <dépôt> "$HOME/rel"`** – 400 Ko, instantané. ⛔ Lecture seule : aucun `gc`, `prune`, `push`.
 
-⚠⚠ **MESURÉ LE 13, ET ÇA A FAILLI ME FAIRE ANNONCER UN FAUX ROUGE** : la suite complète rend **7 essais rouges dans un banc sans
-`.git`** (sentinelles anti-cache, pre-push, `.gitignore`, icônes suivies par git). Dans le clone partagé, les mêmes 557 fichiers
-sont **verts**. ⮕ **Toute suite complète se prend dans le clone, jamais dans l'archive.**
+⚠⚠ **La suite complète rend 7 essais ROUGES dans un banc sans `.git`** (sentinelles anti-cache, pre-push, `.gitignore`, icônes
+suivies par git). Dans le clone partagé, les mêmes fichiers sont **verts**. ⮕ **Toute suite complète se prend dans le clone.**
 ⚠ Le `tests/node_modules` du Mac porte des binaires macOS : `npm install` dans le banc (2 s), ne lie pas le sien.
 ⛔ **N'utilise PAS `git worktree`** : l'entrée reste fantôme dans le `.git` de Grégoire.
 ⚠ **Un `npx vitest` lancé en arrière-plan MEURT à la fin de l'appel** : chaque `device_bash` est un shell neuf. La suite complète
-tient en 30 s : lance-la en synchrone avec `timeout 170`.
+tient en 27 s : lance-la en synchrone avec `timeout 170`. **Et efface ton banc à la fin.**
 
 ---
 
 ## 2 · À LIRE D'ABORD, DANS CET ORDRE
 
 1. **`OU-EN-EST-ON.md`**, sa tête – où on en est, en gestes d'utilisateur.
-2. **`PROTOCOLE.md`** – les règles, dont la 6 (ouverture) et la 8 (verdict Playwright, **Cowork fermé** : c'est GRÉGOIRE qui ferme,
-   CLAUDE CODE qui lance ; ta VM pesait 2,9 Go les soirs de panique noyau).
+2. **`PROTOCOLE.md`** – les règles, dont la 6 (ouverture) et la 8 (verdict Playwright, **Cowork fermé** : **c'est GRÉGOIRE qui
+   ferme**, pas toi – tu ne peux pas te fermer toi-même ; Claude Code lance).
 3. **`plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md`** – le tri, et son **jumeau publié** (artefact « Tri du chantier
    Labo Codex », `06cc946c-fb10-4e1c-aa3c-5409dceb0f55`). **Tenir les deux à jour après chaque lot.**
-4. **`plans de travail/CONSIGNE-DU-JOUR.md`** – le lot #551, **codé dans l'arbre, pas commité** (§ 4).
+4. **`plans de travail/CONSIGNE-DU-JOUR.md`** – le lot #520, **codé, relu, en attente de fusion** (§ 4).
 5. **`BACKLOG.md`**, l'en-tête et les fiches nommées au § 4 seulement.
 
 ⛔ **Ne lis PAS les 150 autres fichiers de `plans de travail/`.** ⛔ Jamais de `Read` par défaut sur `BACKLOG.md`, `SESSION.md`
@@ -59,22 +60,23 @@ ou `RELAIS.md` : des centaines de milliers d'octets. En-tête, puis cibler.
 
 ---
 
-## 3 · L'ÉTAT MESURÉ – le 13 septembre 2026, 14 h 25 (Toronto)
+## 3 · L'ÉTAT MESURÉ – le 13 septembre 2026, 15 h 32 (Toronto)
 
 **Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` ·
-`git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`.
+`git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` ·
+`git --no-optional-locks log --oneline -1 claude/520-ancien-systeme-echelles` · `TZ=America/Toronto date`.
 
-- **`main` = `origin/main` = `53eb0de9`, version `1.140.4`, build `0913-1400`. Rien en attente de push.** L'arbre est sur `main`.
-- **Neuf versions livrées le 13** : `1.139.1` à `1.139.4` (bandeau de version, pack démo à dix élèves, vue « tous groupes »,
-  jetons de reprise, Artefact 9) · `1.140.0` (#853) · `1.140.1` (chaîne anti-cache) · `1.140.2` (#746, #551 garde, #542) ·
-  `1.140.3` (#847, les exemples gris) · `1.140.4` (#657, un fichier `js/` neuf ne peut plus entrer sans être chargé).
-- **230 fiches ouvertes** au BACKLOG de `main`. ⚠ **Le compte se prend à la RACINE** : `grep -c '^- \[ \]'` moins le gabarit de la
-  section « Notes ». Compter les cases indentées donne 234, un faux que ce fichier et l'artefact ont porté une demi-journée.
-- **29 de ces 230 portent le verrou « après le 14 »**, posé par Grégoire lui-même.
-- **Dernier ID : #857**, et c'est un **doublon de #553** – voir § 5.
-- **Les quatre questions en attente sont toutes closes.** Q1 livrée (#847), Q3 répondue par le code (#746, le profil suit le
-  groupe), Q2 tranchée (#742, option C), Q4 tranchée (#551, « la quatrième voie »). `QUESTIONS-EN-ATTENTE-2026-09-13.md` est
-  périmé : **ne le ressers pas**.
+- **`main` = `origin/main` = `c5d0f366`, version `1.140.5`, build `0913-1457`. Rien en attente de push. Arbre propre.**
+- **Une branche vit à côté** : `claude/520-ancien-systeme-echelles` = **`d4e2923f`**, deux commits au-dessus de `main`,
+  **jamais fusionnée, jamais poussée**. C'est tout le travail en vol.
+- **Dix versions livrées le 13** : `1.139.1` à `1.139.4` · `1.140.0` (#853) · `1.140.1` (chaîne anti-cache) · `1.140.2` (#746,
+  #551 garde, #542) · `1.140.3` (#847) · `1.140.4` (#657) · `1.140.5` (#551, la suggestion sans lettre).
+- **228 fiches ouvertes** au BACKLOG de `main`. ⚠ **Le compte se prend à la RACINE** : `grep -c '^- \[ \]'` donne 229, **moins le
+  gabarit de la section « Notes »**. Écris le compte avec la commande qui le produit, à côté.
+- **29 de ces 228 portent le verrou « après le 14 »**, posé par Grégoire lui-même.
+- **Dernier ID utilisé : #857**, fusionnée dans #553. **#858 est réservé pour la fiche des tranches nues – PAS ENCORE INSCRIT.**
+- **Suite complète sur `d4e2923f`, dans le clone partagé : 558 fichiers, 6 337 essais, verts.**
+- **`QUESTIONS-EN-ATTENTE-2026-09-13.md` est périmé** : les quatre questions sont closes. **Ne le ressers pas.**
 
 ---
 
@@ -82,50 +84,66 @@ ou `RELAIS.md` : des centaines de milliers d'octets. En-tête, puis cibler.
 
 **a) À l'ouverture (règle 6)** : remesurer, et vérifier sur quelle branche est l'arbre de travail.
 
-**b) LE LOT #551 EST DANS L'ARBRE, NON COMMITÉ** – mesuré à 14 h 23 : `js/interventions.js` (les trois chaînes, faites),
-`js/changelog-data.js`, `scripts/release.mjs` (le commentaire sur le repère de bump), et les deux bancs
-(`sentinelle-746-551`, `sentinelle-lot-5-interventions-cadrage-11`). **Il attend son commit, puis TA RELECTURE CROISÉE, puis la
-release patch AVEC entrée « Nouvelles », puis le verdict et le push.** La consigne est au § 4 de `CONSIGNE-DU-JOUR.md`.
-⚠ **À vérifier en priorité dans cette relecture** : le bloc B de `sentinelle-lot-5-interventions-cadrage-11` prouvait que le bilan
-et la suggestion bougent ENSEMBLE quand un seuil se déplace. Ce couplage passait par la lettre, qui disparaît. **S'il ne tient plus
-que sur une chaîne remplacée, le cas survit mais la preuve est morte.**
+**b) LE LOT #520 EST RELU ET VERT, IL ATTEND SA FUSION.** Il retire le bloc « ANCIEN SYSTÈME » des échelles d'`index.html`
+(8 identifiants dupliqués → 0) et, avec lui, `sauvegarderConfigEchelle` et `changerTypeEchelle`, devenues mortes.
+**Il reste : le verdict Playwright complet, Cowork fermé — puis la fusion sur `main`, puis le push. PAS DE RELEASE** (aucun geste
+d'utilisateur ne change).
+⚠ **Mon verdict a été rendu sur `b07df06e` ; le sommet est `d4e2923f`.** J'ai lu le delta : quatre lignes qui ajoutent au bord C
+le garde de non-vide de la règle 10, sur son propre découpage. **Le verdict tient.** Ne le reprends pas à zéro ; contente-toi de
+vérifier que le sommet n'a pas encore bougé.
 
-**c) LES DEUX DATES** : **lundi 14**, l'orthopédagogue ouvre l'application sur son poste – ce qui casse chez elle se saura par un
-courriel, pas par une porte. **Mardi 15**, la communauté de pratique (une vingtaine) découvre l'accueil neuf. 1.140.4 est en ligne :
-ce qui avait une date est livré.
+**c) DEUX TEXTES APPROUVÉS PAR GRÉGOIRE, PAS ENCORE DANS LE DÉPÔT** – relayés à Claude Code vers 15 h 30 :
+la **règle 10** de `PROTOCOLE.md` (« une assertion négative se porte sur une tranche dont on a prouvé qu'elle n'est pas vide »)
+et la **fiche #858** (30 assertions à réparer, une fonction de découpe qui refuse, un cliquet contre `slice(indexOf(`).
+⮕ **`grep -c '^## Règle 10' PROTOCOLE.md` et `grep -c '#858' BACKLOG.md` avant de refaire quoi que ce soit** : à 15 h 32 les deux
+rendaient 0. S'ils rendent 0 encore, redemande à Grégoire de les relayer ; **ne les réécris pas de mémoire, les textes sont dans
+la conversation du 13 et ils sont approuvés au mot près.**
 
-**d) Ce qui attend son mois d'usage, et ne se rouvre pas** : #836, #838, #839, #840, plus les 29 fiches « après le 14 », plus
-**#742** (bornes d'alerte, verrou posé le 13 : elles ne deviennent réglables que si un usage réel le réclame). Ne propose pas de
-les avancer.
+**d) UNE LIGNE PÉRIMÉE DANS LE RELAIS POUSSÉ** : `c5d0f366` cite `6fbd5414` comme SHA de #520. Il a changé deux fois depuis
+(`7afa62b9`, puis `d4e2923f`). Claude Code doit le corriger dans le relais qui suivra le push de #520.
 
-**e) Tenir le tri à jour** – le markdown ET l'artefact jumeau, comptes repris sur `main`.
+**e) LES DEUX DATES** : **lundi 14**, l'orthopédagogue ouvre l'application sur son poste – ce qui casse chez elle se saura par un
+courriel, pas par une porte. **Mardi 15**, la communauté de pratique (une vingtaine) découvre l'accueil neuf. **1.140.5 est en
+ligne : tout ce qui avait une date est livré.** ⮕ **Un retour d'elle ou d'un collègue passe AVANT le backlog, sans discussion.**
+
+**f) Ce qui attend son mois d'usage, et ne se rouvre pas** : #836, #838, #839, #840, les 29 fiches « après le 14 », et **#742**
+(bornes d'alerte, verrou du 13). Ne propose pas de les avancer.
+
+**g) Tenir le tri à jour** – le markdown ET l'artefact jumeau, comptes repris sur `main`.
+
+### ⛔ Ne cherche pas de lot dans le backlog
+
+**La règle de sélection – ni arbitrage ni vérification à l'écran – a épuisé le chantier ; #520 était le dernier.** Mesuré trois
+fois le 13 : `js/interventions.js`, `js/profil-etudiant-calculs.js` et `index.html` sont vides de lots codables sans lui.
+⮕ **Ne sonde plus fichier par fichier** : ça coûte un tour pour la même réponse. **Le prochain lot est #858, et il attend d'être
+inscrit.** Après lui, il n'y a rien qui ne passe par Grégoire ou par le 14.
 
 ---
 
 ## 5 · LES ERREURS QUE J'AI PAYÉES LE 13 – ne les refais pas
 
-1. ⚠⚠ **J'AI FAIT INSCRIRE UN DOUBLON.** `#857` (le nom « français » écrit en dur) **est `#553`**, ouverte depuis le 27 août, avec
-   une mesure du 31 août qui va plus loin que la mienne : les normalisations sont DÉJÀ identiques, le désaccord est entre deux
-   chaînes SOURCE, et retirer le rabotage sans savoir d'où vient l'autre clé casserait l'appariement. ⮕ **Avant d'inscrire une
-   trouvaille, `grep` le backlog sur ses mots-clés.** Le compteur qui monte parce qu'on cherche mieux est ce que Grégoire déteste
-   le plus. *(La fusion de #857 dans #553 est dans la consigne du jour, § 6.)*
-2. **J'AI ANNONCÉ DEUX COMPTES FAUX** (234 ici, 241 dans l'artefact) en comptant des sous-cases indentées et des fiches livrées.
-   ⮕ Un compte s'écrit avec la commande qui le produit, à côté.
-3. **J'AI CADRÉ UN LOT SUR UNE PISTE QUE LA MESURE RÉFUTAIT.** Proposé à Grégoire de lire le niveau « dans l'échelle de chacun » ;
-   la grille de dépistage dit les CRITÈRES, pas l'échelle, et l'éditeur n'écrit jamais d'`echelleId` (mesuré sur ses trois
-   trimestres, `js/cartouches.js:438-450`). ⮕ **Mesurer la source d'une donnée AVANT de la promettre dans une question.**
-4. **J'AI ÉCRIT UNE INTERDICTION QUI A FAILLI BLOQUER LE LOT SUIVANT.** La consigne #847 disait « si ces assertions bougent,
-   RECULER » ; la consigne #551 exige précisément qu'elles bougent. ⮕ **Une interdiction de consigne vaut POUR SON LOT. Quand une
-   consigne renverse la précédente, écris-le en tête, en la citant** – sinon Claude Code s'arrête, et il a raison.
-5. **J'AI CRU UN JOURNAL DE BREAK-TESTS SUR UN COMPTE** (3 rouges annoncés, 2 mesurés). ⮕ La divergence venait de MA mutation, pas
-   du compte. **Repose la mutation à l'endroit exact où elle a été posée** avant d'annoncer un écart.
+1. ⚠⚠ **J'AI GÉNÉRALISÉ DEPUIS UN ÉCHANTILLON.** J'ai lu le bloc « Conteneurs cachés pour compatibilité » d'`index.html`, j'y ai
+   compté huit `<div>` vides, et j'ai écrit que **les huit** identifiants dupliqués étaient des souches. **Sept l'étaient** ;
+   `nomEchelleTemplate` (l. 5188) est le vrai champ « Nom de l'échelle ». Le bloc contenait un neuvième id sans rapport.
+   ⮕ **Quand tu écris « les N sont tous X », vérifie les N, pas un bloc qui en contient à peu près N.** Claude Code m'a corrigé.
+2. **J'AI PORTÉ UN COMPTE FAUX PARCE QUE MON `grep` NE VOYAIT PAS UN CAS À CHEVAL SUR DEUX LIGNES** (5 balises à double `class`
+   sur 17 ; la sentinelle en comptait 6 sur 19). ⮕ **Quand une sentinelle fige une liste, c'est ELLE qui fait foi, pas ton grep.**
+3. **J'AI RECOPIÉ UN COMPTE AU LIEU DE REFAIRE LA SOUSTRACTION** : la consigne disait 230 fiches, la mesure en donnait 229 puis 228.
+4. **J'AI SOUPÇONNÉ UNE ERREUR SANS LIRE LA CONVENTION** : l'entrée « Nouvelles » de #551 était au bon endroit, la règle « une
+   entrée par version MINEURE » est écrite en tête de `changelog-data.js`. ⮕ **Lis la convention du fichier avant de crier.**
+5. ⚠⚠ **J'AI FAIT INSCRIRE UN DOUBLON** (#857 = #553, ouverte depuis le 27 août). ⮕ **Avant d'inscrire une trouvaille, `grep` le
+   backlog sur ses mots-clés.** Fait pour #858, qui est propre.
+6. **UNE INTERDICTION DE CONSIGNE VAUT POUR SON LOT.** Quand une consigne renverse la précédente, écris-le en tête, en la citant –
+   sinon Claude Code s'arrête, et il a raison.
 
 ### Ce qui a tenu, et qu'il faut refaire
-- **Mesurer avant de cadrer.** Sur six lots, la mesure a corrigé la fiche à chaque fois : #847 annonçait deux sites, il y en avait
-  trois ; #746 en nommait six, deux avaient déménagé ; #657 disait « aucun défaut », il y avait quatre cas à classer.
-- **Refaire les mutations soi-même**, et **regarder ce qui reste VERT** : c'est là qu'était la trouvaille du 13 (un cas vrai par
-  construction depuis le 10 sept., découvert parce qu'une assertion négative sur une tranche vide ne peut pas rougir).
-- **Dire quand une de ses propres hypothèses est réfutée.** Fait quatre fois le 13 ; chaque fois ça a coûté une ligne et évité un lot.
+- **Reposer les mutations soi-même.** Trois fois le 13, ça a changé la conclusion : la mutation `Mf` a prouvé que le couplage
+  bilan/suggestion de #551 vivait encore ; la mutation `M3` (renommer une fonction) a montré que le bord C de #520 tenait sur les
+  deux bouts. **Un journal de mutations n'est pas une preuve ; le rouge que tu obtiens toi-même en est une.**
+- **Mesurer avant de cadrer.** Sur sept lots, la mesure a corrigé la fiche à chaque fois. #520 nommait cinq identifiants dont un
+  qui n'était pas dupliqué ; il y en avait huit.
+- **Dire quand une de ses propres hypothèses est réfutée.** Fait six fois le 13. Chaque fois : une ligne, et un lot évité.
+- **Restaurer le fichier muté et le prouver** (`cmp`), puis effacer le banc.
 
 ---
 
@@ -133,26 +151,28 @@ les avancer.
 
 - ⚠⚠ **Ce qui le met en surcharge n'est PAS la quantité de travail, c'est la quantité d'information par TOUR.** Une séance peut
   avoir quarante tours ; **chaque tour n'a qu'UN objet.** ⚠ C'est la règle qui se perd en session longue – **revérifie-la avant
-  chaque réponse.** Le 13, il a demandé deux questions d'un coup : je n'en ai posé qu'une, en disant pourquoi. C'était juste.
+  chaque réponse.**
 - **Pose ta question au moment où elle se pose**, et **ne reviens jamais trois tours plus tard** sur un item présenté avant.
 - **Toujours une recommandation argumentée**, jamais un exposé d'options neutre. **Propose-lui un texte à corriger.** Tutoiement,
   guillemets français, tiret demi-cadratin, réponse courte d'abord.
-- **RÈGLE DE SÉLECTION DES LOTS** : prendre ceux qui **ne lui demandent ni arbitrage ni vérification à l'écran**.
-  ⚠ **Mesuré le 13 : cette règle a épuisé le chantier.** Deux fichiers qu'il a nommés (`js/interventions.js`, puis
-  `js/profil-etudiant-calculs.js`) étaient VIDES de lots codables. ⮕ **Ne sonde plus fichier par fichier** : ça coûte un tour à
-  chaque fois pour la même réponse. Ce qui reste passe par lui ou par le 14.
+- **Les numéros de fiches ne lui disent rien** : rends l'avancement en gestes d'utilisateur, les numéros entre parenthèses en fin
+  de ligne.
+- **Le 13, il travaillait en parallèle sur autre chose.** Pour le choix des lots, prends ceux qui ne lui demandent ni arbitrage ni
+  écran à vérifier.
 - ⚠ **Il corrige bien, et souvent contre toi.** Quand il propose un mot, cherche d'abord ce qui le rend juste.
 
 ### Ce qui remonte jusqu'à lui, et rien d'autre
 La **didactique** · ses **données réelles** · les **mots que ses élèves et ses collègues lisent** · ce qui **l'engage publiquement**.
 ⮕ **Tout le reste, tu le tranches seul et tu le dis en une ligne, en nommant ce que tu as supposé.**
 
+⚠ **Une chose qu'il est SEUL à pouvoir faire, et ce n'est pas un arbitrage : fermer Cowork** avant le verdict Playwright. Tu ne
+peux pas te fermer toi-même. Demande-le en une phrase, et donne-lui le bloc de relais AVANT qu'il ferme – après, tu n'es plus là.
+
 ---
 
-## 7 · DEUX LEÇONS DUES À `PROTOCOLE.md` (survivantes, à faire monter)
+## 7 · CE QUI ATTEND UN MOMENT CALME
 
-Elles ne périment pas, donc elles n'ont rien à faire ici. **À proposer à Grégoire au prochain moment calme :**
-
-1. **Une assertion NÉGATIVE sur une tranche vide est vraie par construction.** Tout banc qui découpe un fichier avant d'y chercher
-   une absence doit porter un garde de non-vide sur sa tranche. Mesuré le 13 : un cas vivait ainsi depuis le 10 septembre.
-2. **Avant d'inscrire une trouvaille au backlog, vérifier qu'elle n'y est pas déjà** (§ 5.1).
+**Une seule chose reste en réserve** : la décision sur le **stock** de #520. L'ablation a tari une écriture qui aplatissait la clé
+nue `configEchelle` (`notePassage` et `codesPersonnalises` remis à vide) à chaque chargement d'échelle. **La source est tarie ; le
+stock déjà aplati ne l'est pas**, chez Grégoire comme dans toute sauvegarde Codex (`codex.js` exporte toutes les clés). C'est
+**ses données réelles** : ça se propose, ça ne se répare pas d'office. La fiche #520 le dit ; ne le rouvre pas avant qu'il en parle.
