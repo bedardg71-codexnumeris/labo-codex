@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 15 H 46 (Toronto) : #520 EN LIGNE SANS RELEASE (`eecaa703`, version inchangée 1.140.5) — POUSSÉ ; RÈGLE 10 DU PROTOCOLE ET FICHE #858 INSCRITES
+
+> **Poussé sur `origin/main`** après verdict Playwright local complet sur `eecaa703`, Cowork fermé (vert, aucune rougeur nouvelle, 0 échec) : `c5d0f366..eecaa703` — `7afa62b9` (#520 : le bloc « ANCIEN SYSTÈME » des échelles quitte `index.html`, ids dupliqués 8 → 0), `d4e2923f` (retouche de la relecture croisée de Cowork : les sept premières occurrences étaient des `<div>` vides de compatibilité, pas l'éditeur vivant ; `sauvegarderConfigEchelle` et `changerTypeEchelle` retirées ; bord C de la sentinelle), `eecaa703` (règle 10 du PROTOCOLE, fiche #858). Relecture croisée de Cowork VERTE sur `b07df06e` (15 h 31) ; `d4e2923f` n'en diffère que par quatre lignes de garde (règle 10) dans `sentinelle-520`. **Pas de release** : lot invisible (supposition de Cowork, renversable par Grégoire). Jetons : `echelles.js` 20260913b, `main.js` 20260913l. La branche `claude/520-ancien-systeme-echelles` et son worktree peuvent être retirés.
+>
+> **À Grégoire (ses données)** : le bloc retiré entretenait une écriture qui cesse — `changerTypeEchelle` réécrivait la clé nue `configEchelle` aplatie (`notePassage` et `codesPersonnalises` vides, `seuilReussite` à 60). **Source tarie, stock non réparé** : les copies déjà aplaties restent chez qui les a, et voyagent dans la sauvegarde Codex (`codex.js:304`). Les échelles d'`echellesTemplates` et le pack démo ne sont pas touchés. Seul lecteur : `chargerConfigurationEchelle`, qui la recopie dans des `<div>` cachés. Rien n'est proposé d'office.
+>
+> **Reste** : (1) **#858** (30 tranches sans garde, fonction de découpe qui refuse, cliquet) — ne demande ni arbitrage ni écran ; (2) `SESSION.md` ne couvre ni #657, ni #551, ni #520 (dernier bloc : session 48) ; (3) la fragilité de #551 est écrite dans sa fiche, non corrigée à dessein.
+>
+> Ce commit de relais porte aussi l'archive de Cowork restée sur le disque : `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-14h25.md`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, 15 H 12 (Toronto) : 1.140.5 EN LIGNE (build `0913-1457`, `62c663ba`) — POUSSÉE ; #551 (MOITIÉ AFFICHÉE) ; #520 COMMITÉ SUR SA BRANCHE, PAS SUR `main`
 
 > **Poussé sur `origin/main`** après verdict Playwright local complet sur `62c663ba`, Cowork fermé (vert, aucune rougeur nouvelle, 0 échec) : `53eb0de9..62c663ba` — `d21d320f` (#551, relecture croisée de Cowork VERTE à 14 h 56, mutation Mf reposée par elle), `291216b7` (cadrage de Cowork), `62c663ba` (release 1.140.5, intention **patch** ; l'entrée « Nouvelles » est celle de `d21d320f`, bloc 1.140). Jeton `main.js` à `20260913k` : le `j` proposé par `release.mjs` était déjà posé par `6fbd5414` (hook #826).
