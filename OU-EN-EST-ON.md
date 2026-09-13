@@ -15,6 +15,12 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **FAIT EN 1.139.1, COMMITÉE, PAS ENCORE POUSSÉE (13 SEPTEMBRE 2026, matin — release `d9e45280`, build `0913-0743` ; verdict Playwright complet lancé après ce relais) — LE BANDEAU DE VERSION DIT LA VERSION DU CODE QUI TOURNE, ET NE REVIENT PLUS À CHAQUE OUVERTURE** (ton rapport de 7 h 23, avec la capture : bandeau en 1.135.0, carte « Nouveautés » en 1.139.0).
+**Ce que tu verras** : le bandeau orange, la carte « Nouveautés », l'entête, « À propos » et le rapport de bug disent le même numéro — celui du code chargé. Une copie périmée du fichier de version sur le serveur ne peut plus le changer ; seule une version PLUS RÉCENTE s'annonce (« Une mise à jour a été déployée… »). Au premier chargement de 1.139.1, le bandeau s'affichera **une dernière fois** : ferme-le, il se tait, et la pastille rouge de « Nouveautés » s'éteint. Rien n'a été écrit d'office dans ton espace.
+**Vérifié comment** : `cd tests && npx vitest run unit/sentinelle-849-850-version-chargee.test.js` — 4 essais (réponse périmée ignorée, version plus récente annoncée sans changer la version chargée, repère stocké par la base qui tait le bandeau, fermeture relue au démarrage suivant) ; **quatre fois cassée exprès, quatre rouges**, fichier remis à l'octet (`cmp`). Dans Chrome, sur un serveur local, avec ton stock reproduit (repère du 7 août) : bandeau en 1.139.0 comme la carte, fermé, repère écrit dans la base, **tu au rechargement**. Vitest 552 / 6 038 après le commit du bump ; Playwright ciblé vert (bandeau : 10 cas ; chargements : 6 cas).
+**Ce que la mesure a trouvé en plus** : chez toi, le repère « déjà vu » valait `"0807-1529"` (guillemets compris, 7 août) — la base le réécrit ainsi à chaque démarrage, l'ancien code le lisait brut : c'est pourquoi le bandeau revenait à chaque ouverture et que la pastille restait rouge.
+**Pas établi** : qui a servi, ce matin, le fichier de version périmé (la requête demande pourtant de ne rien prendre en cache). Le correctif en neutralise l'effet, pas la source. *(#849, #850)*
+
 ✅ **FAIT EN 1.139.0, POUSSÉE (12 SEPTEMBRE 2026 — `origin/main` = `e29f734c` ; release `e71e26f1`, build `0912-1259` ; code `9ceca4ff` + correctif `6c8c91a9` de la relecture croisée de Cowork (13 h 10) ; Vitest 551 / 6 034 après le commit du bump ; verdict Playwright local vert sur `e29f734c`, Cowork fermé — huit specs de Conception vertes au second essai seulement, aucune sur Suivi ; poussée par `scripts/pousser.sh`. Porte relevée à 15 h 03, 6 sur 6 ; deux rangées sautées faute du cas) — SUIVI › INTERVENTIONS : « PLANIFIER » N'ÉCRIT PLUS RIEN AVANT « ENREGISTRER », LE BILAN LIT LES MÊMES SEUILS QUE LE RESTE DE L'APPLICATION, ET LA NOTE D'UN ÉLÈVE PARTI DU GROUPE RESTE, GRISÉE** (lot 5 du cadrage de l'onglet Suivi ; consigne de Cowork promue à 12 h 05 ; le chantier de l'orthopédagogie est clos).
 **Ce que tu verras** : « Planifier une intervention » ouvre le formulaire sans rien inscrire dans tes données ; si tu changes d'onglet sans cliquer « Enregistrer », rien ne reste — comme avant à l'écran, mais sans que l'intervention ait existé entre-temps dans une sauvegarde. « Enregistrer » l'écrit, une fois. « Annuler » ne demande rien. Même chose pour « + Nouvelle rencontre ». Dans le bilan d'une intervention complétée, la lettre et le pourcentage s'accordent avec le reste de l'application : un 64,5 % est « D » ici comme dans la suggestion d'objectif (il était « I »). La note écrite pour un élève qui n'est plus dans le groupe reste visible, en gris, avec son nom — ou son DA s'il n'est plus au trimestre — suivi de « (n'est plus dans le groupe) » ; le nombre à côté de « Notes individuelles » compte les lignes affichées.
 **Vérifié comment** : une sentinelle de 12 essais — Planifier sans écriture et Enregistrer en une seule écriture, dans les deux vues (Interventions et Rencontres), changer d'onglet, Annuler, un vieux brouillon resté en base ni affiché ni compté ni effacé, les lettres du bilan avec les seuils par défaut puis avec un seuil déplacé (le bilan et la suggestion bougent ensemble), la note d'un élève parti, y compris en anonymisation (ni son nom ni son DA) ; **treize fois cassée exprès, treize rouges**, fichier remis à l'identique (empreinte). Les bancs d'audit du 5 et du 6 septembre passés à leurs valeurs d'après. Vitest 551 fichiers / 6 032 essais.
@@ -1556,6 +1562,13 @@ chacune.
 ⮕ Le bump est passé par `scripts/release.mjs`, qui écrit les quatre points de
 façon atomique **et** bumpe les jetons anti-cache d'`index.html` (11 ce matin,
 qu'il liste). Le danger reste le bump fait à la main, et lui seul. *(#665)*
+↻ **13 septembre : un deuxième danger, qui n'était pas le bump.** Sur le site, au
+chargement, le numéro était REMPLACÉ par ce que répondait le fichier de version du
+serveur ; ce matin-là, une copie périmée : bandeau en 1.135.0, carte en 1.139.0,
+code en 1.139.0. Depuis 1.139.1, le numéro vient du code chargé, et le serveur ne
+sert plus qu'à annoncer une version plus récente. **Vérifié comment** :
+`cd tests && npx vitest run unit/sentinelle-849-850-version-chargee.test.js`,
+quatre break-tests rouges. *(#849)*
 
 ---
 
