@@ -1357,14 +1357,16 @@ function suggererObjectifIntervention(interventionId) {
 
     if (!plusFaible) return;
 
-    // Déterminer le prochain seuil atteignable
+    // Déterminer le prochain seuil atteignable. Le texte dit le pourcentage sans nommer de niveau (#551) : D et M
+    // étaient les lettres de l'échelle de Grégoire, et cette phrase s'enregistre dans le dossier de l'élève.
+    // Textes approuvés par Grégoire le 13 sept. 2026, au caractère près.
     var suggestion = '';
     if (scorePlusFaible < seuilInsuffisant) {
-        suggestion = 'Amener ' + plusFaible + ' au seuil D (' + Math.round(seuilInsuffisant * 100) + '%)';
+        suggestion = 'Amener ' + plusFaible + ' à ' + Math.round(seuilInsuffisant * 100) + ' %';
     } else if (scorePlusFaible < seuilDeveloppement) {
-        suggestion = 'Amener ' + plusFaible + ' au seuil M (' + Math.round(seuilDeveloppement * 100) + '%)';
+        suggestion = 'Amener ' + plusFaible + ' à ' + Math.round(seuilDeveloppement * 100) + ' %';
     } else {
-        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus du seuil M (' + Math.round(seuilDeveloppement * 100) + '%)';
+        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus de ' + Math.round(seuilDeveloppement * 100) + ' %';
     }
 
     objectifField.value = suggestion;

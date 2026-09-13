@@ -28,6 +28,7 @@
                 'Dans les jetons de ta pratique, une nouvelle case, «&nbsp;Permettre un délai sur une reprise&nbsp;», décide si une copie reprise peut encore recevoir un délai. Décochée par défaut : rien ne change tant que tu ne la coches pas.',
                 'Sur une pratique dont les jetons ont été réglés à sa création, le formulaire le dit et ne laisse plus rien modifier en vain.',
                 'Le profil d\'un élève, son historique d\'accompagnement, ses graphiques et le compteur de la Liste ne montrent plus que les interventions du groupe où tu es, comme la liste des interventions. Celles écrites avant le 12 septembre restent visibles partout.',
+                'Le bouton «&nbsp;Suggérer&nbsp;» d\'une intervention dit maintenant le pourcentage visé, sans nommer de niveau de l\'échelle. Les objectifs déjà enregistrés gardent leur phrase.',
             ]
         },
         {
