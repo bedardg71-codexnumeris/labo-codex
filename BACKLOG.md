@@ -2249,7 +2249,21 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⮕ **Le même patron vit en trois exemplaires jamais comparés** : `travaux-preparation.js:1248` et
   `planification-carte.js:8046` portent **les mêmes trois défauts**, non mesurés sur leur écran.
 
-- [ ] **#659 — Le chemin de LECTURE de la configuration d'échelle écrit en base à chaque entrée dans la section**.
+- [x] **#659 — Le chemin de LECTURE de la configuration d'échelle écrit en base à chaque entrée dans la section**.
+  **✓ FERMÉE PAR LA MESURE le 13 sept. 2026, sans code propre** (le correctif prévu ci-dessous n'a pas été écrit :
+  sa chaîne était déjà coupée). Trois mesures, sur `d7e88b5c` :
+  (1) `grep -c 'function sauvegarderConfigEchelle' js/echelles.js` ⮕ 0, `grep -c 'function changerTypeEchelle'` ⮕ 0 —
+  parties avec #520 (`d4e2923f`) ; (2) `chargerConfigurationEchelle` ne faisait plus que LIRE `db.get('configEchelle')` et
+  poser des `.value` sur des `<div>` ; (3) la seule écriture restante était dans `chargerEchelleTemplate`, qui suivait le
+  CHOIX d'une échelle, pas l'entrée dans la section — et #658 a mesuré le jour même que ce choix n'avait plus aucun
+  déclencheur vivant. Depuis #658, **plus aucun accès à la clé** (`sentinelle-658` C, `sentinelle-520` C réancrée).
+  ⛔ **LE STOCK, NON RÉPARÉ — À GRÉGOIRE.** Tarir n'est pas réparer. La clé est NUE (hors `cle()`) : **au plus une par
+  base**, tous trimestres confondus. Deux formes possibles : la `config` d'une échelle copiée par `chargerEchelleTemplate`,
+  ou la forme aplatie par l'ancien `sauvegarderConfigEchelle` — `{ seuilReussite: 60, notePassage, codesPersonnalises: '' }`,
+  `typeEchelle` ABSENT (`undefined` ne se sérialise pas). **Quel écran s'en sert : aucun**, ni avant #658 (des `.value`
+  sur des `<div>` cachés) ni après (aucun lecteur). Inerte. ⚠ La base réelle de Grégoire n'a PAS été lue par la session :
+  la valeur exacte chez lui n'est pas mesurée (console : `localStorage.getItem('configEchelle')`). L'effacer serait un
+  geste sur ses données : non proposé ici.
   Inscrit le 31 août 2026 par `kuekatsheu-80`, **avant tout usage**. Correctif de comportement, séparé du retrait de legacy
   #628 par arbitrage de Grégoire : deux gestes, deux rouges lisibles.
   Chaîne mesurée, chaque maillon vérifié : `js/main.js:1089` (ou `js/navigation.js:228`) → `initialiserModuleEchelles()` →
@@ -2268,7 +2282,44 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   définitions — vérifié, `:647` est l'appel dans `initialiserModuleEchelles` (définie `:608`), `:1021` l'appel dans
   `chargerConfigurationEchelle` (définie `:999`), et `changerTypeEchelle` est définie `:1073`.
 
-- [ ] **#658 — CONSTAT · `afficherToutesLesEchellesNiveaux` écrit dans un stub caché : le bouton « Modifier » qu'elle génère est inatteignable, et `chargerEchelleTemplate` n'a plus de déclencheur visible**.
+- [x] **#658 — CONSTAT · `afficherToutesLesEchellesNiveaux` écrit dans un stub caché : le bouton « Modifier » qu'elle génère est inatteignable, et `chargerEchelleTemplate` n'a plus de déclencheur visible**.
+  **✓ LIVRÉ le 13 sept. 2026** — le bloc « Conteneurs cachés pour compatibilité » retiré d'`index.html` (sous l'éditeur
+  d'échelles), avec tout ce qui rendait dedans. **Invisible à l'écran** : tout ce qui part était déjà caché. La mesure a
+  ÉLARGI la fiche : pas un conteneur, huit — et chacun n'existait qu'une fois dans le document, dans ce bloc.
+  **Verdict des huit, un par un** (mesuré sur `d7e88b5c`) :
+  · `vueEchellesNiveaux` — `afficherToutesLesEchellesNiveaux` y rendait la vue de toutes les échelles et ses boutons
+    Modifier / Dupliquer / Supprimer : jamais affichée.
+  · `selectEchelleTemplate` — `chargerEchellesTemplates` écrivait des `<option>` dans un `<div>` ; `.value` lu = `undefined`.
+  · `nomEchelleContainer` — `classList.remove('u-hide')` sous un parent qui restait `u-hide`.
+  · `typeEchelle` — servait de GARDE à `initialiserModuleEchelles`, qui ne poursuivait que parce que le stub existait ;
+    ailleurs, un `.value` posé sur un `<div>`.
+  · `seuilReussite` — un `.value` posé sur un `<div>`.
+  · `champAutreEchelle` — aucun lecteur.
+  · `tableauNiveaux` — l'ancien tableau de niveaux (`afficherTableauNiveaux`) et ses sept gestes (modifier, ajouter,
+    supprimer, monter, descendre, verrouiller, réinitialiser) : invisibles, donc inatteignables.
+  · `apercuEchelle` — l'ancien aperçu (`afficherApercuEchelle`) : invisible.
+  **`chargerEchelleTemplate` était bien inatteignable** : ses deux appelants étaient le bouton rendu dans
+  `#vueEchellesNiveaux` et `ajouterNiveauAEchelle`, elle-même sans appelant (`grep -rnw` sur `js/` et `index.html`). Code
+  mort, parti avec le lot. Avec eux : `chargerConfigurationEchelle`, `paletteCouleurs`, `modifierNiveauHandler`, le miroir
+  conditionnel de `niveauxEchelle` dans l'éditeur vivant, 18 règles CSS et deux sélecteurs `.outils-rangee` qui ne
+  servaient qu'à ces rendus, et les clés nues `niveauxEchelle` / `configEchelle` — plus aucun lecteur ni écrivain,
+  inscrites ORPHELINES dans `docs/DATA-OWNERSHIP.md` ; stock resté en place (voir #659).
+  **Preuve** : `tests/unit/sentinelle-658-aucun-conteneur-de-compatibilite.test.js` — A les huit ids absents, B aucun
+  `getElementById` d'echelles.js vers un élément que personne ne pose, C aucun accès aux deux clés dans `js/`, D les
+  fonctions parties. Chaque cas négatif porte sa garde de non-vide (règle 10). **Bancs réancrés, motif écrit dans chacun** :
+  `sentinelle-520` B et C (C passe de « une écriture » à « aucun accès » — pas ajusté, réancré), `sentinelle-505` c,
+  `sentinelle-lot-C` C.a, D.b et E.b, `sentinelle-522-lot2b` C.c (21 → 20, `modifierNiveau` partie), cliquet
+  `sentinelle-858` (lot C 2 → 1). `sentinelle-522-lot2a` **retirée avec son sujet** (les six fonctions dont elle éprouvait
+  la sérialisation n'existent plus). Spec `confirmations-conception-uniformes` : l'appel au sélecteur caché retiré.
+  **Break-tests** (script en série, « mutation posée » vérifiée avant chaque lecture, restauration `cmp` identique) : un
+  `<div id="tableauNiveaux">` reposé ⮕ 658 A (×2) et 520 B rouges ; un `getElementById('tableauNiveaux')` reposé ⮕ 658 B
+  rouge ; un `db.get('niveauxEchelle')` ⮕ 658 C rouge ; un `db.set('configEchelle')` ⮕ 520 C rouge ; `afficherTableauNiveaux`
+  redéfinie ⮕ 658 D rouge. Cinq sur cinq ; témoin vert après restauration. Vitest 559 / 6 337.
+  ⚠ **Restent, hors lot, et c'est délibéré** : `dupliquerEchelle` et `supprimerEchelle` n'avaient de déclencheur que dans
+  le rendu caché — AVANT ce lot. Leurs sentinelles (transport, #555, #468, caractérisation #476) relèvent du chantier
+  duplication : l'arbitrage de #586 du 28 août (option B, au titre de #476) tient, et ce lot ne l'a pas rouvert.
+  `mettreAJourOptionsEchelle` et les règles `.echelle-w-120` / `.echelle-padding-compact` étaient déjà sans usage avant
+  ce lot : notés ici (niveau 3), non touchés.
   Inscrit le 31 août 2026 par `kuekatsheu-80`, **avant tout usage**. Trouvé en cartographiant S10a/#628, **non touché** :
   c'est un constat d'atteignabilité, pas un retrait, et le corriger dans le lot de retrait rendrait sa sentinelle illisible.
   `js/echelles.js:214` écrit dans `document.getElementById('vueEchellesNiveaux')` — porteur unique à `index.html:5127`,

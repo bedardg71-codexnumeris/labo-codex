@@ -21,14 +21,17 @@
  * désormais à chaque appel, et les deux fonctions sont retirées. SOURCE TARIE ;
  * le stock déjà aplati n'est pas réparé (fiche #520).
  *
+ * ↻ 13 sept. 2026 (#658) : le second bloc, « Conteneurs cachés pour compatibilité »,
+ * est retiré à son tour, avec tout ce qui rendait dedans. B et C sont RÉANCRÉS —
+ * leur motif est écrit à côté de chacun.
+ *
  * BREAK-TESTS attendus : un second `id="nomEchelleTemplate"` → A et B rougissent ;
- * une seconde écriture de `configEchelle` → C rougit.
+ * un accès à `configEchelle` reposé dans echelles.js → C rougit.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -56,10 +59,18 @@ describe('#520 · A — aucun identifiant dupliqué dans index.html', () => {
     });
 });
 
-describe('#520 · B — les huit ex-doublons survivent, une fois chacun', () => {
-    it('le champ Nom de l\'éditeur et les sept conteneurs de compatibilité gardent leur id', () => {
+describe('#520 · B — le champ Nom survit une fois ; les sept conteneurs sont partis', () => {
+    // ↻ RÉANCRÉ le 13 sept. 2026 (#658). Ce cas exigeait que les HUIT ex-doublons gardent
+    // chacun leur id. Pour sept d'entre eux, l'occurrence survivante était un `<div>` vide du
+    // bloc « Conteneurs cachés pour compatibilité », sans éditeur vivant derrière : #658 retire
+    // ce bloc. Ce qui reste vrai, et que ce cas tient : le champ Nom de l'éditeur vivant est là,
+    // UNE fois, et aucun des sept ne revient.
+    it('`nomEchelleTemplate` garde son id ; les sept autres n\'existent plus', () => {
         const compte = compterIds();
-        for (const id of HUIT) expect(compte.get(id) || 0, id).toBe(1);
+        // Règle 10 : un compte vide rendrait « 0 » pour tout le monde, et le cas passerait.
+        expect(compte.size, 'identifiants lus dans index.html').toBeGreaterThan(500);
+        expect(compte.get('nomEchelleTemplate') || 0, 'nomEchelleTemplate').toBe(1);
+        for (const id of HUIT.filter((i) => i !== 'nomEchelleTemplate')) expect(compte.get(id) || 0, id).toBe(0);
     });
 
     it('le bloc « ANCIEN SYSTÈME » des échelles est parti', () => {
@@ -68,14 +79,23 @@ describe('#520 · B — les huit ex-doublons survivent, une fois chacun', () => 
 });
 
 describe('#520 · C — la clé nue `configEchelle` n\'est plus aplatie', () => {
-    it('un seul écrivain reste : `chargerEchelleTemplate`, qui y copie `echelle.config`', () => {
-        const ecritures = [...ECHELLES.matchAll(/db\.(?:set|setSync|modifier)\(\s*'configEchelle'/g)];
-        expect(ecritures.length, 'écritures de configEchelle dans echelles.js').toBe(1);
-        // Règle 10 : tranche() refuse un corps introuvable ou tronqué — un marqueur
-        // renommé jette au lieu de rendre une tranche vide où « une écriture » passerait.
-        const corps = tranche(ECHELLES, 'async function chargerEchelleTemplate(', '\nasync function ', { longueurMin: 1500 });
-        expect(corps.match(/db\.(?:set|setSync|modifier)\(\s*'configEchelle'/g) || [],
-            'l\'écriture restante doit être celle de chargerEchelleTemplate').toHaveLength(1);
+    // ↻ RÉANCRÉ DÉLIBÉRÉMENT le 13 sept. 2026 (#658) — pas ajusté pour repasser au vert.
+    // Ce cas exigeait EXACTEMENT UNE écriture de `configEchelle`, celle de
+    // `chargerEchelleTemplate`. La mesure de #658 a montré que cette fonction n'avait plus
+    // AUCUN déclencheur vivant : ses deux appelants étaient un bouton rendu dans
+    // `#vueEchellesNiveaux` (conteneur caché) et `ajouterNiveauAEchelle` (sans appelant).
+    // Le seul lecteur, `chargerConfigurationEchelle`, ne posait que des `.value` sur des
+    // `<div>`. Ni écrivain atteignable, ni lecteur utile : la clé part avec #658.
+    // Passer le compte de 1 à 0 aurait laissé un titre qui ment (« un seul écrivain reste ») ;
+    // ce que le cas tient maintenant est plus fort : AUCUN accès ne subsiste, donc rien ne
+    // peut plus l'aplatir. Le stock déjà écrit chez les gens reste, inerte (fiche #659).
+    it('aucun accès à `configEchelle` ne subsiste dans echelles.js', () => {
+        // Règle 10 : le même motif, sur la clé vivante du module, doit trouver ses accès —
+        // sinon un motif cassé rendrait ce cas vert par construction.
+        expect((ECHELLES.match(/db\.(?:get|getSync|set|setSync|modifier)\(\s*cle\('echellesTemplates'\)/g) || []).length,
+            'le motif trouve les accès de la clé vivante').toBeGreaterThan(5);
+        expect(ECHELLES.match(/db\.(?:get|getSync|set|setSync|modifier)\(\s*'configEchelle'/g) || [],
+            'accès à configEchelle dans echelles.js').toEqual([]);
     });
 
     it('les deux fonctions qui l\'aplatissaient sont parties', () => {

@@ -286,7 +286,11 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // #520 (13 sept. 2026) : 22 → 21. `enregistrerCommeEchelle` est partie avec
         // le bloc « ANCIEN SYSTÈME » d'index.html, son seul appelant. Un site de
         // moins, aucune écriture directe de plus (C.a et C.b le gardent).
-        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(21);
+        // #658 (13 sept. 2026) : 21 → 20. `modifierNiveau` est partie avec l'ancien
+        // tableau de niveaux, qui rendait dans `#tableauNiveaux` (conteneur caché
+        // d'index.html) et portait ses seuls déclencheurs. Même motif : un site de
+        // moins, aucune écriture directe de plus.
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(20);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {
