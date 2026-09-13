@@ -258,10 +258,6 @@ window.naviguerVersReglagesTrimestre = function() {
 };
 window.naviguerVersReglagesTrimestreDepuisPresences = window.naviguerVersReglagesTrimestre;
 window.rechargerPage = function() { window.location.reload(); };
-window.ouvrirImportEchellesLocal = function() {
-    var el = document.getElementById('fichier-import-echelles-local');
-    if (el) el.click();
-};
 window.ouvrirImportTxtCartouche = function() {
     var el = document.getElementById('fichier-import-txt-cartouche');
     if (el) el.click();

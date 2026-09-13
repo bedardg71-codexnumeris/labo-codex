@@ -56,8 +56,14 @@ const BLOQUANTS = [
     // ⚠ La preuve est cherchée sans son apostrophe : le source l'échappe
     // (`l\\'échelle`), et une preuve qui ne peut pas être trouvée ferait rougir
     // la garde sur sa propre écriture plutôt que sur le code.
+    // ⚠⚠ #520 (13 sept. 2026) — ET CELLE-CI AUSSI PASSAIT SUR DU CODE MORT.
+    // « échelle est obligatoire » vivait dans `enregistrerCommeEchelle()`, dont le
+    // seul appelant était un bouton du bloc « ANCIEN SYSTÈME » masqué. Le bloc et
+    // la fonction sont partis ensemble ; la preuve est réancrée sur le refus du
+    // chemin VIVANT, `sauvegarderEchelleComplete()` (le refus y existait déjà :
+    // l'astérisque disait vrai, c'est sa preuve qui regardait ailleurs).
     ['index.html', "Nom de l'échelle",
-     ["échelle est obligatoire"]],
+     ["async function sauvegarderEchelleComplete", "Veuillez entrer un nom pour l\\'échelle"]],
     ['index.html', 'Nom de la cartouche',
      ["Veuillez donner un nom à la cartouche"]],
     // ⚠⚠ #516 (26 août 2026) — CETTE PREUVE-LÀ PASSAIT À VIDE.
