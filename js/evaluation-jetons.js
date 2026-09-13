@@ -30,6 +30,18 @@
  * @param {object|null} brut - jetons bruts portés par la pratique
  * @returns {object|null} config canonique, ou null si non reconnue
  */
+/**
+ * #853 (13 sept. 2026) — « Permettre un délai sur une reprise », réglage de la PRATIQUE.
+ * Grégoire : « la question dépend de l'utilisateur, je ne veux pas imposer ma pratique à moi. »
+ * La clé n'apparaît dans la config canonique QUE si le réglage est coché : absent (toute
+ * pratique antérieure, importée ou partagée) = comportement antérieur (refus), et les configs
+ * existantes restent identiques à l'octet (sentinelle L2c).
+ * Formes : `delaiSurReprise` (PLATE, formulaire de gestion) ; `delai.surReprise` (IMBRIQUÉE, assistant).
+ */
+function _optionDelaiSurReprise(valeur) {
+    return valeur === true ? { surReprise: true } : {};
+}
+
 function _normaliserConfigJetons(brut) {
     if (!brut || typeof brut !== 'object') return null;
 
@@ -39,7 +51,8 @@ function _normaliserConfigJetons(brut) {
     if (estPlat) {
         return {
             actif: brut.actif !== false,
-            delai: { nombre: brut.nombre || 2, dureeJours: brut.delaiDuree || 2 },
+            delai: Object.assign({ nombre: brut.nombre || 2, dureeJours: brut.delaiDuree || 2 },
+                _optionDelaiSurReprise(brut.delaiSurReprise)),
             reprise: {
                 nombre: brut.nombre || 2,
                 maxParProduction: 1,
@@ -59,7 +72,8 @@ function _normaliserConfigJetons(brut) {
         const rc = brut.repriseCiblee || null;
         return {
             actif: (brut.actif !== undefined ? brut.actif : brut.activer) !== false,
-            delai: { nombre: d.nombre != null ? d.nombre : 2, dureeJours: d.dureeJours != null ? d.dureeJours : 2 },
+            delai: Object.assign({ nombre: d.nombre != null ? d.nombre : 2, dureeJours: d.dureeJours != null ? d.dureeJours : 2 },
+                _optionDelaiSurReprise(d.surReprise)),
             reprise: {
                 nombre: r.nombre != null ? r.nombre : 2,
                 maxParProduction: r.maxParProduction != null ? r.maxParProduction : 1,
@@ -339,14 +353,21 @@ function appliquerJetonDelai(evaluationId) {
         return false;
     }
 
-    // Vérifier qu'il n'y a pas déjà un jeton de reprise
-    if (evaluation.repriseDeId || evaluation.remplaceeParId) {
-        notifications.erreur('Conflit', 'Cette évaluation a déjà un jeton de reprise');
+    // Obtenir la configuration (durée du délai, et #853 : délai permis sur une reprise ?)
+    const config = obtenirConfigJetons();
+
+    // Une copie REMPLACÉE ne compte plus : jamais de délai sur elle.
+    if (evaluation.remplaceeParId) {
+        notifications.erreur('Conflit', 'Cette évaluation a été remplacée par une reprise');
         return false;
     }
-
-    // Obtenir la configuration pour la durée du délai
-    const config = obtenirConfigJetons();
+    // #853 (13 sept. 2026) — un délai SUR une reprise dépend du réglage de la pratique
+    // (`delai.surReprise`, absent = refus, comportement antérieur). Grégoire : « je ne veux pas
+    // imposer ma pratique à moi ».
+    if (evaluation.repriseDeId && !(config.delai && config.delai.surReprise === true)) {
+        notifications.erreur('Conflit', 'Ta pratique ne permet pas de délai sur une reprise (réglage des jetons)');
+        return false;
+    }
     const dureeDelai = config.delai.dureeJours;
 
     // Appliquer le jeton

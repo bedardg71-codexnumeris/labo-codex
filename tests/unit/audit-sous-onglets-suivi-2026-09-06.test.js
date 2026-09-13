@@ -511,7 +511,10 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
     });
 
     it('L-5 · Le filtre pattern offre les six patterns du code et rien d\'autre — valeur d\'après #749 lot 2 (constat d\'origine : « En progression » morte, deux patterns non filtrables)', () => {
-        const index = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n').slice(7708, 7911).join('\n');
+        // #853 (13 sept. 2026) : le MENU du filtre, par repère — plus une fenêtre de lignes fixes, que
+        // tout ajout plus haut dans index.html décale (l'absence de « progression » y aurait été
+        // vérifiée hors du menu).
+        const index = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('id="filtre-pattern-liste"')[1].split('</select>')[0];
         const calculs = readFileSync(path.join(RACINE, 'js/profil-etudiant-calculs.js'), 'utf8');
         const option = /value="progression"/.test(index);
         const patterns = ['Stable', 'Défi spécifique', 'Difficulté émergente', 'Difficulté persistante', 'Non-participation', 'Données insuffisantes', 'En progression'].map(p => [p, (calculs.match(new RegExp("'" + p + "'", 'g')) || []).length]);
@@ -648,7 +651,12 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
             .split('id="actions-presences-bar"')[1].split('</div>')[0];
         const config = readFileSync(path.join(RACINE, 'js/config.js'), 'utf8');
         const sousSectionsSuivi = (config.match(/suivi:\s*\[([\s\S]*?)\]/) || ['', ''])[1].match(/id:\s*'([^']+)'/g) || [];
-        const indexHtml = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('\n').slice(7911, 8118).join('\n');
+        // #853 (13 sept. 2026) : fenêtre découpée par REPÈRE (la sous-section de saisie), plus par
+        // numéros de ligne — sept lignes ajoutées plus haut dans index.html (réglage des jetons)
+        // l'avaient décalée hors du bouton « Rapport », et l'essai rougissait sans défaut du code.
+        // La ligne porte `<div id="suivi-saisie" class="sous-section">` : [1] = de la sous-section de
+        // saisie jusqu'à la suivante.
+        const indexHtml = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('id="suivi-saisie"')[1].split('class="sous-section"')[1];
         noter('S5', { rapportDansBarre: html.includes('ouvrirModaleRapportPresences'), rapportDansIndex: indexHtml.includes('ouvrirModaleRapportPresences'), annulerVise: (html.match(/data-param="([^"]+)"/) || [])[1], sousSectionsSuivi: sousSectionsSuivi.map(x => x.replace(/id:\s*'/, '').replace(/'$/, '')) });
         expect(indexHtml).toContain('ouvrirModaleRapportPresences');
         expect(html).toContain('ouvrirModaleRapportPresences');                   // avant #768 : absent de la barre reconstruite
