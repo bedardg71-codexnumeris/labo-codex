@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml } from './_helpers/bac-suivi.js';
+import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml, elementDom } from './_helpers/bac-suivi.js';
 
 // #853 (13 sept. 2026) — « Permettre un délai sur une reprise » est un RÉGLAGE DE LA PRATIQUE.
 // Grégoire : « la question dépend de l'utilisateur, je ne veux pas imposer ma pratique à moi. »
@@ -17,11 +17,12 @@ import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml } from './_helpe
 // `configuration.jetons.delai.surReprise` (assistant). La clé canonique `delai.surReprise`
 // n'apparaît QUE pour le booléen vrai : les configs existantes restent identiques.
 //
-// Relecture croisée de Cowork (13 sept.) : (§2) les valeurs MOLLES d'un JSON importé ("true",
-// "false", 1, 0, {}, null) n'étaient pas essayées — `!!valeur` survivait ; (§3) les essais de
-// câblage cherchaient des chaînes dans le texte des fichiers — remplacés par un ALLER-RETOUR qui
-// exécute le formulaire de gestion ; (§1) sur une pratique à jetons réglés ailleurs (assistant,
-// import), le formulaire était inerte en silence — il le dit désormais, se désactive, n'écrit rien.
+// Relectures croisées de Cowork (13 sept.) — 1re passe : valeurs MOLLES d'un JSON importé ;
+// câblage par recherche de chaînes remplacé par un ALLER-RETOUR qui exécute le formulaire ;
+// formulaire inerte en silence sur une pratique à jetons réglés ailleurs. 2e passe : (§1) sur
+// une pratique MIXTE (bloc plat + bloc de l'assistant ou d'import), l'écran affichait les valeurs
+// inertes sans le dire ; (§2) la note naissait sans son `u-hide` dans le banc, et « l'écran le
+// dit » passait à vide ; (§3a) l'assistant n'était prouvé que par son texte — il est exécuté.
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -102,10 +103,13 @@ describe('#853 · appliquerJetonDelai sur une reprise suit le réglage de la pra
  * Le formulaire de gestion RÉEL (js/pratiques-gestion.js) sur un faux document. `chargerPratiquePourModif`
  * ouvre la pratique (et pose la pratique en édition) ; `appliquerFormulaireDansCollection` est le mutateur
  * que la sauvegarde confie à `db.modifier` — exposé par le banc, appelé ici sur la collection du magasin.
+ * La note naît avec son `u-hide`, comme dans index.html : sans quoi « l'écran le dit » passerait à vide.
  */
 function monterFormulaire(pratique) {
     const store = { test_pratiquesConfigurables: [Object.assign({ id: 'PR', nom: 'Pratique banc', type: 'sommative' }, clone(pratique))] };
-    const elements = {};
+    const note = elementDom({ id: 'mat-jetons-regles-ailleurs' });
+    note.classList.add('u-hide');
+    const elements = { 'mat-jetons-regles-ailleurs': note };
     const document = fauxDocument(elements, {});
     const win = { addEventListener() {}, removeEventListener() {} };
     const globaux = {
@@ -119,13 +123,15 @@ function monterFormulaire(pratique) {
     return { win, store, elements, interne: win.__audit['pratiques-gestion.js'] };
 }
 
+const NOTE_AFFICHEE = (f) => !f.elements['mat-jetons-regles-ailleurs'].classList.contains('u-hide');
+
 describe('#853 · aller-retour : formulaire de gestion → pratique enregistrée → moteur', () => {
-    it('bloc PLAT : la case s\'affiche décochée, se coche, s\'enregistre, et le moteur accorde le délai sur la reprise', async () => {
+    it('bloc PLAT : la note reste cachée, la case s\'affiche décochée, se coche, s\'enregistre, et le moteur accorde le délai', async () => {
         const f = monterFormulaire(PLATE(false));
         await f.win.chargerPratiquePourModif('PR');
+        expect(NOTE_AFFICHEE(f)).toBe(false);
         expect(f.elements['mat-delai-sur-reprise'].checked).toBe(false);
         expect(f.elements['mat-delai-sur-reprise'].disabled).toBe(false);
-        expect(f.elements['mat-jetons-regles-ailleurs'].classList.contains('u-hide')).toBe(true);
         // L'enseignant·e coche le réglage (et laisse le reste tel quel).
         f.elements['mat-jetons-actif'].checked = true;
         f.elements['mat-delai-sur-reprise'].checked = true;
@@ -141,37 +147,81 @@ describe('#853 · aller-retour : formulaire de gestion → pratique enregistrée
         expect(f.elements['mat-delai-sur-reprise'].checked).toBe(true);
     });
 
-    for (const [nom, pratique] of [['configuration.jetons (assistant)', IMBRIQUEE(false)],
+    const CONFIG_IMPORT = { config: { jetons: { actif: true, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2 } } } };
+    const AILLEURS = [
+        ['configuration.jetons (assistant)', IMBRIQUEE(false)],
         ['configuration.jetons désactivés (assistant, `activer: false`)', { configuration: { jetons: { activer: false } } }],
-        ['config.jetons (import)', { config: { jetons: { actif: true, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2 } } } }]]) {
+        ['config.jetons (import)', CONFIG_IMPORT],
+        // 2e passe de Cowork (§1) : pratiques MIXTES — un bloc plat INERTE (coché, valeurs à part) sous un bloc lu.
+        ['MIXTE : bloc plat inerte + configuration.jetons', Object.assign({ jetons: { nombre: 5, delaiDuree: 7, delaiSurReprise: true, repriseOriginale: 'supprimer', cibleePlafond: 80 } }, IMBRIQUEE(false))],
+        ['MIXTE : bloc plat inerte + config.jetons', Object.assign({ jetons: { nombre: 5, delaiDuree: 7, delaiSurReprise: true } }, CONFIG_IMPORT)]
+    ];
+    for (const [nom, pratique] of AILLEURS) {
         it(`jetons réglés ailleurs — ${nom} : l'écran le dit, les champs sont désactivés, rien n'est écrit, le moteur n'a pas bougé`, async () => {
             const f = monterFormulaire(pratique);
             await f.win.chargerPratiquePourModif('PR');
-            expect(f.elements['mat-jetons-regles-ailleurs'].classList.contains('u-hide')).toBe(false);
+            expect(NOTE_AFFICHEE(f)).toBe(true);
             for (const id of ['mat-jetons-actif', 'mat-delai-sur-reprise', 'mat-delai-duree', 'mat-jetons-nombre']) {
                 expect(f.elements[id].disabled, id).toBe(true);
             }
             f.elements['mat-delai-sur-reprise'].checked = true;   // une case désactivée ne se coche pas ; le mutateur ne doit rien en faire
             const avant = clone(f.store.test_pratiquesConfigurables[0]);
             const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables));
-            expect(ecrite[0].jetons).toEqual(avant.jetons);   // aucun bloc plat fabriqué
+            expect(ecrite[0].jetons).toEqual(avant.jetons);   // aucun bloc plat fabriqué, ni l'inerte réécrit
+            expect(ecrite[0].configuration && ecrite[0].configuration.jetons).toEqual(avant.configuration && avant.configuration.jetons);
+            // Le moteur lit le bloc de l'assistant ou d'import, jamais le plat : pas de délai sur la reprise.
             const moteur = monterMoteur({ pratique: ecrite[0] });
             expect(moteur.win.appliquerJetonDelai('R')).toBe(false);
         });
     }
 
-    it('index.html porte la case et la note, masquée par défaut', () => {
+    it('index.html porte la case (décochée) et la note (masquée), qui dit que les valeurs affichées ne s\'appliquent pas', () => {
         const html = lire('index.html');
-        expect(html).toMatch(/<input[^>]*id="mat-delai-sur-reprise"[^>]*>/);
-        expect(html.match(/<input[^>]*id="mat-delai-sur-reprise"[^>]*>/)[0]).not.toMatch(/\bchecked\b/);
-        expect(html).toMatch(/<p id="mat-jetons-regles-ailleurs" class="u-hide\b/);
+        const caseHtml = html.match(/<input[^>]*id="mat-delai-sur-reprise"[^>]*>/);
+        expect(caseHtml).not.toBeNull();
+        expect(caseHtml[0]).not.toMatch(/\bchecked\b/);
+        const note = html.split('id="mat-jetons-regles-ailleurs"')[1].split('</p>')[0];
+        expect(note).toMatch(/^ class="u-hide\b/);
+        expect(note).toMatch(/ne peut pas les modifier, et les valeurs affichées ici ne sont pas celles qui s'appliquent/);
     });
 });
 
-describe('#853 · l\'assistant propose le réglage et ne l\'écrit que coché', () => {
-    it('toggle « Permettre un délai sur une reprise ? », non par défaut ; `surReprise` écrit seulement coché', () => {
-        const src = lire('js/wizard-pratique-v2.js');
-        expect(src).toMatch(/id: 'delaiSurReprise',\s*label: '[^']+',\s*type: 'toggle',\s*default: false/);
-        expect(src).toContain('r.delaiSurReprise === true ? { surReprise: true } : {}');
+/**
+ * L'assistant RÉEL (js/wizard-pratique-v2.js), par le harnais du golden master #319 : réponses posées dans
+ * `wizardState`, `creerPratiqueV2()`, pratique relue dans le magasin — puis rebranchée au moteur.
+ */
+async function produireParAssistant(reponsesJetons) {
+    let store = [];
+    const db = {
+        getSync: (k, d) => (k === 'pratiquesConfigurables' ? store : (k === 'modalitesEvaluation' ? {} : (d !== undefined ? d : null))),
+        setSync: (k, v) => { if (k === 'pratiquesConfigurables') store = v; }
+    };
+    const globaux = { db, cle: (k) => k, notifications: { erreur() {}, succes() {} }, normaliserIdPratique: (t) => t,
+        genererIdUnique: () => 'id-genere', echapperHtml };
+    const win = chargerScript('js/pratiques/modalites-evaluation.js', globaux);
+    chargerScript('js/wizard-pratique-v2.js', globaux, win);
+    win.wizardState.reponses = Object.assign({ calcNoteFinale: 'acceptable', seuilAcceptabilite: 100, utiliserJetons: true,
+        nbJetonsDelai: 3, dureeDelaiJours: 3, nbJetonsReprise: 2, modeleBundle: 'standard', nom: 'SPE banc' }, reponsesJetons);
+    win.wizardState.pratiqueId = 'PR';
+    win.wizardState.modeEdition = false;
+    await win.creerPratiqueV2();
+    return store[0];
+}
+
+describe('#853 · l\'assistant (exécuté) écrit le réglage seulement coché', () => {
+    it('coché : `configuration.jetons.delai.surReprise === true`, et le moteur accorde le délai sur la reprise', async () => {
+        const p = await produireParAssistant({ delaiSurReprise: true });
+        expect(p.configuration.jetons.delai).toEqual({ nombre: 3, dureeJours: 3, surReprise: true });
+        expect(monterMoteur({ pratique: p }).win.appliquerJetonDelai('R')).toBe(true);
+    });
+    for (const [nom, v] of [['décoché', false], ['jamais répondu', undefined]]) {
+        it(`${nom} : la clé n'est PAS écrite (pratique identique au golden #319), et le moteur refuse`, async () => {
+            const p = await produireParAssistant(v === undefined ? {} : { delaiSurReprise: v });
+            expect(p.configuration.jetons.delai).toEqual({ nombre: 3, dureeJours: 3 });
+            expect(monterMoteur({ pratique: p }).win.appliquerJetonDelai('R')).toBe(false);
+        });
+    }
+    it('l\'étape « Configuration des jetons » propose le réglage en toggle, non par défaut', () => {
+        expect(lire('js/wizard-pratique-v2.js')).toMatch(/id: 'delaiSurReprise',\s*label: '[^']+',\s*type: 'toggle',\s*default: false/);
     });
 });
