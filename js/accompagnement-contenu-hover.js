@@ -174,7 +174,7 @@ const TOOLTIPS = {
     'depist-seuils-restaurer':
         'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (70 / 80 / 85 %).',
     'depist-seuils-visuels':
-        'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur les graphiques de la section «Progression temporelle ACP» du profil individuel.',
+        'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur le graphique par critère du profil individuel et sur les graphiques du Suivi du groupe. Le graphique des indices A-C-P n\'en porte pas : un indice agrégé sur le trimestre ne se situe pas dans une échelle de performance.',
 
     // --- Données ---
 

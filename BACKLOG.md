@@ -2,7 +2,7 @@
 
 > **Pour Claude** : Ce fichier liste les **items ouverts** uniquement. L'historique complet des items livrés (313 items, fév-mai 2026) vit dans `BACKLOG-ARCHIVE.md`.
 >
-> **Dernier ID utilisé : #859** (13 sept. 2026, soir — #859 le repère « build vu » écrit deux fois par deux chemins à l'ouverture des nouveautés, trouvaille de la relecture croisée de #801, mesuré sans divergence possible aujourd'hui ; #858 trente assertions négatives portées sur une tranche dont rien ne prouve qu'elle n'est pas vide, mesure de Cowork, règle 10 du PROTOCOLE ; #857 `startsWith('francais')` en dur dans trois chemins de calcul d'`interventions.js`, inscrit pendant #746/#551 ; #856 le banc de la sentinelle 417 héritait de GIT_DIR sous le hook pré-push et écrivait dans le vrai .git/config, isolé le jour même ; #851 vue « tous groupes » ; #852 pack démo à 10 élèves ; #853 délai sur une reprise, réglage de la pratique ; #854 formulaire des jetons ignoré sur une pratique créée par l'assistant ; #855 Artefact 9 du pack démo en plan de rédaction, session parallèle). ⮕ **C'est la SEULE ligne qui fait foi** : les « Dernier ID » des blocs « État courant » ci-dessous sont historiques. **Un seul compteur pour les deux registres** (décision de Grégoire, 12 sept. 2026 — option C de `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`) : une fiche d'ici ET un bug de `Retours des testeurs/SUIVI-BUGS.md` prennent le numéro suivant, **et cette ligne se met à jour dans le même commit**. Aucun numéro ne resert. Avant d'en prendre un : relire cette ligne sur `main` et vérifier par grep dans les deux registres. **Règle du lien** : une ligne de SUIVI-BUGS qui répare ce que décrit une fiche NOMME la fiche (« ferme #631 »), et la case de la fiche se coche dans le même commit.
+> **Dernier ID utilisé : #860** (13 sept. 2026, soir — #860 les niveaux d'une échelle (`ZONES_IDME` en repli) encore dessinés sous le spaghetti P et les trajectoires « note finale », reste de #575 ; #859 le repère « build vu » écrit deux fois par deux chemins à l'ouverture des nouveautés, trouvaille de la relecture croisée de #801, mesuré sans divergence possible aujourd'hui ; #858 trente assertions négatives portées sur une tranche dont rien ne prouve qu'elle n'est pas vide, mesure de Cowork, règle 10 du PROTOCOLE ; #857 `startsWith('francais')` en dur dans trois chemins de calcul d'`interventions.js`, inscrit pendant #746/#551 ; #856 le banc de la sentinelle 417 héritait de GIT_DIR sous le hook pré-push et écrivait dans le vrai .git/config, isolé le jour même ; #851 vue « tous groupes » ; #852 pack démo à 10 élèves ; #853 délai sur une reprise, réglage de la pratique ; #854 formulaire des jetons ignoré sur une pratique créée par l'assistant ; #855 Artefact 9 du pack démo en plan de rédaction, session parallèle). ⮕ **C'est la SEULE ligne qui fait foi** : les « Dernier ID » des blocs « État courant » ci-dessous sont historiques. **Un seul compteur pour les deux registres** (décision de Grégoire, 12 sept. 2026 — option C de `Rapports/PROPOSITION-numerotation-bugs-testeurs-2026-09-12.md`) : une fiche d'ici ET un bug de `Retours des testeurs/SUIVI-BUGS.md` prennent le numéro suivant, **et cette ligne se met à jour dans le même commit**. Aucun numéro ne resert. Avant d'en prendre un : relire cette ligne sur `main` et vérifier par grep dans les deux registres. **Règle du lien** : une ligne de SUIVI-BUGS qui répare ce que décrit une fiche NOMME la fiche (« ferme #631 »), et la case de la fiche se coche dans le même commit.
 >
 > **Dernière bascule** : 19 juin 2026 (clôture session 1.20.0) — 14 items [x] déplacés vers BACKLOG-ARCHIVE.md (#341, #321, #343, #284, #314, #315, #316, #302, #325, #338, #298, #335, #296, #337). Bascule précédente : 10 juin 2026 (passe de triage Cowork) — 16 items, dont #303 et #295 (absorbé par #334).
 > **État courant (12 septembre 2026, soir — 1.139.0 POUSSÉE, TRI DES FICHES D'AUDIT)** : `1.139.0` poussée (`e29f734c`), porte des Interventions relevée 6/6 (2.4 et 2.5 sautées faute de cas). Ce soir, documents seulement : les 37 fiches ouvertes des audits Cadre, Conception, Évaluation et pratique de notation triées contre les huit énoncés (`plans de travail/TRI-2026-09-12-fiches-ouvertes-audits.md`) — #473 périmée et cochée, #467 gardée avant les partages de la cohorte (CO-14 et CO-39 mesurés vivants), 35 après la cohorte ; texte de #624 corrigé (#648, #649 livrés). Cases : 242 ouvertes, 287 cochées. Lot suivant : 6 du cadrage 11, l'Animation.
@@ -4615,7 +4615,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
     fermeture locale** — les badges et les barres posaient `niveau.couleur` BRUT dans un `style`. Extraite en
     `couleurCssSure`, partagée, et testée (elle n'avait aucun test). Légende des barres échappée au passage.
     Sentinelle `sentinelle-575-couleurs-badges-barres` (13 cas, **11 mutations, 11 rouges**).
-  - [ ] **⮕ SEPTIÈME site, TROUVÉ PAR LA SENTINELLE le 27 août — le graphique de progression devine encore
+  - [x] **⮕ SEPTIÈME site, TROUVÉ PAR LA SENTINELLE le 27 août — le graphique de progression devine encore
     l'échelle.** `genererGraphiqueProgression` (`profil-etudiant-sections-affichage.js:3400-3401`) lit
     `echelles.find(e => e.active) || echelles[0]` pour décrire ses zones colorées, et annonce **« Zones
     colorées basées sur l'échelle IDME par défaut »** quand il n'en trouve pas. Ni le plan SOLO ni l'audit ne
@@ -4629,6 +4629,18 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
     (#752), donc `zonesPourChart` retombe sur l'échelle du trimestre (`obtenirEchelleUtilisateur`,
     `find(e => e.parDefaut) || [0]`), et sur `ZONES_IDME` quand il n'y en a aucune. Périmètre à recadrer
     avant la consigne.
+    ⮕ **LIVRÉ le 13 sept. 2026, PAR SUPPRESSION (décision de Grégoire, option 1 : ce canvas seulement).**
+    Le graphique des indices A-C-P du profil ne porte plus AUCUNE zone de niveaux (ni lignes pointillées, ni
+    noms dans la marge droite, ni la marge elle-même), et le calcul mort de `texteZones` est parti avec la
+    lecture d'`echellesTemplates` qui ne servait qu'à lui. **Le motif, pour que personne ne rouvre la
+    question en croyant bien faire : une échelle de performance juge UNE production ; les indices A-C-P-E
+    sont des mesures agrégées en pourcentage sur un trimestre.** Superposer les paliers de l'une aux courbes
+    des autres donnait un repère qui avait l'air de dire quelque chose et ne disait rien. Ce n'était pas une
+    échelle mal choisie : c'était un objet qui n'aurait pas dû exister. ⛔ La décision ne se propage PAS au
+    graphique par critère (#752) : ses points sont des niveaux d'évaluations, ses zones ont un référent.
+    ⮕ Mesure 2a : `ZONES_IDME` et le repli sur l'échelle du trimestre servent ENCORE au spaghetti de
+    l'indice P et aux trajectoires en mode « note finale » — inscrits sous **#860**. #575 ne se coche donc
+    pas : sa fin (« plus aucun jeu de valeurs IDME en dur sur un chemin vivant ») attend #860.
   - [x] **Bilan de rétroaction** (rapport §3 n° 10) — LIVRÉ le 28 août 2026.
     `_NOMS_NIV_BILAN` et `_ORDRE_NIV_BILAN` (`evaluation-retroaction.js`) sont retirées. Elles
     imposaient l'échelle de Grégoire au bilan **remis à l'élève** : hors IDME, le libellé du niveau
@@ -4682,6 +4694,26 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⮕ **13 sept. 2026 : B10b est LIVRÉ** (lot 2 de #555, `170db4c6` et `79d913f3`) ; les deux constats de
   compte ci-dessus sont devenus des essais « le compte est ZÉRO ». Reste du lot 4 : le **septième site**
   seul, recadré à sa sous-case.
+  ⮕ **13 sept. 2026, soir : le septième site est LIVRÉ, par suppression** (le graphique des indices du
+  profil seul, décision de Grégoire). Ce qui reste de #575 est porté par **#860**.
+
+- [ ] **#860 — Deux graphiques de groupe dessinent encore les niveaux d'une échelle (`ZONES_IDME` en repli) sous des pourcentages agrégés.**
+  Inscrit le 13 sept. 2026 par la mesure 2a du septième site de #575 (décision de Grégoire : option 1 —
+  le graphique des indices du profil seul ; les deux autres en fiche neuve). `pluginEtiquettesZones`
+  dessine encore, par `zonesPourChart` → `genererZonesDepuisEchelle()` → `obtenirEchelleUtilisateur`
+  (`find(e => e.parDefaut) || [0]`, puis `ZONES_IDME` quand le trimestre n'a aucune échelle) :
+  (a) le **spaghetti du groupe, indice P** (`creerGraphiqueGroupeSpaghettiACP`) ;
+  (b) les **trajectoires en mode « note finale »** (`creerGraphiqueTrajectoiresProduction`, branche
+  `_zonesParCanvas.delete`).
+  ⮕ Le motif du septième site s'y applique mot pour mot (un pourcentage agrégé ne se situe pas dans une
+  échelle de performance) — **mais la décision ne s'y étend pas d'office : à trancher par Grégoire.** Le
+  mode « habiletés » des trajectoires et le graphique par critère (#752) lisent l'échelle des évaluations :
+  hors de cette fiche.
+  ⮕ Au même endroit : `creerAnnotationsZones` (seul autre lecteur de `ZONES_IDME`) et
+  `creerAnnotationsZonesIDME` n'ont AUCUN appelant (grep sur `js/`, 13 sept.) — code mort à retirer avec.
+  Et l'aide des trajectoires (`index.html`, « seuils 65 % (D), 75 % (M), 85 % (E) ») écrit des valeurs
+  IDME en dur.
+  **Fin** : `ZONES_IDME` n'existe plus, et #575 se coche avec cette fiche.
 
 - [x] **#576 — Le bilan de rétroaction est VIDE quand la grille d'origine est introuvable, alors que le panneau d'à côté sait s'en passer.**
   **Trouvé par la porte terrain 2.6 du 28 août 2026, sur les données réelles d'H2026 de Grégoire** (captures
