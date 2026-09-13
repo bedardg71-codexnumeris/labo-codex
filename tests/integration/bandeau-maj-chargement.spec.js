@@ -43,6 +43,28 @@ test('build vu différent : le bandeau s\'affiche, au présent, sans bouton Rech
     await expect(page.locator('#bandeau-mise-a-jour-texte')).toContainText('Nouvelle version chargée');
     await expect(page.locator('#bandeau-mise-a-jour-texte')).not.toContainText('Rafraîchis');
     await expect(page.locator('#bandeau-mise-a-jour [data-action="rechargerPage"]')).toBeHidden();
+    await expect(page.locator('#bandeau-mise-a-jour [data-action="afficherModalNouveautes"]')).toBeVisible();
+});
+
+test('#801 · le bandeau MÈNE aux nouveautés : un clic ouvre la modale et referme le bandeau', async ({ page }) => {
+    await ouvrir(page, '0101-0000');
+    const bandeau = page.locator('#bandeau-mise-a-jour');
+    await expect(bandeau).toHaveClass(/\bvisible\b/);
+    const bouton = page.locator('#bandeau-mise-a-jour [data-action="afficherModalNouveautes"]');
+    await expect(bouton).toBeVisible();
+    // el.click() plutôt que page.click : ce dernier coûte plusieurs secondes sur le runner.
+    await bouton.evaluate((el) => el.click());
+    await expect(page.locator('#modalNouveautes')).toHaveClass(/\bactif\b/);
+    await expect(bandeau).not.toHaveClass(/\bvisible\b/);
+    expect(await page.evaluate(() => window.db.getSync('monitorage-build-vu'))).toBe(BUILD);
+});
+
+test('#801 · mise à jour DISTANTE : « Recharger » seul, jamais deux boutons côte à côte', async ({ page }) => {
+    await ouvrir(page, BUILD);
+    await page.evaluate(() => window.afficherBandeauVersion('9.9.9', '9999-9999', true));
+    await expect(page.locator('#bandeau-mise-a-jour')).toHaveClass(/\bvisible\b/);
+    await expect(page.locator('#bandeau-mise-a-jour [data-action="rechargerPage"]')).toBeVisible();
+    await expect(page.locator('#bandeau-mise-a-jour [data-action="afficherModalNouveautes"]')).toBeHidden();
 });
 
 test('fermer le bandeau marque le build vu : au rechargement suivant, plus de bandeau', async ({ page }) => {

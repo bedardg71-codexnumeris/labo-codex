@@ -199,6 +199,11 @@ function afficherModalNouveautes() {
         ecrireRepereVu(CLE_BUILD_VU, BUILD_ID);
     }
 
+    // #801 : les nouveautés sont ouvertes — le bandeau « au chargement » qui les
+    // annonçait n'a plus rien à dire. Le bandeau DISTANT reste : il demande un
+    // rechargement que la modale ne remplace pas.
+    if (bandeauBuildLocal) fermerBandeauMiseAJour();
+
     mettreAJourPastille();
 }
 
@@ -403,12 +408,15 @@ function afficherBandeauVersion(beta, build, distant) {
     elBuild.textContent = `BÊTA PUBLIQUE ${beta} (BUILD ${build})`;
     elTexte.textContent = distant
         ? `Une mise à jour a été déployée en arrière-plan pendant que tu travailles. Rafraîchis la page pour l\u2019activer. Tes données persistent.`
-        : `Nouvelle version chargée. Les nouveautés sont dans la carte « Nouveautés », en bas de l\u2019accueil. Tes données persistent.`;
+        : `Nouvelle version chargée. Tes données persistent.`;
     elDate.textContent = `${dateStr} à ${heureStr}`;
 
-    // Le bouton Recharger n'a de sens que pour une mise à jour DISTANTE.
+    // Le bouton Recharger n'a de sens que pour une mise à jour DISTANTE ; celui des
+    // nouveautés, que pour une version DÉJÀ chargée (#801). Jamais les deux côte à côte.
     const btnRecharger = bandeau.querySelector('[data-action="rechargerPage"]');
     if (btnRecharger) btnRecharger.hidden = !distant;
+    const btnNouveautes = bandeau.querySelector('[data-action="afficherModalNouveautes"]');
+    if (btnNouveautes) btnNouveautes.hidden = distant;
     bandeauBuildLocal = distant ? null : build;
 
     bandeau.classList.add('visible');
