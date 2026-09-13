@@ -2,13 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 
 const html = lire('index.html');
-const AIDE = html.slice(html.indexOf('id="section-aide"'), html.indexOf('fin section-aide'));
+const AIDE = tranche(html, 'id="section-aide"', 'fin section-aide');
 const TXT = AIDE.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
 
 // SENTINELLE — lot D de l'audit de conformité de l'Aide (10 sept. 2026).

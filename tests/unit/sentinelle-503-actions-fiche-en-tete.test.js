@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // Sentinelle #503 (25 août 2026) — LES ACTIONS DE LA FICHE SUIVENT LEUR
 // FORMULAIRE, MAINTENANT QU'ELLES N'Y SONT PLUS.
@@ -90,7 +91,7 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
             // au panneau de métadonnées, qui le suit immédiatement.
             ['id="infoCartouche"', 'id="panneauMetadonneesCartouche"', 'sauvegarderCartoucheComplete']
         ]) {
-            const dedans = indexHtml.slice(indexHtml.indexOf(debutMarq), indexHtml.indexOf(finMarq));
+            const dedans = tranche(indexHtml, debutMarq, finMarq);
             expect(dedans, action).not.toContain('data-action="' + action + '"');
         }
     });

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // L'ACCOMPAGNEMENT DOIT DIRE CE QUE L'APP FAIT (16 août 2026)
@@ -112,8 +113,7 @@ describe('Accompagnement de la carte · il doit dire ce que l’app FAIT', () =>
         // pourquoi il n'y a pas de `data-tooltip` ici contient forcément le mot
         // `data-tooltip`, et l'assertion d'absence le trouvait. Documenter une
         // décision ne doit jamais faire rougir le test qui la protège.
-        const brut = carte.slice(carte.indexOf('function enTeteIdentiteHTML'),
-            carte.indexOf('function contenuNoeudHTML'));
+        const brut = tranche(carte, 'function enTeteIdentiteHTML', 'function contenuNoeudHTML');
         const bloc = brut.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
         expect(bloc).toMatch(/famille/);
         expect(bloc).toMatch(/formative ou certificative/);

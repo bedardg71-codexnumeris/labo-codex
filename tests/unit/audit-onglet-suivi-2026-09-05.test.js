@@ -38,6 +38,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -520,7 +521,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         const cSom = b.store.test_indicesCP[DA.SILENCE].actuel.C;
         const hist = b.win.calculerIndicesHistoriques(DA.SILENCE, '2026-02-15');
         const srcSom = readFileSync(path.join(RACINE, 'js/pratiques/pratique-sommative.js'), 'utf8');
-        const corpsC = srcSom.slice(srcSom.indexOf('    calculerCompletion(da) {'), srcSom.indexOf('    detecterDefis(da) {'));
+        const corpsC = tranche(srcSom, '    calculerCompletion(da) {', '    detecterDefis(da) {');
         noter('B4', { cSom, cSnapshot: hist.C, completionSomLitStatutRemise: /statutRemise/.test(corpsC) });
         expect(cSom).toBe(25);
         expect(hist.C).toBe(0);
@@ -955,7 +956,7 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         const lecteurs = ['js/profil-etudiant-rapport.js', 'js/snapshots.js', 'js/export-resultats-finaux.js', 'js/synthese-retroaction-data.js', 'js/export-pdf.js', 'js/tableau-bord-apercu.js', 'js/etudiants.js', 'js/graphiques-progression.js']
             .filter(f => /confidentielEtudiants|servicesAdaptes|sousCategorie|portraitStructure/.test(lire(f)));
         const modes = lire('js/modes.js');
-        const casAnonymises = (modes.slice(modes.indexOf('function anonymiserDonnees')).match(/case '(\w+)':/g) || []).map(s => s.replace(/case '|':/g, ''));
+        const casAnonymises = (tranche(modes, 'function anonymiserDonnees').match(/case '(\w+)':/g) || []).map(s => s.replace(/case '|':/g, ''));
         const confidentiel = lire('js/profil-etudiant-confidentiel.js');
         const consoleSensible = /console\.\w+\([^)]*(infos|donnees|notes)/.test(confidentiel);
         const litBrut = /db\.getSync\(cleConfidentiel|db\.getSync\(clePresences/.test(confidentiel);

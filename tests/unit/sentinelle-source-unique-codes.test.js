@@ -16,6 +16,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -27,7 +28,7 @@ describe('source unique des codes · sources', () => {
     it('U.a la phrase de Grégoire, telle quelle, avec le NOM de la grille', () => {
         const s = outils();
         expect(s).toContain("'Les codes de cette copie viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.'");
-        const f = s.slice(s.indexOf('function _phraseSourceCodes'), s.indexOf('function genererContenuErreursFr'));
+        const f = tranche(s, 'function _phraseSourceCodes', 'function genererContenuErreursFr');
         expect(f).toMatch(/_grilleCourante\.nom/);
         expect(f).not.toMatch(/_grilleCourante\.id/);
     });
@@ -35,11 +36,11 @@ describe('source unique des codes · sources', () => {
     it('U.b gouvernée : l\'engrenage reste et porte la phrase, pas de bandeau, l\'écran de réglage n\'offre que la phrase ; le repli reste éditable', () => {
         const s = outils();
         // L'engrenage est toujours rendu, et son titre est la phrase sous gouvernance…
-        const barre = s.slice(s.indexOf("palette.id = 'travaux-palette-erreurs-fr'"), s.indexOf("id=\"travaux-errfr-contenu\""));
+        const barre = tranche(s, "palette.id = 'travaux-palette-erreurs-fr'", "id=\"travaux-errfr-contenu\"");
         expect(barre).toMatch(/_copieGouvernee\(\) \? _phraseSourceCodes\(\) : 'Personnaliser'/);
         expect(barre).not.toMatch(/if \(!_copieGouvernee\(\)\)/);
         // …la palette ne porte PAS de bandeau (coup d'œil : trop de place)…
-        const contenu = s.slice(s.indexOf('function genererContenuErreursFr'), s.indexOf('function genererContenuTampons'));
+        const contenu = tranche(s, 'function genererContenuErreursFr', 'function genererContenuTampons');
         expect(contenu).not.toMatch(/travaux-errfr-source/);
         // …et l'écran de réglage se garde AVANT de lire les codes du repli.
         const ecran = s.slice(s.indexOf('function ouvrirEditionRetroErreursFr'), s.indexOf('function reinitialiserRetroErreursFr'));

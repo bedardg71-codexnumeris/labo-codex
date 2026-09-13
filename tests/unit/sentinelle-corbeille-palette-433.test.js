@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // =======================================================================
 // SENTINELLE — la corbeille de la palette (#433, 8 août 2026)
@@ -228,7 +229,7 @@ describe('#433 · D — la corbeille est une vraie cible tactile', () => {
         // lignes plus bas — le bloc mesuré devenait quasi vide et l'assertion
         // « les couleurs viennent de la palette » passait sur du vide. Même
         // piège de sous-chaîne que la sentinelle #157 le matin même.
-        const bloc = css.slice(css.indexOf('.planif-corbeille {'), css.indexOf('\n.palette-icon {'));
+        const bloc = tranche(css, '.planif-corbeille {', '\n.palette-icon {');
         expect(bloc).not.toMatch(/var\(--danger[,)]/); // token inexistant dans la palette
         expect(bloc).toContain('var(--rouge-erreur');
     });

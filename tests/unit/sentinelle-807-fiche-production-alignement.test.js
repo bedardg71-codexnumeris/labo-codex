@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE #807 — LA FICHE PRODUCTION NE SE DÉSALIGNE PLUS QUAND UN CHAMP
 // DISPARAÎT.
@@ -66,7 +67,7 @@ describe('#807 · la fiche production ne dépend plus de la hauteur du voisin', 
 
     it('3. les trois choix s\'étirent au lieu de se caler sur leur propre contenu', () => {
         const bloc = sectionFicheProduction();
-        const champGrille = bloc.slice(bloc.indexOf('id="champGrille"'));
+        const champGrille = tranche(bloc, 'id="champGrille"');
         const styleInline = champGrille.slice(0, champGrille.indexOf('>'));
         expect(styleInline, 'align-items: end fait démarrer les trois libellés à trois hauteurs')
             .not.toMatch(/align-items:\s*end/);

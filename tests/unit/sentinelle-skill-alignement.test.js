@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LE SKILL DU MODULE DOIT DIRE LE VRAI VOCABULAIRE (16 août 2026)
@@ -62,8 +63,7 @@ describe('SKILL_Alignement · le vocabulaire documenté est celui du code', () =
         // Les anciens noms ont le droit de figurer — le skill doit dire qu'ils
         // sont legacy. Ce qu'il ne doit plus faire, c'est les lister dans le
         // TABLEAU des types de liens, où une session vient chercher quoi écrire.
-        const tableau = skill.slice(skill.indexOf('| Type de lien |'),
-            skill.indexOf('Anciens identifiants'));
+        const tableau = tranche(skill, '| Type de lien |', 'Anciens identifiants');
         expect(tableau, 'le tableau des types de liens est introuvable').toBeTruthy();
         for (const mort of ['vise', 'mobilise', 'prerequis_de', 'evalue_par',
                             'soutenu_par', 'revise_dans', 'sequence_avant']) {

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // Sentinelle #464 (lot L2 « clés nues », 21 août 2026) — verrouille :
 //   1. le REGISTRE : les 16 clés inscrites par l'inventaire CT-26 (dont
@@ -241,7 +242,7 @@ describe('#574 étendu · 6 — le versement des 8 échelles collègues est RETI
         expect(biblio).toContain('window._sonderEchellesDisciplinaires = _sonderEchellesDisciplinaires;');
         // Elle ne DOIT rien écrire : c'est ce qui autorise Grégoire à la lancer
         // sur ses données réelles sans préalable.
-        const corps = biblio.slice(biblio.indexOf('async function _sonderEchellesDisciplinaires'));
+        const corps = tranche(biblio, 'async function _sonderEchellesDisciplinaires');
         const fin = corps.indexOf('\nwindow._sonderEchellesDisciplinaires');
         const code = corps.slice(0, fin)
             .replace(/\/\*[\s\S]*?\*\//g, '')

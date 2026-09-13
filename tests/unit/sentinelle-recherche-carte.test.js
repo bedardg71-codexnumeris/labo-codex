@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // =======================================================================
 // SENTINELLE — recherche dans la Carte d'alignement (15 août 2026)
@@ -407,10 +408,7 @@ describe('recherche · F — cliquets de source et de cascade', () => {
         // Règle non négociable du projet : tout innerHTML qui injecte du
         // texte saisi passe par echapperHtml(). Titre, libellé de type,
         // couleur, id et les trois tronçons de l'extrait — six insertions.
-        const rendu = sourceCarte.slice(
-            sourceCarte.indexOf('function rendreResultatsRecherche()'),
-            sourceCarte.indexOf('function allerAuResultat(')
-        );
+        const rendu = tranche(sourceCarte, 'function rendreResultatsRecherche()', 'function allerAuResultat(');
         expect(rendu).toContain('echapperHtml(titre)');
         expect(rendu).toContain('echapperHtml(r.label)');
         expect(rendu).toContain('echapperHtml(r.id)');
@@ -468,10 +466,7 @@ describe('recherche · F — cliquets de source et de cascade', () => {
 
     it('aucun handler inline dans la zone de recherche', () => {
         // CSP `script-src \'self\'` : zéro onclick=/onchange= dans le HTML.
-        const zone = html.slice(
-            html.indexOf('id="planif-recherche-zone"'),
-            html.indexOf('<div class="planif-toolbar-droite">')
-        );
+        const zone = tranche(html, 'id="planif-recherche-zone"', '<div class="planif-toolbar-droite">');
         expect(zone).not.toMatch(/\son[a-z]+=/);
     });
 

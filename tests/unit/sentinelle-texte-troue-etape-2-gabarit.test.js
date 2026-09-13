@@ -37,6 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { jetonAuMoins } from './_helpers/jeton-anticache.js';
+import { tranche } from './_helpers/tranche.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
@@ -393,7 +394,7 @@ describe('texte troué 2 · E — les invariants statiques du gabarit', () => {
     });
 
     it('E.b le bloc projection n\'a toujours aucun handler inline, et échappe ce qui vient de la grille', () => {
-        const bloc = grilles.slice(grilles.indexOf('function rendreBlocProjectionAlgo'), grilles.indexOf('function modifierProjectionCritereGrille'));
+        const bloc = tranche(grilles, 'function rendreBlocProjectionAlgo', 'function modifierProjectionCritereGrille');
         expect(bloc).not.toMatch(/\bon(click|change|input|blur|focus)\s*=/);
         expect(bloc).toMatch(/inconnus\.map\(j => '« ' \+ esc\(j\) \+ ' »'\)/);
     });

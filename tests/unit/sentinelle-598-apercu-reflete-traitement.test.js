@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -86,7 +87,7 @@ describe('#598 volet A — l\'aperçu reflète le traitement réel', () => {
     });
 
     it('cas 4 — l\'import passe par le SSOT, pas par une constante locale', () => {
-        const corps = uiJs.slice(uiJs.indexOf('async function executerImportPipeline'));
+        const corps = tranche(uiJs, 'async function executerImportPipeline');
         // Le `const optBalance = true;` local est exactement ce qui permettait à
         // l'import et à l'aperçu de diverger.
         expect(corps).not.toMatch(/const optBalance\s*=\s*true/);

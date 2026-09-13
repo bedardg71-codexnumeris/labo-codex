@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // =======================================================================
 // SENTINELLE #445 — le tracé de lien vers un objectif, et la légende
@@ -297,8 +298,7 @@ describe('#445 · F/G — la légende des pastilles est découvrable', () => {
         expect(css).toMatch(/^\.planif-legende-pastilles\s*\{/m);
         expect(css).toMatch(/\.planif-legende-pastille-ligne \.planif-obj-pastille\s*\{[^}]*cursor:\s*default/);
         // Aucune couleur en dur : la palette passe par les variables.
-        const bloc = css.slice(css.indexOf('.planif-legende-pastilles {'),
-                               css.indexOf('/* === #403 — « Objectifs servis »'));
+        const bloc = tranche(css, '.planif-legende-pastilles {', '/* === #403 — « Objectifs servis »');
         expect(bloc).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);
     });
 });

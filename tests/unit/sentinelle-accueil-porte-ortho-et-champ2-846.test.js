@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE — LA PORTE DE L'ORTHOPÉDAGOGIE SUR L'ACCUEIL, ET LE CHAMP 2 QUI NE SE CONTREDIT PLUS
 // (consigne du 12 septembre 2026, 10 h 25 ; #846 et la carte de l'accueil).
@@ -160,7 +161,7 @@ describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont tou
         const titres = [...html.matchAll(/<div class="accueil-action-titre">([^<]*)<\/div>/g)].map(m => m[1]);
         expect(titres).toEqual(TACHES);
         expect(html.match(/class="accueil-action"/g)).toHaveLength(8);
-        const carte = html.slice(html.indexOf('class="accueil-porte-ortho"'), html.indexOf('<div class="accueil-section-label">Tâches</div>'));
+        const carte = tranche(html, 'class="accueil-porte-ortho"', '<div class="accueil-section-label">Tâches</div>');
         expect(carte).not.toContain('accueil-action');
     });
 });

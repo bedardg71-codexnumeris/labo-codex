@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLES — #387 + #388 + #389 (audit qualité 5 août 2026, rapports A6/C1/C2)
 //
@@ -69,7 +70,7 @@ describe('#388 · purge des trimestres orphelins durable (fonctionnel)', () => {
 
     it('le corps de purgerTrimestresOrphelins ne contient PLUS de localStorage.removeItem (résurrection au boot)', () => {
         const src = lire('trimestres.js');
-        const corps = src.slice(src.indexOf('function purgerTrimestresOrphelins'), src.indexOf('window.listerTrimestresOrphelins'));
+        const corps = tranche(src, 'function purgerTrimestresOrphelins', 'window.listerTrimestresOrphelins');
         expect(corps).not.toMatch(/localStorage\.removeItem\(/);
         expect(corps).toMatch(/db\.removeSync\(cle\)/);
     });

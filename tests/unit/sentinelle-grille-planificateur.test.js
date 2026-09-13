@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // LOT 2 du planificateur en grille (plan du 6 août 2026).
 //
@@ -328,7 +329,7 @@ describe('lot 3 · déplacement dans la grille', () => {
 
     it('la hauteur de la palette n’est plus le goulot (plafond relevé)', () => {
         const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
-        const regle = css.slice(css.indexOf('.planif-nav-contenu {'), css.indexOf('.planif-sommaire {'));
+        const regle = tranche(css, '.planif-nav-contenu {', '.planif-sommaire {');
         expect(regle).toMatch(/max-height: min\(720px, 70vh\)/);
         expect(regle).not.toMatch(/min\(420px, 55vh\)/);
     });

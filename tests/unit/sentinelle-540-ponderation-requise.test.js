@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { position } from './_helpers/tranche.js';
 
 // =======================================================================
 // SENTINELLE #540 LOT A — LA PONDÉRATION EST REQUISE, ET DITE COMME TELLE
@@ -311,8 +312,9 @@ describe('#540-E — le refus est dit, sans dialogue natif', () => {
 
     it('la règle est UNIQUE : aucun contournement pour les fiches existantes', () => {
         // Une exemption s'écrirait forcément en regardant si on est en édition.
-        const zoneRefus = corps.slice(corps.indexOf('!d.ponderation') - 800,
-                                       corps.indexOf('!d.ponderation') + 600);
+        const i = position(corps, '!d.ponderation');
+        const zoneRefus = corps.slice(Math.max(0, i - 800), i + 600);
+        expect(zoneRefus.length, 'la zone autour du refus').toBeGreaterThan(1000);
         expect(zoneRefus).not.toContain('coursEnEditionV2');
     });
 });

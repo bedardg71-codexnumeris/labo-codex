@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE-CLIQUET — 23 AOÛT 2026 · L'OPTIMISATION DE LA CI NE DOIT PAS
 // CRÉER D'ANGLE MORT.
@@ -157,7 +158,7 @@ describe('CI · le job Playwright ne saute que si RIEN d\'observable n\'a bougé
         expect(workflow).toMatch(/^  vitest:\n/m);
         expect(workflow).toMatch(/^  playwright:\n(?:.*\n)*?    needs: vitest\n    if: needs\.vitest\.outputs\.playwright == 'oui'\n/m);
         // Vitest juge TOUT : aucun `if:` au niveau du job.
-        const blocVitest = workflow.slice(workflow.indexOf('\n  vitest:\n'), workflow.indexOf('\n  playwright:\n'));
+        const blocVitest = tranche(workflow, '\n  vitest:\n', '\n  playwright:\n');
         expect(blocVitest).not.toMatch(/^    if:/m);
         // Un job sauté doit rester `skipped` : pas de `continue-on-error`, pas de
         // `if: always()` qui transformerait un saut en vert.

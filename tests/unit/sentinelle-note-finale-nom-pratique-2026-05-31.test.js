@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // #127 (31 mai 2026, Grégoire) — demande d'affichage : montrer QUELLE pratique de
 // notation produit la note finale de l'élève, près du bouton « Réglages de la
@@ -36,7 +37,7 @@ describe('#127 · nom de la pratique active dans le panneau de note finale', () 
 
     it('la classe CSS existe et n\'introduit pas de couleur en dur (variables only)', () => {
         expect(css).toMatch(/\.note-finale-pratique-nom\s*\{/);
-        const bloc = css.slice(css.indexOf('.note-finale-pratique-nom'), css.indexOf('.note-finale-pratique-nom') + 300);
+        const bloc = tranche(css, '.note-finale-pratique-nom', 300);
         // pas de hex codé en dur dans le bloc (mode sombre/clair via variables)
         expect(bloc).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);
     });
