@@ -841,13 +841,15 @@ function sauvegarderHoraireV2() {
         // d'étudiant·e qui porte son numéro. Menu VIDE ⇒ on dit où ça se passe ; menu garni
         // mais rien de choisi ⇒ le refus d'avant suffit. Les mots sont approuvés par Grégoire
         // (13 sept. 2026) : l'accordéon est nommé tel qu'il s'affiche.
+        // ⚠ LE GESTE D'ABORD, l'explication ensuite. Porte 2.3b (13 sept.) : la bulle disparaît
+        // après la PREMIÈRE phrase — dans l'ordre inverse, l'accordéon n'était jamais lu.
         const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
         const aucunGroupe = !selectGroupe || !Array.from(selectGroupe.options).some(o => o.value);
         if (aucunGroupe) {
             notifications.erreur(
                 'Aucun groupe d\'étudiant·es pour l\'instant',
-                'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e. ' +
-                'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus.'
+                'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus. ' +
+                'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e.'
             );
         } else {
             notifications.erreur('Veuillez sélectionner un groupe associé');
