@@ -1,0 +1,84 @@
+import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// =======================================================================
+// SENTINELLE #478 — le parcours de rentrée (CT-28 b et c), 13 sept. 2026
+// =======================================================================
+//
+// Le comportement est tenu dans un vrai navigateur par
+// tests/integration/parcours-rentree-478.spec.js. Cette sentinelle-ci tient les
+// trois ancrages au niveau du texte, parce que le hook pre-push ne lance QUE
+// Vitest : une régression y rougit avant de partir, pas au verdict suivant.
+//
+//   A. le rafraîchisseur de « Groupe associé » est EXPORTÉ sur window. Le module
+//      des étudiant·es l'appelait déjà, par son nom nu, derrière un typeof ; sans
+//      export, ce nom n'existait pas hors de l'IIFE des horaires et l'appel n'a
+//      jamais tourné. Exporté, le nom nu se résout sur window (break-test du
+//      13 sept. : réécrire l'appel en `window.` ne change rien au navigateur) —
+//      c'est donc l'EXPORT qui est verrouillé, et la présence de l'appel ;
+//   B. le refus d'un menu VIDE porte les mots approuvés par Grégoire, mot pour
+//      mot, et nomme l'accordéon tel qu'index.html l'affiche ;
+//   C. la question « Veux-tu l'activer immédiatement ? » n'est posée que s'il
+//      existe un trimestre actif à désactiver.
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racine = path.resolve(__dirname, '..', '..');
+const lire = (rel) => fs.readFileSync(path.join(racine, rel), 'utf8');
+
+const horaires = lire('js/trimestre-v2-horaires.js');
+const etudiants = lire('js/trimestre-v2-etudiants.js');
+const liste = lire('js/trimestre-v2-liste.js');
+const index = lire('index.html');
+
+function corpsDe(source, nomFonction) {
+    const debut = source.indexOf(`function ${nomFonction}(`);
+    expect(debut, `fonction ${nomFonction} introuvable`).toBeGreaterThan(-1);
+    const suite = source.indexOf('\nfunction ', debut + 10);
+    return source.slice(debut, suite === -1 ? undefined : suite);
+}
+
+describe('#478 A — « Groupe associé » se rafraîchit après un ajout d\'étudiant·e', () => {
+    it('le rafraîchisseur est exporté sur window par le module des horaires', () => {
+        expect(horaires).toMatch(/^window\.populerDropdownGroupesHoraireV2\s*=\s*populerDropdownGroupesHoraireV2;/m);
+    });
+
+    it('le module des étudiant·es l\'appelle à chaque rechargement de la liste', () => {
+        const corps = corpsDe(etudiants, 'chargerListeEtudiantsV2');
+        expect(corps).toMatch(/populerDropdownGroupesHoraireV2\(tousLesEtudiants\);/);
+    });
+});
+
+describe('#478 B — le refus d\'un menu vide dit où naît un groupe', () => {
+    const corps = corpsDe(horaires, 'sauvegarderHoraireV2');
+
+    it('porte les mots approuvés, titre et détail', () => {
+        expect(corps).toContain('\'Aucun groupe d\\\'étudiant·es pour l\\\'instant\'');
+        expect(corps).toContain('\'Un groupe apparaît dans ce menu dès qu\\\'un·e étudiant·e y est inscrit·e. \'');
+        expect(corps).toContain('\'Ajoute ou importe ta liste dans l\\\'accordéon « Groupe d\\\'étudiant·es », juste au-dessus.\'');
+    });
+
+    it('le message se choisit sur ce que le menu OFFRE : vide ⇒ les mots neufs', () => {
+        expect(corps).toContain('const aucunGroupe = !selectGroupe || !Array.from(selectGroupe.options).some(o => o.value);');
+        expect(corps).toMatch(/if \(aucunGroupe\) \{\s*notifications\.erreur\(\s*'Aucun groupe d\\'étudiant·es/);
+    });
+
+    it('l\'accordéon nommé existe à l\'écran sous ce libellé exact', () => {
+        expect(index).toMatch(/id="accordeon-groupe-etudiants"[\s\S]{0,400}<\/span> Groupe d'étudiant·es\s*<\/h3>/);
+    });
+
+    it('menu garni sans choix : le refus d\'avant est conservé', () => {
+        expect(corps).toContain('notifications.erreur(\'Veuillez sélectionner un groupe associé\')');
+    });
+});
+
+describe('#478 C — le premier trimestre d\'un poste est actif', () => {
+    it('la question d\'activation est court-circuitée quand aucun trimestre n\'est actif', () => {
+        const corps = corpsDe(liste, 'ouvrirModalNouveauTrimestre');
+        expect(corps).toMatch(/const aucunTrimestreActif = !\(typeof obtenirTrimestreActif === 'function' && obtenirTrimestreActif\(\)\);/);
+        expect(corps).toMatch(/const activer = aucunTrimestreActif \|\| confirm\(/);
+        // Un seul confirm d'activation : pas de second chemin qui reposerait la question.
+        expect(corps.match(/confirm\(/g)).toHaveLength(1);
+    });
+});

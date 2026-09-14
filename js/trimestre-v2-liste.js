@@ -600,8 +600,13 @@ function ouvrirModalNouveauTrimestre() {
         return;
     }
 
-    // Demander si on veut l'activer
-    const activer = confirm(
+    // Demander si on veut l'activer — seulement s'il y a un trimestre actif à désactiver.
+    // #478 (c) : sans trimestre actif, un trimestre créé inactif laissait TOUT le Cadre sans
+    // préfixe de trimestre (mesuré : un groupe-cours partait dans la clé nue et restait
+    // invisible après activation jusqu'au rechargement), et le formulaire du groupe-cours
+    // n'avait rien à présélectionner. Le premier trimestre d'un poste vierge est donc actif.
+    const aucunTrimestreActif = !(typeof obtenirTrimestreActif === 'function' && obtenirTrimestreActif());
+    const activer = aucunTrimestreActif || confirm(
         `Créer le trimestre ${nomSession(session)} ${annee} ?\n\n` +
         `Veux-tu l'activer immédiatement ?\n` +
         `(Le trimestre actuel sera désactivé)`

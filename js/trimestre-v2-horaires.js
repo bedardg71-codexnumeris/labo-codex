@@ -837,7 +837,21 @@ function sauvegarderHoraireV2() {
     const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
 
     if (!groupeAssocie) {
-        notifications.erreur('Veuillez sélectionner un groupe associé');
+        // #478 (b) : un groupe n'a pas de bouton « Créer » — il naît de la première fiche
+        // d'étudiant·e qui porte son numéro. Menu VIDE ⇒ on dit où ça se passe ; menu garni
+        // mais rien de choisi ⇒ le refus d'avant suffit. Les mots sont approuvés par Grégoire
+        // (13 sept. 2026) : l'accordéon est nommé tel qu'il s'affiche.
+        const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
+        const aucunGroupe = !selectGroupe || !Array.from(selectGroupe.options).some(o => o.value);
+        if (aucunGroupe) {
+            notifications.erreur(
+                'Aucun groupe d\'étudiant·es pour l\'instant',
+                'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e. ' +
+                'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus.'
+            );
+        } else {
+            notifications.erreur('Veuillez sélectionner un groupe associé');
+        }
         return;
     }
 
@@ -1157,6 +1171,10 @@ window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
 window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
 window.changerFormatSeancesHoraireV2 = changerFormatSeancesHoraireV2;
 window.chargerHorairesV2 = chargerHorairesV2;
+// #478 (b) : lu par `chargerListeEtudiantsV2` (trimestre-v2-etudiants.js), une AUTRE IIFE.
+// Sans cet export, son `typeof` rendait toujours faux : un groupe ajouté n'apparaissait
+// dans « Groupe associé » qu'en rouvrant le formulaire (mesuré le 13 sept. 2026).
+window.populerDropdownGroupesHoraireV2 = populerDropdownGroupesHoraireV2;
 // Exports migrés du bloc principal résidu (lignes 4524-4530 originelles).
 window.chargerHoraireGroupeActifV2 = chargerHoraireGroupeActifV2;
 window.chargerSeancesV2 = chargerSeancesV2;
