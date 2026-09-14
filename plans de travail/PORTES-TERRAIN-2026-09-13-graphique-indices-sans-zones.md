@@ -55,7 +55,9 @@
 
 | Porte | Verdict |
 |---|---|
-| §0 (4 rangées) | à faire |
-| 2.1.1 · 2.1.2 · 2.2.1 | à faire |
+| §0 (4 rangées) | ✅ **passées** |
+| 2.1.1 · 2.1.2 · 2.2.1 | ✅ **passées** |
+
+⮕ **VERDICT RENDU PAR GRÉGOIRE le 13 septembre 2026, 20 h 12 (Toronto) : 7 rangées sur 7, aucun échec.** Relevé collé depuis l'artefact jumeau. ⚠ **La porte comptait SEPT rangées, pas six** — quatre au §0, trois au §2 ; le compte a été refait, pas recopié. **0.3 est passée**, donc la version regardée était bien la neuve : c'est ce qui rend les six autres recevables.
 
 ⮕ Après ton verdict : release (patch), push par `scripts/pousser.sh` (Cowork fermé : le verdict Playwright se lancera), puis coup d'œil sur `app.codexnumeris.org`.
