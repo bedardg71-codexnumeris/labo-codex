@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.7 (1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
+> **Version** : 1.8 (14 septembre 2026 — §1.4 : correction du fondement juridique cité. La loi ne «exclut» pas les fins personnelles, elle délimite son objet à l'exploitation d'une entreprise (art. 1525 C.c.Q.) ; même correction que `PRIVACY.md` v1.3. Historique antérieur : v1.7, 1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -128,8 +128,19 @@ de l'article 1525 du Code civil du Québec. *Inférence à confirmer par
 un juriste en cas de doute* : dans cette configuration, la *Loi sur la
 protection des renseignements personnels dans le secteur privé*
 (modifiée par la Loi 25) ne s'applique vraisemblablement pas – son
-article premier, deuxième alinéa, exclut les renseignements collectés
-«à des fins exclusivement personnelles, domestiques ou artistiques».
+article premier délimite l'objet de la loi aux renseignements personnels
+traités «à l'occasion de l'exploitation d'une entreprise au sens de
+l'article 1525 du Code civil». Hors d'une telle exploitation, la loi ne
+trouve pas application — ce n'est pas une exclusion à invoquer, c'est un
+champ d'application qui n'est pas atteint.
+
+*Corrigé le 14 septembre 2026 : ce passage invoquait un «article premier,
+deuxième alinéa» excluant les renseignements collectés «à des fins
+exclusivement personnelles, domestiques ou artistiques». Cette formulation
+est celle du RGPD européen, non de P-39.1 : l'article 1 de la loi
+québécoise ne porte aucune exclusion de ce type, et son deuxième alinéa
+traite du support des renseignements. La conclusion est inchangée ; son
+fondement est corrigé. Voir `PRIVACY.md` v1.3, même correction.*
 
 **Renseignements personnels effectivement traités par l'infrastructure** :
 
