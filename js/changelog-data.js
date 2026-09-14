@@ -31,6 +31,7 @@
                 'Le bouton «&nbsp;Suggérer&nbsp;» d\'une intervention dit maintenant le pourcentage visé, sans nommer de niveau de l\'échelle. Les objectifs déjà enregistrés gardent leur phrase.',
                 'Quand une nouvelle version s\'ouvre, son bandeau porte un bouton «&nbsp;Voir les nouveautés&nbsp;» qui les affiche, au lieu de dire où les chercher.',
                 'Le graphique de progression d\'un élève n\'affiche plus les paliers d\'une échelle de notation en arrière-plan. Ces courbes cumulent des pourcentages sur tout le trimestre : les situer dans une échelle faite pour juger une seule production donnait un repère qui n\'en était pas un. Le graphique par critère, lui, garde les siens.',
+                'La préparation d\'un premier trimestre se fait d\'un trait : le trimestre créé est actif d\'emblée, et quand un horaire n\'a encore aucun groupe à associer, un message dit où le créer — dans l\'accordéon «&nbsp;Groupe d\'étudiant·es&nbsp;», juste au-dessus.',
             ]
         },
         {
