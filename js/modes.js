@@ -1162,6 +1162,9 @@ window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
 window.anonymiserGroupe = anonymiserGroupe;
+// 14 sept. 2026 : lu par la liste d'élèves du Cadre (trimestre-v2-etudiants.js), qui
+// affichait les vrais noms en anonymisation. Sans cet export, le nom est privé à cette IIFE.
+window.anonymiserDonnees = anonymiserDonnees;
 window.estModeeLectureSeule = estModeeLectureSeule;
 window.obtenirOptionAffichageDA = obtenirOptionAffichageDA;
 window.definirOptionAffichageDA = definirOptionAffichageDA;

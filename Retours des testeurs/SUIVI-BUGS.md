@@ -133,6 +133,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (14 septembre 2026 — l'anonymisation couvre la liste d'élèves du Cadre)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 861 | Grégoire (`BUG_"grégoire"_2026-09-14_12-31-29.txt`, rencontre de la CoP) | 14 sept. 2026, 12 h 31 | 14 sept. 2026 | 0914-1250 (1.140.9) | Mode anonymisation : Cadre › Trimestre › « Groupe d'étudiant·es » affiche les vrais noms | Lecture brute : `chargerListeEtudiantsV2` (`js/trimestre-v2-etudiants.js`) lisait `db.get(cle('groupeEtudiants'))` sans passer par l'anonymisation (depuis au moins le 17 mai) → rangées par `anonymiserDonnees`, exporté sur window par `js/modes.js` (privé à l'IIFE) ; Modifier/Supprimer refusés en anonymisation (le formulaire et le confirm nommaient l'élève) ; cellules échappées (règle 1). Source seulement, aucun stock. Sentinelle Vitest + `anonymisation-cadre-liste-etudiants.spec.js`, break-test 5/6 et 2/2 rouges |
+
 ## Corrigés (13 septembre 2026, suite — la vue « Cours (tous groupes) » fond de nouveau les groupes)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
