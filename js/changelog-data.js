@@ -30,6 +30,7 @@
                 'Le profil d\'un élève, son historique d\'accompagnement, ses graphiques et le compteur de la Liste ne montrent plus que les interventions du groupe où tu es, comme la liste des interventions. Celles écrites avant le 12 septembre restent visibles partout.',
                 'Le bouton «&nbsp;Suggérer&nbsp;» d\'une intervention dit maintenant le pourcentage visé, sans nommer de niveau de l\'échelle. Les objectifs déjà enregistrés gardent leur phrase.',
                 'Quand une nouvelle version s\'ouvre, son bandeau porte un bouton «&nbsp;Voir les nouveautés&nbsp;» qui les affiche, au lieu de dire où les chercher.',
+                'Le graphique de progression d\'un élève n\'affiche plus les paliers d\'une échelle de notation en arrière-plan. Ces courbes cumulent des pourcentages sur tout le trimestre : les situer dans une échelle faite pour juger une seule production donnait un repère qui n\'en était pas un. Le graphique par critère, lui, garde les siens.',
             ]
         },
         {
