@@ -1,42 +1,58 @@
-# Consigne du jour — le septième site de #575 : retirer les zones du graphique de progression
+# Consigne du jour — #864 : le verrouillage des cartouches sort de l'application
 
-> Écrite le 13 septembre 2026, 19 h 35 (Toronto), sur `8acf6a42` (non poussé ; `origin/main` = `28c5fefa`).
-> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-575-b10b-constat.md`.
-> ⚠ B10b est constaté livré et coché. Ce qui suit est **le dernier site ouvert de #575**, et le seul endroit du dépôt où une table IDME en dur survit sur un chemin vivant.
-> ⚠⚠ **Une première version de cette consigne, écrite vingt minutes plus tôt, disait de RÉPARER le choix de l'échelle. Grégoire a tranché l'inverse.** Si tu as lu cette version-là, oublie-la.
+> Écrite le 14 septembre 2026, 17 h 55 (Toronto), sur `f48170d7` (`1.140.11` releasée, **NON POUSSÉE** ; `origin/main` = `21987bc4` = 1.140.10).
+> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-14-787-doubles-class.md`.
+> ⚠⚠ **NE POUSSE PAS `1.140.11` TELLE QUELLE.** Elle ne porte que le correctif de #863, qui vient de perdre son objet. Ce lot le remplace.
 
-## 0 · D'abord, pousse
+---
 
-`8acf6a42` est commité et non poussé. `scripts/pousser.sh`, à la demande de Grégoire. Ce sont des commentaires et deux jetons anti-cache : `version.json` reste à `1.140.6`, rien ne change à l'écran.
+## 1 · CE QUI S'EST PASSÉ, EN TROIS PAS
 
-## 1 · La décision de Grégoire — SUPPRESSION PURE, et le motif qui la porte
+1. La porte terrain de #787 demandait de regarder le bouton « Déverrouiller » d'une cartouche verrouillée. **Grégoire ne l'a pas trouvé.**
+2. Mesure : le bandeau était caché par une classe que le code ne retirait jamais ⮕ **#863**, corrigé et releasé en `1.140.11`.
+3. **Grégoire ne l'a toujours pas trouvé** — et la mesure suivante a dit pourquoi : **le seul bouton qui verrouille une cartouche vit dans deux fonctions que rien n'appelle.** L'état `verrouille` ne peut donc pas devenir vrai par un geste de l'application.
 
-**Les zones colorées du graphique de progression sont RETIRÉES. On ne cherche pas quelle échelle elles devraient suivre : elles n'en suivent aucune, parce qu'elles n'ont rien à situer.** Tranché par Grégoire le 13 septembre au soir. Le motif est à inscrire dans la fiche, pour que personne ne rouvre la question en croyant bien faire : **une échelle de performance juge UNE production ; les indices A-C-P-E sont des mesures agrégées en pourcentage sur un trimestre.** Superposer les paliers de l'une aux courbes des autres donne un repère qui a l'air de dire quelque chose et qui ne dit rien. Ce n'est pas un défaut de configuration — c'est un objet qui n'aurait pas dû exister.
+⮕ **Tranché par Grégoire le 14 sept. au soir** : *« Maintenant que tout est namespacé, je crois que c'est réglé. Je n'ai jamais senti que j'avais besoin de verrouiller une cartouche. »* ⮕ **Ablation, règle zéro-dette.**
 
-⛔ **Et cette décision ne se propage PAS au graphique par critère** (#752, livré le 11 sept.). Ses points SONT des niveaux d'évaluations : ses zones ont un référent, elles restent, et elles sont justes. Ne les touche pas, et n'invoque pas cette consigne pour le faire.
+## 2 · CE QUI PART
 
-## 2 · LA MESURE QUI PASSE AVANT LE CODAGE
+Tout est dans `js/cartouches.js` sauf indication. Les numéros de ligne sont ceux de `f48170d7` ; **travaille par symbole, pas par ligne.**
 
-Rends ces trois réponses avant d'écrire une ligne. Elles fixent le périmètre, et l'une d'elles peut l'élargir.
+**a) Deux fonctions mortes, entières** — aucun appelant vivant dans tout le dépôt (leurs seules occurrences hors définition sont **des lignes commentées** aux lignes 352, 1076, 1606-1607, 1870, et des blocs de doc) :
+- `afficherListeCartouches` (1399-1442)
+- `afficherToutesLesGrillesEtCartouches` (1466-1559) — et son export `window.` (3294)
 
-**(a) Qui d'autre lit `ZONES_IDME` et `zonesPourChart` ?** Si ces zones ne servent qu'au graphique de progression, la table en dur part avec elles et #575 se ferme entièrement. Si un autre graphique en dépend, tu retires la zone POUR CE CANVAS seulement et tu dis lequel reste — dans ce cas #575 ne se coche pas, et il faut une fiche neuve pour l'autre site.
+**b) La bascule** : `basculerVerrouillageCartouche` (1587-1614) et son export `window.` (3296).
 
-**(b) Qu'est-ce qui disparaît exactement à l'écran ?** Nomme-le : lignes pointillées, noms dans la marge droite, légende, axe, autre chose. `_zonesParCanvas` n'a aucune entrée pour ce canvas, donc les zones y viennent du repli — vérifie-le au lieu de me croire, c'est une mesure de Cowork reprise de ta propre lecture.
+**c) Trois morceaux morts logés dans des fonctions VIVANTES** — c'est la partie délicate, ne touche que ces morceaux :
+- `chargerCartouchePourModif` : le bloc `if (cartouche.verrouille) { … } else { … }` qui cherche `#alerteVerrouillage` et `#btnDeverrouillerCartouche` (1772-1788) ;
+- `supprimerCartoucheConfirm` : la garde `if (cartouche && cartouche.verrouille) { alert('Déverrouille ce cartouche…') }` (1824-1827) — une phrase que personne n'a jamais pu lire, et qui porte une faute d'accord ;
+- `afficherBanqueCartouches` : `verrouIcone` (3502) et sa consommation dans le gabarit (3508).
 
-**(c) Reste-t-il un texte, ailleurs, qui ANNONCE ces zones ?** `texteZones` est mort depuis mars, mais un titre, une infobulle ou une phrase d'aide peut encore promettre des « zones colorées » à l'utilisateur. Un graphique dont la légende annonce ce qui n'est plus dessiné est pire que le défaut qu'on répare. Cherche par le CONTENU, sur le dépôt entier, pas par le nom de la variable.
+**d) `index.html`** : le bloc `#alerteVerrouillage` avec son bouton `#btnDeverrouillerCartouche`, et la règle `.hidden-my15-warning` du bloc `<style>` — **si et seulement si** elle ne sert plus à aucune autre balise (mesuré le 14 : un seul site, mais remesure).
 
-## 3 · Le geste
+**e) `tests/integration/cartouche-verrouillee-bandeau-863.spec.js`** — il part avec son sujet. ⚠ Le geste le plus risqué d'un lot : vérifie par le CONTENU que les symboles qu'il éprouve n'existent plus nulle part, pas par le nom du fichier.
 
-Retire, dans le même commit : le calcul de `texteZones` (`js/profil-etudiant-sections-affichage.js`, vers `:3211-3230`) — code mort depuis `4e38bcce` (21 mars), qui a retiré du HTML la ligne qui l'affichait ; la lecture de `echellesTemplates` qui ne sert qu'à lui ; les zones du graphique de progression ; et, sous réserve de la mesure 2a, `ZONES_IDME` elle-même.
+## 3 · CE QUI NE PART PAS — et c'est délibéré
 
-⚠ **Le verrou `tests/unit/sentinelle-575-couleurs-badges-barres.test.js:130` exige encore la chaîne `'IDME par défaut'` et rougira. C'est le signal attendu, pas une régression.** Ne le fais pas passer en changeant un chiffre : réécris l'assertion pour qu'elle CONSTATE le retrait — zéro occurrence — afin qu'elle rougisse si quelqu'un réintroduit une table de niveaux dans ce graphique.
+**Le champ `verrouille` reste dans les sept schémas d'échange** : `js/partage-schemas.js` (338, 431, 451) et `js/import-export.js` (623, 813, 917, 958). ⮕ **C'est ce qui VOYAGE**, et la révision du 1er septembre de la règle zéro-dette protège exactement ça : un fichier déjà exporté ou partagé doit rester lisible. Le champ devient toléré et ignoré.
 
-## 4 · La preuve
+**`verrouille: false` reste écrit à la création et à la duplication** (212, 483, 1656, 3815). Motif : le retirer toucherait la forme de ce qui s'exporte, pour zéro gain. Un booléen à faux que plus rien ne lit ne coûte rien.
 
-Sentinelle avec break-tests rouges vérifiés isolément, restauration vérifiée à chaque fois. **Le cas qui prouve quelque chose** : un montage sans aucune échelle dans le trimestre, et un autre avec une échelle dont les niveaux ne sont pas I/D/M/E — le graphique rend la même chose dans les deux, parce qu'il ne lit plus d'échelle du tout. Un montage sur l'échelle de Grégoire ne prouve rien : c'est celle où la table en dur tombe juste par coïncidence, et c'est ce qui a caché ce défaut pendant un an.
+**Le STOCK n'est pas réécrit.** Les cartouches déjà en base chez Grégoire portent `verrouille: false` ; il devient inerte, comme les clés de #659. ⛔ **Écrire dans ses données remonte à lui** — on mesure, on sépare, on n'y touche pas.
 
-⚠ **Le rendu change, donc une porte terrain est due.** Ce graphique est du Chart.js dans le profil d'un élève : le verdict se prend à l'écran, pas dans `node`. Prépare la porte selon le skill `portes-terrain` — Grégoire devra regarder, et il le sait.
+## 4 · LA PREUVE EXIGÉE
 
-## 5 · Ce que ce lot ne rouvre pas
+1. **Aucun symbole survivant** : `grep -rn` sur `basculerVerrouillageCartouche`, `afficherListeCartouches`, `afficherToutesLesGrillesEtCartouches`, `alerteVerrouillage`, `btnDeverrouillerCartouche`, `verrouIcone` ⮕ zéro occurrence hors de l'archive du backlog.
+2. **Une sentinelle de non-retour** : plus aucun lecteur de `cartouche.verrouille` dans `js/` **hors des schémas d'échange** nommés au § 3. Elle doit rougir si on réintroduit un lecteur.
+3. **Break-test à montrer** : remets un lecteur, la sentinelle rougit **en le nommant**.
+4. **Rien ne change à l'écran** : la banque de cartouches et l'ouverture d'une cartouche rendent la même chose qu'avant. C'est une ablation de code mort.
+5. Vitest depuis `tests/`, jamais depuis la racine.
 
-#752 (voir §1) · #555 · #553 · #551 · la question de savoir si un indice agrégé se situe dans une échelle de niveaux — tranchée le 13 septembre, elle ne se reprend pas. Aucun bump, aucune release avant le verdict de la porte.
+## 5 · APRÈS
+
+- **La version** : `1.140.11` est déjà écrite par `release.mjs` sur `f48170d7`, non poussée. **Tranche seul** comment y loger ce lot — l'ajouter sous la même `1.140.11`, ou re-releaser — et dis en une ligne ce que tu as choisi.
+- **Pas d'entrée « Nouvelles »** : rien ne change pour un utilisateur. (Décision déjà prise pour #863, même motif.)
+- **Pas de porte terrain.** Aucune vérification à l'écran : la règle du skill `portes-terrain` dit qu'aucune porte n'est due si une machine peut répondre.
+- **Au BACKLOG** : inscrire **#864** (le texte vient dans le message de Grégoire), le cocher dans le même commit s'il est livré, et **ajouter une ligne à #863** disant qu'elle est retirée par #864 — le correctif était juste, c'est la question qu'il réparait qui n'existe plus. Mettre à jour « Dernier ID utilisé » de #863 à #864.
+- ⚠ **Deux commits attendent le push** après celui-ci : la 1.140.11 de #863 et ce lot.
