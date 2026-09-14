@@ -104,12 +104,23 @@ async function chargerListeEtudiantsV2() {
     const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
     toggleDisplay(btnSupprimerGroupe, groupeFiltre);
 
-    // Trier par nom
-    etudiants.sort((a, b) => {
-        const nomA = `${a.nom || ''} ${a.prenom || ''}`.toLowerCase();
-        const nomB = `${b.nom || ''} ${b.prenom || ''}`.toLowerCase();
-        return nomA.localeCompare(nomB);
-    });
+    // Mode anonymisation (bug du 14 sept. 2026, rencontre de la CoP) : cette liste lisait la
+    // clé brute et affichait les vrais noms. Seules les RANGÉES passent par anonymiserDonnees
+    // (modes.js) — `da` y reste le vrai DA, que portent les menus d'action ; le compteur et le
+    // menu des groupes gardent la liste brute (des effectifs, des numéros). Pas de repli sur
+    // la liste brute si anonymiserDonnees manquait : une erreur vaut mieux qu'un nom en clair.
+    const enAnonymisation = db.getSync('modeApplication', 'normal') === 'anonymisation';
+    const rangees = enAnonymisation ? anonymiserDonnees('groupeEtudiants', etudiants) : etudiants;
+
+    // Trier par nom — en anonymisation, l'ordre aléatoire d'anonymiserDonnees est gardé
+    // (comme dans groupe.js) : trier sur les pseudonymes ne dirait rien.
+    if (!enAnonymisation) {
+        rangees.sort((a, b) => {
+            const nomA = `${a.nom || ''} ${a.prenom || ''}`.toLowerCase();
+            const nomB = `${b.nom || ''} ${b.prenom || ''}`.toLowerCase();
+            return nomA.localeCompare(nomB);
+        });
+    }
 
     let html = `
         <table>
@@ -127,28 +138,32 @@ async function chargerListeEtudiantsV2() {
             <tbody>
     `;
 
-    etudiants.forEach((e, index) => {
+    rangees.forEach((e, index) => {
         const sa = e.sa === 'Oui' || e.sa === true ? '<span class="icone-inline icone-inline--check" aria-label="Oui"></span>' : '';
-        // Formater le groupe sur 5 chiffres (ex: 00001)
-        const groupe = e.groupe ? normaliserNumeroGroupe(e.groupe) : '—';
+        // Formater le groupe sur 5 chiffres (ex: 00001) — en anonymisation, le groupe est
+        // déjà remplacé par anonymiserGroupe et s'affiche tel quel.
+        const groupe = e.groupe ? (enAnonymisation ? e.groupe : normaliserNumeroGroupe(e.groupe)) : '—';
+        // daAffichage : 'ANONYME' ou le vrai DA selon l'option d'affichage (modes.js).
+        const daVisible = enAnonymisation ? e.daAffichage : e.da;
         const statut = e.statut || '';
         const classeStatut = statut === 'inactif' || statut === 'décrochage' ? ' etudiant-inactif' : '';
+        // Règle de sécurité 1 : noms, DA et groupe viennent d'un collage Omnivox — échappés.
         html += `
             <tr class="${classeStatut}">
-                <td>${e.da || '—'}</td>
-                <td style="text-align: center;">${groupe}</td>
-                <td>${e.nom || '—'}</td>
-                <td>${e.prenom || '—'}</td>
+                <td>${echapperHtml(daVisible || '—')}</td>
+                <td style="text-align: center;">${echapperHtml(groupe)}</td>
+                <td>${echapperHtml(e.nom || '—')}</td>
+                <td>${echapperHtml(e.prenom || '—')}</td>
                 <td style="text-align: center;">${sa}</td>
                 <td style="text-align: center;">
-                    <select class="controle-form controle-form-compact" data-on-change="actionEtudiantV2Handler" data-da="${e.da}">
+                    <select class="controle-form controle-form-compact" data-on-change="actionEtudiantV2Handler" data-da="${echapperHtml(e.da)}">
                         <option value="">—</option>
                         <option value="editer">Modifier</option>
                         <option value="supprimer">Supprimer</option>
                     </select>
                 </td>
                 <td style="text-align: center;">
-                    <select class="controle-form controle-form-compact" data-on-change="remarqueEtudiantV2Handler" data-da="${e.da}">
+                    <select class="controle-form controle-form-compact" data-on-change="remarqueEtudiantV2Handler" data-da="${echapperHtml(e.da)}">
                         <option value=""${!statut ? ' selected' : ''}>—</option>
                         <option value="inactif"${statut === 'inactif' ? ' selected' : ''}>Inactivité</option>
                         <option value="décrochage"${statut === 'décrochage' ? ' selected' : ''}>Décrochage</option>
@@ -599,6 +614,13 @@ function actionEtudiantV2(selectElement, da) {
     selectElement.value = ''; // Réinitialiser le select
 
     if (!action) return;
+
+    // Mode anonymisation : le formulaire d'édition et la question de suppression
+    // nommeraient l'élève en clair. Même refus que groupe.js.
+    if (db.getSync('modeApplication', 'normal') === 'anonymisation') {
+        notifications.erreur('Modification impossible', 'Repasse en mode normal pour modifier ou supprimer un·e étudiant·e.');
+        return;
+    }
 
     switch (action) {
         case 'editer':
