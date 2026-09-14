@@ -16,6 +16,8 @@ Aucune rangée : rien ne touche ton corpus.
 
 ## § 2 · Interface
 
+> ↻ **14 sept. 2026, soir — verdict de Grégoire sur 2.1 : INVÉRIFIABLE, pas ratée.** « Je ne vois aucune option de verrouillage de cartouche » : le bandeau ne s'affichait jamais, pour une autre raison que ce lot (#863). Corrigé en **1.140.11** ; la rangée se rejoue sur 1.140.11 ou plus.
+
 **2.1 · Le bouton « Déverrouiller » d'une cartouche ne se coupe plus en deux lignes**
 *Où :* Conception → Cartouches de rétroaction, sur une cartouche verrouillée (le bandeau orangé « Cartouche verrouillée »).
 *Pourquoi :* à côté du texte « Cette cartouche est en lecture seule… », le bouton pouvait passer sur deux lignes quand la place manquait.
