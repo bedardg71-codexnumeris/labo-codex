@@ -5,6 +5,21 @@
 > **Ce qui échoue devient une ligne de BACKLOG sous #478**, pas une note mentale.
 > Livrables jumeaux : ce markdown (la trace, écrit par Claude Code) ; l'artefact à cases avec « Copier mes résultats » est publié par Cowork.
 
+## Verdict — Grégoire, 13 sept. 2026 au soir : 6 rangées sur 7
+
+| Rangée | Verdict |
+|---|---|
+| 0.1 · poste vierge sur la copie locale | ✓ |
+| 2.1 · deux questions seulement à la création | ✓ |
+| 2.2 · « 1. Trimestre » déjà sur Automne 2026 | ✓ |
+| 2.3a · la bulle affiche le titre et le message | ✓ |
+| **2.3b · lu jusqu'au bout avant disparition** | **✗ — vrai échec** |
+| 2.4a · étudiant·e ajouté·e, formulaire horaire ouvert | ✓ |
+| 2.4b · « Groupe associé » propose 00001 sans rouvrir | ✓ |
+
+**2.3b** : Grégoire n'a lu que le titre et la PREMIÈRE phrase avant que la bulle disparaisse. L'information que le lot ajoutait — l'accordéon « Groupe d'étudiant·es » — était dans la SECONDE : le correctif ratait sa cible. Les deux gestes du lot fonctionnent ; c'est le temps de lecture qui échoue.
+⮕ **Suite** : les deux phrases inversées, le geste avant l'explication — texte approuvé par Grégoire le 13 sept. au soir (guillemets français), posé le même soir ; le banc de 2.3a rougit si l'ordre revient. La durée de la bulle n'est PAS allongée. **2.3b reste à rejouer** sur le nouvel ordre. La vraie réponse — une note persistante sous le menu vide — est inscrite sous #478, à poser après le 15 sept. avec le skill design-interface si la friction se reproduit.
+
 ## § 0 · Préalable
 
 **0.1** Dans **Safari**, ouvre l'adresse que Claude Code t'a donnée pour ce lot (une copie locale, `http://localhost:8766`). ⮕ *Attendu :* l'application s'ouvre **vide** — aucun trimestre, aucun cours. C'est voulu : une adresse neuve est un poste vierge. **Tes données réelles ne sont pas touchées** : elles vivent sur `app.codexnumeris.org`, qui n'a pas encore ce lot.
@@ -28,7 +43,7 @@ Aucune rangée : rien ne touche ton corpus.
 **2.3 · Un horaire sans groupe dit où créer le groupe**
 *Pourquoi :* le refus « Veuillez sélectionner un groupe associé » laissait devant un menu vide, sans dire où naît un groupe.
 - [ ] Accordéon **« Horaire »** → **« + Nouvel horaire »** ; tape un nom, clique **« Créer »** sans choisir de groupe.
-  ⮕ *Attendu :* la bulle dit **« Aucun groupe d'étudiant·es pour l'instant »**, puis « Un groupe apparaît dans ce menu dès qu'un·e étudiant·e y est inscrit·e. Ajoute ou importe ta liste dans l'accordéon « Groupe d'étudiant·es », juste au-dessus. »
+  ⮕ *Attendu :* la bulle dit **« Aucun groupe d'étudiant·es pour l'instant »**, puis « Ajoute ou importe ta liste dans l'accordéon « Groupe d'étudiant·es », juste au-dessus. Un groupe apparaît dans ce menu dès qu'un·e étudiant·e y est inscrit·e. » *(ordre inversé après le verdict 2.3b du 13 sept.)*
 - [ ] As-tu eu le temps de lire la phrase **jusqu'au bout** avant que la bulle disparaisse ? ⮕ *Attendu :* oui. Sinon, dis-le : c'est la seule chose qu'aucun test ne peut juger.
 
 **2.4 · Le groupe apparaît sans rouvrir le formulaire**

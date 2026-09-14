@@ -202,9 +202,11 @@ test('#478 (b) · menu vide : le refus dit OÙ naît un groupe ; menu garni : le
         return { menuVide, menuGarni, horaires: (db.getSync(cle('horaires'), []) || []).length };
     });
     expect(r.menuVide.titre).toBe('Aucun groupe d\'étudiant·es pour l\'instant');
-    expect(r.menuVide.details).toBe(
-        'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e. ' +
-        'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus.'
+    // Porte 2.3b (13 sept. 2026) : la bulle disparaît après la PREMIÈRE phrase — le geste
+    // (où aller) doit l'être ; l'ordre inverse faisait rater l'accordéon.
+    expect(r.menuVide.details, 'le geste d\'abord, l\'explication ensuite').toBe(
+        'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus. ' +
+        'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e.'
     );
     expect(r.menuGarni.titre, 'des groupes existent, aucun choisi : le refus d\'avant suffit').toBe('Veuillez sélectionner un groupe associé');
     expect(r.menuGarni.details).toBe('');

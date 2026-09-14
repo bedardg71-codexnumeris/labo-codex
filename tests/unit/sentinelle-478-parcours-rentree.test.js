@@ -53,10 +53,15 @@ describe('#478 A — « Groupe associé » se rafraîchit après un ajout d\'ét
 describe('#478 B — le refus d\'un menu vide dit où naît un groupe', () => {
     const corps = corpsDe(horaires, 'sauvegarderHoraireV2');
 
-    it('porte les mots approuvés, titre et détail', () => {
+    it('porte les mots approuvés, titre et détail — LE GESTE D\'ABORD', () => {
         expect(corps).toContain('\'Aucun groupe d\\\'étudiant·es pour l\\\'instant\'');
-        expect(corps).toContain('\'Un groupe apparaît dans ce menu dès qu\\\'un·e étudiant·e y est inscrit·e. \'');
-        expect(corps).toContain('\'Ajoute ou importe ta liste dans l\\\'accordéon « Groupe d\\\'étudiant·es », juste au-dessus.\'');
+        const geste = '\'Ajoute ou importe ta liste dans l\\\'accordéon « Groupe d\\\'étudiant·es », juste au-dessus. \'';
+        const explication = '\'Un groupe apparaît dans ce menu dès qu\\\'un·e étudiant·e y est inscrit·e.\'';
+        expect(corps).toContain(geste);
+        expect(corps).toContain(explication);
+        // Porte 2.3b (13 sept. 2026) : la bulle disparaît après la PREMIÈRE phrase ; dans l'ordre
+        // inverse, l'accordéon — la seule information ajoutée — n'était jamais lu.
+        expect(corps.indexOf(geste), 'le geste doit précéder l\'explication').toBeLessThan(corps.indexOf(explication));
     });
 
     it('le message se choisit sur ce que le menu OFFRE : vide ⇒ les mots neufs', () => {
