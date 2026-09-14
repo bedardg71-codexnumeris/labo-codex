@@ -7,6 +7,28 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 53 — 14 SEPTEMBRE 2026, ≈ 16 H 40 → 19 H 10 (Toronto) : #787, PUIS LA CHAÎNE #862 → #865, à partir de `e5d5ccc7`.
+     (Numérotation : suit la 52 de ce fichier ; les sessions du 14 au matin — #478, #861 — n'y ont pas laissé de bloc.)
+     ▣ #787 LIVRÉ (1.140.10) : les 13 doubles `class` d'index.html fusionnés (premier puis second). DETTE_CONNUE = [], le cliquet
+       sentinelle-779 devient un interdit ; break-test rouge en nommant la signature. Mesure Chrome avant/après sur les 13 :
+       ⚠ le bouton « Consulter la bibliothèque » NE CHANGE PAS (la consigne l'annonçait pleine largeur : `.sidebar-nav-buttons .btn`
+       l'emporte) ; trois `table.tableau` voient leur marge RÉTRÉCIR 15 → 10 px ; alertes et groupe des Évaluations gagnent une marge.
+       Porte : `plans de travail/PORTES-TERRAIN-2026-09-14-787-doubles-class.md` — restent 2.2 et 2.3, sans urgence ; 2.1 sans objet.
+     ▣ #862 inscrite (encadré Loi 25 dans l'Aide ; LES MOTS REVIENNENT À GRÉGOIRE) ; CONFIDENTIALITE.md décision 4 résolue (adresse
+       publique) ; CONFIDENTIALITE-POUR-LE-BLOG.md versionné tel quel.
+     ▣ #863 (bandeau « Cartouche verrouillée » jamais affiché) corrigé, puis RETIRÉE PAR #864 : rien ne pouvait verrouiller une cartouche.
+     ▣ #864 LIVRÉ (1.140.11, build 0914-1843 — même numéro que #863, jamais poussée seule) : ablation du verrouillage des cartouches,
+       par symbole ; champ `verrouille` gardé dans les schémas d'échange et écrit à false ; stock non réécrit. sentinelle-864 (symboles,
+       accès, témoin) : 4 mutations, 4 rouges nommant la ligne. #522 lot 3b réancrée (A.a/A.b sur suppression + duplication, C.b 16 → 15),
+       #647 : `verrouille: true` en stock est inerte. Écran inchangé, mesuré WebKit avant/après sur une copie de HEAD (48 éléments visibles).
+     ▣ #865 inscrite (niveau 2) : doubles `class` dans les gabarits JS — Cowork en comptait 7, remesuré à 5 après #864.
+     ▣ Tout est poussé : `origin/main` = `d56608e3` (Playwright WebKit vert, un essai vert au second passage :
+       comparateur-pratiques-rendu #326 R4b — si elle revient, c'est #685). Vitest 563 / 6 357. Fichiers de Cowork commités à sa demande.
+     ⮕ RESTE : porte #787 (2.2, 2.3) sur 1.140.11 en ligne ; #862 (proposer un texte à Grégoire) ; #865 quand le lot s'ouvrira
+       (étendre le cliquet 779 aux gabarits JS, pas un second).
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 52 — 13 SEPTEMBRE 2026, ≈ 17 H → 17 H 25 (Toronto) : LA GRAPPE `js/echelles.js` (consigne de Cowork, 17 h), sur `d7e88b5c`.
      Rotation : CONSIGNE-DU-JOUR (#858/#801) archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-858-801-regle-10-et-bandeau.md`,
      CONSIGNE-SUIVANTE-echelles promue. ⚠ L'audit de début recommandait d'attendre verdict + push : écarté, la consigne s'ouvrait au
