@@ -14,8 +14,12 @@
      3. Section « Ce qui n'est pas encore fait » — mention du mainteneur
         unique : honnête, mais elle dessert auprès d'une direction.
         Conservée par défaut.
-     4. Adresse publique de cette page — à fixer quand la question de
-        l'hébergement (serveur du cégep ou Netlify) sera tranchée.
+     4. ✓ RÉSOLUE le 14 sept. 2026. Adresse publique de cette page :
+        https://codexnumeris.org/labo-codex-ou-vivent-vos-donnees
+        (blog Codex Numeris, publique, lisible sans compte, vérifié en
+        navigation anonyme le 14 sept.). Source de la version en ligne :
+        CONFIDENTIALITE-POUR-LE-BLOG.md, sans ce bloc ni les liens vers
+        le dépôt, qui est privé.
      5. Passage « Chrome et Edge / Safari et iPad » — vérifier les
         libellés exacts des boutons du va-et-vient avec le fichier codex.
 
