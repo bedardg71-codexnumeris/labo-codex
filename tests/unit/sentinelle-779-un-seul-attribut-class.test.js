@@ -1,6 +1,14 @@
 /**
- * SENTINELLE #779 — LE CHAMP DE DATE DES PRÉSENCES A UN SEUL ATTRIBUT `class`,
- * ET LA DETTE DES AUTRES NE GROSSIT PLUS.
+ * SENTINELLE #779 / #787 — AUCUNE BALISE D'`index.html` NE PORTE DEUX ATTRIBUTS
+ * `class`. PLUS UNE SEULE, JAMAIS.
+ *
+ * ▣ 14 sept. 2026 (#787) : la dette est ÉTEINTE. Les treize derniers cas ont été
+ * fusionnés en un seul attribut, dans l'ordre (valeur du premier, puis du
+ * second), sans rien retirer : le second `class` avait été écrit pour son
+ * effet, et son absence à l'écran était un accident silencieux. Le cliquet
+ * devient un INTERDIT : `DETTE_CONNUE` est vide et doit le rester.
+ *
+ * Historique, pour comprendre d'où vient l'interdit :
  *
  * `index.html` portait, sur le champ de date de la saisie des présences :
  *     <input type="date" id="date-cours" class="controle-form"
@@ -15,12 +23,12 @@
  * chacun est un changement visuel qui se juge à l'écran, et ce lot-ci n'a
  * qu'un item. La liste ci-dessous est donc une DETTE FIGÉE, pas une cible.
  *
- * ⮕ Ce que ce cliquet garde : le cas de #779 est réparé, et la dette ne peut
- *   ni grossir ni changer de forme sans rougir. Un cas retiré rougit aussi —
- *   c'est voulu : la liste doit suivre la réparation.
+ * ⮕ Ce que garde l'interdit : le cas de #779 reste réparé (bloc A), et
+ *   n'importe quel second `class` réapparu dans `index.html` rougit (bloc B).
  *
  * BREAK-TESTS attendus : remettre le second `class="u-flex-1"` sur le champ de
- * date → A et B rougissent (B en nommant la signature de trop).
+ * date → A et B rougissent ; remettre un second `class` sur n'importe quelle
+ * autre balise → B rougit en nommant la signature de trop.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -56,22 +64,10 @@ function signaturesDoubleClass() {
  *  « ANCIEN SYSTÈME » masqué des échelles, retiré par #520 : les deux
  *  `button|…|flex-1`, `groupe-form|max-w-400-mb20`, `groupe-form|max-w-400-mb20-hidden`,
  *  `groupe-form|mt-15`, `btn-groupe|mt-20-justify-between`. Aucun rendu ne change :
- *  le bloc était caché. */
-const DETTE_CONNUE = [
-    'button|btn btn-principal|u-texte-09 u-w-100',
-    'button|btn btn-principal|whitespace-nowrap',
-    'div|alerte alerte-attention|mt-10',
-    'div|alerte alerte-attention|mt-10',
-    'div|alerte alerte-info|mt-15',
-    'div|alerte alerte-info|mt-20',
-    'div|alerte alerte-succes|mt-10',
-    'div|alerte alerte-succes|mt-15',
-    'div|groupe-boutons-colonne|mb-15',
-    'table|tableau|mt-10',
-    'table|tableau|mt-10',
-    'table|tableau|mt-15',
-    'table|tableau|text-09-mt10'
-];
+ *  le bloc était caché.
+ *  ↻ 14 sept. 2026 : 13 → 0 (#787), les treize fusionnés. Liste vide, et elle
+ *  le reste : un cas qui revient se fusionne, il ne s'inscrit pas ici. */
+const DETTE_CONNUE = [];
 
 describe('#779 · A — le champ de date porte ses deux classes', () => {
     const balise = /<input[^<>]*id="date-cours"[^<>]*>/.exec(HTML);
@@ -87,21 +83,15 @@ describe('#779 · A — le champ de date porte ses deux classes', () => {
     });
 });
 
-describe('#779 · B — la dette des doubles `class` ne bouge pas', () => {
-    it('aucun cas neuf, aucun cas transformé', () => {
+describe('#787 · B — aucune balise d\'index.html ne porte deux attributs `class`', () => {
+    it('la liste des doubles `class` est vide', () => {
         const vues = signaturesDoubleClass();
-        const nouvelles = vues.filter((s, i) => s !== DETTE_CONNUE[i] && !DETTE_CONNUE.includes(s));
         expect(
             vues,
-            'La liste des balises à DEUX attributs `class` a changé.\n' +
-            `Attendu ${DETTE_CONNUE.length}, vu ${vues.length}.\n` +
-            (nouvelles.length ? 'Cas non inscrits :\n  ' + nouvelles.join('\n  ') + '\n' : '') +
-            'Un cas NEUF : le second `class` est ignoré par le navigateur — fusionner les\n' +
-            'deux en un seul attribut. Un cas RÉPARÉ : le retirer de DETTE_CONNUE.'
+            `${vues.length} balise(s) à DEUX attributs \`class\` dans index.html :\n  ` +
+            vues.join('\n  ') + '\n' +
+            'Le navigateur ignore le second en silence. Fusionner les deux valeurs en un\n' +
+            'seul attribut (premier puis second) — ne pas inscrire le cas dans DETTE_CONNUE.'
         ).toEqual(DETTE_CONNUE);
-    });
-
-    it('le champ de date n\'est plus dans la dette', () => {
-        expect(signaturesDoubleClass()).not.toContain('input|controle-form|u-flex-1');
     });
 });
