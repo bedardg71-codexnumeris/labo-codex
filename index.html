@@ -3691,15 +3691,6 @@
             display: none;
             margin-top: 15px;
         }
-        /* #863 : plus de display:none ici — le masquage est porté par .u-hide,
-           la classe que chargerCartouchePourModif retire et remet. */
-        .hidden-my15-warning {
-            margin: 15px 0;
-            padding: 12px 15px;
-            background: var(--alerte-fond-attention);
-            border-left: 4px solid #ffc107;
-            border-radius: var(--radius-moyen);
-        }
         .hidden-mb20-success {
             display: none;
             margin-bottom: 20px;
@@ -5335,19 +5326,6 @@
                                 <div id="infoCartouche" class="u-hide">
                                     <div class="panneau-formulaire">
 
-                                    <!-- Message de verrouillage -->
-                                    <div id="alerteVerrouillage" class="hidden-my15-warning u-hide">
-                                        <div class="d-flex-between-center">
-                                            <div>
-                                                <strong class="text-warning-dark"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Cartouche verrouillée</strong>
-                                                <p class="text-warning-856-sm-mt5">Cette cartouche est en lecture seule. Déverrouille-la pour pouvoir la modifier.</p>
-                                            </div>
-                                            <button class="btn btn-principal whitespace-nowrap" id="btnDeverrouillerCartouche">
-                                                Déverrouiller
-                                            </button>
-                                        </div>
-                                    </div>
-
                             <!-- Nom + Grille + Échelle sur une seule ligne (26 août 2026).
                                  ⚠ La légende des astérisques a été RETIRÉE d'ici : les trois champs
                                  de cette ligne sont TOUS obligatoires, une légende qui l'annonce
@@ -5391,7 +5369,6 @@
 
                             <!-- Liste des cartouches existantes (DÉSACTIVÉ - remplacé par sidebar) -->
                             <div id="listeCartouchesExistants" class="d-none-important">
-                                <div id="listeCartouchesContainer"></div>
                             </div>
                                 </div>
 
@@ -10932,7 +10909,6 @@
                             <p><strong>Outils disponibles :</strong></p>
                             <ul>
                                 <li><strong>Aperçu aléatoire</strong> : Teste le rendu de la rétroaction avec un profil simulé</li>
-                                <li><strong>Verrouillage</strong> : Verrouille la cartouche après finalisation pour empêcher les modifications accidentelles (déverrouillable au besoin)</li>
                             </ul>
 
                             <div class="alerte alerte-succes">
@@ -14010,7 +13986,7 @@
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Verrouillage</dt>
-                                <dd class="ml-20-mb-10">Fonction de protection empêchant la modification ou suppression accidentelle. Disponible pour : productions, grilles de critères, échelles, cartouches. Un élément verrouillé affiche une icône de cadenas et ses boutons d'action sont désactivés. Peut être déverrouillé si nécessaire.</dd>
+                                <dd class="ml-20-mb-10">Fonction de protection empêchant la modification ou suppression accidentelle. Disponible pour : productions, grilles de critères, échelles. Un élément verrouillé affiche une icône de cadenas et ses boutons d'action sont désactivés. Peut être déverrouillé si nécessaire.</dd>
                             </dl>
                         </div>
 
@@ -14304,7 +14280,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09141732"></script>
+    <script src="version.js?v=09141843"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260912g"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14401,7 +14377,7 @@
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260913f"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260904b"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
+    <script src="js/cartouches.js?v=20260914a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260911m"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20260912c"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=20260912i"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -14589,11 +14565,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260914c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260914d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260914c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260914d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

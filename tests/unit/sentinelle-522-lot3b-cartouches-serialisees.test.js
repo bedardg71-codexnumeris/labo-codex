@@ -152,8 +152,8 @@ async function monterCartouches() {
     win.marquerRessourceSupprimee = () => {};
     win.IDS_GABARITS_HARDCODES = [];
 
-    for (const f of ['basculerVerrouillageCartouche', 'dupliquerCartouche',
-                     'supprimerCartoucheConfirm', 'retirerCartoucheDeBibliotheque']) {
+    for (const f of ['dupliquerCartouche', 'supprimerCartoucheConfirm',
+                     'retirerCartoucheDeBibliotheque']) {
         if (typeof win[f] !== 'function') throw new Error(f + ' absent du sandbox');
     }
     return { db, win };
@@ -187,46 +187,36 @@ const cartoucheDe = (liste, id) => liste.find((c) => c.id === id);
 
 describe('#522 lot 3b · A — deux gestes en rafale gardent LEURS DEUX effets', () => {
 
-    it('A.a deux verrouillages concurrents tiennent tous les deux', async () => {
+    // ↻ #864 (14 sept. 2026) : A.a, A.b et A.c éprouvaient la file par la bascule
+    // de verrouillage, retirée avec le verrouillage des cartouches. Ils sont
+    // RÉANCRÉS sur des gestes vivants — la course gardée reste la même : deux
+    // écritures lancées ensemble gardent leurs deux effets. A.c est fusionné dans A.b.
+    it('A.a deux suppressions concurrentes s\'appliquent toutes les deux', async () => {
         const { db, win } = await monterCartouches();
         await db.set(CLE, CARTOUCHES());   // security-ok: littéral de banc, aucune source externe
 
         await Promise.all([
-            win.basculerVerrouillageCartouche('C1', G),
-            win.basculerVerrouillageCartouche('C3', G)
+            win.supprimerCartoucheConfirm('C1', G),
+            win.supprimerCartoucheConfirm('C3', G)
         ]);
 
         const liste = await db.get(CLE);
-        expect(cartoucheDe(liste, 'C1').verrouille, 'le premier verrou tient').toBe(true);
-        expect(cartoucheDe(liste, 'C3').verrouille, 'le second verrou tient').toBe(true);
+        expect(liste.map((c) => c.id), 'les deux suppressions tiennent').toEqual(['C2']);
     });
 
-    it('A.b une duplication et un verrouillage concurrents s\'appliquent tous les deux', async () => {
+    it('A.b une duplication et une suppression concurrentes s\'appliquent toutes les deux', async () => {
         const { db, win } = await monterCartouches();
         await db.set(CLE, CARTOUCHES());   // security-ok: littéral de banc, aucune source externe
 
         await Promise.all([
             win.dupliquerCartouche('C1', G),
-            win.basculerVerrouillageCartouche('C2', G)
+            win.supprimerCartoucheConfirm('C2', G)
         ]);
 
         const liste = await db.get(CLE);
-        expect(liste, 'la copie est là').toHaveLength(4);
-        expect(cartoucheDe(liste, 'C2').verrouille, 'le verrou tient').toBe(true);
-    });
-
-    it('A.c une suppression et un verrouillage concurrents s\'appliquent tous les deux', async () => {
-        const { db, win } = await monterCartouches();
-        await db.set(CLE, CARTOUCHES());   // security-ok: littéral de banc, aucune source externe
-
-        await Promise.all([
-            win.supprimerCartoucheConfirm('C3', G),
-            win.basculerVerrouillageCartouche('C1', G)
-        ]);
-
-        const liste = await db.get(CLE);
-        expect(liste, 'la suppression tient').toHaveLength(2);
-        expect(cartoucheDe(liste, 'C1').verrouille, 'le verrou tient').toBe(true);
+        expect(liste, 'trois de départ, une copie, une suppression').toHaveLength(3);
+        expect(cartoucheDe(liste, 'C2'), 'la suppression tient').toBeUndefined();
+        expect(liste.filter((c) => c.nom === 'Français écrit (copie)'), 'la copie tient').toHaveLength(1);
     });
 
     it('A.d deux duplications concurrentes donnent DEUX copies', async () => {
@@ -243,14 +233,8 @@ describe('#522 lot 3b · A — deux gestes en rafale gardent LEURS DEUX effets',
 
 describe('#522 lot 3b · B — un geste impossible REFUSE l\'écriture', () => {
 
-    it('B.a un verrouillage sur un id absent ne touche à rien', async () => {
-        const { db, win } = await monterCartouches();
-        await db.set(CLE, CARTOUCHES());   // security-ok: littéral de banc, aucune source externe
-
-        await win.basculerVerrouillageCartouche('C_FANTOME', G);
-
-        expect(JSON.stringify(await db.get(CLE))).toBe(JSON.stringify(CARTOUCHES()));
-    });
+    // ↻ #864 (14 sept. 2026) : B.a (une bascule de verrouillage sur un id absent)
+    // est parti avec la bascule. B.b et B.c gardent le refus sur deux gestes vivants.
 
     it('B.b un retrait de bibliothèque sur un id absent ne touche à rien', async () => {
         const { db, win } = await monterCartouches();
@@ -309,9 +293,11 @@ describe('#522 lot 3b · C — la course ne peut pas se rouvrir en silence', () 
         expect((lire('js/cartouches.js').match(ECRITURES_DIRECTES) || []).length).toBe(0);
     });
 
-    it('C.b les seize écritures-modifications passent par la file', () => {
+    // ↻ #864 (14 sept. 2026) : seize → quinze. La seizième était la bascule de
+    // verrouillage (`basculerVerrouillageCartouche`), retirée avec le verrouillage.
+    it('C.b les quinze écritures-modifications passent par la file', () => {
         const n = (lire('js/cartouches.js').match(/db\.modifier\(\s*(?:cle\()?\s*[`']cartouches_/g) || []).length;
-        expect(n, 'lot 3b, lot 4 et les conversions antérieures').toBe(16);
+        expect(n, 'lot 3b, lot 4 et les conversions antérieures, moins la bascule retirée par #864').toBe(15);
     });
 
     it('C.c la seule écriture directe restante du dépôt est NOMMÉE, et sa raison tient', () => {

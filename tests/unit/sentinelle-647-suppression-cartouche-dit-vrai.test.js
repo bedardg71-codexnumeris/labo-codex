@@ -202,10 +202,14 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
         expect(questions[0]).toContain("1 évaluation(s) l'emploient");
     });
 
-    it('verrouillée : l\'alerte, et aucune question', async () => {
-        const { questions, alertes } = await questionChemin2({ dansBibliotheque: true, verrouille: true });
-        expect(alertes).toHaveLength(1);
-        expect(questions).toEqual([]);
+    // ↻ #864 (14 sept. 2026) : le verrouillage des cartouches est retiré. Ce cas
+    // exigeait l'alerte « Déverrouille ce cartouche » ; il exige désormais le
+    // contraire. `verrouille: true` peut encore dormir dans un vieux stock ou un
+    // fichier importé : il est INERTE — ni alerte ni refus, la question vient.
+    it('#864 · verrouille: true en stock est inerte : aucune alerte, la question vient', async () => {
+        const { questions, alertes } = await questionChemin2({ dansBibliotheque: false, verrouille: true });
+        expect(alertes).toEqual([]);
+        expect(questions).toEqual(['Supprimer la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\nCette action est irréversible.']);
     });
 
     it('invariant couplé : ce chemin n\'écrit QUE l\'ancrage de la grille, jamais la bibliothèque', () => {
