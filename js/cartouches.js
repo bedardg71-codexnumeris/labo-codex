@@ -11,7 +11,7 @@
    - Matrice de commentaires (critères × niveaux)
    - Import/export de commentaires
    - Génération d'aperçus aléatoires
-   - Verrouillage et duplication
+   - Duplication
    - Calcul du pourcentage de complétion
    =============================== */
 
@@ -37,7 +37,6 @@
    - #matriceContainer : Conteneur de la matrice
    - #matriceRetroaction : Conteneur global de la matrice
    - #listeCartouchesExistants : Conteneur liste
-   - #listeCartouchesContainer : Liste des cartouches
    - #zoneImportCommentaires : Zone d'import
    - #commentairesColles : Textarea d'import
    - #nbCriteres, #nbNiveaux, #nbCommentaires, #pctComplete : Métriques
@@ -346,14 +345,6 @@ async function chargerCartouchesRetroaction(cartoucheIdAGarder = null) {
     document.getElementById('aucuneEvalRetroaction').classList.add('u-hide');
     document.getElementById('infoCartouche').classList.remove('u-hide');
 
-    // Afficher la liste des cartouches existantes
-    // DÉSACTIVÉ pour Beta 80.5+ : remplacé par la sidebar
-    // if (cartouches.length > 0) {
-    //     afficherListeCartouches(cartouches, grilleId);
-    //     document.getElementById('listeCartouchesExistants').style.display = 'block';
-    // } else {
-    //     document.getElementById('listeCartouchesExistants').style.display = 'none';
-    // }
 
     // Toujours masquer l'ancienne liste (Beta 80.5+)
     const listeAncienne = document.getElementById('listeCartouchesExistants');
@@ -1071,10 +1062,6 @@ async function sauvegarderCartouche() {
     // qui survit à un correctif et le contredit un jour.
     await chargerCartouchesRetroaction(cartoucheActuel.id);
 
-    // Rafraîchir la nouvelle vue (ancien système)
-    // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
-    // await afficherToutesLesGrillesEtCartouches();
-
     // Rafraîchir la banque sidebar (Beta 80.5+)
     if (typeof afficherBanqueCartouches === 'function') {
         await afficherBanqueCartouches();
@@ -1368,251 +1355,6 @@ async function calculerPourcentageComplete() {
    LISTE DES CARTOUCHES
    =============================== */
 
-/**
- * Affiche la liste des cartouches existantes
- * Avec options de verrouillage, édition, duplication, suppression
- * 
- * FONCTIONNEMENT:
- * 1. Génère une carte par cartouche
- * 2. Affiche le nom et la progression
- * 3. Boutons d'action selon l'état (verrouillée ou non)
- * 
- * PARAMÈTRES:
- * @param {Array} cartouches - Array des cartouches à afficher
- * @param {string} grilleId - ID de la grille parente
- * 
- * UTILISÉ PAR:
- * - await chargerCartouchesRetroaction()
- * - await basculerVerrouillageCartouche()
- * 
- * AFFICHAGE PAR CARTOUCHE:
- * - Nom
- * - Progression (X / Y commentaires remplis)
- * - Checkbox verrouillage
- * - Bouton Modifier (désactivé si verrouillé)
- * - Bouton Dupliquer
- * - Bouton Supprimer (désactivé si verrouillé)
- * 
- * OPACITÉ:
- * - Boutons désactivés à 50% d'opacité si verrouillé
- */
-function afficherListeCartouches(cartouches, grilleId) {
-    const container = document.getElementById('listeCartouchesContainer');
-
-    container.innerHTML = cartouches.map(cartouche => {
-        const nomEchappe = echapperHtml(cartouche.nom);
-        const nbRemplis = Object.keys(cartouche.commentaires || {})
-            .filter(k => cartouche.commentaires[k] && cartouche.commentaires[k].trim())
-            .length;
-        const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
-
-        return `
-        <div class="item-liste cartouche-fond-bleu-pale">
-            <div class="u-flex-between">
-                <div>
-                    <strong class="u-texte-bleu">${nomEchappe}</strong>
-                    <small class="u-texte-bleu-leger-ml10">
-                        ${nbRemplis} / ${nbTotal} commentaires remplis
-                    </small>
-                </div>
-                <div>
-                    <button data-action="basculerVerrouillageCartouche" data-param="${cartouche.id}" data-param2="${grilleId}"
-                          class="btn btn-tres-compact"
-                          class="u-mr-10"
-                          title="${cartouche.verrouille ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                        ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
-                    </button>
-                    <button class="btn btn-modifier"
-                            data-action="chargerCartouchePourModif" data-param="${cartouche.id}" data-param2="${grilleId}">
-                        Modifier
-                    </button>
-                    <button class="btn btn-principal"
-                            data-action="dupliquerCartouche" data-param="${cartouche.id}" data-param2="${grilleId}">
-                        Dupliquer
-                    </button>
-                    <button class="btn btn-supprimer"
-                            data-action="supprimerCartoucheConfirm" data-param="${cartouche.id}" data-param2="${grilleId}">
-                        Supprimer
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    }).join('');
-}
-
-/* ===============================
-   📂 NOUVELLE INTERFACE: VUE PAR GRILLE
-   Affiche toutes les grilles avec leurs cartouches
-   =============================== */
-
-/**
- * Affiche toutes les grilles avec leurs cartouches regroupées
- * NOUVELLE ARCHITECTURE: Sections repliables par grille
- *
- * FONCTIONNEMENT:
- * 1. Charge toutes les grilles depuis localStorage
- * 2. Pour chaque grille, charge ses cartouches
- * 3. Génère une section <details> repliable
- * 4. Affiche les cartouches de la grille
- * 5. Ajoute un bouton "Ajouter" spécifique à la grille
- *
- * AVANTAGES:
- * - Vue d'ensemble complète
- * - Hiérarchie grille → cartouches visible
- * - Navigation par scroll au lieu de select
- * - Actions contextuelles par grille
- */
-async function afficherToutesLesGrillesEtCartouches() {
-    const container = document.getElementById('vueGrillesCartouches');
-    if (!container) return;
-
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-
-    if (grilles.length === 0) {
-        container.innerHTML = `
-            <div class="cartouche-zone-bleu-pale">
-                <p class="u-texte-bleu-leger">Aucune grille de critères disponible</p>
-                <small>Crée d'abord une grille dans <strong>Conception → Grilles de critères</strong></small>
-            </div>
-        `;
-        return;
-    }
-
-    // ✅ CORRECTION: Utiliser for...of au lieu de map() pour supporter await
-    const htmlSections = [];
-    for (const grille of grilles) {
-        const cartouches = await db.get(cle(`cartouches_${grille.id}`)) || [];
-        const nomGrilleEchappe = echapperHtml(grille.nom);
-
-        htmlSections.push(`
-            <details class="grille-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
-                     border-radius: 8px; background: var(--surface-conteneur, #162c36); overflow: hidden;">
-                <summary style="padding: 15px; background: linear-gradient(135deg, var(--accent-primaire) 0%, var(--bleu-moyen) 100%);
-                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
-                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
-                    <span>${nomGrilleEchappe}</span>
-                    <span class="cartouche-texte-secondaire">
-                        ${cartouches.length} cartouche${cartouches.length > 1 ? 's' : ''}
-                    </span>
-                </summary>
-
-                <div class="cartouche-p-15">
-                    ${cartouches.length > 0 ? `
-                        <div class="u-mb-15">
-                            ${cartouches.map(cartouche => {
-                                const nomCartoucheEchappe = echapperHtml(cartouche.nom);
-                                const nbRemplis = Object.keys(cartouche.commentaires || {})
-                                    .filter(k => cartouche.commentaires[k] && cartouche.commentaires[k].trim())
-                                    .length;
-                                const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
-
-                                return `
-                                    <div class="item-liste cartouche-fond-bleu-pale">
-                                        <div class="u-flex-between">
-                                            <div>
-                                                <strong class="u-texte-bleu">${nomCartoucheEchappe}</strong>
-                                                <small class="u-texte-bleu-leger-ml10">
-                                                    ${nbRemplis} / ${nbTotal} commentaires
-                                                </small>
-                                            </div>
-                                            <div class="u-nowrap">
-                                                <button data-action="basculerVerrouillageCartouche" data-param="${cartouche.id}" data-param2="${grille.id}"
-                                                      class="btn btn-tres-compact"
-                                                      class="u-mr-10"
-                                                      title="${cartouche.verrouille ? 'Verrouillée - Clique pour déverrouiller' : 'Modifiable - Clique pour verrouiller'}">
-                                                    ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
-                                                </button>
-                                                <button class="btn btn-modifier"
-                                                        data-action="chargerCartouchePourModif" data-param="${cartouche.id}" data-param2="${grille.id}">
-                                                    Modifier
-                                                </button>
-                                                <button class="btn btn-principal"
-                                                        data-action="dupliquerCartouche" data-param="${cartouche.id}" data-param2="${grille.id}">
-                                                    Dupliquer
-                                                </button>
-                                                <button class="btn btn-supprimer"
-                                                        data-action="supprimerCartoucheConfirm" data-param="${cartouche.id}" data-param2="${grille.id}">
-                                                    Supprimer
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    ` : `
-                        <p class="cartouche-texte-italique-bleu-leger">
-                            Aucune cartouche pour cette grille
-                        </p>
-                    `}
-
-                    <button class="btn btn-confirmer" data-action="ajouterCartoucheAGrille" data-param="${grille.id}">
-                        + Ajouter une cartouche à cette grille
-                    </button>
-                </div>
-            </details>
-        `);
-    }
-
-    container.innerHTML = htmlSections.join('');
-}
-
-/* ===============================
-   🔒 VERROUILLAGE
-   =============================== */
-
-/**
- * Bascule le verrouillage d'une cartouche
- * Une cartouche verrouillée ne peut pas être modifiée ou supprimée
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les cartouches depuis localStorage
- * 2. Trouve la cartouche concernée
- * 3. Bascule l'état verrouille
- * 4. Sauvegarde
- * 5. Rafraîchit l'affichage
- * 
- * PARAMÈTRES:
- * @param {string} cartoucheId - ID de la cartouche
- * @param {string} grilleId - ID de la grille parente
- * 
- * UTILISÉ PAR:
- * - Checkbox dans afficherListeCartouches()
- * 
- * EFFET:
- * - Désactive/active les boutons Modifier et Supprimer
- * - Change l'opacité des boutons
- */
-async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
-    let statutApres = null;
-    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
-        const cartouches = lues || [];
-        const index = cartouches.findIndex(c => c.id === cartoucheId);
-        if (index === -1) return undefined;
-
-        // Basculer directement l'état (pas de checkbox, juste un span cliquable)
-        cartouches[index].verrouille = !cartouches[index].verrouille;
-        statutApres = cartouches[index].verrouille;
-        return cartouches;
-    }, []);
-
-    if (statutApres !== null) {
-        // Afficher une notification spécifique. Le statut vient du MUTATEUR :
-        // c'est l'état réellement écrit, pas celui d'un instantané d'avant.
-        const statut = statutApres ? 'verrouillée' : 'déverrouillée';
-
-        // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
-        // afficherListeCartouches(cartouches, grilleId);
-        // await afficherToutesLesGrillesEtCartouches();
-
-        // Rafraîchir la banque sidebar (Beta 80.5+)
-        if (typeof afficherBanqueCartouches === 'function') {
-            await afficherBanqueCartouches();
-        }
-    }
-}
-
 /* ===============================
    🔄 DUPLICATION
    =============================== */
@@ -1624,16 +1366,16 @@ async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
  * 1. Trouve la cartouche originale
  * 2. Crée une copie complète (deep copy)
  * 3. Change l'ID et ajoute «(copie)» au nom
- * 4. Déverrouille la copie
- * 5. Ajoute aux cartouches
- * 6. Sélectionne automatiquement la copie
+ * 4. Ajoute aux cartouches (`verrouille: false` reste écrit : champ inerte,
+ *    gardé pour la forme des fichiers échangés — #864)
+ * 5. Sélectionne automatiquement la copie
  * 
  * PARAMÈTRES:
  * @param {string} cartoucheId - ID de la cartouche à dupliquer
  * @param {string} grilleId - ID de la grille parente
  * 
  * UTILISÉ PAR:
- * - Bouton «Dupliquer» dans afficherListeCartouches()
+ * - Bouton « Dupliquer » de la zone d'édition
  * 
  * RETOUR:
  * - Notification de succès
@@ -1683,15 +1425,14 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
 }
 
 /**
- * Charge une cartouche pour modification depuis la liste
- * Vérifie qu'elle n'est pas verrouillée
+ * Charge une cartouche pour modification
  * 
  * PARAMÈTRES:
  * @param {string} cartoucheId - ID de la cartouche
  * @param {string} grilleId - ID de la grille parente
  * 
  * UTILISÉ PAR:
- * - Bouton «Modifier» dans afficherListeCartouches()
+ * - Un clic sur une cartouche de la banque (afficherBanqueCartouches)
  */
 async function chargerCartouchePourModif(cartoucheId, grilleId) {
 
@@ -1768,25 +1509,6 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         if (btnExportPDF) btnExportPDF.classList.remove('u-hide');
         if (btnExportTexte) btnExportTexte.classList.remove('u-hide');
 
-        // Si verrouillée, afficher l'alerte de verrouillage
-        const alerteVerrouillage = document.getElementById('alerteVerrouillage');
-        const btnDeverrouiller = document.getElementById('btnDeverrouillerCartouche');
-
-        if (cartouche.verrouille) {
-            if (alerteVerrouillage) alerteVerrouillage.classList.remove('u-hide');
-
-            // Attacher l'événement au bouton
-            if (btnDeverrouiller) {
-                btnDeverrouiller.onclick = async function() {
-                    await basculerVerrouillageCartouche(cartoucheId, grilleId);
-                    // Recharger la cartouche pour mettre à jour l'affichage
-                    setTimeout(async () => await chargerCartouchePourModif(cartoucheId, grilleId), 100);
-                };
-            }
-        } else {
-            if (alerteVerrouillage) alerteVerrouillage.classList.add('u-hide');
-        }
-
         // NE PLUS faire de scroll - la sidebar reste visible
     } else {
         console.warn('⚠️ Impossible de charger la cartouche (inexistante)');
@@ -1801,30 +1523,23 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
  * Supprime une cartouche avec confirmation
  * 
  * FONCTIONNEMENT:
- * 1. Vérifie que la cartouche n'est pas verrouillée
- * 2. Demande confirmation
- * 3. Retire du localStorage
- * 4. Rafraîchit l'affichage
+ * 1. Demande confirmation
+ * 2. Retire du localStorage
+ * 3. Rafraîchit l'affichage
  * 
  * PARAMÈTRES:
  * @param {string} cartoucheId - ID de la cartouche à supprimer
  * @param {string} grilleId - ID de la grille parente
  * 
  * UTILISÉ PAR:
- * - Bouton «Supprimer» dans afficherListeCartouches()
+ * - supprimerCartoucheActive (bouton « Supprimer » de la zone d'édition)
  * 
  * SÉCURITÉ:
- * - Bloquée si verrouillée (alerte)
  * - Confirmation obligatoire
  */
 async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
-
-    if (cartouche && cartouche.verrouille) {
-        alert('D\u00e9verrouille ce cartouche avant de le supprimer');
-        return;
-    }
 
     // #647 (2 septembre 2026, soir — mots arrêtés par Grégoire) : la question dit
     // la portée réelle. Ce chemin n'écrit QUE l'ancrage de la grille (trimestre
@@ -1864,10 +1579,6 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
 
         // Ancien système (compatibilité)
         await chargerCartouchesRetroaction();
-
-        // Rafraîchir la nouvelle vue
-        // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
-        // await afficherToutesLesGrillesEtCartouches();
 
         // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
@@ -3291,9 +3002,7 @@ async function _diagnostiquerEchellesGrilles() {
    =============================== */
 
 window._diagnostiquerEchellesGrilles = _diagnostiquerEchellesGrilles;   // diagnostic console (#578, lecture seule)
-window.afficherToutesLesGrillesEtCartouches = afficherToutesLesGrillesEtCartouches;
 window.ajouterCartoucheAGrille = ajouterCartoucheAGrille;
-window.basculerVerrouillageCartouche = basculerVerrouillageCartouche;
 window.chargerCartouchePourModif = chargerCartouchePourModif;
 window.dupliquerCartouche = dupliquerCartouche;
 window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
@@ -3499,13 +3208,12 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
 
     html += cartouchesFiltrees.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
-        const verrouIcone = cart.verrouille ? ' <span class="cartouche-texte-warning" title="Verrouillée"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"></span>' : '';
         return `
             <div class="sidebar-item ${estActive ? 'active' : ''}"
                  data-cartouche-id="${cart.id}"
                  data-grille-id="${cart.grilleId}"
                  data-action="chargerCartouchePourModif" data-param="${cart.id}" data-param2="${cart.grilleId}">
-                <div class="sidebar-item-titre">${echapperHtml(cart.nom)}${verrouIcone}</div>
+                <div class="sidebar-item-titre">${echapperHtml(cart.nom)}</div>
                 <div class="sidebar-item-badges"><span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
             </div>
         `;

@@ -16,7 +16,8 @@ Aucune rangée : rien ne touche ton corpus.
 
 ## § 2 · Interface
 
-> ↻ **14 sept. 2026, soir — verdict de Grégoire sur 2.1 : INVÉRIFIABLE, pas ratée.** « Je ne vois aucune option de verrouillage de cartouche » : le bandeau ne s'affichait jamais, pour une autre raison que ce lot (#863). Corrigé en **1.140.11** ; la rangée se rejoue sur 1.140.11 ou plus.
+> ↻ **14 sept. 2026, soir — verdict de Grégoire sur 2.1 : INVÉRIFIABLE, pas ratée.** « Je ne vois aucune option de verrouillage de cartouche » : le bandeau ne s'affichait jamais, pour une autre raison que ce lot (#863).
+> ↻ **Puis SANS OBJET** : rien ne pouvait verrouiller une cartouche, et Grégoire a retiré le verrouillage (#864, 1.140.11) — le bandeau et son bouton n'existent plus. **Cette rangée ne se joue pas.** Restent 2.2 et 2.3.
 
 **2.1 · Le bouton « Déverrouiller » d'une cartouche ne se coupe plus en deux lignes**
 *Où :* Conception → Cartouches de rétroaction, sur une cartouche verrouillée (le bandeau orangé « Cartouche verrouillée »).
