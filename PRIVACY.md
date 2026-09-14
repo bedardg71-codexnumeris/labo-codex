@@ -1,6 +1,6 @@
 # Politique de confidentialité — Labo Codex
 
-> **Version** : 1.2 (27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une porte ouverte ; déclaration de la conservation des adresses courriel et de leur export périodique)
+> **Version** : 1.3 (14 septembre 2026 — correction du fondement juridique cité au §1.1 : la loi ne « exclut » pas les fins personnelles, elle délimite son objet à l'exploitation d'une entreprise au sens de l'art. 1525 C.c.Q. Historique antérieur : v1.2, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une porte ouverte ; déclaration de la conservation des adresses courriel et de leur export périodique)
 > **Responsable** : Grégoire Bédard, Cégep de Drummondville
 > **Régime applicable** : projet d'expérimentation pédagogique conduit à titre
 > personnel, application 100 % hors-ligne. La *Loi sur la protection des
@@ -40,9 +40,19 @@ Labo Codex est un projet d'expérimentation pédagogique conduit par son auteur
 1525 du Code civil du Québec. *Inférence à confirmer par un juriste en cas de
 doute* : dans cette configuration, la *Loi sur la protection des renseignements
 personnels dans le secteur privé* (modifiée par la Loi 25) **ne s'applique
-vraisemblablement pas** — son article premier, deuxième alinéa, exclut les
-renseignements collectés « à des fins exclusivement personnelles, domestiques
-ou artistiques ».
+vraisemblablement pas** — son article premier délimite l'objet de la loi aux
+renseignements personnels qu'une personne recueille, détient, utilise ou
+communique « à l'occasion de l'exploitation d'une entreprise au sens de
+l'article 1525 du Code civil ». Hors d'une telle exploitation, la loi ne trouve
+pas application : il ne s'agit pas d'une exclusion dont il faudrait se
+réclamer, mais d'un champ d'application qui n'est pas atteint.
+*Corrigé le 14 septembre 2026 : ce passage invoquait un « article premier,
+deuxième alinéa » excluant les renseignements collectés « à des fins
+exclusivement personnelles, domestiques ou artistiques ». Cette formulation
+est celle du Règlement général sur la protection des données de l'Union
+européenne, non de P-39.1 : l'article 1 de la loi québécoise ne porte aucune
+exclusion de ce type, et son deuxième alinéa traite du support des
+renseignements. La conclusion est inchangée ; son fondement est corrigé.*
 
 Les versions antérieures de ce document, comme d'anciennes rédactions de
 DEPLOY.md et de l'ADR-008, présentaient le contrôle d'accès à l'application
@@ -661,6 +671,7 @@ PRP, collègue, étudiant, parent) de juger sur pièces.
 | Date | Version | Modification |
 |---|---|---|
 | 2026-05-22 | 1.0 DRAFT | Rédaction initiale, soumis à validation de Grégoire et du responsable PRP du Cégep |
+| 2026-09-14 | 1.3 | **Correction d'une citation inexacte de P-39.1.** Le §1.1 attribuait à l'article premier, deuxième alinéa, une exclusion des renseignements collectés « à des fins exclusivement personnelles, domestiques ou artistiques » — formulation du RGPD européen, absente de la loi québécoise. Reformulé sur le texte réel : l'article 1 délimite l'objet de la loi aux renseignements traités à l'occasion de l'exploitation d'une entreprise (art. 1525 C.c.Q.). Conclusion inchangée (loi vraisemblablement inapplicable), fondement corrigé. Reste à confirmer par un juriste. Repéré en rédigeant CONFIDENTIALITE.md. |
 | 2026-08-27 | 1.2 | **Réactivation de Cloudflare Access au 1er septembre 2026, avec une porte ouverte (`Everyone`).** (a) §3.3 réécrite : distinction entre les *journaux* d'authentification (purgés à 24 h) et la *liste des identités* (`My Team → Users`, conservée sans limite et **exportée périodiquement**) ; finalité déclarée — savoir qui utilise l'application pour pouvoir joindre les utilisateurs, non pour filtrer l'entrée ; procédure de retrait. (b) §6 retitrée et §6.1 / §6.4 réécrites (durcissement éventuel, plutôt que réactivation éventuelle). (c) §8.2 : durée de session portée à un mois, ajout de la ligne de conservation des adresses. (d) §1.1, §2, §7.2, §9, §9.3, §12.4 alignés. (e) §6.2 : correction d'une affirmation de saturation du quota qui était fausse. Cf. ADR-008 révision du 27 août 2026 et DEPLOY.md v1.6. |
 | 2026-06-13 | 1.1 | Alignement sur DEPLOY.md §1.4 et ADR-008 (rév. 2 juin 2026) : régime réel précisé (Loi 25 secteur privé vraisemblablement inapplicable, §1.1) ; conditions de révision de la posture ajoutées (§1.2) ; Cloudflare Access désactivé et accès public par défaut reflétés (§2, §3.3, §4, §6, §7.2, §8.2, §10.4) ; vocabulaire « base de consentement Loi 25 » retiré ; références à la fenêtre 3-30 juin et au refermage du 1er juillet supprimées. |
 
