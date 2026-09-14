@@ -1,116 +1,42 @@
-# Consigne du jour – **IL N'Y A PAS DE LOT**, et c'est le constat principal
+# Consigne du jour — le septième site de #575 : retirer les zones du graphique de progression
 
-> **Écrite par Cowork le dimanche 13 septembre 2026, 18 h 30 (Toronto)**, à la fermeture de la journée. Elle remplace la consigne
-> des échelles, archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-13-658-659-echelles.md`.
->
-> ⚠ **Mesuré sur `b108723f`.** Comme toujours : **remesure avant d'agir**, les numéros de ligne et les comptes vieillissent.
+> Écrite le 13 septembre 2026, 19 h 35 (Toronto), sur `8acf6a42` (non poussé ; `origin/main` = `28c5fefa`).
+> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-13-575-b10b-constat.md`.
+> ⚠ B10b est constaté livré et coché. Ce qui suit est **le dernier site ouvert de #575**, et le seul endroit du dépôt où une table IDME en dur survit sur un chemin vivant.
+> ⚠⚠ **Une première version de cette consigne, écrite vingt minutes plus tôt, disait de RÉPARER le choix de l'échelle. Grégoire a tranché l'inverse.** Si tu as lu cette version-là, oublie-la.
 
----
+## 0 · D'abord, pousse
 
-## 0 · CE QUE CETTE CONSIGNE DEMANDE, ET CE QU'ELLE NE DEMANDE PAS
+`8acf6a42` est commité et non poussé. `scripts/pousser.sh`, à la demande de Grégoire. Ce sont des commentaires et deux jetons anti-cache : `version.json` reste à `1.140.6`, rien ne change à l'écran.
 
-**Elle ne te donne aucun lot de code, parce qu'il n'y en a plus qui ne passe pas par Grégoire.** Ce n'est pas un manque de
-matière : **224 fiches** sont ouvertes. C'est que chacune demande son arbitrage, ses données réelles, un écran qu'il faut
-regarder, ou porte son verrou « après le 14 ».
+## 1 · La décision de Grégoire — SUPPRESSION PURE, et le motif qui la porte
 
-⛔ **NE SONDE PAS LE BACKLOG FICHIER PAR FICHIER POUR EN TROUVER UN AUTRE.** Cowork l'a fait le 13 sur la dernière grappe
-disponible (`js/echelles.js`, six fiches) : **une seule était un lot de code**, et elle est livrée. Le prochain lot viendra du
-**terrain**, pas du tri.
+**Les zones colorées du graphique de progression sont RETIRÉES. On ne cherche pas quelle échelle elles devraient suivre : elles n'en suivent aucune, parce qu'elles n'ont rien à situer.** Tranché par Grégoire le 13 septembre au soir. Le motif est à inscrire dans la fiche, pour que personne ne rouvre la question en croyant bien faire : **une échelle de performance juge UNE production ; les indices A-C-P-E sont des mesures agrégées en pourcentage sur un trimestre.** Superposer les paliers de l'une aux courbes des autres donne un repère qui a l'air de dire quelque chose et qui ne dit rien. Ce n'est pas un défaut de configuration — c'est un objet qui n'aurait pas dû exister.
 
-⮕ **Ce que cette consigne demande, en deux gestes, et c'est tout** : le §1 (commiter trois fichiers), puis attendre. Si un retour
-de testeur arrive, il prend toute la place — voir §3.
+⛔ **Et cette décision ne se propage PAS au graphique par critère** (#752, livré le 11 sept.). Ses points SONT des niveaux d'évaluations : ses zones ont un référent, elles restent, et elles sont justes. Ne les touche pas, et n'invoque pas cette consigne pour le faire.
 
----
+## 2 · LA MESURE QUI PASSE AVANT LE CODAGE
 
-## 1 · LE SEUL GESTE DÛ : COMMITER LES TROIS FICHIERS DE COWORK
+Rends ces trois réponses avant d'écrire une ligne. Elles fixent le périmètre, et l'une d'elles peut l'élargir.
 
-Ils sont écrits, hors commit, et ils t'attendent. **Rien d'autre dans l'arbre ne doit entrer dans ce commit.**
+**(a) Qui d'autre lit `ZONES_IDME` et `zonesPourChart` ?** Si ces zones ne servent qu'au graphique de progression, la table en dur part avec elles et #575 se ferme entièrement. Si un autre graphique en dépend, tu retires la zone POUR CE CANVAS seulement et tu dis lequel reste — dans ce cas #575 ne se coche pas, et il faut une fiche neuve pour l'autre site.
 
-| Fichier | Ce qu'il porte |
-|---|---|
-| `PROTOCOLE.md` | la section **« Le cycle d'un lot — la méthode, du backlog au push »**, écrite le 13 à la demande de Grégoire |
-| `CONSIGNE-DEMARRAGE-COWORK.md` | réécrite à 18 h 30 : elle **corrige une affirmation fausse** (voir §2) |
-| `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-13-15h35.md` et `-18h.md` | les deux archives |
-| `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-13-658-659-echelles.md` | l'archive de la consigne des échelles |
-| `plans de travail/CONSIGNE-DU-JOUR.md` | **ce fichier** |
+**(b) Qu'est-ce qui disparaît exactement à l'écran ?** Nomme-le : lignes pointillées, noms dans la marge droite, légende, axe, autre chose. `_zonesParCanvas` n'a aucune entrée pour ce canvas, donc les zones y viennent du repli — vérifie-le au lieu de me croire, c'est une mesure de Cowork reprise de ta propre lecture.
 
-⚠ **Aucun de ces fichiers n'est du code ni du texte d'application.** Pas de release, pas de bump, pas de jeton anti-cache : le
-rituel de fin de session s'applique, mais son volet « suite de tests » n'a rien à éprouver ici. Dis-le dans le message de commit.
+**(c) Reste-t-il un texte, ailleurs, qui ANNONCE ces zones ?** `texteZones` est mort depuis mars, mais un titre, une infobulle ou une phrase d'aide peut encore promettre des « zones colorées » à l'utilisateur. Un graphique dont la légende annonce ce qui n'est plus dessiné est pire que le défaut qu'on répare. Cherche par le CONTENU, sur le dépôt entier, pas par le nom de la variable.
 
-⛔ **Ne commite PAS** ce qui traîne en `??` et qui n'est pas à nous : `Modèle de consigne de démarrage à froid.txt`,
-`Retours des testeurs/jean-françois/`, `docs/projet de développement/`, `ignorés/`. **Ils sont à Grégoire**, et #694 (les dossiers
-de retours nominatifs qui voyagent avec le dépôt) dit exactement pourquoi on ne les aspire pas sans lui demander.
+## 3 · Le geste
 
----
+Retire, dans le même commit : le calcul de `texteZones` (`js/profil-etudiant-sections-affichage.js`, vers `:3211-3230`) — code mort depuis `4e38bcce` (21 mars), qui a retiré du HTML la ligne qui l'affichait ; la lecture de `echellesTemplates` qui ne sert qu'à lui ; les zones du graphique de progression ; et, sous réserve de la mesure 2a, `ZONES_IDME` elle-même.
 
-## 2 · CE QUE LA CONSIGNE DE COWORK CORRIGE, ET POURQUOI ÇA TE CONCERNE
+⚠ **Le verrou `tests/unit/sentinelle-575-couleurs-badges-barres.test.js:130` exige encore la chaîne `'IDME par défaut'` et rougira. C'est le signal attendu, pas une régression.** Ne le fais pas passer en changeant un chiffre : réécris l'assertion pour qu'elle CONSTATE le retrait — zéro occurrence — afin qu'elle rougisse si quelqu'un réintroduit une table de niveaux dans ce graphique.
 
-Jusqu'au 13 au soir, ce fichier affirmait que **Cowork ne peut pas lancer la suite de tests**. **C'est faux.** Une installation à
-neuf côté Linux fonctionne : clone partagé, `npm install` dans `tests/`, `npx vitest run` — 36 s, 559 fichiers, 6 337 essais.
+## 4 · La preuve
 
-⮕ **Ce que ça change pour toi** : sa relecture croisée peut désormais **reposer tes break-tests elle-même** au lieu de relire ton
-journal. Elle l'a fait le 13 sur #658 : cinq mutations, cinq rouges, témoin vert. **Attends-toi à ce que ses verdicts soient
-étiquetés « par exécution » plutôt que « par lecture »**, et à ce qu'un journal de mutations non reproductible soit relevé.
+Sentinelle avec break-tests rouges vérifiés isolément, restauration vérifiée à chaque fois. **Le cas qui prouve quelque chose** : un montage sans aucune échelle dans le trimestre, et un autre avec une échelle dont les niveaux ne sont pas I/D/M/E — le graphique rend la même chose dans les deux, parce qu'il ne lit plus d'échelle du tout. Un montage sur l'échelle de Grégoire ne prouve rien : c'est celle où la table en dur tombe juste par coïncidence, et c'est ce qui a caché ce défaut pendant un an.
 
-⛔ **Ce que ça ne change pas : le verdict Playwright reste à toi**, et il se prend **Cowork fermé**. Elle ne peut pas se fermer
-elle-même.
+⚠ **Le rendu change, donc une porte terrain est due.** Ce graphique est du Chart.js dans le profil d'un élève : le verdict se prend à l'écran, pas dans `node`. Prépare la porte selon le skill `portes-terrain` — Grégoire devra regarder, et il le sait.
 
----
+## 5 · Ce que ce lot ne rouvre pas
 
-## 3 · PRIORITÉ ABSOLUE, ET ELLE EST IMMINENTE : LES RETOURS DE TERRAIN
-
-**Lundi 14, l'orthopédagogue ouvre l'application sur son poste. Mardi 15, la communauté de pratique découvre l'accueil neuf.**
-Ils verront **1.140.6**, qui est bien en ligne (vérifié chez l'hébergeur, pas seulement au sommet d'`origin/main`).
-
-⮕ **Un bug ou un besoin signalé par l'un d'eux INTERROMPT tout et passe avant le backlog.**
-- `Retours des testeurs/SUIVI-BUGS.md` — consulter **de façon ciblée** (120 Ko) AVANT de corriger.
-- `Retours des testeurs/USAGE-FORMATS.md` — y noter toute observation en moins de 30 s (date + initiales + 1-3 lignes).
-- Un numéro de bug et un numéro de fiche viennent du **même compteur** : la ligne « Dernier ID » en tête de `BACKLOG.md`, à
-  #859, et elle se met à jour **dans le même commit**.
-
----
-
-## 4 · LES TROIS CHOSES QUI ATTENDENT GRÉGOIRE
-
-Elles sont listées sous le lot 10 de la page de tri. **Ne les ouvre pas de toi-même** ; s'il te les donne, voici ce que chacune
-demande.
-
-**a) L'écran des échelles sur Safari et sur iPad.** Le lot #658 a retiré huit conteneurs, ≈ 930 lignes et 18 règles CSS sans
-qu'aucun œil ne regarde le résultat. Tout ce qui part était caché, donc l'attente est « rien n'a bougé » — mais c'est une
-attente, pas une mesure. ⮕ Si Grégoire veut le vérifier : skill `portes-terrain`, **deux livrables jumeaux** (le markdown de
-`plans de travail/` que TU écris, l'artefact publié que COWORK publie). Deux règles de tête : aucune porte si une machine peut
-répondre ; préalable dû seulement si un raté est irréversible.
-
-**b) Le stock de `configEchelle` dans sa base réelle.** Depuis #658, **plus aucun lecteur ni écrivain** des clés nues
-`configEchelle` et `niveauxEchelle` : la source est tarie, le stock est **inerte**. Au plus une clé par base, tous trimestres
-confondus, et elle voyage dans toute sauvegarde Codex. ⛔ **Tarir n'est pas réparer, et écrire dans ses données lui revient** :
-on mesure, on sépare, on propose. Sa console : `localStorage.getItem('configEchelle')`.
-
-**c) #859 — le repère « build vu » écrit deux fois par deux chemins** (`js/init-inline.js`). ⮕ **Recommandation de Cowork : ne
-pas l'ouvrir.** C'est un niveau 2 sans symptôme vécu, et la règle du 24 août dit qu'un item n'entre en lot que s'il a un
-symptôme que Grégoire a VÉCU, ou s'il bloque un chantier en cours. Ni l'un ni l'autre.
-
----
-
-## 5 · LES PIÈGES MESURÉS, À RELIRE AVANT DE TOUCHER À QUOI QUE CE SOIT
-
-- ⚠ **Vitest se lance DEPUIS `tests/`** : de la racine il balaie `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
-- ⚠ **Lectures ciblées obligatoires.** `SESSION.md` (1,6 Mo), `BACKLOG.md` (1,3 Mo) et `RELAIS.md` (446 Ko) : **jamais sans
-  `offset`/`limit`.** En-tête, puis cibler.
-- ⚠ **« PUSH RÉUSSI » NE SIGNIFIE PAS « SUITE COMPLÈTE VERTE »** : le hook pre-push ne lance que Vitest. L'ordre qui fait qu'un
-  push est jugé est au §4.5 de `fin-de-session` : commit, relecture, **puis** verdict, **puis** push.
-- ⚠⚠ **ET « POUSSÉ » NE SIGNIFIE PAS « EN LIGNE ».** Mesuré le 13 : ni le shell de Cowork ni le conteneur n'atteint
-  `app.codexnumeris.org`. Le déploiement se lit chez l'hébergeur — projet Netlify `codexnumeris-051225`, qui rend le `commit_ref`
-  publié et son état. C'est Cowork qui a cette route.
-- ⚠ **Le compte des fiches ne se filtre pas sur la forme du numéro** : `grep -c '\*\*#'` en rate deux (#521 et #523, barrés).
-  Compte les lignes `- [ ] ` à la racine et retire le seul gabarit `#XX` de la section « Notes ».
-- ⚠ **Zones protégées, inchangées** : `js/config.js`, `js/navigation.js`, `noms_stables.json`. Et **les notes d'A2025 et d'H2026
-  ne sont pas rouvertes** (décision de Grégoire du 1er sept., explicitement sans retour).
-
----
-
-## 6 · SI TU N'AS RIEN À FAIRE
-
-C'est le cas attendu, et **ce n'est pas un problème à résoudre**. Fais le §1, écris ton relais, et arrête-toi. ⛔ N'ouvre pas un
-chantier « en attendant » : la règle de stabilité zéro-dette a été révisée le 1er septembre — **l'élargissement de scope n'est
-plus gratuit**, la cohorte 1 est arrivée. Un lot non demandé est un lot que personne n'a mesuré.
+#752 (voir §1) · #555 · #553 · #551 · la question de savoir si un indice agrégé se situe dans une échelle de niveaux — tranchée le 13 septembre, elle ne se reprend pas. Aucun bump, aucune release avant le verdict de la porte.
