@@ -85,6 +85,15 @@ production à la main**. Cinq boutons du profil mènent ici (`sections-affichage
 659, 734, 3093, 3106`), plus un chemin depuis `liste-evaluations.js:1343`.
 ⮕ **Disposition : INSCRIT — #868.** Symptôme silencieux sur un geste courant.
 
+⚠ **RECTIFIÉ le 15 sept., 15 h (session suivante, levée de la réserve de la fiche)** : le
+symptôme est confirmé, **la cause écrite ci-dessus ne l'est pas**. La fonction aux deux
+identifiants inexistants est morte : `evaluation.js` (chargé après) écrase
+`window.evaluerProduction` avec une version aux BONS identifiants. Celle-ci échoue quand
+même, parce que `selectEtudiantEval` n'a aucune option tant qu'aucun fichier n'est ouvert
+dans la visionneuse. Détail et réparation désignée : fiche #868 du BACKLOG.
+**Leçon de méthode** : `grep` d'un identifiant dans le fichier qui l'appelle ne dit pas
+QUELLE définition répond ; `String(window.X)` au navigateur, si.
+
 ### A-5 · Quatre fonctions exportées que rien n'appelle
 Appelants réels, commentaires et lignes d'export exclus (témoin de la mesure :
 `calculerTousLesIndices` ressort dans 9 fichiers) :
