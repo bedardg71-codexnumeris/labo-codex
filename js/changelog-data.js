@@ -33,7 +33,7 @@
                 'Un groupe importé ou créé apparaît tout de suite à l\'étape 3 du groupe-cours&nbsp;: tu peux l\'y choisir et enregistrer sans recharger.',
                 'Réimporter une liste exportée depuis Labo Codex n\'ajoute plus un élève fantôme nommé «&nbsp;Groupe&nbsp;».',
                 'Aide › «&nbsp;Exporter et sauvegarder tes données&nbsp;»&nbsp;: un encadré dit ce que la Loi 25 te demande — où vivent les données de tes élèves, qui en répond, comment les protéger — avec un lien vers la page publique qui détaille tout.',
-                'Import des copies&nbsp;: les photos d\'un même élève pour une même production s\'assemblent de nouveau en un seul PDF, au lieu d\'être annoncées comme doublons à renommer, même quand tu reprends une file avec «&nbsp;Re-déposer les fichiers&nbsp;» (tu fais le tri dans l\'aperçu, rangé par date). Une vignette sans image dit maintenant pourquoi&nbsp;— et, pour une photo HEIC que le navigateur n\'a pas pu lire, la raison s\'affiche quand tu cliques sur le fichier.',
+                'Import des copies&nbsp;: les photos d\'un même élève pour une même production s\'assemblent de nouveau en un seul PDF, au lieu d\'être annoncées comme doublons à renommer, même quand tu reprends une file avec «&nbsp;Re-déposer les fichiers&nbsp;» (tu fais le tri dans l\'aperçu, rangé par date). Une vignette sans image dit maintenant pourquoi&nbsp;— et, pour une photo HEIC que le navigateur n\'a pas pu lire, la raison s\'affiche quand tu cliques sur le fichier. «&nbsp;+ Ajouter des pages&nbsp;» ajoute de nouveau tes pages quand tu confirmes sans réglage.',
             ]
         },
         {

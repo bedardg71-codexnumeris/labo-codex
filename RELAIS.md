@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 18 H 45 (Toronto) : 1.142.4 (#876) PAR-DESSUS 1.142.3
+## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 19 H 20 (Toronto) : 1.142.5 (#877) PAR-DESSUS 1.142.4
+
+> **1.142.4 est en ligne** (`fd2e2357`). **1.142.5** porte **#877** (rapport de 19 h 01) : « + Ajouter des pages » › « Confirmer »
+> sans réglage n'ajoutait rien — `confirmer()` (`travaux-preparation.js`) sortait par « rien à traiter » sans rappeler l'éditeur en
+> mode ad hoc ; il sort désormais par `passer()`. Sentinelle statique #877, break-test rouge ; Vitest 569 / 6 405. Grégoire a
+> demandé l'envoi ce soir (option B). **Si `origin/main` ne porte pas 1.142.5, le push reste à faire** (`pousser.sh`, Cowork fermé).
+>
+> **Décision DUE, posée à Grégoire à ≈ 18 h 55, sans réponse** : plusieurs PDF d'un même élève pour une même production. Depuis
+> #873 ils partagent la clé ; l'assemblage ne soude que des IMAGES (`assemblerGroupesPipeline`), donc le cadre « N pages → 1 PDF »
+> (`travaux-ui.js`, groupesMulti, sans filtre `estImage`) PROMET une fusion qui n'a pas lieu, et le doublon n'apparaît qu'en cours
+> d'import (fenêtre « Doublon détecté ») au lieu de la confirmation. Options posées : **A** (recommandée) séparés et dit franchement
+> — pas de cadre pour les PDF, doublon annoncé à la confirmation ; **B** fusion des PDF. Trouvaille du lot #873 : à finir.
+> Aussi posée, non tranchée : une lettre finale (« Artefact_1a/1b/1c », cas Breton) comme numéro de page ? (`SUFFIXE_PAGE`).
+
+## (précédent) 15 SEPT. 2026, ≈ 18 H 45 (Toronto) : 1.142.4 (#876) PAR-DESSUS 1.142.3
 
 > **1.142.3 est en ligne** (`be785890`, poussée par `pousser.sh`, verdict Playwright vert). **1.142.4** porte **#876**, rapport de
 > Grégoire de 18 h 18 : une file reprise par « Re-déposer les fichiers » (qu'il utilise pour garder ses réglages spécifiques après
