@@ -7,6 +7,61 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 14 H 15 (Toronto) : DEUX RETOURS TESTEURS LIVRÉS ET L'AUDIT DU MODULE PROFIL — TOUT EST SUR `main`, TOUT EST POUSSÉ
+
+> **Rien n'attend sur une branche.** `origin/main` = `4fc69488`, l'arbre principal est propre et aligné.
+> Trois poussées de la journée, chacune par `scripts/pousser.sh` à la demande de Grégoire :
+> `41ffa01e..befbcf25` (#866), `..f9cb9a60` (#867), `..4fc69488` (l'audit).
+>
+> **Version en tête : `1.141.1`, build `0915-1222`.** Vitest **564 / 6 367**. Verdict Playwright WebKit
+> pris par le script sur `f9cb9a60` : code 0, 0 échec connu, 0 instable. Le dernier push (`4fc69488`)
+> est documentaire : Playwright sans objet, Vitest vert au hook. Cowork n'était pas ouvert.
+>
+> **Ce qui a été livré**
+> - **#866** (1.141.0) — les notes prises dans « Rapport » (profil d'un élève) n'étaient enregistrées
+>   NULLE PART. Ce n'était pas une régression : #754 n'avait retiré que l'effacement à l'OUVERTURE, et
+>   sa sentinelle ne fait pas l'aller-retour entre sous-sections. Livré : une zone « Mes notes »
+>   (`<trim>_notesRapport`), écrite au geste, relue au rendu. Le rapport du haut reste refait à chaque
+>   ouverture — décision de Grégoire entre trois formes.
+> - **#867** (1.141.1) — « Enregistrer » dans les informations confidentielles répondait « Étudiant·e
+>   introuvable » sur un enregistrement réussi. Deux moitiés : le DA effacé par la fermeture du modal
+>   avant d'être relu, ET l'état pivot `profilActuelDA` écrit avant validation — après l'alerte, la
+>   barre latérale du profil ne répondait plus. La seconde moitié n'était pas dans le rapport testeur :
+>   c'est la spec, écrite AVANT le correctif, qui l'a trouvée.
+> - **Audit du module profil** (`Rapports/AUDIT-2026-09-15-module-profil.md`), demandé par Grégoire.
+>   11 constats, **4 inscrits (#868 à #871)**, 5 niveau 3, 3 périmés. Chacun porte sa disposition dans
+>   le rapport. **Rien n'a été corrigé.**
+>
+> **CE QUI EST DÛ, par ordre**
+> 1. ⛔ **#871 attend une DÉCISION DE GRÉGOIRE, pédagogique** : le pourcentage et la fraction affichés
+>    côte à côte se contredisent (assiduité « 90 % (23 / 25) » ; complétion, 1 élève sur 10 au pack
+>    démo). Choisir lequel fait foi ne se tranche pas au code. **Ne pas corriger sans sa réponse.**
+> 2. **La vérification en ligne de 1.141.1** — « en ligne » se mesure chez l'hébergeur, pas au sommet
+>    d'`origin/main`, et aucune route vers `app.codexnumeris.org` n'existe depuis nos environnements.
+>    C'est à Grégoire : rejouer les deux trajets du jour sur ses 28 élèves.
+> 3. **Safari et l'iPad** n'ont été éprouvés sur aucun des deux correctifs. Aucune porte terrain n'a
+>    été ouverte (rien n'écrit dans les données existantes, aucun raté irréversible) — c'est assumé.
+> 4. **#868** (« Évaluer » ne présélectionne rien) est le plus proche d'un geste quotidien. Sa fiche
+>    porte une réserve : vérifier que la présélection a encore un sens dans le formulaire tel qu'il est.
+>
+> **TROIS PIÈGES MESURÉS AUJOURD'HUI, à ne pas repayer**
+> - **Un accent grave dans un commentaire HTML écrit DANS un gabarit JS ferme le gabarit.** La syntaxe
+>   reste valide ; l'erreur ne sort qu'à l'exécution, en nommant un mot attrapé dans le commentaire
+>   (`ReferenceError: trim is not defined`). Écrire « clé trim_notesRapport », sans accent grave.
+> - **`el.click()` scripté ne déplace pas le focus**, donc n'émet aucun `change` sur le champ quitté.
+>   Une persistance qui ne tient que par le blur a un trou pour toute navigation faite par du code.
+>   Corollaire : poser `.value` par script n'émet pas non plus de `change` au blur — taper au clavier.
+> - **`grep -c "\.classe\b"` sous zsh ne mesure pas ce qu'on croit.** Ma première passe a donné
+>   « zéro définition » pour des classes vivantes. **Tout comptage doit porter son témoin** : une
+>   valeur connue qui DOIT sortir non nulle. Sans lui, l'audit concluait que toutes les classes du
+>   module étaient fantômes.
+>
+> **Méthode qui a payé, à reprendre** : pour #867, la spec a été écrite **avant** le correctif et a
+> rougi sur les trois symptômes. C'est le break-test le plus honnête qui soit — le rouge porte sur le
+> vrai défaut, pas sur une mutation choisie par l'auteur.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 13 SEPT. 2026, ≈ 17 H 35 (Toronto) : #658 LIVRÉ ET #659 FERMÉE, SANS RELEASE — POUSSÉ PAR `scripts/pousser.sh` DEPUIS L'ARBRE PRINCIPAL
 
 > Sur `main`, au-dessus de `4fe96394` : un commit (#658/#659, ce relais compris), poussé par cette session (`monitorage-v6-ef`) à la demande de Grégoire (17 h 30), par `scripts/pousser.sh` — qui prend le verdict Playwright AVANT d'ouvrir la connexion. Si ce relais est lu sur un `main` qui ne porte pas ce commit, le push a échoué : voir le jeton `scripts/.verdict-playwright.json`.

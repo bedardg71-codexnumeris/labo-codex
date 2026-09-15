@@ -1,5 +1,19 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 15 septembre 2026, ≈ 14 h 15 (Toronto) : `1.141.1` POUSSÉE, `origin/main` = `4fc69488`,
+> arbre propre et aligné, RIEN n'attend sur une branche.** Build `0915-1222`. Vitest **564 / 6 367**. Verdict Playwright WebKit
+> sur `f9cb9a60` : code 0, 0 échec connu. Journée entièrement menée par les retours testeurs, comme le veut CLAUDE.md :
+> **#866** (les notes du Rapport du profil n'étaient enregistrées nulle part — zone « Mes notes » livrée, forme tranchée par
+> Grégoire entre trois propositions) et **#867** (« Enregistrer » dans les informations confidentielles accusait l'élève d'être
+> introuvable ; seconde moitié silencieuse trouvée par la spec : la barre latérale du profil restait sourde ensuite). Puis, à sa
+> demande, l'**audit du module profil** — `Rapports/AUDIT-2026-09-15-module-profil.md`, 11 constats, **4 inscrits (#868 à #871)**,
+> 5 niveau 3, 3 périmés, **rien de corrigé**.
+> **MANDAT COURANT** : (1) ⛔ **#871 attend une décision PÉDAGOGIQUE de Grégoire** — le pourcentage et la fraction affichés côte
+> à côte se contredisent (assiduité, complétion) ; lequel fait foi ne se tranche pas au code, **ne pas corriger sans sa réponse** ;
+> (2) la vérification en ligne de 1.141.1 et Safari/iPad lui reviennent — aucune porte terrain ouverte, assumé (rien n'écrit dans
+> les données existantes) ; (3) **#868** est le plus proche d'un geste quotidien (« Évaluer » depuis le profil ne présélectionne
+> rien), sa fiche porte une réserve à lever avant de corriger ; (4) le cap d'avant la journée reste dû : porte #787 points 2.2 et
+> 2.3, et **#862** (encadré Loi 25 dans l'Aide — **les mots reviennent à Grégoire**). **Les blocs ci-dessous sont historiques.**
 > ↻ **ÉTAT MESURÉ remesuré par Claude Code le 12 septembre 2026, soir (Toronto) : `1.139.0` est POUSSÉE (`e29f734c`) et tout ce
 > qui a suivi aussi — `origin/main` = `5519864d` avant le commit de documents de ce soir. Vitest 551 / 6 034. Porte des Interventions
 > RELEVÉE 6/6 par Cowork à 15 h 03, rangées 2.4 et 2.5 sautées faute de cas. Ce soir, documents seulement : tri des 37 fiches ouvertes
