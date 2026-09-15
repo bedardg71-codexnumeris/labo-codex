@@ -201,60 +201,85 @@ function naviguerVersListeEvaluations() {
 }
 
 /**
- * Navigation vers le formulaire d'évaluation pour un étudiant et une production spécifiques
- * Appelée depuis les badges d'artefacts dans le profil étudiant
+ * « Évaluer » une production d'un élève — LA définition unique (#868, 15 sept. 2026).
  *
- * FONCTIONNEMENT:
- * - Si l'évaluation existe déjà : charge l'évaluation existante avec notes et commentaires
- * - Si l'évaluation n'existe pas : affiche un formulaire vide prêt à évaluer
+ * Appelée par les boutons « Évaluer » du profil (data-action) et par le menu « Actions… »
+ * de la liste des évaluations. Il en existait trois, et aucune ne présélectionnait rien,
+ * en silence : celle du profil visait deux identifiants inexistants et était écrasée au
+ * chargement par celle d'ici, qui remplissait des listes cachées encore vides (elles ne
+ * se peuplent qu'à l'ouverture d'une copie) ; la liste avait sa propre copie.
  *
- * @param {string} da - Code permanent de l'étudiant
+ * - Copie importée, annotée ou non : elle s'ouvre, en mode Évaluer (décision de Grégoire,
+ *   15 sept.). `ouvrirFichier` fait lui-même l'arrivée dans Évaluations (#761).
+ * - Aucune copie : le formulaire sans copie, élève et production choisis, avec les outils
+ *   (Grégoire : « un enseignant pourrait évaluer une copie sans l'importer […] il devrait
+ *   pouvoir utiliser les outils »).
+ *
+ * @param {string} da - DA de l'élève
  * @param {string} productionId - ID de la production à évaluer
  */
 function evaluerProduction(da, productionId) {
+    const fichier = (typeof travauxResolution !== 'undefined')
+        ? travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId: productionId })
+        : null;
 
-    // 1. Naviguer vers la section Évaluations › Annoter et évaluer
+    if (fichier && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
+        if (productionId) sessionStorage.setItem('travaux-filtre-production', productionId);
+        // Consommé par `ouvrirFichier` une fois la copie chargée — le protocole de « Consulter ».
+        window._apresOuvertureFichier = function() { travauxUI.basculerMode('evaluer'); };
+        travauxUI.ouvrirFichier(fichier.id);
+        return;
+    }
+    _evaluerSansCopie(da, productionId);
+}
+
+/**
+ * Le formulaire sans copie, élève et production présélectionnés (#868). Réutilise le
+ * chemin autonome de `modifierEvaluation` : mêmes panneaux, mêmes listes, mêmes outils.
+ */
+function _evaluerSansCopie(da, productionId) {
+    // Une copie ouverte en mode Évaluer tient les panneaux dans ses palettes : les rendre au formulaire.
+    if (document.getElementById('travaux-palette-eval-gauche')
+        && typeof travauxUI !== 'undefined' && typeof travauxUI.fermerModeEvaluation === 'function') {
+        travauxUI.fermerModeEvaluation();
+    }
+    // Même drapeau que `modifierEvaluation` : `afficherFichiers`, relancé par l'arrivée sur
+    // la sous-section, ne masque pas le formulaire qu'on s'apprête à montrer.
+    window._modifierEvaluationEnCours = true;
+    // Et l'arrivée ne rouvre aucune copie : ni celle encore dans la visionneuse (drapeau lu par
+    // `initialiserModuleTravaux`), ni la dernière de la session (clé lue à la restauration).
+    window._evaluerSansCopieEnCours = true;
+    sessionStorage.removeItem('travaux-dernier-fichier');
     afficherSection('evaluations');
     afficherSousSection('evaluations-annoter');
 
-    // Rendre le formulaire d'évaluation visible
-    setTimeout(() => {
-        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
-        const visDiv2 = document.getElementById('evaluations-contenu-visionneuse');
-        if (evalDiv) evalDiv.classList.remove('u-hide');
-        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
-        if (visDiv2) visDiv2.classList.add('u-hide');
-    }, 50);
-
-    // 2. Attendre que le DOM soit prêt et pré-remplir le formulaire
-    setTimeout(() => {
-        const selectEtudiant = document.getElementById('selectEtudiantEval');
-        const selectProduction = document.getElementById('selectProduction1');
-
-        if (!selectEtudiant || !selectProduction) {
-            console.error('❌ Éléments de formulaire introuvables');
-            return;
+    setTimeout(async () => {
+        try {
+            _setupAffichagePanneauxModif(false);
+            // Sans copie, le travail est « Reçu » — remis, non importé (Grégoire, 15 sept.) — et les
+            // critères s'ouvrent ; « Non reçu », le défaut du formulaire, les verrouillait. Posé AVANT
+            // l'élève et la production : leur chargement lit ce statut. Une évaluation déjà
+            // enregistrée pose ensuite le sien (`verifierEtChargerEvaluationExistante`).
+            const selectRemise = document.getElementById('remiseProduction1');
+            if (selectRemise) {
+                selectRemise.value = 'recu';
+                if (typeof window.mettreAJourPillStatut === 'function') window.mettreAJourPillStatut('recu');
+            }
+            // Sans copie, rien n'a peuplé la liste des élèves : seule l'ouverture d'une copie le fait.
+            if (typeof chargerListeEtudiantsEval === 'function') chargerListeEtudiantsEval();
+            const etudiant = (obtenirDonneesSelonMode('groupeEtudiants') || []).find(e => e.da === da);
+            await _chargerSelectsStandalone(
+                { etudiantDA: da, productionId: productionId },
+                _attendreOptionSelect,
+                () => (etudiant && etudiant.groupe) || null
+            );
+        } catch (erreur) {
+            console.error('[Évaluer sans copie]', erreur);
+        } finally {
+            window._modifierEvaluationEnCours = false;
+            window._evaluerSansCopieEnCours = false;
         }
-
-        // 3. Pré-sélectionner l'étudiant
-        selectEtudiant.value = da;
-
-        // 4. Déclencher le chargement des productions pour cet étudiant
-        chargerEvaluationsEtudiant();
-
-        // 5. Attendre que les productions soient chargées et pré-sélectionner la production
-        setTimeout(() => {
-            selectProduction.value = productionId;
-
-            // 6. Déclencher le chargement de la production
-            // Le système va automatiquement détecter si une évaluation existe (via verifierEtChargerEvaluationExistante)
-            // et la charger, sinon affichera un formulaire vide
-            const event = new Event('change', { bubbles: true });
-            selectProduction.dispatchEvent(event);
-
-        }, 200);
-    }, 100);
+    }, 200);
 }
 
 
@@ -1176,6 +1201,30 @@ function _afficherCriteresDepuisEvaluation(evaluation) {
 }
 
 /**
+ * Attend qu'une option précise apparaisse dans un select (polling actif, pas de délai
+ * fixe). Sortie de `modifierEvaluation` le 15 sept. 2026 (#868) : le formulaire sans
+ * copie s'en sert aussi.
+ */
+function _attendreOptionSelect(selectId, valeurCherchee, maxTentatives = 20, delai = 100) {
+    return new Promise((resolve, reject) => {
+        let tentatives = 0;
+        const intervalle = setInterval(() => {
+            tentatives++;
+            const select = document.getElementById(selectId);
+            const optionTrouvee = select ? Array.from(select.options).find(opt => opt.value === valeurCherchee) : null;
+
+            if (optionTrouvee) {
+                clearInterval(intervalle);
+                resolve(select);
+            } else if (tentatives >= maxTentatives) {
+                clearInterval(intervalle);
+                reject(new Error(`Timeout: option "${valeurCherchee}" introuvable dans #${selectId}`));
+            }
+        }, delai);
+    });
+}
+
+/**
  * Charge une évaluation existante pour modification
  * Refactorisé le 16 novembre 2025 pour corriger bug timing chargement
  *
@@ -1206,28 +1255,9 @@ function modifierEvaluation(evaluationId) {
 
     // ========== FONCTIONS HELPER ==========
 
-    /**
-     * Attend qu'une option spécifique apparaisse dans un select
-     * Utilise un polling actif au lieu de délais fixes
-     */
-    const attendreOption = (selectId, valeurCherchee, maxTentatives = 20, delai = 100) => {
-        return new Promise((resolve, reject) => {
-            let tentatives = 0;
-            const intervalle = setInterval(() => {
-                tentatives++;
-                const select = document.getElementById(selectId);
-                const optionTrouvee = select ? Array.from(select.options).find(opt => opt.value === valeurCherchee) : null;
-
-                if (optionTrouvee) {
-                    clearInterval(intervalle);
-                    resolve(select);
-                } else if (tentatives >= maxTentatives) {
-                    clearInterval(intervalle);
-                    reject(new Error(`Timeout: option "${valeurCherchee}" introuvable dans #${selectId}`));
-                }
-            }, delai);
-        });
-    };
+    // L'attente d'une option vit au niveau du module : `_attendreOptionSelect` (#868 la
+    // partage avec le formulaire sans copie).
+    const attendreOption = _attendreOptionSelect;
 
     /**
      * Trouve le numéro de groupe d'un étudiant
@@ -1350,6 +1380,12 @@ function _setupAffichagePanneauxModif(enModeEvaluer) {
         const panneau = document.getElementById(id);
         if (panneau) panneau.classList.remove('u-hide');
     });
+
+    // #868 — sans copie, les mêmes outils que les palettes du mode Évaluer : le cadenas,
+    // les vues de la rétroaction, « Copier tout » et « Copier ».
+    if (typeof travauxUI !== 'undefined' && typeof travauxUI.equiperFormulaireSansCopie === 'function') {
+        travauxUI.equiperFormulaireSansCopie();
+    }
 }
 
 function _chargerSelectsModeEvaluer(evaluation) {
@@ -1365,6 +1401,12 @@ function _chargerSelectsModeEvaluer(evaluation) {
 }
 
 async function _chargerSelectsStandalone(evaluation, attendreOption, trouverGroupeEtudiant) {
+    // #868 — le nom de l'élève et de la production en tête, comme avec une copie
+    // (ils restaient à « — » sur le formulaire sans copie).
+    if (typeof travauxUI !== 'undefined' && typeof travauxUI.ecrireLabelsIdentite === 'function') {
+        travauxUI.ecrireLabelsIdentite(evaluation.etudiantDA, evaluation.productionId);
+    }
+
     // ÉTAPE 0 : selects de base (groupes, grilles, échelles)
     if (typeof chargerGroupesEval === 'function') chargerGroupesEval();
     if (typeof chargerGrillesDansSelect === 'function') chargerGrillesDansSelect();
@@ -1402,7 +1444,9 @@ async function _chargerSelectsStandalone(evaluation, attendreOption, trouverGrou
         console.warn('⚠️ Production', evaluation.productionId, 'introuvable dans les selects');
     }
 
-    // ÉTAPE 4 : Grille (peut ne plus exister dans les templates)
+    // ÉTAPE 4 : Grille (peut ne plus exister dans les templates). Une évaluation NEUVE
+    // (#868, sans copie) n'en porte pas : la production la pose elle-même (`chargerProduction`).
+    if (!evaluation.grilleId) return;
     try {
         await attendreOption('selectGrille1', evaluation.grilleId);
         const selectGrille = document.getElementById('selectGrille1');

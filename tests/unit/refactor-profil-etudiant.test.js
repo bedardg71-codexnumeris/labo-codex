@@ -211,9 +211,9 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'viderRapport',
             'sauvegarderPreferencesRapport',
             'restaurerPreferencesRapport',
-            // Zone Actions cascade — 5 exports (session C 18 mai 2026 : 8 ; trois gestes sans bouton retirés par le lot 4 du cadrage 11)
+            // Zone Actions cascade — 4 exports (session C 18 mai 2026 : 8 ; trois gestes sans bouton retirés par le lot 4 du cadrage 11 ;
+            // `evaluerProduction` partie dans evaluation.js, sa définition unique, #868 du 15 sept. 2026)
             'consulterEvaluation',
-            'evaluerProduction',
             'calculerDetailsNoteFinale',
             'calculerEtStockerPatternsGroupe',
             'obtenirPatternEtudiant',

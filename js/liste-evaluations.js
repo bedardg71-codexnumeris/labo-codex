@@ -1340,7 +1340,7 @@ function executerActionEval(select) {
 
     switch (action) {
         case 'evaluer':
-            evaluerProduction(parts[1], parts[2]);
+            window.evaluerProduction(parts[1], parts[2]); // #868 : la définition unique vit dans evaluation.js
             break;
         case 'annoter':
             ouvrirAnnotationDepuisListe(parts[1], parts[2]);
@@ -1899,123 +1899,6 @@ function consulterEvaluationDepuisListe(evaluationId) {
             }
         }, 300);
     }
-}
-
-/**
- * Ouvre la page d'évaluation pour créer une nouvelle évaluation
- * pour un étudiant et une production donnés
- */
-function evaluerProduction(da, productionId) {
-
-    // Déterminer l'étape du flux selon le statut du travail
-    let etapeNavigation = 'evaluations-annoter'; // défaut: évaluation
-    let ouvrirAnnotation = false;
-
-    // Résolution centralisée : trouver le fichier pour cette évaluation
-    let fichierImporte = null;
-    if (typeof travauxResolution !== 'undefined') {
-        fichierImporte = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId });
-    }
-    if (!fichierImporte && typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        fichierImporte = fichiers.find(f => f.etudiantDA === da && !f.productionId);
-    }
-
-    if (!fichierImporte) {
-        // Pas importé → aller à l'importation
-        etapeNavigation = 'evaluations-importer';
-    } else {
-        // Vérifier annotation
-        const annotation = travauxStockage.obtenirAnnotationFichier(fichierImporte.id);
-        const aAnnotation = annotation && typeof annotationContientDuContenu === 'function' && annotationContientDuContenu(annotation);
-
-        if (!aAnnotation) {
-            // Importé mais pas annoté → ouvrir en mode annotation
-            etapeNavigation = 'evaluations-annoter';
-            ouvrirAnnotation = true;
-        } else {
-            // Annoté ou évalué → évaluation (comportement actuel)
-        }
-    }
-
-    // Mettre le filtre production sur la bonne production AVANT de naviguer
-    if (productionId) {
-        sessionStorage.setItem('travaux-filtre-production', productionId);
-    }
-
-    // Naviguer vers la section appropriée
-    afficherSection('evaluations');
-    if (typeof afficherSousSection === 'function') {
-        afficherSousSection(etapeNavigation);
-    }
-
-    // Si on navigue vers l'import, pas besoin de pré-remplir le formulaire d'évaluation
-    if (etapeNavigation === 'evaluations-importer') {
-        return;
-    }
-
-    // Synchroniser le dropdown filtre avec la production cible
-    setTimeout(() => {
-        const selectFiltre = document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
-        if (selectFiltre && productionId) {
-            selectFiltre.value = productionId;
-            if (typeof travauxUI !== 'undefined' && typeof travauxUI.filtrerBadgesParProduction === 'function') {
-                travauxUI.filtrerBadgesParProduction(selectFiltre);
-            }
-        }
-    }, 100);
-
-    // Si on doit ouvrir le fichier en mode annotation
-    if (ouvrirAnnotation && fichierImporte) {
-        setTimeout(() => {
-            if (typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
-                travauxUI.ouvrirFichier(fichierImporte.id);
-            }
-        }, 200);
-        return;
-    }
-
-    // Rendre le formulaire d'évaluation visible
-    setTimeout(() => {
-        const evalDiv = document.getElementById('evaluations-contenu-evaluation');
-        const fichiersDiv = document.getElementById('evaluations-contenu-fichiers');
-        const visDiv = document.getElementById('evaluations-contenu-visionneuse');
-        if (evalDiv) evalDiv.classList.remove('u-hide');
-        if (fichiersDiv) fichiersDiv.classList.add('u-hide');
-        if (visDiv) visDiv.classList.add('u-hide');
-    }, 50);
-
-    // Attendre que la section soit chargée
-    setTimeout(() => {
-        // Pré-remplir le formulaire avec l'étudiant et la production
-        const selectEtudiant = document.getElementById('selectEtudiantEval');
-        const selectProduction = document.getElementById('selectProduction1');
-
-        if (!selectEtudiant || !selectProduction) {
-            console.error('❌ Éléments de formulaire non trouvés');
-            alert('Le formulaire d\'évaluation n\'est pas disponible.');
-            return;
-        }
-
-        // Sélectionner l'étudiant
-        selectEtudiant.value = da;
-
-        // Déclencher le chargement des productions pour cet étudiant
-        if (typeof chargerEvaluationsEtudiant === 'function') {
-            chargerEvaluationsEtudiant();
-        }
-
-        // Attendre que les productions soient chargées
-        setTimeout(() => {
-            // Sélectionner la production
-            selectProduction.value = productionId;
-
-            // Déclencher le chargement de la grille associée
-            const event = new Event('change');
-            selectProduction.dispatchEvent(event);
-
-        }, 100);
-    }, 200);
 }
 
 /**

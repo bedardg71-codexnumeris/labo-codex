@@ -17,7 +17,6 @@
  *
  * Consommé par d'autres modules (4 exports critiques) :
  * - consulterEvaluation : evaluation.js, travaux-ui.js
- * - evaluerProduction : evaluation.js, liste-evaluations.js
  * - calculerDetailsNoteFinale : portfolio.js, synthese-retroaction-data.js (FIX #37 Beta 96)
  * - calculerEtStockerPatternsGroupe + obtenirPatternEtudiant : tableau-bord-apercu.js
  *
@@ -117,36 +116,8 @@ function consulterEvaluation(da, productionId) {
     }
 }
 
-/**
- * Évalue une production (ouvre le formulaire d'évaluation pour création)
- */
-function evaluerProduction(da, productionId) {
-    // Naviguer vers Évaluations avec préselection de l'élève et de la production
-    afficherSection('evaluations');
-
-    // Attendre que la section soit chargée
-    setTimeout(() => {
-        // Présélectionner l'élève dans le formulaire
-        const selectEleve = document.getElementById('select-eleve-evaluation');
-        if (selectEleve) {
-            selectEleve.value = da;
-            if (typeof selectEleve.onchange === 'function') {
-                selectEleve.onchange();
-            }
-        }
-
-        // Présélectionner la production
-        setTimeout(() => {
-            const selectProduction = document.getElementById('select-production-evaluation');
-            if (selectProduction) {
-                selectProduction.value = productionId;
-                if (typeof selectProduction.onchange === 'function') {
-                    selectProduction.onchange();
-                }
-            }
-        }, 100);
-    }, 200);
-}
+// #868 (15 sept. 2026) — `evaluerProduction` ne vit plus ici : sa définition unique est dans
+// evaluation.js. Celle-ci visait deux identifiants inexistants et était écrasée au chargement.
 
 
 // #128 (31 mai) : message DIAGNOSTIQUE du « non calculable ». Objectif (retour Grégoire) :
@@ -730,7 +701,6 @@ function obtenirPatternEtudiant(da) {
     // `attribuerJetonPersonnaliseAvecPrompt`, `retirerJetonPersonnaliseAvecConfirmation`
     // (remesurés dans js/, index.html et tests/, chaîne comprise) — retirés, pas câblés.
     window.consulterEvaluation                       = consulterEvaluation;
-    window.evaluerProduction                         = evaluerProduction;
     window.calculerDetailsNoteFinale                 = calculerDetailsNoteFinale;
     window.calculerEtStockerPatternsGroupe           = calculerEtStockerPatternsGroupe;
     window.obtenirPatternEtudiant                    = obtenirPatternEtudiant;

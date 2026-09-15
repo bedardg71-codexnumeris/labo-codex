@@ -4406,7 +4406,7 @@ window.naviguerVersPresenceAvecDate = naviguerVersPresenceAvecDate;
 // window.genererEtAfficherRapport → profil-etudiant-rapport.js
 // window.copierRapport → profil-etudiant-rapport.js
 // window.consulterEvaluation → profil-etudiant-actions.js (session C refactor 18 mai 2026)
-// window.evaluerProduction → profil-etudiant-actions.js (session C refactor 18 mai 2026)
+// window.evaluerProduction → evaluation.js (définition unique depuis #868, 15 sept. 2026)
 
 // Phase 5 : Wrappers delegation
 window.togglePSansReprisesIndivHandler = togglePSansReprisesIndivHandler;

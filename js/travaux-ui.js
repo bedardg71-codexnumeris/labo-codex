@@ -691,6 +691,21 @@
 
             // Retour sur l'onglet Annoter : restaurer la session
             if (sousSectionActive === 'evaluations-annoter') {
+                // #868 (15 sept. 2026) — « Évaluer » SANS copie arrive : ne rien rouvrir, ni la
+                // copie encore ouverte (cas 1), ni son mode Évaluer. Sinon elle reprenait les
+                // panneaux, et le formulaire affichait SA production (mesuré au navigateur).
+                // Le cas 2 et la restauration initiale lisent `travaux-dernier-fichier`, que
+                // `_evaluerSansCopie` (evaluation.js) retire. Drapeau dédié, pas
+                // `_modifierEvaluationEnCours` : liste-evaluations.js arme celui-là en COMPTANT
+                // sur la restauration des palettes.
+                if (window._evaluerSansCopieEnCours) {
+                    if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.desactiverAnnotation) {
+                        travauxAnnotation.desactiverAnnotation();   // enregistre les annotations en cours
+                    }
+                    if (document.getElementById('travaux-palette-eval-gauche')) fermerModeEvaluation();
+                    _setModeCourant('annoter');
+                    return;
+                }
                 // Cas 1 : fichier deja ouvert dans la visionneuse — reactiver + restaurer palettes
                 const fichierOuvert = travauxVisionneuse.getFichierActuel();
                 if (fichierOuvert) {
@@ -4805,20 +4820,8 @@
             // Bouton cadenas compact dans la barre de titre
             const barreParam = paletteG.querySelector('.palette-flottante-barre');
             if (barreParam) {
-                const btnVerrou = document.createElement('button');
-                btnVerrou.id = 'btnVerrouPalette';
-                btnVerrou.className = 'btn btn-compact';
-                btnVerrou.title = 'Verrouiller/Déverrouiller l\'évaluation';
-                btnVerrou.style.cssText = 'font-size:12px; padding:2px 6px; margin-right:4px; display:none;';
-                btnVerrou.innerHTML = '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
-                btnVerrou.addEventListener('click', function() {
-                    if (typeof basculerVerrouillageEvaluationCourante === 'function') {
-                        basculerVerrouillageEvaluationCourante();
-                    }
-                });
                 const btnGroup = barreParam.querySelector('div');
-                if (btnGroup) btnGroup.insertBefore(btnVerrou, btnGroup.firstChild);
-                else barreParam.appendChild(btnVerrou);
+                poserBoutonVerrou(btnGroup || barreParam, !!btnGroup);
             }
 
             zoneCanvas.appendChild(paletteG);
@@ -4840,57 +4843,8 @@
             paletteR.style.right = '12px';
             paletteR.style.left = 'auto';
 
-            // Sous-barre : radios (Générale/Spécifique/Bilan) + boutons Copier
-            // Nettoyer les éléments injectés précédemment (le panneau persiste entre les cycles Annoter ↔ Évaluer)
-            const contenuRetro = paletteR.querySelector('.palette-flottante-contenu');
-            if (contenuRetro) {
-                contenuRetro.querySelectorAll('.retro-sous-barre, .btn-copier-retro').forEach(function(el) { el.remove(); });
-                const sousBarre = document.createElement('div');
-                sousBarre.className = 'retro-sous-barre';
-
-                const radiosDiv = document.createElement('div');
-                radiosDiv.className = 'retro-vues-radios';
-                ['Générale', 'Spécifique', 'Bilan'].forEach(function(label, idx) {
-                    var val = ['generale', 'specifique', 'bilan'][idx];
-                    var lbl = document.createElement('label');
-                    var radio = document.createElement('input');
-                    radio.type = 'radio';
-                    radio.name = 'vueRetroaction';
-                    radio.value = val;
-                    if (idx === 0) radio.checked = true;
-                    radio.addEventListener('change', function() { basculerVueRetroaction(val); });
-                    lbl.appendChild(radio);
-                    lbl.appendChild(document.createTextNode(' ' + label));
-                    radiosDiv.appendChild(lbl);
-                });
-                sousBarre.appendChild(radiosDiv);
-
-                var spacer = document.createElement('span');
-                spacer.style.flex = '1';
-                sousBarre.appendChild(spacer);
-
-                const btnCopierTout = document.createElement('button');
-                btnCopierTout.className = 'btn btn-compact';
-                btnCopierTout.textContent = 'Copier tout';
-                btnCopierTout.title = 'Copier les 3 sections';
-                btnCopierTout.style.cssText = 'font-size:10px; padding:2px 6px;';
-                btnCopierTout.addEventListener('click', function() { copierToutRetroaction(); });
-                sousBarre.appendChild(btnCopierTout);
-
-                // Insérer en premier dans le contenu
-                contenuRetro.insertBefore(sousBarre, contenuRetro.firstChild);
-
-                // Bouton Copier dans le pied (à côté de Régénérer et compteur de mots)
-                const piedRetro = contenuRetro.querySelector('.eval-retro-pied');
-                if (piedRetro) {
-                    const btnCopier = document.createElement('button');
-                    btnCopier.className = 'btn-copier-retro';
-                    btnCopier.textContent = 'Copier';
-                    btnCopier.title = 'Copier la section active';
-                    btnCopier.addEventListener('click', function() { copierRetroaction(1); });
-                    piedRetro.appendChild(btnCopier);
-                }
-            }
+            // Sous-barre (vues Générale/Spécifique/Bilan + « Copier tout ») et « Copier » dans le pied
+            equiperRetroaction(paletteR.querySelector('.palette-flottante-contenu'));
             zoneCanvas.appendChild(paletteR);
         }
 
@@ -4997,6 +4951,116 @@
         }, 2000);
     }
 
+    /**
+     * Les outils de la rétroaction : vues Générale / Spécifique / Bilan, « Copier tout », et
+     * « Copier » dans le pied (à côté de « Régénérer » et du compteur de mots). Posés sur la
+     * palette Rétroaction du mode Évaluer ET sur le formulaire sans copie (#868, 15 sept.
+     * 2026) — une seule fonction pour les deux.
+     * Idempotente : elle ne retire que ce qu'elle a posé (`data-outil-eval`). Le nettoyage
+     * d'avant retirait tout `.btn-copier-retro` — classe que porte aussi le bouton STATIQUE
+     * « Régénérer » d'index.html : il disparaissait du mode Évaluer (mesuré le 15 sept.).
+     * @param {HTMLElement|null} conteneur - la zone qui contient le panneau de rétroaction
+     */
+    function equiperRetroaction(conteneur) {
+        if (!conteneur) return;
+        conteneur.querySelectorAll('[data-outil-eval]').forEach(function(el) { el.remove(); });
+
+        const sousBarre = document.createElement('div');
+        sousBarre.className = 'retro-sous-barre';
+        sousBarre.setAttribute('data-outil-eval', '');
+
+        const radiosDiv = document.createElement('div');
+        radiosDiv.className = 'retro-vues-radios';
+        ['Générale', 'Spécifique', 'Bilan'].forEach(function(label, idx) {
+            var val = ['generale', 'specifique', 'bilan'][idx];
+            var lbl = document.createElement('label');
+            var radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'vueRetroaction';
+            radio.value = val;
+            if (idx === 0) radio.checked = true;
+            radio.addEventListener('change', function() { basculerVueRetroaction(val); });
+            lbl.appendChild(radio);
+            lbl.appendChild(document.createTextNode(' ' + label));
+            radiosDiv.appendChild(lbl);
+        });
+        sousBarre.appendChild(radiosDiv);
+
+        var spacer = document.createElement('span');
+        spacer.style.flex = '1';
+        sousBarre.appendChild(spacer);
+
+        const btnCopierTout = document.createElement('button');
+        btnCopierTout.className = 'btn btn-compact';
+        btnCopierTout.textContent = 'Copier tout';
+        btnCopierTout.title = 'Copier les 3 sections';
+        btnCopierTout.style.cssText = 'font-size:10px; padding:2px 6px;';
+        btnCopierTout.addEventListener('click', function() { copierToutRetroaction(); });
+        sousBarre.appendChild(btnCopierTout);
+
+        // Insérer en premier dans le contenu
+        conteneur.insertBefore(sousBarre, conteneur.firstChild);
+
+        const piedRetro = conteneur.querySelector('.eval-retro-pied');
+        if (piedRetro) {
+            const btnCopier = document.createElement('button');
+            btnCopier.className = 'btn-copier-retro';
+            btnCopier.setAttribute('data-outil-eval', '');
+            btnCopier.textContent = 'Copier';
+            btnCopier.title = 'Copier la section active';
+            btnCopier.addEventListener('click', function() { copierRetroaction(1); });
+            piedRetro.appendChild(btnCopier);
+        }
+    }
+
+    /**
+     * Le cadenas (verrouiller / déverrouiller l'évaluation). UN seul dans la page :
+     * `btnVerrouPalette` est lu par `afficherOuMasquerBoutonVerrouillage` (evaluation.js),
+     * qui le montre dès qu'une évaluation enregistrée est chargée.
+     * @param {HTMLElement|null} parent
+     * @param {boolean} enPremier - l'insérer en tête de `parent` plutôt qu'à la fin
+     */
+    function poserBoutonVerrou(parent, enPremier) {
+        if (!parent) return;
+        // Chercher l'ancien AUSSI dans l'arbre de `parent` : `creerPaletteEval` y a déjà déplacé le
+        // panneau « Paramètres » — et le cadenas de son en-tête — avant d'insérer la palette dans la
+        // page, où `getElementById` ne le voit pas encore (deux cadenas, mesuré le 15 sept.).
+        const racine = parent.getRootNode();
+        const anciens = new Set([document.getElementById('btnVerrouPalette')]);
+        if (racine && racine !== document && racine.querySelectorAll) {
+            racine.querySelectorAll('#btnVerrouPalette').forEach(function(b) { anciens.add(b); });
+        }
+        anciens.forEach(function(b) { if (b) b.remove(); });
+        const btnVerrou = document.createElement('button');
+        btnVerrou.id = 'btnVerrouPalette';
+        btnVerrou.className = 'btn btn-compact';
+        btnVerrou.title = 'Verrouiller/Déverrouiller l\'évaluation';
+        btnVerrou.style.cssText = 'font-size:12px; padding:2px 6px; margin-right:4px; display:none;';
+        btnVerrou.innerHTML = '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">'; // security-ok: constante, aucune donnée
+        btnVerrou.addEventListener('click', function() {
+            if (typeof basculerVerrouillageEvaluationCourante === 'function') {
+                basculerVerrouillageEvaluationCourante();
+            }
+        });
+        if (enPremier) parent.insertBefore(btnVerrou, parent.firstChild);
+        else parent.appendChild(btnVerrou);
+    }
+
+    /**
+     * Le formulaire SANS copie reçoit les outils des palettes (#868) : le cadenas dans
+     * l'en-tête « Paramètres », les outils de la rétroaction. Appelée par evaluation.js
+     * (`_setupAffichagePanneauxModif`, chemin sans copie — « Évaluer » et « Consulter »).
+     */
+    function equiperFormulaireSansCopie() {
+        const gauche = document.getElementById('travaux-eval-gauche');
+        const enTete = gauche ? gauche.querySelector('.travaux-panneau-header') : null;
+        if (enTete) {
+            enTete.style.display = '';   // une palette l'a peut-être caché (creerPaletteEval)
+            poserBoutonVerrou(enTete, false);
+        }
+        equiperRetroaction(document.getElementById('travaux-eval-retroaction'));
+    }
+
     function masquerPalettesEval() {
         // Cacher les 3 palettes eval (sans détruire pour préserver l'état)
         ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'].forEach(function(id) {
@@ -5050,16 +5114,40 @@
      * @param {Object} fichier - Fichier actuel de la visionneuse
      */
     function remplirLabelsIdentite(fichier, productionIdOverride) {
-        const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
-        const productions = obtenirDonneesSelonMode('productions');
         const prodId = productionIdOverride || fichier.productionId;
+        ecrireLabelsIdentite(fichier.etudiantDA, prodId);
+
+        // Synchroniser le select production dans la toolbar
+        if (prodId) {
+            const select = document.querySelector('.annot-toolbar .travaux-filtre-production') ||
+                           document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
+            if (select && select.value !== prodId) {
+                select.value = prodId;
+                productionFiltreActive = prodId;
+                sessionStorage.setItem('travaux-filtre-production', prodId);
+                filtrerBadgesParProduction(select);
+            }
+        }
+    }
+
+    /**
+     * Les étiquettes d'identité (élève, production) du formulaire et de la palette Annotation.
+     * Séparée de `remplirLabelsIdentite` le 15 sept. 2026 (#868) : le formulaire sans copie
+     * les écrit aussi, SANS synchroniser le filtre de la barre — geste qui peut ouvrir une
+     * autre copie (voir `consulterEvaluation`, correctif du 5 mars 2026).
+     * @param {string} etudiantDA
+     * @param {string} prodId
+     */
+    function ecrireLabelsIdentite(etudiantDA, prodId) {
+        const etudiant = travauxImport.trouverEtudiantParDA(etudiantDA);
+        const productions = obtenirDonneesSelonMode('productions');
         const production = (productions && prodId) ? productions.find(p => p.id === prodId) : null;
 
         const labelEtud = document.getElementById('travaux-eval-label-etudiant');
         if (labelEtud) {
             labelEtud.textContent = etudiant
                 ? `${etudiant.prenom} ${etudiant.nom} (${etudiant.daAffichage || etudiant.da})`
-                : (fichier.etudiantDA || 'Non associé');
+                : (etudiantDA || 'Non associé');
         }
         const labelProd = document.getElementById('travaux-eval-label-production');
         if (labelProd) {
@@ -7239,6 +7327,8 @@
         basculerMode: basculerMode,
         getModeCourant: function() { return modeCourant; },
         fermerModeEvaluation: fermerModeEvaluation,
+        equiperFormulaireSansCopie: equiperFormulaireSansCopie,   // #868 — evaluation.js, chemin sans copie
+        ecrireLabelsIdentite: ecrireLabelsIdentite,               // #868 — idem
         togglePaletteEvalReplie: togglePaletteEvalReplie,
         toggleCorrectionIdentite: toggleCorrectionIdentite,
         appliquerCorrectionIdentite: appliquerCorrectionIdentite,
