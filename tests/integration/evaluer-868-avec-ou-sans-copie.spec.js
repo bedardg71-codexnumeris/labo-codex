@@ -29,7 +29,9 @@ const patternsAttendus = [
     /Not allowed to load local resource.*\.(svg|png)/i,
     // Le montage ne configure aucune échelle : l'ouverture des palettes le signale. Ce n'est pas
     // l'objet de cette porte, qui juge l'arrivée et la présélection, pas le calcul.
-    /Aucune échelle de performance configurée/
+    /Aucune échelle de performance configurée/,
+    // Ni aucune grille : « Consulter » l'évaluation du montage (sans grille) le signale. Même raison.
+    /Grille introuvable ou sans critères/
 ];
 
 async function monter(page) {
@@ -171,6 +173,38 @@ test('Porte #868 · la liste des évaluations passe par le même chemin', async 
     await page.evaluate(() => window.executerActionEval({ value: 'evaluer|TEST868B|p868-1' }));
     await attendreSansCopie(page, 'p868-1');
     expect(sansModeNiCopie(await lireEtat(page))).toEqual(ETAT_SANS_COPIE);
+    expect(suivi.dialogues).toEqual([]);
+    expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
+});
+
+test('Porte #868 · « Consulter » une évaluation sans copie : le même formulaire, les mêmes outils, le cadenas visible', async ({ page }) => {
+    // Relecture croisée de Cowork (15 sept., 1.142.0) : le changelog promettait ce cas, aucun essai ne le jugeait.
+    const suivi = await monter(page);
+    // Une évaluation ENREGISTRÉE, sans copie, pour « Analyse 1 » — posée dans cet essai seulement : les autres
+    // ont besoin qu'« Analyse 1 » reste à évaluer.
+    await page.evaluate((da) => {
+        window.db.setSync(window.cle('evaluationsSauvegardees'), [{ // security-ok: fixture de test
+            id: 'EVAL868', etudiantDA: da, productionId: 'p868-1', statutRemise: 'recu', statutIntegrite: 'recevable',
+            criteres: [], noteFinale: 80, dateEvaluation: '2026-02-02T12:00:00.000Z', verrouillee: false
+        }]);
+        window.afficherSection('suivi');
+        window.afficherProfilComplet(da);
+    }, DA);
+    await page.waitForFunction((da) => window.profilActuelDA === da && !window._profilAutoChargement, DA, { timeout: 10000 });
+    await page.evaluate(() => window.changerSectionProfil('productions'));
+    const selecteur = '#suivi-profil [data-action="consulterEvaluation"][data-param2="p868-1"]';
+    await page.waitForFunction((s) => !!document.querySelector(s), selecteur, { timeout: 10000 });
+    await page.evaluate((s) => document.querySelector(s).click(), selecteur);
+
+    await attendreSansCopie(page, 'p868-1');
+    // Le chargement d'une évaluation enregistrée montre le cadenas : on l'attend, c'est la fin du chargement.
+    await page.waitForFunction(() => {
+        const b = document.getElementById('btnVerrouPalette');
+        return !!b && b.style.display !== 'none';
+    }, null, { timeout: 10000 });
+    expect(sansModeNiCopie(await lireEtat(page))).toEqual(ETAT_SANS_COPIE);
+    const cadenasDansLEnTete = await page.evaluate(() => !!document.querySelector('#travaux-eval-gauche .travaux-panneau-header #btnVerrouPalette'));
+    expect(cadenasDansLEnTete).toBe(true);
     expect(suivi.dialogues).toEqual([]);
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
