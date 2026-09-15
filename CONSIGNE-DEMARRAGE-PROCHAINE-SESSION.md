@@ -1,5 +1,20 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 15 septembre 2026, ≈ 15 h 55 (Toronto) : `1.142.0` RELEASÉE (`d861ea7c`, build `0915-1549`)
+> — #868 LIVRÉ (« Évaluer » mène au bon élève, avec ou sans copie).** Poussée si le RELAIS le dit (verdict Playwright pris Cowork
+> fermé sur le commit de relais, puis `scripts/pousser.sh`). Vitest **565 / 6 370** après le commit du bump ; spec
+> `evaluer-868-avec-ou-sans-copie` 4/4 ; 10 mutations, 10 rouges. **La cause inscrite par l'audit du matin était FAUSSE** (la
+> fonction aux mauvais identifiants était morte, écrasée au chargement) — rectifiée dans le rapport et la fiche. Décisions de
+> Grégoire : sans copie → formulaire équipé des outils, statut « Reçu » ; copie non annotée → mode Évaluer. **Pas de porte
+> terrain** (règle 2 du skill : aucune donnée touchée) ; non vérifié : vraie copie PDF, Safari, iPad.
+> **Une session parallèle** (`monitorage-v6-0a`) tient **#872** (Mathieu : l'import d'élèves du Cadre) dans le worktree
+> `.claude/worktrees/872-nouveau-groupe`, branche `fix/872-nouveau-groupe` — elle rebase sur `main` APRÈS ce push et prévient avant
+> de fusionner. `Retours des testeurs/SUIVI-BUGS.md` (ligne #872) et `Retours des testeurs/mathieu/` sont À ELLE : ne pas commiter.
+> **MANDAT COURANT** : inchangé pour le reste — (1) ⛔ **#871** attend la décision pédagogique de Grégoire ; (2) **#862** (les mots de
+> l'encadré Loi 25 lui reviennent) ; (3) porte #787, points 2.2 et 2.3. Trouvailles notées, NON inscrites (jamais vécues) : une boucle
+> sans fin `chargerDropdownCoursV2` ↔ `changerCoursSelectionneV2` quand le cours actif n'existe plus dans « cours »
+> (`trimestre-v2-cours.js:272/317`) ; « Consulter » sans copie après une copie ouverte rouvre probablement cette copie (même mécanisme
+> que celui corrigé pour « Évaluer », non mesuré). **Les blocs ci-dessous sont historiques.**
 > ↻ **ÉTAT MESURÉ par Claude Code le 15 septembre 2026, ≈ 14 h 15 (Toronto) : `1.141.1` POUSSÉE, `origin/main` = `4fc69488`,
 > arbre propre et aligné, RIEN n'attend sur une branche.** Build `0915-1222`. Vitest **564 / 6 367**. Verdict Playwright WebKit
 > sur `f9cb9a60` : code 0, 0 échec connu. Journée entièrement menée par les retours testeurs, comme le veut CLAUDE.md :
