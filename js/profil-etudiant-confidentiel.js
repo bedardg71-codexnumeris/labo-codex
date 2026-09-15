@@ -232,6 +232,12 @@ function fermerModalConfidentiel() {
 function sauvegarderConfidentiel() {
     if (!_confidentielDaActuel) return;
 
+    // #867 (15 sept. 2026) — TENIR LE DA AVANT DE FERMER. `fermerModalConfidentiel()`
+    // remet `_confidentielDaActuel` à null ; le rafraîchissement d'en bas recevait donc
+    // null et le profil répondait « Étudiant·e introuvable » sur un enregistrement déjà
+    // réussi. La variable de module ne survit pas à la fermeture : on en prend copie.
+    const daEnCours = _confidentielDaActuel;
+
     const infos = {
         epgc: document.getElementById('confidentiel-epgc').checked,
         coursRegulier: document.getElementById('confidentiel-cours-regulier').checked,
@@ -265,7 +271,7 @@ function sauvegarderConfidentiel() {
 
     // Rafraîchir le profil si nécessaire
     if (typeof window.afficherProfilComplet === 'function') {
-        window.afficherProfilComplet(_confidentielDaActuel);
+        window.afficherProfilComplet(daEnCours);   // #867 — surtout pas `_confidentielDaActuel` : il vient d'être vidé
     }
 }
 

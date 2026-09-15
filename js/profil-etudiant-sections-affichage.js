@@ -2246,10 +2246,6 @@ function _resoudreEtudiantProfil(daOuEl) {
     var da = (typeof daOuEl === 'object' && daOuEl !== null) ? daOuEl.value : daOuEl;
     if (da !== null && da !== undefined) da = String(da);
 
-    // État pivot dual-write atomique (Écart #6 MODULES-MAP §2.3) — couple non séparé
-    profilActuelDA = da;
-    window.profilActuelDA = da;
-
     // 🆕 BETA 95.6 : obtenirEtudiantsCoursActif() pour filtrer par groupe-cours actif
     const tousEtudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
@@ -2261,6 +2257,18 @@ function _resoudreEtudiantProfil(daOuEl) {
     window.etudiantsListeCache = etudiants;
 
     const eleve = etudiants.find(e => e.da === da);
+
+    // État pivot dual-write atomique (Écart #6 MODULES-MAP §2.3) — couple non séparé.
+    // #867 (15 sept. 2026) : écrit SEULEMENT si l'élève existe. Avant, il l'était en
+    // entrée de fonction, donc un DA refusé posait `null` juste avant que l'appelant ne
+    // renonce : `changerSectionProfil` sortait ensuite sur « Aucun profil actuel » et la
+    // barre latérale du profil affiché ne répondait plus. Un appel qui échoue ne doit pas
+    // emporter le profil ouvert.
+    if (eleve) {
+        profilActuelDA = da;
+        window.profilActuelDA = da;
+    }
+
     return { da, etudiants, eleve };
 }
 

@@ -7,6 +7,27 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 54 bis — 15 SEPTEMBRE 2026, ≈ 12 H 30 → 13 H (Toronto) : #867, à partir de `befbcf25`.
+     ▣ RAPPORT TESTEUR GÊNANT (15 sept. 12 h 16, avec capture) : « Enregistrer » dans « Informations
+       confidentielles » répond « Étudiant·e introuvable », alors que le commentaire est bien enregistré.
+     ▣ DEUX MOITIÉS. (a) `sauvegarderConfidentiel` appelle `fermerModalConfidentiel()`, qui remet
+       `_confidentielDaActuel` à NULL, puis passe cette variable à `afficherProfilComplet` : l'alerte
+       vient du profil, pas de l'enregistrement. DA tenu en copie avant la fermeture.
+       (b) MOITIÉ SILENCIEUSE, absente du rapport et trouvée par la spec : `_resoudreEtudiantProfil`
+       écrivait `profilActuelDA` AVANT de vérifier l'existence ⮕ après l'alerte il valait null, et
+       `changerSectionProfil` sortait sur « Aucun profil actuel » : la barre latérale du profil ne
+       répondait plus. Le pivot n'est plus écrit que si l'élève existe.
+     ▣ MÉTHODE QUI A PAYÉ : spec écrite AVANT le correctif — 3 essais, 3 rouges, un par symptôme. C'est
+       le break-test le plus honnête qui soit : le rouge porte sur le vrai défaut, pas sur une mutation
+       que j'aurais choisie. Puis 2 mutations (chaque moitié remise), 2 rouges. ⚠ L'essai « barre latérale »
+       ne rougit qu'avec les DEUX moitiés remises : c'est l'état d'origine, mesuré au premier passage.
+     ▣ PASSE CONNEXIONS : `modes.js:188` et `trimestre-v2-orchestre.js:282` vérifient eux-mêmes
+       l'existence avant d'appeler `afficherProfilComplet` — ils ne comptaient pas sur la mise à null.
+       Seul site au motif « ferme (qui efface) puis utilise » : celui-ci.
+     ▣ LIVRÉ EN 1.141.1 (build 0915-1222). Vitest 564 / 6 367 ; specs du profil 10/10.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 54 — 15 SEPTEMBRE 2026, ≈ 11 H → 12 H (Toronto) : #866, à partir de `41ffa01e`.
      ▣ RAPPORT TESTEUR BLOQUANT (15 sept. 10 h 06) : des notes rédigées dans Suivi › Profils individuels ›
        « Rapport », un aller-retour vers une autre sous-section, et elles avaient disparu.
