@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 18 H (Toronto) : 1.142.3 (#873, #875), #874 INSCRIT — SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 18 H 45 (Toronto) : 1.142.4 (#876) PAR-DESSUS 1.142.3
+
+> **1.142.3 est en ligne** (`be785890`, poussée par `pousser.sh`, verdict Playwright vert). **1.142.4** porte **#876**, rapport de
+> Grégoire de 18 h 18 : une file reprise par « Re-déposer les fichiers » (qu'il utilise pour garder ses réglages spécifiques après
+> un rechargement) ressuscitait l'ancienne clé horodatée — le STOCK de #873. `cleDocumentLea` calcule la clé au dépôt ET à la
+> restauration ; `parseLea.dateRemise` rendue en `Date` (le tri par date calculait `NaN`). Extracteur de la sentinelle #314 rendu
+> robuste. Vitest 568 / 6 402. **Si `origin/main` ne porte pas 1.142.4, le push reste à faire** (`pousser.sh`, Cowork fermé) :
+> Grégoire décide de l'envoi.
+> ⚠ Le « vider la file et re-déposer » écrit plus bas pour #873 était un mauvais conseil : l'interface propose « Re-déposer ».
+
+## (précédent) 15 SEPT. 2026, ≈ 18 H (Toronto) : 1.142.3 (#873, #875), #874 INSCRIT — SUR `main`
 
 > **Sur `main` local, au-dessus de `c70dcc6c` (1.142.2, poussée par la session parallèle)** : UN commit porte le code, la release
 > `1.142.3` (build `0915-1755`) et ce relais. **Le push se fait par `scripts/pousser.sh` après le verdict Playwright pris sur CE

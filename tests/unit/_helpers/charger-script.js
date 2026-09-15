@@ -129,9 +129,11 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
             motsNatureContexteActif: winMots.motsNatureContexteActif });
     }
 
-    const { document: documentOverride, localStorage: localStorageOverride, ...autresGlobaux } = globaux;
+    // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
+    // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.
+    const { document: documentOverride, localStorage: localStorageOverride, sessionStorage: sessionStorageOverride, ...autresGlobaux } = globaux;
     const noms = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autresGlobaux)];
-    const valeurs = [fauxWindow, documentOverride || fauxDocument, console, localStorageOverride || fauxStorage(), fauxStorage(), ...Object.values(autresGlobaux)];
+    const valeurs = [fauxWindow, documentOverride || fauxDocument, console, localStorageOverride || fauxStorage(), sessionStorageOverride || fauxStorage(), ...Object.values(autresGlobaux)];
 
     const fn = new Function(...noms, '"use strict";\n' + code);
     fn(...valeurs);
