@@ -178,6 +178,14 @@
         });
 
         if (aTraiter.length === 0) {
+            // #877 — en mode ad hoc (« + Ajouter des pages »), rien à traiter
+            // veut dire « ajoute les pages telles quelles » : c'est `passer()`.
+            // Cette branche fermait la modale sans rappeler l'éditeur, et
+            // « Confirmer » ne produisait rien (rapport du 15 sept. 2026, 19 h 01).
+            if (queueOffset === -1) {
+                passer();
+                return;
+            }
             fermer();
             if (typeof window.rafraichirImportTravaux === 'function') {
                 window.rafraichirImportTravaux();
