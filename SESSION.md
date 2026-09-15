@@ -7,6 +7,38 @@
      ===================================================================== -->
 
 <!-- =====================================================================
+     SESSION 54 — 15 SEPTEMBRE 2026, ≈ 11 H → 12 H (Toronto) : #866, à partir de `41ffa01e`.
+     ▣ RAPPORT TESTEUR BLOQUANT (15 sept. 10 h 06) : des notes rédigées dans Suivi › Profils individuels ›
+       « Rapport », un aller-retour vers une autre sous-section, et elles avaient disparu.
+     ▣ MESURE — CE N'ÉTAIT PAS UNE RÉGRESSION. Le texte du rapport n'était enregistré NULLE PART : aucune
+       écriture, aucun écouteur, alors que le placeholder invitait à « ajouter tes commentaires ». #754
+       (11 sept.) n'avait retiré que les rendus en trop à l'OUVERTURE ; sa sentinelle
+       (`profil-754-un-seul-rendu.spec.js`) ne fait pas le trajet aller-retour. Le manque n'a jamais été comblé.
+     ▣ DÉCISION DE GRÉGOIRE (3 formes proposées, chiffres et risques présentés avant) : une zone « Mes notes »
+       SÉPARÉE. Le rapport du haut reste refait à chaque ouverture — on ne copie jamais des chiffres périmés ;
+       « Mes notes » est le seul texte enregistré.
+     ▣ #866 LIVRÉ (1.141.0, build 0915-1143) : clé `<trim>_notesRapport` (objet { [da]: texte }), au registre de
+       `trimestres.js` et à `docs/DATA-OWNERSHIP.md`. Écrite AU GESTE seulement — `input` débouncé 400 ms,
+       `change` au blur qui écrit tout de suite ; le rendu ne fait que LIRE, et lit d'abord l'écriture en attente.
+       « Copier » emporte le rapport et les notes. Masquée et non écrite en mode anonymisation (modes.js garde
+       le DA RÉEL : sans cette garde, une note prise en démonstration serait allée dans le codex de Grégoire).
+     ▣ CE QUE LE TEST A TROUVÉ, ET QUE JE N'AVAIS PAS PRÉVU : `el.click()` scripté NE DÉPLACE PAS LE FOCUS, donc
+       n'émet AUCUN `change`. Une navigation faite par du code contournait le blur et le rendu relisait un
+       stockage en retard. D'où la lecture de l'écriture en attente. Les deux chemins de sortie sont éprouvés
+       SÉPARÉMENT dans la spec, le chemin du blur mettant le débounce hors jeu pour ne pas retomber sur le même filet.
+     ▣ PREUVES : sentinelle Vitest (10 essais) + `profil-866-notes-rapport.spec.js` (3 essais) ; **16 mutations,
+       16 rouges**, chacune sur l'essai qu'elle vise. Vitest 564 / 6 367. Trajet du rapport de bug rejoué dans le
+       Chrome de Grégoire avec de VRAIS clics de souris ; contraste 7,2:1 (texte) et 6,9:1 (libellé), deux modes.
+     ▣ SOURCE SEULEMENT, AUCUN STOCK : personne n'avait de note enregistrée — il n'y en avait pas.
+     ▣ TROUVAILLES LAISSÉES (niveau 2 / 3, non inscrites faute de symptôme vécu) : `viderRapport` est du code mort
+       (exporté, aucun appelant, et le `btn-copier-rapport-<da>` qu'elle cherche n'existe pas) ; les six cases et
+       le textarea du rapport interpolent `${da}` dans des attributs sans `echapperHtml` (mon ajout, lui, échappe) ;
+       supprimer un élève ne nettoie aucune donnée dérivée — une note de rapport y survivrait, comme ses
+       évaluations et ses présences aujourd'hui.
+     ▣ PAS DE PORTE TERRAIN : rien n'écrit dans les données existantes, la clé part vide, aucun raté irréversible.
+     ===================================================================== -->
+
+<!-- =====================================================================
      SESSION 53 — 14 SEPTEMBRE 2026, ≈ 16 H 40 → 19 H 10 (Toronto) : #787, PUIS LA CHAÎNE #862 → #865, à partir de `e5d5ccc7`.
      (Numérotation : suit la 52 de ce fichier ; les sessions du 14 au matin — #478, #861 — n'y ont pas laissé de bloc.)
      ▣ #787 LIVRÉ (1.140.10) : les 13 doubles `class` d'index.html fusionnés (premier puis second). DETTE_CONNUE = [], le cliquet
