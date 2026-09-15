@@ -121,6 +121,11 @@
         // (de la forme, pas un contenu) ; la nue `preferencesRapport` devient
         // orpheline, connue de diagnostic-353.
         'preferencesRapport',
+        // 🆕 #866 (15 sept. 2026) : les notes libres de l'enseignant dans le rapport
+        // du profil, un objet { [da]: texte } par trimestre (profil-etudiant-rapport.js).
+        // Sans semis : c'est du contenu propre à Grégoire, pas de la forme — le pack
+        // démo n'en pose pas, et un trimestre neuf part vide.
+        'notesRapport',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre

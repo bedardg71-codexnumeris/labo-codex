@@ -3,7 +3,7 @@
    Extrait de profil-etudiant.js (zone L5362-5752 résidu post-helpers+calculs,
    correspond à L7452-7842 du fichier original) — refactor 18 mai 2026
 
-   Contenu de ce sous-module (7 fonctions, ~390 LOC) :
+   Contenu de ce sous-module (11 fonctions) :
    - genererRapportAPI : assemble le rapport de bilan complet
    - genererSectionRapport : rendu UI de la section rapport
    - genererEtAfficherRapport : déclenche génération + affichage
@@ -11,6 +11,9 @@
    - viderRapport : reset
    - sauvegarderPreferencesRapport / restaurerPreferencesRapport :
      persistance des préférences UI rapport (db.getSync/setSync)
+   - obtenirNotesRapport / planifierEnregistrementNotesRapport /
+     enregistrerNotesRapport : #866, les notes libres de l'enseignant, par élève
+     et par trimestre (`<trim>_notesRapport`) — le seul texte enregistré ici
 
    Tous les exports promus window.X (décision étape 1 b). Logique
    majoritairement pure + manipulations DOM ciblées.
@@ -174,6 +177,12 @@ function genererSectionRapport(da) {
     const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
     if (!etudiant) return '<p>Erreur : Étudiant non trouvé</p>';
 
+    // #866 — le mode anonymisation sert à MONTRER l'écran : le rapport y masque déjà le DA,
+    // et « Mes notes » y est vide et désactivée. Ce que Grégoire écrit sur un élève ne se
+    // projette pas devant une salle, et le mode n'écrit rien (le DA réel, lui, est conservé
+    // par modes.js : sans cette garde, une note prise en démonstration irait dans son codex).
+    const enAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
     return `
         <div style="max-width: 900px;">
             <!-- Carte principale (Proposition 2) -->
@@ -234,11 +243,35 @@ function genererSectionRapport(da) {
                 </div>
             </div>
 
-            <!-- Zone de texte du rapport (éditable pour ajouter commentaires personnels) -->
+            <!-- Zone de texte du rapport : REGÉNÉRÉE à chaque ouverture, jamais enregistrée.
+                 #866 — son placeholder promettait « tu peux ajouter tes commentaires » sans
+                 rien retenir : les notes prises ici disparaissaient au retour dans la section.
+                 Ce qui doit rester se tape dans « Mes notes », juste en dessous. -->
             <div class="profil-position-relative-mt15">
                 <textarea id="textarea-rapport-${da}"
-                          placeholder="Le rapport apparaîtra ici. Tu peux le modifier et ajouter tes commentaires avant de le copier."
+                          placeholder="Le rapport apparaîtra ici, refait à chaque ouverture avec les données du jour. Pour des notes qui restent, utilise « Mes notes » plus bas."
                           style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: var(--surface-conteneur, #142428); overflow-y: auto;"></textarea>
+            </div>
+
+            <!-- #866 — « Mes notes » : le SEUL texte de cette section qui est enregistré.
+                 Écrit au geste (input débounçé + change au blur), relu au rendu, par élève
+                 et par trimestre (clé trim_notesRapport ; pas d'accent grave dans ce
+                 commentaire : il vit DANS un gabarit, un accent grave le refermerait).
+                 Le contenu est posé ici même dans
+                 le HTML : pas de second appel à programmer après le rendu, donc rien à
+                 perdre dans un délai. -->
+            <div class="groupe-form u-mt-15">
+                <label for="textarea-notes-rapport-${echapperHtml(da)}">
+                    Mes notes
+                    <span class="u-texte-mini" style="color: var(--gris-moyen); font-weight: 400;">${enAnonymisation ? '— masquées en mode anonymisation' : '— enregistrées à mesure, gardées d\'une visite à l\'autre'}</span>
+                </label>
+                <textarea id="textarea-notes-rapport-${echapperHtml(da)}"
+                          class="controle-form"
+                          rows="6"
+                          ${enAnonymisation ? 'disabled' : 'data-on-input="planifierEnregistrementNotesRapport" data-on-change="enregistrerNotesRapport"'}
+                          data-param="${echapperHtml(da)}"
+                          placeholder="${enAnonymisation ? 'Tes notes sur cet élève ne sont pas affichées quand l\'écran est montré.' : 'Tes observations sur cet élève. Elles restent ici, et s\'ajoutent au bas du rapport quand tu le copies.'}"
+                          style="line-height: 1.6; resize: vertical;">${enAnonymisation ? '' : echapperHtml(obtenirNotesRapport(da))}</textarea>
             </div>
         </div>
     `;
@@ -297,13 +330,23 @@ function copierRapport(da) {
         return;
     }
 
-    // Copier dans le presse-papiers
+    // #866 — ce qu'on copie, c'est le rapport ET les notes. Les notes viennent du
+    // champ affiché (la frappe de la seconde d'avant peut ne pas être encore écrite),
+    // et le stockage sert de filet si la section n'est pas rendue.
+    const champNotes = document.getElementById(`textarea-notes-rapport-${da}`);
+    const notes = (champNotes ? champNotes.value : obtenirNotesRapport(da)).trim();
+    const texteComplet = notes
+        ? `${textarea.value.trimEnd()}\n\nNotes de l'enseignant :\n${notes}`
+        : textarea.value;
+
+    // Sélectionner le champ visible reste utile : c'est ce que `execCommand` copie
+    // en dernier recours, et cela montre à l'enseignant ce qui part.
     textarea.select();
 
     try {
         // Méthode moderne (Clipboard API)
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(textarea.value).then(() => {
+            navigator.clipboard.writeText(texteComplet).then(() => {
                 notifications.succes("Rapport copié dans le presse-papiers !");
             }).catch(err => {
                 // Fallback vers ancienne méthode
@@ -358,6 +401,92 @@ function cocherSectionRapport(da) {
     genererEtAfficherRapport(da);
 }
 
+/* ===============================
+   📝 « MES NOTES » DU RAPPORT (#866, 15 sept. 2026)
+   ===============================
+   Le rapport lui-même n'est pas enregistré : il est refait à chaque ouverture
+   à partir des données du jour, pour qu'on ne copie jamais des chiffres périmés.
+   Les notes de l'enseignant, elles, sont à lui — elles vivent sous
+   `<trim>_notesRapport`, un objet { [da]: texte }, dans la même forme que
+   `preferencesRapport` (une clé par trimestre, pas une clé par élève).
+
+   Le geste écrit, le rendu ne fait que lire : `input` planifie l'écriture
+   (débounce 400 ms, pour ne pas toucher le stockage à chaque frappe) et
+   `change` — le blur, qui précède le clic sur une autre sous-section — la force
+   tout de suite. Les deux capturent la VALEUR au moment du geste : si le nœud
+   est détruit entre-temps par un changement de section, le texte est déjà en
+   main.
+*/
+
+let _notesEnAttente = null;   // { da, texte } saisi mais pas encore écrit
+let _timerNotes = null;
+
+/**
+ * Le texte des notes d'un élève, ou '' s'il n'y en a pas.
+ * @param {string} da - Numéro DA
+ * @returns {string}
+ */
+function obtenirNotesRapport(da) {
+    // La frappe de la seconde d'avant peut ne pas être encore écrite (débounce) : ce qui
+    // attend EST la valeur la plus fraîche. Mesuré le 15 sept. : une navigation faite par
+    // du code — `el.click()` sur un item de la barre latérale — ne déplace pas le focus,
+    // donc n'émet aucun `change`, et le rendu suivant relisait un stockage en retard.
+    // Lire l'attente ne fait écrire personne : l'invariant « le rendu n'écrit rien » tient.
+    if (_notesEnAttente && String(_notesEnAttente.da) === String(da)) return _notesEnAttente.texte;
+
+    const toutes = db.getSync(cle('notesRapport'), {}) || {};
+    const texte = toutes[String(da)];
+    return typeof texte === 'string' ? texte : '';
+}
+
+/**
+ * Écrit ce qui attend. Rien à faire si aucun geste n'est en attente.
+ * Une note vidée RETIRE son entrée : pas de chaîne vide qui traîne.
+ */
+function ecrireNotesRapportEnAttente() {
+    if (_timerNotes) { clearTimeout(_timerNotes); _timerNotes = null; }
+    if (!_notesEnAttente) return;
+    // Ceinture : le champ est déjà désactivé en anonymisation, mais rien n'écrit dans le
+    // codex depuis un écran de démonstration.
+    if (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule()) { _notesEnAttente = null; return; }
+
+    const { da, texte } = _notesEnAttente;
+    _notesEnAttente = null;
+
+    const toutes = db.getSync(cle('notesRapport'), {}) || {};
+    if (texte.trim() === '') {
+        delete toutes[String(da)];
+    } else {
+        toutes[String(da)] = texte;
+    }
+    db.setSync(cle('notesRapport'), toutes); // security-ok: texte saisi par l'enseignant dans son propre champ (aucune source externe), échappé par echapperHtml au rendu
+}
+
+/**
+ * `data-on-input` : mémoriser la frappe et planifier l'écriture.
+ * @param {string} da - Numéro DA
+ * @param {HTMLTextAreaElement} el - Le champ, fourni par le dispatcher
+ */
+function planifierEnregistrementNotesRapport(da, el) {
+    if (!el || typeof el.value !== 'string') return;
+    _notesEnAttente = { da: da, texte: el.value };
+    if (_timerNotes) clearTimeout(_timerNotes);
+    _timerNotes = setTimeout(ecrireNotesRapportEnAttente, 400);
+}
+
+/**
+ * `data-on-change` : le champ perd le focus — écrire sans attendre.
+ * C'est ce chemin qui sauve la note quand on clique sur une autre sous-section :
+ * le blur part avant que le rendu ne détruise le nœud.
+ * @param {string} da - Numéro DA
+ * @param {HTMLTextAreaElement} el - Le champ, fourni par le dispatcher
+ */
+function enregistrerNotesRapport(da, el) {
+    if (!el || typeof el.value !== 'string') return;
+    _notesEnAttente = { da: da, texte: el.value };
+    ecrireNotesRapportEnAttente();
+}
+
 /**
  * Sauvegarde les préférences du rapport — par TRIMESTRE (`cle()`), pas par élève.
  * ⮕ P-2 : la clé nue `preferencesRapport` était partagée entre trimestres et entre
@@ -399,13 +528,16 @@ function restaurerPreferencesRapport(da) {
     genererEtAfficherRapport(da);
 }
 
-// Exporter les 8 fonctions vers window (décision étape 1 b — convention systématique)
+// Exporter les fonctions vers window (décision étape 1 b — convention systématique)
 window.genererRapportAPI = genererRapportAPI;
 window.cocherSectionRapport = cocherSectionRapport;   // P-2 (lot 4 du cadrage 11)
 window.genererSectionRapport = genererSectionRapport;
 window.genererEtAfficherRapport = genererEtAfficherRapport;
 window.copierRapport = copierRapport;
 window.viderRapport = viderRapport;
+window.obtenirNotesRapport = obtenirNotesRapport;                                   // #866
+window.planifierEnregistrementNotesRapport = planifierEnregistrementNotesRapport;   // #866 (data-on-input)
+window.enregistrerNotesRapport = enregistrerNotesRapport;                           // #866 (data-on-change)
 window.sauvegarderPreferencesRapport = sauvegarderPreferencesRapport;
 window.restaurerPreferencesRapport = restaurerPreferencesRapport;
 
