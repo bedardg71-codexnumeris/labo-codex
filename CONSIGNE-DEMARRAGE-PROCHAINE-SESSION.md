@@ -1,5 +1,10 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 15 septembre 2026, soir (Toronto) : `1.142.2` RELEASÉE (#862, l'encadré Loi 25 de l'Aide)
+> après `1.142.1` (#872, session parallèle) et `1.142.0` (#868) — voir `RELAIS.md` pour l'état du push.** **MANDAT COURANT** :
+> (1) **#871 est PRÊT À CORRIGER** — Grégoire a tranché le 15 au soir (« 90 % (22,5 / 25) » : la fraction montre les présences
+> saisies, le pourcentage en découle) ; volet complétion : mesurer d'abord la divergence sur DEMO015 ; (2) porte #787 points 2.2-2.3.
+> #862 est LIVRÉ. Le bloc qui suit (15 h 55) reste juste pour #868 et les trouvailles non inscrites.
 > ↻ **ÉTAT MESURÉ par Claude Code le 15 septembre 2026, ≈ 15 h 55 (Toronto) : `1.142.0` RELEASÉE (`d861ea7c`, build `0915-1549`)
 > — #868 LIVRÉ (« Évaluer » mène au bon élève, avec ou sans copie).** Poussée si le RELAIS le dit (verdict Playwright pris Cowork
 > fermé sur le commit de relais, puis `scripts/pousser.sh`). Vitest **565 / 6 370** après le commit du bump ; spec

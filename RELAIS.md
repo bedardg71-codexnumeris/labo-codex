@@ -7,6 +7,23 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, SOIR (Toronto) : 1.142.0 (#868), 1.142.1 (#872), 1.142.2 (#862)
+
+> **Trois livraisons ce soir, dans cet ordre, sans chevauchement** : `1.142.0` (#868, cette session, `38bc9ac3`) ; `1.142.1`
+> (#872, session parallèle `monitorage-v6-0a` depuis son worktree, `b4ed9973`, puis `6da26608` docs) ; `1.142.2` (#862, cette
+> session : l'encadré Loi 25 de l'Aide, texte approuvé par Grégoire). Le push de 1.142.2 se fait par `scripts/pousser.sh` après le
+> verdict Playwright pris sur le commit de relais qui la suit, Cowork fermé ; si `origin/main` ne la porte pas, le reprendre là.
+> La session parallèle a rangé son worktree et rendu l'arbre principal.
+>
+> **Décisions de Grégoire ce soir, inscrites** : #871 — la fraction montre les présences saisies (« 90 % (22,5 / 25) »), le
+> pourcentage en découle ; volet complétion : mesurer d'abord pourquoi les deux comptages divergent (DEMO015). #871 est donc
+> **prêt à corriger** (fiche au BACKLOG).
+>
+> **Reste dû** : #871 (correctif), porte #787 points 2.2-2.3 ; trouvailles non inscrites (boucle du choix de cours, « Consulter »
+> sans copie après une copie ouverte) : voir le bloc ci-dessous.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 15 H 55 (Toronto) : #868 LIVRÉ EN `1.142.0` — SUR `main`
 
 > **Sur `main` local** : `c358f29e` (la cause de #868 rectifiée), `50243d0e` (le code), `d861ea7c` (release `1.142.0`, build

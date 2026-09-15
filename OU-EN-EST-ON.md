@@ -15,6 +15,10 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **FAIT EN 1.142.2 (15 SEPTEMBRE 2026, soir — ton texte, approuvé à 16 h 30) — L'AIDE DIT CE QUE LA LOI 25 TE DEMANDE.**
+**Ce que tu verras** : Aide › Référence › « Exporter et sauvegarder tes données » porte un encadré « Important — les données de tes élèves et la Loi 25 » : où vivent les données, qui en répond, comment protéger l'appareil, la sauvegarde et l'effacement, le lien vers la page publique et le contact labo@codexnumeris.org.
+**Vérifié comment** : un contrôle vérifie l'encadré, son lien (nouvel onglet) et le contact, et que les deux boutons qu'il nomme — « Exporter le Codex », « Réinitialiser toutes les données » — existent vraiment sous ces mots ; retiré exprès, il rougit ; rendu regardé dans WebKit en clair et en sombre. **Pas vérifié** : Safari, l'iPad ; la version en ligne tant que ce n'est pas poussé. *(#862)*
+
 ✅ **FAIT EN 1.142.1, POUSSÉE (15 SEPTEMBRE 2026, fin d'après-midi — rapport de Mathieu ; livré par une session parallèle, `b4ed9973`) — CRÉER UN DEUXIÈME GROUPE D'ÉLÈVES.**
 **Ce que tu verras** : dans Cadre › Groupe d'étudiant·es, un bouton « + Nouveau groupe » crée un 2ᵉ groupe, et le formulaire d'ajout suit le groupe choisi : les élèves ne tombent plus dans le premier groupe. Un groupe importé ou créé apparaît tout de suite à l'étape 3 du groupe-cours, sans recharger. Réimporter une liste exportée depuis Labo Codex n'ajoute plus un élève fantôme nommé « Groupe ».
 **Vérifié comment** (rapporté par la session qui l'a livré) : un banc de 11 cas, 13 mutations exprès et 13 rouges ; Vitest 566 / 6 381 ; Playwright WebKit sans rougeur nouvelle ; le parcours joué dans Chrome sur une copie locale. **Pas vérifié** : Safari, l'iPad, et le cas exact de Mathieu, en attente de sa réponse. *(#872)*
