@@ -13,6 +13,9 @@
 > `0915-1549`), puis ce commit de relais. **Le push se fait par `scripts/pousser.sh` après le verdict Playwright pris sur CE commit,
 > Cowork fermé** : si `origin/main` ne le contient pas, c'est que le verdict ou le push n'a pas eu lieu — le reprendre là.
 > Vitest **565 / 6 370** après le commit du bump.
+> **Relecture croisée de Cowork** sur 1.142.0 : saine, un écart — le changelog promettait « Consulter » sans copie sans essai
+> qui le juge. Corrigé par un 5ᵉ essai dans le spec, commité APRÈS ce relais avec la mise à jour des trois fichiers de suivi
+> (test seulement, aucun `js/` : le bump reste valide). Le verdict Playwright porte sur ce dernier commit. 11 mutations, 11 rouges.
 >
 > **Ce qui a été livré** — « Évaluer » (profil d'un élève, liste des évaluations) ne présélectionnait rien. **La cause écrite par
 > l'audit du matin était fausse** : trois `evaluerProduction` coexistaient, celle aux mauvais identifiants était MORTE (écrasée par
