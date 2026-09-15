@@ -14,7 +14,9 @@
 > mode ad hoc ; il sort désormais par `passer()`. Sentinelle statique #877, break-test rouge ; Vitest 569 / 6 405. Grégoire a
 > demandé l'envoi ce soir (option B). **Si `origin/main` ne porte pas 1.142.5, le push reste à faire** (`pousser.sh`, Cowork fermé).
 >
-> **Décision DUE, posée à Grégoire à ≈ 18 h 55, sans réponse** : plusieurs PDF d'un même élève pour une même production. Depuis
+> **1.142.5 en ligne** (`059ea009`, verdict Playwright vert). **Décision REPORTÉE par Grégoire (≈ 19 h 25) : « Ne tranchons pas
+> tout de suite, je verrai à l'usage »** — habituellement, les élèves assemblent eux-mêmes leur PDF. Ne pas la reposer d'office ;
+> la reprendre quand un cas d'usage la ramène. Elle porte sur : plusieurs PDF d'un même élève pour une même production. Depuis
 > #873 ils partagent la clé ; l'assemblage ne soude que des IMAGES (`assemblerGroupesPipeline`), donc le cadre « N pages → 1 PDF »
 > (`travaux-ui.js`, groupesMulti, sans filtre `estImage`) PROMET une fusion qui n'a pas lieu, et le doublon n'apparaît qu'en cours
 > d'import (fenêtre « Doublon détecté ») au lieu de la confirmation. Options posées : **A** (recommandée) séparés et dit franchement
