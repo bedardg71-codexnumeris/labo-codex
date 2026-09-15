@@ -574,16 +574,19 @@
         // Cle de regroupement pour assemblage multi-pages
         let groupeDocumentId = '';
         if (parseLea.da && parseLea.nomProduction) {
-            // #609 (D1, decision Gregoire du 30 aout 2026) — Format LEA complet :
-            // DA + nom production + HORODATAGE DE LA REMISE.
-            // Lea horodate la REMISE, pas le fichier : les pages d'une meme
-            // remise partagent la seconde, deux remises successives ne la
-            // partagent pas. Sans la date, v1 du lundi et v2 du mercredi
-            // etaient soudees en un seul PDF de deux pages, trie par date, et
-            // jamais presente comme doublon. Le correctif #603 a rendu ce cas
-            // PLUS probable en retirant le suffixe de page sans discriminer.
-            const horodatageRemise = parseLea.dateRemise ? '_' + parseLea.dateRemise.getTime() : '';
-            groupeDocumentId = parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-') + horodatageRemise;
+            // Format LEA complet : DA + nom production. Tous les fichiers d'un
+            // eleve pour une production forment UN document ; l'enseignant
+            // trie a la main dans le pipeline (« Defaire le regroupement »,
+            // apercus classes par date).
+            //
+            // #873 (decision Gregoire du 15 sept. 2026) — l'horodatage de #609
+            // est RETIRE de la cle. #609 supposait que Lea horodate la remise
+            // et que les pages en partagent la seconde : mesure fausse sur le
+            // lot reel du 15 sept., ou les photos d'une meme remise portent
+            // 09h46m45s, 09h46m55s… Chaque page devenait son propre document,
+            // rien ne s'assemblait, et toutes les pages apres la premiere
+            // etaient annoncees « doublon » (a renommer) a la confirmation.
+            groupeDocumentId = parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-');
         } else if (daDetecte && productionSelectionnee) {
             // Fallback : DA detecte + production globale selectionnee
             groupeDocumentId = daDetecte + '_' + productionSelectionnee;
@@ -1268,9 +1271,10 @@
             groupes.get(cle).push(f);
         });
         // Trier au sein de chaque groupe : numero de page d'abord, date ensuite.
-        // #603 — Les pages d'une meme remise portent la MEME `dateRemise`
-        // (Lea horodate la remise, pas le fichier) : la date seule ne departage
-        // rien et l'ordre des pages retombait sur l'ordre de selection.
+        // #603 — Quand des pages portent la meme `dateRemise`, la date ne
+        // departage rien : sans le numero, l'ordre retombait sur l'ordre de
+        // selection. #873 — la date, elle, range les remises successives
+        // d'un meme eleve : la plus recente arrive en dernier.
         groupes.forEach(fichiers => {
             fichiers.sort((a, b) => {
                 const pa = a.parseLea && a.parseLea.page;
