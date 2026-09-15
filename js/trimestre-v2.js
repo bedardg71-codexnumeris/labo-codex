@@ -237,6 +237,38 @@ function afficherStatistiquesTrimestreV2() {
 
 
 /**
+ * Peuple le menu « numéro de groupe » (étape 3) du formulaire d'assemblage.
+ * #872 (15 sept. 2026) : extrait du hub ci-dessous pour que la liste d'élèves le rappelle — un
+ * import ou un ajout n'arrivait jamais à l'étape 3 (« 00007 (28 étud.) » seul après un import).
+ * Garde la sélection en cours : un groupe-cours en édition ne perd pas son groupe.
+ */
+function populerDropdownGroupesAssemblageV2() {
+    const selectGroupe = document.getElementById('v2-gc-groupe');
+    if (!selectGroupe) return;
+    const valeurActuelle = selectGroupe.value;
+    const cleEtud = cle('groupeEtudiants');
+    const etudiants = db.getSync(cleEtud, []);
+
+    // Extraire les groupes uniques
+    const groupesSet = new Set();
+    etudiants.forEach(e => {
+        if (e.groupe) {
+            groupesSet.add(String(e.groupe).padStart(5, '0'));
+        }
+    });
+
+    const groupesTries = Array.from(groupesSet).sort();
+    let html = '<option value="">— Choisir un groupe —</option>';
+    groupesTries.forEach(grp => {
+        const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
+        // CT-09 : grp vient du collage CSV des étudiants.
+        html += `<option value="${echapperAttribut(grp)}">${echapperHtml(grp)} (${nbEtudiants} étud.)</option>`;
+    });
+    selectGroupe.innerHTML = html;
+    if (valeurActuelle && groupesSet.has(valeurActuelle)) selectGroupe.value = valeurActuelle;
+}
+
+/**
  * Peuple les dropdowns du formulaire d'assemblage (5 éléments Beta 95.2)
  */
 function populerDropdownsAssemblageV2() {
@@ -288,29 +320,7 @@ function populerDropdownsAssemblageV2() {
     }
 
     // Dropdown Groupes d'étudiants
-    const selectGroupe = document.getElementById('v2-gc-groupe');
-    if (selectGroupe) {
-        const cleEtud = cle('groupeEtudiants');
-        const etudiants = db.getSync(cleEtud, []);
-
-        // Extraire les groupes uniques
-        const groupesSet = new Set();
-        etudiants.forEach(e => {
-            if (e.groupe) {
-                groupesSet.add(String(e.groupe).padStart(5, '0'));
-            }
-        });
-
-        const groupesTries = Array.from(groupesSet).sort();
-        let html = '<option value="">— Choisir un groupe —</option>';
-        groupesTries.forEach(grp => {
-            const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
-            // CT-09 : grp vient du collage CSV des étudiants.
-            html += `<option value="${echapperAttribut(grp)}">${echapperHtml(grp)} (${nbEtudiants} étud.)</option>`;
-        });
-        selectGroupe.innerHTML = html;
-    } else {
-    }
+    populerDropdownGroupesAssemblageV2();
 
     // Beta 95.2: Dropdown Horaires
     const selectHoraire = document.getElementById('v2-gc-horaire');
@@ -378,6 +388,7 @@ function populerDropdownsAssemblageV2() {
 }
 // Hub résiduel consommé par les sous-modules extraits (session A — 17 mai 2026).
 window.populerDropdownsAssemblageV2 = populerDropdownsAssemblageV2;
+window.populerDropdownGroupesAssemblageV2 = populerDropdownGroupesAssemblageV2; // #872
 
 // Export pour le HTML
 
