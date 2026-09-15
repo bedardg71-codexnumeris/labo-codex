@@ -67,7 +67,7 @@ let win;
 let magasin; // fichiers « déjà stockés », vus par obtenirFichiersGroupeActif
 let ecrits;  // fichiers réellement écrits par ajouterFichierTravail
 
-function monter() {
+function monter(session) {
     magasin = [];
     ecrits = [];
 
@@ -93,7 +93,9 @@ function monter() {
         obtenirDonneesSelonMode: (quoi) => (quoi === 'groupeEtudiants' ? ETUDIANTS : []),
         travauxStockage,
         db: { getSync: () => null, setSync: () => {} },
-        notifications: { succes: () => {}, erreur: () => {}, info: () => {} }
+        notifications: { succes: () => {}, erreur: () => {}, info: () => {} },
+        // #876 — une file déjà persistée, restaurée au chargement du module.
+        sessionStorage: session
     });
 }
 
@@ -433,5 +435,72 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
         // rechargement comme « à re-déposer ». L'UI ne peut les faire bouger
         // ensemble que si la fonction lui est accessible.
         expect(typeof win.travauxImport.persisterFileDAttente).toBe('function');
+    });
+});
+
+/* -------------------------------------------------------------------------
+   #876 — la file restaurée RECALCULE sa clé, elle ne la recopie pas
+   ---------------------------------------------------------------------- */
+
+// Rapport de Grégoire du 15 sept. 2026, 18 h 18, en 1.142.3 : « On me signale
+// encore des doublons alors qu'aucun de ces documents n'a le même nom. » Il
+// avait repris par « Re-déposer les fichiers » une file déposée sous 1.142.2.
+// `restaurerFileDAttente` recopiait la clé persistée — l'horodatage de #609 —
+// au lieu de la dériver du nom : #873 était tari à la source, pas dans le stock.
+
+function sessionAvecFile(entrees) {
+    return {
+        _data: { pipeline_queue: JSON.stringify(entrees) },
+        getItem(k) { return this._data[k] != null ? this._data[k] : null; },
+        setItem(k, v) { this._data[k] = String(v); },
+        removeItem(k) { delete this._data[k]; },
+        clear() { this._data = {}; }
+    };
+}
+
+// Une entrée telle que `persisterFileDAttente` l'écrit (JSON : la date est une chaîne).
+function entreePersistee(secondes, groupeDocumentId, parseLea) {
+    const nom = 'Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m' + secondes + 's.jpg';
+    return {
+        nomFichier: nom, typeMIME: 'image/jpeg', tailleFichier: 100, tailleOriginale: 100,
+        daDetecte: '9000058', etudiantDA: '9000058', estPDF: false, estImage: true,
+        statut: 'en-attente', pipelineStatut: 'apercu', productionId: 'prod_artefact_1',
+        parseLea: parseLea || { nom: 'Bourdages', da: '9000058', nomProduction: 'Artefact 1', page: null,
+            dateRemise: '2026-09-15T13:46:' + secondes + '.000Z', raw: nom },
+        groupeDocumentId: groupeDocumentId
+    };
+}
+
+// La clé de #609 : DA + production + horodatage de la remise, en millisecondes.
+const cleHorodatee = (secondes) => '9000058_Artefact-1_' + Date.UTC(2026, 8, 15, 13, 46, Number(secondes));
+
+describe('#876 — une file restaurée recalcule sa clé de regroupement', () => {
+
+    it('une file persistée avec l\'ANCIENNE clé horodatée se regroupe au restaurer, sans doublon', () => {
+        win = monter(sessionAvecFile(['45', '55', '04'].map(s => entreePersistee(s, cleHorodatee(s)))));
+        const file = win.travauxImport.obtenirFileDAttente();
+        expect(file).toHaveLength(3);
+        for (const f of file) expect(f.groupeDocumentId).toBe('9000058_Artefact-1');
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(1);
+        expect(win.travauxImport.detecterDoublonsStockage()).toEqual([]);
+        // La date revient de JSON en chaîne : rendue en Date, elle range
+        // encore les pages (persistées dans l'ordre 45, 55, 04).
+        const pages = [...groupes.values()][0];
+        expect(pages[0].parseLea.dateRemise).toBeInstanceOf(Date);
+        expect(pages.map(f => f.parseLea.dateRemise.getUTCSeconds())).toEqual([4, 45, 55]);
+    });
+
+    it('une clé vidée à la main (« Défaire le regroupement ») reste vide', () => {
+        win = monter(sessionAvecFile([entreePersistee('45', ''), entreePersistee('55', '')]));
+        const file = win.travauxImport.obtenirFileDAttente();
+        expect(file.map(f => f.groupeDocumentId)).toEqual(['', '']);
+        expect(win.travauxImport.regrouperParDocument().size).toBe(2);
+    });
+
+    it('un nom hors format LÉA garde la clé qu\'il avait', () => {
+        const horsLea = { nom: '', da: '', nomProduction: '', page: null, dateRemise: null, raw: 'IMG_0412.jpg' };
+        win = monter(sessionAvecFile([entreePersistee('45', '9000058_auto', horsLea)]));
+        expect(win.travauxImport.obtenirFileDAttente()[0].groupeDocumentId).toBe('9000058_auto');
     });
 });

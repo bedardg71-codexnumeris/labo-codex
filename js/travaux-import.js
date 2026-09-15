@@ -165,6 +165,22 @@
         return resultat;
     }
 
+    /**
+     * Cle de regroupement d'une remise LEA : DA + nom de production.
+     *
+     * #873 (decision Gregoire du 15 sept. 2026) — l'horodatage n'y entre plus :
+     * tous les fichiers d'un eleve pour une production forment un document.
+     * #876 — UN SEUL calcul, pour le depot ET pour la file restauree : une
+     * cle recopiee depuis sessionStorage ressuscitait l'ancien format.
+     *
+     * @param {Object} parseLea - Resultat de parserNomFichierLea
+     * @returns {string} '' si le nom n'est pas au format LEA complet
+     */
+    function cleDocumentLea(parseLea) {
+        if (!parseLea || !parseLea.da || !parseLea.nomProduction) return '';
+        return parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-');
+    }
+
     // Compression images iPad (1400px, JPEG 0.80 pour import standard)
     const MAX_IMAGE_DIMENSION = 1400;
     const JPEG_QUALITY_IMPORT = 0.80;
@@ -586,7 +602,7 @@
             // 09h46m45s, 09h46m55s… Chaque page devenait son propre document,
             // rien ne s'assemblait, et toutes les pages apres la premiere
             // etaient annoncees « doublon » (a renommer) a la confirmation.
-            groupeDocumentId = parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-');
+            groupeDocumentId = cleDocumentLea(parseLea);
         } else if (daDetecte && productionSelectionnee) {
             // Fallback : DA detecte + production globale selectionnee
             groupeDocumentId = daDetecte + '_' + productionSelectionnee;
@@ -1063,9 +1079,18 @@
                 estPDF: !!d.estPDF,
                 estImage: !!d.estImage,
                 statut: d.statut || 'en-attente',
-                parseLea: d.parseLea || { nom: '', da: '', nomProduction: '', dateRemise: null, raw: '' },
+                // #876 — `dateRemise` revient de JSON en chaîne : la rendre en Date,
+                // sinon le tri par date de regrouperParDocument calcule NaN.
+                parseLea: d.parseLea
+                    ? Object.assign({}, d.parseLea, { dateRemise: d.parseLea.dateRemise ? new Date(d.parseLea.dateRemise) : null })
+                    : { nom: '', da: '', nomProduction: '', dateRemise: null, raw: '' },
                 pipelineStatut: d.pipelineStatut || 'apercu',
-                groupeDocumentId: d.groupeDocumentId || '',
+                // #876 — la cle est DERIVEE du nom : la recalculer, pas la
+                // recopier. Une file deposee sous 1.142.2 portait l'horodatage
+                // de #609 ; « Re-deposer les fichiers » la ressuscitait, et
+                // chaque page redevenait un « doublon ». Une cle videe a la
+                // main (« Defaire le regroupement ») reste vide.
+                groupeDocumentId: (d.groupeDocumentId && cleDocumentLea(d.parseLea)) || d.groupeDocumentId || '',
                 thumbnailDataUrl: null, // regeneree au reattachement des blobs
                 productionId: d.productionId || '',
                 // #314 : restaurer les drapeaux d'intention (cf. persisterFileDAttente).
