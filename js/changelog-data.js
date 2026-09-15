@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            version: '1.141',
+            couleur: 'vert',
+            titre: 'Rapport du profil : une zone de notes qui reste',
+            items: [
+                'La section «&nbsp;Rapport&nbsp;» du profil d\'un élève porte maintenant une zone «&nbsp;Mes notes&nbsp;», sous le rapport. Ce que tu y écris est enregistré à mesure et tu le retrouves en revenant, d\'une visite à l\'autre.',
+                'Le bouton «&nbsp;Copier&nbsp;» emporte le rapport et tes notes ensemble.',
+                'Le rapport lui-même, au-dessus, continue d\'être refait à chaque ouverture avec les chiffres du jour&nbsp;: ce que tu y tapes ne se garde pas, pour que tu ne copies jamais des données périmées. C\'est «&nbsp;Mes notes&nbsp;» qui retient.',
+                'En mode anonymisation, tes notes ne s\'affichent pas&nbsp;: un écran montré à une salle ne dévoile pas ce que tu écris sur un élève.',
+            ]
+        },
+        {
             version: '1.140',
             couleur: 'vert',
             titre: 'Jetons : un délai sur une reprise, si ta pratique le permet',
