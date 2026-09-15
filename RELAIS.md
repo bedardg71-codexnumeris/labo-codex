@@ -7,6 +7,34 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 15 H 55 (Toronto) : #868 LIVRÉ EN `1.142.0` — SUR `main`
+
+> **Sur `main` local** : `c358f29e` (la cause de #868 rectifiée), `50243d0e` (le code), `d861ea7c` (release `1.142.0`, build
+> `0915-1549`), puis ce commit de relais. **Le push se fait par `scripts/pousser.sh` après le verdict Playwright pris sur CE commit,
+> Cowork fermé** : si `origin/main` ne le contient pas, c'est que le verdict ou le push n'a pas eu lieu — le reprendre là.
+> Vitest **565 / 6 370** après le commit du bump.
+>
+> **Ce qui a été livré** — « Évaluer » (profil d'un élève, liste des évaluations) ne présélectionnait rien. **La cause écrite par
+> l'audit du matin était fausse** : trois `evaluerProduction` coexistaient, celle aux mauvais identifiants était MORTE (écrasée par
+> `evaluation.js`, chargé après) ; celle qui répondait écrivait dans des listes cachées jamais peuplées sans copie ouverte. Une seule
+> reste (`evaluation.js`). Copie importée → ouverte en mode Évaluer. Sans copie → formulaire autonome, statut « Reçu », équipé des
+> outils des palettes par les MÊMES fonctions (`equiperRetroaction`, `poserBoutonVerrou`, `equiperFormulaireSansCopie`,
+> `ecrireLabelsIdentite`, `travaux-ui.js`). Trois défauts voisins corrigés dans le lot : « Régénérer » retiré du mode Évaluer par
+> un nettoyage trop large ; deux cadenas (arbre détaché de `creerPaletteEval`) ; retour sans copie qui rouvrait la copie précédente
+> (garde `_evaluerSansCopieEnCours`). Plan : `plans de travail/PLAN-2026-09-15-868-evaluer-avec-ou-sans-copie.md`.
+>
+> **Méthode à retenir** : les bancs n'ont pas de binaire de copie, et WebKit refuse un Blob en IndexedDB éphémère — le spec enveloppe
+> `travauxStockage.recupererBlob` pour rendre un PNG d'un pixel, ce qui atteint le vrai mode Évaluer. Chromium n'est pas installé
+> pour Playwright sur ce Mac : sondes jetables sous `webkit`.
+>
+> **Session parallèle** : `monitorage-v6-0a` tient **#872** dans `.claude/worktrees/872-nouveau-groupe` (branche
+> `fix/872-nouveau-groupe`, non commitée au moment d'écrire) ; elle rebase après ce push. Ses fichiers dans l'arbre principal —
+> `Retours des testeurs/SUIVI-BUGS.md` (ligne #872) et `Retours des testeurs/mathieu/` — ne sont pas à commiter par une autre session.
+>
+> **Reste dû, inchangé** : #871 (décision pédagogique de Grégoire), #862 (ses mots), porte #787 points 2.2-2.3.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 14 H 15 (Toronto) : DEUX RETOURS TESTEURS LIVRÉS ET L'AUDIT DU MODULE PROFIL — TOUT EST SUR `main`, TOUT EST POUSSÉ
 
 > **Rien n'attend sur une branche.** `origin/main` = `4fc69488`, l'arbre principal est propre et aligné.

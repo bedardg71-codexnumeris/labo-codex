@@ -81,7 +81,10 @@ matin.
 ## 9 · Avancement
 
 - Lots 1 à 4 : **faits** (détail et « vérifié comment » : fiche #868 du BACKLOG).
-- Lots 5 et 6 : à faire.
+- Lot 5 : release `1.142.0` faite (`d861ea7c`) ; verdict Playwright et push : voir `RELAIS.md`.
+- Lot 6 : **sans objet** — règle 2 du skill `portes-terrain` : une porte n'est due que si un raté
+  est irréversible, et ce lot ne touche aucune donnée. Ce qui n'est pas vérifié (vraie copie PDF,
+  Safari, iPad) est écrit dans `OU-EN-EST-ON.md`.
 - Statut de remise sans copie : **tranché par Grégoire** — « remis mais non importé », soit
   « Reçu », statut existant ; les critères s'ouvrent. Fait et vérifié (mutation M10).
 
