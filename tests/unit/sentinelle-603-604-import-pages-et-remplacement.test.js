@@ -167,8 +167,8 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
     });
 
     it('les pages sont ordonnées par NUMÉRO, pas par ordre de dépôt', () => {
-        // Livia horodate la REMISE : les deux pages portent la même `dateRemise`,
-        // qui ne départage donc rien. Déposées à l'envers, elles doivent
+        // Les deux pages portent ici la même `dateRemise`, qui ne départage
+        // donc rien. Déposées à l'envers, elles doivent
         // ressortir p1 puis p2 — sans quoi le PDF assemblé sort dans le désordre.
         win.travauxImport.ajouterFichiersEnAttente([
             faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf'),
@@ -333,9 +333,15 @@ describe('#604 — la mise à la corbeille est conditionnée à un import vérif
 //    suffixe de page sans discriminer par date.
 //
 // DÉCISION D1 (Grégoire, 30 août 2026, option A) : deux remises datées
-// différemment sont DEUX DOCUMENTS. Les pages d'une même remise partagent la
-// date — Livia horodate la REMISE, pas le fichier — donc la date sépare les
-// remises sans jamais séparer les pages.
+// différemment sont DEUX DOCUMENTS — sur la prémisse que les pages d'une même
+// remise partagent la seconde.
+//
+// #873 — RÉVISÉE (Grégoire, 15 sept. 2026). La prémisse est fausse sur le lot
+// réel : les photos d'une même remise portent 09h46m45s, 09h46m55s… Chaque page
+// devenait un document, rien ne s'assemblait, et toutes les pages après la
+// première étaient annoncées « doublon ». Nouvelle règle : tous les fichiers
+// d'un élève pour une production forment UN document ; l'enseignant trie à la
+// main (« Défaire le regroupement »), les aperçus rangés par date.
 
 describe('#609 — deux fichiers ne sont un document que si le document le dit', () => {
 
@@ -360,18 +366,37 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
         expect(win.travauxImport.regrouperParDocument().size).toBe(3);
     });
 
-    it('deux remises du MÊME élève à des dates différentes font DEUX groupes (D1 = A)', () => {
+    it('#873 — les photos d\'une remise à secondes DIFFÉRENTES font UN document, sans doublon', () => {
+        // Le symptôme exact de la capture du 15 sept. (noms fictifs, secondes
+        // réelles) : « présent 2 fois dans la file », « présent 3 fois »…
+        win.travauxImport.setProductionGlobale('prod_artefact_1');
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg')
+            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m55s.jpg', 'image/jpeg'),
+            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m45s.jpg', 'image/jpeg'),
+            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h47m04s.jpg', 'image/jpeg')
         ]);
         const groupes = win.travauxImport.regrouperParDocument();
-        expect(groupes.size).toBe(2);
-        for (const fichiers of groupes.values()) expect(fichiers).toHaveLength(1);
+        expect(groupes.size).toBe(1);
+        const pages = [...groupes.values()][0];
+        // Rangées par date : l'ordre de dépôt (55 s, 45 s, 04 s) ne compte pas.
+        expect(pages.map(f => f.nomFichier.match(/(\d{2}h\d{2}m\d{2}s)/)[1]))
+            .toEqual(['09h46m45s', '09h46m55s', '09h47m04s']);
+        expect(win.travauxImport.detecterDoublonsStockage()).toEqual([]);
     });
 
-    it('les pages d\'une MÊME remise restent UN seul groupe — la date ne les sépare pas', () => {
-        // Livia horodate la remise : les deux pages portent la même seconde.
+    it('deux remises du MÊME élève à des dates différentes font UN groupe, trié par date (#873)', () => {
+        // Le tri v1 / v2 revient à l'enseignant, dans le pipeline.
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg'),
+            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg')
+        ]);
+        const groupes = win.travauxImport.regrouperParDocument();
+        expect(groupes.size).toBe(1);
+        const fichiers = [...groupes.values()][0];
+        expect(fichiers.map(f => f.parseLea.dateRemise.getDate())).toEqual([24, 26]);
+    });
+
+    it('les pages d\'une MÊME remise restent UN seul groupe', () => {
         win.travauxImport.ajouterFichiersEnAttente([
             faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
             faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
@@ -381,16 +406,17 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
         expect([...groupes.values()][0]).toHaveLength(2);
     });
 
-    it('deux remises datées : chacune garde ses propres pages', () => {
+    it('#873 — un fichier DÉJÀ importé pour le même élève et la même production reste signalé', () => {
+        // Le témoin inverse : regrouper la file n'éteint pas la détection
+        // contre ce qui est déjà en base.
+        win.travauxImport.setProductionGlobale('prod_artefact_1');
+        magasin.push({ id: 'ft_ancien', etudiantDA: '9000058', productionId: 'prod_artefact_1' });
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg')
+            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m45s.jpg', 'image/jpeg')
         ]);
-        const groupes = win.travauxImport.regrouperParDocument();
-        expect(groupes.size).toBe(2);
-        for (const fichiers of groupes.values()) expect(fichiers).toHaveLength(2);
+        const doublons = win.travauxImport.detecterDoublonsStockage();
+        expect(doublons).toHaveLength(1);
+        expect(doublons[0].stockes).toHaveLength(1);
     });
 
     it('deux élèves DIFFÉRENTS, même production, même date : deux groupes (inchangé)', () => {

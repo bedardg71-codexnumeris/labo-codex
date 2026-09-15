@@ -17161,6 +17161,27 @@ tr.etudiant-inactif td {
     filter: brightness(0) invert(0.25);
 }
 
+/* Vignette sans image (contenuApercuAbsent, travaux-ui.js) : un signe par
+   état — triangle (échec), cercle barré (sans aperçu), points (en cours).
+   Rapport du 15 sept. 2026 : l'ancien glyphe se lisait comme une image cassée. */
+.pipeline-apercu-signe { display: inline-flex; line-height: 1; }
+.pipeline-apercu-points {
+    color: var(--texte-secondaire);
+    letter-spacing: 1px;
+    line-height: 1;
+}
+.pipeline-apercu-texte {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    text-align: center;
+}
+.pipeline-heic-raison {
+    margin: 8px 0 0 0;
+    font-size: 0.85rem;
+}
+
 /* --- Groupe boutons pipeline --- */
 .pipeline-boutons-groupe {
     display: flex;

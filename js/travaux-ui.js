@@ -1504,6 +1504,66 @@
     }
 
     /**
+     * Ce qui tient la place d'une vignette sans image.
+     *
+     * L'ancien glyphe (une page à coin replié, aplatie par le filtre des
+     * icônes) se lisait comme l'image cassée de Chrome — et il paraissait
+     * justement là où une image manque (rapport du 15 sept. 2026, 17 h 26 :
+     * « des icônes cassées »). Chaque état porte désormais son signe :
+     *  · 'echec'   — HEIC non décodé, aperçu en erreur : triangle d'avertissement ;
+     *  · 'absent'  — rien à lire (fichier à re-déposer, manquant) : cercle barré ;
+     *  · 'attente' — miniature en cours de calcul : points de suspension.
+     * Un PDF garde son 📄, sauf en échec. Rend le CONTENU seulement : chaque
+     * site garde son enveloppe et sa taille. N'y entrent que des constantes.
+     */
+    const SIGNES_APERCU_ABSENT = {
+        echec:   { icone: 'icons/icons8-warning.svg',   texte: 'Aperçu impossible' },
+        absent:  { icone: 'icons/icon-unavailable.svg', texte: 'Sans aperçu' },
+        attente: { icone: '',                           texte: 'Aperçu en cours\u2026' }
+    };
+
+    /**
+     * @param {Object|null} f - Fichier de la file ou fichier stocké
+     * @param {{etat?: string, avecTexte?: boolean}} [options] - `etat` force
+     *        l'état ; `avecTexte` écrit le mot sous le signe (grand aperçu)
+     * @returns {string} HTML composé de constantes
+     */
+    function contenuApercuAbsent(f, options) {
+        const opts = options || {};
+        let etat = opts.etat;
+        if (!etat) {
+            if (f && f.heicEchec) etat = 'echec';
+            else if (f && f.fichier) etat = 'attente';
+            else etat = 'absent';
+        }
+        const estPDF = !!(f && (f.estPDF || f.typeMIME === 'application/pdf'));
+        if (estPDF && etat !== 'echec') return '&#x1F4C4;';
+        const signe = SIGNES_APERCU_ABSENT[etat] || SIGNES_APERCU_ABSENT.absent;
+        const marque = signe.icone
+            ? '<img class="pipeline-icone-placeholder-img" src="' + signe.icone + '" alt="">'
+            : '<span class="pipeline-apercu-points" aria-hidden="true">\u2026</span>';
+        if (opts.avecTexte) {
+            return marque + '<span class="pipeline-apercu-texte">' + signe.texte + '</span>';
+        }
+        return '<span class="pipeline-apercu-signe" role="img" aria-label="' + signe.texte
+            + '" title="' + signe.texte + '">' + marque + '</span>';
+    }
+
+    /**
+     * Pose l'emplacement dans un conteneur déjà rendu (aperçus calculés après
+     * coup). Passe par le DOM plutôt que par un innerHTML concaténé : seul le
+     * contenu de contenuApercuAbsent — des constantes, jamais un champ du
+     * fichier (verrouillé par sa sentinelle) — est lu comme HTML.
+     */
+    function poserApercuAbsent(conteneur, f, options, taillePolice) {
+        const enveloppe = document.createElement('span');
+        enveloppe.className = 'pipeline-icone-placeholder';
+        if (taillePolice) enveloppe.style.fontSize = taillePolice;
+        enveloppe.innerHTML = contenuApercuAbsent(f, options); // security-ok: contenuApercuAbsent ne compose que des constantes
+        conteneur.replaceChildren(enveloppe);
+    }
+
+    /**
      * Genere un thumbnail de preview avec effets de traitement appliques
      * @param {Object} f - Fichier prepare
      * @param {number} index - Index dans la queue
@@ -1536,7 +1596,7 @@
         const source = f.fichier || null;
         var imgThumb = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
         if (!source && !imgThumb) {
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
+            poserApercuAbsent(conteneur, f);
             return;
         }
 
@@ -1580,7 +1640,7 @@
             conteneur.appendChild(imgResult);
         } catch (e) {
             console.warn('[Pipeline] Erreur preview thumbnail:', f.nomFichier, e);
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
+            poserApercuAbsent(conteneur, f, { etat: 'echec' });
         } finally {
             if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
@@ -1779,7 +1839,7 @@
 
         queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = f.estPDF ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">';
+            const icone = contenuApercuAbsent(f);
             // ✅ ANONYMISATION (Tier 0.2) : anonymiser les noms de fichiers affichés
             const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier;
             const nomLeaAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.parseLea.nom, f.etudiantDA) : f.parseLea.nom;
@@ -1879,7 +1939,7 @@
         const optionsDpi = [['0', 'désactivée'], ['200', '200 dpi'], ['250', '250 dpi'], ['300', '300 dpi']]
             .map(([v, libelle]) => `<option value="${v}"${v === dpiPipelineChoisi ? ' selected' : ''}>${libelle}</option>`)
             .join('');
-        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;">${optionsDpi}</select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icons8-photo-editor.svg" alt="" class="btn-inline-icon"></button></div>`;
+        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;">${optionsDpi}</select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icon-gear.svg" alt="" class="btn-inline-icon"></button></div>`;
 
         // Alerte globale : blobs manquants après restauration session
         const nbBlobsManquants = queue.filter(f => !f.fichier).length;
@@ -1905,8 +1965,18 @@
 
             // Grande preview
             colCentre += `<div class="pipeline-preview-centre" id="pipeline-preview-centre">
-                <span class="pipeline-icone-placeholder"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>
+                <span class="pipeline-icone-placeholder">${contenuApercuAbsent(f, { avecTexte: true })}</span>
             </div>`;
+
+            // La raison d'un HEIC non décodé ne vivait que dans l'infobulle de
+            // « HEIC non décodé » : rien au clic, et aucun survol sur iPad
+            // (rapport du 15 sept. 2026, 17 h 26). Elle s'écrit ici, en clair.
+            if (f.heicEchec) {
+                colCentre += '<div class="alerte alerte-attention pipeline-heic-raison">'
+                    + '<strong>HEIC non décodé :</strong> '
+                    + echapperHtml(f.heicRaison || 'le navigateur n’a pas pu lire cette photo.')
+                    + '</div>';
+            }
 
             // Metadata du fichier
             colCentre += '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">Informations du fichier</p>';
@@ -1974,7 +2044,6 @@
         } else {
             // Placeholder
             colCentre += `<div class="pipeline-preview-placeholder">
-                <span style="font-size:2rem;opacity:0.3;"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>
                 <p class="texte-muted">Clique sur un fichier \u00e0 gauche pour le pr\u00e9visualiser</p>
             </div>`;
         }
@@ -2003,7 +2072,7 @@
             colDroite += `<div class="pipeline-fichier-colonne">
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-preview-${index}">
-                    ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="pipeline-icone-placeholder">${f.estPDF ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">'}</span>`}
+                    ${thumb ? `<img src="${thumb}" alt="">` : `<img data-thumbnail-id="${f.id}" src="" alt="" style="display:none"><span class="pipeline-icone-placeholder">${contenuApercuAbsent(f)}</span>`}
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     ${badgeSpecifique}
@@ -2275,7 +2344,7 @@
         const source = f.fichier || null;
         var centreThumbImg = f.thumbnailDataUrl || await travauxStockage.obtenirThumbnail(f.id);
         if (!source && !centreThumbImg) {
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
+            poserApercuAbsent(conteneur, f, { avecTexte: true }, '3rem');
             return;
         }
 
@@ -2319,7 +2388,7 @@
             conteneur.appendChild(imgResult);
         } catch (e) {
             console.warn('[Pipeline] Erreur preview centre:', f.nomFichier, e);
-            conteneur.innerHTML = '<span class="pipeline-icone-placeholder" style="font-size:3rem;"><img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt=""></span>';
+            poserApercuAbsent(conteneur, f, { etat: 'echec', avecTexte: true }, '3rem');
         } finally {
             if (blobUrl) URL.revokeObjectURL(blobUrl);
         }
@@ -3030,7 +3099,7 @@
         let html = '';
         fichiers.forEach(f => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">';
+            const icone = contenuApercuAbsent(f, { etat: f.blobStatut === 'manquant' ? 'absent' : 'attente' });
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
 
             // Badge cycle de vie
@@ -3095,7 +3164,7 @@
         for (let i = indexDebut; i < indexFin; i++) {
             const f = fichiersPourScroll[i];
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '<img class="pipeline-icone-placeholder-img" src="icons/icon-image.svg" alt="">';
+            const icone = contenuApercuAbsent(f, { etat: f.blobStatut === 'manquant' ? 'absent' : 'attente' });
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
             const top = i * HAUTEUR_MINIATURE;
 

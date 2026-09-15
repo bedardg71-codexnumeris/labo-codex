@@ -7,6 +7,28 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 18 H (Toronto) : 1.142.3 (#873, #875), #874 INSCRIT — SUR `main`
+
+> **Sur `main` local, au-dessus de `c70dcc6c` (1.142.2, poussée par la session parallèle)** : UN commit porte le code, la release
+> `1.142.3` (build `0915-1755`) et ce relais. **Le push se fait par `scripts/pousser.sh` après le verdict Playwright pris sur CE
+> commit, Cowork fermé** : si `origin/main` ne le contient pas, le reprendre là.
+>
+> **Livré** — trois rapports testeurs de Grégoire (15 sept., 17 h 14 → 17 h 26, import des copies, 86 photos) :
+> · **#873** : la clé de regroupement des pages (`groupeDocumentId`) portait l'horodatage de la remise à la seconde (#609, D1) ;
+> la prémisse « les pages d'une remise partagent la seconde » est FAUSSE sur le lot réel (09h46m45s, 09h46m55s…) ⇒ rien ne
+> s'assemblait, chaque page annoncée « doublon » à renommer. **Décision de Grégoire** : clé = DA + production, tri manuel dans le
+> pipeline (aperçus rangés par date). D1 révisée au BACKLOG sous #609.
+> · **#875** : les « icônes cassées » étaient des glyphes (`icon-image.svg`, `icons8-photo-editor.svg`) qui imitaient l'image cassée
+> de Chrome. `contenuApercuAbsent` / `poserApercuAbsent` (`travaux-ui.js`) : un signe par état ; engrenage pour les réglages ; la
+> raison d'un HEIC non décodé s'écrit dans l'inspecteur. Les deux icônes retirées.
+> · **#874 inscrit, non diagnostiqué** : « les PDF sont sans aperçu à l'import » (rapport de 17 h 19).
+>
+> **Reste dû** : #874 ; POURQUOI les 3 HEIC de Sawyer ne se décodent pas (la raison est désormais lisible au clic — à relever au
+> prochain dépôt de Grégoire) ; #615 (retrait de « Renommer pour distinguer », D3 = A) toujours ouvert ; ce qui suit ci-dessous
+> (#871 prêt à corriger, porte #787). ⚠ Stock : une file d'import déjà déposée garde l'ancienne clé — la vider et re-déposer.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, SOIR (Toronto) : 1.142.0 (#868), 1.142.1 (#872), 1.142.2 (#862)
 
 > **Trois livraisons ce soir, dans cet ordre, sans chevauchement** : `1.142.0` (#868, cette session, `38bc9ac3`) ; `1.142.1`
