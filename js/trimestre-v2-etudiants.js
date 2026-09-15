@@ -45,6 +45,11 @@ window.formaterNbEtudiants = formaterNbEtudiants;
 // Variable pour stocker les données en attente d'import
 let donneesImportEnAttenteV2 = [];
 
+// #872 (15 sept. 2026) — un groupe n'existe que comme numéro porté par des élèves. Celui que
+// « + Nouveau groupe » vient de créer n'en a encore aucun : sans cette mémoire, le menu,
+// reconstruit depuis les élèves, le perdait aussitôt. Liée à la clé du trimestre ; jamais écrite.
+let groupesEnAttenteV2 = { cle: null, groupes: new Set() };
+
 /**
  * Charge et affiche la liste des étudiants dans l'accordéon v2
  * ✅ CORRECTION (9 jan 2026): Converti en async pour lire depuis IndexedDB (source de vérité)
@@ -72,6 +77,10 @@ async function chargerListeEtudiantsV2() {
     // formulaire (le select rendu n'était jamais repeuplé). Non destructif.
     if (typeof populerDropdownGroupesHoraireV2 === 'function') {
         populerDropdownGroupesHoraireV2(tousLesEtudiants);
+    }
+    // #872 : même oubli pour l'étape 3 du groupe-cours — un groupe importé n'y paraissait pas.
+    if (typeof window.populerDropdownGroupesAssemblageV2 === 'function') {
+        window.populerDropdownGroupesAssemblageV2();
     }
 
     // Filtrer par groupe si sélectionné
@@ -269,6 +278,12 @@ function populerDropdownGroupesV2(etudiants) {
         }
     });
 
+    // #872 : les groupes créés mais encore vides, du trimestre affiché seulement.
+    const groupesAvecEleves = new Set(groupesSet);
+    if (groupesEnAttenteV2.cle === cle('groupeEtudiants')) {
+        groupesEnAttenteV2.groupes.forEach(g => groupesSet.add(g));
+    }
+
     const groupesTries = Array.from(groupesSet).sort();
 
     // Marqueur démo : un groupe est considéré démo si au moins un de ses
@@ -282,7 +297,10 @@ function populerDropdownGroupesV2(etudiants) {
     let html = '<option value="">Tous les groupes</option>';
     groupesTries.forEach(grp => {
         const suffixeDemo = estGroupeDemo(grp) ? ' (démo)' : '';
-        html += `<option value="${grp}">${grp}${suffixeDemo}</option>`;
+        const suffixeVide = groupesAvecEleves.has(grp) ? '' : ' (vide)';
+        // #872 : grp vient de la 2e colonne importée — échappé (echapperHtml tient aussi les
+        // guillemets depuis #572 : il sert la valeur de l'attribut comme le texte).
+        html += `<option value="${echapperHtml(grp)}">${echapperHtml(grp)}${suffixeDemo}${suffixeVide}</option>`;
     });
     select.innerHTML = html;
 
@@ -308,6 +326,13 @@ async function filtrerParGroupeV2() {
     const select = document.getElementById('v2-selectGroupe');
     if (select) {
         db.setSync(cle('groupeSelectionne'), select.value || '');
+    }
+    // #872 : le formulaire d'ajout suit le groupe choisi. Laissé vide, il versait l'élève dans
+    // le groupe du cours actif — « ça ne faisait qu'ajouter des élèves à mon premier groupe ».
+    // En édition, le champ porte le groupe de la fiche ouverte : on n'y touche pas.
+    if (etudiantEnEditionIndex < 0) {
+        const champGroupe = document.getElementById('v2-etudiantGroupe');
+        if (champGroupe) champGroupe.value = select?.value || '';
     }
     await chargerListeEtudiantsV2();
 }
@@ -490,7 +515,9 @@ function reinitialiserFormEtudiantV2() {
     document.getElementById('v2-etudiantDA').value = '';
     document.getElementById('v2-etudiantNom').value = '';
     document.getElementById('v2-etudiantPrenom').value = '';
-    document.getElementById('v2-etudiantGroupe').value = '';
+    // #872 : après un ajout, l'élève suivant va dans le MÊME groupe (celui du menu), pas dans le
+    // groupe du cours actif. « Tous les groupes » laisse le champ vide, comme avant.
+    document.getElementById('v2-etudiantGroupe').value = getGroupeSelectionneV2();
     document.getElementById('v2-etudiantProgramme').value = '';
     document.getElementById('v2-etudiantSA').value = '';
 
@@ -516,11 +543,12 @@ function ajouterEtudiantV2() {
 /**
  * Crée un nouveau groupe (calcule le prochain numéro disponible)
  */
-function creerNouveauGroupeV2() {
+async function creerNouveauGroupeV2() {
     const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
+    if (groupesEnAttenteV2.cle !== cleEtud) groupesEnAttenteV2 = { cle: cleEtud, groupes: new Set() };
 
-    // Trouver tous les numéros de groupe existants
+    // Numéros déjà pris : ceux que portent des élèves, et ceux des groupes créés encore vides
     const groupesExistants = new Set();
     etudiants.forEach(e => {
         if (e.groupe) {
@@ -528,6 +556,7 @@ function creerNouveauGroupeV2() {
             if (!isNaN(num)) groupesExistants.add(num);
         }
     });
+    groupesEnAttenteV2.groupes.forEach(g => groupesExistants.add(parseInt(g, 10)));
 
     // Calculer le prochain numéro disponible
     let prochainNumero = 1;
@@ -538,10 +567,18 @@ function creerNouveauGroupeV2() {
     const nouveauGroupe = normaliserNumeroGroupe(prochainNumero);
 
     // Demander confirmation ou personnalisation
-    const groupeSaisi = prompt(`Numéro du nouveau groupe :`, nouveauGroupe);
+    const groupeSaisi = prompt(`Numéro du nouveau groupe (celui d'Omnivox) :`, nouveauGroupe);
     if (!groupeSaisi) return; // Annulé
 
-    const groupeFinal = normaliserNumeroGroupe(groupeSaisi);
+    // #872 : un numéro Omnivox s'écrit en chiffres ; « Gr 2 » aurait donné le groupe « 0Gr 2 ».
+    const saisie = String(groupeSaisi).trim();
+    if (!/^\d{1,5}$/.test(saisie)) {
+        notifications.erreur('Numéro de groupe invalide', 'Écris-le en chiffres, comme dans Omnivox (ex. 00002).');
+        return;
+    }
+    const groupeFinal = normaliserNumeroGroupe(saisie);
+    groupesEnAttenteV2.groupes.add(groupeFinal);
+    db.setSync(cle('groupeSelectionne'), groupeFinal);
 
     // Réinitialiser le formulaire et pré-remplir le groupe
     reinitialiserFormEtudiantV2();
@@ -566,7 +603,7 @@ function creerNouveauGroupeV2() {
         }
         select.value = groupeFinal;
         // Rafraîchir l'affichage pour montrer le groupe vide
-        chargerListeEtudiantsV2();
+        await chargerListeEtudiantsV2();
     }
 
     // Focus sur le premier champ
@@ -758,6 +795,9 @@ function analyserListeEtudiantsCollee(contenu) {
     const fiches = [];
     String(contenu || '').trim().split('\n').forEach(ligne => {
         const colonnes = decouperLigneCollee(ligne);
+        // #872 (15 sept. 2026) : une ligne d'en-tête n'est pas un élève. Notre propre export commence
+        // par « DA,Groupe,Nom,… » : le réimporter créait un élève du groupe « Groupe ».
+        if (/^da$/i.test(colonnes[0] || '') || /^groupe$/i.test(colonnes[1] || '')) return;
         if (colonnes.length >= 4) {
             // FIX #49 (1er fév 2026) : SA peut être en colonne 5 ou 6 selon le format Omnivox
             const saValue = (colonnes[5]?.trim() || colonnes[6]?.trim() || '').toUpperCase();
