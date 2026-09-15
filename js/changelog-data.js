@@ -30,6 +30,9 @@
                 'Sans copie importée — une copie remise sur papier, par exemple —, tu arrives sur le formulaire d\'évaluation avec les mêmes outils&nbsp;: le nom de l\'élève en tête, les vues Générale, Spécifique et Bilan de la rétroaction, «&nbsp;Copier tout&nbsp;», «&nbsp;Copier&nbsp;» et le cadenas. Le statut part à «&nbsp;Reçu&nbsp;»&nbsp;; pour une non-remise, repasse-le à «&nbsp;Non reçu&nbsp;».',
                 '«&nbsp;Consulter&nbsp;» une évaluation sans copie profite des mêmes outils.',
                 'Le bouton «&nbsp;Régénérer&nbsp;» de la rétroaction ne disparaît plus en mode Évaluer.',
+                'Cadre › Groupe d\'étudiant·es&nbsp;: un bouton «&nbsp;+ Nouveau groupe&nbsp;» crée un 2e groupe. Le formulaire d\'ajout suit le groupe choisi&nbsp;: tes élèves ne tombent plus dans le premier groupe.',
+                'Un groupe importé ou créé apparaît tout de suite à l\'étape 3 du groupe-cours&nbsp;: tu peux l\'y choisir et enregistrer sans recharger.',
+                'Réimporter une liste exportée depuis Labo Codex n\'ajoute plus un élève fantôme nommé «&nbsp;Groupe&nbsp;».',
             ]
         },
         {
