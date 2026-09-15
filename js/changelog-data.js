@@ -29,6 +29,7 @@
                 'Le bouton «&nbsp;Copier&nbsp;» emporte le rapport et tes notes ensemble.',
                 'Le rapport lui-même, au-dessus, continue d\'être refait à chaque ouverture avec les chiffres du jour&nbsp;: ce que tu y tapes ne se garde pas, pour que tu ne copies jamais des données périmées. C\'est «&nbsp;Mes notes&nbsp;» qui retient.',
                 'En mode anonymisation, tes notes ne s\'affichent pas&nbsp;: un écran montré à une salle ne dévoile pas ce que tu écris sur un élève.',
+                'Enregistrer un commentaire dans «&nbsp;Informations confidentielles&nbsp;» ne répond plus «&nbsp;Étudiant·e introuvable&nbsp;». Le commentaire était bien enregistré&nbsp;; c\'est le profil qui se rafraîchissait sans savoir de quel élève il s\'agissait — et la barre latérale du profil restait sourde ensuite.',
             ]
         },
         {
