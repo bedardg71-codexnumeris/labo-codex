@@ -196,12 +196,15 @@ describe('#557 · une seule définition de supprimerEvaluation', () => {
     //   versions des deux modules `*-bibliotheque.js` scannaient les suffixes
     //   obsolètes `_grilles` / `_cartouches` et rendaient toujours `[]`.
     //   C'est ce banc qui a signalé qu'il fallait raccourcir la liste.
+    // ⮕ DE SIX À CINQ LE 15 SEPT. 2026 (#868) : `evaluerProduction`. La version
+    //   de profil-etudiant-actions.js, écrasée au chargement par evaluation.js,
+    //   visait deux identifiants inexistants ; retirée, avec la copie locale de
+    //   liste-evaluations.js. evaluation.js garde la définition unique.
     const DOUBLONS_CONNUS = [
         '_apresOuvertureFichier',            // profil-etudiant-actions.js / liste-evaluations.js
         'afficherSection',                   // rapport-bug.js / bilan-reflexif.js / planification.js
         'afficherSousSection',               // bilan-reflexif.js / planification.js
         'afficherTableauProductions',        // donnees-v2.js / productions.js
-        'evaluerProduction',                 // profil-etudiant-actions.js / evaluation.js
         'fermerModalBibliothequePratiques'   // pratiques-gestion.js / pratiques.js
     ];
 
