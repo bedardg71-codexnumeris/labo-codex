@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.142',
+            couleur: 'vert',
+            titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
+            items: [
+                '«&nbsp;Évaluer&nbsp;» dans le profil d\'un élève (et dans la liste des évaluations) choisit maintenant l\'élève et la production pour toi. Avant, tu arrivais sur Évaluation sans que rien ne soit choisi.',
+                'Si la copie est importée, elle s\'ouvre directement en mode Évaluer, annotée ou non. «&nbsp;Annoter&nbsp;» reste à un clic.',
+                'Sans copie importée — une copie remise sur papier, par exemple —, tu arrives sur le formulaire d\'évaluation avec les mêmes outils&nbsp;: le nom de l\'élève en tête, les vues Générale, Spécifique et Bilan de la rétroaction, «&nbsp;Copier tout&nbsp;», «&nbsp;Copier&nbsp;» et le cadenas. Le statut part à «&nbsp;Reçu&nbsp;»&nbsp;; pour une non-remise, repasse-le à «&nbsp;Non reçu&nbsp;».',
+                '«&nbsp;Consulter&nbsp;» une évaluation sans copie profite des mêmes outils.',
+                'Le bouton «&nbsp;Régénérer&nbsp;» de la rétroaction ne disparaît plus en mode Évaluer.',
+            ]
+        },
+        {
             version: '1.141',
             couleur: 'vert',
             titre: 'Rapport du profil : une zone de notes qui reste',
