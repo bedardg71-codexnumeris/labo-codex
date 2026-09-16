@@ -1135,6 +1135,7 @@ function cartoucheSelectionnee() {
     }).join('');
 
     document.getElementById('listeCriteresGrille1').innerHTML = html;
+    _signalerCriteresHorsGrille(document.getElementById('listeCriteresGrille1'), grille);   // #652
 
     // Restaurer les niveaux précédemment sélectionnés (s'ils existent)
     // puis recalculer la note et regénérer la rétroaction en temps réel
@@ -1323,6 +1324,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     }).join('');
 
     conteneur.innerHTML = html;
+    _signalerCriteresHorsGrille(conteneur, grille);   // #652
 }
 
 /* ===============================
@@ -1551,6 +1553,57 @@ function _flusherAutoSave() {
 
 // Helpers privés pour _autoSauvegarderCriteres (extraction étape 4 — éclatement cyc 55 → cyc ≤ 15)
 
+/**
+ * #652 (16 sept. 2026) — LES CRITÈRES ÉVALUÉS QUI NE SONT PLUS DANS LEUR GRILLE.
+ *
+ * Une grille modifiée après coup (critère retiré) laisse dans `evaluation.criteres[]` des
+ * entrées qu'aucune carte ne rend plus. Arrêté par Grégoire le 16 sept. 2026 : on les
+ * CONSERVE et on les SIGNALE. Les collecteurs de `criteres[]` parcourent la grille : sans
+ * cette fonction, la première réécriture (auto-save, « Enregistrer ») les effaçait en silence.
+ *
+ * Rend les entrées de `evaluation` dont le `critereId` n'est pas un critère de `grille` —
+ * seulement si l'évaluation porte sur CETTE grille (changer de grille n'emporte rien).
+ */
+function criteresHorsGrille(evaluation, grille) {
+    if (!evaluation || !grille || !Array.isArray(grille.criteres)) return [];
+    if (evaluation.grilleId !== grille.id || !Array.isArray(evaluation.criteres)) return [];
+    const ids = new Set(grille.criteres.map(c => c && c.id));
+    return evaluation.criteres.filter(c => c && c.critereId && !ids.has(c.critereId));
+}
+
+/**
+ * #652 — nomme, en tête des critères, ceux que l'évaluation OUVERTE garde mais que la grille ne
+ * rend plus. Appelée par les DEUX renderers juste après leur `innerHTML` : la liste est réécrite
+ * plusieurs fois pendant une ouverture (sélection différée de la cartouche de la production,
+ * mesurée à +700 ms), un avis posé une fois par l'ouverture était effacé.
+ * Seulement en modification (`idModification`) ; construit par `textContent` (noms = données).
+ */
+function _signalerCriteresHorsGrille(conteneur, grille) {
+    // Sur `window` : c'est là que l'ouverture pose `idModification` (le nom nu de config.js est un autre objet).
+    const idModification = window.evaluationEnCours && window.evaluationEnCours.idModification;
+    if (!conteneur || !idModification) return;
+    const evaluation = db.getSync(cle('evaluationsSauvegardees'), []).find(e => e.id === idModification);
+    const horsGrille = criteresHorsGrille(evaluation, grille);
+    if (horsGrille.length === 0) return;
+
+    const avis = document.createElement('div');
+    avis.id = 'avisCriteresHorsGrille';
+    avis.className = 'alerte alerte-attention';
+    const titre = document.createElement('strong');
+    titre.textContent = horsGrille.length === 1
+        ? 'Un critère évalué n\'est plus dans la grille'
+        : `${horsGrille.length} critères évalués ne sont plus dans la grille`;
+    const detail = document.createElement('div');
+    detail.textContent = horsGrille.map(c => {
+        const valeur = typeof c.points === 'number' ? `${c.points} pts` : (c.niveauSelectionne || '—');
+        return `${c.critereNom || c.critereId} (${valeur})`;
+    }).join(' · ');
+    const explication = document.createElement('small');
+    explication.textContent = 'L\'évaluation garde ce qui a été enregistré. La note se recalcule sur la grille actuelle dès que tu modifies cette copie.';
+    avis.append(titre, detail, explication);
+    conteneur.prepend(avis);
+}
+
 function _collecterCriteresAutoSave(grille, ec) {
     const criteres = [];
     grille.criteres.forEach(function(c) {
@@ -1712,7 +1765,7 @@ function _autoSauvegarderCriteres(snapshot) {
         // notes archivées d'un recalcul accidentel déclenché par une interaction
         // sur un formulaire mal désactivé (angle mort terminale #348 ; risque #350).
         if (evaluations[idx].verrouillee === true) return;
-        _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres);
+        _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres.concat(criteresHorsGrille(evaluations[idx], grille)));   // #652
     } else {
         // #697 (A-1, audit du 5 sept. 2026) — ne rien CRÉER sans échelle résolue : `calculerNote`
         // n'a pas pu calculer, et la nouvelle évaluation porterait `0` sans portée (mesuré au
@@ -1749,6 +1802,7 @@ window.chargerGrilleSelectionnee = chargerGrilleSelectionnee;
 // (reinitialiserEvaluation, reinitialiserFormulaire) et par la sentinelle qui
 // compare le littéral au texte statique d'`index.html`.
 window.MESSAGE_ATTENTE_CRITERES = MESSAGE_ATTENTE_CRITERES;
+window.criteresHorsGrille = criteresHorsGrille;   // #652 — lue par evaluation.js (modification, ouverture)
 window.ecrireAttenteCriteres = ecrireAttenteCriteres;
 window.messageEchelleManquante = messageEchelleManquante;
 window.cartoucheSelectionnee = cartoucheSelectionnee;

@@ -3298,7 +3298,6 @@
         // contaminent le flux suivant (ex: Consulter via profil après un Consulter
         // cassé via la liste).
         if (!window._apresOuvertureFichier) {
-            if (window._resterEnModeAnnoter) window._resterEnModeAnnoter = false;
             if (window._modifierEvaluationEnCours) window._modifierEvaluationEnCours = false;
         }
 
@@ -3449,7 +3448,7 @@
             // _apresOuvertureFichier est en attente — le callback fera lui-même le
             // basculement avec modifierEvaluationParId, évitant un double setup
             // (preRemplirEvaluation + modifierEvaluationParId en parallèle).
-            if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier && !window._resterEnModeAnnoter) {
+            if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier) {
                 const fichierNav = travauxVisionneuse.getFichierActuel();
                 if (fichierNav && fichierNav.etudiantDA) {
                     basculerMode('evaluer');

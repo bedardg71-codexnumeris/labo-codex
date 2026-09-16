@@ -1313,13 +1313,6 @@ function modifierEvaluation(evaluationId) {
             if (window._forceStandaloneEval) {
                 window._forceStandaloneEval = false;
             }
-            // 🔧 FIX (29 mars 2026) : Ne JAMAIS basculer en standalone si _resterEnModeAnnoter
-            // est actif — l'appel vient du mode annotation et masquer le conteneur fichiers
-            // détruit la visionneuse.
-            if (!enModeEvaluer && window._resterEnModeAnnoter) {
-                window._modifierEvaluationEnCours = false;
-                return;
-            }
             _setupAffichagePanneauxModif(enModeEvaluer);
 
             // Chargement selects (deux branches : enModeEvaluer / standalone)
@@ -1662,7 +1655,13 @@ function _restaurerDonneesAlgorithmiquesModif(evaluation) {
  * `modifierEvaluation` affichait « Impossible de charger l'évaluation : Timeout génération
  * selects critères », et les étapes 13-14 (indicateur, verrouillage) ne s'exécutaient jamais :
  * c'est le cadenas absent. Deux symptômes, une cause.
- * Rend `true` quand l'élément est là, `false` sans critère, rejette après 3 secondes.
+ *
+ * #652 (16 sept. 2026) — elle guettait le PREMIER critère enregistré. Si la grille a été modifiée
+ * depuis et que ce critère en est sorti, les autres cartes étaient rendues mais l'attente expirait :
+ * « Erreur de chargement », aucun niveau restauré (rapport de Grégoire du 31 août, 13 h 57 ; spec
+ * WebKit evaluation-652). Elle guette maintenant N'IMPORTE LEQUEL des critères enregistrés ; et si
+ * aucun n'est rendu mais que des cartes le sont au bout du délai, la grille est là : on continue.
+ * Rend `true` quand l'élément est là, `false` sans critère, rejette après 3 secondes sans carte.
  */
 function _attendreSaisiePremierCritereModif(evaluation) {
     return new Promise((resolve, reject) => {
@@ -1674,14 +1673,18 @@ function _attendreSaisiePremierCritereModif(evaluation) {
 
         let tentatives = 0;
         const maxTentatives = 30; // 3 secondes max
-        const premierId = evaluation.criteres[0].critereId;
+        const ids = evaluation.criteres.map(c => c && c.critereId).filter(Boolean);
 
         const intervalle = setInterval(() => {
             tentatives++;
-            const saisie = document.getElementById(`eval_${premierId}`) || document.getElementById(`eval_pts_${premierId}`);
+            const saisie = ids.some(id => document.getElementById(`eval_${id}`) || document.getElementById(`eval_pts_${id}`));
 
             if (saisie) {
                 clearInterval(intervalle);
+                resolve(true);
+            } else if (tentatives >= maxTentatives && document.querySelector('#listeCriteresGrille1 .eval-critere-carte')) {
+                clearInterval(intervalle);
+                console.warn('⚠️ Aucun critère enregistré n\'est dans la grille rendue : ouverture sur la grille actuelle');
                 resolve(true);
             } else if (tentatives >= maxTentatives) {
                 clearInterval(intervalle);
@@ -2077,7 +2080,7 @@ function sauvegarderEvaluationModifiee() {
             productionNom: production ? (production.titre || production.nom) : '',
             grilleId: grilleId,
             grilleNom: grille ? grille.nom : '',
-            criteres: criteres,
+            criteres: criteres.concat(window.criteresHorsGrille(evaluations[indexEval], grille)),   // #652 — conservés
             optionsAffichage: _lireOptionsAffichageMod(),
             donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
             pointsAnalytiques: evaluationEnCours.pointsAnalytiques || {},   // lot 2

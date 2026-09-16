@@ -2188,12 +2188,18 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   aussitôt écrasée. Ne pas payer ça pour un défaut dont le chemin exact est connu.
   ⚠ **Condition avant toute ligne de code** : un ROUGE qui reproduit la combinaison (mode d'avant = `evaluer` + rappel
   posé). Si ce rouge est trop coûteux à monter, le dire plutôt que livrer un correctif non éprouvé.
-- [ ] **#890 — `window._resterEnModeAnnoter` est lu mais plus jamais posé ; la restauration du mode dans `ouvrirFichier` garde une zone morte**.
+- [x] **#890 — LIVRÉ 16 sept. 2026 · `window._resterEnModeAnnoter` est lu mais plus jamais posé ; la restauration du mode dans `ouvrirFichier` garde une zone morte**.
   Inscrit le 16 sept. 2026 en chemin de #651 (trouvaille de Cowork, mesurée). Le seul code qui le passait à vrai a été
   retiré par `59690542` (29 mars) ; restent des lectures (`travaux-ui.js`, condition de restauration du mode dans
   `ouvrirFichier` ; `evaluation.js`, garde du chemin standalone) et une remise à faux. Même endroit : mode d'avant
   `evaluer` + rappel `_apresOuvertureFichier` posé ⮕ ni l'une ni l'autre branche. Non atteinte sur les trajets mesurés
   (l'initialisation remet le mode à « annoter » quand un rappel est posé). Code mort à retirer ; aucun symptôme vécu.
+  ⮕ **Livré (consigne du 16 sept., 15 h 52)** : les trois occurrences retirées par symbole (remise à faux et terme toujours
+  vrai dans `travaux-ui.js`, garde jamais prise dans `evaluation.js`) ; `grep -rn _resterEnModeAnnoter` sur `js/`, `tests/`,
+  `docs/`, `scripts/` ⮕ 0. Sentinelle `tests/unit/sentinelle-890-rester-en-mode-annoter-retire.test.js` (break-test : la
+  ligne réintroduite dans `travaux-ui.js` rougit en le nommant). Specs `liste-651-…` et `profil-travaux-761-…` vertes.
+  ⚠ **La zone morte est LAISSÉE EN L'ÉTAT, exprès** : aucun trajet mesuré ne l'atteint (mesure du lot #651) ; la retoucher
+  sans symptôme serait élargir le lot.
 - [x] **#665 — Le bump de version a QUATRE emplacements, pas trois : `version.js` est le seul que l'application lise en `file://`, et il était resté à l'ancienne version**.
   Inscrit le 31 août 2026 par `kuekatsheu-14`, **avant tout usage**. **CORRIGÉ dans le même commit.**
   **Le fait.** `version.js` (RACINE) est généré par `scripts/release.mjs`, jumeau de `version.json`, créé parce qu'en
@@ -2544,7 +2550,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⚠ Le masquage de `cle` est bien plus large que les deux sites annoncés par le rapport Z2 (`:2786`, `:2861`) : le fichier
   en porte une vingtaine (cf. l'écart de comptage versé à #654).
 
-- [ ] **#652 — CONSTAT · Une attente expire sur des éléments qui sont là : « Timeout génération selects critères »**.
+- [x] **#652 — LIVRÉ 16 sept. 2026 · Une attente expire sur des éléments qui sont là : « Timeout génération selects critères »**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur observation de `kuekatsheu-5d` dans un rapport
   de bug de Grégoire. **Rien de mesuré** — c'est une observation, pas un diagnostic.
   Trois erreurs console à 13 h 57 : `❌ Timeout: selects de critères non générés`, puis `Erreur lors du chargement de
@@ -2553,6 +2559,18 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⮕ Deux hypothèses, aucune vérifiée : l'attente guette le **mauvais sélecteur**, ou elle guette **trop tôt**.
   ⮕ Ressemble à la famille de #645 (deux chemins de rendu qui divergent, l'un émettant les éléments attendus et l'autre
   non), mais **le rapprochement n'est pas mesuré non plus**. À traiter comme une piste, pas comme une cause.
+  ⮕ **CAUSE MESURÉE (16 sept. 2026, WebKit, sur 1.142.15)** : l'attente guettait `eval_<criteres[0].critereId>`, le PREMIER
+  critère enregistré. Grille modifiée après coup et ce critère retiré ⮕ les autres cartes sont rendues, l'attente expire,
+  « Erreur de chargement », aucun niveau restauré — avec cartouche comme sans. Témoin (premier critère présent) : s'ouvre.
+  Non prouvé sur les données de Grégoire (la grille ouverte à 13 h 57 n'est pas nommée ; aucune lecture de ses données).
+  ⮕ **Décision de Grégoire (16 sept.) : CONSERVER et SIGNALER** le critère sorti de la grille. Mesuré avant de coder : les
+  collecteurs de `criteres[]` parcourent la grille — débloquer seul aurait effacé ce critère à la première réécriture.
+  ⮕ **Livré** : l'attente guette n'importe quel critère enregistré (et, au délai, se contente de cartes rendues) ;
+  `criteresHorsGrille` (`evaluation-chargement.js`) ; l'auto-save et « Enregistrer » en modification ajoutent les critères
+  hors grille (seulement pour la MÊME grille) ; les deux renderers affichent un avis `alerte-attention` en modification.
+  La note, elle, se recalcule sur la grille actuelle dès qu'on modifie la copie (dit par l'avis). Stock : rien n'est écrit
+  à l'ouverture. Témoins : `tests/integration/evaluation-652-premier-critere-hors-grille.spec.js` (6, AVANT : 2 rouges) ;
+  `tests/unit/sentinelle-652-critere-hors-grille.test.js` (9) ; 4 mutations / 4 rouges. Parent : #705 (même famille).
 - [x] **#647 — LIVRÉ 2 septembre 2026 (soir) · L'avertissement de suppression d'une cartouche annonce une perte qui n'a pas lieu, et tait une survivance qui a lieu**.
   Inscrit le 31 août 2026 par `kuekatsheu-9f`, **avant tout usage**, sur mesure de `kuekatsheu-94`. Lot de #624.
   `supprimerCartoucheDefinitivement` (`js/donnees-v2.js:1608`) n'appelle que `retirerCartoucheDeLaBibliotheque`, qui

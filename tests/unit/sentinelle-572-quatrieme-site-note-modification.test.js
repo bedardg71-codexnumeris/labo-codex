@@ -66,7 +66,9 @@ function monter({ affichageNote, noteCalculee }) {
         noteCalculeeCourante: noteCalculee,
         evaluationEnCours: { idModification: 'EV1', etudiantDA: '1234567', productionId: 'P1', grilleId: 'G1', criteres: {}, donneesAlgorithmiques: {} },
         sauvegarderEvaluation() { throw new Error('chemin de CRÉATION pris — le test vise la MODIFICATION'); },
-        majBadgesApresEvaluation() {}
+        majBadgesApresEvaluation() {},
+        // #652 — posée par evaluation-chargement.js, que ce banc ne charge pas ; l'évaluation n'a aucun critère.
+        criteresHorsGrille: () => []
     };
     chargerScript('js/evaluation.js', {
         document,
