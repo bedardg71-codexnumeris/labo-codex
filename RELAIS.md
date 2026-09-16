@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 15 SEPT. 2026, ≈ 19 H 20 (Toronto) : 1.142.5 (#877) PAR-DESSUS 1.142.4
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 7 H 20 (Toronto) : 1.142.7 (#880) SUR `main`
+
+> **1.142.7** porte **#880** (rapport de 7 h 00) : quatre PDF d'un même élève pour Artefact 1 restaient quatre copies. **La décision
+> reportée le 15 au soir est TRANCHÉE par Grégoire : B, fusion des PDF.** `assemblerGroupesPipeline` admet `estPDF` ;
+> `pagesImagesDuFichier` (`travaux-import.js`) rend chaque page par pdf.js. Sentinelle #880 (4 cas, 2 mutations rouges), banc WebKit
+> avec les vraies libs (8 pages attendues, 8 obtenues). Vitest 571 / 6 414. **Stock non touché** : les quatre copies déjà importées
+> restent séparées. **Reste ouverte** : la lettre finale comme numéro de page (#878). Voir plus bas le bloc du 15 sept.
+
+## (précédent) 15 SEPT. 2026, ≈ 19 H 20 (Toronto) : 1.142.5 (#877) PAR-DESSUS 1.142.4
 
 > **1.142.4 est en ligne** (`fd2e2357`). **1.142.5** porte **#877** (rapport de 19 h 01) : « + Ajouter des pages » › « Confirmer »
 > sans réglage n'ajoutait rien — `confirmer()` (`travaux-preparation.js`) sortait par « rien à traiter » sans rappeler l'éditeur en

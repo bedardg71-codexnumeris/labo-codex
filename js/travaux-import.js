@@ -1385,8 +1385,8 @@
        =============================== */
 
     /**
-     * Assemble un groupe d'images en un seul PDF via jsPDF
-     * @param {Array} fichiersDuGroupe - Liste de fichiers prepares (images)
+     * Assemble un groupe d'images et de PDF en un seul PDF via jsPDF (#880)
+     * @param {Array} fichiersDuGroupe - Liste de fichiers prepares (images ou PDF)
      * @param {number} [dpi=250] - DPI pour la conversion pixels → mm
      * @returns {Promise<Blob>} Le blob PDF assemble
      */
@@ -1394,30 +1394,13 @@
         const { jsPDF } = window.jspdf;
         let doc = null;
 
-        for (let i = 0; i < fichiersDuGroupe.length; i++) {
-            const f = fichiersDuGroupe[i];
-            const blob = f.fichier;
+        const pages = [];
+        for (const f of fichiersDuGroupe) {
+            pages.push(...await pagesImagesDuFichier(f, dpi));
+        }
 
-            // Charger l'image
-            const imgData = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-
-            // Obtenir les dimensions de l'image
-            const dims = await new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve({ width: img.width, height: img.height });
-                img.onerror = reject;
-                img.src = imgData;
-            });
-
-            // Dimensions en mm
-            const mmPerPx = 25.4 / (dpi || 250);
-            const pageW = dims.width * mmPerPx;
-            const pageH = dims.height * mmPerPx;
+        for (let i = 0; i < pages.length; i++) {
+            const { imgData, pageW, pageH } = pages[i];
 
             if (i === 0) {
                 doc = new jsPDF({
@@ -1434,6 +1417,60 @@
 
         if (!doc) throw new Error('Aucune image a assembler');
         return doc.output('blob');
+    }
+
+    /**
+     * Pages d'un fichier du groupe, en images JPEG dimensionnees en mm.
+     *
+     * #880 (decision Gregoire du 16 sept. 2026) — les PDF d'un eleve pour une
+     * production se fusionnent comme ses photos. Depuis #873 ils partageaient
+     * la cle, mais l'assemblage ne lisait que des images : quatre PDF
+     * restaient quatre documents, alors que la confirmation annoncait « 1 PDF ».
+     * Un PDF est rendu page par page (pdf.js) ; sa page garde sa taille
+     * physique, et le texte n'est plus selectionnable.
+     *
+     * @param {Object} f - Fichier de la file (image ou PDF)
+     * @param {number} [dpi=250] - DPI pour la conversion pixels → mm d'une image
+     * @returns {Promise<Array<{imgData: string, pageW: number, pageH: number}>>}
+     */
+    async function pagesImagesDuFichier(f, dpi) {
+        if (f.estPDF) {
+            if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js non disponible');
+            const pdf = await pdfjsLib.getDocument({ data: await f.fichier.arrayBuffer() }).promise;
+            const pages = [];
+            for (let n = 1; n <= pdf.numPages; n++) {
+                const page = await pdf.getPage(n);
+                // Viewport a l'echelle 1 : en points (1/72 po).
+                const base = page.getViewport({ scale: 1 });
+                const scale = Math.min((dpi || 250) / 72, MAX_IMAGE_DIMENSION / Math.max(base.width, base.height));
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(viewport.width);
+                canvas.height = Math.round(viewport.height);
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+                pages.push({
+                    imgData: canvas.toDataURL('image/jpeg', JPEG_QUALITY_IMPORT),
+                    pageW: base.width * 25.4 / 72,
+                    pageH: base.height * 25.4 / 72
+                });
+            }
+            return pages;
+        }
+
+        const imgData = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(f.fichier);
+        });
+        const dims = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve({ width: img.width, height: img.height });
+            img.onerror = reject;
+            img.src = imgData;
+        });
+        const mmPerPx = 25.4 / (dpi || 250);
+        return [{ imgData, pageW: dims.width * mmPerPx, pageH: dims.height * mmPerPx }];
     }
 
     /* ===============================
