@@ -707,27 +707,36 @@
                     return;
                 }
                 // Cas 1 : fichier deja ouvert dans la visionneuse — reactiver + restaurer palettes
-                const fichierOuvert = travauxVisionneuse.getFichierActuel();
+                // #881 — la copie ouverte a pu partir à la corbeille depuis « Exporter et
+                // archiver » : ne pas la rouvrir, laisser la reconstruction générale plus bas.
+                const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                const fichierOuvertBrut = travauxVisionneuse.getFichierActuel();
+                const fichierOuvert = (fichierOuvertBrut && fichiersTravaux.some(function(f) { return f.id === fichierOuvertBrut.id; }))
+                    ? fichierOuvertBrut : null;
                 if (fichierOuvert) {
-                    // Régénérer les badges toolbar s'ils ont été perdus (navigation entre sous-sections)
+                    // Régénérer les badges toolbar à CHAQUE retour. #881 (16 sept. 2026) — la
+                    // garde « bande vide » laissait en place les badges d'avant une suppression
+                    // faite dans « Exporter et archiver » : les copies jetées restaient au carrousel.
                     const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
-                    if (badgeStrip && badgeStrip.children.length === 0) {
-                        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
-                        if (fichiersTravaux.length > 0) {
-                            _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
-                            badgeStrip.innerHTML = _htmlBadgesGrille;
-                            // Marquer le badge actif
-                            const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
-                            if (badgeActif) badgeActif.classList.add('actif');
-                            // Restaurer le dropdown production si absent
-                            if (_htmlDropdownProduction && !document.querySelector('.annot-toolbar-production')) {
-                                var prodDiv = document.createElement('div');
-                                prodDiv.className = 'annot-toolbar-production';
-                                prodDiv.innerHTML = _htmlDropdownProduction;
-                                badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
-                            }
-                            if (productionFiltreActive) filtrerBadgesParProduction();
+                    if (badgeStrip && fichiersTravaux.length > 0) {
+                        const defilement = badgeStrip.scrollLeft;
+                        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
+                        badgeStrip.innerHTML = _htmlBadgesGrille;
+                        badgeStrip.scrollLeft = defilement;
+                        // Marquer le badge actif
+                        const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
+                        if (badgeActif) badgeActif.classList.add('actif');
+                        // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
+                        const prodExistant = document.querySelector('.annot-toolbar-production');
+                        if (prodExistant) {
+                            prodExistant.innerHTML = _htmlDropdownProduction;
+                        } else if (_htmlDropdownProduction) {
+                            var prodDiv = document.createElement('div');
+                            prodDiv.className = 'annot-toolbar-production';
+                            prodDiv.innerHTML = _htmlDropdownProduction;
+                            badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
                         }
+                        if (productionFiltreActive) filtrerBadgesParProduction();
                     }
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
