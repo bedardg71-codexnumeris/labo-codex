@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 11 H 35 (Toronto) : 1.142.13 (#885, #886) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 13 H 45 (Toronto) : 1.142.14 (#889) SUR `main`
+
+> **1.142.14** (`8df588d9`) porte **#889** (rapport de Grégoire, 13 h 10) : sous l'outil Texte, cliquer sur un texte existant créait
+> un 2e bloc par-dessus ; `onPointerDown` (`js/travaux-annotation.js`) l'ouvre maintenant par `editerTexte`, le clic dans le vide crée
+> toujours un bloc. Porte Playwright `annotation-texte-clic-edite-889.spec.js` (moteur seul), rouge sur 1.142.13, vert après.
+> **Vérifié par Grégoire dans l'app (« ça fonctionne »).** Aucun stock. Poussée, Playwright et Vitest verts.
+> Ouverts inchangés : #887 (import rattaché au cours actif sans le nommer), #888 (étiquette du champ Périodes).
+
+## (précédent) 16 SEPT. 2026, ≈ 11 H 35 (Toronto) : 1.142.13 (#885, #886)
 
 > **1.142.12** (`197e5833`) porte **#885** : le bouton « Supprimer un groupe » (Cadre › Groupe d'étudiant·es) n'apparaissait que si
 > un groupe était choisi ; Mathieu a retiré ses élèves un par un. Toujours visible désormais — **vérifié par Grégoire (« ça fonctionne »)**.
