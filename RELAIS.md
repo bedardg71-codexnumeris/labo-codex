@@ -7,7 +7,29 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 16 H 45 (Toronto) : 1.142.16 (#652, #890) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 17 H 45 (Toronto) : 1.142.17 (#891, #894) SUR `main`
+
+> **1.142.17** (`f59c8b3c`, build `0916-1719`) porte **#891** et **#894**, le lot « Télécharger l'export sans rien perdre » (mandat de
+> Grégoire, 16 sept. soir, choisi parce qu'il ne lui demande ni arbitrage ni vérification à l'écran). **Remesure avant de coder** :
+> `lancerExport` à 632 (la fiche disait 646 — la ligne du nom brut) ; les trois `replace(/[^a-zA-Z0-9]/g, '_')` à 137, 284, 651 ;
+> 0 appelant pour les cinq fonctions mortes (js/, index.html, tests/, docs/, skills, data-action, window.*). **Livré** :
+> `_ajouterFichierAuZip` (seul point qui écrit une copie dans un ZIP ; blob absent ⇒ `throw 'Blob introuvable'`, le mot de
+> `travaux-export-pdf.js` déjà à l'écran par le bilan #565) ; try/catch par fichier dans `exporterTravaux` et `exporterParEtudiant`
+> (retour `{ blob, echecs, nbFichiers, exportes }`) ; `exporterSemestre` par le même helper (**écart assumé** : un blob absent y est
+> maintenant nommé, avant sauté en silence) ; nom du ZIP de `lancerExport` par `_assainirSegmentChemin` (élève et production) ;
+> `'exporte'` posé seulement sur `exportes` dans `lancerExport` et `lancerExportEtudiant`, bilan `_afficherBilanExport` tel quel —
+> **aucun mot neuf à l'écran** ; titres de production par `_assainirSegmentChemin` (« Écrit 1 » garde accent ET espace). **Stock** :
+> rien réécrit, les `'exporte'` posés à tort restent. **#894** : `exporterParProduction`, `lancerExportProduction`,
+> `nettoyerProduction`, `lancerArchivageEtudiant`, `lancerArchivageProduction` retirés ; JSDoc de `exporterPourLea` recollé.
+> Témoin : `sentinelle-891-telecharger-export-sans-rien-perdre` (9 ; faux JSZip ; `exporterSemestre` enfin exécuté) ; 4 mutations /
+> 4 rouges. Vitest 577 / 6 457 après le commit du bump. **Aucune porte terrain** : `telechargerBlob` inchangé. « Nouvelles » :
+> phrase validée par Grégoire. Poussée par `pousser.sh origin main` (verdict Playwright au jeton, Vitest au hook) — voir le rapport
+> de session pour le verdict. ⚠ Une VM Apple Virtualization (845 Mo) tournait pendant le verdict, mémoire libre 59 % : Cowork
+> annoncé fermé, non vérifiable d'ici. **Restent de l'audit** : #892 (nettoyage sans corbeille, décision due), #893 (mots de l'Aide
+> et du quota, à soumettre), #895 (deux cartes, décision due), #870 élargie (`.texte-muted`). Dernier ID : #895 (aucune fiche neuve).
+> **Pour Cowork** : relecture croisée du lot et mise à jour de l'artefact du tri (markdown à jour : page 229, backlog 230, écart {#575}).
+
+## (précédent) 16 SEPT. 2026, ≈ 16 H 45 (Toronto) : 1.142.16 (#652, #890) SUR `main`
 
 > **Ajout de 17 h 45 (session d'audit, Claude Code, Cowork fermé)** — rien de code depuis 1.142.16 ; quatre commits de docs poussés
 > jusqu'à `bcec30a1`. **Audit de « Exporter et archiver »** livré (`Rapports/AUDIT-exporter-et-archiver-2026-09-16.md`) : Grégoire a

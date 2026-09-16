@@ -27,15 +27,15 @@ Niveau de preuve : **banc** = exécuté sur un banc jetable (`scratchpad/banc-ex
 
 | # | Constat | Gravité | Preuve | Disposition |
 |---|---|---|---|---|
-| C1 | « Télécharger » perd TOUT l'export sur un seul fichier illisible ; « Trimestre complet » et « Léa » survivent (#565 corrigé sur deux chemins sur trois) | 🟠 données | banc | **inscrit → #891** |
-| C2 | Le nom du ZIP téléchargé n'est pas assaini : `travaux_Roy/Tremblay_Sam.zip` (#572 corrigé sur le chemin du profil, pas sur celui de l'écran) | 🟡 | banc | **inscrit → #891** |
+| C1 | « Télécharger » perd TOUT l'export sur un seul fichier illisible ; « Trimestre complet » et « Léa » survivent (#565 corrigé sur deux chemins sur trois) | 🟠 données | banc | **inscrit → #891** → livré 1.142.17 (`f59c8b3c`) |
+| C2 | Le nom du ZIP téléchargé n'est pas assaini : `travaux_Roy/Tremblay_Sam.zip` (#572 corrigé sur le chemin du profil, pas sur celui de l'écran) | 🟡 | banc | **inscrit → #891** → livré 1.142.17 (`f59c8b3c`) |
 | C3 | « Proposer un nettoyage » supprime DÉFINITIVEMENT la moitié la plus ancienne des fichiers du groupe, sans corbeille et sans vérifier qu'ils ont été exportés | 🟠 données | lecture | **inscrit → #892** |
 | C4 | L'aide décrit un écran qui n'existe plus : « 4 modes », options « Inclure annotés / Inclure évaluations », « Allègement », titre « Archivage des travaux », import « via Annoter et évaluer » | 🟡 mots lus par les testeurs | grep | **inscrit → #893** |
-| C5 | Statut « exporté » posé par une seule des trois cartes, et posé même sur un fichier dont le blob a été sauté ; ce statut fait taire la détection de blob manquant à l'import d'un codex | 🟡 données | lecture | **inscrit → #891** |
+| C5 | Statut « exporté » posé par une seule des trois cartes, et posé même sur un fichier dont le blob a été sauté ; ce statut fait taire la détection de blob manquant à l'import d'un codex | 🟡 données | lecture | **inscrit → #891** → livré 1.142.17 (`f59c8b3c`) |
 | C6 | Classe `.texte-muted` définie nulle part : 6 usages sur cet écran, 30 dans `travaux-ui.js`, 10 fichiers JS | 🟡 rendu | grep | **inscrit → #870 élargi** |
 | C7 | Deux cartes font la même chose avec les mêmes filtres ; la première refuse son propre défaut (« Toutes / Tous » → alerte) | 🟡 produit | lecture | **inscrit → #895** (décision due) |
-| C8 | Code mort : `exporterParProduction`, `lancerExportProduction`, `nettoyerProduction`, `lancerArchivageEtudiant`, `lancerArchivageProduction` (0 appelant) ; JSDoc de `exporterPourLea` collé à `selectionnerEvaluationsLea` | ⚪ dette | grep | **inscrit → #894** |
-| C9 | Noms de dossiers de production : accents supprimés (« Écrit 1 » → `_crit_1`) alors que #572 les conserve pour les élèves ; `_assainirSegmentChemin` existe et n'est pas utilisée (3 sites) | ⚪ | banc | **inscrit → #891** |
+| C8 | Code mort : `exporterParProduction`, `lancerExportProduction`, `nettoyerProduction`, `lancerArchivageEtudiant`, `lancerArchivageProduction` (0 appelant) ; JSDoc de `exporterPourLea` collé à `selectionnerEvaluationsLea` | ⚪ dette | grep | **inscrit → #894** → livré 1.142.17 (`f59c8b3c`) |
+| C9 | Noms de dossiers de production : accents supprimés (« Écrit 1 » → `_crit_1`) alors que #572 les conserve pour les élèves ; `_assainirSegmentChemin` existe et n'est pas utilisée (3 sites) | ⚪ | banc | **inscrit → #891** → livré 1.142.17 (`f59c8b3c`) |
 | C10 | Microcopy du bloc quota sans accents et en jargon : « utilises », « Espace bientot plein », « liberera », « supprime(s) », « Mode: IndexedDB » | ⚪ mots | grep | **inscrit → #893** |
 | C11 | `telechargerBlob` révoque l'URL dans le même tour que le clic ; deux autres modules attendent 1 s | ⚪ non vérifié | lecture | **refusé** (non vérifié, rouvrir sur symptôme) |
 
@@ -135,4 +135,4 @@ Règle du 24 août : un item n'entre au BACKLOG que sur symptôme vécu ou bloca
 | décision | C7 | à trancher avant tout code sur la carte 1 |
 | refusé | C11 | rouvrir sur symptôme |
 
-**Inscrit** : #891 (lot A), #892 (lot B), #893 (lot C), #894 (code mort), #895 (décision C7), #870 élargi (C6). **Refusé** : C11. La ligne « Dernier ID » de `BACKLOG.md` passe à #895 dans le même commit que ce rapport.
+**Inscrit** : #891 (lot A), #892 (lot B), #893 (lot C), #894 (code mort), #895 (décision C7), #870 élargi (C6). **Refusé** : C11. **Livrés le soir même** : #891 et #894 en 1.142.17 (`f59c8b3c`) — C1, C2, C5, C9, C8. La ligne « Dernier ID » de `BACKLOG.md` passe à #895 dans le même commit que ce rapport.
