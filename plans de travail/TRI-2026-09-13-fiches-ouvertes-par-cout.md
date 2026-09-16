@@ -1,7 +1,7 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 16 sept. à 14 h 45** – **dix-neuf lots menés depuis le tri, et les dix-neuf sont en ligne.**
+> **Mis à jour le 16 sept. à 15 h 00** (14 h 45 pour les comptes, inchangés : `BACKLOG.md` n'a pas bougé depuis `71ca237f`) – **dix-neuf lots menés depuis le tri, et les dix-neuf sont en ligne.**
 > ⚠ **DEUX JOURNÉES DE SUITE SANS TOUCHER AU TRI, ET C'EST L'ORDRE VOULU.** Le 15 a livré six versions, le 16 en a livré neuf, et **les quinze répondaient à un rapport de testeur** – ceux de Grégoire, celui de Mathieu. Les fiches d'ici n'ont pas bougé : ⮕ **ce n'est pas un retard du tri, c'est la règle des retours qui s'applique.**
 > **Poussé : `1.142.14`** (`71ca237f` sur `origin/main`, build `0916-1312`). Grégoire a vérifié dans l'application les trois derniers correctifs (« ça fonctionne »).
 > **Les neuf du 16, dans l'ordre de ses rapports** : `1.142.7` fusion des PDF d'un même élève (décision reportée la veille, **tranchée par lui : option B**) · `1.142.8` une copie jetée quitte le carrousel · `1.142.9` le PDF respecte « Niveau de performance », et le choix s'enregistre · `1.142.10` un travail diagnostique ne pèse plus (« 1 retenue sur 4 possibles », ses mots) · `1.142.11` perspective et rognage survivent à « Re-déposer » · `1.142.12` « Supprimer un groupe » toujours visible · `1.142.13` les sept champs d'une séance sur une rangée · `1.142.14` sous l'outil Texte, le clic ouvre au lieu d'empiler. Avant elles, `1.142.6` : la place du bouton « + Nouveau… » uniformisée dans les six accordéons du Cadre.
@@ -107,6 +107,10 @@ Dernier lot de la grappe des échelles. L'ancien éditeur de niveaux – celui q
 ⚠ **Quatre correctifs ont tari leur source sans toucher au stock, et c'est écrit, pas découvert** : les quatre PDF déjà importés séparément le restent (#880) ; les copies importées avant la correction gardent leurs réglages perdus (#884) ; les évaluations déjà enregistrées en « Note chiffrée » le restent, il faut recocher (#882). **Rien n'a été écrit dans les données de Grégoire.**
 
 ⮕ **Trois fiches sont entrées** : **#887** l'import rattache la liste au cours ACTIF sans le nommer (c'est le mécanisme A de #872, resté non traité en 1.142.1 — il entre parce que Mathieu l'a **vécu**) ; **#888** l'étiquette du champ Périodes, relevée par la session et inscrite **sur décision de Grégoire**, la règle du 24 août l'excluant sans son avis ; **#879** la forme des six boutons « + Nouveau… », **inscrite pour ne pas être ouverte** – aucun symptôme vécu, et le Cadre est du travail d'installation, vraisemblablement au Mac. Elle se réveille si un membre de la CoP fait son installation sur iPad.
+
+⮕ **Ce qui reste à Grégoire, et rien ne se code avant** : #860, #871, #874. Prose à corriger, pas un arbitrage : #878, #888. **Porte reportée par lui au prochain artefact, vers le 23-30 sept.** : perspective et rognage après rechargement puis « Re-déposer » (#884). **Réglée selon lui (16 sept., après-midi)** : la question du profil qui montrait des pourcentages par travail sous « note différée » – ne plus la poser.
+
+⮕ **Page alignée à 15 h 00** : l'item « À toi » périmé du 15 (qui disait « deux autres » et n'en nommait qu'une) est retiré de la page ; il reste ici, dans le journal du 15, comme trace.
 
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 

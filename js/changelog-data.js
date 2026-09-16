@@ -26,7 +26,7 @@
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
             items: [
                 '«&nbsp;Évaluer&nbsp;» dans le profil d\'un élève (et dans la liste des évaluations) choisit maintenant l\'élève et la production pour toi. Avant, tu arrivais sur Évaluation sans que rien ne soit choisi.',
-                'Si la copie est importée, elle s\'ouvre directement en mode Évaluer, annotée ou non. «&nbsp;Annoter&nbsp;» reste à un clic.',
+                'Si la copie est importée, elle s\'ouvre directement en mode Évaluer, annotée ou non. «&nbsp;Annoter&nbsp;» reste à un clic, et ouvre la copie avec ses outils d\'annotation, même choisi dans le menu «&nbsp;Actions…&nbsp;» de la liste après un passage en mode Évaluer.',
                 'Sans copie importée — une copie remise sur papier, par exemple —, tu arrives sur le formulaire d\'évaluation avec les mêmes outils&nbsp;: le nom de l\'élève en tête, les vues Générale, Spécifique et Bilan de la rétroaction, «&nbsp;Copier tout&nbsp;», «&nbsp;Copier&nbsp;» et le cadenas — et «&nbsp;Consulter&nbsp;» une évaluation sans copie aussi. Le statut part à «&nbsp;Reçu&nbsp;»&nbsp;; pour une non-remise, repasse-le à «&nbsp;Non reçu&nbsp;».',
                 'Cadre › Groupe d\'étudiant·es&nbsp;: un bouton «&nbsp;+ Nouveau groupe&nbsp;» crée un 2e groupe. Le formulaire d\'ajout suit le groupe choisi&nbsp;: tes élèves ne tombent plus dans le premier groupe. Le bouton «&nbsp;Supprimer un groupe&nbsp;» est maintenant toujours visible&nbsp;: choisis le groupe dans le menu, et tous ses élèves partent d\'un seul geste.',
                 'Un groupe importé ou créé apparaît tout de suite à l\'étape 3 du groupe-cours&nbsp;: tu peux l\'y choisir et enregistrer sans recharger.',

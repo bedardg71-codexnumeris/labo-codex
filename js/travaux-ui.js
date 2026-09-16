@@ -3456,6 +3456,13 @@
                 }
             } else if (modeAvantNavigation !== 'evaluer') {
                 // Mode annotation par défaut
+                // #651 (16 sept. 2026) — installer AUSSI ses palettes. Revenir dans Évaluations
+                // après le mode Évaluer passe par la réinitialisation générale de
+                // `initialiserModuleTravaux`, qui ferme les palettes d'évaluation et remet le mode
+                // à « annoter » sans rendre les palettes d'annotation : la flottante gardait le
+                // `u-hide` de `masquerPalettesAnnotation`, et « Annoter » depuis la liste ouvrait la
+                // copie sans outils (rapport de Grégoire, 31 août ; spec `liste-651-…`).
+                afficherPalettesAnnotation();
                 travauxVisionneuse.zoomPleineHauteur();
                 const btnAnnoter = document.getElementById('travaux-btn-annoter');
                 if (btnAnnoter) btnAnnoter.classList.add('actif');

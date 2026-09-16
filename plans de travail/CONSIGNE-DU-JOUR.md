@@ -1,58 +1,47 @@
-# Consigne du jour — #864 : le verrouillage des cartouches sort de l'application
+# Consigne du jour – #651 : « Annoter » depuis la liste des évaluations ouvre la copie AVEC sa palette
 
-> Écrite le 14 septembre 2026, 17 h 55 (Toronto), sur `f48170d7` (`1.140.11` releasée, **NON POUSSÉE** ; `origin/main` = `21987bc4` = 1.140.10).
-> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-14-787-doubles-class.md`.
-> ⚠⚠ **NE POUSSE PAS `1.140.11` TELLE QUELLE.** Elle ne porte que le correctif de #863, qui vient de perdre son objet. Ce lot le remplace.
+> Écrite le 16 septembre 2026, 15 h 07 (Toronto), sur `a989bfdf` (`main` = `origin/main`, `1.142.14` en ligne).
+> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-14-864-verrouillage-cartouches.md`.
+> Choisie par Grégoire le 16 sept. : il travaille en ce moment dans la section Évaluations. Symptôme VÉCU (sa capture, 31 août). Aucun arbitrage attendu de lui.
 
 ---
 
-## 1 · CE QUI S'EST PASSÉ, EN TROIS PAS
+## 1 · LE SYMPTÔME
 
-1. La porte terrain de #787 demandait de regarder le bouton « Déverrouiller » d'une cartouche verrouillée. **Grégoire ne l'a pas trouvé.**
-2. Mesure : le bandeau était caché par une classe que le code ne retirait jamais ⮕ **#863**, corrigé et releasé en `1.140.11`.
-3. **Grégoire ne l'a toujours pas trouvé** — et la mesure suivante a dit pourquoi : **le seul bouton qui verrouille une cartouche vit dans deux fonctions que rien n'appelle.** L'état `verrouille` ne peut donc pas devenir vrai par un geste de l'application.
+Dans Évaluations › liste, menu d'actions d'une ligne › « Annoter », **quand le mode courant de la visionneuse est Évaluer** : la copie s'ouvre **sans aucune palette** (ni celles d'annotation, ni celles d'évaluation), et le bouton d'actions reste libellé « Évaluer ».
 
-⮕ **Tranché par Grégoire le 14 sept. au soir** : *« Maintenant que tout est namespacé, je crois que c'est réglé. Je n'ai jamais senti que j'avais besoin de verrouiller une cartouche. »* ⮕ **Ablation, règle zéro-dette.**
+## 2 · CE QUE COWORK A MESURÉ SUR `a989bfdf` – par lecture, pas par exécution
 
-## 2 · CE QUI PART
+Travaille par SYMBOLE ; les lignes sont indicatives.
 
-Tout est dans `js/cartouches.js` sauf indication. Les numéros de ligne sont ceux de `f48170d7` ; **travaille par symbole, pas par ligne.**
+- **La cause écrite dans la fiche tient toujours.** `ouvrirFichier` (`js/travaux-ui.js` ~3452) : `if (modeAvantNavigation === 'evaluer' && !window._apresOuvertureFichier && …)` puis `else if (modeAvantNavigation !== 'evaluer')`. Mode d'avant = `evaluer` **et** un rappel posé ⮕ **aucune des deux branches**. `ouvrirAnnotationDepuisListe` (`js/liste-evaluations.js` ~1403) pose un rappel **no-op** ; son appelant est vivant (le `switch` du menu d'actions, `case 'annoter'`, ~1346).
+- ⚠ **NOUVEAU depuis l'inscription de la fiche : la zone morte s'est élargie.** Le 6 sept., #761 (`ddc94fcf`) a fait poser par `ouvrirFichier` LUI-MÊME un rappel no-op (~3337) quand on arrive hors de la sous-section (vignette de « Travaux soumis » dans le profil), puis se rappeler à +500 ms. Au second passage, le rappel est posé ⮕ si le mode d'avant est `evaluer`, **même zone morte**, alors qu'avant #761 ce chemin restaurait le mode Évaluer. **Non reproduit par Cowork** : à mesurer.
+- ⮕ **Le drapeau sert donc à DEUX usages que la branche ne distingue pas** : « ne restaure pas la session » (les deux no-op, qui n'installent aucun mode), et « l'appelant installera Évaluer lui-même » (`evaluation.js` ~229, `liste-evaluations.js` ~1859, `profil-etudiant-actions.js` ~78). Les no-op bloquent la branche sans rien installer à sa place.
+- **La fiche est périmée sur un point** : `_majLabelBtnActions`, qu'elle nomme pour le libellé, **n'existe plus nulle part dans `js/`** (voir plutôt ce qu'a posé #798, `sentinelle-798-libelle-mode-annoter-evaluer`).
+- **Trouvaille, code étranger** : `window._resterEnModeAnnoter` est LU (`travaux-ui.js` ~3452, `evaluation.js` ~1319) et remis à faux (~3301), mais **aucune ligne de `js/` ne le met à vrai**. Ne t'en sers pas comme remède sans l'avoir vérifié ; issue à nommer (défaut : inscrire).
 
-**a) Deux fonctions mortes, entières** — aucun appelant vivant dans tout le dépôt (leurs seules occurrences hors définition sont **des lignes commentées** aux lignes 352, 1076, 1606-1607, 1870, et des blocs de doc) :
-- `afficherListeCartouches` (1399-1442)
-- `afficherToutesLesGrillesEtCartouches` (1466-1559) — et son export `window.` (3294)
+## 3 · CE QUI EST ATTENDU
 
-**b) La bascule** : `basculerVerrouillageCartouche` (1587-1614) et son export `window.` (3296).
+1. **« Annoter » depuis la liste, mode d'avant = Évaluer** ⮕ la copie s'ouvre en mode Annoter : palettes d'annotation visibles (`afficherPalettesAnnotation`), palettes d'évaluation fermées, bouton Annoter actif, libellé juste.
+2. **La vignette du profil (chemin #761), mode d'avant = Évaluer** ⮕ le comportement d'avant #761 : le mode Évaluer est restauré si la copie a un DA. *Supposition de Cowork, dite à Grégoire : c'est ce que ce chemin faisait avant le 6 sept., et #761 ne visait que l'arrivée sur la page, pas le mode.* **Mesure d'abord** : si le rouge ne se reproduit pas, ce point sort du lot et s'inscrit.
+3. **Inchangés** : les trois appelants dont le rappel bascule VERS Évaluer (Consulter depuis la liste, Évaluer, le profil). La fiche l'avait vu : élargir le `else` leur installerait une annotation aussitôt écrasée.
+4. **Hors lot** : #700 (le compte d'erreurs qui ne retombe pas à 0), même parcours, autre fichier.
 
-**c) Trois morceaux morts logés dans des fonctions VIVANTES** — c'est la partie délicate, ne touche que ces morceaux :
-- `chargerCartouchePourModif` : le bloc `if (cartouche.verrouille) { … } else { … }` qui cherche `#alerteVerrouillage` et `#btnDeverrouillerCartouche` (1772-1788) ;
-- `supprimerCartoucheConfirm` : la garde `if (cartouche && cartouche.verrouille) { alert('Déverrouille ce cartouche…') }` (1824-1827) — une phrase que personne n'a jamais pu lire, et qui porte une faute d'accord ;
-- `afficherBanqueCartouches` : `verrouIcone` (3502) et sa consommation dans le gabarit (3508).
-
-**d) `index.html`** : le bloc `#alerteVerrouillage` avec son bouton `#btnDeverrouillerCartouche`, et la règle `.hidden-my15-warning` du bloc `<style>` — **si et seulement si** elle ne sert plus à aucune autre balise (mesuré le 14 : un seul site, mais remesure).
-
-**e) `tests/integration/cartouche-verrouillee-bandeau-863.spec.js`** — il part avec son sujet. ⚠ Le geste le plus risqué d'un lot : vérifie par le CONTENU que les symboles qu'il éprouve n'existent plus nulle part, pas par le nom du fichier.
-
-## 3 · CE QUI NE PART PAS — et c'est délibéré
-
-**Le champ `verrouille` reste dans les sept schémas d'échange** : `js/partage-schemas.js` (338, 431, 451) et `js/import-export.js` (623, 813, 917, 958). ⮕ **C'est ce qui VOYAGE**, et la révision du 1er septembre de la règle zéro-dette protège exactement ça : un fichier déjà exporté ou partagé doit rester lisible. Le champ devient toléré et ignoré.
-
-**`verrouille: false` reste écrit à la création et à la duplication** (212, 483, 1656, 3815). Motif : le retirer toucherait la forme de ce qui s'exporte, pour zéro gain. Un booléen à faux que plus rien ne lit ne coûte rien.
-
-**Le STOCK n'est pas réécrit.** Les cartouches déjà en base chez Grégoire portent `verrouille: false` ; il devient inerte, comme les clés de #659. ⛔ **Écrire dans ses données remonte à lui** — on mesure, on sépare, on n'y touche pas.
+La forme du remède est à toi : faire honorer au rappel ce qu'il déclare, ou distinguer les sens du drapeau. **Le plus étroit qui tienne les points 1 à 3.**
 
 ## 4 · LA PREUVE EXIGÉE
 
-1. **Aucun symbole survivant** : `grep -rn` sur `basculerVerrouillageCartouche`, `afficherListeCartouches`, `afficherToutesLesGrillesEtCartouches`, `alerteVerrouillage`, `btnDeverrouillerCartouche`, `verrouIcone` ⮕ zéro occurrence hors de l'archive du backlog.
-2. **Une sentinelle de non-retour** : plus aucun lecteur de `cartouche.verrouille` dans `js/` **hors des schémas d'échange** nommés au § 3. Elle doit rougir si on réintroduit un lecteur.
-3. **Break-test à montrer** : remets un lecteur, la sentinelle rougit **en le nommant**.
-4. **Rien ne change à l'écran** : la banque de cartouches et l'ouverture d'une cartouche rendent la même chose qu'avant. C'est une ablation de code mort.
+1. **Le rouge AVANT la ligne de code** (condition posée par la fiche) : Playwright, mode Évaluer installé sur une copie, puis « Annoter » depuis la liste ⮕ rouge sur `1.142.14` sur l'absence de palette. Modèle de harnais : `tests/integration/profil-travaux-761-vignette-mene-a-la-visionneuse.spec.js` (il n'éprouve pas le mode Évaluer : 0 occurrence). Même chose pour le point 2 si tu le retiens.
+2. **Une garde pour le point 3** : Consulter depuis la liste arrive toujours en Évaluer avec l'évaluation chargée.
+3. **Break-test à montrer** : le remède retiré ⮕ rouge en le nommant ; le `else` élargi à la place ⮕ la garde du point 3 rougit.
+4. **Si le rouge est trop coûteux à monter, dis-le** plutôt que livrer un correctif non éprouvé.
 5. Vitest depuis `tests/`, jamais depuis la racine.
 
 ## 5 · APRÈS
 
-- **La version** : `1.140.11` est déjà écrite par `release.mjs` sur `f48170d7`, non poussée. **Tranche seul** comment y loger ce lot — l'ajouter sous la même `1.140.11`, ou re-releaser — et dis en une ligne ce que tu as choisi.
-- **Pas d'entrée « Nouvelles »** : rien ne change pour un utilisateur. (Décision déjà prise pour #863, même motif.)
-- **Pas de porte terrain.** Aucune vérification à l'écran : la règle du skill `portes-terrain` dit qu'aucune porte n'est due si une machine peut répondre.
-- **Au BACKLOG** : inscrire **#864** (le texte vient dans le message de Grégoire), le cocher dans le même commit s'il est livré, et **ajouter une ligne à #863** disant qu'elle est retirée par #864 — le correctif était juste, c'est la question qu'il réparait qui n'existe plus. Mettre à jour « Dernier ID utilisé » de #863 à #864.
-- ⚠ **Deux commits attendent le push** après celui-ci : la 1.140.11 de #863 et ce lot.
+- **Release patch** par `scripts/release.mjs` ; « Nouvelles » selon le skill `release-et-changelog`, tranche seul et dis-le en une ligne.
+- **Stock : aucun.** Rien n'est écrit en base ; c'est un enchaînement d'écran. Dis-le quand même dans le rapport.
+- **Pas de porte terrain** : Playwright voit les palettes, et ce n'est pas une mise en page ; rien de propre à l'iPad ou à Safari. Si ta mesure dit le contraire, dis-le.
+- **Au BACKLOG** : cocher #651 avec sa phrase « vérifié comment » ; corriger la mention de `_majLabelBtnActions` ; nommer l'issue de la trouvaille `_resterEnModeAnnoter` (et du point 2 s'il sort du lot) – si tu inscris, prends le numéro sur la ligne « Dernier ID » de `main` (**#889** à l'écriture) et mets-la à jour dans le même commit.
+- **Commite aussi**, ils sont à Cowork et non commités : `plans de travail/CONSIGNE-DU-JOUR.md`, l'archive `_ancienne-CONSIGNE-DU-JOUR-2026-09-14-864-verrouillage-cartouches.md`, et `plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md` (mis à jour à 15 h).
+- ⚠ **Le verdict Playwright se prend Cowork FERMÉ** : Grégoire le ferme quand tu es prêt.
