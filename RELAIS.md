@@ -13,6 +13,8 @@
 > un 2e bloc par-dessus ; `onPointerDown` (`js/travaux-annotation.js`) l'ouvre maintenant par `editerTexte`, le clic dans le vide crée
 > toujours un bloc. Porte Playwright `annotation-texte-clic-edite-889.spec.js` (moteur seul), rouge sur 1.142.13, vert après.
 > **Vérifié par Grégoire dans l'app (« ça fonctionne »).** Aucun stock. Poussée, Playwright et Vitest verts.
+> **Grégoire, 16 sept. après-midi** : porte #884 (perspective/rognage après rechargement) reportée au prochain artefact, vers le
+> 23-30 sept. ; question « profil et note différée » (#883) **réglée** — ne plus la poser.
 > Ouverts inchangés : #887 (import rattaché au cours actif sans le nommer), #888 (étiquette du champ Périodes).
 
 ## (précédent) 16 SEPT. 2026, ≈ 11 H 35 (Toronto) : 1.142.13 (#885, #886)

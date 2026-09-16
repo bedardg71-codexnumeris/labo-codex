@@ -93,8 +93,8 @@ du compte avaient échoué à le faire.
    le graphique individuel **ne s'y étend pas d'office**. Pose la question avec une recommandation.
 2. **#871** – le pourcentage et la fraction affichés côte à côte se contredisent (assiduité, complétion).
 3. **#874** – les PDF sans aperçu dans la file d'import : inscrit, non diagnostiqué.
-4. **Le calcul du profil** qui montre les pourcentages par travail malgré « note différée » : question posée le 16 au matin, **restée
-   sans réponse**. Ne la repose pas d'office ; attends qu'il en parle ou qu'un symptôme la rouvre.
+4. **Le calcul du profil** qui montre les pourcentages par travail malgré « note différée » : question posée le 16 au matin, **RÉGLÉE selon Grégoire
+   (16 sept., après-midi, rapporté par Claude Code)**. Ne plus la poser.
 
 **d) DEUX FICHES SONT DE LA PROSE À CORRIGER, PAS UN ARBITRAGE** : **#878** (l'Aide ne dit nulle part comment nommer les pages d'une
 remise : `-p1`, `-p2`) et **#888** (Horaire : le champ Périodes sans étiquette visible une fois rempli). ⚠ **Propose-lui un texte à
