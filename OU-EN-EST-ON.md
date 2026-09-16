@@ -15,6 +15,41 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **FAIT EN 1.142.14, POUSSÉE (16 SEPTEMBRE 2026, 13 h 45 — ton rapport de 13 h 10) — AVEC L'OUTIL TEXTE, CLIQUER SUR UN TEXTE LE MODIFIE.**
+**Ce que tu verras** : en annotation, l'outil Texte ouvre un bloc existant quand tu cliques dessus, au lieu d'en poser un second par-dessus. Un clic dans le vide crée toujours un nouveau bloc ; le double-clic de l'outil Sélection marche encore.
+**Vérifié comment** : un contrôle au navigateur (WebKit, moteur d'annotation seul) rouge sur le code d'avant, vert après, avec son témoin (clic dans le vide) ; Vitest 574 / 6 437 ; Playwright WebKit vert au push ; **essayé par toi dans l'app : « ça fonctionne »**. **Rien de changé dans tes données.** **Pas vérifié** : Safari, l'iPad au crayon. *(#889)*
+
+✅ **FAIT EN 1.142.13, POUSSÉE (16 SEPTEMBRE 2026, 11 h 30 — ta capture de 11 h 21) — LES CHAMPS D'UNE SÉANCE D'HORAIRE TIENNENT SUR UNE RANGÉE.**
+**Ce que tu verras** : Cadre › Horaire › Séances hebdomadaires : jour, heures, périodes et local sur la même ligne, à la même hauteur ; sur écran étroit, deux colonnes propres.
+**Vérifié comment** : positions des champs mesurées dans WebKit avant (local sur une 2ᵉ rangée, périodes plus bas) et après (même rangée) ; le contrôle qui comptait « 6 » en dur lit maintenant le nombre de champs, rouge sur le code d'avant ; Vitest 574 / 6 437 ; Playwright WebKit vert au push ; **regardé par toi : « l'alignement de l'horaire est bon »**. **Reste à faire** : le champ Périodes n'a pas d'étiquette visible une fois rempli — inscrit, son libellé te reviendra *(#888)*. *(#886)*
+
+✅ **FAIT EN 1.142.12, POUSSÉE (16 SEPTEMBRE 2026, 11 h 15 — réponse de Mathieu à tes trois questions) — SUPPRIMER UN GROUPE ENTIER, SANS PASSER ÉLÈVE PAR ÉLÈVE.**
+**Ce que tu verras** : Cadre › Groupe d'étudiant·es : le bouton « Supprimer un groupe… » est toujours là ; il devient « Supprimer le groupe 00007 » quand un groupe est choisi dans le menu. Sans groupe choisi, il renvoie au menu et ne supprime rien. La question dit « irréversible », et « répartis dans N cours » si le numéro existe dans plusieurs cours.
+**Ce que la mesure a dit** : le geste existait depuis janvier, mais son bouton ne paraissait que si un groupe était déjà choisi — et le menu s'ouvre sur « Tous les groupes ».
+**Vérifié comment** : 4 contrôles ajoutés, 4 mutations exprès, 4 rouges ; Vitest 574 / 6 437 ; Playwright WebKit vert au push ; **essayé par toi : « ça fonctionne »**. **Rien de changé dans les données** (Mathieu avait déjà vidé à la main). **Reste à faire, le plus gros ouvert** : l'import d'élèves range la liste dans le cours ACTIF sans le nommer — c'est vraisemblablement ce qu'a vécu Mathieu ; ses élèves mal rangés restent chez lui, et les déplacer te reviendrait *(#887)*. *(#885, suite de #872)*
+
+✅ **FAIT EN 1.142.11, POUSSÉE (16 SEPTEMBRE 2026, 10 h 35 — ta capture de 10 h 21) — TES RÉGLAGES DE PERSPECTIVE ET DE ROGNAGE SURVIVENT AU RECHARGEMENT.**
+**Ce que tu verras** : quand tu reprends une file d'import par « Re-déposer les fichiers » après un rechargement, les corrections faites dans la préparation sont réappliquées avant l'import ; « Importer » attend la fin du rejeu, et un échec est nommé à l'écran.
+**Vérifié comment** (rapporté par la session qui l'a livré) : 8 contrôles, mutations exprès rouges ; Vitest 574 / 6 433. **Pas vérifié** : le rendu réel en navigateur par la session — ta porte : réglage → recharger → Re-déposer → importer. **Stock** : les copies déjà importées sans correction restent telles quelles. *(#884)*
+
+✅ **FAIT EN 1.142.10 (16 SEPTEMBRE 2026, 10 h — ta question de 9 h 50), POUSSÉE AVEC 1.142.11 — UN TRAVAIL DIAGNOSTIQUE NE COMPTE PLUS DANS LE PROFIL NI LE PDF.**
+**Ce que tu verras** : « Portrait de lecteur/lectrice » (coché diagnostique) ne figure plus parmi les travaux évalués du profil et du PDF ; la ligne Sélection dit, dans tes mots, « 1 retenue sur 4 possibles ».
+**Vérifié comment** (rapporté par la session) : cause mesurée par une sonde sur tes données (lecture seule) ; 6 contrôles, mutations rouges ; Vitest 573 / 6 425. **En suspens** : ta réponse sur le profil qui montre des % par travail sous « note différée ». *(#883)*
+
+✅ **FAIT EN 1.142.9, POUSSÉE (16 SEPTEMBRE 2026, 9 h 20 — ton rapport de 9 h 09) — LE PDF DE LA RÉTROACTION RESPECTE « NIVEAU DE PERFORMANCE ».**
+**Ce que tu verras** : coché, ce choix est enregistré tout de suite ; le PDF garde le bloc « Note provisoire » avec les niveaux seulement (ta décision), sans pourcentage ni calcul.
+**Vérifié comment** (rapporté par la session) : contrôles hors navigateur et dans WebKit, mutations rouges ; Vitest 572 / 6 419. **Stock** : les évaluations déjà enregistrées en « Note chiffrée » le restent — recocher. *(#882)*
+
+✅ **FAIT EN 1.142.8, POUSSÉE (16 SEPTEMBRE 2026, 8 h 15 — ton rapport de 8 h 09) — UNE COPIE JETÉE DEPUIS « EXPORTER ET ARCHIVER » QUITTE LE CARROUSEL.**
+**Vérifié comment** (rapporté par la session) : contrôle WebKit, trois mutations, trois rouges ; Vitest 571 / 6 414. Aucune donnée en cause (affichage seulement). *(#881)*
+
+✅ **FAIT EN 1.142.7, POUSSÉE (16 SEPTEMBRE 2026, 7 h 15 — ton rapport de 7 h 00 et ta décision reportée la veille) — PLUSIEURS PDF D'UN MÊME ÉLÈVE S'ASSEMBLENT EN UN SEUL.**
+**Ce que tu verras** : comme ses photos ; les pages des PDF y deviennent des images (le texte n'y est plus sélectionnable).
+**Vérifié comment** (rapporté par la session) : banc WebKit avec les vraies bibliothèques — 4 PDF (7 pages) + 1 photo → 1 PDF de 8 pages ; 2 mutations rouges ; Vitest 571 / 6 414. **Stock** : les copies déjà importées restent séparées. *(#880)*
+
+✅ **FAIT EN 1.142.6, POUSSÉE (16 SEPTEMBRE 2026, 6 h 15) — LE BOUTON « + NOUVEAU… » OCCUPE LA MÊME PLACE DANS LES SIX ACCORDÉONS DU CADRE.**
+**Vérifié comment** (rapporté par la session) : mesuré dans Chrome sur l'app servie en local, 8 px sous le menu pour les six ; trois mutations, trois rouges. **Inscrit, à ne pas ouvrir sans retour** : ces boutons restent de formes différentes et font 27 px de haut sur iPad *(#879)*.
+
 ✅ **FAIT EN 1.142.3, 1.142.4 ET 1.142.5, POUSSÉES (15 SEPTEMBRE 2026, de 17 h à 19 h 30 — tes rapports pendant l'import de tes 86 photos) — L'IMPORT DES COPIES ASSEMBLE DE NOUVEAU, ET DIT CE QU'IL FAIT.**
 **Ce que tu verras** : les photos d'un même élève pour une même production forment de nouveau UN document, au lieu d'être annoncées comme doublons à renommer ; tu fais le tri dans l'aperçu, rangé par date, et « Défaire le regroupement » reste là. C'est vrai aussi quand tu reprends une file par « Re-déposer les fichiers » après un rechargement — tes réglages spécifiques sont conservés. Dans l'écran d'import, une vignette sans image ne ressemble plus à une image cassée : un triangle quand la photo n'a pas pu être lue, un cercle barré quand il n'y a rien à lire, des points pendant le calcul ; le bouton des réglages porte un engrenage ; et quand une photo HEIC ne se décode pas, la raison s'écrit dans l'inspecteur quand tu cliques sur le fichier, au lieu d'une infobulle invisible sur iPad. Enfin, « + Ajouter des pages » suivi de « Confirmer » ajoute bien tes pages, même si tu n'as appliqué aucun réglage.
 **Ce que la mesure a dit** : la règle écrite le 30 août — « les pages d'une remise partagent la seconde de dépôt » — est fausse sur ton vrai lot (09h46m45s, 09h46m55s…). Chaque page devenait donc un document séparé. **Ta décision** : tous les fichiers d'un élève pour une production forment un document, et tu tries à la main. Deux suites en sont sorties le même soir : la file déjà déposée gardait l'ancienne règle, et la fenêtre de préparation ne rendait rien quand il n'y avait rien à régler.
