@@ -7,7 +7,24 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 15 H 35 (Toronto) : 1.142.15 (#651, #700) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 16 H 45 (Toronto) : 1.142.16 (#652, #890) SUR `main`
+
+> **1.142.16** (`19604ea4`) porte **#652** : l'ouverture d'une évaluation attendait `eval_<criteres[0].critereId>` ; premier critère
+> retiré de la grille ⮕ attente expirée, « Erreur de chargement », aucun niveau restauré (mesuré WebKit sur 1.142.15, les deux
+> renderers). **Décision de Grégoire : conserver et signaler.** L'attente guette n'importe quel critère enregistré (au délai, des
+> cartes rendues suffisent) ; `criteresHorsGrille` (`evaluation-chargement.js`) ; auto-save et « Enregistrer » en modification
+> ajoutent les critères hors grille (même grille seulement) ; les deux renderers affichent l'avis (`#avisCriteresHorsGrille`,
+> `alerte-attention`, textContent) — posé à l'ouverture seule, le rendu différé de la cartouche l'effaçait. La note se recalcule
+> sur la grille actuelle quand on modifie. Porte `evaluation-652-premier-critere-hors-grille.spec.js` (6) ; `sentinelle-652` (9) ;
+> 7 mutations / 7 rouges. « Enregistrer » couvert par témoin de source seulement. Stock : rien écrit ; les évaluations déjà
+> réécrites avant 1.142.16 ont pu perdre leur critère hors grille — non mesuré. Et **#890** : `_resterEnModeAnnoter` retiré
+> (3 sites), zone morte laissée en l'état ; `sentinelle-890`. « Nouvelles » : phrase validée par Grégoire.
+> Poussée par `pousser.sh` avec `57d0c3f0` (consigne 15 h 52), `8cfe3c65` et `12f2c5fd` (Cowork, docs) : Playwright vert deux
+> fois, Vitest vert au hook. Dernier ID : #895. **Pas encore vu par Grégoire dans l'app.**
+> Verrous vides déplacés par Cowork dans `.git/_to_delete/` (Grégoire les supprime) ; `.git/objects/maintenance.lock` du 31 août
+> non touché.
+
+## (précédent) 16 SEPT. 2026, ≈ 15 H 35 (Toronto) : 1.142.15 (#651, #700) SUR `main`
 
 > **1.142.15** porte **#651** (`b6773bdd`) : « Annoter » depuis la liste, après un passage en mode Évaluer ET un détour hors
 > d'Évaluations, ouvrait la copie sans la palette d'outils — la réinitialisation générale remettait le mode à « annoter » sans
