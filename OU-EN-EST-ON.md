@@ -15,6 +15,12 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **FAIT EN 1.142.16, POUSSÉE (16 SEPTEMBRE 2026, ≈ 16 h 35 — ton rapport du 31 août, 13 h 57, et ton choix de l'après-midi) — UNE ÉVALUATION DONT UN CRITÈRE A ÉTÉ RETIRÉ DE LA GRILLE S'OUVRE DE NOUVEAU, LE SIGNALE ET LE GARDE.**
+
+Avant, elle affichait « Erreur de chargement » et aucun niveau ne revenait. Maintenant elle s'ouvre ; un encadré orange nomme le critère retiré et le niveau enregistré, et l'évaluation le garde, même quand tu modifies la copie. La note, elle, se recalcule sur la grille actuelle dès que tu modifies la copie (l'encadré le dit). Ouvrir la copie n'écrit rien. En chemin, un reste de code sans effet a été retiré (rien ne change à l'écran).
+
+**Vérifié comment** : contrôles au navigateur (WebKit), avec et sans cartouche : la copie au premier critère retiré était rouge sur le code d'avant (« Erreur de chargement », niveaux vides), verte après ; la copie témoin s'ouvre comme avant ; changer un niveau garde le critère retiré en base. Chaque garde retirée exprès fait rougir son contrôle (7 sur 7). Vitest 576 / 6 448 ; Playwright WebKit vert au push. **Pas vérifié** : par toi dans l'app ; le bouton « Enregistrer » n'est vérifié que dans le code, pas par un clic ; que ce soit bien la cause de ton erreur du 31 août (la grille ouverte à 13 h 57 n'est pas nommée dans le rapport, et tes données n'ont pas été lues) ; Safari, l'iPad. **Dans tes données** : rien de changé. *(#652, #890 ; même famille que #705)*
+
 ✅ **FAIT EN 1.142.15, POUSSÉE (16 SEPTEMBRE 2026, 15 h 45 — ton rapport du 31 août et ton choix de 15 h 24) — « ANNOTER » DEPUIS LA LISTE OUVRE LA COPIE AVEC SES OUTILS ; RETIRER TOUS LES CODES D'ERREUR REMET LE COMPTE À 0.**
 **Ce que tu verras** : après avoir évalué une copie, être passé ailleurs dans l'app puis revenu à la liste des évaluations, « Actions… › Annoter » ouvre la copie avec la palette d'outils, et le bouton dit « Annoter ». Et quand tu retires tous les codes d'erreur posés sur une copie, le champ « Nombre d'erreurs » retombe à 0 — sauf si tu y as tapé un nombre toi-même : celui-là n'est jamais effacé.
 **Ce que la mesure a dit** : la cause écrite dans la fiche d'août était fausse. Le passage direct Évaluer → liste → Annoter marchait déjà ; c'est le détour par une autre section, visible dans ton rapport, qui laissait la palette d'outils cachée au retour.
