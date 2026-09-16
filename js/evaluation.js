@@ -990,10 +990,16 @@ function attacherEvenementsMemorisation() {
         'afficherContexte1'
     ];
 
+    // #882 (16 sept. 2026) — ces options vivent dans l'évaluation (`optionsAffichage`) et le PDF
+    // de l'élève les relit : les changer arme l'auto-save, comme un critère.
+    // Par `window` : `_debouncerAutoSave` est privé à l'IIFE d'evaluation-chargement.js.
+    const armerAutoSave = () => { if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave(); };
+
     checkboxesAMemoriser.forEach(id => {
         const checkbox = document.getElementById(id);
         if (checkbox && !checkbox.dataset.memoAttache) {
             checkbox.addEventListener('change', memoriserSelectionsEvaluation);
+            checkbox.addEventListener('change', armerAutoSave);
             checkbox.dataset.memoAttache = '1';
         }
     });
@@ -1003,6 +1009,7 @@ function attacherEvenementsMemorisation() {
         const radio = document.getElementById(id);
         if (radio && !radio.dataset.memoAttache) {
             radio.addEventListener('change', memoriserSelectionsEvaluation);
+            radio.addEventListener('change', armerAutoSave);
             radio.dataset.memoAttache = '1';
         }
     });
