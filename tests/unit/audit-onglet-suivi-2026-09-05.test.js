@@ -595,22 +595,28 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         expect(p.suivi).toMatchObject({ ipb: 3, diagnostic: 'Difficulté persistante' });   // 0,67 < 0,70 : les fondations sont « en défi » sur cette échelle
     });
 
-    it('C5 · un critère analytique en points (21/30 = 70 %) : le dépistage lit la valeur du NIVEAU déduit (65), pas les points', () => {
-        // À la main : la note de la copie compte 21/30 ; le dépistage convertit `niveauSelectionne` D par l'échelle → 0,65.
+    it('C5 · un critère analytique en points (21/30 = 70 %) : le dépistage lit les POINTS (0,70), plus le niveau déduit — valeur d\'après #739 (constat d\'origine : 0,65)', () => {
+        // À la main : la note de la copie compte 21/30 ; le dépistage lisait `niveauSelectionne` D par l'échelle → 0,65.
+        // ↻ #739 (lot B du 16 sept. 2026) : `scoreCritereEvaluation` lit `points / ponderation` → 0,70 — comme les courbes.
+        // Remesure du 16 sept. : la fiche disait `pointsMax` ; le champ que porte `evaluation.criteres[]` (lot 2 du 4 sept.,
+        // `_collecterCriteresAutoSave`) est `ponderation` — 30 ici, celle du critère Structure de la grille.
         const jeu = jeuBase();
         jeu.evaluations = [ev('E1P1', DA.ASSIDU, 'P1', 70, 'D', ['D', 'D', 'D'])];
-        jeu.evaluations[0].criteres[0] = Object.assign(jeu.evaluations[0].criteres[0], { type: 'analytique', points: 21, pointsMax: 30 });
+        jeu.evaluations[0].criteres[0] = Object.assign(jeu.evaluations[0].criteres[0], { type: 'analytique', points: 21 });
         jeu.evaluations[0].pointsAnalytiques = { c1: 21 };
         const b = monter(jeu); b.calculerTout();
         const moy = b.win.calculerMoyennesCriteres(DA.ASSIDU);
-        noter('C5', { structure: moy.structure, pointsIgnores: moy.structure !== 0.7 });
-        expect(moy.structure).toBe(0.65);
+        noter('C5', { structure: moy.structure, pointsLus: moy.structure === 0.7 });
+        expect(jeu.evaluations[0].criteres[0].ponderation).toBe(30);
+        expect(moy.structure).toBeCloseTo(0.70, 10);
     });
 
-    it('C6 · un critère SOLO « Aucun » : hors de l\'IPB, mais TOUJOURS un défi pour la carte RàI, le défi spécifique et les critères ciblés', () => {
-        // À la main : quatrième critère « Méthode » (niveauSOLO 'aucun'), noté I (0,40) partout chez l'assidu. L'IPB ne surveille
-        // que Structure et Rigueur (libellé : « surveillés : Structure, Rigueur »). Mais diagnostiquerForcesChallenges,
-        // identifierDefiSpecifique et calculerMoyennesCriteres n'ont pas de filtre SOLO : Méthode devient le défi principal.
+    it('C6 · un critère SOLO « Aucun » sort de TOUT le dépistage : IPB, défi principal de la carte RàI, défi spécifique, moyennes — valeur d\'après #740 (constat d\'origine : Méthode devenait le défi principal, pattern « Défi spécifique »)', () => {
+        // À la main : quatrième critère « Méthode » (niveauSOLO 'aucun'), noté I (0,40) partout chez l'assidu. L'IPB ne surveillait
+        // que Structure et Rigueur (libellé : « surveillés : Structure, Rigueur »), mais diagnostiquerForcesChallenges,
+        // identifierDefiSpecifique et calculerMoyennesCriteres n'avaient pas de filtre SOLO : Méthode devenait le défi principal.
+        // ↻ #740 (lot B du 16 sept. 2026) : un seul filtre (`estCritereSurveilleParDepistage`, helpers) pour tous les lecteurs —
+        // l'assidu retrouve le portrait de C1 (aucun défi, « Stable »), et « methode » n'a pas de clé dans les moyennes.
         const jeu = jeuBase();
         jeu.grilles[0].criteres.push({ id: 'c4', nom: 'Méthode', ponderation: 0, niveauSOLO: 'aucun' });
         jeu.evaluations.filter(e => e.etudiantDA === DA.ASSIDU).forEach(e => e.criteres.push({ critereId: 'c4', critereNom: 'Méthode', niveauSelectionne: 'I', ponderation: 0 }));
@@ -619,12 +625,14 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         const defi = b.win.identifierDefiSpecifique(DA.ASSIDU);
         const ipb = b.win.calculerIPB(DA.ASSIDU);
         const libelle = b.win.libelleCriteresMultiSurveilles(b.store.test_grillesTemplates[0]);
-        noter('C6', { raiDefi: rai.defi, raiPattern: rai.pattern, defiSpecifique: defi, criteresIPB: ipb.criteresMulti, libelle });
+        const moy = b.win.calculerMoyennesCriteres(DA.ASSIDU);
+        noter('C6', { raiDefi: rai.defi, raiPattern: rai.pattern, defiSpecifique: defi, criteresIPB: ipb.criteresMulti, libelle, clesMoyennes: Object.keys(moy) });
         expect(ipb.criteresMulti).toEqual(['structure', 'rigueur']);
         expect(libelle).toBe('Critères multistructurels surveillés : Structure, Rigueur');
-        expect(rai.defi).toBe('Méthode');
-        expect(rai.pattern).toBe('Défi spécifique');
-        expect(defi.defi).toBe('Méthode');
+        expect(rai.defi).toBe('Aucun');
+        expect(rai.pattern).toBe('Stable');
+        expect(defi.defi).toBe('Aucun');
+        expect(Object.keys(moy)).toEqual(['structure', 'rigueur', 'nuance']);
     });
 
     it('C7 · une évaluation SANS texte de rétroaction finale : elle compte dans P, pas dans le dépistage', () => {

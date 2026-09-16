@@ -76,6 +76,9 @@ function monterProfil(grilleReference) {
         obtenirNombreProductionsPourPatterns: () => 3, obtenirIdsProductionsEvaluables: () => []
     };
     const win = chargerScript('js/profil-etudiant-helpers.js', stubs);
+    // #740 (16 sept. 2026) : le filtre SOLO « Aucun » vit dans helpers ; calculs le lit comme global — le VRAI, pas une copie.
+    stubs.estCritereSurveilleParDepistage = win.estCritereSurveilleParDepistage;
+    stubs.criteresSurveillesParDepistage = win.criteresSurveillesParDepistage;
     chargerScript('js/profil-etudiant-calculs.js', stubs, win);
     return win;
 }
@@ -166,6 +169,8 @@ describe('lot 4 · B.C — le dépistage : une grille toute « Aucun » n\'a pas
         // Le filtre est celui de #542 : un critère sans étiquette est une fondation, « aucun » n'en est pas une.
         const code = sansCommentaires(source('js/profil-etudiant-calculs.js'));
         expect(code).toContain("return (c.niveauSOLO || 'multistructurel') === 'multistructurel';");
+        // #740 (16 sept. 2026) : l'IPB filtre « multistructurel » PARMI les critères que le dépistage lit — la liste partagée.
+        expect(code).toContain("var criteresMulti = criteresSurveillesParDepistage(grille).filter(function (c) {");
         expect(code).toContain("'Intensité non calculable — aucun suivi des fondations disponible'");
     });
 

@@ -2092,7 +2092,8 @@ function calculerDirectionsCriteres(da) {
 
             evaluation.criteres.forEach(c => {
                 if (!c) return;
-                const score = convertirNiveauEnScore(c.niveauSelectionne, table);
+                // #739 — la même lecture que les barres : les points d'abord, le niveau sinon.
+                const score = scoreCritereEvaluation(c, table);
                 if (score === null) return;
                 const cle = cleCritere(c.critereNom);
                 if (!cle) return;
