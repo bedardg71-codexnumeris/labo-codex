@@ -560,6 +560,13 @@
         }
 
         if (outil.id === 'texte') {
+            // #889 : un clic sur un texte existant l'ouvre en édition. Seul le double-clic de
+            // l'outil Sélection le faisait ; l'outil Texte posait un 2e bloc par-dessus.
+            const hitTexte = trouverAnnotationAuPoint(xNorm, yNorm);
+            if (hitTexte && hitTexte.type === 'text') {
+                editerTexte(hitTexte.data);
+                return;
+            }
             ajouterTexte(xNorm, yNorm);
             return;
         }
