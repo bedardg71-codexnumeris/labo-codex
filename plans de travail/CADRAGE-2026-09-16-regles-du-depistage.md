@@ -19,11 +19,15 @@ L'ordre va du moins coûteux au plus large ; A et D touchent le plus d'écrans.
 | Lot | Ce que Grégoire verra | Règle tranchée | Fiches | Ce qui remonte à lui |
 |---|---|---|---|---|
 | **F** · Les écrans du groupe | plus de bandes I/D/M/E sous les courbes du groupe ; un filtre d'engagement qui retient ce que le profil déclare | bandes retirées (motif du 13 sept.) ; filtre = assiduité OU complétion sous 70 % | #860, #828 | le **nouveau libellé du filtre** |
-| **B** · Un critère lu une seule fois | un critère en points lu à sa note (22/30 n'est plus un défi) ; un critère SOLO « Aucun » jamais proposé comme défi ni comme cible | le dépistage lit la note obtenue ; « Aucun » sort de tout le dépistage | #739, #740 | rien |
+| **B** · Un critère lu une seule fois — ✅ **LIVRÉ en 1.142.18** (`4ef65597`, 16 sept., ≈ 18 h 50) | un critère en points lu à sa note (22/30 n'est plus un défi) ; un critère SOLO « Aucun » jamais proposé comme défi ni comme cible | le dépistage lit la note obtenue ; « Aucun » sort de tout le dépistage | #739, #740 | rien — phrase de « Nouvelles » validée par lui |
 | **C** · Un seul palier | la carte RàI donne seule l'intensité, partout (profil, filtres, bilan) ; le palier « Insuffisant » disparaît du code | carte RàI seule ; palier retiré, aucune borne ne bouge | #744, #822 | **le mot qui remplace l'un des deux « Difficulté émergente »** |
 | **A** · Les mêmes copies partout | note, complétion, dépistage et carte RàI lisent les mêmes copies ; un non-remis ne gonfle plus la complétion | une copie compte quand elle est enregistrée, avec ou sans commentaire final ; la complétion ne compte jamais un non-remis ; « Non reçu » reconnu comme « Non remis » | #737, #741, #718, #738 (volet complétion) | rien, sauf si le libellé d'un écran doit changer |
 | **E** · L'élève exclu | son profil calculé par sa pratique, son statut affiché, hors des moyennes du groupe | calcul par sa pratique ; « hors groupe » sans calcul s'il a quitté le groupe | #745 | **les mots du statut** (précédent du lot 5 du cadrage 11 : « (n'est plus dans le groupe) ») |
 | **D** · L'assiduité qui manque | un arrivant tardif n'hérite plus des absences d'avant ; un tiret au lieu de 100 % tant que rien n'est noté ; les deux moyennes du groupe s'accordent | date d'arrivée facultative sur la fiche ; assiduité inconnue avant la première présence | #735, #750, #743 | **le libellé du champ « date d'arrivée »** ; une porte terrain probable (fiche d'élève, iPad) |
+
+### Lot B — livré le 16 sept. (1.142.18)
+
+Remesuré avant de coder : les sept fonctions du relevé sont aux lignes dites ; le champ des points est `ponderation`, pas `pointsMax`. Un seul filtre « Aucun » (`estCritereSurveilleParDepistage`, helpers) et une seule lecture d'un critère (`scoreCritereEvaluation`, la source des courbes). Cas hors des critères de la page, tranché par Claude Code et nommé : sans grille de dépistage choisie, le défi spécifique lit tout, comme avant (rien ne dit lequel est « Aucun »). Stock : les interventions enregistrées avec un critère « Aucun » ciblé ne sont pas réécrites. Détail : fiches #739 et #740, RELAIS.md.
 
 ## Les critères retenus, dans les mots de la page
 
