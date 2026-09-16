@@ -14,7 +14,8 @@
 > **1.142.13** (`bfab4eb3`) porte **#886** : les 7 champs d'une séance d'horaire sur une rangée (la grille avait 6 pistes depuis #540 E1).
 > Mesuré sous WebKit ; pas regardé dans le Chrome de Grégoire. Les deux poussées, Playwright et Vitest verts.
 >
-> **EN SUSPENS (non inscrit au BACKLOG, à trancher) :**
+> **INSCRITS AU BACKLOG sur décision de Grégoire (16 sept., 11 h 45) : #887 (point 1) et #888 (point 2). L'alignement #886 est vérifié par Grégoire.**
+> **(texte d'origine) EN SUSPENS :**
 > 1. **#872 mécanisme (A)** — l'import (`confirmerImportV2`) et l'ajout manuel rattachent les élèves au cours ACTIF sans le nommer.
 >    Réponse de Mathieu (16 sept.) : un groupe par cours ; il ne sait plus quel cours était actif. Symptôme vécu ⇒ entre au BACKLOG.
 > 2. **Horaire, champ Périodes sans étiquette visible** une fois rempli (« 2 » à côté du local ; le placeholder « pér. » disparaît).
