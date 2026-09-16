@@ -900,6 +900,8 @@ function ouvrirIntervention(interventionId, options) {
                 : 'multistructurel';
             // Lot 4, volet B (4 sept. 2026) : un critère « Aucun » n'a pas de badge SOLO —
             // il reste ciblable par l'intervention, il n'est simplement pas étiqueté.
+            // #740 (16 sept.) : il n'est jamais PROPOSÉ — ni compté « en défi » ni pré-coché —
+            // parce que `calculerMoyennesCriteres` ne le lit plus (filtre unique, helpers).
             var badgeSolo = niveauLabel
                 ? '<span class="badge-sys" style="font-size: 0.75rem; padding: 2px 6px; opacity: 0.7;">' + echapperHtml(niveauLabel) + '</span>'
                 : '';

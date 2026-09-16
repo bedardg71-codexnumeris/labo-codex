@@ -44,6 +44,9 @@ beforeAll(() => {
         },
         obtenirIdsProductionsEvaluables: () => ['P1', 'P2'],
         obtenirNombreProductionsPourPatterns: () => 3,
+        // #740 (16 sept. 2026) : `identifierDefiSpecifique` lit la grille de référence pour en exclure les critères
+        // « Aucun ». Sans grille configurée — le cas de ce banc — tout critère est lu, comme avant.
+        obtenirGrilleReferenceDepistage: () => null,
         obtenirSeuil: () => 0.75,
         obtenirPreference: () => null,
         obtenirEtudiantsCoursActif: () => [],

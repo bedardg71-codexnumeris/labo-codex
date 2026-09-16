@@ -857,6 +857,42 @@ function obtenirGrilleReferenceDepistage() {
 }
 
 /**
+ * #740 (lot B du cadrage du 16 sept. 2026, tranché par Grégoire) — CE QUE LE
+ * DÉPISTAGE LIT D'UNE GRILLE : ses critères, SAUF ceux réglés « Aucun » au menu
+ * « Niveau SOLO ». Un tel critère compte dans la note du cours comme les autres
+ * (la note ne passe pas par ici), mais aucun lecteur du dépistage ne le voit :
+ * ni les barres et moyennes par critère, ni l'IPB, ni le défi principal de la
+ * carte RàI, ni le défi spécifique, ni les cibles proposées par une intervention.
+ * C'est la phrase de l'Aide : « le dépistage des fondations ne le surveille pas ».
+ *
+ * ⚠ UN SEUL ENDROIT. Avant, `calculerIPB` filtrait seul (sur « multistructurel »),
+ * et les quatre autres lecteurs prenaient un critère « Aucun » noté I pour un
+ * défi (constat C-6 de l'audit du 5 sept.). Tout lecteur du dépistage passe par
+ * `criteresSurveillesParDepistage` (la liste) ou `trouverCritereDepistage`
+ * (l'appariement d'un critère d'évaluation, dans `profil-etudiant-calculs.js`),
+ * qui reposent tous deux sur ce prédicat. Pas de garde par site.
+ *
+ * Le défaut ne bouge pas : sans étiquette, un critère est multistructurel
+ * (#542), donc surveillé. Seul « aucun » sort.
+ *
+ * @param {Object|null} critere - un critère de la grille de référence
+ * @returns {boolean}
+ */
+function estCritereSurveilleParDepistage(critere) {
+    return !!critere && critere.niveauSOLO !== 'aucun';
+}
+
+/**
+ * Les critères de la grille que le dépistage lit (voir `estCritereSurveilleParDepistage`).
+ * @param {Object|null} grille - la grille de référence du dépistage
+ * @returns {Array} - sous-ensemble de `grille.criteres`, dans l'ordre de la grille
+ */
+function criteresSurveillesParDepistage(grille) {
+    if (!grille || !Array.isArray(grille.criteres)) return [];
+    return grille.criteres.filter(estCritereSurveilleParDepistage);
+}
+
+/**
  * Obtient la liste des critères de la grille de référence avec leurs valeurs pour un étudiant
  * Cette fonction remplace le tableau SRPNF codé en dur par une extraction dynamique
  *
@@ -895,7 +931,8 @@ function criteresDeLaGrillePourAffichage() {
     const grille = (typeof obtenirGrilleReferenceDepistage === 'function')
         ? obtenirGrilleReferenceDepistage() : null;
     if (!grille || !Array.isArray(grille.criteres)) return [];
-    return grille.criteres
+    // #740 — pas de barre pour un critère « Aucun » : le dépistage ne le lit pas.
+    return criteresSurveillesParDepistage(grille)
         .filter(c => c && c.nom)
         .map(c => ({ nom: c.nom, cle: cleCritere(c.nom) }));
 }
@@ -913,8 +950,10 @@ function obtenirCriteresAvecValeurs(da) {
         return [];
     }
 
-    // Construire le tableau dynamiquement depuis la grille
-    return grille.criteres.map(critere => {
+    // Construire le tableau dynamiquement depuis la grille — sans les critères
+    // « Aucun » (#740) : `moyennesCriteres` ne porte pas leur clé, et `?? 0`
+    // en ferait une valeur de 0 %.
+    return criteresSurveillesParDepistage(grille).map(critere => {
         const cleNormalisee = critere.nom.toLowerCase()
             .normalize('NFD')
             .replace(/[̀-ͯ]/g, '')
@@ -1061,6 +1100,9 @@ window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatter
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
 window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
+// #740 — le seul filtre SOLO « Aucun » du dépistage.
+window.estCritereSurveilleParDepistage = estCritereSurveilleParDepistage;
+window.criteresSurveillesParDepistage = criteresSurveillesParDepistage;
 // #550 — le diagnostiqueur qui NOMME la cause quand il n'y a pas de grille.
 window.diagnostiquerGrilleReferenceDepistage = diagnostiquerGrilleReferenceDepistage;
 window.cleCritere = cleCritere;

@@ -603,9 +603,11 @@ function convertirNiveauEnScore(niveau, tableConversion) {
  *     (`tableConversionPourEvaluation`), comme le dépistage ;
  *   - sans valeur convertible : `null`, et l'appelant le DIT (jamais deviné —
  *     décision de Grégoire du 11 sept., 17 h 15).
- * ⚠ Le dépistage (`calculerMoyennesCriteres`, IPB) lit encore le NIVEAU déduit d'un
- * critère en points — c'est #739, à trancher, pas rouvert ici ; ce helper est le
- * candidat unique quand il le sera.
+ * ⮕ #739 (lot B du cadrage du 16 sept. 2026, tranché par Grégoire) : le dépistage
+ * lit ICI aussi — moyennes par critère (barres), IPB, défi spécifique, directions.
+ * Un critère à 22/30 vaut 0,73 partout sur le profil, plus 0,65 (son niveau « D »)
+ * pour le dépistage et 0,73 pour les courbes. UNE source pour ce chiffre : aucun
+ * lecteur du profil n'appelle plus `convertirNiveauEnScore` sur un critère.
  *
  * @param {Object} critere - une entrée de `evaluation.criteres[]`
  * @param {Object|null} tableConversion - table de l'évaluation (code → 0-1)
@@ -835,6 +837,103 @@ function diagnostiquerConversionNiveaux(da) {
 }
 
 /**
+ * Nom de critère normalisé pour l'appariement et les clés de moyennes :
+ * minuscules, sans accents, sans espaces. ⚠ MÊME règle que `cleCritere`
+ * (`profil-etudiant-helpers.js`), qui construit les clés côté affichage.
+ */
+function _normaliserNomCritere(nom) {
+    return String(nom || '').toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+}
+
+/**
+ * Le critère de la grille de référence qui répond à un critère d'ÉVALUATION —
+ * ou `null` si le dépistage ne le lit pas.
+ *
+ * Deux raisons de rendre `null`, et une seule est signalée :
+ *   - le nom n'est dans la grille de référence sous aucune forme (évaluation
+ *     produite avec une autre grille) : avertissement console, comme avant ;
+ *   - le critère est réglé « Aucun » au menu SOLO (#740) : silence — c'est un
+ *     réglage, pas une anomalie. La règle vit dans `estCritereSurveilleParDepistage`.
+ *
+ * L'appariement est celui que les moyennes et l'IPB faisaient chacun de leur
+ * côté : égalité, ou l'un des deux noms normalisés commence par l'autre
+ * (« francais » ↔ « francaisecrit »).
+ *
+ * @param {string} nomCritere - `critereNom` d'une entrée de `evaluation.criteres[]`
+ * @param {Object} grille - la grille de référence du dépistage
+ * @returns {Object|null}
+ */
+function trouverCritereDepistage(nomCritere, grille) {
+    if (!grille || !Array.isArray(grille.criteres)) return null;
+    const nomEval = _normaliserNomCritere(nomCritere);
+    if (!nomEval) return null;
+    const reference = grille.criteres.find(c => {
+        const nomRef = _normaliserNomCritere(c && c.nom);
+        return !!nomRef && (nomRef === nomEval || nomRef.startsWith(nomEval) || nomEval.startsWith(nomRef));
+    });
+    if (!reference) {
+        console.warn(`  ⚠️ Critère "${nomCritere}" non trouvé dans grille de référence`);
+        return null;
+    }
+    return estCritereSurveilleParDepistage(reference) ? reference : null;
+}
+
+/**
+ * Moyenne par critère surveillé, sur un lot d'évaluations. Le corps commun de
+ * `calculerMoyennesCriteres` (toutes les évaluations) et de
+ * `calculerMoyennesCriteresRecents` (les N dernières), qui l'avaient en double.
+ *
+ * Lit chaque critère par `scoreCritereEvaluation` (#739 : les points d'abord, le
+ * niveau sinon), dans l'échelle de SON évaluation (#529), et n'accumule que ce
+ * que `trouverCritereDepistage` reconnaît (#740).
+ *
+ * @param {Array} evaluations - évaluations de l'élève, déjà filtrées
+ * @param {Object} grille - grille de référence (non nulle, avec critères)
+ * @returns {Object|null} - { <cleNormalisee>: 0-1 | null }, ou null si rien n'a été lu
+ */
+function _moyennesCriteresDepistage(evaluations, grille) {
+    const cacheTables = new Map();
+    const scoresCriteres = {};
+    criteresSurveillesParDepistage(grille).forEach(c => {
+        scoresCriteres[_normaliserNomCritere(c.nom)] = [];
+    });
+
+    evaluations.forEach(evaluation => {
+        if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) {
+            console.warn(`  ⚠️ ${evaluation.productionNom}: pas de tableau criteres[], ignorée`);
+            return;
+        }
+        const table = tableConversionPourEvaluation(evaluation, cacheTables);
+        evaluation.criteres.forEach(critereSauvegarde => {
+            if (!critereSauvegarde) return;
+            const score = scoreCritereEvaluation(critereSauvegarde, table);
+            if (score === null) return;
+            const reference = trouverCritereDepistage(critereSauvegarde.critereNom, grille);
+            if (!reference) return;
+            scoresCriteres[_normaliserNomCritere(reference.nom)].push(score);
+        });
+    });
+
+    // Clés standardisées pour l'interface : « francaisecrit » → « francais »
+    const moyennes = {};
+    let aucuneDonnee = true;
+    Object.keys(scoresCriteres).forEach(cle => {
+        const scores = scoresCriteres[cle];
+        const cleStandard = cle.startsWith('francais') ? 'francais' : cle;
+        if (scores.length > 0) {
+            moyennes[cleStandard] = scores.reduce((somme, s) => somme + s, 0) / scores.length;
+            aucuneDonnee = false;
+        } else {
+            moyennes[cleStandard] = null;
+        }
+    });
+    return aucuneDonnee ? null : moyennes;
+}
+
+/**
  * Calcule les moyennes des critères SRPNF sur TOUTES les évaluations de l'étudiant
  * Utilisé pour la pratique sommative (SOM) qui considère toutes les évaluations
  * @param {string} da - Numéro DA de l'étudiant
@@ -863,95 +962,7 @@ function calculerMoyennesCriteres(da) {
         return null;
     }
 
-    // #529 — la table dépend de l'échelle de CHAQUE évaluation, pas d'une
-    // échelle globale devinée. Cache pour ne pas relire N fois la même.
-    const cacheTables = new Map();
-
-    // Initialiser accumulateurs dynamiquement selon critères de la grille
-    const scoresCriteres = {};
-    grille.criteres.forEach(c => {
-        const cleNormalisee = c.nom.toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, '');
-        scoresCriteres[cleNormalisee] = [];
-    });
-
-    // NOUVELLE APPROCHE: Lire directement depuis evaluation.criteres[]
-    // Plus fiable que de parser la rétroaction (qui peut avoir des formats variables)
-
-    evaluationsEleve.forEach(evaluation => {
-        // Vérifier si cette évaluation a un tableau criteres[]
-        if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) {
-            console.warn(`  ⚠️ ${evaluation.productionNom}: pas de tableau criteres[], ignorée`);
-            return;
-        }
-
-        // Pour chaque critère de l'évaluation
-        evaluation.criteres.forEach(critereSauvegarde => {
-            const niveauIDME = critereSauvegarde.niveauSelectionne;
-            const nomCritere = critereSauvegarde.critereNom;
-
-            // Convertir le niveau IDME en score numérique
-            const score = convertirNiveauEnScore(niveauIDME, tableConversionPourEvaluation(evaluation, cacheTables));
-
-            if (score !== null) {
-                // Trouver le critère correspondant dans la grille de référence
-                const critereReference = grille.criteres.find(c => {
-                    // Normaliser les deux noms pour comparaison insensible aux accents/espaces
-                    const nomRef = c.nom.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/\s+/g, '');
-                    const nomEval = nomCritere.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/\s+/g, '');
-
-                    // Correspondance exacte OU l'un commence par l'autre
-                    // Ex: "francais" match "francaisecrit" OU "francaisecrit" match "francais"
-                    return nomRef === nomEval ||
-                           nomRef.startsWith(nomEval) ||
-                           nomEval.startsWith(nomRef);
-                });
-
-                if (critereReference) {
-                    const cleNormalisee = critereReference.nom.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/\s+/g, '');
-                    scoresCriteres[cleNormalisee].push(score);
-                } else {
-                    console.warn(`  ⚠️ Critère "${nomCritere}" non trouvé dans grille de référence`);
-                }
-            }
-        });
-    });
-
-
-    // Calculer les moyennes avec clés standardisées
-    const moyennes = {};
-    let aucuneDonnee = true;
-
-    Object.keys(scoresCriteres).forEach(cle => {
-        const scores = scoresCriteres[cle];
-
-        // Standardiser la clé pour compatibilité avec l'interface
-        // "francaisecrit" → "francais" (pour éviter NaN)
-        let cleStandard = cle;
-        if (cle.startsWith('francais')) {
-            cleStandard = 'francais';
-        }
-
-        if (scores.length > 0) {
-            moyennes[cleStandard] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-            aucuneDonnee = false;
-        } else {
-            moyennes[cleStandard] = null;
-        }
-    });
-
-    return aucuneDonnee ? null : moyennes;
+    return _moyennesCriteresDepistage(evaluationsEleve, grille);
 }
 
 // G2-b (#436) : fenêtre « artefacts récents » du profil. 3 cours × 2 artefacts.
@@ -1014,94 +1025,7 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
         return null;
     }
 
-    // #529 — une table PAR évaluation (chacune porte son `echelleId`).
-    const cacheTables = new Map();
-
-    // Initialiser accumulateurs dynamiquement selon critères de la grille
-    const scoresCriteres = {};
-    grille.criteres.forEach(c => {
-        const cleNormalisee = c.nom.toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, '');
-        scoresCriteres[cleNormalisee] = [];
-    });
-
-    // NOUVELLE APPROCHE: Lire directement depuis evaluation.criteres[]
-    // Plus fiable que de parser la rétroaction (qui peut avoir des formats variables)
-
-    derniersArtefacts.forEach(evaluation => {
-        // Vérifier si cette évaluation a un tableau criteres[]
-        if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) {
-            console.warn(`  ⚠️ ${evaluation.productionNom}: pas de tableau criteres[], ignorée`);
-            return;
-        }
-
-        // Pour chaque critère de l'évaluation
-        evaluation.criteres.forEach(critereSauvegarde => {
-            const niveauIDME = critereSauvegarde.niveauSelectionne;
-            const nomCritere = critereSauvegarde.critereNom;
-
-            // Convertir le niveau IDME en score numérique
-            const score = convertirNiveauEnScore(niveauIDME, tableConversionPourEvaluation(evaluation, cacheTables));
-
-            if (score !== null) {
-                // Trouver le critère correspondant dans la grille de référence
-                const critereReference = grille.criteres.find(c => {
-                    // Normaliser les deux noms pour comparaison insensible aux accents/espaces
-                    const nomRef = c.nom.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/\s+/g, '');
-                    const nomEval = nomCritere.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/\s+/g, '');
-
-                    // Correspondance exacte OU l'un commence par l'autre
-                    // Ex: "francais" match "francaisecrit" OU "francaisecrit" match "francais"
-                    return nomRef === nomEval ||
-                           nomRef.startsWith(nomEval) ||
-                           nomEval.startsWith(nomRef);
-                });
-
-                if (critereReference) {
-                    const cleNormalisee = critereReference.nom.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/\s+/g, '');
-                    scoresCriteres[cleNormalisee].push(score);
-                } else {
-                    console.warn(`  ⚠️ Critère "${nomCritere}" non trouvé dans grille de référence`);
-                }
-            }
-        });
-    });
-
-
-    // Calculer les moyennes avec clés standardisées
-    const moyennes = {};
-    let aucuneDonnee = true;
-
-    Object.keys(scoresCriteres).forEach(cle => {
-        const scores = scoresCriteres[cle];
-
-        // Standardiser la clé en minuscules (cohérent avec calculerMoyennesCriteres)
-        // "francaisecrit" → "francais" (pour éviter NaN)
-        let cleStandard = cle;
-        if (cle.startsWith('francais')) {
-            cleStandard = 'francais';
-        }
-
-        if (scores.length > 0) {
-            moyennes[cleStandard] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-            aucuneDonnee = false;
-        } else {
-            moyennes[cleStandard] = null;
-        }
-    });
-
-    return aucuneDonnee ? null : moyennes;
+    return _moyennesCriteresDepistage(derniersArtefacts, grille);
 }
 
 // [Phase 6] calculerIndiceBlocage() supprimé — remplacé par calculerIPB() + diagnostiquerSuiviApprentissage()
@@ -1135,7 +1059,8 @@ function _calculerScoreMultiArtefactIPB(ev, nomsMulti, cacheTables) {
     var tableConversion = tableConversionPourEvaluation(ev, cacheTables);
     var scores = {};
     ev.criteres.forEach(function (cs) {
-        var score = convertirNiveauEnScore(cs.niveauSelectionne, tableConversion);
+        if (!cs) return;
+        var score = scoreCritereEvaluation(cs, tableConversion);   // #739 — les points d'abord
         if (score === null) return;
         var nomEval = _normaliserNomCritereIPB(cs.critereNom);
         nomsMulti.forEach(function (cm) {
@@ -1214,8 +1139,9 @@ function calculerIPB(da) {
     var grille = obtenirGrilleReferenceDepistage();
     if (!grille || !grille.criteres) return null;
 
-    // Filtrer les critères multistructurels (défaut si pas de tag)
-    var criteresMulti = grille.criteres.filter(function (c) {
+    // Filtrer les critères multistructurels (défaut si pas de tag) — parmi ceux que
+    // le dépistage lit (#740 : « aucun » est déjà sorti par la liste partagée).
+    var criteresMulti = criteresSurveillesParDepistage(grille).filter(function (c) {
         return (c.niveauSOLO || 'multistructurel') === 'multistructurel';
     });
     if (criteresMulti.length === 0) return null;
@@ -1374,8 +1300,10 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
         return { forces: [], defis: [], principaleForce: null, principalDefi: null };
     }
 
-    // Construire dynamiquement le tableau des critères depuis la grille
-    const criteres = grille.criteres.map(c => {
+    // Construire dynamiquement le tableau des critères depuis la grille — ceux que
+    // le dépistage lit (#740). Les moyennes ne portent pas la clé d'un critère
+    // « Aucun » ; la liste partagée l'exclut même si un appelant en fournit une.
+    const criteres = criteresSurveillesParDepistage(grille).map(c => {
         // Normaliser le nom du critère pour trouver sa clé dans moyennes
         // Ex: "Structure" → "structure", "Plausibilité" → "plausibilite"
         const cleNormalisee = c.nom.toLowerCase()
@@ -1718,6 +1646,11 @@ function identifierDefiSpecifique(da) {
     // et le calcul de l'IPB dans ce même fichier : on converge, on n'invente pas.
     const cacheTables = new Map();
 
+    // #740 — le défi spécifique lit les mêmes critères que les moyennes et l'IPB :
+    // ceux de la grille de référence, sans les « Aucun ». Sans grille configurée,
+    // il n'y a rien pour reconnaître un critère : tout est lu, comme avant.
+    const grille = obtenirGrilleReferenceDepistage();
+
     // Accumulation par critereId — identifiant STABLE, contrairement au nom qui
     // peut être renommé d'une grille à l'autre. Le nom n'est gardé que pour
     // l'affichage, et c'est le dernier vu qui l'emporte (le plus récent, les
@@ -1729,7 +1662,8 @@ function identifierDefiSpecifique(da) {
         const table = tableConversionPourEvaluation(evaluation, cacheTables);
         evaluation.criteres.forEach(critereSauvegarde => {
             if (!critereSauvegarde) return;
-            const score = convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, table);
+            if (grille && !trouverCritereDepistage(critereSauvegarde.critereNom, grille)) return;
+            const score = scoreCritereEvaluation(critereSauvegarde, table);   // #739
             if (score === null) return;
             const id = critereSauvegarde.critereId || critereSauvegarde.critereNom;
             if (!id) return;
@@ -2225,6 +2159,7 @@ window.convertirNiveauEnScore = convertirNiveauEnScore;
 // trajectoires par habileté) : la même conversion que le dépistage, par évaluation.
 window.tableConversionPourEvaluation = tableConversionPourEvaluation;
 window.scoreCritereEvaluation = scoreCritereEvaluation;
+window.trouverCritereDepistage = trouverCritereDepistage;   // #740 — l'appariement partagé des lecteurs
 // #542 A3 — consommée par `profil-etudiant-sections-affichage.js` (carte RàI).
 window.diagnostiquerConversionNiveaux = diagnostiquerConversionNiveaux;
 window.calculerMoyennesCriteres = calculerMoyennesCriteres;
