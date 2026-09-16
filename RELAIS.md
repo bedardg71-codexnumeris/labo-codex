@@ -7,7 +7,14 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 9 H 30 (Toronto) : 1.142.9 (#882) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 10 H 10 (Toronto) : 1.142.10 (#883) SUR `main`
+
+> **1.142.9 est en ligne** (`82e7549a`). **1.142.10** porte **#883** : `calculerDetailsNoteFinale` (profil + PDF) ne filtrait pas les
+> productions diagnostiques (#790, porte 1 manquante hors `js/pratiques/`) ; ligne « Sélection » du PDF réécrite (« 1 retenue sur 4
+> possibles », mots de Grégoire). Sonde versée : `scripts/diagnostic-evaluees-vs-retenues.js`. **En suspens** : inscrire ou non le calcul du
+> profil qui montre les % par travail malgré « note différée » (question posée à Grégoire, sans réponse).
+
+## (précédent) 16 SEPT. 2026, ≈ 9 H 30 (Toronto) : 1.142.9 (#882)
 
 > **1.142.8 est en ligne** (`8a553bc6`). **1.142.9** porte **#882** (rapport de 9 h 09) : « Niveau de performance » ignoré par le PDF
 > de synthèse ET jamais écrit par l'auto-save. Décision de Grégoire : bloc « Note provisoire » gardé, niveaux seulement. Sentinelle

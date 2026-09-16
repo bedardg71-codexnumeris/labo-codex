@@ -732,8 +732,16 @@
         // ----- Colonne gauche : sélection (les N meilleures) + calcul -----
         const badgePondSel = (estHybride && note.ponderationSelection != null) ? ` (${esc(note.ponderationSelection)} %)` : '';
         const evaluesSel = (note.nombreEvaluesSelection != null) ? note.nombreEvaluesSelection : nbSelection;
+        // #883 — MOTS ARRÊTÉS PAR GRÉGOIRE (16 sept. 2026) : « 1 retenue sur 4 possibles », et
+        // « , parmi N évaluées » seulement quand il y en a plus que de retenues. L'ancienne tournure
+        // (« les 1 meilleures sur 2 évaluées ») faisait lire le nombre retenu comme le nombre de la pratique.
+        const nARetenir = note.nombreARetenirSelection;
+        const libelleRetenues = (typeof nARetenir === 'number')
+            ? `${esc(nbSelection)} retenue${nbSelection > 1 ? 's' : ''} sur ${esc(nARetenir)} possible${nARetenir > 1 ? 's' : ''}`
+              + (evaluesSel > nbSelection ? `, parmi ${esc(evaluesSel)} évaluées` : '')
+            : `les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées`;
         const libelleSelection = estHybride
-            ? `Sélection (les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées)${badgePondSel}`
+            ? `Sélection (${libelleRetenues})${badgePondSel}`
             : `Voici les ${esc(nbSelection)} meilleurs artefacts que tu as produits`;
         const itemsSelection = note.selection.map(art => {
             const marqueur = formaterNiveauNote(art.niveau, art.note);

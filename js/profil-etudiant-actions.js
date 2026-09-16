@@ -414,7 +414,16 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     let methodeSelection = cfg.methodeSelection;
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = obtenirDonneesSelonMode('productions') || [];
+    // #883 (16 sept. 2026) — LA PORTE 1 DE #790 MANQUAIT ICI. Les familles de `js/pratiques/`
+    // retirent les productions diagnostiques ; ce second système (profil, PDF de l'élève)
+    // les lisait toutes : un « Portrait de lecteur » diagnostique comptait dans « N évaluées »
+    // et réduisait le déficit du plafonnement (mesuré sur A2026 : 28 élèves sur 28), et
+    // entrait dans la note en sélection non hybride. Filtré ici, il sort du pool d'artefacts,
+    // donc de tout ce qui en découle.
+    const productionsBrutes = obtenirDonneesSelonMode('productions') || [];
+    const productions = (typeof window.ProductionDiagnostique !== 'undefined')
+        ? window.ProductionDiagnostique.filtrerProductions(productionsBrutes)
+        : productionsBrutes;
 
     const productionPortfolio = productions.find(p => p.type === 'portfolio');
     const productionTerminale = window.identifierProductionTerminale(productions);
