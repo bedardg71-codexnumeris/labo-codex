@@ -65,10 +65,42 @@
     }
 
     /**
+     * #891 — Met UN fichier dans une archive : l'original, puis sa version
+     * annotée s'il en a une et si on la demande.
+     *
+     * Un blob absent lève « Blob introuvable » (le mot de l'export PDF,
+     * `travaux-export-pdf.js`) au lieu d'être sauté en silence : l'appelant
+     * l'attrape, le nomme dans son bilan (#565) et passe au fichier suivant.
+     * C'est la seule fonction qui écrit un fichier de copie dans un ZIP — les
+     * trois exports de l'écran « Exporter et archiver » et celui du profil
+     * passent ici, donc un fichier illisible y est traité de la même façon.
+     *
+     * @param {Object} conteneur - `JSZip` ou un `zip.folder(...)`
+     * @param {Object} fichier - métadonnées du fichier
+     * @param {{original: string, annote: (string|null)}} chemins - chemins dans
+     *   l'archive ; `annote` à `null` pour ne pas joindre la version annotée
+     */
+    async function _ajouterFichierAuZip(conteneur, fichier, chemins) {
+        const blob = await travauxStockage.recupererBlob(fichier.id);
+        if (!blob) throw new Error('Blob introuvable');
+        conteneur.file(chemins.original, blob);
+
+        if (chemins.annote) {
+            const annote = await genererFichierAnnote(fichier);
+            if (annote) conteneur.file(chemins.annote, annote);
+        }
+    }
+
+    /**
      * Genere un ZIP contenant les travaux d'un etudiant
+     *
+     * #891 : un fichier illisible ne fait plus perdre l'archive entière (même
+     * modèle que #565 sur `exporterSemestre`). `exportes` liste les ids des
+     * fichiers RÉELLEMENT mis dans l'archive : l'appelant ne marque que ceux-là.
+     *
      * @param {string} da - DA de l'etudiant
      * @param {Object} options - Options d'export
-     * @returns {Promise<Blob>} Le blob ZIP
+     * @returns {Promise<{blob: Blob, echecs: string[], nbFichiers: number, exportes: string[]}>}
      */
     async function exporterParEtudiant(da, options = {}) {
         if (typeof JSZip === 'undefined') {
@@ -85,21 +117,19 @@
             : _assainirSegmentChemin(`etudiant_${da}`);
 
         const dossier = zip.folder(nomDossier);
+        const echecs = [];
+        const exportes = [];
 
-        // Ajouter les fichiers originaux
         for (const fichier of fichiers) {
-            const blob = await travauxStockage.recupererBlob(fichier.id);
-            if (blob) {
-                dossier.file(`originaux/${fichier.nomFichier}`, blob);
-            }
-
-            // Ajouter les annotations aplaties si demande
-            if (options.inclureAnnotes) {
-                const annote = await genererFichierAnnote(fichier);
-                if (annote) {
-                    const nomAnnote = _nomVersionAnnotee(fichier.nomFichier);
-                    dossier.file(`annotes/${nomAnnote}`, annote);
-                }
+            try {
+                await _ajouterFichierAuZip(dossier, fichier, {
+                    original: `originaux/${fichier.nomFichier}`,
+                    annote: options.inclureAnnotes ? `annotes/${_nomVersionAnnotee(fichier.nomFichier)}` : null
+                });
+                exportes.push(fichier.id);
+            } catch (e) {
+                console.error('[Travaux-Archivage] Export étudiant — échec sur ' + fichier.nomFichier + ' :', e);
+                echecs.push(`${nomDossier} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
             }
         }
 
@@ -114,73 +144,21 @@
             }
         }
 
-        return await zip.generateAsync({ type: 'blob' });
-    }
-
-    /**
-     * Genere un ZIP contenant les travaux d'une production
-     * @param {string} productionId - ID de la production
-     * @param {Object} options - Options d'export
-     * @returns {Promise<Blob>} Le blob ZIP
-     */
-    async function exporterParProduction(productionId, options = {}) {
-        if (typeof JSZip === 'undefined') {
-            throw new Error('JSZip non disponible');
-        }
-
-        const zip = new JSZip();
-        const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
-        const productions = obtenirDonneesSelonMode('productions');
-        const production = productions.find(p => p.id === productionId);
-
-        const nomDossier = production
-            ? (production.titre || production.nom || productionId).replace(/[^a-zA-Z0-9]/g, '_')
-            : productionId;
-
-        const dossier = zip.folder(nomDossier);
-
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-
-        for (const fichier of fichiers) {
-            const blob = await travauxStockage.recupererBlob(fichier.id);
-            if (!blob) continue;
-
-            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
-            const sousDossier = etudiant
-                ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`)
-                : _assainirSegmentChemin(fichier.etudiantDA || 'non-associe');
-
-            dossier.file(`${sousDossier}/${fichier.nomFichier}`, blob);
-
-            if (options.inclureAnnotes) {
-                const annote = await genererFichierAnnote(fichier);
-                if (annote) {
-                    const nomAnnote = _nomVersionAnnotee(fichier.nomFichier);
-                    dossier.file(`${sousDossier}/${nomAnnote}`, annote);
-                }
-            }
-        }
-
-        // Ajouter les evaluations si demande
-        if (options.inclureEvaluations) {
-            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            const evalsProd = evaluations.filter(e => e.productionId === productionId);
-
-            if (evalsProd.length > 0) {
-                const evalJson = JSON.stringify(evalsProd, null, 2);
-                dossier.file('evaluations.json', evalJson);
-            }
-        }
-
-        return await zip.generateAsync({ type: 'blob' });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        return { blob, echecs, nbFichiers: fichiers.length, exportes };
     }
 
     /**
      * Genere un ZIP filtre par etudiant, production, ou les deux
      * Inclut toujours : productions en PDF + evaluations en JSON
+     *
+     * #891 : un fichier illisible ne fait plus perdre l'archive entière (même
+     * modèle que #565 sur `exporterSemestre`). `exportes` liste les ids des
+     * fichiers RÉELLEMENT mis dans l'archive : l'appelant ne marque que ceux-là.
+     *
      * @param {string|null} da - DA de l'etudiant (null = tous)
      * @param {string|null} productionId - ID de la production (null = toutes)
-     * @returns {Promise<Blob>} Le blob ZIP
+     * @returns {Promise<{blob: Blob, echecs: string[], nbFichiers: number, exportes: string[]}>}
      */
     async function exporterTravaux(da, productionId) {
         if (typeof JSZip === 'undefined') {
@@ -202,23 +180,27 @@
         }
 
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const echecs = [];
+        const exportes = [];
 
         for (const fichier of fichiers) {
-            const blob = await travauxStockage.recupererBlob(fichier.id);
-            if (!blob) continue;
-
+            // Identité résolue AVANT le try : le bilan doit pouvoir nommer
+            // l'élève concerné, pas seulement compter.
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
             const sousDossier = etudiant
                 ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`)
                 : _assainirSegmentChemin(fichier.etudiantDA || 'non-associe');
 
-            zip.file(`${sousDossier}/${fichier.nomFichier}`, blob);
-
-            // Toujours inclure les annotations aplaties
-            const annote = await genererFichierAnnote(fichier);
-            if (annote) {
-                const nomAnnote = _nomVersionAnnotee(fichier.nomFichier);
-                zip.file(`${sousDossier}/${nomAnnote}`, annote);
+            try {
+                // Toujours inclure les annotations aplaties
+                await _ajouterFichierAuZip(zip, fichier, {
+                    original: `${sousDossier}/${fichier.nomFichier}`,
+                    annote: `${sousDossier}/${_nomVersionAnnotee(fichier.nomFichier)}`
+                });
+                exportes.push(fichier.id);
+            } catch (e) {
+                console.error('[Travaux-Archivage] Export — échec sur ' + fichier.nomFichier + ' :', e);
+                echecs.push(`${sousDossier} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
             }
         }
 
@@ -232,7 +214,8 @@
             zip.file('evaluations.json', JSON.stringify(evalsFiltre, null, 2));
         }
 
-        return await zip.generateAsync({ type: 'blob' });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        return { blob, echecs, nbFichiers: fichiers.length, exportes };
     }
 
     /**
@@ -280,22 +263,18 @@
                 ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`)
                 : _assainirSegmentChemin(fichier.etudiantDA || 'non-associe');
 
+            // #891 — même assainissement que les noms d'élèves (#572) : les
+            // accents restent (« Écrit 1 » ne devient plus « _crit_1 »).
             const nomProduction = production
-                ? (production.titre || production.nom || '').replace(/[^a-zA-Z0-9]/g, '_')
+                ? _assainirSegmentChemin(production.titre || production.nom || '')
                 : 'sans-production';
 
             try {
-                const blob = await travauxStockage.recupererBlob(fichier.id);
-                if (blob) {
-                    zip.file(`${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`, blob);
-                }
-
                 // Toujours inclure les annotations aplaties
-                const annote = await genererFichierAnnote(fichier);
-                if (annote) {
-                    const nomAnnote = _nomVersionAnnotee(fichier.nomFichier);
-                    zip.file(`${nomEtudiant}/${nomProduction}/${nomAnnote}`, annote);
-                }
+                await _ajouterFichierAuZip(zip, fichier, {
+                    original: `${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`,
+                    annote: `${nomEtudiant}/${nomProduction}/${_nomVersionAnnotee(fichier.nomFichier)}`
+                });
             } catch (e) {
                 console.error('[Travaux-Archivage] Export trimestre — échec sur ' + fichier.nomFichier + ' :', e);
                 echecs.push(`${nomEtudiant} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
@@ -338,20 +317,6 @@
         return { blob, echecs, nbFichiers: fichiers.length };
     }
 
-    /**
-     * Genere des PDFs annotes+synthese pour televersement Lea
-     * Seuls les fichiers ayant une evaluation completee sont inclus
-     * @param {string} productionId - ID de la production
-     * @param {string|null} da - DA d'un etudiant specifique (null = tous)
-     * @param {boolean} reprisesSeulement - N'exporter que les reprises
-     * @param {Function} onProgression - Callback(traites, total)
-     * @returns {Promise<{blobs: Array<{blob: Blob, nom: string}>, nomProd: string,
-     *   echecs: string[], sansSynthese: string[]}>} Les PDFs generes. #565 :
-     *   `echecs` nomme les étudiants dont le PDF n'a PAS pu être produit (le lot
-     *   continue), `sansSynthese` ceux dont le PDF part sans sa page de
-     *   rétroaction — livrable, mais incomplet, et c'est ce qui partait en
-     *   silence sur Léa auparavant.
-     */
     /**
      * #566 — LA SÉLECTION DE L'EXPORT LÉA, EN UN SEUL ENDROIT.
      *
@@ -410,6 +375,20 @@
         return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier };
     }
 
+    /**
+     * Genere des PDFs annotes+synthese pour televersement Lea
+     * Seuls les fichiers ayant une evaluation completee sont inclus
+     * @param {string} productionId - ID de la production
+     * @param {string|null} da - DA d'un etudiant specifique (null = tous)
+     * @param {boolean} reprisesSeulement - N'exporter que les reprises
+     * @param {Function} onProgression - Callback(traites, total)
+     * @returns {Promise<{blobs: Array<{blob: Blob, nom: string}>, nomProd: string,
+     *   echecs: string[], sansSynthese: string[]}>} Les PDFs generes. #565 :
+     *   `echecs` nomme les étudiants dont le PDF n'a PAS pu être produit (le lot
+     *   continue), `sansSynthese` ceux dont le PDF part sans sa page de
+     *   rétroaction — livrable, mais incomplet, et c'est ce qui partait en
+     *   silence sur Léa auparavant.
+     */
     async function exporterPourLea(productionId, da, reprisesSeulement, onProgression) {
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const productions = obtenirDonneesSelonMode('productions');
@@ -579,45 +558,22 @@
             window.majProgression(20, 'Compression de l\'archive…');
         }
         try {
-            const zip = await exporterParEtudiant(da, options);
+            const { blob, echecs, nbFichiers, exportes } = await exporterParEtudiant(da, options);
             const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             const etudiant = etudiants.find(e => e.da === da);
             // #572 — assaini aussi ici : ce nom devient celui du FICHIER
             // téléchargé, où un « / » casse l'enregistrement.
             const nom = _assainirSegmentChemin(etudiant ? `${etudiant.nom}_${etudiant.prenom}` : da);
-            telechargerBlob(zip, `travaux_${nom}.zip`);
+            // L'archive part MÊME si des fichiers ont échoué (#565, #891).
+            telechargerBlob(blob, `travaux_${nom}.zip`);
 
-            // Marquer tous les fichiers de cet etudiant comme exportes
-            const fichiers = travauxStockage.obtenirFichiersEtudiant(da);
-            fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
+            // #891 — marquer « exporté » SEULEMENT ce qui est réellement dans
+            // l'archive : un fichier sauté n'a pas été exporté, et ce statut
+            // fait taire la détection de blob manquant à l'import d'un codex.
+            exportes.forEach(id => travauxStockage.marquerExporte(id));
+            _afficherBilanExport(exportes.length, nbFichiers, echecs);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export etudiant:', e);
-            alert('L\'export a échoué : ' + e.message);
-        } finally {
-            if (_hasProg) window.masquerProgression();
-        }
-    }
-
-    /**
-     * Lance l'export par production et telecharge
-     * @param {string} productionId - ID de la production
-     * @param {Object} options - Options
-     */
-    async function lancerExportProduction(productionId, options = {}) {
-        const _hasProg = typeof window.afficherProgression === 'function';
-        if (_hasProg) {
-            window.afficherProgression('Export des travaux');
-            window.majProgression(20, 'Compression de l\'archive…');
-        }
-        try {
-            const zip = await exporterParProduction(productionId, options);
-            telechargerBlob(zip, `travaux_production_${productionId}.zip`);
-
-            // Marquer tous les fichiers de cette production comme exportes
-            const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
-            fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
-        } catch (e) {
-            console.error('[Travaux-Archivage] Erreur export production:', e);
             alert('L\'export a échoué : ' + e.message);
         } finally {
             if (_hasProg) window.masquerProgression();
@@ -636,28 +592,30 @@
             window.majProgression(20, 'Compression de l\'archive…');
         }
         try {
-            const zip = await exporterTravaux(da, productionId);
+            const { blob, echecs, nbFichiers, exportes } = await exporterTravaux(da, productionId);
 
-            // Nom du fichier selon le filtre
+            // Nom du fichier selon le filtre. #891 — assaini comme dans
+            // `lancerExportEtudiant` (#572) : ce nom devient celui du FICHIER
+            // téléchargé, où un « / » casse l'enregistrement ; les accents restent.
             let nomZip = 'travaux';
             if (da) {
                 const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
                 const etudiant = etudiants.find(e => e.da === da);
-                nomZip += '_' + (etudiant ? etudiant.nom + '_' + etudiant.prenom : da);
+                nomZip += '_' + _assainirSegmentChemin(etudiant ? `${etudiant.nom}_${etudiant.prenom}` : da);
             }
             if (productionId) {
                 const productions = obtenirDonneesSelonMode('productions');
                 const prod = productions.find(p => p.id === productionId);
-                const titreProd = (prod?.titre || prod?.nom || productionId).replace(/[^a-zA-Z0-9]/g, '_');
-                nomZip += '_' + titreProd;
+                nomZip += '_' + _assainirSegmentChemin(prod?.titre || prod?.nom || productionId);
             }
-            telechargerBlob(zip, nomZip + '.zip');
+            // L'archive part MÊME si des fichiers ont échoué (#565, #891).
+            telechargerBlob(blob, nomZip + '.zip');
 
-            // Marquer les fichiers comme exportes
-            let fichiers = travauxStockage.obtenirFichiersGroupeActif();
-            if (da) fichiers = fichiers.filter(f => f.etudiantDA === da);
-            if (productionId) fichiers = fichiers.filter(f => f.productionId === productionId);
-            fichiers.forEach(f => travauxStockage.marquerExporte(f.id));
+            // #891 — marquer « exporté » SEULEMENT ce qui est réellement dans
+            // l'archive : un fichier sauté n'a pas été exporté, et ce statut
+            // fait taire la détection de blob manquant à l'import d'un codex.
+            exportes.forEach(id => travauxStockage.marquerExporte(id));
+            _afficherBilanExport(exportes.length, nbFichiers, echecs);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export:', e);
             alert('L\'export a échoué : ' + e.message);
@@ -801,43 +759,19 @@
     }
 
     /* ===============================
-       NETTOYAGE POST-ARCHIVAGE
-       =============================== */
-
-    /**
-     * Supprime les fichiers d'une production apres archivage
-     * @param {string} productionId - ID de la production
-     * @returns {Promise<number>} Nombre de fichiers supprimes
-     */
-    async function nettoyerProduction(productionId) {
-        const fichiers = travauxStockage.obtenirFichiersProduction(productionId);
-        let supprimes = 0;
-
-        for (const fichier of fichiers) {
-            await travauxStockage.supprimerFichierTravail(fichier.id);
-            supprimes++;
-        }
-
-        return supprimes;
-    }
-
-    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
     window.travauxArchivage = {
         exporterParEtudiant: exporterParEtudiant,
-        exporterParProduction: exporterParProduction,
         exporterTravaux: exporterTravaux,
         exporterSemestre: exporterSemestre,
         exporterPourLea: exporterPourLea,
         lancerExport: lancerExport,
         lancerExportEtudiant: lancerExportEtudiant,
-        lancerExportProduction: lancerExportProduction,
         lancerExportSemestre: lancerExportSemestre,
         lancerExportLea: lancerExportLea,
         selectionnerEvaluationsLea: selectionnerEvaluationsLea,   // #566 — lue par le compteur de l'écran
-        nettoyerProduction: nettoyerProduction,
         telechargerBlob: telechargerBlob,
         // #572 — exposés pour la sentinelle : deux fonctions pures dont les cas
         // limites (nom contenant « / », fichier sans extension) ne sont pas
