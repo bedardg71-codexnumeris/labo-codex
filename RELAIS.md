@@ -7,7 +7,18 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 13 H 45 (Toronto) : 1.142.14 (#889) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 15 H 35 (Toronto) : 1.142.15 (#651, #700) SUR `main`
+
+> **1.142.15** porte **#651** (`b6773bdd`) : « Annoter » depuis la liste, après un passage en mode Évaluer ET un détour hors
+> d'Évaluations, ouvrait la copie sans la palette d'outils — la réinitialisation générale remettait le mode à « annoter » sans
+> rendre les palettes ; la branche « mode annotation par défaut » d'`ouvrirFichier` les rend. La cause écrite dans la fiche était
+> fausse (mesuré). Porte `liste-651-…` (3 essais). Et **#700** (`8ce8a3ad`) : retirer tous les codes d'erreur remet « Nombre
+> d'erreurs » à 0 si le champ contient encore le total écrit par les annotations de cette copie ; saisie manuelle jamais écrasée.
+> Porte `erreurs-700-…` (4 essais). Stock #700 : les évaluations enregistrées avec un compte fantôme le gardent. Stock #651 : aucun.
+> « Nouvelles » : deux textes validés par Grégoire. Inscrit : **#890** (`_resterEnModeAnnoter` lu sans être posé). Dernier ID : #890.
+> Point 2 de la consigne (vignette #761) sorti du lot, non inscrit. Poussée après verdict Playwright local, Cowork fermé.
+
+## (précédent) 16 SEPT. 2026, ≈ 13 H 45 (Toronto) : 1.142.14 (#889) SUR `main`
 
 > **1.142.14** (`8df588d9`) porte **#889** (rapport de Grégoire, 13 h 10) : sous l'outil Texte, cliquer sur un texte existant créait
 > un 2e bloc par-dessus ; `onPointerDown` (`js/travaux-annotation.js`) l'ouvre maintenant par `editerTexte`, le clic dans le vide crée
