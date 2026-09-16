@@ -18,6 +18,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const DA = '2000001';
@@ -42,11 +43,12 @@ function monterRapport(indices) {
         // La source du profil et de la Liste, telle que le profil la lit.
         calculerTousLesIndices: () => indices,
         obtenirDetailsAssiduite: () => ({ periodesPresentes: 20, periodesOffertes: 20, nombreSeances: 10, absences: [] }),
-        // Les règles partagées, telles que les modules réels les exportent (registre #706 ; helpers).
-        evaluationEntreDansLaNote: (e) => !!e && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined && e.verrouillee !== false && e.ponderationCouverte !== 0,
+        // Les règles partagées, telles que les modules réels les exportent (helpers ; le registre #706 est posé plus bas, en VRAI).
         obtenirIdsProductionsEvaluables: (productions) => productions.filter(p => p.type !== 'portfolio').map(p => p.id),
         calculerEtStockerIndicesCP() {}, estModeeLectureSeule: () => false, notifications: { succes() {}, erreur() {} }, alert() {} };
     const win = { addEventListener() {}, removeEventListener() {} };
+    chargerPredicatsCopie(win);                                        // window.evaluationNonRemise (lot A)
+    globaux.evaluationEntreDansLaNote = win.evaluationEntreDansLaNote;   // le rapport l'appelle par son nom nu
     chargerScript('js/profil-etudiant-rapport.js', globaux, win);
     return win;
 }

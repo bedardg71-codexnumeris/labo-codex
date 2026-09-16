@@ -347,7 +347,7 @@ class PratiquePANStandards {
         const evaluationsEleve = evaluationsCache.filter(e => {
             if (e.etudiantDA !== da) return false;
             if (!artefactsIds.includes(e.productionId)) return false;
-            if (e.statutRemise === 'non-remis') return false;
+            if (window.evaluationNonRemise(e)) return false;         // lot A (16 sept. 2026) : « non-recu » aussi
             if (!window.evaluationEntreDansLaNote(e)) return false;   // #706 : même règle que la note du cours
 
             // ✅ NOUVEAU (Beta 94): Filtrer par dateEcheance de la production
@@ -570,15 +570,14 @@ class PratiquePANStandards {
             return null;
         }
 
-        // 2. Compter combien CET ÉTUDIANT a remis (évaluation avec note existante)
+        // 2. Compter combien CET ÉTUDIANT a remis — lot A du 16 sept. 2026 (#737, #738) : une copie
+        // qui COMPTE (enregistrée, règle unique #706) et qui n'est pas NON REMISE (les deux chaînes).
         const travauxRemis = travauxAssignes.filter(travail => {
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === travail.id &&
-                e.statutRemise !== 'non-remis' &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null &&
-                e.noteFinale !== undefined
+                window.evaluationEntreDansLaNote(e) &&
+                !window.evaluationNonRemise(e)
             );
         });
 
@@ -1103,9 +1102,7 @@ class PratiquePANStandards {
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsIds.includes(e.productionId) &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null &&
-            e.noteFinale !== undefined
+            window.evaluationEntreDansLaNote(e)   // #737 (lot A, 16 sept. 2026) : un brouillon ne compte nulle part
         );
 
         if (evaluationsEleve.length === 0) {

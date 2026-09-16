@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 // SENTINELLE #552 · #535 · #537 — LA CIBLE D'INTERVENTION NE VIENT PLUS NI DE LA
 // MOYENNE EN LANGUE, NI DU NOM D'UN CRITÈRE, NI D'UN SEUIL ÉCRIT DANS LE CODE.
@@ -172,6 +173,7 @@ beforeAll(() => {
     // ré-injection, le test échoue en ReferenceError sur la PREMIÈRE d'entre
     // elles et n'atteint jamais ce qu'il mesure.
     chargerScript('js/profil-etudiant-calculs.js', { ...stubs, ...win }, win);
+    chargerPredicatsCopie(win);
 });
 
 describe('#552 · la cible d\'intervention ne vient plus du critère de langue', () => {

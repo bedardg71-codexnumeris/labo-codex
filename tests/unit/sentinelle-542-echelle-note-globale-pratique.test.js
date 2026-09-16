@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 // SENTINELLE #542 lot 3, pas 3b — C'EST LA PRATIQUE QUI DIT DANS QUOI SA NOTE
 // GLOBALE SE LIT. LE DÉPISTAGE NE LE DÉDUIT PLUS.
@@ -44,7 +45,7 @@ const ECHELLE_A = {
 const ECHELLE_B = { ...ECHELLE_A, id: 'ECH_B', nom: 'Échelle B' };
 
 function chargerCalculs() {
-    return chargerScript('js/profil-etudiant-calculs.js', {
+    return chargerPredicatsCopie(chargerScript('js/profil-etudiant-calculs.js', {
         db: {
             get: async () => null,
             getSync: (k, d) => (k === 'test_echellesTemplates' ? echellesEnBase : (d !== undefined ? d : null)),
@@ -61,11 +62,12 @@ function chargerCalculs() {
         estEtudiantExclu: () => false, filtrerEtudiantsParMode: (a) => a,
         estModeeLectureSeule: () => false, genererSeancesCompletes: () => {},
         calculerEtSauvegarderIndicesAssiduite: () => {}, calculerEtStockerIndicesCP: () => {}
-    });
+    }));
 }
 
+// Lot A (#718, 16 sept. 2026) : une copie compte quand elle est ENREGISTRÉE (noteFinale posée), texte ou pas.
 const evalDe = (echelleId) => ({
-    etudiantDA: '1234567', retroactionFinale: 'texte', echelleId, criteres: []
+    etudiantDA: '1234567', noteFinale: 70, retroactionFinale: 'texte', echelleId, criteres: []
 });
 
 beforeEach(() => {

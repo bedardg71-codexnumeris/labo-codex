@@ -14,6 +14,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 const ASSIDU = '2000001', ABSENT = '2000002', SILENCE = '2000003', AUTRE = '2000004';
 const PRODUCTIONS = [
@@ -30,6 +31,7 @@ function monter() {
     const store = { test_evaluationsSauvegardees: EVALUATIONS, test_productions: PRODUCTIONS, infoCours: { id: 'GC1', _groupeCoursId: 'GC1' } };
     const db = { getSync: (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)), setSync() {}, get: async (k) => (k in store ? store[k] : null), set: async () => {}, useIndexedDB: false, memoryCache: new Map() };
     const win = { addEventListener() {}, removeEventListener() {}, dateLocaleYMD: () => '2026-05-15' };
+    chargerPredicatsCopie(win);
     chargerScript('js/snapshots.js', { db, cle: (k) => 'test_' + k, echapperHtml: (s) => String(s),
         obtenirDonneesSelonMode: (k) => JSON.parse(JSON.stringify(store['test_' + String(k).replace(/^test_/, '')] || [])),
         calculerAssiduite: () => ({ indice: 1, periodesPresentes: 20, periodesOffertes: 20, nombreSeances: 10 }),

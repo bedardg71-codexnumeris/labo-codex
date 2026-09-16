@@ -778,14 +778,16 @@ describe('E · dans quoi la note du cours se lit', () => {
         expect(m.n745.niveau).toBeNull();
         expect(m.n75.niveau).toBe('M'); expect(m.n89.niveau).toBe('M');
     });
-    it('E2 · STD : l\'échelle de la note globale est celle des ÉVALUATIONS qui portent une rétroaction — sans texte de rétroaction, « aucune évaluation retenue », pas de niveau', () => {
+    it('E2 · STD : l\'échelle de la note globale est celle des évaluations ENREGISTRÉES, texte de rétroaction ou pas — valeur d\'après #718 (constat d\'origine : sans texte, « aucune évaluation retenue », pas de niveau)', () => {
+        // ↻ Valeur D'APRÈS #718 (lot A du 16 sept. 2026) : `obtenirEchelleCommuneDesEvaluations` lit `evaluationEntreDansLaNote`,
+        // plus `e.retroactionFinale` — quatre copies sans texte situent 79,45 sur leur échelle : M. Avant : null, « aucune-evaluation ».
         const jeu = jeuSTD(); jeu.evaluations.forEach(e => { e.retroactionFinale = ''; });
         const b = monter(jeu);
         const l = b.win.lireNiveauNoteGlobale(DA.STD, 79.45);
         const commune = b.win.obtenirEchelleCommuneDesEvaluations(DA.STD);
-        noter('E2', { niveau: l.niveau, raison: l.raison, survol: l.survol, raisonCommune: commune.raison });
-        expect(l.niveau).toBeNull();
-        expect(commune.raison).toBe('aucune-evaluation');
+        noter('E2', { niveau: l.niveau && l.niveau.code, raison: l.raison, survol: l.survol, raisonCommune: commune.raison });
+        expect(l.niveau && l.niveau.code).toBe('M');   // avant : null
+        expect(commune.raison).toBeNull();             // avant : 'aucune-evaluation'
     });
     it('E3 · échelle remplacée (#648) : les évaluations désignent E1, le trimestre porte E2 { idOriginal: E1 } → résolue, niveau M ; E1 disparue sans successeur → « échelle non résolue »', () => {
         const E2 = Object.assign(clone(E1), { id: 'E2', idOriginal: 'E1', nom: 'IDME remplacée' });

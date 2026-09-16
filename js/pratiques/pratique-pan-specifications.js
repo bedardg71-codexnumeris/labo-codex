@@ -760,7 +760,7 @@ class PratiquePanSpecifications {
             return false;
         }
 
-        if (evaluation.statutRemise === 'non-remis') {
+        if (window.evaluationNonRemise(evaluation)) {   // lot A (16 sept. 2026) : « non-recu » aussi
             return false;
         }
 

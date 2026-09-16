@@ -78,9 +78,9 @@ function genererRapportAPI(da, options = {}) {
     const productionsComptees = productions.filter(p =>
         idsEvaluables.includes(p.id) && !p.facultatif &&
         evaluations.some(e => e.productionId === p.id && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined));
+    // Lot A (16 sept. 2026) — même compte que la complétion : une copie qui compte et qui n'est pas non remise.
     const nbRemis = productionsComptees.filter(p => evaluations.some(e =>
-        e.etudiantDA === da && e.productionId === p.id && !e.remplaceeParId &&
-        e.statutRemise !== 'non-remis' && e.noteFinale !== null && e.noteFinale !== undefined)).length;
+        e.etudiantDA === da && e.productionId === p.id && compteDansLaNote(e) && !window.evaluationNonRemise(e))).length;
 
     let rapport = '';
 

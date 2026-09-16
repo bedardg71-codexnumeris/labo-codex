@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 // SENTINELLE #542 lot 1 — A2 et A3 : le dépistage cesse de rendre un verdict
 // rassurant quand il n'a rien pu calculer.
@@ -72,6 +73,7 @@ beforeAll(() => {
     };
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
     chargerScript('js/profil-etudiant-calculs.js', stubs, win);
+    chargerPredicatsCopie(win);
 });
 
 // L'échelle telle qu'une pratique configurable la porte : embarquée dans
@@ -164,7 +166,7 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
     it('silence total quand tout est convertible — aucun encadré parasite', () => {
         echellesEnBase = [{ id: 'ECH_1', nom: 'IDME', niveaux: NIVEAUX_ABCD }];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: 'ECH_1', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: 'ECH_1', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         expect(win.diagnostiquerConversionNiveaux('111')).toBeNull();
     });
@@ -178,7 +180,7 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
         echellesEnBase = [];
         pratiquesEnBase = [];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: 'pratique-fantome', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: 'pratique-fantome', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         const diag = win.diagnostiquerConversionNiveaux('111');
         expect(diag).not.toBeNull();
@@ -193,7 +195,7 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
             { id: 'ECH_2', nom: 'B', niveaux: [{ code: 'M', valeurCalcul: 80 }] }
         ];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: '', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: '', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         const diag = win.diagnostiquerConversionNiveaux('111');
         expect(diag.raisons.echelleNonDesignee).toBe(1);
@@ -203,7 +205,7 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
     it('une évaluation sans echelleId mais UNE seule échelle reste silencieuse — pas d\'ambiguïté', () => {
         echellesEnBase = [{ id: 'ECH_1', nom: 'A', niveaux: [{ code: 'M', valeurCalcul: 75 }] }];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: '', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: '', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         expect(win.diagnostiquerConversionNiveaux('111')).toBeNull();
     });
@@ -211,8 +213,8 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
     it('le message distingue « toutes » de « certaines » — la nuance qui change la lecture', () => {
         echellesEnBase = [{ id: 'ECH_1', nom: 'A', niveaux: [{ code: 'M', valeurCalcul: 75 }] }];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: 'ECH_1', retroactionFinale: 'x', criteres: [] },
-            { etudiantDA: '111', echelleId: 'ECH_DISPARUE', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: 'ECH_1', noteFinale: 70, retroactionFinale: 'x', criteres: [] },
+            { etudiantDA: '111', echelleId: 'ECH_DISPARUE', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         let diag = win.diagnostiquerConversionNiveaux('111');
         expect(diag.total).toBe(2);
@@ -220,7 +222,7 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
         expect(diag.message).toMatch(/calculé sur les autres seulement/);
 
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: 'ECH_DISPARUE', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: 'ECH_DISPARUE', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         diag = win.diagnostiquerConversionNiveaux('111');
         expect(diag.message).toMatch(/Aucune des 1 évaluations/);
@@ -230,7 +232,7 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
     it('une évaluation REMPLACÉE ne compte pas — elle porte l\'état d\'avant une reprise', () => {
         echellesEnBase = [{ id: 'ECH_1', nom: 'A', niveaux: [{ code: 'M', valeurCalcul: 75 }] }];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: 'ECH_DISPARUE', retroactionFinale: 'x', criteres: [], remplaceeParId: 'EVAL_9' }
+            { etudiantDA: '111', echelleId: 'ECH_DISPARUE', noteFinale: 70, retroactionFinale: 'x', criteres: [], remplaceeParId: 'EVAL_9' }
         ];
         expect(win.diagnostiquerConversionNiveaux('111')).toBeNull();
     });
@@ -238,8 +240,8 @@ describe('#542 A3 · le dépistage dit ce qu\'il n\'a pas pu calculer', () => {
     it('le diagnostic ne concerne QUE l\'élève demandé', () => {
         echellesEnBase = [{ id: 'ECH_1', nom: 'A', niveaux: [{ code: 'M', valeurCalcul: 75 }] }];
         evaluationsEnBase = [
-            { etudiantDA: '111', echelleId: 'ECH_1', retroactionFinale: 'x', criteres: [] },
-            { etudiantDA: '222', echelleId: 'ECH_DISPARUE', retroactionFinale: 'x', criteres: [] }
+            { etudiantDA: '111', echelleId: 'ECH_1', noteFinale: 70, retroactionFinale: 'x', criteres: [] },
+            { etudiantDA: '222', echelleId: 'ECH_DISPARUE', noteFinale: 70, retroactionFinale: 'x', criteres: [] }
         ];
         expect(win.diagnostiquerConversionNiveaux('111')).toBeNull();
         expect(win.diagnostiquerConversionNiveaux('222')).not.toBeNull();

@@ -850,7 +850,8 @@ function genererSectionAccompagnement(da) {
     // Compter le nombre total d'artefacts évalués (pour afficher la fiabilité des données)
     // #360 — exclure les évals remplacées (reprises archivées ET doublons réconciliés) :
     // le « (sur N) » doit refléter le pool réellement compté par le moteur, pas les exclues.
-    const evaluationsDA = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => e.etudiantDA === da && e.noteFinale != null && !e.remplaceeParId);
+    // Lot A (16 sept. 2026) — le « (sur N) » compte les copies qui comptent, comme les moyennes qu'il qualifie.
+    const evaluationsDA = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
     const nbTotalArtefacts = evaluationsDA.length;
 
     // Construire le texte de progression au format du rapport (basé sur les critères)
@@ -2036,11 +2037,11 @@ function calculerDirectionsCriteres(da) {
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
 
-    // Toutes les évaluations de l'étudiant avec critères structurés
-    // #730 — sans les remplacées : l'originale d'une reprise porte l'état d'avant.
+    // Les copies qui COMPTENT (#737, lot A du 16 sept. 2026 : la règle unique #706 — un brouillon ne
+    // compte nulle part ; #730 — sans les remplacées) et qui portent des critères structurés.
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        !e.remplaceeParId &&
+        window.evaluationEntreDansLaNote(e) &&
         e.criteres && Array.isArray(e.criteres) && e.criteres.length > 0
     );
 
