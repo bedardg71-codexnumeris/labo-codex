@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 7 H 20 (Toronto) : 1.142.7 (#880) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 8 H 30 (Toronto) : 1.142.8 (#881) SUR `main`
+
+> **1.142.7 est en ligne** (`04c87d13`). **1.142.8** porte **#881** (rapport de 8 h 09) : une copie jetée depuis « Exporter et
+> archiver » restait au carrousel d'« Annoter et évaluer » — le cas 1 d'`initialiserModuleTravaux` ne régénérait la bande que
+> vide. Porte Playwright #881 (2 cas, 3 clauses mutées, 3 rouges). Aucun stock (DOM seulement).
+
+## (précédent) 16 SEPT. 2026, ≈ 7 H 20 (Toronto) : 1.142.7 (#880)
 
 > **1.142.7** porte **#880** (rapport de 7 h 00) : quatre PDF d'un même élève pour Artefact 1 restaient quatre copies. **La décision
 > reportée le 15 au soir est TRANCHÉE par Grégoire : B, fusion des PDF.** `assemblerGroupesPipeline` admet `estPDF` ;
