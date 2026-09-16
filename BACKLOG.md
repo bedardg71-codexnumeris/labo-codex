@@ -643,7 +643,19 @@ trancher après le 14 ou renvoyés au second audit ; un commenté ; un sans disp
   verte après. **Correctif, périmètre borné** : `etatVivantEvaluationEnCours` (le nu l'emporte EN BLOC — un niveau retiré ne resurgit pas
   de `window`) pour la porte, l'auto-save et le bilan. **Sentinelles** : la spec WebKit + `sentinelle-699-auto-save-et-bilan-lisent-la-source-du-calcul.test.js`
   (7 cas, break-testées). ⮕ La réunification des deux emplacements reste **#646**, inscrit.
-- [ ] **#700 — Retirer toutes les annotations d'une copie laisse l'ancien compte dans le champ « Nombre d'erreurs »**. ↻ *Tri du 12 sept. 2026 : n'empêche aucun des huit énoncés — après la cohorte (`plans de travail/TRI-2026-09-12-fiches-ouvertes-audits.md`).*
+- [x] **#700 — Retirer toutes les annotations d'une copie laisse l'ancien compte dans le champ « Nombre d'erreurs »**.
+  **CORRIGÉ le 16 sept. 2026 (1.142.15), choisi par Grégoire à 15 h 24** (même parcours que #651 ; la note se calcule sur ce champ).
+  Règle (Cowork, dite à Grégoire) : le champ suit les annotations jusqu'à 0 tant qu'il contient encore le total qu'elles y ont
+  écrit ; une valeur tapée n'est jamais écrasée. Forme : `mettreAJourCompteursErreurs` retient sur le champ le dernier total
+  propagé ET la copie (`annotation.fichierId`) — le même champ sert aux 27 copies (#671). Les écrivains du chargement
+  (`evaluation-chargement.js`, `evaluation.js`) écrivent la valeur enregistrée sans mémoire, ou recréent le champ : ils
+  retombent sur l'ancien comportement (pas de 0), jamais sur un écrasement. Limite assumée : retirer les tampons UN PAR UN
+  réécrit le total restant par-dessus une saisie manuelle, comme avant (garde `total > 0` inchangée).
+  **Vérifié comment** : `tests/integration/erreurs-700-retour-a-zero-annotations-retirees.spec.js` (WebKit, vraie fonction, vrai
+  évènement, annotation fournie par enveloppement) : rouge sur 1.142.15 (3 au lieu de 0) ; garde `total > 0` supprimée ⮕ les trois
+  gardes et `erreurs-saisie-manuelle-preservee` rougissent ; mémoire sans la copie ⮕ la garde multi-copies rougit.
+  **Stock** : les évaluations déjà enregistrées avec un compte fantôme le gardent, et rien ne les distingue d'un compte tapé.
+  A2025 et H2026 ne se rouvrent pas. Historique de la fiche :
   Troisième entrée de D-2, non corrigée par #698 : `travaux-outils.js`, `mettreAJourCompteursErreurs`, ne propage le total des codes
   d'annotation vers `eval_erreurs_` que `if (total > 0)` — garde délibérée pour ne pas écraser une saisie manuelle. Décision : quand le
   compteur tombe à 0, propager 0 (et perdre la saisie manuelle) ou non ? `[lecture]`, non mesuré.

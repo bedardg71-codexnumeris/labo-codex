@@ -2437,9 +2437,28 @@
         // pas au champ : sans cette garde, une saisie MANUELLE du nombre d'erreurs
         // (sans tampons) était écrasée par 0 à chaque appel — notamment via
         // `_forcerRecalculAlgorithmiqueAvantSauvegarde` avant la sauvegarde.
+        //
+        // #700 (16 sept. 2026) — ET JUSQU'À 0 quand le champ contient ENCORE le total que les
+        // annotations de CETTE copie y ont écrit : retirer tous les tampons laissait l'ancien compte,
+        // et la note se calcule sur ce champ. La mémoire porte la copie parce que le même champ sert
+        // à toutes (#671) : un 3 écrit pour une copie ne doit pas effacer le 3 tapé pour une autre.
+        // Une valeur tapée, ou écrite par le chargement d'une évaluation, ne correspond pas à la
+        // mémoire (ou le champ recréé n'en a plus) : elle reste. Spec `erreurs-700-…`.
         const inputErreurs = document.querySelector('input[id^="eval_erreurs_"]');
-        if (inputErreurs && total > 0) {
+        if (!inputErreurs) return;
+        const annotation = travauxAnnotation.getAnnotationCourante();
+        const fichierId = (annotation && annotation.fichierId) || '';
+        if (total > 0) {
             inputErreurs.value = total;
+            inputErreurs.dataset.totalAnnotations = String(total);
+            inputErreurs.dataset.totalAnnotationsFichier = fichierId;
+            inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
+        } else if (fichierId
+            && inputErreurs.dataset.totalAnnotationsFichier === fichierId
+            && inputErreurs.value === inputErreurs.dataset.totalAnnotations) {
+            inputErreurs.value = 0;
+            delete inputErreurs.dataset.totalAnnotations;
+            delete inputErreurs.dataset.totalAnnotationsFichier;
             inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }

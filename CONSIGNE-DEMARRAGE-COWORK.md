@@ -88,6 +88,8 @@ markdown divergent. **L'écart entre les deux comptes est tombé à un** – #57
 backlog pour ce qu'il en reste (#860). ⮕ **La méthode qui l'a clos : comparer les ENSEMBLES de numéros, pas les totaux.** Six révisions
 du compte avaient échoué à le faire.
 
+⚠ **À REPORTER AU TRI À L'OUVERTURE (ajout du 16 sept., 15 h 30)** : « Annoter » depuis la liste (#651) et le nombre d'erreurs qui retombe à 0 (#700) sont partis en lot vers `1.142.15` ; **vérifie sur `origin/main` qu'ils sont poussés** avant de les marquer livrés sur la page ET dans le markdown. Et #890 est inscrite (`_resterEnModeAnnoter` lu sans être posé) : à ajouter aux deux jumeaux.
+
 **c) QUATRE QUESTIONS ATTENDENT GRÉGOIRE, et rien ne se code avant.**
 1. **#860** – deux graphiques de groupe dessinent encore les paliers d'une échelle sous des pourcentages agrégés. ⚠ La décision du 13 sur
    le graphique individuel **ne s'y étend pas d'office**. Pose la question avec une recommandation.
