@@ -109,9 +109,14 @@ async function chargerListeEtudiantsV2() {
 
     if (actionsEtudiants) actionsEtudiants.classList.remove('u-hide');
 
-    // 🆕 Beta 95.3: Afficher/masquer le bouton "Supprimer ce groupe"
+    // #885 : le bouton reste visible dès qu'il y a des élèves. Caché sous « Tous les groupes »,
+    // Mathieu ne l'a jamais vu et a retiré ses élèves un par un. Il nomme le groupe visé ; sans
+    // groupe choisi, il renvoie au menu (supprimerGroupeSelectionneV2).
     const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
-    toggleDisplay(btnSupprimerGroupe, groupeFiltre);
+    if (btnSupprimerGroupe) {
+        toggleDisplay(btnSupprimerGroupe, true);
+        btnSupprimerGroupe.textContent = groupeFiltre ? `Supprimer le groupe ${groupeFiltre}` : 'Supprimer un groupe…';
+    }
 
     // Mode anonymisation (bug du 14 sept. 2026, rencontre de la CoP) : cette liste lisait la
     // clé brute et affichait les vrais noms. Seules les RANGÉES passent par anonymiserDonnees
@@ -992,7 +997,8 @@ function viderListeEtudiantsV2() {
 async function supprimerGroupeSelectionneV2() {
     const groupeSelectionne = getGroupeSelectionneV2();
     if (!groupeSelectionne) {
-        notifications.erreur('Sélectionne un groupe spécifique à supprimer.');
+        notifications.erreur('Choisis d\'abord un groupe', 'Sélectionne dans le menu « Groupe » celui à supprimer.');
+        document.getElementById('v2-selectGroupe')?.focus();
         return;
     }
 
@@ -1011,7 +1017,11 @@ async function supprimerGroupeSelectionneV2() {
         return;
     }
 
-    if (!confirm(`Supprimer les ${etudiantsDuGroupe.length} étudiant(s) du groupe ${groupeSelectionne} ?`)) {
+    // #885 : un numéro Omnivox est propre à un cours — deux cours peuvent porter le même (#872,
+    // mécanisme B). La suppression les emporte tous : la question le dit plutôt que de le taire.
+    const nbCours = new Set(etudiantsDuGroupe.map(e => e.coursId || '')).size;
+    const mentionCours = nbCours > 1 ? `, répartis dans ${nbCours} cours` : '';
+    if (!confirm(`Supprimer les ${etudiantsDuGroupe.length} étudiant(s) du groupe ${groupeSelectionne}${mentionCours} ? Cette action est irréversible.`)) {
         return;
     }
 

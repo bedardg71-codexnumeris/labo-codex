@@ -69,7 +69,7 @@ function normaliserNumeroGroupeReel() {
 }
 
 function monter(store) {
-    const etat = { prefixe: 'test_', reponsePrompt: null, defautsProposes: [] };
+    const etat = { prefixe: 'test_', reponsePrompt: null, defautsProposes: [], confirmations: [], affichages: {}, reponseConfirm: true };
     const cle = (k) => etat.prefixe + k;
     const db = {
         getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)),
@@ -91,7 +91,8 @@ function monter(store) {
         normaliserNumeroGroupe: normaliserNumeroGroupeReel(),
         notifications: { succes(t, m) { notifs.push({ type: 'succes', t, m }); }, erreur(t, m) { notifs.push({ type: 'erreur', t, m }); }, info() {}, warning() {} },
         prompt: (msg, defaut) => { etat.defautsProposes.push(defaut); return etat.reponsePrompt; },
-        alert() {}, confirm: () => true, toggleDisplay() {},
+        alert() {}, confirm: (m) => { etat.confirmations.push(m); return etat.reponseConfirm; },
+        toggleDisplay(el, montrer) { if (el) etat.affichages[el.id] = Boolean(montrer); },
     };
     const win = { addEventListener() {}, cle, db };
     chargerScript('js/trimestre-v2-etudiants.js', globaux, win);
@@ -250,5 +251,67 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
         const fiches = b.win.analyserListeEtudiantsCollee('DA,Groupe,Nom,Prénom,Programme,SA\nDEMO004,0demo,Césaire,Aimé,310.B1,\n2000001,00002,Caron,Zoé,200.B1,');
         expect(fiches.map(f => f.da)).toEqual(['DEMO004', '2000001']);
         expect(fiches.some(f => f.groupe.toLowerCase().includes('groupe'))).toBe(false);
+    });
+});
+
+// SENTINELLE #885 — SUPPRIMER UN GROUPE ENTIER (suite de #872, réponse de Mathieu, 16 sept. 2026)
+//
+// « J'ai ensuite supprimé tous les élèves pour réessayer, mais je n'ai pas trouvé d'autres options
+// que de les supprimer un par un. » Le bouton « Supprimer ce groupe » existait depuis Beta 95.3,
+// mais n'apparaissait que si un groupe précis était choisi dans le menu — or le menu s'ouvre sur
+// « Tous les groupes ». VERROUILLÉ ICI :
+//   J. sous « Tous les groupes », le bouton est visible et renvoie au menu, sans rien supprimer ;
+//   K. un groupe choisi : le bouton le nomme, et le supprime lui seul ;
+//   L. un numéro partagé par deux cours : la question le dit.
+describe('#885 — supprimer un groupe entier sans passer élève par élève', () => {
+    function storeDeuxGroupes() {
+        const store = storeUnGroupe();
+        store.test_groupeEtudiants.push({ da: '2000001', nom: 'Caron', prenom: 'Zoé', groupe: '00002', coursId: 'C2' });
+        return store;
+    }
+
+    it('J. sous « Tous les groupes », le bouton est visible ; cliqué, il renvoie au menu et ne supprime rien', async () => {
+        const b = monter(storeDeuxGroupes());
+        await b.win.chargerListeEtudiantsV2();
+        expect(b.select().value).toBe('');
+        expect(b.etat.affichages['v2-btnSupprimerGroupe']).toBe(true);
+        expect(b.champ('v2-btnSupprimerGroupe').textContent).toBe('Supprimer un groupe…');
+        await b.win.supprimerGroupeSelectionneV2();
+        expect(b.notifs.at(-1)).toMatchObject({ type: 'erreur', t: 'Choisis d\'abord un groupe' });
+        expect(b.etat.confirmations).toEqual([]);
+        expect(b.store.test_groupeEtudiants).toHaveLength(3);
+    });
+
+    it('K. un groupe choisi : le bouton le nomme, et la suppression n\'emporte que lui', async () => {
+        const b = monter(storeDeuxGroupes());
+        await b.win.chargerListeEtudiantsV2();
+        b.select().value = '00001';
+        await b.win.filtrerParGroupeV2();
+        expect(b.etat.affichages['v2-btnSupprimerGroupe']).toBe(true);
+        expect(b.champ('v2-btnSupprimerGroupe').textContent).toBe('Supprimer le groupe 00001');
+        await b.win.supprimerGroupeSelectionneV2();
+        expect(b.etat.confirmations.at(-1)).toBe('Supprimer les 2 étudiant(s) du groupe 00001 ? Cette action est irréversible.');
+        expect(b.store.test_groupeEtudiants.map(e => e.da)).toEqual(['2000001']);
+    });
+
+    it('K (témoin). refuser la question ne supprime rien', async () => {
+        const b = monter(storeDeuxGroupes());
+        await b.win.chargerListeEtudiantsV2();
+        b.select().value = '00001';
+        await b.win.filtrerParGroupeV2();
+        b.etat.reponseConfirm = false;
+        await b.win.supprimerGroupeSelectionneV2();
+        expect(b.store.test_groupeEtudiants).toHaveLength(3);
+    });
+
+    it('L. un même numéro porté dans deux cours : la question le dit', async () => {
+        const store = storeUnGroupe();
+        store.test_groupeEtudiants.push({ da: '2000001', nom: 'Caron', prenom: 'Zoé', groupe: '00001', coursId: 'C2' });
+        const b = monter(store);
+        await b.win.chargerListeEtudiantsV2();
+        b.select().value = '00001';
+        await b.win.filtrerParGroupeV2();
+        await b.win.supprimerGroupeSelectionneV2();
+        expect(b.etat.confirmations.at(-1)).toContain('répartis dans 2 cours');
     });
 });
