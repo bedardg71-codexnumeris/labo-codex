@@ -1,10 +1,12 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 14 sept. à 16 h 10** – **treize lots menés, et les treize sont en ligne.** **Trois versions livrées depuis** : `1.140.7` (le graphique des indices d'un élève ne porte plus les paliers d'une échelle), `1.140.8` (la préparation d'un premier trimestre se fait d'un trait) et `1.140.9` (en anonymisation, la liste d'élèves du Cadre montre les pseudonymes). ⚠ **Un commit attend le push** : la page publique « où vivent les données » (`e5d5ccc7`). `origin/main` = `8d782387` = **1.140.9**, en ligne. L'orthopédagogue a ouvert l'application lundi ; la communauté de pratique la découvre **demain, mardi 15**.
-> **Compte : 225 fiches ouvertes** (224 hier), remesuré le 14 sept. à 16 h 10 sur `BACKLOG.md` de `main` (`e5d5ccc7`). ⚠ **La soustraction est refaite, pas recopiée** : 226 cases `- [ ]` à la racine, dont **225 portent un numéro** ; la 226e est le gabarit `#XX` de la section « Notes ». ⚠⚠ **ET MA PREMIÈRE COMMANDE D'AUJOURD'HUI EN COMPTAIT 153.** Elle exigeait `- [ ] **#nnn` ; or 72 fiches commencent par un emoji de catégorie avant le gras. **Le motif ne voyait pas les synonymes** – même erreur que les 112 découpes du 13, sur un autre motif. Le nombre juste vient de la seconde mesure, pas de la première. Dernier ID : **#861**.
-> ⚠ **Sept comptes annoncés dans la journée — 234, 241, 230, 228, 227, 226, 224 — et pas un n'a changé une décision.** Les premiers comptaient des sous-cases indentées ou des fiches déjà livrées. ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : treize lots, en ligne.
-> ⚠ **Ce document et l'artefact listent 226 entrées ouvertes, soit deux de plus que le backlog** : #575b et #575c y sont détaillées à part alors qu'elles partagent la case de #575. L'écart est voulu et mesuré ; il n'est pas une dérive du compte. La vérification se fait dans ce sens-là : 226 − 2 = 224, et c'est le même nombre que le backlog rend par un autre chemin.
+> **Mis à jour le 15 sept. à 19 h 30** – **dix-neuf lots menés, et les dix-neuf sont en ligne.** **Six versions livrées dans la journée** : `1.141.0` (les notes du « Rapport » d'un profil ne disparaissent plus), `1.141.1` (« Enregistrer » n'accuse plus l'élève d'être introuvable), `1.142.0` (« Évaluer » mène au bon élève, avec ou sans copie), `1.142.1` (créer un deuxième groupe d'élèves – session parallèle), `1.142.2` (l'Aide dit ce que la Loi 25 demande) et `1.142.3` à `1.142.5` (l'import des copies assemble de nouveau). `origin/main` = `b7d2f0b0` = **1.142.5**, en ligne, **tout est poussé**.
+> **Sept rapports de testeurs traités le même jour** – les tiens du matin, du midi et du soir, celui de Mathieu – et ils sont passés devant le backlog chaque fois.
+> **Compte : 230 fiches ouvertes au backlog**, remesuré le 15 sept. à 19 h 30 sur `BACKLOG.md` de `main` (`b7d2f0b0`). La soustraction est refaite, pas recopiée : 231 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#878**.
+> ⚠ **LES DEUX COMPTES SONT RÉCONCILIÉS, ET C'EST NEUF.** Ce document et l'artefact listent **228 entrées ouvertes**, soit **deux de MOINS** que le backlog – l'écart s'était inversé depuis le 14, où ils en listaient deux de plus. Les deux sont nommés, par comparaison des ensembles de numéros : **#575**, détaillée ici en #575b/#575c et marquée livrée, alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860) ; et **#868, livrée et poussée en 1.142.0, dont la ligne du backlog annonce encore « ni releasé ni poussé »** – une écriture à corriger, pas une fiche. ⮕ **Aucune fiche du backlog ne manque à ce tri, et le tri n'en invente aucune.** C'est la première fois que l'écart est clos par les deux bouts plutôt qu'expliqué.
+> ⚠ **Les neuf fiches inscrites depuis le tri** (#862 à #865, #868 à #871, #878) portent un palier lu dans l'audit ou dans la fiche, **pas mesuré au code** : même réserve que les autres, et c'est la réserve qui compte.
+> ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : dix-neuf lots, en ligne.
 > ⛔ `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md` est **périmé** : les quatre questions sont closes depuis le 13. Ne pas le resservir.
 
 ## Journal des lots
@@ -81,6 +83,19 @@ Dernier lot de la grappe des échelles. L'ancien éditeur de niveaux – celui q
 
 ⛔ **Ce qui revient à Grégoire sur ce lot** : l'écran des échelles n'a été regardé ni sur Safari ni sur iPad ; le **stock** déjà écrit dans sa base n'a pas été lu (`localStorage.getItem('configEchelle')`), et ne se répare pas d'office. Le verdict Playwright a été pris (code 0), mais **Cowork n'était pas fermé** : la condition habituelle n'est pas garantie.
 
+### Journée du 15 septembre – six versions, sept rapports de testeurs ✅ TOUT EN LIGNE
+
+**Ce ne sont pas des lots du tri : ce sont des retours de testeurs, et ils passent devant.** Les fiches du tri n'ont pas bougé de la journée, sauf #868, née de l'audit du matin.
+
+1. **Les notes du « Rapport » d'un profil ne disparaissent plus** (`1.141.0`, rapport de 10 h 06). **La mesure a démenti la régression** : ce texte n'était enregistré nulle part, et ne l'avait jamais été – le correctif du 11 sept. n'avait supprimé que l'effacement *pendant* l'ouverture d'un profil, jamais couvert le trajet aller-retour entre sous-sections. Zone « Mes notes » persistante, masquée en anonymisation. Seize mutations, seize rouges.
+2. **« Enregistrer » n'accuse plus l'élève d'être introuvable** (`1.141.1`, rapport de 12 h 16). **Le rapport avait une seconde moitié, silencieuse et mesurable** : après l'alerte, l'application ne savait plus quel élève était ouvert et la barre latérale du profil ne répondait plus. Les trois contrôles écrits AVANT le correctif, rouges sur les trois symptômes.
+3. **« Évaluer » mène au bon élève, avec ou sans copie** (`1.142.0`, #868, audit du module profil). Trois `evaluerProduction` coexistaient ; celle qui répondait remplissait des listes cachées encore vides. **La cause écrite par l'audit du matin était fausse**, et trois défauts voisins sont apparus en chemin. **Relecture croisée de Cowork** : verte par exécution (565 fichiers, 6 370 essais, mutations de la sentinelle reposées une à une, trois rouges, témoin vert) ; **un écart trouvé** – l'entrée de « Nouvelles » promettait « Consulter » sans copie alors qu'aucune mesure ne le jugeait. ⮕ La mesure a été ajoutée (`38bc9ac3`), la phrase gardée. C'est la bonne issue : la promesse était vraie, c'est la preuve qui manquait.
+4. **Créer un deuxième groupe d'élèves** (`1.142.1`, #872, rapport de Mathieu, session parallèle). Le bouton « + Nouveau groupe » avait quitté `index.html` en janvier et sa fonction survivait sans appelant. ⚠ **Non traité** : à l'import, le rattachement au cours actif reste invisible. ⛔ **Et les élèves déjà écrits chez Mathieu ne se déplacent pas d'office** – tarir n'est pas réparer.
+5. **L'Aide dit ce que la Loi 25 demande à l'enseignant** (`1.142.2`, #862, texte de Grégoire approuvé à 16 h 30). Un contrôle vérifie que les deux boutons que l'encadré nomme existent vraiment sous ces mots.
+6. **L'import des copies assemble de nouveau, et dit ce qu'il fait** (`1.142.3` à `1.142.5`, #873, #875, #876, #877). **Le vrai lot de Grégoire – 86 photos – a démenti une règle écrite le 30 août** : les pages d'une remise ne partagent pas la seconde de dépôt (09h46m45s, 09h46m55s…), donc chaque page devenait un document annoncé « doublon ». **Décision de Grégoire** : un document par élève et par production, tri à la main. Deux suites le même soir – la file déjà déposée gardait l'ancienne règle, et la fenêtre de préparation ne rendait rien sans réglage à appliquer.
+
+⮕ **Ce qui reste à Grégoire, et rien ne se code avant** : #860 (les paliers d'échelle sous les deux graphiques de groupe – la décision du 13 sur le graphique individuel ne s'y étend pas d'office), #871 (le pourcentage et la fraction qui se contredisent au profil), #874 (les PDF sans aperçu à l'import, inscrits sans diagnostic). Et une prose à corriger, pas un arbitrage : #878 (comment l'Aide nomme les pages d'une remise).
+
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 
 La contre-épreuve du matin avait déjà trouvé un goulot faux (#689). Le lot 3 en a trouvé **deux de plus**, et de la même cause : **le goulot a été lu dans la fiche, pas mesuré dans le code**. Une fiche ne suit pas le code quand celui-ci déménage.
@@ -101,20 +116,23 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 
 **Ce qu'un lot doit porter, appris des trois relectures** : pour chaque correctif, **la mutation qui ISOLE** le contrôle neuf. Un essai peut passer *pour la mauvaise raison* – un autre garde-fou intercepte avant celui qu'on croit éprouver – ou passer *à vide*, quand le harnais garantit lui-même ce que l'assertion prétend vérifier. Les trois lots ont chacun livré un cas des deux.
 
-## Les comptes – 13 septembre, 14 h 30
+## Les comptes – 15 septembre, 19 h 30
 
 | | fiches |
 |---|---:|
-| Q – rapides | 42 |
-| I – intermédiaires | 85 |
-| L – laborieuses | 100 |
+| Q – rapides | 44 |
+| I – intermédiaires | 82 |
+| L – laborieuses | 97 |
 | indécidables en l'état | 5 |
-| **entrées ouvertes de ce tri** | **230** |
-| **fiches ouvertes au backlog de `main`** | **228** |
-| dont en attente d'un arbitrage | 80 |
-| ✅ sorties du tri depuis son ouverture | 13 |
+| **entrées ouvertes de ce tri** | **228** |
+| **fiches ouvertes au backlog de `main`** | **230** |
+| dont en attente d'un arbitrage | 81 |
+| ✅ sorties du tri depuis son ouverture | 27 |
 
-Portée des arbitrages en attente : 17 se règlent par une phrase, 25 demandent un écran ou ses données, 13 ouvrent un chantier.
+Portée des arbitrages en attente : **19** se règlent par une phrase, **25** demandent un écran ou ses données, **13** ouvrent un chantier, **24** n'ont pas encore de portée établie.
+Nature : pédagogie **26**, arbitrage à préciser **23**, choix de produit **17**, engagement public **6**, mots des élèves et des collègues **5**, ses données **4**.
+
+⚠ Les deux lignes en gras se lisent ensemble : l'écart de deux est nommé en tête de ce document, et il est clos par les deux bouts.
 
 ## Ce que vaut ce tri (contre-épreuve)
 
