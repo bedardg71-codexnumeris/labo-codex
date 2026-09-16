@@ -1871,7 +1871,7 @@
                 groupesOuverts.add(groupeId);
                 colGauche += `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
                     <div class="pipeline-groupe-entete">
-                        <span class="pipeline-groupe-badge">${indicesGroupe.length} pages &rarr; 1 PDF</span>
+                        <span class="pipeline-groupe-badge">${indicesGroupe.length} ${indicesGroupe.some(i => queue[i].estPDF) ? 'fichiers' : 'pages'} &rarr; 1 PDF</span>
                         <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                     </div>`;
             }
@@ -4535,8 +4535,9 @@
         const groupes = travauxImport.regrouperParDocument();
 
         for (const [cle, fichiers] of groupes) {
-            // Seulement les groupes de >= 2 images
-            const images = fichiers.filter(f => f.estImage);
+            // Seulement les groupes de >= 2 fichiers. #880 — les PDF entrent
+            // dans l'assemblage : le cadre « → 1 PDF » les comptait deja.
+            const images = fichiers.filter(f => f.estImage || f.estPDF);
             if (images.length < 2) continue;
 
             try {
