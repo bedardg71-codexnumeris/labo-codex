@@ -1,14 +1,16 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 16 sept. à 15 h 50** (comptes remesurés sur `79ed35cf`) – **vingt lots menés depuis le tri, et les vingt sont en ligne.**
+> **Mis à jour le 16 sept. à 17 h 15** (comptes remesurés sur `116e11e4`, par Claude Code, Cowork fermé) – **vingt et un lots menés depuis le tri, et les vingt et un sont en ligne.**
 > ⚠ **DEUX JOURNÉES DE SUITE SANS TOUCHER AU TRI, ET C'EST L'ORDRE VOULU.** Le 15 a livré six versions, le 16 en a livré neuf, et **les quinze répondaient à un rapport de testeur** – ceux de Grégoire, celui de Mathieu. Les fiches d'ici n'ont pas bougé : ⮕ **ce n'est pas un retard du tri, c'est la règle des retours qui s'applique.**
-> **Poussé : `1.142.15`** (`79ed35cf` = `origin/main`, build `0916-1529`) : le lot 20, « Annoter » depuis la liste (#651) et le nombre d'erreurs qui retombe à 0 (#700). Grégoire a vérifié #651 dans l'application. Avant lui, `1.142.14` (`71ca237f`).
+> **Poussé : `1.142.16`** (`19604ea4`, sur `origin/main` à `116e11e4`, build `0916-1615`) : le lot 21, une évaluation dont un critère a quitté sa grille s'ouvre, le signale et le garde (#652) ; le drapeau mort retiré (#890). Pas encore vu par Grégoire dans l'app. **Cinq fiches entrées le soir** (#891 à #895), sorties de l'audit de « Exporter et archiver » (`Rapports/AUDIT-exporter-et-archiver-2026-09-16.md`) ; Grégoire a tranché « on inscrit tout ». #870 élargie à `.texte-muted`.
+> **(précédent) Poussé : `1.142.15`** (`79ed35cf`, build `0916-1529`) : le lot 20, « Annoter » depuis la liste (#651) et le nombre d'erreurs qui retombe à 0 (#700). Grégoire a vérifié #651 dans l'application. Avant lui, `1.142.14` (`71ca237f`).
 > **Les neuf du 16, dans l'ordre de ses rapports** : `1.142.7` fusion des PDF d'un même élève (décision reportée la veille, **tranchée par lui : option B**) · `1.142.8` une copie jetée quitte le carrousel · `1.142.9` le PDF respecte « Niveau de performance », et le choix s'enregistre · `1.142.10` un travail diagnostique ne pèse plus (« 1 retenue sur 4 possibles », ses mots) · `1.142.11` perspective et rognage survivent à « Re-déposer » · `1.142.12` « Supprimer un groupe » toujours visible · `1.142.13` les sept champs d'une séance sur une rangée · `1.142.14` sous l'outil Texte, le clic ouvre au lieu d'empiler. Avant elles, `1.142.6` : la place du bouton « + Nouveau… » uniformisée dans les six accordéons du Cadre.
-> **Compte : 231 fiches ouvertes au backlog**, remesuré le 16 sept. à 15 h 50 (`79ed35cf`) : 232 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#890**. ⮕ Mesuré en comparant les ENSEMBLES de numéros (backlog − page = {#575} ; page − backlog = ∅).
-> ⚠ **L'ÉCART ENTRE LES DEUX COMPTES EST TOMBÉ À UN.** Ce document et l'artefact listent **230 entrées ouvertes** ; le seul écart restant est **#575**, détaillée ici en #575b/#575c et marquée livrée alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860). Hier l'écart était de deux ; le second était la ligne de #868, restée à « ni releasé ni poussé » – **elle est cochée depuis ce matin** (`476f3c03`).
-> ⚠ **Les treize fiches inscrites depuis le tri** (#862 à #865, #868 à #871, #878, #879, #887, #888, #890) portent un palier lu dans l'audit ou dans la fiche, **pas mesuré au code**.
-> ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : vingt lots, en ligne.
+> **Compte : 234 fiches ouvertes au backlog**, remesuré le 16 sept. à 17 h 15 (`116e11e4`) : 235 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#895**. ⮕ Mesuré en comparant les ENSEMBLES de numéros (backlog − page = {#575} ; page − backlog = ∅).
+> ⚠ **L'ÉCART ENTRE LES DEUX COMPTES EST TOMBÉ À UN.** Ce document et l'artefact listent **233 entrées ouvertes** ; le seul écart restant est **#575**, détaillée ici en #575b/#575c et marquée livrée alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860). Hier l'écart était de deux ; le second était la ligne de #868, restée à « ni releasé ni poussé » – **elle est cochée depuis ce matin** (`476f3c03`).
+> ⚠ Vu en remesurant : **#521 et #523 ont chacune DEUX lignes au backlog** – une case cochée « tranché / clos le 26 août » et une case ouverte au numéro barré (`~~#521~~`, `~~#523~~`). Le tri les garde ouvertes « à revérifier », comme le backlog ; les fermer pour de bon revient à Grégoire.
+> ⚠ **Les dix-huit fiches inscrites depuis le tri** (#862 à #865, #868 à #871, #878, #879, #887, #888, #890, #891 à #895) portent un palier lu dans l'audit ou dans la fiche, **pas mesuré au code**.
+> ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : vingt et un lots, en ligne.
 > ⛔ `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md` est **périmé** : les quatre questions sont closes depuis le 13. Ne pas le resservir.
 
 ## Journal des lots
@@ -118,6 +120,14 @@ Premier lot du tri depuis le 14, choisi par Grégoire parce qu'il travaille dans
 
 ⮕ **#652 n'est PAS couverte par le correctif du 4 sept. – mon inférence de 15 h 50 était fausse, réfutée par la mesure de 15 h 52** : `f485ea34` corrigeait l'attente d'un premier critère ANALYTIQUE (`eval_pts_`), et ce champ n'existe que depuis le 3 sept. (`37660b76`) ; le timeout du 31 août a donc une autre cause, non mesurée. Hypothèse de Cowork : le premier critère de l'évaluation n'existe plus dans la grille rendue. Mise en diagnostic dans la consigne du 16 sept., 15 h 52.
 
+### Lot 21 – une évaluation dont un critère a quitté sa grille s'ouvre, le signale et le garde ✅ LIVRÉ en 1.142.16 (#652, #890)
+
+Le timeout du 31 août. **L'hypothèse de Cowork (15 h 52) tenait** : `_attendreSaisiePremierCritereModif` guettait `eval_<criteres[0].critereId>` ; le premier critère enregistré retiré de la grille ⮕ attente expirée, « Erreur de chargement », aucun niveau restauré (mesuré WebKit sur 1.142.15, les deux renderers). **Décision de Grégoire : conserver et signaler.** L'attente guette n'importe quel critère enregistré ; `criteresHorsGrille` (`evaluation-chargement.js`) ; l'auto-save et « Enregistrer » gardent les critères hors grille (même grille seulement) ; les deux renderers affichent l'avis `#avisCriteresHorsGrille` ; la note se recalcule sur la grille actuelle quand on modifie. Porte `evaluation-652-premier-critere-hors-grille.spec.js` (6) ; `sentinelle-652` (9) ; 7 mutations / 7 rouges. **Stock** : rien écrit ; les évaluations déjà réécrites avant 1.142.16 ont pu perdre leur critère hors grille – non mesuré. **#890** dans le même lot : `_resterEnModeAnnoter` retiré (3 sites), zone morte laissée en l'état, `sentinelle-890`. Poussé par `pousser.sh` : Playwright vert deux fois, Vitest vert au hook.
+
+### Audit de « Exporter et archiver » – 16 sept., soir ⛔ RIEN DE CORRIGÉ, cinq fiches inscrites (#891 à #895)
+
+Demandé par Grégoire ; mené par Claude Code en lecture seule, banc jetable sur le harnais `chargerScript` de la sentinelle 565. **Prouvé au banc** : « Télécharger » perd TOUT l'export sur un seul fichier illisible alors que « Trimestre complet » et « Léa » survivent – #565 posé sur deux chemins sur trois ; le ZIP part sous `travaux_Roy/Tremblay_Sam.zip` – #572 posé sur l'autre chemin (#891). **Lu** : « Proposer un nettoyage » supprime définitivement la moitié des fichiers du groupe, sans corbeille ni vérification d'export (#892) ; l'aide décrit l'écran d'avant le 28 août (#893) ; cinq fonctions sans appelant et un JSDoc détaché (#894) ; deux cartes pour un même geste, la première refusant son défaut « Toutes / Tous » – décision produit (#895). `.texte-muted` n'existe nulle part : #870 élargie. Aucun symptôme vécu : **inscrits sur la décision de Grégoire (« on inscrit tout »)**, pas par la règle du 24 août. C11 (révocation immédiate de l'URL) refusé, non vérifié.
+
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 
 La contre-épreuve du matin avait déjà trouvé un goulot faux (#689). Le lot 3 en a trouvé **deux de plus**, et de la même cause : **le goulot a été lu dans la fiche, pas mesuré dans le code**. Une fiche ne suit pas le code quand celui-ci déménage.
@@ -138,18 +148,18 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 
 **Ce qu'un lot doit porter, appris des trois relectures** : pour chaque correctif, **la mutation qui ISOLE** le contrôle neuf. Un essai peut passer *pour la mauvaise raison* – un autre garde-fou intercepte avant celui qu'on croit éprouver – ou passer *à vide*, quand le harnais garantit lui-même ce que l'assertion prétend vérifier. Les trois lots ont chacun livré un cas des deux.
 
-## Les comptes – 16 septembre, 15 h 50
+## Les comptes – 16 septembre, 17 h 15
 
 | | fiches |
 |---|---:|
-| Q – rapides | 46 |
-| I – intermédiaires | 81 |
+| Q – rapides | 47 |
+| I – intermédiaires | 83 |
 | L – laborieuses | 98 |
 | indécidables en l'état | 5 |
-| **entrées ouvertes de ce tri** | **230** |
-| **fiches ouvertes au backlog de `main`** | **231** |
+| **entrées ouvertes de ce tri** | **233** |
+| **fiches ouvertes au backlog de `main`** | **234** |
 | dont en attente d'un arbitrage | 82 |
-| ✅ sorties du tri depuis son ouverture | 29 |
+| ✅ sorties du tri depuis son ouverture | 31 |
 
 Portée des arbitrages en attente : **19** se règlent par une phrase, **26** demandent un écran ou ses données, **13** ouvrent un chantier, **24** n'ont pas encore de portée établie.
 
@@ -163,10 +173,11 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ## Les lots – même point du code
 
-### `index.html` – 8 ouvertes sur 9
+### `index.html` – 9 ouvertes sur 10
 
-*Aide › Référence rapide · chargement des fichiers et 7 autres écrans*
+*Aide › Référence rapide · chargement des fichiers et 8 autres écrans*
 
+- **Q** L'aide de « Exporter et archiver » décrit l'écran d'avant le 28 août, et le bloc quota parle sans accents (#893)
 - **Q** Le glossaire réduit la PAN à « garder les N meilleurs travaux » (#803)
 - ✅ **Q** Un fichier neuf peut entrer sans jamais être chargé, en silence – **livrée en 1.140.4** (#657)
 - **I** Le style inline d'index.html écrase 13 classes de mise en forme – à Grégoire : choix de produit, à froid ; à revérifier (#766)
@@ -357,12 +368,14 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 - **L** Des cartouches archivées n'apparaissent pas dans la liste – trois modules et plus (#637)
 - **L** Consulter une archive sans la désarchiver – trois modules et plus (#257)
 
-### `js/travaux-ui.js` – 3 ouvertes sur 4
+### `js/travaux-ui.js` – 4 ouvertes sur 6
 
-*Évaluations › annoter une copie · Travaux › Importer et Exporter et 1 autres écrans*
+*Évaluations › annoter une copie · Évaluations › Exporter et archiver et 2 autres écrans*
 
+- **I** « Proposer un nettoyage » supprime la moitié des fichiers sans corbeille ni vérification d'export (#892)
+- **I** Deux cartes pour un même geste, et la première refuse son propre défaut « Toutes / Tous » – à Grégoire : choix de produit, une phrase (#895)
 - ✅ **I** Annoter depuis la liste ouvre la copie sans aucune palette *(livré 1.142.15)* (#651)
-- **Q** Un drapeau de mode est encore lu, alors que plus rien ne le pose (#890)
+- ✅ **Q** Un drapeau de mode est encore lu, alors que plus rien ne le pose *(livré 1.142.16)* (#890)
 - **L** Six clés de session sans préfixe de trimestre peuvent se mélanger – trois modules et plus (#596)
 - **L** La balance des blancs s'applique aux photos sans aperçu – trois modules et plus (#598)
 
@@ -529,6 +542,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ### aucun écran
 
+- **Q** Cinq fonctions d'export sans appelant, et un JSDoc collé à la mauvaise fonction – `js/travaux-archivage.js` (#894)
 - **Q** Retirer 290 lignes de portfolio qu'aucun écran n'appelle (#722)
 
 ### banc d'essai
@@ -630,6 +644,14 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 ### export au format recherche
 
 - **L** L'export ne dit pas où sont placées suffisance et maîtrise – trois modules et plus (#584)
+
+### Évaluations › Exporter et archiver
+
+- **I** « Télécharger » perd tout l'export sur un seul fichier illisible, et son ZIP porte un nom non assaini – `js/travaux-archivage.js` (#891)
+
+### profil d'un élève – classes CSS
+
+- **Q** Sept classes CSS que le module pose et qui ne sont définies nulle part – élargie le 16 : `.texte-muted`, dix fichiers ; absente de ce document jusqu'ici, présente sur la page (#870)
 
 ### export des résultats
 
@@ -773,7 +795,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ### ouvrir une évaluation
 
-- **I** L'ouverture échoue sur une attente qui expire pour rien (#652)
+- ✅ **I** L'ouverture échoue sur une attente qui expire pour rien *(livré 1.142.16)* (#652)
 
 ### pack de démonstration
 
