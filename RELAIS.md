@@ -17,6 +17,7 @@
 > Porte `erreurs-700-…` (4 essais). Stock #700 : les évaluations enregistrées avec un compte fantôme le gardent. Stock #651 : aucun.
 > « Nouvelles » : deux textes validés par Grégoire. Inscrit : **#890** (`_resterEnModeAnnoter` lu sans être posé). Dernier ID : #890.
 > Point 2 de la consigne (vignette #761) sorti du lot, non inscrit. Poussée après verdict Playwright local, Cowork fermé.
+> **#651 vérifié par Grégoire dans l'app (« ça fonctionne », 16 sept.).**
 
 ## (précédent) 16 SEPT. 2026, ≈ 13 H 45 (Toronto) : 1.142.14 (#889) SUR `main`
 
