@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.142.11 (#884) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 11 H 35 (Toronto) : 1.142.13 (#885, #886) SUR `main`
+
+> **1.142.12** (`197e5833`) porte **#885** : le bouton « Supprimer un groupe » (Cadre › Groupe d'étudiant·es) n'apparaissait que si
+> un groupe était choisi ; Mathieu a retiré ses élèves un par un. Toujours visible désormais — **vérifié par Grégoire (« ça fonctionne »)**.
+> **1.142.13** (`bfab4eb3`) porte **#886** : les 7 champs d'une séance d'horaire sur une rangée (la grille avait 6 pistes depuis #540 E1).
+> Mesuré sous WebKit ; pas regardé dans le Chrome de Grégoire. Les deux poussées, Playwright et Vitest verts.
+>
+> **EN SUSPENS (non inscrit au BACKLOG, à trancher) :**
+> 1. **#872 mécanisme (A)** — l'import (`confirmerImportV2`) et l'ajout manuel rattachent les élèves au cours ACTIF sans le nommer.
+>    Réponse de Mathieu (16 sept.) : un groupe par cours ; il ne sait plus quel cours était actif. Symptôme vécu ⇒ entre au BACKLOG.
+> 2. **Horaire, champ Périodes sans étiquette visible** une fois rempli (« 2 » à côté du local ; le placeholder « pér. » disparaît).
+>    Relevé par la session, pas vécu par Grégoire ⇒ selon la règle du 24 août, n'entre pas au BACKLOG sans son avis.
+
+## (précédent) 16 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.142.11 (#884)
 
 > **1.142.11** porte **#884** : « Re-déposer les fichiers » rattachait l'ORIGINAL sans rejouer les réglages spécifiques (perspective,
 > rognage) cuits dans le blob perdu au rechargement. `rejouerReglagesSpecifiques` (`js/travaux-import.js`) les rejoue par
