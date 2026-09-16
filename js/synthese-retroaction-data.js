@@ -1163,12 +1163,15 @@
         let ponderationSelection = null;
         let ponderationObligatoires = null;
         let erreurPonderation = null;
+        let nombreARetenirSelection = null;   // #883 — « N retenues sur 4 possibles »
         if (estHybride) {
             let cats = cfgPrat && cfgPrat.categories ? cfgPrat.categories : null;
             if (!cats && cfgConfiguration.categories) cats = cfgConfiguration.categories;
             if (!cats && typeof obtenirConfigCategories === 'function') cats = obtenirConfigCategories();
             const pondSel = cats && cats.selection ? cats.selection.ponderation : null;
             const pondObl = cats && cats.obligatoires ? cats.obligatoires.ponderation : null;
+            nombreARetenirSelection = (cats && cats.selection && typeof cats.selection.nombreARetenir === 'number')
+                ? cats.selection.nombreARetenir : null;
             if (pondSel == null || pondObl == null) {
                 erreurPonderation = 'Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.';
             } else {
@@ -1226,9 +1229,13 @@
             : [];
 
         // Sélection des artefacts portfolio (priorité au type explicite, fallback non-portfolio)
-        let artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+        // #883 — une production diagnostique n'est ni « à venir » ni obligatoire : elle ne compte pas.
+        const productionsNotees = (typeof window.ProductionDiagnostique !== 'undefined')
+            ? window.ProductionDiagnostique.filtrerProductions(productions)
+            : productions;
+        let artefactsPortfolio = productionsNotees.filter(p => p.type === 'artefact-portfolio');
         if (!artefactsPortfolio.length) {
-            artefactsPortfolio = productions.filter(p => p.type !== 'portfolio');
+            artefactsPortfolio = productionsNotees.filter(p => p.type !== 'portfolio');
         }
 
         const idsEvalues = new Set();
@@ -1281,6 +1288,7 @@
                 selection:                selection.map(sansNote),
                 nombreSelection:          selection.length,
                 nombreEvaluesSelection:   nombreEvaluesSelection,
+                nombreARetenirSelection:  nombreARetenirSelection,
                 obligatoires:             obligatoiresTous.map(sansNote),
                 obligatoiresRetenus:      obligatoiresRetenus.length,
                 ponderationSelection:     null,
@@ -1298,6 +1306,7 @@
             selection:                selection,
             nombreSelection:          selection.length,
             nombreEvaluesSelection:   nombreEvaluesSelection,
+            nombreARetenirSelection:  nombreARetenirSelection,
             obligatoires:             obligatoiresTous,
             obligatoiresRetenus:      obligatoiresRetenus.length,
             ponderationSelection:     ponderationSelection,
