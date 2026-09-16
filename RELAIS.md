@@ -20,7 +20,7 @@
 > réécrites avant 1.142.16 ont pu perdre leur critère hors grille — non mesuré. Et **#890** : `_resterEnModeAnnoter` retiré
 > (3 sites), zone morte laissée en l'état ; `sentinelle-890`. « Nouvelles » : phrase validée par Grégoire.
 > Poussée par `pousser.sh` avec `57d0c3f0` (consigne 15 h 52), `8cfe3c65` et `12f2c5fd` (Cowork, docs) : Playwright vert deux
-> fois, Vitest vert au hook. Dernier ID : #895. **Pas encore vu par Grégoire dans l'app.**
+> fois, Vitest vert au hook. Dernier ID : #895. **Vérifié par Grégoire dans l'app : « ça fonctionne, l'encadré s'affiche » (16 sept.).**
 > Verrous vides déplacés par Cowork dans `.git/_to_delete/` (Grégoire les supprime) ; `.git/objects/maintenance.lock` du 31 août
 > non touché.
 
