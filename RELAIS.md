@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 10 H 10 (Toronto) : 1.142.10 (#883) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.142.11 (#884) SUR `main`
+
+> **1.142.11** porte **#884** : « Re-déposer les fichiers » rattachait l'ORIGINAL sans rejouer les réglages spécifiques (perspective,
+> rognage) cuits dans le blob perdu au rechargement. `rejouerReglagesSpecifiques` (`js/travaux-import.js`) les rejoue par
+> `travauxPreparation.renduFinal` (exporté) ; `confirmer()` AJOUTE à la liste et persiste la file. Poussée avec 1.142.10 (#883, restée
+> locale). **Stock** : les copies déjà importées sans correction restent telles quelles. **Porte** : rendu réel non éprouvé en
+> navigateur par la session — Grégoire teste (réglage → recharger → Re-déposer → importer).
+
+## (précédent) 16 SEPT. 2026, ≈ 10 H 10 (Toronto) : 1.142.10 (#883)
 
 > **1.142.9 est en ligne** (`82e7549a`). **1.142.10** porte **#883** : `calculerDetailsNoteFinale` (profil + PDF) ne filtrait pas les
 > productions diagnostiques (#790, porte 1 manquante hors `js/pratiques/`) ; ligne « Sélection » du PDF réécrite (« 1 retenue sur 4

@@ -1951,7 +1951,7 @@
         colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;">${optionsDpi}</select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icon-gear.svg" alt="" class="btn-inline-icon"></button></div>`;
 
         // Alerte globale : blobs manquants après restauration session
-        const nbBlobsManquants = queue.filter(f => !f.fichier).length;
+        const nbBlobsManquants = queue.filter(f => !f.fichier && !f.reglagesEnRejeu).length;
         if (nbBlobsManquants > 0) {
             colCentre += `<div class="pipeline-alerte-blobs" style="margin-top:8px; padding:8px 10px; background: var(--alerte-fond-attention)); border-radius: var(--radius-moyen); border-left: 3px solid var(--alerte-texte-attention);">
                 <p class="u-texte-petit" style="margin:0 0 6px 0; color: var(--alerte-texte-attention);"><strong>${nbBlobsManquants} fichier${nbBlobsManquants > 1 ? 's' : ''}</strong> ${nbBlobsManquants > 1 ? 'doivent' : 'doit'} \u00eatre re-d\u00e9pos\u00e9${nbBlobsManquants > 1 ? 's' : ''} (session restaur\u00e9e).</p>
@@ -2307,6 +2307,21 @@
                     notifications.succes(bilan.rattaches + ' fichier(s) rattach\u00e9(s)');
                 }
                 rafraichirPipelineUI();
+                // #884 — les réglages spécifiques se réappliquent en arrière-plan ;
+                // un échec est DIT : le fichier part alors sans correction.
+                if (bilan.rejeu) {
+                    bilan.rejeu.then(function(r) {
+                        if (r.echecs.length > 0) {
+                            notifications.avertissement(
+                                'R\u00e9glages sp\u00e9cifiques non r\u00e9appliqu\u00e9s',
+                                r.echecs.join(', ') + ' \u2014 ces fichiers sont rattach\u00e9s sans correction. Rouvre leurs r\u00e9glages sp\u00e9cifiques avant d\u2019importer.'
+                            );
+                        } else if (r.rejoues.length > 0) {
+                            notifications.succes('R\u00e9glages sp\u00e9cifiques r\u00e9appliqu\u00e9s (' + r.rejoues.length + ')');
+                        }
+                        rafraichirPipelineUI();
+                    });
+                }
             }
             document.body.removeChild(input);
         });
@@ -3794,6 +3809,14 @@
         if (queue.length === 0) {
             afficherModalePipeline('Import', '<p>Aucun fichier à importer.</p>',
                 [{ label: 'OK', classe: 'btn-principal', action: () => {} }]);
+            return;
+        }
+
+        // #884 — un fichier re-déposé dont les réglages sont en cours de
+        // réapplication n'a pas encore son blob : ni « expiré », ni importable.
+        const enRejeu = queue.filter(f => f.reglagesEnRejeu);
+        if (enRejeu.length > 0) {
+            notifications.info(enRejeu.length + ' fichier(s) : r\u00e9glages sp\u00e9cifiques en cours de r\u00e9application. Relance l\u2019import dans un instant.');
             return;
         }
 
