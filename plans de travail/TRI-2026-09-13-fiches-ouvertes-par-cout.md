@@ -6,9 +6,9 @@
 > **Poussé : `1.142.16`** (`19604ea4`, sur `origin/main` à `116e11e4`, build `0916-1615`) : le lot 21, une évaluation dont un critère a quitté sa grille s'ouvre, le signale et le garde (#652) ; le drapeau mort retiré (#890). Pas encore vu par Grégoire dans l'app. **Cinq fiches entrées le soir** (#891 à #895), sorties de l'audit de « Exporter et archiver » (`Rapports/AUDIT-exporter-et-archiver-2026-09-16.md`) ; Grégoire a tranché « on inscrit tout ». #870 élargie à `.texte-muted`.
 > **(précédent) Poussé : `1.142.15`** (`79ed35cf`, build `0916-1529`) : le lot 20, « Annoter » depuis la liste (#651) et le nombre d'erreurs qui retombe à 0 (#700). Grégoire a vérifié #651 dans l'application. Avant lui, `1.142.14` (`71ca237f`).
 > **Les neuf du 16, dans l'ordre de ses rapports** : `1.142.7` fusion des PDF d'un même élève (décision reportée la veille, **tranchée par lui : option B**) · `1.142.8` une copie jetée quitte le carrousel · `1.142.9` le PDF respecte « Niveau de performance », et le choix s'enregistre · `1.142.10` un travail diagnostique ne pèse plus (« 1 retenue sur 4 possibles », ses mots) · `1.142.11` perspective et rognage survivent à « Re-déposer » · `1.142.12` « Supprimer un groupe » toujours visible · `1.142.13` les sept champs d'une séance sur une rangée · `1.142.14` sous l'outil Texte, le clic ouvre au lieu d'empiler. Avant elles, `1.142.6` : la place du bouton « + Nouveau… » uniformisée dans les six accordéons du Cadre.
-> **Compte : 234 fiches ouvertes au backlog**, remesuré le 16 sept. à 17 h 15 (`116e11e4`) : 235 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#895**. ⮕ Mesuré en comparant les ENSEMBLES de numéros (backlog − page = {#575} ; page − backlog = ∅).
-> ⚠ **L'ÉCART ENTRE LES DEUX COMPTES EST TOMBÉ À UN.** Ce document et l'artefact listent **233 entrées ouvertes** ; le seul écart restant est **#575**, détaillée ici en #575b/#575c et marquée livrée alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860). Hier l'écart était de deux ; le second était la ligne de #868, restée à « ni releasé ni poussé » – **elle est cochée depuis ce matin** (`476f3c03`).
-> ⚠ Vu en remesurant : **#521 et #523 ont chacune DEUX lignes au backlog** – une case cochée « tranché / clos le 26 août » et une case ouverte au numéro barré (`~~#521~~`, `~~#523~~`). Le tri les garde ouvertes « à revérifier », comme le backlog ; les fermer pour de bon revient à Grégoire.
+> **Compte : 232 fiches ouvertes au backlog**, remesuré le 16 sept. à 17 h 30 : 233 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#895**. ⮕ Mesuré en comparant les ENSEMBLES de numéros (backlog − page = {#575} ; page − backlog = ∅).
+> ⚠ **L'ÉCART ENTRE LES DEUX COMPTES EST TOMBÉ À UN.** Ce document et l'artefact listent **231 entrées ouvertes** ; le seul écart restant est **#575**, détaillée ici en #575b/#575c et marquée livrée alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860). Hier l'écart était de deux ; le second était la ligne de #868, restée à « ni releasé ni poussé » – **elle est cochée depuis ce matin** (`476f3c03`).
+> ✅ **#521 et #523 fermées le 16 sept. à 17 h 30, sur décision de Grégoire** : chacune avait deux lignes au backlog (case cochée « tranché / clos le 26 août », case ouverte au numéro barré) ; la case ouverte est cochée. Comptes : page 231, backlog 232, écart {#575}.
 > ⚠ **Les dix-huit fiches inscrites depuis le tri** (#862 à #865, #868 à #871, #878, #879, #887, #888, #890, #891 à #895) portent un palier lu dans l'audit ou dans la fiche, **pas mesuré au code**.
 > ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : vingt et un lots, en ligne.
 > ⛔ `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md` est **périmé** : les quatre questions sont closes depuis le 13. Ne pas le resservir.
@@ -148,18 +148,18 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 
 **Ce qu'un lot doit porter, appris des trois relectures** : pour chaque correctif, **la mutation qui ISOLE** le contrôle neuf. Un essai peut passer *pour la mauvaise raison* – un autre garde-fou intercepte avant celui qu'on croit éprouver – ou passer *à vide*, quand le harnais garantit lui-même ce que l'assertion prétend vérifier. Les trois lots ont chacun livré un cas des deux.
 
-## Les comptes – 16 septembre, 17 h 15
+## Les comptes – 16 septembre, 17 h 30
 
 | | fiches |
 |---|---:|
-| Q – rapides | 47 |
+| Q – rapides | 45 |
 | I – intermédiaires | 83 |
 | L – laborieuses | 98 |
 | indécidables en l'état | 5 |
-| **entrées ouvertes de ce tri** | **233** |
-| **fiches ouvertes au backlog de `main`** | **234** |
+| **entrées ouvertes de ce tri** | **231** |
+| **fiches ouvertes au backlog de `main`** | **232** |
 | dont en attente d'un arbitrage | 82 |
-| ✅ sorties du tri depuis son ouverture | 31 |
+| ✅ sorties du tri depuis son ouverture | 33 |
 
 Portée des arbitrages en attente : **19** se règlent par une phrase, **26** demandent un écran ou ses données, **13** ouvrent un chantier, **24** n'ont pas encore de portée établie.
 
@@ -399,7 +399,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 *suite de tests · intégration continue*
 
-- **Q** Deux tests rouges en suite, verts isolés – à revérifier (#523)
+- ✅ **Q** Deux tests rouges en suite, verts isolés *(close le 26 août ; case fermée le 16 sept.)* (#523)
 - **Q** Un test ne passe qu'au second essai (#685)
 - **I** Des tests rouges au hasard sur le serveur, verts en local (#833)
 
@@ -843,7 +843,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ### restaurer une archive
 
-- **Q** Le cours ne voyage pas avec la production – à revérifier (#521)
+- ✅ **Q** Le cours ne voyage pas avec la production *(tranchée le 26 août ; case fermée le 16 sept.)* (#521)
 
 ### rituel de commit
 
