@@ -3599,10 +3599,6 @@
         travauxArchivage.lancerExport(da, productionId);
     }
 
-    // Rétrocompatibilité
-    function lancerArchivageEtudiant() { lancerArchivage(); }
-    function lancerArchivageProduction() { lancerArchivage(); }
-
     /**
      * Lance l'archivage du semestre (structure dossiers élève/production)
      */
@@ -7425,8 +7421,6 @@
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
         lancerArchivage: lancerArchivage,
-        lancerArchivageEtudiant: lancerArchivageEtudiant,
-        lancerArchivageProduction: lancerArchivageProduction,
         lancerArchivageSemestre: lancerArchivageSemestre,
         lancerExportLea: lancerExportLea,
         mettreAJourCompteurLea: mettreAJourCompteurLea,
