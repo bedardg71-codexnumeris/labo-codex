@@ -473,10 +473,12 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(res.pratiqueP.silence).toBeNull();
     });
 
-    it('B2 · un BROUILLON (non verrouillé) : hors de la note du cours (#706), mais COMPTÉ comme remis par C et comme artefact par le dépistage', () => {
-        // À la main : Assidu, P4 en brouillon. Note du cours sans P4 = (60·20 + 70·20 + 80·30) / 70 = 71,43 → 71 ;
-        // C sommatif compte « noteFinale !== null » → 4/4 = 100 ; la fenêtre du dépistage (3 derniers) lit
-        // 90, 80, 70 → 0,80 et le RàI pédagogique croise P = 0,71 (< 0,75) → niveau 2, pattern « Stable ».
+    it('B2 · un BROUILLON (non verrouillé) : hors de la note du cours (#706), et depuis #737 hors de C ET du dépistage — valeur d\'après (constat d\'origine : remis pour C, artefact pour le dépistage)', () => {
+        // À la main : Assidu, P4 en brouillon. Note du cours sans P4 = (60·20 + 70·20 + 80·30) / 70 = 71,43 → 71.
+        // ↻ Valeur D'APRÈS #737 (lot A du 16 sept. 2026) : un brouillon ne compte nulle part. C sommatif = 3 remises sur
+        // 4 productions évaluées (P4 l'est par les autres) = 75 ; la fenêtre du dépistage (3 derniers) lit 80, 70, 60 → 0,70 ;
+        // le RàI pédagogique croise P = 0,71 (< 0,75) et 0,70 (< 0,75, ≥ 0,64) → niveau 2, « Difficulté émergente ».
+        // Avant : C 100 (« noteFinale !== null » suffisait), 90/80/70 → 0,80, niveau 2 « Stable ».
         const jeu = jeuBase(); jeu.evaluations.find(e => e.id === 'E1P4').verrouillee = false;
         const b = monter(jeu); b.calculerTout();
         const p = portrait(b, DA.ASSIDU);
@@ -484,10 +486,10 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         noter('B2', { p, ecartees });
         expect(p.P).toBe(71);
         expect(ecartees).toEqual({ brouillons: 1, sansPortee: 0, total: 1 });
-        expect(p.C).toBe(100);                    // le brouillon est « remis » pour C
-        expect(p.performance3).toBe(0.8);         // et il entre dans la performance du dépistage
+        expect(p.C).toBe(75);                     // le brouillon n'est PAS remis pour C — avant 100
+        expect(p.performance3).toBe(0.7);         // ni un artefact du dépistage — avant 0,80 (90, 80, 70)
         expect(p.nbArtefacts).toBe(3);
-        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Stable' });
+        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Difficulté émergente' });   // avant : « Stable »
     });
 
     it('B3 · une REPRISE : la note du cours remplace, et le dépistage aussi (#730 ; avant, il comptait l\'originale ET la reprise)', () => {
@@ -512,9 +514,11 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Difficulté émergente' });   // avant : niveau 3 « Difficulté persistante » (0,60 < 0,64)
     });
 
-    it('B4 · un « non remis » enregistré avec 0 : remis pour le C sommatif, écarté par le C des snapshots', () => {
-        // À la main : Silence reçoit une évaluation P1 à 0 marquée statutRemise « non-remis ». Le C sommatif ne lit pas ce
-        // statut (noteFinale !== null suffit) → 1 remise sur 4 = 25 ; le C historique des snapshots l'exclut → 0/1 = 0 au 1er février.
+    it('B4 · un « non remis » enregistré avec 0 : écarté par le C sommatif COMME par le C des snapshots — valeur d\'après #738 (constat d\'origine : C sommatif 25)', () => {
+        // À la main : Silence reçoit une évaluation P1 à 0 marquée statutRemise « non-remis ». ↻ Valeur D'APRÈS #738 (lot A du
+        // 16 sept. 2026, volet complétion) : la complétion ne compte JAMAIS un non-remis, par `evaluationNonRemise` (registre)
+        // → 0 remise sur 4 = 0 ; le C historique des snapshots l'exclut toujours → 0/1 = 0 au 1er février. Avant : C sommatif 25
+        // (« noteFinale !== null » suffisait ; le corps de calculerCompletion ne lisait pas le statut).
         const jeu = jeuBase();
         jeu.evaluations.push(ev('E3P1', DA.SILENCE, 'P1', 0, '0', ['0', '0', '0'], { statutRemise: 'non-remis' }));
         const b = monter(jeu); b.calculerTout();
@@ -522,10 +526,10 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         const hist = b.win.calculerIndicesHistoriques(DA.SILENCE, '2026-02-15');
         const srcSom = readFileSync(path.join(RACINE, 'js/pratiques/pratique-sommative.js'), 'utf8');
         const corpsC = tranche(srcSom, '    calculerCompletion(da) {', '    detecterDefis(da) {');
-        noter('B4', { cSom, cSnapshot: hist.C, completionSomLitStatutRemise: /statutRemise/.test(corpsC) });
-        expect(cSom).toBe(25);
+        noter('B4', { cSom, cSnapshot: hist.C, completionSomLitLePredicat: /evaluationNonRemise\(/.test(corpsC) });
+        expect(cSom).toBe(0);                                  // avant : 25
         expect(hist.C).toBe(0);
-        expect(/statutRemise/.test(corpsC)).toBe(false);   // l'historique SOM (l. 311) le lit ; le C courant, non
+        expect(/evaluationNonRemise\(/.test(corpsC)).toBe(true);   // le C courant lit le prédicat du registre — avant : ne lisait aucun statut
     });
 
     it('B5 · le même P partout : tableau de bord, liste, profil ET rapport lisent le même stock (#732 ; avant, le rapport levait, puis recalculait le sien)', () => {
@@ -635,18 +639,20 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         expect(Object.keys(moy)).toEqual(['structure', 'rigueur', 'nuance']);
     });
 
-    it('C7 · une évaluation SANS texte de rétroaction finale : elle compte dans P, pas dans le dépistage', () => {
-        // À la main : Assidu, P4 enregistrée sans `retroactionFinale`. P la compte (90 → 77) ; l'IPB, les moyennes par critère et
-        // le défi spécifique filtrent `e.retroactionFinale` → pour eux P4 n'existe pas (trois artefacts, pas quatre).
+    it('C7 · une évaluation SANS texte de rétroaction finale : elle compte dans P ET dans le dépistage — valeur d\'après #741 (constat d\'origine : trois artefacts pour l\'IPB, pas quatre)', () => {
+        // À la main : Assidu, P4 enregistrée sans `retroactionFinale`. P la compte (90 → 77). ↻ Valeur D'APRÈS #741 (lot A du
+        // 16 sept. 2026) : l'IPB, les moyennes par critère et le défi spécifique lisent `evaluationEntreDansLaNote`, plus
+        // `e.retroactionFinale` → P4 existe pour eux : quatre artefacts, score actuel = P4 sur Structure E (1,0) et Rigueur M (0,75)
+        // → 0,875. Avant : trois artefacts, score actuel P3 (0,75).
         const jeu = jeuBase(); jeu.evaluations.find(e => e.id === 'E1P4').retroactionFinale = '';
         const b = monter(jeu); b.calculerTout();
         const p = portrait(b, DA.ASSIDU);
         const ipb = b.win.calculerIPB(DA.ASSIDU);
         noter('C7', { P: p.P, nbArtefactsPerformance: p.nbArtefacts, nbHistoriqueIPB: ipb.historiqueComplet.length, dernierScoreIPB: r3(ipb.scoreActuel) });
         expect(p.P).toBe(77);
-        expect(p.nbArtefacts).toBe(3);                 // calculerIndicesNDerniersArtefacts ne filtre pas la rétroaction
-        expect(ipb.historiqueComplet.length).toBe(3);  // l'IPB, si : P4 est invisible pour lui
-        expect(r3(ipb.scoreActuel)).toBe(0.75);        // P3, pas P4 (0,875)
+        expect(p.nbArtefacts).toBe(3);                 // la fenêtre des 3 derniers (N = 3), inchangée
+        expect(ipb.historiqueComplet.length).toBe(4);  // l'IPB voit P4 — avant : 3
+        expect(r3(ipb.scoreActuel)).toBe(0.875);       // P4 — avant : P3 (0,75)
     });
 });
 

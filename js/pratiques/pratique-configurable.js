@@ -489,13 +489,15 @@ class PratiqueConfigurable {
         const productions = dsp ? dsp.filtrerProductions(productionsBrutes) : productionsBrutes;
         const evaluations = evaluationsBrutes;
 
-        // Identifier les productions qui ont été évaluées (au moins 1 évaluation existe)
+        // Identifier les productions qui ont été évaluées (au moins une copie qui COMPTE existe)
+        // Lot A du cadrage du 16 sept. 2026 (#737, #738) — les deux prédicats de pratique-registre.js,
+        // les mêmes que la sommative : une copie compte quand elle est ENREGISTRÉE ; une copie NON
+        // REMISE (« non-remis » ou « non-recu ») n'est jamais une remise, même notée 0.
         const productionsEvaluees = productions.filter(production => {
             if (production.facultatif) return false;
             return evaluations.some(e =>
                 e.productionId === production.id &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null
+                window.evaluationEntreDansLaNote(e)
             );
         });
 
@@ -508,8 +510,8 @@ class PratiqueConfigurable {
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null
+                window.evaluationEntreDansLaNote(e) &&
+                !window.evaluationNonRemise(e)
             );
         });
 

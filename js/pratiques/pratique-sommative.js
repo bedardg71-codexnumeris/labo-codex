@@ -308,7 +308,7 @@ class PratiqueSommative {
         // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
         const evaluationsEleve = evaluationsCache.filter(e => {
             if (e.da !== da) return false;
-            if (e.statutRemise === 'non-remis') return false;
+            if (window.evaluationNonRemise(e)) return false;   // lot A (16 sept. 2026) : « non-recu » aussi
             if (e.note === null || e.note === undefined) return false;
 
             // ✅ NOUVEAU (Beta 94): Filtrer par dateEcheance de la production
@@ -365,16 +365,19 @@ class PratiqueSommative {
         const productions = this._lireProductions();
         const evaluations = this._lireEvaluations();
 
-        // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES (au moins 1 évaluation existe)
+        // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES (au moins une copie qui COMPTE existe)
+        // Lot A du cadrage du 16 sept. 2026 (#737, #738) — les deux prédicats de pratique-registre.js :
+        // une copie compte quand elle est ENREGISTRÉE (un brouillon ne compte nulle part), et une copie
+        // NON REMISE (« non-remis » ou « non-recu ») n'est jamais une remise, même notée 0. Au
+        // dénominateur, un « non remis » enregistré atteste que le travail a été traité : il y reste.
         const productionsEvaluees = productions.filter(production => {
             // Exclure les productions facultatives
             if (production.facultatif) return false;
 
-            // Vérifier qu'au moins une évaluation existe pour cette production
+            // Vérifier qu'au moins une copie qui compte existe pour cette production
             return evaluations.some(e =>
                 e.productionId === production.id &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null
+                window.evaluationEntreDansLaNote(e)
             );
         });
 
@@ -387,8 +390,8 @@ class PratiqueSommative {
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null
+                window.evaluationEntreDansLaNote(e) &&
+                !window.evaluationNonRemise(e)
             );
         });
 

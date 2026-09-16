@@ -23,6 +23,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -67,6 +68,7 @@ function monter() {
         obtenirEtudiantsCoursActif: () => clone(store.test_groupeEtudiants), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 69, M: 100 }),
         resoudreModeleParId: (type, id) => clone((store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []).find(m => m.id === id) || null) };
     for (const nom of EXPORTS) if (!(nom in globaux) && !/^[A-Z]/.test(nom) && nom !== 'SEUILS_PAR_DEFAUT') globaux[nom] = fwd(nom);
+    chargerPredicatsCopie(win);
     chargerScript('js/interpretation-config.js', globaux, win);
     chargerScript('js/profil-etudiant-calculs.js', globaux, win);
     chargerScript('js/profil-etudiant-helpers.js', globaux, win);

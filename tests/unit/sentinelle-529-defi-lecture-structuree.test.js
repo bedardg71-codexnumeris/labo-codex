@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 // SENTINELLE #529 — Lot 2 : le défi spécifique se lit dans la DONNÉE, plus
 // jamais dans la prose.
@@ -64,6 +65,7 @@ beforeAll(() => {
     };
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
     chargerScript('js/profil-etudiant-calculs.js', stubs, win);
+    chargerPredicatsCopie(win);
 });
 
 // Une grille de sciences et une échelle en lettres : rien de commun avec SRPNF/IDME.
@@ -80,6 +82,7 @@ function evaluationLabo(id, niveauMethode, niveauResultats, texteRetro) {
         id, etudiantDA: '111', productionId: id, productionNom: 'Labo ' + id,
         dateEvaluation: '2026-0' + id.slice(-1) + '-01T10:00:00.000Z',
         echelleId: 'ECH_LETTRES',
+        noteFinale: 70,   // lot A (#741) : une copie enregistrée porte une note ; le texte ne la fait plus compter
         retroactionFinale: texteRetro,
         criteres: [
             { critereId: 'C_METH', critereNom: 'Méthode', niveauSelectionne: niveauMethode, ponderation: 40 },
@@ -120,6 +123,7 @@ describe('#529 Lot 2 · le défi se lit dans criteres[], plus dans la rétroacti
         evaluationsEnBase = [{
             id: 'P1', etudiantDA: '111', productionId: 'P1', productionNom: 'Labo',
             dateEvaluation: '2026-05-01T10:00:00.000Z', echelleId: 'ECH_LETTRES',
+            noteFinale: 70,   // lot A (#741)
             retroactionFinale: 'peu importe',
             criteres: [
                 { critereId: 'C_A', critereNom: 'Méthode', niveauSelectionne: 'C' },   // 0.68
@@ -152,10 +156,10 @@ describe('#529 Lot 2 · le défi se lit dans criteres[], plus dans la rétroacti
         ];
         evaluationsEnBase = [
             { id: 'P1', etudiantDA: '111', productionId: 'P1', dateEvaluation: '2026-05-02T10:00:00Z',
-              echelleId: 'ECH_LETTRES', retroactionFinale: 'x',
+              echelleId: 'ECH_LETTRES', noteFinale: 70, retroactionFinale: 'x',
               criteres: [{ critereId: 'C_M', critereNom: 'Méthode', niveauSelectionne: 'A' }] },   // 0.95
             { id: 'P2', etudiantDA: '111', productionId: 'P2', dateEvaluation: '2026-05-01T10:00:00Z',
-              echelleId: 'ECH_QUATRE', retroactionFinale: 'x',
+              echelleId: 'ECH_QUATRE', noteFinale: 70, retroactionFinale: 'x',
               criteres: [{ critereId: 'C_M', critereNom: 'Méthode', niveauSelectionne: 'A' }] }    // 0.25
         ];
         const r = win.identifierDefiSpecifique('111');

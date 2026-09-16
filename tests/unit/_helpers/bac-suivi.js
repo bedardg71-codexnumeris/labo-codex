@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './charger-script.js';
+import { chargerPredicatsCopie } from './predicats-copie.js';
 
 export const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 export const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -140,6 +141,12 @@ export function monter(store, opts = {}) {
         globaux.obtenirNiveauIDMEDepuisPourcentage = winHelpers.obtenirNiveauIDMEDepuisPourcentage;
     }
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;
+    // Lot A du 16 sept. 2026 : les calculs du profil, les complétions, snapshots.js et le rapport appellent
+    // `window.evaluationEntreDansLaNote` / `window.evaluationNonRemise` (pratique-registre.js). Posés en VRAI,
+    // avant les modules ; un banc qui charge le registre lui-même les réécrit à l'identique.
+    chargerPredicatsCopie(win);
+    if (!('evaluationEntreDansLaNote' in globaux)) globaux.evaluationEntreDansLaNote = win.evaluationEntreDansLaNote;
+    if (!('evaluationNonRemise' in globaux)) globaux.evaluationNonRemise = win.evaluationNonRemise;
     const modules = opts.modules || [];
     const exportsWindow = new Set();
     for (const f of modules) for (const m of readFileSync(path.join(RACINE, f.chemin || f), 'utf8').matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) exportsWindow.add(m[1]);

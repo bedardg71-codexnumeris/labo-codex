@@ -773,6 +773,14 @@ function creerComparateurRecenceStd(productions) {
    Les DEUX systèmes (calculerDetailsNoteFinale et chaque calculerPerformance) passent ici,
    et le profil comme l'export disent combien ont été écartées (compterEvaluationsEcarteesDeLaNote).
 
+   ⮕ LOT A DU CADRAGE DU 16 SEPT. 2026 (#737, #741, #718) — LA MÊME RÈGLE VAUT PARTOUT :
+   « une copie compte quand l'enseignant l'a ENREGISTRÉE, avec ou sans commentaire final ».
+   La complétion (SOM, configurable, STD, snapshots), le dépistage (moyennes par critère,
+   IPB, défi spécifique, directions, performance des N derniers artefacts, carte RàI) et le
+   niveau de la note globale (échelle commune) lisent CE prédicat, et plus jamais
+   `e.retroactionFinale` (le filtre datait de la lecture de la prose, #529). Un brouillon
+   (verrouillee: false) ne compte donc nulle part — décision de Grégoire, 16 sept. 2026.
+
    ⚠ « Incomplète » se juge SANS relire la grille : la porte #674 refuse d'enregistrer une
    portée partielle, donc une évaluation verrouillée est complète à l'enregistrement — sauf
    le zéro « rien couvert » (portée 0 : évaluation enregistrée sans aucun critère, ou fossile
@@ -796,6 +804,22 @@ function evaluationEntreDansLaNote(evaluation) {
     if (evaluation.verrouillee === false) return false;
     if (evaluation.ponderationCouverte === 0) return false;
     return true;
+}
+
+/**
+ * Lot A du cadrage du 16 sept. 2026 (#738, volet complétion) — LA COPIE EST NON REMISE.
+ * Deux valeurs pour une seule réalité : « non-remis », que l'ancien menu écrivait, et
+ * « non-recu », que le menu de remise écrit depuis février 2026 (c'est aussi sa valeur par
+ * défaut). La complétion ne compte JAMAIS une copie non remise, quelle que soit la pratique ;
+ * ce que sa NOTE vaut reste la règle de sa famille (cadrage du 5 sept., hors de ce prédicat).
+ * ⚠ Un seul lecteur de ces deux chaînes dans les calculs : ici. Un site qui les recopie
+ * en oublie une (mesuré le 16 sept. : STD et les snapshots ne lisaient que « non-remis »).
+ * @param {Object} evaluation
+ * @returns {boolean}
+ */
+function evaluationNonRemise(evaluation) {
+    if (!evaluation) return false;
+    return evaluation.statutRemise === 'non-remis' || evaluation.statutRemise === 'non-recu';
 }
 
 /**
@@ -824,6 +848,8 @@ window.enregistrerPratique = enregistrerPratique;
 // #706 — la règle unique de ce qui entre dans la note du cours, et son compte
 window.evaluationEntreDansLaNote = evaluationEntreDansLaNote;
 window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
+// Lot A (16 sept. 2026) — la règle unique de ce qui est « non remis » (deux chaînes, un lecteur)
+window.evaluationNonRemise = evaluationNonRemise;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

@@ -30,6 +30,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -90,6 +91,7 @@ function monterProfil(grille = GRILLE, evaluations = EVALUATIONS()) {
     stubs.estCritereSurveilleParDepistage = win.estCritereSurveilleParDepistage;
     stubs.criteresSurveillesParDepistage = win.criteresSurveillesParDepistage;
     chargerScript('js/profil-etudiant-calculs.js', stubs, win);
+    chargerPredicatsCopie(win);
     return win;
 }
 

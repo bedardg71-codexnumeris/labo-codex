@@ -230,11 +230,13 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     // (constat G-2, 5 sept. 2026). Le repli entier reste #716 ; les snapshots déjà écrits gardent leur valeur.
     const evaluationsFiltrees = evaluations.filter(e => {
         if (e.etudiantDA !== da) return false;
-        if (!e.productionId || e.remplaceeParId) return false;
+        if (!e.productionId) return false;
 
-        // ✅ NOUVEAU : Vérifier que l'évaluation a bien une note ET n'est pas "non remis"
-        if (e.statutRemise === 'non-remis') return false;
-        if (e.noteFinale === null || e.noteFinale === undefined) return false;
+        // Lot A (16 sept. 2026) — une copie qui COMPTE (règle unique #706 : enregistrée, non remplacée,
+        // avec note) et qui n'est pas NON REMISE (« non-remis » ou « non-recu »). Les snapshots déjà
+        // écrits gardent leur valeur : ce filtre tarit la source, il ne réécrit pas le stock.
+        if (!window.evaluationEntreDansLaNote(e)) return false;
+        if (window.evaluationNonRemise(e)) return false;
 
         // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
         const dateEcheance = obtenirDateEcheance(e);
@@ -275,10 +277,8 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                e.statutRemise !== 'non-remis' &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null &&
-                e.noteFinale !== undefined
+                window.evaluationEntreDansLaNote(e) &&   // lot A (16 sept. 2026) : les deux prédicats de pratique-registre.js
+                !window.evaluationNonRemise(e)
             );
         });
 
@@ -635,10 +635,8 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         if (dernierTravail) {
             const nbRemis = evaluationsCache.filter(e =>
                 e.productionId === dernierTravail.id &&
-                e.statutRemise !== 'non-remis' &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null &&
-                e.noteFinale !== undefined
+                window.evaluationEntreDansLaNote(e) &&   // lot A (16 sept. 2026) : les deux prédicats de pratique-registre.js
+                !window.evaluationNonRemise(e)
             ).length;
             cGlobal = Math.round((nbRemis / nbEtudiants) * 100);
         }

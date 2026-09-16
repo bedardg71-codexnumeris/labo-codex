@@ -704,9 +704,10 @@ function tableConversionPourEvaluation(evaluation, cache) {
  *   `raison` nulle quand une seule échelle est en jeu et qu'elle se résout.
  */
 function obtenirEchelleCommuneDesEvaluations(da) {
+    // #718 (lot A, 16 sept. 2026) — une copie enregistrée situe une note, texte ou pas.
     var evaluations = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
         .filter(function (e) {
-            return e && e.etudiantDA === da && e.retroactionFinale && !e.remplaceeParId;
+            return e && e.etudiantDA === da && window.evaluationEntreDansLaNote(e);
         });
 
     if (evaluations.length === 0) {
@@ -778,10 +779,10 @@ function obtenirEchelleCommuneDesEvaluations(da) {
 function diagnostiquerConversionNiveaux(da) {
     var evaluations = (obtenirDonneesSelonMode('evaluationsSauvegardees') || [])
         .filter(function (e) {
-            // Mêmes exclusions que les calculs : les évaluations remplacées
-            // portent l'état d'AVANT une reprise, les compter ferait remonter
-            // un modèle périmé.
-            return e && e.etudiantDA === da && e.retroactionFinale && !e.remplaceeParId;
+            // Mêmes exclusions que les calculs (lot A, 16 sept. 2026) : la règle
+            // unique #706 — les remplacées portent l'état d'AVANT une reprise, les
+            // brouillons ne sont pas encore le jugement de l'enseignant.
+            return e && e.etudiantDA === da && window.evaluationEntreDansLaNote(e);
         });
 
     if (evaluations.length === 0) return null;
@@ -942,10 +943,9 @@ function _moyennesCriteresDepistage(evaluations, grille) {
 function calculerMoyennesCriteres(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
-    // Filtrer toutes les évaluations de l'étudiant avec rétroaction finale
-    // #730 — une évaluation remplacée par une reprise porte l'état d'AVANT : le dépistage ne la compte plus
-    // (audit du 5 septembre 2026, B-3 : l'originale ET la reprise pesaient dans chaque moyenne).
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale && !e.remplaceeParId);
+    // Les copies qui COMPTENT (#741, lot A du 16 sept. 2026) : la règle unique #706 — enregistrées,
+    // non remplacées (#730 : l'originale d'une reprise porte l'état d'avant), avec ou sans commentaire final.
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
 
 
     if (evaluationsEleve.length === 0) {
@@ -997,9 +997,8 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        !e.remplaceeParId &&   // #730 — la remplacée porte l'état d'avant la reprise
-        productionsIds.includes(e.productionId) &&
-        e.retroactionFinale
+        window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730 pour la remplacée
+        productionsIds.includes(e.productionId)
     );
 
     if (evaluationsEleve.length === 0) {
@@ -1040,9 +1039,8 @@ function _normaliserNomCritereIPB(nom) {
 function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
     var filtrees = evaluations.filter(function (e) {
         return e.etudiantDA === da &&
-            !e.remplaceeParId &&   // #730 — l'IPB comptait l'originale ET la reprise (cinq artefacts pour quatre travaux)
+            window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730 — l'IPB comptait l'originale ET la reprise
             productionsIds.indexOf(e.productionId) >= 0 &&
-            e.retroactionFinale &&
             e.criteres && Array.isArray(e.criteres);
     });
     // Trier chronologiquement (plus récent d'abord)
@@ -1400,10 +1398,8 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        !e.remplaceeParId &&   // #730 — la performance du RàI lisait 50, 75, 55 là où la note du cours lit 50, 75, 70
-        productionsIds.includes(e.productionId) &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined
+        window.evaluationEntreDansLaNote(e) &&   // #737 (lot A) : un brouillon ne compte nulle part ; #730 — la performance du RàI lisait 50, 75, 55 là où la note du cours lit 50, 75, 70
+        productionsIds.includes(e.productionId)
     );
 
     if (evaluationsEleve.length === 0) {
@@ -1603,9 +1599,8 @@ function identifierDefiSpecifique(da) {
 
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        !e.remplaceeParId &&   // #730
-        productionsIds.includes(e.productionId) &&
-        e.retroactionFinale
+        window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730
+        productionsIds.includes(e.productionId)
     );
 
     if (evaluationsEleve.length === 0) {
@@ -1785,7 +1780,9 @@ function depistagePeutJugerLaNonParticipation() {
 
     const evaluationsBrutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluations = dsp ? dsp.filtrerEvaluations(evaluationsBrutes, productions) : evaluationsBrutes;
-    const copieEvaluee = evaluations.some(e => e && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined);
+    // #737 (lot A, 16 sept. 2026) — « copie évaluée » = copie qui compte : un brouillon commencé ne rend
+    // pas la classe jugeable (réserve de la relecture croisée du 5 sept., tranchée avec #737).
+    const copieEvaluee = evaluations.some(e => window.evaluationEntreDansLaNote(e));
     if (!copieEvaluee) return { possible: false, raison: 'aucune-copie-evaluee' };
 
     return { possible: true, raison: null };
