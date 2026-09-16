@@ -7,7 +7,35 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 17 H 45 (Toronto) : 1.142.17 (#891, #894) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 18 H 50 (Toronto) : 1.142.18 (#739, #740) SUR `main`
+
+> **1.142.18** (`4ef65597`, build `0916-1824`) porte **#739** et **#740**, le **lot B** du cadrage `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md`
+> (« Un critère lu une seule fois » ; mandat de Grégoire, 18 h, choisi parce qu'il ne lui demandait ni mot ni vérification à l'écran).
+> **Remesure avant de coder** : les sept fonctions du relevé de Cowork sont aux lignes dites ; le champ des points est `ponderation`
+> (ce que `_collecterCriteresAutoSave` écrit), pas `pointsMax` (mot de la fiche) ; `scoreCritereEvaluation` (l. 614, #752) existait déjà
+> comme source des courbes et se désignait « candidat unique » pour #739. **Livré** : (#739) moyennes par critère, IPB, défi spécifique
+> et directions lisent `scoreCritereEvaluation` — plus aucun `convertirNiveauEnScore(…niveauSelectionne)` hors de son corps ;
+> (#740) `estCritereSurveilleParDepistage` / `criteresSurveillesParDepistage` dans `profil-etudiant-helpers.js` (à côté de
+> `obtenirGrilleReferenceDepistage`), le SEUL filtre « aucun » ; les lecteurs y passent par la liste ou par `trouverCritereDepistage`
+> (appariement par nom, calculs) : barres (`criteresDeLaGrillePourAffichage`, `obtenirCriteresAvecValeurs`), moyennes (les deux corps
+> jumeaux fusionnés en `_moyennesCriteresDepistage`), IPB (multistructurel PARMI les surveillés — la chaîne de la sentinelle lot 4-B
+> conservée), forces/défis, défi spécifique (garde `grille && !trouverCritereDepistage`), cibles d'intervention (rien à changer :
+> elles lisent les moyennes). **Supposé, à corriger en dix secondes** : sans grille de référence, `identifierDefiSpecifique` lit tout
+> comme avant ; avec une grille, un critère d'évaluation absent de la grille par le nom est désormais ignoré par le défi spécifique
+> comme il l'était déjà par les moyennes et l'IPB. **Aucun mot neuf à l'écran** ; la phrase de l'Aide vérifiée, pas réécrite. **Stock** :
+> rien réécrit — une intervention enregistrée avec un critère « Aucun » ciblé le garde (TARIR, PAS RÉPARER). Témoin :
+> `sentinelle-lot-B-739-740-critere-lu-une-seule-fois` (20 essais ; helpers + calculs réels, interventions.js réel pour la pré-coche) ;
+> **11 mutations / 11 rouges** (M1 retour au niveau : 9 rouges ; M2 filtre retiré : 10 ; M3a-f site par site : 12/1/3/3/1/1 ;
+> M4-M6 le niveau site par site : 2/3/1). Audit du 5 sept. C5 et C6 passés à la valeur d'après ; 529-défi et lot 4-B adaptés au
+> filtre qui vit dans helpers (le VRAI, pas une copie). Vitest 578 / 6 477 après le commit du bump. **Aucune porte terrain** : la mise
+> en page ne bouge pas. « Nouvelles » : phrase validée par Grégoire (18 h 20). ⚠ Le commit de release a été amendé pour y joindre
+> `version.js` (jumeau généré) avec `LABO_ANTICACHE_SKIP=1` : le hook comparait à un HEAD qui portait déjà l'URL bumpée
+> (`?v=09161824`, vérifié contre `0a0b144c` : `09161719`). Poussée par `pousser.sh origin main` avec `0a0b144c` (docs de Cowork)
+> — voir le rapport de session pour le verdict Playwright. Dernier ID : #895 (aucune fiche neuve). **Restent du cadrage** : lots F,
+> C, A, E, D (chacun remonte un mot ou une porte, sauf A). **Pour Cowork** : relecture croisée du lot B et mise à jour de l'artefact
+> du tri (markdown à jour : lot 23).
+
+## (précédent) 16 SEPT. 2026, ≈ 17 H 45 (Toronto) : 1.142.17 (#891, #894) SUR `main`
 
 > **Ajout de 17 h 51 (Cowork) — relecture croisée de 1.142.17 : VERTE, par exécution.** Sentinelle 891 lancée seule dans une copie jetable (hors du dépôt) : 9 / 9. **Six mutations différentes de celles de Claude Code, six rouges** : `exportes` poussé avant l'écriture (2 rouges) ; blob absent sauté en silence (2) ; bilan de `lancerExport` vidé (1) ; `lancerExportEtudiant` qui remarque tout le filtre (1) ; version annotée jamais jointe (1) ; titre de production brut dans « Trimestre complet » (1). Seuls appelants hors module : le bouton du profil, par `lancerExportEtudiant` ; le changement de forme du retour ne casse rien. **Aucune retouche.** Deux constats, sans conséquence observable : une copie dont seule la version annotée échoue part quand même dans le ZIP, mais le bilan la compte en échec et elle n'est pas marquée « exportée » (prudent, même modèle que #565) ; « Blob introuvable » est un mot technique lu par les collègues dans le bilan, déjà affiché par l'export Léa avant ce lot. ⚠ **Faute de Cowork** : il a écrit dans `BACKLOG.md` et trois cadrages pendant le verdict, alors que la consigne demande que Cowork soit fermé ; ces fichiers sont commités par Cowork juste après cet ajout (les onze règles du dépistage, `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md`).
 
