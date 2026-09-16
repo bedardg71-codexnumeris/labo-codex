@@ -1,14 +1,14 @@
 # Tri des fiches ouvertes par coût de preuve – 13 septembre 2026
 
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
-> **Mis à jour le 16 sept. à 15 h 00** (14 h 45 pour les comptes, inchangés : `BACKLOG.md` n'a pas bougé depuis `71ca237f`) – **dix-neuf lots menés depuis le tri, et les dix-neuf sont en ligne.**
+> **Mis à jour le 16 sept. à 15 h 50** (comptes remesurés sur `79ed35cf`) – **vingt lots menés depuis le tri, et les vingt sont en ligne.**
 > ⚠ **DEUX JOURNÉES DE SUITE SANS TOUCHER AU TRI, ET C'EST L'ORDRE VOULU.** Le 15 a livré six versions, le 16 en a livré neuf, et **les quinze répondaient à un rapport de testeur** – ceux de Grégoire, celui de Mathieu. Les fiches d'ici n'ont pas bougé : ⮕ **ce n'est pas un retard du tri, c'est la règle des retours qui s'applique.**
-> **Poussé : `1.142.14`** (`71ca237f` sur `origin/main`, build `0916-1312`). Grégoire a vérifié dans l'application les trois derniers correctifs (« ça fonctionne »).
+> **Poussé : `1.142.15`** (`79ed35cf` = `origin/main`, build `0916-1529`) : le lot 20, « Annoter » depuis la liste (#651) et le nombre d'erreurs qui retombe à 0 (#700). Grégoire a vérifié #651 dans l'application. Avant lui, `1.142.14` (`71ca237f`).
 > **Les neuf du 16, dans l'ordre de ses rapports** : `1.142.7` fusion des PDF d'un même élève (décision reportée la veille, **tranchée par lui : option B**) · `1.142.8` une copie jetée quitte le carrousel · `1.142.9` le PDF respecte « Niveau de performance », et le choix s'enregistre · `1.142.10` un travail diagnostique ne pèse plus (« 1 retenue sur 4 possibles », ses mots) · `1.142.11` perspective et rognage survivent à « Re-déposer » · `1.142.12` « Supprimer un groupe » toujours visible · `1.142.13` les sept champs d'une séance sur une rangée · `1.142.14` sous l'outil Texte, le clic ouvre au lieu d'empiler. Avant elles, `1.142.6` : la place du bouton « + Nouveau… » uniformisée dans les six accordéons du Cadre.
-> **Compte : 232 fiches ouvertes au backlog**, remesuré le 16 sept. à 14 h 45 (`71ca237f`) : 233 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#889**.
-> ⚠ **L'ÉCART ENTRE LES DEUX COMPTES EST TOMBÉ À UN.** Ce document et l'artefact listent **231 entrées ouvertes** ; le seul écart restant est **#575**, détaillée ici en #575b/#575c et marquée livrée alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860). Hier l'écart était de deux ; le second était la ligne de #868, restée à « ni releasé ni poussé » – **elle est cochée depuis ce matin** (`476f3c03`).
-> ⚠ **Les douze fiches inscrites depuis le tri** (#862 à #865, #868 à #871, #878, #879, #887, #888) portent un palier lu dans l'audit ou dans la fiche, **pas mesuré au code**.
-> ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : dix-neuf lots, en ligne.
+> **Compte : 231 fiches ouvertes au backlog**, remesuré le 16 sept. à 15 h 50 (`79ed35cf`) : 232 cases `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». Dernier ID : **#890**. ⮕ Mesuré en comparant les ENSEMBLES de numéros (backlog − page = {#575} ; page − backlog = ∅).
+> ⚠ **L'ÉCART ENTRE LES DEUX COMPTES EST TOMBÉ À UN.** Ce document et l'artefact listent **230 entrées ouvertes** ; le seul écart restant est **#575**, détaillée ici en #575b/#575c et marquée livrée alors que sa case reste ouverte au backlog pour ce qu'il en reste (#860). Hier l'écart était de deux ; le second était la ligne de #868, restée à « ni releasé ni poussé » – **elle est cochée depuis ce matin** (`476f3c03`).
+> ⚠ **Les treize fiches inscrites depuis le tri** (#862 à #865, #868 à #871, #878, #879, #887, #888, #890) portent un palier lu dans l'audit ou dans la fiche, **pas mesuré au code**.
+> ⮕ Ce nombre ne mesure pas l'avancement : il monte quand on cherche mieux. Ce qui se mesure est en tête : vingt lots, en ligne.
 > ⛔ `plans de travail/QUESTIONS-EN-ATTENTE-2026-09-13.md` est **périmé** : les quatre questions sont closes depuis le 13. Ne pas le resservir.
 
 ## Journal des lots
@@ -108,9 +108,15 @@ Dernier lot de la grappe des échelles. L'ancien éditeur de niveaux – celui q
 
 ⮕ **Trois fiches sont entrées** : **#887** l'import rattache la liste au cours ACTIF sans le nommer (c'est le mécanisme A de #872, resté non traité en 1.142.1 — il entre parce que Mathieu l'a **vécu**) ; **#888** l'étiquette du champ Périodes, relevée par la session et inscrite **sur décision de Grégoire**, la règle du 24 août l'excluant sans son avis ; **#879** la forme des six boutons « + Nouveau… », **inscrite pour ne pas être ouverte** – aucun symptôme vécu, et le Cadre est du travail d'installation, vraisemblablement au Mac. Elle se réveille si un membre de la CoP fait son installation sur iPad.
 
-⮕ **Ce qui reste à Grégoire, et rien ne se code avant** : #860, #871, #874. Prose à corriger, pas un arbitrage : #878, #888. **Porte reportée par lui au prochain artefact, vers le 23-30 sept.** : perspective et rognage après rechargement puis « Re-déposer » (#884). **Réglée selon lui (16 sept., après-midi)** : la question du profil qui montrait des pourcentages par travail sous « note différée » – ne plus la poser.
+⮕ **Ce qui reste à Grégoire, et rien ne se code avant** : #860, #874, et **onze questions du dépistage rassemblées le 16 sept. à 16 h 30 sur l'artefact « Questions du dépistage »** (#860 en fait partie). ⚠ **#871 ne l'attend plus** : tranchée le 15 au soir pour l'assiduité ; la complétion attend une mesure. Prose à corriger, pas un arbitrage : #878, #888. **Porte reportée par lui au prochain artefact, vers le 23-30 sept.** : perspective et rognage après rechargement puis « Re-déposer » (#884). **Réglée selon lui (16 sept., après-midi)** : la question du profil qui montrait des pourcentages par travail sous « note différée » – ne plus la poser.
 
 ⮕ **Page alignée à 15 h 00** : l'item « À toi » périmé du 15 (qui disait « deux autres » et n'en nommait qu'une) est retiré de la page ; il reste ici, dans le journal du 15, comme trace.
+
+### Lot 20 – « Annoter » depuis la liste ouvre la copie avec ses outils ; le nombre d'erreurs retombe à 0 ✅ LIVRÉ en 1.142.15 (#651, #700)
+
+Premier lot du tri depuis le 14, choisi par Grégoire parce qu'il travaille dans l'Évaluation. **La cause écrite dans la fiche était fausse** : la « zone morte » de `ouvrirFichier` ne joue sur aucun trajet mesuré ; le vrai chemin (donné par son rapport du 31 août) passe par un détour hors d'Évaluations, au retour duquel la réinitialisation ferme les palettes d'évaluation sans rendre celles d'annotation. Remède d'une ligne (`afficherPalettesAnnotation()` dans la branche par défaut). **Ma supposition du point 2 (la vignette du profil) était fausse** : avant #761, ce chemin menait à une page vide – sortie du lot. **#700 est entré avant le verdict**, même parcours : le champ suit les annotations jusqu'à 0 tant qu'il contient le total qu'elles y ont écrit ; une saisie manuelle n'est jamais écrasée (décision technique de Cowork). **Stock** : un compte fantôme déjà enregistré le reste. **Nouvelles** : texte corrigé par Grégoire. **Trouvaille** : #890 (`_resterEnModeAnnoter` lu, plus jamais posé) – inscrite sur ma consigne « défaut : inscrire », qui contredisait la règle du 24 août (symptôme vécu) : mon erreur.
+
+⮕ **#652 n'est PAS couverte par le correctif du 4 sept. – mon inférence de 15 h 50 était fausse, réfutée par la mesure de 15 h 52** : `f485ea34` corrigeait l'attente d'un premier critère ANALYTIQUE (`eval_pts_`), et ce champ n'existe que depuis le 3 sept. (`37660b76`) ; le timeout du 31 août a donc une autre cause, non mesurée. Hypothèse de Cowork : le premier critère de l'évaluation n'existe plus dans la grille rendue. Mise en diagnostic dans la consigne du 16 sept., 15 h 52.
 
 ## Ce que valent les goulots de ce tri – deuxième avertissement, mesuré
 
@@ -132,18 +138,18 @@ Le palier ne mesure pas la taille du changement, mais **la preuve à produire av
 
 **Ce qu'un lot doit porter, appris des trois relectures** : pour chaque correctif, **la mutation qui ISOLE** le contrôle neuf. Un essai peut passer *pour la mauvaise raison* – un autre garde-fou intercepte avant celui qu'on croit éprouver – ou passer *à vide*, quand le harnais garantit lui-même ce que l'assertion prétend vérifier. Les trois lots ont chacun livré un cas des deux.
 
-## Les comptes – 16 septembre, 14 h 45
+## Les comptes – 16 septembre, 15 h 50
 
 | | fiches |
 |---|---:|
-| Q – rapides | 45 |
-| I – intermédiaires | 83 |
+| Q – rapides | 46 |
+| I – intermédiaires | 81 |
 | L – laborieuses | 98 |
 | indécidables en l'état | 5 |
-| **entrées ouvertes de ce tri** | **231** |
-| **fiches ouvertes au backlog de `main`** | **232** |
+| **entrées ouvertes de ce tri** | **230** |
+| **fiches ouvertes au backlog de `main`** | **231** |
 | dont en attente d'un arbitrage | 82 |
-| ✅ sorties du tri depuis son ouverture | 27 |
+| ✅ sorties du tri depuis son ouverture | 29 |
 
 Portée des arbitrages en attente : **19** se règlent par une phrase, **26** demandent un écran ou ses données, **13** ouvrent un chantier, **24** n'ont pas encore de portée établie.
 
@@ -351,11 +357,12 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 - **L** Des cartouches archivées n'apparaissent pas dans la liste – trois modules et plus (#637)
 - **L** Consulter une archive sans la désarchiver – trois modules et plus (#257)
 
-### `js/travaux-ui.js` – 3 ouvertes sur 3
+### `js/travaux-ui.js` – 3 ouvertes sur 4
 
 *Évaluations › annoter une copie · Travaux › Importer et Exporter et 1 autres écrans*
 
-- **I** Annoter depuis la liste ouvre la copie sans aucune palette (#651)
+- ✅ **I** Annoter depuis la liste ouvre la copie sans aucune palette *(livré 1.142.15)* (#651)
+- **Q** Un drapeau de mode est encore lu, alors que plus rien ne le pose (#890)
 - **L** Six clés de session sans préfixe de trimestre peuvent se mélanger – trois modules et plus (#596)
 - **L** La balance des blancs s'applique aux photos sans aperçu – trois modules et plus (#598)
 
@@ -510,7 +517,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ### annotation d'une copie
 
-- **I** Retirer toutes les annotations laisse l'ancien compte d'erreurs (#700)
+- ✅ **I** Retirer toutes les annotations laisse l'ancien compte d'erreurs *(livré 1.142.15)* (#700)
 
 ### anonymisation avant partage
 

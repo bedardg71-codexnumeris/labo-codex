@@ -88,15 +88,19 @@ markdown divergent. **L'écart entre les deux comptes est tombé à un** – #57
 backlog pour ce qu'il en reste (#860). ⮕ **La méthode qui l'a clos : comparer les ENSEMBLES de numéros, pas les totaux.** Six révisions
 du compte avaient échoué à le faire.
 
-⚠ **À REPORTER AU TRI À L'OUVERTURE (ajout du 16 sept., 15 h 30)** : « Annoter » depuis la liste (#651) et le nombre d'erreurs qui retombe à 0 (#700) sont partis en lot vers `1.142.15` ; **vérifie sur `origin/main` qu'ils sont poussés** avant de les marquer livrés sur la page ET dans le markdown. Et #890 est inscrite (`_resterEnModeAnnoter` lu sans être posé) : à ajouter aux deux jumeaux.
+⚠ **Depuis 16 h, chaque case du haut de la page montre l'avancement contre le départ** (« 81 · sur 95 · 14 closes »), à la demande de Grégoire. Le calcul lit la liste `INSCRITES_DEPUIS` dans le script de la page : **toute fiche ajoutée à `FICHES` s'ajoute aussi à cette liste**, sinon elle compte comme « du départ ». Départ du 13 sept. : 246 rangées (dont #575b/#575c, détails de #575).
+
+✅ **Reporté au tri le 16 sept. à 15 h 50** : `1.142.15` (#651, #700) est poussée et marquée livrée sur les deux jumeaux, #890 ajoutée. Page 230, backlog 231, écart #575 seul (mesuré par ensembles).
 
 **c) QUATRE QUESTIONS ATTENDENT GRÉGOIRE, et rien ne se code avant.**
 1. **#860** – deux graphiques de groupe dessinent encore les paliers d'une échelle sous des pourcentages agrégés. ⚠ La décision du 13 sur
    le graphique individuel **ne s'y étend pas d'office**. Pose la question avec une recommandation.
-2. **#871** – le pourcentage et la fraction affichés côte à côte se contredisent (assiduité, complétion).
+2. ~~**#871**~~ – **déjà tranchée le 15 sept. au soir** pour l'assiduité (« 90 % (22,5 / 25) »), prête à coder ; la complétion attend la MESURE de DEMO015 que Grégoire a demandée. Ne plus la poser (constaté par la revue du 16 sept., 16 h 30).
 3. **#874** – les PDF sans aperçu dans la file d'import : inscrit, non diagnostiqué.
 4. **Le calcul du profil** qui montre les pourcentages par travail malgré « note différée » : question posée le 16 au matin, **RÉGLÉE selon Grégoire
    (16 sept., après-midi, rapporté par Claude Code)**. Ne plus la poser.
+
+**c bis) ONZE QUESTIONS DU DÉPISTAGE SONT SUR UNE PAGE À PART (16 sept., 16 h 30)** : l'artefact « Questions du dépistage » (https://claude.ai/artifact/TyZfhhuGqCWb3ZBVzz2RAJ), une recommandation par question, les choix de Grégoire enregistrés dans son stockage (`db`, collection `decisions`, un document par question). ⮕ **Lis-les avec l'outil ArtifactData (`list` sur `decisions`) avant de rédiger quoi que ce soit** ; ne les repose pas en conversation. Fiches couvertes : #737+#741+#718, #738, #739, #740, #744, #822, #735+#750, #743, #745, #860, #828. Tranchées seul par Cowork et écrites sur la page : #554 (branche morte, à retirer), #677 (à fermer, pastilles 60/50 en constante documentée), #738 (`'non-recu'` ignoré par les calculs : défaut technique). Revue faite sur `26d4347f` par lecture, trois sous-agents ; leurs mesures détaillées ne sont pas écrites ailleurs : à remesurer au moment de cadrer chaque lot.
 
 **d) DEUX FICHES SONT DE LA PROSE À CORRIGER, PAS UN ARBITRAGE** : **#878** (l'Aide ne dit nulle part comment nommer les pages d'une
 remise : `-p1`, `-p2`) et **#888** (Horaire : le champ Périodes sans étiquette visible une fois rempli). ⚠ **Propose-lui un texte à
