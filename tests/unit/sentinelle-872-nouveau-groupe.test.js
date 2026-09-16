@@ -120,7 +120,14 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
         const html = lire('index.html');
         const i = html.indexOf('id="v2-selectGroupe"');
         expect(i).toBeGreaterThan(-1);
-        const bloc = html.slice(i, html.indexOf('</div>', i));
+        // Borné par la carte résumé, pas par le premier `</div>` : le 16 sept. 2026, le
+        // bouton est sorti du .groupe-form pour prendre la position commune aux six
+        // accordéons du Cadre (juste sous le menu, avant la carte). La fenêtre fixe
+        // serait devenue aveugle au bouton sans rien signaler ; ces deux bornes
+        // verrouillent l'ordre voulu : menu, puis bouton, puis carte.
+        const fin = html.indexOf('carte-resume-etudiants', i);
+        expect(fin).toBeGreaterThan(i);
+        const bloc = html.slice(i, fin);
         expect(bloc).toMatch(/data-action="creerNouveauGroupeV2"/);
         expect(lire('js/trimestre-v2-etudiants.js')).toMatch(/^window\.creerNouveauGroupeV2 = creerNouveauGroupeV2;/m);
     });

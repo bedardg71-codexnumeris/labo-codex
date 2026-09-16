@@ -13756,6 +13756,19 @@ tr.etudiant-inactif td {
     margin-top: 0;
 }
 
+/* « + Nouveau… » : une seule position dans les six accordéons du Cadre — juste
+   sous le menu déroulant de l'entité, sans y être collé (design-system.html §23).
+   La marge du .groupe-form qui précède est annulée : sinon elle fusionne avec
+   celle du bouton et impose 20 px. Doit rester APRÈS la règle :first-of-type,
+   qui sans cela remet la marge à 0 dans les panneaux sans bouton Bibliothèque. */
+#calendrier-trimestre .btn-block.btn-nouvelle-entite {
+    margin-top: 8px;
+}
+
+#calendrier-trimestre .groupe-form:has(+ .btn-nouvelle-entite) {
+    margin-bottom: 0;
+}
+
 /* Boutons - Utilisation des variables Design System */
 #calendrier-trimestre .btn-supprimer,
 #calendrier-trimestre .btn-danger {
