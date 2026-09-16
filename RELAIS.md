@@ -7,7 +7,63 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 18 H 50 (Toronto) : 1.142.18 (#739, #740) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 19 H 45 (Toronto) : 1.142.19 (#737, #741, #718, #738-complétion) SUR `main`
+
+> **1.142.19** porte le **lot A** du cadrage `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md` (« Les mêmes copies
+> partout » ; mandat de Grégoire, 16 sept. soir, choisi parce qu'il ne lui demandait aucun mot). Poussée avec `916e6dac` (relecture
+> de Cowork du lot B). **Remesure avant de coder** : les six `e.retroactionFinale` de `profil-etudiant-calculs.js` aux lignes dites
+> (709, 784, 948, 1002, 1045, 1608 — les trois derniers sur la ligne qui suit `!e.remplaceeParId`, d'où « 3 » au premier grep) ;
+> `evaluationEntreDansLaNote` (registre, #706) dit déjà R1 : remplacée, sans note, brouillon, portée nulle ⇒ ne compte pas — pas
+> réécrit, devenu LE lecteur ; `calculerCompletion` SOM et configurable ne lisaient AUCUN statut, STD (578) et snapshots (236, 278,
+> 638) ne lisaient que `'non-remis'` ; le menu de remise n'écrit plus que `non-recu / recu / importe / annote / evalue`
+> (`index.html:8474`), `'retard'` n'est écrit nulle part. **Ce que la mesure a corrigé du relevé** : deux lecteurs de plus hors R1 —
+> `calculerIndicesNDerniersArtefacts` (la performance du RàI : `noteFinale != null` sans verrou, un brouillon y entrait) et
+> `depistagePeutJugerLaNonParticipation` (réserve de la relecture du 5 sept., tranchée avec #737) ; et `_calculerMoyennesCriteresRecents`
+> de STD est bien dormant : `detecterDefis` / `genererCibleIntervention` de STD n'ont aucun appelant hors `js/pratiques/` (grep), laissé
+> tel quel, nommé.
+> **La mesure du « Non reçu » (arrêt possible du mandat)** : pack démo 101 évaluations, toutes `evalue`, 0 `non-recu` ; bancs Vitest :
+> 0 `non-recu`. **Un chemin réel existe par lecture** : `changerStatutRemise` (evaluation-sauvegarde.js:539) vide la liste DOM des
+> critères mais pas `evaluationEnCours.criteres` ; la porte #674 (`verifierPorteeAvantSauvegarde`) relit `calculerNote()` sur ces
+> critères intacts ⇒ portée complète ⇒ enregistrée verrouillée AVEC niveaux, note et `statutRemise: 'non-recu'`. Un « Non reçu »
+> enregistré sans avoir noté (le cas normal) a portée 0 ⇒ ne compte nulle part (R1). **Décision prise, nommée** : pas d'arrêt —
+> le stock mesurable est à 0 et le cas n'est pas irréversible (repasser le statut à « Évalué ») ; remonté à Grégoire dans
+> OU-EN-EST-ON et #738. **Sonde pour ses données** (console de l'app, lecture seule) :
+> `(function(){var l=db.getSync(cle('evaluationsSauvegardees'),[])||[],t=0,n=0;l.forEach(function(e){if(e&&window.evaluationNonRemise(e)){t++;if(window.evaluationEntreDansLaNote(e))n++;}});console.warn('copies non remises :',t,'dont enregistrées avec une note (comptent partout sauf dans la complétion) :',n);})();`
+> **Livré** : `evaluationNonRemise` ajouté à côté d'`evaluationEntreDansLaNote` dans `pratique-registre.js` (exporté sur window) ;
+> R1 : les 8 sites de calculs (échelle commune, diagnostic de conversion, moyennes, moyennes récentes, IPB, défi spécifique, N derniers,
+> garde de non-participation), `_calculerIndicesTroisDerniersArtefacts` (STD, vivant), `calculerDirectionsCriteres` et le « (sur N) »
+> (sections-affichage), le rapport ; R1 + R2 : `calculerCompletion` SOM / configurable / STD (dénominateur R1, numérateur R1 ∧ ¬R2 —
+> **supposé** : un « non remis » enregistré atteste que le travail a été traité, il reste au dénominateur), les trois lecteurs de
+> `snapshots.js`, `nbRemis` du rapport ; R2 seul : historique P de SOM (311, champs morts #716) et de STD (350), SPE (763). Aucune
+> garde par site (`window.evaluationEntreDansLaNote(e)` nu). **Hors lot, nommés** : les sites d'AFFICHAGE qui lisent `'non-remis' ||
+> 'retard'` (`profil-etudiant-sections-affichage.js:94-98, 2700, 3080, 3091`, `liste-evaluations.js:1144`,
+> `graphiques-progression.js:3744, 3922`) ne reconnaissent pas `'non-recu'` et gardent `'retard'` — badges et courbes, pas des
+> calculs : **inscrire et continuer**, sans fiche ouverte ce soir (à ouvrir si Grégoire le voit). `_calculerNiveauxParObjectif` (STD,
+> 1456) : aucun appelant, dormant, pas touché.
+> **Preuve** : `sentinelle-lot-A-737-741-718-738-les-memes-copies-partout` (12 essais ; bac partagé `_helpers/bac-suivi.js`, modules
+> réels dont modes.js, registre, trois familles, indices, calculs, helpers, rapport, sections-affichage, snapshots ; deux élèves, le
+> témoin met P4 au dénominateur). **17 mutations / 17 rouges** : M1 verrou ignoré dans le registre (6, dont B2 de l'audit) ; M2
+> `'non-recu'` oublié (3) ; M3a-f `e.retroactionFinale` remis site par site — IPB 5, moyennes 4, défi spécifique 2, échelle commune 2,
+> moyennes récentes 1 (D1 seul), diagnostic de conversion 1 (D1 seul) ; M4a-d complétion qui ignore le statut — SOM 3, configurable 3,
+> STD 3, snapshots 3 ; M5a-d brouillon réadmis site par site — N derniers 3, numérateur SOM 2, garde 1, N derniers STD 1 (D3 seul) ;
+> M6 `'non-remis'` recopié dans les snapshots (2). Fichiers restaurés, empreinte md5 vérifiée. **Essais passés à la valeur d'après** :
+> audit Suivi B2 (C 75, 0,70, « Difficulté émergente » ; avant 100, 0,80, « Stable »), B4 (C sommatif 0, corps lit le prédicat ;
+> avant 25, ne lisait rien), C7 (IPB 4 artefacts, 0,875 ; avant 3, 0,75) ; audit pratiques E2 (79,45 → M ; avant null,
+> « aucune-evaluation »). **Onze bancs branchés** sur `_helpers/predicats-copie.js` (les deux prédicats RÉELS recopiés depuis le
+> registre, pas une copie de la règle) : 529, 542-a2-a3, 542-echelle, 552, 730, 731, 732 (son stub remplacé), 734, 775, lot-B, et
+> `bac-suivi.js` (#790 et les 17 bancs qui le partagent) ; trois gabarits (529, 542 ×2) reçoivent `noteFinale: 70` — le texte tenait lieu
+> de « copie enregistrée ». Vitest 579 / 6 489 avant le bump. **Stock** : snapshots déjà écrits gardés (TARIR, PAS RÉPARER).
+> **Aucun mot neuf** ; **phrase de « Nouvelles » PROPOSÉE, pas validée** (Grégoire absent) — un patch la remplace. **Aucune porte
+> terrain**. Dernier ID : #895 (aucune fiche neuve). Comptes : backlog 225 (226 cases moins le gabarit), page 224, écart {#575} ;
+> le markdown du tri corrigé (229 → 227 après le lot B → 224). **Restent du cadrage** : F, C, E, D (chacun remonte un mot ou une porte).
+> ⚠ Worktree `audit-pn-0916` (branche `audit/pratiques-notation-2026-09-16`, 1 commit `9441b027` non fusionné) : hors mandat, à trancher.
+> ⚠ CI : dernier run terminé rouge sur `evaluation-882-…spec.js` (WebKit Linux, `cd78cba9`) ; run sur `bef26eac` en cours au début de
+> session — disposition due. ⚠ Cowork avait des fichiers modifiés hors git pendant la session (`CONSIGNE-DEMARRAGE-COWORK.md`,
+> `CONSIGNE-DU-JOUR.md`, deux `_ancienne-…`) : non commités ici. **Pour Cowork** : relecture croisée du lot A (mutations à poser :
+> le dénominateur de C, le « (sur N) », les directions, le rapport — non exercés par le banc autrement que par le texte) et mise à jour
+> de l'artefact du tri (markdown à jour : lot 24, page 224).
+
+## (précédent) 16 SEPT. 2026, ≈ 18 H 50 (Toronto) : 1.142.18 (#739, #740) SUR `main`
 
 > **Ajout de 19 h 07 (Cowork) — relecture croisée de 1.142.18 (lot B, #739 et #740) : VERTE, par exécution, aucune retouche.** Sentinelle du lot lancée seule dans une copie jetable : 20 / 20. **Sept mutations de Cowork, six rouges** : « Aucun » écrit avec une majuscule dans le prédicat (10 rouges) ; maximum lu dans `pointsMax` au lieu de `ponderation` (6) ; appariement `trouverCritereDepistage` sans le filtre (12) ; onglet Critères qui relit le niveau (1) ; défi spécifique sans appariement (3) ; un score de 0 point ignoré (1). **La septième survit, et c'est un mutant équivalent** : `calculerIPB` sur toute la grille au lieu de la liste filtrée ne change rien, parce que son filtre « multistructurel » écartait déjà « aucun ». La valeur `'aucun'` est écrite en minuscules par les deux menus de `grilles.js` : le prédicat la lit juste. `version.js` porte bien 0916-1824, comme `version.json` et le jeton d'`index.html`. **Un constat, à « inscrire » seulement si #307 rebranche les méthodes des pratiques** : `pratique-pan-standards.js` (`_calculerMoyennesCriteresRecents`, `_calculerIndicesTroisDerniersArtefacts`) lit encore le niveau et ne filtre pas « Aucun ». Aujourd'hui, c'est sans effet : `detecterDefis` et `identifierPattern` n'ont plus de consommateur depuis le retrait de `genererCarteCibleIntervention` (commentaire de `profil-etudiant-sections-affichage.js`, vers la ligne 1777). Pas de fiche neuve. **Comptes remesurés par ensembles** : backlog 228 ouvertes (229 cases moins le gabarit), page 227, écart {#575}. ⚠ **Le markdown du tri dit encore « 229 entrées ouvertes »** (lignes 12 et 169 de `TRI-2026-09-13-fiches-ouvertes-par-cout.md`) : c'est 227 ; à corriger par la prochaine session qui y écrit. Artefact du tri publié en version 25 (lot 23).
 
