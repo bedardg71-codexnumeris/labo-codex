@@ -1,0 +1,41 @@
+# Cadrage — les règles du dépistage, tranchées le 16 septembre
+
+> **Écrit le 16 septembre 2026, 17 h 30 (Toronto), par Cowork.** Pas une consigne : une file de six lots, à promouvoir un par un.
+> **Source des décisions** : la page « Questions du dépistage » (https://claude.ai/artifact/TyZfhhuGqCWb3ZBVzz2RAJ), onze questions tirées de `Rapports/AUDIT-onglet-suivi-2026-09-05.md` (les « règles de l'audit 3 », #735-#754, jusqu'ici « après le 14, à trancher avec toi ») et revues par lecture sur 1.142.15.
+> **Grégoire a répondu entre 17 h 18 et 17 h 21 : onze fois l'option A, qui était chaque fois la recommandation de Cowork, sans nuance écrite.** ⚠ La justesse didactique de ces règles repose donc sur les critères que Cowork a écrits sous chaque question (repris ci-dessous) : si un lot fait apparaître un cas que ces critères n'avaient pas vu, il remonte à Grégoire au lieu d'être tranché par analogie.
+> Chaque fiche du backlog porte sa décision (ligne « ✅ TRANCHÉ … 16 sept. »).
+
+## Ce qui vaut pour les six lots
+
+- **Rien n'écrit dans les données de quelqu'un.** Ces décisions changent ce que l'application calcule et affiche ; un champ neuf (lot D) est facultatif et vide par défaut.
+- **Chaque constat se remesure avant d'être corrigé** : la revue du 16 a lu le code, sans rejouer les exemples marqués « déduit du code ».
+- **Les mots que les collègues lisent remontent avant la release** : ils sont listés lot par lot. La phrase de « Nouvelles » aussi.
+- **Ne se rouvrent pas ici** : les bornes et les noms des bandes de contexte (#821, rencontre avec l'orthopédagogue) ; les seuils d'alerte des interventions (#742, gelés jusqu'aux usages d'octobre) ; la note d'un non-remis, famille par famille (`CADRAGE-2026-09-05-non-remis-par-famille.md`) ; le volet complétion de #871 (mesure due d'abord).
+
+## Les lots, dans l'ordre recommandé
+
+L'ordre va du moins coûteux au plus large ; A et D touchent le plus d'écrans.
+
+| Lot | Ce que Grégoire verra | Règle tranchée | Fiches | Ce qui remonte à lui |
+|---|---|---|---|---|
+| **F** · Les écrans du groupe | plus de bandes I/D/M/E sous les courbes du groupe ; un filtre d'engagement qui retient ce que le profil déclare | bandes retirées (motif du 13 sept.) ; filtre = assiduité OU complétion sous 70 % | #860, #828 | le **nouveau libellé du filtre** |
+| **B** · Un critère lu une seule fois | un critère en points lu à sa note (22/30 n'est plus un défi) ; un critère SOLO « Aucun » jamais proposé comme défi ni comme cible | le dépistage lit la note obtenue ; « Aucun » sort de tout le dépistage | #739, #740 | rien |
+| **C** · Un seul palier | la carte RàI donne seule l'intensité, partout (profil, filtres, bilan) ; le palier « Insuffisant » disparaît du code | carte RàI seule ; palier retiré, aucune borne ne bouge | #744, #822 | **le mot qui remplace l'un des deux « Difficulté émergente »** |
+| **A** · Les mêmes copies partout | note, complétion, dépistage et carte RàI lisent les mêmes copies ; un non-remis ne gonfle plus la complétion | une copie compte quand elle est enregistrée, avec ou sans commentaire final ; la complétion ne compte jamais un non-remis ; « Non reçu » reconnu comme « Non remis » | #737, #741, #718, #738 (volet complétion) | rien, sauf si le libellé d'un écran doit changer |
+| **E** · L'élève exclu | son profil calculé par sa pratique, son statut affiché, hors des moyennes du groupe | calcul par sa pratique ; « hors groupe » sans calcul s'il a quitté le groupe | #745 | **les mots du statut** (précédent du lot 5 du cadrage 11 : « (n'est plus dans le groupe) ») |
+| **D** · L'assiduité qui manque | un arrivant tardif n'hérite plus des absences d'avant ; un tiret au lieu de 100 % tant que rien n'est noté ; les deux moyennes du groupe s'accordent | date d'arrivée facultative sur la fiche ; assiduité inconnue avant la première présence | #735, #750, #743 | **le libellé du champ « date d'arrivée »** ; une porte terrain probable (fiche d'élève, iPad) |
+
+## Les critères retenus, dans les mots de la page
+
+- **A** : un seul ensemble de copies pour l'assiduité, la complétion, la performance et le palier RàI ; un brouillon n'est pas encore le jugement de l'enseignant ; ce sont les niveaux des critères, pas le commentaire, qui portent ce jugement. La complétion mesure la remise, pas la note : un 0 inscrit n'est pas un travail remis.
+- **B** : un seul chiffre par copie sur tout le profil ; une valeur continue suit mieux les progrès. Un critère sans niveau SOLO n'a rien à dire au dépistage.
+- **C** : une seule intensité à l'écran ; le modèle du dépistage désigne déjà la carte RàI comme source unique. Le palier « Insuffisant » n'a jamais servi, et son mot qualifie la personne alors que les bandes décrivent un état du contexte (décision du 10 sept.).
+- **D** : juste pour l'arrivant sans effacer les absences réelles d'un élève inscrit ; ne pas afficher une donnée qui n'existe pas ; les gardes au cas par cas ont déjà montré qu'on en oublie.
+- **E** : le code l'annonce déjà (« résultats jusqu'à la dernière présence, hors des moyennes ») ; l'élève qui décroche est celui qu'on veut relancer.
+- **F** : cohérence avec la décision du 13 sept. ; on filtre sur ce qu'on lit au profil, sans valeur invisible.
+
+## Tranché par Cowork sur la même page, non contesté
+
+- La branche « Décrochage » de la cible d'intervention, que rien n'atteint, part comme code mort (#554).
+- Les couleurs des pastilles de défi restent des constantes documentées ; #677 se ferme (le seuil de « force » suit le réglage depuis le 10 sept.).
+- « Non reçu » est reconnu par les calculs (lot A, avec #738).
