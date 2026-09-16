@@ -30,11 +30,11 @@
 
 ✅ **FAIT EN 1.142.11, POUSSÉE (16 SEPTEMBRE 2026, 10 h 35 — ta capture de 10 h 21) — TES RÉGLAGES DE PERSPECTIVE ET DE ROGNAGE SURVIVENT AU RECHARGEMENT.**
 **Ce que tu verras** : quand tu reprends une file d'import par « Re-déposer les fichiers » après un rechargement, les corrections faites dans la préparation sont réappliquées avant l'import ; « Importer » attend la fin du rejeu, et un échec est nommé à l'écran.
-**Vérifié comment** (rapporté par la session qui l'a livré) : 8 contrôles, mutations exprès rouges ; Vitest 574 / 6 433. **Pas vérifié** : le rendu réel en navigateur par la session — ta porte : réglage → recharger → Re-déposer → importer. **Stock** : les copies déjà importées sans correction restent telles quelles. *(#884)*
+**Vérifié comment** (rapporté par la session qui l'a livré) : 8 contrôles, mutations exprès rouges ; Vitest 574 / 6 433. **Pas vérifié** : le rendu réel en navigateur par la session — ta porte : réglage → recharger → Re-déposer → importer, **reportée par toi au prochain artefact, dans une ou deux semaines (vers le 23-30 septembre 2026)**. **Stock** : les copies déjà importées sans correction restent telles quelles. *(#884)*
 
 ✅ **FAIT EN 1.142.10 (16 SEPTEMBRE 2026, 10 h — ta question de 9 h 50), POUSSÉE AVEC 1.142.11 — UN TRAVAIL DIAGNOSTIQUE NE COMPTE PLUS DANS LE PROFIL NI LE PDF.**
 **Ce que tu verras** : « Portrait de lecteur/lectrice » (coché diagnostique) ne figure plus parmi les travaux évalués du profil et du PDF ; la ligne Sélection dit, dans tes mots, « 1 retenue sur 4 possibles ».
-**Vérifié comment** (rapporté par la session) : cause mesurée par une sonde sur tes données (lecture seule) ; 6 contrôles, mutations rouges ; Vitest 573 / 6 425. **En suspens** : ta réponse sur le profil qui montre des % par travail sous « note différée ». *(#883)*
+**Vérifié comment** (rapporté par la session) : cause mesurée par une sonde sur tes données (lecture seule) ; 6 contrôles, mutations rouges ; Vitest 573 / 6 425. **Question sur le profil qui montrait des % par travail sous « note différée » : réglée, selon toi (16 septembre 2026, après-midi).** *(#883)*
 
 ✅ **FAIT EN 1.142.9, POUSSÉE (16 SEPTEMBRE 2026, 9 h 20 — ton rapport de 9 h 09) — LE PDF DE LA RÉTROACTION RESPECTE « NIVEAU DE PERFORMANCE ».**
 **Ce que tu verras** : coché, ce choix est enregistré tout de suite ; le PDF garde le bloc « Note provisoire » avec les niveaux seulement (ta décision), sans pourcentage ni calcul.
