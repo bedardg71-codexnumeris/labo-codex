@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260915b"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260916a"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -6220,7 +6220,7 @@
                                         </select>
                                     </div>
 
-                                    <button class="btn btn-principal btn-sm btn-block" data-action="ouvrirModalNouveauTrimestre">
+                                    <button class="btn btn-principal btn-sm btn-block btn-nouvelle-entite" data-action="ouvrirModalNouveauTrimestre">
                                         + Nouveau trimestre
                                     </button>
 
@@ -6436,7 +6436,7 @@
                                         </select>
                                     </div>
 
-                                    <button class="btn btn-principal btn-sm btn-block" data-action="nouveauCoursV2">
+                                    <button class="btn btn-principal btn-sm btn-block btn-nouvelle-entite" data-action="nouveauCoursV2">
                                         + Nouveau cours
                                     </button>
 
@@ -6713,13 +6713,13 @@
                                 <!-- GAUCHE : Sélection + Carte profil -->
                                 <div class="panneau-bibliotheque">
                                     <!-- Dropdown sélection profil (Beta 95.2) -->
-                                    <div class="groupe-form u-mb-15">
+                                    <div class="groupe-form">
                                         <label class="u-texte-gras" data-mot-nature="profil">Profil enseignant</label>
                                         <select id="v2-selectEnseignant" class="controle-form" data-on-change="chargerEnseignantSelectionneV2">
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-secondaire btn-block" data-action="nouveauProfilEnseignantV2">
+                                    <button class="btn btn-secondaire btn-block btn-nouvelle-entite" data-action="nouveauProfilEnseignantV2">
                                         + Nouveau profil
                                     </button>
 
@@ -6962,17 +6962,17 @@
                                 <div class="panneau-bibliotheque">
 
                                     <!-- Sélection du groupe -->
-                                    <div class="groupe-form u-mb-15">
+                                    <div class="groupe-form">
                                         <label class="label-compact">Groupe :</label>
                                         <select id="v2-selectGroupe" class="controle-form" data-on-change="filtrerParGroupeV2">
                                             <option value="">Tous les groupes</option>
                                             <!-- Options générées dynamiquement -->
                                         </select>
-                                        <!-- #872 : seul geste qui crée un 2e groupe (retiré le 9 janv. 2026, rétabli) -->
-                                        <button class="btn btn-secondaire btn-sm btn-block u-mt-10" data-action="creerNouveauGroupeV2">
-                                            + Nouveau groupe
-                                        </button>
                                     </div>
+                                    <!-- #872 : seul geste qui crée un 2e groupe (retiré le 9 janv. 2026, rétabli) -->
+                                    <button class="btn btn-secondaire btn-sm btn-block btn-nouvelle-entite" data-action="creerNouveauGroupeV2">
+                                        + Nouveau groupe
+                                    </button>
 
                                     <!-- Carte résumé -->
                                     <div class="carte-resume-etudiants">
@@ -7116,22 +7116,22 @@
                                 <div class="panneau-bibliotheque">
 
                                     <!-- Sélection de l'horaire -->
-                                    <div class="groupe-form u-mb-15">
+                                    <div class="groupe-form">
                                         <label class="label-compact">Horaire :</label>
                                         <select id="v2-selectHoraire" class="controle-form" data-on-change="changerHoraireSelectionneV2">
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
 
+                                    <!-- Bouton nouvel horaire -->
+                                    <button class="btn btn-principal btn-sm btn-block btn-nouvelle-entite" data-action="nouveauHoraireV2">
+                                        + Nouvel horaire
+                                    </button>
+
                                     <!-- Carte résumé de l'horaire sélectionné -->
                                     <div class="carte-resume-horaire" id="v2-carteResumeHoraire">
                                         <p class="etat-vide-resume">Aucun horaire sélectionné</p>
                                     </div>
-
-                                    <!-- Bouton nouvel horaire -->
-                                    <button class="btn btn-principal btn-sm btn-block" data-action="nouveauHoraireV2">
-                                        + Nouvel horaire
-                                    </button>
 
                                 </div>
 
@@ -7236,12 +7236,17 @@
                                     </button>
 
                                     <!-- Sélection du groupe-cours -->
-                                    <div class="groupe-form u-mb-15 u-mt-15">
+                                    <div class="groupe-form u-mt-15">
                                         <label class="label-compact">Groupe-cours existants :</label>
                                         <select id="v2-selectGroupeCours" class="controle-form" data-on-change="changerGroupeCoursSelectionneV2">
                                             <option value="">— Choisir pour modifier —</option>
                                         </select>
                                     </div>
+
+                                    <!-- Bouton nouveau groupe-cours -->
+                                    <button class="btn btn-principal btn-sm btn-block btn-nouvelle-entite" data-action="nouveauGroupeCoursV2">
+                                        + Nouveau groupe-cours
+                                    </button>
 
                                     <!-- Carte résumé du groupe-cours sélectionné -->
                                     <div class="carte-resume-groupe-cours" id="v2-carteResumeGroupeCours">
@@ -7252,11 +7257,6 @@
                                     <p class="texte-aide u-mt-15">
                                         Le groupe-cours actif apparaît dans l'en-tête de l'application.
                                     </p>
-
-                                    <!-- Bouton nouveau groupe-cours -->
-                                    <button class="btn btn-principal btn-sm btn-block" data-action="nouveauGroupeCoursV2">
-                                        + Nouveau groupe-cours
-                                    </button>
 
                                 </div>
 
@@ -14289,7 +14289,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09151905"></script>
+    <script src="version.js?v=09160612"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260912g"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14484,7 +14484,7 @@
     <script src="js/codex-data.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur extraction codex data -->
     <script src="js/codex-data-ui.js?v=2026050603"></script> <!-- #251 : UI Réglages > Données carte 3 -->
     <script src="js/labo-codex-data.js?v=2026050603"></script> <!-- #252 : loader codex data dans le Labo -->
-    <script src="js/travaux-preparation.js?v=20260915a"></script> <!-- #559 : les options d'import ne visent plus un fichier étranger -->
+    <script src="js/travaux-preparation.js?v=20260916a"></script> <!-- #559 : les options d'import ne visent plus un fichier étranger -->
     <script src="js/heic-decodeur.js?v=20260911a"></script> <!-- #597 : conversion HEIC vers JPEG a l'entree de la file ; le bundle libheif (1,2 Mo) est charge par le worker, seulement quand un HEIC se presente -->
     <script src="js/travaux-import.js?v=20260915c"></script> <!-- #612 (T6.3) : un DA sans eleve dans ce groupe est recense ; #611 : appariement par nom par MOTS ENTIERS normalisés, ambiguïté ⇒ aucune association ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=20260903b"></script> <!-- Beta 1.106.14 b0831 : zoom molette/trackpad proportionnel a deltaY + apercu CSS pendant le geste -->
@@ -14553,7 +14553,7 @@
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260915h"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260916a"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14574,11 +14574,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260915h"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260916a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260915h"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260916a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
