@@ -1,7 +1,7 @@
 # Consigne de démarrage – la session Cowork qui prend le relais
 
-> **Réécrite le mercredi 16 septembre 2026, 14 h 45 (Toronto)**, au bout de deux journées de **quinze versions** (`1.141.0` à `1.142.14`) qui répondaient toutes à un rapport de testeur.
-> Elle REMPLACE toute version précédente ; celle du 14 à 18 h 50 est archivée sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-14-18h50.md`.
+> **Réécrite le mercredi 16 septembre 2026, 16 h 31 (Toronto)**, au bout d'un après-midi de **trois lots du tri** (#651 et #700 en `1.142.15`, #652 et #890 en `1.142.16`) et d'une **revue des questions du dépistage**, rassemblées sur leur propre page.
+> Elle REMPLACE toute version précédente ; celle du 16 à 14 h 45 est archivée sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-16-14h45.md`.
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées.
@@ -58,49 +58,36 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 
 ---
 
-## 3 · L'ÉTAT MESURÉ – le 16 septembre 2026, 14 h 45 (Toronto)
+## 3 · L'ÉTAT MESURÉ – le 16 septembre 2026, 16 h 31 (Toronto)
 
 **Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` ·
 `git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`.
 
-- **En ligne et poussé : `1.142.14`** (build `0916-1312`). `main` = `origin/main` = `71ca237f` : **rien n'attend le push.**
-- **Quinze versions en deux jours, et les quinze répondaient à un rapport de testeur** – six le 15 (`1.141.0` à `1.142.5`), neuf le 16
-  (`1.142.6` à `1.142.14`). Grégoire a vérifié les trois derniers dans l'application (« ça fonctionne »).
-- **232 fiches ouvertes au backlog**, remesuré le 16 à 14 h 45. ⚠⚠ **NE COMPTE PAS AVEC `^- \[ \] \*\*#`** : des dizaines de fiches
-  commencent par un emoji de catégorie avant le gras. Compte les lignes `- [ ] ` à la racine (233) et retire celle qui ne porte aucun
-  `#nnn` : c'est le gabarit de la section « Notes ». **Dernier ID : #889**, et ⚠ **la ligne « Dernier ID » en tête de `BACKLOG.md` est
-  la SEULE qui fait foi.**
-- **QUI POUSSE : Claude Code, par `scripts/pousser.sh`, à la demande de Grégoire. Pas toi.** ⛔ Ne conclus pas de ce que TON
-  environnement ne peut pas faire à ce que le RÔLE ne peut pas faire.
-- ⚠ **`OU-EN-EST-ON.md` a deux jours de retard** : dernier commit le 15 à 19 h 22, donc les neuf versions du 16 n'y sont pas. C'est le
-  fichier que CLAUDE.md fait lire en premier : **ne le prends pas pour l'état courant** tant qu'il n'est pas rattrapé. `RELAIS.md`, lui,
-  est à jour à 13 h 45 le 16, et c'est la meilleure source du jour.
+- **En ligne : `1.142.15`** (`26d4347f` = `origin/main`) : « Annoter » depuis la liste ouvre la copie avec ses outils après un passage en mode Évaluer (#651, **vérifié par Grégoire dans l'app**) ; retirer toutes les annotations ramène « Nombre d'erreurs » à 0 sans écraser une saisie manuelle (#700).
+- ⚠⚠ **COMMITÉE, PAS POUSSÉE à l'écriture : `1.142.16`** (`19604ea4`, puis `57d0c3f0` de docs ; build `0916-1615`). Elle porte #652 (une évaluation dont un critère a quitté sa grille s'ouvre, le **signale et le garde** – décision de Grégoire rapportée par Claude Code, phrase de « Nouvelles » validée par lui) et #890 (drapeau mort `_resterEnModeAnnoter` retiré). **Le verdict Playwright attend que Cowork soit fermé.** ⮕ **À l'ouverture, regarde si `origin/main` a rejoint `main`** avant de dire quoi que ce soit de 1.142.16.
+- **Le dernier Vitest rapporté** (Claude Code, sur 1.142.15) : 574 fichiers / 6 437 essais. Non remesuré par Cowork.
+- **229 fiches ouvertes au backlog** sur `57d0c3f0` : 230 lignes `- [ ] ` à la racine, moins le gabarit `#XX` de la section « Notes ». **Dernier ID : #890** – la ligne « Dernier ID » en tête de `BACKLOG.md` est la SEULE qui fait foi. ⚠⚠ **NE COMPTE PAS AVEC `^- \[ \] \*\*#`** (des fiches commencent par un emoji) : extrais le premier `#nnn` de chaque ligne `- [ ] ` et compare des ENSEMBLES.
+- **QUI POUSSE : Claude Code, par `scripts/pousser.sh`, à la demande de Grégoire. Pas toi.**
+- **Aucun retour de la CoP, de l'orthopédagogue ni de Mathieu** dans `Retours des testeurs/` au 16 à 15 h 50 (seuls les rapports de Grégoire). Je ne vois que ce dossier : un retour par courriel m'échappe.
 
 ## 4 · CE QUI EST DÛ – dans l'ordre
 
-**a) À l'ouverture** : remesurer, et **regarder si un retour de la communauté de pratique est arrivé**. Ils ont vu l'application le
-14 au matin, présentée et non utilisée ; les retours étaient attendus dans la semaine, et **un retour de membre passe AVANT le backlog,
-sans discussion**. Même priorité pour l'orthopédagogue et pour Mathieu.
+**a) À l'ouverture** : remesurer ; **regarder si un retour de la CoP, de l'orthopédagogue ou de Mathieu est arrivé** – il passe AVANT le backlog, sans discussion ; et **lire les choix de Grégoire sur la page des questions du dépistage** (point c).
 
-**b) LE TRI EST À JOUR, ET SES DEUX JUMEAUX SONT ALIGNÉS** : `plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md` ET
-l'artefact « Tri du chantier Labo Codex », tous deux au 16 sept. 14 h 45. ⚠ **Un seul des deux Cowork à la fois**, sinon la page et le
-markdown divergent. **L'écart entre les deux comptes est tombé à un** – #575, détaillée en #575b/#575c sur la page et encore ouverte au
-backlog pour ce qu'il en reste (#860). ⮕ **La méthode qui l'a clos : comparer les ENSEMBLES de numéros, pas les totaux.** Six révisions
-du compte avaient échoué à le faire.
+**b) LE TRI : DEUX FICHES À REPORTER, APRÈS LE PUSH SEULEMENT.** `plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md` ET l'artefact « Tri du chantier Labo Codex » (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN) sont alignés au 16 à 16 h 30 **sur 1.142.15** : page 230 entrées ouvertes, backlog 231 sur `26d4347f`, écart = {#575} seul.
+⮕ **Quand `1.142.16` est sur `origin/main`** : marquer #652 et #890 « livré 1.142.16 » sur les DEUX jumeaux (FICHES de la page ; lignes de fiche, compte et journal du markdown), ajouter le lot 21 au journal, remesurer par ensembles (attendu : page 228, backlog 229, écart {#575}).
+⚠ **La page lit `INSCRITES_DEPUIS`** (fiches inscrites après le 13 sept.) pour les cases d'avancement du haut (« 81 · sur 95 · 14 closes », demandé par Grégoire le 16) : **toute fiche ajoutée à `FICHES` s'ajoute aussi à cette liste.** Départ du 13 sept. : 246 rangées (dont #575b/#575c).
+⚠ **Un seul Cowork à la fois** sur ces deux fichiers. ⚠ **Mesure la page à 360, 400, 768 et 1280 px, en clair et en sombre**, avant chaque publication (`scrollWidth` contre `clientWidth`). Pour republier : lis-la (`Artifact` `read`), construis sur la version rendue, **retire l'enveloppe** (`<!doctype>…<body>` et les `</body></html>` de fin, la page en portait deux) avant de publier.
 
-⚠ **Depuis 16 h, chaque case du haut de la page montre l'avancement contre le départ** (« 81 · sur 95 · 14 closes »), à la demande de Grégoire. Le calcul lit la liste `INSCRITES_DEPUIS` dans le script de la page : **toute fiche ajoutée à `FICHES` s'ajoute aussi à cette liste**, sinon elle compte comme « du départ ». Départ du 13 sept. : 246 rangées (dont #575b/#575c, détails de #575).
+**c) LES ONZE QUESTIONS DU DÉPISTAGE ATTENDENT GRÉGOIRE, SUR LEUR PAGE – ne les repose pas en conversation.**
+Page « Questions du dépistage » : https://claude.ai/artifact/TyZfhhuGqCWb3ZBVzz2RAJ (capacité `db`, écriture réservée aux éditeurs). Ses choix s'enregistrent dans la collection **`decisions`**, un document par question (`choix`, `note`, `quand`, `question`). **Lis-les avec l'outil `ArtifactData`, action `list`, collection `decisions`.** À 16 h 31 : **aucune réponse encore.** Il travaille en parallèle (il corrige des copies) : il y répondra à son rythme.
+⮕ **Quand des réponses arrivent** : une question tranchée = un lot à cadrer. **Remesure avant de cadrer** – la revue du 16 est une LECTURE du code sur `26d4347f` par trois sous-agents, ses détails ne sont écrits nulle part ailleurs que dans les fiches du backlog. Ordre suggéré : « quelles copies comptent » d'abord (#737, #741, #718 : un seul périmètre de copies, il conditionne les autres), puis « points ou niveau » et « SOLO Aucun » ensemble (#739, #740 : les mêmes six calculs).
+Les onze et leurs fiches : copies comptées (#737, #741, #718) · non remis dans la complétion (#738) · points ou niveau (#739) · SOLO « Aucun » (#740) · quel palier prime (#744) · palier « Insuffisant » (#822) · arrivée tardive (#735, #750) · aucune présence saisie (#743) · élève exclu (#745) · bandes d'échelle des courbes de groupe (#860) · filtre « A+C < 65 % » (#828).
+**Tranché par Cowork et écrit au bas de la page** (Grégoire peut le contester) : #554 (branche « Décrochage » morte : à retirer) ; #677 (à fermer : le seuil de force suit déjà #817, les pastilles 60/50 restent des constantes documentées) ; #738 (`'non-recu'`, écrit par le menu depuis février, n'est reconnu par AUCUN calcul, qui cherchent `'non-remis'` : défaut technique, à corriger avec la question).
+**Hors de la page** : #871 est **tranchée depuis le 15 au soir** pour l'assiduité (« 90 % (22,5 / 25) », prête à coder) ; la complétion attend **la mesure de DEMO015** que Grégoire a demandée, non faite. #821 attend l'orthopédagogue ; #742 attend ses usages d'octobre.
+⮕ **Un lot sans question qui peut partir tout de suite : le volet assiduité de #871** (tranché, quatre sites d'affichage, source seulement). Et la mesure de DEMO015, qui est une mesure, pas une question.
 
-✅ **Reporté au tri le 16 sept. à 15 h 50** : `1.142.15` (#651, #700) est poussée et marquée livrée sur les deux jumeaux, #890 ajoutée. Page 230, backlog 231, écart #575 seul (mesuré par ensembles).
-
-**c) QUATRE QUESTIONS ATTENDENT GRÉGOIRE, et rien ne se code avant.**
-1. **#860** – deux graphiques de groupe dessinent encore les paliers d'une échelle sous des pourcentages agrégés. ⚠ La décision du 13 sur
-   le graphique individuel **ne s'y étend pas d'office**. Pose la question avec une recommandation.
-2. ~~**#871**~~ – **déjà tranchée le 15 sept. au soir** pour l'assiduité (« 90 % (22,5 / 25) »), prête à coder ; la complétion attend la MESURE de DEMO015 que Grégoire a demandée. Ne plus la poser (constaté par la revue du 16 sept., 16 h 30).
-3. **#874** – les PDF sans aperçu dans la file d'import : inscrit, non diagnostiqué.
-4. **Le calcul du profil** qui montre les pourcentages par travail malgré « note différée » : question posée le 16 au matin, **RÉGLÉE selon Grégoire
-   (16 sept., après-midi, rapporté par Claude Code)**. Ne plus la poser.
-
-**c bis) ONZE QUESTIONS DU DÉPISTAGE SONT SUR UNE PAGE À PART (16 sept., 16 h 30)** : l'artefact « Questions du dépistage » (https://claude.ai/artifact/TyZfhhuGqCWb3ZBVzz2RAJ), une recommandation par question, les choix de Grégoire enregistrés dans son stockage (`db`, collection `decisions`, un document par question). ⮕ **Lis-les avec l'outil ArtifactData (`list` sur `decisions`) avant de rédiger quoi que ce soit** ; ne les repose pas en conversation. Fiches couvertes : #737+#741+#718, #738, #739, #740, #744, #822, #735+#750, #743, #745, #860, #828. Tranchées seul par Cowork et écrites sur la page : #554 (branche morte, à retirer), #677 (à fermer, pastilles 60/50 en constante documentée), #738 (`'non-recu'` ignoré par les calculs : défaut technique). Revue faite sur `26d4347f` par lecture, trois sous-agents ; leurs mesures détaillées ne sont pas écrites ailleurs : à remesurer au moment de cadrer chaque lot.
+**c ter) AUTRES QUESTIONS HORS DÉPISTAGE** : **#874** (les PDF sans aperçu dans la file d'import : inscrit, non diagnostiqué – un diagnostic, puis peut-être une question). La question « profil et note différée » est **réglée** : ne plus la poser. **La porte #884** (perspective et rognage après rechargement) est **reportée par Grégoire au prochain artefact, vers le 23-30 sept.**
 
 **d) DEUX FICHES SONT DE LA PROSE À CORRIGER, PAS UN ARBITRAGE** : **#878** (l'Aide ne dit nulle part comment nommer les pages d'une
 remise : `-p1`, `-p2`) et **#888** (Horaire : le champ Périodes sans étiquette visible une fois rempli). ⚠ **Propose-lui un texte à
@@ -155,6 +142,10 @@ qu'il en parle.
 
 7. **J'AI FAIT INSCRIRE UN DOUBLON** (#857 = #553). ⮕ Avant d'inscrire une trouvaille, `grep` les DEUX registres sur ses mots-clés.
 
+8. ⚠⚠ **J'AI DONNÉ UNE INFÉRENCE POUR UN FAIT, À GRÉGOIRE, EN LUI PROPOSANT UN LOT.** Le 16 à 15 h 50, j'ai écrit que #652 était « vraisemblablement déjà corrigée » parce que le message d'erreur avait quitté le code le 4 sept. La mesure suivante l'a réfuté : ce correctif visait un champ qui n'existait pas encore le jour du rapport. ⮕ **Avant d'annoncer qu'une fiche est réglée, date le correctif CONTRE la date du symptôme** (`git log -S` sur le symbole que le correctif introduit). Et quand ça tombe, dis-le à Grégoire en une phrase, dans le tour suivant.
+9. ⚠ **DEUX SUPPOSITIONS DE CONSIGNE RÉFUTÉES DANS LA MÊME HEURE.** Sur #651, « la vignette du profil restaurait le mode Évaluer avant #761 » : faux, elle menait à une page vide. Et « défaut : inscrire » pour une trouvaille sans symptôme contredisait la règle du 24 août (**un item n'entre que s'il a un symptôme vécu ou bloque un chantier**) : #890 est entrée par ma faute. ⮕ **Relis la règle d'entrée au BACKLOG avant d'écrire « inscrire » dans une consigne** ; pour du code mort sans symptôme, le défaut est « commenter, ou retirer dans le lot qui passe là ».
+10. **LA TABLE DU TRI DISAIT « À TOI » POUR UNE FICHE DÉJÀ TRANCHÉE** (#871, tranchée le 15 au soir, listée en attente le 16). ⮕ **Avant de présenter une question à Grégoire, cherche dans le bloc de la fiche ET dans `RELAIS.md` le mot « tranché ».**
+
 ### Ce qui a tenu, et qu'il faut refaire
 - **LA PORTE TERRAIN TROUVE CE QU'AUCUN TEST NE PEUT TROUVER.** « Je ne vois aucune option de verrouillage » a donné #863, puis, le même
   refus répété, **#864 : tout le verrouillage des cartouches était mort.** ⮕ **Quand une vérification ne trouve pas son écran, c'est
@@ -169,6 +160,11 @@ qu'il en parle.
   si l'objet a lieu d'être.**
 - **Mesurer avant de cadrer.** Sur presque tous les lots depuis le 13, la mesure a démenti la fiche.
 - **Dire quand une de ses propres hypothèses est réfutée.** Une ligne, et un lot évité.
+- **LA REVUE PAR SOUS-AGENTS, EN LECTURE SEULE, PENDANT QUE CLAUDE CODE CODE.** Trois agents, un groupe de fiches chacun, interdits de lancer quoi que ce soit : ils ont trouvé deux fiches en partie périmées (#677, #744), une contradiction entre l'Aide et le code (#740), un défaut technique caché dans une question (#738, `'non-recu'`). ⮕ **Une question se remesure avant de se poser.**
+- **UNE PAGE DE DÉCISIONS QUI ENREGISTRE, PLUTÔT QUE ONZE TOURS DE CONVERSATION.** Il tranche à son rythme, sur l'iPad s'il veut, et on relit ses choix par `ArtifactData`. C'est la règle « une idée par tour » appliquée à un paquet de questions.
+- **L'AVANCEMENT CONTRE LE DÉPART, DEMANDÉ PAR LUI.** Les cases du tri disent « il reste 81, sur 95 vues passer, 14 closes ». ⚠ Il mesure ses progrès par les parcours, pas par les compteurs : garde les deux avertissements de la page (le total monte quand on inscrit ; les laborieuses avancent peu parce qu'on choisit les lots qui lui demandent le moins).
+- **UN LOT AJOUTÉ AVANT LE VERDICT, SUR LE MÊME PARCOURS** (#700 derrière #651) : un seul verdict Playwright, un seul Cowork fermé. ⮕ Pas plus d'un : chaque ajout retarde la mise en ligne du premier.
+
 
 ## 6 · COMMENT GRÉGOIRE VEUT QU'ON LUI PARLE
 
@@ -182,6 +178,8 @@ qu'il en parle.
   muet » ; il a répondu « suppression pure », et il avait raison. **Quand il tranche contre toi, cherche d'abord ce qui le rend juste.**
 - ⚠ **Il travaille en parallèle sur d'autres choses** : pour le CHOIX des prochains lots, prends ceux qui lui demandent le moins – pas
   d'arbitrage à rendre, pas d'écran à aller vérifier chez lui.
+
+- ⚠ **Le 16 après-midi, il corrige des copies en parallèle** et a demandé des lots simples. Préfère les lots sans question, sans écran à vérifier, dans **l'Évaluation** (où il travaille) ou le **Dépistage** (son prochain article, labo #6).
 
 ### Ce qui remonte jusqu'à lui, et rien d'autre
 La **didactique** · ses **données réelles** · les **mots que ses élèves et ses collègues lisent** · ce qui **l'engage publiquement**.
