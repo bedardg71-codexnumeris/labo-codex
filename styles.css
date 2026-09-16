@@ -9826,7 +9826,9 @@ body.mode-clair .bloc-rlo-separateur {
     gap: 10px;
 }
 
-/* Une ligne = SIX champs : Séance N · jour · début · « à » · fin · local.
+/* Une ligne = SEPT champs : Séance N · jour · début · « à » · fin · périodes · local.
+   (Les périodes sont arrivées avec #540 lot E1 sans leur colonne : le local
+   retombait de nouveau sur une 2e rangée — capture de Grégoire, 16 sept. 2026.)
    La grille n'en déclarait que CINQ : le local était rejeté sur une deuxième
    rangée implicite (signalé au terrain le 22 août, capture à l'appui). Et les
    80 px des heures tronquaient la valeur — « 08:0 » au lieu de « 08:00 ».
@@ -9834,7 +9836,7 @@ body.mode-clair .bloc-rlo-separateur {
    projet, que cette rangée n'atteignait pas (≈30 px). */
 .seance-horaire-ligne {
     display: grid;
-    grid-template-columns: auto minmax(110px, 1fr) 124px auto 124px minmax(90px, 130px);
+    grid-template-columns: auto minmax(110px, 1fr) 124px auto 124px 72px minmax(90px, 130px);
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -9851,6 +9853,7 @@ body.mode-clair .bloc-rlo-separateur {
 
 .seance-horaire-ligne select,
 .seance-horaire-ligne input[type="time"],
+.seance-horaire-ligne input[type="number"],
 .seance-horaire-ligne input[type="text"] {
     padding: 8px 10px;
     font-size: 0.9rem;
@@ -9876,8 +9879,8 @@ body.mode-clair .bloc-rlo-separateur {
         display: none;
     }
 
-    .seance-horaire-ligne select,
-    .seance-horaire-ligne input[type="text"] {
+    /* Périodes et local partagent la dernière rangée. */
+    .seance-horaire-ligne select {
         grid-column: 1 / -1;
     }
 }
