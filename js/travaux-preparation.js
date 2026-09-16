@@ -230,8 +230,13 @@
                         queue[i + queueOffset].tailleFichier = blobFinal.size;
                         // Regenerer la thumbnail pour que le pipeline affiche l'image corrigee
                         queue[i + queueOffset].thumbnailDataUrl = null;
-                        // Ecrire les operations dans la queue pour affichage colonne droite
-                        queue[i + queueOffset].operations = f.operations.slice();
+                        // Ecrire les operations dans la queue pour affichage colonne droite.
+                        // #884 — AJOUTER, pas remplacer : `ouvrir()` repart d'une pile
+                        // vide sur un blob DÉJÀ traité ; la liste complète est ce que
+                        // « Re-déposer les fichiers » rejoue sur l'original.
+                        const dejaCuites = Array.isArray(queue[i + queueOffset].operations)
+                            ? queue[i + queueOffset].operations : [];
+                        queue[i + queueOffset].operations = dejaCuites.concat(f.operations);
                     }
                     reussis++;
                 }
@@ -244,6 +249,12 @@
         // Conserver onTerminer avant fermer() (qui libère l'état)
         const callbackToCall = (modeAdHoc && typeof onTerminer === 'function') ? onTerminer : null;
         const fichiersCopie = modeAdHoc ? fichiers.slice() : null;
+
+        // #884 — la liste des réglages doit survivre à un rechargement : c'est
+        // elle qui permet de les réappliquer au re-dépôt.
+        if (!modeAdHoc && typeof travauxImport.persisterFileDAttente === 'function') {
+            travauxImport.persisterFileDAttente();
+        }
 
         fermer();
 
@@ -2975,6 +2986,8 @@
         prepZoomFit: prepZoomFit,
         // Batch
         autoBalanceBlancs: autoBalanceBlancs,
+        // #884 — rejeu des réglages sur un fichier re-déposé (travaux-import.js)
+        renduFinal: renduFinal,
         // Etat
         get actif() { return actif; }
     };

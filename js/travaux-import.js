@@ -1672,12 +1672,23 @@
     function reattacherBlobs(fichiers) {
         let rattaches = 0;
         const ignores = [];
+        const rejeux = [];
         for (const fichier of fichiers) {
             const index = fichiersEnAttente.findIndex(f =>
                 f.nomFichier === fichier.name
                 && f.tailleOriginale === fichier.size
-                && !f.fichier);
+                && !f.fichier
+                && !f.reglagesEnRejeu);
             if (index === -1) { ignores.push(fichier.name); continue; }
+            rattaches++;
+            // #884 — le fichier re-déposé est l'ORIGINAL : les réglages
+            // spécifiques (perspective, rognage…) avaient été cuits dans le
+            // blob perdu au rechargement. Les rejouer avant de rattacher.
+            if (Array.isArray(fichiersEnAttente[index].operations)
+                && fichiersEnAttente[index].operations.length > 0) {
+                rejeux.push(rejouerReglagesSpecifiques(fichiersEnAttente[index], fichier));
+                continue;
+            }
             fichiersEnAttente[index].fichier = fichier;
             fichiersEnAttente[index].fichierOriginal = fichier;
             if (!fichiersEnAttente[index].thumbnailDataUrl) {
@@ -1685,10 +1696,78 @@
                     console.warn('[Travaux-Import] Erreur génération thumbnail:', err);
                 });
             }
-            rattaches++;
         }
         if (rattaches > 0) persisterFileDAttente();
-        return { rattaches: rattaches, ignores: ignores };
+        // `rejeu` : les noms dont les réglages ont été réappliqués, et ceux
+        // dont ils n'ont PAS pu l'être (à dire à l'enseignant·e).
+        const rejeu = Promise.all(rejeux).then(resultats => ({
+            rejoues: resultats.filter(r => r.ok).map(r => r.nom),
+            echecs: resultats.filter(r => !r.ok).map(r => r.nom)
+        }));
+        return { rattaches: rattaches, ignores: ignores, rejeu: rejeu };
+    }
+
+    /**
+     * #884 — Réapplique les réglages spécifiques d'une entrée restaurée sur le
+     * fichier original re-déposé.
+     *
+     * Au « Confirmer » du poste de préparation, les opérations sont CUITES dans
+     * le blob de la file ; seule leur liste survit au rechargement. Sans ce
+     * rejeu, « Re-déposer les fichiers » rattachait la photo brute pendant que
+     * la file affichait encore « Perspective » : l'import partait sans
+     * correction, en silence.
+     *
+     * Le blob n'est posé qu'à la FIN : pendant le rendu, `reglagesEnRejeu`
+     * bloque l'import (travaux-ui.js), qui sinon verrait un fichier manquant.
+     * Échec du rendu : l'original est rattaché et la liste d'opérations vidée,
+     * pour que la file ne prétende plus une correction qui n'a pas eu lieu.
+     *
+     * @param {Object} entree - Entrée de la file (modifiée sur place)
+     * @param {File} fichier - Le fichier re-déposé
+     * @returns {Promise<{nom: string, ok: boolean}>}
+     */
+    async function rejouerReglagesSpecifiques(entree, fichier) {
+        entree.reglagesEnRejeu = true;
+        // Copie de travail : `convertirSiHeic` écrit sur l'objet qu'on lui passe,
+        // et l'entrée ne doit pas recevoir de blob avant la fin du rendu.
+        const travail = Object.assign({}, entree, { fichier: fichier, fichierOriginal: fichier });
+        let ok = false;
+        try {
+            await convertirSiHeic(travail);
+            if (typeof window.travauxPreparation === 'undefined'
+                || typeof window.travauxPreparation.renduFinal !== 'function') {
+                throw new Error('poste de préparation indisponible');
+            }
+            const blob = await window.travauxPreparation.renduFinal({
+                fichier: travail.fichier,
+                operations: entree.operations
+            });
+            if (!blob) throw new Error('rendu vide');
+            Object.assign(entree, {
+                typeMIME: travail.typeMIME,
+                estImage: travail.estImage,
+                estPDF: travail.estPDF,
+                heicConverti: travail.heicConverti,
+                largeurOriginale: travail.largeurOriginale,
+                hauteurOriginale: travail.hauteurOriginale,
+                fichierOriginal: travail.fichierOriginal,
+                fichier: blob,
+                tailleFichier: blob.size,
+                thumbnailDataUrl: null
+            });
+            ok = true;
+        } catch (e) {
+            console.warn('[Travaux-Import] Réglages spécifiques non réappliqués (' + entree.nomFichier + '):', e.message || e);
+            entree.fichier = fichier;
+            entree.fichierOriginal = fichier;
+            entree.operations = [];
+        }
+        entree.reglagesEnRejeu = false;
+        genererThumbnailQueue(entree).catch(err => {
+            console.warn('[Travaux-Import] Erreur génération thumbnail:', err);
+        });
+        persisterFileDAttente();
+        return { nom: entree.nomFichier, ok: ok };
     }
 
     /* ===============================

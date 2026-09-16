@@ -210,6 +210,7 @@ describe('#610 · S2 — un blob ne se rattache qu\'à l\'entrée dont il a le n
     it('reattacherBlobs rend un OBJET, jamais un nombre nu', () => {
         const bilan = win.travauxImport.reattacherBlobs([]);
         expect(typeof bilan).toBe('object');
-        expect(bilan).toEqual({ rattaches: 0, ignores: [] });
+        // #884 : `rejeu` (promesse des réglages réappliqués) s'y ajoute.
+        expect(bilan).toMatchObject({ rattaches: 0, ignores: [] });
     });
 });
