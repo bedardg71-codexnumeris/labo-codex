@@ -9,6 +9,16 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 16 H 45 (Toronto) : 1.142.16 (#652, #890) SUR `main`
 
+> **Ajout de 17 h 45 (session d'audit, Claude Code, Cowork fermé)** — rien de code depuis 1.142.16 ; quatre commits de docs poussés
+> jusqu'à `bcec30a1`. **Audit de « Exporter et archiver »** livré (`Rapports/AUDIT-exporter-et-archiver-2026-09-16.md`) : Grégoire a
+> tranché « on inscrit tout » ⮕ **#891 à #895** au BACKLOG (Dernier ID : #895), #870 élargie à `.texte-muted`, C11 refusé. Rien corrigé.
+> **Le tri est à jour des deux côtés** (page version 22, markdown `f7b47a1c`/`bcec30a1`) : #652 et #890 livrés, lot 21 au journal,
+> #521 et #523 fermées sur sa décision (deux lignes chacune au backlog, la case au numéro barré cochée) ; page 231, backlog 232,
+> écart {#575}. Le point b de `CONSIGNE-DEMARRAGE-COWORK.md` est donc FAIT (la consigne le dit encore au futur).
+> ⚠ **Runner GitHub** : le run de `12f2c5fd` (1.142.16) est « in_progress » depuis 16 h 42, plus d'une heure ; aucun run visible
+> pour les quatre pushs de docs suivants. Et le run précédent (`cd78cba9`) était rouge sur `evaluation-882-…spec.js:40`
+> (timeout 5 s, vert en local sur le même SHA) — **disposition due : instable à inscrire, ou refuser.** Non tranché.
+
 > **1.142.16** (`19604ea4`) porte **#652** : l'ouverture d'une évaluation attendait `eval_<criteres[0].critereId>` ; premier critère
 > retiré de la grille ⮕ attente expirée, « Erreur de chargement », aucun niveau restauré (mesuré WebKit sur 1.142.15, les deux
 > renderers). **Décision de Grégoire : conserver et signaler.** L'attente guette n'importe quel critère enregistré (au délai, des
