@@ -34,6 +34,27 @@
 > Verrous vides déplacés par Cowork dans `.git/_to_delete/` (Grégoire les supprime) ; `.git/objects/maintenance.lock` du 31 août
 > non touché.
 
+> **Ajout de 17 h 55 (session « pratiques de notation », Claude Code)** — **rien de code, rien de poussé.** Deux livrables
+> préparatoires au labo « comment ça marche » : `Rapports/COMPTE-RENDU-documentation-pratiques-notation-2026-09-16.md` (l'état de la
+> doc : le skill `pratiques-notation` est la seule source juste, `docs/modules/pratiques.md` est fausse — #804) et le cadrage
+> `Rapports/prompts-audit/PROMPT-AUDIT-pratiques-notation-configuration-et-discours-2026-09-16.md`. Puis **l'audit exécuté sur la
+> branche `audit/pratiques-notation-2026-09-16`** (worktree `.claude/worktrees/audit-pn-0916`, commit `9441b027`, **non fusionnée,
+> non poussée — Grégoire arbitre les dispositions**, comme le 5 sept.) : `Rapports/AUDIT-pratiques-notation-configuration-et-discours-2026-09-16.md`
+> (24 constats, dispositions proposées) + `Rapports/TABLEAU-LABO-pratiques-notation-2026-09-16.md` (geste par geste, 4 portes terrain)
+> + banc `tests/unit/audit-pratiques-notation-config-2026-09-16.test.js` (8 mesures, assistant réel) + spec
+> `tests/integration/audit-pratiques-notation-parcours-2026-09-16.spec.js` (4 familles, WebKit, 4/4) + 2 captures Chrome. Base
+> `57d0c3f0`/1.142.16 ; Vitest 577/6 456 avec le banc. **Trois majeurs** : (1) SPE créée par l'assistant → ni types ni forfaits,
+> et l'export dit « 0, final » (le cache `indicesCP {P:0, noteConstructible:false}` est relu comme une note par `_lireIndiceStocke`,
+> trou laissé par #709 — proposé « corriger maintenant », deux lignes) ; (2) modèle STD adopté sans instance (pas d'échelle) → profil
+> 77,32 mais export « non constructible » ; rouvert par l'assistant, il ne s'enregistre qu'avec une échelle et ce geste efface son
+> portfolio (proposé « corriger maintenant », `chargerPratiqueExistante`) ; (3) règles spéciales SOM de l'assistant écrites sous
+> `configuration.*`, jamais lues (`calcul_note.conditions_speciales`). **Mots des collègues, à Grégoire** : récap STD « N meilleurs » +
+> « N derniers » sur le même écran (vu dans son Chrome) ; Aide : DEN « pas encore activable ». Break-tests : 5 mutations sur 8 sans
+> rouge (méthode de sélection, seuil SPE, ids de cibles, minimum). Recoupés, tenus : #715, #717, #713, #723, #710, #483, #854, #810,
+> #690, #592, #339. **Aucune fiche neuve** (pas de numéro tant que rien n'est tranché ; Dernier ID reste #895). Artefact de tri à
+> jour (version 23 : entrée « Audit », 13 fiches étiquetées « recoupé »). ⚠ La question standards/cibles est **réglée** (#810, 9 sept.) :
+> ne pas la reposer ; le labo décrit l'app telle qu'elle calcule.
+
 ## (précédent) 16 SEPT. 2026, ≈ 15 H 35 (Toronto) : 1.142.15 (#651, #700) SUR `main`
 
 > **1.142.15** porte **#651** (`b6773bdd`) : « Annoter » depuis la liste, après un passage en mode Évaluer ET un détour hors
