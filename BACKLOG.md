@@ -6576,7 +6576,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   cours homonyme du destinataire, ou sous un cours qui n'existe pas chez lui. La clé reste inscrite
   dans `CLES_PRODUCTION_NON_TRANSPORTEES` avec sa raison, et la sentinelle #511 continue d'exiger
   que toute clé neuve soit transportée ou exclue sciemment. Énoncé d'origine :
-- [ ] **~~#521~~ — Décider du sort de `coursId` au transport.** Extrait de #511 : le rattachement local
+- [x] **~~#521~~ — Décider du sort de `coursId` au transport.** ✅ **Case fermée le 16 sept. 2026 sur décision de Grégoire** : tranchée le 26 août (ligne cochée ci-dessus), cette case ouverte doublait le compte des fiches ouvertes. Extrait de #511 : le rattachement local
   au cours est la seule clé volontairement NON transportée. Conséquence inchangée depuis toujours —
   restaurer une archive rend des productions sans cours. Transporter ferait apparaître une
   production reçue sous un cours homonyme du destinataire, ou sous un cours inexistant.
@@ -6976,7 +6976,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   départagées, parce qu'aucune ne portait sur la vraie variable. C'est l'utilisateur qui savait ce
   qui tournait à côté. **Demander avant de mesurer plus.**
   Énoncé d'origine :
-- [ ] **~~#523~~ — Deux specs Playwright rouges en suite, vertes isolées — cause NON ÉTABLIE.**
+- [x] **~~#523~~ — Deux specs Playwright rouges en suite, vertes isolées — cause NON ÉTABLIE.** ✅ **Case fermée le 16 sept. 2026 sur décision de Grégoire** : close le 26 août (ligne cochée ci-dessus), cette case ouverte doublait le compte des fiches ouvertes.
   ⚠⚠ **CORRECTION DU 26 AOÛT, À LIRE AVANT TOUT LE RESTE DE CET ITEM.** Le titre d'origine disait
   « specs INSTABLES » : c'était une conclusion prématurée. En regardant la machine, j'ai trouvé
   **23 processus Playwright/WebKit vivants en même temps** et une charge moyenne à **159** — parce
