@@ -27,7 +27,17 @@ describe('UI · la rangée de séance tient sur une seule ligne', () => {
     const bloc = tranche(css, '.seance-horaire-ligne {');
     const regle = bloc.slice(0, bloc.indexOf('}'));
 
-    it('la grille déclare SIX colonnes, une par champ', () => {
+    // #540 lot E1 a ajouté le champ Périodes sans sa colonne, et ce banc, qui comptait
+    // « 6 » en dur, est resté vert (capture de Grégoire, 16 sept. 2026). Le compte
+    // attendu se lit maintenant dans le gabarit de la rangée.
+    it('la grille déclare autant de colonnes que la rangée a de champs', () => {
+        const js = lire('js/trimestre-v2-horaires.js');
+        const debut = js.indexOf('<div class="seance-horaire-ligne">');
+        expect(debut).toBeGreaterThan(-1);
+        const gabarit = js.slice(debut, js.indexOf('</div>', debut));
+        const nbChamps = (gabarit.match(/<(label|select|input|span)\b/g) || []).length;
+        expect(nbChamps).toBeGreaterThanOrEqual(7);
+
         const m = regle.match(/grid-template-columns:\s*([^;]+);/);
         expect(m, 'grid-template-columns introuvable').not.toBeNull();
 
@@ -35,13 +45,15 @@ describe('UI · la rangée de séance tient sur une seule ligne', () => {
         const pistes = m[1].replace(/minmax\([^)]*\)/g, 'X').trim().split(/\s+/);
         expect(
             pistes.length,
-            `Six champs, ${pistes.length} colonne(s) : le local retombe sur une 2e rangée.`
-        ).toBe(6);
+            `${nbChamps} champs, ${pistes.length} colonne(s) : le dernier retombe sur une 2e rangée.`
+        ).toBe(nbChamps);
     });
 
-    it('les champs atteignent la cible tactile iPad de 44 px', () => {
+    it('les champs atteignent la cible tactile iPad de 44 px — Périodes compris', () => {
         const zone = css.slice(css.indexOf('.seance-horaire-ligne select,'));
-        expect(zone.slice(0, 400)).toMatch(/min-height:\s*44px/);
+        const regleChamps = zone.slice(0, zone.indexOf('}'));
+        expect(regleChamps).toMatch(/min-height:\s*44px/);
+        expect(regleChamps).toContain('.seance-horaire-ligne input[type="number"]');
     });
 
     it('la largeur du champ Local n\'est plus imposée en style en ligne', () => {
