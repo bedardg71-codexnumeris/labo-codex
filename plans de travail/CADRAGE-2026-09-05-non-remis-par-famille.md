@@ -43,3 +43,7 @@ pratique configurée doit porter et dire.
 ## Ce qui n'appartient qu'à Grégoire
 
 La règle de chaque famille (point 2), et les mots que le collègue lit (point 3).
+
+## Décision voisine, 16 septembre 2026 — la complétion, pas la note
+
+Grégoire a tranché le 16 sept. (page « Questions du dépistage », #738) : **la complétion ne compte jamais un travail non remis, quelle que soit la pratique.** La NOTE garde la règle de sa famille, qui reste l'objet de ce cadrage. Le volet complétion est exécuté avec le lot A de `CADRAGE-2026-09-16-regles-du-depistage.md` ; il ne préjuge pas de ce que chaque famille fait du non-remis dans la note.

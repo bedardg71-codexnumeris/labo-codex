@@ -9,6 +9,9 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 17 H 45 (Toronto) : 1.142.17 (#891, #894) SUR `main`
 
+> **Ajout de 17 h 51 (Cowork) — relecture croisée de 1.142.17 : VERTE, par exécution.** Sentinelle 891 lancée seule dans une copie jetable (hors du dépôt) : 9 / 9. **Six mutations différentes de celles de Claude Code, six rouges** : `exportes` poussé avant l'écriture (2 rouges) ; blob absent sauté en silence (2) ; bilan de `lancerExport` vidé (1) ; `lancerExportEtudiant` qui remarque tout le filtre (1) ; version annotée jamais jointe (1) ; titre de production brut dans « Trimestre complet » (1). Seuls appelants hors module : le bouton du profil, par `lancerExportEtudiant` ; le changement de forme du retour ne casse rien. **Aucune retouche.** Deux constats, sans conséquence observable : une copie dont seule la version annotée échoue part quand même dans le ZIP, mais le bilan la compte en échec et elle n'est pas marquée « exportée » (prudent, même modèle que #565) ; « Blob introuvable » est un mot technique lu par les collègues dans le bilan, déjà affiché par l'export Léa avant ce lot. ⚠ **Faute de Cowork** : il a écrit dans `BACKLOG.md` et trois cadrages pendant le verdict, alors que la consigne demande que Cowork soit fermé ; ces fichiers sont commités par Cowork juste après cet ajout (les onze règles du dépistage, `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md`).
+
+
 > **1.142.17** (`f59c8b3c`, build `0916-1719`) porte **#891** et **#894**, le lot « Télécharger l'export sans rien perdre » (mandat de
 > Grégoire, 16 sept. soir, choisi parce qu'il ne lui demande ni arbitrage ni vérification à l'écran). **Remesure avant de coder** :
 > `lancerExport` à 632 (la fiche disait 646 — la ligne du nom brut) ; les trois `replace(/[^a-zA-Z0-9]/g, '_')` à 137, 284, 651 ;

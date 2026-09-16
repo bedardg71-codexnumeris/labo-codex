@@ -221,6 +221,11 @@ ouverture, **trois questions** (dates du trimestre, nom du service, liste d'él�
 code ni discipline, visible dans Cadre**. Pas d'île, pas d'état invisible. Cinq lots proposés (§ 6), cinq points qui remontent
 à lui (§ 7 : les mots, la complétion, la présence aux rendez-vous, le transfert, le dépistage sur sa liste). Rien n'est codé.
 
+### 12 · Les règles du dépistage, tranchées le 16 septembre — `CADRAGE-2026-09-16-regles-du-depistage.md`
+**Onze questions de didactique tranchées par Grégoire le 16 sept., 17 h 18-17 h 21** (page « Questions du dépistage »), réparties en six lots :
+les écrans du groupe (F), un critère lu une seule fois (B), un seul palier (C), les mêmes copies partout (A), l'élève exclu (E),
+l'assiduité qui manque (D). Quatre lots demandent un mot à Grégoire avant la release (F, C, E, D). Aucun n'écrit dans les données.
+
 ### Né du second audit · Ce que vaut un non-remis, famille par famille — `CADRAGE-2026-09-05-non-remis-par-famille.md`
 **Une règle par famille, pas une règle de moteur** (Grégoire, 5 septembre) : zéro en sommative, ignoré en
 « meilleures notes » si le minimum est atteint. Première mesure due : ce que chaque famille fait aujourd'hui de
