@@ -1583,6 +1583,12 @@ function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     evalExistante.niveauFinal = (document.getElementById('niveauProduction1') || {}).textContent || evalExistante.niveauFinal;
     var retroEl = document.getElementById('retroactionFinale1');
     if (retroEl) evalExistante.retroactionFinale = retroEl.value;
+    // #882 (16 sept. 2026) — « Note chiffrée / Niveau de performance » et les cases d'affichage
+    // suivent l'écran : seul « Enregistrer » les écrivait, et le PDF de l'élève relisait le choix
+    // d'avant. Seulement si le panneau est là : absent, la lecture rendrait des cases décochées.
+    if (document.querySelector('input[name="affichageNote1"]')) {
+        evalExistante.optionsAffichage = _lireOptionsAffichageAutoSave();
+    }
     evalExistante.dateModification = new Date().toISOString();
     // Ne PAS écraser donneesAlgorithmiques avec un objet vide. En JS `{}` est
     // truthy donc `ec.donneesAlgorithmiques || evalExistante.donneesAlgorithmiques`
@@ -1762,6 +1768,8 @@ window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
 // Exposé pour la sentinelle auto-save ↔ verrouillage (Phase 0 A25, juin 2026) :
 // vérifie que l'auto-save ne réécrit JAMAIS une évaluation verrouillée.
 window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
+// #882 — les options d'affichage (evaluation.js) arment l'auto-save comme un critère : nom privé de cette IIFE.
+window._debouncerAutoSave = _debouncerAutoSave;
 
 // Exposé pour la sentinelle anti-re-pollution (Brique D hygiène, juin 2026) :
 // la pré-sélection d'une nouvelle éval suit le modèle des évals existantes,

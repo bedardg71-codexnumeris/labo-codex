@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 8 H 30 (Toronto) : 1.142.8 (#881) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 9 H 30 (Toronto) : 1.142.9 (#882) SUR `main`
+
+> **1.142.8 est en ligne** (`8a553bc6`). **1.142.9** porte **#882** (rapport de 9 h 09) : « Niveau de performance » ignoré par le PDF
+> de synthèse ET jamais écrit par l'auto-save. Décision de Grégoire : bloc « Note provisoire » gardé, niveaux seulement. Sentinelle
+> Vitest #882 + porte WebKit #882. **Stock assumé** : les évaluations déjà enregistrées en « Note chiffrée » le restent (recocher).
+
+## (précédent) 16 SEPT. 2026, ≈ 8 H 30 (Toronto) : 1.142.8 (#881)
 
 > **1.142.7 est en ligne** (`04c87d13`). **1.142.8** porte **#881** (rapport de 8 h 09) : une copie jetée depuis « Exporter et
 > archiver » restait au carrousel d'« Annoter et évaluer » — le cas 1 d'`initialiserModuleTravaux` ne régénérait la bande que

@@ -768,7 +768,7 @@
             concentration: construireConcentration(evaluation, grille, echelle, historique, stats),
             recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille),
             jetons:        construireJetons(da),
-            note:          construireNoteProvisoire(da)
+            note:          construireNoteProvisoire(da, affichageNiveauxSeulement(evaluation))
         };
     }
 
@@ -1127,7 +1127,20 @@
        éliminer le doublon visible côté rendu.
     */
 
-    function construireNoteProvisoire(da) {
+    /**
+     * #882 (décision Grégoire du 16 sept. 2026) — « Niveau de performance » choisi dans la
+     * palette Rétroaction : le PDF ne montre que des niveaux. Même priorité que l'aperçu de
+     * `travaux-export-pdf.js` : le choix ENREGISTRÉ dans l'évaluation, sinon la pratique active.
+     */
+    function affichageNiveauxSeulement(evaluation) {
+        const choix = evaluation && evaluation.optionsAffichage && evaluation.optionsAffichage.affichageNote;
+        if (choix) return choix === 'lettre';
+        const cfgPrat = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
+        const cfg = cfgPrat || {};
+        return (cfg.affichageNote || (cfg.configuration && cfg.configuration.affichageNote)) === 'lettre';
+    }
+
+    function construireNoteProvisoire(da, niveauxSeulement) {
         if (!da || typeof calculerDetailsNoteFinale !== 'function') return null;
         let details;
         try { details = calculerDetailsNoteFinale(da); } catch (e) { return null; }
@@ -1252,6 +1265,32 @@
         // RÉELLEMENT évaluées). Sert au titre « les N meilleures sur M évaluées ».
         const obligatoiresEvaluees = obligatoiresTous.filter(o => typeof o.note === 'number').length;
         const nombreEvaluesSelection = Math.max(0, (portfolio.nombreEvalues || 0) - obligatoiresEvaluees);
+
+        // #882 — niveaux seulement : aucun chiffre ne quitte ce module (notes, moyenne,
+        // pondérations). Les comptes et le tri ci-dessus les ont déjà lus. Le rendu n'a pas de
+        // garde propre : sans pondération ni moyenne, il ne forme ni calcul ni note finale.
+        if (niveauxSeulement) {
+            const sansNote = (item) => Object.assign({}, item, {
+                niveau: (typeof item.note === 'number' && !item.niveau) ? '?' : item.niveau,
+                note: null
+            });
+            return {
+                niveauxSeulement:         true,
+                estHybride:               estHybride,
+                estFinale:                estFinale,
+                selection:                selection.map(sansNote),
+                nombreSelection:          selection.length,
+                nombreEvaluesSelection:   nombreEvaluesSelection,
+                obligatoires:             obligatoiresTous.map(sansNote),
+                obligatoiresRetenus:      obligatoiresRetenus.length,
+                ponderationSelection:     null,
+                ponderationObligatoires:  null,
+                erreurPonderation:        null,
+                moyenne:                  null,
+                plafonnement:             null,
+                avenir:                   avenir
+            };
+        }
 
         return {
             estHybride:               estHybride,
