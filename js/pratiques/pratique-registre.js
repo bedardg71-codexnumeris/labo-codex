@@ -189,6 +189,7 @@ function enregistrerPratique(id, instance) {
         'obtenirDescription',
         'calculerPerformance',
         'calculerCompletion',
+        'calculerDetailsCompletion',   // #871 : { remis, total } — calculerCompletion en découle, l'affichage le lit
         'detecterDefis',
         'identifierPattern',
         'genererCibleIntervention'

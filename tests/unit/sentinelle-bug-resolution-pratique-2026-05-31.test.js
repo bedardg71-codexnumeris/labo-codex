@@ -31,6 +31,7 @@ function instancePratiqueStub(id) {
         obtenirDescription: () => '',
         calculerPerformance: noop,
         calculerCompletion: noop,
+        calculerDetailsCompletion: noop,   // #871 (17 sept. 2026) : exigée par le registre
         detecterDefis: () => [],
         identifierPattern: noop,
         genererCibleIntervention: noop

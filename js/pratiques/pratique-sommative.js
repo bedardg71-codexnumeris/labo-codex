@@ -352,10 +352,12 @@ class PratiqueSommative {
      * Une production est considérée "évaluée" si au moins une évaluation existe pour celle-ci
      * (pas seulement "créée dans le système")
      *
+     * #871 (17 sept. 2026) : rend le DÉTAIL — { remis, total } — et non plus le quotient ; `calculerCompletion`
+     * en découle (plus bas). Ce que cette famille compte n'a pas changé.
      * @param {string} da - Numéro de dossier d'admission
-     * @returns {number} Indice C entre 0 et 1, ou null si pas de données
+     * @returns {{remis:number,total:number}|null} Le détail de la complétion, ou null si pas de données
      */
-    calculerCompletion(da) {
+    calculerDetailsCompletion(da) {
         if (!da || da.length !== 7) {
             // console.warn('[SOM] DA invalide:', da);
             return null;
@@ -395,11 +397,21 @@ class PratiqueSommative {
             );
         });
 
-        const indiceC = productionsRemises.length / productionsEvaluees.length;
+        return { remis: productionsRemises.length, total: productionsEvaluees.length };
+    }
 
-        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-
-        return indiceC;
+    /**
+     * #871, volet complétion (17 sept. 2026) — L'INDICE C DÉCOULE DU DÉTAIL, jamais l'inverse.
+     * « Le pourcentage doit suivre la fraction » (Grégoire, 15 sept.) : `calculerDetailsCompletion` compte,
+     * ici on divise. Le profil et le rapport lisent le même détail (`obtenirDetailsCompletion`, portfolio.js) :
+     * la fraction affichée à côté de C ne peut plus compter autre chose que lui.
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @returns {number|null} Indice C entre 0 et 1, ou null si pas de données
+     */
+    calculerCompletion(da) {
+        const details = this.calculerDetailsCompletion(da);
+        return details ? details.remis / details.total : null;
     }
 
     // ========================================================================

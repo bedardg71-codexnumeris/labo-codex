@@ -46,7 +46,11 @@ function monterRapport(indices) {
         // #871 (17 sept. 2026) : le rapport met les périodes en forme par le formateur RÉEL du profil (helpers.js).
         formaterNombrePeriodes: chargerScript('js/profil-etudiant-helpers.js').formaterNombrePeriodes,
         // Les règles partagées, telles que les modules réels les exportent (helpers ; le registre #706 est posé plus bas, en VRAI).
-        obtenirIdsProductionsEvaluables: (productions) => productions.filter(p => p.type !== 'portfolio').map(p => p.id),
+        // #871, volet complétion (17 sept. 2026) : le rapport ne recompte plus, il lit le détail de la pratique active
+        // (`obtenirDetailsCompletion`, portfolio.js). Ce banc à globaux simulés le fournit tel que la pratique le rendrait
+        // (quatre productions comptées, quatre remises) ; la fraction RÉELLE des quatre familles est jugée par
+        // sentinelle-871-la-fraction-de-completion-compte-ce-que-compte-C.
+        obtenirDetailsCompletion: () => ({ remis: 4, total: 4 }),
         calculerEtStockerIndicesCP() {}, estModeeLectureSeule: () => false, notifications: { succes() {}, erreur() {} }, alert() {} };
     const win = { addEventListener() {}, removeEventListener() {} };
     chargerPredicatsCopie(win);                                        // window.evaluationNonRemise (lot A)

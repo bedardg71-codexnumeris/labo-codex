@@ -138,6 +138,16 @@
  *   global — pas avec un niveau inventé. C'est délibéré : le défaut d'avant
  *   était précisément d'en fabriquer un pour tout le monde.
  *
+ * calculerDetailsCompletion(da) - Le DÉTAIL de la complétion (#871, 17 sept. 2026)
+ *
+ * Rend { remis, total } — ce que la pratique compte au dénominateur et ce qui est remis —, ou null
+ * sans données. C'est la SEULE méthode qui compte : `calculerCompletion` en découle (remis / total), et
+ * le profil comme le rapport lisent ce détail pour écrire la fraction à côté de l'indice C
+ * (`obtenirDetailsCompletion`, portfolio.js). Un affichage ne recompte jamais à part.
+ *
+ * @param {string} da - Numéro de dossier d'admission (7 chiffres)
+ * @returns {{remis:number,total:number}|null}
+ *
  * calculerCompletion(da) - Calcule l'indice C (Complétion)
  *
  * Cette méthode peut être UNIVERSELLE ou SPÉCIFIQUE :
@@ -416,8 +426,13 @@
  *     return total / evaluations.length;
  *   }
  *
+ *   calculerDetailsCompletion(da) {
+ *     // Compter : return { remis, total } ou null
+ *   }
+ *
  *   calculerCompletion(da) {
- *     // Logique similaire...
+ *     const d = this.calculerDetailsCompletion(da);
+ *     return d ? d.remis / d.total : null;
  *   }
  *
  *   // Analyse

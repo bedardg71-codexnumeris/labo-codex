@@ -525,7 +525,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         const cSom = b.store.test_indicesCP[DA.SILENCE].actuel.C;
         const hist = b.win.calculerIndicesHistoriques(DA.SILENCE, '2026-02-15');
         const srcSom = readFileSync(path.join(RACINE, 'js/pratiques/pratique-sommative.js'), 'utf8');
-        const corpsC = tranche(srcSom, '    calculerCompletion(da) {', '    detecterDefis(da) {');
+        const corpsC = tranche(srcSom, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {')   /* #871 : le compte vit dans le détail */;
         noter('B4', { cSom, cSnapshot: hist.C, completionSomLitLePredicat: /evaluationNonRemise\(/.test(corpsC) });
         expect(cSom).toBe(0);                                  // avant : 25
         expect(hist.C).toBe(0);
