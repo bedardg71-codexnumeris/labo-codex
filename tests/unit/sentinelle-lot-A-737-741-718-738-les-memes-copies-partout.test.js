@@ -95,7 +95,7 @@ const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 
     'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-pan-specifications.js', 'js/pratiques/denotation-jugements.js',
     'js/portfolio.js', 'js/indices.js', { chemin: 'js/saisie-presences.js', internes: [] }, 'js/profil-etudiant-actions.js',
     'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js', 'js/profil-etudiant-rapport.js',
-    { chemin: 'js/profil-etudiant-sections-affichage.js', internes: [] }, 'js/snapshots.js'];
+    { chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionAccompagnement'] }, 'js/snapshots.js'];
 const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEvaluation', 'profilActuelDA', 'etudiantsListeCache', 'PRATIQUE_DEFAUT', 'SEUILS_PAR_DEFAUT', '__audit'];
 
 /** Le banc : les modules RÉELS sur le bac partagé du Suivi, la pratique sommative résolue par le registre. */
@@ -127,11 +127,17 @@ function banc(quatrieme) {
                 if (production.echeancesParGroupe && gcId) { const e = production.echeancesParGroupe[gcId]; if (e) return { date: e.date || null, assignee: e.assignee !== false }; }
                 return { date: production.dateEcheance || null, assignee: true };
             },
-            resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); }
+            resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); },
+            // La section « Accompagnement » (le « (sur N) ») lit les interventions (interventions.js, pas chargé) et les termes.
+            obtenirInterventionsEtudiant: () => [], aDesInfosConfidentielles: () => false, obtenirTermeProduction: (c) => (c === 'pluriel' ? 'artefacts' : 'artefact'),
+            accordTermeProduction: (m, n) => (m === 'evalue' ? (n > 1 ? 'évalués' : 'évalué') : m)
         }
     });
     win = b.win;
+    // La chaîne complète, comme l'ouverture du Suivi la déclenche : A, puis C et P stockés par la pratique (indicesCP).
+    // Sans le second, `calculerTousLesIndices` retombe sur `calculerTauxCompletion`, un repli qui n'est pas la pratique.
     win.calculerEtSauvegarderIndicesAssiduite();
+    win.calculerEtStockerIndicesCP();
     return b;
 }
 
@@ -232,6 +238,45 @@ describe('C · #738 — P4 « non-remis » ou « non-recu » enregistrée à 0 :
     });
 });
 
+/* ================= E · complément 1.142.20 — les cinq lecteurs que D3 ne jugeait que par le texte, et le rapport */
+describe('E · complément 1.142.20 — dénominateur de C, rapport, « (sur N) » et directions se jugent par leur comportement', () => {
+    const brouillonTemoin = () => ev('E2P4', DA.TEMOIN, 'P4', 70, 'D', ['D', 'D', 'M'], { verrouillee: false });
+    /** P4 en brouillon pour les DEUX élèves : plus aucune copie qui compte ne touche P4. */
+    function bancDeuxBrouillons() {
+        const b = banc(P4.brouillon());
+        const copies = b.store.test_evaluationsSauvegardees;
+        copies.splice(copies.findIndex(e => e.id === 'E2P4'), 1, brouillonTemoin());
+        b.win.calculerEtStockerIndicesCP();   // les indices stockés se recalculent sur le store modifié
+        return b;
+    }
+    it('E1 · P4 en brouillon pour les deux élèves : P4 quitte le dénominateur — C = 3 / 3 sous SOM et la configurable, et le rapport écrit « 3 remises / 3 productions »', () => {
+        const b = bancDeuxBrouillons();
+        const l = lecture(b);
+        expect([l.cSom, l.cConfigurable, l.C]).toEqual([1, 1, 100]);
+        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 100% \(3 remises \/ 3 productions\)/);
+    });
+    it('E2 · TÉMOIN — la P4 du témoin enregistrée remet P4 au dénominateur : C = 3 / 4 et « 3 remises / 4 productions »', () => {
+        const b = banc(P4.brouillon());
+        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 75% \(3 remises \/ 4 productions\)/);
+    });
+    it('E3 · nbRemis du rapport : P4 « non-recu » notée 0 reste au dénominateur (elle compte) mais n\'est pas une remise — « 3 remises / 4 productions »', () => {
+        const b = banc(P4.nonRemisNote0('non-recu'));
+        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 75% \(3 remises \/ 4 productions\)/);
+    });
+    it('E4 · le « (sur N) » du profil : 3 artefacts avec P4 en brouillon, 4 quand elle est enregistrée', () => {
+        const surN = (b) => (b.interne['profil-etudiant-sections-affichage.js'].genererSectionAccompagnement(DA.ASSIDU).match(/\(sur (\d+) artefacts?\)/) || [])[1];
+        expect(surN(banc(P4.brouillon()))).toBe('3');
+        expect(surN(banc(ev('E1P4', DA.ASSIDU, 'P4', 90, 'E', ['E', 'M', 'E'])))).toBe('4');
+    });
+    it('E5 · les directions par critère ne lisent pas P4 en brouillon : trois copies pour N = 3, « Données insuffisantes » ; enregistrée, quatre copies suffisent et une flèche apparaît', () => {
+        const dir = (b) => Object.values(b.win.calculerDirectionsCriteres(DA.ASSIDU)).map(d => d.symbole);
+        const avecBrouillon = dir(banc(P4.brouillon()));
+        expect(avecBrouillon.length).toBe(3);
+        expect(avecBrouillon.every(s => s === '')).toBe(true);
+        expect(dir(banc(ev('E1P4', DA.ASSIDU, 'P4', 90, 'E', ['E', 'M', 'E']))).some(s => s !== '')).toBe(true);
+    });
+});
+
 /* ============================================== D · le verrou structurel : un seul lecteur de chaque règle */
 describe('D · un seul endroit pour chaque règle — aucun site ne recopie « non-remis », « non-recu » ni le filtre du commentaire', () => {
     const LECTEURS = ['js/profil-etudiant-calculs.js', 'js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js',
@@ -268,6 +313,8 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         // Les lecteurs que ce banc n'exerce pas sous une pratique sommative : la performance des N derniers artefacts de STD
         // (vivante : detecterDefis / genererCarte) et le compte de remises du rapport du profil.
         expect(/evaluationEntreDansLaNote\(e\)/.test(corps('js/pratiques/pratique-pan-standards.js', '    _calculerIndicesTroisDerniersArtefacts(da) {', '        if (evaluationsEleve.length === 0) {'))).toBe(true);
-        expect(/compteDansLaNote\(e\) && !window\.evaluationNonRemise\(e\)/.test(sansCommentaires(source('js/profil-etudiant-rapport.js')))).toBe(true);
+        const rapport = sansCommentaires(source('js/profil-etudiant-rapport.js'));
+        expect(/compteDansLaNote\(e\) && !window\.evaluationNonRemise\(e\)/.test(rapport)).toBe(true);
+        expect(/const compteDansLaNote = \(e\) => window\.evaluationEntreDansLaNote\(e\);/.test(rapport)).toBe(true);   // 1.142.20 : sans copie de secours
     });
 });
