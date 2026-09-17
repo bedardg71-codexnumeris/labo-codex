@@ -1,38 +1,28 @@
-# Consigne suivante – l'élève exclu (lot 32 : lot E du dépistage, #745)
+# Consigne suivante – l'export anonymisé pour la recherche rend les vrais indices (lot 33 : #902)
 
-> Écrite le 17 septembre 2026, 11 h 47 (Toronto), par Cowork, après le push de 1.142.27.
-> **Condition de départ** : `git log origin/main` (pas `git log`) doit montrer `1.142.27` (`f99f5325`) ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-un-seul-palier.md` et renomme `plans de travail/CONSIGNE-SUIVANTE-eleve-exclu.md` en `CONSIGNE-DU-JOUR.md`.
+> Écrite le 17 septembre 2026, 11 h 58 (Toronto), par Cowork, pendant le lot 32 (l'élève exclu, `1.142.28`).
+> **À n'exécuter qu'après le push du lot 32** : au démarrage, `git log origin/main` (pas `git log`) doit montrer `1.142.28` ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-eleve-exclu.md` et renomme `plans de travail/CONSIGNE-SUIVANTE-export-recherche.md` en `CONSIGNE-DU-JOUR.md`.
 
-Mandat : le lot E de `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md`. Règle tranchée par Grégoire le 16 au soir, mots choisis le 17 au matin : **aucune question ne l'attend**, sauf la phrase de « Nouvelles » et toute phrase de l'Aide que tu réécrirais.
+Mandat : #902. **Aucune question n'attend Grégoire**, sauf la phrase de « Nouvelles ». Aucun mot à l'écran ne change.
 
-## 1 · La règle (#745)
+## 1 · Ce que Cowork a mesuré `[lecture]`, qui corrige la fiche
 
-- **Élève exclu par statut** (`estEtudiantExclu`, `main.js:111` : inactif, décrochage, abandon) : son profil se calcule avec la règle de **SA pratique** (celle du groupe-cours), comme un élève actif ; il **affiche son statut** ; il reste **hors des moyennes et statistiques du groupe**.
-- **Élève qui n'est plus dans le groupe** (DA absent de la liste) : « hors groupe », **sans calcul**.
-- **Mots, tels quels** :
-  - exclu par statut, sous le nom dans le profil : **« <libellé du statut> · hors des moyennes du groupe »** – le libellé vient de `libelleStatutEtudiant` (`main.js:125` : Inactivité, Décrochage, Abandon) ; exemple : « Décrochage · hors des moyennes du groupe » ;
-  - absent du groupe, sans calcul : **« N'est plus dans le groupe »** (reprend la mention des Interventions, `interventions.js:720`).
+- **Volet 1, VIVANT** : Réglages › carte « Captures et recherche » › bouton « Générer l'export anonymisé » (`index.html:~9585`, `data-action="exporterFormatRecherche"`) → `exporterFormatRecherche` (`trimestres.js:1988`). Le bloc `indices_finaux` (`~2298`) lit `indicesCP[da].actuel.PAN || .SOM`, format retiré en Beta 95.5 : **`A_final`, `C_final`, `P_final` valent 0 pour chaque élève.** La carte promet pourtant « Indices A-C-P anonymisés ». ⚠ **A n'est pas dans `indicesCP`** : il vit dans `indicesAssiduite` (`sommatif[da]`, objet `{ indice }` ou ancien nombre – voir la lecture de `calculerTousLesIndices`, `indices.js:~484`). Remesure.
+- **Volet 2, MORT** : `trierLignes` (`liste-evaluations.js:2190`) n'a **aucun appelant**, et `#tri-evaluations` n'existe pas dans `index.html` (0 occurrence) ; `obtenirIndicesEtudiant` (`~2142`) n'est appelé que par `trierLignes`. « Les tris de la liste par C, P et N ne trient rien » n'a donc **aucun écran**. Au passage, la fiche le sous-estimait : `pratique` y vaut un booléen (`=== 'standards'`), et A lit `indicesAssiduite[da].actuel.indice`, un autre format absent – A valait 0 aussi.
 
-## 2 · Ce que Cowork a lu `[lecture]`, à remesurer
+## 2 · À faire
 
-- **La cause** : les indices stockés ne contiennent pas les exclus – A (`indices.js:~270`, `etudiantsActifs`) et C/P (`portfolio.js:~685`). `calculerTousLesIndices` (`indices.js:~484`) tombe alors dans le repli « à la volée » : **A = 0** (aucune entrée), **P = `calculerPerformancePAN`** (`indices.js:420`, « les 3 meilleures notes » sans sélection de portfolio), quelle que soit la pratique. Constats D-5 et F-2 de l'audit du 5 sept. `[exécuté]` : un exclu à P 70 là où sa pratique dit 62,5.
-- **Le choix d'implémentation est à toi** (calculer les exclus avec les actifs et filtrer à la lecture des moyennes, ou calculer l'exclu à part par sa pratique) ; dis lequel et pourquoi. Contraintes : **aucune moyenne, statistique, courbe de groupe ni relevé hebdomadaire ne doit changer** pour un groupe qui a un exclu – liste les lecteurs de moyenne (`grep -rn` sur `estEtudiantExclu` et sur les lecteurs de `indicesAssiduite` / `indicesCP`) et prouve-le.
-- **Le repli « à la volée »** : s'il n'a plus de chemin vivant une fois les exclus calculés, retire-le (`calculerPerformancePAN` compris, s'il n'a plus d'appelant) – zéro-dette. S'il en garde un, nomme-le.
-- **Où le mot paraît** : l'en-tête du profil (nom) – la liste des étudiants porte déjà le statut en clair (`etudiants.js:~1186`, #749 lot 2), ne la change pas. Cherche les chemins réels qui ouvrent le profil d'un DA absent du groupe (Interventions ? Évaluations ?) ; s'il n'y en a aucun, dis-le et n'invente pas d'écran.
-- ⛔ **Arrêt** : si calculer un exclu par sa pratique donne, pour un chemin réel, un résultat que la règle du 16 ne tranche pas (par exemple : une pratique dont la note dépend du rang ou de la moyenne du groupe, ou un exclu sans aucune présence ni copie), arrête-toi sur ce cas et rapporte-le, quel que soit le stock : il remonte à Grégoire. Le reste du lot peut continuer.
-- **Stock** : les indices sont des caches recalculés ; dis si un indice d'exclu est ÉCRIT ailleurs (snapshot, relevé hebdomadaire, intervention) et s'il y garde sa valeur. N'y écris rien.
-
-## 3 · Au passage, sans mot, sans release si c'est seul
-
-- **Trou de preuve de la relecture du lot 31** (en tête de la section 1.142.27 de `RELAIS.md`) : dans `sentinelle-790-signalement-vient-du-gabarit`, volet B, le cas « une copie de production DIAGNOSTIQUE lève bien un signalement » ne marque aucune production comme diagnostique. Donne-lui une production `P_DIAG` portant `diagnostique: true`, visible par le module par les deux chemins qu'un filtre emprunterait (un `db` de banc qui la rend sous `cle('productions')`, et le contexte). La mutation N1 de Cowork (écarter dans `pourEleve` les copies dont la production lue par `db.getSync(cle('productions'))` porte `diagnostique === true`, sans le mot `ProductionDiagnostique`) doit rougir.
+- **Volet 1** : `indices_finaux` lit le format PLAT (`indicesCP[da].actuel.C`, `.P`, `.noteConstructible`) et A à sa source. **Un P non constructible ne s'exporte pas comme 0** (règle #394) : tu tranches la forme (`null`, ou un champ additif) en pensant à qui relit ce fichier – un export « voyage » – et tu le dis. Réemploie un lecteur existant plutôt que d'en écrire un troisième (`obtenirIndicesCP`, `calculerTousLesIndices`) si ses unités conviennent : mesure-les (0-100 ou 0-1) et dis ce que le fichier porte.
+- **Volet 2** : retire le code mort (`trierLignes`, `obtenirIndicesEtudiant`), et les lectures de `#tri-evaluations` (`~458`, `~482`, `~506`, `~529`) si elles ne servent à rien d'autre – mesure avant, un `?.value || 'nom-asc'` peut nourrir un état vivant. Zéro-dette : rien d'autre.
+- **Cherche les autres lecteurs de l'ancien format** (`grep -rn` sur `actuel.PAN`, `actuel.SOM`, `actuel?.PAN`, `actuel?.[`) : trois issues nommées pour chacun.
+- **Stock** : source seulement. Un export déjà produit ne se réécrit pas ; dis-le.
 
 ## Preuve
 
-- Sentinelle du lot, sur un groupe à trois élèves dont un en « Décrochage » avec présences et copies : le profil de l'exclu rend A, C et P **de sa pratique** (au moins sommative et standards), pas « 3 meilleures » ni A = 0 ; l'en-tête écrit « Décrochage · hors des moyennes du groupe » ; les moyennes et statistiques du groupe sont **identiques** avec et sans l'exclu calculé. Un DA absent du groupe : « N'est plus dans le groupe », aucun indice calculé.
-- Break-test : l'exclu retombe dans le repli ; l'exclu entre dans une moyenne du groupe ; le libellé écrit en dur au lieu de `libelleStatutEtudiant`. Des essais de COMPORTEMENT : une mutation qui garde le texte exigé et change le calcul doit rougir.
-- Banc WebKit si le pack démo porte un exclu (sinon, dis-le).
-- Vitest depuis `tests/`, puis le verdict Playwright, Cowork fermé. **Porte terrain : aucune attendue.** Si la ligne ajoutée sous le nom change la mise en page de l'en-tête, mesure-la à 768 px et dis-le.
+- Sentinelle : un trimestre de banc à trois élèves (un P constructible, un non constructible, un A en ancien format nombre) → `indices_finaux` porte les valeurs stockées, dans les unités annoncées, et jamais 0 pour un P non constructible ; aucun champ nominatif. L'ancien format `actuel.PAN` n'est plus lu nulle part.
+- Break-test : relire `actuel.PAN` ; A pris dans `indicesCP` ; P non constructible rendu 0. Essais de COMPORTEMENT (une mutation qui garde le texte exigé et change la valeur doit rougir).
+- Vitest depuis `tests/`, puis le verdict Playwright, Cowork fermé. **Porte terrain : aucune** (rien ne change à l'écran ; le téléchargement lui-même n'est pas touché).
 
 ## Livraison
 
-Patch `1.142.28` par `scripts/release.mjs`. **Phrase de « Nouvelles », et toute phrase réécrite dans l'Aide** : propose-les à Grégoire avant de les figer. Puis `OU-EN-EST-ON.md`, `RELAIS.md`, le backlog (#745), le cadrage (lot E livré), le markdown du tri. **Commite aussi les fichiers de Cowork** : la consigne renommée et son archive, et l'ajout de Cowork en tête de la section 1.142.27 de `RELAIS.md` (relecture du lot 31). Push par `scripts/pousser.sh`, puis signale à Cowork que c'est poussé.
+Patch `1.142.29` par `scripts/release.mjs`. **Phrase de « Nouvelles »** : propose-la à Grégoire avant de la figer. Puis `OU-EN-EST-ON.md`, `RELAIS.md`, le backlog (#902), le markdown du tri. **Commite aussi les fichiers de Cowork** : la consigne renommée et son archive, et tout ajout de Cowork dans `RELAIS.md` non encore commité. Push par `scripts/pousser.sh`, puis signale à Cowork que c'est poussé.

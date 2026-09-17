@@ -2013,6 +2013,8 @@
             const echelles = db.getSync(cle('echellesTemplates'), []);
             const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
             const indicesCP = db.getSync(cle('indicesCP'), {});
+            // #902 : A ne vit pas dans indicesCP — sa source est indicesAssiduite (sommatif[da]).
+            const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
             const cours = db.getSync('cours', []);
             const coursActif = cours.find(c => c.actif);
 
@@ -2068,7 +2070,7 @@
             const exportData = {
                 meta: {
                     version_monitorage: '6.0.0-beta95',
-                    version_format: '1.0',
+                    version_format: '1.1', // #902 : indices_finaux porte null et note_constructible (ajout additif)
                     date_export: new Date().toISOString(),
                     trimestre: {
                         id: trimestre.id,
@@ -2295,14 +2297,25 @@
                             }))
                     })),
 
+                    // #902 (17 sept. 2026) : ce bloc lisait `indicesCP[da].actuel.PAN || .SOM`, format
+                    // retiré en Beta 95.5 — A, C et P valaient 0 pour CHAQUE élève, et A n'a jamais
+                    // vécu dans `indicesCP` (sa source est `indicesAssiduite`). Le lecteur unique de
+                    // l'app (`calculerTousLesIndices`) rend les trois, de 0 à 100 comme les snapshots
+                    // ci-dessus, et connaît l'ancien format « nombre » de A.
+                    // ⮕ Règle #394 : un P non constructible n'est PAS un 0. Ce fichier voyage, et un
+                    //   0 entre dans une moyenne sans que personne le voie : `null` (valeur manquante
+                    //   pour R, pandas, etc.), avec `note_constructible` qui dit pourquoi.
+                    unites: 'A, C et P de 0 à 100. P_final vaut null (jamais 0) quand la note n\'est pas constructible : voir note_constructible.',
+
                     indices_finaux: etudiantsActifs.map(e => {
-                        const indices = indicesCP[e.da];
-                        const actuel = indices?.actuel?.PAN || indices?.actuel?.SOM || {};
+                        const indices = calculerTousLesIndices(e.da, indicesAssiduite, indicesCP);
+                        const constructible = indices.noteConstructible !== false;
                         return {
                             id_etudiant: daVersAnonyme[e.da],
-                            A_final: actuel.A || 0,
-                            C_final: actuel.C || 0,
-                            P_final: actuel.P || 0
+                            A_final: indices.A,
+                            C_final: indices.C,
+                            P_final: constructible ? indices.P : null,
+                            note_constructible: constructible
                         };
                     }),
 
