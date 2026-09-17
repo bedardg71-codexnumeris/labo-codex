@@ -25,6 +25,7 @@
             couleur: 'vert',
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
             items: [
+                'Profil d\'un élève&nbsp;: la fraction écrite à côté de la complétion compte maintenant les mêmes productions que le pourcentage, évaluation terminale comprise — «&nbsp;80%&nbsp;» se lit avec «&nbsp;8 / 10&nbsp;», plus avec «&nbsp;7 / 9&nbsp;». Le pourcentage, lui, n\'a pas changé. Dans le profil comme dans le rapport.',
                 'Profil d\'un élève&nbsp;: l\'assiduité montre les présences telles que tu les as saisies, demi-période comprise — «&nbsp;90% (22,5 / 25 périodes)&nbsp;» au lieu de «&nbsp;90% (23 / 25)&nbsp;». Le pourcentage découle de la fraction affichée, dans le profil comme dans le rapport.',
                 'Dans le Suivi du groupe, le filtre «&nbsp;A+C &lt; 65%&nbsp;» devient «&nbsp;A ou C &lt; 70%&nbsp;»&nbsp;: il retient l\'élève dont l\'assiduité ou la complétion est sous le seuil critique du profil, le même que la carte Mobilisation. Les courbes du groupe et les trajectoires en mode Note finale ne dessinent plus les niveaux d\'une échelle sous des pourcentages&nbsp;; le mode Habiletés les garde.',
                 '«&nbsp;Évaluer&nbsp;» dans le profil d\'un élève (et dans la liste des évaluations) choisit maintenant l\'élève et la production pour toi. Avant, tu arrivais sur Évaluation sans que rien ne soit choisi.',

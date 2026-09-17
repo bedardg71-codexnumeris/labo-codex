@@ -66,7 +66,8 @@ function monter(periodesParDate, periodesParSeance = 5) {
         calculerTousLesIndices: () => ({ A: Math.round(calcul.indice * 100), C: 0, P: 0, noteConstructible: false }),
         obtenirDetailsAssiduite: winSections.obtenirDetailsAssiduite,
         formaterNombrePeriodes: winHelpers.formaterNombrePeriodes,
-        obtenirIdsProductionsEvaluables: () => [], evaluationEntreDansLaNote: win.evaluationEntreDansLaNote,
+        // Volet complétion de #871 : le rapport lit le détail de la pratique (portfolio.js) ; ce banc ne juge que l'assiduité.
+        obtenirDetailsCompletion: () => null, evaluationEntreDansLaNote: win.evaluationEntreDansLaNote,
         calculerEtStockerIndicesCP() {}, estModeeLectureSeule: () => false
     }), win);
     const ligne = String(win.genererRapportAPI(DA, { assiduite: true })).split('\n').find(l => l.startsWith('Assiduité')) || null;

@@ -457,10 +457,12 @@ class PratiqueConfigurable {
      * 🔧 FIX (23 fév 2026) : Calcul indépendant à partir des productions et évaluations
      * au lieu de lire depuis indicesCP (dépendance circulaire avec calculerEtStockerIndicesCP)
      *
+     * #871 (17 sept. 2026) : rend le DÉTAIL — { remis, total } — et non plus le quotient ; `calculerCompletion`
+     * en découle (plus bas). Ce que cette famille compte n'a pas changé.
      * @param {string} da - DA de l'étudiant
-     * @returns {number|null} Indice C (0-1, décimal), ou null si aucune production évaluée
+     * @returns {{remis:number,total:number}|null} Le détail de la complétion, ou null si pas de données
      */
-    calculerCompletion(da) {
+    calculerDetailsCompletion(da) {
         if (!da) return null;
 
         // Lire les productions et évaluations via le namespace du mode actif
@@ -515,7 +517,21 @@ class PratiqueConfigurable {
             );
         });
 
-        return productionsRemises.length / productionsEvaluees.length;
+        return { remis: productionsRemises.length, total: productionsEvaluees.length };
+    }
+
+    /**
+     * #871, volet complétion (17 sept. 2026) — L'INDICE C DÉCOULE DU DÉTAIL, jamais l'inverse.
+     * « Le pourcentage doit suivre la fraction » (Grégoire, 15 sept.) : `calculerDetailsCompletion` compte,
+     * ici on divise. Le profil et le rapport lisent le même détail (`obtenirDetailsCompletion`, portfolio.js) :
+     * la fraction affichée à côté de C ne peut plus compter autre chose que lui.
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @returns {number|null} Indice C entre 0 et 1, ou null si pas de données
+     */
+    calculerCompletion(da) {
+        const details = this.calculerDetailsCompletion(da);
+        return details ? details.remis / details.total : null;
     }
 
     // ========================================================================

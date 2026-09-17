@@ -459,6 +459,11 @@ function genererSectionMobilisationEngagement(da) {
     const nbTotal = artefacts.length;
     const nbRemis = artefacts.filter(a => a.remis).length;
     const nbRetenus = artefacts.filter(a => a.retenu).length;
+    // #871, volet complétion (17 sept. 2026) — LA FRACTION ÉCRITE À CÔTÉ DE L'INDICE C vient du détail dont il
+    // découle (`obtenirDetailsCompletion`, portfolio.js), pas de la liste des artefacts ci-dessus : l'indice
+    // compte aussi l'évaluation terminale (« 80% » à côté de « 7/9 » ; tranché par Grégoire le 17 sept.).
+    // `nbRemis` et `nbTotal` restent le compte des ARTEFACTS LISTÉS dans la carte (pastilles, minimum requis).
+    const detailsC = (typeof obtenirDetailsCompletion === 'function' ? obtenirDetailsCompletion(da) : null) || { remis: 0, total: 0 };
     const interpC = interpreterCompletion(indices.C);
     // artefactsRemis déjà déclaré à la ligne 710
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
@@ -535,7 +540,7 @@ function genererSectionMobilisationEngagement(da) {
             <br><br>
             <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
             <br><br>
-            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', nbRemis)} / ${nbTotal} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('total', nbTotal)}
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${detailsC.remis} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', detailsC.remis)} / ${detailsC.total} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('total', detailsC.total)}
             <br><br>
             <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}
         </div>
@@ -605,7 +610,7 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• ${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('remis', 2)} :</strong> ${nbRemis}/${nbTotal}</li>
+                    <li><strong>• ${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('remis', 2)} :</strong> ${detailsC.remis}/${detailsC.total}</li>
                 </ul>
 
                 <hr class="profil-separateur">

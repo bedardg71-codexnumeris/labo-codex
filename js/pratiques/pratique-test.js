@@ -49,15 +49,21 @@ class PratiqueTest {
         return 0.75; // 75%
     }
 
-    calculerCompletion(da) {
+    calculerDetailsCompletion(da) {
         // Validation basique
         if (!da || da.length !== 7) {
             console.warn(`[PratiqueTest] DA invalide : ${da}`);
             return null;
         }
 
-        // Retourner une valeur fixe pour les tests
-        return 0.80; // 80%
+        // Retourner une valeur fixe pour les tests : 8 remises sur 10 (80 %)
+        return { remis: 8, total: 10 };
+    }
+
+    // #871 : l'indice découle du détail, comme dans les vraies pratiques.
+    calculerCompletion(da) {
+        const details = this.calculerDetailsCompletion(da);
+        return details ? details.remis / details.total : null;
     }
 
     // ========================================================================

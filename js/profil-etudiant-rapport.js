@@ -65,23 +65,13 @@ function genererRapportAPI(da, options = {}) {
     const productions = obtenirDonneesSelonMode('productions') || [];
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
-    // Les productions que la pratique compte (artefacts de portfolio en standards, tout sauf le
-    // conteneur en sommative — `obtenirIdsProductionsEvaluables`), non facultatives, et déjà évaluées
-    // pour au moins un élève : c'est le dénominateur de la complétion sommative et la liste que la
-    // section « Complétion » du profil appelle « données ».
-    const idsEvaluables = (typeof obtenirIdsProductionsEvaluables === 'function')
-        ? obtenirIdsProductionsEvaluables(productions)
-        : productions.filter(p => p.type !== 'portfolio').map(p => p.id);
-    // Lot A, complément 1.142.20 (16 sept. 2026) — LA règle unique (#706, registre), sans copie de secours : le
-    // dénominateur lisait encore « non remplacée, avec note » et comptait une production que seuls des brouillons
-    // touchaient (« 3 remises / 4 productions » là où la complétion disait 100 — relecture croisée de Cowork).
+    // #871, volet complétion (17 sept. 2026) — LA FRACTION VIENT DE LA PRATIQUE QUI A CALCULÉ C. Ce rapport
+    // recomptait ici les productions à sa façon (`obtenirIdsProductionsEvaluables` : en standards, les seuls
+    // artefacts du portfolio) à côté d'un indice qui compte aussi l'évaluation terminale : « 80% (7 remises /
+    // 9 productions) ». Il lit maintenant le détail dont l'indice découle, et ne compte plus rien lui-même.
+    const detailsC = obtenirDetailsCompletion(da) || { remis: 0, total: 0 };
+    // La règle unique (#706, registre) reste celle de la liste des évaluations du volet Performance, plus bas.
     const compteDansLaNote = (e) => window.evaluationEntreDansLaNote(e);
-    const productionsComptees = productions.filter(p =>
-        idsEvaluables.includes(p.id) && !p.facultatif &&
-        evaluations.some(e => e.productionId === p.id && compteDansLaNote(e)));
-    // Lot A (16 sept. 2026) — même compte que la complétion : une copie qui compte et qui n'est pas non remise.
-    const nbRemis = productionsComptees.filter(p => evaluations.some(e =>
-        e.etudiantDA === da && e.productionId === p.id && compteDansLaNote(e) && !window.evaluationNonRemise(e))).length;
 
     let rapport = '';
 
@@ -103,7 +93,7 @@ function genererRapportAPI(da, options = {}) {
 
     // 3. COMPLÉTION
     if (opts.completion) {
-        rapport += `Complétion : ${indices.C}% (${nbRemis} remises / ${productionsComptees.length} productions)\n\n`;
+        rapport += `Complétion : ${indices.C}% (${detailsC.remis} remises / ${detailsC.total} productions)\n\n`;
     }
 
     // 4. PERFORMANCE — la note du cours, telle que le profil l'affiche, et les évaluations qui y entrent (#706).

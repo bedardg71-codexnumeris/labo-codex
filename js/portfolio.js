@@ -615,6 +615,37 @@ function comptesDansDepistage(production, mode) {
    =============================== */
 
 /**
+ * #871 (17 sept. 2026) — LA pratique dont les indices C et P sont calculés et stockés : celle du
+ * groupe-cours actif. Un seul endroit la résout, pour le calcul de C et pour le détail que l'écran en montre.
+ * @returns {{pratiqueId:string, pratique:?Object}}
+ */
+function _resoudrePratiqueDesIndicesCP() {
+    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
+        ? obtenirPratiqueActiveGroupeCours()
+        : 'sommative';
+    return { pratiqueId, pratique: obtenirPratiqueParId(pratiqueId) };
+}
+
+/**
+ * #871, volet complétion (17 sept. 2026) — LE DÉTAIL DE LA COMPLÉTION D'UN ÉLÈVE, TEL QUE L'INDICE C LE COMPTE.
+ *
+ * Tranché par Grégoire : « le pourcentage doit suivre la fraction » (15 sept.) et « l'évaluation terminale est
+ * une remise que la complétion suit » (17 sept.). Avant, le rapport et le profil refaisaient chacun leur
+ * compte (les artefacts du portfolio seulement) à côté d'un indice qui comptait aussi la terminale :
+ * « 80% » et « 7 / 9 ». Les sites d'affichage lisent maintenant CE détail, celui dont
+ * `calculerCompletion` de la pratique active découle ; ils ne comptent plus rien eux-mêmes.
+ * Les différences entre familles (travaux dus en standards, palier le plus haut en spécifications) suivent.
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {{remis:number,total:number}|null} null : aucune donnée (l'indice stocké vaut alors 0)
+ */
+function obtenirDetailsCompletion(da) {
+    const { pratique } = _resoudrePratiqueDesIndicesCP();
+    if (!pratique || typeof pratique.calculerDetailsCompletion !== 'function') return null;
+    return pratique.calculerDetailsCompletion(da);
+}
+
+/**
  * 🆕 BETA 95.5 : Calcule et stocke les indices C et P (async + pratique active)
  *
  * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
@@ -642,14 +673,9 @@ function _calculerEtStockerIndicesCPInterne() {
     const cleIndices = cle('indicesCP');
     let indicesCP = db.getSync(cleIndices, {});
 
-    // 🆕 BETA 95.5 : Obtenir la pratique active du groupe-cours
-    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-        ? obtenirPratiqueActiveGroupeCours()
-        : 'sommative';
-
-
-    // Obtenir la pratique depuis le registre
-    const pratique = obtenirPratiqueParId(pratiqueId);
+    // 🆕 BETA 95.5 : la pratique active du groupe-cours, depuis le registre (#871 : résolution partagée
+    // avec `obtenirDetailsCompletion` — la fraction affichée vient de la pratique qui a calculé C).
+    const { pratiqueId, pratique } = _resoudrePratiqueDesIndicesCP();
     if (!pratique) {
         console.error(`❌ Pratique "${pratiqueId}" non disponible dans le registre`);
         return indicesCP;
@@ -1169,6 +1195,7 @@ window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
 
 // 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
 window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
+window.obtenirDetailsCompletion = obtenirDetailsCompletion;   // #871 — la fraction affichée à côté de C
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
 window.simulerIndices = simulerIndices; // #307 Lot 5 — indices C/P en lecture seule pour une pratique simulée
 // window.obtenirIndicesCP → indices.js (#206)

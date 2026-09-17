@@ -380,10 +380,12 @@ class PratiquePanSpecifications {
      * - Un travail "remis mais non acceptable" compte dans le dénominateur (attendu) mais pas dans le numérateur
      * - Les révisions sont comptées (si un travail devient acceptable après révision)
      *
+     * #871 (17 sept. 2026) : rend le DÉTAIL — { remis, total } — et non plus le quotient ; `calculerCompletion`
+     * en découle (plus bas). Ce que cette famille compte n'a pas changé.
      * @param {string} da - Numéro de dossier d'admission
-     * @returns {number} Indice C entre 0 et 1, ou null si pas de données
+     * @returns {{remis:number,total:number}|null} Le détail de la complétion, ou null si pas de données
      */
-    calculerCompletion(da) {
+    calculerDetailsCompletion(da) {
         if (!da || da.length !== 7) {
             console.warn('[SPEC] DA invalide:', da);
             return null;
@@ -424,10 +426,23 @@ class PratiquePanSpecifications {
             return null;
         }
 
-        const indiceC = Math.min(totalAcceptable / totalAttendu, 1.0);
+        // L'indice est plafonné à 1 : au-delà du palier le plus haut, les travaux acceptables en surplus ne
+        // comptent pas — la fraction le dit de la même façon (« 10 / 10 », jamais « 12 / 10 »).
+        return { remis: Math.min(totalAcceptable, totalAttendu), total: totalAttendu };
+    }
 
-
-        return indiceC;
+    /**
+     * #871, volet complétion (17 sept. 2026) — L'INDICE C DÉCOULE DU DÉTAIL, jamais l'inverse.
+     * « Le pourcentage doit suivre la fraction » (Grégoire, 15 sept.) : `calculerDetailsCompletion` compte,
+     * ici on divise. Le profil et le rapport lisent le même détail (`obtenirDetailsCompletion`, portfolio.js) :
+     * la fraction affichée à côté de C ne peut plus compter autre chose que lui.
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @returns {number|null} Indice C entre 0 et 1, ou null si pas de données
+     */
+    calculerCompletion(da) {
+        const details = this.calculerDetailsCompletion(da);
+        return details ? details.remis / details.total : null;
     }
 
     // ========================================================================

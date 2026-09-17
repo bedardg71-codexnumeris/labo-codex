@@ -299,11 +299,12 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         expect((registre.match(/^function evaluationNonRemise\(/gm) || []).length).toBe(1);
     });
     it('D3 · les complétions des trois familles et les trois lecteurs des snapshots passent par les DEUX prédicats ; les directions et le « (sur N) » du profil par le premier', () => {
+        // #871 (17 sept. 2026) : le compte vit dans `calculerDetailsCompletion` ; `calculerCompletion` n'est plus que le quotient.
         const corps = (f, debut, fin) => sansCommentaires(tranche(source(f), debut, fin));
         const deux = (s) => /evaluationEntreDansLaNote\(/.test(s) && /!window\.evaluationNonRemise\(/.test(s);
-        expect(deux(corps('js/pratiques/pratique-sommative.js', '    calculerCompletion(da) {', '    detecterDefis(da) {'))).toBe(true);
-        expect(deux(corps('js/pratiques/pratique-configurable.js', '    calculerCompletion(da) {', '    detecterDefis(da) {'))).toBe(true);
-        expect(deux(corps('js/pratiques/pratique-pan-standards.js', '    calculerCompletion(da) {', '    detecterDefis(da) {'))).toBe(true);
+        expect(deux(corps('js/pratiques/pratique-sommative.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
+        expect(deux(corps('js/pratiques/pratique-configurable.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
+        expect(deux(corps('js/pratiques/pratique-pan-standards.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         const snapshots = sansCommentaires(source('js/snapshots.js'));
         expect((snapshots.match(/!window\.evaluationNonRemise\(/g) || []).length).toBe(2);
         expect((snapshots.match(/window\.evaluationNonRemise\(e\)\) return false/g) || []).length).toBe(1);
@@ -314,7 +315,9 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         // (vivante : detecterDefis / genererCarte) et le compte de remises du rapport du profil.
         expect(/evaluationEntreDansLaNote\(e\)/.test(corps('js/pratiques/pratique-pan-standards.js', '    _calculerIndicesTroisDerniersArtefacts(da) {', '        if (evaluationsEleve.length === 0) {'))).toBe(true);
         const rapport = sansCommentaires(source('js/profil-etudiant-rapport.js'));
-        expect(/compteDansLaNote\(e\) && !window\.evaluationNonRemise\(e\)/.test(rapport)).toBe(true);
+        // #871, volet complétion (17 sept. 2026) : le rapport ne compte plus les remises lui-même — il lit le détail de la pratique
+        // (réancré : la preuve portait sur son ancien compteur ; le compte réel est jugé par les trois complétions ci-dessus).
+        expect(/obtenirDetailsCompletion\(da\)/.test(rapport) && !/evaluationNonRemise\(/.test(rapport)).toBe(true);
         expect(/const compteDansLaNote = \(e\) => window\.evaluationEntreDansLaNote\(e\);/.test(rapport)).toBe(true);   // 1.142.20 : sans copie de secours
     });
 });

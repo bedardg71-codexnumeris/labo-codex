@@ -98,7 +98,7 @@ describe('obtenirTypePratiqueActive — dérivation SSOT (fonctionnel)', () => {
     // (les ids canoniques du registre SONT des types).
     const fauxIPratique = (id) => ({
         obtenirNom: () => id, obtenirId: () => id, obtenirDescription: () => '',
-        calculerPerformance: () => 0, calculerCompletion: () => 0,
+        calculerPerformance: () => 0, calculerCompletion: () => 0, calculerDetailsCompletion: () => null,   // #871 : exigée par le registre
         detecterDefis: () => [], identifierPattern: () => null,
         genererCibleIntervention: () => null
     });
