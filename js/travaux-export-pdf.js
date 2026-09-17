@@ -714,8 +714,10 @@
             return { ajoutee: false, raison: 'aucune évaluation enregistrée pour cette copie' };
         }
 
-        // 3. Récupérer l'annotation (peut être null)
-        const annotation = travauxStockage.obtenirAnnotationFichier(fichier.id);
+        // 3. Récupérer l'annotation (peut être null). #912 — sans copie, `fichier.id` est
+        // absent : on ne cherche pas, sinon une annotation orpheline (sans `fichierId`)
+        // répondrait et ses tampons paraîtraient sur la page d'un élève qui n'a rien remis ici.
+        const annotation = fichier.id ? travauxStockage.obtenirAnnotationFichier(fichier.id) : null;
 
         // 4. Construire le shape Feedback
         const feedback = syntheseRetroactionData.construireFeedback(evaluation, fichier, annotation);
@@ -822,8 +824,8 @@
         const fichier = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId });
 
         if (!fichier) {
-            alert('Aucun fichier trouve pour cet etudiant et cette production.');
-            return;
+            // #912 — sans copie, « Dossier PDF » rend la synthèse seule (Grégoire, 17 sept. 2026).
+            return exporterSyntheseSeule(da, productionId);
         }
 
         const blob = await travauxStockage.recupererBlob(fichier.id);
@@ -878,6 +880,62 @@
         } catch (e) {
             console.error('[Travaux-Export] Erreur export dossier complet:', e);
             alert('Erreur lors de l\'export du dossier. Voir la console.');
+        } finally {
+            if (_hasProg) window.masquerProgression();
+        }
+    }
+
+    /**
+     * #912 (17 sept. 2026) — « Dossier PDF » pour une évaluation SANS copie : la synthèse seule.
+     *
+     * Décision de Grégoire : un PDF d'une page, LA MÊME synthèse que celle remise avec une
+     * copie, sans section d'annotations ; aucun bouton neuf. Cas vécu : tout son Automne 2025,
+     * 303 évaluations faites avec les grilles, aucune copie importée.
+     *
+     * Même moteur, même gabarit : `ajouterPageSynthese` fait tout le travail (dont la porte
+     * #674 et les filtres de ce qui part vers l'élève, qui vivent dans `construireFeedback` et
+     * dans le rendu). Un document jsPDF naît avec une page blanche : on la retire une fois la
+     * synthèse ajoutée. Rien n'est écrit : ni `marquerExporte` (aucun fichier), ni évaluation.
+     */
+    async function exporterSyntheseSeule(da, productionId) {
+        const sansCopie = { id: null, etudiantDA: da, productionId: productionId };
+        if (!trouverEvaluationPourSynthese(sansCopie, productionId)) {
+            alert('Aucune copie ni évaluation enregistrée pour cet·te étudiant·e et cette production.');
+            return;
+        }
+
+        const _hasProg = typeof window.afficherProgression === 'function';
+        if (_hasProg) {
+            window.afficherProgression('Export de la synthèse');
+            window.majProgression(40, 'Mise en page de la rétroaction…');
+        }
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'px', format: [SYNTH_PAGE_W * SYNTH_RASTER_SCALE, SYNTH_PAGE_H_MIN * SYNTH_RASTER_SCALE], compress: true });
+
+            const synthese = await ajouterPageSynthese(doc, sansCopie, productionId);
+            if (!synthese || !synthese.ajoutee) {
+                // Sans la page, il ne reste qu'une feuille blanche : on ne la remet pas.
+                alert('La rétroaction n\'a pas pu être exportée (' + ((synthese && synthese.raison) || 'raison inconnue') + ').');
+                return;
+            }
+            doc.deletePage(1);
+
+            if (_hasProg) window.majProgression(90, 'Téléchargement…');
+
+            // ✅ ANONYMISATION (Tier 0.1) : prenom/nom sont anonymisés par obtenirDonneesSelonMode
+            const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
+            const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
+            doc.save(`synthese_${nomEtudiant}_${productionId}.pdf`);
+
+            // #674 — la page est là, mais elle ne conclut pas : dit avant la remise.
+            if (synthese.avertissement) {
+                alert('Le PDF a été exporté, mais ' + synthese.avertissement + '.');
+            }
+        } catch (e) {
+            console.error('[Travaux-Export] Erreur export de la synthèse seule:', e);
+            alert('Erreur lors de l\'export de la synthèse. Voir la console.');
         } finally {
             if (_hasProg) window.masquerProgression();
         }
