@@ -152,6 +152,8 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             // pas un défaut. Un gabarit de démarrage n'impose pas de mécanique.
         },
         // Les seuils ne nomment rien et ne supposent aucune matière : conservés.
+        // Audit du 16 sept. 2026, constat B-4 : ces clés sont en camelCase, la pratique configurable lit
+        // `va_bien` / `difficulte` / `grande_difficulte`. SANS EFFET : les valeurs sont celles des défauts.
         seuils: {
             vaBien: 75,
             difficulte: 65,

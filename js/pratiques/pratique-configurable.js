@@ -233,6 +233,13 @@ class PratiqueConfigurable {
     /**
      * #709 — la valeur PLATE stockée dans `indicesCP` pour cet élève (0-100), ou null si le
      * cache n'a pas d'entrée : un cache vide n'est pas un zéro.
+     *
+     * Audit du 16 sept. 2026, constat A-3 — NI UN CACHE « NON CONSTRUCTIBLE ». La passe
+     * d'indices écrit `{ P: 0, noteConstructible: false }` quand la note n'a pas pu se
+     * construire (portfolio.js) : ce 0 est un bouche-trou, pas une note. Relu ici sans la
+     * garde, il revenait « 0, constructible » à la DEUXIÈME passe — une spécification créée
+     * par l'assistant (ni types de travaux ni forfaits) exportait « 0, final » pour toute
+     * la classe. Champ additif (#394) : absent ⇒ constructible.
      * @param {string} da
      * @returns {number|null}
      */
@@ -240,6 +247,7 @@ class PratiqueConfigurable {
         const indicesCP = db.getSync(cle('indicesCP'), {}) || {};
         const entree = indicesCP[da];
         if (!entree || !entree.actuel || typeof entree.actuel.P !== 'number') return null;
+        if (entree.actuel.noteConstructible === false) return null;
         return entree.actuel.P;
     }
 
