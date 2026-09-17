@@ -43,6 +43,8 @@ function monterRapport(indices) {
         // La source du profil et de la Liste, telle que le profil la lit.
         calculerTousLesIndices: () => indices,
         obtenirDetailsAssiduite: () => ({ periodesPresentes: 20, periodesOffertes: 20, nombreSeances: 10, absences: [] }),
+        // #871 (17 sept. 2026) : le rapport met les périodes en forme par le formateur RÉEL du profil (helpers.js).
+        formaterNombrePeriodes: chargerScript('js/profil-etudiant-helpers.js').formaterNombrePeriodes,
         // Les règles partagées, telles que les modules réels les exportent (helpers ; le registre #706 est posé plus bas, en VRAI).
         obtenirIdsProductionsEvaluables: (productions) => productions.filter(p => p.type !== 'portfolio').map(p => p.id),
         calculerEtStockerIndicesCP() {}, estModeeLectureSeule: () => false, notifications: { succes() {}, erreur() {} }, alert() {} };

@@ -533,7 +533,7 @@ function genererSectionMobilisationEngagement(da) {
         <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${periodesPresentes} périodes présentes / ${periodesOffertes} périodes offertes
+            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
             <br><br>
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', nbRemis)} / ${nbTotal} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('total', nbTotal)}
             <br><br>
@@ -552,7 +552,7 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• Périodes présentes :</strong> ${periodesPresentes} / ${periodesOffertes}</li>
+                    <li><strong>• Périodes présentes :</strong> ${formaterNombrePeriodes(periodesPresentes)} / ${formaterNombrePeriodes(periodesOffertes)}</li>
                 </ul>
 
                 <hr class="profil-separateur">
@@ -578,8 +578,8 @@ function genererSectionMobilisationEngagement(da) {
                                     </span>
                                     <span class="badge-absence-heures">
                                         ${estAbsenceComplete
-                                            ? `${abs.periodesManquees} pér.`
-                                            : `${abs.periodesPresence} pér.`
+                                            ? `${formaterNombrePeriodes(abs.periodesManquees)} pér.`
+                                            : `${formaterNombrePeriodes(abs.periodesPresence)} pér.`
                                         }
                                     </span>
                                 </div>
@@ -1658,9 +1658,12 @@ function obtenirDetailsAssiduite(da) {
         };
     }
 
-    // 🆕 BETA 96.1: Utiliser directement les périodes (plus simple que les heures)
-    const periodesPresentes = Math.round(detailsSommatif.periodesPresentes || 0);
-    const periodesOffertes = Math.round(detailsSommatif.periodesOffertes || 0);
+    // #871 (17 sept. 2026) — LES PÉRIODES TELLES QUE CALCULÉES, SANS ARRONDI. L'indice A est calculé sur ces
+    // valeurs (indices.js, calculerAssiduiteSommative) et la saisie accepte les demi-périodes : arrondies ici,
+    // elles donnaient « 90% (23 / 25 périodes) » pour 22,5 / 25. Le pourcentage suit la fraction (Grégoire,
+    // 15 sept.) ; la mise en forme (« 22,5 ») appartient à `formaterNombrePeriodes`, aux sites d'affichage.
+    const periodesPresentes = Number(detailsSommatif.periodesPresentes) || 0;
+    const periodesOffertes = Number(detailsSommatif.periodesOffertes) || 0;
     const nombreSeances = detailsSommatif.nombreSeances || 0;
 
     // #224 : Récupérer les présences et construire datesSaisies depuis le GROUPE (pas juste l'étudiant)
@@ -2596,13 +2599,13 @@ function genererSectionAssiduite(da) {
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Périodes présentes</span>
-                    <strong class="profil-valeur-grande-bleu">${details.periodesPresentes}</strong>
+                    <strong class="profil-valeur-grande-bleu">${formaterNombrePeriodes(details.periodesPresentes)}</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Périodes offertes</span>
-                    <strong class="profil-valeur-grande-bleu">${details.periodesOffertes}</strong>
+                    <strong class="profil-valeur-grande-bleu">${formaterNombrePeriodes(details.periodesOffertes)}</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
@@ -4067,7 +4070,7 @@ function genererSectionAssiduiteLegacy(da) {
 
             <!-- Statistiques -->
             <ul class="profil-liste-simple">
-                <li><strong>• Périodes présentes :</strong> ${details.periodesPresentes} / ${details.periodesOffertes}</li>
+                <li><strong>• Périodes présentes :</strong> ${formaterNombrePeriodes(details.periodesPresentes)} / ${formaterNombrePeriodes(details.periodesOffertes)}</li>
             </ul>
 
             <hr class="profil-separateur">
