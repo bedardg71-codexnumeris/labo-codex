@@ -102,6 +102,10 @@ window.scoreALaPositionDistribution = scoreALaPositionDistribution;
 let _etudiantsPrioritaires = [];
 let _tousEtudiantsEnrichis = []; // Tous les étudiants avec indices calculés
 let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'suivi', 'rai'
+// #828 (lot F, 16 sept. 2026) : l'identifiant 'M' est gardé tel quel — il n'est écrit nulle part
+// (ni préférence, ni stockage : `_filtresActifs` vit en mémoire, `data-tri` est relu au clic).
+// Il ne désigne plus la moyenne (A + C) / 2 : le filtre retient l'élève dont l'assiduité OU la
+// complétion est sous la borne « critique » du profil (voir `borneCritiqueEngagement`).
 
 /**
  * #749 — LA CLÉ DE LA LISTE SUIVIE : PAR TRIMESTRE ET PAR GROUPE-COURS.
@@ -272,7 +276,6 @@ function calculerEtudiantsPrioritaires() {
             if (suivi) scoreMulti = suivi.scoreActuel;
         }
 
-        var M = Math.round((indices.A + indices.C) / 2);
         _tousEtudiantsEnrichis.push({
             da: e.da,
             nom: e.nom,
@@ -284,7 +287,6 @@ function calculerEtudiantsPrioritaires() {
             P: indices.P,
             // #394 (règle 4) : P stocké « non constructible » → l'affichage montre « — »
             noteConstructible: indices.noteConstructible !== false,
-            M: M,
             scoreMulti: scoreMulti,
             suivi: suivi
         });
@@ -295,6 +297,26 @@ function calculerEtudiantsPrioritaires() {
 
     appliquerFiltres();
     return _etudiantsPrioritaires;
+}
+
+/**
+ * #828 (lot F du cadrage du 16 sept. 2026) : la borne du filtre « A ou C < N% » est la
+ * borne « critique » de la carte Mobilisation du profil (`BORNES_MOBILISATION`,
+ * `contexte-qualification.js`), lue à l'appel et jamais recopiée : si la borne change,
+ * la règle et le libellé du bouton suivent. En pourcentage entier (0,7 → 70).
+ */
+function borneCritiqueEngagement() {
+    return Math.round(window.BORNES_MOBILISATION.critique * 100);
+}
+
+/**
+ * Un indice n'est « sous la borne » que s'il est un nombre montré (G-4, #749 : on filtre
+ * sur ce qui est MONTRÉ). Un A ou un C absent — null, non constructible, barre vide
+ * (#830) — s'affiche « — » et ne peut pas être « < 70 % » : en JavaScript, `null < 70`
+ * est vrai, d'où cette garde.
+ */
+function indiceSousBorne(valeur, borne) {
+    return typeof valeur === 'number' && Number.isFinite(valeur) && valeur < borne;
 }
 
 /**
@@ -311,6 +333,9 @@ function appliquerFiltres() {
         return;
     }
 
+    // #828 : la borne n'est lue que si le filtre M est actif (les autres filtres n'en dépendent pas).
+    var borneM = _filtresActifs.indexOf('M') >= 0 ? borneCritiqueEngagement() : null;
+
     // Intersection (AND) : chaque filtre doit matcher
     _etudiantsPrioritaires = _tousEtudiantsEnrichis.filter(function(e) {
         for (var i = 0; i < _filtresActifs.length; i++) {
@@ -321,7 +346,8 @@ function appliquerFiltres() {
                     if (e.noteConstructible === false || e.P >= 65) return false;
                     break;
                 case 'M':
-                    if (e.M >= 65) return false;
+                    // #828 : assiduité OU complétion sous la borne critique du profil.
+                    if (!indiceSousBorne(e.A, borneM) && !indiceSousBorne(e.C, borneM)) return false;
                     break;
                 case 'suivi':
                     if (!e.suivi || e.suivi.ipb < 2) return false;
@@ -342,7 +368,12 @@ function appliquerFiltres() {
             for (var i = 0; i < _filtresActifs.length; i++) {
                 switch (_filtresActifs[i]) {
                     case 'P': if (e.noteConstructible !== false) score += Math.max(0, 65 - e.P); break;
-                    case 'M': score += Math.max(0, 65 - e.M); break;
+                    case 'M': {
+                        // #828 : l'urgence est celle du pire des deux indices montrés.
+                        var montres = [e.A, e.C].filter(function(v) { return typeof v === 'number' && Number.isFinite(v); });
+                        if (montres.length) score += Math.max(0, borneM - Math.min.apply(null, montres));
+                        break;
+                    }
                     case 'suivi': score += e.suivi ? e.suivi.ipb * 30 + (e.suivi.direction === '↘' ? 20 : e.suivi.direction === '→' ? 10 : 0) : 0; break;
                     case 'rai': score += e.niveau * 20; break;
                 }
@@ -424,7 +455,7 @@ function genererPanneauSuiviEtudiants() {
             var filtres = [
                 { id: 'alpha', label: 'A→Z' },
                 { id: 'P', label: 'P < 65%' },
-                { id: 'M', label: 'A+C < 65%' },
+                { id: 'M', label: 'A ou C < ' + borneCritiqueEngagement() + '%' },   // #828 : lu à la borne, jamais recopié
                 { id: 'suivi', label: 'Suivi' },
                 { id: 'rai', label: 'RàI 2-3' }
             ];

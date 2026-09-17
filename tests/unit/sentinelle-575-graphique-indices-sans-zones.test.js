@@ -17,7 +17,9 @@
  * redonne le plugin des zones : l'absence mesurée n'est pas une cécité du banc (règle 10).
  *
  * Hors de ce banc, et hors de la décision : le graphique par critère (#752), dont les points sont
- * des niveaux d'évaluations. Les deux graphiques de groupe qui gardent le repli sont à #860.
+ * des niveaux d'évaluations. Les deux graphiques de groupe ont suivi le 16 sept. (#860, lot F) :
+ * plus aucun repli sur l'échelle du trimestre ni sur `ZONES_IDME` — le témoin ci-dessous pose donc
+ * lui-même les zones de l'échelle sur le canvas, comme le font les graphiques qui en dessinent (#752).
  *
  *   cd tests && npx vitest run unit/sentinelle-575-graphique-indices-sans-zones.test.js
  */
@@ -60,7 +62,7 @@ function rendre(echelles) {
             obtenirSnapshotsEtudiant: () => JSON.parse(JSON.stringify(SNAPSHOTS)),
             Chart: function (c, config) { configs.push(config); this.destroy = () => {}; }
         },
-        modules: [{ chemin: 'js/graphiques-progression.js', internes: ['pluginEtiquettesZones'] }]
+        modules: [{ chemin: 'js/graphiques-progression.js', internes: ['pluginEtiquettesZones', 'genererZonesDepuisEchelle', '_zonesParCanvas'] }]
     });
     b.win.creerGraphiqueIndividuel(CANVAS, DA);
     const config = configs[0];
@@ -107,16 +109,16 @@ describe('#575 · septième site — le graphique des indices ne porte aucune zo
     });
 
     it('TÉMOIN — le même enregistreur VOIT les zones quand on redonne le plugin : l\'absence n\'est pas une cécité', () => {
-        // Ce que le graphique dessinait avant le 13 septembre, sur ces deux mêmes trimestres :
-        // les CODES des niveaux dans la marge droite (mesuré : « W X Y Z » sur l'échelle hors
-        // IDME), et, sans échelle, les zones de repli `ZONES_IDME`.
-        horsIdme.traces.length = 0;
-        horsIdme.interne.pluginEtiquettesZones.beforeDatasetsDraw(horsIdme.faux);
-        expect(textesDessines(horsIdme.traces)).toEqual(['W', 'X', 'Y', 'Z']);
-        expect(horsIdme.traces.some((t) => t[0] === 'setLineDash')).toBe(true);
-        sansEchelle.traces.length = 0;
-        sansEchelle.interne.pluginEtiquettesZones.beforeDatasetsDraw(sansEchelle.faux);
-        expect(textesDessines(sansEchelle.traces).length).toBeGreaterThan(0);
-        expect(sansEchelle.traces.some((t) => t[0] === 'setLineDash')).toBe(true);
+        // Ce que le graphique dessinait avant le 13 septembre : les CODES des niveaux dans la marge
+        // droite (mesuré : « W X Y Z » sur l'échelle hors IDME). Depuis #860 (16 sept.), le plugin ne
+        // lit plus aucun repli : le témoin pose les zones de cette échelle sur le canvas, pour chacun
+        // des deux montages, et l'enregistreur les voit.
+        for (const r of [horsIdme, sansEchelle]) {
+            r.traces.length = 0;
+            r.interne._zonesParCanvas.set(r.faux.canvas, r.interne.genererZonesDepuisEchelle(ECHELLE_SANS_IDME));
+            r.interne.pluginEtiquettesZones.beforeDatasetsDraw(r.faux);
+            expect(textesDessines(r.traces)).toEqual(['W', 'X', 'Y', 'Z']);
+            expect(r.traces.some((t) => t[0] === 'setLineDash')).toBe(true);
+        }
     });
 });
