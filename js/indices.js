@@ -4,7 +4,7 @@
 
    Regroupe les fonctions de LECTURE, CALCUL et UTILITAIRES
    des indices A-C-P, précédemment dispersées dans :
-   - profil-etudiant.js (calculerTousLesIndices, calculerPerformancePAN)
+   - profil-etudiant.js (calculerTousLesIndices)
    - apercu-contenu.js (calculerIndicesEtudiant, calculerCorrelationPearson)
    - etudiants.js (calculerCorrelationPearson - doublon)
    - portfolio.js (obtenirIndicesCP)
@@ -248,9 +248,17 @@ function calculerAssiduite(da, dateLimite) {
 }
 
 /**
- * Orchestre le calcul et la sauvegarde de l'indice A pour tous les étudiants actifs.
+ * Orchestre le calcul et la sauvegarde de l'indice A pour tous les élèves du groupe.
  * Appelée après chaque enregistrement de présences.
  * Chaîne calculerEtStockerIndicesCP() pour recalculer E.
+ *
+ * #745 (lot E du cadrage du dépistage, 17 sept. 2026) — UN ÉLÈVE EXCLU PAR STATUT EST CALCULÉ
+ * COMME LES AUTRES. Tranché par Grégoire le 16 sept. : son profil se calcule avec la règle de sa
+ * pratique, affiche son statut, et reste hors des moyennes du groupe. Avant, ce producteur
+ * l'écartait : son A se lisait 0 malgré ses présences. « Hors des moyennes » se tient à la
+ * LECTURE : chaque moyenne, statistique ou courbe du groupe part d'une liste filtrée par
+ * `estEtudiantExclu` et lit ce magasin DA par DA ; aucune ne le parcourt par ses clés
+ * (sentinelle-lot-E-745-eleve-exclu).
  *
  * @returns {Object} Structure { sommatif: { da: {...} }, dateCalcul }
  */
@@ -267,11 +275,7 @@ function calculerEtSauvegarderIndicesAssiduite() {
             dateCalcul: new Date().toISOString()
         };
 
-        var etudiantsActifs = (etudiants || []).filter(function(e) {
-            return !estEtudiantExclu(e);
-        });
-
-        etudiantsActifs.forEach(function(etudiant) {
+        (etudiants || []).forEach(function(etudiant) {
             indices.sommatif[etudiant.da] = calculerAssiduite(etudiant.da, null);
         });
 
@@ -409,60 +413,6 @@ function obtenirIndicesCP(da) {
 }
 
 /* ===============================
-   FALLBACK PERFORMANCE
-   =============================== */
-
-/**
- * Calcule la performance PAN basée sur les artefacts SÉLECTIONNÉS dans le portfolio
- * @param {string} da - Numéro de DA
- * @returns {number} - Performance en proportion 0-1
- */
-function calculerPerformancePAN(da) {
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    // #399 (L7) : filtre aligné sur le motif standard du moteur — un 0 est une
-    // note VALIDE. #706 : la règle unique du registre (remplacées, sans note,
-    // brouillons non verrouillés, portée nulle : hors note).
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
-
-    if (evaluationsEleve.length === 0) {
-        return 0;
-    }
-
-    // PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
-    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
-    const productions = obtenirDonneesSelonMode('productions') || [];
-    const portfolio = productions.find(p => p.type === 'portfolio');
-
-    if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
-        const selectionEleve = selectionsPortfolios[da][portfolio.id];
-        const artefactsRetenus = selectionEleve.artefactsRetenus;
-
-        if (artefactsRetenus.length > 0) {
-            const evaluationsRetenues = evaluationsEleve.filter(e =>
-                artefactsRetenus.includes(e.productionId)
-            );
-
-            if (evaluationsRetenues.length > 0) {
-                const moyenne = evaluationsRetenues.reduce((sum, e) => sum + e.noteFinale, 0) / evaluationsRetenues.length;
-                return moyenne / 100;
-            }
-        }
-    }
-
-    // FALLBACK : Si pas de sélection, prendre les 3 meilleures notes
-    const meilleuresNotes = evaluationsEleve
-        .map(e => e.noteFinale)
-        .sort((a, b) => b - a)
-        .slice(0, 3);
-
-    if (meilleuresNotes.length === 0) return 0;
-
-    const moyenne = meilleuresNotes.reduce((sum, note) => sum + note, 0) / meilleuresNotes.length;
-    return moyenne / 100;
-}
-
-/* ===============================
    LECTEURS COMPOSITES
    =============================== */
 
@@ -480,6 +430,15 @@ function calculerPerformancePAN(da) {
  *   M: 0.760,           // Mobilisation (composite, (A+C)/2)
  *   pratique: 'SOM'     // Pratique utilisée pour le calcul
  * }
+ *
+ * #745 (17 sept. 2026) — UNE SEULE RÈGLE, CELLE DE LA PRATIQUE. Avant, un DA sans entrée stockée
+ * tombait dans un repli « à la volée » : A = 0 et P = « les 3 meilleures notes », quelle que soit
+ * la pratique (un exclu à P 70 là où sa pratique dit 62,5). Le repli est retiré :
+ *   - un élève du groupe, exclu par statut compris, a ses entrées (les deux producteurs le
+ *     calculent) ; s'il n'en a pas ENCORE (lecture avant le premier recalcul), ses indices sont
+ *     calculés ici par les mêmes fonctions que les producteurs, en lecture seule ;
+ *   - un DA qui n'est plus dans le groupe n'est PAS calculé : { A, C, P, M : null,
+ *     horsGroupe: true, noteConstructible: false }.
  */
 function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
     // ========================================
@@ -489,15 +448,7 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
     // boucle sur N étudiants lit les deux clés UNE fois et les passe ici.
     // ========================================
     const indicesAssiduite = _cacheIndicesA || db.getSync(cle('indicesAssiduite'), {});
-    const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
-
-    // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
-    let A = 0;
-    if (typeof assiduiteSommatif === 'object' && assiduiteSommatif.indice !== undefined) {
-        A = assiduiteSommatif.indice;
-    } else if (typeof assiduiteSommatif === 'number') {
-        A = assiduiteSommatif;
-    }
+    let assiduiteSommatif = indicesAssiduite.sommatif?.[da];
 
     // Étiquette de la pratique active (Session C, Lot 3 : jeton SOM|PAN retiré de
     // la signature ; dérivé en interne pour le champ `.pratique` du retour).
@@ -506,39 +457,44 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
     const pratique = typeActif === 'sommative' ? 'SOM' : 'PAN';
 
     // INDICES C, P : Lire depuis indicesCP (Single Source of Truth)
-    let C = 0;
-    let P = 0;
+    // #397 : cache fourni → entrée lue dedans ; sinon lecture SSOT historique.
+    let indicesCP = _cacheIndicesCP
+        ? (_cacheIndicesCP[da]?.actuel || null)
+        : obtenirIndicesCP(da);
+
+    // #745 : sans entrée stockée, le DA est-il dans le groupe ? Même liste que les producteurs.
+    if (assiduiteSommatif === undefined || !indicesCP) {
+        const dansLeGroupe = (obtenirDonneesSelonMode('groupeEtudiants') || []).some(e => e.da === da);
+        if (!dansLeGroupe) {
+            return { A: null, C: null, P: null, M: null, pratique: pratique, noteConstructible: false, horsGroupe: true };
+        }
+        if (assiduiteSommatif === undefined) assiduiteSommatif = calculerAssiduite(da, null);
+        if (!indicesCP && typeof simulerIndices === 'function' && typeof obtenirPratiqueActiveGroupeCours === 'function') {
+            indicesCP = simulerIndices(da, obtenirPratiqueActiveGroupeCours());
+        }
+    }
+
+    // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
+    let A = 0;
+    if (typeof assiduiteSommatif === 'object' && assiduiteSommatif !== null && assiduiteSommatif.indice !== undefined) {
+        A = assiduiteSommatif.indice;
+    } else if (typeof assiduiteSommatif === 'number') {
+        A = assiduiteSommatif;
+    }
+
     // #394 (règle 4) : une note stockée « non constructible » se propage aux
     // affichages (qui montrent « — » au lieu d'un 0 trompeur). Champ additif :
     // absent (entrées antérieures) ⇒ constructible.
+    let C = 0;
+    let P = 0;
     let noteConstructible = true;
-
-    if (_cacheIndicesCP || typeof obtenirIndicesCP === 'function') {
-        // #397 : cache fourni → entrée lue dedans ; sinon lecture SSOT historique.
-        const indicesCP = _cacheIndicesCP
-            ? (_cacheIndicesCP[da]?.actuel || null)
-            : obtenirIndicesCP(da);
-        if (indicesCP) {
-            C = (indicesCP.C || 0) / 100;
-            P = (indicesCP.P || 0) / 100;
-            noteConstructible = indicesCP.noteConstructible !== false;
-        } else {
-            // Fallback : calculer à la volée si pas encore généré
-            console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
-            if (typeof calculerTauxCompletion === 'function') {
-                const taux = calculerTauxCompletion(da);
-                C = taux !== null ? taux / 100 : 0;
-            }
-            P = calculerPerformancePAN(da);
-        }
+    if (indicesCP) {
+        C = (indicesCP.C || 0) / 100;
+        P = (indicesCP.P || 0) / 100;
+        noteConstructible = indicesCP.noteConstructible !== false;
     } else {
-        // Fallback : fonctions anciennes si module pas chargé
-        console.warn('⚠️ obtenirIndicesCP non disponible - Calcul à la volée');
-        if (typeof calculerTauxCompletion === 'function') {
-            const taux = calculerTauxCompletion(da);
-            C = taux !== null ? taux / 100 : 0;
-        }
-        P = calculerPerformancePAN(da);
+        // Pratique introuvable au registre : rien à calculer, et pas de nombre inventé.
+        noteConstructible = false;
     }
 
     // INDICES COMPOSITES
@@ -604,7 +560,6 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
    =============================== */
 window.calculerCorrelationPearson = calculerCorrelationPearson;
 window.obtenirIndicesCP = obtenirIndicesCP;
-window.calculerPerformancePAN = calculerPerformancePAN;
 window.calculerTousLesIndices = calculerTousLesIndices;
 window.calculerIndicesEtudiant = calculerIndicesEtudiant;
 // Producteurs indice A (#224)

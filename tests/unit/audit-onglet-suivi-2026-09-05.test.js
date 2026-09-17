@@ -358,8 +358,9 @@ describe('A · les présences saisies deviennent l\'indice A', () => {
         noter('A2', { ecrits, das: Object.keys(stockA.sommatif), A_absent: stockA.sommatif[DA.ABSENT].indice });
         expect(ecrits).toEqual(['test_indicesAssiduite', 'test_indicesCP']);
         expect(Object.keys(stockA.sommatif).sort()).toEqual([DA.ASSIDU, DA.ABSENT, DA.SILENCE]);
-        // Lecteurs sans recalcul : calculerTousLesIndices lit le stock → l'incohérent y lit A = 0 (aucune entrée).
-        expect(b.win.calculerTousLesIndices(DA.INCOHERENT).A).toBe(0);
+        // Lecteurs sans recalcul : calculerTousLesIndices lit le stock → l'incohérent n'y a aucune entrée. Valeur d'après #745
+        // (17 sept.) : il n'est plus calculé du tout — A null, « hors groupe » (constat d'origine : A = 0, un nombre inventé).
+        expect(b.win.calculerTousLesIndices(DA.INCOHERENT)).toMatchObject({ A: null, horsGroupe: true });
     });
 
     it('A3 · un élève ajouté en semaine 6 : les cinq séances d\'AVANT son arrivée comptent comme des absences', () => {
@@ -730,11 +731,12 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         expect(p.cible.cible).toMatch(/^Persistance non calculable/);
     });
 
-    it('D5 · l\'incohérent (DA hors du groupe, évaluation sur une production inexistante) : invisible aux écrans du groupe, calculé à la volée sur son profil', () => {
-        // À la main : absent de groupeEtudiants → aucun indice stocké ; le profil retombe sur « calcul à la volée » (indices.js) :
-        // A 0 (pas d'entrée), C via calculerTauxCompletion (non chargé ici → 0), P via calculerPerformancePAN = les 3 meilleures notes
-        // parmi ses évaluations qui entrent dans la note : (95 + 70) / 2 = 82,5 → l'évaluation sans production COMPTE ici ; le dépistage,
-        // lui, la filtre par productionsIds → une seule évaluation (P1 à 70).
+    it('D5 · l\'incohérent (DA hors du groupe, évaluation sur une production inexistante) : invisible aux écrans du groupe, et PLUS calculé — valeur d\'après #745 (constat d\'origine : A 0, P 83 « à la volée »)', () => {
+        // Constat d'origine (5 sept.) : absent de groupeEtudiants → aucun indice stocké ; calculerTousLesIndices retombait sur un repli
+        // « à la volée » : A 0, C 0, P = les 3 meilleures notes = (95 + 70) / 2 = 82,5 → 83, la production fantôme comprise.
+        // Depuis #745 (lot E du cadrage du dépistage, 17 sept. 2026 ; tranché par Grégoire le 16) : un DA qui n'est plus dans le groupe
+        // n'est PAS calculé — A, C, P, M null, `horsGroupe`. Le repli est retiré. Le dépistage, lui, filtre toujours par productionsIds
+        // (une seule évaluation, P1 à 70) et les moyennes par critère comptent toujours la fantôme : ces deux-là ne sont pas de ce lot.
         const b = monter(jeuBase()); b.calculerTout();
         const indices = b.win.calculerTousLesIndices(DA.INCOHERENT);
         const n3 = b.win.calculerIndicesNDerniersArtefacts(DA.INCOHERENT, true);
@@ -742,8 +744,7 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         const enrichis = b.win.calculerEtudiantsPrioritaires.call(null); b.interne['tableau-bord-apercu.js']._tousEtudiantsEnrichis;
         const dansGroupe = b.interne['tableau-bord-apercu.js']._tousEtudiantsEnrichis.some(e => e.da === DA.INCOHERENT);
         noter('D5', { A: indices.A, C: indices.C, P: indices.P, nbArtefactsDepistage: n3.nbArtefacts, performance3: r3(n3.performance), moyStructure: r3(moy.structure), dansTableauDeBord: dansGroupe, enrichis: enrichis.length });
-        expect(indices.A).toBe(0);
-        expect(indices.P).toBe(83);                     // (95 + 70) / 2 — la production fantôme compte
+        expect(indices).toEqual({ A: null, C: null, P: null, M: null, pratique: 'SOM', noteConstructible: false, horsGroupe: true });
         expect(n3).toMatchObject({ nbArtefacts: 1, performance: 0.7 });   // le dépistage l'écarte
         expect(r3(moy.structure)).toBe(r3((0.65 + 1.0) / 2));   // mais les moyennes par critère la comptent
         expect(dansGroupe).toBe(false);
@@ -894,18 +895,19 @@ describe('F · les nombres du groupe sont-ils la somme des profils', () => {
         expect(filtreM).toEqual([DA.SILENCE, DA.ABSENT]);
     });
 
-    it('F2 · un élève EXCLU (décrochage) n\'a plus d\'indices stockés : son profil retombe sur « 3 meilleures notes » — un P différent de la pratique', () => {
-        // À la main : Absent en décrochage. calculerEtStockerIndicesCP et calculerEtSauvegarderIndicesAssiduite l'écartent → aucune
-        // entrée. Son profil (calculerTousLesIndices) lit A = 0 (il a pourtant 4 présences) et P = calculerPerformancePAN =
-        // (85 + 70 + 55) / 3 = 70 — la pratique dit 62,5.
+    it('F2 · un élève EXCLU (décrochage) est calculé par SA pratique, comme un actif — valeur d\'après #745 (constat d\'origine : aucune entrée, A 0 et P 70 par « les meilleures notes »)', () => {
+        // Constat d'origine (5 sept.) : Absent en décrochage, écarté des deux producteurs → aucune entrée ; calculerTousLesIndices lisait
+        // A = 0 (il a pourtant 4 présences) et P = (85 + 70 + 55) / 3 = 70 par le repli — la pratique dit 62,5.
+        // Depuis #745 (17 sept. 2026 ; tranché par Grégoire le 16) : les producteurs le calculent. À la main : A = 4 séances sur 10 = 40 ;
+        // C = 4 remises sur 4 = 100 ; P = (85×20 + 70×20 + 55×30 + 50×30) / 100 = 62,5 → 63. Ce sont ses nombres d'élève actif (B1).
         const jeu = jeuBase(); jeu.etudiants[1].statut = 'décrochage';
         const b = monter(jeu); b.calculerTout();
         const indices = b.win.calculerTousLesIndices(DA.ABSENT);
         const pratique = b.win.obtenirPratiqueParId('som-banc').calculerPerformance(DA.ABSENT);
         noter('F2', { stocke: b.store.test_indicesCP[DA.ABSENT] || null, profil: { A: indices.A, C: indices.C, P: indices.P }, pratique: r3(pratique) });
-        expect(b.store.test_indicesCP[DA.ABSENT]).toBeUndefined();
-        expect(indices.A).toBe(0);
-        expect(indices.P).toBe(70);
+        expect(b.store.test_indicesCP[DA.ABSENT].actuel).toMatchObject({ C: 100, P: 63, pratique: 'som-banc' });
+        expect(indices).toMatchObject({ A: 40, C: 100, P: 63, noteConstructible: true });
+        expect(indices.horsGroupe).toBeUndefined();
         expect(r3(pratique)).toBe(0.625);
     });
 

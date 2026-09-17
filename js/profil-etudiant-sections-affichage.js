@@ -1652,7 +1652,6 @@ function genererSectionMobilisation(da) {
     `;
 }
 
-// calculerPerformancePAN → déplacé dans indices.js (#206)
 
 /**
  * Obtient les détails d'assiduité pour un étudiant
@@ -2273,6 +2272,15 @@ function genererValeursComparatives(valeurSOM, valeurPAN, afficherTiret = false)
  * HELPER : résolution étudiant + état pivot atomique
  * Phase 5 : accepte un élément (depuis data-on-change) ou une chaîne.
  * Retourne { da, etudiants, eleve } — eleve = null si introuvable.
+ *
+ * #745 (lot E du cadrage du dépistage, 17 sept. 2026) — LE PROFIL D'UN ÉLÈVE EXCLU PAR STATUT
+ * S'OUVRE. Mesuré avant le lot : depuis le 16 mars, l'élève était cherché parmi les ACTIFS
+ * seulement ; un clic sur sa ligne grisée de la Liste répondait « Étudiant·e introuvable ». La règle
+ * tranchée le 16 sept. (« son profil se calcule avec sa pratique, affiche son statut ») n'avait
+ * donc aucun écran. L'élève est maintenant cherché dans tout le groupe-cours ; `etudiants` (le
+ * sélecteur, Préc. / Suiv.) reste la liste des actifs, plus l'exclu AFFICHÉ, à sa place
+ * alphabétique — sinon le sélecteur montrerait le nom d'un autre. Un DA absent du groupe reste
+ * introuvable : aucun profil, aucun calcul.
  */
 function _resoudreEtudiantProfil(daOuEl) {
     var da = (typeof daOuEl === 'object' && daOuEl !== null) ? daOuEl.value : daOuEl;
@@ -2284,11 +2292,10 @@ function _resoudreEtudiantProfil(daOuEl) {
         : (typeof filtrerEtudiantsParMode === 'function'
             ? filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants'))
             : obtenirDonneesSelonMode('groupeEtudiants').filter(e => e.groupe !== '9999'));
-    const etudiants = tousEtudiants.filter(e => !estEtudiantExclu(e));
+    const eleve = tousEtudiants.find(e => e.da === da);
+    const etudiants = tousEtudiants.filter(e => !estEtudiantExclu(e) || e === eleve);
     etudiants.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
     window.etudiantsListeCache = etudiants;
-
-    const eleve = etudiants.find(e => e.da === da);
 
     // État pivot dual-write atomique (Écart #6 MODULES-MAP §2.3) — couple non séparé.
     // #867 (15 sept. 2026) : écrit SEULEMENT si l'élève existe. Avant, il l'était en
@@ -2496,6 +2503,7 @@ function afficherProfilComplet(daOuEl) {
                         ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
                     </div>
                     <div class="sidebar-info-card-details">
+                        ${estEtudiantExclu(eleve) ? `<div data-statut-exclu="${echapperHtml(eleve.statut)}">${echapperHtml(libelleStatutEtudiant(eleve.statut))} · hors des moyennes du groupe</div>` : ''}
                         ${modeAnonymisation ? '' : `<div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>`}
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}

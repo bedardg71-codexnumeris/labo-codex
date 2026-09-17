@@ -47,7 +47,7 @@ cd tests && npx vitest run unit/audit-onglet-suivi-2026-09-05.test.js
 > | C-7 · évaluation sans texte de rétroaction hors du dépistage | **inscrit** (recoupe #718) | #741 | banc C-7 |
 > | C-8 + E-5 · seuils d'alerte et lettres du bilan en clair | **inscrit** (item 5 du §9 du 27 août ; famille #575 pour E-5) | #742 | `[grep]` |
 > | D-4 · deux paliers sur le même profil | **inscrit** — didactique | #744 | banc D-4 |
-> | D-5 + F-2 · calcul « à la volée » (hors groupe, exclu) | **inscrit** | #745 | banc D-5, F-2 |
+> | D-5 + F-2 · calcul « à la volée » (hors groupe, exclu) | **inscrit, LIVRÉ 17 sept. (1.142.28)** | #745 | banc D-5, F-2 réancrés « valeur d'après » ; `sentinelle-lot-E-745-eleve-exclu` |
 > | D-6 · #554 (décrochage jamais passé) | **recoupé, tenu** | #554 | banc D-6 |
 > | E-1 · interventions sans groupe-cours | **inscrit** | #746 | banc E-1 |
 > | E-2 · absence motivée retire la séance ; doublon aveugle à `facultatif` | **inscrit** (la première à confirmer par lui) ; `heures` = #728 | #747, #728 | banc E-2 |
