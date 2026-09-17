@@ -7,7 +7,34 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 17 H 15 (Toronto) : 1.143.0 (build `0917-1706`, #913, saisie des résultats ultérieurs + sortie dans l'export de recherche) SUR `main` — ⚠ COMMITÉE, PAS ENCORE POUSSÉE (le push attend le signal de Grégoire) ; 1.142.33 (#912) EST POUSSÉE (`5e94f3a8`, verdict Playwright local vert à 16 h 46, par une autre session) ; LOT SUIVANT = lot 35 (`CONSIGNE-SUIVANTE-date-d-arrivee.md`, #735)
+## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 17 H 15 (Toronto) : 1.143.0 (build `0917-1715`, deux commits : le lot `59992d02`, puis le patch de mots de 17 h 13 ; #913, saisie des résultats ultérieurs + sortie dans l'export de recherche) SUR `main` — ⚠ COMMITÉE, PAS ENCORE POUSSÉE (le push attend le signal de Grégoire) ; 1.142.33 (#912) EST POUSSÉE (`5e94f3a8`, verdict Playwright local vert à 16 h 46, par une autre session) ; LOT SUIVANT = lot 35 (`CONSIGNE-SUIVANTE-date-d-arrivee.md`, #735)
+
+### ⮕ AJOUT DE COWORK, 17 sept. 2026, 17h13 — RELECTURE CROISÉE DU LOT #913 : **VERTE**, et **UN PATCH DE MOTS EST DÛ AVANT LE PUSH**
+
+**MOTS VALIDÉS PAR GRÉGOIRE** (« ok », 17 sept. 2026, 17h13) — à poser dans la constante `MOTS` de `js/resultats-ulterieurs.js`, telle quelle :
+- `sousTitre` : **« Les notes que ces élèves ont obtenues dans les cours qui ont suivi. »** ⚠ **C'est le seul changement** : le texte livré dit « cet élève » au-dessus d'une liste de plusieurs — faute de Cowork, relevée par Claude Code, corrigée ici.
+- Tous les autres mots livrés sont CONFIRMÉS tels quels, y compris `refusArchive` accordée au libellé « Permission d'écriture » du bandeau et la phrase neuve `refusTexte` « Indique le cours et le trimestre. » — **Grégoire les a relus, aucun autre patch de mots n'est dû.**
+
+**PHRASE DE « NOUVELLES » CHOISIE PAR GRÉGOIRE** (17 sept. 2026, 17h13), entrée `1.143`, couleur `vert`, titre **« Les résultats de tes anciens élèves »**, un item :
+« Sur un trimestre passé, tu peux maintenant noter les résultats obtenus par tes élèves dans les cours qui ont suivi le tien. Ces notes ressortent dans l'export de recherche, sans identité. »
+
+**LA RELECTURE**, par exécution, clone jetable sur `59992d02`, témoin vert 36/36. Cinq mutations AUTRES que les 22 de l'auteur, posées sur le code LIVRÉ — donc **après** le remaniement du rendu, ce que la campagne de l'auteur ne couvrait pas :
+
+| # | Mutation | Verdict |
+|---|---|---|
+| R1 | `formaterNote` : la virgule décimale n'est plus posée (77,5 → 77.5) | **ROUGE** |
+| R2 | `htmlLigne` : `echapperHtml` retiré autour de `r.cours` (faille stockée) | **ROUGE** |
+| R3 | `nettoyerTexte` : `.slice(0, LONGUEUR_MAX_TEXTE)` retiré | ⚠ **SURVIVANTE** |
+| R4 | `lireNote` : l'arrondi à une décimale retiré (deux décimales gardées) | **ROUGE** |
+| R5 | `retirerResultat` : la clé de l'élève n'est plus supprimée quand sa liste se vide | **ROUGE** |
+
+⮕ **Le trou que l'auteur a nommé (mutations jouées avant le remaniement du rendu) est comblé : le rendu remanié est bel et bien jugé** (R1, R2 rouges).
+
+**LE TROU RESTANT — R3, mineur, SANS release.** Le plafond de longueur du module n'est jugé par rien : le seul rempart mesuré est l'attribut `maxlength` du champ, qui vit dans l'écran, pas dans le module. Conséquence réelle aujourd'hui : **nulle** — tous les appels passent par les champs. Elle cesse de l'être le jour où un appelant programmatique écrit (un import, une console, un futur lot). ⮕ **Un essai à poser dans la sentinelle par le prochain lot qui passe par ce fichier** : `ajouterResultat` appelé avec un `cours` de 500 caractères range au plus `LONGUEUR_MAX_TEXTE`.
+
+**CE QUE J'AI VÉRIFIÉ EN PLUS, ET QUI TIENT** : la règle non négociable de l'échappement est bien jugée par un essai (R2) ; l'arrondi, supposition nommée par l'auteur, est figé (R4) ; le rangement ne laisse pas de clé vide (R5).
+
+⮕ **ORDRE DÛ** : le patch de mots + la phrase de « Nouvelles », PUIS le verdict Playwright, PUIS le push. Le patch touche une constante et le changelog : il ne rouvre aucune mesure du lot.
 
 > Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-resultats-ulterieurs, renommée au démarrage ; celle de #912 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-synthese-sans-copie.md`). Cadrage : `plans de travail/CADRAGE-2026-09-17-resultats-ulterieurs-101-102.md`. **Démarrage** : à l'ouverture, `origin/main` était encore à 1.142.32 — la session s'est ARRÊTÉE comme la consigne le demandait ; une autre session poussait #912 au même moment (`pousser.sh`, fini à 16 h 47) ; condition remesurée remplie (0 / 0), puis départ.
 
@@ -15,11 +42,11 @@
 
 **CE QUI EST POSÉ** : `js/resultats-ulterieurs.js` (seul écrivain de `<trim>_resultatsUlterieurs` = `{ [da]: [{ cours, trimestre, note }] }`, au registre et à DATA-OWNERSHIP, sans semis) ; un bloc repliable sous la liste, rempli sur les rangées mêmes de la liste (filtre de groupe, tri, anonymisation) ; MESURÉ : le mode archive n'est qu'une garde CSS, et les champs d'id `v2-` en sont exemptés — la garde du lot est DANS l'écriture. Export : `observations.etudiants[].resultats_ulterieurs`, liste vide sinon, `version_format` 1.2, aucun DA.
 
-**SUPPOSITIONS NOMMÉES** : zone présente sur tout trimestre, fermée par défaut ; cours et trimestre de la dernière saisie reproposés, curseur sur la note de l'élève suivant (mémoire de séance) ; phrase du verrou accordée à l'écran (« Permission d'écriture ») ; phrase neuve « Indique le cours et le trimestre. » ; note arrondie à une décimale ; release `minor`. Les mots de l'écran restent ceux de COWORK (constante `MOTS`) — Grégoire ne les a pas relus ; le sous-titre dit « cet élève » au-dessus d'une liste de plusieurs. Phrase de « Nouvelles » CHOISIE par Grégoire (parmi trois propositions).
+**SUPPOSITIONS NOMMÉES** : zone présente sur tout trimestre, fermée par défaut ; cours et trimestre de la dernière saisie reproposés, curseur sur la note de l'élève suivant (mémoire de séance) ; phrase du verrou accordée à l'écran (« Permission d'écriture ») ; phrase neuve « Indique le cours et le trimestre. » ; note arrondie à une décimale ; release `minor`. Les mots de l'écran (constante `MOTS`) : proposés par Cowork, **RELUS ET CONFIRMÉS par Grégoire le 17 sept. à 17 h 13** ; un seul corrigé, le sous-titre (« cet élève » au-dessus d'une liste de plusieurs → « Les notes que ces élèves ont obtenues dans les cours qui ont suivi. »), posé dans un second commit, même version 1.143.0 (`--build-only`, rien n'était poussé). Phrase et titre de « Nouvelles » : ceux que Grégoire a choisis à 17 h 13 (ils REMPLACENT la phrase du premier commit, choisie parmi trois propositions de Claude Code).
 
 **PREUVE** : `sentinelle-913-resultats-ulterieurs` (36 essais) ; banc WebKit `resultats-ulterieurs-913` (3 essais, 768 px, 11 cibles ≥ 44 px, octet pour octet) ; 22 mutations une clause à la fois, toutes rouges — une survivante trouvée en chemin (borne basse morte derrière le motif numérique) : clause retirée. ⚠ Les mutations ont tourné AVANT le dernier remaniement du rendu (coquille bâtie par le DOM, pour le lint innerHTML) ; ce remaniement ne touche aucune ligne mutée ; suite et bancs rejoués verts après lui. Vitest 590 fichiers / 6 704 essais ; 8 essais WebKit voisins verts (#913, anonymisation du Cadre, lecture seule #622). En chemin : deux cliquets rougis par MON lot et corrigés (`--radius-standard` est une variable CSS fantôme → `--radius-moyen` ; lint innerHTML).
 
-**À SAVOIR, NON TOUCHÉ, NON INSCRIT** (code étranger, sans symptôme vécu) : l'écriture d'indices à l'ouverture de la Liste sur un trimestre archivé ; le formulaire d'ajout d'élève du Cadre saisissable en mode archive. **RESTE À FAIRE** : verdict Playwright puis push, au signal de Grégoire (Cowork fermé — à MESURER) ; rien chez l'hébergeur tant que ce n'est pas poussé. Le dossier `RELECTURE-2026-09-17-analyse-101-102-de-2025.md` (seuil `defiSpecifique`) attend une décision de Grégoire : ce lot n'a touché à aucun seuil.
+**À SAVOIR, NON TOUCHÉ, NON INSCRIT** (code étranger, sans symptôme vécu) : l'écriture d'indices à l'ouverture de la Liste sur un trimestre archivé ; le formulaire d'ajout d'élève du Cadre saisissable en mode archive. **DÛ AU PROCHAIN LOT QUI PASSE PAR `js/resultats-ulterieurs.js`, SANS RELEASE** (relecture croisée de Cowork, mutation R3 survivante) : `nettoyerTexte` peut perdre son `.slice(0, LONGUEUR_MAX_TEXTE)` sans qu'aucun essai rougisse — le seul rempart mesuré est le `maxlength` du champ, qui vit dans l'écran, pas dans le module. Sans conséquence aujourd'hui (tous les appels passent par les champs). L'essai à poser : `ajouterResultat` avec un `cours` de 500 caractères range au plus `LONGUEUR_MAX_TEXTE`. NON corrigé ici, exprès. **RESTE À FAIRE** : verdict Playwright puis push, au signal de Grégoire (Cowork fermé — à MESURER) ; rien chez l'hébergeur tant que ce n'est pas poussé. Le dossier `RELECTURE-2026-09-17-analyse-101-102-de-2025.md` (seuil `defiSpecifique`) attend une décision de Grégoire : ce lot n'a touché à aucun seuil.
 
 ---
 
