@@ -48,7 +48,16 @@ Fonction canonique unique. Retourne l'assiduite cumulee d'un etudiant.
 
 ### `calculerEtSauvegarderIndicesAssiduite()`
 
-Orchestrateur. Calcule A pour chaque etudiant actif et sauvegarde :
+Orchestrateur. Calcule A pour chaque eleve du groupe et sauvegarde.
+
+> **#745 (17 sept. 2026)** : un eleve exclu par statut (inactif, decrochage, abandon) est calcule comme les
+> autres — son profil lit la regle de sa pratique et affiche son statut. « Hors des moyennes du groupe » se tient
+> a la LECTURE : chaque moyenne, statistique ou courbe part d'une liste filtree par `estEtudiantExclu` et lit ce
+> magasin DA par DA ; aucun lecteur ne le parcourt par ses cles (verrou : `sentinelle-lot-E-745-eleve-exclu`).
+> Meme regle pour `calculerEtStockerIndicesCP()` (portfolio.js). Un DA qui n'est plus dans le groupe n'est pas
+> calcule : `calculerTousLesIndices` rend `{ A, C, P, M : null, horsGroupe: true }`. Le repli « 3 meilleures
+> notes » (`calculerPerformancePAN`) est retire.
+
 
 ```javascript
 // Cle : cle('indicesAssiduite')

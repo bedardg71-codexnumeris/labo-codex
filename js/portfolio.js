@@ -681,13 +681,15 @@ function _calculerEtStockerIndicesCPInterne() {
         return indicesCP;
     }
 
-    // Filtrer les étudiants actifs
-    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
-
     const dateCalcul = new Date().toISOString();
 
-    // Calculer pour chaque étudiant
-    etudiantsActifs.forEach(etudiant => {
+    // Calculer pour chaque élève du groupe — EXCLU PAR STATUT COMPRIS (#745, lot E du cadrage du
+    // dépistage, 17 sept. 2026 ; tranché par Grégoire le 16) : il se calcule avec la règle de sa
+    // pratique, comme les autres. Avant, il était écarté ici : son entrée restait FIGÉE à la valeur
+    // du jour de son exclusion, ou manquait et le profil tombait sur « les 3 meilleures notes ».
+    // « Hors des moyennes du groupe » se tient à la lecture : voir indices.js,
+    // calculerEtSauvegarderIndicesAssiduite.
+    (etudiants || []).forEach(etudiant => {
         const da = etudiant.da;
 
         // ========================================

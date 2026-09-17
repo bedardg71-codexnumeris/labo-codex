@@ -118,6 +118,8 @@ La fonction `diagnostiquerSuiviApprentissage()` (`js/profil-etudiant-calculs.js`
 
 **#744 (tranché par Grégoire, 16-17 sept. 2026)** : ce diagnostic décrit la PERSISTANCE et ne rend plus de palier — la colonne « Niveau RàI » et le champ `niveauRaI` sont retirés. Le palier d'intervention vient de la carte RàI seule (voir plus bas), y compris pour `determinerCibleIntervention`. « Difficulté récente » est le mot du suivi ; « Difficulté émergente » reste le pattern de la carte RàI, et lui seul.
 
+**#745 (tranché par Grégoire le 16 sept. 2026, livré le 17 — lot E du cadrage du dépistage)** : un élève EXCLU PAR STATUT (inactif, décrochage, abandon — `estEtudiantExclu`, `js/main.js`) est calculé par la règle de SA pratique, comme un actif ; son profil s'ouvre et dit sous le nom « <libellé du statut> · hors des moyennes du groupe » (`libelleStatutEtudiant`). Les deux producteurs (`calculerEtSauvegarderIndicesAssiduite`, `calculerEtStockerIndicesCP`) calculent tout le groupe ; « hors des moyennes » se tient À LA LECTURE (chaque lecteur part d'une liste filtrée et lit les magasins DA par DA — ne jamais parcourir `indicesCP` ni `indicesAssiduite` par leurs clés). Un DA qui n'est plus dans le groupe n'est pas calculé (`horsGroupe: true`, indices `null`). Le repli « 3 meilleures notes » n'existe plus. Sentinelle : `sentinelle-lot-E-745-eleve-exclu`.
+
 ### Les patterns d'apprentissage
 
 La fonction `identifierPatternActuel()` (`js/profil-etudiant-calculs.js`) détermine un pattern basé sur la performance (P) et la présence de défis :

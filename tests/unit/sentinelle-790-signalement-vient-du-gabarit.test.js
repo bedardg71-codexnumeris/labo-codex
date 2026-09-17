@@ -40,9 +40,9 @@ function registre() {
  * sur `window`, à l'appel. Le banc charge la VRAIE (pratique-registre.js), pas une doublure :
  * c'est elle qui prouve, au dernier `describe`, qu'elle ne filtre pas les diagnostiques.
  */
-function signalement() {
+function signalement(globaux = {}) {
     const win = chargerScript('js/pratiques/pratique-registre.js');
-    return chargerScript(MODULE, {}, win).SignalementDepistage;
+    return chargerScript(MODULE, globaux, win).SignalementDepistage;
 }
 
 /**
@@ -260,14 +260,26 @@ describe('#790 volet B · ⛔ LA PRODUCTION DIAGNOSTIQUE DOIT ÊTRE LUE ICI', ()
         // calculs ; quelqu'un qui « uniformise » en appliquant ce filtre ici aussi viderait le lot
         // de tout son sens, et aucune autre sentinelle ne le dirait. Le texte que Grégoire fait
         // écrire en première semaine ne compte nulle part — sauf ici.
-        const S = signalement();
+        //
+        // Relecture croisée du lot 31 par Cowork (17 sept. 2026, mutation N1) : ce cas donnait une copie de `P_DIAG`
+        // sans qu'AUCUNE production soit marquée diagnostique — un filtre réel n'y trouvait rien à retirer, et seule la
+        // garde textuelle d'en dessous tenait. `P_DIAG` porte maintenant `diagnostique: true`, et elle est visible par
+        // les DEUX chemins qu'un filtre emprunterait : le `db` du banc (sous `cle('productions')`) et le contexte.
+        const PRODUCTIONS = [{ id: 'P_DIAG', titre: 'Texte diagnostique', type: 'travail', diagnostique: true }, { id: 'P1', titre: 'Analyse 1', type: 'travail' }];
+        const lectures = [];
+        const db = { getSync: (k, d) => { lectures.push(k); return k === 'test_productions' ? JSON.parse(JSON.stringify(PRODUCTIONS)) : (d !== undefined ? d : null); } };
+        const cle = (k) => 'test_' + k;
+        const S = signalement({ db, cle, obtenirDonneesSelonMode: (k) => db.getSync(cle(k), []) });
         const r = S.pourEleve('2000001', {
             evaluations: [evaluation({ erreurs: 20, mots: 300, productionId: 'P_DIAG' })],
             grilles: grilles(critereEUF({ cochés: ['echec'], libelle: 'Aide en français recommandée' })),
+            productions: PRODUCTIONS,
             registre: registre()
         });
         expect(r).toHaveLength(1);
         expect(r[0].productionId).toBe('P_DIAG');
+        // Le banc rend bien la production marquée à qui la demande (sinon la preuve ci-dessus serait de nouveau vide).
+        expect(db.getSync(cle('productions')).find(p => p.id === 'P_DIAG').diagnostique).toBe(true);
     });
 
     it('le module de signalement n\'importe PAS le filtre des quatre portes', () => {

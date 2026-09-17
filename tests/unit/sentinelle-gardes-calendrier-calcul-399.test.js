@@ -10,8 +10,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 //  replis en dur : cadre vide → 0 entrée (avant : 124 entrées fantômes 2025,
 //      dont 82 « cours ») et clé purgée ;
 //  L6 : pondérations 0/0 → erreur de configuration, jamais un NaN stocké ;
-//  L7 : la note 0 compte dans le repli calculerPerformancePAN
-//      ([0, 80, 60] → 0,467 — le filtre truthy rendait 0,70).
+//  L7 : la note 0 comptait dans le repli calculerPerformancePAN ([0, 80, 60] → 0,467). Le repli
+//      lui-même est RETIRÉ par #745 (lot E du cadrage du dépistage, 17 sept. 2026) : l'essai tient
+//      maintenant son absence. « Un 0 est une note valide » reste tenu là où vit la règle
+//      (`evaluationEntreDansLaNote`, sentinelles #706).
 
 // --- L8 + replis : générateur de calendrier ---------------------------------
 function chargerTrimestre(store) {
@@ -140,37 +142,15 @@ describe('#399 · L6 — pondérations 0/0 : erreur de configuration, jamais NaN
     });
 });
 
-// --- L7 : note 0 dans le repli ---------------------------------------------
-describe('#399 · L7 — la note 0 compte dans le repli calculerPerformancePAN', () => {
-    it('sonde du rapport : [0, 80, 60] → 0,467 (avant : 0,70, le zéro disparaissait)', () => {
-        const evals = [
-            { etudiantDA: '1234567', productionId: 'P1', noteFinale: 0 },
-            { etudiantDA: '1234567', productionId: 'P2', noteFinale: 80 },
-            { etudiantDA: '1234567', productionId: 'P3', noteFinale: 60 }
-        ];
-        // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js — chargé d'abord (harnais seulement).
-        const win = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} }, cle: (k) => k });
-        chargerScript('js/indices.js', {
+// --- L7 : le repli « 3 meilleures notes » n'existe plus (#745) ---------------
+describe('#399 · L7 — le repli calculerPerformancePAN est retiré (#745)', () => {
+    it('indices.js ne l\'exporte plus : aucune seconde règle de performance à côté de celle de la pratique', () => {
+        const win = chargerScript('js/indices.js', {
             db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} },
             cle: (k) => k,
-            obtenirDonneesSelonMode: (k) => (k === 'evaluationsSauvegardees' ? evals : (k === 'portfoliosEleves' ? {} : []))
-        }, win);
-        expect(win.calculerPerformancePAN('1234567')).toBeCloseTo(0.4667, 3);
-    });
-
-    it('null et undefined restent exclus (seul le 0 réintègre le corpus)', () => {
-        const evals = [
-            { etudiantDA: '1234567', productionId: 'P1', noteFinale: null },
-            { etudiantDA: '1234567', productionId: 'P2', noteFinale: undefined },
-            { etudiantDA: '1234567', productionId: 'P3', noteFinale: 60 }
-        ];
-        // #706 (5 sept. 2026) : la règle « ce qui entre dans la note » vit dans pratique-registre.js — chargé d'abord (harnais seulement).
-        const win = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} }, cle: (k) => k });
-        chargerScript('js/indices.js', {
-            db: { getSync: (_k, d) => (d !== undefined ? d : null), setSync: () => {}, get: async () => null, set: async () => {} },
-            cle: (k) => k,
-            obtenirDonneesSelonMode: (k) => (k === 'evaluationsSauvegardees' ? evals : (k === 'portfoliosEleves' ? {} : []))
-        }, win);
-        expect(win.calculerPerformancePAN('1234567')).toBeCloseTo(0.60, 5);
+            obtenirDonneesSelonMode: () => []
+        });
+        expect(typeof win.calculerTousLesIndices).toBe('function');   // le module est bien chargé
+        expect(win.calculerPerformancePAN).toBeUndefined();
     });
 });

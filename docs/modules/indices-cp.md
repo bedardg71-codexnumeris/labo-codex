@@ -93,7 +93,8 @@ indicesCP[da] = {
 
 ```javascript
 // Calcul et stockage
-calculerEtStockerIndicesCP()           // Recalcule tous les indices
+calculerEtStockerIndicesCP()           // Recalcule les indices de TOUT le groupe, exclus par statut compris (#745, 17 sept. 2026 —
+                                       // « hors des moyennes » se tient a la lecture : voir indice-assiduite.md)
 
 // Lecture
 obtenirIndicesCP(da)                   // Retourne indices pour un etudiant
