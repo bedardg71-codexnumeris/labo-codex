@@ -25,6 +25,8 @@
             couleur: 'vert',
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
             items: [
+                'Suivi du groupe&nbsp;: le bilan des fondamentaux écrit «&nbsp;difficulté récente&nbsp;» (une seule production récente sous le seuil) là où il écrivait «&nbsp;émergente&nbsp;». «&nbsp;Difficulté émergente&nbsp;» ne désigne plus que le profil d\'apprentissage de la carte RàI, qui donne seule le niveau d\'intervention&nbsp;; le tableau de l\'Aide est accordé.',
+                'Dépistage&nbsp;: une copie encore en brouillon ne lève plus de signalement&nbsp;; il paraît quand la copie est enregistrée.',
                 'Profil d\'un élève&nbsp;: la carte Complétion dit maintenant la même chose que sa fraction. Elle écrit «&nbsp;Productions remises&nbsp;: 9/10&nbsp;», montre la production qui manque — l\'évaluation terminale comprise — sous «&nbsp;1 production non remise ou non recevable&nbsp;», et n\'écrit «&nbsp;Toutes les productions sont remises&nbsp;!&nbsp;» que si rien ne manque. Un brouillon n\'y paraît plus parmi les remises.',
                 'Complétion&nbsp;: une copie marquée «&nbsp;plagiat&nbsp;» ou «&nbsp;IA non autorisée&nbsp;» n\'est plus comptée comme une remise. La complétion d\'un élève qui en a une baisse avec cette mise à jour&nbsp;; sa note ne change pas.',
                 'Exploration des pratiques&nbsp;: une pratique «&nbsp;N derniers&nbsp;» affiche «&nbsp;Récence (dernier essai retenu)&nbsp;» à la ligne des reprises.',

@@ -291,31 +291,19 @@ function qualifierContexteApprentissage(A, C) {
         };
     }
 
-    // Contexte fragile : A < 65% OU C < 65%
-    if (A < BORNES_CONTEXTE.modere || C < BORNES_CONTEXTE.modere) {
-        return {
-            niveau: 'fragile',
-            label: 'Fragile',
-            description: 'Contexte fragile. La tendance actuelle invite à un suivi rapproché.',
-            badgeClasse: 'badge-engagement-fragile',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Interventions recommandées : Rencontrer l\'étudiant·e pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
-        };
-    }
-
-    // ⚠ INATTEIGNABLE, et déplacé tel quel : la branche « Fragile » (un OU)
-    // attrape tout ce qui n'est pas « Modéré » (un ET). « Insuffisant » ne
-    // s'est jamais affiché par ce chemin. Constat inscrit (BACKLOG #822),
-    // pas tranché ici : retirer un palier est une décision de pédagogie.
+    // Contexte fragile : A < 65% OU C < 65% — tout ce qui n'est pas « Modéré ».
+    // #822 (lot C du cadrage du 16 sept. 2026) : un cinquième palier, « Insuffisant »,
+    // suivait celui-ci sans pouvoir être atteint (ce OU attrapait tout avant lui).
+    // Retiré sur décision de Grégoire : il n'a jamais servi, et son mot qualifiait la
+    // personne là où les bandes décrivent un état du contexte. Aucune borne n'a bougé.
     return {
-        niveau: 'insuffisant',
-        label: 'Insuffisant',
-        description: 'Contexte insuffisant. Une rencontre individuelle est recommandée.',
-        badgeClasse: 'badge-engagement-insuffisant',
+        niveau: 'fragile',
+        label: 'Fragile',
+        description: 'Contexte fragile. La tendance actuelle invite à un suivi rapproché.',
+        badgeClasse: 'badge-engagement-fragile',
         A: (A * 100).toFixed(0) + '%',
         C: (C * 100).toFixed(0) + '%',
-        recommandation: 'Intervention urgente requise : Rencontre individuelle, contact avec aide pédagogique, vérifier situation personnelle.'
+        recommandation: 'Interventions recommandées : Rencontrer l\'étudiant·e pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
     };
 }
 

@@ -1431,7 +1431,11 @@ function genererInterpretationSuiviFondamentaux() {
     var maitrise = (compteurs['Maîtrise acquise'] || 0) + (compteurs['Difficulté résolue'] || 0);
     var progression = compteurs['Progression'] || 0;
     var plateau = compteurs['Plateau'] || 0;
-    var emergente = compteurs['Difficulté émergente'] || 0;
+    // #744 (lot C, 17 sept. 2026) : le suivi des fondations dit « Difficulté récente »
+    // (IPB = 1, → ou ↘) ; « Difficulté émergente » est le pattern de la carte RàI, pas le sien.
+    var recente = compteurs['Difficulté récente'] || 0;
+    // ⚠ « Progression lente » (IPB ≥ 3, ↗) entre dans `total` et dans aucune phrase :
+    // constat du 17 sept., laissé tel quel — la phrase à écrire est un mot de Grégoire.
     var constante = compteurs['Difficulté constante'] || 0;
     var persistante = compteurs['Difficulté persistante'] || 0;
 
@@ -1455,11 +1459,11 @@ function genererInterpretationSuiviFondamentaux() {
         messages.push(plateau + ' (' + pct(plateau) + '%) en plateau — consolidation ou stagnation à surveiller');
     }
 
-    // Difficultés actives (émergente + constante + persistante)
-    var diffActives = emergente + constante + persistante;
+    // Difficultés actives (récente + constante + persistante)
+    var diffActives = recente + constante + persistante;
     if (diffActives > 0) {
         var details = [];
-        if (emergente > 0) details.push(emergente + ' émergente' + (emergente > 1 ? 's' : ''));
+        if (recente > 0) details.push(recente + ' récente' + (recente > 1 ? 's' : ''));
         if (constante > 0) details.push(constante + ' constante' + (constante > 1 ? 's' : ''));
         if (persistante > 0) details.push(persistante + ' persistante' + (persistante > 1 ? 's' : ''));
         messages.push(diffActives + ' (' + pct(diffActives) + '%) en difficulté sur les fondamentaux (' + details.join(', ') + ')');

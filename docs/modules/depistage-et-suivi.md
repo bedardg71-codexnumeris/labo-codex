@@ -124,16 +124,20 @@ diagnostiquerSuiviApprentissage(da)  →  profil-etudiant.js (lignes 5377+)
 
 ### Matrice de diagnostic
 
-| IPB | Direction | Diagnostic | Niveau RaI suggere |
-|-----|-----------|------------|-------------------|
-| 0 | — | Maitrise acquise | 1 |
-| 1 | ↗ | Difficulte resolue | 1 |
-| 1 | → ou ↘ | Difficulte emergente | 1 |
-| 2 | ↗ | Progression | 2 |
-| 2 | → | Plateau | 2 |
-| 2 | ↘ | Difficulte constante | 2 |
-| >= 3 | ↗ | Progression lente | 2 |
-| >= 3 | → ou ↘ | Difficulte persistante | 3 |
+| IPB | Direction | Diagnostic |
+|-----|-----------|------------|
+| 0 | — | Maitrise acquise |
+| 1 | ↗ | Difficulte resolue |
+| 1 | → ou ↘ | Difficulte recente |
+| 2 | ↗ | Progression |
+| 2 | → | Plateau |
+| 2 | ↘ | Difficulte constante |
+| >= 3 | ↗ | Progression lente |
+| >= 3 | → ou ↘ | Difficulte persistante |
+
+> **#744 (17 sept. 2026)** : ce diagnostic decrit la PERSISTANCE et ne rend plus de palier. Le palier
+> d'intervention vient de la carte RaI seule (`determinerNiveauRaiPedagogique`). « Difficulte recente »
+> remplace « Difficulte emergente », qui reste le pattern de la carte RaI (P < 75 % et un defi).
 
 ---
 

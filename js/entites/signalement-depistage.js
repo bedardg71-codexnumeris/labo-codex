@@ -39,11 +39,19 @@
 'use strict';
 
 /**
- * Une évaluation compte-t-elle ? Même règle que partout ailleurs : active, notée.
+ * Une évaluation compte-t-elle ? La règle unique du lot A (#706, `evaluationEntreDansLaNote`,
+ * pratique-registre.js) : active, notée, ENREGISTRÉE.
+ *
+ * #905 (lot C, 17 sept. 2026) — UN BROUILLON NE LÈVE PAS DE SIGNALEMENT. Tranché par
+ * Grégoire : il corrige souvent en plusieurs passes, et un signalement levé sur une copie
+ * inachevée se lit comme un jugement. Ce site recopiait l'ancienne règle (active, notée)
+ * et ne voyait pas le verrou ; il lit maintenant le prédicat, à l'appel.
+ * ⚠ CE N'EST PAS LE FILTRE DES QUATRE PORTES : le prédicat ne connaît pas les productions
+ * et ne peut donc pas écarter une production diagnostique (voir l'en-tête).
  * ⚠ `remplaceeParId` couvre les reprises ET les doublons réconciliés (#360).
  */
 function _evaluationActive(e) {
-    return !!(e && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined);
+    return window.evaluationEntreDansLaNote(e);
 }
 
 /**

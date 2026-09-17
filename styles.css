@@ -3370,11 +3370,6 @@ input[type="number"].controle-form {
     color: var(--niveau-attention-eleve);
 }
 
-.badge-engagement-insuffisant {
-    background: rgba(160, 32, 48, 0.12);
-    color: #d04050;
-}
-
 /* 🆕 BETA 96.1: Badge pour données en attente */
 .badge-attente {
     background: rgba(106, 172, 184, 0.08);

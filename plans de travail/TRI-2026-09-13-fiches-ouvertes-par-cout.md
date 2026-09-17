@@ -3,7 +3,8 @@
 > Pendant markdown de l'artefact « Tri du chantier Labo Codex » (la TRACE ; l'artefact porte l'OPÉRATION).
 > **Mis à jour le 16 sept. à 21 h 15** (par Claude Code) – **vingt-cinq lots menés depuis le tri ; vingt-quatre en ligne, le vingt-cinquième poussé.**
 > ⚠ **DEUX JOURNÉES DE SUITE SANS TOUCHER AU TRI, ET C'EST L'ORDRE VOULU.** Le 15 a livré six versions, le 16 en a livré neuf, et **les quinze répondaient à un rapport de testeur** – ceux de Grégoire, celui de Mathieu. Les fiches d'ici n'ont pas bougé : ⮕ **ce n'est pas un retard du tri, c'est la règle des retours qui s'applique.**
-> **Livré : `1.142.26`** (build `0917-0947`) : le lot 30, **la carte Complétion dit ce que dit sa fraction** – la liste des non-remises et le message lisent le détail de la pratique (terminale comprise, brouillon exclu) ; quatre textes de Grégoire ; **tranché : une copie non recevable n'est pas une remise** (C de DEMO004 : 90 → 80) ; L1 du lot 27 fermé, alias `derniers` du Comparateur ; #904 inscrite et livrée. Backlog : 227.
+> **Livré : `1.142.27`** (build `0917-1112`) : le lot 31, **un seul palier d'intervention** (lot C du cadrage du dépistage) – la carte RàI donne seule le palier, le suivi des fondations dit « Difficulté récente » sans palier (#744) ; « Insuffisant » retiré, aucune borne ne bouge (#822) ; un brouillon ne lève pas de signalement (#905, inscrite et livrée). **La remesure a corrigé la fiche** : le palier du suivi n'était lu que par la cible d'intervention, qu'aucun écran n'affiche.
+> **(précédent) Livré : `1.142.26`** (build `0917-0947`) : le lot 30, **la carte Complétion dit ce que dit sa fraction** – la liste des non-remises et le message lisent le détail de la pratique (terminale comprise, brouillon exclu) ; quatre textes de Grégoire ; **tranché : une copie non recevable n'est pas une remise** (C de DEMO004 : 90 → 80) ; L1 du lot 27 fermé, alias `derniers` du Comparateur ; #904 inscrite et livrée. Backlog : 227.
 > **(précédent) Poussé : `1.142.25`** (build `0917-0916`) : le lot 29, **le verrou de la sommative s'applique** – prémisse de l'audit corrigée (`calculerNoteFinale` n'avait aucun appelant) ; 87,43 → 50 au profil et à l'export ; rouvrir ne change plus une règle (A-2) ; cinq textes de Grégoire (#901, #899) ; plafonnement, remplacement et reprises inscrits #903. Backlog : 227.
 > **(précédent) Poussé : `1.142.24`** (build `0917-0846`) : le lot 28, **les suites de l'audit des pratiques de notation** – une spécification de l'assistant n'exporte plus « 0, final » (« non constructible » aux deux passes) ; un modèle « N plus récentes » rouvert garde sa méthode ; sentinelle du tour complet par famille, douze mutations rouges ; B-1 arrêté (#898) ; six fiches inscrites (#897 à #902). Backlog : 229.
 > **(précédent) Poussé : `1.142.23`** (build `0917-0803`) : le lot 27, **#871 close** – la fraction de complétion compte ce que compte l'indice C, évaluation terminale comprise (« 80% », « 8 / 10 ») ; chaque pratique expose le détail dont son indice découle, trois sites le lisent ; C inchangé pour tous.
@@ -137,6 +138,10 @@ Le timeout du 31 août. **L'hypothèse de Cowork (15 h 52) tenait** : `_attendre
 ### Lot 23 – le dépistage lit chaque critère une seule fois : les points d'abord, jamais un critère « Aucun » ✅ LIVRÉ en 1.142.18 (#739, #740 – lot B du cadrage du 16 sept.)
 
 Premier lot du cadrage « Les règles du dépistage » (onze règles tranchées par Grégoire à 17 h 19), choisi parce qu'il ne lui demandait ni mot ni vérification à l'écran. **La remesure a corrigé la fiche sur un point** : le champ des points est `ponderation` (celle du critère, écrite par `_collecterCriteresAutoSave`), pas `pointsMax` ; les sept fonctions du relevé étaient aux lignes dites. **#739** : moyennes par critère (barres), IPB, défi spécifique et directions lisent `scoreCritereEvaluation` – la source des courbes depuis #752, qui se désignait déjà « candidat unique » – et plus aucun lecteur du profil ne convertit le niveau d'un critère. **#740** : un seul filtre, `estCritereSurveilleParDepistage` (helpers, à côté de la grille de référence), lu par la liste ou par l'appariement partagé `trouverCritereDepistage` ; barres, moyennes, IPB, forces/défis, défi spécifique et cibles d'intervention y passent ; la note ne le lit pas ; la phrase de l'Aide est vérifiée, pas réécrite. **Cas hors des critères de la page, nommé** : sans grille de dépistage choisie, le défi spécifique lit tout, comme avant. **Stock** : une intervention enregistrée avec un critère « Aucun » ciblé reste telle quelle. Sentinelle `sentinelle-lot-B-739-740` (20 essais, calculs réels, `interventions.js` réel pour la pré-coche) : **11 mutations / 11 rouges**. Le banc d'audit du 5 sept. (C5, C6) montre la valeur d'après. Aucune porte terrain : la mise en page ne bouge pas. Restent du cadrage : F, C, A, E, D.
+
+### Lot 31 – un seul palier d'intervention ✅ LIVRÉ en 1.142.27 (#744, #822, #905 – lot C du cadrage du dépistage, consigne du 17 sept., 10 h 12)
+
+Remesuré avant de coder : `suivi.niveauRaI` n'avait qu'un lecteur (`determinerCibleIntervention`), dont le seul appelant vivant ne lit que `.pattern` et `niveau === 0` ; le filtre « RàI 2-3 » lisait déjà la carte, le filtre « Suivi » lit l'IPB. Le cas d'arrêt de la consigne n'existe pas (les copies du suivi sont un sous-ensemble de celles de la carte). Aucun palier du suivi n'est écrit dans le stock. Visible : le mot du bilan des fondamentaux, le tableau de l'Aide (colonne retirée, « Progression lente » ajoutée), le brouillon qui ne signale plus. Au passage : le cas « note = seuil » du verrou (lot 29), la ligne sous #903, les deux trous de preuve du lot F. Sentinelle du lot (12 essais), 20 mutations rouges.
 
 ### Lot 30 – la carte Complétion dit ce que dit sa fraction ✅ LIVRÉ en 1.142.26 (relectures croisées des lots 27 et 28 – consigne du 17 sept., 9 h 13)
 
@@ -362,7 +367,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 *profil d'élève – contexte d'apprentissage · tableau de bord et profil d'élève et 1 autres écrans*
 
-- **I** Un palier d'alerte existe dans le code mais ne s'affiche jamais – à Grégoire : pédagogie, à froid (#822)
+- ✅ **I** Un palier d'alerte existe dans le code mais ne s'affiche jamais – **livrée en 1.142.27** : palier retiré, aucune borne ne bouge (#822)
 - **L** Les mots des bandes de couleur ne s'appuient sur rien de nommé – à Grégoire : arbitrage à préciser ; trois modules et plus (#821)
 - **L** Les seuils d'alerte des interventions sont écrits en dur – à Grégoire : pédagogie, à froid ; trois modules et plus *(goulot corrigé : la règle a déménagé le 10 sept.)* (#742)
 
@@ -560,7 +565,7 @@ Le palier de chaque fiche est **lu dans la fiche**, pas mesuré dans le code. Co
 
 ### Suivi › Profil (carte RàI)
 
-- **?** Le même élève reçoit deux paliers RàI différents sur un même écran – à Grégoire : pédagogie, à froid (#744)
+- ✅ **?** Le même élève reçoit deux paliers RàI différents sur un même écran – **livrée en 1.142.27** : la carte RàI seule ; à la mesure, le second palier n'atteignait aucun écran (#744)
 
 ### Trimestre › recoupement horaire
 

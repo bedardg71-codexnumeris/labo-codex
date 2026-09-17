@@ -101,8 +101,8 @@ function definirModeExpertFromEl(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.js au chargement : la version du
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
-let VERSION_MAJEURE = '1.142.26';
-let BUILD_ID = '0917-0947';
+let VERSION_MAJEURE = '1.142.27';
+let BUILD_ID = '0917-1112';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 var SYNONYMES_AIDE = [
     ['rai', 'réponse à l\'intervention', 'niveau 1', 'niveau 2', 'niveau 3', 'interventions', 'dépistage'],
-    ['difficulté', 'difficulté persistante', 'difficulté émergente', 'défi spécifique', 'score multistructurel', 'pattern', 'suivi', 'ipb', 'fondamentaux', 'plateau'],
+    ['difficulté', 'difficulté persistante', 'difficulté émergente', 'difficulté récente', 'défi spécifique', 'score multistructurel', 'pattern', 'suivi', 'ipb', 'fondamentaux', 'plateau'],
     ['performance', 'indice p', 'note', 'artefact', 'portfolio', 'meilleurs artefacts'],
     ['assiduité', 'indice a', 'présence', 'absence', 'taux de présence'],
     ['complétion', 'indice c', 'remise', 'taux de remise'],

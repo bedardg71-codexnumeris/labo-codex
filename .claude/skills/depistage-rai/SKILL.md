@@ -105,16 +105,18 @@ L'IPB mesure le nombre d'artefacts consécutifs récents dont le score pondéré
 
 La fonction `diagnostiquerSuiviApprentissage()` (`js/profil-etudiant-calculs.js`) croise l'IPB avec la direction pour produire un diagnostic :
 
-| IPB | Direction | Diagnostic | Niveau RàI |
-|-----|-----------|------------|-----------|
-| 0 | — | Maîtrise acquise | 1 |
-| 1 | ↗ | Difficulté résolue | 1 |
-| 1 | → ou ↘ | Difficulté émergente | 1 |
-| 2 | ↗ | Progression | 2 |
-| 2 | → | Plateau | 2 |
-| 2 | ↘ | Difficulté constante | 2 |
-| ≥ 3 | ↗ | Progression lente | 2 |
-| ≥ 3 | → ou ↘ | Difficulté persistante | 3 |
+| IPB | Direction | Diagnostic |
+|-----|-----------|------------|
+| 0 | — | Maîtrise acquise |
+| 1 | ↗ | Difficulté résolue |
+| 1 | → ou ↘ | Difficulté récente |
+| 2 | ↗ | Progression |
+| 2 | → | Plateau |
+| 2 | ↘ | Difficulté constante |
+| ≥ 3 | ↗ | Progression lente |
+| ≥ 3 | → ou ↘ | Difficulté persistante |
+
+**#744 (tranché par Grégoire, 16-17 sept. 2026)** : ce diagnostic décrit la PERSISTANCE et ne rend plus de palier — la colonne « Niveau RàI » et le champ `niveauRaI` sont retirés. Le palier d'intervention vient de la carte RàI seule (voir plus bas), y compris pour `determinerCibleIntervention`. « Difficulté récente » est le mot du suivi ; « Difficulté émergente » reste le pattern de la carte RàI, et lui seul.
 
 ### Les patterns d'apprentissage
 

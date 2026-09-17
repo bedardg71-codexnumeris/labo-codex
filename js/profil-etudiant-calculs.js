@@ -1204,8 +1204,16 @@ function calculerIPB(da) {
 /**
  * Diagnostique le portrait de suivi de l'apprentissage.
  * Croise l'IPB (persistance) avec la direction pour produire un diagnostic en langage clair.
+ *
+ * #744 (lot C du cadrage du 16 sept. 2026) — CE DIAGNOSTIC NE REND PLUS DE PALIER.
+ * Règle tranchée par Grégoire : la carte RàI (`determinerNiveauRaiPedagogique`) donne
+ * SEULE le palier d'intervention, partout ; le suivi des fondations décrit la
+ * PERSISTANCE (IPB × direction). Le champ `niveauRaI` qu'il portait disait un second
+ * palier, que la cible d'intervention suivait. Le mot « Difficulté récente » (IPB = 1,
+ * direction → ou ↘) est celui de Grégoire, choisi le 17 sept. : « Difficulté émergente »
+ * reste le pattern de la carte RàI (P < 75 % et un défi), et lui seul.
  * @param {string} da - Numéro de DA
- * @returns {Object|null} - { diagnostic, ipb, direction, scoreActuel, niveauRaI, criteresEnDefi, couleur }
+ * @returns {Object|null} - { diagnostic, ipb, direction, scoreActuel, criteresEnDefi, couleur }
  */
 function diagnostiquerSuiviApprentissage(da) {
     var ipbData = calculerIPB(da);
@@ -1213,43 +1221,33 @@ function diagnostiquerSuiviApprentissage(da) {
 
     var ipb = ipbData.ipb;
     var dir = ipbData.direction;
-    var diagnostic, couleur, niveauRaI;
+    var diagnostic, couleur;
 
     if (ipb === 0) {
         diagnostic = 'Maîtrise acquise';
         couleur = '#28a745';
-        niveauRaI = 1;
     } else if (ipb === 1 && dir === '↗') {
         diagnostic = 'Difficulté résolue';
         couleur = '#28a745';
-        niveauRaI = 1;
     } else if (ipb === 1) {
-        diagnostic = 'Difficulté émergente';
+        diagnostic = 'Difficulté récente';
         couleur = '#ff9800';
-        niveauRaI = 1;
     } else if (ipb === 2 && dir === '↗') {
         diagnostic = 'Progression';
         couleur = '#2196f3';
-        niveauRaI = 2;
     } else if (ipb === 2 && dir === '→') {
         diagnostic = 'Plateau';
         couleur = '#ff9800';
-        niveauRaI = 2;
     } else if (ipb === 2) {
         diagnostic = 'Difficulté constante';
         couleur = '#dc3545';
-        niveauRaI = 2;
-    } else {
+    } else if (dir === '↗') {
         // ipb >= 3
-        if (dir === '↗') {
-            diagnostic = 'Progression lente';
-            couleur = '#2196f3';
-            niveauRaI = 2;
-        } else {
-            diagnostic = 'Difficulté persistante';
-            couleur = '#dc3545';
-            niveauRaI = 3;
-        }
+        diagnostic = 'Progression lente';
+        couleur = '#2196f3';
+    } else {
+        diagnostic = 'Difficulté persistante';
+        couleur = '#dc3545';
     }
 
     return {
@@ -1257,7 +1255,6 @@ function diagnostiquerSuiviApprentissage(da) {
         ipb: ipb,
         direction: dir,
         scoreActuel: ipbData.scoreActuel,
-        niveauRaI: niveauRaI,
         criteresEnDefi: ipbData.criteresEnDefi,
         criteresMulti: ipbData.criteresMulti,
         couleur: couleur,
@@ -1267,8 +1264,6 @@ function diagnostiquerSuiviApprentissage(da) {
         historiqueComplet: ipbData.historiqueComplet
     };
 }
-
-// [Phase 6] interpreterIndiceBlocage() supprimé — remplacé par diagnostiquerSuiviApprentissage()
 
 /**
  * Diagnostique les forces et défis selon le seuil pédagogique
@@ -2039,11 +2034,14 @@ function nommerDefiAvecSOLO(defi) {
  *      qui n'a pas de CAF recevait une prescription qui ne le concerne pas.
  *
  * ⮕ CE QUI LES REMPLACE, et pourquoi ce n'est pas un autre arbitraire :
- *   · L'INTENSITÉ vient de `diagnostiquerSuiviApprentissage` — le croisement
+ *   · L'INTENSITÉ vient de la carte RàI (`determinerNiveauRaiPedagogique`),
+ *     et d'elle SEULE — #744, lot C du cadrage du 16 sept. 2026, règle tranchée
+ *     par Grégoire. Jusqu'au 17 sept. elle venait du suivi des fondations
+ *     (`suivi.niveauRaI`) : deux paliers pour un même élève, selon l'écran.
+ *   · LA PERSISTANCE vient de `diagnostiquerSuiviApprentissage` — le croisement
  *     IPB × direction, qui compte les artefacts consécutifs sous le seuil de
  *     défi CONFIGURÉ et lit une tendance. Aucun nom de critère, aucun seuil
- *     écrit ici. Cette table est celle du modèle RàI documenté (skill
- *     `depistage-rai`), et elle était déjà vivante côté tableau de bord.
+ *     écrit ici. Elle NOMME la cible ; elle ne rend plus de palier.
  *   · LA CAUSE est NOMMÉE, pas prescrite : le critère en défi — dont le nom
  *     vient de la grille de l'utilisateur — et son niveau SOLO configuré.
  *     « L'app fournit les données ; l'enseignant prend les décisions »
@@ -2105,16 +2103,23 @@ function determinerCibleIntervention(da) {
         ? diagnostiquerSuiviApprentissage(da)
         : null;
 
-    // ⮕ SANS SUIVI, ON NOMME LA CAUSE — on ne rend pas une intensité inventée.
+    // #744 — LE PALIER EST CELUI DE LA CARTE RàI, dans les deux sorties ci-dessous.
+    // Les sorties anticipées plus haut (« En attente », « Non-participation ») rendent
+    // déjà ce que la carte rend dans les mêmes cas (même garde #731).
+    const palierCarte = determinerNiveauRaiPedagogique(da).niveau;
+
+    // ⮕ SANS SUIVI, ON NOMME LA CAUSE — on n'invente pas une persistance.
     // `diagnostiquerSuiviApprentissage` rend `null` quand aucune grille de
     // référence n'est utilisable ou qu'aucune évaluation n'est comparable.
-    // Rendre « niveau 1 » dans ce cas se lirait comme un verdict rassurant SUR
-    // L'ÉLÈVE — exactement le défaut corrigé par #550.
+    // Le palier, lui, ne dépend plus du suivi : la carte le donne (#744).
+    // ⚠ Conséquence nommée : un élève jamais présent (A = 0) et sans copie passe
+    // par ici ; la carte le dit « En attente » (niveau 0), et la barre des patterns
+    // du groupe l'écarte désormais comme la barre RàI l'écartait déjà (#731).
     if (!suivi) {
         return {
-            cible: 'Intensité non calculable — aucun suivi des fondations disponible',
+            cible: 'Persistance non calculable — aucun suivi des fondations disponible',
             pattern: M,
-            niveau: null,
+            niveau: palierCarte,
             couleur: '#8aa4b0'
         };
     }
@@ -2129,7 +2134,7 @@ function determinerCibleIntervention(da) {
         ? suivi.diagnostic + ' — ' + nommerDefiAvecSOLO(defi)
         : suivi.diagnostic;
 
-    return { cible: cible, pattern: M, niveau: suivi.niveauRaI, couleur: suivi.couleur };
+    return { cible: cible, pattern: M, niveau: palierCarte, couleur: suivi.couleur };
 }
 
 // Exporter vers window (décision étape 1 b — convention systématique).
