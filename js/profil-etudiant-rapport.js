@@ -72,12 +72,13 @@ function genererRapportAPI(da, options = {}) {
     const idsEvaluables = (typeof obtenirIdsProductionsEvaluables === 'function')
         ? obtenirIdsProductionsEvaluables(productions)
         : productions.filter(p => p.type !== 'portfolio').map(p => p.id);
-    const compteDansLaNote = (e) => (typeof evaluationEntreDansLaNote === 'function')
-        ? evaluationEntreDansLaNote(e)
-        : (!e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined);
+    // Lot A, complément 1.142.20 (16 sept. 2026) — LA règle unique (#706, registre), sans copie de secours : le
+    // dénominateur lisait encore « non remplacée, avec note » et comptait une production que seuls des brouillons
+    // touchaient (« 3 remises / 4 productions » là où la complétion disait 100 — relecture croisée de Cowork).
+    const compteDansLaNote = (e) => window.evaluationEntreDansLaNote(e);
     const productionsComptees = productions.filter(p =>
         idsEvaluables.includes(p.id) && !p.facultatif &&
-        evaluations.some(e => e.productionId === p.id && !e.remplaceeParId && e.noteFinale !== null && e.noteFinale !== undefined));
+        evaluations.some(e => e.productionId === p.id && compteDansLaNote(e)));
     // Lot A (16 sept. 2026) — même compte que la complétion : une copie qui compte et qui n'est pas non remise.
     const nbRemis = productionsComptees.filter(p => evaluations.some(e =>
         e.etudiantDA === da && e.productionId === p.id && compteDansLaNote(e) && !window.evaluationNonRemise(e))).length;
