@@ -7,6 +7,22 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 16 H 15 (Toronto) : 1.142.33 (build `0917-1614`, #912, « Dossier PDF » sans copie rend la synthèse seule) SUR `main` — ⚠ COMMITÉE, PAS ENCORE POUSSÉE (le push attend le signal de Grégoire) ; 1.142.32 (#911) EST POUSSÉE (`554f9bb3`, verdict Playwright vert) ; LOT SUIVANT = lot 35 (`CONSIGNE-SUIVANTE-date-d-arrivee.md`, #735)
+
+> Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-synthese-sans-copie, renommée au démarrage ; celle de #911 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-evaluations-sans-copie.md`). **Démarrage** : `origin/main` = `554f9bb3` (1.142.32) mesuré après `pousser.sh` ; deux essais verts au second essai seulement (`liste-651`, `texte-troue 3`) — `liste-651` touche la zone de la garde #911 : rejoué 15 fois sans réessai, 15 verts, sous une charge de 15 ; s'il revient, #685.
+
+**LA MESURE CORRIGE LA CONSIGNE (§2)** : « Dossier PDF » de la liste appelle `travauxExportPDF.exporterDossierComplet`, pas `travaux-archivage.js:179` (l'export par lot). **Un chemin à ouvrir, pas un calcul à écrire** : `construireFeedback(evaluation, null, null)` rend un objet complet ; le rendu retire la section d'annotations quand elle est vide. Le cas d'arrêt (autre moteur) ne joue pas : `exporterSyntheseSeule` réutilise `ajouterPageSynthese` tel quel et retire la page blanche de naissance de jsPDF.
+
+**SUPPOSITIONS NOMMÉES** : nom du fichier `synthese_<Prénom>_<Nom>_<productionId>.pdf` ; deux dialogues de refus neufs, lus par l'enseignant·e seulement. **À SAVOIR** : la synthèse ne porte pas le texte libre de `retroactionFinale` (avec ou sans copie) ; les mots « Cette copie… » s'y lisent aussi sans copie importée — aucun mot de l'élève n'a été changé dans ce lot. Une évaluation sans critère : page sans tableau, niveau général enregistré, #674 muet — figé, non réparé.
+
+**PREUVE** : `tests/integration/dossier-912-synthese-sans-copie.spec.js`, sept essais ; rouge sur le code d'avant ; parité mot pour mot ; archive : rien d'écrit ; huit mutations toutes rouges (dont #674 qui laisse conclure, et la section d'annotations vide) ; Vitest 589 / 6 666.
+
+**AUSSI DANS CE COMMIT** : les onze décisions de `plans de travail/DECISIONS-2026-09-17-apres-midi.md` posées sous leurs fiches du BACKLOG (#888 par sa ligne exacte ; #878, #908, #892, #895, #903, #887, #701, #704, #705, #909 par le texte du fichier, avec leurs « à remesurer »). Le fichier annonce « dix », il en porte onze.
+
+**RESTE À FAIRE** : verdict Playwright sur le SHA commité puis push, SUR DEMANDE de Grégoire (`scripts/pousser.sh`, détaché, ≈ 15 min, aucune autre session de test). Puis le lot 35.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 15 H (Toronto) : 1.142.32 (build `0917-1504`, bug testeur #911, relire une évaluation d'un trimestre sans copie) SUR `main` — ⚠ COMMITÉE, PAS ENCORE POUSSÉE (le push attend le signal de Grégoire) ; LOT SUIVANT = #912 (« Dossier PDF » sans copie rend la synthèse seule, tranché), PUIS le lot 35
 
 > Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-evaluations-sans-copie, renommée au démarrage ; celle du lot 34 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-echelle-a-l-adoption.md`). **Démarrage** : la condition n'était PAS remplie à l'ouverture (une autre session poussait le lot 34) ; lecture seule jusqu'à la fin de son `pousser.sh`, puis `origin/main` = `cc30a3b1` (1.142.31) mesuré ; Vitest de base 589 / 6 666. Le lot 35 (`CONSIGNE-SUIVANTE-date-d-arrivee.md`, #735) reste REPORTÉ, non renommé.
