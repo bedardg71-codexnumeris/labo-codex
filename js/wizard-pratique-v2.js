@@ -3063,7 +3063,16 @@ function chargerPratiqueExistante(pratiqueId) {
             // #319 Lot 3 (a3) : restaurer les reprises (round-trip d'édition #132).
             if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
         } else if (typeCanon === 'standards') {
-            wizardState.reponses.approcheEvaluation = config.approcheEvaluation;
+            // Audit du 16 sept. 2026, constat B-2 — L'APPROCHE SE DÉDUIT DU PORTFOLIO.
+            // Les gabarits « N meilleures » / « N plus récentes » portent un `portfolio` mais
+            // pas d'`approcheEvaluation`. Enregistrer avec une approche absente n'écrit pas le
+            // bloc portfolio : la pratique revient sans lui. Mesuré le 17 sept. : DANS LA PAGE,
+            // l'étape « Approche d'évaluation » (carte unique pré-cochée, #443) repose la valeur
+            // avant l'enregistrement, et le portfolio survivait ; seul un enregistrement qui ne
+            // traverse pas l'étape le perdait (le banc de l'audit). La relecture ne dépend plus
+            // de cette carte : un portfolio présent EST l'approche par artefacts.
+            wizardState.reponses.approcheEvaluation = config.approcheEvaluation
+                || (config.portfolio ? 'par-artefacts' : undefined);
             wizardState.reponses.echelleId = config.echelleId;
             wizardState.reponses.grilleId = config.grilleId;
 
@@ -3079,7 +3088,15 @@ function chargerPratiqueExistante(pratiqueId) {
                 wizardState.reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
                 // Restaurer la méthode de sélection (sinon le round-trip repart sur 'n_meilleurs').
                 // L'écriture stocke 'meilleurs' pour le mode 'n_meilleurs' → mapping inverse.
-                const methodeVersMode = { 'meilleurs': 'n_meilleurs', 'tous': 'tous', 'derniers': 'derniers' };
+                // B-2 (suite) : la table ignorait le vocabulaire du MOTEUR. `recents` (le gabarit
+                // « N plus récentes », et toute pratique d'avant #434) se relisait « N meilleurs ».
+                // `recents` = `derniers` (alias, portfolio.js) → l'option « N derniers » de l'écran.
+                // `recents-meilleurs` n'a plus d'option depuis #434 : la valeur est GARDÉE telle
+                // quelle, et l'écriture la repasse intacte — jamais convertie en silence ici.
+                const methodeVersMode = {
+                    'meilleurs': 'n_meilleurs', 'tous': 'tous', 'derniers': 'derniers',
+                    'recents': 'derniers', 'recents-meilleurs': 'recents-meilleurs'
+                };
                 wizardState.reponses.modeSelectionPortfolio = config.portfolio.hybride
                     ? 'hybride'
                     : (methodeVersMode[config.portfolio.methodeSelection] || 'n_meilleurs');
