@@ -2617,6 +2617,9 @@ function creerDatasetPoints(label, valeurs, couleur) {
  * Crée un graphique de distribution normale (Gauss) des indices ACPE
  * Affiche les courbes avec moyenne (μ) au centre et écarts-types (σ) marqués
  * Inclut les points individuels des étudiants et le comptage par zone σ
+ * (Mesuré au lot 34, 17 sept. 2026 : AUCUN appelant — aucun écran ne montre cette distribution.
+ * Verrou : sentinelle-745-exclu-hors-des-moyennes-comportement, B.2 — le jour où un appelant
+ * revient, l'essai de comportement du filtre des exclus est dû.)
  * @param {string} canvasId - ID du canvas HTML
  * @returns {Chart|null} - Instance Chart.js ou null si erreur
  */

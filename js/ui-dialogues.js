@@ -7,10 +7,13 @@
  *
  *   const ok = await uiDialogues.confirmerAction({ titre, message, variante });
  *   const saisie = await uiDialogues.demanderSaisie({ titre, message, valeurInitiale });
+ *   const valeur = await uiDialogues.demanderChoix({ titre, message, choix, texteConfirmer });
  *
  * `confirmerAction` résout `true` (confirmer) / `false` (annuler, Échap, clic dehors).
  * `demanderSaisie`  résout la chaîne saisie / `null` (annuler, Échap, clic dehors)
  *   — même contrat que `prompt()` (null = annulation) pour une migration directe.
+ * `demanderChoix`   résout la valeur de l'option cochée / `null` ; rien n'est
+ *   présélectionné, et confirmer sans choix ne répond pas (#898).
  *
  * Design system : classes `.modal-overlay/.modal-contenu/.modal-titre/.modal-section/
  *   .modal-actions/.btn` (cf. modal-backup-reminder.js, styles.css). Deux modes
@@ -231,9 +234,86 @@
         });
     }
 
+    /**
+     * Modale de choix dans une liste (#898) : une question, des options radio, un
+     * bouton d'action. RIEN n'est présélectionné et le bouton d'action reste inerte
+     * tant qu'aucune option n'est cochée — la modale ne devine pas à la place de
+     * l'utilisateur, même s'il n'y a qu'une option.
+     * @param {object} options
+     * @param {string} [options.titre]          Titre court.
+     * @param {string} [options.message]        La question.
+     * @param {Array<{valeur:string, libelle:string}>} options.choix  Options offertes.
+     * @param {string} [options.texteConfirmer] Libellé du bouton d'action (défaut « Confirmer »).
+     * @param {string} [options.texteAnnuler]   Libellé d'annulation (défaut « Annuler »).
+     * @returns {Promise<string|null>} la valeur choisie, ou null (annuler, Échap, clic dehors).
+     */
+    function demanderChoix(options) {
+        options = options || {};
+        const choix = Array.isArray(options.choix) ? options.choix : [];
+        return new Promise(function (resolve) {
+            const focusPrecedent = (typeof document !== 'undefined' && document.activeElement) || null;
+            const base = _construireBase(options);
+
+            if (options.message) {
+                base.section.appendChild(_creer('p', { id: 'ui-dialogue-question', texte: options.message }));
+            }
+
+            const btnAnnuler = _creer('button', { className: 'btn btn-neutre', texte: options.texteAnnuler || 'Annuler' });
+            const btnConfirmer = _creer('button', { className: 'btn btn-principal', texte: options.texteConfirmer || 'Confirmer' });
+            btnConfirmer.disabled = true;
+
+            let valeurChoisie = null;
+            const liste = _creer('div', { className: 'ui-dialogue-choix', attrs: { role: 'radiogroup', 'aria-labelledby': 'ui-dialogue-question' } });
+            const radios = [];
+            choix.forEach(function (c, i) {
+                const ligne = _creer('label', { className: 'ui-dialogue-choix-ligne', attrs: { for: 'ui-dialogue-choix-' + i } });
+                const radio = _creer('input', { id: 'ui-dialogue-choix-' + i, attrs: { type: 'radio', name: 'ui-dialogue-choix' } });
+                radio.value = String(c.valeur);
+                radio.addEventListener('change', function () {
+                    if (!radio.checked) return;
+                    valeurChoisie = String(c.valeur);
+                    btnConfirmer.disabled = false;
+                });
+                ligne.appendChild(radio);
+                ligne.appendChild(_creer('span', { texte: c.libelle }));
+                liste.appendChild(ligne);
+                radios.push(radio);
+            });
+            base.section.appendChild(liste);
+
+            let termine = false;
+            function repondre(valeur) {
+                if (termine) return;
+                termine = true;
+                document.removeEventListener('keydown', surTouche, true);
+                if (base.overlay && base.overlay.remove) base.overlay.remove();
+                _rendreFocus(focusPrecedent);
+                resolve(valeur);
+            }
+            // Sans choix, confirmer ne répond pas : la modale reste ouverte.
+            function confirmer() { if (valeurChoisie !== null) repondre(valeurChoisie); }
+            function surTouche(e) {
+                if (e.key === 'Escape') { e.preventDefault(); repondre(null); }
+                else if (e.key === 'Enter') { e.preventDefault(); confirmer(); }
+            }
+
+            btnAnnuler.addEventListener('click', function () { repondre(null); });
+            btnConfirmer.addEventListener('click', confirmer);
+            base.overlay.addEventListener('click', function (e) { if (e.target === base.overlay) repondre(null); });
+            document.addEventListener('keydown', surTouche, true);
+
+            base.actions.appendChild(btnAnnuler);
+            base.actions.appendChild(btnConfirmer);
+            document.body.appendChild(base.overlay);
+
+            _rendreFocus(radios[0] || btnAnnuler);
+        });
+    }
+
     window.uiDialogues = {
         confirmerAction: confirmerAction,
         demanderSaisie: demanderSaisie,
-        informer: informer
+        informer: informer,
+        demanderChoix: demanderChoix
     };
 })();

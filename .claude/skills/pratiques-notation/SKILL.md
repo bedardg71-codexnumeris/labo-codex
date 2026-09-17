@@ -429,6 +429,14 @@ pratique non calculable n'empêche pas les autres de calculer).
   trompé. Plafonnement (condition en texte libre), remplacement (nombre de paires sans identités) et reprises
   (déclaratif) restent des promesses : #903.
 - **Gabarits prédéfinis ≠ configs exécutables** (§3).
+- **Adopter un modèle Standards SANS échelle DEMANDE l'échelle** (#898, 1.142.31, tranché par Grégoire). DEUX gestes
+  vivants y mènent, et les deux appellent `demanderEchelleAdoption` (`pratiques-bibliotheque.js`) AVANT d'écrire : la
+  branche `_modeleAdopte` de `creerPratiqueV2` (assistant, « Partir d'un modèle ») et `ajouterPratiqueALaSelection`
+  (bouton « Ajouter » de la bibliothèque). On ne devine JAMAIS l'échelle, même s'il n'y en a qu'une. Un TROISIÈME geste
+  d'adoption doit passer par la même fonction. Le prédicat `modeleDemandeEchelle` lit ce que lit
+  `construireConfigComplete` (échelle embarquée ou par id). Cas d'arrêt : aucune échelle dans le trimestre → pas de
+  question, adoption sans échelle (#909, un mot de Grégoire est dû). Stock non réparé : sortie = rouvrir par l'assistant.
+  Mesuré : la NOTE d'un portfolio Standards ne dépend pas de l'échelle choisie ; c'est l'INSTANCE qui en dépend.
 - **`pan-objectifs` supprimé** (§2) ; tout id résiduel résout vers `standards`.
 
 ---
@@ -641,6 +649,7 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-09-17 (#898, lot 34, 1.142.31) | **§10 : adopter un modèle Standards sans échelle demande l'échelle** — deux gestes vivants (assistant, bibliothèque), une seule question (`demanderEchelleAdoption`, `uiDialogues.demanderChoix`), parité profil / export / Comparateur prouvée ; cas d'arrêt #909. |
 | 2026-06-28 (#326 CLOS, 1.26.0) | **Comparateur RÉACTIVÉ (`COMPARATEUR_VISIBLE=true`), PR #73 mergée (squash `495cd99a`), constats terrain T1-T5 traités.** Décisions Grégoire : (1) une note STD non constructible rend `null` (« non constructible »), plus jamais un `0` trompeur — `simulerIndices` discrimine par FAMILLE (`obtenirCode()==='STD'`), le repli `calculerPerformance` ne masque plus l'échec STD (préserve SOM/SPE/DEN ; sentinelle 12 cas break-testée) ; (2) dérivation d'une maquette → créer + atterrir sur l'arbre SANS wizard ; (3) T3 : cause réelle = mismatch de FORME (copies en `.config` seul) → `dupliquerPratique`/`deriverMaquette` écrivent la forme CANONIQUE (sentinelle 4 cas). ⚠ `simulerIndices` alimente AUSSI l'export des résultats finaux — vérifié : les 4 pratiques STD abouties construisent 100 % des notes réelles. Journal antérieur (R1-R6, 1.19.0) = étapes intermédiaires, supersédées par cette clôture. |
 | 2026-06-16 (#343 descriptions) | **Malentendu DEN corrigé dans les descriptions.** §2 bis (DEN) : « standards/specs implicites » → « doivent rester explicites » (cf. #343). 5 sites UI alignés (gabarits-utils, accompagnement terme/popup, wizard type + bannière). Reste #343 (b)+(c) modèle/formulaire (DEN porte échelle/grille optionnelles). |
 | 2026-06-17 (#326 R4b/R5/R6) | **Banc de décision — code COMPLET, release 1.19.0 préparée.** R4b : colonnes paires (sans réf, maquettes incluses) + section « Construction de la note » (R3, alignée par axe, « s.o. ») + section « Résultat » + lien par colonne vers le formulaire #319 + source fictif/réel + « Comparer » depuis l'arbre injecte une colonne. R5 : retrait du code démo mort (PROFILS/PHRASES_CONTEXTE/MICROCOPY_E1/estEnDemo/construireInvitation/activerDemoEtOuvrir). R6 : bump 1.19.0 + changelog. Tests `comparateur-banc-r4b-326` (11). ⚠️ Rendu UI = validation terrain (porte avant merge). |

@@ -301,12 +301,15 @@ test('B-2 · « N plus récentes » adopté puis rouvert par l\'assistant : la m
     const enregistrer = async () => page.evaluate(() => document.getElementById('wizard-v2-btn-creer').click());
     const lirePratique = () => page.evaluate(() => (window.db.getSync(window.cle('pratiquesConfigurables'), []) || [])[0] || null);
 
-    // (1) ADOPTER le modèle « N plus récentes », par les gestes réels.
-    await page.evaluate(() => document.querySelector('button[data-action="creerNouvellePratique"]').click());
-    await page.waitForFunction(() => document.getElementById('modalWizardPratiqueV2')?.classList.contains('actif'));
-    await parcourir({ porteEntree: 'modele', modeleChoisi: 'STD-n-recents' });
-    await enregistrer();
-    await page.waitForFunction(() => (window.db.getSync(window.cle('pratiquesConfigurables'), []) || []).length === 1, null, { timeout: 8000 });
+    // (1) LE STOCK : « N plus récentes » adoptée SANS échelle, telle qu'elle s'écrivait AVANT le lot 34 (#898). Depuis, le
+    // geste d'adoption demande l'échelle (jugé par pratiques-898-echelle-a-l-adoption.spec.js) ; tarir n'est pas réparer :
+    // les pratiques déjà adoptées restent sans échelle, et leur sortie reste celle que ce parcours juge.
+    await page.evaluate(() => {
+        const m = window.obtenirToutesLesPratiquesBibliothequeSync(true).find(x => x.id === 'STD-n-recents');
+        const p = Object.assign(JSON.parse(JSON.stringify(m)), { id: 'pratique_STOCK_898', dansBibliotheque: true, dateCreation: '2026-09-10T12:00:00.000Z' });
+        delete p.estGabarit;
+        window.db.setSync(window.cle('pratiquesConfigurables'), [p]); // security-ok: fixture de test, clone du gabarit de l'application
+    });
     const adoptee = await lirePratique();
     expect(adoptee.configuration.portfolio).toMatchObject({ methodeSelection: 'recents', nombreARetenir: 5, minimumCompletion: 5, nombreTotal: 10 });
     expect(adoptee.configuration.echelleId).toBeUndefined();

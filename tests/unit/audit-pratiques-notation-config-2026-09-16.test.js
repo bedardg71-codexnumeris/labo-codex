@@ -206,6 +206,9 @@ function monter(jeu, opts = {}) {
         afficherSection() {}, afficherSousSection() {}, calculerEtSauvegarderIndicesAssiduite() {},
         notifications: { succes(t, m) { notifs.push({ type: 'succes', t, m }); }, erreur(t, m) { notifs.push({ type: 'erreur', t, m }); }, info() {}, warning() {} },
         confirm: () => true, genererIdUnique: (p) => p + 'NEUF' + (++compteurId),
+        // #898 (lot 34) : adopter un modèle Standards sans échelle DEMANDE l'échelle. Le banc répond `opts.echelleAdoption`
+        // (absent = la question est fermée sans choix : rien n'est adopté).
+        uiDialogues: { demanderChoix: async () => (opts.echelleAdoption || null) },
         resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); },
         obtenirPratiqueActiveGroupeCours: () => (store.test_groupesCours[0].pratiqueId || null),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'), normaliserIdPratique: fwd('normaliserIdPratique'),
@@ -416,15 +419,17 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
 describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?', () => {
     const JEU_PAR_TYPE = { sommative: [jeuSOM, DA.SOM], standards: [jeuSTD, DA.STD], specifications: [jeuSPE, DA.SPE], denotation: [jeuDEN, DA.DEN] };
 
-    // MESURE B-1 (#898 : STD adopté sans échelle, profil 77,32 contre export « non constructible ») et B-3 (#713 : plancher 50).
-    // Volet B-1 ARRÊTÉ au lot 28 : le pack porte deux échelles, pas de candidate unique ; la suite demande une phrase (Grégoire).
+    // B-1 LIVRÉ AU LOT 34 (17 sept. 2026, #898) : l'adoption d'un modèle Standards sans échelle DEMANDE l'échelle ; le banc
+    // choisit E1. Les valeurs ci-dessous sont maintenant les JUSTES : instance construite, export « final », et la même note
+    // au profil et au lecteur du Comparateur. (Avant : pas d'instance, export « non constructible », profil 77,32.)
+    // Reste une MESURE pour B-3 (#713 : plancher 50).
     it('B1 · chaque modèle de MODELES_PRATIQUES_PREDEFINIS, adopté tel quel', async () => {
         const b0 = monter(jeuSOM());
         const modeles = b0.win.obtenirToutesLesPratiquesBibliothequeSync(true).filter(m => m.estGabarit);
         const res = {};
         for (const m of modeles) {
             const [jeu, da] = JEU_PAR_TYPE[b0.win.normaliserIdPratique(m.type)];
-            const b = monter(jeu());
+            const b = monter(jeu(), { echelleAdoption: 'E1' });
             const p0 = await creerParAssistant(b, { nom: 'Adoptée ' + m.id, _modeleAdopte: true, _gabaritSource: clone(m), modeleChoisi: m.id, calcNoteFinale: 'x' });
             activer(b, p0.id);
             if (p0.type === 'denotation') b.store.test_jugementsDenotation = { [p0.id]: { [da]: { ciblesAtteintes: Object.fromEntries((p0.configuration.objectifs || []).map(o => [o.id, true])), noteFinale: 78, justification: 'banc', date: '2026-05-01' } } };
@@ -438,6 +443,12 @@ describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?'
         }
         noter('B1', res);
         expect(Object.keys(res).length).toBeGreaterThanOrEqual(5);
+        for (const id of ['STD-n-meilleurs', 'STD-n-recents']) {
+            expect([id, res[id].echelleId, res[id].instance]).toEqual([id, 'E1', true]);
+            expect([id, res[id].note.export.statut]).toEqual([id, 'final']);
+            expect([id, res[id].note.riche]).toEqual([id, res[id].note.simule.noteFinale]);
+        }
+        for (const id of ['SOM-litterature', 'SPE-simple', 'DEN-base']) expect([id, res[id].echelleId == null]).toEqual([id, true]);   // sans question
     });
 
     it('B2 · « N plus récentes » adoptée puis rouverte par l\'assistant : la méthode relue est « récents », le portfolio est intact', async () => {
@@ -445,9 +456,13 @@ describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?'
         // {meilleurs, tous, derniers} → 'n_meilleurs' → ré-enregistrée en 'meilleurs' (et varianteCalcul 'n-meilleurs').
         // Avec 6 artefacts valides (A6 = 95) et N = 5 : récents = A2..A6 → (60+78+70+78+95)/5 = 76,2 → 45,72+32,8 = 78,52 ;
         // meilleurs = A6,A1,A3,A5,A4 → (95+85+78+78+70)/5 = 81,2 → 48,72+32,8 = 81,52.
-        const b = monter(jeuSTD({ a6Valide: true }));
-        const m = b.win.obtenirToutesLesPratiquesBibliothequeSync(true).find(x => x.id === 'STD-n-recents');
-        const p0 = await creerParAssistant(b, { nom: 'Récentes', _modeleAdopte: true, _gabaritSource: clone(m), modeleChoisi: m.id, calcNoteFinale: 'niveaux' });
+        // #898 (lot 34) — CE CAS EST DÉSORMAIS CELUI DU STOCK : une pratique adoptée SANS échelle AVANT que l'adoption ne la
+        // demande (tarir n'est pas réparer). Elle est donc semée telle qu'elle a été écrite à l'époque, pas adoptée par
+        // l'assistant d'aujourd'hui ; sa sortie reste celle-ci : la rouvrir par l'assistant, qui exige l'échelle.
+        const m0 = monter(jeuSTD()).win.obtenirToutesLesPratiquesBibliothequeSync(true).find(x => x.id === 'STD-n-recents');
+        const p0 = Object.assign(clone(m0), { id: 'pratique_STOCK', nom: 'Récentes', dansBibliotheque: true, dateCreation: '2026-09-10T12:00:00.000Z' });
+        delete p0.estGabarit;
+        const b = monter(jeuSTD({ a6Valide: true }), { pratiques: [p0] });
         activer(b, p0.id);
         const avant = noteDe(b, DA.STD, p0.id);
         const { reponses, apres } = await rouvrirEtResauver(b, p0.id);   // sans échelle : l'assistant REFUSE d'enregistrer

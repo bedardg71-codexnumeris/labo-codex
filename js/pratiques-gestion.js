@@ -831,6 +831,19 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         return;
     }
 
+    // #898 — un modèle Standards sans échelle DEMANDE l'échelle avant de rejoindre la
+    // sélection. La question porte sur ce qui sera réellement écrit : la pratique déjà
+    // en base si elle avait été retirée, sinon le modèle de la bibliothèque. Déjà dans
+    // la sélection : pas de question, le verdict « déjà » répond plus bas. Question
+    // fermée sans choix : rien n'est écrit, la bibliothèque reste ouverte.
+    const enBase = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueId);
+    let echelleAdoption = null;
+    if (!enBase || enBase.dansBibliotheque === false) {
+        const reponseEchelle = await demanderEchelleAdoption(enBase || configSource);
+        if (!reponseEchelle.adopter) return;
+        echelleAdoption = reponseEchelle.echelleId;
+    }
+
     // #522 — la recherche, la garde d'identité et l'écriture tiennent dans la
     // file : entre une lecture et une écriture séparées, un second ajout lancé
     // depuis le même modal passerait la garde sur un instantané périmé.
@@ -851,6 +864,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
             }
 
             // La pratique existe mais a été retirée - la réactiver
+            if (modeleDemandeEchelle(existante)) poserEchelleAdoption(existante, echelleAdoption);
             existante.dansBibliotheque = true;
             existante.dateAjout = new Date().toISOString();
             verdict = 'ajoutee';
@@ -858,11 +872,11 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         }
 
         // Ajouter avec le flag dansBibliotheque
-        const nouvelleConfig = {
+        const nouvelleConfig = poserEchelleAdoption({
             ...configSource,
             dansBibliotheque: true,
             dateAjout: new Date().toISOString()
-        };
+        }, echelleAdoption);
 
         // #476 — garde d'identité au point d'écriture. La recherche ci-dessus
         // ne teste que `p.id === pratiqueId` : une pratique importée d'un autre
