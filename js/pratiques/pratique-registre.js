@@ -837,6 +837,22 @@ function evaluationNonRemise(evaluation) {
 }
 
 /**
+ * Lot 30 (17 sept. 2026) — LA COPIE EST NON RECEVABLE (plagiat, IA non autorisée) : CE N'EST PAS UNE REMISE.
+ * Tranché par Grégoire le 17 sept. 2026, chiffres en main : sur le pack démo, l'indice C comptait comme remise
+ * la copie marquée « plagiat » de DEMO004 (90 %, « 9/10 ») pendant que la carte du profil la rangeait sous
+ * « non remis ou non recevable » — aucun calcul de complétion ne lisait le statut d'intégrité. La complétion
+ * (les trois familles qui comptent des productions, et les snapshots) lit maintenant CE prédicat, à côté de
+ * `evaluationNonRemise`. Ce que la NOTE fait d'une telle copie ne change pas (hors de ce prédicat).
+ * ⚠ SOURCE seulement : l'indice C courant se recalcule ; un snapshot déjà écrit garde sa valeur.
+ * @param {Object} evaluation
+ * @returns {boolean}
+ */
+function evaluationNonRecevable(evaluation) {
+    if (!evaluation) return false;
+    return evaluation.statutIntegrite === 'plagiat' || evaluation.statutIntegrite === 'ia';
+}
+
+/**
  * Combien d'évaluations de cet élève portent une note mais sont écartées par #706.
  * @param {string} da
  * @param {Array} [evaluations] - liste déjà lue (sinon lue via obtenirDonneesSelonMode)
@@ -864,6 +880,8 @@ window.evaluationEntreDansLaNote = evaluationEntreDansLaNote;
 window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
 // Lot A (16 sept. 2026) — la règle unique de ce qui est « non remis » (deux chaînes, un lecteur)
 window.evaluationNonRemise = evaluationNonRemise;
+// Lot 30 (17 sept. 2026) — une copie non recevable (plagiat, IA) n'est pas une remise pour la complétion
+window.evaluationNonRecevable = evaluationNonRecevable;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

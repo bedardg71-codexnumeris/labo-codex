@@ -19,5 +19,6 @@ export function chargerPredicatsCopie(win) {
     const registre = chargerScript('js/pratiques/pratique-registre.js', {}, {});
     win.evaluationEntreDansLaNote = registre.evaluationEntreDansLaNote;
     win.evaluationNonRemise = registre.evaluationNonRemise;
+    win.evaluationNonRecevable = registre.evaluationNonRecevable;   // lot 30 (17 sept. 2026)
     return win;
 }

@@ -145,8 +145,14 @@
  * le profil comme le rapport lisent ce détail pour écrire la fraction à côté de l'indice C
  * (`obtenirDetailsCompletion`, portfolio.js). Un affichage ne recompte jamais à part.
  *
+ * Lot 30 (17 sept. 2026) : quand la pratique compte des PRODUCTIONS identifiables (sommative, standards,
+ * configurable), le détail porte aussi `productions` — [{ id, remis }], une entrée par production du
+ * dénominateur — et `remis` en est le compte. La carte Complétion du profil y lit QUELLES productions
+ * manquent. Les spécifications comptent des travaux acceptables par type, plafonnés au palier le plus haut :
+ * aucune production ne « manque » nommément, `productions` y est absent et la carte garde ses artefacts.
+ *
  * @param {string} da - Numéro de dossier d'admission (7 chiffres)
- * @returns {{remis:number,total:number}|null}
+ * @returns {{remis:number,total:number,productions?:Array<{id:string,remis:boolean}>}|null}
  *
  * calculerCompletion(da) - Calcule l'indice C (Complétion)
  *

@@ -97,6 +97,18 @@ describe('#326 R3 · STANDARDS', () => {
     });
 });
 
+describe('relecture du lot 28 (17 sept. 2026) · reprises STD : l\'alias « derniers » vaut « recents »', () => {
+    // « derniers » est la valeur que l'assistant et le formulaire ÉCRIVENT pour « N derniers » ; ce lecteur était le
+    // seul des cinq à l'ignorer : une pratique « N derniers » lisait « Selon la sélection d'artefacts ».
+    const std = (methodeSelection) => ({ type: 'standards', configuration: { portfolio: { nombreARetenir: 4, methodeSelection } } });
+    it.each([['derniers'], ['recents'], ['recents-meilleurs']])('%s → « Récence (dernier essai retenu) »', (m) => {
+        expect(val(extraire(std(m)), 'reprises')).toBe('Récence (dernier essai retenu)');
+    });
+    it.each([['meilleurs'], ['tous'], [undefined]])('%s → « Selon la sélection d\'artefacts » (le témoin : l\'alias ne déborde pas)', (m) => {
+        expect(val(extraire(std(m)), 'reprises')).toBe('Selon la sélection d\'artefacts');
+    });
+});
+
 describe('#326 R3 · SPÉCIFICATIONS', () => {
     const cfg = {
         type: 'specifications',

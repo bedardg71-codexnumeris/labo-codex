@@ -237,6 +237,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         // écrits gardent leur valeur : ce filtre tarit la source, il ne réécrit pas le stock.
         if (!window.evaluationEntreDansLaNote(e)) return false;
         if (window.evaluationNonRemise(e)) return false;
+        if (window.evaluationNonRecevable(e)) return false;   // lot 30 (17 sept. 2026) : non recevable = pas une remise
 
         // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
         const dateEcheance = obtenirDateEcheance(e);
@@ -278,7 +279,8 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
                 window.evaluationEntreDansLaNote(e) &&   // lot A (16 sept. 2026) : les deux prédicats de pratique-registre.js
-                !window.evaluationNonRemise(e)
+                !window.evaluationNonRemise(e) &&
+                !window.evaluationNonRecevable(e)   // lot 30 (17 sept. 2026)
             );
         });
 
@@ -636,7 +638,8 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             const nbRemis = evaluationsCache.filter(e =>
                 e.productionId === dernierTravail.id &&
                 window.evaluationEntreDansLaNote(e) &&   // lot A (16 sept. 2026) : les deux prédicats de pratique-registre.js
-                !window.evaluationNonRemise(e)
+                !window.evaluationNonRemise(e) &&
+                !window.evaluationNonRecevable(e)   // lot 30 (17 sept. 2026)
             ).length;
             cGlobal = Math.round((nbRemis / nbEtudiants) * 100);
         }

@@ -134,7 +134,12 @@
         }
         // Sélection « récents » ⇒ la dernière tentative non remplacée est retenue.
         var portfolio = _lire(config, 'portfolio') || {};
-        if (String(portfolio.methodeSelection || '').indexOf('recents') !== -1) return 'Récence (dernier essai retenu)';
+        // Relecture croisée du lot 28 (17 sept. 2026) : `derniers` est l'ALIAS de `recents` — c'est la valeur que
+        // l'assistant et le formulaire écrivent pour « N derniers ». Ce lecteur-ci était le seul des cinq à
+        // l'ignorer (portfolio.js, profil-etudiant-actions.js, pratique-pan-standards.js, la carte du profil).
+        var methode = String(portfolio.methodeSelection || '');
+        if (methode === 'derniers') methode = 'recents';
+        if (methode.indexOf('recents') !== -1) return 'Récence (dernier essai retenu)';
         return 'Selon la sélection d\'artefacts';
     }
 

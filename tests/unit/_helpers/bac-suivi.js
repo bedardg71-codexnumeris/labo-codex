@@ -147,6 +147,7 @@ export function monter(store, opts = {}) {
     chargerPredicatsCopie(win);
     if (!('evaluationEntreDansLaNote' in globaux)) globaux.evaluationEntreDansLaNote = win.evaluationEntreDansLaNote;
     if (!('evaluationNonRemise' in globaux)) globaux.evaluationNonRemise = win.evaluationNonRemise;
+    if (!('evaluationNonRecevable' in globaux)) globaux.evaluationNonRecevable = win.evaluationNonRecevable;
     const modules = opts.modules || [];
     const exportsWindow = new Set();
     for (const f of modules) for (const m of readFileSync(path.join(RACINE, f.chemin || f), 'utf8').matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) exportsWindow.add(m[1]);
