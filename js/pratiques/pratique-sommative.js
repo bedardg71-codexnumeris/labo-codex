@@ -388,16 +388,22 @@ class PratiqueSommative {
         }
 
         // 2. Compter combien CET ÉTUDIANT a remis parmi les productions évaluées
-        const productionsRemises = productionsEvaluees.filter(production => {
-            return evaluations.some(e =>
+        // Lot 30 (17 sept. 2026) — LE DÉTAIL DIT AUSSI LESQUELLES : `productions` porte chaque production comptée au
+        // dénominateur et si elle est remise ; `remis` en est le compte (jamais un second calcul). La carte Complétion
+        // du profil y lit sa liste des non-remises et son message, comme la fraction (DEMO006 : « 9/10 » à côté de
+        // « tous les artefacts remis ! » — la terminale manquante n'était nulle part).
+        const detailProductions = productionsEvaluees.map(production => ({
+            id: production.id,
+            remis: evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
                 window.evaluationEntreDansLaNote(e) &&
-                !window.evaluationNonRemise(e)
-            );
-        });
+                !window.evaluationNonRemise(e) &&
+                !window.evaluationNonRecevable(e)   // lot 30 : tranché par Grégoire, 17 sept. 2026
+            )
+        }));
 
-        return { remis: productionsRemises.length, total: productionsEvaluees.length };
+        return { remis: detailProductions.filter(p => p.remis).length, total: detailProductions.length, productions: detailProductions };
     }
 
     /**

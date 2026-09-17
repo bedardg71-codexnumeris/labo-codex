@@ -465,8 +465,30 @@ function genererSectionMobilisationEngagement(da) {
     // `nbRemis` et `nbTotal` restent le compte des ARTEFACTS LISTÉS dans la carte (pastilles, minimum requis).
     const detailsC = (typeof obtenirDetailsCompletion === 'function' ? obtenirDetailsCompletion(da) : null) || { remis: 0, total: 0 };
     const interpC = interpreterCompletion(indices.C);
-    // artefactsRemis déjà déclaré à la ligne 710
-    const artefactsNonRemis = artefacts.filter(a => !a.remis);
+    // Lot 30 (17 sept. 2026) — LES DEUX LISTES DE LA CARTE LISENT LA MÊME SOURCE QUE LA FRACTION. Mesuré sur le
+    // pack démo : « 9/10 » à côté de « 0 artefact non remis… tous les artefacts remis ! » (DEMO006 : la terminale
+    // manquante n'était dans aucune liste) ; un BROUILLON listé parmi les remis alors que l'indice ne le compte
+    // pas (DEMO004, Artefact 7 — « un brouillon ne compte nulle part », 16 sept.). Quand la pratique dit QUELLES
+    // productions elle compte (`detailsC.productions`), les non-remises en sont le complément — toutes
+    // productions confondues, terminale comprise — et les pastilles des remis sont les ARTEFACTS que ce détail
+    // tient pour remis (la liste ne montre que des artefacts : leur terme personnalisé y reste juste).
+    // Sans ce détail (spécifications : des travaux acceptables par type, aucune production ne manque nommément),
+    // la carte garde ses artefacts, comme avant.
+    const productionsC = Array.isArray(detailsC.productions) ? detailsC.productions : null;
+    const idsRemisC = productionsC ? new Set(productionsC.filter(p => p.remis).map(p => p.id)) : null;
+    const remisesCarte = productionsC ? artefacts.filter(a => idsRemisC.has(a.id)) : artefactsRemis;
+    const nonRemisesCarte = productionsC
+        ? productionsC.filter(p => !p.remis).map(p => {
+            const production = productions.find(x => x.id === p.id);
+            if (!production) return null;
+            const copies = evaluationsEleve.filter(e => e.productionId === p.id);
+            return _construireArtefactMobilisation(production, _trouverEvaluationActiveMobilisation(copies));
+        }).filter(Boolean)
+        : artefacts.filter(a => !a.remis);
+    // « En attente de données » suit la fraction, elle aussi : c'est quand la pratique ne compte ENCORE aucune
+    // production (« 0/0 » — rien d'évalué, ou seulement des brouillons). Dès qu'elle en compte une, une liste
+    // vide veut dire que tout est remis.
+    const completionEnAttente = detailsC.total === 0;
 
     // 🆕 BETA 95.6 : Détecter si aucune donnée de complétion/performance
     const aucuneDonneeCompletion = nbTotal === 0;
@@ -540,7 +562,7 @@ function genererSectionMobilisationEngagement(da) {
             <br><br>
             <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
             <br><br>
-            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${detailsC.remis} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', detailsC.remis)} / ${detailsC.total} ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('total', detailsC.total)}
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
             <br><br>
             <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}
         </div>
@@ -610,18 +632,18 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• ${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('remis', 2)} :</strong> ${detailsC.remis}/${detailsC.total}</li>
+                    <li><strong>• Productions remises :</strong> ${detailsC.remis}/${detailsC.total}</li>
                 </ul>
 
                 <hr class="profil-separateur">
 
                 <!-- Artefacts remis (format badge comme Assiduité) -->
                 <h4 class="profil-section-titre">
-                    ${artefactsRemis.length} ${obtenirTermeProduction(artefactsRemis.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('remis', artefactsRemis.length)}
+                    ${remisesCarte.length} ${obtenirTermeProduction(remisesCarte.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('remis', remisesCarte.length)}
                 </h4>
-                ${artefactsRemis.length > 0 ? `
+                ${remisesCarte.length > 0 ? `
                     <div class="badges-centres u-mb-20">
-                        ${artefactsRemis
+                        ${remisesCarte
                             .map(art => {
                                 // Numéro d'artefact depuis le titre (pas la position)
                                 const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
@@ -648,14 +670,14 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Artefacts non remis ou non recevables (format badge comme Assiduité) -->
                 <h4 class="profil-section-titre">
-                    ${artefactsNonRemis.length} ${obtenirTermeProduction(artefactsNonRemis.length > 1 ? 'pluriel' : 'singulier')} non ${accordTermeProduction('remis', artefactsNonRemis.length)} ou non ${accordTermeProduction('recevable', artefactsNonRemis.length)}
+                    ${nonRemisesCarte.length} ${nonRemisesCarte.length > 1 ? 'productions non remises ou non recevables' : 'production non remise ou non recevable'}
                 </h4>
-                ${artefactsNonRemis.length > 0 ? `
+                ${nonRemisesCarte.length > 0 ? `
                     <div class="badges-centres u-mb-20">
-                        ${artefactsNonRemis
+                        ${nonRemisesCarte
                             .map(art => {
                                 // Numéro d'artefact depuis le titre (pas la position)
-                                const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
+                                const indexOriginal = _rangProduction(productions.find(p => p.id === art.id));
                                 return { ...art, indexOriginal };
                             })
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
@@ -673,8 +695,8 @@ function genererSectionMobilisationEngagement(da) {
                             `).join('')}
                     </div>
                 ` : `
-                    <div class="${aucuneDonneeCompletion ? 'profil-message-vide' : 'profil-message-tous-remis'}">
-                        ${aucuneDonneeCompletion ? 'En attente de données' : `${accordTermeProduction('tous', 2, true)} les ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('remis', 2)} !`}
+                    <div class="${completionEnAttente ? 'profil-message-vide' : 'profil-message-tous-remis'}">
+                        ${completionEnAttente ? 'En attente de données' : 'Toutes les productions sont remises !'}
                     </div>
                 `}
             </div>

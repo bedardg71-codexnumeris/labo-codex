@@ -228,6 +228,21 @@ describe('C · #738 — P4 « non-remis » ou « non-recu » enregistrée à 0 :
     it('C2 · « Non reçu » tel que le menu l\'écrit sans rien noter (aucun critère, portée nulle) : ne compte nulle part — les trois copies partout, C = 75, P = 71', () => {
         attenduTroisCopies(lecture(banc(P4.nonRecuSansCritere())));
     });
+    // LOT 30 (17 sept. 2026) — tranché par Grégoire, chiffres du pack démo en main (DEMO004 : la copie « plagiat » comptait
+    // comme remise, 90 % ; la carte la disait « non recevable ») : UNE COPIE NON RECEVABLE N'EST PAS UNE REMISE.
+    ['plagiat', 'ia'].forEach(statut => {
+        it(`C4 · lot 30 · P4 enregistrée à 0 et marquée « ${statut} » : C = 75 sous les trois familles et dans les snapshots (avant : 100)`, () => {
+            const l = lecture(banc(ev('E1P4', DA.ASSIDU, 'P4', 0, '0', ['0', '0', '0'], { statutIntegrite: statut })));
+            expect([l.cSom, l.cConfigurable, l.cStd, l.cSnapshot, l.C]).toEqual([0.75, 0.75, 0.75, 75, 75]);
+        });
+    });
+    it('C5 · lot 30 · le témoin : la même copie « recevable » est une remise (C = 100) ; le prédicat ne lit que « plagiat » et « ia »', () => {
+        const l = lecture(banc(ev('E1P4', DA.ASSIDU, 'P4', 0, '0', ['0', '0', '0'], { statutIntegrite: 'recevable' })));
+        expect([l.cSom, l.cConfigurable, l.cStd, l.cSnapshot, l.C]).toEqual([1, 1, 1, 100, 100]);
+        const b = banc(null);
+        expect(['plagiat', 'ia', 'recevable', undefined, ''].map(x => b.win.evaluationNonRecevable({ statutIntegrite: x }))).toEqual([true, true, false, false, false]);
+        expect(b.win.evaluationNonRecevable(null)).toBe(false);
+    });
     it('C3 · les deux prédicats vivent dans le registre et disent R1 et R2', () => {
         const b = banc(null);
         const brouillon = P4.brouillon(), nonRecu = P4.nonRemisNote0('non-recu'), nonRemis = P4.nonRemisNote0('non-remis'), enregistree = ev('X', DA.ASSIDU, 'P4', 90, 'E', ['E', 'M', 'E'], { retroactionFinale: '' });
@@ -305,7 +320,14 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         expect(deux(corps('js/pratiques/pratique-sommative.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(deux(corps('js/pratiques/pratique-configurable.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(deux(corps('js/pratiques/pratique-pan-standards.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
+        // Lot 30 : partout où la complétion lit « non remise », elle lit aussi « non recevable » — un site qui en oublie une rougit.
+        const trois = (x) => deux(x) && /!window\.evaluationNonRecevable\(/.test(x);
+        ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js', 'js/pratiques/pratique-pan-standards.js'].forEach(fichier =>
+            expect([fichier, trois(corps(fichier, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))]).toEqual([fichier, true]));
         const snapshots = sansCommentaires(source('js/snapshots.js'));
+        expect((snapshots.match(/!window\.evaluationNonRecevable\(/g) || []).length).toBe(2);
+        expect((snapshots.match(/window\.evaluationNonRecevable\(e\)\) return false/g) || []).length).toBe(1);
+        expect((sansCommentaires(source('js/pratiques/pratique-registre.js')).match(/'plagiat'/g) || []).length).toBe(1);
         expect((snapshots.match(/!window\.evaluationNonRemise\(/g) || []).length).toBe(2);
         expect((snapshots.match(/window\.evaluationNonRemise\(e\)\) return false/g) || []).length).toBe(1);
         const affichage = sansCommentaires(source('js/profil-etudiant-sections-affichage.js'));
