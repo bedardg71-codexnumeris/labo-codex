@@ -7,6 +7,22 @@
 
 ---
 
+## EN PARALLÈLE DU LOT 32 — 17 SEPT. 2026, ≈ 12 H 35 (Toronto) : 1.142.29, BUG TESTEUR #907 (le lecteur PDF) SUR `main`
+
+> Retour testeur de Grégoire (12 h 02), traité par une AUTRE session que celle du lot 32, dans le worktree `pdf-worker` (branche `fix/pdf-worker-echec-non-memorise`), livré APRÈS le push de 1.142.28 — ordre choisi par Grégoire. La section du lot 32, ci-dessous, reste le relais du mandat courant ; le lot 33 (#902) n'est pas touché.
+
+**LE BUG** : onglet ouvert depuis des heures, toutes les copies PDF en « Erreur ouverture PDF » jusqu'au rechargement. **FAIT** (lu dans `libs/pdf.min.js`, reproduit sous WebKit) : PDF.js redemande `libs/pdf.worker.min.js` à chaque document, et MÉMORISE l'échec de son repli (`_setupFakeWorkerGlobal`). **INFÉRENCE non prouvée** : le premier échec vient d'une session Cloudflare Access expirée.
+
+**LE CORRECTIF** (`js/travaux-visionneuse.js`, `assurerWorkerPDF`) : fetch avant tout `getDocument`, échec jamais mémorisé, puis `workerSrc` sur une URL blob — les neuf appelants de `getDocument` en profitent. Hors jeu sur `file://`. Source seulement.
+
+**VÉRIFIÉ COMMENT** : `tests/integration/visionneuse-pdf-worker-echec-non-memorise.spec.js` — PREMIER banc servi par HTTP (serveur `node:http` embarqué, borné aux chemins OBSERVABLE) ; rouge sur le code d'avant à l'étape 2, 3 mutations rouges, Vitest 586 / 6 604, 17 essais Playwright voisins. Détail : SUIVI-BUGS #907.
+
+**EN CHEMIN** : le compteur du BACKLOG était resté à #905 alors que le lot 32 a pris #906 — remis à #907. CI GitHub rouge sur six runs : remesurée SOUS #788, pas de fiche neuve. #874 (PDF sans aperçu à l'import) : piste notée, non prouvée, reste ouvert. #602 : note ajoutée (le chemin du worker vit maintenant à deux endroits).
+
+**CE QUI RESTE À GRÉGOIRE** : rien à faire. À l'usage seulement : si « Lecteur PDF non chargé » paraît un jour, c'est l'information qui manquait sur la cause du premier échec — le noter à USAGE-FORMATS.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 12 H 15 (Toronto) : 1.142.28 (lot 32, l'élève exclu : lot E du cadrage du dépistage, #745) SUR `main`
 
 > **1.142.28** (build `0917-1209`) répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-eleve-exclu, renommée au démarrage ; celle du lot 31 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-un-seul-palier.md`). Travail sur `main`. **Démarrage** : `git log origin/main` = `f99f5325` (1.142.27), condition remplie ; audit délégué : 585 fichiers / 6 589 essais verts, 0 « Errors|Unhandled ».

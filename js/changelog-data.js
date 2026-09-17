@@ -25,6 +25,7 @@
             couleur: 'vert',
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
             items: [
+                'Annoter et évaluer&nbsp;: après plusieurs heures dans le même onglet, les copies PDF pouvaient toutes afficher «&nbsp;Erreur ouverture PDF&nbsp;» jusqu\'au rechargement de la page. Ce n\'est plus le cas.',
                 'Élève en décrochage, inactif ou en abandon&nbsp;: son profil s\'ouvre maintenant depuis la Liste (il répondait «&nbsp;Étudiant·e introuvable&nbsp;»). Ses indices sont calculés avec ta pratique de notation, comme ceux des autres, et son statut paraît sous son nom&nbsp;: «&nbsp;Décrochage · hors des moyennes du groupe&nbsp;». Dans la Liste, sa ligne grisée montre son assiduité réelle plutôt que 0&nbsp;%. Les moyennes et les statistiques du groupe ne changent pas.',
                 'Suivi du groupe&nbsp;: le bilan des fondamentaux écrit «&nbsp;difficulté récente&nbsp;» (une seule production récente sous le seuil) là où il écrivait «&nbsp;émergente&nbsp;». «&nbsp;Difficulté émergente&nbsp;» ne désigne plus que le profil d\'apprentissage de la carte RàI, qui donne seule le niveau d\'intervention&nbsp;; le tableau de l\'Aide est accordé.',
                 'Dépistage&nbsp;: une copie encore en brouillon ne lève plus de signalement&nbsp;; il paraît quand la copie est enregistrée.',
