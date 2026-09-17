@@ -21,19 +21,19 @@ cd tests && npx playwright test integration/audit-pratiques-notation-parcours-20
 
 | Constat | Disposition |
 |---|---|
-| A-1 | **inscrit #897** — décision due à Grégoire (brancher ou retirer), posée par Cowork |
-| A-2 | **inscrit sous #854** (élargie à la réédition SOM) |
-| A-3 | le trou du cache : **LIVRÉ en 1.142.24** (`_lireIndiceStocke` rend `null` si `noteConstructible === false` ; « non constructible » aux deux passes, banc A3 et parcours WebKit E-SPE devenus sentinelles). Le reste (ni types ni forfaits, récapitulatif muet) : **inscrit #899** (#319 est livrée et archivée) |
+| A-1 | **LIVRÉ en 1.142.25 (lot 29) pour le VERROU** — « brancher », tranché par Grégoire le 17 sept. ⚠ Constat corrigé à la mesure : « le moteur les applique déjà » était faux (`calculerNoteFinale` n'a aucun appelant) ; le verrou s'applique désormais dans le chemin vivant (87,43 → 50 au profil et à l'export). Plafonnement, remplacement, reprises : l'assistant ne collecte pas de quoi les appliquer — **inscrit #903** |
+| A-2 | **LIVRÉ en 1.142.25 (lot 29)** — les six champs sont relus (et les deux du portfolio sommatif, même défaut) ; diff de réédition vide. #854 reste ouverte pour les jetons et A-4 |
+| A-3 | le trou du cache : **LIVRÉ en 1.142.24** (`_lireIndiceStocke` rend `null` si `noteConstructible === false` ; « non constructible » aux deux passes, banc A3 et parcours WebKit E-SPE devenus sentinelles). Le reste (ni types ni forfaits, récapitulatif muet) : **LIVRÉ en 1.142.25 (lot 29, #899)** — le récapitulatif dit où les régler (texte choisi par Grégoire) ; chemin remesuré dans la page |
 | A-4 | **inscrit sous #854** (élargie au seuil) |
 | A-5 | **inscrit sous #715** (tenu), avec l'attribut contradictoire du Comparateur |
 | A-6 | **inscrit sous #717** (tenu) |
 | A-7 | **inscrit #900** |
 | A-8 | **inscrit sous #339** |
-| B-1 | **inscrit #898 — VOLET ARRÊTÉ.** Mesuré : la « candidate unique » existe comme notion (`obtenirEchelleResolue()` sans id), mais le pack porte deux échelles ; le parcours visé n'en a donc jamais. La suite demande une phrase (Grégoire) |
+| B-1 | **inscrit #898 — VOLET ARRÊTÉ, puis TRANCHÉ par Grégoire le 17 sept. (l'adoption demande l'échelle ; texte choisi, sous la fiche) : lot à part.** Mesuré : la « candidate unique » existe comme notion (`obtenirEchelleResolue()` sans id), mais le pack porte deux échelles ; le parcours visé n'en a donc jamais. La suite demande une phrase (Grégoire) |
 | B-2 | **LIVRÉ en 1.142.24** (`recents` et `recents-meilleurs` dans la table de relecture ; `approcheEvaluation` déduite du portfolio). ⚠ **Le constat est corrigé sur un point** : mesuré sous WebKit le 17 sept., le portfolio ne disparaissait PAS dans la page — l'étape « Approche d'évaluation » (carte pré-cochée, #443) repose la valeur avant l'enregistrement ; seul le banc, qui enregistre sans traverser les étapes, le perdait. Le défaut réel à l'écran était l'autre moitié : « N plus récentes » relue et ré-enregistrée « N meilleurs » |
 | B-3 | **inscrit sous #713** (élargie aux pratiques configurées) |
 | B-4 | **commenté dans le code** (`pratiques-bibliotheque.js`, seuils du « Modèle sommatif ») et oublié |
-| C-1, C-2, C-3, C-6 | **inscrits #901** — des mots : à Grégoire, un à la fois, par Cowork |
+| C-1, C-2, C-3, C-6 | **LIVRÉS en 1.142.25 (lot 29, #901)** — les quatre textes choisis par Grégoire le 17 sept., posés tels quels ; une sentinelle lit les textes et l'absence des anciens |
 | C-4, C-5 | **inscrits sous #810** (C-5 tenu, ⛔ ne rien changer) |
 | C-7 | pas un constat (matériau du labo) |
 | D-1 | **inscrit sous #710** |

@@ -1,48 +1,43 @@
-# Consigne suivante – les pratiques de notation : ce que l'assistant écrit est ce que la note calcule (lot 28)
+# Consigne suivante – les règles spéciales de la sommative s'appliquent, et quatre phrases de l'Aide disent vrai (lot 29 : A-1, A-2, C-1, C-2, C-3, C-6 de l'audit du 16 sept.)
 
-> Écrite le 17 septembre 2026, 7 h 59 (Toronto), sur `ae7ad6f7` (`1.142.22`), **pendant** le lot 27 (#871, volet complétion).
-> **À n'exécuter qu'après le push du lot 27** : les deux lots écrivent dans `js/pratiques/`. Au démarrage : `git log` doit montrer `1.142.23` ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-871-completion.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> Écrite le 17 septembre 2026, 8 h 48 (Toronto), pendant le lot 28 (pratiques de notation, `1.142.24`).
+> **À n'exécuter qu'après le push du lot 28** : mêmes fichiers. Au démarrage, `git log` doit montrer `1.142.24` ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-pratiques-de-notation.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
 
-Mandat : les suites de l'audit du 16 sept. (`Rapports/AUDIT-pratiques-notation-configuration-et-discours-2026-09-16.md`, **sur la branche `audit/pratiques-notation-2026-09-16`, commit `9441b027`, pas sur `main`**). Demandé par Grégoire le 17 au matin. **Périmètre choisi par Cowork : ce qui ne lui demande ni mot ni vérification à l'écran.** Les deux constats que l'audit propose de « corriger maintenant » ont un jour de retard : ils passent en tête. Remesurés par Cowork sur `ae7ad6f7` : le code visé n'a pas bougé depuis l'audit (`_lireIndiceStocke`, `pratique-configurable.js:239` ; `methodeVersMode`, `wizard-pratique-v2.js:3082`).
+Mandat : **tranché par Grégoire le 17 sept. vers 8 h 45 : « brancher »** les règles spéciales que l'assistant promet pour une pratique sommative (constat A-1 de `Rapports/AUDIT-pratiques-notation-configuration-et-discours-2026-09-16.md`), **à la condition que A-2 parte dans le même lot**. Le lot 28 les a inscrits : A-1 est **#897** (à cocher à la livraison) ; A-2 est rangé sous #854 (à cocher ou à annoter, selon ce qui y reste).
 
-## 0 · Ramener l'audit sur `main`
+## 1 · Brancher (A-1)
 
-- Rapport, tableau du labo, compte rendu de la documentation et captures : sur `main`, tels quels.
-- Les deux bancs de l'audit figent les valeurs FAUSSES (A3 : « 0 final », B2 : portfolio perdu). Ils deviennent sentinelles : les mesures A3 et B2 prennent les valeurs justes au moment où le correctif les rend vraies ; les autres gardent leurs valeurs, avec en commentaire le constat qu'elles figent et sa fiche.
+- L'assistant écrit `configuration.conditions_speciales` (verrou « doit être réussie », plafonnement), `configuration.remplacement` et `configuration.reprises` ; le moteur ne lit que `calcul_note.conditions_speciales` (4 sites de `pratique-configurable.js`). **Fais lire au moteur ce que l'assistant écrit**, `construireConfigComplete` d'abord (`pratique-registre.js`).
+- Preuve de l'audit : verrou « Dissertation < 90 → max 50 », Dissertation à 84 → la note passe de 87,43 à 50, au profil ET à l'export (celui-ci disait « 88 final »).
+- Mesure les trois règles (verrou, plafonnement, remplacement), et les reprises. Celle que le moteur ne sait pas appliquer : ne l'invente pas, *inscris-la*, et nomme ce que l'assistant en promet encore.
 
-## 1 · Une pratique non constructible ne devient plus « 0, final » (A-3, majeur)
+## 2 · La condition de Grégoire : rouvrir ne change pas une règle (A-2)
 
-- `_lireIndiceStocke` rend `null` quand l'entrée stockée porte `noteConstructible === false`. Sous une SPE créée par l'assistant (ni types de travaux ni forfaits), l'export doit dire « non constructible » à la première ET à la deuxième passe.
-- Remesure les autres lecteurs de `indicesCP[da].actuel.P` : s'il en existe un autre qui prend ce 0 pour une note, même garde ; nomme-les.
-- Le reste d'A-3 (l'assistant ne collecte ni types ni forfaits, et son récapitulatif ne dit pas où les régler) : **inscrire** sous #319. Pas de mots neufs dans ce lot.
+- `chargerPratiqueExistante` restaure `nbPairesRemplacement`, `nomEvalVerrouillee`, `seuilVerrou`, `plafondVerrou`, `conditionPlafonnement`, `valeurPlafonnement`. Diff de réédition vide, comme STD et DEN (mesure A1 de l'audit : 3 → 2, Dissertation/90/50 → Analyse finale/60/55, « Examen non remis »/50 → ''/55).
+- ⛔ **Si A-2 ne part pas, A-1 ne part pas** : une règle appliquée qui change à l'insu de l'enseignant quand il rouvre sa pratique est pire que la promesse non tenue d'aujourd'hui. Rapporte alors à Cowork.
 
-## 2 · Rouvrir un modèle ne le détruit plus (B-2, majeur)
+## 3 · Cinq textes choisis par Grégoire (C-1, C-2, C-3, C-6 de l'audit, et #899), le 17 sept. vers 8 h 45 – à poser telles quelles
 
-- Dans `chargerPratiqueExistante` : `approcheEvaluation` prend `'par-artefacts'` par défaut quand `config.portfolio` existe ; `methodeVersMode` connaît `recents` et `recents-meilleurs` (mesure la valeur de mode que chacun doit donner).
-- Preuve : « N plus récentes » adopté, rouvert, échelle choisie, enregistré sans rien toucher d'autre → la méthode relue est « récents » et le portfolio est intact.
+- **C-1** · récapitulatif de l'assistant, `wizard-pratique-v2.js` (vers 2020) : le libellé de la variante `n-meilleurs` devient **« Par artefacts »** (sans parenthèse). La méthode ne se dit qu'à « Construction de la note ». Vérifie qu'aucun autre lecteur de ce libellé n'attend la parenthèse.
+- **C-2** · `guides-pedagogiques.js` : le titre (vers 326) devient **« La dénotation : une PRÉN »** ; l'encadré (vers 329) devient **« <strong>Statut dans Labo Codex.</strong> La dénotation est disponible : l'assistant de création la propose, et le jugement sur chaque cible se saisit dans le profil de l'élève. »** (typographie du fichier : espaces insécables comme ailleurs). Remesure que les deux affirmations sont vraies à la livraison.
+- **C-6** · `guides-pedagogiques.js` (vers 140) : la première phrase devient **« L'indice P est la note courante de l'étudiant·e, calculée selon la pratique de notation active (Standards, Spécifications, Dénotation ou Sommative). »** La suite du paragraphe ne change pas.
+- **C-3** · glossaire, `accompagnement-contenu-terme.js` (vers 418, terme « PAN — Pratique Alternative de Notation ») : la première phrase de la définition (« Terme générique qui regroupe les pratiques STD, SPE et DEN — toutes les approches… traditionnelle. ») devient **« Terme qui désigne les pratiques Standards (STD) et Spécifications (SPE). La Dénotation (DEN) est une PRÉN ; l'application lui donne aussi le badge « PAN » par commodité. »** La phrase suivante (« Dans le contexte PAN, les productions… ») ne change pas. Choisi par Grégoire vers 8 h 50.
+- **#899** · récapitulatif de l'assistant pour une pratique par spécifications (`wizard-pratique-v2.js`, vers 2173, là où s'écrit « Grille : À configurer plus tard ») : ajoute, pour SPE seulement, la ligne **« <strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception › Pratiques de notation (clique sur la pratique). Tant qu'ils manquent, aucune note ne peut être calculée. »** Choisi par Grégoire vers 8 h 55 ; écarté : collecter les tables dans l'assistant (un second écrivain). **Remesure que le chemin est exact** (nom de la section, clic sur la pratique dans la liste, titres « Types de productions » et « Table des forfaits (bundles) ») ; s'il ne l'est pas, rapporte à Cowork au lieu d'ajuster la phrase. Si les types ET les forfaits sont déjà présents (réédition), la ligne ne paraît pas. #899 se coche à la livraison.
+- Un banc lit les cinq textes dans le code livré (et l'absence des anciens). **#901** se coche à la livraison : ses quatre phrases sont tranchées.
 
-## 3 · Un modèle Standards adopté calcule partout ou nulle part (B-1, majeur) – mesurer d'abord
+## 4 · À écrire au backlog, sans code dans ce lot
 
-- Un modèle STD adopté tel quel n'a pas d'échelle : le profil calcule (77,32), l'export et le Comparateur disent « non constructible ». Deux écrans se contredisent sur le premier geste du labo.
-- **Décision technique de Cowork** : l'adoption complète l'échelle SANS demander, **si et seulement si** une seule échelle est candidate sans ambiguïté (mesure ce que « candidate » veut dire dans l'app après le retrait d'`obtenirEchelleUtilisateur` au lot F).
-- ⛔ S'il n'existe pas de candidate unique, ou si la voie exige une phrase neuve (une demande d'échelle à l'adoption), **arrête ce volet et rapporte à Cowork** : les mots reviennent à Grégoire. *Inscris* le constat, les volets 1 et 2 partent seuls.
-
-## 4 · La sentinelle du tour complet (G-1)
-
-- Cinq mutations sur huit ne rougissaient rien. Une sentinelle, par famille : **ce que l'assistant et le formulaire écrivent est ce qui est relu, puis ce qui calcule** – la méthode de sélection (les deux écrivains), le seuil SPE par défaut, les ids de cibles DEN, le minimum du portfolio. Le banc A de l'audit en est le brouillon.
-- Rejoue les huit mutations G1-G8 : les huit rougissent.
-
-## 5 · Inscrire le reste
-
-« Inscrire » est l'issue de tout constat de l'audit qui n'est pas dans ce lot, **avec son numéro de constat** (A-1…G-1) dans la fiche. Les recoupements vont sous leur fiche existante (#715, #717, #339, #713, #810, #710, #483, #723) ; A-2 et A-4 sous #854 s'il existe, sinon une fiche. **Ne corrige ni n'écris aucune phrase** : A-1 (brancher ou retirer les règles spéciales de la sommative), C-1, C-2, C-6 et la ligne du glossaire (C-3) reviennent à Grégoire, un à la fois, par Cowork. La documentation (§ F) : inscrite sous #804 et #805, non touchée.
+- Sous **#898**, telle quelle : « ✅ **TRANCHÉ par Grégoire le 17 sept. 2026, vers 8 h 50** : l'adoption d'un modèle Standards sans échelle DEMANDE l'échelle. Texte choisi : **« Ce modèle a besoin d'une échelle de performance pour calculer la note. Choisis-la : »**, suivi de la liste des échelles du trimestre et du bouton **« Adopter »**. Écarté : fixer une échelle dans le gabarit (ne vaut que dans les espaces qui la portent ; choix pédagogique). Lot à part, après le 29 : porte terrain probable (iPad). »
 
 ## Preuve
 
-- Break-test : chaque assertion neuve rougit sous sa mutation (garde du cache retirée ; défaut d'`approcheEvaluation` retiré ; `recents` retiré de la table ; échelle non complétée, si le volet 3 part). Cowork en posera d'autres.
-- Un banc WebKit : le parcours SPE de l'audit (E-SPE) rend « non constructible » à l'export ; le parcours « N plus récentes » adopté puis rouvert garde son portfolio.
-- Vitest depuis `tests/`, puis le verdict Playwright sur le commit final, Cowork fermé. **Porte terrain : aucune attendue.**
-- **Stock** : rien n'est écrit dans les données. Un indice déjà stocké « non constructible » est désormais lu comme tel ; un export déjà téléchargé avec « 0, final » ne se réécrit pas. Un modèle déjà rouvert et vidé de son portfolio ne se répare pas : dis si le cas est mesurable dans les données d'essai.
+- Une sentinelle : les règles écrites par l'assistant sont relues à l'identique et calculent (verrou, plafonnement, remplacement), au profil et par `simulerIndices` (l'export).
+- Break-test : verrou non branché ; chacun des six champs non restauré ; plafonnement lu sous le mauvais nom. Cowork en posera d'autres.
+- Le parcours WebKit E-SOM de l'audit : export 50 avec le verrou coché.
+- **Aucune autre phrase neuve** que celles de la section 3. Si une phrase de l'assistant ou du Comparateur devient fausse, rapporte-la à Cowork (`construction-attributs.js:251`, « Actif (une évaluation doit être réussie) », devient vraie).
+- **Stock** : une pratique sommative déjà créée avec ces règles voit sa note changer à la livraison. Mesure s'il en existe dans les données d'essai ; la phrase de « Nouvelles » proposée à Grégoire le dit.
+- Vitest depuis `tests/`, puis le verdict Playwright, Cowork fermé. **Porte terrain : aucune attendue.**
 
 ## Livraison
 
-Patch `1.142.24` par `scripts/release.mjs`. Phrase de « Nouvelles » : propose-la à Grégoire avant de la figer (un seul message). Puis `OU-EN-EST-ON.md` (phrase « vérifié comment »), `RELAIS.md`, les fiches inscrites, le markdown du tri. Toute trouvaille reçoit l'une des trois issues ; « inscrire et continuer » est le défaut. Commite aussi les fichiers de Cowork : la consigne renommée et l'archive de celle du lot 27. Supprime la branche `audit/pratiques-notation-2026-09-16` en local seulement une fois son contenu sur `main`. Push par `scripts/pousser.sh`, puis signale à Cowork que c'est poussé.
+Patch `1.142.25` par `scripts/release.mjs`. Phrase de « Nouvelles » : propose-la à Grégoire avant de la figer. Puis `OU-EN-EST-ON.md`, `RELAIS.md`, les fiches, le markdown du tri. Commite aussi les fichiers de Cowork : la consigne renommée et son archive, `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md` (tranchages du 17 au matin), `CONSIGNE-DEMARRAGE-COWORK.md`, et les lignes « ✅ MOT(S) CHOISI(S) … 17 sept. » sous #744, #745 et #735 dans `BACKLOG.md` si le lot 28 ne les a pas déjà commitées. Push par `scripts/pousser.sh`, puis signale à Cowork que c'est poussé.

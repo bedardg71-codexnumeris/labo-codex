@@ -299,6 +299,19 @@ function construireConfigComplete(pratiqueData) {
         calcul_note = Object.assign({}, calcul_note, { methode: 'conversion_niveaux' });
     }
 
+    // #897 (audit du 16 sept. 2026, constat A-1 ; « brancher », tranché par Grégoire le 17) —
+    // LE MOTEUR LIT CE QUE L'ASSISTANT ÉCRIT. L'assistant écrit les règles spéciales d'une
+    // sommative sous `configuration.conditions_speciales` ; le moteur ne connaît qu'un lecteur,
+    // `calcul_note.conditions_speciales` (la forme des gabarits). Renvoi à la LECTURE, sans
+    // écriture ; une pratique qui porte déjà les siennes sous `calcul_note` les garde.
+    // ⚠ Seul le VERROU s'applique (PratiqueConfigurable._appliquerVerrousSommatifs) : le
+    // plafonnement de l'assistant n'a qu'une condition en texte libre, voir là-bas.
+    const reglesAssistant = pratiqueData.configuration?.conditions_speciales;
+    if (Array.isArray(reglesAssistant) && reglesAssistant.length > 0
+        && calcul_note && !calcul_note.conditions_speciales) {
+        calcul_note = Object.assign({}, calcul_note, { conditions_speciales: reglesAssistant });
+    }
+
     return {
         // Champs obligatoires - prendre de config si présent, sinon de racine
         id: config.id || pratiqueData.id,

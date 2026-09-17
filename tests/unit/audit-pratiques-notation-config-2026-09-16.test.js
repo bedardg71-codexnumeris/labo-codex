@@ -275,16 +275,15 @@ function noteDe(b, da, id) {
    ============================================================================================= */
 describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur en lit, ce qui survit à une réédition', () => {
 
-    // FIGE A-1 (règles spéciales jamais lues par le moteur — à Grégoire : brancher ou retirer, #897) et A-2 (réédition
-    // qui ramène verrou, plafond et paires aux défauts — #854). Valeurs FAUSSES gardées exprès.
+    // A-1 ET A-2 LIVRÉS AU LOT 29 (17 sept. 2026, 1.142.25 — #897, #854) : les valeurs ci-dessous sont maintenant les JUSTES.
     it('A1 · SOM avec les trois règles spéciales et des valeurs non par défaut', async () => {
         // À LA MAIN (lecture de creerPratiqueV2) : l'assistant écrit configuration.remplacement.nbPaires = 3,
         // configuration.conditions_speciales = [double_verrou {Dissertation < 90 → note_max 50}, plafonnement {valeur 50}],
         // configuration.reprises = {permises:true, mode:'limite'}, seuils {80/70/60}, nbEvaluationsPrevues 8.
-        // Le moteur (PratiqueConfigurable) ne lit les conditions spéciales que sous calcul_note.conditions_speciales
-        // (grep : 4 sites, aucun sous configuration.*) → la moyenne reste 8830/101 = 87,43, sans plafond ni verrou.
-        // À la réédition, chargerPratiqueExistante ne restaure ni nbPairesRemplacement, ni nomEvalVerrouillee/seuilVerrou/
-        // plafondVerrou, ni conditionPlafonnement/valeurPlafonnement → réécrits aux défauts 2 / 'Analyse finale' / 60 / 55 / '' / 55.
+        // construireConfigComplete renvoie ces conditions sous calcul_note.conditions_speciales (le seul lecteur du moteur).
+        // Moyenne 8830/101 = 87,43 ; la Dissertation est à 84 < 90 → le verrou plafonne à 50, au profil ET à l'export.
+        // Le plafonnement (« Examen non remis », texte libre) et le remplacement (3 paires, lesquelles ?) ne s'appliquent pas (#903).
+        // À la réédition, chargerPratiqueExistante restaure les six champs → diff VIDE, et la note reste 50.
         const b = monter(jeuSOM());
         const p0 = await creerParAssistant(b, { nom: 'SOM banc', prenom: 'A', nomAuteur: 'B', calcNoteFinale: 'moyenne',
             reglesSommatives: ['remplacement', 'double_verrou', 'plafonnement'], nbPairesRemplacement: 3,
@@ -298,15 +297,14 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         noter('A1', { ecrit: p0.configuration, seuils: p0.seuils, note, conditionsLuesParLeMoteur: inst.config.calcul_note.conditions_speciales || null, perdu: d });
         expect(p0.configuration.conditions_speciales).toHaveLength(2);
         expect(p0.configuration.remplacement.nbPaires).toBe(3);
-        expect(inst.config.calcul_note.conditions_speciales).toBeUndefined();   // le moteur ne les voit pas
-        expect(note.perf).toBe(87.43);                                            // ni verrou (84 < 90) ni plafond
-        expect(d.map(x => x.chemin)).toEqual(expect.arrayContaining([
-            'configuration.remplacement.nbPaires', 'configuration.conditions_speciales']));
-        expect(apres.configuration.remplacement.nbPaires).toBe(2);
-        expect(apres.configuration.conditions_speciales[0].condition.seuil).toBe(60);
-        expect(apres.configuration.conditions_speciales[0].consequence.note_max).toBe(55);
-        expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });  // celle-là survit
-        expect(apres.seuils).toEqual(p0.seuils);                                            // ceux-là aussi
+        expect(inst.config.calcul_note.conditions_speciales).toEqual(p0.configuration.conditions_speciales);   // le moteur les voit
+        expect(note.perf).toBe(50);                                               // verrou : 84 < 90 → max 50
+        expect(note.simule.P).toBe(50);
+        expect(note.export).toEqual({ note: 50, statut: 'final' });
+        expect(reponses).toMatchObject({ nbPairesRemplacement: 3, nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50,
+            conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 50 });
+        expect(d).toEqual([]);                                                    // rouvrir ne change rien
+        expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
     });
 
     it('A2 · STD « les N derniers », 4 sur 6, minimum 2, reprises limitées', async () => {
@@ -676,5 +674,124 @@ describe('G-1 · SOM : les reprises écrites sont relues et ré-écrites', () =>
         expect(reponses.reprisesPermises).toBe('limite');
         expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
         expect(noteDe(b, DA.SOM, p0.id).perf).toBe(87.43);
+    });
+});
+
+/* =============================================================================================
+   LOT 29 (17 sept. 2026, 1.142.25) · #897 + #854 — LE VERROU QUE L'ASSISTANT ÉCRIT EST RELU À L'IDENTIQUE ET CALCULE,
+   au profil (calculerPerformance), par simulerIndices et à l'export. « Brancher » : tranché par Grégoire, à la condition
+   que rouvrir la pratique ne change aucune règle (A-2). Jeu SOM : Dissertation 84 (×40), Examen 50 remplacé par 90 (×60),
+   Exercice 70 (pondération 0 → poids 1) ; moyenne (3360 + 5400 + 70) / 101 = 87,43.
+   ============================================================================================= */
+const SOM_VERROU = (extra) => Object.assign({ nom: 'SOM verrou', calcNoteFinale: 'moyenne', reglesSommatives: ['double_verrou'],
+    nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50 }, extra || {});
+
+describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la note', () => {
+    it('déclenché (84 < 90 → max 50) : 50 au profil, par simulerIndices et à l\'export', async () => {
+        const b = monter(jeuSOM());
+        const p0 = await creerParAssistant(b, SOM_VERROU());
+        activer(b, p0.id);
+        const n = noteDe(b, DA.SOM, p0.id);
+        expect(n.perf).toBe(50);
+        expect(n.simule).toMatchObject({ P: 50, noteConstructible: true });
+        expect(n.export).toEqual({ note: 50, statut: 'final' });
+    });
+
+    it('non déclenché (84 ≥ 80) : la moyenne 87,43 ne bouge pas ; un plafond plus haut que la moyenne non plus', async () => {
+        const b = monter(jeuSOM());
+        const p80 = await creerParAssistant(b, SOM_VERROU({ seuilVerrou: 80 }));
+        const p95 = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM plafond haut', plafondVerrou: 95 }));
+        expect(noteDe(b, DA.SOM, p80.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, p95.id).perf).toBe(87.43);   // min(87,43 ; 95) : un verrou plafonne, il ne hausse jamais
+    });
+
+    it('le nom saisi se compare au TITRE de la production, sans casse ni espaces de bord ; un nom sans production : sans effet', async () => {
+        const b = monter(jeuSOM());
+        const pCasse = await creerParAssistant(b, SOM_VERROU({ nomEvalVerrouillee: '  dissertation ' }));
+        const pAbsent = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM absent', nomEvalVerrouillee: 'Analyse finale' }));
+        expect(noteDe(b, DA.SOM, pCasse.id).perf).toBe(50);
+        expect(noteDe(b, DA.SOM, pAbsent.id).perf).toBe(87.43);
+    });
+
+    it('seule la copie qui ENTRE dans la note compte : l\'Examen à 50 REMPLACÉ par 90 ne déclenche pas un verrou à 60', async () => {
+        const b = monter(jeuSOM());
+        const p = await creerParAssistant(b, SOM_VERROU({ nomEvalVerrouillee: 'Examen', seuilVerrou: 60, plafondVerrou: 55 }));
+        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
+    });
+
+    it('le plafonnement et le remplacement de l\'assistant ne s\'appliquent PAS et ne lèvent pas (#903) : 87,43', async () => {
+        // Le plafonnement n'a pour condition qu'un texte libre, le remplacement qu'un nombre de paires : rien ne les devine.
+        const b = monter(jeuSOM());
+        const p = await creerParAssistant(b, { nom: 'SOM sans verrou', calcNoteFinale: 'moyenne', reglesSommatives: ['remplacement', 'plafonnement'],
+            nbPairesRemplacement: 3, conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 40 });
+        const inst = b.win.obtenirPratiqueParId(p.id);
+        expect(inst.config.calcul_note.conditions_speciales).toHaveLength(1);
+        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
+    });
+
+    it('la copie d\'un·e AUTRE élève ne déclenche rien : Bruno a 40 à la Dissertation, Alice (84 ≥ 60) garde 87,43', async () => {
+        const jeu = jeuSOM();
+        jeu.evaluations.push(ev('EV_AUTRE', DA.STD, 'P1', 40, 'I'));
+        const b = monter(jeu);
+        const p = await creerParAssistant(b, SOM_VERROU({ seuilVerrou: 60, plafondVerrou: 55 }));
+        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.STD, p.id).perf).toBe(40);        // lui : une seule copie, 40 < 60 → min(40 ; 55) = 40
+    });
+
+    it('seul le type « double_verrou » verrouille : une autre règle qui nommerait une évaluation n\'agit pas', () => {
+        const b = monter(jeuSOM(), { pratiques: [{ id: 'PT', nom: 'Autre type', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee',
+            conditions_speciales: [{ type: 'plafonnement', condition: { evaluation: 'Dissertation', comparateur: '<', seuil: 90 }, consequence: { action: 'plafonner', valeur: 50 } }] } }] });
+        expect(noteDe(b, DA.SOM, 'PT').perf).toBe(87.43);
+    });
+
+    it('une pratique qui porte déjà ses conditions sous calcul_note (forme des gabarits) garde les siennes', () => {
+        const verrouGabarit = { type: 'double_verrou', condition: { evaluation: 'Dissertation', comparateur: '<', seuil: 85 }, consequence: { action: 'echec', note_max: 55 } };
+        const b = monter(jeuSOM(), { pratiques: [{ id: 'PG', nom: 'Gabarit', type: 'sommative',
+            calcul_note: { methode: 'moyenne_ponderee', conditions_speciales: [verrouGabarit] },
+            configuration: { conditions_speciales: [{ type: 'double_verrou', condition: { evaluation: 'Dissertation', comparateur: '<', seuil: 90 }, consequence: { action: 'echec', note_max: 10 } }] } }] });
+        expect(noteDe(b, DA.SOM, 'PG').perf).toBe(55);   // 84 < 85 → 55 ; le 10 de configuration.* n'est pas lu
+    });
+});
+
+describe('lot 29 · SOM : rouvrir une pratique ne change aucune règle (A-2, la condition de Grégoire)', () => {
+    it('les huit champs des règles sont relus ; le diff de réédition est vide ; la note reste 50', async () => {
+        const b = monter(jeuSOM());
+        const p0 = await creerParAssistant(b, { nom: 'SOM quatre règles', calcNoteFinale: 'moyenne',
+            reglesSommatives: ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'], nbPairesRemplacement: 3,
+            nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50, nbArtefactsPortfolio: 8, portfolioQualitatif: true,
+            conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 45 });
+        const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
+        expect(reponses).toMatchObject({ nbPairesRemplacement: 3, nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50,
+            nbArtefactsPortfolio: 8, portfolioQualitatif: true, conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 45 });
+        expect(diff(p0, apres)).toEqual([]);
+        expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
+    });
+});
+
+describe('lot 29 · #899 : le récapitulatif d\'une spécification dit où régler types et forfaits', () => {
+    const LIGNE = 'Types de productions et forfaits';
+    const REPONSES_SPE = { nom: 'SPE récap', typePratique: 'specifications', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70, echelleId: 'E1' };
+    it('création : la ligne paraît ; sommative et standards : jamais', () => {
+        const b = monter(jeuSPE());
+        b.win.wizardState.modeEdition = false; b.win.wizardState.pratiqueId = null;
+        b.win.wizardState.reponses = clone(REPONSES_SPE);
+        expect(b.win.genererRecapitulatif()).toContain(LIGNE);
+        b.win.wizardState.reponses = { nom: 'STD', typePratique: 'standards', calcNoteFinale: 'niveaux', echelleId: 'E1' };
+        expect(b.win.genererRecapitulatif()).not.toContain(LIGNE);
+        b.win.wizardState.reponses = { nom: 'SOM', typePratique: 'sommative', calcNoteFinale: 'moyenne' };
+        expect(b.win.genererRecapitulatif()).not.toContain(LIGNE);
+    });
+
+    it('réédition : la ligne se tait seulement si types ET forfaits sont présents', () => {
+        const types = [{ id: 'dissertation', nom: 'Dissertation' }];
+        const forfaits = [{ note: 80, requis: { dissertation: 1 } }];
+        const CAS = [[{ typesTravaux: types, forfaits }, false], [{ typesTravaux: types, tableBundles: forfaits }, false],
+            [{ typesTravaux: types }, true], [{ forfaits }, true], [{}, true]];
+        for (const [configuration, attendue] of CAS) {
+            const b = monter(jeuSPE(), { pratiques: [{ id: 'PS', nom: 'SPE', type: 'specifications', configuration }] });
+            b.win.wizardState.modeEdition = true; b.win.wizardState.pratiqueId = 'PS';
+            b.win.wizardState.reponses = clone(REPONSES_SPE);
+            expect(b.win.genererRecapitulatif().includes(LIGNE), JSON.stringify(Object.keys(configuration))).toBe(attendue);
+        }
     });
 });

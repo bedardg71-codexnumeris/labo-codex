@@ -269,7 +269,58 @@ class PratiqueConfigurable {
         }
         const inst = new window.PratiqueSommative();
         const p = inst.calculerPerformance(da); // décimal 0-1, ou null
-        return p === null || p === undefined ? null : p * 100;
+        if (p === null || p === undefined) return null;
+        return this._appliquerVerrousSommatifs(p * 100, da, inst);
+    }
+
+    /**
+     * #897 (audit du 16 sept. 2026, constat A-1 ; « brancher », tranché par Grégoire le 17) —
+     * LE VERROU QUE L'ASSISTANT PROMET S'APPLIQUE À LA NOTE. « Une évaluation doit être réussie
+     * pour que la note finale dépasse un plafond » : la moyenne pondérée est plafonnée à
+     * `consequence.note_max` quand la copie de l'évaluation nommée est sous le seuil.
+     *
+     * Mesuré avant d'écrire : `calculerNoteFinale` et ses trois méthodes n'ont AUCUN appelant ;
+     * la note d'une sommative configurable ne passait que par PratiqueSommative, qui ne connaît
+     * aucune règle. On réemploie ici `appliquerDoubleVerrou` (comparateurs, conséquence), seule
+     * pièce de cet ensemble qui se nourrit de ce que l'assistant collecte.
+     *
+     * - L'évaluation se reconnaît au TITRE de sa production (sans casse ni espaces de bord) :
+     *   c'est un nom que l'assistant fait saisir, pas un identifiant.
+     * - Seules les copies qui ENTRENT dans la note comptent (règle unique du registre) : tant
+     *   que l'évaluation nommée n'est pas notée, le verrou ne s'applique pas.
+     * - ⚠ NI LE PLAFONNEMENT NI LE REMPLACEMENT de l'assistant ne s'appliquent : le premier n'a
+     *   pour condition qu'un texte libre (« Examen non remis »), le second qu'un nombre de
+     *   paires sans dire lesquelles. Rien ici ne les devine (#903).
+     *
+     * @param {number} note - moyenne pondérée (0-100)
+     * @param {string} da
+     * @param {Object} inst - l'instance PratiqueSommative qui vient de calculer (mêmes lectures)
+     * @returns {number} la note, plafonnée si un verrou se déclenche
+     */
+    _appliquerVerrousSommatifs(note, da, inst) {
+        const conditions = (this.config.calcul_note && this.config.calcul_note.conditions_speciales) || [];
+        const verrous = conditions.filter(c => c && c.type === 'double_verrou' && c.condition && c.consequence);
+        if (verrous.length === 0) return note;
+
+        const normaliser = (s) => String(s === null || s === undefined ? '' : s).trim().toLowerCase();
+        const productions = inst._lireProductions();
+        const copies = inst._lireEvaluations().filter(e =>
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
+        );
+
+        let resultat = note;
+        for (const verrou of verrous) {
+            const cible = normaliser(verrou.condition.evaluation);
+            if (!cible) continue;
+            for (const copie of copies) {
+                const production = productions.find(p => p.id === copie.productionId);
+                if (!production || normaliser(production.titre) !== cible) continue;
+                resultat = this.appliquerDoubleVerrou(
+                    resultat, [{ nom: verrou.condition.evaluation, note: copie.noteFinale }], verrou
+                );
+            }
+        }
+        return resultat;
     }
 
     /**

@@ -415,7 +415,7 @@ const GLOSSAIRE = {
         terme: 'PAN — Pratique Alternative de Notation',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Terme générique qui regroupe les pratiques STD, SPE et DEN — toutes les approches qui s\'éloignent de la sommative traditionnelle. Dans le contexte PAN, les productions sont d\'abord des occasions d\'apprentissage et de mise en pratique, pas des épreuves évaluatives.',
+        definition: 'Terme qui désigne les pratiques Standards (STD) et Spécifications (SPE). La Dénotation (DEN) est une PRÉN ; l\'application lui donne aussi le badge « PAN » par commodité. Dans le contexte PAN, les productions sont d\'abord des occasions d\'apprentissage et de mise en pratique, pas des épreuves évaluatives.',
         voir: 'Conception > Pratiques'
     },
 
