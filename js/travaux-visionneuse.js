@@ -63,15 +63,77 @@
        INITIALISATION PDF.js
        =============================== */
 
+    // Chemin servi du worker PDF.js. Le garde pre-commit et release.mjs (#602)
+    // lisent l'affectation de workerSrc ci-dessous : la garder litterale.
+    const CHEMIN_WORKER_PDF = 'libs/pdf.worker.min.js';
+
+    // Promesse du worker charge UNE fois pour la vie de l'onglet. Un echec
+    // n'y reste jamais : elle est remise a null pour que l'essai suivant
+    // redemande le fichier (voir assurerWorkerPDF).
+    let promesseWorkerPDF = null;
+
     /**
      * Configure PDF.js worker
      */
     function configurerPDFjs() {
         if (typeof pdfjsLib !== 'undefined') {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
+            if (!promesseWorkerPDF) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
+            }
+            // Precharge sans attendre ni signaler : a l'entree du module la
+            // session est le plus souvent fraiche. Un echec ici est repris,
+            // et dit, par ouvrirPDF.
+            assurerWorkerPDF().catch(() => {});
         } else {
             console.warn('[Travaux-Visionneuse] PDF.js non disponible');
         }
+    }
+
+    /**
+     * Charge le worker PDF.js une seule fois et le sert ensuite depuis la
+     * memoire (URL blob, permise par worker-src de la CSP).
+     *
+     * POURQUOI (bug du 17 sept. 2026) : PDF.js cree un Worker par document
+     * ouvert, donc redemande libs/pdf.worker.min.js au serveur a CHAQUE copie
+     * (libs/ est revalide, netlify.toml). Onglet ouvert depuis des heures,
+     * session Cloudflare Access expiree ou reseau coupe : la requete echoue,
+     * PDF.js tente son repli (« fake worker »), qui echoue aussi — et PDF.js
+     * MEMORISE cet echec (_setupFakeWorkerGlobal garde la promesse rejetee) :
+     * plus aucun PDF ne s'ouvre jusqu'au rechargement de la page.
+     * Ici le fichier est demande par fetch AVANT tout getDocument : s'il ne
+     * vient pas, PDF.js n'est pas appele, rien n'est memorise, et le prochain
+     * essai repart de zero. S'il vient, les neuf appelants de getDocument
+     * (visionneuse, import, export, vignettes) n'ont plus besoin du reseau.
+     *
+     * @returns {Promise<boolean>} resolue quand workerSrc pointe le worker charge
+     */
+    function assurerWorkerPDF() {
+        // Ouverture par double-clic : fetch est refuse sur file://, et le repli
+        // de PDF.js (balise script) y fonctionne sans reseau. Ne rien changer.
+        if (location.protocol === 'file:') return Promise.resolve(true);
+        if (typeof pdfjsLib === 'undefined') return Promise.reject(new Error('PDF.js non disponible'));
+
+        if (!promesseWorkerPDF) {
+            promesseWorkerPDF = fetch(CHEMIN_WORKER_PDF)
+                .then(reponse => {
+                    // Une page de connexion rendue a la place du script repond
+                    // parfois 200 : le type de contenu departage.
+                    const type = reponse.headers.get('content-type') || '';
+                    if (!reponse.ok || !/javascript/i.test(type)) {
+                        throw new Error('Worker PDF.js non servi (' + reponse.status + ')');
+                    }
+                    return reponse.blob();
+                })
+                .then(blob => {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(blob);
+                    return true;
+                })
+                .catch(erreur => {
+                    promesseWorkerPDF = null;
+                    throw erreur;
+                });
+        }
+        return promesseWorkerPDF;
     }
 
     /* ===============================
@@ -146,6 +208,19 @@
         // efface pdfDocument -> etat incoherent (claim un fichier ouvert avec
         // pdfDocument === null) sans erreur visible. Symetrie avec ouvrirImage
         // qui gere son img.onerror via afficherErreur.
+        // Le worker d'abord, et HORS du try ci-dessous : s'il ne charge pas,
+        // getDocument n'est pas appele (PDF.js memoriserait l'echec) et le
+        // message dit quoi faire — ce n'est pas la copie qui est en cause.
+        try {
+            await assurerWorkerPDF();
+        } catch (e) {
+            console.error('[Travaux-Visionneuse] Worker PDF.js non charge:', e);
+            pdfDocument = null;
+            fichierActuel = null;
+            afficherErreur('Lecteur PDF non chargé', 'Vérifie la connexion, puis recharge la page.');
+            return;
+        }
+
         try {
             const arrayBuffer = await blob.arrayBuffer();
             pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -413,7 +488,7 @@
      * Affiche un message d'erreur dans la visionneuse
      * @param {string} message - Le message d'erreur
      */
-    function afficherErreur(message) {
+    function afficherErreur(message, precision) {
         initialiserCanvas();
         if (!canvasDocument) return;
 
@@ -424,7 +499,11 @@
         ctxDocument.fillStyle = '#dc3545';
         ctxDocument.font = '16px sans-serif';
         ctxDocument.textAlign = 'center';
-        ctxDocument.fillText(message, 200, 100);
+        ctxDocument.fillText(message, 200, precision ? 90 : 100);
+        if (precision) {
+            ctxDocument.font = '13px sans-serif';
+            ctxDocument.fillText(precision, 200, 116);
+        }
     }
 
     /* ===============================
