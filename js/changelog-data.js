@@ -25,6 +25,7 @@
             couleur: 'vert',
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
             items: [
+                'Relire une évaluation d\'un ancien trimestre ne donne plus «&nbsp;Erreur de chargement&nbsp;» après avoir évalué une copie dans le trimestre courant.',
                 'Pratiques de notation&nbsp;: adopter un modèle «&nbsp;N meilleures évaluations&nbsp;» ou «&nbsp;N plus récentes&nbsp;» demande maintenant son échelle de performance — que tu partes d\'un modèle dans l\'assistant ou que tu l\'ajoutes depuis la bibliothèque. Sans échelle, le profil de l\'élève calculait une note pendant que l\'export des résultats écrivait «&nbsp;non constructible&nbsp;»&nbsp;; les deux disent maintenant la même chose. Une pratique déjà adoptée sans échelle n\'est pas corrigée&nbsp;: ouvre-la par l\'assistant et choisis son échelle.',
                 'Export anonymisé pour la recherche (Réglages&nbsp;› Captures et recherche)&nbsp;: le fichier porte maintenant les vrais indices A, C et P de chaque élève, de 0 à 100 — il écrivait 0 partout. Quand la note d\'un élève n\'est pas encore constructible, P y est laissé vide plutôt qu\'à 0. Un export déjà produit n\'est pas corrigé&nbsp;: génère-le de nouveau.',
                 'Annoter et évaluer&nbsp;: après plusieurs heures dans le même onglet, les copies PDF pouvaient toutes afficher «&nbsp;Erreur ouverture PDF&nbsp;» jusqu\'au rechargement de la page. Ce n\'est plus le cas.',

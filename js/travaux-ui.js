@@ -1081,6 +1081,16 @@
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
 
         if (fichiersTravaux.length === 0) {
+            // #911 (17 sept. 2026) — sauver les panneaux eval avant d'écraser le conteneur, comme la
+            // branche « visionneuse déjà ouverte » plus bas. Une copie évaluée dans un trimestre, puis
+            // bascule vers un trimestre SANS copie (Automne 2025 de Grégoire) : les trois panneaux du
+            // formulaire, encore dans les palettes, partaient avec la visionneuse — plus aucune
+            // évaluation ne s'ouvrait jusqu'au rechargement (« Timeout : les critères de la grille ne
+            // sont pas rendus », `listeCriteresGrille1` absent du DOM).
+            if (document.getElementById('travaux-palette-eval-gauche')) {
+                fermerModeEvaluation();
+                _setModeCourant('annoter');
+            }
             conteneur.innerHTML = `
                 <div class="conteneur" style="padding: 24px;">
                     <h2 style="margin: 0 0 12px 0;">Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>

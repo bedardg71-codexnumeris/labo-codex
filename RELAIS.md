@@ -7,6 +7,22 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 15 H (Toronto) : 1.142.32 (build `0917-1504`, bug testeur #911, relire une évaluation d'un trimestre sans copie) SUR `main` — ⚠ COMMITÉE, PAS ENCORE POUSSÉE (le push attend le signal de Grégoire) ; LOT SUIVANT = #912 (« Dossier PDF » sans copie rend la synthèse seule, tranché), PUIS le lot 35
+
+> Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-evaluations-sans-copie, renommée au démarrage ; celle du lot 34 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-echelle-a-l-adoption.md`). **Démarrage** : la condition n'était PAS remplie à l'ouverture (une autre session poussait le lot 34) ; lecture seule jusqu'à la fin de son `pousser.sh`, puis `origin/main` = `cc30a3b1` (1.142.31) mesuré ; Vitest de base 589 / 6 666. Le lot 35 (`CONSIGNE-SUIVANTE-date-d-arrivee.md`, #735) reste REPORTÉ, non renommé.
+
+**LA CAUSE, MESURÉE — ET CE N'EST AUCUNE DES TROIS PISTES.** Sur une page fraîche, une évaluation sans copie s'ouvre (liste, lecture seule ou non). Le défaut : les trois panneaux du formulaire vivent dans les palettes de la visionneuse quand une copie est évaluée ; `afficherFichiers` (`js/travaux-ui.js`), branche « Aucun fichier importé », écrasait `#evaluations-contenu-fichiers` sans les rapatrier. Une copie évaluée en A2026, bascule vers A2025 sans recharger → panneaux détruits → plus rien ne s'ouvre, liste ET profil. Correctif : une garde (`fermerModeEvaluation()` + mode « annoter »), dans la limite d'arrêt du §3. **Contournement pour Grégoire d'ici la mise en ligne : recharger l'onglet.** INFÉRENCE non vérifiée chez lui : qu'il avait évalué une copie avant de basculer.
+
+**§4 (formulaire de bogue) : la cause n'est pas l'alerte.** Le mode lecture seule pose `pointer-events: none` sur tout textarea/input (`index.html`, `body.mode-archive`) ; exception posée pour `#descriptionBug` et `#prenomTesteur`.
+
+**PREUVE** : `tests/integration/evaluation-911-relire-sans-copie.spec.js`, six essais (S2 rouge avant, vert après ; S3 archivé : rien d'écrit, comparé octet pour octet ; S4 profil ; S5 sans critère, figé ; S6 formulaire de bogue) ; 4 mutations de la garde et 2 mutations CSS, toutes rouges ; Vitest 589 / 6 666 ; 17 essais WebKit voisins verts (#911, #868, #652). ⚠ Un premier passage des voisins a listé 4 instables en 14 min : charge moyenne à 11 (indexation Spotlight) ; rejoué à charge normale, 17 verts en 1 min.
+
+**NON LIVRÉ — INSCRIT #912, FORME TRANCHÉE par Grégoire vers 15 h : sans copie, « Dossier PDF » rend la synthèse seule (un PDF d'une page, aucun bouton neuf)** : la synthèse de rétroaction sans copie. `construireFeedback` n'utilise pas son paramètre `fichier` ; sa seule porte est la page ajoutée au PDF d'une copie (`ajouterPageSynthese`, `js/travaux-export-pdf.js`). « Dossier PDF » est offert sur une ligne évaluée sans copie et répond `alert('Aucun fichier trouve…')` (`exporterDossierComplet`). Les sept évaluations sans critère : elles s'ouvrent, grille rendue, aucun niveau à restaurer — non réparées.
+
+**RESTE À FAIRE** : le verdict Playwright sur le SHA commité, puis le push, SUR DEMANDE de Grégoire (`scripts/pousser.sh`, en arrière-plan, ≈ 15 min, aucune autre session de test pendant). Phrase de « Nouvelles » choisie par Grégoire (« Relire une évaluation d'un ancien trimestre… »). Fichiers de Cowork commités avec le lot. Cowork : une consigne pour #912 est due ; `CONSIGNE-SUIVANTE-date-d-arrivee.md` reste en attente derrière.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 14 H (Toronto) : 1.142.31 (lot 34, adopter un modèle Standards sans échelle demande l'échelle, #898) SUR `main` — ⚠ COMMITÉE, PAS ENCORE POUSSÉE (le push attend le signal de Grégoire)
 
 > **1.142.31** (build `0917-1343`) répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-echelle-a-l-adoption, renommée au démarrage ; celle du lot 33 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-export-recherche.md`). Travail sur `main`. **Démarrage** : `origin/main` = `932e594a` (1.142.30), condition remplie ; audit de début de session : Vitest 587 / 6 617, aucune autre session, #909 libre.

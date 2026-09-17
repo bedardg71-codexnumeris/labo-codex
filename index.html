@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260917d"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260917e"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -1143,6 +1143,8 @@
 
         /* Mode archivé : désactivation visuelle des éléments interactifs */
         /* Exception : .mode-ecriture-temp réactive les contrôles */
+        /* #911 : le formulaire de rapport de bogue (#prenomTesteur, #descriptionBug) reste saisissable —
+           signaler un problème vu dans un trimestre archivé n'écrit rien dans ce trimestre. */
         body.mode-archive:not(.mode-ecriture-temp) .btn-supprimer,
         body.mode-archive:not(.mode-ecriture-temp) .btn-modifier,
         body.mode-archive:not(.mode-ecriture-temp) .btn-ajouter,
@@ -1155,8 +1157,8 @@
             cursor: not-allowed;
         }
 
-        body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]),
-        body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]),
+        body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]):not(#prenomTesteur),
+        body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]):not(#descriptionBug),
         body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup):not([id^="selecteur"]):not([id^="selectTri"]):not(.eval-actions-select) {
             pointer-events: none;
             opacity: 0.7;
@@ -14290,7 +14292,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09171343"></script>
+    <script src="version.js?v=09171504"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260912g"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14320,7 +14322,7 @@
 
     <script src="js/modes.js?v=20260914b"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
-    <script src="js/ui-dialogues.js?v=20260917a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
+    <script src="js/ui-dialogues.js?v=20260917b"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
 
 
@@ -14362,8 +14364,8 @@
     <script src="js/identite-item.js?v=20260903b"></script> <!-- #291/#476 : source unique de l'identite d'un item de bibliotheque (analyserDoublons) — remplace les 5 detecteurs copies-colles -->
     <script src="js/bibliotheque-ui.js?v=20260909a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js?v=20260911a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
-    <script src="js/pratiques-bibliotheque.js?v=20260917c"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20260917a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
+    <script src="js/pratiques-bibliotheque.js?v=20260917d"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
+    <script src="js/pratiques-gestion.js?v=20260917b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20260911a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260911a"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260911c"></script>
@@ -14432,7 +14434,7 @@
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20260909g"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
-    <script src="js/wizard-pratique-v2.js?v=20260917d"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
+    <script src="js/wizard-pratique-v2.js?v=20260917e"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260917d"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
@@ -14448,7 +14450,7 @@
     <script src="js/profil-etudiant-confidentiel.js?v=20260915b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260916b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
     <script src="js/profil-etudiant-sections-affichage.js?v=20260917g"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
-    <script src="js/presences-apercu.js?v=20260917a"></script>
+    <script src="js/presences-apercu.js?v=20260917b"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260906a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/modelisation.js?v=20260830b"></script> <!-- Modélisation : annotation en projection -->
@@ -14499,7 +14501,7 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260916j"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
+    <script src="js/travaux-ui.js?v=20260917a"></script> <!-- #313 (2 juil.) : le sélecteur global n'écrase plus un choix par-fichier ; #558 choix DPI mémorisé + remplacement non destructif -->
     <script src="js/actions-rlo.js?v=20260808b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14529,7 +14531,7 @@
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=20260917b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
-    <script src="js/graphiques-progression.js?v=20260917b"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
+    <script src="js/graphiques-progression.js?v=20260917c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
         <script src="js/impact-jetons.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
@@ -14554,7 +14556,7 @@
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260917j"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260917k"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14575,11 +14577,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260917j"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260917k"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260917j"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260917k"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

@@ -1,45 +1,49 @@
-# Consigne suivante – adopter un modèle Standards demande l'échelle (lot 34 : #898)
+# Consigne suivante – relire une évaluation sans copie (bug testeur, tout le trimestre A2025)
 
-> Écrite le 17 septembre 2026, 13 h 18 (Toronto), par Cowork, après le push du lot 33 (`932e594a`, 1.142.30).
-> **Condition de départ** : `git --no-optional-locks log --oneline -1 origin/main` doit montrer **`932e594a` (1.142.30)** ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-export-recherche.md` et renomme `plans de travail/CONSIGNE-SUIVANTE-echelle-a-l-adoption.md` en `CONSIGNE-DU-JOUR.md`.
-> **Prochain identifiant libre : #909** (dernier utilisé : #908). Relis la ligne « Dernier ID utilisé » sur `main` avant d'en prendre un, et `grep` les DEUX registres.
+> Écrite le 17 septembre 2026, 13 h 54 (Toronto), par Cowork, pendant le lot 34. **Rapport de testeur : passe AVANT le backlog.**
+> **Condition de départ** : `git --no-optional-locks log --oneline -1 origin/main` doit montrer la version du lot 34 (#898) ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-echelle-a-l-adoption.md` et renomme `plans de travail/CONSIGNE-SUIVANTE-evaluations-sans-copie.md` en `CONSIGNE-DU-JOUR.md`.
+> ⚠ **La consigne `CONSIGNE-SUIVANTE-date-d-arrivee.md` (lot 35, #735) est REPORTÉE derrière celle-ci** : un retour de testeur passe devant. Ne la renomme pas.
+> **Identifiant** : prendre **#911** pour le bug — ⚠ #909 et #910 ont été pris par le lot 34 pendant l'écriture de cette consigne ; **relis la ligne « Dernier ID utilisé » sur `main` avant d'en prendre un** — et écrire sa fiche dans `Retours des testeurs/SUIVI-BUGS.md`, pas dans le backlog. Mettre à jour la ligne « Dernier ID utilisé » dans le même commit.
 
-Mandat : **#898**, tranché par Grégoire le 17 sept. vers 9 h 15, mots choisis. **Aucune question ne l'attend**, sauf la phrase de « Nouvelles » et toute phrase de l'Aide que tu réécrirais.
+## 1 · Le symptôme, tel qu'il est vécu
 
-## 1 · La règle et les mots (#898)
+Rapport du 17 sept., 13 h 49 (`Retours des testeurs/gregoire/BUG__grégoire__2026-09-17_13-49-26.txt`), gravité GÊNANT, sur **1.142.28**, Chrome 152, Mac.
+**Grégoire ne peut ouvrir AUCUNE de ses évaluations du trimestre Automne 2025.** Trimestre actif `a2025` (bandeau « LECTURE SEULE — Automne 2025 »), 30 élèves, 303 évaluations. Depuis Évaluation › Liste des évaluations › menu « Actions… », l'ouverture échoue et l'application affiche **« Erreur de chargement — Impossible de charger l'évaluation: Timeout : les critères de la grille ne sont pas rendus »** ; la page reste vide.
+Console : `❌ Timeout : le premier critère n'est pas rendu (ni menu de niveaux, ni champ de points)` puis `Contenu listeCriteresGrille1: undefined` (`js/evaluation.js:1693`).
 
-- **Adopter un modèle Standards qui n'a pas d'échelle DEMANDE l'échelle.** Tant qu'aucune échelle n'est choisie, le modèle n'est pas adopté.
-- **Texte, tel quel** : **« Ce modèle a besoin d'une échelle de performance pour calculer la note. Choisis-la : »**, suivi de la **liste des échelles du trimestre** et du bouton **« Adopter »**.
-- **Écarté par Grégoire** : fixer une échelle dans le gabarit lui-même.
-- ⚠ **Ne devine pas l'échelle**, même s'il n'en existe qu'une : la demande est la règle tranchée. `obtenirEchelleResolue()` sans id refuse déjà de deviner quand il y en a plusieurs ; ce n'est pas la sortie retenue ici.
+**Ce trimestre est le cas d'usage d'origine de l'application** : le module d'importation n'existait pas, Grégoire évaluait avec les grilles et les échelles, puis recopiait la rétroaction dans Léa à la main. **Aucune copie n'a jamais été importée.**
 
-## 2 · Ce que Cowork a lu `[lecture]`, à REMESURER avant de coder
+## 2 · Ce que Cowork a MESURÉ chez lui (sonde de console, lecture seule, trimestre a2025 actif)
 
-- **Le symptôme** (audit du 16 sept., constat B-1, `[exécuté]`) : les gabarits Standards « N meilleures » et « N plus récentes » n'ont pas d'`echelleId`. Adoptés tels quels, ils ne produisent pas d'instance (« Champ obligatoire manquant : echelle ») : `simulerIndices` rend `null` – **export « non constructible », Comparateur muet** – pendant que le **profil calcule 77,32** par son chemin riche. Deux écrans se contredisent sur le premier geste du labo.
-- **Le chemin d'adoption est à MESURER et à NOMMER par toi**, par ce que l'écran affiche, pas par un nom de fonction ni un commentaire : pars de `estGabarit` (`pratiques-gestion.js`, `pratiques-bibliotheque.js`) et de la bibliothèque des pratiques (`data-action="afficherBibliothequePratiques"`, `index.html:~5469`). **Vérifie qu'un appelant vivant existe** pour la fonction que tu modifies : `appliquerModeleSelectionne` (`pratiques-bibliotheque.js:791`) n'a **aucun appelant** hors de son fichier (`grep` sur `index.html` et `js/` : zéro) – si c'est le seul chemin que tu trouves, c'est que le vrai geste est ailleurs : dis-le et cherche.
-- **La liste à offrir** : les échelles du trimestre, comme les dropdowns de l'éditeur de pratique, donc `echellesTemplates` filtré sur `dansBibliotheque !== false` (la règle qu'applique déjà `verifierDependancesPratique`, `pratiques-gestion.js:613`). **Le pack porte deux échelles** (« IDME et niv 0 », « IDME 4 niv ») : le cas « plusieurs » est le cas normal.
-- **Après le choix**, l'échelle va dans `configuration.echelleId` de la pratique adoptée, et **l'instance se construit** : prouve que `simulerIndices` rend un nombre là où il rendait `null`, et que **l'export et le Comparateur disent la même chose que le profil**. C'est la promesse du lot, pas le fait d'afficher une modale.
-- **Les autres familles ne changent pas** : SOM, SPE et DEN s'adoptent comme aujourd'hui, sans question. Un modèle Standards qui PORTE déjà une échelle s'adopte sans question lui aussi.
-- **La sortie existante reste** : rouvrir la pratique par l'assistant, qui exige l'échelle (« Choisis une échelle de performance… ») et garde la méthode « récents » depuis 1.142.24. Ne la casse pas.
+```
+A2025 : {"total":303,"sansGrilleId":0,"grilleIntrouvable":0,"sansCriteres":7,"avecFichier":0,"sansFichier":303} | grilles visibles : 3
+```
+⮕ **Les 303 évaluations sont sans fichier** (`travauxResolution.trouverFichierPourEvaluation` rend `null` pour toutes). **Aucune grille n'est introuvable** : la piste « grille perdue » est écartée par la mesure. **Sept évaluations n'ont aucun critère enregistré** — cas à part, à nommer (l'attente rend `false` sans critère, elle ne rejette pas).
+⛔ **La cause n'est PAS mesurée** : que le conteneur `#listeCriteresGrille1` n'existe pas au bout de 3 s est un CONSTAT, pas un diagnostic. **Remesure d'abord**, sur un jeu d'essai qui reproduit le cas (évaluations enregistrées, aucun fichier), avant d'écrire une ligne.
+- Pistes à éprouver, dans cet ordre, sans les prendre pour acquises : (a) le formulaire ne s'ouvre qu'à partir d'un FICHIER ouvert dans la visionneuse (`basculerMode` exige un fichier ouvert, `travaux-ui.js:4677` — limite déjà nommée au lot #868) ; (b) le chemin de la Liste des évaluations (`liste-evaluations.js`, menu « Actions… ») n'est pas celui qu'a corrigé #868, qui visait les cinq boutons du PROFIL ; (c) le mode **lecture seule** d'un trimestre archivé change-t-il le rendu ? à départager de (a) : mesure un trimestre NON archivé sans copie.
+- ⚠ #652 (lot 1.142.16) a déjà corrigé une attente voisine : elle guette maintenant n'importe quel critère enregistré. Ici le conteneur lui-même est absent : **ce n'est pas le même défaut**, ne le recorrige pas sans mesure.
 
-### ⛔ Arrêt, sur ce que TU peux mesurer
-- **Aucune échelle utilisable dans le trimestre** (`echellesTemplates` filtré = vide) : la liste serait vide et le bouton « Adopter » sans objet. **Arrête-toi sur ce cas et rapporte-le** – il demande un mot de Grégoire, pas une phrase inventée. Le reste du lot continue.
-- **Si l'adoption d'un gabarit passe par un chemin qui ne peut pas poser de question** (import, activation automatique, pack de démarrage) : nomme-le, ne le change pas, et dis ce qu'il produit aujourd'hui.
+## 3 · Ce que le lot doit rendre possible
 
-## 3 · Au passage, sans mot, sans release si c'est seul
+1. **Ouvrir et relire une évaluation sans copie**, depuis la **Liste des évaluations** ET depuis le profil de l'élève : la grille se rend, les niveaux et les rétroactions enregistrés sont restaurés, la note s'affiche. Sur un trimestre en lecture seule, en lecture seule — **rien ne doit être écrit dans A2025**.
+2. **La synthèse de rétroaction se génère pour une évaluation sans copie.** C'est la demande explicite de Grégoire : « il faudrait que la synthèse des rétroactions soit possible ». Mesure d'abord ce qu'elle fait aujourd'hui sans fichier (`synthese-retroaction-data.js`, `synthese-retroaction-rendu.js`) : si elle fonctionne déjà, dis-le et ne touche à rien ; si elle exige un fichier, nomme où.
+3. **Les sept évaluations sans critère** : dis ce qu'elles font à l'ouverture, et ne les répare pas dans ce lot si elles demandent une décision.
 
-**Les trois essais de comportement dus par la relecture croisée du lot 32** (en tête de la section 1.142.28 de `RELAIS.md`, ajout de 12 h 45). Les mutations **E2b, E3b, E4b** survivent à la suite entière : le filtre des exclus est GARDÉ dans son texte et rendu inopérant (`!estEtudiantExclu(e) || e.statut`) dans `presences-apercu.js`, `snapshots.js` (relevés hebdomadaires) et `graphiques-progression.js` (~2651). Depuis le lot 32, ces filtres portent seuls la promesse « l'exclu reste hors des moyennes du groupe », et **aucun essai de COMPORTEMENT ne les juge**.
-⮕ Trois essais, sur un groupe qui a un exclu CALCULÉ : **la moyenne d'assiduité de l'aperçu des présences**, **les moyennes du relevé hebdomadaire**, **la courbe du groupe** sont celles des seuls actifs. **E2b, E3b, E4b doivent rougir** – une assertion sur le texte du filtre ne suffit pas (erreur 16 : une preuve « par le texte » ne juge pas le comportement).
+⛔ **Arrêt** : si rendre la grille sans copie demande de toucher au moteur de la visionneuse (`travaux-ui.js`) au-delà d'une garde, arrête-toi et rapporte le périmètre avant de coder — c'est un chemin que tout le monde emprunte.
 
-## 4 · Preuve attendue
+## 4 · Au passage, mesuré et vécu (à traiter seulement si c'est une garde)
 
-- Une **sentinelle du lot** : le geste d'adoption d'un modèle Standards sans échelle (la question est posée, rien n'est adopté tant qu'on ne choisit pas), l'adoption après choix (`echelleId` posé, instance construite), **la parité profil / export / Comparateur** sur le même élève, et les familles qui ne changent pas.
-- **Des mutations qui changent le CALCUL**, pas seulement le texte : au moins une qui garde la phrase exigée et neutralise le choix de l'échelle.
-- **Un banc WebKit** sur le pack démo pour le geste réel (la question paraît, la liste porte les deux échelles, « Adopter » adopte), **mesuré à 768 px**.
-- **Porte terrain probable (iPad, Safari)** : si la question s'ouvre dans une modale ou un panneau, dis-le en fin de lot – Cowork prépare la porte pour Grégoire.
+**Le formulaire de rapport de bogue ne se remplit pas quand l'alerte d'erreur est affichée** : Grégoire a cliqué huit fois sur `#sectionFormulaireBug` sans pouvoir écrire sa description (son rapport est parti sans texte). Mesure si l'alerte capte le clic ou le focus ; si c'est une garde d'une ligne, corrige ; sinon, inscris et continue.
 
-## 5 · Mots et traces
+## 5 · Preuve attendue
 
-- **Phrase de « Nouvelles »** : à proposer à Grégoire (par Cowork) avant la release ; ne l'écris pas de ton chef.
-- **Aide** : si une phrase de l'Aide décrit l'adoption d'un modèle, vérifie-la **contre ce que l'écran affiche** avant de la réécrire, et propose les mots plutôt que de les poser.
-- **Fichiers de Cowork à commiter avec le lot** : `plans de travail/CONSIGNE-DU-JOUR.md` (cette consigne, renommée), son archive `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-export-recherche.md`, et `CONSIGNE-DEMARRAGE-COWORK.md` si Cowork l'a réécrite d'ici là.
+- **Un jeu d'essai qui reproduit le cas** : des évaluations enregistrées, avec critères et niveaux, **sans aucun fichier**. Le banc doit être ROUGE avant le correctif — c'est le symptôme de Grégoire reproduit — et vert après.
+- **Des mutations qui changent le comportement**, une clause à la fois.
+- **Un banc WebKit** qui ouvre une évaluation sans copie depuis la Liste des évaluations, par les vrais boutons, et lit la grille rendue ; plus un essai sur la synthèse de rétroaction sans copie.
+- **Mesuré à 768 px** si un écran change.
+
+## 6 · Mots et traces
+
+- **Fiche #909 dans `Retours des testeurs/SUIVI-BUGS.md`** (pas dans le backlog), avec la mesure de la sonde ci-dessus et la version du rapport (1.142.28).
+- **Phrase de « Nouvelles »** : à proposer à Grégoire par Cowork avant la release.
+- **Fichiers de Cowork à commiter avec le lot** : cette consigne renommée, son archive, `plans de travail/DECISIONS-2026-09-17-apres-midi.md` (neuf décisions rendues cet après-midi, chacune avec la ligne exacte à poser sous sa fiche) et `plans de travail/CONSIGNE-SUIVANTE-date-d-arrivee.md` (lot reporté).
