@@ -23,9 +23,9 @@
         {
             version: '1.143',
             couleur: 'vert',
-            titre: 'Résultats ultérieurs',
+            titre: 'Les résultats de tes anciens élèves',
             items: [
-                'Sous la liste des étudiant·es d\'un trimestre, tu peux maintenant noter les résultats obtenus par tes élèves dans les cours suivants&nbsp;; l\'export pour la recherche les inclut, toujours anonymisés.',
+                'Sur un trimestre passé, tu peux maintenant noter les résultats obtenus par tes élèves dans les cours qui ont suivi le tien. Ces notes ressortent dans l\'export de recherche, sans identité.',
             ]
         },
         {

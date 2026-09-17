@@ -123,3 +123,16 @@ Avec ~15 critères × 4 niveaux, plus les indices, les présences et les relevé
 ⮕ **Ce n'est pas un argument pour renoncer** — c'est un argument pour que **D3 (les hypothèses écrites d'avance) soit tranchée AVANT de regarder les données**, et pour que ce qui sera trouvé hors de ces hypothèses soit nommé *exploratoire*, à vérifier sur la cohorte suivante. Le dispositif s'y prête bien : les cohortes arrivent une par une.
 
 ⚠ **À récupérer** : l'analyse de l'an dernier (méthode, variables retenues, ce qu'elle a trouvé). Elle sert de préinscription naturelle — ses hypothèses à elle, mises à l'épreuve sur des données neuves, valent bien plus qu'une exploration à neuf.
+
+
+---
+
+## 12 · Où vivra le module d'analyse — TRANCHÉ par Grégoire le 17 septembre 2026, 17h13
+
+`[établi — ses mots]` **Le Labo.** « Je crois que le labo serait sans doute le meilleur endroit pour le faire. »
+
+⮕ **Ce que ça règle, et c'est plus qu'un emplacement.** Le Labo est déjà l'endroit où l'on explore sans que rien n'engage : c'est là que vivent le Comparateur et les maquettes de pratiques, qu'on compare, qu'on adopte ou qu'on jette. Un résultat longitudinal y est **présenté comme une exploration, pas comme un verdict** — exactement le statut que la relecture de l'analyse de 2025 impose (`plans de travail/RELECTURE-2026-09-17-analyse-101-102-de-2025.md`). Le même écran posé dans le Suivi ou le tableau de bord aurait été lu comme une mesure de l'élève.
+
+⮕ **Ce que ça n'engage pas encore** : la saisie du résultat ultérieur reste où elle est (la liste du Cadre, livrée en 1.143.0) — c'est un geste de tenue de dossier, pas d'analyse. Le Labo reçoit la LECTURE, pas la SAISIE.
+
+⚠ **À remesurer avant de cadrer ce module** : ce que le Labo offre déjà comme charpente (le Comparateur et son écran en source fictive), et si une exploration peut s'y ouvrir sans pratique active.

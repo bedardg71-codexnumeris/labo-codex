@@ -31,12 +31,13 @@
     const NOM_CLE = 'resultatsUlterieurs';
     const LONGUEUR_MAX_TEXTE = 40;
 
-    // Les mots de l'écran, en UN seul endroit. Proposés par Cowork le 17 sept. 2026 ; la phrase
+    // Les mots de l'écran, en UN seul endroit. Proposés par Cowork le 17 sept. 2026, RELUS ET
+    // CONFIRMÉS par Grégoire le même jour à 17 h 13 (sous-titre corrigé par lui) ; la phrase
     // du verrou nomme la case telle que le bandeau l'ÉCRIT (« Permission d'écriture ») — la
     // consigne disait « écriture temporaire », un mot que l'écran ne montre nulle part.
     const MOTS = Object.freeze({
         titre: 'Résultats ultérieurs',
-        sousTitre: 'Les notes obtenues par cet élève dans les cours suivants.',
+        sousTitre: 'Les notes que ces élèves ont obtenues dans les cours qui ont suivi.',
         cours: 'Cours',
         exempleCours: '601-102-MQ',
         trimestre: 'Trimestre',
