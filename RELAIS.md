@@ -7,7 +7,35 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 19 H 45 (Toronto) : 1.142.19 (#737, #741, #718, #738-complétion) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 20 H 30 (Toronto) : 1.142.20 (complément du lot A) SUR `main`
+
+> **1.142.20** répond à l'ajout de Cowork de 19 h 56 (relecture croisée de 1.142.19, « à compléter »). Consigne :
+> `plans de travail/CONSIGNE-DU-JOUR.md` (20 h). Cowork fermé pendant le verdict (Grégoire : « cowork est fermé », 20 h 10).
+> **Point 1, corrigé** : `genererRapportAPI` — `compteDansLaNote = (e) => window.evaluationEntreDansLaNote(e)` (plus de repli
+> `typeof … : ancienne règle`), et `productionsComptees` lit `compteDansLaNote(e)`. C'était le lot qui n'était pas fini, pas une
+> trouvaille : je l'avais nommé « non exercé autrement que par le texte » sans le finir.
+> **Point 2, prouvé par comportement** : cinq essais E1-E5 ajoutés à `sentinelle-lot-A-737-741-718-738-les-memes-copies-partout`
+> (17 essais) — E1 P4 en brouillon pour les DEUX élèves : C = 3/3 sous SOM et configurable, `calculerTousLesIndices` 100 (le banc
+> appelle désormais `calculerEtStockerIndicesCP`, sans quoi le profil retombe sur `calculerTauxCompletion`, un repli qui n'est pas
+> la pratique — mesuré : 75 au lieu de 100), rapport « 3 remises / 3 productions » ; E2 témoin enregistré → « 3 remises /
+> 4 productions » ; E3 P4 « non-recu » notée 0 → « 3 remises / 4 productions » ; E4 « (sur N) » (`genererSectionAccompagnement`,
+> interne) 3 puis 4 ; E5 directions : trois copies pour N = 3 → « Données insuffisantes » partout, quatre → une flèche. D3 gardé
+> (plus l'absence du repli, par le texte). **Les mutations de Cowork reposées, sept rouges** : K1 « (sur N) » → E4 ; K2 directions
+> → E5 ; K3 `nbRemis` → E2, E3 ; K4 dénominateur SOM → E1 ; K5 dénominateur configurable → E1 ; R0 le défaut du point 1 remis →
+> E1 ; R1 la copie de secours remise → D3 (texte seulement : sous ce banc les deux règles coïncident). Fichiers restaurés, md5.
+> **Point 3, mesuré** : `profil-etudiant-sections-affichage.js:2864` — un brouillon d'obligatoire s'affiche avec niveau et note
+> dans la colonne « Obligatoires », entre dans `obligatoiresEvaluees` et dans la contribution pondérée de la colonne ; la sélection
+> (`retenusDecrits`) vient du moteur, déjà filtrée. Par lecture (aucun banc n'exécute cette branche). ⮕ **inscrire et continuer :
+> #896** (Dernier ID : #896). `SignalementDepistage._evaluationActive` : pas touché, question pour Grégoire (Cowork).
+> **« Nouvelles »** : une seule phrase pour 1.142.19 et 1.142.20, PROPOSÉE (Grégoire absent au moment de figer) — item 1.142 du
+> changelog, « … la note, la complétion, le rapport, le dépistage … et la carte RàI lisent maintenant les mêmes copies … pas même
+> parmi les productions du rapport … ». Vitest 579 / 6 494 avant le bump. **Aucune porte terrain, aucun mot neuf.** Fichiers de Cowork
+> commités avec ce lot (consigne de démarrage, consigne du jour, trois archives `_ancienne-…`). Comptes : backlog 226 (une fiche neuve),
+> page 224 + #896 à porter dans l'artefact du tri, écart {#575}. **Pour Cowork** : relecture croisée de 1.142.20 ; artefact du tri.
+
+## (précédent) 16 SEPT. 2026, ≈ 19 H 45 (Toronto) : 1.142.19 (#737, #741, #718, #738-complétion) SUR `main`
+
+> **Ajout de 19 h 56 (Cowork) — relecture croisée de 1.142.19 (lot A) : À COMPLÉTER, par exécution.** Clone jetable de `db117dce` hors du dépôt. Sentinelle du lot seule : 12 / 12 ; `grep retroactionFinale` dans `profil-etudiant-calculs.js` : 0. **Un défaut introduit par le lot, prouvé par exécution** : `genererRapportAPI` garde l'ancienne règle pour son dénominateur (`productionsComptees`, `profil-etudiant-rapport.js:78-80` : `!e.remplaceeParId && e.noteFinale != null`), alors que la complétion SOM lit désormais R1. Banc du lot A, P4 en brouillon pour les DEUX élèves : C SOM = 100, et le rapport écrit « Complétion : 100% (3 remises / 4 productions) ». Avant 1.142.19, les deux disaient 4. Correction d'une ligne (`compteDansLaNote(e)`, déjà défini deux lignes plus haut) posée dans le clone : « 3 remises / 3 productions », Vitest 579 / 6 489 vert. C'est le lot qui n'est pas fini, pas une trouvaille. **Sept mutations de Cowork, deux rouges, cinq survivantes NON équivalentes**, chacune gardant le texte que D3 exige : K1 le « (sur N) » réadmet un brouillon ; K2 les directions réadmettent un brouillon ; K3 `nbRemis` du rapport réadmet un non-remis noté ; K4 et K5 le dénominateur de C (SOM, configurable) réadmet une production que seuls des brouillons touchent. **Les cinq survivent à la suite unitaire entière** (579 / 6 489 vert sous chacune) : ce sont les lecteurs que Claude Code avait nommés « non exercés autrement que par le texte ». Rouges : K6 portée nulle admise dans le registre (1) ; K7 « non-recu » mal orthographié dans le registre (3). **Hors lot, par lecture, question pour Grégoire** : `SignalementDepistage._evaluationActive` (`js/entites/signalement-depistage.js:45`, vivant : profil et tableau de bord) ne lit pas le verrou : une copie en brouillon lève un signalement. R1 dit « nulle part », mais la page des questions ne montrait pas ce cas : pas de tranchage par analogie. **À mesurer par Claude Code** : `profil-etudiant-sections-affichage.js:2864` (détail de la note hybride, obligatoires) lit `noteFinale != null` sans verrou. **Sur l'arrêt « Non reçu »** : la consigne demandait l'arrêt si le cas existe et qu'un chemin réel le produit ; le chemin existe, le stock mesuré est à 0 sur le pack démo et les bancs, pas sur les données de Grégoire (inaccessibles). La décision de ne pas s'arrêter est défendable (un calcul, aucune écriture, réversible en repassant le statut) ; la sonde reste à faire tourner par Grégoire quand il sera disponible. **Suite proposée** : un complément 1.142.20 (`plans de travail/CONSIGNE-DU-JOUR.md`, réécrite à cette heure). Artefact du tri publié en version 26 (lot 24, 1.142.19) : page 224, backlog 225, écart {#575}, comparés par ensembles.
 
 > **1.142.19** porte le **lot A** du cadrage `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md` (« Les mêmes copies
 > partout » ; mandat de Grégoire, 16 sept. soir, choisi parce qu'il ne lui demandait aucun mot). Poussée avec `916e6dac` (relecture
