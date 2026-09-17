@@ -7,7 +7,55 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 20 H 30 (Toronto) : 1.142.20 (complément du lot A) SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 16 SEPT. 2026, ≈ 21 H 15 (Toronto) : 1.142.21 (lot F, #860 + #828) SUR `main`
+
+> **1.142.21** (build `0916-2057`) répond à la consigne de 20 h 40 (`plans de travail/CONSIGNE-DU-JOUR.md`) : lot F du cadrage
+> « Les règles du dépistage », « Les écrans du groupe ». Cowork fermé pendant le verdict (Grégoire : « cowork est fermé », 21 h).
+> **#828** : `borneCritiqueEngagement()` lit `window.BORNES_MOBILISATION.critique` (`contexte-qualification.js`, chargé avant
+> `tableau-bord-apercu.js` dans `index.html`) à l'appel, pour le libellé ET la règle ; `indiceSousBorne(v, borne)` = nombre fini
+> `< borne` (un `null` n'est pas « sous 70 ») ; règle A OU C ; urgence = borne − min des indices montrés ; la borne n'est lue que
+> si le filtre M est actif (les bancs qui n'activent que P n'en dépendent pas). `M` retiré des enrichis (plus aucun lecteur) ;
+> id `'M'` gardé (mesuré : écrit nulle part). `.prioritaire-tri-btn { white-space: nowrap }`.
+> **#860** : `pluginEtiquettesZones` retiré des courbes du groupe (tous indices) et des trajectoires hors mode Habiletés ; marge
+> droite 120 px seulement en Habiletés. Remesuré : `creerAnnotationsZones` / `creerAnnotationsZonesIDME` sans appelant → retirées ;
+> après retrait, `ZONES_IDME`, `obtenirEchelleUtilisateur` et le repli sans argument de `genererZonesDepuisEchelle` n'avaient
+> plus de lecteur vivant (les lecteurs restants du plugin — graphique par critère #752, trajectoires Habiletés — posent leurs
+> zones par `_zonesParCanvas`) → retirés ; `zonesPourChart` rend `[]` sans entrée. **Trois bancs réancrés** parce qu'ils
+> prouvaient l'ancien repli : `sentinelle-575` (témoin : pose les zones lui-même), `lot4-752-754` (e) (sans échelle → `[]`),
+> `audit-onglet-suivi-2026-09-05` F1 (plus de `M`, filtre M → [Silence, Absent]) et H2 (échelle passée, plus lue en repli) ;
+> `sentinelle-749` charge `contexte-qualification.js`. **Mesuré en chemin, corrigeant le texte de départ de Cowork** : aucun
+> graphique ne dessine de « zones colorées en arrière-plan » — `pluginGradientFond` est un plugin vide depuis #240 ; seuls des
+> lignes pointillées et des codes de niveaux (lettres) existent. Les trois textes disent donc « lignes pointillées et lettres ».
+> **Preuve** : `tests/unit/sentinelle-lot-F-860-828-les-ecrans-du-groupe.test.js` (12 essais : A1-A4 filtre, B courbes P et A,
+> B trajectoires note finale / Habiletés témoin / cécité, repli, code mort dans tout `js/`, textes). **Huit mutations, huit
+> rouges** (M1 ancienne règle → A2 A3 ; M2 70 en dur → A3 A4 ; M3 garde retirée → A2 A3 ; M4 zones sur (a) → B-P ; M5 zones sur
+> (b) → note finale ; M6 Habiletés sans zones → témoin ; M7 repli remis → « sans échelle » ; M8 marge remise → note finale), md5
+> restaurés. Vitest 580 / 6 506 avant le bump. **Aucune porte terrain.** ⚠ Non mesuré : la rangée des boutons à 768 px sous WebKit
+> (le bouton ne se casse plus ; la rangée `.prioritaire-tri-zone` est un flex sans wrap et peut déborder — dit, pas mesuré).
+> **Mots proposés à Grégoire, figés dans le code, à corriger en un patch s'il les veut autrement** :
+> · Aide des trajectoires (`index.html`) : « En mode **Habiletés**, les **lignes pointillées** et les lettres des niveaux dans la
+>   marge droite viennent de l'échelle de tes évaluations (la plus fréquente, si elles n'ont pas toutes la même). Le mode **Note
+>   finale** n'en affiche pas : une note en pourcentage ne se situe pas dans une échelle de niveaux. »
+> · Préférence « Indicateurs visuels des seuils » (aide) : « … sur le graphique par critère du profil individuel et sur les
+>   trajectoires du Suivi du groupe, en mode Habiletés. » ; étiquette d'effet : « Suivi du groupe › trajectoires (Habiletés) » ;
+>   infobulle : « … Les indices A-C-P (profil et groupe) et la note finale n'en portent pas : un pourcentage agrégé ne se situe
+>   pas dans une échelle de performance. »
+> · « Nouvelles » (item ajouté à l'entrée 1.142) : « Dans le Suivi du groupe, le filtre « A+C < 65% » devient « A ou C < 70% » :
+>   il retient l'élève dont l'assiduité ou la complétion est sous le seuil critique du profil, le même que la carte Mobilisation.
+>   Les courbes du groupe et les trajectoires en mode Note finale ne dessinent plus les niveaux d'une échelle sous des
+>   pourcentages ; le mode Habiletés les garde. »
+> **Trouvailles** : (1) A sans donnée = 0 ou 100 dans les enrichis, jamais `null` → **inscrire et continuer**, sous #830 (le lot D
+> apportera le tiret) ; (2) `pluginGradientFond` / `pluginGradientFond100`, plugins vides depuis #240, toujours montés →
+> **commenter dans le code et oublier** (déjà documenté « désactivé » dans le source) ; (3) worktree `audit-pn-0916`
+> (`audit/pratiques-notation-2026-09-16`, 1 commit devant `main`, absent d'origin : l'audit des pratiques de notation du 16, non
+> poussé) → **inscrire et continuer** : à pousser ou à merger, décision de Grégoire. Comptes : #860, #828 et **#575** cochées
+> (la fiche #860 disait « #575 se coche avec cette fiche ») : backlog 223, page du tri 223, **écart ∅**. Fichiers de Cowork
+> commités avec ce lot (RELAIS 20 h 37, consigne du jour, archive `_ancienne-…-complement-lot-A-1.142.20.md`).
+> **Pour Cowork** : relecture croisée de 1.142.21 ; artefact du tri (lot 25, #575 cochée, écart nul).
+
+## (précédent) 16 SEPT. 2026, ≈ 20 H 30 (Toronto) : 1.142.20 (complément du lot A) SUR `main`
+
+> **Ajout de 20 h 37 (Cowork) — relecture croisée de 1.142.20 (complément du lot A) : VERTE, par exécution, aucune retouche.** Clone jetable de `80b8a556`, hors du dépôt. Sentinelle du lot seule : 17 / 17 ; suite unitaire entière : 579 / 6 494. **Six mutations de Cowork, différentes de K1-K5, six rouges** : L1 le dénominateur du rapport réadmet une copie en brouillon (E1) ; L2 il ne regarde que les copies de l'élève (E2) ; L3 le « (sur N) » compte les copies de tout le groupe (E4) ; L4 la complétion SOM compte la copie d'un autre élève (A1, B1, C1 ×2) ; L5 `compteDansLaNote` rendu à l'ancienne règle (E1, E2, D3) ; L6 les directions exigent une copie de moins (E5). Fichiers restaurés, `git status` vide. **Un constat, sans fiche (commenter et oublier)** : quand aucune copie enregistrée ne touche un travail dû, la complétion SOM et configurable l'écarte du dénominateur (3 / 3), alors que STD et les snapshots comptent les travaux DUS (3 / 4). La différence de famille est antérieure au lot (elle existait déjà pour un travail que personne n'a touché) ; le lot l'étend aux travaux que seuls des brouillons touchent. Aucun symptôme vécu. E1 n'affirme pas STD ni les snapshots, à raison. **#896 portée à la page du tri** ; comptes remesurés par ensembles : backlog 226, page 225, écart {#575}. Artefact du tri publié en version 27.
 
 > **1.142.20** répond à l'ajout de Cowork de 19 h 56 (relecture croisée de 1.142.19, « à compléter »). Consigne :
 > `plans de travail/CONSIGNE-DU-JOUR.md` (20 h). Cowork fermé pendant le verdict (Grégoire : « cowork est fermé », 20 h 10).

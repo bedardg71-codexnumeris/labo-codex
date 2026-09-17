@@ -11811,6 +11811,7 @@ label:has(+ textarea:disabled) {
 .prioritaire-tri-btn {
     padding: 1px 7px;
     font-size: 0.7rem;
+    white-space: nowrap;   /* #828 : « A ou C < 70% » ne se casse pas en deux lignes dans une rangée serrée */
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 4px;
     background: transparent;

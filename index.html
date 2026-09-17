@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260916d"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
+    <link rel="stylesheet" href="styles.css?v=20260916e"> <!-- Carte : sarcelle unie (EE), flèches d'ordre des objectifs, typographie imposée au collage, retrait du bandeau « en développement » (9 août) -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -7582,7 +7582,7 @@
                                 <li><strong>Note finale</strong> — la note globale par production (champ <em>Note chiffrée</em> de l'évaluation, /100).</li>
                                 <li><strong>Habiletés</strong> — moyenne des critères cochés (niveaux IDME convertis en %). Coche un seul critère pour isoler une habileté, combine-les pour une vue d'ensemble.</li>
                             </ul>
-                            Les <strong>lignes pointillées</strong> aux seuils 65 % (D), 75 % (M), 85 % (E) viennent de l'échelle de notation utilisée. Les zones colorées en arrière-plan correspondent aux niveaux IDME (ou personnalisés).
+                            En mode <strong>Habiletés</strong>, les <strong>lignes pointillées</strong> et les lettres des niveaux dans la marge droite viennent de l'échelle de tes évaluations (la plus fréquente, si elles n'ont pas toutes la même). Le mode <strong>Note finale</strong> n'en affiche pas : une note en pourcentage ne se situe pas dans une échelle de niveaux.
                             <br><br>
                             Active <strong>« Médiane du groupe »</strong> pour superposer deux repères statistiques :
                             <ul style="margin: 8px 0; padding-left: 20px;">
@@ -8835,9 +8835,9 @@
                                     <span class="u-texte-gras">Indicateurs visuels des seuils</span>
                                 </label>
                                 <small class="bloc-option-aide u-texte-petit">
-                                    Lignes pointillées et étiquettes des niveaux de ton échelle sur le graphique par critère du profil individuel et sur les graphiques du Suivi du groupe.
+                                    Lignes pointillées et étiquettes des niveaux de ton échelle sur le graphique par critère du profil individuel et sur les trajectoires du Suivi du groupe, en mode Habiletés.
                                 </small>
-                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › graphique par critère</span><span class="etiquette-effet">Suivi du groupe › semaine par semaine, trajectoires</span></div>
+                                <div class="etiquettes-effet"><span class="etiquette-effet">Profil › graphique par critère</span><span class="etiquette-effet">Suivi du groupe › trajectoires (Habiletés)</span></div>
                             </div>
 
                             <!-- Note différée (#321, couche 1 PRÉN) -->
@@ -14290,7 +14290,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09162004"></script>
+    <script src="version.js?v=09162057"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260912g"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14440,10 +14440,10 @@
     <script src="js/indices.js?v=20260905a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=20260911c"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
+    <script src="js/tableau-bord-apercu.js?v=20260916a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20260916b"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-calculs.js?v=20260916c"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-rapport.js?v=20260916b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
+    <script src="js/profil-etudiant-rapport.js?v=20260916c"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260915b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260916b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
@@ -14529,7 +14529,7 @@
     <script src="js/journal.js?v=2026041706"></script>
     <script src="js/snapshots.js?v=20260916b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
-    <script src="js/graphiques-progression.js?v=20260913c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
+    <script src="js/graphiques-progression.js?v=20260916a"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
         <script src="js/impact-jetons.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
@@ -14554,7 +14554,7 @@
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260916q"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260916r"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14567,7 +14567,7 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260913c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260916a"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260913b"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260911a"></script>
     <script src="js/guides-pedagogiques.js?v=20260911a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
@@ -14575,11 +14575,11 @@
     <script src="js/export-resultats-finaux.js?v=20260905a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260916q"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260916r"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260916q"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260916r"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

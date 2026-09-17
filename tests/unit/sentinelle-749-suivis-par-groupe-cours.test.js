@@ -132,6 +132,7 @@ function monter(store) {
         setTimeout: (f) => 0, requestAnimationFrame: (f) => 0,
     };
     for (const [k, v] of Object.entries(globaux)) if (!(k in win)) win[k] = v;
+    chargerAvecInterne('js/contexte-qualification.js', globaux, win, []);   // #828 (16 sept.) : le bouton « A ou C < 70% » lit la borne du profil
     chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, INTERNES);
     return { win, store, journal, elements, notifs, i: win.__audit['tableau-bord-apercu.js'] };
 }

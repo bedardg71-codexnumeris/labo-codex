@@ -162,8 +162,8 @@ describe('B · #752 — les graphiques lisent l\'échelle de chaque évaluation'
         expect(d.echelles.echelle.id).toBe('EABC');
         expect(d.echelles).toMatchObject({ nb: 2, total: 4, distinctes: 2 });
         expect(g.genererZonesDepuisEchelle(d.echelles.echelle).map((z) => z.code)).toEqual(['A', 'B', 'C']);
-        // Sans argument : l'échelle du trimestre (les graphiques de groupe, inchangés).
-        expect(g.genererZonesDepuisEchelle().map((z) => z.code)).toEqual(['0', 'I', 'D', 'M', 'E']);
+        // #860 (16 sept.) : sans échelle, aucune zone — plus de repli sur celle du trimestre.
+        expect(g.genererZonesDepuisEchelle()).toEqual([]);
         // Aucune échelle résolue : pas de zones inventées.
         expect(g.echelleMajoritaireDesEvaluations([{ echelleId: 'FANTOME' }])).toEqual({ echelle: null, nb: 0, total: 1, distinctes: 0 });
     });

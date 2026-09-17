@@ -858,25 +858,26 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
    F · SUIVI DU GROUPE ET LISTE — les agrégats
    ============================================================================================= */
 describe('F · les nombres du groupe sont-ils la somme des profils', () => {
-    it('F1 · le panneau du Suivi du groupe enrichit chaque élève avec les MÊMES fonctions que le profil ; les filtres P < 65 et A+C < 65 retiennent qui on attend', () => {
+    it('F1 · le panneau du Suivi du groupe enrichit chaque élève avec les MÊMES fonctions que le profil ; les filtres P < 65 et « A ou C < 70 » retiennent qui on attend', () => {
         // À la main : Assidu (A 100, C 100, P 77, niveau 1), Absent (40, 100, 63, niveau 3), Silence (100, 0, P non constructible, niveau 3).
         // Filtre P < 65 : Absent (63) seulement — depuis #749 (11 sept.), Silence (P non constructible, affiché « — ») est ÉCARTÉ.
-        // Filtre M = (A + C) / 2 < 65 : Silence (50) seulement (Absent : 70).
+        // Filtre « A ou C < 70 » (#828, lot F du 16 sept.) : Silence (C 0) puis Absent (A 40), le pire indice d'abord.
+        // Avant le 16 : M = (A + C) / 2 < 65 → Silence (50) seulement (Absent : 70) ; M n'est plus calculé.
         const b = monter(jeuBase()); b.calculerTout();
         b.win.calculerEtudiantsPrioritaires();
         const tb = b.interne['tableau-bord-apercu.js'];
-        const enrichis = tb._tousEtudiantsEnrichis.map(e => ({ da: e.da, A: e.A, C: e.C, P: e.P, M: e.M, niveau: e.niveau, pattern: e.pattern, ipb: e.suivi ? e.suivi.ipb : null }));
+        const enrichis = tb._tousEtudiantsEnrichis.map(e => ({ da: e.da, A: e.A, C: e.C, P: e.P, niveau: e.niveau, pattern: e.pattern, ipb: e.suivi ? e.suivi.ipb : null }));
         tb._filtresActifs.push('P'); tb.appliquerFiltres(); const filtreP = tb._etudiantsPrioritaires.map(e => e.da);
         tb._filtresActifs.length = 0; tb._filtresActifs.push('M'); tb.appliquerFiltres(); const filtreM = tb._etudiantsPrioritaires.map(e => e.da);
         tb._filtresActifs.length = 0;
         noter('F1', { enrichis, filtreP, filtreM });
         expect(enrichis).toEqual([
-            { da: DA.ASSIDU, A: 100, C: 100, P: 77, M: 100, niveau: 1, pattern: 'Stable', ipb: 0 },
-            { da: DA.ABSENT, A: 40, C: 100, P: 63, M: 70, niveau: 3, pattern: 'Difficulté persistante', ipb: 3 },
-            { da: DA.SILENCE, A: 100, C: 0, P: 0, M: 50, niveau: 3, pattern: 'Non-participation', ipb: null }
+            { da: DA.ASSIDU, A: 100, C: 100, P: 77, niveau: 1, pattern: 'Stable', ipb: 0 },
+            { da: DA.ABSENT, A: 40, C: 100, P: 63, niveau: 3, pattern: 'Difficulté persistante', ipb: 3 },
+            { da: DA.SILENCE, A: 100, C: 0, P: 0, niveau: 3, pattern: 'Non-participation', ipb: null }
         ]);
         expect(filtreP).toEqual([DA.ABSENT]);
-        expect(filtreM).toEqual([DA.SILENCE]);
+        expect(filtreM).toEqual([DA.SILENCE, DA.ABSENT]);
     });
 
     it('F2 · un élève EXCLU (décrochage) n\'a plus d\'indices stockés : son profil retombe sur « 3 meilleures notes » — un P différent de la pratique', () => {
@@ -1013,12 +1014,15 @@ describe('H · ce que les courbes lisent', () => {
         expect(d3.sansValeurConvertible).toEqual({ evaluations: 0, points: 0 });
     });
 
-    it('H2 · les zones colorées du graphique viennent de « la première échelle du trimestre » (ou celle marquée parDefaut), pas de celle des évaluations', () => {
+    it('H2 · les zones d\'un graphique viennent de l\'échelle qu\'on lui passe — plus de repli sur « la première échelle du trimestre » (#860, 16 sept.)', () => {
+        // Constat d'origine (6 sept.) : sans argument, la première échelle du trimestre (E60). Depuis #860, sans échelle : aucune zone.
         const b = monter(jeuBase(), { store: { test_echellesTemplates: [clone(E60), clone(E0)] } });
-        const zones = b.interne['graphiques-progression.js'].genererZonesDepuisEchelle();
-        noter('H2', { codes: zones.map(z => z.code), premiereBorne: zones[1] && zones[1].yMin });
+        const g = b.interne['graphiques-progression.js'];
+        const zones = g.genererZonesDepuisEchelle(clone(E60));
+        noter('H2', { codes: zones.map(z => z.code), premiereBorne: zones[1] && zones[1].yMin, sansEchelle: g.genererZonesDepuisEchelle() });
         expect(zones.map(z => z.code)).toEqual(['I', 'D', 'M', 'E']);
-        expect(zones[1].yMin).toBe(0.6);   // E60, pas E0 (dont D commence à 65)
+        expect(zones[1].yMin).toBe(0.6);
+        expect(g.genererZonesDepuisEchelle()).toEqual([]);
     });
 
     it('H3 · un élève sans donnée : pas de courbe à zéro — null, et le graphique individuel refuse sans snapshot', () => {

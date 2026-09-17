@@ -7,7 +7,7 @@
  * Types de graphiques :
  * 1. Graphique individuel : Courbes A-C-P-E d'un étudiant, sans zones de niveaux (#575)
  * 2. Graphique groupe moyennes : Moyennes A-C-P-E du groupe
- * 3. Graphique groupe spaghetti : Tous les étudiants avec zones colorées
+ * 3. Graphique groupe spaghetti : tous les étudiants, sans zone de niveaux (#860)
  *
  * @author Grégoire Bédard
  * @date 8 décembre 2025
@@ -161,47 +161,10 @@ function appliquerStyleSpaghetti(dataset, etat, couleur) {
 let etatLegendeGraphiqueACPE = {}; // { 'A': true, 'C': false, 'P': true, 'E': true }
 let etatLegendeGraphiqueCriteres = {}; // { 'Structure': true, 'Rigueur': false, ... }
 
-/**
- * Zones colorées selon échelle IDME (0.00 à 1.00)
- */
-// 🆕 BETA 96: Couleurs identiques au gradient des barres ACPE (dégradé vertical)
-const ZONES_IDME = [
-    {
-        yMin: 0.00,
-        yMax: 0.40,
-        backgroundColor: 'rgba(255, 140, 0, 0.25)',   // Orange (#ff8c00) - comme barre gauche
-        borderColor: 'rgba(255, 140, 0, 0.4)',
-        label: 'Incomplet'
-    },
-    {
-        yMin: 0.40,
-        yMax: 0.65,
-        backgroundColor: 'rgba(255, 193, 7, 0.25)',   // Jaune (#ffc107) - transition
-        borderColor: 'rgba(255, 193, 7, 0.4)',
-        label: 'Développement'
-    },
-    {
-        yMin: 0.65,
-        yMax: 0.75,
-        backgroundColor: 'rgba(152, 208, 37, 0.25)',  // Vert citron (#98d025) - comme barre centre-gauche
-        borderColor: 'rgba(152, 208, 37, 0.4)',
-        label: 'Développement'
-    },
-    {
-        yMin: 0.75,
-        yMax: 0.85,
-        backgroundColor: 'rgba(34, 197, 94, 0.25)',   // Vert (#22c55e) - comme barre centre
-        borderColor: 'rgba(34, 197, 94, 0.4)',
-        label: 'Maîtrise'
-    },
-    {
-        yMin: 0.85,
-        yMax: 1.00,
-        backgroundColor: 'rgba(14, 165, 233, 0.25)',  // Bleu ciel (#0ea5e9) - comme barre droite
-        borderColor: 'rgba(14, 165, 233, 0.4)',
-        label: 'Étendu'
-    }
-];
+// #860 (lot F, 16 sept. 2026) : la table `ZONES_IDME` (0 / 40 / 65 / 75 / 85, en dur) vivait ici
+// comme repli des zones quand aucune échelle n'était résolue. Plus aucun lecteur : les seuls
+// graphiques qui dessinent des niveaux (par critère #752, trajectoires en mode Habiletés) posent
+// l'échelle de LEURS évaluations par `_zonesParCanvas` ; sans échelle résolue, aucune zone.
 
 /**
  * Calcule les bornes Y dynamiques pour un meilleur affichage des données
@@ -308,23 +271,6 @@ function calculerBornesYDynamiques100(datasets) {
 }
 
 /**
- * Récupère l'échelle de performance de l'utilisateur (première disponible)
- * @returns {Object|null} - Échelle avec ses niveaux ou null
- */
-function obtenirEchelleUtilisateur() {
-    try {
-        const echelles = db.getSync(cle('echellesTemplates'), []);
-        if (echelles && echelles.length > 0) {
-            // Prendre la première échelle (ou celle par défaut si définie)
-            return echelles.find(e => e.parDefaut) || echelles[0];
-        }
-    } catch (e) {
-        console.warn('[Graphiques] Erreur lecture échelles:', e);
-    }
-    return null;
-}
-
-/**
  * Convertit une couleur hex en rgba
  * @param {string} hex - Couleur hex (#RRGGBB ou #RGB)
  * @param {number} alpha - Opacité (0-1)
@@ -359,22 +305,22 @@ function hexVersRgba(hex, alpha = 0.5) {
 }
 
 /**
- * Génère les zones colorées à partir d'une échelle — celle passée, sinon
- * « la première du trimestre » (`obtenirEchelleUtilisateur`, les graphiques de
- * groupe A/C/P et la note finale, inchangés).
+ * Génère les zones de niveaux (lignes de seuil + lettres de la marge) à partir de
+ * l'échelle passée — et seulement d'elle.
  *
- * ⮕ #752 : les courbes par critère du profil et les trajectoires par habileté
- * passent l'échelle de LEURS évaluations (la majoritaire si plusieurs), posée par
+ * ⮕ #752 : les courbes par critère du profil et les trajectoires par habileté passent
+ * l'échelle de LEURS évaluations (la majoritaire si plusieurs), posée par
  * `_zonesParCanvas` et lue par `zonesPourChart` dans les plugins d'étiquettes.
+ * ⮕ #860 (lot F, 16 sept. 2026) : plus de repli sur « la première échelle du trimestre »
+ * ni sur une table IDME en dur — un pourcentage agrégé (indices du groupe, note finale)
+ * ne se situe pas dans une échelle de performance, et les graphiques qui le tracent ne
+ * demandent plus de zones. Sans échelle résolue : aucune zone.
  * @param {Object|null} [echelle] - échelle résolue (`niveaux` avec `min`/`max`/`couleur`)
- * @returns {Array} - Tableau de zones pour les annotations
+ * @returns {Array} - Tableau de zones pour les plugins d'étiquettes
  */
 function genererZonesDepuisEchelle(echelle) {
-    if (echelle === undefined) echelle = obtenirEchelleUtilisateur();
-
     if (!echelle || !echelle.niveaux || echelle.niveaux.length === 0) {
-        // Fallback: retourner ZONES_IDME par défaut
-        return ZONES_IDME;
+        return [];
     }
 
     // Trier les niveaux par min croissant
@@ -391,14 +337,13 @@ function genererZonesDepuisEchelle(echelle) {
 }
 
 /**
- * Les zones d'un graphique donné : celles posées pour son canvas (#752), sinon
- * celles de l'échelle du trimestre. Un canvas re-rendu remplace son entrée.
+ * Les zones d'un graphique donné : celles posées pour son canvas (#752), sinon aucune
+ * (#860 : plus d'échelle du trimestre en repli). Un canvas re-rendu remplace son entrée.
  */
 const _zonesParCanvas = new WeakMap();
 function zonesPourChart(chart) {
     const canvas = chart && chart.canvas;
-    if (canvas && _zonesParCanvas.has(canvas)) return _zonesParCanvas.get(canvas);
-    return genererZonesDepuisEchelle();
+    return (canvas && _zonesParCanvas.get(canvas)) || [];
 }
 
 /**
@@ -1181,27 +1126,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
     }
 }
 
-/**
- * Crée les annotations pour les zones colorées IDME
- * @returns {Object} - Configuration des annotations
- */
-function creerAnnotationsZones() {
-    const annotations = {};
-
-    ZONES_IDME.forEach((zone, index) => {
-        annotations[`zone${index}`] = {
-            type: 'box',
-            yMin: zone.yMin,
-            yMax: zone.yMax,
-            backgroundColor: zone.backgroundColor,
-            borderColor: zone.borderColor,
-            borderWidth: 0,
-            drawTime: 'beforeDatasetsDraw' // Dessiner derrière les courbes
-        };
-    });
-
-    return annotations;
-}
+// #860 : `creerAnnotationsZones` (seul autre lecteur de `ZONES_IDME`) vivait ici sans appelant — retirée.
 
 // #824 (11 sept. 2026) — `creerGraphiqueGroupeMoyennes` (~270 lignes) vivait ici : exportée,
 // jamais appelée (le canevas `graphique-groupe-moyennes` est dessiné par
@@ -1541,8 +1466,12 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         // Configuration
         const config = {
             type: 'line',
-            // 🆕 BETA 96: Utiliser le plugin gradient au lieu des annotations
-            plugins: [pluginGradientFond, ...(indice === 'P' && obtenirPreference('afficherSeuilsVisuels') !== false ? [pluginEtiquettesZones] : []), pluginNomEtudiantSurvolACP],
+            // #860 (lot F, 16 sept. 2026) : AUCUNE zone de niveaux sur ce graphique, l'indice P
+            // compris — même motif que le septième site de #575 (13 sept.) : A, C et P sont des
+            // pourcentages agrégés sur le trimestre, une échelle de performance juge UNE production.
+            // Ne pas réintroduire `pluginEtiquettesZones` ici. La marge droite reste : le nom de
+            // l'élève au survol (`pluginNomEtudiantSurvolACP`) s'écrit après le dernier point.
+            plugins: [pluginGradientFond, pluginNomEtudiantSurvolACP],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -2056,28 +1985,7 @@ function afficherMessageAttente(canvas, titre, details) {
 }
 
 
-/**
- * Crée les annotations pour les zones colorées (version dynamique)
- * Utilise l'échelle de performance de l'utilisateur
- * @returns {Object} - Configuration des annotations
- */
-function creerAnnotationsZonesIDME() {
-    const zones = genererZonesDepuisEchelle();
-    const annotations = {};
-
-    zones.forEach((zone, index) => {
-        annotations[`zone${index}_${zone.code || index}`] = {
-            type: 'box',
-            yMin: zone.yMin,
-            yMax: zone.yMax,
-            backgroundColor: zone.backgroundColor,
-            borderWidth: 0,
-            drawTime: 'beforeDatasetsDraw'
-        };
-    });
-
-    return annotations;
-}
+// #860 : `creerAnnotationsZonesIDME` vivait ici sans appelant — retirée.
 
 /**
  * Plugin gradient désactivé — fond neutre, les seuils sont indiqués par pluginEtiquettesZones
@@ -4142,9 +4050,15 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
             };
         }
 
+        // #860 (lot F, 16 sept. 2026) : les lignes de seuil et les lettres de niveaux ne se
+        // dessinent qu'en mode Habiletés, où les points SONT des niveaux d'évaluations (#752).
+        // En mode Note finale — un pourcentage du cours — aucune zone, et plus de marge droite
+        // pour des lettres qui n'existent plus (même motif que le septième site de #575).
+        const avecZones = mode === 'habiletes'
+            && (typeof obtenirPreference === 'function' && obtenirPreference('afficherSeuilsVisuels') !== false);
         const config = {
             type: 'line',
-            plugins: [pluginGradientFond, ...((typeof obtenirPreference === 'function' && obtenirPreference('afficherSeuilsVisuels') !== false) ? [pluginEtiquettesZones] : [])],
+            plugins: [pluginGradientFond, ...(avecZones ? [pluginEtiquettesZones] : [])],
             data: {
                 labels: labels,
                 datasets: datasets
@@ -4152,7 +4066,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { right: 120 } },
+                layout: { padding: { right: mode === 'habiletes' ? 120 : 0 } },
                 plugins: {
                     title: { display: false },
                     legend: {
@@ -4244,8 +4158,8 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
 
         // #752 — en mode habiletés, les zones sont celles de l'échelle des évaluations
         // tracées (la majoritaire), et le graphique dit ce qu'il n'a pas pu convertir.
-        // En mode note finale (un pourcentage du cours), les zones restent celles du
-        // trimestre, comme avant.
+        // #860 — en mode note finale (un pourcentage du cours), aucune zone : l'entrée du
+        // canvas est retirée et le plugin n'est pas monté.
         const noteConversion = document.getElementById('trajectoires-note-conversion');
         if (mode === 'habiletes') {
             const echelles = echelleMajoritaireDesEvaluations(Array.from(evalIndex.values()));
