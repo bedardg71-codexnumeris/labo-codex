@@ -126,6 +126,12 @@
         // Sans semis : c'est du contenu propre à Grégoire, pas de la forme — le pack
         // démo n'en pose pas, et un trimestre neuf part vide.
         'notesRapport',
+        // 🆕 #913 (17 sept. 2026) : les résultats obtenus APRÈS le trimestre (note finale d'un
+        // ancien élève dans un cours suivant, transmise par la Direction des études et saisie à
+        // la main) : un objet { [da]: [{ cours, trimestre, note }] } par trimestre
+        // (resultats-ulterieurs.js). Sans semis : contenu propre à l'utilisateur, le pack démo
+        // n'en pose pas, un trimestre neuf part vide.
+        'resultatsUlterieurs',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre
@@ -2015,6 +2021,8 @@
             const indicesCP = db.getSync(cle('indicesCP'), {});
             // #902 : A ne vit pas dans indicesCP — sa source est indicesAssiduite (sommatif[da]).
             const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
+            // #913 : rangés par DA — le DA ne sort jamais, la sortie se fait sous id_anonyme.
+            const resultatsUlterieurs = db.getSync(cle('resultatsUlterieurs'), {}) || {};
             const cours = db.getSync('cours', []);
             const coursActif = cours.find(c => c.actif);
 
@@ -2070,7 +2078,7 @@
             const exportData = {
                 meta: {
                     version_monitorage: '6.0.0-beta95',
-                    version_format: '1.1', // #902 : indices_finaux porte null et note_constructible (ajout additif)
+                    version_format: '1.2', // #902 (1.1) : indices_finaux porte null et note_constructible ; #913 (1.2) : resultats_ulterieurs sous chaque élève — ajouts additifs
                     date_export: new Date().toISOString(),
                     trimestre: {
                         id: trimestre.id,
@@ -2231,7 +2239,11 @@
                             // des étudiant·es (`sa`) — `e.servicesAdaptes` n'existait sur aucun
                             // élève (c'était le booléen du volet confidentiel) : toujours faux.
                             services_adaptes: e.sa === 'Oui' || e.sa === true
-                        }
+                        },
+                        // #913 : une liste, vide quand il n'y a rien — jamais un champ absent. Trois
+                        // champs recopiés un à un : rien d'autre de l'objet rangé ne voyage.
+                        resultats_ulterieurs: (Array.isArray(resultatsUlterieurs[e.da]) ? resultatsUlterieurs[e.da] : [])
+                            .map(r => ({ cours: r.cours, trimestre: r.trimestre, note: r.note }))
                     })),
 
                     presences: presences

@@ -119,7 +119,7 @@ describe('#902 — indices_finaux porte les valeurs stockées', () => {
         expect(fichier.calculs.unites).toMatch(/0 à 100/);
         expect(fichier.calculs.unites).toMatch(/null/);
         expect(fichier.calculs.unites).toMatch(/note_constructible/);
-        expect(fichier.meta.version_format).toBe('1.1');
+        expect(fichier.meta.version_format).toBe('1.2'); // 1.1 = #902 ; 1.2 = #913 (resultats_ulterieurs, additif)
     });
 });
 
