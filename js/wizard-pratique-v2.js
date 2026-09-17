@@ -1986,6 +1986,22 @@ function genererSectionExemple(famille) {
 }
 
 /**
+ * #899 — la pratique EN RÉÉDITION porte-t-elle déjà des types de productions ET des forfaits ?
+ * (le formulaire de gestion écrit `forfaits`, les gabarits `tableBundles` : les deux se lisent.)
+ * En création, il n'y a rien à relire : faux.
+ */
+function _specificationPorteTypesEtForfaits() {
+    if (!wizardState.modeEdition || !wizardState.pratiqueId) return false;
+    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
+    const existante = pratiques.find(p => p.id === wizardState.pratiqueId);
+    const configuration = existante && existante.configuration;
+    if (!configuration) return false;
+    const types = configuration.typesTravaux || [];
+    const forfaits = configuration.forfaits || configuration.tableBundles || [];
+    return types.length > 0 && forfaits.length > 0;
+}
+
+/**
  * Génère le récapitulatif
  */
 function genererRecapitulatif() {
@@ -2017,7 +2033,8 @@ function genererRecapitulatif() {
             'verrou': 'Avec verrou d\'évaluation',
             'portfolio': 'Avec portfolio',
             'plafonnement': 'Avec plafonnement conditionnel',
-            'n-meilleurs': 'Par artefacts (N meilleurs)',
+            // #901 (C-1) : sans parenthèse — la méthode ne se dit qu'à « Construction de la note ».
+            'n-meilleurs': 'Par artefacts',
             'objectifs-ponderes': 'Par objectifs pondérés',
             'moyenne-ponderee': 'Moyenne pondérée des objectifs',
             'comptage': 'Comptage d\'objectifs',
@@ -2171,6 +2188,13 @@ function genererRecapitulatif() {
             html += `<p><strong>Grille\u00a0:</strong> ${grille?.nom || r.grilleId}</p>`;
         } else {
             html += `<p><strong>Grille\u00a0:</strong> <em>À configurer plus tard</em></p>`;
+        }
+        // #899 (texte choisi par Grégoire, 17 sept. 2026) — UNE SPÉCIFICATION CRÉÉE ICI NE PEUT
+        // PAS ENCORE CALCULER : l'assistant ne collecte ni types de productions ni forfaits
+        // (écarté : les collecter ici, ce serait un second écrivain). Le récapitulatif dit où
+        // les régler. En réédition d'une pratique qui porte déjà les deux, la ligne se tait.
+        if (r.typePratique === 'specifications' && !_specificationPorteTypesEtForfaits()) {
+            html += '<p><strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception › Pratiques de notation (clique sur la pratique). Tant qu\'ils manquent, aucune note ne peut être calculée.</p>';
         }
         html += '</div>';
     }
@@ -3062,6 +3086,26 @@ function chargerPratiqueExistante(pratiqueId) {
             wizardState.reponses.afficherMoyenneGroupe = config.afficherMoyenneGroupe;
             // #319 Lot 3 (a3) : restaurer les reprises (round-trip d'édition #132).
             if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
+            // #854 (audit du 16 sept. 2026, constat A-2) — ROUVRIR NE CHANGE PAS UNE RÈGLE.
+            // Les valeurs des règles spéciales n'étaient pas relues : ré-enregistrer les
+            // ramenait aux défauts (3 paires → 2 ; verrou « Dissertation, 90, 50 » → « Analyse
+            // finale, 60, 55 » ; plafonnement « Examen non remis, 50 » → vide, 55). Condition posée par Grégoire pour brancher le
+            // verrou (#897) : une règle appliquée ne change pas à l'insu de l'enseignant·e.
+            if (config.remplacement) wizardState.reponses.nbPairesRemplacement = config.remplacement.nbPaires;
+            if (config.portfolio) {
+                wizardState.reponses.nbArtefactsPortfolio = config.portfolio.nbArtefacts;
+                wizardState.reponses.portfolioQualitatif = config.portfolio.qualitatif;
+            }
+            for (const regle of (config.conditions_speciales || [])) {
+                if (regle && regle.type === 'double_verrou') {
+                    wizardState.reponses.nomEvalVerrouillee = regle.condition?.evaluation;
+                    wizardState.reponses.seuilVerrou = regle.condition?.seuil;
+                    wizardState.reponses.plafondVerrou = regle.consequence?.note_max;
+                } else if (regle && regle.type === 'plafonnement') {
+                    wizardState.reponses.conditionPlafonnement = regle.description;
+                    wizardState.reponses.valeurPlafonnement = regle.consequence?.valeur;
+                }
+            }
         } else if (typeCanon === 'standards') {
             // Audit du 16 sept. 2026, constat B-2 — L'APPROCHE SE DÉDUIT DU PORTFOLIO.
             // Les gabarits « N meilleures » / « N plus récentes » portent un `portfolio` mais

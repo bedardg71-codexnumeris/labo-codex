@@ -419,6 +419,15 @@ pratique non calculable n'empêche pas les autres de calculer).
   délégation (état antérieur), une SPE configurable retombait sur `indicesCP.actuel.PAN.P`
   (faux — pas un calcul tout-ou-rien). `jugement_global` (DEN) garde le repli PAN.
   Sentinelle : `tests/unit/sentinelle-spe-configurable-delegation-2026-06-06.test.js`.
+- **SOM configurable : seul le VERROU s'applique (#897, 17 sept. 2026, 1.142.25).** L'assistant écrit les règles
+  spéciales sous `configuration.conditions_speciales` ; `construireConfigComplete` les renvoie sous
+  `calcul_note.conditions_speciales` (une pratique qui porte déjà les siennes les garde), et
+  `_appliquerVerrousSommatifs` plafonne la moyenne de `PratiqueSommative` quand la copie de l'évaluation
+  nommée (comparée au TITRE de la production, sans casse) est sous le seuil. ⚠ `calculerNoteFinale` et ses
+  méthodes (`calculerMoyennePonderee`, `calculerParRemplacementProgression`, `appliquerPlafonnement`…) n'ont
+  AUCUN appelant : ne pas en déduire que « le moteur applique » quoi que ce soit — l'audit du 16 sept. s'y est
+  trompé. Plafonnement (condition en texte libre), remplacement (nombre de paires sans identités) et reprises
+  (déclaratif) restent des promesses : #903.
 - **Gabarits prédéfinis ≠ configs exécutables** (§3).
 - **`pan-objectifs` supprimé** (§2) ; tout id résiduel résout vers `standards`.
 

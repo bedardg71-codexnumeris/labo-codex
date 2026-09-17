@@ -42,7 +42,7 @@ const FAMILLES = {
         evaluations: [ev('EV_S1', '1000001', 'P1', 84, 'M'), ev('EV_S2', '1000001', 'P2', 90, 'E')],
         reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'moyenne', reglesSommatives: ['double_verrou'], nbEvaluationsPrevues: '4', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60',
             nomEvalVerrouillee: 'Dissertation', seuilVerrou: '90', plafondVerrou: '50', afficherRang: true },
-        attendu: 'moyenne pondérée 84×40 + 90×60 = 87,6 ; verrou « Dissertation < 90 → max 50 » ignoré par le moteur (banc A1)' },
+        attendu: 'moyenne pondérée 84×40 + 90×60 = 87,6 ; verrou « Dissertation < 90 → max 50 » APPLIQUÉ depuis le lot 29 (#897) : 50 au profil et à l\'export' },
     STD: { da: '1000002', nom: 'Standards', prenom: 'Bruno',
         productions: [{ id: 'PORT', titre: 'Portfolio', type: 'portfolio', ponderation: 60, regles: { nombreARetenir: 3, minimumCompletion: 1, nombreTotal: 6 } },
             { id: 'TERM', titre: 'Analyse finale', type: 'terminale', ponderation: 40, numero: 7, dateEcheance: '2026-05-01' },
@@ -163,6 +163,17 @@ for (const [code, F] of Object.entries(FAMILLES)) {
             await page.waitForFunction((id) => (window.db.getSync(window.cle('groupesCours'), []) || [])[0]?.pratiqueId === id, R.pratique.id, { timeout: 8000 }).catch(() => {});
             R.applique = await page.evaluate(() => ({ pratiqueId: (window.db.getSync(window.cle('groupesCours'), []) || [])[0]?.pratiqueId,
                 badgeActive: document.querySelectorAll('#sidebarListePratiques .sidebar-item-badge').length }));
+            if (code === 'SPE') {
+                // #899 — LE CHEMIN QUE LE RÉCAPITULATIF PROMET : « Conception › Pratiques de notation (clique sur la pratique) ».
+                // Le clic réel sur la pratique de la liste montre les deux titres nommés par la phrase.
+                await page.evaluate((id) => document.querySelector(`#sidebarListePratiques .sidebar-item[data-id="${id}"]`).click(), R.pratique.id);
+                await page.waitForFunction(() => [...document.querySelectorAll('h4')].some(h => h.textContent.trim() === 'Types de productions' && h.offsetParent !== null), null, { timeout: 8000 }).catch(() => {});
+                R.chemin899 = await page.evaluate(() => {
+                    const visible = (t) => [...document.querySelectorAll('h4')].some(h => h.textContent.trim() === t && h.offsetParent !== null);
+                    const onglet = [...document.querySelectorAll('.sous-navigation button, .sous-navigation a, [data-sous-section]')].map(e => e.textContent.trim());
+                    return { types: visible('Types de productions'), forfaits: visible('Table des forfaits (bundles)'), sectionNommee: onglet.includes('Pratiques de notation') };
+                });
+            }
             if (code === 'DEN') {
                 await page.evaluate(({ id, da }) => { window.db.setSync(window.cle('jugementsDenotation'), { [id]: { [da]: { ciblesAtteintes: { 'cible-1': true, 'cible-2': true }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } }); }, { id: R.pratique.id, da: F.da });
             }
@@ -203,7 +214,20 @@ for (const [code, F] of Object.entries(FAMILLES)) {
         testInfo.attach('AUDIT-PNC-E-' + code, { body: JSON.stringify(R, null, 1), contentType: 'application/json' });
         expect(R.etapeFinale, 'l\'assistant doit atteindre le récapitulatif').toBe('recapitulatif');
         expect(R.pratique, 'une pratique doit être enregistrée').not.toBeNull();
+        // #899 : la ligne du récapitulatif ne paraît que pour une spécification.
+        const ligne899 = (R.recapitulatif || []).some(l => l.includes('Types de productions et forfaits'));
+        expect(ligne899, 'la ligne #899 du récapitulatif').toBe(code === 'SPE');
+        if (code === 'SOM') {
+            // Lot 29 (#897) : le verrou coché dans l'assistant (Dissertation 84 < 90 → max 50) s'applique — profil ET export.
+            expect(R.profil.moteur.perfConfigurable).toBe(0.5);
+            expect(R.profil.moteur.simule).toMatchObject({ P: 50, noteConstructible: true });
+            expect(R.profil.indiceP).toBe(50);
+            const ligneSom = (R.export.lignes || []).find(l => l.includes(F.da));
+            expect(ligneSom, 'la ligne de l\'élève est dans le CSV').toBeTruthy();
+            expect(ligneSom).toMatch(/,50,final/);
+        }
         if (code === 'SPE') {
+            expect(R.chemin899, 'le chemin promis par #899 existe dans la page').toMatchObject({ types: true, forfaits: true });
             // A-3 : la page a fait sa passe d'indices (le cache porte le bouche-trou), et l'export ne le prend pas pour une note.
             const cache = await page.evaluate((da) => (window.db.getSync(window.cle('indicesCP'), {}) || {})[da]?.actuel || null, F.da);
             expect(cache, 'la passe d\'indices a eu lieu : sans elle, ce parcours ne juge rien').not.toBeNull();

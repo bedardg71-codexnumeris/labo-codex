@@ -137,7 +137,7 @@
 <p>L'indice C se calcule à partir des productions attendues dans le trimestre. Une production est « complétée » dès qu'elle est remise, indépendamment de la note obtenue. Les productions à venir ne pénalisent pas C tant que leur date d'échéance n'est pas passée.</p>
 <p>Calcul : <code>C = productions remises / productions attendues échues</code></p>
 <h4>P — Performance</h4>
-<p>L'indice P est la note pondérée de l'étudiant·e selon la pratique de notation active (PAN – Standards, Sommative, ou une pratique personnalisée). Il ne représente <em>pas</em> la note finale du trimestre, mais une projection courante basée sur les productions déjà évaluées.</p>
+<p>L'indice P est la note courante de l'étudiant·e, calculée selon la pratique de notation active (Standards, Spécifications, Dénotation ou Sommative). Il ne représente <em>pas</em> la note finale du trimestre, mais une projection courante basée sur les productions déjà évaluées.</p>
 <div class="guide-pedagogique-astuce">Les trois indices sont indépendants. Un·e étudiant·e peut avoir A élevé (toujours présent·e) mais C faible (ne remet pas ses travaux), ou C élevé (remet tout) mais P faible (résultats faibles). Lire les trois ensemble donne un portrait riche que la seule note ne donne pas.</div>`
                 },
                 {
@@ -323,10 +323,10 @@
 <div class="guide-pedagogique-astuce">Le choix entre Standards et Spécifications n'a pas à être tranché tout de suite, ni de façon définitive : commence par une pratique, sur une partie de ton cours, et ajuste.</div>`
                 },
                 {
-                    titre: 'La dénotation : une PRÉN à l’horizon',
+                    titre: 'La dénotation : une PRÉN',
                     contenu: `
 <p>La troisième voie documentée par la recherche est la <strong>dénotation</strong> (ou <em>ungrading</em>) – une PRÉN. Plutôt que de noter chaque travail, l'enseignant·e mise sur la <strong>rétroaction qualitative</strong> et des <strong>cibles d'apprentissage</strong>, et n'établit une note certificative qu'à la fin. <strong>Ce n'est jamais «&nbsp;pas de note&nbsp;»</strong> : le règlement exige toujours une note finale ; c'est le rôle de <em>tri</em> de la note qui est abandonné, pas la certification.</p>
-<div class="guide-pedagogique-astuce"><strong>Statut dans Labo Codex.</strong> La dénotation est <strong>conçue mais pas encore activable</strong> dans l'application. Cette page situe le paysage&nbsp;; elle ne décrit pas une fonction disponible aujourd'hui. Elle s'enrichira quand la pratique sera implémentée.</div>
+<div class="guide-pedagogique-astuce"><strong>Statut dans Labo Codex.</strong> La dénotation est disponible&nbsp;: l'assistant de création la propose, et le jugement sur chaque cible se saisit dans le profil de l'élève.</div>
 <h4>Deux garde-fous à connaître</h4>
 <p><strong>Équité.</strong> Une note finale fondée sur un jugement global est la plus exposée aux biais implicites. C'est pourquoi une dénotation responsable s'appuie toujours sur des <strong>traces et des critères explicites</strong> (cibles nommées, atteinte consignée), jamais sur une impression d'ensemble.</p>
 <p><strong>Santé mentale.</strong> La dénotation n'est pas un bien universel : la recherche note que <strong>certain·es étudiant·es sont déstabilisé·es par l'absence de repères</strong> habituels comme les notes. La transition demande de l'accompagnement et de la transparence.</p>`
