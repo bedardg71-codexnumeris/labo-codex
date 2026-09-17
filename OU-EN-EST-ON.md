@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-✅ **FAIT EN 1.143.0 (17 SEPTEMBRE 2026, ≈ 17 h 15 — ta demande, le cadrage et la consigne de Cowork de 16 h 31, ta phrase de « Nouvelles ») — UN ENDROIT OÙ DÉPOSER LES RÉSULTATS QUE TES ANCIENS ÉLÈVES OBTIENNENT ENSUITE. ⚠ Commité, PAS encore poussé : rien en ligne tant que tu n'as pas donné le signal.**
+✅ **FAIT EN 1.143.0 (17 SEPTEMBRE 2026, ≈ 17 h 15 — ta demande, le cadrage et la consigne de Cowork de 16 h 31, ta phrase de « Nouvelles ») — UN ENDROIT OÙ DÉPOSER LES RÉSULTATS QUE TES ANCIENS ÉLÈVES OBTIENNENT ENSUITE. Poussé le 17 sept. vers 18 h, à ton signal ; ce que sert l'hébergeur ne se mesure pas d'ici.**
 **Ce que tu verras** : dans Calendrier › Trimestre, accordéon des étudiant·es, sous la liste, un bloc repliable « Résultats ultérieurs ». Une ligne par élève : le cours, le trimestre, la note finale, « Ajouter » (ou Entrée). Un élève peut en porter plusieurs (102, 103…) ; « Retirer » efface une faute de frappe. Le cours et le trimestre que tu viens de taper sont reproposés à la ligne suivante et le curseur passe à la note de l'élève d'après : trente saisies, trente notes à taper.
 **Sur un trimestre archivé** : rien ne s'écrit tant que tu n'as pas coché « Permission d'écriture » dans le bandeau du bas ; l'écran te le dit. C'est la case qui existait déjà, aucune autre.
 **Dans l'export pour la recherche** : chaque élève anonymisé porte la liste de ses résultats ultérieurs (vide s'il n'en a pas). Son DA ne sort jamais. Un élève en abandon reste hors du fichier, comme avant.
