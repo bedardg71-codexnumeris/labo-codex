@@ -705,6 +705,16 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         expect(noteDe(b, DA.SOM, p95.id).perf).toBe(87.43);   // min(87,43 ; 95) : un verrou plafonne, il ne hausse jamais
     });
 
+    it('note SUR le seuil (84 = 84) : non plafonnée — « sous le seuil » est strict ; un point plus haut (85), elle l\'est', async () => {
+        // Trou de preuve de la relecture croisée du lot 29 (Cowork, 17 sept. 2026) : aucun essai ne posait la note SUR le
+        // seuil, et la mutation `comparateur: '<'` → `'<='` de l'assistant restait verte. La Dissertation est à 84.
+        const b = monter(jeuSOM());
+        const pSur = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM seuil égal', seuilVerrou: 84 }));
+        const pAuDessus = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM seuil 85', seuilVerrou: 85 }));
+        expect(noteDe(b, DA.SOM, pSur.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, pAuDessus.id).perf).toBe(50);   // témoin : le même montage plafonne dès que 84 < seuil
+    });
+
     it('le nom saisi se compare au TITRE de la production, sans casse ni espaces de bord ; un nom sans production : sans effet', async () => {
         const b = monter(jeuSOM());
         const pCasse = await creerParAssistant(b, SOM_VERROU({ nomEvalVerrouillee: '  dissertation ' }));

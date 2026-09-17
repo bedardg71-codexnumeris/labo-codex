@@ -325,7 +325,7 @@ function portrait(b, da) {
     return {
         A: indices.A, C: indices.C, P: indices.P, noteConstructible: indices.noteConstructible,
         rai: { niveau: rai.niveau, label: rai.label, pattern: rai.pattern, defi: rai.defi },
-        suivi: suivi ? { ipb: suivi.ipb, direction: suivi.direction, diagnostic: suivi.diagnostic, niveauRaI: suivi.niveauRaI, scoreActuel: r3(suivi.scoreActuel) } : null,
+        suivi: suivi ? { ipb: suivi.ipb, direction: suivi.direction, diagnostic: suivi.diagnostic, rendUnPalier: ('niveauRaI' in suivi) || ('niveau' in suivi), scoreActuel: r3(suivi.scoreActuel) } : null,
         cible: { cible: cible.cible, niveau: cible.niveau, pattern: cible.pattern },
         contexte: { niveau: contexte.niveau, label: contexte.label },
         performance3: r3(n3.performance), nbArtefacts: n3.nbArtefacts
@@ -564,19 +564,19 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         // aucun défi (< 0,70). P 0,77 ≥ 0,75, performance des 3 derniers 0,80 → « Stable », niveau 1.
         const b = monter(jeuBase()); b.calculerTout();
         const p = noter('C1', portrait(b, DA.ASSIDU));
-        expect(p.suivi).toMatchObject({ ipb: 0, direction: '↗', diagnostic: 'Maîtrise acquise', niveauRaI: 1 });
+        expect(p.suivi).toMatchObject({ ipb: 0, direction: '↗', diagnostic: 'Maîtrise acquise', rendUnPalier: false });   // #744 (17 sept.) : le suivi ne rend plus de palier
         expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Stable', defi: 'Aucun' });
         expect(p.cible).toMatchObject({ niveau: 1, cible: 'Maîtrise acquise', pattern: 'Stable' });
         expect(p.contexte.niveau).toBe('tres-favorable');
     });
 
-    it('C2 · l\'absent qui régresse : IPB 3 → « Difficulté persistante » niveau 3 ; RàI niveau 3, défi « Structure » ; contexte « fragile »', () => {
+    it('C2 · l\'absent qui régresse : IPB 3 → « Difficulté persistante », sans palier (#744) ; RàI niveau 3, défi « Structure » ; contexte « fragile »', () => {
         // À la main : fondations P4 0,40 · P3 0,40 · P2 0,65 — trois sous 0,70 → IPB 3 ; 0,40 − 0,40 = 0 → « → ».
         // Moyennes : Structure 0,55 · Rigueur 0,6125 · Nuance 0,6375 → défi principal Structure. P 0,625 < 0,64 → niveau 3.
         // Contexte : A 0,40 < 0,65 → « fragile ».
         const b = monter(jeuBase()); b.calculerTout();
         const p = noter('C2', portrait(b, DA.ABSENT));
-        expect(p.suivi).toMatchObject({ ipb: 3, direction: '→', diagnostic: 'Difficulté persistante', niveauRaI: 3 });
+        expect(p.suivi).toMatchObject({ ipb: 3, direction: '→', diagnostic: 'Difficulté persistante', rendUnPalier: false });
         expect(p.rai).toMatchObject({ niveau: 3, pattern: 'Difficulté persistante', defi: 'Structure' });
         expect(p.cible.niveau).toBe(3);
         expect(p.cible.cible).toMatch(/^Difficulté persistante — Structure/);
@@ -705,15 +705,29 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         expect(raiApres).toMatchObject({ niveau: 0, label: 'En attente' });          // avant #731 : niveau 3 « Non-participation »
     });
 
-    it('D4 · UNE SEULE évaluation faible : le suivi des fondations dit « Difficulté émergente » niveau 1, la carte RàI dit niveau 3', () => {
+    it('D4 · UNE SEULE évaluation faible : le suivi des fondations dit « Difficulté récente » SANS palier, la carte RàI dit niveau 3, la cible la suit (#744)', () => {
         // À la main : Silence remet P1 à 55 (I, I, D). Fondations 0,40 < 0,70 → IPB 1, pas de précédent → « → » → « Difficulté
-        // émergente », niveau RàI 1 (matrice IPB × direction). Le RàI pédagogique lit P = 0,55 < 0,64 → niveau 3 « Difficulté persistante ».
+        // récente » (mot de Grégoire, 17 sept. ; avant : « Difficulté émergente », niveau RàI 1 par la matrice IPB × direction).
+        // Le RàI pédagogique lit P = 0,55 < 0,64 → niveau 3 « Difficulté persistante ». Avant #744, la cible rendait 1 : deux paliers.
         const jeu = jeuBase(); jeu.evaluations.push(ev('E3P1', DA.SILENCE, 'P1', 55, 'I', ['I', 'I', 'D']));
         const b = monter(jeu); b.calculerTout();
         const p = noter('D4', portrait(b, DA.SILENCE));
-        expect(p.suivi).toMatchObject({ ipb: 1, direction: '→', diagnostic: 'Difficulté émergente', niveauRaI: 1 });
+        expect(p.suivi).toMatchObject({ ipb: 1, direction: '→', diagnostic: 'Difficulté récente', rendUnPalier: false });
         expect(p.rai).toMatchObject({ niveau: 3, pattern: 'Difficulté persistante' });
-        expect(p.cible.niveau).toBe(1);   // la cible suit le suivi des fondations, pas la carte RàI
+        expect(p.cible.niveau).toBe(3);   // #744 : la cible suit la carte RàI (avant : 1, le palier du suivi)
+        expect(p.cible.cible).toMatch(/^Difficulté récente/);   // le suivi NOMME toujours la cible
+    });
+
+    it('D4 bis · SANS suivi (aucune grille de référence) : la cible nomme la cause ET rend le palier de la carte (#744 ; avant : niveau null)', () => {
+        // À la main : préférence `grilleReferenceDepistage` vide → `calculerIPB` rend null → aucun suivi. La carte RàI, elle,
+        // ne dépend pas du suivi. Avant #744 la cible rendait `niveau: null` (« Intensité non calculable ») : l'intensité EST
+        // calculable, c'est la carte qui la donne ; seule la persistance ne l'est pas.
+        const b = monter(jeuBase(), { prefs: { grilleReferenceDepistage: null } }); b.calculerTout();
+        const p = noter('D4bis', portrait(b, DA.ABSENT));
+        expect(p.suivi).toBeNull();
+        expect(p.rai.niveau).toBeGreaterThanOrEqual(1);
+        expect(p.cible.niveau).toBe(p.rai.niveau);
+        expect(p.cible.cible).toMatch(/^Persistance non calculable/);
     });
 
     it('D5 · l\'incohérent (DA hors du groupe, évaluation sur une production inexistante) : invisible aux écrans du groupe, calculé à la volée sur son profil', () => {

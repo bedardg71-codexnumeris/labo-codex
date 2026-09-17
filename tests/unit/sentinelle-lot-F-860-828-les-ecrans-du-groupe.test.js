@@ -47,7 +47,13 @@ const ELEVES = [
     eleve('3000005', 'AnulC90', null, 90),  // écarté — A absent n'est pas « sous 70 » (null < 70 est vrai en JS)
     eleve('3000006', 'A90Cnul', 90, null),  // écarté — C absent
     eleve('3000007', 'A100C100', 100, 100), // écarté
-    eleve('3000008', 'A55C90', 55, 90)      // retenu, le plus urgent
+    eleve('3000008', 'A55C90', 55, 90),     // retenu
+    // Trou de preuve fermé le 17 sept. 2026 (lot 31) : les quatre retenus ci-dessus sortaient AUSSI dans l'ordre
+    // alphabétique — un tri par nom passait. Ces deux noms CONTREDISENT l'urgence : « Zed » est le plus urgent
+    // (pire indice 40) et sort premier ; « Abel » est le moins urgent (pire indice 69) et sort dernier. Le pire de
+    // Zed est sa COMPLÉTION, celui d'Abel son ASSIDUITÉ : « le meilleur au lieu du pire » les écarte tous les deux.
+    eleve('3000009', 'Zed', 95, 40),
+    eleve('3000010', 'Abel', 69, 95)
 ];
 function monterSuivi() {
     const b = monter(storeBase(), { modules: ['js/contexte-qualification.js', { chemin: 'js/tableau-bord-apercu.js', internes: INTERNES_TB }], globaux: GLOBAUX_TB });
@@ -70,7 +76,7 @@ describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la co
 
     it('A2 · A 65 / C 90 retenu, A 90 / C 65 retenu, A 60 / C 80 retenu ; A 72 / C 72 écarté ; A ou C absent écarté — tri par le pire indice', () => {
         const { i } = monterSuivi();
-        expect(filtrer(i, ['M'])).toEqual(['A55C90', 'A60C80', 'A65C90', 'A90C65']);
+        expect(filtrer(i, ['M'])).toEqual(['Zed', 'A55C90', 'A60C80', 'A65C90', 'A90C65', 'Abel']);
         expect(filtrer(i, [])).toHaveLength(ELEVES.length);   // sans filtre : tout le monde, le banc n'est pas vide
     });
 
@@ -80,7 +86,7 @@ describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la co
         expect(boutons(b, i)).not.toContain('A+C');
         b.win.BORNES_MOBILISATION.critique = 0.6;   // mute la borne
         expect(boutons(b, i)).toContain('data-tri="M">A ou C < 60%<');
-        expect(filtrer(i, ['M'])).toEqual(['A55C90']);   // 60 n'est pas < 60 ; 65 non plus
+        expect(filtrer(i, ['M'])).toEqual(['Zed', 'A55C90']);   // 60 n'est pas < 60 ; 65 non plus
     });
 
     it('A4 · le filtre P (G-4, #749) ne dépend pas de la borne, et le code ne recopie ni 65 ni 70 pour M', () => {
@@ -169,7 +175,7 @@ function rendreTrajectoires(options) {
 }
 
 describe('B · #860 — (a) les courbes du groupe ne portent aucune zone de niveaux, l\'indice P compris', () => {
-    for (const indice of ['P', 'A']) {
+    for (const indice of ['P', 'A', 'C']) {   // 'C' ajouté le 17 sept. 2026 (lot 31) : la boucle oubliait la complétion
         it('indice ' + indice + ' : graphique construit (deux courbes), aucun plugin de zones, rien de dessiné — préférence « seuils visuels » pourtant allumée', () => {
             const r = rendreCourbesDuGroupe(indice);
             expect(r.config).toBeDefined();

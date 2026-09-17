@@ -35,8 +35,14 @@ function registre() {
     return chargerScript(REGISTRE).projectionAlgo;
 }
 
+/**
+ * #905 (lot C, 17 sept. 2026) : le module lit la règle unique `evaluationEntreDansLaNote`
+ * sur `window`, à l'appel. Le banc charge la VRAIE (pratique-registre.js), pas une doublure :
+ * c'est elle qui prouve, au dernier `describe`, qu'elle ne filtre pas les diagnostiques.
+ */
 function signalement() {
-    return chargerScript(MODULE).SignalementDepistage;
+    const win = chargerScript('js/pratiques/pratique-registre.js');
+    return chargerScript(MODULE, {}, win).SignalementDepistage;
 }
 
 /**

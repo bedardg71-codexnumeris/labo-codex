@@ -171,7 +171,8 @@ describe('lot 4 · B.C — le dépistage : une grille toute « Aucun » n\'a pas
         expect(code).toContain("return (c.niveauSOLO || 'multistructurel') === 'multistructurel';");
         // #740 (16 sept. 2026) : l'IPB filtre « multistructurel » PARMI les critères que le dépistage lit — la liste partagée.
         expect(code).toContain("var criteresMulti = criteresSurveillesParDepistage(grille).filter(function (c) {");
-        expect(code).toContain("'Intensité non calculable — aucun suivi des fondations disponible'");
+        // #744 (lot C, 17 sept. 2026) : sans suivi, c'est la PERSISTANCE qui n'est pas calculable — le palier vient de la carte RàI.
+        expect(code).toContain("'Persistance non calculable — aucun suivi des fondations disponible'");
     });
 
     it('C.b le sous-titre du tableau de bord : les critères surveillés, ou la phrase qui dit qu\'il n\'y en a pas', () => {
