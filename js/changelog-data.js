@@ -25,6 +25,7 @@
             couleur: 'vert',
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',
             items: [
+                'Profil d\'un élève&nbsp;: l\'assiduité montre les présences telles que tu les as saisies, demi-période comprise — «&nbsp;90% (22,5 / 25 périodes)&nbsp;» au lieu de «&nbsp;90% (23 / 25)&nbsp;». Le pourcentage découle de la fraction affichée, dans le profil comme dans le rapport.',
                 'Dans le Suivi du groupe, le filtre «&nbsp;A+C &lt; 65%&nbsp;» devient «&nbsp;A ou C &lt; 70%&nbsp;»&nbsp;: il retient l\'élève dont l\'assiduité ou la complétion est sous le seuil critique du profil, le même que la carte Mobilisation. Les courbes du groupe et les trajectoires en mode Note finale ne dessinent plus les niveaux d\'une échelle sous des pourcentages&nbsp;; le mode Habiletés les garde.',
                 '«&nbsp;Évaluer&nbsp;» dans le profil d\'un élève (et dans la liste des évaluations) choisit maintenant l\'élève et la production pour toi. Avant, tu arrivais sur Évaluation sans que rien ne soit choisi.',
                 'Si la copie est importée, elle s\'ouvre directement en mode Évaluer, annotée ou non. «&nbsp;Annoter&nbsp;» reste à un clic. Choisi dans le menu «&nbsp;Actions…&nbsp;» de la liste, il ouvre maintenant la copie avec ses outils, même après un passage en mode Évaluer.',

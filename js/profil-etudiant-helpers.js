@@ -428,6 +428,25 @@ function obtenirNombreProductionsPourPatterns() {
 }
 
 /**
+ * #871 (17 sept. 2026) — UN NOMBRE DE PÉRIODES, TEL QU'IL S'ÉCRIT À L'ÉCRAN ET DANS LE RAPPORT.
+ *
+ * Règle de Grégoire (15 sept.) : « le pourcentage doit suivre la fraction » — la fraction montre les
+ * présences TELLES QUE SAISIES, demi-période comprise (« 90% (22,5 / 25 périodes) »). Avant, le profil
+ * arrondissait les périodes pour les afficher et écrivait « 90% (23 / 25 périodes) », or 23 / 25 = 92 %.
+ * Le seul endroit où ce nombre se met en forme : virgule décimale, un entier reste un entier
+ * (« 23 », jamais « 23,0 »), et le bruit binaire d'une somme de demi-périodes ou d'heures converties
+ * est ramené à deux décimales au plus. Une valeur absente ou non numérique s'écrit « 0 », comme avant.
+ *
+ * @param {number} n - Nombre de périodes (entier, demi-période, ou conversion d'heures)
+ * @returns {string}
+ */
+function formaterNombrePeriodes(n) {
+    const v = Number(n);
+    if (!Number.isFinite(v)) return '0';
+    return String(Math.round(v * 100) / 100).replace('.', ',');
+}
+
+/**
  * Retourne les IDs des productions évaluables selon la pratique active.
  * PAN/Standards : artefacts de portfolio uniquement (type 'artefact-portfolio')
  * Sommative : toutes les productions sauf le conteneur portfolio
@@ -1098,6 +1117,7 @@ window.situerPourcentageDansEchelle = situerPourcentageDansEchelle;
 window.interpreterNiveauAtteint = interpreterNiveauAtteint;
 window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatterns;
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
+window.formaterNombrePeriodes = formaterNombrePeriodes;   // #871 — le seul formatage d'un nombre de périodes
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
 window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
 // #740 — le seul filtre SOLO « Aucun » du dépistage.
