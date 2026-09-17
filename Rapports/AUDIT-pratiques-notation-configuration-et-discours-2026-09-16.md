@@ -43,7 +43,7 @@ cd tests && npx playwright test integration/audit-pratiques-notation-parcours-20
 | F | **inscrit sous #804 et #805** ; documentation non touchée |
 | G-1 | **LIVRÉ en 1.142.24** — sentinelle du tour complet par famille, dans le banc de l'audit ; G1 à G8 rejouées : **huit rouges sur huit** |
 
-Trouvaille du lot, hors audit : deux lecteurs de l'ancien format double d'`indicesCP` — **inscrit #902**.
+Trouvaille du lot, hors audit : deux lecteurs de l'ancien format double d'`indicesCP` — **inscrit #902**, **livré en 1.142.30** (lot 33 : l'export rend les vrais indices ; le second lecteur était du code mort, retiré).
 
 ---
 

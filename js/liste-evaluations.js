@@ -454,8 +454,7 @@ function rechargerFiltreProduction() {
 function sauvegarderEtatFiltres() {
     const etatFiltres = {
         production: document.getElementById('filtre-production-eval')?.value || '',
-        statut: document.getElementById('filtre-statut-eval')?.value || '',
-        tri: document.getElementById('tri-evaluations')?.value || 'nom-asc'
+        statut: document.getElementById('filtre-statut-eval')?.value || ''
     };
 
     db.setSync('filtresListeEvaluations', etatFiltres);
@@ -479,11 +478,9 @@ function restaurerEtatFiltres() {
         setTimeout(() => {
             const filtreProduction = document.getElementById('filtre-production-eval');
             const filtreStatut = document.getElementById('filtre-statut-eval');
-            const tri = document.getElementById('tri-evaluations');
 
             if (filtreProduction && etat.production) filtreProduction.value = etat.production;
             if (filtreStatut && etat.statut) filtreStatut.value = etat.statut;
-            if (tri && etat.tri) tri.value = etat.tri;
 
 
             // Appliquer les filtres après restauration
@@ -502,8 +499,7 @@ function initialiserEvenementsFilres() {
     // actif filtre déjà en amont) ; il était lu à cinq endroits.
     const filtres = [
         'filtre-production-eval',
-        'filtre-statut-eval',
-        'tri-evaluations'
+        'filtre-statut-eval'
     ];
 
     filtres.forEach(filtreId => {
@@ -526,12 +522,10 @@ function initialiserEvenementsFilres() {
 function reinitialiserFiltres() {
     const filtreProduction = document.getElementById('filtre-production-eval');
     const filtreStatut = document.getElementById('filtre-statut-eval');
-    const tri = document.getElementById('tri-evaluations');
     const recherche = document.getElementById('recherche-evaluations');
 
     if (filtreProduction) filtreProduction.value = '';
     if (filtreStatut) filtreStatut.value = '';
-    if (tri) tri.value = 'nom-asc';
     if (recherche) recherche.value = '';
 
     // Supprimer l'état sauvegardé dans localStorage
@@ -2130,148 +2124,13 @@ function modifierEvaluationRemplacee(evaluationId) {
 // #572 (29 août 2026) — `toggleVerrouillerEvaluation` retirée : aucun appelant, aucun
 // `data-action` (le verrouillage passe par `basculerVerrouillageEvaluationCourante`).
 
-// ============================================
-// SYSTÈME DE TRI
-// ============================================
-
-/**
- * Récupère les indices A-C-P-N pour un étudiant
- * @param {string} da - Numéro DA de l'étudiant
- * @returns {Object} - Objet avec {A, C, P, N} (N = Niveau d'attention)
- */
-function obtenirIndicesEtudiant(da) {
-    // Récupérer les indices selon la pratique active
-    const pratiqueIdIndices = typeof obtenirPratiqueActiveGroupeCours === 'function'
-        ? obtenirPratiqueActiveGroupeCours()
-        : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
-    const pratique = ((typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueIdIndices) : pratiqueIdIndices) === 'standards') ? 'PAN' : 'SOM';
-
-    // Indice A (Assiduité)
-    const indicesAssiduiteDetailles = db.getSync(cle('indicesAssiduite'), {});
-    const A = indicesAssiduiteDetailles[da]?.actuel?.indice ?? 0;
-
-    // Indices C et P (Complétion et Performance)
-    const indicesCP = db.getSync(cle('indicesCP'), {});
-    const donneesCP = indicesCP[da]?.actuel?.[pratique] || {};
-    const C = donneesCP.C ?? 0;
-    const P = donneesCP.P ?? 0;
-
-    // ========================================
-    // DÉCOUPLAGE P/N : Utiliser P_recent pour le calcul du niveau d'attention si activé
-    // ========================================
-    let P_pourNiveauAttention = P;
-    if (donneesCP.details && donneesCP.details.decouplerPN &&
-        donneesCP.details.P_recent !== null && donneesCP.details.P_recent !== undefined) {
-        P_pourNiveauAttention = donneesCP.details.P_recent; // Déjà en pourcentage
-    }
-
-    // ========================================
-    // CALCUL DE N (Niveau d'attention) : basé sur P uniquement
-    // Seuil 65% : sous ce seuil, le niveau d'attention est maximal.
-    // A et C servent de contexte diagnostique, pas de prédiction.
-    // ========================================
-    let N;
-    const P_decimal = P_pourNiveauAttention / 100;  // Convertir en proportion 0-1
-    if (P_decimal < 0.65) {
-        N = 1.0;  // Niveau d'attention maximal
-    } else {
-        N = Math.pow((1.0 - P_decimal) / 0.35, 3);  // Décroissance cubique
-    }
-
-    return { A, C, P, N };
-}
-
-/**
- * Trie un tableau de lignes selon le critère spécifié
- * @param {Array} lignes - Tableau de lignes à trier
- * @param {string} critere - Critère de tri (ex: 'nom-asc', 'assiduite-desc')
- * @returns {Array} - Tableau trié
- */
-function trierLignes(lignes, critere) {
-    if (!critere || critere === '') return lignes;
-
-    // Créer une copie pour ne pas modifier l'original
-    const lignesTriees = [...lignes];
-
-    // Extraire le type et la direction
-    const [type, direction] = critere.split('-');
-    const asc = direction === 'asc';
-
-    // Fonction de comparaison
-    lignesTriees.sort((a, b) => {
-        let valeurA, valeurB;
-
-        switch (type) {
-            case 'nom':
-                // Tri alphabétique par nom
-                valeurA = a.nom.toLowerCase();
-                valeurB = b.nom.toLowerCase();
-                return asc
-                    ? valeurA.localeCompare(valeurB, 'fr')
-                    : valeurB.localeCompare(valeurA, 'fr');
-
-            case 'assiduite':
-                // Tri par indice A
-                const indicesA_A = obtenirIndicesEtudiant(a.da);
-                const indicesA_B = obtenirIndicesEtudiant(b.da);
-                valeurA = indicesA_A.A;
-                valeurB = indicesA_B.A;
-                break;
-
-            case 'completion':
-                // Tri par indice C
-                const indicesC_A = obtenirIndicesEtudiant(a.da);
-                const indicesC_B = obtenirIndicesEtudiant(b.da);
-                valeurA = indicesC_A.C;
-                valeurB = indicesC_B.C;
-                break;
-
-            case 'performance':
-                // Tri par indice P
-                const indicesP_A = obtenirIndicesEtudiant(a.da);
-                const indicesP_B = obtenirIndicesEtudiant(b.da);
-                valeurA = indicesP_A.P;
-                valeurB = indicesP_B.P;
-                break;
-
-            case 'niveau-attention':
-                // Tri par indice N (Niveau d'attention)
-                const indicesN_A = obtenirIndicesEtudiant(a.da);
-                const indicesN_B = obtenirIndicesEtudiant(b.da);
-                valeurA = indicesN_A.N;
-                valeurB = indicesN_B.N;
-                break;
-
-            default:
-                return 0;
-        }
-
-        // Comparaison numérique
-        if (asc) {
-            return valeurA - valeurB;
-        } else {
-            return valeurB - valeurA;
-        }
-    });
-
-    return lignesTriees;
-}
-
-/**
- * Fonction appelée par le select de tri
- * Recharge le tableau avec le tri appliqué
- */
-function trierListeEvaluations() {
-    // Charger les données selon le mode actif
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
-        ? obtenirEtudiantsCoursActif()
-        : obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = obtenirDonneesSelonMode('productions');
-
-    // Afficher le tableau avec tri appliqué
-    afficherTableauEvaluations(evaluations, productions, etudiants);
-}
+// #902 (17 sept. 2026) — le tri par liste déroulante est RETIRÉ : `#tri-evaluations` n'existe
+// nulle part (ni `index.html`, ni HTML généré), `trierLignes` n'avait aucun appelant,
+// `obtenirIndicesEtudiant` n'était appelée que par elle (et lisait deux formats absents :
+// `indicesCP[da].actuel.PAN|SOM` et `indicesAssiduite[da].actuel.indice` — A, C et P valaient 0),
+// et `trierListeEvaluations` (« appelée par le select de tri ») n'avait ni appelant ni `data-action`.
+// Le tri vivant est celui des en-têtes de colonne, ci-dessous. Stock : le champ `tri` déjà écrit
+// dans `filtresListeEvaluations` reste chez les gens, sans lecteur — inoffensif.
 
 // ============================================
 // TRI PAR COLONNE CLIQUABLE
@@ -2975,7 +2834,6 @@ window.supprimerEvaluation = supprimerEvaluation;
 window._restaurerOriginaleSiReprise = restaurerOriginaleSiReprise;
 window.modifierEvaluationRemplacee = modifierEvaluationRemplacee;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
-window.trierListeEvaluations = trierListeEvaluations;
 window.trierTableauParColonne = trierTableauParColonne;
 // #575 — exposée pour la sentinelle `sentinelle-575-ordre-niveaux-derive-echelle`,
 // qui exerce le tri réel plutôt qu'une copie. Même convention que

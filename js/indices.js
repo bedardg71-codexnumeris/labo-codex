@@ -527,6 +527,8 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
         : (typeof obtenirIndicesCP === 'function' ? obtenirIndicesCP(da) : null);
 
     // Détecter le format des données
+    // (#902, mesuré le 17 sept. 2026 : plus aucun producteur n'écrit `.SOM` depuis Beta 95.5 ; la
+    // branche `else` ne sert qu'à un stock antérieur et rend 0 sinon — sans conséquence observable.)
     const estNouveauFormat = indicesCPEtudiant && !indicesCPEtudiant.SOM && indicesCPEtudiant.C !== undefined;
 
     let indicesSOM = null;
