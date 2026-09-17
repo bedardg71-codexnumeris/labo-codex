@@ -2579,7 +2579,11 @@ async function creerPratiqueV2() {
     // nouvel id, le nom/auteur du récap, et entre dans la bibliothèque.
     if (r._modeleAdopte && r._gabaritSource) {
         const src = r._gabaritSource;
-        const clone = JSON.parse(JSON.stringify(src));
+        // #898 — un modèle Standards sans échelle DEMANDE l'échelle avant de s'adopter.
+        // Question fermée sans choix : rien n'est écrit, l'assistant reste ouvert.
+        const reponseEchelle = await demanderEchelleAdoption(src);
+        if (!reponseEchelle.adopter) return;
+        const clone = poserEchelleAdoption(JSON.parse(JSON.stringify(src)), reponseEchelle.echelleId);
         clone.id = wizardState.pratiqueId || genererIdUnique('pratique_');
         clone.nom = r.nom || src.nom || 'Pratique adoptée';
         const auteurRecap = `${r.prenom || ''} ${r.nomAuteur || ''}`.trim();

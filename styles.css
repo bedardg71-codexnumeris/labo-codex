@@ -5160,6 +5160,29 @@ body:not(.mode-clair) .badge-source--partage {
     z-index: 10005;
 }
 
+/* #898 — liste d'options de `uiDialogues.demanderChoix`. Chaque ligne est la
+   cible tactile entière (44 px au moins, iPad), pas le seul bouton radio. */
+.ui-dialogue-choix {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+}
+.ui-dialogue-choix-ligne {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 12px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.ui-dialogue-choix-ligne:has(input:checked) {
+    border-color: var(--bleu-principal);
+    background: var(--bleu-tres-pale);
+}
+
 /* #329 lot P3 — zone de dépôt .lcz (Réglages › Données) : retour visuel
    pendant le survol d'un glisser-déposer. */
 #partage-zone-depot.partage-zone-depot--survol {

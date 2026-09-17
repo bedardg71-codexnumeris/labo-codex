@@ -787,6 +787,9 @@ async function chargerDropdownModelesPratiques() {
 
 /**
  * Appliquer la configuration sélectionnée depuis le dropdown
+ * (Mesuré au lot 34, 17 sept. 2026 : aucun appelant dans index.html ni dans le dossier
+ * js/, et le select `v2-spec-dropdown-modeles` n'existe plus. Ce n'est PAS le geste
+ * d'adoption d'un modèle — voir #898 plus bas.)
  */
 async function appliquerModeleSelectionne() {
     const dropdown = document.getElementById('v2-spec-dropdown-modeles');
@@ -837,8 +840,94 @@ async function ouvrirModaleSauvegardeConfig() {
 }
 
 // ===========================
+// #898 — ADOPTER UN MODÈLE STANDARDS SANS ÉCHELLE DEMANDE L'ÉCHELLE
+// ===========================
+// Tranché par Grégoire le 17 sept. 2026. Les gabarits « N meilleures » et « N plus
+// récentes » n'ont pas d'échelle : adoptés tels quels, ils ne construisaient pas
+// d'instance (« Champ obligatoire manquant : echelle ») — export « non constructible »,
+// Comparateur muet, pendant que le profil calculait par son chemin riche. Deux gestes
+// vivants y menaient, et les deux passent par ici : « ✓ Créer la pratique » de
+// l'assistant après « Partir d'un modèle » (wizard-pratique-v2.js) et « Ajouter » de la
+// bibliothèque (pratiques-gestion.js). Les imports et le pack ne posent pas de question
+// et ne sont pas touchés ; la pratique Standards du pack porte son échelle.
+// ⚠ On ne devine jamais l'échelle, même s'il n'en existe qu'une.
+
+/** Les mots de Grégoire, tels quels. */
+const QUESTION_ECHELLE_ADOPTION = 'Ce modèle a besoin d\'une échelle de performance pour calculer la note. Choisis-la :';
+
+/**
+ * Vrai pour un modèle de la famille Standards qui ne porte AUCUNE échelle — ni
+ * embarquée, ni par id. Même lecture que `construireConfigComplete` (pratique-registre.js),
+ * qui est celle dont dépend l'instance. Les autres familles ne calculent pas par une
+ * échelle : jamais de question.
+ * @param {Object} modele
+ * @returns {boolean}
+ */
+function modeleDemandeEchelle(modele) {
+    if (!modele) return false;
+    const config = modele.config || {};
+    const configuration = modele.configuration || {};
+    const typeBrut = config.type || modele.type || configuration.type;
+    const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(typeBrut) : typeBrut;
+    if (famille !== 'standards') return false;
+    return !(config.echelle || modele.echelle || configuration.echelleId || config.echelleId);
+}
+
+/**
+ * Les échelles du trimestre offertes à l'adoption : celles des dropdowns de l'éditeur
+ * de pratique (`chargerDropdownEchellesMat`, `verifierDependancesPratique`).
+ * @returns {Array<{id:string, nom:string}>}
+ */
+function obtenirEchellesOffertesAdoption() {
+    return (db.getSync(cle('echellesTemplates'), []) || [])
+        .filter(e => e && e.id && e.dansBibliotheque !== false);
+}
+
+/**
+ * Pose la question de l'échelle pour l'adoption de `modele`.
+ * @param {Object} modele
+ * @returns {Promise<{adopter:boolean, echelleId:(string|null)}>}
+ *   · modèle qui ne demande rien → { adopter: true, echelleId: null } ;
+ *   · échelle choisie → { adopter: true, echelleId } ;
+ *   · question fermée sans choix → { adopter: false } : rien n'est adopté.
+ */
+async function demanderEchelleAdoption(modele) {
+    if (!modeleDemandeEchelle(modele)) return { adopter: true, echelleId: null };
+    const echelles = obtenirEchellesOffertesAdoption();
+    // ⛔ CAS D'ARRÊT (consigne du lot 34) : aucune échelle utilisable dans le trimestre.
+    // La liste serait vide et « Adopter » sans objet ; ce que l'écran doit dire alors
+    // demande un mot de Grégoire. D'ici là le geste reste celui d'avant le lot : le
+    // modèle s'adopte sans échelle, et l'assistant l'exige à la réouverture.
+    if (echelles.length === 0) return { adopter: true, echelleId: null };
+    const choisie = await uiDialogues.demanderChoix({
+        titre: modele.nom || 'Sans nom',
+        message: QUESTION_ECHELLE_ADOPTION,
+        choix: echelles.map(e => ({ valeur: e.id, libelle: e.nom || 'Sans nom' })),
+        texteConfirmer: 'Adopter'
+    });
+    // La valeur rendue doit être une échelle OFFERTE : rien d'autre ne s'écrit.
+    if (!choisie || !echelles.some(e => e.id === choisie)) return { adopter: false, echelleId: null };
+    return { adopter: true, echelleId: choisie };
+}
+
+/**
+ * Pose l'échelle choisie sur la pratique adoptée (mute et rend `pratique`).
+ * @param {Object} pratique
+ * @param {string|null} echelleId
+ */
+function poserEchelleAdoption(pratique, echelleId) {
+    if (!pratique || !echelleId) return pratique;
+    pratique.configuration = Object.assign({}, pratique.configuration, { echelleId: echelleId });
+    return pratique;
+}
+
+// ===========================
 // EXPORTS GLOBAUX
 // ===========================
+window.modeleDemandeEchelle = modeleDemandeEchelle;
+window.obtenirEchellesOffertesAdoption = obtenirEchellesOffertesAdoption;
+window.demanderEchelleAdoption = demanderEchelleAdoption;
+window.poserEchelleAdoption = poserEchelleAdoption;
 window.obtenirToutesLesPratiquesBibliotheque = obtenirToutesLesPratiquesBibliotheque;
 window.obtenirToutesLesPratiquesBibliothequeSync = obtenirToutesLesPratiquesBibliothequeSync;
 window.obtenirPratiquesParType = obtenirPratiquesParType;

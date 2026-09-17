@@ -16,6 +16,10 @@ function initialiserModulePresencesApercu() {
 /**
  * Charge et affiche les statistiques d'aperçu des présences
  * Appelée automatiquement lors de l'affichage de la sous-section
+ * (Mesuré au lot 34, 17 sept. 2026 : AUCUN appelant, et ses cibles `pa-taux-moyen`,
+ * `pa-seances-donnees`, `pa-prochaine-seance`, `stat-nb-eleves` n'existent pas dans index.html.
+ * Aucun écran ne lit cette moyenne. Verrou : sentinelle-745-exclu-hors-des-moyennes-comportement,
+ * B.1 — le jour où un appelant revient, l'essai de comportement du filtre des exclus est dû.)
  */
 function chargerApercuPresences() {
 

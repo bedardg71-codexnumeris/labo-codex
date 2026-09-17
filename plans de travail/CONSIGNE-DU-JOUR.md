@@ -1,28 +1,45 @@
-# Consigne suivante – l'export anonymisé pour la recherche rend les vrais indices (lot 33 : #902)
+# Consigne suivante – adopter un modèle Standards demande l'échelle (lot 34 : #898)
 
-> Écrite le 17 septembre 2026, 11 h 58 (Toronto), par Cowork, pendant le lot 32 (l'élève exclu, `1.142.28`).
-> **À n'exécuter qu'après le push du lot 32** : au démarrage, `git log origin/main` (pas `git log`) doit montrer `1.142.28` ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-eleve-exclu.md` et renomme `plans de travail/CONSIGNE-SUIVANTE-export-recherche.md` en `CONSIGNE-DU-JOUR.md`.
+> Écrite le 17 septembre 2026, 13 h 18 (Toronto), par Cowork, après le push du lot 33 (`932e594a`, 1.142.30).
+> **Condition de départ** : `git --no-optional-locks log --oneline -1 origin/main` doit montrer **`932e594a` (1.142.30)** ; sinon, arrête-toi et signale-le. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-export-recherche.md` et renomme `plans de travail/CONSIGNE-SUIVANTE-echelle-a-l-adoption.md` en `CONSIGNE-DU-JOUR.md`.
+> **Prochain identifiant libre : #909** (dernier utilisé : #908). Relis la ligne « Dernier ID utilisé » sur `main` avant d'en prendre un, et `grep` les DEUX registres.
 
-Mandat : #902. **Aucune question n'attend Grégoire**, sauf la phrase de « Nouvelles ». Aucun mot à l'écran ne change.
+Mandat : **#898**, tranché par Grégoire le 17 sept. vers 9 h 15, mots choisis. **Aucune question ne l'attend**, sauf la phrase de « Nouvelles » et toute phrase de l'Aide que tu réécrirais.
 
-## 1 · Ce que Cowork a mesuré `[lecture]`, qui corrige la fiche
+## 1 · La règle et les mots (#898)
 
-- **Volet 1, VIVANT** : Réglages › carte « Captures et recherche » › bouton « Générer l'export anonymisé » (`index.html:~9585`, `data-action="exporterFormatRecherche"`) → `exporterFormatRecherche` (`trimestres.js:1988`). Le bloc `indices_finaux` (`~2298`) lit `indicesCP[da].actuel.PAN || .SOM`, format retiré en Beta 95.5 : **`A_final`, `C_final`, `P_final` valent 0 pour chaque élève.** La carte promet pourtant « Indices A-C-P anonymisés ». ⚠ **A n'est pas dans `indicesCP`** : il vit dans `indicesAssiduite` (`sommatif[da]`, objet `{ indice }` ou ancien nombre – voir la lecture de `calculerTousLesIndices`, `indices.js:~484`). Remesure.
-- **Volet 2, MORT** : `trierLignes` (`liste-evaluations.js:2190`) n'a **aucun appelant**, et `#tri-evaluations` n'existe pas dans `index.html` (0 occurrence) ; `obtenirIndicesEtudiant` (`~2142`) n'est appelé que par `trierLignes`. « Les tris de la liste par C, P et N ne trient rien » n'a donc **aucun écran**. Au passage, la fiche le sous-estimait : `pratique` y vaut un booléen (`=== 'standards'`), et A lit `indicesAssiduite[da].actuel.indice`, un autre format absent – A valait 0 aussi.
+- **Adopter un modèle Standards qui n'a pas d'échelle DEMANDE l'échelle.** Tant qu'aucune échelle n'est choisie, le modèle n'est pas adopté.
+- **Texte, tel quel** : **« Ce modèle a besoin d'une échelle de performance pour calculer la note. Choisis-la : »**, suivi de la **liste des échelles du trimestre** et du bouton **« Adopter »**.
+- **Écarté par Grégoire** : fixer une échelle dans le gabarit lui-même.
+- ⚠ **Ne devine pas l'échelle**, même s'il n'en existe qu'une : la demande est la règle tranchée. `obtenirEchelleResolue()` sans id refuse déjà de deviner quand il y en a plusieurs ; ce n'est pas la sortie retenue ici.
 
-## 2 · À faire
+## 2 · Ce que Cowork a lu `[lecture]`, à REMESURER avant de coder
 
-- **Volet 1** : `indices_finaux` lit le format PLAT (`indicesCP[da].actuel.C`, `.P`, `.noteConstructible`) et A à sa source. **Un P non constructible ne s'exporte pas comme 0** (règle #394) : tu tranches la forme (`null`, ou un champ additif) en pensant à qui relit ce fichier – un export « voyage » – et tu le dis. Réemploie un lecteur existant plutôt que d'en écrire un troisième (`obtenirIndicesCP`, `calculerTousLesIndices`) si ses unités conviennent : mesure-les (0-100 ou 0-1) et dis ce que le fichier porte.
-- **Volet 2** : retire le code mort (`trierLignes`, `obtenirIndicesEtudiant`), et les lectures de `#tri-evaluations` (`~458`, `~482`, `~506`, `~529`) si elles ne servent à rien d'autre – mesure avant, un `?.value || 'nom-asc'` peut nourrir un état vivant. Zéro-dette : rien d'autre.
-- **Cherche les autres lecteurs de l'ancien format** (`grep -rn` sur `actuel.PAN`, `actuel.SOM`, `actuel?.PAN`, `actuel?.[`) : trois issues nommées pour chacun.
-- **Stock** : source seulement. Un export déjà produit ne se réécrit pas ; dis-le.
+- **Le symptôme** (audit du 16 sept., constat B-1, `[exécuté]`) : les gabarits Standards « N meilleures » et « N plus récentes » n'ont pas d'`echelleId`. Adoptés tels quels, ils ne produisent pas d'instance (« Champ obligatoire manquant : echelle ») : `simulerIndices` rend `null` – **export « non constructible », Comparateur muet** – pendant que le **profil calcule 77,32** par son chemin riche. Deux écrans se contredisent sur le premier geste du labo.
+- **Le chemin d'adoption est à MESURER et à NOMMER par toi**, par ce que l'écran affiche, pas par un nom de fonction ni un commentaire : pars de `estGabarit` (`pratiques-gestion.js`, `pratiques-bibliotheque.js`) et de la bibliothèque des pratiques (`data-action="afficherBibliothequePratiques"`, `index.html:~5469`). **Vérifie qu'un appelant vivant existe** pour la fonction que tu modifies : `appliquerModeleSelectionne` (`pratiques-bibliotheque.js:791`) n'a **aucun appelant** hors de son fichier (`grep` sur `index.html` et `js/` : zéro) – si c'est le seul chemin que tu trouves, c'est que le vrai geste est ailleurs : dis-le et cherche.
+- **La liste à offrir** : les échelles du trimestre, comme les dropdowns de l'éditeur de pratique, donc `echellesTemplates` filtré sur `dansBibliotheque !== false` (la règle qu'applique déjà `verifierDependancesPratique`, `pratiques-gestion.js:613`). **Le pack porte deux échelles** (« IDME et niv 0 », « IDME 4 niv ») : le cas « plusieurs » est le cas normal.
+- **Après le choix**, l'échelle va dans `configuration.echelleId` de la pratique adoptée, et **l'instance se construit** : prouve que `simulerIndices` rend un nombre là où il rendait `null`, et que **l'export et le Comparateur disent la même chose que le profil**. C'est la promesse du lot, pas le fait d'afficher une modale.
+- **Les autres familles ne changent pas** : SOM, SPE et DEN s'adoptent comme aujourd'hui, sans question. Un modèle Standards qui PORTE déjà une échelle s'adopte sans question lui aussi.
+- **La sortie existante reste** : rouvrir la pratique par l'assistant, qui exige l'échelle (« Choisis une échelle de performance… ») et garde la méthode « récents » depuis 1.142.24. Ne la casse pas.
 
-## Preuve
+### ⛔ Arrêt, sur ce que TU peux mesurer
+- **Aucune échelle utilisable dans le trimestre** (`echellesTemplates` filtré = vide) : la liste serait vide et le bouton « Adopter » sans objet. **Arrête-toi sur ce cas et rapporte-le** – il demande un mot de Grégoire, pas une phrase inventée. Le reste du lot continue.
+- **Si l'adoption d'un gabarit passe par un chemin qui ne peut pas poser de question** (import, activation automatique, pack de démarrage) : nomme-le, ne le change pas, et dis ce qu'il produit aujourd'hui.
 
-- Sentinelle : un trimestre de banc à trois élèves (un P constructible, un non constructible, un A en ancien format nombre) → `indices_finaux` porte les valeurs stockées, dans les unités annoncées, et jamais 0 pour un P non constructible ; aucun champ nominatif. L'ancien format `actuel.PAN` n'est plus lu nulle part.
-- Break-test : relire `actuel.PAN` ; A pris dans `indicesCP` ; P non constructible rendu 0. Essais de COMPORTEMENT (une mutation qui garde le texte exigé et change la valeur doit rougir).
-- Vitest depuis `tests/`, puis le verdict Playwright, Cowork fermé. **Porte terrain : aucune** (rien ne change à l'écran ; le téléchargement lui-même n'est pas touché).
+## 3 · Au passage, sans mot, sans release si c'est seul
 
-## Livraison
+**Les trois essais de comportement dus par la relecture croisée du lot 32** (en tête de la section 1.142.28 de `RELAIS.md`, ajout de 12 h 45). Les mutations **E2b, E3b, E4b** survivent à la suite entière : le filtre des exclus est GARDÉ dans son texte et rendu inopérant (`!estEtudiantExclu(e) || e.statut`) dans `presences-apercu.js`, `snapshots.js` (relevés hebdomadaires) et `graphiques-progression.js` (~2651). Depuis le lot 32, ces filtres portent seuls la promesse « l'exclu reste hors des moyennes du groupe », et **aucun essai de COMPORTEMENT ne les juge**.
+⮕ Trois essais, sur un groupe qui a un exclu CALCULÉ : **la moyenne d'assiduité de l'aperçu des présences**, **les moyennes du relevé hebdomadaire**, **la courbe du groupe** sont celles des seuls actifs. **E2b, E3b, E4b doivent rougir** – une assertion sur le texte du filtre ne suffit pas (erreur 16 : une preuve « par le texte » ne juge pas le comportement).
 
-Patch `1.142.29` par `scripts/release.mjs`. **Phrase de « Nouvelles »** : propose-la à Grégoire avant de la figer. Puis `OU-EN-EST-ON.md`, `RELAIS.md`, le backlog (#902), le markdown du tri. **Commite aussi les fichiers de Cowork** : la consigne renommée et son archive, et tout ajout de Cowork dans `RELAIS.md` non encore commité. Push par `scripts/pousser.sh`, puis signale à Cowork que c'est poussé.
+## 4 · Preuve attendue
+
+- Une **sentinelle du lot** : le geste d'adoption d'un modèle Standards sans échelle (la question est posée, rien n'est adopté tant qu'on ne choisit pas), l'adoption après choix (`echelleId` posé, instance construite), **la parité profil / export / Comparateur** sur le même élève, et les familles qui ne changent pas.
+- **Des mutations qui changent le CALCUL**, pas seulement le texte : au moins une qui garde la phrase exigée et neutralise le choix de l'échelle.
+- **Un banc WebKit** sur le pack démo pour le geste réel (la question paraît, la liste porte les deux échelles, « Adopter » adopte), **mesuré à 768 px**.
+- **Porte terrain probable (iPad, Safari)** : si la question s'ouvre dans une modale ou un panneau, dis-le en fin de lot – Cowork prépare la porte pour Grégoire.
+
+## 5 · Mots et traces
+
+- **Phrase de « Nouvelles »** : à proposer à Grégoire (par Cowork) avant la release ; ne l'écris pas de ton chef.
+- **Aide** : si une phrase de l'Aide décrit l'adoption d'un modèle, vérifie-la **contre ce que l'écran affiche** avant de la réécrire, et propose les mots plutôt que de les poser.
+- **Fichiers de Cowork à commiter avec le lot** : `plans de travail/CONSIGNE-DU-JOUR.md` (cette consigne, renommée), son archive `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-export-recherche.md`, et `CONSIGNE-DEMARRAGE-COWORK.md` si Cowork l'a réécrite d'ici là.

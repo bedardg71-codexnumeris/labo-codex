@@ -42,12 +42,18 @@ const globaux = {
     normaliserIdPratique: (t) => normMap[t] || t,
     genererIdUnique: () => 'id-genere',
     // Rendu (a2) : wizardV2VoieRapide déclenche afficherEtapeWizardV2 → genererRadioCards.
-    echapperHtml: (s) => String(s == null ? '' : s)
+    echapperHtml: (s) => String(s == null ? '' : s),
+    // #898 (lot 34) : la branche d'adoption passe par la VRAIE question de pratiques-bibliotheque.js (chargé plus bas
+    // dans le même sandbox). Renvoi par fermeture : un identifiant nu du wizard ne voit pas les exports d'un co-chargé.
+    demanderEchelleAdoption: (...a) => win.demanderEchelleAdoption(...a),
+    poserEchelleAdoption: (...a) => win.poserEchelleAdoption(...a),
+    uiDialogues: { demanderChoix: async () => { throw new Error('aucune question attendue pour un modèle SPE'); } }
 };
 // SSOT #328 Lot 1 : le wizard écrit modalitesEvaluation via le module
 // propriétaire — chargé d'abord dans le même sandbox (même db/cle mockés).
 const win = chargerScript('js/pratiques/modalites-evaluation.js', globaux);
 chargerScript('js/wizard-pratique-v2.js', globaux, win);
+chargerScript('js/pratiques-bibliotheque.js', globaux, win);
 
 async function produire(pratiqueId, reponses) {
     store = [];
