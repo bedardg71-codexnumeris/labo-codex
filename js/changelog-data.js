@@ -21,6 +21,14 @@
 
     var CHANGELOG = [
         {
+            version: '1.143',
+            couleur: 'vert',
+            titre: 'Résultats ultérieurs',
+            items: [
+                'Sous la liste des étudiant·es d\'un trimestre, tu peux maintenant noter les résultats obtenus par tes élèves dans les cours suivants&nbsp;; l\'export pour la recherche les inclut, toujours anonymisés.',
+            ]
+        },
+        {
             version: '1.142',
             couleur: 'vert',
             titre: '«&nbsp;Évaluer&nbsp;» mène au bon élève, avec ou sans copie',

@@ -104,6 +104,9 @@ async function chargerListeEtudiantsV2() {
         // Masquer le bouton supprimer groupe si pas d'étudiants
         const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
         if (btnSupprimerGroupe) btnSupprimerGroupe.classList.add('u-hide');
+        // #913 : la zone des résultats ultérieurs suit la liste, y compris quand elle se vide
+        // (sinon elle garderait les élèves du trimestre ou du groupe d'avant).
+        if (typeof window.afficherResultatsUlterieurs === 'function') window.afficherResultatsUlterieurs([]);
         return;
     }
 
@@ -189,6 +192,10 @@ async function chargerListeEtudiantsV2() {
 
     html += '</tbody></table>';
     conteneur.innerHTML = html;
+
+    // #913 : les résultats ultérieurs se saisissent sous cette liste, sur LES MÊMES rangées
+    // (même filtre de groupe, même tri, mêmes noms anonymisés ; `da` reste le vrai DA).
+    if (typeof window.afficherResultatsUlterieurs === 'function') window.afficherResultatsUlterieurs(rangees);
 }
 
 /**

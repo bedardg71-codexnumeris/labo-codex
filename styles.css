@@ -9765,6 +9765,101 @@ body.mode-clair .bloc-rlo-separateur {
     border: 2px solid var(--jaune-moyen, #ffc107);
 }
 
+/* --- Résultats ultérieurs (#913, 17 sept. 2026) : saisie sous la liste du Cadre ---
+   Cibles tactiles à 44 px (iPad) ; la phrase du verrou ne paraît que sur un trimestre archivé
+   sans « Permission d'écriture » — le même sélecteur que la garde d'index.html. */
+
+.ru-zone {
+    margin-bottom: 15px;
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-carte, #1a3040);
+    padding: 0 12px;
+}
+
+.ru-zone > summary {
+    /* display par défaut (list-item) : le triangle dit que la zone se déplie */
+    line-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.ru-zone[open] {
+    padding-bottom: 12px;
+}
+
+.ru-cible {
+    min-height: 44px;
+}
+
+.ru-verrou {
+    display: none;
+    margin: 0 0 10px;
+    color: var(--texte-secondaire, #8aa4b0);
+    font-style: italic;
+}
+
+body.mode-archive:not(.mode-ecriture-temp) .ru-verrou {
+    display: block;
+}
+
+/* `.carte ul` (padding-left: 30px) l'emporterait sur une classe seule */
+.ru-zone .ru-eleves,
+.ru-zone .ru-resultats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ru-eleve {
+    padding: 10px 0;
+    border-top: 1px solid var(--gris-clair);
+}
+
+.ru-nom {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+}
+
+.ru-resultat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.ru-saisie {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 90px auto;
+    gap: 8px;
+    align-items: end;
+    margin-top: 6px;
+}
+
+.ru-saisie label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.75rem;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+
+.ru-refus {
+    margin: 4px 0 0;
+    min-height: 1em;
+    font-size: 0.8rem;
+    color: var(--alerte-texte-erreur);
+}
+
+.ru-refus:empty {
+    display: none;
+}
+
 /* --- Horaire (Beta 95.2) --- */
 
 .carte-resume-horaire {
