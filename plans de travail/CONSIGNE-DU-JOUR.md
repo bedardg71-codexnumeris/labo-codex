@@ -1,47 +1,29 @@
-# Consigne du jour – ouvrir une copie : un drapeau mort à retirer (#890), un timeout à diagnostiquer (#652)
+# Consigne du jour – complément du lot A : le rapport compte les mêmes productions que la complétion (1.142.20)
 
-> Écrite le 16 septembre 2026, 15 h 52 (Toronto), sur `26d4347f` (`main` = `origin/main`, `1.142.15` en ligne).
-> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-16-651-700-annoter-et-compte-erreurs.md`.
-> Choisie par Grégoire vers 15 h 50 : même endroit que le lot d'avant (Évaluations, ouvrir une copie). Aucun arbitrage attendu de lui, sauf au point 2 c si la mesure y mène.
+> Écrite le 16 septembre 2026, 20 h 00 (Toronto), sur `db117dce` (`1.142.19` en ligne), à la suite de la relecture croisée de Cowork (`RELAIS.md`, ajout de 19 h 56).
+> Elle REMPLACE la précédente, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-16-lot-A-memes-copies-partout.md`.
 
----
+Mandat (proposé par Cowork le 16 sept. 2026 à 20 h, relayé par Grégoire) : compléter le lot A des règles du dépistage (1.142.19). La relecture croisée de Cowork a trouvé un endroit que le lot a laissé à moitié, et cinq lecteurs que la sentinelle ne juge que par leur texte. Aucun mot neuf, aucune question de didactique.
 
-## 1 · #890 – RETIRER `window._resterEnModeAnnoter` (code mort, zéro-dette)
+## 1 · Le défaut à corriger (prouvé par exécution)
 
-**Mesuré par Cowork sur `26d4347f` (`grep -rn` sur `js/`, `tests/unit`, `tests/integration`, `docs`)** : aucune ligne ne le met à vrai depuis `59690542` (29 mars). Il reste **trois lectures/écritures, aucune dans les tests ni la doc** :
-- `js/travaux-ui.js` ~3301 : la remise à faux dans `ouvrirFichier` ;
-- `js/travaux-ui.js` ~3452 : `&& !window._resterEnModeAnnoter` dans la condition de restauration du mode ;
-- `js/evaluation.js` ~1316-1322 : la garde `if (!enModeEvaluer && window._resterEnModeAnnoter) { … return; }` et son commentaire du 29 mars.
+`genererRapportAPI` (`js/profil-etudiant-rapport.js`, lignes 78 à 80) calcule son dénominateur `productionsComptees` avec l'ancienne règle (`!e.remplaceeParId && e.noteFinale != null`), alors que la complétion sommative lit désormais `evaluationEntreDansLaNote`. Dans le banc de la sentinelle du lot A, avec P4 en brouillon pour les DEUX élèves, la complétion vaut 100 et le rapport écrit « Complétion : 100% (3 remises / 4 productions) ». Avant 1.142.19, les deux disaient 4. Cowork a posé la correction d'une ligne (`compteDansLaNote(e)`) dans un clone : le rapport écrit « 3 remises / 3 productions », Vitest 579 / 6 489 vert.
+Retire aussi le repli de `compteDansLaNote` (`typeof evaluationEntreDansLaNote === 'function' ? … : ancienne règle`) : la ligne suivante appelle déjà `window.evaluationNonRemise` sans garde, et le lot A a posé « aucune garde par site ». Une seule règle, sans copie de secours.
 
-**Geste** : retirer les trois, par SYMBOLE. La condition de ~3452 perd un terme toujours vrai ; la garde de `evaluation.js` est une branche jamais prise. **Rien ne change à l'écran.**
+## 2 · La preuve qui manque : cinq lecteurs jugés seulement par le texte
 
-⚠ **Ne touche pas à la zone morte elle-même** (mode d'avant `evaluer` + rappel posé ⮕ aucune branche) : ta mesure du lot d'avant dit qu'aucun trajet ne l'atteint, et la retoucher sans symptôme serait élargir. Dis-le dans #890 au moment de la cocher.
+Cowork a posé cinq mutations qui gardent le texte exigé par l'essai D3 et changent le comportement. **Toutes les cinq survivent à la suite unitaire entière** (579 / 6 489 vert sous chacune) :
+- K1 · « (sur N) » du profil (`sections-affichage`, `evaluationsDA`) : `(window.evaluationEntreDansLaNote(e) || (e.noteFinale != null && !e.remplaceeParId))` — un brouillon y rentre ;
+- K2 · directions (`calculerDirectionsCriteres`) : `(window.evaluationEntreDansLaNote(e) || !e.remplaceeParId) &&` — un brouillon y rentre ;
+- K3 · `nbRemis` du rapport : `… && !window.evaluationNonRemise(e) || (e.etudiantDA === da && e.productionId === p.id && e.noteFinale != null)` — un non-remis noté y rentre ;
+- K4 et K5 · dénominateur de la complétion, SOM puis configurable (`productionsEvaluees`) : `(window.evaluationEntreDansLaNote(e) || e.noteFinale != null)` — une production que seuls des brouillons touchent y rentre.
+Ajoute à la sentinelle du lot A des essais de COMPORTEMENT qui rougissent sous chacune : la variante « P4 en brouillon pour les deux élèves » (dénominateur SOM et configurable = 3 ; rapport « 3 remises / 3 productions ») ; le « (sur N) » vaut 3 avec P4 en brouillon ; les directions ne lisent pas P4 en brouillon ; `nbRemis` vaut 3 avec P4 « non-recu » noté 0. Repose K1 à K5 et le défaut du point 1, et rapporte les rouges, mutation par mutation. Garde D3.
 
-**Preuve** : `grep -rn _resterEnModeAnnoter` ⮕ 0 hors archives ; une sentinelle de non-retour qui rougit si le symbole revient dans `js/` (break-test à montrer) ; les specs `liste-651-…` et `profil-travaux-761-…` restent vertes.
+## 3 · À mesurer, pas à corriger d'office
 
-## 2 · #652 – LE TIMEOUT DU 31 AOÛT : DIAGNOSTIC D'ABORD
+- `js/profil-etudiant-sections-affichage.js:2864` (détail de la note hybride sans terminale, colonne des obligatoires) lit `noteFinale != null` sans le verrou : un brouillon d'obligatoire s'y affiche-t-il comme une note comptée ? Mesure, puis donne l'une des trois issues (« inscrire et continuer » par défaut).
+- ⛔ **Ne touche pas** `SignalementDepistage._evaluationActive` (`js/entites/signalement-depistage.js:45`) : il ne lit pas le verrou, donc une copie en brouillon lève un signalement. La règle du lot dit « nulle part », mais la page des questions ne montrait pas ce cas : Cowork pose la question à Grégoire. Rappel : la sentinelle #790 interdit d'y appliquer le filtre des quatre portes (productions diagnostiques).
 
-### a) Ce que Cowork a cru, et ce que la mesure a réfuté
+## Livraison
 
-J'ai dit à Grégoire à 15 h 50 que #652 était « vraisemblablement déjà corrigée » par `f485ea34` (4 sept.). **C'est faux** : ce correctif faisait accepter le champ de points `eval_pts_` d'un premier critère analytique, et **ce champ n'existe que depuis `37660b76` (3 sept.)**. Le timeout du 31 août a donc **une autre cause**.
-
-### b) Ce qui est mesuré, et l'hypothèse
-
-- Rapport : `Retours des testeurs/gregoire/BUG__grégoire__2026-08-31_14-13-51.txt`, erreurs de 13 h 57 : l'attente échoue **alors que `listeCriteresGrille1` contient des cartes de critères**. Le journal de clics ne remonte qu'à 14 h 06 : la grille ouverte à 13 h 57 n'y est pas nommée. Vers 14 h 06, Grégoire modifiait des grilles (« Grille-1 FR-ALGO seul A26 »).
-- Aujourd'hui, `_attendreSaisiePremierCritereModif` (`js/evaluation.js` ~1667) guette **`eval_<criteres[0].critereId>`** ou `eval_pts_<…>`, 3 s, puis **rejette : l'évaluation ne s'ouvre pas**. Les critères holistiques et algorithmiques rendent bien `eval_<id>` (`evaluation-chargement.js` ~1067, ~1102, ~1122).
-- ⮕ **Hypothèse de Cowork, non vérifiée** : le premier critère **enregistré dans l'évaluation** n'existe plus (ou plus sous cet id) dans la grille **rendue** – grille modifiée après l'évaluation, critère retiré ou renuméroté. Les cartes sont là, mais pas celle qu'on attend. Si c'est ça, **le défaut vit encore** : une évaluation dont le premier critère a quitté sa grille ne s'ouvre plus du tout.
-
-### c) Ce qui est attendu
-
-1. **Mesure la cause** : reproduis au banc l'hypothèse (évaluation dont `criteres[0].critereId` n'est pas dans la grille). Rouge = la copie ne s'ouvre pas. Si la sonde sur les données réelles de Grégoire t'est utile : **lecture seule**, et dis-le.
-2. **Si l'hypothèse tient** : le remède étroit est technique – que l'ouverture ne dépende pas d'UN critère précis (attendre la grille rendue, ou le premier critère commun à l'évaluation et à la grille). ⛔ **Mais ce que l'écran doit MONTRER d'un critère évalué qui n'est plus dans la grille** (le taire, le signaler, le garder dans la note) **est une question de didactique** : famille de #705 (« modifier une grille rend incomplètes des évaluations déjà remises », à trier). **Si le remède t'oblige à trancher ça, arrête-toi et rapporte** : la question monte à Grégoire, avec une recommandation.
-3. **Si l'hypothèse tombe** : dis-le, nomme ce que tu as mesuré, et laisse #652 ouverte avec la mesure écrite. **Ne code rien sans rouge.**
-4. **Stock** : aucune écriture dans les données, dans aucun cas.
-
-## 3 · APRÈS
-
-- **Version** : le point 1 seul ne change rien à l'écran (`release.mjs` au jugement du skill, sans « Nouvelles »). Si le point 2 livre un correctif : patch, et **toute phrase de « Nouvelles » est proposée à Grégoire avant le push**.
-- **Porte terrain** : aucune pour le point 1 ; pour le point 2, une machine voit une copie qui s'ouvre ou pas. Si ta mesure dit le contraire, dis-le.
-- **BACKLOG** : #890 cochée (avec la zone morte laissée en l'état, motif écrit) ; #652 cochée seulement si un rouge a été vu puis corrigé, sinon mise à jour avec la mesure.
-- **Commite aussi** (écrits par Cowork, non commités) : cette consigne, son archive `_ancienne-CONSIGNE-DU-JOUR-2026-09-16-651-700-annoter-et-compte-erreurs.md`, `plans de travail/TRI-2026-09-13-fiches-ouvertes-par-cout.md` et `CONSIGNE-DEMARRAGE-COWORK.md` (tri reporté à 15 h 50).
-- ⚠ **Le verdict Playwright se prend Cowork FERMÉ** : dis à Grégoire quand tu es prêt.
+Patch `1.142.20` par `scripts/release.mjs`. La phrase de « Nouvelles » de 1.142.19 n'est pas encore validée : propose à Grégoire UNE phrase qui couvre les deux patchs, avant de la figer. `RELAIS.md` (réponse à l'ajout de Cowork de 19 h 56), `OU-EN-EST-ON.md` (phrase « vérifié comment »). Aucune fiche neuve attendue. Vitest depuis `tests/`, puis le verdict Playwright sur le commit final, Cowork fermé. Aucune porte terrain. Commite aussi les fichiers de Cowork : `CONSIGNE-DEMARRAGE-COWORK.md`, `RELAIS.md` (ajout de 19 h 56), `plans de travail/CONSIGNE-DU-JOUR.md`, et trois archives `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-16-16h31.md`, `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-16-652-890-ouvrir-une-copie.md`, `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-16-lot-A-memes-copies-partout.md`. Push par `scripts/pousser.sh`, puis signale à Cowork que c'est poussé.
