@@ -476,14 +476,24 @@ function genererSectionMobilisationEngagement(da) {
     // la carte garde ses artefacts, comme avant.
     const productionsC = Array.isArray(detailsC.productions) ? detailsC.productions : null;
     const idsRemisC = productionsC ? new Set(productionsC.filter(p => p.remis).map(p => p.id)) : null;
-    const remisesCarte = productionsC ? artefacts.filter(a => idsRemisC.has(a.id)) : artefactsRemis;
+    // #922 (18 sept. 2026) — « ne montrer que des artefacts » tient au MOT du titre : seule une pratique Standards
+    // écrit « N artefacts remis ». Partout ailleurs le titre dit « production », et la liste d'artefacts est vide
+    // (une sommative n'a aucune production de type « artefact de portfolio ») : « 2/2 » au-dessus de « 0 production
+    // remise — Aucune production remise ». Hors Standards, les pastilles sont donc TOUTES les productions que le
+    // détail tient pour remises, comme le sont déjà les non-remises.
+    const pastillesArtefactsSeulement = ((typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null)
+        || window.PRATIQUE_DEFAUT || 'standards') === 'standards';
+    const construirePastilleC = p => {
+        const production = productions.find(x => x.id === p.id);
+        if (!production) return null;
+        const copies = evaluationsEleve.filter(e => e.productionId === p.id);
+        return _construireArtefactMobilisation(production, _trouverEvaluationActiveMobilisation(copies));
+    };
+    const remisesCarte = !productionsC ? artefactsRemis
+        : pastillesArtefactsSeulement ? artefacts.filter(a => idsRemisC.has(a.id))
+        : productionsC.filter(p => p.remis).map(construirePastilleC).filter(Boolean);
     const nonRemisesCarte = productionsC
-        ? productionsC.filter(p => !p.remis).map(p => {
-            const production = productions.find(x => x.id === p.id);
-            if (!production) return null;
-            const copies = evaluationsEleve.filter(e => e.productionId === p.id);
-            return _construireArtefactMobilisation(production, _trouverEvaluationActiveMobilisation(copies));
-        }).filter(Boolean)
+        ? productionsC.filter(p => !p.remis).map(construirePastilleC).filter(Boolean)
         : artefacts.filter(a => !a.remis);
     // « En attente de données » suit la fraction, elle aussi : c'est quand la pratique ne compte ENCORE aucune
     // production (« 0/0 » — rien d'évalué, ou seulement des brouillons). Dès qu'elle en compte une, une liste
@@ -491,7 +501,9 @@ function genererSectionMobilisationEngagement(da) {
     const completionEnAttente = detailsC.total === 0;
 
     // 🆕 BETA 95.6 : Détecter si aucune donnée de complétion/performance
-    const aucuneDonneeCompletion = nbTotal === 0;
+    // #922 — quand la pratique dit ce qu'elle compte, la grande valeur de C suit la fraction, pas la liste des artefacts
+    // (« — » à côté de « 2/2 » sous une sommative).
+    const aucuneDonneeCompletion = productionsC ? completionEnAttente : nbTotal === 0;
     const aucuneDonneePerformance = nbRetenus === 0;
     // P insuffisant : pas assez d'évaluations pour calculer une note fiable
     const performanceInsuffisante = portfolioActif && nbRemis < minimumCompletion && nbRemis > 0;
@@ -552,6 +564,12 @@ function genererSectionMobilisationEngagement(da) {
     const moyenneP = artefactsRetenus.length > 0
         ? Math.round(artefactsRetenus.reduce((sum, a) => sum + (a.note || 0), 0) / artefactsRetenus.length)
         : 0;
+    // #922 (18 sept. 2026) — SOUS UNE SOMMATIVE, LA CARTE PERFORMANCE REDIT LE MOTEUR. Elle parlait portfolio (« 3
+    // meilleures, maîtrise de standards »), listait « 0 meilleure production » et taisait P (« — ») : tout y lisait
+    // la liste des artefacts, vide. Les copies comptées, leur poids et P viennent du récit — JAMAIS de `moyenneP`
+    // ci-dessus, qui est une moyenne SIMPLE (Grégoire, 18 sept. : « la pondération affectée à chaque travail, pas 50-50 »).
+    const recitSOM = _lireRecitSommative(da).recit;
+    const compteesSOM = recitSOM ? (recitSOM.resultats || []).filter(r => r.sort === 'compte') : [];
     // `const interpP = interpreterPerformance(moyenneP);` retiré au pas 3c-3 de
     // #542 : le résultat n'était lu nulle part, et la fonction n'existe plus.
 
@@ -564,7 +582,9 @@ function genererSectionMobilisationEngagement(da) {
             <br><br>
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
             <br><br>
-            <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}
+            <strong>Performance (P) :</strong> ${recitSOM
+                ? `Indice P = ${indicesSOM.P}% — Moyenne pondérée des ${compteesSOM.length} ${obtenirTermeProduction(compteesSOM.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('evalue', compteesSOM.length)}, chacune à son poids`
+                : `Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}`}
         </div>
 
         <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
@@ -646,7 +666,7 @@ function genererSectionMobilisationEngagement(da) {
                         ${remisesCarte
                             .map(art => {
                                 // Numéro d'artefact depuis le titre (pas la position)
-                                const indexOriginal = _rangProduction(artefactsPortfolio.find(p => p.id === art.id));
+                                const indexOriginal = _rangProduction(productions.find(p => p.id === art.id));
                                 return { ...art, indexOriginal };
                             })
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
@@ -707,24 +727,55 @@ function genererSectionMobilisationEngagement(da) {
                     <h3 class="profil-section-titre-seul">Performance</h3>
                     ${performanceInsuffisante
                         ? '<span class="profil-valeur-grande" style="color: var(--gris-moyen);">—</span>'
-                        : genererValeursComparatives(indicesSOM.P, indicesPAN.P, aucuneDonneePerformance)}
+                        : genererValeursComparatives(indicesSOM.P, indicesPAN.P, recitSOM ? compteesSOM.length === 0 : aucuneDonneePerformance)}
                 </div>
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• ${_genererTexteMethodePerformanceMobilisation(performanceInsuffisante, portfolioActif, methodeSelection, nombreARetenir, configCategories, nbRemis, minimumCompletion)}</strong></li>
+                    <li><strong>• ${recitSOM
+                        ? `Moyenne pondérée des ${obtenirTermeProduction('pluriel')} ${accordTermeProduction('evalue', 2)}`
+                        : _genererTexteMethodePerformanceMobilisation(performanceInsuffisante, portfolioActif, methodeSelection, nombreARetenir, configCategories, nbRemis, minimumCompletion)}</strong></li>
                 </ul>
 
                 <hr class="profil-separateur">
 
-                <!-- Gestion des jetons (prédéfinis + personnalisés) -->
-                ${_genererBlocGestionJetons(statutJetons, evaluations, productions, da)}
+                <!-- Gestion des jetons (prédéfinis + personnalisés). #922 : sous une sommative, seulement si l'élève en a un d'appliqué. -->
+                ${(recitSOM && totalJetonsUtilises === 0) ? '' : _genererBlocGestionJetons(statutJetons, evaluations, productions, da)}
 
                 <!-- Artefacts sélectionnés avec notes (badges colorés avec checkboxes) -->
                 <h4 class="profil-section-titre">
-                    ${_genererTitreArtefactsRetenusMobilisation(portfolioActif, methodeSelection, nbRetenus, nombreARetenir)}
+                    ${recitSOM
+                        ? `${compteesSOM.length} ${obtenirTermeProduction(compteesSOM.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('evalue', compteesSOM.length)}`
+                        : _genererTitreArtefactsRetenusMobilisation(portfolioActif, methodeSelection, nbRetenus, nombreARetenir)}
                 </h4>
-                ${artefactsRetenus.length > 0 ? `
+                ${recitSOM ? (compteesSOM.length > 0 ? `
+                    <div class="badges-centres u-mb-20">
+                        ${compteesSOM.map(r => {
+                            const couleurBadge = (typeof couleurDuNiveau === 'function') ? couleurDuNiveau(r.niveau, r.echelleId) : '#999999';
+                            const poidsTxt = (typeof r.poids === 'number') ? `poids ${r.poids.toFixed(0)} %` : '';
+                            return `
+                                <div class="badge-artefact hover-opaque"
+                                     style="background: ${couleurBadge}22; border-color: ${couleurBadge}; border-width: 3px; cursor: pointer;"
+                                     data-action="evaluerProduction" data-param="${da}" data-param2="${echapperHtml(r.productionId)}"
+                                     title="${echapperHtml(r.label)}">
+                                    <span class="badge-artefact-titre" style="color: ${couleurBadge};">
+                                        P${_rangProduction(productions.find(p => p.id === r.productionId))}
+                                    </span>
+                                    <span class="badge-artefact-note" style="background: ${couleurBadge};">
+                                        ${echapperHtml(r.niveau || '—')}
+                                    </span>
+                                    <span class="u-texte-petit u-texte-gris" style="font-weight: 500;">
+                                        ${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `(${typeof r.note === 'number' ? r.note.toFixed(1) : '—'}) · ${poidsTxt}`}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                ` : `
+                    <div class="profil-message-vide u-mb-15">
+                        ${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}
+                    </div>
+                `) : artefactsRetenus.length > 0 ? `
                     <div class="badges-centres u-mb-20">
                         ${artefactsRetenus.map(art => {
                             // Numéro d'artefact depuis le titre (pas la position)
@@ -3805,6 +3856,20 @@ function _calculerIndicesPerformance(da) {
  * @returns {string} HTML sûr (aucune donnée utilisateur)
  */
 /**
+ * #922 — LE récit du moteur pour une pratique sommative, lu une seule fois pour les deux écrans qui le redisent (la
+ * carte de note #921, la carte Performance de la section Engagement). Aucun des deux ne recalcule une moyenne.
+ * @returns {{idActif: ?string, recit: ?Object}} recit = null hors sommative, ou sans rien à compter
+ */
+function _lireRecitSommative(da) {
+    // `simulerIndices` exige l'id : sans lui il rend null. Le même repère que `calculerDetailsNoteFinale` — la pratique du
+    // groupe-cours actif, lue à la SSOT.
+    const idActif = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    const indices = (idActif && typeof simulerIndices === 'function') ? simulerIndices(da, idActif) : null;
+    const recit = indices ? indices.recit : null;
+    return { idActif, recit: (recit && recit.famille === 'SOM' && recit.synthese) ? recit : null };
+}
+
+/**
  * #921 (rapport de Grégoire, 18 sept. 2026) — la note de session d'une pratique SOMMATIVE, sous la liste des
  * productions : chaque copie comptée avec sa note et son poids, la ligne de calcul, le total. Forme choisie par
  * Grégoire (« calquée sur la PAN »). AUCUN calcul de note ici : le total est `recit.synthese.noteFinale`, celui de
@@ -3814,12 +3879,8 @@ function _calculerIndicesPerformance(da) {
  * @returns {string} HTML, ou '' si la pratique active n'est pas une sommative ou n'a encore rien à compter
  */
 function _genererNoteSessionSommative(da) {
-    // `simulerIndices` exige l'id : sans lui il rend null. Le même repère que `calculerDetailsNoteFinale` — la pratique du
-    // groupe-cours actif, lue à la SSOT.
-    const idActif = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
-    const indices = (idActif && typeof simulerIndices === 'function') ? simulerIndices(da, idActif) : null;
-    const recit = indices ? indices.recit : null;
-    if (!recit || recit.famille !== 'SOM' || !recit.synthese) return '';
+    const { idActif, recit } = _lireRecitSommative(da);
+    if (!recit) return '';
 
     const differee = (typeof noteDiffereeActive === 'function' && noteDiffereeActive());  // #321
     const note = recit.synthese.noteFinale;
