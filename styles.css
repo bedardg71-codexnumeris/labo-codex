@@ -9864,6 +9864,75 @@ body.mode-archive:not(.mode-ecriture-temp) .ru-verrou {
     color: var(--texte-secondaire);
 }
 
+/* Lot 2 : la recherche multi-trimestres et le choix. Cibles ≥ 44 px (iPad). */
+.rl-zone-recherche,
+.rl-zone-inscrits {
+    margin-top: 16px;
+}
+
+.rl-titre {
+    font-size: 1rem;
+    margin: 0 0 4px;
+}
+
+.rl-recherche {
+    width: 100%;
+    max-width: 420px;
+    min-height: 44px;
+}
+
+.rl-resultats {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    max-width: 640px;
+}
+
+.rl-resultat-bouton {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--gris-clair);
+    color: inherit;
+    cursor: pointer;
+}
+
+.rl-resultat-bouton:hover,
+.rl-resultat-bouton:focus-visible {
+    background: var(--bleu-tres-pale);
+}
+
+.rl-vide {
+    padding: 8px 10px;
+    font-style: italic;
+    color: var(--texte-secondaire);
+}
+
+.rl-choix {
+    margin-top: 12px;
+}
+
+.rl-choix .rl-nom,
+.rl-choix .rl-meta,
+.rl-resume {
+    margin: 0 0 6px;
+}
+
+#rl-inscrire {
+    min-height: 44px;
+}
+
+.rl-resume {
+    font-size: 0.85rem;
+}
+
 .ru-saisie {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 90px auto;

@@ -78,8 +78,9 @@ describe('#915 lot 1 — ouvrir le sous-onglet lit, et n\'écrit rien', () => {
         b.win.initialiserRegistreLongitudinal();
         const conteneur = b.elements['registre-longitudinal-conteneur'];
         const textes = conteneur.children.map((c) => c.textContent);
-        expect(textes).toContain(b.mots.aucunInscrit);
         expect(textes).toContain(b.mots.perennite);
+        const zoneInscrits = conteneur.children.find((c) => c.id === 'rl-zone-inscrits');
+        expect(zoneInscrits.children.map((c) => c.textContent)).toContain(b.mots.aucunInscrit);
         expect(b.journal).toEqual([]);
         expect(NOM_CLE in b.store).toBe(false);
     });
@@ -88,7 +89,7 @@ describe('#915 lot 1 — ouvrir le sous-onglet lit, et n\'écrit rien', () => {
         for (const brut of [[], { format: 'codex-data', version: 1, groupes: {} }, { format: 'autre', version: 1, eleves: { '2000001': { da: '2000001', nom: 'X', prenom: 'Y' } } }, { format: 'registre-longitudinal', version: 1 }, 'texte', 42]) {
             const store = Object.assign(storeBase(), { [NOM_CLE]: brut });
             const b = banc(store);
-            expect(b.api.lire()).toEqual({ format: 'registre-longitudinal', version: 1, eleves: {} });
+            expect(b.api.lire()).toEqual({ format: 'registre-longitudinal', version: 1, eleves: {}, modeles: { grilles: {}, echelles: {} } });
             b.win.initialiserRegistreLongitudinal();
             expect(b.journal).toEqual([]);
             expect(b.store[NOM_CLE]).toEqual(brut);
@@ -105,7 +106,8 @@ describe('#915 lot 1 — ouvrir le sous-onglet lit, et n\'écrit rien', () => {
         b.win.initialiserRegistreLongitudinal();
         const conteneur = b.elements['registre-longitudinal-conteneur'];
         expect(conteneur.innerHTML).toBe('');
-        const liste = conteneur.children.find((c) => c.className === 'rl-eleves');
+        const zoneInscrits = conteneur.children.find((c) => c.id === 'rl-zone-inscrits');
+        const liste = zoneInscrits.children.find((c) => c.className === 'rl-eleves');
         expect(liste).toBeTruthy();
         expect(liste.children.map((li) => li.dataset.da)).toEqual(['2000005', '2000002', '2000001']);
         expect(liste.children[0].children.map((s) => s.textContent)).toEqual(['Absent, Anna', b.mots.inscritLe + ' 2026-09-12']);
