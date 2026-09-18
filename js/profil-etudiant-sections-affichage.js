@@ -3075,6 +3075,10 @@ function genererSectionProductions(da) {
         }
     }
 
+    // #921 — hors Standards, `calculerDetailsNoteFinale` rend null (il ne décompose qu'un portfolio). Une SOMMATIVE a
+    // pourtant son récit du calcul : le même que lit le Comparateur, par la même porte (`simulerIndices`, lecture seule).
+    if (!detailsNoteFinale) htmlNoteFinale = _genererNoteSessionSommative(da);
+
     // Générer le HTML (productions d'abord, puis note finale)
     return `
         <!-- Tableau des productions -->
@@ -3800,6 +3804,85 @@ function _calculerIndicesPerformance(da) {
  * @param {string} [classeBloc] - rendu en <div class="…"> ; sans elle, en <span> discret
  * @returns {string} HTML sûr (aucune donnée utilisateur)
  */
+/**
+ * #921 (rapport de Grégoire, 18 sept. 2026) — la note de session d'une pratique SOMMATIVE, sous la liste des
+ * productions : chaque copie comptée avec sa note et son poids, la ligne de calcul, le total. Forme choisie par
+ * Grégoire (« calquée sur la PAN »). AUCUN calcul de note ici : le total est `recit.synthese.noteFinale`, celui de
+ * `calculerPerformance` ; la ligne de calcul n'est écrite que si elle REDONNE ce total au dixième — sinon on ne
+ * montre pas une arithmétique qui contredirait la note.
+ * @param {string} da
+ * @returns {string} HTML, ou '' si la pratique active n'est pas une sommative ou n'a encore rien à compter
+ */
+function _genererNoteSessionSommative(da) {
+    // `simulerIndices` exige l'id : sans lui il rend null. Le même repère que `calculerDetailsNoteFinale` — la pratique du
+    // groupe-cours actif, lue à la SSOT.
+    const idActif = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    const indices = (idActif && typeof simulerIndices === 'function') ? simulerIndices(da, idActif) : null;
+    const recit = indices ? indices.recit : null;
+    if (!recit || recit.famille !== 'SOM' || !recit.synthese) return '';
+
+    const differee = (typeof noteDiffereeActive === 'function' && noteDiffereeActive());  // #321
+    const note = recit.synthese.noteFinale;
+    const comptees = (recit.resultats || []).filter(r => r.sort === 'compte');
+    const autres = (recit.resultats || []).filter(r => r.sort !== 'compte');
+    const pratiqueId = idActif;
+    const cfg = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive(idActif) : null;
+    const estFinale = !!(cfg && cfg.notesFinales);
+    const terme = (n) => obtenirTermeProduction(n > 1 ? 'pluriel' : 'singulier') + ' ' + accordTermeProduction('evalue', n);
+
+    const ligne = (r, grise) => {
+        const noteTxt = differee ? badgeNoteDifferee() : ((typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—');
+        const marqueur = `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
+        // En texte, pas en pastille : `.note-finale-ponderation` est une pastille sombre, trop lourde dans une liste.
+        const suite = grise
+            ? ` <span class="note-finale-non-evalue">· ${echapperHtml(r.detail || '')}</span>`
+            : ` · poids ${(typeof r.poids === 'number') ? r.poids.toFixed(0) : '—'} %`;
+        return `<li>${echapperHtml(r.label)}${suite} <strong>(${marqueur})</strong></li>`;
+    };
+
+    // La ligne de calcul, sur les pondérations telles que saisies. Écrite seulement si elle redonne la moyenne.
+    const moyenneAffichee = recit.synthese.plafonnement ? recit.synthese.plafonnement.moyenneOriginale : note;
+    let calculHtml = '';
+    if (!differee && comptees.length && comptees.every(r => typeof r.note === 'number' && typeof r.ponderation === 'number')) {
+        const total = comptees.reduce((t, r) => t + r.ponderation, 0);
+        const somme = comptees.reduce((t, r) => t + r.note * r.ponderation, 0);
+        if (total > 0 && typeof moyenneAffichee === 'number' && Math.abs(somme / total - moyenneAffichee) < 0.05) {
+            const termes = comptees.map(r => `${r.note.toFixed(1)} × ${r.ponderation}`).join(' + ');
+            calculHtml = `(${termes}) ÷ ${total} = <strong>${moyenneAffichee.toFixed(1)}%</strong>`;
+        }
+    }
+
+    const plafond = recit.synthese.plafonnement
+        ? `<div class="note-finale-message-provisoire">Moyenne de ${recit.synthese.plafonnement.moyenneOriginale.toFixed(1)}% ramenée à ${note.toFixed(1)}% par une règle de la pratique.</div>`
+        : '';
+    const totalTxt = differee ? badgeNoteDifferee() : ((typeof note === 'number') ? note.toFixed(1) + '%' : '—');
+
+    return `
+            <!-- Note de session (sommative) — #921 -->
+            <div class="note-finale-section">
+                <h3 class="note-finale-titre">
+                    ${estFinale ? 'Note finale de session' : 'Note provisoire de session'}
+                    ${recit.pratiqueNom ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(recit.pratiqueNom)}</span>` : ''}
+                    ${pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(pratiqueId)}" title="Ouvrir les réglages de cette pratique">Réglages de la pratique</button>` : ''}
+                </h3>
+                <div class="note-finale-grid note-finale-grid-single">
+                    <div class="note-finale-composante">
+                        <div class="note-finale-composante-titre">Moyenne pondérée (${comptees.length} ${terme(comptees.length)})</div>
+                        <div class="note-finale-artefacts">
+                            <ul class="note-finale-liste-artefacts">${comptees.map(r => ligne(r, false)).join('')}${autres.map(r => ligne(r, true)).join('')}</ul>
+                        </div>
+                        ${calculHtml ? `<div class="note-finale-calcul-categorie">${calculHtml}</div>` : ''}
+                    </div>
+                </div>
+                <div class="note-finale-resultat">
+                    <div class="note-finale-formule">Note ${estFinale ? 'finale' : 'provisoire'} = ${echapperHtml(recit.synthese.formuleTexte || 'moyenne pondérée')}</div>
+                    <div class="note-finale-total ${typeof note === 'number' ? '' : 'note-finale-tiret'}">${totalTxt}</div>
+                    ${plafond}
+                </div>
+            </div>
+            `;
+}
+
 function _phraseEvaluationsEcartees(ecartees, classeBloc) {
     if (!ecartees || !ecartees.total) return '';
     const morceaux = [];
