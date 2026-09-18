@@ -176,3 +176,27 @@ test('#920 · par « Consulter », évaluation verrouillée : la barre est là, 
     ]);
     expect(erreurs, 'aucune erreur de page, aucun dialogue').toEqual([]);
 });
+
+// RAPPORT DE GRÉGOIRE, 18 sept. 15 h 39, encore sur 1.146.4 : « Je suis toujours à 24/24, pour peu importe quel élève. » La barre
+// n'était recalculée que par « Évaluer » : ouverte ensuite par « Consulter », elle gardait la position du dernier « Évaluer ».
+// Le banc refait ce trajet : « Évaluer » la DERNIÈRE élève (3 de 3, flèche droite éteinte), puis « Consulter » la première.
+test('#920 · après « Évaluer » la dernière élève, « Consulter » la première remet la barre sur elle — pas sur la position d\'avant', async ({ page }) => {
+    const erreurs = await monter(page, { consulter: true });
+
+    await page.evaluate(() => window.executerActionEval({ value: 'evaluer|TEST920C|p920' }));
+    await attendreEleve(page, 'TEST920C', '');
+    await page.waitForFunction(() => (document.getElementById('eval-navigation-position') || {}).textContent === 'Élève 3 de 3', null, { timeout: 10000 });
+    expect(await barre(page)).toMatchObject({ position: 'Élève 3 de 3', suivantEteint: true });
+
+    await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); });
+    await page.waitForFunction(() => !!document.querySelector('.eval-actions-select option[value="consulter|EVAL920A"]'), null, { timeout: 10000 });
+    await page.evaluate(() => {
+        const menu = document.querySelector('.eval-actions-select option[value="consulter|EVAL920A"]').closest('select');
+        menu.value = 'consulter|EVAL920A';
+        menu.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await attendreEleve(page, 'TEST920A', 'M');
+    await page.waitForFunction(() => (document.getElementById('eval-navigation-position') || {}).textContent === 'Élève 1 de 3', null, { timeout: 10000 }).catch(() => {});
+    expect(await barre(page)).toMatchObject({ visible: true, position: 'Élève 1 de 3', precedentEteint: true, suivantEteint: false });
+    expect(erreurs).toEqual([]);
+});
