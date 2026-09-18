@@ -300,11 +300,23 @@ function _appliquerJetonDelaiSiCocheSauv(evaluation, etudiantDA, maintenant) {
 
 function _basculerEnModificationActiveSauv(existanteActive) {
     console.warn(`[Évaluation] Évaluation active existante détectée (${existanteActive.id}) — bascule en modification`);
-    if (window.evaluationEnCours) {
-        window.evaluationEnCours.idModification = existanteActive.id;
+    // Sans copie ouverte depuis le chargement de la page, seul le `let evaluationEnCours` de
+    // config.js est posé (`chargerEvaluationsEtudiant`) : `window.evaluationEnCours` reste
+    // undefined. L'id n'était alors posé nulle part, `sauvegarderEvaluationModifiee` renvoyait
+    // à `sauvegarderEvaluation`, qui revenait ici : pile débordée, rien d'écrit, aucun message
+    // (#919, rapport du 18 sept. 2026 : trois enregistrements perdus en A24). Le pivot est donc
+    // garanti AVANT le renvoi, et PRÊTÉ le temps de l'enregistrement seulement : laissé en
+    // place, il garderait l'élève de cet instant, et la garde de `verifierEtChargerEvaluationExistante`
+    // (même élève, même production, id posé) sauterait le rechargement au retour sur cet élève.
+    const pivotPrete = !window.evaluationEnCours;
+    if (pivotPrete) window.evaluationEnCours = { idModification: existanteActive.id };
+    else window.evaluationEnCours.idModification = existanteActive.id;
+    try {
+        // Patch §5.6 — promotion sauvegarderEvaluationModifiee vers résidu evaluation.js
+        window.sauvegarderEvaluationModifiee();
+    } finally {
+        if (pivotPrete) window.evaluationEnCours = undefined;
     }
-    // Patch §5.6 — promotion sauvegarderEvaluationModifiee vers résidu evaluation.js
-    window.sauvegarderEvaluationModifiee();
 }
 
 function _gererErreurPersistanceSauv(resultatSauvegarde) {
