@@ -402,8 +402,23 @@ class PratiqueConfigurable {
             const recit = inst ? inst.decrireCalcul(da) : null;
             return recit ? Object.assign(recit, { pratiqueNom: this.obtenirNom() }) : null;
         }
+        if (this.config.calcul_note && this.config.calcul_note.methode === 'moyenne_ponderee') {
+            // #921 — le récit d'une sommative configurable vient du même délégué que sa note (patron #708 de la SPE),
+            // sous le nom de CETTE pratique. La note finale est celle de `_calculerPerformanceSommative` : le verrou
+            // de #897 y est appliqué, et le récit dit quand il a plafonné la moyenne (`moyenneOriginale`).
+            if (typeof window.PratiqueSommative !== 'function') return null;
+            const recit = new window.PratiqueSommative().decrireCalcul(da);
+            if (!recit) return null;
+            const moyenne = recit.synthese.noteFinale;
+            const note = this._calculerPerformanceSommative(da);
+            recit.pratiqueNom = this.obtenirNom();
+            recit.synthese.noteFinale = note;
+            recit.synthese.plafonnement = (typeof note === 'number' && typeof moyenne === 'number' && note < moyenne)
+                ? { moyenneOriginale: moyenne } : null;
+            return recit;
+        }
         if (!(this.config.calcul_note && this.config.calcul_note.methode === 'jugement_global')) {
-            return null; // ni DEN ni SPE : aucun récit à produire ici
+            return null; // ni DEN, ni SPE, ni SOM : aucun récit à produire ici
         }
         if (!window.denotationJugements) return null;
 

@@ -27,9 +27,11 @@ describe('#127 · nom de la pratique active dans le panneau de note finale', () 
         expect(actions).toMatch(/_pratiquesCfg\.find\(p => p\.id === pratiqueId\)\?\.nom/);
     });
 
-    it('le rendu affiche le nom dans les TROIS en-têtes (erreur + hybride + classique)', () => {
+    it('le rendu affiche le nom dans les QUATRE en-têtes (erreur + hybride + classique + sommative, #921)', () => {
         const occurrences = affichage.match(/note-finale-pratique-nom/g) || [];
-        expect(occurrences.length).toBe(3);
+        expect(occurrences.length).toBe(4);
+        // #921 (18 sept. 2026) — la carte d'une sommative lit le nom dans le récit du calcul, échappé lui aussi.
+        expect(affichage).toMatch(/echapperHtml\(recit\.pratiqueNom\)/);
         expect(affichage).toMatch(/detailsNoteFinale\.pratiqueNom \|\| detailsNoteFinale\.pratique/);
         // échappé (donnée libre saisie par l'utilisateur)
         expect(affichage).toMatch(/echapperHtml\(detailsNoteFinale\.pratiqueNom \|\| detailsNoteFinale\.pratique\)/);

@@ -196,6 +196,10 @@ class PratiqueSommative {
                 niveau: e.niveauFinal || null,   // code BRUT — traduit par l'échelle à la vue
                 note: (e.noteFinale ?? null),
                 sort: 'compte',
+                // #921 — le poids en NOMBRE, pour qui écrit la ligne de calcul (profil) : `ponderation` est celle de la
+                // production (défaut 1, même règle que `calculerPerformance`), `poids` sa part en % des copies comptées.
+                ponderation: pondProd(e.productionId),
+                poids: poidsPct(e.productionId),
                 detail: 'comptée une fois · poids ' + poidsPct(e.productionId).toFixed(0) + ' %'
             });
         });
