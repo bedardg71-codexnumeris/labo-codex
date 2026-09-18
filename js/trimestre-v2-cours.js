@@ -312,6 +312,18 @@ function changerCoursSelectionneV2(coursId) {
     // PRÉCÉDENT affiché sans un mot (option périmée, donnée restaurée/corrompue) —
     // l'utilisateur croyait éditer l'élément cliqué. Patron commun aux 3 accordéons.
     if (!coursSelectionne) {
+        // 🔧 #916 (18 sept. 2026) : le cours ACTIF peut être absent de la bibliothèque —
+        // `infoCours` est un miroir que l'orchestre fabrique depuis le `coursId` du
+        // groupe-cours, sans exiger que la fiche existe. chargerDropdownCoursV2 le garde
+        // EXPRÈS dans le menu et le sélectionne : ce n'est pas une option périmée, et le
+        // recharger le resélectionnerait — récursion sans sortie, qui tuait
+        // initialiserTrimestreV2 avant le sélecteur de trimestre. État vide, sans crier.
+        const miroirActif = db.getSync('infoCours', null);
+        if (miroirActif && miroirActif.id === coursId) {
+            console.warn('[Cours V2] Cours actif absent de la bibliothèque :', coursId);
+            changerCoursSelectionneV2(null);
+            return;
+        }
         console.warn('[Cours V2] Sélection non résolue :', coursId);
         notifications.erreur('Cours introuvable', 'La fiche sélectionnée n\'existe plus. La liste va se rafraîchir.');
         chargerDropdownCoursV2();
