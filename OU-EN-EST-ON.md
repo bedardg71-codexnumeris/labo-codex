@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-✅ **FAIT EN 1.146.0 (18 SEPTEMBRE 2026, ≈ 11 h 45) — SUIVI LONGITUDINAL, LOT 4 : LE DOSSIER SE DÉPLIE. Le chantier #915 a livré ses quatre lots. ⚠ Pas encore poussé au moment d'écrire cette ligne : voir RELAIS.md.**
+✅ **FAIT EN 1.146.0 (18 SEPTEMBRE 2026, ≈ 11 h 20) — SUIVI LONGITUDINAL, LOT 4 : LE DOSSIER SE DÉPLIE. Le chantier #915 a livré ses quatre lots. ⚠ Pas encore poussé au moment d'écrire cette ligne : voir RELAIS.md.**
 **Ce que tu verras** : sous chaque élève inscrit·e, « Voir le dossier ». Déplié : un bloc par trimestre — la date de la copie, le statut et le programme ; les trois indices tels qu'ils étaient rangés (assiduité avec ses périodes, complétion, performance) ; puis les évaluations dans l'ordre où elles ont eu lieu, avec la note, le niveau et son nom **au moment de la copie**, la grille, chaque critère et son niveau, et la rétroaction repliée à part. Une évaluation remplacée par une reprise le dit.
 **Tes données** : déplier ne recalcule rien et n'écrit rien — vérifié (aucune écriture, aucun appel à un calcul d'indice ; registre et trimestres identiques après le geste, au navigateur).
 **Ce que la mesure a changé** : j'allais écrire les trois indices à la même échelle. Mesuré dans le code AVANT d'écrire : l'assiduité est rangée de 0 à 1, la complétion et la performance de 0 à 100. Sans cette mesure, l'écran aurait affiché « 5000 % ». Deux mutations tiennent désormais chaque échelle.

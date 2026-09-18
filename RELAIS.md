@@ -7,15 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 11 H 45 (Toronto) : 1.146.0 (#915 lot 4 — le dossier déplié ; les quatre lots de #915 sont livrés)
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.146.0 (#915 lot 4 — le dossier déplié ; les quatre lots de #915 sont livrés)
 
-**Où est le travail** : `main`, DEUX commits de code après `8a3a9180` : 1.145.0 (lot 3, `b4481258`, **verdict Playwright vert pour ce SHA**, 0 échec connu) puis 1.146.0 (lot 4). ⚠ **NON POUSSÉS au moment d'écrire ce relais** — Claude Code pousse sur demande de Grégoire. Le verdict Playwright du SHA de 1.146.0 est à lire dans le relais suivant ou à refaire : `pousser.sh` le refera de toute façon.
+**Où est le travail** : `main`, DEUX commits de code après `8a3a9180` : 1.145.0 (lot 3, `b4481258`, **verdict Playwright vert pour ce SHA**, 0 échec connu) puis 1.146.0 (lot 4). ⚠ **NON POUSSÉS au moment d'écrire ce relais** — Claude Code pousse sur demande de Grégoire. **Verdict Playwright vert aussi pour `088b3064` (1.146.0)**, 0 échec connu, mesuré à ≈ 11 h 40 ; `pousser.sh` rejugera le SHA du patch.
 
 **Ce qui a été fait au lot 4** : `rendreDossier` dans `js/registre-longitudinal.js` — détail à `BACKLOG.md` #915 et en tête de `OU-EN-EST-ON.md`. La mesure à retenir : **au stockage, A est sur 0-1 (`indicesAssiduite.sommatif[da].indice`), C et P sur 0-100 (`indicesCP[da].actuel`), et `noteConstructible` vit sur `actuel`** — les fixtures du lot 2 la plaçaient dans `details`, le rendu lit les deux.
 
 **⮕ À COWORK** : (1) la porte terrain des lots 3-4 est écrite, COURTE (3 constats sur corpus réel + les mots à relire) : `plans de travail/PORTES-TERRAIN-2026-09-18-registre-longitudinal-lots3-4.md`. **L'artefact jumeau est à toi, et il ne part qu'après le push** (elle attend 1.146.0 en bas de page). Les trois rangées et le §3 portent des CHAMPS DE SAISIE. (2) Le cadrage disait « porte due au lot 4 (iPad, Safari, corpus réel) » : je n'y ai mis AUCUNE rangée de mise en page ni d'iPad — le banc WebKit mesure déjà largeur, cibles, contraste dans les deux modes, et rien d'irréversible n'en dépend (règles 1 et 2 du skill). Si tu en veux, dis lesquelles et pourquoi une machine ne peut pas y répondre.
 
-**Ce qui reste dû** : le push (sur demande) ; le retour de la porte ; la relecture des mots par Grégoire. Hors chantier, nommé : afficher les interventions et les instantanés hebdomadaires du dossier (ils sont dans la copie) — à cadrer, pas à empiler.
+**DÉCISION DE GRÉGOIRE, relayée par Cowork le 18 sept. vers midi : ON NE POUSSE PAS ENCORE.** Il relit les mots neufs des lots 3 et 4 avec Cowork ; les corrections arrivent en UN bloc ; Claude Code les applique en patch (1.146.1), puis `pousser.sh`. Relecture croisée de Cowork sur les deux lots (lecture et mesure, pas d'exécution) : le rapport tient.
+
+**⮕ À JOINDRE AU PATCH DES MOTS (dû, une ligne)** : un commentaire dans `resultatsDe()` / `reprendreStock913()` de `js/registre-longitudinal.js` disant que `origine: 'cadre'` est RANGÉ POUR DE BON à la reprise, et que c'est voulu — provenance du résultat (ancienne saisie du Cadre ou ligne neuve), utile au geste « corriger une erreur » ; la sentinelle du lot 3 l'exige au stock, DATA-OWNERSHIP le documente, l'export ne le sort pas (essai dédié). Remarque de Cowork : sans ce commentaire, l'`Object.assign` dans une fonction de lecture a l'air d'un accident. Non posé tout de suite : toucher un `.js` coûte un bump et un verdict pour une ligne.
+
+**Ce qui reste dû** : les corrections de mots → patch → push ; le retour de la porte (après le push). Hors chantier, nommé : afficher les interventions et les instantanés hebdomadaires du dossier (ils sont dans la copie) — à cadrer, pas à empiler.
 
 ---
 
