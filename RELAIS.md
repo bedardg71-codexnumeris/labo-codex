@@ -7,6 +7,17 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 16 H 50 (Toronto) : 1.146.7 (#922) et 1.146.8 (#896), le Suivi — COMMITÉES EN LOCAL, PAS POUSSÉES
+
+⚠ **`main` local est en avance sur `origin/main` (`c5c25e74`) : `e98460a4` et `10bb3869` (docs de la clôture précédente), `916ca8e6` (1.146.7, #922), `57991f06` (1.146.8, build 0918-1640, #896), puis le commit de docs qui porte ce bloc. Le push attend la demande de Grégoire.** Avant de pousser : relire le verdict Playwright GitHub du run `35388425832` sur `c5c25e74` (encore `in_progress` à 16 h 05), mesurer la charge, pousser depuis un worktree propre, `pousser.sh` en arrière-plan.
+
+- **#922** — section « Engagement » du profil sous une sommative : pastilles de Complétion = productions que `obtenirDetailsCompletion` tient pour remises (hors Standards) ; valeur de C sur la fraction ; carte Performance lue du récit du moteur (`_lireRecitSommative`, partagé avec #921), jamais de la moyenne simple ; le récit sommatif porte `productionId` et `echelleId`. Banc `profil-922-…` (4 essais), 7 mutations / 7 rouges. Mots « Moyenne pondérée » choisis avec Grégoire (« pas 50-50 »). **Supposition restée sans réponse** : jetons masqués sous une sommative quand aucun n'est appliqué.
+- **#896** — colonne « Obligatoires » de la note hybride sans terminale : lit `evaluationEntreDansLaNote` ; brouillon nommé « brouillon, non comptée ». Banc `profil-896-…`, 2 mutations / 2 rouges. Exécuté avant correctif : la carte écrivait 71.0 % au-dessus de 79.8 %.
+- **Mesuré** : Vitest 595 / 6 757 verts APRÈS chaque commit de bump ; bancs WebKit #871, #896, #921, #922 : 9 verts. **Non jugé** : la suite Playwright entière.
+- **Trouvaille, issue 2 (inscrire et continuer), NON inscrite faute de symptôme vécu** : `obtenirStatutJetonsEtudiant` appelle `initialiserJetonsEtudiant(da)` à chaque affichage de la section Engagement — une écriture possible à l'affichage, lue, pas mesurée.
+- **Reste ouvert au Suivi, non touché** : #906, #830, #869, #870, et le paquet « à trancher après le 14 » (#710 à #716, #750, #751) — des décisions pédagogiques, une session de cadrage plutôt que de code.
+- Non commité, pas à cette session : `plans de travail/CADRAGE-2026-09-17-soir-registre-longitudinal.md` (Cowork).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 14 H 25 (Toronto) : 1.146.4 (#919 et #920 — un rapport de Grégoire de 13 h 56, saisie des notes d'A2024 sans copie)
 
 ✅ **1.146.5 POUSSÉE vers 15 h 25 : `origin/main` = `bf5c1e6e`**, mesuré après `pousser.sh` depuis un worktree propre (retiré) et `git fetch` ; sentinelle Playwright verte, Vitest vert au hook. ⚠ **`liste-651` (« le trajet direct ») verte AU SECOND ESSAI pendant ce verdict : troisième occurrence du jour (13 h 20, 14 h 20 à charge 25-33, 15 h 20 à charge basse). Ce n'est plus la charge seule : c'est un sujet, #685 — cause non lue, l'attente qui expire est `#evaluations-liste.sous-section.active` (ligne 157 de la spec).**
