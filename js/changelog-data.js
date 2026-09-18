@@ -28,6 +28,7 @@
                 'Labo&nbsp;› Suivi longitudinal&nbsp;: sous chaque élève inscrit·e, «&nbsp;Voir le dossier&nbsp;» déplie la copie que tu as faite — pour chaque trimestre, ses évaluations dans l\'ordre où elles ont eu lieu, critère par critère, avec le niveau obtenu et le nom que ce niveau portait au moment de la copie.',
                 'Les indices au moment de la copie — assiduité, complétion, performance — sont écrits tels qu\'ils étaient rangés. Quand un indice n\'avait pas été calculé, ou qu\'une note était impossible à calculer, l\'écran le dit plutôt que d\'afficher un zéro.',
                 'La rétroaction de chaque évaluation se déplie à part. Rien n\'est recalculé et rien n\'est écrit quand tu déplies un dossier&nbsp;; aucune analyse ni graphique pour l\'instant.',
+                'Cadre&nbsp;› Trimestre&nbsp;: la barre d\'étapes du haut suit maintenant ce que tu viens d\'enregistrer. Importer tes étudiant·es, créer un horaire ou un groupe-cours coche l\'étape tout de suite, sans recharger la page.',
             ]
         },
         {

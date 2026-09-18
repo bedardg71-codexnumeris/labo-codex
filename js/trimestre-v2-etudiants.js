@@ -72,6 +72,13 @@ async function chargerListeEtudiantsV2() {
     // Mettre à jour le dropdown des groupes (avec tous les étudiants)
     populerDropdownGroupesV2(tousLesEtudiants);
 
+    // Retour testeur du 18 sept. 2026 : la barre du haut n'était recalculée
+    // qu'au démarrage et au changement de trimestre. Posé AVANT le retour
+    // « liste vide » plus bas, pour que vider la liste décoche aussi l'étape.
+    if (typeof window.mettreAJourBarreContexte === 'function') {
+        window.mettreAJourBarreContexte();
+    }
+
     // Rafraîchir aussi le dropdown « Groupe associé » de l'éditeur d'horaire :
     // sinon un groupe créé/importé n'y apparaît qu'après réouverture du
     // formulaire (le select rendu n'était jamais repeuplé). Non destructif.
