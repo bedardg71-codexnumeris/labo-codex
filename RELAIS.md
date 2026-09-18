@@ -9,7 +9,9 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 7 H 30 (Toronto) : 1.144.2 (#917, commentaire testeur — « Re-capturer » devient « Refaire la copie »)
 
-**Où est le travail** : `main`, un commit de code après `3b28608b` = la release 1.144.2 (build `0918-0729`). **Poussé ou non : voir le commit de relais qui suit celui-ci** (bloc écrit AVANT le verdict Playwright).
+**Où est le travail** : `main`, un commit de code après `3b28608b` = la release 1.144.2 (build `0918-0729`). **POUSSÉ le 18 sept. 2026 à ≈ 8 h 15 (Toronto), sur demande de Grégoire : origin/main = `6a5fda3e`**, mesuré après `pousser.sh origin main` et `git fetch` — sentinelle Playwright verte pour ce SHA exact, **0 échec connu, 0 instable** ; Vitest vert au hook (593 / 6 734). Ce que sert l'hébergeur ne se mesure pas d'ici.
+
+⚠ **Un passage AVANT celui-là, même SHA, avait rendu cinq specs vertes au second essai** (`bibliotheques-import-persistance`, `carac-476-volet2-duplication`, `cartouches-dropdown-selection`, `comparateur-pratiques-rendu`, `cours-actif-hors-bibliotheque-916`) : sans rapport entre elles, toutes en début d'alphabet, charge machine mesurée à 8,8 juste après. Le passage suivant, vingt minutes plus tard, les a toutes passées du premier coup. Lecture retenue, NON prouvée : pic de charge au démarrage. Non inscrites (une occurrence, aucun symptôme vécu). `cours-actif-hors-bibliotheque-916` est le banc neuf du matin : s'il revient instable dans un verdict calme, c'est à reprendre.
 
 **Ce qui a été fait** : retour de Grégoire (7 h 16) sur le lot 2 de #915 — il ne comprenait ni « Re-capturer » ni si le geste était irréversible pour ses données. Bouton « Refaire la copie », secondaire une fois l'élève inscrit·e ; dialogue qui nomme l'élève, la copie remplacée, et ce qui ne bouge pas ; « Capturé le » → « Copie du ». **Mots validés par Grégoire** (option 1). Aucun comportement, aucune donnée ne change. Fiche #917 dans SUIVI-BUGS.
 
