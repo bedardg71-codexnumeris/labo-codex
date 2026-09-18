@@ -126,11 +126,12 @@
         // Sans semis : c'est du contenu propre à Grégoire, pas de la forme — le pack
         // démo n'en pose pas, et un trimestre neuf part vide.
         'notesRapport',
-        // 🆕 #913 (17 sept. 2026) : les résultats obtenus APRÈS le trimestre (note finale d'un
-        // ancien élève dans un cours suivant, transmise par la Direction des études et saisie à
-        // la main) : un objet { [da]: [{ cours, trimestre, note }] } par trimestre
-        // (resultats-ulterieurs.js). Sans semis : contenu propre à l'utilisateur, le pack démo
-        // n'en pose pas, un trimestre neuf part vide.
+        // #913 (17 sept. 2026) : les résultats obtenus APRÈS le trimestre, un objet
+        // { [da]: [{ cours, trimestre, note }] } par trimestre. ⚠ #915 lot 3 (18 sept. 2026) :
+        // PLUS AUCUN ÉCRIVAIN — la saisie vit dans le registre longitudinal (clé globale). La clé
+        // reste au registre parce que le STOCK déjà écrit chez les gens existe : il voyage avec
+        // l'archive du trimestre, il est LU par registre-longitudinal.js (reprise) et par
+        // exporterFormatRecherche (repli), il n'est ni réécrit ni effacé.
         'resultatsUlterieurs',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
@@ -2026,8 +2027,25 @@
             const indicesCP = db.getSync(cle('indicesCP'), {});
             // #902 : A ne vit pas dans indicesCP — sa source est indicesAssiduite (sommatif[da]).
             const indicesAssiduite = db.getSync(cle('indicesAssiduite'), {});
-            // #913 : rangés par DA — le DA ne sort jamais, la sortie se fait sous id_anonyme.
+            // #913 / #915 lot 3 : rangés par DA — le DA ne sort jamais, la sortie se fait sous id_anonyme.
+            // Deux sources : le REGISTRE longitudinal (clé globale, par DA) d'abord, et l'ancienne clé du
+            // trimestre en repli, en union sans doublon. Dès que le registre a REPRIS le stock d'un DA
+            // (`reprise913`), il fait foi seul : un résultat retiré là-bas ne revient pas par l'ancienne clé.
             const resultatsUlterieurs = db.getSync(cle('resultatsUlterieurs'), {}) || {};
+            const registreLongitudinal = db.getSync('registreLongitudinal', null);
+            const inscritsAuRegistre = (registreLongitudinal && registreLongitudinal.format === 'registre-longitudinal'
+                && registreLongitudinal.eleves && typeof registreLongitudinal.eleves === 'object') ? registreLongitudinal.eleves : {};
+            const resultatsUlterieursDe = (da) => {
+                const inscrit = inscritsAuRegistre[da];
+                const duRegistre = inscrit && Array.isArray(inscrit.resultatsUlterieurs) ? inscrit.resultatsUlterieurs : [];
+                const duTrimestre = (inscrit && inscrit.reprise913) || !Array.isArray(resultatsUlterieurs[da]) ? [] : resultatsUlterieurs[da];
+                const vus = new Set();
+                // Trois champs recopiés un à un : rien d'autre de l'objet rangé ne voyage.
+                return duRegistre.concat(duTrimestre)
+                    .filter(r => r && typeof r === 'object')
+                    .map(r => ({ cours: r.cours, trimestre: r.trimestre, note: r.note }))
+                    .filter(r => { const k = r.cours + '\u0000' + r.trimestre + '\u0000' + r.note; if (vus.has(k)) return false; vus.add(k); return true; });
+            };
             const cours = db.getSync('cours', []);
             const coursActif = cours.find(c => c.actif);
 
@@ -2245,10 +2263,8 @@
                             // élève (c'était le booléen du volet confidentiel) : toujours faux.
                             services_adaptes: e.sa === 'Oui' || e.sa === true
                         },
-                        // #913 : une liste, vide quand il n'y a rien — jamais un champ absent. Trois
-                        // champs recopiés un à un : rien d'autre de l'objet rangé ne voyage.
-                        resultats_ulterieurs: (Array.isArray(resultatsUlterieurs[e.da]) ? resultatsUlterieurs[e.da] : [])
-                            .map(r => ({ cours: r.cours, trimestre: r.trimestre, note: r.note }))
+                        // #913 : une liste, vide quand il n'y a rien — jamais un champ absent.
+                        resultats_ulterieurs: resultatsUlterieursDe(e.da)
                     })),
 
                     presences: presences

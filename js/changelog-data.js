@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            version: '1.145',
+            couleur: 'vert',
+            titre: 'Les résultats ultérieurs rejoignent le Suivi longitudinal',
+            items: [
+                'Labo&nbsp;› Suivi longitudinal&nbsp;: une seule ligne de saisie pour tous tes élèves inscrits — élève, cours, trimestre, note finale. Après chaque ajout, le cours et le trimestre restent en place et la ligne passe à l\'élève suivant&nbsp;: il ne reste qu\'à taper la note. Chaque résultat paraît sous le nom de l\'élève, avec son bouton «&nbsp;Retirer&nbsp;».',
+                'Le bloc «&nbsp;Résultats ultérieurs&nbsp;» quitte Cadre&nbsp;› Trimestre. Ce que tu y avais déjà saisi n\'est pas perdu&nbsp;: c\'est repris sous le nom de l\'élève quand tu l\'inscris, avec la mention «&nbsp;saisi dans le Cadre&nbsp;», et l\'écran nomme les élèves pour qui des résultats attendent. L\'export anonymisé pour la recherche porte les deux.',
+                '«&nbsp;Retirer du registre&nbsp;»&nbsp;: pour corriger une inscription faite par erreur. Avant d\'agir, le dialogue dit ce qui sera effacé — la copie du dossier et chaque résultat ultérieur déjà saisi. Tes trimestres ne sont pas modifiés.',
+                'Tout cela fonctionne aussi quand le trimestre affiché est archivé, sans cocher «&nbsp;Permission d\'écriture&nbsp;»&nbsp;: le registre n\'appartient à aucun trimestre.',
+                'Corrigé&nbsp;: le résumé d\'une copie accorde ses pluriels («&nbsp;11 évaluations · 32 séances · 1 dossier&nbsp;»).',
+            ]
+        },
+        {
             version: '1.144',
             couleur: 'vert',
             titre: 'Suivre un·e élève d\'un trimestre à l\'autre',

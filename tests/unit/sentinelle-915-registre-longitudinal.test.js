@@ -110,8 +110,10 @@ describe('#915 lot 1 — ouvrir le sous-onglet lit, et n\'écrit rien', () => {
         const liste = zoneInscrits.children.find((c) => c.className === 'rl-eleves');
         expect(liste).toBeTruthy();
         expect(liste.children.map((li) => li.dataset.da)).toEqual(['2000005', '2000002', '2000001']);
-        expect(liste.children[0].children.map((s) => s.textContent)).toEqual(['Absent, Anna', b.mots.inscritLe + ' 2026-09-12']);
-        expect(liste.children[1].children[1].textContent).toBe(b.mots.inscritLe + ' 2026-09-17');
+        // Lot 3 : le nom et la date vivent dans l'en-tête de la rangée, suivis du bouton « Retirer du registre ».
+        const entete = (li) => li.children.find((c) => c.className === 'rl-eleve-entete').children.map((s) => s.textContent);
+        expect(entete(liste.children[0])).toEqual(['Absent, Anna', b.mots.inscritLe + ' 2026-09-12', b.mots.retirerDuRegistre]);
+        expect(entete(liste.children[1])[1]).toBe(b.mots.inscritLe + ' 2026-09-17');
         expect(b.journal).toEqual([]);
     });
 

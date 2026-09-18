@@ -13,22 +13,34 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Ce banc juge : la recherche par le vrai dispatcher (data-on-input), le choix et l'inscription par el.click()
 // (aucun page.click, budget du runner), le stock des DEUX trimestres identique octet pour octet après la capture,
 // un DA dans deux trimestres = un élève, deux dossiers ; cibles ≥ 44 px ; « Refaire la copie » au second passage (#917).
+//
+// LOT 3 (même jour) — R3 : la ligne de saisie unique sous la garde du mode archive (les champs .rl-champ restent ouverts, SANS
+// « Permission d'écriture »), Entrée dans la note, le focus qui revient à la note, l'élève qui passe au suivant, le stock de #913
+// repris à l'inscription et l'ancienne clé intacte. R4 : « Retirer du registre » — refusé au dialogue, rien ne bouge ; accepté,
+// l'élève et ses résultats partent, les trimestres restent identiques octet pour octet. (Remplace resultats-ulterieurs-913.spec.js,
+// retiré avec le bloc du Cadre.)
 
 const TA = 't915a'; // archivé, ACTIF
 const TB = 't915b'; // non archivé
 const DA1 = '9150001';
 const DA2 = '9150002';
 
-async function monter(page) {
+/** `dialogues` : { recus: [], accepter: bool } — sans lui, tout dialogue est une ERREUR du banc (aucun n'est attendu). `cadre` : sème le stock de #913. */
+async function monter(page, { dialogues = null, cadre = false } = {}) {
     await page.setViewportSize({ width: 768, height: 1024 });
     const erreurs = [];
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
-    page.on('dialog', (d) => { erreurs.push(`dialogue: ${d.message()}`); d.dismiss().catch(() => {}); });
+    page.on('dialog', (d) => {
+        if (!dialogues) { erreurs.push(`dialogue: ${d.message()}`); d.dismiss().catch(() => {}); return; }
+        dialogues.recus.push(d.message());
+        (dialogues.accepter ? d.accept() : d.dismiss()).catch(() => {});
+    });
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && typeof window.afficherSection === 'function');
-    await page.evaluate(({ TA, TB, DA1, DA2 }) => {
+    await page.evaluate(({ TA, TB, DA1, DA2, cadre }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
+        if (cadre) window.db.setSync(TA + '_resultatsUlterieurs', { [DA1]: [{ cours: '601-102-MQ', trimestre: 'H2025', note: 78.5 }], [DA2]: [{ cours: '601-102-MQ', trimestre: 'H2025', note: 61 }] });
         const coursId = 'cours-915';
         window.db.setSync('trimestres', [
             { id: TA, nom: 'Automne 2024', annee: 2024, session: 'A', actif: true, archive: true },
@@ -53,7 +65,7 @@ async function monter(page) {
         window.db.setSync('trimestreActif', TA);
         window.db.setSync('infoCours', { id: coursId, codeCours: '601-101-MQ', groupe: '00001', _groupeCoursId: 'GC915A' });
         window.db.setSync('groupeCoursActif', { id: 'GC915A', trimestreId: TA });
-    }, { TA, TB, DA1, DA2 });
+    }, { TA, TB, DA1, DA2, cadre });
     // Le mode archive se pose au démarrage : on recharge sur le stock semé (une seule fois, sans `clear`).
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && typeof window.afficherSection === 'function'
@@ -145,7 +157,8 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(ligne).toContain('Hiver 2026');
         expect(ligne).toMatch(/Copie du \d{4}-\d{2}-\d{2}/);
         const resume = await page.evaluate(() => document.querySelector('#rl-choix .rl-resume').textContent);
-        expect(resume).toMatch(/^1 évaluation·s · 1 séance·s · 1 grille·s : SRPNF × IDME · 2 dossier·s, \d+ Ko — Copie du/);
+        // Lot 3 : les pluriels sont accordés (relevé de la porte terrain du 18 sept. : « 11 évaluation·s », « 1 dossier·s »).
+        expect(resume).toMatch(/^1 évaluation · 1 séance · 1 grille : SRPNF × IDME · 2 dossiers, \d+ Ko — Copie du/);
 
         // Second passage (#917, retour de Grégoire du 18 sept.) : le bouton dit le geste, quitte le style principal,
         // garde sa cible de 44 px, et le dialogue nomme l'élève et ce qui ne bouge pas.
@@ -168,6 +181,134 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         await page.waitForFunction(() => document.querySelectorAll('#rl-resultats .rl-vide').length === 1);
         expect(await page.evaluate(() => document.querySelector('#rl-resultats .rl-vide').textContent)).toBe('Aucun·e élève ne porte ce nom.');
         expect(await page.evaluate(() => window.db.getSync('registreLongitudinal', null))).toBeNull();
+        expect(erreurs).toEqual([]);
+    });
+
+    /** Inscrit un·e élève par les vrais gestes : chercher, choisir, cliquer. */
+    async function inscrire(page, motif, nbInscritsAttendu) {
+        await chercher(page, motif);
+        await page.waitForFunction(() => document.querySelectorAll('#rl-resultats .rl-resultat').length === 1);
+        await cliquer(page, '#rl-resultats .rl-resultat-bouton');
+        await page.waitForFunction(() => !!document.getElementById('rl-inscrire'));
+        await cliquer(page, '#rl-inscrire');
+        await page.waitForFunction((n) => document.querySelectorAll('#rl-zone-inscrits .rl-eleve').length === n, nbInscritsAttendu, { timeout: 10000 });
+    }
+
+    /** Remplit la ligne de saisie, pose le curseur dans « Note finale » et tape Entrée (la soumission implicite clique « Ajouter »). */
+    async function saisir(page, { eleve, cours, trimestre, note }) {
+        await page.evaluate(({ eleve, cours, trimestre, note }) => {
+            const f = document.querySelector('#rl-zone-saisie form');
+            if (eleve !== undefined) { f.elements.eleve.value = eleve; f.elements.eleve.dispatchEvent(new Event('change', { bubbles: true })); }
+            if (cours !== undefined) f.elements.cours.value = cours;
+            if (trimestre !== undefined) f.elements.trimestre.value = trimestre;
+            f.elements.note.value = note;
+            f.elements.note.focus();
+        }, { eleve, cours, trimestre, note });
+        await page.keyboard.press('Enter');
+    }
+
+    const resultatsAuRegistre = (page, da) => page.evaluate((da) => { const r = window.db.getSync('registreLongitudinal', null); return r && r.eleves[da] ? r.eleves[da].resultatsUlterieurs : null; }, da);
+
+    test('R3 · lot 3 — la ligne de saisie unique sous le mode archive, SANS permission d\'écriture ; le stock du Cadre repris, l\'ancienne clé intacte', async ({ page }) => {
+        const erreurs = await monter(page, { cadre: true });
+        expect(await page.evaluate(() => document.body.classList.contains('mode-archive') && !document.body.classList.contains('mode-ecriture-temp'))).toBe(true);
+        await ouvrirLeSousOnglet(page);
+        const avant = await stockDesTrimestres(page);
+        expect(avant[TA + '_resultatsUlterieurs']).toBeTruthy();
+
+        // Avant toute inscription : pas de formulaire, et l'écran NOMME les deux élèves dont le Cadre porte un résultat.
+        expect(await page.evaluate(() => !!document.querySelector('#rl-zone-saisie form'))).toBe(false);
+        const enAttente = await page.evaluate(() => document.querySelector('#rl-zone-inscrits .rl-en-attente').textContent);
+        expect(enAttente).toContain('Gagnon, Léa');
+        expect(enAttente).toContain('Roy, Max');
+        expect(enAttente).toContain('1 résultat ultérieur');
+        expect(await page.evaluate(() => window.db.getSync('registreLongitudinal', null))).toBeNull(); // ouvrir n'écrit rien
+
+        await inscrire(page, 'gag', 1);
+        await inscrire(page, 'roy', 2);
+        // La reprise s'est faite À L'INSCRIPTION : le résultat du Cadre est sous le bon nom, et dit d'où il vient.
+        expect(await resultatsAuRegistre(page, DA1)).toEqual([{ cours: '601-102-MQ', trimestre: 'H2025', note: 78.5, origine: 'cadre' }]);
+        const ligneLea = await page.evaluate((da) => Array.from(document.querySelectorAll('#rl-zone-inscrits .rl-eleve')).find((li) => li.dataset.da === da).textContent, DA1);
+        expect(ligneLea).toContain('601-102-MQ · H2025 · 78,5 — saisi dans le Cadre');
+        expect(await page.evaluate(() => document.querySelector('#rl-zone-inscrits .rl-en-attente'))).toBeNull();
+
+        // Les champs restent OUVERTS sous la garde CSS du mode archive (.rl-champ, exception nommée d'index.html) ; cibles ≥ 44 px.
+        const mesures = await page.evaluate(() => {
+            const zone = document.getElementById('registre-longitudinal-conteneur').getBoundingClientRect();
+            const cibles = Array.from(document.querySelectorAll('#rl-zone-saisie .rl-champ, #rl-zone-saisie .rl-cible, #rl-zone-inscrits .rl-cible')).filter((el) => el.offsetParent !== null);
+            return {
+                nb: cibles.length,
+                fermes: cibles.filter((el) => getComputedStyle(el).pointerEvents === 'none' || el.disabled).map((el) => el.name || el.textContent),
+                // arrondi : WebKit rend 43,99997 px pour min-height: 44px ; la liste NOMME la cible fautive
+                petites: cibles.filter((el) => { const r = el.getBoundingClientRect(); return Math.round(r.height) < 44 || Math.round(r.width) < 44; })
+                    .map((el) => el.tagName + ' ' + (el.name || el.textContent) + ' ' + Math.round(el.getBoundingClientRect().width) + '×' + Math.round(el.getBoundingClientRect().height)),
+                horsZone: cibles.filter((el) => { const r = el.getBoundingClientRect(); return r.left < zone.left - 1 || r.right > zone.right + 1; }).length,
+                debordePage: document.documentElement.scrollWidth > window.innerWidth,
+                options: Array.from(document.querySelector('#rl-zone-saisie select').options).map((o) => o.textContent)
+            };
+        });
+        // 4 champs + « Ajouter » ; 2 « Retirer du registre » ; 2 « Retirer » (un résultat du Cadre par élève).
+        expect(mesures.nb).toBe(9);
+        expect(mesures.fermes).toEqual([]);
+        expect(mesures.petites).toEqual([]);
+        expect(mesures.horsZone).toBe(0);
+        expect(mesures.debordePage).toBe(false);
+        expect(mesures.options).toEqual(['Gagnon, Léa', 'Roy, Max']);
+
+        await saisir(page, { eleve: DA1, cours: '601-103-MQ', trimestre: 'A2026', note: '64,5' });
+        await page.waitForFunction(() => document.querySelectorAll('#rl-zone-inscrits .rl-resultat-ulterieur').length === 3, null, { timeout: 5000 });
+        // La saisie suivante : le curseur est dans la note, le cours et le trimestre sont restés, l'élève est passé au suivant.
+        const suite = await page.evaluate(() => { const a = document.activeElement; const f = a && a.closest('form'); return { champ: a && a.name, note: a && a.value, eleve: f && f.elements.eleve.value, cours: f && f.elements.cours.value, trimestre: f && f.elements.trimestre.value }; });
+        expect(suite).toEqual({ champ: 'note', note: '', eleve: DA2, cours: '601-103-MQ', trimestre: 'A2026' });
+        expect(await resultatsAuRegistre(page, DA1)).toEqual([{ cours: '601-102-MQ', trimestre: 'H2025', note: 78.5, origine: 'cadre' }, { cours: '601-103-MQ', trimestre: 'A2026', note: 64.5 }]);
+
+        // Une note hors bornes : rien n'est écrit, l'écran le dit, et ce qui était tapé n'est pas perdu.
+        await saisir(page, { note: '140' });
+        await page.waitForFunction(() => (document.querySelector('#rl-zone-saisie .rl-refus') || {}).textContent === 'La note doit être un nombre entre 0 et 100.', null, { timeout: 5000 });
+        expect(await page.evaluate(() => document.querySelector('#rl-zone-saisie input[name="note"]').value)).toBe('140');
+        expect((await resultatsAuRegistre(page, DA2)).length).toBe(1);
+
+        // « Retirer » un résultat venu du Cadre : il part du registre, il ne revient pas, et le Cadre n'a pas bougé.
+        await page.evaluate((da) => Array.from(document.querySelectorAll('#rl-zone-inscrits .rl-eleve')).find((li) => li.dataset.da === da).querySelector('[data-action="retirerResultatLongitudinal"][data-index="0"]').click(), DA1);
+        await page.waitForFunction(() => document.querySelectorAll('#rl-zone-inscrits .rl-resultat-ulterieur').length === 2, null, { timeout: 5000 });
+        expect(await resultatsAuRegistre(page, DA1)).toEqual([{ cours: '601-103-MQ', trimestre: 'A2026', note: 64.5 }]);
+
+        // La soumission du formulaire n'a pas rechargé la page, et AUCUN trimestre n'a été touché — l'ancienne clé comprise.
+        expect(await page.evaluate(() => !!document.getElementById('rl-recherche'))).toBe(true);
+        expect(await stockDesTrimestres(page)).toEqual(avant);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('R4 · lot 3 — « Retirer du registre » : le dialogue dit ce qu\'il emporte ; refusé, rien ne bouge ; accepté, l\'élève part et les trimestres restent', async ({ page }) => {
+        const dialogues = { recus: [], accepter: false };
+        const erreurs = await monter(page, { dialogues });
+        await ouvrirLeSousOnglet(page);
+        await inscrire(page, 'gag', 1);
+        await inscrire(page, 'roy', 2);
+        await saisir(page, { eleve: DA1, cours: '601-102-MQ', trimestre: 'H2026', note: '78,5' });
+        await page.waitForFunction(() => document.querySelectorAll('#rl-zone-inscrits .rl-resultat-ulterieur').length === 1, null, { timeout: 5000 });
+        const avant = await stockDesTrimestres(page);
+        const registreAvant = await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)));
+        const retirerLea = () => page.evaluate((da) => Array.from(document.querySelectorAll('#rl-zone-inscrits .rl-eleve')).find((li) => li.dataset.da === da).querySelector('[data-action="retirerEleveLongitudinal"]').click(), DA1);
+
+        // Refusé au dialogue : rien ne bouge.
+        await retirerLea();
+        await expect.poll(() => dialogues.recus.length).toBe(1);
+        expect(dialogues.recus[0]).toMatch(/^Retirer Gagnon, Léa du registre \? La copie de son dossier \(2 dossiers, copie du \d{4}-\d{2}-\d{2}\)/);
+        expect(dialogues.recus[0]).toContain('Seront effacés avec elle : 1 résultat ultérieur — 601-102-MQ · H2026 · 78,5.');
+        expect(dialogues.recus[0]).toContain('Tes trimestres ne sont pas modifiés.');
+        expect(await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)))).toBe(registreAvant);
+
+        // Accepté : l'élève, ses dossiers et ses résultats partent ; l'autre reste ; le choix en cours redevient « Inscrire au registre ».
+        dialogues.accepter = true;
+        await retirerLea();
+        await page.waitForFunction(() => document.querySelectorAll('#rl-zone-inscrits .rl-eleve').length === 1, null, { timeout: 10000 });
+        const registre = await page.evaluate(() => window.db.getSync('registreLongitudinal', null));
+        expect(Object.keys(registre.eleves)).toEqual([DA2]);
+        expect(JSON.stringify(registre)).not.toContain(DA1);
+        expect(Object.keys(registre.modeles.grilles)).toEqual([TA + ':G1']); // G1 sert encore au dossier de Max
+        expect(await page.evaluate(() => Array.from(document.querySelector('#rl-zone-saisie select').options).map((o) => o.textContent))).toEqual(['Roy, Max']);
+        expect(await stockDesTrimestres(page)).toEqual(avant);
         expect(erreurs).toEqual([]);
     });
 });

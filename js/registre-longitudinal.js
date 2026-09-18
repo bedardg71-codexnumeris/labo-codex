@@ -38,8 +38,26 @@
    hebdomadaires et d'intervention, ses indices tels que stockés (C/P, assiduité, paliers
    RàI), sa sélection de portfolio. Il LAISSE les blobs (copies, PDF, annotations).
 
+   LES RÉSULTATS ULTÉRIEURS (lot 3, 18 sept. 2026) — la note finale d'un·e ancien·ne élève dans
+   un cours qui suit, transmise par la Direction des études et saisie À LA MAIN. Ils vivent
+   sous l'élève (`resultatsUlterieurs: [{ cours, trimestre, note }]`), `cours` et `trimestre`
+   en TEXTE LIBRE (ce cours-là a été donné par quelqu'un d'autre). Ce module ABSORBE
+   l'ancien resultats-ulterieurs.js (#913) et son bloc du Cadre, retirés au même lot.
+
+   LE STOCK DE #913 — `<trim>_resultatsUlterieurs` = { [da]: [...] }, écrit par le bloc du Cadre
+   du 17 au 18 sept. Il est LU, JAMAIS RÉÉCRIT NI EFFACÉ (écrire dans les données de quelqu'un
+   remonte à Grégoire). Tant qu'un·e inscrit·e ne porte pas `reprise913`, l'écran montre
+   l'union (ses résultats + ce stock, sans doublon) ; la COPIE dans le registre se fait au
+   premier GESTE qui écrit pour cet·te élève (inscrire, refaire la copie, ajouter, retirer),
+   jamais à l'ouverture de l'écran — qui ne fait que lire. Après la reprise, le registre fait
+   foi pour ce DA : un résultat retiré ne revient pas par l'ancienne clé (l'export de recherche
+   lit le même drapeau, trimestres.js). Limite connue et assumée : retirer l'élève du registre
+   puis le réinscrire reprend de nouveau le stock du Cadre, puisqu'il n'a pas bougé.
+
    ÉCRAN — Labo › Suivi longitudinal (config.js, navigation.js, index.html). Rendu bâti par
-   le DOM (textContent) : les mots viennent de MOTS, les noms d'élèves du stock.
+   le DOM (textContent) : les mots viennent de MOTS, les noms d'élèves du stock. Les champs
+   de saisie portent `.rl-champ` : l'exception NOMMÉE de la garde CSS du mode archive
+   (index.html) — le registre n'est la donnée d'aucun trimestre.
    =============================================================== */
 
 (function () {
@@ -48,12 +66,21 @@
     const NOM_CLE = 'registreLongitudinal';
     const FORMAT = 'registre-longitudinal';
     const VERSION = 1;
+    const NOM_CLE_913 = 'resultatsUlterieurs'; // l'ancienne clé namespacée de #913 : LUE par lireDe, jamais écrite
+    const LONGUEUR_MAX_TEXTE = 40;
     const MAX_RESULTATS_RECHERCHE = 30;
     const CLES_BLOBS = ['fichiersTravaux', 'annotationsTravaux', 'corbeilleFichiers', 'archivesBundles'];
 
     // Les mots de l'écran, en UN seul endroit. Supposition nommée : proposés par Claude Code,
     // lus par l'enseignant·e seulement — aucun élève ne les voit. La phrase de pérennité est
     // celle du cadrage v2 § 3.
+    const MOTS_RESULTATS = ['résultat ultérieur', 'résultats ultérieurs'];
+
+    /** « 1 séance », « 32 séances » : un seul accord pour tout l'écran (0 ou 1 → singulier). */
+    function accorder(n, formes) {
+        return n + ' ' + (Math.abs(Number(n)) >= 2 ? formes[1] : formes[0]);
+    }
+
     const MOTS = Object.freeze({
         sousTitre: 'Les élèves que tu suis d\'un trimestre à l\'autre : une copie figée de leur dossier, et les notes qu\'ils obtiennent ensuite.',
         perennite: 'Le registre est sauvegardé par l\'export complet seulement (Réglages › Données), pas par l\'archive d\'un trimestre.',
@@ -76,15 +103,52 @@
         inscritLe: 'Inscrit·e le',
         indiceAbsent: 'non calculé au moment de la copie',
         refusInconnu: 'Cet·te élève n\'est dans aucun trimestre.',
-        evaluations: 'évaluation·s',
-        seances: 'séance·s',
-        grilles: 'grille·s',
-        dossiers: 'dossier·s'
+        // Formes [singulier, pluriel], accordées par accorder() — 0 ou 1 : singulier.
+        evaluations: ['évaluation', 'évaluations'],
+        seances: ['séance', 'séances'],
+        grilles: ['grille', 'grilles'],
+        dossiers: ['dossier', 'dossiers'],
+        resultats: MOTS_RESULTATS,
+        // La saisie : les mots du bloc #913, relus et confirmés par Grégoire le 17 sept. 2026.
+        saisieTitre: 'Résultats ultérieurs',
+        saisieAide: 'Les notes que ces élèves ont obtenues dans les cours qui ont suivi.',
+        saisieSansInscrit: 'Inscris d\'abord un·e élève : ses résultats se rangent sous son nom.',
+        eleve: 'Élève',
+        cours: 'Cours',
+        exempleCours: '601-102-MQ',
+        trimestre: 'Trimestre',
+        exempleTrimestre: 'H2026',
+        note: 'Note finale',
+        ajouter: 'Ajouter',
+        retirer: 'Retirer',
+        refusNote: 'La note doit être un nombre entre 0 et 100.',
+        refusTexte: 'Indique le cours et le trimestre.',
+        refusEleve: 'Choisis un·e élève inscrit·e au registre.',
+        inscritsTitre: 'Élèves inscrit·es',
+        // Le stock de #913. Supposition nommée : mots proposés par Claude Code au lot 3, à relire par Grégoire.
+        duCadre: 'saisi dans le Cadre',
+        enAttenteTitre: 'Des résultats saisis dans le Cadre, avant ce registre, attendent ici :',
+        enAttenteAide: 'Inscris ces élèves pour retrouver leurs résultats sous leur nom. D\'ici là, rien n\'est perdu : ils restent dans leur trimestre et dans l\'export de recherche.',
+        // Décision 3.1 (Grégoire, 18 sept. 2026) : retirer du registre « pour corriger une erreur » — un geste de
+        // réparation : il confirme, et il DIT ce qu'il emporte.
+        retirerDuRegistre: 'Retirer du registre',
+        confirmerRetrait: (nomComplet, texteDossiers, dateCopie, resultats, nbDuCadre) => 'Retirer ' + nomComplet + ' du registre ? '
+            + 'La copie de son dossier (' + texteDossiers + (dateCopie ? ', copie du ' + dateCopie : '') + ') sera effacée du registre et ne pourra pas être retrouvée. '
+            + (resultats.length
+                ? 'Seront effacés avec elle : ' + accorder(resultats.length, MOTS_RESULTATS) + ' — ' + resultats.join(' ; ') + '. '
+                : 'Aucun résultat ultérieur n\'a été saisi pour cet·te élève. ')
+            + (nbDuCadre ? 'Ce qui avait été saisi dans le Cadre reste rangé dans son trimestre. ' : '')
+            + 'Tes trimestres ne sont pas modifiés.'
     });
 
     // Mémoire de SÉANCE, jamais écrite : l'élève choisi dans la recherche.
     let daChoisi = '';
     let dernierResume = null;
+    // Mémoire de SÉANCE de la ligne de saisie, jamais écrite : trente notes du même cours au même
+    // trimestre ne retapent que la note ; l'élève passe au suivant.
+    let daSaisie = '';
+    let dernierCours = '';
+    let dernierTrimestre = '';
 
     /* ---------- Lecture du registre ---------- */
 
@@ -175,6 +239,141 @@
         const motif = normaliser(texte);
         return elevesDeTousLesTrimestres()
             .filter((e) => !motif || normaliser(e.nom + ' ' + e.prenom).includes(motif) || normaliser(e.prenom + ' ' + e.nom).includes(motif));
+    }
+
+    /* ---------- Résultats ultérieurs : le stock de #913 (LU), la vue, la reprise ---------- */
+
+    function troisChamps(r) {
+        return { cours: String(r.cours == null ? '' : r.cours), trimestre: String(r.trimestre == null ? '' : r.trimestre), note: r.note };
+    }
+
+    function cleResultat(r) {
+        return r.cours + '\u0000' + r.trimestre + '\u0000' + r.note;
+    }
+
+    /** Ce que le bloc du Cadre (#913) a rangé pour ce DA, tous trimestres répertoriés confondus, sans doublon. LECTURE SEULE. */
+    function stock913(da) {
+        const vus = new Set();
+        const trouves = [];
+        trimestresRepertories().forEach((t) => {
+            const tous = lireDe(t.id, NOM_CLE_913, {});
+            const liste = tous && typeof tous === 'object' && !Array.isArray(tous) ? tous[String(da)] : null;
+            (Array.isArray(liste) ? liste : []).forEach((r) => {
+                if (!r || typeof r !== 'object') return;
+                const propre = troisChamps(r);
+                if (vus.has(cleResultat(propre))) return;
+                vus.add(cleResultat(propre));
+                trouves.push(propre);
+            });
+        });
+        return trouves;
+    }
+
+    /** Les résultats d'un·e inscrit·e TELS QUE L'ÉCRAN LES MONTRE : les siens, plus le stock du Cadre tant qu'il n'a pas été repris. */
+    function resultatsDe(eleve) {
+        const propres = eleve && Array.isArray(eleve.resultatsUlterieurs) ? eleve.resultatsUlterieurs : [];
+        if (!eleve || eleve.reprise913) return propres;
+        const vus = new Set(propres.map((r) => cleResultat(troisChamps(r))));
+        const duCadre = stock913(eleve.da)
+            .filter((r) => !vus.has(cleResultat(r)))
+            .map((r) => Object.assign(r, { origine: 'cadre' }));
+        return propres.concat(duCadre);
+    }
+
+    /** La reprise : la vue devient le stock du registre, et le drapeau dit que le registre fait foi. Idempotente ; n'écrit rien elle-même. */
+    function reprendreStock913(eleve) {
+        if (eleve.reprise913) return;
+        eleve.resultatsUlterieurs = resultatsDe(eleve);
+        eleve.reprise913 = true;
+    }
+
+    /** Les élèves NON inscrit·es dont le Cadre porte des résultats : l'écran les nomme, pour que rien ne dorme sans être vu. */
+    function enAttenteDuCadre() {
+        const inscrits = lireRegistre().eleves;
+        return elevesDeTousLesTrimestres()
+            .filter((e) => !inscrits[e.da])
+            .map((e) => ({ da: e.da, nom: e.nom, prenom: e.prenom, nb: stock913(e.da).length }))
+            .filter((e) => e.nb > 0);
+    }
+
+    /** Rend un nombre de 0 à 100 arrondi à une décimale, ou null. La virgule décimale est admise. */
+    function lireNote(saisie) {
+        const texte = String(saisie == null ? '' : saisie).trim().replace(',', '.');
+        // Le motif n'admet ni signe ni exposant : la borne basse (0) est tenue ici, la haute dessous.
+        if (!/^\d+(\.\d+)?$/.test(texte)) return null;
+        const n = Math.round(Number(texte) * 10) / 10;
+        if (n > 100) return null;
+        return n;
+    }
+
+    function nettoyerTexte(saisie) {
+        return String(saisie == null ? '' : saisie).trim().slice(0, LONGUEUR_MAX_TEXTE);
+    }
+
+    function formaterNote(note) {
+        return String(note).replace('.', ',');
+    }
+
+    function libelleResultat(r) {
+        return r.cours + ' · ' + r.trimestre + ' · ' + formaterNote(r.note);
+    }
+
+    /** Ajoute un résultat sous un·e inscrit·e. Seule écriture : `registreLongitudinal`. Aucune permission d'archive : ce n'est la donnée d'aucun trimestre. */
+    async function ajouterResultat(da, saisie) {
+        da = String(da || '');
+        const registre = lireRegistre();
+        const eleve = da ? registre.eleves[da] : null;
+        if (!eleve) return { ok: false, refus: MOTS.refusEleve };
+        const cours = nettoyerTexte(saisie && saisie.cours);
+        const trimestre = nettoyerTexte(saisie && saisie.trimestre);
+        if (!cours || !trimestre) return { ok: false, refus: MOTS.refusTexte };
+        const note = lireNote(saisie && saisie.note);
+        if (note === null) return { ok: false, refus: MOTS.refusNote };
+        reprendreStock913(eleve);
+        eleve.resultatsUlterieurs = eleve.resultatsUlterieurs.concat([{ cours, trimestre, note }]);
+        await db.set(NOM_CLE, registre); // security-ok: texte saisi par l'enseignant·e dans son propre champ, borné à 40 caractères, rendu par textContent
+        return { ok: true };
+    }
+
+    /** Retire le résultat de rang `index` DANS LA VUE (celle que l'écran montre) : la reprise d'abord, le retrait ensuite. */
+    async function retirerResultat(da, index) {
+        da = String(da || '');
+        const registre = lireRegistre();
+        const eleve = da ? registre.eleves[da] : null;
+        if (!eleve) return { ok: false, refus: '' };
+        if (!(index >= 0 && index < resultatsDe(eleve).length)) return { ok: false, refus: '' };
+        reprendreStock913(eleve);
+        eleve.resultatsUlterieurs = eleve.resultatsUlterieurs.filter((r, i) => i !== index);
+        await db.set(NOM_CLE, registre); // security-ok: même objet, une entrée en moins
+        return { ok: true };
+    }
+
+    /* ---------- Retirer du registre (décision 3.1) ---------- */
+
+    /** Les modèles (grilles, échelles) sont partagés entre élèves d'un même trimestre : ne restent que ceux qu'un dossier référence encore. */
+    function purgerModeles(registre) {
+        const gardes = { grilles: new Set(), echelles: new Set() };
+        Object.keys(registre.eleves).forEach((da) => {
+            const dossiers = registre.eleves[da] && Array.isArray(registre.eleves[da].dossiers) ? registre.eleves[da].dossiers : [];
+            dossiers.forEach((d) => {
+                (d.grillesIds || []).forEach((id) => gardes.grilles.add(d.trimestre + ':' + id));
+                (d.echellesIds || []).forEach((id) => gardes.echelles.add(d.trimestre + ':' + id));
+            });
+        });
+        ['grilles', 'echelles'].forEach((sorte) => {
+            Object.keys(registre.modeles[sorte]).forEach((k) => { if (!gardes[sorte].has(k)) delete registre.modeles[sorte][k]; });
+        });
+    }
+
+    /** Efface l'élève du registre : ses dossiers, ses résultats ultérieurs, les modèles devenus orphelins. Les trimestres ne sont pas touchés. */
+    async function retirerDuRegistre(da) {
+        da = String(da || '');
+        const registre = lireRegistre();
+        if (!da || !registre.eleves[da]) return { ok: false, refus: '' };
+        delete registre.eleves[da];
+        purgerModeles(registre);
+        await db.set(NOM_CLE, registre); // security-ok: le même registre, un·e élève en moins
+        return { ok: true };
     }
 
     /* ---------- La capture (LECTURE SEULE sur les trimestres) ---------- */
@@ -305,6 +504,9 @@
             dossiers: dossiersGardes.concat(dossiersNeufs),
             resultatsUlterieurs: existant && Array.isArray(existant.resultatsUlterieurs) ? existant.resultatsUlterieurs : []
         };
+        if (existant && existant.reprise913) registre.eleves[da].reprise913 = true;
+        // Lot 3 : ce que le Cadre (#913) avait rangé pour ce DA est recopié ici, une fois ; l'ancienne clé ne bouge pas.
+        reprendreStock913(registre.eleves[da]);
         await db.set(NOM_CLE, registre); // security-ok: copie de données déjà rangées par l'app, aucune source externe ; rendu par textContent
         const resume = resumerDossiers(dossiersNeufs);
         resume.poidsModelesOctets = poidsModeles;
@@ -345,9 +547,9 @@
     }
 
     function formaterResume(resume) {
-        const parts = [resume.nbEvaluations + ' ' + MOTS.evaluations, resume.nbSeances + ' ' + MOTS.seances];
-        if (resume.grilles.length) parts.push(resume.grilles.length + ' ' + MOTS.grilles + ' : ' + resume.grilles.join(', '));
-        parts.push(resume.nbDossiers + ' ' + MOTS.dossiers + ', ' + Math.round(resume.poidsOctets / 1024) + ' Ko');
+        const parts = [accorder(resume.nbEvaluations, MOTS.evaluations), accorder(resume.nbSeances, MOTS.seances)];
+        if (resume.grilles.length) parts.push(accorder(resume.grilles.length, MOTS.grilles) + ' : ' + resume.grilles.join(', '));
+        parts.push(accorder(resume.nbDossiers, MOTS.dossiers) + ', ' + Math.round(resume.poidsOctets / 1024) + ' Ko');
         return parts.join(' · ');
     }
 
@@ -424,24 +626,122 @@
         }
     }
 
+    function champSaisie(formulaire, libelle, balise, nom) {
+        const etiquette = poser(formulaire, 'label', '', libelle);
+        const champ = poser(etiquette, balise, 'controle-form rl-champ');
+        champ.name = nom;
+        if (balise === 'input') {
+            champ.type = 'text';
+            champ.setAttribute('autocomplete', 'off');
+        }
+        return champ;
+    }
+
+    /** La ligne de saisie UNIQUE : [ Élève ▾ ] [ Cours ] [ Trimestre ] [ Note ] [ Ajouter ]. Rend, n'écrit rien. */
+    function rendreSaisie(zone, refus) {
+        zone.textContent = '';
+        poser(zone, 'h3', 'rl-titre', MOTS.saisieTitre);
+        poser(zone, 'p', 'texte-aide', MOTS.saisieAide);
+        const inscrits = elevesInscrits();
+        if (!inscrits.length) {
+            poser(zone, 'p', 'etat-vide-liste', MOTS.saisieSansInscrit);
+            return;
+        }
+        if (!inscrits.some((e) => String(e.da) === daSaisie)) daSaisie = String(inscrits[0].da);
+        const formulaire = poser(zone, 'form', 'rl-saisie');
+        formulaire.setAttribute('novalidate', '');
+        const selecteur = champSaisie(formulaire, MOTS.eleve, 'select', 'eleve');
+        selecteur.setAttribute('data-on-change', 'choisirEleveSaisieLongitudinal');
+        inscrits.forEach((e) => {
+            const option = poser(selecteur, 'option', '', String(e.nom || '') + ', ' + String(e.prenom || ''));
+            option.value = String(e.da);
+            if (String(e.da) === daSaisie) option.selected = true;
+        });
+        const cours = champSaisie(formulaire, MOTS.cours, 'input', 'cours');
+        cours.setAttribute('maxlength', String(LONGUEUR_MAX_TEXTE));
+        cours.setAttribute('placeholder', MOTS.exempleCours);
+        cours.value = dernierCours;
+        const trimestre = champSaisie(formulaire, MOTS.trimestre, 'input', 'trimestre');
+        trimestre.setAttribute('maxlength', String(LONGUEUR_MAX_TEXTE));
+        trimestre.setAttribute('placeholder', MOTS.exempleTrimestre);
+        trimestre.value = dernierTrimestre;
+        const note = champSaisie(formulaire, MOTS.note, 'input', 'note');
+        note.setAttribute('inputmode', 'decimal');
+        note.setAttribute('maxlength', '5');
+        // Ni .btn-ajouter ni .btn-supprimer sur cet écran : la garde du mode archive les ferme, et le registre n'est pas un trimestre.
+        const bouton = poser(formulaire, 'button', 'btn btn-confirmer btn-sm rl-cible', MOTS.ajouter);
+        bouton.type = 'submit';
+        bouton.setAttribute('data-action', 'ajouterResultatLongitudinal');
+        bouton.setAttribute('data-prevent', '');
+        const zoneRefus = poser(zone, 'p', 'rl-refus', refus || '');
+        zoneRefus.setAttribute('role', 'alert');
+    }
+
+    function rendreEnAttente(zone) {
+        const enAttente = enAttenteDuCadre();
+        if (!enAttente.length) return;
+        const bloc = poser(zone, 'div', 'rl-en-attente');
+        poser(bloc, 'p', 'rl-meta', MOTS.enAttenteTitre);
+        const liste = poser(bloc, 'ul', 'rl-resultats');
+        enAttente.forEach((e) => {
+            const li = poser(liste, 'li', 'rl-resultat');
+            const bouton = poser(li, 'button', 'rl-resultat-bouton');
+            bouton.type = 'button';
+            bouton.setAttribute('data-action', 'choisirEleveLongitudinal');
+            bouton.dataset.da = e.da;
+            poser(bouton, 'span', 'rl-nom', e.nom + ', ' + e.prenom);
+            poser(bouton, 'span', 'rl-meta', accorder(e.nb, MOTS.resultats));
+        });
+        poser(bloc, 'p', 'texte-aide', MOTS.enAttenteAide);
+    }
+
     function rendreInscrits(zone) {
         zone.textContent = '';
+        poser(zone, 'h3', 'rl-titre', MOTS.inscritsTitre);
         const inscrits = elevesInscrits();
         if (!inscrits.length) {
             poser(zone, 'p', 'etat-vide-liste', MOTS.aucunInscrit);
+            rendreEnAttente(zone);
             return;
         }
         const liste = poser(zone, 'ul', 'rl-eleves');
         inscrits.forEach((e) => {
+            const da = String(e.da || '');
+            const nomComplet = String(e.nom || '') + ', ' + String(e.prenom || '');
             const li = poser(liste, 'li', 'rl-eleve');
-            li.dataset.da = String(e.da || '');
-            poser(li, 'span', 'rl-nom', String(e.nom || '') + ', ' + String(e.prenom || ''));
+            li.dataset.da = da;
+            const entete = poser(li, 'div', 'rl-eleve-entete');
+            poser(entete, 'span', 'rl-nom', nomComplet);
             const dossiers = Array.isArray(e.dossiers) ? e.dossiers : [];
             const origines = dossiers.map((d) => d.trimestreNom || d.trimestre).filter(Boolean);
             const derniere = dossiers.map((d) => d.capteLe || '').sort().pop();
             const meta = [origines.join(' · '), derniere ? MOTS.captureFaite + ' ' + formaterDate(derniere) : MOTS.inscritLe + ' ' + formaterDate(e.inscritLe)].filter(Boolean).join(' — ');
-            poser(li, 'span', 'rl-meta', meta);
+            poser(entete, 'span', 'rl-meta', meta);
+
+            const resultats = resultatsDe(e);
+            // Geste RARE de réparation, répété à chaque rangée : .btn-neutre (gris du design system) — mesuré le 18 sept. à 768 px,
+            // .btn-annuler (orange) et .btn-secondaire (bleu plein) dominaient la liste.
+            const retrait = poser(entete, 'button', 'btn btn-neutre btn-sm rl-cible', MOTS.retirerDuRegistre);
+            retrait.type = 'button';
+            retrait.setAttribute('data-action', 'retirerEleveLongitudinal');
+            retrait.dataset.da = da;
+            // Posé par setAttribute, lu par confirm() dans le dispatcher : du texte, jamais du HTML. Il DIT ce qu'il emporte.
+            retrait.setAttribute('data-confirm', MOTS.confirmerRetrait(nomComplet, accorder(dossiers.length, MOTS.dossiers), formaterDate(derniere),
+                resultats.map(libelleResultat), resultats.filter((r) => r.origine === 'cadre').length));
+
+            if (!resultats.length) return;
+            const sousListe = poser(li, 'ul', 'rl-resultats-ulterieurs');
+            resultats.forEach((r, i) => {
+                const ligne = poser(sousListe, 'li', 'rl-resultat-ulterieur');
+                poser(ligne, 'span', '', libelleResultat(r) + (r.origine === 'cadre' ? ' — ' + MOTS.duCadre : ''));
+                const bouton = poser(ligne, 'button', 'btn btn-annuler btn-sm rl-cible', MOTS.retirer);
+                bouton.type = 'button';
+                bouton.setAttribute('data-action', 'retirerResultatLongitudinal');
+                bouton.dataset.da = da;
+                bouton.dataset.index = String(i);
+            });
         });
+        rendreEnAttente(zone);
     }
 
     function afficherRegistreLongitudinal() {
@@ -453,9 +753,21 @@
         const recherche = poser(conteneur, 'section', 'rl-zone-recherche');
         recherche.id = 'rl-zone-recherche';
         rendreRecherche(recherche);
+        // La saisie AVANT la liste : la liste grandit (et le lot 4 y déplie les dossiers), la ligne de saisie ne doit pas s'éloigner.
+        const saisie = poser(conteneur, 'section', 'rl-zone-saisie');
+        saisie.id = 'rl-zone-saisie';
+        rendreSaisie(saisie);
         const inscrits = poser(conteneur, 'section', 'rl-zone-inscrits');
         inscrits.id = 'rl-zone-inscrits';
         rendreInscrits(inscrits);
+    }
+
+    /** Après un geste qui change le registre : la saisie (son sélecteur d'élèves) et la liste, sans toucher à la recherche en cours. */
+    function rafraichirSaisieEtInscrits(refus) {
+        const saisie = document.getElementById('rl-zone-saisie');
+        if (saisie) rendreSaisie(saisie, refus);
+        const inscrits = document.getElementById('rl-zone-inscrits');
+        if (inscrits) rendreInscrits(inscrits);
     }
 
     /** Hook d'affichage du sous-onglet (navigation.js). Lit, rend, n'écrit rien. */
@@ -479,8 +791,53 @@
         const issue = await inscrire(da);
         if (issue.ok) dernierResume = { da, resume: issue.resume, quand: new Date(Date.now()).toISOString() };
         rendreChoix();
-        const zone = document.getElementById('rl-zone-inscrits');
-        if (zone) rendreInscrits(zone);
+        rafraichirSaisieEtInscrits();
+        return issue;
+    }
+
+    function choisirEleveSaisieLongitudinal(el) {
+        daSaisie = el && el.value !== undefined ? String(el.value) : '';
+    }
+
+    async function ajouterResultatLongitudinal(el) {
+        const formulaire = el && el.closest ? el.closest('form') : null;
+        if (!formulaire) return;
+        const da = String(formulaire.elements.eleve.value || '');
+        const saisie = { cours: formulaire.elements.cours.value, trimestre: formulaire.elements.trimestre.value, note: formulaire.elements.note.value };
+        // Ce qui est tapé survit à un refus : seule la note repart vide après un ajout réussi.
+        daSaisie = da;
+        dernierCours = nettoyerTexte(saisie.cours);
+        dernierTrimestre = nettoyerTexte(saisie.trimestre);
+        const issue = await ajouterResultat(da, saisie);
+        if (issue.ok) {
+            // La saisie suivante : la note de l'élève d'après (le cours et le trimestre sont déjà là).
+            const das = elevesInscrits().map((e) => String(e.da));
+            daSaisie = das[das.indexOf(da) + 1] || da;
+        }
+        rafraichirSaisieEtInscrits(issue.ok ? '' : issue.refus);
+        const champNote = document.querySelector('#rl-zone-saisie input[name="note"]');
+        if (champNote) {
+            if (!issue.ok) champNote.value = saisie.note;
+            champNote.focus();
+        }
+        return issue;
+    }
+
+    async function retirerResultatLongitudinal(el) {
+        const da = el && el.dataset ? String(el.dataset.da || '') : '';
+        const issue = await retirerResultat(da, Number(el.dataset.index));
+        if (issue.ok) rafraichirSaisieEtInscrits();
+        return issue;
+    }
+
+    /** « Retirer du registre » : la confirmation (data-confirm) est passée AVANT, dans le dispatcher. */
+    async function retirerEleveLongitudinal(el) {
+        const da = el && el.dataset ? String(el.dataset.da || '') : '';
+        const issue = await retirerDuRegistre(da);
+        if (!issue.ok) return issue;
+        if (dernierResume && dernierResume.da === da) dernierResume = null;
+        rendreChoix();
+        rafraichirSaisieEtInscrits();
         return issue;
     }
 
@@ -490,11 +847,16 @@
     window.rechercherEleveLongitudinal = rechercherEleveLongitudinal;
     window.choisirEleveLongitudinal = choisirEleveLongitudinal;
     window.inscrireEleveLongitudinal = inscrireEleveLongitudinal;
-    // Pour les bancs et les lecteurs (export de recherche au lot 3) : tout sans passer par le DOM.
+    window.choisirEleveSaisieLongitudinal = choisirEleveSaisieLongitudinal;
+    window.ajouterResultatLongitudinal = ajouterResultatLongitudinal;
+    window.retirerResultatLongitudinal = retirerResultatLongitudinal;
+    window.retirerEleveLongitudinal = retirerEleveLongitudinal;
+    // Pour les bancs : tout sans passer par le DOM. (L'export de recherche, lui, lit la CLÉ — trimestres.js.)
     window.registreLongitudinal = {
         NOM_CLE, FORMAT, VERSION,
         lire: lireRegistre, inscrits: elevesInscrits,
         trimestres: trimestresRepertories, eleves: elevesDeTousLesTrimestres, rechercher: rechercherEleves,
-        capturerDossier, inscrire, mesurerPoidsTrimestre
+        capturerDossier, inscrire, mesurerPoidsTrimestre,
+        resultatsDe, stock913, enAttenteDuCadre, ajouterResultat, retirerResultat, retirerDuRegistre, lireNote, accorder
     };
 })();
