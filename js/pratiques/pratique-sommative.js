@@ -192,6 +192,9 @@ class PratiqueSommative {
         valides.slice().sort(parDate).forEach(e => {
             resultats.push({
                 label: titreProd(e.productionId),
+                // #922 — la vue en fait une pastille cliquable, à la couleur de SON échelle (#575) : elle ne devine rien.
+                productionId: e.productionId,
+                echelleId: e.echelleId ?? null,
                 date: e.dateEvaluation || null,
                 niveau: e.niveauFinal || null,   // code BRUT — traduit par l'échelle à la vue
                 note: (e.noteFinale ?? null),
