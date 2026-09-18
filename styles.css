@@ -16838,6 +16838,29 @@ tr.etudiant-inactif td {
 }
 
 /* Labels identité dans palette paramètres */
+/* #920 — la barre « Élève 3 de 54 » du formulaire sans copie. 44 px : cible tactile de l'iPad. */
+.eval-navigation-sans-copie {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.eval-navigation-fleche {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.eval-navigation-position {
+    min-width: 9em;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+
 .travaux-eval-identite {
     display: flex;
     flex-direction: column;

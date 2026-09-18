@@ -29,6 +29,8 @@
                 'Les indices au moment de la copie — assiduité, complétion, performance — sont écrits tels qu\'ils étaient rangés. Quand un indice n\'avait pas été calculé, ou qu\'une note était impossible à calculer, l\'écran le dit plutôt que d\'afficher un zéro.',
                 'Chaque évaluation est une tuile, et les tuiles se suivent côte à côte dans l\'ordre des dates&nbsp;: la production, la date, la note et le niveau se lisent d\'emblée&nbsp;; les critères et la rétroaction se déplient dans la tuile. Rien n\'est recalculé et rien n\'est écrit quand tu déplies un dossier&nbsp;; aucune analyse ni graphique pour l\'instant.',
                 'Cadre&nbsp;› Trimestre&nbsp;: la barre d\'étapes du haut suit maintenant ce que tu viens d\'enregistrer. Importer tes étudiant·es, créer un horaire ou un groupe-cours coche l\'étape tout de suite, sans recharger la page.',
+                'Évaluer sans copie (une note saisie depuis la Liste des évaluations)&nbsp;: deux flèches en tête du formulaire mènent d\'un·e élève à l\'autre — «&nbsp;Élève 3 de 54&nbsp;». Ce que tu viens de saisir est enregistré avant de changer d\'élève&nbsp;; la production, la grille et l\'échelle restent.',
+                'Correction&nbsp;: dans un trimestre où aucune copie n\'a été ouverte, «&nbsp;Enregistrer&nbsp;» par-dessus une évaluation déjà faite n\'écrivait rien, sans le dire. La retouche est maintenant enregistrée. Si tu as retouché des notes ainsi, rouvre-les pour vérifier qu\'elles portent ta dernière valeur.',
             ]
         },
         {

@@ -148,10 +148,6 @@ function nouvelleEvaluation() {
     // 🔄 Effacer les sélections mémorisées du mode évaluation en série
     db.removeSync('dernieresSelectionsEvaluation');
 
-    // Masquer l'indicateur de progression
-    const indicateur = document.getElementById('indicateurProgressionEval');
-    if (indicateur) indicateur.classList.add('u-hide');
-
     // Masquer l'indicateur de modification
     const indicateurModif = document.getElementById('indicateurModeModification');
     if (indicateurModif) indicateurModif.classList.add('u-hide');
@@ -273,6 +269,7 @@ function _evaluerSansCopie(da, productionId) {
                 _attendreOptionSelect,
                 () => (etudiant && etudiant.groupe) || null
             );
+            mettreAJourNavigationSansCopie();   // #920
         } catch (erreur) {
             console.error('[Évaluer sans copie]', erreur);
         } finally {
@@ -875,89 +872,55 @@ function verifierEtChargerEvaluationExistante() {
 }
 
 /**
- * Navigue vers l'étudiant précédent dans la liste
+ * D'un élève à l'autre sur le formulaire sans copie (#920). Avec une copie, c'est la bande des
+ * élèves de la visionneuse qui fait ce geste ; sans copie, rien ne le permettait (rapport du
+ * 18 sept. 2026, saisie des notes d'A2024). L'ordre est celui de `selectEtudiantEval`.
+ * `chargerEvaluationsEtudiant` vide l'auto-save en attente AVANT de changer d'élève, garde la
+ * production, la grille et l'échelle, puis recharge l'évaluation existante s'il y en a une.
+ * @param {number} pas -1 ou +1
  */
-function naviguerEtudiantPrecedent() {
+function _naviguerEtudiant(pas) {
     const selectEtudiant = document.getElementById('selectEtudiantEval');
     if (!selectEtudiant || !selectEtudiant.value) return;
 
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
-    const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
+    const cible = options[options.findIndex(opt => opt.value === selectEtudiant.value) + pas];
+    if (!cible) return;
 
-    if (indexActuel > 0) {
-        // Changer l'étudiant sélectionné
-        selectEtudiant.value = options[indexActuel - 1].value;
-
-        // ✅ Charger le nouvel étudiant (préserve production/grille/échelle, réinitialise critères)
-        chargerEvaluationsEtudiant();
-
-        mettreAJourIndicateurProgression();
+    // Lue AVANT le chargement : `chargerEvaluationsEtudiant` vide le sélecteur de production et ne le
+    // repose qu'un instant plus tard — l'étiquette dirait « Non associée ».
+    const productionId = document.getElementById('selectProduction1')?.value || '';
+    selectEtudiant.value = cible.value;
+    chargerEvaluationsEtudiant();
+    if (typeof travauxUI !== 'undefined' && typeof travauxUI.ecrireLabelsIdentite === 'function') {
+        travauxUI.ecrireLabelsIdentite(cible.value, productionId);
     }
+    mettreAJourNavigationSansCopie();
 }
 
+function naviguerEtudiantPrecedent() { _naviguerEtudiant(-1); }
+function naviguerEtudiantSuivant() { _naviguerEtudiant(1); }
+
 /**
- * Navigue vers l'étudiant suivant dans la liste
+ * La barre du formulaire sans copie : « Élève 3 de 54 », flèches éteintes aux deux bouts.
+ * Cachée tant qu'aucun élève n'est choisi.
  */
-function naviguerEtudiantSuivant() {
+function mettreAJourNavigationSansCopie() {
+    const barre = document.getElementById('eval-navigation-sans-copie');
     const selectEtudiant = document.getElementById('selectEtudiantEval');
-    if (!selectEtudiant || !selectEtudiant.value) return;
+    if (!barre || !selectEtudiant) return;
 
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
-    const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
+    const index = options.findIndex(opt => opt.value === selectEtudiant.value);
+    barre.classList.toggle('u-hide', index === -1);
+    if (index === -1) return;
 
-    if (indexActuel >= 0 && indexActuel < options.length - 1) {
-        // Changer l'étudiant sélectionné
-        selectEtudiant.value = options[indexActuel + 1].value;
-
-        // ✅ Charger le nouvel étudiant (préserve production/grille/échelle, réinitialise critères)
-        chargerEvaluationsEtudiant();
-
-        mettreAJourIndicateurProgression();
-    }
-}
-
-/**
- * Met à jour l'indicateur de progression (X/Y évaluations réalisées)
- */
-function mettreAJourIndicateurProgression() {
-    const selectProduction = document.getElementById('selectProduction1');
-    const indicateur = document.getElementById('indicateurProgressionEval');
-
-    if (!selectProduction || !indicateur) return;
-
-    const productionId = selectProduction.value;
-
-    // Si aucune production sélectionnée, masquer l'indicateur
-    if (!productionId) {
-        indicateur.classList.add('u-hide');
-        return;
-    }
-
-    // Compter le nombre total d'étudiants actifs
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
-    const totalEtudiants = etudiantsActifs.length;
-
-    // Compter les évaluations déjà réalisées pour cette production
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluationsProduction = evaluations.filter(e => e.productionId === productionId);
-
-    // Compter les étudiants uniques évalués (au cas où il y aurait plusieurs évaluations par étudiant)
-    const etudiantsEvalues = new Set(evaluationsProduction.map(e => e.etudiantDA));
-    const nbEvaluations = etudiantsEvalues.size;
-
-    // Afficher le compteur
-    indicateur.textContent = `${nbEvaluations}/${totalEtudiants} évaluations`;
-    indicateur.classList.remove('u-hide');
-
-    // Changer la couleur selon la progression
-    if (nbEvaluations === totalEtudiants) {
-        indicateur.style.color = 'var(--vert-succes)'; // Vert - Terminé
-    } else if (nbEvaluations > totalEtudiants / 2) {
-        indicateur.style.color = 'var(--accent-primaire)'; // Bleu - En cours (meilleur contraste)
-    } else {
-        indicateur.style.color = 'var(--accent-primaire)'; // Bleu - Début
-    }
+    const position = document.getElementById('eval-navigation-position');
+    if (position) position.textContent = `Élève ${index + 1} de ${options.length}`;
+    const precedent = barre.querySelector('[data-action="naviguerEtudiantPrecedent"]');
+    const suivant = barre.querySelector('[data-action="naviguerEtudiantSuivant"]');
+    if (precedent) precedent.disabled = index === 0;
+    if (suivant) suivant.disabled = index === options.length - 1;
 }
 
 /**
@@ -1013,92 +976,6 @@ function attacherEvenementsMemorisation() {
             radio.dataset.memoAttache = '1';
         }
     });
-}
-
-/**
- * Insère les boutons de navigation et l'indicateur dans l'interface
- */
-function insererNavigationEvaluationSerie() {
-    const selectEtudiant = document.getElementById('selectEtudiantEval');
-    if (!selectEtudiant) return;
-
-    // Vérifier si déjà inséré
-    if (document.getElementById('navigationEvaluationSerie')) return;
-
-    // Créer le conteneur de navigation
-    const nav = document.createElement('div');
-    nav.id = 'navigationEvaluationSerie';
-    nav.style.cssText = 'display: flex; gap: 10px; align-items: center; margin: 15px 0; justify-content: center;';
-
-    nav.innerHTML = `
-        <button class="btn btn-principal btn-compact" data-action="naviguerEtudiantPrecedent"
-                title="Évaluer l'étudiant·e précédent·e"
-                style="padding: 6px 10px; min-width: auto; font-size: 0.9rem;">
-            ←
-        </button>
-
-        <span id="indicateurProgressionEval"
-              style="font-weight: 400; color: var(--gris-moyen); padding: 0 10px; display: inline-block; font-size: 0.85rem;">
-            0/0 évaluations
-        </span>
-
-        <button class="btn btn-principal btn-compact" data-action="naviguerEtudiantSuivant"
-                title="Évaluer l'étudiant·e suivant·e"
-                style="padding: 6px 10px; min-width: auto; font-size: 0.9rem;">
-            →
-        </button>
-
-        <button id="btnVoirProfilDepuisEval" class="btn btn-secondaire btn-compact"
-                data-action="ouvrirProfilDepuisEvaluation"
-                style="margin-left: 10px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
-                title="Voir le profil de l'étudiant·e">
-            <img src="icons/icon-profile.svg" alt="" class="btn-inline-icon">
-        </button>
-
-        <button id="btnVoirTravailDepuisEval" class="btn btn-secondaire btn-compact"
-                data-action="ouvrirTravailDepuisEvaluation"
-                style="margin-left: 6px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
-                title="Voir le travail de l'étudiant·e">
-            <img src="icons/icon-pdf.svg" alt="" class="btn-inline-icon"> Travail
-        </button>
-    `;
-
-    // Insérer après le select étudiant
-    const parentContainer = selectEtudiant.closest('.form-group') || selectEtudiant.parentElement;
-    if (parentContainer && parentContainer.nextSibling) {
-        parentContainer.parentNode.insertBefore(nav, parentContainer.nextSibling);
-    } else {
-        selectEtudiant.parentElement?.appendChild(nav);
-    }
-
-}
-
-/**
- * Initialise le mode évaluation en série
- * À appeler depuis initialiserModuleEvaluation()
- */
-function initialiserModeEvaluationSerie() {
-    // Insérer l'interface de navigation
-    insererNavigationEvaluationSerie();
-
-    // Attacher les événements de mémorisation
-    attacherEvenementsMemorisation();
-
-    // Restaurer les dernières sélections si elles existent
-    const selectEtudiant = document.getElementById('selectEtudiantEval');
-    if (selectEtudiant && selectEtudiant.value) {
-        restaurerSelectionsEvaluation();
-    }
-
-    // Mettre à jour l'indicateur lors des changements
-    selectEtudiant?.addEventListener('change', mettreAJourIndicateurProgression);
-
-    // Mettre à jour aussi lors du changement de production
-    const selectProduction = document.getElementById('selectProduction1');
-    selectProduction?.addEventListener('change', mettreAJourIndicateurProgression);
-
-    mettreAJourIndicateurProgression();
-
 }
 
 /* ===============================
@@ -3248,6 +3125,7 @@ window.supprimerEvaluationBanque = supprimerEvaluationBanque;
 window.evaluerProduction = evaluerProduction;
 window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
 window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
+window.mettreAJourNavigationSansCopie = mettreAJourNavigationSansCopie;
 window.retirerJeton = retirerJeton;
 
 // Exports manqués lors de l'extraction de evaluation-chargement.js et autres

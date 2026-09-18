@@ -246,8 +246,10 @@ describe('lot E · #745 — hors des moyennes du groupe', () => {
         // Occurrences de `estEtudiantExclu` par fichier, mesurées le 17 sept. 2026 sur f99f5325. Ce sont les lecteurs qui PARTENT
         // d'une liste d'élèves et lisent les magasins DA par DA ; un filtre retiré fait descendre le compte de son fichier.
         // (portfolio.js et indices.js n'y sont plus : ce sont les producteurs, et ils calculent tout le groupe.)
+        // (evaluation.js n'y est plus depuis #920, 18 sept. 2026 : son seul lecteur, `mettreAJourIndicateurProgression`, écrivait dans un
+        // élément que rien n'insérait — aucun appelant vivant ; il est parti avec l'insertion dormante. Un lecteur retiré, pas un filtre.)
         const PLANCHER = { 'js/tableau-bord-apercu.js': 5, 'js/graphiques-progression.js': 13, 'js/etudiants.js': 5, 'js/presences-apercu.js': 1,
-            'js/presences-rapport.js': 2, 'js/snapshots.js': 1, 'js/trimestres.js': 3, 'js/liste-evaluations.js': 1, 'js/evaluation.js': 1,
+            'js/presences-rapport.js': 2, 'js/snapshots.js': 1, 'js/trimestres.js': 3, 'js/liste-evaluations.js': 1,
             'js/boite-outils.js': 1, 'js/navigation.js': 1, 'js/saisie-presences.js': 2 };
         const mesure = Object.fromEntries(Object.keys(PLANCHER).map(f => [f, (source(f).match(/estEtudiantExclu/g) || []).length]));
         for (const f of Object.keys(PLANCHER)) expect([f, mesure[f] >= PLANCHER[f], mesure[f]]).toEqual([f, true, mesure[f]]);
