@@ -890,6 +890,18 @@ function _naviguerEtudiant(pas) {
     // Lue AVANT le chargement : `chargerEvaluationsEtudiant` vide le sélecteur de production et ne le
     // repose qu'un instant plus tard — l'étiquette dirait « Non associée ».
     const productionId = document.getElementById('selectProduction1')?.value || '';
+    // « Consulter » a posé `window.evaluationEnCours` avec l'élève et l'id de SON évaluation. Laissé tel quel, il
+    // garderait cet élève pendant que l'id suit les suivants : au retour, la garde de
+    // `verifierEtChargerEvaluationExistante` (même élève, même production, un id) sauterait le rechargement, et
+    // « Enregistrer » écrirait ce formulaire dans l'évaluation d'un AUTRE élève. Même remise à zéro que
+    // `demarrerEvaluationDepuisFichier` quand la copie change ; l'id est reposé par le rechargement.
+    if (window.evaluationEnCours) {
+        window.evaluationEnCours.etudiantDA = cible.value;
+        window.evaluationEnCours.criteres = {};
+        window.evaluationEnCours.donneesAlgorithmiques = {};
+        window.evaluationEnCours.pointsAnalytiques = {};
+        delete window.evaluationEnCours.idModification;
+    }
     selectEtudiant.value = cible.value;
     chargerEvaluationsEtudiant();
     if (typeof travauxUI !== 'undefined' && typeof travauxUI.ecrireLabelsIdentite === 'function') {
@@ -911,7 +923,9 @@ function mettreAJourNavigationSansCopie() {
     if (!barre || !selectEtudiant) return;
 
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
-    const index = options.findIndex(opt => opt.value === selectEtudiant.value);
+    const formulaire = document.getElementById('evaluations-contenu-evaluation');
+    const sansCopie = !!formulaire && formulaire.contains(document.getElementById('travaux-eval-gauche'));
+    const index = sansCopie ? options.findIndex(opt => opt.value === selectEtudiant.value) : -1;
     barre.classList.toggle('u-hide', index === -1);
     if (index === -1) return;
 
@@ -1219,6 +1233,7 @@ function modifierEvaluation(evaluationId) {
 
             // ÉTAPES 13-14 : Indicateur mode modification + verrouillage
             _gererIndicateurEtVerrouillageModif(evaluation, estVerrouillee);
+            mettreAJourNavigationSansCopie();   // #920 — « Consulter » est le seul geste offert pour un élève déjà noté
 
             // ÉTAPES 15-16 : Gestion jetons + bouton Éditer
             window.afficherGestionJetons(true);
