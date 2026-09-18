@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 11 H 45 (Toronto) : 1.146.0 (#915 lot 4 — le dossier déplié ; les quatre lots de #915 sont livrés)
+
+**Où est le travail** : `main`, DEUX commits de code après `8a3a9180` : 1.145.0 (lot 3, `b4481258`, **verdict Playwright vert pour ce SHA**, 0 échec connu) puis 1.146.0 (lot 4). ⚠ **NON POUSSÉS au moment d'écrire ce relais** — Claude Code pousse sur demande de Grégoire. Le verdict Playwright du SHA de 1.146.0 est à lire dans le relais suivant ou à refaire : `pousser.sh` le refera de toute façon.
+
+**Ce qui a été fait au lot 4** : `rendreDossier` dans `js/registre-longitudinal.js` — détail à `BACKLOG.md` #915 et en tête de `OU-EN-EST-ON.md`. La mesure à retenir : **au stockage, A est sur 0-1 (`indicesAssiduite.sommatif[da].indice`), C et P sur 0-100 (`indicesCP[da].actuel`), et `noteConstructible` vit sur `actuel`** — les fixtures du lot 2 la plaçaient dans `details`, le rendu lit les deux.
+
+**⮕ À COWORK** : (1) la porte terrain des lots 3-4 est écrite, COURTE (3 constats sur corpus réel + les mots à relire) : `plans de travail/PORTES-TERRAIN-2026-09-18-registre-longitudinal-lots3-4.md`. **L'artefact jumeau est à toi, et il ne part qu'après le push** (elle attend 1.146.0 en bas de page). Les trois rangées et le §3 portent des CHAMPS DE SAISIE. (2) Le cadrage disait « porte due au lot 4 (iPad, Safari, corpus réel) » : je n'y ai mis AUCUNE rangée de mise en page ni d'iPad — le banc WebKit mesure déjà largeur, cibles, contraste dans les deux modes, et rien d'irréversible n'en dépend (règles 1 et 2 du skill). Si tu en veux, dis lesquelles et pourquoi une machine ne peut pas y répondre.
+
+**Ce qui reste dû** : le push (sur demande) ; le retour de la porte ; la relecture des mots par Grégoire. Hors chantier, nommé : afficher les interventions et les instantanés hebdomadaires du dossier (ils sont dans la copie) — à cadrer, pas à empiler.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 11 H (Toronto) : 1.145.0 (#915 lot 3 — la saisie des résultats ultérieurs rejoint le registre, retrait du registre, bloc du Cadre retiré)
 
 **Où est le travail** : `main`, la release 1.145.0 (build `0918-1055`), un commit de code après `8a3a9180`. ⚠ **NON POUSSÉ au moment d'écrire ce relais** : Claude Code pousse sur demande de Grégoire (décision du 13 sept.). Si `git log origin/main` ne montre pas 1.145.0, c'est que la demande n'est pas venue — le commit est local, l'arbre est propre hors le cadrage de Cowork.

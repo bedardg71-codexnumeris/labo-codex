@@ -19,6 +19,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // repris à l'inscription et l'ancienne clé intacte. R4 : « Retirer du registre » — refusé au dialogue, rien ne bouge ; accepté,
 // l'élève et ses résultats partent, les trimestres restent identiques octet pour octet. (Remplace resultats-ulterieurs-913.spec.js,
 // retiré avec le bloc du Cadre.)
+//
+// LOT 4 (même jour) — R5 : le dossier déplié. « Voir le dossier » s'ouvre au clic, les évaluations et les indices se lisent,
+// rien ne déborde à 768 px, les cibles font ≥ 44 px, et le texte reste lisible (contraste mesuré) dans les DEUX modes.
 
 const TA = 't915a'; // archivé, ACTIF
 const TB = 't915b'; // non archivé
@@ -247,8 +250,8 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
                 options: Array.from(document.querySelector('#rl-zone-saisie select').options).map((o) => o.textContent)
             };
         });
-        // 4 champs + « Ajouter » ; 2 « Retirer du registre » ; 2 « Retirer » (un résultat du Cadre par élève).
-        expect(mesures.nb).toBe(9);
+        // 4 champs + « Ajouter » ; 2 « Retirer du registre » ; 2 « Retirer » (un résultat du Cadre par élève) ; lot 4 : 2 « Voir le dossier ».
+        expect(mesures.nb).toBe(11);
         expect(mesures.fermes).toEqual([]);
         expect(mesures.petites).toEqual([]);
         expect(mesures.horsZone).toBe(0);
@@ -308,6 +311,66 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(JSON.stringify(registre)).not.toContain(DA1);
         expect(Object.keys(registre.modeles.grilles)).toEqual([TA + ':G1']); // G1 sert encore au dossier de Max
         expect(await page.evaluate(() => Array.from(document.querySelector('#rl-zone-saisie select').options).map((o) => o.textContent))).toEqual(['Roy, Max']);
+        expect(await stockDesTrimestres(page)).toEqual(avant);
+        expect(erreurs).toEqual([]);
+    });
+
+    /** Contraste WCAG entre deux couleurs CSS calculées (rgb/rgba), calculé côté Node sur les couleurs relevées dans la page. */
+    function contraste(c1, c2) {
+        const lum = (c) => {
+            const [r, g, b] = c.match(/[\d.]+/g).slice(0, 3).map((v) => { v = Number(v) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        const [clair, fonce] = [lum(c1), lum(c2)].sort((x, y) => y - x);
+        return (clair + 0.05) / (fonce + 0.05);
+    }
+
+    test('R5 · lot 4 — le dossier déplié : lisible, sans débordement, cibles ≥ 44 px, dans les deux modes ; déplier n\'écrit rien', async ({ page }) => {
+        const erreurs = await monter(page);
+        await ouvrirLeSousOnglet(page);
+        await inscrire(page, 'gag', 1);
+        const avant = await stockDesTrimestres(page);
+        const registreAvant = await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)));
+
+        const replie = await page.evaluate(() => { const d = document.querySelector('#rl-zone-inscrits .rl-dossier'); return { ouvert: d.open, resume: d.querySelector('summary').textContent, hauteur: Math.round(d.querySelector('summary').getBoundingClientRect().height) }; });
+        expect(replie).toEqual({ ouvert: false, resume: 'Voir le dossier', hauteur: expect.any(Number) });
+        expect(replie.hauteur).toBeGreaterThanOrEqual(44);
+
+        await cliquer(page, '#rl-zone-inscrits .rl-dossier > summary');
+        await page.waitForFunction(() => { const d = document.querySelector('#rl-zone-inscrits .rl-dossier'); return d.open && d.querySelector('.rl-evaluation') && d.querySelector('.rl-evaluation').offsetParent !== null; }, null, { timeout: 5000 });
+        const texte = await page.evaluate(() => document.querySelector('#rl-zone-inscrits .rl-dossier').innerText);
+        expect(texte).toContain('Automne 2024 (601-101-MQ, gr. 00001)');
+        expect(texte).toContain('Hiver 2026 (601-101-MQ, gr. 00002)');
+        expect(texte).toContain('Indices au moment de la copie');
+        expect(texte).toMatch(/Complétion : \d+ %/);
+        expect(texte).toContain('Évaluations (1)');
+        expect(texte).toContain('Aucune évaluation dans cette copie.');
+        expect(texte).not.toMatch(/undefined|NaN|\bnull\b/);
+
+        for (const mode of ['sombre', 'clair']) {
+            await page.evaluate((m) => document.body.classList.toggle('mode-clair', m === 'clair'), mode);
+            const releve = await page.evaluate(() => {
+                const dossier = document.querySelector('#rl-zone-inscrits .rl-dossier');
+                const zone = document.getElementById('registre-longitudinal-conteneur').getBoundingClientRect();
+                const fondDe = (el) => { for (let e = el; e; e = e.parentElement) { const c = getComputedStyle(e).backgroundColor; if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c; } return 'rgb(255, 255, 255)'; };
+                const textes = Array.from(dossier.querySelectorAll('summary, h4, h5, p, li')).filter((el) => el.offsetParent !== null && el.textContent.trim());
+                return {
+                    couleurs: textes.map((el) => ({ quoi: el.tagName + ' ' + el.textContent.trim().slice(0, 30), texte: getComputedStyle(el).color, fond: fondDe(el) })),
+                    petites: Array.from(dossier.querySelectorAll('summary')).filter((el) => el.offsetParent !== null && Math.round(el.getBoundingClientRect().height) < 44).map((el) => el.textContent),
+                    horsZone: textes.filter((el) => { const r = el.getBoundingClientRect(); return r.left < zone.left - 1 || r.right > zone.right + 1; }).map((el) => el.textContent.slice(0, 30)),
+                    debordePage: document.documentElement.scrollWidth > window.innerWidth
+                };
+            });
+            const illisibles = releve.couleurs.filter((c) => contraste(c.texte, c.fond) < 4.5).map((c) => mode + ' · ' + c.quoi + ' · ' + c.texte + ' sur ' + c.fond);
+            expect(releve.couleurs.length).toBeGreaterThan(8); // le relevé mesure quelque chose
+            expect(illisibles).toEqual([]);
+            expect(releve.petites).toEqual([]);
+            expect(releve.horsZone).toEqual([]);
+            expect(releve.debordePage).toBe(false);
+        }
+
+        // Déplier est un rendu : ni le registre ni les trimestres n'ont bougé.
+        expect(await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)))).toBe(registreAvant);
         expect(await stockDesTrimestres(page)).toEqual(avant);
         expect(erreurs).toEqual([]);
     });
