@@ -22,6 +22,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //
 // LOT 4 (même jour) — R5 : le dossier déplié. « Voir le dossier » s'ouvre au clic, les évaluations et les indices se lisent,
 // rien ne déborde à 768 px, les cibles font ≥ 44 px, et le texte reste lisible (contraste mesuré) dans les DEUX modes.
+// 1.146.3 (retour de Grégoire à la porte des lots 3-4 : « prend beaucoup d'espace vertical ») : chaque évaluation est une TUILE
+// dans le flux des badges du profil — R5 mesure au moins DEUX tuiles par rangée à 768 px, l'ordre de lecture chronologique
+// (gauche → droite, puis haut → bas), et qu'une tuile dépliée ne déplace ni n'étire sa voisine de rangée.
 
 const TA = 't915a'; // archivé, ACTIF
 const TB = 't915b'; // non archivé
@@ -73,6 +76,19 @@ async function monter(page, { dialogues = null, cadre = false } = {}) {
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && typeof window.afficherSection === 'function'
         && typeof window.initialiserRegistreLongitudinal === 'function');
+    // `offsetParent !== null` NE SUFFIT PAS sous WebKit : le contenu d'un <details> FERMÉ le garde non nul (mesuré le 18 sept. —
+    // le banc comptait une cible repliée). Visible = rendu ET tous les <details> ancêtres ouverts (le <summary> d'un <details>
+    // fermé reste visible, lui). Posée sur window APRÈS le rechargement : les page.evaluate du banc l'appellent.
+    await page.evaluate(() => {
+        window.__visible915 = (el) => {
+            if (!el || el.offsetParent === null) return false;
+            for (let d = el.parentElement && el.parentElement.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) {
+                const sonResume = el.closest('summary');
+                if (!d.open && !(sonResume && sonResume.parentElement === d)) return false;
+            }
+            return true;
+        };
+    });
     // Seule attente fixe du banc, justifiée : le démarrage réécrit les indices du trimestre actif de façon asynchrone
     // (mesuré : P semé 0,8, relu 0), sans aucun signal DOM à attendre ; l'empreinte « avant » se prend après ce délai.
     await page.waitForTimeout(500);
@@ -238,7 +254,7 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         // Les champs restent OUVERTS sous la garde CSS du mode archive (.rl-champ, exception nommée d'index.html) ; cibles ≥ 44 px.
         const mesures = await page.evaluate(() => {
             const zone = document.getElementById('registre-longitudinal-conteneur').getBoundingClientRect();
-            const cibles = Array.from(document.querySelectorAll('#rl-zone-saisie .rl-champ, #rl-zone-saisie .rl-cible, #rl-zone-inscrits .rl-cible')).filter((el) => el.offsetParent !== null);
+            const cibles = Array.from(document.querySelectorAll('#rl-zone-saisie .rl-champ, #rl-zone-saisie .rl-cible, #rl-zone-inscrits .rl-cible')).filter((el) => window.__visible915(el));
             return {
                 nb: cibles.length,
                 fermes: cibles.filter((el) => getComputedStyle(el).pointerEvents === 'none' || el.disabled).map((el) => el.name || el.textContent),
@@ -327,6 +343,15 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
 
     test('R5 · lot 4 — le dossier déplié : lisible, sans débordement, cibles ≥ 44 px, dans les deux modes ; déplier n\'écrit rien', async ({ page }) => {
         const erreurs = await monter(page);
+        // Cinq évaluations pour Léa, à la forme réelle (critereNom, niveauSelectionne), rangées DANS LE DÉSORDRE ; la 5e n'a rien à déplier.
+        await page.evaluate(({ TA, DA1 }) => {
+            // security-ok: fixtures littérales du banc, aucune source externe.
+            const ev = (n, jour, extra) => Object.assign({ id: 'T' + n, etudiantDA: DA1, coursId: 'cours-915', productionNom: 'Artefact ' + n, grilleId: 'G1', grilleNom: 'SRPNF × IDME', echelleId: 'ECH1',
+                dateEvaluation: '2024-10-' + jour + 'T12:00:00.000Z', noteFinale: 60 + n, niveauFinal: 'D', criteres: [{ critereId: 'CR1', critereNom: 'Structure', niveauSelectionne: 'D' }, { critereId: 'CR2', critereNom: 'Rigueur', niveauSelectionne: 'M' }],
+                retroactionFinale: 'Tu commences à dégager les intentions et les procédés. '.repeat(4) }, extra || {});
+            window.db.setSync(TA + '_evaluationsSauvegardees', [ev(3, '15'), ev(1, '01'), ev(4, '22'), ev(2, '08'), ev(5, '29', { criteres: [], retroactionFinale: '' })]);
+            window.db.setSync(TA + '_echellesTemplates', [{ id: 'ECH1', nom: 'IDME', niveaux: [{ code: 'D', nom: 'En Développement' }, { code: 'M', nom: 'Maîtrisé' }] }]);
+        }, { TA, DA1 });
         await ouvrirLeSousOnglet(page);
         await inscrire(page, 'gag', 1);
         const avant = await stockDesTrimestres(page);
@@ -337,15 +362,45 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(replie.hauteur).toBeGreaterThanOrEqual(44);
 
         await cliquer(page, '#rl-zone-inscrits .rl-dossier > summary');
-        await page.waitForFunction(() => { const d = document.querySelector('#rl-zone-inscrits .rl-dossier'); return d.open && d.querySelector('.rl-evaluation') && d.querySelector('.rl-evaluation').offsetParent !== null; }, null, { timeout: 5000 });
+        await page.waitForFunction(() => { const d = document.querySelector('#rl-zone-inscrits .rl-dossier'); return d.open && d.querySelector('.rl-tuile') && d.querySelector('.rl-tuile').offsetParent !== null; }, null, { timeout: 5000 });
         const texte = await page.evaluate(() => document.querySelector('#rl-zone-inscrits .rl-dossier').innerText);
         expect(texte).toContain('Automne 2024 (601-101-MQ, gr. 00001)');
         expect(texte).toContain('Hiver 2026 (601-101-MQ, gr. 00002)');
         expect(texte).toContain('Indices au moment de la copie');
         expect(texte).toMatch(/Complétion : \d+ %/);
-        expect(texte).toContain('Évaluations (1)');
+        expect(texte).toContain('Évaluations (5)');
         expect(texte).toContain('Aucune évaluation dans cette copie.');
         expect(texte).not.toMatch(/undefined|NaN|\bnull\b/);
+
+        // LES TUILES. Production, date, note et niveau visibles d'emblée ; critères et rétroaction repliés dedans.
+        const geometrie = () => page.evaluate(() => Array.from(document.querySelectorAll('#rl-zone-inscrits .rl-tuiles .rl-tuile')).map((t) => {
+            const r = t.getBoundingClientRect();
+            return { nom: t.querySelector('.rl-nom').textContent, balise: t.tagName, ouvert: !!t.open, x: Math.round(r.left), y: Math.round(r.top), l: Math.round(r.width), h: Math.round(r.height),
+                entete: t.querySelector('.rl-tuile-entete').innerText.replace(/\n+/g, ' | '), critereVisible: window.__visible915(t.querySelector('.rl-criteres')) };
+        }));
+        const tuiles = await geometrie();
+        expect(tuiles.map((t) => t.nom)).toEqual(['Artefact 1', 'Artefact 2', 'Artefact 3', 'Artefact 4', 'Artefact 5']); // chronologique, malgré le désordre du stock
+        expect(tuiles[0].entete).toBe('Artefact 1 | 2024-10-01 | Note : 61 · D — En Développement | SRPNF × IDME');
+        expect(tuiles.map((t) => t.balise)).toEqual(['DETAILS', 'DETAILS', 'DETAILS', 'DETAILS', 'DIV']); // la 5e n'a rien à déplier : pas de triangle
+        expect(tuiles.some((t) => t.critereVisible)).toBe(false);
+        // Au moins DEUX tuiles par rangée à 768 px, lues de gauche à droite puis de haut en bas.
+        const rangees = [...new Set(tuiles.map((t) => t.y))].map((y) => tuiles.filter((t) => t.y === y));
+        expect(rangees[0].length).toBeGreaterThanOrEqual(2);
+        expect(rangees.length).toBeLessThan(tuiles.length);
+        for (const rangee of rangees) expect(rangee.map((t) => t.x)).toEqual(rangee.map((t) => t.x).slice().sort((p, q) => p - q));
+        expect(rangees.flat().map((t) => t.nom)).toEqual(tuiles.map((t) => t.nom));
+        // Déplier la 1re : elle grandit, sa voisine de rangée ne bouge pas et ne s'étire pas.
+        await cliquer(page, '#rl-zone-inscrits .rl-tuiles .rl-tuile > summary');
+        await page.waitForFunction(() => window.__visible915(document.querySelector('#rl-zone-inscrits .rl-tuiles .rl-tuile .rl-criteres')), null, { timeout: 5000 });
+        const apres = await geometrie();
+        expect(apres[0].ouvert).toBe(true);
+        expect(apres[0].h).toBeGreaterThan(tuiles[0].h);
+        expect(apres[0].l).toBe(tuiles[0].l);
+        expect({ x: apres[1].x, y: apres[1].y, l: apres[1].l, h: apres[1].h }).toEqual({ x: tuiles[1].x, y: tuiles[1].y, l: tuiles[1].l, h: tuiles[1].h });
+        const ouverte = await page.evaluate(() => document.querySelector('#rl-zone-inscrits .rl-tuiles .rl-tuile').innerText);
+        expect(ouverte).toContain('Structure : D — En Développement');
+        expect(ouverte).toContain('Rétroaction');
+        expect(ouverte).toContain('Tu commences à dégager');
 
         for (const mode of ['sombre', 'clair']) {
             await page.evaluate((m) => document.body.classList.toggle('mode-clair', m === 'clair'), mode);
@@ -353,10 +408,10 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
                 const dossier = document.querySelector('#rl-zone-inscrits .rl-dossier');
                 const zone = document.getElementById('registre-longitudinal-conteneur').getBoundingClientRect();
                 const fondDe = (el) => { for (let e = el; e; e = e.parentElement) { const c = getComputedStyle(e).backgroundColor; if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c; } return 'rgb(255, 255, 255)'; };
-                const textes = Array.from(dossier.querySelectorAll('summary, h4, h5, p, li')).filter((el) => el.offsetParent !== null && el.textContent.trim());
+                const textes = Array.from(dossier.querySelectorAll('summary, h4, h5, p, li, .rl-tuile-entete span')).filter((el) => window.__visible915(el) && el.textContent.trim());
                 return {
                     couleurs: textes.map((el) => ({ quoi: el.tagName + ' ' + el.textContent.trim().slice(0, 30), texte: getComputedStyle(el).color, fond: fondDe(el) })),
-                    petites: Array.from(dossier.querySelectorAll('summary')).filter((el) => el.offsetParent !== null && Math.round(el.getBoundingClientRect().height) < 44).map((el) => el.textContent),
+                    petites: Array.from(dossier.querySelectorAll('summary')).filter((el) => window.__visible915(el) && Math.round(el.getBoundingClientRect().height) < 44).map((el) => el.textContent.slice(0, 30) + ' ' + Math.round(el.getBoundingClientRect().height)),
                     horsZone: textes.filter((el) => { const r = el.getBoundingClientRect(); return r.left < zone.left - 1 || r.right > zone.right + 1; }).map((el) => el.textContent.slice(0, 30)),
                     debordePage: document.documentElement.scrollWidth > window.innerWidth
                 };

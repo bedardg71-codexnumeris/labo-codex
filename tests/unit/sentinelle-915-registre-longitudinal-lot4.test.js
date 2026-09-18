@@ -9,7 +9,11 @@
  *   3. les évaluations en ordre chronologique, critère par critère, avec le libellé du niveau lu dans l'échelle COPIÉE au
  *      registre : si l'échelle du trimestre change après la copie, le dossier ne change pas ;
  *   4. AUCUN calcul d'indice, AUCUNE écriture : déplier est un rendu ;
- *   5. la rétroaction (texte libre de l'enseignant·e) passe par textContent : aucun chemin vers le HTML.
+ *   5. la rétroaction (texte libre de l'enseignant·e) passe par textContent : aucun chemin vers le HTML ;
+ *   6. (1.146.3, retour de Grégoire à la porte des lots 3-4) chaque évaluation est une TUILE, dans le flux des badges du
+ *      profil (`.badges-centres`, réutilisé, pas recopié) : production, date, note et niveau visibles d'emblée ; la tuile EST
+ *      le <details> (aucun mot neuf) et critères + rétroaction se déplient dedans ; une évaluation qui n'a rien à déplier
+ *      est une tuile simple, sans triangle.
  *
  * Le rendu à 768 px, dans les deux modes, cibles ≥ 44 px : banc WebKit registre-longitudinal-915.spec.js (R5).
  */
@@ -129,17 +133,59 @@ describe('#915 lot 4 — le dossier déplié', () => {
         expect(texteDe(h26)).toContain('Performance : ' + b.mots.indiceAbsent);
     });
 
-    it('les évaluations en ordre CHRONOLOGIQUE, critère par critère, niveau = code + libellé de l\'échelle copiée ; un code inconnu reste un code', async () => {
+    it('une TUILE par évaluation, en ordre CHRONOLOGIQUE ; en-tête : production, date, note et niveau (code + libellé de l\'échelle copiée), contexte', async () => {
         const b = banc();
         await b.api.inscrire(DA);
         b.win.initialiserRegistreLongitudinal();
-        const evaluations = tous(dossierDe(b, DA), (el) => el.className === 'rl-evaluation');
-        expect(evaluations.map((li) => li.children[0].textContent)).toEqual(['Artefact 1 — 2025-10-01', 'Artefact 2 — 2025-11-03']); // rangées E2 puis E1 au stock
-        expect(evaluations[0].children[1].textContent).toBe('Note : 66 · D — En Développement · Grille-5 · remplacée par une reprise');
-        expect(evaluations[1].children[1].textContent).toBe('Note : 78,5 · M — Maîtrisé · Grille-5');
-        const criteres = evaluations[0].children.find((c) => c.className === 'rl-criteres').children.map((c) => c.textContent);
-        expect(criteres).toEqual(['Structure : D — En Développement', 'Rigueur : Z']);
-        expect(texteDe(dossierDe(b, DA))).not.toContain('Artefact 1 — 2025-10-01 | Note : 66 · D — En Développement · Grille-5 | '); // la mention « remplacée » n'est pas optionnelle
+        const tuiles = tous(dossierDe(b, DA), (el) => el.className === 'rl-tuile');
+        expect(tuiles.map((t) => t.tagName)).toEqual(['DETAILS', 'DETAILS']);
+        expect(tuiles.every((t) => !t.hasAttribute('open'))).toBe(true);
+        const entete = (t) => t.children[0].children.map((c) => c.textContent);
+        // Rangées E2 puis E1 au stock : l'ordre de lecture est celui des DATES.
+        expect(entete(tuiles[0])).toEqual(['Artefact 1', '2025-10-01', 'Note : 66 · D — En Développement', 'Grille-5 · remplacée par une reprise']);
+        expect(entete(tuiles[1])).toEqual(['Artefact 2', '2025-11-03', 'Note : 78,5 · M — Maîtrisé', 'Grille-5']);
+        for (const t of tuiles) {
+            expect(t.children[0].tagName).toBe('SUMMARY');
+            expect(t.children[0].className).toBe('rl-tuile-entete rl-cible'); // .rl-cible : min-height 44 px
+        }
+    });
+
+    it('DANS la tuile : les critères (un code inconnu reste un code), puis la rétroaction sous son titre', async () => {
+        const b = banc();
+        await b.api.inscrire(DA);
+        b.win.initialiserRegistreLongitudinal();
+        const [t1, t2] = tous(dossierDe(b, DA), (el) => el.className === 'rl-tuile');
+        expect(t1.children.map((c) => c.className)).toEqual(['rl-tuile-entete rl-cible', 'rl-criteres', 'rl-sous-titre', 'rl-retroaction-texte']);
+        expect(t1.children[1].children.map((c) => c.textContent)).toEqual(['Structure : D — En Développement', 'Rigueur : Z']);
+        expect(t2.children.map((c) => c.className)).toEqual(['rl-tuile-entete rl-cible', 'rl-criteres']); // pas de rétroaction : pas de titre orphelin
+    });
+
+    it('le flux est CELUI DES BADGES DU PROFIL, réutilisé : `.badges-centres` sur le conteneur, et `.rl-tuiles` ne redéfinit ni display, ni wrap, ni gap', async () => {
+        const b = banc();
+        await b.api.inscrire(DA);
+        b.win.initialiserRegistreLongitudinal();
+        const [conteneur] = tous(dossierDe(b, DA), (el) => /\brl-tuiles\b/.test(el.className || ''));
+        expect(conteneur.className).toBe('badges-centres rl-tuiles');
+        expect(conteneur.children.every((c) => c.className === 'rl-tuile')).toBe(true);
+        const css = readFileSync(path.join(RACINE, 'styles.css'), 'utf8');
+        expect(css).toMatch(/\.badges-centres \{[^}]*display: flex;[^}]*flex-wrap: wrap;[^}]*gap: 10px;/);
+        const regle = css.match(/\n\.rl-tuiles \{([^}]*)\}/)[1];
+        expect(regle).toMatch(/justify-content: flex-start;/);
+        expect(regle).toMatch(/align-items: flex-start;/); // une tuile dépliée n'étire pas ses voisines de rangée
+        expect(regle).not.toMatch(/display|flex-wrap|gap/);
+        expect(css).not.toMatch(/\.rl-evaluation\b|\.rl-retroaction >/); // zéro-dette : l'ancienne liste est retirée
+    });
+
+    it('une évaluation qui n\'a ni critère ni rétroaction : une tuile SIMPLE, sans <details> — un triangle qui n\'ouvre sur rien mentirait', async () => {
+        const b = banc();
+        await b.api.inscrire(DA2);
+        b.win.initialiserRegistreLongitudinal();
+        const [tuile] = tous(dossierDe(b, DA2), (el) => el.className === 'rl-tuile');
+        expect(tuile.tagName).toBe('DIV');
+        expect(tuile.children).toHaveLength(1);
+        expect(tuile.children[0].tagName).toBe('DIV');
+        expect(tuile.children[0].className).toBe('rl-tuile-entete');
+        expect(tuile.children[0].children.map((c) => c.textContent)).toEqual(['Artefact 1']);
     });
 
     it('le libellé est celui de LA COPIE : l\'échelle du trimestre renommée après coup ne change pas le dossier', async () => {
@@ -153,16 +199,15 @@ describe('#915 lot 4 — le dossier déplié', () => {
         expect(texte).not.toContain('RENOMMÉ');
     });
 
-    it('la rétroaction : repliée, en textContent — une balise tapée par l\'enseignant·e reste du texte', async () => {
+    it('la rétroaction : DANS la tuile repliée, en textContent — une balise tapée par l\'enseignant·e reste du texte', async () => {
         const b = banc();
         await b.api.inscrire(DA);
         b.win.initialiserRegistreLongitudinal();
-        const [retro] = tous(dossierDe(b, DA), (el) => el.className === 'rl-retroaction');
-        expect(retro.tagName).toBe('DETAILS');
-        expect(retro.children[0].textContent).toBe('Rétroaction');
-        expect(retro.children[0].className).toBe('rl-cible');
-        expect(retro.children[1].textContent).toBe('Tu commences à dégager <img src=x onerror=alert(1)> les intentions.');
-        expect(retro.children[1].innerHTML).toBe('');
+        const [texte] = tous(dossierDe(b, DA), (el) => el.className === 'rl-retroaction-texte');
+        expect(texte.textContent).toBe('Tu commences à dégager <img src=x onerror=alert(1)> les intentions.');
+        expect(texte.innerHTML).toBe('');
+        const [titre] = tous(dossierDe(b, DA), (el) => el.className === 'rl-sous-titre' && el.textContent === 'Rétroaction');
+        expect(titre).toBeTruthy();
         expect(readFileSync(path.join(RACINE, 'js/registre-longitudinal.js'), 'utf8')).not.toMatch(/\.innerHTML\s*\+?=|insertAdjacentHTML\(/);
     });
 
