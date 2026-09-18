@@ -1,9 +1,9 @@
 # Portes terrain — Suivi longitudinal, lots 3 et 4 (#915)
 
-**18 septembre 2026 · version attendue : 1.146.0 · 3 gestes, ≈ 5 minutes.**
+**18 septembre 2026 · version attendue : 1.146.1 · 3 gestes, ≈ 5 minutes.**
 
-> ⚠ **À N'ENVOYER QU'APRÈS LE PUSH.** Au moment d'écrire ce fichier, 1.145.0 et
-> 1.146.0 sont commitées en local, pas poussées (Claude Code pousse sur demande de
+> ⚠ **À N'ENVOYER QU'APRÈS LE PUSH.** Au moment d'écrire ce fichier, 1.145.0,
+> 1.146.0 et 1.146.1 (les mots corrigés par Grégoire) sont commitées en local, pas poussées (Claude Code pousse sur demande de
 > Grégoire). Une porte jouée avant le déploiement jugerait 1.144.2 : faux rouge garanti.
 >
 > **Deux livrables jumeaux** : ce markdown est la TRACE. **L'artefact publié, avec son
@@ -28,7 +28,7 @@ répondre, et une vérification préalable n'est due que si un raté est irréve
 ## §0 · Préalable
 
 - [ ] Ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page.
-  ⮕ Attendu : **1.146.0**. Si c'est 1.144.2 ou 1.145.0, le lot n'est pas encore en
+  ⮕ Attendu : **1.146.1**. Si c'est 1.144.2, 1.145.0 ou 1.146.0, le lot n'est pas encore en
   ligne : arrête ici, rien de ce qui suit ne serait jugé sur la bonne version.
 
 Aucun backup n'est exigé : aucun des trois gestes n'écrit dans un trimestre.
@@ -58,8 +58,8 @@ voudrait dire que tes indices ne sont pas rangés comme ceux que j'ai mesurés.
 
 - [ ] Dans le même dossier, lis « Indices au moment de la copie ».
   ⮕ Attendu : trois lignes, chacune entre 0 % et 100 %, ou une phrase qui dit
-  pourquoi il n'y a pas de chiffre (« non calculé au moment de la copie », « note non
-  constructible au moment de la copie »).
+  pourquoi il n'y a pas de chiffre (« non calculé au moment de la copie », « note impossible
+  à calculer au moment de la copie »).
   **À écrire, tels que l'écran les donne** : Assiduité ____ · Complétion ____ ·
   Performance ____ — et : est-ce vraisemblable pour cet élève ? ________
 
@@ -71,25 +71,27 @@ effacé, et l'écran doit te le montrer.
 
 - [ ] Labo › Suivi longitudinal → regarde le bas de « Élèves inscrit·es ».
   ⮕ Attendu : **si tu avais saisi des résultats dans le Cadre**, soit ils sont sous le
-  nom de l'élève avec la mention « saisi dans le Cadre », soit un encadré « Des
-  résultats saisis dans le Cadre, avant ce registre, attendent ici : » nomme les
-  élèves concernés. **Si tu n'avais rien saisi** : ni mention ni encadré, et c'est
+  nom de l'élève avec la mention « saisi dans le Cadre », soit un encadré « Ces
+  élèves ont des résultats saisis dans le Cadre, avant que le registre existe : »
+  nomme les élèves concernés. **Si tu n'avais rien saisi** : ni mention ni encadré, et c'est
   le résultat juste.
   **À écrire** : avais-tu saisi quelque chose dans le Cadre (oui / non / je ne sais
   plus) ? Et que montre l'écran : ________
 
 ## §3 · Décisions — ce ne sont pas des vérifications
 
-Des mots que tu lis, écrits par Claude Code sans relecture (la leçon de « Re-capturer ») :
-dis lesquels changer, s'il y en a. **Champ de saisie, pas de bascule.**
+✅ **RELUS PAR GRÉGOIRE AVEC COWORK LE 18 SEPT. 2026, avant le push** : quatre textes
+corrigés (livrés en 1.146.1, ce sont ceux du tableau), tous les autres gardés tels
+quels. Le tableau dit ce que l'écran écrit ; le champ reste là pour ce que l'usage
+ferait apparaître. **Champ de saisie, pas de bascule.**
 
 | Où | Mots |
 |---|---|
 | Sous un résultat repris | « saisi dans le Cadre » |
-| Encadré d'attente | « Des résultats saisis dans le Cadre, avant ce registre, attendent ici : » — « Inscris ces élèves pour retrouver leurs résultats sous leur nom. D'ici là, rien n'est perdu : ils restent dans leur trimestre et dans l'export de recherche. » |
+| Encadré d'attente *(corrigé)* | « Ces élèves ont des résultats saisis dans le Cadre, avant que le registre existe : » — « Inscris-les pour retrouver leurs résultats sous leur nom. D'ici là, rien n'est perdu : ils restent dans leur trimestre et dans l'export de recherche. » |
 | Saisie sans inscrit | « Inscris d'abord un·e élève : ses résultats se rangent sous son nom. » |
-| Dialogue de retrait | « Retirer [nom] du registre ? La copie de son dossier (2 dossiers, copie du …) sera effacée du registre et ne pourra pas être retrouvée. Seront effacés avec elle : 3 résultats ultérieurs — … Tes trimestres ne sont pas modifiés. » |
-| Dossier déplié | « Voir le dossier » · « Indices au moment de la copie » · « note non constructible au moment de la copie » · « Aucune évaluation dans cette copie. » · « remplacée par une reprise » |
+| Dialogue de retrait *(corrigé)* | « Retirer [nom] du registre ? Sa copie du 2026-09-18 (2 dossiers) sera effacée et ne pourra pas être retrouvée. Ses 3 résultats ultérieurs seront effacés aussi : … Tes trimestres ne sont pas modifiés. » — avec un seul résultat : « Son résultat ultérieur sera effacé aussi : … » |
+| Dossier déplié | « Voir le dossier » · « Indices au moment de la copie » · « note impossible à calculer au moment de la copie » *(corrigé)* · « Aucune évaluation dans cette copie. » · « remplacée par une reprise » |
 
 Ce que tu veux changer : ________
 

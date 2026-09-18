@@ -26,7 +26,7 @@
             titre: 'Le dossier d\'un·e élève se déplie',
             items: [
                 'Labo&nbsp;› Suivi longitudinal&nbsp;: sous chaque élève inscrit·e, «&nbsp;Voir le dossier&nbsp;» déplie la copie que tu as faite — pour chaque trimestre, ses évaluations dans l\'ordre où elles ont eu lieu, critère par critère, avec le niveau obtenu et le nom que ce niveau portait au moment de la copie.',
-                'Les indices au moment de la copie — assiduité, complétion, performance — sont écrits tels qu\'ils étaient rangés. Quand un indice n\'avait pas été calculé, ou qu\'une note n\'était pas constructible, l\'écran le dit plutôt que d\'afficher un zéro.',
+                'Les indices au moment de la copie — assiduité, complétion, performance — sont écrits tels qu\'ils étaient rangés. Quand un indice n\'avait pas été calculé, ou qu\'une note était impossible à calculer, l\'écran le dit plutôt que d\'afficher un zéro.',
                 'La rétroaction de chaque évaluation se déplie à part. Rien n\'est recalculé et rien n\'est écrit quand tu déplies un dossier&nbsp;; aucune analyse ni graphique pour l\'instant.',
             ]
         },
@@ -36,7 +36,7 @@
             titre: 'Les résultats ultérieurs rejoignent le Suivi longitudinal',
             items: [
                 'Labo&nbsp;› Suivi longitudinal&nbsp;: une seule ligne de saisie pour tous tes élèves inscrits — élève, cours, trimestre, note finale. Après chaque ajout, le cours et le trimestre restent en place et la ligne passe à l\'élève suivant&nbsp;: il ne reste qu\'à taper la note. Chaque résultat paraît sous le nom de l\'élève, avec son bouton «&nbsp;Retirer&nbsp;».',
-                'Le bloc «&nbsp;Résultats ultérieurs&nbsp;» quitte Cadre&nbsp;› Trimestre. Ce que tu y avais déjà saisi n\'est pas perdu&nbsp;: c\'est repris sous le nom de l\'élève quand tu l\'inscris, avec la mention «&nbsp;saisi dans le Cadre&nbsp;», et l\'écran nomme les élèves pour qui des résultats attendent. L\'export anonymisé pour la recherche porte les deux.',
+                'Le bloc «&nbsp;Résultats ultérieurs&nbsp;» quitte Cadre&nbsp;› Trimestre. Ce que tu y avais déjà saisi n\'est pas perdu&nbsp;: c\'est repris sous le nom de l\'élève quand tu l\'inscris, avec la mention «&nbsp;saisi dans le Cadre&nbsp;», et l\'écran nomme les élèves qui ont des résultats saisis dans le Cadre. L\'export anonymisé pour la recherche porte les deux.',
                 '«&nbsp;Retirer du registre&nbsp;»&nbsp;: pour corriger une inscription faite par erreur. Avant d\'agir, le dialogue dit ce qui sera effacé — la copie du dossier et chaque résultat ultérieur déjà saisi. Tes trimestres ne sont pas modifiés.',
                 'Tout cela fonctionne aussi quand le trimestre affiché est archivé, sans cocher «&nbsp;Permission d\'écriture&nbsp;»&nbsp;: le registre n\'appartient à aucun trimestre.',
                 'Corrigé&nbsp;: le résumé d\'une copie accorde ses pluriels («&nbsp;11 évaluations · 32 séances · 1 dossier&nbsp;»).',
