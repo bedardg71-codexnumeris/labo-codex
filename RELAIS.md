@@ -7,6 +7,22 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 7 H (Toronto) : 1.144.1 (#916, bug testeur — changer de trimestre quand le cours actif n'est pas dans la bibliothèque)
+
+**Où est le travail** : `main`, un commit de code après `70a7e247` = la release 1.144.1 (build `0918-0654`). Retour testeur de Grégoire (6 h 46), passé avant le lot 3 de #915. **Poussé ou non : voir le commit de relais qui suit celui-ci** — ce bloc est écrit AVANT le verdict Playwright, pour que le jeton vaille pour le SHA poussé.
+
+**Ce qui a été fait** : la garde #466/CT-17 de `changerCoursSelectionneV2` bouclait avec `chargerDropdownCoursV2` quand `infoCours` (miroir fabriqué par l'orchestre depuis le `coursId` du groupe-cours) porte un id absent de la clé globale `cours` ; l'exception tuait `initialiserTrimestreV2` avant `populerDropdownTrimestreV2` — sélecteur de trimestre muet. Correctif : une branche « cours actif hors bibliothèque » → état vide, sans toast ni rechargement. Fiche dans `Retours des testeurs/SUIVI-BUGS.md` (#916). Preuves : `tests/unit/sentinelle-cours-actif-hors-bibliotheque-916.test.js` (4 essais, 4 mutations rouges) et `tests/integration/cours-actif-hors-bibliotheque-916.spec.js` (WebKit, vraie page, rouge sur le code d'avant).
+
+**Source, pas stock** : chez Grégoire, le groupe-cours actif d'`a2025` pointe `COURS1766455789356`, absent de `cours` (inféré du rapport, non mesuré sur ses données). Rien n'y a été touché ; pourquoi ce cours manque n'a pas été cherché. Si Grégoire le demande : sonde en LECTURE SEULE d'abord.
+
+**Suppositions nommées** : l'état vide sans message est le bon écran pour ce cas ; la phrase ajoutée aux « Nouvelles » 1.144 est de Claude Code, à relire par Grégoire.
+
+**Non commité exprès** : `plans de travail/CADRAGE-2026-09-17-soir-registre-longitudinal.md` (modifié par Cowork à 6 h 13, vraisemblablement le § 4.1 bis) — il revient à Cowork.
+
+**Ce qui reste dû** : tout le bloc du 18 sept. ≈ 2 h ci-dessous (lot 3 de #915, décision « retirer du registre », artefact jumeau de la porte du lot 2), inchangé.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 2 H (Toronto) : 1.144.0 (#915, lots 1 et 2 — registre longitudinal : clé, module, sous-onglet, recherche multi-trimestres, capture en lecture seule)
 
 **Où est le travail** : `main`, deux commits de code après `05d411a2` (fiches et cadrages) — le lot 1 `49d2e9e8` (même version 1.143.0, build seul), puis le lot 2 = la release 1.144.0. **POUSSÉ le 18 sept. 2026 à ≈ 6 h 25 (Toronto) : origin/main = `013fcabb`**, mesuré après `pousser.sh origin main` — sentinelle Playwright verte pour ce SHA exact (0 échec connu, 0 instable, jeton `scripts/.verdict-playwright.json`), Vitest vert au hook, Cowork fermé et mémoire libre à 61 % au lancement. Netlify déploie en 30 à 60 s ; ce qu'il sert ne se mesure pas d'ici. La porte terrain (`plans de travail/PORTES-TERRAIN-2026-09-18-registre-longitudinal-lot2.md`) peut partir : Cowork publie l'artefact jumeau.
