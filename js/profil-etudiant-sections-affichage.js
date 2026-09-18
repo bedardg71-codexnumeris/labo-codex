@@ -2929,7 +2929,7 @@ function genererSectionProductions(da) {
         const renderLigneObligatoire = (o) => {
             const aNote = (typeof o.note === 'number');
             const noteTxt = aNote ? (differee ? badgeNoteDifferee() : `${o.note.toFixed(1)}%`) : null;
-            const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}` : 'non remis';
+            const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}` : (o.brouillon ? 'brouillon, non comptée' : 'non remis');
             const activite = o.activite ? ` : ${echapperHtml(o.activite)}` : '';
             return `<li>${echapperHtml(o.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
@@ -2950,14 +2950,20 @@ function genererSectionProductions(da) {
         if (estHybride && !terminal.present) {
             const selection = retenusDecrits.filter(r => r.categorie !== 'obligatoire');
             const productionsObligatoires = productions.filter(p => p.categorie === 'obligatoire' && p.type !== 'portfolio');
-            const evaluationsEleveValides = evaluationsEleve.filter(e => !e.remplaceeParId && e.noteFinale != null);
+            // #896 (18 sept. 2026) — LA COLONNE LIT LA MÊME RÈGLE QUE LA NOTE (`evaluationEntreDansLaNote`, #706). Elle lisait
+            // `noteFinale != null` sans le verrou : un brouillon d'obligatoire entrait dans l'addition de la colonne, et la
+            // carte écrivait « Note finale = … = 71.0 % » au-dessus du total du moteur, « 79.8% » (mesuré en WebKit).
+            // Le brouillon reste NOMMÉ sur sa ligne, avec les mots que la carte emploie déjà ; il n'est plus compté.
+            const evaluationsEleveValides = evaluationsEleve.filter(e => window.evaluationEntreDansLaNote(e));
             const obligatoiresTous = productionsObligatoires.map(prod => {
                 const evalObl = evaluationsEleveValides.find(e => e.productionId === prod.id);
+                const brouillon = !evalObl && evaluationsEleve.some(e => e.productionId === prod.id && !e.remplaceeParId && e.verrouillee === false);
                 return {
                     titreProd: prod.titre || obtenirTermeProduction('singulier', true),
                     activite:  prod.activiteApprentissage || prod.description || '',
                     niveau:    evalObl ? (evalObl.niveauFinal || null) : null,
-                    note:      evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null
+                    note:      evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
+                    brouillon: brouillon
                 };
             });
 
