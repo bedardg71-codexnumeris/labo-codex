@@ -64,12 +64,17 @@
         tropDeResultats: 'Précise le nom : seuls les 30 premiers sont affichés.',
         aucunTrimestre: 'Aucun trimestre dans l\'application.',
         inscrire: 'Inscrire au registre',
-        recapturer: 'Re-capturer',
-        confirmerRecapture: 'La capture précédente de ce trimestre-cours sera remplacée par une copie d\'aujourd\'hui. Continuer ?',
-        captureFaite: 'Capturé le',
+        // #917 (retour de Grégoire, 18 sept. 2026) : « Re-capturer » ne disait ni ce que fait le geste ni ce qu'il
+        // laisse intact. Le dialogue nomme l'élève, la copie remplacée, et ce qui ne bouge pas. Mots validés par Grégoire.
+        recapturer: 'Refaire la copie',
+        confirmerRecapture: (nomComplet, dateCopie) => 'Refaire la copie du dossier de ' + nomComplet + ' ? '
+            + (dateCopie ? 'La copie du ' + dateCopie : 'La copie précédente')
+            + ' sera remplacée par l\'état d\'aujourd\'hui, et l\'ancienne ne pourra pas être retrouvée. '
+            + 'Tes trimestres ne sont pas modifiés ; la date d\'inscription et les résultats ultérieurs sont conservés.',
+        captureFaite: 'Copie du',
         aucunInscrit: 'Aucun·e élève inscrit·e au registre.',
         inscritLe: 'Inscrit·e le',
-        indiceAbsent: 'non calculé à la capture',
+        indiceAbsent: 'non calculé au moment de la copie',
         refusInconnu: 'Cet·te élève n\'est dans aucun trimestre.',
         evaluations: 'évaluation·s',
         seances: 'séance·s',
@@ -380,7 +385,7 @@
         }
         trouves.slice(0, MAX_RESULTATS_RECHERCHE).forEach((e) => {
             const li = poser(liste, 'li', 'rl-resultat');
-            const bouton = poser(li, 'button', 'rl-cible rl-resultat-bouton');
+            const bouton = poser(li, 'button', 'rl-resultat-bouton');
             bouton.type = 'button';
             bouton.setAttribute('data-action', 'choisirEleveLongitudinal');
             bouton.dataset.da = e.da;
@@ -397,15 +402,23 @@
         if (!daChoisi) return;
         const eleve = elevesDeTousLesTrimestres().find((e) => e.da === daChoisi);
         if (!eleve) return;
-        const dejaInscrit = !!lireRegistre().eleves[daChoisi];
-        poser(zone, 'p', 'rl-nom', eleve.nom + ', ' + eleve.prenom);
+        const inscrit = lireRegistre().eleves[daChoisi];
+        const dejaInscrit = !!inscrit;
+        const nomComplet = eleve.nom + ', ' + eleve.prenom;
+        poser(zone, 'p', 'rl-nom', nomComplet);
         poser(zone, 'p', 'rl-meta', eleve.presences.map(libellePresence).join(' · '));
-        const bouton = poser(zone, 'button', 'btn btn-principal rl-cible', dejaInscrit ? MOTS.recapturer : MOTS.inscrire);
+        // #917 : une fois l'élève inscrit·e, refaire la copie est le geste RARE — il quitte le style principal.
+        // La cible de 44 px vient du design system (.btn sous pointer: coarse), pas d'une classe d'ici.
+        const bouton = poser(zone, 'button', dejaInscrit ? 'btn btn-secondaire' : 'btn btn-principal', dejaInscrit ? MOTS.recapturer : MOTS.inscrire);
         bouton.type = 'button';
         bouton.id = 'rl-inscrire';
         bouton.setAttribute('data-action', 'inscrireEleveLongitudinal');
         bouton.dataset.da = daChoisi;
-        if (dejaInscrit) bouton.setAttribute('data-confirm', MOTS.confirmerRecapture);
+        if (dejaInscrit) {
+            const derniereCopie = (Array.isArray(inscrit.dossiers) ? inscrit.dossiers : []).map((d) => d.capteLe || '').sort().pop();
+            // Posé par setAttribute, lu par confirm() dans le dispatcher : du texte, jamais du HTML.
+            bouton.setAttribute('data-confirm', MOTS.confirmerRecapture(nomComplet, formaterDate(derniereCopie)));
+        }
         if (dernierResume && dernierResume.da === daChoisi) {
             poser(zone, 'p', 'rl-resume', formaterResume(dernierResume.resume) + ' — ' + MOTS.captureFaite + ' ' + formaterDate(dernierResume.quand));
         }

@@ -10,7 +10,7 @@
  *      un indice absent donne null ;
  *   5. le dossier n'emporte que ce DA : évaluations, présences, interventions (notes individuelles réduites à ce DA),
  *      instantanés, indices, portfolio — et les grilles/échelles que SES évaluations référencent, par copie, avec empreinte ;
- *   6. « Inscrire » capture tous les trimestres-cours du DA en un geste ; « Re-capturer » remplace le dossier du même
+ *   6. « Inscrire » capture tous les trimestres-cours du DA en un geste ; « Refaire la copie » (#917) remplace le dossier du même
  *      trimestre + cours, garde les autres, ne touche ni inscritLe ni resultatsUlterieurs ;
  *   7. la liste des inscrits montre l'origine et la date de capture.
  *
@@ -267,11 +267,47 @@ describe('#915 lot 2 — l\'écran', () => {
         expect(liste.children).toHaveLength(1);
         const [nom, meta] = liste.children[0].children.map((s) => s.textContent);
         expect(nom).toBe('Assidu, Alice');
-        expect(meta).toMatch(/^Hiver 2026 · Automne 2024 — Capturé le \d{4}-\d{2}-\d{2}$/);
+        expect(meta).toMatch(/^Hiver 2026 · Automne 2024 — Copie du \d{4}-\d{2}-\d{2}$/);
         const zoneRecherche = conteneur.children.find((c) => c.id === 'rl-zone-recherche');
         const champ = zoneRecherche.children.find((c) => c.id === 'rl-recherche');
         expect(champ.type).toBe('search');
         expect(champ.getAttribute('data-on-input')).toBe('rechercherEleveLongitudinal');
+    });
+
+    // #917 (retour de Grégoire, 18 sept. 2026, 7 h 16) : « Je ne comprends pas ce que signifie "Re-capturer" et si
+    // ça aura des conséquences irréversibles sur mes données antérieures. » Le bouton dit le geste, quitte le style
+    // principal une fois l'élève inscrit·e, et le dialogue nomme l'élève, la copie remplacée, et ce qui NE bouge PAS.
+    it('#917 · avant : « Inscrire au registre », principal, sans dialogue ; après : « Refaire la copie », secondaire, et le dialogue dit tout', async () => {
+        const b = banc();
+        b.win.initialiserRegistreLongitudinal();
+        // Le harnais ne vide pas `children` sur `textContent = ''` : le bouton courant est le DERNIER rendu.
+        const boutonDe = () => b.elements['rl-choix'].children.filter((c) => c.id === 'rl-inscrire').pop();
+
+        b.win.choisirEleveLongitudinal({ dataset: { da: DA } });
+        const avant = boutonDe();
+        expect(avant.textContent).toBe('Inscrire au registre');
+        expect(avant.className).toBe('btn btn-principal');
+        expect(avant.getAttribute('data-confirm')).toBeFalsy();
+
+        await b.win.inscrireEleveLongitudinal({ dataset: { da: DA } });
+        b.win.choisirEleveLongitudinal({ dataset: { da: DA } });
+        const apres = boutonDe();
+        expect(apres.textContent).toBe('Refaire la copie');
+        expect(apres.className).toBe('btn btn-secondaire');
+        const dialogue = apres.getAttribute('data-confirm');
+        expect(dialogue).toMatch(/^Refaire la copie du dossier de Assidu, Alice \? La copie du \d{4}-\d{2}-\d{2} sera remplacée/);
+        expect(dialogue).toContain('l\'ancienne ne pourra pas être retrouvée');
+        expect(dialogue).toContain('Tes trimestres ne sont pas modifiés');
+        expect(dialogue).toContain('la date d\'inscription et les résultats ultérieurs sont conservés');
+        // Le mot que Grégoire n'a pas compris ne revient nulle part à l'écran.
+        expect(JSON.stringify(Object.values(b.mots).filter((m) => typeof m === 'string'))).not.toMatch(/captur/i);
+    });
+
+    it('#917 · un dossier sans date de copie : le dialogue le dit sans inventer de date', () => {
+        const b = banc();
+        const texte = b.mots.confirmerRecapture('Assidu, Alice', '');
+        expect(texte).toContain('La copie précédente sera remplacée');
+        expect(texte).not.toMatch(/copie du\s+sera/i);
     });
 
     it('le module ne contient aucun innerHTML', async () => {
