@@ -7,6 +7,19 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 2 H (Toronto) : 1.144.0 (#915, lots 1 et 2 — registre longitudinal : clé, module, sous-onglet, recherche multi-trimestres, capture en lecture seule)
+
+**Où est le travail** : `main`, deux commits de code après `05d411a2` (fiches et cadrages) — le lot 1 `49d2e9e8` (même version 1.143.0, build seul), puis le lot 2 = la release 1.144.0. **Poussé ou non : voir la ligne ci-dessous, tenue au push.** Tant qu'elle n'est pas là, le lot est sur `main` local seulement, et la porte terrain (`plans de travail/PORTES-TERRAIN-2026-09-18-registre-longitudinal-lot2.md`, artefact à publier par Cowork) ATTEND le push.
+
+**Ce qui est dû à la prochaine session** :
+- **Lot 3 de #915** (cadrage v2 § 7) : ligne de saisie unique, liste des inscrits, retrait du bloc « Résultats ultérieurs » du Cadre, reprise du stock `<trim>_resultatsUlterieurs` (copie unique au premier chargement, clé intacte, drapeau — supposition nommée dans la relecture), **l'export de recherche lit le registre par DA avec l'ancienne clé en repli** (§ 6.2), le trou R3 de `resultats-ulterieurs.js` (`nettoyerTexte` sans `.slice` observé), et `sentinelle-913-resultats-ulterieurs.test.js` qui rougira (écriture namespacée attendue) — à réancrer, ce n'est pas une régression.
+- **Décision due à Grégoire** (porte 3.1) : retirer un élève du registre n'est dans aucun lot.
+- **À Cowork, correction du cadrage v2 § 4.1 bis** (point 1 de la relecture, non encore reporté) : le critère « un ordre de grandeur » ne s'applique qu'aux trimestres qui ont des copies ; mesuré sur le pack démo (sans blobs) : registre/structuré = 1,02, 43 Ko par dossier, modèles rangés une fois par trimestre (15,5 Ko par dossier sinon).
+- **Trouvé, hors lot, non inscrit** (code étranger sans symptôme vécu) : le démarrage recalcule et RÉÉCRIT `<trim>_indicesCP` du trimestre actif même archivé (banc : P semé 0,8, relu 0 après reload). Commenté dans `tests/integration/registre-longitudinal-915.spec.js`.
+- `navigation.js` touché (une entrée dans `INITIALISATEURS_SOUS_SECTION`) sur le « d'accord » de Grégoire à la question posée explicitement (option A) — supposition nommée au commit du lot 1.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 17 SEPT. 2026, ≈ 17 H 15 (Toronto) : 1.143.0 (build `0917-1715`, deux commits : le lot `59992d02`, puis le patch de mots de 17 h 13 ; #913, saisie des résultats ultérieurs + sortie dans l'export de recherche) SUR `main` — ✅ POUSSÉE le 17 sept. vers 18 h (`origin/main` = `234d186b`, mesuré après `pousser.sh` : sentinelle Playwright verte, 0 instable, Vitest vert) ; ce qui est servi chez l'hébergeur n'est PAS mesurable d'ici ; 1.142.33 (#912) EST POUSSÉE (`5e94f3a8`, verdict Playwright local vert à 16 h 46, par une autre session) ; LOT SUIVANT = lot 35 (`CONSIGNE-SUIVANTE-date-d-arrivee.md`, #735)
 
 ### ⮕ AJOUT DE COWORK, 17 sept. 2026, 17h13 — RELECTURE CROISÉE DU LOT #913 : **VERTE**, et **UN PATCH DE MOTS EST DÛ AVANT LE PUSH**

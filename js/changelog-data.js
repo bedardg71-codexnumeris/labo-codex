@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.144',
+            couleur: 'vert',
+            titre: 'Suivre un·e élève d\'un trimestre à l\'autre',
+            items: [
+                'Labo&nbsp;› Suivi longitudinal&nbsp;: un nouvel onglet où tu inscris les élèves que tu veux suivre dans la durée. Tu les cherches par nom, dans tous tes trimestres&nbsp;; un même élève vu dans deux trimestres n\'apparaît qu\'une fois.',
+                'Inscrire un·e élève fige une copie datée de son dossier&nbsp;: évaluations, grilles et échelles utilisées, présences, interventions, indices de fin de trimestre — sans les copies numériques. Tes trimestres ne sont pas modifiés, même archivés.',
+                'Le registre est conservé par l\'export complet (Réglages&nbsp;› Données), pas par l\'archive d\'un trimestre&nbsp;; l\'écran le rappelle. La saisie des résultats ultérieurs reste dans le Cadre pour l\'instant&nbsp;: elle rejoint cet onglet au prochain lot.',
+            ]
+        },
+        {
             version: '1.143',
             couleur: 'vert',
             titre: 'Les résultats de tes anciens élèves',
