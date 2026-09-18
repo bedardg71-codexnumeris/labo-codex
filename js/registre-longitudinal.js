@@ -54,6 +54,13 @@
    lit le même drapeau, trimestres.js). Limite connue et assumée : retirer l'élève du registre
    puis le réinscrire reprend de nouveau le stock du Cadre, puisqu'il n'a pas bougé.
 
+   LE DOSSIER DÉPLIÉ (lot 4, 18 sept. 2026) — sous chaque inscrit·e, un <details> « Voir le dossier » : par trimestre-cours,
+   les indices TELS QUE RANGÉS à la copie (mesuré : C et P sont sur 0-100, A sur 0-1, `noteConstructible` vit sur `actuel`),
+   puis les évaluations en ordre chronologique, critère par critère, avec le libellé du niveau lu dans l'échelle COPIÉE au
+   registre (`modeles`) — donc tel qu'il était à la copie, même si l'échelle du trimestre a bougé depuis. AUCUNE analyse,
+   aucun calcul neuf, aucun graphique (cadrage § 5.3) : arrondir un pourcentage pour l'écrire n'est pas un calcul d'indice.
+   Les interventions et les instantanés hebdomadaires sont dans la copie mais pas encore à l'écran (rendu minimal du § 5.3).
+
    ÉCRAN — Labo › Suivi longitudinal (config.js, navigation.js, index.html). Rendu bâti par
    le DOM (textContent) : les mots viennent de MOTS, les noms d'élèves du stock. Les champs
    de saisie portent `.rl-champ` : l'exception NOMMÉE de la garde CSS du mode archive
@@ -125,6 +132,22 @@
         refusTexte: 'Indique le cours et le trimestre.',
         refusEleve: 'Choisis un·e élève inscrit·e au registre.',
         inscritsTitre: 'Élèves inscrit·es',
+        // Le dossier déplié (lot 4). Supposition nommée : mots proposés par Claude Code, à relire par Grégoire.
+        voirDossier: 'Voir le dossier',
+        indicesTitre: 'Indices au moment de la copie',
+        assiduite: 'Assiduité',
+        completion: 'Complétion',
+        performance: 'Performance',
+        periodes: ['période', 'périodes'],
+        noteNonConstructible: 'note non constructible au moment de la copie',
+        evaluationsTitre: 'Évaluations',
+        aucuneEvaluation: 'Aucune évaluation dans cette copie.',
+        productionSansNom: 'Production sans nom',
+        noteFinale: 'Note',
+        remplacee: 'remplacée par une reprise',
+        retroaction: 'Rétroaction',
+        statut: 'statut',
+        programme: 'programme',
         // Le stock de #913. Supposition nommée : mots proposés par Claude Code au lot 3, à relire par Grégoire.
         duCadre: 'saisi dans le Cadre',
         enAttenteTitre: 'Des résultats saisis dans le Cadre, avant ce registre, attendent ici :',
@@ -626,6 +649,96 @@
         }
     }
 
+    /* ---------- Le dossier déplié (lot 4) : LIT le registre, n'écrit rien, ne calcule aucun indice ---------- */
+
+    /** « D — En Développement » : le libellé vient de l'échelle COPIÉE au registre ; un code sans libellé reste un code. */
+    function libelleNiveau(code, echelle) {
+        if (code === undefined || code === null || code === '') return '';
+        const niveaux = echelle && Array.isArray(echelle.niveaux) ? echelle.niveaux : [];
+        const niveau = niveaux.find((nv) => nv && String(nv.code) === String(code));
+        return niveau && niveau.nom ? code + ' — ' + niveau.nom : String(code);
+    }
+
+    function pourcent(valeur) {
+        return Math.round(Number(valeur)) + ' %';
+    }
+
+    /** Les indices tels que rangés : A sur 0-1 (indicesAssiduite.sommatif), C et P sur 0-100 (indicesCP.actuel). */
+    function lignesIndices(indices) {
+        const lignes = [];
+        const a = indices && indices.assiduite;
+        if (a === null || a === undefined) lignes.push(MOTS.assiduite + ' : ' + MOTS.indiceAbsent);
+        else {
+            const indiceA = typeof a === 'object' ? a.indice : a;
+            const detail = typeof a === 'object' && a.periodesOffertes ? ' (' + a.periodesPresentes + ' sur ' + accorder(a.periodesOffertes, MOTS.periodes) + ')' : '';
+            lignes.push(MOTS.assiduite + ' : ' + pourcent(Number(indiceA) * 100) + detail);
+        }
+        const actuel = indices && indices.cp && indices.cp.actuel ? indices.cp.actuel : null;
+        if (!actuel) {
+            lignes.push(MOTS.completion + ' : ' + MOTS.indiceAbsent);
+            lignes.push(MOTS.performance + ' : ' + MOTS.indiceAbsent);
+            return lignes;
+        }
+        lignes.push(MOTS.completion + ' : ' + pourcent(actuel.C || 0));
+        const constructible = actuel.noteConstructible !== false && !(actuel.details && actuel.details.noteConstructible === false);
+        lignes.push(MOTS.performance + ' : ' + (constructible ? pourcent(actuel.P || 0) : MOTS.noteNonConstructible));
+        return lignes;
+    }
+
+    function rendreEvaluation(liste, ev, echelles) {
+        const li = poser(liste, 'li', 'rl-evaluation');
+        const echelle = echelles[ev.echelleId] || null;
+        const entete = [String(ev.productionNom || MOTS.productionSansNom), formaterDate(ev.dateEvaluation)].filter(Boolean).join(' — ');
+        poser(li, 'p', 'rl-nom', entete);
+        const note = [];
+        if (ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '') note.push(MOTS.noteFinale + ' : ' + formaterNote(ev.noteFinale));
+        if (ev.niveauFinal) note.push(libelleNiveau(ev.niveauFinal, echelle));
+        if (ev.grilleNom) note.push(String(ev.grilleNom));
+        if (ev.remplaceeParId) note.push(MOTS.remplacee);
+        if (note.length) poser(li, 'p', 'rl-meta', note.join(' · '));
+        const criteres = Array.isArray(ev.criteres) ? ev.criteres : [];
+        if (criteres.length) {
+            const ul = poser(li, 'ul', 'rl-criteres');
+            criteres.forEach((c) => {
+                if (!c) return;
+                const niveau = libelleNiveau(c.niveauSelectionne !== undefined ? c.niveauSelectionne : c.niveau, echelle);
+                poser(ul, 'li', '', String(c.critereNom || c.nom || c.critereId || c.id || '') + (niveau ? ' : ' + niveau : ''));
+            });
+        }
+        if (ev.retroactionFinale) {
+            const details = poser(li, 'details', 'rl-retroaction');
+            poser(details, 'summary', 'rl-cible', MOTS.retroaction);
+            poser(details, 'p', 'rl-retroaction-texte', String(ev.retroactionFinale));
+        }
+    }
+
+    /** Le dossier d'un·e inscrit·e, replié par défaut. Rend, n'écrit rien. */
+    function rendreDossier(li, eleve, modeles) {
+        const dossiers = Array.isArray(eleve.dossiers) ? eleve.dossiers : [];
+        if (!dossiers.length) return;
+        const details = poser(li, 'details', 'rl-dossier');
+        poser(details, 'summary', 'rl-cible', MOTS.voirDossier);
+        dossiers.forEach((d) => {
+            const bloc = poser(details, 'section', 'rl-dossier-bloc');
+            poser(bloc, 'h4', 'rl-titre', libellePresence({ trimestreNom: d.trimestreNom || d.trimestre, coursCode: d.coursCode, groupe: d.groupe }));
+            const meta = [MOTS.captureFaite + ' ' + formaterDate(d.capteLe)];
+            if (d.statut) meta.push(MOTS.statut + ' : ' + d.statut);
+            if (d.programme) meta.push(MOTS.programme + ' : ' + d.programme);
+            poser(bloc, 'p', 'rl-meta', meta.join(' · '));
+            poser(bloc, 'h5', 'rl-sous-titre', MOTS.indicesTitre);
+            const ulIndices = poser(bloc, 'ul', 'rl-indices');
+            lignesIndices(d.indices).forEach((ligne) => poser(ulIndices, 'li', '', ligne));
+            const evaluations = (Array.isArray(d.evaluations) ? d.evaluations.slice() : [])
+                .sort((x, y) => String(x.dateEvaluation || '9999').localeCompare(String(y.dateEvaluation || '9999')));
+            poser(bloc, 'h5', 'rl-sous-titre', MOTS.evaluationsTitre + ' (' + evaluations.length + ')');
+            if (!evaluations.length) { poser(bloc, 'p', 'rl-meta', MOTS.aucuneEvaluation); return; } // pas .etat-vide-liste : centré, 200 px de haut par bloc vide (mesuré)
+            const echelles = {};
+            (d.echellesIds || []).forEach((id) => { echelles[id] = modeles.echelles[d.trimestre + ':' + id] || null; });
+            const liste = poser(bloc, 'ul', 'rl-evaluations');
+            evaluations.forEach((ev) => rendreEvaluation(liste, ev, echelles));
+        });
+    }
+
     function champSaisie(formulaire, libelle, balise, nom) {
         const etiquette = poser(formulaire, 'label', '', libelle);
         const champ = poser(etiquette, balise, 'controle-form rl-champ');
@@ -705,6 +818,7 @@
             return;
         }
         const liste = poser(zone, 'ul', 'rl-eleves');
+        const modeles = lireRegistre().modeles;
         inscrits.forEach((e) => {
             const da = String(e.da || '');
             const nomComplet = String(e.nom || '') + ', ' + String(e.prenom || '');
@@ -729,6 +843,7 @@
             retrait.setAttribute('data-confirm', MOTS.confirmerRetrait(nomComplet, accorder(dossiers.length, MOTS.dossiers), formaterDate(derniere),
                 resultats.map(libelleResultat), resultats.filter((r) => r.origine === 'cadre').length));
 
+            rendreDossier(li, e, modeles);
             if (!resultats.length) return;
             const sousListe = poser(li, 'ul', 'rl-resultats-ulterieurs');
             resultats.forEach((r, i) => {
@@ -857,6 +972,6 @@
         lire: lireRegistre, inscrits: elevesInscrits,
         trimestres: trimestresRepertories, eleves: elevesDeTousLesTrimestres, rechercher: rechercherEleves,
         capturerDossier, inscrire, mesurerPoidsTrimestre,
-        resultatsDe, stock913, enAttenteDuCadre, ajouterResultat, retirerResultat, retirerDuRegistre, lireNote, accorder
+        lignesIndices, libelleNiveau, resultatsDe, stock913, enAttenteDuCadre, ajouterResultat, retirerResultat, retirerDuRegistre, lireNote, accorder
     };
 })();
