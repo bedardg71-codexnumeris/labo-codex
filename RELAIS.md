@@ -7,6 +7,19 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 14 H 25 (Toronto) : 1.146.4 (#919 et #920 — un rapport de Grégoire de 13 h 56, saisie des notes d'A2024 sans copie)
+
+**État au moment d'écrire ce bloc : `0686bb41` (1.146.4, build 0918-1417) commité sur `main` local, PAS ENCORE POUSSÉ ; `origin/main` = `9fed6119`.** Grégoire a demandé le push à 14 h 24 (« Pousser maintenant ») : `pousser.sh` part juste après ce commit, depuis un worktree propre. Le résultat du push n'est PAS dans ce bloc : le mesurer par `git fetch` puis `git log origin/main -1`.
+
+- **#919** — sans copie ouverte depuis le chargement de la page, seul le `let evaluationEnCours` de `config.js` est posé, `window.evaluationEnCours` reste `undefined` ; « Enregistrer » par-dessus une évaluation existante bouclait (`sauvegarderEvaluation` ⇄ `sauvegarderEvaluationModifiee`), pile débordée, rien d'écrit, aucun message. Pivot prêté le temps de l'enregistrement (`js/evaluation-sauvegarde.js`). Banc `evaluation-919-…` : rouge sur le code de `9fed6119`, vert ici. **Source tarie, stock non réparé** : les retouches de Grégoire à 13 h 49, 13 h 50 et 13 h 51 ne sont vraisemblablement pas écrites ; il est prévenu, c'est à lui de les rouvrir.
+- **#920** — barre « ← Élève 3 de 54 → » en tête du formulaire sans copie (`index.html`, `styles.css`, `js/evaluation.js`). Retirés : `insererNavigationEvaluationSerie`, `initialiserModeEvaluationSerie`, `mettreAJourIndicateurProgression` (aucun appelant) ; le cliquet #745 (j) ne compte plus `evaluation.js`. Banc `evaluation-920-…`, trois mutations rouges sur trois. **Mots d'écran décidés par la session, dits à Grégoire, non relus par lui mot à mot** : « Élève N de M », infobulles « Élève précédent » / « Élève suivant », et deux items au changelog 1.146.
+- **Mesuré** : Vitest 595 / 6 757 verts APRÈS le commit du bump ; bancs WebKit #699, #868, #911, #912, #919, #920 verts. **Non jugé avant ce bloc** : la suite Playwright entière (elle tourne au push).
+- ⚠ **`liste-651-annoter-depuis-le-mode-evaluer.spec.js` (« le trajet direct ») est revenue** : rouge 1 fois en lot, puis 2 vertes / 1 rouge rejouée seule × 3, à charge 25-33 ; l'attente qui expire est `#evaluations-liste.sous-section.active` (ligne 157), hors du code de ce lot. Le bloc ci-dessous disait « si elle revient, c'est un sujet (#685) » : elle est revenue. Cause non lue.
+- **Non couvert, nommé** : la barre n'est rafraîchie que par le chemin « Évaluer » sans copie (`_evaluerSansCopie`) et par ses flèches ; « Consulter » sans copie ne la met pas à jour (elle garde l'état du dernier « Évaluer », ou reste cachée). Les deux liaisons `evaluationEnCours` (le `let` de config.js et `window.`) restent deux : pas inscrit, à inscrire si un second symptôme paraît.
+- Non commité, pas à cette session : `plans de travail/CADRAGE-2026-09-17-soir-registre-longitudinal.md`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 13 H 20 (Toronto) : 1.146.3 (#915 — retour de Grégoire à la porte des lots 3-4 : les évaluations du dossier déplié deviennent des tuiles côte à côte)
 
 ✅ **POUSSÉ le 18 sept. 2026 vers 13 h 50 (Toronto), sur demande de Grégoire (« push »), après la relecture CONFORME de Cowork (aucune correction ; la phrase de « Nouvelles » 1.146 validée telle quelle par Grégoire) : `origin/main` = `9fed6119`**, mesuré après `pousser.sh origin HEAD:main` depuis un worktree propre (retiré depuis) et `git fetch`. **Un seul push a emporté #918 (1.146.2, lot de monitorage-v6-37) et 1.146.3.** Sentinelle Playwright verte pour ce SHA, 0 rougeur nouvelle ; Vitest vert au hook. Charge au lancement : 2,9 ; l'application Claude était restée ouverte (choix de Grégoire). Ce que sert l'hébergeur se mesure chez lui : 1.146.3 en bas de page.
