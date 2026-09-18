@@ -56,7 +56,8 @@
 
    LE DOSSIER DÉPLIÉ (lot 4, 18 sept. 2026) — sous chaque inscrit·e, un <details> « Voir le dossier » : par trimestre-cours,
    les indices TELS QUE RANGÉS à la copie (mesuré : C et P sont sur 0-100, A sur 0-1, `noteConstructible` vit sur `actuel`),
-   puis les évaluations en ordre chronologique, critère par critère, avec le libellé du niveau lu dans l'échelle COPIÉE au
+   puis les évaluations en ordre chronologique — une TUILE chacune, en flux côte à côte (la règle `.badges-centres` du
+   profil), critères et rétroaction dépliés DANS la tuile — avec le libellé du niveau lu dans l'échelle COPIÉE au
    registre (`modeles`) — donc tel qu'il était à la copie, même si l'échelle du trimestre a bougé depuis. AUCUNE analyse,
    aucun calcul neuf, aucun graphique (cadrage § 5.3) : arrondir un pourcentage pour l'écrire n'est pas un calcul d'indice.
    Les interventions et les instantanés hebdomadaires sont dans la copie mais pas encore à l'écran (rendu minimal du § 5.3).
@@ -694,30 +695,40 @@
         return lignes;
     }
 
+    /**
+     * Une évaluation = une TUILE (retour de Grégoire à la porte des lots 3-4, 18 sept. 2026 : le dossier « prend beaucoup
+     * d'espace vertical » ; il demande des blocs côte à côte, comme les badges d'« Engagement ACP » du profil). Le flux est
+     * celui de `.badges-centres` (styles.css), réutilisé tel quel. La tuile EST le <details> : son en-tête — production,
+     * date, note et niveau — sert de <summary>, donc AUCUN mot neuf ; critères et rétroaction se déplient DEDANS. Une
+     * évaluation qui n'a ni critère ni rétroaction est une tuile simple : un triangle qui n'ouvrirait sur rien mentirait.
+     */
     function rendreEvaluation(liste, ev, echelles) {
-        const li = poser(liste, 'li', 'rl-evaluation');
         const echelle = echelles[ev.echelleId] || null;
-        const entete = [String(ev.productionNom || MOTS.productionSansNom), formaterDate(ev.dateEvaluation)].filter(Boolean).join(' — ');
-        poser(li, 'p', 'rl-nom', entete);
+        const criteres = (Array.isArray(ev.criteres) ? ev.criteres : []).filter(Boolean);
+        const depliable = criteres.length > 0 || !!ev.retroactionFinale;
+        const tuile = poser(liste, depliable ? 'details' : 'div', 'rl-tuile');
+        const entete = poser(tuile, depliable ? 'summary' : 'div', 'rl-tuile-entete' + (depliable ? ' rl-cible' : ''));
+        poser(entete, 'span', 'rl-nom', String(ev.productionNom || MOTS.productionSansNom));
+        if (ev.dateEvaluation) poser(entete, 'span', 'rl-meta', formaterDate(ev.dateEvaluation));
         const note = [];
         if (ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '') note.push(MOTS.noteFinale + ' : ' + formaterNote(ev.noteFinale));
         if (ev.niveauFinal) note.push(libelleNiveau(ev.niveauFinal, echelle));
-        if (ev.grilleNom) note.push(String(ev.grilleNom));
-        if (ev.remplaceeParId) note.push(MOTS.remplacee);
-        if (note.length) poser(li, 'p', 'rl-meta', note.join(' · '));
-        const criteres = Array.isArray(ev.criteres) ? ev.criteres : [];
+        if (note.length) poser(entete, 'span', 'rl-tuile-note', note.join(' · '));
+        const contexte = [];
+        if (ev.grilleNom) contexte.push(String(ev.grilleNom));
+        if (ev.remplaceeParId) contexte.push(MOTS.remplacee);
+        if (contexte.length) poser(entete, 'span', 'rl-meta', contexte.join(' · '));
+        if (!depliable) return;
         if (criteres.length) {
-            const ul = poser(li, 'ul', 'rl-criteres');
+            const ul = poser(tuile, 'ul', 'rl-criteres');
             criteres.forEach((c) => {
-                if (!c) return;
                 const niveau = libelleNiveau(c.niveauSelectionne !== undefined ? c.niveauSelectionne : c.niveau, echelle);
                 poser(ul, 'li', '', String(c.critereNom || c.nom || c.critereId || c.id || '') + (niveau ? ' : ' + niveau : ''));
             });
         }
         if (ev.retroactionFinale) {
-            const details = poser(li, 'details', 'rl-retroaction');
-            poser(details, 'summary', 'rl-cible', MOTS.retroaction);
-            poser(details, 'p', 'rl-retroaction-texte', String(ev.retroactionFinale));
+            poser(tuile, 'p', 'rl-sous-titre', MOTS.retroaction);
+            poser(tuile, 'p', 'rl-retroaction-texte', String(ev.retroactionFinale));
         }
     }
 
@@ -743,7 +754,9 @@
             if (!evaluations.length) { poser(bloc, 'p', 'rl-meta', MOTS.aucuneEvaluation); return; } // pas .etat-vide-liste : centré, 200 px de haut par bloc vide (mesuré)
             const echelles = {};
             (d.echellesIds || []).forEach((id) => { echelles[id] = modeles.echelles[d.trimestre + ':' + id] || null; });
-            const liste = poser(bloc, 'ul', 'rl-evaluations');
+            // Le flux des badges du profil (`.badges-centres` : flex, wrap, gap 10 px), aligné à gauche et en haut par `.rl-tuiles` :
+            // l'ordre du DOM reste l'ordre chronologique, lu de gauche à droite puis de haut en bas.
+            const liste = poser(bloc, 'div', 'badges-centres rl-tuiles');
             evaluations.forEach((ev) => rendreEvaluation(liste, ev, echelles));
         });
     }

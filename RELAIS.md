@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 13 H 20 (Toronto) : 1.146.3 (#915 — retour de Grégoire à la porte des lots 3-4 : les évaluations du dossier déplié deviennent des tuiles côte à côte)
+
+**Où est le travail** : `main` local. ⚠ **RIEN DE CECI N'EST POUSSÉ** : `origin/main` = `ab73440c` (1.146.1). En local par-dessus, dans l'ordre : `3d499ff6` (#918, 1.146.2 — lot de l'autre session, monitorage-v6-37), deux `docs(relais)`, `f8447eed` (relevé de la porte des lots 3-4 : 3/3), puis 1.146.3. **Cowork relit 1.146.3 AVANT `pousser.sh`** ; un seul `pousser.sh` emportera #918 et ce patch ensemble — à coordonner avec l'autre session (elle a dit qu'elle préviendrait avant de lancer le sien : ne pas en lancer deux).
+
+**Ce qui a été fait** : porte des lots 3-4 relevée par Grégoire (12 h 56, 3 constats sur 3, aucun mot changé), inscrite à la porte et à `OU-EN-EST-ON.md`. Son retour — le dossier « prend beaucoup d'espace vertical » — est traité : tuiles dans le flux `.badges-centres` du profil (réutilisé, pas recopié), la tuile est le `<details>`, aucun mot neuf à l'écran. Détail et suppositions : tête de `OU-EN-EST-ON.md`, `BACKLOG.md` #915.
+
+**⮕ À COWORK, pour la relecture** : (1) **une phrase de « Nouvelles » 1.146 a changé** (l'ancienne, « La rétroaction de chaque évaluation se déplie à part », était devenue fausse) — c'est le seul texte neuf que Grégoire lira, il est cité en entier dans `OU-EN-EST-ON.md` ; (2) choix à regarder : tuiles alignées à GAUCHE (les badges du profil sont centrés) pour garder l'ordre des dates lisible ; base 280 px ; une tuile ouverte garde sa largeur ; pas de couleur par niveau ; (3) angle mort déclaré : mes captures étaient voilées par la fenêtre « Protège tes données » — la disposition est MESURÉE, pas regardée sans voile.
+
+**Piège de banc à retenir** : sous WebKit, `offsetParent !== null` est VRAI pour le contenu d'un `<details>` fermé. Le banc #915 a maintenant sa sonde (`window.__visible915`) : visible = rendu ET tous les `<details>` ancêtres ouverts.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 13 H (Toronto) : 1.146.2 (#918 — la barre d'étapes du Cadre suit les enregistrements) est COMMITÉE EN LOCAL, PAS POUSSÉE
 
 **Où est le travail** : `main`. `origin/main` = `ab73440c` (1.146.1, mesuré par la session voisine). Par-dessus, EN LOCAL SEULEMENT : `3d499ff6` (fix #918, 1.146.2), `ff1c7e20` (docs relais de la session voisine), puis ce commit. ⚠ **Le push attend la demande de Grégoire** (règle « qui pousse »). Si `origin/main` dépasse `ab73440c`, un commit `docs(relais)` plus récent le dira avec le SHA mesuré.

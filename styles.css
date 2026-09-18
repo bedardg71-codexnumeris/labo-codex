@@ -9954,19 +9954,13 @@ body.mode-clair .bloc-rlo-separateur {
     margin-top: 6px;
 }
 
-.rl-dossier > summary,
-.rl-retroaction > summary {
+.rl-dossier > summary {
     /* display par défaut (list-item) : le triangle reste */
     line-height: 44px;
     cursor: pointer;
     font-weight: 600;
     font-size: 0.85rem;
     color: var(--texte-principal);
-}
-
-.rl-retroaction > summary {
-    font-weight: 400;
-    color: var(--texte-secondaire);
 }
 
 .rl-dossier-bloc {
@@ -9982,30 +9976,81 @@ body.mode-clair .bloc-rlo-separateur {
 }
 
 /* `.carte ul` (padding-left: 30px) l'emporterait sur une classe seule */
-.rl-dossier .rl-indices,
-.rl-dossier .rl-evaluations {
+.rl-dossier .rl-indices {
     list-style: none;
     margin: 0;
     padding: 0;
     font-size: 0.85rem;
 }
 
-.rl-evaluation {
-    padding: 8px 0;
-    border-top: 1px solid var(--gris-clair);
+/* Les tuiles (retour de Grégoire, 18 sept. 2026). Le FLUX est celui des badges du profil — `.badges-centres` (flex, wrap,
+   gap 10 px), posé sur le même élément ; ce modificateur ne change que l'alignement : à gauche, pour lire dans l'ordre
+   chronologique, et en haut, pour qu'une tuile dépliée n'étire pas ses voisines de rangée. */
+.rl-tuiles {
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
-.rl-evaluation p {
-    margin: 0 0 2px;
+/* Base 280 px sans croissance : deux tuiles par rangée à la largeur de l'iPad (mesuré au banc), trois et plus au bureau ;
+   sous 280 px de place, la tuile rétrécit au lieu de déborder. Mêmes jetons que `.badge-artefact`. */
+.rl-tuile {
+    flex: 0 1 280px;
+    min-width: 0;
+    box-sizing: border-box;
+    border: 2px solid var(--gris-clair);
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+.rl-tuile-entete {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-wrap: anywhere;
+}
+
+/* Un <summary> en flex perd son triangle natif : il est redessiné, et tourne quand la tuile s'ouvre. */
+summary.rl-tuile-entete {
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 18px;
+}
+
+summary.rl-tuile-entete::-webkit-details-marker {
+    display: none;
+}
+
+summary.rl-tuile-entete::after {
+    content: '▸';
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: var(--texte-secondaire);
+}
+
+.rl-tuile[open] > summary.rl-tuile-entete::after {
+    content: '▾';
+}
+
+.rl-tuile-note {
+    color: var(--texte-principal);
+}
+
+.rl-tuile .rl-sous-titre {
+    margin: 8px 0 2px;
 }
 
 .rl-dossier .rl-criteres {
-    margin: 4px 0 0;
+    margin: 8px 0 0;
     padding-left: 18px;
     font-size: 0.85rem;
 }
 
 .rl-retroaction-texte {
+    margin: 0;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     font-size: 0.85rem;
