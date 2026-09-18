@@ -9,6 +9,8 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 14 H 25 (Toronto) : 1.146.4 (#919 et #920 — un rapport de Grégoire de 13 h 56, saisie des notes d'A2024 sans copie)
 
+✅ **POUSSÉ le 18 sept. 2026 vers 14 h 45 (Toronto), sur demande de Grégoire : `origin/main` = `686142ff`**, mesuré après `pousser.sh origin HEAD:main` depuis un worktree propre (retiré depuis) et `git fetch` — sentinelle Playwright verte pour ce SHA (0 échec), Vitest vert au hook. Ce que sert l'hébergeur n'est pas mesurable d'ici : Grégoire le lit au numéro de version. Le paragraphe suivant est l'état d'AVANT le push, gardé tel quel.
+
 **État au moment d'écrire ce bloc : `0686bb41` (1.146.4, build 0918-1417) commité sur `main` local, PAS ENCORE POUSSÉ ; `origin/main` = `9fed6119`.** Grégoire a demandé le push à 14 h 24 (« Pousser maintenant ») : `pousser.sh` part juste après ce commit, depuis un worktree propre. Le résultat du push n'est PAS dans ce bloc : le mesurer par `git fetch` puis `git log origin/main -1`.
 
 - **#919** — sans copie ouverte depuis le chargement de la page, seul le `let evaluationEnCours` de `config.js` est posé, `window.evaluationEnCours` reste `undefined` ; « Enregistrer » par-dessus une évaluation existante bouclait (`sauvegarderEvaluation` ⇄ `sauvegarderEvaluationModifiee`), pile débordée, rien d'écrit, aucun message. Pivot prêté le temps de l'enregistrement (`js/evaluation-sauvegarde.js`). Banc `evaluation-919-…` : rouge sur le code de `9fed6119`, vert ici. **Source tarie, stock non réparé** : les retouches de Grégoire à 13 h 49, 13 h 50 et 13 h 51 ne sont vraisemblablement pas écrites ; il est prévenu, c'est à lui de les rouvrir.
