@@ -9,7 +9,13 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 13 H 20 (Toronto) : 1.146.3 (#915 — retour de Grégoire à la porte des lots 3-4 : les évaluations du dossier déplié deviennent des tuiles côte à côte)
 
-**Où est le travail** : `main` local. ⚠ **RIEN DE CECI N'EST POUSSÉ** : `origin/main` = `ab73440c` (1.146.1). En local par-dessus, dans l'ordre : `3d499ff6` (#918, 1.146.2 — lot de l'autre session, monitorage-v6-37), deux `docs(relais)`, `f8447eed` (relevé de la porte des lots 3-4 : 3/3), puis 1.146.3. **Cowork relit 1.146.3 AVANT `pousser.sh`** ; un seul `pousser.sh` emportera #918 et ce patch ensemble — à coordonner avec l'autre session (elle a dit qu'elle préviendrait avant de lancer le sien : ne pas en lancer deux).
+✅ **POUSSÉ le 18 sept. 2026 vers 13 h 50 (Toronto), sur demande de Grégoire (« push »), après la relecture CONFORME de Cowork (aucune correction ; la phrase de « Nouvelles » 1.146 validée telle quelle par Grégoire) : `origin/main` = `9fed6119`**, mesuré après `pousser.sh origin HEAD:main` depuis un worktree propre (retiré depuis) et `git fetch`. **Un seul push a emporté #918 (1.146.2, lot de monitorage-v6-37) et 1.146.3.** Sentinelle Playwright verte pour ce SHA, 0 rougeur nouvelle ; Vitest vert au hook. Charge au lancement : 2,9 ; l'application Claude était restée ouverte (choix de Grégoire). Ce que sert l'hébergeur se mesure chez lui : 1.146.3 en bas de page.
+
+⚠ **UNE instable, première occurrence à ma connaissance** : `liste-651-annoter-depuis-le-mode-evaluer.spec.js` (« le trajet direct Évaluer, Liste, Annoter ») verte au second essai. Hors du périmètre des deux lots poussés. Pas d'item : à surveiller — si elle revient, c'est un sujet (#685).
+
+⚠ **L'ARBRE PRINCIPAL EST PARTAGÉ EN CE MOMENT** : à 13 h 50, une autre session (monitorage-v6-41) y tient un lot non commité — `js/evaluation.js`, `js/evaluation-sauvegarde.js`, `styles.css`, `index.html`, specs #919 et #920. Prévenue. Tout commit d'ici s'indexe par chemins nommés, après lecture de `git status`.
+
+**Où était le travail avant ce push** : `main` local ; `origin/main` valait `ab73440c` (1.146.1). En local par-dessus, dans l'ordre : `3d499ff6` (#918, 1.146.2 — lot de l'autre session, monitorage-v6-37), deux `docs(relais)`, `f8447eed` (relevé de la porte des lots 3-4 : 3/3), puis 1.146.3. **Cowork relit 1.146.3 AVANT `pousser.sh`** ; un seul `pousser.sh` emportera #918 et ce patch ensemble — à coordonner avec l'autre session (elle a dit qu'elle préviendrait avant de lancer le sien : ne pas en lancer deux).
 
 **Ce qui a été fait** : porte des lots 3-4 relevée par Grégoire (12 h 56, 3 constats sur 3, aucun mot changé), inscrite à la porte et à `OU-EN-EST-ON.md`. Son retour — le dossier « prend beaucoup d'espace vertical » — est traité : tuiles dans le flux `.badges-centres` du profil (réutilisé, pas recopié), la tuile est le `<details>`, aucun mot neuf à l'écran. Détail et suppositions : tête de `OU-EN-EST-ON.md`, `BACKLOG.md` #915.
 
