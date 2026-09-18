@@ -9833,6 +9833,37 @@ body.mode-archive:not(.mode-ecriture-temp) .ru-verrou {
     overflow-wrap: anywhere;
 }
 
+/* #915 (17 sept. 2026) — Labo › Suivi longitudinal : la liste des élèves inscrits au
+   registre. Mêmes mesures que la liste #913 (.ru-eleve) : une ligne par élève, séparée
+   d'un filet ; le lot 4 y déplie le dossier. Variables : toutes existantes (cliquet #595). */
+.rl-eleves {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.rl-eleve {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    min-height: 44px;
+    padding: 10px 0;
+    border-top: 1px solid var(--gris-clair);
+}
+
+.rl-nom {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+}
+
+.rl-meta {
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
+
 .ru-saisie {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 90px auto;

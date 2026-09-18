@@ -353,6 +353,13 @@ const INITIALISATEURS_SOUS_SECTION = {
             setTimeout(initialiserBilanReflexif, 100);
         }
     },
+    // #915 (17 sept. 2026) : septième sous-onglet du Labo, entrée autorisée par Grégoire
+    // le même soir (cadrage v2 § 5.1). Le rendu lit le registre, il n'écrit rien.
+    'labo-longitudinal': function () {
+        if (typeof initialiserRegistreLongitudinal === 'function') {
+            initialiserRegistreLongitudinal();
+        }
+    },
 
     // === RÉGLAGES ===
     'reglages-preferences': function () {
