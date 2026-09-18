@@ -12,7 +12,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // champs et les boutons d'écriture ; le registre n'est pas une donnée du trimestre, la capture doit rester possible).
 // Ce banc juge : la recherche par le vrai dispatcher (data-on-input), le choix et l'inscription par el.click()
 // (aucun page.click, budget du runner), le stock des DEUX trimestres identique octet pour octet après la capture,
-// un DA dans deux trimestres = un élève, deux dossiers ; cibles ≥ 44 px ; « Re-capturer » au second passage.
+// un DA dans deux trimestres = un élève, deux dossiers ; cibles ≥ 44 px ; « Refaire la copie » au second passage (#917).
 
 const TA = 't915a'; // archivé, ACTIF
 const TB = 't915b'; // non archivé
@@ -99,7 +99,7 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(champ.type).toBe('search');
         expect(champ.pointer).not.toBe('none');
         expect(champ.disabled).toBe(false);
-        expect(champ.hauteur).toBeGreaterThanOrEqual(44);
+        expect(Math.round(champ.hauteur)).toBeGreaterThanOrEqual(44); // arrondi : WebKit rend 43,99997 px pour min-height: 44px (instabilité du verdict du 18 sept.)
 
         await chercher(page, 'gag');
         await page.waitForFunction(() => document.querySelectorAll('#rl-resultats .rl-resultat').length === 1);
@@ -108,13 +108,13 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(resultat.texte).toContain('Gagnon, Léa');
         expect(resultat.texte).toContain('Automne 2024');
         expect(resultat.texte).toContain('Hiver 2026');
-        expect(resultat.hauteur).toBeGreaterThanOrEqual(44);
+        expect(Math.round(resultat.hauteur)).toBeGreaterThanOrEqual(44); // arrondi : WebKit rend 43,99997 px pour min-height: 44px (instabilité du verdict du 18 sept.)
 
         await cliquer(page, '#rl-resultats .rl-resultat-bouton');
         await page.waitForFunction(() => !!document.getElementById('rl-inscrire'));
         const bouton = await page.evaluate(() => { const b = document.getElementById('rl-inscrire'); const cs = getComputedStyle(b); return { texte: b.textContent, hauteur: b.getBoundingClientRect().height, pointer: cs.pointerEvents, disabled: b.disabled, confirm: b.getAttribute('data-confirm') }; });
         expect(bouton.texte).toBe('Inscrire au registre');
-        expect(bouton.hauteur).toBeGreaterThanOrEqual(44);
+        expect(Math.round(bouton.hauteur)).toBeGreaterThanOrEqual(44); // arrondi : WebKit rend 43,99997 px pour min-height: 44px (instabilité du verdict du 18 sept.)
         expect(bouton.pointer).not.toBe('none');
         expect(bouton.disabled).toBe(false);
         expect(bouton.confirm).toBeNull();
@@ -143,14 +143,20 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(ligne).toContain('Gagnon, Léa');
         expect(ligne).toContain('Automne 2024');
         expect(ligne).toContain('Hiver 2026');
-        expect(ligne).toMatch(/Capturé le \d{4}-\d{2}-\d{2}/);
+        expect(ligne).toMatch(/Copie du \d{4}-\d{2}-\d{2}/);
         const resume = await page.evaluate(() => document.querySelector('#rl-choix .rl-resume').textContent);
-        expect(resume).toMatch(/^1 évaluation·s · 1 séance·s · 1 grille·s : SRPNF × IDME · 2 dossier·s, \d+ Ko — Capturé le/);
+        expect(resume).toMatch(/^1 évaluation·s · 1 séance·s · 1 grille·s : SRPNF × IDME · 2 dossier·s, \d+ Ko — Copie du/);
 
-        // Second passage : le bouton dit « Re-capturer » et prévient.
-        const bouton2 = await page.evaluate(() => { const b = document.getElementById('rl-inscrire'); return { texte: b.textContent, confirm: b.getAttribute('data-confirm') }; });
-        expect(bouton2.texte).toBe('Re-capturer');
+        // Second passage (#917, retour de Grégoire du 18 sept.) : le bouton dit le geste, quitte le style principal,
+        // garde sa cible de 44 px, et le dialogue nomme l'élève et ce qui ne bouge pas.
+        const bouton2 = await page.evaluate(() => { const b = document.getElementById('rl-inscrire'); return { texte: b.textContent, confirm: b.getAttribute('data-confirm'), secondaire: b.classList.contains('btn-secondaire'), principal: b.classList.contains('btn-principal'), hauteur: b.getBoundingClientRect().height }; });
+        expect(bouton2.texte).toBe('Refaire la copie');
+        expect(bouton2.secondaire).toBe(true);
+        expect(bouton2.principal).toBe(false);
+        expect(Math.round(bouton2.hauteur)).toBeGreaterThanOrEqual(44); // arrondi : WebKit rend 43,99997 px pour min-height: 44px (instabilité du verdict du 18 sept.)
+        expect(bouton2.confirm).toContain('Gagnon, Léa');
         expect(bouton2.confirm).toContain('remplacée');
+        expect(bouton2.confirm).toContain('Tes trimestres ne sont pas modifiés');
 
         expect(erreurs).toEqual([]);
     });

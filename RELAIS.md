@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 7 H 30 (Toronto) : 1.144.2 (#917, commentaire testeur — « Re-capturer » devient « Refaire la copie »)
+
+**Où est le travail** : `main`, un commit de code après `3b28608b` = la release 1.144.2 (build `0918-0729`). **Poussé ou non : voir le commit de relais qui suit celui-ci** (bloc écrit AVANT le verdict Playwright).
+
+**Ce qui a été fait** : retour de Grégoire (7 h 16) sur le lot 2 de #915 — il ne comprenait ni « Re-capturer » ni si le geste était irréversible pour ses données. Bouton « Refaire la copie », secondaire une fois l'élève inscrit·e ; dialogue qui nomme l'élève, la copie remplacée, et ce qui ne bouge pas ; « Capturé le » → « Copie du ». **Mots validés par Grégoire** (option 1). Aucun comportement, aucune donnée ne change. Fiche #917 dans SUIVI-BUGS.
+
+**L'instabilité du verdict de 7 h 11 est EXPLIQUÉE et tarie** : `registre-longitudinal-915.spec.js` mesurait 43,99997 px pour `min-height: 44px` sous WebKit ; les quatre mesures de hauteur sont arrondies (10 passages verts sans nouvel essai). Retirée aussi : la classe `rl-cible`, posée au lot 2 sans règle CSS ni lecteur.
+
+**⮕ À COWORK** : la porte terrain du lot 2 (`plans de travail/PORTES-TERRAIN-2026-09-18-registre-longitudinal-lot2.md`) a changé aux points 1.5 et 3.2 (nouveaux mots). Si l'artefact jumeau est déjà publié, il cite encore « Re-capturer » : à réaligner.
+
+**Ce qui reste dû** : inchangé — lot 3 de #915 (ses mots d'écran gagneront à être relus par Grégoire AVANT livraison : c'est la leçon de #917), décision « retirer du registre », cadrage § 4.1 bis (fichier de Cowork, toujours non commité).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 7 H (Toronto) : 1.144.1 (#916, bug testeur — changer de trimestre quand le cours actif n'est pas dans la bibliothèque)
 
 **Où est le travail** : `main`, un commit de code après `70a7e247` = la release 1.144.1 (build `0918-0654`). Retour testeur de Grégoire (6 h 46), passé avant le lot 3 de #915. **POUSSÉ le 18 sept. 2026 à ≈ 7 h 11 (Toronto) : origin/main = `a89c054f`**, mesuré après `pousser.sh origin main` et `git fetch` — sentinelle Playwright verte pour ce SHA exact (0 échec connu, jeton `scripts/.verdict-playwright.json`), Vitest vert au hook (593 / 6 732), mémoire libre à 69 % au lancement, app Claude ouverte. Ce que sert l'hébergeur ne se mesure pas d'ici. Grégoire a relu et accepté la phrase des « Nouvelles ».

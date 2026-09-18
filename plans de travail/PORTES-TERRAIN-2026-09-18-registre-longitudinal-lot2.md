@@ -55,8 +55,10 @@ rangée dans un registre à part, hors trimestre.
   ⮕ Attendu : ses évaluations, ses présences, ses indices sont tels qu'avant.
   (Prouvé par banc sur un trimestre archivé ; ici c'est ton corpus.)
 - [ ] **1.5** Fais « Inscrire » une seconde fois sur le même élève.
-  ⮕ Attendu : le bouton dit maintenant « Re-capturer » et demande confirmation ;
-  après, la date de capture est celle d'aujourd'hui, et il n'y a toujours qu'une
+  ⮕ Attendu (mots changés en 1.144.2, #917, sur ton retour du 18 sept. 7 h 16) : le
+  bouton dit « Refaire la copie », en style secondaire, et le dialogue nomme l'élève,
+  la copie remplacée, et ce qui ne bouge pas (tes trimestres, la date d'inscription,
+  les résultats ultérieurs) ; après, la date de la copie est celle d'aujourd'hui, et il n'y a toujours qu'une
   ligne pour lui dans la liste.
 
 ---
@@ -80,8 +82,9 @@ corrige — rien d'irréversible ici.
   options : (a) un bouton « Retirer du registre » au lot 3, avec les résultats
   ultérieurs ; (b) rien, on retire par l'export complet. Ton choix : ________
 - **3.2 Les mots de l'écran** (sous-titre, phrase de sauvegarde, « Inscrire au
-  registre », « Re-capturer », la ligne de résumé) sont de Claude Code, pas
-  relus. Un mot à changer : ________
+  registre », la ligne de résumé) sont de Claude Code, pas relus. ⮕ « Re-capturer »
+  et son dialogue ONT ÉTÉ RELUS et remplacés le 18 sept. (#917, 1.144.2 : « Refaire la
+  copie », mots validés par Grégoire). Un autre mot à changer : ________
 
 ---
 
