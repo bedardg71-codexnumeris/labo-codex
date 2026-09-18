@@ -7,6 +7,22 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 13 H (Toronto) : 1.146.2 (#918 — la barre d'étapes du Cadre suit les enregistrements) est COMMITÉE EN LOCAL, PAS POUSSÉE
+
+**Où est le travail** : `main`. `origin/main` = `ab73440c` (1.146.1, mesuré par la session voisine). Par-dessus, EN LOCAL SEULEMENT : `3d499ff6` (fix #918, 1.146.2), `ff1c7e20` (docs relais de la session voisine), puis ce commit. ⚠ **Le push attend la demande de Grégoire** (règle « qui pousse »). Si `origin/main` dépasse `ab73440c`, un commit `docs(relais)` plus récent le dira avec le SHA mesuré.
+
+**Ce qui est mesuré pour `3d499ff6`** : banc `tests/integration/barre-convergence-suit-les-enregistrements-918.spec.js` vert sous WebKit, rejoué après le commit ; trois mutations (un appel retiré par site, `node --check` sur le fichier muté), trois rouges sur leur propre titre, restauration par copie à l'empreinte ; Vitest complet 595 / 6 754 APRÈS le commit du bump ; `parcours-neuf-saisie-presences.spec.js` (qui traverse le Cadre et avait rougi sous charge chez la session voisine) verte avec ce lot, charge 33. **Pas mesuré** : la suite Playwright entière — aucun jeton de verdict pour ce SHA ; `pousser.sh` le rendra. Avant de le lancer : `sysctl -n vm.loadavg`, et prévenir toute session voisine.
+
+**Décision technique prise seul, à connaître** : la barre est rejouée par les trois RENDUS que les enregistrements du Cadre rejouent déjà (`populerDropdownsAssemblageV2`, `populerDropdownGroupeCoursV2`, `chargerListeEtudiantsV2`), pas par les ≈ 30 sites d'écriture ni par `db.surEcriture` — ce crochet signale AVANT l'écriture, et `db.set` n'atteint `getSync` qu'après son `await` IndexedDB. Un écrivain qui ne rejoue aucun de ces trois rendus laisserait la barre en arrière : aucun trouvé dans le Cadre, non cherché ailleurs (la barre n'est visible que là, et `initialiserTrimestreV2` la rejoue à chaque retour dans la sous-section).
+
+**Première erreur de cette session** : deux mutations de break-test mal posées (`window.void 0;`) cassaient la syntaxe de deux fichiers du Cadre pendant ≈ 2 min, alors qu'un Vitest complet tournait chez la session voisine — 42 rouges chez elle, faux. Le script vérifie désormais la syntaxe du fichier muté avant de lire le rouge ; et on s'annonce AVANT de muter dans un arbre partagé.
+
+**Trouvailles hors lot, inscrites ici et nulle part ailleurs (aucun symptôme vécu)** : les derniers runs Playwright GitHub sur `main` sont annulés ou rouges (run 35355715562 : cancelled ; a89c054f : failure) — cause non lue ; `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` a un bloc de tête du 15 sept. (1.142.2), périmé.
+
+**À Cowork** : la porte terrain des lots 3-4 de #915 attend « 1.146.1 » à son §0 ; si la 1.146.2 est en ligne quand Grégoire la joue, accepter 1.146.2 aussi. Aucune porte terrain pour #918 : une machine répond (le banc WebKit), et un raté n'a rien d'irréversible.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, DÉBUT D'APRÈS-MIDI (Toronto) : 1.146.1 (#915 — les mots neufs des lots 3-4 relus par Grégoire avec Cowork, quatre textes corrigés ; le commentaire sur `origine: 'cadre'` est posé)
 
 **Où est le travail** : `main`, 1.146.1 par-dessus 1.145.0 et 1.146.0. ✅ **POUSSÉ le 18 sept. 2026 vers 12 h 45 (Toronto), sur demande de Grégoire : `origin/main` = `ab73440c`**, mesuré après `pousser.sh origin HEAD:main` (depuis un worktree propre, retiré depuis) et `git fetch`. Sentinelle Playwright verte pour ce SHA exact, **0 rougeur nouvelle, 0 instable** ; Vitest vert au hook (595 / 6 754). Ce que sert l'hébergeur ne se mesure que chez lui : le numéro en bas de page doit dire 1.146.1 (ou 1.146.2 une fois #918 poussé).
