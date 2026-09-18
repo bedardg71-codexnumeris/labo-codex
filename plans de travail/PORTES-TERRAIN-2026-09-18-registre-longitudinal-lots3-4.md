@@ -2,6 +2,15 @@
 
 **18 septembre 2026 · version attendue : 1.146.1 · 3 gestes, ≈ 5 minutes.**
 
+> ✅ **RELEVÉE LE 18 SEPT. 2026 À 12 H 56 — 3 CONSTATS SUR 3 PASSÉS, porte close.** (Relevé transmis par Cowork.)
+> **1.1** le dossier de son élève réel est propre et lisible ; **1.2** les indices sont conformes ; **1.3** l'encadré du
+> Cadre est conforme ; **§3** il ne change aucun mot.
+> ⚠ La case 0.1 (numéro de version) n'a pas été cochée. Ce qui tient lieu de preuve, nommé par Cowork : « Voir le dossier »
+> n'existe qu'à partir de 1.146 — la bonne version a donc été jugée. Ce n'est pas un échec, c'est une case non jouée.
+> **Un retour d'usage en est sorti, qui n'est pas un échec de porte** : le dossier déplié « est propre et lisible, mais prend
+> beaucoup d'espace vertical » — il demande les productions en tuiles côte à côte, comme les badges d'« Engagement ACP » du
+> profil. Traité en patch (voir `BACKLOG.md` #915).
+
 > ⚠ **À N'ENVOYER QU'APRÈS LE PUSH.** Au moment d'écrire ce fichier, 1.145.0,
 > 1.146.0 et 1.146.1 (les mots corrigés par Grégoire) sont commitées en local, pas poussées (Claude Code pousse sur demande de
 > Grégoire). Une porte jouée avant le déploiement jugerait 1.144.2 : faux rouge garanti.
