@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.146.0 (#915 lot 4 — le dossier déplié ; les quatre lots de #915 sont livrés)
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, DÉBUT D'APRÈS-MIDI (Toronto) : 1.146.1 (#915 — les mots neufs des lots 3-4 relus par Grégoire avec Cowork, quatre textes corrigés ; le commentaire sur `origine: 'cadre'` est posé)
+
+**Où est le travail** : `main`, 1.146.1 par-dessus 1.145.0 et 1.146.0. ⚠ **NON POUSSÉ au moment d'écrire ce bloc** : le push suit (`pousser.sh`, demandé par Grégoire via Cowork), et un commit `docs(relais)` dira le SHA mesuré sur `origin/main`. Si ce commit n'existe pas, le push n'a pas abouti.
+
+**Ce qui a été fait** : les quatre corrections de mots (`MOTS.confirmerRetrait` accordé au nombre sur toute la phrase, `enAttenteTitre`, `enAttenteAide`, `noteNonConstructible`, deux phrases de « Nouvelles » 1.145 et 1.146) ; le commentaire dû dans `resultatsDe()` ; essais réancrés ; § 3 de la porte mis à jour (version attendue : 1.146.1). Supposition nommée : la date du dialogue reste au format de l'écran (2026-09-18).
+
+**⮕ À COWORK** : l'artefact de la porte attend `origin/main` mesuré.
+
+---
+
+## (précédent) 18 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.146.0 (#915 lot 4 — le dossier déplié ; les quatre lots de #915 sont livrés)
 
 **Où est le travail** : `main`, DEUX commits de code après `8a3a9180` : 1.145.0 (lot 3, `b4481258`, **verdict Playwright vert pour ce SHA**, 0 échec connu) puis 1.146.0 (lot 4). ⚠ **NON POUSSÉS au moment d'écrire ce relais** — Claude Code pousse sur demande de Grégoire. **Verdict Playwright vert aussi pour `088b3064` (1.146.0)**, 0 échec connu, mesuré à ≈ 11 h 40 ; `pousser.sh` rejugera le SHA du patch.
 

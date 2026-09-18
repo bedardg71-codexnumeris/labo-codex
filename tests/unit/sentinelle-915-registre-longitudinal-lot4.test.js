@@ -94,7 +94,7 @@ describe('#915 lot 4 — les indices, tels que rangés, à la bonne échelle', (
     it('une note non constructible se DIT (sur `actuel` comme dans `details`) : pas de 0 trompeur', () => {
         const b = banc();
         for (const actuel of [{ C: 40, P: 0, noteConstructible: false }, { C: 40, P: 0, details: { noteConstructible: false } }]) {
-            expect(b.api.lignesIndices({ assiduite: { indice: 0.5 }, cp: { actuel } })[2]).toBe('Performance : note non constructible au moment de la copie');
+            expect(b.api.lignesIndices({ assiduite: { indice: 0.5 }, cp: { actuel } })[2]).toBe('Performance : note impossible à calculer au moment de la copie');
         }
     });
 

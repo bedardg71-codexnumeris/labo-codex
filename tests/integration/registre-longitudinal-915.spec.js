@@ -297,8 +297,8 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         // Refusé au dialogue : rien ne bouge.
         await retirerLea();
         await expect.poll(() => dialogues.recus.length).toBe(1);
-        expect(dialogues.recus[0]).toMatch(/^Retirer Gagnon, Léa du registre \? La copie de son dossier \(2 dossiers, copie du \d{4}-\d{2}-\d{2}\)/);
-        expect(dialogues.recus[0]).toContain('Seront effacés avec elle : 1 résultat ultérieur — 601-102-MQ · H2026 · 78,5.');
+        expect(dialogues.recus[0]).toMatch(/^Retirer Gagnon, Léa du registre \? Sa copie du \d{4}-\d{2}-\d{2} \(2 dossiers\) sera effacée et ne pourra pas être retrouvée\./);
+        expect(dialogues.recus[0]).toContain('Son résultat ultérieur sera effacé aussi : 601-102-MQ · H2026 · 78,5.');
         expect(dialogues.recus[0]).toContain('Tes trimestres ne sont pas modifiés.');
         expect(await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)))).toBe(registreAvant);
 

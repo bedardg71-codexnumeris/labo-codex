@@ -275,8 +275,8 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
         // Ni .btn-ajouter ni .btn-supprimer : la garde CSS du mode archive les fermerait, et le registre n'est pas un trimestre.
         expect(bouton.className).not.toMatch(/btn-supprimer|btn-ajouter|btn-modifier/);
         const dialogue = bouton.getAttribute('data-confirm');
-        expect(dialogue).toMatch(/^Retirer Assidu, Alice du registre \? La copie de son dossier \(2 dossiers, copie du \d{4}-\d{2}-\d{2}\) sera effacée du registre et ne pourra pas être retrouvée\./);
-        expect(dialogue).toContain('Seront effacés avec elle : 3 résultats ultérieurs — ');
+        // Texte de Grégoire (1.146.1, relu avec Cowork le 18 sept.).
+        expect(dialogue).toMatch(/^Retirer Assidu, Alice du registre \? Sa copie du \d{4}-\d{2}-\d{2} \(2 dossiers\) sera effacée et ne pourra pas être retrouvée\. Ses 3 résultats ultérieurs seront effacés aussi : /);
         expect(dialogue).toContain('601-102-MQ · H2025 · 78,5');
         expect(dialogue).toContain('601-103-MQ · A2025 · 70');
         expect(dialogue).toContain('601-104-MQ · A2026 · 82,5');
@@ -287,10 +287,15 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
     it('sans résultat ultérieur : la confirmation le dit aussi, au singulier quand il n\'y a qu\'un dossier', () => {
         const b = banc();
         const texte = b.mots.confirmerRetrait('Absent, Bruno', b.api.accorder(1, b.mots.dossiers), '2026-09-18', [], 0);
-        expect(texte).toContain('(1 dossier, copie du 2026-09-18)');
+        expect(texte).toContain('Sa copie du 2026-09-18 (1 dossier) sera effacée');
         expect(texte).toContain('Aucun résultat ultérieur n\'a été saisi pour cet·te élève.');
         expect(texte).not.toContain('Cadre');
-        expect(b.mots.confirmerRetrait('X, Y', '1 dossier', '', ['A · B · 60'], 0)).toContain('Seront effacés avec elle : 1 résultat ultérieur — A · B · 60.');
+        // UN résultat : toute la phrase s'accorde au singulier ; sans date de copie, la phrase n'invente pas de date.
+        const unSeul = b.mots.confirmerRetrait('X, Y', '1 dossier', '', ['A · B · 60'], 0);
+        expect(unSeul).toContain('Sa copie (1 dossier) sera effacée');
+        expect(unSeul).toContain('Son résultat ultérieur sera effacé aussi : A · B · 60. ');
+        expect(unSeul).not.toMatch(/Ses \d|seront/);
+        expect(b.mots.confirmerRetrait('X, Y', '1 dossier', '', ['A · B · 60', 'C · D · 70'], 0)).toContain('Ses 2 résultats ultérieurs seront effacés aussi : A · B · 60 ; C · D · 70. ');
     });
 
     it('le geste passe par le dispatcher fn(el), et l\'élève retiré·e quitte la liste ET le sélecteur de la saisie', async () => {

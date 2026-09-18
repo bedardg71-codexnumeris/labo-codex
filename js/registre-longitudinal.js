@@ -132,14 +132,14 @@
         refusTexte: 'Indique le cours et le trimestre.',
         refusEleve: 'Choisis un·e élève inscrit·e au registre.',
         inscritsTitre: 'Élèves inscrit·es',
-        // Le dossier déplié (lot 4). Supposition nommée : mots proposés par Claude Code, à relire par Grégoire.
+        // Le dossier déplié (lot 4). Mots relus par Grégoire avec Cowork le 18 sept. 2026 ; un seul corrigé (1.146.1).
         voirDossier: 'Voir le dossier',
         indicesTitre: 'Indices au moment de la copie',
         assiduite: 'Assiduité',
         completion: 'Complétion',
         performance: 'Performance',
         periodes: ['période', 'périodes'],
-        noteNonConstructible: 'note non constructible au moment de la copie',
+        noteNonConstructible: 'note impossible à calculer au moment de la copie',
         evaluationsTitre: 'Évaluations',
         aucuneEvaluation: 'Aucune évaluation dans cette copie.',
         productionSansNom: 'Production sans nom',
@@ -148,18 +148,22 @@
         retroaction: 'Rétroaction',
         statut: 'statut',
         programme: 'programme',
-        // Le stock de #913. Supposition nommée : mots proposés par Claude Code au lot 3, à relire par Grégoire.
+        // Le stock de #913. Mots relus et corrigés par Grégoire avec Cowork le 18 sept. 2026 (1.146.1).
         duCadre: 'saisi dans le Cadre',
-        enAttenteTitre: 'Des résultats saisis dans le Cadre, avant ce registre, attendent ici :',
-        enAttenteAide: 'Inscris ces élèves pour retrouver leurs résultats sous leur nom. D\'ici là, rien n\'est perdu : ils restent dans leur trimestre et dans l\'export de recherche.',
+        enAttenteTitre: 'Ces élèves ont des résultats saisis dans le Cadre, avant que le registre existe :',
+        enAttenteAide: 'Inscris-les pour retrouver leurs résultats sous leur nom. D\'ici là, rien n\'est perdu : ils restent dans leur trimestre et dans l\'export de recherche.',
         // Décision 3.1 (Grégoire, 18 sept. 2026) : retirer du registre « pour corriger une erreur » — un geste de
         // réparation : il confirme, et il DIT ce qu'il emporte.
         retirerDuRegistre: 'Retirer du registre',
+        // Texte de Grégoire (1.146.1). L'accord « Son résultat… sera effacé » / « Ses N résultats… seront effacés » porte sur
+        // toute la phrase : accorder() ne suffit pas ici, d'où les deux formes écrites.
         confirmerRetrait: (nomComplet, texteDossiers, dateCopie, resultats, nbDuCadre) => 'Retirer ' + nomComplet + ' du registre ? '
-            + 'La copie de son dossier (' + texteDossiers + (dateCopie ? ', copie du ' + dateCopie : '') + ') sera effacée du registre et ne pourra pas être retrouvée. '
-            + (resultats.length
-                ? 'Seront effacés avec elle : ' + accorder(resultats.length, MOTS_RESULTATS) + ' — ' + resultats.join(' ; ') + '. '
-                : 'Aucun résultat ultérieur n\'a été saisi pour cet·te élève. ')
+            + 'Sa copie' + (dateCopie ? ' du ' + dateCopie : '') + ' (' + texteDossiers + ') sera effacée et ne pourra pas être retrouvée. '
+            + (resultats.length === 1
+                ? 'Son résultat ultérieur sera effacé aussi : ' + resultats.join(' ; ') + '. '
+                : resultats.length
+                    ? 'Ses ' + resultats.length + ' résultats ultérieurs seront effacés aussi : ' + resultats.join(' ; ') + '. '
+                    : 'Aucun résultat ultérieur n\'a été saisi pour cet·te élève. ')
             + (nbDuCadre ? 'Ce qui avait été saisi dans le Cadre reste rangé dans son trimestre. ' : '')
             + 'Tes trimestres ne sont pas modifiés.'
     });
@@ -297,6 +301,11 @@
         const propres = eleve && Array.isArray(eleve.resultatsUlterieurs) ? eleve.resultatsUlterieurs : [];
         if (!eleve || eleve.reprise913) return propres;
         const vus = new Set(propres.map((r) => cleResultat(troisChamps(r))));
+        // `origine: 'cadre'` est posé sur des objets NEUFS (stock913 rend des copies à trois champs, jamais le stock lui-même),
+        // et il est RANGÉ POUR DE BON quand reprendreStock913 matérialise cette vue : c'est voulu. C'est la provenance du
+        // résultat (ancienne saisie du Cadre, ou ligne neuve), utile au geste « corriger une erreur » ; l'écran la dit avant
+        // comme après la reprise. La sentinelle du lot 3 l'exige au stock, DATA-OWNERSHIP la documente, et l'export de
+        // recherche ne la sort pas (trois champs recopiés, essai dédié). Remarque de la relecture croisée de Cowork, 18 sept.
         const duCadre = stock913(eleve.da)
             .filter((r) => !vus.has(cleResultat(r)))
             .map((r) => Object.assign(r, { origine: 'cadre' }));
