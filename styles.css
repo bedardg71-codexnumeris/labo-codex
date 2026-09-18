@@ -9765,77 +9765,8 @@ body.mode-clair .bloc-rlo-separateur {
     border: 2px solid var(--jaune-moyen, #ffc107);
 }
 
-/* --- Résultats ultérieurs (#913, 17 sept. 2026) : saisie sous la liste du Cadre ---
-   Cibles tactiles à 44 px (iPad) ; la phrase du verrou ne paraît que sur un trimestre archivé
-   sans « Permission d'écriture » — le même sélecteur que la garde d'index.html. */
-
-.ru-zone {
-    margin-bottom: 15px;
-    border: 1px solid var(--bleu-leger);
-    border-radius: var(--radius-moyen);
-    background: var(--surface-carte, #1a3040);
-    padding: 0 12px;
-}
-
-.ru-zone > summary {
-    /* display par défaut (list-item) : le triangle dit que la zone se déplie */
-    line-height: 44px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--texte-principal);
-}
-
-.ru-zone[open] {
-    padding-bottom: 12px;
-}
-
-.ru-cible {
-    min-height: 44px;
-}
-
-.ru-verrou {
-    display: none;
-    margin: 0 0 10px;
-    color: var(--texte-secondaire, #8aa4b0);
-    font-style: italic;
-}
-
-body.mode-archive:not(.mode-ecriture-temp) .ru-verrou {
-    display: block;
-}
-
-/* `.carte ul` (padding-left: 30px) l'emporterait sur une classe seule */
-.ru-zone .ru-eleves,
-.ru-zone .ru-resultats {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.ru-eleve {
-    padding: 10px 0;
-    border-top: 1px solid var(--gris-clair);
-}
-
-.ru-nom {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--texte-principal);
-}
-
-.ru-resultat {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 4px 0;
-    font-size: 0.85rem;
-    overflow-wrap: anywhere;
-}
-
 /* #915 (17 sept. 2026) — Labo › Suivi longitudinal : la liste des élèves inscrits au
-   registre. Mêmes mesures que la liste #913 (.ru-eleve) : une ligne par élève, séparée
-   d'un filet ; le lot 4 y déplie le dossier. Variables : toutes existantes (cliquet #595). */
+   registre. Une ligne par élève, séparée d'un filet ; le lot 4 y déplie le dossier. Variables : toutes existantes (cliquet #595). */
 .rl-eleves {
     list-style: none;
     margin: 0;
@@ -9843,11 +9774,6 @@ body.mode-archive:not(.mode-ecriture-temp) .ru-verrou {
 }
 
 .rl-eleve {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 6px 12px;
     min-height: 44px;
     padding: 10px 0;
     border-top: 1px solid var(--gris-clair);
@@ -9933,31 +9859,100 @@ body.mode-archive:not(.mode-ecriture-temp) .ru-verrou {
     font-size: 0.85rem;
 }
 
-.ru-saisie {
+/* Lot 3 (18 sept. 2026) : la ligne de saisie unique, les résultats sous chaque inscrit·e, le retrait.
+   Remplace le bloc .ru-* de #913 (retiré avec le bloc du Cadre). Cibles ≥ 44 px (iPad). */
+.rl-zone-saisie {
+    margin-top: 16px;
+}
+
+.rl-saisie {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 90px auto;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 90px auto;
     gap: 8px;
     align-items: end;
     margin-top: 6px;
 }
 
-.ru-saisie label {
+.rl-saisie label {
     display: flex;
     flex-direction: column;
     gap: 2px;
     font-size: 0.75rem;
-    color: var(--texte-secondaire, #8aa4b0);
+    color: var(--texte-secondaire);
 }
 
-.ru-refus {
+.rl-champ,
+.rl-cible {
+    min-height: 44px;
+}
+
+.rl-saisie .rl-champ {
+    width: 100%;
+}
+
+/* Un <select> natif ignore min-height sous WebKit (mesuré le 18 sept. : 23 px de haut à 768 px). Apparence retirée,
+   hauteur fixée, chevron redessiné — même patron que .select-nav-mobile, en gris neutre pour les deux modes.
+   L'id du conteneur : `.mode-clair .contenu select { background: white }` (0,2,1) emporterait le chevron sinon (mesuré). */
+#registre-longitudinal-conteneur select.rl-champ {
+    height: 44px;
+    padding: 0 32px 0 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+@media (max-width: 600px) {
+    .rl-saisie {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+.rl-refus {
     margin: 4px 0 0;
-    min-height: 1em;
     font-size: 0.8rem;
     color: var(--alerte-texte-erreur);
 }
 
-.ru-refus:empty {
+.rl-refus:empty {
     display: none;
+}
+
+.rl-eleve-entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+}
+
+.rl-eleve-entete .rl-meta {
+    flex: 1 1 200px;
+}
+
+/* `.carte ul` (padding-left: 30px) l'emporterait sur une classe seule */
+.rl-eleve .rl-resultats-ulterieurs {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+}
+
+.rl-resultat-ulterieur {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.rl-en-attente {
+    margin-top: 16px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gris-clair);
 }
 
 /* --- Horaire (Beta 95.2) --- */

@@ -7,6 +7,22 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 11 H (Toronto) : 1.145.0 (#915 lot 3 — la saisie des résultats ultérieurs rejoint le registre, retrait du registre, bloc du Cadre retiré)
+
+**Où est le travail** : `main`, la release 1.145.0 (build `0918-1055`), un commit de code après `8a3a9180`. ⚠ **NON POUSSÉ au moment d'écrire ce relais** : Claude Code pousse sur demande de Grégoire (décision du 13 sept.). Si `git log origin/main` ne montre pas 1.145.0, c'est que la demande n'est pas venue — le commit est local, l'arbre est propre hors le cadrage de Cowork.
+
+**Ce qui a été fait** : le lot 3 du cadrage (§ 7) plus le § 9 bis (porte du lot 2 relevée 7/7, trois décisions de Grégoire). Détail à `BACKLOG.md` #915 et, en français sans numéros, en tête de `OU-EN-EST-ON.md`. Décisions prises seul, toutes nommées là-bas : reprise du stock #913 **au geste** et non à l'ouverture ; drapeau `reprise913` lu AUSSI par l'export (`trimestres.js` lit la CLÉ, pas le module — SSOT) ; `resultats-ulterieurs.js` absorbé et supprimé ; ligne de saisie avant la liste ; « Retirer du registre » en `.btn-neutre`.
+
+**⚠ Ce qui n'est PAS une régression** : `sentinelle-913-resultats-ulterieurs.test.js` a perdu ses essais d'écriture namespacée (réancrée sur l'export et sur « plus aucun écrivain ») ; `resultats-ulterieurs-913.spec.js` est supprimé, ses gestes vivent en R3/R4 de `registre-longitudinal-915.spec.js`. Annoncé au cadrage (§ 7, ajouts de la relecture).
+
+**Deux défauts trouvés par le banc WebKit avant livraison, corrigés** : un `<select>` natif ignore `min-height` (23 px mesurés) → apparence retirée, hauteur fixée ; `.mode-clair .contenu select { background: white }` (0,2,1) emportait le chevron → règle ancrée sur l'id du conteneur. Piège à retenir pour tout `<select>` neuf dans `.contenu`.
+
+**⮕ À COWORK** : (1) les mots NEUFS du lot 3 ne sont pas relus par Grégoire — la liste exacte est en tête de `OU-EN-EST-ON.md`, point (5) ; c'est la leçon de #917, et la consigne disait « rien n'est en attente » : je les ai livrés en les nommant plutôt que d'attendre. (2) Pas de porte terrain propre au lot 3 (règles de tête du skill : le banc répond, et le seul geste irréversible — retirer du registre — confirme et dit ce qu'il emporte) ; la porte du lot 4 portera les mesures du lot 3 sur corpus réel : reprise de ses vraies saisies du Cadre, s'il en a. (3) Le cadrage (§ 9 bis) est toujours non commité : c'est ton fichier.
+
+**Ce qui reste dû** : lot 4 de #915 (le dossier déplié, 768 px, deux modes, cibles ≥ 44 px) et sa porte terrain.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 7 H 30 (Toronto) : 1.144.2 (#917, commentaire testeur — « Re-capturer » devient « Refaire la copie »)
 
 **Où est le travail** : `main`, un commit de code après `3b28608b` = la release 1.144.2 (build `0918-0729`). **POUSSÉ le 18 sept. 2026 à ≈ 8 h 15 (Toronto), sur demande de Grégoire : origin/main = `6a5fda3e`**, mesuré après `pousser.sh origin main` et `git fetch` — sentinelle Playwright verte pour ce SHA exact, **0 échec connu, 0 instable** ; Vitest vert au hook (593 / 6 734). Ce que sert l'hébergeur ne se mesure pas d'ici.

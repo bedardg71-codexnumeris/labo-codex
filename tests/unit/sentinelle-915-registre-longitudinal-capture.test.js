@@ -265,7 +265,8 @@ describe('#915 lot 2 — l\'écran', () => {
         const zoneInscrits = conteneur.children.find((c) => c.id === 'rl-zone-inscrits');
         const liste = zoneInscrits.children.find((c) => c.className === 'rl-eleves');
         expect(liste.children).toHaveLength(1);
-        const [nom, meta] = liste.children[0].children.map((s) => s.textContent);
+        // Lot 3 : le nom et la date vivent dans l'en-tête de la rangée (.rl-eleve-entete).
+        const [nom, meta] = liste.children[0].children.find((c) => c.className === 'rl-eleve-entete').children.map((s) => s.textContent);
         expect(nom).toBe('Assidu, Alice');
         expect(meta).toMatch(/^Hiver 2026 · Automne 2024 — Copie du \d{4}-\d{2}-\d{2}$/);
         const zoneRecherche = conteneur.children.find((c) => c.id === 'rl-zone-recherche');
