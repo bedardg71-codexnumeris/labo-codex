@@ -198,7 +198,12 @@
         'modeApplication',
         'etatsAccordeonsV2',
         'cours',       // Bibliothèque de cours partagée (clé canonique, remplace listeCours)
-        'listeCours'   // Legacy — migré vers 'cours' au chargement, conservé pour rétrocompatibilité
+        'listeCours',  // Legacy — migré vers 'cours' au chargement, conservé pour rétrocompatibilité
+        // #915 (17 sept. 2026) : le registre longitudinal traverse les trimestres par
+        // construction — un élève, N dossiers figés. Global, jamais préfixé ; survit à
+        // supprimerTrimestre (le filtre `includes(id)` ne l'atteint pas). Seul écrivain :
+        // js/registre-longitudinal.js.
+        'registreLongitudinal'
     ];
 
     // ✅ AJOUT (28 janvier 2026) : Templates à copier lors de l'archivage

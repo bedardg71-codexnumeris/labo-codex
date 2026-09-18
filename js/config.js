@@ -82,7 +82,8 @@ const configurationsOnglets = {
         { id: 'comparateur', label: 'Exploration des pratiques' },
         { id: 'rythme', label: 'Rythme de travail' },
         { id: 'etudes', label: 'Études' },
-        { id: 'bilan', label: 'Bilan réflexif' }
+        { id: 'bilan', label: 'Bilan réflexif' },
+        { id: 'longitudinal', label: 'Suivi longitudinal' } // #915 — nom tranché par Grégoire le 17 sept. 2026 ; entrée autorisée par lui le même soir
     ],
     'aide': [
         { id: 'introduction', label: 'Introduction' },
