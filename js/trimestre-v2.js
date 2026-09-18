@@ -385,6 +385,10 @@ function populerDropdownsAssemblageV2() {
             BibliothequeUI.ajouterOptgroupDemo(selectPratique, pratiquesDemo, p => p.nom || p.id || 'Sans nom');
         }
     }
+
+    // Retour testeur du 18 sept. 2026 : ce hub est rejoué après chaque
+    // enregistrement de cours, d'enseignant·e ou d'horaire — la barre suit.
+    mettreAJourBarreContexte();
 }
 // Hub résiduel consommé par les sous-modules extraits (session A — 17 mai 2026).
 window.populerDropdownsAssemblageV2 = populerDropdownsAssemblageV2;

@@ -174,6 +174,12 @@ function populerDropdownGroupeCoursV2() {
         select.value = valeurActuelle;
     }
     // Note: La restauration depuis groupeCoursActif est gérée par chargerGroupeCoursV2()
+
+    // Retour testeur du 18 sept. 2026 : « Créer » rejoue ce rendu mais pas le
+    // hub — sans cet appel, l'étape Groupe-cours restait vide après la création.
+    if (typeof window.mettreAJourBarreContexte === 'function') {
+        window.mettreAJourBarreContexte();
+    }
 }
 
 /**
