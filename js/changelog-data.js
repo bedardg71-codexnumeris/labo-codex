@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // Entrée PROPOSÉE le 19 sept. 2026 (#701, #702, #703, #704, #705, #686) — à valider par Grégoire.
+            // Entrée validée par Grégoire le 19 sept. 2026 (#701, #702, #703, #704, #705, #686).
             version: '1.150',
             couleur: 'orange',
             titre: 'Ce que l\'élève lit une fois sa note calculée',
