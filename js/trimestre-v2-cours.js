@@ -594,6 +594,8 @@ function activerCoursV2() {
     if (typeof window.peuplerDropdownGroupeCoursActif === 'function') {
         window.peuplerDropdownGroupeCoursActif();
     }
+    // #887 : le formulaire d'ajout d'élèves nomme le cours actif — il vient de changer.
+    if (typeof window.rafraichirRattachementEtudiantsV2 === 'function') window.rafraichirRattachementEtudiantsV2();
 }
 
 /**

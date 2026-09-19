@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.148',
+            couleur: 'vert',
+            titre: 'L\'import d\'élèves dit où vont les élèves',
+            items: [
+                'Cadre&nbsp;› liste du groupe&nbsp;: avant de confirmer un import, l\'écran dit à quel cours la liste sera rattachée, et un menu permet d\'en choisir un autre sur place. Choisir un cours dans ce menu ne change pas ton cours actif. Avant, les élèves rejoignaient le cours actif sans que rien ne le dise.',
+                'Le formulaire d\'ajout d\'un·e élève nomme lui aussi le cours auquel l\'élève sera rattaché·e.',
+                'À l\'import, le DA suit la même règle qu\'au formulaire&nbsp;: sept chiffres, comme celui du collège. Une ligne sans DA, ou dont le DA n\'a pas sept chiffres, n\'est pas importée&nbsp;: l\'aperçu la signale, le bouton dit combien d\'élèves entreront, et le message final nomme les lignes laissées de côté. Les autres lignes entrent normalement. Les élèves déjà inscrit·es ne changent pas.'
+            ]
+        },
+        {
             version: '1.147',
             couleur: 'vert',
             titre: 'L\'assiduité qui manque',

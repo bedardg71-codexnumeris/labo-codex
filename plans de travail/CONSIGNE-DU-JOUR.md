@@ -1,47 +1,50 @@
-# Consigne suivante — l'application n'invente plus de DA (#914)
+# Consigne suivante — l'import d'élèves nomme le cours de rattachement (#887, suite de #872 ; #923 ; DA à l'import)
 
-> Écrite le 19 septembre 2026 à 13 h 40 (Toronto), par Cowork, sur accord de Grégoire (« Oui »).
-> **Condition de départ** : `origin/main` = `88371a4a` (1.147.1 poussée) ou plus récent. Archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-phrases-assiduite-inconnue.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
-> ⚠ **Arbre partagé** : les quatre fichiers de l'autre travail (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) restent hors de l'index ; jeton d'`interpretation-config.js` à `20260910c` (release.mjs voudra le bumper : remets-le, comme aux trois derniers lots).
-> **Identifiant** : aucune fiche neuve attendue ; sinon « Dernier ID utilisé » (#922 à l'écriture) et `grep` des deux registres.
-> **Ce lot ne demande rien à Grégoire** sauf le « pousse » : la règle est la sienne (fiche #914, 17 sept. au soir), le message d'erreur est lu par des enseignants, pas par des élèves – tu le choisis et tu le nommes.
+> Écrite le 19 septembre 2026 à 14 h 01 (Toronto), par Cowork. **Forme tranchée par Grégoire le 17 sept. 2026, 13 h 38** (`plans de travail/DECISIONS-2026-09-17-apres-midi.md`, #887). La règle des DA à l'import : voir §3, décision de Grégoire du 19 sept.
+> **Condition de départ** : `main` porte `a73c88b2` (1.147.2, #914) ou plus récent ; 1.147.2 part avec ce lot ou avant, sur « pousse » de Grégoire. Archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-da-jamais-invente.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> ⚠ **Arbre partagé** : les quatre fichiers de l'autre travail restent hors de l'index ; jeton d'`interpretation-config.js` à `20260910c`.
+> **Identifiant** : « Dernier ID utilisé » = #923 à l'écriture ; relis-le et `grep` les deux registres.
 
 ---
 
-## 1 · La règle de Grégoire, telle quelle
+## 1 · Ce que Grégoire verra
 
-« Aucune DA ne devrait être inventé de toute pièce dans l'application. Il n'existe qu'un seul format, et c'est celui créé par le collège » : **sept chiffres, rien d'autre.**
+Cadre › Groupe d'étudiant·es › « Importer des étudiant·es » : avant de confirmer, la zone dit **à quel cours** la liste sera rattachée, et un menu des cours du trimestre permet d'en choisir un autre, sur place. Aujourd'hui, les élèves vont au cours actif sans que rien ne le dise (Mathieu a importé son 2e groupe « dans son 2e cours », les élèves ont rejoint le premier).
 
-## 2 · Ce que Grégoire verra
+## 2 · La forme tranchée (17 sept., 13 h 38)
 
-Cadre › Groupe d'étudiant·es, formulaire d'ajout : un DA vide ou qui n'a pas sept chiffres est **refusé** avec un message clair, et rien n'est enregistré. Aujourd'hui, un DA vide devient `DA` + horodatage, en silence.
+« La zone d'import NOMME le cours de rattachement et laisse en changer sur place » ; forme proposée, **à ajuster aux mots de l'écran** : « Ces étudiant·es seront rattaché·es à : <code du cours> », plus un menu des cours du trimestre. Écartés : nommer le cours sans menu ; autres variantes de la fiche.
 
-## 3 · Ce que Cowork a mesuré (19 sept., lecture de `main` à `88371a4a`) – à remesurer
+**Décisions techniques de Cowork, à tenir sauf mesure contraire (dis-le alors)** :
+- Le menu choisit la **cible de cet import seulement** ; il ne change pas le cours actif de l'application (changer d'écran actif en plein import surprendrait). Valeur initiale : le cours actif.
+- L'ajout un par un (`soumettreEtudiantV2`, même `coursId = infoCours`) : même phrase nommant le cours au-dessus du formulaire d'ajout, **sans** menu (un élève ajouté à la main l'est dans la liste qu'on regarde). Si la mesure montre que ça ne tient pas, dis-le.
+- Un trimestre sans aucun cours : la zone le dit et l'import reste possible comme aujourd'hui (`coursId` vide) – ne bloque pas un premier trimestre.
 
-- `js/trimestre-v2-etudiants.js`, `soumettreEtudiantV2` (l. 378) : l. 404, `da: da || \`DA${Date.now()}\`` – **seul site** de fabrication dans `js/` au grep.
-- Le même formulaire sert à l'**édition** (`etudiantEnEditionIndex`, `etudiantEnEditionDA`, fusion l. 446-456). ⚠ En édition, un DA effacé à l'écran recevrait AUJOURD'HUI un DA inventé, et la fusion l'écrirait sur la fiche : l'élève changerait d'identifiant et perdrait ses évaluations et présences. Même correctif.
-- ⚠ **Le pack démo porte des DA « DEMO004 », « DEMO015 »** (capture de Grégoire, 12 h 01) : une validation à chaque enregistrement empêcherait de modifier un élève de démonstration. Décision de Cowork, à tenir : **le DA n'est validé qu'à la création, et en édition seulement s'il a changé** (`da !== etudiantEnEditionDA`). Un DA existant non conforme se garde tel quel.
-- La garde « DA déjà dans le groupe » (l. 430-434) reste, et passe après la nouvelle.
-- Le champ `#v2-etudiantDA` (`index.html` ≈ l. 7029) porte `placeholder="1234567"` : un attribut `inputmode="numeric"` aiderait l'iPad (clavier chiffré) – à ton jugement, dit en une ligne.
+## 3 · Les DA à l'import – ✅ Tranché par Grégoire : « oui » à la recommandation de Cowork (19 sept. 2026, 14 h 02). Applique.
 
-## 4 · Hors du lot, à MESURER et à DIRE (pas à changer)
+Mesuré par toi au lot #914 : l'import laisse tout entrer (« 123456 », « ABC-99 », deux lignes sans DA → deux fiches au DA vide, jamais dédoublonnées ; message « 5 étudiant·es ajouté·es »).
+**Recommandation de Cowork** : même règle qu'au formulaire. Une ligne dont le DA n'a pas sept chiffres (après retrait des espaces) **n'est pas importée** ; l'aperçu la montre marquée « DA manquant » / « DA invalide », le bouton dit combien de lignes seront importées, et le message final nomme les lignes écartées. Les autres lignes entrent. Un DA déjà présent dans le trimestre est traité comme aujourd'hui (mesure et dis ce qu'il fait).
+➡ **Ligne à lire ici au démarrage** : si ce paragraphe porte « ✅ Tranché par Grégoire : … », applique ; sinon, arrête-toi avant de coder ce volet et fais le reste du lot.
 
-- **L'import collé / fichier** (`analyserListeEtudiantsCollee` l. 827, `traiterDonneesImportV2` l. 852, `confirmerImportV2` l. 893) : accepte-t-il une ligne dont le DA n'a pas sept chiffres, ou n'en a pas du tout ? Il n'invente rien, mais il laisse passer un autre format que celui du collège. Donne le comportement exact, avec un exemple : **c'est une question pour Grégoire**, Cowork la lui portera.
-- **Le stock** : combien de fiches du pack démo et de la base de test portent un DA en `DA` + 13 chiffres ? Tarir, pas réparer : aucun DA existant n'est réécrit.
+## 4 · Dans la même zone
+
+- **#923** (inscrit par toi) : l'aperçu de l'import pose les colonnes collées sans `echapperHtml` – règle de sécurité n° 1. Corrige-le dans ce lot : c'est la zone que tu réécris.
+- **Mécanisme B de #872** : la liste du Cadre filtre par numéro de groupe seulement ; deux cours qui ont chacun « 00001 » s'affichent comme un seul groupe. **Mesure et dis** si la liste montre les élèves des deux cours sous le même groupe (cas de Mathieu : un groupe par cours). Ne le change pas dans ce lot ; si c'est vrai, propose la phrase de fiche, Cowork la portera à Grégoire.
 
 ## 5 · Arrêts
 
-- Si un autre chemin que le formulaire fabrique ou modifie un DA (Rencontres, import, Codex, registre) : arrête-toi et dis lequel.
-- Si le refus d'un DA non conforme bloque un geste existant au-delà du cas démo (fixture, banc, autre écran) : dis-le avant de contourner.
+- Si le rattachement au cours sert ailleurs sous un autre nom (`coursId` lu par le groupe-cours, l'horaire, les présences) et que le menu risque d'écrire un cours incohérent avec le groupe : arrête-toi et dis-le.
+- Stock : aucun élève déjà rattaché n'est déplacé (écrire dans les données d'un·e enseignant·e remonte à Grégoire).
 
 ## 6 · Preuve
 
-- Sentinelle Vitest : DA vide → refus, rien d'écrit ; « 123456 », « 12345678 », « DA1234567 », « 123 4567 » → refus ; « 1234567 » → accepté ; espaces en tête et en fin retirés avant de juger (à ton jugement, dit) ; édition d'un élève « DEMO015 » sans toucher au DA → enregistrée ; édition qui efface le DA → refusée, fiche intacte.
-- Banc WebKit qui fait le geste au formulaire : le message lu à l'écran, la liste inchangée.
-- Mutations : la garde retirée ; la garde appliquée aussi en édition sans changement (le cas démo doit rougir) ; l'ancien repli `DA${Date.now()}` remis. Chacune rouge, restauration à l'empreinte.
-- Vitest complet depuis `tests/`. Le verdict Playwright par `pousser.sh`, Cowork fermé.
-- Version : patch `1.147.2` ; une ligne de « Nouvelles » proposée, elle remonte à Grégoire par Cowork avant le push.
+- Banc WebKit par le vrai geste : deux cours au trimestre, coller une liste, lire la phrase avec le cours actif, choisir l'autre cours au menu, confirmer ; les élèves portent le `coursId` choisi et le cours actif n'a pas changé.
+- #923 : un nom collé `<img src=x onerror=…>` s'affiche en texte dans l'aperçu.
+- DA (si tranché) : aperçu et message nomment les lignes écartées ; aucune fiche au DA vide.
+- Mutations : cible forcée au cours actif ; menu qui change le cours actif ; échappement retiré ; garde des DA retirée. Chacune rouge.
+- Vitest complet depuis `tests/` ; verdict Playwright par `pousser.sh`, Cowork fermé. Porte terrain probable (le menu sur iPad) : markdown du skill `portes-terrain`, Cowork publie l'artefact.
+- Version : `minor` si le menu est une fonction, à ton jugement ; entrée de « Nouvelles » proposée, elle remonte à Grégoire par Cowork.
 
 ## 7 · Rapport
 
-En gestes d'utilisateur : le message choisi et ce que tu as supposé, le comportement de l'import (§4) avec son exemple, le compte du stock, ce qui n'est pas mesuré, et la liste des chemins à commiter. Mets à jour `OU-EN-EST-ON.md` et `RELAIS.md`, coche #914 avec sa phrase « vérifié comment ».
+En gestes d'utilisateur : les mots posés et ce que tu as supposé (les mots de la zone sont lus par des enseignant·es : propose, pose, nomme), la mesure du mécanisme B, ce qui n'est pas mesuré, les chemins à commiter. `OU-EN-EST-ON.md`, `RELAIS.md` ; coche #887 et #923 avec leur « vérifié comment ».

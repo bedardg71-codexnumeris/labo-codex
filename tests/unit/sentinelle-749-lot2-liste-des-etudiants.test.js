@@ -328,7 +328,7 @@ describe('#749 lot 2 · G — un DA en double refusé ; le groupe padé à l\'é
         expect(store.test_groupeEtudiants.length).toBe(4);                                         // 3 + Ivan
         expect(store.test_groupeEtudiants.find(e => e.da === '2000001').nom).toBe('Césaire');     // intact, pas écrasé
         expect(store.test_groupeEtudiants.filter(e => e.da === '3000001').length).toBe(1);
-        expect(b.notifs.some(n => n.type === 'succes' && n.t === '1 étudiant·e ajouté·e, 2 déjà présent·es (ignoré·es) — 4 au total dans le groupe')).toBe(true);
+        expect(b.notifs.some(n => n.type === 'succes' && n.t === '1 étudiant·e ajouté·e à Cours banc, 2 déjà présent·es (ignoré·es) — 4 au total dans le groupe')).toBe(true);   // #887 : le message nomme le cours
         b.interne.donneesImportEnAttenteV2 = lot();
         await b.win.confirmerImportV2();
         expect(store.test_groupeEtudiants.length).toBe(4);                                         // réimport : rien de plus

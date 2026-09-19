@@ -322,6 +322,8 @@ function _rafraichirVuesContextDependantes(valeurHeader, messageNotification, re
     if (typeof mettreAJourContexteEntete === 'function') {
         mettreAJourContexteEntete();
     }
+    // #887 : le formulaire d'ajout d'élèves du Cadre nomme le cours actif — il vient de changer.
+    if (typeof window.rafraichirRattachementEtudiantsV2 === 'function') window.rafraichirRattachementEtudiantsV2();
 
     notifications.succes(messageNotification);
 
