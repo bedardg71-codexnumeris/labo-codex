@@ -13762,10 +13762,10 @@ label:has(+ textarea:disabled) {
     font-size: 0.8rem;
 }
 
-/* Liste étudiants — en-tête lisible en mode sombre */
-#v2-listeEtudiants thead {
-    background: var(--bleu-moyen, #1a5276);
-}
+/* Liste étudiants — en-tête lisible en mode sombre : texte blanc sur le fond `--bleu-pale` que
+   peint `.conteneur-liste-etudiants th` (en-tête collant, donc opaque). Un fond posé sur le THEAD
+   ne se voit jamais — ce th le masque : la règle `thead` d'ici a été retirée le 19 sept. 2026
+   (elle n'avait aucun effet), et le mode clair pose son fond sur le TH, plus bas. */
 #v2-listeEtudiants th {
     padding: 10px 12px;
     font-weight: 600;
@@ -24429,11 +24429,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* En-tête de la liste de groupe (Cadre › Groupe d'étudiants) : bandeau bleu
    foncé + texte blanc en thème clair. Sans ça, le fond pâlit et le texte
-   blanc devient illisible (blanc sur pâle). */
-.mode-clair #v2-listeEtudiants thead {
-    background: var(--bleu-principal);
-}
+   blanc devient illisible (blanc sur pâle). Le fond va sur le TH, pas sur le THEAD : le fond
+   pâle du th masquait celui du thead (vu par Grégoire sur iPad, 19 sept. 2026 — contraste 1,13). */
 .mode-clair #v2-listeEtudiants th {
+    background: var(--bleu-principal);
     color: white;
 }
 

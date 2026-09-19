@@ -2669,6 +2669,10 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
         etudiantsActifs.forEach(e => {
             // Indice A (Assiduité)
+            // ⚠ CODE SANS APPELANT (mesuré le 19 sept. 2026 ; la sentinelle #745 le dit aussi, essai B.2).
+            // Si ce graphique revit : lire le magasin par `lireIndiceAssiduite` (#743 — le stock d'avant,
+            // `indice: 1, nombreSeances: 0`, compterait ici pour 100 %, et une entrée `null` ferait
+            // `null.indice`), et revoir le `A > 0` plus bas, qui écarte l'absent total, contraire à #750.
             const assiduiteSom = indicesAssiduite.sommatif?.[e.da];
             const A = typeof assiduiteSom === 'object'
                 ? assiduiteSom.indice

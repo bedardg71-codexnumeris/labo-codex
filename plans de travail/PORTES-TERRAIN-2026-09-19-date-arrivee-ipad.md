@@ -58,11 +58,11 @@ ton verdict écrit, pas une case :
 - **3.1 · La carte « Contexte d'apprentissage » d'un·e élève qui a des copies mais aucune assiduité
   connue.** Aujourd'hui : un tiret à la place du palier, « Assiduité (A) : — », la complétion, et
   aucune phrase dessous. Proposition de phrase : « L'assiduité n'est pas encore connue : le contexte
-  se qualifiera dès qu'une séance sera saisie pour cet·te étudiant·e. » — ton verdict : ……
+  se qualifiera dès qu'une séance sera saisie pour cet·te étudiant·e. » — ton verdict : **validée, retouchée : « s'affichera »** (Grégoire, 19 sept. 2026, 11 h 44 ; posée en 1.147.1, lue à l'écran par le banc WebKit du lot D).
 - **3.2 · La bulle du badge « A — » dans le Suivi du groupe › Détails.** Aujourd'hui : aucune bulle
   (celle de P, « Note non constructible… », ne s'applique pas à une assiduité). Proposition :
   « Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e. » — ton
-  verdict : ……
+  verdict : **validée telle quelle** (Grégoire, 19 sept. 2026, 11 h 44 ; posée en 1.147.1, lue à l'écran par le banc WebKit du lot D).
 
 ## §4 · Ce que je n'ai pas pu vérifier
 
@@ -75,3 +75,13 @@ ton verdict écrit, pas une case :
   n'entre dans ce calcul.
 - **Le tri par assiduité** (Liste, Saisie des présences) range une assiduité inconnue comme un 0 :
   c'est un ordre de lignes, aucun chiffre n'est affiché ; non corrigé, dit ici.
+
+## Relevé de Grégoire — 19 sept. 2026, 12 h 01 (reçu par Cowork le 19 sept. 2026, 12 h 01)
+
+**3 passées · 0 échec · 0 non traitée**, sur l'iPad, en 1.147.0 (artefact « Porte — Date d'arrivée »).
+
+- [x] 0.1 — numéro en bas de page lu (1.147.0 ou plus récent).
+- [x] 1.1 — le sélecteur de date s'ouvre ; champ et « Enregistrer les modifications » atteignables.
+- [x] 1.2 — date choisie, enregistrée, relue à la réouverture. Constat écrit : aucun (case cochée seule).
+
+⮕ Porte close. Aucune fiche à inscrire. Relevé à commiter avec le prochain lot (Cowork ne commite pas).
