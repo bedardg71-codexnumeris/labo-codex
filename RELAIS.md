@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 15 H 55 (Toronto) : 1.149.0 (#924 — #872 MÉCANISME B, UN GROUPE = (COURS, NUMÉRO)) — 🟡 FUSIONNÉE DANS `main`, COMMITÉE, NON POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, 16 H 05 (Toronto) : 1.149.0 (#924 — #872 MÉCANISME B, UN GROUPE = (COURS, NUMÉRO)) — ✅ POUSSÉE
+
+**`origin/main` = `dac6267c`, mesuré après `git fetch`** (HEAD = origin/main). `scripts/pousser.sh origin main` sur le « Pousse » de Grégoire (≈ 15 h 45, question fermée), Cowork fermé (dit par Grégoire ET mesuré : aucune VM, seul le pont de l'extension Chrome) : la garde de charge de `pousser.sh` (seuil 8) a attendu 60 s (18,02 → 11,34 → 7,40), suite WebKit sans rougeur nouvelle (0 échec connu, inchangé), Vitest du hook vert, verdict vert à jour pour ce SHA. La session voisine (lot-701, worktree `.claude/worktrees/lot-701`) s'est tenue hors de l'arbre principal et sans test lourd pendant le verdict. **Restent dus** : la relecture croisée de Cowork ; à porter à Grégoire par Cowork : l'édition d'une fiche ne déplace plus un élève d'un cours à l'autre. Ce qui suit est l'état d'AVANT le push, gardé pour le détail.
 
 **Le travail le plus récent vit sur `main`** (branche du lot `lot/872b-groupe-nomme-son-cours` fusionnée en avance rapide, worktree `.claude/worktrees/lot-872b` retiré). Consigne exécutée : `plans de travail/CONSIGNE-DU-JOUR.md` (« un groupe, c'est un numéro DANS un cours »), l'ancienne archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-retouche-import-1148.md`.
 **Mesuré avant le commit** : Vitest 600 fichiers / 6 821 essais verts, sans « Errors » ; les cinq bancs WebKit de l'écran « liste du groupe » verts (8 essais, `--retries=0`) ; 9 mutations / 9 rouges à la sentinelle ET au banc neuf. **Pas mesuré** : la suite Playwright entière — elle tourne au `scripts/pousser.sh origin main`, qui attend le « pousse » de Grégoire, Cowork fermé.
