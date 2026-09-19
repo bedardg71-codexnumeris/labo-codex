@@ -1343,6 +1343,12 @@ function chargerTableauBordApercu() {
         // Afficher RàI et Patterns uniquement si activé dans les réglages
         const activerRai = obtenirPreference('activerRai') !== false;
 
+        // #906 (19 sept. 2026) : la liste enrichie (RàI, suivi des fondations) est rafraîchie AVANT
+        // les barres qui la lisent — la phrase du bilan des fondamentaux et la ligne de fiabilité
+        // (`_tousEtudiantsEnrichis`). Calculée après, elles décrivaient le groupe du rendu précédent.
+        // Un seul calcul par rendu ; aucun accès au DOM ici, les couleurs se posent plus bas.
+        calculerEtudiantsPrioritaires();
+
         if (activerRai) {
             afficherPatternsApprentissage(etudiantsAvecIndices);
             afficherNiveauxRaI(etudiantsAvecIndices);
@@ -1387,9 +1393,8 @@ function chargerTableauBordApercu() {
         // Appliquer les couleurs des étudiants suivis après génération du HTML
         appliquerCouleursEtudiantsSuivis();
 
-        // Calculer les étudiants prioritaires (le compteur `#compteur-prioritaire`
-        // vivait dans le panneau mort `#panneau-prioritaire`, retiré — G-5 #749)
-        calculerEtudiantsPrioritaires();
+        // Couleurs des étudiants prioritaires, sur la liste calculée plus haut (#906). Le compteur
+        // `#compteur-prioritaire` vivait dans le panneau mort `#panneau-prioritaire`, retiré — G-5 #749.
         appliquerCouleursPrioritaires();
 
         // Horodatage discret en bas du tableau de bord
