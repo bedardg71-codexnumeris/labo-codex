@@ -7,6 +7,28 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 14 H (Toronto) : 1.147.2, L'APPLICATION N'INVENTE PLUS DE DA (#914) — 🟡 COMMITÉ, NON POUSSÉ
+
+**Où est le travail** : `main`, release `patch` 1.147.2 par-dessus `88371a4a` (= `origin/main` au départ, mesuré après `git fetch` par l'audit de début de session : 0 en avance, 0 en retard, aucun processus de test concurrent, charge 2,5). **Push sur le « pousse » de Grégoire seulement.** Le lot touche `js/` et `index.html` : `pousser.sh` lancera la garde complète (≈ 15 min, en arrière-plan, **Cowork fermé — à mesurer, pas à supposer**, charge machine basse au lancement).
+
+**Dû avant le push** : (1) la ligne de « Nouvelles » (4e item de l'entrée 1.147 de `js/changelog-data.js`) est PROPOSÉE — elle remonte à Grégoire par Cowork ; (2) la relecture croisée de Cowork ; (3) le « pousse ». **Dû à Grégoire, sans bloquer le push** : la question de l'import (ci-dessous).
+
+**Livré** : `soumettreEtudiantV2` (`js/trimestre-v2-etudiants.js`) refuse un DA vide ou non `^\d{7}$`, à la création et en édition si le DA a changé ; inchangé, le DA d'origine est réécrit tel quel (« DEMO015 » reste modifiable). Message : « DA manquant » / « DA invalide » + « Le DA est celui du collège : sept chiffres, rien d'autre. Rien n'a été enregistré. » `index.html` : astérisque et `inputmode="numeric"` sur `#v2-etudiantDA`. Sentinelle Vitest 15 essais, banc WebKit au formulaire, 6 mutations / 6 rouges, Vitest complet vert (599 fichiers / 6 801 essais attendus — à relire sur la sortie du hook).
+
+**Mesuré hors lot (§4 de la consigne), PAS changé** : l'import collé / fichier (`analyserListeEtudiantsCollee` → `confirmerImportV2`) accepte tout DA, y compris vide. Exécuté sur cinq lignes : « 1234567 », (vide), « 123456 », « ABC-99 », (vide) → cinq fiches écrites, deux au DA vide (le dédoublonnage `if (e.da && …)` saute les vides), message « 5 étudiant·es ajouté·es ». **Question pour Grégoire, portée par Cowork** : l'import doit-il refuser (ou signaler) une ligne dont le DA n'a pas sept chiffres ? Non inscrite au BACKLOG tant qu'il n'a pas tranché.
+
+**Stock** : aucun DA réécrit. Pack démo : 0 DA fabriqué (111 « DEMO### ») ; fixtures : 0 ; trimestres réels de Grégoire : non mesurables d'ici.
+
+**Trouvailles et leur issue** : `js/groupe.js` `parseAndPreview` fabrique des DA « AUTO- » + horodatage — sans appelant vivant (ses éléments `donneesCollees`, `fichierCsvEntree`, `previewZone` sont absents d'`index.html`, `handleFileImport` et `previewPastedData` sans référence) : **issue 3, commenté dans le code**. L'aperçu de l'import (`traiterDonneesImportV2`, ≈ l. 879) pose `e.da`, `e.nom`… dans un `innerHTML` SANS `echapperHtml` — code étranger au lot, non vérifié contre les registres : **issue 2 : inscrit #923, non corrigé** (la CSP bloque l'exécution d'un script ; à prendre avec le prochain lot qui touche l'import).
+
+**Fixture adaptée (constat §5 de la consigne, dit avant d'agir)** : `tests/integration/assiduite-lot-D-date-arrivee-et-inconnu.spec.js` ajoutait trois élèves par le formulaire avec « TARDIF1 », « ABSENT1 », « INCONNU1 » → « 9100001 », « 9100002 », « 9100003 » (15 lignes) ; rejoué en WebKit : vert. **Et une seconde, trouvée en rejouant les specs qui citent `soumettreEtudiantV2`** : `tests/integration/parcours-rentree-478.spec.js` (« un·e étudiant·e ajouté·e fait apparaître son groupe ») ajoutait son élève SANS DA — le geste même que ce lot refuse ; elle reçoit le DA « 2600001 », 4 essais verts. ⚠ Mon premier grep (`v2-etudiantDA`) ne pouvait pas la voir : un banc qui ne remplit pas le champ ne le nomme pas. Refait par `v2-etudiantNom`, le bouton et le nom de la fonction : ces deux specs sont les seules à soumettre le formulaire. **La suite Playwright entière reste le seul juge des autres écrans.**
+
+**Arbre partagé** : les quatre fichiers de l'autre travail (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) sont restés hors de l'index ; jeton d'`interpretation-config.js` remis à `20260910c` après `release.mjs`. Consigne du matin archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-phrases-assiduite-inconnue.md`.
+
+**Vu par l'audit de début de session, sans suite donnée ici** : les 8 derniers runs GitHub sur `main` sont `cancelled` côté Playwright au plafond de 40 min (déjà noté plus bas, « cause non lue », jamais inscrit) ; le worktree `.claude/worktrees/verdict-906` est un reliquat propre, retirable ; `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` date du 15 sept.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 12 H 30 (Toronto) : 1.147.1, LES DEUX PHRASES DE L'ASSIDUITÉ INCONNUE + LA LISTE DU GROUPE VUE SUR IPAD — ✅ POUSSÉ À ≈ 12 H 50
 
 ✅ **POUSSÉ le 19 sept. 2026 à ≈ 12 h 50, sur le « pousse » de Grégoire, après la relecture croisée de Cowork (verte, dit par Grégoire)** : `origin/main` = `39e87f4c` (mesuré après `git fetch`). `pousser.sh` lancé à charge 3,10 : suite Playwright WebKit entière sans rougeur nouvelle (0 échec connu), Vitest du hook vert, jeton de verdict sur ce SHA exact. ⚠ **Une spec verte AU SECOND ESSAI** : `profil-etudiant-chargement.spec.js › Défense refactor · sentinelle exports browser profil-etudiant` — ne bloque pas (#534, #685) ; le lot n'a touché dans les modules du profil que des commentaires et une chaîne, aucun export. À surveiller si elle revient. Le paragraphe suivant décrit l'état d'AVANT le push.

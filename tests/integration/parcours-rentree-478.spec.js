@@ -158,6 +158,7 @@ test('#478 (b) · un·e étudiant·e ajouté·e fait apparaître son groupe dans
         await pause(300);
         const lire = () => Array.from(document.getElementById('v2-hor-groupeAssocie').options).map((o) => o.value);
         const avant = lire();
+        document.getElementById('v2-etudiantDA').value = '2600001';   // #914 : sans DA de sept chiffres, l'ajout est refusé
         document.getElementById('v2-etudiantNom').value = 'Tremblay';
         document.getElementById('v2-etudiantPrenom').value = 'Marie';
         document.getElementById('v2-etudiantGroupe').value = '00001';

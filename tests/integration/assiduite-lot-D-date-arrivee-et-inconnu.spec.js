@@ -70,15 +70,15 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         // séances saisies se lisent PAR GROUPE (#330). Le banc remet ses élèves dans le groupe du pack, puis recalcule.
         const recaler = async () => {
             const tous = obtenirDonneesSelonMode('groupeEtudiants') || [];
-            tous.forEach(e => { if (['TARDIF1', 'ABSENT1', 'INCONNU1', 'DEMO004'].includes(e.da)) e.groupe = groupeDemo; });
+            tous.forEach(e => { if (['9100001', '9100002', '9100003', 'DEMO004'].includes(e.da)) e.groupe = groupeDemo; });
             sauvegarderDonneesSelonMode('groupeEtudiants', tous);
             calculerEtSauvegarderIndicesAssiduite(); await pause(300);
         };
         const fiche = (da) => (obtenirDonneesSelonMode('groupeEtudiants') || []).find(e => e.da === da) || null;
 
-        await soumettre({ da: 'TARDIF1', nom: 'Tardif', prenom: 'Théo' });
+        await soumettre({ da: '9100001', nom: 'Tardif', prenom: 'Théo' });
         await recaler();
-        const ficheSansDate = JSON.parse(JSON.stringify(fiche('TARDIF1')));
+        const ficheSansDate = JSON.parse(JSON.stringify(fiche('9100001')));
 
         // Ses présences : toutes les séances saisies depuis son arrivée, périodes complètes.
         const presences = obtenirDonneesSelonMode('presences') || [];
@@ -88,31 +88,31 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         const datesSaisies = [...new Set(presences.map(p => p.date))].filter(d => auCalendrier.has(d)).sort();
         const datesDepuis = datesSaisies.filter(d => d >= ARRIVEE);
         datesDepuis.forEach(date => {
-            presences.push(Object.assign({}, modele, { da: 'TARDIF1', date, periodesPresentes: obtenirNombrePeriodesSeance(date), facultatif: false }));
+            presences.push(Object.assign({}, modele, { da: '9100001', date, periodesPresentes: obtenirNombrePeriodesSeance(date), facultatif: false }));
         });
         sauvegarderDonneesSelonMode('presences', presences);
         calculerEtSauvegarderIndicesAssiduite(); await pause(300);
-        const sansDate = { indices: calculerTousLesIndices('TARDIF1'), magasin: obtenirDonneesSelonMode('indicesAssiduite').sommatif['TARDIF1'] };
+        const sansDate = { indices: calculerTousLesIndices('9100001'), magasin: obtenirDonneesSelonMode('indicesAssiduite').sommatif['9100001'] };
 
         // La MÊME fiche, éditée : la date d'arrivée saisie dans le champ.
-        editerEtudiantV2('TARDIF1'); await pause(300);
+        editerEtudiantV2('9100001'); await pause(300);
         const champRelu = champ('v2-etudiantDateArrivee').value;
         champ('v2-etudiantDateArrivee').value = ARRIVEE;
         champ('v2-btnSoumettreEtudiant').click(); await pause(900);
         await recaler();
-        const avecDate = { fiche: JSON.parse(JSON.stringify(fiche('TARDIF1'))), indices: calculerTousLesIndices('TARDIF1'), magasin: obtenirDonneesSelonMode('indicesAssiduite').sommatif['TARDIF1'] };
-        editerEtudiantV2('TARDIF1'); await pause(300);
+        const avecDate = { fiche: JSON.parse(JSON.stringify(fiche('9100001'))), indices: calculerTousLesIndices('9100001'), magasin: obtenirDonneesSelonMode('indicesAssiduite').sommatif['9100001'] };
+        editerEtudiantV2('9100001'); await pause(300);
         const champReluApres = champ('v2-etudiantDateArrivee').value;
         annulerEditionEtudiantV2(); await pause(200);
 
         // L'aller-retour : la fiche sérialisée comme un export l'écrit, relue comme un import la pose (clé entière, sans liste blanche).
-        const allerRetour = JSON.parse(JSON.stringify(obtenirDonneesSelonMode('groupeEtudiants'))).find(e => e.da === 'TARDIF1').dateArrivee;
+        const allerRetour = JSON.parse(JSON.stringify(obtenirDonneesSelonMode('groupeEtudiants'))).find(e => e.da === '9100001').dateArrivee;
 
-        await soumettre({ da: 'ABSENT1', nom: 'Absent', prenom: 'Abel' });
-        await soumettre({ da: 'INCONNU1', nom: 'Inconnue', prenom: 'Inès', date: '2025-12-31' });
+        await soumettre({ da: '9100002', nom: 'Absent', prenom: 'Abel' });
+        await soumettre({ da: '9100003', nom: 'Inconnue', prenom: 'Inès', date: '2025-12-31' });
         await recaler();
-        const indicesAbsent = calculerTousLesIndices('ABSENT1');
-        const indicesInconnu = calculerTousLesIndices('INCONNU1');
+        const indicesAbsent = calculerTousLesIndices('9100002');
+        const indicesInconnu = calculerTousLesIndices('9100003');
 
         // LA LISTE : colonne A de chacun, moyenne A.
         afficherListeEtudiantsConsultation(); await pause(700);
@@ -134,13 +134,13 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         const filtre = { libelleM, absentRetenu: retenus.some(t => t.includes('Absent')), inconnuRetenu: retenus.some(t => t.includes('Inconnue')), nbRetenus: retenus.length };
 
         // LE PROFIL de l'inconnue : Engagement (méthodologie), puis Accompagnement (carte de contexte).
-        afficherProfilComplet('INCONNU1'); await pause(900);
+        afficherProfilComplet('9100003'); await pause(900);
         changerSectionProfil('mobilisation'); await pause(800);
         const engagement = texte(document.getElementById('profil-contenu-dynamique')) || '';
         changerSectionProfil('accompagnement'); await pause(800);
         const accompagnement = texte(document.getElementById('profil-contenu-dynamique')) || '';
         // Le profil de Tardif : aucune absence listée avant son arrivée.
-        const absencesTardif = obtenirDetailsAssiduite('TARDIF1').absences.map(a => a.date);
+        const absencesTardif = obtenirDetailsAssiduite('9100001').absences.map(a => a.date);
 
         const indicesDemoApres = dasDemo.map(da => { const i = calculerTousLesIndices(da); return [da, i.A, i.C, i.P]; });
 

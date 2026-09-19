@@ -1,45 +1,47 @@
-# Consigne suivante — les deux phrases de l'assiduité inconnue (suite du lot D, patch 1.147.1)
+# Consigne suivante — l'application n'invente plus de DA (#914)
 
-> Écrite le 19 septembre 2026 à 11 h 44 (Toronto), par Cowork. Phrases **validées par Grégoire** (« oui », 11 h 44).
-> **Condition de départ** : `origin/main` = `085a14aa` ou plus récent. Archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-assiduite-qui-manque.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
-> ⚠ **Arbre partagé** : mêmes quatre fichiers de l'autre travail qu'aux deux lots précédents ; n'y touche pas, jeton d'`interpretation-config.js` à `20260910c`, index par chemins nommés.
-> **Identifiant** : « Dernier ID utilisé » = #922 à l'écriture ; relis-le et `grep` les deux registres avant d'inscrire.
-> **Ce lot ne demande plus rien à Grégoire**, sauf le « pousse ».
+> Écrite le 19 septembre 2026 à 13 h 40 (Toronto), par Cowork, sur accord de Grégoire (« Oui »).
+> **Condition de départ** : `origin/main` = `88371a4a` (1.147.1 poussée) ou plus récent. Archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-phrases-assiduite-inconnue.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> ⚠ **Arbre partagé** : les quatre fichiers de l'autre travail (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) restent hors de l'index ; jeton d'`interpretation-config.js` à `20260910c` (release.mjs voudra le bumper : remets-le, comme aux trois derniers lots).
+> **Identifiant** : aucune fiche neuve attendue ; sinon « Dernier ID utilisé » (#922 à l'écriture) et `grep` des deux registres.
+> **Ce lot ne demande rien à Grégoire** sauf le « pousse » : la règle est la sienne (fiche #914, 17 sept. au soir), le message d'erreur est lu par des enseignants, pas par des élèves – tu le choisis et tu le nommes.
 
 ---
 
-## 1 · Poser les deux phrases (mots de Grégoire, à ne pas retoucher)
+## 1 · La règle de Grégoire, telle quelle
 
-Référence : §3 de `plans de travail/PORTES-TERRAIN-2026-09-19-date-arrivee-ipad.md`.
+« Aucune DA ne devrait être inventé de toute pièce dans l'application. Il n'existe qu'un seul format, et c'est celui créé par le collège » : **sept chiffres, rien d'autre.**
 
-- **3.1 · Sous le tiret de la carte « Contexte d'apprentissage »** (copies, aucune assiduité connue) :
-  « L'assiduité n'est pas encore connue : le contexte s'affichera dès qu'une séance sera saisie pour cet·te étudiant·e. »
-  ⚠ C'est la proposition du §3.1 **avec une retouche** : « se qualifiera » → « s'affichera ».
-- **3.2 · Bulle du badge « A — »** dans Suivi du groupe › Détails, telle que proposée :
-  « Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e. »
+## 2 · Ce que Grégoire verra
 
-La porte iPad est **passée** (relevé de Grégoire, 12 h 01, 3 / 3, ajouté par Cowork en fin du fichier de la porte) : commite ce relevé avec le lot. Inscris au §3 de la porte les deux verdicts (« validée, retouchée : s'affichera » ; « validée telle quelle »). Preuve : le banc WebKit du lot D lit les deux textes à l'écran ; une mutation par texte, rouge. Patch `1.147.1` ; une ligne de « Nouvelles » n'est pas nécessaire (texte d'aide), c'est à toi de juger, en une ligne.
+Cadre › Groupe d'étudiant·es, formulaire d'ajout : un DA vide ou qui n'a pas sept chiffres est **refusé** avec un message clair, et rien n'est enregistré. Aujourd'hui, un DA vide devient `DA` + horodatage, en silence.
 
-## 1 bis · Deux défauts de la liste du groupe, vus par Grégoire sur iPad (19 sept., 12 h 01, capture) – même patch
+## 3 · Ce que Cowork a mesuré (19 sept., lecture de `main` à `88371a4a`) – à remesurer
 
-Cadre › Groupe d'étudiant·es, tableau rendu par `js/trimestre-v2-etudiants.js` (≈ l. 146-195), conteneur `#v2-listeEtudiants`.
+- `js/trimestre-v2-etudiants.js`, `soumettreEtudiantV2` (l. 378) : l. 404, `da: da || \`DA${Date.now()}\`` – **seul site** de fabrication dans `js/` au grep.
+- Le même formulaire sert à l'**édition** (`etudiantEnEditionIndex`, `etudiantEnEditionDA`, fusion l. 446-456). ⚠ En édition, un DA effacé à l'écran recevrait AUJOURD'HUI un DA inventé, et la fusion l'écrirait sur la fiche : l'élève changerait d'identifiant et perdrait ses évaluations et présences. Même correctif.
+- ⚠ **Le pack démo porte des DA « DEMO004 », « DEMO015 »** (capture de Grégoire, 12 h 01) : une validation à chaque enregistrement empêcherait de modifier un élève de démonstration. Décision de Cowork, à tenir : **le DA n'est validé qu'à la création, et en édition seulement s'il a changé** (`da !== etudiantEnEditionDA`). Un DA existant non conforme se garde tel quel.
+- La garde « DA déjà dans le groupe » (l. 430-434) reste, et passe après la nouvelle.
+- Le champ `#v2-etudiantDA` (`index.html` ≈ l. 7029) porte `placeholder="1234567"` : un attribut `inputmode="numeric"` aiderait l'iPad (clavier chiffré) – à ton jugement, dit en une ligne.
 
-- **Les deux menus de ligne affichent « — »**, qui ne dit rien. Mots **validés par Grégoire** (« oui », 12 h 10) : l'option vide du menu **Action** devient « Choisir… » ; l'option vide du menu **Remarque** devient « Aucune ». ⚠ Seul le libellé change : les valeurs restent `""` (Action : le menu doit rester sur une option neutre, sinon « Modifier » choisi d'avance ne déclencherait plus `change` ; Remarque : `""` veut dire « aucune remarque » et efface le statut). Le « — » des cellules vides (DA, Nom, groupe) ne change pas. Cherche si le même menu existe ailleurs (liste d'un autre écran, `groupe.js`) : même mot s'il est le même geste, sinon dis-le.
-- **L'en-tête du tableau est illisible** : texte blanc sur bleu pâle (DA, Grp, Nom, Prénom, SA, Action, Remarque). Pourtant `styles.css` l. 9699 pose `.conteneur-liste-etudiants th { background: var(--bleu-pale); color: var(--bleu-fonce); }` : une autre règle gagne. **Mesure laquelle** au navigateur (style calculé, pas lecture), dans les deux modes et sous le thème du pack démo ; corrige à la source sans `!important`, avec un contraste d'au moins 4,5 mesuré dans les deux modes. Regarde si la même règle fautive blanchit d'autres en-têtes : si oui, nomme-les ; corrige-les dans ce lot seulement si c'est la même cause en une ligne, sinon inscris.
-- Skill `design-interface` à charger. Preuve : un essai WebKit qui lit le libellé des deux options vides et le contraste calculé de l'en-tête ; une mutation par défaut, rouge. Aucune porte (le banc voit le contraste) ; aucune donnée écrite.
+## 4 · Hors du lot, à MESURER et à DIRE (pas à changer)
 
-## 2 · Trouvailles de la relecture croisée de Cowork sur `7b128a66` — issue 2 (inscrire), sauf avis contraire mesuré
+- **L'import collé / fichier** (`analyserListeEtudiantsCollee` l. 827, `traiterDonneesImportV2` l. 852, `confirmerImportV2` l. 893) : accepte-t-il une ligne dont le DA n'a pas sept chiffres, ou n'en a pas du tout ? Il n'invente rien, mais il laisse passer un autre format que celui du collège. Donne le comportement exact, avec un exemple : **c'est une question pour Grégoire**, Cowork la lui portera.
+- **Le stock** : combien de fiches du pack démo et de la base de test portent un DA en `DA` + 13 chiffres ? Tarir, pas réparer : aucun DA existant n'est réécrit.
 
-Relecture **verte par exécution** : Vitest 598 / 6 786 sur le clone ; cinq mutations de Cowork, cinq rouges, toutes à la sentinelle du lot D (le magasin d'avant lu comme inconnu ; séance du jour d'arrivée exclue par `<=` ; date ignorée dans la saisie en direct, sur les séances passées puis sur la séance courante ; format de date non validé) ; témoin vert après restauration. Aucun trou de preuve trouvé sur les règles.
+## 5 · Arrêts
 
-Trois trouvailles, sans symptôme vécu :
+- Si un autre chemin que le formulaire fabrique ou modifie un DA (Rencontres, import, Codex, registre) : arrête-toi et dis lequel.
+- Si le refus d'un DA non conforme bloque un geste existant au-delà du cas démo (fixture, banc, autre écran) : dis-le avant de contourner.
 
-- **R-a** · `js/graphiques-progression.js` ≈ l. 2670-2680 (distribution du groupe, courbe de Gauss) lit `indicesAssiduite.sommatif[da].indice` **sans passer par `lireIndiceAssiduite`** : une entrée du stock d'avant (`indice: 1, nombreSeances: 0`) y compte comme 100 % jusqu'au prochain recalcul du magasin ; et une entrée `null` rangée ferait `null.indice` (défaut antérieur). Le lot annonçait « tout lecteur du magasin passe par ici » : c'est un lecteur oublié **de ton propre lot** au sens du CLAUDE.md (« est-ce que je viens de l'écrire ? » — la règle, oui). ⮕ Juge toi-même : si le brancher sur `lireIndiceAssiduite` tient en deux lignes et un essai, fais-le dans ce patch ; sinon inscris. Note au passage que ce graphique exclut aussi `A = 0` (l'absent total), contraire à la règle de #750 : dis-le dans la fiche, ne le change pas sans mesurer où il s'affiche.
-- **R-b** · `js/trimestres.js` l. 2341, export pour la recherche : la note `unites` dit que seul `P_final` peut valoir `null` ; `A_final` le peut maintenant aussi. Une phrase à compléter pour les chercheurs → même patch si c'est une chaîne, sinon inscrire.
-- **R-c** · `js/profil-etudiant-sections-affichage.js`, `genererSectionMobilisation` (≈ l. 1586) : **aucun appelant** ; elle écrirait « null% » et « Assiduité critique » pour un A inconnu. Code mort antérieur au lot → issue 3 ou retrait (zéro-dette), à toi.
+## 6 · Preuve
 
-Et sur `a260acfc` (1.146.10, #906) : **relecture verte par lecture** – `calculerEtudiantsPrioritaires` ne touche pas au DOM (lu, l. 248-299), un seul appel par rendu, appelé hors de la garde `activerRai` comme avant ; le verdict Playwright du push a couvert le banc neuf. Pas de mutation reposée par Cowork (banc WebKit hors de sa portée).
+- Sentinelle Vitest : DA vide → refus, rien d'écrit ; « 123456 », « 12345678 », « DA1234567 », « 123 4567 » → refus ; « 1234567 » → accepté ; espaces en tête et en fin retirés avant de juger (à ton jugement, dit) ; édition d'un élève « DEMO015 » sans toucher au DA → enregistrée ; édition qui efface le DA → refusée, fiche intacte.
+- Banc WebKit qui fait le geste au formulaire : le message lu à l'écran, la liste inchangée.
+- Mutations : la garde retirée ; la garde appliquée aussi en édition sans changement (le cas démo doit rougir) ; l'ancien repli `DA${Date.now()}` remis. Chacune rouge, restauration à l'empreinte.
+- Vitest complet depuis `tests/`. Le verdict Playwright par `pousser.sh`, Cowork fermé.
+- Version : patch `1.147.2` ; une ligne de « Nouvelles » proposée, elle remonte à Grégoire par Cowork avant le push.
 
-## 3 · Rapport
+## 7 · Rapport
 
-Les deux textes vus à l'écran par le banc, la version, les issues données à R-a, R-b, R-c avec leur numéro, et la liste des chemins à commiter. Mets à jour `OU-EN-EST-ON.md` et `RELAIS.md`. Push sur « pousse » de Grégoire.
+En gestes d'utilisateur : le message choisi et ce que tu as supposé, le comportement de l'import (§4) avec son exemple, le compte du stock, ce qui n'est pas mesuré, et la liste des chemins à commiter. Mets à jour `OU-EN-EST-ON.md` et `RELAIS.md`, coche #914 avec sa phrase « vérifié comment ».
