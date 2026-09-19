@@ -7,7 +7,29 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 10 H 30 (Toronto) : 1.146.10 (#906), LA PHRASE DU BILAN DES FONDAMENTAUX AU PREMIER RENDU — COMMITÉ, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.147.0, L'ASSIDUITÉ QUI MANQUE (LOT D DU DÉPISTAGE : #735, #743, #750) — COMMITÉ, NON POUSSÉ
+
+**Où est le travail** : `main`, commit `7b128a66` (release `minor` 1.147.0, build `0919-1107`), suivi d'un commit de docs (ce relais). Sous lui, toujours non poussés : `8e1c2d0a` (relais) et `a260acfc` (1.146.10, #906). `origin/main` = `41a69c8a`. **Push sur demande de Grégoire seulement** ; avant lui, l'entrée de « Nouvelles » 1.147 (trois phrases, PROPOSÉES, `js/changelog-data.js`) lui remonte par Cowork. ⚠ Le worktree `.claude/worktrees/verdict-906` appartient à la session de 1.146.10 : pas touché, son sort n'est pas connu d'ici.
+
+**Les choix, une ligne chacun** : clé `dateArrivee` sur la fiche, « AAAA-MM-JJ », écrite seulement si saisie et RETIRÉE si effacée en édition (la fusion de #382 l'aurait gardée) ; l'inconnu = `null` (`indice` du calcul, `A` et `M` de `calculerTousLesIndices`, `assiduite` de `calculerIndicesEtudiant`, `taux` du direct de la saisie) ; DEUX lecteurs uniques dans `indices.js` : `obtenirDateArrivee(da)` et `lireIndiceAssiduite(entree)` ; ordre : indices → Liste → Suivi du groupe → profil → rapport, registre, snapshots → saisie → formulaire.
+
+**Le recensement** : 41 sites lecteurs de A (26 appels à `calculerTousLesIndices`, 3 à `calculerIndicesEtudiant`, 6 lectures directes du magasin, 1 appel à `calculerAssiduite` hors producteur, 5 au taux en direct) ; 22 corrigés ; les autres ne lisent pas A, ou lisaient déjà `null` comme « pas de donnée » (courbes de progression, corrélations longitudinales, filtre et tri d'urgence du lot F, « Non-participation » par `A > 0`).
+
+**Ce que j'ai supposé, à relire** : (1) un objet du magasin qui ne porte PAS ses compteurs est cru sur son `indice` (des jeux d'essai ont cette forme ; un stock ancien pourrait l'avoir) ; (2) dans la Liste, les colonnes Pattern et RàI demandaient « a-t-il une fiche de présence ? » : elles suivent maintenant « l'assiduité est-elle connue ? » — un absent total qui a des copies y montre son pattern ; (3) sans A, la carte de contexte ne qualifie rien : tiret, C lisible, description et recommandation VIDES — la phrase est proposée à la porte §3, pas posée ; (4) le badge « A — » du Suivi n'a pas de bulle (celle de P parlait d'une note) — proposée aussi ; (5) la saisie d'une séance d'AVANT l'arrivée ne compte pas non plus dans le taux en direct ; (6) après l'enregistrement d'une fiche, le magasin des assiduités est recalculé (même producteur qu'après une saisie de présences).
+
+**Source ou stock** : SOURCE seulement. Aucune fiche ne reçoit de date ; les snapshots écrits gardent leur valeur ; le magasin écrit avant le lot (`indice: 1, nombreSeances: 0`) est LU comme inconnu, jamais réécrit (il l'est de toute façon au prochain recalcul du trimestre actif). Pack démo : 0 snapshot écrit, 10 entrées au magasin, 0 « 100 % sans séance ». **Arrêts du §4 de la consigne** : aucune note finale ne bouge (aucune pratique ne lit ce magasin — `pratique-sommative.identifierPattern` lit une AUTRE clé, `indicesAssiduiteDetailles`, avec un défaut de 0,85 : vu, étranger, non touché) ; A2025 et H2026 NON SONDÉS — un élève qui y lisait 100 % faute de séance lira un tiret, y compris dans « Voir le dossier » du registre (« non calculé au moment de la copie ») : déduit, pas mesuré.
+
+**Ce qui est mesuré** : sentinelle `sentinelle-lot-D-735-743-750-assiduite-qui-manque` (10 essais) ; banc WebKit `assiduite-lot-D-date-arrivee-et-inconnu` à 768 px (trois élèves ajoutés par le formulaire ; tardif 100 % avec date, moyennes « 86 % » aux deux écrans, l'inconnue comptée donnerait 80 ; filtre jugé sur un élève à C = 80 % et A inconnu ; champ dans la grille, hauteur de ses voisins) ; 11 mutations, 11 rouges, restauration par copie à l'empreinte, `node --check` sur chaque fichier muté — **M8 (la garde du filtre) était VERTE au premier jet** : le banc lisait un panneau non redessiné ; filtre rejoué + témoin « A — », puis rouge ; quatre essais d'avant mis à jour (ils tenaient « 100 % sans séance ») ; Vitest 598 / 6 786 sur le commit ; onze parcours WebKit voisins verts à charge 41. **Pas mesuré** : la suite Playwright entière (`pousser.sh`, Cowork fermé) ; l'export / import par les fenêtres ; l'iPad (porte `PORTES-TERRAIN-2026-09-19-date-arrivee-ipad.md`, une rangée, non bloquante, artefact à publier par Cowork APRÈS le push).
+
+**Vu en chemin, NON inscrit (code étranger, aucun symptôme vécu)** : quatre générateurs du profil sans appelant (`genererSectionMobilisation`, `genererSectionAssiduite`, `genererSectionAssiduiteLegacy`, `genererSectionCompletion`) écriraient « null% » s'ils étaient rebranchés ; `presences-apercu.js` calcule une troisième moyenne A vers des cibles absentes d'`index.html` (muette) ; `interpM` calculé et jamais lu dans `afficherProfilComplet` ; le formulaire pade « demo » en « 0demo », ce qui isole l'élève ajouté du groupe du pack pour la lecture des séances saisies (le banc recale, et le dit).
+
+**Jetons anti-cache** : `release.mjs` a encore voulu bumper `js/interpretation-config.js` — **remis à `20260910c` à la main**, fichier non indexé.
+
+⚠ **L'arbre porte toujours les quatre fichiers d'un autre travail** (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) : ni touchés, ni commités. Indexation par chemins nommés.
+
+---
+
+## (précédent) 19 SEPT. 2026, ≈ 10 H 30 (Toronto) : 1.146.10 (#906), LA PHRASE DU BILAN DES FONDAMENTAUX AU PREMIER RENDU — COMMITÉ, NON POUSSÉ
 
 **Où est le travail** : `main`, un commit de code après `8e1c2d0a` (relais, docs, non poussé lui aussi) = la release 1.146.10 (build `0919-1026`). `origin/main` = `41a69c8a`. **Push sur demande de Grégoire seulement** ; avant lui, la phrase de « Nouvelles » lui remonte par Cowork, et Cowork relit le SHA commité pendant le verdict.
 
