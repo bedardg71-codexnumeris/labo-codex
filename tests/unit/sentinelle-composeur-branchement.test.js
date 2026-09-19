@@ -227,6 +227,10 @@ describe('branchement · D — un point de montage par rendu, le jeton', () => {
         expect((code.match(/^\s*monterVuesBadges\(container\);/gm) || []).length).toBe(2);
         expect((code.match(/_zoneDeFocus\(/g) || []).length).toBe(3);
         expect(code).toMatch(/window\.composeurBadges\.ecrire\(vue, r\.texte, r\.curseur\)/);
-        expect(source('index.html')).toMatch(/js\/grilles\.js\?v=20260905[d-z]|js\/grilles\.js\?v=2026090[6-9]|js\/grilles\.js\?v=20261/);
+        // ↻ 19 sept. 2026 (1.150.0) — le motif d'origine (« 20260905[d-z] | 2026090[6-9] | 20261… ») ne couvrait
+        // pas le 10 au 30 septembre : il a rougi au premier bump de grilles.js passé le 9. Ce qu'il veut dire
+        // — le jeton est AU MOINS celui de ce lot, « 20260905d » — se compare, il ne s'énumère pas.
+        const jeton = (source('index.html').match(/js\/grilles\.js\?v=(\d{8}[a-z]?)/) || [])[1] || '';
+        expect(jeton >= '20260905d', `jeton de grilles.js : « ${jeton} »`).toBe(true);
     });
 });
