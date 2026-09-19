@@ -393,6 +393,20 @@ async function soumettreEtudiantV2() {
         return;
     }
 
+    // #914 (19 sept. 2026) — règle de Grégoire : « Aucune DA ne devrait être inventé de toute pièce dans
+    // l'application. Il n'existe qu'un seul format, et c'est celui créé par le collège » : sept chiffres.
+    // Avant, un DA vide devenait « DA » + horodatage, en silence — et en édition, un DA effacé à l'écran
+    // changeait l'identifiant de l'élève (évaluations et présences orphelines). Le DA est jugé à la
+    // CRÉATION, et en édition SEULEMENT s'il a changé : un DA déjà en base et non conforme (« DEMO015 »
+    // du pack démo, stock d'avant) se garde tel quel, sans quoi sa fiche ne serait plus modifiable.
+    const daInchange = etudiantEnEditionIndex >= 0 && etudiantEnEditionDA !== null
+        && da === String(etudiantEnEditionDA).trim();
+    if (!daInchange && !/^\d{7}$/.test(da || '')) {
+        notifications.erreur(da ? 'DA invalide' : 'DA manquant',
+            'Le DA est celui du collège : sept chiffres, rien d\'autre. Rien n\'a été enregistré.');
+        return;
+    }
+
     const coursActif = db.getSync('infoCours', null);
     // L-9 (#749 lot 2) : padé À L'ÉCRITURE (« 1 » → « 00001 »), par la seule
     // normalisation partagée (modes.js) — les dix `padStart(5, '0')` de ce fichier
@@ -401,7 +415,9 @@ async function soumettreEtudiantV2() {
     const groupe = normaliserNumeroGroupe(groupeInput || coursActif?.groupe || '00001');
 
     const etudiant = {
-        da: da || `DA${Date.now()}`,
+        // #914 : inchangé en édition, le DA d'ORIGINE est réécrit tel qu'il est en base (type et
+        // espaces compris) — la fusion ne touche pas à l'identifiant.
+        da: daInchange ? etudiantEnEditionDA : da,
         nom: nom,
         prenom: prenom,
         groupe: groupe,

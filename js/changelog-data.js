@@ -27,7 +27,8 @@
             items: [
                 'Cadre&nbsp;› liste du groupe&nbsp;: la fiche d\'un·e élève a un nouveau champ facultatif, «&nbsp;Date d\'arrivée&nbsp;». Pour un·e étudiant·e arrivé·e en cours de trimestre, l\'assiduité se compte à partir de cette date&nbsp;: les séances d\'avant ne sont plus comptées comme des absences. Sans date, rien ne change.',
                 'Tant qu\'aucune séance n\'est saisie pour un·e élève, son assiduité est inconnue&nbsp;: un tiret s\'affiche à la place de 100&nbsp;%, au profil, dans la Liste, au Suivi du groupe et dans le rapport. Le contexte d\'apprentissage ne dit plus «&nbsp;Très favorable&nbsp;» sans aucune présence notée.',
-                'Les deux moyennes d\'assiduité du groupe (Liste et Suivi du groupe) disent maintenant le même chiffre&nbsp;: un·e élève à l\'assiduité inconnue n\'y entre pas&nbsp;; un·e élève absent·e à toutes les séances saisies y entre, à 0&nbsp;%.'
+                'Les deux moyennes d\'assiduité du groupe (Liste et Suivi du groupe) disent maintenant le même chiffre&nbsp;: un·e élève à l\'assiduité inconnue n\'y entre pas&nbsp;; un·e élève absent·e à toutes les séances saisies y entre, à 0&nbsp;%.',
+                'Cadre&nbsp;› liste du groupe&nbsp;: le DA est maintenant obligatoire à l\'ajout d\'un·e élève, et il compte sept chiffres, comme celui du collège. Laissé vide, l\'application n\'en fabrique plus un à ta place&nbsp;: elle refuse l\'ajout et te le dit. Les élèves déjà inscrit·es ne changent pas.'
             ]
         },
         {

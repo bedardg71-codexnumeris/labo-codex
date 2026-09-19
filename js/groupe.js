@@ -334,6 +334,10 @@ function parseAndPreview(content) {
                     };
                 }
 
+                // #914 (19 sept. 2026) : les deux replis « AUTO- » + horodatage de ce bloc fabriquent un DA,
+                // ce que Grégoire interdit — mais `parseAndPreview` n'a plus d'appelant vivant (mesuré :
+                // `donneesCollees`, `fichierCsvEntree`, `previewZone` absents d'index.html ; l'import du
+                // Cadre passe par trimestre-v2-etudiants.js). À retirer avec le bloc, pas à réveiller.
                 // Nettoyer le DA (retirer espaces, lettres parasites)
                 student.da = student.da.replace(/[^0-9]/g, '');
                 if (!student.da) student.da = `AUTO-${Date.now() + index}`;
