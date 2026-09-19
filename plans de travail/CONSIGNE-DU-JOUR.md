@@ -1,47 +1,43 @@
-# Consigne suivante — le choix d'échelle de l'assistant de pratique (#910)
+# Consigne suivante — la phrase du bilan des fondamentaux a un rendu de retard (#906)
 
-> Écrite le 19 septembre 2026 à 8 h 02, déposée à 9 h 37 (Toronto), par Cowork. **Proposée**, relayée par Grégoire quand il l'aura dit.
-> **Condition de départ** : `git --no-optional-locks log --oneline -1 origin/main` montre `81ae1e03` ou plus récent. `main` local porte `5fcd7e5e` (relais du 19, docs) d'avance : ce n'est pas un blocage, il partira avec ce lot. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-specs-second-essai.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
-> ⚠ **Arbre partagé** : à l'écriture, quatre fichiers modifiés ne sont ni à toi ni à ce lot – `js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir et la RELECTURE du 17 (travail du dossier 101-102, en cours ailleurs). **N'y touche pas, ne les commite pas** ; indexe par chemins nommés, comme ce matin. Si `js/interpretation-config.js` bouge encore pendant ton verdict, dis-le avant de pousser.
-> **Identifiant** : aucune fiche neuve attendue. Si tu en inscris une, relis « Dernier ID utilisé » sur `main` (#922 à l'écriture) et `grep` les deux registres.
-> **Ce lot ne demande rien à Grégoire avant le push**, sauf la phrase de « Nouvelles » (§ 6). Aucun arbitrage, aucun écran à vérifier chez lui. S'il en fallait un, c'est un arrêt (§ 4).
+> Écrite le 19 septembre 2026 à 10 h 17 (Toronto), par Cowork. **Proposée**, relayée par Grégoire quand il l'aura dit.
+> **Condition de départ** : `git --no-optional-locks log --oneline -1 origin/main` montre `41a69c8a` ou plus récent ; `main` local porte `8e1c2d0a` (relais, docs) d'avance, il partira avec ce lot. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-choix-echelle-assistant.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> ⚠ **Arbre partagé** : à l'écriture, quatre fichiers modifiés appartiennent à un autre travail (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17). N'y touche pas, ne les commite pas, garde leur jeton anti-cache tel quel (comme en 1.146.9) ; indexe par chemins nommés.
+> **Identifiant** : aucune fiche neuve attendue ; sinon relis « Dernier ID utilisé » (#922 à l'écriture) et `grep` les deux registres.
+> **Ce lot ne demande rien à Grégoire** : aucun mot neuf à l'écran, aucun arbitrage, aucun écran à vérifier chez lui. Seule la phrase de « Nouvelles » lui remonte, par Cowork, avant le push.
 
 ---
 
 ## 1 · Ce que Grégoire verra
 
-Dans l'assistant de pratique, la liste « échelle » propose les mêmes échelles que l'éditeur de pratique et que la question d'adoption du lot 34 : celles qui sont dans la bibliothèque. Une échelle qu'il a retirée de la barre latérale n'y paraît plus, sauf si c'est celle que la pratique ouverte utilise déjà. Rien d'autre ne change à l'écran.
+Dans Suivi › tableau de bord du groupe, la phrase du bilan des fondamentaux décrit le groupe affiché dès le premier rendu. Aujourd'hui, après tout changement du groupe (un élève ajouté, retiré, passé en décrochage), elle décrit l'état d'avant jusqu'au rendu suivant – alors que la barre des patterns, juste au-dessus, est déjà à jour.
 
-## 2 · Ce que Cowork a mesuré (19 sept., 8 h, lecture de `main` à `80661049` ; `js/` inchangé depuis, vérifié à 9 h 37) – à remesurer avant de coder
+## 2 · Ce que Cowork a mesuré (19 sept., 10 h 20, lecture de `main` à `8e1c2d0a`) – à remesurer avant de coder
 
-- `js/wizard-pratique-v2.js`, `genererSelectEchelle` (≈ l. 1737), un seul appelant vivant (`case 'select-echelle'`, ≈ l. 1416) :
-  - `${e.nom || 'Sans nom'}` est écrit dans le gabarit **sans `echapperHtml`**, alors que `e.id` l'est sur la même ligne. Règle de sécurité n° 1 de `CLAUDE.md` : un nom d'échelle peut venir d'un partage importé ; la CSP bloque le script, pas l'injection de balises.
-  - La liste lit `db.getSync(cle('echellesTemplates'), [])` **sans** le filtre `dansBibliotheque !== false` que portent l'éditeur (`chargerDropdownEchellesMat`), `accompagnement.js` (l. 520) et, depuis le lot 34, `obtenirEchellesOffertesAdoption` (`pratiques-bibliotheque.js`, ≈ l. 881).
-- **Le piège, trouvé en préparant la consigne** : `restaurerValeursEtape` (≈ l. 2440) remet la valeur par `element.value = wizardState.reponses[champ.id]`. Si l'échelle d'une pratique existante est retirée de la bibliothèque et que le filtre l'écarte, **l'option n'existe plus, le `<select>` retombe sur « -- Sélectionner une échelle -- », et la pratique rouverte perd son échelle en silence** à l'enregistrement. Le filtre seul serait une régression sur ses données.
+- `js/tableau-bord-apercu.js`, `chargerTableauBordApercu` : `afficherPatternsApprentissage(etudiantsAvecIndices)` (≈ l. 1347) écrit la phrase par `genererInterpretationSuiviFondamentaux`, qui lit la variable de module `_tousEtudiantsEnrichis` ; cette variable n'est remplie que par `calculerEtudiantsPrioritaires()` (≈ l. 248), appelée ≈ 45 lignes plus bas (≈ l. 1392). D'où le retard d'un rendu.
+- La phrase n'est écrite que si le réglage `activerRai` n'est pas à `false`.
+- `calculerEtudiantsPrioritaires` a d'autres appelants (≈ l. 438, ≈ l. 1162) : le déplacer change aussi ce qu'ils voient.
+- Le banc `tests/integration/profil-745-*.spec.js` rend le tableau de bord **deux fois** exprès (commentaire ≈ l. 53-56) pour ne pas juger #906.
 
 ## 3 · Ce qui est attendu
 
-1. **Échapper le nom** : `echapperHtml(e.nom || 'Sans nom')`. Un essai qui rougit sur le code actuel (un nom portant `<b>` ou `"><img …>` rend du texte, pas une balise).
-2. **Filtrer comme les autres** : réutilise le prédicat existant plutôt qu'une quatrième copie. `obtenirEchellesOffertesAdoption` fait exactement ce filtre ; si le lire depuis l'assistant crée une dépendance de chargement douteuse (ordre des scripts dans `index.html`), tranche toi-même où vit le prédicat commun et dis-le en une ligne. Zéro-dette : pas de filtre de plus écrit à la main.
-3. **Garder l'échelle déjà choisie** : si `wizardState.reponses.echelleId` désigne une échelle retirée de la bibliothèque, elle reste dans la liste et reste sélectionnée. **Sans libellé neuf** (pas de « (retirée) ») : un mot neuf remonterait à Grégoire. Si elle n'existe plus du tout dans `echellesTemplates`, le comportement actuel ne change pas : ce n'est pas ce lot.
-4. **L'état « aucune échelle »** : la branche `echelles.length === 0` se juge APRÈS le filtre (sinon une bibliothèque où tout est retiré montre une liste vide au lieu du message). Le message existant ne change pas d'un mot.
+Que la phrase lise, au premier rendu, le même groupe que la barre des patterns. **Le choix du correctif est à toi** et se dit en une ligne : faire lire à la phrase la liste que le rendu lui passe déjà (`etudiantsAvecIndices`, une seule source), ou rafraîchir `_tousEtudiantsEnrichis` avant `afficherPatternsApprentissage`. Critère : une seule source pour la barre et la phrase, aucun calcul fait deux fois par rendu, aucun effet sur les autres appelants de `calculerEtudiantsPrioritaires` (à mesurer). Aucun mot de la phrase ne change.
 
-## 4 · Arrêts
+## 4 · Arrêt
 
-- Si garder l'échelle déjà choisie exige un mot neuf à l'écran pour être compréhensible : **arrête-toi avant ce volet**, livre les volets 1, 2 et 4, et remonte la question à Grégoire par Cowork avec le texte que tu proposerais.
-- Si un chemin réel (pack démo, bancs, parcours WebKit) montre une pratique dont l'échelle choisie est retirée ET dont la réouverture doit se comporter autrement qu'au § 3.3 : arrête-toi, quel que soit le stock.
+Si le correctif change ce que dit la phrase au-delà du retard (un autre compte, une autre catégorie, les exclus comptés autrement) : arrête-toi et dis-le avec les deux phrases, avant et après.
 
 ## 5 · Preuve
 
-- Une sentinelle Vitest sur `genererSelectEchelle` par sa vraie fonction (pas par expression régulière sur le source) : nom échappé ; échelle retirée absente ; échelle retirée mais choisie présente ET sélectionnée après `restaurerValeursEtape` ; bibliothèque vide après filtre → message.
-- **Mutations** à poser et à voir rougir : retirer l'`echapperHtml` ; retirer le filtre ; filtrer AUSSI l'échelle choisie (la mutation du piège) ; juger le vide AVANT le filtre. Pose au moins une mutation qui garde le texte exigé et change le calcul.
-- Respecter `sentinelle-648-supprimer-une-echelle-est-la-remplacer` et `sentinelle-577-assistant-reperes-echelle`, qui lisent ce même champ.
-- Le parcours de l'assistant existe en WebKit : fais-le passer. **Aucune porte terrain** : une machine répond à tout, et rien n'est irréversible.
+- **Le banc `profil-745` passe à UN seul rendu** du tableau de bord, et son commentaire sur #906 part : il juge alors la phrase au premier rendu. Il doit rougir sur le code d'avant.
+- Un essai de comportement au premier rendu après un changement du groupe qui n'est PAS un décrochage (un élève ajouté ou retiré) – la fiche dit que le défaut n'est pas propre aux exclus.
+- **Mutations** : remettre l'ordre d'avant ; faire lire à la phrase la liste d'un rendu précédent en gardant le texte de l'appel. Les deux doivent rougir.
+- Pas de porte terrain : une machine répond, rien n'est irréversible.
 
 ## 6 · Livraison
 
-- **Stock** : source seulement, rien n'est écrit dans les données. À dire tel quel.
-- Patch (`1.146.9` attendu). **Entrée de « Nouvelles »** : le changement se voit. Propose la phrase à Grégoire par Cowork AVANT le push ; ne la pose pas sans son accord.
-- Coche **#910** dans le même commit que le code.
-- Fichiers de Cowork à commiter avec le lot : cette consigne renommée et l'archive de la précédente. Rien d'autre de l'arbre partagé.
-- Verdict par `scripts/pousser.sh` (la garde de charge s'applique), push sur demande de Grégoire.
+- Stock : aucun, rien n'est écrit dans les données (la phrase est recalculée à chaque rendu).
+- Patch (`1.146.10` attendu). **Phrase de « Nouvelles »** : propose-la à Grégoire par Cowork avant le push.
+- Coche **#906** dans le même commit que le code.
+- Fichiers de Cowork à commiter avec le lot : cette consigne renommée et l'archive de la précédente.
+- Verdict par `scripts/pousser.sh` (garde de charge), push sur demande de Grégoire. Donne le SHA commité avant le verdict : Cowork relit pendant qu'il tourne, en lecture seule.

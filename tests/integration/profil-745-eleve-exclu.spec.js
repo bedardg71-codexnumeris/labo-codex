@@ -51,13 +51,10 @@ test('profil · un élève en décrochage : son profil s\'ouvre, calculé par sa
         // Les écrans du groupe, tels qu'ils s'écrivent : la Liste (moyennes et corrélations) et le tableau de bord.
         // (L'aperçu des présences n'est pas lu : ses cibles `pa-taux-moyen`, `stat-nb-eleves` n'existent pas dans index.html —
         // mesuré le 17 sept. ; une capture y lirait du vide.)
-        // ⚠ Le tableau de bord est rendu DEUX fois : la phrase du bilan des fondamentaux lit `_tousEtudiantsEnrichis` AVANT que
-        // le rendu ne le rafraîchisse (tableau-bord-apercu.js, afficherPatternsApprentissage puis calculerEtudiantsPrioritaires) ;
-        // elle a un rendu de retard sur tout changement du groupe. Antérieur au lot, inscrit #906 — ce banc ne le juge pas.
+        // Le tableau de bord est rendu UNE fois : la phrase du bilan des fondamentaux est jugée au premier rendu (#906).
         const ecransDuGroupe = async () => {
             afficherListeEtudiantsConsultation(); await pause(500);
             const liste = ['moy-a', 'moy-c', 'moy-p', 'corr-a', 'corr-c'].map(id => id + '=' + texte(document.getElementById(id)));
-            chargerTableauBordApercu(); await pause(700);
             chargerTableauBordApercu(); await pause(700);
             const tdb = ['carte-indicateurs-acpe', 'conteneur-indicateurs-apprentissage', 'compteur-suivi', 'liste-etudiants-suivi'].map(id => id + '=' + texte(document.getElementById(id)));
             return { liste, tdb };

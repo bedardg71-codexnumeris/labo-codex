@@ -7,7 +7,25 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 10 H (Toronto) : 1.146.9 (#910), LE CHOIX D'ÉCHELLE DE L'ASSISTANT — ✅ POUSSÉ À ≈ 10 H 15
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 10 H 30 (Toronto) : 1.146.10 (#906), LA PHRASE DU BILAN DES FONDAMENTAUX AU PREMIER RENDU — COMMITÉ, NON POUSSÉ
+
+**Où est le travail** : `main`, un commit de code après `8e1c2d0a` (relais, docs, non poussé lui aussi) = la release 1.146.10 (build `0919-1026`). `origin/main` = `41a69c8a`. **Push sur demande de Grégoire seulement** ; avant lui, la phrase de « Nouvelles » lui remonte par Cowork, et Cowork relit le SHA commité pendant le verdict.
+
+**Ce qui est fait** : dans `chargerTableauBordApercu` (`js/tableau-bord-apercu.js`), `calculerEtudiantsPrioritaires()` est remonté AVANT `afficherPatternsApprentissage` ; `appliquerCouleursPrioritaires()` reste en bas (elle a besoin du DOM). Un seul calcul par rendu, comme avant. **Choix, en une ligne** : rafraîchir la liste plutôt que faire lire à la phrase `etudiantsAvecIndices` — cette liste-là ne porte pas le diagnostic de suivi (`suivi.diagnostic`), la lire aurait obligé à le calculer deux fois. Les autres appelants (garde « liste vide » du panneau Détails, clic sur le bouton prioritaire) ne voient aucun changement : à la fin du rendu la liste est la même, elle est seulement prête plus tôt. **Effet de bord nommé** : la ligne de fiabilité des deux barres (« Analyse préliminaire… », lue dans la même liste) perd le même retard ; ses mots ne changent pas.
+
+**Ce qui est mesuré** : sonde WebKit sur le pack démo, les dix retraits un à un — AVANT, premier rendu = phrase du groupe de dix, second rendu = bonne phrase ; APRÈS, premier rendu = mot pour mot le second rendu d'avant, dix fois sur dix (aucun arrêt au titre du §4 de la consigne). Banc neuf `tests/integration/tableau-bord-906-bilan-premier-rendu.spec.js` (élève retiré, rajouté, puis le seul élève en difficulté retiré ; barre et phrase jugées au premier rendu, phrases d'AVANT figées) ; `profil-745-eleve-exclu` passé à UN rendu, commentaire #906 retiré. Deux mutations (ordre d'avant ; la phrase lit la liste du rendu précédent, texte de l'appel gardé), `node --check` sur le fichier muté, quatre rouges sur la phrase reçue, restauration par copie à l'empreinte. Vitest complet 597 / 6 776 avant les mutations. **Pas mesuré** : la suite Playwright entière — `pousser.sh` rendra le verdict.
+
+**Stock** : aucun, la phrase est recalculée à chaque rendu.
+
+**Jetons anti-cache** : `release.mjs` a de nouveau voulu bumper `js/interpretation-config.js` (il voit l'arbre) — **remis à `20260910c` à la main** ; il a aussi rebumpé `js/wizard-pratique-v2.js` (non modifié ici), laissé : sans effet autre qu'un rechargement.
+
+**Vu en chemin, NON inscrit (code étranger, aucun symptôme vécu)** : la phrase RàI écrit « 1 étudiants (10%) requièrent » quand un seul élève est au niveau 3 ; et la barre des patterns (4 catégories) et la phrase du bilan (diagnostics IPB) classent le même groupe par deux systèmes — sur le pack démo, « 1 difficulté persistante, 3 émergentes » au-dessus de « 9 maîtrisent ». Des mots d'écran : à Grégoire s'il les rencontre.
+
+⚠ **L'arbre porte toujours quatre fichiers qui ne sont pas de cette session** (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) : ni touchés ni commités, index par chemins nommés.
+
+---
+
+## (précédent) 19 SEPT. 2026, ≈ 10 H (Toronto) : 1.146.9 (#910), LE CHOIX D'ÉCHELLE DE L'ASSISTANT — ✅ POUSSÉ À ≈ 10 H 15
 
 ✅ **POUSSÉ le 19 sept. 2026 à ≈ 10 h 15, sur demande de Grégoire (« Pousse 41a69c8a ») : `origin/main` = `41a69c8a`**, mesuré après `git push origin HEAD:main` depuis le worktree propre du verdict (retiré) et `git fetch` ; avance 0, retard 0. Verdict Playwright détaché sur ce SHA exact : aucune rougeur nouvelle, 0 échec connu, aucune spec instable, lancé par la garde de charge après 150 s d'attente (charge 47 → 8) ; Vitest vert au hook. `js/interpretation-config.js` n'a pas bougé pendant le verdict (modifié à 8 h 56). Relecture croisée de Cowork sur 41a69c8a, 10 h 12 : VERTE, par lecture et par exécution — 57 essais verts (sentinelles 910, 577, 898) ; une mutation de Cowork (prédicat en === true, les échelles sans drapeau ne sont plus offertes) rougit 5 essais de 910 et plusieurs de 898, restaurée, témoin vert. Aucune retouche. Le paragraphe suivant décrit l'état d'AVANT le push.
 
