@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.147.0, L'ASSIDUITÉ QUI MANQUE (LOT D DU DÉPISTAGE : #735, #743, #750) — COMMITÉ, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.147.0, L'ASSIDUITÉ QUI MANQUE (LOT D DU DÉPISTAGE : #735, #743, #750) — ✅ POUSSÉ À ≈ 11 H 40
+
+✅ **POUSSÉ le 19 sept. 2026 à ≈ 11 h 40, sur le « push » de Grégoire** : `origin/main` = `eb7915e5`, quatre commits d'un coup (`8e1c2d0a`, `a260acfc` = 1.146.10, `7b128a66` = 1.147.0, `eb7915e5`). `pousser.sh` lancé à charge 3,51 : suite Playwright WebKit entière verte sans rougeur nouvelle (0 échec connu, 0 instable), Vitest du hook vert, jeton de verdict sur ce SHA exact. ⚠ **1.146.10 est partie dans le même push** : sa phrase de « Nouvelles » et la relecture de Cowork étaient attendues AVANT — dit à Grégoire au retour du push. Restent dus : la relecture croisée de Cowork sur `a260acfc` et `7b128a66`, l'artefact de la porte iPad (Cowork), les deux phrases du §3 de la porte. « En ligne » se mesure chez l'hébergeur, pas ici.
 
 **Où est le travail** : `main`, commit `7b128a66` (release `minor` 1.147.0, build `0919-1107`), suivi d'un commit de docs (ce relais). Sous lui, toujours non poussés : `8e1c2d0a` (relais) et `a260acfc` (1.146.10, #906). `origin/main` = `41a69c8a`. **Push sur demande de Grégoire seulement** ; avant lui, l'entrée de « Nouvelles » 1.147 (trois phrases, PROPOSÉES, `js/changelog-data.js`) lui remonte par Cowork. ⚠ Le worktree `.claude/worktrees/verdict-906` appartient à la session de 1.146.10 : pas touché, son sort n'est pas connu d'ici.
 
