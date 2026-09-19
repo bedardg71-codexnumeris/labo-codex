@@ -130,7 +130,7 @@ test('#887 · la zone d\'import nomme le cours, le menu vise un autre cours sans
     expect(m.apercu.xss).toBe(false);
 
     // 3 · DA à l'import : l'aperçu marque, le bouton compte, la note dit la règle.
-    expect(m.apercu.rangees.map(x => x.motif)).toEqual(['', '', '', 'DA manquant', 'DA invalide', 'Déjà dans la liste']);
+    expect(m.apercu.rangees.map(x => x.motif)).toEqual(['', '', '', 'DA manquant', 'DA invalide', 'Déjà inscrit·e ce trimestre']);
     expect(m.apercu.rangees.map(x => x.ecartee)).toEqual([false, false, false, true, true, true]);
     expect(m.apercu.rangees[1].da).toBe('8870002');
     expect(m.apercu.bouton).toBe('Importer 3 étudiant·es');

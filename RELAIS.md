@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 15 H 10 (Toronto) : 1.148.0, RETOUCHE D'UN MOT AVANT LE PUSH — 🟡 COMMITÉE, « POUSSE » REÇU, VERDICT À RENDRE PAR `pousser.sh`
+
+**Mots de 1.148.0 validés par Grégoire** (« oui avec ta retouche », relayé par Cowork à 14 h 58), sauf un : le motif « Déjà dans la liste » devient « **Déjà inscrit·e ce trimestre** » (la vérification couvre tout le trimestre, tous cours confondus). Constante unique `MOTIF_IMPORT_DEJA_INSCRIT` dans `js/trimestre-v2-etudiants.js` : le jugement la pose, la confirmation la compte. **Pas de nouvelle version** : commit de correctif par-dessus `f833ab96`, sans bump — 1.148.0 n'a jamais été poussée, personne n'a vu l'ancien mot ; seul le jeton anti-cache du fichier avance (`20260919d` → `20260919e`, exigé par le hook). Pas d'amende du commit de release (hook anti-cache, et l'historique reste lisible).
+
+**Preuve** : mutation (l'ancien mot remis dans la constante) rouge à la sentinelle Vitest ET au banc WebKit, fichier restauré à l'empreinte ; Vitest complet et banc WebKit #887 verts après la retouche (chiffres dans le commit de relais qui suit le push). Grégoire a dit « pousse » dans le même message : `scripts/pousser.sh origin main` lancé après ce commit. ⚠ Les quatre fichiers de l'autre travail restent hors de l'index ; jeton d'`interpretation-config.js` à `20260910c`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 14 H 35 (Toronto) : 1.148.0, L'IMPORT D'ÉLÈVES NOMME LE COURS (#887, #923, DA À L'IMPORT) — 🟡 COMMITÉ, NON POUSSÉ
 
 **Où est le travail** : release `minor` 1.148.0 (build 0919-1429) par-dessus `d0b1e9a1` (= `origin/main`, mesuré après `git fetch` : 1.147.2 poussée par la session du lot #914, verdict vert). **Sur `main` = `3ab9c21e`, 1 en avance sur `origin/main`** (écrit dans un worktree parce que l'autre session tenait l'arbre principal pendant son verdict, puis fusionné en avance rapide à 14 h 35 ; worktree et branche retirés) ; les deux sessions se sont parlé (aucun numéro neuf pris, « Dernier ID » reste #923). **Push sur le « pousse » de Grégoire**, après son mot sur les phrases de l'écran et l'entrée de « Nouvelles » 1.148 (PROPOSÉES, Cowork les porte).

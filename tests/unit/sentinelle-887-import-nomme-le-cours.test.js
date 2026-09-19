@@ -147,7 +147,7 @@ describe('DA à l\'import · sept chiffres, sinon la ligne n\'entre pas et elle 
         apercu(b, COLLAGE);
         const html = b.elements['v2-previewTable'].innerHTML;
         const rangees = html.split('<tr').slice(2).map(r => ({ ecartee: r.includes('class="ligne-import-ecartee"'), motif: (r.match(/<strong>([^<]*)<\/strong>/) || [, ''])[1] }));
-        expect(rangees.map(r => r.motif)).toEqual(['', '', 'DA manquant', 'DA invalide', 'DA invalide', 'Déjà dans la liste', 'Déjà dans la liste']);
+        expect(rangees.map(r => r.motif)).toEqual(['', '', 'DA manquant', 'DA invalide', 'DA invalide', 'Déjà inscrit·e ce trimestre', 'Déjà inscrit·e ce trimestre']);
         expect(rangees.map(r => r.ecartee)).toEqual([false, false, true, true, true, true, true]);
         expect(html).toContain('<td>3000002</td>');                        // espaces retirés
         expect(b.elements['v2-btnConfirmerImport'].textContent).toBe('Importer 2 étudiant·es');
