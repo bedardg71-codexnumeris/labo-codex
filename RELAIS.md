@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, SOIR (Toronto) : 1.150.0 CORRIGÉE SUR LA RELECTURE CROISÉE DE COWORK (#705, LA DATE QUI TRANCHE) — 🟡 COMMITÉE SUR `main`, NON POUSSÉE
+
+**`main` local = `047ec94c` + ce commit de relais, devant `origin/main` = `49061df3`.** La relecture de Cowork sur `ff9b6f63` n'est pas passée, pour UNE raison, corrigée : `criteresAjoutesDepuis` comparait la naissance du critère à max(`dateEvaluation`, `dateModification`) ; or le modal de rétroaction de Travaux pose `dateModification` sans écrire un critère — une retouche de texte après l'ajout d'un critère faisait refuser le PDF. **Retenu : `dateEvaluation` seule** (écrite à la création uniquement ; rien de stocké en plus). Écrivains de `dateModification` sur une évaluation, mesurés : `travaux-ui.js` modal (rétroaction seule) ; `evaluation-chargement.js` auto-save et `evaluation.js` « Enregistrer » en modification (critères). Ouvrir une évaluation sans rien changer n'écrit rien (sondé 8 s dans WebKit, verrouillée ou non ; l'ouverture par une copie dans Travaux non sondée). Preuve : cas de Cowork reproduit rouge puis vert ; test WebKit par le vrai modal ; mutation « max avec dateModification » rouge des deux côtés ; stock du pack démo inchangé ; **Vitest complet vert sur `047ec94c` : 602 fichiers, 6 862 essais** ; spec WebKit du lot 4/4. Pas de nouvelle version (1.150.0 jamais poussée) : build 0919-1620, jetons avancés. ⚠ `release.mjs --build-only` lancé dans l'arbre principal a vu `js/interpretation-config.js` (autre travail, hors index) et a bumpé son jeton : remis à `20260910c` avant le commit — à savoir pour toute release faite depuis cet arbre tant que ces quatre fichiers y traînent.
+
+**Tenu par la lecture de Cowork** : #701, #702, #704 et l'écart nommé (un niveau choisi à la main au menu n'est pas remplacé par 100 % : retenu). #703 et #686 : non rejoués par Cowork, rien vu contre. Les mutations n'ont pas été rejouées de son côté (Vitest n'y démarre pas).
+
+**Restent dus** : la relecture par Cowork de CE correctif ; le mot de Grégoire sur « Nouvelles » 1.150 et sur les mots des deux avis d'enseignant·e ; puis `scripts/pousser.sh origin main` sur son « pousse », Cowork fermé — aucun verdict Playwright COMPLET n'existe encore sur ce SHA.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, 16 H 35 (Toronto) : 1.150.0 (#701, #702, #703, #704, #705, #686 — CE QUE L'ÉLÈVE LIT UNE FOIS SA NOTE CALCULÉE) — 🟡 COMMITÉE SUR `main`, NON POUSSÉE
 
 **`main` local = `17a22cd4`, deux commits devant `origin/main` = `49061df3`** : `1cb6b04b` (le lot, 1.150.0, build 0919-1609) et `17a22cd4` (une sentinelle étrangère au lot dont le motif de jeton ne couvrait pas le 10 au 30 septembre — elle a rougi au premier bump de `grilles.js` passé le 9 ; comparée au lieu d'énumérée). Branche `lot/701-ce-que-l-eleve-lit` fusionnée en avance rapide. **Vitest complet vert sur `17a22cd4` : 602 fichiers, 6 861 essais** (mesuré depuis `tests/`, après le commit du bump). Spec WebKit du lot verte ×3 (`tests/integration/ce-que-l-eleve-lit-703-705.spec.js`). ⚠ **Aucun verdict Playwright COMPLET sur ce SHA** : il se fera par `scripts/pousser.sh origin main`, sur le « pousse » de Grégoire, Cowork fermé.
