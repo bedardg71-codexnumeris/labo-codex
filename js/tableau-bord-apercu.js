@@ -558,10 +558,13 @@ function genererPanneauSuiviEtudiants() {
 }
 
 /** Helper badge pour le panneau suivi unifié.
- *  #394 : valeur null = note non constructible → « — » (jamais un 0 trompeur). */
+ *  #394 : valeur null = note non constructible → « — » (jamais un 0 trompeur).
+ *  #743 (lot D) : un A inconnu passe aussi par ici — le tiret, SANS la bulle de P (elle parlerait
+ *  d'une note ; le mot d'une bulle pour A remonte à Grégoire, il n'est pas posé). */
 function _badgeIndiceSuivi(label, valeur) {
     if (valeur === null || valeur === undefined) {
-        return '<span class="prioritaire-indice" title="Note non constructible avec la configuration actuelle">' + label + ' —</span>';
+        var bulle = label === 'P' ? ' title="Note non constructible avec la configuration actuelle"' : '';
+        return '<span class="prioritaire-indice"' + bulle + '>' + label + ' —</span>';
     }
     var cls = 'prioritaire-indice';
     if (valeur < 65) cls += ' prioritaire-indice-critique';
@@ -1709,9 +1712,13 @@ function afficherMetriquesGlobales(etudiants) {
     }
 
     // 🆕 BETA 95.7 (22 jan): Filtrage spécifique pour A (présences saisies, même si A=0%)
-    // Pour A: inclure TOUS les étudiants avec nombreSeances > 0 (y compris les absents à 0%)
-    const etudiantsAvecPresencesSOM = etudiants.filter(e => e.sommatif && e.sommatif.nombreSeances > 0);
-    const etudiantsAvecPresencesPAN = etudiants.filter(e => e.alternatif && e.alternatif.nombreSeances > 0);
+    // Pour A : inclure TOUS les élèves dont l'assiduité est CONNUE (y compris les absents à 0 %).
+    // #743 / #750 (lot D, 19 sept. 2026) : la question « connue ? » a UNE réponse, celle de l'indice
+    // (`assiduite !== null`, rendue par `lireIndiceAssiduite`) — la même que la moyenne A de la Liste.
+    // Avant : `nombreSeances > 0`, vrai aussi pour des séances sans période offerte (valeur absente).
+    const assiduiteConnue = (bloc) => !!bloc && bloc.assiduite !== null && bloc.assiduite !== undefined;
+    const etudiantsAvecPresencesSOM = etudiants.filter(e => assiduiteConnue(e.sommatif));
+    const etudiantsAvecPresencesPAN = etudiants.filter(e => assiduiteConnue(e.alternatif));
 
     // 🆕 BETA 96.1: Pour P, exiger des évaluations réelles (pas seulement des présences)
     const etudiantsAvecEvalsSOM = etudiants.filter(e =>
@@ -1732,10 +1739,10 @@ function afficherMetriquesGlobales(etudiants) {
     // Pour E: nécessite A ET (C ou P) pour être significatif
     // 🔧 FIX (23 fév 2026) : Inclure aussi les étudiants à C=0 quand des évals existent
     const etudiantsAvecDonneesSOM = etudiants.filter(e =>
-        e.sommatif.nombreSeances > 0 && (ilYaDesEvalsSOM || e.sommatif.completion > 0 || e.sommatif.performance > 0)
+        assiduiteConnue(e.sommatif) && (ilYaDesEvalsSOM || e.sommatif.completion > 0 || e.sommatif.performance > 0)
     );
     const etudiantsAvecDonneesPAN = etudiants.filter(e =>
-        e.alternatif.nombreSeances > 0 && (ilYaDesEvalsPAN || e.alternatif.completion > 0 || e.alternatif.performance > 0)
+        assiduiteConnue(e.alternatif) && (ilYaDesEvalsPAN || e.alternatif.completion > 0 || e.alternatif.performance > 0)
     );
 
 
@@ -2819,7 +2826,9 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
 function afficherAlerteNonParticipation(etudiants) {
     // Détecter les élèves présents mais sans aucune production
     const nonParticipants = etudiants.filter(e => {
-        const aDesPresences = (e.sommatif && e.sommatif.nombreSeances > 0) || (e.alternatif && e.alternatif.nombreSeances > 0);
+        // #743 (lot D) : « a des présences » = son assiduité est connue (même lecture que les barres ci-dessus).
+        const aDesPresences = (e.sommatif && e.sommatif.assiduite !== null && e.sommatif.assiduite !== undefined)
+            || (e.alternatif && e.alternatif.assiduite !== null && e.alternatif.assiduite !== undefined);
         const aDesEvals = (e.sommatif && (e.sommatif.completion > 0 || e.sommatif.performance > 0)) ||
                           (e.alternatif && (e.alternatif.completion > 0 || e.alternatif.performance > 0));
         return aDesPresences && !aDesEvals;

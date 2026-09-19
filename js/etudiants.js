@@ -902,7 +902,10 @@ function afficherListeEtudiantsConsultation() {
     const valeursC_actifsCorr = indexActifs.map(i => valeursC_tous[i]);
     const valeursP_actifsCorr = indexActifs.map(i => valeursP_tous[i]);
 
-    const r_AP = calculerCorrelationPearson(valeursA_actifsCorr, valeursP_actifsCorr);
+    // #743 (lot D, 19 sept. 2026) : une assiduité INCONNUE (`null`) n'entre pas dans la corrélation A-P —
+    // Pearson la lirait comme un 0. La paire (A, P) de cet élève est écartée, pas remplacée.
+    const pairesAP = valeursA_actifsCorr.map((a, i) => [a, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
+    const r_AP = calculerCorrelationPearson(pairesAP.map(paire => paire[0]), pairesAP.map(paire => paire[1]));
     const r_CP = calculerCorrelationPearson(valeursC_actifsCorr, valeursP_actifsCorr);
 
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
@@ -954,31 +957,11 @@ function afficherListeEtudiantsConsultation() {
         e.performanceInsuffisante = !estExclu(e) && nbEvals < minimumCompletionTab;
     });
 
-    // 🆕 BETA 95.7 (22 jan): Calculer la moyenne A sur les étudiants avec PRÉSENCES SAISIES
-    // (inclut les 0% = absents, exclut ceux sans aucune présence saisie)
-    let presencesGlobal = obtenirDonneesSelonMode('presences') || [];
-    if (!Array.isArray(presencesGlobal)) presencesGlobal = [];
-
-    // 🆕 BETA 95.7 (23 jan): Filtrer les présences par coursId du groupe-cours actif
-    const coursIdActif = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-
-    // Filtrer pour ne garder que les présences du cours actif
-    const presencesCours = coursIdActif
-        ? presencesGlobal.filter(p => p.coursId === coursIdActif)
-        : presencesGlobal;
-
-    // 🆕 DEBUG: Voir les DA dans les présences vs les DA des étudiants
-    const dasPresences = [...new Set(presencesCours.map(p => p.da))];
-    const dasEtudiants = etudiants.slice(0, 5).map(e => e.da); // 5 premiers pour debug
-
-    // Moyenne A : actifs avec présences saisies dans le cours
-    const valeursA_actifs = [];
-    indexActifs.forEach(i => {
-        const aDesPresences = presencesCours.some(p => p.da === etudiants[i].da);
-        if (aDesPresences) {
-            valeursA_actifs.push(valeursA_tous[i]);
-        }
-    });
+    // #750 (lot D, 19 sept. 2026, tranché par Grégoire le 16) — LA MOYENNE A DE LA LISTE SUIT LA RÈGLE DU
+    // SUIVI DU GROUPE : y entre tout élève actif dont l'assiduité est CONNUE (des séances saisies comptent
+    // pour lui), l'absent total à 0 % compris ; l'assiduité inconnue (`null`, #743) n'y entre pas.
+    // Avant : « a une fiche de présence », ce qui écartait l'absent total (70 ici, 46,7 au Suivi).
+    const valeursA_actifs = indexActifs.map(i => valeursA_tous[i]).filter(v => v !== null);
     const moyenneA = valeursA_actifs.length > 0 ? valeursA_actifs.reduce((s, v) => s + v, 0) / valeursA_actifs.length : null;
 
     // Moyenne C : tous les actifs (les 0% comptent)
@@ -1222,21 +1205,20 @@ function afficherListeEtudiantsConsultation() {
 
         // Détection individuelle des données manquantes
         // Pour A : vérifier si des présences ont été SAISIES (même si absent = 0%)
-        let presences = obtenirDonneesSelonMode('presences') || [];
-        if (!Array.isArray(presences)) presences = [];
-        const presencesEtudiant = presences.filter(p => p.da === etudiant.da);
-        const aPresencesSaisies = presencesEtudiant.length > 0;  // Présences saisies (même si absent)
+        // #743 / #750 (lot D) : la colonne A suit l'indice — tiret tant que l'assiduité est inconnue,
+        // pourcentage dès que des séances saisies comptent (l'absent total lit 0 %, comme au Suivi du groupe).
+        const assiduiteConnue = indices.A !== null && indices.A !== undefined;
 
         // Pour C et P : au moins une évaluation
         const aEvaluations = indices.C > 0 || indices.P > 0;
 
         // Colonnes A-C-P avec couleurs
-        const couleurA = obtenirCouleurAssiduite(Math.round(indices.A));
+        const couleurA = assiduiteConnue ? obtenirCouleurAssiduite(Math.round(indices.A)) : '';
         const couleurC = obtenirCouleurCompletion(Math.round(indices.C));
         const couleurP = obtenirCouleurPerformance(Math.round(indices.P));
 
-        // Colonne A : afficher si présences SAISIES (même si 0%), sinon tiret
-        if (aPresencesSaisies) {
+        // Colonne A : afficher si l'assiduité est connue (même 0 %), sinon tiret
+        if (assiduiteConnue) {
             html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
         } else {
             html += '<td class="etud-text-center">' + tiret + '</td>';
@@ -1254,7 +1236,7 @@ function afficherListeEtudiantsConsultation() {
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         // Toujours générer les cellules pour garder nth-child cohérent avec les checkboxes colonnes
         if (activerRai) {
-            if (aPresencesSaisies && aEvaluations) {
+            if (assiduiteConnue && aEvaluations) {
                 html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
                 html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
             } else {

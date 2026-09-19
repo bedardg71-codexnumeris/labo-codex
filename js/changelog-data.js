@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            version: '1.147',
+            couleur: 'vert',
+            titre: 'L\'assiduité qui manque',
+            items: [
+                'Cadre&nbsp;› liste du groupe&nbsp;: la fiche d\'un·e élève a un nouveau champ facultatif, «&nbsp;Date d\'arrivée&nbsp;». Pour un·e étudiant·e arrivé·e en cours de trimestre, l\'assiduité se compte à partir de cette date&nbsp;: les séances d\'avant ne sont plus comptées comme des absences. Sans date, rien ne change.',
+                'Tant qu\'aucune séance n\'est saisie pour un·e élève, son assiduité est inconnue&nbsp;: un tiret s\'affiche à la place de 100&nbsp;%, au profil, dans la Liste, au Suivi du groupe et dans le rapport. Le contexte d\'apprentissage ne dit plus «&nbsp;Très favorable&nbsp;» sans aucune présence notée.',
+                'Les deux moyennes d\'assiduité du groupe (Liste et Suivi du groupe) disent maintenant le même chiffre&nbsp;: un·e élève à l\'assiduité inconnue n\'y entre pas&nbsp;; un·e élève absent·e à toutes les séances saisies y entre, à 0&nbsp;%.'
+            ]
+        },
+        {
             version: '1.146',
             couleur: 'vert',
             titre: 'Le dossier d\'un·e élève se déplie',

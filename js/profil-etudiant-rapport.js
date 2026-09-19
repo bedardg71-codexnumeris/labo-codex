@@ -88,7 +88,8 @@ function genererRapportAPI(da, options = {}) {
     // 2. ASSIDUITÉ
     if (opts.assiduite) {
         // #871 — la fraction montre les présences telles que saisies (« 22,5 »), le pourcentage en découle.
-        rapport += `Assiduité : ${indices.A}% (${formaterNombrePeriodes(detailsA.periodesPresentes)} / ${formaterNombrePeriodes(detailsA.periodesOffertes)} périodes)\n\n`;
+        // #743 (lot D) : une assiduité inconnue s'écrit d'un tiret, jamais « null% » ni 100 %.
+        rapport += `Assiduité : ${indices.A === null ? '—' : indices.A + '%'} (${formaterNombrePeriodes(detailsA.periodesPresentes)} / ${formaterNombrePeriodes(detailsA.periodesOffertes)} périodes)\n\n`;
     }
 
     // 3. COMPLÉTION

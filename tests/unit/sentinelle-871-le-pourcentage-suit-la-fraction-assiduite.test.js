@@ -63,7 +63,7 @@ function monter(periodesParDate, periodesParSeance = 5) {
     const win = { addEventListener() {}, removeEventListener() {} };
     chargerPredicatsCopie(win);
     chargerScript('js/profil-etudiant-rapport.js', Object.assign({}, socle, {
-        calculerTousLesIndices: () => ({ A: Math.round(calcul.indice * 100), C: 0, P: 0, noteConstructible: false }),
+        calculerTousLesIndices: () => ({ A: calcul.indice === null ? null : Math.round(calcul.indice * 100), C: 0, P: 0, noteConstructible: false }),   // #743 : null reste null
         obtenirDetailsAssiduite: winSections.obtenirDetailsAssiduite,
         formaterNombrePeriodes: winHelpers.formaterNombrePeriodes,
         // Volet complétion de #871 : le rapport lit le détail de la pratique (portfolio.js) ; ce banc ne juge que l'assiduité.
@@ -110,10 +110,11 @@ describe('#871 · assiduité : le pourcentage suit la fraction', () => {
         expect(r.ligne).toBe('Assiduité : 92% (23 / 25 périodes)');
     });
 
-    it('(d) 0 / 0 et l\'élève sans aucune donnée gardent leur écriture : « (0 / 0 périodes) »', () => {
+    it('(d) 0 / 0 et l\'élève sans aucune donnée gardent leur écriture « (0 / 0 périodes) » — et l\'assiduité inconnue s\'écrit d\'un tiret (#743 ; avant : 100%)', () => {
         const sansSeance = monter([]);                       // aucune séance au calendrier, rien de stocké
         expect(sansSeance.details).toMatchObject({ periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 });
-        expect(sansSeance.ligne).toBe('Assiduité : 100% (0 / 0 périodes)');
+        expect(sansSeance.calcul.indice).toBeNull();
+        expect(sansSeance.ligne).toBe('Assiduité : — (0 / 0 périodes)');
     });
 
     it('(e) verrou structurel : dans js/, aucune interpolation n\'écrit un nombre de périodes du profil sans `formaterNombrePeriodes`, et il n\'a qu\'UNE définition', () => {

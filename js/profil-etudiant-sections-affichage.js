@@ -578,7 +578,7 @@ function genererSectionMobilisationEngagement(da) {
         <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
+            <strong>Assiduité (A) :</strong> Indice A = ${indices.A === null ? '—' : indices.A + '%'} — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
             <br><br>
             <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
             <br><br>
@@ -856,7 +856,8 @@ function genererSectionAccompagnement(da) {
     const indices = calculerTousLesIndices(da);
 
     // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
-    const aucuneDonnee = indices.A === 0 && indices.C === 0 && indices.P === 0;
+    // #743 (lot D) : une assiduité inconnue (`null`) est, elle aussi, « aucune donnée ».
+    const aucuneDonnee = (indices.A === null || indices.A === 0) && indices.C === 0 && indices.P === 0;
 
     if (aucuneDonnee) {
         // Retourner un HTML simplifié pour l'état "en attente de données"
@@ -1769,7 +1770,11 @@ function obtenirDetailsAssiduite(da) {
     const absences = [];
 
     // Itérer les dates du calendrier filtrées par datesSaisies et <= aujourd'hui
-    const datesCalendrier = Object.keys(seancesCompletes).filter(d => d <= aujourdhui && datesSaisies.has(d)).sort();
+    // #735 (lot D, 19 sept. 2026) : une séance d'AVANT la date d'arrivée n'est pas une absence — même
+    // lecteur que le calcul de l'indice (`obtenirDateArrivee`, indices.js).
+    const dateArrivee = typeof obtenirDateArrivee === 'function' ? obtenirDateArrivee(da) : null;
+    const datesCalendrier = Object.keys(seancesCompletes)
+        .filter(d => d <= aujourdhui && datesSaisies.has(d) && !(dateArrivee && d < dateArrivee)).sort();
 
     datesCalendrier.forEach(dateCours => {
         // Chercher le record NON-facultatif de l'étudiant

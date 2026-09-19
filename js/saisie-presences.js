@@ -1378,7 +1378,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             <td><span id="heuresHisto_${etudiant.da}">${Math.round(totalPeriodesPresentes)} pér.</span></td>
             <td>
                 <span id="taux_${etudiant.da}" class="u-texte-medium">
-                    ${tauxAssiduiteActuel}%
+                    ${tauxAssiduiteActuel === null ? '—' : tauxAssiduiteActuel + '%'}
                 </span>
             </td>`;
 
@@ -1518,7 +1518,7 @@ function mettreAJourLignePeriodes(da, dateStr, nombrePeriodesMax) {
         spanHeuresHisto.textContent = resultatAff.totalPeriodesPresentes + ' pér.';
     }
 
-    spanTaux.textContent = resultatAff.taux + '%';
+    spanTaux.textContent = resultatAff.taux === null ? '—' : resultatAff.taux + '%';   // #743 : taux inconnu
     spanTaux.style.fontWeight = '500';
 
     // Mettre à jour le compteur présents/absents
@@ -1573,7 +1573,7 @@ function mettreAJourLigne(da, dateStr) {
         spanHeuresHisto.textContent = resultatAff.totalPeriodesPresentes + ' pér.';
     }
 
-    spanTaux.textContent = resultatAff.taux + '%';
+    spanTaux.textContent = resultatAff.taux === null ? '—' : resultatAff.taux + '%';   // #743 : taux inconnu
     // Format simple et uniforme pour tous
     spanTaux.style.fontWeight = '500';
 

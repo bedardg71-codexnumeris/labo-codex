@@ -1937,8 +1937,11 @@ function determinerNiveauRaiPedagogique(da) {
 function determinerAlerteContextuelle(da) {
     // Récupérer les indices de mobilisation
     const indices = calculerTousLesIndices(da);
-    const A = indices.A / 100; // Convertir en décimal 0-1
+    // #743 (lot D, 19 sept. 2026) : une assiduité INCONNUE reste `null` — `null / 100` vaudrait 0.
+    const assiduiteInconnue = indices.A === null || indices.A === undefined;
+    const A = assiduiteInconnue ? null : indices.A / 100; // décimal 0-1, ou null
     const C = indices.C / 100; // Convertir en décimal 0-1
+    const texteA = assiduiteInconnue ? '—' : (A * 100).toFixed(0) + '%';
 
     // 🆕 BETA 96.1: Vérifier si données suffisantes pour C
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
@@ -1951,9 +1954,26 @@ function determinerAlerteContextuelle(da) {
             label: 'En attente',
             description: 'Données insuffisantes pour évaluer le contexte. En attente des premières remises.',
             badgeClasse: 'badge-attente',
-            A: (A * 100).toFixed(0) + '%',
+            A: texteA,
             C: 'En attente',
             recommandation: 'L\'interprétation du contexte d\'apprentissage sera disponible après les premières remises.',
+            donneesSuffisantes: false
+        };
+    }
+
+    // #743 (lot D) — SANS ASSIDUITÉ, LE CONTEXTE NE SE QUALIFIE PAS. Les quatre paliers sont une
+    // conjonction sur A ET C : avec un A inconnu, « Très favorable » (l'ancien A = 100 %) était une donnée
+    // qui n'existe pas. Un tiret à la place du palier ; C, lui, se lit. AUCUN MOT NEUF ici : la phrase
+    // qui accompagnerait ce tiret remonte à Grégoire (proposée au rapport du lot, pas posée).
+    if (assiduiteInconnue) {
+        return {
+            niveau: 'inconnu',
+            label: '—',
+            description: '',
+            badgeClasse: 'badge-attente',
+            A: texteA,
+            C: (C * 100).toFixed(0) + '%',
+            recommandation: '',
             donneesSuffisantes: false
         };
     }
