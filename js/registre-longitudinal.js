@@ -679,9 +679,17 @@
         const a = indices && indices.assiduite;
         if (a === null || a === undefined) lignes.push(MOTS.assiduite + ' : ' + MOTS.indiceAbsent);
         else {
-            const indiceA = typeof a === 'object' ? a.indice : a;
-            const detail = typeof a === 'object' && a.periodesOffertes ? ' (' + a.periodesPresentes + ' sur ' + accorder(a.periodesOffertes, MOTS.periodes) + ')' : '';
-            lignes.push(MOTS.assiduite + ' : ' + pourcent(Number(indiceA) * 100) + detail);
+            // #743 (lot D, 19 sept. 2026) : l'entrée est copiée TELLE QUE RANGÉE ; sans période offerte elle est
+            // INCONNUE — y compris le stock d'avant ce lot (`indice: 1, nombreSeances: 0`), qui se lisait 100 %.
+            const indiceA = typeof window.lireIndiceAssiduite === 'function'
+                ? window.lireIndiceAssiduite(a)
+                : (typeof a === 'object' ? a.indice : a);
+            if (indiceA === null || indiceA === undefined) {
+                lignes.push(MOTS.assiduite + ' : ' + MOTS.indiceAbsent);
+            } else {
+                const detail = typeof a === 'object' && a.periodesOffertes ? ' (' + a.periodesPresentes + ' sur ' + accorder(a.periodesOffertes, MOTS.periodes) + ')' : '';
+                lignes.push(MOTS.assiduite + ' : ' + pourcent(Number(indiceA) * 100) + detail);
+            }
         }
         const actuel = indices && indices.cp && indices.cp.actuel ? indices.cp.actuel : null;
         if (!actuel) {

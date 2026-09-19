@@ -94,6 +94,52 @@ function calculerCorrelationPearson(x, y) {
    =============================== */
 
 /**
+ * #735 (lot D du cadrage du dépistage, 19 sept. 2026) — LA DATE D'ARRIVÉE D'UN·E ÉLÈVE.
+ * Champ FACULTATIF de sa fiche (`dateArrivee`, « AAAA-MM-JJ », même format que les dates de
+ * présences) : pour un·e étudiant·e arrivé·e en cours de trimestre, l'assiduité se compte à
+ * partir de cette date. Absent, vide ou mal formé : `null`, et rien ne change au calcul.
+ * Lecteur UNIQUE : les trois parcours de séances (calcul, saisie en direct, liste des absences
+ * du profil) passent par lui.
+ *
+ * @param {string} da - Numéro DA
+ * @returns {string|null} « AAAA-MM-JJ » ou null
+ */
+function obtenirDateArrivee(da) {
+    var etudiantsGroupe = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    if (!Array.isArray(etudiantsGroupe)) return null;
+    for (var i = 0; i < etudiantsGroupe.length; i++) {
+        if (String(etudiantsGroupe[i].da) === String(da)) {
+            var d = etudiantsGroupe[i].dateArrivee;
+            return (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) ? d : null;
+        }
+    }
+    return null;
+}
+
+/**
+ * #743 (lot D, 19 sept. 2026) — L'ASSIDUITÉ INCONNUE A UNE SEULE FORME : `null`.
+ * Tant qu'aucune séance saisie ne compte pour un·e élève, son assiduité n'existe pas : ni 100 %
+ * (l'ancien `indice: 1`), ni 0 %. Ce lecteur rend la proportion 0-1 d'une entrée du magasin
+ * `indicesAssiduite.sommatif[da]`, ou `null` :
+ *   - entrée absente, ou `indice` qui n'est pas un nombre → null ;
+ *   - objet qui DIT n'avoir aucune séance (`nombreSeances` ou `periodesOffertes` à 0) → null — y
+ *     compris le STOCK écrit avant ce lot (`indice: 1, nombreSeances: 0`), lu comme inconnu sans
+ *     être réécrit ; un objet qui ne porte pas ces compteurs est cru sur son `indice` ;
+ *   - ancien format « nombre » → le nombre.
+ * Tout lecteur du magasin passe par ici ; aucun ne transforme l'inconnu en 0 ni en 100.
+ *
+ * @param {Object|number|null|undefined} entree
+ * @returns {number|null} proportion 0-1, ou null si inconnue
+ */
+function lireIndiceAssiduite(entree) {
+    if (typeof entree === 'number') return Number.isFinite(entree) ? entree : null;
+    if (!entree || typeof entree !== 'object') return null;
+    if (typeof entree.indice !== 'number' || !Number.isFinite(entree.indice)) return null;
+    if (entree.nombreSeances === 0 || entree.periodesOffertes === 0) return null;
+    return entree.indice;
+}
+
+/**
  * Construit l'ensemble des dates de séances saisies pour le GROUPE de l'étudiant·e.
  * FIX #220 : depuis le groupe (pas juste l'étudiant·e), pour que les absences comptent.
  * FIX #330 : restreint aux étudiant·es du MÊME groupe — depuis la consolidation
@@ -142,7 +188,11 @@ function construireDatesSaisiesGroupe(da, presences) {
  *
  * @param {string} da - Numéro DA de l'étudiant
  * @param {string|null} dateLimite - Date max incluse (YYYY-MM-DD), null = aujourd'hui
- * @returns {Object} { indice, periodesPresentes, periodesOffertes, nombreSeances }
+ *
+ * #743 : sans aucune séance qui compte, `indice` vaut `null` (assiduité INCONNUE), jamais 1.
+ * #735 : les séances antérieures à `dateArrivee` (fiche de l'élève) ne comptent pas.
+ *
+ * @returns {Object} { indice (0-1 ou null), periodesPresentes, periodesOffertes, nombreSeances }
  */
 function calculerAssiduite(da, dateLimite) {
     var presences = obtenirDonneesSelonMode('presences') || [];
@@ -159,8 +209,12 @@ function calculerAssiduite(da, dateLimite) {
     // FIX #220 + #330 : dates saisies du groupe de l'étudiant·e (helper partagé)
     var datesSaisies = construireDatesSaisiesGroupe(da, presences);
 
+    // #735 : les séances d'AVANT l'arrivée ne sont pas des absences — elles ne comptent pas.
+    var dateArrivee = obtenirDateArrivee(da);
+
     var dates = Object.keys(seancesCompletes).filter(function(d) {
         if (d > aujourdhui) return false;
+        if (dateArrivee && d < dateArrivee) return false;
         // Pour aujourd'hui (ou dateLimite) : inclure seulement si saisie existe pour cet étudiant
         if (d === aujourdhui && !dateLimite) {
             return presencesEtudiant.some(function(p) { return p.date === d; });
@@ -169,7 +223,7 @@ function calculerAssiduite(da, dateLimite) {
     }).sort();
 
     if (dates.length === 0) {
-        return { indice: 1, periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 };
+        return { indice: null, periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 };   // #743 : inconnue, pas 100 %
     }
 
     var totalPeriodesOffertes = 0;
@@ -235,7 +289,7 @@ function calculerAssiduite(da, dateLimite) {
     });
 
     if (totalPeriodesOffertes === 0) {
-        return { indice: 1, periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 };
+        return { indice: null, periodesPresentes: 0, periodesOffertes: 0, nombreSeances: 0 };   // #743 : inconnue, pas 100 %
     }
 
     var indice = totalPeriodesPresentes / totalPeriodesOffertes;
@@ -298,7 +352,7 @@ function calculerEtSauvegarderIndicesAssiduite() {
  * @param {string} da - Numéro DA
  * @param {string} dateStr - Date de la séance en cours (YYYY-MM-DD)
  * @param {number} periodesSeanceActuelle - Périodes saisies pour la séance en cours
- * @returns {Object} { taux, totalPeriodesPresentes }
+ * @returns {Object} { taux (0-100, ou null si inconnu — #743), totalPeriodesPresentes }
  */
 function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
     var presences = obtenirDonneesSelonMode('presences') || [];
@@ -318,10 +372,12 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
     var periodesOffertes = 0;
 
     // Parcourir toutes les dates du calendrier AVANT dateStr
+    var dateArrivee = obtenirDateArrivee(da);   // #735
     var dates = Object.keys(seancesCompletes).sort();
     for (var i = 0; i < dates.length; i++) {
         var dateSeance = dates[i];
         if (dateSeance >= dateStr) continue;
+        if (dateArrivee && dateSeance < dateArrivee) continue;
         if (!datesSaisies.has(dateSeance)) continue;
 
         var nbPeriodes = typeof obtenirNombrePeriodesSeance === 'function'
@@ -375,10 +431,13 @@ function calculerAssiduitePourAffichage(da, dateStr, periodesSeanceActuelle) {
     var nombrePeriodesSeanceActuelle = typeof obtenirNombrePeriodesSeance === 'function'
         ? obtenirNombrePeriodesSeance(dateStr) : 0;   // #540 lot C
 
-    var periodesOffertesTotal = periodesOffertes + nombrePeriodesSeanceActuelle;
-    var periodesPresentesTotal = periodesPresentes + periodesSeanceActuelle;
+    // #735 : une séance d'AVANT l'arrivée ne compte pas non plus quand c'est elle qu'on saisit.
+    var seanceActuelleCompte = !(dateArrivee && dateStr < dateArrivee);
+    var periodesOffertesTotal = periodesOffertes + (seanceActuelleCompte ? nombrePeriodesSeanceActuelle : 0);
+    var periodesPresentesTotal = periodesPresentes + (seanceActuelleCompte ? periodesSeanceActuelle : 0);
 
-    var taux = periodesOffertesTotal === 0 ? 100 : Math.min(Math.round((periodesPresentesTotal / periodesOffertesTotal) * 100), 100);
+    // #743 : rien d'offert → taux INCONNU (`null`), plus 100. Les sites d'affichage écrivent un tiret.
+    var taux = periodesOffertesTotal === 0 ? null : Math.min(Math.round((periodesPresentesTotal / periodesOffertesTotal) * 100), 100);
 
     return {
         taux: taux,
@@ -424,7 +483,7 @@ function obtenirIndicesCP(da) {
  *
  * STRUCTURE DE RETOUR :
  * {
- *   A: 85,              // % assiduité
+ *   A: 85,              // % assiduité — `null` si INCONNUE (#743 : aucune séance saisie ne compte)
  *   C: 67,              // % complétion (selon pratique)
  *   P: 72,              // % performance (selon pratique)
  *   M: 0.760,           // Mobilisation (composite, (A+C)/2)
@@ -474,13 +533,8 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
         }
     }
 
-    // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
-    let A = 0;
-    if (typeof assiduiteSommatif === 'object' && assiduiteSommatif !== null && assiduiteSommatif.indice !== undefined) {
-        A = assiduiteSommatif.indice;
-    } else if (typeof assiduiteSommatif === 'number') {
-        A = assiduiteSommatif;
-    }
+    // #743 : lecteur unique du magasin — `null` quand l'assiduité est inconnue (jamais 0, jamais 100).
+    const A = lireIndiceAssiduite(assiduiteSommatif);
 
     // #394 (règle 4) : une note stockée « non constructible » se propage aux
     // affichages (qui montrent « — » au lieu d'un 0 trompeur). Champ additif :
@@ -497,14 +551,14 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
         noteConstructible = false;
     }
 
-    // INDICES COMPOSITES
-    const M = (A + C) / 2;
+    // INDICES COMPOSITES — #743 : sans A, pas de M (une moyenne avec un inconnu n'existe pas).
+    const M = (A === null) ? null : (A + C) / 2;
 
     return {
-        A: Math.round(A * 100),
+        A: (A === null) ? null : Math.round(A * 100),
         C: Math.round(C * 100),
         P: Math.round(P * 100),
-        M: parseFloat(M.toFixed(3)),
+        M: (M === null) ? null : parseFloat(M.toFixed(3)),
         pratique: pratique,
         noteConstructible: noteConstructible
     };
@@ -540,11 +594,11 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
     }
 
     const assiduiteSommatif = indicesA.sommatif?.[da];
-    const nombreSeances = (typeof assiduiteSommatif === 'object') ? (assiduiteSommatif.nombreSeances || 0) : 0;
+    const nombreSeances = (assiduiteSommatif && typeof assiduiteSommatif === 'object') ? (assiduiteSommatif.nombreSeances || 0) : 0;
     const nombreEvals = indicesSOM?.details?.nbArtefactsRemis || indicesSOM?.details?.nbProductionsRemises || 0;
 
     const sommatif = {
-        assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
+        assiduite: lireIndiceAssiduite(assiduiteSommatif),   // #743 : null si inconnue
         completion: indicesSOM ? indicesSOM.C / 100 : 0,
         performance: indicesSOM ? indicesSOM.P / 100 : 0,
         nombreSeances: nombreSeances,
@@ -568,6 +622,9 @@ window.calculerIndicesEtudiant = calculerIndicesEtudiant;
 window.calculerAssiduite = calculerAssiduite;
 window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssiduite;
 window.calculerAssiduitePourAffichage = calculerAssiduitePourAffichage;
+// Lot D (#735, #743) : la date d'arrivée et la forme unique de l'assiduité inconnue
+window.obtenirDateArrivee = obtenirDateArrivee;
+window.lireIndiceAssiduite = lireIndiceAssiduite;
 
 
 })();

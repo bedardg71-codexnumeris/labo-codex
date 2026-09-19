@@ -102,6 +102,9 @@ const TOOLTIPS = {
 
     'reglages-etudiants-sa':
         'Coche les étudiant·es inscrit·es aux Services adaptés (diagnostic posé par un·e professionnel·le). Ce marqueur est visible dans le suivi et les interventions.',
+    // #735 (lot D) — mots de Grégoire (17 sept. 2026), à ne pas retoucher.
+    'reglages-etudiants-date-arrivee':
+        'Facultatif : pour un·e étudiant·e arrivé·e en cours de trimestre. L\'assiduité se compte à partir de cette date.',
     'reglages-etudiants-import':
         'Importe ta liste d\'étudiant·es en lot : colle depuis le système de gestion institutionnel ou un tableur, ou charge un fichier CSV. Le format attendu est affiché dans le panneau d\'import.',
 

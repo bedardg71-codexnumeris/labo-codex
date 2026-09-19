@@ -75,7 +75,7 @@ function monter({ echeance, evaluations, A }) {
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     new Function('window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres), '"use strict";\n' + code)(win, doc, console, storage(), storage(), ...Object.values(autres));
     // Ce que le tableau de bord passe à l'alerte : la forme de calculerIndicesEtudiant, pour l'élève seul.
-    const etudiantsTB = [{ da: DA, nom: 'Silence', prenom: 'Chloé', sommatif: { assiduite: A / 100, completion: 0, performance: 0, nombreSeances: A > 0 ? 3 : 0, nbEvaluations: 0 }, alternatif: { assiduite: A / 100, completion: 0, performance: 0, nombreSeances: A > 0 ? 3 : 0 } }];
+    const etudiantsTB = [{ da: DA, nom: 'Silence', prenom: 'Chloé', sommatif: { assiduite: A > 0 ? A / 100 : null, completion: 0, performance: 0, nombreSeances: A > 0 ? 3 : 0, nbEvaluations: 0 }, alternatif: { assiduite: A > 0 ? A / 100 : null, completion: 0, performance: 0, nombreSeances: A > 0 ? 3 : 0 } }];
     return { win, insertions, alerte: () => { win.__alerte(etudiantsTB); return insertions.length; } };
 }
 const portrait = (b) => ({ garde: b.win.depistagePeutJugerLaNonParticipation(), rai: b.win.determinerNiveauRaiPedagogique(DA), cible: b.win.determinerCibleIntervention(DA), alertes: b.alerte() });
@@ -103,9 +103,9 @@ describe('#731 · avant le premier travail, tout le monde reste « En attente »
         expect(p.cible).toMatchObject({ niveau: 3, cible: 'Non-participation' });
         expect(p.alertes).toBe(1);
     });
-    it('zéro donnée (A = 100 par défaut, aucune séance) : la garde suffit — En attente, pas « Non-participation »', () => {
-        // D-3 de l'audit : le défaut « assiduité 100 % sans séance » (indices.js) reste tel quel ; la garde couvre le cas.
-        const p = portrait(monter({ echeance: '2026-02-01', evaluations: [], A: 100 }));
+    it('zéro donnée (aucune séance : A inconnu, `null` depuis #743) : En attente, pas « Non-participation »', () => {
+        // D-3 de l'audit : avant le lot D (19 sept. 2026), « assiduité 100 % sans séance » ; la garde #731 couvrait le cas, et `null > 0` le couvre aussi.
+        const p = portrait(monter({ echeance: '2026-02-01', evaluations: [], A: null }));
         expect(p.rai.label).toBe('En attente');
         expect(p.cible.cible).toBe('En attente');
     });

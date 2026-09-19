@@ -691,8 +691,8 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         expect(inserts.length).toBe(0);                                              // avant : « 3 étudiants présents sans aucun travail remis »
     });
 
-    it('D3 · ZÉRO DONNÉE (ni présence ni évaluation) : A vaut toujours 100 par défaut (indices.js, inscrit), mais la garde #731 rend « En attente » — avant : « Non-participation » dès le premier calcul', () => {
-        // À la main : calculerAssiduite sans aucune séance saisie rend { indice: 1 } — 100 % — et c'est inchangé (défaut inscrit, pas corrigé).
+    it('D3 · ZÉRO DONNÉE (ni présence ni évaluation) : A est INCONNU (null, #743 — avant le lot D : 100 par défaut), et le palier reste « En attente » — avant #731 : « Non-participation » dès le premier calcul', () => {
+        // À la main : calculerAssiduite sans aucune séance saisie rend { indice: null } — assiduité inconnue (#743, lot D du 19 sept. 2026 ; avant : { indice: 1 }, 100 %).
         // Avant #731, le RàI lisait A > 0 → « Non-participation » dès que le stock indicesAssiduite existait. La garde le couvre : aucune copie évaluée.
         const jeu = jeuBase(); jeu.evaluations = []; jeu.presences = [];
         const avant = monter(jeu);
@@ -702,7 +702,7 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         const A = apres.win.calculerTousLesIndices(DA.ASSIDU).A;
         noter('D3', { avantCalcul: { niveau: raiAvant.niveau, label: raiAvant.label }, apresCalcul: { niveau: raiApres.niveau, label: raiApres.label, A } });
         expect(raiAvant).toMatchObject({ niveau: 0, label: 'En attente' });
-        expect(A).toBe(100);                                                         // le défaut d'indices.js, tel quel
+        expect(A).toBeNull();                                                        // #743 : inconnue, ni 100 ni 0
         expect(raiApres).toMatchObject({ niveau: 0, label: 'En attente' });          // avant #731 : niveau 3 « Non-participation »
     });
 

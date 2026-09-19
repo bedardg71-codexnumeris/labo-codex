@@ -62,7 +62,7 @@ describe('#398 · intégration — la garde « séance du jour » de calculerAss
         const r = win.calculerAssiduite('1111111', null);
         // Séance du jour, aucune saisie pour CET étudiant → elle ne compte pas encore.
         expect(r.nombreSeances).toBe(0);
-        expect(r.indice).toBe(1);
+        expect(r.indice).toBeNull();   // #743 (lot D) : sans séance qui compte, l'assiduité est inconnue — avant : 1
     });
 });
 

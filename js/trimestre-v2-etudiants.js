@@ -380,6 +380,11 @@ async function soumettreEtudiantV2() {
     const programme = document.getElementById('v2-etudiantProgramme')?.value?.trim();
     const sa = document.getElementById('v2-etudiantSA')?.value;
     const groupeInput = document.getElementById('v2-etudiantGroupe')?.value?.trim();
+    // #735 (lot D, 19 sept. 2026) : date d'arrivée FACULTATIVE, « AAAA-MM-JJ » (le format d'un champ date, et
+    // celui des dates de présences). Vide : la clé n'est PAS écrite sur la fiche — une fiche sans date se lit
+    // comme avant, et aucune fiche existante n'en reçoit une.
+    const dateArriveeSaisie = document.getElementById('v2-etudiantDateArrivee')?.value || '';
+    const dateArrivee = /^\d{4}-\d{2}-\d{2}$/.test(dateArriveeSaisie) ? dateArriveeSaisie : '';
 
     if (!nom || !prenom) {
         notifications.erreur('Le nom et le prénom sont obligatoires.');
@@ -402,6 +407,7 @@ async function soumettreEtudiantV2() {
         sa: sa || '',
         coursId: coursActif?.id || ''
     };
+    if (dateArrivee) etudiant.dateArrivee = dateArrivee;
 
     const cleEtud = cle('groupeEtudiants');
 
@@ -443,6 +449,9 @@ async function soumettreEtudiantV2() {
                 return undefined;
             }
             etudiants[indexReel] = { ...etudiants[indexReel], ...etudiant };
+            // #735 : la fusion garde les champs hors formulaire — une date d'arrivée EFFACÉE à l'écran
+            // doit donc être retirée explicitement, sinon l'ancienne survivrait.
+            if (!dateArrivee) delete etudiants[indexReel].dateArrivee;
         } else {
             // Mode ajout : ajouter un nouvel étudiant
             etudiants.push(etudiant);
@@ -462,6 +471,12 @@ async function soumettreEtudiantV2() {
         return;
     }
     notifications.succes(`${prenom} ${nom} ${etudiantEnEditionIndex >= 0 ? 'modifié' : 'ajouté'}`);
+
+    // #735 : l'assiduité se compte depuis la date d'arrivée — le magasin des indices A suit la fiche
+    // (même producteur qu'après une saisie de présences ; il enchaîne C et P).
+    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+        try { calculerEtSauvegarderIndicesAssiduite(); } catch (e) { console.warn('[Étudiants] Recalcul de l\'assiduité impossible :', e); }
+    }
 
     // Réinitialiser le formulaire et le mode
     reinitialiserFormEtudiantV2();
@@ -493,6 +508,8 @@ function editerEtudiantV2(da) {
     document.getElementById('v2-etudiantGroupe').value = etudiant.groupe || '';
     document.getElementById('v2-etudiantProgramme').value = etudiant.programme || '';
     document.getElementById('v2-etudiantSA').value = etudiant.sa || '';
+    const champDateArriveeEdition = document.getElementById('v2-etudiantDateArrivee');
+    if (champDateArriveeEdition) champDateArriveeEdition.value = etudiant.dateArrivee || '';   // #735
 
     // Changer l'apparence du formulaire
     const titre = document.getElementById('v2-formEtudiantTitre');
@@ -532,6 +549,8 @@ function reinitialiserFormEtudiantV2() {
     document.getElementById('v2-etudiantGroupe').value = getGroupeSelectionneV2();
     document.getElementById('v2-etudiantProgramme').value = '';
     document.getElementById('v2-etudiantSA').value = '';
+    const champDateArriveeVide = document.getElementById('v2-etudiantDateArrivee');
+    if (champDateArriveeVide) champDateArriveeVide.value = '';   // #735
 
     // Remettre l'apparence normale
     const titre = document.getElementById('v2-formEtudiantTitre');

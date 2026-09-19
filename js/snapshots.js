@@ -185,15 +185,17 @@ let _cacheEvaluations = null;
  * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
  * @param {Array} evaluationsCache - Cache optionnel des évaluations (pour performance)
  * @param {boolean} usePonctualA - (Déprécié #224) Ignoré, toujours cumulatif
- * @returns {Object} - {A: number, C: number, P: number}
+ * @returns {Object} - {A: number|null, C: number, P: number} — A `null` quand l'assiduité est inconnue (#743)
  */
 function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, usePonctualA = false) {
     // #224 : Utiliser la fonction canonique unique (toujours cumulatif)
-    let indiceA = 100;
+    // #743 (lot D, 19 sept. 2026) : sans séance qui compte à cette date, A est INCONNU (`null`) — ni 100
+    // (l'ancien défaut), ni 0 (`Math.round(null * 100)`). Les courbes lisent déjà `null` comme « pas de donnée ».
+    let indiceA = null;
 
     if (typeof calculerAssiduite === 'function') {
         const resultA = calculerAssiduite(da, dateLimite);
-        indiceA = Math.round(resultA.indice * 100);
+        indiceA = (resultA.indice === null || resultA.indice === undefined) ? null : Math.round(resultA.indice * 100);
     }
 
     // Complétion (C) et Performance (P) : Filtrer les évaluations jusqu'à dateLimite
@@ -517,7 +519,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // ✅ Compteurs séparés pour gérer les valeurs null
         // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Retrait de E (snapshots ponctuals A-C-P uniquement)
         let sommeA_ponctuel = 0, sommeC_cumul = 0, sommeP_cumul = 0;
-        let nbAvecC = 0, nbAvecP = 0;
+        let nbAvecA = 0, nbAvecC = 0, nbAvecP = 0;   // #743 : A aussi peut être null
         const valeursA = [], valeursC = [], valeursP = [];
 
         // ✅ NOUVEAU (11 déc 2025): Charger productions pour calculer C global
@@ -608,7 +610,11 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             });
 
             // Accumuler pour moyennes (gérer null)
-            sommeA_ponctuel += indicesCumulatif.A;
+            // #743 / #750 : un A inconnu n'entre ni dans la moyenne ni dans la dispersion (même règle que les écrans)
+            if (indicesCumulatif.A !== null) {
+                sommeA_ponctuel += indicesCumulatif.A;
+                nbAvecA++;
+            }
 
             // C et P peuvent être null si aucune évaluation
             if (indicesCumulatif.C !== null) {
@@ -620,7 +626,9 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
                 nbAvecP++;
             }
 
-            valeursA.push(indicesCumulatif.A);
+            if (indicesCumulatif.A !== null) {
+                valeursA.push(indicesCumulatif.A);
+            }
             if (indicesCumulatif.C !== null) {
                 valeursC.push(indicesCumulatif.C);
             }
@@ -647,11 +655,11 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // Calculer statistiques groupe (gérer null)
         // ✅ CLARIFICATION (Beta 94 - 10 déc 2025): Distinction ponctuel vs cumulatif
         const groupe = {
-            moyenneA: Math.round(sommeA_ponctuel / nbEtudiants), // ✅ A ponctuel (taux de présence à cette séance)
+            moyenneA: nbAvecA > 0 ? Math.round(sommeA_ponctuel / nbAvecA) : null, // ✅ A ponctuel (taux de présence à cette séance)
             moyenneC: cGlobal, // ✅ C ponctuel (taux de remise du dernier artefact dû)
             moyenneP: nbAvecP > 0 ? Math.round(sommeP_cumul / nbAvecP) : null, // ✅ P cumulatif (moyenne jusqu'à cette date)
             nbEtudiants: nbEtudiants,
-            dispersionA: calculerEcartType(valeursA),
+            dispersionA: valeursA.length > 0 ? calculerEcartType(valeursA) : null,
             dispersionC: valeursC.length > 0 ? calculerEcartType(valeursC) : null,
             dispersionP: valeursP.length > 0 ? calculerEcartType(valeursP) : null
         };
