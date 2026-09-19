@@ -7,7 +7,11 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 9 H 15 (Toronto) : LES SPECS AU SECOND ESSAI, MESURÉES, ET LA GARDE DE CHARGE DE `pousser.sh` POSÉE — EN LOCAL, PAS POUSSÉ, aucun bump
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 9 H 15 (Toronto) : LES SPECS AU SECOND ESSAI, MESURÉES, ET LA GARDE DE CHARGE DE `pousser.sh` POSÉE — ✅ POUSSÉ À 9 H 30, aucun bump
+
+✅ **POUSSÉ le 19 sept. 2026 à 9 h 30, sur confirmation directe de Grégoire (« Pousse ») : `origin/main` = `81ae1e03`**, mesuré après `git push origin HEAD:main` depuis le worktree propre du verdict (retiré) et `git fetch` ; `main` local = `origin/main`, avance 0, retard 0. **Verdict Playwright sur `81ae1e03` : vert, 0 échec connu, 0 spec au second essai**, rendu en 14 min 37 s (9 h 12 – 9 h 27) à charge 3 à 5, lancé PAR LA GARDE après 120 s d'attente (charge 44,74 → 7,62, juste après un Vitest complet : le chemin « la charge redescend, on lance » vu en conditions réelles). **Charge au lancement du hook : 2,92** ; Vitest vert au hook ; 57,30 à la sortie du hook — c'est le Vitest lui-même. Ce bloc-ci est un commit de documents POSTÉRIEUR, local, non poussé : il part avec le prochain push. **Lot suivant, annoncé par Cowork** : le choix d'échelle de l'assistant de pratique (#910), consigne à relayer. Le paragraphe suivant est l'état d'AVANT le push.
+
+⚠ **Pour un verdict DÉTACHÉ** (`node scripts/verifier-playwright.mjs` dans un worktree, puis `git push` simple — le chemin quand l'arbre principal porte le travail d'une autre session) : la garde ne s'applique PAS toute seule, elle vit dans `pousser.sh`. Geste fait ce matin : `CHARGE_SEUIL=8 CHARGE_PLAFOND_S=900 CHARGE_PAS_S=30`, sourcer `scripts/garde-charge.sh`, appeler `attendre_charge_basse`, ne lancer que sur code 0. Non inscrit : fait une fois, aucun raté vécu.
 
 Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-specs-au-second-essai, renommée au démarrage ; celle de #913 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-resultats-ulterieurs.md`). **Tout est sur `main` local ; `origin/main` = `fc1c012d` ; le push attend le signal de Grégoire.** Aucun fichier de `js/`, aucune version, aucune « Nouvelle ».
 
