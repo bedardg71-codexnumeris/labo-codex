@@ -59,10 +59,17 @@ let groupesEnAttenteV2 = { cle: null, groupes: new Set() };
    jamais écrit d'ici.
    =============================== */
 
+/** Le code et le nom d'un cours, d'où qu'ils viennent : lu par la zone d'import ET par le menu Groupe. */
+function _codeEtNomCoursV2(c) {
+    return {
+        code: (c && (c.codeCours || c.sigle || c.code)) || '',
+        nom: (c && (c.nomCours || c.nom || c.titre)) || ''
+    };
+}
+
 function _libelleCoursRattachementV2(c) {
     if (!c) return '';
-    const code = c.codeCours || c.sigle || c.code || '';
-    const nom = c.nomCours || c.nom || c.titre || '';
+    const { code, nom } = _codeEtNomCoursV2(c);
     return `${code} ${nom}`.trim() || `Cours ${c.id || 'sans identifiant'}`;
 }
 
@@ -81,18 +88,123 @@ function _coursOffertsAuRattachementV2() {
     return { actif, cours };
 }
 
+/* ===============================
+   UN GROUPE, C'EST UN NUMÉRO DANS UN COURS (#872, mécanisme B — 19 sept. 2026)
+   Omnivox numérote les groupes PAR cours : deux cours portent chacun un « 00001 ». Le menu Groupe
+   ne connaissait que le numéro — une seule entrée, élèves mêlés, et « Supprimer le groupe » qui
+   emportait les deux. L'identité d'un groupe est le couple (coursId, numéro) : le menu porte une
+   valeur composée, `getGroupeSelectionneV2` est son SEUL lecteur, et la liste, le compte, la
+   suppression, « + Nouveau groupe » et le formulaire passent par lui. Rien n'est réécrit en base :
+   une fiche sans `coursId` forme le groupe « sans cours » de son numéro.
+   =============================== */
+
+/** La valeur d'une entrée du menu. encodeURIComponent code aussi « | » : le couple se relit sans ambiguïté. */
+function _valeurGroupeV2(coursId, groupe) {
+    return encodeURIComponent(coursId || '') + '|' + encodeURIComponent(groupe || '');
+}
+
+/** @returns {{coursId: string, groupe: string}|null} null : « Tous les groupes », ou l'ancienne forme (numéro seul). */
+function _lireValeurGroupeV2(valeur) {
+    const v = String(valeur || '');
+    const coupe = v.indexOf('|');
+    if (coupe === -1) return null;
+    try {
+        return { coursId: decodeURIComponent(v.slice(0, coupe)), groupe: decodeURIComponent(v.slice(coupe + 1)) };
+    } catch (e) {
+        return null;
+    }
+}
+
+/** La fiche est-elle du groupe choisi ? Le SEUL jugement d'appartenance de cet écran. */
+function _ficheEstDuGroupeV2(e, sel) {
+    return !!e && !!sel && String(e.coursId || '') === sel.coursId
+        && normaliserNumeroGroupe(e.groupe) === sel.groupe;
+}
+
+/** Un cours par son id : la bibliothèque `cours` (globale), sinon le cours actif (miroir, cf. #916). */
+function _coursParIdV2(coursId) {
+    if (!coursId) return null;
+    const trouve = (db.getSync('cours', []) || []).find(c => c && c.id === coursId);
+    if (trouve) return trouve;
+    const infoCours = db.getSync('infoCours', null);
+    return infoCours && infoCours.id === coursId ? infoCours : null;
+}
+
 /**
- * La phrase au-dessus du formulaire d'ajout. Sans menu : un élève ajouté à la main l'est dans le
- * cours actif. En édition, la phrase reste vraie — enregistrer une fiche la rattache au cours actif
- * (la fusion écrit `coursId` ; comportement d'avant ce lot, inchangé, désormais dit).
+ * Les libellés des groupes — mots de Grégoire (19 sept. 2026) : « 00001 · 601-101-MQ », « 00001 · sans
+ * cours ». Le code seul (largeur du menu sur iPad) ; le nom s'ajoute quand deux cours de la liste
+ * portent le même code. Un cours sans code est nommé ; un cours introuvable : « Cours <id> ».
+ * @param {Array<{coursId: string, groupe: string}>} couples
+ * @returns {Map<string, string>} valeur composée → libellé (sans les suffixes « (démo) » / « (vide) »)
+ */
+function _libellesGroupesV2(couples) {
+    const parCours = new Map();
+    couples.forEach(({ coursId }) => {
+        if (coursId && !parCours.has(coursId)) parCours.set(coursId, _codeEtNomCoursV2(_coursParIdV2(coursId)));
+    });
+    const nbParCode = {};
+    parCours.forEach(({ code }) => { if (code) nbParCode[code] = (nbParCode[code] || 0) + 1; });
+    const libelles = new Map();
+    couples.forEach(({ coursId, groupe }) => {
+        let cours = 'sans cours';
+        if (coursId) {
+            const { code, nom } = parCours.get(coursId);
+            cours = (code && nbParCode[code] > 1 ? `${code} ${nom}`.trim() : (code || nom)) || `Cours ${coursId}`;
+        }
+        libelles.set(_valeurGroupeV2(coursId, groupe), `${groupe} · ${cours}`);
+    });
+    return libelles;
+}
+
+/** Les couples (cours, numéro) que portent des fiches — une fiche sans numéro n'en forme aucun, comme avant. */
+function _couplesDesFichesV2(etudiants) {
+    const vus = new Map();
+    (etudiants || []).forEach(e => {
+        if (!e || !e.groupe) return;
+        const couple = { coursId: String(e.coursId || ''), groupe: normaliserNumeroGroupe(e.groupe) };
+        vus.set(_valeurGroupeV2(couple.coursId, couple.groupe), couple);
+    });
+    return vus;
+}
+
+/** Le libellé du groupe choisi, pour les phrases (suppression, liste vide, bouton). */
+function _libelleGroupeChoisiV2(sel, etudiants) {
+    const couples = _couplesDesFichesV2(etudiants);
+    couples.set(_valeurGroupeV2(sel.coursId, sel.groupe), sel);
+    return _libellesGroupesV2(Array.from(couples.values())).get(_valeurGroupeV2(sel.coursId, sel.groupe));
+}
+
+/**
+ * La phrase au-dessus du formulaire. AJOUT : « un élève ajouté à la main l'est dans la liste qu'on
+ * regarde » — le cours de l'entrée choisie au menu Groupe ; sous « Tous les groupes », le cours actif.
+ * ÉDITION : la fiche GARDE son cours (#872 B — avant, l'enregistrer la rattachait au cours actif en
+ * silence) ; la phrase dit le cours de la fiche.
  */
 function rafraichirRattachementEtudiantsV2() {
     const phrase = document.getElementById('v2-ajoutRattachement');
     if (!phrase) return;
+    if (etudiantEnEditionIndex >= 0) {
+        const fiche = (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e && e.da === etudiantEnEditionDA);
+        const coursId = String((fiche && fiche.coursId) || '');
+        phrase.textContent = coursId
+            ? 'Rattaché·e à : ' + (_libelleCoursRattachementV2(_coursParIdV2(coursId)) || `Cours ${coursId}`)
+            : 'Rattaché·e à aucun cours.';
+        return;
+    }
+    const cours = _coursDeLAjoutV2();
+    phrase.textContent = cours.id
+        ? 'Sera rattaché·e à : ' + (_libelleCoursRattachementV2(_coursParIdV2(cours.id)) || `Cours ${cours.id}`)
+        : (cours.duMenu
+            ? 'L\'étudiant·e ne sera rattaché·e à aucun cours.'
+            : 'Aucun cours actif : l\'étudiant·e ne sera rattaché·e à aucun cours.');
+}
+
+/** Le cours d'un AJOUT à la main : celui de l'entrée choisie au menu Groupe, sinon le cours actif. */
+function _coursDeLAjoutV2() {
+    const sel = getGroupeSelectionneV2();
+    if (sel) return { id: sel.coursId, duMenu: true };
     const { actif } = _coursOffertsAuRattachementV2();
-    phrase.textContent = actif
-        ? 'Sera rattaché·e à : ' + _libelleCoursRattachementV2(actif)
-        : 'Aucun cours actif : l\'étudiant·e ne sera rattaché·e à aucun cours.';
+    return { id: actif ? actif.id : '', duMenu: false };
 }
 
 /** Le menu de la zone d'import : les cours offerts, le cours actif choisi au départ. */
@@ -198,9 +310,11 @@ async function chargerListeEtudiantsV2() {
     }
 
     // Filtrer par groupe si sélectionné
+    // #872 B : l'entrée choisie est un couple (cours, numéro) — jamais le numéro seul.
     const groupeFiltre = getGroupeSelectionneV2();
+    const libelleFiltre = groupeFiltre ? _libelleGroupeChoisiV2(groupeFiltre, tousLesEtudiants) : '';
     const etudiants = groupeFiltre
-        ? tousLesEtudiants.filter(e => normaliserNumeroGroupe(e.groupe) === groupeFiltre)
+        ? tousLesEtudiants.filter(e => _ficheEstDuGroupeV2(e, groupeFiltre))
         : tousLesEtudiants;
 
     // Mettre à jour le compteur dans l'en-tête (total, pas filtré)
@@ -211,7 +325,7 @@ async function chargerListeEtudiantsV2() {
 
     if (etudiants.length === 0) {
         const message = groupeFiltre
-            ? `Aucun étudiant dans le groupe ${echapperHtml(groupeFiltre)}.`
+            ? `Aucun étudiant dans le groupe ${echapperHtml(libelleFiltre)}.`
             : 'Aucun étudiant. Utilise le formulaire ci-dessous ou l\'import plus bas.';
         conteneur.innerHTML = `<p class="etat-vide-liste">${message}</p>`;
         toggleDisplay(actionsEtudiants, tousLesEtudiants.length > 0);
@@ -229,7 +343,7 @@ async function chargerListeEtudiantsV2() {
     const btnSupprimerGroupe = document.getElementById('v2-btnSupprimerGroupe');
     if (btnSupprimerGroupe) {
         toggleDisplay(btnSupprimerGroupe, true);
-        btnSupprimerGroupe.textContent = groupeFiltre ? `Supprimer le groupe ${groupeFiltre}` : 'Supprimer un groupe…';
+        btnSupprimerGroupe.textContent = groupeFiltre ? `Supprimer le groupe ${libelleFiltre}` : 'Supprimer un groupe…';
     }
 
     // Mode anonymisation (bug du 14 sept. 2026, rencontre de la CoP) : cette liste lisait la
@@ -324,9 +438,19 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
 
     // Répartition par groupe
     if (elemGroupes) {
+        // #872 B : un groupe est un couple (cours, numéro). Le cours n'est nommé que si le numéro
+        // est porté par deux cours — partout ailleurs la carte se lit comme avant.
+        const couples = _couplesDesFichesV2(etudiants);
+        const libelles = _libellesGroupesV2(Array.from(couples.values()));
+        const nbParNumero = {};
+        couples.forEach(c => { nbParNumero[c.groupe] = (nbParNumero[c.groupe] || 0) + 1; });
         const groupesMap = {};
         etudiants.forEach(e => {
-            const grp = e.groupe ? normaliserNumeroGroupe(e.groupe) : 'Sans groupe';
+            let grp = 'Sans groupe';
+            if (e.groupe) {
+                const numero = normaliserNumeroGroupe(e.groupe);
+                grp = nbParNumero[numero] > 1 ? libelles.get(_valeurGroupeV2(String(e.coursId || ''), numero)) : numero;
+            }
             groupesMap[grp] = (groupesMap[grp] || 0) + 1;
         });
 
@@ -391,51 +515,62 @@ function populerDropdownGroupesV2(etudiants) {
 
     const valeurActuelle = select.value;
 
-    // Extraire les groupes uniques
-    const groupesSet = new Set();
-    etudiants.forEach(e => {
-        if (e.groupe) {
-            groupesSet.add(normaliserNumeroGroupe(e.groupe));
-        }
-    });
+    // #872 B : une entrée par couple (cours, numéro) — deux cours qui portent chacun un « 00001 »
+    // donnent deux entrées.
+    const couples = _couplesDesFichesV2(etudiants);
 
     // #872 : les groupes créés mais encore vides, du trimestre affiché seulement.
-    const groupesAvecEleves = new Set(groupesSet);
+    const valeursAvecEleves = new Set(couples.keys());
     if (groupesEnAttenteV2.cle === cle('groupeEtudiants')) {
-        groupesEnAttenteV2.groupes.forEach(g => groupesSet.add(g));
+        groupesEnAttenteV2.groupes.forEach(v => {
+            const couple = _lireValeurGroupeV2(v);
+            if (couple && !couples.has(v)) couples.set(v, couple);
+        });
     }
 
-    const groupesTries = Array.from(groupesSet).sort();
+    const libelles = _libellesGroupesV2(Array.from(couples.values()));
+    // Tri : par numéro, puis par libellé (donc par cours).
+    const valeursTriees = Array.from(couples.keys()).sort((a, b) =>
+        couples.get(a).groupe.localeCompare(couples.get(b).groupe) || libelles.get(a).localeCompare(libelles.get(b)));
 
     // Marqueur démo : un groupe est considéré démo si au moins un de ses
     // étudiants a isDemo=true. Cohérent avec le traitement des autres
     // sélecteurs latéraux (horaires, enseignants).
-    const estGroupeDemo = (grp) => etudiants.some(e =>
-        normaliserNumeroGroupe(e.groupe) === grp && e.isDemo === true
-    );
+    const estGroupeDemo = (couple) => etudiants.some(e => _ficheEstDuGroupeV2(e, couple) && e.isDemo === true);
 
     // Reconstruire les options
     let html = '<option value="">Tous les groupes</option>';
-    groupesTries.forEach(grp => {
-        const suffixeDemo = estGroupeDemo(grp) ? ' (démo)' : '';
-        const suffixeVide = groupesAvecEleves.has(grp) ? '' : ' (vide)';
-        // #872 : grp vient de la 2e colonne importée — échappé (echapperHtml tient aussi les
-        // guillemets depuis #572 : il sert la valeur de l'attribut comme le texte).
-        html += `<option value="${echapperHtml(grp)}">${echapperHtml(grp)}${suffixeDemo}${suffixeVide}</option>`;
+    valeursTriees.forEach(v => {
+        const suffixeDemo = estGroupeDemo(couples.get(v)) ? ' (démo)' : '';
+        const suffixeVide = valeursAvecEleves.has(v) ? '' : ' (vide)';
+        // #872 : le numéro vient de la 2e colonne importée, le code du cours d'une saisie — échappés
+        // (echapperHtml tient aussi les guillemets depuis #572 : il sert la valeur de l'attribut
+        // comme le texte).
+        html += `<option value="${echapperHtml(v)}">${echapperHtml(libelles.get(v))}${suffixeDemo}${suffixeVide}</option>`;
     });
     select.innerHTML = html;
 
     // Restaurer la sélection : en priorité la valeur actuelle du DOM (évite
     // de casser une interaction en cours), sinon la valeur persistée par
     // trimestre (permet à entrerEnDemo de pré-sélectionner '0demo').
-    if (valeurActuelle && groupesSet.has(valeurActuelle)) {
+    if (valeurActuelle && couples.has(valeurActuelle)) {
         select.value = valeurActuelle;
     } else {
-        const groupeSauvegarde = db.getSync(cle('groupeSelectionne'), null);
-        if (groupeSauvegarde && groupesSet.has(groupeSauvegarde)) {
-            select.value = groupeSauvegarde;
-        }
+        select.value = _valeurDepuisPersisteeV2(db.getSync(cle('groupeSelectionne'), null), couples);
     }
+}
+
+/**
+ * La valeur persistée → une entrée du menu. L'ANCIENNE forme (le numéro seul, dont le « 0demo »
+ * qu'écrit entrerEnDemo) reste lue : elle choisit l'entrée de ce numéro si elle est UNIQUE ;
+ * portée par deux cours, elle ne désigne plus personne — « Tous les groupes ». Rien n'est réécrit.
+ */
+function _valeurDepuisPersisteeV2(persistee, couples) {
+    if (!persistee) return '';
+    if (couples.has(persistee)) return persistee;
+    if (_lireValeurGroupeV2(persistee)) return '';
+    const candidates = Array.from(couples.keys()).filter(v => couples.get(v).groupe === normaliserNumeroGroupe(persistee));
+    return candidates.length === 1 ? candidates[0] : '';
 }
 
 /**
@@ -453,16 +588,18 @@ async function filtrerParGroupeV2() {
     // En édition, le champ porte le groupe de la fiche ouverte : on n'y touche pas.
     if (etudiantEnEditionIndex < 0) {
         const champGroupe = document.getElementById('v2-etudiantGroupe');
-        if (champGroupe) champGroupe.value = select?.value || '';
+        if (champGroupe) champGroupe.value = getGroupeSelectionneV2()?.groupe || '';
     }
     await chargerListeEtudiantsV2();
 }
 
 /**
- * Retourne le groupe actuellement sélectionné dans le dropdown
+ * Le groupe choisi au menu : le couple (cours, numéro), ou null sous « Tous les groupes ».
+ * #872 B : SEUL lecteur de la valeur du menu — personne ne compare plus le numéro seul.
+ * @returns {{coursId: string, groupe: string}|null}
  */
 function getGroupeSelectionneV2() {
-    return document.getElementById('v2-selectGroupe')?.value || '';
+    return _lireValeurGroupeV2(document.getElementById('v2-selectGroupe')?.value);
 }
 
 /**
@@ -529,9 +666,13 @@ async function soumettreEtudiantV2() {
         prenom: prenom,
         groupe: groupe,
         programme: programme || '',
-        sa: sa || '',
-        coursId: coursActif?.id || ''
+        sa: sa || ''
     };
+    // #872 B : à l'AJOUT, l'élève rejoint le cours de l'entrée choisie au menu Groupe (« la liste
+    // qu'on regarde »), sinon le cours actif. En ÉDITION, `coursId` n'est PAS dans l'objet : la
+    // fusion garde celui de la fiche (absent compris). Avant, enregistrer une fiche la rattachait
+    // au cours actif en silence — c'était le seul geste de l'écran qui déplaçait un élève.
+    if (etudiantEnEditionIndex < 0) etudiant.coursId = _coursDeLAjoutV2().id;
     if (dateArrivee) etudiant.dateArrivee = dateArrivee;
 
     const cleEtud = cle('groupeEtudiants');
@@ -646,6 +787,7 @@ function editerEtudiantV2(da) {
     if (btnSoumettre) btnSoumettre.textContent = 'Enregistrer les modifications';
     if (btnAnnuler) btnAnnuler.classList.remove('u-hide');
     if (formContainer) formContainer.classList.add('mode-edition');
+    rafraichirRattachementEtudiantsV2();   // #872 B : la phrase dit le cours de LA FICHE
 
     // Scroller vers le formulaire
     formContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -671,7 +813,7 @@ function reinitialiserFormEtudiantV2() {
     document.getElementById('v2-etudiantPrenom').value = '';
     // #872 : après un ajout, l'élève suivant va dans le MÊME groupe (celui du menu), pas dans le
     // groupe du cours actif. « Tous les groupes » laisse le champ vide, comme avant.
-    document.getElementById('v2-etudiantGroupe').value = getGroupeSelectionneV2();
+    document.getElementById('v2-etudiantGroupe').value = getGroupeSelectionneV2()?.groupe || '';
     document.getElementById('v2-etudiantProgramme').value = '';
     document.getElementById('v2-etudiantSA').value = '';
     const champDateArriveeVide = document.getElementById('v2-etudiantDateArrivee');
@@ -687,6 +829,7 @@ function reinitialiserFormEtudiantV2() {
     if (btnSoumettre) btnSoumettre.textContent = 'Ajouter l\'étudiant·e';
     if (btnAnnuler) btnAnnuler.classList.add('u-hide');
     if (formContainer) formContainer.classList.remove('mode-edition');
+    rafraichirRattachementEtudiantsV2();   // #872 B : retour à la phrase de l'ajout
 }
 
 /**
@@ -704,15 +847,22 @@ async function creerNouveauGroupeV2() {
     const etudiants = db.getSync(cleEtud, []);
     if (groupesEnAttenteV2.cle !== cleEtud) groupesEnAttenteV2 = { cle: cleEtud, groupes: new Set() };
 
-    // Numéros déjà pris : ceux que portent des élèves, et ceux des groupes créés encore vides
+    // #872 B : le groupe naît dans le COURS ACTIF, et son numéro se juge dans ce cours — le cours B
+    // peut avoir son « 00001 » même si le cours A en a un (Mathieu : « un groupe par cours »).
+    const coursIdDuGroupe = _coursOffertsAuRattachementV2().actif?.id || '';
+
+    // Numéros déjà pris DANS CE COURS : ceux que portent des élèves, et ceux des groupes créés encore vides
     const groupesExistants = new Set();
     etudiants.forEach(e => {
-        if (e.groupe) {
+        if (e.groupe && String(e.coursId || '') === coursIdDuGroupe) {
             const num = parseInt(e.groupe, 10);
             if (!isNaN(num)) groupesExistants.add(num);
         }
     });
-    groupesEnAttenteV2.groupes.forEach(g => groupesExistants.add(parseInt(g, 10)));
+    groupesEnAttenteV2.groupes.forEach(v => {
+        const couple = _lireValeurGroupeV2(v);
+        if (couple && couple.coursId === coursIdDuGroupe) groupesExistants.add(parseInt(couple.groupe, 10));
+    });
 
     // Calculer le prochain numéro disponible
     let prochainNumero = 1;
@@ -733,8 +883,9 @@ async function creerNouveauGroupeV2() {
         return;
     }
     const groupeFinal = normaliserNumeroGroupe(saisie);
-    groupesEnAttenteV2.groupes.add(groupeFinal);
-    db.setSync(cle('groupeSelectionne'), groupeFinal);
+    const valeurFinale = _valeurGroupeV2(coursIdDuGroupe, groupeFinal);
+    groupesEnAttenteV2.groupes.add(valeurFinale);
+    db.setSync(cle('groupeSelectionne'), valeurFinale);
 
     // Réinitialiser le formulaire et pré-remplir le groupe
     reinitialiserFormEtudiantV2();
@@ -746,18 +897,19 @@ async function creerNouveauGroupeV2() {
         // Vérifier si l'option existe déjà
         let optionExiste = false;
         for (let opt of select.options) {
-            if (opt.value === groupeFinal) {
+            if (opt.value === valeurFinale) {
                 optionExiste = true;
                 break;
             }
         }
         if (!optionExiste) {
+            // Option provisoire : chargerListeEtudiantsV2, juste dessous, reconstruit le menu et son libellé.
             const newOption = document.createElement('option');
-            newOption.value = groupeFinal;
+            newOption.value = valeurFinale;
             newOption.textContent = groupeFinal;
             select.appendChild(newOption);
         }
-        select.value = groupeFinal;
+        select.value = valeurFinale;
         // Rafraîchir l'affichage pour montrer le groupe vide
         await chargerListeEtudiantsV2();
     }
@@ -765,7 +917,7 @@ async function creerNouveauGroupeV2() {
     // Focus sur le premier champ
     document.getElementById('v2-etudiantDA')?.focus();
 
-    notifications.succes(`Groupe ${groupeFinal} prêt. Ajoute des étudiants.`);
+    notifications.succes(`Groupe ${_libelleGroupeChoisiV2({ coursId: coursIdDuGroupe, groupe: groupeFinal }, etudiants)} prêt. Ajoute des étudiants.`);
 }
 
 /**
@@ -1199,21 +1351,18 @@ async function supprimerGroupeSelectionneV2() {
     // ✅ CORRECTION (9 jan 2026): Utiliser async pour persistance fiable
     const tousLesEtudiants = await db.get(cleEtud) || [];
 
-    // Compter les étudiants du groupe
-    const etudiantsDuGroupe = tousLesEtudiants.filter(e =>
-        normaliserNumeroGroupe(e.groupe) === groupeSelectionne
-    );
+    // Compter les étudiants du groupe — #872 B : le couple (cours, numéro), jamais le numéro seul.
+    const etudiantsDuGroupe = tousLesEtudiants.filter(e => _ficheEstDuGroupeV2(e, groupeSelectionne));
+    const libelleGroupe = _libelleGroupeChoisiV2(groupeSelectionne, tousLesEtudiants);
 
     if (etudiantsDuGroupe.length === 0) {
         notifications.erreur('Aucun étudiant dans ce groupe.');
         return;
     }
 
-    // #885 : un numéro Omnivox est propre à un cours — deux cours peuvent porter le même (#872,
-    // mécanisme B). La suppression les emporte tous : la question le dit plutôt que de le taire.
-    const nbCours = new Set(etudiantsDuGroupe.map(e => e.coursId || '')).size;
-    const mentionCours = nbCours > 1 ? `, répartis dans ${nbCours} cours` : '';
-    if (!confirm(`Supprimer les ${etudiantsDuGroupe.length} étudiant(s) du groupe ${groupeSelectionne}${mentionCours} ? Cette action est irréversible.`)) {
+    // #872 B : la question nomme le groupe par son libellé (numéro ET cours). Le « 00001 » d'un
+    // autre cours n'est pas touché — la mention « répartis dans N cours » de #885 n'a plus d'objet.
+    if (!confirm(`Supprimer les ${etudiantsDuGroupe.length} étudiant(s) du groupe ${libelleGroupe} ? Cette action est irréversible.`)) {
         return;
     }
 
@@ -1221,9 +1370,7 @@ async function supprimerGroupeSelectionneV2() {
     // rejoué DANS la file : la liste d'avant la confirmation ne vaut plus rien,
     // et un étudiant ajouté pendant la question serait sinon effacé.
     await db.modifier(cleEtud, (lus) => {
-        return (lus || []).filter(e =>
-            normaliserNumeroGroupe(e.groupe) !== groupeSelectionne
-        );
+        return (lus || []).filter(e => !_ficheEstDuGroupeV2(e, groupeSelectionne));
     }, []);
 
     // Reset le dropdown à "Tous les groupes"
@@ -1232,7 +1379,7 @@ async function supprimerGroupeSelectionneV2() {
 
     chargerListeEtudiantsV2();
 
-    notifications.succes(`Groupe ${groupeSelectionne} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
+    notifications.succes(`Groupe ${libelleGroupe} supprimé (${etudiantsDuGroupe.length} étudiant(s))`);
 
     // Mettre à jour le guide groupe-cours
 }

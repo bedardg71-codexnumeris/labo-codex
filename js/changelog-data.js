@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // Entrée PROPOSÉE le 19 sept. 2026 (#872, mécanisme B) — les mots remontent à Grégoire par Cowork.
+            version: '1.149',
+            couleur: 'vert',
+            titre: 'Un groupe, c\'est un numéro dans un cours',
+            items: [
+                'Cadre&nbsp;› liste du groupe&nbsp;: le menu «&nbsp;Groupe&nbsp;» nomme maintenant le cours de chaque groupe («&nbsp;00001&nbsp;· 601-101-MQ&nbsp;»). Si deux de tes cours ont chacun un groupe 00001, tu vois deux entrées, et chacune montre ses propres élèves. Avant, les deux groupes étaient mêlés dans une seule liste.',
+                '«&nbsp;Supprimer le groupe&nbsp;» ne retire que le groupe choisi, dans son cours. Avant, le groupe du même numéro dans un autre cours partait avec lui.',
+                '«&nbsp;+&nbsp;Nouveau groupe&nbsp;» crée le groupe dans ton cours actif&nbsp;: un second cours peut avoir son propre groupe 00001.',
+                'Un·e élève ajouté·e à la main rejoint le cours du groupe affiché. Modifier la fiche d\'un·e élève ne change plus son cours.'
+            ]
+        },
+        {
             version: '1.148',
             couleur: 'vert',
             titre: 'L\'import d\'élèves dit où vont les élèves',
