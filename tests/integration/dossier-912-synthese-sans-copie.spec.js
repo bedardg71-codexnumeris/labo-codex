@@ -47,8 +47,12 @@ async function monter(page, { avecCopie = false, archive = false, criteres = 'co
         window.db.setSync(T + '_groupeEtudiants', [{ da: DA, nom: 'Gagnon', prenom: 'Léa', groupe: '01', coursId, groupeCoursId: 'GC_912' }]);
         window.db.setSync(T + '_productions', [{ id: 'p912', titre: 'Analyse', type: 'travail', ponderation: 100, grilleId: 'G912', echelleId: 'E912', groupeCoursId: 'GC_912' }]);
         window.db.setSync(T + '_grillesTemplates', [{ id: 'G912', nom: 'Grille témoin', type: 'holistique', criteres: [
-            { id: 'c1', nom: 'Contenu', ponderation: 60, type: 'holistique' },
-            { id: 'c2', nom: 'Structure', ponderation: 40, type: 'holistique' }
+            // ↻ #705 (19 sept. 2026) — des identifiants DATÉS (l'ancien format « CR<ms> » d'A2025 : nés le
+            // 3 sept. 2025, avant l'évaluation du 20 oct.). Depuis #705, un critère que l'évaluation ne porte
+            // pas peut avoir été ajouté APRÈS elle : sans date, il est présumé tel et le PDF conclut. C'est la
+            // date de naissance qui fait de « Structure » un critère SAUTÉ — le cas que #674 refuse.
+            { id: 'CR1756900000001', nom: 'Contenu', ponderation: 60, type: 'holistique' },
+            { id: 'CR1756900000002', nom: 'Structure', ponderation: 40, type: 'holistique' }
         ] }]);
         window.db.setSync(T + '_echellesTemplates', [{ id: 'E912', nom: 'IDME témoin', niveaux: [
             { code: 'I', nom: 'Insuffisant', min: 0, max: 54, valeurCalcul: 40 },
@@ -57,8 +61,8 @@ async function monter(page, { avecCopie = false, archive = false, criteres = 'co
             { code: 'E', nom: 'Étendu', min: 90, max: 100, valeurCalcul: 95 }
         ] }]);
         const lesCriteres = {
-            complets: [{ critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60 }, { critereId: 'c2', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 40 }],
-            incomplets: [{ critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60 }],   // c2 (40 %) reste à évaluer : #674
+            complets: [{ critereId: 'CR1756900000001', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60 }, { critereId: 'CR1756900000002', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 40 }],
+            incomplets: [{ critereId: 'CR1756900000001', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60 }],   // c2 (40 %) reste à évaluer : #674
             aucun: []                                                                                              // sept cas dans l'Automne 2025 de Grégoire
         }[criteres];
         window.db.setSync(T + '_evaluationsSauvegardees', [{
