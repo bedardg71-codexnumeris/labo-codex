@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // Entrée PROPOSÉE le 19 sept. 2026 (#872, mécanisme B) — les mots remontent à Grégoire par Cowork.
+            // Entrée validée par Grégoire le 19 sept. 2026 (#872, mécanisme B — #924).
             version: '1.149',
             couleur: 'vert',
             titre: 'Un groupe, c\'est un numéro dans un cours',
