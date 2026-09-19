@@ -2338,7 +2338,8 @@
                     // ⮕ Règle #394 : un P non constructible n'est PAS un 0. Ce fichier voyage, et un
                     //   0 entre dans une moyenne sans que personne le voie : `null` (valeur manquante
                     //   pour R, pandas, etc.), avec `note_constructible` qui dit pourquoi.
-                    unites: 'A, C et P de 0 à 100. P_final vaut null (jamais 0) quand la note n\'est pas constructible : voir note_constructible.',
+                    // #743 (lot D) : A suit la même règle — inconnu tant qu'aucune séance saisie ne compte.
+                    unites: 'A, C et P de 0 à 100. P_final vaut null (jamais 0) quand la note n\'est pas constructible : voir note_constructible. A_final vaut null (et non 0 ou 100) tant qu\'aucune séance saisie ne compte pour l\'étudiant·e : assiduité inconnue.',
 
                     indices_finaux: etudiantsActifs.map(e => {
                         const indices = calculerTousLesIndices(e.da, indicesAssiduite, indicesCP);

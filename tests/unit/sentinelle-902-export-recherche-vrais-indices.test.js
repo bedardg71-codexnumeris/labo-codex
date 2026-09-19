@@ -119,6 +119,8 @@ describe('#902 — indices_finaux porte les valeurs stockées', () => {
         expect(fichier.calculs.unites).toMatch(/0 à 100/);
         expect(fichier.calculs.unites).toMatch(/null/);
         expect(fichier.calculs.unites).toMatch(/note_constructible/);
+        // 1.147.1 : depuis #743 (lot D), A_final peut aussi valoir null — la note le dit aux chercheurs.
+        expect(fichier.calculs.unites).toMatch(/A_final vaut null/);
         expect(fichier.meta.version_format).toBe('1.2'); // 1.1 = #902 ; 1.2 = #913 (resultats_ulterieurs, additif)
     });
 });

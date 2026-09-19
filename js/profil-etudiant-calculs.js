@@ -1963,8 +1963,9 @@ function determinerAlerteContextuelle(da) {
 
     // #743 (lot D) — SANS ASSIDUITÉ, LE CONTEXTE NE SE QUALIFIE PAS. Les quatre paliers sont une
     // conjonction sur A ET C : avec un A inconnu, « Très favorable » (l'ancien A = 100 %) était une donnée
-    // qui n'existe pas. Un tiret à la place du palier ; C, lui, se lit. AUCUN MOT NEUF ici : la phrase
-    // qui accompagnerait ce tiret remonte à Grégoire (proposée au rapport du lot, pas posée).
+    // qui n'existe pas. Un tiret à la place du palier ; C, lui, se lit. La phrase sous le tiret est
+    // de Grégoire (validée le 19 sept. 2026, « s'affichera ») : rangée dans `recommandation`, le ton
+    // gris de la carte — `description` s'y dessine en couleur d'alerte, et ceci n'en est pas une.
     if (assiduiteInconnue) {
         return {
             niveau: 'inconnu',
@@ -1973,7 +1974,7 @@ function determinerAlerteContextuelle(da) {
             badgeClasse: 'badge-attente',
             A: texteA,
             C: (C * 100).toFixed(0) + '%',
-            recommandation: '',
+            recommandation: 'L\'assiduité n\'est pas encore connue : le contexte s\'affichera dès qu\'une séance sera saisie pour cet·te étudiant·e.',
             donneesSuffisantes: false
         };
     }

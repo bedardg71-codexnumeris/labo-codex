@@ -1,58 +1,45 @@
-# Consigne suivante — l'assiduité qui manque (lot D du dépistage : #735, #743, #750)
+# Consigne suivante — les deux phrases de l'assiduité inconnue (suite du lot D, patch 1.147.1)
 
-> Écrite le 19 septembre 2026 à 10 h 35 (Toronto), par Cowork, sur accord de Grégoire (« oui », 10 h 35).
-> **Condition de départ** : `main` local porte `a260acfc` (1.146.10, #906) ou plus récent. 1.146.10 n'est pas encore poussée : son push attend la phrase de « Nouvelles » lue par Grégoire et la relecture de Cowork ; ce lot n'attend pas ce push, mais ne pousse rien sans un « pousse » de Grégoire. Puis archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-bilan-premier-rendu.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
-> ⚠ **Arbre partagé** : quatre fichiers modifiés appartiennent à un autre travail (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17), plus des fichiers non suivis (`docs/projet de développement/`, `ignorés/`, le « Modèle de consigne… .txt », `Retours des testeurs/jean-françois/`). N'y touche pas, ne les commite pas, garde le jeton anti-cache d'`interpretation-config.js` tel quel (`20260910c`, comme en 1.146.9 et 1.146.10) ; indexe par chemins nommés.
-> **Identifiant** : relis « Dernier ID utilisé » (#922 à l'écriture) et `grep` les deux registres avant d'inscrire.
-> **Plan de référence** : `plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md`, ligne du lot D et « Les critères retenus ». Les trois fiches portent les décisions de Grégoire (16 sept., 17 h 18-17 h 21) et ses mots (17 sept., matin).
+> Écrite le 19 septembre 2026 à 11 h 44 (Toronto), par Cowork. Phrases **validées par Grégoire** (« oui », 11 h 44).
+> **Condition de départ** : `origin/main` = `085a14aa` ou plus récent. Archive `plans de travail/CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-assiduite-qui-manque.md` et renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> ⚠ **Arbre partagé** : mêmes quatre fichiers de l'autre travail qu'aux deux lots précédents ; n'y touche pas, jeton d'`interpretation-config.js` à `20260910c`, index par chemins nommés.
+> **Identifiant** : « Dernier ID utilisé » = #922 à l'écriture ; relis-le et `grep` les deux registres avant d'inscrire.
+> **Ce lot ne demande plus rien à Grégoire**, sauf le « pousse ».
 
 ---
 
-## 1 · Ce que Grégoire verra
+## 1 · Poser les deux phrases (mots de Grégoire, à ne pas retoucher)
 
-1. Dans la fiche d'un élève (ajout et édition, Cadre › liste du groupe), un champ facultatif **« Date d'arrivée »**, avec la bulle **« Facultatif : pour un·e étudiant·e arrivé·e en cours de trimestre. L'assiduité se compte à partir de cette date. »** Ces mots sont les siens : ne pas les retoucher.
-2. Un élève qui porte une date d'arrivée n'hérite plus, comme absences, des séances d'avant cette date. Sans date saisie, rien ne change.
-3. Tant qu'aucune séance n'est saisie pour un élève, son assiduité est **inconnue** : un tiret partout où elle s'affiche, comme la performance non calculable, au lieu de 100 % (et au lieu de « Très favorable » dans le contexte).
-4. Les deux moyennes d'assiduité du groupe (Suivi du groupe et Liste) disent le même chiffre, selon la même règle : un élève à l'assiduité inconnue n'y entre pas ; un élève présent à des séances saisies y entre, à 0 % compris s'il a tout manqué.
+Référence : §3 de `plans de travail/PORTES-TERRAIN-2026-09-19-date-arrivee-ipad.md`.
 
-## 2 · Ce que Cowork a mesuré (19 sept., 10 h 35, lecture de `main` à `a260acfc`) – à remesurer avant de coder
+- **3.1 · Sous le tiret de la carte « Contexte d'apprentissage »** (copies, aucune assiduité connue) :
+  « L'assiduité n'est pas encore connue : le contexte s'affichera dès qu'une séance sera saisie pour cet·te étudiant·e. »
+  ⚠ C'est la proposition du §3.1 **avec une retouche** : « se qualifiera » → « s'affichera ».
+- **3.2 · Bulle du badge « A — »** dans Suivi du groupe › Détails, telle que proposée :
+  « Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e. »
 
-- `js/indices.js` : `calculerAssiduite(da, dateLimite)` (l. 147) rend `{ indice: 1, … nombreSeances: 0 }` à deux endroits (l. 172, l. 238) ; `calculerAssiduitePourAffichage` (l. 303) à côté. Deux appelants de `calculerAssiduite(` hors d'`indices.js` au grep – les lecteurs de l'indice A (enrichissement, snapshots, contexte, moyennes) sont bien plus nombreux : **c'est leur recensement qui fait le lot**.
-- Aucun champ de date sur un élève : `grep -rn "dateAjout\|dateInscription\|dateArrivee\|dateEntree" js/*.js` → rien (fiche #735, constat A-2 exécuté : arrivé en semaine 6, A = 50 %).
-- Formulaire : `index.html` l. 7029, `#v2-etudiantDA` ; le champ neuf va à côté (DA, Nom, Prénom, Groupe, Programme, SA). Écriture de la fiche : `js/trimestre-v2-etudiants.js` (`soumettreEtudiantV2`).
-- « Très favorable » se lit dans `js/contexte-qualification.js`, `js/tableau-bord-apercu.js` et les trois `js/accompagnement-contenu-*.js`.
-- Lot F (1.142.21) a laissé une garde en attente, notée sous #830 : un A absent (`null`) n'est pas « sous 70 » dans le filtre « A ou C < 70% ». Elle doit devenir vivante ici, et être jugée.
+La porte iPad est **passée** (relevé de Grégoire, 12 h 01, 3 / 3, ajouté par Cowork en fin du fichier de la porte) : commite ce relevé avec le lot. Inscris au §3 de la porte les deux verdicts (« validée, retouchée : s'affichera » ; « validée telle quelle »). Preuve : le banc WebKit du lot D lit les deux textes à l'écran ; une mutation par texte, rouge. Patch `1.147.1` ; une ligne de « Nouvelles » n'est pas nécessaire (texte d'aide), c'est à toi de juger, en une ligne.
 
-## 3 · Ce qui est attendu
+## 1 bis · Deux défauts de la liste du groupe, vus par Grégoire sur iPad (19 sept., 12 h 01, capture) – même patch
 
-- **Les choix techniques sont à toi**, dits en une ligne chacun : nom et format de la clé de la date sur la fiche, forme de l'inconnu (`null` ou autre), ordre des fichiers. Critère : une seule source pour « A inconnu », lue partout ; aucun lecteur ne transforme l'inconnu en 0 ni en 100 en silence.
-- **Recense tous les lecteurs de l'indice A avant d'écrire** (écrans, moyennes, filtres, contexte, carte RàI, export, snapshots), et donne le compte dans ton rapport.
-- La date d'arrivée voyage avec la fiche (export, import, Codex) : elle doit survivre à un aller-retour ; une fiche importée sans ce champ se lit comme avant.
-- Version : un champ neuf est une fonction → `minor`, par `scripts/release.mjs`. Une entrée de « Nouvelles » en mots d'utilisateur, **proposée** : elle remonte à Grégoire par Cowork avant le push.
+Cadre › Groupe d'étudiant·es, tableau rendu par `js/trimestre-v2-etudiants.js` (≈ l. 146-195), conteneur `#v2-listeEtudiants`.
 
-## 4 · Arrêts
+- **Les deux menus de ligne affichent « — »**, qui ne dit rien. Mots **validés par Grégoire** (« oui », 12 h 10) : l'option vide du menu **Action** devient « Choisir… » ; l'option vide du menu **Remarque** devient « Aucune ». ⚠ Seul le libellé change : les valeurs restent `""` (Action : le menu doit rester sur une option neutre, sinon « Modifier » choisi d'avance ne déclencherait plus `change` ; Remarque : `""` veut dire « aucune remarque » et efface le statut). Le « — » des cellules vides (DA, Nom, groupe) ne change pas. Cherche si le même menu existe ailleurs (liste d'un autre écran, `groupe.js`) : même mot s'il est le même geste, sinon dis-le.
+- **L'en-tête du tableau est illisible** : texte blanc sur bleu pâle (DA, Grp, Nom, Prénom, SA, Action, Remarque). Pourtant `styles.css` l. 9699 pose `.conteneur-liste-etudiants th { background: var(--bleu-pale); color: var(--bleu-fonce); }` : une autre règle gagne. **Mesure laquelle** au navigateur (style calculé, pas lecture), dans les deux modes et sous le thème du pack démo ; corrige à la source sans `!important`, avec un contraste d'au moins 4,5 mesuré dans les deux modes. Regarde si la même règle fautive blanchit d'autres en-têtes : si oui, nomme-les ; corrige-les dans ce lot seulement si c'est la même cause en une ligne, sinon inscris.
+- Skill `design-interface` à charger. Preuve : un essai WebKit qui lit le libellé des deux options vides et le contraste calculé de l'en-tête ; une mutation par défaut, rouge. Aucune porte (le banc voit le contraste) ; aucune donnée écrite.
 
-- Si une **note finale** bouge pour un élève sans date d'arrivée : arrête-toi et dis lequel, avant et après.
-- Si un trimestre d'A2025 ou d'H2026 affiche autre chose qu'un tiret là où il affichait 100 % faute de séance : dis-le avec l'écran et le chiffre (ces notes ne sont pas rouvertes, mais l'affichage peut changer).
-- Si un écran n'a pas de place pour un tiret (graphique, barre) et qu'il faut un mot : propose-le, ne le pose pas.
+## 2 · Trouvailles de la relecture croisée de Cowork sur `7b128a66` — issue 2 (inscrire), sauf avis contraire mesuré
 
-## 5 · Stock
+Relecture **verte par exécution** : Vitest 598 / 6 786 sur le clone ; cinq mutations de Cowork, cinq rouges, toutes à la sentinelle du lot D (le magasin d'avant lu comme inconnu ; séance du jour d'arrivée exclue par `<=` ; date ignorée dans la saisie en direct, sur les séances passées puis sur la séance courante ; format de date non validé) ; témoin vert après restauration. Aucun trou de preuve trouvé sur les règles.
 
-**Tarir, pas réparer.** Aucune fiche existante ne reçoit de date ; les relevés hebdomadaires et snapshots déjà écrits à 100 % le restent – écris-le dans le rapport, avec le compte sur le pack démo.
+Trois trouvailles, sans symptôme vécu :
 
-## 6 · Preuve
+- **R-a** · `js/graphiques-progression.js` ≈ l. 2670-2680 (distribution du groupe, courbe de Gauss) lit `indicesAssiduite.sommatif[da].indice` **sans passer par `lireIndiceAssiduite`** : une entrée du stock d'avant (`indice: 1, nombreSeances: 0`) y compte comme 100 % jusqu'au prochain recalcul du magasin ; et une entrée `null` rangée ferait `null.indice` (défaut antérieur). Le lot annonçait « tout lecteur du magasin passe par ici » : c'est un lecteur oublié **de ton propre lot** au sens du CLAUDE.md (« est-ce que je viens de l'écrire ? » — la règle, oui). ⮕ Juge toi-même : si le brancher sur `lireIndiceAssiduite` tient en deux lignes et un essai, fais-le dans ce patch ; sinon inscris. Note au passage que ce graphique exclut aussi `A = 0` (l'absent total), contraire à la règle de #750 : dis-le dans la fiche, ne le change pas sans mesurer où il s'affiche.
+- **R-b** · `js/trimestres.js` l. 2341, export pour la recherche : la note `unites` dit que seul `P_final` peut valoir `null` ; `A_final` le peut maintenant aussi. Une phrase à compléter pour les chercheurs → même patch si c'est une chaîne, sinon inscrire.
+- **R-c** · `js/profil-etudiant-sections-affichage.js`, `genererSectionMobilisation` (≈ l. 1586) : **aucun appelant** ; elle écrirait « null% » et « Assiduité critique » pour un A inconnu. Code mort antérieur au lot → issue 3 ou retrait (zéro-dette), à toi.
 
-- Un banc WebKit qui fait le geste : un élève ajouté avec une date d'arrivée en semaine 6 → A compté depuis cette date ; le même sans date → A d'avant, mot pour mot.
-- Un élève sans séance saisie → tiret au profil, dans la Liste, au contexte ; il sort des deux moyennes, qui disent le même chiffre.
-- Le filtre « A ou C < 70% » ne retient pas un A inconnu.
-- Aller-retour export/import de la date.
-- Mutations : au moins une par règle (la date ignorée ; l'inconnu remis à 1 ; une moyenne qui compte l'inconnu ; le filtre qui le retient), chacune rouge, restauration à l'empreinte.
-- Vitest complet depuis `tests/`. Le verdict Playwright se prend par `pousser.sh`, Cowork fermé.
+Et sur `a260acfc` (1.146.10, #906) : **relecture verte par lecture** – `calculerEtudiantsPrioritaires` ne touche pas au DOM (lu, l. 248-299), un seul appel par rendu, appelé hors de la garde `activerRai` comme avant ; le verdict Playwright du push a couvert le banc neuf. Pas de mutation reposée par Cowork (banc WebKit hors de sa portée).
 
-## 7 · Porte terrain
+## 3 · Rapport
 
-Une seule rangée probable : le champ « Date d'arrivée » dans la fiche d'élève, sur iPad (768 px, clavier ouvert). Écris-la au markdown du skill `portes-terrain` ; Cowork publie l'artefact. Grégoire peut la reporter : elle ne bloque pas le push.
-
-## 8 · Rapport
-
-En gestes d'utilisateur, avec : les choix faits et ce que tu as supposé ; le compte des lecteurs de A ; source ou stock ; ce qui n'est pas mesuré ; la liste des chemins à commiter. Mets à jour `OU-EN-EST-ON.md` et `RELAIS.md`, et coche #735, #743 et #750 avec leur phrase « vérifié comment ».
+Les deux textes vus à l'écran par le banc, la version, les issues données à R-a, R-b, R-c avec leur numéro, et la liste des chemins à commiter. Mets à jour `OU-EN-EST-ON.md` et `RELAIS.md`. Push sur « pousse » de Grégoire.

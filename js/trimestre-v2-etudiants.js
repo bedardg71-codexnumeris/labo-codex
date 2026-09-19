@@ -178,14 +178,16 @@ async function chargerListeEtudiantsV2() {
                 <td style="text-align: center;">${sa}</td>
                 <td style="text-align: center;">
                     <select class="controle-form controle-form-compact" data-on-change="actionEtudiantV2Handler" data-da="${echapperHtml(e.da)}">
-                        <option value="">—</option>
+                        <!-- Mots de Grégoire (19 sept. 2026). La valeur reste vide : option neutre, pour que « Modifier » déclenche toujours change. -->
+                        <option value="">Choisir…</option>
                         <option value="editer">Modifier</option>
                         <option value="supprimer">Supprimer</option>
                     </select>
                 </td>
                 <td style="text-align: center;">
                     <select class="controle-form controle-form-compact" data-on-change="remarqueEtudiantV2Handler" data-da="${echapperHtml(e.da)}">
-                        <option value=""${!statut ? ' selected' : ''}>—</option>
+                        <!-- Valeur vide = aucune remarque : la choisir efface le statut. -->
+                        <option value=""${!statut ? ' selected' : ''}>Aucune</option>
                         <option value="inactif"${statut === 'inactif' ? ' selected' : ''}>Inactivité</option>
                         <option value="décrochage"${statut === 'décrochage' ? ' selected' : ''}>Décrochage</option>
                     </select>

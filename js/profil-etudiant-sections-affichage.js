@@ -1576,6 +1576,8 @@ function genererSectionAccompagnement(da) {
 
 /**
  * Génère le HTML de la section Mobilisation (M) détaillée
+ * ⚠ SANS APPELANT (mesuré le 19 sept. 2026) : seule la sentinelle #821a l'exécute. Si elle revit :
+ * un A inconnu (`null`, #743) s'y écrirait « null% » et « Assiduité critique ».
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */

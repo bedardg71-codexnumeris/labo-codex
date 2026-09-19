@@ -7,6 +7,32 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 12 H 30 (Toronto) : 1.147.1, LES DEUX PHRASES DE L'ASSIDUITÉ INCONNUE + LA LISTE DU GROUPE VUE SUR IPAD — ⏳ COMMITÉ, NON POUSSÉ
+
+**Où est le travail** : `main`, release `patch` 1.147.1 par-dessus `085a14aa` (= `origin/main` au départ, mesuré après `git fetch`). **Push sur le « pousse » de Grégoire seulement** ; aucun verdict Playwright complet sur ce SHA tant que `pousser.sh` n'a pas tourné (le lot touche `js/` et `styles.css` : garde complète, ≈ 15 min, en arrière-plan, Cowork fermé).
+
+**Ce qui est posé** (consigne de Cowork du 19 sept., 11 h 44, archivée en `CONSIGNE-DU-JOUR.md`) : (1) la phrase du §3.1 de la porte, retouchée par Grégoire (« s'affichera »), dans `determinerAlerteContextuelle` (`profil-etudiant-calculs.js`), champ `recommandation` — le ton gris de la carte ; `description` s'y dessine en couleur d'alerte, d'où ce choix ; (2) la bulle du §3.2 sur le badge « A — » (`_badgeIndiceSuivi`, `tableau-bord-apercu.js`) ; C sans bulle ; (3) `trimestre-v2-etudiants.js` : options vides « Choisir… » (Action) et « Aucune » (Remarque), valeurs toujours `""` ; (4) `styles.css` : l'en-tête de `#v2-listeEtudiants`.
+
+**La cause de l'en-tête, mesurée** (style calculé, WebKit, pack démo) : en mode clair, texte `rgb(255,255,255)` sur fond `rgb(232,242,253)`, contraste 1,13. Le bandeau foncé était posé sur le THEAD ; or `.conteneur-liste-etudiants th` peint son propre fond `--bleu-pale` (en-tête collant, opaque) PAR-DESSUS : le fond du thead ne se voyait jamais, et le `color: white` de `#v2-listeEtudiants th` tombait sur le pâle. Correctif : `.mode-clair #v2-listeEtudiants th` reçoit `background: var(--bleu-principal)` ; les deux règles `thead` (claire et sombre), sans effet, sont retirées. **Le mode sombre est inchangé au pixel** (blanc sur `--bleu-pale` sombre, 14,93) — un premier jet y activait `--bleu-moyen`, retiré : personne ne l'avait demandé. ⚠ Sous `file://`, `document.styleSheets[i].cssRules` lève : la règle gagnante se trouve par `grep` + neutralisation, pas par `el.matches`. **Autres en-têtes** : `.conteneur-liste-etudiants` ne sert qu'à ce tableau (`index.html`, un site) ; aucun autre en-tête n'a cette cause.
+
+**Les deux autres menus « — »** (`travaux-ui.js`, ≈ l. 2038 et 2049) : choisir une production pour un fichier du pipeline — un autre geste, non touché.
+
+**Trouvailles de la relecture de Cowork sur `7b128a66`** : **R-a → issue 3** (commenté). Mesure qui change la lecture : `creerGraphiqueDistributionACPE` n'a AUCUN appelant (la sentinelle #745 l'affirme déjà, essai B.2) — ce n'est pas un lecteur vivant oublié par le lot D, c'est du code mort antérieur ; le commentaire posé au site dit quoi faire s'il revit (lecteur commun, et le `A > 0` qui écarte l'absent total, contraire à #750). **R-b → corrigé dans ce patch** : la note `unites` de l'export recherche dit que `A_final` peut valoir `null` ; une ligne ajoutée à la sentinelle #902. **R-c → issue 3** (commenté) : `genererSectionMobilisation` sans appelant ; non retirée, la sentinelle #821a l'exécute — la retirer, c'est réancrer cette preuve, hors du lot. **Aucun identifiant pris** : « Dernier ID utilisé » reste #922.
+
+**Ce qui est mesuré** : banc WebKit du lot D (les deux phrases lues à l'écran, au caractère près) ; banc neuf `liste-groupe-menus-et-entete.spec.js` (libellés lus dans le vrai menu, zéro option « — », contraste calculé ≥ 4,5 sur les sept colonnes dans les deux modes, témoin de bascule du mode) ; 5 mutations / 5 rouges (M1 « se qualifiera », M2 bulle retirée, M3a et M3b libellés remis à « — », M4 fond retiré → « Received: 1.13 »), témoins verts avant et après, restauration par copie à l'empreinte près ; Vitest 598 / 6 786, 0 « Errors ». **Pas mesuré** : suite Playwright entière (au push) ; iPad, Safari.
+
+**Source ou stock** : sans objet — aucun calcul, aucune donnée ; des mots et une couleur.
+
+**« Nouvelles »** : pas de ligne (textes d'aide, deux libellés, un correctif CSS — les règles du changelog les écartent).
+
+**Porte iPad de la date d'arrivée** : close (relevé de Grégoire, 12 h 01, 3 / 3, ajouté par Cowork) ; les deux verdicts du §3 inscrits ; commités avec ce lot.
+
+⚠ **L'arbre porte toujours les quatre fichiers d'un autre travail** (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) : ni touchés, ni commités ; jeton d'`interpretation-config.js` tenu à `20260910c`. Indexation par chemins nommés.
+
+**Dû** : le « pousse » de Grégoire ; la relecture croisée de Cowork sur ce patch.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 11 H 20 (Toronto) : 1.147.0, L'ASSIDUITÉ QUI MANQUE (LOT D DU DÉPISTAGE : #735, #743, #750) — ✅ POUSSÉ À ≈ 11 H 40
 
 ✅ **POUSSÉ le 19 sept. 2026 à ≈ 11 h 40, sur le « push » de Grégoire** : `origin/main` = `eb7915e5`, quatre commits d'un coup (`8e1c2d0a`, `a260acfc` = 1.146.10, `7b128a66` = 1.147.0, `eb7915e5`). `pousser.sh` lancé à charge 3,51 : suite Playwright WebKit entière verte sans rougeur nouvelle (0 échec connu, 0 instable), Vitest du hook vert, jeton de verdict sur ce SHA exact. ⚠ **1.146.10 est partie dans le même push** : sa phrase de « Nouvelles » et la relecture de Cowork étaient attendues AVANT — dit à Grégoire au retour du push. Restent dus : la relecture croisée de Cowork sur `a260acfc` et `7b128a66`, l'artefact de la porte iPad (Cowork), les deux phrases du §3 de la porte. « En ligne » se mesure chez l'hébergeur, pas ici.

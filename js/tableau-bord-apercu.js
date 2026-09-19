@@ -560,10 +560,11 @@ function genererPanneauSuiviEtudiants() {
 /** Helper badge pour le panneau suivi unifié.
  *  #394 : valeur null = note non constructible → « — » (jamais un 0 trompeur).
  *  #743 (lot D) : un A inconnu passe aussi par ici — le tiret, SANS la bulle de P (elle parlerait
- *  d'une note ; le mot d'une bulle pour A remonte à Grégoire, il n'est pas posé). */
+ *  d'une note). La bulle de A est de Grégoire (validée le 19 sept. 2026). C n'a pas de bulle. */
 function _badgeIndiceSuivi(label, valeur) {
     if (valeur === null || valeur === undefined) {
-        var bulle = label === 'P' ? ' title="Note non constructible avec la configuration actuelle"' : '';
+        var bulle = label === 'P' ? ' title="Note non constructible avec la configuration actuelle"'
+            : label === 'A' ? ' title="Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e."' : '';
         return '<span class="prioritaire-indice"' + bulle + '>' + label + ' —</span>';
     }
     var cls = 'prioritaire-indice';

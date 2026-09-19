@@ -168,6 +168,8 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         const accompagnement004 = texte(document.getElementById('profil-contenu-dynamique')) || '';
         filtreSurA.contexte = (accompagnement004.match(/Contexte d'apprentissage (.{0,45})/) || [null, null])[1];
         filtreSurA.profilNul = /null|NaN|undefined/.test(accompagnement004);
+        // 1.147.1 : la phrase de Grégoire sous le tiret, lue à l'écran (de « L'assiduité » au point final).
+        filtreSurA.phrase = (accompagnement004.match(/L'assiduité n'est pas encore connue[^.]*\./) || [null])[0];
 
         // Le champ à 768 px : dans la grille, sans débordement, cible tactile.
         naviguerVers('calendrier', 'trimestre'); await pause(900);
@@ -215,7 +217,8 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
     expect(m.engagementNul).toBe(false);
     expect(m.contexte).toMatch(/^En attente de données/);      // ni présence ni copie : l'état « aucune donnée », pas « Très favorable »
     expect(m.accompagnementNul).toBe(false);
-    expect(m.badgesInconnu[0]).toEqual({ t: 'A —', bulle: null });
+    //     la bulle du badge « A — » : les mots de Grégoire (19 sept. 2026), au caractère près ; le badge C, lui, n'en a pas.
+    expect(m.badgesInconnu[0]).toEqual({ t: 'A —', bulle: 'Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e.' });
 
     // (3) #750 — les deux moyennes disent le même chiffre : dix élèves du pack (93), Tardif (100), l'absent (0) ; l'inconnue n'y entre pas.
     const attendue = Math.round((m.indicesDemoAvant.reduce((s, l) => s + l[1], 0) + 100 + 0) / 12);
@@ -234,6 +237,8 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
     //     … et sa carte de contexte : un tiret à la place du palier (avant : « Très favorable », A lu 100 %), C lisible.
     expect(m.filtreSurA.contexte).toMatch(/^— Assiduité \(A\) : — Complétion \(C\) : 80%/);
     expect(m.filtreSurA.profilNul).toBe(false);
+    //     … et, sous le tiret, la phrase de Grégoire (19 sept. 2026, « s'affichera »), au caractère près.
+    expect(m.filtreSurA.phrase).toBe('L\'assiduité n\'est pas encore connue : le contexte s\'affichera dès qu\'une séance sera saisie pour cet·te étudiant·e.');
 
     // (5) Aucun élève du pack ne bouge : ni A, ni C, ni P.
     expect(m.indicesDemoApres).toEqual(m.indicesDemoAvant);
