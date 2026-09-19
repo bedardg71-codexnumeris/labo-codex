@@ -1068,11 +1068,26 @@ function _naissanceDuCritere(critere) {
     return m ? Number(m[1]) : null;
 }
 
-/** La dernière fois que les critères de l'évaluation ont été écrits, ou `null`. */
-function _dateDesCriteresDe(evaluation) {
-    const dates = [evaluation && evaluation.dateEvaluation, evaluation && evaluation.dateModification]
-        .map(d => d ? new Date(d).getTime() : NaN).filter(t => !isNaN(t));
-    return dates.length ? Math.max.apply(null, dates) : null;
+/**
+ * LA DATE QUI TRANCHE : celle où l'évaluation a été FAITE (`dateEvaluation`), ou `null`.
+ *
+ * ⚠ PAS `dateModification` (relecture croisée de Cowork, 19 sept. 2026, sur le premier jet du
+ * lot). Le premier jet prenait le plus tardif des deux, en lisant `dateModification` comme « la
+ * dernière écriture des critères ». C'est faux : trois gestes la posent, et l'un d'eux —
+ * retoucher la rétroaction depuis le modal de Travaux (`sauvegarderRetroactionDepuisModal`,
+ * travaux-ui.js) — n'écrit que `retroactionFinale`. Une évaluation du 5, un critère né le 20, un
+ * mot corrigé le 22 : le critère passait « né avant », et le PDF refusait de conclure — le
+ * symptôme de #705, rouvert par un geste sans rapport avec la note.
+ * ⮕ `dateEvaluation` n'est écrite qu'à la CRÉATION (enregistrement, auto-save de création,
+ * copie d'un jeton de reprise) : aucun geste ultérieur ne la déplace, et rien n'est stocké de
+ * plus. Les deux gestes qui réécrivent les critères d'une évaluation existante n'ont pas besoin
+ * d'elle : « Enregistrer » refuse une grille incomplète (le critère ajouté reçoit donc un
+ * niveau, et l'évaluation le PORTE) ; l'auto-save ne touche que les brouillons, qui ne comptent
+ * nulle part et que leur prochain enregistrement complétera.
+ */
+function _dateDeLEvaluation(evaluation) {
+    const t = (evaluation && evaluation.dateEvaluation) ? new Date(evaluation.dateEvaluation).getTime() : NaN;
+    return isNaN(t) ? null : t;
 }
 
 /**
@@ -1102,13 +1117,13 @@ function criteresAjoutesDepuis(evaluation, grille) {
     const { parId, parNom } = _criteresPortesPar(evaluation);
     const porte = c => !!(parId[c.id] || parNom[c.nom]) || _pointsAnalytiquesDe(evaluation, c) !== undefined;
     if (!grille.criteres.some(c => c && porte(c))) return [];
-    const dateCriteres = _dateDesCriteresDe(evaluation);
+    const dateEvaluation = _dateDeLEvaluation(evaluation);
     const brouillonDeclare = typeof evaluation.ponderationCouverte === 'number' && evaluation.verrouillee === false;
     return grille.criteres
         .filter(c => {
             if (!c || porte(c) || !((Number(c.ponderation) || 0) > 0)) return false;
             const naissance = _naissanceDuCritere(c);
-            if (naissance !== null && dateCriteres !== null) return naissance > dateCriteres;
+            if (naissance !== null && dateEvaluation !== null) return naissance > dateEvaluation;
             return !brouillonDeclare;
         })
         .map(c => ({ critereId: c.id, nom: c.nom || c.id, ponderation: Number(c.ponderation) || 0 }));
