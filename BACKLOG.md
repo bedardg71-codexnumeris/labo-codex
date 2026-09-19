@@ -8362,7 +8362,10 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   essais de 22 à 37 s contre 6,5 s au repos, **aucune assertion, aucune attente fixe en cause** ; NON
   TOUCHÉE. Ce que la mesure désigne : la charge au lancement du verdict, et `scripts/pousser.sh` ne
   porte AUCUNE garde de charge (la boucle « qui abandonnait après 5 min » du 18 était improvisée en
-  session). Lot proposé à Grégoire : la garde dans `pousser.sh` (plafonner et NE PAS lancer).
+  session). **GARDE POSÉE le 19 sept.** (`scripts/garde-charge.sh`, seuils en tête de `pousser.sh` : seuil 8,
+  plafond 900 s ; au plafond on NE LANCE PAS, code 3) — sentinelle `sentinelle-685-garde-de-charge`,
+  4 mutations / 4 rouges, et le vrai script démontré sous charge fabriquée (code 3, Playwright non
+  lancé, rien de poussé). Non éprouvé, nommé dans le script : la charge DISQUE (Time Machine).
   ⮕ **RATTACHEMENT CORRIGÉ — `liste-651-annoter-depuis-le-mode-evaluer.spec.js` n'est pas de cette
   famille.** Les relais des 17 et 18 sept. la rangeaient ici ; elle flanche AU REPOS (9/10 à charge 2,9)
   et sa cause est une course, pas une durée : la spec jugeait « Consulter » fini sur `idModification`,

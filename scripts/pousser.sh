@@ -29,6 +29,42 @@
 
 set -eu
 
+# LA GARDE DE CHARGE — SES SEUILS, ET LA MESURE QUI LES JUSTIFIE (#685, 19 sept. 2026)
+# -----------------------------------------------------------------------------------
+# Mesure : plans de travail/MESURE-2026-09-19-specs-au-second-essai.md (machine à 8 cœurs,
+# 10 passes par spec, --retries=0, charge 1 min relevée avant chaque passe).
+#
+#   · Au repos (charge 2 à 4) : triptyque 10/10, planif-toolbar 10/10. Le 18 sept., un même
+#     SHA rouge au verdict lancé à charge 48 était vert 3/3 à charge 3, et la suite entière
+#     verte à charge 2,6.
+#   · Sous charge, ce qui rougit n'est PAS une assertion : c'est le plafond de 30 s par
+#     essai (« Tearing down "context" exceeded the test timeout »). planif-toolbar, 6,5 s
+#     par essai au repos, en met 22 à 37 sous charge 78–186 (9/10). Un verdict rendu sous
+#     charge ne dit donc rien du code — et un « vert au second essai » non plus.
+#   · Le Vitest complet, à lui seul, porte la charge 1 min à 78 ; elle repasse sous 4 en
+#     4 à 6 min (mesuré deux fois : 230 s et 320 s).
+#
+# CHARGE_SEUIL = 8, le nombre de cœurs : au-dessus, des processus attendent leur tour.
+#   Volontairement prudent — des passes ont été vertes bien plus haut, mais attendre coûte
+#   quelques minutes, et un verdict faussé en a coûté 70 le 18 sept.
+# CHARGE_PLAFOND_S = 900 : deux à trois fois le temps que met la charge d'un Vitest à
+#   retomber. Ce qui dure plus longtemps (une sauvegarde Time Machine) ne se règle pas en
+#   attendant : on NE LANCE PAS, on le dit, et on revient.
+# CHARGE_PAS_S = 30 : un relevé, une ligne.
+#
+# ⚠ NON ÉPROUVÉ : la charge DISQUE. La contre-épreuve du 19 fabriquait une charge
+#   processeur ; la sauvegarde Time Machine du 18 (charge 93, six specs au second essai)
+#   pèse sur le disque, et l'application se charge par file://. La charge moyenne la voit
+#   monter (93 ce jour-là), mais rien ne prouve que ce seuil-ci la juge bien.
+# ⚠ La garde juge le LANCEMENT, pas la durée du verdict : une charge qui arrive pendant
+#   les ~15 min de la suite n'est pas vue.
+#
+# Les trois variables LABO_* servent à la sentinelle et à la démonstration sous charge
+# fabriquée. Lever le seuil pour forcer un lancement est un geste explicite, jamais un défaut.
+CHARGE_SEUIL="${LABO_CHARGE_SEUIL:-8}"
+CHARGE_PLAFOND_S="${LABO_CHARGE_PLAFOND_S:-900}"
+CHARGE_PAS_S="${LABO_CHARGE_PAS_S:-30}"
+
 ROUGE='\033[0;31m'
 VERT='\033[0;32m'
 JAUNE='\033[0;33m'
@@ -65,6 +101,7 @@ else
 fi
 
 . "$REPO_ROOT/scripts/lot-observable.sh"
+. "$REPO_ROOT/scripts/garde-charge.sh"
 
 LANCER=0
 if [ -z "$FICHIERS" ]; then
@@ -74,7 +111,18 @@ elif printf '%s\n' "$FICHIERS" | lot_observable; then
 fi
 
 if [ $LANCER -eq 1 ]; then
-    printf "${VERT}→ Sentinelle Playwright, AVANT d'ouvrir la connexion (~4 min)...${RAZ}\n"
+    # La garde de charge, AVANT le verdict : un verdict rendu sous charge ne juge pas le
+    # code (seuils et mesure en tête de ce script). Plafond atteint : on ne lance pas, on
+    # ne pousse pas — aucun lancement par défaut.
+    set +e
+    attendre_charge_basse
+    CODE_CHARGE=$?
+    set -e
+    if [ $CODE_CHARGE -ne 0 ]; then
+        exit 3
+    fi
+
+    printf "${VERT}→ Sentinelle Playwright, AVANT d'ouvrir la connexion (~15 min)...${RAZ}\n"
     # Le script dépose son verdict dans scripts/.verdict-playwright.json ; le
     # hook pré-push le lira. `set -e` ne doit pas tuer le script sur un code
     # non nul : c'est nous qui décidons quoi en faire.

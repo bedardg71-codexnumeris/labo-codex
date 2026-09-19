@@ -173,14 +173,21 @@ Dette nommée, laissée en place : les trois attentes fixes maison de la spec (4
 gardent leur commentaire d'origine (« une fois TOUTES les minuteries de l'ouverture passées ») —
 aucune n'est en cause dans le rouge mesuré.
 
+## 7 bis · A, la garde de charge — posée le même matin
+
+Décision de Grégoire relayée par Cowork (option 2 : avant tout push, pour qu'un seul verdict juge la
+spec et la garde). `scripts/garde-charge.sh` + seuils nommés en tête de `scripts/pousser.sh` : seuil 8,
+plafond 900 s, relevé toutes les 30 s. Preuve : sentinelle `tests/unit/sentinelle-685-garde-de-charge.test.js` (12 essais, 4 mutations / 4 rouges : plafond qui lance quand même, refus ignoré par `pousser.sh`, borne large, illisible pris pour un refus) ; et le VRAI `pousser.sh` sous charge fabriquée (32 brûleurs, plafond raccourci à 60 s, push en `--dry-run`) : quatre relevés de 34,65 à 60,71, puis « Verdict NON LANCÉ […] charge 75.40 après 60 s d'attente », code 3, aucun processus Playwright, jeton de verdict et `origin/main` inchangés.
+Décidé seul : une charge illisible n'est pas un refus (dit en une ligne, la garde ne juge pas).
+
 ## 8 · Dispositions
 
 | Constat | Disposition |
 |---|---|
 | `triptyque` non reproduite (20/20) | *inscrit* — #685, note du 19 sept. ; spec non touchée |
-| `planif-toolbar` : budget de 30 s crevé sous charge | *inscrit* — #685, note du 19 sept. ; spec non touchée ; relève du lot A |
+| `planif-toolbar` : budget de 30 s crevé sous charge | *inscrit* — #685, note du 19 sept. ; spec non touchée ; couvert par la garde (§7 bis) |
 | `liste-651` : course spec / chaîne « Consulter » | *inscrit et corrigé* — #685 (rattachement corrigé), spec réparée |
 | Retour forcé sur « Annoter » dans la seconde qui suit « Consulter » (application) | *refusé* — jamais vécu par Grégoire, ne bloque rien (règle du 24 août) ; décrit dans la spec |
-| Aucune garde de charge dans `pousser.sh` | *inscrit* — #685 ; lot A proposé à Grégoire, non commencé |
+| Aucune garde de charge dans `pousser.sh` | *inscrit et corrigé* — #685 ; garde posée le 19 (§7 bis) |
 | #833 (CI WebKit Linux) | *relu* — rattachement juste, aucune de ses specs rejouée ici |
-| Charge disque (Time Machine) non éprouvée | *refusé pour l'instant* — aucune mesure ne la demande ; à reprendre si le lot A ne suffit pas |
+| Charge disque (Time Machine) non éprouvée | *refusé pour l'instant* — aucune mesure ne la demande ; nommée NON ÉPROUVÉE en tête de `pousser.sh` ; à reprendre si la garde ne suffit pas |
