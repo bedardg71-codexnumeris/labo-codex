@@ -96,6 +96,9 @@ function monter({ echelles = [ECHELLE()] } = {}) {
     win.zoneDuCodeDansNiveaux = globaux.zoneDuCodeDansNiveaux;
     win.toggleDisplay = globaux.toggleDisplay;
     chargerScript('js/echelles.js', globaux, win);
+    // #910 : la liste des échelles lit le prédicat de la question d'adoption, que
+    // index.html charge avant l'assistant. Le vrai, pas un stub.
+    chargerScript('js/pratiques-bibliotheque.js', globaux, win);
     chargerScript('js/wizard-pratique-v2.js', globaux, win);
 
     win.wizardState.reponses = { typePratique: 'standards', approcheEvaluation: 'par-artefacts', nom: 'Test' };

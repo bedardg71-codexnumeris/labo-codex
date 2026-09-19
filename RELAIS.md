@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 10 H (Toronto) : 1.146.9 (#910), LE CHOIX D'ÉCHELLE DE L'ASSISTANT — COMMITÉ EN LOCAL SUR `main`, PAS POUSSÉ
+
+⚠ **`main` local est en avance sur `origin/main` (`81ae1e03`) : `5fcd7e5e` (relais du matin, docs) puis le commit de 1.146.9 (build 0919-0949) qui porte ce bloc. Le push attend la demande de Grégoire**, après le verdict de `scripts/pousser.sh` (garde de charge comprise). Cowork relit le lot sur le SHA commité pendant le verdict, en lecture seule.
+
+Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (déposée par Cowork à 9 h 37 sous le nom CONSIGNE-SUIVANTE-choix-echelle-assistant, renommée au démarrage ; celle des specs au second essai est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-19-specs-second-essai.md`). **Les quatre volets sont livrés, aucun arrêt du § 4** : nom échappé, filtre par le prédicat existant `obtenirEchellesOffertesAdoption`, échelle déjà choisie gardée sans mot neuf, vide jugé après le filtre. Détail et preuves : fiche #910 du BACKLOG (cochée). Phrase de « Nouvelles » validée par Grégoire, 9ᵉ item de l'entrée 1.146.
+
+**Décidé en session, à connaître** : (1) le prédicat commun reste dans `pratiques-bibliotheque.js` (chargé avant l'assistant dans `index.html`), lu par `window.` comme les autres appels inter-modules de l'assistant ; il exige aussi un `id`. (2) Le banc #577 charge désormais le vrai `pratiques-bibliotheque.js` — tout banc qui rend l'étape « Échelle » de l'assistant doit faire de même. (3) `release.mjs` a voulu bumper le jeton anti-cache de `js/interpretation-config.js` parce qu'il voit l'arbre de travail : **jeton remis à `20260910c` à la main dans `index.html`**, ce fichier n'étant pas de ce lot ; son bump partira avec son propre travail.
+
+⚠ **L'arbre porte toujours quatre fichiers qui ne sont pas de cette session** (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17 — dossier 101-102, en cours ailleurs) : ni touchés ni commités, index par chemins nommés.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 9 H 15 (Toronto) : LES SPECS AU SECOND ESSAI, MESURÉES, ET LA GARDE DE CHARGE DE `pousser.sh` POSÉE — ✅ POUSSÉ À 9 H 30, aucun bump
 
 ✅ **POUSSÉ le 19 sept. 2026 à 9 h 30, sur confirmation directe de Grégoire (« Pousse ») : `origin/main` = `81ae1e03`**, mesuré après `git push origin HEAD:main` depuis le worktree propre du verdict (retiré) et `git fetch` ; `main` local = `origin/main`, avance 0, retard 0. **Verdict Playwright sur `81ae1e03` : vert, 0 échec connu, 0 spec au second essai**, rendu en 14 min 37 s (9 h 12 – 9 h 27) à charge 3 à 5, lancé PAR LA GARDE après 120 s d'attente (charge 44,74 → 7,62, juste après un Vitest complet : le chemin « la charge redescend, on lance » vu en conditions réelles). **Charge au lancement du hook : 2,92** ; Vitest vert au hook ; 57,30 à la sortie du hook — c'est le Vitest lui-même. Ce bloc-ci est un commit de documents POSTÉRIEUR, local, non poussé : il part avec le prochain push. **Lot suivant, annoncé par Cowork** : le choix d'échelle de l'assistant de pratique (#910), consigne à relayer. Le paragraphe suivant est l'état d'AVANT le push.

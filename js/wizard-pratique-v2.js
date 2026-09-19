@@ -1735,9 +1735,19 @@ function genererCheckboxCards(champ) {
  * Génère un sélecteur d'échelle
  */
 function genererSelectEchelle(champ) {
-    // Récupérer les échelles existantes
-    const echelles = db.getSync(cle('echellesTemplates'), []);
+    // #910 — La liste offre les échelles de la bibliothèque, par le prédicat de la
+    // question d'adoption (`obtenirEchellesOffertesAdoption`, pratiques-bibliotheque.js,
+    // chargé avant ce fichier) : pas de filtre de plus écrit à la main.
+    // ⚠ L'échelle DÉJÀ CHOISIE reste offerte même retirée de la bibliothèque. Sans
+    // elle, `restaurerValeursEtape` ne trouve plus son <option>, le select retombe
+    // sur « -- » et la pratique rouverte perd son échelle en silence à l'enregistrement.
+    const idsOfferts = new Set(window.obtenirEchellesOffertesAdoption().map(e => e.id));
+    const idChoisi = wizardState.reponses[champ.id];
+    const echelles = (db.getSync(cle('echellesTemplates'), []) || [])
+        .filter(e => e && (idsOfferts.has(e.id) || (idChoisi && e.id === idChoisi)));
 
+    // Le vide se juge APRÈS le filtre : une bibliothèque où tout est retiré dit
+    // le message, pas une liste vide.
     if (echelles.length === 0) {
         return `
             <div class="wizard-v2-champ">
@@ -1752,7 +1762,7 @@ function genererSelectEchelle(champ) {
 
     let options = echelles.map(e => {
         const niveaux = e.niveaux ? e.niveaux.length : 0;
-        return `<option value="${echapperHtml(e.id)}">${e.nom || 'Sans nom'} (${niveaux} niveaux)</option>`;
+        return `<option value="${echapperHtml(e.id)}">${echapperHtml(e.nom || 'Sans nom')} (${niveaux} niveaux)</option>`;
     }).join('');
 
     // #577 : `rafraichir` re-rend l'étape au choix d'une échelle (même
