@@ -229,6 +229,23 @@ describe('#674 · porteeDepuisEvaluation — la portée se recalcule sur ce qui 
         expect(p.criteresNonCouverts).toEqual([{ critereId: NE(apres, 3), nom: 'Langue', ponderation: 20 }]);
     });
 
+    // ↻ RELECTURE CROISÉE DE COWORK (19 sept. 2026, sur ff9b6f63) — la date qui tranche était
+    // max(dateEvaluation, dateModification). Or retoucher la rétroaction depuis le modal de Travaux
+    // (`sauvegarderRetroactionDepuisModal`) pose `dateModification` SANS écrire un seul critère : une
+    // évaluation du 5, un critère né le 20, une retouche de texte le 22 → le critère passait « né avant »
+    // et le PDF refusait de conclure. Le symptôme de #705 lui-même, rouvert par un geste sans rapport.
+    it('E · #705 — une RETOUCHE DE RÉTROACTION postérieure à l\'ajout du critère ne déplace pas la date qui tranche : le PDF conclut toujours', () => {
+        const win = charger();
+        const le = (j) => new Date('2026-09-' + j + 'T12:00:00.000Z').getTime();
+        const grille = { id: 'G1', criteres: [{ id: NE(le('01'), 1), nom: 'A', ponderation: 40 }, { id: NE(le('01'), 2), nom: 'B', ponderation: 40 }, { id: NE(le('20'), 3), nom: 'D', ponderation: 20 }] };
+        const evaluation = (extra) => Object.assign({ grilleId: 'G1', noteFinale: 95, dateEvaluation: '2026-09-05T14:00:00.000Z', verrouillee: true, criteres: [
+            { critereId: NE(le('01'), 1), critereNom: 'A', niveauSelectionne: 'E', ponderation: 40 }, { critereId: NE(le('01'), 2), critereNom: 'B', niveauSelectionne: 'E', ponderation: 40 } ] }, extra);
+        const lire = (e) => { const p = win.porteeDepuisEvaluation(e, grille, ECHELLE_PONCTUELLE.niveaux); return { incomplete: p.incomplete, ajoutes: p.criteresNonCouverts.map((c) => c.nom) }; };
+        expect(lire(evaluation({}))).toEqual({ incomplete: false, ajoutes: ['D'] });
+        expect(lire(evaluation({ dateModification: '2026-09-22T09:00:00.000Z' }))).toEqual({ incomplete: false, ajoutes: ['D'] });
+        expect(lire(evaluation({ dateModification: '2026-09-22T09:00:00.000Z', ponderationCouverte: 80 }))).toEqual({ incomplete: false, ajoutes: ['D'] });
+    });
+
     it('E · #705 — l\'ANCIEN format d\'identifiant (« CR1759243428715 », tout A2025) porte sa date aussi : né le 30 sept. 2025, sauté le 4 oct. → incomplète', () => {
         const win = charger();
         const grille = { id: 'G1', criteres: [{ id: 'CR1759243306842', nom: 'Structure', ponderation: 80 }, { id: 'CR1759243428715', nom: 'Français écrit', ponderation: 20 }] };
