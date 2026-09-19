@@ -128,9 +128,15 @@ function _coursCibleImportV2() {
    LE DA À L'IMPORT (décision de Grégoire, 19 sept. 2026 : même règle qu'au formulaire, #914)
    Une ligne dont le DA n'a pas sept chiffres, espaces retirés, n'est PAS importée : l'aperçu la
    marque, le bouton compte les autres, le message final la nomme. Un DA déjà dans la liste du
-   trimestre, ou répété dans le collage, est ignoré comme avant (L-8, #749) — et l'aperçu le dit,
+   trimestre, ou répété dans le collage, est ignoré comme avant (L-8, #749) — et l'aperçu le dit
+   (« Déjà inscrit·e ce trimestre »),
    pour que le compte du bouton soit vrai.
    =============================== */
+
+// Mot validé par Grégoire (19 sept. 2026, retouche de Cowork) : la vérification couvre tout le TRIMESTRE, tous
+// cours confondus — « dans la liste » aurait fait croire à une erreur pour un·e élève inscrit·e à un autre cours.
+// Constante unique : le jugement la pose, la confirmation la compte.
+const MOTIF_IMPORT_DEJA_INSCRIT = 'Déjà inscrit·e ce trimestre';
 
 /**
  * Juge chaque ligne collée contre la liste en base. Pure.
@@ -142,7 +148,7 @@ function _jugerLignesImportV2(lignes, etudiantsPresents) {
         const da = String(ligne.da == null ? '' : ligne.da).replace(/\s+/g, '');
         const fiche = { ...ligne, da };
         if (!/^\d{7}$/.test(da)) return { fiche, motif: da ? 'DA invalide' : 'DA manquant' };
-        if (dasPresents.has(da)) return { fiche, motif: 'Déjà dans la liste' };
+        if (dasPresents.has(da)) return { fiche, motif: MOTIF_IMPORT_DEJA_INSCRIT };
         dasPresents.add(da);
         return { fiche, motif: '' };
     });
@@ -1059,7 +1065,7 @@ async function confirmerImportV2() {
         nbAjoutes = 0; nbDejaPresents = 0; ecartees = [];
 
         _jugerLignesImportV2(donneesImportEnAttenteV2, etudiants).forEach(({ fiche, motif }) => {
-            if (motif === 'Déjà dans la liste') { nbDejaPresents++; return; }
+            if (motif === MOTIF_IMPORT_DEJA_INSCRIT) { nbDejaPresents++; return; }
             if (motif) { ecartees.push({ fiche, motif }); return; }
             etudiants.push({
                 ...fiche,
