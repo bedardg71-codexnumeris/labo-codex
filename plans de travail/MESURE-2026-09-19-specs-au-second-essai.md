@@ -2,8 +2,8 @@
 
 > Écrit le 19 septembre 2026 par Claude Code, en réponse à `CONSIGNE-DU-JOUR.md`
 > (« les specs qui passent au second essai »). SHA mesuré : `80661049` (code = `fc1c012d`,
-> 1.146.8). Machine : 8 cœurs. **Aucune spec n'a été modifiée** : ce document est la mesure
-> que le §7 de la consigne demande AVANT toute réécriture.
+> 1.146.8). Machine : 8 cœurs. Les §1 à §6 sont la mesure que le §7 de la consigne demande AVANT toute réécriture
+> (commit `ffb447f3`, aucune spec modifiée) ; le §7 d'ici dit ce qui a été fait ensuite.
 > Statut des énoncés : `[mesuré]` = compte obtenu ce jour ; `[lu]` = lu dans un relais ou
 > dans le code ; `[inférence]` = déduit, non éprouvé.
 
@@ -97,8 +97,8 @@ sur « Annoter et évaluer ». L'attente de la ligne 157 ne peut plus jamais êt
   que ce soit — l'assertion (`ETAT_ANNOTER`) ne change pas, seule l'attente change de forme.
 - *Dans l'application* : un enseignant qui clique « Consulter » puis l'onglet « Liste » dans
   la seconde qui suit est ramené sur la copie. Réel, reproductible, jamais vécu par
-  Grégoire, conséquence faible. **Issue : inscrire et continuer** — et la consigne interdit
-  `js/` dans ce lot.
+  Grégoire, conséquence faible. **Issue : commenter et oublier** (règle du 24 août : ni vécu,
+  ni bloquant) — décrit dans la spec ; et la consigne interdit `js/` dans ce lot.
 
 ## 5 · Inventaire daté des vertes au second essai depuis le 1er sept. `[lu]`
 
@@ -112,8 +112,8 @@ conservé.
 | ≈ 11 sept. (CI Linux) | `lot4-gabarit-algo-cartes:81`, `profil-travaux-761` (#833) | runner GitHub | non lue ; 761 réécrite au lot 4 ; job tué (`exit 143`) |
 | ≈ 12 sept. | une « instable connue » non nommée | inconnue | non lue |
 | sept. (non daté au relais) | huit specs de Conception | Cowork ouvert | non lue |
-| sept. (non daté au relais) | `…orphelinage`, `planif-toolbar`, `source-unique-codes` | « machine chargée » | non lue ; pour `planif-toolbar`, le 19 : budget de 30 s crevé sous charge `[mesuré]` |
-| 14 sept. (CI) | `planif-objectifs-espacement-157` | runner GitHub | lue : 793,98 px contre 800,17 — une mesure de rendu, pas une attente |
+| 5 sept., soir (verdict local) | `cartouches-import-trimestre`, `grilles-suppression-orphelinage`, `planif-toolbar`, `source-unique-codes` | « machine chargée » | non lue ; pour `planif-toolbar`, le 19 : budget de 30 s crevé sous charge `[mesuré]` |
+| 5 sept., soir (CI, run 34001941420) | `planif-objectifs-espacement-157` | runner GitHub | lue : 793,98 px contre 800,17 — une mesure de rendu, pas une attente |
 | 17 sept. | `liste-651`, `texte-troue 3` | 15 | `liste-651` rejouée 15/15 verte ce jour-là ; le 19 : course `[mesuré]` |
 | 17 sept., soir | `planif-toolbar` (push bloqué) | inconnue | non lue |
 | 17–18 sept. | `registre-longitudinal-915 › R1` | inconnue | non lue ; suspect nommé : attente fixe de 500 ms sur le recalcul des indices |
@@ -130,8 +130,7 @@ porte la charge 1 min à 78** (mesuré à 7 h 52 pendant l'audit de début de se
 
 ⚠ Rattachements au registre : `liste-651` est rangée sous **#685** dans les relais, mais
 #685 nomme `triptyque` et porte une hypothèse (700 ms) qui ne s'applique pas à `liste-651`.
-#833 est la CI WebKit Linux. `liste-651` mérite sa propre fiche. **Aucune ligne n'a encore
-été écrite au registre** : à faire avec le lot retenu au §6.
+#833 est la CI WebKit Linux. `liste-651` mérite sa propre fiche. Corrigé au registre le 19 sept. (note sous #685).
 
 ## 6 · Ce que ça change au lot — la décision demandée par le §7
 
@@ -150,13 +149,38 @@ ne s'excluent pas :
 Non proposé : réécrire les attentes de `planif-toolbar` et de `triptyque`. La mesure ne le
 justifie pas, et la consigne l'interdit dans ce cas.
 
-## 7 · Dispositions
+## 7 · Ce qui a été fait ensuite, le même jour — B, `liste-651`
+
+Décidé par Claude Code et dit à Grégoire : B entre dans la consigne du jour (une spec, cause dans
+la spec) ; A en sort (c'est `scripts/pousser.sh`) et reste proposé comme lot suivant.
+
+`consulterDepuisLaListe` attend désormais que `modifierEvaluationParId` ait été APPELÉE par ce
+« Consulter »-ci, puis qu'elle ait FINI (`_modifierEvaluationEnCours` retombe dans son `finally`).
+Aucune attente fixe ajoutée ni allongée, aucune assertion changée, `js/` intact.
+
+| | Passes vertes (`--retries=0`, repos) | Essais verts |
+|---|---|---|
+| AVANT | 9/10 (charge 2,4–3,4) | 29/30 |
+| APRÈS | 10/10 (charge 2,2–3,5) | 30/30 |
+| APRÈS, « le trajet direct » seul, `--repeat-each=30` | — | 30/30 |
+
+Avec un taux d'échec de 1 sur 10 avant, 40 verts de suite sur le trajet direct ont ≈ 1,5 % de chances
+d'arriver par hasard : le compte soutient la lecture, il ne la prouve pas seul — c'est la sonde du §4
+qui nomme le mécanisme. **Contre-épreuve** : compteur d'appels muté (l'incrément retiré) ⮕ rouge,
+`TimeoutError` sur la nouvelle attente ; spec restaurée par copie, empreinte vérifiée.
+
+Dette nommée, laissée en place : les trois attentes fixes maison de la spec (400 ms, 1 500 ms ×2)
+gardent leur commentaire d'origine (« une fois TOUTES les minuteries de l'ouverture passées ») —
+aucune n'est en cause dans le rouge mesuré.
+
+## 8 · Dispositions
 
 | Constat | Disposition |
 |---|---|
-| `triptyque` non reproduite | à inscrire sous #685 avec le lot retenu (mesure du 19) |
-| `planif-toolbar` : budget de 30 s crevé sous charge | à inscrire sous #685 ; traité par A |
-| `liste-651` : course spec / chaîne « Consulter » | fiche propre à prendre (après #922) ; traité par B |
-| Retour forcé sur « Annoter » dans la seconde qui suit « Consulter » | fiche à prendre, hors lot (`js/` interdit) |
-| Aucune garde de charge dans `pousser.sh` | traité par A |
-| Charge disque (Time Machine) non éprouvée | nommé au §3, non inscrit : aucune mesure ne le demande encore |
+| `triptyque` non reproduite (20/20) | *inscrit* — #685, note du 19 sept. ; spec non touchée |
+| `planif-toolbar` : budget de 30 s crevé sous charge | *inscrit* — #685, note du 19 sept. ; spec non touchée ; relève du lot A |
+| `liste-651` : course spec / chaîne « Consulter » | *inscrit et corrigé* — #685 (rattachement corrigé), spec réparée |
+| Retour forcé sur « Annoter » dans la seconde qui suit « Consulter » (application) | *refusé* — jamais vécu par Grégoire, ne bloque rien (règle du 24 août) ; décrit dans la spec |
+| Aucune garde de charge dans `pousser.sh` | *inscrit* — #685 ; lot A proposé à Grégoire, non commencé |
+| #833 (CI WebKit Linux) | *relu* — rattachement juste, aucune de ses specs rejouée ici |
+| Charge disque (Time Machine) non éprouvée | *refusé pour l'instant* — aucune mesure ne la demande ; à reprendre si le lot A ne suffit pas |
