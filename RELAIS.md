@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, FIN DE SOIRÉE (Toronto) : 1.150.0 — MOTS VALIDÉS, RELECTURE DE COWORK PASSÉE, PUSH EN COURS PAR `pousser.sh`
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, FIN DE SOIRÉE (Toronto) : 1.150.0 (#701, #702, #703, #704, #705, #686) — ✅ POUSSÉE
+
+**`origin/main` = `9abf8602`, mesuré après `git fetch`** (HEAD = origin/main), plus ce commit de relais (docs seules). Second `scripts/pousser.sh origin main`, Cowork fermé (mesuré : aucune VM), charge 1,99 : suite WebKit complète **sans rougeur nouvelle (0 échec connu, inchangé)**, Vitest du hook vert, `49061df3..9abf8602`. Le travail le plus récent vit sur `main` ; aucune branche ni worktree du lot ne reste. Rien n'est dû sur ce lot. Le bloc ci-dessous raconte la soirée (premier push bloqué à raison, spec #912 réancrée).
+
+---
+
+## (trace) 19 SEPT. 2026, FIN DE SOIRÉE : 1.150.0 — MOTS VALIDÉS, RELECTURE DE COWORK PASSÉE, PUSH EN COURS PAR `pousser.sh`
 
 **Où en est le push : lis `git log origin/main -1` après `git fetch`.** Si `origin/main` porte ce commit de relais, la 1.150.0 est en ligne dans le dépôt, verdict Playwright complet vert sur ce SHA. Sinon, elle est encore locale : `main` est devant `origin/main` = `49061df3`, et il reste à relancer `scripts/pousser.sh origin main`, Cowork fermé.
 
