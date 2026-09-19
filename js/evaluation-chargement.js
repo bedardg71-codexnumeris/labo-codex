@@ -1136,6 +1136,7 @@ function cartoucheSelectionnee() {
 
     document.getElementById('listeCriteresGrille1').innerHTML = html;
     _signalerCriteresHorsGrille(document.getElementById('listeCriteresGrille1'), grille);   // #652
+    _signalerCriteresAjoutesDepuis(document.getElementById('listeCriteresGrille1'), grille);   // #705
 
     // Restaurer les niveaux précédemment sélectionnés (s'ils existent)
     // puis recalculer la note et regénérer la rétroaction en temps réel
@@ -1325,6 +1326,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
 
     conteneur.innerHTML = html;
     _signalerCriteresHorsGrille(conteneur, grille);   // #652
+    _signalerCriteresAjoutesDepuis(conteneur, grille);   // #705
 }
 
 /* ===============================
@@ -1600,6 +1602,42 @@ function _signalerCriteresHorsGrille(conteneur, grille) {
     }).join(' · ');
     const explication = document.createElement('small');
     explication.textContent = 'L\'évaluation garde ce qui a été enregistré. La note se recalcule sur la grille actuelle dès que tu modifies cette copie.';
+    avis.append(titre, detail, explication);
+    conteneur.prepend(avis);
+}
+
+/**
+ * #705 (19 sept. 2026) — LE JUMEAU INVERSÉ DE #652 : les critères que la grille porte et que
+ * l'évaluation OUVERTE ne couvre pas, parce qu'ils ont été ajoutés après elle. Décision de
+ * Grégoire (17 sept.) : l'évaluation se juge contre SA grille, sa note et son PDF concluent ;
+ * le critère ajouté est SIGNALÉ, ici, à l'enseignant·e — jamais sur le PDF de l'élève. La règle
+ * (« ajouté depuis » : mesuré par la date quand elle existe, présumé sinon) vit dans
+ * `criteresAjoutesDepuis` (evaluation-calcul.js), la même que lit la portée du PDF.
+ * Mêmes contraintes que #652 : appelée par les DEUX renderers après leur `innerHTML`,
+ * seulement en modification, seulement sur la grille de l'évaluation, par `textContent`.
+ */
+function _signalerCriteresAjoutesDepuis(conteneur, grille) {
+    const idModification = window.evaluationEnCours && window.evaluationEnCours.idModification;
+    if (!conteneur || !grille || !idModification || typeof window.criteresAjoutesDepuis !== 'function') return;
+    const evaluation = db.getSync(cle('evaluationsSauvegardees'), []).find(e => e.id === idModification);
+    if (!evaluation || evaluation.grilleId !== grille.id) return;
+    const ajoutes = window.criteresAjoutesDepuis(evaluation, grille);
+    if (ajoutes.length === 0) return;
+
+    const un = ajoutes.length === 1;
+    const avis = document.createElement('div');
+    avis.id = 'avisCriteresAjoutesDepuis';
+    avis.className = 'alerte alerte-attention';
+    const titre = document.createElement('strong');
+    titre.textContent = un
+        ? 'Un critère a été ajouté à la grille après cette évaluation'
+        : `${ajoutes.length} critères ont été ajoutés à la grille après cette évaluation`;
+    const detail = document.createElement('div');
+    detail.textContent = ajoutes.map(c => `${c.nom} (${c.ponderation} %)`).join(' · ');
+    const explication = document.createElement('small');
+    explication.textContent = (un ? 'La note enregistrée ne le couvre pas' : 'La note enregistrée ne les couvre pas')
+        + ' et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra '
+        + (un ? 'lui' : 'leur') + ' donner un niveau avant d\'enregistrer.';
     avis.append(titre, detail, explication);
     conteneur.prepend(avis);
 }

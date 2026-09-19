@@ -241,7 +241,9 @@ describe('lot 2 · C — la base relit ce que l\'écran a noté (le témoin exig
 
     it('C.b sans points en base, le critère analytique est hors note en base aussi — pas de « -- » d\'un côté et 80 % de l\'autre', () => {
         const win = chargerCalculSeul();
-        const evaluation = { criteres: [{ critereId: 'c1', niveauSelectionne: 'M', ponderation: 70 }], pointsAnalytiques: {} };
+        // ↻ #705 — un brouillon qui déclare sa portée : c'est là que l'absence veut dire « pas encore de points »
+        // (sans déclaration ni date, un critère absent est désormais présumé ajouté depuis).
+        const evaluation = { criteres: [{ critereId: 'c1', niveauSelectionne: 'M', ponderation: 70 }], pointsAnalytiques: {}, ponderationCouverte: 70, verrouillee: false };
         const portee = win.porteeDepuisEvaluation(evaluation, GRILLE_MIXTE, ECHELLE.niveaux);
         expect(portee.incomplete).toBe(true);
         expect(portee.criteresHorsNote.map(c => c.critereId)).toEqual(['c2']);

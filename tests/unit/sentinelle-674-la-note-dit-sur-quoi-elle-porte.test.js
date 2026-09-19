@@ -201,15 +201,56 @@ describe('#674 · porteeDepuisEvaluation — la portée se recalcule sur ce qui 
         return win;
     }
 
-    it('E · une évaluation d\'avant ce lot (sans ponderationCouverte) dont un critère manque est vue incomplète', () => {
+    // ↻ #705 (19 sept. 2026) — un critère que l'évaluation ne porte pas peut avoir été AJOUTÉ DEPUIS.
+    // Le défaut de #674 reste vu là où la date le prouve : l'identifiant du critère porte sa naissance.
+    const NE = (ms, n) => 'CR_' + ms + '_' + n + '_aabbccddeeff';
+    const grilleDatee = (msLangue) => ({ id: 'G1', criteres: [
+        { id: NE(1750000000000, 1), nom: 'Contenu', ponderation: 50 }, { id: NE(1750000000000, 2), nom: 'Organisation', ponderation: 30 },
+        { id: NE(msLangue, 3), nom: 'Langue', ponderation: 20 } ] });
+    const evalDatee = { grilleId: 'G1', echelleId: 'E1', noteFinale: 95, dateEvaluation: '2026-08-25T14:00:00.000Z', criteres: [
+        { critereId: NE(1750000000000, 1), critereNom: 'Contenu', niveauSelectionne: 'E', ponderation: 50 },
+        { critereId: NE(1750000000000, 2), critereNom: 'Organisation', niveauSelectionne: 'E', ponderation: 30 }
+    ] };
+
+    it('E · une évaluation d\'avant ce lot (sans ponderationCouverte) dont un critère NÉ AVANT ELLE manque est vue incomplète', () => {
         const win = charger();
-        const evaluation = { grilleId: 'G1', echelleId: 'E1', noteFinale: 95, criteres: [
+        const p = win.porteeDepuisEvaluation(evalDatee, grilleDatee(1750000000000), ECHELLE_PONCTUELLE.niveaux);
+        expect(p).toMatchObject({ ponderationCouverte: 80, ponderationGrille: 100, incomplete: true, commencee: true });
+        expect(p.criteresHorsNote).toEqual([{ critereId: NE(1750000000000, 3), nom: 'Langue', ponderation: 20, motif: 'sans-niveau', niveau: '' }]);
+        expect(p.criteresNonCouverts).toEqual([]);
+    });
+
+    it('E · #705 — le même critère NÉ APRÈS l\'évaluation (1er sept. 2026) est un ajout : elle conclut sur 80 sur 80, et il est rendu à part', () => {
+        const win = charger();
+        const apres = new Date('2026-09-01T12:00:00.000Z').getTime();
+        const p = win.porteeDepuisEvaluation(evalDatee, grilleDatee(apres), ECHELLE_PONCTUELLE.niveaux);
+        expect(p).toMatchObject({ ponderationCouverte: 80, ponderationGrille: 80, incomplete: false, commencee: true });
+        expect(p.criteresHorsNote).toEqual([]);
+        expect(p.criteresNonCouverts).toEqual([{ critereId: NE(apres, 3), nom: 'Langue', ponderation: 20 }]);
+    });
+
+    it('E · #705 — l\'ANCIEN format d\'identifiant (« CR1759243428715 », tout A2025) porte sa date aussi : né le 30 sept. 2025, sauté le 4 oct. → incomplète', () => {
+        const win = charger();
+        const grille = { id: 'G1', criteres: [{ id: 'CR1759243306842', nom: 'Structure', ponderation: 80 }, { id: 'CR1759243428715', nom: 'Français écrit', ponderation: 20 }] };
+        const evaluation = { grilleId: 'G1', noteFinale: 70, dateEvaluation: '2025-10-04T22:48:53.781Z', verrouillee: true,
+            criteres: [{ critereId: 'CR1759243306842', critereNom: 'Structure', niveauSelectionne: 'E', ponderation: 80 }] };
+        const p = win.porteeDepuisEvaluation(evaluation, grille, ECHELLE_PONCTUELLE.niveaux);
+        expect(p).toMatchObject({ incomplete: true, ponderationGrille: 100, criteresNonCouverts: [] });
+        expect(p.criteresHorsNote.map((c) => c.nom)).toEqual(['Français écrit']);
+    });
+
+    it('E · #705 — quand la date ne dit rien (identifiants « c1 »), la règle arrêtée s\'applique : l\'absent est présumé ajouté depuis — sauf pour un brouillon qui déclare sa portée', () => {
+        const win = charger();
+        const criteres = [
             { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'E', ponderation: 50 },
             { critereId: 'c2', critereNom: 'Organisation', niveauSelectionne: 'E', ponderation: 30 }
-        ] };
-        const p = win.porteeDepuisEvaluation(evaluation, GRILLE_50_30_20, ECHELLE_PONCTUELLE.niveaux);
-        expect(p).toMatchObject({ ponderationCouverte: 80, ponderationGrille: 100, incomplete: true, commencee: true });
-        expect(p.criteresHorsNote).toEqual([{ critereId: 'c3', nom: 'Langue', ponderation: 20, motif: 'sans-niveau', niveau: '' }]);
+        ];
+        const presume = win.porteeDepuisEvaluation({ grilleId: 'G1', noteFinale: 95, criteres }, GRILLE_50_30_20, ECHELLE_PONCTUELLE.niveaux);
+        expect(presume).toMatchObject({ incomplete: false, ponderationGrille: 80 });
+        expect(presume.criteresNonCouverts.map((c) => c.critereId)).toEqual(['c3']);
+        const brouillon = win.porteeDepuisEvaluation({ grilleId: 'G1', noteFinale: 95, ponderationCouverte: 80, verrouillee: false, criteres }, GRILLE_50_30_20, ECHELLE_PONCTUELLE.niveaux);
+        expect(brouillon).toMatchObject({ incomplete: true, ponderationGrille: 100, criteresNonCouverts: [] });
+        expect(brouillon.criteresHorsNote.map((c) => c.critereId + ':' + c.motif)).toEqual(['c3:sans-niveau']);
     });
 
     it('E bis · la copie muette déjà en base : tous les niveaux sont là, aucun ne vaut — incomplète, motif nommé', () => {

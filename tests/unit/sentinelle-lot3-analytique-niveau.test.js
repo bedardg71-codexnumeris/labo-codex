@@ -272,15 +272,15 @@ describe('lot 3 · B — le niveau suit les points, et seulement eux', () => {
         expect(ecran.noteProduction1.textContent).toBe('56.0 %');
     });
 
-    it('B.d une échelle À TROUS ne déduit rien : le niveau périmé est RETIRÉ, les points comptent quand même', () => {
+    it('B.d une échelle À TROUS — ↻ #701 : le niveau LE PLUS PROCHE (règle unique des trois chemins) ; le niveau périmé ne reste pas, les points comptent seuls', () => {
         const trouee = { id: 'E3', nom: 'trouée', niveaux: [
             { code: 'I', nom: 'I', min: 0, max: 54, valeurCalcul: 40 },
             { code: 'M', nom: 'M', min: 85, max: 100, valeurCalcul: 90 }
         ] };
         const { win, ecran, ec } = monter({ niveaux: { c1: 'M' }, echelle: trouee });
         taper(win, ecran, '10'); expect(ec.criteres.c2).toBe('I');
-        taper(win, ecran, '24');   // 80 % : entre 54 et 85, aucune plage
-        expect(ec.criteres.c2, 'un « I » périmé n\'ouvrirait plus la bonne cartouche').toBeUndefined();
+        taper(win, ecran, '24');   // 80 % : entre 54 et 85, aucune plage — milieu de M (92,5) à 12,5, milieu de I (27) à 53
+        expect(ec.criteres.c2, 'un « I » périmé n\'ouvrirait plus la bonne cartouche ; avant #701 : undefined').toBe('M');
         expect(ecran.noteProduction1.textContent, 'la note compte les points sans niveau : 0,9 × 70 + 24').toBe('87.0 %');
         expect(win.porteeCalculeeCourante.incomplete).toBe(false);
     });
@@ -771,7 +771,8 @@ describe('lot 3 · F — témoins de source', () => {
         expect(iPortee).toBeGreaterThan(iDeduction);
         expect(calcul).toContain("portee.criteresComptes.forEach(({ critere, niveau, valeur }) => {\n        const ponderation = (critere.ponderation || 0) / 100;\n        noteTotal += valeur * ponderation;\n        ponderationTotal += ponderation;");
         // Le niveau « 0 » ne se déduit jamais d'un chiffre.
-        expect(calcul).toMatch(/function niveauDeduitDesPoints[\s\S]*?if \(n\.code === '0' \|\| n\.code === 0\) return false;/);
+        // ↻ #701 — par l'option de la règle unique, plus par une copie du filtre.
+        expect(calcul).toMatch(/function niveauDeduitDesPoints[\s\S]*?niveauDuPourcentage\(pct, niveaux, \{ sansNiveauZero: true \}\);\n\}/);
     });
 
     it('F.d la restauration de la palette et le report au changement de grille passent par le chemin de la frappe', () => {

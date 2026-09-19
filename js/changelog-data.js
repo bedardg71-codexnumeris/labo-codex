@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            // Entrée PROPOSÉE le 19 sept. 2026 (#701, #702, #703, #704, #705, #686) — à valider par Grégoire.
+            version: '1.150',
+            couleur: 'orange',
+            titre: 'Ce que l\'élève lit une fois sa note calculée',
+            items: [
+                'Le niveau suit la note arrondie&nbsp;: 74,5&nbsp;% compte comme 75&nbsp;% au moment de trouver le niveau, 74,4&nbsp;% reste au niveau du dessous. La note, elle, garde toutes ses décimales. La même règle vaut pour le niveau général, pour un critère qui compte des erreurs et pour un critère noté en points.',
+                'Un critère qui compte des erreurs ne reçoit plus «&nbsp;--&nbsp;» comme niveau&nbsp;: sur une échelle dont les bornes laissent un vide, il prend le niveau le plus proche, comme le niveau général le faisait déjà.',
+                'Une copie sans faute reçoit sa note&nbsp;: en mode catégories, aucun code sur un texte dont tu as saisi le nombre de mots donne la note complète du critère, comme en mode simple. Un niveau que tu avais choisi à la main au menu du critère reste le tien.',
+                'Tu ajoutes un critère à une grille déjà utilisée&nbsp;? Les évaluations faites avant gardent leur note, et leur PDF conclut normalement. En ouvrant une de ces copies, un avis te nomme le critère ajouté depuis.',
+                'Conception&nbsp;› Grilles&nbsp;: quand tu passes une grille en «&nbsp;Analytique&nbsp;» ou en «&nbsp;Algorithmique&nbsp;» et que certains de ses critères n\'ont pas de type, l\'éditeur te le dit et t\'offre un bouton pour le leur appliquer. Rien ne change sans ce geste, et les évaluations déjà faites gardent leur note.',
+                'Quand la grille d\'une ancienne évaluation est introuvable, un critère qui s\'appelle «&nbsp;Français écrit&nbsp;» garde les mots du français dans la rétroaction et sur le PDF.'
+            ]
+        },
+        {
             // Entrée validée par Grégoire le 19 sept. 2026 (#872, mécanisme B — #924).
             version: '1.149',
             couleur: 'vert',

@@ -164,7 +164,10 @@ function lireSource(relatif) {
 describe('#672 · la garde d’amorces reste reliée aux gabarits qui les produisent', () => {
     const amorcesAttendues = [
         { texte: 'Saisissez les erreurs et le nombre de mots',           source: 'js/evaluation-chargement.js' },
-        { texte: 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)', source: 'js/evaluation-calcul.js' },
+        // ↻ #704 (19 sept. 2026) — cette amorce n'a plus de PRODUCTEUR : la branche « sans code dominant »
+        // de `calculerNoteAlgorithmiqueAvecCategories`, qui l'écrivait, est devenue le chemin d'une copie
+        // sans faute et écrit la vraie rétroaction. La garde la reconnaît toujours : le stock la porte.
+        { texte: 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)', source: null },
         { texte: 'Sélectionne un niveau',                                source: 'js/evaluation-chargement.js' },
         // Lot 3 (4 sept. 2026) — l'amorce du critère analytique, posée par le lot 2 dans les
         // deux chemins de rendu ; déclarée à la garde quand le critère analytique s'est mis à
@@ -179,11 +182,16 @@ describe('#672 · la garde d’amorces reste reliée aux gabarits qui les produi
         expect(filtre, 'et elle disparaît une fois les commentaires retirés').not.toContain("UNE AMORCE DE SAISIE N'EST PAS UNE RÉTROACTION");
     });
 
-    for (const { texte, source } of amorcesAttendues) {
+    for (const { texte, source } of amorcesAttendues.filter((a) => a.source)) {
         it(`« ${texte.slice(0, 34)}… » existe encore dans ${source}`, () => {
             expect(lireSource(source)).toContain(texte);
         });
     }
+
+    it('#704 — « Saisissez les codes… » n’est plus écrite par le calcul (hors commentaires), et reste reconnue par la garde', () => {
+        expect(lireSource('js/evaluation-calcul.js')).not.toContain(AMORCE_CATEGORIES);
+        expect(lireSource('js/synthese-retroaction-data.js')).toContain(AMORCE_CATEGORIES);
+    });
 
     it('la garde du PDF connaît exactement ces quatre amorces, ni plus ni moins', () => {
         const src = lireSource('js/synthese-retroaction-data.js');

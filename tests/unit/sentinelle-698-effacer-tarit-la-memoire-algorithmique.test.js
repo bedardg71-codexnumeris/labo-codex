@@ -14,6 +14,12 @@
  * part, le niveau posé par le calcul part (un niveau choisi à la main au menu reste), et la
  * note se recalcule tout de suite : le critère redevient « sans niveau », la porte #674 retient.
  *
+ * ↻ #704 (19 sept. 2026, décision de Grégoire du 17) — ZÉRO ERREUR DONNE LA NOTE COMPLÈTE dans
+ * les deux modes : en mode catégories, des codes effacés ne sont plus « pas de résultat » mais
+ * « aucune erreur ». Ce que #698 protège tient toujours — AUCUN RÉSULTAT PÉRIMÉ ne survit — et se
+ * lit maintenant de deux façons : codes effacés → un résultat NEUF (100 %, jamais l'ancien
+ * 87,5) ; mots effacés → le résultat part (essais A, B, E réancrés sur les mots ; A bis neuf).
+ *
  * Patron : le banc `audit-moteur-evaluation-2026-09-05.test.js`. Aucune donnée réelle.
  */
 import { describe, it, expect } from 'vitest';
@@ -93,14 +99,14 @@ const categories = (h, codes, mots) => { h.ecran.eval_categories_a1.value = code
 const simple = (h, erreurs, mots) => { h.ecran.eval_erreurs_a1.value = erreurs; h.ecran.eval_mots_a1.value = mots; h.win.calculerNoteAlgorithmiqueSimple('a1', 20, 500); };
 
 describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
-    it('A · « 1;4 » sur 500 mots : 87,5 % (M), note 84,7 % — puis codes EFFACÉS : le résultat part, la saisie reste, le critère est sans niveau, la note se retient', () => {
+    it('A · « 1;4 » sur 500 mots : 87,5 % (M), note 84,7 % — puis mots EFFACÉS : le résultat part, la saisie reste, le critère est sans niveau, la note se retient', () => {
         const h = monter();
         categories(h, '1;4', '500');
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ pourcentage: 87.5, niveau: 'M', sommePonderee: 2.5 });
         expect(h.ec.criteres.a1).toBe('M');
         expect(h.ecran.noteProduction1.textContent).toBe('84.7 %');
-        categories(h, '', '500');
-        expect(h.ec.donneesAlgorithmiques.a1).toEqual({ codes: [], mots: 500, totalErreurs: 0 });   // #110 v3 : la saisie reste
+        categories(h, '1;4', '');
+        expect(h.ec.donneesAlgorithmiques.a1).toEqual({ codes: ['1', '4'], mots: 0, totalErreurs: 2 });   // #110 v3 : la saisie reste
         expect(h.ec.criteres.a1).toBeUndefined();
         expect(h.ecran.niveau_algo_a1.textContent).toBe('--');
         expect(h.ecran.noteProduction1.textContent).toBe('--');
@@ -108,16 +114,35 @@ describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
         expect(h.win.porteeCalculeeCourante.criteresHorsNote.map((c) => c.critereId + ':' + c.motif)).toEqual(['a1:sans-niveau']);
         expect(h.ecran.porteeNote1.textContent).toContain('Français écrit (20 %)');
     });
+    it('A bis · #704 — codes EFFACÉS sur 500 mots : aucune erreur, donc un résultat NEUF (100 %, E, note 87,2 %) ; rien de l\'ancien 87,5 ne survit', () => {
+        const h = monter();
+        categories(h, '1;4', '500');
+        categories(h, '', '500');
+        expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ codes: [], mots: 500, totalErreurs: 0, sommePonderee: 0, noteCalculee: 20, pourcentage: 100, niveau: 'E' });
+        expect(h.ec.criteres.a1).toBe('E');
+        expect(h.ecran.niveau_algo_a1.textContent).toBe('E');
+        expect(h.ecran.cat_dominante_a1.textContent).toBe('--');
+        expect(h.ecran.noteProduction1.textContent).toBe('87.2 %');   // 0,8×84 + 0,2×100
+        expect(h.win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 100, incomplete: false });
+    });
     it('B · la rétroaction engendrée part aussi (#673 tient) et la rétroaction générale est régénérée', () => {
         const h = monter();
         categories(h, '1;4', '500');
         expect(h.ecran.comm_a1.textContent).not.toBe('');
         const avant = h.retro.length;
-        categories(h, '', '500');
+        categories(h, '1;4', '');
         expect(h.ecran.comm_a1.textContent).toBe('');
         expect(h.retro.length).toBeGreaterThan(avant);
     });
-    it('C · un niveau choisi À LA MAIN au menu du critère (reprise ciblée) survit à l\'effacement, et compte', () => {
+    it('B bis · #704 — codes effacés : la rétroaction est RÉÉCRITE pour zéro erreur (l\'énoncé du gabarit), jamais l\'amorce « Saisissez les codes… »', () => {
+        const h = monter();
+        categories(h, '1;4', '500');
+        categories(h, '', '500');
+        expect(h.ecran.comm_a1.textContent).toContain('0 erreur');
+        expect(h.ecran.comm_a1.textContent).not.toContain('Saisissez');
+        expect(h.ec.donneesAlgorithmiques.a1.retroaction).toBe(h.ecran.comm_a1.textContent);
+    });
+    it('C · un niveau choisi À LA MAIN au menu du critère (reprise ciblée) survit à l\'effacement, et compte — #704 ne le remplace pas par 100 %', () => {
         const h = monter();
         categories(h, '1;4', '500');
         h.ecran.eval_a1.value = 'D'; h.ec.criteres.a1 = 'D';   // le geste de `niveauSelectionne` sur le menu du critère
@@ -134,16 +159,27 @@ describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
         expect(h.ec.criteres.a1).toBeUndefined();
         expect(h.ecran.noteProduction1.textContent).toBe('--');
     });
-    it('E · l\'ENREGISTREMENT après effacement : la porte refuse « incomplète » et le brouillon ne porte AUCUN résultat périmé (avant : 84,7 persisté, 87,5 en mémoire, M en base)', () => {
+    it('E · l\'ENREGISTREMENT après effacement des MOTS : la porte refuse « incomplète » et le brouillon ne porte AUCUN résultat périmé (avant : 84,7 persisté, 87,5 en mémoire, M en base)', () => {
         const h = monter({ chaine: true });
         categories(h, '1;4', '500');
-        categories(h, '', '500');
+        categories(h, '1;4', '');
         h.win.sauvegarderEvaluation();
         expect(h.refus.map((r) => r.titre)).toEqual(['Évaluation incomplète']);
         const ev = h.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EVAL_NEUF');
         expect(ev).toMatchObject({ noteFinale: 84, ponderationCouverte: 80, verrouillee: false });
         expect(ev.criteres.map((c) => c.critereId)).toEqual(['c1']);
-        expect(ev.donneesAlgorithmiques.a1).toEqual({ codes: [], mots: 500, totalErreurs: 0 });
+        expect(ev.donneesAlgorithmiques.a1).toEqual({ codes: ['1', '4'], mots: 0, totalErreurs: 2 });
+    });
+    it('E bis · #704 — l\'ENREGISTREMENT d\'une copie sans faute (codes effacés, 500 mots) : aucun refus, 87,2 sur 100 %, le critère entre avec son niveau E', () => {
+        const h = monter({ chaine: true });
+        categories(h, '1;4', '500');
+        categories(h, '', '500');
+        h.win.sauvegarderEvaluation();
+        expect(h.refus).toEqual([]);
+        const ev = h.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EVAL_NEUF');
+        expect(ev).toMatchObject({ ponderationCouverte: 100, verrouillee: true });
+        expect(ev.noteFinale).toBeCloseTo(87.2, 10);
+        expect(ev.criteres.map((c) => c.critereId + ':' + c.niveauSelectionne)).toEqual(['c1:M', 'a1:E']);
     });
     it('F · témoin — un calcul valide est inchangé : 87,5 (M), 84,7 %, formule affichée, dominante nommée', () => {
         const h = monter();

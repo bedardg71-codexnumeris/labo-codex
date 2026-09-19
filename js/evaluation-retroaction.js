@@ -504,7 +504,10 @@ function genererRetroactionSpecifique() {
     var ech581 = function(t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
     var grilleDef581 = _chargerGrilleDefBilan(
         (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) ? evaluationEnCours.grilleId : null);
-    var critereAlgo581 = window.enoncesAlgo.critereAlgorithmique(grilleDef581);
+    // #686 — grille introuvable : le nom que l'évaluation enregistrée porte, plutôt que rien.
+    var critereAlgo581 = window.enoncesAlgo.critereAlgorithmiqueOuNomme(grilleDef581,
+        grilleDef581 ? null : _chargerEvaluationEnregistreeBilan(
+            (typeof window.etatVivantEvaluationEnCours === 'function') ? window.etatVivantEvaluationEnCours() : window.evaluationEnCours));
 
     if (totalErreurs > 0) {
         var typesTriees = Object.keys(erreurs).sort(function(a, b) { return erreurs[b] - erreurs[a]; }).slice(0, 3);
@@ -1202,7 +1205,7 @@ function genererRetroactionBilan() {
         html += _rendreSignalesBilan(signales, niveauDe);
     } else if (tousMaitrises) {
         html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente,
-            window.enoncesAlgo.critereAlgorithmique(grilleDef));
+            window.enoncesAlgo.critereAlgorithmiqueOuNomme(grilleDef, evalEnregistree));   // #686
     } else if (criteres.length === 0 && !algoA0) {
         // #576 — LE SILENCE ÉTAIT LA MOITIÉ DU DÉFAUT. Sans critère lisible, le
         // bilan affichait « Présentement, il faut se concentrer sur : » suivi de

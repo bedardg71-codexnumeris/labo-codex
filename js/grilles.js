@@ -3332,6 +3332,87 @@ function phrasePrecisionTypeGrille(grille) {
 function rendrePrecisionTypeGrille(grille) {
     const ligne = document.getElementById('precisionTypeGrille');
     if (ligne) ligne.textContent = phrasePrecisionTypeGrille(grille);
+    rendreAvisCriteresSansType(grille);   // #703
+}
+
+/**
+ * #703 (décision de Grégoire, 19 sept. 2026) — L'ÉDITEUR LE DIT ET PROPOSE.
+ *
+ * LE FAIT (constat C-1 de l'audit du moteur) : le type DÉCLARÉ à la grille n'est lu ni par
+ * le calcul ni par la palette, qui ne connaissent que `critere.type`. Passer une grille en
+ * « Analytique » ne touche pas ses critères existants (décision du lot 1) : un critère sans
+ * type y reste holistique — 24 points saisis ignorés, mesuré — sans que rien ne le dise.
+ * ÉCARTÉ par Grégoire : faire suivre le type d'office, qui changerait en silence la façon
+ * de noter des évaluations déjà faites cet automne.
+ *
+ * ⮕ Sous le menu : le compte des critères sans type, et un bouton qui leur applique le type
+ * de la grille. RIEN ne change sans ce geste ; un critère qui a DÉJÀ un type n'est jamais
+ * touché. Seulement pour une grille enregistrée (en création, les critères suivent déjà le
+ * menu — lot 4, C.3) et pour un type qui change le calcul : sous « Holistique », un critère
+ * sans type se calcule déjà en holistique, il n'y a rien à dire.
+ *
+ * ▣ MESURÉ AVANT D'ÉCRIRE (sentinelle #703) : le geste ne recalcule AUCUNE note enregistrée.
+ * `noteFinale` est écrite à l'enregistrement ; la portée relue pour le PDF lit un critère
+ * analytique sans points par son niveau, comme avant (lot 2), et un critère algorithmique
+ * sans mémoire algorithmique par la valeur de son niveau. La phrase le dit donc, avec le
+ * compte des évaluations concernées.
+ */
+function criteresSansType(grille) {
+    return ((grille && Array.isArray(grille.criteres)) ? grille.criteres : [])
+        .filter(c => c && !TYPES_GRILLE.includes(c.type));
+}
+
+const ADJECTIF_TYPE_CRITERE = { analytique: 'analytique', algorithmique: 'algorithmique' };
+
+/** Les mots de l'avis — du texte, posé par `textContent`. `null` quand il n'y a rien à dire. */
+function motsAvisCriteresSansType(grille, nbEvaluations) {
+    if (!grille || !grille.id || !ADJECTIF_TYPE_CRITERE[grille.type]) return null;
+    const n = criteresSansType(grille).length;
+    if (n === 0) return null;
+    const un = n === 1;
+    let phrase = un
+        ? 'Un critère de cette grille n\'a pas de type : il se calcule encore en holistique.'
+        : `${n} critères de cette grille n\'ont pas de type : ils se calculent encore en holistique.`;
+    if (nbEvaluations > 0) {
+        phrase += nbEvaluations === 1
+            ? (un ? ' L\'évaluation déjà faite avec ce critère garde sa note.' : ' L\'évaluation déjà faite avec ces critères garde sa note.')
+            : ` Les ${nbEvaluations} évaluations déjà faites avec ${un ? 'ce critère' : 'ces critères'} gardent leur note.`;
+    }
+    return { phrase: phrase, bouton: (un ? 'Le passer en ' : 'Les passer en ') + ADJECTIF_TYPE_CRITERE[grille.type] };
+}
+
+/** Combien d'évaluations enregistrées de cette grille portent au moins un de ces critères. */
+function _compterEvaluationsDesCriteres(grille, criteres) {
+    const ids = new Set(criteres.map(c => c.id));
+    return (db.getSync(cle('evaluationsSauvegardees'), []) || []).filter(e => e && e.grilleId === grille.id
+        && Array.isArray(e.criteres) && e.criteres.some(c => c && ids.has(c.critereId))).length;
+}
+
+function rendreAvisCriteresSansType(grille) {
+    const avis = document.getElementById('avisTypeCriteresGrille');
+    if (!avis) return;
+    const sansType = criteresSansType(grille);
+    const mots = motsAvisCriteresSansType(grille, sansType.length ? _compterEvaluationsDesCriteres(grille, sansType) : 0);
+    avis.classList.toggle('u-hide', !mots);
+    // Des constantes et un compte — aucun nom de critère ; échappés quand même (règle 1).
+    avis.innerHTML = mots
+        ? `<span>${echapperHtml(mots.phrase)}</span><br>`
+            + `<button type="button" class="btn btn-secondaire u-mt-5" data-action="appliquerTypeGrilleAuxCriteresSansType">${echapperHtml(mots.bouton)}</button>`
+        : '';
+}
+
+/** #703 — LE GESTE : le type de la grille va aux critères SANS type, et à eux seuls. */
+async function appliquerTypeGrilleAuxCriteresSansType() {
+    const grille = grilleTemplateActuelle;
+    if (!grille || !ADJECTIF_TYPE_CRITERE[grille.type]) return;
+    const cibles = criteresSansType(grille);
+    if (cibles.length === 0) return;
+    cibles.forEach(c => {
+        c.type = grille.type;
+        if (c.type === 'algorithmique') avecProjectionNeuve(c);   // lot 4, C.3 — comme un critère qui change de type
+    });
+    await sauvegarderGrilleTemplate(true);
+    afficherCriteresGrille(grilleTemplateActuelle);
 }
 
 function creerNouvelleGrille() {
@@ -6237,12 +6318,14 @@ window.modifierCritereGrilleHandler = modifierCritereGrilleHandler;
 window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;
 // Lot 1 (3 sept. 2026) — le menu « Type de la grille » et ses deux lectures.
 window.modifierTypeGrilleHandler = modifierTypeGrilleHandler;
+window.appliquerTypeGrilleAuxCriteresSansType = appliquerTypeGrilleAuxCriteresSansType;   // #703 — data-action
 window.typeCritereParDefaut = typeCritereParDefaut;
 window.typeGrilleAffiche = typeGrilleAffiche;
 window.rendreCartesGabaritAlgo = rendreCartesGabaritAlgo;   // lot 4 — le gabarit algorithmique, pour les sentinelles
 window.afficherCriteresGrille = afficherCriteresGrille;       // lot 4 — l'écran d'édition, exécuté par les sentinelles (afficherCriteresTemp l'est déjà plus haut)
 window.capturerPlisGabaritAlgo = capturerPlisGabaritAlgo;
 window.phrasePrecisionTypeGrille = phrasePrecisionTypeGrille;
+window.motsAvisCriteresSansType = motsAvisCriteresSansType;   // #703 — les mots, éprouvés par leur sentinelle
 window.TYPES_GRILLE = TYPES_GRILLE;
 window.modifierSousCritereHandler = modifierSousCritereHandler;
 window.modifierPonderationCritereTempHandler = modifierPonderationCritereTempHandler;
