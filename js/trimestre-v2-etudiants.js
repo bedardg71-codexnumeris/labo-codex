@@ -50,6 +50,104 @@ let donneesImportEnAttenteV2 = [];
 // reconstruit depuis les élèves, le perdait aussitôt. Liée à la clé du trimestre ; jamais écrite.
 let groupesEnAttenteV2 = { cle: null, groupes: new Set() };
 
+/* ===============================
+   RATTACHEMENT AU COURS (#887, 19 sept. 2026)
+   Un élève appartient à un cours par `coursId` (modes.js, obtenirEtudiantsCoursActif). L'ajout et
+   l'import le posaient depuis le cours actif sans le dire : Mathieu importait son 2e groupe « dans
+   son 2e cours », les élèves rejoignaient le premier. La zone NOMME maintenant le cours, et
+   l'import laisse en choisir un autre sur place — pour CET import seulement : `infoCours` n'est
+   jamais écrit d'ici.
+   =============================== */
+
+function _libelleCoursRattachementV2(c) {
+    if (!c) return '';
+    const code = c.codeCours || c.sigle || c.code || '';
+    const nom = c.nomCours || c.nom || c.titre || '';
+    return `${code} ${nom}`.trim() || `Cours ${c.id || 'sans identifiant'}`;
+}
+
+/**
+ * Les cours offerts au rattachement : la bibliothèque `cours` (globale — la période vit dans le
+ * groupe-cours, pas dans le cours), sans les cours de démonstration hors démo. Le cours actif y
+ * figure toujours, même absent de la bibliothèque (`infoCours` est un miroir, cf. #916).
+ * @returns {{actif: Object|null, cours: Array}}
+ */
+function _coursOffertsAuRattachementV2() {
+    const infoCours = db.getSync('infoCours', null);
+    const actif = infoCours && infoCours.id ? infoCours : null;
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    const cours = (db.getSync('cours', []) || []).filter(c => c && c.id && (enDemo || !c.isDemo || (actif && c.id === actif.id)));
+    if (actif && !cours.some(c => c.id === actif.id)) cours.unshift(actif);
+    return { actif, cours };
+}
+
+/**
+ * La phrase au-dessus du formulaire d'ajout. Sans menu : un élève ajouté à la main l'est dans le
+ * cours actif. En édition, la phrase reste vraie — enregistrer une fiche la rattache au cours actif
+ * (la fusion écrit `coursId` ; comportement d'avant ce lot, inchangé, désormais dit).
+ */
+function rafraichirRattachementEtudiantsV2() {
+    const phrase = document.getElementById('v2-ajoutRattachement');
+    if (!phrase) return;
+    const { actif } = _coursOffertsAuRattachementV2();
+    phrase.textContent = actif
+        ? 'Sera rattaché·e à : ' + _libelleCoursRattachementV2(actif)
+        : 'Aucun cours actif : l\'étudiant·e ne sera rattaché·e à aucun cours.';
+}
+
+/** Le menu de la zone d'import : les cours offerts, le cours actif choisi au départ. */
+function _peuplerMenuRattachementImportV2() {
+    const bloc = document.getElementById('v2-importRattachement');
+    const select = document.getElementById('v2-importCoursCible');
+    const sansCours = document.getElementById('v2-importSansCours');
+    if (!select) return;
+    const { actif, cours } = _coursOffertsAuRattachementV2();
+    let html = actif ? '' : '<option value="">Aucun cours</option>';
+    cours.forEach(c => {
+        const mention = actif && c.id === actif.id ? ' (cours actif)' : '';
+        html += `<option value="${echapperHtml(c.id)}">${echapperHtml(_libelleCoursRattachementV2(c) + mention)}</option>`;
+    });
+    select.innerHTML = html;
+    select.value = actif ? actif.id : '';
+    // Un trimestre sans aucun cours : la zone le dit, et l'import reste possible (coursId vide).
+    if (bloc) bloc.classList.toggle('u-hide', cours.length === 0);
+    if (sansCours) sansCours.classList.toggle('u-hide', cours.length > 0);
+}
+
+/**
+ * Le cours visé par CET import : la valeur du menu, si elle nomme un cours offert ; sinon le cours
+ * actif (menu absent, vide ou périmé) ; sans cours actif, rien — l'option « Aucun cours ».
+ */
+function _coursCibleImportV2() {
+    const { actif, cours } = _coursOffertsAuRattachementV2();
+    const choisi = String(document.getElementById('v2-importCoursCible')?.value || '');
+    return cours.find(c => c.id === choisi) || actif;
+}
+
+/* ===============================
+   LE DA À L'IMPORT (décision de Grégoire, 19 sept. 2026 : même règle qu'au formulaire, #914)
+   Une ligne dont le DA n'a pas sept chiffres, espaces retirés, n'est PAS importée : l'aperçu la
+   marque, le bouton compte les autres, le message final la nomme. Un DA déjà dans la liste du
+   trimestre, ou répété dans le collage, est ignoré comme avant (L-8, #749) — et l'aperçu le dit,
+   pour que le compte du bouton soit vrai.
+   =============================== */
+
+/**
+ * Juge chaque ligne collée contre la liste en base. Pure.
+ * @returns {Array<{fiche: Object, motif: string}>} motif vide = la ligne sera importée
+ */
+function _jugerLignesImportV2(lignes, etudiantsPresents) {
+    const dasPresents = new Set((etudiantsPresents || []).map(e => e && String(e.da)));
+    return (lignes || []).map(ligne => {
+        const da = String(ligne.da == null ? '' : ligne.da).replace(/\s+/g, '');
+        const fiche = { ...ligne, da };
+        if (!/^\d{7}$/.test(da)) return { fiche, motif: da ? 'DA invalide' : 'DA manquant' };
+        if (dasPresents.has(da)) return { fiche, motif: 'Déjà dans la liste' };
+        dasPresents.add(da);
+        return { fiche, motif: '' };
+    });
+}
+
 /**
  * Charge et affiche la liste des étudiants dans l'accordéon v2
  * ✅ CORRECTION (9 jan 2026): Converti en async pour lire depuis IndexedDB (source de vérité)
@@ -60,6 +158,9 @@ async function chargerListeEtudiantsV2() {
     const actionsEtudiants = document.getElementById('v2-actionsEtudiants');
 
     if (!conteneur) return;
+
+    // #887 : le formulaire d'ajout nomme le cours de rattachement.
+    rafraichirRattachementEtudiantsV2();
 
     // Utiliser namespace cle() pour lire les données du trimestre actif
     const cleEtudiants = cle('groupeEtudiants');
@@ -801,8 +902,8 @@ function importerFichierEtudiantsV2(event) {
  * Prévisualise les données collées
  */
 function previsualiserDonneesV2() {
-    const donnees = document.getElementById('v2-donneesCollees')?.value?.trim();
-    if (!donnees) {
+    const donnees = document.getElementById('v2-donneesCollees')?.value || '';
+    if (!donnees.trim()) {
         alert('Veuillez coller des données à importer.');
         return;
     }
@@ -842,7 +943,10 @@ function decouperLigneCollee(ligne) {
  */
 function analyserListeEtudiantsCollee(contenu) {
     const fiches = [];
-    String(contenu || '').trim().split('\n').forEach(ligne => {
+    // DA à l'import (19 sept. 2026) : pas de `trim()` sur le collage entier — il avalait la tabulation de tête
+    // d'une PREMIÈRE ligne sans DA, ses colonnes glissaient d'un cran et la ligne écartée était mal nommée.
+    String(contenu || '').split('\n').forEach(ligne => {
+        if (!ligne.trim()) return;
         const colonnes = decouperLigneCollee(ligne);
         // #872 (15 sept. 2026) : une ligne d'en-tête n'est pas un élève. Notre propre export commence
         // par « DA,Groupe,Nom,… » : le réimporter créait un élève du groupe « Groupe ».
@@ -878,27 +982,48 @@ function traiterDonneesImportV2(contenu) {
     const previewTable = document.getElementById('v2-previewTable');
 
     if (previewZone && previewTable) {
+        const jugees = _jugerLignesImportV2(donneesImportEnAttenteV2, db.getSync(cle('groupeEtudiants'), []));
+        const nbAImporter = jugees.filter(j => !j.motif).length;
+        const nbEcartees = jugees.length - nbAImporter;
+
         let html = `
             <table class="tableau-blanc" style="width: 100%; font-size: 0.85rem;">
                 <thead>
                     <tr>
-                        <th>DA</th><th>Groupe</th><th>Nom</th><th>Prénom</th><th>Programme</th><th>SA</th>
+                        <th>DA</th><th>Groupe</th><th>Nom</th><th>Prénom</th><th>Programme</th><th>SA</th><th>À l'import</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
 
-        donneesImportEnAttenteV2.forEach(e => {
+        // #923 — règle de sécurité n° 1 : tout ce qui vient du collage est échappé avant d'entrer
+        // dans l'aperçu (la liste dessinée après l'import l'était déjà).
+        jugees.forEach(({ fiche: e, motif }) => {
             const groupe = e.groupe ? normaliserNumeroGroupe(e.groupe) : '—';
             html += `
-                <tr>
-                    <td>${e.da}</td><td>${groupe}</td><td>${e.nom}</td><td>${e.prenom}</td><td>${e.programme}</td><td>${e.sa}</td>
+                <tr${motif ? ' class="ligne-import-ecartee"' : ''}>
+                    <td>${echapperHtml(e.da)}</td><td>${echapperHtml(groupe)}</td><td>${echapperHtml(e.nom)}</td><td>${echapperHtml(e.prenom)}</td><td>${echapperHtml(e.programme)}</td><td>${echapperHtml(e.sa)}</td><td>${motif ? '<strong>' + echapperHtml(motif) + '</strong>' : ''}</td>
                 </tr>
             `;
         });
 
         html += '</tbody></table>';
         previewTable.innerHTML = html;
+
+        const noteEcartees = document.getElementById('v2-importLignesEcartees');
+        if (noteEcartees) {
+            noteEcartees.textContent = nbEcartees > 0
+                ? `${nbEcartees} ${pluriel(nbEcartees, 'ligne ne sera pas importée', 'lignes ne seront pas importées')}. Le DA est celui du collège : sept chiffres, rien d'autre.`
+                : '';
+            noteEcartees.classList.toggle('u-hide', nbEcartees === 0);
+        }
+        const btnConfirmer = document.getElementById('v2-btnConfirmerImport');
+        if (btnConfirmer) {
+            btnConfirmer.textContent = nbAImporter > 0 ? `Importer ${formaterNbEtudiants(nbAImporter)}` : 'Aucune ligne à importer';
+            btnConfirmer.disabled = nbAImporter === 0;
+        }
+
+        _peuplerMenuRattachementImportV2();
         previewZone.classList.remove('u-hide');
     }
 }
@@ -913,34 +1038,38 @@ async function confirmerImportV2() {
         return;
     }
 
-    const coursActif = db.getSync('infoCours', null);
+    // #887 : le cours visé est celui que la zone NOMME (menu), pas le cours actif en silence.
+    // `infoCours` n'est pas écrit : choisir une cible ne change pas d'écran actif.
+    const coursCible = _coursCibleImportV2();
     // ✅ CORRECTION (31 déc 2025): Utiliser namespace
     const cleEtud = cle('groupeEtudiants');
 
     // ✅ CORRECTION (9 jan 2026): Lire depuis IndexedDB pour avoir les données complètes
-    // #522 lot 5 — la liste est relue DANS la file. security-ok: les entrées
-    // viennent du fichier importé, déjà validé en amont ; seul `coursId` est
-    // posé ici, depuis le cours actif.
+    // #522 lot 5 — la liste est relue DANS la file, et les lignes y sont REJUGÉES : l'aperçu a pu
+    // vieillir. security-ok: seules les lignes au DA de sept chiffres entrent ; `coursId` vient
+    // d'un cours offert par le menu.
     // L-8 (#749 lot 2) : un DA déjà présent dans le groupe n'est PAS dupliqué — il est
     // ignoré et compté ; la fiche existante ne bouge pas (réimporter le même fichier
     // n'ajoute rien). Les doublons INTERNES au fichier sont écartés de la même façon.
     let nbAjoutes = 0;
     let nbDejaPresents = 0;
+    let ecartees = [];
     await db.modifier(cleEtud, (lus) => {
         const etudiants = lus || [];
-        const dasPresents = new Set(etudiants.map(e => e && String(e.da)));
+        nbAjoutes = 0; nbDejaPresents = 0; ecartees = [];
 
-        donneesImportEnAttenteV2.forEach(e => {
-            if (e.da && dasPresents.has(String(e.da))) { nbDejaPresents++; return; }
-            if (e.da) dasPresents.add(String(e.da));
+        _jugerLignesImportV2(donneesImportEnAttenteV2, etudiants).forEach(({ fiche, motif }) => {
+            if (motif === 'Déjà dans la liste') { nbDejaPresents++; return; }
+            if (motif) { ecartees.push({ fiche, motif }); return; }
             etudiants.push({
-                ...e,
-                coursId: coursActif?.id || ''
+                ...fiche,
+                coursId: coursCible?.id || ''
             });
             nbAjoutes++;
         });
 
-        return etudiants;
+        // Rien à écrire : le mutateur rend `undefined`, aucune écriture.
+        return nbAjoutes > 0 ? etudiants : undefined;
     }, []);
 
     // Vérification immédiate : le compte relu en base (tout le groupe), et le compte du lot importé.
@@ -961,12 +1090,25 @@ async function confirmerImportV2() {
 
     chargerListeEtudiantsV2();
 
-    // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire.
-    notifications.succes(`${nbImportes} étudiant·e${nbImportes > 1 ? 's' : ''} ajouté·e${nbImportes > 1 ? 's' : ''}`
+    // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire ; le cours
+    // nommé et les lignes écartées : proposition du 19 sept. (#887, DA à l'import).
+    const message = `${nbImportes} étudiant·e${nbImportes > 1 ? 's' : ''} ajouté·e${nbImportes > 1 ? 's' : ''}`
+        + (nbImportes > 0 && coursCible ? ` à ${_libelleCoursRattachementV2(coursCible)}` : '')
         + (nbDejaPresents > 0 ? `, ${nbDejaPresents} déjà présent·e${nbDejaPresents > 1 ? 's' : ''} (ignoré·e${nbDejaPresents > 1 ? 's' : ''})` : '')
-        + ` — ${verification} au total dans le groupe`);
-
-    // Mettre à jour le guide groupe-cours
+        + ` — ${verification} au total dans le groupe`;
+    if (ecartees.length === 0) {
+        notifications.succes(message);
+        return;
+    }
+    // Les lignes écartées sont NOMMÉES : l'enseignant·e sait qui reste à ajouter à la main.
+    const NB_NOMMEES = 8;
+    const nommees = ecartees.slice(0, NB_NOMMEES).map(({ fiche, motif }) =>
+        `${(fiche.nom + ' ' + fiche.prenom).trim() || 'ligne sans nom'} (${motif})`).join(', ');
+    const reste = ecartees.length - NB_NOMMEES;
+    const details = `${ecartees.length} ${pluriel(ecartees.length, 'ligne écartée', 'lignes écartées')} : ${nommees}`
+        + (reste > 0 ? `, et ${reste} ${pluriel(reste, 'autre', 'autres')}` : '') + '.';
+    if (nbImportes > 0) notifications.warning(message, details);
+    else notifications.erreur('Aucun·e étudiant·e importé·e', details);
 }
 
 /**
@@ -1181,6 +1323,7 @@ window.importerFichierEtudiantsV2 = importerFichierEtudiantsV2;
 window.previsualiserDonneesV2 = previsualiserDonneesV2;
 window.confirmerImportV2 = confirmerImportV2;
 window.annulerImportV2 = annulerImportV2;
+window.rafraichirRattachementEtudiantsV2 = rafraichirRattachementEtudiantsV2; // #887 : rappelée quand le cours actif change
 window.exporterEtudiantsV2 = exporterEtudiantsV2;
 window.reinitialiserEtudiantsV2 = reinitialiserEtudiantsV2;
 window.supprimerGroupeSelectionneV2 = supprimerGroupeSelectionneV2;

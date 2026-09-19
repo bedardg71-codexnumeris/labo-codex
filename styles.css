@@ -13782,6 +13782,14 @@ tr.etudiant-inactif td {
     font-style: italic;
 }
 
+/* #887 / DA à l'import : ligne de l'aperçu qui ne sera pas importée (motif dans la dernière colonne) */
+tr.ligne-import-ecartee {
+    opacity: 0.6;
+}
+tr.ligne-import-ecartee td {
+    font-style: italic;
+}
+
 /* Compacter les grilles */
 #calendrier-trimestre .grille-2col {
     gap: 10px;
