@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 10 H (Toronto) : 1.146.9 (#910), LE CHOIX D'ÉCHELLE DE L'ASSISTANT — COMMITÉ EN LOCAL SUR `main`, PAS POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 10 H (Toronto) : 1.146.9 (#910), LE CHOIX D'ÉCHELLE DE L'ASSISTANT — ✅ POUSSÉ À ≈ 10 H 15
+
+✅ **POUSSÉ le 19 sept. 2026 à ≈ 10 h 15, sur demande de Grégoire (« Pousse 41a69c8a ») : `origin/main` = `41a69c8a`**, mesuré après `git push origin HEAD:main` depuis le worktree propre du verdict (retiré) et `git fetch` ; avance 0, retard 0. Verdict Playwright détaché sur ce SHA exact : aucune rougeur nouvelle, 0 échec connu, aucune spec instable, lancé par la garde de charge après 150 s d'attente (charge 47 → 8) ; Vitest vert au hook. `js/interpretation-config.js` n'a pas bougé pendant le verdict (modifié à 8 h 56). Relecture croisée de Cowork sur 41a69c8a, 10 h 12 : VERTE, par lecture et par exécution — 57 essais verts (sentinelles 910, 577, 898) ; une mutation de Cowork (prédicat en === true, les échelles sans drapeau ne sont plus offertes) rougit 5 essais de 910 et plusieurs de 898, restaurée, témoin vert. Aucune retouche. Le paragraphe suivant décrit l'état d'AVANT le push.
 
 ⚠ **`main` local est en avance sur `origin/main` (`81ae1e03`) : `5fcd7e5e` (relais du matin, docs) puis le commit de 1.146.9 (build 0919-0949) qui porte ce bloc. Le push attend la demande de Grégoire**, après le verdict de `scripts/pousser.sh` (garde de charge comprise). Cowork relit le lot sur le SHA commité pendant le verdict, en lecture seule.
 
