@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 14 H (Toronto) : 1.147.2, L'APPLICATION N'INVENTE PLUS DE DA (#914) — 🟡 COMMITÉ, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 14 H (Toronto) : 1.147.2, L'APPLICATION N'INVENTE PLUS DE DA (#914) — ✅ POUSSÉ À ≈ 14 H 20
+
+✅ **POUSSÉ le 19 sept. 2026 à ≈ 14 h 20, sur le « pousse » de Grégoire** : `origin/main` = `a73c88b2` (mesuré après `git fetch`). `pousser.sh origin main` lancé à 14 h 04, charge 3,83, mémoire libre 71 %, Cowork fermé (mesuré : aucun processus Claude desktop ni VM ; son dernier fichier écrit à 14 h 02) : suite Playwright WebKit entière sans rougeur nouvelle (0 échec connu), Vitest du hook vert, jeton de verdict sur ce SHA exact. ⚠ **Une spec verte AU SECOND ESSAI**, la même que ce matin : `profil-etudiant-chargement.spec.js › Défense refactor · sentinelle exports browser profil-etudiant` (#685) — deux fois le même jour à charge basse. **Non confirmé dans cette session** : la relecture croisée de Cowork (Grégoire a dit « pousse » sans la mentionner) ; la ligne de « Nouvelles » est partie telle que proposée, sur ce même « pousse ». **Session voisine** : `monitorage-v6-a9` a pris le lot suivant (consigne « l'import nomme le cours » : #887, #923, le DA à l'import) dans le worktree `.claude/worktrees/import-nomme-le-cours` ; elle vise la version suivante (1.148.0 probable) ; son renommage de la consigne du jour est resté dans l'index, hors de mes commits. Les lignes « Dû avant le push » ci-dessous sont historiques.
 
 **Où est le travail** : `main`, release `patch` 1.147.2 par-dessus `88371a4a` (= `origin/main` au départ, mesuré après `git fetch` par l'audit de début de session : 0 en avance, 0 en retard, aucun processus de test concurrent, charge 2,5). **Push sur le « pousse » de Grégoire seulement.** Le lot touche `js/` et `index.html` : `pousser.sh` lancera la garde complète (≈ 15 min, en arrière-plan, **Cowork fermé — à mesurer, pas à supposer**, charge machine basse au lancement).
 
