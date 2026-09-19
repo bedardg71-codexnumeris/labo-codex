@@ -194,7 +194,8 @@ describe('#522 lot 5a · A — deux gestes en rafale gardent LEURS DEUX effets',
         // cliquet C.a seulement.
         const { db, win, elements } = await monterEtudiants();
         await db.set(CLE, ETUDIANTS());   // security-ok: littéral de banc, aucune source externe
-        elements['v2-selectGroupe'].value = '00002';   // le groupe de l'étudiant 333
+        // #872 B : la valeur du menu est le couple (cours, numéro) — ici le groupe de l'étudiant 333.
+        elements['v2-selectGroupe'].value = 'C1|00002';
 
         // ⚠ L'ORDRE COMPTE, et le break-test l'a montré. Mis en file en premier,
         // le retrait de groupe écrit AVANT que le changement de statut n'existe :

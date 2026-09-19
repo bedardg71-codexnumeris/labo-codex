@@ -106,9 +106,18 @@ function monter(store) {
     return { win, store, etat, notifs, champ, ajouterAuFormulaire, document, db, cle, select: () => document.getElementById('v2-selectGroupe') };
 }
 
+// #872 B (19 sept. 2026) : la valeur d'une entrée du menu est le couple (cours, numéro). Le format
+// est REDIT ici, pas emprunté au module : s'il change, les valeurs persistées chez les gens ne se
+// relisent plus — ce banc doit rougir.
+const V = (coursId, groupe) => encodeURIComponent(coursId) + '|' + encodeURIComponent(groupe);
+
 function storeUnGroupe() {
     return {
-        infoCours: { id: 'C1', nom: 'Cours banc', groupe: '00001' },
+        infoCours: { id: 'C1', codeCours: '601-101-MQ', nomCours: 'Écriture et littérature', groupe: '00001' },
+        cours: [
+            { id: 'C1', codeCours: '601-101-MQ', nomCours: 'Écriture et littérature' },
+            { id: 'C2', codeCours: '601-102-MQ', nomCours: 'Littérature et imaginaire' },
+        ],
         test_groupeEtudiants: [
             { da: '1000001', nom: 'Aubin', prenom: 'Léa', groupe: '00001', coursId: 'C1' },
             { da: '1000002', nom: 'Bélanger', prenom: 'Tom', groupe: '00001', coursId: 'C1' },
@@ -138,8 +147,9 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
         await b.win.chargerListeEtudiantsV2();
         b.etat.reponsePrompt = '2';
         await b.win.creerNouveauGroupeV2();
-        expect(b.select().innerHTML).toContain('<option value="00002">00002 (vide)</option>');
-        expect(b.select().value).toBe('00002');
+        expect(b.select().innerHTML).toContain(`<option value="${V('C1', '00002')}">00002 · 601-101-MQ (vide)</option>`);
+        expect(b.select().value).toBe(V('C1', '00002'));
+        expect(b.store.test_groupeSelectionne).toBe(V('C1', '00002'));
         expect(b.champ('v2-etudiantGroupe').value).toBe('00002');
         expect(b.notifs.at(-1)).toMatchObject({ type: 'succes' });
     });
@@ -156,7 +166,7 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
         expect(groupeDe('2000002')).toBe('00002');
         // Le groupe a maintenant des élèves : il n'est plus marqué vide.
         await b.win.chargerListeEtudiantsV2();
-        expect(b.select().innerHTML).toContain('<option value="00002">00002</option>');
+        expect(b.select().innerHTML).toContain(`<option value="${V('C1', '00002')}">00002 · 601-101-MQ</option>`);
     });
 
     it('C (témoin). sous « Tous les groupes », un champ vide garde l\'ancien repli : le groupe du cours actif', async () => {
@@ -172,13 +182,14 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
         store.test_groupeEtudiants.push({ da: '1000003', nom: 'Côté', prenom: 'Ana', groupe: '00003', coursId: 'C1' });
         const b = monter(store);
         await b.win.chargerListeEtudiantsV2();
-        b.select().value = '00003';
+        b.select().value = V('C1', '00003');
+        expect(b.select().value).toBe(V('C1', '00003'));   // l'entrée existe : le faux select l'a gardée
         await b.win.filtrerParGroupeV2();
         expect(b.champ('v2-etudiantGroupe').value).toBe('00003');
 
         b.win.editerEtudiantV2('1000001');
         expect(b.champ('v2-etudiantGroupe').value).toBe('00001');
-        b.select().value = '00003';
+        b.select().value = V('C1', '00003');
         await b.win.filtrerParGroupeV2();
         expect(b.champ('v2-etudiantGroupe').value).toBe('00001');
     });
@@ -191,7 +202,7 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
         expect(b.notifs.at(-1)).toMatchObject({ type: 'erreur', t: 'Numéro de groupe invalide' });
         await b.win.chargerListeEtudiantsV2();
         expect(b.select().innerHTML).not.toMatch(/Gr 2/);
-        expect(b.select().options.map(o => o.value)).toEqual(['', '00001']);
+        expect(b.select().options.map(o => o.value)).toEqual(['', V('C1', '00001')]);
     });
 
     it('F. le groupe vide ne suit pas dans un autre trimestre, et le numéro proposé le saute', async () => {
@@ -207,7 +218,7 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
 
         b.etat.prefixe = 'autre_';
         await b.win.chargerListeEtudiantsV2();
-        expect(b.select().options.map(o => o.value)).toEqual(['', '00001']);
+        expect(b.select().options.map(o => o.value)).toEqual(['', V('C9', '00001')]);
     });
 
     it('G. un import rafraîchit l\'étape 3 du groupe-cours (appel par la liste d\'élèves)', async () => {
@@ -262,7 +273,8 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
 // « Tous les groupes ». VERROUILLÉ ICI :
 //   J. sous « Tous les groupes », le bouton est visible et renvoie au menu, sans rien supprimer ;
 //   K. un groupe choisi : le bouton le nomme, et le supprime lui seul ;
-//   L. un numéro partagé par deux cours : la question le dit.
+//   L. un numéro partagé par deux cours : depuis #872 B (19 sept.), ce sont DEUX groupes — la
+//      suppression n'emporte que celui du cours choisi, et « répartis dans N cours » a disparu.
 describe('#885 — supprimer un groupe entier sans passer élève par élève', () => {
     function storeDeuxGroupes() {
         const store = storeUnGroupe();
@@ -285,33 +297,195 @@ describe('#885 — supprimer un groupe entier sans passer élève par élève', 
     it('K. un groupe choisi : le bouton le nomme, et la suppression n\'emporte que lui', async () => {
         const b = monter(storeDeuxGroupes());
         await b.win.chargerListeEtudiantsV2();
-        b.select().value = '00001';
+        b.select().value = V('C1', '00001');
         await b.win.filtrerParGroupeV2();
         expect(b.etat.affichages['v2-btnSupprimerGroupe']).toBe(true);
-        expect(b.champ('v2-btnSupprimerGroupe').textContent).toBe('Supprimer le groupe 00001');
+        expect(b.champ('v2-btnSupprimerGroupe').textContent).toBe('Supprimer le groupe 00001 · 601-101-MQ');
         await b.win.supprimerGroupeSelectionneV2();
-        expect(b.etat.confirmations.at(-1)).toBe('Supprimer les 2 étudiant(s) du groupe 00001 ? Cette action est irréversible.');
+        expect(b.etat.confirmations.at(-1)).toBe('Supprimer les 2 étudiant(s) du groupe 00001 · 601-101-MQ ? Cette action est irréversible.');
         expect(b.store.test_groupeEtudiants.map(e => e.da)).toEqual(['2000001']);
     });
 
     it('K (témoin). refuser la question ne supprime rien', async () => {
         const b = monter(storeDeuxGroupes());
         await b.win.chargerListeEtudiantsV2();
-        b.select().value = '00001';
+        b.select().value = V('C1', '00001');
         await b.win.filtrerParGroupeV2();
         b.etat.reponseConfirm = false;
         await b.win.supprimerGroupeSelectionneV2();
+        // La question A ÉTÉ posée : sans ça, l'essai serait vert sur un menu resté à « Tous les groupes ».
+        expect(b.etat.confirmations).toHaveLength(1);
         expect(b.store.test_groupeEtudiants).toHaveLength(3);
     });
 
-    it('L. un même numéro porté dans deux cours : la question le dit', async () => {
-        const store = storeUnGroupe();
-        store.test_groupeEtudiants.push({ da: '2000001', nom: 'Caron', prenom: 'Zoé', groupe: '00001', coursId: 'C2' });
-        const b = monter(store);
+    it('L. un même numéro porté dans deux cours : la suppression n\'emporte que le groupe du cours choisi', async () => {
+        const b = monter(storeDeuxCours());
         await b.win.chargerListeEtudiantsV2();
-        b.select().value = '00001';
+        b.select().value = V('C1', '00001');
         await b.win.filtrerParGroupeV2();
         await b.win.supprimerGroupeSelectionneV2();
-        expect(b.etat.confirmations.at(-1)).toContain('répartis dans 2 cours');
+        expect(b.etat.confirmations.at(-1)).toBe('Supprimer les 2 étudiant(s) du groupe 00001 · 601-101-MQ ? Cette action est irréversible.');
+        expect(b.etat.confirmations.at(-1)).not.toContain('répartis');
+        expect(b.store.test_groupeEtudiants.map(e => e.da)).toEqual(['2000001', '2000002']);
+        expect(b.notifs.at(-1)).toMatchObject({ type: 'succes', t: 'Groupe 00001 · 601-101-MQ supprimé (2 étudiant(s))' });
+    });
+});
+
+// SENTINELLE #872, MÉCANISME B — UN GROUPE, C'EST UN NUMÉRO DANS UN COURS (19 sept. 2026)
+//
+// Omnivox numérote les groupes PAR cours. Forme tranchée par Grégoire : le menu Groupe nomme le cours
+// (« 00001 · 601-101-MQ », mots validés le 19 sept.) ; deux cours qui portent chacun un « 00001 »
+// donnent deux entrées ; la liste, le compte, la suppression (L ci-dessus), « + Nouveau groupe » et le
+// formulaire suivent l'entrée choisie. Aucune fiche n'est réécrite. VERROUILLÉ ICI :
+//   M. deux entrées, chacune ses élèves, le compte suit ; « sans cours » pour une fiche d'avant ;
+//   N. le numéro libre d'un nouveau groupe se juge DANS le cours actif ;
+//   O. un ajout à la main rejoint le cours de l'entrée choisie ; une édition garde le cours de la fiche ;
+//   P. l'ancienne valeur persistée (numéro seul) reste lue : unique → son entrée, sinon « Tous les groupes » ;
+//   Q. deux cours au même code : le nom s'ajoute ;
+//   R. (structurel) plus personne ne compare le numéro seul à la sélection.
+function storeDeuxCours() {
+    const store = storeUnGroupe();
+    store.test_groupeEtudiants.push(
+        { da: '2000001', nom: 'Caron', prenom: 'Zoé', groupe: '00001', coursId: 'C2' },
+        { da: '2000002', nom: 'Dion', prenom: 'Max', groupe: '1', coursId: 'C2' },
+    );
+    return store;
+}
+
+describe('#872 B — un groupe, c\'est un numéro dans un cours', () => {
+    const libelles = (b) => [...b.select().innerHTML.matchAll(/<option value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({ v: m[1], t: m[2] }));
+
+    it('M. deux cours portent « 00001 » : deux entrées, chacune ses élèves, le compte suit', async () => {
+        const store = storeDeuxCours();
+        store.test_groupeEtudiants.push({ da: '3000001', nom: 'Ancienne', prenom: 'Fiche', groupe: '00003' });
+        const b = monter(store);
+        await b.win.chargerListeEtudiantsV2();
+        expect(libelles(b)).toEqual([
+            { v: '', t: 'Tous les groupes' },
+            { v: V('C1', '00001'), t: '00001 · 601-101-MQ' },
+            { v: V('C2', '00001'), t: '00001 · 601-102-MQ' },
+            { v: V('', '00003'), t: '00003 · sans cours' },
+        ]);
+        // Sous « Tous les groupes », la carte nomme le cours des SEULS numéros portés par deux cours.
+        expect(b.champ('v2-resumeGroupes').innerHTML).toContain('Grp 00001 · 601-101-MQ</span><span>2');
+        expect(b.champ('v2-resumeGroupes').innerHTML).toContain('Grp 00001 · 601-102-MQ</span><span>2');
+        expect(b.champ('v2-resumeGroupes').innerHTML).toContain('Grp 00003</span><span>1');
+
+        b.select().value = V('C2', '00001');
+        await b.win.filtrerParGroupeV2();
+        const liste = b.champ('v2-listeEtudiants').innerHTML;
+        expect(liste).toContain('2000001');
+        expect(liste).toContain('2000002');   // « 1 » et « 00001 » : le même numéro
+        expect(liste).not.toContain('1000001');
+        expect(liste).not.toContain('1000002');
+        expect(b.champ('v2-resumeNbTotal').textContent).toBe(2);
+
+        b.select().value = V('', '00003');
+        await b.win.filtrerParGroupeV2();
+        expect(b.champ('v2-listeEtudiants').innerHTML).toContain('3000001');
+        expect(b.champ('v2-listeEtudiants').innerHTML).not.toContain('2000001');
+    });
+
+    it('N. le numéro libre d\'un nouveau groupe se juge dans le cours actif', async () => {
+        const store = storeDeuxCours();
+        store.infoCours = { id: 'C3', codeCours: '601-103-MQ', nomCours: 'Littérature québécoise', groupe: '00001' };
+        store.cours.push({ id: 'C3', codeCours: '601-103-MQ', nomCours: 'Littérature québécoise' });
+        const b = monter(store);
+        await b.win.chargerListeEtudiantsV2();
+        b.etat.reponsePrompt = '1';
+        await b.win.creerNouveauGroupeV2();
+        // C1 et C2 portent un « 00001 » : il reste LIBRE dans C3.
+        expect(b.etat.defautsProposes).toEqual(['00001']);
+        expect(b.select().value).toBe(V('C3', '00001'));
+        expect(libelles(b).map(o => o.t)).toContain('00001 · 601-103-MQ (vide)');
+        // … et pris, il est sauté : la proposition suivante est « 00002 ».
+        b.etat.reponsePrompt = null;
+        await b.win.creerNouveauGroupeV2();
+        expect(b.etat.defautsProposes).toEqual(['00001', '00002']);
+        // L'ajout qui suit rejoint le cours du groupe créé.
+        await b.ajouterAuFormulaire('4000001', 'Gagnon', 'Lou');
+        expect(b.store.test_groupeEtudiants.find(e => e.da === '4000001')).toMatchObject({ groupe: '00001', coursId: 'C3' });
+    });
+
+    it('O. un ajout à la main rejoint le cours de l\'entrée choisie ; une édition garde le cours de la fiche', async () => {
+        const store = storeDeuxCours();
+        store.test_groupeEtudiants.push({ da: '3000001', nom: 'Ancienne', prenom: 'Fiche', groupe: '00003' });
+        const b = monter(store);   // cours actif : C1
+        await b.win.chargerListeEtudiantsV2();
+        b.select().value = V('C2', '00001');
+        await b.win.filtrerParGroupeV2();
+        expect(b.champ('v2-ajoutRattachement').textContent).toBe('Sera rattaché·e à : 601-102-MQ Littérature et imaginaire');
+        await b.ajouterAuFormulaire('2000009', 'Hamel', 'Noa');
+        expect(b.store.test_groupeEtudiants.find(e => e.da === '2000009')).toMatchObject({ groupe: '00001', coursId: 'C2' });
+
+        // Témoin : sous « Tous les groupes », le cours actif, comme avant.
+        b.select().value = '';
+        await b.win.filtrerParGroupeV2();
+        expect(b.champ('v2-ajoutRattachement').textContent).toBe('Sera rattaché·e à : 601-101-MQ Écriture et littérature');
+        await b.ajouterAuFormulaire('1000009', 'Imbeault', 'Sam');
+        expect(b.store.test_groupeEtudiants.find(e => e.da === '1000009').coursId).toBe('C1');
+
+        // ÉDITION d'une fiche de C2, cours actif C1 : elle reste dans C2, et la phrase le dit.
+        b.win.editerEtudiantV2('2000001');
+        expect(b.champ('v2-ajoutRattachement').textContent).toBe('Rattaché·e à : 601-102-MQ Littérature et imaginaire');
+        b.champ('v2-etudiantPrenom').value = 'Zoé-Anne';
+        await b.win.soumettreEtudiantV2();
+        expect(b.store.test_groupeEtudiants.find(e => e.da === '2000001')).toMatchObject({ prenom: 'Zoé-Anne', coursId: 'C2' });
+        expect(b.champ('v2-ajoutRattachement').textContent).toBe('Sera rattaché·e à : 601-101-MQ Écriture et littérature');
+
+        // Une fiche d'avant, sans `coursId` : l'édition ne lui en donne pas (stock intact).
+        b.win.editerEtudiantV2('3000001');
+        expect(b.champ('v2-ajoutRattachement').textContent).toBe('Rattaché·e à aucun cours.');
+        b.champ('v2-etudiantPrenom').value = 'Fiche-Modifiée';
+        await b.win.soumettreEtudiantV2();
+        const ancienne = b.store.test_groupeEtudiants.find(e => e.da === '3000001');
+        expect(ancienne.prenom).toBe('Fiche-Modifiée');
+        expect(Object.prototype.hasOwnProperty.call(ancienne, 'coursId')).toBe(false);
+    });
+
+    it('P. l\'ancienne valeur persistée (numéro seul) reste lue : unique → son entrée ; portée par deux cours → « Tous les groupes »', async () => {
+        const unique = storeUnGroupe();
+        unique.test_groupeSelectionne = '00001';
+        const b1 = monter(unique);
+        await b1.win.chargerListeEtudiantsV2();
+        expect(b1.select().value).toBe(V('C1', '00001'));
+        expect(unique.test_groupeSelectionne).toBe('00001');   // rien n'est réécrit à la lecture
+
+        const ambigu = storeDeuxCours();
+        ambigu.test_groupeSelectionne = '00001';
+        const b2 = monter(ambigu);
+        await b2.win.chargerListeEtudiantsV2();
+        expect(b2.select().value).toBe('');
+
+        const demo = storeUnGroupe();
+        demo.test_groupeEtudiants.push({ da: 'DEMO001', nom: 'Démo', prenom: 'Un', groupe: '0demo', coursId: 'C2', isDemo: true });
+        demo.test_groupeSelectionne = '0demo';
+        const b3 = monter(demo);
+        await b3.win.chargerListeEtudiantsV2();
+        expect(b3.select().value).toBe(V('C2', '0demo'));
+        expect(b3.select().innerHTML).toContain('0demo · 601-102-MQ (démo)</option>');
+    });
+
+    it('Q. deux cours au même code : le nom s\'ajoute ; un cours introuvable est nommé par son identifiant', async () => {
+        const store = storeDeuxCours();
+        store.cours[1].codeCours = '601-101-MQ';
+        store.test_groupeEtudiants.push({ da: '5000001', nom: 'Orpheline', prenom: 'Fiche', groupe: '00004', coursId: 'C-ABSENT' });
+        const b = monter(store);
+        await b.win.chargerListeEtudiantsV2();
+        expect(libelles(b).map(o => o.t)).toEqual([
+            'Tous les groupes',
+            '00001 · 601-101-MQ Écriture et littérature',
+            '00001 · 601-101-MQ Littérature et imaginaire',
+            '00004 · Cours C-ABSENT',
+        ]);
+    });
+
+    it('R. (structurel) la sélection n\'est plus jamais comparée au numéro seul, et le menu n\'a qu\'un lecteur', () => {
+        const source = lire('js/trimestre-v2-etudiants.js');
+        expect(source).not.toMatch(/normaliserNumeroGroupe\(e\.groupe\)\s*[!=]==\s*(groupeFiltre|groupeSelectionne|grp)\b/);
+        // `v2-selectGroupe`.value n'est LU que par getGroupeSelectionneV2 et par le repeuplement du menu.
+        const lectures = [...source.matchAll(/getElementById\('v2-selectGroupe'\)\?\.value/g)];
+        expect(lectures).toHaveLength(1);
+        expect(source).toMatch(/function getGroupeSelectionneV2\(\) \{\s*return _lireValeurGroupeV2\(document\.getElementById\('v2-selectGroupe'\)\?\.value\);/);
     });
 });
