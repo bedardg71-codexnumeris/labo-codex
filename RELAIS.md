@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 12 H 30 (Toronto) : 1.147.1, LES DEUX PHRASES DE L'ASSIDUITÉ INCONNUE + LA LISTE DU GROUPE VUE SUR IPAD — ⏳ COMMITÉ, NON POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 12 H 30 (Toronto) : 1.147.1, LES DEUX PHRASES DE L'ASSIDUITÉ INCONNUE + LA LISTE DU GROUPE VUE SUR IPAD — ✅ POUSSÉ À ≈ 12 H 50
+
+✅ **POUSSÉ le 19 sept. 2026 à ≈ 12 h 50, sur le « pousse » de Grégoire, après la relecture croisée de Cowork (verte, dit par Grégoire)** : `origin/main` = `39e87f4c` (mesuré après `git fetch`). `pousser.sh` lancé à charge 3,10 : suite Playwright WebKit entière sans rougeur nouvelle (0 échec connu), Vitest du hook vert, jeton de verdict sur ce SHA exact. ⚠ **Une spec verte AU SECOND ESSAI** : `profil-etudiant-chargement.spec.js › Défense refactor · sentinelle exports browser profil-etudiant` — ne bloque pas (#534, #685) ; le lot n'a touché dans les modules du profil que des commentaires et une chaîne, aucun export. À surveiller si elle revient. Le paragraphe suivant décrit l'état d'AVANT le push.
 
 **Où est le travail** : `main`, release `patch` 1.147.1 par-dessus `085a14aa` (= `origin/main` au départ, mesuré après `git fetch`). **Push sur le « pousse » de Grégoire seulement** ; aucun verdict Playwright complet sur ce SHA tant que `pousser.sh` n'a pas tourné (le lot touche `js/` et `styles.css` : garde complète, ≈ 15 min, en arrière-plan, Cowork fermé).
 
@@ -29,7 +31,7 @@
 
 ⚠ **L'arbre porte toujours les quatre fichiers d'un autre travail** (`js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, la RELECTURE du 17) : ni touchés, ni commités ; jeton d'`interpretation-config.js` tenu à `20260910c`. Indexation par chemins nommés.
 
-**Dû** : le « pousse » de Grégoire ; la relecture croisée de Cowork sur ce patch.
+**Dû** : rien sur ce patch (poussé, relu par Cowork).
 
 ---
 
