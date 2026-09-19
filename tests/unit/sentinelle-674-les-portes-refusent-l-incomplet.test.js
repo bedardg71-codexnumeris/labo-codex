@@ -342,9 +342,9 @@ describe('#674 · non-porte — l\'auto-save écrit pendant la saisie, la note A
 });
 
 /** Le PDF de l'élève : données (`synthese-retroaction-data.js`) puis rendu. */
-function monterPdf({ echelle = ECHELLE } = {}) {
+function monterPdf({ echelle = ECHELLE, grille = GRILLE } = {}) {
     const calcul = chargerScript('js/evaluation-calcul.js', { valeurNumeriqueDuNiveau }, { addEventListener() {}, removeEventListener() {} });
-    const base = { test_grillesTemplates: [GRILLE] };
+    const base = { test_grillesTemplates: [grille] };
     const communs = {
         db: { getSync: (k, d) => (k in base ? JSON.parse(JSON.stringify(base[k])) : (d !== undefined ? d : null)), get: async () => null, set: async () => {}, setSync() {} },
         cle: (k) => 'test_' + k,
@@ -368,12 +368,27 @@ function monterPdf({ echelle = ECHELLE } = {}) {
     };
 }
 
+// ↻ #705 (19 sept. 2026) — « chaque évaluation se juge contre SA grille » : un critère que
+// l'évaluation ne porte pas n'est plus, d'office, un critère qui manque — il peut avoir été
+// ajouté depuis. Ce que #674 protège (95 sur 80 % de la grille ne conclut pas) tient là où la
+// DATE le prouve : l'identifiant d'un critère porte l'instant de sa création
+// (`genererIdUnique('CR_')`). Ces montages sont donc DATÉS : les trois critères sont nés le
+// 15 juin 2025, l'évaluation est du 25 août 2026 — « Langue » était dans la grille ce jour-là.
+const NE_AVANT = (n) => 'CR_1750000000000_' + n + '_aabbccddeeff';
+const GRILLE_DATEE = {
+    id: 'G1', nom: 'Grille témoin 50/30/20',
+    criteres: [
+        { id: NE_AVANT(1), nom: 'Contenu', ponderation: 50 },
+        { id: NE_AVANT(2), nom: 'Organisation', ponderation: 30 },
+        { id: NE_AVANT(3), nom: 'Langue', ponderation: 20 }
+    ]
+};
 const EVAL_INCOMPLETE_AVANT_LOT = {
-    id: 'EV1', etudiantDA: '111', grilleId: 'G1', echelleId: 'E1',
+    id: 'EV1', etudiantDA: '111', grilleId: 'G1', echelleId: 'E1', dateEvaluation: '2026-08-25T14:00:00.000Z',
     noteFinale: 95, niveauFinal: 'E',   // ce que le défaut écrivait : 95 (E) sur 80 % de la grille
     criteres: [
-        { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'E', ponderation: 50 },
-        { critereId: 'c2', critereNom: 'Organisation', niveauSelectionne: 'E', ponderation: 30 }
+        { critereId: NE_AVANT(1), critereNom: 'Contenu', niveauSelectionne: 'E', ponderation: 50 },
+        { critereId: NE_AVANT(2), critereNom: 'Organisation', niveauSelectionne: 'E', ponderation: 30 }
     ]
 };
 const EVAL_COMPLETE = {
@@ -388,17 +403,17 @@ const EVAL_COMPLETE = {
 
 describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme ce qui manque', () => {
     it('une évaluation d\'AVANT ce lot, incomplète (rétroactif) : la portée est relue, le critère nommé', () => {
-        const { feedback } = monterPdf();
+        const { feedback } = monterPdf({ grille: GRILLE_DATEE });
         const fb = feedback(EVAL_INCOMPLETE_AVANT_LOT);
         expect(fb.portee).toMatchObject({ incomplete: true, commencee: true, ponderationCouverte: 80, ponderationGrille: 100 });
-        expect(fb.portee.criteresHorsNote).toEqual([{ critereId: 'c3', nom: 'Langue', ponderation: 20, motif: 'sans-niveau', niveau: '' }]);
+        expect(fb.portee.criteresHorsNote).toEqual([{ critereId: NE_AVANT(3), nom: 'Langue', ponderation: 20, motif: 'sans-niveau', niveau: '' }]);
         expect(fb.portee.texte).toBe('sans niveau : Langue (20 %)');
     });
 
     // Les mots de l'élève, arrêtés par Grégoire le 2 septembre 2026 (option C) :
     // « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
     it('…et le rendu REFUSE DE CONCLURE : pas de bandeau « E », les mots de l\'élève nomment Langue (20 %)', () => {
-        const { feedback, html } = monterPdf();
+        const { feedback, html } = monterPdf({ grille: GRILLE_DATEE });
         const page = html(feedback(EVAL_INCOMPLETE_AVANT_LOT));
         expect(page).toContain('Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer.');
         // Le bandeau coloré du niveau global (44 px, code seul) n'est PAS rendu.
@@ -459,8 +474,8 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         // vient de la GRILLE. On injecte donc une grille au nom piégé par une seconde monture.
         const calcul = chargerScript('js/evaluation-calcul.js', { valeurNumeriqueDuNiveau }, { addEventListener() {}, removeEventListener() {} });
         const grillePiegee = { id: 'G1', nom: 'G', criteres: [
-            { id: 'c1', nom: 'Contenu', ponderation: 50 }, { id: 'c2', nom: 'Organisation', ponderation: 30 },
-            { id: 'c3', nom: '<img src=x onerror=alert(1)>', ponderation: 20 }
+            { id: NE_AVANT(1), nom: 'Contenu', ponderation: 50 }, { id: NE_AVANT(2), nom: 'Organisation', ponderation: 30 },
+            { id: NE_AVANT(3), nom: '<img src=x onerror=alert(1)>', ponderation: 20 }
         ] };
         const rendu = chargerScript('js/synthese-retroaction-rendu.js', {
             echapperHtml: (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))

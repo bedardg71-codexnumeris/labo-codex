@@ -256,13 +256,13 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         win.calculerNote();
         return { note: ecran.noteProduction1.textContent, niveau: ecran.niveauProduction1.textContent, brut: win.noteCalculeeCourante };
     }
-    it('B1 · le NIVEAU GLOBAL prend le niveau « le plus proche » : 74,5 → M (M commence à 75), 89,5 → E, 59,5 → D', () => {
+    it('B1 · le NIVEAU GLOBAL : 74,5 → M (M commence à 75), 89,5 → E, 59,5 → D — ↻ #701 : mêmes niveaux, mais par l\'ARRONDI à l\'entier (75, 90, 60), plus par le repli « le plus proche »', () => {
         const r = noter('B1', { '74.5': niveauGlobalPour({ c1: 'E', c2: 'I' }), '89.5': niveauGlobalPour({ c1: 'E', c2: 'M' }), '59.5': niveauGlobalPour({ c1: 'D', c2: 'I' }) });
         expect(r['74.5']).toMatchObject({ note: '74.5 %', niveau: 'M' });
         expect(r['89.5']).toMatchObject({ note: '89.5 %', niveau: 'E' });
         expect(r['59.5']).toMatchObject({ note: '59.5 %', niveau: 'D' });
     });
-    it('B2 · le même 74,5 % sur un critère ALGORITHMIQUE rend « -- », et « -- » entre dans evaluationEnCours.criteres', () => {
+    it('B2 · le même 74,5 % sur un critère ALGORITHMIQUE — ↻ corrigé #701/#702 : M, comme le niveau global (avant : « -- », et « -- » entrait dans evaluationEnCours.criteres)', () => {
         const ec = ecDe(GRILLE_ALGO, { criteres: { c1: 'M' } });
         const { win, ecran } = monterMoteur({ grille: GRILLE_ALGO, ec, ecranExtra: champsAlgo('a1') });
         ecran.eval_erreurs_a1.value = '51'; ecran.eval_mots_a1.value = '5000';   // 20 − 51/5000×500 = 14,9 → 74,5 %
@@ -270,17 +270,17 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         noter('B2', { niveauAlgo: ecran.niveau_algo_a1.textContent, pctAlgo: ecran.pct_algo_a1.textContent, critereEnCours: ec.criteres.a1,
             noteGlobale: ecran.noteProduction1.textContent, niveauGlobal: ecran.niveauProduction1.textContent, ligneACopier: ecran.criteresCopier.textContent });
         expect(ecran.pct_algo_a1.textContent).toBe('74.5');
-        expect(ecran.niveau_algo_a1.textContent).toBe('--');
-        expect(ec.criteres.a1).toBe('--');                       // c'est ce que les collecteurs écriraient en base (`if (niveau)` : « -- » est vrai)
-        expect(ecran.noteProduction1.textContent).toBe('82.1 %'); // 0,8×84 + 0,2×74,5 — le critère COMPTE, par son pourcentage exact
-        expect(ecran.criteresCopier.textContent).toBe('M\t--');
+        expect(ecran.niveau_algo_a1.textContent).toBe('M');      // avant #701 : '--'
+        expect(ec.criteres.a1).toBe('M');                        // avant #702 : '--', que les collecteurs écrivaient en base (`if (niveau)` : « -- » est vrai)
+        expect(ecran.noteProduction1.textContent).toBe('82.1 %'); // 0,8×84 + 0,2×74,5 — le critère COMPTE, par son pourcentage exact : l'arrondi ne touche pas la note
+        expect(ecran.criteresCopier.textContent).toBe('M\tM');   // avant : 'M\t--'
     });
-    it('B3 · le même 74,5 % sur un critère ANALYTIQUE ne déduit aucun niveau (undefined) — trois règles pour un trou', () => {
+    it('B3 · le même 74,5 % sur un critère ANALYTIQUE — ↻ corrigé #701 : M, une seule règle pour les trois chemins (avant : undefined, trois règles pour un trou)', () => {
         const { win } = monterMoteur({ grille: GRILLE_50_50, ec: ecDe(GRILLE_50_50) });
         const r = noter('B3', { deduit: win.niveauDeduitDesPoints({ id: 'k', ponderation: 30, type: 'analytique' }, 22.35, ECHELLE.niveaux) });
-        expect(r.deduit).toBeUndefined();
+        expect(r.deduit).toBe('M');   // avant #701 : undefined
     });
-    it('B5 · l\'ENREGISTREMENT écrit « -- » comme niveauSelectionne du critère algorithmique dans le trou (74,5 %), et la note compte 82,1', () => {
+    it('B5 · l\'ENREGISTREMENT du critère algorithmique à 74,5 % — ↻ corrigé #702 : niveauSelectionne M (avant : « -- » en base), et la note compte toujours 82,1', () => {
         const nu = ecDe(GRILLE_ALGO_SIMPLE, { criteres: { c1: 'M' } });
         const { win, ecran, ecritures, refus } = monterChaine({ grille: GRILLE_ALGO_SIMPLE, nu });
         ecran.eval_erreurs_a1.value = '51'; ecran.eval_mots_a1.value = '5000';
@@ -290,8 +290,8 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         const r = noter('B5', { refus: refus.map((x) => x.titre), noteFinale: ecrit && ecrit.noteFinale, niveauFinal: ecrit && ecrit.niveauFinal,
             a1: ecrit && ecrit.criteres.find((c) => c.critereId === 'a1'), algo: ecrit && ecrit.donneesAlgorithmiques.a1 });
         expect(refus).toHaveLength(0);
-        expect(r.a1).toMatchObject({ niveauSelectionne: '--', ponderation: 20 });
-        expect(r.algo.niveau).toBe('--');
+        expect(r.a1).toMatchObject({ niveauSelectionne: 'M', ponderation: 20 });   // avant #702 : '--'
+        expect(r.algo.niveau).toBe('M');                                           // avant #702 : '--'
         expect(r.algo.pourcentage).toBeCloseTo(74.5, 10);   // stocké 74.49999999999999 : le bruit flottant de 20 − 51/5000×500 voyage en base
         expect(r.noteFinale).toBeCloseTo(82.1, 10);
         expect(r.niveauFinal).toBe('M');
@@ -343,7 +343,7 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         const ec = ecDe(GRILLE_ALGO, { criteres: { c1: 'M' } });
         return Object.assign(monterMoteur({ grille: GRILLE_ALGO, ec, ecranExtra: champsAlgo('a1') }), { ec });
     }
-    it('D1 · mode CATÉGORIES, copie sans aucun code (500 mots) : le critère reste sans niveau et la note se retient ; mode SIMPLE, 0 erreur : 100 % (E)', () => {
+    it('D1 · copie sans aucun code (500 mots) — ↻ corrigé #704 : mode CATÉGORIES 100 % (E) comme le mode SIMPLE (avant : critère sans niveau, note retenue)', () => {
         const cat = monterAlgo();
         cat.ecran.eval_categories_a1.value = ''; cat.ecran.eval_mots_a1.value = '500';
         cat.win.calculerNoteAlgorithmiqueAvecCategories('a1', 20, 500, 'a1');
@@ -355,11 +355,12 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
             categories: { niveauAlgo: cat.ecran.niveau_algo_a1.textContent, critere: cat.ec.criteres.a1, note: cat.ecran.noteProduction1.textContent, hors: cat.win.porteeCalculeeCourante.criteresHorsNote.map((c) => c.critereId + ':' + c.motif) },
             simple: { niveauAlgo: simple.ecran.niveau_algo_a1.textContent, pct: simple.ecran.pct_algo_a1.textContent, note: simple.ecran.noteProduction1.textContent }
         });
-        expect(r.categories.note).toBe('--');
-        expect(r.categories.hors).toEqual(['a1:sans-niveau']);
+        expect(r.categories.note).toBe('87.2 %');   // avant #704 : '--'
+        expect(r.categories.hors).toEqual([]);      // avant #704 : ['a1:sans-niveau']
+        expect(r.categories.niveauAlgo).toBe('E');
         expect(r.simple).toEqual({ niveauAlgo: 'E', pct: '100.0', note: '87.2 %' });   // 0,8×84 + 0,2×100
     });
-    it('D2 · mode CATÉGORIES : les codes « 1;4 » donnent 87,5 % ; EFFACÉS — ↻ corrigé #698 : le résultat part, le critère redevient sans niveau, la note se retient (avant : 87,5 et M restaient, 84,7 % inchangé)', () => {
+    it('D2 · mode CATÉGORIES : les codes « 1;4 » donnent 87,5 % ; EFFACÉS — ↻ #698 puis #704 : un résultat NEUF, aucune erreur = 100 % (E), 87,2 % (avant #698 : 87,5 et M restaient ; entre #698 et #704 : sans niveau, note retenue)', () => {
         const { win, ecran, ec } = monterAlgo();
         ecran.eval_categories_a1.value = '1;4'; ecran.eval_mots_a1.value = '500';
         win.calculerNoteAlgorithmiqueAvecCategories('a1', 20, 500, 'a1');
@@ -370,9 +371,9 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         win.calculerNote();   // n'importe quel geste qui recalcule ensuite (un autre critère, l'enregistrement…)
         const r = noter('D2', { avant, apresReset, noteApres: ecran.noteProduction1.textContent, porteeApres: win.porteeCalculeeCourante.ponderationCouverte });
         expect(avant).toMatchObject({ pct: 87.5, critere: 'M', note: '84.7 %' });   // 0,8×84 + 0,2×87,5
-        expect(apresReset).toEqual({ pct: undefined, critere: undefined, niveauAlgo: '--', codes: [] });   // avant #698 : pct 87.5, critere 'M'
-        expect(r.noteApres).toBe('--');       // avant #698 : '84.7 %'
-        expect(r.porteeApres).toBe(80);       // avant #698 : 100
+        expect(apresReset).toEqual({ pct: 100, critere: 'E', niveauAlgo: 'E', codes: [] });   // avant #698 : pct 87.5, critere 'M' ; avant #704 : undefined, undefined, '--'
+        expect(r.noteApres).toBe('87.2 %');   // avant #698 : '84.7 %' ; avant #704 : '--'
+        expect(r.porteeApres).toBe(100);      // avant #704 : 80
     });
     it('D3 · mode SIMPLE : 4 erreurs / 500 mots = 80 % ; le nombre de mots EFFACÉ — ↻ corrigé #698 : le résultat part et la note se retient (avant : 80 et M restaient, 83,2 % inchangé)', () => {
         const { win, ecran, ec } = monterAlgo();
@@ -388,7 +389,7 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         expect(apres).toEqual({ pct: undefined, mots: 0, critere: undefined, niveauAlgo: '--' });   // avant #698 : pct 80, critere 'M'
         expect(r.noteApres).toBe('--');   // avant #698 : '83.2 %'
     });
-    it('D4 · l\'ENREGISTREMENT après effacement des codes — ↻ corrigé #698 : refus « incomplète », brouillon sans résultat périmé (avant : 84,7 persisté avec 87,5 en mémoire)', () => {
+    it('D4 · l\'ENREGISTREMENT après effacement des codes — ↻ #698 puis #704 : copie sans faute, enregistrée à 87,2 sur 100 % (avant #698 : 84,7 persisté avec 87,5 en mémoire ; avant #704 : refus « incomplète »)', () => {
         const nu = ecDe(GRILLE_ALGO, { criteres: { c1: 'M' } });
         const { win, ecran, ecritures, refus } = monterChaine({ grille: GRILLE_ALGO, nu });
         ecran.eval_categories_a1.value = '1;4'; ecran.eval_mots_a1.value = '500';
@@ -399,10 +400,11 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         const ecrit = derniereEcriture(ecritures, 'EVAL_NEUF');
         const r = noter('D4', { refus: refus.map((x) => x.titre), noteFinale: ecrit && ecrit.noteFinale, ponderationCouverte: ecrit && ecrit.ponderationCouverte,
             a1: ecrit && ecrit.criteres.find((c) => c.critereId === 'a1'), algo: ecrit && ecrit.donneesAlgorithmiques.a1 });
-        expect(refus.map((x) => x.titre)).toEqual(['Évaluation incomplète']);   // avant #698 : []
-        expect(ecrit).toMatchObject({ noteFinale: 84, ponderationCouverte: 80, verrouillee: false });   // le brouillon de #674 ; avant : noteFinale 84.7, portée 100, verrouillé
-        expect(r.a1).toBeUndefined();                                            // avant #698 : niveauSelectionne 'M'
-        expect(r.algo).toEqual({ codes: [], mots: 500, totalErreurs: 0 });        // avant #698 : + pourcentage 87.5, noteCalculee 17.5, niveau 'M'
+        expect(refus.map((x) => x.titre)).toEqual([]);                           // avant #704 : ['Évaluation incomplète']
+        expect(ecrit).toMatchObject({ ponderationCouverte: 100, verrouillee: true });
+        expect(ecrit.noteFinale).toBeCloseTo(87.2, 10);                          // 0,8×84 + 0,2×100 ; avant #698 : 84.7 périmé
+        expect(r.a1).toMatchObject({ niveauSelectionne: 'E' });                  // avant #698 : 'M' périmé ; avant #704 : absent
+        expect(r.algo).toMatchObject({ codes: [], mots: 500, totalErreurs: 0, pourcentage: 100, noteCalculee: 20, niveau: 'E' });   // rien des 87.5 / 17.5 / 'M' d'avant
     });
     it('D5 · le facteur de normalisation par DÉFAUT est 500 dans les trois sources du code (registre, palette, recalcul avant sauvegarde)', () => {
         const { win } = monterMoteur({ grille: GRILLE_ALGO, ec: ecDe(GRILLE_ALGO) });
@@ -423,22 +425,26 @@ describe('E · pondération et portée', () => {
         expect(r.brut).toBeCloseTo((0.5 * 95 + 0.3 * 54) / 0.8, 10);   // 79,625
         expect(r.portee).toEqual({ couverte: 80, grille: 80, incomplete: false });
     });
-    it('E2 · grille RÉÉDITÉE après coup (un 4e critère ajouté) : une évaluation complète d\'avant #674 devient « incomplète » à la relecture ; avec sa déclaration, elle ne l\'est pas mais nomme le critère', () => {
+    it('E2 · grille RÉÉDITÉE après coup (un 4e critère ajouté) — ↻ corrigé #705 : les TROIS cas concluent, l\'évaluation se juge contre les critères qu\'elle portait, et c4 est rendu à part comme « non couvert » (avant : incomplète sans déclaration, et incomplète à 100 sur 110)', () => {
         const { win } = monterMoteur({ grille: GRILLE_50_30_20, ec: ecDe(GRILLE_50_30_20) });
         const grilleReeditee = { id: 'G1', criteres: GRILLE_50_30_20.criteres.map((c) => Object.assign({}, c, { ponderation: { c1: 40, c2: 30, c3: 20 }[c.id] })).concat([{ id: 'c4', nom: 'Sources', ponderation: 10 }]) };
         const sansDeclaration = EV1(GRILLE_50_30_20); delete sansDeclaration.ponderationCouverte;
         const p1 = win.porteeDepuisEvaluation(sansDeclaration, grilleReeditee, ECHELLE_674.niveaux);
-        const p2 = win.porteeDepuisEvaluation(EV1(GRILLE_50_30_20), grilleReeditee, ECHELLE_674.niveaux);
+        const p2 = win.porteeDepuisEvaluation(EV1(GRILLE_50_30_20, { verrouillee: true }), grilleReeditee, ECHELLE_674.niveaux);
         const grilleGonflee = { id: 'G1', criteres: GRILLE_50_30_20.criteres.concat([{ id: 'c4', nom: 'Sources', ponderation: 10 }]) };
-        const p3 = win.porteeDepuisEvaluation(EV1(GRILLE_50_30_20), grilleGonflee, ECHELLE_674.niveaux);
+        const p3 = win.porteeDepuisEvaluation(EV1(GRILLE_50_30_20, { verrouillee: true }), grilleGonflee, ECHELLE_674.niveaux);
+        // Témoin : un BROUILLON qui déclare sa portée garde la règle d'avant — l'absence y veut dire « pas encore de niveau ».
+        const p4 = win.porteeDepuisEvaluation(EV1(GRILLE_50_30_20, { verrouillee: false }), grilleGonflee, ECHELLE_674.niveaux);
         const r = noter('E2', {
-            sansDeclaration: { incomplete: p1.incomplete, couverte: p1.ponderationCouverte, grille: p1.ponderationGrille, hors: p1.criteresHorsNote.map((c) => c.critereId) },
-            avecDeclaration100_grille100: { incomplete: p2.incomplete, couverte: p2.ponderationCouverte, grille: p2.ponderationGrille, hors: p2.criteresHorsNote.map((c) => c.critereId) },
-            avecDeclaration100_grille110: { incomplete: p3.incomplete, couverte: p3.ponderationCouverte, grille: p3.ponderationGrille }
+            sansDeclaration: { incomplete: p1.incomplete, couverte: p1.ponderationCouverte, grille: p1.ponderationGrille, hors: p1.criteresHorsNote.map((c) => c.critereId), nonCouverts: p1.criteresNonCouverts.map((c) => c.critereId) },
+            avecDeclaration100_grille100: { incomplete: p2.incomplete, couverte: p2.ponderationCouverte, grille: p2.ponderationGrille, hors: p2.criteresHorsNote.map((c) => c.critereId), nonCouverts: p2.criteresNonCouverts.map((c) => c.critereId) },
+            avecDeclaration100_grille110: { incomplete: p3.incomplete, couverte: p3.ponderationCouverte, grille: p3.ponderationGrille, nonCouverts: p3.criteresNonCouverts.map((c) => c.critereId) }
         });
-        expect(r.sansDeclaration).toEqual({ incomplete: true, couverte: 90, grille: 100, hors: ['c4'] });
-        expect(r.avecDeclaration100_grille100).toEqual({ incomplete: false, couverte: 100, grille: 100, hors: ['c4'] });
-        expect(r.avecDeclaration100_grille110).toEqual({ incomplete: true, couverte: 100, grille: 110 });
+        // La « grille » est désormais celle des critères PORTÉS (pondérations courantes) : 40+30+20 = 90, puis 50+30+20 = 100.
+        expect(r.sansDeclaration).toEqual({ incomplete: false, couverte: 90, grille: 90, hors: [], nonCouverts: ['c4'] });              // avant #705 : incomplète, 90 sur 100, hors [c4]
+        expect(r.avecDeclaration100_grille100).toEqual({ incomplete: false, couverte: 100, grille: 90, hors: [], nonCouverts: ['c4'] }); // avant #705 : hors [c4], grille 100
+        expect(r.avecDeclaration100_grille110).toEqual({ incomplete: false, couverte: 100, grille: 100, nonCouverts: ['c4'] });          // avant #705 : incomplète, 100 sur 110
+        expect({ incomplete: p4.incomplete, grille: p4.ponderationGrille, nonCouverts: p4.criteresNonCouverts }).toEqual({ incomplete: true, grille: 110, nonCouverts: [] });
     });
     it('E3 · une évaluation VIDE sur une grille (aucun niveau) n\'est pas incomplète : 0 est écrit avec portée 0, verrouillé — le cas « changer de grille puis enregistrer »', () => {
         const nu = ecDe(GRILLE_50_30_20, { criteres: {} });

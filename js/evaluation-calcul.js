@@ -124,20 +124,8 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
     const noteCalculee = resFormuleMorte.note;
     const pctFinal = resFormuleMorte.pctBorne;
 
-    // Déterminer le niveau IDME selon l'échelle
-    const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync(cle('echellesTemplates'), []);
-    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
-
-    let niveauIDME = '--';
-    if (echelleSelectionnee && echelleSelectionnee.niveaux) {
-        // Exclure le niveau "0" (Non recevable) — réservé à l'intégrité académique
-        const niveau = echelleSelectionnee.niveaux.find(n => {
-            if (n.code === '0' || n.code === 0) return false;
-            return pctFinal >= n.min && pctFinal <= n.max;
-        });
-        niveauIDME = niveau ? niveau.code : '--';
-    }
+    // #701 / #702 — le niveau par la règle unique ; `undefined` quand rien ne se déduit.
+    const niveauIDME = _determinerNiveauIDMEAlgo(pctFinal);
 
     // Afficher les résultats (guards si éléments pas encore dans le DOM)
     var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
@@ -145,11 +133,11 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
     var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
-    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
+    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
-    // Sauvegarder dans evaluationEnCours
-    evaluationEnCours.criteres[critereId] = niveauIDME;
+    // Sauvegarder dans evaluationEnCours (#702 : jamais « -- »)
+    _poserNiveauCalculeAlgo(critereId, niveauIDME);
 
     // Sauvegarder les données algorithmiques séparément pour pouvoir les recharger
     if (!evaluationEnCours.donneesAlgorithmiques) {
@@ -471,8 +459,90 @@ function _critereDeGrille(critereId) {
     return null;
 }
 
+/**
+ * #686 — Le critère dont les ÉNONCÉS se lisent : celui de la grille, sinon le nom que
+ * l'évaluation enregistrée porte (`criteres[].critereNom`). Sans ce repli, un critère qui
+ * s'appelle « Français écrit » recevait les mots du modèle générique dès que sa grille
+ * était introuvable. ⚠ Pour les énoncés SEULEMENT : la formule garde son propre repli
+ * (`_critereFormulePourCalcul`), qui ne doit pas recevoir un objet sans paramètres.
+ * L'évaluation enregistrée est repérée par `idModification`, posé sur `window` à l'ouverture.
+ */
+function _critereEnoncesPour(critereId) {
+    const deGrille = _critereDeGrille(critereId);
+    if (deGrille || !window.enoncesAlgo || typeof window.enoncesAlgo.critereAlgorithmiqueOuNomme !== 'function') return deGrille;
+    const idModification = (window.evaluationEnCours && window.evaluationEnCours.idModification)
+        || (evaluationEnCours && evaluationEnCours.idModification);
+    if (!idModification) return null;
+    const enregistree = (db.getSync(cle('evaluationsSauvegardees'), []) || []).find(e => e && e.id === idModification);
+    return window.enoncesAlgo.critereAlgorithmiqueOuNomme(null, enregistree, critereId);
+}
+
 function _critereFormulePourCalcul(critereId, facteurRecu) {
     return _critereDeGrille(critereId) || { facteurNormalisation: facteurRecu };
+}
+
+/**
+ * #701 / #702 — LE NIVEAU D'UN POURCENTAGE, UNE SEULE RÈGLE POUR LES TROIS CHEMINS
+ * (note globale, critère algorithmique, critère analytique à points).
+ *
+ * CE QUI EXISTAIT (audit du moteur, constats B-1 et B-2). Cinq copies de
+ * `pourcentage >= n.min && pourcentage <= n.max`, et trois réponses différentes quand
+ * le pourcentage tombait ENTRE deux bornes (74,5 entre « 60-74 » et « 75-89 ») : la
+ * note globale prenait le niveau le plus proche ; le critère algorithmique écrivait
+ * « -- » — et ce « -- », vrai pour un `if (niveau)`, entrait en base comme
+ * `niveauSelectionne`, ouvrait la clé de cartouche `a1_--` et s'imprimait sur le PDF
+ * de l'élève ; le critère analytique n'avait aucun niveau.
+ *
+ * LA RÈGLE (décision de Grégoire, 17 sept. 2026, 13 h 42) : le pourcentage est
+ * ARRONDI À L'ENTIER avant la recherche (74,5 → 75 → niveau supérieur ; 74,4 → 74).
+ * Des bornes entières (« 60-74 / 75-89 ») ou en « ,99 » (« 65-74,99 / 75-84,99 »)
+ * n'ont alors plus aucun trou. Écartés par lui : imposer des bornes contiguës dans
+ * l'éditeur d'échelle ; descendre au niveau inférieur à égalité de distance.
+ *
+ * ⚠ L'arrondi sert à CHERCHER LE NIVEAU, jamais à noter : la note garde son
+ * pourcentage exact partout (`noteCalculeeCourante`, `donneesAlgorithmiques`).
+ *
+ * ⚠ Le premier arrondi, au millionième, retire le bruit de la virgule flottante : une
+ * moyenne pondérée qui VAUT 74,5 peut sortir 74,49999999999999 du calcul, et
+ * tomberait d'un niveau pour une raison que personne ne peut lire à l'écran.
+ *
+ * ▣ TROU RÉSIDUEL (échelle aux bornes espacées, « 60-70 / 75-89 » devant 72) : le
+ * niveau le plus proche, par la distance au MILIEU de plage — la règle que la note
+ * globale appliquait déjà, reprise telle quelle et étendue aux deux autres chemins
+ * (décision de Cowork, consigne du 19 sept., en ligne avec #701). À égalité, le
+ * premier niveau dans l'ordre de l'échelle, comme avant.
+ *
+ * @param {number} pourcentage - 0-100, non arrondi
+ * @param {Array}  niveaux     - les niveaux de l'échelle (code, min, max)
+ * @param {{sansNiveauZero?: boolean}} [options] - le niveau « 0 » (non recevable,
+ *   réservé à l'intégrité académique) ne se déduit jamais d'un chiffre : les chemins
+ *   algorithmique et analytique l'écartent, comme avant.
+ * @returns {string|undefined} le code du niveau, ou `undefined` quand rien ne se
+ *   déduit (pas de pourcentage, pas de niveau utilisable). ⛔ Jamais « -- ».
+ */
+function niveauDuPourcentage(pourcentage, niveaux, options) {
+    if (pourcentage === null || pourcentage === undefined || pourcentage === '') return undefined;
+    const p = Number(pourcentage);
+    if (isNaN(p) || !Array.isArray(niveaux)) return undefined;
+    const sansZero = !!(options && options.sansNiveauZero);
+    const candidats = niveaux.filter(n => n
+        && !(sansZero && (n.code === '0' || n.code === 0))
+        && !isNaN(Number(n.min)) && !isNaN(Number(n.max)));
+    if (candidats.length === 0) return undefined;
+
+    const entier = Math.round(Math.round(p * 1e6) / 1e6);
+    const exact = candidats.find(n => entier >= Number(n.min) && entier <= Number(n.max));
+    if (exact) return exact.code;
+
+    let plusProche = candidats[0];
+    let distMin = Infinity;
+    candidats.forEach(n => {
+        const dist = Math.abs(entier - (Number(n.min) + Number(n.max)) / 2);
+        if (dist < distMin) { distMin = dist; plusProche = n; }
+    });
+    console.warn('[niveauDuPourcentage] ' + entier + ' % ne tombe dans aucune plage : niveau le plus proche, '
+        + plusProche.code + ' [' + plusProche.min + '-' + plusProche.max + ']');
+    return plusProche.code;
 }
 
 function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderation, mots, facteur, critereId) {
@@ -495,16 +565,31 @@ function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderati
     return { sommePonderee, noteCalculee: res.note, pctFinal: res.pctBorne, applicable: true };
 }
 
+/**
+ * Le niveau d'un critère algorithmique, par la règle unique (`niveauDuPourcentage`).
+ * ⮕ L'échelle se résout comme au calcul de la note (`resoudreEchelleEvaluation`, #697) :
+ * ce site ne lisait que `echellesTemplates`, et rendait « -- » sous une échelle de
+ * pratique (`pratique-<id>`) que la note globale, elle, savait lire.
+ * Rend `undefined` quand rien ne se déduit — jamais « -- » (#702).
+ */
 function _determinerNiveauIDMEAlgo(pctFinal) {
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync(cle('echellesTemplates'), []);
-    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
-    if (!echelleSelectionnee || !echelleSelectionnee.niveaux) return '--';
-    const niveau = echelleSelectionnee.niveaux.find(n => {
-        if (n.code === '0' || n.code === 0) return false;
-        return pctFinal >= n.min && pctFinal <= n.max;
-    });
-    return niveau ? niveau.code : '--';
+    const echelleSelectionnee = resoudreEchelleEvaluation(echelleId);
+    if (!echelleSelectionnee || !echelleSelectionnee.niveaux) return undefined;
+    return niveauDuPourcentage(pctFinal, echelleSelectionnee.niveaux, { sansNiveauZero: true });
+}
+
+/**
+ * #702 — LE NIVEAU CALCULÉ ENTRE DANS L'ÉVALUATION EN COURS, OU N'Y ENTRE PAS. Les trois
+ * calculs algorithmiques écrivaient `criteres[critereId] = niveau` même quand le niveau
+ * valait « -- » : les collecteurs de `criteres[]` testent `if (niveau)`, « -- » est vrai,
+ * et il partait en base puis au PDF. Sans niveau déductible, l'entrée est retirée — par
+ * la règle de #698 (un niveau choisi à la main au menu reste).
+ */
+function _poserNiveauCalculeAlgo(critereId, niveau) {
+    if (!evaluationEnCours.criteres) evaluationEnCours.criteres = {};
+    if (niveau) evaluationEnCours.criteres[critereId] = niveau;
+    else _retirerNiveauCalculeAlgo(critereId);
 }
 
 function _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, niveauIDME) {
@@ -513,9 +598,9 @@ function _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, ni
     const nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
-    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
+    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
-    evaluationEnCours.criteres[critereId] = niveauIDME;
+    _poserNiveauCalculeAlgo(critereId, niveauIDME);
     const selectAlgoCat = document.getElementById(`eval_${critereId}`);
     if (selectAlgoCat && selectAlgoCat.value) {
         selectAlgoCat.value = '';
@@ -547,7 +632,7 @@ function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePond
     // ⚠ LA MENTION PONDÉRÉE RESTE CALCULÉE ICI, pas dans le registre : c'est
     // une donnée du calcul, pas un choix de rédaction. Elle arrive comme le
     // jeton {points}, avec son espace de tête, exactement là où elle était.
-    const critereEnonces = _critereDeGrille(critereId);
+    const critereEnonces = _critereEnoncesPour(critereId);   // #686
     const mentionPoints = (scDominant && scDominant.retroaction && Math.abs(sommePonderee - totalErreurs) > 0.01)
         ? ` (${sommePonderee.toFixed(1)} points)`
         : '';
@@ -583,7 +668,20 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
     document.getElementById(`mots_formule_${critereId}`).textContent = mots;
 
-    if (mots === 0 || totalErreurs === 0) {
+    // #704 (décision de Grégoire, 17 sept. 2026) — ZÉRO ERREUR DONNE LA NOTE COMPLÈTE,
+    // dans les deux modes. La garde réunissait `mots === 0 || totalErreurs === 0` : une
+    // copie sans faute ne pouvait être notée qu'en choisissant le niveau au menu, alors
+    // qu'en mode simple 0 erreur sur 500 mots rendait 100 %. Seule la copie SANS TEXTE
+    // reste sans résultat ; la formule, elle, sait déjà quoi faire de zéro erreur.
+    // ⚠ SAUF SI UN NIVEAU EST CHOISI À LA MAIN AU MENU DU CRITÈRE. Jusqu'ici, c'était la
+    // seule façon de noter une copie sans faute en mode catégories (et c'est le geste d'un
+    // jeton de reprise ciblée, #698 C) : le calcul, qui remet le menu à vide, remplacerait
+    // ce choix par 100 % à la première réouverture suivie d'un enregistrement. Le choix
+    // reste ; revenu à « Utiliser le niveau calculé », le critère reçoit la note complète au
+    // prochain calcul (une frappe dans la saisie, ou l'enregistrement, qui recalcule d'abord).
+    const menuCritere = document.getElementById(`eval_${critereId}`);
+    const niveauChoisiALaMain = !!(menuCritere && menuCritere.value);
+    if (mots === 0 || (totalErreurs === 0 && niveauChoisiALaMain)) {
         _resetAffichageAlgoCategories(critereId);
         // Fix #110 v3 (restauré 24 mai 2026, perdu lors du refactoring du 20 mai) :
         // préserver mots+codes+totalErreurs même quand le calcul ne tourne pas,
@@ -617,39 +715,36 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     const { codeDominant, maxFreq } = _trouverCodeDominant(codesSousCriteres);
 
+    // #704 — SANS AUCUN CODE, IL N'Y A PAS DE CATÉGORIE DOMINANTE, MAIS IL Y A UNE NOTE.
+    // Cette branche (`codeDominant === null`) était inatteignable tant que la garde du
+    // dessus sortait sur zéro erreur (mesuré le 1er sept., #673) ; elle écrivait l'amorce
+    // « Saisissez les codes… » par-dessus le div. Depuis #704 elle est le chemin d'une copie
+    // sans faute : elle reçoit la même rétroaction que le mode simple (l'énoncé `decompte`
+    // du gabarit, à zéro erreur, et la projection), et sa mémoire est écrite comme les
+    // autres — sans `pourcentage` en mémoire, le critère ne compterait pas dans la note.
+    // ⮕ L'amorce n'est donc plus PRODUITE nulle part ; elle reste dans la liste de
+    // reconnaissance du PDF (`AMORCES_DE_SAISIE`) : des évaluations enregistrées la portent.
+    const scDominant = (codeDominant === null) ? null : (sousCriteres.find(s => s.code === codeDominant) || null);
     if (codeDominant === null) {
         document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
-        // ⚠ #673 — BRANCHE INATTEIGNABLE, MESURÉE le 1er septembre 2026, PAS retirée.
-        // `_trouverCodeDominant` ne rend `null` que sur une liste VIDE ; une liste vide
-        // donne `totalErreurs === 0`, déjà intercepté par la garde du dessus, qui sort
-        // par `return`. Aucun chemin n'arrive donc ici.
-        // ⮕ Ce qui explique qu'un écrasement inconditionnel du div ait pu survivre ici
-        // sans jamais détruire le texte de personne : il ne s'exécute pas.
-        // ⛔ NE PAS retirer ce bloc à la légère : sa chaîne est la SEULE occurrence de la
-        // troisième amorce dans `js/`, et la sentinelle statique de #672 l'exige présente.
-        // La retirer demande de traiter les deux ensemble — et de garder la chaîne dans la
-        // liste de reconnaissance, puisque des évaluations ENREGISTRÉES la portent encore.
-        const commDiv = document.getElementById(`comm_${critereId}`);
-        if (commDiv) commDiv.textContent = 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)';
     } else {
-        const scDominant = sousCriteres.find(s => s.code === codeDominant);
         const nomDominant = scDominant ? scDominant.nom : `Code ${codeDominant}`;
         document.getElementById(`cat_dominante_${critereId}`).textContent =
             `${nomDominant} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''} du code ${codeDominant})`;
+    }
 
-        const retroaction = _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant);
-        const commDiv = document.getElementById(`comm_${critereId}`);
-        if (commDiv) commDiv.textContent = retroaction;
+    const retroaction = _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant);
+    const commDiv = document.getElementById(`comm_${critereId}`);
+    if (commDiv) commDiv.textContent = retroaction;
 
-        _sauvegarderDonneesAlgo(critereId, {
-            codes: codesSousCriteres, mots, totalErreurs, sommePonderee,
-            noteCalculee, pourcentage: pctFinal, niveau: niveauIDME, retroaction
-        });
+    _sauvegarderDonneesAlgo(critereId, {
+        codes: codesSousCriteres, mots, totalErreurs, sommePonderee,
+        noteCalculee, pourcentage: pctFinal, niveau: niveauIDME, retroaction
+    });
 
-        if (scDominant && scDominant.retroaction) {
-            const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
-            if (retroDiv) retroDiv.classList.add('u-hide');
-        }
+    if (scDominant && scDominant.retroaction) {
+        const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
+        if (retroDiv) retroDiv.classList.add('u-hide');
     }
 
     calculerNote();
@@ -711,20 +806,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     const pctFinal = resFormule.pctBorne;
     _afficherFormuleAlgo(critereId, critereFormuleAlgo, { ponderation, erreurs, mots });
 
-    // Déterminer le niveau IDME selon l'échelle
-    const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync(cle('echellesTemplates'), []);
-    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
-
-    let niveauIDME = '--';
-    if (echelleSelectionnee && echelleSelectionnee.niveaux) {
-        // Exclure le niveau "0" (Non recevable) — réservé à l'intégrité académique
-        const niveau = echelleSelectionnee.niveaux.find(n => {
-            if (n.code === '0' || n.code === 0) return false;
-            return pctFinal >= n.min && pctFinal <= n.max;
-        });
-        niveauIDME = niveau ? niveau.code : '--';
-    }
+    // #701 / #702 — le niveau par la règle unique ; `undefined` quand rien ne se déduit.
+    const niveauIDME = _determinerNiveauIDMEAlgo(pctFinal);
 
     // Afficher les résultats (guards si éléments pas encore dans le DOM)
     var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
@@ -732,7 +815,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
     if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
     if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
-    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME;
+    if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
     // Construire la rétroaction générique simple
@@ -740,7 +823,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     // celle que le gabarit de la grille porte, et elle ne nomme aucune
     // discipline que son auteur·e n'a pas écrite.
     let retroactionGenerique = window.enoncesAlgo.enonce(
-        _critereDeGrille(critereId), 'decompte', { erreurs: erreurs, mots: mots });
+        _critereEnoncesPour(critereId), 'decompte', { erreurs: erreurs, mots: mots });   // #686
 
     // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
     const retroactionEUF = _projectionEUF(critereId, erreurs, mots);
@@ -774,8 +857,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
         retroaction: retroactionGenerique
     };
 
-    // Sauvegarder le critère dans evaluationEnCours.criteres avec le niveau
-    evaluationEnCours.criteres[critereId] = niveauIDME;
+    // Sauvegarder le critère dans evaluationEnCours.criteres avec le niveau (#702 : jamais « -- »)
+    _poserNiveauCalculeAlgo(critereId, niveauIDME);
 
     // Réinitialiser le sélecteur manuel pour que calculerNote() utilise le % exact algorithmique
     const selectAlgo = document.getElementById(`eval_${critereId}`);
@@ -899,19 +982,25 @@ function calculerPortee(criteresGrille, niveauDe, valeurDe) {
  * comme au calcul. Sinon, la valeur ponctuelle du niveau choisi, par la règle unique
  * de `echelles.js` (`valeurNumeriqueDuNiveau`, #525/#527) : jamais de milieu de plage.
  *
+ * ▣ #705 (décision de Grégoire, 17 sept. 2026, 13 h 43) — CHAQUE ÉVALUATION SE JUGE CONTRE
+ * SA GRILLE : les critères qu'elle portait. Cette fonction parcourait la grille COURANTE ;
+ * un critère ajouté après coup rendait « incomplètes » des évaluations déjà remises, et
+ * leur PDF refusait de conclure (constat E-2 de l'audit du moteur, trois cas). Un critère
+ * de la grille que l'évaluation ne porte pas sort donc de la référence : il est rendu à
+ * part (`criteresNonCouverts`), signalé à l'enseignant·e, et n'invalide rien — même
+ * règle que « conserver et signaler » (#652). Écartés par lui : garder la grille courante
+ * comme référence avec une mention ; rouvrir les évaluations pour les compléter.
+ * ⮕ « AJOUTÉ DEPUIS » SE MESURE QUAND C'EST POSSIBLE, ET SE PRÉSUME SINON — voir
+ * `criteresAjoutesDepuis`. Un critère né AVANT l'évaluation et resté sans niveau n'est pas
+ * un ajout : c'est le défaut de #674 (95 % sur 80 % de la grille), et il reste « hors note ».
+ *
  * @param {Object} evaluation     - l'évaluation enregistrée
  * @param {Object} grille         - sa grille, résolue par l'appelant dans le bon trimestre
  * @param {Array}  niveauxEchelle - les niveaux BRUTS de son échelle (avec `valeurCalcul`)
- * @returns {Object} même forme que `calculerPortee`
+ * @returns {Object} même forme que `calculerPortee`, plus `criteresNonCouverts`
  */
 function porteeDepuisEvaluation(evaluation, grille, niveauxEchelle) {
-    const parId = {};
-    const parNom = {};
-    (Array.isArray(evaluation && evaluation.criteres) ? evaluation.criteres : []).forEach(c => {
-        if (!c) return;
-        if (c.critereId) parId[c.critereId] = c;
-        if (c.critereNom) parNom[c.critereNom] = c;
-    });
+    const { parId, parNom } = _criteresPortesPar(evaluation);
     const valeurs = {};
     (Array.isArray(niveauxEchelle) ? niveauxEchelle : []).forEach(n => {
         if (!n) return;
@@ -922,8 +1011,14 @@ function porteeDepuisEvaluation(evaluation, grille, niveauxEchelle) {
     });
     const algo = (evaluation && evaluation.donneesAlgorithmiques) || {};
 
+    const declaree = !!evaluation && typeof evaluation.ponderationCouverte === 'number';
+    const nonCouverts = criteresAjoutesDepuis(evaluation, grille);
+    const idsNonCouverts = new Set(nonCouverts.map(c => c.critereId));
+    const reference = ((grille && Array.isArray(grille.criteres)) ? grille.criteres : [])
+        .filter(c => c && !idsNonCouverts.has(c.id));
+
     const portee = calculerPortee(
-        (grille && Array.isArray(grille.criteres)) ? grille.criteres : [],
+        reference,
         critere => {
             // Lot 2 — même règle qu'à l'écran : les points l'emportent quand ils existent.
             const pts = _pointsAnalytiquesDe(evaluation, critere);
@@ -940,11 +1035,83 @@ function porteeDepuisEvaluation(evaluation, grille, niveauxEchelle) {
         }
     );
 
-    if (evaluation && typeof evaluation.ponderationCouverte === 'number') {
+    if (declaree) {
         portee.ponderationCouverte = evaluation.ponderationCouverte;
         portee.incomplete = portee.commencee && (portee.ponderationCouverte < portee.ponderationGrille - 0.001);
     }
+    portee.criteresNonCouverts = nonCouverts;
     return portee;
+}
+
+/** Les entrées de `evaluation.criteres[]`, par identifiant et par nom de critère. */
+function _criteresPortesPar(evaluation) {
+    const parId = {};
+    const parNom = {};
+    (Array.isArray(evaluation && evaluation.criteres) ? evaluation.criteres : []).forEach(c => {
+        if (!c) return;
+        if (c.critereId) parId[c.critereId] = c;
+        if (c.critereNom) parNom[c.critereNom] = c;
+    });
+    return { parId: parId, parNom: parNom };
+}
+
+/**
+ * La date de naissance d'un critère, lue dans son identifiant : `genererIdUnique('CR_')`
+ * (main.js) écrit `CR_<millisecondes>_<compteur>_<hex>` ; avant lui, `CR<millisecondes>`
+ * — c'est la forme de TOUS les critères d'A2025 (mesuré sur le pack démo le 19 sept. 2026 :
+ * sans elle, deux évaluations où un critère avait été sauté passaient pour antérieures à son
+ * ajout). Rend `null` quand l'identifiant ne porte pas de date (critères semés
+ * `CR_COMPREHENSION`, grilles importées d'ailleurs).
+ */
+function _naissanceDuCritere(critere) {
+    const m = /^CR_?(\d{12,14})(?:_|$)/.exec(String((critere && critere.id) || ''));
+    return m ? Number(m[1]) : null;
+}
+
+/** La dernière fois que les critères de l'évaluation ont été écrits, ou `null`. */
+function _dateDesCriteresDe(evaluation) {
+    const dates = [evaluation && evaluation.dateEvaluation, evaluation && evaluation.dateModification]
+        .map(d => d ? new Date(d).getTime() : NaN).filter(t => !isNaN(t));
+    return dates.length ? Math.max.apply(null, dates) : null;
+}
+
+/**
+ * #705 — LES CRITÈRES DE LA GRILLE AJOUTÉS APRÈS L'ÉVALUATION : ceux qu'elle ne porte pas
+ * (ni entrée dans `criteres[]`, par identifiant ou par nom, ni points analytiques) ET qui
+ * n'existaient pas quand elle a été faite. Le jumeau inversé de `criteresHorsGrille` (#652,
+ * evaluation-chargement.js), qui rend les critères évalués que la grille ne porte plus.
+ *
+ * ▣ QUAND LA DATE PARLE, ELLE TRANCHE. L'identifiant d'un critère porte l'instant de sa
+ * création ; l'évaluation porte sa date. Né après : ajouté depuis, à coup sûr. Né avant et
+ * sans niveau : il était dans la grille ce jour-là et a été sauté — ce n'est pas un ajout.
+ * ▣ QUAND ELLE NE DIT RIEN (identifiant sans date, évaluation sans date), la règle arrêtée
+ * par Grégoire s'applique : les critères que l'évaluation portait font sa grille, l'absent
+ * est présumé ajouté depuis. ⚠ SAUF POUR UN BROUILLON QUI DÉCLARE SA PORTÉE
+ * (`verrouillee === false`, la convention de `pratique-registre.js`) : là, « pas encore de
+ * niveau » est la lecture ordinaire de l'absence, et la déclaration se compare à la grille.
+ * ⚠ CONSÉQUENCE ASSUMÉE de la présomption : une évaluation d'avant #674 (sans déclaration)
+ * où un critère SANS DATE avait été sauté conclut, elle aussi — rien en base ne dit quelle
+ * était sa grille ce jour-là.
+ *
+ * Un critère de pondération nulle ne peut rien déplacer : il n'est pas signalé. Une
+ * évaluation VIDE ne porte rien : aucun critère n'est « ajouté depuis », elle n'est pas
+ * commencée. Du TEXTE, jamais du HTML : `nom` est une donnée utilisateur (règle 1).
+ */
+function criteresAjoutesDepuis(evaluation, grille) {
+    if (!evaluation || !grille || !Array.isArray(grille.criteres)) return [];
+    const { parId, parNom } = _criteresPortesPar(evaluation);
+    const porte = c => !!(parId[c.id] || parNom[c.nom]) || _pointsAnalytiquesDe(evaluation, c) !== undefined;
+    if (!grille.criteres.some(c => c && porte(c))) return [];
+    const dateCriteres = _dateDesCriteresDe(evaluation);
+    const brouillonDeclare = typeof evaluation.ponderationCouverte === 'number' && evaluation.verrouillee === false;
+    return grille.criteres
+        .filter(c => {
+            if (!c || porte(c) || !((Number(c.ponderation) || 0) > 0)) return false;
+            const naissance = _naissanceDuCritere(c);
+            if (naissance !== null && dateCriteres !== null) return naissance > dateCriteres;
+            return !brouillonDeclare;
+        })
+        .map(c => ({ critereId: c.id, nom: c.nom || c.id, ponderation: Number(c.ponderation) || 0 }));
 }
 
 /**
@@ -1164,17 +1331,16 @@ function _pourcentageDesPoints(critere, points) {
  * Ce niveau ouvre la cartouche (clé `critereId_niveau`) et fait entrer le critère dans
  * `evaluation.criteres[]` ; il n'entre PAS dans la note, que les points font seuls
  * (`_valeurCritereEnCours`, `porteeDepuisEvaluation`).
- * Rend `undefined` sans points, sans pondération, ou quand aucune plage ne contient le
- * pourcentage (échelle à trous) : la note compte alors les points, sans niveau.
+ * Rend `undefined` sans points ou sans pondération.
+ * ⮕ #701 (19 sept. 2026) : la recherche passe par la règle unique `niveauDuPourcentage` —
+ * pourcentage arrondi à l'entier, et niveau le plus proche sur une échelle aux bornes
+ * espacées. Avant, un pourcentage tombé dans un trou laissait le critère sans niveau,
+ * donc sans cartouche ; la note, elle, n'a jamais dépendu de ce niveau.
  */
 function niveauDeduitDesPoints(critere, points, niveaux) {
     const pct = (typeof points === 'number' && !isNaN(points)) ? _pourcentageDesPoints(critere, points) : undefined;
     if (pct === undefined || !Array.isArray(niveaux)) return undefined;
-    const niveau = niveaux.find(n => {
-        if (n.code === '0' || n.code === 0) return false;
-        return pct >= Number(n.min) && pct <= Number(n.max);
-    });
-    return niveau ? niveau.code : undefined;
+    return niveauDuPourcentage(pct, niveaux, { sansNiveauZero: true });
 }
 
 /**
@@ -1363,26 +1529,9 @@ function calculerNote() {
             }
         }
 
-        // Déterminer le niveau global selon l'échelle
-        const niveauFinal = niveaux.find(n => {
-            return pourcentage >= n.min && pourcentage <= n.max;
-        });
-
-        if (niveauFinal) {
-            niveauGlobal = niveauFinal.code;
-        } else if (niveaux.length > 0) {
-            // Fallback : si le pourcentage ne tombe dans aucune plage exacte
-            // (bornes non contiguës ou arrondis), prendre le niveau le plus proche
-            var plusProche = niveaux[0];
-            var distMin = Infinity;
-            niveaux.forEach(function(n) {
-                var mid = (n.min + n.max) / 2;
-                var dist = Math.abs(pourcentage - mid);
-                if (dist < distMin) { distMin = dist; plusProche = n; }
-            });
-            niveauGlobal = plusProche.code;
-            console.warn('[calculerNote] Fallback niveau : ' + pourcentage.toFixed(1) + '% → ' + plusProche.code + ' (aucune plage exacte, plus proche de [' + plusProche.min + '-' + plusProche.max + '])');
-        }
+        // #701 — le niveau global par la règle unique : pourcentage arrondi à l'entier,
+        // puis niveau le plus proche s'il reste un trou. Le repli vivait ici, seul.
+        niveauGlobal = niveauDuPourcentage(pourcentage, niveaux) || '--';
 
     }
 
@@ -1529,6 +1678,7 @@ window.calculerNote = calculerNote;
 window._pointsAnalytiquesDe = _pointsAnalytiquesDe;
 window._pourcentageDesPoints = _pourcentageDesPoints;
 window.niveauDeduitDesPoints = niveauDeduitDesPoints;   // lot 3 — le chiffre trouve son niveau
+window.niveauDuPourcentage = niveauDuPourcentage;       // #701 — la règle unique, éprouvée par sa sentinelle
 window.obtenirCouleurNiveau = obtenirCouleurNiveau;
 
 // Restauration fix #110 v3 (24 mai 2026) — appelé par sauvegarderEvaluation
@@ -1542,6 +1692,7 @@ window._forcerRecalculAlgorithmiqueAvantSauvegarde = _forcerRecalculAlgorithmiqu
 // l'export. Sentinelle : `tests/unit/sentinelle-674-*.test.js`.
 window.calculerPortee = calculerPortee;
 window.porteeDepuisEvaluation = porteeDepuisEvaluation;
+window.criteresAjoutesDepuis = criteresAjoutesDepuis;   // #705 — lue par evaluation-chargement.js (le signalement à l'écran)
 window.verifierPorteeAvantSauvegarde = verifierPorteeAvantSauvegarde;
 window.texteCriteresHorsNote = texteCriteresHorsNote;
 // #697 — la même résolution d'échelle pour le calcul, la porte et l'auto-save de création.

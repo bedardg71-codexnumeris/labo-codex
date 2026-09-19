@@ -109,7 +109,7 @@
             // s'imprimait tel quel sur le PDF remis à l'élève : un enseignant de
             // chimie voyait son critère rebaptisé. Le nom existe déjà dans la
             // grille, il n'y avait rien à créer pour aller le chercher.
-            errorsLabel: libelleErreurs(grille),
+            errorsLabel: libelleErreurs(grille, evaluation),
             bilan:     construireBilan(evaluation, grille, echelle, stats),
             // Drapeau « vue recalculée a posteriori » (#347). Vrai quand des
             // artefacts ultérieurs sont entrés dans le portfolio agrégé depuis
@@ -615,10 +615,11 @@
      * Sans critère algorithmique lisible, le registre rend un libellé neutre —
      * jamais le nom d'une discipline.
      */
-    function libelleErreurs(grille) {
+    function libelleErreurs(grille, evaluation) {
         if (typeof window === 'undefined' || !window.enoncesAlgo) return '';
+        // #686 — grille introuvable : le nom que l'évaluation porte, plutôt que le libellé neutre.
         return window.enoncesAlgo.libelleCritere(
-            window.enoncesAlgo.critereAlgorithmique(grille)
+            window.enoncesAlgo.critereAlgorithmiqueOuNomme(grille, evaluation)
         );
     }
 
@@ -816,8 +817,9 @@
                 // Les deux lisent maintenant le MÊME énoncé `concentre` du même
                 // gabarit ; deux chaînes jumelles pouvaient diverger, un registre
                 // partagé ne le peut plus.
-                const phraseConcentre = window.enoncesAlgo.enonce(
-                    window.enoncesAlgo.critereAlgorithmique(grille), 'concentre', {});
+                // #686 — grille introuvable : le nom que l'évaluation porte, plutôt que rien.
+                const critereAlgo = window.enoncesAlgo.critereAlgorithmiqueOuNomme(grille, evaluation);
+                const phraseConcentre = window.enoncesAlgo.enonce(critereAlgo, 'concentre', {});
                 messageGlobal = `Tous les critères sont maîtrisés.${phraseConcentre ? ` ${phraseConcentre}` : ''} (${totErr} erreur${totErr > 1 ? 's' : ''} annotée${totErr > 1 ? 's' : ''}).`;
             } else {
                 // Garde length > 0 : .every() retourne true sur tableau vide (vacuité JS).
@@ -859,7 +861,7 @@
 
     function construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille) {
         const tampons = construireTamponsRecurrents(stats);
-        const francais = construireFrancaisResume(stats, grille);
+        const francais = construireFrancaisResume(stats, grille, evaluation);
         const progression = construireProgressionResume(evaluation, evalPrecedente, historique);
         const ameliorations = construireAmeliorations(evaluation, evalPrecedente);
         const force = construireForce(evaluation, echelle);
@@ -926,7 +928,7 @@
      * Elle porte maintenant le nom du critère, exactement comme l'en-tête de la
      * section du PDF : les deux disent le même mot du même décompte.
      */
-    function construireFrancaisResume(stats, grille) {
+    function construireFrancaisResume(stats, grille, evaluation) {
         if (!stats || !stats.totalErreursFr) return '';
         const codes = (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
         const total = stats.totalErreursFr;
@@ -936,7 +938,7 @@
         // un identifiant inconnu ne nomme rien, comme hier.
         const meta = (principal && codes) ? codes.code(grille, principal) : null;
         const nomPrinc = (meta && !meta.inconnu) ? meta.nom : '';
-        const titre = libelleErreurs(grille);
+        const titre = libelleErreurs(grille, evaluation);
         return `${titre} : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
     }
 

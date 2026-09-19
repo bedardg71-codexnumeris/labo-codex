@@ -117,6 +117,47 @@ function critereAlgorithmique(grille) {
     return null;
 }
 
+/**
+ * #686 — LE CRITÈRE ALGORITHMIQUE DE LA GRILLE, SINON CELUI QUE L'ÉVALUATION NOMME.
+ *
+ * Quand la grille d'une évaluation est introuvable (les grilles désappariées d'un ancien
+ * trimestre, une grille supprimée), les appelants passaient `null` au registre : sans
+ * `nom`, `_nomDitFrancais` répond non, et un critère qui S'APPELLE « Français écrit »
+ * recevait les mots du modèle générique — sur le PDF de l'élève aussi. Le nom existe
+ * pourtant ailleurs : l'évaluation enregistrée le porte (`criteres[].critereNom`, écrit
+ * à chaque sauvegarde). On le LIT ; aucune grille n'est réécrite, et le registre ne
+ * change pas de règle — il reçoit un `{ nom }` au lieu de rien.
+ *
+ * ▣ Avec `critereId` : ce critère-là. Sans : le critère algorithmique de l'évaluation,
+ * reconnu à ce que `donneesAlgorithmiques` porte une entrée à son identifiant (le
+ * premier, comme `critereAlgorithmique`).
+ *
+ * @returns {object|null} le critère de la grille, ou `{ nom }`, ou `null`.
+ */
+function critereAlgorithmiqueOuNomme(grille, evaluation, critereId) {
+    var criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
+    if (critereId) {
+        for (var i = 0; i < criteres.length; i++) {
+            if (criteres[i] && criteres[i].id === critereId) return criteres[i];
+        }
+    } else {
+        var deGrille = critereAlgorithmique(grille);
+        if (deGrille) return deGrille;
+    }
+    if (grille) return null;   // la grille est là et ne porte pas ce critère : rien à deviner
+
+    var entrees = (evaluation && Array.isArray(evaluation.criteres)) ? evaluation.criteres : [];
+    var algo = (evaluation && evaluation.donneesAlgorithmiques) || {};
+    for (var j = 0; j < entrees.length; j++) {
+        var e = entrees[j];
+        if (!e || !e.critereNom) continue;
+        if (critereId ? e.critereId === critereId : Object.prototype.hasOwnProperty.call(algo, e.critereId)) {
+            return { nom: e.critereNom };
+        }
+    }
+    return null;
+}
+
 // ---------------------------------------------------------------------
 // Les jetons
 // ---------------------------------------------------------------------
@@ -632,6 +673,7 @@ var api = {
     enonce: enonce,
     libelleCritere: libelleCritere,
     critereAlgorithmique: critereAlgorithmique,
+    critereAlgorithmiqueOuNomme: critereAlgorithmiqueOuNomme,
     appliquerAuCritere: appliquerAuCritere,
     enoncesRediges: enoncesRediges,
     enoncesParDefaut: enoncesParDefaut
