@@ -101,15 +101,35 @@ const lireEtat = (page) => page.evaluate(() => {
 
 const attendre = (page, ms) => page.evaluate((d) => new Promise((r) => setTimeout(r, d)), ms);
 
-/** « Consulter » depuis la liste, puis la fin de son chargement (mode Évaluer, évaluation chargée). */
+/**
+ * « Consulter » depuis la liste, puis la VRAIE fin de son chargement (mode Évaluer, évaluation chargée).
+ *
+ * ⚠ `idModification === 'EVAL651'` ne dit PAS la fin (mesuré le 19 sept. 2026, 9 vertes sur 10 au repos,
+ * `--retries=0`) : le pré-remplissage du mode Évaluer le pose AVANT que la minuterie de 600 ms de
+ * `_apresOuvertureFichier` n'appelle `modifierEvaluationParId`. Une spec qui repart vers la liste dans cet
+ * intervalle (≈ 20 ms à la sonde) est ramenée de force sur « Annoter et évaluer » par `modifierEvaluation`,
+ * et l'attente de `#evaluations-liste.sous-section.active` ne peut plus aboutir. On attend donc que
+ * `modifierEvaluationParId` ait été APPELÉE par ce « Consulter »-ci, puis qu'elle ait FINI
+ * (`_modifierEvaluationEnCours` retombe dans son `finally`). Mesure : `plans de travail/MESURE-2026-09-19-…`.
+ */
 async function consulterDepuisLaListe(page) {
-    await page.evaluate(() => window.executerActionEval({ value: 'consulter|EVAL651' }));
-    await page.waitForFunction(() => {
+    const appelsAvant = await page.evaluate(() => {
+        if (!window.__fins651) {
+            window.__fins651 = { appels: 0 };
+            const original = window.modifierEvaluationParId;
+            window.modifierEvaluationParId = function () { window.__fins651.appels++; return original.apply(this, arguments); };
+        }
+        const n = window.__fins651.appels;
+        window.executerActionEval({ value: 'consulter|EVAL651' });
+        return n;
+    });
+    await page.waitForFunction((n) => {
         const fa = window.travauxVisionneuse && window.travauxVisionneuse.getFichierActuel && window.travauxVisionneuse.getFichierActuel();
         return fa && fa.id === 'FT651' && window.travauxUI.getModeCourant() === 'evaluer'
             && !!document.getElementById('travaux-palette-eval-retro')
-            && window.evaluationEnCours && window.evaluationEnCours.idModification === 'EVAL651';
-    }, null, { timeout: 10000 });
+            && window.evaluationEnCours && window.evaluationEnCours.idModification === 'EVAL651'
+            && window.__fins651.appels > n && window._modifierEvaluationEnCours === false;
+    }, appelsAvant, { timeout: 10000 });
 }
 
 /** Le trajet du rapport : un détour par une autre section, retour à Évaluations, puis la liste. */

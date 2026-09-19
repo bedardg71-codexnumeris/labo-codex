@@ -8354,6 +8354,28 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   une mesure de géométrie prise avant que la mise en page ait fini de bouger. Le même soir, le verdict
   local en comptait quatre autres (cartouches-import-trimestre, grilles-suppression-orphelinage,
   planif-toolbar, source-unique-codes). Cinq specs au second essai en une soirée : le sujet grossit.
+  ⮕ **MESURÉ LE 19 SEPT. 2026** (`plans de travail/MESURE-2026-09-19-specs-au-second-essai.md`, 10 passes
+  par spec, `--retries=0`, charge relevée avant chaque passe) — **l'hypothèse des 700 ms n'est PAS
+  confirmée** : `triptyque` 10/10 au repos ET 10/10 sous charge fabriquée de 32 à 83 ; non reproduite,
+  NON TOUCHÉE. `planif-toolbar` (24 attentes fixes, le maximum du dépôt) 10/10 au repos, 9/10 sous
+  charge 78–186 : le rouge est « Tearing down "context" exceeded the test timeout of 30000ms » — des
+  essais de 22 à 37 s contre 6,5 s au repos, **aucune assertion, aucune attente fixe en cause** ; NON
+  TOUCHÉE. Ce que la mesure désigne : la charge au lancement du verdict, et `scripts/pousser.sh` ne
+  porte AUCUNE garde de charge (la boucle « qui abandonnait après 5 min » du 18 était improvisée en
+  session). Lot proposé à Grégoire : la garde dans `pousser.sh` (plafonner et NE PAS lancer).
+  ⮕ **RATTACHEMENT CORRIGÉ — `liste-651-annoter-depuis-le-mode-evaluer.spec.js` n'est pas de cette
+  famille.** Les relais des 17 et 18 sept. la rangeaient ici ; elle flanche AU REPOS (9/10 à charge 2,9)
+  et sa cause est une course, pas une durée : la spec jugeait « Consulter » fini sur `idModification`,
+  posé par le pré-remplissage ≈ 20 ms AVANT que la minuterie de 600 ms de `_apresOuvertureFichier`
+  (`liste-evaluations.js`) n'appelle `modifierEvaluationParId`, qui ramène de force sur « Annoter et
+  évaluer » (`evaluation.js`, `modifierEvaluation`). **CORRIGÉ dans la spec le 19 sept.** : elle attend
+  l'appel PUIS la fin de `modifierEvaluationParId`. Avant : 9/10. Après : 10/10, puis le trajet direct
+  30/30 ; rouge sous mutation du compteur d'appels. Assertions inchangées.
+  Côté application, le même mécanisme existe pour un humain (« Consulter » puis l'onglet « Liste » dans
+  la seconde : retour forcé sur la copie). **NON INSCRIT** : jamais vécu par Grégoire, ne bloque aucun
+  chantier (règle du 24 août) ; décrit dans l'en-tête de `consulterDepuisLaListe` de la spec et au §4
+  de la mesure. **#833** (CI WebKit Linux) : rattachement relu, rien à corriger — aucune de ses deux
+  specs n'a été rejouée dans ce lot.
 
 - [x] **#534 CLOS** Un seul dépassement de délai suffit à refuser un push légitime — créé 26 août 2026, **hypothèse initiale RÉFUTÉE le jour même par la mesure**.
   ✅ **TRANCHÉ PAR GRÉGOIRE le 27 août 2026 : durcir la SEULE spec qui a un manque objectif.**

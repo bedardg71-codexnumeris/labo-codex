@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 9 H 15 (Toronto) : LES SPECS AU SECOND ESSAI, MESURÉES — tests et documents EN LOCAL, PAS POUSSÉS, aucun bump
+
+Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-SUIVANTE-specs-au-second-essai, renommée au démarrage ; celle de #913 est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-17-resultats-ulterieurs.md`). **Tout est sur `main` local ; `origin/main` = `fc1c012d` ; le push attend le signal de Grégoire.** Aucun fichier de `js/`, aucune version, aucune « Nouvelle ».
+
+**Ce que la mesure dit** (`plans de travail/MESURE-2026-09-19-specs-au-second-essai.md`, 10 passes par spec, `--retries=0`, charge relevée avant chaque passe) : **les attentes fixes ne sont la cause mesurée d'aucune des trois specs nommées.** `triptyque` 10/10 au repos et 10/10 sous charge 32–83 : non reproduite, non touchée. `planif-toolbar` 10/10 au repos, 9/10 sous charge 78–186 : le rouge est le plafond de 30 s par essai (« Tearing down "context" exceeded the test timeout »), des essais de 22–37 s contre 6,5 s, aucune assertion : non touchée. `liste-651` 9/10 AU REPOS : une course avec la queue de la chaîne « Consulter » (minuterie de 600 ms de `_apresOuvertureFichier`, puis `modifierEvaluation` ramène sur « Annoter et évaluer »). **Corrigée dans la spec** (elle attend l'appel puis la fin de `modifierEvaluationParId`) : avant 9/10, après 10/10 puis le trajet direct 30/30, rouge sous mutation. Note sous **#685** au BACKLOG, rattachement de `liste-651` corrigé ; aucun numéro pris (Dernier ID reste #922).
+
+⚠ **`scripts/pousser.sh` ne porte AUCUNE garde de charge** — la boucle « qui abandonnait après 5 min » du 18 était improvisée en session. Le Vitest complet seul porte la charge 1 min à 78. **Lot proposé à Grégoire, NON commencé** : la garde dans `pousser.sh` (au-dessus d'un seuil : attendre ; au plafond : NE PAS lancer). Repère de seuil : vert jusqu'à 83 pour une spec de 7 s, rouge à 125 pour une spec de 40 s. Non éprouvé : la charge DISQUE (Time Machine).
+
+⚠ **L'arbre porte des fichiers qui ne sont pas de cette session** (vus à 9 h : `js/interpretation-config.js`, `.claude/skills/ecosysteme-classe/SKILL.md`, le CADRAGE du 17 au soir, une RELECTURE du 17) : Grégoire ou une autre session travaille en parallèle. Commits de cette session par chemins nommés seulement.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 18 SEPT. 2026, ≈ 16 H 50 (Toronto) : 1.146.7 (#922) et 1.146.8 (#896), le Suivi — COMMITÉES EN LOCAL, PAS POUSSÉES
 
 ✅ **POUSSÉ le 18 sept. 2026 à 18 h 27, sur demande de Grégoire (« pousse », 17 h 10) : `origin/main` = `fc1c012d`**, mesuré après `pousser.sh origin HEAD:main` depuis un worktree propre (retiré) et `git fetch` ; sentinelle Playwright sans rougeur nouvelle, Vitest vert au hook. Le paragraphe suivant est l'état d'AVANT le push. ⚠ **Verdict rendu en ~70 min, SIX specs vertes au second essai** (accueil-640, portes-relais-cadre #371, portes-terrain-vague3 #306, pratiques-898, **profil-871**, texte-troue-paliers) : lancé à charge 2, mais une sauvegarde Time Machine tournait (`backupd-helper`), charge 93 pendant la suite. `profil-871` lit du code touché par #922 : rejouée seule ×5 sans second essai (charge 42) — 4 vertes en 13 s, 1 blocage de 180 s dans le `page.evaluate` qui attend `activerModeDemo()`, aucune assertion en cause. **Inférence, pas preuve** : l'environnement (le code du lot est un rendu synchrone, un défaut y serait rouge 5 fois sur 5). **À refaire machine au repos** : `profil-871 --retries=0 --repeat-each=5` ; si un blocage revient au calme, c'est un sujet (#685). Le Playwright GitHub du run `35388425832` (`c5c25e74`) a fini `cancelled`, pas rouge : aucun verdict serveur.
