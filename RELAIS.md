@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, ≈ 15 H 10 (Toronto) : 1.148.0, RETOUCHE D'UN MOT AVANT LE PUSH — 🟡 COMMITÉE, « POUSSE » REÇU, VERDICT À RENDRE PAR `pousser.sh`
+## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, 15 H 25 (Toronto) : 1.148.0 (#887, #923, DA À L'IMPORT) ET SA RETOUCHE DE MOT — ✅ POUSSÉES
+
+**`origin/main` = `09f1c6ef`, mesuré après `git fetch`** (HEAD = origin/main). `scripts/pousser.sh origin main` sur le « pousse » de Grégoire, Cowork fermé (dit par Grégoire) : charge 6,34 au lancement après 240 s d'attente de la garde, suite WebKit sans rougeur nouvelle (0 échec connu, aucun second essai), Vitest du hook vert, verdict vert à jour pour ce SHA. Une troisième session (audit de début, lecture seule) a fait tourner un Vitest ≈ 1 min AVANT que la garde de charge ne laisse partir le verdict : sans effet sur la mesure. **Restent dus** : relecture croisée de Cowork ; mécanisme B de #872 (consigne « un groupe = (cours, numéro) » déjà donnée à la session monitorage-v6-61, qui attendait ce push). « En ligne » non mesuré (aucune route vers app.codexnumeris.org d'ici) : lire le numéro en bas de page, 1.148.0.
 
 **Mots de 1.148.0 validés par Grégoire** (« oui avec ta retouche », relayé par Cowork à 14 h 58), sauf un : le motif « Déjà dans la liste » devient « **Déjà inscrit·e ce trimestre** » (la vérification couvre tout le trimestre, tous cours confondus). Constante unique `MOTIF_IMPORT_DEJA_INSCRIT` dans `js/trimestre-v2-etudiants.js` : le jugement la pose, la confirmation la compte. **Pas de nouvelle version** : commit de correctif par-dessus `f833ab96`, sans bump — 1.148.0 n'a jamais été poussée, personne n'a vu l'ancien mot ; seul le jeton anti-cache du fichier avance (`20260919d` → `20260919e`, exigé par le hook). Pas d'amende du commit de release (hook anti-cache, et l'historique reste lisible).
 
