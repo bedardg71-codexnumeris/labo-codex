@@ -240,6 +240,14 @@ class PratiqueConfigurable {
      * garde, il revenait « 0, constructible » à la DEUXIÈME passe — une spécification créée
      * par l'assistant (ni types de travaux ni forfaits) exportait « 0, final » pour toute
      * la classe. Champ additif (#394) : absent ⇒ constructible.
+     *
+     * 20 sept. 2026 — NI LE CACHE D'UNE AUTRE PRATIQUE (chemin frère d'A-3, trouvé par le rouge
+     * du runner GitHub sur « Flux E · SPE »). L'entrée porte la pratique qui l'a calculée
+     * (`actuel.pratique`, portfolio.js). Une passe d'indices faite AVANT qu'on applique cette
+     * pratique-ci (sous « sommative », le défaut d'un groupe-cours sans pratique) laissait
+     * « 85, constructible » ; relu ici, il sortait « SPE, 85, final » à l'export, et chaque passe
+     * suivante le réécrivait tel quel. Mesuré : le Mac finissait l'assistant avant cette
+     * première passe, le runner non. Champ absent (cache d'avant Beta 95.5) ⇒ lu comme avant.
      * @param {string} da
      * @returns {number|null}
      */
@@ -248,6 +256,7 @@ class PratiqueConfigurable {
         const entree = indicesCP[da];
         if (!entree || !entree.actuel || typeof entree.actuel.P !== 'number') return null;
         if (entree.actuel.noteConstructible === false) return null;
+        if (entree.actuel.pratique && entree.actuel.pratique !== this.config.id) return null;
         return entree.actuel.P;
     }
 

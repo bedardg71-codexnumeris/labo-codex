@@ -74,7 +74,9 @@ test('#882 · rouvrir une évaluation, choisir « Niveau de performance » : le 
             productionId: 'P699', productionNom: 'Portrait témoin', grilleId: 'G699', grilleNom: 'Grille témoin 50/30/20',
             echelleId: 'E699', cartoucheId: '', statutRemise: 'evalue', statutIntegrite: 'recevable',
             dateEvaluation: '2026-09-04T10:00:00.000Z', verrouillee: false,
-            optionsAffichage: { description: true, objectif: true, tache: true, adresse: true, contexte: true, affichageNote: 'complet' },
+            // `adresse: false` — LE TÉMOIN (20 sept. 2026) : la case « Adresse » est cochée par défaut, seule la restauration
+            // différée des options de CETTE évaluation peut la décocher.
+            optionsAffichage: { description: true, objectif: true, tache: true, adresse: false, contexte: true, affichageNote: 'complet' },
             criteres: [
                 { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'E', retroaction: '', ponderation: 50 },
                 { critereId: 'c2', critereNom: 'Organisation', niveauSelectionne: 'E', retroaction: '', ponderation: 30 },
@@ -110,13 +112,12 @@ test('#882 · rouvrir une évaluation, choisir « Niveau de performance » : le 
         && window._autoSaveSuspendu === false, null, { timeout: 10000 });
     // La restauration des options de l'évaluation est DIFFÉRÉE (setTimeout de 350 ms dans
     // `verifierEtChargerEvaluationExistante`) : cliquer avant la ferait recocher « Note chiffrée ».
-    // Témoin de sa fin : elle se termine par `genererRetroaction(1)`, enveloppé ici.
-    await page.evaluate(() => {
-        const orig = window.genererRetroaction;
-        window.__retroApresRestauration = 0;
-        window.genererRetroaction = function () { window.__retroApresRestauration++; return orig.apply(this, arguments); };
-    });
-    await page.waitForFunction(() => window.__retroApresRestauration > 0, null, { timeout: 5000 });
+    // Témoin de sa fin : la case « Adresse », cochée par défaut, décochée par elle seule (semis).
+    // ⚠ 20 sept. 2026 — AVANT, le témoin était un enveloppement de `genererRetroaction` posé ICI, donc à poser
+    // entre la levée de la suspension (500 ms) et la restauration (650 ms). Le Mac tenait dans ces 150 ms ;
+    // le runner GitHub non : enveloppement posé trop tard, compteur resté à 0, rouge sur chaque run depuis
+    // la naissance de la spec (mesuré : 400 ms de retard sur le Mac donnent la même erreur, à la ligne près).
+    await page.waitForFunction(() => document.getElementById('afficherAdresse1').checked === false, null, { timeout: 10000 });
     await page.evaluate(() => window.attacherEvenementsMemorisation());
 
     // LE GESTE : « Niveau de performance », comme à la souris (el.click() émet `change`).
@@ -131,7 +132,7 @@ test('#882 · rouvrir une évaluation, choisir « Niveau de performance » : le 
     const base = await page.evaluate(() => (window.db.getSync(cle('evaluationsSauvegardees'), []) || []).find(e => e.id === 'EV699'));
     // Le reste de l'évaluation est intact : l'auto-save n'a rien réécrit d'autre de travers.
     expect(base).toMatchObject({ noteFinale: 84, niveauFinal: 'M', verrouillee: false });
-    expect(base.optionsAffichage).toEqual({ description: true, objectif: true, tache: true, adresse: true, contexte: true, affichageNote: 'lettre' });
+    expect(base.optionsAffichage).toEqual({ description: true, objectif: true, tache: true, adresse: false, contexte: true, affichageNote: 'lettre' });
 
     // Les cases d'affichage vivent dans le même objet : décocher « Contexte » s'écrit aussi.
     await page.evaluate(() => document.getElementById('afficherContexte1').click());
