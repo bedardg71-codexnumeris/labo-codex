@@ -509,7 +509,7 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'archiver-travaux': {
-        titre: 'Archivage des travaux',
+        titre: 'Exporter et archiver',
         sections: [
             {
                 type: 'texte',
@@ -526,7 +526,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichier(s) en stock</em> ») reflète tout ce qui a été importé via le panneau <strong>Annoter et évaluer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
+                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichiers en stock</em> ») reflète tout ce qui a été importé dans <strong>Préparer et importer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
             }
         ],
         voirAussi: ['evaluations-annoter', 'evaluations-liste']

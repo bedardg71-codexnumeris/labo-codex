@@ -164,26 +164,30 @@ Les annotations du mode Annoter restent visibles en mode Evaluer.
 
 ## Onglet 5 — Exporter et archiver
 
-### Options d'export
+### Trois cartes d'export (etat mesure le 20 septembre 2026, #893)
 
-| Mode | Contenu | Format |
-|------|---------|--------|
-| **Par etudiant** | Originaux + PDF annotes + evaluations JSON | ZIP structure par dossiers |
-| **Par production** | Tous les etudiants pour une production | ZIP organise par etudiant |
-| **Semestre complet** | Tous les fichiers du trimestre | ZIP avec barre de progression |
+L'ecran rend TROIS cartes (`afficherArchivage`, `travaux-ui.js`). Les copies annotees et les
+evaluations sont toujours incluses (`exporterTravaux`) : aucune case « Inclure ... » n'existe.
 
-### Structure ZIP (export par etudiant)
+| Carte | Contenu | Filtres | Format |
+|-------|---------|---------|--------|
+| **Exporter des travaux** | Originaux + versions annotees + `evaluations.json` | Production, etudiant·e | ZIP, un dossier par etudiant·e |
+| **Trimestre complet** | Toutes les productions en PDF classees par etudiant·e + evaluations JSON | Production, etudiant·e (optionnels) | ZIP avec barre de progression |
+| **Export Lea** | Copie annotee + page de synthese (note et retroaction) | Production, etudiant·e, case « Reprises seulement » | PDF pret pour Lea |
+
+### Structure ZIP (carte « Exporter des travaux »)
 
 ```
 Nom_Prenom_DA/
-  originaux/
-    fichier1.pdf
-    fichier2.jpg
-  annotes/
-    fichier1_annote.pdf
-    fichier2_annote.pdf
-  evaluations.json
+  fichier1.pdf
+  fichier1_annote.pdf
+  fichier2.jpg
+  fichier2_annote.jpg
+evaluations.json
 ```
+
+La structure a sous-dossiers `originaux/` et `annotes/` est celle de `exporterParEtudiant`,
+appele depuis le profil de l'etudiant·e, pas depuis cet ecran.
 
 ### PDF genere
 
@@ -193,15 +197,19 @@ Pour chaque fichier :
 3. Conversion en JPEG (qualite 0.92)
 4. Page de synthese si evaluation existante (nom, production, note, retroaction)
 
-### Allegement
+### Allegement — RETIRE le 28 aout 2026
 
-Option « Alleger » : conversion en fac-simile (800px, niveaux de gris) en conservant annotations et evaluations. Reduit l'espace de stockage.
+La conversion en fac-simile (800px, niveaux de gris) a ete retiree le 28 aout 2026 (decision de
+Gregoire). Le statut `facsimile` subsiste en lecture pour les fichiers deja alleges ; plus aucun
+geste de l'ecran ne le produit.
 
 ### Cycle de vie des fichiers
 
 ```
-initial → annote → exporte → archive → fac-simile
+initial → annote → exporte → archive
 ```
+
+(`fac-simile` : etat herite, lu mais plus produit depuis le 28 aout 2026.)
 
 **Fichiers** : `travaux-export-pdf.js`, `travaux-archivage.js`, `travaux-ui.js`
 
