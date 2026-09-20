@@ -1,29 +1,34 @@
-# Consigne suivante – GitHub rend de nouveau un verdict (plafond du job WebKit)
+# Consigne en attente – la suite complète au navigateur tourne UNE FOIS PAR JOUR sur GitHub, plus à chaque push
 
-> Écrite le 20 septembre 2026, 16 h 27 (Toronto), par Cowork. **Décision de Grégoire, 20 sept. en fin d'après-midi** : monter le plafond à **60 minutes**, et remesurer la durée réelle sur trois runs avant de rediscuter du chiffre. Motif retenu : un run annulé à 40 min facture 40 minutes et n'achète aucun verdict.
-> **Condition de départ** : `git --no-optional-locks log origin/main` porte 1.151.4 (`a305f524`) ou plus récent, et le commit de relais `8abdd4fc` part avec ce lot. Aucune autre session n'écrit dans `js/`.
-> **Archive** : la consigne précédente est rangée par Cowork sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver.md`. Les deux fichiers vont au commit.
-> ⛔ **Rien dans `js/` ne change** : aucune release, aucune entrée de « Nouvelles », rien à l'écran.
+> Écrite le 20 septembre 2026, 16 h 34 (Toronto), par Cowork. **Décision de Grégoire, 20 sept. en fin d'après-midi** : garder la suite ENTIÈRE (elle seule voit les régressions), mais cesser de la payer à chaque push, puisque son Mac la fait déjà tourner en entier avant chaque push par `scripts/pousser.sh`. Sa question, mot pour mot : « est-il nécessaire de faire les tests Playwright sur toute l'application ? »  Réponse retenue : oui pour l'étendue, non pour la fréquence.
+> **En attente** : ce lot part le premier, AVANT `CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md` — il change ce que chaque push suivant coûte. Au départ : archive `CONSIGNE-DU-JOUR.md` (plafond 60 min, exécutée) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-plafond-github.md`, puis renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> **Condition de départ** : le commit du plafond (`74a845f0` ou son équivalent) est sur `origin/main`, et son run est LU. Aucune autre session n'écrit dans `.github/` ni dans `tests/`.
+> ⛔ Rien dans `js/` : aucune release, rien à l'écran pour Grégoire.
 
 ---
 
-## 1 · Pourquoi
+## 1 · Ce qui change, et ce qui ne change pas
 
-Le job `playwright` de `.github/workflows/tests.yml` porte `timeout-minutes: 40` (l. 232), posé le 2 septembre par **projection** – 239 specs × 7 s + 3 min ≈ 31 min, plus un tiers de marge – et le commentaire du fichier dit lui-même : « si un run réel la dépasse, on le dit ». C'est arrivé : deux runs annulés aujourd'hui à 40 min 17 s (`efa185c1` et `ee2669f9`), pas par un push concurrent. Depuis, la suite a grossi.
+- **Ne change pas** : la suite reste ENTIÈRE. On ne juge jamais « seulement la dernière correction » — c'est précisément ce qui laisserait passer une régression ailleurs. Le `vitest` du hook et le **verdict WebKit complet du Mac avant chaque push** tiennent tels quels : rien n'est poussé sans avoir été jugé.
+- **Change** : sur GitHub, le job `playwright` ne part plus à chaque push. Il part **une fois par jour**, sur `main`, et à la demande.
 
 ## 2 · Ce qui est attendu
 
-1. **`timeout-minutes: 60`** sur le job `playwright`, et **le commentaire d'en-tête mis à jour** : la mesure du 20 septembre (deux annulations à 40 min), la décision de Grégoire, et la règle qui tient toujours – le plafond se déplace sur une mesure, il ne disparaît pas.
-2. **Mesurer la durée réelle** des trois prochains runs complets du job (`gh run list`, `gh run view`) et l'inscrire dans le commentaire du workflow : durée, SHA, nombre de specs. Si un run conclut à 45 min, c'est le chiffre à garder en tête pour la prochaine décision ; s'il frôle 60, dis-le à Grégoire, ne remonte pas le plafond.
-3. **Vérifier le cliquet** `tests/unit/sentinelle-ci-paths-ignore.test.js` : s'il fige le chiffre 40, le mettre à 60 dans le même commit ; sinon dire qu'il ne le voit pas.
-4. **Dire si le job `vitest` (plafond 15) approche le sien** : simple mesure, aucune modification sans mot de Grégoire.
+1. **Déclencheurs du job `playwright`** : `schedule` (une fois par jour) et `workflow_dispatch` (l. 163, déjà présent). Le job quitte la voie du `push`. Le job `vitest` garde le `push` et la `pull_request` tels quels.
+2. **Heure** : `cron: '0 8 * * *'` (UTC) = 4 h du matin à Toronto, pour que le verdict soit là quand Grégoire ouvre sa journée. ⚠ Le cron de GitHub est en UTC et ne suit pas l'heure avancée : l'écart de novembre est connu et assumé, à dire en commentaire.
+3. **Garde d'inutilité** : si `main` n'a pas bougé depuis le dernier run planifié, le job s'arrête AVANT d'installer WebKit (mesure : `git log -1 --format=%cI main` contre 24 h, ou le SHA du dernier run planifié via `gh`). Motif : un run quotidien sur un dépôt immobile paierait 40 minutes pour rien — le défaut même qu'on corrige.
+4. **La liste `OBSERVABLE` et sa décision** (§ du job `vitest`) : elle ne sert plus à lancer `playwright` sur un push. **MESURE D'ABORD** ce qui la lit encore (le cliquet `tests/unit/sentinelle-ci-paths-ignore.test.js`, l. 159 fige `if: needs.vitest.outputs.playwright == 'oui'`), puis retire-la ou garde-la, et dis lequel et pourquoi. ⛔ Ne laisse pas une sortie que plus personne ne lit sans le dire.
+5. **Le cliquet** : réécris-le pour la nouvelle forme, en gardant son intention (le workflow ne peut pas dériver en silence) ; une mutation qui remettrait `playwright` sur le `push` doit le faire rougir.
+6. **Le rituel de début de session** (`.claude/skills/debut-de-session-labo-codex/SKILL.md`, §2.1) : il lit les JOBS d'un run et distingue jugé-vert / jugé-rouge / non jugé. Il doit maintenant dire que **le verdict au navigateur ne vient plus du run du push, mais du dernier run planifié**, avec son SHA — et qu'un écart entre ce SHA et `HEAD` est normal, pas un défaut. Ajoute la ligne au tableau d'historique du fichier.
 
 ## 3 · Arrêts
 
-- Si la mesure montre que le dépassement vient d'une spec qui s'est mise à durer (et non de la croissance régulière de la suite) : arrête-toi, nomme-la, et ne monte rien. Le plafond n'est pas le remède à une spec qui s'emballe.
-- ⛔ Pas de shards (écartés par Grégoire : ils raccourcissent l'attente, pas la facture). Pas d'exclusion, pas de `retries`.
+- Si la garde du point 3 ne peut pas se mesurer sans jeton supplémentaire ou sans droit particulier : pose le `schedule` sans garde, dis-le, et propose la mesure à Grégoire plutôt que d'inventer un contournement.
+- ⛔ Ne réduis PAS le nombre de specs, n'ajoute pas de shards (écartés), ne touche pas aux exclusions Linux.
 
 ## 4 · Preuve
 
-- Le premier run complet après ce commit **conclut** : vert ou rouge, mais lu, avec sa durée inscrite au relais.
-- ⚠ Rappel mesuré ce matin par toi : un nouveau push annule le run en cours. Ce commit part seul, et on lit son run avant d'en pousser un autre.
+- Le cliquet réécrit rougit sur trois mutations : `playwright` remis sur le `push`, le `cron` retiré, la garde d'inutilité retirée.
+- Le premier run planifié conclut et est LU : durée, SHA, verdict, inscrits au relais.
+- Un `workflow_dispatch` lancé à la main conclut aussi : c'est la porte de sortie quand on veut un verdict tout de suite.
+- **Ce que Grégoire y gagne, à écrire en une ligne dans le relais** : le nombre de runs complets par jour, avant et après (aujourd'hui : cinq pushs de code, donc cinq runs).

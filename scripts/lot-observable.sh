@@ -6,8 +6,8 @@
 # le jour où l'une des deux laisserait passer un lot que l'autre aurait retenu.
 #
 # ↻ #756 (7 sept. 2026) — CET ENDROIT N'EST PLUS ICI : c'est la liste
-# `OBSERVABLE` du job `vitest` de .github/workflows/tests.yml, que ce fragment
-# LIT. Le motif vivait ici en dur et ne comptait que `js/`, `index.html`,
+# `OBSERVABLE` de .github/workflows/tests.yml (env du workflow depuis le
+# 20 sept. 2026, du job `vitest` avant), que ce fragment LIT. Le motif vivait ici en dur et ne comptait que `js/`, `index.html`,
 # `styles.css`, `tests/integration/` et deux scripts, là où la CI compte aussi
 # `css/`, `icons/`, `img/`, `libs/`, `version.js`, `version.json`,
 # `noms_stables.json`, `scripts/`, TOUT `tests/` et le workflow lui-même.
@@ -25,8 +25,9 @@
 _SOURCE_OBSERVABLE="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/.github/workflows/tests.yml"
 
 # Construit le motif grep depuis la liste de la CI. Une entrée qui finit par
-# `/` couvre le dossier ; sinon c'est un fichier exact — la même règle que
-# l'étape « Décider » du workflow, qui compare `chemin == entrée`.
+# `/` couvre le dossier ; sinon c'est un fichier exact (`chemin == entrée`).
+# Depuis le 20 sept. 2026, la CI ne porte plus de copie de cette règle : sa
+# garde (scripts/ci-garde-inutilite.sh) appelle `lot_observable` elle aussi.
 _motif_observable() {
     local liste entree echappee motif=''
     liste=$(sed -n 's/^[[:space:]]*OBSERVABLE:[[:space:]]*"\(.*\)"[[:space:]]*$/\1/p' \

@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
@@ -40,6 +42,20 @@ import { tranche } from './_helpers/tranche.js';
 // passerait sans Playwright. Ce bloc lie la liste à ce que les specs lisent.
 // BREAK-TESTS (faits le 2 septembre) — retirer `scripts/` de OBSERVABLE → rouge
 // (deux specs lisent scripts/) ; faire lire `docs/x.md` à un spec → rouge.
+//
+// ↻ BLOC 2 RÉÉCRIT LE 20 SEPTEMBRE 2026 — PLAYWRIGHT A QUITTÉ LA VOIE DU PUSH.
+// Décision de Grégoire (journal de tests.yml, point 7) : la suite entière, mais
+// une fois par jour (`schedule`) et à la demande (`workflow_dispatch`) — le Mac
+// la fait déjà tourner avant chaque push. L'intention du bloc ne change pas : le
+// workflow ne peut pas dériver en silence. Ce qu'il verrouille maintenant : trois
+// jobs ; `playwright` ne dépend que de `garde`, et `garde` ne part JAMAIS sur un
+// push ; le cron est celui-là ; la garde d'inutilité existe, est appelée, et
+// DÉCIDE (banc git jetable : le vrai script, six cas). La liste `OBSERVABLE`
+// reste — elle a trois lecteurs vivants (lot-observable.sh, la garde, ce bloc).
+// BREAK-TESTS (faits le 20 septembre) — `|| github.event_name == 'push'` ajouté
+// au `if:` de `garde` → rouge ; le bloc `schedule:` retiré → rouge ; la garde
+// remplacée par `echo "oui"` dans le script → rouge (banc), et l'appel du script
+// remplacé par `juger=oui` dans le workflow → rouge.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -145,8 +161,8 @@ describe('CI · le `paths-ignore` du workflow ne masque aucun test', () => {
     });
 });
 
-describe('CI · le job Playwright ne saute que si RIEN d\'observable n\'a bougé', () => {
-    /** La liste `OBSERVABLE` du job `vitest` — l'unique source que le shell lit. */
+describe('CI · Playwright tourne une fois par jour, et ne saute que si RIEN d\'observable n\'a bougé', () => {
+    /** La liste `OBSERVABLE` du workflow (env global) — l'unique source que le shell lit. */
     function cheminsObservables() {
         const m = /^\s*OBSERVABLE:\s*"([^"]+)"/m.exec(workflow);
         return m ? m[1].trim().split(/\s+/) : null;
@@ -154,20 +170,125 @@ describe('CI · le job Playwright ne saute que si RIEN d\'observable n\'a bougé
     const estObservable = (chemin, liste) => liste.some((e) =>
         e.endsWith('/') ? chemin.startsWith(e) : chemin === e);
 
-    it('le workflow a deux jobs, Vitest sans condition, Playwright conditionné par la décision de Vitest', () => {
+    it('trois jobs : Vitest sur le push, Playwright derrière la garde — JAMAIS sur un push', () => {
         expect(workflow).toMatch(/^  vitest:\n/m);
-        expect(workflow).toMatch(/^  playwright:\n(?:.*\n)*?    needs: vitest\n    if: needs\.vitest\.outputs\.playwright == 'oui'\n/m);
-        // Vitest juge TOUT : aucun `if:` au niveau du job.
-        const blocVitest = tranche(workflow, '\n  vitest:\n', '\n  playwright:\n');
-        expect(blocVitest).not.toMatch(/^    if:/m);
+        expect(workflow).toMatch(/^  garde:\n/m);
+        // Playwright ne tient qu'à la garde : ni `needs: vitest`, ni la sortie retirée.
+        expect(workflow).toMatch(/^  playwright:\n(?:.*\n)*?    needs: garde\n    if: needs\.garde\.outputs\.juger == 'oui'\n/m);
+        // Hors commentaires : le journal en tête NOMME ce qui a été retiré.
+        const code = workflow.split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
+        expect(code).not.toMatch(/outputs\.playwright/);
+        expect(code).not.toMatch(/needs:.*vitest/);
+        // La garde ne part QUE planifiée ou demandée. Sur un push elle est sautée,
+        // donc Playwright aussi : `skipped`, jamais `success`.
+        const blocGarde = tranche(workflow, '\n  garde:\n', '\n  playwright:\n');
+        const conditions = blocGarde.match(/^    if:.*$/m);
+        expect(conditions, 'le job `garde` n\'a plus de `if:` : il partirait sur chaque push').not.toBeNull();
+        expect(conditions[0]).toBe("    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'");
+        // Vitest garde le push et la pull_request ; il ne saute que le planifié.
+        const blocVitest = tranche(workflow, '\n  vitest:\n', '\n  garde:\n');
+        expect(blocVitest.match(/^    if:.*$/m)[0]).toBe("    if: github.event_name != 'schedule'");
         // Un job sauté doit rester `skipped` : pas de `continue-on-error`, pas de
         // `if: always()` qui transformerait un saut en vert.
         expect(workflow).not.toMatch(/if:\s*always\(\)/);
+        expect(workflow).not.toMatch(/continue-on-error/);
+    });
+
+    it('le run quotidien existe : un seul cron, 8 h UTC, et le lancement à la demande', () => {
+        const declencheurs = tranche(workflow, '\non:\n', '\npermissions:\n');
+        expect(declencheurs).toMatch(/^  schedule:\n    - cron: '0 8 \* \* \*'\n/m);
+        expect((declencheurs.match(/- cron:/g) || []).length).toBe(1);
+        expect(declencheurs).toMatch(/^  workflow_dispatch:/m);
+        // Le push du matin ne doit pas annuler le run planifié en cours.
+        expect(workflow).toMatch(/^  group: tests-\$\{\{ github\.ref \}\}-\$\{\{ github\.event_name \}\}$/m);
+    });
+
+    it('la garde d\'inutilité est APPELÉE par le job `garde`, et c\'est elle qui pose `juger`', () => {
+        const blocGarde = tranche(workflow, '\n  garde:\n', '\n  playwright:\n');
+        expect(blocGarde).toContain('bash scripts/ci-garde-inutilite.sh');
+        expect(blocGarde).toContain('--event schedule');
+        expect(blocGarde).toMatch(/read -r juger raison < <\(bash scripts\/ci-garde-inutilite\.sh\)/);
+        expect(blocGarde).toContain('echo "juger=$juger" >> "$GITHUB_OUTPUT"');
+        // Dans le doute on juge : seule la réponse `non` du script fait sauter.
+        expect(blocGarde).toContain('[ "$juger" = "non" ] || juger=oui');
+        // Aucune installation avant la décision : la garde n'installe rien.
+        expect(blocGarde).not.toMatch(/npm ci|playwright install/);
+    });
+
+    describe('la garde DÉCIDE — le vrai script, dans un dépôt jetable', () => {
+        // ⚠ Aucune variable `GIT_*` ne passe : lancé sous un hook depuis un worktree,
+        // un `git init` jetable écrirait sinon dans le VRAI dépôt (#856).
+        const ENV_SANS_GIT = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GIT_')));
+        const git = (bac, ...args) => execFileSync('git', args, { cwd: bac, env: ENV_SANS_GIT, encoding: 'utf8' }).trim();
+
+        function avecDepotJetable(fn) {
+            const bac = mkdtempSync(path.join(tmpdir(), 'ci-garde-'));
+            try {
+                mkdirSync(path.join(bac, 'scripts'));
+                mkdirSync(path.join(bac, '.github', 'workflows'), { recursive: true });
+                mkdirSync(path.join(bac, 'js'));
+                for (const f of ['ci-garde-inutilite.sh', 'lot-observable.sh']) {
+                    copyFileSync(path.join(racineProjet, 'scripts', f), path.join(bac, 'scripts', f));
+                }
+                copyFileSync(path.join(racineProjet, '.github', 'workflows', 'tests.yml'),
+                    path.join(bac, '.github', 'workflows', 'tests.yml'));
+                writeFileSync(path.join(bac, 'js', 'a.js'), '// un\n');
+                writeFileSync(path.join(bac, 'NOTES.md'), 'un\n');
+                git(bac, 'init', '-q');
+                git(bac, 'config', 'user.email', 'banc@exemple.invalid');
+                git(bac, 'config', 'user.name', 'Banc');
+                git(bac, 'add', '-A');
+                git(bac, 'commit', '-q', '-m', 'base');
+                return fn(bac, git(bac, 'rev-parse', 'HEAD'));
+            } finally {
+                rmSync(bac, { recursive: true, force: true });
+            }
+        }
+        function garde(bac, evenement, dernier) {
+            const r = spawnSync('bash', [path.join(bac, 'scripts', 'ci-garde-inutilite.sh')], {
+                cwd: bac, encoding: 'utf8',
+                env: { ...ENV_SANS_GIT, REPO_ROOT: bac, EVENEMENT: evenement, DERNIER: dernier }
+            });
+            expect(r.status, r.stderr).toBe(0);
+            const [juger, raison] = r.stdout.trim().split('\t');
+            return { juger, raison };
+        }
+        const commit = (bac, fichier, contenu) => {
+            writeFileSync(path.join(bac, fichier), contenu);
+            git(bac, 'add', '-A');
+            git(bac, 'commit', '-q', '-m', fichier);
+        };
+
+        it('main immobile depuis le dernier SHA jugé → NON : on ne paie pas la suite', () => {
+            avecDepotJetable((bac, base) => {
+                const v = garde(bac, 'schedule', base);
+                expect(v.juger).toBe('non');
+                expect(v.raison).toContain(base.slice(0, 8));
+            });
+        });
+
+        it('seulement de la documentation depuis → NON ; du code observable → OUI', () => {
+            avecDepotJetable((bac, base) => {
+                commit(bac, 'NOTES.md', 'deux\n');
+                expect(garde(bac, 'schedule', base).juger).toBe('non');
+                commit(bac, 'js/a.js', '// deux\n');
+                expect(garde(bac, 'schedule', base).juger).toBe('oui');
+            });
+        });
+
+        it('dans le doute, on juge : base inconnue, base introuvable, lancement à la demande', () => {
+            avecDepotJetable((bac, base) => {
+                expect(garde(bac, 'schedule', '').juger).toBe('oui');
+                expect(garde(bac, 'schedule', '0123456789012345678901234567890123456789').juger).toBe('oui');
+                // À la demande, même sur un dépôt immobile : c'est la porte de sortie.
+                expect(garde(bac, 'workflow_dispatch', base).juger).toBe('oui');
+            });
+        });
     });
 
     it('la liste OBSERVABLE existe, et elle porte ce qu\'index.html charge', () => {
         const liste = cheminsObservables();
-        expect(liste, '`OBSERVABLE:` introuvable dans le job vitest').not.toBeNull();
+        expect(liste, '`OBSERVABLE:` introuvable dans tests.yml').not.toBeNull();
         for (const attendu of ['js/', 'index.html', 'styles.css', 'tests/', '.github/workflows/tests.yml']) {
             expect(liste, attendu + ' absent de OBSERVABLE').toContain(attendu);
         }
@@ -193,9 +314,9 @@ describe('CI · le job Playwright ne saute que si RIEN d\'observable n\'a bougé
         }
         expect(
             coupables,
-            'Ces specs Playwright LISENT un chemin qui ne déclenche PAS le job Playwright :\n' +
-            'leur régression passerait sans navigateur. Deux issues : ajouter le chemin à\n' +
-            'OBSERVABLE (job vitest de tests.yml), ou cesser de le lire.\n  ' +
+            'Ces specs Playwright LISENT un chemin qui n\'est PAS observable : ni le verdict\n' +
+            'du Mac (pousser.sh) ni la garde du run quotidien ne le verraient bouger.\n' +
+            'Deux issues : ajouter le chemin à OBSERVABLE (tests.yml), ou cesser de le lire.\n  ' +
             coupables.join('\n  ')
         ).toEqual([]);
     });
