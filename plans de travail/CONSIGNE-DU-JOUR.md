@@ -1,34 +1,36 @@
-# Consigne en attente – la suite complète au navigateur tourne UNE FOIS PAR JOUR sur GitHub, plus à chaque push
+# Consigne en attente – l'Aide dit comment nommer les pages d'une remise en plusieurs fichiers (#878)
 
-> Écrite le 20 septembre 2026, 16 h 34 (Toronto), par Cowork. **Décision de Grégoire, 20 sept. en fin d'après-midi** : garder la suite ENTIÈRE (elle seule voit les régressions), mais cesser de la payer à chaque push, puisque son Mac la fait déjà tourner en entier avant chaque push par `scripts/pousser.sh`. Sa question, mot pour mot : « est-il nécessaire de faire les tests Playwright sur toute l'application ? »  Réponse retenue : oui pour l'étendue, non pour la fréquence.
-> **En attente** : ce lot part le premier, AVANT `CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md` — il change ce que chaque push suivant coûte. Au départ : archive `CONSIGNE-DU-JOUR.md` (plafond 60 min, exécutée) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-plafond-github.md`, puis renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
-> **Condition de départ** : le commit du plafond (`74a845f0` ou son équivalent) est sur `origin/main`, et son run est LU. Aucune autre session n'écrit dans `.github/` ni dans `tests/`.
-> ⛔ Rien dans `js/` : aucune release, rien à l'écran pour Grégoire.
+> Écrite le 20 septembre 2026, 16 h 29 (Toronto), par Cowork.
+
+> **En attente** : elle part APRÈS le lot « une fois par jour » (`CONSIGNE-EN-ATTENTE-ci-une-fois-par-jour.md`), lui-même après le plafond, dont le run doit être LU avant qu'un autre push l'annule. Au départ : archive `CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-plafond-github.md`, puis renomme ce fichier en `CONSIGNE-DU-JOUR.md`.
+> **Condition de départ** : `git --no-optional-locks log origin/main` porte le push du lot précédent. Aucune autre session n'écrit dans `index.html`.
+> **Texte DÉJÀ validé par Grégoire le 17 sept. 2026, 13 h 34** (`plans de travail/DECISIONS-2026-09-17-apres-midi.md`) : rien ne remonte jusqu'à lui dans ce lot.
+> ⛔ Rien dans `js/` ne change : aucun comportement d'import, aucune donnée touchée.
 
 ---
 
-## 1 · Ce qui change, et ce qui ne change pas
+## 1 · Ce que Grégoire verra
 
-- **Ne change pas** : la suite reste ENTIÈRE. On ne juge jamais « seulement la dernière correction » — c'est précisément ce qui laisserait passer une régression ailleurs. Le `vitest` du hook et le **verdict WebKit complet du Mac avant chaque push** tiennent tels quels : rien n'est poussé sans avoir été jugé.
-- **Change** : sur GitHub, le job `playwright` ne part plus à chaque push. Il part **une fois par jour**, sur `main`, et à la demande.
+Dans Aide › « Préparer et importer les travaux », sous « 1. Déposer les fichiers », un paragraphe dit comment nommer les pages d'une remise en plusieurs fichiers pour qu'elles s'assemblent en un seul document. C'est son cas vécu du 15 septembre : trois fichiers `1a`, `1b`, `1c` avaient donné trois productions et des doublons ; renommés `-p1`, `-p2`, `-p3`, ils se sont assemblés.
 
-## 2 · Ce qui est attendu
+## 2 · Le texte à poser, tel quel
 
-1. **Déclencheurs du job `playwright`** : `schedule` (une fois par jour) et `workflow_dispatch` (l. 163, déjà présent). Le job quitte la voie du `push`. Le job `vitest` garde le `push` et la `pull_request` tels quels.
-2. **Heure** : `cron: '0 8 * * *'` (UTC) = 4 h du matin à Toronto, pour que le verdict soit là quand Grégoire ouvre sa journée. ⚠ Le cron de GitHub est en UTC et ne suit pas l'heure avancée : l'écart de novembre est connu et assumé, à dire en commentaire.
-3. **Garde d'inutilité** : si `main` n'a pas bougé depuis le dernier run planifié, le job s'arrête AVANT d'installer WebKit (mesure : `git log -1 --format=%cI main` contre 24 h, ou le SHA du dernier run planifié via `gh`). Motif : un run quotidien sur un dépôt immobile paierait 40 minutes pour rien — le défaut même qu'on corrige.
-4. **La liste `OBSERVABLE` et sa décision** (§ du job `vitest`) : elle ne sert plus à lancer `playwright` sur un push. **MESURE D'ABORD** ce qui la lit encore (le cliquet `tests/unit/sentinelle-ci-paths-ignore.test.js`, l. 159 fige `if: needs.vitest.outputs.playwright == 'oui'`), puis retire-la ou garde-la, et dis lequel et pourquoi. ⛔ Ne laisse pas une sortie que plus personne ne lit sans le dire.
-5. **Le cliquet** : réécris-le pour la nouvelle forme, en gardant son intention (le workflow ne peut pas dériver en silence) ; une mutation qui remettrait `playwright` sur le `push` doit le faire rougir.
-6. **Le rituel de début de session** (`.claude/skills/debut-de-session-labo-codex/SKILL.md`, §2.1) : il lit les JOBS d'un run et distingue jugé-vert / jugé-rouge / non jugé. Il doit maintenant dire que **le verdict au navigateur ne vient plus du run du push, mais du dernier run planifié**, avec son SHA — et qu'un écart entre ce SHA et `HEAD` est normal, pas un défaut. Ajoute la ligne au tableau d'historique du fichier.
+> **Une remise en plusieurs fichiers** : pour que les pages s'assemblent en un seul document, numérote-les à la fin du nom — `-p1`, `-p2`… (ou `_p 2`, `page 2`, `partie 2`, `part2`, `(2)`). Une lettre — `Artefact_1a`, `1b` — crée une AUTRE production : tu obtiens plusieurs documents et des doublons à la confirmation.
 
-## 3 · Arrêts
+Écartés par Grégoire, ne pas les ajouter : une phrase de plus sous la zone de dépôt ; une version courte sans les formes acceptées.
 
-- Si la garde du point 3 ne peut pas se mesurer sans jeton supplémentaire ou sans droit particulier : pose le `schedule` sans garde, dis-le, et propose la mesure à Grégoire plutôt que d'inventer un contournement.
-- ⛔ Ne réduis PAS le nombre de specs, n'ajoute pas de shards (écartés), ne touche pas aux exclusions Linux.
+## 3 · Mesuré par Cowork (lecture de `main` à 1.151.4) – à remesurer
 
-## 4 · Preuve
+- `SUFFIXE_PAGE` (`js/travaux-import.js`, ≈ l. 103) : `/[\s\-_]*(?:\((\d{1,3})\)|(?:p(?:age)?|part(?:ie)?)\s*(\d{1,3}))$/i` — en FIN de nom seulement. Les six formes du texte validé correspondent à cette expression, vérifié forme par forme ; une lettre finale n'est pas reconnue.
+- Point d'insertion : `index.html`, accordéon « Préparer et importer les travaux », sous `<p><strong>1. Déposer les fichiers :</strong></p>` (≈ l. 11626 ; renumérotée par le lot #893, à retrouver par la chaîne, pas par le numéro).
 
-- Le cliquet réécrit rougit sur trois mutations : `playwright` remis sur le `push`, le `cron` retiré, la garde d'inutilité retirée.
-- Le premier run planifié conclut et est LU : durée, SHA, verdict, inscrits au relais.
-- Un `workflow_dispatch` lancé à la main conclut aussi : c'est la porte de sortie quand on veut un verdict tout de suite.
-- **Ce que Grégoire y gagne, à écrire en une ligne dans le relais** : le nombre de runs complets par jour, avant et après (aujourd'hui : cinq pushs de code, donc cinq runs).
+## 4 · Arrêts
+
+- Si une forme du texte n'est PAS reconnue par l'expression mesurée à l'exécution (essaie les six, plus une lettre finale) : arrête-toi et dis-le à Grégoire — son texte promettrait quelque chose de faux. Ne corrige pas le texte toi-même, il est validé.
+- Ne pas toucher à l'assemblage lui-même : reconnaître une lettre finale est REPORTÉ par Grégoire (« je verrai à l'usage »).
+
+## 5 · Preuve
+
+- Sentinelle : le paragraphe existe sous « 1. Déposer les fichiers » et cite les six formes ; mutation (retirer une forme, ou déplacer le paragraphe sous un autre titre) → rouge.
+- Un essai qui joue les six formes CONTRE `SUFFIXE_PAGE` à l'exécution, plus `Artefact_1a` qui ne doit pas s'assembler : c'est la preuve que l'Aide ne ment pas.
+- Patch par `scripts/release.mjs`. Entrée de « Nouvelles » : une ligne, PROPOSÉE.
