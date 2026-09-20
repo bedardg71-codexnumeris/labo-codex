@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 15 H 25 (Toronto) : 1.151.4 (#893, l'aide de « Exporter et archiver » dit ce que l'écran affiche) — 🟡 COMMITÉE SUR `main`, NON POUSSÉE
+
+**État : `main` local = 1.151.4 (build `0920-1519`) ; `origin/main` = `ee2669f9` (1.151.3).** `main` est en avance des trois commits de docs de 13 h 30 plus ce lot. Le « pousse » de Grégoire est attendu ; le lot touche `js/` et `index.html` : verdict WebKit complet par `scripts/pousser.sh origin main`, ≈ 15 min, en arrière-plan.
+
+**Le « ok » de Grégoire (20 sept., ≈ 14 h 55, donné à Claude Code par question fermée) : les textes du §6 de la consigne, AVEC trois retouches** nées de la mesure de l'écran (arrêt du §4 de la consigne) : **A** – l'écran porte une case, « Reprises seulement » (Export Léa), donc « il n'y a rien à cocher » devient « Dans Export Léa, la case « Reprises seulement » limite l'export aux reprises » ; **B** – le bloc d'espace est rendu au BAS de l'écran, pas en haut ; **C** – « Trimestre complet » offre des filtres : « toutes les productions en PDF (ou celles que tu filtres) ». La ligne des « Nouvelles » (6e item de l'entrée 1.151) est validée telle quelle, même jour.
+
+**Livré** : accordéon d'aide (`index.html`), fiche `archiver-travaux` (titre = libellé de navigation ; inventaire « importé dans Préparer et importer » ; « N fichiers en stock » comme à l'écran), bloc d'espace de `chargerQuota` (accents, pluriel par `window.pluriel`, « Rangement : dans le navigateur / fichiers sur ton disque », alerte « L'espace est presque plein. »), `docs/modules/pipeline-annotation-evaluation.md` (trois cartes, structure ZIP mesurée dans `exporterTravaux`, allègement marqué retiré le 28 août). Mesuré en chemin : copies annotées et évaluations sont bien « toujours incluses » (`exporterTravaux`, deux commentaires « Toujours inclure »).
+
+**Preuve** : `tests/unit/sentinelle-893-aide-exporter-archiver.test.js` (11 essais, verrou structurel : titres et cases lus dans le code qui REND, l'aide et la fiche doivent les nommer tous et aucun autre) – **9 mutations, 9 rouges**, restauration par copie à l'empreinte près ; `tests/integration/aide-exporter-archiver-893.spec.js` (WebKit, 3/3 sans second essai ; 2 mutations, 2 rouges). Vitest complet avant mutations : 604 fichiers / 6 884 essais verts.
+
+**Hors périmètre, laissé tel quel (consigne, #892)** : `proposerNettoyage` et ses trois dialogues sans accents (« Aucun fichier a nettoyer », « Cela liberera », « supprime(s) ») – à reprendre AVEC #892, pas avant. Vu au banc, non inscrit (aucun symptôme vécu) : les tailles s'écrivent « 597.2 Ko », point décimal, pas virgule (`formaterTaille`).
+
+**Piège rejoué** : `release.mjs` a bumpé le jeton de `js/interpretation-config.js` (lot orphelin du 19 sept., un commentaire, toujours non commité) ; remis à `20260910c` à la main. Tant que ce lot de trois fichiers traîne, chaque release le rejoue : **à trancher – le commiter ou l'abandonner.**
+
+**Restent dus (inchangés)** : le plafond de 40 min du job WebKit (décision de Grégoire) ; la relecture croisée de Cowork sur ce lot ; la prose des quatre premiers items de l'entrée 1.151.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 12 H 45 (Toronto) : 1.151.3 (#929, la zone « Non planifié » toujours rendue) — POUSSÉE, origin/main = `ee2669f9`
 
 **État : `main` local = `2c72daad` (1.151.3, build `0920-1041`) + ce commit de relais ; `origin/main` = `ba6486a6` (1.151.2, poussée par la session voisine avant le départ de ce lot — condition de la consigne, mesurée par `merge-base --is-ancestor`).** Le « pousse » de Grégoire est attendu. Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push (VM Cowork, charge sous 8). Le lot touche `js/` : verdict WebKit complet, ≈ 15 min, à lancer en arrière-plan.

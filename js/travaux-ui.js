@@ -3693,13 +3693,13 @@
             <div class="travaux-quota-barre-container">
                 <div class="travaux-quota-barre" style="width: ${pourcent}%; background: ${couleurBarre};"></div>
             </div>
-            <p>${quota.utiliseFormate} utilises sur ${quota.totalFormate} (${pourcent}%)</p>
-            <p>${stats.nombre} fichier(s) travaux (${stats.tailleFormatee})</p>
-            <p class="texte-muted">Mode: ${fsapiActif ? 'Fichiers sur disque (FSAPI)' : 'IndexedDB'}</p>
+            <p>${quota.utiliseFormate} utilisés sur ${quota.totalFormate} (${pourcent}&nbsp;%)</p>
+            <p>${stats.nombre} ${window.pluriel(stats.nombre, 'fichier', 'fichiers')} de travaux (${stats.tailleFormatee})</p>
+            <p class="texte-muted">Rangement : ${fsapiActif ? 'fichiers sur ton disque' : 'dans le navigateur'}</p>
             ${quota.alerteQuota ? `
                 <div class="alerte alerte-attention" style="margin-top: 8px; padding: 10px; border-radius: 8px;">
-                    <strong>Espace bientot plein</strong>
-                    <p>Archivez et nettoyez les anciens travaux pour liberer de l'espace.</p>
+                    <strong>L'espace est presque plein.</strong>
+                    <p>Exporte tes anciens travaux avant d'en importer d'autres.</p>
                     <button class="btn btn-petit" data-action="travauxUI.proposerNettoyage">Proposer un nettoyage</button>
                     ${fsapiDispo && !fsapiActif ? '<button class="btn btn-petit btn-secondaire" data-action="travauxUI.configurerFSAPI">Passer au stockage disque</button>' : ''}
                 </div>` : ''}
