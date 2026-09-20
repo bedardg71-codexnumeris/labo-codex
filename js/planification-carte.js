@@ -9924,10 +9924,20 @@ function initialiserDragGrille() {
         if (!info.demarre) return; // simple clic : la navigation suit son cours
         info.item.classList.remove('planif-grille-item-drag');
         // Avaler le clic de navigation qui suit un vrai glisser.
-        document.addEventListener('click', function(ev) {
+        // #929 : ce clic n'existe PAS toujours. Relâché sur un autre élément
+        // que celui saisi (une pastille changée de rangée), WebKit n'en émet
+        // aucun : l'avaleur restait armé et mangeait le PROCHAIN clic de
+        // l'écran — le premier clic sur le bouton de disposition ne faisait
+        // rien (mesuré au banc, 20 sept. 2026). Le clic qui suit un pointerup
+        // part dans la même tâche : au tour suivant, l'avaleur n'a plus d'objet.
+        var avalerClic = function(ev) {
             ev.stopPropagation();
             ev.preventDefault();
-        }, { capture: true, once: true });
+        };
+        document.addEventListener('click', avalerClic, { capture: true, once: true });
+        setTimeout(function() {
+            document.removeEventListener('click', avalerClic, { capture: true });
+        }, 0);
 
         var rangee = rangeeSousPointeur(e.clientX, e.clientY);
         if (!rangee) return;
@@ -10032,12 +10042,18 @@ function mettreAJourPlanificateur() {
     // « déposer ici = désancrer », et le glisser ne doit pas connaître la
     // disposition. Un mode qui changerait l'attribut casserait le dépôt en
     // silence.
-    var zoneReserve = nonPlanifie
-        ? '<div class="planif-grille-nonplanifie' + (aGauche ? ' planif-reserve-colonne' : '') + '"' +
-          ' data-grille-semaine="">' +
-          '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
-          nonPlanifie + '</div>'
-        : '';
+    // #929 (tranché par Grégoire, 20 sept. 2026) : la zone se rend MÊME VIDE.
+    // Elle est la seule cible de désancrage — absente, plus aucune leçon ne
+    // pouvait quitter le calendrier par le glisser — et le bouton de
+    // disposition pivotait sans rien avoir à déplacer. Vide ou pleine, le
+    // balisage de la cible est le même : le dépôt ne connaît pas l'état.
+    var zoneReserve =
+        '<div class="planif-grille-nonplanifie' + (aGauche ? ' planif-reserve-colonne' : '') + '"' +
+        ' data-grille-semaine="">' +
+        '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
+        (nonPlanifie ||
+            '<div class="planif-grille-nonplanifie-vide">Glisse ici une leçon pour la retirer du calendrier.</div>') +
+        '</div>';
 
     html += aGauche
         ? '<div class="planif-cotecote">' + zoneReserve + htmlGrille + '</div>'

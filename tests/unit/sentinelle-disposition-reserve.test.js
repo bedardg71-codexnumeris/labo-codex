@@ -180,12 +180,101 @@ describe('Disposition · le rendu', () => {
         expect(compter(gauche)).toBe(compter(bas));
     });
 
-    it('sans rien en réserve, aucune colonne vide n’est fabriquée', () => {
-        prefs.planifReserveDisposition = 'gauche';
+});
+
+// =======================================================================
+// #929 — LA ZONE SE REND MÊME VIDE (tranché par Grégoire, 20 sept. 2026)
+// =======================================================================
+//
+// RENVERSEMENT ASSUMÉ. Jusqu'au 20 sept., cette sentinelle affirmait l'inverse
+// (« sans rien en réserve, aucune colonne vide n'est fabriquée ») — c'était une
+// décision du 7 août, pas un oubli. Le terrain l'a défaite : tout planifié, le
+// bouton de disposition pivotait sans rien avoir à déplacer (dix clics dans le
+// journal de Grégoire), et la seule cible de désancrage avait disparu — plus
+// aucune leçon ne pouvait quitter le calendrier par le glisser.
+const PHRASE_ZONE_VIDE = 'Glisse ici une leçon pour la retirer du calendrier.';
+
+describe('#929 · la zone « Non planifié » se rend même vide', () => {
+    function poserToutPlanifie() {
         poser(api, 'planif-l1', 'lecon', { titre: 'Placée', metadata: { semaine: 1 } });
+    }
+    /** La zone seule, de son ouverture à la fin du rendu ou à la grille qui suit. */
+    function zone(html) {
+        const debut = html.indexOf('<div class="planif-grille-nonplanifie');
+        if (debut < 0) return '';
+        const grille = html.indexOf('planif-grille-rangee', debut);
+        return grille < 0 ? html.slice(debut) : html.slice(debut, grille);
+    }
+
+    it('en « bas » : titre, phrase validée, APRÈS la grille', () => {
+        poserToutPlanifie();
+        api.mettreAJourPlanificateur();
+        const html = rendu();
+
+        expect(zone(html)).toContain('planif-grille-nonplanifie-titre">Non planifié<');
+        expect(zone(html)).toContain(PHRASE_ZONE_VIDE);
+        expect(html).not.toContain('planif-cotecote');
+        expect(html.indexOf('planif-grille-rangee')).toBeLessThan(html.indexOf('planif-grille-nonplanifie'));
+    });
+
+    it('en « gauche » : titre, phrase validée, en colonne AVANT la grille', () => {
+        prefs.planifReserveDisposition = 'gauche';
+        poserToutPlanifie();
+        api.mettreAJourPlanificateur();
+        const html = rendu();
+
+        expect(zone(html)).toContain('planif-reserve-colonne');
+        expect(zone(html)).toContain('planif-grille-nonplanifie-titre">Non planifié<');
+        expect(zone(html)).toContain(PHRASE_ZONE_VIDE);
+        expect(html.indexOf('planif-grille-nonplanifie')).toBeLessThan(html.indexOf('planif-grille-rangee'));
+    });
+
+    it('le bouton a donc toujours quelque chose à déplacer : la bascule change l’ordre du rendu', () => {
+        poserToutPlanifie();
+        api.mettreAJourPlanificateur();
+        const avant = rendu();
+        api.basculerDispositionReserve();
+        const apres = rendu();
+
+        expect(apres).not.toBe(avant);
+        expect(apres).toContain('planif-cotecote');
+    });
+
+    it('vide ou pleine, la cible de dépôt porte le MÊME balisage', () => {
+        const ouverture = (html) => html.match(/<div class="planif-grille-nonplanifie[^>]*>/)[0];
+
+        poserToutPlanifie();
+        api.mettreAJourPlanificateur();
+        const vide = ouverture(rendu());
+
+        poser(api, 'planif-lx', 'lecon', { titre: 'En réserve', metadata: {} });
+        api.mettreAJourPlanificateur();
+        const pleine = ouverture(rendu());
+
+        expect(vide).toBe(pleine);
+        expect(vide).toContain('data-grille-semaine=""');
+    });
+
+    it('la phrase disparaît dès qu’un élément entre dans la zone', () => {
+        poserCarteMixte(api);
         api.mettreAJourPlanificateur();
 
-        expect(rendu()).not.toContain('planif-grille-nonplanifie');
+        expect(rendu()).not.toContain(PHRASE_ZONE_VIDE);
+        expect(rendu()).not.toContain('planif-grille-nonplanifie-vide');
+    });
+
+    it('les div restent équilibrés, zone vide, dans les deux dispositions', () => {
+        poserToutPlanifie();
+        ['bas', 'gauche'].forEach((d) => {
+            prefs.planifReserveDisposition = d;
+            api.mettreAJourPlanificateur();
+            const html = rendu();
+            expect((html.match(/<div/g) || []).length).toBe((html.match(/<\/div>/g) || []).length);
+        });
+    });
+
+    it('la phrase a une règle CSS — une classe jamais définie n’est pas un lot fini', () => {
+        expect(sourceCss).toMatch(/\.planif-grille-nonplanifie-vide\s*\{[^}]*flex:\s*0 0 100%/);
     });
 });
 
