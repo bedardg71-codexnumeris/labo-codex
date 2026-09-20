@@ -9,6 +9,8 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, MATIN (Toronto) : 1.151.0 (#926, #927) — ✅ POUSSÉE
 
+**⚠ AJOUT DE 8 H 50 — 1.151.1 (#928, le menu des trimestres suit le calendrier) COMMITÉE SUR `main`, NON POUSSÉE.** `origin/main` = `a4f52dd6` ; `main` local a un commit d'avance (ce commit, code + fiches + relais). Vitest complet vert avant la release (603 / 6 866), sentinelle #928 exécutée, 3 mutations rouges. Pas de verdict WebKit sur ce SHA : `scripts/pousser.sh origin main` le prendra, sur le « pousse » de Grégoire (Cowork fermé à mesurer, charge sous 8).
+
 **POUSSÉE à 8 h 28 sur le « pousse » de Grégoire : `22db85c4..9e02cd8e`, `origin/main` = `9e02cd8e` mesuré après `git fetch` (plus ce commit de relais, docs seules).** `scripts/pousser.sh origin main`, préalables mesurés (aucune VM de Cowork, charge 3,3, mémoire libre 61 %, aucun autre test) : suite WebKit complète **sans rougeur nouvelle (0 échec connu, aucune instable, jeton sur `9e02cd8e`)**, Vitest du hook vert. Des « restent dus » ci-dessous, le (1) est FAIT ; le (2) et le (3) tiennent, ainsi que le rouge GitHub à arbitrer.
 
 **`main` local = `9f4723b9` (+ ce commit de relais), `origin/main` = `22db85c4`.** Le travail le plus récent vit sur `main` local ; aucune branche, aucun worktree du lot. Lot : « Enregistrer » ne reste plus grisé sous un cadenas ouvert (#926, une ligne dans `js/evaluation.js`) ; « brouillon » devient « évaluation non enregistrée », badge et filtre « Non enregistrée » dans la liste des évaluations (#927). Fiches dans `Retours des testeurs/SUIVI-BUGS.md`, récit dans `OU-EN-EST-ON.md`.
