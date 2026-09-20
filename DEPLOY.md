@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.8 (14 septembre 2026 — §1.4 : correction du fondement juridique cité. La loi ne «exclut» pas les fins personnelles, elle délimite son objet à l'exploitation d'une entreprise (art. 1525 C.c.Q.) ; même correction que `PRIVACY.md` v1.3. Historique antérieur : v1.7, 1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
+> **Version** : 1.9 (19 septembre 2026 — §3.4 bis : mode « Under Attack » trouvé actif depuis un an et désactivé ; il bloquait au moins un utilisateur légitime. Historique antérieur : v1.8, 14 septembre 2026 — §1.4 : correction du fondement juridique cité. La loi ne «exclut» pas les fins personnelles, elle délimite son objet à l'exploitation d'une entreprise (art. 1525 C.c.Q.) ; même correction que `PRIVACY.md` v1.3. Historique antérieur : v1.7, 1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -482,6 +482,39 @@ les requêtes. Si le proxy est gris (DNS only), Cloudflare Access est
 contourné et l'app est accessible sans authentification. *Ce point redevient
 opérant le 1er septembre 2026 (§3.6) : vérifier que le proxy est bien orange
 avant de considérer la policy comme active.*
+
+### 3.4 bis Mode « Under Attack » — désactivé le 19 septembre 2026
+
+**Constat (lu au tableau de bord le 19 sept. 2026, Cowork, à la demande de Grégoire).**
+Le mode *I'm Under Attack* était actif sur toute la zone `codexnumeris.org`.
+Selon Cloudflare, ce réglage avait été modifié pour la dernière fois « il y a
+un an » : il a donc couru pendant toute la période des testeurs. Rien dans le
+dépôt ne documentait son activation.
+
+**Effet mesuré** (`Sécurité → Analytics → Événements`, 7 jours, règle `iuam`,
+service « Niveau de sécurité », action *Managed Challenge*) :
+- 607 refus (403) sur la page d'accueil `/` en 7 jours, contre 80 ouvertures
+  réussies ;
+- l'adresse la plus touchée appartient au réseau d'un établissement
+  d'enseignement, avec un Safari 16.6 : requêtes en boucle sur l'heure du midi
+  les 17 et 18 septembre, émises depuis l'app elle-même (référent
+  `app.codexnumeris.org`) ; une adresse résidentielle porte le même navigateur ;
+- la connexion de Grégoire était elle-même défiée toutes les 5 minutes.
+
+**Inférence, non vérifiée** : une personne de cet établissement essayait d'utiliser
+l'app et butait sur le défi, qu'un Safari ancien ne passe pas.
+
+**Geste** : mode désactivé le 19 sept. 2026 vers 16 h 40 (`Vue d'ensemble` de la
+zone → `Actions rapides` → `Mode Under Attack`), avec l'accord de Grégoire.
+Motif : aucune attaque visible, et Access protège déjà l'entrée.
+
+**À vérifier** : relire les événements de sécurité après la prochaine journée
+de semaine. Attendu : plus d'événements `iuam` ; les 403 sur `/` doivent
+tomber près de zéro.
+
+⚠ **Ne pas le réactiver par réflexe.** Ce mode sert pendant une attaque DDoS
+réelle, pour quelques heures. Laissé actif, il bloque des utilisateurs
+légitimes sans laisser de trace ailleurs que dans ces événements.
 
 ### 3.5 Vérification
 
