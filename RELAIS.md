@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, MATIN (Toronto) : 1.151.0 (#926, #927) — COMMITÉE SUR `main`, ⚠ NON POUSSÉE
+
+**`main` local = `9f4723b9` (+ ce commit de relais), `origin/main` = `22db85c4`.** Le travail le plus récent vit sur `main` local ; aucune branche, aucun worktree du lot. Lot : « Enregistrer » ne reste plus grisé sous un cadenas ouvert (#926, une ligne dans `js/evaluation.js`) ; « brouillon » devient « évaluation non enregistrée », badge et filtre « Non enregistrée » dans la liste des évaluations (#927). Fiches dans `Retours des testeurs/SUIVI-BUGS.md`, récit dans `OU-EN-EST-ON.md`.
+
+**Mesuré** : Vitest complet vert APRÈS le commit (602 / 6 862) ; spec WebKit neuve `evaluation-926-consulter-enregistrer-grise.spec.js` 2/2 et les trois specs aux mots réécrits, 7/7 ; cinq mutations rouges, fichiers restaurés par copie, empreintes identiques. **Pas mesuré** : la suite WebKit ENTIÈRE — aucun verdict Playwright sur ce SHA.
+
+**Restent dus** : (1) `scripts/pousser.sh origin main` sur le « pousse » de Grégoire — Cowork fermé (à MESURER), charge sous 8 : ce matin la charge a dépassé 200, Chrome en tête (un processus à 163 %), sans rapport avec nos tâches ; la spec neuve a crevé le plafond de 30 s une fois sous cette charge, verte en 16 s avec un plafond large ; (2) la prose de l'entrée 1.151 des « Nouvelles » est PROPOSÉE, à valider par Grégoire (le mot, lui, est validé) ; (3) relecture croisée de Cowork : non faite.
+
+**⚠ Trouvé par l'audit de début de session, NON ouvert, à arbitrer** : le verdict GitHub est ROUGE sur `9abf8602` (run 35469302437) alors que le jeton local était vert sur le même SHA — `audit-pratiques-notation-parcours-2026-09-16.spec.js:68` (Flux E · SPE, `noteConstructible`), `ce-que-l-eleve-lit-703-705.spec.js:40` (la spec neuve de la 1.150.0), `evaluation-882-choix-niveau-ecrit-en-base.spec.js:40` ; instable : `cours-actif-hors-bibliotheque-916.spec.js:19`. Les quatre derniers runs jugés sur `main` sont en échec. Le bloc du 19 sept. ci-dessous ne le disait pas. Worktree résiduel `verdict-906` (propre, ancêtre de HEAD).
+
+**Non commités, PAS de cette session, laissés tels quels** : `.claude/skills/ecosysteme-classe/SKILL.md`, `DEPLOY.md`, `js/interpretation-config.js` (son jeton remis à `20260910c` après `release.mjs`), deux fichiers de `plans de travail/`, `Rapports/suivi-cloudflare/`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 19 SEPT. 2026, FIN DE SOIRÉE (Toronto) : 1.150.0 (#701, #702, #703, #704, #705, #686) — ✅ POUSSÉE
 
 **`origin/main` = `9abf8602`, mesuré après `git fetch`** (HEAD = origin/main), plus ce commit de relais (docs seules). Second `scripts/pousser.sh origin main`, Cowork fermé (mesuré : aucune VM), charge 1,99 : suite WebKit complète **sans rougeur nouvelle (0 échec connu, inchangé)**, Vitest du hook vert, `49061df3..9abf8602`. Le travail le plus récent vit sur `main` ; aucune branche ni worktree du lot ne reste. Rien n'est dû sur ce lot. Le bloc ci-dessous raconte la soirée (premier push bloqué à raison, spec #912 réancrée).
