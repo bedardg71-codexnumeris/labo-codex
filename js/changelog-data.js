@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // Entrée PROPOSÉE le 20 sept. 2026 (#926, #927) — le mot « évaluation non enregistrée » est validé par
+            // Entrée PROPOSÉE le 20 sept. 2026 (#926, #927, #928) — le mot « évaluation non enregistrée » est validé par
             // Grégoire ; la prose de l'entrée reste à valider.
             version: '1.151',
             couleur: 'orange',
@@ -29,7 +29,8 @@
             items: [
                 'Évaluer&nbsp;: quand tu consultes une évaluation non verrouillée juste après une évaluation verrouillée, le bouton «&nbsp;Enregistrer&nbsp;» ne reste plus grisé sous un cadenas ouvert. Tu peux l\'enregistrer, et elle compte alors dans la note et dans la complétion.',
                 'Le mot «&nbsp;brouillon&nbsp;» disparaît&nbsp;: il laissait croire que c\'était le travail de l\'élève qui était un brouillon. L\'application dit maintenant «&nbsp;évaluation non enregistrée&nbsp;», au profil, dans la note de session et dans le message qui refuse une évaluation incomplète. La règle ne change pas&nbsp;: tant qu\'elle n\'est pas enregistrée, une évaluation ne compte nulle part.',
-                'Liste des évaluations&nbsp;: une évaluation non enregistrée porte le badge «&nbsp;Non enregistrée&nbsp;» au lieu de «&nbsp;Évalué&nbsp;», et le filtre Statut offre «&nbsp;Non enregistrée&nbsp;» pour les retrouver d\'un geste.'
+                'Liste des évaluations&nbsp;: une évaluation non enregistrée porte le badge «&nbsp;Non enregistrée&nbsp;» au lieu de «&nbsp;Évalué&nbsp;», et le filtre Statut offre «&nbsp;Non enregistrée&nbsp;» pour les retrouver d\'un geste.',
+                'Cadre&nbsp;› Trimestre&nbsp;: le menu et la liste des trimestres suivent le calendrier, du plus ancien au plus récent — l\'hiver avant l\'automne d\'une même année — et non plus l\'ordre où tu les as créés.'
             ]
         },
         {

@@ -22,6 +22,36 @@
    =============================== */
 
 /**
+ * #928 (20 sept. 2026) — L'ORDRE DU CALENDRIER, pas celui de la création. Le registre garde l'ordre où les
+ * trimestres ont été créés : A2024, reconstruit le 18 sept., arrivait après A2026 (capture de Grégoire).
+ * Année, puis session dans l'année (Hiver, Été, Automne) — un tri alphabétique du nom mettrait « Hiver 2026 »
+ * après « Automne 2026 ». Un trimestre sans année lisible (la démonstration) va à la fin, dans son ordre.
+ * Rend une COPIE : le registre stocké n'est jamais réordonné.
+ * @param {Array<{id:string, annee?:number, session?:string}>} trimestres
+ * @returns {Array}
+ */
+function trierTrimestresChronologique(trimestres) {
+    const RANG_SESSION = { H: 0, E: 1, A: 2 };
+    const moment = (t) => {
+        const parId = /^([ahe])(\d{4})$/i.exec(String((t && t.id) || ''));
+        const annee = Number(t && t.annee) || (parId ? Number(parId[2]) : null);
+        const session = String((t && t.session) || (parId ? parId[1] : '')).charAt(0).toUpperCase();
+        if (!annee || !(session in RANG_SESSION)) return null;
+        return annee * 10 + RANG_SESSION[session];
+    };
+    return (trimestres || [])
+        .map((t, index) => ({ t, index, moment: moment(t) }))
+        .sort((a, b) => {
+            if (a.moment === null || b.moment === null) {
+                if (a.moment === b.moment) return a.index - b.index;
+                return a.moment === null ? 1 : -1;
+            }
+            return (a.moment - b.moment) || (a.index - b.index);
+        })
+        .map((x) => x.t);
+}
+
+/**
  * Popule le dropdown de sélection du trimestre depuis le registre
  */
 function populerDropdownTrimestreV2() {
@@ -50,8 +80,8 @@ function populerDropdownTrimestreV2() {
         return;
     }
 
-    // Ajouter chaque trimestre du registre
-    trimestres.forEach(t => {
+    // Ajouter chaque trimestre du registre, dans l'ordre du calendrier (#928)
+    trierTrimestresChronologique(trimestres).forEach(t => {
         const option = document.createElement('option');
         option.value = t.id;
         option.textContent = t.nom;
@@ -83,7 +113,7 @@ function afficherListeTrimestreGestion() {
         return;
     }
 
-    container.innerHTML = trimestres.map(t => {
+    container.innerHTML = trierTrimestresChronologique(trimestres).map(t => {
         const estActif = trimestreActif && t.id === trimestreActif.id;
         const estArchive = t.archive === true;
 
@@ -639,6 +669,7 @@ function ouvrirModalNouveauTrimestre() {
 }
 
 // Exports — 11 fonctions migrées du bloc principal résidu (L4470-4480 originelles).
+window.trierTrimestresChronologique = trierTrimestresChronologique;
 window.populerDropdownTrimestreV2 = populerDropdownTrimestreV2;
 window.afficherListeTrimestreGestion = afficherListeTrimestreGestion;
 window.confirmerArchivage = confirmerArchivage;
