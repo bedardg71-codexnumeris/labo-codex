@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 10 H 55 (Toronto) : 1.151.3 (#929, la zone « Non planifié » toujours rendue) — COMMITÉE, NON POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 12 H 30 (Toronto) : 1.151.3 (#929, la zone « Non planifié » toujours rendue) — COMMITÉE, PUSH EN COURS SOUS `caffeinate`
 
 **État : `main` local = `2c72daad` (1.151.3, build `0920-1041`) + ce commit de relais ; `origin/main` = `ba6486a6` (1.151.2, poussée par la session voisine avant le départ de ce lot — condition de la consigne, mesurée par `merge-base --is-ancestor`).** Le « pousse » de Grégoire est attendu. Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push (VM Cowork, charge sous 8). Le lot touche `js/` : verdict WebKit complet, ≈ 15 min, à lancer en arrière-plan.
 
@@ -28,7 +28,9 @@
 
 **Pièges rencontrés :** `release.mjs` a bumpé le jeton de `js/interpretation-config.js` (modifié non commité, PAS de cette session) — remis à `20260910c` avant commit, comme le relais précédent le prévoyait. Les quatre fichiers modifiés non commités (`ecosysteme-classe/SKILL.md`, `interpretation-config.js`, CADRAGE et RELECTURE du 17 sept.) restent intouchés.
 
-**Restent dus :** le « pousse » ; la phrase de « Nouvelles » PROPOSÉE à Grégoire (non posée dans `js/changelog-data.js`) ; sa vérification à l’écran (ouvrir sa carte, cliquer ◧, voir la zone changer de place) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
+**12 h 30 — verdict de 11 h 10 PERDU, relancé :** `pousser.sh` lancé à 11 h 10 (mot de Grégoire : « pousse après 11 h 10 ») a tourné 72 min sans finir — Mac sur batterie, mises en veille par à-coups de 11 h 12 à 12 h 20 (`pmset -g log`) ; trois specs rouges aux instants de veille (`evaluation-652` ×2, `-882`, `-911`). Tâche coupée, rien poussé, jeton intact. ⮕ **Lancer `pousser.sh` sous `caffeinate -i`, et regarder `pmset -g batt` avant.** Entre-temps la phrase de « Nouvelles » #929 a été VALIDÉE par Grégoire (« la phrase de Nouvelles est bonne, pose-la ») : 5e item de l’entrée 1.151, `--build-only` (build `0920-1224`, numéro inchangé) ; les quatre premiers items de l’entrée restent à valider.
+
+**Restent dus :** le verdict WebKit et le push (mot de Grégoire : « pousse quand c’est commité ») ; sa vérification à l’écran (ouvrir sa carte, cliquer ◧, voir la zone changer de place) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
 
 ---
 
