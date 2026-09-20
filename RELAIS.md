@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 12 H 30 (Toronto) : 1.151.3 (#929, la zone « Non planifié » toujours rendue) — COMMITÉE, PUSH EN COURS SOUS `caffeinate`
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 12 H 45 (Toronto) : 1.151.3 (#929, la zone « Non planifié » toujours rendue) — POUSSÉE, origin/main = `ee2669f9`
 
 **État : `main` local = `2c72daad` (1.151.3, build `0920-1041`) + ce commit de relais ; `origin/main` = `ba6486a6` (1.151.2, poussée par la session voisine avant le départ de ce lot — condition de la consigne, mesurée par `merge-base --is-ancestor`).** Le « pousse » de Grégoire est attendu. Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push (VM Cowork, charge sous 8). Le lot touche `js/` : verdict WebKit complet, ≈ 15 min, à lancer en arrière-plan.
 
@@ -30,7 +30,9 @@
 
 **12 h 30 — verdict de 11 h 10 PERDU, relancé :** `pousser.sh` lancé à 11 h 10 (mot de Grégoire : « pousse après 11 h 10 ») a tourné 72 min sans finir — Mac sur batterie, mises en veille par à-coups de 11 h 12 à 12 h 20 (`pmset -g log`) ; trois specs rouges aux instants de veille (`evaluation-652` ×2, `-882`, `-911`). Tâche coupée, rien poussé, jeton intact. ⮕ **Lancer `pousser.sh` sous `caffeinate -i`, et regarder `pmset -g batt` avant.** Entre-temps la phrase de « Nouvelles » #929 a été VALIDÉE par Grégoire (« la phrase de Nouvelles est bonne, pose-la ») : 5e item de l’entrée 1.151, `--build-only` (build `0920-1224`, numéro inchangé) ; les quatre premiers items de l’entrée restent à valider.
 
-**Restent dus :** le verdict WebKit et le push (mot de Grégoire : « pousse quand c’est commité ») ; sa vérification à l’écran (ouvrir sa carte, cliquer ◧, voir la zone changer de place) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
+**12 h 41 — POUSSÉE : `ba6486a6..ee2669f9`, 4 commits.** Verdict WebKit complet sous `caffeinate`, Mac branché, 17 min, aucune veille : aucune rougeur nouvelle, 0 échec connu, 1 instable (verte au second essai) = `recoupement-horaire-devis-540D` « on se TAIT quand l’horaire est incomplet » — sans lien avec #929, non inscrite (une occurrence). Vitest du hook vert. ⚠ Ce commit de relais est LOCAL, volontairement non poussé : un push sur `main` annule le run GitHub en cours (constat de la session du filet GitHub), et celui de `ee2669f9` est le deuxième vert attendu. Il partira avec le prochain push, une fois ce run LU.
+
+**Restent dus :** lire le run GitHub de `ee2669f9` (attendu vert, tolérance : l’instable `cours-actif-hors-bibliotheque-916`) ; sa vérification à l’écran (ouvrir sa carte, cliquer ◧, voir la zone changer de place) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
 
 ---
 
