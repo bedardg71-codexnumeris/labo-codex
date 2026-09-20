@@ -19629,6 +19629,32 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     transition: width 0.3s;
 }
 
+/* --- #892 : liste des copies a retirer (modale du nettoyage) ---
+   Defile DANS la modale : sur iPad, le bouton reste a l'ecran quelle que soit
+   la longueur de la liste. */
+.travaux-nettoyage-liste {
+    list-style: none;
+    margin: 12px 0;
+    padding: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+}
+
+.travaux-nettoyage-liste li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+
+.travaux-nettoyage-liste li:last-child {
+    border-bottom: none;
+}
+
 /* --- Vue cote-a-cote --- */
 .travaux-split-view {
     display: flex;
