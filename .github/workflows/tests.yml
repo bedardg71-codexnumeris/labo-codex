@@ -82,6 +82,39 @@
 #     comportent vraiment autrement sous WebKit Linux, ou si les specs présument
 #     une géométrie de macOS.
 #
+# (6) 20 SEPTEMBRE 2026 — LE PLAFOND DE 40 EST DÉPASSÉ PAR LA MESURE : 40 -> 60.
+#     La projection du point (4a) annonçait « si un run réel la dépasse, on le
+#     dit ». Mesuré sur les 60 derniers runs (15 au 20 sept., `gh run view
+#     --json jobs`) : **29 jobs Playwright coupés au plafond** (40,2 à 40,8 min,
+#     `The operation was canceled`, aucun push concurrent), dont trois le 20
+#     (efa185c1, ee2669f9, a305f524), contre une dizaine qui concluent — entre
+#     27,5 et 39,7 min. Un run coupé facture ses 40 minutes et n'achète aucun
+#     verdict.
+#     a) DEUX causes, mesurées, et aucune spec qui s'emballe. La suite est passée
+#        de 239 à 379 essais (+59 %). Et le runner varie du simple au double :
+#        ba6486a6 conclut 375 essais en 32,1 min (5,1 s l'un) ; a305f524, même
+#        suite à 4 essais près, n'en a jugé que 276 en 39,3 min. Sur les 273
+#        essais communs aux deux runs, le rapport des durées est de 1,60 —
+#        médiane par fichier 1,60, minimum 1,21, maximum 2,65 ; les quinze plus
+#        gros écarts ne pèsent que 17 % de l'écart total. Ralentissement
+#        UNIFORME : c'est la machine, pas un essai.
+#     b) Décision de Grégoire (20 sept.) : plafond à 60, et la durée réelle des
+#        TROIS prochains runs complets s'inscrit ci-dessous avant de rediscuter
+#        du chiffre. ⚠ PROJECTION, pas mesure : a305f524 mené à terme au même
+#        rythme aurait pris ~54 min. Un runner lent FRÔLE donc déjà 60. La règle
+#        du point (4a) tient toujours : si un run réel dépasse 60, on le dit à
+#        Grégoire, on ne remonte pas le chiffre en boucle. Le plafond se
+#        déplace sur une mesure, il ne disparaît pas. Toujours écartés : les
+#        shards, les exclusions, les `retries`.
+#     c) MESURES (durée du job Playwright · SHA · essais) — à inscrire ici avec
+#        le prochain push qui touche de toute façon du code observable : ce
+#        fichier est dans OBSERVABLE, le modifier seul coûte un run complet.
+#          1. —
+#          2. —
+#          3. —
+#     d) Le job `vitest` (plafond 15) : 2,0 à 3,3 min sur ces 60 runs, pour
+#        6884 essais. Loin du sien ; rien à changer.
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -226,10 +259,11 @@ jobs:
     needs: vitest
     if: needs.vitest.outputs.playwright == 'oui'
     runs-on: ubuntu-latest
-    # 2 sept. 2026 : 15 -> 40. Voir le point (4a) du journal en tête. Le plafond
-    # se DÉPLACE, il ne disparaît pas : un job sans limite qui part en boucle
-    # consomme des minutes jusqu'à épuisement.
-    timeout-minutes: 40
+    # 2 sept. 2026 : 15 -> 40 (point 4a). 20 sept. 2026 : 40 -> 60 (point 6),
+    # sur mesure — 29 jobs coupés à 40 min en six jours. Le plafond se DÉPLACE,
+    # il ne disparaît pas : un job sans limite qui part en boucle consomme des
+    # minutes jusqu'à épuisement.
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
