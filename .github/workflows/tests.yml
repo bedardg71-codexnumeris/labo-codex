@@ -1,7 +1,9 @@
 # Tests Vitest + Playwright (Défense I) en intégration continue
 #
 # Trigger : push sur main + toute pull request vers main — SAUF quand le commit
-# ne touche que de la documentation (voir `paths-ignore` et son cliquet).
+# ne touche que de la documentation (voir `paths-ignore` et son cliquet) : c'est
+# la voie de VITEST. Depuis le 20 sept. 2026 (point 7), PLAYWRIGHT a la sienne :
+# une fois par jour (`schedule`) et à la demande (`workflow_dispatch`).
 # Runner : ubuntu-latest.
 # Note : Playwright WebKit Linux ≠ Safari macOS — la validation device-
 # spécifique (Safari Mac, iPad Air) reste manuelle locale par Grégoire.
@@ -106,14 +108,51 @@
 #        Grégoire, on ne remonte pas le chiffre en boucle. Le plafond se
 #        déplace sur une mesure, il ne disparaît pas. Toujours écartés : les
 #        shards, les exclusions, les `retries`.
-#     c) MESURES (durée du job Playwright · SHA · essais) — à inscrire ici avec
-#        le prochain push qui touche de toute façon du code observable : ce
-#        fichier est dans OBSERVABLE, le modifier seul coûte un run complet.
+#     c) MESURES (durée du job Playwright · SHA · essais) — celles des trois
+#        premiers runs planifiés ou demandés qui concluent (point 7).
 #          1. —
 #          2. —
 #          3. —
 #     d) Le job `vitest` (plafond 15) : 2,0 à 3,3 min sur ces 60 runs, pour
 #        6884 essais. Loin du sien ; rien à changer.
+#
+# (7) 20 SEPTEMBRE 2026 — PLAYWRIGHT QUITTE LA VOIE DU PUSH : UNE FOIS PAR JOUR.
+#     Question de Grégoire : « est-il nécessaire de faire les tests Playwright
+#     sur toute l'application ? » Réponse retenue : OUI pour l'étendue — la suite
+#     entière est la seule à voir une régression ailleurs que là où l'on vient de
+#     corriger —, NON pour la fréquence. Rien n'est poussé sans avoir été jugé :
+#     `scripts/pousser.sh` fait tourner la suite WebKit ENTIÈRE sur le Mac avant
+#     chaque push de code, et le hook pre-push lance Vitest. Le run GitHub par
+#     push payait donc un second verdict — cinq runs complets le 20 sept., dont
+#     trois coupés au plafond.
+#     a) `vitest` garde le `push` et la `pull_request`, tels quels. Il ne tourne
+#        pas sur le `schedule` : le push l'a déjà jugé.
+#     b) `playwright` ne part plus que par `schedule` — `cron: '0 8 * * *'`, soit
+#        4 h à Toronto l'été. ⚠ Le cron de GitHub est en UTC et ne suit pas
+#        l'heure avancée : de novembre à mars, ce sera 3 h. Connu, assumé. ⚠ Le
+#        cron de GitHub part souvent en retard de plusieurs minutes, et GitHub
+#        suspend les `schedule` d'un dépôt resté 60 jours sans activité — ou par
+#        `workflow_dispatch` : la porte de sortie quand on veut un verdict tout
+#        de suite (`gh workflow run tests.yml`).
+#     c) LA GARDE D'INUTILITÉ (job `garde`, scripts/ci-garde-inutilite.sh) : un
+#        run planifié s'arrête AVANT d'installer quoi que ce soit si rien
+#        d'observable au navigateur n'a bougé depuis le dernier SHA qu'un run
+#        planifié a jugé jusqu'au bout (`success` ou `failure` ; un run coupé ou
+#        annulé ne compte pas, on rejuge). Dans le doute, on juge. Elle lit
+#        l'historique des runs par `gh` avec le jeton du workflow : d'où
+#        `actions: read` sur ce job, et lui seul. Playwright est alors `skipped`,
+#        jamais `success` — la règle du point (4b) tient.
+#     d) La liste `OBSERVABLE` RESTE, et monte au niveau du workflow. Elle ne
+#        décide plus rien sur un push ; elle a trois lecteurs vivants :
+#        scripts/lot-observable.sh (donc `pousser.sh` et le hook pre-push — le
+#        verdict du Mac, #756), la garde du point c, et le cliquet (bloc 2).
+#        RETIRÉS, faute de lecteur : l'étape « Décider si Playwright doit
+#        tourner » et la sortie `outputs.playwright` du job `vitest`.
+#     e) La concurrence se sépare par ÉVÉNEMENT : sans cela, le premier push du
+#        matin (Grégoire travaille dès 4 h) annulerait le run planifié en cours.
+#     f) Ce à quoi on renonce : le verdict GitHub au navigateur ne porte plus
+#        sur le commit du push, mais sur le `main` de 4 h. Un écart entre le SHA
+#        jugé et HEAD est NORMAL (rituel d'ouverture, §2.1).
 #
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
@@ -160,41 +199,43 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: *doc
+  # Point (7) : la voie de Playwright. UTC — 4 h à Toronto l'été, 3 h l'hiver.
+  schedule:
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Par ÉVÉNEMENT (point 7e) : un push ne doit pas annuler le run planifié.
 concurrency:
-  group: tests-${{ github.ref }}
+  group: tests-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
+env:
+  # ⚠ UNE SEULE SOURCE DE VÉRITÉ, trois lecteurs (point 7d) :
+  # scripts/lot-observable.sh — donc `pousser.sh`, le hook pre-push et la garde
+  # du job `garde` —, et le cliquet tests/unit/sentinelle-ci-paths-ignore
+  # (bloc 2), qui vérifie qu'aucun spec Playwright ne LIT un chemin absent
+  # d'ici. Une entrée finissant par `/` couvre le dossier ; sinon, c'est un
+  # fichier exact. Playwright ouvre index.html en file:// : tout ce
+  # qu'index.html charge est observable (js/, css/, icons/, styles.css,
+  # version.js) ; s'y ajoutent ce que les specs lisent (version.json,
+  # scripts/, tests/) et ce workflow lui-même, qui doit se juger.
+  OBSERVABLE: "js/ css/ icons/ img/ libs/ index.html styles.css version.js version.json noms_stables.json scripts/ tests/ .github/workflows/tests.yml"
+
 jobs:
-  # ── Job 1 : Vitest, TOUJOURS. Et il décide si le job 2 doit tourner. ──
+  # ── Job 1 : Vitest, sur CHAQUE push et pull request (et à la demande). ──
+  # Pas sur le `schedule` : le push l'a déjà jugé (point 7a).
   vitest:
     name: Vitest
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    outputs:
-      playwright: ${{ steps.decision.outputs.playwright }}
-    env:
-      # ⚠ UNE SEULE SOURCE DE VÉRITÉ, deux lecteurs : le shell de l'étape
-      # « Décider » ci-dessous, et le cliquet tests/unit/sentinelle-ci-paths-ignore
-      # (bloc 2), qui vérifie qu'aucun spec Playwright ne LIT un chemin absent
-      # d'ici. Une entrée finissant par `/` couvre le dossier ; sinon, c'est un
-      # fichier exact. Playwright ouvre index.html en file:// : tout ce
-      # qu'index.html charge est observable (js/, css/, icons/, styles.css,
-      # version.js) ; s'y ajoutent ce que les specs lisent (version.json,
-      # scripts/, tests/) et ce workflow lui-même, qui doit se juger.
-      OBSERVABLE: "js/ css/ icons/ img/ libs/ index.html styles.css version.js version.json noms_stables.json scripts/ tests/ .github/workflows/tests.yml"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          # L'historique complet : `git diff` doit pouvoir atteindre
-          # `github.event.before`, qui peut être plusieurs commits derrière.
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -211,53 +252,60 @@ jobs:
         working-directory: tests
         run: npm run test:unit
 
-      - name: Décider si Playwright doit tourner
-        id: decision
-        shell: bash
-        run: |
-          set -euo pipefail
-          BASE="${{ github.event.before }}"
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE="${{ github.event.pull_request.base.sha }}"
-          fi
-          decision=oui
-          raison=""
-          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] \
-             || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
-            raison="base introuvable (premier push, branche neuve ou push forcé) : on juge tout"
-          else
-            fichiers=$(git diff --name-only "$BASE" "${{ github.sha }}")
-            decision=non
-            touches=""
-            while IFS= read -r f; do
-              [ -z "$f" ] && continue
-              for e in $OBSERVABLE; do
-                case "$e" in
-                  */) case "$f" in "$e"*) decision=oui; touches="$touches $f";; esac ;;
-                  *)  [ "$f" = "$e" ] && { decision=oui; touches="$touches $f"; } ;;
-                esac
-              done
-            done <<< "$fichiers"
-            if [ "$decision" = oui ]; then
-              raison="fichiers observables au navigateur dans ce push :$touches"
-            else
-              raison="aucun fichier observable au navigateur dans ce push ($(echo "$fichiers" | grep -c . ) fichier(s), tous hors de : $OBSERVABLE)"
-            fi
-          fi
-          echo "playwright=$decision" >> "$GITHUB_OUTPUT"
-          {
-            echo "## Playwright : ${decision^^}"
-            echo ""
-            echo "$raison"
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "Playwright : $decision — $raison"
+  # ── Job 2 : la garde d'inutilité (point 7c). Quelques secondes, rien d'installé. ──
+  garde:
+    name: Garde (Playwright doit-il tourner ?)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      juger: ${{ steps.garde.outputs.juger }}
 
-  # ── Job 2 : Playwright, SEULEMENT si le push touche du code observable. ──
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # L'historique complet : le diff doit pouvoir atteindre le dernier
+          # SHA jugé, qui peut être plusieurs jours derrière.
+          fetch-depth: 0
+
+      - name: Rien d'observable n'a bougé ? Alors on ne paie pas la suite
+        id: garde
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENEMENT: ${{ github.event_name }}
+        run: |
+          set -uo pipefail
+          # Le dernier run planifié qui a CONCLU, celui-ci exclu. `gh` muet ou
+          # en échec : DERNIER reste vide, et le script juge (dans le doute).
+          DERNIER=$(gh run list --workflow tests.yml --event schedule --limit 30 \
+            --json databaseId,headSha,conclusion \
+            --jq '[.[] | select(.databaseId != ${{ github.run_id }}) | select(.conclusion == "success" or .conclusion == "failure")][0].headSha // ""' \
+            2>/dev/null) || DERNIER=""
+          export DERNIER
+          IFS=$'\t' read -r juger raison < <(bash scripts/ci-garde-inutilite.sh)
+          [ "$juger" = "non" ] || juger=oui
+          echo "juger=$juger" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Playwright : ${juger^^}"
+            echo ""
+            echo "${raison:-la garde n'a rien rendu : on juge}"
+            echo ""
+            echo "Commit : \`${GITHUB_SHA:0:8}\` · dernier SHA jugé par un run planifié : \`${DERNIER:0:8}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Playwright : $juger — ${raison:-}"
+
+  # ── Job 3 : Playwright, une fois par jour et à la demande — JAMAIS sur un push. ──
   # ⚠ Sauté = `skipped`, jamais `success`. C'est ce que le rituel d'ouverture lit.
+  # Sur un push, `garde` est sauté, donc celui-ci aussi.
   playwright:
     name: Playwright (WebKit)
-    needs: vitest
-    if: needs.vitest.outputs.playwright == 'oui'
+    needs: garde
+    if: needs.garde.outputs.juger == 'oui'
     runs-on: ubuntu-latest
     # 2 sept. 2026 : 15 -> 40 (point 4a). 20 sept. 2026 : 40 -> 60 (point 6),
     # sur mesure — 29 jobs coupés à 40 min en six jours. Le plafond se DÉPLACE,

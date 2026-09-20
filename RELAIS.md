@@ -7,6 +7,38 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 18 H (Toronto) : sur GitHub, la suite au navigateur tourne UNE FOIS PAR JOUR, plus à chaque push — COMMITÉ, PAS ENCORE POUSSÉ
+
+**Aucune release, rien dans `js/`, rien à l'écran.** Consigne exécutée : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-ci-une-fois-par-jour.md`, Cowork, 16 h 34, décision de Grégoire : « oui pour l'étendue, non pour la fréquence ») ; la précédente est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-plafond-github.md`.
+
+**Ce que Grégoire y gagne** : le 20 sept., cinq pushs de code = **cinq runs complets au navigateur, 182 minutes facturées, dont quatre sans verdict** (trois coupés au plafond, un annulé par le push suivant) ; désormais **un run par jour au plus (35 à 55 min), zéro les jours où rien d'observable n'a bougé**. Rien n'est poussé sans avoir été jugé : le Mac fait tourner la suite entière avant chaque push (`pousser.sh`), inchangé.
+
+⚠ **ÉCART À LA CONDITION DE DÉPART, DIT** : la consigne voulait le commit du plafond (`74a845f0`) sur `origin/main` et son run LU avant de partir. Il n'était pas poussé (le « pousse » de Grégoire n'était pas venu). Ce lot a été préparé en local par-dessus. Conséquence : si les deux commits partent ensemble, le run « du plafond » n'existera jamais sur un push – Playwright a quitté cette voie. **La preuve du plafond (un run complet qui conclut, durée inscrite) devient celle de ce lot : le premier `workflow_dispatch`, puis le premier run planifié.**
+
+| Quoi | Mesure |
+|---|---|
+| Déclencheurs | `schedule` `cron: '0 8 * * *'` (4 h Toronto l'été, 3 h l'hiver : UTC, dit en commentaire) + `workflow_dispatch`. `vitest` garde push et pull request, saute le planifié |
+| Trois jobs | `vitest` · `garde` (planifié/demandé seulement, ~secondes, rien d'installé) · `playwright` (`needs: garde`, `if: …juger == 'oui'`). Sur un push : `garde` et `playwright` `skipped`, jamais `success` |
+| Garde d'inutilité | `scripts/ci-garde-inutilite.sh` : rien d'observable depuis le dernier SHA jugé par un run planifié CONCLU (`success`/`failure` ; un run coupé ne compte pas) → `non`. Dans le doute → `oui`. Le SHA vient de `gh run list` avec le jeton du workflow : **`actions: read` ajouté sur le job `garde` seul** – pas de jeton supplémentaire (arrêt du §3 : non déclenché, mais c'est un droit de plus, dit ici) |
+| `OBSERVABLE` | **GARDÉE**, montée en `env:` du workflow. Mesuré : lue par `scripts/lot-observable.sh` → `pousser.sh` et le hook pre-push (#756), par la garde, par le cliquet. **RETIRÉS** faute de lecteur : l'étape « Décider » et `outputs.playwright` |
+| Concurrence | groupe par ÉVÉNEMENT : sinon le premier push de 4 h annulait le run planifié (non demandé par la consigne, nécessaire : Grégoire travaille à cette heure) |
+| Cliquet `sentinelle-ci-paths-ignore`, bloc 2 réécrit | 18 essais (13 avant) dont un banc git jetable du vrai script (`ENV_SANS_GIT`). **5 mutations, 5 rouges** : `push` ajouté au `if:` de la garde · cron retiré · garde neutralisée dans le script · appel du script remplacé par `juger=oui` · `needs`/`if` retirés de `playwright`. Restauration par copie, empreintes vérifiées |
+| Vitest complet AVANT mutations | 604 fichiers / 6 889 essais verts, 0 `Errors` |
+| Rituel d'ouverture §2.1 | deux verdicts, deux runs : Vitest = dernier push ; navigateur = dernier run planifié où Playwright a conclu, avec SON SHA ; **l'écart avec `HEAD` est normal** ; ligne d'historique ajoutée |
+| Éprouvé sur le vrai dépôt | le script : 6 cas justes ; la requête `gh … --jq` : rend `ba6486a6` sur `--event push` (témoin), vide sur `schedule` (aucun run planifié n'existe encore → le premier jugera tout) |
+
+**NON ÉPROUVÉ, et pourquoi** : le YAML ne s'exécute que chez GitHub. `${{ github.run_id }}` dans le `--jq`, `actions: read`, et le saut en cascade (`garde` sauté ⇒ `playwright` sauté sur un push) sont lus dans la doc, pas mesurés. **Restent dus, dans l'ordre, après le push** : (1) lire le run du PUSH – Vitest `success`, Garde et Playwright `skipped` ; (2) un `workflow_dispatch` lancé à la main (`gh workflow run tests.yml --ref main`) qui conclut : durée, SHA, verdict → mesure n° 1 ci-dessous ; (3) le premier run planifié (lundi 21 sept., ≈ 4 h) LU : s'il suit un dispatch vert sur le même SHA il jugera quand même (la garde ne compte que les runs PLANIFIÉS – choix assumé, à revoir si ça coûte).
+
+**Mesures de durée du job Playwright (plafond 60, décision du 20 sept.)** – remplacent la liste de l'entrée de 17 h :
+
+1. —
+2. —
+3. —
+
+**Restent dus (inchangés)** : le lot orphelin du 19 sept. (`js/interpretation-config.js`, skill `ecosysteme-classe`, RELECTURE, CADRAGE) – à trancher par Grégoire ; `CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md` (Cowork), la suivante, non lue.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H (Toronto) : plafond du job WebKit 40 → 60 min (`.github/workflows/tests.yml`) — COMMITÉ, PAS ENCORE POUSSÉ
 
 **Aucune release, rien dans `js/`, rien à l'écran.** Consigne exécutée : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 16 h 27, décision de Grégoire) ; la précédente est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver.md`. Ce commit part SEUL, avec le relais `8abdd4fc` : **on lit son run GitHub avant d'en pousser un autre** (un push annule le run en cours).

@@ -34,7 +34,7 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 const FRAGMENT = readFileSync(path.join(racineProjet, 'scripts', 'lot-observable.sh'), 'utf8');
 const WORKFLOW = readFileSync(path.join(racineProjet, '.github', 'workflows', 'tests.yml'), 'utf8');
 
-/** La liste `OBSERVABLE` du job vitest — la seule source. */
+/** La liste `OBSERVABLE` du workflow — la seule source. */
 function listeCI() {
     const m = /^\s*OBSERVABLE:\s*"([^"]+)"/m.exec(WORKFLOW);
     return m ? m[1].trim().split(/\s+/) : null;
