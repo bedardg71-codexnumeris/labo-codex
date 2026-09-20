@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 18 H (Toronto) : sur GitHub, la suite au navigateur tourne UNE FOIS PAR JOUR, plus à chaque push — COMMITÉ, PAS ENCORE POUSSÉ
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 18 H (Toronto) : sur GitHub, la suite au navigateur tourne UNE FOIS PAR JOUR, plus à chaque push — ✅ POUSSÉ À 17 H 23, origin/main = `469ff47c`
+
+**Mise à jour de 17 h 30 : poussé par `scripts/pousser.sh origin main` sous `caffeinate`, sur le « 1 » de Grégoire (option « pousse ce soir, sans dispatch »). Préalables mesurés : aucune VM Cowork, aucune session voisine, charge 2,56. Les trois commits sont partis ensemble (`8abdd4fc`, `74a845f0`, `469ff47c`). Verdict WebKit complet du Mac : aucune rougeur nouvelle, 0 échec connu ; Vitest du hook vert. ✅ LECTURE DUE n° 1 FAITE – run du push `35538560093` : `success`, Vitest `success` en 2 min 38 s, Garde `skipped`, Playwright `skipped` – exactement la forme attendue : le YAML tient, et un push ne paie plus de navigateur. RESTENT DUES : n° 3, le premier run planifié (lundi 21 sept., ≈ 4 h, il jugera tout : aucun run planifié conclu n'existe) – à LIRE à l'ouverture, durée inscrite ci-dessous ; n° 2, un `workflow_dispatch`, remis à la première fois qu'on voudra un verdict tout de suite (choix de Grégoire : pas ce soir).**
 
 **Aucune release, rien dans `js/`, rien à l'écran.** Consigne exécutée : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-ci-une-fois-par-jour.md`, Cowork, 16 h 34, décision de Grégoire : « oui pour l'étendue, non pour la fréquence ») ; la précédente est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-plafond-github.md`.
 
