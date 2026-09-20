@@ -1251,17 +1251,74 @@
         }
     }
 
+    // #892 — « Exporté » n'est posé que sur ce qui est réellement parti depuis
+    // 1.142.17 (#891, 16 sept. 2026). Une marque plus ancienne ne garantit rien,
+    // et le stock mal marqué chez les testeurs le reste : on ne s'y fie pas.
+    const BORNE_MARQUE_EXPORT_FIABLE = new Date(2026, 8, 16).getTime();
+
     /**
-     * Propose le nettoyage des fichiers archives
-     * @param {Array} fichiersArchives - IDs des fichiers archives
+     * #892 — Trie les copies qu'on peut retirer SANS RIEN PERDRE. Fonction pure.
+     *
+     * Une copie n'est proposée que si son fichier est sorti, et que la marque
+     * qui le dit est fiable : `blobStatut === 'exporte'`, une `dateExport`
+     * lisible, postérieure à la borne du 16 septembre 2026, et aucune
+     * annotation posée APRÈS l'export (ce travail-là n'est pas dans le fichier
+     * sorti). L'âge ne sert qu'à ordonner la liste.
+     *
+     * @param {Array} fichiers - métadonnées des copies (le groupe affiché)
+     * @param {Array} annotations - annotations du trimestre
+     * @returns {{ aRetirer: Array, marqueAncienne: Array }}
+     */
+    function selectionnerCopiesARetirer(fichiers, annotations) {
+        const derniereAnnotation = {};
+        (annotations || []).forEach(a => {
+            const t = Date.parse(a && a.dateModification);
+            if (a && a.fichierId && !isNaN(t)) {
+                derniereAnnotation[a.fichierId] = Math.max(derniereAnnotation[a.fichierId] || 0, t);
+            }
+        });
+
+        const aRetirer = [];
+        const marqueAncienne = [];
+        (fichiers || []).forEach(f => {
+            if (!f || f.blobStatut !== 'exporte') return;
+            const exporteLe = Date.parse(f.dateExport);
+            if (isNaN(exporteLe)) return;
+            if (exporteLe < BORNE_MARQUE_EXPORT_FIABLE) {
+                marqueAncienne.push(f);
+                return;
+            }
+            if ((derniereAnnotation[f.id] || 0) > exporteLe) return;
+            aRetirer.push(f);
+        });
+
+        aRetirer.sort((a, b) => Date.parse(a.dateExport) - Date.parse(b.dateExport));
+        return { aRetirer: aRetirer, marqueAncienne: marqueAncienne };
+    }
+
+    /**
+     * Retire des copies déjà exportées (blob, vignette, métadonnées).
+     *
+     * #892 — la garde est ICI, dans l'écrivain : chaque id est repassé par
+     * `selectionnerCopiesARetirer` sur le stock relu au moment d'effacer. Un id
+     * qui n'est pas (ou plus) une copie exportée est ignoré, quel que soit
+     * l'appelant : cette fonction ne peut pas effacer un fichier non exporté.
+     *
+     * @param {Array} fichiersArchives - IDs des copies à retirer
      * @returns {Promise<number>} Nombre de fichiers supprimes
      */
     async function nettoyerFichiersArchives(fichiersArchives) {
+        const permis = new Set(
+            selectionnerCopiesARetirer(obtenirFichiersTravaux(), obtenirAnnotations()).aRetirer.map(f => f.id)
+        );
         let supprimes = 0;
-        for (const id of fichiersArchives) {
+        for (const id of (fichiersArchives || [])) {
+            if (!permis.has(id)) {
+                console.warn(`[Travaux-Stockage] Nettoyage refusé pour ${id} : copie non exportée`);
+                continue;
+            }
             try {
-                await supprimerFichierTravail(id);
-                supprimes++;
+                if (await supprimerFichierTravail(id)) supprimes++;
             } catch (e) {
                 console.warn(`[Travaux-Stockage] Erreur nettoyage ${id}:`, e);
             }
@@ -1315,6 +1372,7 @@
         estFSAPIActif: estFSAPIActif,
         configurerRepertoireFSAPI: configurerRepertoireFSAPI,
         // Nettoyage
+        selectionnerCopiesARetirer: selectionnerCopiesARetirer,
         nettoyerFichiersArchives: nettoyerFichiersArchives,
         // Cycle de vie des blobs
         marquerExporte: marquerExporte,

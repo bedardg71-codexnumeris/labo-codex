@@ -3707,38 +3707,78 @@
     }
 
     /**
-     * Propose le nettoyage des anciens fichiers
+     * #892 — « Proposer un nettoyage » ne propose que ce qui est DÉJÀ EXPORTÉ.
+     *
+     * Le tri vit dans `travauxStockage.selectionnerCopiesARetirer` (marque
+     * d'export fiable, rien d'annoté depuis), et l'écrivain le refait avant
+     * d'effacer. Ici : la liste est VUE avant le geste, et sans copie exportée
+     * rien ne s'efface. Textes validés par Grégoire le 20 sept. 2026 (accords
+     * au singulier compris) : aucun mot neuf sans repasser par lui.
      */
-    async function proposerNettoyage() {
+    function proposerNettoyage() {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        if (fichiers.length === 0) {
-            alert('Aucun fichier a nettoyer.');
+        const tri = travauxStockage.selectionnerCopiesARetirer(fichiers, travauxStockage.obtenirAnnotations());
+        const aRetirer = tri.aRetirer;
+        const nbAnciennes = tri.marqueAncienne.length;
+
+        const phraseAnciennes = nbAnciennes === 0 ? '' : (nbAnciennes === 1
+            ? '<p class="texte-muted">1 copie porte une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas. Elle n\'est pas proposée : exporte-la de nouveau si tu veux la retirer.</p>'
+            : `<p class="texte-muted">${nbAnciennes} copies portent une marque d'exportation antérieure au 16 septembre 2026, que l'application ne garantit pas. Elles ne sont pas proposées : exporte-les de nouveau si tu veux les retirer.</p>`);
+
+        if (aRetirer.length === 0) {
+            afficherModalePipeline('Rien à retirer sans risque',
+                '<p>Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter et archiver », puis reviens ici.</p>' + phraseAnciennes,
+                [{ label: 'Fermer', classe: 'btn-secondaire' }]);
             return;
         }
 
-        // Trier par date d'import (plus ancien en premier)
-        const tries = [...fichiers].sort((a, b) =>
-            new Date(a.dateImport) - new Date(b.dateImport)
-        );
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+        const productions = obtenirDonneesSelonMode('productions') || [];
+        let nbEvaluees = 0;
+        const lignes = aRetirer.map(f => {
+            const e = etudiants.find(x => x && x.da === f.etudiantDA);
+            const p = productions.find(x => x && x.id === f.productionId);
+            const nomEleve = e ? `${e.nom || ''}, ${e.prenom || ''}` : (f.etudiantDA || f.nomFichier || '');
+            const nomProduction = p ? (p.titre || p.nom || f.productionId) : (f.productionId || '');
+            const exporteeLe = new Date(f.dateExport).toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+            if (travauxResolution.trouverEvaluationPourFichier(f)) nbEvaluees++;
+            return `<li data-fichier-id="${echapperHtml(f.id)}">
+                    <span><strong>${echapperHtml(nomEleve)}</strong> · ${echapperHtml(nomProduction)}</span>
+                    <span class="texte-muted">${echapperHtml(travauxStockage.formaterTaille(f.tailleFichier || 0))} · exportée le ${echapperHtml(exporteeLe)}</span>
+                </li>`;
+        }).join('');
 
-        const moitie = Math.ceil(tries.length / 2);
-        const anciens = tries.slice(0, moitie);
-        const tailleLiberee = anciens.reduce((acc, f) => acc + (f.tailleFichier || 0), 0);
+        const phraseEvaluees = nbEvaluees === 0 ? '' : (nbEvaluees === 1
+            ? '<p>1 de ces copies est évaluée. Son évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s\'ouvrira plus ici.</p>'
+            : `<p>${nbEvaluees} de ces copies sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s'ouvrira plus ici.</p>`);
 
-        const confirmation = confirm(
-            `Supprimer les ${anciens.length} fichiers les plus anciens ?\n` +
-            `Cela liberera environ ${travauxStockage.formaterTaille(tailleLiberee)}.\n\n` +
-            `Assure-toi d'avoir archivé ces fichiers avant de les supprimer.`
-        );
+        const n = aRetirer.length;
+        const taille = travauxStockage.formaterTaille(aRetirer.reduce((acc, f) => acc + (f.tailleFichier || 0), 0));
+        const intro = n === 1
+            ? 'Cette copie a déjà été exportée : son fichier existe ailleurs, sur ton ordinateur. La retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.'
+            : 'Ces copies ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur. Les retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.';
+        // La liste CAPTURÉE à l'affichage est celle qui part (#556) : pas de relecture au clic.
+        const ids = aRetirer.map(f => f.id);
 
-        if (!confirmation) return;
-
-        const ids = anciens.map(f => f.id);
-        const supprimes = await travauxStockage.nettoyerFichiersArchives(ids);
-        alert(`${supprimes} fichier(s) supprime(s).`);
-
-        // Rafraichir
-        afficherArchivage();
+        afficherModalePipeline('Libérer de l\'espace',
+            `<p>${intro}</p><ul class="travaux-nettoyage-liste">${lignes}</ul>${phraseEvaluees}${phraseAnciennes}`,
+            [
+                { label: 'Annuler', classe: 'btn-secondaire' },
+                {
+                    label: n === 1 ? `Retirer cette copie (${taille})` : `Retirer ces ${n} copies (${taille})`,
+                    classe: 'btn-principal',
+                    action: async () => {
+                        const retirees = await travauxStockage.nettoyerFichiersArchives(ids);
+                        const bilan = retirees === n
+                            ? (n === 1 ? '1 copie retirée' : `${n} copies retirées`)
+                            : `${retirees} copies retirées sur ${n}`;
+                        if (typeof notifications !== 'undefined' && typeof notifications.succes === 'function') {
+                            notifications.succes(bilan);
+                        }
+                        afficherArchivage();
+                    }
+                }
+            ]);
     }
 
     /* ===============================
