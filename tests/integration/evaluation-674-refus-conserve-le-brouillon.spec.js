@@ -176,7 +176,7 @@ test('#674 · Annoter et évaluer — un critère sans niveau, Enregistrer refus
         };
     });
     expect(apres.notifs.map(n => n.t)).toEqual(['Évaluation incomplète']);
-    expect(apres.notifs[0].m).toContain('conservé en brouillon');
+    expect(apres.notifs[0].m).toContain('l\'évaluation n\'est pas enregistrée');
     // ⚠ LE CŒUR DU BANC : ce que le refus laisse en base. Zéro = le travail n'est nulle part,
     // la copie reste « Importé », l'export Léa ne trouve rien (17 h 53, 18 h 04).
     expect(apres.evals, 'le refus doit conserver UN brouillon en base').toHaveLength(1);

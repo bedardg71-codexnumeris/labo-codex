@@ -220,7 +220,7 @@ class PratiqueSommative {
                     niveau: e.niveauFinal || null,
                     note: (e.noteFinale ?? null),
                     sort: 'ecarte',
-                    detail: e.verrouillee === false ? 'brouillon · non comptée' : 'sans critère évalué · non comptée'
+                    detail: e.verrouillee === false ? 'évaluation non enregistrée · non comptée' : 'sans critère évalué · non comptée'
                 });
             });
 

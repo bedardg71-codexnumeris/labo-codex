@@ -138,7 +138,8 @@ function obtenirLibelleStatut(statut) {
         'recu': 'Reçu',
         'importe': 'Importé',
         'annote': 'Annoté',
-        'evalue': 'Évalué'
+        'evalue': 'Évalué',
+        'non-enregistree': 'Non enregistrée'   // #927 — mot validé par Grégoire, 20 sept. 2026
     };
     return libelles[statut] || statut;
 }
@@ -779,6 +780,10 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         evaluationId: evaluation.id,
                         evaluationNotee: evaluationNotee,
                         verrouille: evaluation.verrouillee || false,
+                        // #927 (20 sept. 2026) — NON ENREGISTRÉE : le même test que `evaluationEntreDansLaNote`
+                        // (`verrouillee === false`, strict). La liste la disait « Évalué » pendant que la note et la
+                        // complétion l'ignoraient : 10 portfolios d'A2024 introuvables, rapport de Grégoire.
+                        nonEnregistree: evaluation.verrouillee === false && !estOriginaleRemplacee,
                         remplacee: estOriginaleRemplacee,
                         badgeType: badgeType,
                         scoresOriginaux: scoresOriginaux
@@ -988,6 +993,9 @@ function appliquerFiltresSurLignes(lignes) {
             if (ligne.statutWorkflow !== 'annote') return false;
         } else if (filtreStatut === 'evalue') {
             if (ligne.statutWorkflow !== 'evalue') return false;
+        } else if (filtreStatut === 'non-enregistree') {
+            // #927 — y compris la reprise « À réévaluer » : non enregistrée elle aussi, donc non comptée.
+            if (!ligne.nonEnregistree) return false;
         } else if (filtreStatut === 'non-evalue') {
             if (ligne.statut !== 'non-evalue') return false;
         } else if (filtreStatut === 'non-associe') {
@@ -1124,6 +1132,9 @@ function genererLigneHTML(ligne) {
     // Reprise en attente de réévaluation : pas encore resauvegardée (verrouillee=false)
     if (ligne.badgeType === 'nouvelle-reprise' && !ligne.verrouille) {
         statutW = 'a-reevaluer';
+    } else if (ligne.nonEnregistree) {
+        // #927 — « À réévaluer » reste le mot de la reprise en attente (plus précis) ; toute autre non enregistrée le dit.
+        statutW = 'non-enregistree';
     }
     const libelleStatut = statutW === 'a-reevaluer' ? 'À réévaluer' : obtenirLibelleStatut(statutW);
     let affichageNiveau;

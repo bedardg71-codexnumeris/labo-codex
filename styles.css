@@ -25295,8 +25295,9 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: #fff;
 }
 
-/* Reprise en attente de réévaluation */
-.travaux-badge-pill.a-reevaluer {
+/* Reprise en attente de réévaluation ; #927 — évaluation non enregistrée : même famille, un geste attendu de l'enseignant·e */
+.travaux-badge-pill.a-reevaluer,
+.travaux-badge-pill.non-enregistree {
     background: var(--alerte-bordure-attention);
     color: #fff;
 }

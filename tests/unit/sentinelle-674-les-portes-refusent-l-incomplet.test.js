@@ -183,7 +183,7 @@ describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur t
         expect(refus[0].titre).toBe('Évaluation incomplète');
         expect(refus[0].details).toContain('Langue (20 %)');
         expect(refus[0].details).toContain('80 % de la grille');
-        expect(refus[0].details).toContain('conservé en brouillon');
+        expect(refus[0].details).toContain('l\'évaluation n\'est pas enregistrée');
         const brouillon = seulUnBrouillon(ecritures).find((ev) => ev.id === 'EVAL_NEUF');
         expect(brouillon, 'le brouillon doit exister : la copie reste exportable').toBeTruthy();
         expect(brouillon).toMatchObject({ noteFinale: 95, ponderationCouverte: 80, verrouillee: false, niveauFinal: '--' });
