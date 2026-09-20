@@ -7,6 +7,27 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — COMMITÉE SUR `main`, PAS POUSSÉE (le « pousse » de Grégoire n'est pas venu)
+
+**Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md`, Cowork, 16 h 29). ⚠ **Écart de nom, dit** : la consigne demandait d'archiver la précédente sous `…-plafond-github.md`, nom DÉJÀ pris par la consigne du plafond ; la consigne « une fois par jour » est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-ci-une-fois-par-jour.md`. Conditions de départ mesurées : `origin/main` = `aa46228f` porte le lot précédent ; `index.html` sans modification ; aucune session voisine (`pgrep` vide, un seul worktree résiduel `verdict-906`, propre).
+
+| Quoi | Mesure |
+|---|---|
+| Remesure du §3 | `SUFFIXE_PAGE` (`js/travaux-import.js:103`) identique ; les six formes reconnues, `Artefact_1a`/`1b` non reconnus → aucun arrêt du §4 |
+| Posé | `index.html`, accordéon `accordeon-aide-preparer-importer` : un `<p>` après la liste de « 1. Déposer les fichiers », avant « 2. Traitement » ; texte validé tel quel, noms en `<code>` (usage de l'Aide). **Supposé** : « sous » = après la liste, pas entre le titre et elle |
+| Rien dans `js/` | hors les quatre points de vérité du bump. `cleDocumentLea` n'est pas exportée : la preuve passe par un vrai dépôt (`ajouterFichiersEnAttente` → `regrouperParDocument` → `detecterDoublonsStockage`), plus fidèle aux mots du texte |
+| `sentinelle-878-aide-nommer-les-pages` | 6 essais : formes et lettres LUES dans l'Aide, texte entier comparé, unicité, puis JOUÉES contre l'import. **4 mutations, 4 rouges** : forme `part2` retirée · paragraphe déplacé sous « 2. » · `partie/part` retirés de l'expression · lettre finale reconnue. `node --check` sur le JS muté, restauration par copie, empreintes vérifiées |
+| Vitest complet AVANT mutations | 605 fichiers / 6 895 essais verts, 0 `Errors` |
+| Release | `node scripts/release.mjs patch` → 1.151.5. Le script a aussi avancé le jeton anti-cache de `js/interpretation-config.js` (arbre de travail du lot orphelin) : sans effet, le fichier lui-même n'est PAS dans ce commit |
+
+**« Nouvelles », PROPOSÉE à Grégoire, pas écrite** (entrée 1.151) : « L'aide de « Préparer et importer les travaux » dit comment nommer les pages d'une remise en plusieurs fichiers pour qu'elles s'assemblent en un seul document. » Une fois validée : `js/changelog-data.js` + `--build-only`, comme pour #929.
+
+**Vu en chemin, commenté ici et laissé (niveau 3, jamais vécu)** : `p(?:age)?\s*\d` reconnaît aussi un nom de production qui FINIT par « p » + chiffre sans séparateur (« Recap1 » → production « Reca », page 1).
+
+**Restent dus** : le « pousse » de Grégoire (`scripts/pousser.sh origin main` en arrière-plan, sous `caffeinate` ; le lot touche `index.html` et `js/` → verdict WebKit complet, ≈ 15 min, Cowork fermé à mesurer) ; la ligne de « Nouvelles » ; lire le premier run planifié GitHub du 21 sept. ≈ 4 h ; le lot orphelin du 19 sept. (inchangé, non commité, à trancher par Grégoire).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 18 H (Toronto) : sur GitHub, la suite au navigateur tourne UNE FOIS PAR JOUR, plus à chaque push — ✅ POUSSÉ À 17 H 23, origin/main = `469ff47c`
 
 **Mise à jour de 17 h 30 : poussé par `scripts/pousser.sh origin main` sous `caffeinate`, sur le « 1 » de Grégoire (option « pousse ce soir, sans dispatch »). Préalables mesurés : aucune VM Cowork, aucune session voisine, charge 2,56. Les trois commits sont partis ensemble (`8abdd4fc`, `74a845f0`, `469ff47c`). Verdict WebKit complet du Mac : aucune rougeur nouvelle, 0 échec connu ; Vitest du hook vert. ✅ LECTURE DUE n° 1 FAITE – run du push `35538560093` : `success`, Vitest `success` en 2 min 38 s, Garde `skipped`, Playwright `skipped` – exactement la forme attendue : le YAML tient, et un push ne paie plus de navigateur. RESTENT DUES : n° 3, le premier run planifié (lundi 21 sept., ≈ 4 h, il jugera tout : aucun run planifié conclu n'existe) – à LIRE à l'ouverture, durée inscrite ci-dessous ; n° 2, un `workflow_dispatch`, remis à la première fois qu'on voudra un verdict tout de suite (choix de Grégoire : pas ce soir).**
