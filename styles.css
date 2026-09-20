@@ -20899,6 +20899,19 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-muted, #5a7a88);
     padding: 2px 4px 4px;
 }
+/* #929 : la zone se rend même vide — la phrase reprend l'allure de l'état vide
+   du sommaire (.planif-som-vide) : aucune taille ni couleur nouvelle. Pleine
+   largeur du flex parent, pour qu'elle passe à la ligne DANS la colonne de
+   170 px au lieu de l'élargir. */
+.planif-grille-nonplanifie-vide {
+    flex: 0 0 100%;
+    min-width: 0;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--texte-muted, #5a7a88);
+    padding: 4px 6px;
+    overflow-wrap: anywhere;
+}
 /* Jauge de temps (indicative, jamais bloquante) au pied de la palette */
 .planif-jauge-temps {
     margin-top: 8px;
