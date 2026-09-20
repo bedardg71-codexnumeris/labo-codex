@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — COMMITÉE SUR `main`, PAS POUSSÉE (le « pousse » de Grégoire n'est pas venu)
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — COMMITÉE SUR `main` ; push lancé sur le « Oui : écris et pousse » de Grégoire (≈ 17 h 55) — ⚠ tant qu'un bloc plus récent ne dit pas « POUSSÉ », le verdict n'est pas lu
 
 **Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md`, Cowork, 16 h 29). ⚠ **Écart de nom, dit** : la consigne demandait d'archiver la précédente sous `…-plafond-github.md`, nom DÉJÀ pris par la consigne du plafond ; la consigne « une fois par jour » est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-ci-une-fois-par-jour.md`. Conditions de départ mesurées : `origin/main` = `aa46228f` porte le lot précédent ; `index.html` sans modification ; aucune session voisine (`pgrep` vide, un seul worktree résiduel `verdict-906`, propre).
 
@@ -20,11 +20,11 @@
 | Vitest complet AVANT mutations | 605 fichiers / 6 895 essais verts, 0 `Errors` |
 | Release | `node scripts/release.mjs patch` → 1.151.5. Le script a aussi avancé le jeton anti-cache de `js/interpretation-config.js` (arbre de travail du lot orphelin) : sans effet, le fichier lui-même n'est PAS dans ce commit |
 
-**« Nouvelles », PROPOSÉE à Grégoire, pas écrite** (entrée 1.151) : « L'aide de « Préparer et importer les travaux » dit comment nommer les pages d'une remise en plusieurs fichiers pour qu'elles s'assemblent en un seul document. » Une fois validée : `js/changelog-data.js` + `--build-only`, comme pour #929.
+**« Nouvelles » : VALIDÉE telle quelle par Grégoire le 20 sept. ≈ 17 h 55, écrite** comme 7e ligne de l'entrée 1.151 de `js/changelog-data.js` (build-only, numéro inchangé : 1.151.5).
 
 **Vu en chemin, commenté ici et laissé (niveau 3, jamais vécu)** : `p(?:age)?\s*\d` reconnaît aussi un nom de production qui FINIT par « p » + chiffre sans séparateur (« Recap1 » → production « Reca », page 1).
 
-**Restent dus** : le « pousse » de Grégoire (`scripts/pousser.sh origin main` en arrière-plan, sous `caffeinate` ; le lot touche `index.html` et `js/` → verdict WebKit complet, ≈ 15 min, Cowork fermé à mesurer) ; la ligne de « Nouvelles » ; lire le premier run planifié GitHub du 21 sept. ≈ 4 h ; le lot orphelin du 19 sept. (inchangé, non commité, à trancher par Grégoire).
+**Restent dus** : lire le verdict de `scripts/pousser.sh origin main` (arrière-plan, `caffeinate`, verdict WebKit complet ≈ 15 min ; Cowork fermé : dit par Grégoire et mesuré) ; lire le premier run planifié GitHub du 21 sept. ≈ 4 h ; le lot orphelin du 19 sept. (inchangé, non commité, à trancher par Grégoire).
 
 ---
 
