@@ -7,9 +7,11 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 15 H 25 (Toronto) : 1.151.4 (#893, l'aide de « Exporter et archiver » dit ce que l'écran affiche) — 🟡 COMMITÉE SUR `main`, NON POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 15 H 25 (Toronto) : 1.151.4 (#893, l'aide de « Exporter et archiver » dit ce que l'écran affiche) — ✅ POUSSÉE À 15 H 41, origin/main = `a305f524`
 
-**État : `main` local = 1.151.4 (build `0920-1519`) ; `origin/main` = `ee2669f9` (1.151.3).** `main` est en avance des trois commits de docs de 13 h 30 plus ce lot. Le « pousse » de Grégoire est attendu ; le lot touche `js/` et `index.html` : verdict WebKit complet par `scripts/pousser.sh origin main`, ≈ 15 min, en arrière-plan.
+**Mise à jour de 15 h 45 : poussée par `scripts/pousser.sh origin main` sous `caffeinate`, sur le « pousse » de Grégoire (Cowork fermé, mesuré : aucune VM, aucune session voisine). La garde de charge a attendu (9,57 au lancement). Verdict WebKit complet sur `a305f524` : code 0, 0 échec connu, AUCUNE instable ; Vitest du hook vert. Run GitHub `35533111903` démarré à 15 h 41 : NON LU – ce commit de relais reste LOCAL tant qu'il tourne (un push l'annulerait) ; s'il est annulé vers 40 min, c'est le plafond `timeout-minutes: 40`, toujours à trancher.**
+
+**État au moment du commit du lot : `main` local = 1.151.4 (build `0920-1519`) ; `origin/main` = `ee2669f9` (1.151.3).** `main` est en avance des trois commits de docs de 13 h 30 plus ce lot. Le « pousse » de Grégoire est attendu ; le lot touche `js/` et `index.html` : verdict WebKit complet par `scripts/pousser.sh origin main`, ≈ 15 min, en arrière-plan.
 
 **Le « ok » de Grégoire (20 sept., ≈ 14 h 55, donné à Claude Code par question fermée) : les textes du §6 de la consigne, AVEC trois retouches** nées de la mesure de l'écran (arrêt du §4 de la consigne) : **A** – l'écran porte une case, « Reprises seulement » (Export Léa), donc « il n'y a rien à cocher » devient « Dans Export Léa, la case « Reprises seulement » limite l'export aux reprises » ; **B** – le bloc d'espace est rendu au BAS de l'écran, pas en haut ; **C** – « Trimestre complet » offre des filtres : « toutes les productions en PDF (ou celles que tu filtres) ». La ligne des « Nouvelles » (6e item de l'entrée 1.151) est validée telle quelle, même jour.
 
