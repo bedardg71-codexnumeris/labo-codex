@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — ✅ POUSSÉ À 18 H 26, origin/main = `769bdd2a`
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, ≈ 19 H 15 (Toronto) : 1.151.6 (#892), « Proposer un nettoyage » ne retire que l'exporté — 🟡 COMMITÉ SUR `main` LOCAL (`9d9ddb71` + le commit de relais), **PAS POUSSÉ**
+
+**État exact** : `origin/main` = `19f21704` ; `main` local a deux commits d'avance. Le push attend le mot de Grégoire (« qui pousse : Claude Code, sur demande »). Pour pousser : `scripts/pousser.sh origin main` sous `caffeinate`, EN ARRIÈRE-PLAN (verdict Playwright ≈ 15 min, le lot touche `js/`), Cowork fermé, `pgrep pousser.sh` vide, puis corriger ce bloc.
+
+**Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-892-nettoyage-sans-perte.md`, Cowork, 18 h 46) ; la précédente archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-878-aide-nommer-les-pages.md`. Conditions de départ mesurées : `origin/main` = `19f21704`, aucune session voisine, un seul appelant de `nettoyerFichiersArchives` (l'arrêt du §3 ne s'est pas déclenché).
+
+**Livré** : `selectionnerCopiesARetirer` (pure, `travaux-stockage.js`) + la même garde DANS `nettoyerFichiersArchives` ; `proposerNettoyage` réécrit (modale, liste nommée, textes validés) ; CSS `.travaux-nettoyage-liste`. Sentinelle 892 (6 mutations, 6 rouges), banc WebKit `nettoyage-sans-perte-892` (2 mutations, 2 rouges), sentinelle 893 réancrée. Vitest 606 / 6 911 après le commit du bump. Détail et suppositions nommées : BACKLOG #892.
+
+**Décidé seul, à connaître** : (1) une copie annotée après son export n'est pas proposée ; (2) accords au singulier des textes validés (« Cette copie… », « 1 copie porte… ») ; (3) bilan après retrait par notification : « N copies retirées » ; (4) borne = 16 sept. 2026 0 h, heure locale, à la lettre de la consigne – une marque du 16 avant 17 h 19 (heure du commit de #891) est donc crue ; le risque mesuré est mince : avant #891 la fausse marque tombait sur un blob ILLISIBLE.
+
+**Reste dû** : la ligne de « Nouvelles » (proposée à Grégoire, à entrer en build-only une fois validée) ; le push ; lire le premier run planifié GitHub du 21 sept. ≈ 4 h ; le lot orphelin du 19 sept. (4 fichiers, inchangé, à trancher par Grégoire).
+
+---
+
+## (précédent) — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — ✅ POUSSÉ À 18 H 26, origin/main = `769bdd2a`
 
 **Mise à jour de 18 h 30 : poussé par `scripts/pousser.sh origin main` sous `caffeinate`, sur le « Oui : écris et pousse » de Grégoire.** Préalables mesurés : aucune VM Cowork (et Grégoire l'a dit), aucune session voisine, `origin/main` inchangé ; la garde de charge de `pousser.sh` a attendu 2 min (47 → sous 8, résidu du Vitest). Deux commits partis : `cb6b1727` (#878, 1.151.5) et `769bdd2a` (la ligne de « Nouvelles », build-only). Verdict WebKit complet du Mac : aucune rougeur nouvelle, 0 échec connu ; Vitest du hook vert. **1 spec verte au second essai** : `profil-922-completion-sommative.spec.js` (carte Performance, P 74) — sans lien avec ce lot, PREMIÈRE occurrence au relais : notée ici, pas de fiche ; si elle revient, c'est un sujet. « En ligne » chez l'hébergeur : non mesuré d'ici. Run GitHub de ce push : non lu (forme attendue : Vitest seul, Garde et Playwright `skipped`).
 
