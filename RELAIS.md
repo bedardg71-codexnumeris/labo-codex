@@ -7,6 +7,31 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 10 H 55 (Toronto) : 1.151.3 (#929, la zone « Non planifié » toujours rendue) — COMMITÉE, NON POUSSÉE
+
+**État : `main` local = `2c72daad` (1.151.3, build `0920-1041`) + ce commit de relais ; `origin/main` = `ba6486a6` (1.151.2, poussée par la session voisine avant le départ de ce lot — condition de la consigne, mesurée par `merge-base --is-ancestor`).** Le « pousse » de Grégoire est attendu. Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push (VM Cowork, charge sous 8). Le lot touche `js/` : verdict WebKit complet, ≈ 15 min, à lancer en arrière-plan.
+
+**Consigne exécutée : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-zone-non-planifie.md`) ; la précédente est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-filet-github.md`.** Fiche #929 dans `SUIVI-BUGS.md`, avec la ligne « TRANCHÉ par Grégoire ».
+
+| Quoi | Mesure |
+|---|---|
+| Zone rendue même vide, même balisage | `sentinelle-disposition-reserve` : 7 essais neufs, 4 mutations rouges (retour au `''`, phrase, attribut de dépôt, règle CSS), empreintes restaurées |
+| Renversement | l’essai « aucune colonne vide n’est fabriquée » (décision du 7 août) est réécrit dans l’autre sens — dit dans la sentinelle, la fiche et le commit |
+| Banc WebKit par le geste | `planif-zone-non-planifie-929.spec.js`, 3 essais, 9/9 en trois passes ; 3 mutations rouges ; la 4e (règle CSS absente) reste VERTE au banc, tenue par Vitest seul |
+| Arrêt de la consigne | le glisser sur zone vide et sur zone pleine écrit la même chose (`metadata.semaine` retirée, métadonnées identiques à l’état d’avant planification) : pas d’arrêt |
+| 768 px | colonne 170 px, phrase sur plusieurs lignes, aucun débordement |
+| Vitest complet | avant release : 603 fichiers, 6 873 essais verts, aucun « Errors » ; après le commit du bump (`2c72daad`) : 603 fichiers, 6 873 essais verts, aucun « Errors » |
+
+**TROUVÉ PAR LE BANC — issue 1, corrigé maintenant (dans le parcours livré) :** sous WebKit, une pastille relâchée sur un autre élément que celui saisi ne produit aucun `click` ; l’avaleur « once » du `pointerup` restait armé et mangeait le prochain clic de l’écran — le premier clic sur ◧ après un glisser ne faisait rien. Désarmé au tour suivant (`setTimeout 0`). **Non mesuré : Chrome** (Chromium absent du poste : `/opt/pw-browsers/chromium` introuvable). Ce n’est PAS la cause du rapport de Grégoire : chez lui le glyphe pivotait, donc le clic passait.
+
+**Suppositions nommées :** (1) carte sans aucune séquence ni leçon : l’écran garde « Aucune séquence… » sans la zone ; (2) `CONSIGNE-DU-JOUR.md` et son archive sont commités avec le lot, puisque la consigne ordonnait le renommage.
+
+**Pièges rencontrés :** `release.mjs` a bumpé le jeton de `js/interpretation-config.js` (modifié non commité, PAS de cette session) — remis à `20260910c` avant commit, comme le relais précédent le prévoyait. Les quatre fichiers modifiés non commités (`ecosysteme-classe/SKILL.md`, `interpretation-config.js`, CADRAGE et RELECTURE du 17 sept.) restent intouchés.
+
+**Restent dus :** le « pousse » ; la phrase de « Nouvelles » PROPOSÉE à Grégoire (non posée dans `js/changelog-data.js`) ; sa vérification à l’écran (ouvrir sa carte, cliquer ◧, voir la zone changer de place) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 9 H 35 (Toronto) : 1.151.2 (le filet GitHub) — COMMITÉE, NON POUSSÉE
 
 **État : `main` local = `992d97e6` (1.151.2) + ce commit de relais ; `origin/main` = `3e1040b4`. Deux commits de fond attendent le « pousse » de Grégoire : `bbad392b` (DEPLOY.md v1.9, écrit par Cowork, relu : aucune IP, aucun nom d'établissement) et `992d97e6`.** Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push : Cowork écrivait encore dans l'arbre à 9 h 20 (`CONSIGNE-EN-ATTENTE-zone-non-planifie.md` apparu en cours de session), charge 2,6.
