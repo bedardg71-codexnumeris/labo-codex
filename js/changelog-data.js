@@ -34,7 +34,8 @@
                 'Liste des évaluations&nbsp;: une évaluation non enregistrée porte le badge «&nbsp;Non enregistrée&nbsp;» au lieu de «&nbsp;Évalué&nbsp;», et le filtre Statut offre «&nbsp;Non enregistrée&nbsp;» pour les retrouver d\'un geste.',
                 'Cadre&nbsp;› Trimestre&nbsp;: le menu et la liste des trimestres suivent le calendrier, du plus ancien au plus récent — l\'hiver avant l\'automne d\'une même année — et non plus l\'ordre où tu les as créés.',
                 'Dans le planificateur de la carte, la zone «&nbsp;Non planifié&nbsp;» reste visible même quand tout est planifié&nbsp;: on peut toujours y glisser une leçon pour la retirer du calendrier, et le bouton de disposition la déplace à gauche ou sous la grille.',
-                'Aide&nbsp;› Exporter et archiver&nbsp;: la page décrit maintenant les trois exports que l\'écran offre vraiment. Dans l\'écran, le bloc «&nbsp;Espace de stockage&nbsp;» est écrit en français courant, accents compris.'
+                'Aide&nbsp;› Exporter et archiver&nbsp;: la page décrit maintenant les trois exports que l\'écran offre vraiment. Dans l\'écran, le bloc «&nbsp;Espace de stockage&nbsp;» est écrit en français courant, accents compris.',
+                'L\'aide de «&nbsp;Préparer et importer les travaux&nbsp;» dit comment nommer les pages d\'une remise en plusieurs fichiers pour qu\'elles s\'assemblent en un seul document.'
             ]
         },
         {
