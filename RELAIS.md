@@ -7,6 +7,30 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H (Toronto) : plafond du job WebKit 40 → 60 min (`.github/workflows/tests.yml`) — COMMITÉ, PAS ENCORE POUSSÉ
+
+**Aucune release, rien dans `js/`, rien à l'écran.** Consigne exécutée : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 16 h 27, décision de Grégoire) ; la précédente est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver.md`. Ce commit part SEUL, avec le relais `8abdd4fc` : **on lit son run GitHub avant d'en pousser un autre** (un push annule le run en cours).
+
+**Run `35533111903` (`a305f524`) LU : ANNULÉ par le plafond, 40 min 23 s** – troisième du jour. La prémisse de la consigne (« deux runs annulés ») sous-estimait : sur les 60 derniers runs (15-20 sept.), **29 jobs Playwright coupés à 40 min**, une dizaine qui concluent (27,5 à 39,7 min).
+
+| Quoi | Mesure |
+|---|---|
+| Spec qui s'emballe ? (arrêt du §3) | **Non.** 273 essais communs à `ba6486a6` (vert, 32,1 min) et `a305f524` (coupé) : rapport des durées 1,60, médiane par fichier 1,60, min 1,21, max 2,65 ; les 15 plus gros écarts = 17 % de l'écart. Ralentissement uniforme : le runner, pas un essai |
+| Croissance de la suite | 239 essais le 2 sept. → 379 le 20 sept. (+59 %) ; 5,1 s l'essai sur un runner rapide |
+| ⚠ Projection à surveiller | `a305f524` mené à terme au même rythme : **≈ 54 min**. Un runner lent frôle déjà 60. Si un run réel dépasse 60 : le dire à Grégoire, ne pas remonter |
+| Cliquet `sentinelle-ci-paths-ignore` | ne voit PAS le plafond (ni « timeout » ni « 40 ») ; 13/13 verts après le changement ; aucun essai de `tests/unit` ni script ne lit `timeout-minutes` |
+| Job `vitest` (plafond 15) | 2,0 à 3,3 min sur 60 runs : loin, rien à changer |
+
+**Supposé, dit** : les trois mesures demandées s'inscriront dans le commentaire du workflow (point 6c, trois lignes vides) AVEC le prochain push qui touche de toute façon du code – le workflow est dans `OBSERVABLE`, le modifier seul coûterait un run complet de ~35-55 min pour écrire un chiffre. D'ici là, elles s'inscrivent ici :
+
+1. — (run du commit du plafond : à lire)
+2. —
+3. —
+
+**Restent dus** : lire le run de ce commit (preuve du §4 de la consigne) ; le lot orphelin du 19 sept. (`js/interpretation-config.js` – un commentaire –, skill `ecosysteme-classe`, RELECTURE, CADRAGE), toujours non commité, **à trancher par Grégoire : le commiter ou l'abandonner** ; `CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md`, déposée par Cowork pendant cette session, non lue, non commitée.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 15 H 25 (Toronto) : 1.151.4 (#893, l'aide de « Exporter et archiver » dit ce que l'écran affiche) — ✅ POUSSÉE À 15 H 41, origin/main = `a305f524`
 
 **Mise à jour de 15 h 45 : poussée par `scripts/pousser.sh origin main` sous `caffeinate`, sur le « pousse » de Grégoire (Cowork fermé, mesuré : aucune VM, aucune session voisine). La garde de charge a attendu (9,57 au lancement). Verdict WebKit complet sur `a305f524` : code 0, 0 échec connu, AUCUNE instable ; Vitest du hook vert. Run GitHub `35533111903` démarré à 15 h 41 : NON LU – ce commit de relais reste LOCAL tant qu'il tourne (un push l'annulerait) ; s'il est annulé vers 40 min, c'est le plafond `timeout-minutes: 40`, toujours à trancher.**
