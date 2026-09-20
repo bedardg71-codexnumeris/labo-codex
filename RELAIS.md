@@ -32,7 +32,11 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 9 H 35 (Toronto) : 1.151.2 (le filet GitHub) — COMMITÉE, NON POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 9 H 35 (Toronto) : 1.151.2 (le filet GitHub) — ✅ POUSSÉE, RUN GITHUB LU VERT, LOT CLOS
+
+**✅ POUSSÉE à 10 h 29 sur le « pousse » de Grégoire : `3e1040b4..ba6486a6`, `origin/main` = `ba6486a6` mesuré après `git fetch`.** `scripts/pousser.sh origin main`, préalables mesurés (aucune VM, aucun test en cours, charge 5,7, mémoire libre 53 %) : suite WebKit complète sans rougeur nouvelle, Vitest du hook vert ; 4 specs vertes au second essai seulement, aucune du lot (`ponderation-requise-540` #540-C, `portes-terrain-vague3` #306, `pratiques-898-echelle-a-l-adoption`, `tableau-bord-906-bilan-premier-rendu`), non bloquantes (#534).
+**✅ RUN GITHUB 35516663930 SUR `ba6486a6` : VERT, LU À 11 H 06 (Toronto)** — premier vert sur `main` depuis `a989bfdf` (16 sept.). Vitest 603 / 6 867 ; Playwright WebKit 374 passées en 32,1 min, 0 rouge, 1 instable : `cours-actif-hors-bibliotheque-916:19`, la tolérance nommée par la consigne. Les trois specs du lot sont vertes SUR LE RUNNER au premier essai (Flux E · SPE, #703, #882). Des « reste dû » ci-dessous, le n° 1 est SOLDÉ ; 2, 3 et 4 tiennent.
+**⚠ Trouvé en chemin, à arbitrer par Cowork — pourquoi le rouge a duré quatre jours sans être vu :** un push sur `main` ANNULE le run en cours (35512141906 sur `efa185c1` annulé par le push de 10 h 29). Depuis le 16 sept., presque tous les runs de `main` sont « cancelled » par le push suivant ; à plusieurs livraisons par heure, très peu sont jugés. Le 20, Grégoire a retenu le push de 1.151.3 jusqu'à 11 h 10 pour garder cette preuve. Ce qui suit dans ce bloc raconte l'état d'AVANT le push.
 
 **État : `main` local = `992d97e6` (1.151.2) + ce commit de relais ; `origin/main` = `3e1040b4`. Deux commits de fond attendent le « pousse » de Grégoire : `bbad392b` (DEPLOY.md v1.9, écrit par Cowork, relu : aucune IP, aucun nom d'établissement) et `992d97e6`.** Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push : Cowork écrivait encore dans l'arbre à 9 h 20 (`CONSIGNE-EN-ATTENTE-zone-non-planifie.md` apparu en cours de session), charge 2,6.
 
