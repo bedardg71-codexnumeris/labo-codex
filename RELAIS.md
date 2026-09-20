@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — COMMITÉE SUR `main` ; push lancé sur le « Oui : écris et pousse » de Grégoire (≈ 17 h 55) — ⚠ tant qu'un bloc plus récent ne dit pas « POUSSÉ », le verdict n'est pas lu
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 17 H 45 (Toronto) : 1.151.5 (#878), l'Aide dit comment nommer les pages d'une remise — ✅ POUSSÉ À 18 H 26, origin/main = `769bdd2a`
+
+**Mise à jour de 18 h 30 : poussé par `scripts/pousser.sh origin main` sous `caffeinate`, sur le « Oui : écris et pousse » de Grégoire.** Préalables mesurés : aucune VM Cowork (et Grégoire l'a dit), aucune session voisine, `origin/main` inchangé ; la garde de charge de `pousser.sh` a attendu 2 min (47 → sous 8, résidu du Vitest). Deux commits partis : `cb6b1727` (#878, 1.151.5) et `769bdd2a` (la ligne de « Nouvelles », build-only). Verdict WebKit complet du Mac : aucune rougeur nouvelle, 0 échec connu ; Vitest du hook vert. **1 spec verte au second essai** : `profil-922-completion-sommative.spec.js` (carte Performance, P 74) — sans lien avec ce lot, PREMIÈRE occurrence au relais : notée ici, pas de fiche ; si elle revient, c'est un sujet. « En ligne » chez l'hébergeur : non mesuré d'ici. Run GitHub de ce push : non lu (forme attendue : Vitest seul, Garde et Playwright `skipped`).
 
 **Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-878-nommer-les-pages.md`, Cowork, 16 h 29). ⚠ **Écart de nom, dit** : la consigne demandait d'archiver la précédente sous `…-plafond-github.md`, nom DÉJÀ pris par la consigne du plafond ; la consigne « une fois par jour » est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-ci-une-fois-par-jour.md`. Conditions de départ mesurées : `origin/main` = `aa46228f` porte le lot précédent ; `index.html` sans modification ; aucune session voisine (`pgrep` vide, un seul worktree résiduel `verdict-906`, propre).
 
@@ -24,7 +26,7 @@
 
 **Vu en chemin, commenté ici et laissé (niveau 3, jamais vécu)** : `p(?:age)?\s*\d` reconnaît aussi un nom de production qui FINIT par « p » + chiffre sans séparateur (« Recap1 » → production « Reca », page 1).
 
-**Restent dus** : lire le verdict de `scripts/pousser.sh origin main` (arrière-plan, `caffeinate`, verdict WebKit complet ≈ 15 min ; Cowork fermé : dit par Grégoire et mesuré) ; lire le premier run planifié GitHub du 21 sept. ≈ 4 h ; le lot orphelin du 19 sept. (inchangé, non commité, à trancher par Grégoire).
+**Restent dus** : lire le premier run planifié GitHub du 21 sept. ≈ 4 h ; le lot orphelin du 19 sept. (inchangé, non commité, à trancher par Grégoire).
 
 ---
 
