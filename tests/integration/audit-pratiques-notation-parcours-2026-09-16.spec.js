@@ -94,6 +94,10 @@ for (const [code, F] of Object.entries(FAMILLES)) {
             window.db.setSync(window.cle('productions'), F.productions);
             window.db.setSync(window.cle('evaluationsSauvegardees'), F.evaluations);
             window.afficherSection('conception'); window.afficherSousSection('conception-pratiques-notation');
+            // 20 sept. 2026 — L'ORDRE DU RUNNER, POSÉ EXPRÈS. Sur GitHub, une passe d'indices précédait l'application
+            // de la pratique (groupe-cours sans pratique → « sommative » : 85, constructible) ; le Mac finissait
+            // l'assistant avant elle et ne jugeait donc jamais ce cas. La spec ne dépend plus de qui court le plus vite.
+            window.calculerEtStockerIndicesCP();
         }, { F, E1, GRILLE });
 
         // (1) Le bouton réel « + Nouvelle pratique ».

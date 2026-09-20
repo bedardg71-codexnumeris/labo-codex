@@ -381,6 +381,18 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         // Champ additif (#394) : une entrée ANTÉRIEURE, sans le champ, reste lue comme une note.
         b.store.test_indicesCP = { [DA.SPE]: { actuel: { P: 64, C: 100 } } };
         expect(noteDe(b, DA.SPE, p0.id).perf).toBe(64);
+        // CHEMIN FRÈRE D'A-3 (20 sept. 2026, rouge du runner GitHub sur « Flux E · SPE ») : le cache calculé SOUS UNE AUTRE
+        // PRATIQUE (passe faite avant l'application, groupe-cours encore en « sommative ») n'est pas la note de celle-ci.
+        // Avant : relu « 85, constructible » → « SPE, 85, final » à l'export, et la passe suivante le réécrivait tel quel.
+        b.store.test_indicesCP = { [DA.SPE]: { actuel: { pratique: 'sommative', P: 85, C: 100, noteConstructible: true } } };
+        const sousAutrePratique = noteDe(b, DA.SPE, p0.id);
+        expect(sousAutrePratique.perf).toBeNull();
+        expect(sousAutrePratique.export).toEqual({ note: '', statut: 'non constructible' });
+        b.win.calculerEtStockerIndicesCP();                           // le stock se soigne seul à la passe suivante
+        expect(b.store.test_indicesCP[DA.SPE].actuel).toMatchObject({ pratique: p0.id, P: 0, noteConstructible: false });
+        // Témoin : le cache de CETTE pratique reste lu.
+        b.store.test_indicesCP = { [DA.SPE]: { actuel: { pratique: p0.id, P: 64, C: 100, noteConstructible: true } } };
+        expect(noteDe(b, DA.SPE, p0.id).perf).toBe(64);
         // FIGE A-4 (#854 b, élargi au seuil) : la réédition ramène le seuil à 100 et perd jetons et modèle.
         expect(apres.configuration.seuilAcceptabilite).toBe(100);
         expect(apres.configuration.jetons).toEqual({ activer: false });

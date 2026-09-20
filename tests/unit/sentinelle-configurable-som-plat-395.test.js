@@ -30,11 +30,14 @@ function chargerChaine(store) {
     return win;
 }
 
-function storeDeBase() {
+// 20 sept. 2026 — `pratiqueDuCache` : l'entrée porte la pratique qui l'a calculée, et le repli ne lit plus le cache
+// d'une AUTRE pratique (chemin frère d'A-3). La fixture partagée disait 'som-cfg' pour des instances 'std-cfg' et
+// 'spe-cfg' : sans le vouloir, deux essais figeaient le défaut. Chaque essai nomme maintenant la pratique de son cache.
+function storeDeBase(pratiqueDuCache = 'som-cfg') {
     return {
         // Store PLAT (Beta 95.5+) — la sonde du rapport : C 70, P 86.
         indicesCP: {
-            [DA]: { actuel: { date: '2026-08-01', pratique: 'som-cfg', C: 70, P: 86, details: {} } }
+            [DA]: { actuel: { date: '2026-08-01', pratique: pratiqueDuCache, C: 70, P: 86, details: {} } }
         },
         productions: [
             { id: 'P1', ponderation: 40 },
@@ -82,7 +85,7 @@ describe('#395 — configurable conversion_niveaux : lecture du store PLAT', () 
     };
 
     it('sonde du rapport : store plat {P: 86} → 0,86 (avant : 0 via actuel.PAN?.P)', () => {
-        const win = chargerChaine(storeDeBase());
+        const win = chargerChaine(storeDeBase('std-cfg'));
         const pratique = new win.PratiqueConfigurable({
             id: 'std-cfg', nom: 'STD du wizard', type: 'standards',
             calcul_note: { methode: 'conversion_niveaux' },
@@ -92,12 +95,21 @@ describe('#395 — configurable conversion_niveaux : lecture du store PLAT', () 
     });
 
     it('le repli SPE (config incomplète) lit aussi le format plat', () => {
-        const win = chargerChaine(storeDeBase());
+        const win = chargerChaine(storeDeBase('spe-cfg'));
         const pratique = new win.PratiqueConfigurable({
             id: 'spe-cfg', nom: 'SPE incomplète', type: 'specifications',
             calcul_note: { methode: 'specifications' }
             // pas de typesTravaux/tableBundles → repli sur la valeur stockée
         });
         expect(pratique.calculerPerformance(DA)).toBeCloseTo(0.86, 10);
+    });
+
+    it('le repli ne lit pas le cache calculé sous une AUTRE pratique → null, jamais la note d\'une autre règle', () => {
+        const win = chargerChaine(storeDeBase('som-cfg'));
+        const pratique = new win.PratiqueConfigurable({
+            id: 'spe-cfg', nom: 'SPE incomplète', type: 'specifications',
+            calcul_note: { methode: 'specifications' }
+        });
+        expect(pratique.calculerPerformance(DA)).toBeNull();
     });
 });

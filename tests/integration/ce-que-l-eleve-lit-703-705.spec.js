@@ -72,13 +72,21 @@ test('#703 · grille passée en « Analytique » avec des critères sans type : 
     const mesure = await page.evaluate(() => {
         const a = document.getElementById('avisTypeCriteresGrille'); const b = a.querySelector('button');
         const ra = a.getBoundingClientRect(); const rb = b.getBoundingClientRect();
-        return { page: document.documentElement.scrollWidth <= window.innerWidth, avis: Math.round(ra.right) <= window.innerWidth, bouton: Math.round(rb.right) <= Math.round(ra.right), hauteurBouton: Math.round(rb.height) };
+        // L'ÉTALON : le bouton standard et sa variante compacte, mêmes mots, mesurés dans la même page, hors de l'avis.
+        const etalon = (classes) => { const e = document.createElement('button'); e.type = 'button'; e.className = classes; e.textContent = b.textContent;
+            a.parentElement.appendChild(e); const h = Math.round(e.getBoundingClientRect().height); e.remove(); return h; };
+        return { page: document.documentElement.scrollWidth <= window.innerWidth, avis: Math.round(ra.right) <= window.innerWidth, bouton: Math.round(rb.right) <= Math.round(ra.right), hauteurBouton: Math.round(rb.height),
+            hauteurStandard: etalon('btn btn-secondaire'), hauteurCompacte: etalon('btn btn-secondaire btn-compact') };
     });
     console.log('MESURE 768 px →', JSON.stringify(mesure));
     expect(mesure).toMatchObject({ page: true, avis: true, bouton: true });
-    // Le bouton STANDARD de l'application (37 px), pas sa variante compacte (28 px, mesurée au premier jet).
+    // Le bouton STANDARD de l'application, pas sa variante compacte (mesurée au premier jet).
     // L'écart du bouton standard à la cible tactile de 44 px est connu et inscrit (#879) : pas rouvert ici.
-    expect(mesure.hauteurBouton).toBeGreaterThanOrEqual(37);
+    // ⚠ 20 sept. 2026 — la spec figeait « 37 px », la hauteur du bouton standard SOUS macOS. `.btn` n'a ni `min-height`
+    // ni `line-height` : sa hauteur suit la police du système, et WebKit sous Ubuntu la dessine à 36 px (run GitHub
+    // 35469302437 : « Expected: >= 37, Received: 36 »). Comparé à l'étalon de la même page, le jugement ne dépend plus de la police.
+    expect(mesure.hauteurStandard, 'l\'étalon distingue les deux variantes : sans cela, la comparaison ne juge rien').toBeGreaterThan(mesure.hauteurCompacte);
+    expect(mesure.hauteurBouton).toBeGreaterThanOrEqual(mesure.hauteurStandard);
 
     // LE GESTE.
     await page.evaluate(() => document.querySelector('#avisTypeCriteresGrille button').click());
