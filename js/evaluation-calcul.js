@@ -1302,7 +1302,7 @@ function verifierPorteeAvantSauvegarde() {
         }
     }
     const details = phrasesPorteeIncomplete(portee).join(' ')
-        + ' Ton travail est conservé en brouillon : complète l\'évaluation, puis enregistre.';
+        + ' Ton travail est conservé, mais l\'évaluation n\'est pas enregistrée : complète-la, puis enregistre.';
     if (typeof notifications !== 'undefined' && notifications && typeof notifications.erreur === 'function') {
         notifications.erreur('Évaluation incomplète', details);
     }

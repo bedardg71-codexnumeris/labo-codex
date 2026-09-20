@@ -1647,6 +1647,10 @@ function _gererIndicateurEtVerrouillageModif(evaluation, estVerrouillee) {
         desactiverFormulaireEvaluation(true);
         notifications.succes('Évaluation chargée en lecture seule (verrouillée)');
     } else {
+        // #926 (20 sept. 2026) — le panneau Paramètres est du HTML statique : il garde l'état du DERNIER chargement.
+        // Après « Consulter » une verrouillée, « Consulter » une non verrouillée ouvrait le cadenas sur un
+        // « Enregistrer » resté éteint — l'évaluation ne pouvait plus être enregistrée, donc jamais comptée.
+        desactiverFormulaireEvaluation(false);
         notifications.succes('Évaluation chargée - Tu peux maintenant la modifier');
     }
 }
