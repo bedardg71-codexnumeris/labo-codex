@@ -34,7 +34,9 @@
 
 **13 h 30 — run GitHub de `ee2669f9` (35523517494) LU : ANNULÉ, et pas par un push.** Vitest vert (603 / 6 873) ; job « Playwright (WebKit) » coupé à 40 min 17 s par `timeout-minutes: 40` (`.github/workflows`, l. 232). Mesure des trois derniers jobs WebKit (`gh run view --json jobs`) : `efa185c1` 40 min 39 s ANNULÉ (à 9 h 42, soit 47 min AVANT le push de 10 h 29) ; `ba6486a6` 33 min 06 s VERT ; `ee2669f9` 40 min 17 s ANNULÉ. ⮕ **Le diagnostic « presque tous les runs sont annulés par le push suivant » est FAUX pour ces deux-là : c’est le plafond.** La suite dure 33 à 40 min et plus sur le runner ; le filet juge ou non selon la vitesse du runner du jour. Non mesuré : la part des runs annulés depuis le 16 sept. qui relève du plafond plutôt que d’un push ; ce que #929 ajoute sur le runner (3 essais, 18 s sur le Mac). **Non corrigé : relever le plafond touche le budget de minutes GitHub du dépôt privé — décision de Grégoire.** Aucun verdict GitHub n’existe donc pour 1.151.3 ; le verdict local WebKit complet de 12 h 41, lui, est vert.
 
-**Restent dus :** trancher le plafond de 40 min (consigne à écrire) ; sa vérification à l’écran (ouvrir sa carte, cliquer ◧, voir la zone changer de place) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
+**13 h 30 — VÉRIFIÉ À L’ÉCRAN par Grégoire : « tout fonctionne bien ». #929 est clos.**
+
+**Restent dus :** trancher le plafond de 40 min (consigne à écrire) ; la relecture croisée de Cowork. `OU-EN-EST-ON.md` non touché : #929 est un retour testeur, pas l’un des huit gestes.
 
 ---
 
