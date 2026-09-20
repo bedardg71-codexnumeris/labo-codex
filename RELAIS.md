@@ -7,6 +7,29 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, 9 H 35 (Toronto) : 1.151.2 (le filet GitHub) — COMMITÉE, NON POUSSÉE
+
+**État : `main` local = `992d97e6` (1.151.2) + ce commit de relais ; `origin/main` = `3e1040b4`. Deux commits de fond attendent le « pousse » de Grégoire : `bbad392b` (DEPLOY.md v1.9, écrit par Cowork, relu : aucune IP, aucun nom d'établissement) et `992d97e6`.** Préalables de `scripts/pousser.sh origin main` À MESURER au moment du push : Cowork écrivait encore dans l'arbre à 9 h 20 (`CONSIGNE-EN-ATTENTE-zone-non-planifie.md` apparu en cours de session), charge 2,6.
+
+**Consigne « le filet GitHub redevient un filet » — diagnostic COMPLET, les trois rouges traités.** Runs de `main` lus (`gh run list`, `--log-failed`, artefact `playwright-traces` du run 35469302437) : dernier vert `a989bfdf` (16 sept.) ; 8 runs jugés depuis, tous rouges — 4 par des specs (35104118073, 35142241481, 35231140471, 35469302437), 4 par des coupures du runner (35224703827, 35240586920, 35251277147 code 143, 35257185032 « shutdown signal », 35338388050 journal absent). L'ensemble des specs rouges GROSSIT sans changer : #882 seule les 16-17, + Flux E · SPE le 17, + #703 le 19. **L'hypothèse du fuseau est RÉFUTÉE** : les trois specs sont vertes sous `TZ=UTC` et `TZ=Pacific/Kiritimati`.
+
+| Spec | Issue | Cause MESURÉE | Preuve |
+|---|---|---|---|
+| `audit-pratiques-notation-parcours:68` (Flux E · SPE) | **(a) défaut réel** | `_lireIndiceStocke` relisait le cache `indicesCP` calculé sous une AUTRE pratique : « SPE, 85, final » à l'export, réécrit à chaque passe. Le runner faisait une passe d'indices avant la fin de l'assistant, le Mac non. | Reproduit sur le Mac par une passe forcée (même erreur, même CSV) ; garde retirée → spec, banc A3 et sentinelle #395 rouges |
+| `evaluation-882…:40` | (b) spec, course | témoin à poser dans une fenêtre de 150 ms (500 → 650 ms) | 400 ms de retard sur le Mac = l'erreur du runner ; nouveau témoin (case « Adresse » semée décochée) vert ×9 et avec 1 200 ms de retard ; mutation du correctif #882 rouge |
+| `ce-que-l-eleve-lit-703-705:40` | (b) spec, police | `.btn` sans `min-height` ni `line-height` : 37 px sous macOS, 36 sous Ubuntu | étalon mesuré dans la page (37 / 28) ; bouton rendu `btn-compact` → rouge |
+| `cours-actif-hors-bibliotheque-916:19` | instable, laissée VISIBLE | INFÉRENCE non mesurée : `chargerDropdownCoursV2` mémorise le premier cours quand `infoCours` vaut null (`trimestre-v2-cours.js:213`) ; au 1er essai du runner le miroir valait `a2026-601-101-MQ` | — |
+
+**Supposition nommée (arrêt du §4 de la consigne) :** le défaut (a) ne touche aucune note, niveau ni date ENREGISTRÉS — seulement le cache dérivé `indicesCP` et ce que l'export en tire. Le correctif n'écrit chez personne ; le cache périmé se réécrit « non constructible » à la passe suivante (asserté en Vitest). Pack démo : 0 pratique dans le cas. J'ai donc codé sans m'arrêter. Si Cowork lit l'arrêt autrement : la sonde chez Grégoire lirait, par trimestre, le nombre d'entrées de `indicesCP` dont `actuel.pratique` diffère du `pratiqueId` du groupe-cours actif (comptes seulement, lecture seule).
+
+**RESTE DÛ :**
+1. **« pousse »** de Grégoire → `scripts/pousser.sh origin main` en arrière-plan (≈ 15 min), puis **LIRE le run GitHub du SHA poussé** : le lot n'est clos qu'une fois ce run lu VERT (seule tolérance : l'instable #916). Le run 35512141906 sur `efa185c1` était encore en cours à 9 h 25 ; il sera rouge des trois mêmes specs, c'est attendu.
+2. **Phrase de « Nouvelles » PROPOSÉE, pas posée** (entrée 1.151, dont la prose attend déjà la validation de Grégoire) : « Une pratique par spécifications dont les types de productions et les forfaits ne sont pas encore réglés n'affiche plus la note calculée sous l'ancienne pratique du groupe : elle dit “non constructible”, à l'écran comme dans l'export. »
+3. Relecture croisée de Cowork (1.151.0, 1.151.1, 1.151.2).
+4. Rendu à Grégoire sur le message « nouvelle version disponible » (demande relayée de Cowork, LU dans `js/init-inline.js`, non exécuté) : voir le rapport de session.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, MATIN (Toronto) : 1.151.0 (#926, #927) — ✅ POUSSÉE
 
 **✅ 1.151.1 (#928, le menu des trimestres suit le calendrier) POUSSÉE À 8 H 58 sur le « pousse » de Grégoire : `a4f52dd6..efa185c1`, `origin/main` = `efa185c1` mesuré après `git fetch` (plus ce commit de relais, docs seules) ; suite WebKit complète sans rougeur nouvelle ni instable (jeton sur `efa185c1`), Vitest du hook vert, préalables mesurés (aucune VM, charge 3,6). Rien n'est dû sur ce lot ; ce qui suit dans ce paragraphe raconte l'état d'AVANT le push.** À 8 h 50 : commitée sur `main`, non poussée. Vitest complet vert avant la release (603 / 6 866), sentinelle #928 exécutée, 3 mutations rouges. Pas de verdict WebKit sur ce SHA : `scripts/pousser.sh origin main` le prendra, sur le « pousse » de Grégoire (Cowork fermé à mesurer, charge sous 8).
