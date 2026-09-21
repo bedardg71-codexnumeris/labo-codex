@@ -148,7 +148,7 @@
         const meta = [
             c.code,
             c.session ? c.session.toLowerCase() : '',
-            (a.number && a.total) ? `artefact ${a.number} de ${a.total}` : ''
+            (a.number && a.total) ? `production ${a.number} de ${a.total}` : ''
         ].filter(Boolean).join(' / ');
 
         const ligneEleve = [
@@ -742,7 +742,10 @@
             : `les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées`;
         const libelleSelection = estHybride
             ? `Sélection (${libelleRetenues})${badgePondSel}`
-            : `Voici les ${esc(nbSelection)} meilleurs artefacts que tu as produits`;
+            // Une seule retenue (première évaluation du trimestre) : « les 1 meilleures » ne se lit pas.
+            : (nbSelection === 1
+                ? 'Voici ta meilleure production'
+                : `Voici les ${esc(nbSelection)} meilleures productions que tu as réalisées`);
         const itemsSelection = note.selection.map(art => {
             const marqueur = formaterNiveauNote(art.niveau, art.note);
             const ligne = `${esc(art.titre)}${marqueur ? ` (${esc(marqueur)})` : ''}${art.activite ? ' : ' + esc(art.activite) : ''}`;
@@ -783,7 +786,7 @@
                 }
                 return `<li style="margin-bottom: 2px;">${ligne}</li>`;
             }).join('');
-            blocsDroite.push(`<div style="margin-top: 8px;">Artefacts à venir :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>`);
+            blocsDroite.push(`<div style="margin-top: 8px;">Productions à venir :</div><ul style="margin: 2px 0 0 0; padding-left: 14px;">${items}</ul>`);
         }
         const colDroite = blocsDroite.join('');
 
