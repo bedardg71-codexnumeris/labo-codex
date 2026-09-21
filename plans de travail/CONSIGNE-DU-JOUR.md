@@ -1,49 +1,47 @@
-# Consigne du jour – Lot N1 : trouver la pratique active d'une seule façon (#710, #711, #712, #713 volet registre, #719)
+# Consigne du jour – Lot N1b : les lecteurs suivent la pratique active, puis N1a + N1b partent ensemble (minor)
 
-> Écrite le 21 septembre 2026, 14 h 31 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (1.152.6, trois « artefact » du PDF, poussée) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-trois-artefact-pdf.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Cap de Grégoire (13 h 08)** : après les demies, les dix fiches de notation encore ouvertes ; groupement de Cowork dans `FILE-DES-LOTS.md` (14 h 29), N1 en premier.
-> **DÉCISION DE GRÉGOIRE, 21 sept. à 14 h 31** (question fermée, recommandation de Cowork) : **sans pratique assignée, aucune note.** Pas de repli : « non constructible » partout, et le diagnostic vrai – la phrase qui existe déjà (`profil-etudiant-actions.js` ≈ l. 142) : « Aucune pratique de notation n'est assignée à ce groupe-cours. Ouvre Conception → Pratiques de notation, choisis ta pratique et clique « Appliquer au cours actif ». » Rien n'est effacé : les notes reviennent dès qu'une pratique est assignée.
-> Ligne exacte à poser sous #710 dans `BACKLOG.md` (par toi) : « ✅ TRANCHÉ PAR GRÉGOIRE le 21 sept. 2026, 14 h 31 : sans pratique assignée, aucune note (non constructible partout, diagnostic « Aucune pratique de notation n'est assignée… ») ; pas de repli. »
+> Écrite le 21 septembre 2026, 15 h 40 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (lot N1, devenue N1a) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-lot-n1a.md` (déplacée par Cowork, à commiter avec ce lot). Elle reste la référence pour la décision de Grégoire (sans pratique assignée, aucune note), les preuves attendues et le stock.
+> Base : le bloc de tête de `RELAIS.md` (« lot N1 COUPÉ EN DEUX »), §« CE QUI RESTE ».
 
 ## 0 · Conditions de départ
 
-`git --no-optional-locks log --oneline -1 origin/main` porte `1ca0f949` (journal de 1.152.6) ou un commit de journal après. Sinon, arrête-toi. Aucune autre session n'écrit dans `js/`. **⚠ Laborieux (trois modules et plus, données déjà écrites) : mesure d'abord, et si le lot dépasse ce qu'une session tient proprement, coupe-le en deux (la résolution d'abord, les lecteurs ensuite) et dis-le avant de coder.**
+- `origin/main` porte `016be93e` (relais de N1a) ou un commit de journal après ; la branche `lot-n1a` porte `afcc14ef`. Sinon, arrête-toi. Aucune autre session n'écrit dans `js/`.
+- **Travaille sur `lot-n1a`** (rebase sur `main` si `main` a avancé). Rien ne se fusionne ni ne se pousse avant la fin de ce lot.
+- ⚠ `DEPLOY.md` est modifié et non commité dans l'arbre principal : **pas à toi, pas à Cowork de cette session** ; ne le touche pas, ne le commite pas.
 
-## 1 · Ce que Cowork a remesuré (grep, 14 h 29 ; à remesurer par exécution)
+## 1 · Relecture de N1a par Cowork (21 sept., 15 h 40) – ce qui est tranché
 
-- `obtenirPratiqueActiveGroupeCours` (`modes.js` ≈ 1352) rend `gc.pratiqueId || 'sommative'` ; `PRATIQUE_DEFAUT = 'standards'` (`pratiques/pratique-registre.js:29`) sert de repli à `calculerDetailsNoteFinale` et `obtenirPratiqueActuelle` → deux replis contraires (#710 : P 87 au tableau de bord, « introuvable » au profil ; la branche « Aucune pratique… » de `_diagnostiquerNoteNonCalculable` est inatteignable).
-- `obtenirPratiqueParId` normalise l'id, `obtenirConfigPratiqueActive` cherche l'id brut (#711, `pan-standards`).
-- `obtenirConfigPratiqueActive` (`portfolio.js` ≈ 1176) ne lit que `.configuration`, alors que `construireConfigComplete` résout aussi `.config` (#712).
-- `PratiqueManager.chargerPratiqueActive` (`pratiques/pratique-manager.js:52`) tient `'specifications'` pour une pratique codée en dur valide → instance registre SPE jamais configurée, 50 % pour tous, « constructible » (#713, **volet registre seulement** ; le plancher 50 d'une SPE configurée est le lot N4, didactique, NE PAS y toucher).
-- `obtenirPratiqueActuelle` (`profil-etudiant-helpers.js` ≈ 640-690) passe le TYPE au registre ; `denotation` n'y est pas → une PratiquePANStandards est fabriquée ; le jugement 78 se lit « M » (#719).
-- ⮕ **Commence par lister TOUS les chemins qui répondent « quelle est la pratique active ? » et « quelle est sa configuration ? »** (grep sur les symboles, pas les noms de fichiers), et dis la liste au rapport.
+- **Vitest complet sur `lot-n1a` (`afcc14ef`), par exécution dans un clone : 614 / 7 010, vert.** Pas de mutations de Cowork à ce stade : la relecture croisée par mutations se fera sur N1a + N1b ensemble, avant le verdict.
+- **Les trois suppositions nommées, confirmées par Cowork** (techniques, tranchées sans remonter) :
+  1. Un pointeur ancien mène à une configuration **par son id** (brut, puis normalisé), jamais par « la première de la même famille ». ✔
+  2. `sommative` nu reste une pratique assignée ; `standards` et `specifications` nus deviennent « introuvable ». ✔
+  3. Le stock de #898 (Standards adoptée sans échelle avant le 17 sept.) **garde sa note**. ✔ C'est aussi la limite du 20 sept. : rien de ce que l'élève a déjà ne disparaît.
+- **Le constat de didactique (deux échelles pour le niveau de la note globale d'une Standards) n'est PAS dans ce lot** : il part avec N2 (#716) et remontera à Grégoire à ce moment-là. N1b ne change aucune lettre affichée sous STD / SOM / SPE.
 
-## 2 · Ce qui change
+## 2 · Ce que fait N1b
 
-- **Une seule résolution** : id du groupe-cours actif → id normalisé → configuration par `construireConfigComplete` (`.configuration` puis `.config`) → instance. Tous les lecteurs passent par elle ; le type ne sert plus de clé de registre.
-- **Aucun repli** : pas de pratique assignée, ou pratique introuvable, ou id qui ne mène à aucune configuration (y compris `specifications` / `pan-specifications` nus) → « non constructible », au tableau de bord, au profil, à l'export, dans `indicesCP`. Le diagnostic dit la vraie raison : « Aucune pratique… » quand rien n'est assigné ; « introuvable » quand un id est assigné mais ne mène à rien.
-- **#711** : un id ancien (`pan-standards`) qui, normalisé, mène à une configuration existante calcule avec CETTE configuration (N = 4), pas avec les défauts du registre.
-- **Changer ou retirer la pratique** (ajout du 17 sept. sous #710, D-1) : `indicesCP` ne garde pas l'indice de l'ancienne pratique. Au minimum, un retrait rend « non constructible » ; si recalculer au changement est simple, fais-le, sinon inscris-le et dis-le.
-- **Aucun mot neuf** : les deux phrases existent. Si une phrase doit changer ou naître, arrête-toi et propose-la (mots que des collègues lisent).
+1. **Les 53 sites d'`obtenirPratiqueActiveGroupeCours`** (20 fichiers) : relis-les un à un ; chacun passe par la résolution unique ou lit l'état qu'elle rend (aucune / introuvable / illisible / ok). Puis **retire le repli `'sommative'`** de `modes.js`. Rends au rapport le tableau : site → ce qu'il fait quand il n'y a pas de pratique.
+2. **Les 13 sites `|| (window.PRATIQUE_DEFAUT || 'standards')`** (8 fichiers) et **les 34 appels d'`obtenirTypePratiqueActive`** : même traitement ; le type ne sert plus à fabriquer une instance.
+3. **Sans pratique assignée, C et P sont « — »** (tranché par Cowork : la complétion se calcule par la pratique – la spécification compte autrement –, donc sans pratique il n'y a pas de C non plus). ⚠ **Aucune alerte sur tout le groupe** : la règle du lot 25 tient (« un indice affiché « — » n'est jamais « sous 70 »). Vérifie par exécution le tableau de bord, le filtre « A ou C < 70% », la barre des patterns, la carte RàI et le dépistage avec `C: 0, noteConstructible: false` : aucun élève signalé, aucun compteur d'alerte. **Si un lecteur prend ce C: 0 pour un vrai 0, c'est le défaut à corriger dans ce lot.** Si C sans pratique doit s'écrire autrement que `0` pour que les lecteurs le voient, fais-le (champ additif, comme `noteConstructible`) et dis-le.
+4. **Mots** : aucun mot neuf. Les deux phrases existent (« Aucune pratique de notation n'est assignée… », « …introuvable dans la bibliothèque… »). Si un écran doit dire autre chose que « — » et ces deux phrases, arrête-toi et propose-le.
+5. **Code mort trouvé en chemin** (`genererCartePratique` / `desactiverPratique` / `getPratiqueParDefaut`, `pratiques.js`, 0 appelant, conteneur absent) : c'est le seul geste qui écrirait encore un pointeur nu → **retire-le dans ce lot** (troisième issue : « retirer dans le lot qui passe là »), après avoir re-grepé par nom ET par `data-action` / `onclick`.
 
-## 3 · Stock – limite du 20 sept. : rien ne s'efface, rien ne se réécrit
+## 3 · Stock – limite du 20 sept.
 
-- Lecture tolérante : un pointeur ancien reste tel quel en base ; seule la lecture le normalise. **Aucune migration écrite.**
-- ⚠ **Mesure l'effet sur le pack démo et dis-le** : combien de groupes-cours sans pratique, combien d'élèves dont la note passe d'un nombre à « — ». Grégoire a une pratique assignée : pour lui, rien ne doit bouger – un essai le prouve (groupe avec pratique assignée : notes identiques à l'octet, avant/après).
-- ⚠ **Arrêt** : si un chemin réel écrit une note dans la base À PARTIR d'un repli (ex. un snapshot, un relevé hebdomadaire), arrête-toi et dis-le : ce qui est déjà écrit reste, mais Grégoire doit savoir.
+Rien ne s'efface ni ne se réécrit : pointeurs anciens lus avec tolérance, snapshots déjà écrits gardés, aucune migration. **Pack démo : mesure-le PAR EXÉCUTION** (le relais dit « lu, pas exécuté ») : notes du groupe identiques à l'octet avant/après.
 
-## 4 · Preuves
+## 4 · Preuves, puis livraison
 
-- Sur le vrai moteur, cinq montages : sans pratique ; id introuvable ; `pan-standards` avec configuration N = 4 ; pratique rangée sous `.config` seul ; pointeur `specifications` nu ; dénotation active avec un jugement 78. Pour chacun : tableau de bord, profil, export, `indicesCP` disent la même chose (la même note, ou « — » partout), et le diagnostic dit la bonne phrase.
-- Parité : pour une pratique assignée normale (chacune des quatre familles), notes identiques à avant.
-- Mutations, une à la fois, rouges : repli `'sommative'` remis ; `PRATIQUE_DEFAUT` remis comme repli ; id brut au lieu de normalisé ; `.configuration` seul ; le type passé au registre ; `'specifications'` remis comme pratique codée en dur.
-- Vitest complet vert. **Release : minor** (un comportement change pour les groupes sans pratique). Phrase de « Nouvelles » : **à PROPOSER à Grégoire** (question fermée). Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire.
+- Pour chacun des sept montages de N1a (N1 à N7) : **les écrans** (tableau de bord, profil, liste du groupe, dépistage, export) disent la même chose que les écrivains ; aucune alerte sur un groupe sans pratique.
+- Parité des quatre familles, valeurs non retouchées.
+- Mutations, une à la fois, rouges : repli `'sommative'` remis dans `modes.js` ; un lecteur qui retombe sur `PRATIQUE_DEFAUT` ; un lecteur qui lit `C: 0` comme un vrai 0 (filtre « A ou C < 70% ») ; le type passé au registre.
+- Vitest complet vert. **Release : minor**, N1a + N1b dans la même version. **Phrase de « Nouvelles » : à PROPOSER à Grégoire** (question fermée ; ce qu'un collègue sans pratique voit). Fusion de `lot-n1a` dans `main`, puis **relecture croisée de Cowork par exécution**, verdict Playwright, push sur le mot de Grégoire.
 
 ## 5 · Ce que Grégoire verra
 
-Rien, dans son groupe (sa pratique est assignée). Un collègue qui n'a pas encore choisi sa pratique voit « — » à la place d'une note, et le profil lui dit d'aller choisir sa pratique. Un collègue en dénotation voit la note chiffrée de sa pratique, plus une lettre « M » qu'aucune règle de sa pratique ne donne.
+Rien dans son groupe (sa pratique est assignée). Un collègue sans pratique : « — » pour C et P, aucune alerte, et le profil qui lui dit d'aller choisir sa pratique. Un collègue en dénotation : la note chiffrée de sa pratique, plus de « M ».
 
 ## 6 · Fichiers de Cowork à commiter avec ce lot
 
-Cette consigne, l'archive de la précédente, `plans de travail/FILE-DES-LOTS.md` (le lot N1 en sort une fois poussé).
+Cette consigne, l'archive `_ancienne-CONSIGNE-DU-JOUR-2026-09-21-lot-n1a.md`, `plans de travail/FILE-DES-LOTS.md` (N1 en sort une fois poussé).

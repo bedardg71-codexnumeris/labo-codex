@@ -7,7 +7,37 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, FIN D'APRÈS-MIDI : lot N1 COUPÉ EN DEUX ; **N1a est sur la branche `lot-n1a` (`afcc14ef`), NON FUSIONNÉ, NON POUSSÉ — et il ne doit pas l'être seul**
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 17 H 30 : **1.153.0 (N1a + N1b) FUSIONNÉE DANS `main` EN LOCAL, NON POUSSÉE** — attend la relecture croisée de Cowork par exécution, le verdict Playwright, puis le mot de Grégoire
+
+**Où vit le travail** : `main` local = `origin/main` (`016be93e`) + `7ccd5293` (N1a, rebasé ; l'ancien `afcc14ef`) + `8192b7bf` (N1b, release 1.153.0, build 0921-1715) + ce relais. La branche `lot-n1a` et son worktree `.claude/worktrees/lot-n1a` pointent `8192b7bf` : à retirer une fois poussé.
+
+**Ce que N1b a fait** (détail dans le message de `8192b7bf`) : `obtenirPratiqueActiveGroupeCours` et son repli « sommative » n'existent plus ; le pointeur du groupe-cours n'a qu'UN lecteur, la désignation du registre. `obtenirTypePratiqueActive` rend la famille de cette désignation (son paramètre `contexte`, sans appelant, est retiré). Les 13 replis `PRATIQUE_DEFAUT` sont retirés et `window.PRATIQUE_DEFAUT` n'est plus exporté.
+
+**Compte réel des sites** (la consigne disait 53 / 13 / 34, en comptant les occurrences) : 22 APPELS du pointeur dans 13 fichiers, 13 replis `PRATIQUE_DEFAUT` dans 8 fichiers, 14 appels du type dans 8 fichiers (après retrait du badge mort). Tableau « site → ce qu'il fait sans pratique » : dans le rapport de session remis à Grégoire, et lisible au diff (chaque site porte un commentaire « Lot N1b »).
+
+**C sans pratique** : champ ADDITIF `completionConstructible: false` à l'écriture (portfolio.js), `null` à la lecture (`calculerTousLesIndices`, `calculerIndicesEtudiant`), la forme de l'assiduité inconnue (#743). ⚠ `noteConstructible: false` SEUL ne pouvait pas servir : une Standards au portfolio incomplet a un P non constructible et un C bien réel.
+
+**DEUX DÉFAUTS « C: 0 lu comme un vrai 0 », corrigés dans le lot** : (1) le contexte d'apprentissage disait « Fragile » à tout le groupe ; (2) l'alerte nommée du Suivi du groupe (« N étudiant·e·s présent·e·s sans aucune production remise ») nommait LES DIX élèves du pack démo — **vu sur la vraie page (WebKit, pratique retirée), pas par le banc** : le banc vm ne dessinait pas cette carte. Essai I6 ajouté.
+
+**Preuves** : volet I du banc Suivi (`audit-onglet-suivi-2026-09-05`, I1 à I6, vrai moteur) ; sentinelle structurelle `sentinelle-n1b-les-lecteurs-suivent-la-designation` (9 essais, balaie tout le dossier js) ; L2a et L2b1 réancrées ; SEPT mutations une à la fois (repli « sommative » remis ; lecteur qui retombe sur `PRATIQUE_DEFAUT` ; C rendu 0 ; contexte qui lit l'inconnu comme zéro ; écrivain sans le champ ; type repassé au registre ; garde de l'alerte retirée), toutes rouges sur des bancs de COMPORTEMENT, fichiers restaurés à l'empreinte. **Pack démo PAR EXÉCUTION** (WebKit, `main` avant / lot après) : 264 feuilles de données identiques à l'octet (stock, indices, note, simulation, palier, cible, contexte des 10 élèves), 12 écrans (10 profils, Suivi du groupe, liste) sans différence une fois l'heure affichée normalisée. Vitest 615 fichiers / 7 026 essais verts sur `8192b7bf`, 0 « Errors ». **Playwright NON lancé.**
+
+**Stock (limite du 20 sept.)** : rien n'est réécrit. Un groupe sans pratique dont les indices ont été calculés sous l'ancien repli se corrige au prochain recalcul (le démarrage recalcule le trimestre actif) ; les snapshots déjà écrits gardent leur valeur.
+
+**⚠ SUPPOSITIONS NOMMÉES, à confirmer ou corriger à la relecture croisée :**
+1. **Sans pratique, le dépistage lit TOUS les critères** (la branche « hors Standards » de `calculerMoyennesCriteres`), plus les N récents du repli « standards ». Mesuré sur le pack démo sans pratique : les paliers RàI des 10 élèves sont identiques ; UN élève (DEMO019) change de profil (« Stable » → « Difficulté émergente »), même palier 2.
+2. **Sans pratique, les mots sont « production »** (le terme neutre existant), plus « artefact ».
+3. **La liste des évaluations compare toujours l'ID de la pratique à « standards »** (pas la famille) pour choisir entre niveau et pourcentage : une Standards configurable y affiche donc le pourcentage, comme avant. Aucune note affichée ne change dans ce lot ; à regarder avec N2.
+4. **L'aide « Méthodes de calcul des indices »**, sans pratique, ne nomme plus de pratique et reprend la phrase du diagnostic du profil (aucun mot neuf). Avec une pratique SPE ou DEN elle dit encore « Sommative » : antérieur au lot, non touché.
+
+**Écart avec la consigne, mesuré** : `getPratiqueParDefaut` (`pratiques.js`) n'est PAS sans appelant — `mettreAJourUIPratiqueDefaut` (appelée à l'initialisation) et le sélecteur « Pratique par défaut » de `ouvrirModalBibliothequePratiques` la lisent. Gardée. `genererCartePratique` et `desactiverPratique` (0 appelant par nom et par `data-action`) sont retirées, ainsi que `genererBadgePratiqueListeEtudiants` (0 appelant, lisait `PRATIQUE_DEFAUT`).
+
+**Trouvailles, avec leur issue** : (a) `ouvrirModalBibliothequePratiques` (`pratiques.js`) n'a aucun bouton qui l'ouvre — la bibliothèque vivante est celle de `pratiques-gestion.js` — : îlot mort d'environ 600 lignes, **noté ici et laissé** — sans conséquence observable, aucun symptôme vécu : ni corrigé ni inscrit au backlog ; son retrait serait un lot à lui seul (noms en collision avec le module vivant). (b) `scripts/valider-golden-master-trimestre.mjs` ne calculait plus rien depuis N1a (il bouchonnait l'ancien nom) : **corrigé** (c'est notre lot). (c) Le run PLANIFIÉ de GitHub du 21 sept. au matin (35615802983) est rouge à l'étape « Garde (Playwright doit-il tourner ?) », Vitest et Playwright `skipped` : le verdict au navigateur de GitHub n'est pas jugé — **signalé à Grégoire** (hors lot), cause non lue.
+
+**CE QUI RESTE** : relecture croisée de Cowork par exécution (mutations sur N1a + N1b ensemble) ; `scripts/pousser.sh` en arrière-plan, Cowork fermé MESURÉ, charge machine basse ; push sur le mot de Grégoire ; puis retirer le worktree `lot-n1a` et sortir N1 de `plans de travail/FILE-DES-LOTS.md`. Le constat de didactique (deux échelles pour le niveau de la note globale d'une Standards) part avec N2 (#716).
+
+---
+
+## (relais précédent) 21 SEPT. 2026, FIN D'APRÈS-MIDI : lot N1 COUPÉ EN DEUX ; **N1a est sur la branche `lot-n1a` (`afcc14ef`), NON FUSIONNÉ, NON POUSSÉ — et il ne doit pas l'être seul**
 
 **Où vit le travail** : branche locale `lot-n1a`, un commit (`afcc14ef`) par-dessus `1ca0f949`. `main` = `origin/main` + ce relais. Aucune release, aucun bump : sept jetons anti-cache seulement.
 
