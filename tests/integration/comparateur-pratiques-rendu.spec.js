@@ -122,8 +122,8 @@ test('#326 R2/R4a · les notes du banc sont calculées (> 0) sur les profils gé
             const inj = { evaluationsSauvegardees: c.evaluations, productions: c.productions };
             const som = (da0 && typeof window.simulerIndices === 'function')
                 ? window.simulerIndices(da0, 'sommative', inj) : null;
-            const actif = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
-                ? window.obtenirPratiqueActiveGroupeCours() : null;
+            const actif = (typeof window.obtenirIdPratiqueActive === 'function')
+                ? window.obtenirIdPratiqueActive() : null;
             const actRes = (da0 && actif) ? window.simulerIndices(da0, actif, inj) : null;
             diag = {
                 echNom: ech && (ech.nom || ech.echelle_nom), echId: ech && ech.id,

@@ -95,8 +95,8 @@ test('Porte #762 · le bouton « Appliquer au cours actif » assigne la pratique
 
     // Et le profil ne parle plus de pratique introuvable : la pratique est assignée et résolue.
     const diagnosticApres = await page.evaluate(() => ({
-        active: window.obtenirPratiqueActiveGroupeCours(),
-        resolue: !!window.obtenirPratiqueParId(window.obtenirPratiqueActiveGroupeCours())
+        active: window.obtenirIdPratiqueActive(),
+        resolue: !!window.obtenirPratiqueParId(window.obtenirIdPratiqueActive())
     }));
     expect(diagnosticApres.active).toBe(PAN_STD_ID);
     expect(diagnosticApres.resolue).toBe(true);

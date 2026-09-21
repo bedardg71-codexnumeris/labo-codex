@@ -152,7 +152,7 @@ test('#898 · les deux gestes d\'adoption demandent l\'échelle, et les trois é
         await page.evaluate((id) => { window.chargerPratiquePourModif(id); }, id);
         await page.waitForTimeout(400);
         await page.evaluate(() => document.querySelector('button[data-action="appliquerPratiqueAuCoursActive"]').click());
-        await page.waitForFunction((id) => window.obtenirPratiqueActiveGroupeCours() === id, id, { timeout: 8000 });
+        await page.waitForFunction((id) => window.obtenirIdPratiqueActive() === id, id, { timeout: 8000 });
         const ecrans = await page.evaluate(({ da, id }) => {
             window.afficherProfilComplet(da);
             const total = document.querySelector('#contenuProfilEtudiant .note-finale-total');

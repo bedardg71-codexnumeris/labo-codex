@@ -857,8 +857,14 @@ function genererSectionAccompagnement(da) {
 
     // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
     // #743 (lot D) : une assiduité inconnue (`null`) est, elle aussi, « aucune donnée ».
-    // Lot N1b : une complétion inconnue (`null`, sans pratique assignée) aussi.
-    const aucuneDonnee = (indices.A === null || indices.A === 0) && (indices.C === null || indices.C === 0) && indices.P === 0;
+    // Lot N1b (21 sept. 2026) : une complétion INCONNUE (`null`, sans pratique assignée) ne dit rien des copies —
+    // forces, défis et paliers se lisent sur les copies, pas sur la pratique. « Aucune donnée » s'y juge donc sur
+    // les copies elles-mêmes. (Première écriture du lot : `null` compté comme 0 ; un élève SANS présence saisie et
+    // AVEC des copies voyait « En attente de données » à la place de ses forces — rattrapé par les specs #542.)
+    const completionVide = (indices.C === null)
+        ? calculerIndicesNDerniersArtefacts(da, true).nbArtefacts === 0
+        : indices.C === 0;
+    const aucuneDonnee = (indices.A === null || indices.A === 0) && completionVide && indices.P === 0;
 
     if (aucuneDonnee) {
         // Retourner un HTML simplifié pour l'état "en attente de données"

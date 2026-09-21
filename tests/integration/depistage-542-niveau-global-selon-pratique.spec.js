@@ -113,9 +113,20 @@ async function monterProfil(page, typePratique) {
         // `modalitesEvaluation` : les deux cas rendaient alors EXACTEMENT la
         // même chose, et le test « sommative » exerçait en réalité le chemin
         // « standards » sous un autre nom. Il était vert, et il ne prouvait rien.
+        // ↻ Lots N1a / N1b (21 sept. 2026) : un pointeur `standards` NU ne mène plus à aucune pratique (aucun repli,
+        // aucune instance du registre aux défauts de personne). La pratique par niveaux est donc une VRAIE entrée de
+        // bibliothèque, désignée par son id ; `sommative` nu reste une pratique assignée (supposition nommée de N1a).
+        const pointeur = (typePratique === 'standards') ? 'std-542' : typePratique;
+        if (typePratique === 'standards') {
+            window.db.setSync(window.cle('pratiquesConfigurables'), [ // security-ok: fixture de test, litteral du fichier
+                { id: 'std-542', nom: 'Standards de banc', type: 'standards', dansBibliotheque: true, calcul_note: { methode: 'conversion_niveaux' },
+                configuration: { type: 'standards', approcheEvaluation: 'par-artefacts', echelleId: echelle.id, grilleId: 'GR_542',
+                    portfolio: { utiliser: true, nombreARetenir: 3, minimumCompletion: 1, methodeSelection: 'meilleurs', reglesConformite: { actif: false } }, notesFinales: false } }
+            ]);
+        }
         window.db.setSync('groupeCoursActif', { id: 'GC_542', trimestreId });
         window.db.setSync(trimestreId + '_groupesCours', [
-            { id: 'GC_542', trimestreId, coursId, pratiqueId: typePratique, actif: true }
+            { id: 'GC_542', trimestreId, coursId, pratiqueId: pointeur, actif: true }
         ]);
 
         try {
