@@ -240,10 +240,28 @@ pas avoir à réimporter une archive pour consulter le parcours d'un élève**.
 
 ➔ Et surtout : **le registre a un budget.** Il existe pour libérer de la place. Un
 registre qui pèse autant que les trimestres qu'il permet de retirer ne sert à rien.
-C'est la raison de fond de l'exclusion des blobs (§ 4.1), et c'est ce que le lot 2
-doit mesurer : **le poids du registre pour N élèves face au poids du trimestre qu'il
-permet de retirer.** Si le rapport n'est pas d'au moins un ordre de grandeur, le
-dire à Grégoire plutôt que de livrer.
+C'est la raison de fond de l'exclusion des blobs (§ 4.1).
+
+✅ **MESURÉ AU LOT 2 (18 sept. 2026, pack démo) — ET LE CRITÈRE SE CORRIGE.** Un
+dossier de dix évaluations pèse **43 Ko** ; un registre de dix élèves pèse **448 Ko**
+face à un trimestre structuré de **438 Ko** — **rapport 1,02**.
+
+⚠ Donc le critère « au moins un ordre de grandeur » que la v2 posait **ne vaut pas
+en général** : il ne vaut que pour les trimestres qui portent des **copies
+numériques**. La formulation juste, mesurée :
+
+> **Le registre libère la place occupée par les blobs, pas celle des données
+> structurées.** Un trimestre sans copies importées ne libère presque rien à la
+> suppression, registre ou pas. Un trimestre avec ses copies (l'ordre du gigaoctet,
+> `ECOSYSTEME-DONNEES.md` § 1) libère tout sauf quelques centaines de kilooctets.
+
+Ce n'est pas un défaut du lot : c'est un fait sur la forme des données, à savoir
+avant de décider quel trimestre retirer. La porte 1.3 mesure le cas réel de
+Grégoire (son A2025 porte 303 évaluations et aucune copie).
+
+⚠ **Erreur de la session, rattrapée avant livraison** : la première forme copiait
+grilles et échelles **dans chaque dossier** (15,5 Ko sur 58 par élève, répétés). Les
+modèles sont désormais rangés **une fois par trimestre** dans `modeles`.
 
 ✅ **TRANCHÉ PAR GRÉGOIRE, 17 sept. 2026 au soir** : « oui, ajoute ces informations ».
 
@@ -515,6 +533,61 @@ livrables jumeaux : le markdown ici, l'artefact publié par Cowork.
 - **Le champ de recherche** (§ 5.2) : tranché, motif écrit.
 - **Les cinq ambiguïtés** `[C1-C5]` : tranchées comme Claude Code le proposait,
   écrites aux § 3, 4.1, 4.4.
+
+---
+
+## 9 bis. Relevé de la porte terrain du 18 sept. — ce qu'il change
+
+**7 portes sur 7, zéro échec.** Trois décisions rendues.
+
+### La mesure sur le corpus réel (porte 1.3)
+
+> 11 évaluations · 32 séances · 3 grilles (Grille-5 FR-HOLIS-30 A25, Grille-4 A25,
+> Grille-5 FR-ALGO-30 A25) · 1 dossier, **65 Ko** — Copie du 2026-09-18
+
+Cohérent avec le pack démo (43 Ko pour dix évaluations). Le budget du § 4.1 bis
+tient : l'ordre de grandeur est bien la dizaine de kilooctets par élève.
+
+### ⚠ Un fait sur son corpus, dit par Grégoire le 18 sept.
+
+« Je n'ai les élèves qu'une seule fois puisque je donne le même cours à chaque
+trimestre. Il est arrivé d'avoir à nouveau un même élève, mais c'est une exception. »
+
+➔ **`dossiers[]` vaut presque toujours 1.** La forme reste juste — l'exception
+existe — mais le multi-dossiers n'est **pas** le cas courant et ne mérite aucune
+optimisation ni aucun écran dédié.
+
+➔ **Erreur de cadrage de Cowork, nommée** : la porte 1.1 demandait « un élève que
+tu as eu dans deux trimestres », c'est-à-dire un cas exceptionnel chez lui. Elle est
+verte **sans avoir éprouvé ce qu'elle visait**. La règle « un DA du collège, une
+entrée » reste tenue par la sentinelle, et rien d'irréversible n'en dépend :
+**aucune porte de reprise** (règles 1 et 2 du skill `portes-terrain`).
+
+### Les trois décisions
+
+- **3.1 — Retrait du registre : (a), un bouton « Retirer du registre » au lot 3.**
+  Motif donné par Grégoire : « pour corriger une erreur ». ➔ C'est un geste de
+  réparation, pas de gestion : il demande une confirmation, et il doit **dire ce
+  qu'il emporte** quand des résultats ultérieurs ont déjà été saisis pour cet élève
+  (les perdre en silence sur un clic de correction serait le pire des cas).
+- **3.2 — « capture » disparaît de l'écran, remplacé par « copie ».**
+  Grégoire a jugé « capture » calqué de l'anglais et proposé « instantané ».
+  ⚠ **Objection de Cowork, acceptée par lui** : « instantané » est **déjà pris**
+  dans son écosystème (`ECOSYSTEME-DONNEES.md` : les ex-TimeMachine des Archives) —
+  et ce sont précisément les instantanés hebdomadaires que le dossier emporte. « Un
+  instantané qui contient des instantanés » est illisible dans six mois.
+  ➔ **Mot retenu : « copie »**, que l'écran écrit déjà (« Copie du 2026-09-18 »).
+  « Inscrire au registre » ne bouge pas ; « Re-capturer » devient
+  **« Refaire la copie »**. Plus aucune occurrence de « captur* » dans ce que
+  Grégoire lit — le vocabulaire interne du code n'est pas concerné.
+- **3.3 — Les trois phrases de « Nouvelles » 1.144 : tel quel.**
+
+### Un défaut de forme relevé dans la mesure
+
+La ligne de résumé n'accorde pas ses pluriels : « 11 évaluation·s »,
+« 32 séance·s », « 1 dossier·s ». Le point médian n'a rien à faire là : ce n'est
+pas de l'écriture inclusive, c'est un pluriel non calculé. ➔ À corriger au lot 3
+(un helper, pas onze conditions).
 
 ---
 

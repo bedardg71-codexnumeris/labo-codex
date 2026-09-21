@@ -47,7 +47,7 @@ const SEUILS_PAR_DEFAUT = {
 
     // Identification des défis SRPNF
     // Score en dessous duquel un critère est considéré comme un défi
-    defiSpecifique: 0.70,  // 70% - Seuil d'autonomie empirique (validation 101→102)
+    defiSpecifique: 0.70,  // 70% - Seuil conventionnel ; non validé empiriquement (voir RELECTURE-2026-09-17)
 
     // Seuils d'interprétation A-C-M (Assiduité, Complétion, Mobilisation)
     // Utilisés pour classifier les niveaux de performance

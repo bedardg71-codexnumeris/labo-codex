@@ -99,10 +99,12 @@ Ce skill documente le cadre pédagogique du cours **601-101-MQ Écriture et litt
 | 4 | Relationnel | Maîtrisé (M) | 0.75-0.84 | Maîtrise durable validée |
 | 5 | Abstrait étendu | Étendu (E) | 0.85-1.00 | Maîtrise stable et transférable |
 
-**Validation empirique** (données 101→102) :
-- **< 0.65** : Performance imprévisible au cours suivant
-- **0.75** : Seuil critique garantissant ≥60% au cours 102
-- **≥ 0.85** : Performance hautement stable et prédictive
+**Bornes conventionnelles** : 60 % institutionnel ; 75 et 85 % paliers usuels au collégial.
+L'analyse 101→102 de 2025 **ne les valide pas** (n = 11, colonne « groupe complet » non
+calculable — voir `plans de travail/RELECTURE-2026-09-17-analyse-101-102-de-2025.md`).
+Hypothèse à éprouver sur A2025 + H2026 en janvier 2027. ⛔ Ne pas écrire « validé
+empiriquement » à propos de ces bornes, ni « 0,75 garantit la réussite au 102 »
+(corrigé le 19 sept. 2026, décision de Grégoire : les chiffres restent, la prétention s'en va).
 
 **Principe pédagogique** : Les critères d'évaluation eux-mêmes opèrent à différents niveaux SOLO
 - Structure, Rigueur, Français : Compétences multistructurelles (fondations)
@@ -530,6 +532,9 @@ l'application qui rend cette cohérence visible et vérifiable.
 > Les chiffres ci-dessous sont la **validation initiale (A2024)**. Des trimestres
 > ultérieurs existent (A2025, H2026) et peuvent affiner ce portrait — ne pas présenter
 > A2024 comme la seule donnée disponible.
+> ⚠ Ces chiffres viennent de l'évaluation du cours (engagement, clarté) et des moyennes du
+> trimestre. **Aucun ne valide les bornes IDME ni un lien 101→102** (voir Partie 1, « Bornes
+> conventionnelles »).
 
 **Session A2024** (validation système) :
 
