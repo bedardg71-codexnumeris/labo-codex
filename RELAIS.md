@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 14 H 05 (Toronto) : 1.152.6 (les trois derniers « artefact » du PDF de synthèse) — COMMITÉE, NON POUSSÉE
+
+**Le travail vit sur `main`, en local, en avance sur origin/main (`e74988a0`).** Le lot : `60980f25`. Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 13 h 54, mots validés par Grégoire à 13 h 00 ; relayée par lui). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé. Après le push : retirer le lot 1 de `plans de travail/FILE-DES-LOTS.md`.
+
+**Le lot** : `js/synthese-retroaction-rendu.js`, trois chaînes — « production N de T » (`renderHeader`), « Voici les N meilleures productions que tu as réalisées » (rangée de note, hors hybride), « Productions à venir : ». Noms de variables et de champs inchangés. Espace avant le deux-points : celle que le fichier posait déjà.
+
+**UN MOT D'ÉLÈVE À FAIRE VALIDER (Cowork → Grégoire)** : `nbSelection` peut valoir 1 sur un chemin réel — hors hybride, `nombreSelection = selection.length` (`synthese-retroaction-data.js`), et `construireNoteProvisoire` ne rend `null` que pour zéro retenue : un élève à sa première évaluation lisait « Voici les 1 meilleurs artefacts… ». Accordé au singulier comme la consigne le proposait : **« Voici ta meilleure production »** (suivi du « : » commun). Prouvé par le banc (montage à une retenue), pas seulement lu.
+
+**Autres « artefact » lus par l'élève dans la synthèse : aucun trouvé** (rendu, données, `travaux-export-pdf.js` ; grep des chaînes, hors commentaires) — ne restent que des identifiants (`'artefact-portfolio'`, `t.artefacts`). Non couvert : le TITRE d'une production saisi par l'enseignant.
+
+**Preuves** : `tests/unit/sentinelle-pdf-synthese-production-pas-artefact.test.js` (6 essais) joue `construireFeedback` → `rendreSyntheseHTML` (échappement de `config.js`) et mesure le texte LU (commentaires et balises partis), à quatre retenues et à une seule ; un essai de garde vérifie que le montage mesure quelque chose (rangée de note présente, hors hybride, 4 retenues, 1 à venir, production 2 de 5). Six mutations, une à la fois, toutes ROUGES, « mutation posée » exigé, `node --check` du fichier muté, restauration par copie, empreinte avant = après : M1-M3 chacune des trois chaînes remise à l'ancien mot, M4 « meilleurs » au masculin, M5 singulier neutralisé, M6 singulier remis à « artefact ». Vitest complet, avant le bump et après le commit du bump : 614 fichiers, 7 000 essais, aucune ligne « Errors » ni « Unhandled ».
+
+**« Nouvelles »** : décision de Grégoire (question fermée, 21 sept.) — pas de 7e item ; une phrase AJOUTÉE à la fin de l'item 1.152.4 : « L'en-tête, la rangée de note et la liste « à venir » du PDF disent aussi « production ». » Les mots déjà validés de cet item ne changent pas.
+
+**Stock** : rien n'est persisté ; les PDF déjà remis gardent l'ancien texte. **Supposé, à corriger d'un mot** : `release.mjs` a aussi bumpé le jeton de `js/portfolio.js` (non touché) — voulu par le script (#675, il part de l'avant-dernière release) ; laissé tel quel. **Audit de début** : son Vitest (613 / 6 994 vert) a chevauché mes premières éditions — remplacé par les deux passes ci-dessus. Il signale aussi que le run planifié GitHub de 10 h 58 a échoué dans la Garde (« unexpected EOF », corrigé par `9151a595`, pas encore éprouvé : premier juge = run de 4 h le 22 sept.).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 14 H 00 (Toronto) : 1.152.5 (demies de l'indice P : 57,5 → 58) — ✅ POUSSÉ, origin/main = `518a79c4`
 
 **POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, détaché (`nohup`, suivi par PID), sur le « Oui, pousse — Cowork est fermé » de Grégoire (question fermée, après son relais de la relecture de Cowork) ; `d5b67d62..518a79c4`, trois commits (`e6a5ac31` le lot, `4daca46e` relais, `518a79c4` essais de la relecture). Garde de charge : 4,54, aucune attente. Sentinelle Playwright : aucune rougeur nouvelle, 0 échec connu, verdict vert à jour pour le SHA ; hook Vitest vert. La sortie de `pousser.sh` ne dit rien des specs instables (aucune ligne à ce mot) : non affirmé. Mesuré avant : aucun `pousser.sh`, Vitest ni Playwright ; aucune VM de virtualisation vue, l'application Claude ouverte — « Cowork fermé » tient du mot de Grégoire. « En ligne » chez l'hébergeur : non mesuré d'ici. Le lot 1 est sorti de `plans de travail/FILE-DES-LOTS.md` ; le suivant y est le n° 1 (les trois « artefact » du PDF de synthèse). **Rien n'est dû sur ce lot.** Ce qui suit est l'état d'AVANT le push, gardé pour la trace.
