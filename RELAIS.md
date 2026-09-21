@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 12 H 35 (Toronto) : 1.152.4 (F4-1, mots du bilan de l'élève) — COMMITÉE EN LOCAL, PAS POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 12 H 58 (Toronto) : 1.152.4 (F4-1, mots du bilan de l'élève) — ✅ POUSSÉ, origin/main = `7f517383`
+
+**POUSSÉ à 12 h 57** par `scripts/pousser.sh origin main` sous `caffeinate`, en processus détaché (`nohup`, suivi par PID — un premier lancement par la tâche d'arrière-plan a été arrêté après quelques secondes : son plafond de 10 min est sous la durée du verdict), sur le « Oui, pousse » de Grégoire (question fermée, après son relais de la relecture de Cowork) ; `dde51a01..7f517383`, deux commits (`c8c35efd` le lot, `7f517383` relais). Garde de charge : 2,93, aucune attente. Sentinelle Playwright : verdict vert sur le SHA exact, 0 échec connu, 0 spec instable ; hook Vitest vert. Mesuré avant : aucun `pousser.sh`, aucun Vitest ni Playwright, aucune VM Cowork. « En ligne » chez l'hébergeur : non mesuré d'ici. **Ce qui suit décrit l'état d'AVANT le push.**
 
 **Le travail vit sur `main`, en local, en avance sur origin/main (`dde51a01`).** Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 40, texte validé par Grégoire ; relayée par lui à 12 h 15). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé.
 
