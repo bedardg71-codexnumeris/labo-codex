@@ -7,7 +7,10 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, après-midi (Toronto) : 1.152.3 (#553) — commitée en local (`9151a595`), PAS poussée
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, après-midi (Toronto) : 1.152.3 (#553) — complément fait (`cae37b0a`), PUSH LANCÉ sur le mot de Grégoire (« push compris »)
+
+**Mise à jour (complément de Cowork, 11 h 43 — `plans de travail/CONSIGNE-COMPLEMENT-1152-3-francais.md`)** : relecture croisée VERTE par exécution (164 / 164, six mutations ; une laissée verte, sans conséquence réaliste : compter les candidats sur le préfixe « franc »). Les deux trous que j'avais signalés sont fermés par `tests/unit/sentinelle-553-comportement-fleche-et-compte-des-defis.test.js` : (a) la section Accompagnement RENDUE par les vrais modules porte « → » sur la ligne « Français écrit » (garde anti-silence : le calcul rend bien « → » sous `francaisecrit`, plateau ailleurs) ; (b) `mettreAJourCriteresCibles` affiche « — 2/2 en défi » à l'oral et « — 1/2 en défi » à l'écrit. Trois mutations écrites pour PASSER SOUS le verrou textuel (`'franc' + 'ais'`, `indexOf`) : verrou vert, comportement rouge, les trois. Build-only `0921-1147`, numéro inchangé. **Le push passe par `scripts/pousser.sh origin main` sous `caffeinate`, en arrière-plan ; ce bloc est corrigé quand c'est poussé. Si tu lis ceci sans la mention « POUSSÉ », le push n'a pas abouti : `git log origin/main -1` tranche.** Ce qui suit décrit l'état d'avant le complément.
+
 
 **Le travail vit sur `main`, en local : DEUX commits d'avance sur origin/main (`1defd61c`)** — `e5e3e4a2` (l'audit « code en dur ») et `9151a595` (le lot #553, 1.152.3). Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 25, décision de Grégoire ; relayée par lui). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé. Vitest complet vert APRÈS le commit du bump : 610 fichiers, 6969 / 6969, aucun « Errors ».
 
