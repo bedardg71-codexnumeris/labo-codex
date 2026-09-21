@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.152.2 (#715, #723) — 🟡 COMMITÉE SUR `main` EN LOCAL (`f1ee271c`), PAS POUSSÉE : attend la relecture croisée de Cowork, puis le mot de Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.152.2 (#715, #723) — ✅ POUSSÉE À 11 h 00, origin/main = `2c4d3e4d`
+
+**Mise à jour de 11 h 00 : POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, en arrière-plan, sur le mot de Grégoire (« push compris », reconfirmé par question fermée) ; `b87dfffc..2c4d3e4d`, trois commits (`f1ee271c` le lot, `b277f1bf` relais, `2c4d3e4d` complément de Cowork : l'essai à sept valides, build-only 0921-1040). Garde de charge du script : 90 s d'attente (22,63 → 6,21, Vitest venait de finir). Sentinelle Playwright : verdict vert sur le SHA exact, 0 échec connu, 0 spec instable ; hook Vitest vert (6958 / 6958). Mesuré avant : aucune VM Cowork, aucun `pousser.sh`, arbre propre. Le trou de preuve de la relecture (mutation « coupe à N + 1 » verte) est fermé : elle rougit au chemin riche ET à l'instance. « En ligne » chez l'hébergeur : non mesuré d'ici. **Ce qui suit décrit l'état d'AVANT le push** (le « un commit d'avance » et le « pas lancé » sont périmés).
 
 **Ajout de 10 h 37 (Cowork) — relecture croisée de `f1ee271c` (1.152.2) : VERTE sur le code, par exécution ; UN TROU DE PREUVE.** Cinq bancs du lot : 152 / 152. Cinq mutations de Cowork : quatre rouges ; **« tous » coupé à N + 1 : VERTE** (tous les jeux ont 5 valides pour N = 4). Complément : `plans de travail/CONSIGNE-COMPLEMENT-1152-2-tous.md` (un essai à N + 2 valides), puis push sur le mot de Grégoire.
 
