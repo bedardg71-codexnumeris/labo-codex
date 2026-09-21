@@ -962,13 +962,18 @@ function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente, critereAlgo) 
         var phrase = window.enoncesAlgo.enonce(critereAlgo, 'concentre', {});
         return '<p>Tous les critères sont maîtrisés.' + (phrase ? ' ' + ech(phrase) : '') + ' (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
     }
-    // Verifier si maitrise depuis 2+ artefacts (garde length > 0 :
+    // Verifier si maitrise depuis 2+ productions (garde length > 0 :
     // .every() retourne true sur tableau vide via vacuite JS).
+    // ⚠ F4-1 (audit du 21 sept. 2026) — la phrase disait « depuis plus d’un
+    // artefact » et « vers le niveau É (transfert…) » : le mot du cours de
+    // Grégoire et le sommet de SON échelle, dans le bilan de l'élève de qui que
+    // ce soit. Texte validé par Grégoire ; MÊMES MOTS que le PDF de synthèse
+    // (`synthese-retroaction-data.js`), à l'apostrophe près.
     var maitriseLongtemps = evalPrecedente && Array.isArray(evalPrecedente.criteres) &&
         evalPrecedente.criteres.length > 0 &&
         evalPrecedente.criteres.every(function(c) { return zonePrecedente(c.niveauSelectionne) === 'acquis'; });
     if (maitriseLongtemps) {
-        return '<p class="retro-force">Tous les critères sont maîtrisés depuis plus d’un artefact. Tu peux aider tes collègues — c’est une excellente façon d’étendre tes compétences vers le niveau É (transfert à d’autres contextes).</p>';
+        return '<p class="retro-force">Tous les critères sont maîtrisés depuis plus d’une production. Tu peux aider tes collègues : c’est une excellente façon de transférer tes compétences à d’autres contextes.</p>';
     }
     return '<p class="retro-force">Tous les critères sont maîtrisés. Continue sur cette lancée !</p>';
 }

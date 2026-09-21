@@ -287,7 +287,7 @@ describe('#555 lot 2 · le bilan à l\'écran lit les repères de l\'échelle', 
         expect(html).toContain('Tu as progressé en Démarche');
     });
 
-    it('« maîtrisés depuis plus d\'un artefact » lit le passé dans SON échelle', () => {
+    it('« maîtrisés depuis plus d\'une production » lit le passé dans SON échelle', () => {
         // ⚠ MONTAGE CHOISI POUR ÊTRE DISTINGUABLE, et il a fallu un break-test
         // pour s'en apercevoir. Avec DEUX échelles au store, lire le passé avec
         // `null` faisait échouer la résolution (elle refuse de deviner entre
