@@ -9,6 +9,8 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.152.2 (#715, #723) — 🟡 COMMITÉE SUR `main` EN LOCAL (`f1ee271c`), PAS POUSSÉE : attend la relecture croisée de Cowork, puis le mot de Grégoire
 
+**Ajout de 10 h 37 (Cowork) — relecture croisée de `f1ee271c` (1.152.2) : VERTE sur le code, par exécution ; UN TROU DE PREUVE.** Cinq bancs du lot : 152 / 152. Cinq mutations de Cowork : quatre rouges ; **« tous » coupé à N + 1 : VERTE** (tous les jeux ont 5 valides pour N = 4). Complément : `plans de travail/CONSIGNE-COMPLEMENT-1152-2-tous.md` (un essai à N + 2 valides), puis push sur le mot de Grégoire.
+
 **Le travail vit sur `main`, en local : un commit d'avance sur origin/main (`b87dfffc`).** Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 10 h 17, relayée par Grégoire). Vitest complet vert APRÈS le commit du bump : 609 fichiers, 6956 / 6956, aucun « Errors ». Verdict Playwright : PAS lancé (il vient après la relecture, sur le SHA exact à pousser).
 
 **#715** — un seul site coupait sous « tous » : `_selectionnerArtefactsLegacy` (`js/profil-etudiant-actions.js`). Les quatre autres lecteurs (`portfolio.js`, les deux chemins de `pratique-pan-standards.js` dont `calculerPerformanceHistorique` — vivant, appelé par `snapshots.js` —, la carte du profil) prenaient déjà tout. 77,32 au chemin riche, à l'instance, par `simulerIndices` ; 77 à l'export. **DEUX bancs figeaient 76,75**, pas un : A2b (16 sept.) ET C3 (`audit-pratique-de-notation-2026-09-05`), réécrits tous les deux. Comparateur : « Toutes les productions évaluées (N minimum) », mots validés par Grégoire (question fermée, ≈ 10 h 25).

@@ -102,7 +102,7 @@ function definirModeExpertFromEl(el) {
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
 let VERSION_MAJEURE = '1.152.2';
-let BUILD_ID = '0921-1030';
+let BUILD_ID = '0921-1040';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
