@@ -36,7 +36,9 @@
                 // 1.152.3 (#553) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
                 'Profil d\'un·e élève › forces et défis&nbsp;: un critère dont le nom commence par «&nbsp;Français&nbsp;» («&nbsp;Français écrit&nbsp;», par exemple) y figure de nouveau&nbsp;; s\'il est le plus faible, il devient le défi principal et la cible d\'intervention. Deux critères de français (oral, écrit) ont maintenant chacun leur valeur. Les interventions déjà enregistrées gardent leur bilan.',
                 // 1.152.4 (F4-1 de l'audit du 21 sept.) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
-                'Bilan de l\'élève (rétroaction et PDF de synthèse)&nbsp;: la phrase adressée à qui maîtrise tous les critères deux productions de suite ne parle plus d\'«&nbsp;artefact&nbsp;» ni du «&nbsp;niveau É&nbsp;», des mots propres à un seul cours. Dans le PDF, une production sans titre s\'appelle maintenant «&nbsp;Production&nbsp;».'
+                'Bilan de l\'élève (rétroaction et PDF de synthèse)&nbsp;: la phrase adressée à qui maîtrise tous les critères deux productions de suite ne parle plus d\'«&nbsp;artefact&nbsp;» ni du «&nbsp;niveau É&nbsp;», des mots propres à un seul cours. Dans le PDF, une production sans titre s\'appelle maintenant «&nbsp;Production&nbsp;».',
+                // 1.152.5 (demies de l'indice P) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
+                'Une note finale exactement en ,5 s\'arrondit maintenant toujours vers le haut (57,5&nbsp;→&nbsp;58), au fichier des résultats finaux, au profil et au Comparateur&nbsp;: quatre valeurs (14,5&nbsp;· 28,5&nbsp;· 56,5&nbsp;· 57,5) descendaient par erreur. Les autres notes ne changent pas.'
             ]
         },
         {

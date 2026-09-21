@@ -1,37 +1,43 @@
-# Consigne suivante – le bilan de l'élève ne parle plus d'« artefact » ni du « niveau É » (F4-1 de l'audit du 21 sept.)
+# Consigne du jour – une note en ,5 monte toujours : 57,5 donne 58 (demies de l'export pour Léa, trouvaille de 1.152.2)
 
-> Écrite le 21 septembre 2026, 11 h 40 (Toronto), par Cowork, **pendant** l'exécution de la consigne #553. **À ne lancer qu'une fois #553 poussée** (une seule session écrit dans `js/`). Au lancement : archive la consigne #553 sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-21-553-francais-diagnostic.md` et renomme celle-ci en `CONSIGNE-DU-JOUR.md`.
-> **Texte validé par Grégoire le 21 sept. à 11 h 40** (« oui » à la proposition de Cowork). Mots d'élève : tels quels.
+> Écrite le 21 septembre 2026, 13 h 08 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (F4-1, 1.152.4, poussée) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-f4-1-bilan-mots-eleve.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Décision de Grégoire** : lot ajouté à la file le 21 sept. à 11 h 43 (« oui, on l'ajoute ») ; lancé à 13 h 08 (« oui »). Règle : **la même que celle du niveau imprimé (1.150.0) : une note exactement en ,5 monte** (74,5 → 75, 57,5 → 58).
 
 ## 0 · Conditions de départ
 
-`git log --oneline -1 origin/main` porte 1.152.3 (`dde51a01` ou un commit de journal après). Sinon, arrête-toi. Aucune autre session n'écrit.
+`git --no-optional-locks log --oneline -1 origin/main` porte `d5b67d62` (journal de 1.152.4) ou un commit de journal après. Sinon, arrête-toi. Aucune autre session n'écrit dans `js/`.
 
-## 1 · Ce qui change – deux sites jumeaux, un seul texte
+## 1 · Ce que Cowork a mesuré (21 sept., à remesurer)
 
-Mesuré par Cowork à 11 h 40 :
-- `js/evaluation-retroaction.js` ≈ l. 971 (bilan de l'évaluation) ;
-- `js/synthese-retroaction-data.js` ≈ l. 832-836 (synthèse du PDF), qui dérive `versLeSommet` de `niveauLePlusHaut`.
+- `js/portfolio.js` : `simulerIndices` (≈ l. 844-845) et `calculerEtStockerIndicesCP` (≈ l. 733-734) font `P_decimal = noteFinale / 100` puis `Math.round(P_decimal * 100)`. Exécuté sous node : 14,5 → 14 ; 28,5 → 28 ; 56,5 → 56 ; 57,5 → 57 (`57.5/100*100 = 57.49999999999999`) ; 74,5 → 75 et 59,5 → 60 sont justes.
+- Le commentaire l. ≈ 843 dit « Mêmes arrondis que calculerEtStockerIndicesCP » : **les deux sites doivent rester identiques.**
+- ⚠ **Le lot dépasse l'export pour Léa** : `simulerIndices` est lu par le profil (`profil-etudiant-sections-affichage.js`), le Comparateur, l'assistant, `indices.js` et l'export des résultats finaux ; `calculerEtStockerIndicesCP` écrit l'indice P du trimestre en cours. Mesure la liste des lecteurs et dis-la au rapport.
+- **C** passe par le même aller-retour (`Math.round(C_decimal * 100)`) : remesure s'il perd aussi des demies (un ratio remis ÷ attendus). Si oui, même correctif, même lot ; sinon, dis-le.
 
-Les deux rendent, quand tous les critères sont maîtrisés deux fois de suite, **exactement** :
-> Tous les critères sont maîtrisés depuis plus d'une production. Tu peux aider tes collègues : c'est une excellente façon de transférer tes compétences à d'autres contextes.
+## 2 · Ce qui change
 
-- Apostrophes : suis celles de chaque fichier (typographiques dans le premier, droites dans le second) ; le deux-points précédé d'une espace comme ailleurs dans le fichier.
-- `versLeSommet` et son appel à `niveauLePlusHaut` deviennent sans usage dans ce message : retire-les s'ils ne servent plus nulle part (zéro-dette), dis-le.
-- Le message « Tous les critères sont maîtrisés. Continue sur cette lancée ! » ne change pas.
-- **Repli de titre « Artefact »** que le rapport situe près de `evaluation-retroaction.js:1212` : remesure. S'il est lu par l'élève, il devient « Production » (règle de Grégoire du 21 sept. : « productions étudiantes » plutôt qu'« artefacts » hors de son cours) ; s'il n'est pas lu par l'élève, laisse-le et dis-le.
-- **Aucun autre mot** : si tu trouves d'autres « artefact » ou « niveau É » lus par l'élève, **nomme-les dans ton rapport sans les changer** (ils remontent à Grégoire).
+- Une seule façon d'arrondir, partagée par les deux sites, qui ne passe plus par l'aller-retour flottant (le choix technique est à toi ; nomme-le). Une note exactement en ,5 monte. Rien d'autre ne bouge : aucune note qui n'est pas en ,5 ne change.
+- Si l'arrondi du niveau imprimé de 1.150.0 est une fonction réutilisable, réutilise-la ; sinon, dis pourquoi.
+- **Aucun mot à l'écran ne change.** Pas de phrase de « Nouvelles » sans la proposer à Grégoire (à PROPOSER, question fermée).
 
-## 2 · Preuves
+## 3 · Stock – limite du 20 sept. : rien ne s'efface
 
-- Le vrai bilan et la vraie synthèse rendus pour un élève maîtrisé deux fois de suite, sous **deux échelles** (IDME, et une échelle à quatre niveaux sans É) : le texte exact dans les deux, aucun « É », aucun « artefact ».
-- Mutations, une clause à la fois, rouges : l'ancien texte remis dans un seul des deux sites ; le tiret cadratin remis ; « artefact » remis.
-- Les anciennes « Nouvelles » gardent leurs mots. Vitest complet vert. **Release : patch.** **Phrase de « Nouvelles » à PROPOSER à Grégoire.** Relecture croisée par Cowork avant le verdict et le push ; push sur son mot.
+- Un fichier déjà exporté ne se réécrit pas.
+- L'indice P du trimestre en cours se recalcule à l'ouverture, comme avant : pour un élève dont la note est exactement à 14,5, 28,5, 56,5 ou 57,5, il monte d'un point. Mesure-le sur le pack démo (combien d'élèves, lesquels), dis-le. Les trimestres passés ne sont pas rouverts.
+- ⚠ **Arrêt** : si une valeur corrigée **traverse 60** (59,5 compris) sur un chemin réel, arrête-toi et dis-le avant de commiter : ça touche une réussite, donc Grégoire. (Claude Code a mesuré « aucune ne traverse 60 » : à remesurer.)
 
-## 3 · Ce que Grégoire verra
+## 4 · Preuves
 
-Rétroaction et PDF d'un élève qui a tout maîtrisé deux fois de suite : la phrase ci-dessus, sans « artefact » ni « niveau É ».
+- Sur le vrai moteur : les quatre demies (14,5 · 28,5 · 56,5 · 57,5) donnent 15, 29, 57, 58, au profil, à l'export et dans l'indice stocké ; 74,5 → 75 inchangé ; une note non demie (57,49 → 57, 57,51 → 58) inchangée.
+- Une contre-épreuve sur TOUTES les valeurs à une décimale de 0 à 100 : l'entier rendu = l'arrondi « demi vers le haut » calculé en entiers (dixièmes). Pas seulement les quatre valeurs connues.
+- Mutations, une à la fois, rouges : un seul des deux sites corrigé ; l'ancien aller-retour remis ; `Math.floor` ; demi vers le pair.
+- Vitest complet vert. **Release : patch.** Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire.
 
-## 4 · Fichiers de Cowork à commiter avec ce lot
+## 5 · Ce que Grégoire verra
 
-Cette consigne (renommée), l'archive de celle de #553, `plans de travail/CONSIGNE-COMPLEMENT-1152-3-francais.md` et `plans de travail/FILE-DES-LOTS.md` (retire-en le lot 1 une fois poussé).
+Pour un élève dont la note est exactement en ,5, l'export pour Léa, le profil et le Comparateur disent le même entier, arrondi vers le haut (57,5 → 58). Tous les autres élèves : rien ne change.
+
+## 6 · Fichiers de Cowork à commiter avec ce lot
+
+Cette consigne, l'archive de la précédente, `plans de travail/FILE-DES-LOTS.md` (retire-en le lot 1 une fois poussé ; le lot 2, les trois « artefact » du PDF, a été ajouté par Cowork à 13 h).
