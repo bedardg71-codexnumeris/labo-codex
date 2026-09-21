@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.152.2 (#715, #723) — ✅ POUSSÉE À 11 h 00, origin/main = `2c4d3e4d`
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 12 H (Toronto) : audit « code en dur », LECTURE SEULE — commité en local, PAS poussé
+
+**Le travail vit sur `main`, en local.** Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 06, relayée par Grégoire). Livrable : `Rapports/AUDIT-code-en-dur-2026-09-21.md`. Aucune ligne de `js/`, `index.html`, `styles.css` touchée, aucune release, aucune fiche inscrite : le rapport propose, Grégoire dispose. **Attend la relecture de Cowork, puis le mot de Grégoire pour le push** (docs seulement).
+
+**Ce que le rapport dit, en trois lignes.** (1) Presque tout ce que le 26 août et le 1er sept. nommaient est retiré ou passé dans un registre réglable. (2) Le constat le plus lourd joue CONTRE la pratique de Grégoire : un critère dont le nom commence par « Français » est filtré du diagnostic des forces et défis, et deux critères « Français… » fusionnent — prouvé par banc (quatre cas), c'est le diagnostic que **#553** attendait ; il y a du stock (`snapshotAvant[da].criteres.francais` dans les interventions). (3) Trois des cinq constats de famille 3 sont des doublons (#553, #716, #677 — l'énoncé de #677 est périmé en partie).
+
+**Trouvé par l'audit de début, hors lot, NON corrigé, à remonter à Grégoire** : la garde du run planifié de GitHub échoue sur une apostrophe (`.github/workflows/tests.yml:296`, `${raison:-la garde n'a rien rendu…}` ; run 35615802983) — Vitest et Playwright y sont `skipped`, donc aucun verdict navigateur rendu par GitHub depuis le 20 sept. Le jeton local reste vert sur `2c4d3e4d`.
+
+**Pas vérifié** : aucun écran ouvert dans un navigateur ; aucune donnée réelle lue ; F3-2 (#716) non rejoué au banc.
+
+---
+
+## (précédent) 21 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.152.2 (#715, #723) — ✅ POUSSÉE À 11 h 00, origin/main = `2c4d3e4d`
 
 **Mise à jour de 11 h 00 : POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, en arrière-plan, sur le mot de Grégoire (« push compris », reconfirmé par question fermée) ; `b87dfffc..2c4d3e4d`, trois commits (`f1ee271c` le lot, `b277f1bf` relais, `2c4d3e4d` complément de Cowork : l'essai à sept valides, build-only 0921-1040). Garde de charge du script : 90 s d'attente (22,63 → 6,21, Vitest venait de finir). Sentinelle Playwright : verdict vert sur le SHA exact, 0 échec connu, 0 spec instable ; hook Vitest vert (6958 / 6958). Mesuré avant : aucune VM Cowork, aucun `pousser.sh`, arbre propre. Le trou de preuve de la relecture (mutation « coupe à N + 1 » verte) est fermé : elle rougit au chemin riche ET à l'instance. « En ligne » chez l'hébergeur : non mesuré d'ici. **Ce qui suit décrit l'état d'AVANT le push** (le « un commit d'avance » et le « pas lancé » sont périmés).
 

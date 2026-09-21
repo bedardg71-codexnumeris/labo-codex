@@ -1,42 +1,47 @@
-# Consigne du jour – la note d'une pratique Standards « tous » et l'arrondi de l'export (#715, #723)
+# Consigne du jour – audit en lecture seule : ce qui ne marche qu'avec la pratique de Grégoire
 
-> Écrite le 21 septembre 2026, 10 h 17 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (#908, poussée en 1.152.1) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-908-entete-export-recherche.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Pourquoi ces deux-là** : Grégoire et la cohorte utilisent surtout SOM et PAN-STD cet automne (Grégoire, 21 sept. ≈ 10 h 15). Des quatre défauts de note remesurés par Cowork ce matin (banc `audit-pratiques-notation-config-2026-09-16`, 32/32 verts avec les valeurs fausses figées), ce sont les deux qui les touchent. #713 (SPE) et #717 (DEN) attendent.
+> Écrite le 21 septembre 2026, 11 h 06 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (#715, #723, poussée en 1.152.2) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-715-723-tous-et-arrondi.md` (déplacée par Cowork, à commiter avec ce lot).
 
-## 0 · Conditions de départ – mesure-les
+## 0 · Le critère, et pourquoi maintenant
 
-- `git fetch && git log --oneline -1 origin/main` porte **1.152.1** (`b87dfffc` ou un commit de journal après). Sinon, arrête-toi.
-- Aucune autre session n'écrit, aucun `pousser.sh` en cours ; arbre propre hors des non-suivis anciens et des fichiers de Cowork (§4).
+Le critère est celui de Grégoire du 1er sept. : « que rien ne soit codé en dur » – **sa pratique d'enseignant de littérature gravée dans un code que d'autres disciplines utiliseront**. La cohorte arrive avec d'autres critères, d'autres cours, d'autres pratiques.
+Le 21 sept. à 10 h 40, il a dit : « je croyais qu'on avait retiré tout ce qui est codé en dur ». Le travail a été fait en partie (audit du 26 août, `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md` ; cadrage du 1er sept., `plans de travail/CADRAGE-2026-09-01-front-evaluations-et-code-en-dur.md` ; chantiers #529, #667, #668). **Cet audit dit ce qui en reste aujourd'hui, mesuré.**
 
-## 1 · #715 – sous « tous », la note prend toutes les productions
+## 1 · Règles du lot
 
-Constat (fiche, tenu au 21 sept.) : `_selectionnerArtefactsLegacy` (`js/profil-etudiant-actions.js:262`) applique `.slice(0, nombreARetenir)` à tous les modes ; sous `methodeSelection: 'tous'` le chemin riche coupe à N dans l'ordre de stockage (**76,75**), l'instance `pratique-pan-standards.js` prend tout (**77,32**).
-**Décision de Cowork (technique, dite à Grégoire)** : « tous » veut dire tous – **une règle, celle qui prend tout**, dans les deux chemins.
-- **À remesurer avant de coder** : les autres lecteurs de `methodeSelection` qui pourraient couper sous « tous » (grep des cinq lecteurs cités au lot 28 : `portfolio.js`, `profil-etudiant-actions.js`, `pratique-pan-standards.js`, la carte du profil, `construction-attributs.js`). Mêmes chiffres partout : profil, `simulerIndices`, export.
-- **A2b du banc de l'audit rougit** (il fige 76,75) : réécris-le pour juger 77,32, ne le supprime pas.
-- **Le Comparateur** (`construction-attributs.js:160`) écrit « 4 retenu(s) sur 2 minimum » à côté de « Méthode de sélection : tous ». Sous « tous », rien n'est « retenu sur » : si un libellé EXISTANT dit juste, emploie-le ; sinon **arrête-toi sur ce point et propose les mots** (lus par des collègues), sans les poser.
-- **Stock** : la note se calcule à la lecture ; remesure si un P calculé sous « tous » est ÉCRIT quelque part (relevés hebdomadaires, `indicesCP`). S'il l'est, ne réécris rien : dis-le, en une ligne (« tarir n'est pas réparer »). Les notes d'A2025 et d'H2026 ne se rouvrent pas.
+- **Lecture seule.** Aucune ligne de `js/`, `index.html`, `styles.css` ne change. **Aucune release.** Tu peux écrire des bancs jetables (hors du dépôt, ou retirés avant le commit) et le rapport.
+- **Aucune fiche inscrite au backlog par ce lot** : le rapport PROPOSE ; Grégoire dispose. Chaque constat porte une disposition proposée (voir §4).
+- Condition de départ : `git log --oneline -1 origin/main` porte **1.152.2** (`1defd61c` ou un commit de journal après). Aucune autre session n'écrit.
 
-## 2 · #723 – l'export garde l'entier, et le dit
+## 2 · Trois questions, dans cet ordre
 
-**Tranché par Grégoire le 21 sept. à 10 h 17** : le fichier d'export des résultats finaux sert à reporter les notes dans Léa ; **il garde la note arrondie à l'entier**, et l'en-tête le dit, pour qu'un 88 à côté d'un 87,6 au profil ne passe plus pour une erreur.
-- `js/export-resultats-finaux.js`, `ENTETES_SYNTHESE` (l. 70-72) : la colonne **« Note finale »** devient **« Note finale (arrondie à l'entier) »** – décision de Cowork sur la forme, Grégoire en est informé et peut la reprendre.
-- **À remesurer avant de poser** : l'arrondi est bien un arrondi au plus proche (`indices.js:560`, `Math.round(P * 100)`) et un 74,5 donne 75 comme au niveau imprimé (1.150.0) ; qu'aucun lecteur (import, gabarit, test, Aide) ne dépend du libellé « Note finale » de ce fichier – sinon arrête-toi et dis lequel.
-- Aucune valeur ne change ; seul le libellé de la colonne. Le profil garde sa décimale (hors lot : le point décimal « 79.4 » du profil, s'il s'affiche encore ainsi, est à nommer, pas à corriger ici).
+**A. Ce que le 1er septembre disait encore en dur – est-ce toujours là ?** Pour chaque point du §2 du cadrage du 1er sept. (le seuil 0,7125 et l'échelle 0,85 / 0,75 / 0,65, #677 ; le texte « erreurs de français » et ses six variantes, #581, dont celle **imprimée dans le PDF de l'élève** ; le portrait confidentiel à cinq champs, #539 ; `copierCriteresSRPN(F)` ; les replis IDME à deux libellés de I ; les trois `facteurNormalisation || 500` ; les ressources « SA » / « CAF » de `pratique-sommative.js`) : **présent / retiré / déplacé**, avec la ligne et la commande qui le montre.
 
-## 3 · Preuves attendues
+**B. Ce que Cowork a vu ce matin, et que personne n'a classé** :
+- la normalisation `startsWith('francais') → 'francais'` (`profil-etudiant-calculs.js` ×2, `profil-etudiant-sections-affichage.js`, `profil-etudiant-helpers.js`, `interventions.js` ×3) et `NOM_CRITERE_LANGUE = 'francais'` (`pratiques/pratique-pan-standards.js`) : **que devient un critère de langue qui s'appelle autrement** (« Qualité de la langue », « Langue », « Communication ») ? Joue-le sur le vrai code : une grille à cinq critères aux noms d'une autre discipline, à travers le dépistage, les interventions, le profil et la note Standards.
+- la liste `['structure','rigueur','plausibilite','nuance','francais']` (`profil-etudiant-helpers.js` ≈ l. 941) et la liste `srpnf…` d'`init-inline.js` ≈ l. 571 : qui les lit, pour quoi.
+- « Grégoire » (≈ 111 fichiers de `js/`), « Bédard » (≈ 20), « 601-101 » (≈ 19), « EUF » (≈ 11) : **commentaire, ou valeur qui atteint l'écran, les données ou un calcul ?** Un compte par catégorie suffit ; ne liste que ce qui atteint l'écran, les données ou un calcul.
 
-- #715 : sur le vrai moteur, une STD « tous » à 6 productions dont 4 « à retenir » : 77,32 au profil, par `simulerIndices` et à l'export ; un essai dont l'ordre de stockage contredit l'ordre attendu (erreur 17 de Cowork : un tri doit être jugé par un élément qui le contredit) ; « meilleurs » et « récents » inchangés (non-régression).
-- #723 : le CSV produit relu ; la colonne porte le nouveau libellé ; les valeurs identiques à avant, octet pour octet hors en-tête.
-- Mutations, une clause à la fois, toutes rouges : le `slice` remis sous « tous » ; un seul des deux chemins corrigé ; l'ancien libellé remis ; l'arrondi au plancher.
-- Vitest complet vert. **Release : patch.** **Phrase de « Nouvelles » à PROPOSER à Grégoire** avant de l'écrire.
-- Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire seulement.
+**C. Le balayage large** : tout autre littéral qui suppose **une discipline, un cours, un établissement, une grille ou une échelle précise** (noms de critères, codes de cours, noms de collèges ou de services, seuils pédagogiques non réglables, textes d'élève qui nomment une matière). Cherche par le contenu (`grep -rn` sur des symboles et des mots), pas par nom de fichier. **Exclus** : le pack de démonstration et ses gabarits (ils ont le droit d'être la pratique de Grégoire, s'ils se présentent comme un exemple), `changelog-data.js`, les tests.
 
-## 4 · Fichiers de Cowork à commiter avec ce lot
+## 3 · Chaque trace se classe en une de quatre familles
 
-`plans de travail/CONSIGNE-DU-JOUR.md` (celle-ci), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-908-entete-export-recherche.md`, `CONSIGNE-DEMARRAGE-COWORK.md` (page du tri, version 45).
+1. **Commentaire / trace d'histoire** – sans effet.
+2. **Valeur par défaut réglable** – la pratique de Grégoire sert de départ, l'utilisateur·rice peut la changer à l'écran (dis où).
+3. **Code qui ne marche bien qu'avec la pratique de Grégoire** – un·e collègue d'une autre discipline obtient un calcul faux, un écran vide ou un mot qui ne correspond pas à son critère. **Prouve-le** par un banc jetable qui rejoue le cas d'un·e collègue (critères renommés, autre cours), pas par la lecture seule.
+4. **Mots qui nomment la littérature ou le français à un·e élève d'une autre discipline** (PDF, rétroaction, profil) – famille à part : les mots des élèves remontent à Grégoire.
 
-## 5 · Ce que Grégoire verra (en tête d'`OU-EN-EST-ON.md`)
+## 4 · Le livrable
 
-Une pratique Standards réglée sur « tous » compte toutes les productions évaluées, au profil comme à l'export. Le fichier d'export des résultats finaux titre sa colonne « Note finale (arrondie à l'entier) » ; les notes elles-mêmes ne changent pas.
+`Rapports/AUDIT-code-en-dur-2026-09-21.md`, écrit pour Grégoire **en gestes d'utilisateur** (« un·e collègue de chimie qui… »), les numéros en fin de ligne :
+- en tête, **dix lignes au plus** : combien de traces par famille, et les familles 3 et 4 nommées une par une ;
+- pour chaque constat des familles 3 et 4 : ce qu'un·e collègue voit, la preuve (commande ou banc, et son résultat), l'ampleur (fichiers, sites), le coût estimé (rapide / intermédiaire / laborieux), et une **disposition proposée** : *à corriger avant que la cohorte l'atteigne* / *inscrire* / *refuser (motif)* / *doublon de #NNN* (`grep` les deux registres avant d'écrire « inscrire ») ;
+- **ce qui a été retiré depuis le 26 août**, en une liste courte : c'est la réponse à « je croyais qu'on avait retiré » – ce qui l'a été, ce qui ne l'a pas été ;
+- ce que l'audit n'a pas pu mesurer, dit comme tel.
+
+Commite le rapport, cette consigne et son archive. **Pas de push sans le mot de Grégoire** (docs seulement : pas de verdict Playwright requis). Cowork relira le rapport avant qu'il ne te revienne.
+
+## 5 · Ce que Grégoire verra
+
+Rien à l'écran. Un rapport qui dit, famille par famille, ce qui dans l'application ne marche qu'avec sa pratique, ce qui a déjà été retiré, et ce qu'il faudrait corriger avant que la cohorte le rencontre.
