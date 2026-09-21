@@ -740,10 +740,8 @@ class PratiquePANStandards {
         // Obtenir le pattern et les défis
         const pattern = this.identifierPattern(da);
         const defis = this.detecterDefis(da);
-        const indices3Derniers = this._calculerIndicesTroisDerniersArtefacts(da);
 
         const defiPrincipal = defis.principalDefi ? defis.principalDefi.nom : 'Aucun';
-        const francaisMoyen = indices3Derniers.francaisMoyen;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
 
@@ -751,7 +749,6 @@ class PratiquePANStandards {
         return this._determinerCibleIntervention(
             pattern.type,
             defiPrincipal,
-            francaisMoyen,
             pattern.indices.P
         );
     }
@@ -1108,7 +1105,7 @@ class PratiquePANStandards {
      *
      * @private
      * @param {string} da - Numéro DA
-     * @returns {Object} { performance, idmeMoyen, francaisMoyen, nbArtefacts }
+     * @returns {Object} { performance, idmeMoyen, nbArtefacts }
      */
     _calculerIndicesTroisDerniersArtefacts(da) {
         const config = this._lireConfiguration();
@@ -1127,7 +1124,6 @@ class PratiquePANStandards {
             return {
                 performance: 0,
                 idmeMoyen: 0,
-                francaisMoyen: 0,
                 nbArtefacts: 0
             };
         }
@@ -1159,37 +1155,14 @@ class PratiquePANStandards {
             ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
             : 0;
 
-        // Moyenne du critère de LANGUE — #529.
-        // Retiré : la regex /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi, jumelle
-        // exacte de celle de `profil-etudiant-calculs`. Deux copies de la même
-        // lecture de prose, dans deux fichiers, avec les mêmes codes en dur.
-        // ⚠ Le NOM du critère de langue reste une convention du code : le
-        // sortir suppose que l'utilisateur puisse désigner quel critère de sa
-        // grille joue ce rôle. Décision de conception, inscrite au backlog.
-        const NOM_CRITERE_LANGUE = 'francais';
-        const scoresFrancais = [];
-
-        derniers.forEach(evaluation => {
-            if (!Array.isArray(evaluation.criteres)) return;
-            const table = this._tablePour(evaluation, cacheTables);
-            evaluation.criteres.forEach(critereSauvegarde => {
-                if (!critereSauvegarde) return;
-                const nom = String(critereSauvegarde.critereNom || '').toLowerCase()
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-                if (!nom.startsWith(NOM_CRITERE_LANGUE)) return;
-                const score = this._convertirNiveauEnScore(critereSauvegarde.niveauSelectionne, table);
-                if (score !== null) scoresFrancais.push(score * 100);
-            });
-        });
-
-        const francaisMoyen = scoresFrancais.length > 0
-            ? scoresFrancais.reduce((sum, s) => sum + s, 0) / scoresFrancais.length
-            : 0;
+        // #553 — la « moyenne du critère de langue » est retirée. Elle reconnaissait ce
+        // critère par son NOM (`startsWith('francais')`), et sa valeur n'avait plus aucun
+        // lecteur depuis #552 : jumelle du retrait fait le 27 août dans
+        // `profil-etudiant-calculs` (#537). Le critère de langue est un critère comme un autre.
 
         return {
             performance: performance,
             idmeMoyen: idmeMoyen,
-            francaisMoyen: francaisMoyen,
             nbArtefacts: derniers.length
         };
     }
@@ -1235,11 +1208,10 @@ class PratiquePANStandards {
      * @private
      * @param {string} pattern - Pattern actuel
      * @param {string} defiPrincipal - Nom du défi principal (critère de la grille)
-     * @param {number} francaisMoyen - Moyenne du critère de langue (0-100)
      * @param {number} performance - Performance actuelle (0-1)
      * @returns {Object} { type, cible, strategies, ressources, niveau, couleur, emoji }
      */
-    _determinerCibleIntervention(pattern, defiPrincipal, francaisMoyen, performance) {
+    _determinerCibleIntervention(pattern, defiPrincipal, performance) {
         // Cible par défaut
         let cible = {
             type: 'critere-grille',

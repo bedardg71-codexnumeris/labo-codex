@@ -1085,16 +1085,18 @@ function ouvrirIntervention(interventionId, options) {
                 // Tableau comparatif avant/après sur les critères ciblés
                 var bilanTableau = '';
                 if (intervention.snapshotAvant && intervention.criteresCibles && intervention.criteresCibles.length > 0) {
+                    var clesGrilleBilan = clesCriteresGrilleReference();
                     var lignes = intervention.criteresCibles.map(function(nom) {
+                        // #553 — la clé est le nom normalisé ENTIER, comme dans `calculerMoyennesCriteres`.
                         var cleNorm = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-                        if (cleNorm.startsWith('francais')) cleNorm = 'francais';
 
                         // Moyenne avant (snapshot) et après (actuel) sur les DAs de l'intervention
                         var totalAvant = 0, countAvant = 0, totalApres = 0, countApres = 0;
                         (intervention.etudiants || []).forEach(function(da) {
                             var snap = intervention.snapshotAvant[da];
-                            if (snap && snap.criteres && typeof snap.criteres[cleNorm] === 'number') {
-                                totalAvant += snap.criteres[cleNorm];
+                            var valeurAvant = lireCritereSnapshotIntervention(snap && snap.criteres, cleNorm, clesGrilleBilan);
+                            if (valeurAvant !== null) {
+                                totalAvant += valeurAvant;
                                 countAvant++;
                             }
                             var moyActuelles = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
@@ -1237,6 +1239,48 @@ function onChangementSelectionEtudiants(interventionId) {
 }
 
 /**
+ * #553 — Les clés (noms normalisés entiers) des critères de la grille de référence du dépistage.
+ * Sert à la lecture tolérante du stock : savoir COMBIEN de critères commencent par « francais ».
+ * @returns {string[]} vide si la grille est introuvable
+ */
+function clesCriteresGrilleReference() {
+    var grille = typeof obtenirGrilleReferenceDepistage === 'function' ? obtenirGrilleReferenceDepistage() : null;
+    if (!grille || !Array.isArray(grille.criteres)) return [];
+    return grille.criteres
+        .filter(function(c) { return c && c.nom; })
+        .map(function(c) {
+            return String(c.nom).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+        });
+}
+
+/**
+ * #553 — Lit la valeur « avant » d'un critère dans le stock d'une intervention (`snapshotAvant[da].criteres`).
+ *
+ * TARIR N'EST PAS RÉPARER. Jusqu'à la 1.152.2, la clé d'un critère dont le nom commence par
+ * « Français » était rabotée en `francais` avant d'être enregistrée. La source est tarie (la clé est
+ * maintenant le nom normalisé entier) ; le stock, lui, reste tel quel chez les gens et n'est JAMAIS
+ * réécrit. Il est lu avec tolérance :
+ *   · la clé exacte d'abord ;
+ *   · sinon l'ancienne clé `francais` — à condition qu'UN SEUL critère de la grille commence par
+ *     « francais » ET que ce soit le critère demandé. Avec deux candidats (oral, écrit),
+ *     l'ancienne valeur était celle du dernier écrasant l'autre : on ne sait pas à qui elle est,
+ *     donc on n'apparie rien plutôt que d'inventer une valeur.
+ *
+ * @param {Object|null} criteresSnap - `snapshotAvant[da].criteres`
+ * @param {string} cleNorm - nom normalisé entier du critère ciblé
+ * @param {string[]} clesGrille - clés des critères de la grille de référence
+ * @returns {number|null}
+ */
+function lireCritereSnapshotIntervention(criteresSnap, cleNorm, clesGrille) {
+    if (!criteresSnap) return null;
+    if (typeof criteresSnap[cleNorm] === 'number') return criteresSnap[cleNorm];
+    if (typeof criteresSnap.francais !== 'number') return null;
+    var candidats = (clesGrille || []).filter(function(k) { return k.indexOf('francais') === 0; });
+    if (candidats.length !== 1 || candidats[0] !== cleNorm) return null;
+    return criteresSnap.francais;
+}
+
+/**
  * Met à jour les critères ciblés selon les défis communs des étudiants sélectionnés.
  * Pré-coche les critères en défi commun et affiche le compteur par critère.
  * @param {string} interventionId - ID de l'intervention
@@ -1288,7 +1332,6 @@ function mettreAJourCriteresCibles(interventionId) {
         // Normaliser pour correspondre aux clés de calculerMoyennesCriteres
         var cleNorm = nomCritere.toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-        if (cleNorm.startsWith('francais')) cleNorm = 'francais';
 
         var nbEnDefi = defisParCritere[cleNorm] || 0;
         var countSpan = cb.parentElement.querySelector('.critere-defi-count');
@@ -1339,7 +1382,6 @@ function suggererObjectifIntervention(interventionId) {
     var scorePlusFaible = 1;
     criteresCibles.forEach(function(nom) {
         var cleNorm = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-        if (cleNorm.startsWith('francais')) cleNorm = 'francais';
 
         var total = 0;
         var count = 0;
@@ -1738,6 +1780,8 @@ window.annulerNouvelleIntervention = annulerNouvelleIntervention;
 window.ouvrirIntervention = ouvrirIntervention;
 window.onChangementSelectionEtudiants = onChangementSelectionEtudiants;
 window.mettreAJourCriteresCibles = mettreAJourCriteresCibles;
+window.lireCritereSnapshotIntervention = lireCritereSnapshotIntervention;   // #553 — pure, testée
+window.clesCriteresGrilleReference = clesCriteresGrilleReference;
 window.suggererObjectifIntervention = suggererObjectifIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
 // terminerIntervention et rouvrirIntervention supprimés (Phase 5)

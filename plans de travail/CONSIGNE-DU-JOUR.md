@@ -1,47 +1,36 @@
-# Consigne du jour – audit en lecture seule : ce qui ne marche qu'avec la pratique de Grégoire
+# Consigne du jour – un critère « Français… » ne disparaît plus du diagnostic (#553)
 
-> Écrite le 21 septembre 2026, 11 h 06 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (#715, #723, poussée en 1.152.2) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-715-723-tous-et-arrondi.md` (déplacée par Cowork, à commiter avec ce lot).
+> Écrite le 21 septembre 2026, 11 h 25 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (audit « code en dur », `e5e3e4a2`, commitée, PAS poussée) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-audit-code-en-dur.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Décision de Grégoire, 21 sept. à 11 h 25** : ce lot est le suivant (« oui » à la recommandation de Cowork). Le rapport d'audit part en ligne avec lui.
 
-## 0 · Le critère, et pourquoi maintenant
+## 0 · Conditions de départ – mesure-les
 
-Le critère est celui de Grégoire du 1er sept. : « que rien ne soit codé en dur » – **sa pratique d'enseignant de littérature gravée dans un code que d'autres disciplines utiliseront**. La cohorte arrive avec d'autres critères, d'autres cours, d'autres pratiques.
-Le 21 sept. à 10 h 40, il a dit : « je croyais qu'on avait retiré tout ce qui est codé en dur ». Le travail a été fait en partie (audit du 26 août, `Rapports/AUDIT-srpnf-code-en-dur-2026-08-26.md` ; cadrage du 1er sept., `plans de travail/CADRAGE-2026-09-01-front-evaluations-et-code-en-dur.md` ; chantiers #529, #667, #668). **Cet audit dit ce qui en reste aujourd'hui, mesuré.**
+- `git log --oneline -3 main` : `e5e3e4a2` (audit) sur `1defd61c` ; `origin/main` = `1defd61c`. Sinon, arrête-toi et dis ce que tu vois.
+- Aucune autre session n'écrit, aucun `pousser.sh` ; arbre propre hors des non-suivis anciens, de `RELAIS.md` (ajout de Cowork) et des fichiers de Cowork (§5).
 
-## 1 · Règles du lot
+## 1 · Le défaut (F3-1 du rapport, confirmé par Cowork à la lecture)
 
-- **Lecture seule.** Aucune ligne de `js/`, `index.html`, `styles.css` ne change. **Aucune release.** Tu peux écrire des bancs jetables (hors du dépôt, ou retirés avant le commit) et le rapport.
-- **Aucune fiche inscrite au backlog par ce lot** : le rapport PROPOSE ; Grégoire dispose. Chaque constat porte une disposition proposée (voir §4).
-- Condition de départ : `git log --oneline -1 origin/main` porte **1.152.2** (`1defd61c` ou un commit de journal après). Aucune autre session n'écrit.
+`profil-etudiant-calculs.js:926` range la moyenne d'un critère dont le nom normalisé commence par `francais` sous la clé `francais` ; `diagnostiquerForcesChallenges` (≈ l. 1300) cherche le nom normalisé entier (`francaisecrit`), ne trouve rien, **écarte le critère**. Deux critères « Français… » fusionnent en une clé, le dernier écrase. Neuf sites (rapport, F3-1, « Ampleur »).
 
-## 2 · Trois questions, dans cet ordre
+## 2 · Ce qui est attendu
 
-**A. Ce que le 1er septembre disait encore en dur – est-ce toujours là ?** Pour chaque point du §2 du cadrage du 1er sept. (le seuil 0,7125 et l'échelle 0,85 / 0,75 / 0,65, #677 ; le texte « erreurs de français » et ses six variantes, #581, dont celle **imprimée dans le PDF de l'élève** ; le portrait confidentiel à cinq champs, #539 ; `copierCriteresSRPN(F)` ; les replis IDME à deux libellés de I ; les trois `facteurNormalisation || 500` ; les ressources « SA » / « CAF » de `pratique-sommative.js`) : **présent / retiré / déplacé**, avec la ligne et la commande qui le montre.
+- **Une règle** : la clé d'un critère est son nom normalisé (minuscules, sans accents, sans espaces), **partout, sans rabotage**. Retire le `startsWith('francais') → 'francais'` aux neuf sites, et `NOM_CRITERE_LANGUE = 'francais'` (`pratique-pan-standards.js`) s'il sert à apparier un critère par son nom – **remesure ce qu'il fait avant d'y toucher** ; s'il porte un sens pédagogique (le critère de langue a un rôle à part dans la note Standards), arrête-toi sur ce point et dis-le : ça remonte à Grégoire.
+- **Stock, lu avec tolérance, jamais réécrit** : les interventions déjà enregistrées portent `snapshotAvant[da].criteres` sous la clé `francais` (`interventions.js` ≈ l. 1470-1484). Le bilan avant/après doit continuer de les lire : si la clé exacte manque et qu'une clé `francais` existe, et qu'**un seul** critère de la grille commence par `francais`, lire celle-là. Deux candidats : ne rien apparier et le dire au récit (pas de valeur inventée). Rien n'est écrit dans les données (limite de Grégoire du 20 sept.).
+- **Hors du lot, retenu par Cowork (technique)** : la garde du run planifié GitHub (`.github/workflows/tests.yml` ≈ l. 296, l'apostrophe de `${raison:-la garde n'a rien rendu : on juge}`) : corrige-la pour qu'elle ne casse plus le shell (mets le texte de repli dans une variable, ou échappe-le). Le run manuel de vérification n'est pas demandé.
+- Aucun mot à l'écran ne change. Le nom affiché d'un critère reste son nom.
 
-**B. Ce que Cowork a vu ce matin, et que personne n'a classé** :
-- la normalisation `startsWith('francais') → 'francais'` (`profil-etudiant-calculs.js` ×2, `profil-etudiant-sections-affichage.js`, `profil-etudiant-helpers.js`, `interventions.js` ×3) et `NOM_CRITERE_LANGUE = 'francais'` (`pratiques/pratique-pan-standards.js`) : **que devient un critère de langue qui s'appelle autrement** (« Qualité de la langue », « Langue », « Communication ») ? Joue-le sur le vrai code : une grille à cinq critères aux noms d'une autre discipline, à travers le dépistage, les interventions, le profil et la note Standards.
-- la liste `['structure','rigueur','plausibilite','nuance','francais']` (`profil-etudiant-helpers.js` ≈ l. 941) et la liste `srpnf…` d'`init-inline.js` ≈ l. 571 : qui les lit, pour quoi.
-- « Grégoire » (≈ 111 fichiers de `js/`), « Bédard » (≈ 20), « 601-101 » (≈ 19), « EUF » (≈ 11) : **commentaire, ou valeur qui atteint l'écran, les données ou un calcul ?** Un compte par catégorie suffit ; ne liste que ce qui atteint l'écran, les données ou un calcul.
+## 3 · Preuves attendues
 
-**C. Le balayage large** : tout autre littéral qui suppose **une discipline, un cours, un établissement, une grille ou une échelle précise** (noms de critères, codes de cours, noms de collèges ou de services, seuils pédagogiques non réglables, textes d'élève qui nomment une matière). Cherche par le contenu (`grep -rn` sur des symboles et des mots), pas par nom de fichier. **Exclus** : le pack de démonstration et ses gabarits (ils ont le droit d'être la pratique de Grégoire, s'ils se présentent comme un exemple), `changelog-data.js`, les tests.
+- Sentinelle sur le **vrai** code, les trois cas du rapport : chimie (« Qualité de la langue », inchangé) ; « Français oral » 10 % et « Français écrit » 90 % (deux valeurs distinctes, le 10 % est défi) ; grille de Grégoire, « Français écrit » 10 % (**défi principal : Français écrit**, et la cible d'intervention le vise).
+- Stock : une intervention enregistrée avec la clé `francais` garde son bilan avant/après ; le cas à deux candidats n'apparie rien.
+- Mutations, une clause à la fois, toutes rouges : un rabotage remis à un seul site ; la lecture tolérante retirée ; la tolérance qui apparie malgré deux candidats.
+- Vitest complet vert. **Release : patch.** **Phrase de « Nouvelles » à PROPOSER à Grégoire.** Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire.
 
-## 3 · Chaque trace se classe en une de quatre familles
+## 4 · Ce que Grégoire verra (en tête d'`OU-EN-EST-ON.md`)
 
-1. **Commentaire / trace d'histoire** – sans effet.
-2. **Valeur par défaut réglable** – la pratique de Grégoire sert de départ, l'utilisateur·rice peut la changer à l'écran (dis où).
-3. **Code qui ne marche bien qu'avec la pratique de Grégoire** – un·e collègue d'une autre discipline obtient un calcul faux, un écran vide ou un mot qui ne correspond pas à son critère. **Prouve-le** par un banc jetable qui rejoue le cas d'un·e collègue (critères renommés, autre cours), pas par la lecture seule.
-4. **Mots qui nomment la littérature ou le français à un·e élève d'une autre discipline** (PDF, rétroaction, profil) – famille à part : les mots des élèves remontent à Grégoire.
+Profil d'un élève › forces et défis : un critère nommé « Français… » y figure de nouveau ; s'il est le plus faible, il devient le défi principal et la cible d'intervention. Deux critères de français (oral, écrit) ont chacun leur valeur. Les interventions déjà enregistrées gardent leur bilan.
 
-## 4 · Le livrable
+## 5 · Fichiers de Cowork à commiter avec ce lot
 
-`Rapports/AUDIT-code-en-dur-2026-09-21.md`, écrit pour Grégoire **en gestes d'utilisateur** (« un·e collègue de chimie qui… »), les numéros en fin de ligne :
-- en tête, **dix lignes au plus** : combien de traces par famille, et les familles 3 et 4 nommées une par une ;
-- pour chaque constat des familles 3 et 4 : ce qu'un·e collègue voit, la preuve (commande ou banc, et son résultat), l'ampleur (fichiers, sites), le coût estimé (rapide / intermédiaire / laborieux), et une **disposition proposée** : *à corriger avant que la cohorte l'atteigne* / *inscrire* / *refuser (motif)* / *doublon de #NNN* (`grep` les deux registres avant d'écrire « inscrire ») ;
-- **ce qui a été retiré depuis le 26 août**, en une liste courte : c'est la réponse à « je croyais qu'on avait retiré » – ce qui l'a été, ce qui ne l'a pas été ;
-- ce que l'audit n'a pas pu mesurer, dit comme tel.
-
-Commite le rapport, cette consigne et son archive. **Pas de push sans le mot de Grégoire** (docs seulement : pas de verdict Playwright requis). Cowork relira le rapport avant qu'il ne te revienne.
-
-## 5 · Ce que Grégoire verra
-
-Rien à l'écran. Un rapport qui dit, famille par famille, ce qui dans l'application ne marche qu'avec sa pratique, ce qui a déjà été retiré, et ce qu'il faudrait corriger avant que la cohorte le rencontre.
+`plans de travail/CONSIGNE-DU-JOUR.md` (celle-ci), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-audit-code-en-dur.md`, `RELAIS.md` (ajout de Cowork : relecture de l'audit).

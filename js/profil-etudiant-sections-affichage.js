@@ -1209,9 +1209,10 @@ function genererSectionAccompagnement(da) {
                                 : '';
                             const survolPct = niveauCritere ? '' : ` title="${echapperHtml(survolCritere)}"`;
 
-                            let cleDir = c.cleNormalisee;
-                            if (cleDir.startsWith('francais')) cleDir = 'francais';
-                            const dir = directionsCriteres ? directionsCriteres[cleDir] : null;
+                            // #553 — `calculerDirectionsCriteres` indexe par le nom normalisé ENTIER :
+                            // le rabotage vers « francais » qui vivait ici ne trouvait jamais la
+                            // direction d'un critère « Français… ».
+                            const dir = directionsCriteres ? directionsCriteres[c.cleNormalisee] : null;
                             const symbDir = dir && dir.symbole ? ' ' + dir.symbole : '';
                             return `<li>${echapperHtml(c.nom)} : ${codeCritere}<span${survolPct}>${pct.toFixed(0)}%</span>${symbDir}</li>`;
                         }).join('');

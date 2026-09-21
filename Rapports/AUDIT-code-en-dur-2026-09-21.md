@@ -3,19 +3,20 @@
 **Date** : 21 septembre 2026 · **Base** : `main` `1defd61c`, 1.152.2 · **Lecture seule** : aucune ligne de `js/`, `index.html`, `styles.css` n'a changé, aucune fiche inscrite.
 **Question de Grégoire (10 h 40)** : « je croyais qu'on avait retiré tout ce qui est codé en dur ».
 **Statut de ce rapport** : des mesures et des dispositions PROPOSÉES. Grégoire dispose. Cowork relit.
+**Erratum du 21 sept., après-midi** : la première version classait l'export pour la recherche « sans appelant ». C'était faux — j'avais cherché l'appelant de `lancerExportRecherche`, pas celui du bouton. Corrigé : c'est le constat **F3-6**, et les comptes de l'en-tête ont suivi.
 
 ---
 
 ## En tête — dix lignes
 
 1. **Réponse courte : presque tout ce qui avait été nommé le 26 août et le 1er septembre a été retiré.** Sur les sept points du cadrage, deux sont retirés (le seuil 0,7125 et son échelle, le portrait confidentiel), deux sont passés dans un registre réglable ou neutralisés (les phrases « français », les ressources SA / CAF), trois subsistent sans effet visible (§ 3).
-2. **Famille 1 — commentaires et code sans appelant** : ≈ 640 lignes de commentaires (« Grégoire » 560, « 601-101 » 44, « Bédard » 21, « EUF » 11) et 5 blocs de code que rien n'appelle. Sans effet.
+2. **Famille 1 — commentaires et code sans appelant** : ≈ 640 lignes de commentaires (« Grégoire » 560, « 601-101 » 44, « Bédard » 21, « EUF » 11) et 4 blocs de code que rien n'appelle. Sans effet.
 3. **Famille 2 — défauts réglables** : 9 traces (énoncés, projection, formule, codes d'annotation, sous-critères, seuils, exemples de saisie, gabarits de pratiques, replis d'échelle).
-4. **Famille 3 — ne marche bien qu'avec une pratique précise** : 5 constats, dont **3 sont des doublons de fiches déjà ouvertes** (#553, #716, #677).
+4. **Famille 3 — ne marche bien qu'avec une pratique précise** : 6 constats, dont **3 sont des doublons de fiches déjà ouvertes** (#553, #716, #677).
 5. **Famille 4 — mots d'élève** : 2 constats.
 6. ⚠ **Le constat le plus lourd joue CONTRE la pratique de Grégoire, pas pour elle** (F3-1) : un critère dont le nom commence par « Français » disparaît du diagnostic des forces et défis. Un·e collègue de chimie qui nomme son critère « Qualité de la langue » n'a pas ce défaut ; Grégoire, avec « Français écrit », l'a. Prouvé par banc.
 7. F3-1 est le diagnostic que la fiche **#553** attendait depuis le 27 août (« aucune session ne peut le mesurer seule ») : il est maintenant mesuré.
-8. Familles 3 et 4, une par une : **F3-1** critère « Français… » filtré ou fusionné (#553) · **F3-2** historique de P converti par I/D/M/E en clair (#716) · **F3-3** paliers de couleur 0,60 / 0,50 (#677) · **F3-4** DA à sept chiffres · **F3-5** cinq mots d'aide qui décrivent la grille de Grégoire comme celle du logiciel · **F4-1** « artefact » et « niveau É » dans une phrase de bilan · **F4-2** « En prévision de l'EUF » pour les critères créés avant le 4 septembre.
+8. Familles 3 et 4, une par une : **F3-1** critère « Français… » filtré ou fusionné (#553) · **F3-2** historique de P converti par I/D/M/E en clair (#716) · **F3-3** paliers de couleur 0,60 / 0,50 (#677) · **F3-4** DA à sept chiffres · **F3-5** cinq mots d'aide qui décrivent la grille de Grégoire comme celle du logiciel · **F3-6** l'export pour la recherche compte les niveaux par I / D / M / E · **F4-1** « artefact » et « niveau É » dans une phrase de bilan · **F4-2** « En prévision de l'EUF » pour les critères créés avant le 4 septembre.
 9. Une seule disposition « à corriger avant que la cohorte l'atteigne » est proposée : **F3-1**. Une seconde est à arbitrer par Grégoire parce qu'elle touche les mots d'élève : **F4-1**.
 10. Ce que l'audit n'a pas mesuré est dit au § 5.
 
@@ -43,7 +44,7 @@
 ⚠ **Il y a du stock** : `interventions.js:1468-1484` enregistre `snapshotAvant[da].criteres` avec la clé `francais`. Un correctif tarit la source ; le bilan avant/après des interventions déjà enregistrées devra lire l'ancienne clé avec tolérance. À assumer et à écrire, pas à réparer d'office.
 
 **Coût estimé** : intermédiaire (neuf sites, une lecture tolérante du stock, une sentinelle sur les cas 2 et 3).
-**Disposition proposée** : *à corriger avant que la cohorte l'atteigne* — sous **#553**, dont l'énoncé est à remplacer par cette mesure. Motif : les collègues de la cohorte les plus probables enseignent le français, et c'est leur critère de langue qui est touché ; ce que l'écran montre oriente une intervention.
+**Disposition** : ✅ *inscrit et corrigé* — **#553, livré en 1.152.3 le 21 sept. 2026** (décision de Grégoire de 11 h 25 ; sentinelle `sentinelle-553-cle-de-critere-nom-entier`, neuf mutations rouges). Proposition d'origine : *à corriger avant que la cohorte l'atteigne* — sous **#553**, dont l'énoncé est à remplacer par cette mesure. Motif : les collègues de la cohorte les plus probables enseignent le français, et c'est leur critère de langue qui est touché ; ce que l'écran montre oriente une intervention.
 ▣ Limite : la mesure porte sur les fonctions de calcul, pas sur l'écran rendu dans un navigateur.
 
 ### F3-2 — L'historique de la performance convertit les niveaux par I / D / M / E écrits en clair · doublon de #716
@@ -78,6 +79,13 @@
 
 **La preuve** : les cinq commandes `grep -n` correspondantes. Aucun calcul touché : ce sont des mots d'enseignant·e.
 **Coût** : rapide (cinq chaînes). **Disposition proposée** : *inscrire*, en une seule fiche « mots d'aide », ⚠ les formulations remontent à Grégoire.
+
+### F3-6 — L'export anonymisé pour la recherche compte les niveaux par I / D / M / E
+
+**Ce qu'on voit.** Un·e collègue dont l'échelle ne s'appelle pas I-D-M-E clique « Générer l'export anonymisé » (Réglages › données) : dans le fichier, la performance par critère porte `nb_I`, `nb_D`, `nb_M`, `nb_E` à zéro (ou un seul compte non nul si son échelle a un « D » ou un « E »), et un `taux_maitrise` de 0 — quelle que soit la réussite de ses élèves. Les noms mêmes des colonnes sont ceux de l'échelle de Grégoire.
+**La preuve.** `index.html:9626` (`data-action="exporterFormatRecherche"`) → `trimestres.js:2000` → `:2362` → `calculerPerformanceParCritere` (`:2621-2656`) : `filter(n => n === 'I')`, `=== 'D'`, `=== 'M'`, `=== 'E'`, `taux_maitrise = (nbM + nbE) / total`. ⚠ Établi par lecture et `grep`, **pas exécuté** : la fonction vit dans une fermeture que le harnais ne charge pas telle quelle.
+**Ampleur** : une fonction, et le format du fichier exporté (ce qui VOYAGE : un changement de colonnes touche qui a déjà reçu un export). **Coût** : intermédiaire.
+**Disposition proposée** : *inscrire* — aucune trace aux deux registres (`grep` « export recherche », `nb_I`, `taux_maitrise` : rien). Pas avant la cohorte : l'export sert à la fin d'un trimestre, pas au début.
 
 ---
 
@@ -117,9 +125,9 @@
 - trois `facteurNormalisation || 500` — `evaluation-chargement.js:1014`, `:1244`, `evaluation-calcul.js:1663` : même valeur que le défaut du registre ;
 - deux replis de niveaux I-D-M-E quand l'échelle est introuvable — `evaluation.js:1066`, `evaluation-chargement.js:1232` ;
 - `francaisMoyen` de `pratique-pan-standards.js:1169-1192` : calculé, passé en paramètre, **jamais lu** ; et `genererCibleIntervention` des pratiques (« Viser l'excellence (niveau E) », ressources) n'a d'appelant que `pratique-test.js` ;
-- `afficherConfigurationCategoriesErreurs` (`grilles.js:5466`) et l'export « recherche » (`trimestres.js:2622-2656`, compte `nb_I`…`nb_E`) : exportés, aucun appelant.
+- `afficherConfigurationCategoriesErreurs` (`grilles.js:5466`) : exportée, aucun appelant.
 
-**Pas retiré, avec effet** : F3-1 (#553), F3-2 (#716), F3-3 (#677).
+**Pas retiré, avec effet** : F3-1 (#553), F3-2 (#716), F3-3 (#677), F3-6 (l'export pour la recherche).
 
 **Noms propres** (hors pack de démonstration et changelog) — ce qui atteint l'écran, les données ou un calcul :
 
@@ -151,6 +159,7 @@
 ## 5 · Ce que l'audit n'a pas mesuré
 
 - **Aucun écran n'a été ouvert dans un navigateur.** Les bancs exercent les fonctions de calcul ; ce que dessine le profil pour le cas 3 reste à voir à l'écran (la sonde WebKit du 17 sept. a montré qu'un constat sur la fonction peut différer de l'écran).
+- **F3-6 n'a pas été exécuté** : lecture et `grep` du bouton jusqu'au compte.
 - **F3-2 (#716) n'a pas été rejoué par un banc** : lecture et `grep` seulement, comme au 5 sept.
 - **Aucune donnée réelle lue.** En particulier : combien d'interventions enregistrées portent la clé `francais` dans leur stock, et si le critère de langue de Grégoire cet automne s'appelle bien « Français… ».
 - **L'aide d'`index.html`** n'a été fouillée que par mots (SRPNF, noms de critères), pas relue en entier ; **`styles.css`** n'a pas été balayé.
