@@ -290,10 +290,15 @@ jobs:
           IFS=$'\t' read -r juger raison < <(bash scripts/ci-garde-inutilite.sh)
           [ "$juger" = "non" ] || juger=oui
           echo "juger=$juger" >> "$GITHUB_OUTPUT"
+          # Le texte de repli vit dans une variable : écrit dans `${raison:-…}`, son
+          # apostrophe ouvrait une chaîne que bash ne refermait jamais (« unexpected
+          # EOF », run planifié du 21 sept. 2026 : garde en échec, Vitest et
+          # Playwright sautés).
+          REPLI="la garde n'a rien rendu : on juge"
           {
             echo "## Playwright : ${juger^^}"
             echo ""
-            echo "${raison:-la garde n'a rien rendu : on juge}"
+            echo "${raison:-$REPLI}"
             echo ""
             echo "Commit : \`${GITHUB_SHA:0:8}\` · dernier SHA jugé par un run planifié : \`${DERNIER:0:8}\`"
           } >> "$GITHUB_STEP_SUMMARY"

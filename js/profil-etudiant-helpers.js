@@ -973,21 +973,13 @@ function obtenirCriteresAvecValeurs(da) {
     // « Aucun » (#740) : `moyennesCriteres` ne porte pas leur clé, et `?? 0`
     // en ferait une valeur de 0 %.
     return criteresSurveillesParDepistage(grille).map(critere => {
-        const cleNormalisee = critere.nom.toLowerCase()
-            .normalize('NFD')
-            .replace(/[̀-ͯ]/g, '')
-            .replace(/\s+/g, '');
-
-        // Standardiser la clé pour correspondre au format de calculerMoyennesCriteres()
-        // "francaisecrit" → "francais" pour éviter les 0% incorrects
-        let cleStandard = cleNormalisee;
-        if (cleNormalisee.startsWith('francais')) {
-            cleStandard = 'francais';
-        }
+        // #553 — la même clé que `calculerMoyennesCriteres` : le nom normalisé entier,
+        // sans rabotage de « francais… » (deux critères de français gardent chacun leur valeur).
+        const cleNormalisee = cleCritere(critere.nom);
 
         return {
             nom: critere.nom,
-            valeur: moyennesCriteres[cleStandard] ?? 0,
+            valeur: moyennesCriteres[cleNormalisee] ?? 0,
             cleNormalisee: cleNormalisee
         };
     });

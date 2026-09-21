@@ -918,17 +918,20 @@ function _moyennesCriteresDepistage(evaluations, grille) {
         });
     });
 
-    // Clés standardisées pour l'interface : « francaisecrit » → « francais »
+    // #553 — la clé d'un critère est son nom normalisé, ENTIER. Ce site rabotait
+    // « francaisecrit » en « francais » : `diagnostiquerForcesChallenges`, qui
+    // cherche le nom entier, écartait alors le critère sans un mot, et deux
+    // critères « Français… » (oral, écrit) n'en faisaient qu'un, le dernier
+    // écrasant l'autre (banc de l'audit du 21 sept. 2026).
     const moyennes = {};
     let aucuneDonnee = true;
-    Object.keys(scoresCriteres).forEach(cle => {
-        const scores = scoresCriteres[cle];
-        const cleStandard = cle.startsWith('francais') ? 'francais' : cle;
+    Object.keys(scoresCriteres).forEach(cleCritereNorm => {
+        const scores = scoresCriteres[cleCritereNorm];
         if (scores.length > 0) {
-            moyennes[cleStandard] = scores.reduce((somme, s) => somme + s, 0) / scores.length;
+            moyennes[cleCritereNorm] = scores.reduce((somme, s) => somme + s, 0) / scores.length;
             aucuneDonnee = false;
         } else {
-            moyennes[cleStandard] = null;
+            moyennes[cleCritereNorm] = null;
         }
     });
     return aucuneDonnee ? null : moyennes;
@@ -1031,10 +1034,8 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
 
 // [Phase 6] calculerProgressionBlocage() supprimé — utilisait calculerIndiceBlocage() retiré ci-dessus
 
-function _normaliserNomCritereIPB(nom) {
-    var n = (nom || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '');
-    return n.startsWith('francais') ? 'francais' : n;
-}
+// #553 — `_normaliserNomCritereIPB` est retirée : copie de `_normaliserNomCritere` qui
+// rabotait en plus « francais… » vers « francais ». Une seule règle : le nom normalisé entier.
 
 function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
     var filtrees = evaluations.filter(function (e) {
@@ -1060,7 +1061,7 @@ function _calculerScoreMultiArtefactIPB(ev, nomsMulti, cacheTables) {
         if (!cs) return;
         var score = scoreCritereEvaluation(cs, tableConversion);   // #739 — les points d'abord
         if (score === null) return;
-        var nomEval = _normaliserNomCritereIPB(cs.critereNom);
+        var nomEval = _normaliserNomCritere(cs.critereNom);
         nomsMulti.forEach(function (cm) {
             if (cm.nom === nomEval || cm.nom.startsWith(nomEval) || nomEval.startsWith(cm.nom)) {
                 scores[cm.nom] = score;
@@ -1162,7 +1163,7 @@ function calculerIPB(da) {
 
     // Normaliser les noms des critères multistructurels
     var nomsMulti = criteresMulti.map(function (c) {
-        return { nom: _normaliserNomCritereIPB(c.nom), ponderation: c.ponderation || 0 };
+        return { nom: _normaliserNomCritere(c.nom), ponderation: c.ponderation || 0 };
     });
 
     // Scores pour les artefacts récents (dans la fenêtre IPB)
