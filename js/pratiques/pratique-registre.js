@@ -707,66 +707,25 @@ function initialiserRegistrePratiques() {
 // ============================================================================
 
 /**
- * Résout le TYPE canonique de la pratique active depuis la SSOT — #328 L2-b1.
+ * La FAMILLE canonique de la pratique active — #328 L2-b1, réécrite au lot N1b (21 sept. 2026).
  *
- * Chaîne : `groupesCours[].pratiqueId` (SSOT actée #303) → type de la pratique
- * (id canonique du registre, ou `configuration.type` d'une configurable lue
- * dans la bibliothèque DU TRIMESTRE DU GROUPE-COURS — pas du trimestre actif,
- * c'est l'absorption de #301). Remplace les lectures du miroir
- * `modalitesEvaluation.pratique`, dont le contenu était ambigu (tantôt un
- * type, tantôt un id de configurable selon l'écrivain).
+ * Avant, une HUITIÈME lecture du pointeur vivait ici (SSOT, puis copies, puis registre, puis
+ * bibliothèque par id brut seulement) : un pointeur `standards` nu rendait « standards » pendant
+ * que la résolution le disait introuvable, et chaque appelant ajoutait son repli
+ * (PRATIQUE_DEFAUT, « sommative »). Elle rend maintenant la famille que porte LA désignation
+ * (`designerPratiqueActive`) : lue sur l'entrée de bibliothèque désignée par son id, « sommative »
+ * pour la sommative du registre, null dans tous les autres cas (aucune, introuvable).
  *
- * @param {{gcId?: string, trimestreId?: string}} [contexte] - contexte
- *        EXPLICITE de consultation. Sans contexte : groupe-cours actif et
- *        SON trimestre.
- * @returns {string|null} type canonique ('sommative'|'standards'|
- *        'specifications'|'denotation'), ou null si rien d'actif /
- *        introuvable — chaque appelant applique son défaut historique.
+ * ⚠ Le type ne sert PLUS à fabriquer une instance ni à choisir un calcul : il ne décide que de
+ * mots et de mises en forme. Un appelant qui reçoit null n'a pas de pratique — il n'en invente pas.
+ * (Le paramètre `contexte` {gcId, trimestreId} est retiré : aucun appelant ne le passait.)
+ *
+ * @returns {string|null} 'sommative'|'standards'|'specifications'|'denotation', ou null
  */
-function obtenirTypePratiqueActive(contexte) {
-    contexte = contexte || {};
+function obtenirTypePratiqueActive() {
     try {
-        const gcActif = db.getSync('groupeCoursActif', null);
-
-        // Trimestre de résolution : explicite > celui du GC actif > l'actif.
-        const trimestreId = contexte.trimestreId
-            || (!contexte.gcId && gcActif && gcActif.trimestreId)
-            || (typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : null);
-        const gcId = contexte.gcId || (gcActif && gcActif.id) || null;
-        if (!gcId || !trimestreId) return null;
-
-        // 1. SSOT : pratiqueId du groupe-cours dans la liste du trimestre.
-        let pratiqueId = null;
-        const groupesCours = db.getSync(trimestreId + '_groupesCours', null);
-        const gc = Array.isArray(groupesCours)
-            ? groupesCours.find(g => g && g.id === gcId)
-            : null;
-        if (gc) {
-            pratiqueId = gc.pratiqueId || null;
-        } else if (!contexte.gcId) {
-            // GC actif introuvable dans la SSOT (état transitoire) : copies en
-            // dernier recours — jamais quand un contexte explicite est demandé.
-            pratiqueId = (gcActif && gcActif.pratiqueId)
-                || ((db.getSync('infoCours', null) || {}).pratiqueId)
-                || null;
-        }
-        if (!pratiqueId) return null;
-
-        // 2. id → type. Un id canonique du registre EST un type.
-        const canonique = normaliserIdPratique(pratiqueId);
-        if (pratiquesEnregistrees.has(canonique)) return canonique;
-
-        // 3. Configurable : type déclaré par sa configuration, dans la
-        //    bibliothèque du trimestre demandé.
-        const configurables = db.getSync(trimestreId + '_pratiquesConfigurables', null);
-        const p = Array.isArray(configurables)
-            ? configurables.find(x => x && x.id === pratiqueId)
-            : null;
-        if (p) {
-            const type = (p.configuration && p.configuration.type) || p.type || null;
-            return type ? normaliserIdPratique(type) : null;
-        }
-        return null;
+        const designation = designerPratiqueActive();
+        return designation.etat === 'ok' ? (designation.famille || null) : null;
     } catch (e) {
         console.warn('[Registre] Résolution du type de pratique active échouée :', e.message || e);
         return null;
@@ -949,7 +908,8 @@ window.designerPratiqueActive = designerPratiqueActive;
 window.trouverPratiqueEnBibliotheque = trouverPratiqueEnBibliotheque;
 window.obtenirTypePratiqueActive = obtenirTypePratiqueActive;
 window.normaliserIdPratique = normaliserIdPratique;
-window.PRATIQUE_DEFAUT = PRATIQUE_DEFAUT;
+// Lot N1b (21 sept. 2026) : `window.PRATIQUE_DEFAUT` n'est PLUS exporté — plus aucun lecteur ne se replie sur
+// une pratique par défaut. La constante ne sert plus qu'à la représentation neutre d'un badge (ci-dessus).
 
 // Représentations canoniques (Session B) — source unique code/couleur/famille/badge
 window.obtenirRepresentationPratique = obtenirRepresentationPratique;

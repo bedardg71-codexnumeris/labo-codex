@@ -94,7 +94,10 @@ function genererRapportAPI(da, options = {}) {
 
     // 3. COMPLÉTION
     if (opts.completion) {
-        rapport += `Complétion : ${indices.C}% (${detailsC.remis} remises / ${detailsC.total} productions)\n\n`;
+        // Lot N1b (21 sept. 2026) : sans pratique assignée, la complétion est inconnue — un tiret, jamais « null% » ni 0 %.
+        rapport += (indices.C === null)
+            ? `Complétion : —\n\n`
+            : `Complétion : ${indices.C}% (${detailsC.remis} remises / ${detailsC.total} productions)\n\n`;
     }
 
     // 4. PERFORMANCE — la note du cours, telle que le profil l'affiche, et les évaluations qui y entrent (#706).

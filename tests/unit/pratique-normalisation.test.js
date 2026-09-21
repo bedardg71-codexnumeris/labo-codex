@@ -19,9 +19,9 @@ beforeAll(() => {
 });
 
 describe('Session A · normaliserIdPratique', () => {
-    it('expose normaliserIdPratique et PRATIQUE_DEFAUT', () => {
+    it('expose normaliserIdPratique — et PLUS `PRATIQUE_DEFAUT` (lot N1b, 21 sept. 2026 : aucun lecteur ne se replie sur une pratique par défaut)', () => {
         expect(typeof win.normaliserIdPratique).toBe('function');
-        expect(win.PRATIQUE_DEFAUT).toBe('standards');
+        expect(win.PRATIQUE_DEFAUT).toBeUndefined();
     });
 
     it('mappe chaque identifiant legacy vers son canonique', () => {

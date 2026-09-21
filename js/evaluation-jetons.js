@@ -108,8 +108,10 @@ function _normaliserConfigJetons(brut) {
  * @returns {object|null} config canonique des jetons, ou null
  */
 function obtenirConfigJetonsPratique(pratiqueIdDemande = null) {
+    // Lot N1b (21 sept. 2026) : sans pratique demandée, l'id que rend LA désignation (un ancien
+    // pointeur mène à SA pratique de bibliothèque) ; sans pratique assignée, aucune config de jetons.
     const pratiqueId = pratiqueIdDemande
-        || (typeof obtenirPratiqueActiveGroupeCours === 'function' ? obtenirPratiqueActiveGroupeCours() : null);
+        || (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : null);
     if (!pratiqueId) return null;
 
     const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];

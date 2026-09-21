@@ -246,11 +246,16 @@ function monterMoteur(store, prefixe) {
         cle,
         obtenirDonneesSelonMode: (k) => store[prefixe + '_' + k] || [],
         obtenirTypePratiqueActive: () => famille,
-        obtenirPratiqueActiveGroupeCours: () => pratiqueId,
+        // Lots N1a / N1b (21 sept. 2026) : le chemin riche lit LA désignation de la pratique active
+        // (`designerPratiqueActive`, pratique-registre.js), plus le pointeur ni le type. Même adaptateur :
+        // la vraie pratique stockée, aucune valeur fabriquée.
+        designerPratiqueActive: () => ({ etat: pratiqueId ? 'ok' : 'aucune', idBrut: pratiqueId, id: pratiqueId,
+            donnees: pratiqueId ? { id: pratiqueId, configuration } : null, famille }),
+        trouverPratiqueEnBibliotheque: (id) => (id === pratiqueId ? { id: pratiqueId, configuration } : null),
         obtenirConfigPratiqueActive: () => configuration
     };
 
-    const win = chargerScript('js/profil-etudiant-actions.js', globaux, { PRATIQUE_DEFAUT: 'standards' });
+    const win = chargerScript('js/profil-etudiant-actions.js', globaux, {});
     if (typeof win.calculerDetailsNoteFinale !== 'function') {
         throw new Error('calculerDetailsNoteFinale non exposée après chargement du module.');
     }

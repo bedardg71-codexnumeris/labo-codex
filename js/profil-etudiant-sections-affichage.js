@@ -481,8 +481,8 @@ function genererSectionMobilisationEngagement(da) {
     // (une sommative n'a aucune production de type « artefact de portfolio ») : « 2/2 » au-dessus de « 0 production
     // remise — Aucune production remise ». Hors Standards, les pastilles sont donc TOUTES les productions que le
     // détail tient pour remises, comme le sont déjà les non-remises.
-    const pastillesArtefactsSeulement = ((typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null)
-        || window.PRATIQUE_DEFAUT || 'standards') === 'standards';
+    // (lot N1b : sans pratique assignée, null — aucun repli : toutes les productions remises, comme hors Standards.)
+    const pastillesArtefactsSeulement = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) === 'standards';
     const construirePastilleC = p => {
         const production = productions.find(x => x.id === p.id);
         if (!production) return null;
@@ -580,7 +580,7 @@ function genererSectionMobilisationEngagement(da) {
             <br><br>
             <strong>Assiduité (A) :</strong> Indice A = ${indices.A === null ? '—' : indices.A + '%'} — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
             <br><br>
-            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C === null ? '—' : indices.C + '%'} — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
             <br><br>
             <strong>Performance (P) :</strong> ${recitSOM
                 ? `Indice P = ${indicesSOM.P}% — Moyenne pondérée des ${compteesSOM.length} ${obtenirTermeProduction(compteesSOM.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('evalue', compteesSOM.length)}, chacune à son poids`
@@ -857,7 +857,8 @@ function genererSectionAccompagnement(da) {
 
     // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
     // #743 (lot D) : une assiduité inconnue (`null`) est, elle aussi, « aucune donnée ».
-    const aucuneDonnee = (indices.A === null || indices.A === 0) && indices.C === 0 && indices.P === 0;
+    // Lot N1b : une complétion inconnue (`null`, sans pratique assignée) aussi.
+    const aucuneDonnee = (indices.A === null || indices.A === 0) && (indices.C === null || indices.C === 0) && indices.P === 0;
 
     if (aucuneDonnee) {
         // Retourner un HTML simplifié pour l'état "en attente de données"
@@ -1125,8 +1126,8 @@ function genererSectionAccompagnement(da) {
 
                         // Obtenir la configuration pour afficher le nombre d'artefacts retenus
                         const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-                        // #328 L2-b2 : type dérivé de la SSOT (helper D2), défaut historique conservé.
-                        const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+                        // #328 L2-b2 : type dérivé de la SSOT (helper D2). Lot N1b : plus de défaut — null sans pratique.
+                        const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null);
 
                         let noteExplicative = '';
                         if (pratique === 'standards') {
@@ -2319,8 +2320,12 @@ function genererValeursComparatives(valeurSOM, valeurPAN, afficherTiret = false)
     }
 
     // Session C (#303) : mode comparatif retiré — toujours la valeur de la pratique active.
-    // #328 L2-b2 : type dérivé de la SSOT (helper D2), défaut historique conservé.
-    const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || 'sommative';
+    // #328 L2-b2 : type dérivé de la SSOT (helper D2). Lot N1b : sans pratique assignée, « — » — aucune
+    // des deux valeurs n'est celle d'une pratique (avant : le repli « sommative » montrait valeurSOM).
+    const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null);
+    if (!pratique) {
+        return `<span style="color: var(--gris-clair); font-weight: 600;">—</span>`;
+    }
     const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
     return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
 }
@@ -3876,8 +3881,8 @@ function _calculerIndicesPerformance(da) {
  */
 function _lireRecitSommative(da) {
     // `simulerIndices` exige l'id : sans lui il rend null. Le même repère que `calculerDetailsNoteFinale` — la pratique du
-    // groupe-cours actif, lue à la SSOT.
-    const idActif = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
+    // groupe-cours actif, par LA désignation (lot N1b : sans pratique assignée, null — aucun récit, aucune carte).
+    const idActif = (typeof obtenirIdPratiqueActive === 'function') ? obtenirIdPratiqueActive() : null;
     const indices = (idActif && typeof simulerIndices === 'function') ? simulerIndices(da, idActif) : null;
     const recit = indices ? indices.recit : null;
     return { idActif, recit: (recit && recit.famille === 'SOM' && recit.synthese) ? recit : null };

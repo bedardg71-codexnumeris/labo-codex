@@ -309,7 +309,8 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         const debut = sections.indexOf('function genererSectionMobilisationEngagement(da)');
         const corps = sections.slice(debut, sections.indexOf('\nfunction ', debut + 10));
         expect(corps.length).toBeGreaterThan(5000);                                   // la tranche n'est pas vide
-        expect((corps.match(/Indice C = \$\{indices\.C\}% — \$\{detailsC\.remis\}/g) || []).length).toBe(1);
+        // ↻ Lot N1b (21 sept. 2026) : une complétion inconnue (sans pratique assignée) s'écrit d'un tiret — la fraction reste celle du détail.
+        expect((corps.match(/Indice C = \$\{indices\.C === null \? '—' : indices\.C \+ '%'\} — \$\{detailsC\.remis\}/g) || []).length).toBe(1);
         expect((corps.match(/\$\{detailsC\.remis\}\/\$\{detailsC\.total\}/g) || []).length).toBe(1);
         expect(/\$\{nbRemis\}\s*\/\s*\$\{nbTotal\}/.test(corps)).toBe(false);
         ['configurable', 'sommative', 'pan-standards', 'pan-specifications', 'test'].forEach(f => {

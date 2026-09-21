@@ -1811,7 +1811,7 @@ function determinerNiveauRaiPedagogique(da) {
     // Déterminer quelle fonction utiliser selon la pratique
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
 
     // Calculer moyennes SRPNF
     const moyennes = (pratique === 'standards')
@@ -1941,8 +1941,26 @@ function determinerAlerteContextuelle(da) {
     // #743 (lot D, 19 sept. 2026) : une assiduité INCONNUE reste `null` — `null / 100` vaudrait 0.
     const assiduiteInconnue = indices.A === null || indices.A === undefined;
     const A = assiduiteInconnue ? null : indices.A / 100; // décimal 0-1, ou null
-    const C = indices.C / 100; // Convertir en décimal 0-1
+    // Lot N1b (21 sept. 2026) : une complétion INCONNUE (`null`, sans pratique assignée) reste `null` —
+    // `null / 100` vaut 0, et tout le groupe se lisait « Fragile » sur un zéro qui n'existe pas.
+    const completionInconnue = indices.C === null || indices.C === undefined;
+    const C = completionInconnue ? null : indices.C / 100; // décimal 0-1, ou null
     const texteA = assiduiteInconnue ? '—' : (A * 100).toFixed(0) + '%';
+
+    // Lot N1b — SANS COMPLÉTION, LE CONTEXTE NE SE QUALIFIE PAS (même forme que l'assiduité inconnue,
+    // #743) : un tiret à la place du palier. La phrase est celle du diagnostic du profil — aucun mot neuf.
+    if (completionInconnue) {
+        return {
+            niveau: 'inconnu',
+            label: '—',
+            description: '',
+            badgeClasse: 'badge-attente',
+            A: texteA,
+            C: '—',
+            recommandation: (typeof window._diagnostiquerNoteNonCalculable === 'function') ? window._diagnostiquerNoteNonCalculable() : '',
+            donneesSuffisantes: false
+        };
+    }
 
     // 🆕 BETA 96.1: Vérifier si données suffisantes pour C
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
@@ -2090,7 +2108,7 @@ function determinerCibleIntervention(da) {
     const indices = calculerTousLesIndices(da);
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
 
     const moyennes = (pratique === 'standards')
         ? calculerMoyennesCriteresRecents(da)

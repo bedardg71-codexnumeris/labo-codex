@@ -719,6 +719,13 @@ function _calculerEtStockerIndicesCPInterne() {
         // pratique n'était assignée. Même encodage que #394 : P à 0, `noteConstructible` à false.
         // Rien n'est perdu : les évaluations ne bougent pas, l'indice se recalcule dès qu'une
         // pratique est assignée.
+        // Lot N1b (21 sept. 2026) — ET C N'EST PAS UN ZÉRO NON PLUS. La complétion se calcule PAR la
+        // pratique (la spécification compte autrement) : sans pratique, il n'y a pas de C. Champ
+        // ADDITIF `completionConstructible: false`, comme `noteConstructible` (#394) : `C` reste le
+        // nombre 0 pour les lecteurs du stock, et `calculerTousLesIndices` en fait un `null` —
+        // l'écran écrit « — », et « un indice affiché « — » n'est jamais sous 70 » (lot 25).
+        // ⚠ `noteConstructible: false` SEUL ne dit PAS cela : une Standards au portfolio incomplet
+        // a un P non constructible et un C bien réel.
         (etudiants || []).forEach(etudiant => {
             indicesCP[etudiant.da] = {
                 actuel: {
@@ -727,6 +734,7 @@ function _calculerEtStockerIndicesCPInterne() {
                     C: 0,
                     P: 0,
                     noteConstructible: false,
+                    completionConstructible: false,
                     details: { calculViaPratique: false, pratiqueActive: etat }
                 }
             };

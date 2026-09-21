@@ -46,7 +46,7 @@
 function obtenirTermeProduction(context = 'singulier', majuscule = false) {
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
 
     // Définir les termes selon la pratique
     let termes = {
@@ -115,7 +115,7 @@ const _ACCORDS_TERME_PRODUCTION = {
 function genreTermeProduction() {
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
     return pratique === 'standards' ? 'm' : 'f';
 }
 

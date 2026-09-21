@@ -120,7 +120,7 @@ describe('#328 L2-c · D3 — la config des jetons suit la pratique VIVANTE (pas
         setSync: (k, v) => { store[k] = v; }
     };
     const win = chargerScript('js/evaluation-jetons.js', {
-        db, cle: (k) => k, obtenirPratiqueActiveGroupeCours: () => 'P'
+        db, cle: (k) => k, obtenirIdPratiqueActive: () => 'P'
     });
 
     it('modifier la pratique change la config lue ensuite, sans aucune synchronisation', () => {

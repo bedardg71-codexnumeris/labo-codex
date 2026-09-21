@@ -69,7 +69,7 @@ describe('Sentinelle SSOT · miroir modalitesEvaluation (L2-a, statique)', () =>
 
 });
 
-describe('obtenirPratiqueActiveGroupeCours — priorité SSOT (fonctionnel)', () => {
+describe('lirePointeurPratiqueGroupeCours — priorité SSOT (fonctionnel ; lot N1b, 21 sept. 2026 : obtenirPratiqueActiveGroupeCours et son repli « sommative » sont retirés)', () => {
 
     // store initialisé AVANT le chargement : modes.js lit db.getSync au load
     // (modeApplication). beforeEach le réinitialise ensuite pour chaque cas.
@@ -101,28 +101,29 @@ describe('obtenirPratiqueActiveGroupeCours — priorité SSOT (fonctionnel)', ()
     it('désync copie/SSOT → la SSOT gagne (même patron que #332)', () => {
         store['groupeCoursActif'] = { id: 'GC1', pratiqueId: 'COPIE_PERIMEE' };
         store['t1_groupesCours'] = [{ id: 'GC1', pratiqueId: 'SSOT_A_JOUR' }];
-        expect(win.obtenirPratiqueActiveGroupeCours()).toBe('SSOT_A_JOUR');
+        expect(win.lirePointeurPratiqueGroupeCours()).toBe('SSOT_A_JOUR');
     });
 
-    it('GC trouvé dans la SSOT sans pratiqueId → défaut sommative, la copie ne contredit pas', () => {
+    it('GC trouvé dans la SSOT sans pratiqueId → null (AUCUN repli, lot N1b ; avant : « sommative »), la copie ne contredit pas', () => {
         store['groupeCoursActif'] = { id: 'GC1', pratiqueId: 'COPIE_PERIMEE' };
         store['t1_groupesCours'] = [{ id: 'GC1' }];
-        expect(win.obtenirPratiqueActiveGroupeCours()).toBe('sommative');
+        expect(win.lirePointeurPratiqueGroupeCours()).toBeNull();
     });
 
     it('GC introuvable dans la SSOT → copies en dernier recours (gcActif puis infoCours)', () => {
         store['groupeCoursActif'] = { id: 'GC_FANTOME', pratiqueId: 'P_COPIE' };
         store['t1_groupesCours'] = [{ id: 'GC1', pratiqueId: 'AUTRE' }];
-        expect(win.obtenirPratiqueActiveGroupeCours()).toBe('P_COPIE');
+        expect(win.lirePointeurPratiqueGroupeCours()).toBe('P_COPIE');
 
         store['groupeCoursActif'] = { id: 'GC_FANTOME' };
         store['infoCours'] = { pratiqueId: 'P_INFOCOURS' };
-        expect(win.obtenirPratiqueActiveGroupeCours()).toBe('P_INFOCOURS');
+        expect(win.lirePointeurPratiqueGroupeCours()).toBe('P_INFOCOURS');
     });
 
-    it('rien de configuré → défaut sommative ; pratiqueNotation du miroir IGNORÉ', () => {
+    it('rien de configuré → null (AUCUN repli, lot N1b ; avant : « sommative ») ; pratiqueNotation du miroir IGNORÉ', () => {
         store['t1_modalitesEvaluation'] = { pratiqueNotation: 'fantome' };
-        expect(win.obtenirPratiqueActiveGroupeCours()).toBe('sommative');
+        expect(win.lirePointeurPratiqueGroupeCours()).toBeNull();
     });
 
 });
+

@@ -528,8 +528,10 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
             return { A: null, C: null, P: null, M: null, pratique: pratique, noteConstructible: false, horsGroupe: true };
         }
         if (assiduiteSommatif === undefined) assiduiteSommatif = calculerAssiduite(da, null);
-        if (!indicesCP && typeof simulerIndices === 'function' && typeof obtenirPratiqueActiveGroupeCours === 'function') {
-            indicesCP = simulerIndices(da, obtenirPratiqueActiveGroupeCours());
+        // Lot N1b (21 sept. 2026) : l'id que rend LA désignation. Sans pratique assignée, rien à simuler.
+        const idActif = (typeof obtenirIdPratiqueActive === 'function') ? obtenirIdPratiqueActive() : null;
+        if (!indicesCP && idActif && typeof simulerIndices === 'function') {
+            indicesCP = simulerIndices(da, idActif);
         }
     }
 
@@ -539,28 +541,36 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
     // #394 (règle 4) : une note stockée « non constructible » se propage aux
     // affichages (qui montrent « — » au lieu d'un 0 trompeur). Champ additif :
     // absent (entrées antérieures) ⇒ constructible.
+    // Lot N1b (21 sept. 2026) : SANS PRATIQUE, C EST INCONNU — `null`, la forme de l'assiduité inconnue
+    // (#743). L'écrivain le dit par `completionConstructible: false` (portfolio.js) ; sans entrée du tout
+    // (rien d'assigné, rien à simuler) c'est la même ignorance. Avant : 0, que le filtre « A ou C sous
+    // la borne », la mobilisation et la carte RàI lisaient comme un vrai zéro — tout le groupe signalé.
     let C = 0;
     let P = 0;
     let noteConstructible = true;
+    let completionConstructible = true;
     if (indicesCP) {
         C = (indicesCP.C || 0) / 100;
         P = (indicesCP.P || 0) / 100;
         noteConstructible = indicesCP.noteConstructible !== false;
+        completionConstructible = indicesCP.completionConstructible !== false;
     } else {
         // Pratique introuvable au registre : rien à calculer, et pas de nombre inventé.
         noteConstructible = false;
+        completionConstructible = false;
     }
 
-    // INDICES COMPOSITES — #743 : sans A, pas de M (une moyenne avec un inconnu n'existe pas).
-    const M = (A === null) ? null : (A + C) / 2;
+    // INDICES COMPOSITES — #743 : sans A, pas de M (une moyenne avec un inconnu n'existe pas). Sans C non plus.
+    const M = (A === null || !completionConstructible) ? null : (A + C) / 2;
 
     return {
         A: (A === null) ? null : Math.round(A * 100),
-        C: Math.round(C * 100),
+        C: completionConstructible ? Math.round(C * 100) : null,
         P: Math.round(P * 100),
         M: (M === null) ? null : parseFloat(M.toFixed(3)),
         pratique: pratique,
-        noteConstructible: noteConstructible
+        noteConstructible: noteConstructible,
+        completionConstructible: completionConstructible
     };
 }
 
@@ -599,7 +609,9 @@ function calculerIndicesEtudiant(da, _cacheIndicesA, _cacheIndicesCP) {
 
     const sommatif = {
         assiduite: lireIndiceAssiduite(assiduiteSommatif),   // #743 : null si inconnue
-        completion: indicesSOM ? indicesSOM.C / 100 : 0,
+        // Lot N1b : `null` quand la complétion n'est pas constructible (sans pratique) — jamais un 0.
+        completion: (indicesCPEtudiant && indicesCPEtudiant.completionConstructible === false) ? null
+            : (indicesSOM ? indicesSOM.C / 100 : 0),
         performance: indicesSOM ? indicesSOM.P / 100 : 0,
         nombreSeances: nombreSeances,
         nombreEvaluations: nombreEvals,

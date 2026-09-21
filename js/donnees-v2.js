@@ -262,8 +262,8 @@
             // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId —
             // les fallbacks miroirs (pratique, pratiqueActiveId,
             // configurationSTDAppliquee) n'existent plus.
-            return (typeof obtenirPratiqueActiveGroupeCours === 'function')
-                ? obtenirPratiqueActiveGroupeCours()
+            return (typeof obtenirIdPratiqueActive === 'function')
+                ? obtenirIdPratiqueActive()
                 : null;
         } catch (e) {
             return null;

@@ -420,9 +420,8 @@ function validerProductionsStd(productions) {
 
 /** La pratique active du groupe-cours est-elle de famille STD ? */
 function _pratiqueActiveEstStd() {
-    const id = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
-    if (!id) return false;
-    const inst = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(id) : null;
+    // Lot N1b (21 sept. 2026) : l'instance que rend LA résolution ; sans pratique, pas de zone « À vérifier ».
+    const inst = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive().pratique : null;
     return !!(inst && typeof inst.obtenirCode === 'function' && inst.obtenirCode() === 'STD');
 }
 

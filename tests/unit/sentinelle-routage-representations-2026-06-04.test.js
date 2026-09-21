@@ -50,8 +50,8 @@ describe('Session B Lot 3 · routage code + nettoyage couleurs', () => {
         expect(mainJs).not.toMatch(/typePAN === 'specifications'/);
     });
 
-    it('etudiants.js · badge liste dérive le code du registre (if/else famille retiré)', () => {
-        expect(etudiants).toMatch(/obtenirCodePratique\(typePAN\)/);
+    it('etudiants.js · le badge de liste (sans appelant, lisait PRATIQUE_DEFAUT) est RETIRÉ au lot N1b (21 sept. 2026) — ni lui ni son escalier', () => {
+        expect(etudiants).not.toMatch(/genererBadgePratiqueListeEtudiants/);
         expect(etudiants).not.toMatch(/classePratique = 'spe'/);
     });
 

@@ -399,7 +399,7 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         // (`groupesCours[].pratiqueId`) et dit « aucune pratique de notation n'est assignée » —
         // la moitié « diagnostic » de #710 ; les deux replis de calcul (87 ici) restent à trancher.
         const b = monter(jeuSOM(), { retirerPratiqueId: true });
-        const actif = b.win.obtenirPratiqueActiveGroupeCours();
+        const actif = b.win.obtenirIdPratiqueActive();
         const type = b.win.obtenirTypePratiqueActive();
         b.win.calculerEtStockerIndicesCP(); const p = b.win.calculerEtStockerIndicesCP()[DA.SOM].actuel;
         const details = b.win.calculerDetailsNoteFinale(DA.SOM);
@@ -408,7 +408,10 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         // de calcul sont retirés : l'indice dit « non constructible » (avant : P 87, par la sommative de repli), comme le
         // profil. `obtenirPratiqueActiveGroupeCours` garde « sommative » pour les lecteurs d'écran jusqu'au lot N1b ; ce
         // qui calcule lit le pointeur SANS repli.
-        expect(actif).toBe('sommative');
+        // ↻ Lot N1b (21 sept. 2026) : `obtenirPratiqueActiveGroupeCours` et son repli « sommative » sont retirés ; l'id que
+        // lisent les écrans est celui de la désignation — null.
+        expect(actif).toBeNull();
+        expect(b.win.obtenirPratiqueActiveGroupeCours).toBeUndefined();
         expect(b.win.lirePointeurPratiqueGroupeCours()).toBeNull();
         expect(b.win.resoudrePratiqueActive().etat).toBe('aucune');
         expect(type).toBeNull();

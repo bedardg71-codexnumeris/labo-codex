@@ -360,7 +360,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
     const isPAN = pratique === 'standards';
 
     // Terme production/artefact dynamique (suit la pratique active) — #310.
@@ -372,7 +372,9 @@ function genererExplicationCalculIndices(complementHtml = '') {
     // Récupérer les paramètres de configuration
     const nbArtefacts = config.nombreArtefacts || 7;
 
-    let html = '<strong>Méthodes de calcul des indices (pratique active : ' + (isPAN ? 'PAN-Standards' : 'Sommative') + ')</strong><br><br>';
+    // Lot N1b (21 sept. 2026) : sans pratique assignée, l'aide ne nomme aucune pratique (avant : « PAN-Standards »,
+    // le repli PRATIQUE_DEFAUT) et dit, pour P, la phrase du diagnostic du profil — aucun mot neuf.
+    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + (isPAN ? 'PAN-Standards' : 'Sommative') + ')' : '') + '</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
     html += '<strong class="u-texte-bleu">A (Assiduité)</strong> : ';
@@ -398,7 +400,10 @@ function genererExplicationCalculIndices(complementHtml = '') {
     html += '<strong class="u-texte-bleu">P (Performance)</strong> : ';
     html += '<strong>Calculé selon la pratique de notation en vigueur</strong>. ';
 
-    if (isPAN) {
+    if (!pratique) {
+        const diagnostic = (typeof window._diagnostiquerNoteNonCalculable === 'function') ? window._diagnostiquerNoteNonCalculable() : '';
+        if (diagnostic) html += '<br>→ ' + echapperHtml(diagnostic);
+    } else if (isPAN) {
         html += '<br>→ <strong>PAN-Standards</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Incomplet, Développement, Maîtrise, Étendu) sont convertis en pourcentages.</em>';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs ' + termePlur + ' comptent dans le calcul de P</em>';
@@ -438,39 +443,6 @@ function mettreAJourExplicationCalculIndices() {
 
     const contenuHTML = genererExplicationCalculIndices();
     carteNote.innerHTML = contenuHTML;
-}
-
-/**
- * Génère le badge de pratique de notation (SOM, STD, SPE, DEN)
- * Affiche la pratique choisie par l'utilisateur (pas de mode "Hybride")
- * Le mode comparatif est juste un affichage dual des calculs, pas une pratique distincte
- * Utilise les classes CSS .badge-pratique-compact.som, .std, .spe, .den
- * @returns {string} - HTML du badge
- */
-function genererBadgePratiqueListeEtudiants() {
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
-    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
-    const typePAN = config.typePAN || 'maitrise';
-
-    // Session B : code dérivé du registre (source unique). SOM si pratique sommative ;
-    // sinon le typePAN → code via le registre (specifications→SPE, denotation→DEN,
-    // standards/maitrise/inconnu→STD). Les descriptions (microcopy) restent locales,
-    // indexées par code canonique.
-    const code = (pratique === 'sommative')
-        ? 'SOM'
-        : (typeof obtenirCodePratique === 'function' ? obtenirCodePratique(typePAN) : 'STD');
-
-    const descriptions = {
-        SOM: 'Pratique sommative : moyenne pondérée provisoire',
-        SPE: 'PAN-Spécifications : pass/fail sur objectifs',
-        DEN: 'Dénotation : sans notes chiffrées',
-        STD: 'PAN-Standards : N meilleurs artefacts selon IDME'
-    };
-    const description = descriptions[code] || descriptions.STD;
-
-    return `<span class="badge-pratique-compact ${code.toLowerCase()}" title="${description}">${code}</span>`;
 }
 
 /**
@@ -906,7 +878,9 @@ function afficherListeEtudiantsConsultation() {
     // Pearson la lirait comme un 0. La paire (A, P) de cet élève est écartée, pas remplacée.
     const pairesAP = valeursA_actifsCorr.map((a, i) => [a, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
     const r_AP = calculerCorrelationPearson(pairesAP.map(paire => paire[0]), pairesAP.map(paire => paire[1]));
-    const r_CP = calculerCorrelationPearson(valeursC_actifsCorr, valeursP_actifsCorr);
+    // Lot N1b (21 sept. 2026) : même règle pour une complétion inconnue (`null`, sans pratique assignée).
+    const pairesCP = valeursC_actifsCorr.map((c, i) => [c, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
+    const r_CP = calculerCorrelationPearson(pairesCP.map(paire => paire[0]), pairesCP.map(paire => paire[1]));
 
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
     etudiantsFiltres = etudiantsFiltres.map((e) => {

@@ -54,16 +54,17 @@ function monter({ avecGroupeCours = true } = {}) {
         setSync: (k, v) => { store[k] = JSON.parse(JSON.stringify(v)); ecritures.push(k); },
         get: async () => null, set: async () => {}
     };
-    // Miroir de la règle de modes.js (`obtenirPratiqueActiveGroupeCours`) : la SSOT, sinon le repli.
+    // Miroir de la règle de modes.js (`lirePointeurPratiqueGroupeCours`) : la SSOT, AUCUN repli (lot N1b,
+    // 21 sept. 2026 — avant : « sommative »). La barre latérale lit l'id que rend LA désignation du VRAI registre.
     const pratiqueActive = () => {
         const g = store.groupeCoursActif; const gcs = store.test_groupesCours || [];
         const gc = g ? gcs.find(x => x.id === g.id) : null;
-        return gc ? (gc.pratiqueId || 'sommative') : 'sommative';
+        return gc ? (gc.pratiqueId || null) : null;
     };
-    // Le manager lit `window.obtenirPratiqueActiveGroupeCours` (pas le nom nu) : le miroir est posé
+    // Le registre lit `window.lirePointeurPratiqueGroupeCours` (pas le nom nu) : le miroir est posé
     // sur les deux, comme dans la page. Sans lui sur `window`, `chargerPratiqueActive` sort avant
     // d'instancier quoi que ce soit — et le banc resterait vert pour la mauvaise raison.
-    const win = { addEventListener() {}, removeEventListener() {}, obtenirPratiqueActiveGroupeCours: pratiqueActive };
+    const win = { addEventListener() {}, removeEventListener() {}, lirePointeurPratiqueGroupeCours: pratiqueActive };
     const globaux = {
         db, cle: (k) => 'test_' + k,
         document: { getElementById: (id) => (id === 'sidebarListePratiques' ? sidebar : null), querySelector: () => null, querySelectorAll: () => [],
@@ -73,7 +74,9 @@ function monter({ avecGroupeCours = true } = {}) {
         alert: (m) => alertes.push(m), confirm: () => true,
         echapperHtml: (s) => String(s == null ? '' : s),
         appliquerConfigurationPratique: async () => true,
-        obtenirPratiqueActiveGroupeCours: pratiqueActive,
+        lirePointeurPratiqueGroupeCours: pratiqueActive,
+        // Le nom nu que lit pratiques-gestion.js, renvoyé au VRAI registre chargé plus bas (résolu à l'appel).
+        obtenirIdPratiqueActive: () => win.obtenirIdPratiqueActive(),
         normaliserIdPratique: (t) => t,
         BibliothequeUI: { filtrerParMaquette: (l) => l, filtrerParModeDemo: (l) => l, ajouterOptgroupDemo() {}, forgerInspireDe: () => ({}) },
         obtenirCodePratique: () => 'STD', obtenirCouleurPratique: () => '', obtenirLabelFamillePratique: () => 'PAN'

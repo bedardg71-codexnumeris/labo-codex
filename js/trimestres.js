@@ -2345,7 +2345,7 @@
                     //   0 entre dans une moyenne sans que personne le voie : `null` (valeur manquante
                     //   pour R, pandas, etc.), avec `note_constructible` qui dit pourquoi.
                     // #743 (lot D) : A suit la même règle — inconnu tant qu'aucune séance saisie ne compte.
-                    unites: 'A, C et P de 0 à 100. P_final vaut null (jamais 0) quand la note n\'est pas constructible : voir note_constructible. A_final vaut null (et non 0 ou 100) tant qu\'aucune séance saisie ne compte pour l\'étudiant·e : assiduité inconnue.',
+                    unites: 'A, C et P de 0 à 100. P_final vaut null (jamais 0) quand la note n\'est pas constructible : voir note_constructible. A_final vaut null (et non 0 ou 100) tant qu\'aucune séance saisie ne compte pour l\'étudiant·e : assiduité inconnue. C_final vaut null (jamais 0) quand aucune pratique de notation n\'est assignée au groupe-cours : la complétion se calcule par la pratique.',
 
                     indices_finaux: etudiantsActifs.map(e => {
                         const indices = calculerTousLesIndices(e.da, indicesAssiduite, indicesCP);

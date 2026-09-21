@@ -41,7 +41,7 @@ function monterMoteur({ pratique = null, evaluations = [REPRISE, ORIGINALE] } = 
     const win = chargerScript('js/evaluation-jetons.js', {
         db: { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: () => {}, get: async () => null, set: async () => {} },
         cle: (k) => k,
-        obtenirPratiqueActiveGroupeCours: () => (pratique ? 'PR' : null),
+        obtenirIdPratiqueActive: () => (pratique ? 'PR' : null),
         sauvegarderDonneesSelonMode: (k, v) => { store[k] = v; return true; },
         notifications: { succes: (t, m) => notifs.push({ type: 'succes', t, m }), erreur: (t, m) => notifs.push({ type: 'erreur', t, m }), info() {}, avertissement() {} }
     });

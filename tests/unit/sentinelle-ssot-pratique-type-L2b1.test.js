@@ -91,8 +91,16 @@ describe('obtenirTypePratiqueActive — dérivation SSOT (fonctionnel)', () => {
     };
     const cle = (k) => 'actif_' + k;
 
+    // Lot N1b (21 sept. 2026) : le type se lit sur LA désignation (`designerPratiqueActive`), qui lit le
+    // pointeur par `window.lirePointeurPratiqueGroupeCours` — le VRAI lecteur de modes.js, sur le même store.
+    const winModes = chargerScript('js/modes.js', {
+        db, cle, obtenirPreference: () => null, definirPreference: () => {},
+        echapperHtml: (x) => String(x == null ? '' : x),
+        notifications: { erreur: () => {}, succes: () => {}, warning: () => {}, info: () => {} }
+    });
     const win = chargerScript('js/pratiques/pratique-registre.js', { db, cle });
     win.obtenirTrimestreId = () => 'actif';
+    win.lirePointeurPratiqueGroupeCours = winModes.lirePointeurPratiqueGroupeCours;
 
     // Instance minimale conforme au contrat IPratique pour peupler le registre
     // (les ids canoniques du registre SONT des types).
@@ -103,6 +111,7 @@ describe('obtenirTypePratiqueActive — dérivation SSOT (fonctionnel)', () => {
         genererCibleIntervention: () => null
     });
     win.enregistrerPratique('sommative', fauxIPratique('sommative'));
+    win.enregistrerPratique('standards', fauxIPratique('standards'));
 
     beforeEach(() => { store = {}; });
 
@@ -120,15 +129,23 @@ describe('obtenirTypePratiqueActive — dérivation SSOT (fonctionnel)', () => {
         expect(win.obtenirTypePratiqueActive()).toBe('sommative');
     });
 
-    it('#301 · contexte explicite → bibliothèque du trimestre CONSULTÉ, pas de l\'actif', () => {
-        // Trimestre archivé a2025 : sa propre biblio, son propre GC.
+    it('lot N1b · un pointeur `standards` NU (au registre, jamais configuré) → null — avant : « standards », et une instance aux défauts du registre calculait', () => {
+        store['groupeCoursActif'] = { id: 'GC1', trimestreId: 'actif' };
+        store['actif_groupesCours'] = [{ id: 'GC1', pratiqueId: 'standards' }];
+        expect(win.designerPratiqueActive().etat).toBe('introuvable');
+        expect(win.obtenirTypePratiqueActive()).toBe(null);
+        // La même écriture, une fois la pratique rangée en bibliothèque sous cet id : désignée, donc typée.
+        store['actif_pratiquesConfigurables'] = [{ id: 'standards', configuration: { type: 'standards' } }];
+        expect(win.obtenirTypePratiqueActive()).toBe('standards');
+    });
+
+    it('lot N1b · le paramètre `contexte` est retiré (aucun appelant) : un argument ne détourne plus la lecture', () => {
+        store['groupeCoursActif'] = { id: 'GC1', trimestreId: 'actif' };
+        store['actif_groupesCours'] = [{ id: 'GC1', pratiqueId: 'sommative' }];
         store['a2025_groupesCours'] = [{ id: 'GC_ARCH', pratiqueId: 'p-arch' }];
         store['a2025_pratiquesConfigurables'] = [{ id: 'p-arch', configuration: { type: 'specifications' } }];
-        // La biblio du trimestre ACTIF contient un homonyme de type différent :
-        // il ne doit JAMAIS être consulté.
-        store['actif_pratiquesConfigurables'] = [{ id: 'p-arch', configuration: { type: 'standards' } }];
-        expect(win.obtenirTypePratiqueActive({ gcId: 'GC_ARCH', trimestreId: 'a2025' }))
-            .toBe('specifications');
+        expect(win.obtenirTypePratiqueActive.length).toBe(0);
+        expect(win.obtenirTypePratiqueActive({ gcId: 'GC_ARCH', trimestreId: 'a2025' })).toBe('sommative');
     });
 
     it('désync copie/SSOT → la SSOT gagne', () => {
@@ -138,12 +155,10 @@ describe('obtenirTypePratiqueActive — dérivation SSOT (fonctionnel)', () => {
         expect(win.obtenirTypePratiqueActive()).toBe('sommative');
     });
 
-    it('GC introuvable dans la SSOT → copie en dernier recours, SAUF sous contexte explicite', () => {
+    it('GC introuvable dans la SSOT → copie en dernier recours', () => {
         store['groupeCoursActif'] = { id: 'GC_FANTOME', trimestreId: 'actif', pratiqueId: 'sommative' };
         store['actif_groupesCours'] = [{ id: 'GC1', pratiqueId: 'p-std' }];
         expect(win.obtenirTypePratiqueActive()).toBe('sommative');           // copie tolérée
-        expect(win.obtenirTypePratiqueActive({ gcId: 'GC_FANTOME', trimestreId: 'actif' }))
-            .toBe(null);                                                      // jamais sous contexte
     });
 
     it('rien d\'actif / pratique introuvable en biblio → null (défaut = choix de l\'appelant)', () => {

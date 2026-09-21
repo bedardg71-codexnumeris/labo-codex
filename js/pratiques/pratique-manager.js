@@ -222,8 +222,8 @@ const PratiqueManager = {
         }
 
         // Vérifier que ce n'est pas la pratique active (#328 L2-b2 : SSOT)
-        const pratiqueActiveId = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
-            ? window.obtenirPratiqueActiveGroupeCours()
+        const pratiqueActiveId = (typeof window.obtenirIdPratiqueActive === 'function')
+            ? window.obtenirIdPratiqueActive()
             : null;
         if (pratiqueActiveId === pratiqueId) {
             throw new Error('Impossible de supprimer la pratique active');
