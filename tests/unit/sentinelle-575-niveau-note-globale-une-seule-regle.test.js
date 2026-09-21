@@ -59,6 +59,9 @@ function chargerHelpers(lectureRendue) {
         obtenirPreference: () => null,
         obtenirDonneesSelonMode: () => [],
         obtenirTypePratiqueActive: () => 'standards',
+        // Lot N1a (21 sept. 2026) : `obtenirPratiqueActuelle` part de la DÉSIGNATION de la pratique
+        // active (une Standards assignée), puis demande au registre l'instance de sa famille.
+        designerPratiqueActive: () => ({ etat: 'ok', idBrut: 'std-banc', id: 'std-banc', donnees: {}, famille: 'standards' }),
         // `obtenirPratiqueActuelle` vit DANS le fichier testé : on ne la stubbe
         // pas, on stubbe ce qu'elle appelle. La chaîne réelle est donc exercée.
         obtenirPratiqueParId: () => ({

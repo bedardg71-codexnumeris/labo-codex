@@ -30,55 +30,28 @@ const PratiqueManager = {
      * Compatible avec l'architecture existante
      */
     async chargerPratiqueActive() {
-        // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId — le
-        // miroir modalitesEvaluation.pratique n'existe plus.
-        const pratiqueId = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
-            ? window.obtenirPratiqueActiveGroupeCours()
-            : null; // Ex: 'pan-standards-cinq-niveaux'
+        // Lot N1a (#713 volet registre, #710 — 21 sept. 2026) : LA résolution du registre
+        // (`resoudrePratiqueActive`), sans repli. Avant, `standards`, `sommative` et
+        // `specifications` étaient tenues ici pour des pratiques codées en dur valides : un
+        // pointeur `specifications` nu menait à l'instance SPE du registre, jamais configurée,
+        // qui rendait 50 % à tout le monde, « constructible ». (Le plancher 50 d'une SPE
+        // CONFIGURÉE est une autre question, didactique : lot N4.)
+        // #762 reste vrai : la configuration complète se construit dans le registre, qui rend
+        // null sans lever quand elle est illisible.
+        const resolution = (typeof window.resoudrePratiqueActive === 'function')
+            ? window.resoudrePratiqueActive()
+            : { etat: 'aucune', idBrut: null, pratique: null };
 
-        if (!pratiqueId) {
+        if (resolution.etat === 'aucune') {
             console.warn('[PratiqueManager] Aucune pratique configurée');
             return null;
         }
-
-        // Vérifier si c'est une pratique codée en dur ou configurable.
-        // Session A volet B : normalisation à la lecture — le SSOT peut être legacy
-        // (pan-standards…) OU canonique (standards…). Les ids configurables (p. ex.
-        // pan-standards-bedard) ne figurent pas dans la table → restent inchangés et
-        // tombent dans la branche configurable JSON, comportement préservé.
-        const idCanonique = (typeof normaliserIdPratique === 'function')
-            ? normaliserIdPratique(pratiqueId)
-            : pratiqueId;
-        if (idCanonique === 'standards' || idCanonique === 'sommative' || idCanonique === 'specifications') {
-            // Pratique codée en dur existante, utiliser pratique-registre.js
-            return window.obtenirPratiqueActive();
-        }
-
-        // Pratique configurable JSON
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
-
-        if (!pratiqueData) {
-            console.error(`[PratiqueManager] Pratique introuvable : ${pratiqueId}`);
+        if (!resolution.pratique) {
+            console.error(`[PratiqueManager] Pratique introuvable : ${resolution.idBrut}`);
             return null;
         }
-
-        // #762 (6 sept. 2026) — LA LECTURE UNIQUE DU REGISTRE, pas `pratiqueData.config` seul.
-        // Une pratique écrite par l'assistant range tout sous `configuration` (pas `config`) :
-        // `new PratiqueConfigurable(undefined)` levait ici, juste APRÈS que `changerPratiqueActive`
-        // eut écrit la source de vérité — « Appliquer au cours actif » assignait, puis sortait sur
-        // une erreur sans rendre la barre (porte WebKit `pratiques-762-…`). `obtenirPratiqueParId`
-        // (pratique-registre.js) construit la configuration complète (racine, `config`,
-        // `configuration`, échelle par référence) et rend null, sans lever, si elle est illisible.
-        const instance = (typeof window.obtenirPratiqueParId === 'function')
-            ? window.obtenirPratiqueParId(pratiqueId)
-            : null;
-        if (!instance) {
-            console.error(`[PratiqueManager] Pratique illisible : ${pratiqueId}`);
-            return null;
-        }
-        this.pratiqueActive = instance;
-        return instance;
+        this.pratiqueActive = resolution.pratique;
+        return resolution.pratique;
     },
 
     /**
@@ -117,6 +90,13 @@ const PratiqueManager = {
 
         // Recharger la pratique
         await this.chargerPratiqueActive();
+
+        // Lot N1a (#710, ajout D-1 du 17 sept.) : les indices C et P suivent la pratique qu'on
+        // vient d'assigner. Avant, l'indice de l'ANCIENNE pratique restait affiché sous la
+        // nouvelle jusqu'au premier recalcul.
+        if (typeof window.calculerEtStockerIndicesCP === 'function') {
+            window.calculerEtStockerIndicesCP();
+        }
 
     },
 

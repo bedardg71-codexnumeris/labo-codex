@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 // SENTINELLE #723 (21 sept. 2026, tranché par Grégoire) — le fichier d'export des résultats finaux
 // sert à reporter les notes dans Léa : il GARDE la note arrondie à l'entier, et sa colonne le DIT
@@ -77,7 +78,7 @@ function chaine(notesArtefacts, methodeSelection, nombreARetenir) {
         db, cle, obtenirDonneesSelonMode: (k) => (k in store ? store[k] : null),
         estEtudiantExclu: () => false,
         obtenirTypePratiqueActive: () => 'standards',
-        obtenirPratiqueActiveGroupeCours: () => 'standards',
+        obtenirPratiqueActiveGroupeCours: () => 'standards', ...pontsResolution(win, () => 'standards'),
         obtenirPratiqueParId: (...a) => win.obtenirPratiqueParId(...a),
         obtenirConfigPratiqueActive: (...a) => win.obtenirConfigPratiqueActive(...a),
         calculerDetailsNoteFinale: (...a) => win.calculerDetailsNoteFinale(...a)

@@ -269,6 +269,7 @@ function monter(jeu, opts = {}) {
     const winModes = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test', cle };
     chargerScript('js/modes.js', globauxBase, winModes);
     win.obtenirPratiqueActiveGroupeCours = winModes.obtenirPratiqueActiveGroupeCours;
+    win.lirePointeurPratiqueGroupeCours = winModes.lirePointeurPratiqueGroupeCours;
 
     const globaux = Object.assign({}, globauxBase, {
         obtenirDonneesSelonMode: winModes.obtenirDonneesSelonMode, sauvegarderDonneesSelonMode: winModes.sauvegarderDonneesSelonMode,
@@ -278,7 +279,7 @@ function monter(jeu, opts = {}) {
         // #834 lot E (cadrage « Rencontres », 12 sept. 2026) : l'identifiant du contexte, point unique de modes.js.
         obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService,
         // Aiguillages vers les exports réels, résolus à l'appel.
-        obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours')
+        obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours'), lirePointeurPratiqueGroupeCours: fwd('lirePointeurPratiqueGroupeCours')
         // (Le pont `obtenirDetailsAssiduite` que le banc prêtait à rapport.js n'a plus lieu d'être : #732 l'exporte — mesure B5.)
     });
     const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEvaluation', 'profilActuelDA', 'etudiantsListeCache', 'PRATIQUE_DEFAUT', 'SEUILS_PAR_DEFAUT', '__audit'];

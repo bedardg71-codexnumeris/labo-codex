@@ -27,7 +27,7 @@ const ev = (id, da, prod, niveau, note) => ({ id, etudiantDA: da, productionId: 
 const EVALUATIONS = [ev('E1', ASSIDU, 'P1', 'I', 60), ev('E2', ASSIDU, 'P2', 'D', 70), ev('E3', ABSENT, 'P1', 'E', 85), ev('E4', ABSENT, 'P2', 'D', 70), ev('E5', AUTRE, 'P1', 'D', 70),
     ev('E6', ASSIDU, 'P3', 'M', 80)];   // due le 1er avril : hors du 16 mars
 
-function monter() {
+function monter(enPlus = {}) {
     const store = { test_evaluationsSauvegardees: EVALUATIONS, test_productions: PRODUCTIONS, infoCours: { id: 'GC1', _groupeCoursId: 'GC1' } };
     const db = { getSync: (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)), setSync() {}, get: async (k) => (k in store ? store[k] : null), set: async () => {}, useIndexedDB: false, memoryCache: new Map() };
     const win = { addEventListener() {}, removeEventListener() {}, dateLocaleYMD: () => '2026-05-15' };
@@ -39,7 +39,7 @@ function monter() {
         // La pratique ne sait pas rendre de P historique (le cas de la sommative aujourd'hui, #716) : le repli prend la main.
         obtenirPratiqueActuelle: () => ({ calculerPerformanceHistorique: () => null }),
         obtenirCalendrierComplet: () => ({}), obtenirSeancesCompletes: () => ({}), obtenirEtudiantsCoursActif: () => [], estEtudiantExclu: () => false,
-        notifications: { succes() {}, erreur() {}, info() {} } }, win);
+        notifications: { succes() {}, erreur() {}, info() {} }, ...enPlus }, win);
     return win;
 }
 
@@ -58,5 +58,19 @@ describe('#734 · le P historique du repli est celui de l\'élève', () => {
         const a = monter().calculerIndicesHistoriques(ASSIDU, '2026-03-16');
         expect(a.C).toBe(100);
         expect(a.A).toBe(100);
+    });
+
+    // LOT N1a (21 sept. 2026, #710) — décision de Grégoire : sans pratique assignée, aucune note. Le snapshot
+    // hebdomadaire s'écrit au démarrage : avant ce lot, il y rangeait un P tiré d'une pratique « standards »
+    // fabriquée, puis de la table I/D/M/E en dur. Tarir n'est pas réparer : les snapshots déjà écrits gardent le leur.
+    it('N1a · sans pratique assignée (ou id introuvable), AUCUN P n\'est écrit, même avec des évaluations — C et A restent', () => {
+        for (const etat of ['aucune', 'introuvable']) {
+            const a = monter({ designerPratiqueActive: () => ({ etat }) }).calculerIndicesHistoriques(ASSIDU, '2026-03-16');
+            expect(a.P, etat).toBeNull();
+            expect([a.C, a.A], etat).toEqual([100, 100]);
+        }
+    });
+    it('N1a · témoin : avec une pratique assignée, le P historique ne bouge pas (53, comme avant le lot)', () => {
+        expect(monter({ designerPratiqueActive: () => ({ etat: 'ok' }) }).calculerIndicesHistoriques(ASSIDU, '2026-03-16').P).toBe(53);
     });
 });

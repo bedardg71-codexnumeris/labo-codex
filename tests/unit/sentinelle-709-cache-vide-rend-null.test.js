@@ -15,6 +15,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const DA = '3000001';
@@ -34,7 +35,7 @@ function monter(pratique, evaluations, indicesCP) {
     const win = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test' };
     const fwd = (nom) => (...a) => win[nom](...a);
     const globaux = { db, cle, obtenirDonneesSelonMode, sauvegarderDonneesSelonMode: (k, v) => { store['test_' + k] = clone(v); return true; },
-        estEtudiantExclu: () => false, obtenirPratiqueActiveGroupeCours: () => pratique.id,
+        estEtudiantExclu: () => false, obtenirPratiqueActiveGroupeCours: () => pratique.id, ...pontsResolution(win, () => pratique.id),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'),
         calculerDetailsNoteFinale: () => null, compterEvaluationsEcarteesDeLaNote: fwd('compterEvaluationsEcarteesDeLaNote') };
     chargerScript('js/pratiques/pratique-configurable.js', globaux, win);

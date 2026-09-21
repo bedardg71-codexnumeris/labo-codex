@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 // SENTINELLE #394 — Réunification des DEUX systèmes de calcul STD (décision D1,
 // Grégoire, 5 août 2026). Avant : l'instance registre (PratiquePANStandards)
@@ -86,7 +87,7 @@ function chargerChaine(store) {
         db, cle, obtenirDonneesSelonMode,
         estEtudiantExclu: () => false,
         obtenirTypePratiqueActive: () => 'standards',
-        obtenirPratiqueActiveGroupeCours: () => 'standards',
+        obtenirPratiqueActiveGroupeCours: () => 'standards', ...pontsResolution(win, () => 'standards'),
         obtenirPratiqueParId: (...a) => win.obtenirPratiqueParId(...a),
         obtenirConfigPratiqueActive: (...a) => win.obtenirConfigPratiqueActive(...a),
         calculerDetailsNoteFinale: (...a) => win.calculerDetailsNoteFinale(...a)

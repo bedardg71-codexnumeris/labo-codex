@@ -23,6 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { chargerAvecInterne, fauxDocument, dbBanc } from './_helpers/bac-suivi.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MESURES = {};
@@ -210,7 +211,7 @@ function monter(jeu, opts = {}) {
         // (absent = la question est fermée sans choix : rien n'est adopté).
         uiDialogues: { demanderChoix: async () => (opts.echelleAdoption || null) },
         resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); },
-        obtenirPratiqueActiveGroupeCours: () => (store.test_groupesCours[0].pratiqueId || null),
+        obtenirPratiqueActiveGroupeCours: () => (store.test_groupesCours[0].pratiqueId || null), ...pontsResolution(win, () => (store.test_groupesCours[0].pratiqueId || null)),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'), normaliserIdPratique: fwd('normaliserIdPratique'),
         obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'), calculerNoteAvecCategories: fwd('calculerNoteAvecCategories'),
         calculerDetailsNoteFinale: fwd('calculerDetailsNoteFinale'), calculerEtStockerIndicesCP: fwd('calculerEtStockerIndicesCP'), simulerIndices: fwd('simulerIndices'),
@@ -577,11 +578,18 @@ describe('D · appliquer une pratique au groupe-cours, en changer, la retirer', 
         noter('D1', journal);
         expect(journal[0].ecritParLeGeste).toEqual(expect.arrayContaining(['test_groupesCours', 'groupeCoursActif']));
         expect(journal[0].riche).toBe(75.7);
-        expect(journal[1].indicesAvantRecalcul).toBe(76);     // l'indice de STD survit au changement de pratique jusqu'au recalcul
+        // ↻ Lot N1a (21 sept. 2026, #710 ajout D-1) : `changerPratiqueActive` recalcule les indices — l'indice suit la
+        // pratique qu'on vient d'assigner (avant : 76, celui de STD, survivait au changement jusqu'au premier recalcul).
+        expect(journal[1].indicesAvantRecalcul).toBe(85);
         // OBTENU : 85, pas 87,43 — sous SOM, les six artefacts STD (pondération 0) pèsent chacun 1 (« ponderation || 1 »,
         // skill §10) et entrent dans la moyenne avec les productions sommatives : (84×40 + 90×60 + 70 + 85+60+78+70+78 + 82×1)/…
         expect(journal[1].indicesApresRecalcul).toBe(85);
         expect(journal[2].riche).toBe(75.7);
+        // ↻ Lot N1a : RETIRER la pratique rend « non constructible », à l'indice comme au profil (avant : un 76
+        // « constructible » restait à l'indice pendant que le profil disait qu'aucune pratique n'était assignée).
+        expect(journal[3].indicesApresRecalcul).toBe(0);
+        expect(journal[3].noteConstructible).toBe(false);
+        expect(journal[3].riche.erreur).toMatch(/Aucune pratique de notation n'est assignée/);
     });
 });
 

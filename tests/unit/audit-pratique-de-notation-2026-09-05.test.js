@@ -303,7 +303,7 @@ function monter(jeu, opts = {}) {
         travauxStockage,
         resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); },
         // Aiguillages vers les exports réels, résolus à l'appel (les scripts se référencent par nom nu).
-        obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours'),
+        obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours'), lirePointeurPratiqueGroupeCours: fwd('lirePointeurPratiqueGroupeCours'),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'), normaliserIdPratique: fwd('normaliserIdPratique'),
         obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'), calculerNoteAvecCategories: fwd('calculerNoteAvecCategories'),
         calculerDetailsNoteFinale: fwd('calculerDetailsNoteFinale'), calculerEtStockerIndicesCP: fwd('calculerEtStockerIndicesCP'), simulerIndices: fwd('simulerIndices'),
@@ -352,6 +352,7 @@ function monter(jeu, opts = {}) {
     const winModes = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test' };
     chargerScript('js/modes.js', Object.assign({}, globaux, { document }), winModes);
     win.obtenirPratiqueActiveGroupeCours = winModes.obtenirPratiqueActiveGroupeCours;
+    win.lirePointeurPratiqueGroupeCours = winModes.lirePointeurPratiqueGroupeCours;
 
     return { win, store, ecritures, notifs, confirmations, elements, fichiers, db };
 }
@@ -403,9 +404,17 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         b.win.calculerEtStockerIndicesCP(); const p = b.win.calculerEtStockerIndicesCP()[DA.SOM].actuel;
         const details = b.win.calculerDetailsNoteFinale(DA.SOM);
         noter('A1', { actif, type, indicesP: p.P, noteConstructible: p.noteConstructible, erreurProfil: details && details.erreur });
+        // ↻ Lot N1a (21 sept. 2026, #710 — décision de Grégoire : sans pratique assignée, aucune note). Les deux replis
+        // de calcul sont retirés : l'indice dit « non constructible » (avant : P 87, par la sommative de repli), comme le
+        // profil. `obtenirPratiqueActiveGroupeCours` garde « sommative » pour les lecteurs d'écran jusqu'au lot N1b ; ce
+        // qui calcule lit le pointeur SANS repli.
         expect(actif).toBe('sommative');
+        expect(b.win.lirePointeurPratiqueGroupeCours()).toBeNull();
+        expect(b.win.resoudrePratiqueActive().etat).toBe('aucune');
         expect(type).toBeNull();
-        expect(p.P).toBe(87);
+        expect(p.P).toBe(0);
+        expect(p.noteConstructible).toBe(false);
+        expect(p.pratique).toBeNull();
         expect(details.erreur).toMatch(/[Aa]ucune pratique de notation n'est assignée/);   // avant #762 : « introuvable dans la bibliothèque »
     });
 
@@ -441,9 +450,14 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         const ligne = b.win._exportResultats.construireLignesSynthese([ETUDIANTS[1]], { pratiqueId: 'std-config' }, b.win.simulerIndices)[0];
         noter('A3', { code: inst && inst.obtenirCode(), type: b.win.obtenirTypePratiqueActive(), erreurProfil: details.erreur, simule: { P: simule.P, noteConstructible: simule.noteConstructible }, export: [ligne[8], ligne[9]] });
         expect(inst.obtenirCode()).toBe('STD');
-        expect(details.erreur).toMatch(/configuration de portfolio/);
-        expect(simule.noteConstructible).toBe(false);
-        expect(ligne[9]).toBe('non constructible');
+        // ↻ Lot N1a (21 sept. 2026, #712) : la configuration se lit `.configuration` PUIS `.config`, comme
+        // `construireConfigComplete`. La pratique importée calcule : (85+78+78+70)/4 = 77,75 → 46,65 + 32,8 = 79,45.
+        // Avant : « configuration de portfolio absente », non constructible, export vide.
+        expect(details.erreur == null).toBe(true);
+        expect(r2(details.noteFinale)).toBe(79.45);
+        expect(simule.noteConstructible).toBe(true);
+        expect(simule.P).toBe(79);
+        expect(ligne[8]).toBe(79);
     });
 
     it('A4 · un pointeur « pan-specifications » (ou « specifications ») résout vers l\'instance registre SPE, jamais configurée : 50 % pour tout le monde', () => {
@@ -454,10 +468,118 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         b.win.calculerEtStockerIndicesCP(); const p = b.win.calculerEtStockerIndicesCP()[DA.SPE].actuel;
         const bon = b.win.obtenirPratiqueParId('spe-banc');
         noter('A4', { instance: inst.obtenirId(), registreP: inst.calculerPerformance(DA.SPE), indicesP: p.P, noteConstructible: p.noteConstructible, configurableP: bon.calculerPerformance(DA.SPE) });
-        expect(inst.calculerPerformance(DA.SPE)).toBe(0.5);
-        expect(p.P).toBe(50);
-        expect(p.noteConstructible).toBe(true);
+        expect(inst.calculerPerformance(DA.SPE)).toBe(0.5);   // l'instance du registre, interrogée À LA MAIN, rend toujours son 50 (plancher : lot N4)
+        // ↻ Lot N1a (21 sept. 2026, #713 volet registre) : le pointeur nu ne mène à aucune pratique de la bibliothèque →
+        // « introuvable », non constructible. Avant : P 50 « constructible » pour tout le monde.
+        expect(b.win.resoudrePratiqueActive().etat).toBe('introuvable');
+        expect(p.P).toBe(0);
+        expect(p.noteConstructible).toBe(false);
         expect(bon.calculerPerformance(DA.SPE)).toBe(0.7);
+    });
+});
+
+/* =============================================================================================
+   N1a · LA PRATIQUE ACTIVE SE TROUVE D'UNE SEULE FAÇON (lot N1a, 21 sept. 2026 — #710, #711, #712, #713, #719)
+   Six montages sur le vrai moteur. Pour chacun, QUATRE SURFACES doivent dire la même chose : l'indice stocké
+   (ce que lit le tableau de bord), le profil (chemin riche), l'export des résultats (par l'id que rend
+   `obtenirIdPratiqueActive`, comme `_collecterContexteActif`), et le diagnostic du profil.
+   La parité « pratique assignée normale, notes identiques à avant » est tenue par B1 à B4, dont aucune
+   valeur n'a été retouchée par ce lot.
+   ============================================================================================= */
+function quatreSurfaces(b, da) {
+    const { win } = b;
+    win.calculerEtStockerIndicesCP();
+    const indice = win.calculerEtStockerIndicesCP()[da].actuel;
+    const details = win.calculerDetailsNoteFinale(da);
+    const idExport = win.obtenirIdPratiqueActive();
+    const ligne = win._exportResultats.construireLignesSynthese([ETUDIANTS.find(e => e.da === da)], { pratiqueId: idExport }, win.simulerIndices)[0];
+    const actuelle = win.obtenirPratiqueActuelle();
+    return {
+        etat: win.resoudrePratiqueActive().etat,
+        indice: { P: indice.P, noteConstructible: indice.noteConstructible, pratique: indice.pratique },
+        profil: details ? (details.erreur ? { erreur: details.erreur, pratique: details.pratique } : r2(details.noteFinale)) : null,
+        export: { id: idExport, note: ligne[8], statut: ligne[9] },
+        diagnostic: win._diagnostiquerNoteNonCalculable(),
+        pratiqueActuelle: actuelle ? actuelle.obtenirId() : null
+    };
+}
+const AUCUNE = /Aucune pratique de notation n'est assignée à ce groupe-cours/;
+const INTROUVABLE = /introuvable dans la bibliothèque/;
+
+describe('N1a · la pratique active se trouve d\'une seule façon', () => {
+    it('N1 · SANS pratique assignée : « non constructible » partout, et le diagnostic dit « Aucune pratique… » (#710)', () => {
+        const m = noter('N1', quatreSurfaces(monter(jeuSOM(), { retirerPratiqueId: true }), DA.SOM));
+        expect(m.etat).toBe('aucune');
+        expect(m.indice).toEqual({ P: 0, noteConstructible: false, pratique: null });   // avant : P 87, « constructible », par la sommative de repli
+        expect(m.profil.erreur).toMatch(AUCUNE);
+        expect(m.profil.pratique).toBeNull();                                           // avant : étiqueté « PAN-Standards », par PRATIQUE_DEFAUT
+        expect(m.export).toEqual({ id: null, note: '', statut: 'non constructible' });
+        expect(m.diagnostic).toMatch(AUCUNE);
+        expect(m.pratiqueActuelle).toBeNull();                                          // avant : une PratiquePANStandards fabriquée
+    });
+
+    it('N2 · un id assigné qui ne mène à RIEN (pratique supprimée) : « non constructible » partout, diagnostic « introuvable »', () => {
+        const m = noter('N2', quatreSurfaces(monter(jeuSOM(), { pratiqueId: 'pratique-supprimee' }), DA.SOM));
+        expect(m.etat).toBe('introuvable');
+        expect(m.indice).toEqual({ P: 0, noteConstructible: false, pratique: null });
+        expect(m.profil.erreur).toMatch(INTROUVABLE);
+        expect(m.export).toEqual({ id: null, note: '', statut: 'non constructible' });
+        expect(m.diagnostic).toMatch(INTROUVABLE);
+        expect(m.pratiqueActuelle).toBeNull();
+    });
+
+    it('N3 · #711 — le pointeur ancien « pan-standards » mène, normalisé, à la pratique rangée sous « standards » : SA configuration (N = 4) calcule, 79,45 partout', () => {
+        // À la main (A2) : N = 4 → (85+78+78+70)/4 = 77,75 → 46,65 + 32,8 = 79,45. Les défauts du registre (3 / meilleurs) donnaient 81,0.
+        const jeu = jeuSTD();
+        jeu.pratiques = jeu.pratiques.map(p => Object.assign(p, { id: 'standards' }));
+        const b = monter(jeu, { pratiqueId: 'pan-standards' });
+        const m = noter('N3', quatreSurfaces(b, DA.STD));
+        expect(m.etat).toBe('ok');
+        expect(m.profil).toBe(79.45);
+        expect(m.indice).toEqual({ P: 79, noteConstructible: true, pratique: 'standards' });
+        expect(m.export).toEqual({ id: 'standards', note: 79, statut: 'final' });   // même statut que B2 (pratique assignée par son id)
+        expect(b.store.test_groupesCours[0].pratiqueId).toBe('pan-standards');          // lecture tolérante : le pointeur n'est PAS réécrit
+    });
+
+    it('N4 · #712 — la pratique rangée sous `.config` seul calcule : 79,45 à l\'indice, au profil et à l\'export', () => {
+        const jeu = jeuSTD();
+        jeu.pratiques = [{ id: 'std-config', nom: 'STD (.config)', config: { id: 'std-config', nom: 'STD (.config)', type: 'standards',
+            calcul_note: { methode: 'conversion_niveaux' }, echelle: { type: 'niveaux', niveaux: clone(E1.niveaux) },
+            portfolio: { nombreARetenir: 4, minimumCompletion: 1, methodeSelection: 'meilleurs' } } }];
+        jeu.pratiqueId = 'std-config';
+        const m = noter('N4', quatreSurfaces(monter(jeu), DA.STD));
+        expect(m.profil).toBe(79.45);
+        expect(m.indice).toEqual({ P: 79, noteConstructible: true, pratique: 'std-config' });
+        expect(m.export.note).toBe(79);
+    });
+
+    it('N5 · #713 — un pointeur « specifications » (ou « pan-specifications ») nu : « introuvable », non constructible partout ; plus de 50 % pour tout le monde', () => {
+        for (const pointeur of ['specifications', 'pan-specifications']) {
+            const m = noter('N5-' + pointeur, quatreSurfaces(monter(jeuSPE(), { pratiqueId: pointeur }), DA.SPE));
+            expect(m.etat, pointeur).toBe('introuvable');
+            expect(m.indice, pointeur).toEqual({ P: 0, noteConstructible: false, pratique: null });
+            expect(m.profil.erreur, pointeur).toMatch(INTROUVABLE);
+            expect(m.export, pointeur).toEqual({ id: null, note: '', statut: 'non constructible' });
+        }
+    });
+
+    it('N6 · #719 — dénotation active, jugement 78 : 78 à l\'indice et à l\'export, et AUCUNE lettre (avant : « M », par une Standards fabriquée)', () => {
+        const b = monter(jeuDEN());
+        const m = noter('N6', quatreSurfaces(b, DA.DEN));
+        expect(m.indice).toEqual({ P: 78, noteConstructible: true, pratique: 'den-banc' });
+        expect(m.profil).toBeNull();                       // pas de note « portfolio » pour une dénotation : le profil rend sa carte de jugement
+        expect(m.export).toEqual({ id: 'den-banc', note: 78, statut: 'final' });
+        expect(m.pratiqueActuelle).toBe('den-banc');
+        const lettre = b.win.lireNiveauNoteGlobale(DA.DEN, 78);
+        expect(lettre.niveau).toBeNull();
+        expect(lettre.raison).toBe('note-chiffree');
+    });
+
+    it('N7 · le pointeur « sommative » nu reste une pratique assignée (la seule famille du registre sans configuration) : 87 partout, comme avant', () => {
+        const m = noter('N7', quatreSurfaces(monter(jeuSOM(), { pratiqueId: 'sommative' }), DA.SOM));
+        expect(m.etat).toBe('ok');
+        expect(m.indice).toEqual({ P: 87, noteConstructible: true, pratique: 'sommative' });
+        expect(m.export.note).toBe(87);
     });
 });
 
@@ -555,8 +677,9 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(m.simule).toEqual({ P: 78, noteFinale: null, noteConstructible: true });
         expect(m.indicesPasse1).toEqual({ P: 78, noteConstructible: true });   // DEN court-circuite le cache : juste dès la 1re passe
         expect(m.export).toEqual({ note: 78, statut: 'final' });
-        // ⚠ le niveau global vient de la règle STD (repli de obtenirPratiqueActuelle) — voir E5
-        expect(m.profilNiveau).toBe('M');
+        // ↻ Lot N1a (21 sept. 2026, #719) : plus de lettre « M » qu'aucune règle de la dénotation ne donne — voir E5.
+        expect(m.profilNiveau).toBeNull();
+        expect(m.profilRaison).toBe('note-chiffree');
         const sansEvals = monter(jeuDEN({ sansEvaluations: true }));
         expect(sansEvals.win.obtenirPratiqueParId('den-banc').calculerPerformance(DA.DEN)).toBe(0.78);
     });
@@ -811,8 +934,11 @@ describe('E · dans quoi la note du cours se lit', () => {
         const l = b.win.lireNiveauNoteGlobale(DA.DEN, 78);
         const propre = b.win.obtenirPratiqueParId('den-banc').obtenirEchelleNoteGlobale(DA.DEN);
         noter('E5', { classeRepli: actuelle.constructor.name, idRepli: actuelle.obtenirId(), niveau: l.niveau && l.niveau.code, raisonConfigurable: propre.raison });
-        expect(actuelle.obtenirId()).toBe('standards');
-        expect(l.niveau.code).toBe('M');
+        // ↻ Lot N1a (21 sept. 2026, #719) : c'est la pratique ASSIGNÉE qui répond, résolue par son id. Avant : une
+        // PratiquePANStandards fabriquée (id « standards »), et le jugement 78 se lisait « M ».
+        expect(actuelle.obtenirId()).toBe('den-banc');
+        expect(l.niveau).toBeNull();
+        expect(l.raison).toBe('note-chiffree');
         expect(propre.raison).toBe('note-chiffree');
     });
     it('E6 · STD configurable dont l\'echelleId ne se résout pas (#590) : construireConfigComplete pose une IDME codée en dur (50/65/80/95) — sans bornes, elle ne situe rien ; le calcul, lui, n\'y touche pas', () => {

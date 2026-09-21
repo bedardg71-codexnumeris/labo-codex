@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 // SENTINELLE #399 — lot de gardes calendrier/calcul (rapport L6+L7+L8 +
 // approfondissement #393). Quatre gardes, chacune adossée à la sonde chiffrée
@@ -129,10 +130,14 @@ describe('#399 · L6 — pondérations 0/0 : erreur de configuration, jamais NaN
             db, cle,
             obtenirDonneesSelonMode: (k) => (k === 'productions' ? productions : (k === 'evaluationsSauvegardees' ? evals : [])),
             obtenirTypePratiqueActive: () => 'standards',
-            obtenirPratiqueActiveGroupeCours: () => 'standards',
+            obtenirPratiqueActiveGroupeCours: () => 'standards', ...pontsResolution(win, () => 'standards'),
             obtenirConfigPratiqueActive: () => store.pratiquesConfigurables[0].configuration,
             obtenirPratiqueParId: () => ({ obtenirCode: () => 'STD' })
         }, win);
+        // Lot N1a (21 sept. 2026) : la note passe par LA résolution du registre. Ce banc juge la garde 0/0,
+        // pas la résolution : elle est posée résolue, sur la même instance factice que ci-dessus.
+        win.resoudrePratiqueActive = () => ({ etat: 'ok', idBrut: 'standards', id: 'standards', donnees: store.pratiquesConfigurables[0],
+            configuration: store.pratiquesConfigurables[0].configuration, pratique: { obtenirCode: () => 'STD' } });
 
         const d = win.calculerDetailsNoteFinale('1234567');
         // Avant : noteFinale = NaN traversait la garde (erreur == null) et se stockait.

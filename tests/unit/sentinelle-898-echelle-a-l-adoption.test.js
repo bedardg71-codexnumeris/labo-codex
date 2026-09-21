@@ -22,6 +22,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -159,7 +160,7 @@ function monter(jeu, opts = {}) {
         confirm: () => true, alert() {}, genererIdUnique: (p) => p + 'NEUF' + (++compteurId),
         toggleDisplay() {}, setValeurChamp() {}, getValeurChamp: () => '', getCheckbox: () => false, setCheckbox() {},
         resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); },
-        obtenirPratiqueActiveGroupeCours: () => (store.test_groupesCours[0].pratiqueId || null)
+        obtenirPratiqueActiveGroupeCours: () => (store.test_groupesCours[0].pratiqueId || null), ...pontsResolution(win, () => (store.test_groupesCours[0].pratiqueId || null))
     };
     const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', '_exportResultats', 'modalitesEvaluation', 'profilActuelDA', 'etudiantsListeCache', 'PRATIQUE_DEFAUT',
         'wizardState', 'ETAPES_WIZARD', 'TYPE_BADGES', 'MODELES_PRATIQUES_PREDEFINIS', 'ConstructionAttributs'];

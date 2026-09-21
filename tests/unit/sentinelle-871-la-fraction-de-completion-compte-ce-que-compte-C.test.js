@@ -285,7 +285,13 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         // noté ou non : 9 artefacts + A10 (dû en 2027) + la terminale = 11. La sommative, elle, ne compte que les
         // productions déjà évaluées : 10. Un `obtenirDetailsCompletion` qui résoudrait TOUJOURS la sommative rendrait 8 / 10.
         const futur = { id: 'A10', titre: 'Artefact 10', description: 'Artefact 10', type: 'artefact-portfolio', ponderation: 0, dateEcheance: '2027-01-15', coursId: 'GC1' };
-        const { win } = banc(copies(), PRODUCTIONS.concat([futur]), 'standards');
+        const { win } = banc(copies(), PRODUCTIONS.concat([futur]));
+        // ↻ Lot N1a (21 sept. 2026) : un pointeur « standards » nu ne mène plus à aucune pratique (aucun repli, #711).
+        // Le témoin reste l'instance Standards du registre — la seule dont la règle de complétion diffère de la
+        // sommative —, posée comme pratique RÉSOLUE : ce que l'essai verrouille, c'est que le détail suit la
+        // pratique que rend LA résolution, pas une sommative câblée en dur.
+        const standardsDuRegistre = win.obtenirPratiqueParId('standards');
+        win.resoudrePratiqueActive = () => ({ etat: 'ok', idBrut: 'standards', id: 'standards', donnees: null, configuration: null, pratique: standardsDuRegistre });
         expect(compte(win.obtenirDetailsCompletion(DA.ASSIDU))).toEqual({ remis: 8, total: 11 });
         expect(compte(new win.PratiqueSommative().calculerDetailsCompletion(DA.ASSIDU))).toEqual({ remis: 8, total: 10 });   // le témoin : les deux règles diffèrent bien
         const s = sites(win, DA.ASSIDU);
