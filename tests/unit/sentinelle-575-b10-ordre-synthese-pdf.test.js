@@ -281,7 +281,7 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         expect(bilan.recurrents.force).toBe('');
     });
 
-    it('« maîtrisés DEPUIS PLUS D\'UN ARTEFACT » lit l\'historique dans SON échelle', () => {
+    it('« maîtrisés DEPUIS PLUS D\'UNE PRODUCTION » lit l\'historique dans SON échelle', () => {
         // ⚠ Cas trouvé par le BREAK-TEST : lire l'évaluation précédente dans
         // l'échelle COURANTE laissait la sentinelle verte. Ici, « X » est acquis
         // sous l'échelle indulgente et ne l'est PAS sous l'exigeante — l'élève a
@@ -298,7 +298,9 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         expect(bilan.concentration.tousMaitrises).toBe(true);
         // Lu dans l'échelle exigeante, le passé n'était PAS maîtrisé.
         expect(bilan.concentration.messageGlobal).toContain('Continue sur cette lancée');
-        expect(bilan.concentration.messageGlobal).not.toContain("depuis plus d'un artefact");
+        // ⚠ F4-1 — « d'un artefact » est devenu « d'une production » : l'ancienne
+        // assertion serait restée verte par vacuité, quelle que soit la branche.
+        expect(bilan.concentration.messageGlobal).not.toContain("depuis plus d'");
     });
 
     it('« tu as progressé » lit l\'état ANTÉRIEUR dans l\'échelle de l\'époque', () => {
@@ -532,12 +534,15 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
 
     // ── 4. LE NIVEAU VISÉ, NOMMÉ PAR L'ÉCHELLE ───────────────────────────────
 
-    it('« étendre tes compétences vers… » nomme le niveau LE PLUS HAUT de l\'échelle', () => {
-        // Avant : « vers le niveau É (transfert à d'autres contextes) », écrit en
-        // dur — le dernier niveau de l'échelle de Grégoire, dans le PDF d'un·e
-        // autre. Ici, le plus haut de `ECHELLE_RENVERSEE` est « I / Intégré ».
-        // ⚠ « tous maîtrisés » exige maintenant que TOUTES les zones soient
-        // ACQUISES : seul « I » l'est dans cette échelle.
+    it('« maîtrisés depuis plus d\'une production » ne nomme AUCUN niveau', () => {
+        // Avant #575 : « vers le niveau É (transfert à d'autres contextes) », écrit
+        // en dur — le dernier niveau de l'échelle de Grégoire, dans le PDF d'un·e
+        // autre. #575 B10 l'avait dérivé du sommet de l'échelle (« vers le niveau
+        // Intégré ») ; F4-1 (21 sept. 2026) retire la mention : la phrase validée
+        // par Grégoire ne nomme plus de niveau du tout. Texte exact et jumelage
+        // avec l'écran : `sentinelle-f4-1-bilan-mots-eleve`.
+        // ⚠ « tous maîtrisés » exige que TOUTES les zones soient ACQUISES : seul
+        // « I » l'est dans cette échelle.
         const anterieure = evaluation({
             id: 'EV_ANCIENNE', echelleId: 'ECH_RENV', dateEvaluation: '2026-04-01',
             criteres: [critere('Analyse', 'I'), critere('Plausibilite', 'I')]
@@ -549,7 +554,9 @@ describe('#575 B10 · l\'ordre du bilan remis à l\'élève vient de SON échell
         }));
 
         expect(bilan.concentration.tousMaitrises).toBe(true);
-        expect(bilan.concentration.messageGlobal).toContain('vers le niveau Intégré');
+        expect(bilan.concentration.messageGlobal).toContain("depuis plus d'une production");
+        expect(bilan.concentration.messageGlobal).not.toContain('Intégré');
+        expect(bilan.concentration.messageGlobal).not.toContain('vers le niveau');
         expect(bilan.concentration.messageGlobal).not.toContain('niveau É');
         expect(bilan.concentration.messageGlobal).not.toContain('transfert à d\'autres contextes');
     });

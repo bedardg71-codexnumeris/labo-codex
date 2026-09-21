@@ -1,36 +1,37 @@
-# Consigne du jour – un critère « Français… » ne disparaît plus du diagnostic (#553)
+# Consigne suivante – le bilan de l'élève ne parle plus d'« artefact » ni du « niveau É » (F4-1 de l'audit du 21 sept.)
 
-> Écrite le 21 septembre 2026, 11 h 25 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (audit « code en dur », `e5e3e4a2`, commitée, PAS poussée) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-audit-code-en-dur.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Décision de Grégoire, 21 sept. à 11 h 25** : ce lot est le suivant (« oui » à la recommandation de Cowork). Le rapport d'audit part en ligne avec lui.
+> Écrite le 21 septembre 2026, 11 h 40 (Toronto), par Cowork, **pendant** l'exécution de la consigne #553. **À ne lancer qu'une fois #553 poussée** (une seule session écrit dans `js/`). Au lancement : archive la consigne #553 sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-21-553-francais-diagnostic.md` et renomme celle-ci en `CONSIGNE-DU-JOUR.md`.
+> **Texte validé par Grégoire le 21 sept. à 11 h 40** (« oui » à la proposition de Cowork). Mots d'élève : tels quels.
 
-## 0 · Conditions de départ – mesure-les
+## 0 · Conditions de départ
 
-- `git log --oneline -3 main` : `e5e3e4a2` (audit) sur `1defd61c` ; `origin/main` = `1defd61c`. Sinon, arrête-toi et dis ce que tu vois.
-- Aucune autre session n'écrit, aucun `pousser.sh` ; arbre propre hors des non-suivis anciens, de `RELAIS.md` (ajout de Cowork) et des fichiers de Cowork (§5).
+`git log --oneline -1 origin/main` porte 1.152.3 (`dde51a01` ou un commit de journal après). Sinon, arrête-toi. Aucune autre session n'écrit.
 
-## 1 · Le défaut (F3-1 du rapport, confirmé par Cowork à la lecture)
+## 1 · Ce qui change – deux sites jumeaux, un seul texte
 
-`profil-etudiant-calculs.js:926` range la moyenne d'un critère dont le nom normalisé commence par `francais` sous la clé `francais` ; `diagnostiquerForcesChallenges` (≈ l. 1300) cherche le nom normalisé entier (`francaisecrit`), ne trouve rien, **écarte le critère**. Deux critères « Français… » fusionnent en une clé, le dernier écrase. Neuf sites (rapport, F3-1, « Ampleur »).
+Mesuré par Cowork à 11 h 40 :
+- `js/evaluation-retroaction.js` ≈ l. 971 (bilan de l'évaluation) ;
+- `js/synthese-retroaction-data.js` ≈ l. 832-836 (synthèse du PDF), qui dérive `versLeSommet` de `niveauLePlusHaut`.
 
-## 2 · Ce qui est attendu
+Les deux rendent, quand tous les critères sont maîtrisés deux fois de suite, **exactement** :
+> Tous les critères sont maîtrisés depuis plus d'une production. Tu peux aider tes collègues : c'est une excellente façon de transférer tes compétences à d'autres contextes.
 
-- **Une règle** : la clé d'un critère est son nom normalisé (minuscules, sans accents, sans espaces), **partout, sans rabotage**. Retire le `startsWith('francais') → 'francais'` aux neuf sites, et `NOM_CRITERE_LANGUE = 'francais'` (`pratique-pan-standards.js`) s'il sert à apparier un critère par son nom – **remesure ce qu'il fait avant d'y toucher** ; s'il porte un sens pédagogique (le critère de langue a un rôle à part dans la note Standards), arrête-toi sur ce point et dis-le : ça remonte à Grégoire.
-- **Stock, lu avec tolérance, jamais réécrit** : les interventions déjà enregistrées portent `snapshotAvant[da].criteres` sous la clé `francais` (`interventions.js` ≈ l. 1470-1484). Le bilan avant/après doit continuer de les lire : si la clé exacte manque et qu'une clé `francais` existe, et qu'**un seul** critère de la grille commence par `francais`, lire celle-là. Deux candidats : ne rien apparier et le dire au récit (pas de valeur inventée). Rien n'est écrit dans les données (limite de Grégoire du 20 sept.).
-- **Hors du lot, retenu par Cowork (technique)** : la garde du run planifié GitHub (`.github/workflows/tests.yml` ≈ l. 296, l'apostrophe de `${raison:-la garde n'a rien rendu : on juge}`) : corrige-la pour qu'elle ne casse plus le shell (mets le texte de repli dans une variable, ou échappe-le). Le run manuel de vérification n'est pas demandé.
-- Aucun mot à l'écran ne change. Le nom affiché d'un critère reste son nom.
+- Apostrophes : suis celles de chaque fichier (typographiques dans le premier, droites dans le second) ; le deux-points précédé d'une espace comme ailleurs dans le fichier.
+- `versLeSommet` et son appel à `niveauLePlusHaut` deviennent sans usage dans ce message : retire-les s'ils ne servent plus nulle part (zéro-dette), dis-le.
+- Le message « Tous les critères sont maîtrisés. Continue sur cette lancée ! » ne change pas.
+- **Repli de titre « Artefact »** que le rapport situe près de `evaluation-retroaction.js:1212` : remesure. S'il est lu par l'élève, il devient « Production » (règle de Grégoire du 21 sept. : « productions étudiantes » plutôt qu'« artefacts » hors de son cours) ; s'il n'est pas lu par l'élève, laisse-le et dis-le.
+- **Aucun autre mot** : si tu trouves d'autres « artefact » ou « niveau É » lus par l'élève, **nomme-les dans ton rapport sans les changer** (ils remontent à Grégoire).
 
-## 3 · Preuves attendues
+## 2 · Preuves
 
-- Sentinelle sur le **vrai** code, les trois cas du rapport : chimie (« Qualité de la langue », inchangé) ; « Français oral » 10 % et « Français écrit » 90 % (deux valeurs distinctes, le 10 % est défi) ; grille de Grégoire, « Français écrit » 10 % (**défi principal : Français écrit**, et la cible d'intervention le vise).
-- Stock : une intervention enregistrée avec la clé `francais` garde son bilan avant/après ; le cas à deux candidats n'apparie rien.
-- Mutations, une clause à la fois, toutes rouges : un rabotage remis à un seul site ; la lecture tolérante retirée ; la tolérance qui apparie malgré deux candidats.
-- Vitest complet vert. **Release : patch.** **Phrase de « Nouvelles » à PROPOSER à Grégoire.** Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire.
+- Le vrai bilan et la vraie synthèse rendus pour un élève maîtrisé deux fois de suite, sous **deux échelles** (IDME, et une échelle à quatre niveaux sans É) : le texte exact dans les deux, aucun « É », aucun « artefact ».
+- Mutations, une clause à la fois, rouges : l'ancien texte remis dans un seul des deux sites ; le tiret cadratin remis ; « artefact » remis.
+- Les anciennes « Nouvelles » gardent leurs mots. Vitest complet vert. **Release : patch.** **Phrase de « Nouvelles » à PROPOSER à Grégoire.** Relecture croisée par Cowork avant le verdict et le push ; push sur son mot.
 
-## 4 · Ce que Grégoire verra (en tête d'`OU-EN-EST-ON.md`)
+## 3 · Ce que Grégoire verra
 
-Profil d'un élève › forces et défis : un critère nommé « Français… » y figure de nouveau ; s'il est le plus faible, il devient le défi principal et la cible d'intervention. Deux critères de français (oral, écrit) ont chacun leur valeur. Les interventions déjà enregistrées gardent leur bilan.
+Rétroaction et PDF d'un élève qui a tout maîtrisé deux fois de suite : la phrase ci-dessus, sans « artefact » ni « niveau É ».
 
-## 5 · Fichiers de Cowork à commiter avec ce lot
+## 4 · Fichiers de Cowork à commiter avec ce lot
 
-`plans de travail/CONSIGNE-DU-JOUR.md` (celle-ci), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-audit-code-en-dur.md`, `RELAIS.md` (ajout de Cowork : relecture de l'audit).
+Cette consigne (renommée), l'archive de celle de #553, `plans de travail/CONSIGNE-COMPLEMENT-1152-3-francais.md` et `plans de travail/FILE-DES-LOTS.md` (retire-en le lot 1 une fois poussé).

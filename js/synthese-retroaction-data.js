@@ -678,36 +678,6 @@
     }
 
     /**
-     * Le niveau le plus haut de l'échelle de cette évaluation — ou `null`.
-     *
-     * ⮕ #575 B10, trouvé en chemin. Le message « tous les critères sont
-     * maîtrisés depuis plus d'un artefact » nommait le niveau visé EN DUR :
-     * « vers le niveau É (transfert à d'autres contextes) ». C'était le nom et
-     * la description SOLO du dernier niveau de l'échelle de Grégoire, écrits
-     * dans un PDF remis aux élèves de qui que ce soit — le défaut même que la
-     * sentinelle jumelle interdit déjà pour la légende et la jauge.
-     *
-     * Le « plus haut » se lit par le rang, donc par les plages : c'est une
-     * dérivation, pas une convention. Sans échelle résolue, `null` — la phrase
-     * s'arrête alors avant la mention, plutôt que de nommer un niveau inventé.
-     *
-     * @returns {Object|null} `{ label, solo }` — `solo` vide si non renseigné.
-     */
-    function niveauLePlusHaut(echelleId, echelle) {
-        const ordonnes = (typeof niveauxOrdonnesDeLEchelle === 'function')
-            ? niveauxOrdonnesDeLEchelle(echelleId || null)
-            : [];
-        if (!ordonnes.length) return null;
-        const sommet = ordonnes[ordonnes.length - 1];
-        const dansEchelle = Array.isArray(echelle)
-            ? echelle.find(n => n.code === sommet.code)
-            : null;
-        const label = sommet.nom || (dansEchelle && dansEchelle.label) || sommet.code;
-        if (!label) return null;
-        return { label: label, solo: (dansEchelle && dansEchelle.solo) || '' };
-    }
-
-    /**
      * La zone d'un code — `'priorite'`, `'signale'`, `'acquis'`, ou `null`.
      *
      * ⮕ #555 lot 2, et c'est la fin de B10b. Ce module testait les codes EN
@@ -828,12 +798,14 @@
                 const maitriseLongtemps = historique[0] && Array.isArray(historique[0].criteres) &&
                     historique[0].criteres.length > 0 &&
                     historique[0].criteres.every(c => zonePrecedente(c.niveauSelectionne) === 'acquis');
-                const sommet = niveauLePlusHaut(evaluation.echelleId, echelle);
-                const versLeSommet = sommet
-                    ? ` — c'est une excellente façon d'étendre tes compétences vers le niveau ${sommet.label}${sommet.solo ? ` (${sommet.solo})` : ''}.`
-                    : '.';
+                // ⚠ F4-1 (audit du 21 sept. 2026) — la phrase disait « depuis plus
+                // d'un artefact » et nommait le sommet de l'échelle (« vers le niveau
+                // … ») : le mot du cours de Grégoire, et un niveau que l'élève d'un·e
+                // autre ne vise pas forcément. Texte validé par Grégoire ; MÊMES MOTS
+                // que le bilan de l'app (`evaluation-retroaction.js`), à l'apostrophe
+                // près. Le lecteur du « niveau le plus haut » est parti avec elle.
                 messageGlobal = maitriseLongtemps
-                    ? `Tous les critères sont maîtrisés depuis plus d'un artefact. Tu peux aider tes collègues${versLeSommet}`
+                    ? "Tous les critères sont maîtrisés depuis plus d'une production. Tu peux aider tes collègues : c'est une excellente façon de transférer tes compétences à d'autres contextes."
                     : 'Tous les critères sont maîtrisés. Continue sur cette lancée !';
             }
         }
@@ -1209,7 +1181,7 @@
         const decrireRetenu = (art) => {
             const prod = productions.find(p => p.id === art.productionId);
             return {
-                titre:     prod ? (prod.titre || 'Artefact') : 'Artefact',
+                titre:     prod ? (prod.titre || 'Production') : 'Production',
                 niveau:    art.niveau || '?',
                 note:      (typeof art.note === 'number') ? art.note : null,
                 activite:  obtenirActivite(art.productionId),
@@ -1249,7 +1221,7 @@
             .filter(p => !idsEvalues.has(p.id))
             .filter(p => !(estHybride && p.categorie === 'obligatoire'))
             .map(prod => ({
-                titre:    prod.titre || 'Artefact',
+                titre:    prod.titre || 'Production',
                 activite: prod.activiteApprentissage || prod.description || '',
                 echeance: obtenirEcheance(prod)
             }));
@@ -1261,7 +1233,7 @@
             ? artefactsPortfolio.filter(p => p.categorie === 'obligatoire').map(prod => {
                 const evalObl = evaluations.find(e => e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null);
                 return {
-                    titre:    prod.titre || 'Artefact',
+                    titre:    prod.titre || 'Production',
                     niveau:   evalObl ? (evalObl.niveauFinal || null) : null,
                     note:     evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
                     activite: prod.activiteApprentissage || prod.description || '',

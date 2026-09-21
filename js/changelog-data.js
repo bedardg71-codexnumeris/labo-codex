@@ -34,7 +34,9 @@
                 // 1.152.2 (#715, #723) — phrase VALIDÉE par Grégoire le 21 sept. 2026, telle quelle.
                 'Une pratique Standards réglée sur «&nbsp;tous&nbsp;» compte maintenant toutes les productions évaluées, au profil comme à l\'export&nbsp;: le profil s\'arrêtait au nombre à retenir. Le fichier des résultats finaux titre sa colonne «&nbsp;Note finale (arrondie à l\'entier)&nbsp;»&nbsp;; les notes elles-mêmes ne changent pas.',
                 // 1.152.3 (#553) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
-                'Profil d\'un·e élève › forces et défis&nbsp;: un critère dont le nom commence par «&nbsp;Français&nbsp;» («&nbsp;Français écrit&nbsp;», par exemple) y figure de nouveau&nbsp;; s\'il est le plus faible, il devient le défi principal et la cible d\'intervention. Deux critères de français (oral, écrit) ont maintenant chacun leur valeur. Les interventions déjà enregistrées gardent leur bilan.'
+                'Profil d\'un·e élève › forces et défis&nbsp;: un critère dont le nom commence par «&nbsp;Français&nbsp;» («&nbsp;Français écrit&nbsp;», par exemple) y figure de nouveau&nbsp;; s\'il est le plus faible, il devient le défi principal et la cible d\'intervention. Deux critères de français (oral, écrit) ont maintenant chacun leur valeur. Les interventions déjà enregistrées gardent leur bilan.',
+                // 1.152.4 (F4-1 de l'audit du 21 sept.) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
+                'Bilan de l\'élève (rétroaction et PDF de synthèse)&nbsp;: la phrase adressée à qui maîtrise tous les critères deux productions de suite ne parle plus d\'«&nbsp;artefact&nbsp;» ni du «&nbsp;niveau É&nbsp;», des mots propres à un seul cours. Dans le PDF, une production sans titre s\'appelle maintenant «&nbsp;Production&nbsp;».'
             ]
         },
         {
