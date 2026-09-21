@@ -742,9 +742,10 @@
             : `les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées`;
         const libelleSelection = estHybride
             ? `Sélection (${libelleRetenues})${badgePondSel}`
-            // Une seule retenue (première évaluation du trimestre) : « les 1 meilleures » ne se lit pas.
+            // Une seule retenue (première évaluation du trimestre) : « les 1 meilleures » ne se lit pas,
+            // et rien n'est comparé — mots de Grégoire (21 sept. 2026) : « la production retenue ».
             : (nbSelection === 1
-                ? 'Voici ta meilleure production'
+                ? 'Voici la production retenue'
                 : `Voici les ${esc(nbSelection)} meilleures productions que tu as réalisées`);
         const itemsSelection = note.selection.map(art => {
             const marqueur = formaterNiveauNote(art.niveau, art.note);
