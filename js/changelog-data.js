@@ -21,13 +21,14 @@
 
     var CHANGELOG = [
         {
-            // Entrée VALIDÉE par Grégoire le 21 sept. 2026 (#909, #903) — « Deux items », telle que proposée.
+            // Entrée VALIDÉE par Grégoire le 21 sept. 2026 (#909, #903) — « Deux items » ; l'item 2 repris par lui à 9 h 01
+            // (les reprises ont aussi quitté la branche Standards).
             version: '1.152',
             couleur: 'bleu',
             titre: 'Pratiques de notation : l\'écran promet ce qui s\'applique',
             items: [
                 'Adopter un modèle Standards dans un trimestre qui n\'a aucune échelle de performance&nbsp;: l\'application le dit, indique où créer l\'échelle (Conception → Échelles de performance) et n\'adopte rien, au lieu d\'adopter un modèle qui ne pouvait pas calculer la note.',
-                'L\'assistant de pratique ne propose plus le plafonnement, le remplacement ni les reprises pour une sommative&nbsp;: rien ne les appliquait à la note. Le Comparateur ne les annonce plus «&nbsp;Actif&nbsp;». Tes pratiques déjà créées ne perdent rien.'
+                'L\'assistant de pratique ne propose plus le plafonnement ni le remplacement pour une sommative, ni le choix des reprises&nbsp;: rien ne les appliquait à la note. Le Comparateur ne les annonce plus «&nbsp;Actif&nbsp;». Tes pratiques déjà créées ne perdent rien.'
             ]
         },
         {
