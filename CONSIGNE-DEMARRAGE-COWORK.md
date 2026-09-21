@@ -94,7 +94,7 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 
 **c) LA TENUE DES COMPTES (sans release)** : le lot orphelin (commiter ou abandonner : **à Grégoire**, recommandation de Cowork le 21 : commiter, c'est sa décision du 19 mise en fichiers) ; #830 à remesurer puis cocher ; la ligne #872 de `SUIVI-BUGS.md` à remesurer ; lire le run planifié GitHub du 21 ≈ 4 h.
 
-**d) LA PAGE DU TRI** : **version 44**, à jour du 21 à 8 h (comptes du 21 à 5 h 51 ; phrase fausse sur #909 corrigée, mesurée à 360, 400, 768, 1280 px en clair et en sombre, `scrollWidth` = `clientWidth`). À reporter à chaque lot poussé, comptes par ensembles contre `BACKLOG.md`. Procédure inchangée : section 4 b de `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-16-19h15.md`.
+**d) LA PAGE DU TRI** : **version 45**, à jour du 21 à 10 h 09 (1.152.1 en ligne ; comptes par ensembles : 208 = 208, aucun écart ; #830 remesurée ouverte, sa phrase est due par Grégoire). À reporter à chaque lot poussé. Procédure inchangée : section 4 b de `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-16-19h15.md`.
 
 **e) CE QUI NE SE ROUVRE PAS** : inchangé (section 4 h de l'archive du 17) ; s'y ajoute **#915** (Suivi longitudinal) : ses quatre lots sont en ligne, la fiche reste ouverte **exprès** jusqu'au retour de la porte des lots 3-4 – ne pas la faire cocher.
 

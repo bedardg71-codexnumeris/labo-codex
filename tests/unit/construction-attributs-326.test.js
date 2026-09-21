@@ -90,6 +90,15 @@ describe('#326 R3 · STANDARDS', () => {
     it('nb de productions = retenus sur minimum', () => {
         expect(val(extraire(cfg), 'nbProductions')).toBe('4 retenu(s) sur 8 minimum');
     });
+    it('#715 · sous « tous », rien n\'est « retenu sur » : toutes les productions évaluées, le minimum entre parenthèses', () => {
+        const tous = JSON.parse(JSON.stringify(cfg));
+        const portfolio = (tous.configuration && tous.configuration.portfolio) || tous.portfolio;
+        portfolio.methodeSelection = 'tous';
+        expect(val(extraire(tous), 'nbProductions')).toBe('Toutes les productions évaluées (8 minimum)');
+        expect(val(extraire(tous), 'methodeSelection')).toBe('tous');
+        delete portfolio.minimumCompletion;
+        expect(val(extraire(tous), 'nbProductions')).toBe('Toutes les productions évaluées');
+    });
     it('CONSTAT R1 : STD ne liste PAS de jetons', () => {
         expect(axes(extraire(cfg))).not.toContain('jetons');
         // reprises STD = régime/récence, jamais « jetons »

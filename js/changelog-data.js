@@ -30,7 +30,9 @@
             items: [
                 'Adopter un modèle Standards dans un trimestre qui n\'a aucune échelle de performance&nbsp;: l\'application le dit, indique où créer l\'échelle (Conception → Échelles de performance) et n\'adopte rien, au lieu d\'adopter un modèle qui ne pouvait pas calculer la note.',
                 'L\'assistant de pratique ne propose plus le plafonnement ni le remplacement pour une sommative, ni le choix des reprises&nbsp;: rien ne les appliquait à la note. Le Comparateur ne les annonce plus «&nbsp;Actif&nbsp;». Tes pratiques déjà créées ne perdent rien.',
-                'Export anonymisé pour la recherche&nbsp;: l\'en-tête du fichier porte maintenant la vraie version de Labo Codex et décrit les indices A, C et P tels que l\'application les calcule.'
+                'Export anonymisé pour la recherche&nbsp;: l\'en-tête du fichier porte maintenant la vraie version de Labo Codex et décrit les indices A, C et P tels que l\'application les calcule.',
+                // 1.152.2 (#715, #723) — phrase VALIDÉE par Grégoire le 21 sept. 2026, telle quelle.
+                'Une pratique Standards réglée sur «&nbsp;tous&nbsp;» compte maintenant toutes les productions évaluées, au profil comme à l\'export&nbsp;: le profil s\'arrêtait au nombre à retenir. Le fichier des résultats finaux titre sa colonne «&nbsp;Note finale (arrondie à l\'entier)&nbsp;»&nbsp;; les notes elles-mêmes ne changent pas.'
             ]
         },
         {

@@ -346,7 +346,8 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         expect(d).toEqual([]);
     });
 
-    // FIGE A-5 (#715) : sous « tous », le chemin riche coupe à nombreARetenir — 76,75 au lieu de 77,32. Valeur FAUSSE gardée exprès.
+    // A-5 LIVRÉ LE 21 SEPT. 2026 (#715) : sous « tous », le chemin riche ne coupe plus à nombreARetenir — 77,32, la valeur JUSTE
+    // (avant : 76,75, figée exprès). Les quatre lectures de la note s'accordent : profil, instance, simulerIndices, export.
     it('A2b · STD « tous » : le moteur retient tout, l\'enveloppe dit « n-meilleurs »', async () => {
         // À LA MAIN : methodeSelection 'tous' mais varianteCalcul 'n-meilleurs' (creerPratiqueV2 : « Par défaut »). Note : moyenne
         // des 5 valides (85+60+78+70+78)/5 = 74,2 → 44,52 + 32,8 = 77,32.
@@ -359,10 +360,16 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         noter('A2b', { methodeSelection: p0.configuration.portfolio.methodeSelection, varianteCalcul: p0.configuration.varianteCalcul, note, attributs });
         expect(p0.configuration.portfolio.methodeSelection).toBe('tous');
         expect(p0.configuration.varianteCalcul).toBe('n-meilleurs');
-        // OBTENU : 76,75 = (85+60+78+70)/4 × 0,6 + 32,8 → sous « tous », le chemin riche coupe quand même à nombreARetenir = 4
-        // (les 4 premiers par ordre de production), ce que le 5 sept. avait mesuré en B-5 (#715). Et l'attribut affiché dit
-        // « 4 retenu(s) sur 2 minimum » à côté de « Méthode de sélection : tous ».
-        expect(note.riche).toBe(76.75);
+        // AVANT #715 : 76,75 = (85+60+78+70)/4 × 0,6 + 32,8 — le chemin riche coupait à nombreARetenir = 4 (les 4 premiers par
+        // ordre de stockage), mesuré le 5 sept. en B-5. L'attribut affiché disait « 4 retenu(s) sur 2 minimum » à côté de « Méthode
+        // de sélection : tous » ; il dit maintenant ce que le moteur fait (mots validés par Grégoire le 21 sept.).
+        expect(attributs.attributs.find(x => x.axe === 'nbProductions').valeur).toBe('Toutes les productions évaluées (2 minimum)');
+        expect(note.riche).toBe(77.32);
+        expect(note.simule.noteFinale).toBe(77.32);
+        expect(note.export).toEqual({ note: 77, statut: 'final' });
+        // `note.perf` n'est pas jugé ici : dans ce banc, calculerPerformance rend null pour toute STD (A2 aussi — mesuré, cause
+        // non cherchée). L'accord du chemin riche avec l'instance PAN-Standards est jugé par
+        // sentinelle-715-tous-prend-toutes-les-productions.test.js.
     });
 
     it('A3 · SPE par l\'assistant : seuil 70, jetons 4/5 jours + délai sur reprise, 3 reprises', async () => {
