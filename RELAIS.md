@@ -29,7 +29,9 @@
 
 **Trouvailles, issues nommées** : les boutons d'action de `uiDialogues` font 37 px (< 44 px) — *dit, non inscrit* (famille de #879, sans symptôme vécu) ; la ligne « Reprises » du Comparateur lit pour une sommative un champ jamais écrit à cet endroit et rend toujours « Non permises » — *dit, non inscrit* ; la liste aux boutons « Modifier » de `pratiques.js` (`genererCartePratique`) ne rend plus rien : « Éditer la pratique » du Comparateur est le seul geste vivant de réédition par l'assistant — *commentaire dans le spec* ; `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` est périmée (état du 15 sept., 1.142.2) alors que `CLAUDE.md` la désigne comme mandat courant — *à Cowork / Grégoire*.
 
-**Reste dû** : la phrase de « Nouvelles » de 1.152 (PROPOSÉE à Grégoire, à entrer en build-only une fois validée) ; la relecture croisée de Cowork ; le verdict Playwright complet et le push ; porte terrain iPad / Safari pour la fenêtre de #909 (une modale au-dessus d'une modale) — markdown à écrire si Grégoire la veut, Cowork publie l'artefact ; relire le run planifié le 22.
+**Mise à jour de ≈ 9 h : l'entrée 1.152 des « Nouvelles » est VALIDÉE par Grégoire (« Deux items », telle que proposée) et entrée en build-only (build 0921-0846).** ⚠ Dit à Grégoire : son second item écrit « pour une sommative » alors que les reprises quittent aussi la branche Standards — à reprendre d'un mot s'il le veut.
+
+**Reste dû** : la relecture croisée de Cowork ; le verdict Playwright complet et le push ; porte terrain iPad / Safari pour la fenêtre de #909 (une modale au-dessus d'une modale) — markdown à écrire si Grégoire la veut, Cowork publie l'artefact ; relire le run planifié le 22.
 
 ---
 
