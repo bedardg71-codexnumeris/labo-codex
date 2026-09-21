@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 13 H 30 (Toronto) : 1.152.5 (demies de l'indice P : 57,5 → 58) — 🟡 COMMITÉ, NON POUSSÉ, main = `e6a5ac31` + ce relais
+
+**Le travail vit sur `main`, en local, en avance sur origin/main (`d5b67d62`).** Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 13 h 08 ; relayée par Grégoire). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé. Après le push : retirer le lot 1 de `plans de travail/FILE-DES-LOTS.md` (le lot 2, les trois « artefact » du PDF, y reste).
+
+**Le lot** : `arrondirIndiceSurCent` (`js/portfolio.js`), seule porte des deux sites (`calculerEtStockerIndicesCP`, `_simulerIndicesInterne`) pour C et P ; même expression que `niveauDuPourcentage` (#701) : nettoyage au millionième, puis entier. Non partagée avec `evaluation-calcul.js` : 32 bancs chargent `portfolio.js` seul. Sentinelle : `tests/unit/sentinelle-demies-indice-p-monte.test.js` (10 essais, vrai moteur). Sept mutations rouges, une à la fois. Vitest complet vert après le commit du bump : 613 fichiers, 6 990 essais.
+
+**Deux décisions de Grégoire (questions fermées, 21 sept.)** : (1) la clause d'arrêt de la consigne a joué — une note qui VAUT 59,5 et que le vrai moteur sort à 59,499999999999986 (32,3 et 99,1 au portfolio 60, terminale 50,2 à 40) passait de 59 à 60 : « Oui, 60 » ; (2) la phrase de « Nouvelles » (7e item de 1.152), telle que proposée.
+
+**À relire par Cowork en priorité** : mon premier chiffre donné à Grégoire venait d'un MODÈLE de la formule (204 sur 23 125, 0,9 %) ; le vrai moteur, mesuré ensuite, donne 1,4 à 3,3 % (857 / 61 424 à deux productions, 36 189 / 1 081 186 à trois, 12 819 / 574 894 à quatre). La décision porte sur la règle, pas sur le chiffre, mais il l'a prise sur le premier. À un seul cran de bruit (59,49999999999999), l'ancien code retombait sur 60 par chance ; seuls les cas à deux crans changent.
+
+**Stock** : rien d'écrit chez personne. Pack démo : 10 élèves × 6 pratiques, 0 entier change ; indice stocké = indice simulé pour les dix. Données réelles d'A2026 : non mesurées.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 12 H 58 (Toronto) : 1.152.4 (F4-1, mots du bilan de l'élève) — ✅ POUSSÉ, origin/main = `7f517383`
 
 **POUSSÉ à 12 h 57** par `scripts/pousser.sh origin main` sous `caffeinate`, en processus détaché (`nohup`, suivi par PID — un premier lancement par la tâche d'arrière-plan a été arrêté après quelques secondes : son plafond de 10 min est sous la durée du verdict), sur le « Oui, pousse » de Grégoire (question fermée, après son relais de la relecture de Cowork) ; `dde51a01..7f517383`, deux commits (`c8c35efd` le lot, `7f517383` relais). Garde de charge : 2,93, aucune attente. Sentinelle Playwright : verdict vert sur le SHA exact, 0 échec connu, 0 spec instable ; hook Vitest vert. Mesuré avant : aucun `pousser.sh`, aucun Vitest ni Playwright, aucune VM Cowork. « En ligne » chez l'hébergeur : non mesuré d'ici. **Ce qui suit décrit l'état d'AVANT le push.**
