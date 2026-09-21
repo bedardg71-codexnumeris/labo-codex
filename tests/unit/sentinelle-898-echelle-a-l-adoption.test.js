@@ -29,6 +29,8 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 const r2 = (x) => (typeof x === 'number' ? Math.round(x * 100) / 100 : x);
 
 const QUESTION = 'Ce modèle a besoin d\'une échelle de performance pour calculer la note. Choisis-la :';
+// #909 — la phrase de Grégoire (17 sept. 2026), nom d'écran de la navigation.
+const PHRASE_AUCUNE_ECHELLE = 'Ce modèle a besoin d\'une échelle de performance pour calculer la note, et ce trimestre n\'en a aucune. Crée une échelle dans Conception → Échelles de performance, puis reviens adopter ce modèle.';
 const DA = '1000002';
 const ETUDIANTS = [{ da: DA, nom: 'Standards', prenom: 'Bruno', groupe: '01', coursId: 'GC1' }];
 
@@ -117,7 +119,7 @@ function monter(jeu, opts = {}) {
         bibliothequePratiques: clone(opts.bibliotheque || []),
         infoCours: { id: 'GC1', nom: 'Cours banc', groupe: '01' }
     }, opts.store || {});
-    const notifs = [], questions = [];
+    const notifs = [], questions = [], informations = [];
     const db = {
         getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)),
         setSync: (k, v) => { store[k] = clone(v); },
@@ -150,7 +152,8 @@ function monter(jeu, opts = {}) {
         obtenirEtudiantsCoursActif: () => clone(store.test_groupeEtudiants), genererSeancesCompletes() {},
         afficherSection() {}, afficherSousSection() {}, calculerEtSauvegarderIndicesAssiduite() {},
         notifications: { succes(t, m) { notifs.push({ type: 'succes', t, m }); }, erreur(t, m) { notifs.push({ type: 'erreur', t, m }); }, info(t, m) { notifs.push({ type: 'info', t, m }); }, warning() {} },
-        uiDialogues: { demanderChoix: async (options) => { questions.push(clone(options)); return opts.reponse ? opts.reponse(options) : null; } },
+        uiDialogues: { demanderChoix: async (options) => { questions.push(clone(options)); return opts.reponse ? opts.reponse(options) : null; },
+            informer: async (options) => { informations.push(clone(options)); } },
         BibliothequeUI: { fermerModal() {}, filtrerParMaquette: (a) => a, filtrerParModeDemo: (a) => a, obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null, repertoires: { rendre() {} } },
         ajouterAvecGardeIdentite: (liste, item) => ({ ajoute: true, liste: liste.concat([item]) }),
         confirm: () => true, alert() {}, genererIdUnique: (p) => p + 'NEUF' + (++compteurId),
@@ -182,7 +185,7 @@ function monter(jeu, opts = {}) {
     // Garde de validité du banc : sans ces fonctions, tout ce qui suit ne prouve rien.
     for (const f of ['creerPratiqueV2', 'ajouterPratiqueALaSelection', 'demanderEchelleAdoption', 'simulerIndices', 'calculerDetailsNoteFinale'])
         if (typeof win[f] !== 'function') throw new Error('banc incomplet : ' + f);
-    return { win, store, notifs, questions };
+    return { win, store, notifs, questions, informations };
 }
 
 const pratiques = (b) => b.store.test_pratiquesConfigurables;
@@ -361,13 +364,33 @@ describe('#898 · C — ce qui ne change pas', () => {
         expect(pratiques(b)[0].dansBibliotheque).toBe(true);
         expect(pratiques(b)[0].configuration.echelleId).toBe('E1');
     });
-    it('C.5 ⛔ CAS D\'ARRÊT figé : aucune échelle utilisable → pas de question, le geste d\'avant (un mot de Grégoire est dû)', async () => {
-        const b = monter(jeuSTD(), { echelles: [E_RETIREE], reponse: () => { throw new Error('aucune question attendue'); } });
-        const adoptee = await adopterParAssistant(b, 'STD-n-recents');
-        expect(b.questions).toEqual([]);
-        expect(adoptee).not.toBeNull();
-        expect(adoptee.configuration.echelleId).toBeUndefined();
-    });
+    // C.5 figeait le geste d'avant (#909 : « pas de question, le modèle s'adopte sans échelle »).
+    // Tranché par Grégoire le 17 sept. : la fenêtre s'ouvre quand même, dit pourquoi, nomme où
+    // aller, et l'adoption n'a PAS lieu. Les DEUX gestes disent la même chose.
+    for (const [nom, geste] of GESTES) {
+        for (const [cas, echelles] of [['aucune échelle', []], ['seulement une échelle retirée de la barre latérale', [E_RETIREE]]]) {
+            it(`C.5 [${nom}] #909 ${cas} : la phrase de Grégoire s'affiche, aucune question, RIEN n'est écrit`, async () => {
+                const b = monter(jeuSTD(), { echelles, reponse: () => { throw new Error('aucune question attendue'); } });
+                const avant = JSON.stringify(b.store);
+                const adoptee = await geste(b, 'STD-n-recents');
+                expect(b.questions).toEqual([]);
+                expect(b.informations).toEqual([{ titre: gabarit(b, 'STD-n-recents').nom, message: PHRASE_AUCUNE_ECHELLE }]);
+                expect(adoptee).toBeNull();
+                // Octet pour octet : ni pratiquesConfigurables, ni le groupe-cours, ni rien d'autre.
+                expect(JSON.stringify(b.store)).toBe(avant);
+                expect(b.notifs.filter(n => n.type === 'succes')).toEqual([]);
+            });
+        }
+        it(`C.6 [${nom}] #909 la phrase ne sort PAS quand une échelle est offerte, ni pour une autre famille`, async () => {
+            const b = monter(jeuSTD(), { reponse: () => 'E1' });
+            await geste(b, 'STD-n-recents');
+            expect(b.informations).toEqual([]);
+            const sansEchelle = monter(jeuSOM(), { echelles: [] });
+            const adoptee = await geste(sansEchelle, 'SOM-litterature');
+            expect(sansEchelle.informations).toEqual([]);
+            expect(adoptee).not.toBeNull();
+        });
+    }
 });
 
 describe('#898 · D — le prédicat lit ce que lit l\'instance', () => {
@@ -419,6 +442,11 @@ describe('#898 · E — verrou structurel : qui adopte passe par la question', (
         const hits = ['js/pratiques-bibliotheque.js', 'js/pratiques-gestion.js', 'js/wizard-pratique-v2.js', 'js/ui-dialogues.js']
             .filter(f => lire(f).includes('Ce modèle a besoin d\\\'une échelle de performance'));
         expect(hits).toEqual(['js/pratiques-bibliotheque.js']);
+    });
+    it('E.4 #909 la phrase du trimestre sans échelle : posée UNE fois, mot pour mot', () => {
+        const src = lire('js/pratiques-bibliotheque.js');
+        expect(src.split('ce trimestre n\\\'en a aucune').length - 1).toBe(1);
+        expect(src).toContain(PHRASE_AUCUNE_ECHELLE.replace(/'/g, '\\\''));
     });
 });
 

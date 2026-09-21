@@ -50,15 +50,6 @@ const TYPE_BADGES = {
 // ============================================================================
 
 /**
- * Champs « reprises » réutilisables (#319 Lot 3 a3). Un seul endroit pour le select
- * et la ligne de repère pédagogique, injecté dans les 3 branches de configuration
- * (portfolio, sommative, objectifs). Déclaration de fonction → hoistée, donc
- * appelable dans le littéral ETAPES_WIZARD ci-dessous.
- * NB : la valeur est persistée (configuration.reprises / portfolio.reprisesPermises)
- * mais n'est pas encore consommée par le moteur de calcul — écart tracé au backlog.
- * @param {string} defaut - 'illimite' | 'limite' | 'non'
- */
-/**
  * Le libellé d'une règle sommative — #809 (9 sept. 2026). SOURCE UNIQUE dans
  * `construction-attributs.js`, chargé avant ce fichier. Le repli rend la clé
  * brute plutôt qu'un trou, et n'invente aucun mot : si le module manquait, on
@@ -71,26 +62,15 @@ function _libelleRegle(cle) {
         : cle;
 }
 
-function champsReprises(defaut) {
-    return [
-        {
-            id: 'reprisesPermises',
-            label: 'Reprises permises',
-            type: 'select',
-            options: [
-                { value: 'illimite', label: 'Illimitées' },
-                { value: 'limite', label: 'Limitées (configurer après)' },
-                { value: 'non', label: 'Non permises' }
-            ],
-            default: defaut
-        },
-        {
-            id: 'infoReprisesPedago',
-            type: 'info',
-            texte: 'Des reprises limitées favorisent des soumissions mieux préparées — tu pourras assouplir ensuite.'
-        }
-    ];
-}
+/**
+ * #903 (21 sept. 2026) — TROIS RÈGLES QUE RIEN N'APPLIQUE ONT QUITTÉ L'ASSISTANT :
+ * le plafonnement (sa condition est un texte libre), le remplacement (un nombre de
+ * paires, sans dire lesquelles) et le déclaratif des reprises (une reprise vaut par
+ * `remplaceeParId`, quel que soit le mode coché). Tranché par Grégoire le 17 sept.
+ * On a retiré des CASES, pas des données : une pratique déjà enregistrée garde ce
+ * qu'elle porte — voir `conserverReglesRetirees`, appelée par `sauvegarderPratique`.
+ */
+const REGLES_SOMMATIVES_RETIREES = ['remplacement', 'plafonnement'];
 
 // ───────────────────────────────────────────────────────────────────────────
 // INFÉRENCE COMPORTEMENTALE (bug testeur 8 juin : « pas-certain »)
@@ -480,11 +460,6 @@ const ETAPES_WIZARD = {
                 required: true,
                 options: [
                     {
-                        value: 'remplacement',
-                        label: _libelleRegle('remplacement'),
-                        description: 'L\'évaluation finale remplace la mi-session si elle est meilleure — une forme de reprise sans pénalité, un pilier que tu pratiques peut-être déjà.'
-                    },
-                    {
                         value: 'double_verrou',
                         label: _libelleRegle('double_verrou'),
                         description: 'Une évaluation spécifique (ex: la finale) doit être réussie pour passer le cours.'
@@ -493,11 +468,6 @@ const ETAPES_WIZARD = {
                         value: 'portfolio',
                         label: _libelleRegle('portfolio'),
                         description: 'Un portfolio d\'artefacts contribue à la note, avec progression prise en compte.'
-                    },
-                    {
-                        value: 'plafonnement',
-                        label: _libelleRegle('plafonnement'),
-                        description: 'La note est plafonnée si certaines conditions ne sont pas remplies.'
                     },
                     {
                         value: 'aucune',
@@ -606,23 +576,6 @@ const ETAPES_WIZARD = {
             const regles = reponses.reglesSommatives || [];
             const champs = [];
 
-            if (regles.includes('remplacement')) {
-                champs.push({
-                    id: 'infoRemplacement',
-                    type: 'info',
-                    texte: 'Remplacement automatique : l\'évaluation finale remplace la mi-session si elle est meilleure — une forme de reprise sans pénalité.'
-                });
-                champs.push({
-                    id: 'nbPairesRemplacement',
-                    label: 'Nombre de paires d\'évaluations avec remplacement',
-                    type: 'number',
-                    min: 1,
-                    max: 10,
-                    default: 2,
-                    required: true
-                });
-            }
-
             if (regles.includes('double_verrou')) {
                 champs.push({
                     id: 'infoVerrou',
@@ -679,30 +632,6 @@ const ETAPES_WIZARD = {
                 });
             }
 
-            if (regles.includes('plafonnement')) {
-                champs.push({
-                    id: 'infoPlafonnement',
-                    type: 'info',
-                    texte: 'Plafonnement : la note est plafonnée si certaines conditions ne sont pas remplies.'
-                });
-                champs.push({
-                    id: 'conditionPlafonnement',
-                    label: 'Condition de plafonnement',
-                    type: 'text',
-                    placeholder: 'Ex: Moyenne des standards terminaux < 60%',
-                    required: true
-                });
-                champs.push({
-                    id: 'valeurPlafonnement',
-                    label: 'Note maximale si condition remplie (%)',
-                    type: 'number',
-                    min: 0,
-                    max: 100,
-                    default: 55,
-                    required: true
-                });
-            }
-
             return champs;
         },
         suivant: () => 'config-sommative',
@@ -731,9 +660,7 @@ const ETAPES_WIZARD = {
                 label: 'Afficher la moyenne du groupe ?',
                 type: 'toggle',
                 default: true
-            },
-            // #319 Lot 3 (a3) : reprises configurables aussi en Sommative.
-            ...champsReprises('limite')
+            }
         ],
         suivant: () => 'infos-base',
         precedent: () => 'seuils-personnels'
@@ -833,8 +760,6 @@ const ETAPES_WIZARD = {
                 default: 7,
                 required: true
             },
-            // #319 Lot 3 (a3) : reprises mutualisées, défaut « Limitées » pour les artefacts.
-            ...champsReprises('limite'),
             {
                 id: 'minAvantCalculFormatif',
                 label: 'Minimum d\'artefacts avant calcul formatif',
@@ -2039,10 +1964,8 @@ function genererRecapitulatif() {
     if (classification.variante && classification.type !== 'denotation') {
         const varianteLabels = {
             'classique': 'Classique',
-            'progressive': 'Avec remplacement progressif',
             'verrou': 'Avec verrou d\'évaluation',
             'portfolio': 'Avec portfolio',
-            'plafonnement': 'Avec plafonnement conditionnel',
             // #901 (C-1) : sans parenthèse — la méthode ne se dit qu'à « Construction de la note ».
             'n-meilleurs': 'Par artefacts',
             'objectifs-ponderes': 'Par objectifs pondérés',
@@ -2514,13 +2437,12 @@ function deduireTypePratique(reponses) {
     }
 
     if (q1 === 'moyenne') {
-        const regles = reponses.reglesSommatives || [];
+        // #903 : une clé retirée qui traînerait dans les réponses ne s'écrit pas.
+        const regles = (reponses.reglesSommatives || []).filter(regle => !REGLES_SOMMATIVES_RETIREES.includes(regle));
         let variante = 'classique';
 
-        if (regles.includes('remplacement')) variante = 'progressive';
-        else if (regles.includes('double_verrou')) variante = 'verrou';
+        if (regles.includes('double_verrou')) variante = 'verrou';
         else if (regles.includes('portfolio')) variante = 'portfolio';
-        else if (regles.includes('plafonnement')) variante = 'plafonnement';
 
         return { type: 'sommative', variante, regles, confiance: 1.0 };
     }
@@ -2702,12 +2624,6 @@ async function creerPratiqueV2() {
 
         // Phase 2 : Enrichissement sommative
         const regles = classification.regles || [];
-        if (regles.includes('remplacement')) {
-            pratique.configuration.remplacement = {
-                actif: true,
-                nbPaires: parseInt(r.nbPairesRemplacement) || 2
-            };
-        }
         if (regles.includes('double_verrou')) {
             pratique.configuration.conditions_speciales = pratique.configuration.conditions_speciales || [];
             pratique.configuration.conditions_speciales.push({
@@ -2728,26 +2644,6 @@ async function creerPratiqueV2() {
                 utiliser: true,
                 nbArtefacts: parseInt(r.nbArtefactsPortfolio) || 5,
                 qualitatif: r.portfolioQualitatif || false
-            };
-        }
-        if (regles.includes('plafonnement')) {
-            pratique.configuration.conditions_speciales = pratique.configuration.conditions_speciales || [];
-            pratique.configuration.conditions_speciales.push({
-                type: 'plafonnement',
-                description: r.conditionPlafonnement || '',
-                consequence: {
-                    action: 'plafonner',
-                    valeur: parseInt(r.valeurPlafonnement) || 55
-                }
-            });
-        }
-
-        // Reprises (#319 Lot 3 a3) : champ mutualisé reprisesPermises (select).
-        // Remplace feu config-reprises (reprisesPermisesGlobal/modeReprises/nbMaxReprises).
-        if (r.reprisesPermises) {
-            pratique.configuration.reprises = {
-                permises: r.reprisesPermises !== 'non',
-                mode: r.reprisesPermises
             };
         }
     } else if (typeFinal === 'standards') {
@@ -2791,7 +2687,6 @@ async function creerPratiqueV2() {
                 nombreARetenir: nbRetenus,
                 methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),
                 minimumCompletion: minFormatif,
-                reprisesPermises: r.reprisesPermises || 'illimite',
                 hybride: estHybride  // 🆕 #24 : Flag pour activer les catégories
             };
             // 🆕 #24 : Activer catégories automatiquement si hybride
@@ -2899,6 +2794,59 @@ async function finaliserCreationPratique(pratique) {
 }
 
 /**
+ * #903 — UNE PRATIQUE DÉJÀ ENREGISTRÉE GARDE CE QU'ELLE PORTE (limite de Grégoire du
+ * 20 sept. 2026 : « Je ne veux pas qu'on efface des données de façon irréversible »).
+ * L'assistant reconstruit l'objet à neuf et ne connaît plus le plafonnement, le
+ * remplacement ni le déclaratif des reprises : sans ce passage, rouvrir puis enregistrer
+ * les effacerait. Ils passent donc TELS QUELS de `existante` à `pratique` — aucun calcul
+ * ne les lit (mesuré au lot 29 et remesuré le 21 sept.). Mute et rend `pratique`.
+ * @param {Object} pratique - l'objet reconstruit par l'assistant
+ * @param {Object} existante - l'objet enregistré qu'il remplace
+ * @returns {Object} pratique
+ */
+function conserverReglesRetirees(pratique, existante) {
+    if (!pratique || !existante) return pratique;
+    const clone = (v) => JSON.parse(JSON.stringify(v));
+    const avant = existante.configuration || {};
+
+    // Le déclaratif des reprises d'un portfolio Standards.
+    if (pratique.type === 'standards' && pratique.configuration && pratique.configuration.portfolio
+        && avant.portfolio && avant.portfolio.reprisesPermises !== undefined) {
+        pratique.configuration.portfolio.reprisesPermises = clone(avant.portfolio.reprisesPermises);
+    }
+    if (pratique.type !== 'sommative' || existante.type !== 'sommative') return pratique;
+
+    pratique.configuration = pratique.configuration || {};
+    if (avant.reprises !== undefined) pratique.configuration.reprises = clone(avant.reprises);
+    if (avant.remplacement !== undefined) pratique.configuration.remplacement = clone(avant.remplacement);
+    const plafonnements = (avant.conditions_speciales || []).filter(c => c && c.type === 'plafonnement');
+    if (plafonnements.length > 0) {
+        pratique.configuration.conditions_speciales =
+            (pratique.configuration.conditions_speciales || []).concat(clone(plafonnements));
+    }
+
+    // Les clés des règles : l'ordre enregistré est gardé, et « aucune » ne cohabite pas
+    // avec une règle que la pratique porte encore.
+    const fusionner = (nouvelles, anciennes) => {
+        if (!Array.isArray(anciennes) || !anciennes.some(k => REGLES_SOMMATIVES_RETIREES.includes(k))) return nouvelles;
+        const base = (Array.isArray(nouvelles) ? nouvelles : []).filter(k => k !== 'aucune');
+        return anciennes.filter(k => REGLES_SOMMATIVES_RETIREES.includes(k) || base.includes(k))
+            .concat(base.filter(k => !anciennes.includes(k)));
+    };
+    const reglesSpeciales = fusionner(pratique.reglesSpeciales, existante.reglesSpeciales);
+    if (reglesSpeciales !== undefined) pratique.reglesSpeciales = reglesSpeciales;
+    const reglesSommatives = fusionner(pratique.configuration.reglesSommatives, avant.reglesSommatives);
+    if (reglesSommatives !== undefined) pratique.configuration.reglesSommatives = reglesSommatives;
+
+    // La variante suivait la première règle cochée (remplacement > verrou > portfolio >
+    // plafonnement) : elle reste ce qu'elle était tant que sa règle est toujours portée.
+    const portees = pratique.reglesSpeciales || [];
+    if (portees.includes('remplacement')) pratique.variante = 'progressive';
+    else if (portees.includes('plafonnement') && pratique.variante === 'classique') pratique.variante = 'plafonnement';
+    return pratique;
+}
+
+/**
  * Sauvegarde la pratique dans le stockage
  * 🆕 FIX (20 jan 2026) : Sauvegarde robuste avec vérification
  * @param {Object} pratique - Objet pratique à sauvegarder
@@ -2928,6 +2876,7 @@ async function sauvegarderPratique(pratique) {
         // L'étape auteur peut être sautée en édition : ne jamais remplacer par du vide.
         if (!pratique.auteur && existante.auteur) pratique.auteur = existante.auteur;
         if (!pratique.etablissement && existante.etablissement) pratique.etablissement = existante.etablissement;
+        conserverReglesRetirees(pratique, existante);
         pratiques[index] = pratique;
     } else {
         pratiques.push(pratique);
@@ -3084,7 +3033,10 @@ function chargerPratiqueExistante(pratiqueId) {
         typePratique: typeCanon,
         calcNoteFinale: calcNoteFinaleMap[typeCanon] || 'moyenne',
         typeVariante: pratique.variante || null,
-        reglesSommatives: pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [],
+        // #903 : les règles retirées ne reviennent ni dans les cases ni dans le récapitulatif ;
+        // l'objet enregistré les garde (`conserverReglesRetirees`).
+        reglesSommatives: (pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [])
+            .filter(regle => !REGLES_SOMMATIVES_RETIREES.includes(regle)),
         nbEvaluationsPrevues: pratique.nbEvaluationsPrevues || null,
         seuilVaBien: pratique.seuils?.va_bien || null,
         seuilDifficulte: pratique.seuils?.difficulte || null,
@@ -3098,14 +3050,12 @@ function chargerPratiqueExistante(pratiqueId) {
         if (typeCanon === 'sommative') {
             wizardState.reponses.afficherRang = config.afficherRang;
             wizardState.reponses.afficherMoyenneGroupe = config.afficherMoyenneGroupe;
-            // #319 Lot 3 (a3) : restaurer les reprises (round-trip d'édition #132).
-            if (config.reprises) wizardState.reponses.reprisesPermises = config.reprises.mode;
             // #854 (audit du 16 sept. 2026, constat A-2) — ROUVRIR NE CHANGE PAS UNE RÈGLE.
             // Les valeurs des règles spéciales n'étaient pas relues : ré-enregistrer les
-            // ramenait aux défauts (3 paires → 2 ; verrou « Dissertation, 90, 50 » → « Analyse
-            // finale, 60, 55 » ; plafonnement « Examen non remis, 50 » → vide, 55). Condition posée par Grégoire pour brancher le
-            // verrou (#897) : une règle appliquée ne change pas à l'insu de l'enseignant·e.
-            if (config.remplacement) wizardState.reponses.nbPairesRemplacement = config.remplacement.nbPaires;
+            // ramenait aux défauts (verrou « Dissertation, 90, 50 » → « Analyse finale, 60, 55 »).
+            // Condition posée par Grégoire pour brancher le verrou (#897) : une règle appliquée
+            // ne change pas à l'insu de l'enseignant·e. (#903 : le remplacement et le
+            // plafonnement ne se relisent plus ici — ils passent tels quels à l'enregistrement.)
             if (config.portfolio) {
                 wizardState.reponses.nbArtefactsPortfolio = config.portfolio.nbArtefacts;
                 wizardState.reponses.portfolioQualitatif = config.portfolio.qualitatif;
@@ -3115,9 +3065,6 @@ function chargerPratiqueExistante(pratiqueId) {
                     wizardState.reponses.nomEvalVerrouillee = regle.condition?.evaluation;
                     wizardState.reponses.seuilVerrou = regle.condition?.seuil;
                     wizardState.reponses.plafondVerrou = regle.consequence?.note_max;
-                } else if (regle && regle.type === 'plafonnement') {
-                    wizardState.reponses.conditionPlafonnement = regle.description;
-                    wizardState.reponses.valeurPlafonnement = regle.consequence?.valeur;
                 }
             }
         } else if (typeCanon === 'standards') {
@@ -3142,7 +3089,6 @@ function chargerPratiqueExistante(pratiqueId) {
                 wizardState.reponses.utiliserPortfolio = config.portfolio.utiliser;
                 wizardState.reponses.nbArtefactsSoumis = config.portfolio.nombreTotal;
                 wizardState.reponses.nbArtefactsRetenus = config.portfolio.nombreARetenir;
-                wizardState.reponses.reprisesPermises = config.portfolio.reprisesPermises;
                 wizardState.reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
                 // Restaurer la méthode de sélection (sinon le round-trip repart sur 'n_meilleurs').
                 // L'écriture stocke 'meilleurs' pour le mode 'n_meilleurs' → mapping inverse.
@@ -3230,7 +3176,7 @@ window.ETAPES_WIZARD = ETAPES_WIZARD;
 // `default` ne prouve pas que le RENDU pré-coche. Les deux se cassent
 // séparément, et seul le rendu compte pour l'utilisateur.
 window.genererRadioCards = genererRadioCards;
-window.champsReprises = champsReprises;
+window.conserverReglesRetirees = conserverReglesRetirees;
 window.calculerExempleConsequence = calculerExempleConsequence; // #319 Lot 4 a8 (testabilité)
 window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8/a9 (testabilité du rendu)
 window.genererContenuEtape = genererContenuEtape;

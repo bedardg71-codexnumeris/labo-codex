@@ -84,7 +84,7 @@ const GOLDEN = {
         configuration: {
             approcheEvaluation: 'par-artefacts', echelleId: 'ech1', grilleId: 'gr1', varianteCalcul: 'n-meilleurs',
             portfolio: { utiliser: true, nombreTotal: 12, nombreARetenir: 7, methodeSelection: 'meilleurs',
-                minimumCompletion: 3, reprisesPermises: 'limite', hybride: false }
+                minimumCompletion: 3, hybride: false }
         },
         calcul_note: { methode: 'conversion_niveaux' }
     },
@@ -276,50 +276,36 @@ describe('#319 Lot 2 (a2) — voie rapide', () => {
     });
 });
 
-describe('#319 Lot 3 (a3) — reprises configurables', () => {
-    it('helper champsReprises : select + ligne pédagogique, défaut paramétrable', () => {
-        const champs = win.champsReprises('limite');
-        const select = champs.find(c => c.id === 'reprisesPermises');
-        expect(select.type).toBe('select');
-        expect(select.default).toBe('limite');
-        expect(select.options.map(o => o.value)).toEqual(['illimite', 'limite', 'non']);
-        expect(champs.some(c => c.id === 'infoReprisesPedago')).toBe(true);
+describe('#903 · cliquet d\'absence — le déclaratif des reprises a quitté l\'assistant', () => {
+    // Remplace le bloc « #319 Lot 3 (a3) — reprises configurables ». Le champ était écrit
+    // (configuration.reprises, portfolio.reprisesPermises) et lu par AUCUN calcul : tranché
+    // par Grégoire le 17 sept. 2026, retiré le 21. Même endroit du fichier, invariant inverse.
+    // La réponse `reprisesPermises` reste dans REPONSES.STD_art EXPRÈS : elle prouve qu'une
+    // réponse résiduelle n'est plus écrite. Ce que garde une pratique DÉJÀ enregistrée est
+    // jugé par `sentinelle-903-909-…`.
+    it('le helper champsReprises n\'existe plus, et aucune étape n\'offre le champ', () => {
+        expect(win.champsReprises).toBeUndefined();
+        for (const etape of Object.values(win.ETAPES_WIZARD)) {
+            expect((etape.champs || []).some(c => c.id === 'reprisesPermises' || c.id === 'infoReprisesPedago')).toBe(false);
+        }
     });
 
-    it('défaut artefacts (portfolio) = Limitées', () => {
-        const champ = win.ETAPES_WIZARD['config-portfolio'].champs.find(c => c.id === 'reprisesPermises');
-        expect(champ.default).toBe('limite');
-    });
-
-    it('Sommative persiste configuration.reprises depuis reprisesPermises', async () => {
+    it('une Sommative neuve n\'écrit pas configuration.reprises, même si la réponse traîne', async () => {
         const obj = await produire('fixe-rep-som', { ...REPONSES.SOM, reprisesPermises: 'limite' });
-        expect(obj.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
+        expect(obj.configuration.reprises).toBeUndefined();
     });
 
-    it('Artefacts range les reprises dans configuration.portfolio (mode « non »)', async () => {
-        // #443 : ce cas portait sur l'étape « objectifs », retirée. Il est
-        // REPORTÉ sur le portfolio plutôt que supprimé — l'invariant qu'il
-        // gardait (« non » → permises:false) vaut pour toutes les branches, et
-        // le perdre serait une régression de couverture déguisée en ménage.
+    it('un portfolio neuf n\'écrit pas reprisesPermises, même si la réponse traîne', async () => {
         const obj = await produire('fixe-rep-art', { ...REPONSES.STD_art, reprisesPermises: 'non' });
-        // ⚠ La branche portfolio ne range PAS les reprises au même endroit que
-        // la sommative : elles vivent dans `configuration.portfolio`. Premier
-        // jet de ce report écrit sur `configuration.reprises` — rouge, et à
-        // raison : c'était supposer une symétrie que le code n'a jamais eue.
         expect(obj.configuration.reprises).toBeUndefined();
-        expect(obj.configuration.portfolio.reprisesPermises).toBe('non');
+        expect('reprisesPermises' in obj.configuration.portfolio).toBe(false);
     });
 
-    it('sans champ reprises, aucune configuration.reprises (golden inchangé)', async () => {
-        const obj = await produire('fixe-rep-vide', REPONSES.SOM);
-        expect(obj.configuration.reprises).toBeUndefined();
-    });
-
-    it('round-trip d\'édition : reprises restaurées depuis configuration.reprises', () => {
+    it('rouvrir une pratique ne relit plus les reprises dans les réponses', () => {
         store = [{ id: 'r1', nom: 'X', type: 'sommative', configuration: { reprises: { permises: true, mode: 'limite' } } }];
         win.wizardState.reponses = {};
         win.chargerPratiqueExistante('r1');
-        expect(win.wizardState.reponses.reprisesPermises).toBe('limite');
+        expect(win.wizardState.reponses.reprisesPermises).toBeUndefined();
     });
 });
 
@@ -368,9 +354,10 @@ describe('#443 · cliquet d\'absence — la branche « par objectifs » ne revie
 });
 
 describe('#319 Lot 3 — a11 + purge config-reprises', () => {
-    it('la carte Remplacement nomme la reprise sans pénalité (a11)', () => {
+    it('#903 : la carte Remplacement (a11) a quitté l\'assistant avec sa phrase', () => {
         const src = readFileSync(path.join(racineProjet, 'js/wizard-pratique-v2.js'), 'utf8');
-        expect(src).toMatch(/reprise sans pénalité/);
+        expect(src.length).toBeGreaterThan(50000);
+        expect(src).not.toMatch(/reprise sans pénalité/);
     });
     it('l\'étape morte config-reprises est purgée', () => {
         expect(win.ETAPES_WIZARD['config-reprises']).toBeUndefined();

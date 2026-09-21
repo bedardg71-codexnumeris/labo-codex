@@ -294,17 +294,34 @@ describe('six paramètres · règles spéciales éclatées (le cas tranché)', (
     it('chaque règle cochée se range sous SON paramètre', () => {
         const r = extraire({ type: 'sommative',
             reglesSpeciales: ['remplacement', 'double_verrou', 'plafonnement', 'portfolio'] });
-        expect(param(r, 'regleRemplacement')).toBe('revisabilite');
         expect(param(r, 'regleVerrou')).toBe('determination');
-        expect(param(r, 'reglePlafonnement')).toBe('determination');
         expect(param(r, 'reglePortfolio')).toBe('objet');
     });
 
     it('une règle absente ne produit aucune ligne', () => {
-        const r = extraire({ type: 'sommative', reglesSpeciales: ['remplacement'] });
-        expect(axes(r)).toContain('regleRemplacement');
+        const r = extraire({ type: 'sommative', reglesSpeciales: ['portfolio'] });
+        expect(axes(r)).toContain('reglePortfolio');
         expect(axes(r)).not.toContain('regleVerrou');
-        expect(axes(r)).not.toContain('reglePortfolio');
+    });
+
+    // #903 (21 sept. 2026) — le remplacement et le plafonnement étaient annoncés « Actif »
+    // alors que rien ne les applique. Une pratique ancienne PORTE encore leurs clés : elles
+    // sont tues — ni ligne « Actif », ni mot brut par le repli des valeurs inconnues.
+    it('#903 · une pratique qui porte « remplacement » et « plafonnement » : aucune ligne ne les annonce', () => {
+        const r = extraire({ type: 'sommative',
+            reglesSpeciales: ['remplacement', 'double_verrou', 'plafonnement', 'portfolio'] });
+        expect(axes(r)).not.toContain('regleRemplacement');
+        expect(axes(r)).not.toContain('reglePlafonnement');
+        expect(axes(r).filter(a => /^regle_/.test(a))).toEqual([]);
+        expect(JSON.stringify(r)).not.toMatch(/remplac|plafonn/i);
+    });
+
+    it('#903 · elle ne porte QUE des règles retirées : « Aucune », les mots qui existaient déjà', () => {
+        for (const reglesSpeciales of [['remplacement'], ['plafonnement', 'remplacement'], { remplacement: true, plafonnement: true }]) {
+            const r = extraire({ type: 'sommative', reglesSpeciales });
+            expect(val(r, 'reglesSpeciales')).toBe('Aucune');
+            expect(JSON.stringify(r)).not.toMatch(/remplac|plafonn/i);
+        }
     });
 
     it('aucune règle → une seule ligne « Aucune », sous détermination', () => {
@@ -318,9 +335,9 @@ describe('six paramètres · règles spéciales éclatées (le cas tranché)', (
     });
 
     it('règles portées par un objet plutôt qu\'un tableau : même rangement', () => {
-        const r = extraire({ type: 'sommative', reglesSpeciales: { remplacement: true, plafonnement: true } });
-        expect(param(r, 'regleRemplacement')).toBe('revisabilite');
-        expect(param(r, 'reglePlafonnement')).toBe('determination');
+        const r = extraire({ type: 'sommative', reglesSpeciales: { double_verrou: true, portfolio: true } });
+        expect(param(r, 'regleVerrou')).toBe('determination');
+        expect(param(r, 'reglePortfolio')).toBe('objet');
     });
 
     it('une règle inconnue est rendue telle quelle plutôt que perdue', () => {
@@ -372,9 +389,10 @@ describe('#809 · une seule table de libellés de règles sommatives', () => {
     const { libelleRegleSommative } = win.ConstructionAttributs;
 
     it('le module expose le libellé, et rend la clé brute si elle est inconnue', () => {
-        expect(libelleRegleSommative('remplacement')).toBe('Remplacement automatique');
         expect(libelleRegleSommative('portfolio')).toBe('Portfolio de progression');
-        expect(libelleRegleSommative('plafonnement')).toBe('Plafonnement conditionnel');
+        // #903 : sorties de la table — plus aucun écran ne demande leur libellé.
+        expect(libelleRegleSommative('remplacement')).toBe('remplacement');
+        expect(libelleRegleSommative('plafonnement')).toBe('plafonnement');
         // mieux un mot brut qu'un trou
         expect(libelleRegleSommative('bidule_inconnu')).toBe('bidule_inconnu');
         expect(libelleRegleSommative(null)).toBe('');
@@ -403,16 +421,20 @@ describe('#809 · une seule table de libellés de règles sommatives', () => {
         // Vider le corps du helper (`? cle : cle`) laissait le nom dans la
         // condition et l'essai restait vert. C'est l'appel qui compte.
         expect(CODE_WIZARD).toMatch(/window\.ConstructionAttributs\.libelleRegleSommative\s*\(\s*cle\s*\)/);
-        expect(CODE_WIZARD).toMatch(/_libelleRegle\('remplacement'\)/);
+        expect(CODE_WIZARD).toMatch(/_libelleRegle\('portfolio'\)/);
         expect(CODE_WIZARD).toMatch(/_libelleRegle\('double_verrou'\)/);
     });
 
-    it('les quatre clés du wizard sont exactement celles que le module connaît', () => {
+    it('les deux clés du wizard sont exactement celles que le module connaît (#903 : elles étaient quatre)', () => {
         // Les `value` sont PERSISTÉES : elles ne doivent pas bouger, et aucune
         // règle de l'écran ne doit manquer à la table.
-        ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'].forEach((cle) => {
+        ['double_verrou', 'portfolio'].forEach((cle) => {
             expect(CODE_WIZARD).toMatch(new RegExp("value: '" + cle + "'"));
             expect(libelleRegleSommative(cle)).not.toBe(cle);   // le module la connaît
+        });
+        // #903 — cliquet d'absence : les deux cases retirées ne reviennent pas.
+        ['remplacement', 'plafonnement'].forEach((cle) => {
+            expect(CODE_WIZARD).not.toMatch(new RegExp("value: '" + cle + "'"));
         });
     });
 });
