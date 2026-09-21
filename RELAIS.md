@@ -7,7 +7,25 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 12 H (Toronto) : audit « code en dur », LECTURE SEULE — commité en local, PAS poussé
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, après-midi (Toronto) : 1.152.3 (#553) — commitée en local (`9151a595`), PAS poussée
+
+**Le travail vit sur `main`, en local : DEUX commits d'avance sur origin/main (`1defd61c`)** — `e5e3e4a2` (l'audit « code en dur ») et `9151a595` (le lot #553, 1.152.3). Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 25, décision de Grégoire ; relayée par lui). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé. Vitest complet vert APRÈS le commit du bump : 610 fichiers, 6969 / 6969, aucun « Errors ».
+
+**#553** — la clé d'un critère est son nom normalisé entier, partout. Rabotage `startsWith('francais')` retiré aux neuf sites ; `_normaliserNomCritereIPB` retirée ; `NOM_CRITERE_LANGUE` / `francaisMoyen` retirés de `pratique-pan-standards.js` (**remesuré avant** : valeur sans lecteur depuis #552, aucun rôle dans la note — la sentinelle #552 interdit déjà son retour dans `calculs.js`). Trouvé dans le lot : le site du profil (`sections-affichage`) cherchait `francais` dans `calculerDirectionsCriteres`, qui indexe par le nom entier — la flèche d'un critère « Français… » n'était jamais trouvée ; réparé du même geste. **Stock** : `lireCritereSnapshotIntervention` (`interventions.js`) lit `snapshotAvant[da].criteres.francais` seulement si un seul critère de la grille de référence commence par « francais » et que c'est le critère demandé ; deux candidats : rien (« — » à l'écran). Rien n'est réécrit (assert à l'octet dans la sentinelle).
+
+**Mutations (une clause à la fois, restauration par copie + empreinte, `node --check` du fichier muté)** : M1 rabotage au producteur (5 rouges) ; M2 au profil (3) ; M3 à la direction du profil (2) ; M4 au compte des défis des interventions (2) ; M5 tolérance retirée (2) ; M6 apparie malgré deux candidats (2) ; M7 le candidat n'a plus à être le critère demandé (1) ; M8 le bilan contourne la fonction (1) ; M9 le bilan lit une grille vide (1). **À Cowork, pour la relecture** : (a) M3 et M4 ne rougissent QUE par le verrou structurel — aucun essai de comportement ne couvre la flèche de direction ni le compte des défis ; (b) une clause que j'avais écrite (`cleNorm.indexOf('francais') !== 0`) était logiquement redondante avec `candidats[0] !== cleNorm` : retirée avant les mutations plutôt que laissée intuable ; (c) « le dire au récit » pour le cas à deux candidats : je l'ai lu « le dire au relais et à `OU-EN-EST-ON.md` », pas à l'écran (la consigne dit « aucun mot à l'écran ne change »).
+
+**Garde CI** (`.github/workflows/tests.yml`) : l'erreur est reproduite à l'identique sous bash 3.2 (« unexpected EOF while looking for matching `'` »), le correctif (texte de repli dans `REPLI=`) passe sur le même extrait, YAML valide. Pas éprouvé sous le bash 5 du runner ; run manuel non lancé (non demandé).
+
+**Erratum de l'audit, à MOI** : `Rapports/AUDIT-code-en-dur-2026-09-21.md` classait l'export pour la recherche « sans appelant » — faux, j'avais cherché l'appelant de `lancerExportRecherche` et non celui du bouton (`data-action="exporterFormatRecherche"` → `trimestres.js:2000` → `:2362` → `calculerPerformanceParCritere`). Devenu le constat **F3-6** (compte `nb_I`…`nb_E` par lettres en clair, `taux_maitrise`), proposé « à inscrire », établi par lecture et grep, pas exécuté. Les autres « sans appelant » du rapport ont été re-grepés par le nom ET par `data-action` : ils tiennent.
+
+**Vu en passant, NON touché (issue 2, à inscrire si Grégoire le veut)** : `_calculerScoreMultiArtefactIPB` apparie aussi par préfixe — « Analyse » et « Analyse des résultats » s'y croiseraient.
+
+**Pas vérifié** : aucun écran dans un navigateur ; iPad, Safari ; aucune donnée réelle lue ; « en ligne ».
+
+---
+
+## (précédent) 21 SEPT. 2026, ≈ 12 H (Toronto) : audit « code en dur », LECTURE SEULE — commité en local, PAS poussé
 
 **Ajout de 11 h 23 (Cowork) — relecture de `Rapports/AUDIT-code-en-dur-2026-09-21.md` (`e5e3e4a2`) : F3-1 CONFIRMÉ À LA LECTURE.** `profil-etudiant-calculs.js:926` range la moyenne sous `francais` (`startsWith('francais')`) ; `diagnostiquerForcesChallenges` (≈ l. 1300) cherche `moyennes['francaisecrit']` (nom normalisé sans rabotage) → `null` → filtré. La cause écrite dans le rapport est exacte. Non rejoué par Cowork : le banc jetable (ses chiffres restent ceux de Claude Code). **Une disposition contestée** : F4-2 (« En prévision de l'EUF » pour les critères d'avant le 4 sept.) est proposé « refuser » ; ce sont des mots lus par des élèves d'autres disciplines si Grégoire partage une grille d'avant le 4 sept. – la disposition revient à Grégoire, pas à nous.
 
