@@ -67,9 +67,12 @@ function construireCSV(entetes, lignes) {
 // #706 — la dernière colonne dit combien d'évaluations de l'élève ont été écartées de la note
 // (brouillons non verrouillés, portée nulle), sur le modèle « 2 évaluations en brouillon,
 // non comptées » du profil ; vide quand la simulation ne le sait pas.
+// #723 (21 sept. 2026, tranché par Grégoire) : ce fichier sert à reporter les notes dans Léa —
+// il garde la note ARRONDIE À L'ENTIER (l'indice P de simulerIndices), et l'en-tête le dit, pour
+// qu'un 88 ici à côté d'un 87,6 au profil ne passe plus pour une erreur.
 var ENTETES_SYNTHESE = [
     'DA', 'Nom', 'Prénom', 'Groupe', 'Cours', 'Trimestre',
-    'Pratique (code)', 'Pratique (nom)', 'Note finale', 'Statut', 'Non comptées'
+    'Pratique (code)', 'Pratique (nom)', 'Note finale (arrondie à l\'entier)', 'Statut', 'Non comptées'
 ];
 
 /**

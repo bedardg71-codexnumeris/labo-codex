@@ -1,41 +1,42 @@
-# Consigne du jour – l'en-tête du fichier envoyé aux chercheurs dit ce que l'application calcule (#908)
+# Consigne du jour – la note d'une pratique Standards « tous » et l'arrondi de l'export (#715, #723)
 
-> Écrite le 21 septembre 2026, 9 h 28 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (#909, #903, poussée en 1.152.0) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-909-903-creer-adopter-pratique.md` (déplacée par Cowork, à commiter avec ce lot).
+> Écrite le 21 septembre 2026, 10 h 17 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (#908, poussée en 1.152.1) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-908-entete-export-recherche.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Pourquoi ces deux-là** : Grégoire et la cohorte utilisent surtout SOM et PAN-STD cet automne (Grégoire, 21 sept. ≈ 10 h 15). Des quatre défauts de note remesurés par Cowork ce matin (banc `audit-pratiques-notation-config-2026-09-16`, 32/32 verts avec les valeurs fausses figées), ce sont les deux qui les touchent. #713 (SPE) et #717 (DEN) attendent.
 
 ## 0 · Conditions de départ – mesure-les
 
-- `git fetch && git log --oneline -1 origin/main` porte **1.152.0** (`7c199e45` ou un commit de journal après). Sinon, arrête-toi.
+- `git fetch && git log --oneline -1 origin/main` porte **1.152.1** (`b87dfffc` ou un commit de journal après). Sinon, arrête-toi.
 - Aucune autre session n'écrit, aucun `pousser.sh` en cours ; arbre propre hors des non-suivis anciens et des fichiers de Cowork (§4).
 
-## 1 · Ce qui change – `js/trimestres.js`, `exporterFormatRecherche`, rien d'autre
+## 1 · #715 – sous « tous », la note prend toutes les productions
 
-Mesuré par Cowork le 21 sept. à 9 h 28 (lignes à remesurer) :
+Constat (fiche, tenu au 21 sept.) : `_selectionnerArtefactsLegacy` (`js/profil-etudiant-actions.js:262`) applique `.slice(0, nombreARetenir)` à tous les modes ; sous `methodeSelection: 'tous'` le chemin riche coupe à N dans l'ordre de stockage (**76,75**), l'instance `pratique-pan-standards.js` prend tout (**77,32**).
+**Décision de Cowork (technique, dite à Grégoire)** : « tous » veut dire tous – **une règle, celle qui prend tout**, dans les deux chemins.
+- **À remesurer avant de coder** : les autres lecteurs de `methodeSelection` qui pourraient couper sous « tous » (grep des cinq lecteurs cités au lot 28 : `portfolio.js`, `profil-etudiant-actions.js`, `pratique-pan-standards.js`, la carte du profil, `construction-attributs.js`). Mêmes chiffres partout : profil, `simulerIndices`, export.
+- **A2b du banc de l'audit rougit** (il fige 76,75) : réécris-le pour juger 77,32, ne le supprime pas.
+- **Le Comparateur** (`construction-attributs.js:160`) écrit « 4 retenu(s) sur 2 minimum » à côté de « Méthode de sélection : tous ». Sous « tous », rien n'est « retenu sur » : si un libellé EXISTANT dit juste, emploie-le ; sinon **arrête-toi sur ce point et propose les mots** (lus par des collègues), sans les poser.
+- **Stock** : la note se calcule à la lecture ; remesure si un P calculé sous « tous » est ÉCRIT quelque part (relevés hebdomadaires, `indicesCP`). S'il l'est, ne réécris rien : dis-le, en une ligne (« tarir n'est pas réparer »). Les notes d'A2025 et d'H2026 ne se rouvrent pas.
 
-| Champ | Aujourd'hui | Devient | Qui l'a décidé |
-|---|---|---|---|
-| `meta.version_monitorage` (l. 2103) | `'6.0.0-beta95'` en dur | la version du code chargé, lue à la source unique existante (`version.js` / `VERSION_MAJEURE`, #849 – ou `version.json` si c'est ce que la chaîne tient pour vrai ; **dis laquelle et pourquoi**) | Grégoire, 17 sept. 13 h 34 (technique) |
-| `calculs.description` (l. 2311) | « Indices calculés selon formules Monitorage v6 » | **« Indices calculés par Labo Codex »** | Grégoire, 21 sept. 9 h 28 |
-| `calculs.formules.indice_A` (l. 2313) | « Heures présentes / Heures offertes (cumulatif) » | **« assiduité : périodes présentes ÷ périodes offertes, cumulées depuis le début du trimestre (%) »** | Grégoire, 21 sept. 9 h 28 |
-| `calculs.formules.indice_C` (l. 2314) | « % artefacts évalués >= Maîtrisé (M) » | **« complétion : artefacts remis ÷ artefacts attendus (%) »** | Grégoire, 17 sept. 13 h 34 |
-| `calculs.formules.indice_P` (l. 2315) | « Moyenne pondérée des N meilleurs artefacts (IDME → %) » | **« performance calculée par la pratique de notation du cours ; la méthode varie selon la pratique »** | Grégoire, 17 sept. 13 h 34 |
+## 2 · #723 – l'export garde l'entier, et le dit
 
-- Textes **tels quels**, casse et ponctuation comprises (minuscule initiale voulue : ce sont des définitions dans un JSON).
-- **Aucun champ ajouté ni retiré** (écarté par Grégoire le 17 : nommer la pratique employée ; retirer les formules). Décision de Cowork : `version_format` reste **1.2** – la structure ne bouge pas, seules des valeurs de texte changent. Si tu mesures qu'un lecteur dépend de ces textes, dis-le.
-- **À remesurer avant de poser** : que A est bien le ratio de périodes (`calculerAssiduite`, `js/indices.js:197`, « A = Σ periodesPresentes / Σ periodesOffertes ») et que C compte bien remis ÷ attendus au sens de #871 / #904 (terminale comprise, copie non recevable exclue). Si l'un des deux ne dit pas ce que le texte dit, **arrête-toi** : ça remonte à Grégoire.
-- Stock : un export déjà produit ne se réécrit pas (comme au lot 33). Rien n'est écrit dans les données.
+**Tranché par Grégoire le 21 sept. à 10 h 17** : le fichier d'export des résultats finaux sert à reporter les notes dans Léa ; **il garde la note arrondie à l'entier**, et l'en-tête le dit, pour qu'un 88 à côté d'un 87,6 au profil ne passe plus pour une erreur.
+- `js/export-resultats-finaux.js`, `ENTETES_SYNTHESE` (l. 70-72) : la colonne **« Note finale »** devient **« Note finale (arrondie à l'entier) »** – décision de Cowork sur la forme, Grégoire en est informé et peut la reprendre.
+- **À remesurer avant de poser** : l'arrondi est bien un arrondi au plus proche (`indices.js:560`, `Math.round(P * 100)`) et un 74,5 donne 75 comme au niveau imprimé (1.150.0) ; qu'aucun lecteur (import, gabarit, test, Aide) ne dépend du libellé « Note finale » de ce fichier – sinon arrête-toi et dis lequel.
+- Aucune valeur ne change ; seul le libellé de la colonne. Le profil garde sa décimale (hors lot : le point décimal « 79.4 » du profil, s'il s'affiche encore ainsi, est à nommer, pas à corriger ici).
 
-## 2 · Preuves attendues
+## 3 · Preuves attendues
 
-- Sur le **vrai** `exporterFormatRecherche` (banc de `sentinelle-902-export-recherche-vrais-indices` ou voisin) : le fichier produit est relu ; les cinq valeurs exactes ; `version_monitorage` = la version courante (pas une constante recopiée dans le test) ; l'ensemble des clés de `meta` et de `calculs` identique à avant (cliquet).
-- Mutations, une clause à la fois, toutes rouges : la version remise en dur ; un mot changé dans chacune des quatre définitions ; un champ ajouté.
-- Vitest complet vert. **Release : patch** (rien ne change à l'écran). **Phrase de « Nouvelles » : à PROPOSER à Grégoire** avant de l'écrire (le fichier va aux chercheurs, l'enseignant·e ne voit rien).
+- #715 : sur le vrai moteur, une STD « tous » à 6 productions dont 4 « à retenir » : 77,32 au profil, par `simulerIndices` et à l'export ; un essai dont l'ordre de stockage contredit l'ordre attendu (erreur 17 de Cowork : un tri doit être jugé par un élément qui le contredit) ; « meilleurs » et « récents » inchangés (non-régression).
+- #723 : le CSV produit relu ; la colonne porte le nouveau libellé ; les valeurs identiques à avant, octet pour octet hors en-tête.
+- Mutations, une clause à la fois, toutes rouges : le `slice` remis sous « tous » ; un seul des deux chemins corrigé ; l'ancien libellé remis ; l'arrondi au plancher.
+- Vitest complet vert. **Release : patch.** **Phrase de « Nouvelles » à PROPOSER à Grégoire** avant de l'écrire.
 - Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire seulement.
-
-## 3 · Ce que Grégoire verra (en tête d'`OU-EN-EST-ON.md`)
-
-Rien à l'écran. Réglages › Captures et recherche › export anonymisé : l'en-tête du fichier porte la vraie version et décrit A, C et P comme l'application les calcule, sous le nom Labo Codex.
 
 ## 4 · Fichiers de Cowork à commiter avec ce lot
 
-`plans de travail/CONSIGNE-DU-JOUR.md` (celle-ci), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-909-903-creer-adopter-pratique.md`.
+`plans de travail/CONSIGNE-DU-JOUR.md` (celle-ci), `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-908-entete-export-recherche.md`, `CONSIGNE-DEMARRAGE-COWORK.md` (page du tri, version 45).
+
+## 5 · Ce que Grégoire verra (en tête d'`OU-EN-EST-ON.md`)
+
+Une pratique Standards réglée sur « tous » compte toutes les productions évaluées, au profil comme à l'export. Le fichier d'export des résultats finaux titre sa colonne « Note finale (arrondie à l'entier) » ; les notes elles-mêmes ne changent pas.

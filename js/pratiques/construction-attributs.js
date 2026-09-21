@@ -157,6 +157,11 @@
         // STD
         var portfolio = _lire(config, 'portfolio') || {};
         var nb = portfolio.nombreARetenir, min = portfolio.minimumCompletion;
+        // #715 (21 sept. 2026) : sous « tous », rien n'est « retenu sur » — la note prend toutes les
+        // productions évaluées, et `nombreARetenir` ne joue plus. Mots validés par Grégoire.
+        if (String(portfolio.methodeSelection || '') === 'tous') {
+            return 'Toutes les productions évaluées' + (min != null ? ' (' + min + ' minimum)' : '');
+        }
         if (nb != null && min != null) return nb + ' retenu(s) sur ' + min + ' minimum';
         if (nb != null) return nb + ' artefact(s) retenu(s)';
         return 'Sélection d\'artefacts';

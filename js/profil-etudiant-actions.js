@@ -277,7 +277,12 @@ function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelect
         artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
         artefactsRetenus.sort(parRecence);
     }
-    artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
+    // #715 (21 sept. 2026) : « tous » veut dire tous — la coupe à N ne vaut que pour les modes qui
+    // trient. Avant, elle s'appliquait aussi sous « tous », dans l'ordre de stockage, et ce chemin
+    // s'écartait de l'instance (pratique-pan-standards.js, case 'tous'), qui prend tout.
+    if (methodeSelection !== 'tous') {
+        artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
+    }
 
     let moyennePortfolio = null;
     if (artefactsRetenus.length > 0) {

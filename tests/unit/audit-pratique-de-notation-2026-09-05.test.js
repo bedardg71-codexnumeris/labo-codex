@@ -605,11 +605,12 @@ describe('C · brouillon « 0 » à portée incomplète, brouillon « 95 sur 50 
         expect(p).toBe(87.43);   // avant #706 : 87.5
     });
 
-    it('C3 · STD — le brouillon 0 entre dans le pool (écarté sous « meilleurs » N = 4) ; sous « tous », les DEUX systèmes divergent : le riche tronque à N (76,75), l\'instance prend tout (69,9)', () => {
+    it('C3 · STD — le brouillon 0 entre dans le pool (écarté sous « meilleurs » N = 4) ; sous « tous », les DEUX systèmes prennent tout : 77,32 (↻ #715 ; avant : le riche tronquait à N, 76,75)', () => {
         // À la main, « tous » = toutes les évaluations : (85+60+78+70+78+0)/6 = 61,833 → 61,833×0,6 + 82×0,4 = 69,9 ;
         // sans le brouillon : 371/5 = 74,2 → 44,52 + 32,8 = 77,32.
-        // OBTENU : le chemin riche applique `.slice(0, nombreARetenir)` à TOUS les modes (profil-etudiant-actions.js,
+        // AVANT #715 (21 sept. 2026) : le chemin riche appliquait `.slice(0, nombreARetenir)` à TOUS les modes (profil-etudiant-actions.js,
         // _selectionnerArtefactsLegacy) → les 4 PREMIÈRES de l'ordre de stockage : (85+60+78+70)/4 = 73,25 → 43,95 + 32,8 = 76,75.
+        // DEPUIS : sous « tous », il ne coupe plus — les cinq valides, 77,32, comme l'instance.
         const meilleurs = monter(jeuSTD());
         const tous = monter(jeuSTD({ methodeSelection: 'tous' }));
         const jeuSans = jeuSTD({ methodeSelection: 'tous' }); jeuSans.evaluations = jeuSans.evaluations.filter(e => e.id !== 'EV_A6');
@@ -624,9 +625,9 @@ describe('C · brouillon « 0 » à portée incomplète, brouillon « 95 sur 50 
         expect(m.meilleurs).toBe(79.45);
         expect(m.sortBrouillonSousMeilleurs).toBe('ecarte');
         expect(m.nombreEvalues).toBe(5);   // ↻ #706 : le brouillon n'est plus dans le pool (avant : 6)
-        expect(m.tousRiche).toBe(76.75);
-        expect(m.tousRicheRetenus).toEqual(['A1', 'A2', 'A3', 'A4']);
-        expect(m.tousInstance).toBe(77.32);   // ↻ #706 (avant : 69,9, le brouillon 0 comptait) — la divergence riche/instance (B-5) demeure
+        expect(m.tousRiche).toBe(77.32);   // ↻ #715 (avant : 76,75)
+        expect(m.tousRicheRetenus).toEqual(['A1', 'A2', 'A3', 'A4', 'A5']);   // ↻ #715 (avant : les 4 premières stockées)
+        expect(m.tousInstance).toBe(77.32);   // ↻ #706 (avant : 69,9, le brouillon 0 comptait) ; ↻ #715 : la divergence riche/instance (B-5) est levée
         expect(m.tousSansBrouillonInstance).toBe(77.32);
     });
 
