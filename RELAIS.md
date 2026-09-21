@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 17 H 30 : **1.153.0 (N1a + N1b) FUSIONNÉE DANS `main` EN LOCAL, NON POUSSÉE** — relecture de Cowork VERTE (17 h 34) ; premier verdict Playwright ROUGE, corrigé ; attend un verdict vert sur le SHA exact, puis le mot de Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 19 H 30 : **1.153.0 POUSSÉE — `origin/main = a37d50bf`**, rien en suspens sur `main`
+
+Troisième verdict Playwright sur `a37d50bf`, machine au repos (charge 4,6), sous caffeinate, Cowork fermé mesuré (0 VM) : **vert, 0 échec connu**. Relecture croisée de Cowork verte sur le complément `56f54904` (trois mutations, 19 h 14). Push par `git push origin main` (hook : Vitest vert + jeton vert sur le SHA exact) sur le mot de Grégoire (« pousse si vert », 19 h 20). Worktree `lot-n1a` et branche retirés ; N1 sorti de `FILE-DES-LOTS.md`. **Reste hors lot** : le rouge de la Garde du run planifié GitHub du 21 sept. au matin, à lire au prochain lot, sans release. `DEPLOY.md` (Cowork, non commité) n'a pas été touché.
+
+---
+
+## (relais précédent) 21 SEPT. 2026, 17 H 30 : **1.153.0 (N1a + N1b) FUSIONNÉE DANS `main` EN LOCAL, NON POUSSÉE** — relecture de Cowork VERTE (17 h 34) ; premier verdict Playwright ROUGE, corrigé ; attend un verdict vert sur le SHA exact, puis le mot de Grégoire
 
 **Où vit le travail** : `main` local = `origin/main` (`016be93e`) + `7ccd5293` (N1a, rebasé ; l'ancien `afcc14ef`) + `8192b7bf` (N1b, release 1.153.0, build 0921-1715) + ce relais. La branche `lot-n1a` et son worktree `.claude/worktrees/lot-n1a` pointent `8192b7bf` : à retirer une fois poussé.
 
