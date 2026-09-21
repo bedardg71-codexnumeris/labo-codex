@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // Entrée VALIDÉE par Grégoire le 21 sept. 2026 (#909, #903) — « Deux items », telle que proposée.
+            version: '1.152',
+            couleur: 'bleu',
+            titre: 'Pratiques de notation : l\'écran promet ce qui s\'applique',
+            items: [
+                'Adopter un modèle Standards dans un trimestre qui n\'a aucune échelle de performance&nbsp;: l\'application le dit, indique où créer l\'échelle (Conception → Échelles de performance) et n\'adopte rien, au lieu d\'adopter un modèle qui ne pouvait pas calculer la note.',
+                'L\'assistant de pratique ne propose plus le plafonnement, le remplacement ni les reprises pour une sommative&nbsp;: rien ne les appliquait à la note. Le Comparateur ne les annonce plus «&nbsp;Actif&nbsp;». Tes pratiques déjà créées ne perdent rien.'
+            ]
+        },
+        {
             // Entrée PROPOSÉE le 20 sept. 2026 (#926, #927, #928) — le mot « évaluation non enregistrée » est validé par
             // Grégoire ; la prose de l'entrée reste à valider.
             // Le 5e item (#929, planificateur) est VALIDÉ par Grégoire le 20 sept. 2026 ; les quatre premiers restent à valider.
