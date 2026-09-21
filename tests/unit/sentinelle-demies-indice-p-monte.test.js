@@ -13,7 +13,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //
 // BREAK-TESTS attendus, un à la fois, tous rouges : un seul des deux sites corrigé (l'un, puis l'autre) ;
 // l'ancien aller-retour remis dans la fonction ; `Math.floor` ; demi vers le pair (14,5 → 14 le dénonce,
-// 57,5 → 58 ne le verrait pas seul).
+// 57,5 → 58 ne le verrait pas seul). ; nettoyage au millième au lieu du millionième (59,4996 → 59 le dénonce).
 
 const DA = '1234567';
 
@@ -88,6 +88,19 @@ describe('demies · une note exactement en ,5 monte, aux trois lectures, sur le 
         const dessus = chaine([57.51]);
         expect(dessus.win.calculerDetailsNoteFinale(DA).noteFinale).toBeCloseTo(57.51, 9);
         expect(lesTroisEntiers(dessus)).toEqual({ simule: 58, exporte: 58, stocke: 58 });
+    });
+});
+
+describe('demies · le nettoyage reste au MILLIONIÈME : une note à quatre décimales sous la demie ne monte pas', () => {
+    // Trou de preuve trouvé par la relecture croisée de Cowork (21 sept. 2026) : un nettoyage au millième (1e3) au
+    // lieu du millionième passait les dix essais — aucun ne posait une note juste SOUS une demie, à quatre décimales.
+    // 59,4996 n'est pas 59,5 : c'est 59. Un nettoyage trop large ferait d'un échec une réussite.
+    [[59.4996, 59], [57.4996, 57], [14.4996, 14], [59.5004, 60]].forEach(([note, attendu]) => {
+        it(`${String(note).replace('.', ',')} → ${attendu} aux trois lectures`, () => {
+            const banc = chaine([note]);
+            expect(banc.win.calculerDetailsNoteFinale(DA).noteFinale).toBeCloseTo(note, 9);
+            expect(lesTroisEntiers(banc)).toEqual({ simule: attendu, exporte: attendu, stocke: attendu });
+        });
     });
 });
 
