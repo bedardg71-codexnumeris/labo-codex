@@ -1,43 +1,40 @@
-# Consigne du jour – une note en ,5 monte toujours : 57,5 donne 58 (demies de l'export pour Léa, trouvaille de 1.152.2)
+# Consigne du jour – les trois derniers « artefact » du PDF de synthèse deviennent « production »
 
-> Écrite le 21 septembre 2026, 13 h 08 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (F4-1, 1.152.4, poussée) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-f4-1-bilan-mots-eleve.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Décision de Grégoire** : lot ajouté à la file le 21 sept. à 11 h 43 (« oui, on l'ajoute ») ; lancé à 13 h 08 (« oui »). Règle : **la même que celle du niveau imprimé (1.150.0) : une note exactement en ,5 monte** (74,5 → 75, 57,5 → 58).
+> Écrite le 21 septembre 2026, 13 h 54 (Toronto), par Cowork. **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (demies, 1.152.5, poussée) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-demies.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Mots validés par Grégoire le 21 sept. à 13 h 00, tels quels** (question fermée, recommandation de Cowork). Lot n° 1 de `FILE-DES-LOTS.md`.
 
 ## 0 · Conditions de départ
 
-`git --no-optional-locks log --oneline -1 origin/main` porte `d5b67d62` (journal de 1.152.4) ou un commit de journal après. Sinon, arrête-toi. Aucune autre session n'écrit dans `js/`.
+`git --no-optional-locks log --oneline -1 origin/main` porte `e74988a0` (journal de 1.152.5) ou un commit de journal après. Sinon, arrête-toi. Aucune autre session n'écrit dans `js/`.
 
-## 1 · Ce que Cowork a mesuré (21 sept., à remesurer)
+## 1 · Ce qui change – `js/synthese-retroaction-rendu.js`, trois chaînes lues par l'élève dans le PDF
 
-- `js/portfolio.js` : `simulerIndices` (≈ l. 844-845) et `calculerEtStockerIndicesCP` (≈ l. 733-734) font `P_decimal = noteFinale / 100` puis `Math.round(P_decimal * 100)`. Exécuté sous node : 14,5 → 14 ; 28,5 → 28 ; 56,5 → 56 ; 57,5 → 57 (`57.5/100*100 = 57.49999999999999`) ; 74,5 → 75 et 59,5 → 60 sont justes.
-- Le commentaire l. ≈ 843 dit « Mêmes arrondis que calculerEtStockerIndicesCP » : **les deux sites doivent rester identiques.**
-- ⚠ **Le lot dépasse l'export pour Léa** : `simulerIndices` est lu par le profil (`profil-etudiant-sections-affichage.js`), le Comparateur, l'assistant, `indices.js` et l'export des résultats finaux ; `calculerEtStockerIndicesCP` écrit l'indice P du trimestre en cours. Mesure la liste des lecteurs et dis-la au rapport.
-- **C** passe par le même aller-retour (`Math.round(C_decimal * 100)`) : remesure s'il perd aussi des demies (un ratio remis ÷ attendus). Si oui, même correctif, même lot ; sinon, dis-le.
+Mesuré par Cowork à 13 h 54 (lignes à remesurer) :
+1. ≈ l. 151 : `artefact ${a.number} de ${a.total}` → **`production ${a.number} de ${a.total}`**
+2. ≈ l. 745 : `Voici les ${n} meilleurs artefacts que tu as produits` → **`Voici les ${n} meilleures productions que tu as réalisées`**
+3. ≈ l. 786 : `Artefacts à venir :` → **`Productions à venir :`**
 
-## 2 · Ce qui change
+- Accords : « meilleures » au féminin ; si `nbSelection` peut valoir 1, mesure ce que rend la phrase (« les 1 meilleurs… ») : si ce cas existe sur un chemin réel, accorde au singulier (« Voici ta meilleure production ») et **dis-le** — c'est un mot d'élève, Cowork le fera valider.
+- Espace avant le deux-points : suis ce que le fichier fait déjà.
+- Les noms de variables et de champs (`artefact`, `artefacts`, `f.artefact`) **ne changent pas** : seuls les mots rendus.
+- Si tu trouves un autre « artefact » lu par l'élève ailleurs dans la synthèse (données, rendu, PDF), **nomme-le sans le changer**.
 
-- Une seule façon d'arrondir, partagée par les deux sites, qui ne passe plus par l'aller-retour flottant (le choix technique est à toi ; nomme-le). Une note exactement en ,5 monte. Rien d'autre ne bouge : aucune note qui n'est pas en ,5 ne change.
-- Si l'arrondi du niveau imprimé de 1.150.0 est une fonction réutilisable, réutilise-la ; sinon, dis pourquoi.
-- **Aucun mot à l'écran ne change.** Pas de phrase de « Nouvelles » sans la proposer à Grégoire (à PROPOSER, question fermée).
+## 2 · Preuves
 
-## 3 · Stock – limite du 20 sept. : rien ne s'efface
+- La vraie synthèse rendue jusqu'au HTML du PDF : les trois phrases neuves présentes, aucun « artefact » dans le texte visible (hors attributs et commentaires).
+- Mutations, une à la fois, rouges : chacune des trois chaînes remise à l'ancien mot ; « meilleurs » au masculin.
+- Vitest complet vert. **Release : patch.** Phrase de « Nouvelles » : **à PROPOSER à Grégoire** (question fermée), sinon aucune — ajoute-la à l'entrée 1.152 comme pour 1.152.4.
+- Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire.
 
-- Un fichier déjà exporté ne se réécrit pas.
-- L'indice P du trimestre en cours se recalcule à l'ouverture, comme avant : pour un élève dont la note est exactement à 14,5, 28,5, 56,5 ou 57,5, il monte d'un point. Mesure-le sur le pack démo (combien d'élèves, lesquels), dis-le. Les trimestres passés ne sont pas rouverts.
-- ⚠ **Arrêt** : si une valeur corrigée **traverse 60** (59,5 compris) sur un chemin réel, arrête-toi et dis-le avant de commiter : ça touche une réussite, donc Grégoire. (Claude Code a mesuré « aucune ne traverse 60 » : à remesurer.)
+## 3 · Stock
 
-## 4 · Preuves
+Rien n'est persisté : les mots sont rendus à chaque PDF. Les PDF déjà remis gardent l'ancien texte.
 
-- Sur le vrai moteur : les quatre demies (14,5 · 28,5 · 56,5 · 57,5) donnent 15, 29, 57, 58, au profil, à l'export et dans l'indice stocké ; 74,5 → 75 inchangé ; une note non demie (57,49 → 57, 57,51 → 58) inchangée.
-- Une contre-épreuve sur TOUTES les valeurs à une décimale de 0 à 100 : l'entier rendu = l'arrondi « demi vers le haut » calculé en entiers (dixièmes). Pas seulement les quatre valeurs connues.
-- Mutations, une à la fois, rouges : un seul des deux sites corrigé ; l'ancien aller-retour remis ; `Math.floor` ; demi vers le pair.
-- Vitest complet vert. **Release : patch.** Relecture croisée par Cowork avant le verdict et le push ; push sur le mot de Grégoire.
+## 4 · Ce que Grégoire verra
 
-## 5 · Ce que Grégoire verra
+Dans le PDF de synthèse remis à l'élève : « production 2 de 5 », « Voici les 4 meilleures productions que tu as réalisées », « Productions à venir : ». Plus aucun « artefact ».
 
-Pour un élève dont la note est exactement en ,5, l'export pour Léa, le profil et le Comparateur disent le même entier, arrondi vers le haut (57,5 → 58). Tous les autres élèves : rien ne change.
+## 5 · Fichiers de Cowork à commiter avec ce lot
 
-## 6 · Fichiers de Cowork à commiter avec ce lot
-
-Cette consigne, l'archive de la précédente, `plans de travail/FILE-DES-LOTS.md` (retire-en le lot 1 une fois poussé ; le lot 2, les trois « artefact » du PDF, a été ajouté par Cowork à 13 h).
+Cette consigne, l'archive de la précédente, `plans de travail/FILE-DES-LOTS.md` (retire-en le lot 1 une fois poussé).
