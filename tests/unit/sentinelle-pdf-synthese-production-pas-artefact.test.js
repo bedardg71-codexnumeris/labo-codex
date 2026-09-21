@@ -16,7 +16,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 //
 // ⚠ UNE SEULE RETENUE est un chemin réel : hors hybride, `nombreSelection` est
 // la longueur de la sélection, et un élève à sa première évaluation n'a qu'une
-// production retenue. « Voici les 1 meilleures productions » ne se lit pas.
+// production retenue. « Voici les 1 meilleures productions » ne se lit pas ;
+// « Voici ta meilleure production » non plus (rien n'est comparé) : Grégoire a
+// tranché « Voici la production retenue » le 21 sept. 2026.
 
 const IDME = {
     id: 'ECH_IDME', nom: 'IDME', seuilSuffisance: 'D', seuilMaitrise: 'M',
@@ -130,10 +132,11 @@ describe('PDF de synthèse · « production », plus « artefact », dans ce que
         expect(lu).toContain('Productions à venir : Labo 5');
     });
 
-    it('une seule retenue : « Voici ta meilleure production », jamais « les 1 »', () => {
+    it('une seule retenue : « Voici la production retenue », jamais « les 1 » ni « meilleure »', () => {
         const { feedback, lu } = synthese(['P2']);
         expect(feedback.bilan.note.nombreSelection).toBe(1);
-        expect(lu).toContain('Voici ta meilleure production :');
+        expect(lu).toContain('Voici la production retenue :');
+        expect(lu).not.toContain('meilleure');
         expect(lu).not.toContain('les 1 ');
         expect(lu).not.toContain('meilleures productions');
     });
