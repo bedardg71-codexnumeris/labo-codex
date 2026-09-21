@@ -1020,10 +1020,9 @@
                 modeNotePreview = evaluation.optionsAffichage.affichageNote;
             } else {
                 try {
-                    const cfgs = db.getSync(cle('pratiquesConfigurables'), null) || [];
-                    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
-                    const pId = (typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null;
-                    const pActive = pId ? (cfgs.find(p => p.id === pId) || cfgs.find(p => p.type === pId)) : null;
+                    // Lot N1b (21 sept. 2026) : l'entrée de bibliothèque que rend LA désignation — par son id,
+                    // jamais « la première pratique du même type ». Sans pratique assignée : note complète.
+                    const pActive = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
                     if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';
                 } catch(e) { console.warn('[PDF-Export] pratique affichageNote preview fallback:', e.message || e); }
             }

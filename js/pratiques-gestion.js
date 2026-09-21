@@ -132,8 +132,8 @@ async function afficherListePratiquesMateriel() {
     // ne le disait pas : un enseignant pouvait croire sa pratique « activée » sans qu'aucune le
     // soit (le repli « sommative » ne correspond à aucune pratique de la liste : pas de badge).
     // Même badge et même règle que `afficherListePratiquesSidebar` (pratiques.js) : la SSOT.
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
+    const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
         : null;
 
     // Générer les items de la sidebar

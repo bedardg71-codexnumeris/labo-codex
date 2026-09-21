@@ -428,10 +428,12 @@ function obtenirEtatApplication() {
         const pratiqueDefaut = db.getSync('pratiqueParDefaut', 'non définie');
         etat.pratiqueParDefaut = pratiqueDefaut;
 
-        // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
-        etat.pratiqueActive = ((typeof obtenirPratiqueActiveGroupeCours === 'function')
-            ? obtenirPratiqueActiveGroupeCours()
-            : null) || 'non définie';
+        // Lot N1b (21 sept. 2026) : le pointeur TEL QU'IL EST ÉCRIT et l'état que rend LA désignation
+        // (aucune / introuvable / ok) — ce qu'il faut pour lire un rapport « aucune note ».
+        const designation = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive() : null;
+        etat.pratiqueActive = designation
+            ? ((designation.idBrut || 'non définie') + ' (' + designation.etat + ')')
+            : 'non définie';
     } catch (e) {
         etat.pratiqueParDefaut = 'erreur lecture';
     }

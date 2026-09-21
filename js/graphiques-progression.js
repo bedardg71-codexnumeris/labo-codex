@@ -4237,7 +4237,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
 function obtenirLabelNoteFinale() {
     try {
         // #328 L2-b2 : type dérivé de la SSOT groupesCours[].pratiqueId (helper D2).
-        const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        const pratique = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null);   // lot N1b : aucun repli
         return (pratique === 'standards') ? 'Note chiffrée' : 'Note finale';
     } catch (e) {
         return 'Note chiffrée';

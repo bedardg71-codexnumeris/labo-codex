@@ -6995,10 +6995,8 @@
         // Lire le réglage affichageNote de la pratique active du groupe-cours
         let modeNote = 'complet';
         try {
-            const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-                ? obtenirPratiqueActiveGroupeCours() : null;
-            const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
-            const pratiqueActive = pratiqueId ? configurations.find(p => p.id === pratiqueId) : null;
+            // Lot N1b (21 sept. 2026) : l'entrée que rend LA désignation ; sans pratique, note complète.
+            const pratiqueActive = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
             if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
         } catch(e) { console.warn('[Travaux-UI] pratique affichageNote fallback:', e.message || e); }
 

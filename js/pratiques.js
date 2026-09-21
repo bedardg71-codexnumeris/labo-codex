@@ -54,7 +54,7 @@
  * Guard `typeof` car pratique-registre.js peut être chargé après ce fichier ;
  * au runtime (handlers) il est présent.
  * NB #328 L2-b2 : le miroir modalites.pratique n'existe plus — la pratique
- * active se dérive de la SSOT via obtenirPratiqueActiveGroupeCours (id) et
+ * active se dérive de la SSOT via obtenirIdPratiqueActive (id) et
  * obtenirTypePratiqueActive (type canonique).
  * @param {string} p - identifiant éventuellement legacy
  * @returns {string} forme canonique (ou l'entrée telle quelle)
@@ -265,14 +265,16 @@ function getCoursActifId() {
  */
 function getCoursUtilisantPratique(pratiqueId) {
     const cours = db.getSync('cours', []);
-    // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
-    const pratiqueActive = ((typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
-        : null) || 'sommative';
+    // Lot N1b (21 sept. 2026) : l'id que rend LA désignation (`designerPratiqueActive`), sans repli.
+    // Avant, un pointeur vide valait « sommative » : une pratique nommée « sommative » passait
+    // pour utilisée par tous les cours d'un groupe-cours qui n'en avait assigné aucune.
+    const pratiqueActive = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
+        : null;
 
     // Si cette pratique est la pratique active, tous les cours l'utilisent
     // (comparaison normalisée : tolère legacy ↔ canonique des deux côtés).
-    if (_normPratique(pratiqueId) === _normPratique(pratiqueActive)) {
+    if (pratiqueActive && _normPratique(pratiqueId) === _normPratique(pratiqueActive)) {
         return cours;
     }
 
@@ -534,84 +536,6 @@ function genererSelecteurPratiqueParDefaut() {
 }
 
 /**
- * Génère le HTML d'une carte de pratique (avec toggle collapsible)
- * ✅ MODIFICATION (8 décembre 2025) : Carte collapsible pour optimiser l'espace vertical
- * @param {object} pratique - Objet pratique {id, nom, description, auteur}
- * @param {boolean} estActive - True si c'est la pratique active
- * @param {boolean} modifiable - True si la pratique peut être éditée/supprimée
- * @returns {string} HTML de la carte
- */
-function genererCartePratique(pratique, estActive, modifiable) {
-
-    const badgeActif = estActive ? `<span class="badge-pratique badge-pratique-active">ACTIVE</span>` : '';
-
-    // NOUVEAU Beta 91 : Compter le nombre de cours utilisant cette pratique
-    const coursUtilisant = getCoursUtilisantPratique(pratique.id);
-    const nbCours = coursUtilisant.length;
-    const badgeParDefaut = (getPratiqueParDefaut() === pratique.id) ?
-        `<span class="badge-pratique badge-pratique-defaut">PAR DÉFAUT</span>` : '';
-
-    // ✅ AJOUT (8 décembre 2025) : Bouton Activer OU Désactiver selon l'état
-    const boutonActiver = !estActive
-        ? `<button class="btn btn-tres-compact btn-confirmer" data-action="activerPratique" data-param="${pratique.id}">Activer</button>`
-        : `<button class="btn btn-tres-compact btn-secondaire" data-action="desactiverPratique" data-param="${pratique.id}">Désactiver</button>`;
-
-    const boutonsModification = modifiable ? `
-        <button class="btn btn-tres-compact btn-modifier" data-action="editerPratique" data-param="${pratique.id}">Modifier</button>
-        <button class="btn btn-tres-compact btn-secondaire" data-action="dupliquerPratique" data-param="${pratique.id}">Dupliquer</button>
-        <button class="btn btn-tres-compact btn-secondaire" data-action="exporterPratiqueVersJSON" data-param="${pratique.id}">Exporter</button>
-        <button class="btn btn-tres-compact btn-supprimer" data-action="supprimerPratique" data-param="${pratique.id}">Supprimer</button>
-    ` : '';
-
-    const auteur = pratique.auteur ?
-        `Par ${pratique.auteur}${pratique.etablissement ? ` (${pratique.etablissement})` : ''}` : '';
-
-    // Par défaut : la pratique ACTIVE est ouverte, les autres sont fermées
-    const estOuvert = estActive;
-    const iconeToggle = estOuvert ? '▲' : '▼';
-    const displayDetails = estOuvert ? 'block' : 'none';
-
-    return `
-        <div class="carte pratique-carte" data-pratique-id="${pratique.id}">
-            <!-- Header cliquable (toujours visible) -->
-            <div class="pratique-header" data-action="togglePratique" data-param="${pratique.id}" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                    <strong style="font-size: 1rem; color: var(--accent-primaire);">${pratique.nom}</strong>
-                    ${badgeActif}
-                    ${badgeParDefaut}
-                </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="text-align: right;">
-                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--accent-primaire);">${nbCours}</div>
-                        <div style="font-size: 0.75rem; color: var(--gris-moyen);">cours</div>
-                    </div>
-                    <div class="pratique-toggle-icon" style="font-size: 1.2rem; color: var(--accent-primaire); user-select: none;">
-                        ${iconeToggle}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Détails collapsibles -->
-            <div class="pratique-details" id="pratique-details-${pratique.id}" style="display: ${displayDetails}; transition: all 0.3s ease;">
-                <!-- Séparateur visuel -->
-                <div style="border-top: 1px solid var(--gris-leger); margin-bottom: 12px; padding-top: 12px;">
-                    ${auteur ? `<div style="margin-bottom: 6px; color: var(--gris-moyen); font-size: 0.85rem;">${auteur}</div>` : ''}
-                    ${(function(l){return l ? '<div class="biblio-carte-inspire" style="margin-bottom: 6px;">' + echapperHtml(l) + '</div>' : '';})(BibliothequeUI.formaterInspireDe(pratique))}
-                    ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
-                    ${nbCours > 0 ? `<div style="margin-top: 8px; color: var(--gris-moyen); font-size: 0.85rem;"><strong>Cours :</strong> ${coursUtilisant.map(c => c.sigle).join(', ')}</div>` : ''}
-                </div>
-
-                <!-- Boutons d'action -->
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    ${boutonActiver}
-                    ${boutonsModification}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-/**
  * Toggle l'affichage des détails d'une carte de pratique
  * ✅ AJOUT (8 décembre 2025) : Gestion collapsible des cartes
  * @param {string} pratiqueId - ID de la pratique à toggle
@@ -639,8 +563,8 @@ function togglePratique(pratiqueId) {
  */
 async function activerPratique(id, confirmer = true) {
     // Vérifier si la pratique est déjà active (#328 L2-b2 : SSOT, plus le miroir)
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
+    const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
         : null;
     if (pratiqueActiveId === id) {
         // ✅ NOUVEAU (9 décembre 2025) : Même si déjà active, recharger sa config
@@ -806,39 +730,12 @@ function afficherSectionsSelonConfig(config) {
 }
 
 /**
- * Désactive une pratique (revient à la pratique par défaut)
- * ✅ AJOUT (8 décembre 2025)
- * @param {string} id - ID de la pratique à désactiver
- */
-async function desactiverPratique(id) {
-    const pratiqueDefaut = getPratiqueParDefaut();
-
-    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${_normPratique(pratiqueDefaut) === 'standards' ? 'PAN-Standards' : 'Sommative'}) sera activée à la place.`)) {
-        return;
-    }
-
-    try {
-        // Activer la pratique par défaut à la place
-        await PratiqueManager.changerPratiqueActive(pratiqueDefaut);
-
-        // Recharger l'affichage
-        await afficherListePratiques();
-
-        // Notification
-        notifications.succes('Pratique désactivée', 'La pratique par défaut est maintenant active.');
-    } catch (error) {
-        console.error('Erreur lors de la désactivation:', error);
-        alert(`❌ Erreur : ${error.message}`);
-    }
-}
-
-/**
  * Ouvre le wizard pour éditer la pratique actuellement active
  */
 async function editerPratiqueActive() {
     // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
+    const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
         : null;
 
     if (!pratiqueActiveId) {
@@ -1078,8 +975,8 @@ async function supprimerPratique(id) {
     const pratique = pratiques.find(p => p.id === id);
 
     // Vérifier que la pratique n'est pas active (#328 L2-b2 : SSOT, plus le miroir)
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
+    const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
         : null;
     if (pratiqueActiveId === id) {
         alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
@@ -1274,7 +1171,6 @@ window.changerPratiqueParDefaut = changerPratiqueParDefaut;
 window.mettreAJourUIPratiqueDefaut = mettreAJourUIPratiqueDefaut;
 
 // Phase 5 : exports manquants pour délégation data-action
-window.desactiverPratique = desactiverPratique;
 window.togglePratique = togglePratique;
 window.chargerConfigurationPratique = chargerConfigurationPratique;
 window.alertFonctionnaliteAVenir = alertFonctionnaliteAVenir;
@@ -1329,8 +1225,8 @@ async function afficherListePratiquesSidebar() {
     if (!container) return;
 
     // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId.
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
+    const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
         : null;
 
     // ✅ NOUVEAU (9 décembre 2025) : Récupérer la pratique sélectionnée pour l'affichage
@@ -1644,8 +1540,8 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
     }
 
     // Vérifier que la pratique n'est pas active (#328 L2-b2 : SSOT, plus le miroir)
-    const pratiqueActiveId = (typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours()
+    const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
+        ? obtenirIdPratiqueActive()
         : null;
     if (pratiqueActiveId === pratiqueId) {
         alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);

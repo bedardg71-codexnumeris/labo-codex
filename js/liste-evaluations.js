@@ -663,10 +663,11 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
  */
 function construireLignesEvaluations(evaluations, productions, etudiants) {
     const lignes = [];
-    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-        ? obtenirPratiqueActiveGroupeCours()
-        : (typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : 'sommative');
-    const estPAN = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueId) : pratiqueId) === 'standards';
+    // Lot N1b (21 sept. 2026) : l'id que rend LA désignation, sans repli. ⚠ La règle N'A PAS bougé :
+    // c'est l'ID qui se compare à « standards », pas la famille — une Standards configurable (id propre)
+    // affiche donc le pourcentage, comme avant. Ce lot ne change aucune note affichée.
+    const pratiqueId = (typeof obtenirIdPratiqueActive === 'function') ? obtenirIdPratiqueActive() : null;
+    const estPAN = !!pratiqueId && (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratiqueId) : pratiqueId) === 'standards';
 
     // Productions à évaluer (exclure le portfolio lui-même).
     // #605 — la règle vit dans `productionGenereUneLigne`, lue aussi par le

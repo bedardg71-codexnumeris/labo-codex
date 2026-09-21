@@ -242,9 +242,9 @@ function chargerGrillesDansSelect() {
 function _obtenirPratiqueIdActive() {
     const coursActifId = getCoursActifId();
     if (coursActifId) return getPratiqueCours(coursActifId);
-    // #328 L2-b1 : id dérivé de la SSOT (groupesCours), plus du miroir.
-    return ((typeof obtenirPratiqueActiveGroupeCours === 'function')
-        ? obtenirPratiqueActiveGroupeCours() : null) || 'sommative';
+    // Lot N1b (21 sept. 2026) : l'id que rend LA désignation, sans repli « sommative » — le seul
+    // lecteur (`_resoudreEchellePratique`) rend null sans id, comme il le faisait pour « sommative ».
+    return (typeof obtenirIdPratiqueActive === 'function') ? obtenirIdPratiqueActive() : null;
 }
 
 // #328 L2-c : `_synchroniserJetonsPratique` RETIRÉ — le miroir modalites.configPAN.jetons

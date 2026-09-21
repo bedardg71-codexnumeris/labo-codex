@@ -1600,9 +1600,11 @@ function determinerModeAffichageTableauBord(config) {
     // plus honorées : ce seul point garantit qu'aucun rendu n'affiche deux couches.
     // #328 L2-b2 : type dérivé de la SSOT (le paramètre config reste pour les
     // autres champs des appelants, plus pour la pratique).
+    // Lot N1b (21 sept. 2026) : plus de repli PRATIQUE_DEFAUT. Sans pratique assignée (null), la couche
+    // reste « PAN » : c'est une COUCHE D'AFFICHAGE, elle ne calcule rien — C et P s'y lisent « — ».
     const pratiqueActive = (typeof obtenirTypePratiqueActive === 'function'
         ? obtenirTypePratiqueActive()
-        : null) || (window.PRATIQUE_DEFAUT || 'standards');
+        : null);
     const estSommative = pratiqueActive === 'sommative';
     return { afficherSom: estSommative, afficherPan: !estSommative };
 }
@@ -2832,6 +2834,11 @@ function afficherAlerteNonParticipation(etudiants) {
             || (e.alternatif && e.alternatif.assiduite !== null && e.alternatif.assiduite !== undefined);
         const aDesEvals = (e.sommatif && (e.sommatif.completion > 0 || e.sommatif.performance > 0)) ||
                           (e.alternatif && (e.alternatif.completion > 0 || e.alternatif.performance > 0));
+        // Lot N1b (21 sept. 2026) — SANS PRATIQUE ASSIGNÉE, LA COMPLÉTION EST INCONNUE (`null`, indices.js) : on ne
+        // sait pas ce que cet élève a remis AU SENS DE LA PRATIQUE, donc on ne peut pas dire « aucune production
+        // remise ». Mesuré sur la vraie page (pack démo, pratique retirée) : les 10 élèves étaient nommés ici.
+        const completionInconnue = (bloc) => !!bloc && bloc.completion === null;
+        if (completionInconnue(e.sommatif) || completionInconnue(e.alternatif)) return false;
         return aDesPresences && !aDesEvals;
     });
 

@@ -1327,25 +1327,16 @@ function etudiantDansCoursActif(etudiant) {
 }
 
 /**
- * 🆕 BETA 95.5 : Obtient la pratique de notation active du groupe-cours
- * Retourne l'ID de la pratique (ex: "sommative", "pan-standards")
- *
- * @returns {string|null} - ID de la pratique active ou null si non définie
- */
-function obtenirPratiqueActiveGroupeCours() {
-    // Lot N1a (#710, 21 sept. 2026) : le pointeur se lit dans `lirePointeurPratiqueGroupeCours`.
-    // ⚠ Le repli « sommative » ne vit plus qu'ICI, pour les lecteurs d'écran qui n'ont pas
-    // encore été relus un à un (lot N1b, qui le retire). Tout ce qui CALCULE ou ÉCRIT une note
-    // passe par `resoudrePratiqueActive` (pratique-registre.js), qui ne connaît aucun repli.
-    return lirePointeurPratiqueGroupeCours() || 'sommative';
-}
-
-/**
  * Lot N1a (#710) — LE POINTEUR DE PRATIQUE DU GROUPE-COURS ACTIF, TEL QU'IL EST ÉCRIT. AUCUN REPLI.
  *
  * Décision de Grégoire (21 sept. 2026, 14 h 31) : sans pratique assignée, aucune note. Rendre
  * « sommative » à la place d'un pointeur vide faisait calculer un P de 87 au tableau de bord
  * pendant que le profil disait qu'aucune pratique n'était assignée.
+ *
+ * Lot N1b (21 sept. 2026) : `obtenirPratiqueActiveGroupeCours` et son repli « sommative » sont
+ * RETIRÉS. Les lecteurs d'écran passent par la désignation (`designerPratiqueActive`,
+ * `obtenirIdPratiqueActive`, `obtenirTypePratiqueActive` — pratique-registre.js) ; CE lecteur-ci
+ * n'a qu'un appelant légitime : la désignation elle-même.
  *
  * @returns {string|null} l'id écrit dans `groupesCours[].pratiqueId`, brut (ni normalisé ni
  *          vérifié) ; null quand rien n'est assigné.
@@ -1392,7 +1383,6 @@ window.coursDuContexteActif = coursDuContexteActif;
 window.estCoursService = estCoursService;
 window.contexteActifEstService = contexteActifEstService;
 window.etudiantDansCoursActif = etudiantDansCoursActif;
-window.obtenirPratiqueActiveGroupeCours = obtenirPratiqueActiveGroupeCours;
 window.lirePointeurPratiqueGroupeCours = lirePointeurPratiqueGroupeCours;
 
 // ============================================

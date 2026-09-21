@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.153.0 (lots N1a + N1b, #710 à #713, #719) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
+            version: '1.153',
+            couleur: 'bleu',
+            titre: 'Pratiques de notation : sans pratique assignée, aucune note par défaut',
+            items: [
+                'Un groupe-cours sans pratique de notation assignée n\'affiche plus de note calculée par défaut&nbsp;: la complétion et la performance se lisent «&nbsp;—&nbsp;», aucun élève n\'est signalé pour cette raison, et le profil indique où choisir la pratique (Conception → Pratiques de notation). Rien n\'est effacé&nbsp;: les notes reviennent dès qu\'une pratique est assignée.'
+            ]
+        },
+        {
             // Entrée VALIDÉE par Grégoire le 21 sept. 2026 (#909, #903) — « Deux items » ; l'item 2 repris par lui à 9 h 01
             // (les reprises ont aussi quitté la branche Standards).
             // Le 3e item (#908, en-tête de l'export recherche, 1.152.1) est VALIDÉ par Grégoire le 21 sept. 2026.

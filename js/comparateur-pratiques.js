@@ -260,9 +260,10 @@
 
     // Pratique active du groupe-cours — sert de 1ʳᵉ colonne par défaut (#326 R4b :
     // colonnes paires, plus de notion de « référence privilégiée »).
+    // Lot N1b (21 sept. 2026) : l'id que rend LA désignation, ou null. Sans pratique assignée, aucune
+    // colonne n'est « l'active » : `_initColonnes` remplit ses deux colonnes par les comparables.
     function _refId() {
-        return (typeof obtenirPratiqueActiveGroupeCours === 'function' && obtenirPratiqueActiveGroupeCours())
-            || (window.PRATIQUE_DEFAUT || 'standards');
+        return (typeof obtenirIdPratiqueActive === 'function') ? obtenirIdPratiqueActive() : null;
     }
 
     // Pratiques COMPARABLES offertes aux sélecteurs (#326 R4b) : familles codées

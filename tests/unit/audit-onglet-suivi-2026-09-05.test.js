@@ -1051,3 +1051,109 @@ describe('H · ce que les courbes lisent', () => {
         expect(snaps).toEqual([]);
     });
 });
+
+/* =============================================================================================
+   I · LOT N1b (21 sept. 2026) — UN GROUPE SANS PRATIQUE ASSIGNÉE : « — », ET AUCUNE ALERTE
+   ============================================================================================= */
+describe('I · groupe-cours sans pratique assignée (lot N1b)', () => {
+    /** Le groupe de banc, sa pratique retirée, toute la chaîne recalculée. */
+    const sansPratique = (pointeur) => {
+        const jeu = jeuBase(); jeu.pratiqueId = pointeur;
+        const b = monter(jeu); b.calculerTout(); b.win.calculerEtudiantsPrioritaires();
+        return b;
+    };
+    const filtrer = (b, filtre) => {
+        const tb = b.interne['tableau-bord-apercu.js'];
+        tb._filtresActifs.length = 0; tb._filtresActifs.push(filtre); tb.appliquerFiltres();
+        const das = tb._etudiantsPrioritaires.map(e => e.da);
+        tb._filtresActifs.length = 0;
+        return das;
+    };
+
+    it('I1 · l\'écrivain pose « complétion non constructible » (champ additif) et le lecteur rend C = null, jamais 0 ; P « non constructible »', () => {
+        const b = sansPratique(undefined);
+        const stock = b.store.test_indicesCP[DA.ASSIDU].actuel;
+        const indices = b.win.calculerTousLesIndices(DA.ASSIDU);
+        noter('I1', { stock: { C: stock.C, P: stock.P, noteConstructible: stock.noteConstructible, completionConstructible: stock.completionConstructible }, indices });
+        expect(stock).toMatchObject({ pratique: null, C: 0, P: 0, noteConstructible: false, completionConstructible: false });
+        expect(indices.A).toBe(100);            // l'assiduité ne dépend d'aucune pratique
+        expect(indices.C).toBeNull();
+        expect(indices.M).toBeNull();
+        expect(indices.noteConstructible).toBe(false);
+        expect(indices.completionConstructible).toBe(false);
+        // Le bloc du tableau de bord (barres du groupe) : complétion inconnue, pas 0.
+        expect(b.win.calculerIndicesEtudiant(DA.ASSIDU).sommatif.completion).toBeNull();
+    });
+
+    it('I2 · AUCUNE ALERTE DUE À C : le filtre « A ou C sous la borne » ne retient que l\'assiduité réellement basse ; le filtre P personne ; le contexte se lit « — » pour tous', () => {
+        // À la main : Assidu A 100, Absent A 40, Silence A 100 ; C inconnu pour les trois. Avant ce lot, C valait 0 :
+        // le filtre retenait les TROIS élèves et le contexte d'apprentissage disait « Fragile » à tout le groupe.
+        const b = sansPratique(undefined);
+        const filtreM = filtrer(b, 'M'), filtreP = filtrer(b, 'P');
+        const contextes = [DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => b.win.determinerAlerteContextuelle(da));
+        noter('I2', { filtreM, filtreP, contextes: contextes.map(c => ({ niveau: c.niveau, label: c.label, C: c.C })) });
+        expect(filtreM).toEqual([DA.ABSENT]);
+        expect(filtreP).toEqual([]);
+        contextes.forEach(c => {
+            expect(c).toMatchObject({ niveau: 'inconnu', label: '—', C: '—', donneesSuffisantes: false });
+            expect(c.recommandation).toMatch(/^Aucune pratique de notation n'est assignée/);   // la phrase du diagnostic, aucun mot neuf
+        });
+    });
+
+    it('I3 · le dépistage lit les COPIES, pas la pratique : les paliers sont ceux du même groupe AVEC sa pratique (F1) — aucun élève de plus n\'est signalé', () => {
+        const avec = (() => { const b = monter(jeuBase()); b.calculerTout(); b.win.calculerEtudiantsPrioritaires(); return b; })();
+        const sans = sansPratique(undefined);
+        const paliers = (b) => [DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => { const r = b.win.determinerNiveauRaiPedagogique(da); return { niveau: r.niveau, pattern: r.pattern }; });
+        const cibles = (b) => [DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => b.win.determinerCibleIntervention(da).cible);
+        noter('I3', { paliers: paliers(sans), cibles: cibles(sans) });
+        expect(paliers(sans)).toEqual(paliers(avec));
+        expect(cibles(sans)).toEqual(cibles(avec));
+        expect(paliers(sans)[0]).toEqual({ niveau: 1, pattern: 'Stable' });
+        expect(filtrer(sans, 'rai')).toEqual(filtrer(avec, 'rai'));
+    });
+
+    it('I4 · les écrans : badge « C — », rapport « Complétion : — », type de pratique null (aucun mot de pratique inventé)', () => {
+        const b = sansPratique(undefined);
+        const tb = b.interne['tableau-bord-apercu.js'];
+        const enrichi = tb._tousEtudiantsEnrichis.find(e => e.da === DA.ASSIDU);
+        const rapport = b.win.genererRapportAPI(DA.ASSIDU, { assiduite: true, completion: true, performance: true });
+        noter('I4', { enrichi: { A: enrichi.A, C: enrichi.C, P: enrichi.P, noteConstructible: enrichi.noteConstructible }, type: b.win.obtenirTypePratiqueActive(), id: b.win.obtenirIdPratiqueActive(), terme: b.win.obtenirTermeProduction('singulier') });
+        expect(enrichi).toMatchObject({ A: 100, C: null, noteConstructible: false });
+        expect(b.win.obtenirTypePratiqueActive()).toBeNull();
+        expect(b.win.obtenirIdPratiqueActive()).toBeNull();
+        expect(b.win.obtenirTermeProduction('singulier')).toBe('production');     // avant : « artefact », le mot du repli PRATIQUE_DEFAUT
+        expect(b.win.determinerModeAffichageTableauBord({})).toEqual({ afficherSom: false, afficherPan: true });
+        expect(rapport).toContain('Complétion : —');
+        expect(rapport).not.toMatch(/null\s*%/);
+        expect(rapport).toContain('Performance : non constructible');
+    });
+
+    it('I6 · l\'alerte NOMMÉE du tableau de bord (« N étudiant·e·s présent·e·s sans aucune production remise ») ne nomme PERSONNE sans pratique — avec la pratique, Silence seul', () => {
+        // Trouvé sur la VRAIE page (pack démo, pratique retirée, WebKit) : les 10 élèves y étaient nommés — complétion inconnue
+        // lue comme « rien remis ». Le témoin AVEC pratique prouve que l'alerte sait encore parler : Silence (A 100, rien remis).
+        const monterAvecCarte = (pointeur) => {
+            const inserts = [];
+            const jeu = jeuBase(); jeu.pratiqueId = pointeur;
+            const b = monter(jeu, { elements: { 'carte-indicateurs-acpe': elementDom({ insertAdjacentHTML: (ou, h) => inserts.push(h) }) } }); b.calculerTout();
+            b.interne['tableau-bord-apercu.js'].afficherAlerteNonParticipation([DA.ASSIDU, DA.ABSENT, DA.SILENCE].map(da => Object.assign({ da, nom: da, prenom: '' }, b.win.calculerIndicesEtudiant(da))));
+            return inserts;
+        };
+        const avec = monterAvecCarte('som-banc'), sans = monterAvecCarte(undefined);
+        noter('I6', { avec: avec.length, sans: sans.length });
+        expect(avec).toHaveLength(1);
+        expect(avec[0]).toContain('1 étudiant·e présent·e');
+        expect(avec[0]).toContain(DA.SILENCE);
+        expect(sans).toEqual([]);
+    });
+
+    it('I5 · un pointeur `standards` NU (jamais configuré) est « introuvable » : mêmes écrans que sans pratique — et `sommative` nu reste une pratique assignée', () => {
+        const nu = sansPratique('standards');
+        expect(nu.win.designerPratiqueActive().etat).toBe('introuvable');
+        expect(nu.win.obtenirTypePratiqueActive()).toBeNull();                   // avant : « standards », lu au registre
+        expect(nu.win.calculerTousLesIndices(DA.ASSIDU).C).toBeNull();
+        expect(filtrer(nu, 'M')).toEqual([DA.ABSENT]);
+        const som = sansPratique('sommative');
+        expect(som.win.obtenirTypePratiqueActive()).toBe('sommative');
+        expect(som.win.calculerTousLesIndices(DA.ASSIDU)).toMatchObject({ C: 100, P: 77, noteConstructible: true });
+    });
+});

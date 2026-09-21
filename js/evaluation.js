@@ -88,15 +88,9 @@ function cocherOptionsParDefaut() {
 
     // Initialiser affichageNote depuis la pratique active du groupe-cours
     try {
-        const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-            ? obtenirPratiqueActiveGroupeCours() : null;
-        const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        // ✅ CORRIGÉ (16 mars 2026) : chercher par id, puis fallback par type
-        // (les anciens groupe-cours stockent le type 'pan-standards' au lieu de l'ID unique)
-        var pratiqueActive = pratiqueId ? configurations.find(function(p) { return p.id === pratiqueId; }) : null;
-        if (!pratiqueActive && pratiqueId) {
-            pratiqueActive = configurations.find(function(p) { return p.type === pratiqueId; });
-        }
+        // Lot N1b (21 sept. 2026) : l'entrée de bibliothèque que rend LA désignation (id brut, puis
+        // normalisé — un ancien pointeur « pan-standards » y mène), jamais « la première du même type ».
+        var pratiqueActive = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
         if (pratiqueActive?.affichageNote === 'lettre') {
             document.getElementById('affichageNoteLettre1').checked = true;
         } else {
@@ -547,13 +541,8 @@ function restaurerSelectionsEvaluation() {
 
                 // Appliquer affichageNote depuis la PRATIQUE ACTIVE (pas la mémorisation)
                 try {
-                    var _pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-                        ? obtenirPratiqueActiveGroupeCours() : null;
-                    var _configs = db.getSync(cle('pratiquesConfigurables'), null) || [];
-                    var _pratique = _pratiqueId ? _configs.find(function(p) { return p.id === _pratiqueId; }) : null;
-                    if (!_pratique && _pratiqueId) {
-                        _pratique = _configs.find(function(p) { return p.type === _pratiqueId; });
-                    }
+                    // Lot N1b : même désignation que l'initialisation du formulaire (plus haut).
+                    var _pratique = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
                     if (_pratique?.affichageNote === 'lettre') {
                         document.getElementById('affichageNoteLettre1').checked = true;
                     } else {

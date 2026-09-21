@@ -39,7 +39,7 @@ function chargerJetons(pratiqueActiveId, pratiques, extra = {}) {
     return chargerScript('js/evaluation-jetons.js', {
         db: dbDepuisStore(store),
         cle: (k) => k,
-        obtenirPratiqueActiveGroupeCours: () => pratiqueActiveId
+        obtenirIdPratiqueActive: () => pratiqueActiveId
     });
 }
 
