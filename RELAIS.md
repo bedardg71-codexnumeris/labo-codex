@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 9 H 45 (Toronto) : 1.152.1 (#908), l'en-tête de l'export recherche — COMMITÉE, PAS POUSSÉE ; origin/main = `7c199e45`
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 9 H 45 (Toronto) : 1.152.1 (#908), l'en-tête de l'export recherche — ✅ POUSSÉ À 10 h 05, origin/main = `e901e808`
+
+**Mise à jour de 10 h 05 : POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, en arrière-plan, sur le mot de Grégoire (« exécute-la, push compris ») ; `7c199e45..e901e808`, deux commits (`ffd1368b` 1.152.1, `e901e808` complément de Cowork : trois commentaires rendus vrais — C est proposé par Claude Code, validé par Grégoire à 9 h 43 ; build-only). Garde de charge du script : 150 s d'attente (53,85 → 7,22, Vitest venait de finir). Sentinelle Playwright : aucune rougeur nouvelle ; hook Vitest vert (6940 / 6940). Mesuré avant : aucune VM Cowork, aucun `pousser.sh`, arbre propre, 52 % de mémoire libre. « En ligne » chez l'hébergeur : non mesuré d'ici.
 
 **Ajout de 9 h 42 (Cowork) — relecture croisée de `ffd1368b` (1.152.1, #908) : VERTE pour le code, par exécution ; UN ÉCART DE MOTS porté à Grégoire.** Clone jetable, `sentinelle-902-export-recherche-vrais-indices` : 19 / 19. Cinq mutations de Cowork, cinq rouges : version remise en dur (« 1.152.1 ») ; « périodes » → « heures » dans A ; la réserve des spécifications retirée de C ; un mot retiré de P ; un champ `pratique` ajouté à `calculs`. `git status` du clone vide après restauration. **Lu** : la réserve de C est exacte (`pratique-pan-specifications.js`, `calculerDetailsCompletion` : acceptables ÷ somme des requis du palier le plus haut, plafonné à 1). **Écart** : le texte de C n'est pas celui que Grégoire a validé (« complétion : artefacts remis ÷ artefacts attendus (%) ») et le commentaire au-dessus dit « Mots de Grégoire, tels quels » – faux pour C tant qu'il n'a pas tranché. **Tranché par Grégoire à 9 h 43 : le texte de C de Claude Code est retenu.** Reste à rendre vrai le commentaire, puis le push sur son mot : `plans de travail/CONSIGNE-COMPLEMENT-1152-1-commentaire-C.md`.
 
