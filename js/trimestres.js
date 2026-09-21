@@ -2309,8 +2309,9 @@
                 },
 
                 calculs: {
-                    // #908 (21 sept. 2026) — CES TEXTES DISENT CE QUE L'APPLICATION CALCULE. Mots de Grégoire, tels quels
-                    // (minuscule initiale voulue : des définitions dans un JSON). Verrouillés par la sentinelle #908.
+                    // #908 (21 sept. 2026) — CES TEXTES DISENT CE QUE L'APPLICATION CALCULE. description, A et P : mots de
+                    // Grégoire, tels quels ; C : proposé par Claude Code, validé par Grégoire le 21 sept. 2026. (Minuscule
+                    // initiale voulue : des définitions dans un JSON.) Verrouillés par la sentinelle #908.
                     description: 'Indices calculés par Labo Codex',
                     formules: {
                         indice_A: 'assiduité : périodes présentes ÷ périodes offertes, cumulées depuis le début du trimestre (%)',

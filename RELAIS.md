@@ -9,6 +9,8 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 9 H 45 (Toronto) : 1.152.1 (#908), l'en-tête de l'export recherche — COMMITÉE, PAS POUSSÉE ; origin/main = `7c199e45`
 
+**Ajout de 9 h 42 (Cowork) — relecture croisée de `ffd1368b` (1.152.1, #908) : VERTE pour le code, par exécution ; UN ÉCART DE MOTS porté à Grégoire.** Clone jetable, `sentinelle-902-export-recherche-vrais-indices` : 19 / 19. Cinq mutations de Cowork, cinq rouges : version remise en dur (« 1.152.1 ») ; « périodes » → « heures » dans A ; la réserve des spécifications retirée de C ; un mot retiré de P ; un champ `pratique` ajouté à `calculs`. `git status` du clone vide après restauration. **Lu** : la réserve de C est exacte (`pratique-pan-specifications.js`, `calculerDetailsCompletion` : acceptables ÷ somme des requis du palier le plus haut, plafonné à 1). **Écart** : le texte de C n'est pas celui que Grégoire a validé (« complétion : artefacts remis ÷ artefacts attendus (%) ») et le commentaire au-dessus dit « Mots de Grégoire, tels quels » – faux pour C tant qu'il n'a pas tranché. **Tranché par Grégoire à 9 h 43 : le texte de C de Claude Code est retenu.** Reste à rendre vrai le commentaire, puis le push sur son mot : `plans de travail/CONSIGNE-COMPLEMENT-1152-1-commentaire-C.md`.
+
 **Le travail vit sur `main`, en local.** Ordre dû (consigne, §2) : relecture croisée de Cowork → corrections → verdict → push **sur le mot de Grégoire seulement**.
 
 **Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 21 sept., 9 h 28), relayée par Grégoire. Conditions de départ mesurées par l'audit : `main` = `origin/main` = `7c199e45`, 1.152.0, Vitest 6934 / 6934, aucune session voisine ni `pousser.sh`, arbre = les deux fichiers de Cowork.
