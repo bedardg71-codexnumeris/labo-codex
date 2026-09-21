@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 14 H 05 (Toronto) : 1.152.6 (les trois derniers « artefact » du PDF de synthèse) — COMMITÉE, NON POUSSÉE
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 14 H 30 (Toronto) : 1.152.6 (les trois derniers « artefact » du PDF de synthèse) — ✅ POUSSÉ, origin/main = `91d4d15d`
+
+**POUSSÉ à 14 h 25** par `scripts/pousser.sh origin main` sous `caffeinate`, détaché (`nohup`, suivi par PID), sur le « Oui, pousse — je ferme Cowork » de Grégoire (question fermée posée par Claude Code : le mot de push arrivait dans le texte de relecture rédigé par Cowork) ; `e74988a0..91d4d15d`, trois commits (`60980f25` le lot, `cdfd49c3` relais, `91d4d15d` complément du singulier). Cowork fermé MESURÉ avant le lancement (machine virtuelle partie, Claude.app fermée). Garde de charge : 26,90 au lancement, 7,62 après 90 s d'attente. Sentinelle Playwright : aucune rougeur nouvelle, 0 échec connu, verdict vert à jour pour le SHA ; hook Vitest vert. La sortie de `pousser.sh` ne dit rien des specs instables : non affirmé. `git fetch` après coup : origin/main = `91d4d15d`. « En ligne » chez l'hébergeur : non mesuré d'ici. Lot 1 retiré de `plans de travail/FILE-DES-LOTS.md`. **Rien n'est dû sur ce lot.** Ce qui suit est l'état d'AVANT le push, gardé pour la trace.
 
 **Le travail vit sur `main`, en local, en avance sur origin/main (`e74988a0`).** Le lot : `60980f25`. Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 13 h 54, mots validés par Grégoire à 13 h 00 ; relayée par lui). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé. Après le push : retirer le lot 1 de `plans de travail/FILE-DES-LOTS.md`.
 
