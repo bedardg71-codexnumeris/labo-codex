@@ -7,6 +7,36 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, FIN D'APRÈS-MIDI : lot N1 COUPÉ EN DEUX ; **N1a est sur la branche `lot-n1a` (`afcc14ef`), NON FUSIONNÉ, NON POUSSÉ — et il ne doit pas l'être seul**
+
+**Où vit le travail** : branche locale `lot-n1a`, un commit (`afcc14ef`) par-dessus `1ca0f949`. `main` = `origin/main` + ce relais. Aucune release, aucun bump : sept jetons anti-cache seulement.
+
+**Pourquoi coupé** (décision de Grégoire, question fermée, ~14 h 50 : « coupe en deux, snapshots inclus ») : la mesure a trouvé SEPT fonctions qui répondent « quelle pratique ? » (la consigne en nommait quatre ; en plus : `obtenirIdPratiqueActive`, `obtenirPratiqueActive`, `obtenirTypePratiqueActive`), 13 sites `|| PRATIQUE_DEFAUT || 'standards'` dans 8 fichiers, 53 sites d'`obtenirPratiqueActiveGroupeCours` dans 20 fichiers, et deux écrivains en base.
+
+**Cas d'arrêt du §3, dit à Grégoire** : `snapshots.js` écrivait chaque semaine, au démarrage, un P tiré d'une pratique « standards » fabriquée puis de la table I/D/M/E en dur (preuve par exécution déjà au dépôt : sentinelle #734). Tari par N1a ; **le stock reste** (les snapshots déjà écrits gardent leur P, rien n'est réécrit).
+
+**Ce que N1a fait** (détail dans le message de `afcc14ef`) : une résolution unique au registre (`designerPratiqueActive` / `resoudrePratiqueActive` : pointeur brut → entrée de bibliothèque PAR SON ID, brut puis normalisé, jamais par type → configuration `.configuration` puis `.config` → instance ; états aucune / introuvable / illisible / ok) ; `indicesCP`, le chemin riche du profil, l'export (`obtenirIdPratiqueActive`), `PratiqueManager` et les snapshots passent par elle ; retirer la pratique écrit « non constructible » ; changer de pratique recalcule les indices.
+
+**Preuves** : sept montages sur le vrai moteur, quatre surfaces chacun (N1 à N7, dans `tests/unit/audit-pratique-de-notation-2026-09-05.test.js`) ; parité des quatre familles par B1 à B4, VALEURS NON RETOUCHÉES ; neuf mutations une à la fois, toutes rouges, fichiers restaurés à l'empreinte ; Vitest 614 fichiers / 7 010 essais verts, 0 « Errors ». Playwright NON lancé (rien n'est poussé). Pack démo : LU, pas exécuté — un seul groupe-cours, `demo-std-litt` assignée, donc 0 groupe et 0 élève touchés.
+
+**⚠ TROIS SUPPOSITIONS NOMMÉES, à confirmer ou corriger par Grégoire / Cowork à la relecture croisée :**
+1. Un pointeur ancien « mène à une configuration » par son **id** (brut, puis normalisé), jamais par « la première pratique de la même famille ». Sinon #711 et #713 se contredisent.
+2. Un pointeur **`sommative` nu reste une pratique assignée** (seule famille du registre sans configuration ; elle calcule juste partout aujourd'hui). `standards` et `specifications` nus deviennent « introuvable » — l'indice d'un `pan-standards` nu était DÉJÀ « non constructible » avant le lot (A2).
+3. **Le stock de #898** (Standards adoptée SANS échelle avant le 17 sept. : instance illisible, mais le profil calcule sa note) **garde sa note** : ma première écriture la faisait passer à « — », rattrapé par l'essai B2 de l'audit du 16 sept. La décision « aucune note » porte sur « sans pratique assignée » ; ici une pratique l'est.
+
+**⚠ CONSTAT DE DIDACTIQUE, À GRÉGOIRE (pas tranché, pas touché)** : pour une Standards, les deux instances ne lisent pas le niveau de la note globale dans la même échelle — celle du registre prend l'échelle COMMUNE AUX ÉVALUATIONS de l'élève (#575) ; la `PratiqueConfigurable` prend l'échelle RANGÉE DANS LA PRATIQUE. Suivre #719 à la lettre changeait la lettre au profil (mesuré : le « M » d'une échelle remplacée, #648, disparaissait — essai E3). N1a garde donc l'instance du registre pour STD / SOM / SPE et ne change que la dénotation. Laquelle fait foi se décide avec N2 (#716), qui doit aussi donner un P historique à la configurable (elle n'a pas `calculerPerformanceHistorique`).
+
+**CE QUI RESTE — lot N1b (les lecteurs), puis la livraison du tout en `minor`** :
+1. Relire un à un les 53 sites d'`obtenirPratiqueActiveGroupeCours`, puis RETIRER son repli « sommative » (il ne vit plus que là, `modes.js`).
+2. Les 13 sites `|| (window.PRATIQUE_DEFAUT || 'standards')` et les 34 appels d'`obtenirTypePratiqueActive`.
+3. **`C: 0` s'écrit avec `noteConstructible: false` quand rien n'est assigné** : vérifier ce que le tableau de bord, les patterns et le dépistage en font (un « — », pas une alerte sur tout le groupe). C'est la raison pour laquelle N1a ne se livre pas seul.
+4. Mesurer le pack démo PAR EXÉCUTION ; commiter les fichiers de Cowork (consigne, archive, `FILE-DES-LOTS.md`) avec la livraison ; phrase de « Nouvelles » À PROPOSER à Grégoire ; relecture croisée de Cowork ; verdict Playwright ; push sur le mot de Grégoire.
+
+**Trouvé en chemin, troisième issue (sans conséquence observable, rien d'inscrit)** : `genererCartePratique` / `desactiverPratique` / `getPratiqueParDefaut` (`pratiques.js`) — 0 appelant, conteneur `#listePratiques` absent d'`index.html` ; ce bouton « Désactiver » mort est le seul geste qui écrirait encore un pointeur nu.
+**Pas à moi, non commité** : `DEPLOY.md` (v1.10, écrit par Cowork à 14 h 39 pendant la session) et les trois fichiers de `plans de travail/`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 14 H 30 (Toronto) : 1.152.6 (les trois derniers « artefact » du PDF de synthèse) — ✅ POUSSÉ, origin/main = `91d4d15d`
 
 **POUSSÉ à 14 h 25** par `scripts/pousser.sh origin main` sous `caffeinate`, détaché (`nohup`, suivi par PID), sur le « Oui, pousse — je ferme Cowork » de Grégoire (question fermée posée par Claude Code : le mot de push arrivait dans le texte de relecture rédigé par Cowork) ; `e74988a0..91d4d15d`, trois commits (`60980f25` le lot, `cdfd49c3` relais, `91d4d15d` complément du singulier). Cowork fermé MESURÉ avant le lancement (machine virtuelle partie, Claude.app fermée). Garde de charge : 26,90 au lancement, 7,62 après 90 s d'attente. Sentinelle Playwright : aucune rougeur nouvelle, 0 échec connu, verdict vert à jour pour le SHA ; hook Vitest vert. La sortie de `pousser.sh` ne dit rien des specs instables : non affirmé. `git fetch` après coup : origin/main = `91d4d15d`. « En ligne » chez l'hébergeur : non mesuré d'ici. Lot 1 retiré de `plans de travail/FILE-DES-LOTS.md`. **Rien n'est dû sur ce lot.** Ce qui suit est l'état d'AVANT le push, gardé pour la trace.
