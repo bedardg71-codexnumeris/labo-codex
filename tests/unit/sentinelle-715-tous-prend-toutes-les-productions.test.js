@@ -7,8 +7,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // l'ordre de stockage (76,75), l'instance (pratique-pan-standards.js, case 'tous') prenait tout
 // (77,32). #394 avait réuni les deux systèmes sur « meilleurs » et « récents », pas sur « tous ».
 //
-// Le corpus est celui du banc de l'audit du 16 sept. (A2b) : 6 productions, 4 « à retenir »,
-// 5 évaluations valides (85, 60, 78, 70, 78), la 6e en brouillon (hors note, #706), une
+// Le corpus reprend les nombres du banc de l'audit du 16 sept. (A2b) : 4 « à retenir »,
+// 5 évaluations valides (85, 60, 78, 70, 78), une autre en brouillon (A8, hors note, #706), une
 // terminale à 82, pondérations 60/40. Moyenne des 5 = 74,2 → 74,2 × 0,6 + 82 × 0,4 = 77,32.
 // A2b juge les mêmes nombres par `simulerIndices` et par l'export, sur le moteur de l'assistant.
 //
@@ -17,14 +17,14 @@ import { chargerScript } from './_helpers/charger-script.js';
 const DA = '1234567';
 const NOTES = { A1: 85, A2: 60, A3: 78, A4: 70, A5: 78 };
 
-function corpus(methodeSelection, ordre) {
+function corpus(methodeSelection, ordre, notes = NOTES) {
     const productions = [
         { id: 'PF', type: 'portfolio', ponderation: 60, titre: 'Portfolio' },
         { id: 'TERM', type: 'terminale', ponderation: 40, numero: 7, titre: 'Analyse finale' }
     ];
-    for (let i = 1; i <= 6; i++) productions.push({ id: 'A' + i, type: 'artefact-portfolio', numero: i, titre: 'Artefact ' + i });
+    for (let i = 1; i <= 8; i++) productions.push({ id: 'A' + i, type: 'artefact-portfolio', numero: i, titre: 'Artefact ' + i });
     const valide = (pid) => ({
-        etudiantDA: DA, productionId: pid, noteFinale: NOTES[pid], ponderationCouverte: 100, verrouillee: true,
+        etudiantDA: DA, productionId: pid, noteFinale: notes[pid], ponderationCouverte: 100, verrouillee: true,
         dateEvaluation: '2026-02-0' + pid.slice(1), remplaceeParId: null
     });
     return {
@@ -32,7 +32,7 @@ function corpus(methodeSelection, ordre) {
         evaluationsSauvegardees: [
             ...ordre.map(valide),
             // Brouillon non verrouillé : nommé au récit, jamais compté (#706).
-            { etudiantDA: DA, productionId: 'A6', noteFinale: 0, ponderationCouverte: 50, verrouillee: false, remplaceeParId: null },
+            { etudiantDA: DA, productionId: 'A8', noteFinale: 0, ponderationCouverte: 50, verrouillee: false, remplaceeParId: null },
             { etudiantDA: DA, productionId: 'TERM', noteFinale: 82, ponderationCouverte: 100, verrouillee: true, remplaceeParId: null }
         ],
         groupeEtudiants: [{ da: DA, nom: 'Test', prenom: 'Étudiant' }],
@@ -73,8 +73,8 @@ function chargerChaine(store) {
     return win;
 }
 
-function lesDeuxChemins(methodeSelection, ordre) {
-    const win = chargerChaine(corpus(methodeSelection, ordre));
+function lesDeuxChemins(methodeSelection, ordre, notes) {
+    const win = chargerChaine(corpus(methodeSelection, ordre, notes));
     const riche = win.calculerDetailsNoteFinale(DA);
     const instance = win.obtenirPratiqueParId('standards').calculerPerformance(DA);
     return { riche, instance };
@@ -108,6 +108,32 @@ describe('#715 · sous « tous », la note prend toutes les productions évalué
         expect(riche.portfolio.artefactsRetenus.map(a => a.productionId).sort()).toEqual(['A1', 'A2', 'A3', 'A4', 'A5']);
         const horsSelection = riche.recit.resultats.filter(r => /hors des/.test(r.detail || ''));
         expect(horsSelection).toEqual([]);
+    });
+});
+
+// Relecture croisée de Cowork (21 sept. 2026, 10 h 37) : tous les jeux ci-dessus ont CINQ valides pour N = 4 — une coupe à
+// N + 1 y prend tout, par hasard, et sa mutation restait VERTE (152 / 152). Ici, SEPT valides (N + 3), la plus faible
+// stockée en dernier : toute coupe qui reviendrait sous « tous », quelle que soit sa borne (N, N + 1, `nombreTotal` = 6),
+// l'écarte et change la note.
+describe('#715 · sous « tous », AUCUNE borne ne coupe : sept valides pour N = 4 et nombreTotal = 6', () => {
+    const SEPT = { A1: 85, A2: 60, A3: 78, A4: 70, A5: 78, A6: 90, A7: 40 };
+    const ORDRE = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'];   // la plus faible (40) en dernier
+    // (85+60+78+70+78+90+40)/7 = 501/7 = 71,5714… → × 0,6 + 82 × 0,4 = 75,742857…
+    const ATTENDU = (501 / 7) * 0.6 + 82 * 0.4;
+
+    it('la note est la moyenne des SEPT, au chemin riche ET à l\'instance (coupe à 5 : 77,32 ; à 6 : 78,9)', () => {
+        const { riche, instance } = lesDeuxChemins('tous', ORDRE, SEPT);
+        expect(riche.noteFinale).toBeCloseTo(ATTENDU, 6);
+        expect(instance).toBeCloseTo(ATTENDU / 100, 6);
+        expect(riche.portfolio.nombreRetenus).toBe(7);
+        expect(riche.portfolio.artefactsRetenus.map(a => a.productionId)).toContain('A7');
+    });
+
+    it('témoin : sous « meilleurs », le même jeu écarte bien la plus faible (les 4 meilleures : 90, 85, 78, 78 → 82,45)', () => {
+        const { riche, instance } = lesDeuxChemins('meilleurs', ORDRE, SEPT);
+        expect(riche.noteFinale).toBeCloseTo(82.75 * 0.6 + 32.8, 6);
+        expect(instance).toBeCloseTo((82.75 * 0.6 + 32.8) / 100, 6);
+        expect(riche.portfolio.artefactsRetenus.map(a => a.productionId)).not.toContain('A7');
     });
 });
 
