@@ -29,7 +29,10 @@ import { tranche } from './_helpers/tranche.js';
 //   D. annotation postérieure à l'export ignorée ;
 //   E. garde de l'écrivain retirée (`permis.has` toujours vrai).
 //   F. un `confirm(` natif reposé dans l'écran.
-//   ⮕ six mutations, six rouges.
+//   G. le test du statut (`blobStatut !== 'exporte'`) retiré — trouvée VERTE par la
+//      relecture croisée de Cowork (20 sept., 19 h 54) : aucun essai ne portait une
+//      copie re-déposée. Essais ajoutés, mutation reposée : rouge.
+//   ⮕ sept mutations, sept rouges.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -159,6 +162,31 @@ describe('#892 · l\'écrivain porte sa garde : il ne peut pas effacer un fichie
         const avant = JSON.stringify(magasin);
         expect(await travauxStockage.nettoyerFichiersArchives(['FT_jamais', 'FT_sansdate'])).toBe(0);
         expect(journal.blobsSupprimes).toEqual([]);
+        expect(JSON.stringify(magasin)).toBe(avant);
+    });
+
+    // Re-déposer une copie remet `blobStatut = 'present'` SANS effacer `dateExport`
+    // (`travaux-import.js`, remplacement du blob sous le même id) : la date dit
+    // « sortie hier », le fichier est NEUF et n'est jamais sorti. Même chose pour
+    // une copie `manquant` qui garde sa date. Seul le statut les écarte.
+    const REDEPOSEES = [
+        F('FT_redeposee', { blobStatut: 'present', dateExport: '2026-09-19T15:00:00.000Z' }),
+        F('FT_manquante', { blobStatut: 'manquant', dateExport: '2026-09-19T15:00:00.000Z' })
+    ];
+
+    it('une copie re-déposée (`present`) ou `manquant` qui garde sa date d\'export n\'est pas proposée', () => {
+        const { travauxStockage } = monter([]);
+        const tri = travauxStockage.selectionnerCopiesARetirer(REDEPOSEES, []);
+        expect(tri.aRetirer).toEqual([]);
+        expect(tri.marqueAncienne).toEqual([]);
+    });
+
+    it('et l\'écrivain, appelé avec leurs ids, ne les efface pas', async () => {
+        const { travauxStockage, magasin, journal } = monter(REDEPOSEES);
+        const avant = JSON.stringify(magasin);
+        expect(await travauxStockage.nettoyerFichiersArchives(['FT_redeposee', 'FT_manquante'])).toBe(0);
+        expect(journal.blobsSupprimes).toEqual([]);
+        expect(journal.vignettesSupprimees).toEqual([]);
         expect(JSON.stringify(magasin)).toBe(avant);
     });
 
