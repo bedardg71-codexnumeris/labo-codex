@@ -9,7 +9,9 @@
 
 ## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, ≈ 19 H 15 (Toronto) : 1.151.6 (#892), « Proposer un nettoyage » ne retire que l'exporté — 🟡 COMMITÉ SUR `main` LOCAL (`9d9ddb71` + le commit de relais), **PAS POUSSÉ**
 
-**État exact** : `origin/main` = `19f21704` ; `main` local a deux commits d'avance. Le push attend le mot de Grégoire (« qui pousse : Claude Code, sur demande »). Pour pousser : `scripts/pousser.sh origin main` sous `caffeinate`, EN ARRIÈRE-PLAN (verdict Playwright ≈ 15 min, le lot touche `js/`), Cowork fermé, `pgrep pousser.sh` vide, puis corriger ce bloc.
+**Mise à jour du 21 sept., 0 h 50 : complément de Cowork exécuté (`8433cd8c`), push LANCÉ sur le « Oui : ligne validée, pousse » de Grégoire.** Relecture croisée de Cowork (`plans de travail/CONSIGNE-COMPLEMENT-892.md`) : la mutation « test du statut retiré » restait verte – une copie re-déposée redevient `present` en gardant sa `dateExport`. Deux essais de comportement ajoutés (sélection et écrivain, copies `present` et `manquant` datées d'hier), mutation reposée : rouge (2), empreinte restaurée ; aucun code d'application changé. Ligne de « Nouvelles » entrée dans 1.151 (build-only `0921-0045`, numéro inchangé). Vitest 606 / 6 913. ⮕ Si ce bloc ne dit pas « POUSSÉ » plus bas, mesurer : `git fetch && git log origin/main --oneline -1`.
+
+**État au lancement du push** : `origin/main` = `19f21704` ; `main` local a quatre commits d'avance. Le push attend le mot de Grégoire (« qui pousse : Claude Code, sur demande »). Pour pousser : `scripts/pousser.sh origin main` sous `caffeinate`, EN ARRIÈRE-PLAN (verdict Playwright ≈ 15 min, le lot touche `js/`), Cowork fermé, `pgrep pousser.sh` vide, puis corriger ce bloc.
 
 **Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (ex-`CONSIGNE-EN-ATTENTE-892-nettoyage-sans-perte.md`, Cowork, 18 h 46) ; la précédente archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-20-878-aide-nommer-les-pages.md`. Conditions de départ mesurées : `origin/main` = `19f21704`, aucune session voisine, un seul appelant de `nettoyerFichiersArchives` (l'arrêt du §3 ne s'est pas déclenché).
 
