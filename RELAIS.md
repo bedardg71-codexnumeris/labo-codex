@@ -7,6 +7,26 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 9 H 45 (Toronto) : 1.152.1 (#908), l'en-tête de l'export recherche — COMMITÉE, PAS POUSSÉE ; origin/main = `7c199e45`
+
+**Le travail vit sur `main`, en local.** Ordre dû (consigne, §2) : relecture croisée de Cowork → corrections → verdict → push **sur le mot de Grégoire seulement**.
+
+**Consigne exécutée** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 21 sept., 9 h 28), relayée par Grégoire. Conditions de départ mesurées par l'audit : `main` = `origin/main` = `7c199e45`, 1.152.0, Vitest 6934 / 6934, aucune session voisine ni `pousser.sh`, arbre = les deux fichiers de Cowork.
+
+| Quoi | Mesure |
+|---|---|
+| Source de la version | `window.VERSION_MAJEURE`, posée par `version.js` (#849) — la version du code CHARGÉ ; même idiome que `codex.js`, `codex-data.js`, `reserve.js`. Pas `version.json` : illisible en `file://`, et il a déjà servi une copie périmée (#849). Repli : « inconnue » |
+| Remesure de A | conforme : `calculerAssiduite` = Σ périodes présentes ÷ Σ périodes offertes. Nuance non écrite au fichier : cumul depuis la date d'arrivée pour un élève arrivé en retard (#735) |
+| Remesure de C | **arrêt, remonté à Grégoire** : sommative, configurable, PAN-Standards = remis ÷ attendus ; la classe PAN-Spécifications (enregistrée sous `specifications`, offerte par `#mat-pratique-type` et le choix de pratique par défaut) = acceptables ÷ requis du palier le plus haut. **Tranché par lui** : ajouter la réserve ; « productions étudiantes » plutôt qu'« artefacts ». La tournure exacte est de Claude Code — supposition nommée dans `OU-EN-EST-ON.md` |
+| Lecteurs des textes | aucun (grep : seul `js/trimestres.js` les porte). `version_format` reste 1.2 |
+| Preuves | six essais `#908` dans `sentinelle-902-export-recherche-vrais-indices.test.js`, sur le vrai `exporterFormatRecherche` ; la version attendue est lue dans `version.js`, pas recopiée. Huit mutations, une clause à la fois, huit rouges, par l'essai attendu ; restauration par copie, empreinte vérifiée. Vitest complet : 607 fichiers, 6940 / 6940, aucun « Errors » |
+| « Nouvelles » | 3e item de l'entrée 1.152, **validé par Grégoire** (phrase proposée, acceptée telle quelle) |
+| Trouvaille, issue 3 (commentée dans le code) | les quatre familles ne comptent pas C de la même façon — c'est connu (#871) ; le commentaire posé au-dessus de `indice_C` dit pourquoi le texte porte une réserve. Rien d'inscrit |
+
+**Signalé par l'audit de début, non traité ici** : aucun run planifié de `tests.yml` n'est parti ce matin (cron `0 8 * * *`, commit `469ff47c`) ; dernier job Playwright conclu sur GitHub : `cancelled`, `a305f524`, 20 sept. À surveiller demain ; un `gh workflow run` manuel est une dépense, à la décision de Grégoire.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 8 H 50 (Toronto) : 1.152.0 (#909, #903), créer ou adopter une pratique — ✅ POUSSÉ À 9 H 23, origin/main = `4da1310e`
 
 **Ajout de 8 h 59 (Cowork) — relecture croisée de `f86683f4` (1.152.0) : VERTE, par exécution, aucune retouche de code.** Clone jetable de `f86683f4`, hors du dépôt ; les six bancs du lot seuls : 194 / 194. **Neuf mutations de Cowork, différentes des tiennes, neuf rouges** : C1 le plafonnement non repassé à la réédition (5) ; C2 `portfolio.reprisesPermises` d'un Standards perdu (1) ; C3 « aucune » qui cohabite avec une règle portée (1) ; C4 la variante `progressive` non restaurée (4) ; C5 #909 muette – plus de fenêtre, adoption refusée quand même (4) ; C6 #909 qui dit la phrase puis adopte (4) ; C7 l'ordre des règles inversé à la fusion (4) ; C8 `remplacement` perdu (4) ; C9 le Comparateur qui réannonce le plafonnement (2). Fichiers restaurés par `git checkout -- js`, `status --porcelain` vide. **Deux scénarios jetables, verts** : deux rééditions de suite (rien ne se double, objet = stock) ; verrou décoché puis recoché (les trois champs restent, une seule fois). **Lu, sans effet** : `variante: 'progressive'` n'a aucun autre lecteur dans `js/`. **Une imprécision de mots, pas de code** : l'item 2 de « Nouvelles » 1.152 dit « pour une sommative », or les reprises ont aussi quitté la branche Standards – portée à Grégoire (mots lus par des collègues). **Tranché par Grégoire à 9 h 01 : il prend la correction de Cowork** – texte et marche à suivre dans `plans de travail/CONSIGNE-COMPLEMENT-1152-nouvelles.md`, build-only, puis push sur son mot. Non relu par Cowork : le banc WebKit (verdict au push).

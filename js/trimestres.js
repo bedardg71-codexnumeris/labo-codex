@@ -2100,7 +2100,8 @@
             // 6. Construire le JSON selon les spécifications
             const exportData = {
                 meta: {
-                    version_monitorage: '6.0.0-beta95',
+                    // #908 : la version du code CHARGÉ (version.js, #849) — « 6.0.0-beta95 » était écrit en dur depuis la Beta 95.
+                    version_monitorage: typeof window.VERSION_MAJEURE === 'string' ? window.VERSION_MAJEURE : 'inconnue',
                     version_format: '1.2', // #902 (1.1) : indices_finaux porte null et note_constructible ; #913 (1.2) : resultats_ulterieurs sous chaque élève — ajouts additifs
                     date_export: new Date().toISOString(),
                     trimestre: {
@@ -2308,11 +2309,15 @@
                 },
 
                 calculs: {
-                    description: 'Indices calculés selon formules Monitorage v6',
+                    // #908 (21 sept. 2026) — CES TEXTES DISENT CE QUE L'APPLICATION CALCULE. Mots de Grégoire, tels quels
+                    // (minuscule initiale voulue : des définitions dans un JSON). Verrouillés par la sentinelle #908.
+                    description: 'Indices calculés par Labo Codex',
                     formules: {
-                        indice_A: 'Heures présentes / Heures offertes (cumulatif)',
-                        indice_C: '% artefacts évalués >= Maîtrisé (M)',
-                        indice_P: 'Moyenne pondérée des N meilleurs artefacts (IDME → %)'
+                        indice_A: 'assiduité : périodes présentes ÷ périodes offertes, cumulées depuis le début du trimestre (%)',
+                        // C : trois familles comptent remis ÷ attendus ; la classe PAN-Spécifications compte acceptables ÷ requis du
+                        // palier le plus haut — d'où la réserve. « productions étudiantes » et non « artefacts » : tous n'ont pas de portfolio.
+                        indice_C: 'complétion : productions étudiantes remises ÷ productions étudiantes attendues (%) ; en pratique par spécifications, productions acceptables ÷ productions requises',
+                        indice_P: 'performance calculée par la pratique de notation du cours ; la méthode varie selon la pratique'
                     },
 
                     snapshots_hebdomadaires: snapshots.map(s => ({

@@ -50,14 +50,15 @@ function storeDuBanc() {
 }
 
 /** Fait tourner le vrai export ; rend le fichier anonymisé (le premier Blob) en texte et en objet. */
-async function exporter(store) {
+async function exporter(store, globauxEnPlus) {
     const blobs = [];
     function Blob(parts) { blobs.push(parts.join('')); }
     const banc = monter(store || storeDuBanc(), {
         modules: ['js/indices.js', 'js/trimestres.js'],
         globaux: {
             // Le `document` du banc sait déjà créer un lien cliquable ; on ne fournit que ce que le navigateur apporte.
-            Blob, URL: { createObjectURL: () => 'blob:banc', revokeObjectURL() {} }, crypto: globalThis.crypto, TextEncoder
+            Blob, URL: { createObjectURL: () => 'blob:banc', revokeObjectURL() {} }, crypto: globalThis.crypto, TextEncoder,
+            ...(globauxEnPlus || {})   // #908 : la version chargée, que `init-inline.js` pose sur window dans la page
         }
     });
     try {
@@ -144,6 +145,59 @@ describe('#902 — le fichier anonymisé reste anonyme', () => {
             expect(Object.keys(l).sort()).toEqual(['A_final', 'C_final', 'P_final', 'id_etudiant', 'note_constructible']);
             expect(l.id_etudiant).toMatch(/^[0-9a-f]{8}$/);
         }
+    });
+});
+
+/**
+ * #908 (21 sept. 2026) — L'EN-TÊTE DU FICHIER DIT CE QUE L'APPLICATION CALCULE.
+ *
+ * MESURÉ AVANT DE CODER : `version_monitorage` valait « 6.0.0-beta95 » en dur (l'application est en 1.152.0) ; les
+ * trois formules décrivaient un calcul qui n'existe plus (A en heures, C en « % >= M », P en « N meilleurs »).
+ * A relu dans `calculerAssiduite` (Σ périodes présentes ÷ Σ périodes offertes). Les textes sont de Grégoire, tels
+ * quels. La structure ne bouge pas : `version_format` reste 1.2, aucun champ ajouté ni retiré (cliquet plus bas).
+ */
+describe('#908 — l\'en-tête du fichier dit ce que l\'application calcule', () => {
+    // Les clés du fichier AVANT #908 (le diff du lot ne touche que des valeurs : mesuré sur le fichier produit).
+    const CLES_META = ['version_monitorage', 'version_format', 'date_export', 'trimestre', 'anonymisation'];
+    const CLES_CALCULS = ['description', 'formules', 'snapshots_hebdomadaires', 'unites', 'indices_finaux', 'performance_par_critere'];
+
+    // La version du dépôt, lue là où `release.mjs` l'écrit — jamais une constante recopiée ici.
+    const versionDuDepot = JSON.parse(readFileSync(path.join(RACINE, 'version.js'), 'utf8').match(/window\.__VERSION__\s*=\s*(\{.*?\});/)[1]).beta;
+
+    it('la lecture de version.js rend bien une version (garde contre une comparaison vide)', () => {
+        expect(versionDuDepot).toMatch(/^\d+\.\d+\.\d+$/);
+    });
+
+    it('version_monitorage est la version du code chargé', async () => {
+        const { fichier } = await exporter(null, { VERSION_MAJEURE: versionDuDepot });
+        expect(fichier.meta.version_monitorage).toBe(versionDuDepot);
+    });
+
+    it('version_monitorage SUIT la version chargée : une autre version chargée, une autre valeur', async () => {
+        const { fichier } = await exporter(null, { VERSION_MAJEURE: '9.98.7' });
+        expect(fichier.meta.version_monitorage).toBe('9.98.7');
+    });
+
+    it('sans version chargée, le fichier dit « inconnue » — jamais une version inventée', async () => {
+        const { fichier } = await exporter();
+        expect(fichier.meta.version_monitorage).toBe('inconnue');
+    });
+
+    it('la description et les définitions de A, de C et de P, mot pour mot', async () => {
+        const { calculs } = (await exporter()).fichier;
+        expect(calculs.description).toBe('Indices calculés par Labo Codex');
+        expect(calculs.formules.indice_A).toBe('assiduité : périodes présentes ÷ périodes offertes, cumulées depuis le début du trimestre (%)');
+        // C : mots de Grégoire (21 sept.) — « productions étudiantes », et la réserve pour la classe PAN-Spécifications (acceptables ÷ requis).
+        expect(calculs.formules.indice_C).toBe('complétion : productions étudiantes remises ÷ productions étudiantes attendues (%) ; en pratique par spécifications, productions acceptables ÷ productions requises');
+        expect(calculs.formules.indice_P).toBe('performance calculée par la pratique de notation du cours ; la méthode varie selon la pratique');
+    });
+
+    it('cliquet : les clés de meta, de calculs et de formules sont celles d\'avant #908', async () => {
+        const { fichier } = await exporter();
+        expect(Object.keys(fichier.meta)).toEqual(CLES_META);
+        expect(Object.keys(fichier.calculs)).toEqual(CLES_CALCULS);
+        expect(Object.keys(fichier.calculs.formules)).toEqual(['indice_A', 'indice_C', 'indice_P']);
+        expect(fichier.meta.version_format).toBe('1.2');
     });
 });
 
