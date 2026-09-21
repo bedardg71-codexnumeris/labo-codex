@@ -303,7 +303,7 @@ function monter(jeu, opts = {}) {
     chargerScript('js/profil-etudiant-rapport.js', globaux, win);
     chargerScript('js/profil-etudiant-diagnostics.js', globaux, win);
     chargerScript('js/profil-etudiant-confidentiel.js', globaux, win);
-    chargerAvecInterne('js/profil-etudiant-sections-affichage.js', globaux, win, ['obtenirDetailsAssiduite']);
+    chargerAvecInterne('js/profil-etudiant-sections-affichage.js', globaux, win, ['obtenirDetailsAssiduite', 'genererSectionAccompagnement']);
     chargerAvecInterne('js/interventions.js', globaux, win, ['genererAffichageNotesIndividuelles']);
     chargerScript('js/snapshots.js', globaux, win);
     chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, ['_tousEtudiantsEnrichis', '_etudiantsPrioritaires', '_filtresActifs', 'appliquerFiltres', 'nettoyerEtudiantsSuivis', 'afficherAlerteNonParticipation']);
@@ -1144,6 +1144,21 @@ describe('I · groupe-cours sans pratique assignée (lot N1b)', () => {
         expect(avec[0]).toContain('1 étudiant·e présent·e');
         expect(avec[0]).toContain(DA.SILENCE);
         expect(sans).toEqual([]);
+    });
+
+    it('I7 · profil › Accompagnement, SANS pratique et SANS présence saisie : un élève qui a des copies voit ses forces et défis, pas « En attente de données » — celui qui n\'a rien, si', () => {
+        // Rattrapé par les specs Playwright #542 au verdict du 21 sept. : la première écriture du lot comptait une complétion
+        // inconnue comme un zéro dans « aucune donnée » — A inconnu + C inconnu + P 0 = « En attente », copies ou pas.
+        const jeu = jeuBase(); jeu.pratiqueId = undefined; jeu.presences = [];
+        const b = monter(jeu); b.calculerTout();
+        const section = b.interne['profil-etudiant-sections-affichage.js'].genererSectionAccompagnement;
+        const indices = b.win.calculerTousLesIndices(DA.ASSIDU);
+        const avecCopies = section(DA.ASSIDU), sansRien = section(DA.SILENCE);
+        noter('I7', { A: indices.A, C: indices.C, P: indices.P, avecCopies: avecCopies.includes('En attente de données'), sansRien: sansRien.includes('En attente de données') });
+        expect(indices).toMatchObject({ A: null, C: null, P: 0 });
+        expect(avecCopies).not.toContain('En attente de données');
+        expect(avecCopies.length).toBeGreaterThan(sansRien.length);        // la section pleine, pas la version simplifiée
+        expect(sansRien).toContain('En attente de données');
     });
 
     it('I5 · un pointeur `standards` NU (jamais configuré) est « introuvable » : mêmes écrans que sans pratique — et `sommative` nu reste une pratique assignée', () => {

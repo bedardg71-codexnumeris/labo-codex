@@ -134,9 +134,16 @@ async function monterProfil(page, echelle, options) {
         ]);
 
         // La pratique active se lit dans la SSOT `groupesCours[].pratiqueId`.
+        // ↻ Lots N1a / N1b (21 sept. 2026) : un pointeur `standards` NU ne mène plus à aucune pratique. Le montage pose
+        // donc une VRAIE entrée de bibliothèque, désignée par son id — sinon il exercerait « sans pratique » sans le dire.
+        window.db.setSync(window.cle('pratiquesConfigurables'), [ // security-ok: fixture de test, litteral du fichier
+            { id: 'std-3c3', nom: 'Standards de banc', type: 'standards', dansBibliotheque: true, calcul_note: { methode: 'conversion_niveaux' },
+                configuration: { type: 'standards', approcheEvaluation: 'par-artefacts', echelleId: echelle.id, grilleId: 'GR_3C3',
+                    portfolio: { utiliser: true, nombreARetenir: 3, minimumCompletion: 1, methodeSelection: 'meilleurs', reglesConformite: { actif: false } }, notesFinales: false } }
+        ]);
         window.db.setSync('groupeCoursActif', { id: 'GC_3C3', trimestreId });
         window.db.setSync(trimestreId + '_groupesCours', [
-            { id: 'GC_3C3', trimestreId, coursId, pratiqueId: 'standards', actif: true }
+            { id: 'GC_3C3', trimestreId, coursId, pratiqueId: 'std-3c3', actif: true }
         ]);
 
         try {
