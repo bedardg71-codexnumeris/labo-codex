@@ -7,7 +7,10 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 13 H 30 (Toronto) : 1.152.5 (demies de l'indice P : 57,5 → 58) — 🟡 COMMITÉ, NON POUSSÉ, main = `e6a5ac31` + ce relais
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 14 H 00 (Toronto) : 1.152.5 (demies de l'indice P : 57,5 → 58) — ✅ POUSSÉ, origin/main = `518a79c4`
+
+**POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, détaché (`nohup`, suivi par PID), sur le « Oui, pousse — Cowork est fermé » de Grégoire (question fermée, après son relais de la relecture de Cowork) ; `d5b67d62..518a79c4`, trois commits (`e6a5ac31` le lot, `4daca46e` relais, `518a79c4` essais de la relecture). Garde de charge : 4,54, aucune attente. Sentinelle Playwright : aucune rougeur nouvelle, 0 échec connu, verdict vert à jour pour le SHA ; hook Vitest vert. La sortie de `pousser.sh` ne dit rien des specs instables (aucune ligne à ce mot) : non affirmé. Mesuré avant : aucun `pousser.sh`, Vitest ni Playwright ; aucune VM de virtualisation vue, l'application Claude ouverte — « Cowork fermé » tient du mot de Grégoire. « En ligne » chez l'hébergeur : non mesuré d'ici. Le lot 1 est sorti de `plans de travail/FILE-DES-LOTS.md` ; le suivant y est le n° 1 (les trois « artefact » du PDF de synthèse). **Rien n'est dû sur ce lot.** Ce qui suit est l'état d'AVANT le push, gardé pour la trace.
+
 
 **Le travail vit sur `main`, en local, en avance sur origin/main (`d5b67d62`).** Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 13 h 08 ; relayée par Grégoire). **Attend : la relecture croisée de Cowork, PUIS le verdict Playwright sur le SHA exact à pousser, PUIS le mot de Grégoire.** Verdict Playwright : PAS lancé. Après le push : retirer le lot 1 de `plans de travail/FILE-DES-LOTS.md` (le lot 2, les trois « artefact » du PDF, y reste).
 
