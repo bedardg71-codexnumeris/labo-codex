@@ -153,8 +153,8 @@ describe('#902 — le fichier anonymisé reste anonyme', () => {
  *
  * MESURÉ AVANT DE CODER : `version_monitorage` valait « 6.0.0-beta95 » en dur (l'application est en 1.152.0) ; les
  * trois formules décrivaient un calcul qui n'existe plus (A en heures, C en « % >= M », P en « N meilleurs »).
- * A relu dans `calculerAssiduite` (Σ périodes présentes ÷ Σ périodes offertes). Les textes sont de Grégoire, tels
- * quels. La structure ne bouge pas : `version_format` reste 1.2, aucun champ ajouté ni retiré (cliquet plus bas).
+ * A relu dans `calculerAssiduite` (Σ périodes présentes ÷ Σ périodes offertes). description, A et P : mots de Grégoire, tels
+ * quels ; C : proposé par Claude Code, validé par Grégoire le 21 sept. 2026. La structure ne bouge pas : `version_format` reste 1.2, aucun champ ajouté ni retiré (cliquet plus bas).
  */
 describe('#908 — l\'en-tête du fichier dit ce que l\'application calcule', () => {
     // Les clés du fichier AVANT #908 (le diff du lot ne touche que des valeurs : mesuré sur le fichier produit).
@@ -187,7 +187,8 @@ describe('#908 — l\'en-tête du fichier dit ce que l\'application calcule', ()
         const { calculs } = (await exporter()).fichier;
         expect(calculs.description).toBe('Indices calculés par Labo Codex');
         expect(calculs.formules.indice_A).toBe('assiduité : périodes présentes ÷ périodes offertes, cumulées depuis le début du trimestre (%)');
-        // C : mots de Grégoire (21 sept.) — « productions étudiantes », et la réserve pour la classe PAN-Spécifications (acceptables ÷ requis).
+        // C : proposé par Claude Code, validé par Grégoire (21 sept.) — « productions étudiantes » et la réserve sont de lui ;
+        // la réserve vaut pour la classe PAN-Spécifications (acceptables ÷ requis).
         expect(calculs.formules.indice_C).toBe('complétion : productions étudiantes remises ÷ productions étudiantes attendues (%) ; en pratique par spécifications, productions acceptables ÷ productions requises');
         expect(calculs.formules.indice_P).toBe('performance calculée par la pratique de notation du cours ; la méthode varie selon la pratique');
     });
