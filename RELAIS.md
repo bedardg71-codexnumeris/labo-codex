@@ -7,7 +7,9 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, ≈ 19 H 15 (Toronto) : 1.151.6 (#892), « Proposer un nettoyage » ne retire que l'exporté — 🟡 COMMITÉ SUR `main` LOCAL (`9d9ddb71` + le commit de relais), **PAS POUSSÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 20 SEPT. 2026, ≈ 19 H 15 (Toronto) : 1.151.6 (#892), « Proposer un nettoyage » ne retire que l'exporté — ✅ POUSSÉ LE 21 SEPT. À 1 H 05, origin/main = `5d269d47`
+
+**Mise à jour du 21 sept., 1 h 06 : POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, en arrière-plan ; `19f21704..5d269d47`, quatre commits. La garde de charge a attendu 90 s (28,8 → 7,4). Verdict WebKit complet du Mac : aucune rougeur nouvelle, 0 échec connu ; Vitest du hook vert. **2 specs vertes au second essai** : `ponderation-requise-540` (#540-H, lot B) et `retroaction-mode-simple-672` – ni l'une ni l'autre ne touche l'écran du lot ; `profil-922` n'est pas revenue. « En ligne » chez l'hébergeur : non mesuré d'ici. ⚠ Les lignes « PAS POUSSÉ » et « Reste dû : … le push » ci-dessous sont l'état d'AVANT ce push ; la ligne de « Nouvelles » est entrée.
 
 **Mise à jour du 21 sept., 0 h 50 : complément de Cowork exécuté (`8433cd8c`), push LANCÉ sur le « Oui : ligne validée, pousse » de Grégoire.** Relecture croisée de Cowork (`plans de travail/CONSIGNE-COMPLEMENT-892.md`) : la mutation « test du statut retiré » restait verte – une copie re-déposée redevient `present` en gardant sa `dateExport`. Deux essais de comportement ajoutés (sélection et écrivain, copies `present` et `manquant` datées d'hier), mutation reposée : rouge (2), empreinte restaurée ; aucun code d'application changé. Ligne de « Nouvelles » entrée dans 1.151 (build-only `0921-0045`, numéro inchangé). Vitest 606 / 6 913. ⮕ Si ce bloc ne dit pas « POUSSÉ » plus bas, mesurer : `git fetch && git log origin/main --oneline -1`.
 
