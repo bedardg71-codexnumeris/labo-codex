@@ -1,10 +1,11 @@
 # Consigne de démarrage – la session Cowork qui prend le relais
 
-> **Réécrite le jeudi 17 septembre 2026, 9 h 45 (Toronto)**, au bout d'une matinée de **quatre versions poussées** (`1.142.22` à `1.142.25`), **deux relectures croisées vertes** (lots 27 et 28), **treize arbitrages rendus par Grégoire** et un **lot 30 en cours chez Claude Code** à l'écriture.
-> Elle REMPLACE toute version précédente ; celle du 17 à 3 h 08 (avec ses ajouts du matin) est archivée sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-17-03h08.md`.
+> **Réécrite le lundi 21 septembre 2026, 8 h 05 (Toronto)**, à l'ouverture de la journée, **quatre jours après la précédente** : entre le 17 à 9 h 45 et ce matin, **aucune session Cowork ne l'a réécrite**, alors que vingt-cinq versions sont parties (1.142.26 à 1.151.6). La session de ce matin a ouvert sur ses repères périmés (erreur 28).
+> Elle REMPLACE toute version précédente ; celle du 17 à 9 h 45 est archivée sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-17-09h45.md`.
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées.
+> ⛔⛔ **Il se réécrit à la fin de CHAQUE journée Cowork**, même quand la page du tri et `OU-EN-EST-ON.md` sont à jour : ce sont eux que tu lis pour l'état, mais c'est ce fichier qui te dit de les lire.
 
 ---
 
@@ -37,7 +38,7 @@ demande-toi de QUEL objet chacun parle. Un verdict se rend sur un SHA : redis le
 
 1. `git clone --shared --quiet --branch main "$HOME/mnt/Monitorage_v6" "$HOME/banc"` – instantané.
 2. `cd "$HOME/banc/tests" && npm install --silent --no-audit --no-fund` – ~40 s.
-3. `cd "$HOME/banc/tests" && timeout 165 npx vitest run --reporter=dot` – ~26 s. Claude Code rapporte **584 fichiers / 6 557 essais** sur 1.142.25. ⚠ Le 17, `npm ci` sur un clone `--no-hardlinks` a pris ~2 s (cache chaud) ; un lien symbolique vers le `node_modules` du Mac échoue (rollup natif macOS).
+3. `cd "$HOME/banc/tests" && timeout 165 npx vitest run --reporter=dot` – ~26 s. Claude Code rapporte **606 fichiers / 6 913 essais** sur 1.151.6. ⚠ Le 17, `npm ci` sur un clone `--no-hardlinks` a pris ~2 s (cache chaud) ; un lien symbolique vers le `node_modules` du Mac échoue (rollup natif macOS).
 
 ⛔ **Lecture seule sur le dépôt de Grégoire** : aucun `gc`, `prune`, `push`, et **jamais `git worktree`** (l'entrée reste fantôme
 dans son `.git`). ⚠ **Efface ton banc à la fin** (`rm -rf "$HOME/banc"`). ⚠ Un `npx vitest` lancé en arrière-plan MEURT à la fin de
@@ -59,50 +60,47 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 
 ---
 
-## 3 · L'ÉTAT MESURÉ – le 17 septembre 2026, 9 h 44 (Toronto)
+## 3 · L'ÉTAT MESURÉ – le 21 septembre 2026, 7 h 56 (Toronto)
 
 **Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` ·
 `git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`.
+**Pour le détail des jours manqués, trois sources, dans cet ordre** : l'en-tête de `OU-EN-EST-ON.md` (en gestes, écrit par Claude Code à chaque push) ; les blocs `## POUR LA SESSION QUI PREND LE RELAIS` en tête de `RELAIS.md` (`grep -n -E "^## " RELAIS.md | head -40`) ; la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN).
 
-- **Poussé : `1.142.25`** (`7c9ae885` = `main` = `origin/main` ; build `0917-0916`). Quatre versions ce matin, en gestes d'utilisateur :
-  - **`1.142.22`** (`ae7ad6f7`) : l'assiduité du profil et du rapport écrit les présences telles que saisies, « 90% (22,5 / 25 périodes) » (#871, volet assiduité). **Relecture VERTE par exécution** (six mutations, quatre rouges, une par lecture du banc WebKit, une verte sans effet : une décimale au lieu de deux).
-  - **`1.142.23`** (`453169c2`) : la fraction de complétion compte ce que compte l'indice C, évaluation terminale comprise (« 80% … 8 / 10 ») – **tranché par Grégoire**. #871 close. **Relecture VERTE pour le calcul** (cinq mutations, quatre rouges ; L1 verte = trou de preuve) **et une contradiction à l'écran** : la carte Complétion écrit « Artefacts remis : 9/10 … tous les artefacts remis ! » → **lot 30**.
-  - **`1.142.24`** (`52c3739b`, lot 28, suites de l'audit des pratiques du 16) : une spécification sans types ni forfaits n'exporte plus « 0, final » ; un modèle « N plus récentes » rouvert garde sa méthode ; sentinelle du tour complet. L'audit est sur `main`, sa branche supprimée. **Relecture VERTE par exécution** (sept mutations, six rouges, la septième rouge à `sentinelle-816`) ; une trouvaille sans mot (`construction-attributs.js:137`, alias `derniers`) → lot 30.
-  - **`1.142.25`** (`7c9ae885`, lot 29) : dans une sommative, le verrou « doit être réussie » plafonne enfin la note (87,43 → 50, profil et export) ; rouvrir la pratique ne change plus ses règles ; cinq textes de Grégoire posés (C-1, C-2, C-3, C-6, ligne #899). Plafonnement, remplacement et reprises : le moteur ne sait pas, **inscrit #903**, rien d'inventé. **⚠ PAS ENCORE RELU PAR COWORK.**
-- **EN COURS À L'ÉCRITURE : lot 30** (`plans de travail/CONSIGNE-DU-JOUR.md`, écrite sous le nom `CONSIGNE-SUIVANTE-carte-completion.md` ; renommage indexé, `js/` modifié dans l'arbre : `construction-attributs.js`, les pratiques, `profil-etudiant-sections-affichage.js`, `snapshots.js`, des bancs). Patch attendu `1.142.26`. ⮕ **À l'ouverture : 1.142.26 est-il sur `origin/main` ? Sinon, `RELAIS.md` dit-il un arrêt ?**
-- ⚠ **DEUX SESSIONS CLAUDE CODE ONT TOURNÉ CE MATIN** : la première (lots 27, 28) a été arrêtée à 9 h 06 sur ma demande ; la seconde a fait le lot 29 et, sans doute, fait le 30. Ne relaie qu'à UNE session à la fois, et dis à Grégoire laquelle.
-- **Comptes** : backlog **227 cases ouvertes** (`grep -cE '^- \[ \] '`, gabarit `#XX` compris, donc **226 fiches** ; cohérent avec les 229 de 1.142.24 moins #897, #899, #901 cochées, plus #903 – **à vérifier par ensembles** avant de publier le tri), **dernier ID #903**. **Page du tri : version 29, à jour du lot 26 seulement** – les lots 27, 28, 29 (et 30) n'y sont pas, ni #897 à #903.
-- **Fichiers de Cowork NON COMMITÉS à l'écriture** : ce fichier et son archive `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-17-03h08.md`. La consigne du lot 30 ne les nomme pas : **donne-les à Claude Code** (bloc de relais) au prochain lot.
-- **Non suivis, anciens, pas des retours neufs** : `Retours des testeurs/jean-françois/` (26 août), `docs/projet de développement/`, `ignorés/`, le modèle de consigne à froid. **Aucun retour** neuf de la CoP, de l'orthopédagogue ni de Mathieu (dernier dépôt : Grégoire, le 16 à 17 h 10).
+- **Poussé : `1.151.6`** (build `0921-0045`). `origin/main` = `fe3e884e` (commit de journal), le code est `5d269d47`. Poussé le 21 à 1 h 05 par `pousser.sh` ; verdict WebKit complet vert, deux specs vertes au second essai (`ponderation-requise-540` #540-H, `retroaction-mode-simple-672`). Vitest **606 / 6 913**. **Aucun lot en cours** à l'écriture.
+- **Ce qui est parti depuis le 17, en gestes** (détail : `OU-EN-EST-ON.md`) :
+  - 17 sept. : carte Complétion cohérente (1.142.26) ; un seul palier d'intervention (1.142.27) ; l'élève exclu retrouve un profil (1.142.28) ; les PDF s'ouvrent après un raté du lecteur (1.142.29) ; l'export de recherche porte de vrais indices (1.142.30) ; adopter un modèle Standards demande l'échelle (1.142.31) ; les évaluations d'A2025 sans copie s'ouvrent (1.142.32) ; « Dossier PDF » sans copie (1.142.33) ; saisie des résultats ultérieurs (1.143.0).
+  - 18 sept. : **le Suivi longitudinal** (1.144.0 à 1.146.3, quatre lots) ; sept retours de Grégoire corrigés le jour même (1.144.1 à 1.146.8).
+  - 19 sept. : « Date d'arrivée » et le tiret de l'assiduité inconnue (1.147.0, 1.147.1) ; plus de DA inventé (1.147.2) ; l'import d'élèves nomme le cours (1.148.0) ; un groupe = un numéro dans un cours (1.149.0) ; ce que l'élève lit une fois sa note calculée (1.150.0).
+  - 20 sept. : « Enregistrer » plus grisé sous un cadenas ouvert, « brouillon » devient « évaluation non enregistrée » (1.151.0) ; trimestres dans l'ordre du calendrier (1.151.1) ; filet GitHub levé (1.151.2) ; zone « Non planifié » toujours rendue (1.151.3) ; l'aide d'« Exporter et archiver » (1.151.4) ; nommer les pages d'une remise (1.151.5) ; « Proposer un nettoyage » ne retire que l'exporté (1.151.6). La CI GitHub tourne **une fois par jour** (≈ 4 h), plus à chaque push.
+- **Retours testeurs ouverts** (`SUIVI-BUGS.md`, tableau « Ouverts ») : #114 (beacon Cloudflare), #872 (Mathieu, deuxième groupe – livré en 1.142.1 et 1.149.0, ligne à remesurer), #874 (PDF sans aperçu, non diagnostiqué, ne se rouvre pas sans symptôme). **Aucun retour neuf** depuis celui de Grégoire du 20 à 8 h 51 (#929, livré).
+- **Comptes** : **212 cases ouvertes** au backlog (`grep -cE '^- \[ \] '`), gabarit `#XX` compris, donc **211 fiches** ; **dernier ID #929**. Page du tri remesurée le 21 à 5 h 51 : 210 affichées, **un seul écart**, la case de #830 (assiduité muette du Suivi) non cochée – ⚠ la page dit « livrée en 1.147.0 », **à remesurer avant de la faire cocher** (erreur 8).
+- ⚠ **LE LOT ORPHELIN DU 19 SEPT., NON COMMITÉ DEPUIS DEUX JOURS** : `js/interpretation-config.js` (un commentaire : le seuil 0,70 « non validé empiriquement »), `.claude/skills/ecosysteme-classe/SKILL.md` (« les chiffres restent, la prétention s'en va », décision de Grégoire du 19), `plans de travail/CADRAGE-2026-09-17-soir-registre-longitudinal.md`, `plans de travail/RELECTURE-2026-09-17-analyse-101-102-de-2025.md`. **Chaque release le rejoue** : `release.mjs` en avance le jeton anti-cache, Claude Code le remet à la main (RELAIS, 1.151.4). Claude Code attend « commiter ou abandonner ».
+- **Non suivis, anciens, pas des retours neufs** : `Retours des testeurs/jean-françois/` (26 août), `docs/projet de développement/`, `ignorés/`, le modèle de consigne à froid.
 - **QUI POUSSE : Claude Code, par `scripts/pousser.sh`, à la demande de Grégoire. Pas toi.**
 
 ---
 
 ## 4 · CE QUI EST DÛ – dans l'ordre
 
-**a) À l'ouverture** : remesurer ; un retour de la CoP, de l'orthopédagogue ou de Mathieu passe AVANT le backlog, sans discussion ; **situer le lot 30** (poussé, en cours, arrêté).
+**a) À l'ouverture** : remesurer ; un retour de la CoP, de l'orthopédagogue ou de Mathieu passe AVANT le backlog, sans discussion ; lire l'en-tête d'`OU-EN-EST-ON.md` et le premier bloc de `RELAIS.md` pour savoir si un lot est en cours.
 
-**b) LA RELECTURE CROISÉE DU LOT 29 (`7c9ae885`)** – due maintenant, sans attendre le 30, mais **jamais pendant un verdict Playwright chez Claude Code** (demande à Grégoire s'il en tourne un). Clone jetable (section 2), `git checkout -q 7c9ae885`. Bancs : `tests/unit/audit-pratiques-notation-config-2026-09-16.test.js` (31 essais) et `tests/unit/sentinelle-lot-29-cinq-textes-901-899.test.js` (7). Vise ce que le lot promet : **le verrou plafonne au profil ET par `simulerIndices`** (l'export), **le diff de réédition est vide pour les HUIT champs**, **rien d'inventé** pour plafonnement / remplacement / reprises, les **cinq textes** exacts. Scénario à chercher : une sommative **sans** verrou coché dont la note ne doit pas bouger ; un verrou dont la production est renommée ou supprimée (`_appliquerVerrousSommatifs` lit le TITRE). Verdict en tête de la section 1.142.25 de `RELAIS.md`, daté par `date`.
+**b) LES FICHES TRANCHÉES QUI N'ATTENDENT QUE LE CODE** – toutes tranchées par Grégoire le 17 sept., texte et formes dans la ligne ✅ TRANCHÉ de chaque fiche ; chacune porte « ⚠ À REMESURER avant de coder » :
+1. **#909** · adopter un modèle Standards dans un trimestre sans aucune échelle : la fenêtre dit pourquoi et où aller, l'adoption n'a pas lieu. Texte validé (15 h 06). La page du tri disait encore « une phrase t'est due » : corrigé le 21 à 8 h (version 44, erreur 29).
+2. **#903** · retirer de l'assistant les trois cases qui ne s'appliquent pas (plafonnement, remplacement, reprises). ⚠ **Limite du 20 sept.** : retirer les CASES, ne rien effacer de ce qu'une pratique déjà enregistrée porte – mesurer ce que l'assistant a écrit, et le dire.
+3. **#908** · l'en-tête de l'export anonymisé pour la recherche : version lue dans `version.json`, définitions de C et P réécrites (textes dans la fiche).
+4. **#888** · le suffixe « pér. » reste visible à côté d'une case Périodes remplie (Cadre › Horaire). Porte iPad probable.
+5. **#895** · une seule carte « Exporter des travaux » (forme des dossiers et compression en options ; « Toutes / Tous » = export complet). Le plus lourd : remesurer ce que « Trimestre complet » produit en plus (`_resume.json`, arborescence).
+⮕ #909 et #903 touchent le même parcours (créer ou adopter une pratique) : **un lot**. #908 est isolé. #888 et #895 vont seuls.
 
-**c) QUAND LE LOT 30 EST POUSSÉ (`1.142.26`) : sa relecture**, même méthode. Vise : les quatre textes « productions » exacts, la terminale manquante DANS la liste des non-remis, le message absent quand un élément manque, `DEMO006` / `DEMO020`, le trou L1 fermé (la mutation « toujours la sommative » doit rougir), l'alias `derniers` au Comparateur.
+**c) LA TENUE DES COMPTES (sans release)** : le lot orphelin (commiter ou abandonner : **à Grégoire**, recommandation de Cowork le 21 : commiter, c'est sa décision du 19 mise en fichiers) ; #830 à remesurer puis cocher ; la ligne #872 de `SUIVI-BUGS.md` à remesurer ; lire le run planifié GitHub du 21 ≈ 4 h.
 
-**d) LA PAGE DU TRI** (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, **version 29**) : porter les lots 27, 28, 29 (et 30 s'il est poussé) au journal, en gestes d'utilisateur ; #871 « livré 1.142.23 » (close) ; les fiches #897 à #903 à ajouter (et dans `INSCRITES_DEPUIS`) avec leur état (#897, #899, #901 livrées en 1.142.25 ; #898 « tranché le 17 sept., lot à venir » ; #900, #902, #903 ouvertes) ; « À toi » : plus aucun arbitrage de l'audit des pratiques ; les trois lots du dépistage n'attendent plus de mots. **Comptes par ensembles** contre `BACKLOG.md`. Procédure : section 4 b de l'archive du 16, inchangée (`Artifact read` → enveloppe retirée avant `<title>` et après le dernier `</body>` → remplacements vérifiés `count == 1` → mesure Chromium à 360, 400, 768, 1280 px en clair et en sombre → publication sur la même URL, sans `favicon`).
+**d) LA PAGE DU TRI** : **version 44**, à jour du 21 à 8 h (comptes du 21 à 5 h 51 ; phrase fausse sur #909 corrigée, mesurée à 360, 400, 768, 1280 px en clair et en sombre, `scrollWidth` = `clientWidth`). À reporter à chaque lot poussé, comptes par ensembles contre `BACKLOG.md`. Procédure inchangée : section 4 b de `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-16-19h15.md`.
 
-**e) LA FILE DES LOTS, tous sans arbitrage en attente** – propose-les à Grégoire UN à la fois, avec une phrase sur ce qu'il verra :
-1. **#898 · l'échelle demandée à l'adoption d'un modèle Standards.** Texte choisi le 17 (« Ce modèle a besoin d'une échelle de performance pour calculer la note. Choisis-la : » + liste + « Adopter »), ligne TRANCHÉ déjà sous la fiche. Consigne à écrire. **Porte terrain probable** (iPad) : à dire en le proposant.
-2. **Chantier du dépistage** (`plans de travail/CADRAGE-2026-09-16-regles-du-depistage.md`), mots TOUS choisis le 17 : **C · un seul palier** (« Difficulté récente » pour le suivi des fondations ; la carte RàI garde « Difficulté émergente » ; y joindre « un brouillon ne lève pas de signalement », `signalement-depistage.js:45`, fiche à inscrire, sentinelle #790 à respecter) – **le moins coûteux, à proposer en premier** ; **E · l'élève exclu** (« Décrochage · hors des moyennes du groupe », « N'est plus dans le groupe ») ; **D · l'assiduité qui manque** (« Date d'arrivée » + bulle ; porte probable, iPad ; le « — » attendu par #830). ⚠ Remesurer chaque fiche avant de coder ; la phrase de « Nouvelles » reste à lui proposer à chaque lot.
-3. **#902** (deux lecteurs de l'ancien format d'indices rendent 0 : export de recherche anonymisé, tris de la liste des évaluations) : sans mot, source seulement.
-4. **#903, #900** : à cadrer seulement si un symptôme vécu les appelle (règle d'entrée du 24 août).
+**e) CE QUI NE SE ROUVRE PAS** : inchangé (section 4 h de l'archive du 17) ; s'y ajoute **#915** (Suivi longitudinal) : ses quatre lots sont en ligne, la fiche reste ouverte **exprès** jusqu'au retour de la porte des lots 3-4 – ne pas la faire cocher.
 
-**f) LES TROUS DE PREUVE DU LOT F** (`sentinelle-lot-F-860-828-les-ecrans-du-groupe` : noms du banc dans l'ordre de l'urgence ; boucle `['P', 'A']` sans `'C'`) : toujours dus au prochain lot qui passe par ces fichiers, sans release. Non mesuré : la rangée « Filtrer : » à 768 px.
+**f) LES TROUS DE PREUVE DU LOT F** : toujours dus au prochain lot qui passe par `sentinelle-lot-F-860-828-les-ecrans-du-groupe`, sans release.
 
-**g) EN ATTENTE DE LUI, SANS URGENCE – un par tour, quand il est disponible** :
-- **La sonde « Non reçu »** : une copie évaluée puis repassée à « Non reçu » garde ses niveaux et compte dans la note. Stock mesuré à 0 sur le pack démo et les bancs, **pas sur ses données**. La sonde (console de l'app, lecture seule) est dans `RELAIS.md`, section 1.142.19, et sous #738. C'est un geste chez lui : ne la propose que s'il a l'application ouverte.
-- **La CI** : le dernier run terminé était rouge sur `evaluation-882-…spec.js` (WebKit Linux) ; disposition due par Claude Code, pas par lui.
-- **#892, #893, #895** (audit « Exporter et archiver ») : #893 est de la prose à proposer ; #892 et #895 sont des décisions de produit. **#878, #888** : prose à corriger. **#887** : des mots et une décision sur ses données, gardée pour un moment où il est disponible.
-
-**h) CE QUI NE SE ROUVRE PAS** : inchangé depuis l'archive du 16 (`_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-16-19h15.md`, section 4 i) – #879, #874, la porte #884 (vers le 23-30 sept.), ce qui attend son mois d'usage, les STOCKS de #520, #659, #864, #880, #882, #884, #891, #740. S'y ajoutent : **les relevés hebdomadaires déjà écrits** (1.142.19 : ils gardent leur valeur) ; **#896** (inscrite, sans symptôme vécu) ; **le constat SOM / STD** (quand seules des copies en brouillon touchent un travail dû, la complétion sommative l'écarte du dénominateur et STD le compte ; différence de famille antérieure, sans symptôme : commentée, pas de fiche – #871 est close sans l'avoir rouverte).
-**Un reste dormant, sans fiche** : `pratique-pan-standards.js` (`_calculerMoyennesCriteresRecents`, `_calculerNiveauxParObjectif`) ; à reprendre **seulement** si #307 rebranche les méthodes des pratiques.
+---
 
 ## 5 · LES ERREURS QUE J'AI PAYÉES – ne les refais pas
 
@@ -160,6 +158,8 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 25. **J'AI LANCÉ `git log` ET `git diff --cached` SANS `--no-optional-locks`.** Aucun verrou n'est apparu (vérifié), mais la règle de la section 1 est absolue. ⮕ Relis-la.
 26. **UNE CONDITION D'ARRÊT « SI UNE SEULE CANDIDATE » QUI N'ARRIVAIT JAMAIS** (#898) : le pack porte deux échelles, donc le volet ne pouvait pas partir. Claude Code s'est arrêté comme prévu. ⮕ **Avant d'écrire une condition, mesure si le cas visé la remplit** – ici, une ligne de `grep` sur le pack.
 27. **UNE PRÉMISSE D'AUDIT REPRISE SANS LA MESURER** : « le moteur applique déjà les règles spéciales » (A-1) était faux – `calculerNoteFinale` n'avait aucun appelant. Claude Code l'a mesuré et branché pour de vrai. ⮕ **Quand je recopie une affirmation d'audit dans une consigne, j'écris « à remesurer ».**
+28. ⚠⚠ **LA CONSIGNE DE DÉMARRAGE N'A PAS ÉTÉ RÉÉCRITE PENDANT QUATRE JOURS** (17 → 21 sept.). Les sessions Cowork intermédiaires ont tenu la page du tri et relu les lots, mais aucune n'a réécrit ce fichier : la session du 21 a ouvert sur « 1.142.25, lot 30 en cours » quand le dépôt était à 1.151.6. ⮕ **Ce fichier se réécrit à la fin de chaque journée Cowork, sans exception**, même en trois lignes.
+29. **LA PAGE DU TRI DISAIT « UNE PHRASE T'EST DUE » POUR UNE FICHE TRANCHÉE** (#909, tranchée le 17 à 15 h 06 ; la page le disait encore le 21 à 5 h 51). Même famille que l'erreur 10. ⮕ **Avant de dire à Grégoire qu'une question l'attend, `grep TRANCHÉ` dans le bloc de la fiche.**
 
 ### Ce qui a tenu, et qu'il faut refaire
 - **LA PORTE TERRAIN TROUVE CE QU'AUCUN TEST NE PEUT TROUVER.** « Je ne vois aucune option de verrouillage » a donné #863, puis, le même
@@ -200,8 +200,8 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 - **Les numéros de fiches ne lui disent rien** : rends l'avancement en gestes d'utilisateur, les numéros entre parenthèses en fin de ligne.
 - ⚠ **Il corrige bien, et souvent contre toi.** Ma recommandation sur les zones du graphique était « garde l'échelle et arrête le repli
   muet » ; il a répondu « suppression pure », et il avait raison. **Quand il tranche contre toi, cherche d'abord ce qui le rend juste.**
-- ⚠ **Il travaille en parallèle sur d'autres choses** : pour le CHOIX des prochains lots, prends ceux qui lui demandent le moins – pas
-  d'arbitrage à rendre, pas d'écran à aller vérifier chez lui.
+- ⚠ **Le 13 sept.**, il demandait les lots qui lui demandent le moins ; **le 19 sept., il a levé cette réserve** : « je suis disponible pour des lots qui nécessitent un arbitrage. Ne gardons pas ces lots pour plus tard. » Propose-les aussi, sans les différer.
+- ⛔ **Le 20 sept. : « Je ne veux pas qu'on efface des données de façon irréversible. »** Aucun lot dont le code supprime définitivement des données d'utilisateur (c'est ce qui a donné 1.151.6). Retirer une case d'un écran n'est pas effacer ce qu'elle a écrit : dis lequel des deux un lot fait.
 
 - ⚠ **Le 17 au matin**, il enchaîne les lots et relaie vite (quatre lots poussés entre 7 h 17 et 9 h 16) ; il a demandé de **trancher les arbitrages pendant que Claude Code code**. Les cartes à choix, une par tour, avec « (Recommandé) », lui conviennent.
 - ⚠ **Le 16, après-midi et soir, il corrigeait des copies en parallèle** et a demandé des lots simples. Préfère les lots sans question, sans écran à vérifier, dans **l'Évaluation** (où il travaille) ou le **Dépistage** (son prochain article, labo #6).

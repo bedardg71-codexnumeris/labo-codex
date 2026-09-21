@@ -52,7 +52,7 @@ describe('#132 · round-trip d\'édition — portfolio (par-artefacts)', () => {
         expect(r.nbArtefactsSoumis).toBe(10);       // ← nombreTotal
         expect(r.nbArtefactsRetenus).toBe(6);       // ← nombreARetenir
         expect(r.minAvantCalculFormatif).toBe(2);   // ← minimumCompletion
-        expect(r.reprisesPermises).toBe('limite');
+        expect(r.reprisesPermises).toBeUndefined();  // #903 : plus relu ; l'objet enregistré le garde (sentinelle-903-909)
         expect(r.utiliserPortfolio).toBe(true);
     });
 

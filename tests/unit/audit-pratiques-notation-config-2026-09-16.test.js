@@ -261,6 +261,25 @@ async function rouvrirEtResauver(b, id) {
     return { reponses, apres };
 }
 function activer(b, id) { b.store.test_groupesCours[0].pratiqueId = id; }
+
+/**
+ * #903 (21 sept. 2026) — LE STOCK. L'assistant n'écrit plus le plafonnement, le remplacement ni les reprises :
+ * ces essais ne peuvent plus les CRÉER par lui. Ils sèment donc l'objet que l'ancien assistant écrivait — capturé
+ * sur le code de `fe3e884e` par l'ancien A1 de ce banc, pas réécrit de mémoire — et jugent ce qu'il devient.
+ */
+const STOCK_SOM_TROIS_REGLES = {
+    id: 'STOCK_SOM', nom: 'SOM banc', auteur: 'A B', etablissement: '', description: '', discipline: '',
+    type: 'sommative', variante: 'progressive', pratiques: ['SOM'], dansBibliotheque: true, dateCreation: '2026-09-17T12:00:00.000Z',
+    configuration: { afficherRang: true, afficherMoyenneGroupe: true, reglesSommatives: ['remplacement', 'double_verrou', 'plafonnement'],
+        remplacement: { actif: true, nbPaires: 3 },
+        conditions_speciales: [
+            { type: 'double_verrou', condition: { evaluation: 'Dissertation', comparateur: '<', seuil: 90 }, consequence: { action: 'echec', note_max: 50 } },
+            { type: 'plafonnement', description: 'Examen non remis', consequence: { action: 'plafonner', valeur: 50 } }],
+        reprises: { permises: true, mode: 'limite' } },
+    calcul_note: { methode: 'moyenne_ponderee' },
+    seuils: { type: 'pourcentage', va_bien: 80, difficulte: 70, grande_difficulte: 60 }, nbEvaluationsPrevues: 8,
+    reglesSpeciales: ['remplacement', 'double_verrou', 'plafonnement']
+};
 function noteDe(b, da, id) {
     const inst = b.win.obtenirPratiqueParId(id);
     const perf = inst ? inst.calculerPerformance(da) : undefined;
@@ -279,34 +298,31 @@ function noteDe(b, da, id) {
 describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur en lit, ce qui survit à une réédition', () => {
 
     // A-1 ET A-2 LIVRÉS AU LOT 29 (17 sept. 2026, 1.142.25 — #897, #854) : les valeurs ci-dessous sont maintenant les JUSTES.
-    it('A1 · SOM avec les trois règles spéciales et des valeurs non par défaut', async () => {
-        // À LA MAIN (lecture de creerPratiqueV2) : l'assistant écrit configuration.remplacement.nbPaires = 3,
-        // configuration.conditions_speciales = [double_verrou {Dissertation < 90 → note_max 50}, plafonnement {valeur 50}],
-        // configuration.reprises = {permises:true, mode:'limite'}, seuils {80/70/60}, nbEvaluationsPrevues 8.
+    it('A1 · SOM avec les trois règles spéciales et des valeurs non par défaut (stock semé depuis #903)', async () => {
+        // L'objet porte configuration.remplacement.nbPaires = 3, conditions_speciales = [double_verrou {Dissertation < 90 →
+        // note_max 50}, plafonnement {valeur 50}], reprises {permises:true, mode:'limite'}, seuils {80/70/60}, 8 évaluations.
         // construireConfigComplete renvoie ces conditions sous calcul_note.conditions_speciales (le seul lecteur du moteur).
         // Moyenne 8830/101 = 87,43 ; la Dissertation est à 84 < 90 → le verrou plafonne à 50, au profil ET à l'export.
-        // Le plafonnement (« Examen non remis », texte libre) et le remplacement (3 paires, lesquelles ?) ne s'appliquent pas (#903).
-        // À la réédition, chargerPratiqueExistante restaure les six champs → diff VIDE, et la note reste 50.
-        const b = monter(jeuSOM());
-        const p0 = await creerParAssistant(b, { nom: 'SOM banc', prenom: 'A', nomAuteur: 'B', calcNoteFinale: 'moyenne',
-            reglesSommatives: ['remplacement', 'double_verrou', 'plafonnement'], nbPairesRemplacement: 3,
-            nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50, conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 50,
-            reprisesPermises: 'limite', afficherRang: true, seuilVaBien: 80, seuilDifficulte: 70, seuilGrandeDifficulte: 60, nbEvaluationsPrevues: 8 });
+        // Le plafonnement et le remplacement ne s'appliquent pas (#903) — et l'assistant ne les offre plus.
+        // À la réédition : le verrou est relu, les trois règles retirées passent telles quelles → diff VIDE, la note reste 50.
+        const b = monter(jeuSOM(), { pratiques: [STOCK_SOM_TROIS_REGLES] });
+        const p0 = clone(STOCK_SOM_TROIS_REGLES);
         activer(b, p0.id);
         const inst = b.win.obtenirPratiqueParId(p0.id);
         const note = noteDe(b, DA.SOM, p0.id);
         const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
-        const d = diff(p0, apres);
+        const d = diff(p0, apres, []);
         noter('A1', { ecrit: p0.configuration, seuils: p0.seuils, note, conditionsLuesParLeMoteur: inst.config.calcul_note.conditions_speciales || null, perdu: d });
-        expect(p0.configuration.conditions_speciales).toHaveLength(2);
-        expect(p0.configuration.remplacement.nbPaires).toBe(3);
         expect(inst.config.calcul_note.conditions_speciales).toEqual(p0.configuration.conditions_speciales);   // le moteur les voit
         expect(note.perf).toBe(50);                                               // verrou : 84 < 90 → max 50
         expect(note.simule.P).toBe(50);
         expect(note.export).toEqual({ note: 50, statut: 'final' });
-        expect(reponses).toMatchObject({ nbPairesRemplacement: 3, nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50,
-            conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 50 });
-        expect(d).toEqual([]);                                                    // rouvrir ne change rien
+        expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50 });
+        for (const retire of ['nbPairesRemplacement', 'conditionPlafonnement', 'valeurPlafonnement', 'reprisesPermises']) expect(reponses[retire]).toBeUndefined();
+        expect(d).toEqual([]);                                                    // rouvrir ne change rien, dateCreation comprise
+        expect(apres.configuration.remplacement).toEqual({ actif: true, nbPaires: 3 });
+        expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
+        expect(apres.configuration.conditions_speciales).toHaveLength(2);
         expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
     });
 
@@ -691,16 +707,20 @@ describe('G-1 · DEN : les ids de cibles écrits sont ceux que le jugement index
     });
 });
 
-describe('G-1 · SOM : les reprises écrites sont relues et ré-écrites', () => {
-    it('assistant · reprises « limitées » : écrites, relues, ré-écrites ; la moyenne 87,43 ne bouge pas', async () => {
+describe('G-1 · SOM : les reprises ne sont plus écrites (#903) ; celles d\'une pratique enregistrée restent', () => {
+    it('assistant · une pratique neuve n\'écrit pas de reprises ; le stock « limitées » survit à la réédition ; la moyenne 87,43 ne bouge pas', async () => {
         const b = monter(jeuSOM());
-        const p0 = await creerParAssistant(b, { nom: 'SOM', calcNoteFinale: 'moyenne', reglesSommatives: [], reprisesPermises: 'limite' });
-        activer(b, p0.id);
-        const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
-        expect(p0.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
-        expect(reponses.reprisesPermises).toBe('limite');
+        const neuve = await creerParAssistant(b, { nom: 'SOM', calcNoteFinale: 'moyenne', reglesSommatives: [], reprisesPermises: 'limite' });
+        expect(neuve.configuration.reprises).toBeUndefined();
+        const stock = Object.assign(clone(neuve), { id: 'STOCK_REPRISES' });
+        stock.configuration.reprises = { permises: true, mode: 'limite' };
+        b.store.test_pratiquesConfigurables.push(clone(stock));
+        activer(b, stock.id);
+        const { reponses, apres } = await rouvrirEtResauver(b, stock.id);
+        expect(reponses.reprisesPermises).toBeUndefined();
+        expect(diff(stock, apres, [])).toEqual([]);
         expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
-        expect(noteDe(b, DA.SOM, p0.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.43);
     });
 });
 
@@ -756,14 +776,18 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
     });
 
-    it('le plafonnement et le remplacement de l\'assistant ne s\'appliquent PAS et ne lèvent pas (#903) : 87,43', async () => {
+    it('le plafonnement et le remplacement d\'une pratique enregistrée ne s\'appliquent PAS et ne lèvent pas (#903) : 87,43', () => {
         // Le plafonnement n'a pour condition qu'un texte libre, le remplacement qu'un nombre de paires : rien ne les devine.
-        const b = monter(jeuSOM());
-        const p = await creerParAssistant(b, { nom: 'SOM sans verrou', calcNoteFinale: 'moyenne', reglesSommatives: ['remplacement', 'plafonnement'],
-            nbPairesRemplacement: 3, conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 40 });
-        const inst = b.win.obtenirPratiqueParId(p.id);
+        // Depuis #903 l'assistant ne les écrit plus : le stock est semé.
+        const stock = clone(STOCK_SOM_TROIS_REGLES);
+        stock.variante = 'progressive';
+        stock.reglesSpeciales = ['remplacement', 'plafonnement'];
+        stock.configuration.reglesSommatives = ['remplacement', 'plafonnement'];
+        stock.configuration.conditions_speciales = [{ type: 'plafonnement', description: 'Examen non remis', consequence: { action: 'plafonner', valeur: 40 } }];
+        const b = monter(jeuSOM(), { pratiques: [stock] });
+        const inst = b.win.obtenirPratiqueParId(stock.id);
         expect(inst.config.calcul_note.conditions_speciales).toHaveLength(1);
-        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.43);
     });
 
     it('la copie d\'un·e AUTRE élève ne déclenche rien : Bruno a 40 à la Dissertation, Alice (84 ≥ 60) garde 87,43', async () => {
@@ -791,16 +815,19 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
 });
 
 describe('lot 29 · SOM : rouvrir une pratique ne change aucune règle (A-2, la condition de Grégoire)', () => {
-    it('les huit champs des règles sont relus ; le diff de réédition est vide ; la note reste 50', async () => {
-        const b = monter(jeuSOM());
-        const p0 = await creerParAssistant(b, { nom: 'SOM quatre règles', calcNoteFinale: 'moyenne',
-            reglesSommatives: ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'], nbPairesRemplacement: 3,
-            nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50, nbArtefactsPortfolio: 8, portfolioQualitatif: true,
-            conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 45 });
+    it('les cinq champs du verrou et du portfolio sont relus ; le diff de réédition est vide, règles retirées comprises (#903) ; la note reste 50', async () => {
+        const p0 = clone(STOCK_SOM_TROIS_REGLES);
+        p0.id = 'STOCK_QUATRE';
+        p0.reglesSpeciales = ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'];
+        p0.configuration.reglesSommatives = ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'];
+        p0.configuration.portfolio = { utiliser: true, nbArtefacts: 8, qualitatif: true };
+        p0.configuration.conditions_speciales[1].consequence.valeur = 45;
+        const b = monter(jeuSOM(), { pratiques: [p0] });
+        activer(b, p0.id);
         const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
-        expect(reponses).toMatchObject({ nbPairesRemplacement: 3, nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50,
-            nbArtefactsPortfolio: 8, portfolioQualitatif: true, conditionPlafonnement: 'Examen non remis', valeurPlafonnement: 45 });
-        expect(diff(p0, apres)).toEqual([]);
+        expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou', 'portfolio'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50,
+            nbArtefactsPortfolio: 8, portfolioQualitatif: true });
+        expect(diff(p0, apres, [])).toEqual([]);
         expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
     });
 });

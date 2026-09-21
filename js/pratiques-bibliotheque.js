@@ -856,6 +856,13 @@ async function ouvrirModaleSauvegardeConfig() {
 const QUESTION_ECHELLE_ADOPTION = 'Ce modèle a besoin d\'une échelle de performance pour calculer la note. Choisis-la :';
 
 /**
+ * #909 — le trimestre n'a AUCUNE échelle à offrir : la fenêtre s'ouvre quand même, dit
+ * pourquoi et où aller, et l'adoption n'a pas lieu. Les mots de Grégoire (17 sept. 2026) ;
+ * le nom d'écran est celui de la navigation (« Conception → Échelles de performance »).
+ */
+const PHRASE_AUCUNE_ECHELLE_ADOPTION = 'Ce modèle a besoin d\'une échelle de performance pour calculer la note, et ce trimestre n\'en a aucune. Crée une échelle dans Conception → Échelles de performance, puis reviens adopter ce modèle.';
+
+/**
  * Vrai pour un modèle de la famille Standards qui ne porte AUCUNE échelle — ni
  * embarquée, ni par id. Même lecture que `construireConfigComplete` (pratique-registre.js),
  * qui est celle dont dépend l'instance. Les autres familles ne calculent pas par une
@@ -890,15 +897,18 @@ function obtenirEchellesOffertesAdoption() {
  *   · modèle qui ne demande rien → { adopter: true, echelleId: null } ;
  *   · échelle choisie → { adopter: true, echelleId } ;
  *   · question fermée sans choix → { adopter: false } : rien n'est adopté.
+ *   · aucune échelle à offrir (#909) → la phrase est affichée, { adopter: false }.
  */
 async function demanderEchelleAdoption(modele) {
     if (!modeleDemandeEchelle(modele)) return { adopter: true, echelleId: null };
     const echelles = obtenirEchellesOffertesAdoption();
-    // ⛔ CAS D'ARRÊT (consigne du lot 34) : aucune échelle utilisable dans le trimestre.
-    // La liste serait vide et « Adopter » sans objet ; ce que l'écran doit dire alors
-    // demande un mot de Grégoire. D'ici là le geste reste celui d'avant le lot : le
-    // modèle s'adopte sans échelle, et l'assistant l'exige à la réouverture.
-    if (echelles.length === 0) return { adopter: true, echelleId: null };
+    // #909 — aucune échelle utilisable dans le trimestre : la liste serait vide et
+    // « Adopter » sans objet. On le DIT (même titre que la question : le nom du modèle),
+    // et rien n'est adopté — les deux gestes d'adoption passent par ici.
+    if (echelles.length === 0) {
+        await uiDialogues.informer({ titre: modele.nom || 'Sans nom', message: PHRASE_AUCUNE_ECHELLE_ADOPTION });
+        return { adopter: false, echelleId: null };
+    }
     const choisie = await uiDialogues.demanderChoix({
         titre: modele.nom || 'Sans nom',
         message: QUESTION_ECHELLE_ADOPTION,

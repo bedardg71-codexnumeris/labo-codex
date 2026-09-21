@@ -248,15 +248,16 @@
     // case. C'est le libellé de la SAISIE qui est retenu — c'est celui que
     // l'utilisateur rencontre en premier, et le plus explicite des deux.
     // -------------------------------------------------------------------------
+    //
+    // ⮕ #903 (21 sept. 2026) — DEUX RÈGLES SONT SORTIES DE LA TABLE : « remplacement » et
+    // « plafonnement ». Rien ne les applique (l'assistant ne collectait pas de quoi), et
+    // cette table les annonçait « Actif ». Une pratique ancienne peut encore PORTER leurs
+    // clés (on n'efface pas ses données) : elles sont tues, pas rendues en mot brut.
+    var REGLES_RETIREES = ['remplacement', 'plafonnement'];
     var REGLES_SOMMATIVES = {
-        remplacement:  { axe: 'regleRemplacement', libelle: 'Remplacement automatique',
-                         valeur: 'Actif (la finale remplace la mi-session si meilleure)',
-                         parametre: 'revisabilite' },
         double_verrou: { axe: 'regleVerrou', libelle: 'Verrou sur une évaluation',
                          valeur: 'Actif (une évaluation doit être réussie)',
                          parametre: 'determination' },
-        plafonnement:  { axe: 'reglePlafonnement', libelle: 'Plafonnement conditionnel',
-                         valeur: 'Actif', parametre: 'determination' },
         portfolio:     { axe: 'reglePortfolio', libelle: 'Portfolio de progression',
                          valeur: 'Actif', parametre: 'objet' }
     };
@@ -279,7 +280,7 @@
         var cles = [];
         if (Array.isArray(rs)) cles = rs.slice();
         else if (rs && typeof rs === 'object') cles = Object.keys(rs);
-        return cles.filter(function (c) { return c && c !== 'aucune'; });
+        return cles.filter(function (c) { return c && c !== 'aucune' && REGLES_RETIREES.indexOf(c) === -1; });
     }
 
     /** Pousse les règles d'un paramètre donné. Rend true si au moins une l'a été. */
