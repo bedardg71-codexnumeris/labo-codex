@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-🟡 **FAIT EN 1.152.1, COMMITÉE, PAS ENCORE POUSSÉE (21 SEPTEMBRE 2026, ≈ 9 H 45 ; relecture de Cowork et ton mot attendus avant le push) — LE FICHIER ENVOYÉ AUX CHERCHEURS DIT CE QUE L'APPLICATION CALCULE**
+✅ **FAIT EN 1.152.1, POUSSÉE (21 SEPTEMBRE 2026, 10 H 05, sur ton « push compris » ; relecture de Cowork verte ; suite Playwright sans rougeur nouvelle, Vitest vert ; « en ligne » chez l'hébergeur : non mesuré d'ici) — LE FICHIER ENVOYÉ AUX CHERCHEURS DIT CE QUE L'APPLICATION CALCULE**
 **Ce que tu verras** : rien à l'écran. Réglages › Captures et recherche › export anonymisé : l'en-tête du fichier porte la vraie version (1.152.1, et non plus « 6.0.0-beta95 ») et décrit A, C et P comme l'application les calcule, sous le nom Labo Codex.
 **Vérifié comment** : le vrai export tourne dans un contrôle et le fichier produit est relu : la version suit celle du code chargé (une autre version chargée, une autre valeur ; sans version, « inconnue ») ; les cinq textes y sont au mot près ; la liste des champs de l'en-tête est la même qu'avant. Huit sabotages, un à la fois (version remise en dur, un mot changé dans chaque texte, un champ ajouté) : huit contrôles rouges. Tous les contrôles automatiques verts.
 **Ce que la remesure a changé** : A est bien un ratio de périodes. Pour C, trois façons de noter sur quatre comptent « remis ÷ attendus » ; la pratique par spécifications (celle choisie directement, pas celle de l'assistant) compte les travaux acceptables ÷ requis. Tu as tranché : ajouter la réserve, et dire « productions étudiantes » plutôt qu'« artefacts ».
