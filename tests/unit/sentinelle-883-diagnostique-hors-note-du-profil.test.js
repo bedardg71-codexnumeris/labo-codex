@@ -40,6 +40,8 @@ function monter({ hybride, diagnostique = true, minimum = 3 }) {
         obtenirDonneesSelonMode: (k) => store['test_' + k] || [],
         obtenirTypePratiqueActive: () => 'standards',
         obtenirPratiqueActiveGroupeCours: () => 'P1',
+        // Lot N1a (21 sept. 2026) : le chemin riche lit la DÉSIGNATION de la pratique active (id, famille).
+        designerPratiqueActive: () => ({ etat: 'ok', idBrut: 'P1', id: 'P1', donnees: null, famille: 'standards' }),
         obtenirConfigPratiqueActive: () => config,
         obtenirConfigCategories: () => config.categories
     };

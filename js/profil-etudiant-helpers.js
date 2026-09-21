@@ -665,51 +665,36 @@ function lireNiveauNoteGlobale(da, pourcentage) {
 }
 
 /**
- * Obtient l'instance de la pratique actuelle configurée
- * @returns {Object} - Instance de la pratique (PratiquePANStandards ou PratiqueSommative)
+ * L'instance de la pratique active du groupe-cours, ou null.
+ *
+ * Lot N1a (#719, #710 — 21 sept. 2026) : LA résolution du registre (`resoudrePratiqueActive`),
+ * par l'ID de la pratique assignée. Avant, le TYPE de la pratique passait au registre :
+ * « denotation » n'y est pas, une PratiquePANStandards était fabriquée, et le jugement 78
+ * d'une dénotation se lisait « M » par une règle qu'aucune pratique de l'enseignant ne donne.
+ * Sans pratique assignée, PRATIQUE_DEFAUT (« standards ») tenait lieu de pratique.
+ *
+ * ⮕ Aucun repli : rien d'assigné, ou un id qui ne mène à rien, rend null. Les appelants
+ * (`lireNiveauNoteGlobale`, snapshots.js) savent lire null — « pas de code », « pas de P ».
+ * Le repli `new PratiquePANStandards()` de #542 (lot 3) disparaît avec sa raison d'être.
+ *
+ * ⚠ CE QUI NE BOUGE PAS, ET POURQUOI. Pour une Standards, une sommative ou des spécifications,
+ * ce qui est rendu reste l'instance du registre de LA FAMILLE de la pratique assignée, comme
+ * avant ce lot. Elle porte deux règles que PratiqueConfigurable n'a pas : le P historique des
+ * snapshots (`calculerPerformanceHistorique`), et la lecture du niveau de la note globale dans
+ * l'échelle COMMUNE AUX ÉVALUATIONS de l'élève (#575, décision de Grégoire) — la configurable,
+ * elle, lirait l'échelle rangée dans la pratique : mesuré, le « M » d'une échelle remplacée
+ * (#648) disparaissait. Laquelle des deux échelles fait foi est une question de didactique ;
+ * réunir les deux instances est l'objet du lot N2 (#716). Seule la dénotation change ici : la
+ * famille n'a pas d'instance au registre, c'est la pratique assignée qui répond (#719).
+ *
+ * @returns {Object|null}
  */
 function obtenirPratiqueActuelle() {
-    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
-    // (On passe le TYPE au registre, comme avant — même classe d'instance.)
-    const pratiqueId = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
-
-    // Obtenir l'instance depuis le registre
-    if (typeof obtenirPratiqueParId === 'function') {
-        const pratique = obtenirPratiqueParId(pratiqueId);
-        // ✅ CORRECTIF (10 déc 2025): Ne retourner que si non-null
-        if (pratique) {
-            return pratique;
-        }
-        // Sinon, continuer vers le fallback
-    }
-
-    // Fallback : créer une instance directement (id déjà canonique).
-    //
-    // ⚠⚠ LE DÉFAUT CORRIGÉ ICI : CE REPLI LEVAIT UN `ReferenceError` (#542
-    // lot 3, 27 août 2026). Il instanciait `PratiquePANMaitrise`, une classe qui
-    // N'EXISTE NULLE PART dans le dépôt — la classe s'appelle
-    // `PratiquePANStandards` (`js/pratiques/pratique-pan-standards.js:75`). Le
-    // nom fautif ne vivait qu'ici et dans le JSDoc juste au-dessus.
-    //
-    // ⮕ IL EST ATTEIGNABLE, ce n'est pas du code mort. `obtenirPratiqueParId`
-    // rend `null` dans deux cas réels : la pratique configurable a été
-    // supprimée, ou sa construction a levé et a été rattrapée par le `catch` de
-    // `pratique-registre.js`. Le repli prenait alors la main et faisait tomber
-    // TOUT le profil de l'élève.
-    //
-    // ⮕ REPRODUIT AVANT D'ÊTRE CORRIGÉ, pas déduit de la lecture : un registre
-    // stubbé à `null` rend « ReferenceError : PratiquePANMaitrise is not
-    // defined ». Trouvé en écrivant le pas 3b — le nom de la classe ne
-    // correspondait pas à ce que le test attendait.
-    //
-    // Verrouillé par `tests/unit/sentinelle-542-repli-pratique-actuelle.test.js`.
-    if (pratiqueId === 'sommative') {
-        return new PratiqueSommative();
-    } else {
-        // Standards (et toutes ses variantes normalisées) par défaut.
-        return new PratiquePANStandards();
-    }
+    const designation = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive() : null;
+    if (!designation || designation.etat !== 'ok') return null;
+    const duRegistre = (['standards', 'sommative', 'specifications'].includes(designation.famille) && typeof obtenirPratiqueParId === 'function')
+        ? obtenirPratiqueParId(designation.famille) : null;
+    return duRegistre || resoudrePratiqueActive().pratique;
 }
 
 /**

@@ -126,6 +126,8 @@ export function monter(store, opts = {}) {
         obtenirEtudiantsCoursActif: winModes.obtenirEtudiantsCoursActif, obtenirContexteCoursActif: winModes.obtenirContexteCoursActif,
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture, invaliderCacheLecture: winModes.invaliderCacheLecture,
         filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule, obtenirPratiqueActiveGroupeCours: winModes.obtenirPratiqueActiveGroupeCours,
+        // Lot N1a (21 sept. 2026) : le pointeur SANS repli de modes.js, que lit la résolution du registre.
+        lirePointeurPratiqueGroupeCours: winModes.lirePointeurPratiqueGroupeCours,
         // #749 lot 2 : le numéro de groupe s'écrit et se lit par la fonction unique de modes.js.
         normaliserNumeroGroupe: winModes.normaliserNumeroGroupe,
         // #834 lot E (cadrage « Rencontres ») : l'identifiant du contexte, point unique de modes.js.

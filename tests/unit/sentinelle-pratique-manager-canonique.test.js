@@ -53,36 +53,45 @@ beforeAll(() => {
     normaliserIdPratique = registre.normaliserIdPratique;
 });
 
-describe('Session A volet B · pratique-manager résout legacy ET canonique', () => {
-    it('route les ids canoniques codés en dur vers le registre', async () => {
-        for (const id of ['standards', 'specifications', 'sommative']) {
-            const win = chargerManager(id, { normaliser: normaliserIdPratique });
-            const res = await win.PratiqueManager.chargerPratiqueActive();
-            expect(res, `id canonique ${id}`).toBe(MARQUEUR_REGISTRE);
+// ↻ LOT N1a (21 sept. 2026, #713 volet registre / #710) — PratiqueManager NE ROUTE PLUS RIEN LUI-MÊME.
+// Avant, `standards`, `sommative` et `specifications` (et leurs formes `pan-…`) étaient tenues pour des
+// pratiques codées en dur valides et renvoyées au registre : un pointeur `specifications` nu donnait
+// l'instance SPE jamais configurée, 50 % pour tout le monde. `chargerPratiqueActive` rend maintenant ce
+// que rend LA résolution du registre (`window.resoudrePratiqueActive`) — et rien d'autre. Ce que la
+// résolution décide pour chaque pointeur est prouvé sur le vrai moteur dans
+// `sentinelle-lot-N1a-pratique-active-une-seule-facon.test.js`.
+describe('Session A volet B ↻ N1a · pratique-manager rend ce que rend la résolution du registre', () => {
+    const avecResolution = (pointeur, resolution) => {
+        const win = chargerManager(pointeur, { normaliser: normaliserIdPratique });
+        win.resoudrePratiqueActive = () => resolution;
+        return win;
+    };
+
+    it('pratique résolue → son instance, quel que soit le pointeur (canonique, legacy ou configurable)', async () => {
+        const instance = { obtenirId: () => 'la-pratique-assignee' };
+        for (const id of ['sommative', 'pan-standards', 'pan-standards-bedard']) {
+            const win = avecResolution(id, { etat: 'ok', idBrut: id, id, pratique: instance });
+            expect(await win.PratiqueManager.chargerPratiqueActive(), `pointeur ${id}`).toBe(instance);
+            expect(win.PratiqueManager.pratiqueActive).toBe(instance);
         }
     });
 
-    it('route encore les ids legacy (compat données non migrées)', async () => {
-        for (const id of ['pan-standards', 'pan-specifications']) {
-            const win = chargerManager(id, { normaliser: normaliserIdPratique });
+    it('#713 · un pointeur nu que la résolution dit « introuvable » → null, et le registre n\'est PAS consulté à côté', async () => {
+        for (const id of ['specifications', 'pan-specifications', 'standards', 'pan-standards']) {
+            const win = avecResolution(id, { etat: 'introuvable', idBrut: id, id: null, pratique: null });
             const res = await win.PratiqueManager.chargerPratiqueActive();
-            expect(res, `id legacy ${id}`).toBe(MARQUEUR_REGISTRE);
+            expect(res, `pointeur ${id}`).toBeNull();
+            expect(res).not.toBe(MARQUEUR_REGISTRE);
         }
     });
 
-    it('ne MAL-route PAS une pratique configurable (pan-standards-bedard) vers le registre', async () => {
-        const win = chargerManager('pan-standards-bedard', { normaliser: normaliserIdPratique });
-        const res = await win.PratiqueManager.chargerPratiqueActive();
-        // Absente de la table de normalisation → reste configurable → branche JSON
-        // → introuvable dans une liste vide → pas le marqueur registre.
-        expect(res).not.toBe(MARQUEUR_REGISTRE);
+    it('rien d\'assigné, ou pratique assignée illisible → null', async () => {
+        expect(await avecResolution(null, { etat: 'aucune', idBrut: null, id: null, pratique: null }).PratiqueManager.chargerPratiqueActive()).toBeNull();
+        expect(await avecResolution('p1', { etat: 'illisible', idBrut: 'p1', id: 'p1', pratique: null }).PratiqueManager.chargerPratiqueActive()).toBeNull();
     });
 
-    it('reste fonctionnel si normaliserIdPratique est absent (guard typeof)', async () => {
-        // Sans la fonction, le guard retombe sur la valeur brute ; un id legacy
-        // ne matche plus le set canonique — comportement dégradé mais sans crash.
+    it('registre non chargé (aucune résolution) : null, sans lever', async () => {
         const win = chargerManager('standards', { normaliser: undefined });
-        const res = await win.PratiqueManager.chargerPratiqueActive();
-        expect(res).toBe(MARQUEUR_REGISTRE); // 'standards' est déjà canonique → route OK
+        expect(await win.PratiqueManager.chargerPratiqueActive()).toBeNull();
     });
 });

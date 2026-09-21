@@ -24,7 +24,9 @@ describe('#127 · nom de la pratique active dans le panneau de note finale', () 
         // + dans le récit de calcul C2-a (traçabilité de la fiche du comparateur).
         expect(occ.length).toBe(3);
         // résolu depuis la bibliothèque par id
-        expect(actions).toMatch(/_pratiquesCfg\.find\(p => p\.id === pratiqueId\)\?\.nom/);
+        // ↻ Lot N1a (21 sept. 2026) : le nom se lit par la désignation du registre (id brut, puis normalisé),
+        // la même que celle du calcul — plus par une recherche locale sur l'id brut.
+        expect(actions).toMatch(/trouverPratiqueEnBibliotheque\(pratiqueId\)\?\.nom/);
     });
 
     it('le rendu affiche le nom dans les QUATRE en-têtes (erreur + hybride + classique + sommative, #921)', () => {

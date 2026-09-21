@@ -293,7 +293,18 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     // ✅ CORRECTION (Beta 93) : Respect de l'architecture modulaire
     let indiceP = null;
 
-    if (typeof obtenirPratiqueActuelle === 'function') {
+    // Lot N1a (#710, 21 sept. 2026) — SANS PRATIQUE ASSIGNÉE, AUCUN P N'EST ÉCRIT.
+    // Avant : `obtenirPratiqueActuelle` fabriquait une pratique « standards » quand rien n'était
+    // assigné, et le repli ci-dessous (table I/D/M/E en dur) prenait le relais si elle ne rendait
+    // rien. Un P était donc écrit chaque semaine, au démarrage, à partir d'un repli — et il
+    // nourrit les courbes de progression, les corrélations et l'impact des jetons.
+    // ⚠ TARIR N'EST PAS RÉPARER : les snapshots déjà écrits gardent leur P. Rien n'est réécrit.
+    const designationP = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive() : null;
+    const sansPratique = !!(designationP && designationP.etat !== 'ok');
+
+    if (sansPratique) {
+        indiceP = null;
+    } else if (typeof obtenirPratiqueActuelle === 'function') {
         try {
             const pratique = obtenirPratiqueActuelle();
             if (pratique && typeof pratique.calculerPerformanceHistorique === 'function') {

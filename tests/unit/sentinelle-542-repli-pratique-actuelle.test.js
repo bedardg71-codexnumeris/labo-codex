@@ -51,45 +51,45 @@ function charger(surcharges) {
     });
 }
 
-describe('#542 · le repli de obtenirPratiqueActuelle ne lève pas', () => {
+// ↻ LOT N1a (21 sept. 2026, #710 / #719) — LE REPLI DE #542 N'EXISTE PLUS, ET C'EST VOULU.
+// Décision de Grégoire : sans pratique assignée, aucune note. `obtenirPratiqueActuelle` ne fabrique
+// plus d'instance : elle part de la DÉSIGNATION de la pratique active (`designerPratiqueActive`,
+// pratique-registre.js) et rend null quand rien n'est assigné ou que l'id ne mène à rien.
+// Ce que #542 protégeait reste tenu : elle ne LÈVE jamais, quel que soit l'état du registre.
+const designation = (etat, famille) => () => ({ etat, idBrut: etat === 'aucune' ? null : 'p1', id: etat === 'ok' ? 'p1' : null, donnees: etat === 'ok' ? {} : null, famille: famille || null });
 
-    it('1. LE CAS QUI PLANTAIT — le registre ne trouve rien, la pratique est « standards »', () => {
-        // Reproduit exactement le chemin du `catch` de pratique-registre.js.
-        const win = charger({
-            obtenirPratiqueParId: () => null,
-            obtenirTypePratiqueActive: () => 'standards'
-        });
-        let leve = null;
-        let instance = null;
-        try { instance = win.obtenirPratiqueActuelle(); } catch (e) { leve = e; }
-        expect(leve, leve ? `${leve.constructor.name} : ${leve.message}` : '').toBeNull();
-        expect(instance).toBeInstanceOf(PratiquePANStandardsFactice);
+describe('#542 ↻ N1a · obtenirPratiqueActuelle : aucun repli, et jamais d\'exception', () => {
+
+    it('1. rien n\'est assigné → null (avant : une PratiquePANStandards fabriquée)', () => {
+        const win = charger({ designerPratiqueActive: designation('aucune'), obtenirPratiqueParId: () => { throw new Error('le registre ne doit pas être interrogé'); } });
+        expect(win.obtenirPratiqueActuelle()).toBeNull();
     });
 
-    it('2. le repli sommatif fonctionnait déjà — il doit continuer', () => {
-        const win = charger({
-            obtenirPratiqueParId: () => null,
-            obtenirTypePratiqueActive: () => 'sommative'
-        });
-        expect(win.obtenirPratiqueActuelle()).toBeInstanceOf(PratiqueSommativeFactice);
+    it('2. un id assigné qui ne mène à rien → null, pas de sommative ni de standards de remplacement', () => {
+        const win = charger({ designerPratiqueActive: designation('introuvable'), obtenirPratiqueParId: () => new PratiqueSommativeFactice() });
+        expect(win.obtenirPratiqueActuelle()).toBeNull();
     });
 
-    it('3. quand le registre RÉPOND, c\'est lui qui gagne — le repli n\'est pas pris', () => {
+    it('3. une Standards assignée → l\'instance du registre de SA famille (elle porte #575 et le P historique)', () => {
         const duRegistre = { obtenirId: () => 'venu-du-registre' };
-        const win = charger({
-            obtenirPratiqueParId: () => duRegistre,
-            obtenirTypePratiqueActive: () => 'standards'
-        });
+        const demandes = [];
+        const win = charger({ designerPratiqueActive: designation('ok', 'standards'), obtenirPratiqueParId: (id) => { demandes.push(id); return duRegistre; } });
         expect(win.obtenirPratiqueActuelle()).toBe(duRegistre);
+        expect(demandes).toEqual(['standards']);
     });
 
-    it('4. registre absent du tout (fonction non définie) : le repli tient aussi', () => {
-        const win = charger({
-            obtenirPratiqueParId: undefined,
-            obtenirTypePratiqueActive: () => 'standards'
-        });
-        let leve = null;
-        try { win.obtenirPratiqueActuelle(); } catch (e) { leve = e; }
+    it('4. une dénotation assignée → l\'instance de la pratique ASSIGNÉE, jamais une Standards fabriquée (#719)', () => {
+        const assignee = { obtenirId: () => 'den-banc' };
+        const win = charger({ designerPratiqueActive: designation('ok', 'denotation'), obtenirPratiqueParId: () => new PratiquePANStandardsFactice(),
+            resoudrePratiqueActive: () => ({ etat: 'ok', pratique: assignee }) });
+        expect(win.obtenirPratiqueActuelle()).toBe(assignee);
+    });
+
+    it('5. registre absent du tout (aucune fonction définie) : null, sans lever', () => {
+        const win = charger({});
+        let leve = null, rendu;
+        try { rendu = win.obtenirPratiqueActuelle(); } catch (e) { leve = e; }
         expect(leve, leve ? `${leve.constructor.name} : ${leve.message}` : '').toBeNull();
+        expect(rendu).toBeNull();
     });
 });

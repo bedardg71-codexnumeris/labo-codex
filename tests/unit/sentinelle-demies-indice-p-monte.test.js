@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 // SENTINELLE (21 sept. 2026, décision de Grégoire) — UNE NOTE EXACTEMENT EN ,5 MONTE : 57,5 → 58.
 //
@@ -48,7 +49,7 @@ function chaine(notesArtefacts, terminale) {
         db, cle, obtenirDonneesSelonMode: (k) => (k in store ? store[k] : null),
         estEtudiantExclu: () => false,
         obtenirTypePratiqueActive: () => 'standards',
-        obtenirPratiqueActiveGroupeCours: () => 'standards',
+        obtenirPratiqueActiveGroupeCours: () => 'standards', ...pontsResolution(win, () => 'standards'),
         obtenirPratiqueParId: (...a) => win.obtenirPratiqueParId(...a),
         obtenirConfigPratiqueActive: (...a) => win.obtenirConfigPratiqueActive(...a),
         calculerDetailsNoteFinale: (...a) => win.calculerDetailsNoteFinale(...a)
@@ -145,6 +146,7 @@ describe('demies · contre-épreuve sur TOUTES les valeurs à une décimale, de 
         let decimalP = 0, decimalC = 0;
         const factice = { obtenirCode: () => 'SOM', calculerCompletion: () => decimalC, calculerPerformance: () => decimalP };
         const vrai = win.obtenirPratiqueParId;
+        const vraieResolution = win.resoudrePratiqueActive;
         const ecarts = [];
         try {
             win.obtenirPratiqueParId = (id) => (id === 'factice' ? factice : vrai(id));
@@ -156,12 +158,14 @@ describe('demies · contre-épreuve sur TOUTES les valeurs à une décimale, de 
             }
             decimalC = 23 / 40; // 57,5 % de remises : tombait à 57 par le même aller-retour
             expect(win.simulerIndices(DA, 'factice').C).toBe(58);
-            // Le site jumeau : l'écrivain résout la pratique active (« standards ») — la factice y répond aussi.
-            win.obtenirPratiqueParId = () => factice;
+            // Le site jumeau : l'écrivain résout la pratique active par LA résolution du registre
+            // (lot N1a, 21 sept. 2026) — la factice y répond aussi.
+            win.resoudrePratiqueActive = () => ({ etat: 'ok', idBrut: 'factice', id: 'factice', donnees: null, configuration: null, pratique: factice });
             win.calculerEtStockerIndicesCP();
             expect(store.indicesCP[DA].actuel.C).toBe(58);
         } finally {
             win.obtenirPratiqueParId = vrai;
+            win.resoudrePratiqueActive = vraieResolution;
         }
         expect(ecarts).toEqual([]);
     });

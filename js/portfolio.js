@@ -620,10 +620,12 @@ function comptesDansDepistage(production, mode) {
  * @returns {{pratiqueId:string, pratique:?Object}}
  */
 function _resoudrePratiqueDesIndicesCP() {
-    const pratiqueId = typeof obtenirPratiqueActiveGroupeCours === 'function'
-        ? obtenirPratiqueActiveGroupeCours()
-        : 'sommative';
-    return { pratiqueId, pratique: obtenirPratiqueParId(pratiqueId) };
+    // Lot N1a (#710, 21 sept. 2026) : LA résolution du registre, sans repli. Avant, le pointeur
+    // vide devenait « sommative » ici, et « standards » chez le profil.
+    const resolution = (typeof resoudrePratiqueActive === 'function')
+        ? resoudrePratiqueActive()
+        : { etat: 'registre-absent', id: null, pratique: null };   // le registre n'est pas chargé : on ne sait rien
+    return { pratiqueId: resolution.id, pratique: resolution.pratique, etat: resolution.etat };
 }
 
 /**
@@ -700,13 +702,40 @@ function _calculerEtStockerIndicesCPInterne() {
 
     // 🆕 BETA 95.5 : la pratique active du groupe-cours, depuis le registre (#871 : résolution partagée
     // avec `obtenirDetailsCompletion` — la fraction affichée vient de la pratique qui a calculé C).
-    const { pratiqueId, pratique } = _resoudrePratiqueDesIndicesCP();
-    if (!pratique) {
-        console.error(`❌ Pratique "${pratiqueId}" non disponible dans le registre`);
+    const { pratiqueId, pratique, etat } = _resoudrePratiqueDesIndicesCP();
+    const dateCalcul = new Date().toISOString();
+
+    if (etat === 'registre-absent' || etat === 'illisible') {
+        // Ne rien écrire sur une ignorance : « le registre n'a pas chargé » n'est pas « aucune pratique »,
+        // et une pratique assignée dont l'instance ne se construit pas (stock de #898) non plus — comme avant ce lot.
+        console.error(`❌ Pratique active ${etat === 'illisible' ? `"${pratiqueId}" illisible` : 'inconnue (registre non chargé)'} : indices C et P non recalculés`);
         return indicesCP;
     }
 
-    const dateCalcul = new Date().toISOString();
+    if (!pratique) {
+        // Lot N1a (#710, ajout D-1 du 17 sept.) — SANS PRATIQUE, « NON CONSTRUCTIBLE » S'ÉCRIT.
+        // Avant, on sortait ici sans rien écrire : retirer la pratique laissait l'indice de
+        // l'ANCIENNE (76, « constructible ») affiché pendant que le profil disait qu'aucune
+        // pratique n'était assignée. Même encodage que #394 : P à 0, `noteConstructible` à false.
+        // Rien n'est perdu : les évaluations ne bougent pas, l'indice se recalcule dès qu'une
+        // pratique est assignée.
+        (etudiants || []).forEach(etudiant => {
+            indicesCP[etudiant.da] = {
+                actuel: {
+                    date: dateCalcul,
+                    pratique: null,
+                    C: 0,
+                    P: 0,
+                    noteConstructible: false,
+                    details: { calculViaPratique: false, pratiqueActive: etat }
+                }
+            };
+        });
+        indicesCP.dateCalcul = dateCalcul;
+        db.setSync(cleIndices, indicesCP);
+        return indicesCP;
+    }
+
 
     // Calculer pour chaque élève du groupe — EXCLU PAR STATUT COMPRIS (#745, lot E du cadrage du
     // dépistage, 17 sept. 2026 ; tranché par Grégoire le 16) : il se calcule avec la règle de sa
@@ -1157,23 +1186,19 @@ function calculerNoteAvecCategories(da, configCategories) {
  * @returns {object|null} - Objet configuration { portfolio, categories, ... } ou null
  */
 function obtenirConfigPratiqueActive(pratiqueIdDemande = null) {
-    const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || [];
-
-    // #307 (simulation) : si une pratique est explicitement demandée, on résout SA
-    // config sans changer l'état global. Sinon, repli sur la pratique active du
-    // groupe-cours via obtenirPratiqueActiveGroupeCours() qui gère tous les fallbacks
-    // (groupeCoursActif → infoCours → groupesCours → modalitesEvaluation).
-    // Param absent ⇒ comportement historique strictement inchangé.
-    const pratiqueId = pratiqueIdDemande
-        || (typeof obtenirPratiqueActiveGroupeCours === 'function'
-            ? obtenirPratiqueActiveGroupeCours() : null);
-
-    if (!pratiqueId) {
+    // Lot N1a (21 sept. 2026) — LA MÊME DÉSIGNATION QUE L'INSTANCE, LA MÊME FORME QUE `construireConfigComplete`.
+    // Avant : l'id BRUT cherché dans la bibliothèque (#711 : l'instance, elle, se résolvait par
+    // l'id normalisé — le calcul et sa configuration ne parlaient pas de la même pratique), et
+    // `.configuration` seul (#712 : une pratique importée, rangée sous `.config`, résolvait
+    // mais restait « configuration de portfolio absente »).
+    // #307 (simulation) : une pratique explicitement demandée se lit sans changer l'état global.
+    const donnees = pratiqueIdDemande
+        ? (typeof trouverPratiqueEnBibliotheque === 'function' ? trouverPratiqueEnBibliotheque(pratiqueIdDemande) : null)
+        : (typeof designerPratiqueActive === 'function' ? designerPratiqueActive().donnees : null);
+    if (!donnees) {
         return null;
     }
-
-    const configPratique = pratiquesConfig.find(p => p.id === pratiqueId);
-    return configPratique?.configuration || null;
+    return donnees.configuration || donnees.config || null;
 }
 
 /**

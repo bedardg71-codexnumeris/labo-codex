@@ -363,26 +363,109 @@ function construireConfigComplete(pratiqueData) {
  */
 function obtenirIdPratiqueActive() {
     try {
-        // #328 L2-b2 : id dérivé de la SSOT groupesCours[].pratiqueId (le miroir
-        // modalitesEvaluation.pratique n'existe plus). La résolution passe par
-        // obtenirPratiqueActiveGroupeCours (modes.js) — SSOT d'abord, copies en
-        // dernier recours, défaut 'sommative'.
-        const idPratique = (typeof window.obtenirPratiqueActiveGroupeCours === 'function')
-            ? window.obtenirPratiqueActiveGroupeCours()
-            : null;
-
-        if (!idPratique) {
-            return null;
-        }
-
-        // Normalisation vers l'identifiant canonique (point unique : normaliserIdPratique).
-        // On normalise À LA LECTURE, SANS write-back (Session A-1) — la SSOT peut
-        // contenir un id configurable (laissé tel quel) ou un type legacy.
-        return normaliserIdPratique(idPratique);
+        // Lot N1a (21 sept. 2026) : l'id que rend LA résolution (`designerPratiqueActive`), ou null.
+        // Avant, le pointeur normalisé, repli « sommative » compris : l'export des résultats
+        // simulait une sommative pour un groupe-cours sans pratique.
+        const designation = designerPratiqueActive();
+        return designation.etat === 'ok' ? designation.id : null;
     } catch (error) {
         console.error('Erreur lors de la lecture de la pratique active:', error);
         return null;
     }
+}
+
+/* ===============================
+   LOT N1a (#710, #711, #712, #713 volet registre, #719 — 21 sept. 2026)
+   LA PRATIQUE ACTIVE SE TROUVE D'UNE SEULE FAÇON
+
+   Avant, sept fonctions répondaient « quelle est la pratique active ? », avec deux replis
+   contraires (« sommative » dans modes.js, PRATIQUE_DEFAUT = « standards » chez le profil) :
+   P 87 au tableau de bord, « introuvable » au profil, pour le même groupe-cours.
+
+   Décision de Grégoire (21 sept. 2026, 14 h 31) : SANS PRATIQUE ASSIGNÉE, AUCUNE NOTE. Pas de
+   repli. Rien n'est effacé : les notes reviennent dès qu'une pratique est assignée.
+
+   La chaîne : pointeur du groupe-cours actif (brut, modes.js) → entrée de la bibliothèque
+   désignée PAR SON ID (brut, puis normalisé ; jamais par son type) → configuration complète
+   (`construireConfigComplete`) → instance.
+
+   Les états :
+   - 'illisible'   : (résolution seulement) assignée et trouvée, mais l'instance ne se construit pas ;
+   - 'aucune'      : rien n'est assigné ;
+   - 'introuvable' : un id est assigné, mais il ne mène à aucune pratique de la bibliothèque
+                     (supprimée, id ancien jamais réécrit, `standards` ou `specifications` nus :
+                     une instance du registre jamais configurée calculait avec SES défauts, #711,
+                     ou rendait 50 % à tout le monde, #713) ;
+   - 'ok'.
+
+   ⚠ SUPPOSITION NOMMÉE : un pointeur `sommative` nu reste 'ok'. La moyenne pondérée est la
+   seule famille du registre qui n'a besoin d'aucune configuration ; elle calcule juste
+   aujourd'hui, au tableau de bord comme au profil. Ce n'est pas un repli : c'est ce qui est assigné.
+
+   ⚠ AUCUNE ÉCRITURE : un pointeur ancien reste tel quel en base, seule la lecture le normalise.
+   =============================== */
+
+/**
+ * L'entrée de la bibliothèque du trimestre qu'un id désigne : id brut d'abord, puis id normalisé
+ * (#711 : un pointeur `pan-standards` désigne la pratique rangée sous cet id, ou sous `standards`).
+ * Jamais par type : « la première pratique de la même famille » serait une pratique devinée.
+ * @param {string} id
+ * @returns {Object|null}
+ */
+function trouverPratiqueEnBibliotheque(id) {
+    if (!id) return null;
+    const liste = db.getSync(cle('pratiquesConfigurables'), null);
+    if (!Array.isArray(liste)) return null;
+    const canonique = normaliserIdPratique(id);
+    return liste.find(p => p && p.id === id)
+        || liste.find(p => p && p.id === canonique)
+        || liste.find(p => p && normaliserIdPratique(p.id) === canonique)
+        || null;
+}
+
+/** La désignation seule (sans instance) : ce que `obtenirIdPratiqueActive` et la résolution partagent. */
+function designerPratiqueActive() {
+    const idBrut = (typeof window.lirePointeurPratiqueGroupeCours === 'function')
+        ? window.lirePointeurPratiqueGroupeCours()
+        : null;
+    if (!idBrut) return { etat: 'aucune', idBrut: null, id: null, donnees: null, famille: null };
+    const donnees = trouverPratiqueEnBibliotheque(idBrut);
+    if (donnees) {
+        // La famille se lit sur l'ENTRÉE de bibliothèque (comme `obtenirTypePratiqueActive`, plus la
+        // forme d'import `.config`, #712), pas sur l'instance : une Standards adoptée sans échelle
+        // avant #898 n'a pas d'instance constructible, mais son portfolio calcule — ce stock garde sa note.
+        const type = (donnees.configuration && donnees.configuration.type) || donnees.type || (donnees.config && donnees.config.type) || null;
+        return { etat: 'ok', idBrut, id: donnees.id, donnees, famille: type ? normaliserIdPratique(type) : null };
+    }
+    if (normaliserIdPratique(idBrut) === 'sommative' && pratiquesEnregistrees.has('sommative')) {
+        return { etat: 'ok', idBrut, id: 'sommative', donnees: null, famille: 'sommative' };
+    }
+    return { etat: 'introuvable', idBrut, id: null, donnees: null, famille: null };
+}
+
+/**
+ * LA résolution de la pratique active du groupe-cours. Tout ce qui calcule ou écrit une note passe par ici.
+ *
+ * @returns {{etat:'aucune'|'introuvable'|'illisible'|'ok', idBrut:?string, famille:?string, id:?string, donnees:?Object,
+ *            configuration:?Object, pratique:?Object}}
+ *          `configuration` : ce que lisent le portfolio et ses règles — `.configuration`, sinon
+ *          `.config` (#712, la forme d'import) ; null pour la sommative du registre.
+ */
+function resoudrePratiqueActive() {
+    const designation = designerPratiqueActive();
+    if (designation.etat !== 'ok') {
+        return Object.assign({ configuration: null, pratique: null }, designation);
+    }
+    const pratique = obtenirPratiqueParId(designation.id);
+    const donnees = designation.donnees;
+    return Object.assign({}, designation, {
+        // 'illisible' : une pratique EST assignée et se trouve en bibliothèque, mais son instance ne se
+        // construit pas (le stock de #898 : Standards adoptée sans échelle). Ce n'est ni « aucune »
+        // ni « introuvable » : on n'écrit pas « non constructible » par-dessus, on ne calcule pas non plus.
+        etat: pratique ? 'ok' : 'illisible',
+        configuration: donnees ? (donnees.configuration || donnees.config || null) : null,
+        pratique
+    });
 }
 
 /**
@@ -417,33 +500,10 @@ function obtenirPratiqueActive() {
         return null;
     }
 
-    // Chercher dans le registre (pratiques codées en dur)
-    let instance = pratiquesEnregistrees.get(idActif);
-
-    // NOUVEAU (Beta 92): Si non trouvée dans le registre, chercher dans les pratiques configurables
-    // MISE À JOUR (Beta 96.2): Utilise construireConfigComplete pour normaliser les formats
-    if (!instance && window.PratiqueManager) {
-
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        const pratiqueData = pratiquesConfigurables.find(p => p.id === idActif);
-
-        if (pratiqueData) {
-            // Créer une instance de PratiqueConfigurable
-            try {
-                const configComplete = construireConfigComplete(pratiqueData);
-                instance = new PratiqueConfigurable(configComplete);
-            } catch (error) {
-                console.error(`Erreur lors du chargement de la pratique configurable "${idActif}":`, error);
-                return null;
-            }
-        }
-    }
-
+    // Lot N1a : l'instance que rend LA résolution. Avant, une troisième recherche, par id brut
+    // dans la bibliothèque et par id normalisé au registre.
+    const instance = resoudrePratiqueActive().pratique;
     if (!instance) {
-        console.error(
-            `Pratique "${idActif}" non trouvée (ni dans le registre, ni dans les pratiques configurables). ` +
-            `Pratiques disponibles : ${Array.from(pratiquesEnregistrees.keys()).join(', ')}`
-        );
         return null;
     }
 
@@ -530,28 +590,24 @@ function obtenirPratiqueParId(id) {
     // bedard…) sont absents de la table → restent inchangés et résolvent comme avant.
     const idCanonique = normaliserIdPratique(id);
 
-    // Chercher dans le registre (pratiques codées en dur)
-    let instance = pratiquesEnregistrees.get(idCanonique);
-
-    // Si non trouvée dans le registre, chercher dans les pratiques configurables
-    if (!instance && window.PratiqueManager) {
-        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        const pratiqueData = pratiquesConfigurables.find(p => p.id === idCanonique);
-
-        if (pratiqueData) {
-            try {
-                // Construire la config complète en fusionnant racine + config
-                // (certaines pratiques ont les champs à la racine, d'autres dans config)
-                const configComplete = construireConfigComplete(pratiqueData);
-                instance = new PratiqueConfigurable(configComplete);
-            } catch (error) {
-                console.error(`Erreur lors du chargement de la pratique configurable "${idCanonique}":`, error);
-                return null;
-            }
+    // Lot N1a (#711, 21 sept. 2026) : LA BIBLIOTHÈQUE D'ABORD, le registre ensuite. Avant, un id
+    // que la normalisation menait au registre (`pan-standards` → `standards`) n'atteignait jamais
+    // la pratique rangée sous ce même id : l'instance du registre calculait avec SES défauts
+    // (3 / meilleurs) à la place de la configuration de l'enseignant (N = 4).
+    const pratiqueData = window.PratiqueManager ? trouverPratiqueEnBibliotheque(id) : null;
+    if (pratiqueData) {
+        try {
+            // Construire la config complète en fusionnant racine + config
+            // (certaines pratiques ont les champs à la racine, d'autres dans config)
+            return new PratiqueConfigurable(construireConfigComplete(pratiqueData));
+        } catch (error) {
+            console.error(`Erreur lors du chargement de la pratique configurable "${idCanonique}":`, error);
+            return null;
         }
     }
 
-    return instance || null;
+    // Pratiques codées en dur
+    return pratiquesEnregistrees.get(idCanonique) || null;
 }
 
 // ============================================================================
@@ -888,6 +944,9 @@ window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;
 window.creerComparateurRecenceStd = creerComparateurRecenceStd;
 window.obtenirPratiqueActive = obtenirPratiqueActive;
 window.obtenirIdPratiqueActive = obtenirIdPratiqueActive;
+window.resoudrePratiqueActive = resoudrePratiqueActive;
+window.designerPratiqueActive = designerPratiqueActive;
+window.trouverPratiqueEnBibliotheque = trouverPratiqueEnBibliotheque;
 window.obtenirTypePratiqueActive = obtenirTypePratiqueActive;
 window.normaliserIdPratique = normaliserIdPratique;
 window.PRATIQUE_DEFAUT = PRATIQUE_DEFAUT;

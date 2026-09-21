@@ -36,6 +36,8 @@ beforeAll(() => {
         db, cle,
         obtenirPratiqueParId: (id) => instances[id] || null,
         obtenirPratiqueActiveGroupeCours: () => ACTIVE,
+        // Lot N1a (21 sept. 2026) : l'écrivain d'indicesCP résout la pratique active par LA résolution du registre.
+        resoudrePratiqueActive: () => ({ etat: instances[ACTIVE] ? 'ok' : 'illisible', idBrut: ACTIVE, id: ACTIVE, donnees: null, configuration: null, pratique: instances[ACTIVE] || null }),
         obtenirDonneesSelonMode: (k) => (k === 'groupeEtudiants' ? [{ da: DA }] : []),
         estEtudiantExclu: () => false,
         // Sans pratiqueId ⇒ pratique active (comme calculerEtStockerIndicesCP l'appelle).

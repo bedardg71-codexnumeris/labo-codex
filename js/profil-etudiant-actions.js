@@ -141,8 +141,11 @@ function _diagnostiquerNoteNonCalculable() {
     if (!pratiqueId) {
         return 'Aucune pratique de notation n\'est assignée à ce groupe-cours. Ouvre Conception → Pratiques de notation, choisis ta pratique et clique « Appliquer au cours actif ».';
     }
-    const pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const pratiqueData = pratiquesCfg.find(p => p.id === pratiqueId) || null;
+    // Lot N1a (#711) : la même désignation que le calcul (id brut, puis normalisé). Avant, l'id
+    // brut seul : un pointeur ancien qui menait à une pratique se disait « introuvable ».
+    const pratiqueData = (typeof trouverPratiqueEnBibliotheque === 'function')
+        ? trouverPratiqueEnBibliotheque(pratiqueId)
+        : ((db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueId) || null);
     if (!pratiqueData) {
         return 'La pratique assignée à ce groupe-cours est introuvable dans la bibliothèque (supprimée, ou assignation vers un identifiant obsolète). Réassigne une pratique dans Conception → Pratiques de notation.';
     }
@@ -365,9 +368,13 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  */
 function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-    // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
-    const pratique = ((typeof obtenirTypePratiqueActive === 'function')
-        ? obtenirTypePratiqueActive() : null) || (window.PRATIQUE_DEFAUT || 'standards');
+    // Lot N1a (#710, 21 sept. 2026) : LA résolution du registre, sans repli. Avant, le TYPE de
+    // la pratique active, et PRATIQUE_DEFAUT (« standards ») quand rien n'était assigné — pendant
+    // que l'indice P, lui, se calculait en « sommative ».
+    // La désignation suffit (id, entrée de bibliothèque, famille) : le portfolio se calcule sur la
+    // configuration, sans instance — et aucune instance n'est construite par élève.
+    const resolution = (!pratiqueIdDemande && typeof designerPratiqueActive === 'function')
+        ? designerPratiqueActive() : null;
 
     // On gère seulement Standards (portfolio à note construite). Les autres pratiques
     // (sommative, specifications, denotation) n'ont pas de détail de note finale portfolio.
@@ -378,8 +385,22 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     if (pratiqueIdDemande) {
         const _instDemande = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(pratiqueIdDemande) : null;
         estFamilleStandards = !!(_instDemande && typeof _instDemande.obtenirCode === 'function' && _instDemande.obtenirCode() === 'STD');
+    } else if (resolution && resolution.etat !== 'ok') {
+        // Aucune pratique assignée, ou un id qui ne mène à rien : aucune note, et la vraie raison.
+        return {
+            pratique: null,
+            pratiqueId: null,
+            pratiqueNom: null,
+            erreur: _diagnostiquerNoteNonCalculable(),
+            portfolio: null,
+            terminal: null,
+            noteFinale: null,
+            estProvisoire: false,
+            ecartees: window.compterEvaluationsEcarteesDeLaNote(da),
+            recit: null
+        };
     } else {
-        estFamilleStandards = (pratique === 'standards');
+        estFamilleStandards = !!(resolution && resolution.famille === 'standards');
     }
     if (!estFamilleStandards) return null;
 
@@ -388,10 +409,9 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // sont pas calculables ne sont pas identifiées »). Lu depuis la bibliothèque.
     // Session C (Lot 2) : si une pratique est explicitement demandée (#307), on la
     // privilégie ; sinon repli sur la pratique active du groupe-cours (identique à avant).
-    const pratiqueId = pratiqueIdDemande
-        || ((typeof obtenirPratiqueActiveGroupeCours === 'function') ? obtenirPratiqueActiveGroupeCours() : null);
-    const _pratiquesCfg = db.getSync(cle('pratiquesConfigurables'), null) || [];
-    const pratiqueNom = (_pratiquesCfg.find(p => p.id === pratiqueId)?.nom) || null;
+    const pratiqueId = pratiqueIdDemande || (resolution ? resolution.id : null);
+    const pratiqueNom = ((typeof trouverPratiqueEnBibliotheque === 'function')
+        ? trouverPratiqueEnBibliotheque(pratiqueId)?.nom : null) || null;
 
     // Lecture config portfolio (source canonique : pratiquesConfigurables, via
     // obtenirConfigPratiqueActive). Plus de fallback sur configPAN.portfolio

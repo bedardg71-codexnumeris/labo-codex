@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 // SENTINELLE #397 — perf du geste le plus fréquent (rapport P1+P2).
 // Avant : chaque recalcul d'indices relisait les MÊMES clés une fois PAR
@@ -205,7 +206,7 @@ describe('#397 · décision D3 — l\'historique indicesCP est purgé (zéro lec
             db, cle,
             obtenirDonneesSelonMode: (k) => (k in store ? store[k] : null),
             estEtudiantExclu: () => false,
-            obtenirPratiqueActiveGroupeCours: () => 'sommative',
+            obtenirPratiqueActiveGroupeCours: () => 'sommative', ...pontsResolution(win, () => 'sommative'),
             obtenirPratiqueParId: (...a) => win.obtenirPratiqueParId(...a)
         };
         chargerScript('js/pratiques/pratique-sommative.js', ponts, win);

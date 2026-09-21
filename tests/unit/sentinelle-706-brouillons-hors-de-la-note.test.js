@@ -24,6 +24,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -109,7 +110,7 @@ function monter(jeu) {
     const fwd = (nom) => (...a) => win[nom](...a);
     const globaux = { db, cle, obtenirDonneesSelonMode, sauvegarderDonneesSelonMode: (k, v) => { store['test_' + k] = clone(v); return true; },
         estEtudiantExclu: () => false, echapperHtml: (s) => String(s == null ? '' : s), obtenirPreference: () => null,
-        obtenirPratiqueActiveGroupeCours: () => store.test_groupesCours[0].pratiqueId,
+        obtenirPratiqueActiveGroupeCours: () => store.test_groupesCours[0].pratiqueId, ...pontsResolution(win, () => store.test_groupesCours[0].pratiqueId),
         resoudreModeleParId: (type, id) => clone((store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []).find(m => m && m.id === id) || null),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'), normaliserIdPratique: fwd('normaliserIdPratique'),
         obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'), calculerNoteAvecCategories: fwd('calculerNoteAvecCategories'),

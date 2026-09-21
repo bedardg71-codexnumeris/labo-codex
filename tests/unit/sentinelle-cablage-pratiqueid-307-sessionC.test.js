@@ -27,7 +27,12 @@ const obtenirPratiqueActiveGroupeCours = () => 'prat-A';
 
 let win;
 beforeAll(() => {
-    win = chargerScript('js/portfolio.js', { db, cle, obtenirPratiqueActiveGroupeCours });
+    // Lot N1a (21 sept. 2026) : la configuration se lit par la désignation du registre RÉEL
+    // (`trouverPratiqueEnBibliotheque`, `designerPratiqueActive`), sur le pointeur du groupe-cours.
+    const registre = chargerScript('js/pratiques/pratique-registre.js', { db, cle });
+    registre.lirePointeurPratiqueGroupeCours = () => 'prat-A';
+    win = chargerScript('js/portfolio.js', { db, cle, obtenirPratiqueActiveGroupeCours,
+        trouverPratiqueEnBibliotheque: registre.trouverPratiqueEnBibliotheque, designerPratiqueActive: registre.designerPratiqueActive });
 });
 
 describe('Session C Lot 2 · câblage pratiqueId → config (#307)', () => {
