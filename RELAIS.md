@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 10 H 35 (Toronto) : 1.152.2 (#715, #723) — 🟡 COMMITÉE SUR `main` EN LOCAL (`f1ee271c`), PAS POUSSÉE : attend la relecture croisée de Cowork, puis le mot de Grégoire
+
+**Le travail vit sur `main`, en local : un commit d'avance sur origin/main (`b87dfffc`).** Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 10 h 17, relayée par Grégoire). Vitest complet vert APRÈS le commit du bump : 609 fichiers, 6956 / 6956, aucun « Errors ». Verdict Playwright : PAS lancé (il vient après la relecture, sur le SHA exact à pousser).
+
+**#715** — un seul site coupait sous « tous » : `_selectionnerArtefactsLegacy` (`js/profil-etudiant-actions.js`). Les quatre autres lecteurs (`portfolio.js`, les deux chemins de `pratique-pan-standards.js` dont `calculerPerformanceHistorique` — vivant, appelé par `snapshots.js` —, la carte du profil) prenaient déjà tout. 77,32 au chemin riche, à l'instance, par `simulerIndices` ; 77 à l'export. **DEUX bancs figeaient 76,75**, pas un : A2b (16 sept.) ET C3 (`audit-pratique-de-notation-2026-09-05`), réécrits tous les deux. Comparateur : « Toutes les productions évaluées (N minimum) », mots validés par Grégoire (question fermée, ≈ 10 h 25).
+
+**#723** — libellé posé, aucune valeur changée (lignes capturées sur HEAD, comparées à l'octet). **Écart avec la consigne** : l'arrondi que lit l'export est à `js/portfolio.js` (`simulerIndices`, `Math.round(P_decimal * 100)`), pas à `indices.js:560` (qui relit l'indice stocké). Aucun lecteur ne dépend du libellé (les bancs lisent la colonne par son rang).
+
+**Mutations (une clause à la fois, restauration par copie + empreinte)** : M1 le `slice` remis sous « tous » (7 rouges) ; M2 l'instance coupe sous « tous » — un seul chemin juste (4 rouges) ; M3 l'ancien libellé (2) ; M4 `Math.floor` (3) ; M5 la clause « tous » du Comparateur retirée (2).
+
+**À Cowork, pour la relecture** : (a) dans A2b, `note.perf` n'est PAS jugé — dans ce banc `calculerPerformance` rend null pour toute STD (A2 aussi), cause non cherchée ; l'accord riche/instance est jugé par la sentinelle #715, sur le harnais du banc #394. (b) La phrase de « Nouvelles » est celle validée par Grégoire, telle quelle, ajoutée à l'entrée 1.152.
+
+**Trouvé en mesurant, NON corrigé, remonté à Grégoire** : l'aller-retour ÷100 ×100 de `simulerIndices` perd quatre demies sur cent — 14,5 · 28,5 · 56,5 · 57,5 s'arrondissent vers le bas (74,5 → 75 est juste). Aucune ne traverse 60. Issue : ni inscrit ni corrigé tant qu'il n'a pas dit si ça vaut un lot (la consigne disait « aucune valeur ne change »). Aussi, déjà là avant : le titre du profil écrit « Portfolio (5 tous productions sur 5 évaluées) » sous « tous ».
+
+**Pas vérifié** : l'écran dans un navigateur (profil, Comparateur) ; iPad, Safari ; « en ligne ».
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, ≈ 9 H 45 (Toronto) : 1.152.1 (#908), l'en-tête de l'export recherche — ✅ POUSSÉ À 10 h 05, origin/main = `e901e808`
 
 **Mise à jour de 10 h 05 : POUSSÉ** par `scripts/pousser.sh origin main` sous `caffeinate`, en arrière-plan, sur le mot de Grégoire (« exécute-la, push compris ») ; `7c199e45..e901e808`, deux commits (`ffd1368b` 1.152.1, `e901e808` complément de Cowork : trois commentaires rendus vrais — C est proposé par Claude Code, validé par Grégoire à 9 h 43 ; build-only). Garde de charge du script : 150 s d'attente (53,85 → 7,22, Vitest venait de finir). Sentinelle Playwright : aucune rougeur nouvelle ; hook Vitest vert (6940 / 6940). Mesuré avant : aucune VM Cowork, aucun `pousser.sh`, arbre propre, 52 % de mémoire libre. « En ligne » chez l'hébergeur : non mesuré d'ici.
