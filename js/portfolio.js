@@ -646,6 +646,31 @@ function obtenirDetailsCompletion(da) {
 }
 
 /**
+ * L'ENTIER D'UN INDICE C OU P (0-1 → 0-100) : UNE NOTE EXACTEMENT EN ,5 MONTE.
+ *
+ * CE QUI EXISTAIT. `Math.round(decimal * 100)` aux deux sites (indice stocké, indice simulé).
+ * L'aller-retour ÷ 100 × 100 perd quatre demies à la virgule flottante : 57,5 / 100 * 100 rend
+ * 57,49999999999999, donc 57 ; de même 14,5 → 14, 28,5 → 28, 56,5 → 56 — alors que 74,5 → 75.
+ * Pour C, 23 remis sur 40 attendus (57,5 %) tombait à 57 de la même façon.
+ *
+ * LA RÈGLE (décision de Grégoire, 21 sept. 2026) : celle du niveau imprimé (#701, 17 sept.) —
+ * une note exactement en ,5 monte (57,5 → 58). Même expression que `niveauDuPourcentage`
+ * (evaluation-calcul.js) : le premier arrondi, au millionième, retire le bruit de la virgule
+ * flottante, d'où qu'il vienne (l'aller-retour, ou une moyenne pondérée qui VAUT 57,5 et sort
+ * 57,49999999999999 du calcul) ; le second rend l'entier. Logée ici et non partagée avec
+ * evaluation-calcul.js : les deux fichiers se chargent séparément, à l'écran comme dans les bancs.
+ *
+ * ⚠ Les DEUX sites passent par ici, et seulement par ici : `calculerEtStockerIndicesCP` et
+ * `_simulerIndicesInterne` doivent rendre le même entier (parité, #307).
+ *
+ * @param {number} decimal - indice sur 0-1
+ * @returns {number} entier sur 0-100, demi vers le haut
+ */
+function arrondirIndiceSurCent(decimal) {
+    return Math.round(Math.round(decimal * 100 * 1e6) / 1e6);
+}
+
+/**
  * 🆕 BETA 95.5 : Calcule et stocke les indices C et P (async + pratique active)
  *
  * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
@@ -729,9 +754,9 @@ function _calculerEtStockerIndicesCPInterne() {
         // continuent de lire un nombre (0) ; les affichages montrent « — ».
         const noteConstructible = (typeof P_decimal === 'number' && isFinite(P_decimal));
 
-        // Convertir 0-1 → 0-100
-        const C = C_decimal !== null ? Math.round(C_decimal * 100) : 0;
-        const P = noteConstructible ? Math.round(P_decimal * 100) : 0;
+        // Convertir 0-1 → 0-100, demi vers le haut (arrondirIndiceSurCent)
+        const C = C_decimal !== null ? arrondirIndiceSurCent(C_decimal) : 0;
+        const P = noteConstructible ? arrondirIndiceSurCent(P_decimal) : 0;
 
         const entreeActuelle = {
             date: dateCalcul,
@@ -840,9 +865,9 @@ function _simulerIndicesInterne(da, pratiqueId) {
         P_decimal = pratique.calculerPerformance(da);
     }
 
-    // Mêmes arrondis que calculerEtStockerIndicesCP (0-1 → 0-100).
-    const C = C_decimal !== null && C_decimal !== undefined ? Math.round(C_decimal * 100) : 0;
-    const P = P_decimal !== null && P_decimal !== undefined ? Math.round(P_decimal * 100) : 0;
+    // Mêmes arrondis que calculerEtStockerIndicesCP (0-1 → 0-100) : la même fonction, demi vers le haut.
+    const C = C_decimal !== null && C_decimal !== undefined ? arrondirIndiceSurCent(C_decimal) : 0;
+    const P = P_decimal !== null && P_decimal !== undefined ? arrondirIndiceSurCent(P_decimal) : 0;
 
     // #326 (sous-item) — distinguer un « 0 » LÉGITIME (le moteur a calculé 0)
     // d'une note NON CONSTRUCTIBLE (P_decimal est resté null : soit le chemin riche STD
