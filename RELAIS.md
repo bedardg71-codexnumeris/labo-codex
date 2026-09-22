@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 15 H 35 : **1.154.0 POUSSÉE (`origin/main = 1862d309`, Playwright vert 0 échec connu sur le SHA exact) ; PORTE TERRAIN RENDUE PAR GRÉGOIRE 12/12 ; 1.154.1 (`1e5d25af`, décision 3.1 « aligner ») COMMITÉE SUR `main`, verdict et push lancés par `pousser.sh`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 16 H 30 : **1.155.0 (#695 élargie, date réelle dans l'Inspecteur) FUSIONNÉE DANS `main` EN AVANCE RAPIDE ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`3fc304e4`) + la branche `lot-date-inspecteur` : `e0c622b8` (release 1.155.0, code + tests), `2aff4825` (BACKLOG #695 cochée, consigne et archive), `2d0214a7` (item du changelog validé par Grégoire, relecture Cowork), puis ce relais. Relecture de Cowork verte, aucune correction de code. **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
+
+**Reste** : le geste du §7 de la consigne, par Grégoire, en mode clair et sombre (aspect de la ligne et cas à deux groupes non vus à l'écran). Hors lot, inchangé : #892/#929 rouges sur le runner GitHub. Fichiers Cowork non commités (`CONSIGNE-DEMARRAGE-COWORK.md`, `DEPLOY.md`, leur archive) non touchés.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 15 H 35 : **1.154.0 POUSSÉE (`origin/main = 1862d309`, Playwright vert 0 échec connu sur le SHA exact) ; PORTE TERRAIN RENDUE PAR GRÉGOIRE 12/12 ; 1.154.1 (`1e5d25af`, décision 3.1 « aligner ») COMMITÉE SUR `main`, verdict et push lancés par `pousser.sh`** — lire le message de fin de session ou `git log origin/main`
 
 **1.154.0** : poussée après un verdict Playwright vert (charge attendue 90 s, 0 échec connu, 0 instable), Vitest vert dans le hook, aucune VM Cowork ni GitHub Desktop (mesuré). « En ligne » non mesurable d'ici : l'adresse est derrière Cloudflare Access (page de connexion) — Grégoire l'a lue lui-même à la porte 0.1. **Porte terrain 1.154.0** rendue via l'artefact de Cowork : 12 passées / 0 échec / 0 non traitée, Mac et iPad, vraies données ; seule la mesure 1.1.e (nombre déplacé) est revenue vide, non réclamée. Décisions : 3.1 « aligner », 3.2 rien ne change.
 
