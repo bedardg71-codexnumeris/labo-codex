@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.154.0 (#932, #934 ; #933 refusé) — deux items VALIDÉS par Grégoire le 22 sept. 2026 (§6 du rapport du lot).
+            version: '1.154',
+            couleur: 'vert',
+            titre: 'Réassigner une copie : un seul geste, qui montre la copie, et en lot',
+            items: [
+                'Déplacer une copie vers une autre production passe par un seul geste, qui montre la copie (vignette, nom du fichier) et demande avant de remplacer un fichier existant — en nommant les deux.',
+                'Dans la Liste des évaluations, coche plusieurs copies et réassigne-les d\'un coup&nbsp;: une seule question compte, nomme les fichiers et les conflits.'
+            ]
+        },
+        {
             // 1.153.0 (lots N1a + N1b, #710 à #713, #719) — phrase VALIDÉE par Grégoire le 21 sept. 2026 (question fermée), telle quelle.
             version: '1.153',
             couleur: 'bleu',
