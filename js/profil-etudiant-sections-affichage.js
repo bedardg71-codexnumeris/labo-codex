@@ -52,7 +52,8 @@
    - 'groupeEtudiants' : Array des étudiants
    - 'productions' : Array des productions (dont artefacts)
    - 'evaluationsSauvegardees' : Array des évaluations
-   - 'portfoliosEleves' : Object avec sélections d'artefacts
+   (#714 : 'portfoliosEleves' n'est plus lu ni écrit ici — le panneau « Développement des
+    habiletés » lit la note par calculerDetailsNoteFinale.)
    
    COMPATIBILITÉ:
    - ES6+ requis
@@ -3785,10 +3786,7 @@ function _genererGraphiqueCriteresHTML(da) {
     `;
 }
 
-function _genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport) {
-    if (!portfolioActifRapport) {
-        return 'Portfolio désactivé — Les productions sont évaluées de manière indépendante';
-    }
+function _genererTexteRegleSelectionPortfolio(methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport) {
     if (methodeSelectionRapport === 'hybride-categories') {
         const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
         const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
@@ -3815,10 +3813,7 @@ function _genererTextePonderationCriteresActifs() {
     return 'Pondération des critères déterminée dans les réglages';
 }
 
-function _genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport) {
-    if (!portfolioActifRapport) {
-        return 'Performance des productions indépendantes';
-    }
+function _genererTextePerformanceMethodeBloc(methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport) {
     if (methodeSelectionRapport === 'hybride-categories') {
         const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
         const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
@@ -3832,33 +3827,6 @@ function _genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelec
         'tous': `Performance du portfolio actuel (${accordTermeProduction('tous', 2)} les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
     };
     return textesPerformance[methodeSelectionRapport] || textesPerformance['meilleurs'];
-}
-
-function _appliquerSelectionAutoArtefacts(da, portfolio, artefacts, selectionEleve, selectionsPortfolios, nombreARetenir) {
-    if (selectionEleve.artefactsRetenus.length !== 0) return;
-    const artefactsRemisAvecNote = artefacts
-        .filter(a => a.remis && a.note !== null)
-        .sort((a, b) => b.note - a.note);
-    const meilleurs = artefactsRemisAvecNote.slice(0, nombreARetenir);
-    if (meilleurs.length === 0) return;
-
-    selectionEleve.artefactsRetenus = meilleurs.map(a => a.id);
-    if (!selectionsPortfolios[da]) selectionsPortfolios[da] = {};
-    selectionsPortfolios[da][portfolio.id] = {
-        artefactsRetenus: selectionEleve.artefactsRetenus,
-        dateSelection: new Date().toISOString(),
-        auto: true
-    };
-    db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
-
-    // Recalculer les indices C et P après sélection automatique
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-    // Mettre à jour le flag retenu
-    artefacts.forEach(art => {
-        art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
-    });
 }
 
 function _calculerIndicesPerformance(da) {
@@ -3985,69 +3953,81 @@ function _phraseEvaluationsEcartees(ecartees, classeBloc) {
     return '<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">' + texte + '</span>';
 }
 
-function _lireDetailsRapportPerformance(da, nombreARetenir, artefacts) {
-    let methodeSelectionRapport = 'meilleurs';
-    let portfolioActifRapport = true;
-    let nombreARetenirConfig = nombreARetenir;
+/**
+ * #714 (22 sept. 2026) — CE QUE LE PANNEAU « Développement des habiletés » DIT DE LA NOTE, lu dans
+ * `calculerDetailsNoteFinale` et nulle part ailleurs : combien d'évaluations sont retenues, lesquelles,
+ * sur combien, par quelle méthode, et leur moyenne.
+ *
+ * Avant : le nombre à retenir venait des `regles` de la PRODUCTION Portfolio (« 3 » sous une pratique
+ * « 4 meilleurs ») ; la liste venait de `indicesCP.details`, que plus rien n'écrit (« Calcul impossible »
+ * sous un P juste) ; et le rendu ÉCRIVAIT une sélection « meilleurs » dans `portfoliosEleves`, puis
+ * relançait les indices, à chaque affichage. Le panneau n'écrit plus rien. Les sélections déjà écrites
+ * restent où elles sont (limite de Grégoire du 20 sept.) : rien ne les lit pour calculer une note.
+ *
+ * Les MOTS du compte sont ceux de la carte de la note (`genererSectionProductions` du même fichier),
+ * pour que les deux disent la même chose.
+ *
+ * @param {string} da
+ * @param {Array} productions - celles du trimestre, pour nommer les évaluations retenues
+ * @returns {Object|null} null hors Standards ou sans note calculable : le panneau ne dit alors
+ *   AUCUNE phrase sur des évaluations retenues.
+ */
+function _lireNotePourPanneauHabiletes(da, productions) {
+    const details = (typeof calculerDetailsNoteFinale === 'function') ? calculerDetailsNoteFinale(da) : null;
+    if (!details || details.erreur || !details.portfolio) return null;
+    const portfolio = details.portfolio;
+    const hybride = portfolio.methodeSelectionCle === 'hybride';
+    const cats = (hybride && typeof obtenirConfigCategories === 'function') ? obtenirConfigCategories() : null;
+    const nombreARetenir = hybride
+        ? ((cats && cats.selection && cats.selection.nombreARetenir) || 4)   // le défaut de _selectionnerArtefactsHybride
+        : portfolio.nombreARetenir;
 
-    // Détecter mode Hybride (source : pratiquesConfigurables)
-    const configPratiqueRapport = typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null;
-    const configCategoriesRapport = configPratiqueRapport?.categories
-        || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
-    const modeHybrideRapport = !!(configCategoriesRapport && configCategoriesRapport.actif);
+    const parId = {};
+    (productions || []).forEach(p => { parId[p.id] = p; });
+    const retenues = (portfolio.artefactsRetenus || [])
+        .map(a => ({ titre: (parId[a.productionId] && parId[a.productionId].titre) || obtenirTermeProduction('singulier', true),
+            note: a.note, obligatoire: !!(parId[a.productionId] && parId[a.productionId].categorie === 'obligatoire') }))
+        .sort((a, b) => (b.note || 0) - (a.note || 0));   // l'ordre de la carte
 
-    if (modeHybrideRapport) {
-        methodeSelectionRapport = 'hybride-categories';
-        nombreARetenirConfig = configCategoriesRapport.selection?.nombreARetenir || 4;
-    } else if (configPratiqueRapport?.portfolio?.methodeSelection) {
-        methodeSelectionRapport = configPratiqueRapport.portfolio.methodeSelection;
-        if (methodeSelectionRapport === 'derniers') methodeSelectionRapport = 'recents';
-        nombreARetenirConfig = configPratiqueRapport.portfolio.nombreARetenir || nombreARetenir;
+    let compte;
+    if (hybride) {
+        const obligatoires = retenues.filter(r => r.obligatoire).length;
+        const evaluesSelection = Math.max(0, portfolio.nombreEvalues - obligatoires);
+        compte = `les ${nombreARetenir} meilleures sur ${evaluesSelection} évaluées`
+            + (obligatoires ? `, et ${obligatoires} obligatoire${obligatoires > 1 ? 's' : ''}` : '');
+    } else {
+        compte = `${portfolio.nombreRetenus} ${echapperHtml(portfolio.methodeSelection)} ${obtenirTermeProduction('pluriel')} sur ${portfolio.nombreEvalues} ${accordTermeProduction('evalue', portfolio.nombreEvalues)}`;
     }
 
-    let artefactsRetenus = [];
-    let notesRetenues = [];
-    let noteTop3 = null;
-
-    if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da);
-        if (indicesCP && indicesCP.details) {
-            const idsRetenus = indicesCP.details.artefactsRetenus || [];
-            notesRetenues = indicesCP.details.notes || [];
-
-            // Lire la config depuis indicesCP si disponible (fallback si pas hybride)
-            if (!modeHybrideRapport) {
-                methodeSelectionRapport = indicesCP.details.methodeSelection || 'meilleurs';
-                portfolioActifRapport = indicesCP.details.portfolioActif !== false;
-                nombreARetenirConfig = indicesCP.details.nombreARetenir || nombreARetenir;
-            }
-
-            // Récupérer les titres des artefacts retenus
-            artefactsRetenus = idsRetenus.map(id => {
-                const artefact = artefacts.find(a => a.id === id);
-                const idx = idsRetenus.indexOf(id);
-                return {
-                    titre: artefact ? artefact.titre : 'Artefact inconnu',
-                    note: notesRetenues[idx] || 0
-                };
-            });
-
-            if (notesRetenues.length > 0) {
-                const somme = notesRetenues.reduce((sum, note) => sum + note, 0);
-                noteTop3 = (somme / notesRetenues.length).toFixed(1);
-            }
-        }
-    }
     return {
-        methodeSelectionRapport,
-        portfolioActifRapport,
-        nombreARetenirConfig,
-        modeHybrideRapport,
-        configCategoriesRapport,
-        artefactsRetenus,
-        notesRetenues,
-        noteTop3
+        methodeCle: hybride ? 'hybride-categories' : (portfolio.methodeSelectionCle || 'meilleurs'),
+        nombreARetenir,
+        configCategories: cats,
+        compte,
+        retenues,
+        moyenne: portfolio.moyenne,
+        terminalePresente: !!(details.terminal && details.terminal.present),
+        formule: (details.recit && details.recit.synthese) ? details.recit.synthese.formuleTexte : null
     };
+}
+
+/**
+ * #714 — la ligne « Calcul de l'indice P », écrite SEULEMENT si l'addition qu'elle montre redonne la
+ * moyenne du moteur (même principe que #921) : c'est cette règle, et elle seule, qui l'écarte sous
+ * l'hybride (moyenne pondérée) ou un plafonnement — la carte de la note les détaille. Jamais
+ * « Calcul impossible » sous une note.
+ * @returns {string} HTML, ou '' si rien d'exact ne peut être écrit
+ */
+function _ligneCalculIndicePPanneau(note, differee) {
+    if (!note || differee || !note.retenues.length) return '';
+    if (typeof note.moyenne !== 'number' || !note.retenues.every(r => typeof r.note === 'number')) return '';
+    const n = note.retenues.length;
+    const somme = note.retenues.reduce((t, r) => t + r.note, 0);
+    if (Math.abs(somme / n - note.moyenne) >= 0.05) return '';
+    const addition = `(${note.retenues.map(r => r.note.toFixed(1)).join(' + ')}) / ${n} = <strong>${note.moyenne.toFixed(1)}%</strong>`;
+    const quoi = `Moyenne des ${n} ${obtenirTermeProduction(n > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('retenu', n)}`;
+    if (!note.terminalePresente) return `${quoi} — P = ${addition}`;
+    return `${quoi} = ${addition}` + (note.formule ? ` ; P = ${echapperHtml(note.formule)}` : '');
 }
 
 function genererSectionPerformance(da) {
@@ -4081,63 +4061,17 @@ function genererSectionPerformance(da) {
         });
     }
 
-    // ✅ CORRECTION : Identifier les artefacts RÉELLEMENT ÉVALUÉS
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productionsEvaluees = new Set();
-    evaluations.forEach(evaluation => {
-        productionsEvaluees.add(evaluation.productionId);
-    });
-
-    // ✅ Ne considérer QUE les artefacts qui ont été évalués (au moins 1 élève)
-    const artefactsPortfolio = tousLesArtefactsPortfolio.filter(art => 
-        productionsEvaluees.has(art.id)
-    );
-
-    // Récupérer les évaluations et sélections de l'élève
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
-    const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
-
-    // Construire la liste des artefacts (seulement ceux évalués)
-    const artefacts = artefactsPortfolio.map(art => {
-        const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
-        return {
-            id: art.id,
-            titre: art.titre,
-            description: art.description || art.titre, // Utiliser description ou fallback sur titre
-            remis: !!evaluation,
-            note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
-            niveau: evaluation?.niveauFinal ?? null,
-            retenu: selectionEleve.artefactsRetenus.includes(art.id)
-        };
-    }).sort((a, b) => {
-        if (a.remis && !b.remis) return -1;
-        if (!a.remis && b.remis) return 1;
-        return a.description.localeCompare(b.description);
-    });
-
-    // Sélection auto des meilleurs artefacts si aucune sélection manuelle
-    const nombreARetenir = portfolio.regles.nombreARetenir || 3;
-    _appliquerSelectionAutoArtefacts(da, portfolio, artefacts, selectionEleve, selectionsPortfolios, nombreARetenir);
-
-    const nbTotal = artefacts.length;  // ✅ Maintenant basé sur les artefacts ÉVALUÉS
-    const nbRemis = artefacts.filter(a => a.remis).length;
-    const nbRetenus = selectionEleve.artefactsRetenus.length;
-
-    // Calcul dual pour mode comparatif (Beta 90 + correctif 7 déc 2025 :
-    // vérifier === true pour éviter le mode comparatif par défaut)
-    const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — indices de la pratique active.
     const { indices } = _calculerIndicesPerformance(da);
 
-    // Détails du rapport portfolio (méthode sélection, artefacts retenus, etc.)
-    const detailsRapport = _lireDetailsRapportPerformance(da, nombreARetenir, artefacts);
-    const {
-        methodeSelectionRapport, portfolioActifRapport, nombreARetenirConfig,
-        configCategoriesRapport, artefactsRetenus, notesRetenues
-    } = detailsRapport;
-
-    const selectionComplete = nbRetenus === portfolio.regles.nombreARetenir;
+    // #714 — ce que le panneau dit de la note vient de `calculerDetailsNoteFinale`, seul ; null hors
+    // Standards. Plus de sélection écrite au rendu ; le nombre et la liste ne viennent plus du conteneur ni du cache d'indices.
+    const noteLue = _lireNotePourPanneauHabiletes(da, productions);
+    const differee = (typeof noteDiffereeActive === 'function' && noteDiffereeActive());  // #321, comme la carte
+    const ligneCalculP = _ligneCalculIndicePPanneau(noteLue, differee);
+    const listeRetenues = noteLue ? (noteLue.retenues.length
+        ? noteLue.retenues.map((r, idx) => `${idx + 1}. ${echapperHtml(r.titre)} → ${differee ? badgeNoteDifferee() : (typeof r.note === 'number' ? r.note.toFixed(1) + '/100' : '—')}`).join(' • ')
+        : `${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}`) : '';
 
     // `const interpP = interpreterPerformance(indices.P);` retiré au pas 3c-3 de
     // #542 : second appel dont le résultat n'était lu nulle part.
@@ -4199,17 +4133,14 @@ function genererSectionPerformance(da) {
             <br><br>
             <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'PAN-Standards' : 'Sommative'}
             <br><br>
-            <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)}
+${noteLue ? `
+            <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(noteLue.methodeCle, noteLue.nombreARetenir, noteLue.configCategories)}
             <br><br>
-            <strong>${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('retenu', 2)} :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
-                `${idx + 1}. ${art.description} → ${art.note.toFixed(1)}/100`
-            ).join(' • ') : `${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}`}
+            <strong>${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('retenu', 2)} (${noteLue.compte}) :</strong> ${listeRetenues}
             <br><br>
-            <strong>Calcul de l'indice P :</strong> ${artefactsRetenus.length > 0 ? `
-                Moyenne des ${artefactsRetenus.length} ${obtenirTermeProduction(artefactsRetenus.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('retenu', artefactsRetenus.length)} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
-            ` : 'Calcul impossible : aucune évaluation disponible'}
-            <br><br>
-            <strong>Calcul de la note de chaque ${obtenirTermeProduction('singulier')} :</strong> ${_genererTextePonderationCriteresActifs()}${selectionEleve.auto ? '<br><br><strong>Note :</strong> Sélection automatique basée sur les meilleures notes' : ''}
+            ${ligneCalculP ? `<strong>Calcul de l'indice P :</strong> ${ligneCalculP}
+            <br><br>` : ''}` : ''}
+            <strong>Calcul de la note de chaque ${obtenirTermeProduction('singulier')} :</strong> ${_genererTextePonderationCriteresActifs()}
         </div>
 
         <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
@@ -4222,9 +4153,9 @@ function genererSectionPerformance(da) {
             </div>
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->
-            <ul class="profil-liste-simple" style="margin-bottom: 15px;">
-                <li><strong>• ${_genererTextePerformanceMethodeBloc(portfolioActifRapport, methodeSelectionRapport, nombreARetenirConfig, configCategoriesRapport)}</strong></li>
-            </ul>
+            ${noteLue ? `<ul class="profil-liste-simple" style="margin-bottom: 15px;">
+                <li><strong>• ${_genererTextePerformanceMethodeBloc(noteLue.methodeCle, noteLue.nombreARetenir, noteLue.configCategories)}</strong></li>
+            </ul>` : ''}
 
             <hr class="profil-separateur">
 
