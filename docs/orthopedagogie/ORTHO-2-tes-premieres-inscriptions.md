@@ -43,7 +43,7 @@ Trois formes sont acceptées, et tu peux les mélanger :
 ```
 Léa Tremblay
 1234567 ; Gagnon ; Noah
-="9000195";="00007";="A., Yacine";="241.A0";
+="9000931";="00007";="Exemple";="Sara";="241.A0";
 ```
 
 La première est un simple prénom et nom. La deuxième donne le numéro de DA, le nom, puis le prénom. La

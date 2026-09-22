@@ -10365,12 +10365,12 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
            possible sur l'undo de reprise).
         2. Coder le CŒUR : helper pur `_reconcilierActivesNoteEgale` (6 conditions + exclure les 4 marques de reprise dont la CIBLÉE +
            invariant `verrouillee` interne + normaliser note 1 décimale) + 2 chemins de save (avec fix persistance) + garde/sentinelle
-           break-testée (rouge note-égale / vert Samuel divergent).
+           break-testée (rouge note-égale / vert Fictivam divergent).
         3. Sous-lots REPORTÉS (chacun sa propre ouverture) : (a) tarir le splice — PAS du code mort, branché sur une préférence
            utilisateur vivante (radio « supprimer l'originale » index.html:6372 → toute la chaîne UI/config) = DÉCISION PRODUIT Grégoire ;
            (b) diagnostic rétroactif sur migration-diagnostic.js (patron reparerCoursIdProductions, dry-run, par trimestre, 6 conditions,
            faille [0] à corriger, LISTER les divergents) = SESSION DÉDIÉE, RISQUE DONNÉES (backup Codex).
-     ⮕ Limite assumée : la prévention ne couvre que les surnuméraires NOTE-ÉGALE ; un orphelin re-noté DIVERGENT (≈ Samuel) double une
+     ⮕ Limite assumée : la prévention ne couvre que les surnuméraires NOTE-ÉGALE ; un orphelin re-noté DIVERGENT (≈ Fictivam) double une
         production dans le top-N et reste invisible jusqu'au diagnostic rétroactif (à lister, jamais trancher seul).
      Mémoire : [[distinguer-reprises-doublons]] (corrigée), [[audit-integrite-reconstruction-2026-06-27]].
      ===================================================================== -->
@@ -10384,8 +10384,8 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
      2. e2026 (trimestre de TEST) SUPPRIMÉ : 23 clés `e2026_*` (db.remove, localStorage+IDB) + 1 entrée `cours` (COURS_1780008321319)
         + entrée registre `trimestres`. Garde anti-suppression-du-trimestre-actif. Trimestre actif = h2026 (non touché).
      3. 3 DOUBLONS ORPHELINS d'évals NETTOYÉS, inertie PROUVÉE par recalcul des DEUX moteurs réels (legacy 'meilleurs' top-4 +
-        hybride) : Taly `EVAL_1760797515415` (a2025, moy 76,125 inchangée), Ally `EVAL_1761735149243` (a2025, 85,025),
-        Elisa `EVAL_1775489289020_4_…` (h2026, 77,5575). Orphelin = dans le pool mais HORS top-N → Δ=0. **Samuel LAISSÉ** (divergent,
+        hybride) : Fictaly `EVAL_1760797515415` (a2025, moy 76,125 inchangée), Fictally `EVAL_1761735149243` (a2025, 85,025),
+        Fictelisa `EVAL_1775489289020_4_…` (h2026, 77,5575). Orphelin = dans le pool mais HORS top-N → Δ=0. **Fictivam LAISSÉ** (divergent,
         déjà tranché 27 juin). Garde : ne supprimer qu'une éval SANS marque (`remplaceeParId`/`repriseDeId`/`jetonRepriseApplique`).
         ⚠ 2 oracles intermédiaires faux (faux positifs : champ raté, puis contexte UI non chargé) AVANT la preuve déterministe par recalcul.
      • CAVEAT d'audit LEVÉ : `_filtrerEvaluationsArtefactsValides` (profil-etudiant-actions.js:251) ne filtre QUE sur `!remplaceeParId`
@@ -10394,7 +10394,7 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
      ⮕ NOUVEAU CHANTIER #360 (BACKLOG) — distinguer/prévenir reprises vs doublons. TRACÉ POUR SESSION DÉDIÉE (décision Grégoire).
         Synthèse d'un workflow adverse (4 approches, 2 rejetées 2 à amender). Orientation : PAS de nouveau champ d'état (le moteur ne
         lit que `!remplaceeParId`, ~62 sites) → `filter()` posant `remplaceeParId` sur surnuméraires note-égale + garde/sentinelle
-        (divergent→vert = Samuel épargné) + tarir le `splice` de reprise + réutiliser `migration-diagnostic.js`. CAUSE RACINE probable
+        (divergent→vert = Fictivam épargné) + tarir le `splice` de reprise + réutiliser `migration-diagnostic.js`. CAUSE RACINE probable
         des doublons = non-persistance silencieuse (`db.js:1104` flush IDB avalé ; `memoryCache` volatile) → connecte #352/#353.
         Mémoire : [[distinguer-reprises-doublons]], [[audit-integrite-reconstruction-2026-06-27]].
 
@@ -10417,10 +10417,10 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
        h2026 MAE 0,39 (46 él. notés, mode FINALE ; 3 abandons « AE/X » exclus). → AUCUNE note du codex ne diverge d'Omnivox.
      • « Doublons d'évals » RECLASSÉS (≠ corruption) : FIDÈLES aux notes Omnivox officielles. PRINCIPE ACTÉ Grégoire :
        LA NOTE OMNIVOX REMISE À L'ÉLÈVE FAIT FOI.
-       - SAMUEL M. (a2025) : Artefact 4 compté 2× (77,3 + 79) = son 71,1 officiel ; Artefact 5 confirmé NON remis (capture
+       - FICTIVAM Calque (a2025) : Artefact 4 compté 2× (77,3 + 79) = son 71,1 officiel ; Artefact 5 confirmé NON remis (capture
          productions) ⇒ pas de réattribution possible. DÉCISION : GARDER le 2×A4, ZÉRO écriture. (Si compté 1×, 5e note = 66,5 → 69,5.)
-       - Taly (a2025) : doublons INERTES (sous le top-4) ; Elisa (h2026) : jumelle 73 = cosmétique.
-       - 4 résidus h2026 (Houle/Philibert/Handfield/Michaud-Lebel) = bruit < 2 pts (composante obligatoires/sélection ≠ formule
+       - Fictaly (a2025) : doublons INERTES (sous le top-4) ; Fictelisa (h2026) : jumelle 73 = cosmétique.
+       - 4 résidus h2026 (Esquisse/Canevas/Schema/Silhouette) = bruit < 2 pts (composante obligatoires/sélection ≠ formule
          Omnivox), VÉRIFIÉ : PAS des reprises non nettoyées (reprises correctement appliquées) → ACCEPTÉS, Omnivox prime.
      • Carte d'audit reclassée en mémoire : [[audit-integrite-reconstruction-2026-06-27]].
 
@@ -10431,7 +10431,7 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
      3. SUPPRIMER e2026 (trimestre de TEST) : snippet console fourni (l'app n'a PAS de suppression = stub).
         Périmètre borné : 23 clés e2026_* via db.remove (couvre localStorage + IndexedDB) + 1 entrée `cours` globale
         (trimestre==='e2026', COURS_1780008321319…) + entrée du registre `trimestres`. Garde anti-suppression-du-trimestre-actif.
-     4. NETTOYAGE COSMÉTIQUE (Taly/Elisa inertes) : EN ATTENTE — vérifier la couverture d'artefacts AVANT (leçon Samuel :
+     4. NETTOYAGE COSMÉTIQUE (Fictaly/Fictelisa inertes) : EN ATTENTE — vérifier la couverture d'artefacts AVANT (leçon Fictivam :
         ne pas inventer de remise vers un slot vide). ZÉRO enjeu de note.
      Préférence de travail notée : [[preference-chiffre-avant-decision]] (présenter le chiffre décisif avant toute question).
 
@@ -10465,10 +10465,10 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
 
      RESTE (priorisé — détail dans la mémoire Claude « audit-integrite-reconstruction-2026-06-27 ») :
        1. Décision D-D1 (régime §3.2 : pleinement namespacé vs hybride) à trancher à froid sur codex assaini.
-       2. Doublons d'évals ACTIVES à notes DIVERGENTES (a2025 Taly B./Art4 = 4 actives 63/66/69/69 ;
-          Samuel M./Art4 = 77,3 vs 79) → fausse la note retenue. + doublons note-identique (h2026 Elisa/Art5 ; a2025 Ally/Art5).
-       3. h2026 : Vanesa G.-A./Art1 — note ≠ critères SANS justification (examiner en 1er) ; grilleId faux 5-critères
-          (Salma C./Art3, Elisa B./Art5) ; éval partielle 4/5 (Francine M.-T./Art2 = même défaut que Grace, non corrigé).
+       2. Doublons d'évals ACTIVES à notes DIVERGENTES (a2025 Fictaly Epure/Art4 = 4 actives 63/66/69/69 ;
+          Fictivam Calque/Art4 = 77,3 vs 79) → fausse la note retenue. + doublons note-identique (h2026 Fictelisa/Art5 ; a2025 Fictally/Art5).
+       3. h2026 : Fictanesa Estampe/Art1 — note ≠ critères SANS justification (examiner en 1er) ; grilleId faux 5-critères
+          (Fictalma Contour/Art3, Fictelisa Trame/Art5) ; éval partielle 4/5 (Fictancine Filigrane/Art2 = même défaut que Fictrace, non corrigé).
        4. e2026 : groupesCours VIDE + grappe prod/éval sur coursId orphelin → décision à prendre.
        5. Préférence `grilleReferenceDepistage` VIDE (radar de dépistage) → `definirPreference('grilleReferenceDepistage','GRILLE1759529438501')`.
        6. Catalogue `cours` : 3 doublons `h2026-601-102-MQ-00001` à dédoublonner. a2024 = ingestion brute (pas prêt pour le longitudinal).
@@ -10939,7 +10939,7 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
           (db.setSync ; poser-modeles-a25-console.js, hors repo). Terrain Grégoire : échelle + critères +
           grille s'affichent (fin du symptôme #348 / #349 composante 2).
        2. CSV L0 oracle régénéré (maintenance) — 2 valeurs « conforme » réalignées sur le moteur
-          (Houle 77,9→77,6 ; Marquis 69,4→71,1). MAE conforme 0,087→0,024, 30/30 dans la tolérance,
+          (Esquisse 77,9→77,6 ; Calque 69,4→71,1). MAE conforme 0,087→0,024, 30/30 dans la tolérance,
           diagnostic « valeurs à régénérer » résorbé. Backup *.avant-regen-L0 (dossier Grégoire, hors repo).
        3. DIAGNOSTIC TERRAIN (Grégoire) → BACKLOG #350 : à l'ouverture d'une éval rédaction A25, la note se
           RECALCULE faux (éval-pilote terminale 76,6 → 88 %). Le critère français algo affiche 0 erreur au
@@ -11000,9 +11000,9 @@ parallèle, corrigé dans le même commit, invariant verrouillé par sentinelle.
        restaurées, arbre propre. Playwright = CI (non lançable local).
      VALIDÉ TERRAIN (Grégoire, Mac) : Section A H26 (non-régression écrans d'analyse) ; L0 golden master
        a2025 VERT (30/30, MAE Omnivox 0.148 = identique au 23 juin → namespacing NOTE-NEUTRE) ; #348 crash
-       résolu (éval terminale Patricio se charge) ; #348-résiduel bruit échelle tu.
+       résolu (éval terminale Fictricio se charge) ; #348-résiduel bruit échelle tu.
      ORACLE L0 — 2 divergences NON bloquantes (le moteur colle MIEUX à Omnivox que le CSV de reconstruction) :
-       Houle CSV 77.9 / moteur+Omnivox 77.6 ; Marquis CSV 69.4 / moteur 71.1 / Omnivox 70.8. → 2 VALEURS DU
+       Esquisse CSV 77.9 / moteur+Omnivox 77.6 ; Calque CSV 69.4 / moteur 71.1 / Omnivox 70.8. → 2 VALEURS DU
        CSV « conforme » À RÉGÉNÉRER (maintenance d'oracle, pas un défaut moteur). Non urgent.
      PROCHAIN CAP : PILOTE A25 — poser les copies a2025_grillesTemplates/echellesTemplates (JSON de Grégoire,
        échelle marquée `active`). Rend l'effet du namespacing visible sur A25 ET résorbe les résiduels A25

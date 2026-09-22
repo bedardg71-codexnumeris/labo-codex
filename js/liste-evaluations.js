@@ -1566,7 +1566,7 @@ function genererDropdownActions(ligne, fichierResolu) {
     // #931 (22 sept. 2026) — PLUS DE REPLI SUR UNE LIGNE SANS FICHIER. Depuis le
     // 5 mars, une ligne sans fichier offrait quand même « Réassocier », en prenant
     // « un fichier du même DA sous une AUTRE production » — le PREMIER trouvé, sans
-    // le nommer. Mesuré chez Grégoire : sur la ligne Allache × Artefact 2 (rév), le
+    // le nommer. Mesuré chez Grégoire : sur la ligne Exemple × Artefact 2 (rév), le
     // menu a déplacé son vieux « Portrait de lecteur », puis son Artefact 1 annoté
     // et évalué, à la place du fichier importé le matin même (parti à la corbeille
     // par la porte « Remplacer l'existant ? » de `reassignerCopie`, #932). Un

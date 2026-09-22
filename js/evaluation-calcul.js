@@ -204,8 +204,8 @@ function _projectionEUF(critereId, erreurs, mots) {
  * Un calcul déclenché là écrit le compte du voisin sous le nom du nouvel élève.
  *
  * MESURÉ le 31 août 2026 sur 27 copies réelles : 5 contaminées, dont 3 par le
- * voisin immédiat (Boucher a reçu le 59 d'Allache, Bourgeois le 11 de Dumont,
- * Nanthavong le 8 de Patenaude). Des PDF faux étaient déjà remis aux élèves.
+ * voisin immédiat (Fictif a reçu le 59 d'Exemple, Gabarit le 11 de Simulacre,
+ * Maquette le 8 de Croquis). Des PDF faux étaient déjà remis aux élèves.
  *
  * ⚠ POURQUOI PAS UN DÉLAI DE PLUS. Le correctif du 15 décembre 2025
  * (`5d2d41c7`) couvrait déjà cette course en « augmentant le délai de recalcul

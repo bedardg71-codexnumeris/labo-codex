@@ -19,7 +19,7 @@ const lire = (rel) => readFileSync(path.join(racine, rel), 'utf8');
 // reprise » et rouvrirait le bug (suppression du survivant → résurrection du
 // doublon ; ré-ouverture du doublon → perte de la vraie note).
 //
-// LIMITE ASSUMÉE : un orphelin re-noté DIVERGENT (≈ Samuel, validé Omnivox) reste
+// LIMITE ASSUMÉE : un orphelin re-noté DIVERGENT (≈ Fictivam, validé Omnivox) reste
 // intact — décision actée : ne jamais trancher un divergent automatiquement.
 //
 // Break-tests (cf. SKILL_verification_adverse) : réintroduire un bug fait ROUGIR.
@@ -56,7 +56,7 @@ describe('#360 · reconcilierActivesNoteEgale · cœur (helper pur)', () => {
         expect(marquee.reconcilieParDoublon).toBe(true);  // Option A : drapeau discriminant
     });
 
-    it('2 actives DIVERGENTES (Samuel 77,3 / 79) → AUCUN marquage (contre-cas)', () => {
+    it('2 actives DIVERGENTES (Fictivam 77,3 / 79) → AUCUN marquage (contre-cas)', () => {
         const evals = [ev('E1', { noteFinale: 77.3 }), ev('E2', { noteFinale: 79 })];
         const r = R.reconcilierActivesNoteEgale(evals, 'DA1', 'P1');
 

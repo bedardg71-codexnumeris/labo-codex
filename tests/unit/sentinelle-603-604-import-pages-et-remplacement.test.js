@@ -21,7 +21,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // « présent 2 fois dans la file » à la confirmation, et deux entrées qui
 // survivent jusqu'à l'import.
 //
-// ⚠ Les remises multi-fichiers SANS suffixe (Mailhot, Boucher, Thibodeau…)
+// ⚠ Les remises multi-fichiers SANS suffixe (Postiche, Fictif, Pastiche…)
 // passent correctement : même `nomProduction`, même clé, donc assemblage. Le
 // défaut ne frappe QUE les pages numérotées.
 //
@@ -48,7 +48,7 @@ const sourceUI = readFileSync(path.join(racineProjet, 'js', 'travaux-ui.js'), 'u
 const ETUDIANTS = [
     { da: '9000058', nom: 'Bourdages', prenom: 'Alma' },
     { da: '9000582', nom: 'Turcotte', prenom: 'Aria' },
-    { da: '9000200', nom: 'Mailhot', prenom: 'Lubin' }
+    { da: '9000200', nom: 'Postiche', prenom: 'Lubin' }
 ];
 
 // Un vrai PDF minimal : `validerMagicBytes` lit les quatre premiers octets.

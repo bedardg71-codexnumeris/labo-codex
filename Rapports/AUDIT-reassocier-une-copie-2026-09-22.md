@@ -23,7 +23,7 @@ Le lien « Non associé › » de la liste (`liste-evaluations.js:1185`) ouvre P
 
 ## 3. Réponse à la question
 
-**Oui, l'éditeur (B) est plus clair** : c'est le seul chemin « voir la photo, puis décider ». **Mais il n'est ni plus simple ni plus sûr** : quatre clics et deux écrans (Modifier → Propriétés → Production → Sauvegarder), et son enregistrement contourne la porte de conflit — ce qui, ce matin, aurait laissé deux copies d'Allache sous Artefact 2 (rév) sans rien dire, plutôt que d'en envoyer une à la corbeille.
+**Oui, l'éditeur (B) est plus clair** : c'est le seul chemin « voir la photo, puis décider ». **Mais il n'est ni plus simple ni plus sûr** : quatre clics et deux écrans (Modifier → Propriétés → Production → Sauvegarder), et son enregistrement contourne la porte de conflit — ce qui, ce matin, aurait laissé deux copies d'Exemple sous Artefact 2 (rév) sans rien dire, plutôt que d'en envoyer une à la corbeille.
 
 Le défaut n'est pas « un chemin de trop », c'est **trois écrivains pour un seul geste**, chacun avec sa part de ce qu'il faudrait : A et C ont la porte, B a la vue. La règle zéro-dette du projet dit la suite : **un seul geste**, qui montre la copie (vignette + nom de fichier), nomme la cible, et passe par la porte.
 

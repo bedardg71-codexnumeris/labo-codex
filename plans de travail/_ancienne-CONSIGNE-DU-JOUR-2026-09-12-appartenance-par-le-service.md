@@ -40,7 +40,7 @@ rendu par le goulot : 0
 ```
 
 **Le défaut est à la LECTURE.** Trois élèves saisis (« Service créé — 3 élèves »), **deux affichés**. Le troisième venait d'une
-ligne Omnivox réelle : `="9000195";="00007";="A., Yacine";="241.A0";`. Sa fiche porte `groupe: "00007"` — le vrai groupe de
+ligne Omnivox réelle : `="9000931";="00007";="Exemple";="Sara";="241.A0";`. Sa fiche porte `groupe: "00007"` — le vrai groupe de
 ce collège. Le groupe-cours du service porte `groupeNum: "00001"`. Les deux lectures ci-dessous exigent l'égalité des deux, et
 l'élève tombe.
 
@@ -117,8 +117,8 @@ rencontres, pas ce qui a été réparé dans le code. Si le lot B n'est pas fait
 
 ## 6 · LA PORTE TERRAIN
 Deux rangées à ajouter au markdown existant (`PORTES-TERRAIN-2026-09-12-rencontres.md`), pas une porte neuve :
-- **13** — en démo, sur le service déjà créé ce matin : `Suivi › Liste des étudiant·es` montre **les trois élèves**, dont A.
-  Yacine, sans que Grégoire ait rien ressaisi (c'est la preuve que le stock est réparé par la lecture).
+- **13** — en démo, sur le service déjà créé ce matin : `Suivi › Liste des étudiant·es` montre **les trois élèves**, dont Exemple
+  Sara, sans que Grégoire ait rien ressaisi (c'est la preuve que le stock est réparé par la lecture).
 - **14** — sur ses **deux groupes réels** : Liste, Suivi du groupe et un profil, identiques à ce matin.
 
 ## 7 · TROUVAILLES ET RAPPORT

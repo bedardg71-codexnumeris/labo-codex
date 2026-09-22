@@ -20,7 +20,7 @@
    « originale archivée par une reprise », rouvrant le bug qu'on prétend fermer.
 
    LIMITE ASSUMÉE : seuls les surnuméraires NOTE-ÉGALE sont réconciliés. Un
-   orphelin re-noté DIVERGENT (ex. Samuel : 77,3 / 79, validé Omnivox) est laissé
+   orphelin re-noté DIVERGENT (ex. Fictivam : 77,3 / 79, validé Omnivox) est laissé
    intact — le code n'a aucun champ pour distinguer une double remise volontaire
    d'un orphelin re-noté. Décision actée : ne JAMAIS trancher un divergent.
 
@@ -100,7 +100,7 @@ function reconcilierActivesNoteEgale(evaluations, etudiantDA, productionId) {
     if (actives.length < 2) return resultat;
 
     // 2. Grouper par note normalisée. Un groupe de taille 1 = note unique → on n'y
-    //    touche pas (c'est le cas « Samuel divergent » qui doit rester intact).
+    //    touche pas (c'est le cas « Fictivam divergent » qui doit rester intact).
     const groupes = new Map();
     for (const e of actives) {
         const k = _noteNormalisee(e.noteFinale);

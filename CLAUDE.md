@@ -7,7 +7,6 @@
 > ce qui y entre doit valoir la place qu'il prend à chacune.
 
 ---
-
 ## Lecture obligatoire
 
 **Commence TOUJOURS par** : `OU-EN-EST-ON.md` (racine) — où en est chacun des huit
@@ -183,6 +182,7 @@ exemples et modèle de menaces : skill `securite-donnees`.)
    `log` de debug sont retirés avant commit.
 5. **Tout chantier sécurité Phase 1+ ajoute ≥ 1 test** couvrant la défense livrée :
    fonction pure → Vitest `tests/unit/` ; navigateur → Playwright `tests/integration/`.
+6. **Aucun nom d'élève réel** dans le code, tests, rapports, plans, exemples : noms fictifs (22 sept. 2026).
 
 Avant un commit touchant `js/securite-*.js`, `js/import-export.js`,
 `js/cc-license.js` ou la CSP : `cd tests && npm test` — il enchaîne Vitest ET

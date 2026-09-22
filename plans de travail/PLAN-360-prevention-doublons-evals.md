@@ -155,7 +155,7 @@ ROUGIT  ⟺  ∃ groupe note-égale avec  countActivesSansMarqueDeReprise > 1
            ET aucune des surnuméraires n'est verrouillee===true
         (= état illégal : >1 active note-égale sans marque sur un couple)
 
-VERT (Samuel)  ⟺  les 2+ actives ont des notes normalisées DIFFÉRENTES (groupes distincts de taille 1)
+VERT (Fictivam)  ⟺  les 2+ actives ont des notes normalisées DIFFÉRENTES (groupes distincts de taille 1)
 VERT aussi      ⟺  une seule active, OU surnuméraire = reprise marquée (4 marques), OU verrouillée
 ```
 
@@ -172,7 +172,7 @@ VERT aussi      ⟺  une seule active, OU surnuméraire = reprise marquée (4 ma
 | Cas | Attendu | Break-test |
 |---|---|---|
 | 2 actives note-égale sans marque | après réconciliation, exactement 1 active sans `remplaceeParId` | **oui** |
-| 2 actives **divergentes** (Samuel 77,3 / 79) | **aucun** marquage ; 2 actives restent | non (contre-cas) |
+| 2 actives **divergentes** (Fictivam 77,3 / 79) | **aucun** marquage ; 2 actives restent | non (contre-cas) |
 | reprise légitime note-égale (marquée) | non re-marquée | non |
 | surnuméraire plagiat/ia ou `noteFinale` null | déjà écarté par le moteur → aucun marquage | non |
 | paire note-égale dont la non-survivante est **verrouillée** | **aucun** marquage | oui |
@@ -218,7 +218,7 @@ prend la 1ʳᵉ active (`.find`) — un doublon terminal note-égale n'y casse p
   `cleSource('evaluationsSauvegardees', t.id)` + `db` (**pas** `obtenirDonneesSelonMode` =
   mode courant) ; pool d'actives via le **prédicat 6 conditions** (la section existante l.35
   filtre sur le `!remplaceeParId` nu → à corriger) ; refus de trancher les divergents
-  (= « Samuel juge de paix ») ; corriger la **faille [0]** (section l.55-70 étiquette par
+  (= « Fictivam juge de paix ») ; corriger la **faille [0]** (section l.55-70 étiquette par
   `groupe[0]`/ordre du tableau → étiqueter par **ordre moteur**, tri `noteFinale` desc).
   **Touche les vraies données → session dédiée, backup Codex + dry-run d'abord** (comme la migration).
 
@@ -228,9 +228,9 @@ prend la 1ʳᵉ active (`.find`) — un doublon terminal note-égale n'y casse p
 
 - **La prévention ne couvre que les surnuméraires *note-égale*.** Un orphelin **re-noté
   divergent** (re-save ratée puis re-notée légèrement différemment, ex. 79,0 / 79,4) est
-  *laissé intact* — comme Samuel — alors qu'il **double** la production dans le top-N
+  *laissé intact* — comme Fictivam — alors qu'il **double** la production dans le top-N
   (`pratique-pan-standards.js`), la somme pondérée et la consolidation. Le code n'a aucun
-  champ pour distinguer « double remise intentionnelle » (Samuel, validé Omnivox) d'« orphelin
+  champ pour distinguer « double remise intentionnelle » (Fictivam, validé Omnivox) d'« orphelin
   re-noté ». **Décision actée : ne jamais trancher un divergent automatiquement.** Le
   diagnostic rétroactif (sous-lot 2) devra au minimum **lister** ces couples divergents
   multi-actifs pour revue humaine, pour qu'ils ne restent pas invisibles.

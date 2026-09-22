@@ -5,7 +5,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //
 // Rapport de Grégoire, 1.153.0, 10 h 35 : « L'artefact 2 (rév) que je dois
 // annoter me renvoie l'artefact 1 qui est déjà annoté et évalué. » Mesuré en
-// lecture seule dans son Chrome : à 10 h 18, sur la ligne Allache × Artefact 2
+// lecture seule dans son Chrome : à 10 h 18, sur la ligne Exemple × Artefact 2
 // (rév) — SANS fichier, le sien vivait sous « Artefact 2 » —, le menu offrait
 // « Réassocier » et a pris le PREMIER fichier de l'élève sous une autre
 // production : son vieux « Portrait de lecteur ». Trois élèves, trois Portraits
@@ -19,7 +19,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //       sans production d'un élève reste rattrapé par le match souple (un seul).
 //   P — la porte de remplacement nomme le fichier qui part et celui qui arrive.
 
-const DA = '9000195';
+const DA = '9000931';
 const A1 = 'PROD_A1', A2 = 'PROD_A2', A2R = 'PROD_A2R';
 const PORTRAIT = 'PROD_PORTRAIT';
 const PRODUCTIONS = [{ id: PORTRAIT, titre: 'Portrait de lecteur/lectrice' }, { id: A1, titre: 'Artefact 1' }, { id: A2, titre: 'Artefact 2' }, { id: A2R, titre: 'Artefact 2 (rév)' }];
@@ -50,14 +50,14 @@ function menu(win, ligne) {
 /* ------------------------------------------ R — pas de repli sur une autre ligne */
 
 describe('#931 · R — une ligne sans fichier ne propose rien à réassocier', () => {
-    // Le cas d'Allache à 10 h 18 : Portrait, Artefact 1, et le revise sous « Artefact 2 ».
+    // Le cas d'Exemple à 10 h 18 : Portrait, Artefact 1, et le revise sous « Artefact 2 ».
     const FICHIERS_ALLACHE = [
         { id: 'FT_portrait', etudiantDA: DA, productionId: PORTRAIT, nomFichier: 'Allache_Portrait.pdf' },
         { id: 'FT_a1', etudiantDA: DA, productionId: A1, nomFichier: 'Allache_Artefact_1.pdf' },
         { id: 'FT_revise', etudiantDA: DA, productionId: A2, nomFichier: 'Allache_Artefact_2_revise.jpg' }
     ];
 
-    it('R.a Ligne Allache × Artefact 2 (rév), sans fichier : aucune option « associer », ni Annoter ni Supprimer', () => {
+    it('R.a Ligne Exemple × Artefact 2 (rév), sans fichier : aucune option « associer », ni Annoter ni Supprimer', () => {
         const win = chargerListe(FICHIERS_ALLACHE);
         const options = menu(win, { da: DA, productionId: A2R });
         expect(options.filter(o => o.startsWith('associer|'))).toEqual([]);
@@ -65,7 +65,7 @@ describe('#931 · R — une ligne sans fichier ne propose rien à réassocier', 
         expect(options).toContain(`evaluer|${DA}|${A2R}`);   // la ligne vit, elle n'a juste pas de fichier
     });
 
-    it('R.b Le fichier se réassocie depuis SA ligne : Allache × Artefact 2 nomme le revise, et lui seul', () => {
+    it('R.b Le fichier se réassocie depuis SA ligne : Exemple × Artefact 2 nomme le revise, et lui seul', () => {
         const win = chargerListe(FICHIERS_ALLACHE);
         const options = menu(win, { da: DA, productionId: A2 });
         expect(options.filter(o => o.startsWith('associer|'))).toEqual([`associer|FT_revise|${DA}`]);

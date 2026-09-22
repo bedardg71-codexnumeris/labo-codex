@@ -31,7 +31,7 @@ Push par `scripts/pousser.sh origin main` sous caffeinate, charge 2,7, aucune VM
 
 ## (relais précédent) 22 SEPT. 2026, MATIN : **1.153.1 (#930) ET 1.153.2 (#931) COMMITÉES SUR `main` EN LOCAL, NON POUSSÉES** — pas de route vers GitHub depuis le poste de l'école ; push au retour de Grégoire à la maison
 
-**↻ 11 h 30 — #931 (1.153.2), second commit local.** Retour de 10 h 35 : « Réassocier » sur une ligne SANS fichier prenait le premier fichier de l'élève sous une autre production (`genererDropdownActions`, repli du 5 mars), et « Remplacer l'existant ? » ne nommait aucun fichier — l'Artefact 1 annoté d'Allache a pris la place de son Artefact 2 revise, parti à la corbeille. Chronologie mesurée en lecture seule dans le Chrome de Grégoire (fiche SUIVI-BUGS #931). Branche retirée, la porte nomme les deux fichiers ; `sentinelle-931` (7 essais), 3 mutations rouges ; Vitest 617 / 7044. **Stock** : réparé — d'abord par Grégoire dans l'app (l'app en ligne portait encore le piège, deux fichiers de plus ont bougé), puis par script sur son mot (11 h 32) : quatre `productionId` réécrits, sauvegarde dans `~/Downloads/sauvegarde-931-…json`, remesuré (27 / 24 / 27, 0 doublon, annotations suivies). Détail dans la fiche #931. Inscrit, non traité : la grille de badges du carrousel reste périmée après une suppression (le « (3) »).
+**↻ 11 h 30 — #931 (1.153.2), second commit local.** Retour de 10 h 35 : « Réassocier » sur une ligne SANS fichier prenait le premier fichier de l'élève sous une autre production (`genererDropdownActions`, repli du 5 mars), et « Remplacer l'existant ? » ne nommait aucun fichier — l'Artefact 1 annoté d'Exemple a pris la place de son Artefact 2 revise, parti à la corbeille. Chronologie mesurée en lecture seule dans le Chrome de Grégoire (fiche SUIVI-BUGS #931). Branche retirée, la porte nomme les deux fichiers ; `sentinelle-931` (7 essais), 3 mutations rouges ; Vitest 617 / 7044. **Stock** : réparé — d'abord par Grégoire dans l'app (l'app en ligne portait encore le piège, deux fichiers de plus ont bougé), puis par script sur son mot (11 h 32) : quatre `productionId` réécrits, sauvegarde dans `~/Downloads/sauvegarde-931-…json`, remesuré (27 / 24 / 27, 0 doublon, annotations suivies). Détail dans la fiche #931. Inscrit, non traité : la grille de badges du carrousel reste périmée après une suppression (le « (3) »).
 
 **Où vit le travail** : `main` local = `origin/main` (`602907b1`) + `49c1142d` (1.153.1, #930) + le commit 1.153.2 (#931). Aucune branche, aucun worktree neuf (`verdict-906` est un vestige déjà dans `main`). **Ce que c'est** : deux retours de Grégoire du 22 sept. au matin sur Conception › Productions étudiantes — (1) la date d'échéance qui ne se changeait pas (deux écrivains contradictoires du `disabled` ; **décision de Grégoire : une date prévue se pose sans transmission, la case seule décide qu'elle est due**, renverse U5 de #494) ; (2) le tri « par échéance » de la barre latérale plantait depuis le 16 mai (`obtenirEcheancePlusTot` jamais exportée sur `window` après l'extraction de `productions-liste.js`). Fiche complète : `Retours des testeurs/SUIVI-BUGS.md`, #930. Preuves : sentinelle `sentinelle-930-tri-echeance-sidebar` (8 essais, verrou structurel sur l'en-tête de `productions-liste.js`), `sentinelle-494` U5 réécrite (+ U5.c, U5.d) ; 4 mutations rouges, restauré à l'empreinte ; Vitest 616 fichiers / 7037 essais verts. **Playwright NON lancé, navigateur NON vu.**
 
@@ -1459,7 +1459,7 @@ Répond à `plans de travail/CONSIGNE-DU-JOUR.md` (écrite sous le nom CONSIGNE-
 > (`travaux-ui.js`, groupesMulti, sans filtre `estImage`) PROMET une fusion qui n'a pas lieu, et le doublon n'apparaît qu'en cours
 > d'import (fenêtre « Doublon détecté ») au lieu de la confirmation. Options posées : **A** (recommandée) séparés et dit franchement
 > — pas de cadre pour les PDF, doublon annoncé à la confirmation ; **B** fusion des PDF. Trouvaille du lot #873 : à finir.
-> Aussi posée, non tranchée : une lettre finale (« Artefact_1a/1b/1c », cas Breton) comme numéro de page ? (`SUFFIXE_PAGE`).
+> Aussi posée, non tranchée : une lettre finale (« Artefact_1a/1b/1c », cas Factice) comme numéro de page ? (`SUFFIXE_PAGE`).
 
 ## (précédent) 15 SEPT. 2026, ≈ 18 H 45 (Toronto) : 1.142.4 (#876) PAR-DESSUS 1.142.3
 
@@ -3885,8 +3885,8 @@ portaient un compte d'erreurs qui n'était pas le leur — trois fois celui de l
 **voisin immédiat** dans l'ordre du tableau stocké.
 
 **Réparé, et vérifié après coup** : `DIVERGENTES: 0` sur les 27, les cinq
-niveaux inchangés. Boucher 59→23, Bourgeois 11→4, Houle 24→25, Morissette 16→17,
-Nanthavong 8→16.
+niveaux inchangés. Fictif 59→23, Gabarit 11→4, Esquisse 24→25, Modelage 16→17,
+Maquette 8→16.
 
 ### ⚠⚠ TROIS ZÉROS QUI ONT MENTI DANS LA MÊME NUIT
 
