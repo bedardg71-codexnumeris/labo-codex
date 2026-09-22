@@ -4827,7 +4827,8 @@
             changeProduction: nouveauProdId !== prodActuelle,
             nomFichier: (fichier && fichier.nomFichier) || fichierId,
             nomProduction: prod ? (prod.titre || prod.nom) : nouveauProdId,
-            nomEleve: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : nouveauDA,
+            // Relecture Cowork (22 sept.) : un DA vide ne s'affiche pas vide, ni dans la porte ni dans le récapitulatif.
+            nomEleve: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : (nouveauDA || 'élève non identifié·e'),
             conflit: !!verif.conflit,
             fichierExistant: verif.fichierExistant || null,
             nomExistant: verif.fichierExistant ? (verif.fichierExistant.nomFichier || verif.fichierExistant.id) : '',
