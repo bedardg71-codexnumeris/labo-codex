@@ -1,6 +1,6 @@
 # Guide de déploiement — Labo Codex
 
-> **Version** : 1.9 (19 septembre 2026 — §3.4 bis : mode « Under Attack » trouvé actif depuis un an et désactivé ; il bloquait au moins un utilisateur légitime. Historique antérieur : v1.8, 14 septembre 2026 — §1.4 : correction du fondement juridique cité. La loi ne «exclut» pas les fins personnelles, elle délimite son objet à l'exploitation d'une entreprise (art. 1525 C.c.Q.) ; même correction que `PRIVACY.md` v1.3. Historique antérieur : v1.7, 1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
+> **Version** : 1.10 (21 septembre 2026 — §3.4 ter : Web Analytics (payant, faussé par Cloudflare) et Real User Monitoring (aucune donnée) de Netlify désactivés. Historique antérieur : v1.9, 19 septembre 2026 — §3.4 bis : mode « Under Attack » trouvé actif depuis un an et désactivé ; il bloquait au moins un utilisateur légitime. Historique antérieur : v1.8, 14 septembre 2026 — §1.4 : correction du fondement juridique cité. La loi ne «exclut» pas les fins personnelles, elle délimite son objet à l'exploitation d'une entreprise (art. 1525 C.c.Q.) ; même correction que `PRIVACY.md` v1.3. Historique antérieur : v1.7, 1er septembre 2026 — les deux sous-domaines `*.netlify.app` servaient l'application sans authentification, MESURÉ ; redirigés en 301 vers `app.codexnumeris.org` dans `netlify.toml`. Historique antérieur : v1.6, 27 août 2026 — réactivation de Cloudflare Access au 1er septembre 2026 avec une policy ouverte ; quatre affirmations fausses corrigées ; §4.4 refondue en export périodique des identités)
 > **Public** : Grégoire Bédard (mainteneur principal) + co-mainteneur éventuel
 > **Document apparenté** : [`PRIVACY.md`](PRIVACY.md), [`INCIDENTS.md`](INCIDENTS.md)
 
@@ -515,6 +515,17 @@ tomber près de zéro.
 ⚠ **Ne pas le réactiver par réflexe.** Ce mode sert pendant une attaque DDoS
 réelle, pour quelques heures. Laissé actif, il bloque des utilisateurs
 légitimes sans laisser de trace ailleurs que dans ces événements.
+
+### 3.4 ter Netlify — Web Analytics et Real User Monitoring retirés le 21 septembre 2026
+
+**Constat (lu au tableau de bord Netlify le 21 sept. 2026, Cowork, à la demande de Grégoire).**
+- **Web Analytics** : abonnement payant actif. Ses chiffres étaient faussés par le proxy Cloudflare placé devant le site : Netlify voyait surtout les adresses de Cloudflare (« 566 visiteurs uniques » sur 30 jours, majorité « United States », alors que Cloudflare mesurait un trafic presque entièrement canadien). Il ne voit ni les identités d'Access ni les refus. Doublon moins fiable des statistiques de Cloudflare.
+- **Real User Monitoring** : activé, script `/.netlify/scripts/rum` injecté dans chaque page, **aucune donnée collectée en 30 jours**. Hypothèse non vérifiée : la CSP de l'app bloque l'envoi des mesures.
+
+**Geste** : les deux désactivés par Grégoire le 21 sept. 2026 (`Analytics & metrics` du projet `codexnumeris-051225`), vérifié ensuite par Cowork (les deux pages proposent de nouveau « Enable »). L'abonnement cesse d'être facturé à la période suivante.
+Motif : doublon payant pour l'un ; pour l'autre, un script qui tente d'envoyer des données depuis le navigateur des utilisateurs n'a pas sa place dans une app qui promet que rien ne sort de l'appareil.
+
+⚠ **Ne pas les réactiver par réflexe.** Le suivi de fréquentation passe par Cloudflare (tableau de bord du domaine), selon le protocole de suivi hebdomadaire, conservé HORS du dépôt.
 
 ### 3.5 Vérification
 

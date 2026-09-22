@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 16 H 30 : **1.155.0 (#695 élargie, date réelle dans l'Inspecteur) FUSIONNÉE DANS `main` EN AVANCE RAPIDE ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 18 H : **LOT N3 (#714) COMMITÉ SUR LA BRANCHE `lot-n3-habiletes`, RELEASE 1.155.1 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
+
+**Où vit le travail** : branche locale `lot-n3-habiletes`, partie de `0026e95b` : `d24b0524` (#710, #711, #712, #719 cochées, remesurées), `0f196a8b` (le lot : code, sentinelle-714, B3b), `09918477` (#714 cochée, consigne N3 et archive), `632df922` (release 1.155.1, build 0922-1757), `af7fc99f` (« Où en est-on »). `main` local porte ce relais et les fichiers de Cowork par-dessus `0026e95b` : la fusion sera un merge, pas une avance rapide.
+
+**Reste, dans l'ordre** : relecture de Cowork (PROTOCOLE, règle 2) → corrections → Grégoire valide l'item de « Nouvelles » (1.155.1, marqué PROPOSÉ dans `js/changelog-data.js`) → fusion dans `main` → verdict Playwright Cowork fermé → `pousser.sh`. Vitest 621 / 7 119 après le bump. Pas de porte terrain (règles 1 et 2 du skill : aucune écriture irréversible, tout le reste mesuré) ; le geste du §7 de la consigne reste facultatif pour Grégoire. Mots nouveaux à relire : « , et N obligatoire(s) » (compte hybride) et « ; P = <formule de la carte> » (avec terminale). Trouvaille §4 déjà inscrite (#722). Hors lot, inchangé : #892/#929 rouges sur le runner GitHub.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 16 H 30 : **1.155.0 (#695 élargie, date réelle dans l'Inspecteur) FUSIONNÉE DANS `main` EN AVANCE RAPIDE ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`3fc304e4`) + la branche `lot-date-inspecteur` : `e0c622b8` (release 1.155.0, code + tests), `2aff4825` (BACKLOG #695 cochée, consigne et archive), `2d0214a7` (item du changelog validé par Grégoire, relecture Cowork), puis ce relais. Relecture de Cowork verte, aucune correction de code. **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
 
