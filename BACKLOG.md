@@ -1169,7 +1169,18 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   nouveau « la Bibliothèque » (bouton « Retirer de la bibliothèque » et phrase « Le retrait de la bibliothèque est
   irréversible » de la modal Données ; titre « Bibliothèque de cartouches de rétroaction »). Hors du lot du 3 septembre,
   qui ne visait que l'expression « partagée ».
-- [ ] **#695 — L'Inspecteur d'une leçon affiche « SEMAINE 3 », pas la date où elle aura lieu**.
+- [x] **#695 — L'Inspecteur d'une leçon affiche « SEMAINE 3 », pas la date où elle aura lieu**.
+  ↻ **LIVRÉ le 22 septembre 2026 en 1.155.0** (consigne Cowork 15 h 40, branche
+  `lot-date-inspecteur`, en attente de la relecture de Cowork). **Élargie à l'ÉVALUATION** (demande
+  de Grégoire, 22 sept., 15 h 30) : sa date est celle de sa leçon parente, sous « Dans la leçon ».
+  **Décision de Grégoire : plusieurs groupes = une ligne par groupe**, sans groupe « actif »
+  (`Gr. <groupeNum>`, nom complet à défaut). Ligne en lecture seule, étiquetée « Date » ; elle
+  dit chaque cas dégradé au lieu de deviner. Calcul : `lignesDateDeLecon` dans
+  `planification-export.js`, sur `construireHoraireDeLecons` + `dateDeLecon` (pas de copie) ;
+  rafraîchie par `sauvegarder()`. **Vérifié comment** : Vitest `sentinelle-695` (21 essais,
+  17 mutations dont 16 rouges ; la 17ᵉ, textuelle, est couverte par le spec), Playwright
+  `planif-date-inspecteur-695` (geste du §7 en WebKit, 5 mutations / 5 rouges), parité
+  export / `productions.js` mesurée identique sur 24 couples. Reste : le geste de Grégoire à l'écran.
   Inscrit le 2 septembre 2026 depuis Cowork, **sur un usage réel** : Grégoire préparait son cours
   et a demandé « que la date réelle de la leçon soit affichée dans l'Inspecteur ».
   ▣ **CE QU'IL VOIT** : l'Inspecteur d'un nœud `LEÇON` porte TITRE, DESCRIPTION, **SEMAINE** (un
