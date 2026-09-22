@@ -25,7 +25,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   U2 — LE POINT DÉCISIF : ce que la case dit à l'écran est ce qui s'enregistre.
 //   U3 — rétro-compat : une production d'avant ce jour n'est pas déclassée.
 //   U4 — une date préparée n'est PAS une échéance due.
-//   U5 — le champ date suit la case, comme en multi-groupe.
+//   U5 — le champ date NE SUIT PLUS la case (#930, 22 sept. 2026) : une date
+//        prévue se pose sans transmission, cochée ou non.
 
 /* ------------------------------------------------------------------ mini-DOM */
 
@@ -143,12 +144,13 @@ describe('#494 · U1 — la case existe en mode simple', () => {
         expect(tous.filter(n => n.type === 'checkbox')).toHaveLength(1);
     });
 
-    it('U1.d La note dit ce qui se prépare : la production, pas la date', () => {
+    it('U1.d La note dit que la date se pose d\'avance et que la case seule la rend due (#930)', () => {
         const win = charger();
         const ecran = ecranModeSimple();
         const zone = poser(win, ecran, null, 'GC_A');
         const note = zone.enfants.find(n => n.className && n.className.includes('echeance-simple-note'));
-        expect(note.textContent).toContain('La production peut être préparée à l\'avance.');
+        expect(note.textContent).toContain('La date peut être posée d\'avance');
+        expect(note.textContent).toContain('une fois la case cochée');
     });
 });
 
@@ -256,17 +258,26 @@ describe('#494 · U4 — une date préparée n\'est pas une échéance due', () 
     });
 });
 
-/* --------------------------------------------------- U5 — le champ suit la case */
+/* ------------------------------------ U5 — le champ ne suit plus la case (#930) */
 
-describe('#494 · U5 — le champ date suit la case', () => {
-    it('U5.a Décochée à l\'ouverture ⇒ champ inactif', () => {
+// Le 22 septembre 2026 (#930), Grégoire n'a pas pu changer la date d'une
+// production : décocher grisait le champ, et `gererChangementTypeProduction`,
+// appelé juste après à l'ouverture, le réactivait sans condition — la fiche
+// s'ouvrait éditable, un aller-retour sur la case la verrouillait. Décision de
+// Grégoire : une date PRÉVUE se pose sans transmission ; la case seule décide
+// qu'elle est due (U4). Le champ n'a donc plus qu'un écrivain de `disabled`,
+// le type (portfolio conteneur), et la case n'y touche jamais.
+
+describe('#494 · U5 — le champ date reste saisissable, cochée ou non (#930)', () => {
+    it('U5.a Décochée à l\'ouverture ⇒ champ ACTIF : la date se prépare d\'avance', () => {
         const win = charger();
         const ecran = ecranModeSimple();
-        poser(win, ecran, null, 'GC_A');
-        expect(ecran.input.disabled).toBe(true);
+        const zone = poser(win, ecran, null, 'GC_A');
+        expect(laCase(zone).checked).toBe(false);
+        expect(ecran.input.disabled).toBe(false);
     });
 
-    it('U5.b Cocher réactive le champ, décocher le referme', () => {
+    it('U5.b Cocher puis décocher ne touche pas au champ', () => {
         const win = charger();
         const ecran = ecranModeSimple();
         const c = laCase(poser(win, ecran, null, 'GC_A'));
@@ -275,6 +286,55 @@ describe('#494 · U5 — le champ date suit la case', () => {
         expect(ecran.input.disabled).toBe(false);
 
         c.checked = false; c.declencher('change');
-        expect(ecran.input.disabled).toBe(true);
+        expect(ecran.input.disabled).toBe(false);
+    });
+
+    it('U5.c La case n\'écoute plus rien : aucun écouteur posé sur elle', () => {
+        // Le verrou de l'ancienne règle vivait dans un `change` sur la case.
+        // S'il revient, U5.b peut passer par hasard (le champ était déjà
+        // actif) ; ce point-ci le voit quoi qu'il fasse.
+        const win = charger();
+        const c = laCase(poser(win, ecranModeSimple(), null, 'GC_A'));
+        expect(Object.keys(c._ecouteurs)).toEqual([]);
+    });
+
+    it('U5.d Mode multi-groupe : un groupe décoché a son champ date ACTIF lui aussi', () => {
+        // Même règle des deux côtés : le gabarit HTML d'une ligne de groupe ne
+        // pose plus `disabled` sur la date, et aucun écouteur ne le repose.
+        const store = {
+            a2026_groupesCours: [
+                { id: 'GC_A', coursId: 'COURS_A', groupeNum: 2 },
+                { id: 'GC_B', coursId: 'COURS_A', groupeNum: 8 }
+            ]
+        };
+        const liste = { innerHTML: '', querySelectorAll: () => [], querySelector: () => null };
+        const elementsParId = {
+            containerEcheancesGroupes: { classList: { add() {}, remove() {} } },
+            champDateEcheance: { style: {} },
+            listeEcheancesGroupes: liste,
+            productionDateEcheance: element('input', 'productionDateEcheance')
+        };
+        const win = chargerScript('js/productions.js', {
+            db: { getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)), get: async (k, d) => d, set: async () => {} },
+            cle: (k) => `a2026_${k}`,
+            echapperHtml: (t) => String(t == null ? '' : t),
+            obtenirCoursActifId: () => 'COURS_A',
+            GabaritsUtils: { lirePratiquesSelectionnees: () => [] },
+            alert: () => {},
+            document: { createElement: (tag) => element(tag), getElementById: (id) => elementsParId[id] || null,
+                        querySelector: () => null, querySelectorAll: () => [], addEventListener() {} }
+        });
+        win.cle = (k) => `a2026_${k}`;
+        win.peuplerEcheancesParGroupe({ id: 'PROD_1', echeancesParGroupe: {
+            GC_A: { assignee: false, date: '2026-10-01' },
+            GC_B: { assignee: true, date: '2026-10-02' }
+        } });
+
+        const lignes = liste.innerHTML.match(/<input type="date"[^>]*>/g) || [];
+        expect(lignes, 'deux groupes ⇒ deux champs date').toHaveLength(2);
+        expect(lignes.filter(l => /\bdisabled\b/.test(l))).toEqual([]);
+        // Le témoin que le harnais lit bien les cases : GC_A décochée, GC_B cochée.
+        expect(liste.innerHTML).toMatch(/class="echeance-gc-checkbox" data-gc-id="GC_A"\s*>/);
+        expect(liste.innerHTML).toMatch(/class="echeance-gc-checkbox" data-gc-id="GC_B"\s*checked>/);
     });
 });

@@ -990,7 +990,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'La date est <strong>facultative</strong>. Poser l\u2019\u00e9ch\u00e9ance, c\u2019est transmettre\u00a0: tant qu\u2019elle est vide, le gabarit s\u2019enregistre normalement et porte le badge <em>\u00e0 planifier</em> dans la liste. Il n\u2019appara\u00eet alors ni au calendrier ni dans les indices C et P \u2014 rien n\u2019est d\u00fb tant que rien n\u2019est annonc\u00e9.'
+                contenu: 'La date est <strong>facultative</strong> et peut \u00eatre pos\u00e9e d\u2019avance. C\u2019est la case <em>Consignes transmises</em> qui d\u00e9cide\u00a0: tant qu\u2019elle est d\u00e9coch\u00e9e, le gabarit s\u2019enregistre normalement et porte le badge <em>\u00e0 planifier</em> dans la liste. Il n\u2019appara\u00eet alors ni au calendrier ni dans les indices C et P \u2014 rien n\u2019est d\u00fb tant que rien n\u2019est annonc\u00e9.'
             },
         ],
         voirAussi: ['tableau-bord-apercu', 'conception-productions']

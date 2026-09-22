@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 21 SEPT. 2026, 19 H 30 : **1.153.0 POUSSÉE — `origin/main = a37d50bf`**, rien en suspens sur `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, MATIN : **1.153.1 (#930) COMMITÉE SUR `main` EN LOCAL, NON POUSSÉE** — pas de route vers GitHub depuis le poste de l'école ; push au retour de Grégoire à la maison
+
+**Où vit le travail** : `main` local = `origin/main` (`602907b1`) + le commit 1.153.1 (#930). Aucune branche, aucun worktree neuf (`verdict-906` est un vestige déjà dans `main`). **Ce que c'est** : deux retours de Grégoire du 22 sept. au matin sur Conception › Productions étudiantes — (1) la date d'échéance qui ne se changeait pas (deux écrivains contradictoires du `disabled` ; **décision de Grégoire : une date prévue se pose sans transmission, la case seule décide qu'elle est due**, renverse U5 de #494) ; (2) le tri « par échéance » de la barre latérale plantait depuis le 16 mai (`obtenirEcheancePlusTot` jamais exportée sur `window` après l'extraction de `productions-liste.js`). Fiche complète : `Retours des testeurs/SUIVI-BUGS.md`, #930. Preuves : sentinelle `sentinelle-930-tri-echeance-sidebar` (8 essais, verrou structurel sur l'en-tête de `productions-liste.js`), `sentinelle-494` U5 réécrite (+ U5.c, U5.d) ; 4 mutations rouges, restauré à l'empreinte ; Vitest 616 fichiers / 7037 essais verts. **Playwright NON lancé, navigateur NON vu.**
+
+**Pour pousser (à la maison)** : `scripts/pousser.sh origin main` en arrière-plan, machine au repos, Cowork fermé mesuré ; il porte sa garde de charge. Avant : Grégoire ouvre une fiche de production, décoche « Consignes transmises », change la date, Enregistre, rouvre — la date tient et le champ répond ; puis tri « par échéance » dans la barre latérale.
+
+**Mots d'écran tranchés par la session, à valider par Grégoire avant le push** : note sous la case (« Décoché = les étudiant·es n'ont pas encore reçu le travail. La date peut être posée d'avance : elle ne compte qu'une fois la case cochée. »), note sous le champ, deux infobulles, popup « Date d'échéance et indices », et les deux items du changelog 1.153.
+
+**Reste hors lot, inscrit et continué** : le run planifié GitHub du 22 sept. (13 h 15 UTC, sur `602907b1`) est ROUGE au navigateur : `nettoyage-sans-perte-892.spec.js:89` et `planif-zone-non-planifie-929.spec.js:75`, ni l'une ni l'autre dans une liste d'exclusion ; 4 instables passées au retry. À lire au prochain lot, sans release. `SESSION.md` n'est plus un relais vivant (dernier bloc : 28 août, 1.105.0) : ce fichier et `OU-EN-EST-ON.md` font foi.
+
+---
+
+## (relais précédent) 21 SEPT. 2026, 19 H 30 : **1.153.0 POUSSÉE — `origin/main = a37d50bf`**, rien en suspens sur `main`
 
 Troisième verdict Playwright sur `a37d50bf`, machine au repos (charge 4,6), sous caffeinate, Cowork fermé mesuré (0 VM) : **vert, 0 échec connu**. Relecture croisée de Cowork verte sur le complément `56f54904` (trois mutations, 19 h 14). Push par `git push origin main` (hook : Vitest vert + jeton vert sur le SHA exact) sur le mot de Grégoire (« pousse si vert », 19 h 20). Worktree `lot-n1a` et branche retirés ; N1 sorti de `FILE-DES-LOTS.md`. **Reste hors lot** : le rouge de la Garde du run planifié GitHub du 21 sept. au matin, à lire au prochain lot, sans release. `DEPLOY.md` (Cowork, non commité) n'a pas été touché.
 
