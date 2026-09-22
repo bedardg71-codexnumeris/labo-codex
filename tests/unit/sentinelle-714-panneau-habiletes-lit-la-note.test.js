@@ -67,13 +67,13 @@ function ev(id, da, productionId, noteFinale, niveauFinal) {
  * Le conteneur Portfolio porte `regles.nombreARetenir: 3` — volontairement DIFFÉRENT de la pratique (4) :
  * c'est le « 3 » que le panneau lisait. Pas de terminale : P = moyenne des retenues.
  */
-function jeuSTD({ methodeSelection = 'meilleurs', hybride = false, terminale = false } = {}) {
+function jeuSTD({ methodeSelection = 'meilleurs', hybride = false, terminale = false, ponderationTerminale = 40, titreA5 = 'Artefact 5' } = {}) {
     const productions = [
         { id: 'PORT', titre: 'Portfolio', type: 'portfolio', ponderation: 60, regles: { nombreARetenir: 3, minimumCompletion: 1, nombreTotal: 6 } }
     ];
-    if (terminale) productions.push({ id: 'TERM', titre: 'Analyse finale', type: 'terminale', ponderation: 40, numero: 9, dateEcheance: '2026-05-01' });
+    if (terminale) productions.push({ id: 'TERM', titre: 'Analyse finale', type: 'terminale', ponderation: ponderationTerminale, numero: 9, dateEcheance: '2026-05-01' });
     const notes = [85, 60, 78, 70, 90];
-    notes.forEach((_, i) => productions.push({ id: 'A' + (i + 1), titre: 'Artefact ' + (i + 1), type: 'artefact-portfolio', numero: i + 1,
+    notes.forEach((_, i) => productions.push({ id: 'A' + (i + 1), titre: i === 4 ? titreA5 : 'Artefact ' + (i + 1), type: 'artefact-portfolio', numero: i + 1,
         ponderation: 0, dateEcheance: '2026-0' + (i + 1) + '-10', categorie: hybride ? (i === 1 ? 'obligatoire' : 'selection') : undefined }));
     const niveaux = { 85: 'M', 60: 'D', 78: 'M', 70: 'D', 90: 'E' };
     const evaluations = notes.map((n, i) => ev('EV_A' + (i + 1), DA.STD, 'A' + (i + 1), n, niveaux[n]));
@@ -119,7 +119,7 @@ function elementDom() {
         setAttribute() {}, getAttribute() { return null; }, appendChild() {}, addEventListener() {}, removeEventListener() {}, querySelector() { return null; }, querySelectorAll() { return []; } };
 }
 
-function monter(jeu) {
+function monter(jeu, opts = {}) {
     const store = {
         groupeCoursActif: { id: 'GC1', trimestreId: 'test', nom: 'Groupe 1' },
         test_groupesCours: [{ id: 'GC1', trimestreId: 'test', pratiqueId: jeu.pratiqueId }],
@@ -159,7 +159,11 @@ function monter(jeu) {
     const fwd = (nom) => (...a) => win[nom](...a);
     const globaux = {
         document, db, cle, obtenirDonneesSelonMode, sauvegarderDonneesSelonMode,
-        echapperHtml: (s) => String(s == null ? '' : s),
+        // L'échappement RÉEL (forme de config.js) : un titre porteur de HTML doit sortir inerte (relecture Cowork, (2)).
+        echapperHtml: (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'),
+        // La note différée (#321), seulement quand l'essai la demande.
+        noteDiffereeActive: () => !!opts.differee,
+        badgeNoteDifferee: () => '<span class="badge-note-differee">Note différée</span>',
         estEtudiantExclu: (e) => !!(e && e.exclu),
         obtenirPreference: () => null, obtenirSeuil: (n) => ({ 'defiSpecifique': 0.70, 'idme.insuffisant': 0.64, 'idme.developpement': 0.75 })[n],
         chargerSeuilsInterpretation: () => ({}), filtrerEtudiantsParMode: (a) => a, estModeeLectureSeule: () => false,
@@ -266,14 +270,44 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         expect(r.html).not.toMatch(/Règle de sélection|retenu|Calcul impossible|Calcul de l'indice P|Performance du portfolio/);
     });
 
-    it('Standards, élève sans évaluation : aucune retenue dite, et pas de « Calcul impossible »', () => {
+    it('Standards, élève sans évaluation : aucune retenue dite, pas de compte « (0 … sur 0) », et pas de « Calcul impossible »', () => {
+        // Relecture Cowork (4) : sans évaluation, la parenthèse du compte n'est pas écrite — la liste dit déjà « Aucun … évalué ».
         const b = monter(jeuSTD());
         const r = rendre(b, DA.VIDE);
         expect(r.html).toContain('Méthodologie de calcul');
-        expect(r.retenues).toBe('(0 meilleurs artefacts sur 0 évalué)');
+        expect(r.retenues).toBeNull();
+        expect(r.html).toContain('Artefacts retenus :</strong>');
+        expect(r.html).not.toMatch(/\(0 [^)]*sur 0/);
         expect(r.liste).toMatch(/^Aucun artefact évalué/);
         expect(r.calculP).toBeNull();
         expect(r.html).not.toContain('Calcul impossible');
+    });
+
+    it('note différée (#321) : aucune note chiffrée, ni dans la liste des retenues ni dans une ligne « Calcul de l\'indice P » — le badge seulement', () => {
+        const b = monter(jeuSTD(), { differee: true });
+        const r = rendre(b, DA.STD);
+        expect(r.retenues).toBe('(4 meilleurs artefacts sur 5 évalués)');   // garde de non-vide : le panneau Standards est bien rendu
+        expect(r.calculP).toBeNull();
+        const methodo = tranche(r.html, 'Méthodologie de calcul', '</div>');
+        expect(methodo).toContain('1. Artefact 5 → <span class="badge-note-differee">Note différée</span>');
+        expect(methodo).not.toMatch(/\d+\.\d\/100|\d+\.\d%/);
+    });
+
+    it('un titre de production porteur de HTML sort échappé dans la liste des retenues', () => {
+        const b = monter(jeuSTD({ titreA5: '<img src=x onerror=alert(1)>' }));
+        const r = rendre(b, DA.STD);
+        expect(r.html).toContain('1. &lt;img src=x onerror=alert(1)&gt; → 90.0/100');
+        expect(r.html).not.toContain('<img src=x');
+    });
+
+    it('pondération manquante (erreur ET portfolio rendus) : aucune phrase de retenue, aucune ligne P, pas de « Calcul impossible »', () => {
+        const b = monter(jeuSTD({ terminale: true, ponderationTerminale: null }));
+        const details = b.win.calculerDetailsNoteFinale(DA.STD);
+        expect(details.erreur).toMatch(/Pondération manquante/);          // le cas visé : erreur…
+        expect(details.portfolio && details.portfolio.nombreRetenus).toBe(4);   // …ET un portfolio rempli
+        const r = rendre(b, DA.STD);
+        expect(r.html).toContain('Méthodologie de calcul');                  // garde de non-vide
+        expect(r.html).not.toMatch(/Règle de sélection|retenu|Calcul impossible|Calcul de l'indice P|Performance du portfolio/);
     });
 });
 
