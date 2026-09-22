@@ -2851,7 +2851,10 @@ function ouvrirPanneau(id) {
         var semLecon = semaineDeLecon(donnees);
         extra.innerHTML +=
             '<label for="planif-panneau-semaine">Semaine</label>' +
-            '<input type="number" id="planif-panneau-semaine" value="' + (semLecon === null ? '' : semLecon) + '" min="1" placeholder="non planifiée">';
+            '<input type="number" id="planif-panneau-semaine" value="' + (semLecon === null ? '' : semLecon) + '" min="1" placeholder="non planifiée">' +
+            // #695 — dans la MÊME écriture que le champ : un `innerHTML +=`
+            // posé après l'écouteur ci-dessous le détruirait.
+            LIGNE_DATE_INSPECTEUR_HTML;
         var semInput = extra.querySelector('#planif-panneau-semaine');
         semInput.addEventListener('focus', function() { enregistrerPourUndo(); });
         semInput.addEventListener('input', function(e) {
@@ -2899,6 +2902,8 @@ function ouvrirPanneau(id) {
                     echapperHtml(lc2.titre || 'Sans titre') + '</option>';
             }
             htmlDeplacer += '</select>';
+            // #695 — la date de l'évaluation est celle de sa leçon parente.
+            if (donnees.type === 'evaluation') htmlDeplacer += LIGNE_DATE_INSPECTEUR_HTML;
             extra.innerHTML += htmlDeplacer;
             // ⚠ Le listener est posé EN FIN de ouvrirPanneau : tout
             // `extra.innerHTML +=` ultérieur (ex. bloc niveau cognitif des
@@ -3297,6 +3302,65 @@ function ouvrirPanneau(id) {
     panneau.classList.add('visible');
     etat.panneauOuvert = true;
     etat.panneauNoeudId = id;
+
+    // #695 — l'horaire de chaque groupe se construit ICI, une fois par
+    // ouverture ; les gestes qui suivent ne font que relire ce cache.
+    horairesInspecteur = null;
+    if (document.getElementById('planif-panneau-date')) {
+        var exporteurDate = window.planificationExport;
+        if (exporteurDate && typeof exporteurDate.horairesDesGroupesDuCours === 'function') {
+            var coursDate = exporteurDate.coursDeLaCarteActive();
+            horairesInspecteur = { coursId: coursDate, groupes: exporteurDate.horairesDesGroupesDuCours(coursDate) };
+        }
+        rafraichirDateInspecteur();
+    }
+}
+
+// === LA DATE DANS L'INSPECTEUR (#695, 22 sept. 2026) ===
+//
+// Une ligne de LECTURE SEULE, jamais un champ : la date est la conséquence du
+// couple (semaine, rang) et de l'horaire du groupe. La rendre modifiable en
+// ferait une troisième source de vérité. Le calcul n'est pas ici : il vit dans
+// `planification-export.js` (`lignesDateDeLecon`), le même que l'export du plan.
+
+var LIGNE_DATE_INSPECTEUR_HTML =
+    '<label>Date</label><div class="planif-panneau-derive" id="planif-panneau-date"></div>';
+
+/** { coursId, groupes } construit à l'ouverture de l'Inspecteur, ou null. */
+var horairesInspecteur = null;
+
+/**
+ * Réécrit la ligne « Date » de l'Inspecteur ouvert, si elle y est. Appelée à
+ * chaque `sauvegarder()` : c'est le point par où passent TOUS les gestes qui la
+ * changent — semaine (Inspecteur, sélecteur de l'en-tête, glisser dans la
+ * grille), rang (`B`), leçon parente. (Annuler ferme l'Inspecteur.)
+ */
+function rafraichirDateInspecteur() {
+    if (!etat.panneauOuvert) return;
+    var cible = document.getElementById('planif-panneau-date');
+    if (!cible) return;
+    var n = etat.noeuds.get(etat.panneauNoeudId);
+    var exporteur = window.planificationExport;
+    if (!n || !horairesInspecteur || !exporteur || typeof exporteur.lignesDateDeLecon !== 'function') {
+        cible.textContent = '';
+        return;
+    }
+    var lecon = n.type === 'lecon' ? n : leconParenteDe(n);
+    var rang = rangSeanceDeLecon(lecon);
+    var lignes = exporteur.lignesDateDeLecon({
+        horsLecon: !lecon,
+        coursId: horairesInspecteur.coursId,
+        groupes: horairesInspecteur.groupes,
+        semaine: semaineDeLecon(lecon),
+        rang: rang,
+        lettre: lettreRangSeance(rang)
+    });
+    // textContent : le nom d'un groupe est une donnée saisie.
+    cible.replaceChildren.apply(cible, lignes.map(function(texte) {
+        var ligne = document.createElement('div');
+        ligne.textContent = texte;
+        return ligne;
+    }));
 }
 
 function fermerPanneau() {
@@ -5920,6 +5984,7 @@ function sauvegarder() {
     window.planificationDonnees.sauvegarderCarte(index.active, donnees);
 
     mettreAJourTousLesBadges();
+    rafraichirDateInspecteur();
 }
 
 function viderCanvas() {

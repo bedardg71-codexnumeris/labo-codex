@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.155.0 (#695, élargie à l'évaluation le 22 sept. 2026) — phrase de la consigne, à relire par Grégoire.
+            version: '1.155',
+            couleur: 'vert',
+            titre: 'Carte d\'alignement : la date réelle dans l\'Inspecteur',
+            items: [
+                'L\'Inspecteur d\'une leçon et d\'une évaluation donne la date où elle aura lieu, pour chaque groupe du cours. Quand la date n\'existe pas (séance non fixée, congé, aucun horaire saisi), il le dit plutôt que d\'en deviner une.'
+            ]
+        },
+        {
             // 1.154.0 (#932, #934 ; #933 refusé) — deux items VALIDÉS par Grégoire le 22 sept. 2026 (§6 du rapport du lot).
             version: '1.154',
             couleur: 'vert',
