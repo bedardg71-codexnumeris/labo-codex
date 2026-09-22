@@ -1,69 +1,58 @@
-# Consigne du jour – La date réelle de la leçon et de l'évaluation dans l'Inspecteur (#695, élargie)
+# Consigne du jour – Lot N3 : le panneau « Développement des habiletés » lit la note, et n'écrit rien (#714)
 
-> Écrite le 22 septembre 2026, 15 h 40 (Toronto), par Cowork, sur `main` = `3fc304e4` (1.154.1 commitée, push en cours par la session précédente). **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (réassigner une copie, livrée en 1.154.0 / 1.154.1) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-22-reassigner-une-copie.md` (déplacée par Cowork, à commiter avec ce lot).
-> **La fiche fait foi** : `BACKLOG.md`, #695 (≈ l. 1172). Cette consigne dit ce qui l'élargit et ce que Grégoire a tranché aujourd'hui.
+> Écrite le 22 septembre 2026, 17 h 50 (Toronto), par Cowork, sur `origin/main` = `0026e95b` (application en 1.155.0). **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (#695, la date dans l'Inspecteur, livrée en 1.155.0 et vérifiée à l'écran par Grégoire) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-22-date-inspecteur.md` (déplacée par Cowork, à commiter avec ce lot).
+> **La fiche fait foi** : `BACKLOG.md`, #714 (≈ l. 787). Le lot est le premier de l'ordre recommandé dans `plans de travail/FILE-DES-LOTS.md` (N3, N2, N4, N5, N6). Isolé, **aucune question à Grégoire**, sauf l'arrêt prévu au §3.
 
 ## 0 · Conditions de départ
 
-- `origin/main` contient `1e5d25af` (release 1.154.1) **poussé**. Sinon, arrête-toi et dis-le : la session précédente n'a pas fini.
-- Aucune autre session n'écrit dans `js/`. Branche `lot-date-inspecteur` partie de `main`. Rien ne se fusionne ni ne se pousse avant la relecture de Cowork (PROTOCOLE, règle 2).
-- Skill `design-interface` chargé (c'est un changement visuel), skill `alignement` pour le module.
+- `origin/main` porte `0026e95b` ou un commit de journal après. Aucune autre session n'écrit dans `js/`.
+- Branche `lot-n3-habiletes` partie de `main`. Rien ne se fusionne ni ne se pousse avant la relecture de Cowork (PROTOCOLE, règle 2).
+- Skills `pratiques-notation` (le moteur), `labo-codex`, `design-interface` si un mot change à l'écran.
+- **Au passage, sans release** : coche au `BACKLOG.md` les quatre fiches livrées en 1.153.0 et restées ouvertes (#710, #711, #712, #719 ; #713 garde son volet plancher, lot N4). Remesure chacune avant de cocher (règle 1 : aucune ancre sans preuve). Et commite `DEPLOY.md` et `CONSIGNE-DEMARRAGE-COWORK.md` avec le relais, comme dit par Cowork le 21.
 
-## 1 · Ce que Grégoire a demandé (22 sept., 15 h 30, sur ses captures)
+## 1 · Ce que Cowork a remesuré (lecture seule, 17 h 45) – la fiche est vraie, ses numéros de ligne ont bougé
 
-Sur sa carte, la leçon « La carte mentale » porte `S5` et `B` dans son en-tête. Il veut voir **la date réelle et précise** où elle aura lieu, **pour la leçon ET pour l'évaluation qu'elle contient**. La fiche #695 ne visait que la leçon : **elle s'élargit au bloc Évaluation.**
+- **Le panneau** : `genererSectionPerformance` est à `js/profil-etudiant-sections-affichage.js:4053` (la fiche dit 4130).
+- **« 3 meilleurs »** : `const nombreARetenir = portfolio.regles.nombreARetenir || 3;` (≈ l. 4119) lit les `regles` de la PRODUCTION Portfolio, pas la pratique. `selectionComplete` (≈ l. 4138) compare aussi à `portfolio.regles.nombreARetenir`.
+- **« Calcul impossible : aucune évaluation disponible »** (≈ l. 4210) : `_lireDetailsRapportPerformance` (l. 3988) lit `indicesCP.details.*`. Plus rien n'écrit `details` : `grep -rn "details\.\(artefactsRetenus\|notes\|methodeSelection\)\s*=" js/` → **0**. La branche qui remplit la liste est donc morte, et le message s'affiche sous un P juste.
+- **L'écriture au rendu** : `_appliquerSelectionAutoArtefacts` (l. 3837), appelée à ≈ l. 4121, fait `db.setSync(cle('portfoliosEleves'), …)` puis `calculerEtStockerIndicesCP()` **à chaque affichage** d'un élève sans sélection. Elle trie toujours par « meilleurs », coupe à `regles.nombreARetenir`, et écrit `{ artefactsRetenus, dateSelection, auto: true }` **sans `modalite`**.
+- **La bonne source existe** : `calculerDetailsNoteFinale(da)` (`js/profil-etudiant-actions.js:369`) rend, pour une Standards, `portfolio.{ nombreARetenir, nombreEvalues, nombreRetenus, minimumRequis, methodeSelection, moyenne, artefactsRetenus[{ productionId, note, niveau }] }` (≈ l. 617-640), et `null` hors Standards.
+- **Ce qui rend le lot sans risque pour les notes, à confirmer par toi** : Cowork ne trouve **aucune lecture** de `portfoliosEleves` dans le calcul de la note (`grep -n "portfoliosEleves" js/profil-etudiant-actions.js js/pratiques/*.js` → 0). La sélection écrite au rendu ne servirait donc qu'à l'affichage (les coches « retenu »).
 
-## 2 · Tranché par Grégoire
+## 2 · Ce que fait le lot
 
-**Plusieurs groupes = une ligne par groupe.** Deux groupes d'un même cours n'ont pas les mêmes jours de rencontre (les séances vivent par groupe-cours : `seancesCompletes_gc_<id>`, voir le commentaire de `js/planification-export.js` ≈ l. 160). L'Inspecteur affiche donc **toutes** les dates, une par groupe du cours de la carte, sans menu ni groupe « actif ». Avec un seul groupe, une seule ligne, sans préfixe de groupe.
+**2a. Le panneau lit `calculerDetailsNoteFinale(da)`, et rien d'autre, pour ce qu'il dit de la note** : combien d'évaluations sont retenues, lesquelles, sur combien, par quelle méthode, et leur moyenne. Plus de `portfolio.regles.nombreARetenir`, plus de `indicesCP.details`. `_lireDetailsRapportPerformance` perd sa branche morte ; si elle n'a plus d'objet, elle part (zéro-dette : pas de repli « au cas où »).
 
-## 3 · Ce que Cowork a mesuré (lecture seule, 15 h 35)
+**2b. Le panneau n'écrit rien.** `_appliquerSelectionAutoArtefacts` quitte le chemin du rendu. Plus de `db.setSync`, plus de `calculerEtStockerIndicesCP()` quand on affiche un profil. Les coches « retenu » viennent de `artefactsRetenus` de `calculerDetailsNoteFinale`. **Rien n'est effacé** des `portfoliosEleves` déjà écrits (limite de Grégoire du 20 sept.) : on cesse d'écrire, on ne nettoie pas.
 
-- **Le calcul existe, entier, dans l'export** : `groupesCoursDuCours(coursId)`, `coursDeLaCarteActive()`, `construireHoraireDeLecons(groupeCoursId)` (≈ l. 170-227) et `dateDeLecon(horaire, semaine, rang)` (≈ l. 240), pure, qui rend `null` dans les trois cas dégradés. `construireHoraireDeLecons` et `dateDeLecon` sont exportés sur `window.planificationExport` (≈ l. 1611-1612) ; `groupesCoursDuCours` ne l'est pas.
-- **Une deuxième implémentation vit dans `js/productions.js`** : `dateSeanceDuRang` (≈ l. 1222), pour la date d'échéance proposée par la carte (#930).
-- **L'Inspecteur** : `js/planification-carte.js`, champ « Semaine » de la leçon ≈ l. 2849-2866 ; « Dans la leçon » ≈ l. 2881 (écouteur attaché ≈ l. 3204). Le rang : `rangSeanceDeLecon(n)` (≈ l. 649), la semaine : `semaineDeLecon(n)` (≈ l. 475).
-- **La règle du code, à respecter** (≈ l. 7673, commentaire) : « Une leçon sans semaine OU sans rang n'est pas située. »
+**2c. Hors Standards** (`calculerDetailsNoteFinale` rend `null`) : le panneau ne dit **aucune** phrase sur des évaluations « retenues » et n'affiche pas « Calcul impossible ». Il garde ce qu'il sait vraiment (critères, forces et défis, gestes cognitifs). **Décidé par Cowork (technique)**.
 
-## 4 · Ce que fait le lot
+**2d. Les mots.** Là où une phrase change à l'écran, reprends la forme du profil (carte de la note, `_phraseEvaluationsEcartees`, #883 : « 1 retenue sur 4 possibles »), pour que le panneau et la carte disent la même chose. Si un mot neuf est inévitable, propose-le dans le rapport : Grégoire le lira à la porte.
 
-**4a. Une ligne en lecture seule, étiquetée « Date », jamais un champ.** La date est une conséquence du couple (semaine, rang) et du calendrier ; la rendre modifiable créerait une troisième source de vérité (fiche #695).
-- **Leçon** : sous « Semaine ».
-- **Évaluation** : sous « Dans la leçon ». Sa date est celle de sa leçon parente. Une évaluation hors leçon (« — Aucune (bloc libre) ») n'a pas de date : la ligne le dit.
-- **Elle suit les gestes** : changer la semaine (Inspecteur ou sélecteur de l'en-tête), le rang (`B`), ou la leçon parente d'une évaluation met la ligne à jour sans rouvrir l'Inspecteur.
+## 3 · L'arrêt prévu – une seule condition
 
-**4b. Ce que la ligne dit, cas par cas** (mots proposés par Cowork ; tu peux les resserrer, pas les rendre plus vagues) :
+Avant de coder, **mesure** si quelque chose lit `portfoliosEleves` pour calculer une note, un indice ou un export (pas seulement pour afficher des coches). Sers-toi de `reserve.js`, `registre-longitudinal.js`, `trimestres.js` et `portfolio.js`, en plus du calcul.
+- **Si rien ne le lit pour calculer** : continue. Dis-le dans le rapport, commande à l'appui.
+- **Si quelque chose le lit pour calculer** : **arrête-toi et dis-le.** Alors les sélections déjà écrites par le panneau (« meilleurs », coupées à 3, reconnaissables à l'absence de `modalite`) ont pu fausser une note chez Grégoire, et la suite lui revient.
 
-| Cas | Texte |
-|---|---|
-| Un groupe, date trouvée | `Mercredi 30 septembre · séance B` |
-| Plusieurs groupes | une ligne par groupe : `Gr. 01 : mercredi 30 septembre` (nom du groupe tel que l'export le montre) ; `· séance B` une seule fois, en tête ou en fin |
-| Semaine posée, rang absent | `Semaine 5, séance non fixée` |
-| Pas de semaine | `Leçon non planifiée` |
-| Le groupe n'a pas de séance à ce rang cette semaine (congé, semaine à deux rencontres) | `Gr. 02 : pas de séance B en semaine 5` – **jamais** le jour suivant en silence |
-| Cours sans groupe ou sans horaire saisi | `Aucun horaire saisi pour ce cours` |
-| Carte rattachée à aucun cours | `Carte rattachée à aucun cours : pas de date` |
-| Évaluation hors leçon | `Hors leçon : pas de date` |
+## 4 · Trouvaille probable, à inscrire, pas à corriger
 
-Le jour de la semaine et le mois en toutes lettres, en français, sans l'année. **Aucune date devinée** : une date fausse dans un plan de cours se recopie (fiche #695).
-
-**4c. Zéro-dette : aucune quatrième copie du calcul.** Réutilise `construireHoraireDeLecons` + `dateDeLecon` (exporte `groupesCoursDuCours` s'il le faut). **Décidé par Cowork (technique)** : ne pas unifier maintenant avec `dateSeanceDuRang` de `productions.js` – hors lot ; mais **mesure** si les deux rendent la même date pour le même (groupe, semaine, rang) et dis-le dans le rapport (si elles divergent, c'est une trouvaille à inscrire, issue 2 de `CLAUDE.md`).
-L'horaire d'un groupe se construit **une fois par ouverture de l'Inspecteur**, pas à chaque frappe de la semaine.
-
-**4d. Hors lot, à ne pas faire** : la grille du Planificateur, l'en-tête du bloc sur la carte, l'échéance enregistrée d'une production (champ « Production » de l'évaluation). Si une évaluation liée à une production a, dans « Productions étudiantes », une échéance enregistrée **différente** de la date affichée, ne rien afficher de plus : compte ces cas sur la carte de démonstration et dis-le dans le rapport.
+`chargerPortfolioEleveDetail` (`js/portfolio.js:143`) fait lui aussi une sélection automatique **et l'écrit au rendu** (≈ l. 265-280, avec `modalite`). Mesure si elle est encore appelée. Si oui : fiche au BACKLOG (issue 2 de `CLAUDE.md`, prochain numéro de la ligne « Dernier ID »), même défaut que #714, hors de ce lot.
 
 ## 5 · Tests
 
-- Vitest sur la fonction qui produit les lignes : chaque rangée du tableau 4b, plus deux groupes aux jours différents qui rendent deux dates différentes pour la même leçon.
-- Sentinelle : le fichier de l'Inspecteur n'a pas de calcul de date de séance à lui (pas de parcours de `obtenirSeancesCompletesDuGroupe` hors `planification-export.js` et `productions.js`) ; garde de non-vide (règle 10). Break-test : chaque assertion doit pouvoir rougir (skill `verification-adverse`).
-- Suite complète verte avant le commit.
+- Vitest sur le panneau rendu pour : une Standards « 4 meilleurs » (le panneau dit 4, pas 3) ; « récents » ; hybride par catégories ; une sommative (aucune phrase de retenue, pas de « Calcul impossible ») ; un élève sans évaluation.
+- **Témoin d'écriture** : rendre le panneau ne change ni `portfoliosEleves` ni `indicesCP` (compare l'état du stockage avant et après). Garde de non-vide (règle 10).
+- Sentinelle : aucun `db.setSync` ni `calculerEtStockerIndicesCP(` dans `genererSectionPerformance` et ce qu'elle appelle au rendu.
+- Break-test sur chaque assertion (skill `verification-adverse`) ; suite complète verte avant le commit.
 
 ## 6 · Livraison
 
-- Deux commits au plus : le code et ses tests ; puis `BACKLOG.md` (#695 cochée, élargissement à l'évaluation et décision « une ligne par groupe » notés) et le déplacement de l'ancienne consigne.
-- Version **mineure** (nouvelle information à l'écran) par `scripts/release.mjs`, skill `release-et-changelog`. Changelog, une phrase d'utilisateur : l'Inspecteur d'une leçon et d'une évaluation donne la date où elle aura lieu, pour chaque groupe.
-- Commit → relecture de Cowork → corrections → verdict → push. **Tu ne pousses pas avant le verdict.**
+- Commits : le cochage des quatre fiches de 1.153.0 (sans release) ; le lot (code, tests) ; `BACKLOG.md` (#714 cochée, trouvaille du §4 si elle existe) et le déplacement de l'ancienne consigne.
+- Version **patch** par `scripts/release.mjs` (skill `release-et-changelog`) : l'écran dit le vrai, sans geste neuf. Item de « Nouvelles » **proposé, à valider par Grégoire avant le push**.
+- Commit → relecture de Cowork → corrections → verdict → push.
 
 ## 7 · Le geste que Grégoire vérifiera à l'écran
 
-Il ouvre sa carte, double-clique « La carte mentale » (S5, B) : sous « Semaine », la date de chacun de ses groupes, qu'il compare à son calendrier. Il double-clique l'évaluation « Artefact n° 2 » : la même date sous « Dans la leçon ». Il change `B` en `A` : les deux lignes changent sans rouvrir l'Inspecteur.
+Il ouvre le profil d'un de ses élèves, section « Développement des habiletés » : le nombre d'évaluations retenues est celui de sa pratique, les évaluations cochées « retenues » sont celles de la carte de la note, et « Calcul impossible » n'apparaît plus sous une note calculée.
