@@ -302,6 +302,57 @@ describe('#932 · C — reassignerCopie : la porte nomme l\'élève quand il cha
     });
 });
 
+/* ------------------------- R — relecture de Cowork : sans élève, pas de conflit */
+
+// Relecture du 22 sept. (Cowork) : `reassocierFichier` en vérification seule comparait
+// `f.etudiantDA === nouveauDA` sans exiger un DA non vide. Deux copies SANS élève sous
+// une même production se disaient « en conflit » : réassigner l'une envoyait l'autre à
+// la corbeille, avec un nom d'élève vide dans la question. Le chemin en masse (#934) le
+// rendait plus probable. Ici : le VRAI stockage, monté sur une mémoire.
+
+function monterStockage(fichiers) {
+    const magasin = { test_fichiersTravaux: JSON.parse(JSON.stringify(fichiers)) };
+    const db = {
+        getSync: (k, d) => (k in magasin ? magasin[k] : (d !== undefined ? d : null)),
+        setSync: (k, v) => { magasin[k] = v; },
+        get: async () => null, set: async () => {}, remove: async () => {}, deleteBlob: async () => {}, listBlobsByStudent: async () => []
+    };
+    const w = chargerScript('js/travaux-stockage.js', {
+        db, cle: (k) => 'test_' + k, Image: function () {},
+        obtenirDonneesSelonMode: () => [],
+        document: { createElement: () => ({ getContext: () => null }) }, navigator: { storage: null }
+    });
+    return w.travauxStockage;
+}
+
+describe('#932 · R — relecture : deux copies sans élève ne sont pas en conflit, et le nom vide se dit', () => {
+    it('R.a vrai stockage : DA vide des deux côtés ⇒ aucun conflit ; DA identique non vide ⇒ conflit (garde de non-vide)', () => {
+        const stockage = monterStockage([
+            { id: 'F_orphelin_1', etudiantDA: '', productionId: A2 },
+            { id: 'F_orphelin_2', etudiantDA: '', productionId: A2R },
+            { id: 'F_sara', etudiantDA: DA1, productionId: A2 },
+            { id: 'F_sara_rev', etudiantDA: DA1, productionId: A2R }
+        ]);
+        const sans = stockage.reassocierFichier('F_orphelin_1', { productionId: A2R }, { verificationSeule: true });
+        expect(sans.conflit).toBe(false);
+        expect(sans.fichierExistant).toBeUndefined();
+        // Un DA absent (undefined) vaut vide.
+        const absent = stockage.reassocierFichier('F_orphelin_1', { etudiantDA: undefined, productionId: A2R }, { verificationSeule: true });
+        expect(absent.conflit).toBe(false);
+        // Le même geste avec un élève : le conflit existe toujours.
+        const avec = stockage.reassocierFichier('F_sara', { productionId: A2R }, { verificationSeule: true });
+        expect(avec.conflit).toBe(true);
+        expect(avec.fichierExistant.id).toBe('F_sara_rev');
+    });
+
+    it('R.b la mesure nomme « élève non identifié·e » quand le DA est vide, le DA quand l\'élève est inconnu', () => {
+        const fichiers = [{ id: 'F_orphelin', etudiantDA: '', productionId: A2, nomFichier: 'inconnu.pdf' }];
+        const { win } = monterUI({ fichiers });
+        expect(win.travauxUI.mesurerReassignation('F_orphelin', { productionId: A2R }).nomEleve).toBe('élève non identifié·e');
+        expect(win.travauxUI.mesurerReassignation('F_orphelin', { etudiantDA: '9999999', productionId: A2R }).nomEleve).toBe('9999999');
+    });
+});
+
 /* ------------------------------------------- P — Propriétés (liste-evaluations) */
 
 function echapperHtmlReel(texte) {

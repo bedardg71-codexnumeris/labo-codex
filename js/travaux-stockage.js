@@ -511,7 +511,11 @@
             const resultat = { conflit: false, evaluationOrpheline: false };
 
             // Vérifier conflit : un autre fichier actif existe-t-il pour (DA, prodId) ?
-            if (nouveauProdId) {
+            // Relecture Cowork du lot #932/#934 (22 sept. 2026) — SANS ÉLÈVE, PAS DE
+            // CONFLIT. Deux copies non identifiées (DA vide) sous une même production
+            // ne se remplacent pas : les comparer par `'' === ''` envoyait l'une à la
+            // corbeille dès qu'on réassignait l'autre, sans nom dans la question.
+            if (nouveauProdId && nouveauDA) {
                 const existant = fichiers.find(f =>
                     f.id !== id &&
                     f.etudiantDA === nouveauDA &&

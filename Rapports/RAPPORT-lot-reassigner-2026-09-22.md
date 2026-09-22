@@ -77,3 +77,15 @@ Le verbe est le sien (« réassigner » / « assigner »). Tout le reste est **p
 **Modale de la sélection** : titre « Réassigner N copies » ; « Production cible : » ; avant le choix : « Choisis la production cible pour voir ce qui sera déplacé. » ; puis « **N copies** vers « Cible » : » et la liste « Prénom Nom — fichier » ; « **K conflits** : un fichier existe déjà sur la cible. Il ira à la corbeille (récupérable pendant 30 jours). » puis « Prénom Nom : [existant] → remplacé par [arrivant] » ; « M évaluation(s) sur l'ancienne production perdra sa / perdront leur copie. » ; « D copie(s) déjà sur la cible, laissée(s) telle(s) quelle(s). » ; « **A copies non déplacées** : deux copies d'un même élève sont cochées. Choisis-en une. » ; « Aucune copie à déplacer vers « Cible ». » ; bouton « Réassigner N copies » / « Annuler » ; notification « N copies réassignées vers « Cible » ».
 
 **Changelog (à écrire à la release, deux items proposés)** : « Déplacer une copie vers une autre production passe par un seul geste, qui montre la copie (vignette, nom du fichier) et demande avant de remplacer un fichier existant — en nommant les deux. » ; « Dans la Liste des évaluations, coche plusieurs copies et réassigne-les d'un coup : une seule question compte, nomme les fichiers et les conflits. »
+
+---
+
+## 7. Retouche de relecture (Cowork, 22 sept., soir) — commit après `8f6e500e`
+
+**Relecture de Cowork** : verte par exécution ciblée (51 essais) et par six mutations rouges de son côté. **Une retouche demandée, issue 1** : `reassocierFichier` en vérification seule comparait `f.etudiantDA === nouveauDA` sans exiger un DA non vide ; deux copies sans élève sous une même production se disaient « en conflit », et réassigner l'une envoyait l'autre à la corbeille, sans nom dans la question — le chemin en masse (#934) le rendait plus probable.
+
+**Fait** : dans `travaux-stockage.js`, pas de conflit quand le DA cible est vide ou absent (`if (nouveauProdId && nouveauDA)`) ; dans `mesurerReassignation`, un DA vide se nomme « élève non identifié·e » (porte et récapitulatif le lisent tous deux). Jetons anticache : `travaux-stockage.js?v=20260922a`, `travaux-ui.js?v=20260922c`.
+
+**Preuves** : `sentinelle-932` R.a (le VRAI stockage monté sur une mémoire : DA vide ⇒ aucun conflit, DA absent ⇒ aucun conflit, même DA non vide ⇒ conflit, garde de non-vide) et R.b (« élève non identifié·e » pour un DA vide, le DA pour un élève inconnu) ; deux mutations rouges (garde du DA retirée ; repli du nom retiré), restauration par copie aux empreintes ; suite Vitest complète 619 fichiers / 7 085 verts.
+
+**Mot d'écran neuf, proposé** : « élève non identifié·e » (à ajouter au §6). Arrêt ici : Grégoire valide les mots du §6 avant la release.
