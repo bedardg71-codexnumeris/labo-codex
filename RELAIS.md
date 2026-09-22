@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, 15 H : **1.153.2 EN LIGNE, rien en suspens sur `main`** — MANDAT DU 23 SEPT. AU MATIN : les trois lots de `plans de travail/PLAN-932-933-934-reassocier-une-copie.md`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, FIN D'APRÈS-MIDI : **LE LOT « RÉASSIGNER » (#932 + #934) EST SUR LA BRANCHE `lot-reassigner`, DEUX COMMITS, NON FUSIONNÉ, NON POUSSÉ** — il attend la relecture de Cowork, puis les mots de Grégoire, puis une release `minor`
+
+**Où vit le travail** : branche locale `lot-reassigner`, partie de `main` = `origin/main` = `ac374dea`. Deux commits de code : `2be01973` (lot 2, #932 : `reassignerCopie`, le seul écrivain de l'association d'une copie, Propriétés montre la copie, correction d'identité et menu du tableau suivent le verdict, modale aveugle retirée) et le commit qui porte ce relais (lot 3, #934 : « Réassigner la sélection » dans la Liste des évaluations, question groupée). Version inchangée (1.153.2) : **pas de release, pas de verdict Playwright complet, pas de push** — la consigne du 22 sept. (13 h 50) s'arrête au commit du lot 3. **Rapport à Cowork** : `Rapports/RAPPORT-lot-reassigner-2026-09-22.md` (mesures, suppositions, écarts, trouvailles, **mots d'écran proposés à valider par Grégoire avant la release**).
+
+**Ce qui a changé de mandat depuis le relais de 15 h (ci-dessous)** : la consigne révisée de Cowork (13 h 30, révisée 13 h 50 sur deux réponses de Grégoire) a avancé le lot au 22 sept. après-midi, **refusé #933** (Grégoire ne se sert pas du tableau d'« Annoter et évaluer » : les 23 réassociations du matin venaient de la Liste), déplacé #934 dans la Liste, et ajouté à #932 un cinquième écrivain (la correction d'identité du panneau d'évaluation) et le changement d'élève. BACKLOG à jour (#932 et #934 cochés, #933 refusé avec motif).
+
+**Pour finir** : Cowork relit (règle 2 du PROTOCOLE) ; Grégoire valide les mots proposés ; release `minor` par `scripts/release.mjs` sur la branche, fusion dans `main`, verdict Cowork fermé (règle 8), `scripts/pousser.sh origin main`. Preuves déjà rendues : Vitest complet vert (619 fichiers), sentinelles #932 (22 essais) et #934 (16), spec WebKit `liste-934-reassigner-la-selection.spec.js` verte seule, 18 mutations rouges au total. **Reste hors lot, inchangé** : #892/#929 rouges sur le runner GitHub (run du 22 sept. au matin) ; grille du carrousel périmée (fiche #931). `CONSIGNE-DEMARRAGE-COWORK.md`, `DEPLOY.md` et l'archive `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-21-08h05.md` (Cowork, non commités) n'ont pas été touchés.
+
+---
+
+## (relais précédent) 22 SEPT. 2026, 15 H : **1.153.2 EN LIGNE, rien en suspens sur `main`** — MANDAT DU 23 SEPT. AU MATIN : les trois lots de `plans de travail/PLAN-932-933-934-reassocier-une-copie.md`
 
 **Mandat** (décidé par Grégoire le 22 sept., 15 h) : lot 1 #933 (le tableau d'« Annoter et évaluer » montre le nom du fichier, le menu attend le verdict), lot 2 #932 (Propriétés = geste unique, vignette + porte de conflit, la liste y envoie, le jeton de reprise survit), lot 3 #934 (« Réassigner la sélection » en masse). Fenêtre du matin, `design-interface`, mots d'écran neufs proposés avant livraison. **Mot d'écran tranché : « réassigner » / « assigner », plus « réassocier »** — le code garde ses noms. Audit source : `Rapports/AUDIT-reassocier-une-copie-2026-09-22.md`.
 
