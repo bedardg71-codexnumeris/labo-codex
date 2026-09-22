@@ -250,9 +250,9 @@ const TOOLTIPS = {
     'cn-prod-ponderation':
         'Poids dans la note finale. L\'ensemble des productions se partage le 100 %.',
     'cn-prod-echeance':
-        'Date limite de remise. Conditionne la génération des snapshots, le calcul de C (complétion) et P (performance), et la gestion des travaux remis ou non remis. Facultative : laisse-la vide tant que les consignes ne sont pas transmises — le gabarit s\'enregistre et se marque « à planifier ». Clique sur l\'icône d\'info pour plus de détails.',
+        'Date limite de remise. Conditionne la génération des snapshots, le calcul de C (complétion) et P (performance), et la gestion des travaux remis ou non remis. Elle peut être posée d\'avance : tant que « Consignes transmises » est décochée, la production reste « à planifier » et rien n\'est dû. Clique sur l\'icône d\'info pour plus de détails.',
     'cn-prod-echeance-mg':
-        'Date limite propre à ce groupe-cours. Décoche la case pour signaler que ce groupe n\'a pas encore reçu la production (échéance neutralisée). Clique sur l\'icône d\'info pour plus de détails.',
+        'Date limite propre à ce groupe-cours. Elle peut être posée d\'avance : décoche la case tant que ce groupe n\'a pas reçu la production (échéance neutralisée). Clique sur l\'icône d\'info pour plus de détails.',
 
     // --- Grilles de critères ---
 

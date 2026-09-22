@@ -922,14 +922,20 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     const note = document.createElement('p');
     note.className = 'echeance-simple-note u-texte-petit';
     note.style.cssText = 'color: var(--gris-moyen); margin: 2px 0 0 0; line-height: 1.4;';
-    note.textContent = 'Décoché = les étudiant·es n\'ont pas encore reçu le travail. La production peut être préparée à l\'avance.';
+    note.textContent = 'Décoché = les étudiant·es n\'ont pas encore reçu le travail. La date peut être posée d\'avance : elle ne compte qu\'une fois la case cochée.';
     zone.appendChild(note);
 
     parent.insertBefore(zone, inputSimple);
 
-    // Même geste que le mode multi : sans transmission, le champ ne se saisit pas.
-    inputSimple.disabled = !assignee;
-    case_.addEventListener('change', () => { inputSimple.disabled = !case_.checked; });
+    // #930 (22 sept. 2026) — LE CHAMP DATE NE SUIT PLUS LA CASE. Jusqu'ici, décocher
+    // grisait le champ (« sans transmission, le champ ne se saisit pas »), et
+    // `gererChangementTypeProduction`, appelé juste après à l'ouverture de la
+    // fiche, le réactivait sans condition : la fiche s'ouvrait éditable, un aller-
+    // retour sur la case la verrouillait, et Grégoire ne pouvait plus changer la
+    // date. Décision de Grégoire ce jour : une date PRÉVUE se pose sans
+    // transmission ; la case seule décide de ce qui entre dans C, P et le
+    // calendrier (U4 de la sentinelle #494, inchangé). Un seul écrivain du
+    // `disabled` reste : le type (portfolio conteneur).
 }
 
 /**
@@ -1050,22 +1056,14 @@ function peuplerEcheancesParGroupe(production) {
                 data-tooltip="cn-prod-echeance-mg"
                 value="${dateVal}" style="width: 180px;"
                 ${dateMinTrimestre ? `min="${dateMinTrimestre}"` : ''}
-                ${dateMaxTrimestre ? `max="${dateMaxTrimestre}"` : ''}
-                ${estAssigne ? '' : 'disabled'}>
+                ${dateMaxTrimestre ? `max="${dateMaxTrimestre}"` : ''}>
             <span class="info-seance-echeance" data-gc-id="${gc.id}" style="font-size: 0.85em; color: var(--texte-secondaire, #999); white-space: nowrap;"></span>
         </div>`;
     }).join('');
 
-    // Event listeners : activer/désactiver le champ date selon la checkbox
-    listeContainer.querySelectorAll('.echeance-gc-checkbox').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const gcId = cb.dataset.gcId;
-            const dateInput = listeContainer.querySelector(`.echeance-gc-date[data-gc-id="${gcId}"]`);
-            if (dateInput) {
-                dateInput.disabled = !cb.checked;
-            }
-        });
-    });
+    // #930 — le champ date d'un groupe ne suit plus sa case : une date prévue se
+    // pose sans transmission, la case seule décide qu'elle est due (voir
+    // `poserCaseAssignationSimple`, même règle en mode simple).
 
     // 🆕 Beta 98.4 : Indicateur de séance à côté des dates
     // (#493 : la table gcId → groupeNum a disparu avec le filtre qu'elle servait.
@@ -2407,7 +2405,7 @@ function gererChangementTypeProduction() {
     }
     if (asterisqueDateEcheance) asterisqueDateEcheance.classList.remove('u-hide');
     if (noteExplicativeDateEcheance) {
-        noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux. Facultative : laisse-la vide tant que les consignes ne sont pas transmises.';
+        noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux. Facultative, et posable d\'avance : elle ne compte qu\'une fois les consignes transmises.';
     }
 
     if (champsPortfolio) champsPortfolio.classList.add('u-hide');
@@ -3011,7 +3009,8 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
 
 // 🆕 Beta 98.3 : Échéances par groupe-cours
 window.obtenirEcheanceEffective = obtenirEcheanceEffective;
-window.aucuneEcheanceAssignee = aucuneEcheanceAssignee;                     // #486 — badge « à planifier » + sentinelle (tests/unit)
+window.obtenirEcheancePlusTot = obtenirEcheancePlusTot;                     // #930 — le tri « échéance » de la barre latérale vit dans productions-liste.js ; sans cet export, ReferenceError depuis le 16 mai 2026
+window.aucuneEcheanceAssignee = aucuneEcheanceAssignee;                    // #486 — badge « à planifier » + sentinelle (tests/unit)
 window.datesSeancesDeLaSemaine = datesSeancesDeLaSemaine;                   // #493 — la liste unique (rang ⇄ date)
 window.dateSeanceDuRang = dateSeanceDuRang;                                 // #493 — « semaine 4, séance B » → « mardi 17 février »
 window.dateEcheanceProposeeParLaCarte = dateEcheanceProposeeParLaCarte;     // #493 — ce que la carte propose, par groupe
