@@ -172,7 +172,7 @@ const ANONYMES = { [DA1]: 'Élève 1', [DA2]: 'Élève 2' };
 const anonymiserNomStub = (da) => ANONYMES[da] || 'Étudiant Inconnu';
 const anonymiserNomFichierStub = (nom, da) => (ANONYMES[da] ? ANONYMES[da].replace(' ', '_') + '_document' : 'Document') + ((nom || '').match(/\.[^.]+$/) || [''])[0];
 
-function monterUI({ fichiers, reponse = true, elements = {}, anonymisation = false } = {}) {
+function monterUI({ fichiers, reponse = true, elements = {}, anonymisation = false, orpheline = false } = {}) {
     const journal = { questions: [], corbeille: [], ecrits: [], notifs: [] };
     const anonymes = anonymisation ? { anonymiserNom: anonymiserNomStub, anonymiserNomFichier: anonymiserNomFichierStub } : {};
     const win = chargerScript('js/travaux-ui.js', Object.assign(anonymes, {
@@ -203,7 +203,7 @@ function monterUI({ fichiers, reponse = true, elements = {}, anonymisation = fal
                 const prod = assoc.productionId !== undefined ? assoc.productionId : f.productionId;
                 if (options && options.verificationSeule) {
                     const existant = fichiers.find(x => x.id !== id && x.etudiantDA === da && x.productionId === prod);
-                    return { conflit: !!existant, fichierExistant: existant, evaluationOrpheline: false };
+                    return { conflit: !!existant, fichierExistant: existant, evaluationOrpheline: !!orpheline };
                 }
                 journal.ecrits.push([id, Object.assign({}, assoc)]);
                 return true;
@@ -252,6 +252,17 @@ describe('#932 · C — reassignerCopie : la porte nomme l\'élève quand il cha
         await win.travauxUI.reassignerCopie('FT_camille', { productionId: A2R });
         expect(journal.questions[0]).toContain('cette production (Artefact 2 (rév))');
         expect(journal.questions[0]).not.toContain('Sara Exemple');
+    });
+
+    it('C.c bis évaluation orpheline : la porte dit la phrase validée, avec le nom de l\'ancienne production ; refus ⇒ rien n\'est écrit', async () => {
+        // Porte terrain 1.154.0, décision 3.1 (« aligner ») : même phrase que le récapitulatif du geste en masse.
+        const fichiers = [{ id: 'FT_camille', etudiantDA: DA2, productionId: A2, nomFichier: 'Roy_Artefact_2.pdf' }];
+        const { win, journal } = monterUI({ fichiers, reponse: false, orpheline: true });
+        const ok = await win.travauxUI.reassignerCopie('FT_camille', { productionId: A2R });
+        expect(ok).toBe(false);
+        expect(journal.questions).toHaveLength(1);
+        expect(journal.questions[0]).toBe('L’évaluation déjà faite sur « Artefact 2 » n’aura plus de copie liée (l’évaluation elle-même est conservée). Continuer ?');
+        expect(journal.ecrits).toEqual([]);
     });
 
     it('C.d mesurer puis écrire : la mesure dit ce qui change et ce qui bloque ; l\'écriture sans conflit ne touche pas la corbeille', () => {

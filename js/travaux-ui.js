@@ -4900,7 +4900,12 @@
         if (mesure.conflit && !confirm(texteDeLaPorte(mesure))) return false;
 
         if (mesure.evaluationOrpheline) {
-            const confirme = confirm('L\'évaluation pour l\'ancienne production perdra son fichier associé. Continuer ?');
+            // Porte terrain 1.154.0, décision 3.1 de Grégoire : « aligner » — la même phrase que le
+            // récapitulatif du geste en masse, avec le nom de l'ancienne production (porté par la mesure).
+            const confirme = confirm(
+                `L’évaluation déjà faite sur « ${mesure.nomProductionActuelle} » n’aura plus de copie liée ` +
+                `(l’évaluation elle-même est conservée). Continuer ?`
+            );
             if (!confirme) return false;
         }
 
