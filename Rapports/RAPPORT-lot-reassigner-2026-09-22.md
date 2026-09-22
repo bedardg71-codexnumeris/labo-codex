@@ -101,3 +101,42 @@ Le verbe est le sien (« réassigner » / « assigner »). Tout le reste est **p
 **(3) Mot validé par Grégoire** : la ligne des évaluations orphelines du récapitulatif devient « N évaluation(s) déjà faite(s) sur « Ancienne production » n’aura / n’auront plus de copie liée (l’évaluation elle-même est conservée). », une ligne par ancienne production (la mesure porte désormais `nomProductionActuelle`). La porte du geste unitaire garde son texte d'avant (« L'évaluation pour l'ancienne production perdra son fichier associé. Continuer ? ») : non couvert par la validation, à trancher avec le §6. Preuves : `sentinelle-934` R.c (singulier) et R.e (pluriel, deux élèves).
 
 Jetons anticache : `travaux-ui.js?v=20260922d`, `liste-evaluations.js?v=20260922d`. Le reste des mots du §6 attend encore sa validation.
+
+---
+
+## 9. Retrait des noms d'élèves réels du dépôt (décision de Grégoire, 22 sept.) — commit à part
+
+**Portée** : les fichiers actuels seulement. **L'historique git n'est pas réécrit** : les noms restent lisibles dans les commits antérieurs. Aucun essai ne change de sens : quand un test s'ancrait sur un nom (fixtures des sentinelles #931, #603/#604, #605, #360), le nom a changé des deux côtés. Suite Vitest complète : 619 fichiers, 7 089 / 7 089 verts. Jetons anticache posés sur les trois scripts touchés (commentaires seulement).
+
+**Ce qui a été remplacé** — la liste amorce de Cowork (9 noms), élargie par le contexte à **23 noms de famille, 16 prénoms et un numéro de DA réel** (une ligne Omnivox recopiée dans deux docs, une consigne et une sentinelle). Élargissement trouvé dans : la table des « index voisins » de la fiche #671 du BACKLOG (cinq élèves), le relais de réparation correspondant dans RELAIS, les journaux de reconstruction A2025/H2026 de SESSION.md (doublons d'évaluations, oracle Omnivox : huit élèves de plus, prénoms et noms), le cas « divergent validé Omnivox » cité par son prénom dans `js/entites/reconciliation-evaluations.js`, la sentinelle #360 et le plan #360, et « copie de … » dans une fiche de SUIVI-BUGS. Chaque personne reçoit un nom fictif stable (noms de la famille du « gabarit » : Exemple, Fictif, Gabarit, Factice, Prototype, Simulacre… ; prénoms en « Fictiv- »), le même dans tous les fichiers ; la personne de l'incident #931 devient « Sara Exemple », comme la fixture du lot.
+
+| Fichier | Remplacements |
+|---|---|
+| `SESSION.md` | 31 |
+| `BACKLOG.md` | 23 |
+| `Retours des testeurs/SUIVI-BUGS.md` | 15 |
+| `RELAIS.md` | 7 |
+| `js/evaluation-calcul.js` (commentaire) | 6 |
+| `tests/unit/sentinelle-931-reassocier-sans-fichier.test.js` (dont le DA) | 5 |
+| `plans de travail/PLAN-360-prevention-doublons-evals.md` | 5 |
+| `tests/unit/sentinelle-603-604-import-pages-et-remplacement.test.js` | 4 |
+| `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-12-appartenance-par-le-service.md` (dont le DA) | 3 |
+| `docs/orthopedagogie/ORTHO-2-tes-premieres-inscriptions.md` (dont le DA) | 2 |
+| `docs/orthopedagogie/2026-09-12 Pour elle — tes premières inscriptions (BROUILLON).md` (dont le DA) | 2 |
+| `js/entites/reconciliation-evaluations.js` (commentaires) | 2 |
+| `tests/unit/sentinelle-reconciliation-doublons-360.test.js` (titre d'essai, commentaire) | 2 |
+| `Rapports/AUDIT-reassocier-une-copie-2026-09-22.md` | 1 |
+| `js/liste-evaluations.js` (commentaire) | 1 |
+| `tests/unit/sentinelle-605-fichier-sous-autre-production.test.js` | 1 |
+
+**Non touché, vérifié** : le roster de démonstration de `js/config.js` (l. 248-255 : sept noms de famille courants en ordre alphabétique, DA `1234567` à `1234573`, zone protégée) — inventé ; le roster d'import de `docs/utilisateur/README_DONNEES_DEMO.md` (DA `2024016`…, programme `TEST`) et celui de `docs/utilisateur/PACK_DEMARRAGE_README.md` / `plans de travail/CONSIGNE-renommage-eleves-demo.md` — inventés ; l'autrice Natasha Kanapé Fontaine (skill `ecosysteme-classe`, rétroactions du pack démo) ; la langue « Breton » de `libs/jspdf.umd.min.js` ; le verbe « Boucher les trois trous » d'une ancienne consigne ; les prénoms des personas de `docs/securite/` (Marie, Pierre, Lucas) ; les renommages démo « Félix Leclerc », « Gabrielle Roy » (RELAIS, OU-EN-EST-ON).
+
+**Doutes, listés sans changement** : (1) les prénoms des rétroactions du pack démo (`js/pack-demo-10.js` : « Bonjour Oumou ! », Nelson, Marie…) — le pack est présenté comme inventé, mais ses textes de rétroaction ont l'air de vraies rétroactions ; à confirmer par Grégoire ; (2) `SESSION.md` (358 Ko de journal, dont la reconstruction A2025/H2026 sur les données réelles) : j'ai remplacé ce qu'un balayage ciblé (lignes portant a2025/h2026/Omnivox/CSV) a fait remonter, pas un inventaire exhaustif — sans la liste de classe, un prénom seul peut m'échapper ; (3) « Léa » et « Marie » apparaissent aussi dans SESSION.md, mais comme prénoms de la démo (« Léa Tremblay ») ou des personas.
+
+**Commande de contrôle** (0 attendu ; la liste amorce est celle de la consigne de Cowork, non recopiée ici — rendue dans le message de session) :
+```
+git grep -l -w -E '<liste amorce>' -- . ':!libs/' ':!js/config.js' ':!js/pack-demo-10.js' ':!docs/utilisateur/README_DONNEES_DEMO.md' ':!.claude/skills/ecosysteme-classe/SKILL.md' ':!plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-11-ouverture-immuable.md' | wc -l
+```
+Les six exclusions sont les occurrences non-élèves ci-dessus (bibliothèque, rosters inventés, autrice, verbe).
+
+**CLAUDE.md** : règle 6 ajoutée à la section sécurité — aucun nom d'élève réel dans le code, les tests, les rapports, les plans ni les exemples ; employer des noms fictifs.
