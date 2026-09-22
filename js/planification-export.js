@@ -174,7 +174,7 @@ function groupesCoursDuCours(coursId) {
     if (!Array.isArray(tous)) return [];
     return tous
         .filter(function(g) { return g && g.coursId === coursId; })
-        .map(function(g) { return { id: g.id, nom: g.nom || g.id }; });
+        .map(function(g) { return { id: g.id, nom: g.nom || g.id, groupeNum: g.groupeNum || '' }; });
 }
 
 /** Le cours de la carte ACTIVE, ou null. N'atteste rien de son existence. */
@@ -248,6 +248,86 @@ function dateDeLecon(horaire, semaine, rangSeance) {
     if (!Array.isArray(dates) || dates.length < r) return null;
 
     return dates[r - 1];
+}
+
+// ---------------------------------------------------------------------------
+// LA DATE DANS L'INSPECTEUR (#695, élargie à l'évaluation le 22 sept. 2026)
+//
+// Même calcul que l'export, pas une copie : l'Inspecteur lit la date par
+// `construireHoraireDeLecons` + `dateDeLecon`. Ce qui change, c'est qu'il ne
+// CHOISIT pas de groupe (décision de Grégoire, 22 sept.) : il montre une ligne
+// par groupe du cours, parce que deux groupes n'ont pas les mêmes jours.
+//
+// ⚠ Aucune date devinée : quand le rang n'existe pas cette semaine-là (congé,
+// semaine à deux rencontres), la ligne le DIT. Sauter au jour suivant ferait
+// une date fausse, et une date fausse dans un plan de cours se recopie.
+// ---------------------------------------------------------------------------
+
+var JOURS_FR = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+var MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+/** « 2026-09-30 » → « mercredi 30 septembre ». Null si la date est illisible. */
+function formaterJourEtMois(ymd) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ''));
+    if (!m) return null;
+    var a = +m[1], mo = +m[2], j = +m[3];
+    // UTC : le jour de la semaine ne doit pas dépendre du fuseau de l'appareil.
+    var d = new Date(Date.UTC(a, mo - 1, j));
+    if (d.getUTCMonth() !== mo - 1 || d.getUTCDate() !== j) return null;
+    return JOURS_FR[d.getUTCDay()] + ' ' + j + ' ' + MOIS_FR[mo - 1];
+}
+
+/**
+ * Les groupes du cours, chacun avec son horaire construit UNE fois. L'Inspecteur
+ * l'appelle à l'ouverture, pas à chaque frappe de la semaine.
+ * @returns {Array<{id, nom, groupeNum, horaire}>} [] si le cours n'a aucun groupe
+ */
+function horairesDesGroupesDuCours(coursId) {
+    return groupesCoursDuCours(coursId).map(function(g) {
+        return { id: g.id, nom: g.nom, groupeNum: g.groupeNum, horaire: construireHoraireDeLecons(g.id) };
+    });
+}
+
+/**
+ * Les lignes « Date » de l'Inspecteur. Fonction PURE : tout lui est passé.
+ * @param {Object} ctx
+ *   horsLecon {boolean} — évaluation posée hors de toute leçon
+ *   coursId   {string|null} — cours de la carte
+ *   groupes   {Array} — sortie de `horairesDesGroupesDuCours`
+ *   semaine, rang {number|null} — le couple qui situe la leçon
+ *   lettre    {string} — « B » pour le rang 2 (lettreRangSeance de la carte)
+ * @returns {Array<string>} au moins une ligne, jamais vide
+ */
+function lignesDateDeLecon(ctx) {
+    var c = ctx || {};
+    if (c.horsLecon) return ['Hors leçon : pas de date'];
+    if (c.semaine === null || c.semaine === undefined) return ['Leçon non planifiée'];
+    if (c.rang === null || c.rang === undefined) return ['Semaine ' + c.semaine + ', séance non fixée'];
+    if (!c.coursId) return ['Carte rattachée à aucun cours : pas de date'];
+
+    var groupes = Array.isArray(c.groupes) ? c.groupes : [];
+    if (!groupes.some(function(g) { return g && g.horaire; })) return ['Aucun horaire saisi pour ce cours'];
+
+    var seance = 'séance ' + c.lettre;
+    var manque = 'pas de ' + seance + ' en semaine ' + c.semaine;
+    var dateDuGroupe = function(g) {
+        if (!g.horaire) return 'aucun horaire saisi';
+        var jour = formaterJourEtMois(dateDeLecon(g.horaire, c.semaine, c.rang));
+        return jour || manque;
+    };
+
+    if (groupes.length === 1) {
+        var seule = dateDuGroupe(groupes[0]);
+        if (seule === manque) return ['Pas de ' + seance + ' en semaine ' + c.semaine];
+        return [seule.charAt(0).toUpperCase() + seule.slice(1) + ' · ' + seance];
+    }
+
+    // Plusieurs groupes : « séance B » une fois, en tête, puis un groupe par ligne.
+    return [seance.charAt(0).toUpperCase() + seance.slice(1)].concat(groupes.map(function(g) {
+        var etiquette = g.groupeNum ? 'Gr. ' + g.groupeNum : g.nom;
+        return etiquette + ' : ' + dateDuGroupe(g);
+    }));
 }
 
 /**
@@ -1610,6 +1690,10 @@ window.planificationExport = {
     groupesCoursDeLaCarte: groupesCoursDeLaCarte,
     construireHoraireDeLecons: construireHoraireDeLecons,
     dateDeLecon: dateDeLecon,
+    // #695 — la date dans l'Inspecteur : une ligne par groupe du cours.
+    coursDeLaCarteActive: coursDeLaCarteActive,
+    horairesDesGroupesDuCours: horairesDesGroupesDuCours,
+    lignesDateDeLecon: lignesDateDeLecon,
     // #416 lot G — le générateur à trois axes : granularité × colonnes × format.
     CATALOGUE_COLONNES: CATALOGUE_COLONNES,
     COLONNES_PAR_SEANCE: COLONNES_PAR_SEANCE,
