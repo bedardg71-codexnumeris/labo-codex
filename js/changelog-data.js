@@ -26,7 +26,9 @@
             couleur: 'vert',
             titre: 'Carte d\'alignement : la date réelle dans l\'Inspecteur',
             items: [
-                'L\'Inspecteur d\'une leçon, et de l\'évaluation qu\'elle contient, affiche la date où elle aura lieu, une ligne par groupe. Quand la date n\'existe pas (séance non fixée, congé, horaire non saisi), il le dit au lieu d\'en deviner une.'
+                'L\'Inspecteur d\'une leçon, et de l\'évaluation qu\'elle contient, affiche la date où elle aura lieu, une ligne par groupe. Quand la date n\'existe pas (séance non fixée, congé, horaire non saisi), il le dit au lieu d\'en deviner une.',
+                // 1.155.1 (#714, lot N3) — PROPOSÉ, à valider par Grégoire avant le push.
+                'Profil de l\'élève, «&nbsp;Développement des habiletés&nbsp;»&nbsp;: le détail du calcul donne le nombre d\'évaluations retenues par ta pratique, et les mêmes évaluations que la carte de la note. «&nbsp;Calcul impossible&nbsp;» n\'apparaît plus sous une note calculée, et ouvrir un profil ne modifie plus rien.'
             ]
         },
         {
