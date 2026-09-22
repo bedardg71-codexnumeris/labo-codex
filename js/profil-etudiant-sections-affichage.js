@@ -3989,13 +3989,15 @@ function _lireNotePourPanneauHabiletes(da, productions) {
             note: a.note, obligatoire: !!(parId[a.productionId] && parId[a.productionId].categorie === 'obligatoire') }))
         .sort((a, b) => (b.note || 0) - (a.note || 0));   // l'ordre de la carte
 
-    let compte;
-    if (hybride) {
+    // Sans aucune évaluation, pas de compte : « (0 … sur 0 évalué) » redirait ce que la liste dit déjà
+    // (« Aucun … évalué ») — décidé par Cowork à la relecture du 22 sept.
+    let compte = '';
+    if (portfolio.nombreEvalues && hybride) {
         const obligatoires = retenues.filter(r => r.obligatoire).length;
         const evaluesSelection = Math.max(0, portfolio.nombreEvalues - obligatoires);
         compte = `les ${nombreARetenir} meilleures sur ${evaluesSelection} évaluées`
             + (obligatoires ? `, et ${obligatoires} obligatoire${obligatoires > 1 ? 's' : ''}` : '');
-    } else {
+    } else if (portfolio.nombreEvalues) {
         compte = `${portfolio.nombreRetenus} ${echapperHtml(portfolio.methodeSelection)} ${obtenirTermeProduction('pluriel')} sur ${portfolio.nombreEvalues} ${accordTermeProduction('evalue', portfolio.nombreEvalues)}`;
     }
 
@@ -4136,7 +4138,7 @@ function genererSectionPerformance(da) {
 ${noteLue ? `
             <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(noteLue.methodeCle, noteLue.nombreARetenir, noteLue.configCategories)}
             <br><br>
-            <strong>${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('retenu', 2)} (${noteLue.compte}) :</strong> ${listeRetenues}
+            <strong>${obtenirTermeProduction('pluriel', true)} ${accordTermeProduction('retenu', 2)}${noteLue.compte ? ` (${noteLue.compte})` : ''} :</strong> ${listeRetenues}
             <br><br>
             ${ligneCalculP ? `<strong>Calcul de l'indice P :</strong> ${ligneCalculP}
             <br><br>` : ''}` : ''}
