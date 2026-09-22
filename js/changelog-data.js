@@ -27,7 +27,9 @@
             titre: 'Réassigner une copie : un seul geste, qui montre la copie, et en lot',
             items: [
                 'Déplacer une copie vers une autre production passe par un seul geste, qui montre la copie (vignette, nom du fichier) et demande avant de remplacer un fichier existant — en nommant les deux.',
-                'Dans la Liste des évaluations, coche plusieurs copies et réassigne-les d\'un coup&nbsp;: une seule question compte, nomme les fichiers et les conflits.'
+                'Dans la Liste des évaluations, coche plusieurs copies et réassigne-les d\'un coup&nbsp;: une seule question compte, nomme les fichiers et les conflits.',
+                // 1.154.1 — porte terrain 1.154.0, décision 3.1 de Grégoire (« aligner »), mot validé.
+                'Quand l\'ancienne production garde une évaluation, la question le dit avec les mêmes mots que le geste en lot&nbsp;: l\'évaluation déjà faite n\'aura plus de copie liée, et elle est conservée.'
             ]
         },
         {
