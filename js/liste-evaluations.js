@@ -640,8 +640,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         // Générer les lignes HTML
         corpsTableau.innerHTML = lignesFiltrees.map(ligne => genererLigneHTML(ligne)).join('');
 
-        // Attacher les événements aux boutons d'action
-
         // Restaurer la visibilité des colonnes selon les préférences
         restaurerPreferencesColonnes();
 
@@ -651,11 +649,249 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
     }
 
+    // #934 — chaque rendu repart d'une sélection vide : les cases renaissent avec
+    // les lignes, et « tout sélectionner » ne vise que les lignes affichées.
+    mettreAJourSelectionEval();
+
     // Bandeau Phase 7 #3 : signaler la présence de doublons (au-dessus du tableau)
     if (typeof travauxDoublonsUI !== 'undefined' &&
         typeof travauxDoublonsUI.mettreAJourBandeau === 'function') {
         travauxDoublonsUI.mettreAJourBandeau();
     }
+}
+
+// ============================================
+// RÉASSIGNER LA SÉLECTION (#934)
+// ============================================
+// Vécu le 22 sept. 2026 : 24 copies importées sous la mauvaise production,
+// corrigées une par une depuis « Réassigner » de cette liste — 23 gestes en
+// quatre minutes, et l'incident #931 au milieu. Grégoire : « Idéalement,
+// j'aurais une option pour procéder à la réassignation par lot plutôt qu'une
+// par une. » Ici : cocher les lignes qui portent une copie, « Réassigner la
+// sélection (N) », choisir la cible ; UNE question groupée compte les copies,
+// nomme les fichiers (ce que la liste n'affiche pas) et liste les conflits
+// avant d'écrire. Vingt-quatre portes à la suite, c'est la fatigue qui a
+// produit #931. L'écriture passe par `travauxUI.ecrireReassignation`, sur des
+// mesures de `travauxUI.mesurerReassignation` : la vérification est séparée de
+// l'écriture DANS le geste unique (#932), pas contournée ici.
+
+/**
+ * Les copies cochées, sans doublon (deux lignes peuvent résoudre le même fichier).
+ * @returns {string[]} identifiants de fichiers
+ */
+function obtenirSelectionEval() {
+    const cases = document.querySelectorAll('#corps-tableau-evaluations .eval-selection-cb:checked');
+    const ids = [];
+    cases.forEach(cb => {
+        const id = cb.getAttribute('data-fichier-id');
+        if (id && ids.indexOf(id) === -1) ids.push(id);
+    });
+    return ids;
+}
+
+/**
+ * Met la barre de sélection et la case d'en-tête au diapason des cases cochées.
+ * Appelée à chaque case cochée (`data-on-change`) et après chaque rendu.
+ */
+function mettreAJourSelectionEval() {
+    const n = obtenirSelectionEval().length;
+    const barre = document.getElementById('eval-barre-selection');
+    const compte = document.getElementById('eval-barre-selection-compte');
+    const bouton = document.getElementById('eval-btn-reassigner-selection');
+    if (barre) barre.classList.toggle('u-hide', n === 0);
+    if (compte) compte.textContent = n + ' ' + (n > 1 ? 'copies sélectionnées' : 'copie sélectionnée');
+    if (bouton) bouton.textContent = 'Réassigner la sélection (' + n + ')';
+
+    const cbTout = document.getElementById('eval-tout-selectionner');
+    if (cbTout) {
+        const toutes = document.querySelectorAll('#corps-tableau-evaluations .eval-selection-cb');
+        const cochees = document.querySelectorAll('#corps-tableau-evaluations .eval-selection-cb:checked');
+        cbTout.checked = toutes.length > 0 && cochees.length === toutes.length;
+        cbTout.indeterminate = cochees.length > 0 && cochees.length < toutes.length;
+        cbTout.disabled = toutes.length === 0;
+    }
+}
+
+/**
+ * « Tout sélectionner » : suit le filtre — seules les lignes AFFICHÉES ont une case.
+ * @param {HTMLInputElement} cb - la case d'en-tête
+ */
+function basculerToutSelectionnerEval(cb) {
+    const coche = !!(cb && cb.checked);
+    document.querySelectorAll('#corps-tableau-evaluations .eval-selection-cb').forEach(c => { c.checked = coche; });
+    mettreAJourSelectionEval();
+}
+
+/** Décoche tout. */
+function viderSelectionEval() {
+    document.querySelectorAll('#corps-tableau-evaluations .eval-selection-cb').forEach(c => { c.checked = false; });
+    mettreAJourSelectionEval();
+}
+
+/**
+ * Trie des mesures de réassignation (`travauxUI.mesurerReassignation`) en ce que
+ * le geste groupé fera, et ce qu'il laissera.
+ *   · `dejaSurCible` : la copie est déjà sur la production cible — rien à faire ;
+ *   · `ambigus`      : deux copies cochées pour un MÊME élève — écrites l'une après
+ *                      l'autre, la seconde entrerait en conflit avec la première ;
+ *                      aucune des deux ne bouge, l'utilisateur en choisit une ;
+ *   · `aDeplacer`    : ce qui s'écrira — conflits compris, puisqu'ils sont nommés ;
+ *   · `conflits`     : parmi `aDeplacer`, celles dont un fichier existant partira à
+ *                      la corbeille ;
+ *   · `orphelines`   : parmi `aDeplacer`, celles dont l'ancienne production garde
+ *                      une évaluation sans copie.
+ * Pure : aucune lecture du DOM ni du stockage. Sentinelle #934.
+ * @param {Object[]} mesures
+ * @returns {{aDeplacer: Object[], conflits: Object[], orphelines: Object[], dejaSurCible: Object[], ambigus: Object[]}}
+ */
+function composerRecapReassignation(mesures) {
+    const dejaSurCible = [];
+    const candidates = [];
+    (mesures || []).forEach(m => {
+        if (!m) return;
+        if (!m.changeProduction) dejaSurCible.push(m); else candidates.push(m);
+    });
+    const parEleve = new Map();
+    candidates.forEach(m => {
+        const da = (m.fichier && m.fichier.etudiantDA) || '';
+        if (!parEleve.has(da)) parEleve.set(da, []);
+        parEleve.get(da).push(m);
+    });
+    const ambigus = [];
+    const aDeplacer = [];
+    candidates.forEach(m => {
+        const da = (m.fichier && m.fichier.etudiantDA) || '';
+        if (da && parEleve.get(da).length > 1) ambigus.push(m); else aDeplacer.push(m);
+    });
+    return {
+        aDeplacer,
+        conflits: aDeplacer.filter(m => m.conflit),
+        orphelines: aDeplacer.filter(m => m.evaluationOrpheline),
+        dejaSurCible,
+        ambigus
+    };
+}
+
+/**
+ * Le HTML de la question groupée, à partir d'un récapitulatif et du nom de la cible.
+ * Tout ce qui vient des données passe par `echapperHtml` (règle 1).
+ * @param {Object} recap - rendu par `composerRecapReassignation`
+ * @param {string} nomCible
+ * @returns {string}
+ */
+function genererRecapReassignationHTML(recap, nomCible) {
+    const n = recap.aDeplacer.length;
+    const pl = (k, s, p) => k + ' ' + (k > 1 ? p : s);
+    const li = (m) => '<li>' + echapperHtml(m.nomEleve) + ' — ' + echapperHtml(m.nomFichier) + '</li>';
+    let html = '';
+    if (n === 0) {
+        html += '<p class="reassigner-recap-vide">Aucune copie à déplacer vers « ' + echapperHtml(nomCible) + ' ».</p>';
+    } else {
+        html += '<p><strong>' + pl(n, 'copie', 'copies') + '</strong> vers « ' + echapperHtml(nomCible) + ' » :</p>' +
+            '<ul class="reassigner-recap-liste">' + recap.aDeplacer.map(li).join('') + '</ul>';
+    }
+    if (recap.conflits.length) {
+        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.conflits.length, 'conflit', 'conflits') +
+            '</strong> : un fichier existe déjà sur la cible. Il ira à la corbeille (récupérable pendant 30 jours).</p><ul class="reassigner-recap-liste">' +
+            recap.conflits.map(m => '<li>' + echapperHtml(m.nomEleve) + ' : ' + echapperHtml(m.nomExistant) + ' → remplacé par ' + echapperHtml(m.nomFichier) + '</li>').join('') +
+            '</ul></div>';
+    }
+    if (recap.orphelines.length) {
+        html += '<div class="reassigner-recap-bloc"><p>' + pl(recap.orphelines.length, 'évaluation', 'évaluations') +
+            ' sur l’ancienne production ' + (recap.orphelines.length > 1 ? 'perdront leur' : 'perdra sa') + ' copie.</p><ul class="reassigner-recap-liste">' +
+            recap.orphelines.map(li).join('') + '</ul></div>';
+    }
+    if (recap.dejaSurCible.length) {
+        html += '<div class="reassigner-recap-bloc"><p>' + pl(recap.dejaSurCible.length, 'copie déjà sur la cible, laissée telle quelle', 'copies déjà sur la cible, laissées telles quelles') + '.</p></div>';
+    }
+    if (recap.ambigus.length) {
+        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.ambigus.length, 'copie non déplacée', 'copies non déplacées') +
+            '</strong> : deux copies d’un même élève sont cochées. Choisis-en une.</p><ul class="reassigner-recap-liste">' +
+            recap.ambigus.map(li).join('') + '</ul></div>';
+    }
+    return html;
+}
+
+/**
+ * « Réassigner la sélection (N) » : la cible, la question groupée, puis l'écriture.
+ */
+function reassignerSelectionEval() {
+    const ids = obtenirSelectionEval();
+    if (ids.length === 0) return;
+    if (typeof travauxUI === 'undefined' || typeof travauxUI.mesurerReassignation !== 'function' || typeof travauxUI.ecrireReassignation !== 'function') {
+        notifications.erreur('Réassignation impossible', 'Le module des copies n’est pas chargé.');
+        return;
+    }
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    if (productions.length === 0) {
+        notifications.erreur('Aucune production', 'Crée d’abord des productions dans « Construction de la note ».');
+        return;
+    }
+    const optionsProductions = productions.map(function(p) {
+        const label = p.description ? (p.titre + ' - ' + p.description) : p.titre;
+        return '<option value="' + echapperHtml(p.id) + '">' + echapperHtml(label) + '</option>';
+    }).join('');
+
+    const existante = document.getElementById('reassigner-selection-overlay');
+    if (existante) existante.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'reassigner-selection-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML =
+        '<div class="modal-contenu modal-compact" style="max-width: 560px;">' +
+            '<button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
+            '<h3 class="modal-titre">Réassigner ' + ids.length + (ids.length > 1 ? ' copies' : ' copie') + '</h3>' +
+            '<label for="reassigner-selection-cible" style="font-size: 0.85em; color: var(--texte-secondaire);">Production cible :</label>' +
+            '<select id="reassigner-selection-cible" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;">' +
+                '<option value="">— Choisir une production —</option>' + optionsProductions +
+            '</select>' +
+            '<div id="reassigner-selection-recap" class="reassigner-recap" aria-live="polite">' +
+                '<p class="reassigner-recap-vide">Choisis la production cible pour voir ce qui sera déplacé.</p>' +
+            '</div>' +
+            '<div class="modal-actions" style="display:flex;gap:8px">' +
+                '<button class="btn btn-principal" id="reassigner-selection-btn-confirmer" disabled>Réassigner</button>' +
+                '<button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+    const selectCible = document.getElementById('reassigner-selection-cible');
+    const zoneRecap = document.getElementById('reassigner-selection-recap');
+    const btnConfirmer = document.getElementById('reassigner-selection-btn-confirmer');
+    let recapCourant = null;
+    let nomCibleCourant = '';
+
+    // La question groupée se recompose à chaque cible choisie : elle MESURE, n'écrit rien.
+    selectCible.addEventListener('change', function() {
+        const cibleId = selectCible.value;
+        if (!cibleId) {
+            recapCourant = null;
+            zoneRecap.innerHTML = '<p class="reassigner-recap-vide">Choisis la production cible pour voir ce qui sera déplacé.</p>';
+            btnConfirmer.disabled = true;
+            btnConfirmer.textContent = 'Réassigner';
+            return;
+        }
+        const prod = productions.find(p => p.id === cibleId);
+        nomCibleCourant = prod ? (prod.titre || prod.nom) : cibleId;
+        const mesures = ids.map(id => travauxUI.mesurerReassignation(id, { productionId: cibleId }));
+        recapCourant = composerRecapReassignation(mesures);
+        zoneRecap.innerHTML = genererRecapReassignationHTML(recapCourant, nomCibleCourant);
+        const n = recapCourant.aDeplacer.length;
+        btnConfirmer.disabled = n === 0;
+        btnConfirmer.textContent = n === 0 ? 'Réassigner' : 'Réassigner ' + n + (n > 1 ? ' copies' : ' copie');
+    });
+
+    // La question a été lue et nommait chaque conflit : on écrit chaque mesure, sans autre porte.
+    btnConfirmer.addEventListener('click', function() {
+        if (!recapCourant || recapCourant.aDeplacer.length === 0) return;
+        let nb = 0;
+        recapCourant.aDeplacer.forEach(m => { if (travauxUI.ecrireReassignation(m)) nb++; });
+        overlay.remove();
+        notifications.succes(nb + (nb > 1 ? ' copies réassignées' : ' copie réassignée') + ' vers « ' + nomCibleCourant + ' »');
+        appliquerFiltres();
+    });
 }
 
 /**
@@ -1168,13 +1404,21 @@ function genererLigneHTML(ligne) {
         affichageNoteChiffree = '-';
     }
 
+    // #934 (22 sept. 2026) — la copie que porte cette ligne, résolue UNE fois : la
+    // case de sélection et le menu Actions parlent du même fichier.
+    const fichierLigne = trouverFichierDeLigne(ligne);
+
     // Générer le dropdown d'actions contextuel
-    const boutons = genererDropdownActions(ligne);
+    const boutons = genererDropdownActions(ligne, fichierLigne);
 
     const daAffiche = ligne.daAffichage || ligne.da;
 
+    // #934 — une ligne « Non reçu » n'a rien à déplacer : pas de case.
     return `
         <tr data-evaluation-id="${echapperHtml(ligne.evaluationId || '')}" data-da="${echapperHtml(ligne.da)}" data-production-id="${echapperHtml(ligne.productionId || '')}"${classeRemplacee}>
+            <td class="td-center eval-td-selection">${fichierLigne
+                ? `<input type="checkbox" class="eval-selection-cb" data-fichier-id="${echapperHtml(fichierLigne.id)}" data-on-change="mettreAJourSelectionEval" aria-label="${echapperHtml('Sélectionner la copie de ' + (ligne.prenom || '') + ' ' + (ligne.nom || ''))}">`
+                : ''}</td>
             <td class="td-left">${echapperHtml(daAffiche)}</td>
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
@@ -1197,46 +1441,63 @@ function genererLigneHTML(ligne) {
 }
 
 /**
- * Génère un <select> natif d'actions contextuel selon le statut de la ligne
+ * La copie que porte une ligne de la liste (élève × production), ou null.
+ *
+ * Une ligne ne stocke pas de `fichierId`, sauf les lignes dédiées aux fichiers non
+ * associés : la copie se résout ici, dans cet ordre — l'id porté par la ligne,
+ * puis l'évaluation liée (distingue original et reprise), puis l'élève × la
+ * production (strict), puis, s'il est SEUL, le fichier de l'élève sans production
+ * connue (souple, 5 mars 2026). Deux lecteurs : le menu Actions et, depuis #934, la
+ * case de sélection pour « Réassigner la sélection ».
+ * @param {Object} ligne
+ * @returns {Object|null}
  */
-function genererDropdownActions(ligne) {
+function trouverFichierDeLigne(ligne) {
+    if (typeof travauxStockage === 'undefined' || typeof travauxStockage.obtenirFichiersTravaux !== 'function') return null;
+    const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+    const productions = obtenirDonneesSelonMode('productions');
+    const productionIdsConnus = new Set(productions.map(p => p.id));
+    let fichierImporte = null;
+    // Match direct par fichierId (lignes dédiées non-associées)
+    if (ligne.fichierId) {
+        fichierImporte = fichiers.find(f => f.id === ligne.fichierId);
+    }
+    // Match prioritaire par evaluationId (distingue original vs reprise)
+    if (!fichierImporte && ligne.evaluationId) {
+        fichierImporte = fichiers.find(f =>
+            f.evaluationId === ligne.evaluationId
+        );
+    }
+    // Fallback : match strict par DA + productionId
+    if (!fichierImporte) {
+        fichierImporte = fichiers.find(f =>
+            f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
+        );
+    }
+    // Match souple : fichier du même DA sans productionId ou avec productionId orphelin
+    // 🔧 FIX (5 mars 2026) : Ne soft-matcher que si l'étudiant n'a qu'UN seul fichier
+    // non-associé. Sinon le match est ambigu (pourrait être pour une autre production).
+    if (!fichierImporte) {
+        const fichiersNonAssocies = fichiers.filter(f =>
+            f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
+        );
+        if (fichiersNonAssocies.length === 1) {
+            fichierImporte = fichiersNonAssocies[0];
+        }
+    }
+    return fichierImporte || null;
+}
+
+/**
+ * Génère un <select> natif d'actions contextuel selon le statut de la ligne
+ * @param {Object} ligne
+ * @param {Object|null} [fichierResolu] - la copie déjà résolue par l'appelant (#934) ; sinon résolue ici
+ */
+function genererDropdownActions(ligne, fichierResolu) {
     // #562 — les identifiants interpolés dans `value="action|id|id"` sont échappés :
     // le navigateur décode `&quot;`/`&amp;` en lisant `.value`, `executerActionEval`
     // reçoit donc la valeur d'origine ; seul l'attribut est protégé.
-    // Trouver le fichier importé associé
-    let fichierImporte = null;
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersTravaux === 'function') {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const productions = obtenirDonneesSelonMode('productions');
-        const productionIdsConnus = new Set(productions.map(p => p.id));
-        // Match direct par fichierId (lignes dédiées non-associées)
-        if (ligne.fichierId) {
-            fichierImporte = fichiers.find(f => f.id === ligne.fichierId);
-        }
-        // Match prioritaire par evaluationId (distingue original vs reprise)
-        if (!fichierImporte && ligne.evaluationId) {
-            fichierImporte = fichiers.find(f =>
-                f.evaluationId === ligne.evaluationId
-            );
-        }
-        // Fallback : match strict par DA + productionId
-        if (!fichierImporte) {
-            fichierImporte = fichiers.find(f =>
-                f.etudiantDA === ligne.da && f.productionId && f.productionId === ligne.productionId
-            );
-        }
-        // Match souple : fichier du même DA sans productionId ou avec productionId orphelin
-        // 🔧 FIX (5 mars 2026) : Ne soft-matcher que si l'étudiant n'a qu'UN seul fichier
-        // non-associé. Sinon le match est ambigu (pourrait être pour une autre production).
-        if (!fichierImporte) {
-            const fichiersNonAssocies = fichiers.filter(f =>
-                f.etudiantDA === ligne.da && (!f.productionId || !productionIdsConnus.has(f.productionId))
-            );
-            if (fichiersNonAssocies.length === 1) {
-                fichierImporte = fichiersNonAssocies[0];
-            }
-        }
-    }
+    const fichierImporte = (fichierResolu === undefined) ? trouverFichierDeLigne(ligne) : fichierResolu;
     const fichierId = fichierImporte ? fichierImporte.id : null;
     const da = ligne.da;
     const prodId = ligne.productionId;
@@ -2289,15 +2550,17 @@ function trierLignesParColonne(lignes, tri) {
 // SÉLECTEUR DE COLONNES VISIBLES
 // ============================================
 
+// #934 — la première colonne est la case de sélection (non masquable) : les rangs
+// commencent à 2.
 const colonneIndexMap = {
-    'da': 1,
-    'nom': 2,
-    'prenom': 3,
-    'production': 4,
-    'jeton': 5,
-    'statut': 6,
-    'niveau': 7,
-    'note': 8
+    'da': 2,
+    'nom': 3,
+    'prenom': 4,
+    'production': 5,
+    'jeton': 6,
+    'statut': 7,
+    'niveau': 8,
+    'note': 9
 };
 
 /**
@@ -2835,6 +3098,14 @@ window.rechercherEvaluations = rechercherEvaluations;
 // Select d'actions et sélecteur de colonnes
 window.executerActionEval = executerActionEval;
 window.toggleColonneEval = toggleColonneEval;
+// #934 — réassigner la sélection
+window.mettreAJourSelectionEval = mettreAJourSelectionEval;
+window.basculerToutSelectionnerEval = basculerToutSelectionnerEval;
+window.viderSelectionEval = viderSelectionEval;
+window.reassignerSelectionEval = reassignerSelectionEval;
+window._composerRecapReassignation = composerRecapReassignation;     // sentinelle #934 (fonction pure)
+window._genererRecapReassignationHTML = genererRecapReassignationHTML; // idem
+window._trouverFichierDeLigne = trouverFichierDeLigne;               // idem
 window.ouvrirAnnotationDepuisListe = ouvrirAnnotationDepuisListe;
 window.ouvrirEditeurDepuisListe = ouvrirEditeurDepuisListe;
 window.confirmerSuppressionFichier = confirmerSuppressionFichier;
