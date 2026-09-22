@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, FIN D'APRÈS-MIDI : **LE LOT « RÉASSIGNER » (#932 + #934) EST SUR LA BRANCHE `lot-reassigner`, DEUX COMMITS, NON FUSIONNÉ, NON POUSSÉ** — il attend la relecture de Cowork, puis les mots de Grégoire, puis une release `minor`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 15 H : **1.154.0 FUSIONNÉE DANS `main` EN LOCAL (`89c7cf56`), VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session (ou `git log origin/main`) pour savoir si le push est passé
+
+**Où vit le travail** : `main` local = `origin/main` (`ac374dea`) + neuf commits de la branche `lot-reassigner`, fusionnée en avance rapide : lot 2 `2be01973` (#932), lot 3 `8f6e500e` (#934), deux retouches de relecture Cowork `bc69ca0c` (sans élève, pas de conflit) et `8c385421` (anonymisation, noms fictifs, mot validé), retrait des noms d'élèves réels `99b376fe` (règle 6 de CLAUDE.md), mots validés `7dbe8bce` (« étudiant·e »), release `89c7cf56` (1.154.0, build 0922-1455), puis ce relais et la porte terrain. Relecture de Cowork verte (51 essais + 6 mutations), mots du §6 validés par Grégoire. **Si `origin/main` n'est pas à ce commit** : le verdict a été rouge ou le push interrompu — mesurer (`scripts/.verdict-playwright.json`, reflog, processus) avant tout geste, relancer par `pousser.sh` seulement.
+
+**Porte terrain** : `plans de travail/PORTES-TERRAIN-2026-09-22-reassigner-une-copie.md` (trois portes : réassignation en masse sur ses vraies données, vignette dans Propriétés + anonymisation, case de sélection sur iPad). L'artefact jumeau est à publier par Cowork. **Reste hors lot, inchangé** : #892/#929 rouges sur le runner GitHub ; grille du carrousel périmée (fiche #931) ; porte 3.1 (aligner la porte unitaire des évaluations orphelines sur la phrase validée). Doutes du retrait des noms (§9 du rapport) : prénoms des rétroactions du pack démo, exhaustivité de SESSION.md. `CONSIGNE-DEMARRAGE-COWORK.md`, `DEPLOY.md` et l'archive `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-21-08h05.md` (Cowork, non commités) n'ont pas été touchés.
+
+---
+
+## (relais précédent) 22 SEPT. 2026, FIN D'APRÈS-MIDI : **LE LOT « RÉASSIGNER » (#932 + #934) EST SUR LA BRANCHE `lot-reassigner`, DEUX COMMITS, NON FUSIONNÉ, NON POUSSÉ** — il attend la relecture de Cowork, puis les mots de Grégoire, puis une release `minor`
 
 **Où vit le travail** : branche locale `lot-reassigner`, partie de `main` = `origin/main` = `ac374dea`. Deux commits de code : `2be01973` (lot 2, #932 : `reassignerCopie`, le seul écrivain de l'association d'une copie, Propriétés montre la copie, correction d'identité et menu du tableau suivent le verdict, modale aveugle retirée) et le commit qui porte ce relais (lot 3, #934 : « Réassigner la sélection » dans la Liste des évaluations, question groupée). Version inchangée (1.153.2) : **pas de release, pas de verdict Playwright complet, pas de push** — la consigne du 22 sept. (13 h 50) s'arrête au commit du lot 3. **Rapport à Cowork** : `Rapports/RAPPORT-lot-reassigner-2026-09-22.md` (mesures, suppositions, écarts, trouvailles, **mots d'écran proposés à valider par Grégoire avant la release**).
 
