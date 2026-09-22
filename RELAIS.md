@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, MATIN : **1.153.1 (#930) ET 1.153.2 (#931) COMMITÉES SUR `main` EN LOCAL, NON POUSSÉES** — pas de route vers GitHub depuis le poste de l'école ; push au retour de Grégoire à la maison
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, 12 H : **1.153.2 POUSSÉE — `origin/main = 084750c2`**, en ligne chez l'hébergeur (mesuré depuis le Chrome de Grégoire : `version.json` = 1.153.2, build 0922-1051), rien en suspens sur `main`
+
+Push par `scripts/pousser.sh origin main` sous caffeinate, charge 2,7, aucune VM Cowork : Playwright vert (0 échec connu), Vitest vert dans le hook, sur le mot de Grégoire (« tu peux faire le reste », de la maison). Trois commits partis : `49c1142d` (1.153.1, #930), `0f77e248` (1.153.2, #931), `084750c2` (docs #931). Suppositions de la journée validées par Grégoire (« ok, c'est bon ») : tri par date prévue, « Réassocier » retiré sur une ligne sans copie, mots d'écran et changelog. **Reste hors lot** : les deux specs rouges du run planifié GitHub du 22 sept. au matin (#892, #929) sur `602907b1`, à lire au prochain lot ; la grille de badges du carrousel périmée après une suppression (inscrit dans la fiche #931). `CONSIGNE-DEMARRAGE-COWORK.md` et `DEPLOY.md` (Cowork, non commités) n'ont pas été touchés.
+
+---
+
+## (relais précédent) 22 SEPT. 2026, MATIN : **1.153.1 (#930) ET 1.153.2 (#931) COMMITÉES SUR `main` EN LOCAL, NON POUSSÉES** — pas de route vers GitHub depuis le poste de l'école ; push au retour de Grégoire à la maison
 
 **↻ 11 h 30 — #931 (1.153.2), second commit local.** Retour de 10 h 35 : « Réassocier » sur une ligne SANS fichier prenait le premier fichier de l'élève sous une autre production (`genererDropdownActions`, repli du 5 mars), et « Remplacer l'existant ? » ne nommait aucun fichier — l'Artefact 1 annoté d'Allache a pris la place de son Artefact 2 revise, parti à la corbeille. Chronologie mesurée en lecture seule dans le Chrome de Grégoire (fiche SUIVI-BUGS #931). Branche retirée, la porte nomme les deux fichiers ; `sentinelle-931` (7 essais), 3 mutations rouges ; Vitest 617 / 7044. **Stock** : réparé — d'abord par Grégoire dans l'app (l'app en ligne portait encore le piège, deux fichiers de plus ont bougé), puis par script sur son mot (11 h 32) : quatre `productionId` réécrits, sauvegarde dans `~/Downloads/sauvegarde-931-…json`, remesuré (27 / 24 / 27, 0 doublon, annotations suivies). Détail dans la fiche #931. Inscrit, non traité : la grille de badges du carrousel reste périmée après une suppression (le « (3) »).
 
