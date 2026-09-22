@@ -1289,21 +1289,21 @@ function genererDropdownActions(ligne) {
         options.push(`<option value="transferer">Transférer</option>`);
     }
 
-    // Associer / Réassocier — si fichier importé (strict ou souple)
+    // Associer / Réassocier — si fichier importé (strict ou souple).
+    //
+    // #931 (22 sept. 2026) — PLUS DE REPLI SUR UNE LIGNE SANS FICHIER. Depuis le
+    // 5 mars, une ligne sans fichier offrait quand même « Réassocier », en prenant
+    // « un fichier du même DA sous une AUTRE production » — le PREMIER trouvé, sans
+    // le nommer. Mesuré chez Grégoire : sur la ligne Allache × Artefact 2 (rév), le
+    // menu a déplacé son vieux « Portrait de lecteur », puis son Artefact 1 annoté
+    // et évalué, à la place du fichier importé le matin même (parti à la corbeille
+    // par la porte « Remplacer l'existant ? » de `changerProductionFichier`). Un
+    // fichier qui vit sur une autre production se réassocie DEPUIS SA LIGNE, où le
+    // menu sait de quel fichier il parle ; le fichier sans production d'un élève
+    // est déjà rattrapé par le match souple ci-dessus (un seul ⇒ `fichierId`).
     if (fichierId) {
         const labelAssoc = ligne.productionId ? 'Réassocier' : 'Associer';
         options.push(`<option value="associer|${echapperHtml(fichierId)}|${echapperHtml(da)}">${labelAssoc}</option>`);
-    } else if (typeof travauxStockage !== 'undefined') {
-        // Fichier mal associé OU non associé : même DA mais sous une autre production ou sans productionId
-        // 🔧 FIX (5 mars 2026) : Inclure aussi les fichiers sans productionId (besoin d'association)
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const fichierAAssocier = fichiers.find(f =>
-            f.etudiantDA === da && (!f.productionId || f.productionId !== prodId)
-        );
-        if (fichierAAssocier) {
-            const label = fichierAAssocier.productionId ? 'Réassocier' : 'Associer';
-            options.push(`<option value="associer|${echapperHtml(fichierAAssocier.id)}|${echapperHtml(da)}">${label}</option>`);
-        }
     }
 
     // Supprimer — si fichier importé

@@ -29,7 +29,9 @@
                 'Un groupe-cours sans pratique de notation assignée n\'affiche plus de note calculée par défaut&nbsp;: la complétion et la performance se lisent «&nbsp;—&nbsp;», aucun élève n\'est signalé pour cette raison, et le profil indique où choisir la pratique (Conception → Pratiques de notation). Rien n\'est effacé&nbsp;: les notes reviennent dès qu\'une pratique est assignée.',
                 // 1.153.1 (#930, retours de Grégoire du 22 sept. 2026) — mots à valider par lui avant le push.
                 'Productions étudiantes&nbsp;: la date d\'échéance se pose d\'avance, même si «&nbsp;Consignes transmises&nbsp;» est décochée. C\'est la case seule qui décide que la production est due (calendrier, complétion, performance). Le champ ne se grise plus.',
-                'Productions étudiantes&nbsp;: le tri «&nbsp;par échéance&nbsp;» de la liste de gauche fonctionne de nouveau (il échouait en silence depuis mai).'
+                'Productions étudiantes&nbsp;: le tri «&nbsp;par échéance&nbsp;» de la liste de gauche fonctionne de nouveau (il échouait en silence depuis mai).',
+                // 1.153.2 (#931) — mots à valider par Grégoire avant le push.
+                'Liste des évaluations&nbsp;: sur une ligne sans copie, «&nbsp;Réassocier&nbsp;» ne prend plus en silence une autre copie de l\'élève. Une copie se réassocie depuis sa propre ligne, et la question «&nbsp;Remplacer l\'existant&nbsp;?&nbsp;» nomme maintenant les deux fichiers.'
             ]
         },
         {
