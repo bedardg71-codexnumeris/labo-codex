@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, 12 H : **1.153.2 POUSSÉE — `origin/main = 084750c2`**, en ligne chez l'hébergeur (mesuré depuis le Chrome de Grégoire : `version.json` = 1.153.2, build 0922-1051), rien en suspens sur `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, 15 H : **1.153.2 EN LIGNE, rien en suspens sur `main`** — MANDAT DU 23 SEPT. AU MATIN : les trois lots de `plans de travail/PLAN-932-933-934-reassocier-une-copie.md`
+
+**Mandat** (décidé par Grégoire le 22 sept., 15 h) : lot 1 #933 (le tableau d'« Annoter et évaluer » montre le nom du fichier, le menu attend le verdict), lot 2 #932 (Propriétés = geste unique, vignette + porte de conflit, la liste y envoie, le jeton de reprise survit), lot 3 #934 (« Réassigner la sélection » en masse). Fenêtre du matin, `design-interface`, mots d'écran neufs proposés avant livraison. **Mot d'écran tranché : « réassigner » / « assigner », plus « réassocier »** — le code garde ses noms. Audit source : `Rapports/AUDIT-reassocier-une-copie-2026-09-22.md`.
+
+---
+
+## (relais précédent) 22 SEPT. 2026, 12 H : **1.153.2 POUSSÉE — `origin/main = 084750c2`**, en ligne chez l'hébergeur (mesuré depuis le Chrome de Grégoire : `version.json` = 1.153.2, build 0922-1051), rien en suspens sur `main`
 
 Push par `scripts/pousser.sh origin main` sous caffeinate, charge 2,7, aucune VM Cowork : Playwright vert (0 échec connu), Vitest vert dans le hook, sur le mot de Grégoire (« tu peux faire le reste », de la maison). Trois commits partis : `49c1142d` (1.153.1, #930), `0f77e248` (1.153.2, #931), `084750c2` (docs #931). Suppositions de la journée validées par Grégoire (« ok, c'est bon ») : tri par date prévue, « Réassocier » retiré sur une ligne sans copie, mots d'écran et changelog. **Reste hors lot** : les deux specs rouges du run planifié GitHub du 22 sept. au matin (#892, #929) sur `602907b1`, à lire au prochain lot ; la grille de badges du carrousel périmée après une suppression (inscrit dans la fiche #931). `CONSIGNE-DEMARRAGE-COWORK.md` et `DEPLOY.md` (Cowork, non commités) n'ont pas été touchés.
 
