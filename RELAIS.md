@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 15 H : **1.154.0 FUSIONNÉE DANS `main` EN LOCAL (`89c7cf56`), VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session (ou `git log origin/main`) pour savoir si le push est passé
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 15 H 35 : **1.154.0 POUSSÉE (`origin/main = 1862d309`, Playwright vert 0 échec connu sur le SHA exact) ; PORTE TERRAIN RENDUE PAR GRÉGOIRE 12/12 ; 1.154.1 (`1e5d25af`, décision 3.1 « aligner ») COMMITÉE SUR `main`, verdict et push lancés par `pousser.sh`** — lire le message de fin de session ou `git log origin/main`
+
+**1.154.0** : poussée après un verdict Playwright vert (charge attendue 90 s, 0 échec connu, 0 instable), Vitest vert dans le hook, aucune VM Cowork ni GitHub Desktop (mesuré). « En ligne » non mesurable d'ici : l'adresse est derrière Cloudflare Access (page de connexion) — Grégoire l'a lue lui-même à la porte 0.1. **Porte terrain 1.154.0** rendue via l'artefact de Cowork : 12 passées / 0 échec / 0 non traitée, Mac et iPad, vraies données ; seule la mesure 1.1.e (nombre déplacé) est revenue vide, non réclamée. Décisions : 3.1 « aligner », 3.2 rien ne change.
+
+**1.154.1** (`1e5d25af`) : la porte des évaluations orphelines de `reassignerCopie` dit la phrase validée, avec le nom de l'ancienne production porté par la mesure ; essai C.c bis (#932), une mutation rouge ; changelog : un item court sous 1.154. Pas de porte terrain (un seul texte, prouvé par le banc). **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
+
+**Reste hors lot, inchangé** : #892/#929 rouges sur le runner GitHub ; grille du carrousel périmée (fiche #931) ; doutes du retrait des noms (§9 du rapport). Fichiers Cowork non commités non touchés.
+
+---
+
+## (relais précédent) 22 SEPT. 2026, ≈ 15 H : **1.154.0 FUSIONNÉE DANS `main` EN LOCAL (`89c7cf56`), VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session (ou `git log origin/main`) pour savoir si le push est passé
 
 **Où vit le travail** : `main` local = `origin/main` (`ac374dea`) + neuf commits de la branche `lot-reassigner`, fusionnée en avance rapide : lot 2 `2be01973` (#932), lot 3 `8f6e500e` (#934), deux retouches de relecture Cowork `bc69ca0c` (sans élève, pas de conflit) et `8c385421` (anonymisation, noms fictifs, mot validé), retrait des noms d'élèves réels `99b376fe` (règle 6 de CLAUDE.md), mots validés `7dbe8bce` (« étudiant·e »), release `89c7cf56` (1.154.0, build 0922-1455), puis ce relais et la porte terrain. Relecture de Cowork verte (51 essais + 6 mutations), mots du §6 validés par Grégoire. **Si `origin/main` n'est pas à ce commit** : le verdict a été rouge ou le push interrompu — mesurer (`scripts/.verdict-playwright.json`, reflog, processus) avant tout geste, relancer par `pousser.sh` seulement.
 
