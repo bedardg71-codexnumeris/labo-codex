@@ -17,9 +17,9 @@ Remesure rapide au code (grep, pas exécuté) : les constats tiennent encore —
 
 - ~~**Lot N1**~~ — **SORTI DE LA FILE : livré en 1.153.0 (N1a + N1b), poussé le 21 sept. 2026 à 19 h 30 (`a37d50bf`).** Le constat de didactique (deux échelles pour le niveau de la note globale d'une Standards) part avec N2.
 - **Lot N2 – Le P historique suit la note du cours** (#716). Dépend de N1 (sous DEN, l'historique passe par la même résolution que #719). Sommative : lire `etudiantDA` / `noteFinale` ; SPE et DEN : plus de conversion IDME en dur.
-- **Lot N3 – Le panneau « Développement des habiletés » lit la note, et n'écrit rien** (#714). Isolé ; aucune question.
+- ~~**Lot N3**~~ — **SORTI DE LA FILE : livré en 1.155.1, fusionné dans `main` le 22 sept. 2026 (`32f09aaa`) après la relecture croisée de Cowork (verte, sentinelle 11/11) ; verdict et push par `pousser.sh`.**
 - **Lot N4 – Spécifications : le plancher de 50 et la réédition** (#713 volet plancher, #854 volet SPE). ⚠ **Didactique, à Grégoire** : un·e élève qui n'atteint aucun forfait reçoit 50 « final » — que doit dire la note ? Plus : rééditer une SPE par l'assistant ramène le seuil à 70 et perd ses jetons.
 - **Lot N5 – Dénotation : une cible renommée ne plafonne plus en silence** (#717). **À Grégoire** : ids stables à la création (recommandé) ou message.
 - **Lot N6 – Zéro-dette : les réglages que rien ne lit** (#900). Retirer du CODE ce qui écrit des champs sans lecteur ; rien n'est effacé des données déjà écrites. À joindre à un lot qui passe par l'assistant.
 
-Ordre recommandé : N3, N2, N4, N5, N6 (N1 livré).
+Ordre recommandé : N2, N4, N5, N6 (N1 et N3 livrés). **Prochain lot : N2** (#716).

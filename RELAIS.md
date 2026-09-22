@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 18 H : **LOT N3 (#714) COMMITÉ SUR LA BRANCHE `lot-n3-habiletes`, RELEASE 1.155.1 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 18 H 30 : **LOT N3 (#714, 1.155.1) FUSIONNÉ DANS `main` (merge `32f09aaa`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`0026e95b`) + `3ce62661` (relais précédent, fichiers de Cowork) + le merge de `lot-n3-habiletes` (jusqu'à `ee6f9d9c`, complément de relecture) + ce relais. Relecture croisée de Cowork sur `ee6f9d9c` : verte, par exécution sur une copie `git archive`, sentinelle 11/11 ; une mutation survit (retirer `echapperHtml(portfolio.methodeSelection)`) — libellé tiré de `methodesLabels`, mots fixes de l'app, la carte de la note ne l'échappe pas non plus : issue 3, ni correction ni fiche. **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
+
+**Suite** : lot N2 (#716, le P historique suit la note du cours), premier de `plans de travail/FILE-DES-LOTS.md`. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub. La branche `lot-n3-habiletes` peut être supprimée une fois le push mesuré.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 18 H : **LOT N3 (#714) COMMITÉ SUR LA BRANCHE `lot-n3-habiletes`, RELEASE 1.155.1 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
 
 **Où vit le travail** : branche locale `lot-n3-habiletes`, partie de `0026e95b` : `d24b0524` (#710, #711, #712, #719 cochées, remesurées), `0f196a8b` (le lot : code, sentinelle-714, B3b), `09918477` (#714 cochée, consigne N3 et archive), `632df922` (release 1.155.1, build 0922-1757), `af7fc99f` (« Où en est-on »). `main` local porte ce relais et les fichiers de Cowork par-dessus `0026e95b` : la fusion sera un merge, pas une avance rapide.
 
