@@ -155,7 +155,7 @@ describe('#932 · S — un seul écrivain de l\'association d\'une copie', () =>
 const DA1 = '2000001', DA2 = '2000002';
 const A2 = 'PROD_A2', A2R = 'PROD_A2R';
 const PRODUCTIONS = [{ id: A2, titre: 'Artefact 2' }, { id: A2R, titre: 'Artefact 2 (rév)' }];
-const ETUDIANTS = [{ da: DA1, nom: 'Allache', prenom: 'Sara' }, { da: DA2, nom: 'Roy', prenom: 'Camille' }];
+const ETUDIANTS = [{ da: DA1, nom: 'Exemple', prenom: 'Sara' }, { da: DA2, nom: 'Roy', prenom: 'Camille' }];
 
 function elementGenerique(extra) {
     return Object.assign({
@@ -166,9 +166,16 @@ function elementGenerique(extra) {
     }, extra || {});
 }
 
-function monterUI({ fichiers, reponse = true, elements = {} } = {}) {
+// En mode anonymisation, `anonymiserNom` rend « Élève N » et `anonymiserNomFichier` un nom
+// générique (modes.js) ; hors de ce mode, `anonymiserNom` rend null et le nom de fichier revient tel quel.
+const ANONYMES = { [DA1]: 'Élève 1', [DA2]: 'Élève 2' };
+const anonymiserNomStub = (da) => ANONYMES[da] || 'Étudiant Inconnu';
+const anonymiserNomFichierStub = (nom, da) => (ANONYMES[da] ? ANONYMES[da].replace(' ', '_') + '_document' : 'Document') + ((nom || '').match(/\.[^.]+$/) || [''])[0];
+
+function monterUI({ fichiers, reponse = true, elements = {}, anonymisation = false } = {}) {
     const journal = { questions: [], corbeille: [], ecrits: [], notifs: [] };
-    const win = chargerScript('js/travaux-ui.js', {
+    const anonymes = anonymisation ? { anonymiserNom: anonymiserNomStub, anonymiserNomFichier: anonymiserNomFichierStub } : {};
+    const win = chargerScript('js/travaux-ui.js', Object.assign(anonymes, {
         db: { get: async () => null, getSync: (k, d) => (d !== undefined ? d : null), set: async () => {}, setSync: () => {} },
         cle: (k) => 'test_' + k,
         echapperHtml: (t) => String(t == null ? '' : t),
@@ -203,7 +210,7 @@ function monterUI({ fichiers, reponse = true, elements = {} } = {}) {
             },
             deplacerEnCorbeille: (id) => journal.corbeille.push(id)
         }
-    }, { addEventListener() {}, removeEventListener() {} });
+    }), { addEventListener() {}, removeEventListener() {} });
     return { win, journal };
 }
 
@@ -212,7 +219,7 @@ function monterUI({ fichiers, reponse = true, elements = {} } = {}) {
 // d'élève ET de production, en conflit avec la copie de Sara.
 const FICHIERS = () => [
     { id: 'FT_camille', etudiantDA: DA2, productionId: A2, nomFichier: 'Roy_Artefact_2.pdf' },
-    { id: 'FT_sara', etudiantDA: DA1, productionId: A2R, nomFichier: 'Allache_Artefact_2_rev.jpg' }
+    { id: 'FT_sara', etudiantDA: DA1, productionId: A2R, nomFichier: 'Exemple_Artefact_2_rev.jpg' }
 ];
 
 describe('#932 · C — reassignerCopie : la porte nomme l\'élève quand il change, et rien ne s\'écrit sans elle', () => {
@@ -222,10 +229,10 @@ describe('#932 · C — reassignerCopie : la porte nomme l\'élève quand il cha
         expect(ok).toBe(false);
         expect(journal.questions).toHaveLength(1);
         const q = journal.questions[0];
-        expect(q).toContain('Sara Allache');
+        expect(q).toContain('Sara Exemple');
         expect(q).toContain('Artefact 2 (rév)');
-        expect(q.indexOf('Allache_Artefact_2_rev.jpg')).toBeGreaterThan(-1);
-        expect(q.indexOf('Roy_Artefact_2.pdf')).toBeGreaterThan(q.indexOf('Allache_Artefact_2_rev.jpg'));
+        expect(q.indexOf('Exemple_Artefact_2_rev.jpg')).toBeGreaterThan(-1);
+        expect(q.indexOf('Roy_Artefact_2.pdf')).toBeGreaterThan(q.indexOf('Exemple_Artefact_2_rev.jpg'));
         expect(q).toContain('corbeille');
         expect(journal.ecrits).toEqual([]);
         expect(journal.corbeille).toEqual([]);
@@ -244,13 +251,13 @@ describe('#932 · C — reassignerCopie : la porte nomme l\'élève quand il cha
         const { win, journal } = monterUI({ fichiers, reponse: false });
         await win.travauxUI.reassignerCopie('FT_camille', { productionId: A2R });
         expect(journal.questions[0]).toContain('cette production (Artefact 2 (rév))');
-        expect(journal.questions[0]).not.toContain('Sara Allache');
+        expect(journal.questions[0]).not.toContain('Sara Exemple');
     });
 
     it('C.d mesurer puis écrire : la mesure dit ce qui change et ce qui bloque ; l\'écriture sans conflit ne touche pas la corbeille', () => {
         const { win, journal } = monterUI({ fichiers: FICHIERS() });
         const m = win.travauxUI.mesurerReassignation('FT_camille', { etudiantDA: DA1, productionId: A2R });
-        expect(m).toMatchObject({ changeEleve: true, changeProduction: true, conflit: true, nomEleve: 'Sara Allache', nomProduction: 'Artefact 2 (rév)', nomFichier: 'Roy_Artefact_2.pdf', nomExistant: 'Allache_Artefact_2_rev.jpg' });
+        expect(m).toMatchObject({ changeEleve: true, changeProduction: true, conflit: true, nomEleve: 'Sara Exemple', nomProduction: 'Artefact 2 (rév)', nomFichier: 'Roy_Artefact_2.pdf', nomExistant: 'Exemple_Artefact_2_rev.jpg' });
         const m2 = win.travauxUI.mesurerReassignation('FT_camille', { productionId: A2R });
         expect(m2).toMatchObject({ changeEleve: false, changeProduction: true, conflit: false });
         expect(win.travauxUI.ecrireReassignation(m2)).toBe(true);
@@ -353,6 +360,50 @@ describe('#932 · R — relecture : deux copies sans élève ne sont pas en conf
     });
 });
 
+/* ------------------------- A — relecture de Cowork : la porte et le récapitulatif anonymisent */
+
+// Relecture du 22 sept. (soir) : la mesure rendait nomEleve, nomFichier et nomExistant EN
+// CLAIR ; en mode anonymisation, la liste dit « Élève N » et la question aurait dit le vrai
+// nom d'élève et de fichier — en ligne depuis 1.153.2 (la porte de #931). Ici, le mode est
+// posé par les deux fonctions de modes.js (stubs au contrat), et l'on vérifie ce qui SORT :
+// la question de la porte, et le récapitulatif de la Liste construit sur ces mesures.
+
+describe('#932 · A — en mode anonymisation, ni la porte ni le récapitulatif ne disent un vrai nom', () => {
+    const REELS = ['Sara', 'Exemple', 'Camille', 'Roy', 'Roy_Artefact_2.pdf', 'Exemple_Artefact_2_rev.jpg'];
+
+    it('A.a la porte (changement d\'élève en conflit) ne nomme que des noms anonymisés — et les nomme (garde de non-vide)', async () => {
+        const { win, journal } = monterUI({ fichiers: FICHIERS(), reponse: false, anonymisation: true });
+        await win.travauxUI.reassignerCopie('FT_camille', { etudiantDA: DA1, productionId: A2R });
+        expect(journal.questions).toHaveLength(1);
+        const q = journal.questions[0];
+        for (const r of REELS) expect(q, 'vrai nom dans la porte : ' + r).not.toContain(r);
+        expect(q).toContain('Élève 1 × Artefact 2 (rév)');
+        expect(q).toContain('Élève_1_document.jpg');   // l'existant (de Sara, anonymisée « Élève 1 »)
+        expect(q).toContain('Élève_2_document.pdf');   // l'arrivant (de Camille, anonymisée « Élève 2 »)
+    });
+
+    it('A.b la mesure est anonymisée, et le récapitulatif de la Liste, construit dessus, aussi', () => {
+        const { win } = monterUI({ fichiers: FICHIERS(), anonymisation: true });
+        const m = win.travauxUI.mesurerReassignation('FT_camille', { etudiantDA: DA1, productionId: A2R });
+        expect(m).toMatchObject({ nomEleve: 'Élève 1', nomFichier: 'Élève_2_document.pdf', nomExistant: 'Élève_1_document.jpg', nomProductionActuelle: 'Artefact 2' });
+        const liste = chargerScript('js/liste-evaluations.js', {
+            db: { get: async () => null, getSync: (k, d) => (d !== undefined ? d : null), set: async () => {}, setSync: () => {} },
+            cle: (k) => 'test_' + k, echapperHtml: echapperHtmlReel, obtenirLibelleStatut: (s) => s, obtenirDonneesSelonMode: () => [],
+            notifications: { succes() {}, erreur() {}, info() {}, warning() {} }
+        }, { addEventListener() {}, removeEventListener() {} });
+        const html = liste._genererRecapReassignationHTML(liste._composerRecapReassignation([m]), 'Artefact 2 (rév)');
+        for (const r of REELS) expect(html, 'vrai nom dans le récapitulatif : ' + r).not.toContain(r);
+        expect(html).toContain('Élève 1 — Élève_2_document.pdf');
+        expect(html).toContain('Élève 1 : Élève_1_document.jpg → remplacé par Élève_2_document.pdf');
+    });
+
+    it('A.c hors du mode : `anonymiserNom` rend null, les vrais noms reviennent', () => {
+        const { win } = monterUI({ fichiers: FICHIERS() });
+        const m = win.travauxUI.mesurerReassignation('FT_camille', { etudiantDA: DA1, productionId: A2R });
+        expect(m).toMatchObject({ nomEleve: 'Sara Exemple', nomFichier: 'Roy_Artefact_2.pdf', nomExistant: 'Exemple_Artefact_2_rev.jpg' });
+    });
+});
+
 /* ------------------------------------------- P — Propriétés (liste-evaluations) */
 
 function echapperHtmlReel(texte) {
@@ -409,7 +460,7 @@ function monterProprietes({ fichier, vignette = '', verdict = true, jetonsActifs
     return { win, journal, overlays, registre };
 }
 
-const FICHIER_SARA = () => ({ id: 'FT_sara', etudiantDA: DA1, productionId: A2, nomFichier: 'Allache_<Artefact>_2.pdf', typeMIME: 'application/pdf', nombrePages: 3, tailleFichier: 1234, evaluationId: '' });
+const FICHIER_SARA = () => ({ id: 'FT_sara', etudiantDA: DA1, productionId: A2, nomFichier: 'Exemple_<Artefact>_2.pdf', typeMIME: 'application/pdf', nombrePages: 3, tailleFichier: 1234, evaluationId: '' });
 
 describe('#932 · P — Propriétés montre la copie, écrit par le geste unique et attend son verdict', () => {
     it('P.a la modale porte la vignette (du cache) et le nom de fichier, échappé', () => {
@@ -418,7 +469,7 @@ describe('#932 · P — Propriétés montre la copie, écrit par le geste unique
         expect(overlays).toHaveLength(1);
         const html = overlays[0].innerHTML;
         expect(html).toContain('class="prop-fichier-vignette" src="data:image/png;base64,AAAA"');
-        expect(html).toContain('Allache_&lt;Artefact&gt;_2.pdf');
+        expect(html).toContain('Exemple_&lt;Artefact&gt;_2.pdf');
         expect(html).not.toContain('<Artefact>');
         expect(html).toContain('3 pages');
         expect(journal.vignettesChargees).toBe(0);

@@ -38,7 +38,7 @@ function echapperHtmlReel(texte) {
 const A2 = 'PROD_A2', A2R = 'PROD_A2R';
 const PRODUCTIONS = [{ id: A2, titre: 'Artefact 2' }, { id: A2R, titre: 'Artefact 2 (rév)' }];
 const ETUDIANTS = [
-    { da: '2000001', nom: 'Allache', prenom: 'Sara' },
+    { da: '2000001', nom: 'Exemple', prenom: 'Sara' },
     { da: '2000002', nom: 'Roy', prenom: 'Camille' },
     { da: '2000003', nom: 'Gagnon', prenom: 'Léa' }
 ];
@@ -48,7 +48,7 @@ function mesure(id, da, nomFichier, extra) {
     const e = ETUDIANTS.find(x => x.da === da);
     return Object.assign({
         fichierId: id, association: { productionId: A2R }, fichier: { id, etudiantDA: da, productionId: A2, nomFichier },
-        changeEleve: false, changeProduction: true, nomFichier, nomProduction: 'Artefact 2 (rév)',
+        changeEleve: false, changeProduction: true, nomFichier, nomProduction: 'Artefact 2 (rév)', nomProductionActuelle: 'Artefact 2',
         nomEleve: e ? e.prenom + ' ' + e.nom : da, conflit: false, fichierExistant: null, nomExistant: '', evaluationOrpheline: false
     }, extra || {});
 }
@@ -80,7 +80,7 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
 
     it('R.a déjà sur la cible, ambigus (deux copies d\'un même élève), conflits, orphelines, à déplacer', () => {
         const mesures = [
-            mesure('F_sara', '2000001', 'Allache_A2.pdf', { conflit: true, fichierExistant: { id: 'F_sara_rev' }, nomExistant: 'Allache_A2_rev.jpg' }),
+            mesure('F_sara', '2000001', 'Exemple_A2.pdf', { conflit: true, fichierExistant: { id: 'F_sara_rev' }, nomExistant: 'Exemple_A2_rev.jpg' }),
             mesure('F_camille', '2000002', 'Roy_A2.pdf', { evaluationOrpheline: true }),
             mesure('F_lea_1', '2000003', 'Gagnon_A2_p1.jpg'),
             mesure('F_lea_2', '2000003', 'Gagnon_A2_p2.jpg'),
@@ -106,7 +106,7 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
 
     it('R.c le HTML compte les copies, nomme élève et fichier, nomme chaque conflit (existant → arrivant), et échappe', () => {
         const r = win._composerRecapReassignation([
-            mesure('F_sara', '2000001', 'Allache_<A2>.pdf', { conflit: true, fichierExistant: { id: 'F_sara_rev' }, nomExistant: 'Allache_A2_rev.jpg' }),
+            mesure('F_sara', '2000001', 'Exemple_<A2>.pdf', { conflit: true, fichierExistant: { id: 'F_sara_rev' }, nomExistant: 'Exemple_A2_rev.jpg' }),
             mesure('F_camille', '2000002', 'Roy_A2.pdf', { evaluationOrpheline: true }),
             mesure('F_lea', '2000003', 'Gagnon_A2.jpg')
         ]);
@@ -114,12 +114,24 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
         expect(html).toContain('<strong>3 copies</strong>');
         expect(html).toContain('Artefact 2 &lt;rév&gt;');
         expect(html).not.toContain('<A2>');
-        expect(html).toContain('Sara Allache — Allache_&lt;A2&gt;.pdf');
+        expect(html).toContain('Sara Exemple — Exemple_&lt;A2&gt;.pdf');
         expect(html).toContain('Camille Roy — Roy_A2.pdf');
         expect(html).toContain('<strong>1 conflit</strong>');
-        expect(html).toContain('Sara Allache : Allache_A2_rev.jpg → remplacé par Allache_&lt;A2&gt;.pdf');
+        expect(html).toContain('Sara Exemple : Exemple_A2_rev.jpg → remplacé par Exemple_&lt;A2&gt;.pdf');
         expect(html).toContain('corbeille');
-        expect(html).toContain('1 évaluation sur l’ancienne production perdra sa copie');
+        // Mot validé par Grégoire (22 sept., soir).
+        expect(html).toContain('1 évaluation déjà faite sur « Artefact 2 » n’aura plus de copie liée (l’évaluation elle-même est conservée).');
+    });
+
+    it('R.e deux évaluations orphelines sur la même ancienne production : une ligne au pluriel, qui nomme les deux élèves', () => {
+        const r = win._composerRecapReassignation([
+            mesure('F_camille', '2000002', 'Roy_A2.pdf', { evaluationOrpheline: true }),
+            mesure('F_lea', '2000003', 'Gagnon_A2.jpg', { evaluationOrpheline: true })
+        ]);
+        const html = win._genererRecapReassignationHTML(r, 'Artefact 2 (rév)');
+        expect(html).toContain('2 évaluations déjà faites sur « Artefact 2 » n’auront plus de copie liée (l’évaluation elle-même est conservée).');
+        expect(html).toContain('Camille Roy — Roy_A2.pdf');
+        expect(html).toContain('Léa Gagnon — Gagnon_A2.jpg');
     });
 
     it('R.d rien à déplacer : le HTML le dit, et nomme les ambigus', () => {
@@ -135,9 +147,9 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
 
 describe('#934 · L — une ligne porte une case seulement si elle porte une copie', () => {
     const HOSTILE = '"><img src=x onerror=alert(1)>';
-    const FICHIERS = [{ id: 'FT_sara', etudiantDA: '2000001', productionId: A2, nomFichier: 'Allache_A2.pdf' }];
+    const FICHIERS = [{ id: 'FT_sara', etudiantDA: '2000001', productionId: A2, nomFichier: 'Exemple_A2.pdf' }];
     const ligne = (extra) => Object.assign({
-        da: '2000001', nom: 'Allache', prenom: 'Sara', productionId: A2, productionNom: 'Artefact 2',
+        da: '2000001', nom: 'Exemple', prenom: 'Sara', productionId: A2, productionNom: 'Artefact 2',
         statut: 'non-evalue', statutRemise: 'non-remis', statutWorkflow: 'importe', niveauFinal: '-', noteChiffree: null, evaluationId: null
     }, extra || {});
 
@@ -292,7 +304,7 @@ describe('#934 · D — la barre suit les cases, et la modale n\'écrit qu\'à l
     });
 
     const MESURES = {
-        F_sara: mesure('F_sara', '2000001', 'Allache_A2.pdf', { conflit: true, fichierExistant: { id: 'F_sara_rev' }, nomExistant: 'Allache_A2_rev.jpg' }),
+        F_sara: mesure('F_sara', '2000001', 'Exemple_A2.pdf', { conflit: true, fichierExistant: { id: 'F_sara_rev' }, nomExistant: 'Exemple_A2_rev.jpg' }),
         F_camille: mesure('F_camille', '2000002', 'Roy_A2.pdf'),
         F_lea: mesure('F_lea', '2000003', 'Gagnon_A2.jpg')
     };
@@ -310,7 +322,7 @@ describe('#934 · D — la barre suit les cases, et la modale n\'écrit qu\'à l
         const recap = registre['reassigner-selection-recap'].innerHTML;
         expect(recap).toContain('<strong>3 copies</strong>');
         expect(recap).toContain('Artefact 2 (rév)');
-        expect(recap).toContain('Sara Allache : Allache_A2_rev.jpg → remplacé par Allache_A2.pdf');
+        expect(recap).toContain('Sara Exemple : Exemple_A2_rev.jpg → remplacé par Exemple_A2.pdf');
         expect(registre['reassigner-selection-btn-confirmer'].disabled).toBe(false);
         expect(registre['reassigner-selection-btn-confirmer'].textContent).toBe('Réassigner 3 copies');
         // « Annuler » : la modale part, rien n'a été écrit.

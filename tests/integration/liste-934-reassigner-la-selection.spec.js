@@ -49,7 +49,7 @@ async function monter(page) {
         window.db.setSync('groupeCoursActif', { id: 'GC_934', trimestreId: t });
         window.db.setSync(t + '_groupesCours', [{ id: 'GC_934', trimestreId: t, coursId, groupeNum: '01', pratiqueId: 'sommative', actif: true }]);
         window.db.setSync(window.cle('groupeEtudiants'), [ // security-ok: fixture de test
-            { da: 'TEST934A', nom: 'Allache', prenom: 'Sara', groupe: '01', coursId },
+            { da: 'TEST934A', nom: 'Exemple', prenom: 'Sara', groupe: '01', coursId },
             { da: 'TEST934B', nom: 'Roy', prenom: 'Camille', groupe: '01', coursId },
             { da: 'TEST934C', nom: 'Gagnon', prenom: 'Léa', groupe: '01', coursId }
         ]);
@@ -65,10 +65,10 @@ async function monter(page) {
         });
         // Trois copies importées sous « Artefact 2 » par erreur ; Sara a DÉJÀ une copie sous « Artefact 2 (rév) ».
         window.db.setSync(window.cle('fichiersTravaux'), [ // security-ok: fixture de test
-            copie('FT934A', 'TEST934A', A2, 'Allache_Artefact_2_revise.png'),
+            copie('FT934A', 'TEST934A', A2, 'Exemple_Artefact_2_revise.png'),
             copie('FT934B', 'TEST934B', A2, 'Roy_Artefact_2_revise.png'),
             copie('FT934C', 'TEST934C', A2, 'Gagnon_Artefact_2_revise.png'),
-            copie('FT934A_OLD', 'TEST934A', A2R, 'Allache_Artefact_1.png')
+            copie('FT934A_OLD', 'TEST934A', A2R, 'Exemple_Artefact_1.png')
         ]);
         window.db.setSync(window.cle('evaluationsSauvegardees'), []); // security-ok: fixture de test
         window.db.setSync(window.cle('corbeilleFichiers'), []); // security-ok: fixture de test
@@ -136,11 +136,11 @@ test('Porte #934 · trois copies cochées, une en conflit : la question nomme le
     expect(q.titre).toBe('Réassigner 3 copies');
     expect(q.bouton).toBe('Réassigner 3 copies');
     expect(q.recap).toContain('3 copies vers « Artefact 2 (rév) »');
-    expect(q.recap).toContain('Sara Allache — Allache_Artefact_2_revise.png');
+    expect(q.recap).toContain('Sara Exemple — Exemple_Artefact_2_revise.png');
     expect(q.recap).toContain('Camille Roy — Roy_Artefact_2_revise.png');
     expect(q.recap).toContain('Léa Gagnon — Gagnon_Artefact_2_revise.png');
     expect(q.recap).toContain('1 conflit');
-    expect(q.recap).toContain('Sara Allache : Allache_Artefact_1.png → remplacé par Allache_Artefact_2_revise.png');
+    expect(q.recap).toContain('Sara Exemple : Exemple_Artefact_1.png → remplacé par Exemple_Artefact_2_revise.png');
     expect(q.recap).toContain('corbeille');
 
     // 2. « Annuler » : la modale part, rien ne bouge.

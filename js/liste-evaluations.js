@@ -797,9 +797,20 @@ function genererRecapReassignationHTML(recap, nomCible) {
             '</ul></div>';
     }
     if (recap.orphelines.length) {
-        html += '<div class="reassigner-recap-bloc"><p>' + pl(recap.orphelines.length, 'évaluation', 'évaluations') +
-            ' sur l’ancienne production ' + (recap.orphelines.length > 1 ? 'perdront leur' : 'perdra sa') + ' copie.</p><ul class="reassigner-recap-liste">' +
-            recap.orphelines.map(li).join('') + '</ul></div>';
+        // Mot validé par Grégoire (22 sept., soir), une ligne par ancienne production.
+        const parAncienne = new Map();
+        recap.orphelines.forEach(m => {
+            const k = m.nomProductionActuelle || '?';
+            if (!parAncienne.has(k)) parAncienne.set(k, []);
+            parAncienne.get(k).push(m);
+        });
+        parAncienne.forEach((liste, ancienne) => {
+            const k = liste.length;
+            html += '<div class="reassigner-recap-bloc"><p>' + k + (k > 1 ? ' évaluations déjà faites' : ' évaluation déjà faite') +
+                ' sur « ' + echapperHtml(ancienne) + ' » ' + (k > 1 ? 'n’auront' : 'n’aura') +
+                ' plus de copie liée (l’évaluation elle-même est conservée).</p><ul class="reassigner-recap-liste">' +
+                liste.map(li).join('') + '</ul></div>';
+        });
     }
     if (recap.dejaSurCible.length) {
         html += '<div class="reassigner-recap-bloc"><p>' + pl(recap.dejaSurCible.length, 'copie déjà sur la cible, laissée telle quelle', 'copies déjà sur la cible, laissées telles quelles') + '.</p></div>';

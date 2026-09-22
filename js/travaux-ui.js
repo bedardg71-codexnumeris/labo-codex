@@ -4816,8 +4816,18 @@
 
         const productions = obtenirDonneesSelonMode('productions') || [];
         const prod = productions.find(p => p.id === nouveauProdId);
+        const prodAvant = productions.find(p => p.id === prodActuelle);
         const etudiant = (typeof travauxImport !== 'undefined' && typeof travauxImport.trouverEtudiantParDA === 'function')
             ? travauxImport.trouverEtudiantParDA(nouveauDA) : null;
+
+        // Relecture Cowork (22 sept., soir) — CE QUE LA PORTE ET LE RÉCAPITULATIF NOMMENT
+        // PASSE PAR L'ANONYMISATION, comme le reste de l'app (carrousel, tableau) : en
+        // mode anonymisation, la liste dit « Élève N » et la question disait le vrai nom.
+        // Un DA vide ne s'affiche pas vide non plus.
+        const nomReel = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : (nouveauDA || 'élève non identifié·e');
+        const nomEleve = (typeof anonymiserNom === 'function' && nouveauDA && anonymiserNom(nouveauDA)) || nomReel;
+        const nomDeFichierAffiche = (nom, da) => (typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(nom, da) : nom);
+        const existant = verif.fichierExistant || null;
 
         return {
             fichierId: fichierId,
@@ -4825,13 +4835,13 @@
             fichier: fichier,
             changeEleve: nouveauDA !== daActuel,
             changeProduction: nouveauProdId !== prodActuelle,
-            nomFichier: (fichier && fichier.nomFichier) || fichierId,
+            nomFichier: nomDeFichierAffiche((fichier && fichier.nomFichier) || fichierId, daActuel),
             nomProduction: prod ? (prod.titre || prod.nom) : nouveauProdId,
-            // Relecture Cowork (22 sept.) : un DA vide ne s'affiche pas vide, ni dans la porte ni dans le récapitulatif.
-            nomEleve: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : (nouveauDA || 'élève non identifié·e'),
+            nomProductionActuelle: prodAvant ? (prodAvant.titre || prodAvant.nom) : prodActuelle,
+            nomEleve: nomEleve,
             conflit: !!verif.conflit,
-            fichierExistant: verif.fichierExistant || null,
-            nomExistant: verif.fichierExistant ? (verif.fichierExistant.nomFichier || verif.fichierExistant.id) : '',
+            fichierExistant: existant,
+            nomExistant: existant ? nomDeFichierAffiche(existant.nomFichier || existant.id, existant.etudiantDA) : '',
             evaluationOrpheline: !!verif.evaluationOrpheline
         };
     }
