@@ -21,12 +21,12 @@
 
     var CHANGELOG = [
         {
-            // 1.155.0 (#695, élargie à l'évaluation le 22 sept. 2026) — phrase de la consigne, à relire par Grégoire.
+            // 1.155.0 (#695, élargie à l'évaluation le 22 sept. 2026) — VALIDÉ par Grégoire le 22 sept. 2026.
             version: '1.155',
             couleur: 'vert',
             titre: 'Carte d\'alignement : la date réelle dans l\'Inspecteur',
             items: [
-                'L\'Inspecteur d\'une leçon et d\'une évaluation donne la date où elle aura lieu, pour chaque groupe du cours. Quand la date n\'existe pas (séance non fixée, congé, aucun horaire saisi), il le dit plutôt que d\'en deviner une.'
+                'L\'Inspecteur d\'une leçon, et de l\'évaluation qu\'elle contient, affiche la date où elle aura lieu, une ligne par groupe. Quand la date n\'existe pas (séance non fixée, congé, horaire non saisi), il le dit au lieu d\'en deviner une.'
             ]
         },
         {
