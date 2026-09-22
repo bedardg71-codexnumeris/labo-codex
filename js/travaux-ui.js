@@ -4796,7 +4796,22 @@
             const productions = obtenirDonneesSelonMode('productions');
             const prod = productions.find(p => p.id === nouveauProductionId);
             const nomProd = prod ? (prod.titre || prod.nom) : nouveauProductionId;
-            const confirme = confirm(`Un fichier existe déjà pour cette production (${nomProd}). Remplacer l'existant ?`);
+            // #931 (22 sept. 2026) — LA PORTE NOMME LES DEUX FICHIERS. « Remplacer
+            // l'existant ? » ne disait ni lequel part à la corbeille ni lequel prend
+            // sa place : Grégoire a dit oui, et le fichier importé le matin même est
+            // parti à la corbeille pendant qu'un Artefact 1 annoté et évalué prenait
+            // sa place sous Artefact 2 (rév).
+            const tousLesFichiers = (typeof travauxStockage.obtenirFichiersTravaux === 'function' && travauxStockage.obtenirFichiersTravaux()) || [];
+            const fichierDeplace = tousLesFichiers.find(f => f.id === fichierId);
+            const nomDeplace = (fichierDeplace && fichierDeplace.nomFichier) || fichierId;
+            const nomExistant = verif.fichierExistant.nomFichier || verif.fichierExistant.id;
+            const confirme = confirm(
+                `Un fichier existe déjà pour cette production (${nomProd}) :\n` +
+                `    ${nomExistant}\n\n` +
+                `Le remplacer par :\n` +
+                `    ${nomDeplace}\n\n` +
+                `Le fichier existant ira à la corbeille (récupérable pendant 30 jours).`
+            );
             if (!confirme) return false;
             travauxStockage.deplacerEnCorbeille(verif.fichierExistant.id);
         }
