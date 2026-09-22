@@ -48,7 +48,7 @@ function mesure(id, da, nomFichier, extra) {
     const e = ETUDIANTS.find(x => x.da === da);
     return Object.assign({
         fichierId: id, association: { productionId: A2R }, fichier: { id, etudiantDA: da, productionId: A2, nomFichier },
-        changeEleve: false, changeProduction: true, nomFichier, nomProduction: 'Artefact 2 (rév)',
+        changeEleve: false, changeProduction: true, nomFichier, nomProduction: 'Artefact 2 (rév)', nomProductionActuelle: 'Artefact 2',
         nomEleve: e ? e.prenom + ' ' + e.nom : da, conflit: false, fichierExistant: null, nomExistant: '', evaluationOrpheline: false
     }, extra || {});
 }
@@ -119,7 +119,19 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
         expect(html).toContain('<strong>1 conflit</strong>');
         expect(html).toContain('Sara Exemple : Exemple_A2_rev.jpg → remplacé par Exemple_&lt;A2&gt;.pdf');
         expect(html).toContain('corbeille');
-        expect(html).toContain('1 évaluation sur l’ancienne production perdra sa copie');
+        // Mot validé par Grégoire (22 sept., soir).
+        expect(html).toContain('1 évaluation déjà faite sur « Artefact 2 » n’aura plus de copie liée (l’évaluation elle-même est conservée).');
+    });
+
+    it('R.e deux évaluations orphelines sur la même ancienne production : une ligne au pluriel, qui nomme les deux élèves', () => {
+        const r = win._composerRecapReassignation([
+            mesure('F_camille', '2000002', 'Roy_A2.pdf', { evaluationOrpheline: true }),
+            mesure('F_lea', '2000003', 'Gagnon_A2.jpg', { evaluationOrpheline: true })
+        ]);
+        const html = win._genererRecapReassignationHTML(r, 'Artefact 2 (rév)');
+        expect(html).toContain('2 évaluations déjà faites sur « Artefact 2 » n’auront plus de copie liée (l’évaluation elle-même est conservée).');
+        expect(html).toContain('Camille Roy — Roy_A2.pdf');
+        expect(html).toContain('Léa Gagnon — Gagnon_A2.jpg');
     });
 
     it('R.d rien à déplacer : le HTML le dit, et nomme les ambigus', () => {
