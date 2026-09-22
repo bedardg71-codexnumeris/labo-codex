@@ -626,6 +626,9 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             nombreRetenus: artefactsRetenus.length,
             minimumRequis: minimumRequis,
             methodeSelection: methodesLabels[methodeSelection] || methodeSelection,
+            // #714 — la CLÉ, à côté du libellé : le panneau « Développement des habiletés » choisit
+            // sa phrase de règle sur elle ('meilleurs', 'recents', 'recents-meilleurs', 'tous', 'hybride').
+            methodeSelectionCle: methodeSelection,
             moyenne: moyennePortfolio,
             ponderation: ponderationPortfolio,
             ponderationNormalisee: normaliser(ponderationPortfolio),

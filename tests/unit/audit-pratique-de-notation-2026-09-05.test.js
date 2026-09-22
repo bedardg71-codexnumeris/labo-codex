@@ -344,7 +344,7 @@ function monter(jeu, opts = {}) {
     chargerScript('js/profil-etudiant-rapport.js', globaux, win);
     chargerScript('js/profil-etudiant-diagnostics.js', globaux, win);
     chargerScript('js/profil-etudiant-confidentiel.js', globaux, win);
-    chargerAvecInterne('js/profil-etudiant-sections-affichage.js', globaux, win, ['genererSectionPerformance', '_lireDetailsRapportPerformance']);
+    chargerAvecInterne('js/profil-etudiant-sections-affichage.js', globaux, win, ['genererSectionPerformance']);   // _lireDetailsRapportPerformance retirée (#714)
     if (opts.avecJetons) chargerScript('js/evaluation-jetons.js', globaux, win);
 
     // La résolution de la pratique active : le CODE RÉEL de modes.js, chargé dans un bac à part
@@ -654,8 +654,12 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         });
         expect(erreur).toBeNull();
         expect(m.pGrand).toMatch(/79%/);
-        expect(m.methodo).toMatch(/Calcul impossible/);
-        expect(m.ecritures).toBeGreaterThan(0);
+        // ↻ #714 (lot N3, 22 sept. 2026) — valeurs D'APRÈS. Avant : « Calcul impossible : aucune évaluation
+        // disponible » et au moins une écriture de `portfoliosEleves` par rendu. Le panneau lit désormais
+        // `calculerDetailsNoteFinale` et n'écrit rien (sentinelle-714-panneau-habiletes-lit-la-note).
+        expect(m.methodo).not.toMatch(/Calcul impossible/);
+        expect(m.methodo).toMatch(/^Moyenne des 4 /);
+        expect(m.ecritures).toBe(0);
     });
 
     it('B4 · SPE — attendu 70 (palier C+) : dissertation 1 acceptable (80 ; la reprise 65 remplace le 75), examen 1 (90), dossier 1 (72)', () => {
