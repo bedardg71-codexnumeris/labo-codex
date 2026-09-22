@@ -352,10 +352,12 @@ describe('#932 · R — relecture : deux copies sans élève ne sont pas en conf
         expect(avec.fichierExistant.id).toBe('F_sara_rev');
     });
 
-    it('R.b la mesure nomme « élève non identifié·e » quand le DA est vide, le DA quand l\'élève est inconnu', () => {
+    // Réancrage délibéré (22 sept., soir) : Grégoire emploie « étudiant·e », jamais « élève », dans ce que l'app
+    // affiche. Le mot de repli change ; ce que l'essai prouve (un DA vide ne s'affiche pas vide) ne change pas.
+    it('R.b la mesure nomme « étudiant·e non identifié·e » quand le DA est vide, le DA quand l\'étudiant·e est inconnu·e', () => {
         const fichiers = [{ id: 'F_orphelin', etudiantDA: '', productionId: A2, nomFichier: 'inconnu.pdf' }];
         const { win } = monterUI({ fichiers });
-        expect(win.travauxUI.mesurerReassignation('F_orphelin', { productionId: A2R }).nomEleve).toBe('élève non identifié·e');
+        expect(win.travauxUI.mesurerReassignation('F_orphelin', { productionId: A2R }).nomEleve).toBe('étudiant·e non identifié·e');
         expect(win.travauxUI.mesurerReassignation('F_orphelin', { etudiantDA: '9999999', productionId: A2R }).nomEleve).toBe('9999999');
     });
 });
