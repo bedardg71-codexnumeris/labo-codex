@@ -1,47 +1,69 @@
-# Consigne du jour – Réassigner une copie : un seul geste, qui montre la copie et passe par la porte (#932, #934 ; #933 refusé)
+# Consigne du jour – La date réelle de la leçon et de l'évaluation dans l'Inspecteur (#695, élargie)
 
-> Écrite le 22 septembre 2026, 13 h 30 (Toronto), par Cowork, **révisée à 13 h 50 sur deux réponses de Grégoire (§1d)**, sur `main` = `origin/main` = `ac374dea` (application en 1.153.2). **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (lot N1b) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-21-lot-n1b.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Le plan fait foi** : `plans de travail/PLAN-932-933-934-reassocier-une-copie.md` (et l'audit `Rapports/AUDIT-reassocier-une-copie-2026-09-22.md`). Cette consigne ne le recopie pas : elle dit ce qui change de calendrier et **ce que la remesure de Cowork dément dans le plan**.
+> Écrite le 22 septembre 2026, 15 h 40 (Toronto), par Cowork, sur `main` = `3fc304e4` (1.154.1 commitée, push en cours par la session précédente). **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (réassigner une copie, livrée en 1.154.0 / 1.154.1) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-22-reassigner-une-copie.md` (déplacée par Cowork, à commiter avec ce lot).
+> **La fiche fait foi** : `BACKLOG.md`, #695 (≈ l. 1172). Cette consigne dit ce qui l'élargit et ce que Grégoire a tranché aujourd'hui.
 
 ## 0 · Conditions de départ
 
-- **Avancé par Grégoire** : le plan disait « matinée du 23 sept. ». Grégoire le lance **maintenant** (22 sept., après-midi), motif : un défaut de conception qui peut nuire à l'utilisateur.
-- `origin/main` porte `ac374dea` ou un commit de journal après. Sinon, arrête-toi et dis-le. Aucune autre session n'écrit dans `js/`.
-- Travaille sur une branche `lot-reassigner` partie de `main`. Rien ne se fusionne ni ne se pousse avant la relecture de Cowork.
-- Skill `design-interface` chargé pour tout ce qui touche l'écran (lots 1, 2, 3).
+- `origin/main` contient `1e5d25af` (release 1.154.1) **poussé**. Sinon, arrête-toi et dis-le : la session précédente n'a pas fini.
+- Aucune autre session n'écrit dans `js/`. Branche `lot-date-inspecteur` partie de `main`. Rien ne se fusionne ni ne se pousse avant la relecture de Cowork (PROTOCOLE, règle 2).
+- Skill `design-interface` chargé (c'est un changement visuel), skill `alignement` pour le module.
 
-## 1 · Ce que la remesure de Cowork corrige dans le plan (13 h 30, lecture seule, commandes ci-dessous)
+## 1 · Ce que Grégoire a demandé (22 sept., 15 h 30, sur ses captures)
 
-**1a. Il y a un CINQUIÈME écrivain, que l'audit et le plan n'ont pas vu.** `appliquerCorrectionIdentite` (`js/travaux-ui.js:5372`), la « correction d'identité » du panneau d'évaluation (ouverte par `toggleCorrectionIdentite`, `:5354`, et automatiquement à `:4906`). Il change l'élève ET/OU la production d'une copie, avec **sa propre porte** : `confirm('Un fichier existe déjà pour cet étudiant et cette production. Remplacer ?')` – la porte muette d'avant #931, qui ne nomme aucun fichier –, puis `reassocierFichier` nu (`:5401`).
-Commande : `grep -rn "reassocierFichier(" js/ | grep -v "^js/travaux-stockage.js"` → **5 appels** : `travaux-ui.js:4793` et `:4824` (`changerProductionFichier`), `:5392` et `:5401` (correction d'identité), `liste-evaluations.js:1579` (Propriétés).
-⮕ **La sentinelle du lot 2 (point 4 du plan) est fausse telle qu'écrite** : elle serait rouge dès le départ. La correction d'identité **entre dans le lot 2**. Elle montre déjà la copie (elle vit dans la visionneuse) : il lui manque la porte qui nomme.
+Sur sa carte, la leçon « La carte mentale » porte `S5` et `B` dans son en-tête. Il veut voir **la date réelle et précise** où elle aura lieu, **pour la leçon ET pour l'évaluation qu'elle contient**. La fiche #695 ne visait que la leçon : **elle s'élargit au bloc Évaluation.**
 
-**1b. La porte ne couvre que la production ; deux écrivains changent aussi l'ÉLÈVE.** Propriétés (`liste-evaluations.js:1574-1580`) et la correction d'identité écrivent `{ etudiantDA, productionId }` ensemble. Changer l'élève d'une copie peut, lui aussi, créer un conflit (une copie existe déjà pour le nouvel élève × cette production). Or `changerProductionFichier` (`travaux-ui.js:4791`) ne prend que `nouveauProductionId`.
-⮕ Le plan disait « `etudiantDA` garde son chemin » : **c'est ce chemin qui contourne la porte.** **Décidé par Cowork (technique)** : UNE fonction porte l'écriture de l'association d'une copie et sa porte de conflit, pour `productionId` ET `etudiantDA`. Elle nomme les deux fichiers (forme de #931) et, quand l'élève change, nomme aussi l'élève. Nom, signature et sort de `changerProductionFichier` : à toi (zéro-dette : pas d'alias « au cas où » ; si `changerProductionFichier` reste, c'est comme cette fonction, pas à côté). L'appel du jeton de reprise (`liste-evaluations.js:1686`, #561) et `sentinelle-561-reassociation-verdict.test.js` doivent rester verts.
-⮕ **La sentinelle devient** : hors `travaux-stockage.js`, `reassocierFichier(` n'a qu'un appelant, cette fonction ; `reassocierFichiersBatch(` n'a que Transférer (`travaux-ui.js:7262`). Garde de non-vide (règle 10).
+## 2 · Tranché par Grégoire
 
-**1c. Ce qui est confirmé tel quel** : `genererLigneTableauFichier` `:2970` ; `changerProductionFichierDepuisTableau` `:7356` (le plan dit 7355), appel sans `await` à `:7359` ; `ouvrirProprieteFichier` `liste-evaluations.js:1487` ; libellés `:1305` et `:1640` ; `associerProductionDepuisListe` `:1603` ; `obtenirThumbnailSync` exporté (`travaux-stockage.js:735`, `:1358`) ; lien « Non associé › » qui ouvre Propriétés (`liste-evaluations.js:1185`).
+**Plusieurs groupes = une ligne par groupe.** Deux groupes d'un même cours n'ont pas les mêmes jours de rencontre (les séances vivent par groupe-cours : `seancesCompletes_gc_<id>`, voir le commentaire de `js/planification-export.js` ≈ l. 160). L'Inspecteur affiche donc **toutes** les dates, une par groupe du cours de la carte, sans menu ni groupe « actif ». Avec un seul groupe, une seule ligne, sans préfixe de groupe.
 
-**1d. La prémisse du plan sur le tableau est fausse – dit par Grégoire, 13 h 45.** Le plan écrit que le menu Production du tableau d'« Annoter et évaluer » (l'« État A » de `afficherFichiers`, `travaux-ui.js:1119`, qui ne s'affiche que visionneuse fermée) « a fait les 23 réassociations correctes du 22 sept. ». **Faux** : Grégoire les a faites avec « Réassocier » de la **Liste des évaluations**, une par une. Il ne connaît pas ce tableau (il retombe sur le carrousel). La fiche #931 de `SUIVI-BUGS.md` disait seulement « une par une ».
-⮕ Conséquences, **acceptées par Grégoire** : (1) la colonne « Fichier » du tableau (#933) n'est pas faite – **#933 refusé**, motif : écran que l'utilisateur n'emploie pas, besoin couvert par le lot 2 (Propriétés montre la copie), à rouvrir si un testeur s'y trompe ; (2) seul l'`await` du lot 1 survit (`changerProductionFichierDepuisTableau`, `:7359` : sur refus, le menu revient à l'ancienne production), et il passe au lot 2 – ce menu reste un point d'entrée et doit passer par la fonction unique ; (3) **la réassignation en masse (#934) va dans la Liste des évaluations**, pas dans le tableau. Grégoire, textuellement : « Idéalement, j'aurais une option pour procéder à la réassignation par lot plutôt qu'une par une. »
+## 3 · Ce que Cowork a mesuré (lecture seule, 15 h 35)
 
-## 2 · Ce que fait le lot – deux commits
+- **Le calcul existe, entier, dans l'export** : `groupesCoursDuCours(coursId)`, `coursDeLaCarteActive()`, `construireHoraireDeLecons(groupeCoursId)` (≈ l. 170-227) et `dateDeLecon(horaire, semaine, rang)` (≈ l. 240), pure, qui rend `null` dans les trois cas dégradés. `construireHoraireDeLecons` et `dateDeLecon` sont exportés sur `window.planificationExport` (≈ l. 1611-1612) ; `groupesCoursDuCours` ne l'est pas.
+- **Une deuxième implémentation vit dans `js/productions.js`** : `dateSeanceDuRang` (≈ l. 1222), pour la date d'échéance proposée par la carte (#930).
+- **L'Inspecteur** : `js/planification-carte.js`, champ « Semaine » de la leçon ≈ l. 2849-2866 ; « Dans la leçon » ≈ l. 2881 (écouteur attaché ≈ l. 3204). Le rang : `rangSeanceDeLecon(n)` (≈ l. 649), la semaine : `semaineDeLecon(n)` (≈ l. 475).
+- **La règle du code, à respecter** (≈ l. 7673, commentaire) : « Une leçon sans semaine OU sans rang n'est pas située. »
 
-- **Lot 2 (#932)** : le plan, **plus** 1a, 1b et l'`await` du tableau (1d). La correction d'identité et le menu Production du tableau passent par la fonction unique. Les deux choix « à trancher au design » du plan (où vit le jeton de reprise ; forme de la vignette) sont **à toi**, avec `design-interface` : dis ce que tu as retenu en une ligne. Seule contrainte : le jeton de reprise ne se perd pas.
-- **Lot 3 (#934), déplacé dans la Liste des évaluations** (`js/liste-evaluations.js`). Le geste visé, celui de Grégoire ce matin : filtrer sur la production où l'import s'est trompé (« Artefact 2 »), cocher les lignes **qui portent une copie** (une ligne « Non reçu » n'a rien à déplacer : pas de case, ou case inerte), « Réassigner la sélection (N) », choisir la production cible (« Artefact 2 (rév) »). Une case « tout sélectionner » qui suit le filtre. La confirmation **compte** les copies, **nomme les fichiers** (c'est ce que la liste n'affiche pas) et **liste les conflits** avant d'écrire. Choix « une porte par conflit ou une question groupée » : **décidé par Cowork, question groupée** qui nomme chaque paire (élève, fichier qui part, fichier qui arrive) – 24 `confirm()` à la suite, c'est la fatigue qui a produit #931. L'écriture passe par la fonction unique : sépare la vérification de l'écriture dans cette fonction plutôt que d'ajouter un contournement. Mesure d'abord ce qu'est une ligne de la liste (élève × production, avec ou sans `fichierId`) et dis-le au rapport.
-- Spec WebKit du lot 3 : sur le pack démo, dans la Liste, trois lignes cochées, une en conflit ; la question nomme le conflit ; « Annuler » ne déplace rien.
+## 4 · Ce que fait le lot
 
-## 3 · Les mots d'écran
+**4a. Une ligne en lecture seule, étiquetée « Date », jamais un champ.** La date est une conséquence du couple (semaine, rang) et du calendrier ; la rendre modifiable créerait une troisième source de vérité (fiche #695).
+- **Leçon** : sous « Semaine ».
+- **Évaluation** : sous « Dans la leçon ». Sa date est celle de sa leçon parente. Une évaluation hors leçon (« — Aucune (bloc libre) ») n'a pas de date : la ligne le dit.
+- **Elle suit les gestes** : changer la semaine (Inspecteur ou sélecteur de l'en-tête), le rang (`B`), ou la leçon parente d'une évaluation met la ligne à jour sans rouvrir l'Inspecteur.
 
-Le verbe est tranché par Grégoire : « réassigner » / « assigner ». **Les phrases neuves** (bouton du lot 3, question groupée, porte de la correction d'identité, notification d'abandon) : écris-les, marque-les **proposées** dans ton rapport, en un bloc à part. Grégoire les valide **avant la release**, pas avant le code.
+**4b. Ce que la ligne dit, cas par cas** (mots proposés par Cowork ; tu peux les resserrer, pas les rendre plus vagues) :
 
-## 4 · Stock – limite du 20 sept.
+| Cas | Texte |
+|---|---|
+| Un groupe, date trouvée | `Mercredi 30 septembre · séance B` |
+| Plusieurs groupes | une ligne par groupe : `Gr. 01 : mercredi 30 septembre` (nom du groupe tel que l'export le montre) ; `· séance B` une seule fois, en tête ou en fin |
+| Semaine posée, rang absent | `Semaine 5, séance non fixée` |
+| Pas de semaine | `Leçon non planifiée` |
+| Le groupe n'a pas de séance à ce rang cette semaine (congé, semaine à deux rencontres) | `Gr. 02 : pas de séance B en semaine 5` – **jamais** le jour suivant en silence |
+| Cours sans groupe ou sans horaire saisi | `Aucun horaire saisi pour ce cours` |
+| Carte rattachée à aucun cours | `Carte rattachée à aucun cours : pas de date` |
+| Évaluation hors leçon | `Hors leçon : pas de date` |
 
-**Source seulement, aucune donnée réécrite.** Le stock possible : des paires élève × production portant deux copies, créées par Propriétés ou la correction d'identité sans porte. **Ne le répare pas, ne le cherche pas dans ses données.** Dis dans le rapport si le code d'après le lot le rend visible (ou non) quand il existe : c'est tout.
+Le jour de la semaine et le mois en toutes lettres, en français, sans l'année. **Aucune date devinée** : une date fausse dans un plan de cours se recopie (fiche #695).
 
-## 5 · Preuves et arrêt
+**4c. Zéro-dette : aucune quatrième copie du calcul.** Réutilise `construireHoraireDeLecons` + `dateDeLecon` (exporte `groupesCoursDuCours` s'il le faut). **Décidé par Cowork (technique)** : ne pas unifier maintenant avec `dateSeanceDuRang` de `productions.js` – hors lot ; mais **mesure** si les deux rendent la même date pour le même (groupe, semaine, rang) et dis-le dans le rapport (si elles divergent, c'est une trouvaille à inscrire, issue 2 de `CLAUDE.md`).
+L'horaire d'un groupe se construit **une fois par ouverture de l'Inspecteur**, pas à chaque frappe de la semaine.
 
-Par lot : Vitest ciblé, break-test à mutations rouges (celles du plan, **plus** : correction d'identité qui rappelle `reassocierFichier` nu ; changement d'élève dans Propriétés qui contourne la porte), restauration par copie, puis Vitest complet depuis `tests/`. Spec WebKit du lot 3 (ci-dessus).
-**Arrêt après le commit du lot 3** (deux commits de code : lot 2, lot 3) : pas de release, pas de verdict Playwright, pas de push. Rapport à Cowork : ce que tu as mesuré, ce que tu as supposé, tes écarts avec cette consigne, les trouvailles avec leur issue (1 / 2 / 3), les mots proposés. Cowork relit (règle 2), Grégoire valide les mots, puis release `minor`, verdict Cowork fermé (règle 8), `scripts/pousser.sh`.
-**Écritures dues avec le lot** : cases #932 et #934 au BACKLOG ; #933 fermé avec sa disposition « refusé » et son motif (1d) ; #934 réécrit (Liste des évaluations, pas le tableau) ; la fiche #932 gagne la correction d'identité et le changement d'élève (1a, 1b) ; ce fichier et l'archive de la précédente.
+**4d. Hors lot, à ne pas faire** : la grille du Planificateur, l'en-tête du bloc sur la carte, l'échéance enregistrée d'une production (champ « Production » de l'évaluation). Si une évaluation liée à une production a, dans « Productions étudiantes », une échéance enregistrée **différente** de la date affichée, ne rien afficher de plus : compte ces cas sur la carte de démonstration et dis-le dans le rapport.
+
+## 5 · Tests
+
+- Vitest sur la fonction qui produit les lignes : chaque rangée du tableau 4b, plus deux groupes aux jours différents qui rendent deux dates différentes pour la même leçon.
+- Sentinelle : le fichier de l'Inspecteur n'a pas de calcul de date de séance à lui (pas de parcours de `obtenirSeancesCompletesDuGroupe` hors `planification-export.js` et `productions.js`) ; garde de non-vide (règle 10). Break-test : chaque assertion doit pouvoir rougir (skill `verification-adverse`).
+- Suite complète verte avant le commit.
+
+## 6 · Livraison
+
+- Deux commits au plus : le code et ses tests ; puis `BACKLOG.md` (#695 cochée, élargissement à l'évaluation et décision « une ligne par groupe » notés) et le déplacement de l'ancienne consigne.
+- Version **mineure** (nouvelle information à l'écran) par `scripts/release.mjs`, skill `release-et-changelog`. Changelog, une phrase d'utilisateur : l'Inspecteur d'une leçon et d'une évaluation donne la date où elle aura lieu, pour chaque groupe.
+- Commit → relecture de Cowork → corrections → verdict → push. **Tu ne pousses pas avant le verdict.**
+
+## 7 · Le geste que Grégoire vérifiera à l'écran
+
+Il ouvre sa carte, double-clique « La carte mentale » (S5, B) : sous « Semaine », la date de chacun de ses groupes, qu'il compare à son calendrier. Il double-clique l'évaluation « Artefact n° 2 » : la même date sous « Dans la leçon ». Il change `B` en `A` : les deux lignes changent sans rouvrir l'Inspecteur.
