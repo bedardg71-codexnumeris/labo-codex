@@ -4824,7 +4824,7 @@
         // PASSE PAR L'ANONYMISATION, comme le reste de l'app (carrousel, tableau) : en
         // mode anonymisation, la liste dit « Élève N » et la question disait le vrai nom.
         // Un DA vide ne s'affiche pas vide non plus.
-        const nomReel = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : (nouveauDA || 'élève non identifié·e');
+        const nomReel = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : (nouveauDA || 'étudiant·e non identifié·e');
         const nomEleve = (typeof anonymiserNom === 'function' && nouveauDA && anonymiserNom(nouveauDA)) || nomReel;
         const nomDeFichierAffiche = (nom, da) => (typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(nom, da) : nom);
         const existant = verif.fichierExistant || null;
@@ -4855,7 +4855,7 @@
      */
     function texteDeLaPorte(m) {
         const pour = m.changeEleve
-            ? `cet·te élève et cette production (${m.nomEleve} × ${m.nomProduction})`
+            ? `cet·te étudiant·e et cette production (${m.nomEleve} × ${m.nomProduction})`
             : `cette production (${m.nomProduction})`;
         return `Un fichier existe déjà pour ${pour} :\n` +
             `    ${m.nomExistant}\n\n` +
@@ -5476,7 +5476,7 @@
         // `reassignerCopie` : sur refus, rien n'est écrit et le panneau reste ouvert.
         const ok = await reassignerCopie(fichier.id, association);
         if (!ok) {
-            notifications.info('Réassignation annulée', 'La copie garde son élève et sa production.');
+            notifications.info('Réassignation annulée', 'La copie garde son étudiant·e et sa production.');
             return;
         }
 

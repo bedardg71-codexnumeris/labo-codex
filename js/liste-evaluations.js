@@ -817,7 +817,7 @@ function genererRecapReassignationHTML(recap, nomCible) {
     }
     if (recap.ambigus.length) {
         html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.ambigus.length, 'copie non déplacée', 'copies non déplacées') +
-            '</strong> : deux copies d’un même élève sont cochées. Choisis-en une.</p><ul class="reassigner-recap-liste">' +
+            '</strong> : deux copies d’un·e même étudiant·e sont cochées. Choisis-en une.</p><ul class="reassigner-recap-liste">' +
             recap.ambigus.map(li).join('') + '</ul></div>';
     }
     return html;
@@ -1906,7 +1906,7 @@ function ouvrirProprieteFichier(fichierId) {
             }
             var reassigne = await travauxUI.reassignerCopie(fichierId, association);
             if (!reassigne) {
-                notifications.info('Réassignation annulée', 'La copie garde son élève et sa production ; rien n’a été modifié.');
+                notifications.info('Réassignation annulée', 'La copie garde son étudiant·e et sa production ; rien n’a été modifié.');
                 return;
             }
             modifie = true;
