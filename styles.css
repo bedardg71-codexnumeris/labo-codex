@@ -25802,6 +25802,67 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     text-overflow: ellipsis;
 }
 
+/* Propriétés d'une copie (#932) : la copie qu'on déplace, visible avant le geste.
+   Même vocabulaire que la vignette de fusion ci-dessus : une première page à
+   gauche, le nom de fichier et sa matière à droite. */
+.prop-fichier-apercu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    margin: 0 0 14px 0;
+    background: var(--surface-element);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen, 6px);
+}
+.prop-fichier-vignette {
+    width: 56px;
+    height: 74px;
+    object-fit: contain;
+    border-radius: 3px;
+    background: var(--surface-page);
+    flex-shrink: 0;
+}
+.prop-fichier-vignette-vide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--bordure-moyenne);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    letter-spacing: 0.04em;
+}
+.prop-fichier-vignette-vide img { max-width: 100%; max-height: 100%; }
+.prop-fichier-apercu-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.prop-fichier-apercu-nom {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--texte-principal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.prop-fichier-apercu-meta {
+    font-size: 0.78rem;
+    color: var(--texte-secondaire);
+}
+.prop-fichier-jeton {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: -6px 0 12px 0;
+    font-size: 0.85em;
+    color: var(--texte-secondaire);
+    cursor: pointer;
+}
+.prop-fichier-jeton input { margin-top: 3px; flex-shrink: 0; }
+
 /* ===============================
    PIPELINE — GROUPES VISUELS
    =============================== */

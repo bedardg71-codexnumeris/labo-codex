@@ -128,7 +128,7 @@ describe('#931 · P — « Remplacer l\'existant ? » nomme le fichier qui part 
 
     it('P.a La question nomme l\'existant (qui part) et l\'arrivant, dans cet ordre', async () => {
         const { win, questions } = chargerUI(FICHIERS, false);
-        await win.travauxUI.changerProductionFichier('FT_revise', A2R);
+        await win.travauxUI.reassignerCopie('FT_revise', { productionId: A2R });
         expect(questions).toHaveLength(1);
         const q = questions[0];
         expect(q).toContain('Artefact 2 (rév)');
@@ -139,7 +139,7 @@ describe('#931 · P — « Remplacer l\'existant ? » nomme le fichier qui part 
 
     it('P.b Refusée : rien ne bouge, rien ne part', async () => {
         const { win, corbeille, reassocies } = chargerUI(FICHIERS, false);
-        const ok = await win.travauxUI.changerProductionFichier('FT_revise', A2R);
+        const ok = await win.travauxUI.reassignerCopie('FT_revise', { productionId: A2R });
         expect(ok).toBe(false);
         expect(corbeille).toEqual([]);
         expect(reassocies).toEqual([]);
@@ -147,7 +147,7 @@ describe('#931 · P — « Remplacer l\'existant ? » nomme le fichier qui part 
 
     it('P.c Acceptée : l\'existant part à la corbeille, l\'arrivant est réassocié', async () => {
         const { win, corbeille, reassocies } = chargerUI(FICHIERS, true);
-        const ok = await win.travauxUI.changerProductionFichier('FT_revise', A2R);
+        const ok = await win.travauxUI.reassignerCopie('FT_revise', { productionId: A2R });
         expect(ok).toBe(true);
         expect(corbeille).toEqual(['FT_a1']);
         expect(reassocies).toEqual([['FT_revise', A2R]]);
