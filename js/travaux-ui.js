@@ -4771,58 +4771,129 @@
        ACTIONS CYCLE DE VIE
        =============================== */
 
+    /* ===============================
+       RÉASSIGNATION D'UNE COPIE (#932)
+       =============================== */
+
+    // #932 (22 sept. 2026) — UNE SEULE ÉCRITURE DE L'ASSOCIATION D'UNE COPIE.
+    // Cinq chemins réassociaient une copie (menu de la Liste, Propriétés, correction
+    // d'identité du panneau d'évaluation, menu Production du tableau, jeton de
+    // reprise). Deux d'entre eux — Propriétés et la correction d'identité —
+    // changeaient aussi l'ÉLÈVE, et écrivaient sans porte, ou avec la porte muette
+    // d'avant #931 (« Remplacer ? », sans nommer les fichiers). Le 22 sept. au matin,
+    // c'est cette porte-là qui a envoyé à la corbeille une copie importée le jour
+    // même, pendant qu'un Artefact 1 annoté prenait sa place.
+    //
+    // Trois fonctions portent désormais le geste, et rien d'autre n'écrit :
+    //   · `mesurerReassignation` — LIT ce que le geste ferait (conflit, évaluation
+    //     orpheline), et nomme ce que la porte doit nommer ;
+    //   · `ecrireReassignation`  — ÉCRIT, sur une mesure : corbeille de l'existant,
+    //     puis `reassocierFichier` ;
+    //   · `reassignerCopie`      — le geste complet : mesure → porte → écriture.
+    // La réassignation en masse de la Liste (#934) mesure chaque copie, pose UNE
+    // question groupée, puis écrit chaque mesure : la vérification est séparée de
+    // l'écriture ICI, pas contournée là-bas.
+    // Hors `travaux-stockage.js`, `reassocierFichier` n'a plus d'autre appelant que
+    // les deux premières — sentinelle #932.
+
     /**
-     * Change la production associee a un fichier deja importe
-     * @param {string} fichierId - ID du fichier
-     * @param {string} productionId - Nouvel ID de production
+     * Mesure ce qu'une réassignation ferait, sans rien écrire ni rien demander.
+     * @param {string} fichierId
+     * @param {{productionId?: string, etudiantDA?: string}} association
+     * @returns {Object|null} la mesure, ou null si le stockage ne connaît pas la copie
      */
+    function mesurerReassignation(fichierId, association) {
+        const assoc = association || {};
+        const verif = travauxStockage.reassocierFichier(fichierId, assoc, { verificationSeule: true });
+        if (!verif) return null;
+
+        const tousLesFichiers = (typeof travauxStockage.obtenirFichiersTravaux === 'function' && travauxStockage.obtenirFichiersTravaux()) || [];
+        const fichier = tousLesFichiers.find(f => f.id === fichierId) || null;
+        const daActuel = (fichier && fichier.etudiantDA) || '';
+        const prodActuelle = (fichier && fichier.productionId) || '';
+        const nouveauDA = assoc.etudiantDA !== undefined ? (assoc.etudiantDA || '') : daActuel;
+        const nouveauProdId = assoc.productionId !== undefined ? (assoc.productionId || '') : prodActuelle;
+
+        const productions = obtenirDonneesSelonMode('productions') || [];
+        const prod = productions.find(p => p.id === nouveauProdId);
+        const etudiant = (typeof travauxImport !== 'undefined' && typeof travauxImport.trouverEtudiantParDA === 'function')
+            ? travauxImport.trouverEtudiantParDA(nouveauDA) : null;
+
+        return {
+            fichierId: fichierId,
+            association: assoc,
+            fichier: fichier,
+            changeEleve: nouveauDA !== daActuel,
+            changeProduction: nouveauProdId !== prodActuelle,
+            nomFichier: (fichier && fichier.nomFichier) || fichierId,
+            nomProduction: prod ? (prod.titre || prod.nom) : nouveauProdId,
+            nomEleve: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : nouveauDA,
+            conflit: !!verif.conflit,
+            fichierExistant: verif.fichierExistant || null,
+            nomExistant: verif.fichierExistant ? (verif.fichierExistant.nomFichier || verif.fichierExistant.id) : '',
+            evaluationOrpheline: !!verif.evaluationOrpheline
+        };
+    }
+
     /**
-     * Réassocie un fichier à une autre production.
+     * La porte de conflit. #931 (22 sept. 2026) — elle NOMME les deux fichiers :
+     * « Remplacer l'existant ? » ne disait ni lequel part à la corbeille ni lequel
+     * prend sa place. #932 — quand l'élève change, elle nomme aussi l'élève.
+     * @param {Object} m - une mesure
+     * @returns {string}
+     */
+    function texteDeLaPorte(m) {
+        const pour = m.changeEleve
+            ? `cet·te élève et cette production (${m.nomEleve} × ${m.nomProduction})`
+            : `cette production (${m.nomProduction})`;
+        return `Un fichier existe déjà pour ${pour} :\n` +
+            `    ${m.nomExistant}\n\n` +
+            `Le remplacer par :\n` +
+            `    ${m.nomFichier}\n\n` +
+            `Le fichier existant ira à la corbeille (récupérable pendant 30 jours).`;
+    }
+
+    /**
+     * Écrit une réassignation mesurée : l'existant en conflit part à la corbeille,
+     * puis le stockage réassocie. Aucune question ici — elle a été posée par
+     * `reassignerCopie`, ou groupée par la Liste (#934).
+     * @param {Object} mesure - rendue par `mesurerReassignation`
+     * @returns {boolean}
+     */
+    function ecrireReassignation(mesure) {
+        if (!mesure || !mesure.fichierId) return false;
+        if (mesure.conflit && mesure.fichierExistant) {
+            travauxStockage.deplacerEnCorbeille(mesure.fichierExistant.id);
+        }
+        const ok = travauxStockage.reassocierFichier(mesure.fichierId, mesure.association);
+        return !!ok;
+    }
+
+    /**
+     * Réassigne une copie (production et/ou élève), en passant par la porte.
      *
-     * #561 (29 août 2026) — RENDRE UN VERDICT. Cette fonction pouvait s'arrêter
-     * sur un `confirm()` refusé sans rien dire à son appelant, qui marquait alors
-     * le fichier « reprise » et consommait le jeton sur l'ANCIENNE production. Elle
-     * rend désormais `true` quand la réassociation a eu lieu, `false` sinon
-     * (abandon par l'utilisateur, ou refus du stockage). Le `if (ok) {}` vide qui
-     * terminait la fonction (#572) était exactement ce verdict jamais rendu.
+     * #561 (29 août 2026) — RENDRE UN VERDICT. Le geste peut s'arrêter sur un
+     * `confirm()` refusé : il rend `true` quand la réassignation a eu lieu, `false`
+     * sinon (abandon par l'utilisateur, ou refus du stockage). Un appelant qui
+     * marquait « reprise » sans ce verdict consommait le jeton sur l'ANCIENNE
+     * production.
      *
+     * @param {string} fichierId
+     * @param {{productionId?: string, etudiantDA?: string}} association
      * @returns {Promise<boolean>}
      */
-    async function changerProductionFichier(fichierId, nouveauProductionId) {
-        // Phase 5 : vérifier les conflits et évaluations orphelines avant de réassocier
-        const verif = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId }, { verificationSeule: true });
+    async function reassignerCopie(fichierId, association) {
+        const mesure = mesurerReassignation(fichierId, association);
+        if (!mesure) return false;
 
-        if (verif && verif.conflit) {
-            const productions = obtenirDonneesSelonMode('productions');
-            const prod = productions.find(p => p.id === nouveauProductionId);
-            const nomProd = prod ? (prod.titre || prod.nom) : nouveauProductionId;
-            // #931 (22 sept. 2026) — LA PORTE NOMME LES DEUX FICHIERS. « Remplacer
-            // l'existant ? » ne disait ni lequel part à la corbeille ni lequel prend
-            // sa place : Grégoire a dit oui, et le fichier importé le matin même est
-            // parti à la corbeille pendant qu'un Artefact 1 annoté et évalué prenait
-            // sa place sous Artefact 2 (rév).
-            const tousLesFichiers = (typeof travauxStockage.obtenirFichiersTravaux === 'function' && travauxStockage.obtenirFichiersTravaux()) || [];
-            const fichierDeplace = tousLesFichiers.find(f => f.id === fichierId);
-            const nomDeplace = (fichierDeplace && fichierDeplace.nomFichier) || fichierId;
-            const nomExistant = verif.fichierExistant.nomFichier || verif.fichierExistant.id;
-            const confirme = confirm(
-                `Un fichier existe déjà pour cette production (${nomProd}) :\n` +
-                `    ${nomExistant}\n\n` +
-                `Le remplacer par :\n` +
-                `    ${nomDeplace}\n\n` +
-                `Le fichier existant ira à la corbeille (récupérable pendant 30 jours).`
-            );
-            if (!confirme) return false;
-            travauxStockage.deplacerEnCorbeille(verif.fichierExistant.id);
-        }
+        if (mesure.conflit && !confirm(texteDeLaPorte(mesure))) return false;
 
-        if (verif && verif.evaluationOrpheline) {
+        if (mesure.evaluationOrpheline) {
             const confirme = confirm('L\'évaluation pour l\'ancienne production perdra son fichier associé. Continuer ?');
             if (!confirme) return false;
         }
 
-        const ok = travauxStockage.reassocierFichier(fichierId, { productionId: nouveauProductionId });
-        return !!ok;
+        return ecrireReassignation(mesure);
     }
 
     /**
@@ -5369,7 +5440,7 @@
     /**
      * Applique la correction d'identite (etudiant/production) au fichier importe
      */
-    function appliquerCorrectionIdentite() {
+    async function appliquerCorrectionIdentite() {
         const fichier = travauxVisionneuse.getFichierActuel();
         if (!fichier) return;
 
@@ -5383,22 +5454,20 @@
             return;
         }
 
-        // Mettre a jour le fichier importe (champs d'identité via reassocierFichier)
         const association = {};
         if (nouveauDA) association.etudiantDA = nouveauDA;
         if (nouveauProdId) association.productionId = nouveauProdId;
 
-        // Phase 5 : vérifier les conflits avant de réassocier
-        const verif = travauxStockage.reassocierFichier(fichier.id, association, { verificationSeule: true });
-        if (verif && verif.conflit) {
-            if (!confirm('Un fichier existe déjà pour cet étudiant et cette production. Remplacer ?')) return;
-            travauxStockage.deplacerEnCorbeille(verif.fichierExistant.id);
+        // #932 (22 sept. 2026) — LE CINQUIÈME ÉCRIVAIN PASSE PAR LE GESTE UNIQUE. Cette
+        // correction écrivait l'élève ET la production derrière la porte muette
+        // d'avant #931 (« Remplacer ? », sans nommer les fichiers), puis
+        // `reassocierFichier` nu. Elle attend maintenant le verdict de
+        // `reassignerCopie` : sur refus, rien n'est écrit et le panneau reste ouvert.
+        const ok = await reassignerCopie(fichier.id, association);
+        if (!ok) {
+            notifications.info('Réassignation annulée', 'La copie garde son élève et sa production.');
+            return;
         }
-        if (verif && verif.evaluationOrpheline) {
-            if (!confirm('L\'évaluation pour l\'ancienne production perdra son fichier associé. Continuer ?')) return;
-        }
-
-        travauxStockage.reassocierFichier(fichier.id, association);
 
         // Mettre a jour l'objet fichier en memoire
         if (nouveauDA) fichier.etudiantDA = nouveauDA;
@@ -7352,13 +7421,24 @@
         if (fichier && fichier.id) reimporterFichier(fichier.id);
     }
 
-    /** Changer la production d'un fichier depuis le tableau (onchange select) */
-    function changerProductionFichierDepuisTableau(el) {
+    /**
+     * Changer la production d'un fichier depuis le tableau (onchange select).
+     * #932 (22 sept. 2026) — LE MENU SUIT LE VERDICT. Le geste n'était pas attendu :
+     * sur un « Annuler » à la porte, le menu affichait la nouvelle production alors
+     * que rien n'avait changé. Il revient maintenant à l'ancienne.
+     */
+    async function changerProductionFichierDepuisTableau(el) {
         var fichierId = el.dataset.fichierId;
         var value = el.value;
-        changerProductionFichier(fichierId, value);
         var row = el.closest('tr');
-        if (row) row.dataset.productionId = value;
+        var fichier = (typeof travauxStockage.obtenirFichierParId === 'function') ? travauxStockage.obtenirFichierParId(fichierId) : null;
+        var ancienne = row ? (row.dataset.productionId || '') : ((fichier && fichier.productionId) || '');
+        var ok = await reassignerCopie(fichierId, { productionId: value });
+        if (ok) {
+            if (row) row.dataset.productionId = value;
+        } else {
+            el.value = ancienne;
+        }
     }
 
     /* ===============================
@@ -7524,8 +7604,10 @@
         togglePauseChrono: togglePauseChrono,
         getDureeMs: getDureeMs,
         resetChrono: resetChrono,
-        // Association production
-        changerProductionFichier: changerProductionFichier,
+        // Réassignation d'une copie (#932) — le seul chemin d'écriture de l'association
+        reassignerCopie: reassignerCopie,
+        mesurerReassignation: mesurerReassignation,
+        ecrireReassignation: ecrireReassignation,
         // Filtre production (appelé depuis liste-evaluations pour pré-sélectionner)
         setProductionFiltre: function(prodId) {
             productionFiltreActive = prodId || '';

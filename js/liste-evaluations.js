@@ -1297,12 +1297,16 @@ function genererDropdownActions(ligne) {
     // le nommer. Mesuré chez Grégoire : sur la ligne Allache × Artefact 2 (rév), le
     // menu a déplacé son vieux « Portrait de lecteur », puis son Artefact 1 annoté
     // et évalué, à la place du fichier importé le matin même (parti à la corbeille
-    // par la porte « Remplacer l'existant ? » de `changerProductionFichier`). Un
+    // par la porte « Remplacer l'existant ? » de `reassignerCopie`, #932). Un
     // fichier qui vit sur une autre production se réassocie DEPUIS SA LIGNE, où le
     // menu sait de quel fichier il parle ; le fichier sans production d'un élève
     // est déjà rattrapé par le match souple ci-dessus (un seul ⇒ `fichierId`).
+    // #932 (22 sept. 2026) — le mot est « réassigner » (Grégoire, 22 sept.), et le
+    // geste ouvre Propriétés : la seule fenêtre qui MONTRE la copie (vignette, nom
+    // de fichier) avant de la déplacer. La modale aveugle d'avant (un seul menu
+    // « Production ») est retirée.
     if (fichierId) {
-        const labelAssoc = ligne.productionId ? 'Réassocier' : 'Associer';
+        const labelAssoc = ligne.productionId ? 'Réassigner' : 'Assigner';
         options.push(`<option value="associer|${echapperHtml(fichierId)}|${echapperHtml(da)}">${labelAssoc}</option>`);
     }
 
@@ -1371,7 +1375,7 @@ function executerActionEval(select) {
             }
             break;
         case 'associer':
-            associerProductionDepuisListe(parts[1], parts[2]);
+            ouvrirProprieteFichier(parts[1]); // #932 — Propriétés est le geste unique de réassignation
             break;
         case 'supprimer':
             confirmerSuppressionFichier(parts[1], parts[2]);
@@ -1482,12 +1486,49 @@ function ouvrirEditeurDepuisListe(fichierId) {
 /**
  * Ouvre la modale Propriétés d'un fichier (nom, étudiant, production).
  * Accessible depuis un bouton dans l'éditeur de pages ou la liste.
+ *
+ * #932 (22 sept. 2026) — LE GESTE UNIQUE DE RÉASSIGNATION. Cette modale MONTRE la
+ * copie (vignette de la première page, nom de fichier en lecture) et c'est elle
+ * qu'ouvrent « Réassigner » / « Assigner » du menu Actions et « Non associé › ».
+ * Son enregistrement passe l'élève et la production par `travauxUI.reassignerCopie`
+ * (porte de conflit qui nomme les fichiers, #931) et ATTEND le verdict : sur
+ * refus, la modale reste ouverte et rien n'est écrit. Avant, elle appelait
+ * `reassocierFichier` nu : deux copies d'un même élève × production pouvaient
+ * coexister sans question ni corbeille.
+ * Le jeton de reprise (#561), qui vivait dans la modale aveugle retirée, vit ici :
+ * une case sous la production, visible quand les jetons sont actifs.
+ *
  * @param {string} fichierId - ID du fichier à modifier
  */
 function ouvrirProprieteFichier(fichierId) {
     var fichier = (typeof travauxStockage !== 'undefined')
         ? travauxStockage.obtenirFichierParId(fichierId) : null;
     if (!fichier) return;
+
+    // La copie qu'on déplace, visible AVANT le geste.
+    var vignette = (typeof travauxStockage.obtenirThumbnailSync === 'function') ? (travauxStockage.obtenirThumbnailSync(fichierId) || '') : '';
+    var nomAffiche = (typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : (fichier.nomFichier || '')) || fichier.id;
+    var extension = ((fichier.nomFichier || '').match(/\.([a-z0-9]{2,4})$/i) || [])[1];
+    var etiquetteType = extension ? extension.toUpperCase() : (/pdf/i.test(fichier.typeMIME || '') ? 'PDF' : 'IMG');
+    var meta = [];
+    if (fichier.nombrePages) meta.push(fichier.nombrePages + (fichier.nombrePages > 1 ? ' pages' : ' page'));
+    if (fichier.tailleFichier && typeof travauxStockage.formaterTaille === 'function') meta.push(travauxStockage.formaterTaille(fichier.tailleFichier));
+    var apercuHTML =
+        '<div class="prop-fichier-apercu">' +
+            (vignette
+                ? '<img class="prop-fichier-vignette" src="' + echapperHtml(vignette) + '" alt="">'
+                : '<div class="prop-fichier-vignette prop-fichier-vignette-vide" data-thumbnail-id="' + echapperHtml(fichierId) + '"><span>' + echapperHtml(etiquetteType) + '</span></div>') +
+            '<div class="prop-fichier-apercu-info">' +
+                '<span class="prop-fichier-apercu-nom" id="prop-fichier-apercu-nom" title="' + echapperHtml(nomAffiche) + '">' + echapperHtml(nomAffiche) + '</span>' +
+                (meta.length ? '<span class="prop-fichier-apercu-meta">' + echapperHtml(meta.join(' · ')) + '</span>' : '') +
+            '</div>' +
+        '</div>';
+
+    // Jeton de reprise (#561) : une case, visible seulement quand les jetons sont actifs.
+    var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
+    var blocJeton = (configJetons && configJetons.actif)
+        ? '<label class="prop-fichier-jeton"><input type="checkbox" id="prop-fichier-jeton-reprise"> Cette copie est une reprise : appliquer un jeton de reprise sur la production choisie</label>'
+        : '';
 
     // Étudiants du groupe actif
     var etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
@@ -1535,6 +1576,7 @@ function ouvrirProprieteFichier(fichierId) {
         '<div class="modal-contenu modal-compact" style="max-width: 520px;">' +
             '<button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
             '<h3 class="modal-titre">Propri\u00e9t\u00e9s du fichier</h3>' +
+            apercuHTML +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Nom du document :</label>' +
             '<input type="text" id="prop-fichier-nom" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;" value="' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : (fichier.nomFichier || '')) + '">' +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">\u00c9tudiant\u00b7e :</label>' +
@@ -1547,6 +1589,7 @@ function ouvrirProprieteFichier(fichierId) {
                 '<option value="">\u2014 Non associ\u00e9 \u2014</option>' +
                 optionsProductions +
             '</select>' +
+            blocJeton +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">\u00c9valuation li\u00e9e :</label>' +
             '<select id="prop-fichier-evaluation" class="controle-form" style="margin: 4px 0 16px 0; width: 100%;">' +
                 '<option value="">\u2014 Aucune \u2014</option>' +
@@ -1561,22 +1604,39 @@ function ouvrirProprieteFichier(fichierId) {
 
     document.body.appendChild(overlay);
 
+    // La vignette absente du cache mémoire se charge depuis IndexedDB, comme dans le carrousel.
+    if (!vignette && typeof travauxStockage.chargerThumbnailsConteneur === 'function') {
+        travauxStockage.chargerThumbnailsConteneur(overlay);
+    }
+
     var fermer = function() { overlay.remove(); };
     overlay.addEventListener('click', function(e) { if (e.target === overlay) fermer(); });
 
-    document.getElementById('prop-fichier-btn-sauver').onclick = function() {
+    document.getElementById('prop-fichier-btn-sauver').onclick = async function() {
         var nouveauNom = (document.getElementById('prop-fichier-nom') || {}).value || fichier.nomFichier;
         var nouveauDA = (document.getElementById('prop-fichier-etudiant') || {}).value || '';
         var nouvelleProd = (document.getElementById('prop-fichier-production') || {}).value || '';
         var nouvelleEval = (document.getElementById('prop-fichier-evaluation') || {}).value || '';
+        var caseJeton = document.getElementById('prop-fichier-jeton-reprise');
+        var appliquerJeton = !!(caseJeton && caseJeton.checked);
         var modifie = false;
 
-        // etudiantDA et productionId sont des champs protégés → utiliser reassocierFichier
+        // #932 — l'élève ET la production passent par le geste unique, qui porte la
+        // porte de conflit ; on ATTEND son verdict (#561). Sur refus : la modale
+        // reste ouverte, rien n'est écrit (ni le nom, ni l'évaluation liée).
         var association = {};
         if (nouveauDA !== (fichier.etudiantDA || '')) association.etudiantDA = nouveauDA;
         if (nouvelleProd !== (fichier.productionId || '')) association.productionId = nouvelleProd;
         if (Object.keys(association).length > 0) {
-            travauxStockage.reassocierFichier(fichierId, association);
+            if (typeof travauxUI === 'undefined' || typeof travauxUI.reassignerCopie !== 'function') {
+                notifications.erreur('Réassignation impossible', 'Le module des copies n’est pas chargé.');
+                return;
+            }
+            var reassigne = await travauxUI.reassignerCopie(fichierId, association);
+            if (!reassigne) {
+                notifications.info('Réassignation annulée', 'La copie garde son élève et sa production ; rien n’a été modifié.');
+                return;
+            }
             modifie = true;
         }
 
@@ -1589,137 +1649,43 @@ function ouvrirProprieteFichier(fichierId) {
             modifie = true;
         }
 
+        // Jeton de reprise (#561) : APRÈS le verdict de la réassignation, jamais avant.
+        // En dernier : l'évaluation de reprise qu'il crée devient l'évaluation liée.
+        if (appliquerJeton && nouvelleProd) {
+            appliquerJetonRepriseSurCopie(fichierId, nouveauDA, nouvelleProd);
+            modifie = true;
+        }
+
         if (modifie) {
-            notifications.succes('Propri\u00e9t\u00e9s mises \u00e0 jour');
+            notifications.succes('Propriétés mises à jour');
         }
         fermer();
+        appliquerFiltres();
     };
 }
 window.ouvrirProprieteFichier = ouvrirProprieteFichier;
 
 /**
- * Ouvre une modale pour associer (ou réassocier) un fichier importé à une production
+ * Marque une copie comme reprise et applique le jeton sur l'évaluation active de
+ * (élève × production), si elle existe. Ne s'appelle qu'APRÈS un verdict vrai de
+ * `travauxUI.reassignerCopie` (#561) : posé avant, le jeton se consommait sur
+ * l'ANCIENNE production.
+ * @param {string} fichierId
+ * @param {string} da
+ * @param {string} productionId
  */
-function associerProductionDepuisListe(fichierId, da) {
-    const productions = obtenirDonneesSelonMode('productions');
-    if (productions.length === 0) {
-        notifications.erreur('Aucune production', 'Crée d\'abord des productions dans « Construction de la note ».');
-        return;
-    }
-
-    // Trouver le fichier pour connaître la production actuelle
-    let productionActuelle = null;
-    if (typeof travauxStockage !== 'undefined') {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
-        const fichier = fichiers.find(f => f.id === fichierId);
-        if (fichier) productionActuelle = fichier.productionId;
-    }
-
-    // Vérifier si les jetons de reprise sont activés
-    var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
-    var jetonsActifs = configJetons && configJetons.actif;
-
-    var optionsHTML = productions.map(function(p) {
-        var label = p.description ? (p.titre + ' - ' + p.description) : p.titre;
-        return '<option value="' + echapperHtml(p.id) + '" ' + (p.id === productionActuelle ? 'selected' : '') + '>' + echapperHtml(label) + '</option>';
-    }).join('');
-    if (jetonsActifs) {
-        optionsHTML += '<option value="__jeton_reprise__">Jeton de reprise</option>';
-    }
-
-    // Retirer une modale existante
-    const existante = document.getElementById('associer-prod-modal-overlay');
-    if (existante) existante.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'associer-prod-modal-overlay';
-    overlay.className = 'modal-overlay actif';
-    overlay.innerHTML = `
-        <div class="modal-contenu modal-compact" style="max-width: 440px;">
-            <button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-            <h3 class="modal-titre">${productionActuelle ? 'Réassocier' : 'Associer'} à une production</h3>
-            <label style="font-size: 0.85em; color: var(--texte-secondaire);">Production :</label>
-            <select id="associer-prod-select" class="controle-form" style="margin: 6px 0 16px 0; width: 100%;">
-                <option value="">— Choisir une production —</option>
-                ${optionsHTML}
-            </select>
-            <div class="modal-actions">
-                <button class="btn btn-principal" id="associer-prod-btn-confirmer">Confirmer</button>
-                <button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>
-            </div>
-        </div>`;
-
-    document.body.appendChild(overlay);
-
-    const fermer = () => overlay.remove();
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(); });
-
-    // Quand "Jeton de reprise" est sélectionné, afficher le sous-sélecteur de production cible
-    var selectProd = document.getElementById('associer-prod-select');
-    selectProd.addEventListener('change', function() {
-        var sousSelect = document.getElementById('associer-jeton-prod-container');
-        if (selectProd.value === '__jeton_reprise__') {
-            if (!sousSelect) {
-                var div = document.createElement('div');
-                div.id = 'associer-jeton-prod-container';
-                div.style.cssText = 'margin: 6px 0 16px 0;';
-                div.innerHTML = '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Pour quelle production ?</label>' +
-                    '<select id="associer-jeton-prod-select" class="controle-form" style="margin: 4px 0 0 0; width: 100%;">' +
-                    '<option value="">-- Choisir --</option>' + optionsHTML.replace('__jeton_reprise__', '').replace(/<option[^>]*__jeton_reprise__[^>]*>[^<]*<\/option>/g, '') + '</select>';
-                selectProd.parentNode.insertBefore(div, selectProd.nextSibling.nextSibling);
-            }
-        } else if (sousSelect) {
-            sousSelect.remove();
-        }
+function appliquerJetonRepriseSurCopie(fichierId, da, productionId) {
+    travauxStockage.mettreAJourFichier(fichierId, { estReprise: true });
+    var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    var evalActive = evaluations.find(function(e) {
+        return e.etudiantDA === da && e.productionId === productionId && !e.remplaceeParId;
     });
-
-    document.getElementById('associer-prod-btn-confirmer').onclick = async function() {
-        var prodId = document.getElementById('associer-prod-select').value;
-        if (!prodId) return;
-
-        if (prodId === '__jeton_reprise__') {
-            // Mode jeton : associer comme reprise
-            var jetonProdSelect = document.getElementById('associer-jeton-prod-select');
-            var jetonProdId = jetonProdSelect ? jetonProdSelect.value : '';
-            if (!jetonProdId) return;
-
-            // #561 — Réassocier D'ABORD, et ATTENDRE le verdict : `changerProductionFichier`
-            // peut s'arrêter sur un `confirm()` refusé. Marquer « reprise » et consommer
-            // le jeton sans ce verdict créait la reprise sur l'ANCIENNE production.
-            if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
-                var reassocie = await travauxUI.changerProductionFichier(fichierId, jetonProdId);
-                if (!reassocie) {
-                    notifications.info('Réassociation annulée', 'Le fichier reste sur sa production ; aucun jeton de reprise n\'a été appliqué.');
-                    overlay.remove();
-                    return;
-                }
-            }
-            travauxStockage.mettreAJourFichier(fichierId, { estReprise: true });
-
-            // Appliquer le jeton de reprise si une évaluation existe
-            var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-            var evalActive = evaluations.find(function(e) {
-                return e.etudiantDA === da && e.productionId === jetonProdId && !e.remplaceeParId;
-            });
-            if (evalActive && typeof appliquerJetonReprise === 'function') {
-                var nouvelleEval = appliquerJetonReprise(evalActive.id);
-                if (nouvelleEval) {
-                    travauxStockage.mettreAJourFichier(fichierId, { evaluationId: nouvelleEval.id });
-                }
-            }
-
-            overlay.remove();
-            appliquerFiltres();
-            return;
+    if (evalActive && typeof appliquerJetonReprise === 'function') {
+        var nouvelleEval = appliquerJetonReprise(evalActive.id);
+        if (nouvelleEval) {
+            travauxStockage.mettreAJourFichier(fichierId, { evaluationId: nouvelleEval.id });
         }
-
-        if (typeof travauxUI !== 'undefined' && typeof travauxUI.changerProductionFichier === 'function') {
-            var ok = await travauxUI.changerProductionFichier(fichierId, prodId);
-            if (!ok) notifications.info('Réassociation annulée', 'Le fichier reste sur sa production.');
-        }
-        overlay.remove();
-        appliquerFiltres();
-    };
+    }
 }
 
 /**
@@ -2871,7 +2837,6 @@ window.executerActionEval = executerActionEval;
 window.toggleColonneEval = toggleColonneEval;
 window.ouvrirAnnotationDepuisListe = ouvrirAnnotationDepuisListe;
 window.ouvrirEditeurDepuisListe = ouvrirEditeurDepuisListe;
-window.associerProductionDepuisListe = associerProductionDepuisListe;
 window.confirmerSuppressionFichier = confirmerSuppressionFichier;
 
 // Corbeille
