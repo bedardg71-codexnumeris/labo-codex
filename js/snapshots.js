@@ -282,7 +282,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     //     évaluations, et il n'en garde qu'une version.
     // Lot N1a (#710) : sans pratique assignée, aucun P non plus.
     // ⚠ TARIR N'EST PAS RÉPARER : les snapshots déjà écrits gardent leur P jusqu'à ce que l'enseignant
-    // clique « Reconstruire ». Rien n'est réécrit d'office.
+    // clique « Recalculer les captures » (Réglages › Captures et recherche). Rien n'est réécrit d'office.
     let indiceP = null;
     const resolutionP = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive() : null;
     const pratiqueP = (resolutionP && resolutionP.etat === 'ok') ? resolutionP.pratique : null;
