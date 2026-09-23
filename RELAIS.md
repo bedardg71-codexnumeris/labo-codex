@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N7 (1.155.3) FUSIONNÉ DANS `main` (merge `4b256bda`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 10 H : **LOT N4 COMMITÉ SUR LA BRANCHE `lot-n4-specifications-plancher`, RELEASE 1.155.4 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK ET LA VALIDATION DES MOTS PAR GRÉGOIRE**
+
+**Où vit le travail** : branche locale `lot-n4-specifications-plancher`, partie de `7ebdf47f` : un seul commit, `0a2dd209` (le lot, la release 1.155.4, #935 inscrite, la consigne N4 et l'archive de N7). Vitest 622 fichiers / 7 162 essais verts après le commit ; spec WebKit `lot-n4-spe-note-absente-cause` verte ; 19 mutations rouges.
+
+**À valider par Grégoire avant le push** : (1) l'item de « Nouvelles » 1.155.4 (`js/changelog-data.js`, marqué PROPOSÉ) ; (2) la seconde cause, pour une spécification sans types ni forfaits, reprise des mots du récapitulatif #899 : « Ta pratique n'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception › Pratiques de notation (clique sur la pratique). »
+
+**À relire en priorité** : `conserverConfigurationSpecifications` (wizard-pratique-v2.js) — la réédition part de la configuration ENREGISTRÉE ; le statut de l'export porte maintenant la cause (« non constructible – … ») ; la carte Performance d'Engagement passe au tiret pour toute note non constructible (toutes familles), avec la cause en bulle.
+
+**Reste, dans l'ordre** : relecture de Cowork → corrections → validation des mots → fusion dans `main` → verdict Playwright → `pousser.sh`. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N7 (1.155.3) FUSIONNÉ DANS `main` (merge `4b256bda`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`73445a4c`) + `13c078d8` (relais précédent) + le merge de `lot-n7-echelle-note-globale` (`1961325b` le lot, `1a858ffa` release 1.155.3) + ce relais. Relecture croisée de Cowork : verte, par exécution sur une copie `git archive`, bancs du lot 209/209 ; sept mutations de Cowork, sept rouges ; aucune correction. Vitest 622 / 7 153. **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
 
