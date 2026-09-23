@@ -238,11 +238,11 @@ const ETAPES_WIZARD = {
                 texte: 'La dénotation s\'appuie sur des cibles et des critères explicites (grille, échelle) pour la rétroaction ; elle abandonne la fonction de tri, mais produit toujours une note certificative (RREC : 60 réussite / 59 échec).'
             },
             {
+                // #717 : une ligne par cible, chacune porte son id (EditeurCibles).
                 id: 'ciblesDenotation',
-                label: 'Cibles d\'apprentissage (une par ligne)',
-                type: 'textarea',
-                required: true,
-                placeholder: 'Ex. :\nAnalyser une source\nArgumenter de façon structurée\nMaîtriser la langue écrite'
+                label: 'Cibles d\'apprentissage',
+                type: 'liste-cibles',
+                required: true
             },
             {
                 id: 'infoMethodeSuggestion',
@@ -1327,6 +1327,8 @@ function genererChamp(champ) {
             return genererChampTexte(champ);
         case 'textarea':
             return genererChampTextarea(champ);
+        case 'liste-cibles':
+            return genererChampListeCibles(champ);
         case 'number':
             return genererChampNumber(champ);
         case 'toggle':
@@ -1438,6 +1440,20 @@ function genererChampTextarea(champ) {
                       name="${champ.id}"
                       placeholder="${champ.placeholder || ''}"
                       rows="3"></textarea>
+        </div>
+    `;
+}
+
+/**
+ * #717 — Liste des cibles de la dénotation : le composant commun `EditeurCibles`
+ * (une ligne par cible, chacune porte son id). Les valeurs sont posées par
+ * `restaurerValeursEtape`.
+ */
+function genererChampListeCibles(champ) {
+    return `
+        <div class="wizard-v2-champ">
+            <label id="${WIZARD_V2_ID_PREFIX}${champ.id}-label">${champ.label}${champ.required ? ' *' : ''}</label>
+            <div id="${WIZARD_V2_ID_PREFIX}${champ.id}" role="group" aria-labelledby="${WIZARD_V2_ID_PREFIX}${champ.id}-label">${window.EditeurCibles.rendre([])}</div>
         </div>
     `;
 }
@@ -2075,7 +2091,7 @@ function genererRecapitulatif() {
     }
 
     if (r.typePratique === 'denotation') {
-        const cibles = String(r.ciblesDenotation || '').split('\n').map(s => s.trim()).filter(Boolean);
+        const cibles = Array.isArray(r.ciblesDenotation) ? r.ciblesDenotation : [];
         const methodeLabels = { 'mode': 'Mode', 'mediane': 'Médiane', 'moyenne': 'Moyenne' };
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Dénotation</h4>';
@@ -2273,6 +2289,10 @@ function validerEtape(etapeId) {
                 const checked = document.querySelectorAll(`input[name="${champ.id}"]:checked`);
                 element = checked.length > 0 ? checked[0] : null;
                 valeurTrouvee = checked.length > 0 ? 'selected' : '';
+            } else if (champ.type === 'liste-cibles') {
+                // #717 : au moins une cible nommée.
+                element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
+                valeurTrouvee = window.EditeurCibles.lire(element).length > 0 ? 'cibles' : '';
             } else {
                 // Pour les autres champs, chercher par ID avec préfixe V2
                 element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
@@ -2357,6 +2377,8 @@ function sauvegarderReponsesEtape(etapeId) {
             wizardState.reponses[champ.id] = Array.from(checked).map(cb => cb.value);
         } else if (champ.type === 'toggle') {
             wizardState.reponses[champ.id] = element?.checked || false;
+        } else if (champ.type === 'liste-cibles') {
+            if (element) wizardState.reponses[champ.id] = window.EditeurCibles.lire(element);
         } else if (element) {
             wizardState.reponses[champ.id] = element.value;
         }
@@ -2406,6 +2428,8 @@ function restaurerValeursEtape(etapeId) {
             });
         } else if (champ.type === 'toggle') {
             if (element) element.checked = valeur;
+        } else if (champ.type === 'liste-cibles') {
+            window.EditeurCibles.poser(element, valeur);
         } else if (element) {
             element.value = valeur;
         }
@@ -2731,14 +2755,18 @@ async function creerPratiqueV2() {
             pratique.configuration.modeleBundle = r.modeleBundle;
         }
     } else if (typeFinal === 'denotation') {
-        // DEN couche 2 (#318, DEN-3). Les cibles sont saisies réellement (une par
-        // ligne) pour que la garde « cibles atteintes » soit opérante dès la création
-        // (chaque cible a un id stable). Mode « éliminée » seul pour l'instant.
-        const cibles = String(r.ciblesDenotation || '')
-            .split('\n')
-            .map(s => s.trim())
-            .filter(Boolean)
-            .map((nom, i) => ({ id: 'cible-' + (i + 1), nom: nom }));
+        // DEN couche 2 (#318, DEN-3). Mode « éliminée » seul pour l'instant.
+        // #717 : chaque cible garde l'id reçu à sa création (EditeurCibles) ; les coches
+        // du jugement y sont indexées. Déplacer ou renommer ne les touche pas.
+        const cibles = (Array.isArray(r.ciblesDenotation) ? r.ciblesDenotation : [])
+            .map(c => ({ id: c.id, nom: c.nom }));
+
+        // #717 (2c) : retirer une cible cochée change la note — la question avant d'écrire.
+        if (wizardState.modeEdition && wizardState.pratiqueId) {
+            const existante = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === wizardState.pratiqueId);
+            const anciennes = (existante && existante.configuration && existante.configuration.objectifs) || [];
+            if (!window.EditeurCibles.confirmerRetraits(wizardState.pratiqueId, anciennes, cibles)) return;
+        }
 
         pratique.configuration = {
             type: 'denotation',
@@ -3174,11 +3202,11 @@ function chargerPratiqueExistante(pratiqueId) {
             }
             if (config.modeleBundle !== undefined) wizardState.reponses.modeleBundle = config.modeleBundle;
         } else if (typeCanon === 'denotation') {
-            // #343 (b) round-trip d'édition DEN (gap pré-existant comblé) : restaurer
-            // les cibles (textarea), la suggestion, et l'échelle/grille de rétroaction.
+            // #343 (b) round-trip d'édition DEN : restaurer les cibles, la suggestion, et
+            // l'échelle/grille de rétroaction. #717 : les cibles reviennent AVEC leur id.
             if (Array.isArray(config.objectifs)) {
                 wizardState.reponses.ciblesDenotation = config.objectifs
-                    .map(o => (o && o.nom) ? o.nom : o).filter(Boolean).join('\n');
+                    .filter(o => o && o.id).map(o => ({ id: o.id, nom: o.nom }));
             }
             if (config.suggestion && config.suggestion.methode) {
                 wizardState.reponses.methodeSuggestionDen = config.suggestion.methode;

@@ -209,7 +209,10 @@
         const pratiqueId = inst.config.id;
         const cibles = _ciblesDe(inst);
 
-        const ciblesAtteintes = {};
+        // #717 : les coches d'une cible retirée restent enregistrées (elles ne sont plus
+        // lues) ; réenregistrer le jugement ne les efface pas.
+        const avant = window.denotationJugements.lireJugementDenotation(pratiqueId, da);
+        const ciblesAtteintes = Object.assign({}, avant && avant.ciblesAtteintes);
         cibles.forEach(function (c) {
             const cb = document.getElementById('den-cible-' + c.id + '-' + da);
             ciblesAtteintes[c.id] = !!(cb && cb.checked);

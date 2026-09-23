@@ -63,7 +63,7 @@ describe('#343-T4a — récapitulatif : pas de ligne « Variante » pour DEN', (
     chargerScript('js/wizard-pratique-v2.js', globaux, win);
 
     it('DEN : la ligne « Variante » est masquée', () => {
-        win.wizardState.reponses = { calcNoteFinale: 'jugement', ciblesDenotation: 'Cible 1\nCible 2' };
+        win.wizardState.reponses = { calcNoteFinale: 'jugement', ciblesDenotation: [{ id: 'c_a', nom: 'Cible 1' }, { id: 'c_b', nom: 'Cible 2' }] };
         const html = win.genererRecapitulatif();
         expect(html).not.toContain('Variante');
         expect(html).not.toContain('eliminee'); // jamais le brut technique
