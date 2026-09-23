@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 8 H : **LOT N7 COMMITÉ SUR LA BRANCHE `lot-n7-echelle-note-globale`, RELEASE 1.155.3 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N7 (1.155.3) FUSIONNÉ DANS `main` (merge `4b256bda`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`73445a4c`) + `13c078d8` (relais précédent) + le merge de `lot-n7-echelle-note-globale` (`1961325b` le lot, `1a858ffa` release 1.155.3) + ce relais. Relecture croisée de Cowork : verte, par exécution sur une copie `git archive`, bancs du lot 209/209 ; sept mutations de Cowork, sept rouges ; aucune correction. Vitest 622 / 7 153. **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
+
+**Suite** : lot N4 (spécifications, le plancher de 50), qui attend une décision de didactique de Grégoire, que Cowork lui posera. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub. La branche `lot-n7-echelle-note-globale` peut être supprimée une fois le push mesuré.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 8 H : **LOT N7 COMMITÉ SUR LA BRANCHE `lot-n7-echelle-note-globale`, RELEASE 1.155.3 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
 
 **Où vit le travail** : branche locale `lot-n7-echelle-note-globale`, partie de `73445a4c` : `1961325b` (le lot : `lireEchelleNoteGlobale`, retrait d'`obtenirPratiqueActuelle` et des méthodes du registre, garde de la configurable, sentinelle-n7, bloc N7 du banc moteur ; plus les fichiers de plans de Cowork que la consigne disait de commiter avec le lot), `1a858ffa` (release 1.155.3, build 0923-0754). Break-test : 11 mutations, toutes rouges. Vitest 622 / 7 153 après le bump.
 
