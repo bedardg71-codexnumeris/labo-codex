@@ -156,7 +156,6 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             'obtenirNiveauIDMEDepuisPourcentage',
             'obtenirNombreProductionsPourPatterns',
             'obtenirIdsProductionsEvaluables',
-            'obtenirPratiqueActuelle',
             'obtenirGrilleReferenceDepistage',
             'obtenirCriteresAvecValeurs',
             'initialiserModuleProfilEtudiant',

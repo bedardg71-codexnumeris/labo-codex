@@ -1130,38 +1130,6 @@ class PratiquePANStandards {
         return table;
     }
 
-    /**
-     * L'échelle dans laquelle SA note globale se lit — pour PAN-Standards :
-     * celle que ses évaluations désignent, si elles s'accordent.
-     *
-     * ⮕ #542 lot 3, pas 3b. Cette pratique établit sa note globale en
-     * convertissant CHAQUE évaluation par SON échelle (`evaluation.echelleId`,
-     * cf. `_obtenirTableConversionNiveaux` ci-dessous), puis en moyennant les
-     * niveaux obtenus. La même échelle doit donc relire la moyenne : elle est
-     * déjà celle du calcul, la reprendre n'ajoute aucune supposition.
-     *
-     * ⚠ ET SI ELLES NE S'ACCORDENT PAS, ON NE CHOISIT PAS. Le helper délégué
-     * rend alors `echelle: null` et nomme la cause. Choisir la « bonne » échelle
-     * parmi plusieurs reviendrait à en écarter une autre sans le dire — c'est le
-     * refus de deviner que #529 a posé pour une évaluation isolée, porté au
-     * portrait entier.
-     *
-     * @param {string} da - Numéro de DA
-     * @returns {Object} `{ echelle, raison, message }`
-     */
-    obtenirEchelleNoteGlobale(da) {
-        if (typeof obtenirEchelleCommuneDesEvaluations === 'function') {
-            return obtenirEchelleCommuneDesEvaluations(da);
-        }
-        // Le module de calcul n'est pas chargé : on ne fabrique pas d'échelle
-        // pour autant. Même règle que `_obtenirTableConversionNiveaux`.
-        return {
-            echelle: null,
-            raison: 'helper-absent',
-            message: 'Le module de calcul du profil n\'est pas disponible.'
-        };
-    }
-
     _obtenirTableConversionNiveaux(echelleId) {
         // #529 — le repli qui vivait ici est RETIRÉ. Il rendait
         // {I:0.55, D:0.70, M:0.80, E:0.90} — des valeurs qui n'étaient celles

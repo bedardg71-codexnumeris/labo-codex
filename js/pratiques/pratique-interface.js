@@ -118,26 +118,6 @@
  */
 
 /**
- * obtenirEchelleNoteGlobale(da) - L'échelle dans laquelle SA note globale se lit
- *
- *   ⮕ #542 lot 3, pas 3b — décision de Grégoire, 27 août 2026 : « c'est la
- *   pratique de notation qui établit la note globale de l'élève ». C'est donc à
- *   elle, et à elle seule, de dire dans quoi cette note se lit. Le dépistage ne
- *   le déduit plus : il demande.
- *
- *   Rend `{ echelle, raison, message }` :
- *     · `echelle` non nulle, `raison` nulle — la note globale est un NIVEAU
- *       ATTEINT, à situer dans cette échelle (et dont l'étiquette SOLO, si elle
- *       est posée, donne l'interprétation) ;
- *     · `echelle: null` avec une `raison` — il n'y a pas de niveau à afficher,
- *       et le `message` dit pourquoi. Ce n'est pas une panne : une pratique
- *       sommative rend `'note-chiffree'` parce qu'un pourcentage pondéré N'EST
- *       PAS un niveau, et c'est la bonne réponse.
- *
- *   ⚠ Une pratique qui ne l'implémente pas laisse le dépistage sans niveau
- *   global — pas avec un niveau inventé. C'est délibéré : le défaut d'avant
- *   était précisément d'en fabriquer un pour tout le monde.
- *
  * calculerDetailsCompletion(da) - Le DÉTAIL de la complétion (#871, 17 sept. 2026)
  *
  * Rend { remis, total } — ce que la pratique compte au dénominateur et ce qui est remis —, ou null

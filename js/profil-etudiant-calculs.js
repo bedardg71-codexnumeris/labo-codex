@@ -1493,7 +1493,6 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
 function calculerProgressionEleve(da) {
     // 🆕 NOUVELLE LOGIQUE : Basée sur les critères individuels plutôt que sur la note globale
     // Obtenir les directions pour chaque critère
-    const pratique = obtenirPratiqueActuelle();
     const directionsCriteres = calculerDirectionsCriteres(da);
 
     // Vérifier si nous avons suffisamment de données
