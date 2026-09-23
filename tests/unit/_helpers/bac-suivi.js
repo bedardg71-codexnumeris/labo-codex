@@ -131,7 +131,10 @@ export function monter(store, opts = {}) {
         // #749 lot 2 : le numéro de groupe s'écrit et se lit par la fonction unique de modes.js.
         normaliserNumeroGroupe: winModes.normaliserNumeroGroupe,
         // #834 lot E (cadrage « Rencontres ») : l'identifiant du contexte, point unique de modes.js.
-        obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService
+        obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService,
+        // Lot N2 (#716) : le P historique des snapshots pose les évaluations échues dans le contexte de simulation.
+        definirContexteSimulation: winModes.definirContexteSimulation, effacerContexteSimulation: winModes.effacerContexteSimulation,
+        contexteImposeNoteProvisoire: winModes.contexteImposeNoteProvisoire
     });
     Object.assign(globaux, opts.globaux || {});
     // Lot 5 du cadrage 11 (12 sept. 2026) : la lettre du bilan d'une intervention sort d'`obtenirNiveauIDMEDepuisPourcentage`

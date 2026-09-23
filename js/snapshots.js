@@ -214,6 +214,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
 
     // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Utiliser dateEcheance de la production
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
+    // Lot N2 (#716) : c'est l'échéance qui décide si une évaluation entre dans le P historique (plus bas).
     const groupeCoursId = obtenirCoursIdPourSnapshots();
     const obtenirDateEcheance = (evaluation) => {
         const production = productions.find(p => p.id === evaluation.productionId);
@@ -224,29 +225,6 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         if (!assignee) return null;
         return date || evaluation.dateEvaluation;
     };
-
-    // Filtrer les évaluations complétées avant la date limite
-    // #734 — CELLES DE L'ÉLÈVE. Ce filtre ne portait pas sur `etudiantDA` : quand la pratique ne rend pas de P
-    // historique (la sommative lit `e.da` / `e.note`, champs absents — #716 ; SPE et DEN n'ont pas la méthode),
-    // le repli moyennait les niveaux de TOUT LE GROUPE dus à cette date — 67 pour chaque élève du banc d'audit
-    // (constat G-2, 5 sept. 2026). Le repli entier reste #716 ; les snapshots déjà écrits gardent leur valeur.
-    const evaluationsFiltrees = evaluations.filter(e => {
-        if (e.etudiantDA !== da) return false;
-        if (!e.productionId) return false;
-
-        // Lot A (16 sept. 2026) — une copie qui COMPTE (règle unique #706 : enregistrée, non remplacée,
-        // avec note) et qui n'est pas NON REMISE (« non-remis » ou « non-recu »). Les snapshots déjà
-        // écrits gardent leur valeur : ce filtre tarit la source, il ne réécrit pas le stock.
-        if (!window.evaluationEntreDansLaNote(e)) return false;
-        if (window.evaluationNonRemise(e)) return false;
-        if (window.evaluationNonRecevable(e)) return false;   // lot 30 (17 sept. 2026) : non recevable = pas une remise
-
-        // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
-        const dateEcheance = obtenirDateEcheance(e);
-        if (!dateEcheance) return false;
-
-        return dateEcheance <= dateLimite;
-    });
 
     // ✅ CORRECTION (10 déc 2025): Identifier les productions DUES jusqu'à cette date (dateEcheance)
     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe + assignee)
@@ -289,100 +267,45 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         indiceC = Math.round((productionsRemises.length / productionsDues.length) * 100);
     }
 
-    // Calculer P : Déléguer à la pratique de notation configurée
-    // ✅ CORRECTION (Beta 93) : Respect de l'architecture modulaire
+    // P : LA NOTE DU COURS TELLE QU'ELLE SE CALCULAIT À `dateLimite` (lot N2, #716, 22 sept. 2026).
+    // La fonction qui écrit l'indice P d'aujourd'hui (`calculerNoteDuCours`, portfolio.js), appliquée aux
+    // seules évaluations de l'élève dont la production est échue à cette date (échéance effective du
+    // groupe-cours, comme C ci-dessus). Les évaluations passent par le contexte de simulation (modes.js) :
+    // chaque famille les lit par son accesseur habituel, son moteur n'est pas touché.
+    // Avant : deux copies de la sélection (une méthode historique propre à la standards et à la sommative —
+    // cette dernière lisait `e.da` / `e.note` et ne trouvait jamais rien), puis un repli qui convertissait
+    // les niveaux par une table I/D/M/E codée en dur. Aucun P n'est plus fabriqué : sans note, `null`.
+    // Décisions de Grégoire (22 sept. 2026) :
+    //   · à une date passée, la note est PROVISOIRE (`noteProvisoire`) — « notes finales » compterait 0
+    //     pour des obligatoires pas encore dues ;
+    //   · la DÉNOTATION n'a pas de P historique : sa note est un jugement saisi, pas un calcul sur des
+    //     évaluations, et il n'en garde qu'une version.
+    // Lot N1a (#710) : sans pratique assignée, aucun P non plus.
+    // ⚠ TARIR N'EST PAS RÉPARER : les snapshots déjà écrits gardent leur P jusqu'à ce que l'enseignant
+    // clique « Reconstruire ». Rien n'est réécrit d'office.
     let indiceP = null;
+    const resolutionP = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive() : null;
+    const pratiqueP = (resolutionP && resolutionP.etat === 'ok') ? resolutionP.pratique : null;
+    const estDenotation = !!(pratiqueP && typeof pratiqueP.obtenirCode === 'function' && pratiqueP.obtenirCode() === 'DEN');
 
-    // Lot N1a (#710, 21 sept. 2026) — SANS PRATIQUE ASSIGNÉE, AUCUN P N'EST ÉCRIT.
-    // Avant : `obtenirPratiqueActuelle` fabriquait une pratique « standards » quand rien n'était
-    // assigné, et le repli ci-dessous (table I/D/M/E en dur) prenait le relais si elle ne rendait
-    // rien. Un P était donc écrit chaque semaine, au démarrage, à partir d'un repli — et il
-    // nourrit les courbes de progression, les corrélations et l'impact des jetons.
-    // ⚠ TARIR N'EST PAS RÉPARER : les snapshots déjà écrits gardent leur P. Rien n'est réécrit.
-    const designationP = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive() : null;
-    const sansPratique = !!(designationP && designationP.etat !== 'ok');
-
-    if (sansPratique) {
-        indiceP = null;
-    } else if (typeof obtenirPratiqueActuelle === 'function') {
-        try {
-            const pratique = obtenirPratiqueActuelle();
-            if (pratique && typeof pratique.calculerPerformanceHistorique === 'function') {
-                // Déléguer le calcul historique à la pratique
-                const indiceP_decimal = pratique.calculerPerformanceHistorique(da, dateLimite, evaluations);
-                // Convertir de 0-1 vers 0-100 (arrondi)
-                if (indiceP_decimal !== null) {
-                    indiceP = Math.round(indiceP_decimal * 100);
-                }
-            }
-
-            // ✅ CORRECTION (7 déc): Fallback si méthode manquante OU retourne null
-            if (indiceP === null) {
-                // ⚡ FALLBACK: Si méthode manquante, calculer moyenne simple des évaluations
-                // (désactivation warning pour éviter 870 logs: 29 snapshots × 30 étudiants)
-                // console.warn('[calculerIndicesHistoriques] Pratique ou méthode calculerPerformanceHistorique() manquante');
-
-                // Calcul fallback simple: moyenne de toutes les évaluations jusqu'à cette date
-                if (evaluationsFiltrees.length > 0) {
-                    const notesValides = evaluationsFiltrees
-                        .filter(e => e.niveauFinal !== null && e.niveauFinal !== undefined && e.niveauFinal !== '--')
-                        .map(e => {
-                            // ✅ CORRECTION (7 déc): Gérer échelle IDME (lettres) et nombres
-                            const niveau = String(e.niveauFinal).trim().toUpperCase();
-
-                            // Si c'est une lettre IDME, utiliser valeurs configurées
-                            // (40% pour I, 65% pour D, 75% pour M, 100% pour E selon l'échelle utilisateur)
-                            if (niveau === '0') return 0;       // Aucun/Plagiat
-                            if (niveau === 'I') return 40;      // Incomplet
-                            if (niveau === 'D') return 65;      // en Développement
-                            if (niveau === 'M') return 75;      // Maîtrisé
-                            if (niveau === 'E') return 100;     // Étendu
-
-                            // Sinon, nombre: convertir 0-4 → 0-100, ou garder si déjà 0-100
-                            const note = parseFloat(e.niveauFinal);
-                            if (isNaN(note)) return null;
-                            return note <= 4 ? (note / 4) * 100 : note;
-                        })
-                        .filter(note => note !== null && !isNaN(note));
-
-                    if (notesValides.length > 0) {
-                        const somme = notesValides.reduce((acc, val) => acc + val, 0);
-                        indiceP = Math.round(somme / notesValides.length);
-                    }
-                }
-            }
-        } catch (error) {
-            // console.error('[calculerIndicesHistoriques] Erreur lors du calcul de P:', error);
-            indiceP = null;
-        }
-    } else {
-        // console.warn('[calculerIndicesHistoriques] obtenirPratiqueActuelle() non disponible');
-
-        // Même fallback si fonction pas disponible
-        if (evaluationsFiltrees.length > 0) {
-            const notesValides = evaluationsFiltrees
-                .filter(e => e.niveauFinal !== null && e.niveauFinal !== undefined && e.niveauFinal !== '--')
-                .map(e => {
-                    // ✅ CORRECTION (7 déc): Gérer échelle IDME (lettres) et nombres
-                    const niveau = String(e.niveauFinal).trim().toUpperCase();
-
-                    // Si c'est une lettre IDME, utiliser valeurs configurées
-                    if (niveau === '0') return 0;       // Aucun/Plagiat
-                    if (niveau === 'I') return 40;      // Incomplet
-                    if (niveau === 'D') return 65;      // en Développement
-                    if (niveau === 'M') return 75;      // Maîtrisé
-                    if (niveau === 'E') return 100;     // Étendu
-
-                    // Sinon, nombre: convertir 0-4 → 0-100, ou garder si déjà 0-100
-                    const note = parseFloat(e.niveauFinal);
-                    if (isNaN(note)) return null;
-                    return note <= 4 ? (note / 4) * 100 : note;
-                })
-                .filter(note => note !== null && !isNaN(note));
-
-            if (notesValides.length > 0) {
-                const somme = notesValides.reduce((acc, val) => acc + val, 0);
-                indiceP = Math.round(somme / notesValides.length);
+    if (pratiqueP && !estDenotation && typeof calculerNoteDuCours === 'function' && typeof definirContexteSimulation === 'function') {
+        // Ce que la note lit aujourd'hui (même filtre de cours), réduit à l'élève et à la date.
+        const evaluationsDeLaNote = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const echues = evaluationsDeLaNote.filter(e => {
+            if (e.etudiantDA !== da) return false;
+            const dateEcheance = obtenirDateEcheance(e);
+            return !!dateEcheance && dateEcheance <= dateLimite;
+        });
+        if (echues.length > 0) {
+            definirContexteSimulation({ evaluationsSauvegardees: echues, noteProvisoire: true });
+            try {
+                const noteDecimale = calculerNoteDuCours(da, pratiqueP);
+                indiceP = (noteDecimale === null) ? null : arrondirIndiceSurCent(noteDecimale);
+            } catch (error) {
+                console.error('[calculerIndicesHistoriques] Note du cours non calculable :', error);
+                indiceP = null;
+            } finally {
+                effacerContexteSimulation();
             }
         }
     }

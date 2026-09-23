@@ -79,15 +79,17 @@ describe('lot E · structurel : l\'expression n\'est plus recopiée hors de mode
         parcourir(path.join(RACINE, 'js'));
         expect(fautifs).toEqual([]);
     });
-    it('les douze fichiers mesurés appellent bien le point unique (vingt appels : dix-neuf sites et le helper de snapshots)', () => {
-        const fichiers = ['correlations-longitudinales.js', 'export-pdf.js', 'graphiques-progression.js', 'impact-jetons.js', 'planification-carte.js', 'productions.js', 'profil-etudiant-calculs.js', 'trimestres.js', 'profil-etudiant-sections-affichage.js', 'snapshots.js', 'pratiques/pratique-pan-standards.js', 'pratiques/pratique-sommative.js'];
+    // Lot N2 (#716, 22 sept. 2026) : deux sites partent avec les méthodes historiques de la standards et de la
+    // sommative (le P historique est désormais la note du cours) — 20 → 18, et la sommative sort de la liste.
+    it('les onze fichiers mesurés appellent bien le point unique (dix-huit appels : dix-sept sites et le helper de snapshots)', () => {
+        const fichiers = ['correlations-longitudinales.js', 'export-pdf.js', 'graphiques-progression.js', 'impact-jetons.js', 'planification-carte.js', 'productions.js', 'profil-etudiant-calculs.js', 'trimestres.js', 'profil-etudiant-sections-affichage.js', 'snapshots.js', 'pratiques/pratique-pan-standards.js'];
         let total = 0;
         for (const f of fichiers) {
             const n = (readFileSync(path.join(RACINE, 'js', f), 'utf8').match(/obtenirIdContexteActif\(/g) || []).length;
             expect(n, f).toBeGreaterThan(0);
             total += n;
         }
-        expect(total).toBe(20);
+        expect(total).toBe(18);
     });
 });
 
