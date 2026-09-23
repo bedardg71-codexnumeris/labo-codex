@@ -79,11 +79,11 @@ function normaliserConfigurationSpecifications(configuration) {
 
 /**
  * Lot N4 (#713) — LES DEUX CAUSES D'UNE NOTE ABSENTE EN SPÉCIFICATIONS, écrites une fois.
- * La première est la phrase approuvée par Grégoire le 23 sept. 2026 (consigne N4, §0) ; la
- * seconde reprend les mots du récapitulatif de l'assistant (#899).
+ * Les deux sont VALIDÉES par Grégoire le 23 sept. 2026 : la première est la phrase de la consigne N4 (§0) ; la
+ * seconde reprend les mots du récapitulatif de l'assistant (#899), avec la flèche « → » de l'application.
  */
 const CAUSE_AUCUN_FORFAIT_ATTEINT = 'Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.';
-const CAUSE_SANS_TYPES_NI_FORFAITS = 'Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception › Pratiques de notation (clique sur la pratique).';
+const CAUSE_SANS_TYPES_NI_FORFAITS = 'Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception → Pratiques de notation (clique sur la pratique).';
 
 /** Sans casse ni accents ni espaces : « Présentation » ↔ `presentation`. */
 function _cleNom(valeur) {
