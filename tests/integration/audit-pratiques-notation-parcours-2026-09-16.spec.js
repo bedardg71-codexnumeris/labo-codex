@@ -340,7 +340,7 @@ test('B-2 · « N plus récentes » adopté puis rouvert par l\'assistant : la m
     const apres = await lirePratique();
     expect(apres.id).toBe(adoptee.id);
     expect(apres.configuration.portfolio).toMatchObject({ methodeSelection: 'derniers', nombreARetenir: 5, minimumCompletion: 5, nombreTotal: 10 });
-    expect(apres.configuration.varianteCalcul).toBe('n-recents');
+    expect(apres.configuration.varianteCalcul).toBeUndefined();   // #900 (lot N6) : ni le gabarit ni l'assistant ne l'écrivent
 
     // (3) Et le moteur calcule : les 5 plus récents de A1..A5 = (85+60+78+70+78)/5 = 74,2 → 74,2 × 0,6 + 82 × 0,4 = 77,32.
     const note = await page.evaluate(({ id, da }) => {
