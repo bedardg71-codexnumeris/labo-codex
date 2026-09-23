@@ -150,15 +150,11 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             // `particularites` RETIRÉ : `doubleVerrou` et
             // `portfolioNombreTravaux: '5-7'` étaient deux réglages personnels,
             // pas un défaut. Un gabarit de démarrage n'impose pas de mécanique.
-        },
-        // Les seuils ne nomment rien et ne supposent aucune matière : conservés.
-        // Audit du 16 sept. 2026, constat B-4 : ces clés sont en camelCase, la pratique configurable lit
-        // `va_bien` / `difficulte` / `grande_difficulte`. SANS EFFET : les valeurs sont celles des défauts.
-        seuils: {
-            vaBien: 75,
-            difficulte: 65,
-            grandeDifficulte: 55
         }
+        // (#900, lot N6 — constat B-4 de l'audit du 16 sept. 2026 : le bloc `seuils` en camelCase
+        // (`vaBien`, `difficulte`, `grandeDifficulte`) est retiré. La pratique configurable lit
+        // `va_bien` / `difficulte` / `grande_difficulte` : il était sans effet, ses valeurs étaient
+        // celles des défauts.)
     },
     // === PAN-STANDARDS ===
     // #435 (9 août 2026) : les quatre gabarits « par objectifs » (Par objectifs
@@ -176,13 +172,11 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         estGabarit: true,
         pratiques: ['STD'],
         configuration: {
-            varianteCalcul: 'n-meilleurs',
             portfolio: {
                 methodeSelection: 'meilleurs',
                 nombreARetenir: 7,
                 minimumCompletion: 7,
-                nombreTotal: 10,
-                decouplerPN: false
+                nombreTotal: 10
             }
         }
     },
@@ -196,13 +190,11 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         estGabarit: true,
         pratiques: ['STD'],
         configuration: {
-            varianteCalcul: 'n-recents',
             portfolio: {
                 methodeSelection: 'recents',
                 nombreARetenir: 5,
                 minimumCompletion: 5,
-                nombreTotal: 10,
-                decouplerPN: false
+                nombreTotal: 10
             }
         }
     },
@@ -508,16 +500,13 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
     } else if (pratiqueCanon === 'standards') {
         nouvelleConfig.pratiques = ['STD'];
         nouvelleConfig.configuration = {
-            // Variante de calcul
-            varianteCalcul: modalites.varianteCalcul || '',
-
+            // (#900, lot N6 : ni `varianteCalcul` ni `decouplerPN` — aucun lecteur.)
             // Portfolio complet (mode de sélection, N à retenir, etc.)
             portfolio: modalites.portfolio ? {
                 methodeSelection: modalites.portfolio.methodeSelection || 'meilleurs',
                 nombreARetenir: modalites.portfolio.nombreARetenir || 5,
                 minimumCompletion: modalites.portfolio.minimumCompletion || 5,
-                nombreTotal: modalites.portfolio.nombreTotal || 10,
-                decouplerPN: modalites.portfolio.decouplerPN || false
+                nombreTotal: modalites.portfolio.nombreTotal || 10
             } : null,
 
             parObjectifs: null // #435 : mode retiré — ne plus propager une config morte
@@ -568,10 +557,7 @@ async function appliquerConfigurationPratique(configId) {
         modalites.specifications.modeleNom = config.nom;
 
     } else if (typeConfig === 'standards') {
-        // Variante de calcul (n-meilleurs, n-recents, hybride)
-        if (config.configuration?.varianteCalcul) {
-            modalites.varianteCalcul = config.configuration.varianteCalcul;
-        }
+        // (#900, lot N6 : `varianteCalcul` n'est plus recopié dans les modalités — aucun lecteur.)
 
         // Portfolio (mode de sélection, N à retenir, etc.)
         if (config.configuration?.portfolio) {

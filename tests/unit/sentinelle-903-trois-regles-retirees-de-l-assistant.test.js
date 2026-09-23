@@ -128,7 +128,8 @@ describe('#903 · A — les cases ont quitté l\'assistant', () => {
         expect(vus).toBeGreaterThan(20);           // le banc a bien parcouru des champs
         // Le verrou et le portfolio, eux, sont toujours configurés.
         const ids = win.ETAPES_WIZARD['config-sommative-regles'].getChampsDynamiques(reponses).map(c => c.id);
-        expect(ids).toEqual(['infoVerrou', 'nomEvalVerrouillee', 'seuilVerrou', 'plafondVerrou', 'infoPortfolio', 'nbArtefactsPortfolio', 'portfolioQualitatif']);
+        // #900 (lot N6) : « nombre d'artefacts » et « qualitatif » du portfolio sommatif sont retirés (aucun lecteur).
+        expect(ids).toEqual(['infoVerrou', 'nomEvalVerrouillee', 'seuilVerrou', 'plafondVerrou', 'infoPortfolio']);
     });
     it('A.3 les phrases qui promettaient ces règles ne sont plus dans l\'assistant', () => {
         const src = lire('js/wizard-pratique-v2.js');
@@ -157,7 +158,7 @@ describe('#903 · B — une pratique NEUVE n\'écrit plus les trois règles', ()
         expect(p.configuration.reprises).toBeUndefined();
         expect(p.configuration.conditions_speciales.map(c => c.type)).toEqual(['double_verrou']);
         expect(p.reglesSpeciales).toEqual(['double_verrou']);
-        expect(p.configuration.reglesSommatives).toEqual(['double_verrou']);
+        expect(p.configuration.reglesSommatives).toBeUndefined();   // #900 (lot N6) : doublon de reglesSpeciales, plus écrit
         expect(p.variante).toBe('verrou');
         expect(canon(p)).not.toMatch(/remplacement|plafonn|reprises/i);
     });
@@ -193,13 +194,17 @@ describe('#903 · C — une pratique DÉJÀ enregistrée garde ce qu\'elle porte
         expect(canon(apres)).toBe(canon(STOCK_STD));
     });
     it('C.4 une VRAIE retouche passe, et n\'emporte pas le reste : le verrou décoché s\'en va, les trois champs restent', async () => {
-        const { apres } = await rouvrirEtEnregistrer(STOCK_SOM, (r) => { r.reglesSommatives = ['portfolio']; r.nbArtefactsPortfolio = 4; });
+        const { apres } = await rouvrirEtEnregistrer(STOCK_SOM, (r) => { r.reglesSommatives = ['portfolio']; });
         expect(apres.reglesSpeciales).toEqual(['remplacement', 'plafonnement', 'portfolio']);
         expect(apres.configuration.reglesSommatives).toEqual(['remplacement', 'plafonnement', 'portfolio']);
         expect(apres.configuration.conditions_speciales).toEqual([STOCK_SOM.configuration.conditions_speciales[1]]);
         expect(apres.configuration.remplacement).toEqual({ actif: true, nbPaires: 3 });
         expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
-        expect(apres.configuration.portfolio).toEqual({ utiliser: true, nbArtefacts: 4, qualitatif: false });
+        // #900 (lot N6) : le portfolio d'une sommative n'est plus écrit (ses réglages n'avaient aucun lecteur) ; le stock
+        // n'en portait pas, il n'en porte toujours pas. Rang et moyenne du groupe, sans lecteur, passent tels quels.
+        expect(apres.configuration.portfolio).toBeUndefined();
+        expect(apres.configuration.afficherRang).toBe(true);
+        expect(apres.configuration.afficherMoyenneGroupe).toBe(true);
         expect(apres.variante).toBe('progressive');
     });
     it('C.5 le récapitulatif d\'une pratique rouverte n\'annonce aucune des règles retirées', async () => {

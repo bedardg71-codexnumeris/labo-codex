@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0923-1205';
+window._SCRIPT_BUILD_main = '0923-1330';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -388,56 +388,10 @@ document.addEventListener('DOMContentLoaded', function () {
             db.setSync('migration_rapports_bug_20_done', true);
         }
 
-        // Migration vocabulaire descriptif (22 mai 2026, Phase 6.1 PLAN-AQPC) :
-        // renomme la propriété `decouplerPR` → `decouplerPN` (Découpler
-        // Performance / Niveau d'attention) dans la config portfolio des
-        // pratiques. Cohérent avec le renommage des tokens CSS --risque-*
-        // → --niveau-attention-* livré au chantier J du 21 mai 2026.
-        // Idempotent.
-        // #823 (10 sept. 2026) — le volet 1 (`preferencesUtilisateur.decouplerPR`)
-        // est retiré avec la préférence « Découpler P et N », que personne ne
-        // lisait. Un `decouplerPR` ou `decouplerPN` encore présent dans les
-        // préférences d'un utilisateur y reste, orphelin : on ne réécrit pas
-        // les données des gens pour une clé sans lecteur.
-        if (!db.getSync('migration_decoupler_pn_done', false)) {
-            try {
-                const renommerDansObjet = (obj) => {
-                    if (obj && Object.prototype.hasOwnProperty.call(obj, 'decouplerPR')) {
-                        obj.decouplerPN = obj.decouplerPR;
-                        delete obj.decouplerPR;
-                        return true;
-                    }
-                    return false;
-                };
-
-                // NB Lot 3 #328 (11 juin 2026) : le volet « modalitesEvaluation
-                // .portfolio.decouplerPR » (clé globale pré-namespacing) a été
-                // retiré — la clé nue est morte et le module propriétaire est
-                // le seul écrivain de la clé namespacée. La config portfolio
-                // canonique vit dans pratiquesConfigurables (Phase G2-a).
-
-                // bibliothequePratiques[*].config.portfolio.decouplerPR
-                const biblioPratiques = db.getSync('bibliothequePratiques', []);
-                let biblioModifiee = false;
-                if (Array.isArray(biblioPratiques)) {
-                    biblioPratiques.forEach(p => {
-                        if (p?.config?.portfolio && renommerDansObjet(p.config.portfolio)) {
-                            biblioModifiee = true;
-                        }
-                    });
-                    if (biblioModifiee) db.setSync('bibliothequePratiques', biblioPratiques);
-                }
-
-                // #626 (31 août 2026) — le volet 3 est retiré. Il renommait un
-                // champ dans une collection dont ces trois lignes étaient le SEUL
-                // accès de tout le dépôt, lecture comprise : la migration
-                // entretenait une donnée que personne ne lit. Les volets 1 et 2
-                // ci-dessus restent : leurs deux clés ont des lecteurs vivants.
-            } catch(e) {
-                console.warn('[migration_decoupler_pn] erreur partielle ignorée:', e);
-            }
-            db.setSync('migration_decoupler_pn_done', true);
-        }
+        // (#900, lot N6, 23 sept. 2026 — la migration `decouplerPR` → `decouplerPN` est
+        // retirée : elle renommait, dans `bibliothequePratiques`, un champ que personne
+        // ne lit sous l'un ou l'autre nom. Rien n'est effacé : ce qu'elle a écrit reste,
+        // et le repère `migration_decoupler_pn_done` déjà posé chez les gens aussi.)
 
         // Migration namespacing de modalitesEvaluation (24 mai 2026) :
         // la pratique de notation devient namespacée par trimestre pour que

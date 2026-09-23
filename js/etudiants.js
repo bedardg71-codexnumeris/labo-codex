@@ -419,7 +419,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
     html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Standards, ou autre).';
 
     html += '<br><br>';
-    html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Conception › Pratiques de notation</strong></em>';
+    html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Conception → Pratiques de notation</strong></em>';
 
     // Complément propre à la page appelante (ex. mention Gauss du Suivi du groupe).
     if (complementHtml) {

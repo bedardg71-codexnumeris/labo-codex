@@ -709,7 +709,7 @@
                     '<p>Le comparateur s’appuie sur des <strong>profils-types fictifs</strong> générés ' +
                     'depuis ton <strong>échelle de performance</strong> — pour comparer ce que chaque ' +
                     'pratique ferait de la même trajectoire d’apprentissage, avant d’en adopter une.</p>' +
-                    '<p>Crée d’abord une échelle dans <strong>Conception › Échelles</strong>, puis reviens ici.</p>' +
+                    '<p>Crée d’abord une échelle dans <strong>Conception → Échelles</strong>, puis reviens ici.</p>' +
                 '</div>' +
             '</div>';
     }
