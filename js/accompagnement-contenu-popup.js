@@ -517,10 +517,9 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'liste',
-                titre: 'Trois modes d\'archivage',
+                titre: 'Deux modes d\'archivage',
                 items: [
-                    '<strong>Exporter des travaux</strong> : sélection ciblée par production et/ou étudiant·e. Sortie = évaluations en JSON + productions en PDF.',
-                    '<strong>Trimestre complet</strong> : toutes les productions en PDF classées par étudiant·e + évaluations en JSON. Idéal pour archiver une fin de session.',
+                    '<strong>Exporter des travaux</strong> : productions en PDF + évaluations en JSON. « Toutes » et « Tous » donnent l\'archive de tout le groupe, idéale en fin de session ; sinon, filtre par production et/ou étudiant·e.',
                     '<strong>Export Léa</strong> : production annotée + évaluation (note et rétroaction) en PDF prêts à téléverser dans Léa.'
                 ]
             },

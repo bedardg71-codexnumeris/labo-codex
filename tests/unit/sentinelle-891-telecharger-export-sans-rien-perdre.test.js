@@ -12,7 +12,12 @@ import { chargerScript } from './_helpers/charger-script.js';
 // `exporterTravaux` ni `exporterSemestre` : c'est pour cela que la 565 était
 // verte. Ce banc est celui de l'audit du 16 septembre, devenu sentinelle.
 //
-// Quatre invariants, sur les trois exports par ZIP :
+// #895 (23 sept. 2026) : « Trimestre complet » et son moteur `exporterSemestre`
+// sont fondus dans `exporterTravaux(options, onProgression)` ; les essais qui
+// visaient l'ancien moteur visent la forme « par étudiant·e et production » du
+// moteur unique. Le reste de #895 : `sentinelle-895-une-carte-exporter-des-travaux`.
+//
+// Quatre invariants, sur les exports par ZIP :
 //   · le lot survit : un fichier illisible est sauté et NOMMÉ, les autres partent ;
 //   · le nom du ZIP téléchargé est assaini (« Roy/Tremblay » ne casse plus
 //     l'enregistrement) et garde ses accents (« Écrit 1 » ≠ « _crit_1 », #572) ;
@@ -104,7 +109,7 @@ const cheminsCopies = (entrees) => entrees.map(e => e.chemin).filter(c => !c.end
 describe('#891 · un fichier illisible n’emporte plus l’archive entière', () => {
     it('exporterTravaux : le lot survit (2 copies sur 3) et l’échec est nommé', async () => {
         const { archivage, entrees } = monter({ recupererBlob: blobIllisibleSurF2 });
-        const { echecs, nbFichiers, exportes } = await archivage.exporterTravaux(null, 'P1');
+        const { echecs, nbFichiers, exportes } = await archivage.exporterTravaux({ productionId: 'P1', forme: 'etudiant' });
         expect(cheminsCopies(entrees)).toEqual(['Tremblay_Alix_111/copie1.pdf', 'Gagnon_Noa_333/copie3.pdf']);
         expect(nbFichiers).toBe(3);
         expect(exportes).toEqual(['F1', 'F3']);
@@ -135,9 +140,9 @@ describe('#891 · un fichier illisible n’emporte plus l’archive entière', (
         expect(r.echecs).toEqual([]);
     });
 
-    it('exporterSemestre : le même harnais l’exécute enfin — 2 copies, 1 échec nommé, résumé', async () => {
+    it('forme « par étudiant·e et production » (l’ancien « Trimestre complet ») — 2 copies, 1 échec nommé, résumé', async () => {
         const { archivage, entrees } = monter({ recupererBlob: blobIllisibleSurF2 });
-        const { echecs, nbFichiers } = await archivage.exporterSemestre({}, null);
+        const { echecs, nbFichiers } = await archivage.exporterTravaux({}, null);
         expect(cheminsCopies(entrees)).toEqual([
             'Tremblay_Alix_111/Écrit 1/copie1.pdf',
             'Gagnon_Noa_333/Écrit 1/copie3.pdf'
@@ -151,7 +156,7 @@ describe('#891 · un fichier illisible n’emporte plus l’archive entière', (
 
     it('un PDF qui rejette au rendu annoté est sauté et nommé, et non marqué exporté', async () => {
         const { archivage, entrees } = monter({ annotations: { F3: { pages: { 1: {} } } } });
-        const { echecs, exportes } = await archivage.exporterTravaux(null, 'P1');
+        const { echecs, exportes } = await archivage.exporterTravaux({ productionId: 'P1', forme: 'etudiant' });
         expect(echecs).toHaveLength(1);
         expect(echecs[0]).toContain('Gagnon_Noa_333 / copie3.pdf');
         expect(echecs[0]).toContain('PDF corrompu');
@@ -165,13 +170,13 @@ describe('#891 · un fichier illisible n’emporte plus l’archive entière', (
 describe('#891 · lancerExport (le bouton « Télécharger ») — nom, marquage, bilan', () => {
     it('le nom du ZIP est assaini : « Roy/Tremblay » ne crée plus de chemin', async () => {
         const { archivage, telecharges } = monter({});
-        await archivage.lancerExport('222', null);
+        await archivage.lancerExport({ da: '222' });
         expect(telecharges).toEqual(['travaux_Roy-Tremblay_Sam.zip']);
     });
 
     it('le nom du ZIP garde ses accents : « Écrit 1 », pas « _crit_1 »', async () => {
         const { archivage, telecharges } = monter({});
-        await archivage.lancerExport('111', 'P1');
+        await archivage.lancerExport({ da: '111', productionId: 'P1' });
         expect(telecharges).toHaveLength(1);
         expect(telecharges[0]).toContain('Écrit 1');
         expect(telecharges[0]).not.toContain('_crit_1');
@@ -180,7 +185,7 @@ describe('#891 · lancerExport (le bouton « Télécharger ») — nom, marquage
 
     it('seuls les fichiers réellement exportés sont marqués « exporté » ; l’archive part et le bilan nomme la perte', async () => {
         const { archivage, marques, telecharges, alertes } = monter({ recupererBlob: blobIllisibleSurF2 });
-        await archivage.lancerExport(null, 'P1');
+        await archivage.lancerExport({ productionId: 'P1' });
         expect(telecharges).toEqual(['travaux_Écrit 1.zip']);
         expect(marques).toEqual(['F1', 'F3']);
         expect(marques).not.toContain('F2');
@@ -192,7 +197,7 @@ describe('#891 · lancerExport (le bouton « Télécharger ») — nom, marquage
 
     it('contrôle : sans échec, tout est marqué et rien n’est dit', async () => {
         const { archivage, marques, alertes } = monter({});
-        await archivage.lancerExport(null, 'P1');
+        await archivage.lancerExport({ productionId: 'P1' });
         expect(marques).toEqual(['F1', 'F2', 'F3']);
         expect(alertes).toEqual([]);
     });

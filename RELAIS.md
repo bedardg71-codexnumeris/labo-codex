@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 13 H 50 : **LOT N6 (1.155.7) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 17 H 10 : **#895 ET 1.156.0 SUR `lot-895-une-carte-exporter`, NON FUSIONNÉ, NON POUSSÉ** — attend la relecture croisée de Cowork et la validation par Grégoire des mots
+
+**Où vit le travail** : branche `lot-895-une-carte-exporter` = `main` (`c5dec89e`, 1.155.7) + le commit du lot et de la release 1.156.0. Une seule carte « Exporter des travaux », un seul moteur (`exporterTravaux(options, onProgression)`), « Toutes / Tous » = tout le groupe, « exporté » posé aussi par l'export complet. Vitest 626 / 7246 vert ; specs WebKit du lot vertes (895, 893, 892 : 6/6) ; 14 mutations, 14 rouges. Verdict Playwright complet NON lancé (après la revérification de Cowork, règle 2 du PROTOCOLE).
+
+**À Grégoire, avant le push** : (1) les mots de la carte : « Dossiers », « Par étudiant·e et production » / « Par étudiant·e », « Compresser l'archive » ; (2) la phrase de l'aide qui remplace les deux lignes de cartes (index.html) et celle de la fiche contextuelle ; (3) l'item de Nouvelles 1.156, marqué PROPOSÉ dans `js/changelog-data.js`.
+
+**Ordre** : relecture Cowork → corrections → revérification Cowork si du code change → verdict → fusion dans `main` → push. Aucune porte terrain : `telechargerBlob` n'a pas bougé.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 13 H 50 : **LOT N6 (1.155.7) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`18b283d3`) + `fbe89f5d` (relais précédent) + le merge `41758817` de `lot-n6-reglages` (`212f8822` lot et release 1.155.7, `a1eda771` mots validés) + ce relais. Relecture croisée de Cowork : verte du premier coup (copie `git archive`, 20 bancs, 288/288, huit mutations rouges). Mots validés par Grégoire (option B) ; Cowork vérifiera les deux textes sur `main` après le push. #938 inscrite (jetons perdus à la réédition par l'assistant).
 

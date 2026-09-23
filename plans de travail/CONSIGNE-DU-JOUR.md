@@ -1,39 +1,53 @@
-# Consigne du jour – Lot N6 : les réglages que rien ne lit, et un réglage lu sous deux noms (#900 ; #935 volet nom ; #899 ; dénotation à zéro cible)
+# Consigne du jour – Une seule carte « Exporter des travaux » (#895)
 
-> Écrite le 23 septembre 2026, 12 h 20 (Toronto), par Cowork, sur `origin/main` = `dcd22d4f` (1.155.5, en production chez Netlify depuis 11 h 56, déploiement mesuré). **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (lot N5, livrée en 1.155.5) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-n5-cibles.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Les fiches font foi** : `BACKLOG.md`, #900 (constat A-7 et ses ajouts du lot 28) et #935 (volet « deux noms » seulement). Dernier lot de la file des pratiques de notation (`plans de travail/FILE-DES-LOTS.md`). **Aucune question à Grégoire en entrée** ; un arrêt prévu au §4, et des mots à lui proposer au §2d.
-> ⚠ **Rappel de protocole** (écart du 23 sept. sur N5) : après le complément de relecture, **attends que Cowork l'ait revérifié** avant le verdict, la fusion et le push. Le push du lot N5 a précédé cette revérification ; elle s'est révélée verte, mais l'ordre fait partie de la preuve (PROTOCOLE, règle 2).
+> Écrite le 23 septembre 2026, 16 h 50 (Toronto), par Cowork, sur `origin/main` = `c5dec89e` (1.155.7, en production chez Netlify depuis 16 h 19, déploiement mesuré ; les deux textes validés du lot N6 vérifiés mot pour mot sur `main`). **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (lot N6, livrée en 1.155.7) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-n6-reglages.md` (déplacée par Cowork, à commiter avec ce lot). La file des pratiques de notation est vide ; retire aussi la ligne « une seule carte « Exporter des travaux » (#895) » de la tête de `FILE-DES-LOTS.md` à la livraison.
+> **La fiche fait foi** : `BACKLOG.md`, #895, et sa décision : `plans de travail/DECISIONS-2026-09-17-apres-midi.md`. Dernier lot de l'audit « Exporter et archiver » du 16 sept.
 
-## 1 · Ce que fait le lot, en quatre volets
+## 0 · La décision de Grégoire (17 sept. 2026, 13 h 36) – elle fait foi
 
-**1a. Retirer du CODE ce qui écrit des champs sans lecteur (#900).** Liste de la fiche : `configuration.varianteCalcul` (hors miroir et formulaire), `portfolio.hybride`, `portfolio.reprisesPermises`, `afficherRang`, `afficherMoyenneGroupe`, `reglesSommatives`, SOM `portfolio{nbArtefacts, qualitatif}`, `jetons.delaiActif`, `jetons.repriseActif`, `portfolio.decouplerPN`, `modeDEN`, et les seuils camelCase du « Modèle sommatif » (B-4, `pratiques-bibliotheque.js`). **Remesure chacun avant de le retirer** : la fiche date du 17 sept., et les lots N1 à N5 ont touché ces fichiers (`modeleBundle`, par exemple, a maintenant un lecteur depuis N4 : il reste). Pour chaque champ : lecteur trouvé → il reste, et tu le dis ; aucun lecteur → l'écriture part. **Rien n'est effacé des données déjà écrites** (limite de Grégoire du 20 sept.) : on cesse d'écrire, on ne nettoie pas. Un champ lu par une phrase seulement (`reprisesPermises`, la fiche le dit) : la phrase dit-elle vrai sans le champ ? Si elle devient fausse ou vide, dis-le.
+**Une seule carte « Exporter des travaux »**, avec la **forme des dossiers** (par étudiant·e / par étudiant·e et production) et la **compression** en options, et **« Toutes / Tous » accepté comme un export complet**. Écartés : garder les deux cartes en réparant le refus ; retirer « Trimestre complet » sans reprendre sa forme.
 
-**1b. Un réglage, un nom (#935, volet nom seulement).** L'assistant écrit `seuilAcceptabilite`, le formulaire de gestion lit et écrit `seuilAcceptable`, le moteur fait primer `seuilAcceptable` : enregistrer au formulaire une spécification créée à 70 la fait passer à 75 sans un mot (mesuré par N4). **Décidé par Cowork (technique)** : un seul nom, celui que le moteur lit ; le formulaire affiche la valeur que la pratique porte, sous l'un ou l'autre nom, et écrit sous le nom unique ; l'assistant écrit sous ce nom. Les pratiques déjà écrites sous l'autre nom se lisent (pas de conversion en base). **Hors lot, à Grégoire plus tard** : la valeur par défaut (75, 100, 60) ; n'en change aucune.
+## 1 · Ce que Cowork a mesuré (lecture seule, 16 h 45)
 
-**1c. La flèche (#899).** Le récapitulatif de l'assistant écrit « Conception › Pratiques de notation » (`wizard-pratique-v2.js` ≈ l. 2146) : « → », comme le reste de l'application. Balaye `js/` et `index.html` pour d'autres « › » dans un chemin de navigation montré à l'utilisateur ; aligne ceux des pratiques de notation, inscris les autres s'il y en a.
+- **Deux cartes** dans `genererSectionArchivage` (ou équivalent, `js/travaux-ui.js` ≈ l. 1280-1330) : « Exporter des travaux » (menus `travaux-archivage-production` / `-etudiant`, bouton `travauxUI.lancerArchivage`) et « Trimestre complet » (menus `travaux-archivage-semestre-*`, barre de progression, bouton `travauxUI.lancerArchivageSemestre`). Mêmes filtres, mêmes contenus (originaux, annotés, évaluations JSON).
+- **Le refus** : `lancerArchivage` (`travaux-ui.js` ≈ l. 3597-3606) fait `alert('Sélectionne au moins un étudiant ou une production')` quand les deux menus sont à leur valeur de départ « Toutes / Tous ». Un `alert` natif, en plus.
+- **Deux moteurs** dans `js/travaux-archivage.js` : `exporterTravaux(da, productionId)` (l. 163, arborescence `étudiant·e/fichier`, sans compression) et `exporterSemestre(options, onProgression)` (l. ≈ 232, arborescence `étudiant·e/production/fichier`, `_resume.json` avec les pertes nommées, DEFLATE niveau 6, progression).
+- **⚠ Une différence qui compte pour tes données** : `lancerExport` marque « exporté » ce qui est réellement parti (`marquerExporte`, #891, ≈ l. 615-618) ; `lancerExportSemestre` (l. 680) **ne marque rien**. Or « Proposer un nettoyage » ne propose que des copies exportées (#892).
+- **L'aide** décrit les deux cartes (`index.html` ≈ l. 11735-11736) ; elle a été réécrite en 1.151.4 (#893, spec `aide-exporter-archiver-893.spec.js`).
 
-**1d. Une dénotation sans cible ne s'enregistre plus (mesuré par N5, `aa7007e9`).** La gestion des pratiques accepte d'enregistrer une dénotation à zéro cible ; toutes ses notes sont alors plafonnées à 59. L'assistant, lui, l'interdit. Même garde dans la gestion, par le même composant (`EditeurCibles`) : pas de copie de la règle. **Le message du refus est un mot neuf : propose-le dans le rapport**, Grégoire le lira avant le push.
+## 2 · Ce que fait le lot
 
-## 2 · Arrêt prévu
+**2a. Une carte, un moteur.** « Exporter des travaux » garde ses deux menus (Production, Étudiant·e), gagne deux options (forme des dossiers ; compression) et la barre de progression. « Toutes / Tous » exporte tout le groupe, sans refus. « Trimestre complet » disparaît, **et l'un des deux moteurs avec lui** (zéro-dette) : un seul `exporter…` porte les deux arborescences, `_resume.json`, les pertes nommées (#565, #891) et la compression. Lequel garder, et sous quel nom, relève de toi.
 
-Si un champ de la liste 1a est lu par un **export, un import, un partage de pratique ou la Réserve** (ce qui voyage), il ne part pas : **arrête-toi sur ce champ et dis lequel**, les autres continuent. Rétro-compatibilité de ce qui voyage (`CLAUDE.md`).
+**2b. « Exporté » suit la règle de #891 pour tout export.** Tout fichier réellement mis dans l'archive est marqué « exporté », quelle que soit l'option. **Décidé par Cowork (technique)** : c'est la règle déjà livrée, appliquée au chemin qui y échappait. Conséquence à écrire dans le rapport : un export complet rend ses fichiers éligibles à « Proposer un nettoyage », qui, lui, ne supprime toujours rien sans la question de #892.
 
-## 3 · Tests
+**2c. Les valeurs par défaut des options.** **Décidé par Cowork** : forme « par étudiant·e et production » et compression activée, soit la forme de « Trimestre complet » (la plus complète et la plus légère). Si tu mesures que cela change le résultat d'un parcours existant (spec, banc) au-delà de l'arborescence, dis lequel.
 
-- Pour chaque champ retiré : une pratique créée (assistant, formulaire, gabarit) ne le porte plus ; une pratique ancienne qui le porte encore s'ouvre, calcule et s'enregistre sans erreur, et **la note ne bouge pas** (même valeur avant et après, sur les quatre familles).
-- 1b : une spécification créée par l'assistant à 70 s'affiche 70 au formulaire et reste 70 après un enregistrement sans rien toucher ; une pratique ancienne sous l'autre nom aussi.
-- 1c : la phrase du récapitulatif, mot pour mot.
-- 1d : la gestion refuse zéro cible avec le message ; une cible suffit.
-- Sentinelle : aucun écrivain des champs retirés dans `js/`.
-- Break-test sur chaque assertion ; suite Vitest complète verte.
+**2d. Le refus disparaît avec son `alert`.** Aucune sélection n'est plus « invalide ». Si un filtre ne donne aucun fichier, le bilan de l'export le dit (mécanisme existant de `_afficherBilanExport`), sans `alert`.
 
-## 4 · Livraison
+**2e. Les mots.** Les libellés des deux options et de leurs choix, et la phrase de l'aide qui remplace les deux lignes de cartes, sont lus par les enseignant·es : **propose-les dans le rapport**, sur le modèle des mots déjà à l'écran (« Évaluations en JSON + productions en PDF », « étudiant·e »). Grégoire les validera avant le push.
 
-- Version **patch** par `scripts/release.mjs`. Item de « Nouvelles » **proposé, à valider par Grégoire avant le push** (sans doute un seul : le seuil qui ne change plus au formulaire, et la dénotation qui exige une cible ; le ménage lui-même ne se voit pas).
-- Ordre : commit, relecture de Cowork, corrections, **revérification de Cowork**, verdict, push.
-- Ensuite : N6 sort de `FILE-DES-LOTS.md`. **La file des pratiques de notation est vide.** Le chantier suivant, décidé par Grégoire le 23 sept. : le dernier lot de l'export (une seule carte « Exporter des travaux », #895).
+## 3 · Arrêt prévu
 
-## 5 · Le geste que Grégoire vérifiera à l'écran (s'il le souhaite)
+Si le moteur retiré est appelé ailleurs que depuis cette carte (export Léa, archivage d'un trimestre, Réserve, un bouton d'un autre écran), **arrête-toi et dis où** : ce chemin-là ne disparaît pas sans décision.
 
-Aucun sur ses données : rien ne change pour une pratique Standards. Le lot se prouve par les tests.
+## 4 · Tests
+
+- Carte unique : « Toutes / Tous » produit une archive complète (tous les fichiers du groupe, `_resume.json` compris) ; une production seule ; un·e étudiant·e seul·e ; les deux.
+- Les deux formes de dossiers, les deux états de compression.
+- Un fichier illisible : sauté, nommé dans le bilan et dans `_resume.json`, les autres partent (#891).
+- « Exporté » : posé sur ce qui est parti, et seulement là, dans chaque option.
+- Sentinelle : plus de carte « Trimestre complet », plus de `lancerArchivageSemestre`, plus d'`alert` dans ce chemin, un seul moteur.
+- La spec de l'aide (#893) suit le nouveau texte.
+- Break-test sur chaque assertion ; suite Vitest complète verte ; une spec WebKit qui télécharge réellement l'archive par le bouton et lit son contenu.
+
+## 5 · Livraison
+
+- Version **mineure** par `scripts/release.mjs` (un geste change de forme à l'écran). Item de « Nouvelles » **proposé, à valider par Grégoire avant le push**.
+- Ordre : commit, relecture de Cowork, corrections, **revérification de Cowork si du code change**, verdict, push.
+- **Porte terrain** : le téléchargement d'une archive sur iPad (Safari) ne se juge pas en WebKit de bureau. Si tu l'estimes due, écris son markdown dans `plans de travail/` (skill `portes-terrain`) ; Cowork publie l'artefact.
+
+## 6 · Le geste que Grégoire vérifiera à l'écran
+
+Dans « Exporter et archiver », une seule carte « Exporter des travaux » ; laisser « Toutes / Tous » et cliquer « Télécharger » donne l'archive de tout le groupe, rangée par étudiant·e et par production.
