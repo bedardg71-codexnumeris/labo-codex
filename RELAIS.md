@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 17 H 10 : **#895 ET 1.156.0 SUR `lot-895-une-carte-exporter`, NON FUSIONNÉ, NON POUSSÉ** — attend la relecture croisée de Cowork et la validation par Grégoire des mots
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 17 H 30 : **LOT #895 (1.156.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`c5dec89e`) + le merge `d7fb3cee` de `lot-895-une-carte-exporter` (`3cfe8e66` lot et release 1.156.0, `28f0d02f` mots validés) + ce relais. Relecture croisée de Cowork verte (copie `git archive`, 41/41, huit mutations rouges ; `plans de travail/RELECTURE-2026-09-23-lot-895.md`). Mots validés par Grégoire avec deux retouches (« étudiant·e » dans l'aide ; « maintenant » et la phrase du nettoyage dans Nouvelles). Le bump de jetons des fichiers de N6 vient de `release.mjs` : il compte depuis l'AVANT-dernière release (#675), un rechargement de trop, pas un défaut.
+
+**Suite** : #895 sort de la file ; l'audit « Exporter et archiver » du 16 sept. est clos côté code (#892 reste pour ses dialogues). La branche `lot-895-une-carte-exporter` peut être supprimée une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 17 H 10 : **#895 ET 1.156.0 SUR `lot-895-une-carte-exporter`, NON FUSIONNÉ, NON POUSSÉ** — attend la relecture croisée de Cowork et la validation par Grégoire des mots
 
 **Où vit le travail** : branche `lot-895-une-carte-exporter` = `main` (`c5dec89e`, 1.155.7) + le commit du lot et de la release 1.156.0. Une seule carte « Exporter des travaux », un seul moteur (`exporterTravaux(options, onProgression)`), « Toutes / Tous » = tout le groupe, « exporté » posé aussi par l'export complet. Vitest 626 / 7246 vert ; specs WebKit du lot vertes (895, 893, 892 : 6/6) ; 14 mutations, 14 rouges. Verdict Playwright complet NON lancé (après la revérification de Cowork, règle 2 du PROTOCOLE).
 
