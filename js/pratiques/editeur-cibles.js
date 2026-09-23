@@ -183,7 +183,8 @@
         return confirm(message);
     }
 
-    const MOTIF_AUCUNE_CIBLE = 'Ajoute au moins une cible : sans cible, aucune ne peut être atteinte et aucune note ne peut dépasser 59.';
+    // Mots VALIDÉS par Grégoire le 23 sept. 2026 (option B, raccourci proposé par Cowork).
+    const MOTIF_AUCUNE_CIBLE = 'Ajoute au moins une cible : sans cible, aucune note ne peut dépasser 59.';
 
     /**
      * Lot N6 (23 sept. 2026) — UNE DÉNOTATION A AU MOINS UNE CIBLE. Sans cible, aucune ne
