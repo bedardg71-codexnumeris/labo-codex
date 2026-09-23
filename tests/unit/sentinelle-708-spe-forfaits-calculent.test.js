@@ -98,7 +98,7 @@ describe('#708 · la forme « forfaits » du gabarit calcule', () => {
         expect(win.obtenirPratiqueParId('spe-assistant').calculerPerformance(DA.A)).toBeNull();
         const ligne = win._exportResultats.construireLignesSynthese([{ da: DA.A, nom: 'N', prenom: 'P' }], { pratiqueId: 'spe-assistant' }, win.simulerIndices)[0];
         // Lot N4 (#713) : l'export nomme la cause.
-        expect([ligne[8], ligne[9]]).toEqual(['', 'non constructible – Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception › Pratiques de notation (clique sur la pratique).']);
+        expect([ligne[8], ligne[9]]).toEqual(['', 'non constructible – Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception → Pratiques de notation (clique sur la pratique).']);
     });
     it('la traduction : seuil de la racine propagé aux types, note → noteFixe, lettre → label, travaux → requis, forfait sans travaux → palier plancher', () => {
         const { win } = monter(GABARIT);

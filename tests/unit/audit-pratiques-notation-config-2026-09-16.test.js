@@ -50,7 +50,7 @@ function diff(a, b, ignorer = ['dateCreation']) {
 }
 
 /** Lot N4 (#713) — le statut d'export d'une spécification sans types ni forfaits (la cause, nommée). */
-const STATUT_SANS_TYPES_NI_FORFAITS = 'non constructible – Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception › Pratiques de notation (clique sur la pratique).';
+const STATUT_SANS_TYPES_NI_FORFAITS = 'non constructible – Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception → Pratiques de notation (clique sur la pratique).';
 const DA = { SOM: '1000001', STD: '1000002', SPE: '1000003', DEN: '1000004' };
 const ETUDIANTS = [
     { da: DA.SOM, nom: 'Sommative', prenom: 'Alice', groupe: '01', coursId: 'GC1' },
@@ -958,6 +958,21 @@ describe('lot N4 · #713 : aucun forfait atteint, aucun palier d\'échec créé 
         expect(b2.win.causeNoteNonConstructible(DA.SPE)).toBeNull();
     });
 
+    it('un élève dont la SEULE copie est un brouillon n\'a pas de note, et ne reçoit PAS la cause « aucun forfait atteint » (#706 : un brouillon ne compte nulle part)', () => {
+        // Complément de la relecture de Cowork (mutation survivante : le filtre `evaluationEntreDansLaNote` de la cause).
+        // À LA MAIN : Alice n'a qu'un projet à 60 NON ENREGISTRÉ → aucune copie ne compte → pas de note, et la cause
+        // n'est pas celle d'un forfait manqué : aucune copie n'a été jugée.
+        const b = monterN4(MODELE_SIMPLE);
+        b.store.test_evaluationsSauvegardees = b.store.test_evaluationsSauvegardees
+            .filter(e => e.etudiantDA !== DA.SOM).concat([ev('N4_BR', DA.SOM, 'PJ1', 60, 'D', { verrouillee: false })]);
+        expect(noteDe(b, DA.SOM, MODELE_SIMPLE.id).perf).toBeNull();
+        expect(b.win.causeNoteNonConstructible(DA.SOM)).toBeNull();
+        expect(b.win.simulerIndices(DA.SOM, MODELE_SIMPLE.id).causeNonConstructible).toBeNull();
+        // Témoin : la même copie ENREGISTRÉE reçoit la cause (le banc sait la voir).
+        b.store.test_evaluationsSauvegardees = b.store.test_evaluationsSauvegardees.map(e => e.id === 'N4_BR' ? Object.assign(e, { verrouillee: true }) : e);
+        expect(b.win.causeNoteNonConstructible(DA.SOM)).toBe(CAUSE_AUCUN_FORFAIT);
+    });
+
     it('la configurable n\'a plus de chemin « specifications » à elle : pas de suite de notes par défaut, la note vient du moteur', () => {
         const b = monterN4(MODELE_SIMPLE);
         const inst = b.win.obtenirPratiqueParId(MODELE_SIMPLE.id);
@@ -1009,6 +1024,19 @@ describe('lot N4 · #854 volet spécifications : rouvrir puis enregistrer sans r
         const { apres } = await rouvrirEtResauver(b, p0.id);
         expect(JSON.stringify(apres.configuration)).toBe(JSON.stringify(avant.configuration));
         expect(diff(avant, apres)).toEqual([]);
+    });
+
+    it('modèle de forfaits autre que le défaut (« litterature ») : rouvrir PRÉSÉLECTIONNE le modèle enregistré, enregistrer sans toucher le garde', async () => {
+        // Complément de la relecture de Cowork (mutation survivante : la relecture de `modeleBundle` — la fusion gardait
+        // l'ancienne valeur quand rien n'était répondu, et l'écran, lui, ne présélectionnait rien).
+        const b = monterN4(MODELE_SIMPLE);
+        const p0 = await creerParAssistant(b, { nom: 'SPE flexibles', calcNoteFinale: 'acceptable', seuilAcceptabilite: 80, utiliserJetons: false, modeleBundle: 'litterature' });
+        const avant = clone(b.store.test_pratiquesConfigurables.find(p => p.id === p0.id));
+        expect(avant.configuration.modeleBundle).toBe('litterature');
+        const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
+        expect(reponses.modeleBundle).toBe('litterature');                      // la carte cochée à l'écran
+        expect(apres.configuration.modeleBundle).toBe('litterature');
+        expect(JSON.stringify(apres.configuration)).toBe(JSON.stringify(avant.configuration));
     });
 
     it('jetons DÉSACTIVÉS par l\'assistant : restent `{ activer: false }`, seuil 60 gardé', async () => {
