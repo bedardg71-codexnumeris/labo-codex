@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N2 (#716, 1.155.2) FUSIONNÉ DANS `main` (merge `63308965`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 8 H : **LOT N7 COMMITÉ SUR LA BRANCHE `lot-n7-echelle-note-globale`, RELEASE 1.155.3 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
+
+**Où vit le travail** : branche locale `lot-n7-echelle-note-globale`, partie de `73445a4c` : `1961325b` (le lot : `lireEchelleNoteGlobale`, retrait d'`obtenirPratiqueActuelle` et des méthodes du registre, garde de la configurable, sentinelle-n7, bloc N7 du banc moteur ; plus les fichiers de plans de Cowork que la consigne disait de commiter avec le lot), `1a858ffa` (release 1.155.3, build 0923-0754). Break-test : 11 mutations, toutes rouges. Vitest 622 / 7 153 après le bump.
+
+**À relire en priorité** : le seul écart à l'écran — une Standards rangée en bibliothèque sous l'id « standards » ou « pan-standards » (#711) lisait l'échelle de la pratique (règle B) ; elle lit maintenant celle des évaluations (essai N7-2bis). Pack démo (`demo-std-litt`) et bancs : même appel qu'avant. Aucun item de « Nouvelles ». Repli IDME de `construireConfigComplete` : hors chemin de lecture, déjà inscrit (#590).
+
+**Reste, dans l'ordre** : relecture de Cowork (PROTOCOLE, règle 2) → corrections → fusion dans `main` → verdict Playwright → `pousser.sh`. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N2 (#716, 1.155.2) FUSIONNÉ DANS `main` (merge `63308965`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`4a0cd22b`) + `a3436f24` (relais précédent) + le merge de `lot-n2-p-historique` (jusqu'à `8f7dc947`, complément de relecture) + ce relais. Relecture croisée de Cowork sur `8f7dc947` : verte, par exécution sur une copie `git archive`, bancs du lot 188/188 ; les deux mutations qui survivaient rougissent. Phrase de « Nouvelles » validée par Grégoire le 23 sept. au matin. Vitest 622 / 7 144.
 
