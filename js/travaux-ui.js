@@ -57,10 +57,14 @@
         return _chronoElapsed;
     }
 
-    // IDs des badges chrono (palette flottante indépendante + toolbar legacy)
-    var _chronoBadgeIds = ['chrono-badge', 'travaux-chrono-badge'];
+    // Badge chrono, dans la barre du haut de la visionneuse (retour testeur du 23 sept. 2026)
+    var _chronoBadgeIds = ['chrono-badge'];
+    var _CHRONO_TITRE = 'Démarre à la 1re annotation et s\'arrête à l\'enregistrement.';
 
     function _majAffichageChrono() {
+        // Le groupe n'existe dans la barre que si la préférence est cochée.
+        var groupe = document.getElementById('travaux-chrono-toolbar');
+        if (groupe) groupe.classList.toggle('u-hide', obtenirPreference('chronoEvaluation') !== true);
         var total = _chronoTotalMs();
         var enCours = _chronoDebut && !_chronoPaused;
         var chronoActif = enCours || _chronoPaused;
@@ -94,10 +98,6 @@
         _chronoPaused = false;
         const fichier = travauxVisionneuse.getFichierActuel();
         _chronoFichierId = fichier ? fichier.id : null;
-        // Ouvrir automatiquement la palette chrono
-        if (typeof travauxOutils !== 'undefined' && travauxOutils.ouvrirPaletteChrono) {
-            travauxOutils.ouvrirPaletteChrono();
-        }
         _majAffichageChrono();
         _chronoInterval = setInterval(_majAffichageChrono, 1000);
 
@@ -232,19 +232,18 @@
     }
 
     /**
-     * Affiche l'info moyenne dans la palette chrono.
+     * Affiche l'info moyenne en infobulle du chrono : dans la barre, une seconde
+     * ligne n'a pas de place.
      */
     function _afficherInfoMoyenne(moyenneInfo) {
-        var el = document.getElementById('chrono-info-moyenne');
+        var el = document.getElementById('travaux-chrono-toolbar');
         if (!el) return;
         if (moyenneInfo.count < 2) {
-            el.style.display = 'none';
+            el.title = _CHRONO_TITRE;
             return;
         }
         var nom = moyenneInfo.activite || '';
-        if (nom.length > 30) nom = nom.substring(0, 28) + '…';
-        el.textContent = 'Moy. ' + _formaterDuree(moyenneInfo.moyenneMs) + ' × ' + moyenneInfo.count + (nom ? ' · ' + nom : '');
-        el.style.display = '';
+        el.title = 'Moy. ' + _formaterDuree(moyenneInfo.moyenneMs) + ' × ' + moyenneInfo.count + (nom ? ' · ' + nom : '') + '\n' + _CHRONO_TITRE;
     }
 
     function getDureeMs() {
@@ -1176,29 +1175,10 @@
                                 <div class="actions-separateur"></div>
                                 <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Modifier</button>
                                 <!-- Re-importer : opération sur fichier, disponible dans Exporter et archiver -->
-                            </div>
-                        </div>
-                        ${_htmlDropdownProduction ? `<div class="annot-toolbar-production">${_htmlDropdownProduction}</div>` : ''}
-                        <div class="annot-toolbar-fichiers travaux-fichiers-compact">
-                            ${_htmlBadgesGrille}
-                        </div>
-                        <div class="annot-toolbar-separateur"></div>
-                        <div class="annot-toolbar-outils">
-                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
-                            <span id="travaux-indicateur-page">-- / --</span>
-                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
-                            <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-badge-prec" class="travaux-btn-nav" data-action="travauxUI.badgePrecedent" disabled title="Fichier précédent"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
-                            <span id="travaux-compteur-badge" class="travaux-compteur-badge">-- / --</span>
-                            <button id="travaux-btn-badge-suiv" class="travaux-btn-nav" data-action="travauxUI.badgeSuivant" disabled title="Fichier suivant"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
-                            <span class="travaux-separateur"></span>
-                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster à la largeur"><img src="icons/icon-resize-horizontal.svg" alt="" class="nav-seq-icon"></button>
-                            <button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster à la hauteur"><img src="icons/icon-resize-vertical.svg" alt="" class="nav-seq-icon"></button>
-                            <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
-                            <span class="travaux-separateur"></span>
-                            <div class="travaux-fond-picker" id="travaux-fond-picker">
-                                <button class="travaux-btn-nav" id="travaux-btn-fond" title="Couleur de fond du canvas"><img src="icons/icon-paint-palette.svg" alt="" class="outil-svg-icon" style="width:16px;height:16px;"></button>
-                                <div class="travaux-fond-dropdown" id="travaux-fond-dropdown">
+                                <!-- Retour testeur du 23 sept. 2026 — la couleur du fond quitte la barre du haut pour ce menu. -->
+                                <div class="actions-separateur"></div>
+                                <div class="actions-sous-titre">Fond du canevas</div>
+                                <div class="actions-fond-swatches" id="travaux-fond-swatches">
                                     <button class="travaux-fond-swatch" data-fond="" title="D\u00e9faut (suit le th\u00e8me)" style="background:var(--surface-conteneur, #142428); border:2px solid var(--accent-primaire)"></button>
                                     <button class="travaux-fond-swatch" data-fond="#142428" title="Oc\u00e9an" style="background:#142428"></button>
                                     <button class="travaux-fond-swatch" data-fond="#1a2744" title="Nuit" style="background:#1a2744"></button>
@@ -1213,7 +1193,27 @@
                                     <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr\u00e8me" style="background:#e8e4da"></button>
                                 </div>
                             </div>
+                        </div>
+                        ${_htmlDropdownProduction ? `<div class="annot-toolbar-production">${_htmlDropdownProduction}</div>` : ''}
+                        <div class="annot-toolbar-fichiers travaux-fichiers-compact">
+                            ${_htmlBadgesGrille}
+                        </div>
+                        <div class="annot-toolbar-separateur"></div>
+                        <div class="annot-toolbar-outils">
+                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
+                            <span id="travaux-indicateur-page">-- / --</span>
+                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
+                            <span class="travaux-separateur"></span>
+                            <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
+                            <span class="travaux-separateur"></span>
                             <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran"><img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon"></button>
+                            <!-- Retour testeur du 23 sept. 2026 — le chronomètre revient dans la barre : en palette, il prenait de la place sur la copie. -->
+                            <div id="travaux-chrono-toolbar" class="travaux-chrono-toolbar u-hide" title="Démarre à la 1re annotation et s'arrête à l'enregistrement.">
+                                <span class="travaux-separateur"></span>
+                                <img src="icons/icons8-stopwatch.svg" alt="Chronomètre" class="nav-seq-icon travaux-chrono-icone">
+                                <span id="chrono-badge" class="travaux-chrono-badge">--:--</span>
+                                <button id="chrono-btn-pause" class="chrono-btn-etat" data-action="travauxUI.togglePauseChrono" style="display:none" title="Pause">\u23f8\ufe0f</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1240,6 +1240,9 @@
 
         // Couleur de fond du canvas
         initialiserFondCanvas();
+
+        // Chrono : visible selon la préférence, avec son état courant
+        _majAffichageChrono();
 
         // Configurer la visionneuse
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
@@ -3094,9 +3097,6 @@
                 }
             }
         }
-
-        // Rafraîchir le compteur pour refléter le filtre
-        mettreAJourCompteurBadge();
     }
 
     /**
@@ -3522,9 +3522,6 @@
                 const selRemise = document.getElementById('remiseProduction1');
                 mettreAJourPillStatut(selRemise ? selRemise.value : 'importe');
             }
-
-            // Mettre à jour le compteur de badges (navigation fichiers)
-            mettreAJourCompteurBadge();
 
             // Bulle de decouverte au premier fichier ouvert (aide-contextuelle)
             if (typeof estAideContextuelleActive === 'function' && estAideContextuelleActive()
@@ -7356,61 +7353,6 @@
     }
 
     /* ===============================
-       COMPTEUR DE BADGES (navigation fichiers)
-       =============================== */
-
-    /**
-     * Retourne la liste de fichiers filtrée par la production active (si applicable).
-     */
-    function obtenirFichiersNavigables() {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        if (!productionFiltreActive) return fichiers;
-        return fichiers.filter(f => f.productionId === productionFiltreActive);
-    }
-
-    function mettreAJourCompteurBadge() {
-        const fichiers = obtenirFichiersNavigables();
-        const fichierActuel = travauxVisionneuse.getFichierActuel();
-        const index = fichierActuel ? fichiers.findIndex(f => f.id === fichierActuel.id) : -1;
-
-        const texte = index >= 0 ? `${index + 1} / ${fichiers.length}` : `-- / ${fichiers.length || '--'}`;
-        const precDisabled = index <= 0;
-        const suivDisabled = index < 0 || index >= fichiers.length - 1;
-
-        // Mettre à jour le compteur toolbar (annotation)
-        const ind1 = document.getElementById('travaux-compteur-badge');
-        if (ind1) ind1.textContent = texte;
-        const bp1 = document.getElementById('travaux-btn-badge-prec');
-        if (bp1) bp1.disabled = precDisabled;
-        const bs1 = document.getElementById('travaux-btn-badge-suiv');
-        if (bs1) bs1.disabled = suivDisabled;
-
-        // Mettre à jour le compteur header (Fichiers importés)
-        const ind2 = document.getElementById('travaux-compteur-badge-txt-header');
-        if (ind2) ind2.textContent = texte;
-        const bp2 = document.getElementById('travaux-btn-badge-prec-header');
-        if (bp2) bp2.disabled = precDisabled;
-        const bs2 = document.getElementById('travaux-btn-badge-suiv-header');
-        if (bs2) bs2.disabled = suivDisabled;
-    }
-
-    function badgePrecedent() {
-        const fichiers = obtenirFichiersNavigables();
-        const fichierActuel = travauxVisionneuse.getFichierActuel();
-        if (!fichierActuel) return;
-        const index = fichiers.findIndex(f => f.id === fichierActuel.id);
-        if (index > 0) ouvrirFichier(fichiers[index - 1].id);
-    }
-
-    function badgeSuivant() {
-        const fichiers = obtenirFichiersNavigables();
-        const fichierActuel = travauxVisionneuse.getFichierActuel();
-        if (!fichierActuel) return;
-        const index = fichiers.findIndex(f => f.id === fichierActuel.id);
-        if (index >= 0 && index < fichiers.length - 1) ouvrirFichier(fichiers[index + 1].id);
-    }
-
-    /* ===============================
        CHANGEMENT DE MODE (anonymisation)
        =============================== */
 
@@ -7484,17 +7426,15 @@
         }
     });
 
+    /**
+     * Pastilles de fond, dans le menu Actions depuis le retour testeur du 23 sept. 2026.
+     * Le clic sur une pastille ne remonte pas au menu : il reste ouvert pour comparer.
+     */
     function initialiserFondCanvas() {
-        var btnFond = document.getElementById('travaux-btn-fond');
-        var dropdown = document.getElementById('travaux-fond-dropdown');
-        if (!btnFond || !dropdown) return;
+        var pastilles = document.getElementById('travaux-fond-swatches');
+        if (!pastilles) return;
 
-        btnFond.addEventListener('click', function(e) {
-            e.stopPropagation();
-            dropdown.classList.toggle('visible');
-        });
-
-        dropdown.addEventListener('click', function(e) {
+        pastilles.addEventListener('click', function(e) {
             e.stopPropagation();
             var swatch = e.target.closest('[data-fond]');
             if (!swatch) return;
@@ -7509,12 +7449,6 @@
                 }
             }
             db.setSync('travaux-fond-canvas', couleur);
-            dropdown.classList.remove('visible');
-        });
-
-        // Fermer le dropdown au clic ailleurs
-        document.addEventListener('click', function() {
-            dropdown.classList.remove('visible');
         });
 
         // Restaurer la couleur sauvegardée
@@ -7563,8 +7497,6 @@
         configurerFSAPI: configurerFSAPI,
         lancerImport: lancerImport,
         ouvrirFichier: ouvrirFichier,
-        badgePrecedent: badgePrecedent,
-        badgeSuivant: badgeSuivant,
         filtrerParEtudiant: filtrerParEtudiant,
         toggleSidebar: toggleSidebar,
         retourFichiers: retourFichiers,

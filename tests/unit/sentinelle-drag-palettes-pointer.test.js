@@ -64,10 +64,11 @@ describe('sentinelle · drag des palettes en Pointer Events (#144)', () => {
         expect(reglePlanif).toContain('touch-action: none');
     });
 
-    it('poignée visuelle ⠿ présente dans les barres (éval, annotation, tampons, codes, chrono, nœuds)', () => {
+    // #937 (23 sept. 2026) — la palette chrono n'existe plus : le chrono vit dans la barre du haut.
+    it('poignée visuelle ⠿ présente dans les barres (éval, annotation, tampons, codes, nœuds)', () => {
         const ui = readFileSync(path.join(racine, 'js', 'travaux-ui.js'), 'utf8');
         const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
-        expect((outils.match(/class="palette-grip"/g) || []).length).toBeGreaterThanOrEqual(4);
+        expect((outils.match(/class="palette-grip"/g) || []).length).toBeGreaterThanOrEqual(3);
         expect(ui).toContain('class="palette-grip"');
         expect(html).toContain('class="palette-grip"');
     });

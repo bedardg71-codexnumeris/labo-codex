@@ -134,6 +134,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (23 septembre 2026 — le chronomètre revient dans la barre du haut d'Annoter)
+
+| # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
+|---|---------|--------------|---------|-------|-------------|------------|
+| 937 | Grégoire (`FEEDBACK_"grégoire"_2026-09-23_10-47-05.txt` + 2 captures, 1.155.4, Chrome/Mac ; Évaluations › Annoter) | 23 sept., 10 h 47 | 23 sept. | à livrer (branche `chrono-barre-937`) | **« Je voudrais qu'on déplace le chronomètre dans la toolbar, en haut, à droite du canevas. […] il occupe ainsi de l'espace dans le canevas et ce n'est pas nécessaire. »** Pour faire la place : retirer les chevrons d'un élève à l'autre (le carrousel le fait), « pleine hauteur » / « pleine largeur », et la palette du fond, « qui peut devenir un bouton intégré dans un menu ». | Le chrono (icône, temps, pause) est au bout droit de la barre, visible seulement si la préférence « chronométrer » est cochée ; la moyenne par activité passe en infobulle. Chevrons « fichier précédent / suivant » et leur compteur retirés, avec `badgePrecedent`/`badgeSuivant`/`mettreAJourCompteurBadge` ; les deux ajustements retirés de cette barre (Modélisation garde les siens) ; les pastilles du fond passent dans le menu Actions, section « Fond du canevas », qui reste ouvert pour comparer. Retirés : la palette flottante « Chronométrer », son bouton dans la palette Annotation, un badge chrono hérité jamais affiché (panneau Paramètres). Source seulement : la couleur de fond déjà choisie (`travaux-fond-canvas`) est relue telle quelle. Banc `tests/integration/chrono-barre-annoter-937.spec.js` (3 essais WebKit, 2 mutations / 2 rouges). |
+
 ## Corrigés (22 septembre 2026 — la date d'échéance d'une production se pose d'avance ; le tri « par échéance » de la barre latérale plantait depuis mai ; « Réassocier » ne devine plus le fichier)
 
 | # | Testeur | Date rapport | Corrigé | Build | Description | Correction |
