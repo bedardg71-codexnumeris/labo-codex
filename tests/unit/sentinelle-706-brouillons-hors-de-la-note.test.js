@@ -178,7 +178,7 @@ describe('#706 · un brouillon n\'entre pas dans la note du cours — les quatre
         const b95 = monter(jeuSPE(BROUILLON95)), b0 = monter(jeuSPE(BROUILLON0));
         expect(b95.win.obtenirPratiqueParId('spe-banc').calculerPerformance(DA.SPE) * 100).toBe(80);     // avant : 100
         expect(b0.win.obtenirPratiqueParId('spe-banc').calculerPerformance(DA.SPE) * 100).toBe(80);
-        expect(b95.win.obtenirPratiqueParId('specifications').calculerPerformance(DA.SPE)).toBe(0.5);  // l'instance registre, jamais configurée (A-4)
+        expect(b95.win.obtenirPratiqueParId('specifications').calculerPerformance(DA.SPE)).toBeNull(); // l'instance registre, jamais configurée (A-4) : aucune note (lot N4 ; avant : 0,5)
     });
     it('SPE · un élève qui n\'a QUE des brouillons n\'a pas de note (null), pas un palier d\'échec', () => {
         const jeu = jeuSPE(BROUILLON95); jeu.evaluations = jeu.evaluations.filter(e => e.id === 'EV_X2');

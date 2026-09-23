@@ -103,7 +103,9 @@ function genererRapportAPI(da, options = {}) {
     // 4. PERFORMANCE — la note du cours, telle que le profil l'affiche, et les évaluations qui y entrent (#706).
     if (opts.performance) {
         if (indices.noteConstructible === false) {
-            rapport += `Performance : non constructible (aucune évaluation ne compte encore dans la note du cours)\n\n`;
+            // Lot N4 (#713) : la cause que la pratique déclare, sinon celle d'avant.
+            const cause = (typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(da) : null;
+            rapport += `Performance : non constructible (${cause || 'aucune évaluation ne compte encore dans la note du cours'})\n\n`;
         } else {
             rapport += `Performance : ${indices.P}% (note du cours)\n\n`;
         }

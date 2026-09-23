@@ -24,6 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { chargerAvecInterne, fauxDocument, dbBanc } from './_helpers/bac-suivi.js';
 import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (21 sept. 2026)
+import { tranche } from './_helpers/tranche.js';   // lot N4 (23 sept. 2026)
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MESURES = {};
@@ -48,6 +49,8 @@ function diff(a, b, ignorer = ['dateCreation']) {
     return res.sort((x, y) => x.chemin.localeCompare(y.chemin));
 }
 
+/** Lot N4 (#713) — le statut d'export d'une spécification sans types ni forfaits (la cause, nommée). */
+const STATUT_SANS_TYPES_NI_FORFAITS = 'non constructible – Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception → Pratiques de notation (clique sur la pratique).';
 const DA = { SOM: '1000001', STD: '1000002', SPE: '1000003', DEN: '1000004' };
 const ETUDIANTS = [
     { da: DA.SOM, nom: 'Sommative', prenom: 'Alice', groupe: '01', coursId: 'GC1' },
@@ -396,10 +399,10 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         expect(p0.configuration.forfaits).toBeUndefined();
         // A-3 CORRIGÉ (1.142.24) — « non constructible » à la PREMIÈRE et à la DEUXIÈME passe. Avant : la passe d'indices
         // écrivait { P: 0, noteConstructible: false }, _lireIndiceStocke relisait ce 0 comme une note → « 0, final ».
-        expect(note.export).toEqual({ note: '', statut: 'non constructible' });
+        expect(note.export).toEqual({ note: '', statut: STATUT_SANS_TYPES_NI_FORFAITS });   // lot N4 : la cause est nommée
         expect(cache.actuel.P).toBe(0);
         expect(cache.actuel.noteConstructible).toBe(false);          // le cache porte bien le bouche-trou : la garde a quelque chose à garder
-        expect(noteApresPasse.export).toEqual({ note: '', statut: 'non constructible' });
+        expect(noteApresPasse.export).toEqual({ note: '', statut: STATUT_SANS_TYPES_NI_FORFAITS });
         expect(noteApresPasse.perf).toBeNull();
         expect(noteApresPasse.simule).toEqual({ P: 0, noteFinale: null, noteConstructible: false });
         // Champ additif (#394) : une entrée ANTÉRIEURE, sans le champ, reste lue comme une note.
@@ -411,16 +414,18 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         b.store.test_indicesCP = { [DA.SPE]: { actuel: { pratique: 'sommative', P: 85, C: 100, noteConstructible: true } } };
         const sousAutrePratique = noteDe(b, DA.SPE, p0.id);
         expect(sousAutrePratique.perf).toBeNull();
-        expect(sousAutrePratique.export).toEqual({ note: '', statut: 'non constructible' });
+        expect(sousAutrePratique.export).toEqual({ note: '', statut: STATUT_SANS_TYPES_NI_FORFAITS });
         b.win.calculerEtStockerIndicesCP();                           // le stock se soigne seul à la passe suivante
         expect(b.store.test_indicesCP[DA.SPE].actuel).toMatchObject({ pratique: p0.id, P: 0, noteConstructible: false });
         // Témoin : le cache de CETTE pratique reste lu.
         b.store.test_indicesCP = { [DA.SPE]: { actuel: { pratique: p0.id, P: 64, C: 100, noteConstructible: true } } };
         expect(noteDe(b, DA.SPE, p0.id).perf).toBe(64);
-        // FIGE A-4 (#854 b, élargi au seuil) : la réédition ramène le seuil à 100 et perd jetons et modèle.
-        expect(apres.configuration.seuilAcceptabilite).toBe(100);
-        expect(apres.configuration.jetons).toEqual({ activer: false });
-        expect(apres.configuration.modeleBundle).toBeUndefined();
+        // A-4 CORRIGÉ (lot N4, #854 volet spécifications) : la réédition garde le seuil, les jetons et le modèle — diff vide.
+        // Avant : seuil ramené à 100, jetons { activer: false }, modèle perdu.
+        expect(d).toEqual([]);
+        expect(apres.configuration.seuilAcceptabilite).toBe(70);
+        expect(apres.configuration.jetons).toEqual({ activer: true, delai: { nombre: 4, dureeJours: 5, surReprise: true }, reprise: { nombre: 3 } });
+        expect(apres.configuration.modeleBundle).toBe('simple');
     });
 
     // FIGE A-6 (#717) : retirer la première cible décale les ids, la garde se tait (59 → 78). Valeur FAUSSE gardée exprès.
@@ -686,11 +691,12 @@ describe('G-1 · SPE : le seuil d\'acceptabilité écrit est celui qui décide d
     // ni types ni forfaits (A-3, #899) : ils sont posés ici comme le formulaire de gestion les écrit.
     //   seuil 70  : une seule dissertation acceptable (80) → C → 70
     //   seuil 60  : les deux (80, 65)                      → A → 90
-    //   sans réponse : l'assistant écrit 100 → rien d'acceptable → plancher 50 (B-3, #713). À 75, ce serait 70.
+    //   sans réponse : l'assistant écrit 100 → rien d'acceptable → aucune note, la cause nommée (lot N4, #713 ; avant :
+    //   plancher 50, B-3). À 75, ce serait 70.
     const TYPES_ET_FORFAITS = { typesTravaux: [{ id: 'dissertation', nom: 'Dissertation' }, { id: 'examen', nom: 'Examen' }],
         forfaits: [{ id: 1, lettre: 'A', note: 90, travaux: { dissertation: 2, examen: 1 } }, { id: 2, lettre: 'C', note: 70, travaux: { dissertation: 1, examen: 1 } }] };
-    for (const [reponse, ecrit, attendu] of [[70, 70, 70], [60, 60, 90], [undefined, 100, 50]]) {
-        it(`assistant · seuil ${reponse === undefined ? 'par défaut' : reponse} : écrit ${ecrit}, calcule ${attendu}`, async () => {
+    for (const [reponse, ecrit, attendu] of [[70, 70, 70], [60, 60, 90], [undefined, 100, null]]) {
+        it(`assistant · seuil ${reponse === undefined ? 'par défaut' : reponse} : écrit ${ecrit}, calcule ${attendu === null ? 'aucune note' : attendu}`, async () => {
             const b = monter(jeuSPE());
             const p0 = await creerParAssistant(b, { nom: 'SPE', calcNoteFinale: 'acceptable', seuilAcceptabilite: reponse });
             Object.assign(b.store.test_pratiquesConfigurables[0].configuration, clone(TYPES_ET_FORFAITS));
@@ -698,7 +704,9 @@ describe('G-1 · SPE : le seuil d\'acceptabilité écrit est celui qui décide d
             const note = noteDe(b, DA.SPE, p0.id);
             expect(p0.configuration.seuilAcceptabilite).toBe(ecrit);
             expect(note.perf).toBe(attendu);
-            expect(note.export).toEqual({ note: attendu, statut: 'final' });
+            expect(note.export).toEqual(attendu === null
+                ? { note: '', statut: 'non constructible – Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.' }
+                : { note: attendu, statut: 'final' });
         });
     }
 });
@@ -872,5 +880,186 @@ describe('lot 29 · #899 : le récapitulatif d\'une spécification dit où régl
             b.win.wizardState.reponses = clone(REPONSES_SPE);
             expect(b.win.genererRecapitulatif().includes(LIGNE), JSON.stringify(Object.keys(configuration))).toBe(attendue);
         }
+    });
+});
+
+/* =============================================================================================
+   LOT N4 (23 sept. 2026) · #713 volet plancher, #854 volet spécifications
+   Décision de Grégoire (23 sept., 8 h 20, réponse A) : sans forfait atteint et sans palier d'échec créé par le collègue,
+   AUCUNE NOTE, la cause nommée — ni 50, ni 0, ni une suite de notes par défaut.
+   ============================================================================================= */
+const CAUSE_AUCUN_FORFAIT = 'Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.';
+/** Le gabarit « Modèle simple » TEL QU'IL EST OFFERT (pratiques-bibliotheque.js, 'SPE-simple'), adopté tel quel. */
+const MODELE_SIMPLE = { id: 'SPE_SIMPLE', nom: 'Modèle simple', type: 'specifications', pratiques: ['SPE'], dansBibliotheque: true,
+    dateCreation: '2026-09-23T12:00:00.000Z', calcul_note: { methode: 'specifications' },
+    configuration: { seuilAcceptable: 75,
+        typesTravaux: [{ id: 1, nom: 'Projet', description: 'Travail pratique ou créatif' }, { id: 2, nom: 'Examen', description: 'Évaluation sommative' }],
+        forfaits: [{ id: 1, lettre: 'Excellence', note: 90, travaux: { 1: 2, 2: 1 } }, { id: 2, lettre: 'Réussite', note: 70, travaux: { 1: 1, 2: 1 } }] } };
+// À LA MAIN (seuil 75) — Chloé (DA.SPE) : projet 80 + examen 90 → Réussite → 70.
+//                        Alice (DA.SOM) : projet 60 (< 75) + examen 90 → aucun forfait, aucun palier d'échec → aucune note.
+function jeuN4() {
+    return {
+        productions: [{ id: 'PJ1', titre: 'Projet 1', type: 'projet', dateEcheance: '2026-02-01' },
+            { id: 'PJ2', titre: 'Projet 2', type: 'projet', dateEcheance: '2026-03-01' },
+            { id: 'EX1', titre: 'Examen', type: 'examen', dateEcheance: '2026-04-01' }],
+        evaluations: [ev('N4_C1', DA.SPE, 'PJ1', 80, 'M'), ev('N4_C2', DA.SPE, 'EX1', 90, 'E'),
+            ev('N4_A1', DA.SOM, 'PJ1', 60, 'D'), ev('N4_A2', DA.SOM, 'EX1', 90, 'E')]
+    };
+}
+function monterN4(pratique) {
+    const b = monter(jeuN4(), { pratiques: [clone(pratique)], pratiqueId: pratique.id,
+        store: { TYPES_PRODUCTION: undefined } });
+    b.win.TYPES_PRODUCTION = [{ id: 'projet', libelle: 'Projet' }, { id: 'examen', libelle: 'Examen' }];
+    return b;
+}
+
+describe('lot N4 · #713 : aucun forfait atteint, aucun palier d\'échec créé → aucune note, la cause nommée', () => {
+    it('« Modèle simple » adopté tel quel : Alice n\'a PAS de note (null, « — », export vide avec la cause) ; Chloé garde 70', () => {
+        const b = monterN4(MODELE_SIMPLE);
+        const alice = noteDe(b, DA.SOM, MODELE_SIMPLE.id);
+        expect(alice.perf).toBeNull();                                       // avant le lot : 50
+        expect(alice.simule).toEqual({ P: 0, noteFinale: null, noteConstructible: false });
+        expect(alice.export).toEqual({ note: '', statut: 'non constructible – ' + CAUSE_AUCUN_FORFAIT });
+        expect(b.win.simulerIndices(DA.SOM, MODELE_SIMPLE.id).causeNonConstructible).toBe(CAUSE_AUCUN_FORFAIT);
+        // L'indice P stocké (ce que lisent le profil, le Suivi et la courbe) : non constructible ; la cause se relit à la source.
+        b.win.calculerEtStockerIndicesCP();
+        expect(b.store.test_indicesCP[DA.SOM].actuel).toMatchObject({ P: 0, noteConstructible: false });
+        expect(b.win.calculerTousLesIndices(DA.SOM).noteConstructible).toBe(false);
+        expect(b.win.causeNoteNonConstructible(DA.SOM)).toBe(CAUSE_AUCUN_FORFAIT);
+        // Le récit du calcul (la carte de la note, le Comparateur) dit la même cause.
+        expect(b.win.obtenirPratiqueParId(MODELE_SIMPLE.id).decrireCalcul(DA.SOM).synthese).toMatchObject({ noteFinale: null, formuleTexte: CAUSE_AUCUN_FORFAIT });
+        // Un forfait atteint : la note du forfait, inchangée, et aucune cause.
+        const chloe = noteDe(b, DA.SPE, MODELE_SIMPLE.id);
+        expect(chloe.perf).toBe(70);
+        expect(chloe.export).toEqual({ note: 70, statut: 'final' });
+        expect(b.win.causeNoteNonConstructible(DA.SPE)).toBeNull();
+        expect(b.win.simulerIndices(DA.SPE, MODELE_SIMPLE.id).causeNonConstructible).toBeNull();
+    });
+
+    it('le palier d\'échec CRÉÉ par le collègue (un forfait sans travaux) s\'applique : Alice 45, sans cause', () => {
+        const avecEchec = clone(MODELE_SIMPLE);
+        avecEchec.configuration.forfaits.push({ id: 3, lettre: 'Échec', note: 45, travaux: {} });
+        const b = monterN4(avecEchec);
+        const alice = noteDe(b, DA.SOM, avecEchec.id);
+        expect(alice.perf).toBe(45);
+        expect(alice.export).toEqual({ note: 45, statut: 'final' });
+        expect(b.win.causeNoteNonConstructible(DA.SOM)).toBeNull();
+        expect(noteDe(b, DA.SPE, avecEchec.id).perf).toBe(70);
+    });
+
+    it('sans forfaits configurés : aucune note pour personne, et la cause le dit ; avec un seul palier d\'échec, sa note', () => {
+        const sansForfaits = clone(MODELE_SIMPLE); sansForfaits.configuration.forfaits = [];
+        const b = monterN4(sansForfaits);
+        expect(noteDe(b, DA.SPE, sansForfaits.id).perf).toBeNull();
+        expect(b.win.causeNoteNonConstructible(DA.SPE)).toBe(STATUT_SANS_TYPES_NI_FORFAITS.replace('non constructible – ', ''));
+        const echecSeul = clone(MODELE_SIMPLE); echecSeul.configuration.forfaits = [{ id: 9, lettre: 'Échec', note: 45, travaux: {} }];
+        const b2 = monterN4(echecSeul);
+        expect(noteDe(b2, DA.SPE, echecSeul.id).perf).toBe(45);
+        expect(b2.win.causeNoteNonConstructible(DA.SPE)).toBeNull();
+    });
+
+    it('un élève dont la SEULE copie est un brouillon n\'a pas de note, et ne reçoit PAS la cause « aucun forfait atteint » (#706 : un brouillon ne compte nulle part)', () => {
+        // Complément de la relecture de Cowork (mutation survivante : le filtre `evaluationEntreDansLaNote` de la cause).
+        // À LA MAIN : Alice n'a qu'un projet à 60 NON ENREGISTRÉ → aucune copie ne compte → pas de note, et la cause
+        // n'est pas celle d'un forfait manqué : aucune copie n'a été jugée.
+        const b = monterN4(MODELE_SIMPLE);
+        b.store.test_evaluationsSauvegardees = b.store.test_evaluationsSauvegardees
+            .filter(e => e.etudiantDA !== DA.SOM).concat([ev('N4_BR', DA.SOM, 'PJ1', 60, 'D', { verrouillee: false })]);
+        expect(noteDe(b, DA.SOM, MODELE_SIMPLE.id).perf).toBeNull();
+        expect(b.win.causeNoteNonConstructible(DA.SOM)).toBeNull();
+        expect(b.win.simulerIndices(DA.SOM, MODELE_SIMPLE.id).causeNonConstructible).toBeNull();
+        // Témoin : la même copie ENREGISTRÉE reçoit la cause (le banc sait la voir).
+        b.store.test_evaluationsSauvegardees = b.store.test_evaluationsSauvegardees.map(e => e.id === 'N4_BR' ? Object.assign(e, { verrouillee: true }) : e);
+        expect(b.win.causeNoteNonConstructible(DA.SOM)).toBe(CAUSE_AUCUN_FORFAIT);
+    });
+
+    it('la configurable n\'a plus de chemin « specifications » à elle : pas de suite de notes par défaut, la note vient du moteur', () => {
+        const b = monterN4(MODELE_SIMPLE);
+        const inst = b.win.obtenirPratiqueParId(MODELE_SIMPLE.id);
+        expect(inst.constructor.name).toBe('PratiqueConfigurable');
+        expect(typeof inst.calculerParSpecifications).toBe('undefined');
+        expect(inst.calculerPerformance(DA.SOM)).toBeNull();
+    });
+
+    it('sentinelle : ni 50 en repli de palier, ni suite [100, 80, 60, 50] dans les deux moteurs', () => {
+        const spe = readFileSync(path.join(RACINE, 'js/pratiques/pratique-pan-specifications.js'), 'utf8');
+        const conf = readFileSync(path.join(RACINE, 'js/pratiques/pratique-configurable.js'), 'utf8');
+        const corps = tranche(spe, '    _determinerPalierBundle(comptesAcceptables) {', '    expliquerNoteNonConstructible(da) {', { longueurMin: 200 });
+        expect(corps).not.toMatch(/:\s*50\s*;/);
+        for (const src of [spe, conf]) expect(src.replace(/\s/g, '')).not.toContain('[100,80,60,50]');
+    });
+});
+
+describe('lot N4 · #854 volet spécifications : rouvrir puis enregistrer sans rien toucher rend la même configuration, à l\'octet', () => {
+    // Ignoré, et nommé : `dateCreation` (l'assistant la réécrit ; sauvegarderPratique remet l'ancienne — le diff la saute
+    // par prudence, comme partout dans ce banc). Aucune autre date n'est écrite par l'assistant. La CONFIGURATION se compare
+    // par JSON.stringify : mêmes clés, mêmes valeurs, même ordre.
+    it('« Modèle simple » ADOPTÉ par l\'assistant, palier d\'échec ajouté : seuil (sous `seuilAcceptable`), types, forfaits, palier d\'échec — identiques ; la note ne bouge pas', async () => {
+        const b = monterN4(MODELE_SIMPLE);
+        const gabarit = b.win.obtenirToutesLesPratiquesBibliothequeSync(true).find(m => m.id === 'SPE-simple');
+        const p0 = await creerParAssistant(b, { nom: 'Adoptée SPE-simple', _modeleAdopte: true, _gabaritSource: clone(gabarit), modeleChoisi: 'SPE-simple', calcNoteFinale: 'x' });
+        const cible = b.store.test_pratiquesConfigurables.find(p => p.id === p0.id);
+        cible.configuration.forfaits.push({ id: 3, lettre: 'Échec', note: 45, travaux: {} });
+        activer(b, p0.id);
+        const avant = clone(cible);
+        const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
+        expect(reponses).toMatchObject({ seuilAcceptabilite: 75, utiliserJetons: false });
+        expect(JSON.stringify(apres.configuration)).toBe(JSON.stringify(avant.configuration));
+        // L'ENVELOPPE (hors `configuration`), mesurée et nommée : l'assistant y ajoute `calcul_note.methode: 'specifications'`
+        // (le gabarit adopté n'en porte pas ; c'est la méthode que le type désigne déjà), `etablissement: ''` et
+        // `variante: 'bundles'` — comme pour toute famille qu'il enregistre. La note ci-dessous prouve qu'ils ne changent rien.
+        noter('N4-reedition-enveloppe', diff(avant, apres));
+        expect(diff(avant, apres).map(d => d.chemin)).toEqual(['calcul_note.methode', 'etablissement', 'variante']);
+        expect([noteDe(b, DA.SOM, p0.id).perf, noteDe(b, DA.SPE, p0.id).perf]).toEqual([45, 70]);
+    });
+
+    it('SPE de l\'assistant, jetons actifs (délai sur reprise), types et forfaits posés ensuite par le formulaire : identique', async () => {
+        const b = monterN4(MODELE_SIMPLE);
+        const p0 = await creerParAssistant(b, { nom: 'SPE jetons', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70, utiliserJetons: true,
+            nbJetonsDelai: 4, dureeDelaiJours: 5, delaiSurReprise: true, nbJetonsReprise: 3, modeleBundle: 'simple' });
+        const cible = b.store.test_pratiquesConfigurables.find(p => p.id === p0.id);
+        Object.assign(cible.configuration, clone({ typesTravaux: MODELE_SIMPLE.configuration.typesTravaux,
+            forfaits: MODELE_SIMPLE.configuration.forfaits.concat([{ id: 3, lettre: 'Échec', note: 45, travaux: {} }]) }));
+        const avant = clone(cible);
+        const { apres } = await rouvrirEtResauver(b, p0.id);
+        expect(JSON.stringify(apres.configuration)).toBe(JSON.stringify(avant.configuration));
+        expect(diff(avant, apres)).toEqual([]);
+    });
+
+    it('modèle de forfaits autre que le défaut (« litterature ») : rouvrir PRÉSÉLECTIONNE le modèle enregistré, enregistrer sans toucher le garde', async () => {
+        // Complément de la relecture de Cowork (mutation survivante : la relecture de `modeleBundle` — la fusion gardait
+        // l'ancienne valeur quand rien n'était répondu, et l'écran, lui, ne présélectionnait rien).
+        const b = monterN4(MODELE_SIMPLE);
+        const p0 = await creerParAssistant(b, { nom: 'SPE flexibles', calcNoteFinale: 'acceptable', seuilAcceptabilite: 80, utiliserJetons: false, modeleBundle: 'litterature' });
+        const avant = clone(b.store.test_pratiquesConfigurables.find(p => p.id === p0.id));
+        expect(avant.configuration.modeleBundle).toBe('litterature');
+        const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
+        expect(reponses.modeleBundle).toBe('litterature');                      // la carte cochée à l'écran
+        expect(apres.configuration.modeleBundle).toBe('litterature');
+        expect(JSON.stringify(apres.configuration)).toBe(JSON.stringify(avant.configuration));
+    });
+
+    it('jetons DÉSACTIVÉS par l\'assistant : restent `{ activer: false }`, seuil 60 gardé', async () => {
+        const b = monterN4(MODELE_SIMPLE);
+        const p0 = await creerParAssistant(b, { nom: 'SPE sans jetons', calcNoteFinale: 'acceptable', seuilAcceptabilite: 60, utiliserJetons: false });
+        const avant = clone(b.store.test_pratiquesConfigurables.find(p => p.id === p0.id));
+        expect(avant.configuration.jetons).toEqual({ activer: false });
+        const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
+        expect(reponses.utiliserJetons).toBe(false);
+        expect(JSON.stringify(apres.configuration)).toBe(JSON.stringify(avant.configuration));
+    });
+
+    it('un vrai changement passe : le seuil modifié s\'écrit sous le nom que la pratique porte (le moteur le lit) ; décocher les jetons les désactive', async () => {
+        const b = monterN4(MODELE_SIMPLE);
+        b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(MODELE_SIMPLE.id);
+        const apres = await creerParAssistant(b, Object.assign(clone(b.win.wizardState.reponses), { seuilAcceptabilite: 55 }), MODELE_SIMPLE.id);
+        expect(apres.configuration.seuilAcceptable).toBe(55);
+        expect(apres.configuration.seuilAcceptabilite).toBeUndefined();
+        expect(noteDe(b, DA.SOM, MODELE_SIMPLE.id).perf).toBe(70);           // 60 ≥ 55 : Alice atteint Réussite
+        const b2 = monterN4(MODELE_SIMPLE);
+        const p0 = await creerParAssistant(b2, { nom: 'SPE J', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70, utiliserJetons: true, nbJetonsDelai: 2, dureeDelaiJours: 2, nbJetonsReprise: 1 });
+        b2.win.wizardState.reponses = {}; b2.win.chargerPratiqueExistante(p0.id);
+        const sansJetons = await creerParAssistant(b2, Object.assign(clone(b2.win.wizardState.reponses), { utiliserJetons: false }), p0.id);
+        expect(sansJetons.configuration.jetons).toEqual({ activer: false });
     });
 });
