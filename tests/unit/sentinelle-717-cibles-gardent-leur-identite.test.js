@@ -17,7 +17,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-import { chargerAvecInterne, fauxDocument, dbBanc } from './_helpers/bac-suivi.js';
+import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml } from './_helpers/bac-suivi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.resolve(__dirname, '..', '..');
@@ -129,7 +129,7 @@ describe('#717 · l\'assistant : déplacer, renommer, retirer ne déplace plus l
         await reediter(a, id, (c) => c.filter(x => x.id !== L));
         expect(a.questions).toHaveLength(1);
         expect(a.questions[0]).toContain('« Lire »');
-        expect(a.questions[0]).toContain('cochée pour 2 élèves');
+        expect(a.questions[0]).toContain('cochée pour 2 étudiant·es');
         expect(a.questions[0]).not.toContain('Écrire');
         expect(a.store).toEqual(avant);                 // annulé : rien d'écrit
 
@@ -169,9 +169,9 @@ describe('#717 · l\'id d\'une cible : jamais une position, jamais redonné', ()
 
     it('un id retiré n\'est pas redonné à la cible ajoutée ensuite', () => {
         // Deux cibles ; on retire la PREMIÈRE ; la cible ajoutée ensuite ne reprend ni son id ni celui de l'autre.
-        const a = win.EditeurCibles.nouvelId([]);
-        const b = win.EditeurCibles.nouvelId([a]);
-        const c = win.EditeurCibles.nouvelId([b]);
+        const a = win.EditeurCibles.nouvelId();
+        const b = win.EditeurCibles.nouvelId();
+        const c = win.EditeurCibles.nouvelId();
         expect(new Set([a, b, c]).size).toBe(3);
     });
 
@@ -181,14 +181,21 @@ describe('#717 · l\'id d\'une cible : jamais une position, jamais redonné', ()
         expect(ids.filter(id => /^cible-\d+$/.test(id))).toEqual([]);
     });
 
-    it('un id déjà vu n\'est jamais rendu, même dans la même milliseconde', () => {
+    it('deux ids de la même milliseconde sont distincts (le compteur, pas l\'horloge)', () => {
         const maintenant = Date.now;
         Date.now = () => 1790000000000;
         try {
-            const a = win.EditeurCibles.nouvelId();
-            const b = win.EditeurCibles.nouvelId([a]);
-            expect(b).not.toBe(a);
+            expect(win.EditeurCibles.nouvelId()).not.toBe(win.EditeurCibles.nouvelId());
         } finally { Date.now = maintenant; }
+    });
+
+    it('sécurité (règle 1) : un nom porteur de " et < est rendu échappé dans la valeur du champ, rien n\'est injecté', () => {
+        const w = chargerScript('js/pratiques/editeur-cibles.js', {});
+        w.echapperHtml = echapperHtml;
+        const html = w.EditeurCibles.rendre([{ id: 'cible_x', nom: 'Lire" onfocus="alert(1)<img src=x>' }]);
+        expect(html).toContain('value="Lire&quot; onfocus=&quot;alert(1)&lt;img src=x&gt;"');
+        expect(html).not.toContain('onfocus="alert');
+        expect(html).not.toContain('<img src=x>');
     });
 });
 
@@ -266,9 +273,35 @@ describe('#717 · la gestion des pratiques : les mêmes gestes, la même règle'
         await g.win.sauvegarderConfigPratiqueMat();
         expect(g.questions).toHaveLength(1);
         expect(g.questions[0]).toContain('« Lire »');
-        expect(g.questions[0]).toContain('cochée pour 2 élèves');
+        expect(g.questions[0]).toContain('cochée pour 2 étudiant·es');
         expect(g.store).toEqual(avant);
         expect(g.elements['mat-den-cibles'].innerHTML).toContain('data-cible-id="cible_a"');   // la liste enregistrée revient à l'écran
+    });
+
+    it('une ligne laissée vide (« + Ajouter une cible » sans nom) ne s\'enregistre pas : elle ne serait cochable par personne', async () => {
+        // Une cible sans nom plafonnerait toutes les notes à 59 (aucune coche possible à la saisie).
+        const g = monterGestion(PRATIQUE_GESTION, JUGEMENTS);
+        await g.win.chargerPratiquePourModif('P_DEN');
+        g.ecran([{ id: 'cible_a', nom: 'Lire' }, { id: 'cible_b', nom: 'Écrire' }, { id: 'cible_vide', nom: '   ' }]);
+        await g.win.sauvegarderConfigPratiqueMat();
+        expect(g.store.test_pratiquesConfigurables[0].configuration.objectifs).toEqual([{ id: 'cible_a', nom: 'Lire' }, { id: 'cible_b', nom: 'Écrire' }]);
+        expect(noteMoteur(g.store, 'P_DEN', DA1)).toBe(78);
+    });
+
+    it('la question au singulier : « pour 1 étudiant·e », « sans elle » ; deux cibles retirées : « sans elles »', async () => {
+        const g = monterGestion(PRATIQUE_GESTION, { P_DEN: { [DA1]: jugement({ cible_a: true, cible_b: true }) } });
+        await g.win.chargerPratiquePourModif('P_DEN');
+        g.ecran([{ id: 'cible_b', nom: 'Écrire' }]);
+        g.reponsesConfirm.push(false);
+        await g.win.sauvegarderConfigPratiqueMat();
+        expect(g.questions[0]).toContain('« Lire » : cochée pour 1 étudiant·e\n');
+        expect(g.questions[0]).toContain('recalculée sans elle.');
+        g.ecran([]);
+        g.reponsesConfirm.push(false);
+        await g.win.sauvegarderConfigPratiqueMat();
+        expect(g.questions[1]).toContain('Tu retires des cibles déjà cochées.');
+        expect(g.questions[1]).toContain('recalculée sans elles.');
+        expect(g.questions[1]).not.toContain('élève');
     });
 
     it('le stock : une pratique aux ids `cible-N` s\'enregistre sans rien toucher et ressort identique', async () => {

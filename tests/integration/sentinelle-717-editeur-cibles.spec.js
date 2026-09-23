@@ -68,7 +68,7 @@ test('gestion des pratiques · déplacer, renommer, retirer : les ids restent, l
     await liste.locator('.editeur-cibles-ligne').nth(1).locator('[data-action="EditeurCibles.retirer"]').click();
     await expect.poll(() => questions.length).toBe(1);
     expect(questions[0]).toContain('« Lire »');
-    expect(questions[0]).toContain('cochée pour 2 élèves');
+    expect(questions[0]).toContain('cochée pour 2 étudiant·es');
     await expect(liste.locator('.editeur-cibles-ligne')).toHaveCount(2);
     expect(await objectifs(page)).toEqual([{ id: 'cible_ecrire', nom: 'Écrire un essai' }, { id: 'cible_lire', nom: 'Lire' }]);
 
