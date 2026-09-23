@@ -18,6 +18,9 @@ import { tranche } from './_helpers/tranche.js';
 // sans carte à l'écran rougit aussi.
 //
 // Hors périmètre, délibérément : `proposerNettoyage` et ses dialogues (#892).
+//
+// #895 (23 sept. 2026) : « Trimestre complet » est fondu dans « Exporter des
+// travaux », qui gagne la case « Compresser l'archive ». Deux cartes, deux cases.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -41,9 +44,9 @@ const fiche = tranche(fiches, "'archiver-travaux': {", "voirAussi:", { longueurM
 const modesFiche = [...fiche.matchAll(/'<strong>([^<]+)<\/strong> :/g)].map(m => m[1]);
 
 describe('#893 · la mesure elle-même mesure quelque chose', () => {
-    it('l\'écran rend trois cartes et une case, lues dans le code qui les rend', () => {
-        expect(titresRendus).toEqual(['Exporter des travaux', 'Trimestre complet', 'Export Léa']);
-        expect(casesRendues).toEqual(['Reprises seulement']);
+    it('l\'écran rend deux cartes et deux cases, lues dans le code qui les rend', () => {
+        expect(titresRendus).toEqual(['Exporter des travaux', 'Export Léa']);
+        expect(casesRendues).toEqual(["Compresser l'archive", 'Reprises seulement']);
         // Toute case de la zone est captée par le motif à étiquette : aucune n'échappe au compte.
         expect((zoneCartes.match(/type="checkbox"/g) || []).length).toBe(casesRendues.length);
     });

@@ -2,7 +2,7 @@
 
 > Mise à jour le 23 septembre 2026, 13 h 50 (Toronto) — par Claude Code : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
 
-1. Tranchées le 17 sept., code seulement : le suffixe « pér. » d'une séance d'horaire (#888) ; une seule carte « Exporter des travaux » (#895).
+1. Tranchée le 17 sept., code seulement : le suffixe « pér. » d'une séance d'horaire (#888).
 2. À Grégoire : la phrase de la barre « Assiduité » du groupe quand aucune séance ne porte de périodes (#830) ; la disposition de F4-2 (« En prévision de l'EUF » pour les critères d'avant le 4 sept.) ; F3-6 (l'export pour la recherche compte les niveaux par I / D / M / E).
 
 ## Cap fixé par Grégoire le 21 sept. à 13 h 08
@@ -24,4 +24,4 @@ Remesure rapide au code (grep, pas exécuté) : les constats tiennent encore —
 
 - ~~**Lot N7**~~ — **SORTI DE LA FILE : livré en 1.155.3, fusionné dans `main` le 23 sept. 2026 (`4b256bda`) après la relecture croisée de Cowork (verte, bancs du lot 209/209, sept mutations rouges) ; verdict et push par `pousser.sh`.** ~~Le niveau de la note globale se lit dans une seule règle, celle des évaluations~~ (sans fiche : constat de didactique de N1a, sorti de N2 par Cowork le 22 sept.). **Tranché par Grégoire le 22 sept. au soir : A**, l'échelle des évaluations de l'élève (#575), pas celle rangée dans la pratique. Son principe, posé en répondant : « L'échelle IDME est ma pratique personnelle. On ne peut l'imposer à aucun utilisateur. Il faut toujours prendre les grilles, échelles, cartouches, etc. créés par l'utilisateur. » Rien ne change à l'écran ; retire la règle B et, si plus rien ne la demande, la seconde instance. **Après la fusion de N2** (même fonction). Consigne : `plans de travail/CONSIGNE-DU-JOUR.md` depuis le 23 sept., 7 h 45 (la version préparée d'avance est archivée sous `_ancienne-CONSIGNE-N7-echelle-note-globale-preparee.md`).
 
-**La file des pratiques de notation est vide** (N1 à N7 livrés). Prochain chantier, décidé par Grégoire le 23 sept. : le dernier lot de l'export — une seule carte « Exporter des travaux » (#895), consigne par Cowork.
+**La file des pratiques de notation est vide** (N1 à N7 livrés). Le dernier lot de l'export — une seule carte « Exporter des travaux » (#895) — est livré en 1.156.0 le 23 sept. (branche `lot-895-une-carte-exporter`), sorti de la file à sa fusion.
