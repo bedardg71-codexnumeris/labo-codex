@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 12 H : **LOT N5 ET #936 (1.155.5) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 12 H 10 : **#937 (1.155.6) SUR `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin HEAD:main` DEPUIS LE WORKTREE `chrono-barre-937`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`dcd22d4f`, N5 + #936) + `7fb5da12` (#937 : le chronomètre revient dans la barre du haut d'Annoter ; chevrons d'élève, pleine largeur / hauteur et palette du fond en sortent, le fond passe au menu Actions) + `dfae4a51` (release 1.155.6) + ce relais. Mots d'écran et item de Nouvelles validés par Grégoire (« ok »). Banc `chrono-barre-annoter-937.spec.js` : 3 essais WebKit, 2 mutations / 2 rouges refaites sur la base rebasée. **Relecture croisée de Cowork non faite** : à reprendre à froid.
+
+**Suite** : lot N6 (inchangé). Porte terrain de #937 : rendu iPad et mode sombre sur une vraie copie. La branche `chrono-barre-937` et son worktree peuvent être supprimés une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 12 H : **LOT N5 ET #936 (1.155.5) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`78575a46`) + le merge de `lot-n5-cibles-stables` : `d3cc9737` (lot N5, #717), `9d3389b7` (merge du correctif #936, `6bb5db62`, session parallèle), `4549fb2d` (release 1.155.5), `aa7007e9` (complément de relecture et mots validés « étudiant·e ») + ce relais. Mots validés par Grégoire (option B). Relecture croisée de Cowork : sept mutations rouges sur dix ; les trois survivantes gardées par `aa7007e9`. Fusion et release demandées par Grégoire avant que Cowork ait refait ses mutations sur le complément.
 
