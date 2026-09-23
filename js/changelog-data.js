@@ -27,12 +27,16 @@
             titre: 'Carte d\'alignement : la date réelle dans l\'Inspecteur',
             items: [
                 'L\'Inspecteur d\'une leçon, et de l\'évaluation qu\'elle contient, affiche la date où elle aura lieu, une ligne par groupe. Quand la date n\'existe pas (séance non fixée, congé, horaire non saisi), il le dit au lieu d\'en deviner une.',
-                // 1.155.1 (#714, lot N3) — VALIDÉ par Grégoire le 22 sept. 2026 (option 2 : sans « et ouvrir un profil ne modifie plus rien »).
-                'Profil de l\'élève, «&nbsp;Développement des habiletés&nbsp;»&nbsp;: le détail du calcul donne le nombre d\'évaluations retenues par ta pratique, et les mêmes évaluations que la carte de la note. «&nbsp;Calcul impossible&nbsp;» n\'apparaît plus sous une note calculée.',
-                // 1.155.2 (#716, lot N2) — VALIDÉ par Grégoire le 23 sept. 2026 au matin (relayé par la relecture de Cowork).
-                'Suivi de l\'élève&nbsp;: la courbe de performance suit maintenant la note du cours, semaine par semaine, en pratique Standards, sommative ou par spécifications. En dénotation, la courbe n\'a plus de point&nbsp;: elle affichait un barème qui n\'était pas ta note. Les semaines déjà enregistrées se mettent à jour avec «&nbsp;Recalculer les captures&nbsp;» (Réglages › Captures et recherche).',
-                // 1.155.4 (#713 volet plancher, #854 volet spécifications, lot N4) — VALIDÉ par Grégoire le 23 sept. 2026 (option A, telle quelle).
-                'Pratique par spécifications&nbsp;: un élève qui n\'atteint aucun forfait n\'a plus de note tant que ta pratique n\'en prévoit pas une. Le profil, le Suivi et l\'export écrivent «&nbsp;—&nbsp;» et en disent la raison. Pour donner une note dans ce cas, ajoute un forfait sans travaux requis (Conception → Pratiques de notation). Rouvrir la pratique dans l\'assistant ne change plus son seuil, ses forfaits ni ses jetons.'
+                // 1.155.1 (#714, lot N3) — VALIDÉ par Grégoire le 22 sept. 2026 ; « l'étudiant·e » VALIDÉ par Grégoire le 23 sept. 2026 (option 2 : sans « et ouvrir un profil ne modifie plus rien »).
+                'Profil de l\'étudiant·e, «&nbsp;Développement des habiletés&nbsp;»&nbsp;: le détail du calcul donne le nombre d\'évaluations retenues par ta pratique, et les mêmes évaluations que la carte de la note. «&nbsp;Calcul impossible&nbsp;» n\'apparaît plus sous une note calculée.',
+                // 1.155.2 (#716, lot N2) — VALIDÉ par Grégoire le 23 sept. 2026 au matin (relayé par la relecture de Cowork) ; « l'étudiant·e » VALIDÉ par Grégoire le 23 sept. 2026.
+                'Suivi de l\'étudiant·e&nbsp;: la courbe de performance suit maintenant la note du cours, semaine par semaine, en pratique Standards, sommative ou par spécifications. En dénotation, la courbe n\'a plus de point&nbsp;: elle affichait un barème qui n\'était pas ta note. Les semaines déjà enregistrées se mettent à jour avec «&nbsp;Recalculer les captures&nbsp;» (Réglages › Captures et recherche).',
+                // 1.155.4 (#713 volet plancher, #854 volet spécifications, lot N4) — « un·e étudiant·e » VALIDÉ par Grégoire le 23 sept. 2026 ; VALIDÉ par Grégoire le 23 sept. 2026 (option A, telle quelle).
+                'Pratique par spécifications&nbsp;: un·e étudiant·e qui n\'atteint aucun forfait n\'a plus de note tant que ta pratique n\'en prévoit pas une. Le profil, le Suivi et l\'export écrivent «&nbsp;—&nbsp;» et en disent la raison. Pour donner une note dans ce cas, ajoute un forfait sans travaux requis (Conception → Pratiques de notation). Rouvrir la pratique dans l\'assistant ne change plus son seuil, ses forfaits ni ses jetons.',
+                // 1.155.5 (#717, lot N5) — VALIDÉ par Grégoire le 23 sept. 2026 (option B : « étudiant·es », jamais « élèves »).
+                'Pratique par dénotation&nbsp;: les cibles s\'éditent maintenant une par ligne. Déplacer, renommer ou retirer une cible ne déplace plus les coches déjà faites. Si tu retires une cible déjà cochée, l\'application te dit laquelle et pour combien d\'étudiant·es avant d\'enregistrer.',
+                // 1.155.5 (#936, bug testeur) — VALIDÉ par Grégoire le 23 sept. 2026 (tel quel).
+                'Annoter&nbsp;: une fois zoomé, on peut maintenant défiler jusqu\'au bord gauche du travail. La roue de la palette d\'annotation ne se transforme plus en «&nbsp;−&nbsp;» quand on replie la palette.'
             ]
         },
         {

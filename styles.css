@@ -4008,6 +4008,40 @@ input[type="number"].controle-form {
 .den-suggestion {
     margin-bottom: 16px;
 }
+
+/* #717 — Éditeur des cibles (assistant et gestion des pratiques) : une ligne par
+   cible, chacune porte son id. Boutons d'icône à 44 px : cible tactile iPad. */
+.editeur-cibles-liste {
+    list-style: none;
+    margin: 0 0 8px 0;
+    padding: 0;
+}
+.editeur-cibles-ligne {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 6px;
+}
+.editeur-cibles-nom {
+    flex: 1;
+    min-width: 0;
+    margin-right: 6px;
+}
+.editeur-cibles-ligne .btn-icone-nu {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+}
+.editeur-cibles-ligne .btn-delete-icon {
+    width: 14px;
+    height: 14px;
+}
+.editeur-cibles-ligne .btn-icone-nu:disabled {
+    cursor: default;
+}
+.editeur-cibles-ajouter {
+    min-height: 44px;
+}
 .den-suggestion-note {
     display: block;
     margin-top: 4px;
@@ -18707,7 +18741,12 @@ tr.ligne-import-ecartee td {
     position: relative;
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    /* #936 (23 sept. 2026) — PAS de `justify-content: center` : le wrapper (marge
+       100vw) déborde toujours, et le centrage le faisait déborder à GAUCHE, zone
+       qu'aucun défilement n'atteint. Zoomé plus large que l'écran, la moitié de
+       l'excédent du document était coupée. Le centrage visuel est fait par
+       recentrerVue() (scrollLeft), comme l'axe vertical l'a toujours fait. */
+    justify-content: flex-start;
     padding: 16px;
     background: var(--surface-conteneur, #142428);
     touch-action: pan-x pan-y;
