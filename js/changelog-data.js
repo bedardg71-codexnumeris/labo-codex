@@ -28,7 +28,9 @@
             items: [
                 'L\'Inspecteur d\'une leçon, et de l\'évaluation qu\'elle contient, affiche la date où elle aura lieu, une ligne par groupe. Quand la date n\'existe pas (séance non fixée, congé, horaire non saisi), il le dit au lieu d\'en deviner une.',
                 // 1.155.1 (#714, lot N3) — VALIDÉ par Grégoire le 22 sept. 2026 (option 2 : sans « et ouvrir un profil ne modifie plus rien »).
-                'Profil de l\'élève, «&nbsp;Développement des habiletés&nbsp;»&nbsp;: le détail du calcul donne le nombre d\'évaluations retenues par ta pratique, et les mêmes évaluations que la carte de la note. «&nbsp;Calcul impossible&nbsp;» n\'apparaît plus sous une note calculée.'
+                'Profil de l\'élève, «&nbsp;Développement des habiletés&nbsp;»&nbsp;: le détail du calcul donne le nombre d\'évaluations retenues par ta pratique, et les mêmes évaluations que la carte de la note. «&nbsp;Calcul impossible&nbsp;» n\'apparaît plus sous une note calculée.',
+                // 1.155.2 (#716, lot N2) — PROPOSÉ, à valider par Grégoire avant le push.
+                'Suivi de l\'élève&nbsp;: la courbe de performance suit la note du cours, semaine par semaine, quelle que soit ta pratique de notation. Les semaines déjà enregistrées se mettent à jour quand tu cliques sur «&nbsp;Reconstruire&nbsp;».'
             ]
         },
         {
