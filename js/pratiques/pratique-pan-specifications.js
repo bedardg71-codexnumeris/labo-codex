@@ -77,6 +77,14 @@ function normaliserConfigurationSpecifications(configuration) {
     return { typesTravaux: typesTravaux, tableBundles: tableBundles };
 }
 
+/**
+ * Lot N4 (#713) — LES DEUX CAUSES D'UNE NOTE ABSENTE EN SPÉCIFICATIONS, écrites une fois.
+ * Les deux sont VALIDÉES par Grégoire le 23 sept. 2026 : la première est la phrase de la consigne N4 (§0) ; la
+ * seconde reprend les mots du récapitulatif de l'assistant (#899), avec la flèche « → » de l'application.
+ */
+const CAUSE_AUCUN_FORFAIT_ATTEINT = 'Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.';
+const CAUSE_SANS_TYPES_NI_FORFAITS = 'Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception → Pratiques de notation (clique sur la pratique).';
+
 /** Sans casse ni accents ni espaces : « Présentation » ↔ `presentation`. */
 function _cleNom(valeur) {
     return String(valeur == null ? '' : valeur).toLowerCase()
@@ -261,8 +269,8 @@ class PratiquePanSpecifications {
         // ÉTAPE 2 : Déterminer palier de note atteint (logique bundles)
         const noteAtteinte = this._determinerPalierBundle(comptesAcceptables);
 
-
-        return noteAtteinte / 100;
+        // Lot N4 (#713) : aucun forfait atteint et aucun palier d'échec créé → aucune note.
+        return noteAtteinte === null ? null : noteAtteinte / 100;
     }
 
     /**
@@ -362,7 +370,8 @@ class PratiquePanSpecifications {
                 formuleTexte: palierAtteint
                     ? ('palier ' + labelPalier(palierAtteint) + ' atteint'
                        + (palierAtteint.description ? ' — ' + palierAtteint.description : ''))
-                    : 'aucun palier atteint',
+                    // Lot N4 (#713) : sans palier, la cause — la même que lisent les autres écrans.
+                    : (this.expliquerNoteNonConstructible(da) || 'aucun palier atteint'),
                 noteFinale: noteFinale,
                 plafonnement: null               // les spécifications ne plafonnent pas
             }
@@ -572,6 +581,11 @@ class PratiquePanSpecifications {
         const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
         const noteActuelle = this._determinerPalierBundle(comptesAcceptables);
 
+        // Lot N4 (#713) : sans note, pas de pattern tiré d'une note — comme sans évaluation.
+        if (noteActuelle === null) {
+            return 'stable';
+        }
+
         // Déterminer pattern selon note atteinte
         if (noteActuelle >= this.config.seuilExcellence) {
             return 'excellence'; // 80%+
@@ -698,7 +712,7 @@ class PratiquePanSpecifications {
             travauxAcceptables: totalAcceptables,
             travauxTotaux: totalAttendus,
             detailsTravauxAcceptables: comptesAcceptables,
-            palierActuel: this._obtenirDescriptionPalier(noteActuelle),
+            palierActuel: noteActuelle === null ? null : this._obtenirDescriptionPalier(noteActuelle),   // lot N4 (#713)
             prochainPalier: defis.prochainPalier ? this._obtenirDescriptionPalier(defis.prochainPalier.noteFixe) : null,
             travauxManquants: defis.defis.filter(d => d.type === 'travaux-manquants'),
             travauxCritiques: defis.defis.filter(d => d.type === 'travaux-critiques')
@@ -792,10 +806,16 @@ class PratiquePanSpecifications {
      *
      * PRINCIPE UNIVERSEL (codé en dur) :
      * Trouver le palier le plus élevé dont TOUS les requis sont satisfaits.
-     * Si aucun palier n'est atteint, retourner la note d'échec.
+     * Si aucun palier n'est atteint, retourner la note du palier d'échec — celui que le
+     * collègue a créé (un palier sans `requis`).
+     *
+     * Lot N4 (#713, décision de Grégoire du 23 sept. 2026, réponse A) — SANS PALIER D'ÉCHEC
+     * CRÉÉ, AUCUNE NOTE : `null`, jamais un 50 écrit ici. « Il faut toujours prendre les
+     * grilles, échelles, cartouches, etc. créés par l'utilisateur » ; un 50 codé en dur est
+     * une note que personne n'a créée. La cause se dit par `expliquerNoteNonConstructible`.
      *
      * @param {Object} comptesAcceptables - Comptes de travaux acceptables par type
-     * @returns {number} Note fixe du palier atteint
+     * @returns {number|null} Note fixe du palier atteint, ou null (aucun palier, aucun palier d'échec)
      * @private
      */
     _determinerPalierBundle(comptesAcceptables) {
@@ -818,9 +838,39 @@ class PratiquePanSpecifications {
             }
         }
 
-        // Aucun palier atteint : retourner note d'échec
+        // Aucun palier atteint : la note du palier d'échec du collègue, ou aucune note.
         const palierEchec = this.config.tableBundles.find(p => !p.requis);
-        return palierEchec ? palierEchec.noteFixe : 50;
+        return palierEchec ? palierEchec.noteFixe : null;
+    }
+
+    /**
+     * Lot N4 (#713) — POURQUOI CET·TE ÉLÈVE N'A PAS DE NOTE, dans les mots que l'écran affiche.
+     * Source unique de la cause pour cette famille : le profil, le rapport, le Suivi et l'export
+     * la lisent par `causeNoteNonConstructible` (portfolio.js), jamais par une copie de la phrase.
+     *
+     * - La pratique n'a pas ses types de productions ou ses forfaits : aucune note ne peut se
+     *   calculer, pour personne (mots du récapitulatif de l'assistant, #899).
+     * - Des copies comptent, aucun forfait n'est atteint, et la pratique n'a pas de palier
+     *   d'échec : la phrase approuvée par Grégoire le 23 sept. 2026.
+     * - Sinon (aucune copie ne compte encore, ou une note existe) : null — la cause, s'il y en a
+     *   une, n'appartient pas à cette famille.
+     *
+     * @param {string} da
+     * @returns {string|null}
+     */
+    expliquerNoteNonConstructible(da) {
+        const types = this.config.typesTravaux || [];
+        const paliers = this.config.tableBundles || [];
+        if (types.length === 0 || !paliers.some(p => p && p.requis)) {
+            // Sans types ou sans forfaits, seul un palier d'échec du collègue donne une note.
+            return paliers.some(p => p && !p.requis) ? null : CAUSE_SANS_TYPES_NI_FORFAITS;
+        }
+        if (!da || da.length !== 7) return null;
+        const evaluationsEleve = this._lireEvaluations().filter(e =>
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
+        if (evaluationsEleve.length === 0) return null;
+        const note = this._determinerPalierBundle(this._compterTravauxAcceptables(da, evaluationsEleve));
+        return note === null ? CAUSE_AUCUN_FORFAIT_ATTEINT : null;
     }
 
     /**

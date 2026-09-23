@@ -39,7 +39,8 @@ function ev(id, da, productionId, noteFinale) {
 }
 // À la main (seuil 75) : A → projet 80, 85 et examen 90 → 2 + 1 → Excellence 90 ;
 //                        B → projet 80 et examen 90 → Réussite 70 ;
-//                        C → projet 60 (< 75) et examen 90 → aucun forfait → 50 (aucun palier plancher déclaré).
+//                        C → projet 60 (< 75) et examen 90 → aucun forfait, aucun palier d'échec déclaré → AUCUNE NOTE
+//                            (lot N4, #713 : avant, un 50 écrit dans le moteur).
 const EVALUATIONS = [ev('a1', DA.A, 'PR1', 80), ev('a2', DA.A, 'PR2', 85), ev('a3', DA.A, 'EX1', 90),
     ev('b1', DA.B, 'PR1', 80), ev('b2', DA.B, 'EX1', 90),
     ev('c1', DA.C, 'PR1', 60), ev('c2', DA.C, 'EX1', 90)];
@@ -69,15 +70,15 @@ function monter(pratique) {
 }
 
 describe('#708 · la forme « forfaits » du gabarit calcule', () => {
-    it('LE CAS QUI RENDAIT 0 À TOUTE LA CLASSE — le gabarit « Modèle simple » : 90 · 70 · 50, par la configurable et par la simulation', () => {
+    it('LE CAS QUI RENDAIT 0 À TOUTE LA CLASSE — le gabarit « Modèle simple » : 90 · 70 · aucune note, par la configurable et par la simulation', () => {
         const { win } = monter(GABARIT);
         const p = win.obtenirPratiqueParId('spe-gabarit');
         expect(p.calculerPerformance(DA.A)).toBe(0.9);      // avant : 0
         expect(p.calculerPerformance(DA.B)).toBe(0.7);      // avant : 0
-        expect(p.calculerPerformance(DA.C)).toBe(0.5);      // avant : 0
+        expect(p.calculerPerformance(DA.C)).toBeNull();     // avant #708 : 0 ; avant le lot N4 : 0,5 (plancher codé en dur)
         expect(win.simulerIndices(DA.A, 'spe-gabarit')).toMatchObject({ P: 90, noteConstructible: true });
         const lignes = win._exportResultats.construireLignesSynthese(Object.values(DA).map(da => ({ da, nom: 'N', prenom: 'P' })), { pratiqueId: 'spe-gabarit' }, win.simulerIndices);
-        expect(lignes.map(l => l[8])).toEqual([90, 70, 50]);
+        expect(lignes.map(l => l[8])).toEqual([90, 70, '']);
     });
     it('le récit de calcul suit, sous le nom de la pratique : Projet et Examen « satisfaits » pour A, palier « Excellence »', () => {
         const { win } = monter(GABARIT);
@@ -90,13 +91,14 @@ describe('#708 · la forme « forfaits » du gabarit calcule', () => {
     it('la forme du moteur (tableBundles) rend les MÊMES nombres — parité des deux formes', () => {
         const { win } = monter(MOTEUR);
         const p = win.obtenirPratiqueParId('spe-moteur');
-        expect([p.calculerPerformance(DA.A), p.calculerPerformance(DA.B), p.calculerPerformance(DA.C)]).toEqual([0.9, 0.7, 0.5]);
+        expect([p.calculerPerformance(DA.A), p.calculerPerformance(DA.B), p.calculerPerformance(DA.C)]).toEqual([0.9, 0.7, null]);
     });
     it('ce que l\'assistant écrit (ni types ni forfaits) reste NON CONSTRUCTIBLE — null, jamais 0, et l\'export le dit', () => {
         const { win } = monter(ASSISTANT);
         expect(win.obtenirPratiqueParId('spe-assistant').calculerPerformance(DA.A)).toBeNull();
         const ligne = win._exportResultats.construireLignesSynthese([{ da: DA.A, nom: 'N', prenom: 'P' }], { pratiqueId: 'spe-assistant' }, win.simulerIndices)[0];
-        expect([ligne[8], ligne[9]]).toEqual(['', 'non constructible']);
+        // Lot N4 (#713) : l'export nomme la cause.
+        expect([ligne[8], ligne[9]]).toEqual(['', 'non constructible – Ta pratique n\'a pas encore ses types de productions et ses forfaits : aucune note ne peut être calculée. Règle-les dans Conception → Pratiques de notation (clique sur la pratique).']);
     });
     it('la traduction : seuil de la racine propagé aux types, note → noteFixe, lettre → label, travaux → requis, forfait sans travaux → palier plancher', () => {
         const { win } = monter(GABARIT);

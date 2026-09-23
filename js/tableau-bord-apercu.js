@@ -544,7 +544,9 @@ function genererPanneauSuiviEtudiants() {
         if (filtrePrio && enrichi) {
             badges = '<span class="etudiant-prioritaire-indices">'
                 + _badgeIndiceSuivi('A', enrichi.A) + _badgeIndiceSuivi('C', enrichi.C)
-                + _badgeIndiceSuivi('P', enrichi.noteConstructible === false ? null : enrichi.P)
+                + _badgeIndiceSuivi('P', enrichi.noteConstructible === false ? null : enrichi.P,
+                    // Lot N4 (#713) : la cause, quand la pratique en déclare une (source unique, portfolio.js).
+                    (enrichi.noteConstructible === false && typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(e.da) : null)
                 + '</span>';
         }
 
@@ -560,10 +562,11 @@ function genererPanneauSuiviEtudiants() {
 /** Helper badge pour le panneau suivi unifié.
  *  #394 : valeur null = note non constructible → « — » (jamais un 0 trompeur).
  *  #743 (lot D) : un A inconnu passe aussi par ici — le tiret, SANS la bulle de P (elle parlerait
- *  d'une note). La bulle de A est de Grégoire (validée le 19 sept. 2026). C n'a pas de bulle. */
-function _badgeIndiceSuivi(label, valeur) {
+ *  d'une note). La bulle de A est de Grégoire (validée le 19 sept. 2026). C n'a pas de bulle.
+ *  Lot N4 (#713) : `cause` — la phrase de la pratique, quand elle en déclare une — remplace la bulle générique de P. */
+function _badgeIndiceSuivi(label, valeur, cause) {
     if (valeur === null || valeur === undefined) {
-        var bulle = label === 'P' ? ' title="Note non constructible avec la configuration actuelle"'
+        var bulle = label === 'P' ? ' title="' + (cause ? echapperHtml(cause) : 'Note non constructible avec la configuration actuelle') + '"'
             : label === 'A' ? ' title="Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e."' : '';
         return '<span class="prioritaire-indice"' + bulle + '>' + label + ' —</span>';
     }

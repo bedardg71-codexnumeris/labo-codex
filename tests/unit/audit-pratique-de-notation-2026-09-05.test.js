@@ -463,15 +463,17 @@ describe('A · quelle pratique calcule pour cet élève', () => {
         expect(ligne[8]).toBe(79);
     });
 
-    it('A4 · un pointeur « pan-specifications » (ou « specifications ») résout vers l\'instance registre SPE, jamais configurée : 50 % pour tout le monde', () => {
-        // À la main : typesTravaux [] → comptes {} → aucun palier → palierEchec absent → 50 → 0,5 ;
+    it('A4 · un pointeur « pan-specifications » (ou « specifications ») résout vers l\'instance registre SPE, jamais configurée : aucune note pour personne', () => {
+        // À la main : typesTravaux [] → comptes {} → aucun palier → palierEchec absent → aucune note (lot N4 ; avant : 50 → 0,5) ;
         // la configurable spe-banc, elle, donne C+ = 70.
         const b = monter(jeuSPE(), { pratiqueId: 'pan-specifications' });
         const inst = b.win.obtenirPratiqueParId('pan-specifications');
         b.win.calculerEtStockerIndicesCP(); const p = b.win.calculerEtStockerIndicesCP()[DA.SPE].actuel;
         const bon = b.win.obtenirPratiqueParId('spe-banc');
         noter('A4', { instance: inst.obtenirId(), registreP: inst.calculerPerformance(DA.SPE), indicesP: p.P, noteConstructible: p.noteConstructible, configurableP: bon.calculerPerformance(DA.SPE) });
-        expect(inst.calculerPerformance(DA.SPE)).toBe(0.5);   // l'instance du registre, interrogée À LA MAIN, rend toujours son 50 (plancher : lot N4)
+        // ↻ Lot N4 (#713, 23 sept. 2026) : l'instance du registre, interrogée À LA MAIN, n'a ni forfait ni palier d'échec → aucune note.
+        // Avant : son 50 codé en dur.
+        expect(inst.calculerPerformance(DA.SPE)).toBeNull();
         // ↻ Lot N1a (21 sept. 2026, #713 volet registre) : le pointeur nu ne mène à aucune pratique de la bibliothèque →
         // « introuvable », non constructible. Avant : P 50 « constructible » pour tout le monde.
         expect(b.win.resoudrePratiqueActive().etat).toBe('introuvable');
@@ -746,7 +748,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         const m = noter('B4', mesurerEleve(b, DA.SPE, 'spe-banc'));
         expect(m.famille).toBe('SPE');
         expect(m.riche).toBeNull();
-        expect(m.registreP).toBe(0.5);                    // ⚠ l'instance registre, jamais configurée : 50 (voir A4)
+        expect(m.registreP).toBeNull();                   // l'instance registre, jamais configurée : aucune note (lot N4 ; voir A4)
         expect(m.configurableP).toBe(0.7);
         expect(m.simule).toEqual({ P: 70, noteFinale: null, noteConstructible: true });
         expect(m.indicesPasse2).toEqual({ P: 70, noteConstructible: true });
