@@ -71,19 +71,11 @@ describe('#434 · le champ legacy est parti, sans reste', () => {
         expect(avant, 'la pose doit précéder le garde `if (config.portfolio)`').toBeLessThan(garde);
     });
 
-    it('chaque mode encore existant se projette sur sa valeur historique', () => {
-        // Table extraite du source et évaluée : le test lit la vraie fonction.
-        const debut = sourceGestion.indexOf('function varianteCalculDepuisMode');
-        expect(debut).toBeGreaterThan(-1);
-        const fin = sourceGestion.indexOf('\n}\n', debut);
-        expect(fin).toBeGreaterThan(debut);
-        // eslint-disable-next-line no-new-func
-        const projeter = new Function(sourceGestion.slice(debut, fin + 2) + '; return varianteCalculDepuisMode;')();
-        expect(projeter('hybride')).toBe('hybride');
-        expect(projeter('meilleurs')).toBe('n-meilleurs');
-        expect(projeter('derniers')).toBe('n-recents');
-        expect(projeter('tous')).toBe('');
-        expect(projeter('par-objectifs')).toBe('');   // #435 : le mode n'existe plus
+    // #900 (lot N6, 23 sept. 2026) — la projection `varianteCalculDepuisMode` est RETIRÉE avec le champ qu'elle
+    // écrivait : depuis #435, le moteur ne lit plus `varianteCalcul`. Le mode de sélection reste l'unique commande.
+    it('la projection vers `varianteCalcul` est partie avec son champ (#900)', () => {
+        expect(sourceGestion).not.toContain('function varianteCalculDepuisMode');
+        expect(sourceGestion).not.toMatch(/configuration\.varianteCalcul\s*=/);
     });
 });
 

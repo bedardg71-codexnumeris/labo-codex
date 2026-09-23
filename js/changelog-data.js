@@ -38,7 +38,9 @@
                 // 1.155.5 (#936, bug testeur) — VALIDÉ par Grégoire le 23 sept. 2026 (tel quel).
                 'Annoter&nbsp;: une fois zoomé, on peut maintenant défiler jusqu\'au bord gauche du travail. La roue de la palette d\'annotation ne se transforme plus en «&nbsp;−&nbsp;» quand on replie la palette.',
                 // 1.155.6 (#937, retour testeur) — VALIDÉ par Grégoire le 23 sept. 2026 (« ok », tel quel).
-                'Annoter&nbsp;: le chronomètre revient dans la barre du haut, à droite, au lieu d\'occuper une palette sur la copie. Pour lui faire de la place, trois éléments quittent cette barre&nbsp;: les flèches pour passer d\'un élève à l\'autre (le carrousel fait ce geste), et les boutons «&nbsp;pleine largeur&nbsp;» et «&nbsp;pleine hauteur&nbsp;». La couleur du fond se choisit maintenant dans le menu Actions.'
+                'Annoter&nbsp;: le chronomètre revient dans la barre du haut, à droite, au lieu d\'occuper une palette sur la copie. Pour lui faire de la place, trois éléments quittent cette barre&nbsp;: les flèches pour passer d\'un élève à l\'autre (le carrousel fait ce geste), et les boutons «&nbsp;pleine largeur&nbsp;» et «&nbsp;pleine hauteur&nbsp;». La couleur du fond se choisit maintenant dans le menu Actions.',
+                // 1.155.7 (#935 volet nom, #900, lot N6) — VALIDÉ par Grégoire le 23 sept. 2026
+                'Pratiques de notation&nbsp;: le seuil d\'acceptabilité d\'une pratique par spécifications ne change plus quand tu l\'enregistres dans Conception&nbsp;→ Pratiques de notation (un seuil de 70 y passait à 75 sans avertissement). Une pratique par dénotation doit avoir au moins une cible. L\'assistant ne pose plus quatre questions dont la réponse ne servait nulle part.'
             ]
         },
         {

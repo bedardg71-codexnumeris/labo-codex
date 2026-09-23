@@ -206,10 +206,10 @@ describe('#717 · l\'id d\'une cible : jamais une position, jamais redonné', ()
 function monterGestion(pratique, jugements) {
     const store = { test_pratiquesConfigurables: [clone(pratique)], test_jugementsDenotation: clone(jugements), test_echellesTemplates: [], test_grillesTemplates: [] };
     const elements = {};
-    const questions = [], reponsesConfirm = [];
+    const questions = [], reponsesConfirm = [], notifs = [];
     const win = { addEventListener() {}, removeEventListener() {} };
     const globaux = { document: fauxDocument(elements, {}), db: dbBanc(store, []), cle: (k) => 'test_' + k, echapperHtml: (x) => String(x == null ? '' : x),
-        notifications: { succes() {}, erreur() {}, info() {}, avertissement() {}, warning() {} },
+        notifications: { succes(t, m) { notifs.push(['succes', t, m]); }, erreur(t, m) { notifs.push(['erreur', t, m]); }, info() {}, avertissement() {}, warning() {} },
         setTimeout: (f) => { f(); return 0; }, clearTimeout() {},
         toggleDisplay: (el, visible) => { if (el) el.style.display = visible ? '' : 'none'; },
         confirm: (m) => { questions.push(m); return reponsesConfirm.length ? reponsesConfirm.shift() : true; } };
@@ -222,7 +222,7 @@ function monterGestion(pratique, jugements) {
         elements['mat-den-cibles'].querySelectorAll = (s) => (s === '.editeur-cibles-ligne'
             ? cibles.map(c => ({ dataset: { cibleId: c.id }, querySelector: () => ({ value: c.nom }) })) : []);
     };
-    return { win, store, elements, ecran, questions, reponsesConfirm };
+    return { win, store, elements, ecran, questions, reponsesConfirm, notifs };
 }
 const PRATIQUE_GESTION = { id: 'P_DEN', nom: 'DEN gestion', type: 'denotation', calcul_note: { methode: 'jugement_global' }, pratiques: ['DEN'],
     configuration: { type: 'denotation', modeDEN: 'eliminee', objectifs: [{ id: 'cible_a', nom: 'Lire' }, { id: 'cible_b', nom: 'Écrire' }],
@@ -296,7 +296,8 @@ describe('#717 · la gestion des pratiques : les mêmes gestes, la même règle'
         await g.win.sauvegarderConfigPratiqueMat();
         expect(g.questions[0]).toContain('« Lire » : cochée pour 1 étudiant·e\n');
         expect(g.questions[0]).toContain('recalculée sans elle.');
-        g.ecran([]);
+        // Lot N6 : zéro cible est refusé AVANT la question — le pluriel s'éprouve donc avec une cible neuve qui reste.
+        g.ecran([{ id: 'cible_neuve', nom: 'Parler' }]);
         g.reponsesConfirm.push(false);
         await g.win.sauvegarderConfigPratiqueMat();
         expect(g.questions[1]).toContain('Tu retires des cibles déjà cochées.');
@@ -359,5 +360,74 @@ describe('#717 · sentinelle : aucun id de cible positionnel dans js/', () => {
         expect(gestion).toContain("window.EditeurCibles.lire(document.getElementById('mat-den-cibles'))");
         expect(index).not.toMatch(/<textarea id="mat-den-cibles"/);
         expect(index).toMatch(/<script src="js\/pratiques\/editeur-cibles\.js/);
+    });
+});
+
+/* ---------------------------------------------------------------------------------------------
+   LOT N6 (23 sept. 2026) — une dénotation sans cible ne s'enregistre plus, dans la gestion comme dans l'assistant.
+   Mesuré au lot N5 (`aa7007e9`) : la gestion enregistrait zéro cible, et toutes les notes étaient alors plafonnées à 59.
+   --------------------------------------------------------------------------------------------- */
+// Mot pour mot, VALIDÉ par Grégoire le 23 sept. 2026 ; l'ancienne version proposée ne doit plus paraître.
+const MOTIF_N6 = 'Ajoute au moins une cible : sans cible, aucune note ne peut dépasser 59.';
+
+describe('lot N6 · zéro cible : refusé par la règle du composant, dans les deux écrans', () => {
+    it('le composant : zéro cible → le motif, mot pour mot ; une cible → rien à redire', () => {
+        const a = monterAssistant(storeVide());
+        expect(a.win.EditeurCibles.motifRefus([])).toBe(MOTIF_N6);
+        expect(readFileSync(path.join(RACINE, 'js/pratiques/editeur-cibles.js'), 'utf8')).not.toContain('aucune ne peut être atteinte');
+        expect(a.win.EditeurCibles.motifRefus(undefined)).toBe(MOTIF_N6);
+        expect(a.win.EditeurCibles.motifRefus([{ id: 'c1', nom: 'Lire' }])).toBeNull();
+    });
+
+    it('la gestion REFUSE zéro cible : rien n\'est écrit, le motif s\'affiche, « Enregistrer » n\'annonce pas de succès', async () => {
+        const g = monterGestion(PRATIQUE_GESTION, { P_DEN: { [DA1]: jugement({ cible_a: true, cible_b: true }) } });
+        await g.win.chargerPratiquePourModif('P_DEN');
+        const avant = clone(g.store.test_pratiquesConfigurables);
+        g.ecran([]);
+        expect(await g.win.sauvegarderConfigPratiqueMat()).toBe(false);
+        expect(g.store.test_pratiquesConfigurables).toEqual(avant);
+        expect(g.notifs).toEqual([['erreur', 'Aucune cible', MOTIF_N6]]);
+        expect(g.questions).toEqual([]);                                   // refusé AVANT la question des coches
+        await g.win.sauvegarderPratiqueMaterielComplet();
+        // Le refus, et RIEN d'autre : ni « Pratique enregistrée », ni la suite de l'enregistrement (nom, description…).
+        expect(g.notifs).toEqual([['erreur', 'Aucune cible', MOTIF_N6], ['erreur', 'Aucune cible', MOTIF_N6]]);
+        expect(g.store.test_pratiquesConfigurables).toEqual(avant);
+        expect(noteMoteur(g.store, 'P_DEN', DA1)).toBe(78);                // la pratique garde ses deux cibles
+    });
+
+    it('la gestion : UNE cible suffit (écrite, la note suit)', async () => {
+        const g = monterGestion(PRATIQUE_GESTION, { P_DEN: { [DA1]: jugement({ cible_a: true, cible_b: false }) } });
+        await g.win.chargerPratiquePourModif('P_DEN');
+        g.ecran([{ id: 'cible_a', nom: 'Lire' }]);
+        expect(await g.win.sauvegarderConfigPratiqueMat()).toBe(true);     // « Écrire » (non cochée) retirée : pas de question
+        expect(g.store.test_pratiquesConfigurables[0].configuration.objectifs).toEqual([{ id: 'cible_a', nom: 'Lire' }]);
+        expect(g.notifs.filter(n => n[0] === 'erreur')).toEqual([]);
+        expect(noteMoteur(g.store, 'P_DEN', DA1)).toBe(78);
+    });
+
+    it('l\'assistant : l\'étape des cibles reste bloquée à zéro cible, passe à une (vraie `validerEtape`, même règle)', () => {
+        let lignes = [];
+        const conteneur = { closest: () => null, classList: { add() {}, remove() {} }, querySelectorAll: (sel) => (sel === '.editeur-cibles-ligne'
+            ? lignes.map(c => ({ dataset: { cibleId: c.id }, querySelector: () => ({ value: c.nom }) })) : []) };
+        const erreurs = [];
+        const win = { addEventListener() {}, removeEventListener() {} };
+        const globaux = {
+            // La méthode de suggestion, l'autre champ requis de l'étape, est cochée : seule la liste des cibles décide.
+            document: { getElementById: (id) => (id.endsWith('ciblesDenotation') ? conteneur : null),
+                querySelector: (sel) => (sel.includes('methodeSuggestionDen') ? { value: 'mode', closest: () => null } : null),
+                querySelectorAll: () => [], addEventListener() {}, removeEventListener() {} },
+            db: dbBanc(storeVide(), []), cle: (k) => 'test_' + k,
+            notifications: { erreur(m) { erreurs.push(m); }, succes() {}, info() {}, warning() {} },
+            normaliserIdPratique: (t) => t, genererIdUnique: (p) => p + 'NEUF', echapperHtml: (x) => String(x == null ? '' : x)
+        };
+        chargerScript('js/pratiques/editeur-cibles.js', globaux, win);
+        chargerAvecInterne('js/wizard-pratique-v2.js', globaux, win, ['validerEtape']);
+        const validerEtape = win.__audit['wizard-pratique-v2.js'].validerEtape;
+        win.wizardState.reponses = {};
+        expect(validerEtape('config-denotation')).toBe(false);
+        expect(erreurs).toHaveLength(1);
+        lignes = [{ id: 'c1', nom: 'Lire' }];
+        expect(validerEtape('config-denotation')).toBe(true);
+        expect(erreurs).toHaveLength(1);
     });
 });
