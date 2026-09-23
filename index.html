@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260923a"> <!-- #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés -->
+    <link rel="stylesheet" href="styles.css?v=20260923y"> <!-- #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -14537,9 +14537,9 @@
     <script src="js/heic-decodeur.js?v=20260911a"></script> <!-- #597 : conversion HEIC vers JPEG a l'entree de la file ; le bundle libheif (1,2 Mo) est charge par le worker, seulement quand un HEIC se presente -->
     <script src="js/travaux-import.js?v=20260916d"></script> <!-- #612 (T6.3) : un DA sans eleve dans ce groupe est recense ; #611 : appariement par nom par MOTS ENTIERS normalisés, ambiguïté ⇒ aucune association ; #558 la file survit au rechargement -->
     <script src="js/travaux-visionneuse.js?v=20260917b"></script> <!-- Beta 1.106.14 b0831 : zoom molette/trackpad proportionnel a deltaY + apercu CSS pendant le geste -->
-    <script src="js/travaux-outils.js?v=20260916b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
+    <script src="js/travaux-outils.js?v=20260923x"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
-    <script src="js/travaux-annotation.js?v=20260916b"></script>
+    <script src="js/travaux-annotation.js?v=20260923x"></script>
     <script src="js/travaux-archivage.js?v=20260916b"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
     <script src="js/synthese-retroaction-data.js?v=20260921b"></script>
     <script src="js/synthese-retroaction-rendu.js?v=20260921c"></script>
@@ -14547,7 +14547,7 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260922h"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
+    <script src="js/travaux-ui.js?v=20260923x"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
     <script src="js/actions-rlo.js?v=20260808b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14583,7 +14583,7 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260921b"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 ; #725/#617/#724/#720 jetons de reprise -->
-    <script src="js/evaluation-chargement.js?v=20260921b"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
+    <script src="js/evaluation-chargement.js?v=20260923x"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260922c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260921b"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260918b"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->

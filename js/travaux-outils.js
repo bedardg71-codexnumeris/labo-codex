@@ -2262,7 +2262,9 @@
         const palette = document.getElementById('travaux-palette-flottante');
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.palette-flottante-toggle') || palette.querySelector('.travaux-palette-toggle');
+        // #936 — par son id : la barre porte d'abord la roue (même classe), qu'un
+        // querySelector de classe remplaçait par « − » / « + ».
+        const btn = document.getElementById('travaux-palette-toggle');
         if (btn) {
             btn.innerHTML = palette.classList.contains('replie') ? '&#x002B;' : '&#x2212;';
         }
