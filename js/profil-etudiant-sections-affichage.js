@@ -571,6 +571,9 @@ function genererSectionMobilisationEngagement(da) {
     // ci-dessus, qui est une moyenne SIMPLE (Grégoire, 18 sept. : « la pondération affectée à chaque travail, pas 50-50 »).
     const recitSOM = _lireRecitSommative(da).recit;
     const compteesSOM = recitSOM ? (recitSOM.resultats || []).filter(r => r.sort === 'compte') : [];
+    // Lot N4 (#713) — pourquoi la note n'existe pas, quand la pratique le déclare (source unique, portfolio.js).
+    const causeNoteAbsente = (indices.noteConstructible === false && typeof causeNoteNonConstructible === 'function')
+        ? causeNoteNonConstructible(da) : null;
     // `const interpP = interpreterPerformance(moyenneP);` retiré au pas 3c-3 de
     // #542 : le résultat n'était lu nulle part, et la fonction n'existe plus.
 
@@ -726,7 +729,10 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Performance</h3>
-                    ${performanceInsuffisante
+                    ${indices.noteConstructible === false
+                        // Lot N4 (#713) : une note absente est un tiret, jamais le 0 du stockage ; la cause en bulle.
+                        ? `<span class="profil-valeur-grande" style="color: var(--gris-moyen);"${causeNoteAbsente ? ` title="${echapperHtml(causeNoteAbsente)}"` : ''}>—</span>`
+                        : performanceInsuffisante
                         ? '<span class="profil-valeur-grande" style="color: var(--gris-moyen);">—</span>'
                         : genererValeursComparatives(indicesSOM.P, indicesPAN.P, recitSOM ? compteesSOM.length === 0 : aucuneDonneePerformance)}
                 </div>
@@ -1092,6 +1098,13 @@ function genererSectionAccompagnement(da) {
                 <p class="profil-texte-paragraphe">
                     <strong>Performance globale (P) :</strong> ${(() => {
                         const pct = indices.P;
+
+                        // Lot N4 (#713) — UNE NOTE ABSENTE S'ÉCRIT « — », AVEC SA CAUSE. `indices.P` vaut alors le 0
+                        // du stockage (#394) : l'écrire ici donnait « 0% » sous une note qui n'existe pas.
+                        if (indices.noteConstructible === false) {
+                            const cause = (typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(da) : null;
+                            return '—' + (cause ? `<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">${echapperHtml(cause)}</span>` : '');
+                        }
 
                         // ⚠⚠ #542 lot 3, pas 3c — LE NIVEAU VIENT DE LA PRATIQUE,
                         // PLUS D'UN TERNAIRE.

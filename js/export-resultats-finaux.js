@@ -94,7 +94,8 @@ function construireLignesSynthese(etudiants, contexte, simuler) {
             // Cohérent avec #326 : on n'écrit pas un 0 trompeur quand la note
             // ne se construit pas (DEN sans saisie, config incompatible…).
             note = '';
-            statut = 'non constructible';
+            // Lot N4 (#713) : la cause, quand la pratique en déclare une (`simulerIndices`, source unique).
+            statut = (r && r.causeNonConstructible) ? 'non constructible – ' + r.causeNonConstructible : 'non constructible';
         } else {
             note = r.P;
             statut = (r.details && r.details.estProvisoire) ? 'provisoire' : 'final';

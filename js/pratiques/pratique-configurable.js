@@ -545,6 +545,21 @@ class PratiqueConfigurable {
         return (perf === null || perf === undefined) ? null : perf * 100;
     }
 
+    /**
+     * Lot N4 (#713) — la cause d'une note absente, lue au moteur de la famille (source unique :
+     * `PratiquePanSpecifications.expliquerNoteNonConstructible`). Hors spécifications : null.
+     * Configuration sans types ou sans forfaits : l'instance ne se construit pas, et c'est la cause.
+     * @param {string} da
+     * @returns {string|null}
+     */
+    expliquerNoteNonConstructible(da) {
+        if (!this.config.calcul_note || this.config.calcul_note.methode !== 'specifications') return null;
+        const inst = this._instanceSpecifications();
+        if (inst) return inst.expliquerNoteNonConstructible(da);
+        if (typeof window.PratiquePanSpecifications !== 'function') return null;
+        return new window.PratiquePanSpecifications().expliquerNoteNonConstructible(da);
+    }
+
     // ========================================================================
     // CALCUL DE LA COMPLÉTION (Indice C)
     // ========================================================================
@@ -723,8 +738,10 @@ class PratiqueConfigurable {
             case 'moyenne_ponderee':
                 return this.calculerMoyennePonderee(evaluations);
 
-            case 'specifications':
-                return this.calculerParSpecifications(evaluations);
+            // Lot N4 (#713) : 'specifications' n'a plus de chemin ici — sa suite de quatre notes
+            // par défaut et son 0 « sans spécifications » sont retirés avec lui.
+            // Mesuré : `calculerNoteFinale` n'a aucun appelant (voir #897 plus haut) ; la note
+            // d'une SPE configurable passe par `_calculerPerformanceSpecifications`.
 
             case 'remplacement-progression':
                 return this.calculerParRemplacementProgression(evaluations);
@@ -874,75 +891,6 @@ class PratiqueConfigurable {
         }
 
         return Math.round(noteBrute * 10) / 10;
-    }
-
-    /**
-     * Calcule note par spécifications
-     * Vérifie quelles spécifications sont satisfaites et retourne
-     * la note du forfait (bundle) le plus élevé satisfait.
-     *
-     * Référence : PRATIQUE_PAN_SPECIFICATIONS dans pratiques-predefines.js
-     * @private
-     */
-    calculerParSpecifications(evaluations) {
-        const structure = this.config.structure_evaluations;
-        if (!structure || !structure.specifications) {
-            console.warn('[PratiqueConfigurable] Pas de spécifications configurées');
-            return 0;
-        }
-
-        const specifications = structure.specifications;
-
-        // Déterminer quelles spécifications sont satisfaites
-        const specsSatisfaites = new Set();
-        for (const spec of specifications) {
-            // Chercher une évaluation correspondante qui est réussie
-            const evalCorrespondante = evaluations.find(e =>
-                (e.nom === spec.nom || e.specificationId === spec.id) &&
-                e.note !== null && e.note !== undefined &&
-                (e.reussi === true || e.note >= (spec.seuil || 60))
-            );
-            if (evalCorrespondante) {
-                specsSatisfaites.add(spec.nom || spec.id);
-            }
-        }
-
-        // Déterminer les notes possibles (forfaits), triées du plus élevé au plus bas
-        const echelle = this.config.echelle;
-        const notesPossibles = (echelle && echelle.notes_possibles)
-            ? [...echelle.notes_possibles].sort((a, b) => b - a)
-            : [100, 80, 60, 50];
-
-        // Pour chaque note (de la plus haute à la plus basse),
-        // vérifier si toutes les spécifications requises sont satisfaites
-        for (const note of notesPossibles) {
-            const specsRequises = specifications.filter(s =>
-                s.requis_pour && s.requis_pour.includes(note)
-            );
-
-            const toutesRequisesSatisfaites = specsRequises.every(s =>
-                specsSatisfaites.has(s.nom || s.id)
-            );
-
-            if (toutesRequisesSatisfaites && specsRequises.length > 0) {
-                return note;
-            }
-        }
-
-        // Aucun forfait satisfait — note minimale ou 0
-        const noteMin = notesPossibles.length > 0
-            ? notesPossibles[notesPossibles.length - 1]
-            : 0;
-
-        // Vérifier si au moins les specs du niveau minimal sont satisfaites
-        const specsMin = specifications.filter(s =>
-            s.requis_pour && s.requis_pour.includes(noteMin)
-        );
-        const minSatisfait = specsMin.every(s =>
-            specsSatisfaites.has(s.nom || s.id)
-        );
-
-        return minSatisfait ? noteMin : 0;
     }
 
     /**
