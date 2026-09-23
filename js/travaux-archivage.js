@@ -95,7 +95,7 @@
      * Genere un ZIP contenant les travaux d'un etudiant
      *
      * #891 : un fichier illisible ne fait plus perdre l'archive entière (même
-     * modèle que #565 sur `exporterSemestre`). `exportes` liste les ids des
+     * modèle que #565 sur l'ancien export du trimestre). `exportes` liste les ids des
      * fichiers RÉELLEMENT mis dans l'archive : l'appelant ne marque que ceux-là.
      *
      * @param {string} da - DA de l'etudiant
@@ -149,154 +149,97 @@
     }
 
     /**
-     * Genere un ZIP filtre par etudiant, production, ou les deux
-     * Inclut toujours : productions en PDF + evaluations en JSON
+     * #895 — LE moteur de la carte « Exporter des travaux ».
      *
-     * #891 : un fichier illisible ne fait plus perdre l'archive entière (même
-     * modèle que #565 sur `exporterSemestre`). `exportes` liste les ids des
-     * fichiers RÉELLEMENT mis dans l'archive : l'appelant ne marque que ceux-là.
+     * Il y avait deux cartes et deux moteurs pour un même geste : `exporterTravaux`
+     * (`élève/fichier`, sans compression) et celui de « Trimestre complet »
+     * (`élève/production/fichier`, `_resume.json`, DEFLATE, progression). Une seule carte reste (décision de Grégoire, 17 sept. 2026) ;
+     * ce moteur porte les deux arborescences en option, le résumé et la
+     * compression. Aucun filtre = tout le groupe : ce n'est plus un refus.
      *
-     * @param {string|null} da - DA de l'etudiant (null = tous)
-     * @param {string|null} productionId - ID de la production (null = toutes)
-     * @returns {Promise<{blob: Blob, echecs: string[], nbFichiers: number, exportes: string[]}>}
+     * Un fichier illisible est sauté et NOMMÉ, dans `echecs` et dans
+     * `_resume.json` (#565, #891). `exportes` liste les ids des fichiers
+     * RÉELLEMENT mis dans l'archive : l'appelant ne marque que ceux-là.
+     *
+     * @param {Object} [options]
+     * @param {string|null} [options.da] - DA d'un·e élève (null = tous)
+     * @param {string|null} [options.productionId] - production (null = toutes)
+     * @param {'etudiant-production'|'etudiant'} [options.forme] - arborescence
+     * @param {boolean} [options.compression] - DEFLATE (true) ou stockage brut
+     * @param {Function} [onProgression] - (traites, total)
+     * @returns {Promise<{blob: (Blob|null), echecs: string[], nbFichiers: number, exportes: string[]}>}
+     *   `blob` est null quand aucun fichier ne correspond aux filtres.
      */
-    async function exporterTravaux(da, productionId) {
+    async function exporterTravaux(options = {}, onProgression) {
         if (typeof JSZip === 'undefined') {
             throw new Error('JSZip non disponible');
         }
 
-        const zip = new JSZip();
-        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        const da = options.da || null;
+        const productionId = options.productionId || null;
+        const parProduction = options.forme !== 'etudiant';
+        const compression = options.compression !== false;
 
-        if (da) {
-            fichiers = fichiers.filter(f => f.etudiantDA === da);
-        }
-        if (productionId) {
-            fichiers = fichiers.filter(f => f.productionId === productionId);
-        }
+        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        if (da) fichiers = fichiers.filter(f => f.etudiantDA === da);
+        if (productionId) fichiers = fichiers.filter(f => f.productionId === productionId);
 
         if (fichiers.length === 0) {
-            throw new Error('Aucun fichier trouvé pour ces critères.');
+            return { blob: null, echecs: [], nbFichiers: 0, exportes: [] };
         }
 
+        const zip = new JSZip();
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const productions = obtenirDonneesSelonMode('productions');
         const echecs = [];
         const exportes = [];
+        let traites = 0;
 
         for (const fichier of fichiers) {
             // Identité résolue AVANT le try : le bilan doit pouvoir nommer
             // l'élève concerné, pas seulement compter.
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
-            const sousDossier = etudiant
-                ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`)
-                : _assainirSegmentChemin(fichier.etudiantDA || 'non-associe');
-
-            try {
-                // Toujours inclure les annotations aplaties
-                await _ajouterFichierAuZip(zip, fichier, {
-                    original: `${sousDossier}/${fichier.nomFichier}`,
-                    annote: `${sousDossier}/${_nomVersionAnnotee(fichier.nomFichier)}`
-                });
-                exportes.push(fichier.id);
-            } catch (e) {
-                console.error('[Travaux-Archivage] Export — échec sur ' + fichier.nomFichier + ' :', e);
-                echecs.push(`${sousDossier} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
-            }
-        }
-
-        // Toujours inclure les evaluations
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        let evalsFiltre = evaluations;
-        if (da) evalsFiltre = evalsFiltre.filter(e => e.etudiantDA === da);
-        if (productionId) evalsFiltre = evalsFiltre.filter(e => e.productionId === productionId);
-
-        if (evalsFiltre.length > 0) {
-            zip.file('evaluations.json', JSON.stringify(evalsFiltre, null, 2));
-        }
-
-        const blob = await zip.generateAsync({ type: 'blob' });
-        return { blob, echecs, nbFichiers: fichiers.length, exportes };
-    }
-
-    /**
-     * Genere un ZIP complet du semestre
-     *
-     * #565 : un fichier illisible ne fait plus perdre l'archive entière. Chaque
-     * item est isolé par try/catch, les pertes sont nommées dans `echecs` ET
-     * inscrites dans le `_resume.json` de l'archive.
-     *
-     * @param {Object} options - Options d'export
-     * @param {Function} onProgression - Callback de progression
-     * @returns {Promise<{blob: Blob, echecs: string[], nbFichiers: number}>}
-     */
-    async function exporterSemestre(options = {}, onProgression) {
-        if (typeof JSZip === 'undefined') {
-            throw new Error('JSZip non disponible');
-        }
-
-        const zip = new JSZip();
-        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const productions = obtenirDonneesSelonMode('productions');
-
-        // Filtres optionnels
-        if (options.da) {
-            fichiers = fichiers.filter(f => f.etudiantDA === options.da);
-        }
-        if (options.productionId) {
-            fichiers = fichiers.filter(f => f.productionId === options.productionId);
-        }
-
-        const trimestreActif = obtenirTrimestreActif();
-        const nomArchive = trimestreActif ? trimestreActif.nom.replace(/\s/g, '_') : 'semestre';
-
-        let traites = 0;
-        // #565 — un fichier illisible ne doit plus faire perdre l'archive entière.
-        const echecs = [];
-
-        // Structure: eleve/production/fichier
-        for (const fichier of fichiers) {
-            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
-            const production = productions.find(p => p.id === fichier.productionId);
-
             const nomEtudiant = etudiant
                 ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`)
                 : _assainirSegmentChemin(fichier.etudiantDA || 'non-associe');
 
-            // #891 — même assainissement que les noms d'élèves (#572) : les
-            // accents restent (« Écrit 1 » ne devient plus « _crit_1 »).
-            const nomProduction = production
-                ? _assainirSegmentChemin(production.titre || production.nom || '')
-                : 'sans-production';
+            let dossier = nomEtudiant;
+            if (parProduction) {
+                // #891 — même assainissement que les noms d'élèves (#572) : les
+                // accents restent (« Écrit 1 » ne devient plus « _crit_1 »).
+                const production = productions.find(p => p.id === fichier.productionId);
+                dossier += '/' + (production
+                    ? _assainirSegmentChemin(production.titre || production.nom || '')
+                    : 'sans-production');
+            }
 
             try {
                 // Toujours inclure les annotations aplaties
                 await _ajouterFichierAuZip(zip, fichier, {
-                    original: `${nomEtudiant}/${nomProduction}/${fichier.nomFichier}`,
-                    annote: `${nomEtudiant}/${nomProduction}/${_nomVersionAnnotee(fichier.nomFichier)}`
+                    original: `${dossier}/${fichier.nomFichier}`,
+                    annote: `${dossier}/${_nomVersionAnnotee(fichier.nomFichier)}`
                 });
+                exportes.push(fichier.id);
             } catch (e) {
-                console.error('[Travaux-Archivage] Export trimestre — échec sur ' + fichier.nomFichier + ' :', e);
+                console.error('[Travaux-Archivage] Export — échec sur ' + fichier.nomFichier + ' :', e);
                 echecs.push(`${nomEtudiant} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
             }
 
             traites++;
-            if (onProgression) {
-                onProgression(traites, fichiers.length);
-            }
+            if (onProgression) onProgression(traites, fichiers.length);
         }
 
         // Toujours inclure les evaluations
         let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        if (options.da) evaluations = evaluations.filter(e => e.etudiantDA === options.da);
-        if (options.productionId) evaluations = evaluations.filter(e => e.productionId === options.productionId);
+        if (da) evaluations = evaluations.filter(e => e.etudiantDA === da);
+        if (productionId) evaluations = evaluations.filter(e => e.productionId === productionId);
         if (evaluations.length > 0) {
             zip.file('_evaluations.json', JSON.stringify(evaluations, null, 2));
         }
 
-        // Ajouter un fichier resume
+        const trimestreActif = obtenirTrimestreActif();
         const resume = {
-            export: nomArchive,
+            export: trimestreActif ? trimestreActif.nom.replace(/\s/g, '_') : 'semestre',
             date: new Date().toISOString(),
             nbFichiers: fichiers.length,
             nbEtudiants: new Set(fichiers.map(f => f.etudiantDA).filter(Boolean)).size,
@@ -308,13 +251,10 @@
         };
         zip.file('_resume.json', JSON.stringify(resume, null, 2));
 
-        const blob = await zip.generateAsync({
-            type: 'blob',
-            compression: 'DEFLATE',
-            compressionOptions: { level: 6 }
-        });
-
-        return { blob, echecs, nbFichiers: fichiers.length };
+        const blob = await zip.generateAsync(compression
+            ? { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }
+            : { type: 'blob' });
+        return { blob, echecs, nbFichiers: fichiers.length, exportes };
     }
 
     /**
@@ -581,18 +521,34 @@
     }
 
     /**
-     * Lance l'export unifie (etudiant, production, ou les deux) et telecharge
-     * @param {string|null} da - DA de l'etudiant (null = tous)
-     * @param {string|null} productionId - ID de la production (null = toutes)
+     * #895 — Le bouton « Télécharger » de la carte « Exporter des travaux ».
+     *
+     * Aucun filtre = tout le groupe (ce que faisait « Trimestre complet », retiré).
+     * Un filtre sans fichier ne télécharge rien et le dit dans la ligne de
+     * progression de la carte, sans `alert`.
+     *
+     * @param {Object} [options] - `{ da, productionId, forme, compression }`,
+     *   voir `exporterTravaux`
      */
-    async function lancerExport(da, productionId) {
-        const _hasProg = typeof window.afficherProgression === 'function';
-        if (_hasProg) {
-            window.afficherProgression('Export des travaux');
-            window.majProgression(20, 'Compression de l\'archive…');
-        }
+    async function lancerExport(options = {}) {
+        const da = options.da || null;
+        const productionId = options.productionId || null;
         try {
-            const { blob, echecs, nbFichiers, exportes } = await exporterTravaux(da, productionId);
+            _reinitialiserBarreProgression('travaux-barre-progression', 'travaux-texte-progression');
+
+            const { blob, echecs, nbFichiers, exportes } = await exporterTravaux(options, (traites, total) => {
+                const pourcent = Math.round((traites / total) * 100);
+                const barre = document.getElementById('travaux-barre-progression');
+                if (barre) barre.style.width = pourcent + '%';
+                const texte = document.getElementById('travaux-texte-progression');
+                if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
+            });
+
+            if (!blob) {
+                const texte = document.getElementById('travaux-texte-progression');
+                if (texte) texte.textContent = 'Aucun fichier trouvé pour ces critères.';
+                return;
+            }
 
             // Nom du fichier selon le filtre. #891 — assaini comme dans
             // `lancerExportEtudiant` (#572) : ce nom devient celui du FICHIER
@@ -608,19 +564,25 @@
                 const prod = productions.find(p => p.id === productionId);
                 nomZip += '_' + _assainirSegmentChemin(prod?.titre || prod?.nom || productionId);
             }
+            if (!da && !productionId) {
+                // L'archive de tout le groupe : datée, comme l'était « Trimestre complet ».
+                const trimestreActif = obtenirTrimestreActif();
+                nomZip += '_' + (trimestreActif ? trimestreActif.id : 'semestre')
+                    + '_' + new Date().toISOString().split('T')[0];
+            }
             // L'archive part MÊME si des fichiers ont échoué (#565, #891).
             telechargerBlob(blob, nomZip + '.zip');
 
             // #891 — marquer « exporté » SEULEMENT ce qui est réellement dans
             // l'archive : un fichier sauté n'a pas été exporté, et ce statut
             // fait taire la détection de blob manquant à l'import d'un codex.
+            // #895 — vaut pour toute forme d'export : l'ancien « Trimestre
+            // complet » ne marquait rien.
             exportes.forEach(id => travauxStockage.marquerExporte(id));
             _afficherBilanExport(exportes.length, nbFichiers, echecs);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export:', e);
             alert('L\'export a échoué : ' + e.message);
-        } finally {
-            if (_hasProg) window.masquerProgression();
         }
     }
 
@@ -671,35 +633,6 @@
 
         if (lignes.length === 0) return;
         alert(lignes.join('\n'));
-    }
-
-    /**
-     * Lance l'export du semestre complet et telecharge
-     * @param {Object} options - Options
-     */
-    async function lancerExportSemestre(options = {}) {
-        try {
-            const trimestreActif = obtenirTrimestreActif();
-            const nom = trimestreActif ? trimestreActif.id : 'semestre';
-
-            _reinitialiserBarreProgression('travaux-barre-progression', 'travaux-texte-progression');
-
-            const { blob, echecs, nbFichiers } = await exporterSemestre(options, (traites, total) => {
-                const pourcent = Math.round((traites / total) * 100);
-                const barre = document.getElementById('travaux-barre-progression');
-                if (barre) barre.style.width = pourcent + '%';
-                const texte = document.getElementById('travaux-texte-progression');
-                if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
-            });
-
-            // L'archive part MÊME si des fichiers ont échoué : les N−1 valides
-            // ont plus de valeur que rien du tout (#565). Le bilan suit.
-            telechargerBlob(blob, `archive_travaux_${nom}_${new Date().toISOString().split('T')[0]}.zip`);
-            _afficherBilanExport(nbFichiers - echecs.length, nbFichiers, echecs);
-        } catch (e) {
-            console.error('[Travaux-Archivage] Erreur export semestre:', e);
-            alert('L\'export a échoué : ' + e.message);
-        }
     }
 
     /**
@@ -765,11 +698,9 @@
     window.travauxArchivage = {
         exporterParEtudiant: exporterParEtudiant,
         exporterTravaux: exporterTravaux,
-        exporterSemestre: exporterSemestre,
         exporterPourLea: exporterPourLea,
         lancerExport: lancerExport,
         lancerExportEtudiant: lancerExportEtudiant,
-        lancerExportSemestre: lancerExportSemestre,
         lancerExportLea: lancerExportLea,
         selectionnerEvaluationsLea: selectionnerEvaluationsLea,   // #566 — lue par le compteur de l'écran
         telechargerBlob: telechargerBlob,

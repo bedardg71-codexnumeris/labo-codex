@@ -1282,7 +1282,7 @@
             <div class="travaux-archivage-options">
                 <!-- Allégement : fonctionnalité RETIRÉE le 28 août 2026 (décision Grégoire). Le statut « facsimile » subsiste en lecture pour les fichiers déjà allégés. -->
 
-                <!-- Exporter des travaux -->
+                <!-- Exporter des travaux (#895 : seule carte d'export par ZIP ; « Toutes / Tous » = tout le groupe) -->
                 <div class="travaux-archivage-carte">
                     <h4>Exporter des travaux</h4>
                     <p class="texte-muted">Évaluations en JSON + productions en PDF</p>
@@ -1301,35 +1301,23 @@
                                 ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
                             </select>
                         </div>
-                    </div>
-                    <button class="btn btn-principal" data-action="travauxUI.lancerArchivage">Télécharger</button>
-                </div>
-
-                <!-- Trimestre complet -->
-                <div class="travaux-archivage-carte">
-                    <h4>Trimestre complet</h4>
-                    <p class="texte-muted">Toutes les productions en PDF classées par étudiant·e + évaluations en JSON</p>
-                    <div class="travaux-archivage-filtres">
                         <div class="groupe-form">
-                            <label>Production</label>
-                            <select id="travaux-archivage-semestre-production" class="controle-form">
-                                <option value="">— Toutes —</option>
-                                ${productions.map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="groupe-form">
-                            <label>Étudiant·e</label>
-                            <select id="travaux-archivage-semestre-etudiant" class="controle-form">
-                                <option value="">— Tous —</option>
-                                ${[...etudiants].sort((a,b) => (a.nom||'').localeCompare(b.nom||'')).map(e => `<option value="${echapperHtml(e.da)}">${e.nom ? echapperHtml(e.nom + ', ' + e.prenom) : echapperHtml(e.prenom)} (${e.daAffichage || e.da})</option>`).join('')}
+                            <label>Dossiers</label>
+                            <select id="travaux-archivage-forme" class="controle-form">
+                                <option value="etudiant-production">Par étudiant·e et production</option>
+                                <option value="etudiant">Par étudiant·e</option>
                             </select>
                         </div>
                     </div>
+                    <label style="display:flex;align-items:center;gap:6px;margin-top:6px;cursor:pointer">
+                        <input type="checkbox" id="travaux-archivage-compression" checked>
+                        Compresser l'archive
+                    </label>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-principal" data-action="travauxUI.lancerArchivageSemestre">Télécharger archive</button>
+                    <button class="btn btn-principal" data-action="travauxUI.lancerArchivage">Télécharger</button>
                 </div>
 
                 <!-- Export Lea -->
@@ -3592,27 +3580,16 @@
     }
 
     /**
-     * Lance l'archivage unifié (étudiant, production, ou les deux)
+     * #895 — « Télécharger » de la carte « Exporter des travaux ». Aucune
+     * sélection n'est invalide : « Toutes / Tous » exporte tout le groupe.
      */
     function lancerArchivage() {
-        const da = document.getElementById('travaux-archivage-etudiant')?.value || null;
-        const productionId = document.getElementById('travaux-archivage-production')?.value || null;
-
-        if (!da && !productionId) {
-            alert('Sélectionne au moins un étudiant ou une production');
-            return;
-        }
-
-        travauxArchivage.lancerExport(da, productionId);
-    }
-
-    /**
-     * Lance l'archivage du semestre (structure dossiers élève/production)
-     */
-    function lancerArchivageSemestre() {
-        const da = document.getElementById('travaux-archivage-semestre-etudiant')?.value || null;
-        const productionId = document.getElementById('travaux-archivage-semestre-production')?.value || null;
-        travauxArchivage.lancerExportSemestre({ da, productionId });
+        travauxArchivage.lancerExport({
+            da: document.getElementById('travaux-archivage-etudiant')?.value || null,
+            productionId: document.getElementById('travaux-archivage-production')?.value || null,
+            forme: document.getElementById('travaux-archivage-forme')?.value || 'etudiant-production',
+            compression: document.getElementById('travaux-archivage-compression')?.checked !== false
+        });
     }
 
     /**
@@ -7513,7 +7490,6 @@
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
         lancerArchivage: lancerArchivage,
-        lancerArchivageSemestre: lancerArchivageSemestre,
         lancerExportLea: lancerExportLea,
         mettreAJourCompteurLea: mettreAJourCompteurLea,
         // Annotation → Evaluation
