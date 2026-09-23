@@ -101,7 +101,7 @@
             var ps = cats.selection.ponderation, po = cats.obligatoires.ponderation;
             if (ps != null && po != null) return 'Sélection ' + ps + ' % / Obligatoires ' + po + ' %';
         }
-        if (famille === 'sommative') return 'Par production (réglée dans Conception › Productions)';
+        if (famille === 'sommative') return 'Par production (réglée dans Conception → Productions)';
         if (famille === 'denotation') return 's.o. (note = jugement)';
         var se = _lire(config, 'structure_evaluations') || {};
         if (se.ponderation && String(se.ponderation).toLowerCase() !== 'egale') return 'Inégale';
@@ -211,7 +211,7 @@
      * EST PUR, il ne touche ni au DOM ni au stockage.
      */
     function _temporaliteNote() {
-        return 'Réglage global (note différée), dans Réglages › Préférences';
+        return 'Réglage global (note différée), dans Réglages → Préférences';
     }
 
     /**
@@ -433,7 +433,9 @@
                 nf === true ? 'Oui (obligatoire non remise = 0)' : 'Non', 'determination'));
         }
         if (famille === 'specifications') {
-            var seuil = _lire(config, 'seuilAcceptabilite');
+            // #935 (lot N6) : le nom unique d'abord, l'ancien nom de l'assistant ensuite (ordre du moteur).
+            var seuil = _lire(config, 'seuilAcceptable');
+            if (typeof seuil !== 'number') seuil = _lire(config, 'seuilAcceptabilite');
             out.push(_row('seuilAcceptabilite', 'Seuil d\'acceptabilité',
                 seuil != null ? (seuil + ' %') : '—', 'determination'));
         }

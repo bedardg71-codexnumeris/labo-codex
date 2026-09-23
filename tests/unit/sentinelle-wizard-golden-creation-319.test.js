@@ -66,11 +66,15 @@ async function produire(pratiqueId, reponses) {
     return obj;
 }
 
+// #900 / #935 (lot N6, 23 sept. 2026) — LE CONTRAT CHANGE, DÉLIBÉRÉMENT : l'assistant cesse d'écrire les champs
+// qu'aucun lecteur ne lit (rang, moyenne du groupe, doublon `reglesSommatives`, `varianteCalcul`,
+// `portfolio.hybride`) et écrit le seuil sous le nom que le moteur lit (`seuilAcceptable`). Chaque retrait est
+// mesuré dans `sentinelle-lot-n6-reglages-sans-lecteur.test.js` ; le golden décrit la nouvelle sortie.
 const GOLDEN = {
     SOM: {
         id: 'fixe-SOM', nom: 'Golden SOM', auteur: '', etablissement: '', description: '', discipline: '',
         type: 'sommative', variante: 'classique', pratiques: ['SOM'], dansBibliotheque: true,
-        configuration: { afficherRang: false, afficherMoyenneGroupe: true, reglesSommatives: [] },
+        configuration: {},
         calcul_note: { methode: 'moyenne_ponderee' }, nbEvaluationsPrevues: 6
     },
     // #443 (10 août 2026) : le golden STD_obj est RETIRÉ AVEC la fonctionnalité.
@@ -82,9 +86,9 @@ const GOLDEN = {
         id: 'fixe-STD_art', nom: 'Golden STD-art', auteur: '', etablissement: '', description: '', discipline: '',
         type: 'standards', variante: 'n-meilleurs', pratiques: ['STD'], dansBibliotheque: true,
         configuration: {
-            approcheEvaluation: 'par-artefacts', echelleId: 'ech1', grilleId: 'gr1', varianteCalcul: 'n-meilleurs',
+            approcheEvaluation: 'par-artefacts', echelleId: 'ech1', grilleId: 'gr1',
             portfolio: { utiliser: true, nombreTotal: 12, nombreARetenir: 7, methodeSelection: 'meilleurs',
-                minimumCompletion: 3, hybride: false }
+                minimumCompletion: 3 }
         },
         calcul_note: { methode: 'conversion_niveaux' }
     },
@@ -92,7 +96,7 @@ const GOLDEN = {
         id: 'fixe-SPE', nom: 'Golden SPE', auteur: '', etablissement: '', description: '', discipline: '',
         type: 'specifications', variante: 'bundles', pratiques: ['SPE'], dansBibliotheque: true,
         configuration: {
-            seuilAcceptabilite: 100,
+            seuilAcceptable: 100,
             jetons: { activer: true, delai: { nombre: 3, dureeJours: 3 }, reprise: { nombre: 2 } },
             modeleBundle: 'standard'
         },

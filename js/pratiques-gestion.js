@@ -386,7 +386,7 @@ async function afficherBibliothequePratiques() {
 
     // #326 (demande terrain 17 juin) — Découvrabilité des maquettes. Les maquettes
     // d'exploration sont VOLONTAIREMENT masquées de cette bibliothèque (D-2 : elles
-    // vivent dans le Labo › Comparateur). Résultat terrain : l'utilisateur les cherche
+    // vivent dans le Labo → Comparateur). Résultat terrain : l'utilisateur les cherche
     // ici pour les supprimer et ne les trouve pas. On signale donc leur existence et
     // on pointe vers le seul endroit où on peut les comparer, les adopter ou les jeter.
     const nbMaquettes = BibliothequeUI.filtrerParModeDemo(
@@ -400,7 +400,7 @@ async function afficherBibliothequePratiques() {
         const banniereMaquettes = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
             '<p style="margin: 0 0 8px; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
                 'Tu as <strong>' + nbMaquettes + ' ' + motMaquette + '</strong> d\'exploration. ' +
-                'Les maquettes ne s\'affichent pas ici : elles vivent dans le <strong>Labo › Comparateur</strong>, ' +
+                'Les maquettes ne s\'affichent pas ici : elles vivent dans le <strong>Labo → Comparateur</strong>, ' +
                 'où tu peux les comparer, les adopter ou les jeter.' +
             '</p>' +
             '<button type="button" class="btn btn-secondaire btn-mini" data-action="ouvrirExplorationMaquettes">Gérer mes maquettes</button>' +
@@ -800,7 +800,7 @@ async function importerToutPratiquesTrimestreModal() {
 }
 
 /**
- * Ferme la bibliothèque puis ouvre le Labo › Comparateur, où vivent les maquettes
+ * Ferme la bibliothèque puis ouvre le Labo → Comparateur, où vivent les maquettes
  * d'exploration (comparer / adopter / jeter). Routé par le dispatcher data-action
  * depuis la bannière de découvrabilité (#326). CSP-safe, aucun handler inline.
  */
@@ -1237,7 +1237,7 @@ function remplirFormulairePratique(pratique) {
             setValeurChamp('mat-portfolio-nombre', valNombre);
             setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
             setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
-            setCheckbox('mat-decoupler-pn', config.portfolio.decouplerPN || false);
+            // (#900, lot N6 : la case `mat-decoupler-pn` n'existait plus dans la page ; `decouplerPN` n'est plus écrit.)
         }
 
         // 🆕 Beta 95.4 : Catégories Sélection/Obligatoires
@@ -1259,7 +1259,12 @@ function remplirFormulairePratique(pratique) {
         const config = pratique.configuration || {};
 
         // Seuil
-        setValeurChamp('mat-spec-seuil', config.seuilAcceptable || 75);
+        // #935 (lot N6) : la valeur que la pratique PORTE, sous l'un ou l'autre nom, dans l'ordre du moteur
+        // (`pratique-pan-specifications.js`). Lire le seul `seuilAcceptable` montrait 75 pour une pratique
+        // de l'assistant créée à 70 — et l'enregistrer écrivait 75, qui l'emportait.
+        const seuilPorte = (typeof config.seuilAcceptable === 'number') ? config.seuilAcceptable
+            : (typeof config.seuilAcceptabilite === 'number' ? config.seuilAcceptabilite : null);
+        setValeurChamp('mat-spec-seuil', seuilPorte || 75);
 
         // Types de travaux
         afficherTypesTravauxMat(config.typesTravaux || []);
@@ -1293,10 +1298,8 @@ function remplirFormulairePratique(pratique) {
     setCheckbox('mat-jetons-actif', jetons.actif || false);
     toggleSystemeJetonsMat(); // Afficher/masquer le contenu
     setValeurChamp('mat-jetons-nombre', jetons.nombre || 2);  // 🆕 Beta 95.7 : défaut 2
-    setCheckbox('mat-jeton-delai-actif', jetons.delaiActif !== false);
     setValeurChamp('mat-delai-duree', jetons.delaiDuree || 2);  // 🆕 Beta 95.7 : défaut 2 jours
     setCheckbox('mat-delai-sur-reprise', jetons.delaiSurReprise === true);  // #853 : absent = non (comportement antérieur)
-    setCheckbox('mat-jeton-reprise-actif', jetons.repriseActif !== false);
     // Radio pour l'évaluation originale
     const radioArchiver = document.querySelector('input[name="mat-reprise-originale"][value="archiver"]');
     const radioSupprimer = document.querySelector('input[name="mat-reprise-originale"][value="supprimer"]');
@@ -1360,8 +1363,10 @@ function jetonsReglesAilleurs(pratique) {
         || (pratique.config && pratique.config.jetons)));
 }
 
-const CHAMPS_JETONS_MAT = ['mat-jetons-actif', 'mat-jetons-nombre', 'mat-jeton-delai-actif', 'mat-delai-duree',
-    'mat-delai-sur-reprise', 'mat-jeton-reprise-actif', 'mat-jeton-ciblee-actif', 'mat-ciblee-plafond'];
+// #900 (lot N6) : les cases « Jetons de délai » et « Jetons de reprise » sont retirées — le moteur
+// (`evaluation-jetons.js`) ne lisait ni `delaiActif` ni `repriseActif`. Le titre de chaque type reste.
+const CHAMPS_JETONS_MAT = ['mat-jetons-actif', 'mat-jetons-nombre', 'mat-delai-duree',
+    'mat-delai-sur-reprise', 'mat-jeton-ciblee-actif', 'mat-ciblee-plafond'];
 
 /**
  * Affiche la description taxonomique selon le type de pratique
@@ -1558,13 +1563,22 @@ async function sauvegarderConfigPratiqueMat() {
         const enregistree = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
         const anciennes = (enregistree && enregistree.configuration && enregistree.configuration.objectifs) || [];
         const conteneur = document.getElementById('mat-den-cibles');
-        if (!window.EditeurCibles.confirmerRetraits(pratiqueEnEditionMateriel, anciennes, window.EditeurCibles.lire(conteneur))) {
+        const cibles = window.EditeurCibles.lire(conteneur);
+        // Lot N6 : zéro cible ne s'enregistre pas (même règle que l'assistant, lue dans le
+        // composant). La liste reste à l'écran telle quelle : c'est là qu'on ajoute la cible.
+        const motif = window.EditeurCibles.motifRefus(cibles);
+        if (motif) {
+            notifications.erreur('Aucune cible', motif);
+            return false;
+        }
+        if (!window.EditeurCibles.confirmerRetraits(pratiqueEnEditionMateriel, anciennes, cibles)) {
             window.EditeurCibles.poser(conteneur, anciennes);
-            return;
+            return false;
         }
     }
 
     await db.modifier(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, []);
+    return true;
 }
 
 /**
@@ -1615,30 +1629,23 @@ function appliquerFormulaireDansCollection(lues) {
 
     // Sauvegarder selon le type (comparaison canonique)
     if (typeCanon === 'standards') {
-        // #434 — le mode de sélection est la SEULE saisie ; `varianteCalcul` en
-        // est désormais une PROJECTION, plus un second champ que l'utilisateur
-        // remplit. C'est ce qui ferme le Bug 5 du plan : deux commandes qui
-        // pouvaient diverger sont devenues une commande et sa dérivée.
-        //
-        // ⚠ Pourquoi la projection subsiste au lieu de disparaître : le moteur
-        // la LIT — `pratique-pan-standards.js:134` route `calculerPerformance`
-        // vers le calcul par objectifs sur `modalites.varianteCalcul`. Faire
-        // lire `methodeSelection` au moteur est un changement du contrat de
-        // calcul : il appartient au même lot que G2-b (les lecteurs legacy du
-        // snapshot `modalitesEvaluation`), pas à un retrait d'UI.
+        // #434 — le mode de sélection est la SEULE saisie. #900 (lot N6) : sa projection
+        // `varianteCalcul` n'est plus écrite — le moteur a cessé de la lire avec #435. Une
+        // pratique qui la porte la garde (on n'efface pas), sans lecteur.
         const modeSelection = getValeurChamp('mat-portfolio-selection') || 'meilleurs';
-        configurations[index].configuration.varianteCalcul = varianteCalculDepuisMode(modeSelection);
 
         // Configuration Portfolio (#435 : plus de branche « par objectifs » —
         // le portfolio est LA configuration STD, toujours écrite)
         {
+            const decouplerAvant = configurations[index].configuration.portfolio?.decouplerPN;
             configurations[index].configuration.portfolio = {
                 methodeSelection: modeSelection,
                 nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
                 minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
-                nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10,
-                decouplerPN: getCheckbox('mat-decoupler-pn')
+                nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10
             };
+            // #900 (lot N6) : `decouplerPN` n'est plus écrit ; une pratique qui le porte le garde.
+            if (decouplerAvant !== undefined) configurations[index].configuration.portfolio.decouplerPN = decouplerAvant;
 
             // 🆕 Beta 95.4 : Configuration Catégories Sélection/Obligatoires
             const categoriesActif = getCheckbox('mat-categories-actif');
@@ -1685,17 +1692,21 @@ function appliquerFormulaireDansCollection(lues) {
     // bloc plat ; on n'en fabrique pas un qu'il ignorerait (cause profonde : #854).
     if (!jetonsReglesAilleurs(configurations[index])) {
     const repriseOriginale = document.querySelector('input[name="mat-reprise-originale"]:checked');
+    const jetonsAvant = configurations[index].jetons || {};
     configurations[index].jetons = {
         actif: getCheckbox('mat-jetons-actif'),
         nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 2,  // 🆕 Beta 95.7 : défaut 2
-        delaiActif: getCheckbox('mat-jeton-delai-actif'),
         delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 2,  // 🆕 Beta 95.7 : défaut 2 jours
         delaiSurReprise: getCheckbox('mat-delai-sur-reprise'),  // #853 : réglage de la pratique
-        repriseActif: getCheckbox('mat-jeton-reprise-actif'),
         repriseOriginale: repriseOriginale ? repriseOriginale.value : 'archiver',
         cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),
         cibleePlafond: getValeurChamp('mat-ciblee-plafond') || ''  // 🆕 Beta 95.7 : pas de défaut
     };
+    // #900 (lot N6) : les cases « actif » du délai et de la reprise sont retirées (aucun lecteur) ; une
+    // pratique qui porte leurs valeurs les garde — on cesse d'écrire, on n'efface pas.
+    for (const cleMorte of ['delaiActif', 'repriseActif']) {
+        if (jetonsAvant[cleMorte] !== undefined) configurations[index].jetons[cleMorte] = jetonsAvant[cleMorte];
+    }
     }
 
     // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
@@ -1715,7 +1726,8 @@ function appliquerFormulaireDansCollection(lues) {
  */
 async function sauvegarderPratiqueMaterielComplet() {
     try {
-        await sauvegarderConfigPratiqueMat();
+        // Lot N6 : un refus (dénotation sans cible, retrait annulé) n'annonce pas « enregistrée ».
+        if (await sauvegarderConfigPratiqueMat() === false) return;
         await mettreAJourNomPratiqueMat();
         await mettreAJourDescriptionPratiqueMat();
         await mettreAJourDisciplinePratiqueMat();
@@ -2553,29 +2565,6 @@ const DESCRIPTIONS_MODE_SELECTION = {
     'tous':          'Toutes les évaluations du portfolio comptent, sans sélection.',
     'hybride':       'Les N meilleures de la Sélection, plus les productions Obligatoires, avec une pondération par bloc.'
 };
-
-/**
- * Projette le mode de sélection vers le champ historique `varianteCalcul`.
- *
- * ⚠ #434 — cette table est le PONT entre la seule commande de l'interface et
- * le champ que le moteur de calcul lit encore (`pratique-pan-standards.js` y
- * route le calcul par objectifs). Les deux vocabulaires diffèrent depuis
- * toujours — c'est exactement ce qui rendait les deux anciens sélecteurs
- * capables de diverger sans que rien ne le signale.
- *
- * Seule la valeur `par-objectifs` a un effet de calcul aujourd'hui ; les
- * autres sont conservées à l'identique pour ne pas réécrire les pratiques
- * existantes ni les entrées du catalogue de `pratiques-bibliotheque.js`.
- */
-function varianteCalculDepuisMode(mode) {
-    switch (mode) {
-        // ('par-objectifs' retiré par #435 — le mode n'existe plus.)
-        case 'hybride':       return 'hybride';
-        case 'meilleurs':     return 'n-meilleurs';
-        case 'derniers':      return 'n-recents';
-        default:              return '';   // « tous » n'a jamais eu d'équivalent
-    }
-}
 
 /**
  * Handler : changement du mode de sélection du portfolio.

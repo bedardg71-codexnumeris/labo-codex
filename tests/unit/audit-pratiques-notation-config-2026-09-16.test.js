@@ -346,14 +346,14 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         const d = diff(p0, apres);
         noter('A2', { ecrit: p0.configuration, note, perdu: d });
         expect(p0.configuration.portfolio.methodeSelection).toBe('derniers');
-        expect(p0.configuration.varianteCalcul).toBe('n-recents');
+        expect(p0.configuration.varianteCalcul).toBeUndefined();   // #900 (lot N6) : plus écrit, aucun lecteur
         expect(note.riche).toBe(75.7);
         expect(d).toEqual([]);
     });
 
     // A-5 LIVRÉ LE 21 SEPT. 2026 (#715) : sous « tous », le chemin riche ne coupe plus à nombreARetenir — 77,32, la valeur JUSTE
     // (avant : 76,75, figée exprès). Les quatre lectures de la note s'accordent : profil, instance, simulerIndices, export.
-    it('A2b · STD « tous » : le moteur retient tout, l\'enveloppe dit « n-meilleurs »', async () => {
+    it('A2b · STD « tous » : le moteur retient tout, l\'enveloppe ne porte plus de variante (#900)', async () => {
         // À LA MAIN : methodeSelection 'tous' mais varianteCalcul 'n-meilleurs' (creerPratiqueV2 : « Par défaut »). Note : moyenne
         // des 5 valides (85+60+78+70+78)/5 = 74,2 → 44,52 + 32,8 = 77,32.
         const b = monter(jeuSTD());
@@ -364,7 +364,7 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         const attributs = b.win.ConstructionAttributs.extraire(b.win.construireConfigComplete(p0));
         noter('A2b', { methodeSelection: p0.configuration.portfolio.methodeSelection, varianteCalcul: p0.configuration.varianteCalcul, note, attributs });
         expect(p0.configuration.portfolio.methodeSelection).toBe('tous');
-        expect(p0.configuration.varianteCalcul).toBe('n-meilleurs');
+        expect(p0.configuration.varianteCalcul).toBeUndefined();   // #900 (lot N6) : avant, « n-meilleurs » sous « tous »
         // AVANT #715 : 76,75 = (85+60+78+70)/4 × 0,6 + 32,8 — le chemin riche coupait à nombreARetenir = 4 (les 4 premiers par
         // ordre de stockage), mesuré le 5 sept. en B-5. L'attribut affiché disait « 4 retenu(s) sur 2 minimum » à côté de « Méthode
         // de sélection : tous » ; il dit maintenant ce que le moteur fait (mots validés par Grégoire le 21 sept.).
@@ -424,7 +424,8 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         // A-4 CORRIGÉ (lot N4, #854 volet spécifications) : la réédition garde le seuil, les jetons et le modèle — diff vide.
         // Avant : seuil ramené à 100, jetons { activer: false }, modèle perdu.
         expect(d).toEqual([]);
-        expect(apres.configuration.seuilAcceptabilite).toBe(70);
+        expect(apres.configuration.seuilAcceptable).toBe(70);        // #935 (lot N6) : le nom que le moteur lit
+        expect(apres.configuration.seuilAcceptabilite).toBeUndefined();
         expect(apres.configuration.jetons).toEqual({ activer: true, delai: { nombre: 4, dureeJours: 5, surReprise: true }, reprise: { nombre: 3 } });
         expect(apres.configuration.modeleBundle).toBe('simple');
     });
@@ -526,7 +527,7 @@ describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?'
         expect(reponses.approcheEvaluation).toBe('par-artefacts');
         expect(diff(p0, apres)).toEqual([]);                          // sans échelle : refus, rien d'écrit (inchangé)
         expect(apres2.configuration.portfolio).toMatchObject({ nombreARetenir: 5, minimumCompletion: 5, nombreTotal: 10, methodeSelection: 'derniers' });
-        expect(apres2.configuration.varianteCalcul).toBe('n-recents');
+        expect(apres2.configuration.varianteCalcul).toBeUndefined();   // #900 (lot N6) : ni le gabarit ni l'assistant ne l'écrivent
         expect(avant.riche).toBe(78.52);
         expect(apresNote.riche).toBe(78.52);                          // « derniers » = « recents » (alias du moteur) : la note n'a pas bougé
         expect(apresNote.export).toEqual({ note: 79, statut: 'final' });
@@ -638,7 +639,7 @@ describe('G-1 · STD : la méthode de sélection écrite est celle relue et cell
             const note = noteDe(b, DA.STD, p0.id);
             const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
             expect(p0.configuration.portfolio.methodeSelection).toBe(methode);
-            expect(p0.configuration.varianteCalcul).toBe(variante);
+            expect(p0.configuration.varianteCalcul, `avant N6 : ${variante}`).toBeUndefined();   // #900 (lot N6)
             expect(reponses.modeSelectionPortfolio).toBe(mode);
             expect(apres.configuration.portfolio.methodeSelection).toBe(methode);
             expect(note.riche).toBe(attendu);
@@ -656,7 +657,7 @@ describe('G-1 · STD : la méthode de sélection écrite est celle relue et cell
             // L'enseignant·e enregistre sans rien toucher.
             const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables))[0];
             expect(ecrite.configuration.portfolio).toMatchObject({ methodeSelection: methode, nombreARetenir: 4, minimumCompletion: 2, nombreTotal: 6 });
-            expect(ecrite.configuration.varianteCalcul).toBe(variante);
+            expect(ecrite.configuration.varianteCalcul, `avant N6 : ${variante}`).toBeUndefined();   // #900 (lot N6)
             expect(ecrite.configuration.echelleId).toBe('E1');
             const b2 = monter(jeuSTD({ a6Valide: true }), { pratiques: [ecrite], pratiqueId: p0.id });
             expect(noteDe(b2, DA.STD, p0.id).riche).toBe(attendu);
@@ -706,7 +707,8 @@ describe('G-1 · SPE : le seuil d\'acceptabilité écrit est celui qui décide d
             Object.assign(b.store.test_pratiquesConfigurables[0].configuration, clone(TYPES_ET_FORFAITS));
             activer(b, p0.id);
             const note = noteDe(b, DA.SPE, p0.id);
-            expect(p0.configuration.seuilAcceptabilite).toBe(ecrit);
+            expect(p0.configuration.seuilAcceptable).toBe(ecrit);            // #935 (lot N6) : un nom, celui du moteur
+            expect(p0.configuration.seuilAcceptabilite).toBeUndefined();
             expect(note.perf).toBe(attendu);
             expect(note.export).toEqual(attendu === null
                 ? { note: '', statut: 'non constructible – Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.' }
@@ -853,8 +855,11 @@ describe('lot 29 · SOM : rouvrir une pratique ne change aucune règle (A-2, la 
         const b = monter(jeuSOM(), { pratiques: [p0] });
         activer(b, p0.id);
         const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
-        expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou', 'portfolio'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50,
-            nbArtefactsPortfolio: 8, portfolioQualitatif: true });
+        expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou', 'portfolio'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50 });
+        // #900 (lot N6) : les deux questions du portfolio sommatif sont retirées (aucun lecteur) ; leurs valeurs ne sont
+        // plus relues comme réponses, et l'objet enregistré les garde tel quel (diff vide ci-dessous).
+        expect(reponses.nbArtefactsPortfolio).toBeUndefined();
+        expect(reponses.portfolioQualitatif).toBeUndefined();
         expect(diff(p0, apres, [])).toEqual([]);
         expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
     });
@@ -1066,5 +1071,199 @@ describe('lot N4 · #854 volet spécifications : rouvrir puis enregistrer sans r
         b2.win.wizardState.reponses = {}; b2.win.chargerPratiqueExistante(p0.id);
         const sansJetons = await creerParAssistant(b2, Object.assign(clone(b2.win.wizardState.reponses), { utiliserJetons: false }), p0.id);
         expect(sansJetons.configuration.jetons).toEqual({ activer: false });
+    });
+});
+
+/* =============================================================================================
+   LOT N6 (23 sept. 2026) — #900 les réglages sans lecteur, #935 un réglage sous un seul nom.
+   Le verrou structurel (aucun écrivain frais dans js/) vit dans `sentinelle-lot-n6-reglages-sans-lecteur.test.js` ;
+   ici, les modules RÉELS : ce qu'une pratique NEUVE porte, et une pratique ANCIENNE qui porte encore ces champs
+   s'ouvre, calcule et s'enregistre, par l'assistant ET par le formulaire, sans que la note bouge — quatre familles.
+   ============================================================================================= */
+const MORTS_SOM = ['afficherRang', 'afficherMoyenneGroupe', 'reglesSommatives', 'portfolio'];
+const TYPES_FORFAITS_N6 = { typesTravaux: [{ id: 'dissertation', nom: 'Dissertation' }, { id: 'examen', nom: 'Examen' }],
+    forfaits: [{ id: 1, lettre: 'A', note: 90, travaux: { dissertation: 2, examen: 1 } }, { id: 2, lettre: 'C', note: 70, travaux: { dissertation: 1, examen: 1 } }] };
+/** Le formulaire de gestion RÉEL ouvre la pratique puis l'enregistre SANS RIEN TOUCHER ; rend l'objet écrit et l'écran. */
+async function enregistrerParFormulaire(p) {
+    const f = monterFormulaire(p);
+    await f.win.chargerPratiquePourModif(p.id);
+    const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables))[0];
+    return { ecrite, f };
+}
+
+describe('lot N6 · une pratique NEUVE ne porte plus les champs sans lecteur (#900)', () => {
+    it('assistant · sommative (verrou + portfolio, rang « oui ») : ni rang, ni moyenne, ni doublon des règles, ni portfolio', async () => {
+        const b = monter(jeuSOM());
+        const p0 = await creerParAssistant(b, { nom: 'SOM N6', calcNoteFinale: 'moyenne', reglesSommatives: ['double_verrou', 'portfolio'],
+            nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50, afficherRang: true, afficherMoyenneGroupe: true,
+            nbArtefactsPortfolio: 8, portfolioQualitatif: true });
+        for (const cle of MORTS_SOM) expect(p0.configuration[cle], cle).toBeUndefined();
+        expect(p0.reglesSpeciales).toEqual(['double_verrou', 'portfolio']);                // la règle vit ici
+        expect(p0.configuration.conditions_speciales.map(c => c.type)).toEqual(['double_verrou']);
+        activer(b, p0.id);
+        expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);                                   // le verrou calcule toujours
+    });
+
+    it('assistant · standards « hybride » : ni `varianteCalcul` ni `portfolio.hybride` ; les catégories le portent, la relecture le lit', async () => {
+        const b = monter(jeuSTD({ a6Valide: true }));
+        const p0 = await creerParAssistant(b, REPONSES_STD('hybride', { minAvantCalculFormatif: 2 }));
+        expect(p0.configuration.varianteCalcul).toBeUndefined();
+        expect('hybride' in p0.configuration.portfolio).toBe(false);
+        expect(p0.configuration.categories.actif).toBe(true);
+        b.win.wizardState.reponses = {};
+        b.win.chargerPratiqueExistante(p0.id);
+        expect(b.win.wizardState.reponses.modeSelectionPortfolio).toBe('hybride');        // relu par `categories.actif`
+        const f = monterFormulaire(p0);
+        await f.win.chargerPratiquePourModif(p0.id);
+        expect(f.elements['mat-portfolio-selection'].value).toBe('hybride');              // le formulaire aussi
+    });
+
+    it('formulaire · standards enregistré : ni `varianteCalcul`, ni `decouplerPN`, ni `delaiActif` / `repriseActif`', async () => {
+        const b = monter(jeuSTD({ a6Valide: true }));
+        const p0 = await creerParAssistant(b, REPONSES_STD('derniers', { minAvantCalculFormatif: 2 }));
+        const { ecrite } = await enregistrerParFormulaire(p0);
+        expect(ecrite.configuration.varianteCalcul).toBeUndefined();
+        expect('decouplerPN' in ecrite.configuration.portfolio).toBe(false);
+        expect(ecrite.jetons).toBeDefined();                                               // le bloc plat du formulaire est écrit…
+        expect('delaiActif' in ecrite.jetons).toBe(false);                                 // … sans les deux cases retirées
+        expect('repriseActif' in ecrite.jetons).toBe(false);
+        expect('cibleeActif' in ecrite.jetons).toBe(true);                                 // témoin : la case lue reste
+    });
+
+    it('gabarits · « N meilleures », « N plus récentes » et « Modèle sommatif » : plus de champ sans lecteur', () => {
+        const b = monter(jeuSTD());
+        const tous = b.win.obtenirToutesLesPratiquesBibliothequeSync(true);
+        for (const id of ['STD-n-meilleurs', 'STD-n-recents']) {
+            const g = tous.find(x => x.id === id);
+            expect(g, id).toBeDefined();
+            expect(g.configuration.varianteCalcul, id).toBeUndefined();
+            expect('decouplerPN' in g.configuration.portfolio, id).toBe(false);
+            expect(g.configuration.portfolio.methodeSelection, id).toBe(id === 'STD-n-meilleurs' ? 'meilleurs' : 'recents');
+        }
+        const som = tous.find(x => x.id === 'SOM-litterature');
+        expect(som).toBeDefined();
+        expect(som.seuils).toBeUndefined();                                                // B-4 : les clés camelCase sans effet
+        expect(som.configuration.evaluations).toHaveLength(4);                             // témoin : le reste du gabarit est là
+    });
+});
+
+describe('lot N6 · une pratique ANCIENNE qui porte ces champs : s\'ouvre, calcule, s\'enregistre, la note ne bouge pas', () => {
+    it('sommative · rang, moyenne, doublon des règles et portfolio passent tels quels ; 50 avant, 50 après (assistant et formulaire)', async () => {
+        const p0 = clone(STOCK_SOM_TROIS_REGLES);
+        p0.id = 'STOCK_N6_SOM';
+        p0.configuration.portfolio = { utiliser: true, nbArtefacts: 8, qualitatif: true };
+        const b = monter(jeuSOM(), { pratiques: [p0] });
+        activer(b, p0.id);
+        expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
+        const { apres } = await rouvrirEtResauver(b, p0.id);
+        expect(diff(p0, apres, [])).toEqual([]);                                           // rien d'effacé, rien d'ajouté
+        expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);
+        const { ecrite } = await enregistrerParFormulaire(p0);
+        for (const cle of MORTS_SOM) expect(ecrite.configuration[cle], cle).toEqual(p0.configuration[cle]);
+        const b2 = monter(jeuSOM(), { pratiques: [ecrite], pratiqueId: p0.id });
+        expect(noteDe(b2, DA.SOM, p0.id).perf).toBe(50);
+    });
+
+    it('standards · `varianteCalcul`, `hybride`, `decouplerPN`, `delaiActif`, `repriseActif` restent ; 80,95 avant et après', async () => {
+        const b0 = monter(jeuSTD({ a6Valide: true }));
+        const p0 = await creerParAssistant(b0, REPONSES_STD('derniers', { minAvantCalculFormatif: 2 }));
+        // L'objet qu'écrivaient l'assistant et le formulaire d'avant N6.
+        Object.assign(p0.configuration, { varianteCalcul: 'n-recents' });
+        Object.assign(p0.configuration.portfolio, { hybride: false, decouplerPN: true });
+        p0.jetons = { actif: true, nombre: 3, delaiActif: false, delaiDuree: 2, delaiSurReprise: false, repriseActif: true,
+            repriseOriginale: 'archiver', cibleeActif: false, cibleePlafond: '' };
+        const b = monter(jeuSTD({ a6Valide: true }), { pratiques: [p0], pratiqueId: p0.id });
+        expect(noteDe(b, DA.STD, p0.id).riche).toBe(80.95);
+        const { apres } = await rouvrirEtResauver(b, p0.id);
+        // ⚠ HORS LOT, mesuré ici : la réédition par l'assistant perd TOUT le bloc plat `jetons` du formulaire (l'enveloppe
+        // de `sauvegarderPratique` ne le recopie pas) — avant N6 comme après. Le reste de l'objet est intact.
+        expect(diff(p0, apres, ['jetons'])).toEqual([]);
+        expect(noteDe(b, DA.STD, p0.id).riche).toBe(80.95);
+        const { ecrite } = await enregistrerParFormulaire(p0);
+        expect(ecrite.configuration.varianteCalcul).toBe('n-recents');
+        expect(ecrite.configuration.portfolio.decouplerPN).toBe(true);
+        expect(ecrite.jetons).toMatchObject({ delaiActif: false, repriseActif: true });
+        const b2 = monter(jeuSTD({ a6Valide: true }), { pratiques: [ecrite], pratiqueId: p0.id });
+        expect(noteDe(b2, DA.STD, p0.id).riche).toBe(80.95);
+    });
+
+    it('standards · `hybride` gardé ALIGNÉ : rouvrir une pratique hybride et la passer à « N derniers » ne la fait pas rouvrir en hybride', async () => {
+        const b = monter(jeuSTD({ a6Valide: true }));
+        const p0 = await creerParAssistant(b, REPONSES_STD('hybride', { minAvantCalculFormatif: 2 }));
+        b.store.test_pratiquesConfigurables[0].configuration.portfolio.hybride = true;       // stock d'avant N6
+        b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(p0.id);
+        const r = Object.assign(clone(b.win.wizardState.reponses), { modeSelectionPortfolio: 'derniers' });
+        const apres = await creerParAssistant(b, r, p0.id);
+        expect(apres.configuration.categories).toBeUndefined();
+        expect(apres.configuration.portfolio.hybride).toBe(false);
+        b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(p0.id);
+        expect(b.win.wizardState.reponses.modeSelectionPortfolio).toBe('derniers');
+    });
+
+    it('spécifications · l\'ancien nom `seuilAcceptabilite` (70) : 70 au formulaire, 70 après l\'avoir enregistré, et 70 à l\'assistant', async () => {
+        const b0 = monter(jeuSPE());
+        const p0 = await creerParAssistant(b0, { nom: 'SPE N6', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70 });
+        delete p0.configuration.seuilAcceptable;
+        Object.assign(p0.configuration, { seuilAcceptabilite: 70 }, clone(TYPES_FORFAITS_N6));   // l'objet de l'assistant d'avant N6
+        const b = monter(jeuSPE(), { pratiques: [p0], pratiqueId: p0.id });
+        expect(noteDe(b, DA.SPE, p0.id).perf).toBe(70);
+        const { ecrite, f } = await enregistrerParFormulaire(p0);
+        expect(f.elements['mat-spec-seuil'].value).toBe(70);                               // avant N6 : 75
+        expect(ecrite.configuration.seuilAcceptable).toBe(70);
+        expect(ecrite.configuration.seuilAcceptabilite).toBe(70);                          // pas de conversion en base
+        const b2 = monter(jeuSPE(), { pratiques: [ecrite], pratiqueId: p0.id });
+        expect(noteDe(b2, DA.SPE, p0.id).perf).toBe(70);                                   // avant N6 : 75 l'emportait → la note bougeait
+        b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(p0.id);
+        expect(b.win.wizardState.reponses.seuilAcceptabilite).toBe(70);
+        const { apres } = await rouvrirEtResauver(b, p0.id);
+        expect(apres.configuration.seuilAcceptable).toBe(70);
+        expect(noteDe(b, DA.SPE, p0.id).perf).toBe(70);
+    });
+
+    it('spécifications · le stock du défaut (70 sous l\'ancien nom, 75 sous le nouveau) : on montre ce que le moteur calcule, 75', async () => {
+        const b0 = monter(jeuSPE());
+        const p0 = await creerParAssistant(b0, { nom: 'SPE deux noms', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70 });
+        Object.assign(p0.configuration, { seuilAcceptabilite: 70, seuilAcceptable: 75 }, clone(TYPES_FORFAITS_N6));
+        const b = monter(jeuSPE(), { pratiques: [p0], pratiqueId: p0.id });
+        const avant = noteDe(b, DA.SPE, p0.id).perf;
+        const { ecrite, f } = await enregistrerParFormulaire(p0);
+        expect(f.elements['mat-spec-seuil'].value).toBe(75);
+        const b2 = monter(jeuSPE(), { pratiques: [ecrite], pratiqueId: p0.id });
+        expect(noteDe(b2, DA.SPE, p0.id).perf).toBe(avant);
+        b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(p0.id);
+        expect(b.win.wizardState.reponses.seuilAcceptabilite).toBe(75);                  // avant N6 : 70, que le moteur ignorait
+    });
+
+    it('#935 · une spécification créée par l\'assistant à 70 : 70 au formulaire, et 70 après un enregistrement sans rien toucher', async () => {
+        const b0 = monter(jeuSPE());
+        const p0 = await creerParAssistant(b0, { nom: 'SPE 70', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70 });
+        Object.assign(p0.configuration, clone(TYPES_FORFAITS_N6));
+        const { ecrite, f } = await enregistrerParFormulaire(p0);
+        expect(f.elements['mat-spec-seuil'].value).toBe(70);
+        expect(ecrite.configuration.seuilAcceptable).toBe(70);
+        const b = monter(jeuSPE(), { pratiques: [p0], pratiqueId: p0.id });
+        const b2 = monter(jeuSPE(), { pratiques: [ecrite], pratiqueId: p0.id });
+        expect(noteDe(b, DA.SPE, p0.id).perf).toBe(70);
+        expect(noteDe(b2, DA.SPE, p0.id).perf).toBe(70);
+    });
+
+    it('dénotation · `modeDEN` (lu) reste ; le formulaire enregistre sans rien toucher, la note ne bouge pas', async () => {
+        const p0 = { id: 'STOCK_N6_DEN', nom: 'DEN N6', type: 'denotation', pratiques: ['DEN'], calcul_note: { methode: 'jugement_global' },
+            configuration: { type: 'denotation', modeDEN: 'eliminee', objectifs: [{ id: 'cible_a', nom: 'Lire' }, { id: 'cible_b', nom: 'Écrire' }],
+                suggestion: { methode: 'mode' }, grilleId: null, echelleId: 'E1' } };
+        const jugements = { STOCK_N6_DEN: { [DA.DEN]: { ciblesAtteintes: { cible_a: true, cible_b: true }, noteFinale: 78, justification: 'banc', date: '2026-09-01' } } };
+        const b = monter(jeuDEN(), { pratiques: [p0], pratiqueId: p0.id, jugements });
+        const avant = noteDe(b, DA.DEN, p0.id).perf;
+        expect(avant).toBe(78);
+        const f = monterFormulaire(p0);
+        await f.win.chargerPratiquePourModif(p0.id);
+        // L'écran montre les deux cibles enregistrées (patron de la sentinelle #717 : le faux document ne rend pas le HTML).
+        f.elements['mat-den-cibles'].querySelectorAll = (sel) => (sel === '.editeur-cibles-ligne'
+            ? p0.configuration.objectifs.map(c => ({ dataset: { cibleId: c.id }, querySelector: () => ({ value: c.nom }) })) : []);
+        const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables))[0];
+        expect(ecrite.configuration.modeDEN).toBe('eliminee');
+        expect(ecrite.configuration.objectifs).toEqual(p0.configuration.objectifs);
+        const b2 = monter(jeuDEN(), { pratiques: [ecrite], pratiqueId: p0.id, jugements });
+        expect(noteDe(b2, DA.DEN, p0.id).perf).toBe(avant);
     });
 });
