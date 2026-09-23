@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N4 (1.155.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 12 H : **LOT N5 ET #936 (1.155.5) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`78575a46`) + le merge de `lot-n5-cibles-stables` : `d3cc9737` (lot N5, #717), `9d3389b7` (merge du correctif #936, `6bb5db62`, session parallèle), `4549fb2d` (release 1.155.5), `aa7007e9` (complément de relecture et mots validés « étudiant·e ») + ce relais. Mots validés par Grégoire (option B). Relecture croisée de Cowork : sept mutations rouges sur dix ; les trois survivantes gardées par `aa7007e9`. Fusion et release demandées par Grégoire avant que Cowork ait refait ses mutations sur le complément.
+
+**Suite** : lot N6 (les réglages que rien ne lit, #900, plus le « › » de #899). En attente sur sa branche : `chrono-barre-937` (#937, session parallèle) — relecture et mots à valider, se rebasera sur ce `main`. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub. Les branches `lot-n5-cibles-stables` et `fix-annotation-zoom-palette` peuvent être supprimées une fois le push mesuré.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N4 (1.155.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`7ebdf47f`) + `7b89dd41` (relais précédent) + le merge de `lot-n4-specifications-plancher` (`0a2dd209` lot et release 1.155.4, `33285f1c` complément de relecture) + ce relais. Relecture croisée de Cowork : verte, par exécution sur une copie `git archive`, bancs du lot 196/196 ; mots validés par Grégoire (option A, flèche « → » dans la seconde cause).
 
