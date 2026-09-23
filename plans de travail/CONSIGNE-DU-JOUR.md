@@ -1,50 +1,39 @@
-# Consigne du jour – Lot N5 : dénotation, chaque cible garde son identité, et ses coches avec elle (#717)
+# Consigne du jour – Lot N6 : les réglages que rien ne lit, et un réglage lu sous deux noms (#900 ; #935 volet nom ; #899 ; dénotation à zéro cible)
 
-> Écrite le 23 septembre 2026, 9 h 35 (Toronto), par Cowork, sur `origin/main` = `78575a46` (1.155.4, en production chez Netlify depuis 9 h 19, déploiement mesuré). **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (lot N4, livrée en 1.155.4) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-n4-specifications.md` (déplacée par Cowork, à commiter avec ce lot).
-> **La fiche fait foi** : `BACKLOG.md`, #717 (≈ l. 801 ; recoupe #465 « ids de cibles stables »). Premier lot de l'ordre dans `plans de travail/FILE-DES-LOTS.md` (N5, N6).
+> Écrite le 23 septembre 2026, 12 h 20 (Toronto), par Cowork, sur `origin/main` = `dcd22d4f` (1.155.5, en production chez Netlify depuis 11 h 56, déploiement mesuré). **Proposée** tant que Grégoire ne l'a pas relayée.
+> La précédente (lot N5, livrée en 1.155.5) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-n5-cibles.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Les fiches font foi** : `BACKLOG.md`, #900 (constat A-7 et ses ajouts du lot 28) et #935 (volet « deux noms » seulement). Dernier lot de la file des pratiques de notation (`plans de travail/FILE-DES-LOTS.md`). **Aucune question à Grégoire en entrée** ; un arrêt prévu au §4, et des mots à lui proposer au §2d.
+> ⚠ **Rappel de protocole** (écart du 23 sept. sur N5) : après le complément de relecture, **attends que Cowork l'ait revérifié** avant le verdict, la fusion et le push. Le push du lot N5 a précédé cette revérification ; elle s'est révélée verte, mais l'ordre fait partie de la preuve (PROTOCOLE, règle 2).
 
-## 0 · La décision de Grégoire (23 sept. 2026, 9 h 30) – elle fait foi
+## 1 · Ce que fait le lot, en quatre volets
 
-Question posée par Cowork : comment l'application garde-t-elle chaque coche sur sa cible ? A, une identité permanente donnée à chaque cible à sa création ; B, retrouver les cibles par leur nom ; C, garder la position et avertir. **Réponse : A.** Déplacer ou renommer une cible ne touche plus aux coches déjà faites ; une cible retirée emporte ses coches.
+**1a. Retirer du CODE ce qui écrit des champs sans lecteur (#900).** Liste de la fiche : `configuration.varianteCalcul` (hors miroir et formulaire), `portfolio.hybride`, `portfolio.reprisesPermises`, `afficherRang`, `afficherMoyenneGroupe`, `reglesSommatives`, SOM `portfolio{nbArtefacts, qualitatif}`, `jetons.delaiActif`, `jetons.repriseActif`, `portfolio.decouplerPN`, `modeDEN`, et les seuils camelCase du « Modèle sommatif » (B-4, `pratiques-bibliotheque.js`). **Remesure chacun avant de le retirer** : la fiche date du 17 sept., et les lots N1 à N5 ont touché ces fichiers (`modeleBundle`, par exemple, a maintenant un lecteur depuis N4 : il reste). Pour chaque champ : lecteur trouvé → il reste, et tu le dis ; aucun lecteur → l'écriture part. **Rien n'est effacé des données déjà écrites** (limite de Grégoire du 20 sept.) : on cesse d'écrire, on ne nettoie pas. Un champ lu par une phrase seulement (`reprisesPermises`, la fiche le dit) : la phrase dit-elle vrai sans le champ ? Si elle devient fausse ou vide, dis-le.
 
-## 1 · Ce que Cowork a mesuré (lecture seule, 9 h 30) – deux écrivains, une même faute
+**1b. Un réglage, un nom (#935, volet nom seulement).** L'assistant écrit `seuilAcceptabilite`, le formulaire de gestion lit et écrit `seuilAcceptable`, le moteur fait primer `seuilAcceptable` : enregistrer au formulaire une spécification créée à 70 la fait passer à 75 sans un mot (mesuré par N4). **Décidé par Cowork (technique)** : un seul nom, celui que le moteur lit ; le formulaire affiche la valeur que la pratique porte, sous l'un ou l'autre nom, et écrit sous le nom unique ; l'assistant écrit sous ce nom. Les pratiques déjà écrites sous l'autre nom se lisent (pas de conversion en base). **Hors lot, à Grégoire plus tard** : la valeur par défaut (75, 100, 60) ; n'en change aucune.
 
-- **La note** : `_calculerPerformanceDenotation` (`js/pratiques/pratique-configurable.js` ≈ l. 380-400) exige que **toutes** les cibles de `objectifs` soient confirmées dans `jugementsDenotation[pratiqueId][da].ciblesAtteintes[cible.id]` ; sinon `Math.min(note, 59)`. Les coches sont donc indexées par l'**id** de la cible.
-- **Écrivain 1, l'assistant** : `creerPratiqueV2` (`js/wizard-pratique-v2.js` ≈ l. 2737-2741) lit une zone de texte (une cible par ligne, champ `ciblesDenotation`, l. 241) et nomme les cibles **par position** : `{ id: 'cible-' + (i + 1), nom }`. À la réouverture (`chargerPratiqueExistante`, ≈ l. 3180), les ids sont jetés : seuls les noms reviennent dans la zone de texte.
-- **Écrivain 2, la gestion des pratiques** : même faute, recopiée. Chargement (`js/pratiques-gestion.js` ≈ l. 1275, noms seuls dans `mat-den-cibles`) et enregistrement (≈ l. 1653-1658, `'cible-' + (i + 1)`).
-- **Lecteurs** : la saisie des jugements (`js/pratiques/denotation-saisie-ui.js` ≈ l. 215, coches écrites par `c.id`), `denotation-jugements.js`, la note. Ils lisent l'id : ils n'ont pas à changer.
-- **Le verrou existant** : la sentinelle G-1 (1.142.24) fige les ids `cible-N` de l'assistant, et le banc `audit-pratiques-notation-config-2026-09-16` (A4) fige exprès la valeur fausse (59 → 78). Les deux passent à la règle A dans ce lot.
+**1c. La flèche (#899).** Le récapitulatif de l'assistant écrit « Conception › Pratiques de notation » (`wizard-pratique-v2.js` ≈ l. 2146) : « → », comme le reste de l'application. Balaye `js/` et `index.html` pour d'autres « › » dans un chemin de navigation montré à l'utilisateur ; aligne ceux des pratiques de notation, inscris les autres s'il y en a.
 
-## 2 · Ce que fait le lot
+**1d. Une dénotation sans cible ne s'enregistre plus (mesuré par N5, `aa7007e9`).** La gestion des pratiques accepte d'enregistrer une dénotation à zéro cible ; toutes ses notes sont alors plafonnées à 59. L'assistant, lui, l'interdit. Même garde dans la gestion, par le même composant (`EditeurCibles`) : pas de copie de la règle. **Le message du refus est un mot neuf : propose-le dans le rapport**, Grégoire le lira avant le push.
 
-**2a. Une cible reçoit son id une fois, à sa création, et le garde.** Un id neuf n'est jamais la position et n'est jamais réutilisé (un id retiré ne revient pas sur une autre cible). Forme de l'id : **décidé par toi**.
+## 2 · Arrêt prévu
 
-**2b. Les deux éditeurs gardent l'identité à la réouverture.** Une zone de texte ne peut pas porter d'identité (renommer une ligne la rend méconnaissable). **Décidé par Cowork** : dans l'assistant et dans la gestion des pratiques, les cibles s'éditent comme une **liste de champs, un par cible**, chacun portant son id : ajouter, renommer, retirer, déplacer. Renommer garde l'id. Un seul composant pour les deux écrans, pas deux copies (même faute recopiée deux fois aujourd'hui). Skill `design-interface` : le composant suit `design-system.html`, cibles tactiles iPad comprises. Les mots de ses boutons sont ceux que l'application emploie déjà pour ce geste ailleurs ; s'il faut un mot neuf, propose-le dans le rapport.
+Si un champ de la liste 1a est lu par un **export, un import, un partage de pratique ou la Réserve** (ce qui voyage), il ne part pas : **arrête-toi sur ce champ et dis lequel**, les autres continuent. Rétro-compatibilité de ce qui voyage (`CLAUDE.md`).
 
-**2c. Retirer une cible qui porte des coches : la note change, et l'écran le dit avant.** Retirer une cible fait légitimement monter la note des élèves à qui il ne manquait qu'elle (c'est ce que le collègue demande en la retirant). Au moment de l'enregistrement, si une cible retirée porte des coches, **une question nomme la cible et le nombre d'élèves concernés** avant d'écrire. Les coches de la cible retirée **ne sont pas effacées** des données (limite de Grégoire du 20 sept.) : elles cessent simplement d'être lues.
+## 3 · Tests
 
-**2d. Le stock : aucune conversion.** Les pratiques déjà créées portent `cible-1`, `cible-2`… : ce sont des ids valides, et leurs coches y sont indexées. **Ils restent tels quels** ; seul ce qui est créé ensuite reçoit la forme neuve. ⚠ Une pratique déjà réordonnée avant ce lot a pu déplacer ses coches sur la mauvaise cible : ce stock-là ne se répare pas d'office (règle « tarir n'est pas réparer »). Mesure si les données d'essai en contiennent un, et dis-le.
+- Pour chaque champ retiré : une pratique créée (assistant, formulaire, gabarit) ne le porte plus ; une pratique ancienne qui le porte encore s'ouvre, calcule et s'enregistre sans erreur, et **la note ne bouge pas** (même valeur avant et après, sur les quatre familles).
+- 1b : une spécification créée par l'assistant à 70 s'affiche 70 au formulaire et reste 70 après un enregistrement sans rien toucher ; une pratique ancienne sous l'autre nom aussi.
+- 1c : la phrase du récapitulatif, mot pour mot.
+- 1d : la gestion refuse zéro cible avec le message ; une cible suffit.
+- Sentinelle : aucun écrivain des champs retirés dans `js/`.
+- Break-test sur chaque assertion ; suite Vitest complète verte.
 
-## 3 · Arrêt prévu
+## 4 · Livraison
 
-Si un lecteur de `objectifs` (export, rapport, import d'une pratique partagée, Réserve) dépend de la **forme** `cible-N` ou de l'**ordre** des cibles pour autre chose que l'affichage, **arrête-toi et dis lequel** : une pratique qui voyage (partage, import) est de la rétro-compatibilité (`CLAUDE.md`, « ce qui voyage »).
+- Version **patch** par `scripts/release.mjs`. Item de « Nouvelles » **proposé, à valider par Grégoire avant le push** (sans doute un seul : le seuil qui ne change plus au formulaire, et la dénotation qui exige une cible ; le ménage lui-même ne se voit pas).
+- Ordre : commit, relecture de Cowork, corrections, **revérification de Cowork**, verdict, push.
+- Ensuite : N6 sort de `FILE-DES-LOTS.md`. **La file des pratiques de notation est vide.** Le chantier suivant, décidé par Grégoire le 23 sept. : le dernier lot de l'export (une seule carte « Exporter des travaux », #895).
 
-## 4 · Tests
+## 5 · Le geste que Grégoire vérifiera à l'écran (s'il le souhaite)
 
-- Le constat #717, rejoué par l'assistant réel : deux cibles, les deux cochées, note 78 ; retirer la première → la cible restante garde sa coche, la note reste 78 (et non 59 → 78 par glissement) ; déplacer → coches inchangées ; renommer → coches inchangées.
-- La même chose par la gestion des pratiques.
-- Retirer une cible cochée : la question nomme la cible et le nombre d'élèves ; « annuler » n'écrit rien.
-- Un id retiré n'est jamais redonné à une cible ajoutée ensuite.
-- Stock : une pratique aux ids `cible-N` s'ouvre, s'enregistre sans rien toucher, et ressort **identique** (ids et coches).
-- Sentinelle : aucun `'cible-' + (i + 1)` ni équivalent positionnel dans `js/`.
-- Break-test sur chaque assertion ; suite Vitest complète verte ; une spec WebKit du composant (iPad 768 px).
-
-## 5 · Livraison
-
-- Version **patch** par `scripts/release.mjs`. Item de « Nouvelles » **proposé, à valider par Grégoire avant le push** : il dit que déplacer, renommer ou retirer une cible ne déplace plus les coches déjà faites.
-- Commit, relecture de Cowork, corrections, verdict, push.
-
-## 6 · Le geste que Grégoire vérifiera à l'écran (s'il le souhaite)
-
-Il n'utilise pas la dénotation. Une porte terrain n'est due que pour le composant sur iPad, si la spec WebKit ne suffit pas à le juger : dis-le dans le rapport.
+Aucun sur ses données : rien ne change pour une pratique Standards. Le lot se prouve par les tests.

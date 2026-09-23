@@ -183,6 +183,22 @@
         return confirm(message);
     }
 
+    // Mots VALIDÉS par Grégoire le 23 sept. 2026 (option B, raccourci proposé par Cowork).
+    const MOTIF_AUCUNE_CIBLE = 'Ajoute au moins une cible : sans cible, aucune note ne peut dépasser 59.';
+
+    /**
+     * Lot N6 (23 sept. 2026) — UNE DÉNOTATION A AU MOINS UNE CIBLE. Sans cible, aucune ne
+     * peut être atteinte : toutes les notes sont plafonnées à 59 (mesuré au lot N5). La règle
+     * vit ICI, lue par l'assistant (champ requis) et par la gestion des pratiques (refus à
+     * l'enregistrement) : elle n'est écrite qu'une fois.
+     * @param {Array} cibles - telles que `lireEditeurCibles` les rend
+     * @returns {string|null} le motif du refus, ou `null` si la liste peut s'enregistrer
+     */
+    function motifRefusCibles(cibles) {
+        if (Array.isArray(cibles) && cibles.length > 0) return null;
+        return MOTIF_AUCUNE_CIBLE;
+    }
+
     window.EditeurCibles = {
         nouvelId: nouvelIdCible,
         rendre: rendreEditeurCibles,
@@ -193,6 +209,7 @@
         descendre: descendre,
         retirer: retirer,
         ciblesRetireesCochees: ciblesRetireesCochees,
-        confirmerRetraits: confirmerRetraitCibles
+        confirmerRetraits: confirmerRetraitCibles,
+        motifRefus: motifRefusCibles
     };
 })();

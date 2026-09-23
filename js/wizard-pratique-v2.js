@@ -312,7 +312,11 @@ const ETAPES_WIZARD = {
         suivant: () => 'recapitulatif',
         precedent: (reponses) => {
             // Précédent = la dernière étape de configuration (ex-précédent du récap).
-            if (reponses.typePratique === 'sommative') return 'config-sommative';
+            // #900 (lot N6) : l'étape « Configuration sommative » (rang, moyenne du groupe) est retirée.
+            if (reponses.typePratique === 'sommative') {
+                const regles = deduireTypePratique(reponses).regles || [];
+                return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'seuils-personnels';
+            }
             if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
             if (reponses.typePratique === 'denotation') return 'config-denotation';
             return 'grille-criteres'; // PAN-Standards (portfolio — seule approche depuis #443)
@@ -550,7 +554,7 @@ const ETAPES_WIZARD = {
             if (type === 'sommative' && regles.length > 0 && !regles.includes('aucune')) {
                 return 'config-sommative-regles';
             }
-            if (type === 'sommative') return 'config-sommative';
+            if (type === 'sommative') return 'infos-base';
             // #443 : PAN-Standards n'a plus qu'une approche. Le branchement à
             // trois voies est retiré avec les étapes qu'il servait — un aiguillage
             // dont deux sorties sont mortes finit par être relu comme un choix.
@@ -615,26 +619,14 @@ const ETAPES_WIZARD = {
                     type: 'info',
                     texte: 'Portfolio de progression : les artefacts contribuent à la note avec prise en compte de la progression.'
                 });
-                champs.push({
-                    id: 'nbArtefactsPortfolio',
-                    label: 'Nombre d\'artefacts dans le portfolio',
-                    type: 'number',
-                    min: 1,
-                    max: 20,
-                    default: 5,
-                    required: true
-                });
-                champs.push({
-                    id: 'portfolioQualitatif',
-                    label: 'Portfolio qualitatif (sans note chiffrée) ?',
-                    type: 'toggle',
-                    default: false
-                });
+                // #900 (lot N6) : « Nombre d'artefacts dans le portfolio » et « Portfolio qualitatif »
+                // sont retirés — leurs réponses (`portfolio.nbArtefacts`, `portfolio.qualitatif`)
+                // n'étaient lues par rien.
             }
 
             return champs;
         },
-        suivant: () => 'config-sommative',
+        suivant: () => 'infos-base',
         precedent: () => 'seuils-personnels'
     },
 
@@ -642,29 +634,9 @@ const ETAPES_WIZARD = {
     // BRANCHE SOMMATIVE
     // ─────────────────────────────────────────────────────────────────────────
 
-    'config-sommative': {
-        id: 'config-sommative',
-        titre: 'Configuration sommative',
-        description: 'Paramètre l\'affichage des résultats',
-        branche: 'sommative',
-        ordre: 4,
-        champs: [
-            {
-                id: 'afficherRang',
-                label: 'Afficher le rang dans le groupe ?',
-                type: 'toggle',
-                default: false
-            },
-            {
-                id: 'afficherMoyenneGroupe',
-                label: 'Afficher la moyenne du groupe ?',
-                type: 'toggle',
-                default: true
-            }
-        ],
-        suivant: () => 'infos-base',
-        precedent: () => 'seuils-personnels'
-    },
+    // #900 (lot N6, 23 sept. 2026) : l'étape « Configuration sommative » (« Afficher le rang
+    // dans le groupe ? », « Afficher la moyenne du groupe ? ») est retirée. Ses deux réponses
+    // (`afficherRang`, `afficherMoyenneGroupe`) n'étaient lues par aucun écran.
 
     // ─────────────────────────────────────────────────────────────────────────
     // BRANCHE PAN-STANDARDS
@@ -2039,15 +2011,8 @@ function genererRecapitulatif() {
         html += '</div>';
     }
 
-    // Section spécifique selon le type
-    if (r.typePratique === 'sommative') {
-        html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration</h4>';
-        html += `<p><strong>Afficher le rang\u00a0:</strong> ${r.afficherRang ? 'Oui' : 'Non'}</p>`;
-        html += `<p><strong>Afficher la moyenne du groupe\u00a0:</strong> ${r.afficherMoyenneGroupe ? 'Oui' : 'Non'}</p>`;
-        html += '</div>';
-    }
-
+    // Section spécifique selon le type (#900, lot N6 : la section « Configuration » d'une
+    // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Standards</h4>';
@@ -2143,7 +2108,7 @@ function genererRecapitulatif() {
         // (écarté : les collecter ici, ce serait un second écrivain). Le récapitulatif dit où
         // les régler. En réédition d'une pratique qui porte déjà les deux, la ligne se tait.
         if (r.typePratique === 'specifications' && !_specificationPorteTypesEtForfaits()) {
-            html += '<p><strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception › Pratiques de notation (clique sur la pratique). Tant qu\'ils manquent, aucune note ne peut être calculée.</p>';
+            html += '<p><strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception → Pratiques de notation (clique sur la pratique). Tant qu\'ils manquent, aucune note ne peut être calculée.</p>';
         }
         html += '</div>';
     }
@@ -2290,9 +2255,9 @@ function validerEtape(etapeId) {
                 element = checked.length > 0 ? checked[0] : null;
                 valeurTrouvee = checked.length > 0 ? 'selected' : '';
             } else if (champ.type === 'liste-cibles') {
-                // #717 : au moins une cible nommée.
+                // #717 : au moins une cible nommée — règle du composant (lot N6), lue aussi par la gestion.
                 element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
-                valeurTrouvee = window.EditeurCibles.lire(element).length > 0 ? 'cibles' : '';
+                valeurTrouvee = window.EditeurCibles.motifRefus(window.EditeurCibles.lire(element)) === null ? 'cibles' : '';
             } else {
                 // Pour les autres champs, chercher par ID avec préfixe V2
                 element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
@@ -2640,11 +2605,9 @@ async function creerPratiqueV2() {
 
     // Configuration selon le type
     if (typeFinal === 'sommative') {
-        pratique.configuration = {
-            afficherRang: r.afficherRang || false,
-            afficherMoyenneGroupe: r.afficherMoyenneGroupe !== false,
-            reglesSommatives: classification.regles || []
-        };
+        // #900 (lot N6) : ni `afficherRang`, ni `afficherMoyenneGroupe` (aucun lecteur), ni
+        // `configuration.reglesSommatives` (doublon de `reglesSpeciales`, écrit plus haut).
+        pratique.configuration = {};
 
         // Phase 2 : Enrichissement sommative
         const regles = classification.regles || [];
@@ -2663,35 +2626,18 @@ async function creerPratiqueV2() {
                 }
             });
         }
-        if (regles.includes('portfolio')) {
-            pratique.configuration.portfolio = {
-                utiliser: true,
-                nbArtefacts: parseInt(r.nbArtefactsPortfolio) || 5,
-                qualitatif: r.portfolioQualitatif || false
-            };
-        }
+        // (#900, lot N6 : le bloc `portfolio` d'une sommative n'est plus écrit — ni `utiliser`, ni
+        //  `nbArtefacts`, ni `qualitatif` n'ont de lecteur ; la règle vit dans `reglesSpeciales`.)
     } else if (typeFinal === 'standards') {
-        // 🆕 #24 : Récupérer le mode de sélection pour déterminer varianteCalcul
         const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
         const estHybride = modeSelection === 'hybride';
 
-        // Mapper le mode de sélection vers varianteCalcul
-        let varianteCalcul = '';
-        if (estHybride) {
-            varianteCalcul = 'hybride';
-        } else if (modeSelection === 'n_meilleurs' || modeSelection === 'meilleurs') {
-            varianteCalcul = 'n-meilleurs';
-        } else if (modeSelection === 'derniers') {
-            varianteCalcul = 'n-recents';
-        } else if (modeSelection === 'tous') {
-            varianteCalcul = 'n-meilleurs'; // Par défaut
-        }
-
+        // #900 (lot N6) : `varianteCalcul` n'est plus écrit — aucun lecteur depuis #435 (le moteur
+        // ne route plus « par-objectifs »). Le mode de sélection est la seule commande.
         pratique.configuration = {
             approcheEvaluation: r.approcheEvaluation,
             echelleId: r.echelleId || null,
-            grilleId: r.grilleId || null,
-            varianteCalcul: varianteCalcul  // 🆕 #24 : Sauvegarder pour Mode Expert
+            grilleId: r.grilleId || null
         };
 
         if (r.approcheEvaluation === 'par-artefacts') {
@@ -2710,10 +2656,11 @@ async function creerPratiqueV2() {
                 nombreTotal: nbSoumis,
                 nombreARetenir: nbRetenus,
                 methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),
-                minimumCompletion: minFormatif,
-                hybride: estHybride  // 🆕 #24 : Flag pour activer les catégories
+                minimumCompletion: minFormatif
             };
-            // 🆕 #24 : Activer catégories automatiquement si hybride
+            // 🆕 #24 : Activer catégories automatiquement si hybride. #900 (lot N6) : le drapeau
+            // `portfolio.hybride` n'est plus écrit — `categories.actif` est ce que le moteur lit
+            // (`obtenirConfigCategories`, portfolio.js), et la relecture le lit aussi.
             if (estHybride || modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
                 pratique.configuration.categories = {
                     actif: true,
@@ -2730,7 +2677,9 @@ async function creerPratiqueV2() {
         }
     } else if (typeFinal === 'specifications') {
         pratique.configuration = {
-            seuilAcceptabilite: parseInt(r.seuilAcceptabilite) || 100,
+            // #935 (lot N6) : UN nom, celui que le moteur lit — `seuilAcceptable`. La réponse de
+            // l'assistant garde son id d'étape (`seuilAcceptabilite`) ; seul le champ écrit change.
+            seuilAcceptable: parseInt(r.seuilAcceptabilite) || 100,
             jetons: {
                 activer: r.utiliserJetons || false
             }
@@ -2861,10 +2810,15 @@ function conserverReglesRetirees(pratique, existante) {
         return anciennes.filter(k => REGLES_SOMMATIVES_RETIREES.includes(k) || base.includes(k))
             .concat(base.filter(k => !anciennes.includes(k)));
     };
-    const reglesSpeciales = fusionner(pratique.reglesSpeciales, existante.reglesSpeciales);
+    const cochees = pratique.reglesSpeciales;
+    const reglesSpeciales = fusionner(cochees, existante.reglesSpeciales);
     if (reglesSpeciales !== undefined) pratique.reglesSpeciales = reglesSpeciales;
-    const reglesSommatives = fusionner(pratique.configuration.reglesSommatives, avant.reglesSommatives);
-    if (reglesSommatives !== undefined) pratique.configuration.reglesSommatives = reglesSommatives;
+    // #900 (lot N6) : l'assistant n'écrit plus le doublon `configuration.reglesSommatives` ; une
+    // pratique qui le porte le garde, fusionné avec les MÊMES cases cochées que `reglesSpeciales`.
+    if (avant.reglesSommatives !== undefined) {
+        const reglesSommatives = fusionner(cochees, avant.reglesSommatives);
+        if (reglesSommatives !== undefined) pratique.configuration.reglesSommatives = reglesSommatives;
+    }
 
     // La variante suivait la première règle cochée (remplacement > verrou > portfolio >
     // plafonnement) : elle reste ce qu'elle était tant que sa règle est toujours portée.
@@ -2875,14 +2829,51 @@ function conserverReglesRetirees(pratique, existante) {
 }
 
 /**
+ * #900 (lot N6, 23 sept. 2026) — LES RÉGLAGES SANS LECTEUR QU'UNE PRATIQUE PORTE DÉJÀ RESTENT.
+ * L'assistant n'écrit plus « Afficher le rang », « Afficher la moyenne du groupe », le portfolio d'une
+ * sommative (nombre d'artefacts, qualitatif) ni `portfolio.decouplerPN` : aucun écran ni calcul ne les lit.
+ * Une pratique qui les porte les garde à la réédition (limite de Grégoire du 20 sept. : on cesse d'écrire, on
+ * n'efface pas) — tels quels, puisque plus rien ne les édite. `varianteCalcul` (projection du mode de sélection,
+ * lue seulement par l'avertissement « par-objectifs ») passe aussi tel quel. `portfolio.hybride` est à part : le
+ * formulaire, son badge et la relecture le lisent encore (en « ou » avec `categories.actif`) — gardé figé, il
+ * ferait rouvrir en « hybride » une pratique qu'on vient d'en sortir. Il n'est plus créé ; une pratique qui le
+ * porte le garde ALIGNÉ sur `categories.actif`, ce que le moteur calcule. Mute et rend `pratique`.
+ * @param {Object} pratique - l'objet reconstruit par l'assistant
+ * @param {Object} existante - l'objet enregistré qu'il remplace
+ * @returns {Object} pratique
+ */
+function conserverReglagesSansLecteur(pratique, existante) {
+    if (!pratique || !existante) return pratique;
+    const canon = (t) => (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(t) : t);
+    if (canon(pratique.type) !== canon(existante.type)) return pratique;
+    const clone = (v) => JSON.parse(JSON.stringify(v));
+    const avant = existante.configuration || {};
+    pratique.configuration = pratique.configuration || {};
+    if (pratique.type === 'sommative') {
+        for (const cle of ['afficherRang', 'afficherMoyenneGroupe', 'portfolio']) {
+            if (avant[cle] !== undefined && pratique.configuration[cle] === undefined) pratique.configuration[cle] = clone(avant[cle]);
+        }
+    } else if (pratique.type === 'standards') {
+        if (avant.varianteCalcul !== undefined) pratique.configuration.varianteCalcul = clone(avant.varianteCalcul);
+        const portfolio = pratique.configuration.portfolio;
+        if (portfolio && avant.portfolio) {
+            if (avant.portfolio.decouplerPN !== undefined) portfolio.decouplerPN = clone(avant.portfolio.decouplerPN);
+            if (avant.portfolio.hybride !== undefined) portfolio.hybride = !!(pratique.configuration.categories && pratique.configuration.categories.actif);
+        }
+    }
+    return pratique;
+}
+
+/**
  * Lot N4 (#854, volet spécifications, 23 sept. 2026) — UNE SPÉCIFICATION ROUVERTE GARDE SA CONFIGURATION.
  * L'assistant reconstruit `configuration` à neuf avec ce qu'il sait éditer (seuil, jetons, modèle de forfaits) ;
  * les types de productions et les forfaits — le palier d'échec compris — se règlent ailleurs (formulaire de
  * gestion) et disparaissaient au premier enregistrement. On part donc de la configuration ENREGISTRÉE et on n'y
  * remplace que ce que l'assistant gère, à la place où chaque clé se trouvait : rouvrir puis enregistrer sans
  * rien toucher rend la même configuration, à l'octet.
- * - Le seuil s'écrit sous le nom que la pratique porte déjà (`seuilAcceptable` pour le gabarit « Modèle simple »),
- *   sinon le moteur continuerait de lire l'ancien et ignorerait le nouveau.
+ * - Le seuil s'écrit sous `seuilAcceptable`, le nom que le moteur lit (#935, lot N6). Une pratique ancienne qui
+ *   porte `seuilAcceptabilite` le garde (aucune conversion en base) : le moteur, le formulaire et l'assistant
+ *   lisent `seuilAcceptable` d'abord, il cesse d'être lu dès que le nom unique est écrit.
  * - Des jetons « désactivés » ne s'ajoutent pas à une pratique qui n'en portait pas.
  * Mute et rend `pratique`.
  * @param {Object} pratique - l'objet reconstruit par l'assistant
@@ -2893,10 +2884,6 @@ function conserverConfigurationSpecifications(pratique, existante) {
     if (!pratique || !existante || pratique.type !== 'specifications' || existante.type !== 'specifications') return pratique;
     const avant = JSON.parse(JSON.stringify(existante.configuration || {}));
     const neuve = Object.assign({}, pratique.configuration || {});
-    if (typeof avant.seuilAcceptable === 'number' && avant.seuilAcceptabilite === undefined && 'seuilAcceptabilite' in neuve) {
-        neuve.seuilAcceptable = neuve.seuilAcceptabilite;
-        delete neuve.seuilAcceptabilite;
-    }
     if (avant.jetons === undefined && neuve.jetons && neuve.jetons.activer !== true) delete neuve.jetons;
     pratique.configuration = Object.assign(avant, neuve);
     return pratique;
@@ -2933,6 +2920,7 @@ async function sauvegarderPratique(pratique) {
         if (!pratique.auteur && existante.auteur) pratique.auteur = existante.auteur;
         if (!pratique.etablissement && existante.etablissement) pratique.etablissement = existante.etablissement;
         conserverReglesRetirees(pratique, existante);
+        conserverReglagesSansLecteur(pratique, existante);           // lot N6 (#900)
         conserverConfigurationSpecifications(pratique, existante);   // lot N4 (#854)
         pratiques[index] = pratique;
     } else {
@@ -3105,18 +3093,12 @@ function chargerPratiqueExistante(pratiqueId) {
         const config = pratique.configuration;
 
         if (typeCanon === 'sommative') {
-            wizardState.reponses.afficherRang = config.afficherRang;
-            wizardState.reponses.afficherMoyenneGroupe = config.afficherMoyenneGroupe;
             // #854 (audit du 16 sept. 2026, constat A-2) — ROUVRIR NE CHANGE PAS UNE RÈGLE.
             // Les valeurs des règles spéciales n'étaient pas relues : ré-enregistrer les
             // ramenait aux défauts (verrou « Dissertation, 90, 50 » → « Analyse finale, 60, 55 »).
             // Condition posée par Grégoire pour brancher le verrou (#897) : une règle appliquée
             // ne change pas à l'insu de l'enseignant·e. (#903 : le remplacement et le
             // plafonnement ne se relisent plus ici — ils passent tels quels à l'enregistrement.)
-            if (config.portfolio) {
-                wizardState.reponses.nbArtefactsPortfolio = config.portfolio.nbArtefacts;
-                wizardState.reponses.portfolioQualitatif = config.portfolio.qualitatif;
-            }
             for (const regle of (config.conditions_speciales || [])) {
                 if (regle && regle.type === 'double_verrou') {
                     wizardState.reponses.nomEvalVerrouillee = regle.condition?.evaluation;
@@ -3158,7 +3140,9 @@ function chargerPratiqueExistante(pratiqueId) {
                     'meilleurs': 'n_meilleurs', 'tous': 'tous', 'derniers': 'derniers',
                     'recents': 'derniers', 'recents-meilleurs': 'recents-meilleurs'
                 };
-                wizardState.reponses.modeSelectionPortfolio = config.portfolio.hybride
+                // #900 (lot N6) : hybride = catégories actives, comme au moteur et au formulaire de
+                // gestion ; `portfolio.hybride` reste lu pour les pratiques qui le portent encore.
+                wizardState.reponses.modeSelectionPortfolio = (config.portfolio.hybride || config.categories?.actif)
                     ? 'hybride'
                     : (methodeVersMode[config.portfolio.methodeSelection] || 'n_meilleurs');
             }
@@ -3185,10 +3169,10 @@ function chargerPratiqueExistante(pratiqueId) {
         } else if (typeCanon === 'specifications') {
             // Lot N4 (#854, volet spécifications) — ROUVRIR NE CHANGE RIEN. Sans cette branche, le seuil
             // repassait à 100 et les jetons à « désactivés » au premier enregistrement. Le seuil se lit
-            // sous ses deux noms : `seuilAcceptabilite` (l'assistant) et `seuilAcceptable` (le gabarit
-            // « Modèle simple » et le formulaire de gestion). Types et forfaits ne sont pas des réponses
+            // sous ses deux noms, dans l'ordre du moteur (#935, lot N6) : `seuilAcceptable` (le nom unique),
+            // puis `seuilAcceptabilite` (l'assistant d'avant N6). Types et forfaits ne sont pas des réponses
             // de l'assistant : ils passent tels quels à l'enregistrement (`conserverConfigurationSpecifications`).
-            const seuil = (typeof config.seuilAcceptabilite === 'number') ? config.seuilAcceptabilite : config.seuilAcceptable;
+            const seuil = (typeof config.seuilAcceptable === 'number') ? config.seuilAcceptable : config.seuilAcceptabilite;
             if (seuil !== undefined) wizardState.reponses.seuilAcceptabilite = seuil;
             const jetons = config.jetons || {};
             wizardState.reponses.utiliserJetons = jetons.activer === true;
@@ -3253,6 +3237,7 @@ window.ETAPES_WIZARD = ETAPES_WIZARD;
 // séparément, et seul le rendu compte pour l'utilisateur.
 window.genererRadioCards = genererRadioCards;
 window.conserverReglesRetirees = conserverReglesRetirees;
+window.conserverReglagesSansLecteur = conserverReglagesSansLecteur;
 window.calculerExempleConsequence = calculerExempleConsequence; // #319 Lot 4 a8 (testabilité)
 window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8/a9 (testabilité du rendu)
 window.genererContenuEtape = genererContenuEtape;

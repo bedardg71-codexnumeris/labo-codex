@@ -92,8 +92,7 @@ function migrerConfigurationsSpecifiques() {
                 nombreARetenir: 5,
                 minimumCompletion: 7,
                 nombreTotal: 10,
-                methodeSelection: 'meilleurs',
-                decouplerPN: false
+                methodeSelection: 'meilleurs'
             };
         }
 

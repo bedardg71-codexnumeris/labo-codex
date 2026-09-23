@@ -284,10 +284,12 @@ describe('#626 · M2 / D5 — les clés mortes ne sont plus lues', () => {
     // visait le volet 3 seul. Le volet `preferencesUtilisateur` est parti à son
     // tour au #823 (10 sept. 2026), avec la préférence « Découpler P et N » que
     // personne ne lisait : il ne reste que le volet des pratiques.
-    it('TÉMOIN · le volet `bibliothequePratiques` de la migration reste, celui des préférences est parti (#823)', () => {
+    // #900 (lot N6, 23 sept. 2026) : le dernier volet part à son tour — il renommait `decouplerPR` en `decouplerPN`,
+    // un champ que personne ne lit sous l'un ou l'autre nom. Rien n'est effacé chez les gens.
+    it('la migration `decouplerPR` → `decouplerPN` est retirée, volets des pratiques et des préférences (#823, #900)', () => {
         const c = code('js/main.js');
-        expect(c).toContain('migration_decoupler_pn_done');
-        expect(c).toContain("db.getSync('bibliothequePratiques'");
+        expect(c).not.toContain("db.setSync('migration_decoupler_pn_done'");
+        expect(c).not.toContain("db.getSync('bibliothequePratiques'");
         expect(c).not.toContain("db.getSync('preferencesUtilisateur'");
     });
 

@@ -55,7 +55,9 @@ describe('lot 29 · #901 — quatre phrases de l\'Aide disent ce que fait le cod
 describe('lot 29 · #899 — le récapitulatif d\'une spécification dit où régler types et forfaits', () => {
     it('la ligne est dans le code, mot pour mot', () => {
         const src = mots(lire('js/wizard-pratique-v2.js'));
-        expect(src).toContain('<strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception › Pratiques de notation (clique sur la pratique). Tant qu\\\'ils manquent, aucune note ne peut être calculée.');
+        // Lot N6 (#899, la flèche) : « → », comme les autres chemins des pratiques de notation ; le reste mot pour mot.
+        expect(src).toContain('<strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception → Pratiques de notation (clique sur la pratique). Tant qu\\\'ils manquent, aucune note ne peut être calculée.');
+        expect(src).not.toContain('Conception › Pratiques de notation');
     });
 
     it('le chemin qu\'elle promet existe : section « Pratiques de notation » sous Conception, et les deux titres de l\'éditeur', () => {
