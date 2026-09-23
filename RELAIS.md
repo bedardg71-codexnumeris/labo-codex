@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 18 H 30 : **LOT N3 (#714, 1.155.1) FUSIONNÉ DANS `main` (merge `32f09aaa`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 22 H 30 : **LOT N2 (#716) COMMITÉ SUR LA BRANCHE `lot-n2-p-historique`, RELEASE 1.155.2 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
+
+**Où vit le travail** : branche locale `lot-n2-p-historique`, partie de `4a0cd22b` : `41ba4e9c` (le lot : code, sentinelle-716, bancs réancrés), `b98a4b88` (#716 cochée, consigne N2 et archive N3), `3a4539c1` (release 1.155.2, build 0922-2227). Décisions de Grégoire du 22 sept., prises aux deux arrêts prévus de la consigne : 1A (note provisoire à une date passée), 2A (pas de P historique en dénotation). Vitest 622 / 7 142 après le bump.
+
+**Reste, dans l'ordre** : relecture de Cowork (PROTOCOLE, règle 2) → corrections → Grégoire valide l'item de « Nouvelles » (1.155.2, marqué PROPOSÉ dans `js/changelog-data.js`) → fusion dans `main` → verdict Playwright → `pousser.sh`. Fichiers de Cowork non commités, non touchés : `FILE-DES-LOTS.md`, `CONSIGNE-N7-echelle-note-globale.md`.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 18 H 30 : **LOT N3 (#714, 1.155.1) FUSIONNÉ DANS `main` (merge `32f09aaa`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`0026e95b`) + `3ce62661` (relais précédent, fichiers de Cowork) + le merge de `lot-n3-habiletes` (jusqu'à `ee6f9d9c`, complément de relecture) + ce relais. Relecture croisée de Cowork sur `ee6f9d9c` : verte, par exécution sur une copie `git archive`, sentinelle 11/11 ; une mutation survit (retirer `echapperHtml(portfolio.methodeSelection)`) — libellé tiré de `methodesLabels`, mots fixes de l'app, la carte de la note ne l'échappe pas non plus : issue 3, ni correction ni fiche. **Si `origin/main` n'est pas à ce commit ou après** : le push a été refusé ou interrompu — mesurer avant tout geste, relancer par `pousser.sh` seulement.
 
