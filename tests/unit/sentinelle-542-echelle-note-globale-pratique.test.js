@@ -178,15 +178,6 @@ const stubsPratique = {
 
 describe('#542 lot 3 pas 3b · B — chaque pratique dit dans quoi SA note se lit', () => {
 
-    it('B1. SOMMATIVE : aucune échelle, raison « note-chiffree » — et c\'est la bonne réponse', () => {
-        const w = chargerScript('js/pratiques/pratique-sommative.js', stubsPratique);
-        const p = new w.PratiqueSommative();
-        const r = p.obtenirEchelleNoteGlobale('1234567');
-        expect(r.echelle, 'une note pondérée n\'est pas un niveau atteint').toBeNull();
-        expect(r.raison).toBe('note-chiffree');
-        expect(r.message).toContain('pourcentage');
-    });
-
     it('B2. CONFIGURABLE par niveaux : son échelle embarquée, sans résolution ni ambiguïté', () => {
         const w = chargerScript('js/pratiques/pratique-configurable.js', stubsPratique);
         const p = new w.PratiqueConfigurable({
@@ -211,47 +202,34 @@ describe('#542 lot 3 pas 3b · B — chaque pratique dit dans quoi SA note se li
         expect(r.raison).toBe('note-chiffree');
     });
 
-    it('B4bis. PAN-STANDARDS DÉLÈGUE au helper — elle ne réécrit pas la règle chez elle', () => {
-        // L'invariant qui compte ici n'est pas « PAN rend une échelle », c'est
-        // « PAN emploie LE MÊME chemin que le reste du dépistage ». Une seconde
-        // règle écrite dans la pratique divergerait du helper au premier
-        // changement — c'est le patron que #529 a défait, et que le pas 3a a
-        // évité pour la résolution.
-        let appelsRecus = [];
-        const w = chargerScript('js/pratiques/pratique-pan-standards.js', {
-            ...stubsPratique,
-            obtenirEchelleCommuneDesEvaluations: (da) => {
-                appelsRecus.push(da);
-                return { echelle: ECHELLE_A, raison: null, message: null };
-            }
-        });
-        const p = new w.PratiquePANStandards();
-        const r = p.obtenirEchelleNoteGlobale('1234567');
-
-        expect(appelsRecus, 'le helper partagé doit être appelé, avec le DA').toEqual(['1234567']);
-        expect(r.echelle.id).toBe('ECH_A');
-        expect(r.raison).toBeNull();
-    });
-
-    it('B4. LE CONTRAT — les trois pratiques implémentent la méthode', () => {
-        // Une pratique qui ne l'implémenterait pas laisserait le dépistage sans
-        // niveau global. C'est délibérément sûr, mais ça doit rester un choix,
-        // pas un oubli : ce test compte les implémentations.
-        const fichiers = [
-            'js/pratiques/pratique-sommative.js',
-            'js/pratiques/pratique-pan-standards.js',
-            'js/pratiques/pratique-configurable.js'
-        ];
+    it('B4. ↻ LOT N7 — la sommative et PAN-Standards du registre NE répondent PLUS : la règle vit dans `lireEchelleNoteGlobale`', () => {
+        // Avant N7 (23 sept. 2026), chaque instance du registre portait sa réponse, et PAN-Standards
+        // déléguait à `obtenirEchelleCommuneDesEvaluations`. La seule raison d'appeler ces instances
+        // était `obtenirPratiqueActuelle`, retirée : la famille de la pratique assignée route, à UN
+        // endroit (`profil-etudiant-helpers.js`). Une méthode qui reviendrait ici serait une seconde
+        // règle, que rien n'appelle — et qui divergerait au premier changement (#529).
         const fs = require('node:fs');
         const path = require('node:path');
         const racine = path.resolve(__dirname, '..', '..');
-        const sans = fichiers.filter((f) =>
-            !fs.readFileSync(path.join(racine, f), 'utf-8').includes('obtenirEchelleNoteGlobale('));
-        expect(sans, `pratiques sans échelle de note globale : ${sans.join(', ')}`).toEqual([]);
+        for (const f of ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-pan-specifications.js']) {
+            expect(fs.readFileSync(path.join(racine, f), 'utf-8'), f).not.toContain('obtenirEchelleNoteGlobale(');
+        }
+    });
 
-        // Et le contrat lui-même la documente, sinon la prochaine pratique
-        // écrite d'après l'interface l'ignorera.
-        const contrat = fs.readFileSync(path.join(racine, 'js/pratiques/pratique-interface.js'), 'utf-8');
-        expect(contrat).toContain('obtenirEchelleNoteGlobale(da)');
+    it('B5. ↻ LOT N7 — une CONFIGURABLE de type Standards ne lit JAMAIS son niveau dans `config.echelle` (décision de Grégoire, 22 sept.)', () => {
+        // La VRAIE normalisation des ids (le registre, chargé dans un bac jetable) : « pan-standards »
+        // est une Standards, et la garde doit le savoir sans recopier la table.
+        const registre = chargerScript('js/pratiques/pratique-registre.js', {}, {});
+        const w = chargerScript('js/pratiques/pratique-configurable.js', { ...stubsPratique, normaliserIdPratique: registre.normaliserIdPratique });
+        for (const type of ['standards', 'pan-standards']) {
+            const p = new w.PratiqueConfigurable({
+                id: 'prat-std', nom: 'STD', type,
+                calcul_note: { methode: 'conversion_niveaux' },
+                echelle: { type: 'niveaux', niveaux: ECHELLE_A.niveaux }
+            });
+            const r = p.obtenirEchelleNoteGlobale('1234567');
+            expect(r.echelle, type).toBeNull();
+            expect(r.raison, type).toBe('echelle-des-evaluations');
+        }
     });
 });

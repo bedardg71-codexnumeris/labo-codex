@@ -309,7 +309,7 @@ function monter(jeu, opts = {}) {
         calculerDetailsNoteFinale: fwd('calculerDetailsNoteFinale'), calculerEtStockerIndicesCP: fwd('calculerEtStockerIndicesCP'), simulerIndices: fwd('simulerIndices'),
         obtenirIndicesCP: fwd('obtenirIndicesCP'), calculerTousLesIndices: fwd('calculerTousLesIndices'),
         obtenirEchelleResolue: fwd('obtenirEchelleResolue'), obtenirTableConversionNiveaux: fwd('obtenirTableConversionNiveaux'),
-        obtenirEchelleCommuneDesEvaluations: fwd('obtenirEchelleCommuneDesEvaluations'), obtenirPratiqueActuelle: fwd('obtenirPratiqueActuelle'),
+        obtenirEchelleCommuneDesEvaluations: fwd('obtenirEchelleCommuneDesEvaluations'),
         situerPourcentageDansEchelle: fwd('situerPourcentageDansEchelle'), interpreterNiveauAtteint: fwd('interpreterNiveauAtteint'), lireNiveauNoteGlobale: fwd('lireNiveauNoteGlobale'),
         // Le panneau « Développement des habiletés » du profil référence par nom nu des exports d'autres IIFE.
         _genererBarresSRPNF: fwd('_genererBarresSRPNF'),
@@ -496,14 +496,14 @@ function quatreSurfaces(b, da) {
     const details = win.calculerDetailsNoteFinale(da);
     const idExport = win.obtenirIdPratiqueActive();
     const ligne = win._exportResultats.construireLignesSynthese([ETUDIANTS.find(e => e.da === da)], { pratiqueId: idExport }, win.simulerIndices)[0];
-    const actuelle = win.obtenirPratiqueActuelle();
     return {
         etat: win.resoudrePratiqueActive().etat,
         indice: { P: indice.P, noteConstructible: indice.noteConstructible, pratique: indice.pratique },
         profil: details ? (details.erreur ? { erreur: details.erreur, pratique: details.pratique } : r2(details.noteFinale)) : null,
         export: { id: idExport, note: ligne[8], statut: ligne[9] },
         diagnostic: win._diagnostiquerNoteNonCalculable(),
-        pratiqueActuelle: actuelle ? actuelle.obtenirId() : null
+        // ↻ Lot N7 (23 sept. 2026) : `obtenirPratiqueActuelle` est retirée ; on lit ce qu'elle servait, le niveau global.
+        raisonNiveau: win.lireNiveauNoteGlobale(da, 80).raison
     };
 }
 const AUCUNE = /Aucune pratique de notation n'est assignée à ce groupe-cours/;
@@ -518,7 +518,7 @@ describe('N1a · la pratique active se trouve d\'une seule façon', () => {
         expect(m.profil.pratique).toBeNull();                                           // avant : étiqueté « PAN-Standards », par PRATIQUE_DEFAUT
         expect(m.export).toEqual({ id: null, note: '', statut: 'non constructible' });
         expect(m.diagnostic).toMatch(AUCUNE);
-        expect(m.pratiqueActuelle).toBeNull();                                          // avant : une PratiquePANStandards fabriquée
+        expect(m.raisonNiveau).toBe('pratique-sans-methode');                           // avant N1a : une PratiquePANStandards fabriquée lisait un niveau
     });
 
     it('N2 · un id assigné qui ne mène à RIEN (pratique supprimée) : « non constructible » partout, diagnostic « introuvable »', () => {
@@ -528,7 +528,7 @@ describe('N1a · la pratique active se trouve d\'une seule façon', () => {
         expect(m.profil.erreur).toMatch(INTROUVABLE);
         expect(m.export).toEqual({ id: null, note: '', statut: 'non constructible' });
         expect(m.diagnostic).toMatch(INTROUVABLE);
-        expect(m.pratiqueActuelle).toBeNull();
+        expect(m.raisonNiveau).toBe('pratique-sans-methode');
     });
 
     it('N3 · #711 — le pointeur ancien « pan-standards » mène, normalisé, à la pratique rangée sous « standards » : SA configuration (N = 4) calcule, 79,45 partout', () => {
@@ -572,7 +572,7 @@ describe('N1a · la pratique active se trouve d\'une seule façon', () => {
         expect(m.indice).toEqual({ P: 78, noteConstructible: true, pratique: 'den-banc' });
         expect(m.profil).toBeNull();                       // pas de note « portfolio » pour une dénotation : le profil rend sa carte de jugement
         expect(m.export).toEqual({ id: 'den-banc', note: 78, statut: 'final' });
-        expect(m.pratiqueActuelle).toBe('den-banc');
+        expect(m.raisonNiveau).toBe('note-chiffree');     // la pratique ASSIGNÉE répond (la configurable de dénotation)
         const lettre = b.win.lireNiveauNoteGlobale(DA.DEN, 78);
         expect(lettre.niveau).toBeNull();
         expect(lettre.raison).toBe('note-chiffree');
@@ -583,6 +583,85 @@ describe('N1a · la pratique active se trouve d\'une seule façon', () => {
         expect(m.etat).toBe('ok');
         expect(m.indice).toEqual({ P: 87, noteConstructible: true, pratique: 'sommative' });
         expect(m.export.note).toBe(87);
+    });
+});
+
+/* =============================================================================================
+   N7 · LE NIVEAU DE LA NOTE GLOBALE SE LIT DANS UNE SEULE RÈGLE (lot N7, 23 sept. 2026)
+   Décision de Grégoire (22 sept., soir) : pour une Standards, l'échelle des ÉVALUATIONS (règle A),
+   jamais celle rangée dans la pratique (règle B). Et : « L'échelle IDME est ma pratique personnelle.
+   On ne peut l'imposer à aucun utilisateur. » D'où une échelle d'essai aux codes et bornes inventés,
+   décalées d'IDME : à 72 %, E1 dit « D » (55-74), l'échelle d'essai dit « AQ » (72-93).
+   ============================================================================================= */
+const ESSAI = { id: 'ESSAI', nom: 'Échelle d\'essai', niveaux: [
+    { code: 'AM', nom: 'Amorce', min: 0, max: 47, valeurCalcul: 30 },
+    { code: 'CH', nom: 'En chemin', min: 48, max: 71, valeurCalcul: 60 },
+    { code: 'AQ', nom: 'Acquis', min: 72, max: 93, valeurCalcul: 80 },
+    { code: 'TR', nom: 'Transféré', min: 94, max: 100, valeurCalcul: 97 }
+] };
+const VERS_ESSAI = { I: 'AM', D: 'CH', M: 'AQ', E: 'TR', 0: '0' };
+/** Le jeu STD, ses évaluations passées dans l'échelle d'essai (toutes, ou celles que `garder` écarte). */
+function jeuSTDEssai(opts = {}) {
+    const jeu = jeuSTD({ echelleId: opts.echelleDeLaPratique || 'ESSAI' });
+    jeu.evaluations.forEach((e, i) => {
+        if (opts.laisserEnE1 && opts.laisserEnE1(e, i)) return;
+        e.echelleId = 'ESSAI';
+        e.niveauFinal = VERS_ESSAI[e.niveauFinal];
+        e.criteres.forEach(c => { c.niveauSelectionne = VERS_ESSAI[c.niveauSelectionne]; });
+    });
+    if (opts.idDeLaPratique) jeu.pratiques.forEach(p => { p.id = opts.idDeLaPratique; });
+    return jeu;
+}
+const lettre = (b, pct) => { const l = b.win.lireNiveauNoteGlobale(DA.STD, pct); return { code: l.niveau ? l.niveau.code : null, raison: l.raison }; };
+
+describe('N7 · le niveau de la note globale : la règle des évaluations, et elle seule', () => {
+    it('N7-1 · STD, évaluations dans UNE échelle créée par l\'utilisateur (pas IDME) : le niveau est lu dans cette échelle', () => {
+        const b = monter(jeuSTDEssai(), { echelles: [E1, ESSAI] });
+        const m = noter('N7-1', { a72: lettre(b, 72), a50: lettre(b, 50), a95: lettre(b, 95) });
+        expect(m.a72).toEqual({ code: 'AQ', raison: null });   // E1 dirait « D »
+        expect(m.a50.code).toBe('CH');                          // E1 dirait « I »
+        expect(m.a95.code).toBe('TR');
+    });
+
+    it('N7-2 · STD dont la pratique porte une échelle B DIFFÉRENTE de celle des évaluations (cas #648) : le niveau vient des évaluations, jamais de B', () => {
+        const b = monter(jeuSTDEssai({ echelleDeLaPratique: 'E1' }), { echelles: [E1, ESSAI] });
+        const inst = b.win.obtenirPratiqueParId('std-banc');
+        expect(inst.config.echelle.echelle_id).toBe('E1');                 // B est bien rangée dans la pratique
+        expect(b.win.situerPourcentageDansEchelle(72, inst.config.echelle).code).toBe('D');   // et B dirait « D »
+        const m = noter('N7-2', lettre(b, 72));
+        expect(m).toEqual({ code: 'AQ', raison: null });
+    });
+
+    it('N7-2bis · même cas, pratique rangée sous l\'id « standards » et pointeur ancien « pan-standards » (#711) : avant N7, l\'instance « du registre » ÉTAIT la configurable, et B répondait — plus maintenant', () => {
+        // Avant N7, `obtenirPratiqueActuelle` demandait `obtenirPratiqueParId('standards')`, qui trouve d'abord la
+        // bibliothèque (#711) : la PratiqueConfigurable, donc `config.echelle` — « D » à 72 %. Seul chemin où la
+        // règle B servait une Standards à l'écran. Ni le pack démo (`demo-std-litt`) ni les bancs n'y passaient.
+        const b = monter(jeuSTDEssai({ echelleDeLaPratique: 'E1', idDeLaPratique: 'standards' }), { echelles: [E1, ESSAI], pratiqueId: 'pan-standards' });
+        expect(b.win.resoudrePratiqueActive().famille).toBe('standards');
+        expect(noter('N7-2bis', lettre(b, 72))).toEqual({ code: 'AQ', raison: null });
+    });
+
+    it('N7-3 · STD, évaluations dans DEUX échelles : aucun niveau, la cause nommée', () => {
+        const b = monter(jeuSTDEssai({ laisserEnE1: (e, i) => i % 2 === 0 }), { echelles: [E1, ESSAI] });
+        const l = b.win.lireNiveauNoteGlobale(DA.STD, 72);
+        noter('N7-3', { code: l.niveau, raison: l.raison, survol: l.survol });
+        expect(l.niveau).toBeNull();
+        expect(l.raison).toBe('echelles-divergentes');
+        expect(l.survol).not.toBe('');
+    });
+
+    it('N7-4 · SOM, SPE, DEN : niveau inchangé par rapport à main d\'avant le lot (aucun niveau ; « note-chiffree », « pratique-sans-methode », « note-chiffree »)', () => {
+        // Valeurs de `main` à 73445a4c (E4, E5, N6) ; le message de la sommative est celui de PratiqueSommative, recopié mot pour mot.
+        const som = monter(jeuSOM()).win.lireNiveauNoteGlobale(DA.SOM, 87);
+        const spe = monter(jeuSPE()).win.lireNiveauNoteGlobale(DA.SPE, 70);
+        const den = monter(jeuDEN()).win.lireNiveauNoteGlobale(DA.DEN, 78);
+        noter('N7-4', { som, spe, den });
+        expect(som).toEqual({ niveau: null, raison: 'note-chiffree', survol: 'La pratique sommative établit la note globale comme un pourcentage pondéré. Elle ne la situe dans aucune échelle de niveaux — c\'est une note, pas un niveau atteint.' });
+        expect(spe).toEqual({ niveau: null, raison: 'pratique-sans-methode', survol: '' });
+        expect(den.niveau).toBeNull(); expect(den.raison).toBe('note-chiffree');
+        // Et même une SPE qui PORTE une échelle de niveaux n'en reçoit pas un en passant (décision de didactique, pas de refactor).
+        const jeu = jeuSPE(); jeu.pratiques[0].configuration.echelleId = 'E1';
+        expect(monter(jeu).win.lireNiveauNoteGlobale(DA.SPE, 80).niveau).toBeNull();
     });
 });
 
@@ -935,15 +1014,14 @@ describe('E · dans quoi la note du cours se lit', () => {
         noter('E4', { SOM: ls.raison, SPE: lp.raison });
         expect(ls.raison).toBe('note-chiffree'); expect(lp.raison).toBe('pratique-sans-methode');
     });
-    it('E5 · DEN : obtenirPratiqueActuelle ne trouve pas « denotation » au registre et FABRIQUE une PratiquePANStandards → le jugement 78 se lit « M » par la règle STD ; la configurable elle-même répond « note-chiffree »', () => {
+    it('E5 · DEN : la pratique ASSIGNÉE (configurable de dénotation) répond « note-chiffree » — le jugement 78 ne se lit dans aucune échelle (avant N1a : « M », par une PratiquePANStandards fabriquée)', () => {
+        // ↻ Lot N7 (23 sept. 2026) : `obtenirPratiqueActuelle` est retirée ; la dénotation passe par la branche
+        // « autre famille » de `lireEchelleNoteGlobale`, qui interroge la pratique que rend LA résolution.
         const b = monter(jeuDEN());
-        const actuelle = b.win.obtenirPratiqueActuelle();
         const l = b.win.lireNiveauNoteGlobale(DA.DEN, 78);
         const propre = b.win.obtenirPratiqueParId('den-banc').obtenirEchelleNoteGlobale(DA.DEN);
-        noter('E5', { classeRepli: actuelle.constructor.name, idRepli: actuelle.obtenirId(), niveau: l.niveau && l.niveau.code, raisonConfigurable: propre.raison });
-        // ↻ Lot N1a (21 sept. 2026, #719) : c'est la pratique ASSIGNÉE qui répond, résolue par son id. Avant : une
-        // PratiquePANStandards fabriquée (id « standards »), et le jugement 78 se lisait « M ».
-        expect(actuelle.obtenirId()).toBe('den-banc');
+        noter('E5', { niveau: l.niveau && l.niveau.code, raison: l.raison, raisonConfigurable: propre.raison });
+        expect(b.win.resoudrePratiqueActive().pratique.obtenirId()).toBe('den-banc');
         expect(l.niveau).toBeNull();
         expect(l.raison).toBe('note-chiffree');
         expect(propre.raison).toBe('note-chiffree');

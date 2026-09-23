@@ -60,36 +60,6 @@ class PratiqueSommative {
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice P entre 0 et 1, ou null si pas de données
      */
-    /**
-     * L'échelle dans laquelle SA note globale se lit — pour la sommative :
-     * AUCUNE, et ce n'est pas un manque.
-     *
-     * ⮕ #542 lot 3, pas 3b. Décision de Grégoire, 27 août 2026 : « c'est la
-     * pratique de notation qui établit la note globale de l'élève ». Une
-     * pratique sommative traditionnelle l'établit comme une MOYENNE PONDÉRÉE DE
-     * NOTES CHIFFRÉES (`noteFinale` × pondération de la production) — un
-     * pourcentage, pas un niveau atteint.
-     *
-     * ⚠ CE QUE ÇA CORRIGE. Le dépistage affichait jusqu'ici un niveau IDME pour
-     * TOUT LE MONDE, quelle que soit la pratique — `pct >= 85 ? 'E' : …`, écrit
-     * en dur. Il faisait donc dire à une note sommative quelque chose que la
-     * pratique ne prétend pas dire : qu'un 87 % « est » un niveau d'échelle.
-     * Situer une note chiffrée dans une échelle de niveaux est un geste
-     * pédagogique, pas une conversion — et il appartient à l'enseignant qui
-     * choisit une pratique par niveaux, pas au dépistage.
-     *
-     * @returns {Object} `{ echelle: null, raison: 'note-chiffree', message }`
-     */
-    obtenirEchelleNoteGlobale() {
-        return {
-            echelle: null,
-            raison: 'note-chiffree',
-            message: 'La pratique sommative établit la note globale comme un pourcentage '
-                + 'pondéré. Elle ne la situe dans aucune échelle de niveaux — c\'est une note, '
-                + 'pas un niveau atteint.'
-        };
-    }
-
     calculerPerformance(da) {
         if (!da || da.length !== 7) {
             // console.warn('[SOM] DA invalide:', da);

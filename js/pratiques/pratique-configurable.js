@@ -110,9 +110,25 @@ class PratiqueConfigurable {
      * pas d'échelle de niveaux, sa note globale est un chiffre, et elle le dit :
      * même réponse que la pratique sommative.
      *
+     * ⛔ LOT N7 (23 sept. 2026) — JAMAIS POUR UNE STANDARDS. Décision de Grégoire (22 sept.) : le
+     * niveau d'une Standards se lit dans l'échelle commune à ses ÉVALUATIONS, pas dans celle rangée
+     * dans la pratique — les deux divergent dès qu'une échelle est remplacée (#648). La règle vit
+     * dans `lireEchelleNoteGlobale` (profil-etudiant-helpers.js), qui ne demande jamais ceci pour
+     * une Standards ; cette garde tient si un autre chemin le demandait. Ce qui passe encore ici :
+     * la dénotation.
+     *
      * @returns {Object} `{ echelle, raison, message }`
      */
     obtenirEchelleNoteGlobale() {
+        var famille = this._typeFamille();
+        if ((typeof normaliserIdPratique === 'function' ? normaliserIdPratique(famille) : famille) === 'standards') {
+            return {
+                echelle: null,
+                raison: 'echelle-des-evaluations',
+                message: 'Une pratique par standards lit sa note globale dans l\'échelle de ses évaluations, '
+                    + 'pas dans celle rangée dans la pratique.'
+            };
+        }
         var echelle = this.config && this.config.echelle;
         var aDesNiveaux = echelle
             && echelle.type === 'niveaux'
