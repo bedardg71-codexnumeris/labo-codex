@@ -186,6 +186,13 @@ describe('#716 · une date intermédiaire : la note du cours recalculée sur les
         expect(historique(b, DA.ALICE, MI)).toBe(avant);
         expect(stocke(b, DA.ALICE).P).not.toBe(stocke(banc(JEUX['Standards « meilleurs »']), DA.ALICE).P);   // témoin : la copie compte bien à la fin
     });
+    // Complément de relecture (Cowork, 23 sept. 2026) : « <= » remplacé par « < » survivait.
+    it('la borne : une évaluation dont l\'échéance EST la date du snapshot y entre ; la veille, elle n\'y est pas (A4, due le 15 mars)', () => {
+        const b = banc(JEUX['Standards « meilleurs »']);
+        // Le 14 : A1-A3 = 60, 70, 88 → 72,67 → 73. Le 15 : les trois meilleures de 60, 70, 88, 92 → (88 + 92 + 70) / 3 = 83,33 → 83.
+        expect([historique(b, DA.ALICE, '2026-03-14'), historique(b, DA.ALICE, '2026-03-15')]).toEqual([73, 83]);
+        expect(historique(b, DA.ALICE, '2026-03-15')).toBe(noteSurLesEchues(JEUX['Standards « meilleurs »'], '2026-03-15', ECHEANCES)[0]);
+    });
     it('valeurs à la main (Standards « meilleurs », 10 mars) : Alice A1-A3 = 60, 70, 88 → 72,67 → 73 ; la terminale n\'est pas due', () => {
         expect(historique(banc(JEUX['Standards « meilleurs »']), DA.ALICE, MI)).toBe(73);
     });
@@ -232,6 +239,26 @@ describe('#716 · ce qui rend null — jamais une valeur fabriquée', () => {
         historique(b, DA.ALICE, MI);
         expect(b.winModes.obtenirDonneesSelonMode('evaluationsSauvegardees').length).toBe(copiesSTD().length);
         expect(b.winModes.contexteImposeNoteProvisoire()).toBe(false);
+    });
+});
+
+describe('#716 · règle #394 déplacée dans calculerNoteDuCours : une Standards qui ne bâtit pas sa note est NON CONSTRUCTIBLE', () => {
+    // Complément de relecture (Cowork, 23 sept. 2026) : retirer « && !cheminRicheStdAEchoue » survivait à toute la suite.
+    // Le repli d'une Standards configurable (`conversion_niveaux`) relit l'indice STOCKÉ : tant qu'il est déjà « non
+    // constructible », il rend null et la garde ne se voit pas. Le trajet qui la départage est celui d'un stock encore
+    // CONSTRUCTIBLE : la note a été calculée, puis la pondération de la terminale a disparu. Sans la garde, l'ancienne
+    // note revient — au snapshot (capturé avant le recalcul des indices) comme à l'indice recalculé.
+    it('pondération de la terminale retirée après un calcul : point du snapshot null ET indice P non constructible — jamais l\'ancienne note', () => {
+        const b = banc(JEUX['Standards « meilleurs »']);
+        const avant = stocke(b, DA.ALICE);
+        expect(avant).toMatchObject({ noteConstructible: true, pratique: 'std-banc' });   // le stock est constructible
+        expect(avant.P).toBeGreaterThan(0);
+        b.store.test_productions = b.store.test_productions.map(p => (p.id === 'T1' ? Object.assign(p, { ponderation: undefined }) : p));
+        // Le chemin riche a bien tourné et échoue (ce n'est pas « aucune pratique ») :
+        expect(b.win.calculerDetailsNoteFinale(DA.ALICE)).toMatchObject({ noteFinale: null });
+        expect([historique(b, DA.ALICE, FIN), historique(b, DA.ALICE, MI)]).toEqual([null, null]);
+        b.win.calculerEtStockerIndicesCP();
+        expect(stocke(b, DA.ALICE)).toMatchObject({ noteConstructible: false, P: 0 });
     });
 });
 
