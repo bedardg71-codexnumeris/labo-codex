@@ -51,7 +51,7 @@ test('DEN-3 · créer une DEN via l\'assistant → pratique calculable', async (
             prenom: 'Grégoire', nomAuteur: 'Bédard',
             etablissement: 'Cégep de Drummondville',
             discipline: 'Philosophie',
-            ciblesDenotation: 'Analyser une source\nArgumenter de façon structurée',
+            ciblesDenotation: [{ id: window.EditeurCibles.nouvelId(), nom: 'Analyser une source' }, { id: window.EditeurCibles.nouvelId(), nom: 'Argumenter de façon structurée' }],
             methodeSuggestionDen: 'mediane'
         };
 
@@ -105,7 +105,7 @@ test('DEN-3 · créer une DEN via l\'assistant → pratique calculable', async (
     expect(r.modeDEN).toBe('eliminee');
     expect(r.suggestion).toBe('mediane');
     expect(r.nbCibles).toBe(2);                    // cibles réelles (ids stables)
-    expect(r.premiereCibleId).toBe('cible-1');
+    expect(r.premiereCibleId).toMatch(/^cible_/);      // #717 : l'id reçu à la création, jamais la position
     expect(r.premiereCibleNom).toBe('Analyser une source');
     expect(r.estDenActive).toBe(true);             // le profil offrira le panneau de jugement
     expect(r.valideDEN).toBe(true);

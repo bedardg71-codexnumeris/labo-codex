@@ -4008,6 +4008,40 @@ input[type="number"].controle-form {
 .den-suggestion {
     margin-bottom: 16px;
 }
+
+/* #717 — Éditeur des cibles (assistant et gestion des pratiques) : une ligne par
+   cible, chacune porte son id. Boutons d'icône à 44 px : cible tactile iPad. */
+.editeur-cibles-liste {
+    list-style: none;
+    margin: 0 0 8px 0;
+    padding: 0;
+}
+.editeur-cibles-ligne {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 6px;
+}
+.editeur-cibles-nom {
+    flex: 1;
+    min-width: 0;
+    margin-right: 6px;
+}
+.editeur-cibles-ligne .btn-icone-nu {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+}
+.editeur-cibles-ligne .btn-delete-icon {
+    width: 14px;
+    height: 14px;
+}
+.editeur-cibles-ligne .btn-icone-nu:disabled {
+    cursor: default;
+}
+.editeur-cibles-ajouter {
+    min-height: 44px;
+}
 .den-suggestion-note {
     display: block;
     margin-top: 4px;

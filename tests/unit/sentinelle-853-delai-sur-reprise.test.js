@@ -119,6 +119,7 @@ function monterFormulaire(pratique) {
         // Global d'un autre module (js/utils) que le formulaire appelle par nom nu.
         toggleDisplay: (el, visible) => { if (el) el.style.display = visible ? '' : 'none'; }
     };
+    chargerScript('js/pratiques/editeur-cibles.js', globaux, win);   // lot N5 (#717) : la liste des cibles DEN, posée au chargement
     chargerAvecInterne('js/pratiques-gestion.js', globaux, win, ['appliquerFormulaireDansCollection']);
     return { win, store, elements, interne: win.__audit['pratiques-gestion.js'] };
 }
