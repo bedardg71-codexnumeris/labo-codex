@@ -1898,7 +1898,6 @@
         html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icons8-library-2.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes"><img src="' + ICONS_DIR + 'icons8-traffic-light.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
         html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons"><img src="' + ICONS_DIR + 'icons8-rubber-stamp.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
-        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-chrono" data-action="travauxOutils.togglePaletteChrono" title="Chronomètre"><img src="' + ICONS_DIR + 'icons8-stopwatch.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
         html += '</div>';
 
         html += '</div>'; // fin .palette-flottante
@@ -2322,69 +2321,6 @@
         document.getElementById('raccourcis-outils-fermer').addEventListener('click', function() {
             modal.remove();
         });
-    }
-
-    /* ===============================
-       PALETTE CHRONOMÈTRE (flottante)
-       =============================== */
-
-    /**
-     * Toggle la palette chronomètre flottante
-     */
-    function togglePaletteChrono() {
-        let palette = document.getElementById('travaux-palette-chrono');
-
-        if (palette) {
-            palette.remove();
-            majEtatBtnToggle('btn-toggle-chrono', false);
-            return;
-        }
-
-        palette = document.createElement('div');
-        palette.id = 'travaux-palette-chrono';
-        palette.className = 'palette-flottante palette-chrono';
-
-        let html = '<div class="palette-flottante-barre">';
-        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Chronométrer</span>';
-        html += '<button class="palette-flottante-toggle" title="Démarre à la 1re annotation et s\'arrête à la sauvegarde. Indique ensuite une durée moyenne.">?</button>';
-        html += '</div>';
-        html += '<div class="palette-flottante-contenu palette-chrono-contenu">';
-        html += '<button id="chrono-btn-pause" class="chrono-btn-etat" data-action="travauxUI.togglePauseChrono" style="display:none" title="Pause">\u23f8\ufe0f</button>';
-        html += '<span id="chrono-badge" class="travaux-chrono-badge">--:--</span>';
-        html += '</div>';
-        html += '<div id="chrono-info-moyenne" class="chrono-info-moyenne" style="display:none"></div>';
-
-        palette.innerHTML = html;
-
-        // Insérer dans la zone canvas (parent commun, persiste entre modes)
-        const conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
-        if (conteneur) {
-            // Positionner sous la palette Annotation ou Paramètres (selon le mode)
-            const paletteRef = document.getElementById('travaux-palette-flottante')
-                || document.getElementById('travaux-palette-eval-gauche');
-            if (paletteRef) {
-                const rect = paletteRef.getBoundingClientRect();
-                const cRect = conteneur.getBoundingClientRect();
-                palette.style.top = (rect.bottom - cRect.top + 8) + 'px';
-                palette.style.left = (rect.left - cRect.left) + 'px';
-                palette.style.width = rect.width + 'px';
-            } else {
-                palette.style.top = '12px';
-                palette.style.left = '12px';
-            }
-            conteneur.appendChild(palette);
-            configurerDragPalette(palette, conteneur);
-        }
-        majEtatBtnToggle('btn-toggle-chrono', true);
-    }
-
-    /**
-     * Ouvre la palette chrono si elle n'est pas déjà ouverte
-     */
-    function ouvrirPaletteChrono() {
-        if (!document.getElementById('travaux-palette-chrono')) {
-            togglePaletteChrono();
-        }
     }
 
     /* ===============================
@@ -3917,8 +3853,6 @@
         layoutPaletteH: layoutPaletteH,
         layoutPaletteV: layoutPaletteV,
         afficherRaccourcis: afficherRaccourcis,
-        togglePaletteChrono: togglePaletteChrono,
-        ouvrirPaletteChrono: ouvrirPaletteChrono,
         // Raccourcis clavier annotation
         obtenirRaccourcisAnnotation: obtenirRaccourcisAnnotation,
         definirRaccourci: definirRaccourci,

@@ -16560,12 +16560,6 @@ tr.ligne-import-ecartee td {
     font-style: italic;
 }
 
-/* Chronomètre dans la palette */
-.eval-chrono-wrapper {
-    text-align: center;
-    margin-bottom: 6px;
-}
-
 .travaux-palette-eval .boite-note-finale {
     margin-top: 8px;
     padding: 6px;
@@ -16770,8 +16764,7 @@ tr.ligne-import-ecartee td {
     background: var(--surface-conteneur, #ffffff);
 }
 .mode-clair .travaux-zoom-info,
-.mode-clair #travaux-indicateur-page,
-.mode-clair .travaux-compteur-badge {
+.mode-clair #travaux-indicateur-page {
     color: var(--texte-secondaire);
 }
 /* Retroaction dans palette eval */
@@ -18316,20 +18309,13 @@ tr.ligne-import-ecartee td {
     color: var(--couleur-attention, #f0ad4e);
 }
 
-/* Palette chrono flottante */
-.palette-chrono {
-    min-width: 80px;
-    width: auto;
-    max-width: 200px;
-    resize: none;
-}
-.palette-chrono-contenu {
-    display: flex;
+/* Chrono dans la barre du haut (retour testeur du 23 sept. 2026) */
+.travaux-chrono-toolbar {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 4px 10px;
+    gap: 4px;
 }
+.travaux-chrono-icone { opacity: 0.7; }
 .chrono-btn-etat {
     border: none;
     background: none;
@@ -18340,17 +18326,6 @@ tr.ligne-import-ecartee td {
     color: var(--texte-secondaire);
 }
 .chrono-btn-etat:hover { color: var(--texte-principal); }
-.palette-chrono::after { display: none; }
-.chrono-info-moyenne {
-    font-size: .7rem;
-    color: var(--texte-secondaire);
-    text-align: center;
-    padding: 0 8px 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.palette-chrono { max-width: 260px; }
 
 /* Rythme de travail */
 .rythme-colonnes-toggle {
@@ -18696,27 +18671,6 @@ tr.ligne-import-ecartee td {
     border-color: var(--vert-succes, #28a745);
 }
 
-/* Compteur de badges (navigation fichiers) */
-.travaux-compteur-badge-nav {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-.travaux-compteur-badge {
-    font-size: 11px;
-    color: var(--texte-secondaire, #8aa4b0);
-    white-space: nowrap;
-}
-
-/* Séparateur entre compteur badges et navigation pages */
-.travaux-separateur-page {
-    width: 1px;
-    height: 18px;
-    background: var(--planif-couleur-bordure);
-    margin: 0 6px;
-    flex-shrink: 0;
-}
-
 /* Indicateur page */
 #travaux-indicateur-page {
     font-size: 11px;
@@ -18840,30 +18794,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     display: none !important;
 }
 
-/* Sélecteur de fond canvas */
-.travaux-fond-picker {
-    position: relative;
-    display: inline-block;
-}
-.travaux-fond-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 6px;
-    z-index: 100;
-    padding: 6px;
-    background: var(--surface-carte, #1a3040);
-    border: 1px solid var(--bleu-carte, rgba(106,172,184,0.2));
-    border-radius: 8px;
-    box-shadow: var(--shadow-prononce);
-    gap: 4px;
-    flex-wrap: wrap;
-    width: 152px;
-}
-.travaux-fond-dropdown.visible {
-    display: flex;
-}
+/* Pastilles de fond du canevas, dans le menu Actions (retour testeur du 23 sept. 2026) */
 .travaux-fond-swatch {
     width: 28px;
     height: 28px;
@@ -25313,6 +25244,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .actions-separateur {
     border-top: 1px solid rgba(106, 172, 184, 0.15);
     margin: 4px 0;
+}
+.actions-sous-titre {
+    padding: 4px 14px 2px;
+    font-size: 0.75rem;
+    color: var(--texte-secondaire);
+}
+.actions-fond-swatches {
+    display: grid;
+    grid-template-columns: repeat(6, auto);
+    justify-content: start;
+    gap: 4px;
+    padding: 4px 14px 8px;
 }
 
 /* Mode clair */
