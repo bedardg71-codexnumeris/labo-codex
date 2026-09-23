@@ -22,4 +22,6 @@ Remesure rapide au code (grep, pas exécuté) : les constats tiennent encore —
 - **Lot N5 – Dénotation : une cible renommée ne plafonne plus en silence** (#717). **À Grégoire** : ids stables à la création (recommandé) ou message.
 - **Lot N6 – Zéro-dette : les réglages que rien ne lit** (#900). Retirer du CODE ce qui écrit des champs sans lecteur ; rien n'est effacé des données déjà écrites. À joindre à un lot qui passe par l'assistant.
 
-Ordre recommandé : N2, N4, N5, N6 (N1 et N3 livrés). **Prochain lot : N2** (#716).
+- **Lot N7 – Le niveau de la note globale se lit dans une seule règle, celle des évaluations** (sans fiche : constat de didactique de N1a, sorti de N2 par Cowork le 22 sept.). **Tranché par Grégoire le 22 sept. au soir : A**, l'échelle des évaluations de l'élève (#575), pas celle rangée dans la pratique. Son principe, posé en répondant : « L'échelle IDME est ma pratique personnelle. On ne peut l'imposer à aucun utilisateur. Il faut toujours prendre les grilles, échelles, cartouches, etc. créés par l'utilisateur. » Rien ne change à l'écran ; retire la règle B et, si plus rien ne la demande, la seconde instance. **Après la fusion de N2** (même fonction). Consigne prête : `plans de travail/CONSIGNE-N7-echelle-note-globale.md`.
+
+Ordre recommandé : N2, N7, N4, N5, N6 (N1 et N3 livrés). **Prochain lot : N2** (#716), puis N7.

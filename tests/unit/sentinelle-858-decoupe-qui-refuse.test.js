@@ -115,7 +115,7 @@ describe('#858 · B — cliquet : les découpes par indexOf ne font que descendr
 // Liste fermée au 13 septembre 2026, après routage : fichier → découpes restantes.
 // 113 découpes dans 62 fichiers. Ne peut que descendre.
 const TOLEREES = {
-    'unit/audit-onglet-suivi-2026-09-05.test.js': 2,
+    'unit/audit-onglet-suivi-2026-09-05.test.js': 1,   // lot N2 (#716) : la découpe du filtre du repli est partie avec lui
     'unit/audit-sous-onglets-suivi-2026-09-06.test.js': 2,
     'unit/sentinelle-418-db-ready-sans-idb.test.js': 1,
     'unit/sentinelle-448-fusion-par-identite.test.js': 2,
