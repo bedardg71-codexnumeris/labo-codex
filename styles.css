@@ -18707,7 +18707,12 @@ tr.ligne-import-ecartee td {
     position: relative;
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    /* #936 (23 sept. 2026) — PAS de `justify-content: center` : le wrapper (marge
+       100vw) déborde toujours, et le centrage le faisait déborder à GAUCHE, zone
+       qu'aucun défilement n'atteint. Zoomé plus large que l'écran, la moitié de
+       l'excédent du document était coupée. Le centrage visuel est fait par
+       recentrerVue() (scrollLeft), comme l'axe vertical l'a toujours fait. */
+    justify-content: flex-start;
     padding: 16px;
     background: var(--surface-conteneur, #142428);
     touch-action: pan-x pan-y;
