@@ -131,7 +131,6 @@ describe('lot D · #743 — l\'assiduité inconnue', () => {
             echapperHtml: (x) => String(x),
             calculerAssiduite: b.win.calculerAssiduite,                       // le calcul RÉEL, pas un bouchon
             obtenirEcheanceEffective: (prod) => ({ date: prod.dateEcheance || null, assignee: true }),
-            obtenirPratiqueActuelle: () => ({ calculerPerformanceHistorique: () => null }),
             obtenirCalendrierComplet: () => ({}), obtenirEtudiantsCoursActif: () => [], estEtudiantExclu: () => false,
             notifications: { succes() {}, erreur() {}, info() {} }
         }), win);

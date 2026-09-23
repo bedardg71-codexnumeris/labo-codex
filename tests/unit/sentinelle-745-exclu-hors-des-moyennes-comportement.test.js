@@ -67,7 +67,6 @@ function monter(eleves) {
         obtenirDonneesSelonMode: (k) => clone(store['test_' + String(k).replace(/^test_/, '')] || []),
         calculerAssiduite: (da) => ({ indice: ASSIDUITE[da], periodesPresentes: 20 * ASSIDUITE[da], periodesOffertes: 20, nombreSeances: 10 }),
         obtenirEcheanceEffective: (p) => ({ date: p.dateEcheance || null, assignee: true }),
-        obtenirPratiqueActuelle: () => ({ calculerPerformanceHistorique: () => null }),
         obtenirCalendrierComplet: () => ({}), obtenirSeancesCompletes: () => ({}),
         obtenirEtudiantsCoursActif: () => clone(eleves), estEtudiantExclu: vraiEstEtudiantExclu(),
         notifications: { succes() {}, erreur() {}, info() {} } }, win);
