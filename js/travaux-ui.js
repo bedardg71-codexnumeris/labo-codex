@@ -5564,7 +5564,8 @@
         const palette = document.getElementById(paletteId);
         if (!palette) return;
         palette.classList.toggle('replie');
-        const btn = palette.querySelector('.palette-flottante-toggle');
+        // #936 — le bouton de repli, pas le premier de la barre (« ↔ »).
+        const btn = palette.querySelector('[data-action="travauxUI.togglePaletteEvalReplie"]');
         if (btn) {
             btn.innerHTML = palette.classList.contains('replie') ? '&#x002B;' : '&#x2212;';
         }
