@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 22 H 30 : **LOT N2 (#716) COMMITÉ SUR LA BRANCHE `lot-n2-p-historique`, RELEASE 1.155.2 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N2 (#716, 1.155.2) FUSIONNÉ DANS `main` (merge `63308965`) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`4a0cd22b`) + `a3436f24` (relais précédent) + le merge de `lot-n2-p-historique` (jusqu'à `8f7dc947`, complément de relecture) + ce relais. Relecture croisée de Cowork sur `8f7dc947` : verte, par exécution sur une copie `git archive`, bancs du lot 188/188 ; les deux mutations qui survivaient rougissent. Phrase de « Nouvelles » validée par Grégoire le 23 sept. au matin. Vitest 622 / 7 144.
+
+**Suite** : lot N7 (`plans de travail/CONSIGNE-N7-echelle-note-globale.md`), que Cowork remesure sur ce `main` avant de le lancer. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub. La branche `lot-n2-p-historique` peut être supprimée une fois le push mesuré.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 22 SEPT. 2026, ≈ 22 H 30 : **LOT N2 (#716) COMMITÉ SUR LA BRANCHE `lot-n2-p-historique`, RELEASE 1.155.2 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK**
 
 **Où vit le travail** : branche locale `lot-n2-p-historique`, partie de `4a0cd22b` : `41ba4e9c` (le lot : code, sentinelle-716, bancs réancrés), `b98a4b88` (#716 cochée, consigne N2 et archive N3), `3a4539c1` (release 1.155.2, build 0922-2227). Décisions de Grégoire du 22 sept., prises aux deux arrêts prévus de la consigne : 1A (note provisoire à une date passée), 2A (pas de P historique en dénotation). Vitest 622 / 7 142 après le bump.
 
