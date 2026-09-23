@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 12 H 10 : **#937 (1.155.6) SUR `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin HEAD:main` DEPUIS LE WORKTREE `chrono-barre-937`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 13 H 40 : **LOT N6 ET 1.155.7 SUR `lot-n6-reglages`, NON FUSIONNÉ, NON POUSSÉ** — attend la relecture croisée de Cowork, puis sa revérification, et la validation par Grégoire de deux textes
+
+**Où vit le travail** : branche `lot-n6-reglages` = `main` (`18b283d3`, 1.155.6) + `212f8822` (lot N6 et release 1.155.7 : #900 réglages sans lecteur, #935 volet nom, #899 flèche, dénotation à zéro cible). Vitest 625 / 7225 vert après le bump ; 24 mutations, 24 rouges. Verdict Playwright NON lancé (après la revérification de Cowork, règle 2 du PROTOCOLE).
+
+**À Grégoire, avant le push** : (1) le motif du refus « zéro cible » : « Ajoute au moins une cible : sans cible, aucune ne peut être atteinte et aucune note ne peut dépasser 59. » (titre « Aucune cible ») ; (2) l'item de Nouvelles 1.155.7, marqué PROPOSÉ dans `js/changelog-data.js`.
+
+**Ordre** : relecture Cowork → corrections → revérification Cowork → verdict → fusion dans `main` → push → N6 sort de `FILE-DES-LOTS.md`. Suite : le dernier lot de l'export (#895).
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 12 H 10 : **#937 (1.155.6) SUR `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin HEAD:main` DEPUIS LE WORKTREE `chrono-barre-937`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`dcd22d4f`, N5 + #936) + `7fb5da12` (#937 : le chronomètre revient dans la barre du haut d'Annoter ; chevrons d'élève, pleine largeur / hauteur et palette du fond en sortent, le fond passe au menu Actions) + `dfae4a51` (release 1.155.6) + ce relais. Mots d'écran et item de Nouvelles validés par Grégoire (« ok »). Banc `chrono-barre-annoter-937.spec.js` : 3 essais WebKit, 2 mutations / 2 rouges refaites sur la base rebasée. **Relecture croisée de Cowork non faite** : à reprendre à froid.
 
