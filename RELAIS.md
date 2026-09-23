@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 10 H : **LOT N4 COMMITÉ SUR LA BRANCHE `lot-n4-specifications-plancher`, RELEASE 1.155.4 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK ET LA VALIDATION DES MOTS PAR GRÉGOIRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026 : **LOT N4 (1.155.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`7ebdf47f`) + `7b89dd41` (relais précédent) + le merge de `lot-n4-specifications-plancher` (`0a2dd209` lot et release 1.155.4, `33285f1c` complément de relecture) + ce relais. Relecture croisée de Cowork : verte, par exécution sur une copie `git archive`, bancs du lot 196/196 ; mots validés par Grégoire (option A, flèche « → » dans la seconde cause).
+
+**Suite** : lot N5 (dénotation, #717), qui attend une décision de Grégoire, que Cowork lui posera. N6 porte en plus l'alignement du « › » du récapitulatif #899. Hors lot, inchangé : #892/#929 rouges sur le runner GitHub. La branche `lot-n4-specifications-plancher` peut être supprimée une fois le push mesuré.
+
+---
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 10 H : **LOT N4 COMMITÉ SUR LA BRANCHE `lot-n4-specifications-plancher`, RELEASE 1.155.4 COMPRISE — NI FUSIONNÉ NI POUSSÉ : ATTEND LA RELECTURE DE COWORK ET LA VALIDATION DES MOTS PAR GRÉGOIRE**
 
 **Où vit le travail** : branche locale `lot-n4-specifications-plancher`, partie de `7ebdf47f` : un seul commit, `0a2dd209` (le lot, la release 1.155.4, #935 inscrite, la consigne N4 et l'archive de N7). Vitest 622 fichiers / 7 162 essais verts après le commit ; spec WebKit `lot-n4-spe-note-absente-cause` verte ; 19 mutations rouges.
 
