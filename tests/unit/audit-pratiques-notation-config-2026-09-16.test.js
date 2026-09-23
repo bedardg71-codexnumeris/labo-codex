@@ -217,7 +217,7 @@ function monter(jeu, opts = {}) {
         calculerDetailsNoteFinale: fwd('calculerDetailsNoteFinale'), calculerEtStockerIndicesCP: fwd('calculerEtStockerIndicesCP'), simulerIndices: fwd('simulerIndices'),
         obtenirIndicesCP: fwd('obtenirIndicesCP'), calculerTousLesIndices: fwd('calculerTousLesIndices'),
         obtenirEchelleResolue: fwd('obtenirEchelleResolue'), obtenirTableConversionNiveaux: fwd('obtenirTableConversionNiveaux'),
-        obtenirEchelleCommuneDesEvaluations: fwd('obtenirEchelleCommuneDesEvaluations'), obtenirPratiqueActuelle: fwd('obtenirPratiqueActuelle'),
+        obtenirEchelleCommuneDesEvaluations: fwd('obtenirEchelleCommuneDesEvaluations'),
         obtenirIdsProductionsEvaluables: fwd('obtenirIdsProductionsEvaluables'), obtenirNombreProductionsPourPatterns: fwd('obtenirNombreProductionsPourPatterns'),
         obtenirToutesLesPratiquesBibliothequeSync: fwd('obtenirToutesLesPratiquesBibliothequeSync'), construireConfigComplete: fwd('construireConfigComplete')
     };

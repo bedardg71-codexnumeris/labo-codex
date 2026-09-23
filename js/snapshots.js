@@ -511,10 +511,9 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             let rai = 'Non calculé';
 
             /* DÉSACTIVÉ TEMPORAIREMENT POUR PERFORMANCE
-            if (typeof obtenirPratiqueActuelle === 'function') {
-                const pratique = obtenirPratiqueActuelle();
+            {
                 if (typeof calculerDirectionsCriteres === 'function') {
-                    const directions = calculerDirectionsCriteres(da, pratique);
+                    const directions = calculerDirectionsCriteres(da);
                     // Déterminer pattern majoritaire
                     const symboles = Object.values(directions).map(d => d.symbole);
                     const nbAmelioration = symboles.filter(s => s === '→').length;

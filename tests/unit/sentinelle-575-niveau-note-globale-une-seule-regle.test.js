@@ -59,14 +59,11 @@ function chargerHelpers(lectureRendue) {
         obtenirPreference: () => null,
         obtenirDonneesSelonMode: () => [],
         obtenirTypePratiqueActive: () => 'standards',
-        // Lot N1a (21 sept. 2026) : `obtenirPratiqueActuelle` part de la DÉSIGNATION de la pratique
-        // active (une Standards assignée), puis demande au registre l'instance de sa famille.
+        // Lot N7 (23 sept. 2026) : `lireEchelleNoteGlobale` part de la DÉSIGNATION de la pratique
+        // active (une Standards assignée) et lit l'échelle commune de ses évaluations. Elle vit DANS
+        // le fichier testé : on ne la stubbe pas, on stubbe ce qu'elle appelle.
         designerPratiqueActive: () => ({ etat: 'ok', idBrut: 'std-banc', id: 'std-banc', donnees: {}, famille: 'standards' }),
-        // `obtenirPratiqueActuelle` vit DANS le fichier testé : on ne la stubbe
-        // pas, on stubbe ce qu'elle appelle. La chaîne réelle est donc exercée.
-        obtenirPratiqueParId: () => ({
-            obtenirEchelleNoteGlobale: () => lectureRendue
-        }),
+        obtenirEchelleCommuneDesEvaluations: () => lectureRendue,
         // La VRAIE table SOLO, telle que `echelles.js` la publie (#542 lot 2) :
         // `interpreterNiveauAtteint` la lit sur `window`, elle ne l'invente pas.
         NIVEAUX_SOLO_ECHELLE: [

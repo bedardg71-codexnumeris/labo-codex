@@ -636,11 +636,7 @@ function niveauxEtGradientDesEvaluations(da) {
  *   quand la lecture a abouti.
  */
 function lireNiveauNoteGlobale(da, pourcentage) {
-    const pratique = (typeof obtenirPratiqueActuelle === 'function')
-        ? obtenirPratiqueActuelle() : null;
-    const lecture = (pratique && typeof pratique.obtenirEchelleNoteGlobale === 'function')
-        ? pratique.obtenirEchelleNoteGlobale(da)
-        : { echelle: null, raison: 'pratique-sans-methode', message: '' };
+    const lecture = lireEchelleNoteGlobale(da);
 
     const niveau = lecture.echelle
         ? situerPourcentageDansEchelle(pourcentage, lecture.echelle)
@@ -665,37 +661,60 @@ function lireNiveauNoteGlobale(da, pourcentage) {
 }
 
 /**
- * L'instance de la pratique active du groupe-cours, ou null.
+ * L'échelle dans laquelle se lit la note globale d'un élève, selon la FAMILLE de la pratique
+ * assignée au groupe-cours — ou la raison pour laquelle il n'y en a pas.
  *
- * Lot N1a (#719, #710 — 21 sept. 2026) : LA résolution du registre (`resoudrePratiqueActive`),
- * par l'ID de la pratique assignée. Avant, le TYPE de la pratique passait au registre :
- * « denotation » n'y est pas, une PratiquePANStandards était fabriquée, et le jugement 78
- * d'une dénotation se lisait « M » par une règle qu'aucune pratique de l'enseignant ne donne.
- * Sans pratique assignée, PRATIQUE_DEFAUT (« standards ») tenait lieu de pratique.
+ * ⮕ LOT N7 (23 sept. 2026) — LA RÈGLE VIT ICI, ET SEULEMENT ICI. Décision de Grégoire (22 sept.,
+ * soir) : pour une Standards, le niveau se lit dans l'échelle COMMUNE AUX ÉVALUATIONS de l'élève
+ * (`obtenirEchelleCommuneDesEvaluations`, #575, sa règle du 27 août) — jamais dans l'échelle
+ * rangée dans la pratique (`config.echelle`) : mesuré par N1a, le « M » d'une échelle remplacée
+ * (#648) y disparaissait. Et son principe : « L'échelle IDME est ma pratique personnelle. On ne
+ * peut l'imposer à aucun utilisateur. » Aucune échelle, aucun code, aucune borne ici : on route.
  *
- * ⮕ Aucun repli : rien d'assigné, ou un id qui ne mène à rien, rend null. Les appelants
- * (`lireNiveauNoteGlobale`) savent lire null — « pas de code ».
- * Le repli `new PratiquePANStandards()` de #542 (lot 3) disparaît avec sa raison d'être.
+ * Avant, `obtenirPratiqueActuelle` rendait l'instance du REGISTRE de la famille, qui portait la
+ * règle ; c'était sa dernière raison d'être (N2 avait retiré le P historique). Elle part, avec
+ * les méthodes `obtenirEchelleNoteGlobale` de PratiquePANStandards et de PratiqueSommative.
+ * On route sur la DÉSIGNATION, pas sur l'instance : une Standards adoptée sans échelle avant
+ * #898 n'a pas d'instance constructible, mais ses évaluations ont une échelle, et son niveau
+ * s'affichait — il s'affiche toujours.
  *
- * ⚠ CE QUI NE BOUGE PAS, ET POURQUOI. Pour une Standards, une sommative ou des spécifications,
- * ce qui est rendu reste l'instance du registre de LA FAMILLE de la pratique assignée, comme
- * avant ce lot. Elle porte une règle que PratiqueConfigurable n'a pas : la lecture du niveau de
- * la note globale dans l'échelle COMMUNE AUX ÉVALUATIONS de l'élève (#575, décision de Grégoire)
- * — la configurable, elle, lirait l'échelle rangée dans la pratique : mesuré, le « M » d'une
- * échelle remplacée (#648) disparaissait. Laquelle des deux échelles fait foi est une question
- * de didactique, laissée à Grégoire ; elle aura son propre lot. Seule la dénotation change ici :
- * la famille n'a pas d'instance au registre, c'est la pratique assignée qui répond (#719).
- * Lot N2 (#716, 22 sept. 2026) : le P historique des snapshots ne passe plus par ici — il est la
- * note du cours (`calculerNoteDuCours`, portfolio.js), et les méthodes historiques des familles sont retirées.
+ *   · standards      → l'échelle commune des évaluations (règle A) ; si elles ne s'accordent
+ *                      pas, aucune échelle et la cause nommée ;
+ *   · sommative      → aucune échelle : une note pondérée n'est pas un niveau atteint ;
+ *   · specifications → aucune échelle, comme avant ce lot (« pratique sans méthode ») : lui en
+ *                      donner une serait une décision de didactique, pas un refactor ;
+ *   · autre (dénotation…) → la pratique assignée répond elle-même (`PratiqueConfigurable`).
  *
- * @returns {Object|null}
+ * @param {string} da - Numéro de DA
+ * @returns {Object} `{ echelle, raison, message }`
  */
-function obtenirPratiqueActuelle() {
+function lireEchelleNoteGlobale(da) {
+    const sansMethode = { echelle: null, raison: 'pratique-sans-methode', message: '' };
     const designation = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive() : null;
-    if (!designation || designation.etat !== 'ok') return null;
-    const duRegistre = (['standards', 'sommative', 'specifications'].includes(designation.famille) && typeof obtenirPratiqueParId === 'function')
-        ? obtenirPratiqueParId(designation.famille) : null;
-    return duRegistre || resoudrePratiqueActive().pratique;
+    if (!designation || designation.etat !== 'ok') return sansMethode;
+
+    switch (designation.famille) {
+        case 'standards':
+            return (typeof obtenirEchelleCommuneDesEvaluations === 'function')
+                ? obtenirEchelleCommuneDesEvaluations(da)
+                : { echelle: null, raison: 'helper-absent', message: 'Le module de calcul du profil n\'est pas disponible.' };
+        case 'sommative':
+            return {
+                echelle: null,
+                raison: 'note-chiffree',
+                message: 'La pratique sommative établit la note globale comme un pourcentage '
+                    + 'pondéré. Elle ne la situe dans aucune échelle de niveaux — c\'est une note, '
+                    + 'pas un niveau atteint.'
+            };
+        case 'specifications':
+            return sansMethode;
+        default: {
+            const pratique = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive().pratique : null;
+            return (pratique && typeof pratique.obtenirEchelleNoteGlobale === 'function')
+                ? pratique.obtenirEchelleNoteGlobale(da)
+                : sansMethode;
+        }
+    }
 }
 
 /**
@@ -1096,7 +1115,6 @@ window.interpreterNiveauAtteint = interpreterNiveauAtteint;
 window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatterns;
 window.obtenirIdsProductionsEvaluables = obtenirIdsProductionsEvaluables;
 window.formaterNombrePeriodes = formaterNombrePeriodes;   // #871 — le seul formatage d'un nombre de périodes
-window.obtenirPratiqueActuelle = obtenirPratiqueActuelle;
 window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
 // #740 — le seul filtre SOLO « Aucun » du dépistage.
 window.estCritereSurveilleParDepistage = estCritereSurveilleParDepistage;

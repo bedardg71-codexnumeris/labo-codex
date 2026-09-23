@@ -9,7 +9,7 @@ import { chargerScript } from './charger-script.js';
  * `snapshots.js`, `profil-etudiant-rapport.js` et `profil-etudiant-sections-affichage.js` les appellent
  * par `window.…` : un banc qui charge l'un de ces modules SANS le registre tombe en TypeError avant de
  * mesurer quoi que ce soit. Le registre est chargé dans un bac jetable et seuls les deux prédicats sont
- * recopiés : le banc garde ses propres stubs pour tout le reste (`obtenirPratiqueActuelle`…).
+ * recopiés : le banc garde ses propres stubs pour tout le reste (`designerPratiqueActive`…).
  * Pas une copie de la règle — le code de js/, pour que la sentinelle rougisse si la règle change.
  *
  * @param {object} win - le bac à sable du banc (l'objet `window` vu par les modules chargés)
