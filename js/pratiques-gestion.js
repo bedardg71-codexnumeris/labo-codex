@@ -1268,16 +1268,17 @@ function remplirFormulairePratique(pratique) {
         afficherForfaitsMat(config.forfaits || [], config.typesTravaux || []);
     }
 
-    // #343-T1 — DEN éditable inline. Cibles (une par ligne), méthode de suggestion,
-    // grille de rétroaction. L'échelle utilise la carte commune (mat-echelle-id) plus bas.
+    // #343-T1 — DEN éditable inline. Cibles, méthode de suggestion, grille de
+    // rétroaction. L'échelle utilise la carte commune (mat-echelle-id) plus bas.
+    // #717 : les cibles s'éditent par le composant commun, chacune avec son id.
     if (typeCanon === 'denotation') {
         const config = pratique.configuration || {};
-        const cibles = Array.isArray(config.objectifs)
-            ? config.objectifs.map(o => (o && o.nom) ? o.nom : o).filter(Boolean).join('\n')
-            : '';
-        setValeurChamp('mat-den-cibles', cibles);
+        window.EditeurCibles.poser(document.getElementById('mat-den-cibles'), config.objectifs);
         setValeurChamp('mat-den-suggestion', config.suggestion?.methode || 'mode');
         setValeurChamp('mat-den-grille', config.grilleId || '');
+    } else {
+        // La liste ne garde pas les cibles d'une autre pratique ouverte avant celle-ci.
+        window.EditeurCibles.poser(document.getElementById('mat-den-cibles'), []);
     }
 
     // Échelle de performance
@@ -1549,6 +1550,20 @@ async function sauvegarderConfigPratiqueMat() {
     // MÊME collection : la lecture, les mutations et l'écriture doivent tenir
     // dans la file par clé. Le corps est extrait tel quel dans
     // `appliquerFormulaireDansCollection`, qui est le mutateur.
+    // #717 (2c) : retirer une cible cochée change la note — la question AVANT d'écrire.
+    // « Annuler » n'écrit rien et remet la liste enregistrée à l'écran.
+    const typeCanonEdite = (typeof normaliserIdPratique === 'function')
+        ? normaliserIdPratique(getValeurChamp('mat-pratique-type')) : getValeurChamp('mat-pratique-type');
+    if (typeCanonEdite === 'denotation') {
+        const enregistree = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
+        const anciennes = (enregistree && enregistree.configuration && enregistree.configuration.objectifs) || [];
+        const conteneur = document.getElementById('mat-den-cibles');
+        if (!window.EditeurCibles.confirmerRetraits(pratiqueEnEditionMateriel, anciennes, window.EditeurCibles.lire(conteneur))) {
+            window.EditeurCibles.poser(conteneur, anciennes);
+            return;
+        }
+    }
+
     await db.modifier(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, []);
 }
 
@@ -1650,9 +1665,8 @@ function appliquerFormulaireDansCollection(lues) {
         // #343-T1 — DEN éditée inline. MÊME forme de config que la création assistant
         // (creerPratiqueV2) : la note finale reste un jugement saisi ; cibles = critères
         // explicites ; échelle/grille = rétroaction (n'entrent pas dans le calcul).
-        const cibles = String(getValeurChamp('mat-den-cibles') || '')
-            .split('\n').map(s => s.trim()).filter(Boolean)
-            .map((nom, i) => ({ id: 'cible-' + (i + 1), nom: nom }));
+        // #717 : chaque cible garde l'id reçu à sa création (EditeurCibles).
+        const cibles = window.EditeurCibles.lire(document.getElementById('mat-den-cibles'));
         configurations[index].configuration.type = 'denotation';
         configurations[index].configuration.modeDEN = 'eliminee';
         configurations[index].configuration.objectifs = cibles;

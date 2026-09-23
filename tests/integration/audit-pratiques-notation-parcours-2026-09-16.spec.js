@@ -60,7 +60,7 @@ const FAMILLES = {
     DEN: { da: '1000004', nom: 'Denotation', prenom: 'Dani',
         productions: [{ id: 'W1', titre: 'Travail 1', type: 'travail', dateEcheance: '2026-02-01' }, { id: 'W2', titre: 'Travail 2', type: 'travail', dateEcheance: '2026-03-01' }],
         evaluations: [ev('EV_W1', '1000004', 'W1', 85, 'M'), ev('EV_W2', '1000004', 'W2', 90, 'E')],
-        reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'jugement', ciblesDenotation: 'Lire\nÉcrire', methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' },
+        reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'jugement', ciblesDenotation: ['Lire', 'Écrire'], methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' },
         attendu: 'sans jugement saisi : non calculable ; avec un jugement 78 aux deux cibles : 78 (banc A4)' }
 };
 
@@ -124,6 +124,15 @@ for (const [code, F] of Object.entries(FAMILLES)) {
                     } else if (c.type === 'checkbox-cards') {
                         document.querySelectorAll(`input[name="${c.id}"]`).forEach(cb => { cb.checked = v.includes(cb.value); });
                         poses.push(c.id + '=' + JSON.stringify(v));
+                    } else if (c.type === 'liste-cibles') {
+                        // #717 : le composant des cibles — une ligne par cible, « + Ajouter une cible » pour la suivante.
+                        const liste = document.getElementById('wizardv2-' + c.id);
+                        v.forEach((nom, i) => {
+                            if (i > 0) liste.querySelector('[data-action="EditeurCibles.ajouter"]').click();
+                            const champ = liste.querySelectorAll('.editeur-cibles-nom')[i];
+                            champ.value = nom; champ.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        poses.push(c.id + '=' + JSON.stringify(v));
                     } else {
                         const el = document.getElementById('wizardv2-' + c.id);
                         if (!el) { poses.push(c.id + ' INTROUVABLE (' + c.type + ')'); continue; }
@@ -179,7 +188,7 @@ for (const [code, F] of Object.entries(FAMILLES)) {
                 });
             }
             if (code === 'DEN') {
-                await page.evaluate(({ id, da }) => { window.db.setSync(window.cle('jugementsDenotation'), { [id]: { [da]: { ciblesAtteintes: { 'cible-1': true, 'cible-2': true }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } }); }, { id: R.pratique.id, da: F.da });
+                await page.evaluate(({ id, da, ids }) => { window.db.setSync(window.cle('jugementsDenotation'), { [id]: { [da]: { ciblesAtteintes: Object.fromEntries(ids.map(c => [c, true])), noteFinale: 78, justification: 'banc', date: '2026-05-01' } } }); }, { id: R.pratique.id, da: F.da, ids: R.pratique.configuration.objectifs.map(c => c.id) });
             }
         }
 

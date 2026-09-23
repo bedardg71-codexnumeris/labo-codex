@@ -123,6 +123,8 @@ function fauxDocument() {
 /** Monte la vraie db PUIS le vrai éditeur de pratiques, dans un même sandbox. */
 async function monterEditeurPratiques() {
     const db = await monterDb();
+    // lot N5 (#717) : la liste des cibles DEN (EditeurCibles), posée au chargement du formulaire.
+    const winCibles = chargerScript('js/pratiques/editeur-cibles.js', { echapperHtml: (t) => String(t == null ? '' : t) });
     const win = chargerScript('js/pratiques-gestion.js', {
         db,
         cle: (k) => 'a2026_' + k,
@@ -146,7 +148,7 @@ async function monterEditeurPratiques() {
         getValeurChamp: () => '',
         getCheckbox: () => false,
         setCheckbox: () => {}
-    });
+    }, winCibles);
     return { db, win };
 }
 

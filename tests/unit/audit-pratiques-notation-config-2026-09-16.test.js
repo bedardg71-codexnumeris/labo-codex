@@ -243,6 +243,7 @@ function monter(jeu, opts = {}) {
     chargerScript('js/export-resultats-finaux.js', globaux, win);
     chargerScript('js/pratiques-bibliotheque.js', globaux, win);
     chargerScript('js/pratiques/construction-attributs.js', globaux, win);
+    chargerScript('js/pratiques/editeur-cibles.js', globaux, win);   // lot N5 (#717)
     chargerScript('js/wizard-pratique-v2.js', globaux, win);
     return { win, store, ecritures, notifs, db };
 }
@@ -428,29 +429,31 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         expect(apres.configuration.modeleBundle).toBe('simple');
     });
 
-    // FIGE A-6 (#717) : retirer la première cible décale les ids, la garde se tait (59 → 78). Valeur FAUSSE gardée exprès.
+    // A-6 (#717) LIVRÉ au lot N5 (23 sept. 2026) : chaque cible garde l'id reçu à sa création. Avant : retirer la
+    // première faisait de « Écrire » la `cible-1`, la coche de « Lire » glissait sur elle, et la note passait de 59 à 78.
     it('A4 · DEN : deux cibles, suggestion médiane, échelle et grille de rétroaction', async () => {
-        // À LA MAIN : objectifs [{cible-1, Lire}, {cible-2, Écrire}], suggestion.methode 'mediane', echelleId E1, grilleId G1, modeDEN 'eliminee'.
-        // Avec un jugement 78 et les deux cibles confirmées → 78. Réédition : branche 'denotation' restaure tout → diff vide.
+        // À LA MAIN : objectifs [{idL, Lire}, {idE, Écrire}] (ids reçus à la création), suggestion.methode 'mediane',
+        // echelleId E1, grilleId G1, modeDEN 'eliminee'. Jugement 78 et les deux cibles confirmées → 78.
+        // Réédition : la branche 'denotation' restaure tout, ids compris → diff vide.
         const b = monter(jeuDEN());
-        const p0 = await creerParAssistant(b, { nom: 'DEN banc', calcNoteFinale: 'jugement', ciblesDenotation: 'Lire\nÉcrire', methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' });
+        const idL = b.win.EditeurCibles.nouvelId(), idE = b.win.EditeurCibles.nouvelId();
+        const p0 = await creerParAssistant(b, { nom: 'DEN banc', calcNoteFinale: 'jugement', ciblesDenotation: [{ id: idL, nom: 'Lire' }, { id: idE, nom: 'Écrire' }], methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' });
         activer(b, p0.id);
-        b.store.test_jugementsDenotation = { [p0.id]: { [DA.DEN]: { ciblesAtteintes: { 'cible-1': true, 'cible-2': true }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } };
+        b.store.test_jugementsDenotation = { [p0.id]: { [DA.DEN]: { ciblesAtteintes: { [idL]: true, [idE]: false }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } };
         const note = noteDe(b, DA.DEN, p0.id);
         const { apres } = await rouvrirEtResauver(b, p0.id);
         const d = diff(p0, apres);
-        // Puis l'enseignant RETIRE la première cible dans la zone de texte : « Écrire » devient cible-1.
-        b.store.test_jugementsDenotation = { [p0.id]: { [DA.DEN]: { ciblesAtteintes: { 'cible-1': true, 'cible-2': false }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } };
-        const avantRetrait = noteDe(b, DA.DEN, p0.id).perf;
+        // Puis l'enseignant RETIRE « Lire », la cible confirmée : « Écrire » garde son id et son absence de coche.
         b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(p0.id);
-        const apres2 = await creerParAssistant(b, Object.assign(clone(b.win.wizardState.reponses), { ciblesDenotation: 'Écrire' }), p0.id);
+        const reponses = clone(b.win.wizardState.reponses);
+        const apres2 = await creerParAssistant(b, Object.assign(reponses, { ciblesDenotation: reponses.ciblesDenotation.filter(c => c.id !== idL) }), p0.id);
         const apresRetrait = noteDe(b, DA.DEN, p0.id).perf;
-        noter('A4', { ecrit: p0.configuration, note, perdu: d, ciblesApresRetrait: apres2.configuration.objectifs, avantRetrait, apresRetrait });
-        expect(note.perf).toBe(78);
+        noter('A4', { ecrit: p0.configuration, note, perdu: d, ciblesApresRetrait: apres2.configuration.objectifs, apresRetrait });
+        expect(p0.configuration.objectifs).toEqual([{ id: idL, nom: 'Lire' }, { id: idE, nom: 'Écrire' }]);
+        expect(note.perf).toBe(59);              // « Écrire » non confirmée → plafond RREC
         expect(d).toEqual([]);
-        expect(avantRetrait).toBe(59);            // « Écrire » non confirmée → plafond RREC
-        expect(apres2.configuration.objectifs).toEqual([{ id: 'cible-1', nom: 'Écrire' }]);
-        expect(apresRetrait).toBe(78);           // la cible non confirmée a disparu avec son id : la garde se tait (#717)
+        expect(apres2.configuration.objectifs).toEqual([{ id: idE, nom: 'Écrire' }]);
+        expect(apresRetrait).toBe(59);           // la garde retrouve « Écrire » par son id (avant #717 : 78, sans un mot)
     });
 });
 
@@ -614,6 +617,7 @@ function monterFormulaire(pratique) {
         notifications: { succes() {}, erreur() {}, info() {}, avertissement() {}, warning() {} },
         setTimeout: (f) => { f(); return 0; }, clearTimeout() {},
         toggleDisplay: (el, visible) => { if (el) el.style.display = visible ? '' : 'none'; } };
+    chargerScript('js/pratiques/editeur-cibles.js', globaux, win);   // lot N5 (#717)
     chargerAvecInterne('js/pratiques-gestion.js', globaux, win, ['appliquerFormulaireDansCollection']);
     return { win, store, elements, interne: win.__audit['pratiques-gestion.js'] };
 }
@@ -712,20 +716,21 @@ describe('G-1 · SPE : le seuil d\'acceptabilité écrit est celui qui décide d
 });
 
 describe('G-1 · DEN : les ids de cibles écrits sont ceux que le jugement indexe', () => {
-    it('assistant · « Lire / Écrire » : ids cible-1 et cible-2, relus, ré-écrits, et la garde par cible les retrouve', async () => {
-        // À LA MAIN : jugement 78, deux cibles confirmées → 78 ; « cible-2 » non confirmée → plafond RREC 59.
-        // Des ids écrits autrement ('c-1'…) ne retrouveraient aucune confirmation : 59 partout.
+    it('assistant · « Lire / Écrire » : les ids reçus à la création sont écrits, relus, ré-écrits, et la garde par cible les retrouve', async () => {
+        // À LA MAIN : jugement 78, deux cibles confirmées → 78 ; « Écrire » non confirmée → plafond RREC 59.
+        // Des ids écrits autrement (la position, un id neuf à l'écriture…) ne retrouveraient aucune confirmation : 59 partout.
         const b = monter(jeuDEN());
-        const p0 = await creerParAssistant(b, { nom: 'DEN', calcNoteFinale: 'jugement', ciblesDenotation: 'Lire\nÉcrire', methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' });
+        const cibles = [{ id: b.win.EditeurCibles.nouvelId(), nom: 'Lire' }, { id: b.win.EditeurCibles.nouvelId(), nom: 'Écrire' }];
+        const p0 = await creerParAssistant(b, { nom: 'DEN', calcNoteFinale: 'jugement', ciblesDenotation: clone(cibles), methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' });
         activer(b, p0.id);
-        const juger = (c2) => { b.store.test_jugementsDenotation = { [p0.id]: { [DA.DEN]: { ciblesAtteintes: { 'cible-1': true, 'cible-2': c2 }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } }; };
-        expect(p0.configuration.objectifs).toEqual([{ id: 'cible-1', nom: 'Lire' }, { id: 'cible-2', nom: 'Écrire' }]);
+        const juger = (c2) => { b.store.test_jugementsDenotation = { [p0.id]: { [DA.DEN]: { ciblesAtteintes: { [cibles[0].id]: true, [cibles[1].id]: c2 }, noteFinale: 78, justification: 'banc', date: '2026-05-01' } } }; };
+        expect(p0.configuration.objectifs).toEqual(cibles);
         juger(true);
         expect(noteDe(b, DA.DEN, p0.id).perf).toBe(78);
         juger(false);
         expect(noteDe(b, DA.DEN, p0.id).perf).toBe(59);
         const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
-        expect(reponses.ciblesDenotation).toBe('Lire\nÉcrire');
+        expect(reponses.ciblesDenotation).toEqual(cibles);
         expect(apres.configuration.objectifs).toEqual(p0.configuration.objectifs);
     });
 });
