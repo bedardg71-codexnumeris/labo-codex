@@ -1618,6 +1618,22 @@ function determinerModeAffichageTableauBord(config) {
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
+// #830 — phrase validée par Grégoire le 23 sept. 2026, mot pour mot.
+const TEXTE_A_SANS_PERIODES = 'Assiduité non calculée : aucune séance de l\'horaire ne porte son nombre de périodes. Tu peux le saisir dans Cadre › Trimestre › Horaire.';
+
+/**
+ * #830 — vrai quand l'horaire a des séances et qu'AUCUNE ne porte un nombre de périodes.
+ * Même lecture que le dénominateur de l'assiduité (`obtenirPeriodesPrevuesParHoraire`,
+ * saisie-presences.js) : `parseInt(nombrePeriodes) > 0`. Un horaire vide rend faux : la
+ * phrase parle de séances qui existent.
+ * @param {Array} seances - séances de `obtenirSeancesHoraire()` (format déclaré déjà projeté)
+ * @returns {boolean}
+ */
+function horaireSansAucunePeriode(seances) {
+    if (!Array.isArray(seances) || seances.length === 0) return false;
+    return !seances.some(s => s && parseInt(s.nombrePeriodes, 10) > 0);
+}
+
 function afficherMetriquesGlobales(etudiants) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
@@ -1725,6 +1741,15 @@ function afficherMetriquesGlobales(etudiants) {
     const assiduiteConnue = (bloc) => !!bloc && bloc.assiduite !== null && bloc.assiduite !== undefined;
     const etudiantsAvecPresencesSOM = etudiants.filter(e => assiduiteConnue(e.sommatif));
     const etudiantsAvecPresencesPAN = etudiants.filter(e => assiduiteConnue(e.alternatif));
+
+    // #830 (23 sept. 2026) — la barre A dit POURQUOI elle est vide : un horaire dont aucune séance ne
+    // porte son nombre de périodes — le dénominateur de A vaut 0 partout, aucun élève n'a d'assiduité
+    // connue. Sans présence saisie, « N séance en attente » garde la priorité (cas inchangé). Mesuré :
+    // le cache des séances suit l'horaire et le rendu recalcule A — aucun A connu ne survit à cet
+    // horaire, d'où l'absence de garde côté élèves.
+    const texteBarreA = texteAttenteA || (
+        horaireSansAucunePeriode(typeof obtenirSeancesHoraire === 'function' ? obtenirSeancesHoraire() : [])
+            ? TEXTE_A_SANS_PERIODES : '');
 
     // 🆕 BETA 96.1: Pour P, exiger des évaluations réelles (pas seulement des présences)
     const etudiantsAvecEvalsSOM = etudiants.filter(e =>
@@ -1868,7 +1893,7 @@ function afficherMetriquesGlobales(etudiants) {
     const html = `
         <div class="tb-p-20">
             ${legendeUnique}
-            ${genererBarreDistribution(labelA, etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, texteAttenteA, nbTotal)}
+            ${genererBarreDistribution(labelA, etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, texteBarreA, nbTotal)}
             ${genererBarreDistribution(labelC, etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, texteAttenteC, nbTotal)}
             ${genererBarreDistribution(labelP, etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, texteAttenteP, nbTotal)}
         </div>
@@ -3519,6 +3544,7 @@ window.togglerCritereTrajectoires = togglerCritereTrajectoires;
 window.changerMesureTrajectoires = changerMesureTrajectoires;
 window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
 window.determinerModeAffichageTableauBord = determinerModeAffichageTableauBord;
+window.horaireSansAucunePeriode = horaireSansAucunePeriode;
 window.libelleCriteresMultiSurveilles = libelleCriteresMultiSurveilles;   // lot 4, volet B
 // 7 sept. 2026 — exposée pour la sentinelle des bulles au doigt : le toucher
 // ne se joue pas au banc (WebKit absent des conteneurs), son arbitrage si.
