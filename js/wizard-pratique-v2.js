@@ -2847,6 +2847,34 @@ function conserverReglesRetirees(pratique, existante) {
 }
 
 /**
+ * Lot N4 (#854, volet spécifications, 23 sept. 2026) — UNE SPÉCIFICATION ROUVERTE GARDE SA CONFIGURATION.
+ * L'assistant reconstruit `configuration` à neuf avec ce qu'il sait éditer (seuil, jetons, modèle de forfaits) ;
+ * les types de productions et les forfaits — le palier d'échec compris — se règlent ailleurs (formulaire de
+ * gestion) et disparaissaient au premier enregistrement. On part donc de la configuration ENREGISTRÉE et on n'y
+ * remplace que ce que l'assistant gère, à la place où chaque clé se trouvait : rouvrir puis enregistrer sans
+ * rien toucher rend la même configuration, à l'octet.
+ * - Le seuil s'écrit sous le nom que la pratique porte déjà (`seuilAcceptable` pour le gabarit « Modèle simple »),
+ *   sinon le moteur continuerait de lire l'ancien et ignorerait le nouveau.
+ * - Des jetons « désactivés » ne s'ajoutent pas à une pratique qui n'en portait pas.
+ * Mute et rend `pratique`.
+ * @param {Object} pratique - l'objet reconstruit par l'assistant
+ * @param {Object} existante - l'objet enregistré qu'il remplace
+ * @returns {Object} pratique
+ */
+function conserverConfigurationSpecifications(pratique, existante) {
+    if (!pratique || !existante || pratique.type !== 'specifications' || existante.type !== 'specifications') return pratique;
+    const avant = JSON.parse(JSON.stringify(existante.configuration || {}));
+    const neuve = Object.assign({}, pratique.configuration || {});
+    if (typeof avant.seuilAcceptable === 'number' && avant.seuilAcceptabilite === undefined && 'seuilAcceptabilite' in neuve) {
+        neuve.seuilAcceptable = neuve.seuilAcceptabilite;
+        delete neuve.seuilAcceptabilite;
+    }
+    if (avant.jetons === undefined && neuve.jetons && neuve.jetons.activer !== true) delete neuve.jetons;
+    pratique.configuration = Object.assign(avant, neuve);
+    return pratique;
+}
+
+/**
  * Sauvegarde la pratique dans le stockage
  * 🆕 FIX (20 jan 2026) : Sauvegarde robuste avec vérification
  * @param {Object} pratique - Objet pratique à sauvegarder
@@ -2877,6 +2905,7 @@ async function sauvegarderPratique(pratique) {
         if (!pratique.auteur && existante.auteur) pratique.auteur = existante.auteur;
         if (!pratique.etablissement && existante.etablissement) pratique.etablissement = existante.etablissement;
         conserverReglesRetirees(pratique, existante);
+        conserverConfigurationSpecifications(pratique, existante);   // lot N4 (#854)
         pratiques[index] = pratique;
     } else {
         pratiques.push(pratique);
@@ -3125,6 +3154,25 @@ function chargerPratiqueExistante(pratiqueId) {
                     + 'Sa configuration `objectifs` est ignorée, et sera remplacée si tu sauvegardes.');
                 wizardState.reponses.approcheEvaluation = 'par-artefacts';
             }
+        } else if (typeCanon === 'specifications') {
+            // Lot N4 (#854, volet spécifications) — ROUVRIR NE CHANGE RIEN. Sans cette branche, le seuil
+            // repassait à 100 et les jetons à « désactivés » au premier enregistrement. Le seuil se lit
+            // sous ses deux noms : `seuilAcceptabilite` (l'assistant) et `seuilAcceptable` (le gabarit
+            // « Modèle simple » et le formulaire de gestion). Types et forfaits ne sont pas des réponses
+            // de l'assistant : ils passent tels quels à l'enregistrement (`conserverConfigurationSpecifications`).
+            const seuil = (typeof config.seuilAcceptabilite === 'number') ? config.seuilAcceptabilite : config.seuilAcceptable;
+            if (seuil !== undefined) wizardState.reponses.seuilAcceptabilite = seuil;
+            const jetons = config.jetons || {};
+            wizardState.reponses.utiliserJetons = jetons.activer === true;
+            if (jetons.activer === true) {
+                if (jetons.delai) {
+                    wizardState.reponses.nbJetonsDelai = jetons.delai.nombre;
+                    wizardState.reponses.dureeDelaiJours = jetons.delai.dureeJours;
+                    wizardState.reponses.delaiSurReprise = jetons.delai.surReprise === true;
+                }
+                if (jetons.reprise) wizardState.reponses.nbJetonsReprise = jetons.reprise.nombre;
+            }
+            if (config.modeleBundle !== undefined) wizardState.reponses.modeleBundle = config.modeleBundle;
         } else if (typeCanon === 'denotation') {
             // #343 (b) round-trip d'édition DEN (gap pré-existant comblé) : restaurer
             // les cibles (textarea), la suggestion, et l'échelle/grille de rétroaction.

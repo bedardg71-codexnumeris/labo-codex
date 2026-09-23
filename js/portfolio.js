@@ -709,6 +709,25 @@ function calculerNoteDuCours(da, pratique) {
 }
 
 /**
+ * Lot N4 (#713, 23 sept. 2026) — POURQUOI LA NOTE DU COURS N'EXISTE PAS, dite par la pratique qui l'a calculée.
+ *
+ * Source unique de la cause : la pratique la déclare (`expliquerNoteNonConstructible`, aujourd'hui la famille
+ * par spécifications — « Ta pratique ne dit pas quelle note donner quand aucun forfait n'est atteint. ») et
+ * tous les écrans qui écrivent « — » la lisent ici : le profil, le rapport, le Suivi (pratique active) et
+ * l'export (par `simulerIndices`, champ `causeNonConstructible`). Rien n'est rangé dans le stockage : la cause
+ * se relit, comme la note se recalcule.
+ *
+ * @param {string} da
+ * @param {Object} [pratique] - l'instance ; absente : la pratique active du groupe-cours
+ * @returns {string|null} la phrase, ou null quand la pratique n'en déclare pas
+ */
+function causeNoteNonConstructible(da, pratique) {
+    const inst = pratique || _resoudrePratiqueDesIndicesCP().pratique;
+    if (!inst || typeof inst.expliquerNoteNonConstructible !== 'function') return null;
+    return inst.expliquerNoteNonConstructible(da) || null;
+}
+
+/**
  * 🆕 BETA 95.5 : Calcule et stocke les indices C et P (async + pratique active)
  *
  * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
@@ -949,7 +968,10 @@ function _simulerIndicesInterne(da, pratiqueId) {
     const ecartees = (typeof compterEvaluationsEcarteesDeLaNote === 'function')
         ? compterEvaluationsEcarteesDeLaNote(da) : null;
 
-    return { pratique: pratiqueId, C, P, noteFinale, details, recit, noteConstructible, ecartees };
+    // Lot N4 (#713) — la cause d'une note absente, pour l'export (additif ; null quand la note existe).
+    const causeNonConstructible = noteConstructible ? null : causeNoteNonConstructible(da, pratique);
+
+    return { pratique: pratiqueId, C, P, noteFinale, details, recit, noteConstructible, ecartees, causeNonConstructible };
 }
 
 /**
@@ -1274,6 +1296,7 @@ window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
 window.calculerNoteDuCours = calculerNoteDuCours;   // lot N2 (#716) — la note du cours, partagée avec le P historique des snapshots
 window.arrondirIndiceSurCent = arrondirIndiceSurCent;   // lot N2 (#716) — le même entier pour le P historique
 window.obtenirDetailsCompletion = obtenirDetailsCompletion;   // #871 — la fraction affichée à côté de C
+window.causeNoteNonConstructible = causeNoteNonConstructible;   // lot N4 (#713) — la cause d'une note « — »
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
 window.simulerIndices = simulerIndices; // #307 Lot 5 — indices C/P en lecture seule pour une pratique simulée
 // window.obtenirIndicesCP → indices.js (#206)
