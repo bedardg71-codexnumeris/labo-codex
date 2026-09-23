@@ -367,12 +367,14 @@ describe('#717 · sentinelle : aucun id de cible positionnel dans js/', () => {
    LOT N6 (23 sept. 2026) — une dénotation sans cible ne s'enregistre plus, dans la gestion comme dans l'assistant.
    Mesuré au lot N5 (`aa7007e9`) : la gestion enregistrait zéro cible, et toutes les notes étaient alors plafonnées à 59.
    --------------------------------------------------------------------------------------------- */
-const MOTIF_N6 = 'Ajoute au moins une cible : sans cible, aucune ne peut être atteinte et aucune note ne peut dépasser 59.';
+// Mot pour mot, VALIDÉ par Grégoire le 23 sept. 2026 ; l'ancienne version proposée ne doit plus paraître.
+const MOTIF_N6 = 'Ajoute au moins une cible : sans cible, aucune note ne peut dépasser 59.';
 
 describe('lot N6 · zéro cible : refusé par la règle du composant, dans les deux écrans', () => {
     it('le composant : zéro cible → le motif, mot pour mot ; une cible → rien à redire', () => {
         const a = monterAssistant(storeVide());
         expect(a.win.EditeurCibles.motifRefus([])).toBe(MOTIF_N6);
+        expect(readFileSync(path.join(RACINE, 'js/pratiques/editeur-cibles.js'), 'utf8')).not.toContain('aucune ne peut être atteinte');
         expect(a.win.EditeurCibles.motifRefus(undefined)).toBe(MOTIF_N6);
         expect(a.win.EditeurCibles.motifRefus([{ id: 'c1', nom: 'Lire' }])).toBeNull();
     });
