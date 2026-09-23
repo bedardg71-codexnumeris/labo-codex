@@ -32,19 +32,14 @@
     }
 
     /**
-     * Id neuf d'une cible : horodatage + compteur de la session. Jamais une position,
-     * jamais un id déjà connu (`dejaVus`) — un id retiré ne revient donc pas.
-     * @param {Iterable<string>} [dejaVus]
+     * Id neuf d'une cible : horodatage + compteur de la session. Jamais une position ;
+     * le compteur rend deux ids d'une même milliseconde distincts, l'horodatage deux
+     * sessions distinctes — un id retiré ne revient donc pas.
      * @returns {string}
      */
-    function nouvelIdCible(dejaVus) {
-        const connus = new Set(dejaVus || []);
-        let id;
-        do {
-            compteur++;
-            id = 'cible_' + Date.now().toString(36) + '_' + compteur.toString(36);
-        } while (connus.has(id));
-        return id;
+    function nouvelIdCible() {
+        compteur++;
+        return 'cible_' + Date.now().toString(36) + '_' + compteur.toString(36);
     }
 
     function ligneHtml(cible) {
@@ -122,9 +117,8 @@
     function ajouter(el) {
         const editeur = editeurDe(el);
         if (!editeur) return;
-        const ids = Array.from(editeur.querySelectorAll('.editeur-cibles-ligne')).map(li => li.dataset.cibleId);
         const liste = editeur.querySelector('.editeur-cibles-liste');
-        liste.insertAdjacentHTML('beforeend', ligneHtml({ id: nouvelIdCible(ids), nom: '' }));
+        liste.insertAdjacentHTML('beforeend', ligneHtml({ id: nouvelIdCible(), nom: '' }));
         majExtremites(editeur);
         liste.lastElementChild.querySelector('.editeur-cibles-nom').focus();
     }
@@ -155,7 +149,7 @@
 
     /**
      * Les cibles enregistrées absentes de la nouvelle liste ET cochées pour au moins un
-     * élève : `{ cible, nbEleves }`. Lecture seule.
+     * étudiant·e : `{ cible, nbEleves }`. Lecture seule.
      * @param {string} pratiqueId
      * @param {Array} anciennes - `objectifs` enregistrés
      * @param {Array} nouvelles - `objectifs` à écrire
@@ -176,16 +170,16 @@
 
     /**
      * La question posée AVANT d'écrire, si une cible retirée porte des coches : elle
-     * nomme la cible et le nombre d'élèves. Rien à demander → vrai.
+     * nomme la cible et le nombre d'étudiant·es (mots validés par Grégoire le 23 sept. 2026). Rien à demander → vrai.
      * @returns {boolean} vrai si l'écran peut écrire
      */
     function confirmerRetraitCibles(pratiqueId, anciennes, nouvelles) {
         const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);
         if (retraits.length === 0) return true;
-        const lignes = retraits.map(r => `« ${r.cible.nom || r.cible.id} » : cochée pour ${r.nbEleves} élève${r.nbEleves > 1 ? 's' : ''}`);
+        const lignes = retraits.map(r => `« ${r.cible.nom || r.cible.id} » : cochée pour ${r.nbEleves} ${r.nbEleves > 1 ? 'étudiant·es' : 'étudiant·e'}`);
         const message = (retraits.length > 1 ? 'Tu retires des cibles déjà cochées.\n\n' : 'Tu retires une cible déjà cochée.\n\n')
             + lignes.join('\n')
-            + '\n\nLa note de ces élèves sera recalculée sans elle. Les coches restent enregistrées, mais ne comptent plus.\n\nRetirer quand même ?';
+            + '\n\nLa note de ces étudiant·es sera recalculée sans ' + (retraits.length > 1 ? 'elles' : 'elle') + '. Les coches restent enregistrées, mais ne comptent plus.\n\nRetirer quand même ?';
         return confirm(message);
     }
 
