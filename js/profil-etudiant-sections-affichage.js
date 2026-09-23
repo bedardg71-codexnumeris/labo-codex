@@ -4533,7 +4533,7 @@ function lancerExportEtudiantAnnotes(da) {
 // 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
 window.afficherProfilComplet = afficherProfilComplet;
 // window.calculerTousLesIndices → indices.js (#206)
-// window.obtenirPratiqueActuelle → profil-etudiant-helpers.js (Utilisé par snapshots.js pour calcul historique P, Beta 93.5)
+// window.obtenirPratiqueActuelle → profil-etudiant-helpers.js (lit le niveau de la note globale ; plus le P historique depuis #716)
 // window.calculerDetailsNoteFinale → profil-etudiant-actions.js (session C refactor 18 mai 2026, FIX #37 préservé)
 window.calculerDirectionsCriteres = calculerDirectionsCriteres; // session C refactor : reste dans le résidu (zone Sections affichage L2003), export migré depuis zone actions
 // #732 — `profil-etudiant-rapport.js` (une autre IIFE) l'appelle par son nom nu : sans cet export, le bouton
