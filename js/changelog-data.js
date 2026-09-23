@@ -32,7 +32,11 @@
                 // 1.155.2 (#716, lot N2) — VALIDÉ par Grégoire le 23 sept. 2026 au matin (relayé par la relecture de Cowork).
                 'Suivi de l\'élève&nbsp;: la courbe de performance suit maintenant la note du cours, semaine par semaine, en pratique Standards, sommative ou par spécifications. En dénotation, la courbe n\'a plus de point&nbsp;: elle affichait un barème qui n\'était pas ta note. Les semaines déjà enregistrées se mettent à jour avec «&nbsp;Recalculer les captures&nbsp;» (Réglages › Captures et recherche).',
                 // 1.155.4 (#713 volet plancher, #854 volet spécifications, lot N4) — VALIDÉ par Grégoire le 23 sept. 2026 (option A, telle quelle).
-                'Pratique par spécifications&nbsp;: un élève qui n\'atteint aucun forfait n\'a plus de note tant que ta pratique n\'en prévoit pas une. Le profil, le Suivi et l\'export écrivent «&nbsp;—&nbsp;» et en disent la raison. Pour donner une note dans ce cas, ajoute un forfait sans travaux requis (Conception → Pratiques de notation). Rouvrir la pratique dans l\'assistant ne change plus son seuil, ses forfaits ni ses jetons.'
+                'Pratique par spécifications&nbsp;: un élève qui n\'atteint aucun forfait n\'a plus de note tant que ta pratique n\'en prévoit pas une. Le profil, le Suivi et l\'export écrivent «&nbsp;—&nbsp;» et en disent la raison. Pour donner une note dans ce cas, ajoute un forfait sans travaux requis (Conception → Pratiques de notation). Rouvrir la pratique dans l\'assistant ne change plus son seuil, ses forfaits ni ses jetons.',
+                // 1.155.5 (#717, lot N5) — PROPOSÉ, à valider par Grégoire avant le push.
+                'Pratique par dénotation&nbsp;: les cibles s\'éditent maintenant une par ligne. Déplacer, renommer ou retirer une cible ne déplace plus les coches déjà faites. Si tu retires une cible déjà cochée, l\'application te dit laquelle et pour combien d\'élèves avant d\'enregistrer.',
+                // 1.155.5 (#936, bug testeur) — PROPOSÉ par la session du correctif, à valider par Grégoire avant le push.
+                'Annoter&nbsp;: une fois zoomé, on peut maintenant défiler jusqu\'au bord gauche du travail. La roue de la palette d\'annotation ne se transforme plus en «&nbsp;−&nbsp;» quand on replie la palette.'
             ]
         },
         {
