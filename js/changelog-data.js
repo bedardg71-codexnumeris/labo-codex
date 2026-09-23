@@ -21,12 +21,12 @@
 
     var CHANGELOG = [
         {
-            // 1.156.0 (#895) — PROPOSÉ, À VALIDER par Grégoire avant le push.
+            // 1.156.0 (#895) — VALIDÉ par Grégoire le 23 sept. 2026 (deux retouches de Cowork : « étudiant·e » dans l'aide ; « maintenant » et la phrase du nettoyage dans Nouvelles).
             version: '1.156',
             couleur: 'bleu',
             titre: 'Exporter et archiver : une seule carte pour exporter',
             items: [
-                '«&nbsp;Exporter des travaux&nbsp;» remplace aussi «&nbsp;Trimestre complet&nbsp;». Laisse «&nbsp;Toutes&nbsp;» et «&nbsp;Tous&nbsp;» et clique «&nbsp;Télécharger&nbsp;» : tu reçois l\'archive de tout le groupe, sans avoir à choisir d\'abord une production ou un·e étudiant·e. Deux options s\'ajoutent : ranger les dossiers par étudiant·e et production, ou par étudiant·e seulement, et compresser l\'archive. Toute copie mise dans l\'archive est marquée «&nbsp;exportée&nbsp;», archive complète comprise.'
+                '«&nbsp;Exporter des travaux&nbsp;» remplace maintenant «&nbsp;Trimestre complet&nbsp;». Laisse «&nbsp;Toutes&nbsp;» et «&nbsp;Tous&nbsp;» et clique «&nbsp;Télécharger&nbsp;» : tu reçois l\'archive de tout le groupe, sans avoir à choisir d\'abord une production ou un·e étudiant·e. Deux options s\'ajoutent : ranger les dossiers par étudiant·e et production, ou par étudiant·e seulement, et compresser l\'archive. Toute copie mise dans l\'archive est marquée «&nbsp;exportée&nbsp;», archive complète comprise&nbsp;: «&nbsp;Proposer un nettoyage&nbsp;» peut donc te la proposer, et rien n\'est retiré sans ta confirmation.'
             ]
         },
         {
