@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 13 H 40 : **LOT N6 ET 1.155.7 SUR `lot-n6-reglages`, NON FUSIONNÉ, NON POUSSÉ** — attend la relecture croisée de Cowork, puis sa revérification, et la validation par Grégoire de deux textes
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 13 H 50 : **LOT N6 (1.155.7) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`18b283d3`) + `fbe89f5d` (relais précédent) + le merge `41758817` de `lot-n6-reglages` (`212f8822` lot et release 1.155.7, `a1eda771` mots validés) + ce relais. Relecture croisée de Cowork : verte du premier coup (copie `git archive`, 20 bancs, 288/288, huit mutations rouges). Mots validés par Grégoire (option B) ; Cowork vérifiera les deux textes sur `main` après le push. #938 inscrite (jetons perdus à la réédition par l'assistant).
+
+**Suite** : la file des pratiques de notation est vide. Prochain chantier : le dernier lot de l'export (#895, une seule carte « Exporter des travaux »), consigne par Cowork. Ménage fait : Vitest orphelin (PID 21702) arrêté, worktrees `chrono-barre-937` et `verdict-906` retirés (fusionnés). La branche `lot-n6-reglages` peut être supprimée une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 13 H 40 : **LOT N6 ET 1.155.7 SUR `lot-n6-reglages`, NON FUSIONNÉ, NON POUSSÉ** — attend la relecture croisée de Cowork, puis sa revérification, et la validation par Grégoire de deux textes
 
 **Où vit le travail** : branche `lot-n6-reglages` = `main` (`18b283d3`, 1.155.6) + `212f8822` (lot N6 et release 1.155.7 : #900 réglages sans lecteur, #935 volet nom, #899 flèche, dénotation à zéro cible). Vitest 625 / 7225 vert après le bump ; 24 mutations, 24 rouges. Verdict Playwright NON lancé (après la revérification de Cowork, règle 2 du PROTOCOLE).
 
