@@ -595,6 +595,8 @@ function obtenirContexteCoursActif() {
 // en try/finally — jamais persisté. Seules les clés du corpus (évaluations,
 // productions) sont interceptées ; la config des pratiques + les échelles restent
 // lues du stockage réel (on ne simule que les artefacts d'élèves, pas les règles).
+// Second usager (lot N2, #716, 22 sept. 2026) : le P historique des snapshots
+// (snapshots.js) y pose les évaluations de l'élève échues à la date du snapshot.
 // ============================================================================
 let _contexteSimulation = null;
 const _CLES_SIMULABLES = ['evaluationsSauvegardees', 'productions'];
@@ -604,6 +606,18 @@ function definirContexteSimulation(donnees) {
 }
 function effacerContexteSimulation() {
     _contexteSimulation = null;
+}
+/**
+ * Lot N2 (#716, 22 sept. 2026) — LA NOTE CALCULÉE SOUS CE CONTEXTE EST PROVISOIRE, QUOI QUE DISE LA PRATIQUE.
+ * Le P historique d'un snapshot (snapshots.js) pose `noteProvisoire: true` avec les évaluations échues à sa
+ * date. Décision de Grégoire (22 sept. 2026) : à une date passée, la note se calcule comme une note
+ * provisoire — le réglage « notes finales » de la pratique (les obligatoires non remises valent 0) est
+ * celui d'AUJOURD'HUI, et l'appliquer à la semaine 3 compterait 0 pour des obligatoires pas encore dues.
+ * Seul lecteur : `calculerDetailsNoteFinale` (profil-etudiant-actions.js), le seul à lire `notesFinales`.
+ * @returns {boolean}
+ */
+function contexteImposeNoteProvisoire() {
+    return !!(_contexteSimulation && _contexteSimulation.noteProvisoire === true);
 }
 // Retourne le jeu injecté pour une clé simulable, ou null si pas de simulation en
 // cours. Sert à router les lectures directes du chemin de calcul (db.getSync(cle('…')))
@@ -1159,6 +1173,7 @@ if (typeof db !== 'undefined' && typeof db.surEcriture === 'function') {
 window.definirContexteSimulation = definirContexteSimulation;
 window.effacerContexteSimulation = effacerContexteSimulation;
 window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;
+window.contexteImposeNoteProvisoire = contexteImposeNoteProvisoire;   // lot N2 (#716)
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
 window.anonymiserGroupe = anonymiserGroupe;

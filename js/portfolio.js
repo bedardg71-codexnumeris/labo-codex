@@ -673,6 +673,42 @@ function arrondirIndiceSurCent(decimal) {
 }
 
 /**
+ * LA NOTE DU COURS D'UN ÉLÈVE, SUR 0-1, POUR LA PRATIQUE ACTIVE — ou null quand elle n'est pas constructible.
+ *
+ * Lot N2 (#716, 22 sept. 2026) : extraite de `calculerEtStockerIndicesCP` pour qu'il n'en existe qu'une
+ * définition. L'indice P stocké et le P historique des snapshots (snapshots.js, `calculerIndicesHistoriques`)
+ * passent par ici ; le snapshot la calcule sur les seules évaluations échues à sa date.
+ *
+ * P via calculerDetailsNoteFinale pour garantir la cohérence avec la note affichée dans le profil.
+ * #394 (L3) : MÊME discrimination par famille que _simulerIndicesInterne (#326 T1) — une STD dont le
+ * chemin riche échoue est NON CONSTRUCTIBLE ; le repli calculerPerformance ne masque plus l'échec par
+ * un nombre. Le repli reste LÉGITIME pour les familles sans note portfolio riche (SOM/SPE/DEN →
+ * calculerDetailsNoteFinale rend null).
+ *
+ * @param {string} da - Numéro de DA
+ * @param {Object} pratique - l'instance de la pratique active (`resoudrePratiqueActive().pratique`)
+ * @returns {number|null} la note sur 0-1, ou null (non constructible)
+ */
+function calculerNoteDuCours(da, pratique) {
+    const estStd = !!(typeof pratique.obtenirCode === 'function' && pratique.obtenirCode() === 'STD');
+    let P_decimal = null;
+    let cheminRicheStdAEchoue = false;
+    if (typeof calculerDetailsNoteFinale === 'function') {
+        const detailsNote = calculerDetailsNoteFinale(da);
+        if (detailsNote && detailsNote.noteFinale !== null && detailsNote.noteFinale !== undefined) {
+            P_decimal = detailsNote.noteFinale / 100; // Convertir % → 0-1
+        } else if (detailsNote && estStd) {
+            cheminRicheStdAEchoue = true;
+        }
+    }
+
+    if (P_decimal === null && !cheminRicheStdAEchoue) {
+        P_decimal = pratique.calculerPerformance(da);
+    }
+    return (typeof P_decimal === 'number' && isFinite(P_decimal)) ? P_decimal : null;
+}
+
+/**
  * 🆕 BETA 95.5 : Calcule et stocke les indices C et P (async + pratique active)
  *
  * @returns {Promise<Object>} - Structure avec indices pour chaque étudiant
@@ -763,33 +799,13 @@ function _calculerEtStockerIndicesCPInterne() {
         // Calculer C via la pratique active
         const C_decimal = pratique.calculerCompletion(da);
 
-        // Calculer P via calculerDetailsNoteFinale (si disponible)
-        // pour garantir la cohérence avec la note affichée dans le profil.
-        // #394 (L3) : MÊME discrimination par famille que _simulerIndicesInterne
-        // (#326 T1) — une STD dont le chemin riche échoue est NON CONSTRUCTIBLE ;
-        // le repli calculerPerformance ne masque plus l'échec par un nombre. Le
-        // repli reste LÉGITIME pour les familles sans note portfolio riche
-        // (SOM/SPE/DEN → calculerDetailsNoteFinale rend null).
-        const estStd = !!(typeof pratique.obtenirCode === 'function' && pratique.obtenirCode() === 'STD');
-        let P_decimal = null;
-        let cheminRicheStdAEchoue = false;
-        if (typeof calculerDetailsNoteFinale === 'function') {
-            const detailsNote = calculerDetailsNoteFinale(da);
-            if (detailsNote && detailsNote.noteFinale !== null && detailsNote.noteFinale !== undefined) {
-                P_decimal = detailsNote.noteFinale / 100; // Convertir % → 0-1
-            } else if (detailsNote && estStd) {
-                cheminRicheStdAEchoue = true;
-            }
-        }
-
-        if (P_decimal === null && !cheminRicheStdAEchoue) {
-            P_decimal = pratique.calculerPerformance(da);
-        }
+        // P : LA note du cours (lot N2, #716 : extraite pour que le P historique des snapshots la partage).
+        const P_decimal = calculerNoteDuCours(da, pratique);
 
         // #394 (D1 règle 4) : encodage STOCKÉ de « non constructible » — champ
         // ADDITIF, miroir exact de simulerIndices. Les lecteurs historiques de .P
         // continuent de lire un nombre (0) ; les affichages montrent « — ».
-        const noteConstructible = (typeof P_decimal === 'number' && isFinite(P_decimal));
+        const noteConstructible = P_decimal !== null;
 
         // Convertir 0-1 → 0-100, demi vers le haut (arrondirIndiceSurCent)
         const C = C_decimal !== null ? arrondirIndiceSurCent(C_decimal) : 0;
@@ -1255,6 +1271,8 @@ window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
 
 // 🆕 Beta 95.5 : Exporter les fonctions d'indices C/P
 window.calculerEtStockerIndicesCP = calculerEtStockerIndicesCP;
+window.calculerNoteDuCours = calculerNoteDuCours;   // lot N2 (#716) — la note du cours, partagée avec le P historique des snapshots
+window.arrondirIndiceSurCent = arrondirIndiceSurCent;   // lot N2 (#716) — le même entier pour le P historique
 window.obtenirDetailsCompletion = obtenirDetailsCompletion;   // #871 — la fraction affichée à côté de C
 window.obtenirIndicesCPAsync = obtenirIndicesCPAsync;
 window.simulerIndices = simulerIndices; // #307 Lot 5 — indices C/P en lecture seule pour une pratique simulée

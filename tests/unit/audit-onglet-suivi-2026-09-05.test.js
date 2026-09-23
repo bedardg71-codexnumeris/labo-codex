@@ -275,6 +275,8 @@ function monter(jeu, opts = {}) {
         obtenirDonneesSelonMode: winModes.obtenirDonneesSelonMode, sauvegarderDonneesSelonMode: winModes.sauvegarderDonneesSelonMode,
         obtenirEtudiantsCoursActif: winModes.obtenirEtudiantsCoursActif, obtenirContexteCoursActif: winModes.obtenirContexteCoursActif,
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture, invaliderCacheLecture: winModes.invaliderCacheLecture,
+        // Lot N2 (#716) : le P historique pose les évaluations échues dans le contexte de simulation de modes.js.
+        definirContexteSimulation: winModes.definirContexteSimulation, effacerContexteSimulation: winModes.effacerContexteSimulation, contexteImposeNoteProvisoire: winModes.contexteImposeNoteProvisoire,
         filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule,
         // #834 lot E (cadrage « Rencontres », 12 sept. 2026) : l'identifiant du contexte, point unique de modes.js.
         obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService,
@@ -960,24 +962,20 @@ describe('G · les sorties du Suivi et le volet confidentiel', () => {
         expect(/SENSIBLE|Dyslexie|fragile|PRESENCE-BANC/.test(rapport)).toBe(false);
     });
 
-    it('G2 · le snapshot d\'archivage : par élève { da, nom, A, C, P } — rien du volet confidentiel ; son P historique est celui de l\'ÉLÈVE (#734), mais pas la note du cours (#716)', async () => {
+    it('G2 · le snapshot d\'archivage : par élève { da, nom, A, C, P } — rien du volet confidentiel ; son P historique est la note du cours de l\'ÉLÈVE à cette date (#734, #716)', async () => {
         // À la main : au 16 mars, deux travaux dus (P1, P2). Assidu : C 2/2 = 100 ; sa note du cours sur ces deux travaux est
-        // (60 + 70) / 2 = 65. Le P historique sommatif (#716) : `calculerPerformanceHistorique` lit `e.da` / `e.note` (jamais
-        // remplis) → null → repli IDME en dur (I 40, D 65) sur SES évaluations dues au 16 mars : (40 + 65) / 2 = 52,5 → 53 ;
-        // Absent (E 100, D 65) → 82,5 → 83. AVANT #734, le repli ne filtrait pas par élève : (40 + 65 + 100 + 65 + 65) / 5 = 67 pour tous.
+        // (60 + 70) / 2 = 65 ; Absent (85 + 70) / 2 = 77,5 → 78.
+        // ↻ Lot N2 (#716, 22 sept. 2026) — valeurs d'après : 65 et 78. Avant, la méthode historique sommative lisait `e.da` /
+        // `e.note` (jamais remplis) → null → repli IDME en dur (I 40, D 65) : 53 et 83 ; et avant #734, 67 pour tous.
         const b = monter(jeuBase(), { store: { test_confidentielEtudiants: { [DA.ASSIDU]: { notes: 'NOTE-SENSIBLE-BANC' } } } }); b.calculerTout();
         const snap = await b.win.capturerSnapshotSeance('2026-03-16', null, { numeroSemaine: 10 });
         const assidu = snap.etudiants.find(e => e.da === DA.ASSIDU);
         const absent = snap.etudiants.find(e => e.da === DA.ABSENT);
         const cleEcrite = b.ecritures.filter(k => /snapshots/.test(k));
-        // Le filtre du repli, tel qu'écrit (snapshots.js, `evaluationsFiltrees`) : aucun `etudiantDA` avant `productionsDues`.
-        const srcSnap = readFileSync(path.join(RACINE, 'js/snapshots.js'), 'utf8');
-        const blocFiltre = srcSnap.slice(srcSnap.indexOf('const evaluationsFiltrees = evaluations.filter'), srcSnap.indexOf('const productionsDues = productions.filter'));
-        noter('G2', { champs: Object.keys(assidu), assidu, absentP: absent.P, cleEcrite, filtreParDA: /etudiantDA/.test(blocFiltre), sensible: /SENSIBLE/.test(JSON.stringify(snap)) });
+        noter('G2', { champs: Object.keys(assidu), assidu, absentP: absent.P, cleEcrite, sensible: /SENSIBLE/.test(JSON.stringify(snap)) });
         expect(Object.keys(assidu).sort()).toEqual(['A', 'A_cumulatif', 'C', 'P', 'da', 'nom', 'pattern', 'rai'].sort());
-        expect(assidu).toMatchObject({ A: 100, C: 100, P: 53, nom: 'Alice Assidu' });   // avant #734 : 67 (la moyenne du groupe)
-        expect(absent.P).toBe(83);                       // avant : 67, le même que l'assidu
-        expect(/etudiantDA/.test(blocFiltre)).toBe(true);   // avant : false
+        expect(assidu).toMatchObject({ A: 100, C: 100, P: 65, nom: 'Alice Assidu' });   // avant #716 : 53 (table I/D/M/E) ; avant #734 : 67
+        expect(absent.P).toBe(78);                       // avant #716 : 83 ; avant #734 : 67, le même que l'assidu
         expect(cleEcrite).toEqual(['test_snapshots_GC1']);
         expect(/SENSIBLE/.test(JSON.stringify(snap))).toBe(false);
     });

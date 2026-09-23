@@ -461,7 +461,10 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     // remises = 0 » : appliquée uniquement en mode finale. En provisoire,
     // les non-remises restent simplement ignorées.
     const cfgPratiqueActive = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive(pratiqueIdDemande) : null;
-    const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales);
+    // Lot N2 (#716) : le P historique d'un snapshot se calcule en provisoire (décision de Grégoire,
+    // 22 sept. 2026) — voir `contexteImposeNoteProvisoire` (modes.js).
+    const estFinale = !!(cfgPratiqueActive && cfgPratiqueActive.notesFinales)
+        && !(typeof contexteImposeNoteProvisoire === 'function' && contexteImposeNoteProvisoire());
     // pratiqueId / pratiqueNom : déjà résolus en tête de fonction (#127, pour couvrir
     // aussi le cas « non calculable »).
 

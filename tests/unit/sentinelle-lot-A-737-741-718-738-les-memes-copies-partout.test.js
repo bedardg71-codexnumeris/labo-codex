@@ -313,7 +313,7 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         expect((registre.match(/'non-recu'/g) || []).length).toBe(1);
         expect((registre.match(/^function evaluationNonRemise\(/gm) || []).length).toBe(1);
     });
-    it('D3 · les complétions des trois familles et les trois lecteurs des snapshots passent par les DEUX prédicats ; les directions et le « (sur N) » du profil par le premier', () => {
+    it('D3 · les complétions des trois familles et les deux lecteurs des snapshots passent par les DEUX prédicats (le troisième est parti avec le repli, #716) ; les directions et le « (sur N) » du profil par le premier', () => {
         // #871 (17 sept. 2026) : le compte vit dans `calculerDetailsCompletion` ; `calculerCompletion` n'est plus que le quotient.
         const corps = (f, debut, fin) => sansCommentaires(tranche(source(f), debut, fin));
         const deux = (s) => /evaluationEntreDansLaNote\(/.test(s) && /!window\.evaluationNonRemise\(/.test(s);
@@ -326,10 +326,13 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
             expect([fichier, trois(corps(fichier, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))]).toEqual([fichier, true]));
         const snapshots = sansCommentaires(source('js/snapshots.js'));
         expect((snapshots.match(/!window\.evaluationNonRecevable\(/g) || []).length).toBe(2);
-        expect((snapshots.match(/window\.evaluationNonRecevable\(e\)\) return false/g) || []).length).toBe(1);
+        // Lot N2 (#716, 22 sept. 2026) : le troisième lecteur — le filtre du repli du P historique — est parti avec
+        // le repli. Le P historique est la note du cours : il lit les copies par les accesseurs de la pratique.
+        expect((snapshots.match(/window\.evaluationNonRecevable\(e\)\) return false/g) || []).length).toBe(0);
+        expect(/calculerNoteDuCours\(da, pratiqueP\)/.test(snapshots)).toBe(true);
         expect((sansCommentaires(source('js/pratiques/pratique-registre.js')).match(/'plagiat'/g) || []).length).toBe(1);
         expect((snapshots.match(/!window\.evaluationNonRemise\(/g) || []).length).toBe(2);
-        expect((snapshots.match(/window\.evaluationNonRemise\(e\)\) return false/g) || []).length).toBe(1);
+        expect((snapshots.match(/window\.evaluationNonRemise\(e\)\) return false/g) || []).length).toBe(0);
         const affichage = sansCommentaires(source('js/profil-etudiant-sections-affichage.js'));
         expect(/evaluationEntreDansLaNote\(e\)/.test(tranche(affichage, 'function calculerDirectionsCriteres(da) {', 'const resultatParDefaut'))).toBe(true);
         expect(/const evaluationsDA = [^\n]*evaluationEntreDansLaNote\(e\)/.test(affichage)).toBe(true);

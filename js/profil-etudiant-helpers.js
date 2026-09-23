@@ -674,18 +674,19 @@ function lireNiveauNoteGlobale(da, pourcentage) {
  * Sans pratique assignée, PRATIQUE_DEFAUT (« standards ») tenait lieu de pratique.
  *
  * ⮕ Aucun repli : rien d'assigné, ou un id qui ne mène à rien, rend null. Les appelants
- * (`lireNiveauNoteGlobale`, snapshots.js) savent lire null — « pas de code », « pas de P ».
+ * (`lireNiveauNoteGlobale`) savent lire null — « pas de code ».
  * Le repli `new PratiquePANStandards()` de #542 (lot 3) disparaît avec sa raison d'être.
  *
  * ⚠ CE QUI NE BOUGE PAS, ET POURQUOI. Pour une Standards, une sommative ou des spécifications,
  * ce qui est rendu reste l'instance du registre de LA FAMILLE de la pratique assignée, comme
- * avant ce lot. Elle porte deux règles que PratiqueConfigurable n'a pas : le P historique des
- * snapshots (`calculerPerformanceHistorique`), et la lecture du niveau de la note globale dans
- * l'échelle COMMUNE AUX ÉVALUATIONS de l'élève (#575, décision de Grégoire) — la configurable,
- * elle, lirait l'échelle rangée dans la pratique : mesuré, le « M » d'une échelle remplacée
- * (#648) disparaissait. Laquelle des deux échelles fait foi est une question de didactique ;
- * réunir les deux instances est l'objet du lot N2 (#716). Seule la dénotation change ici : la
- * famille n'a pas d'instance au registre, c'est la pratique assignée qui répond (#719).
+ * avant ce lot. Elle porte une règle que PratiqueConfigurable n'a pas : la lecture du niveau de
+ * la note globale dans l'échelle COMMUNE AUX ÉVALUATIONS de l'élève (#575, décision de Grégoire)
+ * — la configurable, elle, lirait l'échelle rangée dans la pratique : mesuré, le « M » d'une
+ * échelle remplacée (#648) disparaissait. Laquelle des deux échelles fait foi est une question
+ * de didactique, laissée à Grégoire ; elle aura son propre lot. Seule la dénotation change ici :
+ * la famille n'a pas d'instance au registre, c'est la pratique assignée qui répond (#719).
+ * Lot N2 (#716, 22 sept. 2026) : le P historique des snapshots ne passe plus par ici — il est la
+ * note du cours (`calculerNoteDuCours`, portfolio.js), et les méthodes historiques des familles sont retirées.
  *
  * @returns {Object|null}
  */
