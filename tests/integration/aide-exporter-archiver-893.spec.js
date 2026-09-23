@@ -25,7 +25,7 @@ const patternsAttendus = [
 ];
 const estErreurAttendue = (msg) => patternsAttendus.some((re) => re.test(msg));
 
-test('#893 · l\'aide nomme les trois cartes que l\'écran rend, et son bloc d\'espace parle français', async ({ page }) => {
+test('#893 · l\'aide nomme les deux cartes que l\'écran rend, et son bloc d\'espace parle français', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => {
         const m = `pageerror: ${e.message}`;
@@ -53,8 +53,10 @@ test('#893 · l\'aide nomme les trois cartes que l\'écran rend, et son bloc d\'
     expect(aide.sousSectionActive, 'la sous-section « Utilisation hebdomadaire » est affichée').toBe(true);
     expect(aide.ferme, 'la carte est dépliée').toBe(false);
     expect(aide.hauteur, 'le contenu déplié a une hauteur').toBeGreaterThan(100);
-    expect(aide.modes).toEqual(['Exporter des travaux', 'Trimestre complet', 'Export Léa']);
+    // #895 : « Trimestre complet » est fondu dans « Exporter des travaux ».
+    expect(aide.modes).toEqual(['Exporter des travaux', 'Export Léa']);
     expect(aide.texte).toContain('« Reprises seulement »');
+    expect(aide.texte).toContain("« Compresser l'archive »");
     expect(aide.texte).not.toMatch(/Inclure annotés|Inclure évaluations|All[èe]gement|fac-simil/i);
 
     // 2. L'écran lui-même : ses cartes, ses cases, son bloc d'espace.
@@ -74,7 +76,7 @@ test('#893 · l\'aide nomme les trois cartes que l\'écran rend, et son bloc d\'
         };
     });
     expect(ecran.titres, 'l\'aide et l\'écran disent la même chose').toEqual(aide.modes);
-    expect(ecran.cases).toEqual(['Reprises seulement']);
+    expect(ecran.cases).toEqual(["Compresser l'archive", 'Reprises seulement']);
     expect(ecran.quotaApresCartes, 'le bloc d\'espace est au bas de l\'écran, comme le dit l\'aide').toBe(true);
     expect(ecran.quota).toMatch(/utilisés sur .+ \(\d+\s%\)/);
     expect(ecran.quota).toMatch(/\d+ fichiers? de travaux/);

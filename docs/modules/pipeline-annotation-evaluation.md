@@ -164,26 +164,32 @@ Les annotations du mode Annoter restent visibles en mode Evaluer.
 
 ## Onglet 5 — Exporter et archiver
 
-### Trois cartes d'export (etat mesure le 20 septembre 2026, #893)
+### Deux cartes d'export (#893, puis #895 le 23 septembre 2026)
 
-L'ecran rend TROIS cartes (`afficherArchivage`, `travaux-ui.js`). Les copies annotees et les
-evaluations sont toujours incluses (`exporterTravaux`) : aucune case « Inclure ... » n'existe.
+L'ecran rend DEUX cartes (`afficherArchivage`, `travaux-ui.js`). « Trimestre complet » a ete
+fondu dans « Exporter des travaux » (#895, decision de Gregoire du 17 sept.) avec son moteur :
+`exporterTravaux(options, onProgression)` est le seul moteur ZIP de l'ecran. Les copies annotees
+et les evaluations sont toujours incluses : aucune case « Inclure ... » n'existe.
 
-| Carte | Contenu | Filtres | Format |
+| Carte | Contenu | Filtres et options | Format |
 |-------|---------|---------|--------|
-| **Exporter des travaux** | Originaux + versions annotees + `evaluations.json` | Production, etudiant·e | ZIP, un dossier par etudiant·e |
-| **Trimestre complet** | Toutes les productions en PDF classees par etudiant·e + evaluations JSON | Production, etudiant·e (optionnels) | ZIP avec barre de progression |
+| **Exporter des travaux** | Originaux + versions annotees + `_evaluations.json` + `_resume.json` | Production, etudiant·e (« Toutes / Tous » = tout le groupe) ; Dossiers ; « Compresser l'archive » | ZIP avec barre de progression |
 | **Export Lea** | Copie annotee + page de synthese (note et retroaction) | Production, etudiant·e, case « Reprises seulement » | PDF pret pour Lea |
+
+Tout fichier reellement mis dans l'archive est marque « exporte » (#891, etendu a l'export
+complet par #895) : il devient eligible a « Proposer un nettoyage » (#892).
 
 ### Structure ZIP (carte « Exporter des travaux »)
 
+Par defaut « Par etudiant·e et production » ; « Par etudiant·e » retire le niveau production.
+
 ```
 Nom_Prenom_DA/
-  fichier1.pdf
-  fichier1_annote.pdf
-  fichier2.jpg
-  fichier2_annote.jpg
-evaluations.json
+  Titre de la production/
+    fichier1.pdf
+    fichier1_annote.pdf
+_evaluations.json
+_resume.json        (nbFichiers, nbEchecs, echecs nommes — #565)
 ```
 
 La structure a sous-dossiers `originaux/` et `annotes/` est celle de `exporterParEtudiant`,

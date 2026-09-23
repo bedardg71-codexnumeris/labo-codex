@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.156.0 (#895) — PROPOSÉ, À VALIDER par Grégoire avant le push.
+            version: '1.156',
+            couleur: 'bleu',
+            titre: 'Exporter et archiver : une seule carte pour exporter',
+            items: [
+                '«&nbsp;Exporter des travaux&nbsp;» remplace aussi «&nbsp;Trimestre complet&nbsp;». Laisse «&nbsp;Toutes&nbsp;» et «&nbsp;Tous&nbsp;» et clique «&nbsp;Télécharger&nbsp;» : tu reçois l\'archive de tout le groupe, sans avoir à choisir d\'abord une production ou un·e étudiant·e. Deux options s\'ajoutent : ranger les dossiers par étudiant·e et production, ou par étudiant·e seulement, et compresser l\'archive. Toute copie mise dans l\'archive est marquée «&nbsp;exportée&nbsp;», archive complète comprise.'
+            ]
+        },
+        {
             // 1.155.0 (#695, élargie à l'évaluation le 22 sept. 2026) — VALIDÉ par Grégoire le 22 sept. 2026.
             version: '1.155',
             couleur: 'vert',

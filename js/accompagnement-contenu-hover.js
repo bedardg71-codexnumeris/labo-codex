@@ -423,8 +423,6 @@ const TOOLTIPS = {
         'Télécharge un ZIP contenant tous les travaux d\'un·e étudiant·e. Utile pour remettre un dossier complet en fin de session.',
     'travaux-archivage-production':
         'Télécharge un ZIP regroupant tous les travaux d\'une production. Pratique pour archiver une évaluation complète.',
-    'travaux-archivage-semestre':
-        'Archive complète de tous les travaux du trimestre en un seul ZIP. Recommandé en fin de session pour la conservation.',
     'travaux-archivage-inclure-annotes':
         'Ajoute les versions annotées (avec surlignage, commentaires et tampons) au ZIP. Décoche pour n\'exporter que les originaux.',
     'travaux-archivage-inclure-evals':
