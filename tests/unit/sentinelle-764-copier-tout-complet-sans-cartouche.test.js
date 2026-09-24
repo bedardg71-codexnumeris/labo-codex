@@ -118,6 +118,8 @@ function monter({ avecCartouche }) {
         travauxExportPDF: exportPdf,
         calculerNote: (...a) => win.calculerNote(...a), genererRetroaction: (...a) => win.genererRetroaction(...a)
     };
+    // #939 — la règle du commentaire d'un critère (`commentaireDuCritere`), le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', globaux, win);
     chargerScript('js/evaluation-calcul.js', globaux, win);
     chargerScript('js/evaluation-retroaction.js', globaux, win);
     win.calculerNote();

@@ -1354,21 +1354,55 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
  * cartouche, qu'on ait choisi le niveau au menu ou tapé un chiffre.
  */
 function _afficherCommentaireCritere(critereId, niveau) {
-    if (!niveau || !evaluationEnCours || !evaluationEnCours.cartoucheId) return;
+    if (!niveau || !evaluationEnCours) return;
     const grilleId = evaluationEnCours.grilleId;
-    const cartouches = db.getSync(cle(`cartouches_${grilleId}`), []);
-    const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
-    if (!cartouche) return;
+    const cartouches = evaluationEnCours.cartoucheId ? (db.getSync(cle(`cartouches_${grilleId}`), []) || []) : [];
+    const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId) || null;
+    const enregistre = _commentaireEnregistreDuCritere(critereId, niveau);
+    if (!cartouche && !enregistre) return;
 
-    const cleCommentaire = `${critereId}_${niveau}`;
-    const commentaire = (cartouche.commentaires || {})[cleCommentaire] || '[Non défini]';
+    // #939 — LE COMMENTAIRE ENREGISTRÉ PASSE AVANT LA CARTOUCHE VIVANTE (décision de Grégoire,
+    // 24 sept. 2026 : une cartouche retouchée ne change pas une copie déjà évaluée). À la
+    // réouverture, les niveaux repassent par `niveauSelectionne` : ce div recevait la cartouche
+    // d'AUJOURD'HUI, et le prochain enregistrement écrasait le commentaire d'alors. Même règle
+    // que le PDF (`commentaireDuCritere`). Sans commentaire nulle part, le div est vidé — plus
+    // de « [Non défini] », que les collecteurs enregistraient et que l'élève lisait.
+    const commentaire = window.syntheseRetroactionData.commentaireDuCritere({ enregistre, cartouche, critereId, niveau });
 
     const commDiv = document.getElementById(`comm_${critereId}`);
     if (commDiv) {
         commDiv.textContent = commentaire;
-        commDiv.style.fontStyle = commentaire === '[Non défini]' ? 'italic' : 'normal';
-        commDiv.style.color = commentaire === '[Non défini]' ? 'var(--gris-clair)' : 'var(--gris-moyen)';
+        commDiv.style.fontStyle = 'normal';
+        commDiv.style.color = 'var(--gris-moyen)';
     }
+}
+
+/**
+ * #939 — Le commentaire enregistré avec CETTE copie pour ce critère, s'il a été écrit au MÊME
+ * niveau ; sinon ''. Un niveau changé, c'est un autre commentaire : celui de la cartouche au
+ * nouveau niveau. L'identifiant, l'élève et la production viennent de
+ * `etatVivantEvaluationEnCours` (les deux liaisons, #699 / #919) ; une évaluation d'un autre
+ * élève ou d'une autre production n'est jamais lue.
+ * ⚠ Sans identifiant, la même recherche que `verifierEtChargerEvaluationExistante` (même
+ * élève, même production, non remplacée) : ce chargeur restaure les niveaux AVANT de poser
+ * `idModification` (evaluation.js, le `setTimeout` de la restauration). Mesuré en WebKit le
+ * 24 sept. : un second passage (`cartoucheSelectionnee`) suit, identifiant posé ; sans ce
+ * repli, le div porte la cartouche d'aujourd'hui entre les deux. Le banc Vitest #939 le
+ * tient, la spec WebKit ne le distingue pas (le second passage le masque).
+ */
+function _commentaireEnregistreDuCritere(critereId, niveau) {
+    const vivant = (typeof window.etatVivantEvaluationEnCours === 'function')
+        ? window.etatVivantEvaluationEnCours() : (evaluationEnCours || {});
+    if (!vivant || !vivant.etudiantDA || !vivant.productionId) return '';
+    // Le lecteur du chargeur (`obtenirDonneesSelonMode`) : l'élève et la production s'y comparent
+    // comme lui les compare.
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evaluation = vivant.idModification
+        ? evaluations.find(e => e.id === vivant.idModification)
+        : evaluations.find(e => e.etudiantDA === vivant.etudiantDA && e.productionId === vivant.productionId && !e.remplaceeParId);
+    if (!evaluation || evaluation.etudiantDA !== vivant.etudiantDA || evaluation.productionId !== vivant.productionId) return '';
+    const critere = (evaluation.criteres || []).find(c => c.critereId === critereId);
+    return (critere && critere.niveauSelectionne === niveau) ? (critere.retroaction || '') : '';
 }
 
 function niveauSelectionne(critereId) {
