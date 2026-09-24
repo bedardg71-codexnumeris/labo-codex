@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MIDI : **LOT S1 DE #941 (1.158.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 12 H 15 : **LOT S2 DE #941 (1.159.0) SUR LA BRANCHE `lot-941-s2-regle-60` (worktree `.claude/worktrees/lot-941-s2`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles 1.159 par Grégoire
+
+**Où vit le travail** : `main` = `origin/main` = `6cbe59a0` (S1 poussé, verdict vert ; six specs vertes au second essai seulement : #914, #912, #700, #699, #926, suppression de grille — à surveiller, #685) + ce relais. Branche `lot-941-s2-regle-60` = `6cbe59a0` + `c55eca38` (lot + release 1.159.0). **Rien de S2 n'est poussé.**
+
+**Ce que fait S2** (D2) : `zoneDuCritereDeLaCopie` (synthese-retroaction-data.js), une règle pour le PDF et l'écran — une copie en points se lit à 60 % (décision A : copies enregistrées comprises, même sous une échelle à repères) ; une copie à niveaux garde ses repères. Attentes changées, c'est voulu : `lot3-analytique-niveau.spec.js` (« à consolider » et « Ta force » disparaissent pour une grille en points à repères). Preuve : banc du parcours (D2), `sentinelle-941-s2-regle-60` 15/15, sept mutations rouges.
+
+**Suite** : relecture de Cowork → merge → verdict → push ; puis S3 (D5, C2, C5, et la condition de la mention sans jetons) ; puis #943.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MIDI : **LOT S1 DE #941 (1.158.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `0c8b1328` + `b9ab1bca` (relais) + le merge `f55b80c4` de `lot-941-s1-points-sans-echelle` (`9c69599a` lot + release 1.158.0, `50f374f6` relecture versée) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-941-s1.md`). Nouvelles et deux phrases de l'élève validées telles quelles par Grégoire ; la CONDITION de la mention « Note provisoire » sans jetons suit D5 et se code dans S3.
 
