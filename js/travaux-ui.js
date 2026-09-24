@@ -5164,8 +5164,7 @@
                     selE.value = selectionsCache.echelle;
                 }
                 if (selC && !selC.value && selectionsCache.cartouche) {
-                    selC.value = selectionsCache.cartouche;
-                    selC.dispatchEvent(new Event('change', { bubbles: true }));
+                    window.poserCartoucheParChargeur(selC, selectionsCache.cartouche);   // #944 — pas le geste
                 }
                 // Débloquer la mémorisation maintenant que la restauration est terminée
                 window._bloquerMemorisation = false;
