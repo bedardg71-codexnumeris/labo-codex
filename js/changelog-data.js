@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // 1.159.0 (#941, lot S2) — PROPOSÉ par Claude Code, À SOUMETTRE à Grégoire avant le push.
+            // 1.159.0 (#941, lot S2) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
             version: '1.159',
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
