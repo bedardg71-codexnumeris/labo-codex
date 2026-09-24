@@ -1123,9 +1123,11 @@ function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, z
 }
 
 function _rendreJetonsBilan(da) {
-    if (typeof obtenirConfigJetons !== 'function' || !da) return '';
+    // #941 lot S3 (D5) — seulement les jetons que la pratique DÉCLARE (`jetonsDeclares`, la même règle
+    // que le PDF) : les défauts du code (2 / 2 / 2) n'atteignent jamais l'élève.
+    if (typeof jetonsDeclares !== 'function' || !da) return '';
     try {
-        var configJetons = obtenirConfigJetons();
+        var configJetons = jetonsDeclares();
         if (!configJetons || !configJetons.actif) return '';
         var maxJetons = configJetons.reprise ? configJetons.reprise.nombre : 2;
         var toutesEvalsJ = obtenirDonneesSelonMode('evaluationsSauvegardees');
@@ -1242,21 +1244,23 @@ function genererRetroactionBilan() {
     var html = '';
     html += '<p class="eval-vide" style="margin-bottom:6px;">Mes standards sont très élevés à ton égard parce que je crois que tu as tout ce qu’il faut pour les atteindre et j’ai confiance en toi. Si tu as besoin d’aide, viens me voir.</p>';
     html += '<p class="retro-question" style="margin-bottom:8px;">Selon toi, quel aspect de ta production mériterait le plus d’attention ?</p>';
-    html += '<h5>Présentement, il faut se concentrer sur :</h5>';
-    html += _rendreAlgoA0Bilan(algoA0);
+    // #941 lot S3 (C2) — le titre « Présentement, il faut se concentrer sur : » ne s'écrit que si
+    // quelque chose s'y range : suivi de rien, il partait tel quel dans « Copier tout » (le PDF, lui,
+    // retire déjà sa rangée vide). Le contenu se compose d'abord, le titre suit s'il y a lieu.
+    var presentement = _rendreAlgoA0Bilan(algoA0);
 
     if (defis.length > 0) {
-        html += _rendreDefisBilan(defis, algoA0, niveauDe);
-        html += _rendreSignalesBilan(signales, niveauDe);
+        presentement += _rendreDefisBilan(defis, algoA0, niveauDe);
+        presentement += _rendreSignalesBilan(signales, niveauDe);
     } else if (signales.length > 0) {
         // ⮕ #555 lot 2 — AUCUNE priorité mais des acquis en développement.
         // Avant les repères, ces critères tombaient dans les défis et la section
         // n'était jamais vide ; depuis, le titre restait suivi du VIDE — le
         // symptôme exact de la porte terrain 2.6, réintroduit par mon lot et
         // trouvé par une spec WebKit alors que Vitest restait vert.
-        html += _rendreSignalesBilan(signales, niveauDe);
+        presentement += _rendreSignalesBilan(signales, niveauDe);
     } else if (tousMaitrises) {
-        html += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente,
+        presentement += _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente,
             window.enoncesAlgo.critereAlgorithmiqueOuNomme(grilleDef, evalEnregistree));   // #686
     } else if (criteres.length === 0 && !algoA0) {
         // #576 — LE SILENCE ÉTAIT LA MOITIÉ DU DÉFAUT. Sans critère lisible, le
@@ -1265,8 +1269,9 @@ function genererRetroactionBilan() {
         // l'enseignant·e, de distinguer ça d'un travail sans aucun défi.
         // ⮕ La phrase est écrite POUR L'ÉLÈVE — ce bloc part dans sa rétroaction.
         // Elle constate, elle n'accuse pas l'outil et ne nomme aucune anomalie.
-        html += '<p>Aucun critère n\'est encore évalué pour cette production.</p>';
+        presentement += '<p>Aucun critère n\'est encore évalué pour cette production.</p>';
     }
+    if (presentement) html += '<h5>Présentement, il faut se concentrer sur :</h5>' + presentement;
 
     html += _rendreForceBilan(criteres, defis, niveauDe, zoneCritere, signales);
     html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneCritere, recurrences, enPoints);

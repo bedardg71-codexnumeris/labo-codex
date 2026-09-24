@@ -85,7 +85,7 @@ const echapper = (t) => (t == null ? '' : String(t).replace(/&/g, '&amp;').repla
 const desechapper = (t) => t.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
 /** Le bilan de l'ÉCRAN (copié par « Copier tout ») pour la même copie rouverte — harnais de #940. */
-function bilanEcran(courante, anterieures, niveauAffiche) {
+function bilanEcran(courante, anterieures, niveauAffiche, extra) {
     const enBase = anterieures.concat([courante]);
     const els = {};
     const boite = () => ({ innerHTML: '', classList: { add() {}, remove() {}, toggle() {} } });
@@ -103,7 +103,7 @@ function bilanEcran(courante, anterieures, niveauAffiche) {
         echapperHtml: echapper,
         niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle, niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
         zoneDuNiveau: calculs.zoneDuNiveau, echellesComparables: calculs.echellesComparables, obtenirEchelleResolue: calculs.obtenirEchelleResolue,
-        evaluationEnPoints
+        evaluationEnPoints, ...(extra || {})
     }, wEnonces);
     const niveaux = {}; const points = {};
     courante.criteres.forEach(c => { niveaux[c.critereId] = c.niveauSelectionne; if (typeof c.points === 'number') points[c.critereId] = c.points; });
@@ -229,5 +229,29 @@ describe('#941 S2 · R.e — la révision du principe du 28 août est écrite', 
         const retro = source('js/evaluation-retroaction.js');
         expect(retro).toContain('window.syntheseRetroactionData.zoneDuCritereDeLaCopie(copieVivante, c, _lecteurZoneBilan)');
         expect(retro).toMatch(/lignesRecurrentes\(defis\.concat\(signales\),[\s\S]{0,300}copieVivante\);/);
+    });
+});
+
+// #941 LOT S3 (C2, D5) — le bilan de l'ÉCRAN, celui que « Copier tout » remet à l'élève.
+describe('#941 S3 · l\'écran ne dit pas ce qui ne s\'y range pas', () => {
+    it('C2 — tout à 60 % ou plus : pas de titre « Présentement » suivi de rien', () => {
+        const e = bilanEcran(enPoints('C', J(30), { Compréhension: 36, Structure: 22, Langue: 20 }), []);
+        expect(e.html).not.toContain('Présentement');
+    });
+    it('C2 — une priorité : le titre et sa ligne', () => {
+        const e = bilanEcran(enPoints('C', J(30), { Compréhension: 36, Langue: 12 }), []);
+        expect(e.html).toContain('<h5>Présentement, il faut se concentrer sur :</h5>');
+        expect(e.presentement).toEqual(['Langue (12 / 30) : Écrire correctement']);
+    });
+    it('D5 — aucun jeton déclaré : pas de « Jetons utilisés » (les défauts 2 / 2 / 2 n\'y arrivent pas)', () => {
+        const defauts = { actif: true, delai: { nombre: 2 }, reprise: { nombre: 2 }, repriseCiblee: { actif: true, nombre: 2 } };
+        const e = bilanEcran(enPoints('C', J(30), { Langue: 12 }), [], '--',
+            { jetonsDeclares: () => null, obtenirConfigJetons: () => defauts });
+        expect(e.html).not.toContain('Jetons utilisés');
+    });
+    it('D5 — des jetons déclarés : le bloc paraît', () => {
+        const declares = { actif: true, delai: { nombre: 1 }, reprise: { nombre: 3 }, repriseCiblee: { actif: false } };
+        const e = bilanEcran(enPoints('C', J(30), { Langue: 12 }), [], '--', { jetonsDeclares: () => declares });
+        expect(e.html).toContain('Jetons utilisés : 0 / 3');
     });
 });

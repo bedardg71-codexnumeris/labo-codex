@@ -378,6 +378,19 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
     expect(R.stock.texte, 'stock : Langue prioritaire à 60 %').toContain('Langue (15 / 30)');
     expect(R.stock.texte, 'stock : pas de « Ta force »').not.toContain('Ta force');
 
+    // ── #941 lot S3 (D5, C5) — ce que la synthèse ne dit plus. La pratique sommative de l'assistant ne déclare aucun
+    // jeton : plus de « Délai : 0 / 2 · Reprise : 0 / 2 » (défauts du code), ni au PDF ni dans « Copier tout ».
+    // Sans cartouche, pas d'étiquette « CONTEXTE » vide sur le ruban. Avant S3, le banc imprimait les deux.
+    [0, 1, 2].forEach(i => {
+        expect(pdf(i), 'P' + (i + 1) + ' : pas de jetons non déclarés').not.toMatch(/Jetons utilisés|Délai : 0 \/ 2/);
+        expect(pdf(i), 'P' + (i + 1) + ' : pas de « CONTEXTE » vide').not.toContain('CONTEXTE');
+        expect(pdf(i), 'P' + (i + 1) + ' : le ruban reste (objectif, tâche)').toContain('OBJECTIF');
+    });
+    expect(R.etapes.copierTout.texte, 'Copier tout : pas de jetons non déclarés').not.toContain('Jetons utilisés');
+    // La mention sous la note provisoire, sous la condition de D5 : sans jetons déclarés, elle n'en parle pas.
+    expect(pageP3, 'P3 : la mention sans jetons').toContain('Note provisoire — peut changer selon tes prochains travaux.');
+    expect(pageP3, 'P3 : aucun mot de jetons').not.toContain('application de jetons');
+
     // Le stock (décision A) : plus de nom de niveau, rien de réécrit.
     expect(R.stock.texte, 'stock : aucun nom de niveau').not.toMatch(NOMS_NIVEAUX);
     expect(R.stock.texte, 'stock : la note de la copie').toContain('Note de la copie : 62 %');

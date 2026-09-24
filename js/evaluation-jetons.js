@@ -175,6 +175,27 @@ function obtenirConfigJetons() {
 }
 
 /**
+ * #941 lot S3 (D5, décision de Grégoire du 24 sept. 2026) — LES JETONS QUE LA PRATIQUE DÉCLARE,
+ * ou `null`. Ce que l'élève lit des jetons (le bloc « Jetons utilisés » de la synthèse, PDF et
+ * écran, et la mention « Note provisoire ») n'existe que si la pratique déclare des jetons ACTIFS.
+ * Les valeurs par défaut de `obtenirConfigJetons` (2 / 2 / 2) n'atteignent jamais l'élève : il
+ * lirait des délais et des reprises que son enseignant·e n'offre pas.
+ *   · pratique configurable active : son bloc de jetons, s'il existe et est actif ;
+ *   · sinon, l'ancien réglage explicite (`modalitesEvaluation.configurationJetons`), s'il est actif :
+ *     c'est une déclaration de l'enseignant·e, pas un défaut ;
+ *   · sinon : `null`.
+ * `obtenirConfigJetons` garde ses défauts pour les gestes de l'enseignant·e (appliquer un jeton).
+ */
+function jetonsDeclares() {
+    const depuisPratique = obtenirConfigJetonsPratique();
+    if (depuisPratique) return depuisPratique.actif ? depuisPratique : null;
+    const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
+    if (!modalites.configurationJetons) return null;
+    const config = obtenirConfigJetons();
+    return (config && config.actif) ? config : null;
+}
+
+/**
  * Compte le nombre de jetons utilisés par un étudiant pour un type donné
  * @param {string} da - Code permanent de l'étudiant
  * @param {string} type - Type de jeton ('delai' ou 'reprise')
@@ -983,6 +1004,7 @@ function retirerJetonPersonnalise(da, jetonId) {
 
 // Exporter les fonctions vers window pour qu'elles soient accessibles globalement
 window.obtenirConfigJetons = obtenirConfigJetons;
+window.jetonsDeclares = jetonsDeclares;   // #941 lot S3 (D5)
 window.obtenirConfigJetonsPratique = obtenirConfigJetonsPratique;  // #328 L2-c (réutilisé par les lecteurs migrés)
 window.compterJetonsUtilises = compterJetonsUtilises;
 window.verifierDisponibiliteJeton = verifierDisponibiliteJeton;
