@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, DÉBUT D'APRÈS-MIDI : **LOT S2 DE #941 (1.159.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 13 H : **LOT S3 DE #941 (1.159.1) SUR LA BRANCHE `lot-941-s3-ce-que-la-synthese-tait` (worktree `.claude/worktrees/lot-941-s3`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
+
+**Où vit le travail** : `main` = `origin/main` = `2ae88f30` (S2 poussé, verdict vert ; seule `planif-zone-non-planifie-929` au second essai) + ce relais. Branche S3 = `2ae88f30` + `3d08d222` (lot + release 1.159.1). **Rien de S3 n'est poussé.**
+
+**Ce que fait S3** : `jetonsDeclares` (evaluation-jetons.js), une règle pour le bloc « Jetons utilisés » (PDF, écran) et la mention « Note provisoire » (D5) ; le titre « Présentement » ne s'écrit plus suivi de rien à l'écran et dans « Copier tout » (C2) ; le ruban du PDF sans étiquette vide (C5). Attente changée, c'est voulu : `sentinelle-575-ordre-niveaux-derive-echelle` (« le titre reste, suivi de rien »). Preuve : banc du parcours, `sentinelle-941-s3` 7/7, sept mutations rouges.
+
+**Suite** : relecture de Cowork → merge (et coche de #941) → verdict → push ; puis #943.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, DÉBUT D'APRÈS-MIDI : **LOT S2 DE #941 (1.159.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `6cbe59a0` (S1, poussé) + `21ba4b63` (relais) + le merge `90232db7` de `lot-941-s2-regle-60` (`c55eca38` lot + release, `ce9822ac` relecture versée) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-941-s2.md`) ; la supposition (60 % pour toute copie en points, même sous une échelle à repères) retenue par Grégoire et versée à `DECISIONS-2026-09-24-parcours-sommatif.md` ; Nouvelles 1.159 validées.
 
