@@ -1,53 +1,39 @@
-# Consigne du jour – Une seule carte « Exporter des travaux » (#895)
+# Consigne du jour – La barre « Assiduité (A) » du Suivi du groupe dit pourquoi elle est vide (#830)
 
-> Écrite le 23 septembre 2026, 16 h 50 (Toronto), par Cowork, sur `origin/main` = `c5dec89e` (1.155.7, en production chez Netlify depuis 16 h 19, déploiement mesuré ; les deux textes validés du lot N6 vérifiés mot pour mot sur `main`). **Proposée** tant que Grégoire ne l'a pas relayée.
-> La précédente (lot N6, livrée en 1.155.7) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-n6-reglages.md` (déplacée par Cowork, à commiter avec ce lot). La file des pratiques de notation est vide ; retire aussi la ligne « une seule carte « Exporter des travaux » (#895) » de la tête de `FILE-DES-LOTS.md` à la livraison.
-> **La fiche fait foi** : `BACKLOG.md`, #895, et sa décision : `plans de travail/DECISIONS-2026-09-17-apres-midi.md`. Dernier lot de l'audit « Exporter et archiver » du 16 sept.
+> Écrite le 23 septembre 2026, soir (Toronto), par Cowork, sur `origin/main` = `642ce374` (1.156.0 en ligne).
+> La précédente (#895, livrée en 1.156.0) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-895-une-carte-exporter.md` (déplacée par Cowork, à commiter avec ce lot).
+> **La fiche fait foi** : `BACKLOG.md`, #830, dernier sous-point « Ce qui reste, inscrit ». Symptôme VÉCU par Grégoire le 11 sept. (quatre sondes pour trouver ce qu'un texte aurait dit).
 
-## 0 · La décision de Grégoire (17 sept. 2026, 13 h 36) – elle fait foi
+## 0 · Le geste, en une phrase
 
-**Une seule carte « Exporter des travaux »**, avec la **forme des dossiers** (par étudiant·e / par étudiant·e et production) et la **compression** en options, et **« Toutes / Tous » accepté comme un export complet**. Écartés : garder les deux cartes en réparant le refus ; retirer « Trimestre complet » sans reprendre sa forme.
+Dans Suivi du groupe, quand des présences existent pour le groupe mais qu'aucune séance de l'horaire ne porte son nombre de périodes, la barre « Assiduité (A) » affiche une phrase au lieu d'une barre nue.
 
-## 1 · Ce que Cowork a mesuré (lecture seule, 16 h 45)
+## 1 · La phrase – VALIDÉE par Grégoire le 23 sept. 2026, mot pour mot
 
-- **Deux cartes** dans `genererSectionArchivage` (ou équivalent, `js/travaux-ui.js` ≈ l. 1280-1330) : « Exporter des travaux » (menus `travaux-archivage-production` / `-etudiant`, bouton `travauxUI.lancerArchivage`) et « Trimestre complet » (menus `travaux-archivage-semestre-*`, barre de progression, bouton `travauxUI.lancerArchivageSemestre`). Mêmes filtres, mêmes contenus (originaux, annotés, évaluations JSON).
-- **Le refus** : `lancerArchivage` (`travaux-ui.js` ≈ l. 3597-3606) fait `alert('Sélectionne au moins un étudiant ou une production')` quand les deux menus sont à leur valeur de départ « Toutes / Tous ». Un `alert` natif, en plus.
-- **Deux moteurs** dans `js/travaux-archivage.js` : `exporterTravaux(da, productionId)` (l. 163, arborescence `étudiant·e/fichier`, sans compression) et `exporterSemestre(options, onProgression)` (l. ≈ 232, arborescence `étudiant·e/production/fichier`, `_resume.json` avec les pertes nommées, DEFLATE niveau 6, progression).
-- **⚠ Une différence qui compte pour tes données** : `lancerExport` marque « exporté » ce qui est réellement parti (`marquerExporte`, #891, ≈ l. 615-618) ; `lancerExportSemestre` (l. 680) **ne marque rien**. Or « Proposer un nettoyage » ne propose que des copies exportées (#892).
-- **L'aide** décrit les deux cartes (`index.html` ≈ l. 11735-11736) ; elle a été réécrite en 1.151.4 (#893, spec `aide-exporter-archiver-893.spec.js`).
+> Assiduité non calculée : aucune séance de l'horaire ne porte son nombre de périodes. Tu peux le saisir dans Cadre › Trimestre › Horaire.
 
-## 2 · Ce que fait le lot
+(Le chemin « Cadre › Trimestre › Horaire » est celui qu'emploient déjà l'aide et `cc-license.js` ; l'accordéon s'appelle « Horaire » dans la barre de convergence de la section Trimestre – mesuré par Cowork, `index.html` ≈ l. 6192.)
 
-**2a. Une carte, un moteur.** « Exporter des travaux » garde ses deux menus (Production, Étudiant·e), gagne deux options (forme des dossiers ; compression) et la barre de progression. « Toutes / Tous » exporte tout le groupe, sans refus. « Trimestre complet » disparaît, **et l'un des deux moteurs avec lui** (zéro-dette) : un seul `exporter…` porte les deux arborescences, `_resume.json`, les pertes nommées (#565, #891) et la compression. Lequel garder, et sous quel nom, relève de toi.
+## 2 · Ce que Cowork a mesuré (lecture seule, à REMESURER avant de coder)
 
-**2b. « Exporté » suit la règle de #891 pour tout export.** Tout fichier réellement mis dans l'archive est marqué « exporté », quelle que soit l'option. **Décidé par Cowork (technique)** : c'est la règle déjà livrée, appliquée au chemin qui y échappait. Conséquence à écrire dans le rapport : un export complet rend ses fichiers éligibles à « Proposer un nettoyage », qui, lui, ne supprime toujours rien sans la question de #892.
+- `js/tableau-bord-apercu.js`, `afficherMetriquesGlobales` (≈ l. 1621) : l'assiduité « connue » se juge par `assiduite !== null` depuis le lot D (≈ l. 1720-1726) ; un texte d'attente existe déjà pour A (`texteAttenteA`, ≈ l. 1706 : « N séances en attente ») et part dans `genererBarreDistribution(…, texteAttente, nbTotal)` (≈ l. 1931). C'est vraisemblablement le bon endroit : un cas de plus pour ce texte, pas un second mécanisme. **Toi seul départages** après mesure.
+- La condition exacte est à mesurer, pas à deviner : « des présences existent pour le groupe ET aucune séance de l'horaire n'a de nombre de périodes ». L'écran Horaire compte déjà « N sans nombre de périodes » (`trimestre-v2-horaires.js` ≈ l. 293) : lis sa source pour ne pas écrire une seconde définition de « séance sans périodes ». Rappel : depuis 1.131.1, `obtenirSeancesHoraire` projette `horaire.periodesParSeance` sur les séances qui n'ont pas la leur – un horaire au format déclaré n'est donc PAS dans ce cas.
+- Cas à distinguer, et à dire dans ton rapport : (a) aucune présence saisie du tout → comportement actuel inchangé ; (b) présences, mais certaines séances seulement sans périodes → hors de ce lot (la barre se calcule sur les autres) : dis ce qu'elle affiche, sans corriger ; (c) présences, aucune séance avec périodes → la phrase.
 
-**2c. Les valeurs par défaut des options.** **Décidé par Cowork** : forme « par étudiant·e et production » et compression activée, soit la forme de « Trimestre complet » (la plus complète et la plus légère). Si tu mesures que cela change le résultat d'un parcours existant (spec, banc) au-delà de l'arborescence, dis lequel.
+## 3 · Limites
 
-**2d. Le refus disparaît avec son `alert`.** Aucune sélection n'est plus « invalide ». Si un filtre ne donne aucun fichier, le bilan de l'export le dit (mécanisme existant de `_afficherBilanExport`), sans `alert`.
+- Aucune donnée écrite. Lecture seule sur les présences et l'horaire.
+- Un seul fichier de code attendu (`tableau-bord-apercu.js`), plus le banc. Si la mesure exige d'en toucher un autre, dis pourquoi en une ligne et continue si c'est technique.
+- Pas de lien cliquable vers l'Horaire : la phrase nomme le chemin, c'est tout ce qui est validé. Un lien serait un autre lot.
+- La bulle « A — » et le filtre « A ou C < 70% » (1.147.0) ne bougent pas.
 
-**2e. Les mots.** Les libellés des deux options et de leurs choix, et la phrase de l'aide qui remplace les deux lignes de cartes, sont lus par les enseignant·es : **propose-les dans le rapport**, sur le modèle des mots déjà à l'écran (« Évaluations en JSON + productions en PDF », « étudiant·e »). Grégoire les validera avant le push.
+## 4 · Preuve attendue
 
-## 3 · Arrêt prévu
+- Un banc WebKit qui monte le cas (c) – présences + horaire sans aucune période – et lit la phrase dans la barre A, mot pour mot ; et le cas (a) qui ne l'affiche pas. Si le moteur de ces cas est une fonction pure, un essai Vitest en plus.
+- Break-tests : condition inversée, phrase retirée – chacune rouge.
+- « Nouvelles » : patch 1.156.1. **Proposition de Cowork, à soumettre à Grégoire avant le push** : « Suivi du groupe : quand aucune séance de l'horaire ne porte son nombre de périodes, la barre Assiduité le dit et indique où le saisir, au lieu de rester vide. »
+- Relecture croisée de Cowork avant la fusion (règle 2 du PROTOCOLE), puis verdict, fusion, push. À la livraison : #830 se coche (c'était son dernier reste) ; retire-la de `FILE-DES-LOTS.md` si elle y figure.
 
-Si le moteur retiré est appelé ailleurs que depuis cette carte (export Léa, archivage d'un trimestre, Réserve, un bouton d'un autre écran), **arrête-toi et dis où** : ce chemin-là ne disparaît pas sans décision.
+## 5 · Porte terrain
 
-## 4 · Tests
-
-- Carte unique : « Toutes / Tous » produit une archive complète (tous les fichiers du groupe, `_resume.json` compris) ; une production seule ; un·e étudiant·e seul·e ; les deux.
-- Les deux formes de dossiers, les deux états de compression.
-- Un fichier illisible : sauté, nommé dans le bilan et dans `_resume.json`, les autres partent (#891).
-- « Exporté » : posé sur ce qui est parti, et seulement là, dans chaque option.
-- Sentinelle : plus de carte « Trimestre complet », plus de `lancerArchivageSemestre`, plus d'`alert` dans ce chemin, un seul moteur.
-- La spec de l'aide (#893) suit le nouveau texte.
-- Break-test sur chaque assertion ; suite Vitest complète verte ; une spec WebKit qui télécharge réellement l'archive par le bouton et lit son contenu.
-
-## 5 · Livraison
-
-- Version **mineure** par `scripts/release.mjs` (un geste change de forme à l'écran). Item de « Nouvelles » **proposé, à valider par Grégoire avant le push**.
-- Ordre : commit, relecture de Cowork, corrections, **revérification de Cowork si du code change**, verdict, push.
-- **Porte terrain** : le téléchargement d'une archive sur iPad (Safari) ne se juge pas en WebKit de bureau. Si tu l'estimes due, écris son markdown dans `plans de travail/` (skill `portes-terrain`) ; Cowork publie l'artefact.
-
-## 6 · Le geste que Grégoire vérifiera à l'écran
-
-Dans « Exporter et archiver », une seule carte « Exporter des travaux » ; laisser « Toutes / Tous » et cliquer « Télécharger » donne l'archive de tout le groupe, rangée par étudiant·e et par production.
+Une seule rangée possible, et seulement si Grégoire a encore un trimestre dont l'horaire n'a aucune période saisie : ouvrir le Suivi de ce groupe et lire la phrase. Sinon, aucune porte (il ne crée pas de données fictives).
