@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 7 H 15 : **LOT #939 (1.156.3) SUR LA BRANCHE `lot-939-commentaire-critere`, NON FUSIONNÉ** — attend la relecture croisée de Cowork (fermé pendant la session)
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MATIN : **LOT #939 (1.156.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `28d66162` + le relais `e477971c` + le merge `27adf716` de `lot-939-commentaire-critere` (`738e01bc` lot, `d08a8680` release 1.156.3) + ce relais. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-939.md` : 70/70, sept mutations rouges ; remarque d'issue 3 sur les reprises, sans suite). Arbre principal remis à l'état de `main` avant la fusion (§3 de la relecture). #939 coché ; le lot sort de FILE-DES-LOTS.
+
+**Suite** : aucune porte terrain. Branche `lot-939-commentaire-critere` et son worktree supprimables une fois le push constaté. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 7 H 15 : **LOT #939 (1.156.3) SUR LA BRANCHE `lot-939-commentaire-critere`, NON FUSIONNÉ** — attend la relecture croisée de Cowork (fermé pendant la session)
 
 **Où vit le travail** : branche `lot-939-commentaire-critere` (worktree `.claude/worktrees/lot-939`) = `28d66162` + `738e01bc` (lot, avec la consigne du jour et l'ancienne consigne de Cowork) + `d08a8680` (release 1.156.3, Nouvelles). `main` = `origin/main` + ce relais. Rien n'est poussé. ⚠ L'arbre principal garde en non commité les deux fichiers de consigne de Cowork, identiques à ceux de la branche : les retirer de l'arbre (`git checkout -- "plans de travail/CONSIGNE-DU-JOUR.md"` et supprimer l'ancienne consigne non suivie) AVANT le merge, sinon git le refuse.
 
