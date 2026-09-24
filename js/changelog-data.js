@@ -29,7 +29,7 @@
                 '«&nbsp;Exporter des travaux&nbsp;» remplace maintenant «&nbsp;Trimestre complet&nbsp;». Laisse «&nbsp;Toutes&nbsp;» et «&nbsp;Tous&nbsp;» et clique «&nbsp;Télécharger&nbsp;» : tu reçois l\'archive de tout le groupe, sans avoir à choisir d\'abord une production ou un·e étudiant·e. Deux options s\'ajoutent : ranger les dossiers par étudiant·e et production, ou par étudiant·e seulement, et compresser l\'archive. Toute copie mise dans l\'archive est marquée «&nbsp;exportée&nbsp;», archive complète comprise&nbsp;: «&nbsp;Proposer un nettoyage&nbsp;» peut donc te la proposer, et rien n\'est retiré sans ta confirmation.',
                 // 1.156.1 (#830) — VALIDÉ par Grégoire le 23 sept. 2026, tel quel (proposition de Cowork).
                 'Suivi du groupe&nbsp;: quand aucune séance de l\'horaire ne porte son nombre de périodes, la barre Assiduité le dit et indique où le saisir, au lieu de rester vide.',
-                // 1.156.2 (#760, #759) — PROPOSITION de Cowork, À VALIDER par Grégoire avant le push.
+                // 1.156.2 (#760, #759) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (proposition de Cowork).
                 'Rétroaction&nbsp;: le bloc «&nbsp;Observations&nbsp;» liste maintenant les tampons que tu poses, avec tes noms, tes textes et tes catégories, comme la rétroaction spécifique. Le texte copié vers Léa garde ses phrases séparées.'
             ]
         },
