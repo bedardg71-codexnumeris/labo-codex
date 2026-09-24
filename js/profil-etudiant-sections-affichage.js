@@ -104,7 +104,7 @@ function _construireArtefactMobilisation(art, evaluation) {
         description: art.description || art.titre,
         remis: estRemis,
         note: evaluation?.noteFinale ?? null,
-        niveau: evaluation?.niveauFinal ?? null,
+        niveau: _niveauVuProfil(evaluation),   // #941 lot S1 — aucun pour une copie en points
         // #575 — l'échelle de CETTE évaluation, pour que la vue n'ait pas à la
         // deviner. Sans elle, le badge choisissait « l'échelle active, sinon la
         // première » et pouvait colorer un code avec la couleur d'un autre.
@@ -2842,6 +2842,22 @@ function _determinerBadgeTypeEvaluation(evaluation) {
     return null;
 }
 
+/**
+ * #941 lot S1 (décision A, 24 sept. 2026) — le niveau qu'une vue du profil peut montrer : aucun
+ * pour une copie en points (`niveauFinalAffichable`, gabarits-utils.js), ni « -- » ; sinon le code.
+ */
+function _niveauVuProfil(evaluation) {
+    if (!evaluation) return null;
+    if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation) || null;
+    return evaluation.niveauFinal ?? null;
+}
+
+/** #941 lot S1 — « D » + espace devant une note, ou rien quand il n'y a pas de niveau à montrer. */
+function _prefixeNiveau(evaluation) {
+    const niv = _niveauVuProfil(evaluation);
+    return niv ? niv + ' ' : '';
+}
+
 function _construireLigneProductionEvaluee(production, evaluation, indexArtefact) {
     const statutRemise = evaluation.statutRemise || 'evalue';
     const statutIntegrite = evaluation.statutIntegrite || 'recevable';
@@ -2850,9 +2866,10 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
     return {
         production: production.titre,
         description: production.activiteApprentissage || production.description || production.titre,
+        // #941 lot S1 — sans niveau affichable (copie en points), la note seule.
         note: (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
-            ? `${evaluation.niveauFinal} ${badgeNoteDifferee()}`   // #321 : niveau IDME gardé, % masqué
-            : `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
+            ? `${_prefixeNiveau(evaluation)}${badgeNoteDifferee()}`   // #321 : niveau IDME gardé, % masqué
+            : `${_prefixeNiveau(evaluation)}${evaluation.noteFinale}%`,
         date: _calculerEcheanceFormateeProduction(production),
         statut: estNonRemis ? 'non-remis' : 'evalue',
         statutRemise: statutRemise,
@@ -2968,6 +2985,7 @@ function genererSectionProductions(da) {
                 titreProd: prod?.titre || `Artefact ${i + 1}`,
                 activite:  prod?.activiteApprentissage || prod?.description || '',
                 niveau:    art.niveau,
+                enPoints:  !!art.enPoints,   // #941 lot S1
                 note:      art.note,
                 categorie: prod?.categorie || null
             };
@@ -2980,14 +2998,18 @@ function genererSectionProductions(da) {
         const renderLigneRetenu = (r) => {
             const noteTxt = differee ? badgeNoteDifferee()
                 : ((typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—');
-            const marqueur = `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
+            // #941 lot S1 — une copie en points n'a pas de niveau : pas de « ? » devant sa note.
+            const marqueur = r.enPoints ? noteTxt : `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
             const activite = r.activite ? ` : ${echapperHtml(r.activite)}` : '';
             return `<li>${echapperHtml(r.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
         const renderLigneObligatoire = (o) => {
             const aNote = (typeof o.note === 'number');
             const noteTxt = aNote ? (differee ? badgeNoteDifferee() : `${o.note.toFixed(1)}%`) : null;
-            const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}` : (o.brouillon ? 'évaluation non enregistrée, non comptée' : 'non remis');
+            // #941 lot S1 — une obligatoire en points est notée sans niveau : sa note, jamais « non remis ».
+            const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}`
+                : (o.enPoints && noteTxt) ? noteTxt
+                : (o.brouillon ? 'évaluation non enregistrée, non comptée' : 'non remis');
             const activite = o.activite ? ` : ${echapperHtml(o.activite)}` : '';
             return `<li>${echapperHtml(o.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
@@ -3019,7 +3041,8 @@ function genererSectionProductions(da) {
                 return {
                     titreProd: prod.titre || obtenirTermeProduction('singulier', true),
                     activite:  prod.activiteApprentissage || prod.description || '',
-                    niveau:    evalObl ? (evalObl.niveauFinal || null) : null,
+                    niveau:    evalObl ? _niveauVuProfil(evalObl) : null,   // #941 lot S1
+                    enPoints:  !!evalObl && typeof evaluationEnPoints === 'function' && evaluationEnPoints(evalObl),
                     note:      evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
                     brouillon: brouillon
                 };
@@ -3126,7 +3149,7 @@ function genererSectionProductions(da) {
                 <div class="note-finale-composante">
                     <div class="note-finale-composante-titre">${echapperHtml(terminal.nom)}</div>
                     <div class="note-finale-artefacts">
-                        ${terminal.niveau ? `Niveau atteint : <strong>${echapperHtml(terminal.niveau)}</strong>` : '<span class="note-finale-non-evalue">Non évaluée</span>'}
+                        ${terminal.niveau ? `Niveau atteint : <strong>${echapperHtml(terminal.niveau)}</strong>` : (terminal.enPoints ? '' : '<span class="note-finale-non-evalue">Non évaluée</span>')}
                     </div>
                     <div class="note-finale-valeur-ligne">
                         <span class="note-finale-valeur ${terminal.note === null ? 'note-finale-tiret' : ''}">
@@ -3499,7 +3522,7 @@ function genererSectionCompletion(da) {
             description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
             note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
-            niveau: evaluation?.niveauFinal ?? null,
+            niveau: _niveauVuProfil(evaluation),   // #941 lot S1
             jetonReprise: evaluation?.repriseDeId ? true : false,
             jetonDelai: evaluation?.jetonDelaiApplique ? true : false
         };
@@ -3924,7 +3947,8 @@ function _genererNoteSessionSommative(da) {
 
     const ligne = (r, grise) => {
         const noteTxt = differee ? badgeNoteDifferee() : ((typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—');
-        const marqueur = `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
+        // #941 lot S1 — une copie en points n'a pas de niveau : pas de « ? » devant sa note.
+        const marqueur = r.enPoints ? noteTxt : `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
         // En texte, pas en pastille : `.note-finale-ponderation` est une pastille sombre, trop lourde dans une liste.
         const suite = grise
             ? ` <span class="note-finale-non-evalue">· ${echapperHtml(r.detail || '')}</span>`

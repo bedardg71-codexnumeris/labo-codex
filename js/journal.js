@@ -119,7 +119,9 @@ function capturerFinEvaluation(evaluation, dureeMs) {
         dureeMs: dureeMs || null,
         dureeSec: dureeMs ? Math.round(dureeMs / 1000) : null,
         noteFinale: evaluation.noteFinale,
-        niveauFinal: evaluation.niveauFinal,
+        // #941 lot S1 — une copie en points n'a pas de niveau à journaliser (décision A) ; les
+        // entrées déjà écrites restent telles quelles.
+        niveauFinal: (typeof niveauFinalAffichable === 'function') ? niveauFinalAffichable(evaluation) : evaluation.niveauFinal,
         statutIntegrite: evaluation.statutIntegrite
     });
 

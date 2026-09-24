@@ -150,7 +150,11 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
 
     grille.criteres.forEach((critere, index) => {
         const niveau = evaluationEnCours.criteres[critere.id];
-        if (!niveau) return;
+        // #941 lot S1 — sans échelle, un critère en points n'a pas de niveau déduit : ses
+        // points suffisent pour qu'il s'écrive.
+        const ptsDuCritere = (critere.type === 'analytique' && evaluationEnCours.pointsAnalytiques)
+            ? evaluationEnCours.pointsAnalytiques[critere.id] : undefined;
+        if (!niveau && !(typeof ptsDuCritere === 'number' && !isNaN(ptsDuCritere))) return;
 
         // Marquer la position du critère actif avant d'ajouter le texte
         if (critere.id === critereActifId) {
@@ -239,9 +243,19 @@ function _rendreAnnotationsVisuelles() {
     return _rendreObservationsAnnotations(statsAnnot) + _rendreErreursFrancaisAnnotations(statsAnnot);
 }
 
+/** #941 lot S1 — la grille de l'évaluation en cours est-elle entièrement en points ? */
+function _grilleEnCoursEnPoints() {
+    if (!evaluationEnCours || typeof window.grilleEntierementEnPoints !== 'function') return false;
+    const grille = (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.id === evaluationEnCours.grilleId);
+    return window.grilleEntierementEnPoints(grille);
+}
+
 function _rendreNoteFinale() {
     const modeNote = document.querySelector('input[name="affichageNote1"]:checked')?.value || 'complet';
-    if (modeNote === 'lettre') {
+    // #941 lot S1 (D1, décision A) — une grille en points n'a que des chiffres : ni « Niveau de
+    // performance », ni « | Niveau : X ». La note chiffrée s'écrit seule, quel que soit le mode.
+    const enPoints = _grilleEnCoursEnPoints();
+    if (modeNote === 'lettre' && !enPoints) {
         if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
             return `---\nNiveau de performance : ${evaluationEnCours.niveauFinal}`;
         }
@@ -259,7 +273,7 @@ function _rendreNoteFinale() {
     if (noteAffichee && noteAffichee !== '--') {
         texte += `---\nNote finale : ${noteAffichee}`;
     }
-    if (evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
+    if (!enPoints && evaluationEnCours.niveauFinal && evaluationEnCours.niveauFinal !== '--') {
         texte += `  |  Niveau : ${evaluationEnCours.niveauFinal}`;
     }
     return texte;
@@ -768,14 +782,16 @@ function _collecterCriteresBilan(grilleDef, ec, enregistree) {
     if (grilleDef && grilleDef.criteres) {
         grilleDef.criteres.forEach(function(gc) {
             var niv = ec.criteres[gc.id];
-            if (niv) {
-                var entree = { critereNom: gc.nom, critereId: gc.id, niveauSelectionne: niv, description: gc.description || '' };
-                // Lot 3, retouche du 4 sept. 2026 — un critère analytique porte ses POINTS
-                // (source : `pointsAnalytiques`, lot 2) et le poids de la grille : le bilan
-                // le nomme par son chiffre, jamais par le nom du niveau déduit (arrêté 4).
-                // ⚠ Lus sur `ec`, l'état vivant (#699 : le nu l'emporte), comme les niveaux.
-                var pts = (gc.type === 'analytique' && ec.pointsAnalytiques) ? ec.pointsAnalytiques[gc.id] : undefined;
-                if (typeof pts === 'number' && !isNaN(pts)) { entree.points = pts; entree.ponderation = gc.ponderation || 0; }
+            // Lot 3, retouche du 4 sept. 2026 — un critère analytique porte ses POINTS
+            // (source : `pointsAnalytiques`, lot 2) et le poids de la grille : le bilan
+            // le nomme par son chiffre, jamais par le nom du niveau déduit (arrêté 4).
+            // ⚠ Lus sur `ec`, l'état vivant (#699 : le nu l'emporte), comme les niveaux.
+            var pts = (gc.type === 'analytique' && ec.pointsAnalytiques) ? ec.pointsAnalytiques[gc.id] : undefined;
+            var aDesPoints = typeof pts === 'number' && !isNaN(pts);
+            // #941 lot S1 — sans échelle, pas de niveau déduit : les points suffisent.
+            if (niv || aDesPoints) {
+                var entree = { critereNom: gc.nom, critereId: gc.id, niveauSelectionne: niv || '', description: gc.description || '' };
+                if (aDesPoints) { entree.points = pts; entree.ponderation = gc.ponderation || 0; }
                 criteres.push(entree);
             }
         });
@@ -790,11 +806,12 @@ function _collecterCriteresBilan(grilleDef, ec, enregistree) {
     enregistree.criteres.forEach(function(c) {
         if (!c || !c.critereId) return;
         var niv = ec.criteres[c.critereId];
-        if (!niv) return;
+        var enregistreAvecPoints = typeof c.points === 'number' && !isNaN(c.points);   // #941 lot S1
+        if (!niv && !enregistreAvecPoints) return;
         var entree = {
             critereNom: c.critereNom || c.critereId,
             critereId: c.critereId,
-            niveauSelectionne: niv,
+            niveauSelectionne: niv || '',
             description: ''
         };
         // Lot 3, retouche — relu depuis `criteres[]` en base : les points et le poids

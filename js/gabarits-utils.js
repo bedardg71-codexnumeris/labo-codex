@@ -91,6 +91,50 @@
         return LIBELLES_COMPOSITION[[...types][0]] || '';
     }
 
+    /**
+     * #941 lot S1 (24 sept. 2026) — UNE GRILLE ENTIÈREMENT EN POINTS se note sans échelle
+     * (décision D1 de Grégoire : les points « remplacent ni plus ni moins l'échelle de
+     * performance »). Même règle que le badge « ANALY » : tous ses critères sont analytiques.
+     * Une grille mixte n'en est pas une, et ne change pas.
+     */
+    function grilleEntierementEnPoints(grille) {
+        return compositionGrille(grille) === 'ANALY';
+    }
+
+    /**
+     * #941 lot S1 — UNE ÉVALUATION EN POINTS, lue dans l'évaluation seule (les lecteurs n'ont
+     * pas tous sa grille, ni son trimestre) : chaque critère enregistré porte ses `points`
+     * (les collecteurs ne les écrivent que pour un critère analytique). C'est le prédicat que
+     * les rendus du lot 3 lisaient déjà critère par critère (« points présent »).
+     * Sans `criteres[]` (brouillon commencé), les points saisis décident.
+     * ⮕ Décision A de Grégoire (24 sept.) : une telle évaluation ne montre JAMAIS de nom de
+     * niveau, copies déjà enregistrées comprises — règle d'affichage, rien n'est réécrit.
+     * Une échelle choisie exprès peut servir en coulisse (cartouche par niveau) ; son nom
+     * ne s'affiche pas.
+     */
+    function evaluationEnPoints(evaluation) {
+        if (!evaluation || typeof evaluation !== 'object') return false;
+        const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres.filter(Boolean) : [];
+        if (criteres.length > 0) {
+            return criteres.every(c => typeof c.points === 'number' && !isNaN(c.points));
+        }
+        const pts = evaluation.pointsAnalytiques;
+        return !!pts && typeof pts === 'object'
+            && Object.values(pts).some(v => typeof v === 'number' && !isNaN(v));
+    }
+
+    /**
+     * #941 lot S1 — LE NIVEAU GÉNÉRAL QU'UN ÉCRAN PEUT MONTRER : '' pour une évaluation en
+     * points (décision A, même une copie enregistrée avec l'échelle de départ) et pour le
+     * « -- » que le calcul écrit faute de niveau ; sinon `niveauFinal`. Les lecteurs d'affichage
+     * passent par ici ; les calculs (rangs, zones) gardent leur lecture.
+     */
+    function niveauFinalAffichable(evaluation) {
+        if (!evaluation || evaluationEnPoints(evaluation)) return '';
+        const niv = evaluation.niveauFinal;
+        return (niv && niv !== '--') ? String(niv) : '';
+    }
+
     /** Le badge de composition d'une grille — '' quand il n'y a rien à dire. */
     function genererBadgeComposition(grille) {
         const code = compositionGrille(grille);
@@ -281,6 +325,9 @@
         // Composition d'une grille (3 sept. 2026, volet C)
         compositionGrille,
         genererBadgeComposition,
+        grilleEntierementEnPoints,   // #941 lot S1
+        evaluationEnPoints,          // #941 lot S1
+        niveauFinalAffichable,       // #941 lot S1
 
         // Interface utilisateur
         genererSeparateur,
@@ -290,6 +337,11 @@
         ajouterGabaritsDefautSiManquants,
         initialiserTousLesGabarits
     };
+    // #941 lot S1 — aussi en nom global : une trentaine de lecteurs, dans des fichiers
+    // chargés après celui-ci, posent la même question.
+    window.grilleEntierementEnPoints = grilleEntierementEnPoints;
+    window.evaluationEnPoints = evaluationEnPoints;
+    window.niveauFinalAffichable = niveauFinalAffichable;
 
     // Initialiser les gabarits au chargement
     if (document.readyState === 'loading') {

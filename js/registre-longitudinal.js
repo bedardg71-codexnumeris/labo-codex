@@ -720,7 +720,9 @@
         if (ev.dateEvaluation) poser(entete, 'span', 'rl-meta', formaterDate(ev.dateEvaluation));
         const note = [];
         if (ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '') note.push(MOTS.noteFinale + ' : ' + formaterNote(ev.noteFinale));
-        if (ev.niveauFinal) note.push(libelleNiveau(ev.niveauFinal, echelle));
+        // #941 lot S1 (décision A) — une copie en points : ni niveau général, ni niveau par critère.
+        const enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(ev);
+        if (ev.niveauFinal && !enPoints) note.push(libelleNiveau(ev.niveauFinal, echelle));
         if (note.length) poser(entete, 'span', 'rl-tuile-note', note.join(' · '));
         const contexte = [];
         if (ev.grilleNom) contexte.push(String(ev.grilleNom));
@@ -730,7 +732,9 @@
         if (criteres.length) {
             const ul = poser(tuile, 'ul', 'rl-criteres');
             criteres.forEach((c) => {
-                const niveau = libelleNiveau(c.niveauSelectionne !== undefined ? c.niveauSelectionne : c.niveau, echelle);
+                const niveau = (typeof c.points === 'number')
+                    ? `${c.points} / ${c.ponderation}`
+                    : libelleNiveau(c.niveauSelectionne !== undefined ? c.niveauSelectionne : c.niveau, echelle);
                 poser(ul, 'li', '', String(c.critereNom || c.nom || c.critereId || c.id || '') + (niveau ? ' : ' + niveau : ''));
             });
         }
