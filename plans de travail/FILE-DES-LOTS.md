@@ -16,7 +16,7 @@
 
 ## Demandes de Grégoire du 24 sept.
 
-- **Lot #942** — Profil › Engagement : chaque absence nomme la leçon que la carte d'alignement place ce jour-là pour le groupe de l'élève (inverse du calcul de l'Inspecteur, #695). Consigne : `CONSIGNE-LECON-MANQUEE.md`. En cours sur `lot-942-lecon-manquee`, relecture croisée de Cowork avant la fusion.
+- ~~**Lot #942**~~ — **SORTI DE LA FILE : livré en 1.157.0, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte ; titre piégé ajouté) ; Nouvelles validées telles quelles.** Profil › Engagement : chaque absence nomme la leçon que la carte d'alignement place ce jour-là pour le groupe de l'élève (inverse du calcul de l'Inspecteur, #695). Consigne : `CONSIGNE-LECON-MANQUEE.md`.
 
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 

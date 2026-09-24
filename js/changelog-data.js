@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // 1.157.0 (#942) — PROPOSITION DE COWORK, À VALIDER PAR GRÉGOIRE AVANT LE PUSH (titre de Claude Code).
+            // 1.157.0 (#942) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Cowork, titre de Claude Code).
             version: '1.157',
             couleur: 'vert',
             titre: 'Profil : la leçon manquée',

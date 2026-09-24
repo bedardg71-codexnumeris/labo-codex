@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI : **LOT #942 (1.157.0) SUR LA BRANCHE `lot-942-lecon-manquee`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles par Grégoire ; **`main` porte en plus l'audit du parcours sommatif (#941), non poussé**
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, FIN D'APRÈS-MIDI : **LOT #942 (1.157.0) FUSIONNÉ DANS `main`, AVEC L'AUDIT DU PARCOURS SOMMATIF (#941) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `a67890fe` + `ae2c7501` (audit sommatif, #941) + `3008d3ed` (relais) + le merge `d4c3e5c8` de `lot-942-lecon-manquee` (`c6525f7e` lot + release 1.157.0 + porte terrain, `f5f91f9c` essai du titre piégé) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-942.md` : 19/19, M1-M3 rouges ; M4 — titre sans `echapperHtml` — survivait, fermée par l'essai WebKit du § 2, rouge sous M4 aux deux largeurs). Nouvelles et titre validés tels quels par Grégoire. #942 coché ; le lot sort de FILE-DES-LOTS. Commités ici, écrits par Cowork : `CONSIGNE-SOMMATIVE-FONCTIONNELLE.md` et `DECISIONS-2026-09-24-parcours-sommatif.md` (à lire au prochain lot), et la relecture.
+
+**Suite** : la porte terrain (une rangée, `plans de travail/PORTES-TERRAIN-2026-09-24-lot-942.md` : l'absence du 18 sept. doit nommer « La carte mentale ») une fois 1.157.0 en ligne ; artefact jumeau à publier par Cowork. Branche `lot-942-lecon-manquee` supprimable une fois le push constaté. Prochain lot annoncé par Cowork : `CONSIGNE-SOMMATIVE-FONCTIONNELLE.md`. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI : **LOT #942 (1.157.0) SUR LA BRANCHE `lot-942-lecon-manquee`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles par Grégoire ; **`main` porte en plus l'audit du parcours sommatif (#941), non poussé**
 
 **Où vit le travail** : `main` = `a67890fe` (= `origin/main` au début de la session) + `ae2c7501` (audit du parcours sommatif : `Rapports/AUDIT-parcours-sommatif-2026-09-24.md`, #941 inscrit, banc `tests/integration/audit-parcours-sommatif-2026-09-24.spec.js`) + ce relais. Branche `lot-942-lecon-manquee` = `ae2c7501` + `c6525f7e` (lot + release 1.157.0 + porte terrain, un seul commit). **Rien n'est poussé.** Arbre principal revenu sur `main`. Fichiers non suivis de Cowork laissés tels quels : `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `CONSIGNE-SOMMATIVE-FONCTIONNELLE.md`, `DECISIONS-2026-09-24-parcours-sommatif.md`.
 
