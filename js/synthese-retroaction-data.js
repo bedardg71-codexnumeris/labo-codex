@@ -778,13 +778,17 @@
         // « Points récurrents » dit lesquels reviennent d'une copie à l'autre.
         const aTravailler = criteresATravailler(evaluation);
 
+        const note = construireNoteProvisoire(da, affichageNiveauxSeulement(evaluation))
+                     || construireNoteSommative(da);
+        // #941 lot S3 (D5, relecture de Cowork du lot S1, § 2) — la mention « Note provisoire » ne parle
+        // de jetons que si la pratique en déclare : la MÊME règle que le bloc « Jetons utilisés ».
+        if (note) note.sansJetons = !(typeof jetonsDeclares === 'function' && jetonsDeclares());
         return {
             intro:         BILAN_INTRO,
             concentration: construireConcentration(evaluation, grille, echelle, historique, stats, aTravailler),
             recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille, aTravailler),
             jetons:        construireJetons(da),
-            note:          construireNoteProvisoire(da, affichageNiveauxSeulement(evaluation))
-                           || construireNoteSommative(da)
+            note:          note
         };
     }
 
@@ -1094,9 +1098,10 @@
     */
 
     function construireJetons(da) {
-        if (!da || typeof obtenirConfigJetons !== 'function') return null;
+        if (!da) return null;
         let config;
-        try { config = obtenirConfigJetons(); } catch (e) { return null; }
+        // #941 lot S3 (D5) — seulement les jetons que la pratique DÉCLARE, jamais les défauts du code.
+        try { config = (typeof jetonsDeclares === 'function') ? jetonsDeclares() : null; } catch (e) { return null; }
         if (!config || !config.actif) return null;
 
         const evaluations = lireDonneesNamespace('evaluationsSauvegardees');
