@@ -451,7 +451,7 @@
        ===================================================================== */
 
     function renderTamponsErreurs(ctx) {
-        const stamps = ctx.feedback.stamps || {};
+        const stamps = Array.isArray(ctx.feedback.stamps) ? ctx.feedback.stamps : [];
         const errors = ctx.feedback.errors || [];
 
         const colTampons = renderTampons(ctx, stamps);
@@ -476,21 +476,14 @@
     }
 
     function renderTampons(ctx, stamps) {
-        const ordre = (typeof syntheseRetroactionData !== 'undefined' && syntheseRetroactionData.FAMILY_ORDER)
-            ? syntheseRetroactionData.FAMILY_ORDER
-            : ['action', 'observations', 'comprehension'];
-        const noms = obtenirNomsFamilles();
-
-        const famillesNonVides = ordre.filter(fam => Array.isArray(stamps[fam]) && stamps[fam].length > 0);
+        // #760 — une colonne par catégorie utilisée, dans l'ordre des réglages ;
+        // nom et couleur viennent des données (`construireStamps`).
+        const famillesNonVides = stamps.filter(fam => fam && Array.isArray(fam.items) && fam.items.length > 0);
         if (!famillesNonVides.length) return '';
 
-        // Couleur d'une famille : dérivée du premier item de la famille (qui
-        // porte la couleur personnalisée de la catégorie via construireStamps).
-        const colonnes = famillesNonVides.map(fam => {
-            const items = stamps[fam];
-            const couleur = (items[0] && items[0].couleur) || '#767169';
-            return renderColonneTampons(fam, items, couleur, noms[fam] || fam);
-        }).join('');
+        const colonnes = famillesNonVides.map(fam =>
+            renderColonneTampons(fam.id, fam.items, fam.couleur || '#767169', fam.nom || fam.id)
+        ).join('');
         const cols = `repeat(${famillesNonVides.length}, 1fr)`;
 
         return `
@@ -527,13 +520,6 @@
                 <div style="font-family: ${FONT_MONO}; font-size: 7.5px; letter-spacing: 0.6px; text-transform: uppercase; color: ${couleur}; font-weight: 700; margin-bottom: 5px; padding-bottom: 3px; border-bottom: 1px solid ${LINE};">${esc(libelleFamille)} <span style="color: ${MUTED}; font-weight: 500;">· ${total}</span></div>
                 ${lignes}
             </div>`;
-    }
-
-    function obtenirNomsFamilles() {
-        if (typeof travauxOutils !== 'undefined' && typeof travauxOutils.obtenirNomsCategories === 'function') {
-            return travauxOutils.obtenirNomsCategories();
-        }
-        return { action: 'Action', observations: 'Observations', comprehension: 'Compréhension' };
     }
 
     function renderErreurs(ctx, errors) {

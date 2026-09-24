@@ -10,6 +10,7 @@
 1. Les demies de Léa : ✅ poussé en 1.152.5 (`518a79c4`).
 2. Puis **les dix fiches de notation encore ouvertes** : ce qui se passe quand la pratique n'est pas la sienne (#710, #711, #712, #713, #714, #716, #717, #719, #854, #900). À remesurer et à grouper en lots par Cowork.
 3. Puis **la synthèse des rétroactions** : son prochain « Labo » portera là-dessus.
+   - **Lot en cours (24 sept.) — #760 + #759** : ce que l'élève lit de ses tampons, un seul lecteur sur les réglages actuels (générale, spécifique, PDF de synthèse) ; « Copier tout » garde les phrases séparées. Consigne : `CONSIGNE-DU-JOUR.md`.
 
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 

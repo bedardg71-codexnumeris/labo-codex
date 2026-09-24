@@ -184,16 +184,20 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
 }
 
 function _rendreObservationsAnnotations(statsAnnot) {
-    const retroObs = travauxOutils.obtenirRetroactionsObservations();
-    const DIAG_IDS = ['bon-lien','manque-lien','confusion','repetitif','preuve-absente','citation','approfondir','procedes','attention'];
-    const tamponsObs = Object.entries(statsAnnot.tampons).filter(([id]) => DIAG_IDS.includes(id));
-    if (tamponsObs.length === 0) return '';
+    // #760 (24 sept. 2026) — les mêmes tampons que la spécifique, dans le même ordre,
+    // sous les mêmes titres, lus dans les réglages actuels (`observationsDesTampons`).
+    // Le filtre d'hier (neuf identifiants hérités) ne laissait passer aucun tampon du
+    // catalogue courant : le bloc ne s'écrivait jamais.
+    const categories = travauxOutils.observationsDesTampons(statsAnnot.tampons);
+    if (categories.length === 0) return '';
     let texte = '--- Observations ---\n\n';
-    for (const [id, count] of tamponsObs) {
-        const def = travauxOutils.AUTOCOLLANTS.find(a => a.id === id);
-        const txt = retroObs[id];
-        if (txt) texte += `${def?.nom || id} (×${count}) :\n${txt}\n\n`;
-    }
+    categories.forEach(cat => {
+        texte += `${cat.nom}\n`;
+        cat.tampons.forEach(t => {
+            texte += t.texte ? `${t.nom} (×${t.nombre}) :\n${t.texte}\n` : `${t.nom} (×${t.nombre})\n`;
+        });
+        texte += '\n';
+    });
     return texte;
 }
 
@@ -381,6 +385,37 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
+ * #759 (24 sept. 2026) — Le texte d'une vue (spécifique, bilan) tel que l'écran le
+ * sépare : un saut de ligne entre deux blocs (paragraphe, titre, item), une ligne
+ * blanche avant un titre. Le `textContent` d'hier collait la fin d'une phrase au
+ * début de la suivante (« …viens me voir.Selon toi… ») : le HTML est assemblé sans
+ * blanc entre ses balises. Aucun mot ne change.
+ *
+ * Lit la chaîne `innerHTML` (aucun analyseur HTML, rien n'est réinjecté dans la page)
+ * et décode les entités qu'`echapperHtml` et les gabarits y posent.
+ * @param {string} html
+ * @returns {string}
+ */
+function _texteSepareDuHtml(html) {
+    return String(html == null ? '' : html)
+        .replace(/\u0000/g, '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<h[1-6][\s>]/gi, '\u0000$&')   // marque « ligne blanche avant un titre »
+        .replace(/<\/?(p|h[1-6]|li|ul|ol|div|section|tr)(\s[^>]*)?>/gi, '\n')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;|&#160;/g, ' ')
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"').replace(/&#0*39;|&#x27;|&apos;/gi, "'")
+        .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(parseInt(n, 10)))
+        .replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
+        .replace(/&amp;/g, '&')
+        .split('\n').map(l => l.replace(/[ \t]+/g, ' ').trim()).join('\n')
+        .replace(/\n{2,}/g, '\n')
+        .replace(/\n?\u0000\n?/g, '\n\n')
+        .trim();
+}
+
+/**
  * Copie la rétroaction dans le presse-papier
  */
 function copierRetroaction(num) {
@@ -394,10 +429,10 @@ function copierRetroaction(num) {
         texte = (document.getElementById('retroactionFinale1') || {}).value || '';
     } else if (vueSpec && !vueSpec.classList.contains('u-hide')) {
         genererRetroactionSpecifique();
-        texte = (document.getElementById('contenuRetroSpecifique') || {}).textContent || '';
+        texte = _texteSepareDuHtml((document.getElementById('contenuRetroSpecifique') || {}).innerHTML);
     } else if (vueBil && !vueBil.classList.contains('u-hide')) {
         genererRetroactionBilan();
-        texte = (document.getElementById('contenuRetroBilan') || {}).textContent || '';
+        texte = _texteSepareDuHtml((document.getElementById('contenuRetroBilan') || {}).innerHTML);
     } else {
         texte = (document.getElementById('retroactionFinale1') || {}).value || '';
     }
@@ -477,21 +512,16 @@ function genererRetroactionSpecifique() {
     var html = '';
 
     // Tampons par catégorie
+    // #760 (24 sept. 2026) — lus dans les réglages actuels (`observationsDesTampons`),
+    // comme le bloc « Observations » de la générale. Noms et textes sont des données
+    // utilisateur posées dans innerHTML : échappés (règle 1).
     if (totalTampons > 0) {
-        var autocollantsDef = travauxOutils.AUTOCOLLANTS;
-        var retroObs = travauxOutils.obtenirRetroactionsObservations();
-        var nomsCat = travauxOutils.obtenirNomsCategories();
-        var ordreCategories = travauxOutils.obtenirOrdreCategories();
-
-        ordreCategories.forEach(function(catId) {
-            var tamponsCat = autocollantsDef.filter(function(a) { return !a.legacy && a.categorie === catId; });
-            var utilises = tamponsCat.filter(function(a) { return tampons[a.id]; });
-            if (utilises.length === 0) return;
-
-            html += '<h5>' + (nomsCat[catId] || catId) + '</h5>';
-            utilises.forEach(function(a) {
-                var retro = retroObs[a.id] || '';
-                html += '<p><strong>' + a.nom + '</strong> (' + tampons[a.id] + ') — ' + retro + '</p>';
+        var ech760 = function(t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
+        travauxOutils.observationsDesTampons(tampons).forEach(function(cat) {
+            html += '<h5>' + ech760(cat.nom) + '</h5>';
+            cat.tampons.forEach(function(t) {
+                html += '<p><strong>' + ech760(t.nom) + '</strong> (' + t.nombre + ')'
+                    + (t.texte ? ' — ' + ech760(t.texte) : '') + '</p>';
             });
         });
     }
@@ -1237,17 +1267,14 @@ function copierToutRetroaction() {
 
     // Spécifique
     genererRetroactionSpecifique();
-    var contenuSpec = document.getElementById('contenuRetroSpecifique');
-    if (contenuSpec && contenuSpec.textContent.trim()) {
-        parties.push('=== RÉTROACTION SPÉCIFIQUE ===\n' + contenuSpec.textContent.trim());
-    }
+    // #759 — séparé comme à l'écran : le textContent collait les phrases.
+    var texteSpec = _texteSepareDuHtml((document.getElementById('contenuRetroSpecifique') || {}).innerHTML);
+    if (texteSpec) parties.push('=== RÉTROACTION SPÉCIFIQUE ===\n' + texteSpec);
 
     // Bilan
     genererRetroactionBilan();
-    var contenuBilan = document.getElementById('contenuRetroBilan');
-    if (contenuBilan && contenuBilan.textContent.trim()) {
-        parties.push('=== BILAN ===\n' + contenuBilan.textContent.trim());
-    }
+    var texteBilan = _texteSepareDuHtml((document.getElementById('contenuRetroBilan') || {}).innerHTML);
+    if (texteBilan) parties.push('=== BILAN ===\n' + texteBilan);
 
     var texteComplet = parties.join('\n\n');
     if (!texteComplet) {
