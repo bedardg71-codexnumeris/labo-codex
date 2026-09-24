@@ -26,7 +26,7 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
-                // 1.159.3 (#944) — PROPOSÉ par Claude Code, À SOUMETTRE à Grégoire avant le push.
+                // 1.159.3 (#944) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
                 'Évaluer&nbsp;: sur une copie déjà évaluée, choisir une autre cartouche au menu propose maintenant de remplacer ses commentaires par ceux de la nouvelle cartouche. Tu confirmes ou tu gardes les commentaires actuels&nbsp;; une cartouche retouchée ailleurs ne change toujours pas une copie déjà évaluée.',
                 // 1.159.2 (#943) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
                 'Annoter&nbsp;: une ligne (fléchée ou non) qu\'on vient de tracer montre aussitôt ses poignées. Tire son milieu pour la courber, ou une extrémité pour la déplacer, sans passer par l\'outil Sélection.',
