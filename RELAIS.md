@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 11 H 30 : **LOT S1 DE #941 (1.158.0) SUR LA BRANCHE `lot-941-s1-points-sans-echelle`, NON FUSIONNÉ** — attend la relecture croisée de Cowork, et Grégoire pour les Nouvelles et deux phrases neuves de l'élève
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MIDI : **LOT S1 DE #941 (1.158.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `0c8b1328` + `b9ab1bca` (relais) + le merge `f55b80c4` de `lot-941-s1-points-sans-echelle` (`9c69599a` lot + release 1.158.0, `50f374f6` relecture versée) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-941-s1.md`). Nouvelles et deux phrases de l'élève validées telles quelles par Grégoire ; la CONDITION de la mention « Note provisoire » sans jetons suit D5 et se code dans S3.
+
+**Suite** : lot S2 (D2, la règle des 60 %), puis S3, puis #943. Branche `lot-941-s1-points-sans-echelle` supprimable une fois le push constaté. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 11 H 30 : **LOT S1 DE #941 (1.158.0) SUR LA BRANCHE `lot-941-s1-points-sans-echelle`, NON FUSIONNÉ** — attend la relecture croisée de Cowork, et Grégoire pour les Nouvelles et deux phrases neuves de l'élève
 
 **Où vit le travail** : branche `lot-941-s1-points-sans-echelle` = `0c8b1328` (= `origin/main`) + `9c69599a` (lot + release 1.158.0 + #943 inscrit). `main` = `0c8b1328` + ce relais. **Rien n'est poussé.**
 
