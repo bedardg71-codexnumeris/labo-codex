@@ -1864,6 +1864,13 @@ function _collecterCriteresAutoSave(grille, ec) {
 }
 
 function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
+    // #944 — un remplacement confirmé écrit ses commentaires ici même (les niveaux restaurés
+    // arment l'auto-save) : la cartouche part avec eux, sinon la base porterait les
+    // commentaires de la nouvelle sous le nom de l'ancienne. Hors ce geste, l'auto-save ne
+    // touche jamais `cartoucheId` (seul « Enregistrer » l'écrit).
+    if (_remplacementConfirme && _remplacementConfirmeActif(_etatVivantDeLaCopie(), evalExistante)) {
+        evalExistante.cartoucheId = _remplacementConfirme.cartoucheId;
+    }
     evalExistante.criteres = criteres;
     evalExistante.noteFinale = (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : evalExistante.noteFinale;   // #572
     evalExistante.ponderationCouverte = (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : evalExistante.ponderationCouverte;   // #674 — la portée voyage avec la note

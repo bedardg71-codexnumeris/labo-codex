@@ -350,6 +350,23 @@ describe('#944 · une AUTRE cartouche choisie au menu, sur une copie déjà éva
         expect(commentairesDuPdf(ctx.win, ev).Structure).toBe(CARTOUCHE_REV.commentaires.h1_M);
     });
 
+    it('confirmé puis quitté SANS « Enregistrer » : l\'auto-save (armé par les niveaux restaurés) écrit la nouvelle cartouche AVEC ses commentaires', async () => {
+        const ctx = rouvrir({ reponse: true });
+        await choisir(ctx, 'CT9R');
+        ctx.win._autoSauvegarderCriteres(ctx.win.etatVivantEvaluationEnCours());
+        const ev = ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.criteres.find((c) => c.critereId === 'h1').retroaction).toBe(CARTOUCHE_REV.commentaires.h1_M);
+        expect(ev.cartoucheId, 'avant : l\'ancienne cartouche sous les nouveaux commentaires').toBe('CT9R');
+    });
+
+    it('sans remplacement confirmé, l\'auto-save ne touche pas `cartoucheId`, même si le menu en montre une autre', () => {
+        const ctx = rouvrir({ reponse: true });
+        ctx.ecran.selectCartoucheEval.value = 'CT9R';          // un chargeur, pas le geste
+        ctx.win._autoSauvegarderCriteres(ctx.win.etatVivantEvaluationEnCours());
+        const ev = ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.cartoucheId).toBe('CT9');
+    });
+
     it('annulé → le commentaire enregistré prime toujours, le menu revient, cartoucheId inchangé, rien d\'écrit', async () => {
         const ctx = rouvrir({ reponse: false });
         await choisir(ctx, 'CT9R');

@@ -14,7 +14,7 @@
 
 > **POURQUOI** — C'est ton rapport de 15 h 52 : sur une copie déjà évaluée, choisir « Carte mentale A26 (rev) » au menu ne changeait aucun commentaire. Les tests le prouvent sur une copie inventée ; seule une de tes copies dit que ça tient avec ta vraie grille et ta vraie cartouche.
 
-- [ ] Sur l'iPad, ouvre UNE copie déjà évaluée avec l'ancienne cartouche de la carte mentale. Dans le menu « Cartouche de rétroaction », choisis **Carte mentale A26 (rev)** (le sélecteur de l'iPad, puis « OK »).
+- [ ] Sur l'iPad, ouvre UNE copie déjà évaluée avec l'ancienne cartouche de la carte mentale. Si elle s'ouvre « en lecture seule (verrouillée) », déverrouille-la d'abord (cadenas) : sinon le menu reste grisé. Dans le menu « Cartouche de rétroaction », choisis **Carte mentale A26 (rev)** (le sélecteur de l'iPad, puis « OK »).
       ⮕ Attendu : une fenêtre **« Changer de cartouche »** s'ouvre et nomme « Carte mentale A26 (rev) ». Le menu affiche encore l'ancienne cartouche derrière elle. `iPad` `⚠⚠ Données`
 - [ ] Touche **« Garder les commentaires actuels »**.
       ⮕ Attendu : la fenêtre se ferme, le menu montre l'ancienne cartouche, la rétroaction n'a pas bougé. `iPad`
@@ -22,6 +22,7 @@
       ⮕ Attendu : la rétroaction générale montre les commentaires de la cartouche révisée ; avant 1.159.3, elle gardait les anciens. `iPad` `⚠⚠ Données`
 - [ ] Enregistre, puis ouvre le PDF de cette copie.
       ⮕ Attendu : le PDF montre les nouveaux commentaires. `iPad`
+      ⮕ Bon à savoir : quelques secondes après « Remplacer », l'enregistrement automatique a déjà fixé les nouveaux commentaires, même sans ce geste.
 
 ## §2 · Interface
 
