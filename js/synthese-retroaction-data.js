@@ -1364,14 +1364,16 @@
      * ⮕ Décision de Grégoire (24 sept. 2026) : « une récurrence identifiée dans le temps »,
      * « une cible de travail immédiate pour l'élève ». Dès DEUX productions. La ligne donne le
      * nombre réel de productions consécutives où le critère reste à travailler, en remontant
-     * l'historique jusqu'à la première copie où il n'y est plus ; le mot vient de la zone de
+     * l'historique jusqu'à la première copie où il est acquis ; le mot vient de la zone de
      * la copie ACTUELLE.
      *
      * ⚠ CHAQUE COPIE EST LUE DANS SON ÉCHELLE (#555 lot 2) : une zone se compare à une zone,
      * jamais un code à un code.
-     * ⚠ LA CHAÎNE S'ARRÊTE sur une copie où le critère est acquis — et aussi sur une copie
-     * qui ne dit pas : critère absent de sa grille, ou échelle sans repères (`null`). On ne
-     * compte que ce qui a été mesuré.
+     * ⚠ SEULE UNE COPIE OÙ LE CRITÈRE EST ACQUIS ARRÊTE LE COMPTE (décision de Grégoire,
+     * 24 sept. 2026, après la relecture de Cowork). Une copie qui ne dit rien du critère est
+     * SAUTÉE — elle n'interrompt pas la récurrence et n'entre pas dans le compte : critère
+     * absent de sa grille (les productions d'un trimestre n'évaluent pas toutes les mêmes
+     * critères), ou échelle sans repères (`null`). N compte les productions qui l'évaluent.
      *
      * @param {Array} criteres - les critères à travailler de la copie, dans l'ordre d'affichage
      * @param {Array} historique - les copies antérieures, la plus récente d'abord
@@ -1398,8 +1400,8 @@
             let productions = 1;
             for (const zones of anterieures) {
                 const zone = zones[c.critereNom];
-                if (zone !== 'priorite' && zone !== 'signale') break;
-                productions++;
+                if (zone === 'acquis') break;
+                if (zone === 'priorite' || zone === 'signale') productions++;   // sinon : sautée
             }
             if (productions >= 2) lignes.push(`${nomDe(c.critereNom)} : ${mot} depuis ${productions} productions`);
         });
