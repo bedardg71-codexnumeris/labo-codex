@@ -1,9 +1,9 @@
 # File des lots – tenue par Cowork
 
-> Mise à jour le 23 septembre 2026, 13 h 50 (Toronto) — par Claude Code : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
+> Mise à jour le 23 septembre 2026, 22 h (Toronto) — par Claude Code : #830 sort (1.156.1, phrase validée). Avant : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
 
 1. Tranchée le 17 sept., code seulement : le suffixe « pér. » d'une séance d'horaire (#888).
-2. À Grégoire : la phrase de la barre « Assiduité » du groupe quand aucune séance ne porte de périodes (#830) ; la disposition de F4-2 (« En prévision de l'EUF » pour les critères d'avant le 4 sept.) ; F3-6 (l'export pour la recherche compte les niveaux par I / D / M / E).
+2. À Grégoire : la disposition de F4-2 (« En prévision de l'EUF » pour les critères d'avant le 4 sept.) ; F3-6 (l'export pour la recherche compte les niveaux par I / D / M / E).
 
 ## Cap fixé par Grégoire le 21 sept. à 13 h 08
 
