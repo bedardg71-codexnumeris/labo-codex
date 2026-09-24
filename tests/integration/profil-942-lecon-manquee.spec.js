@@ -19,6 +19,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //
 // ⚠ Stockage vidé UNE fois, avant le reload (pas en addInitScript : il se rejouerait au reload).
 
+// Un titre porteur de HTML (relecture de Cowork, § 2) : il doit se lire, pas s'exécuter.
+const TITRE_PIEGE = 'Le plan <img src=x onerror="window.__xss942=1"> détaillé';
+
 for (const largeur of [1280, 768]) {
 test(`profil › Engagement (${largeur} px) · deux absences, deux titres de leçon ; une absence sans leçon, une pastille sans titre`, async ({ page }) => {
     test.setTimeout(120000);
@@ -42,7 +45,7 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1200);
 
-    const r = await page.evaluate(async () => {
+    const r = await page.evaluate(async (TITRE_PIEGE) => {
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));
         await window.activerModeDemo();
         await pause(1500);
@@ -72,7 +75,7 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
         db.setSync(cle('planification_mindmap'), {
             index: { active: 'carte_942', compteurCartes: 1, cartes: [{ id: 'carte_942', nom: 'Carte banc', coursId: gc.coursId }] },
             cartes: { carte_942: { compteur: 2, compteurLiens: 0, liens: [], noeuds: [
-                noeud('L1', 'La carte mentale', p1), noeud('L2', 'Le plan détaillé', p2)
+                noeud('L1', 'La carte mentale', p1), noeud('L2', TITRE_PIEGE, p2)
             ] } }
         });
 
@@ -82,17 +85,22 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
         const pastilles = Array.from(racine.querySelectorAll('.badge-absence[data-action="naviguerVersPresenceAvecDate"]')).map(b => ({
             date: b.getAttribute('data-param'),
             lecons: Array.from(b.querySelectorAll('.badge-absence-lecon')).map(s => s.textContent.trim()),
+            balisesInjectees: b.querySelectorAll('.badge-absence-lecon *').length,
             largeur: Math.round(b.getBoundingClientRect().width)
         }));
         const carteAssiduite = pastilles.length ? Math.round(racine.querySelector('.badge-absence').closest('.profil-carte').getBoundingClientRect().width) : null;
-        return { da, gcId, dates: [a1.date, a2.date, a3.date], p1, p2, pastilles, carteAssiduite };
-    });
+        return { da, gcId, dates: [a1.date, a2.date, a3.date], p1, p2, pastilles, carteAssiduite, xss: window.__xss942 === 1 };
+    }, TITRE_PIEGE);
 
     console.log('PROFIL-942 ' + largeur + ' ' + JSON.stringify(r));
     expect(r.erreur).toBeUndefined();
     const parDate = Object.fromEntries(r.pastilles.map(p => [p.date, p.lecons]));
     expect(parDate[r.dates[0]]).toEqual(['La carte mentale']);
-    expect(parDate[r.dates[1]]).toEqual(['Le plan détaillé']);
+    // Relecture de Cowork, § 2 : le titre d'une leçon est une donnée utilisateur (une carte peut venir d'un import).
+    // Il sort ÉCHAPPÉ : le texte tel quel dans la pastille, aucune balise créée, aucun gestionnaire exécuté.
+    expect(parDate[r.dates[1]]).toEqual([TITRE_PIEGE]);
+    expect(r.pastilles.every(p => p.balisesInjectees === 0), 'aucune balise créée par un titre').toBe(true);
+    expect(r.xss, 'aucun gestionnaire onerror exécuté').toBe(false);
     expect(parDate[r.dates[2]], 'une absence sans leçon : pastille sans titre').toEqual([]);
     // La pastille reste dans sa carte : aucun titre ne la fait déborder.
     r.pastilles.forEach(p => expect(p.largeur).toBeLessThanOrEqual(r.carteAssiduite));
