@@ -1,37 +1,53 @@
-# Consigne du jour – Le commentaire d'un critère est le même dans le PDF et dans le texte copié vers Léa
+# Consigne du jour – Le bilan : la définition de chaque critère à travailler, et des « Points récurrents » qui regardent d'une copie à l'autre
 
-> Écrite le 24 septembre 2026 (Toronto), par Cowork, sur `origin/main` = `28d66162` (1.156.2, en production chez Netlify depuis 6 h 34, déploiement mesuré ; porte terrain des colonnes du PDF passée par Grégoire).
-> La précédente (#760 + #759, livrée en 1.156.2) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-24-lot-760-759-observations.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Deuxième lot du chantier « synthèse des rétroactions »** (cap du 21 sept.). Source : `Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md`, section A, bloc 3, colonne « Répété ailleurs ? » (« B lit la cartouche VIVANTE… mesuré : « GELÉ » sur le PDF, « VIVANT » dans B pour le même critère »). **Pas de fiche au BACKLOG** : inscris-en une à l'ouverture du lot (numéro suivant #938), avec ce constat remesuré, et coche-la à la livraison. Ajoute le lot à `FILE-DES-LOTS.md` sous le cap.
+> Écrite le 24 septembre 2026 (Toronto), par Cowork, sur `origin/main` = `4b2e6e4d` (1.156.3, en production chez Netlify depuis 7 h 35, déploiement mesuré).
+> La précédente (#939, livrée en 1.156.3) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-24-lot-939-commentaire-critere.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Troisième lot du chantier « synthèse des rétroactions »** (cap du 21 sept.). Né d'une capture de Grégoire (PDF d'une copie en pratique Standards) : « Ce bilan est une composante majeure de la rétroaction. » **Symptôme vécu.** Inscris UNE fiche au BACKLOG à l'ouverture (numéro suivant #939) et coche-la à la livraison ; ajoute le lot à `FILE-DES-LOTS.md` sous le cap.
 
-## 0 · La décision de Grégoire (24 sept. 2026) – elle fait foi
+## 0 · Les décisions de Grégoire (24 sept. 2026) – elles font foi
 
-**Le commentaire qui fait foi est celui qui est enregistré avec l'évaluation**, comme le PDF le fait déjà : le texte validé en évaluant cette copie-là, y compris celui que l'enseignant·e a réécrit pour cet·te élève. Une cartouche retouchée plus tard ne change pas une copie déjà évaluée. Le texte copié vers Léa suit la même règle.
+Forme validée, mot pour mot (les ‹…› sont des données) :
 
-## 1 · Ce que Cowork a mesuré (lecture seule, sur `28d66162` – à REMESURER avant de coder)
+> **PRÉSENTEMENT, IL FAUT SE CONCENTRER SUR**
+> Acquis en développement, à consolider :
+> • Structure (En développement) : ‹la définition du critère, telle qu'elle est écrite dans la grille›
+>
+> **POINTS RÉCURRENTS**
+> • Structure : à consolider depuis 2 productions
+> • Rigueur : prioritaire depuis 4 productions
 
-- **Le PDF** : `construireCriteres` (`js/synthese-retroaction-data.js` ≈ l. 435-480) prend, dans l'ordre : `c.retroaction` persistée (sauf une amorce de saisie, `estAmorceDeSaisie`, #672) → la rétroaction algorithmique persistée (`donneesAlgorithmiques[id].retroaction`, gelée, #581) → la cartouche au niveau retenu → rien. Puis `anonymiserTexteRetroaction`.
-- **Le texte copié vers Léa** (générale) : `_rendreCommentairesCriteres` (`js/evaluation-retroaction.js` ≈ l. 144-185) prend : la rétroaction algorithmique → la cartouche VIVANTE (`cartouche.commentaires[critere_niveau]`) → sinon **« [Non défini] »** en clair, que l'élève lit. Il ne lit jamais le commentaire propre à la copie.
-- **Le geste** : une seule règle pour les deux. Idéalement UNE fonction (propriétaire à choisir par toi après mesure : vraisemblablement `synthese-retroaction-data.js`, qui porte déjà la règle complète) que les deux lisent – zéro-dette, pas une seconde copie de la cascade. « [Non défini] » part : sans commentaire, le critère se dit par son en-tête, comme le PDF (et comme #764 le fait déjà sans cartouche).
+1. **Chaque critère de « Présentement, il faut se concentrer sur » porte sa définition** – les prioritaires ET les « à consolider ». Forme : `Nom (niveau) : définition`. La définition telle qu'écrite (plus de minuscules forcées, plus placée devant le nom). Sans définition dans la grille : `Nom (niveau)` seul, rien d'inventé.
+2. **« Points récurrents » = ce qui revient D'UNE COPIE À L'AUTRE** (les mots de Grégoire : « une récurrence identifiée dans le temps », « une cible de travail immédiate pour l'élève »). Un critère y paraît quand il est dans une zone à travailler (priorité ou signalé) sur cette copie ET sur la précédente – **dès deux productions**. La ligne donne le **nombre réel de productions consécutives** où il reste à travailler, en remontant l'historique jusqu'à la première copie où il est « acquis » (ou jusqu'au bout de l'historique lu). Le mot vient de la zone de la copie ACTUELLE : « prioritaire » ou « à consolider ». Forme : `Nom : à consolider depuis N productions` / `Nom : prioritaire depuis N productions`.
+3. **Les tampons de la copie quittent « Points récurrents »** : ils sont en entier dans « Commentaires ciblés ». (La répétition tronquée à 80 caractères part.)
+4. **La mention « Cet objectif est prioritaire depuis 3 productions »** quitte la ligne du critère dans « Présentement… » : la récurrence se dit une seule fois, dans « Points récurrents ».
 
-**⚠ À mesurer d'abord – c'est le point délicat** : la générale se compose PENDANT l'évaluation, sur l'état vivant de l'écran (`evaluationEnCours`), pas seulement sur l'évaluation enregistrée. Trouve où l'enseignant·e tape le commentaire propre à une copie, et où il vit avant l'enregistrement (auto-save à 1,5 s, #758). La règle vaut pour « le commentaire de cette copie, tel qu'il est à l'écran ou enregistré » : un commentaire que l'enseignant·e vient de réécrire doit sortir dans le texte copié même si l'auto-save n'a pas encore tourné.
+## 1 · Ce que Cowork a mesuré (lecture seule, sur `4b2e6e4d` – à REMESURER)
 
-⛔ **Arrêt prévu** : si la mesure montre que le commentaire propre à une copie n'existe PAS à l'écran d'évaluation (seulement ailleurs, ou seulement en base), ou si les deux sources à l'écran peuvent se contredire, arrête-toi et dis-le avant de coder.
+- **Pourquoi la définition a disparu** : jusqu'au 28 août, un critère en D était un « défi » et recevait `description` en préfixe (`construireConcentration`, `js/synthese-retroaction-data.js` ≈ l. 834-842). `170db4c6` (#555 lot 2) a créé la zone `'signale'` ; les critères en D y sont passés, et `signales` ne rend que `Nom (niveau)` (≈ l. 847). Même chose côté écran : `_rendreSignalesBilan` (`js/evaluation-retroaction.js` ≈ l. 969).
+- **La récurrence existante** : `identifierPatrons` (≈ l. 1318) ne regarde que la zone `'priorite'`, exige trois copies (actuelle + deux précédentes), et n'alimente que le suffixe de « Présentement ». `lireHistorique` (≈ l. 1341) : même élève, non remplacée, sans la copie en cours, triée par date, **cinq au plus** – donc un compte plafonné à 6 ; dis-le, et décide seul si le plafond gêne (technique). Côté écran : le même suffixe (`evaluation-retroaction.js` ≈ l. 931).
+- **« Points récurrents » aujourd'hui** (`construireRecurrents`, ≈ l. 853) porte aussi « Ta force », le décompte d'erreurs (« principalement… »), « Progrès : … depuis … », « Tu as progressé en … ». **Hors décision** : ces lignes ne bougent pas dans ce lot. Dis dans ton rapport lesquelles regardent cette copie seule et lesquelles regardent le temps : Grégoire tranchera ensuite, pas maintenant.
+- **Écran et PDF, mêmes mots** (#581, `copierToutRetroaction` copie l'un dans l'autre) : le bilan de l'écran (`evaluation-retroaction.js`) suit exactement la même forme. Idéalement une seule règle que les deux lisent (zéro-dette), comme #939 l'a fait pour le commentaire d'un critère.
 
-## 2 · Limites
+## 2 · La question de Grégoire – à mesurer et à dire dans le rapport
 
-- **Aucune donnée écrite.** Aucune évaluation réécrite, aucune cartouche touchée. Source, pas stock : les textes déjà copiés dans Léa sont déjà partis.
-- La cascade du PDF ne change pas (amorce, gel algorithmique, anonymisation) : c'est le texte copié qui la rejoint.
+« On parle ici d'une pratique Standards avec échelle de performance. C'est sans doute différent avec des critères analytiques et une sommative ? À vérifier. »
+
+Ce que Cowork a lu (à confirmer par l'exécution) : le bilan ne dépend pas de la pratique, mais de l'**échelle de l'évaluation** (`zoneDuNiveau`, `profil-etudiant-calculs.js` ≈ l. 352), et chaque copie de l'historique est lue dans SA propre échelle. Un critère analytique porte un niveau déduit de ses points (`niveauSelectionne`) : il a donc une zone, et « Présentement » affiche ses points (« 56 / 70 », `lectureNiveauCritere`). Une échelle sans aucun des deux repères rend `null` : ni « Présentement » ni « Points récurrents » ne disent rien – refus honnête, inchangé. **Prouve-le au banc sur trois copies de chaque sorte** : holistique (Standards, échelle à repères), analytique (sommative, échelle à repères), et une échelle sans repères ; plus un historique qui change d'échelle d'une copie à l'autre. Dis en une ligne, en français d'utilisateur, ce que lit l'élève dans chaque cas.
+
+## 3 · Limites
+
+- **Aucune donnée écrite.** Le bilan se compose à la lecture ; aucune évaluation réécrite.
 - Pas de nom d'élève réel dans les bancs ni le rapport (règle 6).
+- Ne touche ni l'intro du bilan, ni « Jetons utilisés », ni « Note provisoire ».
 
-## 3 · Preuve attendue
+## 4 · Preuve attendue
 
-- Vitest : critère dont la copie porte un commentaire réécrit → le texte copié le dit (et plus la cartouche) ; cartouche retouchée après l'évaluation → le texte copié garde le commentaire enregistré ; amorce de saisie → la cartouche, pas l'amorce ; critère algorithmique → le texte gelé ; aucun commentaire nulle part → l'en-tête seul, jamais « [Non défini] ». Et le PDF rend la même chose sur les mêmes cas.
-- WebKit : une copie dont un commentaire est réécrit à l'écran → « Copier tout » le livre, avant et après l'enregistrement.
+- Vitest (PDF et écran, mêmes cas) : définition présente / absente ; prioritaire et à consolider ; récurrence à 2, à N, interrompue par un « acquis », absente avec une seule copie ; plafond de l'historique ; changement d'échelle ; échelle sans repères ; analytique. Les tampons ne sont plus dans « Points récurrents » ; le suffixe « depuis 3 productions » n'est plus dans « Présentement ».
+- WebKit : une copie Standards à deux copies antérieures → le PDF de synthèse et le bilan de l'écran portent les mêmes lignes.
 - Break-tests de ton choix, chacun rouge ; nomme-les.
-- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Rétroaction : le texte copié vers Léa donne pour chaque critère le même commentaire que le PDF, celui de l'évaluation, y compris ce que tu as réécrit pour l'étudiant·e. Il n'écrit plus « [Non défini] ». »
+- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Synthèse de rétroaction : « Présentement, il faut se concentrer sur » donne de nouveau la définition de chaque critère à travailler. « Points récurrents » nomme ce qui revient d'une copie à l'autre, dès deux productions, et depuis combien de productions. »
 - Relecture croisée de Cowork avant la fusion, puis verdict, fusion, push.
 
-## 4 · Porte terrain
+## 5 · Porte terrain
 
-Une rangée, si Grégoire a une copie de cet automne dont il a réécrit un commentaire de critère : « Copier tout », coller dans une note, comparer au « Dossier PDF » de la même copie. Sinon, aucune porte.
+Une rangée, sur ses vraies données : le « Dossier PDF » d'une copie d'un·e élève qui a au moins une copie évaluée avant celle-ci.
