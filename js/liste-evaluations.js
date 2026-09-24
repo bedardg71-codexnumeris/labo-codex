@@ -994,7 +994,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         var originale = evaluations.find(function(e) { return e.id === evaluation.repriseDeId; });
                         if (originale) {
                             scoresOriginaux = {
-                                niveauFinal: originale.niveauFinal || '-',
+                                niveauFinal: _niveauAffiche(originale) || '-',   // #941 lot S1
                                 noteFinale: originale.noteFinale != null ? originale.noteFinale : null
                             };
                         }
@@ -1018,7 +1018,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
                         note: obtenirNoteAffichee(evaluation, estPAN),
                         noteChiffree: evaluation.noteFinale != null ? evaluation.noteFinale : null,
-                        niveauFinal: evaluation.niveauFinal || '-',
+                        niveauFinal: _niveauAffiche(evaluation) || '-',   // #941 lot S1 — aucun niveau pour une copie en points
                         // #575 — le code voyage avec SON échelle. Sans elle, le
                         // tri de la colonne « Niveau » n'a aucun ordre à lire.
                         echelleId: evaluation.echelleId || null,
@@ -1186,8 +1186,19 @@ function obtenirNomCartouche(grilleId, cartoucheId) {
 /**
  * Obtient la note affichée selon la pratique de notation
  */
+/**
+ * #941 lot S1 (décision A) — le niveau qu'une ligne peut montrer : aucun pour une copie en
+ * points, même enregistrée avec l'échelle de départ (`niveauFinalAffichable`, gabarits-utils.js).
+ */
+function _niveauAffiche(evaluation) {
+    if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation);
+    return (evaluation && evaluation.niveauFinal) || '';
+}
+
 function obtenirNoteAffichee(evaluation, estPAN) {
-    if (estPAN) {
+    // #941 lot S1 — une copie en points se lit à sa note, même sous une pratique à niveaux.
+    const enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
+    if (estPAN && !enPoints) {
         return evaluation.niveauFinal || '-';
     } else {
         return evaluation.noteFinale != null && evaluation.noteFinale !== 0 ? `${(Math.round(evaluation.noteFinale * 10) / 10)}%` : '-';
@@ -1831,7 +1842,8 @@ function ouvrirProprieteFichier(fichierId) {
         var prod = productions.find(function(p) { return p.id === e.productionId; });
         var nomProd = prod ? (prod.titre || prod.nom) : (e.productionId || '?');
         var type = e.remplaceeParId ? ' (Remplac\u00e9e)' : (e.repriseDeId ? ' (Reprise)' : '');
-        var note = e.noteFinale != null ? ' \u2014 ' + e.niveauFinal + ' ' + (Math.round(e.noteFinale * 10) / 10) + '%' : '';
+        var niv = _niveauAffiche(e);   // #941 lot S1 (et plus de « undefined » sans niveau)
+        var note = e.noteFinale != null ? ' \u2014 ' + (niv ? niv + ' ' : '') + (Math.round(e.noteFinale * 10) / 10) + '%' : '';
         var label = nomProd + type + note;
         var selected = (e.id === fichier.evaluationId) ? ' selected' : '';
         return '<option value="' + echapperHtml(e.id) + '"' + selected + '>' + echapperHtml(label) + '</option>';

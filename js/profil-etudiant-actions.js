@@ -366,6 +366,16 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
  *   ici on plombe la signature + la résolution d'identité, sans changer le calcul actif.
  * @returns {Object|null} - Détails de la note finale ou null si pas de données
  */
+/**
+ * #941 lot S1 (décision A, 24 sept. 2026) — le niveau que le récit de la note porte VERS LES VUES :
+ * aucun pour une copie en points, ni « -- ». Le calcul de la note ne lit pas ce champ.
+ */
+function _niveauVu(evaluation) {
+    if (!evaluation) return null;
+    if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation) || null;
+    return evaluation.niveauFinal || null;
+}
+
 function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Lot N1a (#710, 21 sept. 2026) : LA résolution du registre, sans repli. Avant, le TYPE de
@@ -556,7 +566,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const _resArtefact = (e, sort, detail) => ({
         label: _titreProd(e.productionId),
         date: e.dateEvaluation || null,
-        niveau: e.niveauFinal || null,   // code BRUT — traduit par l'échelle à la vue (neutralité)
+        niveau: _niveauVu(e),   // code BRUT — traduit par l'échelle à la vue (neutralité) ; #941 lot S1
+        enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(e),
         note: (e.noteFinale ?? null),
         sort: sort,
         detail: detail
@@ -599,7 +610,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         _resultatsRecit.push({
             label: productionTerminale.titre || productionTerminale.activiteApprentissage || 'Évaluation terminale',
             date: evaluationTerminale?.dateEvaluation || null,
-            niveau: evaluationTerminale?.niveauFinal || null,
+            niveau: _niveauVu(evaluationTerminale),
+            enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluationTerminale),
             note: noteTerminale,
             sort: 'compte',
             detail: 'comptée · poids ' + normaliser(ponderationTerminale) + ' %'
@@ -638,14 +650,16 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             artefactsRetenus: artefactsRetenus.map(e => ({
                 productionId: e.productionId,
                 note: e.noteFinale,
-                niveau: e.niveauFinal
+                niveau: _niveauVu(e),   // #941 lot S1 — affichage seulement
+                enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(e)
             })),
             plafonnement: plafonnement
         },
         terminal: {
             nom: productionTerminale?.titre || productionTerminale?.activiteApprentissage || productionTerminale?.description || 'Évaluation terminale',
             note: noteTerminale,
-            niveau: evaluationTerminale?.niveauFinal || null,
+            niveau: _niveauVu(evaluationTerminale),
+            enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluationTerminale),
             ponderation: ponderationTerminale,
             ponderationNormalisee: normaliser(ponderationTerminale),
             present: productionTerminale !== null

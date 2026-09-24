@@ -30,3 +30,7 @@ Motif retenu : en sommative traditionnelle, la note est la première chose que l
 - **C2** : quand aucun critère ne se classe, « Présentement, il faut se concentrer sur : » ne s'écrit pas (ni à l'écran, ni dans « Copier tout », ni dans le PDF) plutôt que d'être suivi de rien.
 - **C5** : sans cartouche, l'étiquette « CONTEXTE » vide du ruban ne s'affiche pas.
 - **Découpage** : trois lots, dans cet ordre, chacun avec sa relecture croisée – voir `CONSIGNE-SOMMATIVE-FONCTIONNELLE.md`.
+
+## Tranché par Grégoire pendant le lot S1 (24 sept., fin de matinée) — ajouté par Claude Code
+
+- **Décision A (précise D1)** : une grille entièrement en points (tous ses critères analytiques, la règle du badge « ANALY ») ne montre **jamais** de nom de niveau, **copies déjà enregistrées comprises** (celles qui portent l'échelle de départ glissée d'office). C'est une règle d'affichage : rien n'est réécrit en base. Une échelle choisie exprès peut servir en coulisse (cartouche par niveau, niveau général calculé et écrit) ; son nom ne s'affiche pas. Les grilles mixtes ne changent pas. Écartée : ne corriger que les copies neuves (le stock aurait gardé « Incomplet » à 62 %).

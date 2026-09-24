@@ -755,7 +755,8 @@ describe('lot 3 · F — témoins de source', () => {
         for (const f of ['js/evaluation-sauvegarde.js', 'js/evaluation.js', 'js/evaluation-chargement.js']) {
             const src = source(f);
             expect(src, f).toMatch(/type === 'analytique' && typeof pts === 'number' && !isNaN\(pts\)\) entree\.points = pts;/);
-            expect(src, f).toContain('niveauSelectionne: niveau,');
+            // #941 lot S1 — sans échelle, un critère à points entre sans niveau déduit : `|| ''`.
+            expect(src, f).toContain("niveauSelectionne: niveau || '',");
         }
     });
 
