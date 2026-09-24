@@ -231,15 +231,29 @@ describe('#940 · « Points récurrents » : ce qui revient d\'une copie à l\'a
         ]);
     });
 
-    it('une copie antérieure sous une échelle SANS repères ne dit rien : la chaîne s\'y arrête', () => {
-        const { pdf } = lesDeux({ Rigueur: 'I', Structure: 'M' },
+    // Décision de Grégoire (24 sept. 2026, relecture de Cowork §2) : une copie qui ne dit rien du
+    // critère est SAUTÉE — elle n'interrompt pas la récurrence et n'entre pas dans le compte ; seule
+    // une copie où il est ACQUIS arrête le compte.
+    it('une copie antérieure sous une échelle SANS repères est sautée : ni comptée, ni interruptrice', () => {
+        const seule = lesDeux({ Rigueur: 'I', Structure: 'M' },
             historique([{ echelleId: 'E_SANS', niveaux: { Rigueur: 'I' } }]));
-        expect(pdf.recurrents).toEqual([]);
+        expect(seule.pdf.recurrents).toEqual([]);
+        const { pdf } = lesDeux({ Rigueur: 'I', Structure: 'M' },
+            historique([{ echelleId: 'E_SANS', niveaux: { Rigueur: 'I' } }, { Rigueur: 'D' }]));
+        expect(pdf.recurrents).toEqual(['Rigueur : prioritaire depuis 2 productions']);
     });
 
-    it('un critère absent de la copie antérieure arrête la chaîne (on ne compte que ce qui a été mesuré)', () => {
-        const { pdf } = lesDeux({ Rigueur: 'I', Nuance: 'I' }, historique([{ Rigueur: 'I', Structure: 'M' }]));
-        expect(pdf.recurrents).toEqual(['Rigueur : prioritaire depuis 2 productions']);
+    it('une copie qui n\'évalue pas le critère est sautée : la récurrence se compte sur les copies qui l\'évaluent', () => {
+        // Structure : à travailler aux productions 1 et 3 ; la production 2 ne l'évalue pas.
+        const { pdf } = lesDeux({ Structure: 'I', Rigueur: 'M' },
+            historique([{ Rigueur: 'M' }, { Structure: 'D', Rigueur: 'M' }]));
+        expect(pdf.recurrents).toEqual(['Structure : prioritaire depuis 2 productions']);
+    });
+
+    it('une copie sautée ne franchit pas un ACQUIS : le compte s\'arrête à la copie acquise', () => {
+        const { pdf } = lesDeux({ Structure: 'I', Rigueur: 'M' },
+            historique([{ Rigueur: 'M' }, { Structure: 'I', Rigueur: 'M' }, { Structure: 'M', Rigueur: 'M' }, { Structure: 'I', Rigueur: 'M' }]));
+        expect(pdf.recurrents).toEqual(['Structure : prioritaire depuis 2 productions']);
     });
 
     it('analytique : la zone vient du niveau déduit des points, comme pour « Présentement »', () => {

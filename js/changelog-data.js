@@ -33,7 +33,7 @@
                 'Rétroaction&nbsp;: le bloc «&nbsp;Observations&nbsp;» liste maintenant les tampons que tu poses, avec tes noms, tes textes et tes catégories, comme la rétroaction spécifique. Le texte copié vers Léa garde ses phrases séparées.',
                 // 1.156.3 (#939) — VALIDÉ par Grégoire le 24 sept. 2026 (version ajustée : aucune réécriture par critère n'existe).
                 'Rétroaction&nbsp;: le texte copié vers Léa donne pour chaque critère le même commentaire que le PDF, celui qui a été enregistré avec l\'évaluation&nbsp;; une cartouche retouchée après coup ne le change plus. Ni l\'un ni l\'autre n\'écrit «&nbsp;[Non défini]&nbsp;».',
-                // 1.156.4 (#940) — PROPOSITION de Cowork, À VALIDER par Grégoire avant le push.
+                // 1.156.4 (#940) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (proposition de Cowork).
                 'Synthèse de rétroaction&nbsp;: «&nbsp;Présentement, il faut se concentrer sur&nbsp;» donne de nouveau la définition de chaque critère à travailler. «&nbsp;Points récurrents&nbsp;» nomme ce qui revient d\'une copie à l\'autre, dès deux productions, et depuis combien de productions.'
             ]
         },
