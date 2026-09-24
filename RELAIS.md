@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 6 H 30 : **LOT #760 + #759 (1.156.2) SUR LA BRANCHE `lot-760-759-observations`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des mots par Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MATIN : **LOT #760 + #759 (1.156.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`e29ebdf0`) + le relais `99b34475` + le merge `0d73ad36` de `lot-760-759-observations` (`24d98f52` lot et release 1.156.2, `8929ab19` Nouvelles validées et relecture) + ce relais. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-760-759.md` : 25/25, sept mutations rouges). Phrase des Nouvelles, trois titres (« Qualité », « Diagnostic », « Autres tampons ») et forme du bloc validés par Grégoire tels quels (réponse A). #760 et #759 cochés ; le lot sort de FILE-DES-LOTS.
+
+**Suite** : porte terrain d'une rangée (`plans de travail/PORTES-TERRAIN-2026-09-24-lot-760-759.md` : largeur des colonnes du PDF de synthèse) — **artefact à publier par Cowork**, une fois 1.156.2 en ligne. Toujours à inscrire : le suivi GitHub au navigateur rouge sur `78575a46` (nettoyage-sans-perte-892 ×2, planif-zone-non-planifie-929), à confirmer au prochain run planifié. Branches `lot-830-barre-a-dit-pourquoi` et `lot-760-759-observations` supprimables une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 6 H 30 : **LOT #760 + #759 (1.156.2) SUR LA BRANCHE `lot-760-759-observations`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des mots par Grégoire
 
 **Où vit le travail** : branche `lot-760-759-observations` = `e29ebdf0` + `24d98f52` (lot et release 1.156.2 en un commit : le hook anti-cache a refusé le commit du lot seul, jetons d'`index.html` non indexés). `main` = `origin/main` + ce relais, rien d'autre. Rien n'est poussé.
 
