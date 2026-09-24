@@ -966,7 +966,10 @@ function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente, critereAlgo) 
     // ⚠ #555 lot 2 — l'évaluation PRÉCÉDENTE est lue dans SON échelle, pas dans
     // celle du bilan en cours : deux barèmes différents ne disent pas la même
     // chose du même code.
-    var zonePrecedente = _lecteurZoneBilan(evalPrecedente && evalPrecedente.echelleId);
+    // #941 lot S2 — chaque entrée par la règle de SA copie (60 % en points), comme le PDF.
+    var zonePrecedente = function (c) {
+        return window.syntheseRetroactionData.zoneDuCritereDeLaCopie(evalPrecedente, c, _lecteurZoneBilan);
+    };
     if (totalErreursFr > 0) {
         // #581 — « Concentre-toi sur la qualité du français » sortait à qui
         // compte des erreurs de calcul. ⚠ MÊMES MOTS QUE LE PDF DE SYNTHÈSE,
@@ -987,7 +990,7 @@ function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente, critereAlgo) 
     // (`synthese-retroaction-data.js`), à l'apostrophe près.
     var maitriseLongtemps = evalPrecedente && Array.isArray(evalPrecedente.criteres) &&
         evalPrecedente.criteres.length > 0 &&
-        evalPrecedente.criteres.every(function(c) { return zonePrecedente(c.niveauSelectionne) === 'acquis'; });
+        evalPrecedente.criteres.every(function(c) { return zonePrecedente(c) === 'acquis'; });
     if (maitriseLongtemps) {
         return '<p class="retro-force">Tous les critères sont maîtrisés depuis plus d’une production. Tu peux aider tes collègues : c’est une excellente façon de transférer tes compétences à d’autres contextes.</p>';
     }
@@ -1015,7 +1018,9 @@ function _rendreForceBilan(criteres, defis, niveauDe, zoneDe, signales) {
     // développement. Avec la seule condition d'origine, sa force disparaissait
     // du bilan — trouvé par une spec WebKit, Vitest restant vert.
     var resteATravailler = defis.length > 0 || (signales && signales.length > 0);
-    if (meilleur && zoneDe(meilleur.niveauSelectionne) === 'acquis' && resteATravailler) {
+    // #941 lot S2 — `zoneDe` lit l'ENTRÉE par la règle de sa copie : une copie en points n'a
+    // jamais d'« acquis » (60 % n'est pas l'acquis), donc jamais de « Ta force » (D2).
+    if (meilleur && zoneDe(meilleur) === 'acquis' && resteATravailler) {
         var nomNiveau = _lectureNiveauBilan(niveauDe, meilleur);   // le chiffre pour un analytique (retouche du lot 3)
         var nomCritere = (typeof echapperHtml === 'function') ? echapperHtml(meilleur.critereNom) : '';
         return '<p class="retro-force">Ta force : ' + nomCritere
@@ -1036,7 +1041,7 @@ function _listeEchappeeBilan(noms) {
     return noms.map(echappe).join(' et ');
 }
 
-function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe, recurrences) {
+function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe, recurrences, enPoints) {
     var recurrentsHtml = '';
 
     // ⮕ #940 — ce qui revient d'une copie à l'autre (décision de Grégoire, 24 sept.) :
@@ -1056,7 +1061,10 @@ function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, z
     // peut pas savoir si les deux rangs sont comparables — et « ne pas deviner »
     // vaut ici aussi. `profil-etudiant-calculs.js` est chargé avant ce module
     // dans `index.html` ; ce filet ne sert qu'à ne jamais lever.
-    var memeEchelle = !!evalPrecedente
+    // #941 (reste du lot S1, fermé au lot S2) — une copie en points ne se compare pas par
+    // niveaux : même sous une échelle choisie en coulisse, « Progrès : I → D » nommerait des
+    // niveaux que l'élève ne lit plus (décision A). Même garde que le PDF.
+    var memeEchelle = !enPoints && !!evalPrecedente
         && (typeof echellesComparables === 'function')
         && echellesComparables(evalPrecedente.echelleId, echelleId);
     if (memeEchelle && evalPrecedente.niveauFinal) {
@@ -1086,14 +1094,17 @@ function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, z
     // n'annonce rien — sinon chaque évaluation antérieure à leur pose ferait
     // annoncer un progrès qu'on n'a pas mesuré.
     if (evalPrecedente && evalPrecedente.criteres) {
-        var zoneAvant = _lecteurZoneBilan(evalPrecedente.echelleId);
+        // #941 lot S2 — les ENTRÉES, chacune lue par la règle de sa copie (60 % en points).
+        var zoneAvant = function (c) {
+            return c ? window.syntheseRetroactionData.zoneDuCritereDeLaCopie(evalPrecedente, c, _lecteurZoneBilan) : null;
+        };
         var criteresPrec = {};
-        evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c.niveauSelectionne; });
+        evalPrecedente.criteres.forEach(function(c) { criteresPrec[c.critereNom] = c; });
         var ameliorations = [];
         var aConsolider = [];
         criteres.forEach(function(c) {
             var avant = zoneAvant(criteresPrec[c.critereNom]);
-            var apres = zoneDe(c.niveauSelectionne);
+            var apres = zoneDe(c);
             if (avant == null) return;
             if (avant !== 'acquis' && apres === 'acquis') ameliorations.push(c.critereNom);
             else if (avant === 'priorite' && apres === 'signale') aConsolider.push(c.critereNom);
@@ -1172,14 +1183,24 @@ function genererRetroactionBilan() {
     // bilan. Même lecture que `evaluation-calcul.js` : l'évaluation d'abord, le
     // sélecteur de l'écran en repli tant qu'elle n'a pas été enregistrée.
     var niveauDe = _lecteurNiveauBilan(echelleId);
-    var zoneDe = _lecteurZoneBilan(echelleId);
+    // #941 lot S2 (D2) — LA ZONE D'UN CRITÈRE PAR LA RÈGLE DE SA COPIE, la même que le PDF
+    // (`zoneDuCritereDeLaCopie`, synthese-retroaction-data.js) : 60 % pour une copie en points,
+    // les repères de l'échelle sinon. La copie vivante, ce sont les critères collectés.
+    var copieVivante = { criteres: criteres, echelleId: echelleId };
+    var enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(copieVivante);
+    var zoneCritere = function (c) {
+        return window.syntheseRetroactionData.zoneDuCritereDeLaCopie(copieVivante, c, _lecteurZoneBilan);
+    };
+    var pctDe = window.syntheseRetroactionData.pourcentageDesPoints;
 
     // Defis prioritaires + détection « tous maîtrisés »
     // ⮕ #555 lot 2 — « défi » n'est plus une lettre : c'est ce qui est SOUS le
     // seuil de suffisance de l'échelle. L'ordre reste dérivé du rang.
     var defis = criteres
-        .filter(function(c) { return zoneDe(c.niveauSelectionne) === 'priorite'; })
+        .filter(function(c) { return zoneCritere(c) === 'priorite'; })
         .sort(function(a, b) {
+            // #941 lot S2 — en points : du plus faible pourcentage au plus fort (même ordre que le PDF).
+            if (enPoints) return pctDe(a) - pctDe(b);
             var ra = _rangBilan(niveauDe, a.niveauSelectionne);
             var rb = _rangBilan(niveauDe, b.niveauSelectionne);
             // ⚠ `Infinity - Infinity` vaut NaN, et un comparateur qui rend NaN
@@ -1198,7 +1219,7 @@ function genererRetroactionBilan() {
     // `textContent` de CE bilan dans ce qui est remis à l'élève : les deux
     // documents doivent dire la même chose du même critère.
     var signales = criteres
-        .filter(function(c) { return zoneDe(c.niveauSelectionne) === 'signale'; })
+        .filter(function(c) { return zoneCritere(c) === 'signale'; })
         .sort(function(a, b) {
             var ra = _rangBilan(niveauDe, a.niveauSelectionne);
             var rb = _rangBilan(niveauDe, b.niveauSelectionne);
@@ -1206,13 +1227,14 @@ function genererRetroactionBilan() {
         });
 
     var tousMaitrises = criteres.length > 0 &&
-        criteres.every(function(c) { return zoneDe(c.niveauSelectionne) === 'acquis'; });
+        criteres.every(function(c) { return zoneCritere(c) === 'acquis'; });
 
     // #940 — les critères à travailler qui reviennent d'une copie à l'autre, dans l'ordre de
     // « Présentement » (priorités, puis « à consolider »). Les noms sont échappés ici.
     var recurrences = window.syntheseRetroactionData.lignesRecurrentes(defis.concat(signales),
         historiqueEleve, echelleId, _lecteurZoneBilan,
-        function (nom) { return (typeof echapperHtml === 'function') ? echapperHtml(String(nom)) : ''; });
+        function (nom) { return (typeof echapperHtml === 'function') ? echapperHtml(String(nom)) : ''; },
+        copieVivante);
 
     var algoA0 = _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr);
 
@@ -1246,8 +1268,8 @@ function genererRetroactionBilan() {
         html += '<p>Aucun critère n\'est encore évalué pour cette production.</p>';
     }
 
-    html += _rendreForceBilan(criteres, defis, niveauDe, zoneDe, signales);
-    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe, recurrences);
+    html += _rendreForceBilan(criteres, defis, niveauDe, zoneCritere, signales);
+    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneCritere, recurrences, enPoints);
     html += _rendreJetonsBilan(da);
 
     conteneur.innerHTML = html;

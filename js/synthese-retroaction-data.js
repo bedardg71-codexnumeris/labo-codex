@@ -797,6 +797,15 @@
     function criteresATravailler(evaluation) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
 
+        // #941 lot S2 (D2) — une copie en points : sous 60 % = prioritaire, du plus faible
+        // pourcentage au plus fort ; rien « à consolider » (60 % dit où commence l'échec,
+        // pas où commence l'acquis). Voir `zoneDesPoints`.
+        if (estEnPoints(evaluation)) {
+            const defisPoints = criteres.filter(c => zoneDesPoints(c) === 'priorite')
+                .sort((a, b) => pourcentageDesPoints(a) - pourcentageDesPoints(b));
+            return { defis: defisPoints, signales: [] };
+        }
+
         // #555 lot 2 — trois zones, lues dans les repères de l'échelle. « Défi »
         // n'est plus une lettre : c'est ce qui est SOUS le seuil de suffisance.
         const rangDe = lecteurRang(evaluation.echelleId);
@@ -821,7 +830,6 @@
     function construireConcentration(evaluation, grille, echelle, historique, stats, aTravailler) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
-        const zoneDe = lecteurZone(evaluation.echelleId);
         const defis = aTravailler.defis;
         const signales = aTravailler.signales;
 
@@ -831,8 +839,10 @@
         // (vacuité JS), et un travail non recevable ne doit JAMAIS déclencher
         // « tous maîtrisés ». Un niveau que l'échelle ne situe pas (`null`)
         // empêche la conclusion — on ne dit pas « tout est acquis » sur un doute.
+        // #941 lot S2 — la zone de CHAQUE ENTRÉE, par la règle de sa copie (60 % en points,
+        // jamais « acquis » ; les repères de l'échelle sinon).
         const tousMaitrises = criteres.length > 0 &&
-            criteres.every(c => zoneDe(c.niveauSelectionne) === 'acquis');
+            criteres.every(c => zoneDuCritereDeLaCopie(evaluation, c, lecteurZone) === 'acquis');
 
         let messageGlobal = '';
         if (tousMaitrises) {
@@ -850,10 +860,9 @@
             } else {
                 // Garde length > 0 : .every() retourne true sur tableau vide (vacuité JS).
                 // ⚠ L'évaluation précédente porte SON échelle, pas forcément celle-ci.
-                const zonePrecedente = lecteurZone(historique[0] && historique[0].echelleId);
                 const maitriseLongtemps = historique[0] && Array.isArray(historique[0].criteres) &&
                     historique[0].criteres.length > 0 &&
-                    historique[0].criteres.every(c => zonePrecedente(c.niveauSelectionne) === 'acquis');
+                    historique[0].criteres.every(c => zoneDuCritereDeLaCopie(historique[0], c, lecteurZone) === 'acquis');
                 // ⚠ F4-1 (audit du 21 sept. 2026) — la phrase disait « depuis plus
                 // d'un artefact » et nommait le sommet de l'échelle (« vers le niveau
                 // … ») : le mot du cours de Grégoire, et un niveau que l'élève d'un·e
@@ -890,7 +899,7 @@
         // sortis (décision de Grégoire, 24 sept. 2026) : ils sont en entier dans
         // « Commentaires ciblés », et leur répétition tronquée à 80 caractères est partie.
         const recurrences = lignesRecurrentes(aTravailler.defis.concat(aTravailler.signales),
-            historique, evaluation.echelleId, lecteurZone);
+            historique, evaluation.echelleId, lecteurZone, null, evaluation);
         const francais = construireFrancaisResume(stats, grille, evaluation);
         // La tendance lit les cinq copies précédentes, comme avant #940 : l'historique
         // n'est plus plafonné (le compte des récurrences en a besoin), sa tendance oui.
@@ -911,6 +920,9 @@
     function construireForce(evaluation, echelle) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         if (!criteres.length) return '';
+        // #941 lot S2 (D2) — « Ta force » reste vide pour une copie en points : 60 % dit où
+        // commence l'échec, pas où commence l'acquis.
+        if (estEnPoints(evaluation)) return '';
         // Un critère dont le niveau ne se lit pas dans l'échelle n'est la force de
         // personne : il ne peut pas devenir le meilleur, et si AUCUN ne se lit,
         // la ligne ne s'affiche pas. Avant, tous étaient à 0 et le premier du
@@ -1018,15 +1030,17 @@
 
     function construireAmeliorations(evaluation, evalPrecedente) {
         if (!evalPrecedente || !Array.isArray(evalPrecedente.criteres) || !Array.isArray(evaluation.criteres)) return '';
+        // #941 lot S2 — les ENTRÉES, pas les codes : chaque copie est lue par sa règle
+        // (`zoneDuCritereDeLaCopie` : 60 % en points, les repères de son échelle sinon).
         const prec = {};
-        evalPrecedente.criteres.forEach(c => { prec[c.critereNom] = c.niveauSelectionne; });
+        evalPrecedente.criteres.forEach(c => { prec[c.critereNom] = c; });
 
         // #555 lot 2 — « tu as progressé » = passé d'une PRIORITÉ à un ACQUIS.
         // ⚠ Chaque évaluation est lue dans SON échelle : la précédente peut avoir
         // été produite sous une autre, et comparer deux zones lues dans le mauvais
         // barème annoncerait des progrès qui n'ont pas eu lieu.
-        const zoneAvant = lecteurZone(evalPrecedente.echelleId);
-        const zoneApres = lecteurZone(evaluation.echelleId);
+        const zoneAvant = (c) => (c ? zoneDuCritereDeLaCopie(evalPrecedente, c, lecteurZone) : null);
+        const zoneApres = (c) => zoneDuCritereDeLaCopie(evaluation, c, lecteurZone);
         // ⮕ DEUX PROGRÈS DE NATURES DIFFÉRENTES, et Grégoire a demandé qu'ils
         // soient dits différemment (28 août 2026, option 3 sur trois proposées).
         //   · vers ACQUIS   → « Tu as progressé en X. »
@@ -1049,7 +1063,7 @@
             .filter(c => {
                 const avant = zoneAvant(prec[c.critereNom]);
                 return avant != null && avant !== 'acquis'
-                    && zoneApres(c.niveauSelectionne) === 'acquis';
+                    && zoneApres(c) === 'acquis';
             })
             .map(c => c.critereNom);
 
@@ -1058,7 +1072,7 @@
         // listes sont disjointes par construction (`=== 'signale'`).
         const consolides = evaluation.criteres
             .filter(c => zoneAvant(prec[c.critereNom]) === 'priorite'
-                      && zoneApres(c.niveauSelectionne) === 'signale')
+                      && zoneApres(c) === 'signale')
             .map(c => c.critereNom);
 
         const phrases = [];
@@ -1447,6 +1461,54 @@
     const MOT_DE_LA_ZONE = { priorite: 'prioritaire', signale: 'à consolider' };
 
     /**
+     * #941 lot S2 (D2, décision de Grégoire du 24 sept. 2026) — LA RÈGLE DES 60 %, pour les
+     * copies EN POINTS seulement (`evaluationEnPoints` : chaque critère porte ses points —
+     * décision A du lot S1, copies déjà enregistrées comprises ; les grilles mixtes ne
+     * changent pas).
+     *
+     *   `'priorite'` — points / pondération sous 60 % : prioritaire, avec sa définition ;
+     *   `'reussi'`   — 60 % et plus : absent de « Présentement », jamais « Ta force », jamais
+     *                  « acquis » (60 % dit où commence l'échec, pas où commence l'acquis) ;
+     *                  il ARRÊTE le compte des « Points récurrents » (une réussite mesurée) ;
+     *   `null`       — le critère n'a pas de points (non évalué) : la copie est sautée.
+     *
+     * ⮕ RÉVISION DU PRINCIPE DU 28 AOÛT (`zoneDuNiveau`, profil-etudiant-calculs.js : « aucune
+     * valeur n'est devinée à leur place : ni par les lettres, ni par une position dans la liste,
+     * ni par un pourcentage »). Il RESTE VRAI POUR LES ÉCHELLES : une échelle qui a ses repères
+     * garde ses repères, et les 60 % ne s'appliquent jamais aux niveaux (ni par `valeurCalcul`,
+     * ni par la plage). Il est révisé pour les copies en points, où le pourcentage n'est pas
+     * deviné : il EST la mesure. Les deux règles ne se rencontrent jamais (D3 réglée) :
+     * `zoneDuCritereDeLaCopie` choisit l'une OU l'autre, par la copie.
+     */
+    const SEUIL_POINTS_PRIORITE = 60;
+
+    function pourcentageDesPoints(c) {
+        const pts = c ? Number(c.points) : NaN;
+        const pond = c ? Number(c.ponderation) : NaN;
+        if (!c || typeof c.points !== 'number' || isNaN(pts) || !(pond > 0)) return null;
+        return pts / pond * 100;
+    }
+
+    function zoneDesPoints(c) {
+        const pct = pourcentageDesPoints(c);
+        if (pct === null) return null;
+        return pct < SEUIL_POINTS_PRIORITE ? 'priorite' : 'reussi';
+    }
+
+    /**
+     * #941 lot S2 — LA ZONE D'UN CRITÈRE DANS SA COPIE, une seule règle pour le PDF et l'écran :
+     * 60 % pour une copie en points (`zoneDesPoints`), les repères de SON échelle sinon.
+     * @param {Object} copie - l'évaluation (ses `criteres[]`, son `echelleId`)
+     * @param {Object} c - l'entrée du critère dans `copie.criteres`
+     * @param {Function} lecteurZoneDe - `echelleId → (code → zone)`
+     */
+    function zoneDuCritereDeLaCopie(copie, c, lecteurZoneDe) {
+        if (!c) return null;
+        if (estEnPoints(copie)) return zoneDesPoints(c);
+        return lecteurZoneDe(copie && copie.echelleId)(c.niveauSelectionne);
+    }
+
+    /**
      * « Points récurrents » : les critères à travailler sur cette copie ET sur la précédente.
      *
      * ⮕ Décision de Grégoire (24 sept. 2026) : « une récurrence identifiée dans le temps »,
@@ -1468,27 +1530,32 @@
      * @param {string|null} echelleId - l'échelle de la copie en cours
      * @param {Function} lecteurZoneDe - `echelleId → (code → zone)`
      * @param {Function} [formaterNom] - l'échappement du nom quand l'appelant pose du HTML
+     * @param {Object} [copieCourante] - la copie en cours (ses `criteres[]`) : #941 lot S2, une
+     *   copie en points se lit à 60 % (`zoneDuCritereDeLaCopie`) ; sans elle, son échelle
      * @returns {string[]} « Nom : prioritaire depuis N productions »
+     *
+     * ⮕ #941 lot S2 (D2, décision de Grégoire du 24 sept.) — une copie EN POINTS où le critère
+     * est à 60 % ou plus ARRÊTE le compte (`'reussi'` : une réussite mesurée), comme un acquis.
+     * Une copie qui n'évalue pas le critère reste sautée (décision du lot #940).
      */
-    function lignesRecurrentes(criteres, historique, echelleId, lecteurZoneDe, formaterNom) {
+    function lignesRecurrentes(criteres, historique, echelleId, lecteurZoneDe, formaterNom, copieCourante) {
         const nomDe = (typeof formaterNom === 'function') ? formaterNom : (n) => String(n);
-        const zoneCourante = lecteurZoneDe(echelleId);
+        const copie = copieCourante || { echelleId: echelleId };
         const anterieures = (Array.isArray(historique) ? historique : []).map(ev => {
-            const zoneDe = lecteurZoneDe(ev && ev.echelleId);
             const zones = {};
             if (ev && Array.isArray(ev.criteres)) {
-                ev.criteres.forEach(c => { if (c && c.critereNom) zones[c.critereNom] = zoneDe(c.niveauSelectionne); });
+                ev.criteres.forEach(c => { if (c && c.critereNom) zones[c.critereNom] = zoneDuCritereDeLaCopie(ev, c, lecteurZoneDe); });
             }
             return zones;
         });
         const lignes = [];
         (Array.isArray(criteres) ? criteres : []).forEach(c => {
-            const mot = MOT_DE_LA_ZONE[zoneCourante(c.niveauSelectionne)];
+            const mot = MOT_DE_LA_ZONE[zoneDuCritereDeLaCopie(copie, c, lecteurZoneDe)];
             if (!mot) return;
             let productions = 1;
             for (const zones of anterieures) {
                 const zone = zones[c.critereNom];
-                if (zone === 'acquis') break;
+                if (zone === 'acquis' || zone === 'reussi') break;
                 if (zone === 'priorite' || zone === 'signale') productions++;   // sinon : sautée
             }
             if (productions >= 2) lignes.push(`${nomDe(c.critereNom)} : ${mot} depuis ${productions} productions`);
@@ -1591,7 +1658,10 @@
         // (`genererRetroactionBilan`, evaluation-retroaction.js).
         historiqueAnterieur: historiqueAnterieur,
         ligneCritereATravailler: ligneCritereATravailler,
-        lignesRecurrentes: lignesRecurrentes
+        lignesRecurrentes: lignesRecurrentes,
+        // #941 lot S2 — la zone d'un critère par la règle de sa copie (60 % en points).
+        zoneDuCritereDeLaCopie: zoneDuCritereDeLaCopie,
+        pourcentageDesPoints: pourcentageDesPoints
         // #575 — `SCALE_FALLBACK` était exposée ici ; elle n'avait aucun lecteur
         // hors du module. Sa remplaçante (`COULEUR_NIVEAU_NEUTRE`) reste privée
         // plutôt que d'ajouter un export que personne n'appelle.
