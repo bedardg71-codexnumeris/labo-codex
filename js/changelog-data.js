@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.159.0 (#941, lot S2) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
+            version: '1.159',
+            couleur: 'vert',
+            titre: 'Sommative : le bilan d\'une grille en points',
+            items: [
+                'Avec une grille en points, le bilan de ton élève nomme maintenant chaque critère sous 60&nbsp;%, avec sa définition, dans «&nbsp;Présentement, il faut se concentrer sur&nbsp;», et «&nbsp;Points récurrents&nbsp;» dit depuis combien de productions il revient. Un critère à 60&nbsp;% ou plus n\'y figure pas.'
+            ]
+        },
+        {
             // 1.158.0 (#941, lot S1) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
             version: '1.158',
             couleur: 'vert',

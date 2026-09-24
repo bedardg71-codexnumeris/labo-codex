@@ -70,6 +70,13 @@ function historique(liste) {
 }
 const DATE_COURANTE = '2026-10-01T12:00:00.000Z';
 
+// #941 lot S2 — LA VRAIE règle « copie en points » (gabarits-utils.js), chargée comme en production :
+// sans elle, `estEnPoints` rendait faux dans ce harnais et la règle des 60 % (D2) n'y était jamais lue.
+const { evaluationEnPoints } = chargerScript('js/gabarits-utils.js', {
+    db: { getSync: (c, d) => (d !== undefined ? d : null), setSync() {}, get: async () => null, set: async () => {} },
+    cle: (k) => 'test_' + k, echapperHtml: (t) => String(t == null ? '' : t)
+});
+
 function chargerCalculs() {
     return chargerScript('js/profil-etudiant-calculs.js', {
         db: { getSync: (k, d) => (String(k).indexOf('echellesTemplates') !== -1 ? ECHELLES : (d !== undefined ? d : null)), get: async () => null, set: async () => {}, setSync() {} },
@@ -92,7 +99,7 @@ function bilanPdf(courante, enBase) {
         travauxStockage: { obtenirAnnotationFichier: () => null }, travauxOutils: { AUTOCOLLANTS: [] }, obtenirPreference: () => null,
         obtenirEchelleResolue: calculs.obtenirEchelleResolue, niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
         niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle, echellesComparables: calculs.echellesComparables,
-        zoneDuNiveau: calculs.zoneDuNiveau
+        zoneDuNiveau: calculs.zoneDuNiveau, evaluationEnPoints
     });
     const bilan = win.syntheseRetroactionData.construireFeedback(courante, { id: 'F1' }, null).bilan;
     return {
@@ -110,7 +117,7 @@ function bilanEcran(courante, enBase) {
     ['contenuRetroBilan', 'contenuRetroSpecifique', 'vueRetroGenerale', 'vueRetroSpecifique', 'vueRetroBilan'].forEach(id => { els[id] = boite(); });
     els.niveauProduction1 = { textContent: 'D' };
     const wEnonces = chargerScript('js/evaluation-enonces.js');
-    chargerScript('js/synthese-retroaction-data.js', {}, wEnonces);
+    chargerScript('js/synthese-retroaction-data.js', { evaluationEnPoints }, wEnonces);
     const w = chargerScript('js/evaluation-retroaction.js', {
         document: { addEventListener() {}, removeEventListener() {}, querySelector: () => null, querySelectorAll: () => [],
             getElementById: (id) => els[id] || null, createElement: () => ({ setAttribute() {}, appendChild() {}, style: {}, classList: { add() {}, remove() {} } }),
@@ -120,7 +127,8 @@ function bilanEcran(courante, enBase) {
         obtenirDonneesSelonMode: (quoi) => (quoi === 'evaluationsSauvegardees' ? JSON.parse(JSON.stringify(enBase)) : []),
         echapperHtml: echapper,
         niveauxOrdonnesDeLEchelle: calculs.niveauxOrdonnesDeLEchelle, niveauDuCodeDansEchelle: calculs.niveauDuCodeDansEchelle,
-        zoneDuNiveau: calculs.zoneDuNiveau, echellesComparables: calculs.echellesComparables, obtenirEchelleResolue: calculs.obtenirEchelleResolue
+        zoneDuNiveau: calculs.zoneDuNiveau, echellesComparables: calculs.echellesComparables, obtenirEchelleResolue: calculs.obtenirEchelleResolue,
+        evaluationEnPoints
     }, wEnonces);
     const niveaux = {}; const points = {};
     courante.criteres.forEach(c => { niveaux[c.critereId] = c.niveauSelectionne; if (typeof c.points === 'number') points[c.critereId] = c.points; });
