@@ -17,9 +17,9 @@
 ## Demandes de Grégoire du 24 sept.
 
 - ~~**Lot #942**~~ — **SORTI DE LA FILE : livré en 1.157.0, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte ; titre piégé ajouté) ; Nouvelles validées telles quelles.** Profil › Engagement : chaque absence nomme la leçon que la carte d'alignement place ce jour-là pour le groupe de l'élève (inverse du calcul de l'Inspecteur, #695). Consigne : `CONSIGNE-LECON-MANQUEE.md`.
-- **Lot S1 de #941** (`CONSIGNE-SOMMATIVE-FONCTIONNELLE.md`, D1 et D4) — **codé en 1.158.0 sur `lot-941-s1-points-sans-echelle`, en attente de la relecture croisée de Cowork** ; Nouvelles et deux phrases neuves de l'élève soumises à Grégoire. Une grille entièrement en points se note sans échelle, aucune n'est choisie d'office ; aucun nom de niveau pour une copie en points, copies déjà enregistrées comprises (décision A de Grégoire, 24 sept.) ; « Note de la copie : 74 % » et la note cumulée de la sommative sur la page du PDF.
+- ~~**Lot S1 de #941**~~ — **SORTI DE LA FILE : livré en 1.158.0, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte ; M4 redondante, commentée) ; Nouvelles et deux phrases validées telles quelles ; la condition de la mention sans jetons passe à S3 (D5).** (`CONSIGNE-SOMMATIVE-FONCTIONNELLE.md`, D1 et D4) Une grille entièrement en points se note sans échelle, aucune n'est choisie d'office ; aucun nom de niveau pour une copie en points, copies déjà enregistrées comprises (décision A de Grégoire, 24 sept.) ; « Note de la copie : 74 % » et la note cumulée de la sommative sur la page du PDF.
 - **Lot S2 de #941** (D2) — la règle des 60 % du bilan d'une grille en points. Après S1.
-- **Lot S3 de #941** (D5, C2, C5) — jetons non déclarés, « Présentement » sans rien, « CONTEXTE » vide. Après S2 ; #941 se coche à sa sortie.
+- **Lot S3 de #941** (D5, C2, C5) — jetons non déclarés, « Présentement » sans rien, « CONTEXTE » vide ; et la mention « Note provisoire » sans « et l'application de jetons » sous la MÊME condition que D5 (relecture S1, § 2). Après S2 ; #941 se coche à sa sortie.
 - **#943** (retour testeur de Grégoire, 24 sept. 10 h 18) — une ligne ou une flèche qu'on vient de tracer montre aussitôt ses poignées de courbure. Après S1, à la demande de Grégoire.
 
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)

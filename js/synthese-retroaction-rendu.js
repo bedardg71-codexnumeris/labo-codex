@@ -746,7 +746,7 @@
               + (evaluesSel > nbSelection ? `, parmi ${esc(evaluesSel)} évaluées` : '')
             : `les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées`;
         // #941 lot S1 (D4) — en sommative, toutes les copies évaluées comptent : rien n'est
-        // « retenu ». ⚠ Mots que l'élève lit, soumis à Grégoire avant le push.
+        // « retenu ». Mots que l'élève lit, VALIDÉS par Grégoire le 24 sept. 2026.
         const libelleSommative = nbSelection === 1
             ? 'Voici la production comptée dans ta note'
             : `Voici les ${esc(nbSelection)} productions comptées dans ta note`;
@@ -818,8 +818,9 @@
                     ? 'Note plafonnée (échec) : déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'
                     : 'Note plafonnée par déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'}</div>`
                 : '';
-            // #941 lot S1 — en sommative, pas de jetons à invoquer (D5 les retire du bilan au lot S3).
-            // ⚠ Mots que l'élève lit, soumis à Grégoire avant le push.
+            // #941 lot S1 — mots VALIDÉS par Grégoire le 24 sept. ⚠ La CONDITION est provisoire : au lot S3,
+            // elle devient celle de D5 (« la pratique ne déclare pas de jetons actifs »), la même règle que
+            // le bloc « Jetons utilisés » (relecture de Cowork, § 2).
             const texteProvisoire = note.sommative
                 ? 'Note provisoire — peut changer selon tes prochains travaux.'
                 : 'Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.';

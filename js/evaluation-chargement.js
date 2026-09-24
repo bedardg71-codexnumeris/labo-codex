@@ -346,6 +346,8 @@ function _retirerEchelleDOffice(enPoints) {
     const select = document.getElementById('selectEchelle1');
     if (!enPoints || !select || !select.value || select.dataset.choixAuto !== select.value) return false;
     const vivant = (typeof window.etatVivantEvaluationEnCours === 'function') ? window.etatVivantEvaluationEnCours() : null;
+    // Relecture de Cowork (24 sept.) : garde redondante avec `dejaEvaluee` ci-dessous (même élève, même
+    // production) — la retirer ne rougit rien ; gardée comme court-circuit, sans suite.
     if (vivant && vivant.idModification) return false;
     if (vivant && vivant.etudiantDA && vivant.productionId) {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
