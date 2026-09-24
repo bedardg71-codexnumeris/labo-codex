@@ -521,8 +521,7 @@ function restaurerSelectionsEvaluation() {
                     selectEchelle.value = selections.echelle;
                 }
                 if (selectCartouche && selections.cartouche) {
-                    selectCartouche.value = selections.cartouche;
-                    selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+                    window.poserCartoucheParChargeur(selectCartouche, selections.cartouche);   // #944 — pas le geste
                 }
                 if (selectRemise && selections.remise) {
                     selectRemise.value = selections.remise;
@@ -1422,8 +1421,7 @@ function _chargerCartoucheDropdownModif(evaluation) {
     if (!evaluation.cartoucheId) return false;
     const cartoucheExiste = cartouches.some(c => c.id === evaluation.cartoucheId);
     if (cartoucheExiste) {
-        selectCartouche.value = evaluation.cartoucheId;
-        selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+        window.poserCartoucheParChargeur(selectCartouche, evaluation.cartoucheId);   // #944
         return true;
     }
     console.warn(`   ⚠️ Cartouche ${evaluation.cartoucheId} non trouvée dans les ${cartouches.length} cartouches`);
