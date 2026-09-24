@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 13 H 30 : **#943 (1.159.2) SUR LA BRANCHE `bug-943-poignees-ligne` (worktree `.claude/worktrees/bug-943`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI (SUITE) : **#943 (1.159.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `11434988` (#941 au complet, poussé) + `dd1cd9bf` (relais) + le merge `94999fb0` de `bug-943-poignees-ligne` (`a98d2fc1` correctif + release, `34ba15b1` relecture versée + porte terrain) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-bug-943.md`) ; les deux décisions (la palette vise la ligne suivante ; changer d'outil retire les poignées) retenues par Grégoire ; Nouvelles validées.
+
+**Suite** : la porte terrain `plans de travail/PORTES-TERRAIN-2026-09-24-bug-943.md` (iPad + Pencil, dont le compromis « deux flèches bout à bout » du § 2 de la relecture), une fois 1.159.2 en ligne ; artefact jumeau à publier par Cowork. Worktree `.claude/worktrees/bug-943` et sa branche supprimables une fois le push constaté. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 13 H 30 : **#943 (1.159.2) SUR LA BRANCHE `bug-943-poignees-ligne` (worktree `.claude/worktrees/bug-943`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
 
 **Où vit le travail** : `main` = `origin/main` = `11434988` (#941 en ligne au complet : S1 1.158.0, S2 1.159.0, S3 1.159.1 ; verdict S3 vert sans second essai) + ce relais. Branche `bug-943-poignees-ligne` = `11434988` + `a98d2fc1` (correctif + release 1.159.2). **Rien de #943 n'est poussé.**
 
