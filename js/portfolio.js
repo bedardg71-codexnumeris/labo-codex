@@ -210,7 +210,7 @@ function chargerPortfolioEleveDetail(da) {
                 numero: art.numero || parseInt(art.id.match(/\d+/)?.[0]) || 0, // AJOUT (24 jan 2026)
                 remis: !!evaluation,
                 note: evaluation?.noteFinale || null,
-                niveau: evaluation?.niveauFinal || null,
+                niveau: evaluation ? ((typeof niveauFinalAffichable === 'function') ? (niveauFinalAffichable(evaluation) || null) : (evaluation.niveauFinal || null)) : null,   // #941 lot S1
                 retenu: selectionEleve.artefactsRetenus.includes(art.id),
                 existe: true
             });
@@ -345,7 +345,7 @@ function chargerPortfolioEleveDetail(da) {
                                     ${art.remis
                                         ? `<span class="u-texte-succes"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Remis</span>
                                            <span>${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `<strong>Note :</strong> ${art.note}/100`}</span>
-                                           <span><strong>Niveau :</strong> ${echapperHtml(art.niveau)}</span>`
+                                           ${art.niveau ? `<span><strong>Niveau :</strong> ${echapperHtml(art.niveau)}</span>` : ''}`
                                         : '<span class="portfolio-texte-gris-fade">— Non remis</span>'}
                                 </div>
                             </div>

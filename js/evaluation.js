@@ -62,7 +62,10 @@
  * Change l'échelle d'évaluation
  */
 function changerEchelleEvaluation(num) {
-    const echelleId = document.getElementById('selectEchelle1').value;
+    const selectEchelle = document.getElementById('selectEchelle1');
+    const echelleId = selectEchelle.value;
+    // #941 lot S1 — un choix fait au menu n'est plus celui de l'application (`_retirerEchelleDOffice`).
+    delete selectEchelle.dataset.choixAuto;
 
     if (evaluationEnCours) {
         evaluationEnCours.echelleId = echelleId;
@@ -512,7 +515,9 @@ function restaurerSelectionsEvaluation() {
             }
 
             setTimeout(() => {
-                if (selectEchelle && selections.echelle) {
+                // #941 lot S1 — pas sous une grille entièrement en points (voir travaux-ui.js).
+                const grilleEnPoints = typeof window.grilleSelectionneeEnPoints === 'function' && window.grilleSelectionneeEnPoints();
+                if (selectEchelle && selections.echelle && !grilleEnPoints) {
                     selectEchelle.value = selections.echelle;
                 }
                 if (selectCartouche && selections.cartouche) {
@@ -1736,12 +1741,16 @@ function _collecterCriteresMod(grille) {
     if (!grille || !grille.criteres) return criteres;
     grille.criteres.forEach(critere => {
         const niveau = evaluationEnCours.criteres[critere.id];
-        if (niveau) {
+        // #941 lot S1 — sans échelle, un critère analytique n'a pas de niveau déduit : ses
+        // points suffisent à le faire entrer (`niveauSelectionne` vide).
+        const ptsSaisis = (evaluationEnCours.pointsAnalytiques || {})[critere.id];
+        const aDesPoints = critere.type === 'analytique' && typeof ptsSaisis === 'number' && !isNaN(ptsSaisis);
+        if (niveau || aDesPoints) {
             const commDiv = document.getElementById(`comm_${critere.id}`);
             const entree = {
                 critereId: critere.id,
                 critereNom: critere.nom,
-                niveauSelectionne: niveau,
+                niveauSelectionne: niveau || '',
                 retroaction: commDiv ? commDiv.textContent : '',
                 ponderation: critere.ponderation || 0
             };

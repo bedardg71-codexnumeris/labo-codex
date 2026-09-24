@@ -116,7 +116,7 @@ function genererRapportAPI(da, options = {}) {
                 const production = productions.find(p => p.id === e.productionId);
                 return {
                     productionNom: production?.activiteApprentissage || production?.description || production?.titre || production?.nom || `Production ${e.productionId}`,
-                    niveauFinal: e.niveauFinal,
+                    niveauFinal: ((typeof niveauFinalAffichable === 'function') ? (niveauFinalAffichable(e) || null) : (e.niveauFinal || null)),   // #941 lot S1
                     notePct: parseFloat(e.noteFinale),
                     date: e.dateEvaluation || e.dateCreation || ''
                 };

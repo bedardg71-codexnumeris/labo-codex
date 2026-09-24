@@ -422,6 +422,23 @@
             </section>`;
     }
 
+    /**
+     * #941 lot S1 (D4, 24 sept. 2026) — en tête du bloc « Niveau général » d'une copie en points,
+     * sa note : « Note de la copie : 74 % » (forme proposée par Cowork, retenue par Grégoire).
+     * Aucun nom de niveau (D1, décision A). Le pourcentage s'écrit comme dans le bloc de la
+     * note provisoire (arrondi au dixième).
+     */
+    function renderNoteDeLaCopie(o) {
+        if (typeof o.note !== 'number' || isNaN(o.note)) return '';
+        return `
+            <section style="margin-bottom: 10px;">
+                <div style="padding: 10px 12px; border: 1.5px solid ${MUTED}; border-radius: 3px; color: ${INK};">
+                    <div style="${styleMonoLabel()} margin-bottom: 4px;">Niveau général</div>
+                    <div style="font-size: 16px; font-weight: 800;">${esc('Note de la copie : ' + (Math.round(o.note * 10) / 10) + ' %')}</div>
+                </div>
+            </section>`;
+    }
+
     function renderNiveauGlobal(ctx) {
         const o = ctx.feedback.overall || {};
         // #674 — LE PDF REFUSE DE CONCLURE quand la note ne porte pas sur toute la
@@ -430,9 +447,12 @@
         // simplement omis : une grille amputée était indistinguable d'une grille qui
         // n'avait jamais eu ce critère.
         const portee = ctx.feedback.portee || null;
-        if (portee && (portee.incomplete || (portee.commencee && !o.code))) {
+        // #941 lot S1 — une copie en points n'a jamais de niveau général : l'absence de code
+        // n'y est pas un refus de conclure, seule une portée incomplète l'est.
+        if (portee && (portee.incomplete || (portee.commencee && !o.code && !o.enPoints))) {
             return renderPorteeIncomplete(ctx, portee);
         }
+        if (o.enPoints) return renderNoteDeLaCopie(o);
         if (!o.code) return '';
 
         const couleur = ctx.codeColor[o.code] || o.color || MUTED;
@@ -725,7 +745,12 @@
             ? `${esc(nbSelection)} retenue${nbSelection > 1 ? 's' : ''} sur ${esc(nARetenir)} possible${nARetenir > 1 ? 's' : ''}`
               + (evaluesSel > nbSelection ? `, parmi ${esc(evaluesSel)} évaluées` : '')
             : `les ${esc(nbSelection)} meilleures sur ${esc(evaluesSel)} évaluées`;
-        const libelleSelection = estHybride
+        // #941 lot S1 (D4) — en sommative, toutes les copies évaluées comptent : rien n'est
+        // « retenu ». ⚠ Mots que l'élève lit, soumis à Grégoire avant le push.
+        const libelleSommative = nbSelection === 1
+            ? 'Voici la production comptée dans ta note'
+            : `Voici les ${esc(nbSelection)} productions comptées dans ta note`;
+        const libelleSelection = note.sommative ? libelleSommative : estHybride
             ? `Sélection (${libelleRetenues})${badgePondSel}`
             // Une seule retenue (première évaluation du trimestre) : « les 1 meilleures » ne se lit pas,
             // et rien n'est comparé — mots de Grégoire (21 sept. 2026) : « la production retenue ».
@@ -793,8 +818,13 @@
                     ? 'Note plafonnée (échec) : déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'
                     : 'Note plafonnée par déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'}</div>`
                 : '';
+            // #941 lot S1 — en sommative, pas de jetons à invoquer (D5 les retire du bilan au lot S3).
+            // ⚠ Mots que l'élève lit, soumis à Grégoire avant le push.
+            const texteProvisoire = note.sommative
+                ? 'Note provisoire — peut changer selon tes prochains travaux.'
+                : 'Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.';
             const mentionProvisoire = (!estFinale)
-                ? `<div style="margin-top: 4px; font-size: 9px; color: ${MUTED}; font-style: italic;">Note provisoire — peut changer selon tes prochains travaux et l'application de jetons.</div>`
+                ? `<div style="margin-top: 4px; font-size: 9px; color: ${MUTED}; font-style: italic;">${esc(texteProvisoire)}</div>`
                 : '';
             resultatFinal = `
                 <div style="margin-top: 12px; padding: 12px; border: 1px solid ${LINE}; border-radius: 4px; text-align: center;">

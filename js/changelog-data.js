@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.158.0 (#941, lot S1) — PROPOSÉ par Claude Code, À SOUMETTRE à Grégoire avant le push.
+            version: '1.158',
+            couleur: 'vert',
+            titre: 'Sommative : une grille en points se note sans échelle',
+            items: [
+                'Une grille entièrement en points se note maintenant sans échelle de performance, et aucune échelle n\'est plus choisie à ta place. Ton élève lit ses points, «&nbsp;Note de la copie&nbsp;» en tête de sa rétroaction et sa note provisoire, sans aucun nom de niveau, même sur les copies déjà évaluées.'
+            ]
+        },
+        {
             // 1.157.0 (#942) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Cowork, titre de Claude Code).
             version: '1.157',
             couleur: 'vert',

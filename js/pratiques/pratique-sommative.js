@@ -20,6 +20,17 @@
 (function() {
 'use strict';
 
+// #941 lot S1 (décision A, 24 sept. 2026) — ce que le RÉCIT dit du niveau d'une copie : rien pour
+// une copie en points (`evaluationEnPoints`, gabarits-utils.js), ni pour le « -- » faute de niveau.
+// Le récit est lu par les vues (profil, Comparateur) ; la note, elle, ne lit pas ce champ.
+function estEnPoints(e) {
+    return typeof window.evaluationEnPoints === 'function' && window.evaluationEnPoints(e);
+}
+function niveauDuRecit(e) {
+    if (typeof window.niveauFinalAffichable === 'function') return window.niveauFinalAffichable(e) || null;
+    return (e && e.niveauFinal) || null;
+}
+
 class PratiqueSommative {
 
     constructor() {
@@ -166,7 +177,8 @@ class PratiqueSommative {
                 productionId: e.productionId,
                 echelleId: e.echelleId ?? null,
                 date: e.dateEvaluation || null,
-                niveau: e.niveauFinal || null,   // code BRUT — traduit par l'échelle à la vue
+                niveau: niveauDuRecit(e),   // code BRUT — traduit par l'échelle à la vue ; #941 lot S1 : aucun en points
+                enPoints: estEnPoints(e),
                 note: (e.noteFinale ?? null),
                 sort: 'compte',
                 // #921 — le poids en NOMBRE, pour qui écrit la ligne de calcul (profil) : `ponderation` est celle de la
@@ -187,7 +199,8 @@ class PratiqueSommative {
                 resultats.push({
                     label: titreProd(e.productionId),
                     date: e.dateEvaluation || null,
-                    niveau: e.niveauFinal || null,
+                    niveau: niveauDuRecit(e),
+                    enPoints: estEnPoints(e),
                     note: (e.noteFinale ?? null),
                     sort: 'ecarte',
                     detail: e.verrouillee === false ? 'évaluation non enregistrée · non comptée' : 'sans critère évalué · non comptée'
@@ -204,7 +217,8 @@ class PratiqueSommative {
                 resultats.push({
                     label: titreProd(e.productionId),
                     date: e.dateEvaluation || null,
-                    niveau: e.niveauFinal || null,
+                    niveau: niveauDuRecit(e),
+                    enPoints: estEnPoints(e),
                     note: (e.noteFinale ?? null),
                     sort: 'remplace',
                     detail: 'remplacée par une reprise · exclue de la moyenne'
@@ -219,7 +233,8 @@ class PratiqueSommative {
                 resultats.push({
                     label: titreProd(e.productionId),
                     date: e.dateEvaluation || null,
-                    niveau: e.niveauFinal || null,
+                    niveau: niveauDuRecit(e),
+                    enPoints: estEnPoints(e),
                     note: (e.noteFinale ?? null),
                     sort: 'remplace',
                     detail: 'doublon note-égale · exclu de la moyenne'

@@ -309,11 +309,55 @@ function chargerEchellePerformance() {
 
     _renderOptionsEchelles(select, echelles, echellePratique);
 
+    // #941 lot S1 — ce choix-ci est celui de l'APPLICATION, pas de l'enseignant·e : il est
+    // marqué, pour qu'une grille entièrement en points puisse le défaire (`_retirerEchelleDOffice`).
+    delete select.dataset.choixAuto;
     if (echellePratique) {
         select.value = echellePratique.id;
     } else if (echelles.length === 1) {
         select.value = echelles[0].id;
+        select.dataset.choixAuto = echelles[0].id;
+        // La grille peut être choisie AVANT ce remplissage (première copie, grille unique) : même règle ici.
+        _retirerEchelleDOffice(grilleSelectionneeEnPoints());
     }
+}
+
+/**
+ * #941 lot S1 (D1, 24 sept. 2026) — AUCUNE ÉCHELLE GLISSÉE D'OFFICE sous une grille entièrement
+ * en points. Quand le trimestre n'a qu'une échelle, `chargerEchellePerformance` la choisissait
+ * pour l'enseignant·e, avant même qu'une grille soit connue ; chaque copie en points l'emportait
+ * en base. Défait ici, au choix de la grille, à trois conditions :
+ *   - l'échelle affichée est encore celle que l'application a choisie (un choix fait au menu
+ *     efface la marque, `changerEchelleEvaluation`) ;
+ *   - la copie n'a pas d'évaluation enregistrée : une copie déjà évaluée garde l'échelle
+ *     qu'elle porte (en coulisse — aucun nom ne s'affiche, décision A) ; rien n'est réécrit ;
+ *   - la grille est entièrement en points (les grilles mixtes ne changent pas).
+ * Rend `true` quand l'échelle a été retirée.
+ */
+/** #941 lot S1 — la grille choisie à l'écran est-elle entièrement en points ? */
+function grilleSelectionneeEnPoints() {
+    const grilleId = (document.getElementById('selectGrille1') || {}).value;
+    if (!grilleId || typeof window.grilleEntierementEnPoints !== 'function') return false;
+    const grille = (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.id === grilleId);
+    return window.grilleEntierementEnPoints(grille);
+}
+
+function _retirerEchelleDOffice(enPoints) {
+    const select = document.getElementById('selectEchelle1');
+    if (!enPoints || !select || !select.value || select.dataset.choixAuto !== select.value) return false;
+    const vivant = (typeof window.etatVivantEvaluationEnCours === 'function') ? window.etatVivantEvaluationEnCours() : null;
+    if (vivant && vivant.idModification) return false;
+    if (vivant && vivant.etudiantDA && vivant.productionId) {
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const dejaEvaluee = evaluations.some(e => e && e.etudiantDA === vivant.etudiantDA
+            && e.productionId === vivant.productionId && !e.remplaceeParId);
+        if (dejaEvaluee) return false;
+    }
+    select.value = '';
+    delete select.dataset.choixAuto;
+    if (evaluationEnCours) evaluationEnCours.echelleId = '';
+    if (window.evaluationEnCours) window.evaluationEnCours.echelleId = '';
+    return true;
 }
 
 /* ===============================
@@ -365,6 +409,8 @@ function chargerEvaluationsEtudiant() {
     const productionActuelle = selectProduction?.value || null;
     const grilleActuelle = selectGrille?.value || null;
     const echelleActuelle = selectEchelle?.value || null;
+    // #941 lot S1 — l'échelle préservée garde sa nature : choisie par l'application, ou au menu.
+    const echelleActuelleAuto = !!echelleActuelle && selectEchelle?.dataset.choixAuto === echelleActuelle;
     const cartoucheActuelle = selectCartouche?.value || null;
     const remiseActuelle = selectRemise?.value || 'non-recu';
 
@@ -456,6 +502,9 @@ function chargerEvaluationsEtudiant() {
         }
         if (echelleActuelle && selectEchelle) {
             selectEchelle.value = echelleActuelle;
+            if (echelleActuelleAuto) selectEchelle.dataset.choixAuto = echelleActuelle;
+            // #941 lot S1 — restaurée sous une grille en points, une échelle d'office repart.
+            _retirerEchelleDOffice(grilleSelectionneeEnPoints());
         }
         if (cartoucheActuelle && selectCartouche) {
             selectCartouche.value = cartoucheActuelle;
@@ -800,8 +849,13 @@ function chargerGrilleSelectionnee() {
     }
 
     // Régénérer les critères depuis la nouvelle grille et recalculer la note
+    // #941 lot S1 (D1) — une grille entièrement en points n'attend pas d'échelle : ses champs de
+    // points n'en ont pas besoin, et sa note se calcule sans elle (`calculerNote`).
+    const grilleChoisie = (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.id === grilleId);
+    const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grilleChoisie);
+    _retirerEchelleDOffice(enPoints);
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    if (echelleId) {
+    if (echelleId || enPoints) {
         // Construire un map nom→niveau depuis l'ancienne grille pour matcher par nom
         const grilles = db.getSync(cle('grillesTemplates'), []);
         const ancienneGrilleId = evaluationEnCours._ancienneGrilleId || '';
@@ -1680,12 +1734,16 @@ function _collecterCriteresAutoSave(grille, ec) {
     const criteres = [];
     grille.criteres.forEach(function(c) {
         const niveau = ec.criteres[c.id];
-        if (niveau) {
+        // #941 lot S1 — sans échelle, un critère analytique n'a pas de niveau déduit : ses
+        // points suffisent à le faire entrer (`niveauSelectionne` vide).
+        const ptsSaisis = (ec.pointsAnalytiques || {})[c.id];
+        const aDesPoints = c.type === 'analytique' && typeof ptsSaisis === 'number' && !isNaN(ptsSaisis);
+        if (niveau || aDesPoints) {
             const commDiv = document.getElementById('comm_' + c.id);
             const entree = {
                 critereId: c.id,
                 critereNom: c.nom,
-                niveauSelectionne: niveau,
+                niveauSelectionne: niveau || '',
                 retroaction: commDiv ? commDiv.textContent : '',
                 ponderation: c.ponderation || 0
             };
@@ -1842,7 +1900,10 @@ function _autoSauvegarderCriteres(snapshot) {
         // #697 (A-1, audit du 5 sept. 2026) — ne rien CRÉER sans échelle résolue : `calculerNote`
         // n'a pas pu calculer, et la nouvelle évaluation porterait `0` sans portée (mesuré au
         // banc : A5). Une existante garde sa note (`_majEvaluationExistanteAutoSave`, `#572`).
-        if (typeof window.resoudreEchelleEvaluation === 'function') {
+        // #941 lot S1 — une grille entièrement en points se note sans échelle : `calculerNote` a
+        // calculé, la création passe (même règle que la porte de l'enregistrement).
+        const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
+        if (!enPoints && typeof window.resoudreEchelleEvaluation === 'function') {
             const echelleId = ec.echelleId || (document.getElementById('selectEchelle1') || {}).value || '';
             if (!window.resoudreEchelleEvaluation(echelleId)) return;
         }
@@ -1866,6 +1927,7 @@ window.chargerGroupesEval = chargerGroupesEval;
 window.filtrerEtudiantsParGroupe = filtrerEtudiantsParGroupe;
 window.chargerGrillesDansSelect = chargerGrillesDansSelect;
 window.chargerEchellePerformance = chargerEchellePerformance;
+window.grilleSelectionneeEnPoints = grilleSelectionneeEnPoints;   // #941 lot S1
 window.chargerEvaluationsEtudiant = chargerEvaluationsEtudiant;
 window.chargerProduction = chargerProduction;
 window.chargerGrilleSelectionnee = chargerGrilleSelectionnee;

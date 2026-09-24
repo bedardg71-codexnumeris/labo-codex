@@ -276,7 +276,7 @@
                 numero: idx + 1,
                 titre: prod.titre || prod.nom || ('Artefact ' + (idx + 1)),
                 dateEvaluation: ev.dateEvaluation || null,
-                niveauFinal: ev.niveauFinal || null,
+                niveauFinal: ((typeof niveauFinalAffichable === 'function') ? (niveauFinalAffichable(ev) || null) : (ev.niveauFinal || null)),   // #941 lot S1 — aucun niveau pour une copie en points
                 observe: observe,
                 ratios: ratios
             };
