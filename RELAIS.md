@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI : **LOT S3 DE #941 (1.159.1) FUSIONNÉ DANS `main`, #941 COCHÉE ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 13 H 30 : **#943 (1.159.2) SUR LA BRANCHE `bug-943-poignees-ligne` (worktree `.claude/worktrees/bug-943`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
+
+**Où vit le travail** : `main` = `origin/main` = `11434988` (#941 en ligne au complet : S1 1.158.0, S2 1.159.0, S3 1.159.1 ; verdict S3 vert sans second essai) + ce relais. Branche `bug-943-poignees-ligne` = `11434988` + `a98d2fc1` (correctif + release 1.159.2). **Rien de #943 n'est poussé.**
+
+**Ce que fait #943** (retour de Grégoire, 10 h 18) : après le tracé, la ligne (fléchée ou non) et la vague restent sélectionnées ; sous l'outil Ligne, une poignée la courbe ou en tire une extrémité ; couleur, épaisseur et pointes choisies ensuite visent la ligne suivante ; changer d'outil retire les poignées. Preuve : `annotation-ligne-poignees-apres-trace-943.spec.js` 5/5, rouge sur le code d'avant et sous trois mutations. Fiche passée aux Corrigés de `SUIVI-BUGS.md`.
+
+**Suite** : relecture de Cowork → merge → verdict → push. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI : **LOT S3 DE #941 (1.159.1) FUSIONNÉ DANS `main`, #941 COCHÉE ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `2ae88f30` (S2, poussé) + `b9133c8b` (relais) + le merge `29ca1906` de `lot-941-s3-ce-que-la-synthese-tait` (`3d08d222` lot + release, `b88e6bd0` relecture versée, #941 cochée) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-941-s3.md`) ; la mesure du § 2 faite par Grégoire dans l'application en ligne : `obtenirConfigJetonsPratique()` rend un bloc actif (délai 2, reprise 2, reprise ciblée 2) — rien ne change pour ses élèves. Ligne des Nouvelles 1.159 validée.
 
