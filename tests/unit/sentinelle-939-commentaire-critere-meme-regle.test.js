@@ -74,11 +74,18 @@ const ECHELLE = {
 // La cartouche d'AUJOURD'HUI : retouchée après l'évaluation (h1_M), toujours sans rien pour h2_D.
 const CARTOUCHE = {
     id: 'CT9', nom: 'Cartouche témoin', grilleId: 'G9', contexte: '',
+    criteres: GRILLE.criteres.map((c) => ({ id: c.id, nom: c.nom })),
     commentaires: {
         h1_M: 'RETOUCHÉE h1_M : la cartouche d\'aujourd\'hui.',
         h1_E: 'VIVANTE h1_E : ta structure est remarquable.',
         h3_M: 'VIVANTE h3_M : ta nuance est maîtrisée.'
     }
+};
+// #944 — la cartouche RÉVISÉE, importée à côté (même grille), que l'enseignant choisit au menu.
+const CARTOUCHE_REV = {
+    id: 'CT9R', nom: 'Cartouche témoin (rev)', grilleId: 'G9', contexte: '',
+    criteres: GRILLE.criteres.map((c) => ({ id: c.id, nom: c.nom })),
+    commentaires: { h1_M: 'REV h1_M : la cartouche révisée.', h2_D: 'REV h2_D : la cartouche révisée.' }
 };
 // L'évaluation enregistrée, telle que les collecteurs l'ont écrite avant ce lot.
 function evaluationEnregistree(surcharge = {}) {
@@ -96,18 +103,24 @@ function evaluationEnregistree(surcharge = {}) {
 }
 
 /** Rouvre la copie : même chemin que la page (`niveauSelectionne` pour chaque niveau restauré). */
-function rouvrir({ enBase = [evaluationEnregistree()], idModification = 'EV9', niveaux = { h1: 'M', h2: 'D', h3: 'M' } } = {}) {
+function rouvrir({ enBase = [evaluationEnregistree()], idModification = 'EV9', niveaux = { h1: 'M', h2: 'D', h3: 'M' }, reponse = true } = {}) {
+    const niveauxOfferts = ['I', 'D', 'M', 'E'].map((v) => ({ value: v }));
+    const questions = [];
     const ecran = {
         noteProduction1: elementDom(), niveauProduction1: elementDom(), criteresCopier: elementDom(),
         porteeNote1: elementDom({ classList: classList(['u-hide']) }),
         selectEtudiantEval: elementDom({ value: DA }), selectProduction1: elementDom({ value: 'P9' }),
         selectGrille1: elementDom({ value: 'G9' }), selectEchelle1: elementDom({ value: 'E9' }),
-        selectCartoucheEval: elementDom({ value: 'CT9' }),
+        // #944 — le menu : un `change` y passe par le dispatcher de main.js (`data-on-change`).
+        selectCartoucheEval: elementDom({ value: 'CT9', options: [{ value: '', textContent: '— Choisir —' },
+            { value: 'CT9', textContent: CARTOUCHE.nom }, { value: 'CT9R', textContent: CARTOUCHE_REV.nom }],
+            dispatchEvent() { return win.choisirCartoucheEval(ecran.selectCartoucheEval); } }),
+        listeCriteresGrille1: elementDom(),
         remiseProduction1: elementDom({ value: 'remis' }), statutIntegrite: elementDom({ value: 'recevable' }),
         notesIntegrite: elementDom({ value: '' }), retroactionFinale1: elementDom({ value: '' }),
         afficherDescription1: elementDom(), afficherObjectif1: elementDom(), afficherTache1: elementDom(),
         afficherAdresse1: elementDom(), afficherContexte1: elementDom(),
-        eval_h1: elementDom(), eval_h2: elementDom(), eval_h3: elementDom(),
+        eval_h1: elementDom({ options: niveauxOfferts }), eval_h2: elementDom({ options: niveauxOfferts }), eval_h3: elementDom({ options: niveauxOfferts }),
         // Le gabarit pose ses amorces ; `a4` garde la sienne, son texte est l'algorithmique.
         comm_h1: elementDom({ textContent: 'Sélectionne un niveau' }),
         comm_h2: elementDom({ textContent: 'Sélectionne un niveau' }),
@@ -129,13 +142,15 @@ function rouvrir({ enBase = [evaluationEnregistree()], idModification = 'EV9', n
         pointsAnalytiques: {}, idModification
     };
     const base = {
-        test_grillesTemplates: [GRILLE], test_echellesTemplates: [ECHELLE], test_cartouches_G9: [CARTOUCHE],
+        test_grillesTemplates: [GRILLE], test_echellesTemplates: [ECHELLE], test_cartouches_G9: [CARTOUCHE, CARTOUCHE_REV],
         test_pratiquesConfigurables: [], test_evaluationsSauvegardees: enBase
     };
     const lire = (k, d) => (k in base ? JSON.parse(JSON.stringify(base[k])) : (d !== undefined ? d : null));
     const ecritures = [];
     const refus = [];
-    const win = { addEventListener() {}, removeEventListener() {}, evaluationEnCours: ec, majBadgesApresEvaluation() {} };
+    const win = { addEventListener() {}, removeEventListener() {}, evaluationEnCours: ec, majBadgesApresEvaluation() {},
+        // #944 — le composant de confirmation de l'app : on note la question, on rend la réponse du banc.
+        uiDialogues: { confirmerAction: async (o) => { questions.push(o); return reponse; } } };
     const globaux = {
         document, evaluationEnCours: ec,
         db: { getSync: lire, setSync() {}, get: async () => null, set: async () => {} },
@@ -170,7 +185,7 @@ function rouvrir({ enBase = [evaluationEnregistree()], idModification = 'EV9', n
         win.niveauSelectionne(critereId);
     }
     win.genererRetroaction(1);
-    return { win, ecran, ec, ecritures, refus };
+    return { win, ecran, ec, ecritures, refus, questions };
 }
 
 /** Le commentaire qu'un bloc « Critère n (Nom) — X » porte dans le texte copié ('' : l'en-tête seul). */
@@ -298,5 +313,109 @@ describe('#939 · après l\'enregistrement, la base garde le commentaire d\'alor
         const pdf = commentairesDuPdf(win, ev);
         expect(pdf.Structure).toBe(evaluationEnregistree().criteres[0].retroaction);
         expect(pdf.Rigueur).toBe('');
+    });
+});
+
+describe('#944 · une AUTRE cartouche choisie au menu, sur une copie déjà évaluée', () => {
+    /** Le geste de l'enseignant : le menu change, le dispatcher appelle `choisirCartoucheEval`. */
+    async function choisir(ctx, cartoucheId) {
+        ctx.ecran.selectCartoucheEval.value = cartoucheId;
+        await ctx.win.choisirCartoucheEval(ctx.ecran.selectCartoucheEval);
+    }
+
+    it('confirmé → le commentaire enregistré cesse de primer : chaque critère prend la nouvelle cartouche à son niveau', async () => {
+        const ctx = rouvrir({ reponse: true });
+        await choisir(ctx, 'CT9R');
+        expect(ctx.questions).toHaveLength(1);
+        expect(ctx.questions[0].message).toContain('« Cartouche témoin (rev) »');
+        expect(ctx.ecran.selectCartoucheEval.value).toBe('CT9R');
+        expect(ctx.ec.cartoucheId).toBe('CT9R');
+        expect(ctx.ecran.comm_h1.textContent, 'avant : le commentaire enregistré gagnait toujours').toBe(CARTOUCHE_REV.commentaires.h1_M);
+        expect(ctx.ecran.comm_h2.textContent).toBe(CARTOUCHE_REV.commentaires.h2_D);
+        expect(ctx.ecran.comm_h3.textContent, 'rien à ce niveau dans la révisée : vide, pas l\'ancien').toBe('');
+        expect(commentaireCopie(ctx.ecran.retroactionFinale1.value, 'Structure')).toBe(CARTOUCHE_REV.commentaires.h1_M);
+        // L'algorithmique reste gelé (#581) : la cartouche ne le touche pas.
+        expect(commentaireCopie(ctx.ecran.retroactionFinale1.value, 'Langue')).toBe(ALGO_GELE);
+    });
+
+    it('confirmé puis enregistré → la base porte la nouvelle cartouche et ses commentaires, le PDF aussi', async () => {
+        const ctx = rouvrir({ reponse: true });
+        await choisir(ctx, 'CT9R');
+        ctx.win.sauvegarderEvaluationModifiee();
+        expect(ctx.refus).toEqual([]);
+        const ev = ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.cartoucheId).toBe('CT9R');
+        const par = Object.fromEntries(ev.criteres.map((c) => [c.critereId, c.retroaction]));
+        expect(par.h1).toBe(CARTOUCHE_REV.commentaires.h1_M);
+        expect(commentairesDuPdf(ctx.win, ev).Structure).toBe(CARTOUCHE_REV.commentaires.h1_M);
+    });
+
+    it('confirmé puis quitté SANS « Enregistrer » : l\'auto-save (armé par les niveaux restaurés) écrit la nouvelle cartouche AVEC ses commentaires', async () => {
+        const ctx = rouvrir({ reponse: true });
+        await choisir(ctx, 'CT9R');
+        ctx.win._autoSauvegarderCriteres(ctx.win.etatVivantEvaluationEnCours());
+        const ev = ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.criteres.find((c) => c.critereId === 'h1').retroaction).toBe(CARTOUCHE_REV.commentaires.h1_M);
+        expect(ev.cartoucheId, 'avant : l\'ancienne cartouche sous les nouveaux commentaires').toBe('CT9R');
+    });
+
+    it('sans remplacement confirmé, l\'auto-save ne touche pas `cartoucheId`, même si le menu en montre une autre', () => {
+        const ctx = rouvrir({ reponse: true });
+        ctx.ecran.selectCartoucheEval.value = 'CT9R';          // un chargeur, pas le geste
+        ctx.win._autoSauvegarderCriteres(ctx.win.etatVivantEvaluationEnCours());
+        const ev = ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.cartoucheId).toBe('CT9');
+    });
+
+    it('annulé → le commentaire enregistré prime toujours, le menu revient, cartoucheId inchangé, rien d\'écrit', async () => {
+        const ctx = rouvrir({ reponse: false });
+        await choisir(ctx, 'CT9R');
+        expect(ctx.questions).toHaveLength(1);
+        expect(ctx.ecran.selectCartoucheEval.value).toBe('CT9');
+        expect(ctx.ec.cartoucheId).toBe('CT9');
+        expect(ctx.ecran.comm_h1.textContent).toBe(evaluationEnregistree().criteres[0].retroaction);
+        expect(ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees')).toEqual([]);
+    });
+
+    it('copie sans commentaire enregistré (amorces, « [Non défini] », vide) → aucune question, la cartouche s\'applique comme avant', async () => {
+        const vide = evaluationEnregistree();
+        vide.criteres = vide.criteres.map((c, i) => ({ ...c, retroaction: ['', '[Non défini]', 'Sélectionne un niveau', AMORCE_ALGO][i] }));
+        const ctx = rouvrir({ enBase: [vide], reponse: false });
+        await choisir(ctx, 'CT9R');
+        expect(ctx.questions).toEqual([]);
+        expect(ctx.ec.cartoucheId).toBe('CT9R');
+        expect(ctx.ecran.comm_h1.textContent).toBe(CARTOUCHE_REV.commentaires.h1_M);
+    });
+
+    it('un CHARGEUR qui pose la cartouche (`poserCartoucheParChargeur`) ne pose aucune question et ne remplace rien', () => {
+        const ctx = rouvrir({ reponse: true });
+        ctx.win.poserCartoucheParChargeur(ctx.ecran.selectCartoucheEval, 'CT9R');
+        expect(ctx.questions).toEqual([]);
+        expect(ctx.ecran.comm_h1.textContent, '#939 : le commentaire d\'alors').toBe(evaluationEnregistree().criteres[0].retroaction);
+    });
+
+    it('revenir à la cartouche de l\'évaluation → aucune question, les commentaires d\'alors reviennent', async () => {
+        const ctx = rouvrir({ reponse: true });
+        await choisir(ctx, 'CT9R');
+        await choisir(ctx, 'CT9');
+        expect(ctx.questions).toHaveLength(1);
+        expect(ctx.ecran.comm_h1.textContent).toBe(evaluationEnregistree().criteres[0].retroaction);
+    });
+
+    it('une fois enregistrés, les nouveaux commentaires sont protégés par #939 : la révisée retouchée n\'y touche plus', async () => {
+        const enBase = [evaluationEnregistree()];
+        const ctx = rouvrir({ enBase, reponse: true });
+        await choisir(ctx, 'CT9R');
+        ctx.win.sauvegarderEvaluationModifiee();
+        const ecrite = ctx.ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        enBase[0] = ecrite;                                  // la base du banc devient ce qui vient d'être écrit
+        CARTOUCHE_REV.commentaires.h1_M = 'REV RETOUCHÉE APRÈS COUP';
+        try {
+            ctx.ecran.eval_h1.value = 'M';
+            ctx.win.niveauSelectionne('h1');
+            expect(ctx.ecran.comm_h1.textContent).toBe('REV h1_M : la cartouche révisée.');
+        } finally {
+            CARTOUCHE_REV.commentaires.h1_M = 'REV h1_M : la cartouche révisée.';
+        }
     });
 });
