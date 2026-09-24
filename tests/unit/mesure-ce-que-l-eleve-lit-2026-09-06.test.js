@@ -38,6 +38,7 @@
  */
 import { describe, it, expect, afterAll } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerTravauxOutilsReel } from './_helpers/travaux-outils-reel.js';
 
 const MESURES = {};
 afterAll(() => { console.log('MESURE-PDF-ELEVE ' + JSON.stringify(MESURES, null, 1)); });
@@ -159,24 +160,9 @@ const PRODUCTIONS = [
     { id: 'P3', numero: 3, titre: 'Dissertation', type: 'travail', activiteApprentissage: 'ACTIVITÉ-P3 : dissertation critique', objectif: 'OBJECTIF-P3', tache: 'TÂCHE-P3', ponderation: 30, dateEcheance: '2026-11-15', coursId: 'GC1' }
 ];
 
-// Trois tampons RÉELS du catalogue (`travaux-outils.js` l. 303-318) et leurs textes par
-// défaut (`RETROACTIONS_OBSERVATIONS_DEFAUT`, l. 660-693), recopiés tels quels.
-const AUTOCOLLANTS = [
-    { id: 'action-liaison', nom: 'Liaison', categorie: 'action' },
-    { id: 'obs-hoc', nom: 'Id. directrice', categorie: 'observations' },
-    { id: 'comp-relationnel', nom: 'Relationnel', categorie: 'comprehension' }
-];
-const RETRO_OBS = {
-    'action-liaison': "L'étudiant·e infère, relie des éléments entre eux, interprète.",
-    'obs-hoc': "L'idée directrice n'est pas adéquatement identifiée.",
-    'comp-relationnel': "Les concepts sont multiples et reliés."
-};
-const travauxOutils = {
-    AUTOCOLLANTS,
-    obtenirRetroactionsObservations: () => RETRO_OBS,
-    obtenirNomsCategories: () => ({ action: 'Action', comprehension: 'Compréhension', observations: 'Observations' }),
-    obtenirOrdreCategories: () => ['action', 'observations', 'comprehension']
-};
+// Trois tampons RÉELS du catalogue, lus par le VRAI lecteur (#760, 24 sept. 2026) :
+// `travaux-outils.js` chargé sur des réglages vides (catalogue et textes par défaut).
+const travauxOutils = chargerTravauxOutilsReel().travauxOutils;
 const CONFIG_JETONS = { actif: true, delai: { nombre: 2 }, reprise: { nombre: 2 }, repriseCiblee: { actif: false, nombre: 0 } };
 
 function annotation(erreurs) {
@@ -538,19 +524,28 @@ describe('mesure · ce que l\'élève lit dans son PDF et dans le texte copié v
         expect(errH).toContain('Construction syntaxique');   // repli : les dix codes d'hier
     });
 
-    it('le texte copié : « spécifique » et « bilan » sont des textContent SANS séparateur entre les paragraphes', () => {
-        // Le bilan de l'écran est assemblé sans blanc entre ses balises : ce que le presse-papier
-        // reçoit colle la fin d'une phrase au début de la suivante.
+    it('CONSTAT 3 (corrigé, #759) · le texte copié garde ses phrases séparées : un saut de ligne entre deux blocs, comme à l\'écran', () => {
+        // Le bilan de l'écran est assemblé sans blanc entre ses balises : son textContent colle
+        // toujours la fin d'une phrase au début de la suivante. Le presse-papier, lui, ne le reçoit plus.
         expect(H.m.lea.bilan).toContain('viens me voir.Selon toi');
+        expect(H.m.lea.tout).not.toContain('viens me voir.Selon toi');
+        expect(H.m.lea.tout).toContain('viens me voir.\nSelon toi');
+        expect(H.m.lea.tout).not.toContain('Insuffisant)Acquis');
         expect(H.m.lea.tout).toContain('=== RÉTROACTION GÉNÉRALE ===');
         expect(H.m.lea.tout).toContain('=== RÉTROACTION SPÉCIFIQUE ===');
         expect(H.m.lea.tout).toContain('=== BILAN ===');
     });
 
-    it('le bloc « --- Observations --- » du texte Léa ne s\'écrit jamais pour les tampons du catalogue courant (identifiants hérités)', () => {
+    it('CONSTAT 4 (corrigé, #760) · le bloc « --- Observations --- » du texte Léa liste les tampons du catalogue courant, comme la spécifique', () => {
         [H, A, G].forEach(x => {
-            expect(x.m.lea.generale).not.toContain('--- Observations ---');
+            expect(x.m.lea.generale).toContain('--- Observations ---\n\nAction\nLiaison (×1) :');
+            expect(x.m.lea.generale).toContain('Observations\nId. directrice (×2) :\nL\'idée directrice n\'est pas adéquatement identifiée.');
             expect(x.m.lea.generale).toContain('--- Langue ---');
+            // Le PDF de synthèse lit le même lecteur : mêmes catégories, dans l'ordre des réglages.
+            const pdf = x.blocs.find(bl => roleDuBloc(bl) === 'tampons + erreurs annotées').texte;
+            const rangs = ['Liaison', 'Relationnel', 'Id. directrice'].map(n => pdf.indexOf(n));
+            expect(rangs.every(r => r !== -1)).toBe(true);
+            expect(rangs).toEqual([...rangs].sort((u, v) => u - v));
         });
     });
 });

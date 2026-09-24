@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { chargerTravauxOutilsReel } from './_helpers/travaux-outils-reel.js';
 
 // SENTINELLE #764 — « COPIER TOUT » LIVRE UN TEXTE COMPLET, MÊME SANS CARTOUCHE, ET SANS PHRASE COUPÉE.
 //
@@ -112,7 +113,8 @@ function monter({ avecCartouche }) {
         navigator: { clipboard: { writeText: (t) => { copie.texte = t; return Promise.resolve(); } } },
         travauxVisionneuse: { getFichierActuel: () => FICHIER },
         travauxStockage: { obtenirAnnotationFichier: () => JSON.parse(JSON.stringify(ANNOTATION)), obtenirFichierParId: () => FICHIER },
-        travauxOutils: { AUTOCOLLANTS: [], obtenirRetroactionsObservations: () => ({}), obtenirNomsCategories: () => ({}), obtenirOrdreCategories: () => [] },
+        // #760 — le vrai lecteur des tampons, sur des réglages vides.
+        travauxOutils: chargerTravauxOutilsReel().travauxOutils,
         travauxExportPDF: exportPdf,
         calculerNote: (...a) => win.calculerNote(...a), genererRetroaction: (...a) => win.genererRetroaction(...a)
     };

@@ -1014,6 +1014,112 @@
         return ordre.map(id => map[id]).filter(Boolean);
     }
 
+    // #760 — Titres des catégories que les réglages ne nomment pas : les anciens
+    // tampons (copies annotées avant le catalogue actuel) et un tampon que le
+    // catalogue ne connaît plus (tampon personnel supprimé depuis).
+    const NOMS_CATEGORIES_HORS_REGLAGES = {
+        qualite: 'Qualité',
+        diagnostic: 'Diagnostic',
+        autres: 'Autres tampons'
+    };
+
+    /**
+     * #760 (24 sept. 2026) — CE QUE L'ÉLÈVE LIT DES TAMPONS D'UNE COPIE : le seul
+     * lecteur. La rétroaction générale (bloc « Observations »), la spécifique et le
+     * PDF de synthèse le lisent ; chacun ne garde que sa mise en forme.
+     *
+     * Les réglages sont relus À CHAQUE APPEL (« les observations reposent sur les
+     * paramètres actualisés », Grégoire, 24 sept.) : tampons personnels, noms,
+     * textes, catégories personnelles, leurs noms et leur ordre. `AUTOCOLLANTS`
+     * n'est pas la source : il n'est rafraîchi qu'au chargement du module et à
+     * l'enregistrement du modal, pas après un import.
+     *
+     * - Un tampon posé n'est jamais tu : ancien tampon, tampon masqué de la palette,
+     *   tampon personnel supprimé depuis (catégorie « autres »).
+     * - Les jetons ne sont pas des observations : absents.
+     * - Texte : clé PRÉSENTE dans l'objet enregistré → le choix de l'utilisateur,
+     *   même vide ; clé ABSENTE → le texte par défaut. `obtenirRetroactionsObservations`
+     *   rend l'objet enregistré OU les défauts, jamais leur fusion : un objet
+     *   enregistré avant l'ajout d'un tampon n'a pas son texte.
+     *
+     * @param {Object} comptes - { autocollantId: nombre } (ex. `stats.tampons`)
+     * @returns {Array<{id: string, nom: string, tampons: Array<{id: string, nom: string, texte: string, nombre: number}>}>}
+     *   Catégories dans l'ordre des réglages (puis les catégories hors réglages),
+     *   tampons dans l'ordre de leur catégorie ; seules les catégories utilisées.
+     */
+    function observationsDesTampons(comptes) {
+        if (!comptes || typeof comptes !== 'object') return [];
+        const idsJetons = Object.keys(TAMPONS_JETON_PAR_TYPE).map(k => TAMPONS_JETON_PAR_TYPE[k]);
+
+        // Catalogue courant : le catalogue livré, puis les tampons personnels enregistrés.
+        const catalogue = {};
+        const rangCatalogue = {};
+        _defautsAutocollants.forEach(a => { catalogue[a.id] = { id: a.id, nom: a.nom, categorie: a.categorie }; });
+        const customs = db.getSync('tamponsPersonnalises', null);
+        (Array.isArray(customs) ? customs : []).forEach(c => {
+            if (c && c.id && !catalogue[c.id]) {
+                catalogue[c.id] = { id: c.id, nom: c.nom || '', categorie: c.categorie || 'diagnostic' };
+            }
+        });
+        Object.keys(catalogue).forEach((id, i) => { rangCatalogue[id] = i; });
+
+        const persObs = obtenirPersonnalisationObservations();
+        const textesEnregistres = db.getSync('retroactionsObservations', null);
+        const texteDe = (id) => {
+            if (textesEnregistres && Object.prototype.hasOwnProperty.call(textesEnregistres, id)) {
+                const t = textesEnregistres[id];
+                return (t == null) ? '' : String(t);
+            }
+            return RETROACTIONS_OBSERVATIONS_DEFAUT[id] || '';
+        };
+
+        // Les tampons posés, rangés par catégorie.
+        const parCategorie = {};
+        Object.keys(comptes).forEach(id => {
+            const nombre = Number(comptes[id]) || 0;
+            if (nombre <= 0) return;
+            const def = catalogue[id];
+            if ((def && def.categorie === 'jeton') || idsJetons.indexOf(id) !== -1) return;
+            const cat = def ? def.categorie : 'autres';
+            const nomPerso = persObs[id] && persObs[id].nom;
+            (parCategorie[cat] = parCategorie[cat] || []).push({
+                id: id,
+                nom: nomPerso || (def && def.nom) || id,
+                texte: texteDe(id),
+                nombre: nombre
+            });
+        });
+
+        // Ordre des catégories : celui des réglages, puis les autres dans l'ordre du catalogue.
+        const ordreCats = obtenirOrdreCategories().slice();
+        ['qualite', 'diagnostic'].concat(Object.keys(parCategorie), ['autres']).forEach(cat => {
+            if (ordreCats.indexOf(cat) === -1) ordreCats.push(cat);
+        });
+        const noms = obtenirNomsCategories();
+        const catsPerso = obtenirCategoriesPerso();
+
+        const resultat = [];
+        ordreCats.forEach(cat => {
+            const tampons = parCategorie[cat];
+            if (!tampons) return;
+            // Ordre des tampons : celui des réglages de la catégorie, puis le catalogue.
+            const ordreRegle = db.getSync('ordreAutocollants_' + cat, null);
+            const rang = (id) => {
+                const r = Array.isArray(ordreRegle) ? ordreRegle.indexOf(id) : -1;
+                if (r !== -1) return r;
+                return 100000 + (rangCatalogue[id] !== undefined ? rangCatalogue[id] : 100000);
+            };
+            tampons.sort((a, b) => (rang(a.id) - rang(b.id)) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+            const perso = catsPerso.find(c => c && c.id === cat);
+            resultat.push({
+                id: cat,
+                nom: noms[cat] || (perso && perso.nom) || NOMS_CATEGORIES_DEFAUT[cat] || NOMS_CATEGORIES_HORS_REGLAGES[cat] || cat,
+                tampons: tampons
+            });
+        });
+        return resultat;
+    }
+
     function obtenirPersonnalisationErreursFr() {
         return db.getSync('personnalisationErreursFr', null) || {};
     }
@@ -3902,6 +4008,8 @@
         // Catégories tampons (noms, ordre)
         obtenirNomsCategories: obtenirNomsCategories,
         obtenirOrdreCategories: obtenirOrdreCategories,
+        // #760 — ce que l'élève lit des tampons d'une copie (seul lecteur)
+        observationsDesTampons: observationsDesTampons,
         // Ordre personnalisé des erreurs FR
         // Mode synthèse erreurs FR (principale / toutes)
         changerModeSyntheseErrFr: changerModeSyntheseErrFr,
