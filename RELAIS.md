@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MATIN : **LOT #939 (1.156.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 10 H : **LOT #940 (1.156.4) SUR LA BRANCHE `lot-940-bilan-recurrents`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles par Grégoire
+
+**Où vit le travail** : branche `lot-940-bilan-recurrents` (dans l'arbre principal, pas de worktree) = `4b2e6e4d` + `e40fcabe` (lot + release 1.156.4, un seul commit : le hook anticache exige les jetons dans le même commit) + `c491b237` (porte terrain, markdown). `main` = `origin/main` + ce relais. Rien n'est poussé. L'arbre principal est revenu sur `main` ; `plans de travail/CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md` (non suivi) est un fichier de Cowork, laissé tel quel.
+
+**Ce que le lot fait** : une seule règle dans `synthese-retroaction-data.js`, lue par le PDF et le bilan de l'écran — `ligneCritereATravailler` (« Nom (niveau) : définition »), `lignesRecurrentes` (« Nom : prioritaire / à consolider depuis N productions », dès deux, chaque copie dans son échelle), `historiqueAnterieur` (copies antérieures seulement, sans plafond). Tampons et suffixe « depuis 3 productions » retirés. Vitest 7297/7297 ; WebKit : spec #940 et voisines vertes ; mutations M1-M7 et PW-M1-M3 rouges.
+
+**Suite** : relecture de Cowork → Nouvelles validées par Grégoire → fusion → verdict → push. Porte terrain (une rangée) après le push ; artefact jumeau à publier par Cowork. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MATIN : **LOT #939 (1.156.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `28d66162` + le relais `e477971c` + le merge `27adf716` de `lot-939-commentaire-critere` (`738e01bc` lot, `d08a8680` release 1.156.3) + ce relais. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-939.md` : 70/70, sept mutations rouges ; remarque d'issue 3 sur les reprises, sans suite). Arbre principal remis à l'état de `main` avant la fusion (§3 de la relecture). #939 coché ; le lot sort de FILE-DES-LOTS.
 
