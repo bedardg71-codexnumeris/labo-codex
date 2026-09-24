@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI (SUITE) : **#943 (1.159.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 16 H 30 : **#944 (1.159.3) SUR LA BRANCHE `bug-944-cartouche-changee` (arbre principal), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
+
+**Où vit le travail** : `main` = `origin/main` = `bb790e78` (#943 en ligne) + ce relais. Branche `bug-944-cartouche-changee` = `bb790e78` + `5347ca39` (correctif + release 1.159.3) + `d742cf30` (porte terrain). **Rien de #944 n'est poussé.**
+
+**Ce que fait #944** (retour de Grégoire, 15 h 52, suite de #939) : sur une copie qui a des commentaires enregistrés, choisir au menu une autre cartouche que celle de l'évaluation ouvre « Changer de cartouche » (titre validé par Grégoire ; message et boutons de sa décision). « Remplacer » : pour cette copie seulement, la nouvelle cartouche donne les commentaires ; le prochain enregistrement les fixe, de nouveau protégés par #939. « Garder » : rien ne change, `cartoucheId` compris. Les quatre chargeurs passent par `poserCartoucheParChargeur` et ne posent aucune question. Aucun marqueur « remise à l'élève » n'existe (mesuré) : la ligne prévue n'est pas ajoutée. Preuve : bloc #944 de `sentinelle-939` (7 essais) et `cartouche-changee-copie-evaluee-944.spec.js` (3/3), rouges sans le correctif et sous sept mutations ; Vitest 634/634, 7362/7362 sur `5347ca39` ; 18 specs voisines 46/46. Trouvailles inscrites au BACKLOG : #945 (Entrée confirme toujours dans les confirmations « danger »), #946 (cartouche modèle réappliquée à l'ouverture d'une copie évaluée).
+
+**Suite** : relecture de Cowork → merge → verdict → push, puis la porte terrain `plans de travail/PORTES-TERRAIN-2026-09-24-bug-944.md` (iPad, une copie réelle) ; artefact jumeau à publier par Cowork. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI (SUITE) : **#943 (1.159.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `11434988` (#941 au complet, poussé) + `dd1cd9bf` (relais) + le merge `94999fb0` de `bug-943-poignees-ligne` (`a98d2fc1` correctif + release, `34ba15b1` relecture versée + porte terrain) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-bug-943.md`) ; les deux décisions (la palette vise la ligne suivante ; changer d'outil retire les poignées) retenues par Grégoire ; Nouvelles validées.
 
