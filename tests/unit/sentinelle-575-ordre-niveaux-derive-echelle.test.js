@@ -397,8 +397,9 @@ describe('#575 — le rang et le nom d\'un niveau se lisent dans son échelle', 
         expect(renduEtranger).not.toContain('Démarche');
         expect(renduEtranger).not.toContain('Incomplet');
         expect(renduEtranger).not.toContain('En développement');
-        // Et le titre reste, suivi de rien : la section ne ment pas.
-        expect(renduEtranger).toContain('Présentement, il faut se concentrer sur');
+        // #941 lot S3 (C2, 24 sept. 2026) — ATTENTE CHANGÉE, C'EST VOULU : le titre ne s'écrit plus
+        // suivi de rien (il partait tel quel dans « Copier tout »). Avant : le titre restait seul.
+        expect(renduEtranger).not.toContain('Présentement, il faut se concentrer sur');
     });
 
     it('annonce le progrès quand l\'élève monte DANS SON échelle — ce que la table IDME interdisait', () => {
