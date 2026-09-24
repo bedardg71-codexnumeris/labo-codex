@@ -26,7 +26,7 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
-                // 1.159.2 (#943) — PROPOSÉ par Claude Code, À SOUMETTRE à Grégoire avant le push.
+                // 1.159.2 (#943) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
                 'Annoter&nbsp;: une ligne (fléchée ou non) qu\'on vient de tracer montre aussitôt ses poignées. Tire son milieu pour la courber, ou une extrémité pour la déplacer, sans passer par l\'outil Sélection.',
                 // 1.159.1 (#941, lot S3) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
                 'La rétroaction de ton élève ne montre plus de jetons que ta pratique n\'offre pas, n\'écrit plus «&nbsp;Présentement, il faut se concentrer sur&nbsp;» quand rien ne suit, et n\'affiche plus l\'étiquette «&nbsp;Contexte&nbsp;» vide quand la copie n\'a pas de cartouche.',
