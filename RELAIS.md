@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 10 H : **LOT #940 (1.156.4) SUR LA BRANCHE `lot-940-bilan-recurrents`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles par Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, FIN DE MATINÉE : **LOT #940 (1.156.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `0e2508d8` + le merge `7e20215a` de `lot-940-bilan-recurrents` (`e40fcabe` lot + release 1.156.4, `c491b237` porte terrain, `a35b58f4` « copie sautée ») + ce relais. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-940.md` : 103/103, quatre mutations rouges). Sa question §2 tranchée par Grégoire : une copie qui n'évalue pas le critère, ou sans repères, est sautée ; seul un acquis arrête le compte (M8-M10 rouges). Nouvelles validées telles quelles. #940 coché ; le lot sort de FILE-DES-LOTS.
+
+**Suite** : la porte terrain (une rangée, `plans de travail/PORTES-TERRAIN-2026-09-24-lot-940.md`) une fois 1.156.4 en ligne ; artefact jumeau à publier par Cowork. Branche `lot-940-bilan-recurrents` supprimable une fois le push constaté. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 10 H : **LOT #940 (1.156.4) SUR LA BRANCHE `lot-940-bilan-recurrents`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles par Grégoire
 
 **Où vit le travail** : branche `lot-940-bilan-recurrents` (dans l'arbre principal, pas de worktree) = `4b2e6e4d` + `e40fcabe` (lot + release 1.156.4, un seul commit : le hook anticache exige les jetons dans le même commit) + `c491b237` (porte terrain, markdown). `main` = `origin/main` + ce relais. Rien n'est poussé. L'arbre principal est revenu sur `main` ; `plans de travail/CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md` (non suivi) est un fichier de Cowork, laissé tel quel.
 
