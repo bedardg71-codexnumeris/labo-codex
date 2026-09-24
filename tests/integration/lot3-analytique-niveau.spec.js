@@ -399,9 +399,14 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     expect(apres.nb).toBe(1);
     expect(apres.criteres).toEqual(['a1:E:50', 'a2:D:20', 'a3:I:8']);
     // (a) Le bilan du PDF, aux trois endroits : le chiffre, jamais le nom du niveau déduit.
+    // #941 lot S2 (D2, 24 sept. 2026) — ATTENTES CHANGÉES, C'EST VOULU : une copie en points se lit à 60 %,
+    // même sous une échelle à repères (décision A). Sujet divisé à 40 % reste prioritaire ; Sujet posé (66,7 %,
+    // niveau déduit D) n'est plus « à consolider » ; « Ta force » (Sujet amené, 100 %, E) reste vide — 60 %
+    // dit où commence l'échec, pas où commence l'acquis. Avant : signales ['Sujet posé (20 / 30)'] et
+    // force 'Ta force : Sujet amené (50 / 50)'.
     expect(apres.priorites).toEqual(['Sujet divisé (8 / 20) : Pertinent et clair']);   // #940 : « Nom (niveau) : définition »
-    expect(apres.signales).toEqual(['Sujet posé (20 / 30)']);
-    expect(apres.force).toBe('Ta force : Sujet amené (50 / 50)');
+    expect(apres.signales).toEqual([]);
+    expect(apres.force).toBe('');
     expect(apres.chiffres).toEqual([true, true, true]);
     // (b) Aucune légende d'échelle, et aucun libellé de niveau de la section des critères à la fin.
     expect(apres.legende).toBe(false);
@@ -444,7 +449,10 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     // n'a pas : la notification « lecture seule (verrouillée) », émise juste après, prouve que les
     // étapes 13-14 ont tourné — c'est ce que le timeout empêchait.)
     expect(rouverte.pointsWindow).toEqual({ a1: 50, a2: 20, a3: 8 });
-    expect(rouverte.bilan).toContain('Ta force : Sujet amené (50 / 50)');
+    // #941 lot S2 (D2) — attente changée, c'est voulu : plus de « Ta force » pour une copie en points
+    // (avant : 'Ta force : Sujet amené (50 / 50)') ; le bilan rouvert nomme la priorité par son chiffre.
+    expect(rouverte.bilan).toContain('Sujet divisé (8 / 20) : Pertinent et clair');
+    expect(rouverte.bilan).not.toContain('Ta force');
     expect(rouverte.bilan).not.toContain('Étendu');
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);

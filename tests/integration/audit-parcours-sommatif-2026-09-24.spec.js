@@ -351,6 +351,33 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
     expect(R.etapes.copierTout.texte, 'Copier tout : aucun niveau').not.toMatch(/Niveau :|Niveau de performance/);
     // Sans aucune échelle, la grille en points se note encore.
     expect(R.sansAucuneEchelle.ecran.note, 'sans échelle : la note se calcule').not.toBe('--');
+    // ── #941 lot S2 (D2) — la règle des 60 % dans le bilan d'une copie en points. Langue sous 60 % aux trois copies ;
+    // Structure sous 60 % à la première (56,7 %), à 63,3 % puis 73,3 %. Avant S2, le bilan était vide (aucun repère).
+    const pdf = (i) => R.pdfSansReperes[i].blocs.map(b => b.texte).join(' ');
+    // Présentement : sous 60 %, avec sa définition, du plus faible au plus fort ; 60 % et plus : absent.
+    expect(pdf(0), 'P1 : Langue puis Structure').toMatch(/Langue \(15 \/ 30\) : Écrire dans une langue correcte.*Structure \(17 \/ 30\) : Organiser le propos/);
+    expect(pdf(1), 'P2 : Langue prioritaire').toContain('Langue (17 / 30) : Écrire dans une langue correcte');
+    expect(pdf(1), 'P2 : Structure à 63,3 % absente').not.toContain('Structure (19 / 30)');
+    expect(pdf(2), 'P3 : Langue prioritaire').toContain('Langue (16 / 30) : Écrire dans une langue correcte');
+    expect(pdf(2), 'P3 : Structure à 73,3 % absente').not.toContain('Structure (22 / 30)');
+    // « Ta force » vide, rien « à consolider » : 60 % dit où commence l'échec, pas où commence l'acquis.
+    [0, 1, 2].forEach(i => {
+        expect(pdf(i), 'P' + (i + 1) + ' : pas de « Ta force »').not.toContain('Ta force');
+        expect(pdf(i), 'P' + (i + 1) + ' : rien « à consolider »').not.toMatch(/consolider/);
+    });
+    // Points récurrents : Langue depuis 2, puis 3 productions ; Structure, à 63,3 % en P2, a arrêté son compte.
+    expect(pdf(1), 'P2 : Langue récurrente').toContain('Langue : prioritaire depuis 2 productions');
+    expect(pdf(2), 'P3 : Langue récurrente').toContain('Langue : prioritaire depuis 3 productions');
+    expect(pdf(0), 'P1 : aucune récurrence').not.toMatch(/depuis \d+ productions/);
+    // Le bilan de l'écran (copié par « Copier tout », sur P3) dit la même chose, sans « Progrès : ».
+    expect(R.etapes.copierTout.texte, 'Copier tout : Langue prioritaire').toContain('Langue (16 / 30) : Écrire dans une langue correcte');
+    expect(R.etapes.copierTout.texte, 'Copier tout : Langue récurrente').toContain('Langue : prioritaire depuis 3 productions');
+    expect(R.etapes.copierTout.texte, 'Copier tout : pas de « Ta force »').not.toContain('Ta force');
+    expect(R.etapes.copierTout.texte, 'Copier tout : pas de « Progrès »').not.toContain('Progrès :');
+    // Le stock (décision A) : la copie à l'échelle de départ se lit aussi à 60 % — Langue et Structure prioritaires.
+    expect(R.stock.texte, 'stock : Langue prioritaire à 60 %').toContain('Langue (15 / 30)');
+    expect(R.stock.texte, 'stock : pas de « Ta force »').not.toContain('Ta force');
+
     // Le stock (décision A) : plus de nom de niveau, rien de réécrit.
     expect(R.stock.texte, 'stock : aucun nom de niveau').not.toMatch(NOMS_NIVEAUX);
     expect(R.stock.texte, 'stock : la note de la copie').toContain('Note de la copie : 62 %');

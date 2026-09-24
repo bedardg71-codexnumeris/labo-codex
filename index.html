@@ -14324,7 +14324,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=09241118"></script>
+    <script src="version.js?v=09241210"></script>
     <script src="js/db.js?v=20260826b"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260912g"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14379,7 +14379,7 @@
     <script src="js/trimestre-v2-liste.js?v=20260920b"></script> <!-- #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
     <script src="js/trimestre-v2-cours.js?v=20260919b"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20260919g"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
-    <script src="js/registre-longitudinal.js?v=20260924a"></script> <!-- #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
+    <script src="js/registre-longitudinal.js?v=20260924b"></script> <!-- #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20260918c"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
     <script src="js/trimestre-v2-orchestre.js?v=20260919b"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
@@ -14393,7 +14393,7 @@
     <script src="js/entites/signalement-depistage.js?v=20260917b"></script> <!-- #790 : le signalement, recalculé à la volée depuis les gabarits — jamais stocké -->
 
     <script src="js/pratique-notation-v2.js?v=20260905b"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
-    <script src="js/gabarits-utils.js?v=20260924a"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
+    <script src="js/gabarits-utils.js?v=20260924b"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/identite-item.js?v=20260903b"></script> <!-- #291/#476 : source unique de l'identite d'un item de bibliotheque (analyserDoublons) — remplace les 5 detecteurs copies-colles -->
     <script src="js/bibliotheque-ui.js?v=20260909a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js?v=20260911a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
@@ -14444,7 +14444,7 @@
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-test.js?v=20260917b"></script>
     <script src="js/pratiques/pratique-pan-standards.js?v=20260923b"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=20260924a"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=20260924b"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=20260923d"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
@@ -14472,7 +14472,7 @@
     <script src="js/wizard-pratique-v2.js?v=20260923f"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
-    <script src="js/portfolio.js?v=20260924a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
+    <script src="js/portfolio.js?v=20260924b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
     <script src="js/saisie-presences.js?v=20260919b"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260921b"></script>
 
@@ -14480,11 +14480,11 @@
     <script src="js/tableau-bord-apercu.js?v=20260924b"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20260923b"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-calculs.js?v=20260923b"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-rapport.js?v=20260924a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
+    <script src="js/profil-etudiant-rapport.js?v=20260924b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260915b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=20260924a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20260924b"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-actions.js?v=20260924b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20260924c"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20260917b"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260906a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -14530,14 +14530,14 @@
     <script src="js/tampons-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
     <script src="js/travaux-annotation.js?v=20260923z"></script>
     <script src="js/travaux-archivage.js?v=20260923b"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
-    <script src="js/synthese-retroaction-data.js?v=20260924h"></script>
-    <script src="js/synthese-retroaction-rendu.js?v=20260924h"></script>
-    <script src="js/travaux-export-pdf.js?v=20260924a"></script> <!-- Beta 99.42 : ultrareview 2 Commit 2 — icones via forme.icone, pointille, sym-* ; #565 la synthese omise est dite -->
+    <script src="js/synthese-retroaction-data.js?v=20260924i"></script>
+    <script src="js/synthese-retroaction-rendu.js?v=20260924i"></script>
+    <script src="js/travaux-export-pdf.js?v=20260924b"></script> <!-- Beta 99.42 : ultrareview 2 Commit 2 — icones via forme.icone, pointille, sym-* ; #565 la synthese omise est dite -->
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=2026062701"></script>
-    <script src="js/travaux-ui.js?v=20260924a"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
-    <script src="js/actions-rlo.js?v=20260924a"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
+    <script src="js/travaux-ui.js?v=20260924b"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
+    <script src="js/actions-rlo.js?v=20260924b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
@@ -14562,8 +14562,8 @@
     <script src="js/partage-section.js?v=20260901a"></script>
     <script src="js/import-export.js?v=20260913c"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20260909a"></script> <!-- #614 : la fusion valide les magic bytes ; la purge #336 ne recense plus la corbeille ni la modélisation -->
-    <script src="js/liste-evaluations.js?v=20260924a"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
-    <script src="js/journal.js?v=20260924a"></script>
+    <script src="js/liste-evaluations.js?v=20260924b"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
+    <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
     <script src="js/graphiques-progression.js?v=20260921b"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
@@ -14572,11 +14572,11 @@
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=20260921b"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 ; #725/#617/#724/#720 jetons de reprise -->
-    <script src="js/evaluation-chargement.js?v=20260924e"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
-    <script src="js/evaluation-calcul.js?v=20260924a"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
-    <script src="js/evaluation-retroaction.js?v=20260924g"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20260924a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20260924a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation-chargement.js?v=20260924f"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
+    <script src="js/evaluation-calcul.js?v=20260924b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
+    <script src="js/evaluation-retroaction.js?v=20260924h"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
+    <script src="js/evaluation-sauvegarde.js?v=20260924b"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation.js?v=20260924b"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
@@ -14591,7 +14591,7 @@
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20260924i"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20260924j"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14612,11 +14612,11 @@
     <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20260924e"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20260924f"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20260924e"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20260924f"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
