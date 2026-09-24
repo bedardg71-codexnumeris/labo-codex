@@ -5157,7 +5157,10 @@
             // Restaurer échelle et cartouche si vides (avec délai pour laisser
             // chargerGrilleSelectionnee() repeupler les options cartouche)
             setTimeout(() => {
-                if (selE && !selE.value && selectionsCache.echelle) {
+                // #941 lot S1 — pas sous une grille entièrement en points : elle se note sans
+                // échelle, et la mémoire des sélections en remettrait une d'office.
+                const grilleEnPoints = typeof window.grilleSelectionneeEnPoints === 'function' && window.grilleSelectionneeEnPoints();
+                if (selE && !selE.value && selectionsCache.echelle && !grilleEnPoints) {
                     selE.value = selectionsCache.echelle;
                 }
                 if (selC && !selC.value && selectionsCache.cartouche) {
@@ -7058,7 +7061,7 @@
                 const extrait = retroTexte ? echapperHtml(retroTexte.substring(0, 120)) : '';
                 return `<li>
                     <strong>${echapperHtml(c.critereNom || '')}</strong>
-                    <span class="niveau">${echapperHtml(c.niveauSelectionne || '—')}</span>
+                    <span class="niveau">${echapperHtml((typeof c.points === 'number') ? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || '—'))}</span>
                     <span class="retro-texte">${extrait}</span>
                 </li>`;
             }).join('');
@@ -7075,11 +7078,17 @@
             if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
         } catch(e) { console.warn('[Travaux-UI] pratique affichageNote fallback:', e.message || e); }
 
+        // #941 lot S1 (décision A) — une copie en points : sa note, jamais un niveau ; ses critères
+        // par leurs points (ci-dessus), pas par le niveau déduit.
+        const enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
+        const noteTexte = evaluation.noteFinale != null ? evaluation.noteFinale + '%' : '—';
         let noteHTML;
-        if (modeNote === 'lettre') {
+        if (enPoints) {
+            noteHTML = `Note : <strong>${noteTexte}</strong>`;
+        } else if (modeNote === 'lettre') {
             noteHTML = `Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
         } else {
-            noteHTML = `Note : <strong>${evaluation.noteFinale != null ? evaluation.noteFinale + '%' : '—'}</strong> &nbsp;|&nbsp; Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
+            noteHTML = `Note : <strong>${noteTexte}</strong> &nbsp;|&nbsp; Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
         }
 
         // Construire le modal

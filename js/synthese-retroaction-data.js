@@ -88,6 +88,8 @@
         const stats = compterAnnotations(annotation);
 
         return {
+            // #941 lot S1 (D1, décision A) — une copie en points ne montre aucun nom de niveau.
+            enPoints:  estEnPoints(evaluation),
             student:   construireStudent(evaluation),
             course:    construireCourse(evaluation),
             artefact:  construireArtefact(evaluation, cartouche),
@@ -328,9 +330,13 @@
 
             let status = 'todo';
             let code = null;
+            // #941 lot S1 — une copie en points est faite sans niveau : sa case porte son
+            // numéro, jamais une lettre (ni « -- », que le calcul écrit faute de niveau).
             if (estEnCours) {
                 status = 'current';
-                code = evaluation.niveauFinal || null;
+                code = estEnPoints(evaluation) ? null : (evaluation.niveauFinal || null);
+            } else if (evalProduction && estEnPoints(evalProduction)) {
+                status = 'done';
             } else if (evalProduction && evalProduction.niveauFinal) {
                 status = 'done';
                 code = evalProduction.niveauFinal;
@@ -368,6 +374,11 @@
      * d'export, où `profil-etudiant-calculs.js` est présent — mais un shape
      * `Feedback` ne doit jamais lever pour une dépendance absente.
      */
+    /** #941 lot S1 — la règle partagée (`gabarits-utils.js`), repli prudent si elle manque. */
+    function estEnPoints(evaluation) {
+        return (typeof evaluationEnPoints === 'function') ? evaluationEnPoints(evaluation) : false;
+    }
+
     function lireEchelle(echelleId) {
         const echelle = (typeof obtenirEchelleResolue === 'function')
             ? obtenirEchelleResolue(echelleId || null)
@@ -542,6 +553,17 @@
        ===================================================================== */
 
     function construireOverall(evaluation, echelle) {
+        // #941 lot S1 (D1, D4) — une copie en points n'a pas de niveau général : le bloc porte
+        // la note de la copie (« Note de la copie : 74 % »), rien d'autre.
+        if (estEnPoints(evaluation)) {
+            return {
+                code:     '',
+                label:    '',
+                color:    '#767169',
+                enPoints: true,
+                note:     (typeof evaluation.noteFinale === 'number' && !isNaN(evaluation.noteFinale)) ? evaluation.noteFinale : null
+            };
+        }
         const code = evaluation.niveauFinal || '';
         const niveau = echelle.find(s => s.code === code);
         // Pas de `note` : `evaluation.retroactionFinale` est la concaténation
@@ -762,6 +784,7 @@
             recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille, aTravailler),
             jetons:        construireJetons(da),
             note:          construireNoteProvisoire(da, affichageNiveauxSeulement(evaluation))
+                           || construireNoteSommative(da)
         };
     }
 
@@ -943,6 +966,9 @@
      */
     function construireProgressionResume(evaluation, evalPrecedente, historique) {
         const result = { message: '', tendance: '' };
+        // #941 lot S1 — une copie en points ne se compare pas par niveaux : « Progrès : I → D »
+        // nommerait des niveaux que l'élève ne lit plus (décision A).
+        if (estEnPoints(evaluation)) return result;
         if (!evalPrecedente || !evaluation.niveauFinal || !evalPrecedente.niveauFinal) return result;
 
         const echelleId = evaluation.echelleId;
@@ -1121,11 +1147,73 @@
      * `travaux-export-pdf.js` : le choix ENREGISTRÉ dans l'évaluation, sinon la pratique active.
      */
     function affichageNiveauxSeulement(evaluation) {
+        // #941 lot S1 — une copie en points n'a que des chiffres : « niveaux seulement » n'aurait
+        // rien à montrer. La note reste chiffrée.
+        if (estEnPoints(evaluation)) return false;
         const choix = evaluation && evaluation.optionsAffichage && evaluation.optionsAffichage.affichageNote;
         if (choix) return choix === 'lettre';
         const cfgPrat = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
         const cfg = cfgPrat || {};
         return (cfg.affichageNote || (cfg.configuration && cfg.configuration.affichageNote)) === 'lettre';
+    }
+
+    /**
+     * #941 lot S1 (D4, 24 sept. 2026) — LA NOTE CUMULÉE D'UNE PRATIQUE SOMMATIVE, dans le bloc
+     * « Note provisoire », comme en Standards. `calculerDetailsNoteFinale` rend null hors
+     * portfolio ; la sommative a pourtant son récit, celui que le profil affiche (#921) et que
+     * le Comparateur lit, par la même porte (`simulerIndices`, lecture seule). AUCUN calcul ici :
+     * la note est `recit.synthese.noteFinale`. Même forme que le portfolio, marquée `sommative`,
+     * pour que le rendu garde un seul bloc. Rend null hors sommative, sans rien à compter, ou
+     * sous une note différée (#321 : l'élève ne la lit pas avant la date).
+     */
+    function construireNoteSommative(da) {
+        if (!da || typeof simulerIndices !== 'function') return null;
+        if (typeof noteDiffereeActive === 'function' && noteDiffereeActive()) return null;
+        const idActif = (typeof obtenirIdPratiqueActive === 'function') ? obtenirIdPratiqueActive() : null;
+        if (!idActif) return null;
+        let recit = null;
+        try {
+            const indices = simulerIndices(da, idActif);
+            recit = indices ? indices.recit : null;
+        } catch (e) { return null; }
+        if (!recit || recit.famille !== 'SOM' || !recit.synthese || typeof recit.synthese.noteFinale !== 'number') return null;
+        const comptees = (recit.resultats || []).filter(r => r.sort === 'compte' && typeof r.note === 'number');
+        if (!comptees.length) return null;
+        const cfg = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive(idActif) : null;
+        const productions = lireDonneesNamespace('productions');
+        const evaluations = lireDonneesNamespace('evaluationsSauvegardees');
+        const evaluees = new Set(evaluations
+            .filter(e => e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null)
+            .map(e => e.productionId));
+        // Les productions à venir : même filtre que le portfolio (#883 — une diagnostique ne compte pas).
+        const notees = (typeof window.ProductionDiagnostique !== 'undefined')
+            ? window.ProductionDiagnostique.filtrerProductions(productions)
+            : productions;
+        const gcIdEleve = obtenirGcIdEleve(da);
+        const echeanceDe = (prod) => {
+            if (typeof obtenirEcheanceEffective === 'function') {
+                const r = obtenirEcheanceEffective(prod, gcIdEleve);
+                return (r && r.date) || null;
+            }
+            return prod.dateEcheance || null;
+        };
+        const avenir = notees
+            .filter(p => p && p.id && p.type !== 'portfolio' && !evaluees.has(p.id))
+            .map(prod => ({
+                titre:    prod.titre || 'Production',
+                activite: prod.activiteApprentissage || prod.description || '',
+                echeance: echeanceDe(prod)
+            }));
+        return {
+            sommative:       true,
+            estHybride:      false,
+            estFinale:       !!(cfg && cfg.notesFinales),
+            selection:       comptees.map(r => ({ titre: r.label || 'Production', niveau: null, note: r.note, activite: '' })),
+            nombreSelection: comptees.length,
+            moyenne:         Math.round(recit.synthese.noteFinale * 10) / 10,
+            plafonnement:    null,
+            avenir:          avenir
+        };
     }
 
     function construireNoteProvisoire(da, niveauxSeulement) {

@@ -292,9 +292,68 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         return { detailsNoteFinale: det, jetons, indiceP: p, designation: window.designerPratiqueActive ? window.designerPratiqueActive() : null };
     }, DA);
 
+    // #941 lot S1 — LE STOCK : une copie enregistrée AVANT le lot, avec l'échelle de départ glissée d'office (niveau
+    // général « I », niveaux déduits par critère). Décision A de Grégoire : elle ne montre plus aucun nom de niveau,
+    // et rien n'est réécrit en base.
+    R.stock = await page.evaluate(() => {
+        const nettoyer = (html) => html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+        const cleEv = window.cle('evaluationsSauvegardees');
+        const evals = window.db.getSync(cleEv, []) || [];
+        const e = evals.find(x => x.productionId === 'P1');
+        const echId = (window.db.getSync(window.cle('echellesTemplates'), []) || [])[0]?.id;
+        const deduit = { c_comp: 'M', c_struct: 'I', c_langue: 'I' };
+        const ancienne = JSON.parse(JSON.stringify(e));
+        ancienne.echelleId = echId; ancienne.niveauFinal = 'I';
+        ancienne.criteres = ancienne.criteres.map(c => Object.assign({}, c, { niveauSelectionne: deduit[c.critereId] }));
+        const f = (window.db.getSync(window.cle('fichiersTravaux'), []) || []).find(x => x.productionId === 'P1');
+        const fb = window.syntheseRetroactionData.construireFeedback(ancienne, f, window.travauxStockage.obtenirAnnotationFichier(f.id));
+        const texte = nettoyer(window.syntheseRetroactionRendu.rendreSyntheseHTML(fb));
+        return { texte, overall: fb.overall, affichable: window.niveauFinalAffichable(ancienne), niveauFinalIntact: ancienne.niveauFinal };
+    });
+
     R.dialogues = dialogues; R.erreursConsole = erreurs.slice(0, 8);
     console.log('AUDIT-SOM ' + JSON.stringify(R, null, 1));
     testInfo.attach('AUDIT-SOM', { body: JSON.stringify(R, null, 1), contentType: 'application/json' });
     expect(R.etapes.assistant.etapeFinale, 'l\'assistant doit atteindre le récapitulatif').toBe('recapitulatif');
     expect(R.etapes.evaluations.every(e => e.enBase), 'les trois copies doivent être enregistrées').toBe(true);
+
+    // ── #941 lot S1 (D1, D4) — ce que le banc DIT désormais. Avant le lot, il imprimait l'échelle de départ choisie
+    // d'office, « I Niveau général · Incomplet » à 62 %, aucune note sur la page, « | Niveau : D » dans « Copier tout »
+    // et « -- » sans échelle. Ces attentes suivent le changement voulu (décisions du 24 sept.).
+    const notes = [62, 70, 74];
+    R.etapes.evaluations.forEach((ev, i) => {
+        // D1 — aucune échelle glissée d'office, et la copie s'enregistre sans elle.
+        expect(ev.avant.echelleChoisie, ev.copie + ' : aucune échelle choisie d\'office').toBe('');
+        expect(ev.enBase.echelleId || '', ev.copie + ' : enregistrée sans échelle').toBe('');
+        expect(ev.enBase.noteFinale, ev.copie + ' : la note des points').toBeCloseTo(notes[i], 5);
+        expect(ev.ecran.note, ev.copie + ' : la note affichée').toBe(notes[i].toFixed(1) + ' %');
+        // Chaque critère entre en base par ses points, sans niveau déduit.
+        expect(ev.enBase.criteres.length, ev.copie + ' : trois critères en base').toBe(3);
+        ev.enBase.criteres.forEach(c => expect(c, ev.copie).toMatch(/^[^:]+: {2}· \d+ \/ \d+ ·/));
+    });
+    const NOMS_NIVEAUX = /Incomplet|Développement|Maîtrise|Étendu|Niveau général ·/;
+    R.pdfSansReperes.forEach((pdf, i) => {
+        const texte = pdf.blocs.map(b => b.texte).join(' ');
+        // D1 — l'élève ne lit aucun nom de niveau.
+        expect(texte, pdf.p + ' : aucun nom de niveau').not.toMatch(NOMS_NIVEAUX);
+        // D4 — la note de la copie en tête du bloc « Niveau général ».
+        expect(texte, pdf.p + ' : la note de la copie').toContain('Niveau général Note de la copie : ' + notes[i] + ' %');
+    });
+    // D4 — la note cumulée dans « Note provisoire », calculée par la pratique sommative : (62 + 70 + 74) ÷ 3.
+    const pageP3 = R.pdfSansReperes[2].blocs.map(b => b.texte).join(' ');
+    expect(pageP3, 'P3 : la note provisoire de la sommative').toContain('Note provisoire');
+    expect(pageP3, 'P3 : la note cumulée').toContain('68.7 %');
+    expect(pageP3, 'P3 : les trois copies comptées').toContain('Voici les 3 productions comptées dans ta note');
+    // Les repères posés sur l'échelle de départ ne font pas revenir de niveau : ces copies n'ont pas d'échelle.
+    R.pdfAvecReperes.forEach(pdf => expect(pdf.blocs.map(b => b.texte).join(' '), pdf.p + ' (repères)').not.toMatch(NOMS_NIVEAUX));
+    // « Copier tout » : la note chiffrée, jamais « | Niveau : ».
+    expect(R.etapes.copierTout.texte, 'Copier tout : la note').toContain('Note finale : 74.0 %');
+    expect(R.etapes.copierTout.texte, 'Copier tout : aucun niveau').not.toMatch(/Niveau :|Niveau de performance/);
+    // Sans aucune échelle, la grille en points se note encore.
+    expect(R.sansAucuneEchelle.ecran.note, 'sans échelle : la note se calcule').not.toBe('--');
+    // Le stock (décision A) : plus de nom de niveau, rien de réécrit.
+    expect(R.stock.texte, 'stock : aucun nom de niveau').not.toMatch(NOMS_NIVEAUX);
+    expect(R.stock.texte, 'stock : la note de la copie').toContain('Note de la copie : 62 %');
+    expect(R.stock.affichable, 'stock : aucun niveau affichable').toBe('');
+    expect(R.stock.niveauFinalIntact, 'stock : la donnée reste telle quelle').toBe('I');
 });

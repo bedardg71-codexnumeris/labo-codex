@@ -1027,7 +1027,13 @@
                 } catch(e) { console.warn('[PDF-Export] pratique affichageNote preview fallback:', e.message || e); }
             }
 
-            if (modeNotePreview === 'lettre') {
+            // #941 lot S1 (décision A) — une copie en points : sa note, jamais un niveau.
+            const enPointsPreview = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
+            if (enPointsPreview) {
+                if (evaluation.noteFinale != null) {
+                    html += `<p><strong>Note :</strong> ${evaluation.noteFinale}%</p>`;
+                }
+            } else if (modeNotePreview === 'lettre') {
                 if (evaluation.niveauFinal) {
                     html += `<p><strong>Niveau de performance :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
                 }

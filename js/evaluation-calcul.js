@@ -1454,6 +1454,16 @@ function resoudreEchelleEvaluation(echelleId) {
     return echelles.find(e => e.id === id) || null;
 }
 
+/**
+ * #941 lot S1 — la case « Niveau » de la note finale n'a rien à dire pour une grille
+ * entièrement en points : elle se masque, la note chiffrée reste seule.
+ */
+function _montrerNiveauEcran(montrer) {
+    const el = document.getElementById('niveauProduction1');
+    const bloc = el ? el.closest('.u-text-right') : null;
+    if (bloc) bloc.classList.toggle('u-hide', !montrer);
+}
+
 function calculerNote() {
     if (!evaluationEnCours) return;
     window.porteeCalculeeCourante = null;   // #674 — inconnue tant qu'elle n'est pas calculée
@@ -1469,13 +1479,22 @@ function calculerNote() {
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
     const echelleSelectionnee = resoudreEchelleEvaluation(echelleId);
 
+    // #941 lot S1 (D1, 24 sept. 2026) — UNE GRILLE ENTIÈREMENT EN POINTS SE NOTE SANS ÉCHELLE.
+    // Sa note ne dépend que des points (`_valeurCritereEnCours`) : l'échelle ne donnait qu'un
+    // nom de niveau, que l'élève ne lit plus (décision A). Une échelle choisie exprès sert
+    // encore en coulisse (niveau déduit → cartouche) ; sans elle, la note se calcule quand même.
+    // Le chiffre est le même avec ou sans échelle : aucune note enregistrée ne change.
+    const enPoints = typeof grilleEntierementEnPoints === 'function' && grilleEntierementEnPoints(grille);
+    _montrerNiveauEcran(!enPoints);
+
     // SÉCURITÉ: Vérifier que l'échelle existe. Si non résolue (consultation d'un
     // trimestre archivé sans copie d'échelle = pilote A25 pas posé, ou échelle pas
     // encore sélectionnée), on dégrade SILENCIEUSEMENT (note « -- ») — comme le cas
     // « grille manquante » plus haut. Le problème de fond est déjà signalé une fois par
     // l'avertissement « Grille introuvable » ; crier ❌ à chaque recalcul en cascade au
     // chargement ne fait que polluer la console (4× à l'ouverture d'une éval A25). (#348-résiduel)
-    if (!echelleSelectionnee || !echelleSelectionnee.niveaux || echelleSelectionnee.niveaux.length === 0) {
+    const echelleResolue = !!(echelleSelectionnee && echelleSelectionnee.niveaux && echelleSelectionnee.niveaux.length > 0);
+    if (!echelleResolue && !enPoints) {
         const elNote = document.getElementById('noteProduction1');
         const elNiveau = document.getElementById('niveauProduction1');
         if (elNote) elNote.textContent = '--';
@@ -1485,7 +1504,7 @@ function calculerNote() {
         return;
     }
 
-    const niveaux = echelleSelectionnee.niveaux;
+    const niveaux = echelleResolue ? echelleSelectionnee.niveaux : [];
 
     // Utiliser les valeurs ponctuelles configurées par l'utilisateur
     const valeurs = {};
@@ -1549,6 +1568,11 @@ function calculerNote() {
         niveauGlobal = niveauDuPourcentage(pourcentage, niveaux) || '--';
 
     }
+    // #941 lot S1 — en points, le niveau général ne s'AFFICHE nulle part (case masquée ici,
+    // `niveauFinalAffichable` ailleurs). Il reste CALCULÉ et écrit quand une échelle est là
+    // (décision A : « en coulisse ») : une pratique qui convertit les niveaux en note
+    // (`calculerParConversionNiveaux`) compte une copie re-enregistrée comme avant. Sans
+    // échelle, `niveauDuPourcentage` n'a rien à rendre : « -- ».
 
     // #674 — L'ÉCRAN RETIENT LA CONCLUSION QUAND LA PORTÉE EST INCOMPLÈTE, ET DIT
     // POURQUOI. Un « 95,0 % » calculé sur 80 % de la grille n'est pas une note sur
@@ -1581,7 +1605,7 @@ function calculerNote() {
 
     // Colorer l'encadré de la note finale selon le niveau
     const noteContainer = document.getElementById('noteProduction1').closest('div[style*="background"]');
-    if (noteContainer && niveauGlobal !== '--') {
+    if (noteContainer && niveauGlobal !== '--' && !enPoints) {   // #941 lot S1 : pas la couleur d'un niveau non affiché
         const couleur = obtenirCouleurNiveau(niveauGlobal);
         if (couleur && couleur !== 'transparent') {
             noteContainer.style.background = couleur + '20'; // 20% opacité
