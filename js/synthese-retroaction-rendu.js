@@ -290,17 +290,19 @@
             { label: 'CONTEXTE', texte: a.context }
         ];
 
-        // Si toutes les cellules sont vides, on retire le ruban entier.
-        if (!cellules.some(c => c.texte && c.texte.trim())) return '';
+        // #941 lot S3 (C5) — une cellule vide ne s'affiche pas : sans cartouche, pas d'étiquette
+        // « CONTEXTE » suivie de rien (même règle pour l'objectif et la tâche). Toutes vides : pas de ruban.
+        const pleines = cellules.filter(c => c.texte && c.texte.trim());
+        if (!pleines.length) return '';
 
-        const inner = cellules.map(c => `
+        const inner = pleines.map(c => `
             <div>
                 <div style="${styleMonoLabel()} margin-bottom: 2px;">${esc(c.label)}</div>
                 <div>${esc(c.texte || '')}</div>
             </div>`).join('');
 
         return `
-            <div style="background: ${CARD}; padding: 8px 10px; margin-bottom: 10px; border-radius: 3px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; font-size: 9.5px;">
+            <div style="background: ${CARD}; padding: 8px 10px; margin-bottom: 10px; border-radius: 3px; display: grid; grid-template-columns: repeat(${pleines.length}, 1fr); gap: 14px; font-size: 9.5px;">
                 ${inner}
             </div>`;
     }
@@ -818,10 +820,10 @@
                     ? 'Note plafonnée (échec) : déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'
                     : 'Note plafonnée par déficit de ' + esc(note.plafonnement.deficit) + ' production(s).'}</div>`
                 : '';
-            // #941 lot S1 — mots VALIDÉS par Grégoire le 24 sept. ⚠ La CONDITION est provisoire : au lot S3,
-            // elle devient celle de D5 (« la pratique ne déclare pas de jetons actifs »), la même règle que
-            // le bloc « Jetons utilisés » (relecture de Cowork, § 2).
-            const texteProvisoire = note.sommative
+            // #941 — mots VALIDÉS par Grégoire le 24 sept. (lot S1) ; la CONDITION est celle de D5 (lot S3) :
+            // sans jetons déclarés par la pratique, la mention n'en parle pas — la même règle que le bloc
+            // « Jetons utilisés » (`jetonsDeclares`, evaluation-jetons.js ; relecture de Cowork du lot S1, § 2).
+            const texteProvisoire = note.sansJetons
                 ? 'Note provisoire — peut changer selon tes prochains travaux.'
                 : 'Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.';
             const mentionProvisoire = (!estFinale)

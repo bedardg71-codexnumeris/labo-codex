@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.1 (#941, lot S3) — PROPOSÉ par Claude Code, À SOUMETTRE à Grégoire avant le push.
+                'La rétroaction de ton élève ne montre plus de jetons que ta pratique n\'offre pas, n\'écrit plus «&nbsp;Présentement, il faut se concentrer sur&nbsp;» quand rien ne suit, et n\'affiche plus l\'étiquette «&nbsp;Contexte&nbsp;» vide quand la copie n\'a pas de cartouche.',
                 'Avec une grille en points, le bilan de ton élève nomme maintenant chaque critère sous 60&nbsp;%, avec sa définition, dans «&nbsp;Présentement, il faut se concentrer sur&nbsp;», et «&nbsp;Points récurrents&nbsp;» dit depuis combien de productions il revient. Un critère à 60&nbsp;% ou plus n\'y figure pas.'
             ]
         },
