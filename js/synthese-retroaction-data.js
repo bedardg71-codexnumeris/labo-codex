@@ -66,9 +66,6 @@
         comprehension: '#5fb84a'
     };
 
-    // Ordre d'affichage des familles dans la synthèse.
-    const FAMILY_ORDER = ['action', 'observations', 'comprehension'];
-
     /* =====================================================================
        API PUBLIQUE
        ===================================================================== */
@@ -532,44 +529,37 @@
        H. TAMPONS PAR FAMILLE
        ===================================================================== */
 
+    /**
+     * #760 (24 sept. 2026) — les tampons de la copie, lus dans les RÉGLAGES ACTUELS
+     * par le seul lecteur (`travauxOutils.observationsDesTampons`), comme la
+     * rétroaction générale et la spécifique : catégories et tampons dans l'ordre des
+     * réglages, noms et textes de l'utilisateur, tampons personnels et anciens
+     * tampons compris, jetons absents. Hier : trois familles figées, noms du
+     * catalogue, tri par nombre, tampons personnels et anciens tus.
+     * @returns {Array<{id, nom, couleur, items: Array}>} une entrée par catégorie utilisée
+     */
     function construireStamps(stats) {
-        const sortie = { action: [], observations: [], comprehension: [] };
-        if (!stats || !stats.tampons) return sortie;
-
-        // Catalogue + rétroactions par défaut + couleurs de catégories (palette utilisateur)
-        const catalogue = (typeof travauxOutils !== 'undefined' && travauxOutils.AUTOCOLLANTS)
-            ? travauxOutils.AUTOCOLLANTS
-            : [];
-        const retroactions = (typeof travauxOutils !== 'undefined' && typeof travauxOutils.obtenirRetroactionsObservations === 'function')
-            ? travauxOutils.obtenirRetroactionsObservations()
-            : {};
+        if (!stats || !stats.tampons) return [];
+        if (typeof travauxOutils === 'undefined' || typeof travauxOutils.observationsDesTampons !== 'function') return [];
         // Couleurs personnalisées par catégorie (palette tampons configurée par l'utilisateur)
         const couleursCat = (typeof db !== 'undefined' && db.getSync) ? (db.getSync('couleursCategories', null) || {}) : {};
 
-        Object.keys(stats.tampons).forEach(id => {
-            const count = stats.tampons[id] || 0;
-            if (!count) return;
-            const meta = catalogue.find(a => a.id === id);
-            if (!meta) return; // tampon inconnu (legacy non listé) → ignoré
-            const famille = meta.categorie;
-            if (!sortie[famille]) return; // catégorie 'qualite'/'diagnostic' legacy → ignorée
-            const couleurFam = couleursCat[famille] || FAMILY_COLOR[famille] || '#767169';
-            sortie[famille].push({
-                id:      id,
-                nom:     meta.nom || '',
-                count:   count,
-                comment: retroactions[id] || '',
-                icone:   tamponEnDataURL(id, couleurFam),
-                couleur: couleurFam
-            });
+        return travauxOutils.observationsDesTampons(stats.tampons).map(cat => {
+            const couleurFam = couleursCat[cat.id] || FAMILY_COLOR[cat.id] || '#767169';
+            return {
+                id:      cat.id,
+                nom:     cat.nom,
+                couleur: couleurFam,
+                items:   cat.tampons.map(t => ({
+                    id:      t.id,
+                    nom:     t.nom,
+                    count:   t.nombre,
+                    comment: t.texte,
+                    icone:   tamponEnDataURL(t.id, couleurFam),
+                    couleur: couleurFam
+                }))
+            };
         });
-
-        // Tri stable : par count décroissant puis par nom
-        FAMILY_ORDER.forEach(fam => {
-            sortie[fam].sort((a, b) => (b.count - a.count) || a.nom.localeCompare(b.nom));
-        });
-
-        return sortie;
     }
 
     /**
@@ -872,23 +862,18 @@
 
     function construireTamponsRecurrents(stats) {
         if (!stats || !stats.tampons) return [];
-        const catalogue = (typeof travauxOutils !== 'undefined' && travauxOutils.AUTOCOLLANTS) ? travauxOutils.AUTOCOLLANTS : [];
-        const retroactions = (typeof travauxOutils !== 'undefined' && typeof travauxOutils.obtenirRetroactionsObservations === 'function')
-            ? travauxOutils.obtenirRetroactionsObservations() : {};
+        // #760 — même lecteur que le reste de la page (réglages actuels).
+        const categories = (typeof travauxOutils !== 'undefined' && typeof travauxOutils.observationsDesTampons === 'function')
+            ? travauxOutils.observationsDesTampons(stats.tampons) : [];
 
-        return Object.keys(stats.tampons)
-            .map(id => {
-                const count = stats.tampons[id] || 0;
-                const meta = catalogue.find(a => a.id === id);
-                const retro = retroactions[id] || '';
-                if (!count || !meta || !retro) return null;
-                return {
-                    nom:          meta.nom || id,
-                    count:        count,
-                    retroaction:  retro.length > 80 ? retro.substring(0, 80) + '...' : retro
-                };
-            })
-            .filter(Boolean)
+        return categories
+            .reduce((acc, cat) => acc.concat(cat.tampons), [])
+            .filter(t => t.texte)
+            .map(t => ({
+                nom:          t.nom,
+                count:        t.nombre,
+                retroaction:  t.texte.length > 80 ? t.texte.substring(0, 80) + '...' : t.texte
+            }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 2);
     }
@@ -1403,7 +1388,6 @@
         construireFeedback: construireFeedback,
         // Exposés pour le rendu et les tests
         FAMILY_COLOR: FAMILY_COLOR,
-        FAMILY_ORDER: FAMILY_ORDER,
         // #673 — EXPOSÉ POUR QUE LA LISTE RESTE UNIQUE. L'écran d'évaluation doit
         // reconnaître les mêmes amorces pour savoir ce qu'il a le droit d'effacer
         // (`_effacerRetroactionMachine`, evaluation-calcul.js). Recopier la liste
