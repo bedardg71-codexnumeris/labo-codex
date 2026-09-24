@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 22 H 30 : **LOT #830 (1.156.1) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 6 H 30 : **LOT #760 + #759 (1.156.2) SUR LA BRANCHE `lot-760-759-observations`, NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des mots par Grégoire
+
+**Où vit le travail** : branche `lot-760-759-observations` = `e29ebdf0` + `24d98f52` (lot et release 1.156.2 en un commit : le hook anti-cache a refusé le commit du lot seul, jetons d'`index.html` non indexés). `main` = `origin/main` + ce relais, rien d'autre. Rien n'est poussé.
+
+**Ce que le lot fait** : `travauxOutils.observationsDesTampons(comptes)` (`js/travaux-outils.js`) est le seul lecteur de ce que l'élève lit de ses tampons ; la générale (bloc « Observations »), la spécifique et le PDF de synthèse le lisent. Réglages relus à chaque appel. `DIAG_IDS`, `FAMILY_ORDER`, `obtenirNomsFamilles` partis. #759 : `_texteSepareDuHtml` (`js/evaluation-retroaction.js`) pour « Copier » et « Copier tout ». Vitest 628 / 7263 vert ; spec WebKit `retroaction-760-759-observations-et-copie` verte, rouge sur le code d'hier ; onze mutations rouges (détail dans le message de fin de session).
+
+**À Grégoire avant la fusion** : la phrase des Nouvelles (proposition de Cowork, posée telle quelle dans `js/changelog-data.js`) ; trois titres que ses élèves peuvent lire, choisis par Claude Code : « Qualité », « Diagnostic » (anciens tampons), « Autres tampons » (tampon personnel supprimé depuis) ; la forme du bloc « Observations » en texte brut (titre de catégorie seul sur sa ligne, puis « Nom (×n) : » et le texte).
+
+**Suite** : relecture Cowork → mots validés → verdict Playwright → fusion → push. À la livraison : #760 et #759 se cochent, le lot sort de FILE-DES-LOTS. Toujours à inscrire (reporté du relais précédent) : le suivi GitHub au navigateur rouge sur `78575a46` (nettoyage-sans-perte-892 ×2, planif-zone-non-planifie-929), à confirmer au prochain run planifié. La branche `lot-830-barre-a-dit-pourquoi` peut être supprimée.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 22 H 30 : **LOT #830 (1.156.1) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`642ce374`, 1.156.0) + le merge `f2792353` de `lot-830-barre-a-dit-pourquoi` (`08815aea` lot, `03264344` release 1.156.1, `34504db7` retouche du JSDoc demandée par la relecture) + ce relais. Relecture croisée de Cowork verte (copie `git archive`, sentinelle 4/4, trois mutations rouges ; `plans de travail/RELECTURE-2026-09-23-lot-830.md`). Phrase de la barre validée par Grégoire le 23 sept., mot pour mot ; phrase des Nouvelles validée telle quelle (confirmée par Grégoire après la relecture). Vitest 627 / 7250 vert ; spec WebKit `suivi-830-barre-a-sans-periodes` verte, cinq mutations rouges.
 
