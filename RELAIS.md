@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 17 H 30 : **LOT #895 (1.156.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 22 H 30 : **LOT #830 (1.156.1) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+
+**Où vit le travail** : `main` = `origin/main` (`642ce374`, 1.156.0) + le merge `f2792353` de `lot-830-barre-a-dit-pourquoi` (`08815aea` lot, `03264344` release 1.156.1, `34504db7` retouche du JSDoc demandée par la relecture) + ce relais. Relecture croisée de Cowork verte (copie `git archive`, sentinelle 4/4, trois mutations rouges ; `plans de travail/RELECTURE-2026-09-23-lot-830.md`). Phrase de la barre validée par Grégoire le 23 sept., mot pour mot ; phrase des Nouvelles validée telle quelle (confirmée par Grégoire après la relecture). Vitest 627 / 7250 vert ; spec WebKit `suivi-830-barre-a-sans-periodes` verte, cinq mutations rouges.
+
+**Suite** : #830 cochée, sortie de la file. Reste dans FILE-DES-LOTS : #888 (code seulement), F4-2 et F3-6 à Grégoire. Non inscrit, à inscrire : le suivi GitHub au navigateur rouge sur `78575a46` (nettoyage-sans-perte-892 ×2, planif-zone-non-planifie-929), vraisemblablement un rouge du runner Linux seul — à confirmer au prochain run planifié. La branche `lot-830-barre-a-dit-pourquoi` peut être supprimée une fois le push constaté. Aucune porte terrain (seulement si un trimestre de Grégoire a un horaire sans aucune période).
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 23 SEPT. 2026, ≈ 17 H 30 : **LOT #895 (1.156.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`c5dec89e`) + le merge `d7fb3cee` de `lot-895-une-carte-exporter` (`3cfe8e66` lot et release 1.156.0, `28f0d02f` mots validés) + ce relais. Relecture croisée de Cowork verte (copie `git archive`, 41/41, huit mutations rouges ; `plans de travail/RELECTURE-2026-09-23-lot-895.md`). Mots validés par Grégoire avec deux retouches (« étudiant·e » dans l'aide ; « maintenant » et la phrase du nettoyage dans Nouvelles). Le bump de jetons des fichiers de N6 vient de `release.mjs` : il compte depuis l'AVANT-dernière release (#675), un rechargement de trop, pas un défaut.
 
