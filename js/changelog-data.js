@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // 1.158.0 (#941, lot S1) — PROPOSÉ par Claude Code, À SOUMETTRE à Grégoire avant le push.
+            // 1.158.0 (#941, lot S1) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
             version: '1.158',
             couleur: 'vert',
             titre: 'Sommative : une grille en points se note sans échelle',
