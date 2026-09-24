@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 12 H 15 : **LOT S2 DE #941 (1.159.0) SUR LA BRANCHE `lot-941-s2-regle-60` (worktree `.claude/worktrees/lot-941-s2`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles 1.159 par Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, DÉBUT D'APRÈS-MIDI : **LOT S2 DE #941 (1.159.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `6cbe59a0` (S1, poussé) + `21ba4b63` (relais) + le merge `90232db7` de `lot-941-s2-regle-60` (`c55eca38` lot + release, `ce9822ac` relecture versée) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-941-s2.md`) ; la supposition (60 % pour toute copie en points, même sous une échelle à repères) retenue par Grégoire et versée à `DECISIONS-2026-09-24-parcours-sommatif.md` ; Nouvelles 1.159 validées.
+
+**Suite** : lot S3 (D5 jetons déclarés, C2 « Présentement » sans rien, C5 « CONTEXTE » vide, et la mention « Note provisoire » sans jetons sous la condition de D5) ; puis #943. Worktree `.claude/worktrees/lot-941-s2` et sa branche supprimables une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 12 H 15 : **LOT S2 DE #941 (1.159.0) SUR LA BRANCHE `lot-941-s2-regle-60` (worktree `.claude/worktrees/lot-941-s2`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la validation des Nouvelles 1.159 par Grégoire
 
 **Où vit le travail** : `main` = `origin/main` = `6cbe59a0` (S1 poussé, verdict vert ; six specs vertes au second essai seulement : #914, #912, #700, #699, #926, suppression de grille — à surveiller, #685) + ce relais. Branche `lot-941-s2-regle-60` = `6cbe59a0` + `c55eca38` (lot + release 1.159.0). **Rien de S2 n'est poussé.**
 
