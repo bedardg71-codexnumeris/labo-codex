@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, FIN D'APRÈS-MIDI : **LOT #942 (1.157.0) FUSIONNÉ DANS `main`, AVEC L'AUDIT DU PARCOURS SOMMATIF (#941) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 11 H 30 : **LOT S1 DE #941 (1.158.0) SUR LA BRANCHE `lot-941-s1-points-sans-echelle`, NON FUSIONNÉ** — attend la relecture croisée de Cowork, et Grégoire pour les Nouvelles et deux phrases neuves de l'élève
+
+**Où vit le travail** : branche `lot-941-s1-points-sans-echelle` = `0c8b1328` (= `origin/main`) + `9c69599a` (lot + release 1.158.0 + #943 inscrit). `main` = `0c8b1328` + ce relais. **Rien n'est poussé.**
+
+**Ce que fait S1** (consigne `plans de travail/CONSIGNE-SOMMATIVE-FONCTIONNELLE.md`, D1 et D4) : une grille entièrement en points se note sans échelle ; l'échelle unique n'est plus choisie d'office pour une copie neuve ; aucun nom de niveau pour une copie en points (décision A de Grégoire, versée à `DECISIONS-2026-09-24-parcours-sommatif.md` : copies déjà enregistrées comprises, rien n'est réécrit) ; « Note de la copie : … » et la note cumulée sommative sur la page du PDF. Preuve : `tests/integration/audit-parcours-sommatif-2026-09-24.spec.js` (attentes D1/D4, variante du stock ; sept mutations rouges), `tests/unit/sentinelle-941-s1-points-sans-echelle.test.js`.
+
+**À Grégoire avant le push** : la phrase des Nouvelles 1.158 ; « Voici les N productions comptées dans ta note » (« Voici la production comptée dans ta note ») ; « Note provisoire — peut changer selon tes prochains travaux. » (sans « et l'application de jetons » en sommative).
+
+**Suite** : relecture de Cowork → merge → verdict → push ; puis #943 (poignées d'une ligne tracée), puis S2. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, FIN D'APRÈS-MIDI : **LOT #942 (1.157.0) FUSIONNÉ DANS `main`, AVEC L'AUDIT DU PARCOURS SOMMATIF (#941) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `a67890fe` + `ae2c7501` (audit sommatif, #941) + `3008d3ed` (relais) + le merge `d4c3e5c8` de `lot-942-lecon-manquee` (`c6525f7e` lot + release 1.157.0 + porte terrain, `f5f91f9c` essai du titre piégé) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-942.md` : 19/19, M1-M3 rouges ; M4 — titre sans `echapperHtml` — survivait, fermée par l'essai WebKit du § 2, rouge sous M4 aux deux largeurs). Nouvelles et titre validés tels quels par Grégoire. #942 coché ; le lot sort de FILE-DES-LOTS. Commités ici, écrits par Cowork : `CONSIGNE-SOMMATIVE-FONCTIONNELLE.md` et `DECISIONS-2026-09-24-parcours-sommatif.md` (à lire au prochain lot), et la relecture.
 
