@@ -250,6 +250,70 @@ function dateDeLecon(horaire, semaine, rangSeance) {
     return dates[r - 1];
 }
 
+/**
+ * L'INVERSE DE `dateDeLecon` (#942) : la semaine et le rang d'une DATE, dans le
+ * même horaire. Fonction PURE, et même table : `dateDeLecon(h, s, r) === d` si et
+ * seulement si `rangDeLaDate(h, d)` rend `{ semaine: s, rang: r }`. Deux lectures
+ * d'une seule liste, pas deux résolutions — le patron de `datesSeancesDeLaSemaine`
+ * (productions.js).
+ *
+ * ⚠ Le rang compte les DATES : deux séances le même jour font une seule rencontre
+ * (voir `construireHoraireDeLecons`). Une date qui n'est pas une séance de ce
+ * groupe (congé, jour sans cours, autre groupe) rend null — aucune semaine devinée.
+ *
+ * @returns {{semaine:number, rang:number}|null}
+ */
+function rangDeLaDate(horaire, ymd) {
+    if (!horaire || !horaire.datesParSemaine || !ymd) return null;
+    var semaines = Object.keys(horaire.datesParSemaine);
+    for (var i = 0; i < semaines.length; i++) {
+        var dates = horaire.datesParSemaine[semaines[i]];
+        var k = Array.isArray(dates) ? dates.indexOf(ymd) : -1;
+        if (k !== -1) return { semaine: parseInt(semaines[i], 10), rang: k + 1 };
+    }
+    return null;
+}
+
+/**
+ * Les titres des leçons posées à cette date pour ce groupe (#942). Fonction PURE.
+ * Plusieurs leçons au même couple semaine / séance → tous les titres, dans l'ordre
+ * de la liste reçue. Une leçon sans titre s'écrit « Leçon sans titre » : elle a été
+ * manquée, et le taire ferait croire qu'aucune leçon n'était prévue.
+ *
+ * @param {Object} horaire - sortie de `construireHoraireDeLecons`
+ * @param {string} ymd - 'AAAA-MM-JJ'
+ * @param {Array<{titre, semaine, rang}>} lecons - leçons SITUÉES (semaine ET rang)
+ * @returns {Array<string>} [] quand aucune leçon n'est prévue ce jour-là
+ */
+function titresDesLeconsALaDate(horaire, ymd, lecons) {
+    var pos = rangDeLaDate(horaire, ymd);
+    if (!pos || !Array.isArray(lecons)) return [];
+    return lecons
+        .filter(function(l) { return l && l.semaine === pos.semaine && l.rang === pos.rang; })
+        .map(function(l) {
+            var t = (l.titre == null) ? '' : String(l.titre).trim();
+            return t || 'Leçon sans titre';
+        });
+}
+
+/**
+ * Le lecteur « date → leçons manquées » d'UN groupe-cours (#942, profil › Engagement).
+ * L'horaire et les leçons sont lus UNE fois ; le lecteur rendu répond ensuite à
+ * chaque absence sans relire le stockage. Lecture seule : rien n'est écrit.
+ * Les leçons viennent des cartes du cours (`leconsSitueesDuCours`, même choix de
+ * cartes que la date d'échéance proposée par la carte).
+ *
+ * @returns {function(string): Array<string>} toujours une fonction ; elle rend []
+ *   quand le groupe n'a pas d'horaire ou le cours pas de leçon située
+ */
+function lecteurLeconsDuGroupe(groupeCoursId, coursId) {
+    var horaire = construireHoraireDeLecons(groupeCoursId);
+    var c = carte();
+    var lecons = (horaire && c && typeof c.leconsSitueesDuCours === 'function')
+        ? c.leconsSitueesDuCours(coursId) : [];
+    return function(ymd) { return titresDesLeconsALaDate(horaire, ymd, lecons); };
+}
+
 // ---------------------------------------------------------------------------
 // LA DATE DANS L'INSPECTEUR (#695, élargie à l'évaluation le 22 sept. 2026)
 //
@@ -1694,6 +1758,10 @@ window.planificationExport = {
     coursDeLaCarteActive: coursDeLaCarteActive,
     horairesDesGroupesDuCours: horairesDesGroupesDuCours,
     lignesDateDeLecon: lignesDateDeLecon,
+    // #942 — l'inverse : date + groupe → leçon (profil › Engagement).
+    rangDeLaDate: rangDeLaDate,
+    titresDesLeconsALaDate: titresDesLeconsALaDate,
+    lecteurLeconsDuGroupe: lecteurLeconsDuGroupe,
     // #416 lot G — le générateur à trois axes : granularité × colonnes × format.
     CATALOGUE_COLONNES: CATALOGUE_COLONNES,
     COLONNES_PAR_SEANCE: COLONNES_PAR_SEANCE,
