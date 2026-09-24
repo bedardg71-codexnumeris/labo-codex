@@ -100,6 +100,8 @@ function chargerBilan({ echelles, evaluationEnCours, historique = [], elements, 
     // VRAI registre dans le sandbox AVANT le module testé, et on l'enchaîne par
     // le 3e paramètre : un stub testerait des phrases inventées pour le banc.
     const wEnonces581 = chargerScript('js/evaluation-enonces.js');
+    // #940 — le bilan lit sa règle (ligne d'un critère, récurrences, historique) dans le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', {}, wEnonces581);
     const w = chargerScript('js/evaluation-retroaction.js', {
         document: fauxDocument,
         db: {

@@ -26,7 +26,9 @@
      · genererRetroactionBilan (cyc 75 → cyc ≤ 30 PRIVÉE — éclatée étape 4
        le 18 mai 2026 en 10 helpers privés : _chargerHistoriqueBilan,
        _chargerGrilleDefBilan, _collecterCriteresBilan, _detecterPatrons
-       RecurrentsBilan, _compterErreursFrancaisBilan, _detecterAlgoA0Bilan,
+       RecurrentsBilan (RETIRÉE le 24 sept. 2026 par #940 : la récurrence
+       vit dans `lignesRecurrentes`, synthese-retroaction-data.js),
+       _compterErreursFrancaisBilan, _detecterAlgoA0Bilan,
        _rendreAlgoA0Bilan, _rendreDefisBilan, _rendreTousMaitrisesBilan,
        _rendreForceBilan, _rendreRecurrentsBilan, _rendreJetonsBilan +
        + 2 constantes module-scope _NOMS_NIV_BILAN, _ORDRE_NIV_BILAN —
@@ -655,7 +657,11 @@ function _nomBilan(niveauDe, code) {
 }
 
 /**
- * L'historique de l'élève — ses AUTRES copies, la plus récente d'abord, cinq au plus.
+ * L'historique de l'élève — ses copies ANTÉRIEURES, la plus récente d'abord.
+ *
+ * ⮕ #940 (24 sept. 2026) — la règle vit dans `historiqueAnterieur`
+ * (synthese-retroaction-data.js), la même que le PDF : plus de plafond à cinq (« depuis
+ * N productions » compte tout), et seulement les copies d'AVANT celle-ci.
  *
  * ⮕ #758 (6 sept. 2026) — LA COPIE EN COURS N'EN FAIT PAS PARTIE. Dès que l'auto-save
  * l'a écrite (1,5 s après le premier geste), elle était ici la plus récente des
@@ -672,13 +678,12 @@ function _nomBilan(niveauDe, code) {
  * @param {Object|null} copieEnBase - l'évaluation enregistrée de la copie en cours, ou null
  */
 function _chargerHistoriqueBilan(da, copieEnBase) {
-    var idCopie = copieEnBase ? copieEnBase.id : null;
     try {
-        var toutesEvals = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        return toutesEvals
-            .filter(function(e) { return e.etudiantDA === da && !e.remplaceeParId && !(idCopie && e.id === idCopie); })
-            .sort(function(a, b) { return new Date(b.dateEvaluation) - new Date(a.dateEvaluation); })
-            .slice(0, 5);
+        return window.syntheseRetroactionData.historiqueAnterieur(obtenirDonneesSelonMode('evaluationsSauvegardees'), {
+            da: da,
+            idCopie: copieEnBase ? copieEnBase.id : null,
+            date: copieEnBase ? copieEnBase.dateEvaluation : null
+        });
     } catch(e) {
         console.warn('[Evaluation] historique eleve load skipped:', e.message || e);
         return [];
@@ -818,35 +823,6 @@ function _lectureNiveauBilan(niveauDe, c) {
     return _nomBilan(niveauDe, c ? c.niveauSelectionne : '');
 }
 
-/**
- * ⮕ #555 lot 2 — les trois états comparés sont maintenant des ZONES, et chaque
- * évaluation de l'historique est lue dans SON échelle. Un élève dont la pratique
- * a changé de barème en cours de trimestre n'hérite plus d'un « objectif
- * prioritaire depuis 3 productions » calculé sur des zones qui ne parlaient pas
- * de la même chose.
- */
-function _detecterPatronsRecurrentsBilan(criteres, historiqueEleve, echelleId) {
-    var nomsPatrons = [];
-    if (historiqueEleve.length < 2) return nomsPatrons;
-    var zonesDe = function (ev) {
-        var map = {};
-        var zone = _lecteurZoneBilan(ev && ev.echelleId);
-        if (ev && ev.criteres) ev.criteres.forEach(function(c) { map[c.critereNom] = zone(c.niveauSelectionne); });
-        return map;
-    };
-    var zH1 = zonesDe(historiqueEleve[0]);
-    var zH2 = zonesDe(historiqueEleve[1]);
-    var zoneCourante = _lecteurZoneBilan(echelleId);
-    criteres.forEach(function(c) {
-        if (zoneCourante(c.niveauSelectionne) === 'priorite' &&
-            zH1[c.critereNom] === 'priorite' &&
-            zH2[c.critereNom] === 'priorite') {
-            nomsPatrons.push(c.critereNom);
-        }
-    });
-    return nomsPatrons;
-}
-
 function _compterErreursFrancaisBilan() {
     var totalErreursFr = 0;
     try {
@@ -916,42 +892,37 @@ function _rendreAlgoA0Bilan(algoA0) {
     return '<p>- <strong>' + ech(phrase) + '</strong> (' + ech(algoA0.critereNom) + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Incomplet)</p>';
 }
 
-function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
+function _rendreDefisBilan(defis, algoA0, niveauDe) {
     var html = '';
     var maxDefis = algoA0 ? 1 : 2;
     for (var i = 0; i < Math.min(maxDefis, defis.length); i++) {
         var d = defis[i];
         // Ne pas répéter le critère algorithmique déjà mentionné
         if (algoA0 && d.critereNom === algoA0.critereNom) { maxDefis++; continue; }
-        // ⚠ #576 — LES DEUX BRANCHES SONT DES DONNÉES UTILISATEUR, et celle de
-        // droite est neuve : le repli sur l'évaluation enregistrée ne fournit
-        // aucune description, donc `desc` devient le NOM du critère, jusque-là
-        // toujours passé par la branche échappée d'à côté. Trouvé par la
-        // sentinelle #576, pas par relecture.
-        var patron = nomsPatrons.indexOf(d.critereNom) !== -1 ? '. Cet objectif est prioritaire depuis 3 productions' : '';
-        // #575 — le nom du niveau vient de l'échelle. Quand elle ne le nomme
-        // pas, il est simplement absent : jamais un repère inventé.
-        var nomNiveau = _lectureNiveauBilan(niveauDe, d);   // le chiffre pour un analytique (retouche du lot 3)
-        // ⚠ LES DEUX SONT DES DONNÉES UTILISATEUR — description ET nom du
-        // critère traversent un innerHTML. La règle n° 1 s'applique aux deux.
-        var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(t) : ''; };
-        var nomCritere = ech(d.critereNom);
-
-        // ⚠⚠ #576 — LE NOM NE S'ÉCRIT QU'UNE FOIS. La description d'un critère
-        // vient de la GRILLE ; le repli sur l'évaluation enregistrée n'en a
-        // aucune, et la ligne retombait alors sur le nom — qu'elle répétait
-        // aussitôt entre parenthèses : « Plausibilité (Plausibilité En
-        // développement) ». Vu en RENDANT le bilan, pas en le testant : les
-        // assertions cherchaient la présence des mots, pas leur nombre.
-        // Ce texte part chez l'élève ; il doit se lire.
-        var description = (d.description == null) ? '' : String(d.description).trim();
-        var tete = description ? ech(description.toLowerCase()) : nomCritere;
-        var precision = description
-            ? nomCritere + (nomNiveau ? ' ' + nomNiveau : '')
-            : nomNiveau;
-        html += '<p>- ' + tete + (precision ? ' (' + precision + ')' : '') + patron + '</p>';
+        html += '<p>- ' + _ligneCritereBilan(d, niveauDe) + '</p>';
     }
     return html;
+}
+
+/**
+ * Une ligne d'un critère à travailler — `Nom (niveau) : définition`, la règle du PDF
+ * (`ligneCritereATravailler`, synthese-retroaction-data.js).
+ *
+ * ⮕ #940 (24 sept. 2026, décision de Grégoire) : la définition du critère, telle
+ * qu'écrite dans la grille — plus en minuscules, plus placée devant le nom —, pour les
+ * priorités ET les « à consolider ». Sans définition (repli #576 sur l'évaluation
+ * enregistrée, ou grille qui n'en a pas) : `Nom (niveau)`, rien d'inventé. La mention
+ * « prioritaire depuis 3 productions » est partie d'ici : la récurrence se dit une seule
+ * fois, dans « Points récurrents ».
+ * ⚠ NOM, NIVEAU ET DÉFINITION SONT DES DONNÉES UTILISATEUR et traversent un `innerHTML` :
+ * échappés ici (le niveau l'est déjà par `_lectureNiveauBilan`).
+ */
+function _ligneCritereBilan(c, niveauDe) {
+    var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
+    return window.syntheseRetroactionData.ligneCritereATravailler(
+        ech(c.critereNom),
+        _lectureNiveauBilan(niveauDe, c),   // le chiffre pour un analytique (retouche du lot 3)
+        ech(c.description));
 }
 
 /**
@@ -968,10 +939,8 @@ function _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe) {
  */
 function _rendreSignalesBilan(signales, niveauDe) {
     if (!signales || signales.length === 0) return '';
-    var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(t) : ''; };
     var lignes = signales.map(function (c) {
-        var nomNiveau = _lectureNiveauBilan(niveauDe, c);   // le chiffre pour un analytique (retouche du lot 3)
-        return '<p>- ' + ech(c.critereNom) + (nomNiveau ? ' (' + nomNiveau + ')' : '') + '</p>';
+        return '<p>- ' + _ligneCritereBilan(c, niveauDe) + '</p>';   // #940 — avec sa définition
     }).join('');
     return '<h5>Acquis en développement, à consolider :</h5>' + lignes;
 }
@@ -1050,8 +1019,12 @@ function _listeEchappeeBilan(noms) {
     return noms.map(echappe).join(' et ');
 }
 
-function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe) {
+function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe, recurrences) {
     var recurrentsHtml = '';
+
+    // ⮕ #940 — ce qui revient d'une copie à l'autre (décision de Grégoire, 24 sept.) :
+    // « Nom : prioritaire depuis N productions ». Même règle que le PDF (`lignesRecurrentes`).
+    (recurrences || []).forEach(function (ligne) { recurrentsHtml += '<p>- ' + ligne + '</p>'; });
 
     // Progrès (comparaison de l'élève avec lui-même)
     //
@@ -1176,7 +1149,6 @@ function genererRetroactionBilan() {
     // ⚠ `echelleId` est résolu plus bas ; on le calcule ici pour que les patrons
     // le reçoivent. Même lecture : l'évaluation d'abord, le sélecteur en repli.
     var echelleId = ec.echelleId || document.getElementById('selectEchelle1')?.value || null;
-    var nomsPatrons = _detecterPatronsRecurrentsBilan(criteres, historiqueEleve, echelleId);
     var totalErreursFr = _compterErreursFrancaisBilan();
 
     // #575 — l'échelle de l'évaluation en cours, résolue UNE fois pour tout le
@@ -1219,6 +1191,12 @@ function genererRetroactionBilan() {
     var tousMaitrises = criteres.length > 0 &&
         criteres.every(function(c) { return zoneDe(c.niveauSelectionne) === 'acquis'; });
 
+    // #940 — les critères à travailler qui reviennent d'une copie à l'autre, dans l'ordre de
+    // « Présentement » (priorités, puis « à consolider »). Les noms sont échappés ici.
+    var recurrences = window.syntheseRetroactionData.lignesRecurrentes(defis.concat(signales),
+        historiqueEleve, echelleId, _lecteurZoneBilan,
+        function (nom) { return (typeof echapperHtml === 'function') ? echapperHtml(String(nom)) : ''; });
+
     var algoA0 = _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr);
 
     // Assemblage HTML
@@ -1229,7 +1207,7 @@ function genererRetroactionBilan() {
     html += _rendreAlgoA0Bilan(algoA0);
 
     if (defis.length > 0) {
-        html += _rendreDefisBilan(defis, algoA0, nomsPatrons, niveauDe);
+        html += _rendreDefisBilan(defis, algoA0, niveauDe);
         html += _rendreSignalesBilan(signales, niveauDe);
     } else if (signales.length > 0) {
         // ⮕ #555 lot 2 — AUCUNE priorité mais des acquis en développement.
@@ -1252,7 +1230,7 @@ function genererRetroactionBilan() {
     }
 
     html += _rendreForceBilan(criteres, defis, niveauDe, zoneDe, signales);
-    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe);
+    html += _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, zoneDe, recurrences);
     html += _rendreJetonsBilan(da);
 
     conteneur.innerHTML = html;

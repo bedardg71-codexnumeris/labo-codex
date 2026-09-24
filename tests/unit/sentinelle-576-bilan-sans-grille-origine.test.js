@@ -120,6 +120,8 @@ function chargerBilan({ grilles, evaluations, evaluationEnCours, elements }) {
     // VRAI registre dans le sandbox AVANT le module testé, et on l'enchaîne par
     // le 3e paramètre : un stub testerait des phrases inventées pour le banc.
     const wEnonces581 = chargerScript('js/evaluation-enonces.js');
+    // #940 — le bilan lit sa règle (ligne d'un critère, récurrences, historique) dans le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', {}, wEnonces581);
     const w = chargerScript('js/evaluation-retroaction.js', {
         document: fauxDocument,
         db: {
@@ -322,18 +324,18 @@ describe('#576 — le bilan survit à la disparition de la grille d\'origine', (
     });
 
     it('garde la description de la GRILLE en tête quand elle existe', () => {
-        // Le chemin normal est inchangé : « description (Critère Niveau) ».
+        // #940 — le chemin normal : « Critère (Niveau) : définition », la définition telle qu'écrite.
         const elements = faireElements();
         const w = chargerBilan({
             grilles: [{ id: 'GR_DISPARUE', criteres: [{ id: 'c3', nom: 'Plausibilité', description: 'La cohérence logique' }] }],
             evaluations: [EVAL_ENREGISTREE],
             // « I » : ce cas veut un critère PRIORITAIRE pour vérifier le format
-            // « description (Critère Niveau) ». Voir la note sur `EN_COURS`.
+            // « Critère (Niveau) : définition » (#940). Voir la note sur `EN_COURS`.
             evaluationEnCours: Object.assign({}, EN_COURS, { criteres: { c3: 'I' } }),
             elements
         });
         w.basculerVueRetroaction('bilan');
-        expect(elements.contenuRetroBilan.innerHTML).toContain('la cohérence logique (Plausibilité Incomplet ou insuffisant)');
+        expect(elements.contenuRetroBilan.innerHTML).toContain('Plausibilité (Incomplet ou insuffisant) : La cohérence logique');
     });
 
     it('le repli est branché sur le chemin vivant, pas seulement défini', () => {
