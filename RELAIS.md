@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MATIN : **LOT #760 + #759 (1.156.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 7 H 15 : **LOT #939 (1.156.3) SUR LA BRANCHE `lot-939-commentaire-critere`, NON FUSIONNÉ** — attend la relecture croisée de Cowork (fermé pendant la session)
+
+**Où vit le travail** : branche `lot-939-commentaire-critere` (worktree `.claude/worktrees/lot-939`) = `28d66162` + `738e01bc` (lot, avec la consigne du jour et l'ancienne consigne de Cowork) + `d08a8680` (release 1.156.3, Nouvelles). `main` = `origin/main` + ce relais. Rien n'est poussé. ⚠ L'arbre principal garde en non commité les deux fichiers de consigne de Cowork, identiques à ceux de la branche : les retirer de l'arbre (`git checkout -- "plans de travail/CONSIGNE-DU-JOUR.md"` et supprimer l'ancienne consigne non suivie) AVANT le merge, sinon git le refuse.
+
+**Ce que le lot fait** : `syntheseRetroactionData.commentaireDuCritere` (`js/synthese-retroaction-data.js`) est la seule règle du commentaire d'un critère (enregistré → algorithmique gelé → cartouche → rien ; amorces et « [Non défini] » ne comptent pas). Le PDF, le texte copié (`_rendreCommentairesCriteres`) et l'écran (`_afficherCommentaireCritere`, qui reprend le commentaire enregistré à la réouverture, même critère et même niveau) la lisent. « [Non défini] » n'est plus écrit (source) ; le stock est rattrapé à la lecture, rien n'est réécrit. Arrêt prévu de la consigne déclenché (aucune saisie par critère n'existe) : **périmètre réduit par Grégoire**. Phrase des Nouvelles : version ajustée, validée par Grégoire. Vitest 629 / 7276 vert ; banc `sentinelle-939` (13 cas, mutations M1-M8 rouges) ; spec WebKit `commentaire-critere-939-meme-regle` verte (PW-M2 rouge ; le repli sans identifiant n'y est pas discriminé : un second passage de restauration le masque, mesuré par sonde).
+
+**Suite** : relecture croisée de Cowork → verdict Playwright → fusion → push (sur signal de Grégoire). À la livraison : cocher #939 et sortir le lot de FILE-DES-LOTS. Porte terrain : aucune (la machine a répondu). Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, MATIN : **LOT #760 + #759 (1.156.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire le message de fin de session ou `git log origin/main`
 
 **Où vit le travail** : `main` = `origin/main` (`e29ebdf0`) + le relais `99b34475` + le merge `0d73ad36` de `lot-760-759-observations` (`24d98f52` lot et release 1.156.2, `8929ab19` Nouvelles validées et relecture) + ce relais. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-760-759.md` : 25/25, sept mutations rouges). Phrase des Nouvelles, trois titres (« Qualité », « Diagnostic », « Autres tampons ») et forme du bloc validés par Grégoire tels quels (réponse A). #760 et #759 cochés ; le lot sort de FILE-DES-LOTS.
 
