@@ -14,6 +14,10 @@
    - ~~**Lot #939**~~ — **SORTI DE LA FILE : livré en 1.156.3, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte, 70/70, sept mutations rouges) ; Nouvelles validées par Grégoire (version ajustée).** le commentaire d'un critère, une seule règle pour le PDF et le texte copié vers Léa (celui de l'évaluation, jamais « [Non défini] ») ; périmètre réduit par Grégoire le 24 sept. (aucune saisie par critère n'existe). Consigne : `CONSIGNE-DU-JOUR.md`.
    - ~~**Lot #940**~~ — **SORTI DE LA FILE : livré en 1.156.4, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte, 103/103, quatre mutations rouges) ; « copie sautée » tranchée par Grégoire ; Nouvelles validées telles quelles.** le bilan de la synthèse : la définition de chaque critère à travailler (`Nom (niveau) : définition`), et des « Points récurrents » qui regardent d'une copie à l'autre (dès deux productions, avec leur nombre) ; les tampons et le suffixe « depuis 3 productions » en sortent. Décisions de Grégoire du 24 sept. Consigne : `CONSIGNE-DU-JOUR.md`.
 
+## Demandes de Grégoire du 24 sept.
+
+- **Lot #942** — Profil › Engagement : chaque absence nomme la leçon que la carte d'alignement place ce jour-là pour le groupe de l'élève (inverse du calcul de l'Inspecteur, #695). Consigne : `CONSIGNE-LECON-MANQUEE.md`. En cours sur `lot-942-lecon-manquee`, relecture croisée de Cowork avant la fusion.
+
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 
 Remesure rapide au code (grep, pas exécuté) : les constats tiennent encore — `obtenirPratiqueActiveGroupeCours` rend `'sommative'` par défaut (modes.js ≈ 1352) pendant que `PRATIQUE_DEFAUT = 'standards'` (pratique-registre.js:29) ; `obtenirConfigPratiqueActive` ne lit que `.configuration` (portfolio.js ≈ 1176) ; le gestionnaire tient `'specifications'` pour une pratique codée en dur (pratique-manager.js:52) ; `calculerPerformanceHistorique` n'existe que chez la sommative et la STD ; la sommative lit encore `e.da` / `e.note` (pratique-sommative.js:317-319).

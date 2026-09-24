@@ -633,6 +633,7 @@ function genererSectionMobilisationEngagement(da) {
                                             : `${formaterNombrePeriodes(abs.periodesPresence)} pér.`
                                         }
                                     </span>
+                                    ${(abs.lecons || []).map(t => `<span class="badge-absence-lecon">${echapperHtml(t)}</span>`).join('')}
                                 </div>
                             `;
                         }).join('')}
@@ -1730,6 +1731,24 @@ function genererSectionMobilisation(da) {
 
 
 /**
+ * #942 — Le lecteur « date → titres des leçons » du groupe de cet élève. Le groupe se
+ * résout comme au PDF (`groupeCoursIdDeLEleve`), le calcul est l'inverse de celui de
+ * l'Inspecteur (`lecteurLeconsDuGroupe`, planification-export.js). Tout maillon absent
+ * (module non chargé, élève sans groupe, groupe sans horaire) → un lecteur qui rend [].
+ */
+function _lecteurLeconsManquees(da) {
+    const rien = () => [];
+    const synth = window.syntheseRetroactionData;
+    const exporteur = window.planificationExport;
+    if (!synth || typeof synth.groupeCoursIdDeLEleve !== 'function'
+        || !exporteur || typeof exporteur.lecteurLeconsDuGroupe !== 'function') return rien;
+    const gcId = synth.groupeCoursIdDeLEleve(da);
+    if (!gcId) return rien;
+    const gc = (obtenirDonneesSelonMode('groupesCours') || []).find(g => g && g.id === gcId);
+    return exporteur.lecteurLeconsDuGroupe(gcId, gc ? gc.coursId : null);
+}
+
+/**
  * Obtient les détails d'assiduité pour un étudiant
  * @param {string} da - Numéro de DA
  * @returns {Object} - Détails d'assiduité
@@ -1848,6 +1867,12 @@ function obtenirDetailsAssiduite(da) {
 
     // Trier par date CROISSANTE (plus ancien en premier)
     absences.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // #942 — la leçon manquée : ce que la carte d'alignement place à cette date POUR LE GROUPE
+    // DE L'ÉLÈVE. Un retard porte aussi le titre (la matière a été en partie manquée) ; aucune
+    // leçon ce jour-là → `lecons: []`, rien d'inventé. Lecture seule.
+    const leconsA = _lecteurLeconsManquees(da);
+    absences.forEach(abs => { abs.lecons = leconsA(abs.date); });
 
     return {
         periodesPresentes,

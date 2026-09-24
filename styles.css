@@ -10937,6 +10937,22 @@ summary.rl-tuile-entete::after {
     font-size: 0.85rem;
 }
 
+/* #942 — La leçon manquée : sous la date et les périodes, sur sa propre ligne (flex-basis 100 %),
+   pour que la pastille garde sa largeur dans la colonne étroite de l'iPad (768 px, grille à trois
+   cartes). Texte principal : lisible sur le fond teinté rouge ou jaune, dans les deux modes. */
+.badge-absence:has(.badge-absence-lecon) {
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.badge-absence-lecon {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--texte-principal);
+    overflow-wrap: anywhere;
+}
+
 .badge-absence-heures {
     padding: 2px 8px;
     border-radius: var(--radius-moyen);

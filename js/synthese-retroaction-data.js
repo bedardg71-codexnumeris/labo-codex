@@ -1436,13 +1436,20 @@
         const infoCoursActif = db.getSync('infoCours', null);
         const coursIdActif = infoCoursActif ? (infoCoursActif.coursId || infoCoursActif.id) : null;
 
+        // #942 — le numéro se compare NORMALISÉ, comme dans la liste des élèves
+        // (`normaliserNumeroGroupe`, modes.js). En égalité stricte, « demo » ne trouvait
+        // pas « 0demo » (pack démo, mesuré le 24 sept. 2026) : la fonction rendait null,
+        // et l'échéance du groupe comme la leçon manquée de l'élève se taisaient.
+        const norm = (typeof normaliserNumeroGroupe === 'function') ? normaliserNumeroGroupe : (g) => String(g || '');
+        const memeGroupe = (g) => norm(g.groupeNum) === norm(eleve.groupe);
+
         // Match par numero de groupe + coursId actif (cas multi-cours)
         if (coursIdActif) {
-            const gcExact = gcs.find(g => g.groupeNum === eleve.groupe && g.coursId === coursIdActif);
+            const gcExact = gcs.find(g => memeGroupe(g) && g.coursId === coursIdActif);
             if (gcExact) return gcExact.id;
         }
         // Fallback : juste par numero de groupe (un seul cours)
-        const gcParGroupe = gcs.find(g => g.groupeNum === eleve.groupe);
+        const gcParGroupe = gcs.find(memeGroupe);
         if (gcParGroupe) return gcParGroupe.id;
 
         return null;
@@ -1475,6 +1482,9 @@
 
     window.syntheseRetroactionData = {
         construireFeedback: construireFeedback,
+        // #942 — LE groupe-cours d'un élève, exposé pour que le profil (leçon manquée d'une
+        // absence) résolve le groupe comme le PDF le fait pour les échéances : une seule règle.
+        groupeCoursIdDeLEleve: obtenirGcIdEleve,
         // Exposés pour le rendu et les tests
         FAMILY_COLOR: FAMILY_COLOR,
         // #673 — EXPOSÉ POUR QUE LA LISTE RESTE UNIQUE. L'écran d'évaluation doit
