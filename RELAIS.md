@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 16 H 30 : **#944 (1.159.3) SUR LA BRANCHE `bug-944-cartouche-changee` (arbre principal), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 16 H 45 : **#944 (1.159.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `bb790e78` (#943 en ligne) + les relais `a7759e85`, `c80461d6` + le merge `832e861e` de `bug-944-cartouche-changee` (`5347ca39` correctif + release, `d742cf30` porte terrain, `7c6e92eb` auto-save + demande de relecture, `545ad493` relecture versée + Nouvelles validées ; build 0924-1641) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-bug-944.md`) : **cinq** chargeurs sur `bb790e78` (et non quatre comme l'écrivaient la demande et le relais précédent), tous passés par `poserCartoucheParChargeur`. Nouvelles validées par Grégoire telles quelles.
+
+**À dire à Grégoire (relecture, observation 2)** : tant que les copies d'une production portent deux cartouches, une copie pas encore évaluée n'en reçoit aucune pré-sélectionnée ; elle se choisit à la main.
+
+**Suite** : la porte terrain `plans de travail/PORTES-TERRAIN-2026-09-24-bug-944.md` (iPad, une copie réelle, déverrouillée d'abord), une fois 1.159.3 en ligne ; artefact jumeau à publier par Cowork. Branche `bug-944-cartouche-changee` supprimable une fois le push constaté. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 16 H 30 : **#944 (1.159.3) SUR LA BRANCHE `bug-944-cartouche-changee` (arbre principal), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
 
 **Où vit le travail** : `main` = `origin/main` = `bb790e78` (#943 en ligne) + ce relais. Branche `bug-944-cartouche-changee` = `bb790e78` + `5347ca39` (correctif + release 1.159.3) + `d742cf30` (porte terrain) + `7c6e92eb` (l'auto-save porte la nouvelle cartouche après « Remplacer » ; demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-09-24-bug-944.md` ; build 0924-1625). **Rien de #944 n'est poussé.**
 
