@@ -164,20 +164,20 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
             ? `${ptsAnalytiques} / ${critere.ponderation}` : niveau;
         // Vérifier si c'est un critère algorithmique
         const enteteCritere = `Critère ${index + 1} (${critere.nom}) — ${lectureNiveau}`;
-        if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
-            const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
-            texte += `${enteteCritere}\n${retroAlgo}\n\n`;
-        } else if (cartouche && cartouche.commentaires) {
-            const cle = `${critere.id}_${niveau}`;
-            const commentaire = cartouche.commentaires[cle];
-            texte += commentaire
-                ? `${enteteCritere}\n${commentaire}\n\n`
-                : `${enteteCritere}\n[Non défini]\n\n`;
-        } else {
-            // #764 — sans cartouche, le critère se dit par son en-tête (nom, niveau ou points) :
-            // rien à inventer à la place d'un commentaire qui n'existe pas.
-            texte += `${enteteCritere}\n\n`;
-        }
+        // #939 (24 sept. 2026) — LA MÊME RÈGLE QUE LE PDF (`commentaireDuCritere`). Ce texte
+        // lisait la cartouche VIVANTE et jamais le commentaire de la copie : une cartouche
+        // retouchée après l'évaluation changeait ce que l'élève recevait, et un niveau sans
+        // commentaire s'écrivait « [Non défini] ». Le commentaire de CETTE copie, à l'écran,
+        // est le div `comm_<critereId>` — celui que les collecteurs enregistrent, rempli depuis
+        // l'évaluation enregistrée à la réouverture (`_afficherCommentaireCritere`) : il vaut
+        // avant comme après l'auto-save. Sans commentaire, l'en-tête seul (#764).
+        const commDiv = document.getElementById(`comm_${critere.id}`);
+        const commentaire = window.syntheseRetroactionData.commentaireDuCritere({
+            enregistre: commDiv ? commDiv.textContent : '',
+            algorithmique: critere.type === 'algorithmique' ? evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction : '',
+            cartouche, critereId: critere.id, niveau
+        });
+        texte += commentaire ? `${enteteCritere}\n${commentaire}\n\n` : `${enteteCritere}\n\n`;
     });
 
     return { texte, positionCritereActif };

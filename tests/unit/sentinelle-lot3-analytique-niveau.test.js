@@ -176,6 +176,8 @@ function monter({ niveaux = {}, points = {}, echelle = ECHELLE, modification = f
         calculerNote: (...a) => win.calculerNote(...a),
         genererRetroaction: (...a) => win.genererRetroaction(...a)
     };
+    // #939 — la règle du commentaire d'un critère (`commentaireDuCritere`), le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', globaux, win);
     chargerScript('js/evaluation-calcul.js', globaux, win);
     chargerScript('js/evaluation-chargement.js', globaux, win);
     chargerScript('js/evaluation-retroaction.js', globaux, win);
@@ -760,7 +762,8 @@ describe('lot 3 · F — témoins de source', () => {
         const src = source('js/evaluation-chargement.js');
         expect((src.match(/^\s+_afficherCommentaireCritere\(critereId, /gm) || []).length, 'deux appels : niveauSelectionne et pointsSaisis').toBe(2);
         expect(src).toMatch(/^function _afficherCommentaireCritere\(critereId, niveau\)/m);
-        expect(src).toContain('const cleCommentaire = `${critereId}_${niveau}`;');
+        // #939 — la clé `critereId_niveau` se construit dans la règle partagée, que l'écran lit.
+        expect(src).toContain('window.syntheseRetroactionData.commentaireDuCritere({ enregistre, cartouche, critereId, niveau })');
     });
 
     it('F.c la déduction est appelée par `calculerNote` AVANT la portée, et la boucle n\'a pas bougé', () => {

@@ -1,48 +1,37 @@
-# Consigne du jour – Ce que l'élève lit de tes tampons : un seul lecteur, tes réglages actuels (#760, #759)
+# Consigne du jour – Le commentaire d'un critère est le même dans le PDF et dans le texte copié vers Léa
 
-> Écrite le 24 septembre 2026, matin (Toronto), par Cowork, sur `origin/main` = `e29ebdf0` (1.156.1, en production chez Netlify depuis 5 h 29, déploiement mesuré).
-> La précédente (#830, livrée en 1.156.1) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-830-barre-a.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Premier lot du chantier « synthèse des rétroactions »**, troisième point du cap que Grégoire a fixé le 21 sept. (son prochain Labo portera là-dessus). Les fiches font foi : `BACKLOG.md`, #760 et #759, toutes deux « à cadrer avec la synthèse des rétroactions ». Ajoute ce lot à `FILE-DES-LOTS.md` sous le cap, puis retire-le à la livraison.
+> Écrite le 24 septembre 2026 (Toronto), par Cowork, sur `origin/main` = `28d66162` (1.156.2, en production chez Netlify depuis 6 h 34, déploiement mesuré ; porte terrain des colonnes du PDF passée par Grégoire).
+> La précédente (#760 + #759, livrée en 1.156.2) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-24-lot-760-759-observations.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Deuxième lot du chantier « synthèse des rétroactions »** (cap du 21 sept.). Source : `Rapports/MESURE-ce-que-l-eleve-lit-dans-le-pdf-2026-09-06.md`, section A, bloc 3, colonne « Répété ailleurs ? » (« B lit la cartouche VIVANTE… mesuré : « GELÉ » sur le PDF, « VIVANT » dans B pour le même critère »). **Pas de fiche au BACKLOG** : inscris-en une à l'ouverture du lot (numéro suivant #938), avec ce constat remesuré, et coche-la à la livraison. Ajoute le lot à `FILE-DES-LOTS.md` sous le cap.
 
-## 0 · Les décisions de Grégoire (24 sept. 2026, matin) – elles font foi
+## 0 · La décision de Grégoire (24 sept. 2026) – elle fait foi
 
-1. **« Observations » (rétroaction générale) montre les mêmes tampons que la rétroaction spécifique** : mêmes tampons, même ordre, sous les mêmes titres de catégorie, avec le nombre et le texte. « Soupçon IA » compris. Proposition de Cowork retenue « complète ».
-2. **« Les observations doivent reposer sur les paramètres actualisés de l'utilisateur. »** Ses mots. Donc : les tampons qu'il a ajoutés, les noms qu'il a donnés, les textes qu'il a écrits, ses catégories personnelles, leurs noms et leur ordre – tels qu'ils sont réglés AU MOMENT où la rétroaction se compose.
+**Le commentaire qui fait foi est celui qui est enregistré avec l'évaluation**, comme le PDF le fait déjà : le texte validé en évaluant cette copie-là, y compris celui que l'enseignant·e a réécrit pour cet·te élève. Une cartouche retouchée plus tard ne change pas une copie déjà évaluée. Le texte copié vers Léa suit la même règle.
 
-Décidé par Cowork (technique), à dire en une ligne dans ton rapport :
-- Les copies annotées avec les anciens tampons (`legacy: true`, catégories `diagnostic` et `qualite`) gardent leurs observations : un tampon posé sur une copie n'est jamais tu.
-- Les jetons (`categorie: 'jeton'`) n'y paraissent pas : ce ne sont pas des observations.
-- Un texte réglé par l'utilisateur l'emporte ; un tampon dont le texte n'a jamais été réglé prend le texte par défaut (clé ABSENTE de l'objet enregistré → défaut ; clé PRÉSENTE, même vide → le choix de l'utilisateur). Motif mesurable : `obtenirRetroactionsObservations` rend l'objet enregistré OU les défauts, jamais leur fusion – un objet enregistré avant l'ajout d'un tampon n'a pas son texte.
+## 1 · Ce que Cowork a mesuré (lecture seule, sur `28d66162` – à REMESURER avant de coder)
 
-## 1 · Ce que Cowork a mesuré (lecture seule, sur `e29ebdf0` – à REMESURER avant de coder)
+- **Le PDF** : `construireCriteres` (`js/synthese-retroaction-data.js` ≈ l. 435-480) prend, dans l'ordre : `c.retroaction` persistée (sauf une amorce de saisie, `estAmorceDeSaisie`, #672) → la rétroaction algorithmique persistée (`donneesAlgorithmiques[id].retroaction`, gelée, #581) → la cartouche au niveau retenu → rien. Puis `anonymiserTexteRetroaction`.
+- **Le texte copié vers Léa** (générale) : `_rendreCommentairesCriteres` (`js/evaluation-retroaction.js` ≈ l. 144-185) prend : la rétroaction algorithmique → la cartouche VIVANTE (`cartouche.commentaires[critere_niveau]`) → sinon **« [Non défini] »** en clair, que l'élève lit. Il ne lit jamais le commentaire propre à la copie.
+- **Le geste** : une seule règle pour les deux. Idéalement UNE fonction (propriétaire à choisir par toi après mesure : vraisemblablement `synthese-retroaction-data.js`, qui porte déjà la règle complète) que les deux lisent – zéro-dette, pas une seconde copie de la cascade. « [Non défini] » part : sans commentaire, le critère se dit par son en-tête, comme le PDF (et comme #764 le fait déjà sans cartouche).
 
-**Trois lecteurs, trois lectures différentes du même réglage** – c'est le cœur du lot :
-- **Générale, bloc « --- Observations --- »** : `_rendreObservationsAnnotations` (`js/evaluation-retroaction.js` ≈ l. 186). Filtre par `DIAG_IDS`, neuf identifiants hérités ; aucun tampon actuel ne passe (#760). Nom lu dans `travauxOutils.AUTOCOLLANTS` (la liste figée), pas dans les réglages.
-- **Spécifique** (≈ l. 478-495) : bonne forme (catégories dans `obtenirOrdreCategories`, titres par `obtenirNomsCategories`), mais tampons et noms lus dans `AUTOCOLLANTS` figé : ni tampons personnels, ni noms personnalisés (`obtenirPersonnalisationObservations`), ni ordre des tampons dans une catégorie (`obtenirAutocollantsOrdonnes` / `ordreAutocollants_<cat>`). À vérifier : `obtenirAutocollants()` (lu par `tampons-bibliotheque.js`) est-il la liste qui porte déjà les tampons personnels ?
-- **PDF de synthèse** : `js/synthese-retroaction-data.js` ≈ l. 543 et ≈ l. 876 lisent aussi `obtenirRetroactionsObservations`. Mesure ce qu'ils lisent pour les noms, l'ordre et les tampons personnels.
+**⚠ À mesurer d'abord – c'est le point délicat** : la générale se compose PENDANT l'évaluation, sur l'état vivant de l'écran (`evaluationEnCours`), pas seulement sur l'évaluation enregistrée. Trouve où l'enseignant·e tape le commentaire propre à une copie, et où il vit avant l'enregistrement (auto-save à 1,5 s, #758). La règle vaut pour « le commentaire de cette copie, tel qu'il est à l'écran ou enregistré » : un commentaire que l'enseignant·e vient de réécrire doit sortir dans le texte copié même si l'auto-save n'a pas encore tourné.
 
-**Le geste** : UNE fonction dans `js/travaux-outils.js` (le propriétaire des réglages de tampons), qui prend les comptes de tampons d'une copie et rend, dans l'ordre des réglages, les catégories et leurs tampons utilisés, chacun avec son nom, son texte et son nombre. Les trois lecteurs la lisent ; chacun ne garde que sa mise en forme (texte brut, HTML échappé, PDF). Zéro-dette : les lectures parallèles partent, `DIAG_IDS` aussi.
+⛔ **Arrêt prévu** : si la mesure montre que le commentaire propre à une copie n'existe PAS à l'écran d'évaluation (seulement ailleurs, ou seulement en base), ou si les deux sources à l'écran peuvent se contredire, arrête-toi et dis-le avant de coder.
 
-⛔ **Arrêt prévu** : si la mesure trouve un QUATRIÈME endroit où l'élève lit un tampon, ou si le PDF de synthèse demande de changer sa mise en page (pas seulement sa source), arrête-toi et dis-le avant de coder ce morceau.
+## 2 · Limites
 
-## 2 · #759 – le texte copié vers Léa colle les phrases
-
-`copierToutRetroaction` (≈ l. 1231) et `copierRetroaction` (≈ l. 386) copient le `textContent` d'un HTML assemblé sans blanc entre balises : « …viens me voir.Selon toi… », « …(Rigueur Insuffisant)Acquis en développement… ». Remesure d'abord au banc de la mesure du 6 sept. (`mesure-ce-que-l-eleve-lit-2026-09-06.test.js`). Correctif technique : chaque bloc (paragraphe, titre, item) séparé comme à l'écran (saut de ligne entre blocs). Aucun mot ne change. Le banc qui fige aujourd'hui le texte collé suit le texte séparé : même changement voulu.
-
-## 3 · Limites
-
-- **Aucune donnée écrite.** Ni les réglages de tampons, ni les rétroactions déjà enregistrées : une rétroaction déjà composée et sauvegardée garde son texte (le dire dans le rapport : source, pas stock ; combien d'évaluations portent un bloc « Observations » enregistré, si c'est mesurable sans écrire).
+- **Aucune donnée écrite.** Aucune évaluation réécrite, aucune cartouche touchée. Source, pas stock : les textes déjà copiés dans Léa sont déjà partis.
+- La cascade du PDF ne change pas (amorce, gel algorithmique, anonymisation) : c'est le texte copié qui la rejoint.
 - Pas de nom d'élève réel dans les bancs ni le rapport (règle 6).
-- Échappement : un nom de tampon ou de catégorie personnel est une donnée utilisateur posée dans `innerHTML` → `echapperHtml` (règle 1). Le lecteur actuel de la spécifique ne l'échappe pas : c'est ton lot qui le touche, donc tu le finis.
 
-## 4 · Preuve attendue
+## 3 · Preuve attendue
 
-- Vitest sur la fonction unique : tampon actuel compté ; tampon personnel ; nom personnalisé ; texte personnalisé ; texte jamais réglé → défaut ; texte réglé vide → rien d'inventé ; ancien tampon sur une vieille copie ; jeton absent ; ordre des catégories et des tampons suivi ; nom HTML échappé côté spécifique.
-- WebKit : une copie annotée de tampons actuels → la générale et la spécifique listent les mêmes, dans le même ordre ; « Copier tout » rend des phrases séparées.
+- Vitest : critère dont la copie porte un commentaire réécrit → le texte copié le dit (et plus la cartouche) ; cartouche retouchée après l'évaluation → le texte copié garde le commentaire enregistré ; amorce de saisie → la cartouche, pas l'amorce ; critère algorithmique → le texte gelé ; aucun commentaire nulle part → l'en-tête seul, jamais « [Non défini] ». Et le PDF rend la même chose sur les mêmes cas.
+- WebKit : une copie dont un commentaire est réécrit à l'écran → « Copier tout » le livre, avant et après l'enregistrement.
 - Break-tests de ton choix, chacun rouge ; nomme-les.
-- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Rétroaction : le bloc « Observations » liste maintenant les tampons que tu poses, avec tes noms, tes textes et tes catégories, comme la rétroaction spécifique. Le texte copié vers Léa garde ses phrases séparées. »
-- Relecture croisée de Cowork avant la fusion, puis verdict, fusion, push. À la livraison : #760 et #759 se cochent.
+- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Rétroaction : le texte copié vers Léa donne pour chaque critère le même commentaire que le PDF, celui de l'évaluation, y compris ce que tu as réécrit pour l'étudiant·e. Il n'écrit plus « [Non défini] ». »
+- Relecture croisée de Cowork avant la fusion, puis verdict, fusion, push.
 
-## 5 · Porte terrain
+## 4 · Porte terrain
 
-Une rangée, sur ses vraies données, si Grégoire a une copie annotée de tampons actuels : ouvrir son évaluation, lire « Observations » dans la rétroaction générale, puis « Copier tout » et coller dans une note. Rien d'autre.
+Une rangée, si Grégoire a une copie de cet automne dont il a réécrit un commentaire de critère : « Copier tout », coller dans une note, comparer au « Dossier PDF » de la même copie. Sinon, aucune porte.

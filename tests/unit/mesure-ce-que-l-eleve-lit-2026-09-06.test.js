@@ -341,6 +341,8 @@ function monterEcran(c, base, calculs, reg, exportPdf) {
         calculerNote: (...a) => win.calculerNote(...a),
         genererRetroaction: (...a) => win.genererRetroaction(...a)
     };
+    // #939 — la règle du commentaire d'un critère (`commentaireDuCritere`), le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', globaux, win);
     chargerScript('js/evaluation-calcul.js', globaux, win);
     chargerScript('js/evaluation-retroaction.js', globaux, win);
     return { win, ecran, ec, copie };
