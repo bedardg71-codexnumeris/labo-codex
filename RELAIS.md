@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 13 H : **LOT S3 DE #941 (1.159.1) SUR LA BRANCHE `lot-941-s3-ce-que-la-synthese-tait` (worktree `.claude/worktrees/lot-941-s3`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
+## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, APRÈS-MIDI : **LOT S3 DE #941 (1.159.1) FUSIONNÉ DANS `main`, #941 COCHÉE ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `2ae88f30` (S2, poussé) + `b9133c8b` (relais) + le merge `29ca1906` de `lot-941-s3-ce-que-la-synthese-tait` (`3d08d222` lot + release, `b88e6bd0` relecture versée, #941 cochée) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-lot-941-s3.md`) ; la mesure du § 2 faite par Grégoire dans l'application en ligne : `obtenirConfigJetonsPratique()` rend un bloc actif (délai 2, reprise 2, reprise ciblée 2) — rien ne change pour ses élèves. Ligne des Nouvelles 1.159 validée.
+
+**#941 est fermée** : les trois lots de `CONSIGNE-SOMMATIVE-FONCTIONNELLE.md` sont en ligne une fois ce push constaté.
+
+**Suite** : #943 (retour testeur de Grégoire : une ligne ou une flèche qu'on vient de tracer montre aussitôt ses poignées de courbure). Worktree `.claude/worktrees/lot-941-s3` et sa branche supprimables une fois le push constaté. Toujours à inscrire : le rouge GitHub au navigateur sur `78575a46`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 13 H : **LOT S3 DE #941 (1.159.1) SUR LA BRANCHE `lot-941-s3-ce-que-la-synthese-tait` (worktree `.claude/worktrees/lot-941-s3`), NON FUSIONNÉ** — attend la relecture croisée de Cowork et la ligne des Nouvelles par Grégoire
 
 **Où vit le travail** : `main` = `origin/main` = `2ae88f30` (S2 poussé, verdict vert ; seule `planif-zone-non-planifie-929` au second essai) + ce relais. Branche S3 = `2ae88f30` + `3d08d222` (lot + release 1.159.1). **Rien de S3 n'est poussé.**
 
