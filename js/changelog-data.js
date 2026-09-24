@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.157.0 (#942) — PROPOSITION DE COWORK, À VALIDER PAR GRÉGOIRE AVANT LE PUSH (titre de Claude Code).
+            version: '1.157',
+            couleur: 'vert',
+            titre: 'Profil : la leçon manquée',
+            items: [
+                'Profil › Engagement&nbsp;: chaque absence nomme la leçon prévue ce jour-là dans ta carte d\'alignement, pour voir d\'un coup d\'œil la matière manquée.'
+            ]
+        },
+        {
             // 1.156.0 (#895) — VALIDÉ par Grégoire le 23 sept. 2026 (deux retouches de Cowork : « étudiant·e » dans l'aide ; « maintenant » et la phrase du nettoyage dans Nouvelles).
             version: '1.156',
             couleur: 'bleu',

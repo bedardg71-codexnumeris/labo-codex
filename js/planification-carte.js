@@ -7845,18 +7845,7 @@ function positionCarteDeLaProduction(productionId, coursId) {
     var pd = window.planificationDonnees;
     if (!pd || typeof pd.getIndex !== 'function' || typeof pd.chargerCarte !== 'function') return null;
 
-    var index = pd.getIndex();
-    if (!index || !Array.isArray(index.cartes)) return null;
-
-    var duCours = [], sansCours = [];
-    for (var c = 0; c < index.cartes.length; c++) {
-        var fiche = index.cartes[c];
-        if (!fiche || !fiche.id) continue;
-        var idCours = fiche.coursId || null;
-        if (coursId && idCours === coursId) duCours.push(fiche.id);
-        else if (!idCours) sansCours.push(fiche.id);
-    }
-    var aFouiller = duCours.length > 0 ? duCours : sansCours;
+    var aFouiller = idsCartesDuCours(pd, coursId);
 
     var trouvees = [];
     for (var i = 0; i < aFouiller.length; i++) {
@@ -7905,6 +7894,49 @@ function positionDansUneCarte(carteId, productionId, pd) {
         return { semaine: semaine, rangSeance: rang, carteId: carteId, noeudId: noeud.id };
     }
     return null;
+}
+
+/**
+ * LES CARTES À LIRE POUR UN COURS — la règle, extraite de `positionCarteDeLaProduction`
+ * (#942) pour que la date d'échéance proposée et la leçon manquée d'une absence
+ * lisent les MÊMES cartes : celles rattachées au cours ; à défaut seulement, celles
+ * rattachées à aucun cours. Jamais la carte d'un autre cours.
+ * @returns {Array<string>} ids de cartes, [] si rien
+ */
+function idsCartesDuCours(pd, coursId) {
+    var index = (pd && typeof pd.getIndex === 'function') ? pd.getIndex() : null;
+    if (!index || !Array.isArray(index.cartes)) return [];
+
+    var duCours = [], sansCours = [];
+    for (var c = 0; c < index.cartes.length; c++) {
+        var fiche = index.cartes[c];
+        if (!fiche || !fiche.id) continue;
+        var idCours = fiche.coursId || null;
+        if (coursId && idCours === coursId) duCours.push(fiche.id);
+        else if (!idCours) sansCours.push(fiche.id);
+    }
+    return duCours.length > 0 ? duCours : sansCours;
+}
+
+/**
+ * Les leçons SITUÉES (semaine ET séance posées) des cartes d'un cours, lues au
+ * stockage (#942). `sauvegarder()` écrit à chaque geste : le stockage ne retarde
+ * pas sur l'écran. Même lecteurs que la carte (`semaineDeLecon`, `rangSeanceDeLecon`).
+ * @returns {Array<{titre, semaine, rang}>}
+ */
+function leconsSitueesDuCours(coursId) {
+    var pd = window.planificationDonnees;
+    if (!pd || typeof pd.chargerCarte !== 'function') return [];
+    var lecons = [];
+    idsCartesDuCours(pd, coursId).forEach(function(carteId) {
+        var donnees = pd.chargerCarte(carteId);
+        if (!donnees || !Array.isArray(donnees.noeuds)) return;
+        donnees.noeuds.forEach(function(n) {
+            var s = semaineDeLecon(n), r = rangSeanceDeLecon(n);
+            if (s !== null && r !== null) lecons.push({ titre: n.titre, semaine: s, rang: r });
+        });
+    });
+    return lecons;
 }
 
 /**
@@ -11828,6 +11860,7 @@ window.planificationCarte = {
     chargerProductions: chargerProductions,
     optionsProductionsHTML: optionsProductionsHTML,                             // 25 août 2026 — exposée pour la sentinelle #492
     positionCarteDeLaProduction: positionCarteDeLaProduction,                   // 25 août 2026 — l'autre sens du pont (#493)
+    leconsSitueesDuCours: leconsSitueesDuCours,                                 // #942 — la leçon manquée d'une absence (profil)
     afficherDetailsProduction: afficherDetailsProduction,
     naviguerVers: naviguerVers,
     CLE_SEANCES: CLE_SEANCES,
