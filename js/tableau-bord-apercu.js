@@ -1612,12 +1612,6 @@ function determinerModeAffichageTableauBord(config) {
     return { afficherSom: estSommative, afficherPan: !estSommative };
 }
 
-/**
- * Affiche les métriques globales du groupe avec barres de distribution
- * Chaque étudiant est représenté par une ligne verticale sur l'échelle
- *
- * @param {Array} etudiants - Étudiants avec indices calculés
- */
 // #830 — phrase validée par Grégoire le 23 sept. 2026, mot pour mot.
 const TEXTE_A_SANS_PERIODES = 'Assiduité non calculée : aucune séance de l\'horaire ne porte son nombre de périodes. Tu peux le saisir dans Cadre › Trimestre › Horaire.';
 
@@ -1634,6 +1628,12 @@ function horaireSansAucunePeriode(seances) {
     return !seances.some(s => s && parseInt(s.nombrePeriodes, 10) > 0);
 }
 
+/**
+ * Affiche les métriques globales du groupe avec barres de distribution
+ * Chaque étudiant est représenté par une ligne verticale sur l'échelle
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ */
 function afficherMetriquesGlobales(etudiants) {
     const config = db.getSync(cle('modalitesEvaluation'), null) || {};
     // Session C (#303) : mode comparatif retiré — couche unique (pratique active).
