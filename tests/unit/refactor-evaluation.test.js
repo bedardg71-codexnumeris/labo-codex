@@ -101,6 +101,8 @@ beforeAll(() => {
     // retroaction.js extrait depuis evaluation.js (deux blocs combinés :
     // résidu L60-301 + L1334-1733, 10 fonctions dont genererRetroaction cyc 61
     // exporté et genererRetroactionBilan cyc 75 PRIVÉE héritage Cat-B).
+    // #940 — le bilan lit sa règle (ligne d'un critère, récurrences, historique) dans le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', stubs, win);
     chargerScript('js/evaluation-retroaction.js', stubs, win);
 
     // Refactor étape 3 session B 3e sous-module (18 mai 2026) : evaluation-

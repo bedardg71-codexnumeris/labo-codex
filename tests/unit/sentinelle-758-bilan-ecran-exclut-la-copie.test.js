@@ -62,6 +62,8 @@ function bilan({ enBase, idModification }) {
     const calculs = chargerCalculs();
     const els = elements();
     const wEnonces = chargerScript('js/evaluation-enonces.js');
+    // #940 — le bilan lit sa règle (ligne d'un critère, récurrences, historique) dans le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', {}, wEnonces);
     const w = chargerScript('js/evaluation-retroaction.js', {
         document: { addEventListener() {}, removeEventListener() {}, querySelector: () => null, querySelectorAll: () => [],
             getElementById: (id) => els[id] || null, createElement: () => ({ setAttribute() {}, appendChild() {}, style: {}, classList: { add() {}, remove() {} } }),

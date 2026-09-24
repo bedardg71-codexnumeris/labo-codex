@@ -752,11 +752,14 @@
         const historique = lireHistorique(evaluation);
         const evalPrecedente = historique[0] || null;
         const da = evaluation.etudiantDA;
+        // #940 — les critères à travailler, lus UNE fois : « Présentement » les nomme,
+        // « Points récurrents » dit lesquels reviennent d'une copie à l'autre.
+        const aTravailler = criteresATravailler(evaluation);
 
         return {
             intro:         BILAN_INTRO,
-            concentration: construireConcentration(evaluation, grille, echelle, historique, stats),
-            recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille),
+            concentration: construireConcentration(evaluation, grille, echelle, historique, stats, aTravailler),
+            recurrents:    construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille, aTravailler),
             jetons:        construireJetons(da),
             note:          construireNoteProvisoire(da, affichageNiveauxSeulement(evaluation))
         };
@@ -764,9 +767,12 @@
 
     /* ----- J.1 — Présentement, il faut se concentrer sur... ----- */
 
-    function construireConcentration(evaluation, grille, echelle, historique, stats) {
+    /**
+     * Les critères à travailler de cette copie : les priorités, puis les « à consolider »,
+     * chacun trié du rang le plus faible au plus fort.
+     */
+    function criteresATravailler(evaluation) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
-        const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
 
         // #555 lot 2 — trois zones, lues dans les repères de l'échelle. « Défi »
         // n'est plus une lettre : c'est ce qui est SOUS le seuil de suffisance.
@@ -786,8 +792,16 @@
         // Réel, donc pas un défi ; non durable, donc pas encore acquis.
         const signales = criteres.filter(c => zoneDe(c.niveauSelectionne) === 'signale')
                                  .sort(parRangCroissant);
+        return { defis: defis, signales: signales };
+    }
 
-        const patrons = identifierPatrons(criteres, historique, evaluation.echelleId);
+    function construireConcentration(evaluation, grille, echelle, historique, stats, aTravailler) {
+        const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
+        const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
+        const zoneDe = lecteurZone(evaluation.echelleId);
+        const defis = aTravailler.defis;
+        const signales = aTravailler.signales;
+
         // Vérification explicite M/E sur tous les critères : un travail Non recevable
         // (niveau '0') ou sans critères ne doit JAMAIS déclencher « tous maîtrisés ».
         // Garde `length > 0` conservée : `.every()` rend `true` sur un tableau vide
@@ -829,37 +843,41 @@
             }
         }
 
-        const priorites = defis.slice(0, 2).map(d => {
+        // #940 — « Nom (niveau) : définition », pour les priorités ET les « à consolider »
+        // (décision de Grégoire, 24 sept. 2026). La définition telle qu'écrite dans la grille ;
+        // le niveau est le chiffre pour un analytique. La récurrence ne se dit plus ici : elle
+        // se dit une seule fois, dans « Points récurrents ».
+        const ligne = (d) => {
             const def = grilleCriteres.find(gc => gc.nom === d.critereNom || gc.id === d.critereId);
-            const desc = def && def.description ? def.description.toLowerCase() : '';
-            const prefix = desc || d.critereNom;
-            const niveauTxt = lectureNiveauCritere(echelle, d);   // le chiffre pour un analytique
-            const recurrent = patrons.indexOf(d.critereNom) !== -1
-                ? '. Cet objectif est prioritaire depuis 3 productions'
-                : '';
-            return `${prefix} (${d.critereNom} ${niveauTxt})${recurrent}`;
-        });
+            return ligneCritereATravailler(d.critereNom, lectureNiveauCritere(echelle, d), def && def.description);
+        };
 
         return {
             tousMaitrises:  tousMaitrises,
             messageGlobal:  messageGlobal,
-            priorites:      priorites,
-            signales:       signales.map(d => `${d.critereNom} (${lectureNiveauCritere(echelle, d)})`)   // le chiffre pour un analytique
+            priorites:      defis.slice(0, 2).map(ligne),
+            signales:       signales.map(ligne)
         };
     }
 
     /* ----- J.2 — Points récurrents ----- */
 
-    function construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille) {
-        const tampons = construireTamponsRecurrents(stats);
+    function construireRecurrents(evaluation, echelle, evalPrecedente, historique, stats, grille, aTravailler) {
+        // #940 — ce qui revient D'UNE COPIE À L'AUTRE. Les tampons de la copie en sont
+        // sortis (décision de Grégoire, 24 sept. 2026) : ils sont en entier dans
+        // « Commentaires ciblés », et leur répétition tronquée à 80 caractères est partie.
+        const recurrences = lignesRecurrentes(aTravailler.defis.concat(aTravailler.signales),
+            historique, evaluation.echelleId, lecteurZone);
         const francais = construireFrancaisResume(stats, grille, evaluation);
-        const progression = construireProgressionResume(evaluation, evalPrecedente, historique);
+        // La tendance lit les cinq copies précédentes, comme avant #940 : l'historique
+        // n'est plus plafonné (le compte des récurrences en a besoin), sa tendance oui.
+        const progression = construireProgressionResume(evaluation, evalPrecedente, historique.slice(0, 5));
         const ameliorations = construireAmeliorations(evaluation, evalPrecedente);
         const force = construireForce(evaluation, echelle);
 
         return {
             force:         force,
-            tampons:       tampons,
+            recurrences:   recurrences,
             francais:      francais,
             progression:   progression.message,
             tendance:      progression.tendance,
@@ -887,24 +905,6 @@
         // l'annoncer comme une force dirait à l'élève qu'il peut s'en détourner.
         if (lecteurZone(evaluation.echelleId)(meilleur.niveauSelectionne) !== 'acquis') return '';
         return `Ta force : ${meilleur.critereNom} (${lectureNiveauCritere(echelle, meilleur)})`;   // le chiffre pour un analytique
-    }
-
-    function construireTamponsRecurrents(stats) {
-        if (!stats || !stats.tampons) return [];
-        // #760 — même lecteur que le reste de la page (réglages actuels).
-        const categories = (typeof travauxOutils !== 'undefined' && typeof travauxOutils.observationsDesTampons === 'function')
-            ? travauxOutils.observationsDesTampons(stats.tampons) : [];
-
-        return categories
-            .reduce((acc, cat) => acc.concat(cat.tampons), [])
-            .filter(t => t.texte)
-            .map(t => ({
-                nom:          t.nom,
-                count:        t.nombre,
-                retroaction:  t.texte.length > 80 ? t.texte.substring(0, 80) + '...' : t.texte
-            }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 2);
     }
 
     /**
@@ -1306,46 +1306,106 @@
         };
     }
 
-    /**
-     * Les critères prioritaires depuis TROIS productions d'affilée.
-     *
-     * ⮕ #555 lot 2 — `estFaible` testait `n === 'I' || n === 'D'`. Chaque
-     * évaluation de l'historique est maintenant lue dans SON échelle : un élève
-     * dont la pratique a changé de barème en cours de trimestre n'hérite pas
-     * d'un « objectif prioritaire depuis 3 productions » calculé sur des zones
-     * qui ne parlaient pas de la même chose.
-     */
-    function identifierPatrons(criteresActuels, historique, echelleIdCourante) {
-        if (!Array.isArray(historique) || historique.length < 2) return [];
-
-        const zonesAt = (idx) => {
-            const map = {};
-            const ev = historique[idx];
-            const zoneDe = lecteurZone(ev && ev.echelleId);
-            if (ev && Array.isArray(ev.criteres)) {
-                ev.criteres.forEach(c => { map[c.critereNom] = zoneDe(c.niveauSelectionne); });
-            }
-            return map;
-        };
-        const zH1 = zonesAt(0);
-        const zH2 = zonesAt(1);
-        const zoneCourante = lecteurZone(echelleIdCourante);
-
-        return criteresActuels
-            .filter(c => zoneCourante(c.niveauSelectionne) === 'priorite'
-                      && zH1[c.critereNom] === 'priorite'
-                      && zH2[c.critereNom] === 'priorite')
-            .map(c => c.critereNom);
+    function lireHistorique(evaluation) {
+        return historiqueAnterieur(lireDonneesNamespace('evaluationsSauvegardees'), {
+            da: evaluation.etudiantDA, idCopie: evaluation.id, date: evaluation.dateEvaluation
+        });
     }
 
-    function lireHistorique(evaluation) {
-        const da = evaluation.etudiantDA;
-        if (!da) return [];
-        const evaluations = lireDonneesNamespace('evaluationsSauvegardees');
+    /* =====================================================================
+       #940 — LE BILAN : UNE SEULE RÈGLE POUR LE PDF ET POUR L'ÉCRAN
+       ===================================================================== */
+    // Le bilan de l'écran (`evaluation-retroaction.js`) lit ces trois fonctions : il est
+    // copié par `copierToutRetroaction` dans ce que l'élève reçoit, et doit dire les mêmes
+    // mots que le PDF (#581). Même motif que `commentaireDuCritere` (#939).
+
+    /**
+     * L'historique de l'élève AVANT cette copie — ses autres copies, la plus récente
+     * d'abord, les reprises remplacées écartées.
+     *
+     * ⮕ #940 — deux changements, les deux nécessaires à « depuis N productions » :
+     * · PLUS DE PLAFOND. Il était de cinq copies, et le compte aurait plafonné à 6 sans le
+     *   dire. Un trimestre en compte rarement plus d'une dizaine : tout se lit.
+     * · SEULES LES COPIES ANTÉRIEURES. Rouvrir la deuxième copie d'un trimestre prenait
+     *   pour « précédente » la plus récente de toutes, POSTÉRIEURE à celle-ci. Une copie
+     *   sans date reste (en fin de liste, comme avant) : on ne l'écarte pas sur un doute ;
+     *   sans date pour la copie en cours (pas encore enregistrée), toutes les autres sont
+     *   antérieures.
+     *
+     * @param {Array} evaluations - toutes les évaluations du trimestre
+     * @param {{da: string, idCopie?: string, date?: string}} copie - l'élève, la copie en cours
+     */
+    function historiqueAnterieur(evaluations, { da, idCopie, date } = {}) {
+        if (!da || !Array.isArray(evaluations)) return [];
+        const limite = date ? new Date(date).getTime() : NaN;
+        const quand = (e) => new Date(e.dateEvaluation || 0).getTime();
         return evaluations
-            .filter(e => e.etudiantDA === da && !e.remplaceeParId && e.id !== evaluation.id)
-            .sort((a, b) => new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0))
-            .slice(0, 5);
+            .filter(e => e && e.etudiantDA === da && !e.remplaceeParId && !(idCopie && e.id === idCopie))
+            .filter(e => isNaN(limite) || !e.dateEvaluation || !(quand(e) > limite))
+            .sort((a, b) => quand(b) - quand(a));
+    }
+
+    /**
+     * Une ligne de « Présentement, il faut se concentrer sur » : `Nom (niveau) : définition`.
+     * Sans définition dans la grille : `Nom (niveau)`, rien d'inventé. Sans niveau lisible :
+     * le nom seul. Les morceaux arrivent déjà échappés quand l'appelant pose du HTML.
+     */
+    function ligneCritereATravailler(nom, niveau, definition) {
+        const def = (definition == null) ? '' : String(definition).trim();
+        const tete = niveau ? `${nom} (${niveau})` : String(nom);
+        return def ? `${tete} : ${def}` : tete;
+    }
+
+    const MOT_DE_LA_ZONE = { priorite: 'prioritaire', signale: 'à consolider' };
+
+    /**
+     * « Points récurrents » : les critères à travailler sur cette copie ET sur la précédente.
+     *
+     * ⮕ Décision de Grégoire (24 sept. 2026) : « une récurrence identifiée dans le temps »,
+     * « une cible de travail immédiate pour l'élève ». Dès DEUX productions. La ligne donne le
+     * nombre réel de productions consécutives où le critère reste à travailler, en remontant
+     * l'historique jusqu'à la première copie où il est acquis ; le mot vient de la zone de
+     * la copie ACTUELLE.
+     *
+     * ⚠ CHAQUE COPIE EST LUE DANS SON ÉCHELLE (#555 lot 2) : une zone se compare à une zone,
+     * jamais un code à un code.
+     * ⚠ SEULE UNE COPIE OÙ LE CRITÈRE EST ACQUIS ARRÊTE LE COMPTE (décision de Grégoire,
+     * 24 sept. 2026, après la relecture de Cowork). Une copie qui ne dit rien du critère est
+     * SAUTÉE — elle n'interrompt pas la récurrence et n'entre pas dans le compte : critère
+     * absent de sa grille (les productions d'un trimestre n'évaluent pas toutes les mêmes
+     * critères), ou échelle sans repères (`null`). N compte les productions qui l'évaluent.
+     *
+     * @param {Array} criteres - les critères à travailler de la copie, dans l'ordre d'affichage
+     * @param {Array} historique - les copies antérieures, la plus récente d'abord
+     * @param {string|null} echelleId - l'échelle de la copie en cours
+     * @param {Function} lecteurZoneDe - `echelleId → (code → zone)`
+     * @param {Function} [formaterNom] - l'échappement du nom quand l'appelant pose du HTML
+     * @returns {string[]} « Nom : prioritaire depuis N productions »
+     */
+    function lignesRecurrentes(criteres, historique, echelleId, lecteurZoneDe, formaterNom) {
+        const nomDe = (typeof formaterNom === 'function') ? formaterNom : (n) => String(n);
+        const zoneCourante = lecteurZoneDe(echelleId);
+        const anterieures = (Array.isArray(historique) ? historique : []).map(ev => {
+            const zoneDe = lecteurZoneDe(ev && ev.echelleId);
+            const zones = {};
+            if (ev && Array.isArray(ev.criteres)) {
+                ev.criteres.forEach(c => { if (c && c.critereNom) zones[c.critereNom] = zoneDe(c.niveauSelectionne); });
+            }
+            return zones;
+        });
+        const lignes = [];
+        (Array.isArray(criteres) ? criteres : []).forEach(c => {
+            const mot = MOT_DE_LA_ZONE[zoneCourante(c.niveauSelectionne)];
+            if (!mot) return;
+            let productions = 1;
+            for (const zones of anterieures) {
+                const zone = zones[c.critereNom];
+                if (zone === 'acquis') break;
+                if (zone === 'priorite' || zone === 'signale') productions++;   // sinon : sautée
+            }
+            if (productions >= 2) lignes.push(`${nomDe(c.critereNom)} : ${mot} depuis ${productions} productions`);
+        });
+        return lignes;
     }
 
     /* =====================================================================
@@ -1428,7 +1488,12 @@
         // #939 — la règle du commentaire d'un critère, lue par le PDF (ci-dessus), par le
         // texte copié vers Léa (`_rendreCommentairesCriteres`) et par l'écran d'évaluation
         // qui remplit `comm_<critereId>` (`_afficherCommentaireCritere`).
-        commentaireDuCritere: commentaireDuCritere
+        commentaireDuCritere: commentaireDuCritere,
+        // #940 — le bilan, lu par le PDF (ci-dessus) et par celui de l'écran
+        // (`genererRetroactionBilan`, evaluation-retroaction.js).
+        historiqueAnterieur: historiqueAnterieur,
+        ligneCritereATravailler: ligneCritereATravailler,
+        lignesRecurrentes: lignesRecurrentes
         // #575 — `SCALE_FALLBACK` était exposée ici ; elle n'avait aucun lecteur
         // hors du module. Sa remplaçante (`COULEUR_NIVEAU_NEUTRE`) reste privée
         // plutôt que d'ajouter un export que personne n'appelle.

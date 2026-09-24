@@ -82,6 +82,8 @@ function monter({ nu, fenetre, evaluations = [EV1()] }) {
     chargerScript('js/evaluation-chargement.js', globaux, win);
     chargerScript('js/evaluation-sauvegarde.js', globaux, win);
     chargerScript('js/evaluation.js', globaux, win);
+    // #940 — le bilan lit sa règle (ligne d'un critère, récurrences, historique) dans le vrai module.
+    chargerScript('js/synthese-retroaction-data.js', globaux, win);
     chargerScript('js/evaluation-retroaction.js', globaux, win);
     return { win, ecran, ecritures, minuteries };
 }

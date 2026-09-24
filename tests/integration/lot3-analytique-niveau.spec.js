@@ -399,7 +399,7 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     expect(apres.nb).toBe(1);
     expect(apres.criteres).toEqual(['a1:E:50', 'a2:D:20', 'a3:I:8']);
     // (a) Le bilan du PDF, aux trois endroits : le chiffre, jamais le nom du niveau déduit.
-    expect(apres.priorites).toEqual(['pertinent et clair (Sujet divisé 8 / 20)']);
+    expect(apres.priorites).toEqual(['Sujet divisé (8 / 20) : Pertinent et clair']);   // #940 : « Nom (niveau) : définition »
     expect(apres.signales).toEqual(['Sujet posé (20 / 30)']);
     expect(apres.force).toBe('Ta force : Sujet amené (50 / 50)');
     expect(apres.chiffres).toEqual([true, true, true]);

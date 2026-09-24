@@ -643,11 +643,10 @@
 
         const lignes = [];
         if (recurrents.force) lignes.push(`<div style="font-weight: 600; margin-bottom: 3px;">${esc(recurrents.force)}</div>`);
-        if (Array.isArray(recurrents.tampons) && recurrents.tampons.length) {
-            const items = recurrents.tampons.map(t => {
-                const occ = `${t.count} occurrence${t.count > 1 ? 's' : ''}`;
-                return `<li style="margin-bottom: 2px;">${esc(t.nom)} (${esc(occ)}) — ${esc(t.retroaction)}</li>`;
-            }).join('');
+        // #940 — ce qui revient d'une copie à l'autre, là où se tenaient les tampons de la
+        // copie (ils sont en entier dans « Commentaires ciblés »).
+        if (Array.isArray(recurrents.recurrences) && recurrents.recurrences.length) {
+            const items = recurrents.recurrences.map(r => `<li style="margin-bottom: 2px;">${esc(r)}</li>`).join('');
             lignes.push(`<ul style="margin: 0 0 4px 0; padding-left: 14px;">${items}</ul>`);
         }
         if (recurrents.francais) lignes.push(`<div>${esc(recurrents.francais)}</div>`);

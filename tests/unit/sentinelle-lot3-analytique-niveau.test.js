@@ -562,11 +562,12 @@ describe('lot 3 · H — le PDF de l\'élève : son bilan nomme un critère anal
         return { fb, page: rendu.syntheseRetroactionRendu.rendreSyntheseHTML(fb) };
     }
 
-    it('H.a « Présentement, il faut se concentrer sur » : « pertinent et clair (Sujet divisé 8 / 20) », pas « Insuffisant »', () => {
+    // #940 (24 sept. 2026) — forme de Grégoire : « Nom (niveau) : définition », la définition telle qu'écrite.
+    it('H.a « Présentement, il faut se concentrer sur » : « Sujet divisé (8 / 20) : Pertinent et clair », pas « Insuffisant »', () => {
         const { fb, page } = pageAnalytique();
-        expect(fb.bilan.concentration.priorites).toEqual(['pertinent et clair (Sujet divisé 8 / 20)']);
-        expect(page).toContain('pertinent et clair (Sujet divisé 8 / 20)');
-        expect(page).not.toContain('(Sujet divisé Insuffisant)');
+        expect(fb.bilan.concentration.priorites).toEqual(['Sujet divisé (8 / 20) : Pertinent et clair']);
+        expect(page).toContain('Sujet divisé (8 / 20) : Pertinent et clair');
+        expect(page).not.toContain('Sujet divisé (Insuffisant)');
     });
 
     it('H.b « Acquis en développement, à consolider » : « Sujet posé (20 / 30) »', () => {
@@ -600,7 +601,7 @@ describe('lot 3 · H — le PDF de l\'élève : son bilan nomme un critère anal
         const avecDefi = JSON.parse(JSON.stringify(EVAL_LOT3));
         avecDefi.criteres[0].niveauSelectionne = 'I';   // Contenu (holistique) en priorité
         const fb = pdf.feedback(avecDefi);
-        expect(fb.bilan.concentration.priorites).toEqual(['le fond. (Contenu Insuffisant)']);
+        expect(fb.bilan.concentration.priorites).toEqual(['Contenu (Insuffisant) : Le fond.']);   // #940
         expect(fb.bilan.recurrents.force).toBe('Ta force : Langue (24 / 30)');
     });
 });
@@ -614,11 +615,11 @@ function bilan(win, ecran) {
 }
 
 describe('lot 3 · G — le bilan nomme un critère analytique par son chiffre, jamais par le nom du niveau déduit (décision de Grégoire, 4 sept.)', () => {
-    it('G.a un défi analytique : « (Langue 12 / 30) », et le holistique garde le nom de son niveau', () => {
+    it('G.a un défi analytique : « Langue (12 / 30) », et le holistique garde le nom de son niveau', () => {
         // 12 sur 30 = 40 % → I (priorité) ; Contenu à M (acquis) devient la force.
         const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'I' }, points: { c2: 12 } });
         const html = bilan(win, ecran);
-        expect(html).toContain('(Langue 12 / 30)');
+        expect(html).toContain('Langue (12 / 30) : Imposé à 30 par la politique.');   // #940
         expect(html).not.toContain('Insuffisant');
         expect(html).toContain('Ta force : Contenu (Maîtrisé)');
     });
@@ -655,7 +656,7 @@ describe('lot 3 · G — le bilan nomme un critère analytique par son chiffre, 
     it('G.e sans points, un critère analytique se nomme par son niveau, comme avant', () => {
         const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'I' }, points: {} });
         const html = bilan(win, ecran);
-        expect(html).toContain('(Langue Insuffisant)');
+        expect(html).toContain('Langue (Insuffisant)');   // #940
         expect(html).not.toContain(' / ');
     });
 });
@@ -792,12 +793,14 @@ describe('lot 3 · F — témoins de source', () => {
         expect(source('js/travaux-export-pdf.js')).toContain('? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || \'—\');');
         // Seconde retouche (§6) : le bilan du PDF, trois sites, une lecture ; et la légende conditionnée.
         const data = source('js/synthese-retroaction-data.js');
-        expect((data.match(/lectureNiveauCritere\(echelle, (d|meilleur)\)/g) || []).length, 'priorités, signalés, force').toBe(3);
+        // #940 — priorités et signalés partagent une seule ligne (`ligneCritereATravailler`) : deux sites.
+        expect((data.match(/lectureNiveauCritere\(echelle, (d|meilleur)\)/g) || []).length, 'ligne d\'un critère à travailler, force').toBe(2);
         expect(data).not.toMatch(/libelleNiveau\(echelle, [a-z]+\.niveauSelectionne\)/);
         expect(source('js/synthese-retroaction-rendu.js')).toContain("criteres.some(c => typeof c.points !== 'number') ? renderLegende(ctx) : ''");
         // Retouche du 4 sept. : les trois rendus du bilan passent par la même lecture, et plus aucun n'appelle `_nomBilan` sur un critère.
         const retro = source('js/evaluation-retroaction.js');
-        expect((retro.match(/= _lectureNiveauBilan\(niveauDe, (d|c|meilleur)\)/g) || []).length, "trois rendus, une lecture").toBe(3);
+        // #940 — défis et signalés passent par `_ligneCritereBilan` : deux sites, une lecture.
+        expect((retro.match(/(?<!function )_lectureNiveauBilan\(niveauDe, (d|c|meilleur)\)[,;]/g) || []).length, "ligne d'un critère à travailler, force").toBe(2);
         expect(retro).not.toMatch(/_nomBilan\(niveauDe, [a-z]+\.niveauSelectionne\)/);
     });
 });
