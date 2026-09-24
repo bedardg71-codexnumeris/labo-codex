@@ -432,6 +432,37 @@
         return nu !== '' && AMORCES_DE_SAISIE.includes(nu);
     }
 
+    // #939 — CE QUE L'ÉCRAN ÉCRIVAIT QUAND LA CARTOUCHE N'AVAIT RIEN POUR CE NIVEAU.
+    // `_afficherCommentaireCritere` posait « [Non défini] » dans `comm_<critereId>`, et les
+    // collecteurs l'enregistraient comme `criteres[].retroaction` : le PDF l'imprimait, le
+    // texte copié vers Léa aussi. L'écran ne l'écrit plus (source) ; les évaluations
+    // enregistrées avant le portent encore (stock), d'où sa reconnaissance ici — comme une
+    // amorce, ce n'est pas un commentaire.
+    const COMMENTAIRE_NON_DEFINI = '[Non défini]';
+
+    /**
+     * #939 — LE COMMENTAIRE D'UN CRITÈRE, UNE SEULE RÈGLE POUR LE PDF ET LE TEXTE COPIÉ.
+     * Décision de Grégoire (24 sept. 2026) : le commentaire qui fait foi est celui qui est
+     * enregistré avec l'évaluation ; une cartouche retouchée plus tard ne change pas une
+     * copie déjà évaluée. Dans l'ordre :
+     *   1. le commentaire enregistré (ou, à l'écran, celui du div `comm_` de cette copie),
+     *      sauf une amorce de saisie (#672) ou « [Non défini] » ;
+     *   2. la rétroaction algorithmique, gelée au calcul (#581) ;
+     *   3. la cartouche, au niveau retenu ;
+     *   4. rien — le critère se dit alors par son en-tête.
+     * Rend le texte BRUT : l'anonymisation reste à l'appelant qui imprime (#566).
+     */
+    function commentaireDuCritere({ enregistre, algorithmique, cartouche, critereId, niveau } = {}) {
+        const retenu = (t) => {
+            const nu = String(t == null ? '' : t).trim();
+            return (nu === '' || estAmorceDeSaisie(nu) || nu === COMMENTAIRE_NON_DEFINI) ? '' : nu;
+        };
+        const cleCart = critereId && niveau ? `${critereId}_${niveau}` : null;
+        return retenu(enregistre) ||
+            retenu(algorithmique) ||
+            retenu(cartouche && cleCart && cartouche.commentaires ? cartouche.commentaires[cleCart] : '');
+    }
+
     function construireCriteres(evaluation, grille, cartouche) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
@@ -440,7 +471,6 @@
         return criteres.map(c => {
             const def = grilleCriteres.find(gc => gc.id === c.critereId || gc.nom === c.critereNom) || {};
             const niveau = c.niveauSelectionne || '';
-            const cleCart = c.critereId && niveau ? `${c.critereId}_${niveau}` : null;
             const estAlgorithmique = def.type === 'algorithmique';
             const donneesAlgoCrit = (estAlgorithmique && donneesAlgo[c.critereId]) ? donneesAlgo[c.critereId] : null;
             const ponderationCrit = (typeof c.ponderation === 'number') ? c.ponderation : (def.ponderation || 0);
@@ -464,12 +494,11 @@
             // gagnant. Les évaluations enregistrées avant la correction du mode simple
             // portent cette amorce en base : c'est ici, et seulement ici, qu'elles sont
             // rattrapées.
-            const retroPersistee = estAmorceDeSaisie(c.retroaction) ? '' : (c.retroaction && c.retroaction.trim());
-            const commentaireBrut =
-                retroPersistee ||
-                retroAlgo ||
-                (cartouche && cleCart && cartouche.commentaires && cartouche.commentaires[cleCart]) ||
-                '';
+            // #939 — la cascade vit dans `commentaireDuCritere` : le texte copié vers Léa
+            // (`evaluation-retroaction.js`) la lit aussi.
+            const commentaireBrut = commentaireDuCritere({
+                enregistre: c.retroaction, algorithmique: retroAlgo, cartouche, critereId: c.critereId, niveau
+            });
             // #566 — LE TEXTE LIBRE PASSE PAR L'ANONYMISATION. Le modal de révision
             // anonymisait les rétroactions, la synthèse rasterisée JAMAIS : en mode
             // anonymisé, un prénom tapé dans une rétroaction sortait dans le PDF remis.
@@ -1395,7 +1424,11 @@
         // que la sentinelle statique de #672 existe précisément pour empêcher.
         // Ce module charge AVANT evaluation-calcul.js (index.html l. 14602 vs 14645),
         // et l'appel a lieu bien après le chargement complet de toute façon.
-        estAmorceDeSaisie: estAmorceDeSaisie
+        estAmorceDeSaisie: estAmorceDeSaisie,
+        // #939 — la règle du commentaire d'un critère, lue par le PDF (ci-dessus), par le
+        // texte copié vers Léa (`_rendreCommentairesCriteres`) et par l'écran d'évaluation
+        // qui remplit `comm_<critereId>` (`_afficherCommentaireCritere`).
+        commentaireDuCritere: commentaireDuCritere
         // #575 — `SCALE_FALLBACK` était exposée ici ; elle n'avait aucun lecteur
         // hors du module. Sa remplaçante (`COULEUR_NIVEAU_NEUTRE`) reste privée
         // plutôt que d'ajouter un export que personne n'appelle.

@@ -11,6 +11,7 @@
 2. Puis **les dix fiches de notation encore ouvertes** : ce qui se passe quand la pratique n'est pas la sienne (#710, #711, #712, #713, #714, #716, #717, #719, #854, #900). À remesurer et à grouper en lots par Cowork.
 3. Puis **la synthèse des rétroactions** : son prochain « Labo » portera là-dessus.
    - ~~**Lot #760 + #759**~~ — **SORTI DE LA FILE : livré en 1.156.2, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte, 25/25, sept mutations rouges) ; Nouvelles et titres validés par Grégoire tels quels.** ce que l'élève lit de ses tampons, un seul lecteur sur les réglages actuels (générale, spécifique, PDF de synthèse) ; « Copier tout » garde les phrases séparées. Consigne : `CONSIGNE-DU-JOUR.md`.
+   - **Lot #939** — le commentaire d'un critère, une seule règle pour le PDF et le texte copié vers Léa (celui de l'évaluation, jamais « [Non défini] ») ; périmètre réduit par Grégoire le 24 sept. (aucune saisie par critère n'existe). Consigne : `CONSIGNE-DU-JOUR.md`. En cours sur `lot-939-commentaire-critere`.
 
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 
