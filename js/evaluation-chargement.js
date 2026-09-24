@@ -632,9 +632,8 @@ function demarrerEvaluationDepuisFichier(fichier, opts) {
                 _tentativesCartouche++;
                 var selC = document.getElementById('selectCartoucheEval');
                 if (selC && Array.from(selC.options).some(function(o) { return o.value === refModele.cartoucheId; })) {
-                    selC.value = refModele.cartoucheId;
                     if (window.evaluationEnCours) window.evaluationEnCours.cartoucheId = refModele.cartoucheId;
-                    selC.dispatchEvent(new Event('change', { bubbles: true }));
+                    poserCartoucheParChargeur(selC, refModele.cartoucheId);   // #944
                 } else if (_tentativesCartouche < 8) {
                     setTimeout(_essayerCartouche, 250);
                 }
@@ -761,10 +760,7 @@ function _selectionnerCartoucheProduction(cartoucheId) {
     const selC = document.getElementById('selectCartoucheEval');
     if (!selC) return;
     const optionExiste = Array.from(selC.options).some(o => o.value === cartoucheId);
-    if (optionExiste) {
-        selC.value = cartoucheId;
-        selC.dispatchEvent(new Event('change', { bubbles: true }));
-    }
+    if (optionExiste) poserCartoucheParChargeur(selC, cartoucheId);   // #944
 }
 
 /**
@@ -1447,18 +1443,124 @@ function _afficherCommentaireCritere(critereId, niveau) {
  * tient, la spec WebKit ne le distingue pas (le second passage le masque).
  */
 function _commentaireEnregistreDuCritere(critereId, niveau) {
-    const vivant = (typeof window.etatVivantEvaluationEnCours === 'function')
+    const vivant = _etatVivantDeLaCopie();
+    const evaluation = _evaluationEnregistreeDeLaCopie(vivant);
+    if (!evaluation || _remplacementConfirmeActif(vivant, evaluation)) return '';
+    const critere = (evaluation.criteres || []).find(c => c.critereId === critereId);
+    return (critere && critere.niveauSelectionne === niveau) ? (critere.retroaction || '') : '';
+}
+
+function _etatVivantDeLaCopie() {
+    return (typeof window.etatVivantEvaluationEnCours === 'function')
         ? window.etatVivantEvaluationEnCours() : (evaluationEnCours || {});
-    if (!vivant || !vivant.etudiantDA || !vivant.productionId) return '';
+}
+
+/** L'évaluation enregistrée de la copie ouverte (#939), ou null. */
+function _evaluationEnregistreeDeLaCopie(vivant) {
+    if (!vivant || !vivant.etudiantDA || !vivant.productionId) return null;
     // Le lecteur du chargeur (`obtenirDonneesSelonMode`) : l'élève et la production s'y comparent
     // comme lui les compare.
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluation = vivant.idModification
         ? evaluations.find(e => e.id === vivant.idModification)
         : evaluations.find(e => e.etudiantDA === vivant.etudiantDA && e.productionId === vivant.productionId && !e.remplaceeParId);
-    if (!evaluation || evaluation.etudiantDA !== vivant.etudiantDA || evaluation.productionId !== vivant.productionId) return '';
-    const critere = (evaluation.criteres || []).find(c => c.critereId === critereId);
-    return (critere && critere.niveauSelectionne === niveau) ? (critere.retroaction || '') : '';
+    if (!evaluation || evaluation.etudiantDA !== vivant.etudiantDA || evaluation.productionId !== vivant.productionId) return null;
+    return evaluation;
+}
+
+/* ===============================
+   #944 — CHANGER DE CARTOUCHE SUR UNE COPIE DÉJÀ ÉVALUÉE
+   =============================== */
+
+/**
+ * #944 (24 sept. 2026) — LA RÈGLE #939 A UNE EXCEPTION, ET UNE SEULE : LE GESTE CONFIRMÉ.
+ * Décision de Grégoire : une cartouche retouchée en arrière-plan ne change jamais une copie
+ * déjà évaluée ; mais l'enseignant qui CHOISIT une autre cartouche au menu, et le confirme,
+ * veut ses commentaires. Sans cette exception, le commentaire enregistré (clé critère +
+ * niveau, indépendant de la cartouche) gagnait toujours : changer de cartouche ne changeait
+ * rien (BUG_grégoire_2026-09-24_15-52-33, « Carte mentale A26 (rev) »).
+ *
+ * Le remplacement vaut pour UNE copie (élève + production) et UNE cartouche. Il n'est actif
+ * que tant que la cartouche appliquée est celle qu'on a confirmée ET qu'elle diffère de celle
+ * de l'évaluation enregistrée : dès le prochain enregistrement, la cartouche enregistrée EST
+ * la nouvelle, le commentaire enregistré est le nouveau, et #939 le protège de nouveau. Revenir
+ * à la cartouche enregistrée, ou rouvrir la copie sans avoir enregistré, rend aussi la main
+ * aux commentaires d'alors. Rien n'est écrit dans le stock : seulement dans cette variable.
+ */
+let _remplacementConfirme = null;   // { etudiantDA, productionId, cartoucheId }
+
+function _remplacementConfirmeActif(vivant, evaluation) {
+    const r = _remplacementConfirme;
+    return !!(r && vivant && evaluation
+        && r.etudiantDA === vivant.etudiantDA && r.productionId === vivant.productionId
+        && r.cartoucheId === vivant.cartoucheId && r.cartoucheId !== evaluation.cartoucheId);
+}
+
+/** La copie a-t-elle au moins un commentaire enregistré qui fait foi (règle #939) ? */
+function _aDesCommentairesEnregistres(evaluation) {
+    const regle = window.syntheseRetroactionData.commentaireDuCritere;
+    return !!evaluation && (evaluation.criteres || []).some(c => regle({ enregistre: c.retroaction }) !== '');
+}
+
+/**
+ * #944 — Les CHARGEURS posent eux aussi la cartouche au menu par un `change` scripté (la
+ * mémorisation des sélections l'écoute). Ce n'est pas le geste de l'enseignant : ils passent
+ * par ici, et `choisirCartoucheEval` les laisse filer sans rien demander. Sans cette marque,
+ * la réapplication de la cartouche modèle (`chargerProduction`, 300 ms après l'ouverture
+ * d'une copie évaluée) ouvrirait la confirmation toute seule.
+ */
+let _cartouchePoseeParChargeur = false;
+function poserCartoucheParChargeur(select, cartoucheId) {
+    select.value = cartoucheId;
+    _cartouchePoseeParChargeur = true;
+    try {
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    } finally {
+        _cartouchePoseeParChargeur = false;
+    }
+}
+
+/**
+ * #944 — LE GESTE : l'enseignant choisit une cartouche au menu (`data-on-change`).
+ * Copie sans commentaire enregistré, ou retour à la cartouche de l'évaluation : rien à
+ * demander, comportement d'avant. Sinon, la confirmation ; le menu montre l'ancienne
+ * cartouche le temps de la question, pour qu'un enregistrement automatique ne lise pas
+ * la nouvelle avant la réponse. Annuler : rien ne change, cartoucheId compris.
+ */
+async function choisirCartoucheEval(select) {
+    if (_cartouchePoseeParChargeur || !select || !evaluationEnCours) return cartoucheSelectionnee();
+
+    const nouvelle = select.value;
+    const vivant = _etatVivantDeLaCopie();
+    const evaluation = _evaluationEnregistreeDeLaCopie(vivant);
+    const r = _remplacementConfirme;
+    const dejaConfirme = r && vivant && r.etudiantDA === vivant.etudiantDA
+        && r.productionId === vivant.productionId && r.cartoucheId === nouvelle;
+    if (!nouvelle || !evaluation || nouvelle === evaluation.cartoucheId
+        || dejaConfirme || !_aDesCommentairesEnregistres(evaluation)) {
+        return cartoucheSelectionnee();
+    }
+
+    const precedente = evaluationEnCours.cartoucheId || evaluation.cartoucheId || '';
+    const option = Array.from(select.options).find(o => o.value === nouvelle);
+    const nom = option ? option.textContent : nouvelle;
+    select.value = precedente;
+    if (typeof window.memoriserSelectionsEvaluation === 'function') window.memoriserSelectionsEvaluation();
+
+    const remplacer = await window.uiDialogues.confirmerAction({
+        titre: 'Changer de cartouche',
+        message: `Remplacer les commentaires de cette copie par ceux de la cartouche « ${nom} » ? `
+            + 'Les retouches faites à la main dans la rétroaction de cette copie seront perdues.',
+        texteConfirmer: 'Remplacer',
+        texteAnnuler: 'Garder les commentaires actuels',
+        variante: 'danger'
+    });
+    if (!remplacer) return;
+
+    _remplacementConfirme = { etudiantDA: vivant.etudiantDA, productionId: vivant.productionId, cartoucheId: nouvelle };
+    select.value = nouvelle;
+    if (typeof window.memoriserSelectionsEvaluation === 'function') window.memoriserSelectionsEvaluation();
+    cartoucheSelectionnee();
 }
 
 function niveauSelectionne(critereId) {
@@ -1942,6 +2044,8 @@ window.criteresHorsGrille = criteresHorsGrille;   // #652 — lue par evaluation
 window.ecrireAttenteCriteres = ecrireAttenteCriteres;
 window.messageEchelleManquante = messageEchelleManquante;
 window.cartoucheSelectionnee = cartoucheSelectionnee;
+window.choisirCartoucheEval = choisirCartoucheEval;             // #944 — le geste au menu (index.html)
+window.poserCartoucheParChargeur = poserCartoucheParChargeur;   // #944 — evaluation.js, travaux-ui.js
 window.niveauSelectionne = niveauSelectionne;
 window.pointsSaisis = pointsSaisis;   // lot 2
 
