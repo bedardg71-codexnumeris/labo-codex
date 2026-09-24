@@ -60,6 +60,16 @@
 
     // Mode selection (multi-selection)
     let annotationSelectionnee = null;  // { type, index, data, bbox } — element principal
+    // #943 (retour de Grégoire, 24 sept. 2026) — une ligne qu'on vient de tracer reste sélectionnée,
+    // ses poignées actives, SANS passer par l'outil Sélection : on la courbe (ou on en tire une
+    // extrémité) avec l'outil Ligne encore en main. `selectionApresTrace` distingue cette sélection
+    // légère d'une sélection faite exprès : elle n'absorbe ni couleur, ni épaisseur, ni pointes (ces
+    // réglages visent la PROCHAINE ligne) et tombe au changement d'outil ou au tracé suivant.
+    // ⚠ Le drapeau ne vaut qu'avec une sélection posée : les huit sites qui vident la sélection
+    // (annuler, rétablir, changement de page…) peuvent le laisser vrai, sans effet — la reprise des
+    // poignées exige `annotationSelectionnee`, et `deselectionner()` le remet à faux.
+    let selectionApresTrace = false;
+    let dragPoigneeApresTrace = false;
     let selectionsMultiples = [];       // [{ type, index, data, bbox }, ...]
     let poigneeActive = null;           // null | 'move' | 'nw' | 'ne' | 'sw' | 'se'
     let deplacementOrigine = null;      // { x, y }
@@ -474,6 +484,7 @@
         // Mode selection
         if (outil.type === 'selection') {
             const shiftKey = e.shiftKey;
+            selectionApresTrace = false;   // #943 — sous l'outil Sélection, c'est une sélection ordinaire
 
             // Verifier si on clique sur une poignee de la selection existante (mono-selection seulement)
             if (annotationSelectionnee && selectionsMultiples.length <= 1) {
@@ -576,6 +587,22 @@
                 ajouterSymbole(outil.id, xNorm, yNorm);
                 return;
             }
+            // #943 — la ligne qu'on vient de tracer : un clic sur l'une de ses poignées la courbe
+            // (point de contrôle) ou en tire une extrémité ; ailleurs, on trace une nouvelle ligne.
+            if (selectionApresTrace && annotationSelectionnee && selectionsMultiples.length <= 1) {
+                const poignee = detecterPoignee(xNorm, yNorm, annotationSelectionnee.bbox, annotationSelectionnee);
+                if (poignee) {
+                    poigneeActive = poignee;
+                    deplacementOrigine = { x: xNorm, y: yNorm };
+                    dimensionsOriginales = { ...annotationSelectionnee.bbox };
+                    donneesAvantModif = clonerDonneesAnnotation(annotationSelectionnee);
+                    donneesMultiplesAvantModif = [donneesAvantModif];
+                    dragPoigneeApresTrace = true;
+                    enDessin = true;
+                    return;
+                }
+                deselectionner();
+            }
             // Debut forme
             formeOrigine = { x: xNorm, y: yNorm };
             formeEnCours = {
@@ -652,8 +679,8 @@
 
         if (!enDessin) return;
 
-        // Mode selection : drag en cours
-        if (outil.type === 'selection') {
+        // Mode selection : drag en cours — et #943, la poignée d'une ligne tout juste tracée
+        if (outil.type === 'selection' || dragPoigneeApresTrace) {
             if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
             e.preventDefault();
 
@@ -753,10 +780,12 @@
 
         const outil = _outils().getOutilActif();
 
-        // Mode selection : finaliser le drag
-        if (outil.type === 'selection') {
+        // Mode selection : finaliser le drag — et #943, la poignée d'une ligne tout juste tracée
+        // (même fin : l'annulation « modification » s'empile, la sélection reste pour un autre geste).
+        if (outil.type === 'selection' || dragPoigneeApresTrace) {
             if (e.pointerType !== 'pen' && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return;
             enDessin = false;
+            dragPoigneeApresTrace = false;
 
             // Finaliser le rectangle de selection (marquee)
             if (rectangleSelection) {
@@ -819,6 +848,14 @@
             const donneesPage = obtenirDonneesPage();
             donneesPage.shapes.push(formeEnCours);
             empilerUndo('ajout-forme', formeEnCours);
+            // #943 — une ligne tracée reste sélectionnée, ses poignées visibles et actives.
+            if (estLigneAPoignees(formeEnCours)) {
+                const index = donneesPage.shapes.length - 1;
+                const sel = { type: 'shape', index: index, data: formeEnCours, bbox: calculerBBox('shape', formeEnCours) };
+                selectionsMultiples = [sel];
+                annotationSelectionnee = sel;
+                selectionApresTrace = true;
+            }
             formeEnCours = null;
             formeOrigine = null;
             reRendreAnnotations();
@@ -869,6 +906,13 @@
         if (formeEnCours) {
             formeEnCours = null; formeOrigine = null; enDessin = false;
             reRendreAnnotations();
+        }
+
+        // #943 — la sélection d'une ligne tout juste tracée appartient à l'outil Ligne : elle tombe
+        // au changement d'outil, sauf vers l'outil Sélection, où elle devient une sélection ordinaire.
+        if (selectionApresTrace) {
+            if (e.detail.outil.type === 'selection') selectionApresTrace = false;
+            else deselectionner();
         }
 
         if (e.detail.outil.id === 'position') {
@@ -1707,6 +1751,14 @@
     }
 
     /**
+     * #943 — les formes dont la sélection porte des poignées d'extrémité et un point de courbure
+     * (les mêmes que `detecterPoignee` sait lire) : la ligne (fléchée ou non), l'ancienne ligne, la vague.
+     */
+    function estLigneAPoignees(forme) {
+        return !!forme && (forme.type === 'fleche' || forme.type === 'ligne' || forme.type === 'ondule');
+    }
+
+    /**
      * Detecte si le point est sur une poignee de la selection
      * @returns {string|null} 'nw' | 'ne' | 'sw' | 'se' | null
      */
@@ -1714,7 +1766,7 @@
         const taille = 12 / (canvasAnnotation?.width || 1000); // 12px en normalise
 
         // Fleche/ligne : poignees directes sur les extremites + point de controle
-        if (sel && sel.type === 'shape' && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule')) {
+        if (sel && sel.type === 'shape' && estLigneAPoignees(sel.data)) {
             const data = sel.data;
             // Point de controle Bezier (prioritaire)
             const cpX = data.cx != null ? data.cx : (data.x1 + data.x2) / 2;
@@ -1958,6 +2010,8 @@
      */
     function deselectionner() {
         annotationSelectionnee = null;
+        selectionApresTrace = false;       // #943
+        dragPoigneeApresTrace = false;
         selectionsMultiples = [];
         poigneeActive = null;
         deplacementOrigine = null;
@@ -2176,6 +2230,8 @@
 
     function onCouleurChange(e) {
         if (!annotationActive) return;
+        // #943 — la couleur choisie après un tracé vise la PROCHAINE ligne, pas celle qu'on vient de tracer.
+        if (selectionApresTrace) { deselectionner(); return; }
         if (selectionsMultiples.length > 0) {
             appliquerCouleurSelection(e.detail.couleur);
         }
@@ -2183,6 +2239,7 @@
 
     function onEpaisseurChange(e) {
         if (!annotationActive) return;
+        if (selectionApresTrace) { deselectionner(); return; }   // #943 — même règle que la couleur
         if (selectionsMultiples.length > 0) {
             appliquerEpaisseurSelection(e.detail.epaisseur);
         }
@@ -2190,6 +2247,7 @@
 
     function onFlechePointesChange(e) {
         if (!annotationActive) return;
+        if (selectionApresTrace) { deselectionner(); return; }   // #943 — même règle que la couleur
         if (selectionsMultiples.length === 0) return;
         const val = e.detail.pointes;
         const snapshots = selectionsMultiples.map(s => clonerDonneesAnnotation(s));
