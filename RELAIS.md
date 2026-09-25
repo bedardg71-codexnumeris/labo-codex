@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 12 H 50 : **#948 + #949 (1.159.6) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant les relectures de Cowork — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 30 : **#947 (1.159.7) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** (Cowork fermé) — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `55d8a522` (#948/#949 en ligne en 1.159.6, relectures versées, fiches cochées) + le merge `e86eab5e` de `fix/947-visionneuse-memoire-copie-evaluee` (`f87c7b29` correctif + release, `2a7aa21e` demande de relecture, `f857b547` relecture versée + Nouvelles validées ; build 0925-1400) + cette clôture. Relecture croisée de Cowork verte, sans retouche (`plans de travail/RELECTURE-2026-09-25-bug-947.md`). Nouvelles validées par Grégoire telles quelles.
+
+**Suite** : aucune porte terrain (consigne § 5). Le cap « rétroaction » du 24 sept. au soir : #944, #945, #946, #947 livrés. Ouverts nés aujourd'hui : #950 (l'export Léa garde le DA réel en mode anonymisation ; d'abord décider ce que ce geste doit faire dans ce mode). Branches `fix/947-…` et `fix/948-…` supprimables une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 12 H 50 : **#948 + #949 (1.159.6) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant les relectures de Cowork — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `9eb4edac` (#945 en ligne) + le merge `74963905` de `fix/948-anonymisation-export-travaux` (`1426f4b9` #948 correctif, `b221df29` demande de relecture #948 seconde remise, `bb84acdd` #949, `e983da12` demande de relecture #949, `f0d5127a` release ; build 0925-1210) + cette clôture. Nouvelles validées par Grégoire telles quelles.
 
