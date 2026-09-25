@@ -25,7 +25,11 @@
  *
  * a11y : `role="dialog"` + `aria-modal` + `aria-labelledby`, focus déplacé dans la
  *   modale (option sûre = Annuler pour une action destructive), Échap ferme, Entrée
- *   confirme (sauf saisie multiligne), focus rendu à l'élément précédent à la fermeture.
+ *   confirme (sauf saisie multiligne) — dans `confirmerAction`, Entrée suit le bouton qui a
+ *   le focus (#945), donc Annuler pour une action destructive —, focus rendu à l'élément
+ *   précédent à la fermeture. Les trois autres modales n'ont aucune action destructive
+ *   par défaut sur Entrée : saisie (renvoie la chaîne), information (ferme), choix
+ *   (seulement après une option cochée à la main).
  */
 (function () {
     'use strict';
@@ -107,9 +111,18 @@
                 _rendreFocus(focusPrecedent);
                 resolve(valeur);
             }
+            // #945 — Entrée fait ce que ferait le bouton qui a le focus ; hors des deux boutons,
+            // l'action sûre de la variante (danger : annuler). Sans cela, un Entrée réflexe
+            // confirmait la destruction alors que le focus était posé sur « Annuler ».
             function surTouche(e) {
                 if (e.key === 'Escape') { e.preventDefault(); repondre(false); }
-                else if (e.key === 'Enter') { e.preventDefault(); repondre(true); }
+                else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const focus = document.activeElement;
+                    if (focus === btnConfirmer) repondre(true);
+                    else if (focus === btnAnnuler) repondre(false);
+                    else repondre(!estDanger);
+                }
             }
 
             btnAnnuler.addEventListener('click', function () { repondre(false); });

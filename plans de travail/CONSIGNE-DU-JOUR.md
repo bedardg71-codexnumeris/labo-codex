@@ -1,40 +1,36 @@
-# Consigne du jour – #946 : à l'ouverture d'une copie déjà évaluée, la cartouche de la copie fait foi
+# Consigne du jour – #945 : dans une confirmation « danger », Entrée suit le bouton qui a le focus
 
-> Écrite le 25 septembre 2026, 10 h 10 (Toronto), par Cowork, sur `origin/main` = `aa5579e8` (1.159.3). **À remesurer avant tout code.**
-> La précédente (#940, livrée en 1.156.4) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-24-lot-940-bilan.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Premier lot du cap posé par Grégoire le 24 sept. au soir** : « terminer tout ce qui concerne la rétroaction dans les prochains lots » (`FILE-DES-LOTS.md`, section du 24 sept. au soir). La fiche existe : **#946** (trouvaille du lot #944). Pas de nouvelle fiche à inscrire pour le lot lui-même.
+> Écrite le 25 septembre 2026, vers 11 h 20 (Toronto), par Cowork, sur `origin/main` = `b1e18ed4` (1.159.4, en ligne chez Netlify depuis 10 h 56, mesuré). **À remesurer avant tout code.**
+> La précédente (#946, livrée en 1.159.4) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-25-bug-946-cartouche.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Deuxième lot du cap du 24 sept. au soir** (« terminer tout ce qui concerne la rétroaction ») : la confirmation « Changer de cartouche » (#944) en est le cas d'entrée. La fiche existe : **#945**. Symptôme non vécu.
 
-## 0 · La règle qui décide – déjà posée par Grégoire
+## 0 · Ce qui est décidé (technique, par Cowork – aucune question à Grégoire)
 
-**Ce qui est enregistré avec l'évaluation fait foi** (sa règle de #939, le 24 sept.). Appliquée ici : sur une copie qui a une évaluation enregistrée, la cartouche affichée à l'ouverture est celle de l'évaluation, jamais celle que la production prévoit. La cartouche du modèle ne sert qu'à pré-remplir une copie **sans** évaluation. Aucune question à lui poser sur ce point.
+**Entrée fait ce que ferait le bouton qui a le focus.** Pour une confirmation `danger`, le focus part sur « Annuler » : Entrée annule. Si l'enseignant·e a déplacé le focus sur le bouton rouge (Tab), Entrée confirme. Si le focus n'est sur aucun des deux boutons, Entrée fait l'action sûre de la variante : `danger` → annuler ; autre variante → confirmer (inchangé). Échap annule toujours ; le clic ne change pas.
+Motif : aujourd'hui `surTouche` (`js/ui-dialogues.js` ≈ l. 110-113) répond `true` sur Entrée quelle que soit la variante, alors que la même fonction pose exprès le focus sur Annuler (≈ l. 124-125, et le commentaire d'en-tête ≈ l. 26-28 le promet). Un Entrée réflexe confirme donc la destruction.
 
-## 1 · Ce que Cowork a lu (lecture seule, sur `aa5579e8` – non exécuté)
+## 1 · Ce que Cowork a lu (lecture seule, sur `b1e18ed4` – non exécuté)
 
-- `chargerProduction` (`js/evaluation-chargement.js` ≈ l. 696) : pose la cartouche du modèle (≈ l. 736), puis à +100 ms `verifierEtChargerEvaluationExistante` (`js/evaluation.js` ≈ l. 575) pose la cartouche de l'évaluation **sans événement `change`** (≈ l. 665 de ce fichier), puis à +300 ms `_selectionnerCartoucheProduction(refModele.cartoucheId)` (≈ l. 743) **repose la cartouche du modèle**, par `poserCartoucheParChargeur` (donc aucune confirmation #944) et `cartoucheSelectionnee` (≈ l. 1003) l'écrit dans `evaluationEnCours.cartoucheId`. « Enregistrer » l'écrirait ensuite dans l'évaluation (l'auto-save, lui, ne touche pas `cartoucheId`, ≈ l. 1870).
-- **Pourquoi le défaut est peut-être rare** – ta relecture #944 l'a vu (`RELECTURE-2026-09-24-bug-944.md`, § « Ce que j'ai vérifié sur la trouvaille #946 ») : `_modeleProductionPourEval` (≈ l. 664) ne retient la cartouche des évaluations que si TOUTES s'accordent ; en état mixte, il rend `''` et rien n'est reposé.
-- **Le cas que Cowork croit réel, à prouver ou à réfuter** : quand les évaluations d'une production n'ont pas toutes la même **grille**, `_modeleProductionPourEval` retombe sur `production.grilleId / cartoucheId`. Une copie évaluée avec la grille de la production mais une **autre** cartouche de cette grille verrait alors la cartouche de la production reposée à +300 ms (l'option existe dans le menu). Idem si la production porte une cartouche et qu'aucune évaluation n'a de `grilleId`.
-- **Second chargeur à mesurer** : `demarrerEvaluationDepuisFichier` (≈ l. 629-640) pose lui aussi la cartouche du modèle, en boucle de huit essais. Dis s'il peut atteindre une copie déjà évaluée, et dans quel ordre par rapport au chargement de l'évaluation.
+- `confirmerAction` (`js/ui-dialogues.js` ≈ l. 81-127) : le seul lieu à corriger pour la variante `danger`.
+- **Neuf appels `variante: 'danger'`** dans cinq fichiers (`evaluation-chargement.js`, `planification-bibliotheque.js`, `codex.js`, `comparateur-pratiques.js`, `productions-bibliotheque-ui.js`) : « Changer de cartouche », « Supprimer la carte », « Supprimer de la bibliothèque » (deux), « Modèle antérieur détecté » (deux), « Annuler la fusion », « Jeter la maquette », « Supprimer définitivement ». Remesure le compte ; aucun ne doit avoir besoin d'un changement à l'appel.
+- Les trois autres modales du fichier (saisie ≈ l. 144, information ≈ l. 203, choix ≈ l. 254) ont leur propre `surTouche`. Dis en une ligne si l'une porte une action destructive par défaut sur Entrée ; ne les touche que si oui (sinon : commenter, issue 3).
+- Banc existant : `tests/unit/ui-dialogues-315.test.js` (« Échap → false ; Entrée → true », sans variante) reste vrai pour la variante ordinaire.
 
-## 2 · Le lot
+## 2 · Limites
 
-1. **Mesure d'abord, en WebKit** : reproduis le cas du § 1 (production aux grilles mixtes, copie évaluée avec une autre cartouche que celle de la production) par le vrai menu « Production ». Note ce que montre le menu et ce qu'« Enregistrer » écrit.
-2. **Si le défaut se reproduit** : corrige à la source, selon la règle du § 0, pour **tous** les chargeurs qui posent la cartouche du modèle sur une copie (au moins les deux du § 1). Zéro-dette : si la réapplication à +300 ms ne sert plus qu'à contourner un écrasement, retire-la plutôt que de la garder. La forme du correctif est à toi.
-3. **Si aucun chemin ne reproduit le défaut** : la fiche se ferme **par la mesure**, sans code applicatif. Laisse un essai qui fige le comportement (il doit rougir si on force le modèle sur une copie évaluée), coche #946 avec la phrase qui dit pourquoi, et pas de release.
-
-## 3 · Limites
-
-- **Tarir n'est pas réparer.** Des évaluations ont peut-être déjà été enregistrées avec la cartouche de la production au lieu de la leur ; rien ne permet de les reconnaître. **Aucune donnée réécrite.** Écris-le comme stock assumé dans le rapport et dans la fiche.
-- Ne touche pas au geste #944 (« Changer de cartouche », sa confirmation, `_remplacementConfirme`) ni à la règle #939 du commentaire enregistré.
-- #945 (Entrée confirme une confirmation « danger ») est le lot suivant, pas celui-ci.
+- Rien d'autre ne change : libellés, couleurs, ordre des boutons, clic sur l'overlay.
+- Aucune donnée touchée.
+- #947 est le lot suivant, pas celui-ci.
 - Aucun nom d'élève réel dans les bancs ni dans le rapport (règle 6).
 
-## 4 · Preuve attendue
+## 3 · Preuve attendue
 
-- WebKit : le cas du § 1, rouge sur `aa5579e8` par le symptôme exact (le menu montre la cartouche de la production ; ou l'évaluation enregistrée change de `cartoucheId`), vert après. Plus : une copie **sans** évaluation reçoit toujours la cartouche du modèle ; une copie évaluée dans l'état mixte de #944 garde la sienne.
+- Vitest (`ui-dialogues-315` étendu ou banc neuf) : `danger` + Entrée → `false` ; `danger` + focus déplacé sur le bouton rouge + Entrée → `true` ; `danger` + focus hors des boutons + Entrée → `false` ; variante ordinaire + Entrée → `true` (inchangé) ; Échap → `false` partout. Rouges sur `b1e18ed4` là où le comportement change.
+- WebKit, par un vrai chemin : la confirmation « Changer de cartouche » (#944) sur une copie évaluée, Entrée → les commentaires ne sont pas remplacés et rien n'est écrit.
 - Break-tests de ton choix, chacun rouge ; nomme-les.
-- « Nouvelles » (seulement s'il y a correctif) : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Ouvrir une copie déjà évaluée garde la cartouche avec laquelle elle a été évaluée, même quand la production en prévoit une autre. »
-- Relecture croisée de Cowork avant la fusion (le lot touche ce qui s'écrit dans une évaluation) : branche, `DEMANDE-RELECTURE-2026-09-25-bug-946.md`, puis verdict, fusion, push.
+- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Confirmations : quand une action efface ou remplace quelque chose, la touche Entrée choisit le bouton sélectionné, « Annuler » au départ. Pour confirmer, clique sur le bouton rouge. »
+- Relecture croisée de Cowork avant la fusion (le lot garde les gestes destructifs) : branche, `DEMANDE-RELECTURE-2026-09-25-bug-945.md`, puis verdict, fusion, push.
 
-## 5 · Porte terrain
+## 4 · Porte terrain
 
-**Aucune.** Une machine peut répondre, et Grégoire ne crée pas de données fictives pour vérifier un geste. Si le correctif change ce qu'il voit en ouvrant une de ses copies, dis-le en une phrase dans le rapport.
+**Aucune.** Une machine répond. L'iPad sans clavier n'est pas concerné (pas de touche Entrée) : dis-le en une ligne si tu mesures autrement.

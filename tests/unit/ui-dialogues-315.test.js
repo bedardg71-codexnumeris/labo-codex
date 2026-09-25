@@ -209,3 +209,65 @@ describe('#315 · sécurité (XSS)', () => {
         await p;
     });
 });
+
+// #945 (25 sept. 2026) — ENTRÉE FAIT CE QUE FERAIT LE BOUTON QUI A LE FOCUS.
+// Décision technique de Cowork : une confirmation `danger` pose le focus sur « Annuler » ;
+// Entrée confirmait quand même la destruction. Focus hors des deux boutons : l'action sûre de
+// la variante (danger → annuler ; ordinaire → confirmer, inchangé). Échap annule toujours.
+describe('#945 · confirmerAction — Entrée suit le bouton qui a le focus', () => {
+    const danger = () => uiDialogues.confirmerAction({ titre: 'Changer de cartouche', message: 'Remplacer ?', texteConfirmer: 'Remplacer', variante: 'danger' });
+    const ordinaire = () => uiDialogues.confirmerAction({ titre: 'Continuer', message: 'Sûr ?', texteConfirmer: 'Continuer' });
+
+    it('danger + Entrée (focus de départ sur Annuler) → false', async () => {
+        const p = danger();
+        expect(doc.activeElement).toBe(bouton('Annuler'));
+        touche('Enter');
+        await expect(p).resolves.toBe(false);
+    });
+
+    it('danger + focus déplacé sur le bouton rouge + Entrée → true', async () => {
+        const p = danger();
+        bouton('Remplacer').focus();
+        touche('Enter');
+        await expect(p).resolves.toBe(true);
+    });
+
+    it('danger + focus hors des deux boutons + Entrée → false', async () => {
+        const p = danger();
+        doc.activeElement = doc.body;
+        touche('Enter');
+        await expect(p).resolves.toBe(false);
+    });
+
+    it('ordinaire + Entrée (focus de départ sur Confirmer) → true (inchangé)', async () => {
+        const p = ordinaire();
+        expect(doc.activeElement).toBe(bouton('Continuer'));
+        touche('Enter');
+        await expect(p).resolves.toBe(true);
+    });
+
+    it('ordinaire + focus hors des deux boutons + Entrée → true (inchangé)', async () => {
+        const p = ordinaire();
+        doc.activeElement = doc.body;
+        touche('Enter');
+        await expect(p).resolves.toBe(true);
+    });
+
+    it('ordinaire + focus déplacé sur Annuler + Entrée → false', async () => {
+        const p = ordinaire();
+        bouton('Annuler').focus();
+        touche('Enter');
+        await expect(p).resolves.toBe(false);
+    });
+
+    it('Échap → false partout, même focus sur le bouton rouge', async () => {
+        const p1 = danger();
+        bouton('Remplacer').focus();
+        touche('Escape');
+        await expect(p1).resolves.toBe(false);
+        reinitialiserDom(); uiDialogues = chargerUiDialogues();
+        const p2 = ordinaire();
+        touche('Escape');
+        await expect(p2).resolves.toBe(false);
+    });
+});
