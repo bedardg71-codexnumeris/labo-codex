@@ -5148,8 +5148,14 @@
         // Utilise selectionsCache (capturé avant le setup) pour éviter les valeurs écrasées
         // Délai suffisant pour que preRemplirEvaluation ait fini son chaînage
         setTimeout(() => {
-            if (!selectionsCache) {
-                // Pas de cache — débloquer la mémorisation quand même
+            // #947 — la mémoire des derniers choix vient d'une AUTRE copie : elle ne pré-remplit
+            // qu'une copie SANS évaluation. Sur une copie évaluée, ce qui est enregistré fait foi
+            // (#939, #946) : une évaluation sans cartouche ou sans échelle reste sans, sinon
+            // « Enregistrer », qui lit les menus, y écrivait celles de la mémoire.
+            const copieEvaluee = typeof window._evaluationEnregistreeDeLaCopie === 'function'
+                && !!window._evaluationEnregistreeDeLaCopie({ etudiantDA: fichier.etudiantDA, productionId: productionIdEffective });
+            if (!selectionsCache || copieEvaluee) {
+                // Rien à restaurer — débloquer la mémorisation quand même
                 window._bloquerMemorisation = false;
                 return;
             }

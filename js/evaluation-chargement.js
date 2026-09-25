@@ -2066,6 +2066,7 @@ window.messageEchelleManquante = messageEchelleManquante;
 window.cartoucheSelectionnee = cartoucheSelectionnee;
 window.choisirCartoucheEval = choisirCartoucheEval;             // #944 — le geste au menu (index.html)
 window.poserCartoucheParChargeur = poserCartoucheParChargeur;   // #944 — evaluation.js, travaux-ui.js
+window._evaluationEnregistreeDeLaCopie = _evaluationEnregistreeDeLaCopie;   // #947 — la restauration de la visionneuse (travaux-ui.js)
 window.niveauSelectionne = niveauSelectionne;
 window.pointsSaisis = pointsSaisis;   // lot 2
 

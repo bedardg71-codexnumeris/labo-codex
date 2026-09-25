@@ -1,36 +1,40 @@
-# Consigne du jour – #945 : dans une confirmation « danger », Entrée suit le bouton qui a le focus
+# Consigne du jour – #947 : dans la visionneuse, la mémoire des derniers choix ne touche plus une copie déjà évaluée
 
-> Écrite le 25 septembre 2026, vers 11 h 20 (Toronto), par Cowork, sur `origin/main` = `b1e18ed4` (1.159.4, en ligne chez Netlify depuis 10 h 56, mesuré). **À remesurer avant tout code.**
-> La précédente (#946, livrée en 1.159.4) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-25-bug-946-cartouche.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Deuxième lot du cap du 24 sept. au soir** (« terminer tout ce qui concerne la rétroaction ») : la confirmation « Changer de cartouche » (#944) en est le cas d'entrée. La fiche existe : **#945**. Symptôme non vécu.
+> Écrite le 25 septembre 2026, vers 11 h 45 (Toronto), par Cowork, sur `origin/main` = `9eb4edac` (1.159.5, en ligne chez Netlify depuis 11 h 31, mesuré). **À remesurer avant tout code.**
+> La précédente (#945, livrée en 1.159.5) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-25-bug-945-entree.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Troisième lot du cap du 24 sept. au soir** (« terminer tout ce qui concerne la rétroaction »). La fiche existe : **#947** (trouvaille de #946, inscrite sur la disposition de la relecture de Cowork). Symptôme non vécu.
 
-## 0 · Ce qui est décidé (technique, par Cowork – aucune question à Grégoire)
+## 0 · La règle qui décide – déjà posée par Grégoire
 
-**Entrée fait ce que ferait le bouton qui a le focus.** Pour une confirmation `danger`, le focus part sur « Annuler » : Entrée annule. Si l'enseignant·e a déplacé le focus sur le bouton rouge (Tab), Entrée confirme. Si le focus n'est sur aucun des deux boutons, Entrée fait l'action sûre de la variante : `danger` → annuler ; autre variante → confirmer (inchangé). Échap annule toujours ; le clic ne change pas.
-Motif : aujourd'hui `surTouche` (`js/ui-dialogues.js` ≈ l. 110-113) répond `true` sur Entrée quelle que soit la variante, alors que la même fonction pose exprès le focus sur Annuler (≈ l. 124-125, et le commentaire d'en-tête ≈ l. 26-28 le promet). Un Entrée réflexe confirme donc la destruction.
+**Ce qui est enregistré avec l'évaluation fait foi** (#939, appliquée en #946). La mémoire des derniers choix (`dernieresSelectionsEvaluation`) sert à pré-remplir une copie **sans** évaluation ; sur une copie évaluée, elle ne pose ni grille, ni échelle, ni cartouche. Une copie évaluée sans cartouche reste sans cartouche – c'est aussi ce que font désormais « Consulter » et le menu « Production » (#946). Aucune question à Grégoire.
 
-## 1 · Ce que Cowork a lu (lecture seule, sur `b1e18ed4` – non exécuté)
+## 1 · Ce que Cowork a lu (lecture seule, sur `9eb4edac` – non exécuté)
 
-- `confirmerAction` (`js/ui-dialogues.js` ≈ l. 81-127) : le seul lieu à corriger pour la variante `danger`.
-- **Neuf appels `variante: 'danger'`** dans cinq fichiers (`evaluation-chargement.js`, `planification-bibliotheque.js`, `codex.js`, `comparateur-pratiques.js`, `productions-bibliotheque-ui.js`) : « Changer de cartouche », « Supprimer la carte », « Supprimer de la bibliothèque » (deux), « Modèle antérieur détecté » (deux), « Annuler la fusion », « Jeter la maquette », « Supprimer définitivement ». Remesure le compte ; aucun ne doit avoir besoin d'un changement à l'appel.
-- Les trois autres modales du fichier (saisie ≈ l. 144, information ≈ l. 203, choix ≈ l. 254) ont leur propre `surTouche`. Dis en une ligne si l'une porte une action destructive par défaut sur Entrée ; ne les touche que si oui (sinon : commenter, issue 3).
-- Banc existant : `tests/unit/ui-dialogues-315.test.js` (« Échap → false ; Entrée → true », sans variante) reste vrai pour la variante ordinaire.
+- `js/travaux-ui.js` ≈ l. 5086-5172 (ouverture de la visionneuse) : `selectionsCache` est lu avant le chargement (≈ l. 5091) ; à +2,5 s puis +0,2 s, la grille (≈ l. 5152), l'échelle (≈ l. 5163) et la cartouche (≈ l. 5166, par `poserCartoucheParChargeur`, donc sans confirmation #944) sont posées **si leur menu est vide**. Sur une copie évaluée sans `cartoucheId`, `_chargerCartoucheDropdownModif` (`js/evaluation.js` ≈ l. 1398) laisse le menu vide : la cartouche mémorisée – venue d'une autre copie, peut-être d'une autre production – y entre, `cartoucheSelectionnee` l'écrit dans `evaluationEnCours`, et « Enregistrer » (qui lit le menu, `evaluation.js` ≈ l. 1790) l'écrirait dans l'évaluation.
+- Même question pour l'échelle : une évaluation sans `echelleId` hors grille en points. Mesure-la et traite-la par la même règle.
+- **Code mort du même mécanisme** : `restaurerSelectionsEvaluation` (`js/evaluation.js` ≈ l. 488) n'a **aucun appelant** (grep sur `js/` et `index.html`) et pose la cartouche mémorisée sans aucune garde. Remesure ; s'il n'a toujours aucun appelant, retire-le dans ce lot (zéro-dette : même mécanisme, et il réécrirait le défaut s'il se réveillait). S'il en a un, applique-lui la même règle.
 
-## 2 · Limites
+## 2 · Le lot
 
-- Rien d'autre ne change : libellés, couleurs, ordre des boutons, clic sur l'overlay.
-- Aucune donnée touchée.
-- #947 est le lot suivant, pas celui-ci.
+1. **Mesure d'abord, en WebKit, par la vraie visionneuse** : une copie évaluée sans cartouche, après avoir évalué une autre copie avec une cartouche (la mémoire en porte une). Note ce que montre le menu à +3 s et ce qu'« Enregistrer » écrit.
+2. **Si le défaut se reproduit** : la restauration de la visionneuse ne s'applique qu'à une copie sans évaluation enregistrée. Réutilise le lecteur de #939/#946 (`_evaluationEnregistreeDeLaCopie`) plutôt qu'une troisième recherche ; la forme est à toi.
+3. **S'il ne se reproduit pas** : la fiche se ferme par la mesure, avec un essai qui fige le comportement, et le retrait du code mort seul (sans release si rien ne change à l'écran).
+
+## 3 · Limites
+
+- **Tarir n'est pas réparer.** Des évaluations ont peut-être déjà reçu une cartouche mémorisée ; rien ne permet de les reconnaître. **Aucune donnée réécrite** ; stock assumé, écrit dans la fiche.
+- Une copie **sans** évaluation garde la restauration telle qu'elle est (grille, échelle, cartouche, remise, options d'affichage).
+- Ne touche ni #944 (« Changer de cartouche ») ni #946 (`_cartoucheModelePourLaCopie`).
 - Aucun nom d'élève réel dans les bancs ni dans le rapport (règle 6).
 
-## 3 · Preuve attendue
+## 4 · Preuve attendue
 
-- Vitest (`ui-dialogues-315` étendu ou banc neuf) : `danger` + Entrée → `false` ; `danger` + focus déplacé sur le bouton rouge + Entrée → `true` ; `danger` + focus hors des boutons + Entrée → `false` ; variante ordinaire + Entrée → `true` (inchangé) ; Échap → `false` partout. Rouges sur `b1e18ed4` là où le comportement change.
-- WebKit, par un vrai chemin : la confirmation « Changer de cartouche » (#944) sur une copie évaluée, Entrée → les commentaires ne sont pas remplacés et rien n'est écrit.
+- WebKit : le cas du § 2.1, rouge sur `9eb4edac` par le symptôme exact, vert après ; une copie sans évaluation reçoit toujours la cartouche mémorisée ; une copie évaluée avec sa cartouche la garde.
+- Si le code mort part : un essai ou une sentinelle qui rougit s'il revient (au choix).
 - Break-tests de ton choix, chacun rouge ; nomme-les.
-- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Confirmations : quand une action efface ou remplace quelque chose, la touche Entrée choisit le bouton sélectionné, « Annuler » au départ. Pour confirmer, clique sur le bouton rouge. »
-- Relecture croisée de Cowork avant la fusion (le lot garde les gestes destructifs) : branche, `DEMANDE-RELECTURE-2026-09-25-bug-945.md`, puis verdict, fusion, push.
+- « Nouvelles » (seulement s'il y a correctif) : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Évaluer : dans la visionneuse, une copie déjà évaluée ne reçoit plus la dernière grille, échelle ou cartouche que tu as utilisée ailleurs ; elle garde ce qui a été enregistré avec elle. »
+- Relecture croisée de Cowork avant la fusion (le lot touche ce qui s'écrit dans une évaluation) : branche, `DEMANDE-RELECTURE-2026-09-25-bug-947.md`, puis verdict, fusion, push.
 
-## 4 · Porte terrain
+## 5 · Porte terrain
 
-**Aucune.** Une machine répond. L'iPad sans clavier n'est pas concerné (pas de touche Entrée) : dis-le en une ligne si tu mesures autrement.
+**Aucune.** Une machine répond.
