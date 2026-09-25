@@ -2131,7 +2131,16 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   la liste blanche est un geste à l'aveugle — et c'est exactement ce que la sentinelle du 28 août reproche.
   ⮕ **Rattachement** : énoncé 6 d'`OBJECTIF-COHORTE-1.md` (« une grille partagée arrive complète »), à confirmer
   par la mesure ci-dessus. Jumeau de #511 et de la sentinelle de transport des échelles.
-  ⏳ **RIEN N'EST CODÉ.**
+  ▣ **LIVRÉ SUR BRANCHE le 25 sept. 2026, avec #583** (en relecture croisée avant fusion). « Qui le lit
+  chez celui qui reçoit ? », champ par champ : `description` (racine) et `niveaux[].description` —
+  l'éditeur d'échelle les affiche et les édite ; `discipline` — affichée et filtrée en bibliothèque, et
+  dans le nom du fichier exporté ; `niveaux[].niveauSOLO` — le `<select>` de l'éditeur et l'export
+  recherche. **Les quatre voyagent.** Les champs LOCAUX sont inscrits, avec leur raison, dans
+  `partageSchemas.CHAMPS_ECHELLE_NON_PARTAGES` — le registre qui manquait. Deux registres (un par
+  canal) et non un : les deux canaux n'ont pas le même contrat (restaurer ses propres documents vs les
+  remettre à quelqu'un d'autre) ; la source unique est le RELEVÉ des champs d'échelle, fait une fois
+  dans `sentinelle-transport-echelles.test.js` (AE) pour les deux canaux. Un champ d'échelle ni partagé
+  ni exclu y fait rougir un test.
 
 - [x] **#673 — Un calcul redevenu inapplicable laisse un texte de rétroaction PÉRIMÉ dans le div, et la sauvegarde le persiste**.
   Inscrit le 1er septembre 2026 **avant tout usage de l'ID**. **ID distinct de [[#672]], délibérément** : #672 est clos
@@ -5222,9 +5231,23 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⮕ **Geste** : les faire passer par `obtenirEchelleResolue`, ou dire pourquoi ils ne le peuvent pas.
 
 - [ ] **#583 — Partager une échelle la prive de ses deux repères de maîtrise, à l'ÉMISSION.**
-  ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : faire évoluer le format en `v2`,
+  ✅ **25 sept. 2026 – Grégoire : on prolonge le format `v1` (option A du 28 août abandonnée) ;
+  un format `v2` ne viendra pas avant juin 2027.** Motif mesuré par Cowork : le `v1` a déjà été
+  étendu trois fois depuis le 28 août.
+  ~~✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A : faire évoluer le format en `v2`,
   avec lecture des DEUX versions.** L'extension tolérante de `v1` est écartée : la
-  fermeture du format est une défense, on ne la retire pas pour deux champs.
+  fermeture du format est une défense, on ne la retire pas pour deux champs.~~
+  ▣ **LIVRÉ SUR BRANCHE le 25 sept. 2026, avec #680** (`lot-583-680-partage-reperes`, en relecture
+  croisée de Cowork avant fusion). Mesuré en WebKit AVANT : l'échelle arrivait sans repères et le
+  bilan de la copie évaluée chez la destinataire n'écrivait rien sous « Présentement » ; APRÈS : les
+  deux lignes attendues (`tests/integration/partage-echelle-reperes-583.spec.js`). Les repères sont
+  au schéma `v1` ; un repère qui ne désigne aucun code transporté est RETIRÉ à la réception et la
+  prévisualisation le dit ; un paquet portant un champ inconnu (page restée sur une version plus
+  ancienne) est refusé avec la phrase « Ce fichier vient d'une version plus récente… », le détail
+  technique dessous. Un paquet signé avant le lot se vérifie encore (vecteur figé du lot F).
+  ⚠ **STOCK ASSUMÉ (tarir n'est pas réparer).** Les échelles partagées et reçues AVANT cette version
+  sont arrivées sans repères, et rien ne les reconnaît comme telles chez le destinataire. Aucune donnée
+  n'est réécrite : le destinataire peut poser ses repères à la main dans l'éditeur d'échelle.
   ⮕ **CE QUE ÇA NE TRANCHE PAS, et c'est une contrainte de DÉPLOIEMENT, pas de code** :
   une `v2` qui lit les paquets `v1` règle la moitié du problème. L'autre moitié est qu'un
   paquet `v2` arrivant chez un utilisateur resté en `v1` sera REFUSÉ — le format rejette

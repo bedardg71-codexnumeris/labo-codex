@@ -383,9 +383,25 @@
                         // affichait 0,0 % sans un mot. La liste blanche ne signale pas
                         // ce qu'elle oublie, elle le fait disparaître (#511).
                         valeur: { type: 'nombre', minValeur: 0, maxValeur: 100 },
-                        couleur: { type: 'chaine', max: 30 }
+                        couleur: { type: 'chaine', max: 30 },
+                        // #680 (25 sept. 2026) — la description du niveau et son
+                        // étiquette SOLO se saisissent dans l'éditeur d'échelle ;
+                        // `niveauSOLO` part aussi dans l'export recherche. Mêmes
+                        // bornes que `SCHEMAS_IMPORT.echelle` (import-export.js).
+                        description: { type: 'chaine', max: 500 },
+                        niveauSOLO: { type: 'chaine', max: 50 }
                     }
                 },
+                // #583 (25 sept. 2026) — LES DEUX REPÈRES DE MAÎTRISE VOYAGENT. Ce
+                // sont des CODES de niveau ('D', 'M'…), pas des scores : ils ne
+                // valent que rapportés aux `niveaux` ci-dessus. Sans eux, le bilan
+                // de la rétroaction (« Présentement… », « Points récurrents »)
+                // restait muet chez la personne qui reçoit l'échelle — mesuré en
+                // WebKit le 25 sept. (banc `partage-echelle-reperes-583.spec.js`).
+                // Un repère qui ne désigne aucun code transporté est retiré à la
+                // réception, et la prévisualisation le dit (partage-validation.js).
+                seuilSuffisance: { type: 'chaine', max: 20 },
+                seuilMaitrise: { type: 'chaine', max: 20 },
                 config: {
                     type: 'objet',
                     schema: {
@@ -395,6 +411,10 @@
                         codesPersonnalises: { type: 'chaine', max: 2000 }
                     }
                 },
+                // #680 — saisies dans l'éditeur (description) et affichées ou
+                // filtrées en bibliothèque (discipline).
+                description: { type: 'chaine', max: 500 },
+                discipline: { type: 'chaine', max: 100 },
                 dateCreation: { type: 'chaine', max: 40 },
                 dateModification: { type: 'chaine', max: 40 },
                 dansBibliotheque: { type: 'booleen' },
@@ -498,6 +518,37 @@
             // par manifest.auteur.institution, pas par l'entité.
             champsInterdits: ['etablissement']
         }
+    };
+
+    /**
+     * #680 (25 sept. 2026) — CE QUE LE PARTAGE N'EMPORTE PAS D'UNE ÉCHELLE, ET POURQUOI.
+     *
+     * Jumeau de `CLES_ECHELLE_NON_TRANSPORTEES` (import-export.js) : le schéma
+     * ci-dessus est une liste blanche, et une liste blanche ne signale pas ce
+     * qu'elle oublie, elle le fait disparaître. Les repères de maîtrise sont
+     * restés en chemin du 28 août au 25 sept. pour cette raison (#583).
+     * `tests/unit/sentinelle-transport-echelles.test.js` (AE) relit les champs
+     * qu'écrit echelles.js et exige que chacun soit déclaré au schéma OU inscrit
+     * ici, avec sa raison.
+     *
+     * ⚠ DEUX REGISTRES ET NON UN, DÉLIBÉRÉMENT. Les deux canaux n'ont pas le
+     * même contrat : l'import-export restaure les documents de la MÊME personne
+     * (son auteur, ses dates d'import, son verrou la suivent) ; le partage les
+     * remet à QUELQU'UN D'AUTRE, qui ne doit hériter d'aucun de ces états
+     * locaux. Un registre commun devrait porter une disposition par canal, et
+     * deux modules chargés indépendamment devraient le lire. La source unique
+     * est ailleurs : le relevé des champs d'échelle, que le banc fait une seule
+     * fois pour les deux canaux.
+     */
+    partageSchemas.CHAMPS_ECHELLE_NON_PARTAGES = {
+        auteur: 'l\'attribution voyage dans le manifeste et la chaîne d\'attribution — interdit à la racine d\'une entité (CHAMPS_INTERDITS_COMMUNS)',
+        auteurOriginal: 'ancienne forme de l\'attribution, remplacée par metadata_cc et inspireDe, qui voyagent',
+        idOriginal: 'trace de la source d\'un import — la transporter ferait répondre la copie à l\'identifiant de la source (#542)',
+        dateImport: 'date à laquelle CETTE personne a importé l\'échelle — un état local, sans sens chez le destinataire',
+        dateAjoutBiblio: 'date d\'ajout à la bibliothèque de CETTE personne — un état local ; la duplication chez le destinataire la retire aussi',
+        estDemo: 'drapeau du pack démo — retiré silencieusement à la réception (CHAMPS_RETIRES_SILENCIEUSEMENT)',
+        isDemo: 'drapeau du pack démo — retiré silencieusement à la réception (CHAMPS_RETIRES_SILENCIEUSEMENT)',
+        verrouille: 'verrou posé par CETTE personne sur son échelle — le destinataire décide du sien'
     };
 
     // ------------------------------------------------------------------
