@@ -258,9 +258,12 @@
      * @param {string|null} [options.productionId] - production (null = toutes)
      * @param {'etudiant-production'|'etudiant'} [options.forme] - arborescence
      * @param {boolean} [options.compression] - DEFLATE (true) ou stockage brut
+     * @param {Function} [options.doitArreter] - #949 : lu avant chaque fichier
+     *   et après la compression ; vrai = abandon, sans archive
      * @param {Function} [onProgression] - (traites, total)
-     * @returns {Promise<{blob: (Blob|null), echecs: string[], nbFichiers: number, exportes: string[]}>}
-     *   `blob` est null quand aucun fichier ne correspond aux filtres.
+     * @returns {Promise<{blob: (Blob|null), echecs: string[], nbFichiers: number, exportes: string[], arrete: boolean}>}
+     *   `blob` est null quand aucun fichier ne correspond aux filtres, ou quand
+     *   l'export a été arrêté (`arrete` vrai, `exportes` vide).
      */
     async function exporterTravaux(options = {}, onProgression) {
         if (typeof JSZip === 'undefined') {
@@ -270,6 +273,7 @@
         const da = options.da || null;
         const productionId = options.productionId || null;
         const parProduction = options.forme !== 'etudiant';
+        const doitArreter = typeof options.doitArreter === 'function' ? options.doitArreter : () => false;
         const compression = options.compression !== false;
 
         let fichiers = travauxStockage.obtenirFichiersGroupeActif();
@@ -277,8 +281,11 @@
         if (productionId) fichiers = fichiers.filter(f => f.productionId === productionId);
 
         if (fichiers.length === 0) {
-            return { blob: null, echecs: [], nbFichiers: 0, exportes: [] };
+            return { blob: null, echecs: [], nbFichiers: 0, exportes: [], arrete: false };
         }
+
+        // #949 — un export arrêté ne rend rien : ni archive, ni fichier marqué « exporté ».
+        const arret = () => ({ blob: null, echecs: [], nbFichiers: fichiers.length, exportes: [], arrete: true });
 
         const zip = new JSZip();
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
@@ -289,6 +296,7 @@
         let traites = 0;
 
         for (const fichier of fichiers) {
+            if (doitArreter()) return arret();
             // Identité résolue AVANT le try : le bilan doit pouvoir nommer
             // l'élève concerné, pas seulement compter.
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
@@ -344,7 +352,10 @@
         const blob = await zip.generateAsync(compression
             ? { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }
             : { type: 'blob' });
-        return { blob, echecs, nbFichiers: fichiers.length, exportes };
+        // La compression ne s'interrompt pas : un arrêt demandé pendant qu'elle
+        // tourne est honoré ici, en jetant l'archive.
+        if (doitArreter()) return arret();
+        return { blob, echecs, nbFichiers: fichiers.length, exportes, arrete: false };
     }
 
     /**
@@ -623,16 +634,31 @@
     async function lancerExport(options = {}) {
         const da = options.da || null;
         const productionId = options.productionId || null;
+        // #949 — un seul export à la fois : « Télécharger » est caché pendant
+        // l'export, et un second appel ne lance rien.
+        if (_exportEnCours) return;
+        const exportCourant = { arrete: false };
+        _exportEnCours = exportCourant;
+        _basculerBoutonsExport(true);
         try {
             _reinitialiserBarreProgression('travaux-barre-progression', 'travaux-texte-progression');
 
-            const { blob, echecs, nbFichiers, exportes } = await exporterTravaux(options, (traites, total) => {
-                const pourcent = Math.round((traites / total) * 100);
-                const barre = document.getElementById('travaux-barre-progression');
-                if (barre) barre.style.width = pourcent + '%';
+            const { blob, echecs, nbFichiers, exportes, arrete } = await exporterTravaux(
+                Object.assign({}, options, { doitArreter: () => exportCourant.arrete }),
+                (traites, total) => {
+                    const pourcent = Math.round((traites / total) * 100);
+                    const barre = document.getElementById('travaux-barre-progression');
+                    if (barre) barre.style.width = pourcent + '%';
+                    const texte = document.getElementById('travaux-texte-progression');
+                    if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
+                });
+
+            if (arrete) {
+                _reinitialiserBarreProgression('travaux-barre-progression', 'travaux-texte-progression');
                 const texte = document.getElementById('travaux-texte-progression');
-                if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
-            });
+                if (texte) texte.textContent = 'Export arrêté. Aucun fichier téléchargé.';
+                return;
+            }
 
             if (!blob) {
                 const texte = document.getElementById('travaux-texte-progression');
@@ -673,6 +699,42 @@
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export:', e);
             alert('L\'export a échoué : ' + e.message);
+        } finally {
+            _exportEnCours = null;
+            _basculerBoutonsExport(false);
+        }
+    }
+
+    /**
+     * #949 — L'export en cours de la carte « Exporter des travaux », ou null.
+     * Demande de Grégoire (25 sept. 2026) : pouvoir annuler un export lancé par
+     * erreur (« j'ai simplement oublié d'anonymiser l'export »). Sa décision :
+     * à l'arrêt, rien n'est téléchargé.
+     */
+    let _exportEnCours = null;
+
+    /**
+     * #949 — « Arrêter l'export ». Le fichier en cours de traitement se termine
+     * (une copie annotée ne s'interrompt pas au milieu) ; l'export s'arrête
+     * avant le suivant, ou jette l'archive si la compression tournait.
+     */
+    function arreterExport() {
+        if (!_exportEnCours || _exportEnCours.arrete) return;
+        _exportEnCours.arrete = true;
+        const texte = document.getElementById('travaux-texte-progression');
+        if (texte) texte.textContent = 'Arrêt en cours…';
+        const bouton = document.getElementById('travaux-archivage-arreter');
+        if (bouton) bouton.disabled = true;
+    }
+
+    /** #949 — Pendant un export : « Arrêter l'export » à la place de « Télécharger ». */
+    function _basculerBoutonsExport(enCours) {
+        const telecharger = document.getElementById('travaux-archivage-telecharger');
+        if (telecharger) telecharger.style.display = enCours ? 'none' : '';
+        const arreter = document.getElementById('travaux-archivage-arreter');
+        if (arreter) {
+            arreter.style.display = enCours ? '' : 'none';
+            arreter.disabled = false;
         }
     }
 
@@ -790,6 +852,7 @@
         exporterTravaux: exporterTravaux,
         exporterPourLea: exporterPourLea,
         lancerExport: lancerExport,
+        arreterExport: arreterExport,
         lancerExportEtudiant: lancerExportEtudiant,
         lancerExportLea: lancerExportLea,
         selectionnerEvaluationsLea: selectionnerEvaluationsLea,   // #566 — lue par le compteur de l'écran
