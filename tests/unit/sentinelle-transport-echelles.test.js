@@ -308,3 +308,68 @@ describe('transport des échelles · AD — élargir la liste n\'ouvre pas une p
         expect(apres.seuilMaitrise).toBe('');
     });
 });
+
+/* ----------------------------- AE — le canal de PARTAGE, même couture (#583/#680) */
+
+// Le canal de partage (`SCHEMA_ENTITE.echelle`, partage-schemas.js) est une SECONDE
+// liste blanche, et elle a oublié de la même façon : les deux repères de maîtrise y
+// sont restés absents du 28 août au 25 sept. 2026, alors que ce banc les gardait
+// déjà côté import-export. C'est la cinquième fois (#511, 28 août, #667, #668, #583)
+// qu'un champ se perd ainsi. Le relevé des champs connus d'une échelle est fait UNE
+// fois, ici, pour les deux canaux : chacun doit les transporter ou les exclure.
+//
+// « Connu de l'application » = écrit par echelles.js (AA) OU connu du canal
+// d'import-export (transporté ou exclu). Le second ensemble est ce qui attrape les
+// champs d'état local (`dateImport`, `verrouille`…) que la création ne pose pas.
+
+function clesConnuesDUneEchelle() {
+    return new Set([
+        ...clesEcritesParLaDuplication(),
+        ...clesEcritesParLaCreationComplete(),
+        ...Object.keys(win.SCHEMAS_IMPORT.echelle),
+        ...Object.keys(win.CLES_ECHELLE_NON_TRANSPORTEES)
+    ]);
+}
+
+describe('transport des échelles · AE — le partage ne perd aucun champ d\'échelle en silence', () => {
+    let schemas;
+    beforeEach(() => { schemas = chargerScript('js/partage-schemas.js').partageSchemas; });
+
+    it('AE.a LE CAS QUI PORTE LE SENS : chaque champ connu est partagé, ou exclu avec sa raison', () => {
+        const partages = Object.keys(schemas.SCHEMA_ENTITE.echelle.champs);
+        const exclus = Object.keys(schemas.CHAMPS_ECHELLE_NON_PARTAGES);
+        const orphelins = [...clesConnuesDUneEchelle()].filter(c => !partages.includes(c) && !exclus.includes(c));
+        expect(orphelins,
+            'champs d\'échelle ni partagés ni exclus : les ajouter à SCHEMA_ENTITE.echelle '
+            + '(partage-schemas.js), ou à CHAMPS_ECHELLE_NON_PARTAGES avec leur raison'
+        ).toEqual([]);
+    });
+
+    it('AE.b les deux repères et les champs retenus de #680 sont DÉCLARÉS (pas exclus)', () => {
+        const partages = Object.keys(schemas.SCHEMA_ENTITE.echelle.champs);
+        ['seuilSuffisance', 'seuilMaitrise', 'description', 'discipline']
+            .forEach(c => expect(partages, `« ${c} » doit voyager`).toContain(c));
+    });
+
+    it('AE.c un niveau voyage entier : toute clé de niveau connue est déclarée', () => {
+        const partages = Object.keys(schemas.SCHEMA_ENTITE.echelle.champs.niveaux.schema);
+        const connues = new Set([...clesCanoniquesDUnNiveau(), ...Object.keys(win.SCHEMAS_IMPORT.echelle.niveaux.schema)]);
+        const orphelines = [...connues].filter(c => !partages.includes(c));
+        expect(orphelines, 'clés de niveau connues mais absentes de SCHEMA_ENTITE.echelle.niveaux').toEqual([]);
+    });
+
+    it('AE.d la configuration voyage entière', () => {
+        const partages = Object.keys(schemas.SCHEMA_ENTITE.echelle.champs.config.schema);
+        const orphelines = Object.keys(win.SCHEMAS_IMPORT.echelle.config.schema).filter(c => !partages.includes(c));
+        expect(orphelines).toEqual([]);
+    });
+
+    it('AE.e une exclusion porte sa raison, et ne contredit pas le schéma', () => {
+        const partages = Object.keys(schemas.SCHEMA_ENTITE.echelle.champs);
+        Object.entries(schemas.CHAMPS_ECHELLE_NON_PARTAGES).forEach(([cle, raison]) => {
+            expect(typeof raison, `« ${cle} » doit porter sa raison`).toBe('string');
+            expect(raison.length, `la raison de « ${cle} » est trop courte pour en être une`).toBeGreaterThan(20);
+            expect(partages, `« ${cle} » est à la fois exclu et déclaré`).not.toContain(cle);
+        });
+    });
+});
