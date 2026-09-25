@@ -626,14 +626,15 @@ function demarrerEvaluationDepuisFichier(fichier, opts) {
 
         if (typeof chargerGrilleSelectionnee === 'function') chargerGrilleSelectionnee();
 
-        if (refModele.cartoucheId) {
+        const cartoucheModele = _cartoucheModelePourLaCopie(fichier.etudiantDA, productionIdEffective, refModele);   // #946
+        if (cartoucheModele) {
             var _tentativesCartouche = 0;
             var _essayerCartouche = function() {
                 _tentativesCartouche++;
                 var selC = document.getElementById('selectCartoucheEval');
-                if (selC && Array.from(selC.options).some(function(o) { return o.value === refModele.cartoucheId; })) {
-                    if (window.evaluationEnCours) window.evaluationEnCours.cartoucheId = refModele.cartoucheId;
-                    poserCartoucheParChargeur(selC, refModele.cartoucheId);   // #944
+                if (selC && Array.from(selC.options).some(function(o) { return o.value === cartoucheModele; })) {
+                    if (window.evaluationEnCours) window.evaluationEnCours.cartoucheId = cartoucheModele;
+                    poserCartoucheParChargeur(selC, cartoucheModele);   // #944
                 } else if (_tentativesCartouche < 8) {
                     setTimeout(_essayerCartouche, 250);
                 }
@@ -680,6 +681,18 @@ function _modeleProductionPourEval(prod) {
         }
     }
     return { grilleId: prod.grilleId || '', echelleId: prod.echelleId || '', cartoucheId: prod.cartoucheId || '' };
+}
+
+/**
+ * #946 (25 sept. 2026) — La cartouche du modèle ne se pose que sur une copie SANS évaluation.
+ * Règle de Grégoire (#939) : ce qui est enregistré avec l'évaluation fait foi. Sur une copie
+ * déjà évaluée, le chargeur de l'évaluation pose la sienne (`verifierEtChargerEvaluationExistante`,
+ * `modifierEvaluation`) ; le modèle, s'il la posait aussi, la remplaçait selon l'ordre des
+ * minuteries — et « Enregistrer » l'écrivait. `_modeleProductionPourEval` ne suffit pas à
+ * l'éviter : quand les grilles des évaluations divergent, il retombe sur la production.
+ */
+function _cartoucheModelePourLaCopie(etudiantDA, productionId, refModele) {
+    return _evaluationEnregistreeDeLaCopie({ etudiantDA, productionId }) ? '' : refModele.cartoucheId;
 }
 
 /**
@@ -732,16 +745,16 @@ function chargerProduction(productionNum) {
                 // Déclencher le chargement de la grille et des cartouches
                 chargerGrilleSelectionnee();
 
-                // Pré-sélectionner la cartouche immédiatement (les options sont déjà là)
-                _selectionnerCartoucheProduction(refModele.cartoucheId);
+                // Pré-sélectionner la cartouche immédiatement (les options sont déjà là) —
+                // sur une copie sans évaluation seulement (#946).
+                const etudiantDA = document.getElementById('selectEtudiantEval')?.value;
+                _selectionnerCartoucheProduction(_cartoucheModelePourLaCopie(etudiantDA, productionId, refModele));
 
-                // Vérifier si une évaluation existante doit être chargée,
-                // puis réappliquer la cartouche au cas où le chargement l'écrase
+                // Vérifier si une évaluation existante doit être chargée. #946 : la cartouche
+                // du modèle n'est plus réappliquée 200 ms plus tard — elle écrasait celle de
+                // l'évaluation qu'on venait de charger.
                 setTimeout(() => {
                     verifierEtChargerEvaluationExistante();
-                    if (refModele.cartoucheId) {
-                        setTimeout(() => _selectionnerCartoucheProduction(refModele.cartoucheId), 200);
-                    }
                 }, 100);
             }
         }
