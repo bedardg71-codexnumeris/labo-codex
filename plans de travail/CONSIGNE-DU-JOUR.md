@@ -1,53 +1,40 @@
-# Consigne du jour – Le bilan : la définition de chaque critère à travailler, et des « Points récurrents » qui regardent d'une copie à l'autre
+# Consigne du jour – #946 : à l'ouverture d'une copie déjà évaluée, la cartouche de la copie fait foi
 
-> Écrite le 24 septembre 2026 (Toronto), par Cowork, sur `origin/main` = `4b2e6e4d` (1.156.3, en production chez Netlify depuis 7 h 35, déploiement mesuré).
-> La précédente (#939, livrée en 1.156.3) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-24-lot-939-commentaire-critere.md` (déplacée par Cowork, à commiter avec ce lot).
-> **Troisième lot du chantier « synthèse des rétroactions »** (cap du 21 sept.). Né d'une capture de Grégoire (PDF d'une copie en pratique Standards) : « Ce bilan est une composante majeure de la rétroaction. » **Symptôme vécu.** Inscris UNE fiche au BACKLOG à l'ouverture (numéro suivant #939) et coche-la à la livraison ; ajoute le lot à `FILE-DES-LOTS.md` sous le cap.
+> Écrite le 25 septembre 2026, 10 h 10 (Toronto), par Cowork, sur `origin/main` = `aa5579e8` (1.159.3). **À remesurer avant tout code.**
+> La précédente (#940, livrée en 1.156.4) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-24-lot-940-bilan.md` (déplacée par Cowork, à commiter avec ce lot).
+> **Premier lot du cap posé par Grégoire le 24 sept. au soir** : « terminer tout ce qui concerne la rétroaction dans les prochains lots » (`FILE-DES-LOTS.md`, section du 24 sept. au soir). La fiche existe : **#946** (trouvaille du lot #944). Pas de nouvelle fiche à inscrire pour le lot lui-même.
 
-## 0 · Les décisions de Grégoire (24 sept. 2026) – elles font foi
+## 0 · La règle qui décide – déjà posée par Grégoire
 
-Forme validée, mot pour mot (les ‹…› sont des données) :
+**Ce qui est enregistré avec l'évaluation fait foi** (sa règle de #939, le 24 sept.). Appliquée ici : sur une copie qui a une évaluation enregistrée, la cartouche affichée à l'ouverture est celle de l'évaluation, jamais celle que la production prévoit. La cartouche du modèle ne sert qu'à pré-remplir une copie **sans** évaluation. Aucune question à lui poser sur ce point.
 
-> **PRÉSENTEMENT, IL FAUT SE CONCENTRER SUR**
-> Acquis en développement, à consolider :
-> • Structure (En développement) : ‹la définition du critère, telle qu'elle est écrite dans la grille›
->
-> **POINTS RÉCURRENTS**
-> • Structure : à consolider depuis 2 productions
-> • Rigueur : prioritaire depuis 4 productions
+## 1 · Ce que Cowork a lu (lecture seule, sur `aa5579e8` – non exécuté)
 
-1. **Chaque critère de « Présentement, il faut se concentrer sur » porte sa définition** – les prioritaires ET les « à consolider ». Forme : `Nom (niveau) : définition`. La définition telle qu'écrite (plus de minuscules forcées, plus placée devant le nom). Sans définition dans la grille : `Nom (niveau)` seul, rien d'inventé.
-2. **« Points récurrents » = ce qui revient D'UNE COPIE À L'AUTRE** (les mots de Grégoire : « une récurrence identifiée dans le temps », « une cible de travail immédiate pour l'élève »). Un critère y paraît quand il est dans une zone à travailler (priorité ou signalé) sur cette copie ET sur la précédente – **dès deux productions**. La ligne donne le **nombre réel de productions consécutives** où il reste à travailler, en remontant l'historique jusqu'à la première copie où il est « acquis » (ou jusqu'au bout de l'historique lu). Le mot vient de la zone de la copie ACTUELLE : « prioritaire » ou « à consolider ». Forme : `Nom : à consolider depuis N productions` / `Nom : prioritaire depuis N productions`.
-3. **Les tampons de la copie quittent « Points récurrents »** : ils sont en entier dans « Commentaires ciblés ». (La répétition tronquée à 80 caractères part.)
-4. **La mention « Cet objectif est prioritaire depuis 3 productions »** quitte la ligne du critère dans « Présentement… » : la récurrence se dit une seule fois, dans « Points récurrents ».
+- `chargerProduction` (`js/evaluation-chargement.js` ≈ l. 696) : pose la cartouche du modèle (≈ l. 736), puis à +100 ms `verifierEtChargerEvaluationExistante` (`js/evaluation.js` ≈ l. 575) pose la cartouche de l'évaluation **sans événement `change`** (≈ l. 665 de ce fichier), puis à +300 ms `_selectionnerCartoucheProduction(refModele.cartoucheId)` (≈ l. 743) **repose la cartouche du modèle**, par `poserCartoucheParChargeur` (donc aucune confirmation #944) et `cartoucheSelectionnee` (≈ l. 1003) l'écrit dans `evaluationEnCours.cartoucheId`. « Enregistrer » l'écrirait ensuite dans l'évaluation (l'auto-save, lui, ne touche pas `cartoucheId`, ≈ l. 1870).
+- **Pourquoi le défaut est peut-être rare** – ta relecture #944 l'a vu (`RELECTURE-2026-09-24-bug-944.md`, § « Ce que j'ai vérifié sur la trouvaille #946 ») : `_modeleProductionPourEval` (≈ l. 664) ne retient la cartouche des évaluations que si TOUTES s'accordent ; en état mixte, il rend `''` et rien n'est reposé.
+- **Le cas que Cowork croit réel, à prouver ou à réfuter** : quand les évaluations d'une production n'ont pas toutes la même **grille**, `_modeleProductionPourEval` retombe sur `production.grilleId / cartoucheId`. Une copie évaluée avec la grille de la production mais une **autre** cartouche de cette grille verrait alors la cartouche de la production reposée à +300 ms (l'option existe dans le menu). Idem si la production porte une cartouche et qu'aucune évaluation n'a de `grilleId`.
+- **Second chargeur à mesurer** : `demarrerEvaluationDepuisFichier` (≈ l. 629-640) pose lui aussi la cartouche du modèle, en boucle de huit essais. Dis s'il peut atteindre une copie déjà évaluée, et dans quel ordre par rapport au chargement de l'évaluation.
 
-## 1 · Ce que Cowork a mesuré (lecture seule, sur `4b2e6e4d` – à REMESURER)
+## 2 · Le lot
 
-- **Pourquoi la définition a disparu** : jusqu'au 28 août, un critère en D était un « défi » et recevait `description` en préfixe (`construireConcentration`, `js/synthese-retroaction-data.js` ≈ l. 834-842). `170db4c6` (#555 lot 2) a créé la zone `'signale'` ; les critères en D y sont passés, et `signales` ne rend que `Nom (niveau)` (≈ l. 847). Même chose côté écran : `_rendreSignalesBilan` (`js/evaluation-retroaction.js` ≈ l. 969).
-- **La récurrence existante** : `identifierPatrons` (≈ l. 1318) ne regarde que la zone `'priorite'`, exige trois copies (actuelle + deux précédentes), et n'alimente que le suffixe de « Présentement ». `lireHistorique` (≈ l. 1341) : même élève, non remplacée, sans la copie en cours, triée par date, **cinq au plus** – donc un compte plafonné à 6 ; dis-le, et décide seul si le plafond gêne (technique). Côté écran : le même suffixe (`evaluation-retroaction.js` ≈ l. 931).
-- **« Points récurrents » aujourd'hui** (`construireRecurrents`, ≈ l. 853) porte aussi « Ta force », le décompte d'erreurs (« principalement… »), « Progrès : … depuis … », « Tu as progressé en … ». **Hors décision** : ces lignes ne bougent pas dans ce lot. Dis dans ton rapport lesquelles regardent cette copie seule et lesquelles regardent le temps : Grégoire tranchera ensuite, pas maintenant.
-- **Écran et PDF, mêmes mots** (#581, `copierToutRetroaction` copie l'un dans l'autre) : le bilan de l'écran (`evaluation-retroaction.js`) suit exactement la même forme. Idéalement une seule règle que les deux lisent (zéro-dette), comme #939 l'a fait pour le commentaire d'un critère.
-
-## 2 · La question de Grégoire – à mesurer et à dire dans le rapport
-
-« On parle ici d'une pratique Standards avec échelle de performance. C'est sans doute différent avec des critères analytiques et une sommative ? À vérifier. »
-
-Ce que Cowork a lu (à confirmer par l'exécution) : le bilan ne dépend pas de la pratique, mais de l'**échelle de l'évaluation** (`zoneDuNiveau`, `profil-etudiant-calculs.js` ≈ l. 352), et chaque copie de l'historique est lue dans SA propre échelle. Un critère analytique porte un niveau déduit de ses points (`niveauSelectionne`) : il a donc une zone, et « Présentement » affiche ses points (« 56 / 70 », `lectureNiveauCritere`). Une échelle sans aucun des deux repères rend `null` : ni « Présentement » ni « Points récurrents » ne disent rien – refus honnête, inchangé. **Prouve-le au banc sur trois copies de chaque sorte** : holistique (Standards, échelle à repères), analytique (sommative, échelle à repères), et une échelle sans repères ; plus un historique qui change d'échelle d'une copie à l'autre. Dis en une ligne, en français d'utilisateur, ce que lit l'élève dans chaque cas.
+1. **Mesure d'abord, en WebKit** : reproduis le cas du § 1 (production aux grilles mixtes, copie évaluée avec une autre cartouche que celle de la production) par le vrai menu « Production ». Note ce que montre le menu et ce qu'« Enregistrer » écrit.
+2. **Si le défaut se reproduit** : corrige à la source, selon la règle du § 0, pour **tous** les chargeurs qui posent la cartouche du modèle sur une copie (au moins les deux du § 1). Zéro-dette : si la réapplication à +300 ms ne sert plus qu'à contourner un écrasement, retire-la plutôt que de la garder. La forme du correctif est à toi.
+3. **Si aucun chemin ne reproduit le défaut** : la fiche se ferme **par la mesure**, sans code applicatif. Laisse un essai qui fige le comportement (il doit rougir si on force le modèle sur une copie évaluée), coche #946 avec la phrase qui dit pourquoi, et pas de release.
 
 ## 3 · Limites
 
-- **Aucune donnée écrite.** Le bilan se compose à la lecture ; aucune évaluation réécrite.
-- Pas de nom d'élève réel dans les bancs ni le rapport (règle 6).
-- Ne touche ni l'intro du bilan, ni « Jetons utilisés », ni « Note provisoire ».
+- **Tarir n'est pas réparer.** Des évaluations ont peut-être déjà été enregistrées avec la cartouche de la production au lieu de la leur ; rien ne permet de les reconnaître. **Aucune donnée réécrite.** Écris-le comme stock assumé dans le rapport et dans la fiche.
+- Ne touche pas au geste #944 (« Changer de cartouche », sa confirmation, `_remplacementConfirme`) ni à la règle #939 du commentaire enregistré.
+- #945 (Entrée confirme une confirmation « danger ») est le lot suivant, pas celui-ci.
+- Aucun nom d'élève réel dans les bancs ni dans le rapport (règle 6).
 
 ## 4 · Preuve attendue
 
-- Vitest (PDF et écran, mêmes cas) : définition présente / absente ; prioritaire et à consolider ; récurrence à 2, à N, interrompue par un « acquis », absente avec une seule copie ; plafond de l'historique ; changement d'échelle ; échelle sans repères ; analytique. Les tampons ne sont plus dans « Points récurrents » ; le suffixe « depuis 3 productions » n'est plus dans « Présentement ».
-- WebKit : une copie Standards à deux copies antérieures → le PDF de synthèse et le bilan de l'écran portent les mêmes lignes.
+- WebKit : le cas du § 1, rouge sur `aa5579e8` par le symptôme exact (le menu montre la cartouche de la production ; ou l'évaluation enregistrée change de `cartoucheId`), vert après. Plus : une copie **sans** évaluation reçoit toujours la cartouche du modèle ; une copie évaluée dans l'état mixte de #944 garde la sienne.
 - Break-tests de ton choix, chacun rouge ; nomme-les.
-- « Nouvelles » : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Synthèse de rétroaction : « Présentement, il faut se concentrer sur » donne de nouveau la définition de chaque critère à travailler. « Points récurrents » nomme ce qui revient d'une copie à l'autre, dès deux productions, et depuis combien de productions. »
-- Relecture croisée de Cowork avant la fusion, puis verdict, fusion, push.
+- « Nouvelles » (seulement s'il y a correctif) : **proposition de Cowork, à soumettre à Grégoire avant le push** : « Ouvrir une copie déjà évaluée garde la cartouche avec laquelle elle a été évaluée, même quand la production en prévoit une autre. »
+- Relecture croisée de Cowork avant la fusion (le lot touche ce qui s'écrit dans une évaluation) : branche, `DEMANDE-RELECTURE-2026-09-25-bug-946.md`, puis verdict, fusion, push.
 
 ## 5 · Porte terrain
 
-Une rangée, sur ses vraies données : le « Dossier PDF » d'une copie d'un·e élève qui a au moins une copie évaluée avant celle-ci.
+**Aucune.** Une machine peut répondre, et Grégoire ne crée pas de données fictives pour vérifier un geste. Si le correctif change ce qu'il voit en ouvrant une de ses copies, dis-le en une phrase dans le rapport.
