@@ -11,6 +11,8 @@
 
 **Où vit le travail** : `main` = `5cacc875` (#947 poussé en 1.159.7) + le merge de `fix/950-export-lea-anonymise` (`2415f0ba` nom du PDF Léa, `a7e03032` page de rétroaction, `5e65883b` release + demande de relecture ; build 0925-1432) + cette clôture. Travaillé dans le worktree `../Monitorage_v6-950` pendant le verdict de 1.159.7 ; à retirer (`git worktree remove`) une fois le push constaté.
 
+**Mesuré ensuite** : 1.159.8 EN LIGNE à 14 h 56 (Netlify, déploiement prêt sur `4236b7e7`) ; éprouvée par Grégoire en ligne (« Ça fonctionne »). Worktree `../Monitorage_v6-950` retiré. `OU-EN-EST-ON.md` à jour pour 1.159.6 à 1.159.8 (trou signalé : 1.156.3 à 1.159.5 jamais reportées). Aucun travail en avance sur `main`.
+
 **⚠ Relecture NON rendue** : Grégoire a choisi de livrer avant (#950 vécu deux fois : nom du PDF, puis DA dans la page de rétroaction). Cowork relit après coup : `plans de travail/DEMANDE-RELECTURE-2026-09-25-bug-950.md`.
 
 **Suite** : Grégoire vérifie en ligne un export Léa anonymisé (nom du fichier, en-tête de la page de rétroaction : « Élève 32 · Gr. A », sans DA). Branches `fix/947-…`, `fix/948-…`, `fix/950-…` supprimables une fois le push constaté.
