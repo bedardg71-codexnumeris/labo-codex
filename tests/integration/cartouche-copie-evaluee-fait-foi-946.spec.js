@@ -19,7 +19,7 @@ const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwA
 const T = 't946';
 const ENREGISTRE = "ENREGISTRÉ c1_M : ton propos tient, d'un bout à l'autre.";
 
-async function monter(page, { avecCopie = true, grillesMixtes = true } = {}) {
+async function monter(page, { avecCopie = true, grillesMixtes = true, sansCartouche = false } = {}) {
     const erreurs = [];
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
@@ -27,7 +27,7 @@ async function monter(page, { avecCopie = true, grillesMixtes = true } = {}) {
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.travauxUI && window.travauxStockage
         && typeof window.evaluerProduction === 'function');
-    await page.evaluate(({ png, T, ENREGISTRE, avecCopie, grillesMixtes }) => {
+    await page.evaluate(({ png, T, ENREGISTRE, avecCopie, grillesMixtes, sansCartouche }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
         const coursId = 'cours-946';
         const crit = [{ id: 'c1', nom: 'Contenu', ponderation: 60, type: 'holistique' },
@@ -63,7 +63,7 @@ async function monter(page, { avecCopie = true, grillesMixtes = true } = {}) {
         ]);
         const evals = [{
             id: 'EV946', etudiantDA: 'TEST946', productionId: 'p946', groupeCoursId: 'GC946',
-            grilleId: 'G946', echelleId: 'E946', cartoucheId: 'CT946', statutRemise: 'evalue',
+            grilleId: 'G946', echelleId: 'E946', cartoucheId: sansCartouche ? '' : 'CT946', statutRemise: 'evalue',
             dateEvaluation: '2026-09-15T08:00:00.000Z', noteFinale: 74, niveauFinal: 'D', verrouillee: false,
             criteres: [
                 { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60, retroaction: ENREGISTRE },
@@ -107,7 +107,7 @@ async function monter(page, { avecCopie = true, grillesMixtes = true } = {}) {
         Object.defineProperty(s, 'value', { configurable: true,
             get() { return proto.get.call(this); },
             set(v) { proto.set.call(this, v); window._journal946.push(v); } });
-    }, { png: PNG, T, ENREGISTRE, avecCopie, grillesMixtes });
+    }, { png: PNG, T, ENREGISTRE, avecCopie, grillesMixtes, sansCartouche });
     return erreurs;
 }
 
@@ -188,6 +188,39 @@ test('#946 · menu « Production » : formulaire ouvert sur une autre production
     expect(apres.base, '« Enregistrer » garde la cartouche de l\'évaluation').toBe('CT946');
     expect(erreurs.filter((m) => !/favicon|ERR_FILE_NOT_FOUND/.test(m))).toEqual([]);
 });
+
+// Relecture de Cowork (25 sept.) : une copie évaluée SANS cartouche. Rien n'a été enregistré, rien
+// ne s'impose : la cartouche de la production ne s'y pose pas (comme la visionneuse, qui vide le menu).
+for (const chemin of ['Consulter', 'menu Production']) {
+test(`#946 · copie évaluée SANS cartouche, par ${chemin} : la cartouche de la production ne s'y pose pas`, async ({ page }) => {
+    const erreurs = await monter(page, { avecCopie: false, sansCartouche: true });
+    if (chemin === 'Consulter') {
+        await page.evaluate(() => window.modifierEvaluationParId('EV946'));
+        await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EV946', null, { timeout: 15000 });
+    } else {
+        await page.evaluate(() => window.evaluerProduction('TEST946', 'p2'));
+        await page.waitForFunction(() => document.getElementById('selectProduction1')?.value === 'p2'
+            && window._modifierEvaluationEnCours === false, null, { timeout: 15000 });
+        await laisserPasserLesChargeurs(page);
+        await page.evaluate(() => {
+            const s = document.getElementById('selectProduction1');
+            s.value = 'p946';
+            s.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    }
+    await laisserPasserLesChargeurs(page);
+    const e = await etat(page);
+    console.warn(`[946 sans cartouche, ${chemin}] ` + JSON.stringify(e));
+    expect.soft(e.menu, 'le menu reste sans cartouche').toBe('');
+    expect.soft(e.journal).not.toContain('CT946R');
+    expect.soft(e.enCours, 'le pivot de l\'évaluation ne reçoit pas celle de la production').not.toBe('CT946R');
+    await enregistrer(page);
+    const apres = await etat(page);
+    console.warn(`[946 sans cartouche, ${chemin}, après Enregistrer] ` + JSON.stringify(apres));
+    expect(apres.base, '« Enregistrer » n\'écrit pas la cartouche de la production').not.toBe('CT946R');
+    expect(erreurs.filter((m) => !/favicon|ERR_FILE_NOT_FOUND/.test(m))).toEqual([]);
+});
+}
 
 test('#946 · copie SANS évaluation : elle reçoit la cartouche que la production prévoit', async ({ page }) => {
     const erreurs = await monter(page);
