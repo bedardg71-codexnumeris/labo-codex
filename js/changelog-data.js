@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.10 (#888) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
+                'Horaire&nbsp;: dans une séance, le mot «&nbsp;pér.&nbsp;» reste affiché à côté du nombre de périodes, même une fois la case remplie.',
                 // 1.159.9 (#583, #680) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork, complété avec lui).
                 'Partage&nbsp;: une échelle partagée emporte maintenant ses repères de maîtrise, les descriptions de ses niveaux, leur étiquette SOLO et sa discipline. Chez la personne qui la reçoit, le bilan de la rétroaction («&nbsp;Présentement…&nbsp;», «&nbsp;Points récurrents&nbsp;») fonctionne comme chez toi. Les échelles reçues avant cette version n\'ont pas leurs repères&nbsp;: on peut les poser dans l\'éditeur d\'échelle.',
                 // 1.159.8 (#950) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Claude Code, corrigé avec lui).
