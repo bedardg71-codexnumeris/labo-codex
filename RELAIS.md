@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 11 H : **#946 (1.159.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 11 H 30 : **#945 (1.159.5) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `b1e18ed4` (#946 en ligne) + le merge `5a8c22c2` de `fix/945-entree-confirmation-danger` (`165ffa3f` correctif + release, `37e491e7` demande de relecture, `ab310b92` relecture versée + Nouvelles validées ; build 0925-1105) + cette clôture. Relecture croisée de Cowork verte, sans retouche (`plans de travail/RELECTURE-2026-09-25-bug-945.md`) ; elle confirme l'effet voulu sur les confirmations ordinaires (focus sur « Annuler » + Entrée → annule). Nouvelles validées par Grégoire telles quelles.
+
+**Suite** : aucune porte terrain (consigne § 4). Lot suivant du cap « rétroaction » : #947 (la visionneuse pose la dernière cartouche mémorisée sur une copie évaluée sans cartouche). Branche `fix/945-entree-confirmation-danger` supprimable une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 11 H : **#946 (1.159.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `aa5579e8` (#944) + le merge `bb00fa05` de `fix/946-cartouche-copie-evaluee` (`9ba02569` correctif + release, `babf2504` demande de relecture, `3e085007` essai de la relecture + verdict versé + #947 inscrite, `eb2e22fc` Nouvelles validées ; build 0925-1015) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-25-bug-946.md`), une retouche faite : l'essai « copie évaluée sans cartouche », rouge sous sa mutation C2. Nouvelles validées par Grégoire telles quelles.
 
