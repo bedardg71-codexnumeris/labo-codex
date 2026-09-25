@@ -26,6 +26,9 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.6 (#948, #949) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Claude Code).
+                'Exporter des travaux en mode anonymisation. L\'archive ne contient plus le nom ni le numéro de DA des élèves&nbsp;: dossiers «&nbsp;Élève 32&nbsp;», copies «&nbsp;Élève 32_Artefact 1_1.pdf&nbsp;», et les rétroactions jointes remplacent les prénoms. Ce qui reste hors d\'atteinte&nbsp;: ce qui est écrit à l\'intérieur d\'une copie, et un nom de famille tapé dans une rétroaction.',
+                'Arrêter un export. Pendant un export de travaux, le bouton «&nbsp;Arrêter l\'export&nbsp;» remplace «&nbsp;Télécharger&nbsp;». À l\'arrêt, rien n\'est téléchargé.',
                 // 1.159.5 (#945) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
                 'Confirmations&nbsp;: quand une action efface ou remplace quelque chose, la touche Entrée choisit le bouton sélectionné, «&nbsp;Annuler&nbsp;» au départ. Pour confirmer, clique sur le bouton rouge.',
                 // 1.159.4 (#946) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).

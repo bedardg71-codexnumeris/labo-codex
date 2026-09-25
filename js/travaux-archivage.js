@@ -65,6 +65,93 @@
     }
 
     /**
+     * #948 — L'anonymisation doit se rendre jusqu'aux noms dans l'archive.
+     *
+     * Avant : en mode anonymisation, `obtenirDonneesSelonMode` rendait bien
+     * « Élève 32 » pour le dossier, mais le chemin ajoutait le DA réel, et chaque
+     * copie gardait son nom d'origine — le nom Léa de l'élève
+     * (`Nom_DA_Artefact_1_Remis_le_….pdf`). Le ZIP sortait de la machine avec
+     * les noms et les DA qu'il prétendait masquer.
+     *
+     * Hors anonymisation, rien ne change.
+     */
+    function _estAnonymise() {
+        return typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation() === true;
+    }
+
+    /**
+     * #948 — Le libellé d'un·e élève dans l'archive (dossier, nom du ZIP, bilan).
+     * En anonymisation : le nom anonyme SEUL, jamais le DA (le réglage
+     * « afficher le DA réel » vaut pour l'écran, pas pour ce qui quitte la machine).
+     *
+     * @param {Object|undefined} etudiant - fiche lue par `obtenirDonneesSelonMode`
+     * @param {string} da - DA réel
+     * @param {boolean} avecDA - ajouter le DA hors anonymisation
+     * @returns {string} segment assaini
+     */
+    function _libelleEleve(etudiant, da, avecDA) {
+        if (_estAnonymise()) {
+            const nomAnonyme = etudiant ? [etudiant.prenom, etudiant.nom].filter(Boolean).join(' ') : '';
+            return _assainirSegmentChemin(nomAnonyme || 'Élève non associé');
+        }
+        if (!etudiant) return _assainirSegmentChemin(da || 'non-associe');
+        return _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}` + (avecDA ? `_${da}` : ''));
+    }
+
+    /**
+     * #948 — Le nom d'une copie dans l'archive. En anonymisation, rien du nom
+     * d'origine ne passe, sauf l'extension : `Élève 32_Artefact 1_1.pdf`. Le rang
+     * départage les copies d'un même dossier (original et reprise).
+     * Ce n'est PAS un doublon à unifier avec `anonymiserNomFichier` (modes.js) :
+     * celle-là nomme une copie à l'écran, sans rang ; ici, sans rang, deux
+     * copies d'un même dossier s'écraseraient dans le ZIP.
+     *
+     * @param {Object} fichier - métadonnées du fichier
+     * @param {string} libelle - `_libelleEleve(...)`
+     * @param {string} titreProduction - titre assaini, ou ''
+     * @param {Object} rangs - compteur par dossier, partagé par l'appelant
+     * @param {string} dossier - chemin du dossier dans l'archive
+     * @returns {string}
+     */
+    function _nomCopieDansArchive(fichier, libelle, titreProduction, rangs, dossier) {
+        if (!_estAnonymise()) return fichier.nomFichier;
+        const nom = String(fichier.nomFichier == null ? '' : fichier.nomFichier);
+        const pos = nom.lastIndexOf('.');
+        const suffixe = pos > 0 ? nom.slice(pos + 1).replace(/[^A-Za-z0-9]/g, '') : '';
+        const extension = suffixe ? '.' + suffixe : '';
+        rangs[dossier] = (rangs[dossier] || 0) + 1;
+        return [libelle, titreProduction, String(rangs[dossier])].filter(Boolean).join('_') + extension;
+    }
+
+    /**
+     * #948 — Les évaluations jointes à l'archive. En anonymisation, le DA réel
+     * est retiré : `etudiantDA` devient le libellé anonyme, les champs
+     * `etudiantDAReel` / `etudiantDAffichage` posés par `anonymiserDonnees` sont
+     * ôtés. Les textes libres passent par `anonymiserTexteRetroaction`, le même
+     * outil que l'écran et le PDF : la rétroaction générée commence par
+     * « Bonjour ‹prénom› » et elle est stockée avec le prénom réel.
+     * Limite : cet outil remplace les PRÉNOMS, pas les noms de famille.
+     */
+    function _evaluationsPourArchive(evaluations, etudiants) {
+        if (!_estAnonymise()) return evaluations;
+        return evaluations.map(e => {
+            const copie = Object.assign({}, e);
+            const texte = (t) => (typeof t === 'string' && typeof anonymiserTexteRetroaction === 'function')
+                ? anonymiserTexteRetroaction(t, e.etudiantDA)
+                : t;
+            copie.retroactionFinale = texte(e.retroactionFinale);
+            copie.notesIntegrite = texte(e.notesIntegrite);
+            if (Array.isArray(e.criteres)) {
+                copie.criteres = e.criteres.map(c => Object.assign({}, c, { retroaction: texte(c && c.retroaction) }));
+            }
+            delete copie.etudiantDAReel;
+            delete copie.etudiantDAffichage;
+            copie.etudiantDA = _libelleEleve(etudiants.find(x => x.da === e.etudiantDA), e.etudiantDA, false);
+            return copie;
+        });
+    }
+
+    /**
      * #891 — Met UN fichier dans une archive : l'original, puis sa version
      * annotée s'il en a une et si on la demande.
      *
@@ -112,24 +199,29 @@
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiant = etudiants.find(e => e.da === da);
 
-        const nomDossier = etudiant
-            ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${da}`)
+        const nomDossier = etudiant || _estAnonymise()
+            ? _libelleEleve(etudiant, da, true)
             : _assainirSegmentChemin(`etudiant_${da}`);
+        const productions = obtenirDonneesSelonMode('productions');
+        const rangs = {};
 
         const dossier = zip.folder(nomDossier);
         const echecs = [];
         const exportes = [];
 
         for (const fichier of fichiers) {
+            const production = productions.find(p => p.id === fichier.productionId);
+            const titre = production ? _assainirSegmentChemin(production.titre || production.nom || '') : '';
+            const nomCopie = _nomCopieDansArchive(fichier, nomDossier, titre, rangs, '');
             try {
                 await _ajouterFichierAuZip(dossier, fichier, {
-                    original: `originaux/${fichier.nomFichier}`,
-                    annote: options.inclureAnnotes ? `annotes/${_nomVersionAnnotee(fichier.nomFichier)}` : null
+                    original: `originaux/${nomCopie}`,
+                    annote: options.inclureAnnotes ? `annotes/${_nomVersionAnnotee(nomCopie)}` : null
                 });
                 exportes.push(fichier.id);
             } catch (e) {
-                console.error('[Travaux-Archivage] Export étudiant — échec sur ' + fichier.nomFichier + ' :', e);
-                echecs.push(`${nomDossier} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
+                console.error('[Travaux-Archivage] Export étudiant — échec sur ' + nomCopie + ' :', e);
+                echecs.push(`${nomDossier} / ${nomCopie} — ${e && e.message ? e.message : e}`);
             }
         }
 
@@ -139,7 +231,7 @@
             const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);
 
             if (evalsEtudiant.length > 0) {
-                const evalJson = JSON.stringify(evalsEtudiant, null, 2);
+                const evalJson = JSON.stringify(_evaluationsPourArchive(evalsEtudiant, etudiants), null, 2);
                 dossier.file('evaluations.json', evalJson);
             }
         }
@@ -166,9 +258,12 @@
      * @param {string|null} [options.productionId] - production (null = toutes)
      * @param {'etudiant-production'|'etudiant'} [options.forme] - arborescence
      * @param {boolean} [options.compression] - DEFLATE (true) ou stockage brut
+     * @param {Function} [options.doitArreter] - #949 : lu avant chaque fichier
+     *   et après la compression ; vrai = abandon, sans archive
      * @param {Function} [onProgression] - (traites, total)
-     * @returns {Promise<{blob: (Blob|null), echecs: string[], nbFichiers: number, exportes: string[]}>}
-     *   `blob` est null quand aucun fichier ne correspond aux filtres.
+     * @returns {Promise<{blob: (Blob|null), echecs: string[], nbFichiers: number, exportes: string[], arrete: boolean}>}
+     *   `blob` est null quand aucun fichier ne correspond aux filtres, ou quand
+     *   l'export a été arrêté (`arrete` vrai, `exportes` vide).
      */
     async function exporterTravaux(options = {}, onProgression) {
         if (typeof JSZip === 'undefined') {
@@ -178,6 +273,7 @@
         const da = options.da || null;
         const productionId = options.productionId || null;
         const parProduction = options.forme !== 'etudiant';
+        const doitArreter = typeof options.doitArreter === 'function' ? options.doitArreter : () => false;
         const compression = options.compression !== false;
 
         let fichiers = travauxStockage.obtenirFichiersGroupeActif();
@@ -185,44 +281,46 @@
         if (productionId) fichiers = fichiers.filter(f => f.productionId === productionId);
 
         if (fichiers.length === 0) {
-            return { blob: null, echecs: [], nbFichiers: 0, exportes: [] };
+            return { blob: null, echecs: [], nbFichiers: 0, exportes: [], arrete: false };
         }
+
+        // #949 — un export arrêté ne rend rien : ni archive, ni fichier marqué « exporté ».
+        const arret = () => ({ blob: null, echecs: [], nbFichiers: fichiers.length, exportes: [], arrete: true });
 
         const zip = new JSZip();
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const productions = obtenirDonneesSelonMode('productions');
         const echecs = [];
         const exportes = [];
+        const rangs = {};
         let traites = 0;
 
         for (const fichier of fichiers) {
+            if (doitArreter()) return arret();
             // Identité résolue AVANT le try : le bilan doit pouvoir nommer
             // l'élève concerné, pas seulement compter.
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
-            const nomEtudiant = etudiant
-                ? _assainirSegmentChemin(`${etudiant.nom}_${etudiant.prenom}_${fichier.etudiantDA}`)
-                : _assainirSegmentChemin(fichier.etudiantDA || 'non-associe');
+            const nomEtudiant = _libelleEleve(etudiant, fichier.etudiantDA, true);
+
+            // #891 — même assainissement que les noms d'élèves (#572) : les
+            // accents restent (« Écrit 1 » ne devient plus « _crit_1 »).
+            const production = productions.find(p => p.id === fichier.productionId);
+            const titre = production ? _assainirSegmentChemin(production.titre || production.nom || '') : '';
 
             let dossier = nomEtudiant;
-            if (parProduction) {
-                // #891 — même assainissement que les noms d'élèves (#572) : les
-                // accents restent (« Écrit 1 » ne devient plus « _crit_1 »).
-                const production = productions.find(p => p.id === fichier.productionId);
-                dossier += '/' + (production
-                    ? _assainirSegmentChemin(production.titre || production.nom || '')
-                    : 'sans-production');
-            }
+            if (parProduction) dossier += '/' + (titre || 'sans-production');
+            const nomCopie = _nomCopieDansArchive(fichier, nomEtudiant, titre, rangs, dossier);
 
             try {
                 // Toujours inclure les annotations aplaties
                 await _ajouterFichierAuZip(zip, fichier, {
-                    original: `${dossier}/${fichier.nomFichier}`,
-                    annote: `${dossier}/${_nomVersionAnnotee(fichier.nomFichier)}`
+                    original: `${dossier}/${nomCopie}`,
+                    annote: `${dossier}/${_nomVersionAnnotee(nomCopie)}`
                 });
                 exportes.push(fichier.id);
             } catch (e) {
-                console.error('[Travaux-Archivage] Export — échec sur ' + fichier.nomFichier + ' :', e);
-                echecs.push(`${nomEtudiant} / ${fichier.nomFichier} — ${e && e.message ? e.message : e}`);
+                console.error('[Travaux-Archivage] Export — échec sur ' + nomCopie + ' :', e);
+                echecs.push(`${nomEtudiant} / ${nomCopie} — ${e && e.message ? e.message : e}`);
             }
 
             traites++;
@@ -234,7 +332,7 @@
         if (da) evaluations = evaluations.filter(e => e.etudiantDA === da);
         if (productionId) evaluations = evaluations.filter(e => e.productionId === productionId);
         if (evaluations.length > 0) {
-            zip.file('_evaluations.json', JSON.stringify(evaluations, null, 2));
+            zip.file('_evaluations.json', JSON.stringify(_evaluationsPourArchive(evaluations, etudiants), null, 2));
         }
 
         const trimestreActif = obtenirTrimestreActif();
@@ -254,7 +352,10 @@
         const blob = await zip.generateAsync(compression
             ? { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }
             : { type: 'blob' });
-        return { blob, echecs, nbFichiers: fichiers.length, exportes };
+        // La compression ne s'interrompt pas : un arrêt demandé pendant qu'elle
+        // tourne est honoré ici, en jetant l'archive.
+        if (doitArreter()) return arret();
+        return { blob, echecs, nbFichiers: fichiers.length, exportes, arrete: false };
     }
 
     /**
@@ -503,7 +604,7 @@
             const etudiant = etudiants.find(e => e.da === da);
             // #572 — assaini aussi ici : ce nom devient celui du FICHIER
             // téléchargé, où un « / » casse l'enregistrement.
-            const nom = _assainirSegmentChemin(etudiant ? `${etudiant.nom}_${etudiant.prenom}` : da);
+            const nom = _libelleEleve(etudiant, da, false);
             // L'archive part MÊME si des fichiers ont échoué (#565, #891).
             telechargerBlob(blob, `travaux_${nom}.zip`);
 
@@ -533,16 +634,31 @@
     async function lancerExport(options = {}) {
         const da = options.da || null;
         const productionId = options.productionId || null;
+        // #949 — un seul export à la fois : « Télécharger » est caché pendant
+        // l'export, et un second appel ne lance rien.
+        if (_exportEnCours) return;
+        const exportCourant = { arrete: false };
+        _exportEnCours = exportCourant;
+        _basculerBoutonsExport(true);
         try {
             _reinitialiserBarreProgression('travaux-barre-progression', 'travaux-texte-progression');
 
-            const { blob, echecs, nbFichiers, exportes } = await exporterTravaux(options, (traites, total) => {
-                const pourcent = Math.round((traites / total) * 100);
-                const barre = document.getElementById('travaux-barre-progression');
-                if (barre) barre.style.width = pourcent + '%';
+            const { blob, echecs, nbFichiers, exportes, arrete } = await exporterTravaux(
+                Object.assign({}, options, { doitArreter: () => exportCourant.arrete }),
+                (traites, total) => {
+                    const pourcent = Math.round((traites / total) * 100);
+                    const barre = document.getElementById('travaux-barre-progression');
+                    if (barre) barre.style.width = pourcent + '%';
+                    const texte = document.getElementById('travaux-texte-progression');
+                    if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
+                });
+
+            if (arrete) {
+                _reinitialiserBarreProgression('travaux-barre-progression', 'travaux-texte-progression');
                 const texte = document.getElementById('travaux-texte-progression');
-                if (texte) texte.textContent = `${traites}/${total} fichiers traités…`;
-            });
+                if (texte) texte.textContent = 'Export arrêté. Aucun fichier téléchargé.';
+                return;
+            }
 
             if (!blob) {
                 const texte = document.getElementById('travaux-texte-progression');
@@ -557,7 +673,7 @@
             if (da) {
                 const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
                 const etudiant = etudiants.find(e => e.da === da);
-                nomZip += '_' + _assainirSegmentChemin(etudiant ? `${etudiant.nom}_${etudiant.prenom}` : da);
+                nomZip += '_' + _libelleEleve(etudiant, da, false);
             }
             if (productionId) {
                 const productions = obtenirDonneesSelonMode('productions');
@@ -583,6 +699,42 @@
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export:', e);
             alert('L\'export a échoué : ' + e.message);
+        } finally {
+            _exportEnCours = null;
+            _basculerBoutonsExport(false);
+        }
+    }
+
+    /**
+     * #949 — L'export en cours de la carte « Exporter des travaux », ou null.
+     * Demande de Grégoire (25 sept. 2026) : pouvoir annuler un export lancé par
+     * erreur (« j'ai simplement oublié d'anonymiser l'export »). Sa décision :
+     * à l'arrêt, rien n'est téléchargé.
+     */
+    let _exportEnCours = null;
+
+    /**
+     * #949 — « Arrêter l'export ». Le fichier en cours de traitement se termine
+     * (une copie annotée ne s'interrompt pas au milieu) ; l'export s'arrête
+     * avant le suivant, ou jette l'archive si la compression tournait.
+     */
+    function arreterExport() {
+        if (!_exportEnCours || _exportEnCours.arrete) return;
+        _exportEnCours.arrete = true;
+        const texte = document.getElementById('travaux-texte-progression');
+        if (texte) texte.textContent = 'Arrêt en cours…';
+        const bouton = document.getElementById('travaux-archivage-arreter');
+        if (bouton) bouton.disabled = true;
+    }
+
+    /** #949 — Pendant un export : « Arrêter l'export » à la place de « Télécharger ». */
+    function _basculerBoutonsExport(enCours) {
+        const telecharger = document.getElementById('travaux-archivage-telecharger');
+        if (telecharger) telecharger.style.display = enCours ? 'none' : '';
+        const arreter = document.getElementById('travaux-archivage-arreter');
+        if (arreter) {
+            arreter.style.display = enCours ? '' : 'none';
+            arreter.disabled = false;
         }
     }
 
@@ -700,6 +852,7 @@
         exporterTravaux: exporterTravaux,
         exporterPourLea: exporterPourLea,
         lancerExport: lancerExport,
+        arreterExport: arreterExport,
         lancerExportEtudiant: lancerExportEtudiant,
         lancerExportLea: lancerExportLea,
         selectionnerEvaluationsLea: selectionnerEvaluationsLea,   // #566 — lue par le compteur de l'écran
