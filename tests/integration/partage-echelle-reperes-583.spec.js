@@ -217,12 +217,12 @@ test('#583 · à l\'écran : un repère orphelin est dit dans la prévisualisati
     console.log('ÉCRAN →', JSON.stringify(r));
 
     expect(r.statut1).toBe('importe');
-    expect(r.texteAvert).toContain('le repère de maîtrise « X » ne désigne aucun de ses niveaux');
+    expect(r.texteAvert).toBe('Échelle « IDME orpheline » : le repère « Maîtrisé à partir de » désigne le niveau « X », qui n\'existe pas dans cette échelle. Ce repère n\'est pas importé ; tu pourras le poser dans l\'éditeur d\'échelle.');
     expect(r.classeAvert).toBe('alerte alerte-attention');
     expect(r.recue).toEqual({ s: 'I', m: undefined, a: false });
 
     expect(r.statut2).toBe('rejete_validation');
-    expect(r.puces[0]).toBe('Ce fichier vient d\'une version plus récente de Labo Codex. Recharge la page (Cmd+Maj+R), puis importe-le de nouveau.');
+    expect(r.puces[0]).toBe('Ce fichier vient d\'une version plus récente de Labo Codex. Recharge la page, puis importe-le de nouveau.');
     expect(r.puces.slice(1).join(' ')).toContain('champ inconnu');
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);

@@ -386,9 +386,15 @@
                         couleur: { type: 'chaine', max: 30 },
                         // #680 (25 sept. 2026) — la description du niveau et son
                         // étiquette SOLO se saisissent dans l'éditeur d'échelle ;
-                        // `niveauSOLO` part aussi dans l'export recherche. Mêmes
-                        // bornes que `SCHEMAS_IMPORT.echelle` (import-export.js).
-                        description: { type: 'chaine', max: 500 },
+                        // `niveauSOLO` part aussi dans l'export recherche.
+                        // ⚠ BORNE GÉNÉREUSE POUR UN TEXTE LIBRE, délibérément (relecture
+                        // de Cowork) : l'éditeur ne limite pas sa longueur, et
+                        // l'auto-contrôle de l'export (`partage-export.js`) REFUSE tout le
+                        // paquet au-delà de la borne. À 500, une échelle qui se partageait
+                        // avant #680 (le champ tombait) ne se partageait plus du tout.
+                        // La borne est un garde-fou contre l'abus, pas une règle de saisie.
+                        description: { type: 'chaine', max: 10000 },
+                        // Valeur d'une liste fermée (`optionsNiveauSOLOEchelle`).
                         niveauSOLO: { type: 'chaine', max: 50 }
                     }
                 },
@@ -412,9 +418,13 @@
                     }
                 },
                 // #680 — saisies dans l'éditeur (description) et affichées ou
-                // filtrées en bibliothèque (discipline).
-                description: { type: 'chaine', max: 500 },
-                discipline: { type: 'chaine', max: 100 },
+                // filtrées en bibliothèque (discipline). Bornes généreuses : voir
+                // `niveaux[].description` ci-dessus.
+                // `null` n'est pas accepté (pas de `nullable`) : mesuré le 25 sept.,
+                // aucun écrivain ne le produit — l'éditeur écrit '' ou retire la
+                // clé, l'import-export assainit en ''.
+                description: { type: 'chaine', max: 10000 },
+                discipline: { type: 'chaine', max: 1000 },
                 dateCreation: { type: 'chaine', max: 40 },
                 dateModification: { type: 'chaine', max: 40 },
                 dansBibliotheque: { type: 'booleen' },
