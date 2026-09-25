@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.4 (#946) — PROPOSÉ par Cowork le 25 sept. 2026, À VALIDER par Grégoire avant le push.
+                'Évaluer&nbsp;: ouvrir une copie déjà évaluée garde la cartouche avec laquelle elle a été évaluée, même quand la production en prévoit une autre.',
                 // 1.159.3 (#944) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
                 'Évaluer&nbsp;: sur une copie déjà évaluée, choisir une autre cartouche au menu propose maintenant de remplacer ses commentaires par ceux de la nouvelle cartouche. Tu confirmes ou tu gardes les commentaires actuels&nbsp;; une cartouche retouchée ailleurs ne change toujours pas une copie déjà évaluée.',
                 // 1.159.2 (#943) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
