@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.7 (#947) — texte de Cowork, À VALIDER par Grégoire avant le push.
+                'Évaluer&nbsp;: dans la visionneuse, une copie déjà évaluée ne reçoit plus la dernière grille, échelle ou cartouche que tu as utilisée ailleurs&nbsp;; elle garde ce qui a été enregistré avec elle.',
                 // 1.159.6 (#948, #949) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Claude Code).
                 'Exporter des travaux en mode anonymisation. L\'archive ne contient plus le nom ni le numéro de DA des élèves&nbsp;: dossiers «&nbsp;Élève 32&nbsp;», copies «&nbsp;Élève 32_Artefact 1_1.pdf&nbsp;», et les rétroactions jointes remplacent les prénoms. Ce qui reste hors d\'atteinte&nbsp;: ce qui est écrit à l\'intérieur d\'une copie, et un nom de famille tapé dans une rétroaction.',
                 'Arrêter un export. Pendant un export de travaux, le bouton «&nbsp;Arrêter l\'export&nbsp;» remplace «&nbsp;Télécharger&nbsp;». À l\'arrêt, rien n\'est téléchargé.',
