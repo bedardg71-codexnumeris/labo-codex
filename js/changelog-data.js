@@ -26,7 +26,7 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
-                // 1.159.5 (#945) — PROPOSÉ par Cowork le 25 sept. 2026, À VALIDER par Grégoire avant le push.
+                // 1.159.5 (#945) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
                 'Confirmations&nbsp;: quand une action efface ou remplace quelque chose, la touche Entrée choisit le bouton sélectionné, «&nbsp;Annuler&nbsp;» au départ. Pour confirmer, clique sur le bouton rouge.',
                 // 1.159.4 (#946) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
                 'Évaluer&nbsp;: ouvrir une copie déjà évaluée garde la cartouche avec laquelle elle a été évaluée, même quand la production en prévoit une autre.',
