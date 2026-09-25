@@ -506,11 +506,29 @@
         }, 'fermer', 'fermer');
     }
 
+    /**
+     * #583 (25 sept. 2026) — UN CHAMP INCONNU VIENT LE PLUS SOUVENT D'UNE VERSION
+     * PLUS RÉCENTE. Le format `labo-codex-partage-v1` s'étend sans changer de nom
+     * (décision de Grégoire, 25 sept.) : une page restée ouverte sur une version
+     * antérieure refuse donc un paquet émis après l'extension. Le refus technique
+     * (« champ inconnu (schéma fermé) ») ne disait pas quoi faire ; cette phrase
+     * vient d'abord, le détail reste dessous.
+     */
+    // Texte validé par Grégoire le 25 sept. 2026. Sans raccourci clavier : il n'existe
+    // pas sur iPad, et netlify.toml sert /*.html en `max-age=0, must-revalidate`
+    // (chaque script porte son `?v=`) — un rechargement ordinaire suffit.
+    var TEXTE_VERSION_PLUS_RECENTE = 'Ce fichier vient d\'une version plus récente de Labo Codex. '
+        + 'Recharge la page, puis importe-le de nouveau.';
+    partageImport.TEXTE_VERSION_PLUS_RECENTE = TEXTE_VERSION_PLUS_RECENTE;
+
     function formaterErreursValidation(erreurs) {
-        return erreurs.map(function (e) {
+        var lignes = erreurs.map(function (e) {
             return '[' + e.code + '] ' + e.message + (e.champ ? ' (' + e.champ + ')' : '');
         });
+        var inconnu = erreurs.some(function (e) { return e.champInconnu; });
+        return inconnu ? [TEXTE_VERSION_PLUS_RECENTE].concat(lignes) : lignes;
     }
+    partageImport.formaterErreursValidation = formaterErreursValidation;
 
     /**
      * Prévisualisation OBLIGATOIRE avant intégration. Affiche l'item
@@ -576,6 +594,17 @@
                 });
                 carte.appendChild(blocChaine);
                 carte.appendChild(listeChaine);
+            }
+
+            // #583 — ce que la validation a retiré en chemin (un repère de
+            // maîtrise qui ne désigne aucun niveau) : dit AVANT la décision.
+            if ((preview.avertissements || []).length) {
+                var blocAvert = el('div');
+                blocAvert.id = 'partage-previz-avertissements';
+                preview.avertissements.forEach(function (texte) {
+                    blocAvert.appendChild(el('p', 'alerte alerte-attention', texte));
+                });
+                carte.appendChild(blocAvert);
             }
 
             if (importExistant) {
