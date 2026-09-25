@@ -11,7 +11,11 @@
 
 **Où vit le travail** : `main` = `ad06d508` + le merge `d29a7783` de `lot-583-680-partage-reperes` (`659cd0d9` le lot, `906f56fd` correction demandée par la relecture — bornes des textes libres — et textes validés, `d6e0ea94` release ; build 0925-1650) + cette clôture. Travaillé dans le worktree `.claude/worktrees/lot-583-680`, à retirer une fois le push constaté. Relecture croisée de Cowork rendue AVANT la fusion (`plans de travail/RELECTURE-2026-09-25-lot-583-680.md`) : acceptée après une correction, faite (essai rouge sur `659cd0d9`, puis vert). Les trois textes (refus, repère orphelin, Nouvelles) validés par Grégoire.
 
-**Suite** : aucune porte terrain (acceptée par Cowork). #951 inscrit (classe CSS absente dans `partage-export.js`, issue 2). Branche `lot-583-680-partage-reperes` supprimable une fois le push constaté. `OU-EN-EST-ON.md` pas encore mis à jour pour 1.159.9.
+**Mesuré ensuite** : poussé (`ad06d508..37baafa1`) ; 1.159.9 EN LIGNE à 17 h 15 (Netlify, déploiement de production prêt sur `37baafa1`, constaté par Cowork). Worktree et branche du lot retirés. `OU-EN-EST-ON.md` à jour pour 1.159.9.
+
+**⚠ Spec instable, observée UNE fois** : `depistage-542-3c3-carte-structure.spec.js › #550 · sans grille de référence, la carte ET la liste disent la cause` n'est passée qu'au SECOND essai dans le verdict WebKit du 25 sept. (pousser.sh, sur `37baafa1`). Sans lien avec le lot. Règle posée par Grégoire : **si elle échoue encore une fois, l'inscrire au BACKLOG.**
+
+**Suite** : aucune porte terrain (acceptée par Cowork). #951 inscrit (classe CSS absente dans `partage-export.js`, issue 2).
 
 ## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 40 : **#950 (1.159.8) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant la relecture de Cowork — lire `git log origin/main`
 
