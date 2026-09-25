@@ -216,7 +216,9 @@
             } else if (interdits.indexOf(k) !== -1) {
                 problemes.push({ champ: chemin + '.' + k, message: 'champ interdit dans un package' });
             } else if (!schemaChamps[k]) {
-                problemes.push({ champ: chemin + '.' + k, message: 'champ inconnu (schéma fermé)' });
+                // `inconnu` : ce champ peut venir d'une version PLUS RÉCENTE de
+                // Labo Codex (#583) — partage-import.js le dit à l'enseignant·e.
+                problemes.push({ champ: chemin + '.' + k, message: 'champ inconnu (schéma fermé)', inconnu: true });
             }
         });
 
@@ -302,6 +304,56 @@
         return noeud;
     }
 
+    /**
+     * #583 (25 sept. 2026) — UN REPÈRE QUI NE DÉSIGNE AUCUN NIVEAU N'ARRIVE PAS.
+     *
+     * Les deux repères de maîtrise sont des CODES de niveau. Un repère dont le
+     * code n'est porté par aucun des niveaux transportés (paquet fabriqué à la
+     * main, ou échelle dont un niveau a été renommé sans que le repère suive)
+     * serait lu chez le destinataire comme « défini » — et le bilan de la
+     * rétroaction classerait les critères contre un niveau introuvable.
+     *
+     * Règle : le repère est RETIRÉ de l'échelle nettoyée, le reste de l'échelle
+     * est importé, et la prévisualisation le DIT. Refuser tout le paquet pour un
+     * repère serait disproportionné : la personne peut le poser elle-même dans
+     * l'éditeur d'échelle. Un repère vide est retiré sans un mot : vide se lit
+     * « absent », c'est la règle de `modifierRepereEchelle` (echelles.js).
+     *
+     * Travaille sur le clone nettoyé : le paquet brut, que vérifie la
+     * signature, n'est jamais touché.
+     *
+     * @param {Array} echelles - entites.echelles du package NETTOYÉ (muté)
+     * @returns {Array<{id, champ, code, message}>}
+     */
+    var LIBELLES_REPERES = {
+        seuilSuffisance: 'suffisance',
+        seuilMaitrise: 'maîtrise'
+    };
+
+    function retirerReperesOrphelins(echelles) {
+        var avertissements = [];
+        echelles.forEach(function (echelle) {
+            var codes = (echelle.niveaux || []).map(function (n) { return n.code; });
+            Object.keys(LIBELLES_REPERES).forEach(function (champ) {
+                if (!(champ in echelle)) return;
+                var code = echelle[champ];
+                if (code !== '' && codes.indexOf(code) !== -1) return;
+                delete echelle[champ];
+                if (code === '') return;
+                avertissements.push({
+                    id: echelle.id,
+                    champ: champ,
+                    code: code,
+                    message: 'Échelle « ' + echelle.nom + ' » : le repère de '
+                        + LIBELLES_REPERES[champ] + ' « ' + code + ' » ne désigne aucun de ses niveaux ; '
+                        + 'il n\'est pas importé. Tu pourras le poser dans l\'éditeur d\'échelle.'
+                });
+            });
+        });
+        return avertissements;
+    }
+    partageValidation.retirerReperesOrphelins = retirerReperesOrphelins;
+
     // ------------------------------------------------------------------
     // validerPackage — les 6 niveaux
     // ------------------------------------------------------------------
@@ -324,7 +376,7 @@
         }
         Object.keys(pkgObj).forEach(function (k) {
             if (schemas.CLES_RACINE.indexOf(k) === -1) {
-                erreurs.push(erreur(1, 'FORMAT_INVALIDE', 'Clé racine inconnue : « ' + k + ' »'));
+                erreurs.push(erreur(1, 'FORMAT_INVALIDE', 'Clé racine inconnue : « ' + k + ' »', { champInconnu: true }));
             }
         });
         ['format', 'manifest', 'entites'].forEach(function (k) {
@@ -359,7 +411,7 @@
         var problemesManifest = [];
         validerObjetFerme(manifest, schemas.SCHEMA_MANIFESTE.champs, 'manifest', problemesManifest, null);
         problemesManifest.forEach(function (p) {
-            erreurs.push(erreur(2, 'MANIFEST_INVALIDE', p.message, { champ: p.champ }));
+            erreurs.push(erreur(2, 'MANIFEST_INVALIDE', p.message, { champ: p.champ, champInconnu: !!p.inconnu }));
         });
         if (manifest.dateExport && isNaN(Date.parse(manifest.dateExport))) {
             erreurs.push(erreur(2, 'MANIFEST_INVALIDE', 'dateExport non parsable en date ISO 8601', { champ: 'manifest.dateExport' }));
@@ -378,7 +430,7 @@
                 if (schemas.CLES_ENTITES[t] === clePluriel) type = t;
             });
             if (!type) {
-                erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'Type d\'entité inconnu : « ' + clePluriel + ' »'));
+                erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'Type d\'entité inconnu : « ' + clePluriel + ' »', { champInconnu: true }));
                 return;
             }
             var liste = entites[clePluriel];
@@ -404,7 +456,7 @@
                 validerObjetFerme(item, schemaType.champs, clePluriel + '[' + i + ']', problemes,
                     schemas.CHAMPS_INTERDITS_COMMUNS.concat(schemaType.champsInterdits));
                 problemes.forEach(function (p) {
-                    erreurs.push(erreur(3, 'ENTITE_INVALIDE', p.message, { type: type, id: item.id || null, champ: p.champ }));
+                    erreurs.push(erreur(3, 'ENTITE_INVALIDE', p.message, { type: type, id: item.id || null, champ: p.champ, champInconnu: !!p.inconnu }));
                 });
             });
         });
@@ -531,6 +583,9 @@
         });
         if (erreurs.length) return rejet();
 
+        // ---- Repères de maîtrise orphelins (#583, 25 sept. 2026) -----------
+        var avertissements = retirerReperesOrphelins(entites[schemas.CLES_ENTITES.echelle] || []);
+
         // ---- Succès --------------------------------------------------------
         var nbEntites = {};
         schemas.TYPES_ENTITES.forEach(function (t) {
@@ -544,8 +599,10 @@
                 auteurNom: manifest.auteur.nom,
                 dateExport: manifest.dateExport,
                 nbEntites: nbEntites,
-                chaineAttribution: clonerProfond(manifest.chaineAttribution || [])
+                chaineAttribution: clonerProfond(manifest.chaineAttribution || []),
+                avertissements: avertissements.map(function (a) { return a.message; })
             },
+            avertissements: avertissements,
             packageNettoye: pkg
         };
     };

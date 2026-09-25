@@ -56,6 +56,10 @@ const EMPLOIS_CONNUS = {
     'js/echelles.js': 5,
     // Le transport à l'import : `SCHEMAS_IMPORT.echelle.seuilMaitrise`.
     'js/import-export.js': 1,
+    // #583 : le transport au PARTAGE (`SCHEMA_ENTITE.echelle.seuilMaitrise`), et le
+    // libellé du repère orphelin retiré à la réception (`LIBELLES_REPERES`).
+    'js/partage-schemas.js': 1,
+    'js/partage-validation.js': 1,
     // `rangDuCode(echelle.seuilMaitrise)` dans `zoneDuCodeDansNiveaux`.
     'js/profil-etudiant-calculs.js': 1,
     // #577 : l'assistant LIT le repère de l'échelle choisie (avertissement si
