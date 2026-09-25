@@ -10259,6 +10259,28 @@ summary.rl-tuile-entete::after {
     width: 100%;
 }
 
+/* #888 — la case Périodes et son mot « pér. » partagent la colonne de 72 px (aucune
+   largeur ajoutée : décision de Grégoire, 17 sept. 2026). Le padding horizontal de
+   la case est resserré pour laisser au chiffre la place que prend le mot. */
+.seance-horaire-periodes {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.seance-horaire-ligne .seance-horaire-periodes input[type="number"] {
+    padding-left: 6px;
+    padding-right: 4px;
+}
+
+.seance-horaire-unite {
+    flex: none;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+    white-space: nowrap;
+}
+
 /* En dessous, la rangée ne tient plus d'un trait : deux colonnes, le libellé
    en tête, et « à » masqué (les deux heures se suivent, la préposition n'a
    plus de sens sur deux lignes). */

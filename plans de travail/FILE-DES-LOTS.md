@@ -1,9 +1,9 @@
 # File des lots – tenue par Cowork
 
-> Mise à jour le 23 septembre 2026, 22 h (Toronto) — par Claude Code : #830 sort (1.156.1, phrase validée). Avant : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
+> Mise à jour le 25 septembre 2026, soir (Toronto) — par Claude Code : #888 sort (1.159.10, phrase validée). Avant, 23 sept., 22 h : #830 sort (1.156.1, phrase validée). Avant : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
 
-1. Tranchée le 17 sept., code seulement : le suffixe « pér. » d'une séance d'horaire (#888).
-2. À Grégoire : la disposition de F4-2 (« En prévision de l'EUF » pour les critères d'avant le 4 sept.) ; F3-6 (l'export pour la recherche compte les niveaux par I / D / M / E).
+1. ~~Tranchée le 17 sept., code seulement : le suffixe « pér. » d'une séance d'horaire (#888).~~ **SORTI DE LA FILE : corrigé en 1.159.10 le 25 sept. 2026 (Claude Code) ; Nouvelles validées telles quelles ; coup d'œil de Grégoire en ligne dû (Cadre › Horaire, une séance remplie).**
+2. À Grégoire : ~~la disposition de F4-2~~ (**tranchée le 25 sept. 2026, 17 h 50 : « laisser tel quel »**, la disposition *refuser* de l'audit du 21 sept. est retenue) ; F3-6 (l'export pour la recherche compte les niveaux par I / D / M / E).
 
 ## Cap fixé par Grégoire le 21 sept. à 13 h 08
 
@@ -22,6 +22,24 @@
 - ~~**Lot S3 de #941**~~ — **SORTI DE LA FILE : livré en 1.159.1, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte ; la mesure du § 2 faite par Grégoire : sa pratique déclare un bloc de jetons actif, rien ne change pour ses élèves) ; ligne des Nouvelles validée telle quelle. #941 cochée.** (D5, C2, C5) jetons non déclarés, « Présentement » sans rien, « CONTEXTE » vide, mention « Note provisoire » sous la condition de D5.
 - ~~**#943**~~ — **SORTI DE LA FILE : corrigé en 1.159.2, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte ; deux décisions retenues par Grégoire) ; Nouvelles validées telles quelles. Porte terrain : `PORTES-TERRAIN-2026-09-24-bug-943.md` (iPad + Pencil).** Une ligne ou une flèche qu'on vient de tracer montre aussitôt ses poignées de courbure (retour testeur de Grégoire, 24 sept. 10 h 18).
 - ~~**#944**~~ — **SORTI DE LA FILE : corrigé en 1.159.3, fusionné dans `main` le 24 sept. 2026 après la relecture croisée de Cowork (verte ; cinq chargeurs comptés, tous marqués) ; Nouvelles validées telles quelles.** Choisir une autre cartouche au menu, sur une copie déjà évaluée, remplace ses commentaires après confirmation. Trouvailles inscrites : #945, #946.
+
+## Cap fixé par Grégoire le 24 sept. au soir (19 h 20, Toronto) – écrit par Cowork
+
+« Je voudrais qu'on termine tout ce qui concerne la rétroaction dans les prochains lots. »
+
+1. ~~**#946**~~ – **SORTI DE LA FILE : corrigé en 1.159.4, fusionné dans `main` (`b1e18ed4`) le 25 sept. 2026 après la relecture croisée de Cowork (verte ; essai « copie évaluée sans cartouche » ajouté) ; Nouvelles validées telles quelles ; en ligne chez Netlify à 10 h 56 (mesuré).** Avant : – à l'ouverture d'une copie déjà évaluée, la cartouche de la production peut remplacer celle de la copie (`js/evaluation-chargement.js`, second `_selectionnerCartoucheProduction` ≈ l. 743). Remesuré le 24 à 19 h 16 : aucun commit ne l'a touchée. Commencer par reproduire au navigateur ; si le défaut ne se produit pas, la fiche se ferme par la mesure. Règle qui décide, déjà posée par Grégoire (#939) : ce qui est enregistré avec l'évaluation fait foi.
+2. Puis, inventaire provisoire de Cowork (grep des fiches ouvertes, non exécuté – à remesurer) :
+   - ~~**#948 et #949**~~ – **SORTIS DE LA FILE : livrés en 1.159.6 (`e6f0cdd3`, en ligne à 12 h 51), à la demande de Grégoire avant la relecture ; relecture après coup de Cowork verte, sans retouche (`RELECTURE-2026-09-25-bug-948-2.md`).** Reste #950 (l'export Léa nomme ses PDF avec le DA réel). Avant : #948 passe avant #947 : l'export des travaux en mode anonymisation laissait le DA, le nom d'origine des copies et les prénoms des rétroactions. Relecture de Cowork : `RELECTURE-2026-09-25-bug-948.md` (pas encore : R1 bloquante).
+   - #947 (inscrite avec #946) – dans la visionneuse, une copie évaluée sans cartouche reçoit la dernière cartouche mémorisée (`travaux-ui.js` ≈ l. 5165). Code seulement ; issue de la relecture #946.
+   - ~~#945~~ – **SORTI DE LA FILE : corrigé en 1.159.5, fusionné dans `main` (`9eb4edac`) le 25 sept. 2026 après la relecture croisée de Cowork (verte, sans retouche) ; Nouvelles validées ; en ligne à 11 h 31 (mesuré).** Avant : Entrée confirme une confirmation « danger » même quand le focus est sur Annuler (dont « Changer de cartouche », #944). Code seulement.
+   - ~~F4-2~~ – « En prévision de l'EUF » pour les critères d'avant le 4 sept. : **tranchée par Grégoire le 25 sept. 2026 : laisser tel quel** (aucun lot).
+   - #654 – une production importée ne retrouve pas sa cartouche (`production.cartoucheId` jamais remappé). Non vécu.
+   - #275 – des rétroactions plus riches dans la synthèse : **décision de pédagogie avant tout code**.
+   - Écartée : #453 (artefacts H2026 – trimestre non rouvert).
+
+## Choisi par Grégoire le 25 sept. après-midi – écrit par Cowork
+
+- **Lot #583 + #680** – partager une échelle transporte ses repères de maîtrise (et les autres champs laissés en chemin), avec un registre d'exclusion et un message clair pour un paquet venu d'une version plus récente. **Décision de Grégoire, 15 h 40** : « On prolonge le format actuel. La version ne viendra pas avant juin 2027. » (pas de `v2`). Consigne : `CONSIGNE-DU-JOUR.md`.
 
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 
