@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 11 H 30 : **#945 (1.159.5) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 12 H 50 : **#948 + #949 (1.159.6) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant les relectures de Cowork — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `9eb4edac` (#945 en ligne) + le merge `74963905` de `fix/948-anonymisation-export-travaux` (`1426f4b9` #948 correctif, `b221df29` demande de relecture #948 seconde remise, `bb84acdd` #949, `e983da12` demande de relecture #949, `f0d5127a` release ; build 0925-1210) + cette clôture. Nouvelles validées par Grégoire telles quelles.
+
+**⚠ Relectures NON rendues** : Grégoire a choisi de livrer avant (ses essais en ligne montraient encore l'export non anonymisé, le correctif n'étant que sur la branche). Cowork relit APRÈS coup : `plans de travail/DEMANDE-RELECTURE-2026-09-25-bug-948.md` (R1-R3 de sa première relecture appliqués) et `…-bug-949.md`. Toute retouche = un nouveau patch.
+
+**Suite** : (1) Grégoire essaie en ligne, mode anonymisation activé : dossiers `Élève N`, copies `Élève N_‹production›_‹rang›.pdf`, bouton « Arrêter l'export » visible PENDANT l'export (non vu dans un navigateur par Claude Code) ; (2) #950 inscrit (l'export Léa garde le DA réel en mode anonymisation) ; (3) #947 attend. Branche `fix/948-anonymisation-export-travaux` supprimable une fois le push constaté. Hors code : l'archive exportée par Grégoire ce matin (dossier + `.zip` dans Téléchargements) garde les noms ; à supprimer par lui.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 11 H 30 : **#945 (1.159.5) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `b1e18ed4` (#946 en ligne) + le merge `5a8c22c2` de `fix/945-entree-confirmation-danger` (`165ffa3f` correctif + release, `37e491e7` demande de relecture, `ab310b92` relecture versée + Nouvelles validées ; build 0925-1105) + cette clôture. Relecture croisée de Cowork verte, sans retouche (`plans de travail/RELECTURE-2026-09-25-bug-945.md`) ; elle confirme l'effet voulu sur les confirmations ordinaires (focus sur « Annuler » + Entrée → annule). Nouvelles validées par Grégoire telles quelles.
 
