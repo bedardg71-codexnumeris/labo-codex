@@ -231,6 +231,36 @@ test('#944 · même geste, « Garder les commentaires actuels » : le menu revie
     expect(erreurs.filter((m) => !/favicon|ERR_FILE_NOT_FOUND/.test(m))).toEqual([]);
 });
 
+// #945 (25 sept. 2026) — Entrée suit le bouton qui a le focus : dans cette confirmation
+// « danger », le focus part sur « Garder les commentaires actuels ». Une vraie frappe au clavier.
+test('#945 · même geste, touche Entrée : rien n\'est remplacé ni écrit ; Tab jusqu\'au bouton rouge puis Entrée remplace', async ({ page }) => {
+    const erreurs = await monter(page);
+    await ouvrirLaCopie(page);
+    const avant = JSON.stringify(await enBase(page));
+
+    await choisirAuMenu(page, 'CT939R');
+    await dialogue(page);
+    expect(await page.evaluate(() => document.activeElement && document.activeElement.textContent)).toBe('Garder les commentaires actuels');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => !document.getElementById('overlay-ui-dialogue'));
+    expect(await page.evaluate(() => document.getElementById('selectCartoucheEval').value)).toBe('CT939');
+    expect(await divs(page)).toEqual({ c1: ENREGISTRE, c2: '' });
+    await page.waitForTimeout(1500);
+    await page.waitForFunction(() => !window._timerAutoSave, null, { timeout: 10000 });
+    expect(JSON.stringify(await enBase(page)), 'rien d\'écrit en base').toBe(avant);
+
+    // Le focus déplacé sur le bouton rouge : Entrée confirme, comme le ferait ce bouton.
+    await choisirAuMenu(page, 'CT939R');
+    await dialogue(page);
+    await page.evaluate(() => Array.from(document.querySelectorAll('#overlay-ui-dialogue button')).find(b => b.textContent === 'Remplacer').focus());
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => !document.getElementById('overlay-ui-dialogue'));
+    expect(await page.evaluate(() => document.getElementById('selectCartoucheEval').value)).toBe('CT939R');
+    expect(await divs(page)).toEqual({ c1: NOUVEAU_C1, c2: NOUVEAU_C2 });
+
+    expect(erreurs.filter((m) => !/favicon|ERR_FILE_NOT_FOUND/.test(m))).toEqual([]);
+});
+
 test.describe('iPad', () => {
     test.use({ hasTouch: true, isMobile: true, viewport: { width: 820, height: 1180 } });
 test('#944 · les deux boutons de la confirmation sont des cibles tactiles (iPad, 44 px)', async ({ page }) => {
