@@ -34,7 +34,7 @@ Grégoire, à 11 h 46, avec une capture de la carte « Exporter des travaux » �
 ## Preuves
 
 - Banc `tests/unit/sentinelle-949-arreter-export-travaux.test.js`, 10 essais : les boutons échangés pendant l'export et rétablis après ; l'arrêt pendant le 2e fichier (F3 et F4 ne sont pas lus, rien n'est compressé, téléchargé ou marqué) ; l'état du bouton au clic ; l'arrêt pendant la compression ; le second export refusé ; un nouvel export qui part normalement après un arrêt ; « Arrêter » sans export en cours ; le moteur arrêté et le moteur non arrêté ; le gabarit de la carte.
-- 14 mutations, 14 rouges. Pendant la passe, deux mutations sont d'abord restées vertes.
+- 12 mutations, 12 rouges (corrigé au rituel de fin de session : j'avais écrit « 14 », et le message du commit `bb84acdd` le dit encore). La première passe en comptait 12, dont deux sont d'abord restées vertes.
   - La garde `if (exportCourant.arrete) return;` dans le rappel de progression n'avait aucun effet observable : le message d'arrêt remplace le compteur aussitôt après. **Je l'ai retirée.**
   - `exportes` rendu non vide à l'arrêt n'était pas vu, parce que `lancerExport` sort avant de marquer. J'ai ajouté un essai direct sur le moteur.
 - Anti-cache : `travaux-archivage.js?v=20260925b` et `travaux-ui.js?v=20260925a`.
