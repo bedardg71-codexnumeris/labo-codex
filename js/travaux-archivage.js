@@ -457,13 +457,20 @@
             const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
             const nom = (etudiant?.nom || 'Inconnu').replace(/[^a-zA-ZÀ-ÿ-]/g, '');
             const daEtud = etudiant?.da || fichier.etudiantDA || '0000000';
-            const libelle = `${etudiant?.prenom ? etudiant.prenom + ' ' : ''}${etudiant?.nom || 'étudiant inconnu'} (${daEtud})`;
+            // #950 — en anonymisation, ni nom ni DA : le nom anonyme seul (« Élève 32 »), comme
+            // l'export des travaux (#948). Avant : `Inconnu_<DA réel>_…` (le nom anonyme est vide).
+            const anonyme = _estAnonymise();
+            const libelle = anonyme
+                ? _libelleEleve(etudiant, daEtud, false)
+                : `${etudiant?.prenom ? etudiant.prenom + ' ' : ''}${etudiant?.nom || 'étudiant inconnu'} (${daEtud})`;
 
             try {
                 const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
                 const pdfBlob = doc.output('blob');
 
-                const nomFichier = `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
+                const nomFichier = anonyme
+                    ? `${libelle}_${nomProd}_Evalue.pdf`
+                    : `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
                 blobs.push({ blob: pdfBlob, nom: nomFichier });
 
                 // La copie part quand même : elle est valide, il lui manque la

@@ -200,6 +200,22 @@
         const etudiants = lireDonneesNamespace('groupeEtudiants');
         const e = etudiants.find(x => x.da === da) || {};
 
+        // #950 — en mode anonymisation, l'en-tête ne porte ni DA ni nom réel. Le nom anonyme
+        // n'a pas de nom de famille (« Élève 32 », `nom: ''`) : le repli ci-dessous le recomposait
+        // depuis `etudiantNom` et imprimait « Élève 32 32 ». Le groupe anonyme porte déjà « Gr. »,
+        // que l'en-tête ajoute aussi.
+        const anonyme = typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation() === true;
+        if (anonyme) {
+            const nomAnonyme = [e.prenom, e.nom].filter(Boolean).join(' ')
+                || (typeof anonymiserNom === 'function' ? anonymiserNom(da) : '');
+            return {
+                firstName: nomAnonyme,
+                lastName:  '',
+                da:        '',
+                group:     String(e.groupe || '').replace(/^Gr\.\s*/, '')
+            };
+        }
+
         // Fallback sur evaluation.etudiantNom si l'étudiant n'est plus trouvable
         let prenom = e.prenom || '';
         let nom = e.nom || '';
