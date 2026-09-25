@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 16 H 55 : **#583 + #680 (1.159.9) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 18 H 10 : **#888 (1.159.10) COMMITÉ SUR `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `db89265b` (doc 1.159.9, non poussé jusqu'ici) + `503f00b5` le lot + `2e91da82` release (build 0925-1757) + cette clôture. Travaillé directement sur `main` (aucune autre session active, mesuré). Pas de relecture croisée (consigne : rien ne se reprend mal). Nouvelles validées par Grégoire telles quelles.
+
+**Reste** : constater « en ligne » chez Netlify ; coup d'œil de Grégoire (Cadre › Horaire, une séance remplie ; réserve Safari Mac : le chiffre touche les flèches de la case, ≈ 43 px). Non commités, laissés à Cowork : `PORTES-TERRAIN-2026-09-24-bug-944.md` (modifié), `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md`, `Claude outputs/`. CI GitHub planifiée rouge les 21, 22, 23 et 25 sept. (#868, #892, #929) : hors lot, non inscrit.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 16 H 55 : **#583 + #680 (1.159.9) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `ad06d508` + le merge `d29a7783` de `lot-583-680-partage-reperes` (`659cd0d9` le lot, `906f56fd` correction demandée par la relecture — bornes des textes libres — et textes validés, `d6e0ea94` release ; build 0925-1650) + cette clôture. Travaillé dans le worktree `.claude/worktrees/lot-583-680`, à retirer une fois le push constaté. Relecture croisée de Cowork rendue AVANT la fusion (`plans de travail/RELECTURE-2026-09-25-lot-583-680.md`) : acceptée après une correction, faite (essai rouge sur `659cd0d9`, puis vert). Les trois textes (refus, repère orphelin, Nouvelles) validés par Grégoire.
 
