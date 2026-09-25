@@ -1317,7 +1317,9 @@
                     <div class="travaux-barre-progression-container">
                         <div id="travaux-barre-progression" class="travaux-barre-progression"></div>
                     </div>
-                    <button class="btn btn-principal" data-action="travauxUI.lancerArchivage">Télécharger</button>
+                    <button id="travaux-archivage-telecharger" class="btn btn-principal" data-action="travauxUI.lancerArchivage">Télécharger</button>
+                    <!-- #949 : visible pendant un export seulement ; à l'arrêt, rien n'est téléchargé -->
+                    <button id="travaux-archivage-arreter" class="btn btn-secondaire" data-action="travauxUI.arreterArchivage" style="display:none">Arrêter l'export</button>
                 </div>
 
                 <!-- Export Lea -->
@@ -3590,6 +3592,13 @@
             forme: document.getElementById('travaux-archivage-forme')?.value || 'etudiant-production',
             compression: document.getElementById('travaux-archivage-compression')?.checked !== false
         });
+    }
+
+    /**
+     * #949 — « Arrêter l'export » de la même carte.
+     */
+    function arreterArchivage() {
+        travauxArchivage.arreterExport();
     }
 
     /**
@@ -7498,6 +7507,7 @@
         rafraichirPipelineUI: rafraichirPipelineUI,
         // Archivage
         lancerArchivage: lancerArchivage,
+        arreterArchivage: arreterArchivage,
         lancerExportLea: lancerExportLea,
         mettreAJourCompteurLea: mettreAJourCompteurLea,
         // Annotation → Evaluation

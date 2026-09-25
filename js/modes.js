@@ -389,6 +389,19 @@ function anonymiserNom(da) {
 }
 
 /**
+ * #948 — Remplace un prénom entier dans un texte. L'ancienne forme
+ * `\b${prenom}\b` ratait les prénoms qui commencent ou finissent par une
+ * lettre accentuée (« Éloïse », « René ») : en JavaScript, `\b` ne tient pour
+ * lettres que A-Z, a-z, 0-9 et _. La frontière est ici posée sur les lettres
+ * Unicode, et le prénom est échappé (un « . » ou une « ( » n'est plus un motif).
+ */
+function _remplacerPrenomEntier(texte, prenom, remplacement, prefixe = '', drapeaux = 'gu') {
+    const echappe = String(prenom).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const motif = new RegExp(`(^|[^\\p{L}\\p{N}_])(${prefixe}${echappe})(?![\\p{L}\\p{N}_])`, drapeaux);
+    return texte.replace(motif, (_m, avant) => avant + prefixe + remplacement);
+}
+
+/**
  * Anonymise le texte d'une rétroaction en remplaçant les prénoms réels par les prénoms anonymisés
  * ✅ NOUVEAU (30 déc 2025) - Corrige le bug d'affichage des vrais prénoms en mode Anonymisé
  *
@@ -413,19 +426,19 @@ function anonymiserTexteRetroaction(texte, daEtudiant) {
     let texteAnonyme = texte;
 
     // Remplacer tous les prénoms réels par "Élève X"
-    etudiants.forEach(etudiant => {
+    // #948 — les plus longs d'abord : « Marie-Ève » avant « Marie », sinon le
+    // second mangeait le début du premier et laissait « Élève 5-Ève ».
+    etudiants.slice().sort((a, b) => String(b.prenom || '').length - String(a.prenom || '').length).forEach(etudiant => {
         if (etudiant.prenom && mapping[etudiant.da]) {
             const prenomReel = etudiant.prenom;
             const prenomAnonyme = mapping[etudiant.da].prenom || 'Élève';
 
             // Remplacer "Bonjour Prénom" par "Bonjour Élève X"
-            const regexBonjour = new RegExp(`Bonjour ${prenomReel}`, 'gi');
-            texteAnonyme = texteAnonyme.replace(regexBonjour, `Bonjour ${prenomAnonyme}`);
+            texteAnonyme = _remplacerPrenomEntier(texteAnonyme, prenomReel, prenomAnonyme, 'Bonjour ', 'giu');
 
             // Remplacer le prénom seul suivi d'espace ou ponctuation (pour éviter les faux positifs)
             // Par exemple "Marie, tu as bien travaillé" → "Élève 5, tu as bien travaillé"
-            const regexPrenom = new RegExp(`\\b${prenomReel}\\b`, 'g');
-            texteAnonyme = texteAnonyme.replace(regexPrenom, prenomAnonyme);
+            texteAnonyme = _remplacerPrenomEntier(texteAnonyme, prenomReel, prenomAnonyme);
         }
     });
 
@@ -433,8 +446,7 @@ function anonymiserTexteRetroaction(texte, daEtudiant) {
     if (daEtudiant && mapping[daEtudiant]) {
         const etudiant = etudiants.find(e => e.da === daEtudiant);
         if (etudiant && etudiant.prenom) {
-            const regexPrenom = new RegExp(`\\b${etudiant.prenom}\\b`, 'g');
-            texteAnonyme = texteAnonyme.replace(regexPrenom, mapping[daEtudiant].prenom || 'Élève');
+            texteAnonyme = _remplacerPrenomEntier(texteAnonyme, etudiant.prenom, mapping[daEtudiant].prenom || 'Élève');
         }
     }
 
@@ -1142,7 +1154,17 @@ function estEnModeDemo() {
     return false;
 }
 
+/**
+ * #948 — Le mode anonymisation est-il actif ? `modeActuel` est un `let` de ce
+ * fichier : invisible depuis l'IIFE d'un autre module. Les exports de travaux
+ * (travaux-archivage.js) en ont besoin pour nommer dossiers et fichiers.
+ */
+function estModeAnonymisation() {
+    return modeActuel === MODES.ANONYMISATION;
+}
+
 window.MODES = MODES;
+window.estModeAnonymisation = estModeAnonymisation;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
 window.estTourGuideActif = estTourGuideActif;
