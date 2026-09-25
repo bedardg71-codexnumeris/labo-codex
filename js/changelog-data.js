@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.8 (#950) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Claude Code, corrigé avec lui).
+                'Export Léa en mode anonymisation&nbsp;: le PDF se nomme «&nbsp;Élève 32_Artefact-2_Evalue.pdf&nbsp;», et sa page de rétroaction n\'affiche plus que «&nbsp;Élève 32&nbsp;» et le groupe, sans nom ni numéro de DA.',
                 // 1.159.7 (#947) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
                 'Évaluer&nbsp;: dans la visionneuse, une copie déjà évaluée ne reçoit plus la dernière grille, échelle ou cartouche que tu as utilisée ailleurs&nbsp;; elle garde ce qui a été enregistré avec elle.',
                 // 1.159.6 (#948, #949) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Claude Code).
