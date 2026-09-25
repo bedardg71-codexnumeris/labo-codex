@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 16 H 45 : **#944 (1.159.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 11 H : **#946 (1.159.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `aa5579e8` (#944) + le merge `bb00fa05` de `fix/946-cartouche-copie-evaluee` (`9ba02569` correctif + release, `babf2504` demande de relecture, `3e085007` essai de la relecture + verdict versé + #947 inscrite, `eb2e22fc` Nouvelles validées ; build 0925-1015) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-25-bug-946.md`), une retouche faite : l'essai « copie évaluée sans cartouche », rouge sous sa mutation C2. Nouvelles validées par Grégoire telles quelles.
+
+**Suite** : aucune porte terrain (consigne § 5). Lot suivant du cap « rétroaction » : #945 (Entrée confirme une confirmation « danger »), puis #947 (la visionneuse pose la dernière cartouche mémorisée sur une copie évaluée sans cartouche). Branche `fix/946-cartouche-copie-evaluee` supprimable une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 24 SEPT. 2026, ≈ 16 H 45 : **#944 (1.159.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `bb790e78` (#943 en ligne) + les relais `a7759e85`, `c80461d6` + le merge `832e861e` de `bug-944-cartouche-changee` (`5347ca39` correctif + release, `d742cf30` porte terrain, `7c6e92eb` auto-save + demande de relecture, `545ad493` relecture versée + Nouvelles validées ; build 0924-1641) + cette clôture. Relecture croisée de Cowork verte (`plans de travail/RELECTURE-2026-09-24-bug-944.md`) : **cinq** chargeurs sur `bb790e78` (et non quatre comme l'écrivaient la demande et le relais précédent), tous passés par `poserCartoucheParChargeur`. Nouvelles validées par Grégoire telles quelles.
 
