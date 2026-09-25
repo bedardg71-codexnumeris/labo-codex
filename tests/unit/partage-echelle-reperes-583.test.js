@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const racineProjet = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // #583 + #680 (25 sept. 2026) — UNE ÉCHELLE PARTAGÉE EMPORTE SES REPÈRES DE MAÎTRISE.
 //
@@ -91,10 +96,23 @@ describe('#583 · R — la réception', () => {
         expect(recue.seuilSuffisance).toBe('D');
         expect(verdict.avertissements).toHaveLength(1);
         expect(verdict.avertissements[0]).toMatchObject({ id: 'ECH_583', champ: 'seuilMaitrise', code: 'X' });
+        // Texte validé par Grégoire le 25 sept. 2026, avec les libellés de l'écran.
         expect(verdict.preview.avertissements).toEqual([
-            'Échelle « IDME fictive » : le repère de maîtrise « X » ne désigne aucun de ses niveaux ; '
-            + 'il n\'est pas importé. Tu pourras le poser dans l\'éditeur d\'échelle.'
+            'Échelle « IDME fictive » : le repère « Maîtrisé à partir de » désigne le niveau « X », '
+            + 'qui n\'existe pas dans cette échelle. Ce repère n\'est pas importé ; '
+            + 'tu pourras le poser dans l\'éditeur d\'échelle.'
         ]);
+    });
+
+    it('R.f les libellés de l\'avertissement sont ceux de l\'écran (REPERES_ECHELLE, echelles.js)', () => {
+        const source = readFileSync(path.join(racineProjet, 'js', 'echelles.js'), 'utf8');
+        const debut = source.indexOf('const REPERES_ECHELLE = {');
+        expect(debut, 'REPERES_ECHELLE introuvable — le banc a perdu sa cible').toBeGreaterThan(-1);
+        const bloc = source.slice(debut, source.indexOf('};', debut));
+        const ecran = {};
+        for (const [, cle, libelle] of bloc.matchAll(/(\w+):\s*'([^']+)'/g)) ecran[cle] = libelle;
+        expect(Object.keys(ecran)).toHaveLength(2);
+        expect({ ...w.partageValidation.LIBELLES_REPERES }).toEqual(ecran);
     });
 
     it('R.c le paquet BRUT n\'est pas touché (c\'est lui que vérifie la signature)', () => {
@@ -213,5 +231,36 @@ describe('#583 · M — un champ inconnu dit quoi faire', () => {
         expect(erreurs.length).toBeGreaterThan(0);
         const lignes = w.partageImport.formaterErreursValidation(erreurs);
         expect(lignes).not.toContain(w.partageImport.TEXTE_VERSION_PLUS_RECENTE);
+    });
+});
+
+// Relecture de Cowork (25 sept., § 1) — LE LOT NE DOIT PAS FERMER UN CHEMIN QUI MARCHAIT.
+// Avant #680, une description trop longue TOMBAIT à la projection et le partage passait.
+// Déclarer le champ avec une borne étroite faisait échouer l'auto-contrôle de l'export
+// (`partage-export.js` passe le paquet à `validerPackage` et s'interrompt) : TOUT le
+// partage de l'échelle était refusé. L'éditeur ne limite pas la longueur de ces textes.
+describe('#583 · L — un texte libre long ne bloque pas le partage', () => {
+    const long = (n) => 'Texte fictif. '.repeat(Math.ceil(n / 14)).slice(0, n);
+
+    function echelleLongue() {
+        return {
+            ...ECHELLE,
+            description: long(3000),
+            discipline: long(300),
+            niveaux: ECHELLE.niveaux.map((n, i) => (i === 0 ? { ...n, description: long(2500) } : n))
+        };
+    }
+
+    it('L.a l\'auto-contrôle de l\'export passe (même chemin que partage-export.js)', () => {
+        const verdict = w.partageValidation.validerPackage(paquet(echelleLongue()));
+        expect(verdict.erreurs).toEqual([]);
+        expect(verdict.valide).toBe(true);
+    });
+
+    it('L.b et le texte arrive ENTIER : aucune troncature silencieuse', () => {
+        const recue = w.partageValidation.validerPackage(paquet(echelleLongue())).packageNettoye.entites.echelles[0];
+        expect(recue.description).toHaveLength(3000);
+        expect(recue.discipline).toHaveLength(300);
+        expect(recue.niveaux[0].description).toHaveLength(2500);
     });
 });

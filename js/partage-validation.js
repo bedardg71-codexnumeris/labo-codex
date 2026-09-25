@@ -325,9 +325,13 @@
      * @param {Array} echelles - entites.echelles du package NETTOYÉ (muté)
      * @returns {Array<{id, champ, code, message}>}
      */
+    // Les libellés de l'ÉCRAN (`REPERES_ECHELLE`, echelles.js) : « le repère de
+    // suffisance » n'existe nulle part dans l'éditeur. Recopiés et non lus, parce
+    // que ce module se charge sans echelles.js (bancs, auto-contrôle) ; un essai
+    // de `partage-echelle-reperes-583.test.js` exige qu'ils restent identiques.
     var LIBELLES_REPERES = {
-        seuilSuffisance: 'suffisance',
-        seuilMaitrise: 'maîtrise'
+        seuilSuffisance: 'Suffisant à partir de',
+        seuilMaitrise: 'Maîtrisé à partir de'
     };
 
     function retirerReperesOrphelins(echelles) {
@@ -344,15 +348,17 @@
                     id: echelle.id,
                     champ: champ,
                     code: code,
-                    message: 'Échelle « ' + echelle.nom + ' » : le repère de '
-                        + LIBELLES_REPERES[champ] + ' « ' + code + ' » ne désigne aucun de ses niveaux ; '
-                        + 'il n\'est pas importé. Tu pourras le poser dans l\'éditeur d\'échelle.'
+                    // Texte validé par Grégoire le 25 sept. 2026.
+                    message: 'Échelle « ' + echelle.nom + ' » : le repère « ' + LIBELLES_REPERES[champ]
+                        + ' » désigne le niveau « ' + code + ' », qui n\'existe pas dans cette échelle. '
+                        + 'Ce repère n\'est pas importé ; tu pourras le poser dans l\'éditeur d\'échelle.'
                 });
             });
         });
         return avertissements;
     }
     partageValidation.retirerReperesOrphelins = retirerReperesOrphelins;
+    partageValidation.LIBELLES_REPERES = LIBELLES_REPERES;
 
     // ------------------------------------------------------------------
     // validerPackage — les 6 niveaux

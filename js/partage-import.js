@@ -514,8 +514,11 @@
      * (« champ inconnu (schéma fermé) ») ne disait pas quoi faire ; cette phrase
      * vient d'abord, le détail reste dessous.
      */
+    // Texte validé par Grégoire le 25 sept. 2026. Sans raccourci clavier : il n'existe
+    // pas sur iPad, et netlify.toml sert /*.html en `max-age=0, must-revalidate`
+    // (chaque script porte son `?v=`) — un rechargement ordinaire suffit.
     var TEXTE_VERSION_PLUS_RECENTE = 'Ce fichier vient d\'une version plus récente de Labo Codex. '
-        + 'Recharge la page (Cmd+Maj+R), puis importe-le de nouveau.';
+        + 'Recharge la page, puis importe-le de nouveau.';
     partageImport.TEXTE_VERSION_PLUS_RECENTE = TEXTE_VERSION_PLUS_RECENTE;
 
     function formaterErreursValidation(erreurs) {
