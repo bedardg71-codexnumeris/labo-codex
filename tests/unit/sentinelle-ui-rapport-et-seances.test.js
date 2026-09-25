@@ -34,8 +34,19 @@ describe('UI · la rangée de séance tient sur une seule ligne', () => {
         const js = lire('js/trimestre-v2-horaires.js');
         const debut = js.indexOf('<div class="seance-horaire-ligne">');
         expect(debut).toBeGreaterThan(-1);
-        const gabarit = js.slice(debut, js.indexOf('</div>', debut));
-        const nbChamps = (gabarit.match(/<(label|select|input|span)\b/g) || []).length;
+        // #888 : la case Périodes et son mot « pér. » vivent dans un conteneur, qui occupe
+        // UNE colonne. On compte donc les enfants DIRECTS de la rangée, en suivant la
+        // profondeur des balises, jusqu'à sa fermeture.
+        const balises = js.slice(debut).matchAll(/<(\/?)([a-z]+)\b[^>]*>/g);
+        const VIDES = new Set(['input', 'br', 'img']);
+        let profondeur = 0;
+        let nbChamps = 0;
+        for (const [, fermante, nom] of balises) {
+            if (fermante) { profondeur--; if (profondeur === 0) break; continue; }
+            if (profondeur === 1) nbChamps++;
+            if (!VIDES.has(nom)) profondeur++;
+        }
+        expect(profondeur, 'la rangée ne se referme pas dans le gabarit').toBe(0);
         expect(nbChamps).toBeGreaterThanOrEqual(7);
 
         const m = regle.match(/grid-template-columns:\s*([^;]+);/);

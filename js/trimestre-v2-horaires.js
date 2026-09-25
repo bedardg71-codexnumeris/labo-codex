@@ -1085,6 +1085,11 @@ function mettreAJourSeancesHoraireV2() {
     const DEBUT_PAR_DEFAUT = '08:00';
     const FIN_PAR_DEFAUT = '10:00';
 
+    // #888 — le mot « pér. » reste à côté de la case, en dehors d'elle. En placeholder, il
+    // disparaissait à la saisie, et le « 2 » restant ne disait plus ce qu'il compte (le
+    // `title` n'existe pas au toucher). Décision de Grégoire, 17 sept. 2026 : ni rangée ni
+    // largeur ajoutées, donc le mot se loge dans la colonne des périodes.
+
     for (let i = 0; i < nbSeances; i++) {
         const jourDefaut = jours[i % jours.length];
         html += `
@@ -1096,9 +1101,13 @@ function mettreAJourSeancesHoraireV2() {
                 <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}">
                 <span>à</span>
                 <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}">
-                <input type="number" id="v2-hor-seance-${i}-periodes" class="controle-form controle-form-compact"
-                       min="1" max="8" step="1" placeholder="pér." title="Nombre de périodes de cette séance"
-                       data-on-input="majResumeFormatHoraireV2">
+                <div class="seance-horaire-periodes">
+                    <input type="number" id="v2-hor-seance-${i}-periodes" class="controle-form controle-form-compact"
+                           min="1" max="8" step="1" title="Nombre de périodes de cette séance"
+                           aria-describedby="v2-hor-seance-${i}-periodes-unite"
+                           data-on-input="majResumeFormatHoraireV2">
+                    <span id="v2-hor-seance-${i}-periodes-unite" class="seance-horaire-unite">pér.</span>
+                </div>
                 <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local">
             </div>
         `;
