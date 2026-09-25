@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 30 : **#947 (1.159.7) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** (Cowork fermé) — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 40 : **#950 (1.159.8) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant la relecture de Cowork — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `5cacc875` (#947 poussé en 1.159.7) + le merge de `fix/950-export-lea-anonymise` (`2415f0ba` nom du PDF Léa, `a7e03032` page de rétroaction, `5e65883b` release + demande de relecture ; build 0925-1432) + cette clôture. Travaillé dans le worktree `../Monitorage_v6-950` pendant le verdict de 1.159.7 ; à retirer (`git worktree remove`) une fois le push constaté.
+
+**⚠ Relecture NON rendue** : Grégoire a choisi de livrer avant (#950 vécu deux fois : nom du PDF, puis DA dans la page de rétroaction). Cowork relit après coup : `plans de travail/DEMANDE-RELECTURE-2026-09-25-bug-950.md`.
+
+**Suite** : Grégoire vérifie en ligne un export Léa anonymisé (nom du fichier, en-tête de la page de rétroaction : « Élève 32 · Gr. A », sans DA). Branches `fix/947-…`, `fix/948-…`, `fix/950-…` supprimables une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 30 : **#947 (1.159.7) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** (Cowork fermé) — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `55d8a522` (#948/#949 en ligne en 1.159.6, relectures versées, fiches cochées) + le merge `e86eab5e` de `fix/947-visionneuse-memoire-copie-evaluee` (`f87c7b29` correctif + release, `2a7aa21e` demande de relecture, `f857b547` relecture versée + Nouvelles validées ; build 0925-1400) + cette clôture. Relecture croisée de Cowork verte, sans retouche (`plans de travail/RELECTURE-2026-09-25-bug-947.md`). Nouvelles validées par Grégoire telles quelles.
 
