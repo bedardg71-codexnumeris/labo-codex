@@ -64,3 +64,43 @@ describe('#950 · hors anonymisation, rien ne change', () => {
         expect(echec.echecs).toEqual([`Alix Tremblay (${DA}) — Blob introuvable`]);
     });
 });
+
+// Suite vécue (capture de Grégoire, 25 sept., 14 h 30) : la page de rétroaction du PDF imprimait
+// « Élève 32 32 · DA <réel> · Gr. … ». `construireStudent` (synthese-retroaction-data.js) : en
+// anonymisation, le nom anonyme seul, pas de DA, le groupe anonyme sans son « Gr. » (l'en-tête l'ajoute).
+function chargerSynthese({ anonyme, etudiants }) {
+    return chargerScript('js/synthese-retroaction-data.js', {
+        db: { getSync: (k, d) => (d !== undefined ? d : null), setSync: () => {} },
+        cle: (k) => 'test_' + k,
+        obtenirEchelleResolue: () => ({ niveaux: [{ code: 'M', nom: 'Maîtrisé', min: 75, max: 89 }] }),
+        obtenirDonneesSelonMode: (k) => (k === 'groupeEtudiants' ? etudiants : []),
+        obtenirTrimestreActif: () => ({ id: 'T1', nom: 'A2026' }),
+        obtenirEtudiantsCoursActif: () => [], obtenirGroupesCours: () => [],
+        travauxStockage: { obtenirAnnotationFichier: () => null },
+        travauxOutils: { AUTOCOLLANTS: [] },
+        obtenirPreference: () => null,
+        anonymiserTexteRetroaction: (t) => t,
+        anonymiserNom: () => 'Élève 99'
+    }, { addEventListener() {}, removeEventListener() {}, estModeAnonymisation: () => anonyme === true });
+}
+const EVAL_950 = { id: 'EV1', etudiantDA: DA, etudiantNom: 'Élève 32', groupe: 'Gr. A', grilleId: 'G1', criteres: [] };
+
+describe('#950 · la page de rétroaction du PDF, en anonymisation', () => {
+    it('« Élève 32 », sans DA ni « 32 » doublé ; le groupe anonyme sans « Gr. » répété', () => {
+        const win = chargerSynthese({ anonyme: true, etudiants: [{ da: DA, nom: '', prenom: 'Élève 32', groupe: 'Gr. A' }] });
+        const s = win.syntheseRetroactionData.construireFeedback(EVAL_950, { id: 'F1' }, null).student;
+        expect(s).toEqual({ firstName: 'Élève 32', lastName: '', da: '', group: 'A' });
+    });
+
+    it('élève absent de la liste : le nom anonyme vient de anonymiserNom, pas d\'etudiantNom ni du DA', () => {
+        const win = chargerSynthese({ anonyme: true, etudiants: [] });
+        const s = win.syntheseRetroactionData.construireFeedback(EVAL_950, { id: 'F1' }, null).student;
+        expect(s).toEqual({ firstName: 'Élève 99', lastName: '', da: '', group: '' });
+    });
+
+    it('hors anonymisation : prénom, nom, DA et groupe réels, inchangés', () => {
+        const win = chargerSynthese({ anonyme: false, etudiants: [{ da: DA, nom: 'Tremblay', prenom: 'Alix', groupe: '01' }] });
+        const s = win.syntheseRetroactionData.construireFeedback({ ...EVAL_950, groupe: '01' }, { id: 'F1' }, null).student;
+        expect(s).toEqual({ firstName: 'Alix', lastName: 'Tremblay', da: DA, group: '01' });
+    });
+});
