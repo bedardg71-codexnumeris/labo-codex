@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 40 : **#950 (1.159.8) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant la relecture de Cowork — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 16 H 55 : **#583 + #680 (1.159.9) FUSIONNÉS DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `ad06d508` + le merge `d29a7783` de `lot-583-680-partage-reperes` (`659cd0d9` le lot, `906f56fd` correction demandée par la relecture — bornes des textes libres — et textes validés, `d6e0ea94` release ; build 0925-1650) + cette clôture. Travaillé dans le worktree `.claude/worktrees/lot-583-680`, à retirer une fois le push constaté. Relecture croisée de Cowork rendue AVANT la fusion (`plans de travail/RELECTURE-2026-09-25-lot-583-680.md`) : acceptée après une correction, faite (essai rouge sur `659cd0d9`, puis vert). Les trois textes (refus, repère orphelin, Nouvelles) validés par Grégoire.
+
+**Suite** : aucune porte terrain (acceptée par Cowork). #951 inscrit (classe CSS absente dans `partage-export.js`, issue 2). Branche `lot-583-680-partage-reperes` supprimable une fois le push constaté. `OU-EN-EST-ON.md` pas encore mis à jour pour 1.159.9.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 14 H 40 : **#950 (1.159.8) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`**, avant la relecture de Cowork — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `5cacc875` (#947 poussé en 1.159.7) + le merge de `fix/950-export-lea-anonymise` (`2415f0ba` nom du PDF Léa, `a7e03032` page de rétroaction, `5e65883b` release + demande de relecture ; build 0925-1432) + cette clôture. Travaillé dans le worktree `../Monitorage_v6-950` pendant le verdict de 1.159.7 ; à retirer (`git worktree remove`) une fois le push constaté.
 
