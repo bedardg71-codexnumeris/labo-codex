@@ -521,6 +521,10 @@
         + 'Recharge la page, puis importe-le de nouveau.';
     partageImport.TEXTE_VERSION_PLUS_RECENTE = TEXTE_VERSION_PLUS_RECENTE;
 
+    // #643 — texte proposé par Cowork le 26 sept. 2026, à valider par Grégoire.
+    var TEXTE_TRIMESTRE_CARTOUCHES = 'Cartouches tirées du trimestre : ';
+    partageImport.TEXTE_TRIMESTRE_CARTOUCHES = TEXTE_TRIMESTRE_CARTOUCHES;
+
     function formaterErreursValidation(erreurs) {
         var lignes = erreurs.map(function (e) {
             return '[' + e.code + '] ' + e.message + (e.champ ? ' (' + e.champ + ')' : '');
@@ -583,6 +587,13 @@
             });
             carte.appendChild(el('p', null, 'Contenu : ' + morceaux.join(', ')
                 + '. Exporté le ' + formaterDate(manifest.dateExport) + '.'));
+
+            // #643 — de quel trimestre de l'émettrice viennent les cartouches.
+            if (preview.trimestreCartouches) {
+                var blocTrimestre = el('p', null, TEXTE_TRIMESTRE_CARTOUCHES + preview.trimestreCartouches);
+                blocTrimestre.id = 'partage-previz-trimestre';
+                carte.appendChild(blocTrimestre);
+            }
 
             // Chaîne d'attribution (si multi-niveaux).
             if ((preview.chaineAttribution || []).length) {
