@@ -62,3 +62,29 @@ Le chargeur partagé passe par `poserChampTexteLibre` (lot A) : notes masquées 
 1. Les deux conséquences du § 2 (traduction des anciens statuts pour « Modifier », `change` émis sur la remise) : y a-t-il un chemin où la remise « non-recu » ou un ancien statut se comporte autrement qu'avant ?
 2. La remise à « recevable » dans la branche « aucune évaluation » : un trajet où cette branche s'exécute alors qu'une évaluation « IA » est encore en cours d'ouverture (course avec `modifierEvaluation`, garde `_modifierEvaluationEnCours`) ?
 3. La disposition de la rétroaction régénérée (§ 1).
+
+---
+
+## 7 · Réponse à la relecture de Cowork (26 sept. 2026, vers 17 h) – P1, P2, M1 faits
+
+Banc neuf : `tests/integration/evaluation-959-neutralite-chargeur.spec.js`. Trajet de la copie = `evaluerProduction` (la visionneuse, celui de #946) ; la sonde montre qu'il enchaîne **copie, copie, puis « Modifier »** (`chargerEvaluationExistanteSiPresente`). Semis : l'évaluation porte l'échelle `E959B` et la cartouche `CT959` ; la production prévoit `E959` et `CT959R` ; commentaire enregistré sur c1, vide sur c2 ; rétroaction finale réécrite à la main. **Joué sur le code d'avant le lot (`98a0fc0b`, `js/evaluation.js` posé par copie puis restauré, empreinte vérifiée) ET d'après.**
+
+| Mesure | Avant le lot | Après le lot |
+|---|---|---|
+| P1(a) cartouche, échelle, niveaux, commentaire enregistré – copie et Liste | gardés | gardés |
+| P1(b) ouverture sans geste – Liste | base inchangée | base inchangée |
+| P1(b) ouverture sans geste – **copie** | **base réécrite** (rétroaction, commentaire vide) | **identique** |
+| M1 rétroaction à la main – Liste, après « Enregistrer » | gardée | gardée |
+| M1 rétroaction à la main – **copie** | **remplacée** (texte régénéré) | **identique** |
+| P2 `remis` / `non-remis` – Liste | menu vide, base `''` | `evalue` / `non-recu` |
+| P2 `remis` / `non-remis` – copie | menu vide, base `''` | `evalue` / `non-recu` |
+
+**P1 – le dispatch ne fait pas de tort mesurable** : sortie identique à l'octet avant et après sur les deux chemins. Pas de correction.
+
+**P2 – prouvée.** Constat en plus : avant le lot, la traduction du chemin de la copie ne servait à rien sur le trajet réel, puisque « Modifier », qui passe en dernier, reposait la valeur brute. Rouge avant, vert après, par les deux chemins. Mutation (traduction retirée du chargeur partagé) : 4 / 4 rouges ; restauration par copie, `git diff` vide.
+
+**M1 – antérieure et identique avant/après** ⮕ selon ta décision, **inscrite : #960** (issue 2, prochain lot court avant le lot B). Deux cas `test.fail` du banc la déclarent.
+
+**Question jointe à #960, non tranchée** : un commentaire de critère enregistré **vide** prend celui de la cartouche (par la copie dès l'ouverture, par la Liste à « Enregistrer »). Avec la règle #939 (« le commentaire enregistré fait foi »), voulu ou non ? Mon semis est artificiel sur ce point : il suppose une cartouche qui a gagné un commentaire après l'évaluation.
+
+**Preuves** : banc de neutralité 10 / 10 sur la branche (dont les deux `test.fail` attendus) ; banc #959 et specs voisines inchangés.
