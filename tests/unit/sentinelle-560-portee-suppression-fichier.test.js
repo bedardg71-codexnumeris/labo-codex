@@ -115,6 +115,8 @@ describe('#560 · C — le message d\'après dit ce qui est parti', () => {
         expect(modale).toContain("'Fichier supprimé définitivement.'");
         expect(modale).toContain('nbEvalsRetirees > 0');
         // Le compte n'est posé QUE si l'écriture a eu lieu (branche else du garde des modes).
-        expect(modale).toMatch(/\} else \{\s*nbEvalsRetirees = avant - evaluations\.length;/);
+        // Réancré le 26 sept. 2026 (lot A de l'enregistrement) : plus de branche de refus en
+        // anonymisation — le compte suit l'écriture par le garde des modes.
+        expect(modale).toMatch(/sauvegarderDonneesSelonMode\('evaluationsSauvegardees', evaluations\);\s*nbEvalsRetirees = avant - evaluations\.length;/);
     });
 });

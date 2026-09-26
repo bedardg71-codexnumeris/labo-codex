@@ -329,11 +329,6 @@ function _gererErreurPersistanceSauv(resultatSauvegarde) {
             'Espace de stockage insuffisant',
             'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Données) puis supprime des évaluations anciennes.'
         );
-    } else if (resultatSauvegarde === false) {
-        notifications.erreur(
-            'Modification impossible',
-            'Les modifications sont impossibles en mode Anonymisé. Passe en mode Normal pour sauvegarder.'
-        );
     } else {
         notifications.erreur(
             'Erreur de sauvegarde',

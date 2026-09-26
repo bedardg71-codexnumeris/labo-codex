@@ -1557,6 +1557,9 @@ function genererSectionAccompagnement(da) {
         const dateFormatee = date.toLocaleDateString('fr-CA', options);
         const duree = intervention.duree || 2;
         const typeLibelle = intervention.type === 'individuel' ? 'Individuel' : intervention.type === 'mio' ? 'MIO' : 'Groupe';
+        // Lot A de l'enregistrement (#751) : la note individuelle, texte libre, est masquée en
+        // anonymisation ; la note et le titre passent par echapperHtml (règle 1, ils ne l'étaient pas).
+        const modeAnonymisation = typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
         const noteIndividuelle = intervention.notesIndividuelles?.[da] || '';
         const niveauRai = intervention.niveauRai || 3;
 
@@ -1572,14 +1575,16 @@ function genererSectionAccompagnement(da) {
             <div class="intervention-timeline-item">
                 <div class="u-flex-gap-12 u-align-center" style="flex: 1;">
                     <span class="badge-intervention-vert">
-                        ${typeLibelle} · ${badgeTexte}
+                        ${typeLibelle} · ${echapperHtml(badgeTexte)}
                     </span>
                     <span class="u-texte-bleu" style="font-weight: 600; font-size: 0.9rem;">
                         ${dateFormatee}
                     </span>
                     ${noteIndividuelle ? `
                         <span class="u-texte-gris u-texte-09" style="flex: 1;">
-                            ${noteIndividuelle}
+                            ${modeAnonymisation
+                                ? '<em>' + echapperHtml(window.MENTION_MASQUE_ANONYMISATION) + '</em>'
+                                : echapperHtml(noteIndividuelle)}
                         </span>
                     ` : ''}
                 </div>

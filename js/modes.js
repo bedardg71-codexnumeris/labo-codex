@@ -837,24 +837,130 @@ function obtenirDonneesSelonMode(cle) {
     return donnees;
 }
 
+// ─── Lot A de l'enregistrement — la garde contre les substitutions (26 sept. 2026) ───
+//
+// En anonymisation, `anonymiserDonnees` remplace à la LECTURE : « Élève 32 » pour le prénom,
+// « Gr. A » pour le groupe, des marqueurs (`daReel`, `etudiantDAReel`…) ; et
+// `anonymiserTexteRetroaction` remplace les prénoms réels d'un texte par « Élève N ». Un écran
+// qui relit ces valeurs et les réécrit (la rétroaction pré-remplie, le « Bonjour Élève 32 ! »
+// généré depuis la liste anonymisée, un tableau lu par `obtenirDonneesSelonMode`) les enverrait
+// dans les vraies données. Cette garde les RETIRE avant l'écriture, par motif : elle ne
+// dépend pas du chemin de lecture, et une valeur qu'on ne reconnaît pas passe telle quelle.
+//
+// Assumé : un texte réel qui contiendrait déjà « Élève 12 » (écrit à la main, ou une
+// substitution écrite avant ce lot par un écran qui n'avait pas de garde) serait lu comme une
+// substitution et reçu le prénom de l'élève que le mapping actuel numérote 12.
+const _CLES_SUBSTITUEES = ['groupeEtudiants', 'evaluationsSauvegardees', 'presences'];
+const _MOTIF_ELEVE_N = /(^|[^\p{L}\p{N}_])Élève (\d+)(?![\p{L}\p{N}_])/gu;
+
+function _estPseudonyme(valeur) {
+    return typeof valeur === 'string' && /^(Élève \d+|Anonyme|Étudiant Inconnu)$/.test(valeur.trim());
+}
+
+function _estGroupeSubstitue(valeur) {
+    return typeof valeur === 'string' && /^Gr\. ([A-Z]|\?)$/.test(valeur);
+}
+
+// « Élève N » → prénom réel de l'élève que le mapping numérote N ; un N inconnu reste tel quel.
+// Rend le MÊME objet quand rien n'a changé : la garde parcourt tout le tableau à chaque écriture.
+function _desanonymiserChaines(valeur, prenomParNumero) {
+    if (typeof valeur === 'string') {
+        if (valeur.indexOf('Élève ') === -1) return valeur;
+        return valeur.replace(_MOTIF_ELEVE_N, (m, avant, n) =>
+            prenomParNumero.has(n) ? avant + prenomParNumero.get(n) : m);
+    }
+    if (!valeur || typeof valeur !== 'object') return valeur;
+    let copie = null;
+    const cles = Object.keys(valeur);
+    for (let i = 0; i < cles.length; i++) {
+        const avant = valeur[cles[i]];
+        const apres = _desanonymiserChaines(avant, prenomParNumero);
+        if (apres !== avant) {
+            if (!copie) copie = Array.isArray(valeur) ? valeur.slice() : { ...valeur };
+            copie[cles[i]] = apres;
+        }
+    }
+    return copie || valeur;
+}
+
+function retirerSubstitutionsAnonymisation(cle, donnees) {
+    if (!Array.isArray(donnees)) return donnees;
+    const trId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : null;
+    const cleBase = (trId && cle.startsWith(trId + '_')) ? cle.substring(trId.length + 1) : cle;
+    if (!_CLES_SUBSTITUEES.includes(cleBase)) return donnees;
+
+    const reels = db.getSync(window.cle('groupeEtudiants'), []) || [];
+    const parDA = new Map(reels.map(e => [String(e.da), e]));
+    const mapping = genererMappingAnonyme();
+    const prenomParNumero = new Map();
+    Object.keys(mapping).forEach(da => {
+        const eleve = parDA.get(String(da));
+        if (eleve && eleve.prenom && mapping[da] && mapping[da].numero !== undefined) {
+            prenomParNumero.set(String(mapping[da].numero), eleve.prenom);
+        }
+    });
+    const groupesParLettre = {};
+    const mappingGroupes = db.getSync('mapping_groupes_anonymes', {}) || {};
+    Object.keys(mappingGroupes).forEach(reel => { groupesParLettre[mappingGroupes[reel]] = reel; });
+    const groupeReel = (valeur, eleve) => (valeur in groupesParLettre)
+        ? groupesParLettre[valeur] : (eleve ? eleve.groupe : '');
+
+    return donnees.map(item => {
+        if (!item || typeof item !== 'object') return item;
+        const r = { ..._desanonymiserChaines(item, prenomParNumero) };
+        if (cleBase === 'evaluationsSauvegardees') {
+            if (r.etudiantDAReel !== undefined) r.etudiantDA = r.etudiantDAReel;
+            delete r.etudiantDAReel;
+            delete r.etudiantDAffichage;
+            const eleve = parDA.get(String(r.etudiantDA));
+            // Le prénom seul a déjà été rendu par `_desanonymiserChaines` ; le nom complet, lui,
+            // se reprend à la fiche (« Élève 32 » + nom vide ne dit pas le nom de famille).
+            if (_estPseudonyme(item.etudiantNom)) r.etudiantNom = eleve ? `${eleve.prenom} ${eleve.nom}` : '';
+            if (_estGroupeSubstitue(r.groupe)) r.groupe = groupeReel(r.groupe, eleve);
+        } else {
+            // groupeEtudiants, presences : les marqueurs de `anonymiserDonnees`.
+            const aMarqueur = r.daReel !== undefined;
+            if (aMarqueur) r.da = r.daReel;
+            const eleve = parDA.get(String(r.da));
+            if (cleBase === 'groupeEtudiants') {
+                if (aMarqueur) {
+                    r.groupe = r.groupeReel;
+                    delete r.groupeReel;
+                    delete r.ordreAffichage;
+                } else if (_estGroupeSubstitue(r.groupe)) {
+                    r.groupe = groupeReel(r.groupe, eleve);
+                }
+                if (_estPseudonyme(item.prenom) && eleve) { r.prenom = eleve.prenom; r.nom = eleve.nom; }
+            } else if (aMarqueur) {
+                // Une présence ne porte ni nom ni prénom : ceux-là viennent de l'anonymisation.
+                delete r.nom;
+                delete r.prenom;
+            }
+            delete r.daReel;
+            delete r.daAffichage;
+        }
+        return r;
+    });
+}
+
 /**
  * Sauvegarde des données selon le mode actif
  * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
  *
  * @param {string} cle - Clé de base (ex: 'groupeEtudiants')
  * @param {*} donnees - Données à sauvegarder
- * @returns {boolean|string} - true si succès, false si bloqué (mode anonymisation), 'quota' si quota dépassé
+ * @returns {boolean|string} - true si succès, 'quota' si quota dépassé, 'error' sinon
  */
 function sauvegarderDonneesSelonMode(cle, donnees) {
-    const mode = modeActuel;
-
-    // MODE ANONYMISATION : Bloquer toute écriture
-    if (mode === MODES.ANONYMISATION) {
-        console.warn('⚠️ Écriture bloquée en mode anonymisation');
-        return false;
+    // Lot A de l'enregistrement (D5, Grégoire, 26 sept. 2026 : « Je choisis A ») — en
+    // anonymisation, on écrit comme en mode normal ; seul l'AFFICHAGE protège l'identité.
+    // Avant : `return false` ici. L'évaluation faite en anonymisation restait visible pendant
+    // la séance (le cache mémoire la portait) puis disparaissait au rechargement, sans un mot.
+    // Ce qui part vers les vraies données ne porte aucune valeur de substitution.
+    if (modeActuel === MODES.ANONYMISATION) {
+        donnees = retirerSubstitutionsAnonymisation(cle, donnees);
     }
 
-    // MODE NORMAL : Sauvegarder dans les clés réelles
     try {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
@@ -1025,7 +1131,10 @@ function obtenirDAAffichage(etudiant) {
 }
 
 /**
- * Vérifie si le mode actuel est en lecture seule
+ * Le mode anonymisation est-il actif ? Le nom est historique : depuis le lot A de
+ * l'enregistrement (26 sept. 2026), l'anonymisation n'est plus une lecture seule — on y
+ * écrit comme en mode normal, et les lecteurs de cette fonction s'en servent pour MASQUER.
+ * Même réponse que `estModeAnonymisation` ; 47 bancs la simulent sous ce nom.
  * @returns {boolean}
  */
 function estModeeLectureSeule() {
@@ -1164,7 +1273,11 @@ function estModeAnonymisation() {
 }
 
 window.MODES = MODES;
+// Lot A de l'enregistrement (26 sept. 2026) — la mention d'un champ ou d'un texte masqué en
+// anonymisation. Une seule source : ces mots sont soumis à Grégoire, ils se changent ici.
+window.MENTION_MASQUE_ANONYMISATION = 'Masqué en anonymisation';
 window.estModeAnonymisation = estModeAnonymisation;
+window.retirerSubstitutionsAnonymisation = retirerSubstitutionsAnonymisation;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
 window.estTourGuideActif = estTourGuideActif;

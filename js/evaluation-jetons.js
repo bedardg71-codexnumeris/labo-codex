@@ -267,9 +267,9 @@ function verifierDisponibiliteJeton(da, type) {
  *
  * @param {Array} evaluations - Le tableau complet à persister
  * @param {string} geste - Ce que l'utilisateur croyait faire, pour le message
- * #617/#725 (13 sept. 2026) : `sauvegarderDonneesSelonMode` rend TROIS refus — `false`
- * (anonymisation), `'quota'` et `'error'` (l'écriture a levé, `modes.js`). Les deux derniers
- * sont des chaînes, donc truthy : l'ancien `return ok` les laissait passer pour un succès
+ * #617/#725 (13 sept. 2026) : `sauvegarderDonneesSelonMode` rend deux refus — `'quota'` et
+ * `'error'` (l'écriture a levé, `modes.js`) ; l'anonymisation n'en est plus un depuis le lot A
+ * de l'enregistrement (26 sept. 2026). Ce sont des chaînes, donc truthy : l'ancien `return ok` les laissait passer pour un succès
  * chez tous les appelants. Seul `true` est un succès — même contrat que `supprimerEvaluation`.
  *
  * @returns {boolean} true si l'écriture a bien eu lieu, false sinon (jamais une chaîne)
@@ -278,8 +278,7 @@ function _persisterEvaluationsJetons(evaluations, geste) {
     const retour = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
     const ok = retour === true;
     if (!ok) {
-        const cause = retour === false ? "l'écriture est bloquée (mode anonymisation)."
-            : retour === 'quota' ? "l'espace de stockage est plein."
+        const cause = retour === 'quota' ? "l'espace de stockage est plein."
             : "le stockage a refusé l'écriture.";
         console.warn('[Jetons] Écriture refusée (' + String(retour) + ') — ' + geste);
         notifications.erreur('Modification non enregistrée', geste + ' : ' + cause);

@@ -620,9 +620,17 @@ let etudiantEnEditionDA = null;
  * Soumet le formulaire étudiant (ajout ou modification)
  */
 async function soumettreEtudiantV2() {
-    const da = document.getElementById('v2-etudiantDA')?.value?.trim();
-    const nom = document.getElementById('v2-etudiantNom')?.value?.trim();
-    const prenom = document.getElementById('v2-etudiantPrenom')?.value?.trim();
+    let da = document.getElementById('v2-etudiantDA')?.value?.trim();
+    let nom = document.getElementById('v2-etudiantNom')?.value?.trim();
+    let prenom = document.getElementById('v2-etudiantPrenom')?.value?.trim();
+    // Lot A de l'enregistrement : identité masquée en anonymisation (`editerEtudiantV2`) — les
+    // champs vides à l'écran ne disent rien de la fiche : son DA, son nom et son prénom sont
+    // réécrits tels qu'ils sont en base.
+    const identiteMasquee = document.getElementById('v2-etudiantNom')?.dataset?.masqueAnonymisation === '1';
+    if (identiteMasquee && etudiantEnEditionDA !== null) {
+        const fiche = (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e.da === etudiantEnEditionDA);
+        if (fiche) { da = String(fiche.da).trim(); nom = fiche.nom; prenom = fiche.prenom; }
+    }
     const programme = document.getElementById('v2-etudiantProgramme')?.value?.trim();
     const sa = document.getElementById('v2-etudiantSA')?.value;
     const groupeInput = document.getElementById('v2-etudiantGroupe')?.value?.trim();
@@ -729,14 +737,14 @@ async function soumettreEtudiantV2() {
     // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
     if (daEnDouble) {
         // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire.
-        notifications.erreur('Ce DA est déjà dans le groupe : ' + ((daEnDouble.prenom || '') + ' ' + (daEnDouble.nom || '')).trim() + '.');
+        notifications.erreur('Ce DA est déjà dans le groupe : ' + _nomAfficheV2(daEnDouble) + '.');
         return;
     }
     if (introuvable) {
         notifications.erreur('Étudiant introuvable', 'La liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant avant d\'enregistrer.');
         return;
     }
-    notifications.succes(`${prenom} ${nom} ${etudiantEnEditionIndex >= 0 ? 'modifié' : 'ajouté'}`);
+    notifications.succes(`${_nomAfficheV2({ da: etudiant.da, prenom, nom })} ${etudiantEnEditionIndex >= 0 ? 'modifié' : 'ajouté'}`);
 
     // #735 : l'assiduité se compte depuis la date d'arrivée — le magasin des indices A suit la fiche
     // (même producteur qu'après une saisie de présences ; il enchaîne C et P).
@@ -747,6 +755,32 @@ async function soumettreEtudiantV2() {
     // Réinitialiser le formulaire et le mode
     reinitialiserFormEtudiantV2();
     chargerListeEtudiantsV2();
+}
+
+function _anonymisationV2() {
+    return typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
+}
+
+// Le nom d'une fiche tel que l'écran peut le dire : son pseudonyme en anonymisation.
+function _nomAfficheV2(fiche) {
+    if (_anonymisationV2()) return (typeof anonymiserNom === 'function' && anonymiserNom(fiche && fiche.da)) || '---';
+    return (((fiche && fiche.prenom) || '') + ' ' + ((fiche && fiche.nom) || '')).trim();
+}
+
+// Lot A de l'enregistrement (26 sept. 2026) — les champs d'identité de la fiche, non modifiables
+// et masqués en anonymisation. Le marqueur dit à `soumettreEtudiantV2` de reprendre la base.
+const _CHAMPS_IDENTITE_V2 = { 'v2-etudiantDA': null, 'v2-etudiantNom': null, 'v2-etudiantPrenom': null };
+function _masquerIdentiteV2(masquer) {
+    Object.keys(_CHAMPS_IDENTITE_V2).forEach(id => {
+        const champ = document.getElementById(id);
+        if (!champ || !champ.dataset) return;
+        if (!masquer && champ.dataset.masqueAnonymisation !== '1') return;   // rien à rendre
+        if (_CHAMPS_IDENTITE_V2[id] === null) _CHAMPS_IDENTITE_V2[id] = champ.placeholder || '';
+        champ.disabled = masquer;
+        champ.placeholder = masquer ? window.MENTION_MASQUE_ANONYMISATION : _CHAMPS_IDENTITE_V2[id];
+        if (masquer) champ.dataset.masqueAnonymisation = '1';
+        else delete champ.dataset.masqueAnonymisation;
+    });
 }
 
 /**
@@ -767,10 +801,13 @@ function editerEtudiantV2(da) {
     // par ce DA, robuste aux changements de liste entre ouverture et save.
     etudiantEnEditionDA = etudiant.da ?? null;
 
-    // Remplir le formulaire
-    document.getElementById('v2-etudiantDA').value = etudiant.da || '';
-    document.getElementById('v2-etudiantNom').value = etudiant.nom || '';
-    document.getElementById('v2-etudiantPrenom').value = etudiant.prenom || '';
+    // Remplir le formulaire — en anonymisation, DA, nom et prénom restent vides et non modifiables
+    // (lot A de l'enregistrement) : ni affichés, ni réécrits autrement que depuis la base.
+    const masquer = _anonymisationV2();
+    document.getElementById('v2-etudiantDA').value = masquer ? '' : (etudiant.da || '');
+    document.getElementById('v2-etudiantNom').value = masquer ? '' : (etudiant.nom || '');
+    document.getElementById('v2-etudiantPrenom').value = masquer ? '' : (etudiant.prenom || '');
+    _masquerIdentiteV2(masquer);
     document.getElementById('v2-etudiantGroupe').value = etudiant.groupe || '';
     document.getElementById('v2-etudiantProgramme').value = etudiant.programme || '';
     document.getElementById('v2-etudiantSA').value = etudiant.sa || '';
@@ -808,6 +845,7 @@ function reinitialiserFormEtudiantV2() {
     etudiantEnEditionDA = null; // #382
 
     // Vider les champs
+    _masquerIdentiteV2(false);
     document.getElementById('v2-etudiantDA').value = '';
     document.getElementById('v2-etudiantNom').value = '';
     document.getElementById('v2-etudiantPrenom').value = '';
@@ -936,7 +974,7 @@ async function supprimerEtudiantV2(da) {
     const index = etudiants.findIndex(e => e.da === da);
     const etudiant = etudiants[index];
 
-    if (index === -1 || !confirm(`Supprimer ${etudiant?.prenom || ''} ${etudiant?.nom || ''} ?`)) return;
+    if (index === -1 || !confirm(`Supprimer ${_nomAfficheV2(etudiant)} ?`)) return;
 
     await db.modifier(cleEtud, (lus) => {
         const liste = lus || [];
@@ -960,12 +998,8 @@ function actionEtudiantV2(selectElement, da) {
 
     if (!action) return;
 
-    // Mode anonymisation : le formulaire d'édition et la question de suppression
-    // nommeraient l'élève en clair. Même refus que groupe.js.
-    if (db.getSync('modeApplication', 'normal') === 'anonymisation') {
-        notifications.erreur('Modification impossible', 'Repasse en mode normal pour modifier ou supprimer un·e étudiant·e.');
-        return;
-    }
+    // Lot A de l'enregistrement (26 sept. 2026) : plus de refus en anonymisation. Le formulaire
+    // masque l'identité (`editerEtudiantV2`), la question de suppression nomme le pseudonyme.
 
     switch (action) {
         case 'editer':
@@ -1002,7 +1036,7 @@ async function changerStatutEtudiantV2(da, nouveauStatut) {
     if (index === -1) return;
 
     var etudiant = etudiants[index];
-    var nomComplet = (etudiant.prenom || '') + ' ' + (etudiant.nom || '');
+    var nomComplet = _nomAfficheV2(etudiant);
 
     if (nouveauStatut === 'inactif') {
         if (!confirm('Marquer ' + nomComplet.trim() + ' comme inactif ?\n\nSes résultats seront affichés jusqu\'à sa dernière présence, mais ne seront plus comptés dans les calculs du groupe.')) return;
