@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 9 H 20 : **LOT #643 #654 #637 (1.159.11) FUSIONNÉ DANS `main` (avance rapide) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 10 H 10 : **LOT #953 (1.159.12) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `14314530` + la branche `lot-953-grilles-echelles-archive` (`5b2c91a5` correctif, `3d30bf0c` demande de relecture, `2c66f8e9` relecture + BACKLOG) + `8662eaf5` fusion + `89d58a14` release (build 0926-1001) + cette clôture. Pratiques entrées au lot sur mesure. Relecture croisée de Cowork VERTE avant la fusion, sans retouche. Nouvelles validées par Grégoire telles quelles. Trouvailles inscrites : #955 (run planifié GitHub jamais vert depuis quatre jours), #956 (versement copie la forme nue figée des pratiques). Branche `lot-cartouches-643-654-637` retirée (le push de 1.159.11 était constaté).
+
+**Reste** : constater « en ligne » chez Netlify ; retirer la branche `lot-953-grilles-echelles-archive` une fois le push constaté. Non commités, laissés à Cowork : `PORTES-TERRAIN-2026-09-24-bug-944.md` (modifié), `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md`, `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 9 H 20 : **LOT #643 #654 #637 (1.159.11) FUSIONNÉ DANS `main` (avance rapide) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `ac24acb7` + la branche `lot-cartouches-643-654-637` (`8e87853d` #643, `d7da0b66` #654, `6c4a21c6` #637, `79ce0b0c` demande de relecture, `a75691cb` relecture) + `b7d59396` release (build 0926-0916) + cette clôture. Relecture croisée de Cowork VERTE avant la fusion, sans retouche. Phrase de prévisualisation et Nouvelles validées par Grégoire telles quelles. Trouvailles inscrites : #952, #953, #954 (O1 de la relecture).
 
