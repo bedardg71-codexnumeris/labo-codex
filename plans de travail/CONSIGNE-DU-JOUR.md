@@ -1,38 +1,35 @@
-# Consigne du jour – Lot A de l'enregistrement : en mode anonymisation, on travaille normalement, et rien d'identifiant ne s'affiche
+# Consigne – lot court #959 : une évaluation ouverte depuis sa copie garde son statut d'intégrité (et tout ce qu'elle porte) quand on l'enregistre
 
-> Écrite le 26 septembre 2026, vers 13 h 45 (Toronto), par Cowork, sur `main` = `fd9d1dc7` (1.159.13 en ligne). La précédente (#957) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-957-grille.md` (déplacée par Cowork, à commiter).
-> **Fait foi** : `plans de travail/DECISIONS-2026-09-26-enregistrement.md` (D0 à D5, et l'ordre des lots), à commiter avec ce lot. Source des constats : `INVENTAIRE-ENREGISTREMENT-2026-09-26.md`.
+> Écrite le 26 septembre 2026, vers 15 h 32 (Toronto), par Cowork, pendant que le lot A était en fusion (branche `lot-a-anonymisation-enregistre` encore active dans l'arbre de travail). **Ne commence qu'une fois 1.160.0 poussée et verte.** Écrite sous ce nom, et non dans `CONSIGNE-DU-JOUR.md`, pour ne pas toucher un fichier suivi pendant ta fusion : au début du lot, archive l'actuelle `CONSIGNE-DU-JOUR.md` (lot A) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-A-anonymisation.md` et renomme celle-ci en `CONSIGNE-DU-JOUR.md`. À remesurer avant tout code (lignes lues sur la branche du lot A).
+> **Tranché par Cowork** (addendum de la relecture du lot A) : lot court juste après le lot A, avant le Lot B, sur le modèle de #957. Grégoire ne veut pas qu'on mesure ses données réelles pour ce défaut (26 sept.) : **aucune mesure du stock**.
 
-## 0 · La décision de Grégoire (D5, « Je choisis A »)
+## 1 · Le constat (#959, le tien, `[exécuté]` en mode normal)
 
-En anonymisation, **on travaille normalement et tout s'enregistre** ; seul l'affichage protège l'identité des élèves. Son usage : « captures d'écran pour Claude ou démos live avec mes vraies données ». Donc deux exigences, aussi fortes l'une que l'autre :
+Une évaluation « IA » (ou « plagiat ») ouverte depuis sa copie, puis enregistrée (`sauvegarderEvaluationModifiee`, `js/evaluation.js` ≈ l. 1835), repasse à « recevable » et perd ses notes d'intégrité. Cause lue : seul `modifierEvaluation` (Liste des évaluations, ≈ l. 1037) appelle `_chargerStatutsEtBadgesModif` (≈ l. 1375, appel l. 1132) ; le chemin de la copie ne l'appelle pas, et `_lireChampsDOMMod` (≈ l. 1704) relit l'écran resté à ses valeurs par défaut.
 
-1. **Rien ne se perd** : une écriture faite en anonymisation va dans les vraies données, comme en mode normal.
-2. **Rien d'identifiant ne s'affiche**, et **aucune valeur de substitution n'est écrite** dans les vraies données.
+## 2 · Ce que Cowork a lu en plus (non exécuté) : le défaut est probablement plus large que l'intégrité
 
-## 1 · Ce que l'inventaire a mesuré (à remesurer avant tout code)
+`_chargerStatutsEtBadgesModif` restaure aussi le **statut de remise** (`remiseProduction1`), les **points** par critère (`eval_pts_…`) et les **catégories d'erreurs** (`eval_categories_…`), entre autres. Si le chemin de la copie ne les charge pas et que `_lireChampsDOMMod` les relit, ils se perdent de la même façon.
 
-- `sauvegarderDonneesSelonMode` (`js/modes.js` ≈ l. 848-855) rend `false` en anonymisation (« Bloquer toute écriture ») ; seuls l'évaluation, les présences (« Enregistrer »), la suppression d'une évaluation, les jetons et la modification d'un élève passent par elle. Le reste écrit déjà (384 appels directs dans 78 fichiers, inventaire A2).
-- **Perte vécue** `[exécuté]` : une évaluation faite en anonymisation paraît enregistrée pendant la séance, puis disparaît au rechargement, sans message (inventaire l. 225-228).
-- Présences : « Verrouiller » écrit en anonymisation, « Enregistrer » refuse (l. 219-220). Rétroaction par la bulle du badge : texte perdu en silence (l. 81).
-- **#751** (affichage) : `anonymiserDonnees` ne traite ni `confidentielEtudiants` ni `interventions` ; le volet « Confidentiel » lit le store brut, sans garde de mode – notes libres, portraits et notes de présences s'affichent tels quels (`modes.js` ≈ l. 865, `profil-etudiant-confidentiel.js` l. 87/146, `sections-affichage.js` l. 1172). Lignes de la fiche, à remesurer.
+## 3 · Ce qui est attendu
 
-## 2 · Ce qui est attendu
+1. **Mesure d'abord, au navigateur** : pour CHAQUE champ que `_lireChampsDOMMod` relit, une évaluation qui porte une valeur non par défaut, ouverte depuis la copie puis enregistrée, la garde-t-elle ? Fais-en la liste (champ, gardé / perdu).
+2. **Un seul chargeur pour les deux chemins.** Le chemin de la copie restaure l'évaluation par la même fonction que « Modifier » dans la Liste (pas une copie de ses lignes). Si l'ordre d'appel ou le contexte du chemin de la copie l'empêche, dis pourquoi en une ligne, et choisis le remède qui ferme TOUS les champs perdus du § 3.1.
+3. **Anonymisation** : les notes d'intégrité sont masquées en anonymisation depuis le lot A (`poserChampTexteLibre`) ; vérifie que le chargeur partagé garde ce comportement, et qu'un enregistrement en anonymisation réécrit la note en base, telle quelle.
+4. **Ne change rien à l'interface ni aux mots** : l'harmonisation de l'évaluation (D1, « Verrouiller l'évaluation », « Non verrouillée ») est le Lot C.
 
-1. **Écrire en anonymisation comme en mode normal.** Le blocage de `sauvegarderDonneesSelonMode` et les refus « Modification impossible – … mode anonymisation » disparaissent. #736 devient sans objet : dis-le dans la fiche et coche-la.
-2. **La garde contre les substitutions – c'est le cœur du lot, mesure d'abord.** Recense chaque écran où, en anonymisation, un champ **modifiable** affiche une valeur de substitution (nom, prénom, DA, groupe…) ou pré-remplit un texte avec elle (par exemple une rétroaction qui commence par « Bonjour ‹prénom› »). Pour chacun, au navigateur : l'enregistrer écrit-il la substitution dans les vraies données ? Le remède est ton choix, champ par champ, dit en une ligne : ne pas écrire un champ resté inchangé, ou rendre ce champ non modifiable en anonymisation avec la mention « Masqué en anonymisation ». **La fiche d'élève** (nom, prénom, DA) est le cas le plus probable : si tu ne peux pas garantir simplement qu'aucune substitution n'y est écrite, laisse ces champs d'identité non modifiables en anonymisation, et dis-le.
-3. **Rien d'identifiant à l'écran (#751).** Le volet confidentiel, les notes libres des interventions, les portraits et les notes de présences ne s'affichent pas en anonymisation. Un texte libre ne se dé-identifie pas de façon fiable : préfère masquer (« Masqué en anonymisation ») plutôt qu'essayer d'anonymiser. Si tu trouves d'autres fuites d'identité à l'écran en chemin, corrige-les si elles tombent sous la même règle, sinon inscris-les.
-4. **Ne touche pas au témoin commun ni aux autres messages** : c'est le Lot B. Ici, une écriture en anonymisation se comporte exactement comme en mode normal, messages compris.
+**Stock** : une évaluation déjà remise à « recevable » par ce chemin ne retrouve pas son statut ; rien n'est réécrit. **Rien n'est effacé.**
 
-## 3 · Preuves
+## 4 · Preuves
 
-- Bancs WebKit, rouges avant, verts après : (a) une évaluation faite en anonymisation est encore là après rechargement ; (b) des présences enregistrées en anonymisation sont écrites ; (c) pour chaque champ recensé au § 2.2 : après enregistrement en anonymisation, les vraies données ne contiennent aucune valeur de substitution ; (d) volet confidentiel et notes : aucun texte réel à l'écran en anonymisation, visible en mode normal (témoin).
-- Mutations : rétablir le blocage → (a) rouge ; retirer la garde d'un champ → (c) rouge ; retirer le masque du volet → (d) rouge.
-- Suite complète Vitest. Données fictives seulement (règle du 22 sept.).
+- Banc WebKit sur le trajet de la copie (celui des specs #699 / #882) : pour chaque champ perdu au § 3.1, rouge avant, vert après. Un cas témoin par la Liste (vert avant et après).
+- Un cas en anonymisation pour les notes d'intégrité.
+- Mutation : retirer l'appel au chargeur dans le chemin de la copie → rouge.
+- Suite complète Vitest.
 
-## 4 · Livraison
+## 5 · Livraison
 
-- **Relecture croisée de Cowork obligatoire** (vraies données, identité des élèves). `DEMANDE-RELECTURE-2026-09-26-lot-A-anonymisation.md`, puis l'ordre du `PROTOCOLE.md`.
-- Mineure (le comportement d'un mode change).
-- **Textes à soumettre à Grégoire avant le push** : la mention « Masqué en anonymisation » là où tu l'emploies ; l'aide du mode anonymisation si elle dit « lecture seule » ou l'équivalent (relève-la) ; et les « Nouvelles », proposition de Cowork : « Mode anonymisation : tu travailles normalement et tout s'enregistre ; seuls les noms, et tout ce qui pourrait identifier un·e élève, sont cachés à l'écran. »
-- Fin de lot : cocher #751 et #736 ; FILE-DES-LOTS à jour.
+- **Relecture croisée de Cowork obligatoire** (notes d'élèves, intégrité académique). `DEMANDE-RELECTURE-2026-09-26-lot-959.md`, puis l'ordre du `PROTOCOLE.md`.
+- Correctif (patch).
+- **Nouvelles, proposition de Cowork, à soumettre à Grégoire avant le push** (à ajuster aux champs réellement perdus) : « Évaluer : une évaluation ouverte depuis la copie garde son statut d'intégrité et ses notes quand tu l'enregistres. »
+- Fin de lot : cocher #959 ; `FILE-DES-LOTS.md` à jour.

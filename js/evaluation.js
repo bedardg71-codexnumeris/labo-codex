@@ -557,6 +557,14 @@ function verifierEtChargerEvaluationExistante() {
             spans.forEach(span => span.textContent = '--');
         });
 
+        // #959 — le statut d'intégrité de l'élève précédent (« IA », ses notes) ne passe pas à celui-ci :
+        // rien d'autre ne remet ce menu à « recevable ». `changerStatutIntegrite` vide les notes.
+        const selectIntegrite = document.getElementById('statutIntegrite');
+        if (selectIntegrite && selectIntegrite.value !== 'recevable') {
+            selectIntegrite.value = 'recevable';
+            selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
         // Masquer les badges de jetons
         const section = document.getElementById('gestionJetonsEvaluation');
         if (section) section.classList.add('u-hide');
@@ -585,16 +593,10 @@ function verifierEtChargerEvaluationExistante() {
         }
     }
 
-    // Charger le statut de remise
-    if (evaluationExistante.statutRemise) {
-        const selectRemise = document.getElementById('remiseProduction1');
-        if (selectRemise) {
-            // Mapper les anciens statuts vers les nouveaux
-            const statutMap = { 'non-remis': 'non-recu', 'remis': 'evalue' };
-            selectRemise.value = statutMap[evaluationExistante.statutRemise] || evaluationExistante.statutRemise;
-            window.mettreAJourPillStatut(selectRemise.value);
-        }
-    }
+    // Statut de remise et statut d'intégrité : le chargeur de « Modifier » (Liste des évaluations).
+    // #959 — ce chemin posait la remise seule : une évaluation « IA » ouverte depuis sa copie
+    // repassait à « recevable » et perdait ses notes d'intégrité à « Enregistrer ».
+    _chargerStatutsEtBadgesModif(evaluationExistante);
 
     // Charger l'échelle (si elle existe)
     if (evaluationExistante.echelleId) {
@@ -1374,10 +1376,14 @@ function _chargerEchelleEtCartoucheModif(evaluation) {
 
 function _chargerStatutsEtBadgesModif(evaluation) {
     // ÉTAPE 8 : Charger statut de remise
+    // Partagé avec le chemin de la copie (`verifierEtChargerEvaluationExistante`, #959).
     const selectRemise = document.getElementById('remiseProduction1');
     if (selectRemise) {
-        selectRemise.value = evaluation.statutRemise;
-        window.mettreAJourPillStatut(evaluation.statutRemise);
+        // Les anciens statuts (le chemin de la copie les traduisait seul ; « Modifier » posait une
+        // valeur absente du menu, qui se relisait vide à « Enregistrer »).
+        const statutMap = { 'non-remis': 'non-recu', 'remis': 'evalue' };
+        selectRemise.value = statutMap[evaluation.statutRemise] || evaluation.statutRemise;
+        window.mettreAJourPillStatut(selectRemise.value);
         selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
