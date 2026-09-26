@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.160.0 (lot A de l'enregistrement, #751, #736) — Nouvelles VALIDÉES par Grégoire le 26 sept. 2026,
+            // telles quelles (texte de Cowork) ; titre repris de leurs premiers mots.
+            version: '1.160',
+            couleur: 'bleu',
+            titre: 'Mode anonymisation',
+            items: [
+                'Mode anonymisation&nbsp;: tu travailles normalement et tout s\'enregistre&nbsp;; seuls les noms, et tout ce qui pourrait identifier un·e élève, sont cachés à l\'écran.'
+            ]
+        },
+        {
             // 1.159.0 (#941, lot S2) — VALIDÉ par Grégoire le 24 sept. 2026, tel quel (texte de Claude Code).
             version: '1.159',
             couleur: 'vert',
