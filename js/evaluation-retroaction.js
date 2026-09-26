@@ -179,7 +179,7 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
         // avant comme après l'auto-save. Sans commentaire, l'en-tête seul (#764).
         const commDiv = document.getElementById(`comm_${critere.id}`);
         const commentaire = window.syntheseRetroactionData.commentaireDuCritere({
-            enregistre: commDiv ? commDiv.textContent : '',
+            enregistre: commDiv ? commDiv.textContent : null,   // #960 — sans div, rien d'enregistré (D6)
             algorithmique: critere.type === 'algorithmique' ? evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction : '',
             cartouche, critereId: critere.id, niveau
         });

@@ -765,8 +765,7 @@ describe('lot 3 · F — témoins de source', () => {
         expect((src.match(/^\s+_afficherCommentaireCritere\(critereId, /gm) || []).length, 'deux appels : niveauSelectionne et pointsSaisis').toBe(2);
         expect(src).toMatch(/^function _afficherCommentaireCritere\(critereId, niveau\)/m);
         // #939 — la clé `critereId_niveau` se construit dans la règle partagée, que l'écran lit.
-        // ↻ #960 — l'enregistré vaut `null` quand rien n'est enregistré à ce niveau (D6 : le vide reste vide).
-        expect(src).toContain("window.syntheseRetroactionData.commentaireDuCritere({ enregistre: enregistre || '', cartouche, critereId, niveau })");
+        expect(src).toContain('window.syntheseRetroactionData.commentaireDuCritere({ enregistre, cartouche, critereId, niveau })');
     });
 
     it('F.c la déduction est appelée par `calculerNote` AVANT la portée, et la boucle n\'a pas bougé', () => {

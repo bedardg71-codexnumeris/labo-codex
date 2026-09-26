@@ -69,6 +69,7 @@ Texte proposé par Cowork, retenu sans retouche :
 - **Un commentaire de critère enregistré VIDE reste vide**, par les deux chemins : à l'ouverture par la copie, et à « Enregistrer » par la Liste. Il ne reçoit jamais le commentaire que la cartouche propose aujourd'hui.
 - Motifs (proposés par Cowork, retenus) : la règle #939, « le commentaire enregistré fait foi » ; et le cas où il se remplirait est celui d'une cartouche qui a gagné un commentaire après l'évaluation – l'élève ne l'a jamais lu, il apparaîtrait dans son PDF sans décision de l'enseignant.
 - Livrée au lot #960.
+- Vaut jusqu'au PDF de l'élève et à « Copier tout » : un commentaire enregistré vide s'imprime vide (Grégoire, 26 sept., option a).
 
 ## Ordre des lots (tranché par Cowork, question technique)
 

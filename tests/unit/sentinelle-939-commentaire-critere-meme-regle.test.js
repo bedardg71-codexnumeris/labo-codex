@@ -212,8 +212,12 @@ describe('#939 · la règle unique `commentaireDuCritere`', () => {
         const cartouche = { commentaires: { x_M: 'CARTOUCHE' } };
         expect(regle({ enregistre: 'ENREG', algorithmique: 'ALGO', cartouche, critereId: 'x', niveau: 'M' })).toBe('ENREG');
         expect(regle({ enregistre: '', algorithmique: 'ALGO', cartouche, critereId: 'x', niveau: 'M' })).toBe('ALGO');
-        expect(regle({ enregistre: '', algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('CARTOUCHE');
-        expect(regle({ enregistre: '', algorithmique: '', cartouche, critereId: 'x', niveau: 'D' })).toBe('');
+        expect(regle({ enregistre: null, algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('CARTOUCHE');
+        expect(regle({ algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('CARTOUCHE');
+        // ↻ #960 (D6, option a) : enregistré VIDE → vide, la cartouche ne le remplit pas (avant : 'CARTOUCHE').
+        expect(regle({ enregistre: '', algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('');
+        expect(regle({ enregistre: '  ', cartouche, critereId: 'x', niveau: 'M' })).toBe('');
+        expect(regle({ enregistre: null, algorithmique: '', cartouche, critereId: 'x', niveau: 'D' })).toBe('');
         expect(regle({ critereId: 'x', niveau: 'M' })).toBe('');
     });
 
@@ -438,6 +442,24 @@ describe('#960 · D6 — un commentaire de critère enregistré VIDE reste vide 
         win.sauvegarderEvaluationModifiee();
         const ev = ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
         expect(ev.criteres.find((c) => c.critereId === 'h1').retroaction).toBe('');
+    });
+
+    // Option (a) de Grégoire (26 sept.) : D6 vaut jusqu'à ce que l'élève lit. Avant, les deux
+    // imprimaient la cartouche d'aujourd'hui (« RETOUCHÉE h1_M »), mesuré le 26 sept.
+    it('le PDF de l\'élève imprime le critère SANS commentaire (l\'en-tête seul)', () => {
+        const { win } = rouvrir({ enBase: [avecH1Vide()] });
+        expect(commentairesDuPdf(win, avecH1Vide()).Structure).toBe('');
+    });
+
+    it('« Copier tout » (la rétroaction générale) écrit le critère SANS commentaire', () => {
+        const { ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        expect(commentaireCopie(ecran.retroactionFinale1.value, 'Structure')).toBe('');
+    });
+
+    it('TÉMOIN : dans le PDF, une amorce ou « [Non défini] » en stock garde la règle #939', () => {
+        const { win } = rouvrir();
+        const pdf = commentairesDuPdf(win, evaluationEnregistree());
+        expect(pdf.Nuance, 'amorce en stock').toBe(CARTOUCHE.commentaires.h3_M);
     });
 
     it('TÉMOIN : un niveau CHANGÉ prend la cartouche au nouveau niveau (le vide était celui de l\'ancien)', () => {
