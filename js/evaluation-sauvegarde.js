@@ -576,12 +576,16 @@ function changerStatutIntegrite() {
     // Sauvegarder dans evaluationEnCours
     if (evaluationEnCours) {
         evaluationEnCours.statutIntegrite = statut;
-        evaluationEnCours.notesIntegrite = notes.value;
+        const masque = typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(notes);   // Lot A, R4
+        if (!masque) evaluationEnCours.notesIntegrite = notes.value;
     }
 
     // Afficher le champ de notes seulement si ce n'est pas "recevable"
     if (statut !== 'recevable') {
         divNotes.classList.remove('u-hide');
+        // Lot A, R4 : en anonymisation, le champ se montre masqué (texte libre).
+        if (typeof estModeAnonymisation === 'function' && estModeAnonymisation()
+            && typeof poserChampTexteLibre === 'function') poserChampTexteLibre(notes, '');
     } else {
         divNotes.classList.add('u-hide');
         notes.value = ''; // Vider les notes si on repasse à recevable

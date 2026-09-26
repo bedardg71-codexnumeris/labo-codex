@@ -64,17 +64,13 @@ async function packDemo(page) {
 
 const ANONYMISATION = (page) => page.evaluate(async () => { await changerMode('anonymisation'); });
 
-// -----------------------------------------------------------------------
-// (a) + (c) — L'ÉVALUATION : elle survit au rechargement, sans « Élève N » ni « Gr. A » en base
-// -----------------------------------------------------------------------
-// Semis et séquence d'ouverture : ceux des specs #699 / #882 (copie déjà évaluée, rouverte).
-test('(a)(c) une évaluation modifiée en anonymisation est encore là après rechargement, sans substitution écrite', async ({ page }) => {
-    test.setTimeout(90000);
-    const erreurs = brancherEcouteurs(page);
+// Semis et séquence d'ouverture : ceux des specs #699 / #882 (copie déjà évaluée, rouverte),
+// ouverte EN ANONYMISATION.
+async function ouvrirEvaluationTemoin(page, integrite = { statut: 'recevable', notes: '' }) {
     await viderLeStockage(page);
     await page.waitForFunction(() => typeof window.demarrerEvaluationDepuisFichier === 'function' && typeof window.db !== 'undefined');
 
-    await page.evaluate(async () => {
+    await page.evaluate(async (integrite) => {
         const k = (b) => (typeof cle === 'function' ? cle(b) : b);
         // security-ok: fixtures littérales du banc, aucune source externe.
         window.db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
@@ -96,7 +92,7 @@ test('(a)(c) une évaluation modifiée en anonymisation est encore là après re
         window.db.setSync(k('evaluationsSauvegardees'), [{
             id: 'EV699', etudiantDA: '1234567', etudiantNom: 'Daniel Témoin', groupe: '00007', groupeCoursId: 'GC1',
             productionId: 'P699', productionNom: 'Portrait témoin', grilleId: 'G699', grilleNom: 'Grille témoin 50/30/20',
-            echelleId: 'E699', cartoucheId: '', statutRemise: 'evalue', statutIntegrite: 'recevable',
+            echelleId: 'E699', cartoucheId: '', statutRemise: 'evalue', statutIntegrite: integrite.statut, notesIntegrite: integrite.notes,
             dateEvaluation: '2026-09-04T10:00:00.000Z', verrouillee: false,
             optionsAffichage: { description: true, objectif: true, tache: true, adresse: false, contexte: true, affichageNote: 'complet' },
             criteres: [
@@ -121,10 +117,19 @@ test('(a)(c) une évaluation modifiée en anonymisation est encore là après re
         const selP = document.getElementById('selectProduction1');
         selP.value = 'P699';
         selP.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    }, integrite);
     await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EV699'
-        && (document.getElementById('eval_c3') || {}).value === 'I'
         && window._autoSaveSuspendu === false, null, { timeout: 10000 });
+}
+
+// -----------------------------------------------------------------------
+// (a) + (c) — L'ÉVALUATION : elle survit au rechargement, sans « Élève N » ni « Gr. A » en base
+// -----------------------------------------------------------------------
+test('(a)(c) une évaluation modifiée en anonymisation est encore là après rechargement, sans substitution écrite', async ({ page }) => {
+    test.setTimeout(90000);
+    const erreurs = brancherEcouteurs(page);
+    await ouvrirEvaluationTemoin(page);
+    await page.waitForFunction(() => (document.getElementById('eval_c3') || {}).value === 'I', null, { timeout: 10000 });
     await page.waitForFunction(() => document.getElementById('afficherAdresse1').checked === false, null, { timeout: 10000 });
     await page.evaluate(() => window.attacherEvenementsMemorisation());
 
@@ -158,6 +163,32 @@ test('(a)(c) une évaluation modifiée en anonymisation est encore là après re
     expect(base.etudiantNom).toBe('Daniel Témoin');
     expect(base.groupe).toBe('00007');
     expect(erreurs).toEqual([]);
+});
+
+// -----------------------------------------------------------------------
+// R4 (relecture croisée) — LES NOTES D'INTÉGRITÉ : masquées, et « Enregistrer » ne les efface pas
+// -----------------------------------------------------------------------
+test('R4 notes d\'intégrité en anonymisation : masquées à l\'écran, gardées en base à l\'enregistrement', async ({ page }) => {
+    test.setTimeout(90000);
+    brancherEcouteurs(page);
+    const NOTES = 'Passages repris de la copie de Curie';
+    await ouvrirEvaluationTemoin(page, { statut: 'ia', notes: NOTES });
+    // Le statut d'intégrité se recharge par « Modifier » (Liste des évaluations), pas par la copie.
+    await page.evaluate(() => window.modifierEvaluation('EV699'));
+    await page.waitForFunction(() => (document.getElementById('statutIntegrite') || {}).value === 'ia', null, { timeout: 10000 });
+    await page.waitForTimeout(800);
+    const champ = await page.evaluate(() => {
+        const c = document.getElementById('notesIntegrite');
+        return { valeur: c.value, desactive: c.disabled, placeholder: c.placeholder,
+            visible: !document.getElementById('divNotesIntegrite').classList.contains('u-hide') };
+    });
+    expect(champ).toEqual({ valeur: '', desactive: true, placeholder: 'Masqué en anonymisation', visible: true });
+
+    await page.evaluate(() => window.sauvegarderEvaluationModifiee());
+    await page.waitForTimeout(600);
+    const base = await page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || []).find(e => e.id === 'EV699'));
+    expect(base.statutIntegrite).toBe('ia');
+    expect(base.notesIntegrite).toBe(NOTES);
 });
 
 // -----------------------------------------------------------------------
@@ -248,6 +279,10 @@ test('(c)(d) intervention en anonymisation : description, observations et notes 
     const ecran = await page.evaluate(() => document.getElementById('conteneurPrincipal').innerText + ' '
         + [...document.querySelectorAll('#conteneurPrincipal textarea')].map(t => t.value).join(' '));
     for (const texte of Object.values(TEXTES)) expect(ecran).not.toContain(texte);
+    // R4 : le titre (texte libre) aussi — titre générique daté, champ masqué.
+    expect(ecran).not.toContain('Atelier thèse');
+    expect(ecran).toContain('Intervention du 10 septembre');
+    await expect(page.locator('#interventionTitre')).toBeDisabled();
     for (const id of ['#interventionDescription', '#observationsIntervention', '#note-DEMO004', '#observationsBilan']) {
         await expect(page.locator(id)).toBeDisabled();
         await expect(page.locator(id)).toHaveAttribute('placeholder', 'Masqué en anonymisation');
@@ -260,6 +295,7 @@ test('(c)(d) intervention en anonymisation : description, observations et notes 
     expect(ecrite.observations).toBe(TEXTES.observations);
     expect(ecrite.notesIndividuelles.DEMO004).toBe(TEXTES.note);
     expect(ecrite.bilan.observationsBilan).toBe(TEXTES.bilan);
+    expect(ecrite.titre).toBe('Atelier thèse');
 });
 
 // -----------------------------------------------------------------------
@@ -319,6 +355,16 @@ test('(d) volet confidentiel : ses notes s\'affichent en mode normal, rien ne s\
         return r;
     });
 
+    // R2 : la pastille verte du bouton « Confidentiel » (témoin en mode normal).
+    const pastille = () => page.evaluate(() => {
+        naviguerVers('suivi', 'profil');
+        window.afficherProfilComplet('DEMO004');
+        window.changerSectionProfil('accompagnement');
+        const bouton = document.querySelector('[data-action="ouvrirModalConfidentiel"]');
+        return bouton ? bouton.textContent.includes('\u25CF') : null;
+    });
+    expect(await pastille()).toBe(true);
+
     const normal = await lireVolet();
     expect(normal.texte).toContain(NOTE);                 // témoin
     expect(normal.texte).toContain(NOTE_PRESENCE);
@@ -331,4 +377,68 @@ test('(d) volet confidentiel : ses notes s\'affichent en mode normal, rien ne s\
     expect(anonyme.texte).toContain('Masqué en anonymisation');
     expect(anonyme.fls).toBe(false);
     await expect(page.locator('#confidentiel-btn-enregistrer')).toBeHidden();
+    expect(await pastille(), 'R2 : pas de pastille en anonymisation').toBe(false);
+});
+
+// -----------------------------------------------------------------------
+// R5 (relecture croisée) — PRÉSENCES PAR SOUS-GROUPE : la bascule de mode ne vide plus la séance
+// -----------------------------------------------------------------------
+// Mesuré avant le correctif : le menu des sous-groupes, rempli au démarrage seulement, gardait
+// les vrais numéros pendant que la liste passait à « Gr. A » ; le tableau tombait à zéro ligne,
+// « Verrouiller » n'écrivait rien sans un mot, et la préférence « Gr. B » s'écrivait en base.
+test('R5 présences par sous-groupe : après la bascule en anonymisation, la séance garde ses élèves et « Verrouiller » écrit', async ({ page }) => {
+    test.setTimeout(90000);
+    brancherEcouteurs(page);
+    await packDemo(page);
+    await page.evaluate(() => {
+        // Deux sous-groupes dans le même cours (« mode cours », tous les groupes fusionnés).
+        const k = cle('groupeEtudiants');
+        const c = obtenirCoursActifId();
+        const liste = db.getSync(k, []);
+        liste.forEach((e, i) => { e.coursId = c; if (i % 2) e.groupe = '00002'; });
+        // security-ok: fixture du banc, dérivée du pack démo.
+        db.setSync(k, liste);
+        const info = db.getSync('infoCours', {});
+        info._modeCours = true;
+        // security-ok: fixture du banc.
+        db.setSync('infoCours', info);
+    });
+    await page.evaluate(() => naviguerVers('suivi', 'saisie'));
+    await page.evaluate(() => { window.chargerGroupesPresences(); window.initialiserSaisiePresences(); });
+    await page.waitForTimeout(800);
+    const lignes = () => page.evaluate(() => document.querySelectorAll('#tbody-saisie-presences input[id^="periodes_"]').length);
+    expect(await lignes()).toBe(10);
+
+    // Le sous-groupe « 00002 », puis la bascule par le bouton de l'en-tête.
+    await page.evaluate(() => { const s = document.getElementById('selectGroupePresences'); s.value = '00002'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await page.waitForTimeout(500);
+    expect(await lignes()).toBe(5);
+    await page.evaluate(async () => { await basculerModeAnonymisation(); });
+    await page.waitForTimeout(800);
+    expect(await lignes(), 'la séance doit garder les cinq élèves du sous-groupe').toBe(5);
+
+    // « Verrouiller » écrit la séance du sous-groupe (période 0 posée sur le premier élève affiché).
+    const r = await page.evaluate(() => {
+        const champ = document.querySelector('#tbody-saisie-presences input[id^="periodes_"]');
+        const da = champ.id.slice('periodes_'.length);
+        champ.value = '0';
+        const date = document.getElementById('date-cours').value;
+        basculerVerrouillageDateActive();
+        const p = (db.getSync(cle('presences'), []) || []).find(x => x.date === date && x.da === da);
+        basculerVerrouillageDateActive();
+        return { periodes: p ? p.periodesPresentes : null, pref: db.getSync(cle('presences_groupe'), null) };
+    });
+    expect(r.periodes).toBe(0);
+
+    // Le menu, rempli en anonymisation : libellés anonymisés, valeurs et préférence réelles.
+    await page.evaluate(() => { window.chargerGroupesPresences(); });
+    const menu = await page.evaluate(() => {
+        const s = document.getElementById('selectGroupePresences');
+        s.value = '00002';
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+        return { libelles: [...s.options].map(o => o.textContent), pref: db.getSync(cle('presences_groupe'), null) };
+    });
+    expect(menu.libelles.join(' ')).toMatch(/Gr\. [A-Z]/);
+    expect(menu.libelles.join(' ')).not.toContain('00002');
+    expect(menu.pref).toBe('00002');
 });

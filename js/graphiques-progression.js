@@ -491,7 +491,7 @@ function obtenirRaiParDate(da, snapshots) {
             if (intervention.niveauRai > niveauActuel) {
                 raiParDate[dateSeance] = {
                     niveau: intervention.niveauRai,
-                    titre: intervention.titre || `Intervention niveau ${intervention.niveauRai}`
+                    titre: (typeof window.titreInterventionAffiche === 'function' ? window.titreInterventionAffiche(intervention) : intervention.titre) || `Intervention niveau ${intervention.niveauRai}`   // Lot A, R4
                 };
             }
         });
@@ -2189,7 +2189,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                     if (!existant || inter.niveauRai > existant.niveau) {
                         interventionsParIndex[meilleurIdx] = {
                             niveau: inter.niveauRai,
-                            titre: inter.titre || 'Intervention N' + inter.niveauRai
+                            titre: (typeof window.titreInterventionAffiche === 'function' ? window.titreInterventionAffiche(inter) : inter.titre) || 'Intervention N' + inter.niveauRai   // Lot A, R4
                         };
                     }
                 });
