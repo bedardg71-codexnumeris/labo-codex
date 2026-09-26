@@ -1,6 +1,6 @@
 # File des lots – tenue par Cowork
 
-> Mise à jour le 25 septembre 2026, soir (Toronto) — par Claude Code : #888 sort (1.159.10, phrase validée). Avant, 23 sept., 22 h : #830 sort (1.156.1, phrase validée). Avant : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
+> Mise à jour le 26 septembre 2026, ≈ 9 h 20 (Toronto) — par Claude Code : le lot des cartouches sort (1.159.11, relecture de Cowork verte, deux textes validés). Avant, 8 h 15 — par Cowork : le lot des cartouches entre dans la file. Avant, 25 sept., soir — par Claude Code : #888 sort (1.159.10, phrase validée). Avant, 23 sept., 22 h : #830 sort (1.156.1, phrase validée). Avant : le lot N6 est sorti (1.155.7) ; la file des pratiques de notation est vide. Reste tenu par Cowork. Un lot entre ici quand Grégoire a dit « oui » ; il en sort quand il est poussé.
 
 1. ~~Tranchée le 17 sept., code seulement : le suffixe « pér. » d'une séance d'horaire (#888).~~ **SORTI DE LA FILE : corrigé en 1.159.10 le 25 sept. 2026 (Claude Code) ; Nouvelles validées telles quelles ; coup d'œil de Grégoire en ligne dû (Cadre › Horaire, une séance remplie).**
 2. À Grégoire : ~~la disposition de F4-2~~ (**tranchée le 25 sept. 2026, 17 h 50 : « laisser tel quel »**, la disposition *refuser* de l'audit du 21 sept. est retenue) ; F3-6 (l'export pour la recherche compte les niveaux par I / D / M / E).
@@ -40,6 +40,10 @@
 ## Choisi par Grégoire le 25 sept. après-midi – écrit par Cowork
 
 - **Lot #583 + #680** – partager une échelle transporte ses repères de maîtrise (et les autres champs laissés en chemin), avec un registre d'exclusion et un message clair pour un paquet venu d'une version plus récente. **Décision de Grégoire, 15 h 40** : « On prolonge le format actuel. La version ne viendra pas avant juin 2027. » (pas de `v2`). Consigne : `CONSIGNE-DU-JOUR.md`.
+
+## Choisi par Grégoire le 26 sept. à 8 h 10 – écrit par Cowork
+
+- ~~**Lot « les cartouches arrivent entières »** (#643, #654, #637)~~ **SORTI DE LA FILE : 1.159.11, le 26 sept. 2026 (Claude Code) ; relecture croisée de Cowork verte ; phrase de prévisualisation et Nouvelles validées telles quelles ; trouvailles inscrites #952, #953, #954.** – dans le cap du 24 au soir (la rétroaction). Le fichier de partage dit de quel trimestre viennent ses cartouches ; une production importée retrouve sa cartouche ; une archive rouverte montre toutes ses cartouches (#637 d'abord confirmée à l'exécution, sinon sortie du lot). Relecture croisée obligatoire. Consigne : `CONSIGNE-DU-JOUR.md`.
 
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 

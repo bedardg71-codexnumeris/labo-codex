@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 18 H 10 : **#888 (1.159.10) COMMITÉ SUR `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 9 H 20 : **LOT #643 #654 #637 (1.159.11) FUSIONNÉ DANS `main` (avance rapide) ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `ac24acb7` + la branche `lot-cartouches-643-654-637` (`8e87853d` #643, `d7da0b66` #654, `6c4a21c6` #637, `79ce0b0c` demande de relecture, `a75691cb` relecture) + `b7d59396` release (build 0926-0916) + cette clôture. Relecture croisée de Cowork VERTE avant la fusion, sans retouche. Phrase de prévisualisation et Nouvelles validées par Grégoire telles quelles. Trouvailles inscrites : #952, #953, #954 (O1 de la relecture).
+
+**Reste** : constater « en ligne » chez Netlify ; retirer la branche `lot-cartouches-643-654-637` une fois le push constaté. Non commités, laissés à Cowork : `PORTES-TERRAIN-2026-09-24-bug-944.md` (modifié), `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md`, `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 25 SEPT. 2026, ≈ 18 H 10 : **#888 (1.159.10) COMMITÉ SUR `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `db89265b` (doc 1.159.9, non poussé jusqu'ici) + `503f00b5` le lot + `2e91da82` release (build 0925-1757) + cette clôture. Travaillé directement sur `main` (aucune autre session active, mesuré). Pas de relecture croisée (consigne : rien ne se reprend mal). Nouvelles validées par Grégoire telles quelles.
 

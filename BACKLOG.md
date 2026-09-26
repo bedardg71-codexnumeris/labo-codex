@@ -1641,7 +1641,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   console sur les données réelles. Sous namespacement (S5 / D2-A) ils rendraient zéro — et **un diagnostic qui rend
   zéro se lit « rien à réparer »**. Un outil qui ment par zéro est pire qu'un outil absent.
   ⮕ **À traiter DANS le périmètre de S5**, pas après : le jour où la migration passe, ces sept-là sont déjà faux.
-- [ ] **#637 — `reserve.js` écrit DEUX formes de clé de cartouches dans la même archive, et un lecteur sur deux n'en voit qu'une**.
+- [x] **#637 — `reserve.js` écrit DEUX formes de clé de cartouches dans la même archive, et un lecteur sur deux n'en voit qu'une**. ✅ **LIVRÉ en 1.159.11 le 26 sept. 2026** (lot « les cartouches arrivent entières », relecture croisée de Cowork verte : `plans de travail/RELECTURE-2026-09-26-lot-cartouches.md`) — confirmé à l'exécution avant correctif (WebKit : 0 cartouche proposée) ; la réouverture reconnaît `<trim>_cartouches_<g>` et la forme nue, la namespacée l'emporte par grille. Preuve : `tests/integration/reserve-reouverture-cartouches-637.spec.js`.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, sur mesure de `kuekatsheu-67`, recoupée indépendamment.
   ⚠ **Défaut ACTUEL, pas un coût futur de S5** — mais **mesuré STATIQUEMENT seulement** : à confirmer sur données
   réelles avant d'y croire.
@@ -2736,7 +2736,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   (ce qui ferait rugir le témoin — signal attendu, témoin à mettre à jour), ou le non-remap y est-il la règle voulue ?
   Aucune urgence : le comportement actuel est stable et verrouillé des deux côtés.
 
-- [ ] **#654 — CONSTAT · Aucun des quatre remaps d'import ne mémorise l'id neuf d'une cartouche : `production.cartoucheId` n'est remappé nulle part**.
+- [x] **#654 — CONSTAT · Aucun des quatre remaps d'import ne mémorise l'id neuf d'une cartouche : `production.cartoucheId` n'est remappé nulle part**. ✅ **LIVRÉ en 1.159.11 le 26 sept. 2026** (lot « les cartouches arrivent entières », relecture croisée de Cowork verte : `plans de travail/RELECTURE-2026-09-26-lot-cartouches.md`) — `fusionnerParIdentite` rend ses renommages ; configuration complète, import sélectif et Réserve rebranchent `production.cartoucheId` (cartouches traitées avant les productions). La sentinelle-627 annoncée n'existe pas sur `main` (mesuré). Preuves : `tests/integration/import-cartouche-renommee-654.spec.js`, `tests/unit/fusion-renommages-654.test.js`.
   Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`. Sorti de S9a/#627
   délibérément : le remède n'est pas local, et le mêler à l'unification rendrait illisible le rouge de sa sentinelle.
   Les quatre implémentations frappent un id neuf pour une cartouche en collision, aucune ne le retient. `remapCartouches`
@@ -2981,7 +2981,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⮕ Rouge obtenu au banc **avant** correctif avec la vraie `travauxOutils.configurerDragPalette` : `{verrou: 0,
   toggle: 1}` — le voisin exempté sert de témoin, sans lui un zéro des deux côtés ne dirait rien. Vert après :
   `{verrou: 1, toggle: 1}`, garde-fou inverse (glisser par le titre) inchangé.
-- [ ] **#643 — Le fichier de partage `.lcz` ne porte pas le trimestre d'où viennent les cartouches ; seule la modale le dit**.
+- [x] **#643 — Le fichier de partage `.lcz` ne porte pas le trimestre d'où viennent les cartouches ; seule la modale le dit**. ✅ **LIVRÉ en 1.159.11 le 26 sept. 2026** (lot « les cartouches arrivent entières », relecture croisée de Cowork verte : `plans de travail/RELECTURE-2026-09-26-lot-cartouches.md`) — `manifest.trimestreCartouches` (nom du trimestre actif, jamais l'id), dit à la prévisualisation ; format `v1` prolongé. Preuves : `tests/unit/partage-trimestre-cartouches-643.test.js`, `tests/integration/partage-trimestre-cartouches-643.spec.js`.
   Inscrit le 31 août 2026 par `kuekatsheu-c8`, **avant tout usage**. Mesure de `kuekatsheu-67`. Suite de S5/#623.
   Décision de Grégoire du 31 août : une grille partagée qui vit dans deux trimestres envoie les cartouches du
   **trimestre ACTIF**, et l'export **doit le dire**. La moitié « écran » est livrée (`confirmerExport`,
