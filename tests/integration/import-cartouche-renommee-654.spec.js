@@ -152,9 +152,13 @@ test('#654 · Réserve, copie en double : la production copiée désigne la copi
         const fichier = new File([await zip.generateAsync({ type: 'blob' })], 'archive-654.zip');
         document.getElementById('modalOuvrirVersement').classList.add('actif');
         await window.ReserveOuvrir.onFichierChoisi({ files: [fichier] });
-        const cases = [...document.querySelectorAll('#modalOuvrirVersement input.reserve-ouvrir-checkbox')];
-        cases.forEach(c => { c.checked = true; });
-        document.getElementById('reserve-ouvrir-toggle-copie').checked = true;
+        // Les gestes de la modale : « Copier en double » déverrouille les doublons, puis
+        // « tout cocher » par section.
+        const bascule = document.getElementById('reserve-ouvrir-toggle-copie');
+        bascule.checked = true;
+        window.ReserveOuvrir.onChangerToggleCopie(bascule);
+        ['grilles', 'cartouches', 'productions'].forEach(t => window.ReserveOuvrir.onCheckTout(t + ':1'));
+        const cases = [...document.querySelectorAll('#modalOuvrirVersement input.reserve-ouvrir-checkbox')].filter(c => c.checked);
         await window.ReserveOuvrir.appliquerReimport();
         const prods = (window.db.getSync(cle('productions'), []) || []).filter(p => p.titre === 'Analyse 654' && p.id !== 'P654');
         const prod = prods[0] || {};
@@ -164,7 +168,7 @@ test('#654 · Réserve, copie en double : la production copiée désigne la copi
             idsDeSaGrille: cartouchesDeSaGrille.map(c => c.id), designee: designee && designee.nom };
     }, { GRILLE, CART_LOCALE, CART_ARRIVANTE, PROD });
     console.log('RÉSERVE →', JSON.stringify(r));
-    expect(r.nbCases, 'grille, cartouche et production offertes').toBe(3);
+    expect(r.nbCases, 'grille, cartouche et production cochées (doublons déverrouillés)').toBe(3);
     expect(r.nbCopies).toBe(1);
     // Témoin : la grille a bien été copiée (sinon la cartouche resterait dans G654).
     expect(r.grilleId).not.toBe('G654');

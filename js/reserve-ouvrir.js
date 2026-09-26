@@ -258,22 +258,37 @@ function _extraireRessources(donnees) {
         }
     });
 
-    // Cartouches : scanner toutes les clés cartouches_* et flatten (avec grilleId préservé)
-    var cartouches = [];
-    var idsCartouchesParGrille = {};
+    // Cartouches : les DEUX formes de clé d'une archive (#637, 26 sept. 2026).
+    // Depuis S5/#623, un trimestre range ses cartouches sous `<trim>_cartouches_<grilleId>`,
+    // et le versement (`reserve.js`) copie cette clé complète ; la forme nue
+    // `cartouches_<grilleId>` n'y est plus qu'un héritage d'avant S5. Ne lire que la nue
+    // rendait une liste vide — ou périmée — pour toute archive récente (mesuré en WebKit,
+    // `reserve-reouverture-cartouches-637.spec.js`).
+    // ⚠ Pour une même grille, la forme NAMESPACÉE l'emporte en bloc : c'est elle que les
+    // évaluations du trimestre ont lue (`cle('cartouches_…')`). La nue ne sert que si la
+    // namespacée manque.
+    var sourcesParGrille = {};
     Object.keys(donnees).forEach(function(k) {
-        if (k.indexOf('cartouches_') !== 0) return;
-        var grilleId = k.substring('cartouches_'.length);
-        var arr = donnees[k];
-        if (!Array.isArray(arr)) return;
-        if (!idsCartouchesParGrille[grilleId]) {
-            var actuels = (window.db && db.getSync(k, [])) || [];
-            if (!Array.isArray(actuels)) actuels = [];
-            idsCartouchesParGrille[grilleId] = new Set(actuels.map(function(c) { return c.id; }));
-        }
-        var idsActuels = idsCartouchesParGrille[grilleId];
+        var m = /^(?:([^_]+)_)?cartouches_(.+)$/.exec(k);
+        if (!m || !Array.isArray(donnees[k])) return;
+        var s = sourcesParGrille[m[2]] || (sourcesParGrille[m[2]] = { namespacees: [], nues: [] });
+        (m[1] ? s.namespacees : s.nues).push(donnees[k]);
+    });
+
+    var cartouches = [];
+    Object.keys(sourcesParGrille).forEach(function(grilleId) {
+        var s = sourcesParGrille[grilleId];
+        var arr = [].concat.apply([], s.namespacees.length ? s.namespacees : s.nues);
+        // Doublon = déjà là OÙ L'IMPORT ÉCRIRA : `importerCartouchesExternes` écrit sous
+        // `cle('cartouches_<grilleId>')` (trimestre actif). Lire la clé de l'archive
+        // comparait à un autre magasin que celui qui recevra la cartouche.
+        var actuels = (window.db && db.getSync(cle('cartouches_' + grilleId), [])) || [];
+        if (!Array.isArray(actuels)) actuels = [];
+        var idsActuels = new Set(actuels.map(function(c) { return c.id; }));
+        var idsVus = new Set();
         arr.forEach(function(c) {
-            if (!c || !c.id) return;
+            if (!c || !c.id || idsVus.has(c.id)) return;
+            idsVus.add(c.id);
             var clone = Object.assign({}, c);
             if (!clone.grilleId) clone.grilleId = grilleId;
             clone._doublon = idsActuels.has(c.id);
