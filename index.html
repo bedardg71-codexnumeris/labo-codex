@@ -11291,9 +11291,10 @@
                                 <h4 class="u-mb-10 u-texte-bleu">Mode Anonymisé</h4>
                                 <p><strong>Présentations publiques</strong> — Confidentialité protégée</p>
                                 <ul class="mt-8">
-                                    <li>Tes vraies données avec noms fictifs automatiques</li>
-                                    <li>Préfixe «AN.» devant les numéros de groupe</li>
-                                    <li>Lecture seule (aucune modification possible)</li>
+                                    <li>Tes vraies données, les noms remplacés par «&nbsp;Élève 1&nbsp;», «&nbsp;Élève 2&nbsp;»…</li>
+                                    <li>Les groupes deviennent «&nbsp;Gr. A&nbsp;», «&nbsp;Gr. B&nbsp;»…</li>
+                                    <li>Tu travailles normalement : tout s'enregistre dans tes vraies données</li>
+                                    <li>Les notes libres et la fiche confidentielle sont masquées</li>
                                     <li>Parfait pour captures d'écran et présentations</li>
                                 </ul>
                             </div>
@@ -14352,7 +14353,7 @@
     <script src="js/navigation.js?v=20260918a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=20260911a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
-    <script src="js/modes.js?v=20260926a"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
+    <script src="js/modes.js?v=20260926b"></script> <!-- Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/ui-dialogues.js?v=20260925b"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
@@ -14473,7 +14474,7 @@
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260924b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20260926a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20260926b"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260921b"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -14484,7 +14485,7 @@
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260926a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260924b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20260926a"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20260926b"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20260917b"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20260906a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -14543,7 +14544,7 @@
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
     <script src="js/horaire.js?v=20260911l"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
     <script src="js/groupe.js?v=20260926a"></script>
-    <script src="js/interventions.js?v=20260926a"></script> <!-- cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
+    <script src="js/interventions.js?v=20260926b"></script> <!-- cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
     <script src="js/rencontres.js?v=20260912c"></script> <!-- cadrage « Rencontres » (12 sept. 2026) : le sous-onglet Suivi › Rencontres, les trois questions -->
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
@@ -14566,8 +14567,8 @@
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
-    <script src="js/graphiques-progression.js?v=20260921b"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
-    <script src="js/correlations-longitudinales.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
+    <script src="js/graphiques-progression.js?v=20260926a"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
+    <script src="js/correlations-longitudinales.js?v=20260926a"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
         <script src="js/impact-jetons.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
     <!-- PRIORITÉ 7: Utilitaires -->
@@ -14575,8 +14576,8 @@
     <script src="js/evaluation-chargement.js?v=20260925e"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260924b"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260924j"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20260926a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20260926a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation-sauvegarde.js?v=20260926b"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation.js?v=20260926b"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260518d"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
@@ -14605,7 +14606,7 @@
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=20260923b"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260923b"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260926a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260917b"></script>
     <script src="js/guides-pedagogiques.js?v=20260917b"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260923b"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->

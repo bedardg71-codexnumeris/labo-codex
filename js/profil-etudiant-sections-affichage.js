@@ -851,6 +851,14 @@ function genererSectionMobilisationEngagement(da) {
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
+// Relecture croisée R2 (lot A de l'enregistrement, 26 sept. 2026) — la pastille dit qu'un élève a
+// des informations confidentielles (un parcours, un diagnostic) : dans une capture ou une démo,
+// c'est une information sur l'élève. En anonymisation, le bouton reste, neutre.
+function _pastilleConfidentielVisible(da) {
+    if (typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation()) return false;
+    return aDesInfosConfidentielles(da);
+}
+
 function genererSectionAccompagnement(da) {
     // Récupérer toutes les interventions où cet étudiant était présent
     const interventions = obtenirInterventionsEtudiant(da);
@@ -1299,7 +1307,7 @@ function genererSectionAccompagnement(da) {
                 </p>
 
                 <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
-                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Confidentiel ${aDesInfosConfidentielles(da) ? '<span style="color: var(--vert-principal);">\u25CF</span>' : ''}
+                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Confidentiel ${_pastilleConfidentielVisible(da) ? '<span style="color: var(--vert-principal);">\u25CF</span>' : ''}
                 </button>
             </div>
 
@@ -1566,7 +1574,8 @@ function genererSectionAccompagnement(da) {
         // Déterminer le texte du badge (titre ou niveau)
         let badgeTexte = '';
         if (intervention.titre) {
-            badgeTexte = intervention.titre;
+            badgeTexte = typeof window.titreInterventionAffiche === 'function'
+                ? window.titreInterventionAffiche(intervention) : intervention.titre;   // Lot A, R4
         } else {
             badgeTexte = niveauRai === 1 ? 'Rattrapage (1)' : niveauRai === 2 ? 'Rattrapage (2)' : 'Intervention niveau 3';
         }

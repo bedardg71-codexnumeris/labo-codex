@@ -146,6 +146,11 @@ function derniereSeancePassee() {
    GESTION DES GROUPES
    =============================== */
 
+// Le vrai numéro de groupe d'un élève, qu'il vienne de la liste brute ou anonymisée (R5).
+function _groupeReel(e) {
+    return e.groupeReel !== undefined ? e.groupeReel : e.groupe;
+}
+
 /**
  * Charge la liste des groupes dans le select
  * 🆕 BETA 95.7 (23 jan) : Utiliser uniquement les étudiants du groupe-cours ACTIF
@@ -162,15 +167,19 @@ function chargerGroupesPresences() {
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants') || [];
 
-    // Extraire les groupes uniques (sous-groupes à l'intérieur du groupe-cours)
-    const groupesSet = new Set();
+    // Extraire les groupes uniques (sous-groupes à l'intérieur du groupe-cours).
+    // Relecture croisée R5 (lot A, 26 sept. 2026) : la VALEUR d'une option est le vrai numéro,
+    // le LIBELLÉ est celui de l'écran (« Gr. A » en anonymisation). Avant, la valeur était le
+    // libellé : après une bascule de mode, le menu (rempli au démarrage seulement) ne
+    // correspondait plus à la liste, le tableau tombait à zéro ligne et « Verrouiller »
+    // n'écrivait rien, sans un mot ; et la préférence « Gr. B » s'écrivait dans les données.
+    const libelles = new Map();
     etudiants.forEach(e => {
-        if (e.groupe && e.groupe.trim() !== '') {
-            groupesSet.add(e.groupe);
-        }
+        const reel = _groupeReel(e);
+        if (reel && String(reel).trim() !== '') libelles.set(reel, e.groupe);
     });
 
-    const groupes = Array.from(groupesSet).sort();
+    const groupes = Array.from(libelles.keys()).sort();
 
     // Remplir le select
     // 🆕 BETA 95.7 : Si un seul groupe, ne pas afficher le filtre "Tous les groupes"
@@ -182,7 +191,7 @@ function chargerGroupesPresences() {
         groupes.forEach(groupe => {
             const option = document.createElement('option');
             option.value = groupe;
-            option.textContent = groupe;
+            option.textContent = libelles.get(groupe);
             selectGroupe.appendChild(option);
         });
         selectGroupe.classList.remove('u-hide');
@@ -923,7 +932,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
     const selectGroupe = document.getElementById('selectGroupePresences');
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
     let etudiantsATraiter = groupeFiltre
-        ? etudiants.filter(e => e.groupe === groupeFiltre)
+        ? etudiants.filter(e => _groupeReel(e) === groupeFiltre)
         : etudiants;
 
     // Préserver les flags facultatifs
@@ -1287,7 +1296,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
     // ÉTAPE 1 : Filtrer par groupe (si un groupe est sélectionné)
     if (groupeFiltre) {
-        etudiantsFiltres = etudiants.filter(e => e.groupe === groupeFiltre);
+        etudiantsFiltres = etudiants.filter(e => _groupeReel(e) === groupeFiltre);
     }
 
     // ÉTAPE 2 : Trier selon le critère choisi
@@ -1652,7 +1661,7 @@ function enregistrerPresences() {
     // Filtrer les étudiants si un sous-groupe est sélectionné (à l'intérieur du groupe-cours)
     let etudiantsATraiter = etudiants;
     if (groupeFiltre) {
-        etudiantsATraiter = etudiants.filter(e => e.groupe === groupeFiltre);
+        etudiantsATraiter = etudiants.filter(e => _groupeReel(e) === groupeFiltre);
     }
 
     // IMPORTANT : Sauvegarder les flags facultatifs AVANT de supprimer les anciennes présences

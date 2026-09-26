@@ -17,7 +17,8 @@
  *   - rétablir `return false` en tête de `sauvegarderDonneesSelonMode` → A rouge ;
  *   - retirer l'appel à `retirerSubstitutionsAnonymisation` → B, C, D rouges ;
  *   - retirer le rendu des prénoms (`_desanonymiserChaines`) → B rouge (texte) ;
- *   - retirer la restauration du groupe (`_estGroupeSubstitue`) → B rouge (groupe).
+ *   - retirer la restauration du groupe (`_estGroupeSubstitue`) → B rouge (groupe) ;
+ *   - R1 : ne plus sauter les éléments inchangés (`if (inchange(item)) return item;`) → R1 rouge (la voisine).
  */
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -37,8 +38,10 @@ function monter(mode, extra = {}) {
         removeSync: (k) => { delete store[k]; },
         get: async () => null, set: async () => {}
     };
-    const win = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test', cle: (k) => (k.startsWith('test_') ? k : 'test_' + k) };
-    chargerScript('js/modes.js', { db, cle: win.cle, echapperHtml: (s) => String(s), toggleDisplay() {}, obtenirPreference: () => null, notifications: { erreur() {}, succes() {} } }, win);
+    const win = { addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, obtenirTrimestreId: () => 'test', cle: (k) => (k.startsWith('test_') ? k : 'test_' + k) };
+    chargerScript('js/modes.js', { db, cle: win.cle, echapperHtml: (s) => String(s), toggleDisplay() {}, obtenirPreference: () => null, notifications: { erreur() {}, succes() {} },
+        // `changerMode` (R1 : il pose les empreintes) rafraîchit l'écran : rien à rafraîchir ici.
+        sousSectionActive: null, CustomEvent: class { constructor(t, o) { this.type = t; this.detail = o && o.detail; } } }, win);
     return { win, store, ecrits };
 }
 
@@ -95,6 +98,41 @@ describe('Lot A · B — une évaluation construite depuis l\'écran anonymisé 
         win.obtenirDonneesSelonMode('groupeEtudiants');           // pose le mapping (numéros 1 et 2)
         win.sauvegarderDonneesSelonMode('evaluationsSauvegardees', [{ id: 'E1', etudiantDA: '3000001', etudiantNom: 'Aurore Fictif', retroactionFinale: 'Comme Élève 99 dans le roman.' }]);
         expect(store.test_evaluationsSauvegardees[0].retroactionFinale).toBe('Comme Élève 99 dans le roman.');
+    });
+});
+
+describe('Lot A · R1 — la garde ne touche que ce qui a changé depuis l\'entrée en anonymisation', () => {
+    it('une évaluation voisine qui contient déjà « Élève N » ressort intacte ; la copie modifiée est rendue', async () => {
+        const { win, store } = monter('normal', { test_evaluationsSauvegardees: [] });
+        // Le mapping du trimestre existe déjà (une séance d'anonymisation antérieure).
+        await win.changerMode('anonymisation');           // empreintes posées ici (R1)
+        const n = win.anonymiserNom('3000001');            // « Élève k » d'Aurore
+        expect(n).toMatch(/^Élève \d+$/);
+        store.test_evaluationsSauvegardees = [
+            { id: 'E_VOISINE', etudiantDA: '3000002', etudiantNom: 'Basile Inventé', retroactionFinale: `Comme ${n} du roman.` },
+            { id: 'E_TOUCHEE', etudiantDA: '3000001', etudiantNom: 'Aurore Fictif', retroactionFinale: '' }
+        ];
+        await win.changerMode('normal');
+        await win.changerMode('anonymisation');           // empreintes de ce stock
+        // L'auto-save : relit la base, modifie EN PLACE la copie touchée, réécrit tout.
+        const evals = JSON.parse(JSON.stringify(store.test_evaluationsSauvegardees));
+        evals[1].retroactionFinale = `Bonjour ${n} !`;
+        win.sauvegarderDonneesSelonMode('evaluationsSauvegardees', evals);
+        const ecrit = store.test_evaluationsSauvegardees;
+        expect(ecrit.find(e => e.id === 'E_VOISINE').retroactionFinale).toBe(`Comme ${n} du roman.`);
+        expect(ecrit.find(e => e.id === 'E_TOUCHEE').retroactionFinale).toBe('Bonjour Aurore !');
+    });
+
+    it('une copie modifiée À NOUVEAU après une écriture gardée est encore rendue (empreintes reprises)', async () => {
+        const { win, store } = monter('normal', { test_evaluationsSauvegardees: [{ id: 'E1', etudiantDA: '3000001', etudiantNom: 'Aurore Fictif', retroactionFinale: '' }] });
+        await win.changerMode('anonymisation');
+        const n = win.anonymiserNom('3000001');
+        const lus = JSON.parse(JSON.stringify(store.test_evaluationsSauvegardees));
+        lus[0].retroactionFinale = 'Premier jet.';
+        win.sauvegarderDonneesSelonMode('evaluationsSauvegardees', lus);
+        lus[0].retroactionFinale = `Bonjour ${n} !`;
+        win.sauvegarderDonneesSelonMode('evaluationsSauvegardees', lus);
+        expect(store.test_evaluationsSauvegardees[0].retroactionFinale).toBe('Bonjour Aurore !');
     });
 });
 

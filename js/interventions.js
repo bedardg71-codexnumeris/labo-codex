@@ -27,6 +27,11 @@ function _attributsTexteLibre(placeholder) {
         ? 'placeholder="' + echapperHtml(window.MENTION_MASQUE_ANONYMISATION) + '" disabled data-masque-anonymisation="1"'
         : 'placeholder="' + echapperHtml(placeholder) + '"';
 }
+// Relecture croisée R4 : le titre aussi est un texte libre — un titre générique daté en anonymisation.
+function _titreAffiche(intervention) {
+    if (typeof window.titreInterventionAffiche !== 'function') return intervention.titre || '';
+    return window.titreInterventionAffiche(intervention, '', _enVueRencontres() ? 'Rencontre' : 'Intervention');
+}
 function _texteDuChamp(champ, valeurEnBase) {
     if (champ && champ.dataset.masqueAnonymisation === '1') return valeurEnBase || '';
     return champ ? champ.value : '';
@@ -465,7 +470,7 @@ function afficherListeInterventions() {
             <div class="carte intervention-item u-mb-15">
                 <div class="intervention-header">
                     <div>
-                        <h4 class="intervention-titre" data-tooltip="interv-carte">${echapperHtml(intervention.titre)}</h4>
+                        <h4 class="intervention-titre" data-tooltip="interv-carte">${echapperHtml(_titreAffiche(intervention))}</h4>
                         <div class="intervention-badges">
                             <span>${badgeStatut}</span>
                             <span class="badge-type-intervention">${badgeType}</span>
@@ -569,7 +574,7 @@ function _blocProchainsRendezVous(interventions) {
         : '<ul style="margin: 0; padding-left: 20px;">' + aVenir.map(function(i) {
             return '<li><strong>' + echapperHtml(formaterDateLisible(i.date)) + '</strong>'
                 + (i.heure ? ' à ' + echapperHtml(i.heure) : '')
-                + ' — ' + echapperHtml(i.titre) + ' · ' + _formeRencontre(i).toLowerCase() + '</li>';
+                + ' — ' + echapperHtml(_titreAffiche(i)) + ' · ' + _formeRencontre(i).toLowerCase() + '</li>';
         }).join('') + '</ul>';
     return '<div class="carte u-mb-15" id="prochainsRendezVous">'
         + '<h4 class="intervention-titre u-mb-10">Tes prochains rendez-vous</h4>' + corps + '</div>';
@@ -946,7 +951,7 @@ function ouvrirIntervention(interventionId, options) {
     // absent ⇒ sauvegarderPresencesIntervention ne touche ni `criteresCibles` ni `objectifVise`.
     container.innerHTML = `
         <div class="carte">
-            <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? V().titreNouvelle : echapperHtml(intervention.titre)}</h3>
+            <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? V().titreNouvelle : echapperHtml(_titreAffiche(intervention))}</h3>
 
             <!-- Section informations éditables -->
             <div class="intervention-grid-1-09">
@@ -957,7 +962,7 @@ function ouvrirIntervention(interventionId, options) {
                         <div class="champ-formulaire u-m-0">
                             <label for="interventionTitre" class="label-formulaire">Titre :</label>
                             <input type="text" id="interventionTitre" class="controle-form" required
-                                   value="${echapperHtml(intervention.titre)}" placeholder="${V().placeholderTitre}">
+                                   ${_texteLibreMasque() ? _attributsTexteLibre('') : 'value="' + echapperHtml(intervention.titre) + '" placeholder="' + echapperHtml(V().placeholderTitre) + '"'}>
                         </div>
 
                         <div class="champ-formulaire u-m-0">
@@ -1494,7 +1499,7 @@ function sauvegarderPresencesIntervention(interventionId) {
     else if (niveauSave === 3) typeSave = 'individuel';
 
     // Mettre à jour les informations de base
-    interventions[index].titre = document.getElementById('interventionTitre').value;
+    interventions[index].titre = _texteDuChamp(document.getElementById('interventionTitre'), interventions[index].titre);
     interventions[index].date = document.getElementById('interventionDate').value;
     interventions[index].heure = document.getElementById('interventionHeure').value;
     interventions[index].duree = parseFloat(document.getElementById('interventionDuree').value) || 2;

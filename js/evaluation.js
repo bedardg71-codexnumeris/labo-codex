@@ -1386,7 +1386,11 @@ function _chargerStatutsEtBadgesModif(evaluation) {
     const notesIntegrite = document.getElementById('notesIntegrite');
     if (selectIntegrite) {
         selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
-        if (notesIntegrite) notesIntegrite.value = evaluation.notesIntegrite || '';
+        // Lot A, R4 : texte libre, masqué en anonymisation (`poserChampTexteLibre`, modes.js).
+        if (notesIntegrite) {
+            if (typeof poserChampTexteLibre === 'function') poserChampTexteLibre(notesIntegrite, evaluation.notesIntegrite || '');
+            else notesIntegrite.value = evaluation.notesIntegrite || '';
+        }
         selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
@@ -1698,7 +1702,7 @@ function _extraireProprietesJetons(evalExistante) {
 }
 
 function _lireChampsDOMMod(maintenant) {
-    return {
+    const champs = {
         echelleId: document.getElementById('selectEchelle1').value,
         cartoucheId: document.getElementById('selectCartoucheEval').value,
         dateModification: maintenant.toISOString(),
@@ -1716,6 +1720,10 @@ function _lireChampsDOMMod(maintenant) {
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value
     };
+    // Lot A, R4 : notes d'intégrité masquées en anonymisation — la fusion garde celles de la base.
+    if (typeof champMasqueAnonymisation === 'function'
+        && champMasqueAnonymisation(document.getElementById('notesIntegrite'))) delete champs.notesIntegrite;
+    return champs;
 }
 
 function _lireOptionsAffichageMod() {
