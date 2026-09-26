@@ -419,3 +419,36 @@ describe('#944 · une AUTRE cartouche choisie au menu, sur une copie déjà éva
         }
     });
 });
+
+describe('#960 · D6 — un commentaire de critère enregistré VIDE reste vide (décision de Grégoire, 26 sept. 2026)', () => {
+    // h1 enregistré vide au niveau M ; la cartouche de l'évaluation (CT9) porte « h1_M ».
+    const avecH1Vide = () => {
+        const ev = evaluationEnregistree();
+        ev.criteres[0] = { ...ev.criteres[0], retroaction: '' };
+        return ev;
+    };
+
+    it('à la réouverture, le commentaire de la copie reste vide : la cartouche ne le remplit pas', () => {
+        const { ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        expect(ecran.comm_h1.textContent).toBe('');
+    });
+
+    it('à « Enregistrer », la base garde le vide', () => {
+        const { win, ecritures } = rouvrir({ enBase: [avecH1Vide()] });
+        win.sauvegarderEvaluationModifiee();
+        const ev = ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.criteres.find((c) => c.critereId === 'h1').retroaction).toBe('');
+    });
+
+    it('TÉMOIN : un niveau CHANGÉ prend la cartouche au nouveau niveau (le vide était celui de l\'ancien)', () => {
+        const { win, ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        ecran.eval_h1.value = 'E';
+        win.niveauSelectionne('h1');
+        expect(ecran.comm_h1.textContent).toBe(CARTOUCHE.commentaires.h1_E);
+    });
+
+    it('TÉMOIN : une amorce ou « [Non défini] » en stock n\'est pas un vide enregistré — la cartouche, comme #939', () => {
+        const { ecran } = rouvrir();
+        expect(ecran.comm_h3.textContent, 'amorce en stock').toBe(CARTOUCHE.commentaires.h3_M);
+    });
+});

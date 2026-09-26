@@ -122,13 +122,12 @@ const pertinent = (ev) => ({
     retroactionFinale: ev.retroactionFinale
 });
 
-// MESURÉ LE 26 SEPT. 2026, IDENTIQUE SUR LE CODE D'AVANT LE LOT (`98a0fc0b`) ET D'APRÈS :
-//   · par la copie (la visionneuse enchaîne « copie, copie, modifier »), la SIMPLE OUVERTURE écrit en
-//     base : la rétroaction finale réécrite à la main est remplacée par le texte régénéré, et un
-//     commentaire de critère enregistré vide prend celui de la cartouche. ⮕ #960, inscrite.
-//   · par la Liste, l'ouverture n'écrit rien ; « Enregistrer » garde la rétroaction à la main, mais
-//     remplit aussi le commentaire vide depuis la cartouche (question posée avec #960, règle #939).
-// Ces écarts sont déclarés `test.fail` : le jour où #960 les corrige, le banc le dira.
+// #960 (26 sept. 2026) — mesuré avant le correctif, identique avant et après #959 :
+//   · par la copie (la visionneuse enchaîne « copie, copie, modifier »), la SIMPLE OUVERTURE écrivait
+//     en base : la rétroaction finale réécrite à la main remplacée par le texte régénéré, et un
+//     commentaire de critère enregistré vide rempli par la cartouche ;
+//   · par la Liste, « Enregistrer » remplissait aussi le commentaire vide depuis la cartouche.
+// Décision de Grégoire (D6) : un commentaire de critère enregistré vide reste vide.
 const nom = (chemin) => (chemin === 'copie' ? 'la copie' : 'la Liste');
 
 for (const chemin of ['copie', 'liste']) {
@@ -179,8 +178,7 @@ test('#959 M1 · par la Liste, « Enregistrer » garde la rétroaction réécrit
     expect((await base(page)).retroactionFinale).toBe(A_LA_MAIN);
 });
 
-test('#960 (antérieur à #959) · ouverte par la copie sans rien toucher : la base devrait être inchangée', async ({ page }) => {
-    test.fail(true, '#960 — la simple ouverture par la visionneuse réécrit la rétroaction et remplit le commentaire vide');
+test('#960 · ouverte par la copie sans rien toucher : la base est inchangée, à l\'octet', async ({ page }) => {
     test.setTimeout(90000);
     await monter(page);
     const avant = await base(page);
@@ -188,11 +186,26 @@ test('#960 (antérieur à #959) · ouverte par la copie sans rien toucher : la b
     expect(await base(page)).toEqual(avant);
 });
 
-test('#960 (antérieur à #959) · par la copie, la rétroaction réécrite à la main devrait survivre', async ({ page }) => {
-    test.fail(true, '#960 — remplacée par le texte régénéré depuis les critères');
+test('#960 · par la copie, « Enregistrer » garde la rétroaction réécrite à la main', async ({ page }) => {
     test.setTimeout(90000);
     await monter(page);
     await ouvrir(page, 'copie');
     await enregistrer(page);
     expect((await base(page)).retroactionFinale).toBe(A_LA_MAIN);
 });
+
+for (const chemin of ['copie', 'liste']) {
+    test(`#960 D6 · par ${nom(chemin)} : le commentaire enregistré vide reste vide, à l'ouverture et à « Enregistrer »`, async ({ page }) => {
+        test.setTimeout(90000);
+        await monter(page);
+        await ouvrir(page, chemin);
+        const ouvert = await base(page);
+        const ecran = await page.evaluate(() => document.getElementById('comm_c2').textContent);
+        await enregistrer(page);
+        const enregistre = await base(page);
+        // La cartouche de l'évaluation (CT959) porte « c2_D » : c'est ce texte qui entrait.
+        expect.soft(ecran, 'écran, après l\'ouverture').toBe('');
+        expect.soft(ouvert.criteres[1].retroaction, 'base, après l\'ouverture').toBe('');
+        expect(enregistre.criteres[1].retroaction, 'base, après « Enregistrer »').toBe('');
+    });
+}

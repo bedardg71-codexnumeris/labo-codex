@@ -1,35 +1,38 @@
-# Consigne – lot court #959 : une évaluation ouverte depuis sa copie garde son statut d'intégrité (et tout ce qu'elle porte) quand on l'enregistre
+# Consigne – lot court #960 : ouvrir une copie ne réécrit plus rien, et une rétroaction réécrite à la main reste la tienne
 
-> Écrite le 26 septembre 2026, vers 15 h 32 (Toronto), par Cowork, pendant que le lot A était en fusion (branche `lot-a-anonymisation-enregistre` encore active dans l'arbre de travail). **Ne commence qu'une fois 1.160.0 poussée et verte.** Écrite sous ce nom, et non dans `CONSIGNE-DU-JOUR.md`, pour ne pas toucher un fichier suivi pendant ta fusion : au début du lot, archive l'actuelle `CONSIGNE-DU-JOUR.md` (lot A) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-A-anonymisation.md` et renomme celle-ci en `CONSIGNE-DU-JOUR.md`. À remesurer avant tout code (lignes lues sur la branche du lot A).
-> **Tranché par Cowork** (addendum de la relecture du lot A) : lot court juste après le lot A, avant le Lot B, sur le modèle de #957. Grégoire ne veut pas qu'on mesure ses données réelles pour ce défaut (26 sept.) : **aucune mesure du stock**.
+> Écrite le 26 septembre 2026, vers 16 h 39 (Toronto), par Cowork, pendant la fusion de #959 (branche `lot-959-statut-integrite` encore active). **Ne commence qu'une fois la version de #959 poussée et verte.** Écrite sous ce nom pour ne pas toucher un fichier suivi pendant ta fusion : au début du lot, archive l'actuelle `CONSIGNE-DU-JOUR.md` (#959) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-959.md` et renomme celle-ci en `CONSIGNE-DU-JOUR.md`. À remesurer avant tout code.
+> Tranché par Cowork (relecture de #959, M1) : lot court avant le Lot B, cap « finir la rétroaction ». Grégoire ne veut pas qu'on mesure ses données réelles : **aucune mesure du stock**.
 
-## 1 · Le constat (#959, le tien, `[exécuté]` en mode normal)
+## 0 · La décision de Grégoire (26 sept., « garde vide »)
 
-Une évaluation « IA » (ou « plagiat ») ouverte depuis sa copie, puis enregistrée (`sauvegarderEvaluationModifiee`, `js/evaluation.js` ≈ l. 1835), repasse à « recevable » et perd ses notes d'intégrité. Cause lue : seul `modifierEvaluation` (Liste des évaluations, ≈ l. 1037) appelle `_chargerStatutsEtBadgesModif` (≈ l. 1375, appel l. 1132) ; le chemin de la copie ne l'appelle pas, et `_lireChampsDOMMod` (≈ l. 1704) relit l'écran resté à ses valeurs par défaut.
+**Un commentaire de critère enregistré VIDE reste vide**, par les deux chemins : à l'ouverture par la copie, et à « Enregistrer » par la Liste. Il ne reçoit jamais le commentaire que la cartouche propose aujourd'hui. Motifs (proposés par Cowork, retenus) : la règle #939, « le commentaire enregistré fait foi » ; et le cas où il se remplirait est celui d'une cartouche qui a gagné un commentaire après l'évaluation – l'élève ne l'a jamais lu, il apparaîtrait dans son PDF sans décision de l'enseignant.
+⮕ Ajoute-la à `plans de travail/DECISIONS-2026-09-26-enregistrement.md` comme **D6 · Un commentaire de critère enregistré vide reste vide**, avec ces mots.
 
-## 2 · Ce que Cowork a lu en plus (non exécuté) : le défaut est probablement plus large que l'intégrité
+## 1 · Le constat (#960, le tien, `[exécuté]`)
 
-`_chargerStatutsEtBadgesModif` restaure aussi le **statut de remise** (`remiseProduction1`), les **points** par critère (`eval_pts_…`) et les **catégories d'erreurs** (`eval_categories_…`), entre autres. Si le chemin de la copie ne les charge pas et que `_lireChampsDOMMod` les relit, ils se perdent de la même façon.
+Par la copie (visionneuse, trajet `evaluerProduction` : chargeurs copie, copie, modifier), **la simple ouverture réécrit la base** : une rétroaction finale réécrite à la main est remplacée par le texte régénéré depuis les critères. Par la Liste (« Modifier »), l'ouverture n'écrit rien et « Enregistrer » garde la rétroaction. Identique avant et après #959. Banc : `tests/integration/evaluation-959-neutralite-chargeur.spec.js`, deux cas `test.fail` marqués #960.
 
-## 3 · Ce qui est attendu
+## 2 · Ce qui est attendu
 
-1. **Mesure d'abord, au navigateur** : pour CHAQUE champ que `_lireChampsDOMMod` relit, une évaluation qui porte une valeur non par défaut, ouverte depuis la copie puis enregistrée, la garde-t-elle ? Fais-en la liste (champ, gardé / perdu).
-2. **Un seul chargeur pour les deux chemins.** Le chemin de la copie restaure l'évaluation par la même fonction que « Modifier » dans la Liste (pas une copie de ses lignes). Si l'ordre d'appel ou le contexte du chemin de la copie l'empêche, dis pourquoi en une ligne, et choisis le remède qui ferme TOUS les champs perdus du § 3.1.
-3. **Anonymisation** : les notes d'intégrité sont masquées en anonymisation depuis le lot A (`poserChampTexteLibre`) ; vérifie que le chargeur partagé garde ce comportement, et qu'un enregistrement en anonymisation réécrit la note en base, telle quelle.
-4. **Ne change rien à l'interface ni aux mots** : l'harmonisation de l'évaluation (D1, « Verrouiller l'évaluation », « Non verrouillée ») est le Lot C.
+1. **Ouvrir une évaluation, par n'importe quel chemin, n'écrit rien.** Trouve ce qui écrit à l'ouverture sur le trajet de la copie (régénération de la rétroaction, enregistrement automatique déclenché par le chargement, autre) et ferme-le à la source ; dis en une ligne ce que c'était.
+2. **La rétroaction finale enregistrée fait foi** à l'ouverture et à « Enregistrer », par les deux chemins : elle n'est jamais régénérée par le simple fait d'ouvrir ou d'enregistrer sans changement.
+3. **D6** : un commentaire de critère enregistré vide reste vide, par les deux chemins.
+4. **Mesure seulement, sans rien changer** : quand l'enseignant change un niveau APRÈS avoir réécrit la rétroaction finale à la main, que devient son texte ? Écris le résultat dans le rapport. C'est une autre question (la régénération voulue quand on change un critère), qui reviendra à Grégoire si elle pose problème.
+5. **Ne change rien à l'interface ni aux mots** (Lot C pour l'évaluation).
 
-**Stock** : une évaluation déjà remise à « recevable » par ce chemin ne retrouve pas son statut ; rien n'est réécrit. **Rien n'est effacé.**
+**Stock** : une rétroaction déjà remplacée ne revient pas ; rien n'est réécrit. **Rien n'est effacé.**
 
-## 4 · Preuves
+## 3 · Preuves
 
-- Banc WebKit sur le trajet de la copie (celui des specs #699 / #882) : pour chaque champ perdu au § 3.1, rouge avant, vert après. Un cas témoin par la Liste (vert avant et après).
-- Un cas en anonymisation pour les notes d'intégrité.
-- Mutation : retirer l'appel au chargeur dans le chemin de la copie → rouge.
+- Les deux cas `test.fail` #960 deviennent des cas normaux, verts.
+- Ouverture par la copie sans rien toucher : base identique à l'octet ; puis « Enregistrer » : rétroaction à la main gardée. Idem par la Liste (témoin).
+- D6 : commentaire vide + cartouche qui porte un commentaire → vide après ouverture par la copie et après « Enregistrer » par la Liste ; rouge avant.
+- Mutations : rétablir l'écriture à l'ouverture → rouge ; rétablir le remplissage d'un commentaire vide → rouge.
 - Suite complète Vitest.
 
-## 5 · Livraison
+## 4 · Livraison
 
-- **Relecture croisée de Cowork obligatoire** (notes d'élèves, intégrité académique). `DEMANDE-RELECTURE-2026-09-26-lot-959.md`, puis l'ordre du `PROTOCOLE.md`.
+- **Relecture croisée de Cowork obligatoire** (rétroaction lue par les élèves). `DEMANDE-RELECTURE-2026-09-26-lot-960.md`, puis l'ordre du `PROTOCOLE.md`.
 - Correctif (patch).
-- **Nouvelles, proposition de Cowork, à soumettre à Grégoire avant le push** (à ajuster aux champs réellement perdus) : « Évaluer : une évaluation ouverte depuis la copie garde son statut d'intégrité et ses notes quand tu l'enregistres. »
-- Fin de lot : cocher #959 ; `FILE-DES-LOTS.md` à jour.
+- **Nouvelles, proposition de Cowork, à soumettre à Grégoire avant le push** : « Évaluer : ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide. »
+- Fin de lot : cocher #960 ; `FILE-DES-LOTS.md` à jour.
