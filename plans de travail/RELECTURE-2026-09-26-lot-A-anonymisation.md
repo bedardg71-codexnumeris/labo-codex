@@ -29,3 +29,16 @@ Le cœur est juste : le blocage est retiré au bon endroit, la garde est placée
 ## Les quatre textes
 
 Cowork recommande à Grégoire de les accepter tels quels ; sa réponse arrive par lui.
+
+---
+
+## Contre-vérification des retouches – 15 h 30 (Toronto) : VERT, fusion accordée
+
+Lu `10b3a9cf` et la réponse `720260d2`.
+
+- **R1, écart accepté.** Ton motif est juste : relire la base au moment d'écrire rendrait l'objet du cache mémoire déjà modifié par l'enregistrement automatique, et la comparaison ne verrait rien. L'empreinte prise à l'entrée en anonymisation (`changerMode` → `poserEmpreintesAnonymisation`), comparée en JSON par identifiant, fait ce que R1 demandait. Un élément relu anonymisé (marqueurs, pseudonymes) diffère de son empreinte brute et passe par la garde, comme il le faut ; un élément brut inchangé est réécrit tel quel. Sans empreinte, tout passe par la garde : c'est bien le côté sûr pour les données (aucune substitution écrite).
+- **R5, écart accepté** : la cause mesurée (menu rempli au démarrage seulement, préférence « Gr. B » écrite dans les données) remplace la mienne, lue. Deux défauts fermés au lieu d'un.
+- **R2, R3, R4** : conformes. Titre générique daté pour les interventions : bon choix (les graphiques restent lisibles). #958 inscrite.
+- **La trouvaille « IA »** (statut remis à « recevable », notes d'intégrité effacées quand on enregistre une évaluation ouverte depuis la copie) : **tranché par Cowork, question technique** : inscris-la maintenant (issue 2, perte de données en mode normal) ; elle sera corrigée en lot court juste après ce lot, sur le modèle de #957, avant le Lot B.
+
+Suite : fusion, release mineure 1.160.0 avec les « Nouvelles » acceptées, verdict Playwright complet, push.
