@@ -67,3 +67,32 @@ Une rétroaction déjà remplacée ne revient pas ; un commentaire vide déjà r
 1. Le compteur : une sortie de `modifierEvaluation` qui le laisserait armé (l'auto-save serait muet pour la session).
 2. Le chemin sans copie (`_evaluerSansCopie`) et la flèche d'élève (#920) : non instrumentés par ce lot ; ils passent par le chargeur de la copie ou par « Modifier ».
 3. L'extension de `_remplacementConfirme` au choix sans question (§ 2).
+
+---
+
+## 9 · Complément du 26 sept., soir – D6 jusqu'au PDF (option a de Grégoire), commit `a749e717`
+
+Décision de Grégoire (option a, recommandée par Cowork) : un commentaire de critère enregistré vide s'imprime vide dans le PDF de l'élève et dans « Copier tout » (le titre du critère reste, sans commentaire). Même frontière : le vide réel seulement. La ligne est ajoutée sous D6 dans `DECISIONS-2026-09-26-enregistrement.md`. **Le § 5 est tranché, et la phrase des Nouvelles du § 6 est vraie partout** : je la garde.
+
+**Une seule fonction.** `estCommentaireEnregistreVide` (`synthese-retroaction-data.js`, à côté de `commentaireDuCritere`) : une chaîne vide ou faite de blancs. `commentaireDuCritere` saute la cartouche quand elle est vraie. Les trois lecteurs passent par cette règle et par rien d'autre :
+- **PDF** (`construireCriteres`) : `enregistre: c.retroaction`, inchangé ;
+- **« Copier tout »** (`_rendreCommentairesCriteres`) : le div `comm_` de la copie ; sans div, `null` (rien d'enregistré), et non plus `''` ;
+- **l'écran du critère** (`_afficherCommentaireCritere`) : la logique locale de mon premier commit est retirée. `_commentaireEnregistreDuCritere` rend `null` ou le texte, et la règle partagée décide.
+
+Absent (`null` / `undefined`) : la cartouche, comme avant. Amorce ou « [Non défini] » en stock : la cartouche (#939), témoin à l'appui.
+
+**Test retourné.** Dans la règle partagée, `enregistre: ''` avec une cartouche rendait `'CARTOUCHE'` ; il exige maintenant `''`, et l'absent garde la cartouche. Nouveaux cas : PDF (`Structure` → `''`), « Copier tout » (`Structure` → en-tête seul), témoin PDF « amorce en stock → cartouche ».
+
+**Ajusté, à regarder** : la mesure du 6 sept. (`mesure-ce-que-l-eleve-lit-2026-09-06.test.js`) montait ses divs `comm_` VIDES. Avec D6, ce vide se lisait « enregistré vide » et le texte Léa perdait la cartouche. La vraie page y pose l'amorce du gabarit (`renderCriteres`, « Sélectionne un niveau ») : le faux écran la pose maintenant aussi. Rien d'autre ne change dans ce banc.
+
+**Mutations, chacune séparément** (restauration par copie, `cmp` vérifié) :
+
+| | Mutation | Rouge |
+|---|---|---|
+| MP | PDF : `enregistre: c.retroaction \|\| null` (repli rétabli pour le PDF seul) | 1 : « le PDF de l'élève imprime le critère SANS commentaire » ; « Copier tout » vert |
+| MC | « Copier tout » : `(commDiv && commDiv.textContent) \|\| null` (repli rétabli pour le texte seul) | 1 : « « Copier tout » (la rétroaction générale) écrit le critère SANS commentaire » ; PDF vert |
+| MR | `estCommentaireEnregistreVide` rend toujours faux | 5 (règle, écran, base, PDF, « Copier tout ») |
+
+**Suites** : Vitest complet 642 fichiers, **7 459 / 7 459**. WebKit (959 neutralité, 939, 944, 946, 882, 699) : **27 / 27**.
+
+**Stock – à assumer, pas à découvrir** : c'est une LECTURE qui change. Toute évaluation déjà enregistrée avec un commentaire de critère vide, sous une cartouche qui porte un commentaire à ce niveau, imprimera désormais ce critère sans commentaire dans son PDF et dans « Copier tout », là où elle imprimait la cartouche d'aujourd'hui. Rien n'est écrit. Non mesuré (demande de Grégoire).
