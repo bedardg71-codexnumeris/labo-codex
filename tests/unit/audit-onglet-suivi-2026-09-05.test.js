@@ -863,8 +863,12 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
     it('E6 · les observations de l\'intervention passent par echapperHtml dans le <textarea> (#733 ; avant : brutes, le bilan seul était échappé)', () => {
         const src = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
         const brut = /<textarea id="observationsIntervention"[^>]*>\$\{intervention\.observations \|\| ''\}<\/textarea>/.test(src);
-        const echappe = /<textarea id="observationsIntervention"[^>]*>\$\{echapperHtml\(intervention\.observations \|\| ''\)\}<\/textarea>/.test(src);
-        const bilanEchappe = /<textarea id="observationsBilan"[^>]*>' \+ echapperHtml\(bilan\.observationsBilan \|\| ''\)/.test(src);
+        // Réancré le 26 sept. 2026 (lot A de l'enregistrement, #751) : les deux champs passent par
+        // `_valeurTexteLibre`, qui les masque en anonymisation et les échappe sinon — l'échappement
+        // se lit donc dans ce relais, et le relais doit bien appeler echapperHtml.
+        const relaisEchappe = /function _valeurTexteLibre\(texte\) \{\s*return _texteLibreMasque\(\) \? '' : echapperHtml\(texte \|\| ''\);/.test(src);
+        const echappe = relaisEchappe && /<textarea id="observationsIntervention"[^>]*>\$\{_valeurTexteLibre\(intervention\.observations\)\}<\/textarea>/.test(src);
+        const bilanEchappe = relaisEchappe && /<textarea id="observationsBilan"[^>]*' \+ _attributsTexteLibre\([^)]*\) \+ '>' \+ _valeurTexteLibre\(bilan\.observationsBilan\)/.test(src);
         noter('E6', { observationsBrutes: brut, observationsEchappees: echappe, bilanEchappe });
         expect(brut).toBe(false);      // avant #733 : true
         expect(echappe).toBe(true);

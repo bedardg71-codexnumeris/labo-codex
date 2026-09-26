@@ -119,6 +119,8 @@ async function changerMode(nouveauMode) {
     // Sauvegarder le nouveau mode
     modeActuel = nouveauMode;
     db.setSync('modeApplication', nouveauMode);
+    // Lot A, R1 : les empreintes de la garde, avant qu'aucun écran anonymisé n'existe.
+    if (nouveauMode === MODES.ANONYMISATION) poserEmpreintesAnonymisation();
 
     // Appliquer le thème
     appliquerTheme(nouveauMode);
@@ -837,24 +839,217 @@ function obtenirDonneesSelonMode(cle) {
     return donnees;
 }
 
+// ─── Lot A de l'enregistrement — la garde contre les substitutions (26 sept. 2026) ───
+//
+// En anonymisation, `anonymiserDonnees` remplace à la LECTURE : « Élève 32 » pour le prénom,
+// « Gr. A » pour le groupe, des marqueurs (`daReel`, `etudiantDAReel`…) ; et
+// `anonymiserTexteRetroaction` remplace les prénoms réels d'un texte par « Élève N ». Un écran
+// qui relit ces valeurs et les réécrit (la rétroaction pré-remplie, le « Bonjour Élève 32 ! »
+// généré depuis la liste anonymisée, un tableau lu par `obtenirDonneesSelonMode`) les enverrait
+// dans les vraies données. Cette garde les RETIRE avant l'écriture, par motif : elle ne
+// dépend pas du chemin de lecture, et une valeur qu'on ne reconnaît pas passe telle quelle.
+//
+// Assumé : un texte réel qui contiendrait déjà « Élève 12 » (écrit à la main, ou une
+// substitution écrite avant ce lot par un écran qui n'avait pas de garde) serait lu comme une
+// substitution et reçu le prénom de l'élève que le mapping actuel numérote 12.
+const _CLES_SUBSTITUEES = ['groupeEtudiants', 'evaluationsSauvegardees', 'presences'];
+const _MOTIF_ELEVE_N = /(^|[^\p{L}\p{N}_])Élève (\d+)(?![\p{L}\p{N}_])/gu;
+
+function _estPseudonyme(valeur) {
+    return typeof valeur === 'string' && /^(Élève \d+|Anonyme|Étudiant Inconnu)$/.test(valeur.trim());
+}
+
+function _estGroupeSubstitue(valeur) {
+    return typeof valeur === 'string' && /^Gr\. ([A-Z]|\?)$/.test(valeur);
+}
+
+// « Élève N » → prénom réel de l'élève que le mapping numérote N ; un N inconnu reste tel quel.
+// Rend le MÊME objet quand rien n'a changé : la garde parcourt tout le tableau à chaque écriture.
+function _desanonymiserChaines(valeur, prenomParNumero) {
+    if (typeof valeur === 'string') {
+        if (valeur.indexOf('Élève ') === -1) return valeur;
+        return valeur.replace(_MOTIF_ELEVE_N, (m, avant, n) =>
+            prenomParNumero.has(n) ? avant + prenomParNumero.get(n) : m);
+    }
+    if (!valeur || typeof valeur !== 'object') return valeur;
+    let copie = null;
+    const cles = Object.keys(valeur);
+    for (let i = 0; i < cles.length; i++) {
+        const avant = valeur[cles[i]];
+        const apres = _desanonymiserChaines(avant, prenomParNumero);
+        if (apres !== avant) {
+            if (!copie) copie = Array.isArray(valeur) ? valeur.slice() : { ...valeur };
+            copie[cles[i]] = apres;
+        }
+    }
+    return copie || valeur;
+}
+
+// Relecture croisée R1 (26 sept. 2026) — la garde ne touche que ce qui a CHANGÉ. Un élément
+// identique à son empreinte est réécrit tel quel : une évaluation voisine dont un texte contient
+// déjà « Élève 12 » n'est pas modifiée par l'enregistrement automatique d'une autre copie.
+// Les empreintes ne se lisent PAS dans `db.getSync` au moment d'écrire : quand les données sont
+// volumineuses, il rend l'objet même du cache mémoire, que l'auto-save a déjà modifié en place.
+// Elles sont prises à l'entrée en anonymisation (`changerMode`), avant tout écran anonymisé, puis
+// après chaque écriture gardée. Sans empreinte pour une clé (démarrage déjà en anonymisation,
+// autre trimestre), tout le tableau passe par la garde : le côté sûr.
+const _empreintesAnonymisation = new Map();   // clé effective → Map(identifiant → JSON)
+
+function _identifiantElement(cleBase, item) {
+    if (cleBase === 'evaluationsSauvegardees') return item.id !== undefined ? String(item.id) : null;
+    const da = String(item.daReel !== undefined ? item.daReel : item.da);
+    return cleBase === 'presences' ? [da, item.date, item.coursId || ''].join('|') : da;
+}
+
+function _cleBaseSubstituee(cle) {
+    const trId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : null;
+    const cleBase = (trId && cle.startsWith(trId + '_')) ? cle.substring(trId.length + 1) : cle;
+    return _CLES_SUBSTITUEES.includes(cleBase) ? cleBase : null;
+}
+
+function _poserEmpreintes(cle, donnees) {
+    const cleBase = _cleBaseSubstituee(cle);
+    if (!cleBase || !Array.isArray(donnees)) return;
+    const empreintes = new Map();
+    donnees.forEach(item => {
+        if (!item || typeof item !== 'object') return;
+        const id = _identifiantElement(cleBase, item);
+        if (id !== null) empreintes.set(id, JSON.stringify(item));
+    });
+    _empreintesAnonymisation.set(window.cle(cle), empreintes);
+}
+
+function poserEmpreintesAnonymisation() {
+    _empreintesAnonymisation.clear();
+    _CLES_SUBSTITUEES.forEach(k => _poserEmpreintes(k, db.getSync(window.cle(k), null)));
+}
+
+function retirerSubstitutionsAnonymisation(cle, donnees) {
+    if (!Array.isArray(donnees)) return donnees;
+    const cleBase = _cleBaseSubstituee(cle);
+    if (!cleBase) return donnees;
+    const empreintes = _empreintesAnonymisation.get(window.cle(cle)) || null;
+    const inchange = (item) => {
+        if (!empreintes) return false;
+        const id = _identifiantElement(cleBase, item);
+        return id !== null && empreintes.get(id) === JSON.stringify(item);
+    };
+
+    const reels = db.getSync(window.cle('groupeEtudiants'), []) || [];
+    const parDA = new Map(reels.map(e => [String(e.da), e]));
+    const mapping = genererMappingAnonyme();
+    const prenomParNumero = new Map();
+    Object.keys(mapping).forEach(da => {
+        const eleve = parDA.get(String(da));
+        if (eleve && eleve.prenom && mapping[da] && mapping[da].numero !== undefined) {
+            prenomParNumero.set(String(mapping[da].numero), eleve.prenom);
+        }
+    });
+    const groupesParLettre = {};
+    const mappingGroupes = db.getSync('mapping_groupes_anonymes', {}) || {};
+    Object.keys(mappingGroupes).forEach(reel => { groupesParLettre[mappingGroupes[reel]] = reel; });
+    const groupeReel = (valeur, eleve) => (valeur in groupesParLettre)
+        ? groupesParLettre[valeur] : (eleve ? eleve.groupe : '');
+
+    return donnees.map(item => {
+        if (!item || typeof item !== 'object') return item;
+        if (inchange(item)) return item;
+        const r = { ..._desanonymiserChaines(item, prenomParNumero) };
+        if (cleBase === 'evaluationsSauvegardees') {
+            if (r.etudiantDAReel !== undefined) r.etudiantDA = r.etudiantDAReel;
+            delete r.etudiantDAReel;
+            delete r.etudiantDAffichage;
+            const eleve = parDA.get(String(r.etudiantDA));
+            // Le prénom seul a déjà été rendu par `_desanonymiserChaines` ; le nom complet, lui,
+            // se reprend à la fiche (« Élève 32 » + nom vide ne dit pas le nom de famille).
+            if (_estPseudonyme(item.etudiantNom)) r.etudiantNom = eleve ? `${eleve.prenom} ${eleve.nom}` : '';
+            if (_estGroupeSubstitue(r.groupe)) r.groupe = groupeReel(r.groupe, eleve);
+        } else {
+            // groupeEtudiants, presences : les marqueurs de `anonymiserDonnees`.
+            const aMarqueur = r.daReel !== undefined;
+            if (aMarqueur) r.da = r.daReel;
+            const eleve = parDA.get(String(r.da));
+            if (cleBase === 'groupeEtudiants') {
+                if (aMarqueur) {
+                    r.groupe = r.groupeReel;
+                    delete r.groupeReel;
+                    delete r.ordreAffichage;
+                } else if (_estGroupeSubstitue(r.groupe)) {
+                    r.groupe = groupeReel(r.groupe, eleve);
+                }
+                if (_estPseudonyme(item.prenom) && eleve) { r.prenom = eleve.prenom; r.nom = eleve.nom; }
+            } else if (aMarqueur) {
+                // Une présence ne porte ni nom ni prénom : ceux-là viennent de l'anonymisation.
+                delete r.nom;
+                delete r.prenom;
+            }
+            delete r.daReel;
+            delete r.daAffichage;
+        }
+        return r;
+    });
+}
+
+// ─── Relecture croisée R4 (lot A, 26 sept. 2026) — deux textes libres de plus ───
+//
+// Un champ de texte libre que le DOM remplit (pas un gabarit) : en anonymisation, vide, non
+// modifiable, avec la mention ; l'écrivain qui le relit prend la base si `champMasqueAnonymisation`.
+// Le `disabled` n'est rendu que s'il a été posé ICI (un verrou d'évaluation le pose aussi).
+function poserChampTexteLibre(champ, valeur) {
+    if (!champ) return;
+    const masquer = modeActuel === MODES.ANONYMISATION;
+    if (champ.dataset.placeholderOrigine === undefined) champ.dataset.placeholderOrigine = champ.placeholder || '';
+    if (masquer) {
+        champ.value = '';
+        champ.disabled = true;
+        champ.placeholder = window.MENTION_MASQUE_ANONYMISATION;
+        champ.dataset.masqueAnonymisation = '1';
+        return;
+    }
+    if (champ.dataset.masqueAnonymisation === '1') {
+        champ.disabled = false;
+        champ.placeholder = champ.dataset.placeholderOrigine;
+        delete champ.dataset.masqueAnonymisation;
+    }
+    champ.value = valeur || '';
+}
+
+function champMasqueAnonymisation(champ) {
+    return !!(champ && champ.dataset && champ.dataset.masqueAnonymisation === '1');
+}
+
+// Le titre d'une intervention est un texte libre (« Suivi de ‹prénom› ») : en anonymisation,
+// un titre générique daté le remplace partout où il s'affiche (cartes, profil, graphiques).
+function titreInterventionAffiche(intervention, repli, nom) {
+    if (!intervention) return repli || '';
+    if (modeActuel === MODES.ANONYMISATION) {
+        const d = intervention.date ? new Date(intervention.date + 'T12:00:00') : null;
+        const quoi = nom || 'Intervention';
+        return (d && !isNaN(d.getTime()))
+            ? quoi + ' du ' + d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' })
+            : quoi;
+    }
+    return intervention.titre || repli || '';
+}
+
 /**
  * Sauvegarde des données selon le mode actif
  * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
  *
  * @param {string} cle - Clé de base (ex: 'groupeEtudiants')
  * @param {*} donnees - Données à sauvegarder
- * @returns {boolean|string} - true si succès, false si bloqué (mode anonymisation), 'quota' si quota dépassé
+ * @returns {boolean|string} - true si succès, 'quota' si quota dépassé, 'error' sinon
  */
 function sauvegarderDonneesSelonMode(cle, donnees) {
-    const mode = modeActuel;
-
-    // MODE ANONYMISATION : Bloquer toute écriture
-    if (mode === MODES.ANONYMISATION) {
-        console.warn('⚠️ Écriture bloquée en mode anonymisation');
-        return false;
+    // Lot A de l'enregistrement (D5, Grégoire, 26 sept. 2026 : « Je choisis A ») — en
+    // anonymisation, on écrit comme en mode normal ; seul l'AFFICHAGE protège l'identité.
+    // Avant : `return false` ici. L'évaluation faite en anonymisation restait visible pendant
+    // la séance (le cache mémoire la portait) puis disparaissait au rechargement, sans un mot.
+    // Ce qui part vers les vraies données ne porte aucune valeur de substitution.
+    if (modeActuel === MODES.ANONYMISATION) {
+        donnees = retirerSubstitutionsAnonymisation(cle, donnees);
     }
 
-    // MODE NORMAL : Sauvegarder dans les clés réelles
     try {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
@@ -866,6 +1061,7 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         // qu'elle ne possède pas. La seconde invalidation est un `delete` sur
         // une entrée déjà retirée : gratuite.
         invaliderCacheLecture(cleEffective);
+        if (modeActuel === MODES.ANONYMISATION) _poserEmpreintes(cle, donnees);   // R1
         return true;
     } catch (error) {
         // Détecter erreur de quota dépassé
@@ -1025,7 +1221,10 @@ function obtenirDAAffichage(etudiant) {
 }
 
 /**
- * Vérifie si le mode actuel est en lecture seule
+ * Le mode anonymisation est-il actif ? Le nom est historique : depuis le lot A de
+ * l'enregistrement (26 sept. 2026), l'anonymisation n'est plus une lecture seule — on y
+ * écrit comme en mode normal, et les lecteurs de cette fonction s'en servent pour MASQUER.
+ * Même réponse que `estModeAnonymisation` ; 47 bancs la simulent sous ce nom.
  * @returns {boolean}
  */
 function estModeeLectureSeule() {
@@ -1164,7 +1363,14 @@ function estModeAnonymisation() {
 }
 
 window.MODES = MODES;
+// Lot A de l'enregistrement (26 sept. 2026) — la mention d'un champ ou d'un texte masqué en
+// anonymisation. Une seule source : ces mots sont soumis à Grégoire, ils se changent ici.
+window.MENTION_MASQUE_ANONYMISATION = 'Masqué en anonymisation';
+window.poserChampTexteLibre = poserChampTexteLibre;
+window.champMasqueAnonymisation = champMasqueAnonymisation;
+window.titreInterventionAffiche = titreInterventionAffiche;
 window.estModeAnonymisation = estModeAnonymisation;
+window.retirerSubstitutionsAnonymisation = retirerSubstitutionsAnonymisation;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
 window.estTourGuideActif = estTourGuideActif;

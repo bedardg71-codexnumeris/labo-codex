@@ -48,8 +48,10 @@ function monter({ ecritureRefusee }) {
         cle: (k) => k,
         echapperHtml: (s) => String(s == null ? '' : s),
         obtenirDonneesSelonMode: () => evaluations,
-        // Le cœur du test : l'écriture est REFUSÉE, comme en mode anonymisation.
-        sauvegarderDonneesSelonMode: () => !ecritureRefusee,
+        // Le cœur du test : l'écriture est REFUSÉE. Réancré le 26 sept. 2026 (lot A de
+        // l'enregistrement) : l'anonymisation ne refuse plus (`false` n'est plus rendu) ; le refus
+        // modélisé est celui du stockage, `'error'` (`modes.js`).
+        sauvegarderDonneesSelonMode: () => (ecritureRefusee ? 'error' : true),
         obtenirPreference: () => null,
         notifications: {
             erreur: (titre, msg) => erreurs.push(titre + ' | ' + msg),
@@ -73,7 +75,7 @@ describe('#563 · une écriture de jeton refusée ne passe plus pour un succès'
         win.retirerJetonDelai('E1');
         expect(erreurs).toHaveLength(1);
         expect(erreurs[0]).toContain('Modification non enregistrée');
-        expect(erreurs[0]).toContain('anonymisation');
+        expect(erreurs[0]).toContain('le stockage a refusé l\'écriture');
     });
 
     it('contrôle : écriture acceptée → succès, aucune alarme (garde ciblée)', () => {

@@ -1386,7 +1386,11 @@ function _chargerStatutsEtBadgesModif(evaluation) {
     const notesIntegrite = document.getElementById('notesIntegrite');
     if (selectIntegrite) {
         selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
-        if (notesIntegrite) notesIntegrite.value = evaluation.notesIntegrite || '';
+        // Lot A, R4 : texte libre, masqué en anonymisation (`poserChampTexteLibre`, modes.js).
+        if (notesIntegrite) {
+            if (typeof poserChampTexteLibre === 'function') poserChampTexteLibre(notesIntegrite, evaluation.notesIntegrite || '');
+            else notesIntegrite.value = evaluation.notesIntegrite || '';
+        }
         selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
@@ -1698,7 +1702,7 @@ function _extraireProprietesJetons(evalExistante) {
 }
 
 function _lireChampsDOMMod(maintenant) {
-    return {
+    const champs = {
         echelleId: document.getElementById('selectEchelle1').value,
         cartoucheId: document.getElementById('selectCartoucheEval').value,
         dateModification: maintenant.toISOString(),
@@ -1716,6 +1720,10 @@ function _lireChampsDOMMod(maintenant) {
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value
     };
+    // Lot A, R4 : notes d'intégrité masquées en anonymisation — la fusion garde celles de la base.
+    if (typeof champMasqueAnonymisation === 'function'
+        && champMasqueAnonymisation(document.getElementById('notesIntegrite'))) delete champs.notesIntegrite;
+    return champs;
 }
 
 function _lireOptionsAffichageMod() {
@@ -1905,10 +1913,7 @@ function sauvegarderEvaluationModifiee() {
     _marquerModificationJournalMod(evaluations[indexEval], dureeMsModif);
 
     // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     _traiterPostRepriseMod(evaluations, indexEval, evaluationId);
     _postSauvegardeMod(evaluations[indexEval]);
@@ -1931,10 +1936,7 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
     evaluations[index].verrouillee = true;
     evaluations[index].dateVerrouillage = new Date().toISOString();
 
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de verrouiller en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     notifications.succes('Évaluation verrouillée');
 
@@ -1957,10 +1959,7 @@ function deverrouillerEvaluationIndividuelle(evaluationId) {
     evaluations[index].verrouillee = false;
     delete evaluations[index].dateVerrouillage;
 
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de déverrouiller en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     notifications.succes('Évaluation déverrouillée');
 
@@ -2390,10 +2389,7 @@ function basculerVerrouillageEvaluation(evaluationId) {
     const estVerrouillee = evaluations[index].verrouillee;
 
     // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     const message = estVerrouillee ? 'Évaluation verrouillée' : 'Évaluation déverrouillée';
     notifications.succes(message);
@@ -2455,10 +2451,7 @@ function retirerJeton(evaluationId, typeJeton) {
     }
 
     // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     // Rafraîchir la liste
     filtrerBanqueEvaluations();
@@ -2495,10 +2488,7 @@ function supprimerEvaluationBanque(evaluationId) {
     // Supprimer
     evaluations = evaluations.filter(e => e.id !== evaluationId);
 
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     notifications.succes('Évaluation supprimée');
 
@@ -2537,10 +2527,7 @@ function verrouillerToutesEvaluations(verrouiller) {
         verrouillee: verrouiller
     }));
 
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de modifier en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     const resultat = verrouiller
         ? `${evaluations.length} évaluations verrouillées`
@@ -2581,10 +2568,7 @@ function basculerVerrouillageEvaluationCourante() {
     const estVerrouillee = evaluations[index].verrouillee;
 
     // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        notifications.erreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     // Mettre à jour evaluationEnCours pour refléter le changement
     if (window.evaluationEnCours) {

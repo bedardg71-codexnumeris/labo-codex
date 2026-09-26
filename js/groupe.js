@@ -433,13 +433,6 @@ function confirmImport() {
         let students = db.getSync(cleEtudiants, []);
         const ancienTotal = students.length;
 
-        // Vérifier mode anonymisation
-        const modeActuel = db.getSync('modeApplication', 'normal');
-        if (modeActuel === 'anonymisation') {
-            notifications.erreur('Modification impossible', 'Impossible d\'importer en mode anonymisation');
-            return;
-        }
-
         // Vérifier doublons DA
         const dasExistants = students.map(s => s.da);
         const nouveauxDAs = tempImportData.map(s => s.da);
@@ -932,13 +925,6 @@ function supprimerEtudiant(id) {
     const verrouille = db.getSync('groupeVerrouille', false);
     if (verrouille) {
         alert('D\u00e9verrouillez le groupe avant de supprimer');
-        return;
-    }
-
-    // Vérifier mode anonymisation
-    const modeActuel = db.getSync('modeApplication', 'normal');
-    if (modeActuel === 'anonymisation') {
-        notifications.erreur('Modification impossible', 'Impossible de supprimer en mode anonymisation');
         return;
     }
 

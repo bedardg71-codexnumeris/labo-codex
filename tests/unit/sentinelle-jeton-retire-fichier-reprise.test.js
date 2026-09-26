@@ -397,13 +397,17 @@ describe('#612 T6.6 · supprimer une reprise depuis la LISTE emporte son fichier
         expect(travauxStockage._corbeille).toEqual([]);
     });
 
-    it('ÉCRITURE REFUSÉE (mode anonymisation) : le fichier n\'est PAS mis à la corbeille', () => {
+    it('ÉCRITURE REFUSÉE (erreur du stockage) : le fichier n\'est PAS mis à la corbeille', () => {
         // Le cas qui décide de l'ORDRE. Détacher avant de persister laisserait
         // le fichier à la corbeille et l'évaluation en place — définitivement.
-        const { win, stores, travauxStockage, notifs } = monterListe({
+        // Réancré le 26 sept. 2026 (lot A de l'enregistrement) : le refus modélisé était celui
+        // du mode anonymisation (`false`), qui n'existe plus — l'anonymisation écrit. Le refus
+        // restant est `'error'`. Le message d'échec n'est plus asserté ici : `'error'` et
+        // `'quota'` sont truthy, la suite les prend pour un succès (#618, lot B).
+        const { win, stores, travauxStockage } = monterListe({
             evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
             fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE],
-            retourEcriture: false
+            retourEcriture: 'error'
         });
 
         win.supprimerEvaluation('EVAL_B');
@@ -411,7 +415,6 @@ describe('#612 T6.6 · supprimer une reprise depuis la LISTE emporte son fichier
         expect(travauxStockage._corbeille).toEqual([]);
         expect(travauxStockage._actifs.map(f => f.id)).toEqual(['F_ORIG', 'F_REPR']);
         expect(stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A', 'EVAL_B']);
-        expect(notifs.some(n => n.type === 'erreur')).toBe(true);
     });
 
     it('QUOTA DÉPASSÉ (retour \'quota\', truthy) : le fichier n\'est PAS mis à la corbeille', () => {

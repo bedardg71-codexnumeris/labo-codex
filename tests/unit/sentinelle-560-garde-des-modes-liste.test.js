@@ -44,14 +44,17 @@ describe('#560 · A — aucune écriture directe des évaluations dans la Liste'
     });
 });
 
-describe('#560 · B — les deux chemins passent par le garde des modes et TESTENT son refus', () => {
+// Réancré le 26 sept. 2026 (lot A de l'enregistrement, D5 de Grégoire : « Je choisis A ») :
+// le garde des modes n'a plus de refus à rendre — l'anonymisation écrit comme le mode normal,
+// en retirant les valeurs de substitution (`modes.js`, banc `sentinelle-lot-a-anonymisation-*`).
+// Ce qui reste vrai et reste verrouillé : les deux chemins écrivent PAR le garde, et le message
+// « écriture refusée en mode anonymisation » ne peut plus s'afficher (il mentirait).
+describe('#560 · B — les deux chemins passent par le garde des modes', () => {
     for (const nom of ['supprimerFichierDefinitivement', 'viderTouteCorbeille']) {
         it(nom, () => {
             const c = corps(liste, nom);
             expect(c).toContain("sauvegarderDonneesSelonMode('evaluationsSauvegardees'");
-            expect(c).toMatch(/if \(!sauvegarderDonneesSelonMode\('evaluationsSauvegardees'/);
-            // Le refus est DIT à l'utilisateur, pas seulement journalisé.
-            expect(c).toMatch(/notifications\.erreur\([^)]*conserv/);
+            expect(c).not.toMatch(/refusée en mode anonymisation/);
         });
     }
 });

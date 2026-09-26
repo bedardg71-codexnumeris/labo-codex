@@ -2282,10 +2282,6 @@ function supprimerEvaluation(evaluationId) {
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
     const resultatEcriture = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered);
-    if (!resultatEcriture) {
-        notifications.erreur('Erreur', 'Impossible de supprimer en mode anonymisation');
-        return;
-    }
 
     // #612 (T6.6) — le fichier de la reprise part avec elle. Le geste vit dans
     // `evaluation-jetons.js` (#607) et n'est pas réécrit ici : une seconde
@@ -2294,7 +2290,7 @@ function supprimerEvaluation(evaluationId) {
     // ORDRE : le détachement suit IMMÉDIATEMENT l'écriture des évaluations,
     // sans point d'attente entre les deux — et seulement si l'écriture a
     // VRAIMENT eu lieu. `sauvegarderDonneesSelonMode` rend trois valeurs
-    // (`modes.js:751`) : `true`, `false`, et la chaîne `'quota'`, truthy alors
+    // (`modes.js`) : `true`, `'error'`, et la chaîne `'quota'`, truthy alors
     // que RIEN n'a été enregistré. Un refus rendu n'est pas une exception, il se
     // LIT : d'où le `=== true` et non la simple véracité. Détacher plus tôt, ou
     // sur un `'quota'`, mettrait le fichier à la corbeille pour une suppression
@@ -2961,19 +2957,15 @@ function supprimerFichierDefinitivement(id) {
                 return !estDuCoupleDuFichier(ev, fichier);
             });
             if (evaluations.length < avant) {
-                // #560 — par le GARDE DES MODES, comme `supprimerEvaluation` : en mode
-                // anonymisation l'écriture est refusée, et on le DIT — le fichier est
-                // parti, les évaluations liées restent, l'écran ne prétend pas le contraire.
-                if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-                    notifications.erreur('Évaluations conservées', 'Le fichier est supprimé, mais ses évaluations n\'ont pas été retirées : écriture refusée en mode anonymisation.');
-                } else {
-                    nbEvalsRetirees = avant - evaluations.length;
-                    // Tier 6.3 : Invalider les caches de moyennes
-                    window._moyennesQualifies = null;
-                    window._moyennesToutes = null;
-                    if (typeof calculerEtStockerIndicesCP === 'function') {
-                        calculerEtStockerIndicesCP();
-                    }
+                // #560 — par le garde des modes, comme `supprimerEvaluation`. Depuis le lot A
+                // de l'enregistrement (26 sept. 2026), l'anonymisation y écrit comme le mode normal.
+                sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+                nbEvalsRetirees = avant - evaluations.length;
+                // Tier 6.3 : Invalider les caches de moyennes
+                window._moyennesQualifies = null;
+                window._moyennesToutes = null;
+                if (typeof calculerEtStockerIndicesCP === 'function') {
+                    calculerEtStockerIndicesCP();
                 }
             }
         }
@@ -3061,16 +3053,13 @@ function viderTouteCorbeille() {
                 });
             });
             if (evaluations.length < avant) {
-                // #560 — même garde que ci-dessus, même honnêteté sur le refus.
-                if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-                    notifications.erreur('Évaluations conservées', 'La corbeille est vidée, mais les évaluations liées n\'ont pas été retirées : écriture refusée en mode anonymisation.');
-                } else {
-                    // Tier 6.3 : Invalider les caches de moyennes
-                    window._moyennesQualifies = null;
-                    window._moyennesToutes = null;
-                    if (typeof calculerEtStockerIndicesCP === 'function') {
-                        calculerEtStockerIndicesCP();
-                    }
+                // #560 — même garde que ci-dessus.
+                sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+                // Tier 6.3 : Invalider les caches de moyennes
+                window._moyennesQualifies = null;
+                window._moyennesToutes = null;
+                if (typeof calculerEtStockerIndicesCP === 'function') {
+                    calculerEtStockerIndicesCP();
                 }
             }
         }
