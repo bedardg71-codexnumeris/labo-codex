@@ -475,8 +475,9 @@
      *   1. le commentaire enregistré (ou, à l'écran, celui du div `comm_` de cette copie),
      *      sauf une amorce de saisie (#672) ou « [Non défini] » ;
      *   2. la rétroaction algorithmique, gelée au calcul (#581) ;
-     *   3. la cartouche, au niveau retenu ;
+     *   3. la cartouche, au niveau retenu — SAUF si l'enregistré est VIDE (#960, D6) ;
      *   4. rien — le critère se dit alors par son en-tête.
+     * `enregistre` : le texte enregistré (vide compris), ou null / undefined s'il n'y en a pas.
      * Rend le texte BRUT : l'anonymisation reste à l'appelant qui imprime (#566).
      */
     function commentaireDuCritere({ enregistre, algorithmique, cartouche, critereId, niveau } = {}) {
@@ -487,7 +488,19 @@
         const cleCart = critereId && niveau ? `${critereId}_${niveau}` : null;
         return retenu(enregistre) ||
             retenu(algorithmique) ||
-            retenu(cartouche && cleCart && cartouche.commentaires ? cartouche.commentaires[cleCart] : '');
+            (estCommentaireEnregistreVide(enregistre) ? ''
+                : retenu(cartouche && cleCart && cartouche.commentaires ? cartouche.commentaires[cleCart] : ''));
+    }
+
+    /**
+     * #960 — D6 (décision de Grégoire, 26 sept. 2026) : UN COMMENTAIRE ENREGISTRÉ VIDE RESTE VIDE,
+     * jusqu'au PDF de l'élève et à « Copier tout » (option a). La cartouche d'aujourd'hui ne le
+     * remplit pas : l'élève ne l'a jamais lu, et il partirait sans décision de l'enseignant.
+     * Le vide RÉEL seulement : une amorce de saisie ou « [Non défini] » en stock n'est pas un
+     * vide enregistré, elle garde la règle #939 (la cartouche). Absent (null / undefined) non plus.
+     */
+    function estCommentaireEnregistreVide(enregistre) {
+        return typeof enregistre === 'string' && enregistre.trim() === '';
     }
 
     function construireCriteres(evaluation, grille, cartouche) {
