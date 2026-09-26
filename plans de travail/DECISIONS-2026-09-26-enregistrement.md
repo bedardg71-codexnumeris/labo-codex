@@ -64,6 +64,13 @@ Texte proposé par Cowork, retenu sans retouche :
 - Écartée : (b) lecture seule.
 - **Usage déclaré par Grégoire** : « Le mode sert quand je fais des captures d'écran pour Claude ou des démos live avec mes vraies données. » ⮕ Conséquence acceptée : en démo, un clic modifie les vraies données. ⮕ Exigence qui en découle : **rien d'identifiant ne doit s'afficher en anonymisation**, y compris le volet confidentiel, les notes libres, les portraits et les notes de présences (#751).
 
+## D6 · Un commentaire de critère enregistré vide reste vide – arrêtée le 26 sept., « garde vide »
+
+- **Un commentaire de critère enregistré VIDE reste vide**, par les deux chemins : à l'ouverture par la copie, et à « Enregistrer » par la Liste. Il ne reçoit jamais le commentaire que la cartouche propose aujourd'hui.
+- Motifs (proposés par Cowork, retenus) : la règle #939, « le commentaire enregistré fait foi » ; et le cas où il se remplirait est celui d'une cartouche qui a gagné un commentaire après l'évaluation – l'élève ne l'a jamais lu, il apparaîtrait dans son PDF sans décision de l'enseignant.
+- Livrée au lot #960.
+- Vaut jusqu'au PDF de l'élève et à « Copier tout » : un commentaire enregistré vide s'imprime vide (Grégoire, 26 sept., option a).
+
 ## Ordre des lots (tranché par Cowork, question technique)
 
 1. **Lot A – Anonymisation (D5)** : on enregistre comme en mode normal ; garde contre les valeurs de substitution ; rien d'identifiant à l'écran (#751). Arrête une perte vécue : l'évaluation faite en anonymisation qui disparaît au rechargement. Rend #736 sans objet.

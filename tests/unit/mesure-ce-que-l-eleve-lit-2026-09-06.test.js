@@ -310,7 +310,9 @@ function monterEcran(c, base, calculs, reg, exportPdf) {
     };
     c.grille.criteres.forEach(cr => {
         ecran['eval_' + cr.id] = elementDom({ value: '' });
-        ecran['comm_' + cr.id] = elementDom();
+        // ↻ #960 — le gabarit pose son amorce dans le div (`renderCriteres`) : un div VIDE est un
+        // commentaire enregistré vide (D6), qui ne prend plus la cartouche.
+        ecran['comm_' + cr.id] = elementDom({ textContent: 'Sélectionne un niveau' });
         ecran['eval_pts_' + cr.id] = elementDom({ max: String(cr.ponderation) });
         ecran['eval_mots_' + cr.id] = elementDom({ value: '600' });
     });

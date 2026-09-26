@@ -1423,8 +1423,9 @@ function _afficherCommentaireCritere(critereId, niveau) {
     const grilleId = evaluationEnCours.grilleId;
     const cartouches = evaluationEnCours.cartoucheId ? (db.getSync(cle(`cartouches_${grilleId}`), []) || []) : [];
     const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId) || null;
+    // #960 — `null` : rien d'enregistré à ce niveau ; un texte, VIDE compris (D6, la règle partagée).
     const enregistre = _commentaireEnregistreDuCritere(critereId, niveau);
-    if (!cartouche && !enregistre) return;
+    if (!cartouche && enregistre === null) return;
 
     // #939 — LE COMMENTAIRE ENREGISTRÉ PASSE AVANT LA CARTOUCHE VIVANTE (décision de Grégoire,
     // 24 sept. 2026 : une cartouche retouchée ne change pas une copie déjà évaluée). À la
@@ -1444,7 +1445,7 @@ function _afficherCommentaireCritere(critereId, niveau) {
 
 /**
  * #939 — Le commentaire enregistré avec CETTE copie pour ce critère, s'il a été écrit au MÊME
- * niveau ; sinon ''. Un niveau changé, c'est un autre commentaire : celui de la cartouche au
+ * niveau (un texte, vide compris : #960, D6) ; sinon null. Un niveau changé, c'est un autre commentaire : celui de la cartouche au
  * nouveau niveau. L'identifiant, l'élève et la production viennent de
  * `etatVivantEvaluationEnCours` (les deux liaisons, #699 / #919) ; une évaluation d'un autre
  * élève ou d'une autre production n'est jamais lue.
@@ -1458,9 +1459,12 @@ function _afficherCommentaireCritere(critereId, niveau) {
 function _commentaireEnregistreDuCritere(critereId, niveau) {
     const vivant = _etatVivantDeLaCopie();
     const evaluation = _evaluationEnregistreeDeLaCopie(vivant);
-    if (!evaluation || _remplacementConfirmeActif(vivant, evaluation)) return '';
+    if (!evaluation || _remplacementConfirmeActif(vivant, evaluation)) return null;
     const critere = (evaluation.criteres || []).find(c => c.critereId === critereId);
-    return (critere && critere.niveauSelectionne === niveau) ? (critere.retroaction || '') : '';
+    // Seule une CHAÎNE est un enregistré : sans clé `retroaction` (ou `null`), rien d'enregistré,
+    // la cartouche — la même frontière que le PDF, qui reçoit `c.retroaction` tel quel (#960, R1).
+    return (critere && critere.niveauSelectionne === niveau && typeof critere.retroaction === 'string')
+        ? critere.retroaction : null;
 }
 
 function _etatVivantDeLaCopie() {
@@ -1549,8 +1553,14 @@ async function choisirCartoucheEval(select) {
     const r = _remplacementConfirme;
     const dejaConfirme = r && vivant && r.etudiantDA === vivant.etudiantDA
         && r.productionId === vivant.productionId && r.cartoucheId === nouvelle;
-    if (!nouvelle || !evaluation || nouvelle === evaluation.cartoucheId
-        || dejaConfirme || !_aDesCommentairesEnregistres(evaluation)) {
+    if (!nouvelle || !evaluation || nouvelle === evaluation.cartoucheId || dejaConfirme) {
+        return cartoucheSelectionnee();
+    }
+    // Rien d'écrit à perdre : pas de question, mais c'est bien le geste de l'enseignant. Il vaut
+    // remplacement, sans quoi un commentaire enregistré vide resterait vide (#960, D6) sous la
+    // cartouche qu'il vient de choisir.
+    if (!_aDesCommentairesEnregistres(evaluation)) {
+        _remplacementConfirme = { etudiantDA: vivant.etudiantDA, productionId: vivant.productionId, cartoucheId: nouvelle };
         return cartoucheSelectionnee();
     }
 
@@ -1698,6 +1708,10 @@ function _debouncerAutoSave() {
     // Ignorer les debounces pendant le chargement d'une évaluation (cf.
     // `_suspendreAutoSaveTemporairement`).
     if (window._autoSaveSuspendu) return;
+    // #960 — un chargeur qui restaure une évaluation n'écrit rien : ses `change` scriptés ne
+    // sont pas des gestes. La suspension de 500 ms ne couvrait pas « Modifier », qui restaure
+    // les niveaux bien après (mesuré : +660 ms sur le trajet de la copie).
+    if (window._chargementsEvaluationEnCours > 0) return;
     if (window._timerAutoSave) clearTimeout(window._timerAutoSave);
     // Snapshot de l'état ACTUEL pour pouvoir flusher si l'utilisateur change d'élève.
     // #699 (G-2, audit du 5 sept. 2026) — pris LÀ OÙ LE CALCUL LIT : le nom nu l'emporte

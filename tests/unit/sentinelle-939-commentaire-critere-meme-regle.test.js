@@ -212,8 +212,12 @@ describe('#939 · la règle unique `commentaireDuCritere`', () => {
         const cartouche = { commentaires: { x_M: 'CARTOUCHE' } };
         expect(regle({ enregistre: 'ENREG', algorithmique: 'ALGO', cartouche, critereId: 'x', niveau: 'M' })).toBe('ENREG');
         expect(regle({ enregistre: '', algorithmique: 'ALGO', cartouche, critereId: 'x', niveau: 'M' })).toBe('ALGO');
-        expect(regle({ enregistre: '', algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('CARTOUCHE');
-        expect(regle({ enregistre: '', algorithmique: '', cartouche, critereId: 'x', niveau: 'D' })).toBe('');
+        expect(regle({ enregistre: null, algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('CARTOUCHE');
+        expect(regle({ algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('CARTOUCHE');
+        // ↻ #960 (D6, option a) : enregistré VIDE → vide, la cartouche ne le remplit pas (avant : 'CARTOUCHE').
+        expect(regle({ enregistre: '', algorithmique: '', cartouche, critereId: 'x', niveau: 'M' })).toBe('');
+        expect(regle({ enregistre: '  ', cartouche, critereId: 'x', niveau: 'M' })).toBe('');
+        expect(regle({ enregistre: null, algorithmique: '', cartouche, critereId: 'x', niveau: 'D' })).toBe('');
         expect(regle({ critereId: 'x', niveau: 'M' })).toBe('');
     });
 
@@ -417,5 +421,80 @@ describe('#944 · une AUTRE cartouche choisie au menu, sur une copie déjà éva
         } finally {
             CARTOUCHE_REV.commentaires.h1_M = 'REV h1_M : la cartouche révisée.';
         }
+    });
+});
+
+describe('#960 · D6 — un commentaire de critère enregistré VIDE reste vide (décision de Grégoire, 26 sept. 2026)', () => {
+    // h1 enregistré vide au niveau M ; la cartouche de l'évaluation (CT9) porte « h1_M ».
+    const avecH1Vide = () => {
+        const ev = evaluationEnregistree();
+        ev.criteres[0] = { ...ev.criteres[0], retroaction: '' };
+        return ev;
+    };
+
+    it('à la réouverture, le commentaire de la copie reste vide : la cartouche ne le remplit pas', () => {
+        const { ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        expect(ecran.comm_h1.textContent).toBe('');
+    });
+
+    it('à « Enregistrer », la base garde le vide', () => {
+        const { win, ecritures } = rouvrir({ enBase: [avecH1Vide()] });
+        win.sauvegarderEvaluationModifiee();
+        const ev = ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+        expect(ev.criteres.find((c) => c.critereId === 'h1').retroaction).toBe('');
+    });
+
+    // Option (a) de Grégoire (26 sept.) : D6 vaut jusqu'à ce que l'élève lit. Avant, les deux
+    // imprimaient la cartouche d'aujourd'hui (« RETOUCHÉE h1_M »), mesuré le 26 sept.
+    it('le PDF de l\'élève imprime le critère SANS commentaire (l\'en-tête seul)', () => {
+        const { win } = rouvrir({ enBase: [avecH1Vide()] });
+        expect(commentairesDuPdf(win, avecH1Vide()).Structure).toBe('');
+    });
+
+    it('« Copier tout » (la rétroaction générale) écrit le critère SANS commentaire', () => {
+        const { ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        expect(commentaireCopie(ecran.retroactionFinale1.value, 'Structure')).toBe('');
+    });
+
+    it('TÉMOIN : dans le PDF, une amorce ou « [Non défini] » en stock garde la règle #939', () => {
+        const { win } = rouvrir();
+        const pdf = commentairesDuPdf(win, evaluationEnregistree());
+        expect(pdf.Nuance, 'amorce en stock').toBe(CARTOUCHE.commentaires.h3_M);
+    });
+
+    // R1 de la relecture de Cowork : ABSENT n'est pas VIDE. Un critère stocké sans la clé
+    // `retroaction` (ou avec `null`) n'a rien d'enregistré — la cartouche, à l'écran comme au PDF.
+    for (const [nomCas, sansCle] of [['sans la clé', (c) => { const x = { ...c }; delete x.retroaction; return x; }],
+        ['à null', (c) => ({ ...c, retroaction: null })]]) {
+        it(`R1 · critère stocké ${nomCas} : écran, PDF et « Enregistrer » prennent la cartouche`, () => {
+            const ev = evaluationEnregistree();
+            ev.criteres[0] = sansCle(ev.criteres[0]);
+            const { win, ecran, ecritures } = rouvrir({ enBase: [ev] });
+            expect(ecran.comm_h1.textContent, 'écran').toBe(CARTOUCHE.commentaires.h1_M);
+            expect(commentairesDuPdf(win, ev).Structure, 'PDF').toBe(CARTOUCHE.commentaires.h1_M);
+            win.sauvegarderEvaluationModifiee();
+            const ecrit = ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+            expect(ecrit.criteres.find((c) => c.critereId === 'h1').retroaction, 'base').toBe(CARTOUCHE.commentaires.h1_M);
+        });
+    }
+
+    // R3 — « Copier tout » sans div `comm_` pour un critère : rien d'enregistré à lire, la cartouche.
+    it('R3 · un critère sans div `comm_` : « Copier tout » garde la cartouche (sans div n\'est pas « enregistré vide »)', () => {
+        const { win, ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        delete ecran.comm_h1;
+        win.genererRetroaction(1);
+        expect(commentaireCopie(ecran.retroactionFinale1.value, 'Structure')).toBe(CARTOUCHE.commentaires.h1_M);
+    });
+
+    it('TÉMOIN : un niveau CHANGÉ prend la cartouche au nouveau niveau (le vide était celui de l\'ancien)', () => {
+        const { win, ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        ecran.eval_h1.value = 'E';
+        win.niveauSelectionne('h1');
+        expect(ecran.comm_h1.textContent).toBe(CARTOUCHE.commentaires.h1_E);
+    });
+
+    it('TÉMOIN : une amorce ou « [Non défini] » en stock n\'est pas un vide enregistré — la cartouche, comme #939', () => {
+        const { ecran } = rouvrir();
+        expect(ecran.comm_h3.textContent, 'amorce en stock').toBe(CARTOUCHE.commentaires.h3_M);
     });
 });

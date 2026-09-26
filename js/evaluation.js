@@ -772,9 +772,10 @@ function verifierEtChargerEvaluationExistante() {
                     if (r) r.checked = true;
                 }
             }
-            // Régénérer la rétroaction avec les options d'affichage restaurées
-            // Patch §5.6 — promotion genererRetroaction vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
-            window.genererRetroaction(1);
+            // Régénérer la rétroaction avec les options d'affichage restaurées — SEULEMENT si
+            // l'évaluation n'en a pas. #960 : la rétroaction enregistrée fait foi ; régénérée ici,
+            // elle remplaçait le texte réécrit à la main, après que « Modifier » l'eut remis.
+            if (!evaluationExistante.retroactionFinale) window.genererRetroaction(1);
         }, 350);
     }, 300);
 }
@@ -1036,6 +1037,9 @@ function _attendreOptionSelect(selectId, valeurCherchee, maxTentatives = 20, del
  *
  * @param {string} evaluationId - ID de l'évaluation à charger
  */
+/** #960, B1 — au plus tard, le compteur de chargement est rendu à l'auto-save. */
+const DELAI_BORNE_CHARGEMENT_EVALUATION = 15000;
+
 function modifierEvaluation(evaluationId) {
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
@@ -1104,6 +1108,24 @@ function modifierEvaluation(evaluationId) {
 
     // ========== CHARGEMENT SÉQUENTIEL ==========
 
+    // #960 — ouvrir n'écrit rien : l'auto-save ne s'arme pas pendant la restauration (compteur,
+    // et non `_modifierEvaluationEnCours`, que `ouvrirFichier` remet à faux en chemin). Posé
+    // juste avant le minuteur dont le `finally` le rend : aucune sortie ne le laisse armé.
+    // B1 (contre-vérification de Cowork) — et une BORNE : la vue côte à côte attend PDF.js sans
+    // délai maximal ; un `finally` qui n'arrive pas laisserait l'auto-save muet pour la séance.
+    // Rendu une seule fois, par le premier des deux.
+    window._chargementsEvaluationEnCours = (window._chargementsEvaluationEnCours || 0) + 1;
+    let compteurRendu = false;
+    const rendreCompteur = () => {
+        if (compteurRendu) return;
+        compteurRendu = true;
+        window._chargementsEvaluationEnCours = Math.max(0, (window._chargementsEvaluationEnCours || 1) - 1);
+    };
+    const borneCompteur = setTimeout(() => {
+        if (compteurRendu) return;
+        console.warn('[Modifier] Chargement de l\'évaluation non terminé après 15 s : l\'enregistrement automatique reprend.');
+        rendreCompteur();
+    }, DELAI_BORNE_CHARGEMENT_EVALUATION);
     setTimeout(async () => {
         try {
             // 🔧 FIX (20 mars 2026) : _forceStandaloneEval permet à modifierEvaluationRemplacee()
@@ -1158,6 +1180,8 @@ function modifierEvaluation(evaluationId) {
             );
         } finally {
             window._modifierEvaluationEnCours = false;
+            clearTimeout(borneCompteur);
+            rendreCompteur();
         }
     }, 200);
 }
