@@ -207,6 +207,33 @@ async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, f
 }
 
 /**
+ * Lit une collection d'une archive sous ses deux formes de clé (#637, #953) :
+ * `<trim>_<nom>` (namespacée) et `<nom>` (nue, héritée). La forme NAMESPACÉE
+ * l'emporte en bloc : c'est elle que le trimestre archivé lisait. La nue ne sert
+ * que si aucune namespacée n'existe. Un id répété n'est rendu qu'une fois.
+ */
+function _lireDeuxFormes(donnees, nom) {
+    var namespacees = [];
+    Object.keys(donnees).forEach(function(k) {
+        // Préfixe = un seul segment (`a2025`) : `cartouches_G1` n'est pas une forme
+        // namespacée de `G1`.
+        var prefixe = k.slice(0, k.length - nom.length - 1);
+        if (prefixe && prefixe.indexOf('_') < 0 && k === prefixe + '_' + nom &&
+            Array.isArray(donnees[k])) {
+            namespacees.push(donnees[k]);
+        }
+    });
+    var sources = namespacees.length ? namespacees : (Array.isArray(donnees[nom]) ? [donnees[nom]] : []);
+    var idsVus = new Set();
+    return [].concat.apply([], sources).filter(function(item) {
+        if (!item || !item.id) return true;
+        if (idsVus.has(item.id)) return false;
+        idsVus.add(item.id);
+        return true;
+    });
+}
+
+/**
  * Extrait les ressources réimportables et marque les doublons par ID.
  * Annote chaque production/cartouche/pratique avec ses références croisées
  * (grille/échelle) et un flag _ref*Manquante si la référence n'est ni dans
@@ -230,13 +257,14 @@ function _extraireRessources(donnees) {
     var idsProductionsActives = new Set(productionsActives.map(function(p) { return p.id; }));
     var idsPratiquesActives = new Set(pratiquesActives.map(function(p) { return p.id; }));
 
-    // Grilles (clé globale)
-    var grilles = (Array.isArray(donnees.grillesTemplates) ? donnees.grillesTemplates : [])
+    // Grilles et échelles : les deux formes de clé d'une archive (#953, même règle que #637).
+    // Depuis #358, le versement ne copie plus que `<trim>_grillesTemplates` /
+    // `<trim>_echellesTemplates` : ne lire que la nue ne proposait rien.
+    var grilles = _lireDeuxFormes(donnees, 'grillesTemplates')
         .filter(function(g) { return g && g.id && g.nom; })
         .map(function(g) { return Object.assign({}, g, { _doublon: idsGrillesActives.has(g.id) }); });
 
-    // Échelles (clé globale)
-    var echelles = (Array.isArray(donnees.echellesTemplates) ? donnees.echellesTemplates : [])
+    var echelles = _lireDeuxFormes(donnees, 'echellesTemplates')
         .filter(function(e) { return e && e.id && e.nom; })
         .map(function(e) { return Object.assign({}, e, { _doublon: idsEchellesActives.has(e.id) }); });
 
@@ -267,28 +295,23 @@ function _extraireRessources(donnees) {
     // ⚠ Pour une même grille, la forme NAMESPACÉE l'emporte en bloc : c'est elle que les
     // évaluations du trimestre ont lue (`cle('cartouches_…')`). La nue ne sert que si la
     // namespacée manque.
-    var sourcesParGrille = {};
+    var grillesDesCartouches = {};
     Object.keys(donnees).forEach(function(k) {
-        var m = /^(?:([^_]+)_)?cartouches_(.+)$/.exec(k);
-        if (!m || !Array.isArray(donnees[k])) return;
-        var s = sourcesParGrille[m[2]] || (sourcesParGrille[m[2]] = { namespacees: [], nues: [] });
-        (m[1] ? s.namespacees : s.nues).push(donnees[k]);
+        var m = /^(?:[^_]+_)?cartouches_(.+)$/.exec(k);
+        if (m) grillesDesCartouches[m[1]] = true;
     });
 
     var cartouches = [];
-    Object.keys(sourcesParGrille).forEach(function(grilleId) {
-        var s = sourcesParGrille[grilleId];
-        var arr = [].concat.apply([], s.namespacees.length ? s.namespacees : s.nues);
+    Object.keys(grillesDesCartouches).forEach(function(grilleId) {
+        var arr = _lireDeuxFormes(donnees, 'cartouches_' + grilleId);
         // Doublon = déjà là OÙ L'IMPORT ÉCRIRA : `importerCartouchesExternes` écrit sous
         // `cle('cartouches_<grilleId>')` (trimestre actif). Lire la clé de l'archive
         // comparait à un autre magasin que celui qui recevra la cartouche.
         var actuels = (window.db && db.getSync(cle('cartouches_' + grilleId), [])) || [];
         if (!Array.isArray(actuels)) actuels = [];
         var idsActuels = new Set(actuels.map(function(c) { return c.id; }));
-        var idsVus = new Set();
         arr.forEach(function(c) {
-            if (!c || !c.id || idsVus.has(c.id)) return;
-            idsVus.add(c.id);
+            if (!c || !c.id) return;
             var clone = Object.assign({}, c);
             if (!clone.grilleId) clone.grilleId = grilleId;
             clone._doublon = idsActuels.has(c.id);
@@ -296,8 +319,10 @@ function _extraireRessources(donnees) {
         });
     });
 
-    // Pratiques (clé globale)
-    var pratiques = (Array.isArray(donnees.pratiquesConfigurables) ? donnees.pratiquesConfigurables : [])
+    // Pratiques : même règle (#953). La forme nue n'est plus écrite depuis la migration
+    // du 24 mai 2026 (`main.js`) mais le versement la copie encore : figée, elle
+    // proposait des pratiques d'avant la migration à la place de celles du trimestre.
+    var pratiques = _lireDeuxFormes(donnees, 'pratiquesConfigurables')
         .filter(function(p) { return p && p.id && p.nom; })
         .map(function(p) { return Object.assign({}, p, { _doublon: idsPratiquesActives.has(p.id) }); });
 
