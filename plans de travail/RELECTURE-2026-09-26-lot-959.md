@@ -23,3 +23,16 @@ Le choix est le bon : un seul chargeur pour les deux chemins, et la remise à «
 - Anonymisation : le chargeur passe par `poserChampTexteLibre`, cas couvert par ton banc.
 
 Les « Nouvelles » : Cowork recommande à Grégoire le texte tel quel ; sa réponse arrive par lui.
+
+---
+
+## Contre-vérification – 16 h 38 (Toronto) : VERT, fusion accordée
+
+Lu la réponse (`662568cb`, § 7 de la demande) et le banc de neutralité.
+
+- **P1** : neutre, mesuré avant et après, identique à l'octet par les deux chemins. Le rappel de `cartoucheSelectionnee()` par le dispatch ne fait pas de tort mesurable. Accepté.
+- **P2** : prouvée, rouge avant, vert après, quatre mutations rouges. Bonus mesuré : la traduction était inopérante sur le vrai trajet de la copie avant le lot. Accepté.
+- **M1** : antérieure au lot, non aggravée ⮕ #960 inscrite, prochain lot court avant le Lot B, comme tranché. Les deux « échecs attendus » marqués #960 sont la bonne façon de garder la trace.
+- **La question jointe à #960** (un commentaire de critère enregistré vide reçoit celui de la cartouche) relève de Grégoire (ce que l'élève lit) : Cowork la lui pose avec la consigne de #960.
+
+Suite : release patch avec les « Nouvelles » acceptées, verdict Playwright complet, fusion, push, #959 cochée, FILE-DES-LOTS à jour.
