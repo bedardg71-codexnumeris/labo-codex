@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.11 (#643, #654, #637) — VALIDÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
+                'Partage et archives&nbsp;: les cartouches arrivent entières. Un fichier partagé dit de quel trimestre viennent ses cartouches, une production importée retrouve sa cartouche, et une archive rouverte les montre toutes.',
                 // 1.159.10 (#888) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
                 'Horaire&nbsp;: dans une séance, le mot «&nbsp;pér.&nbsp;» reste affiché à côté du nombre de périodes, même une fois la case remplie.',
                 // 1.159.9 (#583, #680) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork, complété avec lui).
