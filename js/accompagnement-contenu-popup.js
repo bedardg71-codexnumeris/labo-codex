@@ -1591,7 +1591,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette fiche stocke des informations sensibles localement, dans ton navigateur uniquement. Elles ne sont jamais envoyées à un serveur, jamais incluses dans les exports partageables (matériel pédagogique, codex data anonymisé), et anonymisées en mode anonymisation."
+                contenu: "Cette fiche stocke des informations sensibles localement, dans ton navigateur uniquement. Elles ne sont jamais envoyées à un serveur, jamais incluses dans les exports partageables (matériel pédagogique, codex data anonymisé), et masquées en mode anonymisation."
             },
             {
                 type: 'liste',

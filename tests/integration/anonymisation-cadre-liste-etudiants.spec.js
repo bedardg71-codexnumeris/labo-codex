@@ -71,13 +71,19 @@ test('en anonymisation, la liste du Cadre ne montre aucun vrai nom — les menus
     for (const nom of NOMS_REELS) expect(apresAllerRetour).not.toContain(nom);
 });
 
-test('en anonymisation, « Modifier » est refusé : le formulaire ne se remplit pas du vrai nom', async ({ page }) => {
+// Réancré le 26 sept. 2026 (lot A de l'enregistrement, D5 de Grégoire) : « Modifier » n'est plus
+// refusé en anonymisation. Le formulaire s'ouvre, l'identité y est vide et non modifiable.
+test('en anonymisation, « Modifier » ouvre la fiche sans le vrai nom : DA, nom et prénom masqués', async ({ page }) => {
     await packDemoSurLeCadre(page);
     await page.evaluate(() => changerMode('anonymisation'));
     await page.waitForTimeout(800);
 
     await page.locator('#v2-listeEtudiants select[data-da="DEMO004"]').first().selectOption('editer');
     await page.waitForTimeout(400);
-    expect(await page.locator('#v2-etudiantNom').inputValue()).toBe('');
-    await expect(page.getByText('Repasse en mode normal pour modifier ou supprimer un·e étudiant·e.')).toBeVisible();
+    for (const id of ['#v2-etudiantDA', '#v2-etudiantNom', '#v2-etudiantPrenom']) {
+        expect(await page.locator(id).inputValue()).toBe('');
+        await expect(page.locator(id)).toBeDisabled();
+        await expect(page.locator(id)).toHaveAttribute('placeholder', 'Masqué en anonymisation');
+    }
+    await expect(page.locator('#v2-btnSoumettreEtudiant')).toHaveText('Enregistrer les modifications');
 });

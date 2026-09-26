@@ -76,7 +76,7 @@ function calculerCorrelationsLongitudinales() {
             interventionsParDA[da].push({
                 date: interv.date,
                 type: interv.type,
-                titre: interv.titre
+                titre: typeof window.titreInterventionAffiche === 'function' ? window.titreInterventionAffiche(interv) : interv.titre   // Lot A, R4
             });
         }
     }
@@ -171,7 +171,7 @@ function calculerCorrelationsLongitudinales() {
                     interventionsVues[cleInterv] = true;
                     evenementsInterventions.push({
                         indexSeance: s,
-                        titre: interventions[ii].titre || 'Intervention',
+                        titre: (typeof window.titreInterventionAffiche === 'function' ? window.titreInterventionAffiche(interventions[ii]) : interventions[ii].titre) || 'Intervention',   // Lot A, R4
                         type: interventions[ii].type || 'groupe',
                         niveauRai: interventions[ii].niveauRai || 2
                     });
@@ -220,7 +220,7 @@ function calculerCorrelationsLongitudinales() {
             moyP.push(nbP > 0 ? Math.round(somP / nbP * 10) / 10 : null);
         }
 
-        var titreCourtInterv = interv.titre || ('Intervention ' + (ci + 1));
+        var titreCourtInterv = (typeof window.titreInterventionAffiche === 'function' ? window.titreInterventionAffiche(interv) : interv.titre) || ('Intervention ' + (ci + 1));   // Lot A, R4
         if (titreCourtInterv.length > 20) titreCourtInterv = titreCourtInterv.substring(0, 18) + '…';
 
         resultat.interventionsCourbes.push({

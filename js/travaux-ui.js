@@ -3789,8 +3789,10 @@
             );
             if (!choix) return;
 
-            // Supprimer l'évaluation
-            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+            // Supprimer l'évaluation — lecture brute (read-modify-write) : le tableau filtré par
+            // cours de `obtenirDonneesSelonMode` réécrit sans les évaluations des autres cours
+            // du trimestre (lot A de l'enregistrement, 26 sept. 2026).
+            const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
             const evaluationsMaj = evaluations.filter(e => e.id !== evalAssociee.id);
             sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj);
         } else {
@@ -7151,7 +7153,10 @@
 
         const evalTrouvee = travauxResolution.trouverEvaluationPourFichier(fichier);
         if (!evalTrouvee) return;
-        let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        // Lecture brute, comme la suppression plus haut : la lecture anonymisée et filtrée par
+        // cours réécrivait « Gr. A », les marqueurs d'anonymisation, et perdait les évaluations
+        // des autres cours. Le texte de la zone, lui, passe par la garde de `modes.js`.
+        let evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
         const index = evaluations.findIndex(e => e.id === evalTrouvee.id);
 
         if (index === -1) return;

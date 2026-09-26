@@ -146,6 +146,11 @@ function derniereSeancePassee() {
    GESTION DES GROUPES
    =============================== */
 
+// Le vrai numéro de groupe d'un élève, qu'il vienne de la liste brute ou anonymisée (R5).
+function _groupeReel(e) {
+    return e.groupeReel !== undefined ? e.groupeReel : e.groupe;
+}
+
 /**
  * Charge la liste des groupes dans le select
  * 🆕 BETA 95.7 (23 jan) : Utiliser uniquement les étudiants du groupe-cours ACTIF
@@ -162,15 +167,19 @@ function chargerGroupesPresences() {
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants') || [];
 
-    // Extraire les groupes uniques (sous-groupes à l'intérieur du groupe-cours)
-    const groupesSet = new Set();
+    // Extraire les groupes uniques (sous-groupes à l'intérieur du groupe-cours).
+    // Relecture croisée R5 (lot A, 26 sept. 2026) : la VALEUR d'une option est le vrai numéro,
+    // le LIBELLÉ est celui de l'écran (« Gr. A » en anonymisation). Avant, la valeur était le
+    // libellé : après une bascule de mode, le menu (rempli au démarrage seulement) ne
+    // correspondait plus à la liste, le tableau tombait à zéro ligne et « Verrouiller »
+    // n'écrivait rien, sans un mot ; et la préférence « Gr. B » s'écrivait dans les données.
+    const libelles = new Map();
     etudiants.forEach(e => {
-        if (e.groupe && e.groupe.trim() !== '') {
-            groupesSet.add(e.groupe);
-        }
+        const reel = _groupeReel(e);
+        if (reel && String(reel).trim() !== '') libelles.set(reel, e.groupe);
     });
 
-    const groupes = Array.from(groupesSet).sort();
+    const groupes = Array.from(libelles.keys()).sort();
 
     // Remplir le select
     // 🆕 BETA 95.7 : Si un seul groupe, ne pas afficher le filtre "Tous les groupes"
@@ -182,7 +191,7 @@ function chargerGroupesPresences() {
         groupes.forEach(groupe => {
             const option = document.createElement('option');
             option.value = groupe;
-            option.textContent = groupe;
+            option.textContent = libelles.get(groupe);
             selectGroupe.appendChild(option);
         });
         selectGroupe.classList.remove('u-hide');
@@ -838,9 +847,8 @@ function basculerVerrouillageDate(dateStr) {
         datesVerrouillees.splice(index, 1);
     } else {
         // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller.
-        // ⚠ Cette sauvegarde écrit `cle('presences')` HORS du mode anonymisation :
-        // l'une des trois portes de #736, règle arbitrée après le 14 sept. 2026 —
-        // citée ici, pas rejugée. Le lot 3 change la CLÉ du verrou, pas la porte.
+        // Écrit aussi en anonymisation, comme « Enregistrer » (lot A de l'enregistrement,
+        // 26 sept. 2026 : #736 sans objet, le mode ne bloque plus aucune écriture).
         sauvegarderPresencesSansValidation(dateStr);
         datesVerrouillees.push(dateStr);
     }
@@ -924,7 +932,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
     const selectGroupe = document.getElementById('selectGroupePresences');
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
     let etudiantsATraiter = groupeFiltre
-        ? etudiants.filter(e => e.groupe === groupeFiltre)
+        ? etudiants.filter(e => _groupeReel(e) === groupeFiltre)
         : etudiants;
 
     // Préserver les flags facultatifs
@@ -947,6 +955,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
     );
 
     // Supprimer les anciennes présences pour cette date et ce cours
+    const presencesAvant = presences;
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
         if (coursId && p.coursId && p.coursId !== coursId) return true;
@@ -961,7 +970,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
 
         if (inputPeriodes) {
             const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
-            const notes = inputNotes ? inputNotes.value.trim() : '';
+            const notes = _notesDuChamp(inputNotes, presencesAvant, etudiant.da, dateStr, coursId);
 
             // #540 lot E3 : `heures` n'est PLUS ÉCRIT. C'était une sérialisation de
             // `periodesPresentes` par la durée de période — un champ de
@@ -989,6 +998,20 @@ function sauvegarderPresencesSansValidation(dateStr) {
 
     // Sauvegarder
     db.setSync(clePresences, presences);
+}
+
+/**
+ * Lot A de l'enregistrement (26 sept. 2026) — la note d'une présence telle qu'elle doit être
+ * écrite. Un champ masqué en anonymisation est vide à l'écran : il ne dit rien de la note, il
+ * ne l'efface pas — la note déjà en base est réécrite telle quelle.
+ */
+function _notesDuChamp(inputNotes, presencesAvant, da, dateStr, coursId) {
+    if (inputNotes && inputNotes.dataset.masqueAnonymisation === '1') {
+        const avant = presencesAvant.find(p => p.da === da && p.date === dateStr
+            && (!coursId || !p.coursId || p.coursId === coursId));
+        return avant ? (avant.notes || '') : '';
+    }
+    return inputNotes ? inputNotes.value.trim() : '';
 }
 
 /**
@@ -1273,7 +1296,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
     // ÉTAPE 1 : Filtrer par groupe (si un groupe est sélectionné)
     if (groupeFiltre) {
-        etudiantsFiltres = etudiants.filter(e => e.groupe === groupeFiltre);
+        etudiantsFiltres = etudiants.filter(e => _groupeReel(e) === groupeFiltre);
     }
 
     // ÉTAPE 2 : Trier selon le critère choisi
@@ -1331,6 +1354,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         }
 
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
+        // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
+        // l'écran : la note (texte libre) est masquée, le DA aussi. Le champ masqué ne s'écrit pas.
+        const masquer = typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
         const estFacultatif = presenceExistante ? (presenceExistante.facultatif === true) : false;
 
         // #224 : Calcul via fonction canonique dans indices.js
@@ -1363,7 +1389,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
         // Structure : DA | Prénom | Nom | Présence | Notes | Total pér. | Assiduité
         tr.innerHTML = `
-            <td>${echapperHtml(etudiant.da)}</td>
+            <td>${echapperHtml(masquer ? obtenirDAAffichage(etudiant) : etudiant.da)}</td>
             <td>${echapperHtml(etudiant.prenom)}</td>
             <td>${echapperHtml(etudiant.nom)}</td>
             <td style="white-space: nowrap;">${inputPeriodesHTML}</td>
@@ -1371,9 +1397,10 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                 <input type="text"
                        class="controle-form input-notes"
                        id="notes_${etudiant.da}"
-                       value="${echapperHtml(notes)}"
-                       placeholder="Notes…"
-                       ${estVerrouille ? 'disabled' : ''}>
+                       value="${masquer ? '' : echapperHtml(notes)}"
+                       placeholder="${masquer ? window.MENTION_MASQUE_ANONYMISATION : 'Notes…'}"
+                       ${masquer ? 'data-masque-anonymisation="1"' : ''}
+                       ${estVerrouille || masquer ? 'disabled' : ''}>
             </td>
             <td><span id="heuresHisto_${etudiant.da}">${Math.round(totalPeriodesPresentes)} pér.</span></td>
             <td>
@@ -1634,7 +1661,7 @@ function enregistrerPresences() {
     // Filtrer les étudiants si un sous-groupe est sélectionné (à l'intérieur du groupe-cours)
     let etudiantsATraiter = etudiants;
     if (groupeFiltre) {
-        etudiantsATraiter = etudiants.filter(e => e.groupe === groupeFiltre);
+        etudiantsATraiter = etudiants.filter(e => _groupeReel(e) === groupeFiltre);
     }
 
     // IMPORTANT : Sauvegarder les flags facultatifs AVANT de supprimer les anciennes présences
@@ -1659,6 +1686,7 @@ function enregistrerPresences() {
 
     // Supprimer les anciennes présences pour cette date et ces étudiants
     // ✅ CORRIGÉ (8 janvier 2026) : Protéger les présences des autres cours
+    const presencesAvant = presences;
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
         // Préserver les présences d'autres cours (coursId différent)
@@ -1682,7 +1710,7 @@ function enregistrerPresences() {
             // #540 lot E3 : `heures` n'est plus écrit — voir l'autre chemin
             // d'enregistrement, même raison. Deux sites écrivaient le même champ de
             // rétrocompatibilité ; aucun ne l'écrit plus.
-            const notes = inputNotes ? inputNotes.value.trim() : '';
+            const notes = _notesDuChamp(inputNotes, presencesAvant, etudiant.da, dateStr, coursId);
 
             // Créer l'objet de présence
             const presenceObj = {
@@ -1702,11 +1730,7 @@ function enregistrerPresences() {
         }
     });
 
-    // Protection : bloquer en mode anonymisation (lecture seule)
-    if (!sauvegarderDonneesSelonMode('presences', presences)) {
-        notifications.erreur('Modification impossible', 'Impossible de sauvegarder les présences en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('presences', presences);
 
     notifications.succes('Présences enregistrées');
 
