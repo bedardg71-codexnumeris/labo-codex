@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 12 H 30 : **LOT #957 (1.159.13) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 15 H 40 : **LOT A DE L'ENREGISTREMENT (1.160.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `fd9d1dc7` + la branche `lot-a-anonymisation-enregistre` (`ad63a2e1` lot, `99e0405b` demande de relecture, `10b3a9cf` cinq retouches R1-R5, `720260d2` réponse, `e107ddd3` contre-vérification verte + #959) + `a43bd44f` fusion + `e9518e9c` release (build 0926-1532) + cette clôture. Quatre textes acceptés par Grégoire (mention « Masqué en anonymisation », deux aides, Nouvelles). Vitest 7 452 / 7 452 après la release.
+
+**Reste** : constater « en ligne » chez Netlify ; retirer les branches `lot-957-grille-critere` et `lot-a-anonymisation-enregistre` une fois le push constaté ; **prochain lot : #959 (lot court, avant le lot B), décision de Cowork**. Non commités, laissés à Cowork : `PORTES-TERRAIN-2026-09-24-bug-944.md` (modifié), `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md`, `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 12 H 30 : **LOT #957 (1.159.13) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `9b575769` (inventaire de l'enregistrement, poussé) + la branche `lot-957-grille-critere` (`3428894a` correctif, `609f42b8` demande de relecture, `628415d9` relecture + fiche cochée) + `c8e43205` fusion + `a6a2a43d` release (build 0926-1224) + cette clôture. Échelles entrées au lot (même patron). Relecture croisée de Cowork VERTE avant la fusion, sans retouche ; conversion des trois gestes injoignables gardée (décision de Grégoire). Nouvelles validées par Grégoire (option b, sous-critères ajoutés). Vitest 7 443 / 7 443 après la release.
 
