@@ -1,81 +1,45 @@
-# Consigne du jour – les cartouches arrivent entières : partage (#643), import (#654), archive (#637)
+# Consigne du jour – #953 : une archive rouverte propose aussi ses grilles et ses échelles
 
-> Écrite le 26 septembre 2026, vers 8 h 15 (Toronto), par Cowork, sur `main` = `origin/main` = `ac24acb7` (1.159.10). **À remesurer avant tout code** : ce que Cowork a lu est du texte, pas une exécution.
-> La précédente (#888, livrée en 1.159.10) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-25-bug-888-per.md` (déplacée par Cowork, à commiter avec ce lot).
-> Lot choisi par Grégoire le 26 sept. à 8 h 10, dans son cap du 24 au soir : « Je voudrais qu'on termine tout ce qui concerne la rétroaction dans les prochains lots. » Trois fiches laborieuses, aucune n'attend d'arbitrage.
+> Écrite le 26 septembre 2026, vers 9 h 40 (Toronto), par Cowork, sur `main` = `14314530` (1.159.11 fusionnée ; verdict et push de `pousser.sh` en cours au moment de l'écriture). **Ne commence qu'une fois ce push terminé et vert.** À remesurer avant tout code.
+> La précédente (lot #643 #654 #637, 1.159.11) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-cartouches.md` (déplacée par Cowork, à commiter avec ce lot).
+> Lot choisi par Grégoire le 26 sept. vers 9 h 40 : il termine le geste livré le matin même (#637). Sans lui, une archive rouverte propose ses cartouches, mais chacune s'y dit « grille manquante ».
 
 ## 0 · Ce que Grégoire verra, en une phrase
 
-Une cartouche ne se perd plus en chemin : le fichier de partage dit de quel trimestre viennent ses cartouches, une production importée retrouve sa cartouche, et une archive rouverte montre toutes ses cartouches.
+Quand il rouvre une archive, la liste propose aussi les grilles et les échelles du trimestre archivé, et ses cartouches ne s'y disent plus « grille manquante ».
 
-## 1 · Ordre, et une seule session
+## 1 · Ce que Cowork a lu (lecture seule, sur `14314530` – non exécuté)
 
-Une seule session écrit (les trois touchent `js/`). Trois commits, dans cet ordre, sur une branche :
+- `js/reserve-ouvrir.js`, `_extraireRessources` (l. 215) : les grilles (l. 234), les échelles (l. 239) et les pratiques (l. 300) ne sont lues que sous la clé NUE (`donnees.grillesTemplates`, etc.). Les productions sont lues sous les deux formes (`/_productions$/`), et les cartouches depuis #637.
+- `js/reserve.js` : le versement range grilles, échelles et pratiques sous la clé du trimestre (`CLES_SANS_FILTRE`, l. 115-117, passe préfixe) ; les grilles et les échelles sont retirées du passage des clés globales depuis #358 (l. 58-60 : « la clé globale héritée est vidée au boot »). `pratiquesConfigurables` y est encore, sous la forme nue (l. 62), en plus de la forme namespacée.
+- Les annotations « manquante » (l. 304 et suivantes) se calculent sur les grilles et échelles extraites plus haut : elles se corrigeront d'elles-mêmes si l'extraction lit les bonnes clés.
+- Témoin d'exécution : #953 a été constatée par toi au navigateur, dans `tests/integration/reserve-reouverture-cartouches-637.spec.js`.
 
-1. **#643** d'abord : le patron vient d'être posé par #583 (1.159.9), et c'est le seul qui porte un texte à faire valider par Grégoire – autant le lui soumettre tôt.
-2. **#654** ensuite.
-3. **#637** en dernier : il commence par une confirmation à l'exécution, et il peut sortir du lot (§ 4).
+## 2 · Ce qui est attendu
 
-`js/reserve-ouvrir.js` est touché par #654 ET #637 : ne pas les mener en parallèle.
+1. **Grilles et échelles** : `_extraireRessources` reconnaît `<préfixe>_grillesTemplates` et `<préfixe>_echellesTemplates`, avec **la même règle que #637** : la forme namespacée l'emporte ; la nue ne sert que si la namespacée manque. Reprends la même reconnaissance que pour les cartouches, sans en fabriquer une seconde : si une petite fonction commune s'impose, ton choix, dis-le en une ligne.
+2. **Pratiques – à mesurer d'abord, ta décision ensuite.** L'archive porte `pratiquesConfigurables` sous les deux formes. Mesure au navigateur ce que la liste propose aujourd'hui pour une archive récente : si la forme nue est vide ou périmée par rapport à la namespacée, applique la même règle aux pratiques dans ce lot (même fonction, même défaut) ; si les deux formes concordent, n'y touche pas et dis-le. Dans les deux cas, une ligne dans le rapport.
+3. **Doublons** : `_doublon` compare déjà au trimestre actif (`cle('grillesTemplates')`, etc., l. 216-224) ; c'est là que la réouverture écrira. Vérifie-le sur l'écriture réelle d'`appliquerReimport`, sans rien changer si c'est conforme.
+4. **Rien n'est effacé**, ni dans l'archive ni dans le trimestre (limite de Grégoire du 20 sept.).
 
-## 2 · #643 – le fichier de partage dit de quel trimestre viennent les cartouches
+## 3 · Preuves attendues
 
-**Décisions de Grégoire, elles font foi** :
-- 31 août : une grille qui vit dans deux trimestres envoie les cartouches du **trimestre ACTIF**, et l'export **doit le dire**. La moitié « écran » est livrée (`confirmerExport`, `js/partage-export.js`, phrase affichée seulement si la grille existe dans plusieurs trimestres).
-- 25 sept., 15 h 40 : **on prolonge le format `v1`**, pas de `v2` avant juin 2027.
+- Prolonge le banc WebKit de #637 plutôt que d'en créer un parallèle : un groupe-cours versé en ZIP par `Reserve.verserGroupeCours`, rouvert dans un espace vierge. **Rouge avant** (grille absente de la liste, cartouche « grille manquante ») ; **vert après** (grille et échelle proposées, plus aucune mention « manquante »).
+- Un cas où les deux formes coexistent et divergent : la namespacée l'emporte.
+- Réimporter la grille ET sa cartouche : la cartouche se range sous une grille présente dans le trimestre actif.
+- Mutations : retirer la reconnaissance de la forme complète (grilles, puis échelles) → rouge ; inverser la priorité → rouge.
+- Suite complète Vitest.
 
-**Ce que Cowork a lu (non exécuté)** : `js/partage-schemas.js` déclare toujours des schémas fermés (l. 2, l. 22 : « champ inconnu = rejet ») et `FORMAT = 'labo-codex-partage-v1'` (l. 42). Le commit `659cd0d9` (#583) a montré le chemin : champ déclaré au schéma `v1`, et une version plus ancienne qui reçoit le fichier refuse avec « Ce fichier vient d'une version plus récente… » (`js/partage-import.js`). Les champs LOCAUX au trimestre de l'auteur sont interdits au partage (l. 496-499, `coursId`, `dateEcheance`).
+## 4 · Hors lot, à ne pas toucher
 
-**Attendu** :
-1. Le paquet porte le **nom lisible** du trimestre d'où viennent les cartouches (par ex. « Automne 2026 »), jamais son identifiant interne : un id de trimestre est local et ne dit rien à la destinataire. Où le poser (manifeste ou entité grille), et s'il part toujours ou seulement quand la grille vit dans plusieurs trimestres : ton choix, dis-le en une ligne. Préférence de Cowork : toujours, pour que la destinataire ne dépende pas d'une condition qu'elle ne voit pas.
-2. À la réception, la prévisualisation le dit. **Texte proposé par Cowork, à soumettre à Grégoire avant le push** : « Cartouches tirées du trimestre : Automne 2026 ». Un fichier sans ce champ (émis avant cette version) ne dit rien : pas de phrase inventée.
-3. Le champ entre au registre de transport comme ceux de #680 (déclaré ou exclu avec sa raison), pour que la sentinelle de transport continue de protéger.
+- Les deux défauts de l'import sélectif (#952, #954) et la clé nue du même bloc (#655) : un prochain lot, dans `import-export.js`.
+- L'unification des imports (#627).
+- `js/codex-data.js`.
 
-**Preuves** : Vitest à l'envoi et à la réception ; banc WebKit à deux contextes (le patron `partage-echelle-reperes-583.spec.js`) – rouge avant, vert après ; **un fichier signé en juin se vérifie encore** (le vecteur signé du lot F, inchangé) ; mutation : retirer le champ du schéma → rouge.
+## 5 · Livraison
 
-## 3 · #654 – une production importée retrouve sa cartouche
-
-**Le constat (fiche, mesuré le 31 août ; remesuré par Cowork ce matin, lignes conformes)** : aucun des quatre chemins d'import ne retient l'id neuf d'une cartouche en collision ; `production.cartoucheId` n'est remappé nulle part.
-- `js/reserve-ouvrir.js` : `_preparerEtCollecter(items, prefix, table)` (l. 1043) mémorise ; `_preparerEtPatcher(items, prefix, type)` (l. 1079) n'a pas de table. Passes l. 1094-1098.
-- `js/import-export.js` : le mint est dans `fusionnerParIdentite` (définition l. 134, **neuf sites d'appel** – remesuré, conforme).
-
-⚠ **Ce que Cowork a vu en lisant, et que la fiche ne dit pas** : à `reserve-ouvrir.js` l. 1096-1097, les productions sont patchées AVANT que les cartouches soient préparées. Ajouter une table aux cartouches ne suffit donc pas : il faut qu'elle soit remplie avant le patch des productions. Vérifie-le à l'exécution avant de réordonner, et dis si le réordonnancement change autre chose.
-
-⚠⚠ **La bascule armée (fiche, § parenté #649)** : peupler `ctx.cartouches` active le remap de `production.cartoucheId` sur les QUATRE chemins d'un coup. Le cas de la sentinelle de #627 qui fige la table vide **doit rougir** ce jour-là : c'est le signal, pas une régression. Mets-le à jour délibérément, en disant ce qu'il protège désormais ; ne le « répare » pas.
-
-**Périmètre** : les **cartouches** seulement. Si `fusionnerParIdentite` rend ses renommages pour les cinq collections, ce lot n'en consomme que celui des cartouches ; pour les autres familles (échelles, grilles, productions, pratiques), mesure s'il manque un remap et **inscris** (issue 2), sans corriger ici. L'écart de comptage 16 / 18 de la fiche reste hors lot.
-
-**Stock** : les productions déjà importées qui pointent vers une cartouche disparue ne sont pas réparées ; rien n'est réécrit dans les données de Grégoire.
-
-**Preuves** : reproduire d'abord au navigateur (import d'une production dont la cartouche entre en collision → la production pointe vers une cartouche absente) ; rouge avant, vert après, sur chaque chemin touché ; mutations sur le remap et sur l'ordre des passes.
-
-## 4 · #637 – une archive rouverte montre toutes ses cartouches
-
-**La fiche l'a mesuré STATIQUEMENT seulement** : « à confirmer avant d'y croire ». Lignes remesurées ce matin par Cowork :
-- `js/reserve.js` l. 660 écrit la clé COMPLÈTE `<trim>_cartouches_<id>` ; l. 694 et suivantes écrivent en plus la clé NUE.
-- `js/reserve-ouvrir.js` l. 265 ne retient que la forme NUE (`k.indexOf('cartouches_') !== 0` → `return`).
-- Ce qui rend le défaut plausible : l'évaluation lit les cartouches par `` cle(`cartouches_${grilleId}`) ``, donc sous la forme namespacée (`evaluation-chargement.js` l. 848, 1033, 1424 ; `evaluation.js` l. 1324 ; `evaluation-retroaction.js` l. 299).
-
-**Attendu** :
-1. **Confirmer à l'exécution d'abord** (WebKit) : archiver un trimestre dont les cartouches vivent sous la clé namespacée, rouvrir l'archive, constater qu'elles manquent à la liste. **Si ça ne se confirme pas : arrête #637**, inscris la mesure dans la fiche, et le lot se livre avec #643 et #654.
-2. Si confirmé : la liste de réouverture reconnaît les deux formes. Quand les deux existent pour une même grille, **la forme namespacée l'emporte** (c'est celle que les évaluations de ce trimestre ont lue – « ce qui est enregistré fait foi ») ; la forme nue ne sert que si la namespacée manque. Supposition de Cowork : si la mesure la dément, dis-le.
-3. **Ne touche pas `js/codex-data.js`** : l. 240 et 261 ratent ensemble et se compensent (écart de classement, pas une perte – fiche). Si ton correctif les désaccorde, arrête-toi et dis-le.
-
-**Rien n'est effacé** : ni dans l'archive, ni dans le trimestre (limite de Grégoire du 20 sept.).
-
-**Preuves** : rouge avant, vert après ; un cas où les deux formes coexistent ; mutation : retirer la reconnaissance de la forme complète → rouge.
-
-## 5 · Hors lot, à ne pas toucher
-
-- L'unification des quatre imports (#627, laborieuse à elle seule).
-- `js/codex-data.js` (§ 4.3).
-- Les remaps des autres familles (§ 3, à inscrire s'ils manquent).
-- La réparation du stock.
-
-## 6 · Livraison
-
-- **Relecture croisée de Cowork OBLIGATOIRE** : échange entre enseignants, import, réouverture d'archive – rien de cela ne se reprend proprement. Ordre du `PROTOCOLE.md` : commit sur la branche → `DEMANDE-RELECTURE-2026-09-26-lot-cartouches.md` → relecture → corrections → verdict → fusion et push.
-- Une seule release à la fin du lot (le skill `release-et-changelog` décide patch ou mineure).
-- **Deux textes à soumettre à Grégoire avant le push** : la phrase de la prévisualisation (§ 2.2) et la ligne des « Nouvelles ». Proposition de Cowork, à ajuster à ce qui part réellement : « Partage et archives : les cartouches arrivent entières. Un fichier partagé dit de quel trimestre viennent ses cartouches, une production importée retrouve sa cartouche, et une archive rouverte les montre toutes. »
-- **Pas de porte terrain** : Grégoire ne fabrique pas de données fictives, et les bancs à deux contextes font la preuve. Ce qui attend un cas réel : la prochaine grille qu'une collègue lui partage.
-- Fin de lot : sortir le lot de `FILE-DES-LOTS.md`, cocher les fiches livrées, et **cocher aussi #583 et #680** au `BACKLOG.md`, livrées en 1.159.9 et restées non cochées (remesuré par Cowork ce matin).
+- **Relecture croisée de Cowork OBLIGATOIRE** (réouverture d'archive : écrit dans le trimestre). Ordre du `PROTOCOLE.md` : commit sur une branche → `DEMANDE-RELECTURE-2026-09-26-lot-953.md` → relecture → corrections → verdict → fusion et push.
+- Correctif (patch).
+- **Nouvelles, proposition de Cowork, à soumettre à Grégoire avant le push** : « Archives : une archive rouverte propose aussi ses grilles et ses échelles, et ses cartouches ne s'y disent plus « grille manquante ». » (à ajuster si les pratiques entrent au lot.)
+- **Pas de porte terrain** : le banc à deux contextes fait la preuve ; Grégoire ne fabrique pas de données fictives.
+- Fin de lot : sortir le lot de `FILE-DES-LOTS.md`, cocher #953.

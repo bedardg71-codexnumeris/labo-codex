@@ -45,6 +45,10 @@
 
 - ~~**Lot « les cartouches arrivent entières »** (#643, #654, #637)~~ **SORTI DE LA FILE : 1.159.11, le 26 sept. 2026 (Claude Code) ; relecture croisée de Cowork verte ; phrase de prévisualisation et Nouvelles validées telles quelles ; trouvailles inscrites #952, #953, #954.** – dans le cap du 24 au soir (la rétroaction). Le fichier de partage dit de quel trimestre viennent ses cartouches ; une production importée retrouve sa cartouche ; une archive rouverte montre toutes ses cartouches (#637 d'abord confirmée à l'exécution, sinon sortie du lot). Relecture croisée obligatoire. Consigne : `CONSIGNE-DU-JOUR.md`.
 
+## Choisi par Grégoire le 26 sept., vers 9 h 40 – écrit par Cowork
+
+- ~~**Lot #953**~~ **SORTI DE LA FILE : 1.159.12, le 26 sept. 2026 (Claude Code) ; pratiques entrées au lot sur mesure (la forme nue, figée depuis le 24 mai, était seule proposée) ; relecture croisée de Cowork verte ; Nouvelles validées telles quelles ; trouvailles inscrites #955, #956.** – une archive rouverte propose aussi ses grilles et ses échelles (et ses pratiques, si la mesure montre le même défaut) ; ses cartouches ne s'y disent plus « grille manquante ». Termine le geste de #637 (1.159.11). Relecture croisée obligatoire. Consigne : `CONSIGNE-DU-JOUR.md`.
+
 ## Les dix fiches de notation, remesurées et groupées par Cowork (21 sept., 14 h 29)
 
 Remesure rapide au code (grep, pas exécuté) : les constats tiennent encore — `obtenirPratiqueActiveGroupeCours` rend `'sommative'` par défaut (modes.js ≈ 1352) pendant que `PRATIQUE_DEFAUT = 'standards'` (pratique-registre.js:29) ; `obtenirConfigPratiqueActive` ne lit que `.configuration` (portfolio.js ≈ 1176) ; le gestionnaire tient `'specifications'` pour une pratique codée en dur (pratique-manager.js:52) ; `calculerPerformanceHistorique` n'existe que chez la sommative et la STD ; la sommative lit encore `e.da` / `e.note` (pratique-sommative.js:317-319).
