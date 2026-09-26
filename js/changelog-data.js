@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.13 (#957) — VALIDÉ par Grégoire le 26 sept. 2026 (texte de Cowork, sous-critères ajoutés, option b).
+                'Grilles&nbsp;: un critère ou un sous-critère ajouté n\'est plus perdu quand on clique «&nbsp;Enregistrer&nbsp;» ensuite.',
                 // 1.159.12 (#953) — VALIDÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork, pratiques ajoutées).
                 'Archives&nbsp;: une archive rouverte propose aussi ses grilles, ses échelles et ses pratiques, et ses cartouches ne s\'y disent plus «&nbsp;grille manquante&nbsp;».',
                 // 1.159.11 (#643, #654, #637) — VALIDÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
