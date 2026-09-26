@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 17 H : **LOT #959 (1.160.1) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, SOIR : **LOT #960 CODÉ SUR `lot-960-retroaction-a-la-main`, NON FUSIONNÉ ; ATTEND LA RELECTURE CROISÉE DE COWORK**
+
+**Où vit le travail** : `main` = `99b022aa` (1.160.1, poussé, en ligne) + ce relais (non poussé : il partira avec la fusion). Branche `lot-960-retroaction-a-la-main` : `c0255246` correctif (ouvrir une copie n'écrit plus rien, rétroaction enregistrée qui fait foi, D6) + consignes, `81a0cada` demande de relecture, `a749e717` D6 jusqu'au PDF et à « Copier tout » (option a de Grégoire), `988c6249` complément de la demande. Vitest 7 459 / 7 459 ; verdict Playwright complet pas encore lancé.
+
+**Reste** : relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-09-26-lot-960.md` → `RELECTURE-2026-09-26-lot-960.md`), puis retouches éventuelles, verdict, release patch, fusion, push. Nouvelles (proposition de Cowork, à soumettre à Grégoire avant le push) : « Évaluer : ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide. » Fin de lot : cocher #960, `FILE-DES-LOTS.md`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 17 H : **LOT #959 (1.160.1) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `98a0fc0b` + la branche `lot-959-statut-integrite` (`208de686` correctif + banc + consignes, `3a54f381` demande de relecture, `79700a4e` relecture de Cowork, `662568cb` P1/P2/M1 + #960 inscrite, `f47c6283` contre-vérification verte, `4987ff94` release build 0926-1639) + `7f9d1fdb` fusion + cette clôture. Nouvelles acceptées par Grégoire. Vitest 7 452 / 7 452 après la release.
 
