@@ -13,6 +13,8 @@
 
 **Reste** : constater « en ligne » chez Netlify ; retirer la branche `lot-959-statut-integrite` une fois le push constaté ; **prochain lot : #960 (lot court, avant le lot B)** — consigne de Cowork déjà dans l'arbre, non commitée (`CONSIGNE-LOT-960-retroaction-a-la-main.md`). Non commités, laissés à Cowork : `PORTES-TERRAIN-2026-09-24-bug-944.md` (modifié), `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md`, `CONSIGNE-LOT-960-retroaction-a-la-main.md`, `Claude outputs/`.
 
+**26 sept. 2026** — Titre de l'entrée 1.160 gardé tel quel par Grégoire. Versés par un commit de docs (sans release) : `PORTES-TERRAIN-2026-09-24-bug-944.md`, `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md` ; `CONSIGNE-LOT-960-retroaction-a-la-main.md` reste non commitée (renommée en `CONSIGNE-DU-JOUR.md` au début du lot #960).
+
 ## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 15 H 40 : **LOT A DE L'ENREGISTREMENT (1.160.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `fd9d1dc7` + la branche `lot-a-anonymisation-enregistre` (`ad63a2e1` lot, `99e0405b` demande de relecture, `10b3a9cf` cinq retouches R1-R5, `720260d2` réponse, `e107ddd3` contre-vérification verte + #959) + `a43bd44f` fusion + `e9518e9c` release (build 0926-1532) + cette clôture. Quatre textes acceptés par Grégoire (mention « Masqué en anonymisation », deux aides, Nouvelles). Vitest 7 452 / 7 452 après la release.

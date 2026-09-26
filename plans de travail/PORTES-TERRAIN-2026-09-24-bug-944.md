@@ -38,3 +38,7 @@ Aucune en attente. Le texte de la fenêtre est le tien ; le titre « Changer de 
 - **Ta vraie copie** : je n'ai ni ton rapport (`BUG_grégoire_2026-09-24_15-52-33`, introuvable dans le dépôt) ni ta cartouche révisée ; la reproduction est faite sur une copie de banc.
 - **Entrée confirme** dans cette fenêtre même si « Garder » a le focus (clavier du Mac) : inscrit en #945, non corrigé ici.
 - **Une copie qui s'ouvrirait avec une autre cartouche que la sienne** : lu dans le code, non mesuré ; inscrit en #946.
+
+## Relevé de Grégoire – 24 sept. 2026, 18 h 46 (versé par Cowork depuis l'artefact jumeau)
+
+**4 passées · 0 échec · 2 non cochées (§0).** 1.1 à 1.4 passées sur l'iPad, sur une copie réelle : la fenêtre « Changer de cartouche » s'ouvre au « OK » du sélecteur natif ; « Garder » ne change rien ; « Remplacer » pose les commentaires de « Carte mentale A26 (rev) » ; le PDF les montre. §0 non cochés : 0.1 est attesté par le résultat (le correctif n'existe qu'en 1.159.3) ; 0.2 (sauvegarde Codex) non attesté, sans conséquence – le remplacement est celui que Grégoire voulait. **#944 : porte passée.**
