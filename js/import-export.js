@@ -129,7 +129,10 @@ function signatureContenu(valeur, champsIgnores) {
  * @param {Array} existants
  * @param {Array} entrants
  * @param {string} nomCollection - pour le journal console
- * @returns {{liste: Array, ajoutes: number, ignores: number, conflits: number}}
+ * @returns {{liste: Array, ajoutes: number, ignores: number, conflits: number,
+ *            renommages: Object<string, string>}} `renommages` : ancienId → id
+ *          neuf de chaque entrant renommé pour conflit (#654 — sans lui, rien ne
+ *          peut rebrancher ce qui le référençait).
  */
 function fusionnerParIdentite(existants, entrants, nomCollection) {
     const base = Array.isArray(existants) ? existants.slice() : [];
@@ -142,6 +145,7 @@ function fusionnerParIdentite(existants, entrants, nomCollection) {
     }
 
     let ajoutes = 0, ignores = 0, conflits = 0;
+    const renommages = {};
 
     for (let j = 0; j < arrivants.length; j++) {
         const entrant = arrivants[j];
@@ -168,6 +172,7 @@ function fusionnerParIdentite(existants, entrants, nomCollection) {
         // mais on le DIT — jusqu'ici ça se faisait en silence.
         const ancienId = entrant.id;
         entrant.id = genererIdUnique(String(ancienId).replace(/[0-9_]+$/, '').replace(/-+$/, '_'));
+        renommages[ancienId] = entrant.id;
         base.push(entrant);
         parId.set(entrant.id, entrant);
         conflits++;
@@ -184,7 +189,7 @@ function fusionnerParIdentite(existants, entrants, nomCollection) {
     // Filet : le lot ENTRANT peut lui-même porter des ids dupliqués en
     // interne. `fusionnerParIdentite` ne traite que la collision avec
     // l'existant — celle-là reste du ressort de `verifierUniciteIds`.
-    return { liste: verifierUniciteIds(base, nomCollection), ajoutes, ignores, conflits };
+    return { liste: verifierUniciteIds(base, nomCollection), ajoutes, ignores, conflits, renommages };
 }
 
 /**
@@ -2548,6 +2553,7 @@ async function executerImportConfigComplete() {
         // Table de remapping: oldId → newId
         const remapEchelles = {};
         const remapGrilles = {};
+        const remapCartouches = {};   // #654 — rempli par la fusion des cartouches
 
         // Récupérer les ressources existantes
         const echellesExistantes = db.getSync(cle('echellesTemplates'), []);
@@ -2608,51 +2614,11 @@ async function executerImportConfigComplete() {
             db.setSync(cle('grillesTemplates'), fusionG.liste);
         }
 
-        // 3. Importer les productions avec mise à jour des références aux grilles
-        // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
-        if (contenu.productions && contenu.productions.length > 0) {
-            const cleProductions = cle('productions');
-            const productionsExistantes = db.getSync(cleProductions, []);
-
-            const prodsParId = new Map(productionsExistantes.filter(p => p && p.id).map(p => [p.id, p]));
-
-            const productionsAImporter = contenu.productions.map(production => {
-                // Créer une copie de la production
-                const prod = { ...production };
-
-                // ⚠ #448 : l'ancien code renommait dès que l'id existait, donc
-                // réimporter le même codex fabriquait une production jumelle.
-                // On ne renomme que si le CONTENU diffère réellement ; à
-                // l'identique, `fusionnerParIdentite` l'écartera plus bas.
-                const prodEnPlace = prod.id ? prodsParId.get(prod.id) : null;
-                if (prodEnPlace) {
-                    const sigA = signatureContenu(prodEnPlace, ['id']);
-                    const sigB = signatureContenu(prod, ['id']);
-                    if (sigA === null || sigA !== sigB) {
-                        prod.id = genererIdUnique('PROD_');
-                    }
-                }
-                // Sinon, garder l'ID original pour préserver les références
-
-                // Mettre à jour la référence à la grille si elle a été remappée
-                if (prod.grilleId && remapGrilles[prod.grilleId]) {
-                    prod.grilleId = remapGrilles[prod.grilleId];
-                }
-
-                // Mettre à jour la référence à l'échelle si elle a été remappée
-                if (prod.echelleId && remapEchelles[prod.echelleId]) {
-                    prod.echelleId = remapEchelles[prod.echelleId];
-                }
-
-                return prod;
-            });
-
-            // Fusionner avec productions existantes
-            const fusionP = fusionnerParIdentite(productionsExistantes, productionsAImporter, 'productions');
-            db.setSync(cleProductions, fusionP.liste);
-        }
-
-        // 4. Importer les cartouches avec mise à jour des clés (grilleId)
+        // 3. Importer les cartouches avec mise à jour des clés (grilleId)
+        // #654 (26 sept. 2026) — AVANT les productions : une cartouche en conflit
+        // (même id, contenu différent) reçoit un id neuf dans `fusionnerParIdentite`,
+        // et la production importée qui la désignait doit être rebranchée dessus.
+        // Traitées après, les productions partaient déjà écrites avec l'ancien id.
         if (contenu.cartouches) {
             let nbCartouchesTotal = 0;
 
@@ -2679,10 +2645,66 @@ async function executerImportConfigComplete() {
                 // produit les quatre paires 75/0, 79/0, 50/0, 50/0 du 24 mars.
                 const fusionC = fusionnerParIdentite(cartouchesExistantes, cartouchesAssainis, 'cartouches');
                 db.setSync(cle(`cartouches_${grilleIdFinal}`), fusionC.liste);
+                Object.assign(remapCartouches, fusionC.renommages);
 
                 nbCartouchesTotal += fusionC.ajoutes;
             });
 
+        }
+
+        // 4. Importer les productions avec mise à jour des références (grilles, échelles, cartouches)
+        // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
+        if (contenu.productions && contenu.productions.length > 0) {
+            const cleProductions = cle('productions');
+            const productionsExistantes = db.getSync(cleProductions, []);
+
+            const prodsParId = new Map(productionsExistantes.filter(p => p && p.id).map(p => [p.id, p]));
+
+            const productionsAImporter = contenu.productions.map(production => {
+                // Créer une copie de la production
+                const prod = { ...production };
+
+                // ⚠ #448 : l'ancien code renommait dès que l'id existait, donc
+                // réimporter le même codex fabriquait une production jumelle.
+                // On ne renomme que si le CONTENU diffère réellement ; à
+                // l'identique, `fusionnerParIdentite` l'écartera plus bas.
+                const prodEnPlace = prod.id ? prodsParId.get(prod.id) : null;
+                let identiqueEnPlace = false;
+                if (prodEnPlace) {
+                    const sigA = signatureContenu(prodEnPlace, ['id']);
+                    const sigB = signatureContenu(prod, ['id']);
+                    if (sigA === null || sigA !== sigB) {
+                        prod.id = genererIdUnique('PROD_');
+                    } else {
+                        identiqueEnPlace = true;
+                    }
+                }
+                // Sinon, garder l'ID original pour préserver les références
+
+                // Mettre à jour la référence à la grille si elle a été remappée
+                if (prod.grilleId && remapGrilles[prod.grilleId]) {
+                    prod.grilleId = remapGrilles[prod.grilleId];
+                }
+
+                // Mettre à jour la référence à l'échelle si elle a été remappée
+                if (prod.echelleId && remapEchelles[prod.echelleId]) {
+                    prod.echelleId = remapEchelles[prod.echelleId];
+                }
+
+                // #654 — rebrancher sur la cartouche renommée pour conflit. SAUF une
+                // production déjà en place à l'identique : `fusionnerParIdentite`
+                // l'écarte, et la toucher ici la ferait passer pour différente — une
+                // production jumelle naîtrait. Celle en place garde sa cartouche.
+                if (!identiqueEnPlace && prod.cartoucheId && remapCartouches[prod.cartoucheId]) {
+                    prod.cartoucheId = remapCartouches[prod.cartoucheId];
+                }
+
+                return prod;
+            });
+
+            // Fusionner avec productions existantes
+            const fusionP = fusionnerParIdentite(productionsExistantes, productionsAImporter, 'productions');
+            db.setSync(cleProductions, fusionP.liste);
         }
 
         // 5. Importer les paramètres du cours (fusion avec paramètres existants)
@@ -2964,6 +2986,48 @@ async function executerImportSelectif() {
             }
         }
 
+        // #654 (26 sept. 2026) — les cartouches passent AVANT les productions : une
+        // cartouche en conflit reçoit un id neuf dans `fusionnerParIdentite`, et la
+        // production importée qui la désignait est rebranchée dessus (plus bas).
+        // ⚠ Ce bloc écrit sous la clé NUE (#655, inscrit, hors de ce lot).
+        const remapCartouches = {};
+        // Cartouches - #383 (audit 5 août, rapport A2) : la modale liste UNE ligne
+        // par grille avec data-item-id = clé `cartouches_<grilleId>` — le filtre
+        // se fait donc PAR CLÉ. L'ancien filtre comparait les ids AGRÉGÉS de la
+        // modale (`cartouches_0`, `cartouches_1`…) aux ids INDIVIDUELS des
+        // cartouches : aucune correspondance possible, cocher « Cartouches »
+        // n'importait JAMAIS rien.
+        if (hasCheckedItems('cartouches')) {
+            const selectedIds = getCheckedItemIds('cartouches');
+            let nbCartouches = 0;
+            Object.keys(donnees).forEach(cle => {
+                if (cle.startsWith('cartouches_') && selectedIds.includes(cle)) {
+                    const cartouches = parseValeur(donnees[cle]);
+                    if (Array.isArray(cartouches) && cartouches.length > 0) {
+                        const cartouchesExistantes = db.getSync(cle, []);
+                        // Assainir via SCHEMAS_IMPORT.cartouche (descend dans
+                        // criteres, niveaux, commentaires — MODELE-MENACES §3.1.bis).
+                        const cartouchesSelectionnees = cartouches
+                            .map(c => ({
+                                ...assainirObjet(c, SCHEMAS_IMPORT.cartouche),
+                                dateImport: new Date().toISOString(),
+                                auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
+                            }));
+                        if (cartouchesSelectionnees.length > 0) {
+                            const fusionC = fusionnerParIdentite(cartouchesExistantes, cartouchesSelectionnees, 'cartouches');
+                            db.setSync(cle, fusionC.liste);
+                            Object.assign(remapCartouches, fusionC.renommages);
+                            nbCartouches += cartouchesSelectionnees.length;
+                        }
+                    }
+                }
+            });
+            if (nbCartouches > 0) {
+                compteurs.ressources += nbCartouches;
+                details.push(`${nbCartouches} cartouche(s)`);
+            }
+        }
+
         // Productions - ✅ MODIFIÉ pour import sélectif individuel
         // 🆕 FIX (1er fév 2026) : Support clés namespacées *_productions
         let clesProdsSource = [];
@@ -3014,6 +3078,8 @@ async function executerImportSelectif() {
                         ...assainirObjet(p, SCHEMAS_IMPORT.production),
                         // Garder l'ID original sauf si conflit d'ID
                         ...(idExiste ? { id: genererIdUnique('PROD_') } : {}),
+                        // #654 — rebranchée si sa cartouche a été renommée pour conflit.
+                        ...(p.cartoucheId && remapCartouches[p.cartoucheId] ? { cartoucheId: remapCartouches[p.cartoucheId] } : {}),
                         dateImport: new Date().toISOString(),
                         auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     };
@@ -3022,42 +3088,6 @@ async function executerImportSelectif() {
                 db.setSync(cleProductions, fusionnerParIdentite(prodsExistantes, prodsNouvelles, 'productions').liste);
                 compteurs.ressources += prodsNouvelles.length;
                 details.push(`${prodsNouvelles.length} production(s)`);
-            }
-        }
-
-        // Cartouches - #383 (audit 5 août, rapport A2) : la modale liste UNE ligne
-        // par grille avec data-item-id = clé `cartouches_<grilleId>` — le filtre
-        // se fait donc PAR CLÉ. L'ancien filtre comparait les ids AGRÉGÉS de la
-        // modale (`cartouches_0`, `cartouches_1`…) aux ids INDIVIDUELS des
-        // cartouches : aucune correspondance possible, cocher « Cartouches »
-        // n'importait JAMAIS rien.
-        if (hasCheckedItems('cartouches')) {
-            const selectedIds = getCheckedItemIds('cartouches');
-            let nbCartouches = 0;
-            Object.keys(donnees).forEach(cle => {
-                if (cle.startsWith('cartouches_') && selectedIds.includes(cle)) {
-                    const cartouches = parseValeur(donnees[cle]);
-                    if (Array.isArray(cartouches) && cartouches.length > 0) {
-                        const cartouchesExistantes = db.getSync(cle, []);
-                        // Assainir via SCHEMAS_IMPORT.cartouche (descend dans
-                        // criteres, niveaux, commentaires — MODELE-MENACES §3.1.bis).
-                        const cartouchesSelectionnees = cartouches
-                            .map(c => ({
-                                ...assainirObjet(c, SCHEMAS_IMPORT.cartouche),
-                                dateImport: new Date().toISOString(),
-                                auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
-                            }));
-                        if (cartouchesSelectionnees.length > 0) {
-                            const cartouchesFusionnees = fusionnerParIdentite(cartouchesExistantes, cartouchesSelectionnees, 'cartouches').liste;
-                            db.setSync(cle, cartouchesFusionnees);
-                            nbCartouches += cartouchesSelectionnees.length;
-                        }
-                    }
-                }
-            });
-            if (nbCartouches > 0) {
-                compteurs.ressources += nbCartouches;
-                details.push(`${nbCartouches} cartouche(s)`);
             }
         }
 

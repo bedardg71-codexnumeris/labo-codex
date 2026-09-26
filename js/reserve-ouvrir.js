@@ -1034,11 +1034,13 @@ async function appliquerReimport() {
     };
 
     // Tables de remapping (ancienId -> nouveauId) pour les ressources référencées
-    // par d'autres : seules les grilles et échelles ont des références entrantes
-    // (productions.grilleId/echelleId, cartouches.grilleId, pratiques.config.echelleId).
+    // par d'autres : grilles, échelles et cartouches ont des références entrantes
+    // (productions.grilleId/echelleId/cartoucheId, cartouches.grilleId,
+    // pratiques.config.echelleId).
     // Peuplées uniquement quand l'item est copié en double ; sinon l'ID reste stable.
     var remapGrilles = {};
     var remapEchelles = {};
+    var remapCartouches = {};   // #654 (26 sept. 2026)
 
     function _preparerEtCollecter(items, prefix, table) {
         return items.map(function(item) {
@@ -1062,6 +1064,10 @@ async function appliquerReimport() {
                 item.echelleId = remapEchelles[item.echelleId];
                 rapport.refsRemappees++;
             }
+            if (item.cartoucheId && remapCartouches[item.cartoucheId]) {
+                item.cartoucheId = remapCartouches[item.cartoucheId];
+                rapport.refsRemappees++;
+            }
         } else if (type === 'cartouche') {
             if (item.grilleId && remapGrilles[item.grilleId]) {
                 item.grilleId = remapGrilles[item.grilleId];
@@ -1076,12 +1082,13 @@ async function appliquerReimport() {
         return item;
     }
 
-    function _preparerEtPatcher(items, prefix, type) {
+    function _preparerEtPatcher(items, prefix, type, table) {
         return items.map(function(item) {
             var prepared;
             if (copieEnDouble && item._doublon) {
                 rapport.copies++;
                 prepared = _faireCopie(item, prefix);
+                if (table && item.id) table[item.id] = prepared.id;
             } else {
                 prepared = _nettoyerMarqueurs(item);
             }
@@ -1089,12 +1096,15 @@ async function appliquerReimport() {
         });
     }
 
-    // Préparation préalable : grilles et échelles d'abord (sources des remaps),
-    // puis productions/cartouches/pratiques (qui peuvent dépendre des remaps).
+    // Préparation préalable, dans l'ordre des dépendances : grilles et échelles
+    // (sources des remaps), puis cartouches (qui en dépendent ET en sont une source
+    // pour les productions — #654 : préparées après, les productions gardaient
+    // l'id d'une cartouche copiée), puis productions et pratiques.
+    // L'ordre d'ÉCRITURE, plus bas, ne change pas.
     var grillesPretes = _preparerEtCollecter(selection.grilles, 'GRILLE', remapGrilles);
     var echellesPretes = _preparerEtCollecter(selection.echelles, 'ECH', remapEchelles);
+    var cartouchesPretes = _preparerEtPatcher(selection.cartouches, 'CART', 'cartouche', remapCartouches);
     var productionsPretes = _preparerEtPatcher(selection.productions, 'PROD', 'production');
-    var cartouchesPretes = _preparerEtPatcher(selection.cartouches, 'CART', 'cartouche');
     var pratiquesPretes = _preparerEtPatcher(selection.pratiques, 'PRAT', 'pratique');
 
     try {
