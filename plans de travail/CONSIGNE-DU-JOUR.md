@@ -1,45 +1,49 @@
-# Consigne du jour – #953 : une archive rouverte propose aussi ses grilles et ses échelles
+# Consigne du jour – inventaire : où l'application enregistre-t-elle toute seule, où faut-il enregistrer, et l'écran le dit-il ?
 
-> Écrite le 26 septembre 2026, vers 9 h 40 (Toronto), par Cowork, sur `main` = `14314530` (1.159.11 fusionnée ; verdict et push de `pousser.sh` en cours au moment de l'écriture). **Ne commence qu'une fois ce push terminé et vert.** À remesurer avant tout code.
-> La précédente (lot #643 #654 #637, 1.159.11) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-cartouches.md` (déplacée par Cowork, à commiter avec ce lot).
-> Lot choisi par Grégoire le 26 sept. vers 9 h 40 : il termine le geste livré le matin même (#637). Sans lui, une archive rouverte propose ses cartouches, mais chacune s'y dit « grille manquante ».
+> Écrite le 26 septembre 2026, vers 11 h 20 (Toronto), par Cowork, sur `main` = `origin/main` = `8ab1b416` (1.159.12 en ligne). La précédente (#953) est archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-953.md` (déplacée par Cowork, à commiter).
+> **AUCUN CHANGEMENT DE CODE.** C'est un inventaire. Le seul livrable est un fichier de `plans de travail/`. Des scripts ou bancs de mesure temporaires sont permis ; ils ne sont pas commités.
 
-## 0 · Ce que Grégoire verra, en une phrase
+## 0 · Avant tout : le bloc 1.159.12 d'`OU-EN-EST-ON.md`
 
-Quand il rouvre une archive, la liste propose aussi les grilles et les échelles du trimestre archivé, et ses cartouches ne s'y disent plus « grille manquante ».
+Chaque version livrée y a son bloc (1.159.10 en a un pour « pér. »). Écris celui de 1.159.12 (#953), au format des précédents : « Ce que tu verras », « Vérifié comment », « Tes données ». Commit à part.
 
-## 1 · Ce que Cowork a lu (lecture seule, sur `14314530` – non exécuté)
+## 1 · Pourquoi cet inventaire (Grégoire, 26 sept., vers 11 h 15)
 
-- `js/reserve-ouvrir.js`, `_extraireRessources` (l. 215) : les grilles (l. 234), les échelles (l. 239) et les pratiques (l. 300) ne sont lues que sous la clé NUE (`donnees.grillesTemplates`, etc.). Les productions sont lues sous les deux formes (`/_productions$/`), et les cartouches depuis #637.
-- `js/reserve.js` : le versement range grilles, échelles et pratiques sous la clé du trimestre (`CLES_SANS_FILTRE`, l. 115-117, passe préfixe) ; les grilles et les échelles sont retirées du passage des clés globales depuis #358 (l. 58-60 : « la clé globale héritée est vidée au boot »). `pratiquesConfigurables` y est encore, sous la forme nue (l. 62), en plus de la forme namespacée.
-- Les annotations « manquante » (l. 304 et suivantes) se calculent sur les grilles et échelles extraites plus haut : elles se corrigeront d'elles-mêmes si l'extraction lit les bonnes clés.
-- Témoin d'exécution : #953 a été constatée par toi au navigateur, dans `tests/integration/reserve-reouverture-cartouches-637.spec.js`.
+Des usagers lui ont dit qu'ils croyaient devoir enregistrer eux-mêmes alors que l'application enregistrait déjà. Les écrans mélangent « Enregistré », des boutons « Enregistrer », des mentions d'enregistrement automatique, sans qu'on sache lequel dit vrai, ni où. **Sa règle** : par défaut, tout s'enregistre tout seul, tout le temps, et l'écran le dit de la même façon partout ; là où c'est à l'usager d'enregistrer, il doit le savoir sans ambiguïté.
 
-## 2 · Ce qui est attendu
+L'inventaire lui servira à trancher, écran par écran : ce qui est manuel devient-il automatique, ou reste-t-il manuel mais clairement signalé ? **Ne propose pas de décision à sa place** : décris, mesure, et signale ce qui est ambigu ou faux. Une recommandation de ta part est bienvenue, mais séparée du constat.
 
-1. **Grilles et échelles** : `_extraireRessources` reconnaît `<préfixe>_grillesTemplates` et `<préfixe>_echellesTemplates`, avec **la même règle que #637** : la forme namespacée l'emporte ; la nue ne sert que si la namespacée manque. Reprends la même reconnaissance que pour les cartouches, sans en fabriquer une seconde : si une petite fonction commune s'impose, ton choix, dis-le en une ligne.
-2. **Pratiques – à mesurer d'abord, ta décision ensuite.** L'archive porte `pratiquesConfigurables` sous les deux formes. Mesure au navigateur ce que la liste propose aujourd'hui pour une archive récente : si la forme nue est vide ou périmée par rapport à la namespacée, applique la même règle aux pratiques dans ce lot (même fonction, même défaut) ; si les deux formes concordent, n'y touche pas et dis-le. Dans les deux cas, une ligne dans le rapport.
-3. **Doublons** : `_doublon` compare déjà au trimestre actif (`cle('grillesTemplates')`, etc., l. 216-224) ; c'est là que la réouverture écrira. Vérifie-le sur l'écriture réelle d'`appliquerReimport`, sans rien changer si c'est conforme.
-4. **Rien n'est effacé**, ni dans l'archive ni dans le trimestre (limite de Grégoire du 20 sept.).
+## 2 · Ce que Cowork a relevé (grep sur `8ab1b416`, non exécuté – point de départ, pas une liste close)
 
-## 3 · Preuves attendues
+- `sauvegarderDonneesSelonMode` (`js/modes.js` l. 848) : **33 appels** dans 12 fichiers (`evaluation.js`, `evaluation-chargement.js`, `evaluation-sauvegarde.js`, `evaluation-jetons.js`, `liste-evaluations.js`, `saisie-presences.js`, `travaux-ui.js`, `groupe.js`, `indices.js`, `migrations.js`, `migration-diagnostic.js`, `modes.js`). Elle rend `true`, `false` (écriture bloquée, anonymisation), `'quota'` ou `'error'` ; #618 et #786 disent que la plupart des appelants lisent les deux chaînes comme un succès. **Ces deux fiches font partie de l'inventaire** : pour chaque appelant, que dit l'écran quand l'écriture échoue ?
+- Beaucoup d'écritures passent ailleurs (`db.setSync`, `db.modifier`, `db.set`…) : l'inventaire part des GESTES, pas de cette seule fonction.
+- Libellés : « enregistré(e) » ≈ 170 occurrences, « non enregistrée » ≈ 20 (l'évaluation d'une copie, depuis 1.151.0), « enregistrement automatique » dans les cartouches (#573, `js/cartouches.js` ≈ l. 881-900), « sauvegardé automatiquement » dans les Préférences (`index.html` ≈ l. 11235) et « n'est pas sauvegardé automatiquement » pour le rapport d'élève (`js/profil-etudiant-rapport.js` l. 196). Neuf boutons « Enregistrer » nus dans `index.html`, plus « Enregistrer la grille », « Enregistrer sous », « Enregistrer les réglages ».
+- ⚠ **Fausse piste** : « AUTO-ENREGISTREMENT » dans `js/pratiques/*.js` et `bilan-reflexif.js` désigne l'inscription d'un module dans un registre, pas l'enregistrement de données. Hors sujet.
+- ⚠ **Hypothèse de Cowork, à vérifier** : le mot « enregistrer » a au moins **trois sens** pour l'usager : (a) écrire dans le navigateur ; (b) « Enregistrer le codex », écrire un fichier sur le disque ou la clé USB (un vrai geste manuel : « Avant de partir, enregistre le codex sur ta clé USB ») ; (c) verser à la Réserve. La confusion des usagers pourrait venir de (a) contre (b). Dis si la mesure le confirme ou non.
 
-- Prolonge le banc WebKit de #637 plutôt que d'en créer un parallèle : un groupe-cours versé en ZIP par `Reserve.verserGroupeCours`, rouvert dans un espace vierge. **Rouge avant** (grille absente de la liste, cartouche « grille manquante ») ; **vert après** (grille et échelle proposées, plus aucune mention « manquante »).
-- Un cas où les deux formes coexistent et divergent : la namespacée l'emporte.
-- Réimporter la grille ET sa cartouche : la cartouche se range sous une grille présente dans le trimestre actif.
-- Mutations : retirer la reconnaissance de la forme complète (grilles, puis échelles) → rouge ; inverser la priorité → rouge.
-- Suite complète Vitest.
+## 3 · Ce qui est attendu : `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md`
 
-## 4 · Hors lot, à ne pas toucher
+**Partie 1 – pour Grégoire, en gestes d'usager, sans nom de fichier ni de fonction** (les numéros de fiche seulement entre parenthèses, en fin de ligne). Un tableau par grande zone (Cadre : trimestre, horaire, groupes, élèves ; Conception : grilles, échelles, cartouches, pratiques, productions ; Alignement ; Évaluer : copie, visionneuse, annotation ; Liste des évaluations ; Présences ; Interventions et rencontres ; Profil de l'élève ; Réglages et préférences ; Codex ; Réserve ; tout autre écran que tu trouves). Colonnes :
 
-- Les deux défauts de l'import sélectif (#952, #954) et la clé nue du même bloc (#655) : un prochain lot, dans `import-export.js`.
-- L'unification des imports (#627).
-- `js/codex-data.js`.
+1. **Le geste** (ex. « modifier le nom d'un critère dans une grille »).
+2. **Comment ça s'enregistre** : automatique (à chaque frappe, à la sortie du champ, après un délai) ou manuel (quel bouton).
+3. **Ce que l'écran dit**, mot pour mot, et quand (pendant, après, jamais).
+4. **Si c'est manuel : que se passe-t-il si on quitte sans enregistrer** (avertissement, perte silencieuse, brouillon gardé ?).
+5. **Si l'écriture échoue** (mémoire pleine, anonymisation) : ce que l'écran dit.
+6. **Verdict** : clair / ambigu / ment. Une ligne de motif pour chaque « ambigu » et « ment ».
+
+Puis : **les sens du mot « enregistrer »** (§ 2, hypothèse) et **une synthèse en cinq lignes au plus** : combien d'écrans automatiques, combien de manuels, combien d'ambigus, combien qui mentent, et les trois qui te semblent les plus susceptibles d'expliquer ce que les usagers ont dit.
+
+**Partie 2 – annexe technique**, pour la session qui corrigera : fichier, ligne, mécanisme d'écriture, preuve (commande ou banc et son résultat).
+
+## 4 · Méthode
+
+- **Mesure au navigateur pour ce que l'écran dit** (WebKit) ; lecture de code pour le mécanisme. Écris pour chaque ligne si elle est `[exécuté]` ou `[lu]`.
+- L'échec d'écriture se simule dans un banc temporaire (quota plein, mode anonymisation) ; ne le commite pas.
+- **Parallélise la lecture** : des sous-agents en lecture seule, un par zone, c'est le bon usage ici. Une seule session lance les bancs.
+- Aucun nom d'élève réel, nulle part (règle de Grégoire du 22 sept.) : données fictives du banc seulement.
 
 ## 5 · Livraison
 
-- **Relecture croisée de Cowork OBLIGATOIRE** (réouverture d'archive : écrit dans le trimestre). Ordre du `PROTOCOLE.md` : commit sur une branche → `DEMANDE-RELECTURE-2026-09-26-lot-953.md` → relecture → corrections → verdict → fusion et push.
-- Correctif (patch).
-- **Nouvelles, proposition de Cowork, à soumettre à Grégoire avant le push** : « Archives : une archive rouverte propose aussi ses grilles et ses échelles, et ses cartouches ne s'y disent plus « grille manquante ». » (à ajuster si les pratiques entrent au lot.)
-- **Pas de porte terrain** : le banc à deux contextes fait la preuve ; Grégoire ne fabrique pas de données fictives.
-- Fin de lot : sortir le lot de `FILE-DES-LOTS.md`, cocher #953.
+- Commit du fichier d'inventaire (et du bloc d'`OU-EN-EST-ON.md`, à part), push. Pas de release : rien ne change dans l'application.
+- Puis arrête-toi : **Grégoire tranchera à partir de la Partie 1**, avec Cowork. Les correctifs (dont #618 et #786) viendront après, dans des lots séparés.
