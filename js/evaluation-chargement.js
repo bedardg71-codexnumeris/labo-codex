@@ -1423,13 +1423,9 @@ function _afficherCommentaireCritere(critereId, niveau) {
     const grilleId = evaluationEnCours.grilleId;
     const cartouches = evaluationEnCours.cartoucheId ? (db.getSync(cle(`cartouches_${grilleId}`), []) || []) : [];
     const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId) || null;
+    // #960 — `null` : rien d'enregistré à ce niveau ; un texte, VIDE compris (D6, la règle partagée).
     const enregistre = _commentaireEnregistreDuCritere(critereId, niveau);
-    // #960 (D6, décision de Grégoire, 26 sept. 2026) — UN COMMENTAIRE ENREGISTRÉ VIDE RESTE VIDE.
-    // Il ne prend pas celui que la cartouche propose aujourd'hui : l'élève ne l'a jamais lu, et
-    // il partirait dans son PDF sans que l'enseignant l'ait décidé. Le vide littéral seulement :
-    // une amorce ou « [Non défini] » en stock suit la règle #939 (la cartouche).
-    const videEnregistre = enregistre !== null && String(enregistre).trim() === '';
-    if (!cartouche && !enregistre && !videEnregistre) return;
+    if (!cartouche && enregistre === null) return;
 
     // #939 — LE COMMENTAIRE ENREGISTRÉ PASSE AVANT LA CARTOUCHE VIVANTE (décision de Grégoire,
     // 24 sept. 2026 : une cartouche retouchée ne change pas une copie déjà évaluée). À la
@@ -1437,8 +1433,7 @@ function _afficherCommentaireCritere(critereId, niveau) {
     // d'AUJOURD'HUI, et le prochain enregistrement écrasait le commentaire d'alors. Même règle
     // que le PDF (`commentaireDuCritere`). Sans commentaire nulle part, le div est vidé — plus
     // de « [Non défini] », que les collecteurs enregistraient et que l'élève lisait.
-    const commentaire = videEnregistre ? ''
-        : window.syntheseRetroactionData.commentaireDuCritere({ enregistre: enregistre || '', cartouche, critereId, niveau });
+    const commentaire = window.syntheseRetroactionData.commentaireDuCritere({ enregistre, cartouche, critereId, niveau });
 
     const commDiv = document.getElementById(`comm_${critereId}`);
     if (commDiv) {
