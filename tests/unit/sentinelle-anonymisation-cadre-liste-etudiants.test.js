@@ -65,13 +65,21 @@ describe('Cadre › liste d\'élèves — le mode anonymisation est respecté', 
     });
 });
 
-describe('Cadre › liste d\'élèves — Modifier et Supprimer refusés en anonymisation', () => {
-    const corps = corpsDe(etudiants, 'actionEtudiantV2');
+// Réancré le 26 sept. 2026 (lot A de l'enregistrement, D5 de Grégoire) : Modifier et Supprimer ne
+// sont plus refusés en anonymisation. Ce qui les protégeait (le formulaire et le confirm nommaient
+// l'élève) est tenu autrement : identité masquée et non modifiable, pseudonyme dans les messages.
+// Le comportement est éprouvé au navigateur (`lot-a-anonymisation-enregistre.spec.js`).
+describe('Cadre › liste d\'élèves — Modifier et Supprimer en anonymisation', () => {
+    const action = corpsDe(etudiants, 'actionEtudiantV2');
+    const editer = corpsDe(etudiants, 'editerEtudiantV2');
 
-    it('le refus précède le dispatch (le formulaire et le confirm nommeraient l\'élève)', () => {
-        const garde = corps.indexOf('if (db.getSync(\'modeApplication\', \'normal\') === \'anonymisation\') {');
-        expect(garde).toBeGreaterThan(-1);
-        expect(garde).toBeLessThan(corps.indexOf('switch (action)'));
-        expect(corps).toMatch(/notifications\.erreur\('Modification impossible'[^)]*\);\s*return;/);
+    it('plus de refus avant le dispatch', () => {
+        expect(action).not.toContain('Repasse en mode normal');
+        expect(action).not.toMatch(/notifications\.erreur\('Modification impossible'/);
+    });
+
+    it('le formulaire d\'édition masque DA, nom et prénom en anonymisation', () => {
+        expect(editer).toContain('_masquerIdentiteV2(masquer)');
+        expect(editer).toMatch(/getElementById\('v2-etudiantNom'\)\.value = masquer \? '' :/);
     });
 });

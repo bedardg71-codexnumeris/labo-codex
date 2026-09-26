@@ -838,9 +838,8 @@ function basculerVerrouillageDate(dateStr) {
         datesVerrouillees.splice(index, 1);
     } else {
         // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller.
-        // ⚠ Cette sauvegarde écrit `cle('presences')` HORS du mode anonymisation :
-        // l'une des trois portes de #736, règle arbitrée après le 14 sept. 2026 —
-        // citée ici, pas rejugée. Le lot 3 change la CLÉ du verrou, pas la porte.
+        // Écrit aussi en anonymisation, comme « Enregistrer » (lot A de l'enregistrement,
+        // 26 sept. 2026 : #736 sans objet, le mode ne bloque plus aucune écriture).
         sauvegarderPresencesSansValidation(dateStr);
         datesVerrouillees.push(dateStr);
     }
@@ -947,6 +946,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
     );
 
     // Supprimer les anciennes présences pour cette date et ce cours
+    const presencesAvant = presences;
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
         if (coursId && p.coursId && p.coursId !== coursId) return true;
@@ -961,7 +961,7 @@ function sauvegarderPresencesSansValidation(dateStr) {
 
         if (inputPeriodes) {
             const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
-            const notes = inputNotes ? inputNotes.value.trim() : '';
+            const notes = _notesDuChamp(inputNotes, presencesAvant, etudiant.da, dateStr, coursId);
 
             // #540 lot E3 : `heures` n'est PLUS ÉCRIT. C'était une sérialisation de
             // `periodesPresentes` par la durée de période — un champ de
@@ -989,6 +989,20 @@ function sauvegarderPresencesSansValidation(dateStr) {
 
     // Sauvegarder
     db.setSync(clePresences, presences);
+}
+
+/**
+ * Lot A de l'enregistrement (26 sept. 2026) — la note d'une présence telle qu'elle doit être
+ * écrite. Un champ masqué en anonymisation est vide à l'écran : il ne dit rien de la note, il
+ * ne l'efface pas — la note déjà en base est réécrite telle quelle.
+ */
+function _notesDuChamp(inputNotes, presencesAvant, da, dateStr, coursId) {
+    if (inputNotes && inputNotes.dataset.masqueAnonymisation === '1') {
+        const avant = presencesAvant.find(p => p.da === da && p.date === dateStr
+            && (!coursId || !p.coursId || p.coursId === coursId));
+        return avant ? (avant.notes || '') : '';
+    }
+    return inputNotes ? inputNotes.value.trim() : '';
 }
 
 /**
@@ -1331,6 +1345,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         }
 
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
+        // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
+        // l'écran : la note (texte libre) est masquée, le DA aussi. Le champ masqué ne s'écrit pas.
+        const masquer = typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
         const estFacultatif = presenceExistante ? (presenceExistante.facultatif === true) : false;
 
         // #224 : Calcul via fonction canonique dans indices.js
@@ -1363,7 +1380,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
         // Structure : DA | Prénom | Nom | Présence | Notes | Total pér. | Assiduité
         tr.innerHTML = `
-            <td>${echapperHtml(etudiant.da)}</td>
+            <td>${echapperHtml(masquer ? obtenirDAAffichage(etudiant) : etudiant.da)}</td>
             <td>${echapperHtml(etudiant.prenom)}</td>
             <td>${echapperHtml(etudiant.nom)}</td>
             <td style="white-space: nowrap;">${inputPeriodesHTML}</td>
@@ -1371,9 +1388,10 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                 <input type="text"
                        class="controle-form input-notes"
                        id="notes_${etudiant.da}"
-                       value="${echapperHtml(notes)}"
-                       placeholder="Notes…"
-                       ${estVerrouille ? 'disabled' : ''}>
+                       value="${masquer ? '' : echapperHtml(notes)}"
+                       placeholder="${masquer ? window.MENTION_MASQUE_ANONYMISATION : 'Notes…'}"
+                       ${masquer ? 'data-masque-anonymisation="1"' : ''}
+                       ${estVerrouille || masquer ? 'disabled' : ''}>
             </td>
             <td><span id="heuresHisto_${etudiant.da}">${Math.round(totalPeriodesPresentes)} pér.</span></td>
             <td>
@@ -1659,6 +1677,7 @@ function enregistrerPresences() {
 
     // Supprimer les anciennes présences pour cette date et ces étudiants
     // ✅ CORRIGÉ (8 janvier 2026) : Protéger les présences des autres cours
+    const presencesAvant = presences;
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
         // Préserver les présences d'autres cours (coursId différent)
@@ -1682,7 +1701,7 @@ function enregistrerPresences() {
             // #540 lot E3 : `heures` n'est plus écrit — voir l'autre chemin
             // d'enregistrement, même raison. Deux sites écrivaient le même champ de
             // rétrocompatibilité ; aucun ne l'écrit plus.
-            const notes = inputNotes ? inputNotes.value.trim() : '';
+            const notes = _notesDuChamp(inputNotes, presencesAvant, etudiant.da, dateStr, coursId);
 
             // Créer l'objet de présence
             const presenceObj = {
@@ -1702,11 +1721,7 @@ function enregistrerPresences() {
         }
     });
 
-    // Protection : bloquer en mode anonymisation (lecture seule)
-    if (!sauvegarderDonneesSelonMode('presences', presences)) {
-        notifications.erreur('Modification impossible', 'Impossible de sauvegarder les présences en mode anonymisation');
-        return;
-    }
+    sauvegarderDonneesSelonMode('presences', presences);
 
     notifications.succes('Présences enregistrées');
 

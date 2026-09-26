@@ -6,6 +6,32 @@
 (function() {
 'use strict';
 
+// Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, un texte libre ne se
+// dé-identifie pas de façon fiable (un nom de famille, un surnom, une allusion) : il est MASQUÉ,
+// dans les cartes comme dans le formulaire, et un champ masqué ne s'écrit pas — ce qui est en
+// base y reste. Avant : description et observations s'affichaient en clair dans le formulaire,
+// et la note individuelle, pré-remplie avec « Élève N », s'écrivait telle quelle à l'Enregistrer.
+function _texteLibreMasque() {
+    return typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
+}
+function _texteLibreAffiche(texte) {
+    return _texteLibreMasque()
+        ? '<em class="text-muted">' + echapperHtml(window.MENTION_MASQUE_ANONYMISATION) + '</em>'
+        : echapperHtml(texte || '');
+}
+function _valeurTexteLibre(texte) {
+    return _texteLibreMasque() ? '' : echapperHtml(texte || '');
+}
+function _attributsTexteLibre(placeholder) {
+    return _texteLibreMasque()
+        ? 'placeholder="' + echapperHtml(window.MENTION_MASQUE_ANONYMISATION) + '" disabled data-masque-anonymisation="1"'
+        : 'placeholder="' + echapperHtml(placeholder) + '"';
+}
+function _texteDuChamp(champ, valeurEnBase) {
+    if (champ && champ.dataset.masqueAnonymisation === '1') return valeurEnBase || '';
+    return champ ? champ.value : '';
+}
+
 /**
  * MODULE INTERVENTIONS - SOURCE UNIQUE
  *
@@ -454,7 +480,7 @@ function afficherListeInterventions() {
                     </div>
                 </div>
 
-                <p class="intervention-description">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(intervention.description || '', null) : (intervention.description || ''))} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${echapperHtml(intervention.heure)}` : ''}</span></p>
+                <p class="intervention-description">${_texteLibreAffiche(intervention.description)} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${echapperHtml(intervention.heure)}` : ''}</span></p>
 
                 ${(intervention.analyse || (intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0)) ? `
                     <h4 class="intervention-titre u-mb-10 u-mt-10">${V().titreApercu} (${formaterNbEtudiants(intervention.analyse ? intervention.analyse.nbEtudiants : 0)})</h4>
@@ -467,7 +493,7 @@ function afficherListeInterventions() {
                 ${intervention.observations ? `
                     <div class="carte intervention-observations">
                         <h5>Observations générales</h5>
-                        <p>${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(intervention.observations, null) : intervention.observations)}</p>
+                        <p>${_texteLibreAffiche(intervention.observations)}</p>
                     </div>
                 ` : ''}
             </div>
@@ -698,9 +724,7 @@ function genererAffichageNotesIndividuelles(notesIndividuelles) {
     let nbLignes = 0;
     Object.entries(notesIndividuelles).forEach(([da, note]) => {
         if (!note) return;
-        // ✅ ANONYMISATION (Tier 0.4) + SÉCURITÉ : echapperHtml + anonymiser prénoms dans le texte libre
-        const noteAff = echapperHtml(typeof anonymiserTexteRetroaction === 'function'
-            ? anonymiserTexteRetroaction(note, da) : note);
+        const noteAff = _texteLibreAffiche(note);
         nbLignes++;
         const etudiant = trouver(groupe, da);
         if (etudiant) {
@@ -870,8 +894,8 @@ function ouvrirIntervention(interventionId, options) {
                     ${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}
                 </label>
                 <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
-                          placeholder="Note individuelle…"
-                          style="font-size: 0.85rem; resize: vertical;">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(noteExistante, etudiant.da) : noteExistante)}</textarea>
+                          ${_attributsTexteLibre('Note individuelle…')}
+                          style="font-size: 0.85rem; resize: vertical;">${_valeurTexteLibre(noteExistante)}</textarea>
                 <span class="badge-rai-${niveauBadge}">Niveau ${niveauBadge}</span>
             </div>
         `;
@@ -980,7 +1004,7 @@ function ouvrirIntervention(interventionId, options) {
                     <div class="champ-formulaire u-m-0">
                         <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
                         <textarea id="interventionDescription" class="controle-form" rows="3"
-                                  placeholder="Objectifs de l'intervention, sujets abord\u00e9s\u2026">${echapperHtml(intervention.description || '')}</textarea>
+                                  ${_attributsTexteLibre("Objectifs de l'intervention, sujets abord\u00e9s\u2026")}>${_valeurTexteLibre(intervention.description)}</textarea>
                     </div>
                 </div>
 
@@ -1075,7 +1099,7 @@ function ouvrirIntervention(interventionId, options) {
                     Note tes observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
                 </p>
                 <!-- #733 — règle 1 : texte libre de l'enseignant (ou importé) dans du HTML → echapperHtml, comme le bilan plus bas -->
-                <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex. Stratégie de lecture n°3…">${echapperHtml(intervention.observations || '')}</textarea>
+                <textarea id="observationsIntervention" class="controle-form" rows="6" ${_attributsTexteLibre('Ex. Stratégie de lecture n°3…')}>${_valeurTexteLibre(intervention.observations)}</textarea>
             </div>
 
             ${(() => {
@@ -1172,7 +1196,7 @@ function ouvrirIntervention(interventionId, options) {
                     '</div>' +
                     '<div>' +
                         '<label for="observationsBilan" class="label-formulaire">Observations de bilan</label>' +
-                        '<textarea id="observationsBilan" class="controle-form" rows="3" placeholder="Réflexions sur l\'intervention, ajustements à apporter…">' + echapperHtml(bilan.observationsBilan || '') + '</textarea>' +
+                        '<textarea id="observationsBilan" class="controle-form" rows="3" ' + _attributsTexteLibre("Réflexions sur l'intervention, ajustements à apporter…") + '>' + _valeurTexteLibre(bilan.observationsBilan) + '</textarea>' +
                     '</div>' +
                 '</div>';
             })()}
@@ -1430,7 +1454,6 @@ function sauvegarderPresencesIntervention(interventionId) {
     // notes, par un simple « Enregistrer ». On distingue donc les DA affichés (cochés ou non) des autres.
     const dasAffiches = Array.from(document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]')).map(cb => cb.value);
     const observationsField = document.getElementById('observationsIntervention');
-    const observations = observationsField ? observationsField.value : '';
 
     // Lire le statut depuis les boutons radio
     const statutRadio = document.querySelector('input[name="interventionStatut"]:checked');
@@ -1478,7 +1501,7 @@ function sauvegarderPresencesIntervention(interventionId) {
     interventions[index].niveauRai = niveauSave;
     interventions[index].contexte = contexteSave;
     interventions[index].type = typeSave;
-    interventions[index].description = document.getElementById('interventionDescription').value;
+    interventions[index].description = _texteDuChamp(document.getElementById('interventionDescription'), interventions[index].description);
 
     // Absences seulement si rattrapage
     if (contexteSave === 'rattrapage') {
@@ -1493,7 +1516,7 @@ function sauvegarderPresencesIntervention(interventionId) {
     interventions[index].statut = nouveauStatut;
 
     // Mettre à jour observations
-    interventions[index].observations = observations;
+    interventions[index].observations = _texteDuChamp(observationsField, interventions[index].observations);
 
     // Notes individuelles (#772) : on part de celles en base et on n'écrit que ce que le formulaire a
     // montré — un champ affiché vide efface la note, un champ affiché rempli la pose (coché ou non) ;
@@ -1501,7 +1524,8 @@ function sauvegarderPresencesIntervention(interventionId) {
     const notesIndividuelles = Object.assign({}, interventions[index].notesIndividuelles || {});
     dasAffiches.forEach(da => {
         const noteField = document.getElementById(`note-${da}`);
-        if (!noteField) return;
+        // Masqué en anonymisation : la note en base reste telle quelle.
+        if (!noteField || noteField.dataset.masqueAnonymisation === '1') return;
         const texte = noteField.value.trim();
         if (texte) notesIndividuelles[da] = texte;
         else delete notesIndividuelles[da];
@@ -1545,7 +1569,7 @@ function sauvegarderPresencesIntervention(interventionId) {
         interventions[index].bilan = {
             atteint: bilanAtteintRadio ? bilanAtteintRadio.value : null,
             suite: bilanSuiteRadio ? bilanSuiteRadio.value : null,
-            observationsBilan: observationsBilanField ? observationsBilanField.value : '',
+            observationsBilan: _texteDuChamp(observationsBilanField, (interventions[index].bilan || {}).observationsBilan),
             dateBilan: Date.now()
         };
     }

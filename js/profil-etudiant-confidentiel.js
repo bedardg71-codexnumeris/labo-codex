@@ -67,6 +67,18 @@ const SOUS_CATEGORIES_SERVICES = {
     ]
 };
 
+function _voletMasque() {
+    return typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
+}
+
+// Les champs gardent la saisie de la dernière ouverture : en anonymisation, rien n'y reste.
+function _viderChampsConfidentiel() {
+    document.querySelectorAll('#confidentiel-champs input[type="checkbox"]').forEach(c => { c.checked = false; });
+    document.querySelectorAll('#confidentiel-champs select, #confidentiel-champs textarea').forEach(c => { c.value = ''; });
+    const notesPresences = document.getElementById('confidentiel-notes-presences');
+    if (notesPresences) notesPresences.textContent = '';
+}
+
 /**
  * Ouvre le modal des informations confidentielles pour un étudiant
  * @param {string} da - Numéro de DA de l'étudiant
@@ -77,10 +89,29 @@ function ouvrirModalConfidentiel(da) {
     // Récupérer les infos de l'étudiant
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === da);
-    const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
+    const masquer = _voletMasque();
+    const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : (masquer ? '---' : `DA ${da}`);
 
     // Afficher le nom dans le modal
     document.getElementById('confidentiel-nom-etudiant').textContent = nomComplet;
+
+    // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
+    // l'écran : parcours, diagnostic, défis, notes libres et notes de présences ne sont ni lus ni
+    // affichés, et le volet n'a rien à enregistrer. Avant : il lisait le store brut, sans garde.
+    ['confidentiel-champs', 'confidentiel-bloc-notes-presences', 'confidentiel-btn-enregistrer'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('u-hide', masquer);
+    });
+    const mention = document.getElementById('confidentiel-masque');
+    if (mention) {
+        mention.textContent = masquer ? window.MENTION_MASQUE_ANONYMISATION : '';
+        mention.classList.toggle('u-hide', !masquer);
+    }
+    if (masquer) {
+        _viderChampsConfidentiel();
+        document.getElementById('modalConfidentiel').classList.add('actif');
+        return;
+    }
 
     // Charger les données existantes
     const cleConfidentiel = cle('confidentielEtudiants');
@@ -231,6 +262,8 @@ function fermerModalConfidentiel() {
  */
 function sauvegarderConfidentiel() {
     if (!_confidentielDaActuel) return;
+    // Masqué en anonymisation : les champs n'ont pas été remplis, les écrire effacerait le volet.
+    if (_voletMasque()) { fermerModalConfidentiel(); return; }
 
     // #867 (15 sept. 2026) — TENIR LE DA AVANT DE FERMER. `fermerModalConfidentiel()`
     // remet `_confidentielDaActuel` à null ; le rafraîchissement d'en bas recevait donc
