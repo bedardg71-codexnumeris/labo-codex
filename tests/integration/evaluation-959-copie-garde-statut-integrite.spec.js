@@ -80,10 +80,12 @@ async function semer(page, { anonymisation = false } = {}) {
         window.db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
         window.db.setSync('trimestreActif', 'a2026');
         window.db.setSync('groupeCoursActif', { id: 'GC1', trimestreId: 'a2026', nom: 'Groupe 00007' });
+        // security-ok: fixture littérale du banc.
         window.db.setSync(k('groupeEtudiants'), [
             { da: '1234567', prenom: 'Daniel', nom: 'Témoin', groupe: '00007', groupeCoursId: 'GC1' },
             { da: '7654321', prenom: 'Berthe', nom: 'Voisine', groupe: '00007', groupeCoursId: 'GC1' }
         ]);
+        // security-ok: fixture littérale du banc.
         window.db.setSync(k('grillesTemplates'), [{ id: 'G959', nom: 'Grille témoin mixte', criteres: [
             { id: 'c1', nom: 'Contenu', ponderation: 50, description: 'Le fond.' },
             { id: 'c2', nom: 'Structure', ponderation: 30, type: 'analytique', description: 'La structure.' },
@@ -95,10 +97,12 @@ async function semer(page, { anonymisation = false } = {}) {
             { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeurCalcul: 82 },
             { code: 'E', nom: 'Étendu', min: 90, max: 100, valeurCalcul: 95 }
         ];
+        // security-ok: fixture littérale du banc.
         window.db.setSync(k('echellesTemplates'), [
             { id: 'E959', nom: 'IDME témoin', niveaux },
             { id: 'E959B', nom: 'IDME témoin bis', niveaux }
         ]);
+        // security-ok: fixture littérale du banc.
         window.db.setSync(k('productions'), [{ id: 'P959', titre: 'Portrait témoin', grilleId: 'G959', echelleId: 'E959', groupeCoursId: 'GC1' }]);
         window.db.setSync(k('evaluationsSauvegardees'), [evaluation]);
         if (anonymisation) await window.changerMode('anonymisation');
