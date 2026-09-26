@@ -26,6 +26,8 @@
             couleur: 'vert',
             titre: 'Sommative : le bilan d\'une grille en points',
             items: [
+                // 1.159.12 (#953) — VALIDÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork, pratiques ajoutées).
+                'Archives&nbsp;: une archive rouverte propose aussi ses grilles, ses échelles et ses pratiques, et ses cartouches ne s\'y disent plus «&nbsp;grille manquante&nbsp;».',
                 // 1.159.11 (#643, #654, #637) — VALIDÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
                 'Partage et archives&nbsp;: les cartouches arrivent entières. Un fichier partagé dit de quel trimestre viennent ses cartouches, une production importée retrouve sa cartouche, et une archive rouverte les montre toutes.',
                 // 1.159.10 (#888) — VALIDÉ par Grégoire le 25 sept. 2026, tel quel (texte de Cowork).
