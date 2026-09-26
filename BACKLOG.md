@@ -2110,7 +2110,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   cas de course** (l'utilisateur renomme entre la lecture et l'écriture) pour le faire rougir. Une règle
   que personne ne fait rougir n'est pas une règle verrouillée — le cas est devenu l'assertion F.
 
-- [ ] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**.
+- [x] **#680 — Le canal de PARTAGE laisse d'autres champs d'échelle en chemin, et personne n'a écrit lesquels**. ✅ **LIVRÉ en 1.159.9, en ligne le 25 sept. 2026 à 17 h 15** (Netlify, `37baafa1`, mesuré par Cowork) — coché le 26 sept. par le lot #643/#654/#637, à la demande de sa consigne ; preuve : `OU-EN-EST-ON.md`, bloc « FAIT EN 1.159.9 ».
   Inscrit le 1er septembre 2026, **issue 2 (inscrire et continuer)** : trouvaille faite en corrigeant `valeur`,
   hors du lot en cours.
   ▣ **CE QUI EST MESURÉ.** Les deux schémas d'échelle du dépôt ont été comparés champ par champ, sous WebKit, sur
@@ -5233,7 +5233,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   corrigé au lot 2.
   ⮕ **Geste** : les faire passer par `obtenirEchelleResolue`, ou dire pourquoi ils ne le peuvent pas.
 
-- [ ] **#583 — Partager une échelle la prive de ses deux repères de maîtrise, à l'ÉMISSION.**
+- [x] **#583 — Partager une échelle la prive de ses deux repères de maîtrise, à l'ÉMISSION.** ✅ **LIVRÉ en 1.159.9, en ligne le 25 sept. 2026 à 17 h 15** (Netlify, `37baafa1`, mesuré par Cowork) — coché le 26 sept. par le lot #643/#654/#637, à la demande de sa consigne ; preuve : `OU-EN-EST-ON.md`, bloc « FAIT EN 1.159.9 ».
   ✅ **25 sept. 2026 – Grégoire : on prolonge le format `v1` (option A du 28 août abandonnée) ;
   un format `v2` ne viendra pas avant juin 2027.** Motif mesuré par Cowork : le `v1` a déjà été
   étendu trois fois depuis le 28 août.
