@@ -772,9 +772,10 @@ function verifierEtChargerEvaluationExistante() {
                     if (r) r.checked = true;
                 }
             }
-            // Régénérer la rétroaction avec les options d'affichage restaurées
-            // Patch §5.6 — promotion genererRetroaction vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
-            window.genererRetroaction(1);
+            // Régénérer la rétroaction avec les options d'affichage restaurées — SEULEMENT si
+            // l'évaluation n'en a pas. #960 : la rétroaction enregistrée fait foi ; régénérée ici,
+            // elle remplaçait le texte réécrit à la main, après que « Modifier » l'eut remis.
+            if (!evaluationExistante.retroactionFinale) window.genererRetroaction(1);
         }, 350);
     }, 300);
 }
@@ -1104,6 +1105,10 @@ function modifierEvaluation(evaluationId) {
 
     // ========== CHARGEMENT SÉQUENTIEL ==========
 
+    // #960 — ouvrir n'écrit rien : l'auto-save ne s'arme pas pendant la restauration (compteur,
+    // et non `_modifierEvaluationEnCours`, que `ouvrirFichier` remet à faux en chemin). Posé
+    // juste avant le minuteur dont le `finally` le rend : aucune sortie ne le laisse armé.
+    window._chargementsEvaluationEnCours = (window._chargementsEvaluationEnCours || 0) + 1;
     setTimeout(async () => {
         try {
             // 🔧 FIX (20 mars 2026) : _forceStandaloneEval permet à modifierEvaluationRemplacee()
@@ -1158,6 +1163,7 @@ function modifierEvaluation(evaluationId) {
             );
         } finally {
             window._modifierEvaluationEnCours = false;
+            window._chargementsEvaluationEnCours = Math.max(0, (window._chargementsEvaluationEnCours || 1) - 1);
         }
     }, 200);
 }
