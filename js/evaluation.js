@@ -120,6 +120,7 @@ function nouvelleEvaluation() {
     window.mettreAJourPillStatut('non-recu');
     window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
+    if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
 
@@ -170,6 +171,7 @@ function reinitialiserFormulaire() {
     // Réinitialiser uniquement les éléments du formulaire de notation
     window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
+    if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
 
@@ -657,6 +659,12 @@ function verifierEtChargerEvaluationExistante() {
                 ? anonymiserTexteRetroaction(evaluationExistante.retroactionFinale, evaluationExistante.etudiantDA)
                 : evaluationExistante.retroactionFinale;
             retroaction.value = texteRetroaction;
+        }
+        // #961 (D7) — la marque enregistrée revient avec le texte. Sans marque (stock d'avant
+        // D7), la rétroaction suit les niveaux comme avant : la comparaison au texte généré
+        // n'est pas fiable (gabarits et générateur changés depuis) — volet laissé ouvert.
+        if (typeof window.poserRetroactionReecrite === 'function') {
+            window.poserRetroactionReecrite(!!(evaluationExistante.retroactionFinale && evaluationExistante.retroactionReecrite === true));
         }
         // Patch §5.6 — promotion mettreAJourCompteurMots vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
         window.mettreAJourCompteurMots();
@@ -1574,6 +1582,10 @@ function _chargerOptionsEtRetroactionModif(evaluation) {
             : (evaluation.retroactionFinale || '');
         retroaction.value = texteRetroaction;
     }
+    // #961 (D7) — la marque enregistrée revient avec le texte (jumeau de l'ouverture par la copie).
+    if (typeof window.poserRetroactionReecrite === 'function') {
+        window.poserRetroactionReecrite(!!(evaluation.retroactionFinale && evaluation.retroactionReecrite === true));
+    }
 }
 
 function _gererIndicateurEtVerrouillageModif(evaluation, estVerrouillee) {
@@ -1748,7 +1760,8 @@ function _lireChampsDOMMod(maintenant) {
         noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,
         ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: document.getElementById('niveauProduction1').textContent,
-        retroactionFinale: document.getElementById('retroactionFinale1').value
+        retroactionFinale: document.getElementById('retroactionFinale1').value,
+        retroactionReecrite: (typeof window.estRetroactionReecrite === 'function') ? window.estRetroactionReecrite() : false   // #961
     };
     // Lot A, R4 : notes d'intégrité masquées en anonymisation — la fusion garde celles de la base.
     if (typeof champMasqueAnonymisation === 'function'

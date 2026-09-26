@@ -42,7 +42,8 @@
    Variables module-scope encapsulées (anti-pattern §5.10) : aucune
    (toutes les locals sont à l'intérieur des function bodies).
 
-   6 exports window.X :
+   8 exports window.X (6 d'origine + 2 de #961, estRetroactionReecrite et
+   poserRetroactionReecrite, en fin de fichier) :
      · window.genererRetroaction (préservé du bloc principal L5409)
      · window.regenererRetroactionAvecFeedback (préservé export dispersé L282)
      · window.copierRetroaction (préservé du bloc principal L5410)
@@ -290,6 +291,9 @@ function genererRetroaction(num) {
     // et ses commentaires : sans elle, ils manquent, le reste s'écrit.
     const zoneRetroaction = document.getElementById('retroactionFinale1');
     if (!zoneRetroaction) return;
+    // #961 (D7) — une rétroaction réécrite à la main ne suit plus les niveaux : aucune
+    // génération automatique ne la remplace. « Régénérer » efface le marqueur d'abord.
+    if (estRetroactionReecrite()) return;
     if (!evaluationEnCours || !evaluationEnCours.grilleId) {
         zoneRetroaction.value = '';
         return;
@@ -338,6 +342,40 @@ function genererRetroaction(num) {
 }
 
 /**
+ * #961 (D7, 26 sept. 2026) — LA RÉTROACTION RÉÉCRITE À LA MAIN.
+ *
+ * Une frappe dans la zone (`retroactionModifiee`, l'événement `input` que `.value = …` ne
+ * déclenche pas) la marque ; « Régénérer » seul efface la marque, et le changement de
+ * cartouche confirmé (#944, qui annonce la perte des retouches). La marque vit sur la zone,
+ * attachée à la copie (élève + production) : ouvrir une autre copie ne l'emporte pas. Elle
+ * s'enregistre avec l'évaluation (`retroactionReecrite`) et revient à l'ouverture.
+ */
+function _cleCopieRetroaction(copie) {
+    const c = copie || ((typeof window.etatVivantEvaluationEnCours === 'function')
+        ? window.etatVivantEvaluationEnCours() : (window.evaluationEnCours || {}));
+    return (c && c.etudiantDA && c.productionId) ? c.etudiantDA + '|' + c.productionId : '';
+}
+
+/** La rétroaction de la copie ouverte (ou de `copie`) est-elle réécrite à la main ? */
+function estRetroactionReecrite(copie) {
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction(copie);
+    return !!(zone && zone.dataset && cleCopie && zone.dataset.reecritePour === cleCopie);
+}
+
+/** Pose ou retire la marque pour la copie ouverte, et l'avis sous la zone. */
+function poserRetroactionReecrite(reecrite) {
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction();
+    if (zone && zone.dataset) {
+        if (reecrite && cleCopie) zone.dataset.reecritePour = cleCopie;
+        else delete zone.dataset.reecritePour;
+    }
+    const avis = document.getElementById('avisRetroactionReecrite');
+    if (avis) avis.classList.toggle('u-hide', !estRetroactionReecrite());
+}
+
+/**
  * Régénère la rétroaction avec feedback visuel (avant/après)
  */
 function regenererRetroactionAvecFeedback() {
@@ -347,7 +385,11 @@ function regenererRetroactionAvecFeedback() {
     const ancienTexte = textarea.value;
     const ancienMots = ancienTexte.trim().length === 0 ? 0 : ancienTexte.trim().split(/\s+/).length;
 
+    // #961 — le geste qui rend la rétroaction aux niveaux : la marque part, le texte généré
+    // la remplace, et l'auto-save l'écrit (comme une frappe), marque comprise.
+    poserRetroactionReecrite(false);
     genererRetroaction(1);
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
 
     const nouveauTexte = textarea.value;
     const nouveauMots = nouveauTexte.trim().length === 0 ? 0 : nouveauTexte.trim().split(/\s+/).length;
@@ -1321,7 +1363,7 @@ function sauvegarderRetroactionFinale(productionNum) {
 }
 
 // =====================================================================
-// Exports window.X (6) — voir en-tête pour détails
+// Exports window.X (8) — voir en-tête pour détails
 // =====================================================================
 
 // Préservés depuis bloc principal evaluation.js :
@@ -1335,5 +1377,9 @@ window.regenererRetroactionAvecFeedback = regenererRetroactionAvecFeedback;
 
 // Promotion §5.6 nouvelle (session B 2e sous-module) :
 window.mettreAJourCompteurMots = mettreAJourCompteurMots;
+
+// #961 — la marque de la rétroaction réécrite à la main (frappe, ouverture, enregistrement).
+window.estRetroactionReecrite = estRetroactionReecrite;
+window.poserRetroactionReecrite = poserRetroactionReecrite;
 
 })();
