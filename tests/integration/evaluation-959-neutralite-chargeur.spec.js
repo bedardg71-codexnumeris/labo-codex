@@ -227,3 +227,25 @@ for (const chemin of ['copie', 'liste']) {
         expect((await base(page)).criteres[1].niveauSelectionne).toBe('M');
     });
 }
+
+// B1 de la contre-vérification de Cowork — la vue côte à côte attend PDF.js sans délai maximal. Si elle
+// ne répond jamais, le `finally` de `modifierEvaluation` n'arrive pas : la borne rend le compteur.
+test('#960 B1 · par la Liste, la vue côte à côte ne répond jamais : après la borne, un niveau changé s\'écrit seul', async ({ page }) => {
+    test.setTimeout(90000);
+    await monter(page);
+    const avertis = [];
+    page.on('console', (m) => { if (m.type() === 'warning') avertis.push(m.text()); });
+    await page.evaluate(() => { window.travauxUI.ouvrirVueCoteACote = () => new Promise(() => {}); });
+    await page.evaluate(() => window.modifierEvaluation('EV959'));
+    await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EV959', null, { timeout: 15000 });
+    await page.waitForTimeout(17000);   // borne de 15 s après l'armement
+    expect.soft(await page.evaluate(() => window._modifierEvaluationEnCours), 'le `finally` n\'est pas arrivé').toBe(true);
+    await page.evaluate(() => {
+        const s = document.getElementById('eval_c2');
+        s.value = 'M';
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.waitForTimeout(2500);
+    expect((await base(page)).criteres[1].niveauSelectionne).toBe('M');
+    expect(avertis.some((t) => t.includes('non terminé après 15 s'))).toBe(true);
+});

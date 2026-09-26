@@ -25,3 +25,21 @@ Le choix est le bon : les deux sources d'écriture à l'ouverture sont fermées 
 ## Ensuite
 
 R1, R2, R3, M1 sur la branche, un commit, puis complète la demande avec le SHA et arrête-toi : Cowork contre-vérifie (R1 et R3 par exécution dans son clone). Les « Nouvelles » : la phrase tient, garde-la.
+
+---
+
+## Contre-vérification – 26 sept., 18 h 22 (Toronto), sur `82a4f1b8`
+
+**Verdict : VERTE, fusion accordée sous une condition (B1), sans repasser par Cowork.**
+
+`[exécuté]` Clone `--shared` de la branche : Vitest complet **642 / 7 462** vert. Mutations de Cowork, chacune seule, restaurées (`git checkout -- js`, arbre propre) :
+
+| | Mutation | Résultat |
+|---|---|---|
+| MX2 | « Copier tout » sans div : `''` au lieu de `null` | rouge, 1 (R3) – tuée |
+| MR1b | écran : `critere.retroaction ?? ''` (absent redevient vide) | rouge, 2 (R1, les deux formes) |
+| MR1c | PDF : `c.retroaction ?? ''` (absent devient vide au PDF seul) | rouge, 2 (R1) |
+
+R2 et M1 sont WebKit : pris sur ta parole (tests nommés, mutation rapportée rouge), hors de portée de Cowork.
+
+**B1 · Borne sur le compteur, à ajouter avant la fusion (tranché par Cowork).** Ta réponse à R2 : `_ouvrirVueCoteACoteModif` attend la lecture du fichier et PDF.js **sans délai maximal**. Avant ce lot, un PDF.js muet ne coûtait que la vue ; maintenant il garde le compteur armé et **l'auto-save reste muet pour la séance, sans un mot** – une perte silencieuse introduite par ce lot, même improbable. Ajoute une borne : le compteur est rendu au plus tard ~15 s après son armement, même si le `finally` n'arrive pas, **une seule fois** (le `finally` et la borne ne décrémentent pas deux fois ; un drapeau par chargement suffit), avec un `console.warn` qui le dit. Essai : une vue côte à côte qui ne résout jamais → après la borne, un niveau changé s'écrit seul. Mutation : borne retirée → rouge. Puis fusionne, prends le verdict, pousse, selon la procédure habituelle ; la phrase des « Nouvelles » : la réponse de Grégoire arrive par lui, avec cette relecture.
