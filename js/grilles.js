@@ -338,27 +338,22 @@ async function sauvegarderCritere() {
 
     // Si on est en édition de grille existante
     if (grilleTemplateActuelle) {
-        if (!grilleTemplateActuelle.criteres) {
-            grilleTemplateActuelle.criteres = [];
-        }
+        if (!critereEnEdition) critere.id = genererIdUnique('CR_');
+        const idEnEdition = critereEnEdition;
 
-        if (critereEnEdition) {
-            // Modifier le critère existant
-            const index = grilleTemplateActuelle.criteres.findIndex(c => c.id === critereEnEdition);
-            if (index !== -1) {
-                grilleTemplateActuelle.criteres[index] = { 
-                    ...grilleTemplateActuelle.criteres[index], 
-                    ...critere 
-                };
+        // Sauvegarder automatiquement la grille — le critère est posé sur la
+        // version EN BASE (#957), pas sur l'objet mémoire.
+        await sauvegarderGrilleTemplate(true, (g) => {  // true = sauvegarde silencieuse
+            if (!g.criteres) g.criteres = [];
+            if (idEnEdition) {
+                // Modifier le critère existant
+                const index = g.criteres.findIndex(c => c.id === idEnEdition);
+                if (index !== -1) g.criteres[index] = { ...g.criteres[index], ...critere };
+            } else {
+                // Ajouter nouveau critère
+                g.criteres.push(critere);
             }
-        } else {
-            // Ajouter nouveau critère
-            critere.id = genererIdUnique('CR_');
-            grilleTemplateActuelle.criteres.push(critere);
-        }
-
-        // Sauvegarder automatiquement la grille
-        await sauvegarderGrilleTemplate(true);  // true = sauvegarde silencieuse
+        });
         afficherListeCriteres(grilleTemplateActuelle.criteres, grilleTemplateActuelle.id);
 
     } else {
@@ -502,8 +497,10 @@ async function supprimerCritere(id) {
 
     if (confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {
         if (grilleTemplateActuelle) {
-            grilleTemplateActuelle.criteres = grilleTemplateActuelle.criteres.filter(c => c.id !== id);
-            await sauvegarderGrilleTemplate();
+            // #957 : retiré de la version en base, pas de l'objet mémoire.
+            await sauvegarderGrilleTemplate(false, (g) => {
+                g.criteres = (g.criteres || []).filter(c => c.id !== id);
+            });
             afficherListeCriteres(grilleTemplateActuelle.criteres, grilleTemplateActuelle.id);
         } else {
             window.tempCriteres = window.tempCriteres.filter(c => c.id !== id);
@@ -620,7 +617,9 @@ function afficherChampFormule() {
  * Sauvegarde la grille de critères dans localStorage
  * 
  * @param {boolean} silencieux - Si true, pas de notification
- * 
+ * @param {Function} [appliquer] - #957 : en édition, le changement propre au geste,
+ *   appliqué à la version EN BASE de la grille (jamais à `grilleTemplateActuelle`)
+ *
  * UTILISÉ PAR:
  * - sauvegarderCritere() après chaque critère
  * - sauvegarderNomGrille() après changement de nom
@@ -634,7 +633,7 @@ function afficherChampFormule() {
  * 5. Recharge le select
  * 6. Affiche notification si pas silencieux
  */
-async function sauvegarderGrilleTemplate(silencieux = false) {
+async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     let nomGrille = document.getElementById('nomGrilleTemplate')?.value?.trim();
 
     if (!nomGrille) {
@@ -688,15 +687,6 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
 
     if (grilleTemplateActuelle) {
         // Mode édition
-        grilleTemplateActuelle.nom = nomGrille;
-        grilleTemplateActuelle.description = document.getElementById('descriptionGrille')?.value?.trim() || '';
-        grilleTemplateActuelle.dateModification = new Date().toISOString();
-
-        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
-        if (typeof ajouterContributeurSiNecessaire === 'function') {
-            grilleTemplateActuelle = ajouterContributeurSiNecessaire(grilleTemplateActuelle);
-        }
-
         const index = grillesEnFile.findIndex(g => g.id === grilleTemplateActuelle.id);
         if (index === -1) {
             // 🔧 #466/CO-16 (21 août 2026) : la branche absente produisait un
@@ -706,7 +696,30 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             horsTrimestreActif = true;
             return undefined;
         }
-        grillesEnFile[index] = grilleTemplateActuelle;
+
+        // #957 (26 sept. 2026) — L'ÉCRITURE PART DE LA GRILLE EN BASE, pas de
+        // `grilleTemplateActuelle`. Cet objet mémoire n'est pas tenu à jour par
+        // les écritures partielles (ajouter un critère, les sous-critères, les
+        // catégories, la bibliothèque, d'autres modules : 23 écrivains recensés) ;
+        // le réécrire entier effaçait ce qu'elles venaient d'écrire — « + Ajouter
+        // un critère » puis « Enregistrer » : 5 → 6 → 5, sous « sauvegardée ! ».
+        // Ce que ce formulaire possède (nom, description) est posé sur la version
+        // en base ; un geste qui change autre chose passe son changement par
+        // `appliquer`, exécuté sur cette même version, dans la file.
+        let grille = Object.assign({}, grillesEnFile[index], {
+            nom: nomGrille,
+            description: document.getElementById('descriptionGrille')?.value?.trim() || '',
+            dateModification: new Date().toISOString()
+        });
+        if (typeof appliquer === 'function') appliquer(grille);
+
+        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+        if (typeof ajouterContributeurSiNecessaire === 'function') {
+            grille = ajouterContributeurSiNecessaire(grille);
+        }
+
+        grillesEnFile[index] = grille;
+        grilleTemplateActuelle = grille;
     } else {
         // Mode création
         // 🆕 Beta 95.3 : Capturer discipline depuis infoCours
@@ -1081,28 +1094,31 @@ async function basculerVerrouillageCritere(critereId) {
         return;
     }
 
-    let criteres;
     if (grilleTemplateActuelle) {
-        criteres = grilleTemplateActuelle.criteres;
-    } else {
-        criteres = window.tempCriteres;
+        // #957 : basculé sur la version EN BASE, pas sur l'objet mémoire.
+        // Sauvegarder en mode silencieux pour éviter la notification "Grille sauvegardée"
+        let bascule = null;
+        await sauvegarderGrilleTemplate(true, (g) => {
+            const c = (g.criteres || []).find(x => x.id === critereId);
+            if (!c) return;
+            c.verrouille = !c.verrouille;
+            bascule = c;
+        });
+        if (!bascule) return;
+
+        // Afficher une notification spécifique au verrouillage
+        const statut = bascule.verrouille ? 'verrouillé' : 'déverrouillé';
+        notifications.succes(`Critère "${bascule.nom}" ${statut}`);
+        afficherListeCriteres(grilleTemplateActuelle.criteres, grilleTemplateActuelle.id);
+        return;
     }
 
+    const criteres = window.tempCriteres;
     const index = criteres.findIndex(c => c.id === critereId);
     if (index !== -1) {
         // Basculer directement l'état (pas de checkbox, juste un span cliquable)
         criteres[index].verrouille = !criteres[index].verrouille;
-
-        if (grilleTemplateActuelle) {
-            // Sauvegarder en mode silencieux pour éviter la notification "Grille sauvegardée"
-            await sauvegarderGrilleTemplate(true);
-
-            // Afficher une notification spécifique au verrouillage
-            const statut = criteres[index].verrouille ? 'verrouillé' : 'déverrouillé';
-            notifications.succes(`Critère "${criteres[index].nom}" ${statut}`);
-        }
-
-        afficherListeCriteres(criteres, grilleTemplateActuelle?.id || null);
+        afficherListeCriteres(criteres, null);
     }
 }
 
@@ -3405,13 +3421,15 @@ function rendreAvisCriteresSansType(grille) {
 async function appliquerTypeGrilleAuxCriteresSansType() {
     const grille = grilleTemplateActuelle;
     if (!grille || !ADJECTIF_TYPE_CRITERE[grille.type]) return;
-    const cibles = criteresSansType(grille);
-    if (cibles.length === 0) return;
-    cibles.forEach(c => {
-        c.type = grille.type;
-        if (c.type === 'algorithmique') avecProjectionNeuve(c);   // lot 4, C.3 — comme un critère qui change de type
+    if (criteresSansType(grille).length === 0) return;
+    // #957 : appliqué à la version EN BASE, pas à l'objet mémoire.
+    await sauvegarderGrilleTemplate(true, (g) => {
+        if (!ADJECTIF_TYPE_CRITERE[g.type]) return;
+        criteresSansType(g).forEach(c => {
+            c.type = g.type;
+            if (c.type === 'algorithmique') avecProjectionNeuve(c);   // lot 4, C.3 — comme un critère qui change de type
+        });
     });
-    await sauvegarderGrilleTemplate(true);
     afficherCriteresGrille(grilleTemplateActuelle);
 }
 
@@ -6185,9 +6203,11 @@ async function modifierParamFormuleGrilleHandler(el) {
 async function modifierTypeGrilleHandler(el) {
     const valeur = TYPES_GRILLE.includes(el.value) ? el.value : '';
     if (grilleTemplateActuelle) {
-        if (valeur) grilleTemplateActuelle.type = valeur;
-        else delete grilleTemplateActuelle.type;
-        await sauvegarderGrilleTemplate(true);
+        // #957 : posé sur la version EN BASE, pas sur l'objet mémoire.
+        await sauvegarderGrilleTemplate(true, (g) => {
+            if (valeur) g.type = valeur;
+            else delete g.type;
+        });
         rendrePrecisionTypeGrille(grilleTemplateActuelle);
         return;
     }

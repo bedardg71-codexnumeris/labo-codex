@@ -574,37 +574,32 @@ async function initialiserModuleEchelles() {
 async function sauvegarderNomEchelle() {
     const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
     if (echelleTemplateActuelle && echelleTemplateActuelle.id && nom) {
-        // CRITIQUE: Vérifier la synchronisation avec localStorage pour éviter perte de données
-        const echellesActuelles = await db.get(cle('echellesTemplates')) ||  [];
-        const echelleActuelleEnStorage = echellesActuelles.find(e => e.id === echelleTemplateActuelle.id);
+        // #957 (26 sept. 2026) — L'ÉCRITURE PART DE L'ÉCHELLE EN BASE, pas de
+        // `echelleTemplateActuelle`. La garde qui précédait ne resynchronisait
+        // l'objet mémoire que si le NOMBRE de niveaux différait : toute autre
+        // écriture partielle (repères, bibliothèque, autres modules) était
+        // réécrite par la copie périmée. Même défaut que les grilles (5 → 6 → 5).
+        // Ce que ce formulaire possède (nom, description) est posé sur la version
+        // en base ; l'objet mémoire est remplacé par ce qui a été écrit.
+        const description = document.getElementById('descriptionEchelle')?.value?.trim() || '';
+        const idEdite = echelleTemplateActuelle.id;
 
-        // Protection: Si désynchronisation détectée, resynchroniser depuis localStorage
-        if (echelleActuelleEnStorage &&
-            echelleActuelleEnStorage.niveaux?.length !== echelleTemplateActuelle.niveaux?.length) {
-            console.warn('⚠️ Désynchronisation détectée - Resynchronisation depuis localStorage');
-            echelleTemplateActuelle = { ...echelleActuelleEnStorage };
-        }
-
-        // Mettre à jour en mémoire
-        echelleTemplateActuelle.nom = nom;
-        echelleTemplateActuelle.description = document.getElementById('descriptionEchelle')?.value?.trim() || '';
-        echelleTemplateActuelle.dateModification = new Date().toISOString();
-
-        // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
-        if (typeof ajouterContributeurSiNecessaire === 'function') {
-            echelleTemplateActuelle = ajouterContributeurSiNecessaire(echelleTemplateActuelle);
-        }
-
-        // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
+        // Écrire dans la file : l'échelle relue en base, avec ce que le formulaire possède.
         // security-ok: écriture pré-existante, passée par la file. La source est
         // l'éditeur local, jamais un fichier importé : les imports passent par
         // confirmerImportEchelles.
         let ecrite = false;
         await db.modifier(cle('echellesTemplates'), (lues) => {
             const echelles = lues || [];
-            const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+            const index = echelles.findIndex(e => e.id === idEdite);
             if (index === -1) return undefined;
-            echelles[index] = { ...echelleTemplateActuelle };
+            let echelle = { ...echelles[index], nom: nom, description: description, dateModification: new Date().toISOString() };
+            // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+            if (typeof ajouterContributeurSiNecessaire === 'function') {
+                echelle = ajouterContributeurSiNecessaire(echelle);
+            }
+            echelles[index] = echelle;
+            echelleTemplateActuelle = echelle;
             ecrite = true;
             return echelles;
         }, []);
