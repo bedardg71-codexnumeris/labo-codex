@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 10 H 10 : **LOT #953 (1.159.12) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 12 H 30 : **LOT #957 (1.159.13) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `9b575769` (inventaire de l'enregistrement, poussé) + la branche `lot-957-grille-critere` (`3428894a` correctif, `609f42b8` demande de relecture, `628415d9` relecture + fiche cochée) + `c8e43205` fusion + `a6a2a43d` release (build 0926-1224) + cette clôture. Échelles entrées au lot (même patron). Relecture croisée de Cowork VERTE avant la fusion, sans retouche ; conversion des trois gestes injoignables gardée (décision de Grégoire). Nouvelles validées par Grégoire (option b, sous-critères ajoutés). Vitest 7 443 / 7 443 après la release.
+
+**Reste** : constater « en ligne » chez Netlify ; retirer la branche `lot-957-grille-critere` une fois le push constaté ; la décision d'ensemble sur l'enregistrement (Partie 1 de `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md`) attend Grégoire et Cowork. Non commités, laissés à Cowork : `FILE-DES-LOTS.md` et `PORTES-TERRAIN-2026-09-24-bug-944.md` (modifiés), `CONSIGNE-AUDIT-PARCOURS-SOMMATIF.md`, `CONSIGNE-LECON-MANQUEE.md`, `RELECTURE-2026-09-25-bug-950.md`, `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 10 H 10 : **LOT #953 (1.159.12) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT ET PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `14314530` + la branche `lot-953-grilles-echelles-archive` (`5b2c91a5` correctif, `3d30bf0c` demande de relecture, `2c66f8e9` relecture + BACKLOG) + `8662eaf5` fusion + `89d58a14` release (build 0926-1001) + cette clôture. Pratiques entrées au lot sur mesure. Relecture croisée de Cowork VERTE avant la fusion, sans retouche. Nouvelles validées par Grégoire telles quelles. Trouvailles inscrites : #955 (run planifié GitHub jamais vert depuis quatre jours), #956 (versement copie la forme nue figée des pratiques). Branche `lot-cartouches-643-654-637` retirée (le push de 1.159.11 était constaté).
 
