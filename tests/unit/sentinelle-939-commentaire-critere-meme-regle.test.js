@@ -462,6 +462,30 @@ describe('#960 · D6 — un commentaire de critère enregistré VIDE reste vide 
         expect(pdf.Nuance, 'amorce en stock').toBe(CARTOUCHE.commentaires.h3_M);
     });
 
+    // R1 de la relecture de Cowork : ABSENT n'est pas VIDE. Un critère stocké sans la clé
+    // `retroaction` (ou avec `null`) n'a rien d'enregistré — la cartouche, à l'écran comme au PDF.
+    for (const [nomCas, sansCle] of [['sans la clé', (c) => { const x = { ...c }; delete x.retroaction; return x; }],
+        ['à null', (c) => ({ ...c, retroaction: null })]]) {
+        it(`R1 · critère stocké ${nomCas} : écran, PDF et « Enregistrer » prennent la cartouche`, () => {
+            const ev = evaluationEnregistree();
+            ev.criteres[0] = sansCle(ev.criteres[0]);
+            const { win, ecran, ecritures } = rouvrir({ enBase: [ev] });
+            expect(ecran.comm_h1.textContent, 'écran').toBe(CARTOUCHE.commentaires.h1_M);
+            expect(commentairesDuPdf(win, ev).Structure, 'PDF').toBe(CARTOUCHE.commentaires.h1_M);
+            win.sauvegarderEvaluationModifiee();
+            const ecrit = ecritures.filter((x) => x.k === 'evaluationsSauvegardees').pop().v.find((e) => e.id === 'EV9');
+            expect(ecrit.criteres.find((c) => c.critereId === 'h1').retroaction, 'base').toBe(CARTOUCHE.commentaires.h1_M);
+        });
+    }
+
+    // R3 — « Copier tout » sans div `comm_` pour un critère : rien d'enregistré à lire, la cartouche.
+    it('R3 · un critère sans div `comm_` : « Copier tout » garde la cartouche (sans div n\'est pas « enregistré vide »)', () => {
+        const { win, ecran } = rouvrir({ enBase: [avecH1Vide()] });
+        delete ecran.comm_h1;
+        win.genererRetroaction(1);
+        expect(commentaireCopie(ecran.retroactionFinale1.value, 'Structure')).toBe(CARTOUCHE.commentaires.h1_M);
+    });
+
     it('TÉMOIN : un niveau CHANGÉ prend la cartouche au nouveau niveau (le vide était celui de l\'ancien)', () => {
         const { win, ecran } = rouvrir({ enBase: [avecH1Vide()] });
         ecran.eval_h1.value = 'E';

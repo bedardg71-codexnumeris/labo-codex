@@ -209,3 +209,21 @@ for (const chemin of ['copie', 'liste']) {
         expect(enregistre.criteres[1].retroaction, 'base, après « Enregistrer »').toBe('');
     });
 }
+
+// R2 de la relecture de Cowork (26 sept.) — ouvrir n'écrit rien, mais l'auto-save doit REVENIR après
+// l'ouverture : sans la décrémentation du compteur (`finally` de `modifierEvaluation`), il serait
+// muet pour toute la session, sans un mot.
+for (const chemin of ['copie', 'liste']) {
+    test(`#960 R2 · par ${nom(chemin)} : après l'ouverture, un niveau changé s'écrit seul en base (auto-save)`, async ({ page }) => {
+        test.setTimeout(90000);
+        await monter(page);
+        await ouvrir(page, chemin);
+        await page.evaluate(() => {
+            const s = document.getElementById('eval_c2');
+            s.value = 'M';
+            s.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        await page.waitForTimeout(2500);   // débounce de 1,5 s
+        expect((await base(page)).criteres[1].niveauSelectionne).toBe('M');
+    });
+}
