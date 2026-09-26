@@ -29,7 +29,9 @@
             items: [
                 'Mode anonymisation&nbsp;: tu travailles normalement et tout s\'enregistre&nbsp;; seuls les noms, et tout ce qui pourrait identifier un·e élève, sont cachés à l\'écran.',
                 // 1.160.1 (#959) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
-                'Évaluer&nbsp;: une évaluation ouverte depuis la copie garde son statut d\'intégrité et ses notes quand tu l\'enregistres.'
+                'Évaluer&nbsp;: une évaluation ouverte depuis la copie garde son statut d\'intégrité et ses notes quand tu l\'enregistres.',
+                // 1.160.2 (#960) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
+                'Évaluer&nbsp;: ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide.'
             ]
         },
         {
