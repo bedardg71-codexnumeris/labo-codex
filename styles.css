@@ -16573,6 +16573,7 @@ tr.ligne-import-ecartee td {
 /* Compteur de mots */
 .eval-retro-pied {
     display: flex;
+    flex-wrap: wrap;   /* #961 — l'avis passe au-dessus sur un écran étroit */
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
@@ -16582,6 +16583,12 @@ tr.ligne-import-ecartee td {
 .eval-compteur-mots {
     font-size: 0.7rem;
     color: var(--gris-moyen);
+}
+/* #961 (D7) — l'avis d'une rétroaction réécrite à la main, à gauche du compteur et de « Régénérer » */
+.eval-avis-retro-reecrite {
+    margin-right: auto;
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
 }
 
 /* Contenu rétroaction en lecture */
