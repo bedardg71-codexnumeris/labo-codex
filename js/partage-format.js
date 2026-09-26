@@ -336,26 +336,46 @@
             references = deps.references;
         }
 
+        var manifest = {
+            licence: schemas.LICENCE,
+            licence_url: schemas.LICENCE_URL,
+            dateExport: new Date().toISOString(),
+            auteur: normaliserAuteur(options.identiteAuteur),
+            item_principal: { type: type, id: String(itemPrincipal.id) },
+            chaineAttribution: Array.isArray(options.chaineAttribution)
+                ? clonerProfond(options.chaineAttribution)
+                : construireChaineAttribution(itemPrincipal),
+            signature: null,
+            clePublique: null,
+            algorithme: null
+        };
+
+        // #643 — DIRE D'OÙ VIENNENT LES CARTOUCHES, dans le fichier et plus seulement
+        // dans la modale de l'émettrice. Seulement quand elles sont lues par les
+        // lecteurs par défaut (le trimestre actif) : un ré-export de « Partagés »
+        // (`options.lecteurs`) tire les siennes d'une collection plate, sans trimestre.
+        // Toujours, et pas seulement quand la grille vit dans plusieurs trimestres :
+        // la destinataire ne voit pas cette condition, elle ne doit pas en dépendre.
+        var nomTrimestre = options.lecteurs ? '' : nomTrimestreActif();
+        if (nomTrimestre && entites[schemas.CLES_ENTITES.cartouche].length > 0) {
+            manifest.trimestreCartouches = nomTrimestre;
+        }
+
         return {
             format: schemas.FORMAT,
-            manifest: {
-                licence: schemas.LICENCE,
-                licence_url: schemas.LICENCE_URL,
-                dateExport: new Date().toISOString(),
-                auteur: normaliserAuteur(options.identiteAuteur),
-                item_principal: { type: type, id: String(itemPrincipal.id) },
-                chaineAttribution: Array.isArray(options.chaineAttribution)
-                    ? clonerProfond(options.chaineAttribution)
-                    : construireChaineAttribution(itemPrincipal),
-                signature: null,
-                clePublique: null,
-                algorithme: null
-            },
+            manifest: manifest,
             entites: entites,
             references: references,
             medias: []
         };
     };
+
+    /** Nom lisible du trimestre actif (« Automne 2026 »), '' si inconnu — jamais son id. */
+    function nomTrimestreActif() {
+        var actif = (typeof window.obtenirTrimestreActif === 'function') ? window.obtenirTrimestreActif() : null;
+        var nom = actif && typeof actif.nom === 'string' ? actif.nom.trim() : '';
+        return nom.slice(0, 200);
+    }
 
     /**
      * Variante signée : construit le package puis le signe avec l'identité

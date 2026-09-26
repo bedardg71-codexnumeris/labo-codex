@@ -175,6 +175,14 @@
                     date: { type: 'chaine', max: 40 }
                 }
             },
+            // #643 (26 sept. 2026) — LE NOM du trimestre d'où viennent les cartouches
+            // embarquées (« Automne 2026 »), jamais son id : un id de trimestre est
+            // local à l'émettrice et ne dit rien à la destinataire. Posé par
+            // `construirePackage` dès qu'une cartouche est lue dans les collections de
+            // l'émettrice (le trimestre ACTIF, décision de Grégoire du 31 août) ;
+            // absent d'un paquet sans cartouche, d'un ré-export de « Partagés », et de
+            // tout fichier émis avant ce lot. Format `v1` prolongé (décision du 25 sept.).
+            trimestreCartouches: { type: 'chaine', max: 200 },
             // Bloc signature (D2) — présent dès la v1 pour éviter un format v2
             // au lot F (zéro-dette appliqué au format). null accepté tant que
             // la signature n'est pas câblée.

@@ -606,6 +606,10 @@
                 dateExport: manifest.dateExport,
                 nbEntites: nbEntites,
                 chaineAttribution: clonerProfond(manifest.chaineAttribution || []),
+                // #643 — '' pour un fichier émis avant ce lot, ou sans cartouche : la
+                // prévisualisation ne dit alors rien, plutôt qu'une phrase inventée.
+                trimestreCartouches: (nbEntites[schemas.CLES_ENTITES.cartouche] > 0
+                    && typeof manifest.trimestreCartouches === 'string') ? manifest.trimestreCartouches : '',
                 avertissements: avertissements.map(function (a) { return a.message; })
             },
             avertissements: avertissements,
