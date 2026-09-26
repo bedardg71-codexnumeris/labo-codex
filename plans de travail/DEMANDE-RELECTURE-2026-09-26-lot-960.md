@@ -96,3 +96,14 @@ Absent (`null` / `undefined`) : la cartouche, comme avant. Amorce ou « [Non dé
 **Suites** : Vitest complet 642 fichiers, **7 459 / 7 459**. WebKit (959 neutralité, 939, 944, 946, 882, 699) : **27 / 27**.
 
 **Stock – à assumer, pas à découvrir** : c'est une LECTURE qui change. Toute évaluation déjà enregistrée avec un commentaire de critère vide, sous une cartouche qui porte un commentaire à ce niveau, imprimera désormais ce critère sans commentaire dans son PDF et dans « Copier tout », là où elle imprimait la cartouche d'aujourd'hui. Rien n'est écrit. Non mesuré (demande de Grégoire).
+
+---
+
+## 10 · Réponse à la relecture de Cowork (`RELECTURE-2026-09-26-lot-960.md`, 18 h 12), commit `63abebb9`
+
+- **R1 · absent = rien d'enregistré, partout.** `_commentaireEnregistreDuCritere` rend le texte seulement si `critere.retroaction` est une chaîne ; sans la clé ou à `null`, il rend `null` (la cartouche), la même frontière que le PDF. Essais Vitest (bloc #960 du banc #939), un par forme (sans la clé, à `null`) : écran = cartouche, PDF = cartouche, « Enregistrer » écrit la cartouche. **Mutation qui rétablit `|| ''` → 2 rouges** (les deux essais R1).
+- **R2 · l'auto-save revient après l'ouverture.** Essai WebKit (`evaluation-959-neutralite-chargeur.spec.js`), par la copie ET par la Liste : ouvrir, laisser passer les chargeurs, changer le niveau de `c2`, attendre 2,5 s → la base porte `M`. Vert. **Mutation qui retire la décrémentation du `finally` → 2 rouges.** `travauxUI.ouvrirVueCoteACote` n'attend **aucun geste** de l'utilisateur : ses seules attentes sont des lectures (`travauxVisionneuse.ouvrirFichier` → le fichier en base, puis `assurerWorkerPDF` et `pdfjsLib.getDocument` / `rendrePage` pour un PDF), sans borne de temps explicite. Un PDF.js qui ne répond pas retarderait le `finally`, et l'auto-save avec lui, sans que ce soit une attente sans fin voulue ; non mesuré.
+- **R3 · MX2 tuée.** Essai Vitest : copie rouverte (h1 enregistré vide), puis le div `comm_h1` retiré, puis « Copier tout » → la cartouche (sans div, rien d'enregistré). **Mutation MX2 (`: ''`) → 1 rouge** (cet essai). Je ne plaide pas l'équivalence : un essai vaut mieux.
+- **M1 · chemins sans copie.** `evaluation-920-naviguer-sans-copie`, `evaluation-911-relire-sans-copie`, `dossier-912-synthese-sans-copie`, avec le banc du lot : **30 / 30** WebKit. Aucun rouge.
+- **Suites** : Vitest complet 642 fichiers, **7 462 / 7 462**. Verdict Playwright complet : pas lancé (consigne : après ta contre-vérification).
+- Relecture de Cowork versée dans le même commit.
