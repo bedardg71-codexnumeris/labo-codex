@@ -1461,7 +1461,10 @@ function _commentaireEnregistreDuCritere(critereId, niveau) {
     const evaluation = _evaluationEnregistreeDeLaCopie(vivant);
     if (!evaluation || _remplacementConfirmeActif(vivant, evaluation)) return null;
     const critere = (evaluation.criteres || []).find(c => c.critereId === critereId);
-    return (critere && critere.niveauSelectionne === niveau) ? (critere.retroaction || '') : null;
+    // Seule une CHAÎNE est un enregistré : sans clé `retroaction` (ou `null`), rien d'enregistré,
+    // la cartouche — la même frontière que le PDF, qui reçoit `c.retroaction` tel quel (#960, R1).
+    return (critere && critere.niveauSelectionne === niveau && typeof critere.retroaction === 'string')
+        ? critere.retroaction : null;
 }
 
 function _etatVivantDeLaCopie() {
