@@ -7,11 +7,11 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, SOIR : **LOT #960 CODÉ SUR `lot-960-retroaction-a-la-main`, NON FUSIONNÉ ; ATTEND LA RELECTURE CROISÉE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 18 H 45 : **LOT #960 (1.160.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
-**Où vit le travail** : `main` = `99b022aa` (1.160.1, poussé, en ligne) + ce relais (non poussé : il partira avec la fusion). Branche `lot-960-retroaction-a-la-main` : `c0255246` correctif (ouvrir une copie n'écrit plus rien, rétroaction enregistrée qui fait foi, D6) + consignes, `81a0cada` demande de relecture, `a749e717` D6 jusqu'au PDF et à « Copier tout » (option a de Grégoire), `988c6249` complément de la demande. Vitest 7 459 / 7 459 ; verdict Playwright complet pas encore lancé.
+**Où vit le travail** : `main` = `99b022aa` + `680a84b8` (relais d'attente) + la branche `lot-960-retroaction-a-la-main` (`c0255246` correctif + consignes, `81a0cada` demande de relecture, `a749e717` D6 jusqu'au PDF, `988c6249` complément, `63abebb9` R1-R3 + M1 + relecture de Cowork, `82a4f1b8` réponse, `9c7e16e2` B1 + contre-vérification, `5c6ac282` release build 0926-1828) + `c440eaa6` fusion + cette clôture. Contre-vérification de Cowork VERTE sous B1 (livrée). **Nouvelles acceptées par Grégoire le 26 sept., telles quelles** : « Évaluer : ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide. » Vitest 7 462 / 7 462 après la release.
 
-**Reste** : relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-09-26-lot-960.md` → `RELECTURE-2026-09-26-lot-960.md`), puis retouches éventuelles, verdict, release patch, fusion, push. Nouvelles (proposition de Cowork, à soumettre à Grégoire avant le push) : « Évaluer : ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide. » Fin de lot : cocher #960, `FILE-DES-LOTS.md`.
+**Reste** : constater « en ligne » chez Netlify ; retirer la branche `lot-960-retroaction-a-la-main` une fois le push constaté ; **prochain lot : lot B de l'enregistrement** (`DECISIONS-2026-09-26-enregistrement.md`). Mesuré, non changé, que Cowork porte à Grégoire : changer un niveau remplace la rétroaction finale réécrite à la main. Non commité, laissé : `Claude outputs/`.
 
 ## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 17 H : **LOT #959 (1.160.1) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
 
