@@ -57,16 +57,14 @@ const RELEVE = `() => {
     });
 }`;
 
-test('PREUVE · échelle · Enregistrer produit UN bandeau glissant, zéro fenêtre native', async ({ page }) => {
+// ↻ Lot E1 (D3, 27 sept. 2026) : une fiche EXISTANTE s'enregistre toute seule (le témoin commun
+// parle) ; le bandeau glissant reste au geste de CRÉATION, « … créée. ». Les deux preuves de forme
+// passent donc par « Créer l'échelle » / « Créer la grille ».
+test('PREUVE · échelle · Créer produit UN bandeau glissant, zéro fenêtre native', async ({ page }) => {
     const dialogues = await ouvrir(page);
     const r = await page.evaluate(async () => {
-        // security-ok: fixture de test, littéral écrit par le spec lui-même — aucune source externe.
-        await db.set('a2026_echellesTemplates', [{
-            id: 'ECH_T', nom: 'Échelle témoin', niveaux: [{ code: 'A', nom: 'Atteint', min: 60, max: 100 }],
-            description: 'témoin', dansBibliotheque: true
-        }]);
-        await chargerEchellePourModif('ECH_T');
-        await new Promise(res => setTimeout(res, 400));
+        await creerNouvelleEchelle();
+        (window._niveauxNouvelleEchelle || []).forEach((n, i) => { n.code = 'N' + i; n.nom = 'Niveau ' + i; });
         document.getElementById('nomEchelleTemplate').value = 'Échelle témoin';
         await sauvegarderEchelleComplete();
         await new Promise(res => setTimeout(res, 700));
@@ -77,7 +75,7 @@ test('PREUVE · échelle · Enregistrer produit UN bandeau glissant, zéro fenê
     console.log('ÉCHELLE →', JSON.stringify(notifs, null, 1));
     console.log('ÉCHELLE · fenêtres natives →', JSON.stringify(dialogues));
     expect(notifs.length, 'exactement un bandeau').toBe(1);
-    expect(notifs[0].texte).toContain('sauvegardée');
+    expect(notifs[0].texte).toContain('créée');
     expect(notifs[0].classes).toContain('notification-succes');
     expect(notifs[0].position).toBe('fixed');
     // Le bandeau doit passer DEVANT les modales : .modal-js-overlay est à 10000
@@ -98,9 +96,9 @@ test('PREUVE · grille · même forme, même coin que l\'échelle', async ({ pag
             id: 'GR_T', nom: 'Grille témoin', criteres: [], dansBibliotheque: true
         }]);
         await chargerListeGrillesTemplates();
-        await chargerGrillePourModif('GR_T');
+        await creerNouvelleGrille();
         await new Promise(res => setTimeout(res, 400));
-        document.getElementById('nomGrilleTemplate').value = 'Grille témoin';
+        document.getElementById('nomGrilleTemplate').value = 'Grille témoin neuve';
         await sauvegarderGrilleComplete();
         await new Promise(res => setTimeout(res, 700));
     });
@@ -108,7 +106,7 @@ test('PREUVE · grille · même forme, même coin que l\'échelle', async ({ pag
     console.log('GRILLE →', JSON.stringify(notifs, null, 1));
     console.log('GRILLE · fenêtres natives →', JSON.stringify(dialogues));
     expect(notifs.length).toBeGreaterThanOrEqual(1);
-    expect(notifs[0].texte).toContain('sauvegardée');
+    expect(notifs[0].texte).toContain('créée');
 });
 
 test('PREUVE · #466/CO-16 · écriture refusée = bandeau rouge SEUL, aucun « sauvegardée »', async ({ page }) => {
@@ -133,7 +131,8 @@ test('PREUVE · #466/CO-16 · écriture refusée = bandeau rouge SEUL, aucun « 
             cleActive: cle('echellesTemplates')
         };
         document.getElementById('nomEchelleTemplate').value = 'Échelle du trimestre A';
-        await sauvegarderEchelleComplete();
+        // Lot E1 : une échelle existante s'écrit au changement du nom (`sauvegarderNomEchelle`).
+        await sauvegarderNomEchelle();
         await new Promise(res => setTimeout(res, 700));
     });
     console.log('REFUS · diagnostic →', JSON.stringify(await page.evaluate(() => window.__diag)));
