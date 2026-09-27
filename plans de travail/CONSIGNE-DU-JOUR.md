@@ -1,34 +1,37 @@
-# Consigne – lot court : une rétroaction finale réécrite à la main ne suit plus les niveaux
+# Consigne – lot court : « Par où commencer ? » en trois étapes, et les tutoriels du blogue
 
-> Écrite le 26 septembre 2026, à 18 h 59 (Toronto), par Cowork. **Ne commence qu'une fois 1.160.2 poussée** (`git log origin/main` montre `958683a7` ou plus récent). Au début du lot : archive l'actuelle `CONSIGNE-DU-JOUR.md` (#960) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-960.md`, puis renomme celle-ci en `CONSIGNE-DU-JOUR.md`. À remesurer avant tout code. Lot court, AVANT le lot B ; cap « finir la rétroaction ». **Aucune mesure du stock** (demande de Grégoire).
+> Écrite le 26 septembre 2026, à 20 h 33 (Toronto), par Cowork. **Ne commence qu'une fois le lot #961 (rétroaction réécrite à la main) poussé et vert** (`git log origin/main`). Au début du lot : archive l'actuelle `CONSIGNE-DU-JOUR.md` sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-961.md`, puis renomme celle-ci en `CONSIGNE-DU-JOUR.md`. À remesurer avant tout code. Des mots seulement, et un lien : aucune donnée, aucune règle ne change.
 
-## 0 · Ménage d'ouverture
+## 1 · La demande de Grégoire (26 sept., au soir)
 
-- Supprime la branche locale `lot-960-retroaction-a-la-main` (fusionnée dans `main`, jamais poussée seule ; 1.160.2 en production chez Netlify depuis 18 h 56, constaté par Cowork).
+Ajouter à l'encadré « Bienvenue dans Labo Codex ! » de l'accueil l'accès aux tutoriels qu'il a créés sur son blogue : https://codexnumeris.org/tutoriels ; et reformuler « Par où commencer ? ». Texte proposé par Cowork, **accepté par Grégoire** ; il a tranché de **garder** la ligne de l'orthopédagogue (sa décision du 12 sept. : « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale »).
 
-## 1 · Le constat (le tien, point 4 de #960, `[exécuté]`)
+## 2 · Les mots, exacts (`js/accueil.js`, `genererBanniereBienvenue`)
 
-Changer le niveau d'un critère APRÈS une rétroaction finale réécrite à la main remplace toute la rétroaction par le texte régénéré (`niveauSelectionne` → `genererRetroaction(1)` ; idem `pointsSaisis`), sans avertissement ; l'auto-save l'écrit 1,5 s plus tard. Par la copie et par la Liste. Le texte à la main est perdu.
-⮕ **Inscris la fiche** au BACKLOG (prochain ID), disposition « tranché par Grégoire, lot court », avec la ligne ci-dessous.
+Remplace le paragraphe « Par où commencer ? » par :
 
-## 2 · La décision de Grégoire (26 sept., option b, recommandée par Cowork)
+> **Par où commencer ?**
+> 1. **Pose ton cadre.** Dans l'onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les saisis une fois : l'application s'en sert partout.
+> 2. **Conçois tes productions et tes évaluations.** Tu peux les élaborer seul·e ou les partager avec tes collègues.
+> 3. **Apprends geste par geste.** Les tutoriels de Labo Codex, sur le blogue Codex Numeris, montrent chaque étape en images.
+>
+> **Tu es orthopédagogue ?** Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.
 
-**Une rétroaction finale réécrite à la main ne suit plus les niveaux.** Changer un niveau ou des points ne la remplace plus. Une ligne d'avis, sous la zone de rétroaction, le dit : « Tu as réécrit cette rétroaction : elle ne suit plus les niveaux. », avec un bouton « Régénérer » qui, lui seul, remplace le texte par la version générée (après quoi elle suit de nouveau les niveaux). Motifs : « ce qui est enregistré fait foi » (#939, #946, #960) appliqué jusqu'au bout, et aucun texte perdu ; une fenêtre à chaque changement de niveau interromprait plusieurs fois par copie.
-⮕ Ajoute-la à `plans de travail/DECISIONS-2026-09-26-enregistrement.md` comme **D7 · Une rétroaction réécrite à la main ne suit plus les niveaux**, avec ces mots. Les deux textes (l'avis et « Régénérer ») sont acceptés avec l'option ; `[à vérifier]` s'ils tiennent sur iPad à côté de la zone.
+- Une vraie liste numérotée (`<ol>`), pas des `<br>` ; « Tu es orthopédagogue ? » en paragraphe à part, après la liste.
+- **Plus aucun tiret cadratin (—) dans l'encadré** : Grégoire le réserve aux dialogues.
+- Apostrophes typographiques (’) comme le reste du bandeau.
+- Ne touche ni au premier paragraphe, ni à « Certains concepts sont nouveaux ? », ni au courriel, ni à l'encadré de l'AQPC, ni à la carte « Tu es orthopédagogue ? » sous le bandeau.
 
-## 3 · Ce qui est attendu (tranché par Cowork, question technique)
+## 3 · Le troisième bouton
 
-- **Qui est « réécrite à la main »** : une frappe de l'utilisateur dans la zone (l'événement `input` de `retroactionModifiee`, que `.value = …` ne déclenche pas). Le marqueur se **persiste** avec l'évaluation, pour qu'une copie rouverte le garde.
-- **Stock sans marqueur** : à l'ouverture, une rétroaction enregistrée qui DIFFÈRE du texte que la génération donnerait compte comme réécrite (le sens sûr : dans le doute, on ne remplace pas). Si la comparaison n'est pas fiable (options d'affichage, gabarits changés depuis), dis-le et arrête-toi avant de coder ce volet.
-- **« Régénérer »** efface le marqueur et remplace ; rien d'autre ne l'efface. « Changer de cartouche » confirmé (#944) : dis ce qu'il fait aujourd'hui de la rétroaction finale, sans le changer dans ce lot.
-- **Aucune donnée réécrite** à l'ouverture (la neutralité de #960 tient : banc `evaluation-959-neutralite-chargeur`).
+Après « Voir les guides pédagogiques » : **« Voir les tutoriels ↗ »**, un lien `<a class="btn btn-secondaire" href="https://codexnumeris.org/tutoriels" target="_blank" rel="noopener noreferrer">`, avec un texte masqué pour les lecteurs d'écran (« s'ouvre dans un nouvel onglet ») et la flèche en `aria-hidden`. Charge le skill `design-interface` avant : même hauteur et même style que les deux autres boutons, cible tactile iPad, et les trois boutons passent à la ligne proprement sur un écran étroit (`flex-wrap`, à mesurer à 360, 768 et 1024 px). ⚠ Vérifie que la politique d'en-têtes (`_headers`, CSP) ne bloque pas la navigation vers ce domaine.
 
 ## 4 · Preuves
 
-- WebKit, par la copie ET par la Liste : réécrire, changer un niveau, attendre > 1,5 s → base et écran gardent le texte, l'avis s'affiche ; « Régénérer » → texte généré, avis parti, un niveau changé ensuite suit de nouveau. Même chose par les points d'un critère analytique.
-- Rouvrir une copie réécrite (marqueur en base) → avis présent, niveau changé → texte gardé.
-- Mutations : marqueur non persisté ; garde retirée dans `niveauSelectionne` ; garde retirée dans `pointsSaisis` ; « Régénérer » qui n'efface pas le marqueur. Chacune rouge.
+- La sentinelle `sentinelle-accueil-porte-ortho-et-champ2-846.test.js` verrouille les mots du bandeau (`MOTS_BANDEAU`) : **mets-y les nouveaux mots**, dans l'ordre rendu ; B1 à B4 inchangés (la carte reste, les huit tâches restent). Ajoute : le lien a la bonne adresse, `target="_blank"` et `rel` avec `noopener` ; aucun « — » dans le rendu du bandeau.
+- `sentinelle-640-accueil-porte-entree.test.js` : vert, inchangé.
+- Mutations : adresse du lien changée ; `rel` retiré ; ligne de l'orthopédagogue retirée. Chacune rouge.
 
 ## 5 · Livraison
 
-Commit sur branche, demande de relecture croisée dans `plans de travail/DEMANDE-RELECTURE-2026-09-26-<fiche>.md`, et arrête-toi : Cowork relit. **Cases à cocher à la livraison** : la fiche inscrite au § 1. **Nouvelles** proposées par Cowork, à faire accepter par Grégoire : « Évaluer : une rétroaction finale que tu as réécrite à la main n'est plus remplacée quand tu changes un niveau ; le bouton « Régénérer » la refait à la demande. »
+Pas de relecture croisée exigée (des mots, un lien, rien qui ne se reprenne) : fusion, release, verdict, push. **Nouvelles**, proposées par Cowork, à faire accepter par Grégoire avant le push : « Accueil : « Par où commencer ? » se lit en trois étapes, et un bouton ouvre les tutoriels de Labo Codex sur le blogue Codex Numeris. »
