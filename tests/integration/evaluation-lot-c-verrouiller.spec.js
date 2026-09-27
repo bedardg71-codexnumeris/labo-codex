@@ -304,3 +304,37 @@ test('lot C · copie neuve : « IA » posé avant tout niveau s\'enregistre (non
     }))).toEqual({ id: b[0].id, cadenas: '' });
     expect(erreurs).toEqual([]);
 });
+
+// R1 (relecture de Cowork, 27 sept.) — L'ÉVALUATION CRÉÉE EN CHEMIN NE PASSE PAS À L'ÉLÈVE SUIVANT. L'écriture
+// en attente part au changement d'élève, quand le menu porte déjà le suivant : son id ne doit pas devenir celui
+// de l'écran (`_signalerEvaluationCreeeAutoSave` compare les menus), sinon « Verrouiller l'évaluation » sur le
+// suivant verrouillerait l'évaluation du précédent.
+for (const cas of [
+    { quoi: '« IA » posé', geste: ['statutIntegrite', 'ia', 'change'] },
+    { quoi: 'un niveau choisi', geste: ['eval_c1', 'E', 'change'] }
+]) {
+    test(`lot C · R1 copie neuve, ${cas.quoi}, élève suivant avant 1,5 s : l'id ne suit pas, le verrou du suivant ne touche pas le précédent`, async ({ page }) => {
+        test.setTimeout(90000);
+        const erreurs = brancherEcouteurs(page);
+        await semer(page, null);
+        await ouvrirParLaCopie(page, '1234567');
+        await attendreCopieChargee(page, { idAttendu: null });
+
+        await saisir(page, ...cas.geste);
+        await ouvrirParLaCopie(page, '7654321');
+        await attendreCopieChargee(page, { idAttendu: null });
+
+        const premiere = (await base(page)).find((e) => e.etudiantDA === '1234567');
+        expect(premiere, 'l\'évaluation du premier est en base').toBeTruthy();
+        expect(premiere.verrouillee).toBe(false);
+        expect(await page.evaluate(() => (window.evaluationEnCours || {}).idModification), 'l\'écran du second n\'a pas son id')
+            .not.toBe(premiere.id);
+
+        await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').click());
+        await page.waitForTimeout(500);
+        const apres = (await base(page)).find((e) => e.id === premiere.id);
+        expect(apres.verrouillee, 'le verrou du second ne touche pas l\'évaluation du premier').toBe(false);
+        expect(apres.etudiantDA).toBe('1234567');
+        expect(erreurs.filter((m) => !m.startsWith('dialogue:'))).toEqual([]);
+    });
+}

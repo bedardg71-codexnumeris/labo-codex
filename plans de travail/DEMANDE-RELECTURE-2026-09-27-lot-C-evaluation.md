@@ -56,6 +56,8 @@ Recherche dans `BACKLOG.md` et `SUIVI-BUGS.md` (ouverts) sur : nombre d'erreurs,
 
 ## 5 · Les mots – à faire accepter par Grégoire avant le push
 
+> **ACCEPTÉS par Grégoire le 27 sept. 2026 (option 1)** : les mots de ce § et l'Aide du § 6, retouche des Nouvelles comprise (« intégrité » au lieu de « statut de remise »).
+
 Déjà décidés (D1) : « Verrouiller l'évaluation » ; « Non verrouillée » ; « ne compte pas encore dans la note ».
 
 Ceux du § 3 de la consigne, posés tels quels : « Déverrouiller l'évaluation » ; « Verrouillée – clique pour déverrouiller » / « Non verrouillée – clique pour verrouiller » ; « Non verrouillée : ne compte pas encore dans la note. » ; « évaluation non verrouillée, non comptée » (et `· non comptée`) ; « Évaluation verrouillée : ‹élève› – ‹production› » ; « Évaluation déverrouillée : … ».
