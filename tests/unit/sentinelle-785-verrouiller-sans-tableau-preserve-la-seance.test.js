@@ -127,12 +127,32 @@ describe('#785 · verrouiller une date dont le tableau n’est pas rendu', () =>
         // Sans ce cas, « ne retirer que ce qu’on va réécrire » pourrait dégénérer en « ne rien
         // retirer » : la sauvegarde deviendrait un geste sans effet, et les quatre cas ci-dessus
         // resteraient verts. Ici l’écran affiche 1 période là où la base en porte 2.
+        //
+        // Lot D (27 sept. 2026) : sur une séance DÉJÀ saisie, le verrou n'écrit que les lignes
+        // TOUCHÉES (un chargement ou un verrou ne réécrit pas ce qui est en base). La contre-épreuve
+        // passe donc par le geste : les trois lignes sont touchées, puis on verrouille.
         const store = storeAvecUneSeance();
         const b = monterAvecDomFidele(store, true, '1');
+        for (const da of ['2000001', '2000002', '2000003']) {
+            // Le geste passe par la note (même armement que la période ; ce banc n'a pas le calcul
+            // d'affichage de l'assiduité que le champ de période relance).
+            b.win.notePresenceModifiee({ dataset: { da, dateStr: DATE } });
+        }
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
         const apres = presencesDu(store, DATE);
         expect(apres).toHaveLength(3);
         expect(apres.every((p) => p.periodesPresentes === 1)).toBe(true);
+    });
+
+    it('Lot D · SANS geste, verrouiller une séance saisie ne la réécrit pas depuis l’écran', () => {
+        // L'écran affiche 1 période partout, la base en porte 2 / 1 / 2 : rien n'a été touché, rien
+        // ne change. Avant le lot, le verrou réécrivait toute ligne rendue.
+        const store = storeAvecUneSeance();
+        const avant = JSON.stringify(presencesDu(store, DATE));
+        const b = monterAvecDomFidele(store, true, '1');
+        try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
+        expect(JSON.stringify(presencesDu(store, DATE))).toBe(avant);
+        expect(store[K_VERROU]).toContain(DATE);
     });
 
     it('DÉVERROUILLER ne touche à rien — seul le verrouillage passe par la sauvegarde', () => {

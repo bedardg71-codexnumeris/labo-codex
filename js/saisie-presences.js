@@ -842,19 +842,35 @@ function basculerVerrouillageDate(dateStr) {
     const datesVerrouillees = obtenirDatesVerrouillees().slice();
 
     const index = datesVerrouillees.indexOf(dateStr);
+    let message = null;
     if (index > -1) {
         // Déverrouillage
         datesVerrouillees.splice(index, 1);
     } else {
-        // 🆕 FIX (3 fév 2026) : Sauvegarder les présences AVANT de verrouiller.
-        // Écrit aussi en anonymisation, comme « Enregistrer » (lot A de l'enregistrement,
-        // 26 sept. 2026 : #736 sans objet, le mode ne bloque plus aucune écriture).
-        sauvegarderPresencesSansValidation(dateStr);
+        // Lot D (D2) : verrouiller ENREGISTRE la séance, par l'écrivain unique, et le dit. Une
+        // séance non saisie devient saisie (les élèves non marqués comptent présents) ; les
+        // lignes touchées en attente partent dans la même écriture. Pas de validation de date :
+        // le verrou n'est offert que sur une séance valide, et il écrivait déjà sans elle.
+        const nonSaisie = _seanceNonSaisie(dateStr);
+        const ecrit = ecrirePresencesSeance(dateStr, {
+            touches: _prendreTouchesEnAttente(dateStr),
+            geste: 'Verrouillage de la séance',
+            valider: false
+        });
+        // Un échec d'écriture ne verrouille pas une séance qui n'est pas en base.
+        if (ecrit === false) {
+            mettreAJourControleVerrouillage(dateStr, false);
+            return;
+        }
         datesVerrouillees.push(dateStr);
+        message = nonSaisie
+            ? 'Séance saisie et verrouillée : les élèves non marqué·es comptent présent·es.'
+            : 'Séance verrouillée.';
     }
 
     db.setSync(cleDatesVerrouillees(), datesVerrouillees);
     initialiserSaisiePresences();
+    if (message && typeof notifications !== 'undefined') notifications.succes(message);
 }
 
 /**
@@ -898,106 +914,269 @@ function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
 
 window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
 
-/**
- * 🆕 FIX (3 fév 2026) : Sauvegarde les présences sans validation
- * Utilisé lors du verrouillage pour ne pas perdre les données saisies
- */
-function sauvegarderPresencesSansValidation(dateStr) {
+/* ===============================
+   ENREGISTREMENT — lot D (D2, D2 bis ; 27 sept. 2026)
+   =============================== */
 
-    // Obtenir les étudiants du cours actif
-    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+/*
+ * UN SEUL ÉCRIVAIN : `ecrirePresencesSeance`. L'enregistrement automatique, « Confirmer la
+ * séance », « Tous présents », « Réinitialiser » et le verrou passent tous par lui. Avant le
+ * lot, deux écrivains (`enregistrerPresences`, le bouton ; `sauvegarderPresencesSansValidation`,
+ * le verrou) réécrivaient chacun TOUTES les lignes rendues.
+ *
+ * QUELLES LIGNES S'ÉCRIVENT. L'assiduité ne regarde pas les élèves un par un : une date est
+ * « saisie » pour un sous-groupe dès qu'UN élève de ce sous-groupe y a une fiche, et un élève
+ * sans fiche y compte alors absent (`construireDatesSaisiesGroupe`, indices.js). Sur cette base :
+ *   - une ligne TOUCHÉE (période, note, « Tous présents », « Réinitialiser ») s'écrit toujours ;
+ *   - une ligne sans fiche dans un sous-groupe dont la séance n'est PAS saisie s'écrit au premier
+ *     geste (D2 : « les élèves qu'on n'a pas touchés comptent présents ») — recherche comprise :
+ *     une ligne cachée par la recherche s'écrit aussi (D2 bis a) ;
+ *   - une ligne sans fiche dans un sous-groupe DÉJÀ saisi ne s'écrit pas tant qu'on ne la touche
+ *     pas : elle compte absente et le dit (D2 bis b) ;
+ *   - une ligne qui a déjà sa fiche, non touchée, n'est pas réécrite.
+ * Les lignes absentes du tableau (autre sous-groupe filtré) ne sont jamais retirées (#785).
+ *
+ * UN CHARGEMENT N'ÉCRIT RIEN : ouvrir une séance jamais saisie ne crée aucune présence
+ * (« aucune présence inventée »), ouvrir une séance saisie ne la réécrit pas. Seul un geste arme
+ * l'écriture.
+ */
+
+const DELAI_ENREGISTREMENT_PRESENCES_MS = 1500;
+const GESTE_PRESENCES = 'Enregistrement des présences';
+const MENTION_NON_SAISI = 'Non saisi·e : compté·e absent·e';
+
+/** L'écriture en attente : { dateStr, touches: Set<da>, minuterie }. */
+let _presencesEnAttente = null;
+
+/** Les présences du cours actif (filtrées par `coursId`, comme l'assiduité les lit). */
+function _presencesDuCours() {
+    const p = typeof obtenirDonneesSelonMode === 'function' ? obtenirDonneesSelonMode('presences') : null;
+    return Array.isArray(p) ? p : [];
+}
+
+/**
+ * L'état de chaque ligne rendue pour cette séance : { da, aFiche, groupeSaisi }.
+ * `groupeSaisi` est lu par la fonction même de l'assiduité : l'écran et l'indice A disent la
+ * même chose. Une ligne compte si son champ existe ET porte cette date (le tableau d'une autre
+ * date, rendu par-dessus, ne s'écrit jamais sous celle-ci).
+ */
+function _etatLignesSeance(dateStr, presencesCours) {
+    let etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
-
-    if (!etudiants || etudiants.length === 0) {
-        console.warn('⚠️ Aucun étudiant à sauvegarder');
-        return;
-    }
-
-    // Lire TOUTES les présences existantes
-    const clePresences = cle('presences');
-    let presences = db.getSync(clePresences, []);
-    if (!Array.isArray(presences)) presences = [];
-
-    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-    // #749 lot 3 (S-3, 11 sept. 2026) : même garde que dans `enregistrerPresences`,
-    // même motif — sans cours actif, la fiche d'un autre cours serait remplacée.
-    if (!coursId) {
-        console.warn('[Présences] sauvegarderPresencesSansValidation : aucun cours actif — rien n\'est écrit.');
-        return;
-    }
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
-
-    // Filtrer par sous-groupe si sélectionné
+    etudiants = etudiants || [];
     const selectGroupe = document.getElementById('selectGroupePresences');
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
-    let etudiantsATraiter = groupeFiltre
-        ? etudiants.filter(e => _groupeReel(e) === groupeFiltre)
-        : etudiants;
+    if (groupeFiltre) etudiants = etudiants.filter(e => _groupeReel(e) === groupeFiltre);
 
-    // Préserver les flags facultatifs
+    const lignes = [];
+    etudiants.forEach(e => {
+        const input = document.getElementById(`periodes_${e.da}`);
+        if (!input) return;
+        const dateLigne = input.dataset && input.dataset.dateStr;
+        if (dateLigne && dateLigne !== dateStr) return;
+        const aFiche = presencesCours.some(p => p.date === dateStr && p.da === e.da);
+        const groupeSaisi = typeof construireDatesSaisiesGroupe === 'function'
+            ? construireDatesSaisiesGroupe(e.da, presencesCours).has(dateStr)
+            : presencesCours.some(p => p.date === dateStr);
+        lignes.push({ da: e.da, aFiche, groupeSaisi });
+    });
+    return lignes;
+}
+
+/** Une ligne à écrire au prochain enregistrement (voir l'en-tête du bloc). */
+function _ligneAEcrire(ligne, touches) {
+    if (touches && touches.has(ligne.da)) return true;
+    return !ligne.aFiche && !ligne.groupeSaisi;
+}
+
+/**
+ * L'ÉCRIVAIN UNIQUE des présences d'une séance.
+ *
+ * @param {string} dateStr
+ * @param {Object} [options]
+ * @param {Set<string>} [options.touches] - les lignes touchées depuis la dernière écriture
+ * @param {string} [options.geste] - le geste nommé par le témoin en cas d'échec
+ * @param {boolean} [options.valider=true] - refuser ce que « Confirmer la séance » refuserait
+ * @returns {boolean|null} true : écrit ; false : refusé ou échec (le témoin l'a dit) ;
+ *   null : rien à écrire.
+ */
+function ecrirePresencesSeance(dateStr, options) {
+    const { touches, geste = GESTE_PRESENCES, valider = true } = options || {};
+    if (!dateStr) return null;
+
+    // #749 lot 3 (S-3) : sans cours actif, la fiche d'un autre cours serait remplacée par une
+    // fiche `coursId: null`. Rien n'est écrit, sans mot neuf à l'écran.
+    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    if (!coursId) {
+        console.warn('[Présences] ecrirePresencesSeance : aucun cours actif — rien n\'est écrit.');
+        return null;
+    }
+
+    if (valider) {
+        const validation = validerDateSaisie(dateStr);
+        if (!validation.valide || validation.verrouille) {
+            const raison = validation.verrouille
+                ? 'la séance est verrouillée.'
+                : 'cette date n\'est pas une séance où saisir les présences.';
+            if (window.temoinEnregistrement) window.temoinEnregistrement.nonEnregistre(raison, geste, cle('presences'));
+            return false;
+        }
+    }
+
+    const presencesCours = _presencesDuCours();
+    const daEcrits = new Set(_etatLignesSeance(dateStr, presencesCours)
+        .filter(l => _ligneAEcrire(l, touches))
+        .map(l => l.da));
+    if (daEcrits.size === 0) return null;
+
+    let presences = db.getSync(cle('presences'), []);
+    if (!Array.isArray(presences)) presences = [];
+    const presencesAvant = presences;
+
+    // Les absences motivées RàI (`facultatif`) gardent leur marque.
     const flagsFacultatifs = {};
     presences.forEach(p => {
-        const matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
-        if (p.date === dateStr && p.facultatif === true && matchCoursId) {
-            flagsFacultatifs[p.da] = true;
-        }
+        const matchCoursId = !p.coursId || p.coursId === coursId;
+        if (p.date === dateStr && p.facultatif === true && matchCoursId) flagsFacultatifs[p.da] = true;
     });
 
-    // 🛡️ #785 (8 sept. 2026) : NE RETIRER QUE CE QUI SERA RÉÉCRIT.
-    // La liste des élèves vient de la BASE, la réécriture vient du DOM. Quand le
-    // tableau de la séance n'est pas rendu, le retrait emportait la séance ENTIÈRE
-    // sans qu'aucune écriture ne la remplace — une séance détruite en silence.
-    const daReecrits = new Set(
-        etudiantsATraiter
-            .filter(e => document.getElementById(`periodes_${e.da}`))
-            .map(e => e.da)
-    );
-
-    // Supprimer les anciennes présences pour cette date et ce cours
-    const presencesAvant = presences;
+    // 🛡️ #785 : NE RETIRER QUE CE QUI SERA RÉÉCRIT — et les fiches d'un autre cours jamais.
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
-        if (coursId && p.coursId && p.coursId !== coursId) return true;
-        return !daReecrits.has(p.da);
+        if (p.coursId && p.coursId !== coursId) return true;
+        return !daEcrits.has(p.da);
     });
 
-    // Ajouter les nouvelles présences depuis le formulaire
-    let compteur = 0;
-    etudiantsATraiter.forEach(etudiant => {
-        const inputPeriodes = document.getElementById(`periodes_${etudiant.da}`);
-        const inputNotes = document.getElementById(`notes_${etudiant.da}`);
-
-        if (inputPeriodes) {
-            const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
-            const notes = _notesDuChamp(inputNotes, presencesAvant, etudiant.da, dateStr, coursId);
-
-            // #540 lot E3 : `heures` n'est PLUS ÉCRIT. C'était une sérialisation de
-            // `periodesPresentes` par la durée de période — un champ de
-            // rétrocompatibilité qui n'apportait rien de plus que sa source, et dont le
-            // nom a déjà induit en erreur ailleurs (les présences RàI y stockent des
-            // PÉRIODES, cf. lot E2). Les lecteurs le lisent tous APRÈS
-            // `periodesPresentes` ; une présence neuve qui ne le porte pas est donc lue
-            // correctement partout. Les anciennes le gardent et restent lisibles.
-            const presenceObj = {
-                date: dateStr,
-                da: etudiant.da,
-                periodesPresentes: periodesPresentes,
-                notes: notes,
-                coursId: coursId
-            };
-
-            if (flagsFacultatifs[etudiant.da] === true) {
-                presenceObj.facultatif = true;
-            }
-
-            presences.push(presenceObj);
-            compteur++;
-        }
+    daEcrits.forEach(da => {
+        const inputPeriodes = document.getElementById(`periodes_${da}`);
+        const inputNotes = document.getElementById(`notes_${da}`);
+        // #540 lot E3 : `heures` n'est plus écrit ; les lecteurs lisent `periodesPresentes`.
+        const presenceObj = {
+            date: dateStr,
+            da: da,
+            periodesPresentes: parseFloat(inputPeriodes.value) || 0,
+            notes: _notesDuChamp(inputNotes, presencesAvant, da, dateStr, coursId),
+            coursId: coursId
+        };
+        if (flagsFacultatifs[da] === true) presenceObj.facultatif = true;
+        presences.push(presenceObj);
     });
 
-    // Sauvegarder
-    db.setSync(clePresences, presences);
+    // Lot B : le témoin dit « Enregistré » ou « Non enregistré – ‹geste› : ‹raison› ».
+    if (sauvegarderDonneesSelonMode('presences', presences, { geste }) !== true) return false;
+
+    calculerEtSauvegarderIndicesAssiduite();
+    _rafraichirEtatSeance(dateStr);
+
+    // Le Suivi du groupe, s'il est affiché, suit.
+    const sousSectionGroupe = document.getElementById('suivi-groupe');
+    if (sousSectionGroupe && sousSectionGroupe.classList.contains('active')
+        && typeof chargerTableauBordApercu === 'function') {
+        setTimeout(() => chargerTableauBordApercu(), 300);
+    }
+    return true;
+}
+
+/**
+ * Arme l'enregistrement automatique après un geste sur la ligne `da` (ou sur plusieurs, par
+ * « Tous présents » / « Réinitialiser »). Une écriture en attente pour une AUTRE date part
+ * d'abord.
+ */
+function _armerEnregistrementPresences(dateStr, das) {
+    if (!dateStr) return;
+    if (_presencesEnAttente && _presencesEnAttente.dateStr !== dateStr) viderEnregistrementPresences();
+    if (!_presencesEnAttente) _presencesEnAttente = { dateStr, touches: new Set(), minuterie: null };
+    (das || []).forEach(da => {
+        _presencesEnAttente.touches.add(da);
+        _retirerMentionNonSaisi(da);   // la ligne touchée s'écrit : elle ne compte plus absente d'office
+    });
+    clearTimeout(_presencesEnAttente.minuterie);
+    _presencesEnAttente.minuterie = setTimeout(viderEnregistrementPresences, DELAI_ENREGISTREMENT_PRESENCES_MS);
+}
+
+/**
+ * VIDAGE : l'écriture en attente part maintenant. Appelé avant tout nouveau rendu du tableau
+ * (date, séance, sous-groupe, tri, retour à l'onglet, verrou), avant « Fermer », et quand la
+ * page se cache ou se décharge. Les pertes mesurées par l'inventaire du 26 sept. (A1 : saisie
+ * puis séance suivante, puis `naviguerVers`) venaient du rendu qui écrasait la saisie.
+ */
+function viderEnregistrementPresences() {
+    const attente = _presencesEnAttente;
+    if (!attente) return null;
+    _presencesEnAttente = null;
+    clearTimeout(attente.minuterie);
+    return ecrirePresencesSeance(attente.dateStr, { touches: attente.touches });
+}
+
+/** Les lignes touchées en attente, retirées de l'attente (le verrou les écrit lui-même). */
+function _prendreTouchesEnAttente(dateStr) {
+    const attente = _presencesEnAttente;
+    if (!attente) return new Set();
+    if (attente.dateStr !== dateStr) { viderEnregistrementPresences(); return new Set(); }
+    _presencesEnAttente = null;
+    clearTimeout(attente.minuterie);
+    return attente.touches;
+}
+
+/** La séance affichée est-elle non saisie (au moins une ligne qui s'écrirait sans geste) ? */
+function _seanceNonSaisie(dateStr) {
+    return _etatLignesSeance(dateStr, _presencesDuCours()).some(l => _ligneAEcrire(l, null));
+}
+
+/**
+ * L'état de la séance, dans la barre : « Séance non saisie » + « Confirmer la séance », ou
+ * « Séance saisie ». Et la mention des lignes sans fiche d'une séance saisie (D2 bis b).
+ * Ne rend pas le tableau : un champ en cours de frappe garde son focus.
+ */
+function _rafraichirEtatSeance(dateStr) {
+    const etat = document.getElementById('etat-seance-presences');
+    const btnConfirmer = document.querySelector('[data-action="confirmerSeancePresences"]');
+    const lignes = dateStr ? _etatLignesSeance(dateStr, _presencesDuCours()) : [];
+    const nonSaisie = lignes.some(l => _ligneAEcrire(l, null));
+    const verrouillee = dateStr ? estDateVerrouillee(dateStr) : false;
+
+    if (etat) {
+        etat.textContent = lignes.length === 0 ? '' : (nonSaisie ? 'Séance non saisie' : 'Séance saisie');
+        etat.classList.toggle('u-hide', lignes.length === 0);
+    }
+    if (btnConfirmer) {
+        btnConfirmer.classList.toggle('u-hide', !nonSaisie);
+        btnConfirmer.disabled = verrouillee;
+    }
+    lignes.forEach(l => { if (l.aFiche || !l.groupeSaisi) _retirerMentionNonSaisi(l.da); });
+}
+
+function _retirerMentionNonSaisi(da) {
+    const mention = document.getElementById(`non-saisi_${da}`);
+    if (mention) mention.remove();
+}
+
+/**
+ * « Confirmer la séance » : tout le monde est là, rien à changer. La séance passe à « saisie ».
+ */
+function confirmerSeancePresences() {
+    const dateInput = document.getElementById('date-cours');
+    if (!dateInput || !dateInput.value) return;
+    const dateStr = dateInput.value;
+    ecrirePresencesSeance(dateStr, { touches: _prendreTouchesEnAttente(dateStr) });
+}
+
+/** « Fermer » : l'écriture en attente part, puis retour à la liste. */
+function fermerSaisiePresences() {
+    viderEnregistrementPresences();
+    if (typeof afficherSousSection === 'function') afficherSousSection('suivi-liste');
+}
+
+// La page qui se cache ou se décharge emporte l'écriture en attente (même trio que `db.js`).
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('pagehide', viderEnregistrementPresences);
+    window.addEventListener('beforeunload', viderEnregistrementPresences);
+}
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') viderEnregistrementPresences();
+    });
 }
 
 /**
@@ -1069,6 +1248,10 @@ function verifierConfigurationFormatHoraire() {
  * 🆕 BETA 95.7 (22 jan) : Persistance des paramètres (date, groupe, tri)
  */
 function initialiserSaisiePresences() {
+    // Lot D : l'écriture en attente part AVANT que le tableau soit rendu de nouveau (date,
+    // séance, sous-groupe, tri, retour à l'onglet, verrou) — sinon le rendu l'écrase.
+    viderEnregistrementPresences();
+
     // 🆕 FIX #220 (3 mars 2026) : Régénérer les séances complètes du groupe-cours actif
     // pour s'assurer que le cache reflète l'horaire spécifique au groupe-cours.
     if (typeof genererSeancesCompletes === 'function') {
@@ -1147,6 +1330,7 @@ function initialiserSaisiePresences() {
 
         mettreAJourEnteteDateSeance('');
         mettreAJourControleVerrouillage(null, false);
+        _rafraichirEtatSeance(null);
         return;
     }
 
@@ -1280,9 +1464,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     let etudiants = typeof obtenirEtudiantsCoursActif === 'function'
         ? obtenirEtudiantsCoursActif()
         : obtenirDonneesSelonMode('groupeEtudiants');
-    // Garde null (99.30) : install fraiche / cours sans etudiants -> sort()
-    // crash. Parite avec sauvegarderPresencesSansValidation:616 et obtenir
-    // DonneesSelonMode pattern dans le reste du module.
+    // Garde null (99.30) : install fraiche / cours sans etudiants -> sort() crash.
     etudiants = etudiants || [];
     // ✅ CORRIGÉ (8 janvier 2026) : Utiliser obtenirDonneesSelonMode pour filtrer par coursId
     // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
@@ -1353,6 +1535,13 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             periodesPresence = nombrePeriodesSeance; // Présent par défaut si nouvelle saisie
         }
 
+        // D2 bis (b), 27 sept. 2026 — une séance DÉJÀ saisie pour son sous-groupe, sans fiche pour
+        // cet élève : l'assiduité le compte absent. La ligne le dit, au lieu d'afficher « présent ».
+        // Rien n'est écrit tant qu'on ne touche pas sa ligne.
+        const nonSaisi = !presenceExistante && typeof construireDatesSaisiesGroupe === 'function'
+            && construireDatesSaisiesGroupe(etudiant.da, presences).has(dateStr);
+        if (nonSaisi) periodesPresence = 0;
+
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
         // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
         // l'écran : la note (texte libre) est masquée, le DA aussi. Le champ masqué ne s'écrit pas.
@@ -1385,7 +1574,8 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                    ${estVerrouille ? 'disabled' : ''}
                    data-facultatif="${estFacultatif ? 'true' : 'false'}"
                    data-on-change="mettreAJourLignePeriodesHandler" data-da="${etudiant.da}" data-date-str="${dateStr}" data-nb-periodes="${nombrePeriodesSeance}"
-            >/<span class="max-periodes">${nombrePeriodesSeance}</span>`;
+            >/<span class="max-periodes">${nombrePeriodesSeance}</span>${nonSaisi
+                ? `<span id="non-saisi_${echapperHtml(etudiant.da)}" class="presence-non-saisie">${MENTION_NON_SAISI}</span>` : ''}`;
 
         // Structure : DA | Prénom | Nom | Présence | Notes | Total pér. | Assiduité
         tr.innerHTML = `
@@ -1400,6 +1590,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                        value="${masquer ? '' : echapperHtml(notes)}"
                        placeholder="${masquer ? window.MENTION_MASQUE_ANONYMISATION : 'Notes…'}"
                        ${masquer ? 'data-masque-anonymisation="1"' : ''}
+                       data-on-input="notePresenceModifiee" data-da="${echapperHtml(etudiant.da)}" data-date-str="${dateStr}"
                        ${estVerrouille || masquer ? 'disabled' : ''}>
             </td>
             <td><span id="heuresHisto_${etudiant.da}">${Math.round(totalPeriodesPresentes)} pér.</span></td>
@@ -1444,14 +1635,13 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     // Gérer l'état des boutons principaux
     const btnTousPresents = document.getElementById('btn-tous-presents');
     const btnReinit = document.getElementById('btn-reinit-saisie');
-    const btnEnregistrer = document.querySelector('[data-action="enregistrerPresences"]');
-    const btnAnnuler = document.querySelector('#actions-presences-bar .btn-annuler');
 
     if (btnTousPresents) btnTousPresents.disabled = estVerrouille;
     if (btnReinit) btnReinit.disabled = estVerrouille;
-    if (btnEnregistrer) btnEnregistrer.disabled = estVerrouille;
-    if (btnAnnuler) btnAnnuler.disabled = estVerrouille;
     calculerEtSauvegarderIndicesAssiduite();
+
+    // « Séance non saisie » / « Séance saisie » (lot D) — lecture seule, rien n'est écrit.
+    _rafraichirEtatSeance(dateStr);
 
     // Mettre à jour le compteur présents/absents
     mettreAJourCompteurPresences();
@@ -1609,148 +1799,6 @@ function mettreAJourLigne(da, dateStr) {
 }
 
 /* ===============================
-   ENREGISTREMENT
-   =============================== */
-
-/**
- * Enregistre les présences saisies
- */
-function enregistrerPresences() {
-    const dateInput = document.getElementById('date-cours');
-    if (!dateInput || !dateInput.value) {
-        alert('Sélectionne une date');
-        return;
-    }
-
-    const dateStr = dateInput.value;
-    const validation = validerDateSaisie(dateStr);
-
-    if (validation.verrouille) {
-        alert('Cette date est verrouillée. Déverrouille-la d\'abord pour modifier les présences.');
-        return;
-    }
-
-    const selectGroupe = document.getElementById('selectGroupePresences');
-    const groupeFiltre = selectGroupe ? selectGroupe.value : '';
-
-    // 🆕 BETA 95.7 (23 jan) : Utiliser UNIQUEMENT les étudiants du groupe-cours actif
-    let etudiants = typeof obtenirEtudiantsCoursActif === 'function'
-        ? obtenirEtudiantsCoursActif()
-        : obtenirDonneesSelonMode('groupeEtudiants');
-    // Garde null (99.30) : evite crash filter() si install fraiche.
-    etudiants = etudiants || [];
-    // ✅ CORRIGÉ (22 janvier 2026) : Utiliser la clé namespacée pour le trimestre actif
-    const clePresences = cle('presences');
-    let presences = db.getSync(clePresences, []);
-    // ✅ CORRIGÉ (22 janvier 2026) : S'assurer que presences est un tableau
-    if (!Array.isArray(presences)) presences = [];
-
-    // ✅ CORRIGÉ (8 janvier 2026) : Obtenir coursId en premier pour filtrer correctement
-    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
-
-    // #749 lot 3 (S-3, 11 sept. 2026) : sans cours actif, la garde du filtre
-    // ci-dessous (`coursId && p.coursId && …`) tombe, et la fiche d'un AUTRE cours
-    // à cette date serait remplacée par une fiche `coursId: null`. Cas incohérent
-    // (`infoCours` nul avec un groupe-cours actif), jamais vu par Grégoire : on
-    // n'écrit rien, sans mot neuf à l'écran.
-    if (!coursId) {
-        console.warn('[Présences] enregistrerPresences : aucun cours actif — rien n\'est écrit.');
-        return;
-    }
-
-    // Filtrer les étudiants si un sous-groupe est sélectionné (à l'intérieur du groupe-cours)
-    let etudiantsATraiter = etudiants;
-    if (groupeFiltre) {
-        etudiantsATraiter = etudiants.filter(e => _groupeReel(e) === groupeFiltre);
-    }
-
-    // IMPORTANT : Sauvegarder les flags facultatifs AVANT de supprimer les anciennes présences
-    // ✅ CORRIGÉ (8 janvier 2026) : Vérifier aussi coursId pour ne pas mélanger les cours
-    const flagsFacultatifs = {};
-    presences.forEach(p => {
-        const matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
-        if (p.date === dateStr && p.facultatif === true && matchCoursId) {
-            flagsFacultatifs[p.da] = true;
-        }
-    });
-
-    // 🛡️ #785 (8 sept. 2026) : NE RETIRER QUE CE QUI SERA RÉÉCRIT.
-    // La liste des élèves vient de la BASE, la réécriture vient du DOM. Quand le
-    // tableau de la séance n'est pas rendu, le retrait emportait la séance ENTIÈRE
-    // sans qu'aucune écriture ne la remplace — une séance détruite en silence.
-    const daReecrits = new Set(
-        etudiantsATraiter
-            .filter(e => document.getElementById(`periodes_${e.da}`))
-            .map(e => e.da)
-    );
-
-    // Supprimer les anciennes présences pour cette date et ces étudiants
-    // ✅ CORRIGÉ (8 janvier 2026) : Protéger les présences des autres cours
-    const presencesAvant = presences;
-    presences = presences.filter(p => {
-        if (p.date !== dateStr) return true;
-        // Préserver les présences d'autres cours (coursId différent)
-        if (coursId && p.coursId && p.coursId !== coursId) return true;
-        return !daReecrits.has(p.da);
-    });
-
-    // Ajouter les nouvelles présences
-
-    // 🆕 BETA 95.1 : Utiliser les périodes au lieu des heures
-    const dureePeriode = typeof obtenirDureePeriode === 'function' ? obtenirDureePeriode() : (window.DUREE_PERIODE_DEFAUT || 50);
-
-    etudiantsATraiter.forEach(etudiant => {
-        // 🆕 BETA 95.7 : Chercher l'input de périodes
-        const inputPeriodes = document.getElementById(`periodes_${etudiant.da}`);
-        const inputNotes = document.getElementById(`notes_${etudiant.da}`);
-
-        if (inputPeriodes) {
-            // parseFloat pour supporter les fractions (1.5, etc.)
-            const periodesPresentes = parseFloat(inputPeriodes.value) || 0;
-            // #540 lot E3 : `heures` n'est plus écrit — voir l'autre chemin
-            // d'enregistrement, même raison. Deux sites écrivaient le même champ de
-            // rétrocompatibilité ; aucun ne l'écrit plus.
-            const notes = _notesDuChamp(inputNotes, presencesAvant, etudiant.da, dateStr, coursId);
-
-            // Créer l'objet de présence
-            const presenceObj = {
-                date: dateStr,
-                da: etudiant.da,
-                periodesPresentes: periodesPresentes,  // 🆕 BETA 95.1
-                notes: notes,
-                coursId: coursId  // ✅ Lier la présence au cours actif
-            };
-
-            // IMPORTANT : Préserver le flag facultatif s'il existait
-            if (flagsFacultatifs[etudiant.da] === true) {
-                presenceObj.facultatif = true;
-            }
-
-            presences.push(presenceObj);
-        }
-    });
-
-    // Lot B de l'enregistrement (#618) : « Présences enregistrées » ne part que sur une
-    // écriture réelle (mesuré au navigateur le 26 sept. : il partait sur un quota dépassé).
-    if (sauvegarderDonneesSelonMode('presences', presences,
-        { geste: 'Enregistrement des présences' }) !== true) return;
-
-    notifications.succes('Présences enregistrées');
-
-    calculerEtSauvegarderIndicesAssiduite();
-
-    // ========== NOUVEAU : Recharger le tableau de bord ==========
-    // Si le sous-onglet Suivi > Suivi du groupe est actif, le rafraîchir.
-    const sousSectionGroupe = document.getElementById('suivi-groupe');
-    if (sousSectionGroupe && sousSectionGroupe.classList.contains('active')) {
-        if (typeof chargerTableauBordApercu === 'function') {
-            setTimeout(() => chargerTableauBordApercu(), 300);
-        }
-    }
-
-}
-
-/* ===============================
    🧮 CALCULS STATISTIQUES
    =============================== */
 
@@ -1792,8 +1840,7 @@ function tousPresents() {
     let presences = obtenirDonneesSelonMode('presences') || [];
     if (!Array.isArray(presences)) presences = [];
 
-    let nbMisPresents = 0;
-    let nbAbsencesMotiveesPreservees = 0;
+    const touches = [];
 
     inputs.forEach(input => {
         if (!input.disabled) {
@@ -1805,10 +1852,7 @@ function tousPresents() {
                                       presenceExistante.facultatif === true &&
                                       (presenceExistante.periodesPresentes === 0 || presenceExistante.heures === 0);
 
-            if (estAbsenceMotivee) {
-                // Ne pas toucher aux absences motivées RàI
-                nbAbsencesMotiveesPreservees++;
-            } else {
+            if (!estAbsenceMotivee) {   // les absences motivées RàI ne sont pas touchées
                 // Mettre présent (toutes les périodes)
                 input.value = nombrePeriodesSeance;
 
@@ -1818,27 +1862,43 @@ function tousPresents() {
                 // Mettre à jour les stats
                 mettreAJourLignePeriodes(da, dateStr, nombrePeriodesSeance);
 
-                nbMisPresents++;
+                touches.push(da);
             }
         }
     });
 
-    if (nbAbsencesMotiveesPreservees > 0) {
-    }
+    _armerEnregistrementPresences(dateStr, touches);   // lot D
 }
 
 /**
- * Réinitialise la saisie (met toutes les périodes à 0 = absent)
+ * Réinitialise la saisie (met toutes les périodes à 0 = absent, vide les notes)
  * 🆕 BETA 95.1 : Utilise les périodes au lieu des heures
+ *
+ * Lot D (27 sept. 2026) — sans confirmation « pour être plus rapide » tant que rien n'est en
+ * base. Avec l'enregistrement automatique, un seul toucher remplacerait une séance déjà saisie :
+ * sur une séance saisie, on demande (patron #945 : « Annuler » a le focus, Entrée le suit).
  */
-function reinitialiserSaisie() {
+async function reinitialiserSaisie() {
     const dateInput = document.getElementById('date-cours');
     if (!dateInput || !dateInput.value) return;
 
     const dateStr = dateInput.value;
     const nombrePeriodesSeance = obtenirNombrePeriodesSeance(dateStr);
 
-    // Pas de confirmation pour être plus rapide
+    // Ce qui attend part d'abord : la question porte sur ce qui est en base.
+    viderEnregistrementPresences();
+    const seanceSaisie = _etatLignesSeance(dateStr, _presencesDuCours()).some(l => l.aFiche);
+    if (seanceSaisie && typeof uiDialogues !== 'undefined') {
+        const ok = await uiDialogues.confirmerAction({
+            titre: 'Réinitialiser la séance',
+            message: 'Mettre tout le monde absent et vider les notes de cette séance ?',
+            texteConfirmer: 'Réinitialiser',
+            variante: 'danger'
+        });
+        if (!ok) return;
+    }
+
+    const touches = [];
     // 🆕 BETA 95.7 : Utiliser .input-periodes au lieu de .select-periodes
     document.querySelectorAll('.input-periodes').forEach(input => {
         if (!input.disabled) {
@@ -1847,6 +1907,7 @@ function reinitialiserSaisie() {
 
             const da = input.id.replace('periodes_', '');
             mettreAJourLignePeriodes(da, dateStr, nombrePeriodesSeance);
+            touches.push(da);
         }
     });
 
@@ -1856,6 +1917,7 @@ function reinitialiserSaisie() {
         }
     });
 
+    _armerEnregistrementPresences(dateStr, touches);
 }
 
 /* ===============================
@@ -2082,6 +2144,12 @@ function obtenirDerniereDataSaisie(da = null) {
 
 function mettreAJourLignePeriodesHandler(el) {
     mettreAJourLignePeriodes(el.dataset.da, el.dataset.dateStr, parseInt(el.dataset.nbPeriodes));
+    _armerEnregistrementPresences(el.dataset.dateStr, [el.dataset.da]);   // lot D
+}
+
+/** Lot D — une note tapée s'enregistre toute seule, 1,5 s après la dernière frappe. */
+function notePresenceModifiee(el) {
+    _armerEnregistrementPresences(el.dataset.dateStr, [el.dataset.da]);
 }
 
 /* ===============================
@@ -2093,7 +2161,10 @@ window.mettreAJourLignePeriodesHandler = mettreAJourLignePeriodesHandler;
 window.initialiserModuleSaisiePresences = initialiserModuleSaisiePresences;
 window.chargerGroupesPresences = chargerGroupesPresences;
 window.initialiserSaisiePresences = initialiserSaisiePresences;
-window.enregistrerPresences = enregistrerPresences;
+window.confirmerSeancePresences = confirmerSeancePresences;
+window.fermerSaisiePresences = fermerSaisiePresences;
+window.notePresenceModifiee = notePresenceModifiee;
+window.viderEnregistrementPresences = viderEnregistrementPresences;
 // #224 : calculerAssiduiteJusquADate et calculerEtSauvegarderIndicesAssiduite déplacées vers indices.js
 /**
  * Filtre le tableau de saisie des présences selon la recherche
@@ -2341,8 +2412,8 @@ window.modifierNotesPresence = function(da, date, notes, coursId) {
 
     for (var i = 0; i < presences.length; i++) {
         // Match (da, date) ET coursId si dispos. Pattern aligne sur les autres
-        // writers (enregistrerPresences, sauvegarderPresencesSansValidation,
-        // ajouterPresencesIntervention) qui filtrent tous par coursId.
+        // writers (ecrirePresencesSeance, ajouterPresencesIntervention) qui
+        // filtrent tous par coursId.
         var p = presences[i];
         var matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
         if (p.da === da && p.date === date && matchCoursId) {

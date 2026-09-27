@@ -279,7 +279,9 @@ test('lot B · le témoin : un seul nœud, rôles justes, l\'échec RESTE jusqu\
 // -----------------------------------------------------------------------
 // SITE VIVANT · LES PRÉSENCES (bouton réel, pack démo)
 // -----------------------------------------------------------------------
-test('lot B · présences : sous les trois pannes, pas de « Présences enregistrées », le témoin dit l\'échec, base inchangée', async ({ page }) => {
+// Lot D (27 sept. 2026) : le bouton « Enregistrer » est parti ; le geste est une période changée,
+// suivie du vidage de l'écriture en attente (l'écrivain unique, avec le geste touché).
+test('lot B · présences : sous les trois pannes, aucun message de succès, le témoin dit l\'échec, base inchangée', async ({ page }) => {
     test.setTimeout(90000);
     const erreurs = brancherEcouteurs(page);
     await viderLeStockage(page);
@@ -289,11 +291,13 @@ test('lot B · présences : sous les trois pannes, pas de « Présences enregist
     await page.waitForTimeout(800);
     await poserOutils(page);
 
-    const clic = "document.querySelector('[data-action=\"enregistrerPresences\"]').click()";
+    const clic = "(() => { const el = document.querySelector('#tbody-saisie-presences input[id^=\"periodes_\"]'); "
+        + "el.value = String(Number(el.value) === 1 ? 2 : 1); mettreAJourLignePeriodesHandler(el); return viderEnregistrementPresences(); })()";
     await eprouverLesTroisPannes(page, 'presences', clic, 'Enregistrement des présences');
 
     const ok = await ecritureReussie(page, clic);
-    expect(ok.toasts.some((t) => t.includes('Présences enregistrées'))).toBe(true);
+    // Lot D : « Présences enregistrées » est parti ; le témoin le dit.
+    expect(ok.toasts.some((t) => t.includes('Présences enregistrées'))).toBe(false);
     expect(ok.temoin.succes).toBe('Enregistré');
     expect(ok.temoin.echec).toBe(null);
     expect(erreurs).toEqual([]);

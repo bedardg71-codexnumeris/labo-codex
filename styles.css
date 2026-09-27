@@ -3343,6 +3343,15 @@ input.saisie-vide {
     color: var(--texte-secondaire, #8aa4b0);
 }
 
+/* Lot D (D2 bis b) — élève sans fiche dans une séance saisie : compté·e absent·e, et la ligne le dit */
+.presence-non-saisie {
+    display: block;
+    margin-top: 4px;
+    font-size: var(--font-compact);
+    color: var(--texte-secondaire);
+    white-space: normal;
+}
+
 /* Transition douce pour les changements de couleur */
 input[type="number"].controle-form {
     transition: background-color 0.3s ease, border-color 0.3s ease;

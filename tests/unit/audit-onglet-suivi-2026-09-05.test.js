@@ -446,13 +446,15 @@ describe('A · les présences saisies deviennent l\'indice A', () => {
         expect(live.classList.liste()).toEqual(['saisie-retard']); // la même valeur, lue comme 0,5
     });
 
-    it('A6 · trois portes d\'écriture des présences, deux régimes : enregistrerPresences passe par le mode, les deux API directes non', () => {
+    // Lot D (27 sept. 2026) : l'écran n'a plus qu'un écrivain, `ecrirePresencesSeance`, par le mode
+    // (le verrou y passe aussi). Restent les deux API directes, hors de l'écran de saisie.
+    it('A6 · l\'écran écrit par une seule porte, par le mode ; les deux API directes non', () => {
         const src = readFileSync(path.join(RACINE, 'js/saisie-presences.js'), 'utf8');
         const parMode = (src.match(/sauvegarderDonneesSelonMode\('presences'/g) || []).length;
         const directes = (src.match(/db\.setSync\(clePresences, presences\)/g) || []).length;
         noter('A6', { parMode, directes });
-        expect(parMode).toBe(1);   // enregistrerPresences
-        expect(directes).toBe(3);  // sauvegarderPresencesSansValidation, modifierNotesPresence, ajouterPresencesIntervention
+        expect(parMode).toBe(1);   // ecrirePresencesSeance
+        expect(directes).toBe(2);  // modifierNotesPresence, ajouterPresencesIntervention
     });
 });
 
