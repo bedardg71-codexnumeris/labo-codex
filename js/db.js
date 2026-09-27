@@ -1489,6 +1489,10 @@
          * et déclenche écriture asynchrone dans IndexedDB si disponible
          * @param {string} key - Clé de la donnée
          * @param {*} value - Valeur à stocker
+         * @returns {boolean} false si la garde #340 a refusé l'écriture (rien
+         *   n'est écrit), true sinon. Lot B de l'enregistrement (27 sept. 2026) :
+         *   avant, un `return` nu — `sauvegarderDonneesSelonMode` ne pouvait pas
+         *   distinguer le refus d'un succès, et disait « écrit » sans rien écrire.
          * @throws {Error} Si IndexedDB non disponible ET localStorage plein
          */
         setSync(key, value) {
@@ -1519,7 +1523,7 @@
             }
             // #340 — Garde d'écriture : bloque une écriture incohérente avant
             // toute persistance (localStorage, memoryCache ou IDB).
-            if (!this._ecritureAutorisee(key, value)) return;
+            if (!this._ecritureAutorisee(key, value)) return false;
 
             this._signalerEcriture(key);
 
@@ -1538,7 +1542,7 @@
                 try { localStorage.removeItem(key); } catch (ex) {}
                 // Écriture IDB en arrière-plan (trackée pour flush)
                 this._trackWrite(key, value);
-                return;
+                return true;
             }
 
             // 1. Essayer d'écrire dans localStorage (cache rapide)
@@ -1579,6 +1583,7 @@
                 // clé ne vit qu'en localStorage (invisible à db.keys()).
                 this._operationsAvantInit.push({ type: 'set', key: key, value: value });
             }
+            return true;
         }
 
         /**

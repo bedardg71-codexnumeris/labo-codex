@@ -1952,8 +1952,10 @@ function sauvegarderEvaluationModifiee() {
 
     _marquerModificationJournalMod(evaluations[indexEval], dureeMsModif);
 
-    // Sauvegarder
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    // Lot B de l'enregistrement (#618) : « Évaluation modifiée » ne part que sur une écriture
+    // réelle ; l'échec, c'est le témoin commun qui le dit.
+    if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
+        { geste: 'Enregistrement de l\'évaluation' }) !== true) return;
 
     _traiterPostRepriseMod(evaluations, indexEval, evaluationId);
     _postSauvegardeMod(evaluations[indexEval]);
@@ -2607,8 +2609,15 @@ function basculerVerrouillageEvaluationCourante() {
     evaluations[index].verrouillee = !evaluations[index].verrouillee;
     const estVerrouillee = evaluations[index].verrouillee;
 
-    // Sauvegarder
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    // Lot B de l'enregistrement (#618) : sur un échec, rien ne bascule à l'écran (cadenas,
+    // formulaire, message) et le tableau lu reprend son état — il peut être l'objet du
+    // cache mémoire de `db`. Le témoin commun dit l'échec.
+    if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, {
+        geste: estVerrouillee ? 'Verrouillage de l\'évaluation' : 'Déverrouillage de l\'évaluation'
+    }) !== true) {
+        evaluations[index].verrouillee = !estVerrouillee;
+        return;
+    }
 
     // Mettre à jour evaluationEnCours pour refléter le changement
     if (window.evaluationEnCours) {

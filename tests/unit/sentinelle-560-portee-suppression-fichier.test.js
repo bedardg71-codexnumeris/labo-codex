@@ -116,7 +116,8 @@ describe('#560 · C — le message d\'après dit ce qui est parti', () => {
         expect(modale).toContain('nbEvalsRetirees > 0');
         // Le compte n'est posé QUE si l'écriture a eu lieu (branche else du garde des modes).
         // Réancré le 26 sept. 2026 (lot A de l'enregistrement) : plus de branche de refus en
-        // anonymisation — le compte suit l'écriture par le garde des modes.
-        expect(modale).toMatch(/sauvegarderDonneesSelonMode\('evaluationsSauvegardees', evaluations\);\s*nbEvalsRetirees = avant - evaluations\.length;/);
+        // anonymisation. Puis le 27 sept. (lot B, #618) : le compte n'est posé que sur `=== true`
+        // — un refus rendu ne compte plus comme des évaluations supprimées.
+        expect(modale).toMatch(/if \(sauvegarderDonneesSelonMode\('evaluationsSauvegardees', evaluations,[\s\S]{0,80}?\) === true\) \{\s*nbEvalsRetirees = avant - evaluations\.length;/);
     });
 });

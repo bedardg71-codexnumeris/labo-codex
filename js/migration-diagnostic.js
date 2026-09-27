@@ -210,9 +210,9 @@
         console.warn(`  Évaluations : ${evaluations.length}`);
         console.warn(`  Corbeille : ${(corbeille || []).length}`);
 
-        sauvegarderDonneesSelonMode('fichiersTravaux', fichiers);
-        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-        sauvegarderDonneesSelonMode('corbeilleFichiers', corbeille || []);
+        sauvegarderDonneesSelonMode('fichiersTravaux', fichiers, { discret: true });
+        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, { discret: true });
+        sauvegarderDonneesSelonMode('corbeilleFichiers', corbeille || [], { discret: true });
 
         return true;
     }
@@ -274,7 +274,7 @@
         });
 
         if (nbMigres > 0) {
-            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, { discret: true });
         }
         db.setSync(flagMigration, new Date().toISOString());
 
@@ -310,7 +310,7 @@
         });
 
         if (nbMigres > 0) {
-            sauvegarderDonneesSelonMode('fichiersTravaux', fichiers);
+            sauvegarderDonneesSelonMode('fichiersTravaux', fichiers, { discret: true });
         } else {
         }
 

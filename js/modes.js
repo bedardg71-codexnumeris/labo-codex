@@ -1033,14 +1033,37 @@ function titreInterventionAffiche(intervention, repli, nom) {
 }
 
 /**
+ * Lot B de l'enregistrement (D0 point 2, #618, #786 — 27 sept. 2026) : les raisons d'un
+ * « Non enregistré », dites par le témoin commun (`temoin-enregistrement.js`).
+ * Mots proposés par Cowork, à faire accepter par Grégoire.
+ */
+const RAISONS_NON_ENREGISTRE = {
+    quota: 'la mémoire du navigateur est pleine. Pour libérer de la place : Cadre › Trimestre › Bibliothèque, « Supprimer… » sur un ancien trimestre.',
+    erreur: 'le navigateur a refusé l\'écriture.',
+    garde: 'ces données ne correspondent pas au trimestre ouvert.'
+};
+
+/**
  * Sauvegarde des données selon le mode actif
  * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
  *
+ * CONTRAT (lot B, #786) : `true` si l'écriture a eu lieu, `false` sinon — jamais une
+ * chaîne. Avant, elle rendait `'quota'` ou `'error'`, truthy : les appelants en
+ * `if (!…)` les lisaient comme un succès et affichaient « enregistré » sur un échec.
+ * C'est ELLE qui fait parler le témoin commun, sur le succès comme sur l'échec :
+ * l'appelant n'a plus à dire l'échec, seulement à ne pas dire un succès qui n'a pas eu lieu.
+ *
  * @param {string} cle - Clé de base (ex: 'groupeEtudiants')
  * @param {*} donnees - Données à sauvegarder
- * @returns {boolean|string} - true si succès, 'quota' si quota dépassé, 'error' sinon
+ * @param {Object} [options]
+ * @param {string} [options.geste] - Ce que l'usager croyait faire, dit par le témoin sur un
+ *   échec (« Non enregistré – ‹geste› : ‹raison› », modèle des jetons).
+ * @param {boolean} [options.discret] - N'annonce pas le succès : écritures que l'usager n'a
+ *   pas faites (indices recalculés, migrations). Un échec est toujours dit.
+ * @returns {boolean} true si l'écriture a eu lieu, false sinon
  */
-function sauvegarderDonneesSelonMode(cle, donnees) {
+function sauvegarderDonneesSelonMode(cle, donnees, options) {
+    const { geste, discret } = options || {};
     // Lot A de l'enregistrement (D5, Grégoire, 26 sept. 2026 : « Je choisis A ») — en
     // anonymisation, on écrit comme en mode normal ; seul l'AFFICHAGE protège l'identité.
     // Avant : `return false` ici. L'évaluation faite en anonymisation restait visible pendant
@@ -1050,10 +1073,17 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         donnees = retirerSubstitutionsAnonymisation(cle, donnees);
     }
 
+    const temoin = window.temoinEnregistrement;
     try {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         const cleEffective = window.cle(cle);
-        db.setSync(cleEffective, donnees);
+        // #340 : la garde de `db` refuse une écriture incohérente et rend `false` (sans
+        // rien écrire). Avant le lot B, un `return` nu : cette fonction rendait `true`.
+        if (db.setSync(cleEffective, donnees) === false) {
+            console.error(`❌ Écriture refusée par la garde #340 : ${cle}`);
+            if (temoin) temoin.nonEnregistre(RAISONS_NON_ENREGISTRE.garde, geste);
+            return false;
+        }
         // #397/#447 : l'invalidation est CIBLÉE sur la clé écrite (voir
         // invaliderCacheLecture). Elle est faite ici explicitement ET signalée
         // par `db` : ce n'est pas une ceinture-bretelles décorative — cette
@@ -1062,21 +1092,16 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         // une entrée déjà retirée : gratuite.
         invaliderCacheLecture(cleEffective);
         if (modeActuel === MODES.ANONYMISATION) _poserEmpreintes(cle, donnees);   // R1
+        if (temoin && !discret) temoin.enregistre();
         return true;
     } catch (error) {
-        // Détecter erreur de quota dépassé
-        if (error.name === 'QuotaExceededError' ||
-            (error.message && error.message.includes('quota'))) {
-            console.error('❌ Quota de stockage dépassé:', error);
-            notifications.erreur(
-                'Espace de stockage presque plein',
-                'Les données sont sauvegardées, mais l\'espace disponible est limité. Tu peux nettoyer les anciens trimestres dans Réglages.'
-            );
-            return 'quota';
-        }
-        // Autre erreur
-        console.error(`❌ Erreur sauvegarde ${cle}:`, error);
-        return 'error';
+        // #618 : l'ancien toast disait « Les données sont sauvegardées » sur un quota
+        // dépassé — faux à chaque fois : `db.setSync` ne lève que si RIEN n'a été écrit.
+        const quota = error.name === 'QuotaExceededError' ||
+            (error.message && error.message.includes('quota'));
+        console.error(`❌ Erreur sauvegarde ${cle}${quota ? ' (quota)' : ''}:`, error);
+        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste);
+        return false;
     }
 }
 
