@@ -3794,6 +3794,9 @@
             // du trimestre (lot A de l'enregistrement, 26 sept. 2026).
             const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
             const evaluationsMaj = evaluations.filter(e => e.id !== evalAssociee.id);
+            // Lot B (relecture de Cowork, « commenter ») : si cette écriture échoue, le fichier est
+            // quand même supprimé plus bas — une évaluation sans copie, état que l'application
+            // connaît déjà ; l'usager a demandé la suppression, et le témoin dit l'échec.
             sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj,
                 { geste: 'Suppression de l\'évaluation du fichier' });
         } else {
@@ -7169,14 +7172,13 @@
         if (textarea.value !== textarea.defaultValue) evaluations[index].retroactionReecrite = true;
         evaluations[index].dateModification = new Date().toISOString();
         // Lot B de l'enregistrement : l'échec est dit par le témoin commun, avec le geste.
-        const resultat = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
-            { geste: 'Enregistrement de la rétroaction' });
+        // Relecture de Cowork (lot B, R3) : sur un échec, la fenêtre RESTE ouverte — fermée,
+        // elle emportait le texte qu'on venait d'écrire pendant que le témoin disait « Non enregistré ».
+        if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
+            { geste: 'Enregistrement de la rétroaction' }) !== true) return;
 
         fermerModalRetroaction();
-
-        if (resultat === true) {
-            notifications.succes('Rétroaction sauvegardée');
-        }
+        notifications.succes('Rétroaction sauvegardée');
     }
 
     /**

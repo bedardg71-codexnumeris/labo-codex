@@ -1074,14 +1074,17 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
     }
 
     const temoin = window.temoinEnregistrement;
+    // La clé écrite accompagne le témoin : un « Non enregistré » ne s'efface que par une
+    // écriture réussie de LA MÊME clé (relecture de Cowork, R1).
+    let cleEffective = cle;
     try {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
-        const cleEffective = window.cle(cle);
+        cleEffective = window.cle(cle);
         // #340 : la garde de `db` refuse une écriture incohérente et rend `false` (sans
         // rien écrire). Avant le lot B, un `return` nu : cette fonction rendait `true`.
         if (db.setSync(cleEffective, donnees) === false) {
             console.error(`❌ Écriture refusée par la garde #340 : ${cle}`);
-            if (temoin) temoin.nonEnregistre(RAISONS_NON_ENREGISTRE.garde, geste);
+            if (temoin) temoin.nonEnregistre(RAISONS_NON_ENREGISTRE.garde, geste, cleEffective);
             return false;
         }
         // #397/#447 : l'invalidation est CIBLÉE sur la clé écrite (voir
@@ -1092,7 +1095,7 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
         // une entrée déjà retirée : gratuite.
         invaliderCacheLecture(cleEffective);
         if (modeActuel === MODES.ANONYMISATION) _poserEmpreintes(cle, donnees);   // R1
-        if (temoin && !discret) temoin.enregistre();
+        if (temoin && !discret) temoin.enregistre(cleEffective);
         return true;
     } catch (error) {
         // #618 : l'ancien toast disait « Les données sont sauvegardées » sur un quota
@@ -1100,7 +1103,7 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
         const quota = error.name === 'QuotaExceededError' ||
             (error.message && error.message.includes('quota'));
         console.error(`❌ Erreur sauvegarde ${cle}${quota ? ' (quota)' : ''}:`, error);
-        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste);
+        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste, cleEffective);
         return false;
     }
 }

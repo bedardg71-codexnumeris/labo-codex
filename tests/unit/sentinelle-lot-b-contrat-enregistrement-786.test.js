@@ -130,3 +130,57 @@ describe('lot B · les sites vivants ne disent un succès que sur `true` (#618) 
         });
     }
 });
+
+describe('lot B · relecture de Cowork, R1 — la clé écrite accompagne le témoin', () => {
+    // Le témoin n'efface un « Non enregistré » que par le succès de LA MÊME clé : il faut
+    // donc qu'il la reçoive, sur l'échec comme sur le succès. Comportement du témoin lui-même
+    // (l'échec reste sous le succès d'une autre clé) : banc WebKit.
+    it('échec et succès portent la clé effective (préfixe de trimestre compris)', () => {
+        const echec = monter(quota);
+        const vuEchec = [];
+        echec.win.temoinEnregistrement.nonEnregistre = (...a) => vuEchec.push(a);
+        echec.win.sauvegarderDonneesSelonMode('presences', [1], { geste: 'g' });
+        expect(vuEchec[0][2]).toBe('a2026_presences');
+
+        const ok = monter(accepte);
+        const vuOk = [];
+        ok.win.temoinEnregistrement.enregistre = (...a) => vuOk.push(a);
+        ok.win.sauvegarderDonneesSelonMode('presences', [1]);
+        expect(vuOk).toEqual([['a2026_presences']]);
+    });
+});
+
+describe('lot B · relecture de Cowork, R2 — une migration refusée ne se marque pas faite', () => {
+    function monterMigration(ecritureAcceptee) {
+        const store = { h2026_productions: [{ id: 'P1', description: 'Lire un conte' }] };
+        const db = {
+            getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
+            setSync: (k, v) => { store[k] = v; },
+            removeSync: (k) => { delete store[k]; },
+            get: async () => null, set: async () => {}
+        };
+        const win = chargerScript('js/migrations.js', {
+            db, cle: (k) => 'h2026_' + k,
+            obtenirDonneesSelonMode: (k) => JSON.parse(JSON.stringify(store['h2026_' + k] || [])),
+            sauvegarderDonneesSelonMode: (k, v) => {
+                if (!ecritureAcceptee) return false;
+                store['h2026_' + k] = v;
+                return true;
+            }
+        });
+        return { win, store };
+    }
+
+    it('écriture refusée → aucun drapeau, la migration sera rejouée', () => {
+        const b = monterMigration(false);
+        expect(b.win.migrerDescriptionVersActivite()).toBe(0);
+        expect(b.store.migration_activiteApprentissage).toBeUndefined();
+    });
+
+    it('contrôle : écriture acceptée → la production migre, le drapeau est posé', () => {
+        const b = monterMigration(true);
+        expect(b.win.migrerDescriptionVersActivite()).toBe(1);
+        expect(b.store.h2026_productions[0].activiteApprentissage).toBe('Lire un conte');
+        expect(b.store.migration_activiteApprentissage).toBe(true);
+    });
+});

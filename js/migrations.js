@@ -1033,7 +1033,9 @@ function migrerDescriptionVersActivite() {
         }
     });
     if (nb > 0) {
-        sauvegarderDonneesSelonMode('productions', productions, { discret: true });
+        // Relecture de Cowork (lot B, R2) : une migration refusée ne se marque pas faite —
+        // le drapeau posé sur un échec l'empêchait d'être jamais rejouée. Le témoin dit l'échec.
+        if (sauvegarderDonneesSelonMode('productions', productions, { discret: true }) !== true) return 0;
         console.warn('[migrations] ' + nb + ' productions : description → activiteApprentissage');
     }
     db.setSync(flag, true);
