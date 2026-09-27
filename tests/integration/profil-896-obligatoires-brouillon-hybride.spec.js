@@ -62,7 +62,7 @@ test('#896 · hybride sans terminale : un brouillon d\'obligatoire est nommé su
     expect(r.details.note).toBe(79.75);
     expect(r.carte).toContain('Sélection (les 2 meilleures sur 2 évaluées) (65%)');
     expect(r.carte).toContain('Obligatoire 1 (D 70.0%)');
-    expect(r.carte).toContain('Obligatoire 2 (évaluation non enregistrée, non comptée)');
+    expect(r.carte).toContain('Obligatoire 2 (évaluation non verrouillée, non comptée)');
     expect(r.carte).toContain('(70.0%) ÷ 1 = 70.0% × 35% = 24.5 pts');
     // L'accord qui manquait : la formule écrite et le total du moteur, sur la même carte.
     expect(r.carte).toContain('Note finale = 55.3 pts + 24.5 pts = 79.8 % 79.8%');

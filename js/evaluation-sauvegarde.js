@@ -346,7 +346,10 @@ function _postSauvegardeSauv(evaluation, groupeCoursActif) {
     window._moyennesQualifies = null;
     window._moyennesToutes = null;
 
-    notifications.succes(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+    // Lot C de l'enregistrement (D1) — ce chemin VERROUILLE (`verrouillee: true`) : il le dit.
+    notifications.succes(window.messageVerrouEvaluation
+        ? window.messageVerrouEvaluation(evaluation, true)
+        : `Évaluation verrouillée : ${evaluation.etudiantNom} – ${evaluation.productionNom}`);
 
     if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
         travauxUI.arreterChrono();
@@ -394,7 +397,7 @@ function sauvegarderEvaluation() {
 
     const { etudiantDA, productionId, grilleId } = _lireEntreesFormulaireSauv();
     if (!etudiantDA || !productionId || !grilleId) {
-        alert('Sélectionne un·e étudiant·e, une production et une grille avant d\'enregistrer.');
+        alert('Sélectionne un·e étudiant·e, une production et une grille avant de verrouiller.');
         return;
     }
 
@@ -471,8 +474,14 @@ function sauvegarderEvaluation() {
     // Lot B de l'enregistrement (27 sept. 2026) : l'échec est dit par le témoin commun, avec
     // le geste ; les deux toasts propres à ce module (« Espace de stockage insuffisant »,
     // « Erreur de sauvegarde ») sont retirés — un échec ne se dit qu'une fois.
+    // Lot C : ce geste est le verrouillage ; sur un échec, le tableau lu (peut-être l'objet du
+    // cache mémoire de `db`, R4 du lot B) rend l'évaluation qu'il n'a pas écrite.
     if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
-        { geste: 'Enregistrement de l\'évaluation' }) !== true) return;
+        { geste: 'Verrouillage de l\'évaluation' }) !== true) {
+        const i = evaluations.indexOf(evaluation);
+        if (i !== -1) evaluations.splice(i, 1);
+        return;
+    }
 
     _postSauvegardeSauv(evaluation, groupeCoursActif);
 }
@@ -633,6 +642,11 @@ function changerStatutIntegrite() {
         // Patch §5.6 — promotion calculerNote vers evaluation-calcul.js (session B 1er sous-module)
         window.calculerNote();
     }
+
+    // Lot C de l'enregistrement (D1) — l'intégrité s'enregistre toute seule, comme un niveau.
+    // Les chargeurs qui posent ce menu par `change` (#959) sont tus par les gardes de
+    // `_debouncerAutoSave` (suspension, compteur #960).
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
 }
 
 // Fonction gererDelaiAccorde() supprimée - remplacée par appliquerJetonDelaiDepuisSidebar()
@@ -909,7 +923,7 @@ function gererChangementCheckboxJetonReprise() {
     if (!evaluationId) {
         console.warn('⚠️ Jeton de reprise : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
         checkbox.checked = false;
-        notifications.erreur('Erreur', 'Enregistre d\'abord l\'évaluation avant d\'appliquer un jeton');
+        notifications.erreur('Erreur', 'Choisis d\'abord un niveau : l\'évaluation n\'existe pas encore.');   // lot C — elle s'enregistre toute seule
         return;
     }
 

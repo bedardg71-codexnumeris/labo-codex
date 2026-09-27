@@ -309,7 +309,7 @@ test('lot B · évaluation modifiée, cadenas, suppression : aucun succès sur u
     await poserOutils(page);
     await page.evaluate(() => { window._autoSaveSuspendu = true; });
 
-    await eprouverLesTroisPannes(page, 'evaluationsSauvegardees', 'sauvegarderEvaluation()', 'Enregistrement de l\'évaluation');
+    await eprouverLesTroisPannes(page, 'evaluationsSauvegardees', 'sauvegarderEvaluation()', 'Verrouillage de l\'évaluation');
     await eprouverLesTroisPannes(page, 'evaluationsSauvegardees', 'basculerVerrouillageEvaluationCourante()', 'Verrouillage de l\'évaluation');
     // Le cadenas n'a pas basculé à l'écran ni dans l'évaluation en cours.
     expect(await page.evaluate(() => !!window.evaluationEnCours.verrouillee)).toBe(false);
@@ -317,7 +317,7 @@ test('lot B · évaluation modifiée, cadenas, suppression : aucun succès sur u
 
     // Puis les écritures réussies : le succès revient, le témoin dit « Enregistré ».
     const modif = await ecritureReussie(page, 'sauvegarderEvaluation()');
-    expect(modif.toasts.some((t) => t.includes('Évaluation modifiée'))).toBe(true);
+    expect(modif.toasts.some((t) => t.includes('Évaluation verrouillée : '))).toBe(true);   // lot C
     expect(modif.temoin.echec).toBe(null);
     expect(modif.temoin.succes).toBe('Enregistré');
     const cadenas = await ecritureReussie(page, 'basculerVerrouillageEvaluationCourante()');

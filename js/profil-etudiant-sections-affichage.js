@@ -3023,7 +3023,7 @@ function genererSectionProductions(da) {
             // #941 lot S1 — une obligatoire en points est notée sans niveau : sa note, jamais « non remis ».
             const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}`
                 : (o.enPoints && noteTxt) ? noteTxt
-                : (o.brouillon ? 'évaluation non enregistrée, non comptée' : 'non remis');
+                : (o.brouillon ? 'évaluation non verrouillée, non comptée' : 'non remis');
             const activite = o.activite ? ` : ${echapperHtml(o.activite)}` : '';
             return `<li>${echapperHtml(o.titreProd)} <strong>(${marqueur})</strong>${activite}</li>`;
         };
@@ -4018,7 +4018,7 @@ function _phraseEvaluationsEcartees(ecartees, classeBloc) {
     const morceaux = [];
     if (ecartees.brouillons) {
         const n = ecartees.brouillons;
-        morceaux.push(n + ' évaluation' + (n > 1 ? 's' : '') + ' non enregistrée' + (n > 1 ? 's' : '') + ', non comptée' + (n > 1 ? 's' : ''));
+        morceaux.push(n + ' évaluation' + (n > 1 ? 's' : '') + ' non verrouillée' + (n > 1 ? 's' : '') + ', non comptée' + (n > 1 ? 's' : ''));
     }
     if (ecartees.sansPortee) {
         const m = ecartees.sansPortee;

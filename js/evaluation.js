@@ -720,10 +720,18 @@ function verifierEtChargerEvaluationExistante() {
                         const inputCategories = document.getElementById(`eval_categories_${critereId}`);
                         const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
 
-                        if (inputCategories) {
-                            inputCategories.dispatchEvent(new Event('input', { bubbles: true }));
-                        } else if (inputErreurs) {
-                            inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
+                        // Lot C de l'enregistrement — ce `input` scripté n'est pas un geste : depuis que le
+                        // nombre d'erreurs s'enregistre tout seul, il arme l'écriture, et il part après la
+                        // suspension de 500 ms (mesuré : +560 ms). Le compteur de #960 le tait.
+                        window._chargementsEvaluationEnCours = (window._chargementsEvaluationEnCours || 0) + 1;
+                        try {
+                            if (inputCategories) {
+                                inputCategories.dispatchEvent(new Event('input', { bubbles: true }));
+                            } else if (inputErreurs) {
+                                inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        } finally {
+                            window._chargementsEvaluationEnCours = Math.max(0, window._chargementsEvaluationEnCours - 1);
                         }
                     }, 100);
                 });
@@ -1838,7 +1846,7 @@ function _ajouterCadenasBadgesMod() {
 }
 
 function _postSauvegardeMod(evalModifiee) {
-    notifications.succes(`Évaluation modifiée : ${evalModifiee.etudiantNom} - ${evalModifiee.productionNom}`);
+    notifications.succes(messageVerrouEvaluation(evalModifiee, true));   // lot C — le seul message du geste
 
     if (typeof travauxUI !== 'undefined' && travauxUI.arreterChrono) {
         travauxUI.arreterChrono();
@@ -1922,6 +1930,7 @@ function sauvegarderEvaluationModifiee() {
     const criteres = _collecterCriteresMod(grille);
     const maintenant = new Date();
     const proprietesJetons = _extraireProprietesJetons(evaluations[indexEval]);
+    const avantEcriture = evaluations[indexEval];   // lot C — rendu sur un échec (R4 du lot B)
 
     evaluations[indexEval] = Object.assign({},
         evaluations[indexEval], // Garder l'ID et la date originale
@@ -1952,10 +1961,15 @@ function sauvegarderEvaluationModifiee() {
 
     _marquerModificationJournalMod(evaluations[indexEval], dureeMsModif);
 
-    // Lot B de l'enregistrement (#618) : « Évaluation modifiée » ne part que sur une écriture
-    // réelle ; l'échec, c'est le témoin commun qui le dit.
+    // Lot B de l'enregistrement (#618) : le message ne part que sur une écriture réelle ;
+    // l'échec, c'est le témoin commun qui le dit. Lot C : ce geste est le verrouillage, et le
+    // tableau lu — peut-être l'objet du cache mémoire de `db` — reprend l'évaluation d'avant :
+    // l'enregistrement automatique suivant n'écrira pas un verrou que l'écran ne montre pas.
     if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
-        { geste: 'Enregistrement de l\'évaluation' }) !== true) return;
+        { geste: 'Verrouillage de l\'évaluation' }) !== true) {
+        evaluations[indexEval] = avantEcriture;
+        return;
+    }
 
     _traiterPostRepriseMod(evaluations, indexEval, evaluationId);
     _postSauvegardeMod(evaluations[indexEval]);
@@ -1966,6 +1980,8 @@ function sauvegarderEvaluationModifiee() {
  * @param {string} evaluationId - ID de l'évaluation à verrouiller
  * NOTE: Fonction renommée pour éviter conflit avec verrouillerEvaluation de productions.js
  */
+// ⚠ Lot C de l'enregistrement (27 sept. 2026) — SANS APPELANT VIVANT (inventaire A7) : ni bouton,
+// ni data-action, ni appel. Pas branchée sur la porte unique (`basculerVerrouillageEvaluationCourante`).
 function verrouillerEvaluationIndividuelle(evaluationId) {
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
@@ -1989,6 +2005,8 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
  * @param {string} evaluationId - ID de l'évaluation à déverrouiller
  * NOTE: Fonction renommée pour cohérence avec verrouillerEvaluationIndividuelle
  */
+// ⚠ Lot C de l'enregistrement (27 sept. 2026) — SANS APPELANT VIVANT (inventaire A7) : ni bouton,
+// ni data-action, ni appel. Pas branchée sur la porte unique (`basculerVerrouillageEvaluationCourante`).
 function deverrouillerEvaluationIndividuelle(evaluationId) {
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
@@ -2082,6 +2100,9 @@ function afficherIndicateurModeModification(evaluation) {
 /**
  * Ouvre le modal de la banque d'évaluations
  */
+// ⚠ Lot C de l'enregistrement (27 sept. 2026) — LA BANQUE D'ÉVALUATIONS N'A PLUS D'ÉCRAN : la modale
+// `modalBanqueEvaluations` n'existe pas dans index.html, et `ouvrirBanqueAvecRecherche` n'a aucun
+// appelant. Son cadenas (`basculerVerrouillageEvaluation`) n'est donc pas branché sur la porte unique.
 function ouvrirBanqueEvaluations() {
     const modal = document.getElementById('modalBanqueEvaluations');
     if (!modal) return;
@@ -2547,6 +2568,8 @@ function supprimerEvaluationBanque(evaluationId) {
  * Verrouille ou déverrouille toutes les évaluations
  * @param {boolean} verrouiller - true pour verrouiller, false pour déverrouiller
  */
+// ⚠ Lot C de l'enregistrement (27 sept. 2026) — SANS APPELANT VIVANT (inventaire A7) : ni bouton,
+// ni data-action, ni appel. Pas branchée sur la porte unique (`basculerVerrouillageEvaluationCourante`).
 function verrouillerToutesEvaluations(verrouiller) {
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
 
@@ -2586,36 +2609,43 @@ function verrouillerToutesEvaluations(verrouiller) {
    =============================== */
 
 /**
- * Bascule le verrouillage de l'évaluation courante
+ * Lot C de l'enregistrement (D1, Grégoire, 26 sept. 2026) — UNE SEULE PORTE POUR LE VERROU.
+ * « Verrouiller l'évaluation » (le bouton du panneau Paramètres) et le cadenas (`btnVerrouPalette`,
+ * en-tête de la palette ou du formulaire sans copie) appellent cette fonction, et elle seule :
+ *   · évaluation non verrouillée, ou pas encore créée → `sauvegarderEvaluation`, qui fait les
+ *     vérifications (références, échelle résolue #697, portée #674), crée l'évaluation au besoin
+ *     et la verrouille. Le cadenas verrouillait sans rien vérifier : ce raccourci est fermé ;
+ *   · évaluation verrouillée → la déverrouiller, sans vérification : elle ne compte plus dans la
+ *     note jusqu'à ce qu'on la reverrouille (`evaluationEntreDansLaNote`, pratique-registre.js).
+ * Les badges de la barre latérale et de la barre d'outils (`.travaux-badge-verrou`) montrent l'état
+ * et ne se cliquent pas. La Liste n'a pas de cadenas. Les fonctions de la Banque et du
+ * verrouillage en lot (plus bas) n'ont aucun appelant vivant : pas branchées.
  */
 function basculerVerrouillageEvaluationCourante() {
     const evaluationId = window.evaluationEnCours?.idModification;
 
-    if (!evaluationId) {
-        notifications.erreur('Erreur', 'Aucune évaluation en cours de modification');
-        return;
-    }
-
     // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
-    const index = evaluations.findIndex(e => e.id === evaluationId);
+    const index = evaluationId ? evaluations.findIndex(e => e.id === evaluationId) : -1;
 
-    if (index === -1) {
-        notifications.erreur('Erreur', 'Évaluation introuvable');
+    // Verrouiller : la porte de l'enregistrement, avec ses vérifications. Pas d'évaluation connue
+    // (copie neuve, id perdu) : elle retrouve l'existante par l'élève et la production.
+    if (index === -1 || evaluations[index].verrouillee !== true) {
+        window.sauvegarderEvaluation();
         return;
     }
 
-    // Basculer le statut de verrouillage
-    evaluations[index].verrouillee = !evaluations[index].verrouillee;
-    const estVerrouillee = evaluations[index].verrouillee;
+    // Déverrouiller
+    evaluations[index].verrouillee = false;
+    const estVerrouillee = false;
 
     // Lot B de l'enregistrement (#618) : sur un échec, rien ne bascule à l'écran (cadenas,
     // formulaire, message) et le tableau lu reprend son état — il peut être l'objet du
     // cache mémoire de `db`. Le témoin commun dit l'échec.
     if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, {
-        geste: estVerrouillee ? 'Verrouillage de l\'évaluation' : 'Déverrouillage de l\'évaluation'
+        geste: 'Déverrouillage de l\'évaluation'
     }) !== true) {
-        evaluations[index].verrouillee = !estVerrouillee;
+        evaluations[index].verrouillee = true;
         return;
     }
 
@@ -2629,11 +2659,7 @@ function basculerVerrouillageEvaluationCourante() {
         mettreAJourBoutonVerrouillage(estVerrouillee);
     }
 
-    // Notification
-    const message = estVerrouillee
-        ? `Évaluation verrouillée - Modification impossible`
-        : `Évaluation déverrouillée - Modification autorisée`;
-    notifications.succes(message);
+    notifications.succes(messageVerrouEvaluation(evaluations[index], false));
 
     // Activer/désactiver tous les champs du formulaire (sans reload)
     if (typeof desactiverFormulaireEvaluation === 'function') {
@@ -2672,10 +2698,10 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
     if (btnVerrouPalette) {
         btnVerrouPalette.style.display = '';
         btnVerrouPalette.innerHTML = estVerrouillee ? '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
-        btnVerrouPalette.title = estVerrouillee
-            ? 'Évaluation verrouillée - Clique pour déverrouiller'
-            : 'Évaluation modifiable - Clique pour verrouiller';
+        btnVerrouPalette.title = estVerrouillee ? TITRE_CADENAS_VERROUILLE : TITRE_CADENAS_OUVERT;
+        btnVerrouPalette.setAttribute('aria-label', btnVerrouPalette.title);
     }
+    _libellerBoutonVerrouiller(estVerrouillee);
 
     // Cadenas sur les badges (sidebar actif + toolbar)
     const badgesActifs = [
@@ -2710,6 +2736,7 @@ function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
         // Masquer le bouton cadenas dans la barre de palette
         const btnVerrouPalette = document.getElementById('btnVerrouPalette');
         if (btnVerrouPalette) btnVerrouPalette.style.display = 'none';
+        _libellerBoutonVerrouiller(false);   // lot C — copie neuve : « Verrouiller l'évaluation »
         // Retirer le cadenas des badges
         document.querySelectorAll('.travaux-badge-verrou').forEach(el => el.remove());
     }
@@ -2774,18 +2801,38 @@ function desactiverFormulaireEvaluation(desactiver) {
         if (checkbox) checkbox.disabled = desactiver;
     });
 
-    // Désactiver le bouton de sauvegarde
-    // Chercher dans le formulaire statique ET dans les palettes flottantes
-    // (en mode visionneuse, les panneaux sont déplacés dans les palettes)
-    const boutonsSauvegarde = document.querySelectorAll(
-        '#evaluations-contenu-evaluation button, .travaux-palette-eval button'
-    );
-    boutonsSauvegarde.forEach(btn => {
-        if (btn.textContent.includes('Enregistrer')) {
-            btn.disabled = desactiver;
-        }
-    });
+    // Lot C de l'enregistrement — « Verrouiller l'évaluation » n'est plus éteint sous le verrou :
+    // il y devient « Déverrouiller l'évaluation » (`_libellerBoutonVerrouiller`). Toujours actif.
+    const btnVerrouiller = document.getElementById('btnVerrouillerEvaluation');
+    if (btnVerrouiller) btnVerrouiller.disabled = false;
+}
 
+/**
+ * Lot C de l'enregistrement (D1) — les mots du verrou, proposés par Cowork le 27 sept. 2026
+ * (plans de travail/CONSIGNE-DU-JOUR.md, § 3).
+ */
+const TITRE_CADENAS_VERROUILLE = 'Verrouillée – clique pour déverrouiller';
+const TITRE_CADENAS_OUVERT = 'Non verrouillée – clique pour verrouiller';
+
+function _libellerBoutonVerrouiller(estVerrouillee) {
+    const btn = document.getElementById('btnVerrouillerEvaluation');
+    if (!btn) return;
+    btn.textContent = estVerrouillee ? 'Déverrouiller l\'évaluation' : 'Verrouiller l\'évaluation';
+    btn.disabled = false;
+}
+
+/**
+ * Lot C — « Évaluation verrouillée : ‹étudiant·e› – ‹production› », ou « déverrouillée ». Un seul
+ * message par geste. En anonymisation, le nom est celui de l'anonymisation (règle du lot A).
+ */
+function messageVerrouEvaluation(evaluation, verrouillee) {
+    const ev = evaluation || {};
+    const anonyme = typeof estModeAnonymisation === 'function' && estModeAnonymisation();
+    const nom = anonyme
+        ? ((typeof anonymiserNom === 'function' && anonymiserNom(ev.etudiantDA)) || '---')
+        : (ev.etudiantNom || '');
+    return (verrouillee ? 'Évaluation verrouillée : ' : 'Évaluation déverrouillée : ')
+        + nom + ' – ' + (ev.productionNom || '');
 }
 
 /**
@@ -3068,6 +3115,7 @@ window.copierCriteresSRPNF = copierCriteresSRPNF;
 // Exports requis pour le mode evaluation depuis la visionneuse (travaux-ui.js)
 window.changerEchelleEvaluation = changerEchelleEvaluation;
 window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;
+window.messageVerrouEvaluation = messageVerrouEvaluation;   // lot C — evaluation-sauvegarde.js
 window.nouvelleEvaluation = nouvelleEvaluation;
 
 // Promotion §5.6 (session B 3e sous-module) — sauvegarderEvaluationModifiee

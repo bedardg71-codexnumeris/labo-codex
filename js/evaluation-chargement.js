@@ -1739,6 +1739,9 @@ function _debouncerAutoSave() {
         pointsAnalytiques: window.evaluationEnCours?.pointsAnalytiques
             ? JSON.parse(JSON.stringify(window.evaluationEnCours.pointsAnalytiques)) : {}   // lot 2
     };
+    // Lot C — l'intégrité voyage DANS l'instantané : l'écriture peut partir après un changement
+    // de copie, quand l'écran montre déjà l'élève suivant (#959 le remet à « recevable »).
+    window._pendingAutoSaveSnapshot.integrite = _lireIntegriteEcran();
     window._timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(window._pendingAutoSaveSnapshot); }, 1500);
 }
 
@@ -1865,7 +1868,7 @@ function _signalerCriteresAjoutesDepuis(conteneur, grille) {
     const explication = document.createElement('small');
     explication.textContent = (un ? 'La note enregistrée ne le couvre pas' : 'La note enregistrée ne les couvre pas')
         + ' et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra '
-        + (un ? 'lui' : 'leur') + ' donner un niveau avant d\'enregistrer.';
+        + (un ? 'lui' : 'leur') + ' donner un niveau avant de verrouiller.';
     avis.append(titre, detail, explication);
     conteneur.prepend(avis);
 }
@@ -2009,8 +2012,13 @@ function _autoSauvegarderCriteres(snapshot) {
     if (!ec || !ec.etudiantDA || !ec.productionId || !ec.grilleId) return;
 
     // Au moins un critere doit etre renseigne
-    if (!Object.values(ec.criteres || {}).some(function(v) { return v; })
-        && !Object.keys(ec.pointsAnalytiques || {}).length) return;   // lot 2 — des points seuls comptent
+    // Lot C de l'enregistrement (D1) — ou l'intégrité signalée : « IA » posé avant tout niveau
+    // se perdait au changement d'élève. Une EXISTANTE reçoit ses champs d'intégrité même sans
+    // niveau dans l'instantané (plus bas) ; seuls les critères exigent des niveaux.
+    const aDesNiveaux = Object.values(ec.criteres || {}).some(function(v) { return v; })
+        || Object.keys(ec.pointsAnalytiques || {}).length > 0;   // lot 2 — des points seuls comptent
+    const integrite = ec.integrite || _lireIntegriteEcran();
+    const integriteSignalee = integrite.statutIntegrite !== 'recevable';
 
     // Collecter les criteres
     const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -2049,8 +2057,12 @@ function _autoSauvegarderCriteres(snapshot) {
         // notes archivées d'un recalcul accidentel déclenché par une interaction
         // sur un formulaire mal désactivé (angle mort terminale #348 ; risque #350).
         if (evaluations[idx].verrouillee === true) return;
-        _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres.concat(criteresHorsGrille(evaluations[idx], grille)));   // #652
+        _majIntegriteAutoSave(evaluations[idx], integrite);   // lot C
+        // Sans niveau dans l'instantané, les critères ne sont pas réécrits : un instantané vide
+        // effacerait ceux de la base (la garde d'origine de cette fonction).
+        if (aDesNiveaux) _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres.concat(criteresHorsGrille(evaluations[idx], grille)));   // #652
     } else {
+        if (!aDesNiveaux && !integriteSignalee) return;
         // #697 (A-1, audit du 5 sept. 2026) — ne rien CRÉER sans échelle résolue : `calculerNote`
         // n'a pas pu calculer, et la nouvelle évaluation porterait `0` sans portée (mesuré au
         // banc : A5). Une existante garde sa note (`_majEvaluationExistanteAutoSave`, `#572`).
@@ -2064,11 +2076,63 @@ function _autoSauvegarderCriteres(snapshot) {
         // Creer une nouvelle evaluation (brouillon non verrouille)
         const nouvelle = _construireNouvelleEvaluationAutoSave(ec, grille, criteres);
         if (!nouvelle) return;
+        _majIntegriteAutoSave(nouvelle, integrite);   // lot C — l'instantané, pas l'écran
+        if (typeof integrite.notesIntegrite !== 'string') nouvelle.notesIntegrite = '';   // masquées : rien
         evaluations.push(nouvelle);
         ec.idModification = nouvelle.id;
     }
 
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations) !== true) return;
+    if (idx === -1) _signalerEvaluationCreeeAutoSave(ec);
+}
+
+/**
+ * Lot C de l'enregistrement (D1) — L'INTÉGRITÉ S'ENREGISTRE TOUTE SEULE, comme les niveaux :
+ * seul « Enregistrer » l'écrivait, et « IA » ou ses notes se perdaient au changement d'élève.
+ * Lue à l'écran au moment du geste (les deux chargeurs la restaurent : #959,
+ * `_chargerStatutsEtBadgesModif`) et portée par l'instantané. Notes masquées en anonymisation :
+ * absentes, la base garde les siennes (lot A, R4). Le statut de remise n'y est pas : aucun geste
+ * ne le change à l'écran (son menu est caché), seuls des chargeurs l'écrivent ; « Verrouiller
+ * l'évaluation » l'écrit, comme « Enregistrer » avant.
+ */
+function _lireIntegriteEcran() {
+    const statut = document.getElementById('statutIntegrite');
+    const notes = document.getElementById('notesIntegrite');
+    const lue = { statutIntegrite: (statut && statut.value) || 'recevable' };
+    if (notes && !(typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(notes))) {
+        lue.notesIntegrite = notes.value || '';
+    }
+    return lue;
+}
+
+function _majIntegriteAutoSave(evaluation, integrite) {
+    evaluation.statutIntegrite = integrite.statutIntegrite;
+    if (typeof integrite.notesIntegrite === 'string') evaluation.notesIntegrite = integrite.notesIntegrite;
+}
+
+/**
+ * Lot C — l'évaluation que l'enregistrement automatique vient de CRÉER est celle de l'écran :
+ * son id passe au pivot (le cadenas, les jetons et « Verrouiller l'évaluation » la trouvent) et
+ * le cadenas ouvert s'affiche. Seulement si l'écran montre encore cette copie : au changement
+ * d'élève, l'écriture en attente part quand le menu porte déjà le suivant.
+ */
+function _signalerEvaluationCreeeAutoSave(ec) {
+    if (!ec || !ec.idModification) return;
+    const da = (document.getElementById('selectEtudiantEval') || {}).value || '';
+    const prod = (document.getElementById('selectProduction1') || {}).value || '';
+    if (da !== ec.etudiantDA || prod !== ec.productionId) return;
+    if (window.evaluationEnCours) window.evaluationEnCours.idModification = ec.idModification;
+    if (typeof window.afficherOuMasquerBoutonVerrouillage === 'function') window.afficherOuMasquerBoutonVerrouillage(true, false);
+}
+
+/**
+ * Lot C — les notes d'intégrité, tapées au clavier, arment l'enregistrement automatique
+ * (`data-on-input` du champ, index.html). Masquées en anonymisation : rien à écrire.
+ */
+function notesIntegriteModifiees(champ) {
+    if (typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(champ)) return;
+    if (typeof evaluationEnCours !== 'undefined' && evaluationEnCours) evaluationEnCours.notesIntegrite = champ ? champ.value : '';
+    _debouncerAutoSave();
 }
 
 // =====================================================================
@@ -2115,6 +2179,10 @@ window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
 window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
 // #882 — les options d'affichage (evaluation.js) arment l'auto-save comme un critère : nom privé de cette IIFE.
 window._debouncerAutoSave = _debouncerAutoSave;
+// Lot C — travaux-annotation.js le lisait par son nom nu, privé à cette IIFE : `typeof` rendait
+// toujours faux, et la fermeture de la copie comme le rechargement ne vidaient rien.
+window._flusherAutoSave = _flusherAutoSave;
+window.notesIntegriteModifiees = notesIntegriteModifiees;   // lot C — data-on-input (index.html)
 
 // Exposé pour la sentinelle anti-re-pollution (Brique D hygiène, juin 2026) :
 // la pré-sélection d'une nouvelle éval suit le modèle des évals existantes,

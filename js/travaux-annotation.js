@@ -115,8 +115,8 @@
         window.addEventListener('travaux-fichier-ferme', () => {
             desactiverAnnotation();
             // Flusher l'auto-save évaluation (erreurs de français en cours)
-            if (typeof _flusherAutoSave === 'function') {
-                _flusherAutoSave();
+            if (typeof window._flusherAutoSave === 'function') {
+                window._flusherAutoSave();
             }
             // Cacher les canvas quand le fichier est ferme
             if (canvasAnnotation) {
@@ -137,8 +137,8 @@
                 sauvegarderAnnotation();
             }
             // Flusher l'auto-save évaluation en attente
-            if (typeof _flusherAutoSave === 'function') {
-                _flusherAutoSave();
+            if (typeof window._flusherAutoSave === 'function') {
+                window._flusherAutoSave();
             }
         });
 

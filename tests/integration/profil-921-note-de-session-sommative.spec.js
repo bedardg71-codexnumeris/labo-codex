@@ -87,7 +87,7 @@ test('#921 · sommative configurable : la carte « Moyenne pondérée » paraît
     expect(c.lignes).toEqual([
         'Analyse terminale · poids 40 % (D 67.4%)',
         'Portfolio (global) · poids 60 % (M 78.3%)',
-        'Exercice en cours · évaluation non enregistrée · non comptée (I 20.0%)'
+        'Exercice en cours · évaluation non verrouillée · non comptée (I 20.0%)'
     ]);
     expect(c.calcul).toBe('(67.4 × 40 + 78.3 × 60) ÷ 100 = 73.9%');
     expect(c.total).toBe('73.9%');

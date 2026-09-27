@@ -139,7 +139,9 @@ function obtenirLibelleStatut(statut) {
         'importe': 'Importé',
         'annote': 'Annoté',
         'evalue': 'Évalué',
-        'non-enregistree': 'Non enregistrée'   // #927 — mot validé par Grégoire, 20 sept. 2026
+        // #927 (20 sept. 2026) puis lot C de l'enregistrement (D1, 26 sept.) : « Non verrouillée ».
+        // L'identifiant reste `non-enregistree` : le filtre retenu le mémorise (`etat.statut`).
+        'non-enregistree': 'Non verrouillée'
     };
     return libelles[statut] || statut;
 }
@@ -1400,7 +1402,9 @@ function genererLigneHTML(ligne) {
     if (ligne.statut === 'non-recevable') {
         affichageNiveau = '<strong style="color: var(--gris-clair);">0</strong>';
     } else {
-        affichageNiveau = `<span class="travaux-badge-pill ${echapperHtml(statutW)}">${echapperHtml(libelleStatut)}</span>`;
+        // Lot C (D1) — l'aide courte de « Non verrouillée ».
+        const titreStatut = statutW === 'non-enregistree' ? 'Non verrouillée : ne compte pas encore dans la note.' : '';
+        affichageNiveau = `<span class="travaux-badge-pill ${echapperHtml(statutW)}" title="${echapperHtml(titreStatut)}">${echapperHtml(libelleStatut)}</span>`;
     }
 
     // Afficher la note chiffrée (%)

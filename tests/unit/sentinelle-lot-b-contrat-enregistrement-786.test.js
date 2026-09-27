@@ -117,8 +117,9 @@ describe('lot B · les sites vivants ne disent un succès que sur `true` (#618) 
     const lire = (f) => readFileSync(path.join(racineProjet, 'js', f), 'utf8');
     const cas = [
         ['saisie-presences.js', "sauvegarderDonneesSelonMode('presences', presences,", "notifications.succes('Présences enregistrées')"],
-        ['evaluation.js', "{ geste: 'Enregistrement de l\\'évaluation' }) !== true) return;", '_traiterPostRepriseMod(evaluations, indexEval, evaluationId);'],
-        ['evaluation-sauvegarde.js', "{ geste: 'Enregistrement de l\\'évaluation' }) !== true) return;", '_postSauvegardeSauv(evaluation, groupeCoursActif);'],
+        // Lot C : le geste est le verrouillage, et l'échec rend le tableau lu (R4) avant de sortir.
+        ['evaluation.js', "{ geste: 'Verrouillage de l\\'évaluation' }) !== true) {", '_traiterPostRepriseMod(evaluations, indexEval, evaluationId);'],
+        ['evaluation-sauvegarde.js', "{ geste: 'Verrouillage de l\\'évaluation' }) !== true) {", '_postSauvegardeSauv(evaluation, groupeCoursActif);'],
         ['liste-evaluations.js', "{ geste: 'Suppression de l\\'évaluation' }) !== true) return;", "'Évaluation supprimée'"]
     ];
     for (const [fichier, garde, succes] of cas) {

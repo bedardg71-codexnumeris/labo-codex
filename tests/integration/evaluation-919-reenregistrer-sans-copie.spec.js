@@ -68,7 +68,7 @@ test('#919 · page fraîche, sans copie : « Enregistrer » par-dessus une éval
         const niveau = document.getElementById('eval_c1');
         niveau.value = 'E';
         niveau.dispatchEvent(new Event('change', { bubbles: true }));
-        document.querySelector('[data-action="sauvegarderEvaluation"]').click();
+        document.getElementById('btnVerrouillerEvaluation').click();
     });
     await page.waitForFunction((T) => {
         const e = window.db.getSync(T + '_evaluationsSauvegardees', []).find((x) => x.id === 'EVAL919');
