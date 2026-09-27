@@ -2283,6 +2283,9 @@ function supprimerEvaluation(evaluationId) {
 
     // Lot B de l'enregistrement (#618) : sur un échec, rien de ce qui suit — ni détachement
     // du fichier, ni message « Évaluation supprimée ». Le témoin commun dit l'échec.
+    // ⚠ (relecture de Cowork, « commenter ») `restaurerOriginaleSiReprise` a déjà muté le tableau
+    // lu : pour une clé servie par le cache mémoire de `db`, la séance peut voir l'originale
+    // restaurée jusqu'au rechargement. Même famille que le cadenas (R4) ; sans suite.
     if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered,
         { geste: 'Suppression de l\'évaluation' }) !== true) return;
 

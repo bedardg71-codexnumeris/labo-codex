@@ -158,10 +158,12 @@ async function ecritureReussie(page, geste) {
 }
 
 // Semis : celui du spec du lot A (copie déjà évaluée, rouverte), en mode NORMAL.
-async function ouvrirEvaluationTemoin(page) {
+// `grosse` ajoute une évaluation d'un autre élève de plus de 25 Ki caractères : la clé passe
+// alors par le cache mémoire de `db` (IDB-first), comme celle d'un groupe réel.
+async function ouvrirEvaluationTemoin(page, { grosse = false } = {}) {
     await viderLeStockage(page);
     await page.waitForFunction(() => typeof window.demarrerEvaluationDepuisFichier === 'function' && typeof window.db !== 'undefined');
-    await page.evaluate(() => {
+    await page.evaluate((grosse) => {
         const k = (b) => (typeof cle === 'function' ? cle(b) : b);
         // security-ok: fixtures littérales du banc, aucune source externe.
         window.db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
@@ -193,7 +195,12 @@ async function ouvrirEvaluationTemoin(page) {
             ],
             noteFinale: 84, ponderationCouverte: 100, niveauFinal: 'M', retroactionFinale: '',
             donneesAlgorithmiques: {}, pointsAnalytiques: {}
-        }]);
+        }].concat(grosse ? [{
+            id: 'EV_LOURDE', etudiantDA: '7654321', etudiantNom: 'Estelle Voisine', groupe: '00007', groupeCoursId: 'GC1',
+            productionId: 'P699', productionNom: 'Portrait témoin', grilleId: 'G699', echelleId: 'E699',
+            criteres: [], noteFinale: 70, niveauFinal: 'D', verrouillee: true, dateEvaluation: '2026-09-05T10:00:00.000Z',
+            retroactionFinale: 'x'.repeat(30000)
+        }] : []));
         window.chargerListeEtudiantsEval();
         window.chargerGroupesEval();
         window.chargerProductionsDansSelect();
@@ -205,7 +212,7 @@ async function ouvrirEvaluationTemoin(page) {
         const selP = document.getElementById('selectProduction1');
         selP.value = 'P699';
         selP.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    }, grosse);
     await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EV699'
         && window._autoSaveSuspendu === false, null, { timeout: 10000 });
     await page.waitForTimeout(2000);   // laisser passer tout auto-enregistrement d'ouverture
@@ -230,6 +237,10 @@ test('lot B · le témoin : un seul nœud, rôles justes, l\'échec RESTE jusqu\
         // Un échec qu'on n'a pas vu est le mal que ce lot répare : aucun délai ne l'efface.
         await pause(3500);
         out.echecApresDelai = window.__lireTemoin();
+        // R1 (relecture de Cowork) : le succès d'une AUTRE clé montre « Enregistré » sans
+        // retirer l'échec — une petite écriture réussie juste après une grosse qui échoue.
+        sauvegarderDonneesSelonMode('banc_autre', [1]);
+        out.apresAutreCle = window.__lireTemoin();
         out.retourSucces = sauvegarderDonneesSelonMode('banc_lotB', [2]);
         out.succes = window.__lireTemoin();
         for (let i = 0; i < 5; i++) sauvegarderDonneesSelonMode('banc_lotB', [3 + i]);
@@ -251,6 +262,8 @@ test('lot B · le témoin : un seul nœud, rôles justes, l\'échec RESTE jusqu\
     expect(r.echec.echec).toBe('Non enregistré – Essai du banc : la mémoire du navigateur est pleine. Pour libérer de la place : Cadre › Trimestre › Bibliothèque, « Supprimer… » sur un ancien trimestre.');
     expect(r.echec.roleEchec).toBe('alert');
     expect(r.echecApresDelai.echec, 'l\'échec est encore affiché 3,5 s plus tard').toBe(r.echec.echec);
+    expect(r.apresAutreCle.succes, 'une autre clé réussit : « Enregistré »').toBe('Enregistré');
+    expect(r.apresAutreCle.echec, 'R1 : le succès d\'une autre clé ne retire pas l\'échec').toBe(r.echec.echec);
     expect(r.retourSucces).toBe(true);
     expect(r.succes.succes).toBe('Enregistré');
     expect(r.succes.echec, 'une écriture réussie efface le « Non enregistré »').toBe(null);
@@ -361,7 +374,87 @@ test('lot B · corbeille : le message ne compte que les évaluations vraiment re
 });
 
 // -----------------------------------------------------------------------
-// PLACEMENT · 360, 768, 1024 px, clair et sombre : il ne masque ni la barre d'Annoter
+// R4 (a) · LE CADENAS QUAND LA CLÉ EST SERVIE PAR LE CACHE MÉMOIRE
+// -----------------------------------------------------------------------
+test('lot B · R4 cadenas, clé servie par le cache mémoire : après un échec, le verrou reste tel quel dans ce que db rend', async ({ page }) => {
+    test.setTimeout(90000);
+    const erreurs = brancherEcouteurs(page);
+    await ouvrirEvaluationTemoin(page, { grosse: true });
+    await poserOutils(page);
+    await page.evaluate(() => { window._autoSaveSuspendu = true; });
+
+    const r = await page.evaluate(() => {
+        const k = cle('evaluationsSauvegardees');
+        const out = { servieParCache: db.memoryCache.has(k) };
+        const lire = () => (db.getSync(k, []).find((e) => e.id === 'EV699') || {}).verrouillee;
+        out.avant = lire();
+        window.__poserPanne('evaluationsSauvegardees', 'quota');
+        try { basculerVerrouillageEvaluationCourante(); } finally { window.__retirerPanne(); }
+        out.apres = lire();
+        out.echec = window.__lireTemoin().echec;
+        return out;
+    });
+    // Sans ce témoin de fraîcheur, l'essai passerait sur une clé en localStorage (relue
+    // fraîche à chaque `getSync`), où la mutation en place ne se voit jamais.
+    expect(r.servieParCache, 'la clé doit être servie par le cache mémoire').toBe(true);
+    expect(r.echec).toMatch(/^Non enregistré – Verrouillage de l'évaluation : /);
+    expect(r.apres, 'le tableau lu reprend son verrou : l\'auto-enregistrement suivant n\'écrira pas un verrou que l\'écran ne montre pas').toBe(r.avant);
+    expect(erreurs).toEqual([]);
+});
+
+// -----------------------------------------------------------------------
+// R3 · LA FENÊTRE DE LA RÉTROACTION RESTE OUVERTE SUR UN ÉCHEC
+// -----------------------------------------------------------------------
+test('lot B · R3 rétroaction : sur un échec, la fenêtre reste ouverte avec le texte ; sur un succès, elle se ferme', async ({ page }) => {
+    test.setTimeout(60000);
+    const erreurs = brancherEcouteurs(page);
+    await viderLeStockage(page);
+    await page.waitForFunction(() => window.travauxUI && window.travauxStockage && typeof window.db !== 'undefined', null, { timeout: 30000 });
+    await page.evaluate(() => {
+        // security-ok: fixtures littérales du banc, aucune source externe.
+        db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
+        db.setSync('trimestreActif', 'a2026');
+        db.setSync('cours', [{ id: 'C1', code: '601-101', nom: 'Cours un' }]);
+        db.setSync('infoCours', { id: 'C1', code: '601-101', nom: 'Cours un' });
+        db.setSync(cle('groupeEtudiants'), [{ da: '1234567', prenom: 'Daniel', nom: 'Témoin', groupe: '00001', coursId: 'C1' }]);
+        db.setSync(cle('fichiersTravaux'), [{ id: 'F1', etudiantDA: '1234567', productionId: 'P1', nomFichier: 'copie.pdf', coursId: 'C1' }]);
+        db.setSync(cle('evaluationsSauvegardees'), [{ id: 'EV_C1', coursId: 'C1', etudiantDA: '1234567', etudiantNom: 'Daniel Témoin',
+            groupe: '00001', productionId: 'P1', productionNom: 'Portrait', grilleNom: 'Grille', noteFinale: 80, niveauFinal: 'M',
+            criteres: [], retroactionFinale: 'Première version.', dateEvaluation: '2026-09-10T10:00:00.000Z', verrouillee: false }]);
+    });
+    await poserOutils(page);
+    await page.evaluate(() => travauxUI.afficherRetroaction('F1'));
+    await page.locator('#travaux-modal-retro-texte').fill('Deuxième version, écrite à la main.');
+
+    const echec = await page.evaluate(() => {
+        const avant = window.__base('evaluationsSauvegardees');
+        window.__toasts = [];
+        window.__poserPanne('evaluationsSauvegardees', 'erreur');
+        try { travauxUI.sauvegarderRetroactionDepuisModal('F1'); } finally { window.__retirerPanne(); }
+        const zone = document.getElementById('travaux-modal-retro-texte');
+        return { ouverte: !!document.getElementById('travaux-modal-retroaction'), texte: zone && zone.value,
+            toasts: window.__toasts.slice(), temoin: window.__lireTemoin(), inchangee: window.__base('evaluationsSauvegardees') === avant };
+    });
+    expect(echec.ouverte, 'la fenêtre reste ouverte sur un échec').toBe(true);
+    expect(echec.texte, 'le texte écrit est toujours là').toBe('Deuxième version, écrite à la main.');
+    expect(echec.toasts.filter((t) => t.startsWith('succes:'))).toEqual([]);
+    expect(echec.temoin.echec).toMatch(/^Non enregistré – Enregistrement de la rétroaction : le navigateur a refusé/);
+    expect(echec.inchangee).toBe(true);
+
+    const ok = await page.evaluate(() => {
+        window.__toasts = [];
+        travauxUI.sauvegarderRetroactionDepuisModal('F1');
+        return { ouverte: !!document.getElementById('travaux-modal-retroaction'), toasts: window.__toasts.slice(),
+            temoin: window.__lireTemoin(), texte: db.getSync(cle('evaluationsSauvegardees'), [])[0].retroactionFinale };
+    });
+    expect(ok.ouverte, 'sur un succès, la fenêtre se ferme').toBe(false);
+    expect(ok.texte).toBe('Deuxième version, écrite à la main.');
+    expect(ok.temoin.echec).toBe(null);
+    expect(erreurs).toEqual([]);
+});
+
+// -----------------------------------------------------------------------
+// PLACEMENT · 360, 768, 1024, 1180 px, clair et sombre : il ne masque ni la barre d'Annoter
 // ni les boutons des présences
 // -----------------------------------------------------------------------
 const INTERACTIFS = 'button, input, select, textarea, a[href], [data-action], [role="button"]';
@@ -390,12 +483,13 @@ async function chevauchements(page, portee) {
     }, { portee, INTERACTIFS });
 }
 
-for (const largeur of [360, 768, 1024]) {
+for (const largeur of [360, 768, 1024, 1180]) {
     for (const clair of [false, true]) {
         test(`lot B · placement ${largeur} px, ${clair ? 'clair' : 'sombre'} : aucun bouton des présences ni de la barre d'Annoter sous le témoin`, async ({ page }) => {
             test.setTimeout(90000);
             const erreurs = brancherEcouteurs(page);
-            await page.setViewportSize({ width: largeur, height: largeur === 360 ? 740 : (largeur === 768 ? 1024 : 768) });
+            // 1180 × 820 : l'iPad Air de Grégoire couché (relecture de Cowork, R4 b).
+            await page.setViewportSize({ width: largeur, height: { 360: 740, 768: 1024, 1024: 768, 1180: 820 }[largeur] });
             await viderLeStockage(page);
             await page.evaluate(() => activerModeDemo());
             await page.waitForTimeout(1200);

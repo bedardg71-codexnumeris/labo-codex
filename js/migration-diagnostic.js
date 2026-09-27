@@ -273,6 +273,9 @@
             }
         });
 
+        // ⚠ Lot B de l'enregistrement (relecture de Cowork, R2) : le drapeau se pose même si
+        // l'écriture est refusée (le témoin dit l'échec). Laissé tel quel : outil de console,
+        // lancé à la main, dont le rapport se relit.
         if (nbMigres > 0) {
             sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, { discret: true });
         }

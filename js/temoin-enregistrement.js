@@ -11,15 +11,20 @@
 // (ils l'auront avec leur écran, lots C à E).
 //
 // API : window.temoinEnregistrement.{ enregistre, nonEnregistre, fermer }
-//   enregistre()                 → « Enregistré », discret, s'efface seul ;
-//                                  retire un « Non enregistré » affiché.
-//   nonEnregistre(raison, geste) → « Non enregistré : ‹raison› », ou
-//                                  « Non enregistré – ‹geste› : ‹raison› ».
-//                                  RESTE affiché jusqu'à la prochaine écriture
-//                                  réussie, ou jusqu'à « Fermer ». Un échec
-//                                  qu'on n'a pas vu est le mal que ce lot répare :
-//                                  aucun délai ne l'efface.
-//   fermer()                     → retire le « Non enregistré » (bouton Fermer).
+//   enregistre(cle)                   → « Enregistré », discret, s'efface seul ;
+//                                       retire le « Non enregistré » affiché
+//                                       SEULEMENT s'il porte la même clé.
+//   nonEnregistre(raison, geste, cle) → « Non enregistré : ‹raison› », ou
+//                                       « Non enregistré – ‹geste› : ‹raison› ».
+//                                       RESTE affiché jusqu'à une écriture réussie
+//                                       de LA MÊME clé, ou jusqu'à « Fermer ». Un
+//                                       échec qu'on n'a pas vu est le mal que ce lot
+//                                       répare : aucun délai ne l'efface, ni le
+//                                       succès d'une autre clé (relecture de Cowork,
+//                                       R1 : une grosse écriture qui échoue, une
+//                                       petite qui réussit juste après — l'échec
+//                                       partait avant d'avoir été lu).
+//   fermer()                          → retire le « Non enregistré » (bouton Fermer).
 //
 // UN SEUL NŒUD : `#temoin-enregistrement`, posé au premier appel et retrouvé par
 // son id ensuite. Deux régions vivantes dedans, parce qu'un même nœud ne peut
@@ -43,6 +48,7 @@
     const ID = 'temoin-enregistrement';
     const DUREE_ENREGISTRE_MS = 2000;
     let minuterieEnregistre = null;
+    let cleEchec = null;   // la clé du « Non enregistré » affiché
 
     function _noeud() {
         let temoin = document.getElementById(ID);
@@ -78,10 +84,10 @@
         return temoin;
     }
 
-    function enregistre() {
+    function enregistre(cle) {
         if (!document.body) return;
         const temoin = _noeud();
-        fermerEchec();
+        if (cleEchec !== null && cle === cleEchec) fermerEchec();
         const succes = temoin.querySelector('.temoin-enregistrement-succes');
         if (succes.textContent !== 'Enregistré') succes.textContent = 'Enregistré';
         succes.classList.add('visible');
@@ -89,9 +95,10 @@
         minuterieEnregistre = setTimeout(() => succes.classList.remove('visible'), DUREE_ENREGISTRE_MS);
     }
 
-    function nonEnregistre(raison, geste) {
+    function nonEnregistre(raison, geste, cle) {
         if (!document.body) return;
         const temoin = _noeud();
+        cleEchec = cle === undefined ? '' : cle;
         clearTimeout(minuterieEnregistre);
         temoin.querySelector('.temoin-enregistrement-succes').classList.remove('visible');
         const echec = temoin.querySelector('.temoin-enregistrement-echec');
@@ -102,6 +109,7 @@
     }
 
     function fermerEchec() {
+        cleEchec = null;
         const temoin = document.getElementById(ID);
         if (!temoin) return;
         const echec = temoin.querySelector('.temoin-enregistrement-echec');
