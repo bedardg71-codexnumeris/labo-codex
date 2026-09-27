@@ -3,8 +3,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 // Lot « les jetons de reprise ne mentent plus » (13 sept. 2026) — #725, #617, #724, #720.
 //
-// GESTE 1 · retirerJetonReprise. `sauvegarderDonneesSelonMode` rend trois refus : `false`
-// (anonymisation), `'quota'` et `'error'` (l'écriture a levé) — les deux derniers sont truthy.
+// GESTE 1 · retirerJetonReprise. `sauvegarderDonneesSelonMode` rendait trois refus : `false`
+// (anonymisation), `'quota'` et `'error'` (l'écriture a levé) — les deux derniers truthy. Depuis
+// le lot B de l'enregistrement (27 sept. 2026), un seul : `false`, et c'est la fonction qui dit
+// l'échec par le témoin commun, avec le geste reçu en option.
 // Avant : « Originale restaurée » était notifié (#725) et le fichier de la reprise mis à la
 // corbeille (#617) AVANT l'écriture ; sur `'quota'`/`'error'`, le refus passait même pour un succès.
 //
@@ -23,7 +25,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 const DA = '1111111';
 const P = 'PROD_1';
-const REFUS = [false, 'quota', 'error'];
+const REFUS = [false];
 
 function creerStockage(fichiers) {
     const actifs = fichiers.map(f => Object.assign({}, f));
@@ -41,12 +43,13 @@ function monter({ evaluations, fichiers = [], retourEcriture = true }) {
     const stores = { evaluationsSauvegardees: evaluations.map(e => JSON.parse(JSON.stringify(e))) };
     const travauxStockage = creerStockage(fichiers);
     const notifs = [];
+    const gestes = [];
     const globaux = {
         db: { getSync: (k, d) => (k in stores ? JSON.parse(JSON.stringify(stores[k])) : (d !== undefined ? d : null)), setSync: () => {}, get: async () => null, set: async () => {} },
         cle: (k) => k,
         obtenirDonneesSelonMode: (k) => stores[k],
-        // Le faux magasin rend les TROIS refus de `modes.js` et n'écrit que sur `true`.
-        sauvegarderDonneesSelonMode: (k, v) => { if (retourEcriture !== true) return retourEcriture; stores[k] = v; return true; },
+        // Le faux magasin rend le refus de `modes.js` et n'écrit que sur `true`.
+        sauvegarderDonneesSelonMode: (k, v, options) => { gestes.push(options && options.geste); if (retourEcriture !== true) return retourEcriture; stores[k] = v; return true; },
         notifications: {
             succes: (t, m) => notifs.push({ type: 'succes', t, m }), erreur: (t, m) => notifs.push({ type: 'erreur', t, m }),
             info: () => {}, avertissement: () => {}
@@ -56,7 +59,7 @@ function monter({ evaluations, fichiers = [], retourEcriture = true }) {
         travauxStockage
     };
     const win = chargerScript('js/evaluation-jetons.js', globaux);
-    return { win, stores, travauxStockage, notifs };
+    return { win, stores, travauxStockage, notifs, gestes };
 }
 
 const ORIGINALE = { id: 'EVAL_A', etudiantDA: DA, productionId: P, noteFinale: 60,
@@ -69,10 +72,11 @@ describe('Geste 1 · retirer une reprise : sur un refus d\'écriture, rien ne bo
     // Les deux portes : décocher sur la REPRISE (EVAL_B), ou restaurer depuis l'ORIGINALE (EVAL_A).
     for (const porte of ['EVAL_B', 'EVAL_A']) {
         for (const refus of REFUS) {
-            it(`porte ${porte}, retour ${JSON.stringify(refus)} : false, une seule notification (l'erreur), aucun fichier déplacé`, () => {
+            it(`porte ${porte}, retour ${JSON.stringify(refus)} : false, aucune notification propre (le témoin dit l'échec, avec le geste), aucun fichier déplacé`, () => {
                 const b = monter({ evaluations: [ORIGINALE, REPRISE], fichiers: [F_REPRISE], retourEcriture: refus });
                 expect(b.win.retirerJetonReprise(porte)).toBe(false);
-                expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
+                expect(b.notifs).toEqual([]);
+                expect(b.gestes).toEqual(['Retrait du jeton de reprise']);
                 expect(b.travauxStockage._corbeille).toEqual([]);
                 expect(b.travauxStockage._actifs.map(f => f.id)).toEqual(['F_REPR']);
             });
@@ -88,11 +92,11 @@ describe('Geste 1 · retirer une reprise : sur un refus d\'écriture, rien ne bo
         });
     }
 
-    it('le point de persistance rend un BOOLÉEN : `\'quota\'` n\'arrive plus à l\'appelant comme un succès (retirerJetonDelai)', () => {
-        const b = monter({ evaluations: [{ id: 'E1', etudiantDA: DA, productionId: P, jetonDelaiApplique: true }], retourEcriture: 'quota' });
+    it('le point de persistance rend un BOOLÉEN et passe le geste au témoin (retirerJetonDelai)', () => {
+        const b = monter({ evaluations: [{ id: 'E1', etudiantDA: DA, productionId: P, jetonDelaiApplique: true }], retourEcriture: false });
         expect(b.win.retirerJetonDelai('E1')).toBe(false);
-        expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
-        expect(b.notifs[0].m).toMatch(/espace de stockage est plein/);
+        expect(b.notifs).toEqual([]);
+        expect(b.gestes).toEqual(['Retrait du jeton de délai']);
     });
 });
 

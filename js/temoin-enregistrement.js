@@ -1,0 +1,121 @@
+// ============================================================================
+// temoin-enregistrement.js — le témoin commun « Enregistré » / « Non enregistré »
+// ----------------------------------------------------------------------------
+// Lot B de l'enregistrement (D0, point 2 — Grégoire, 26 sept. 2026) : « Un seul
+// témoin, le même partout, dit « Enregistré » après chaque écriture. Si
+// l'écriture échoue, il dit « Non enregistré », avec la raison. »
+//
+// Qui le fait parler : `sauvegarderDonneesSelonMode` (`modes.js`), et elle seule.
+// Un écrivain n'appelle pas ce module : il passe par la fonction centrale, qui
+// dit le succès comme l'échec. Les 384 `db.setSync` directs n'ont PAS le témoin
+// (ils l'auront avec leur écran, lots C à E).
+//
+// API : window.temoinEnregistrement.{ enregistre, nonEnregistre, fermer }
+//   enregistre(cle)                   → « Enregistré », discret, s'efface seul ;
+//                                       retire le « Non enregistré » affiché
+//                                       SEULEMENT s'il porte la même clé.
+//   nonEnregistre(raison, geste, cle) → « Non enregistré : ‹raison› », ou
+//                                       « Non enregistré – ‹geste› : ‹raison› ».
+//                                       RESTE affiché jusqu'à une écriture réussie
+//                                       de LA MÊME clé, ou jusqu'à « Fermer ». Un
+//                                       échec qu'on n'a pas vu est le mal que ce lot
+//                                       répare : aucun délai ne l'efface, ni le
+//                                       succès d'une autre clé (relecture de Cowork,
+//                                       R1 : une grosse écriture qui échoue, une
+//                                       petite qui réussit juste après — l'échec
+//                                       partait avant d'avoir été lu).
+//   fermer()                          → retire le « Non enregistré » (bouton Fermer).
+//
+// UN SEUL NŒUD : `#temoin-enregistrement`, posé au premier appel et retrouvé par
+// son id ensuite. Deux régions vivantes dedans, parce qu'un même nœud ne peut
+// pas être à la fois `status` (poli) et `alert` : changer `role` en cours de
+// route n'est pas annoncé de façon fiable par VoiceOver.
+//
+// Le texte « Enregistré » ne change pas d'un succès à l'autre : la région polie
+// ne le réannonce donc pas à chaque auto-enregistrement (toutes les 1,5 s pendant
+// qu'on évalue). Seul le visuel réapparaît.
+//
+// Placement : en bas à gauche, loin du témoin du Codex (menu du haut, D4 / lot F)
+// et des toasts (en haut à droite). `pointer-events: none` hors du bouton Fermer :
+// le témoin ne capte ni le Pencil ni un clic destiné à ce qu'il survole.
+//
+// Sécurité : texte par textContent, jamais innerHTML.
+// ============================================================================
+
+(function() {
+    'use strict';
+
+    const ID = 'temoin-enregistrement';
+    const DUREE_ENREGISTRE_MS = 2000;
+    let minuterieEnregistre = null;
+    let cleEchec = null;   // la clé du « Non enregistré » affiché
+
+    function _noeud() {
+        let temoin = document.getElementById(ID);
+        if (temoin) return temoin;
+        temoin = document.createElement('div');
+        temoin.id = ID;
+        temoin.className = 'temoin-enregistrement';
+
+        const succes = document.createElement('div');
+        succes.className = 'temoin-enregistrement-succes';
+        succes.setAttribute('role', 'status');
+        succes.setAttribute('aria-live', 'polite');
+        succes.setAttribute('aria-atomic', 'true');
+        temoin.appendChild(succes);
+
+        const echec = document.createElement('div');
+        echec.className = 'temoin-enregistrement-echec';
+        echec.setAttribute('role', 'alert');
+        echec.setAttribute('aria-atomic', 'true');
+        const texte = document.createElement('span');
+        texte.className = 'temoin-enregistrement-echec-texte';
+        echec.appendChild(texte);
+        const fermer = document.createElement('button');
+        fermer.type = 'button';
+        fermer.className = 'temoin-enregistrement-fermer';
+        fermer.setAttribute('aria-label', 'Fermer');
+        fermer.textContent = '×';
+        fermer.addEventListener('click', fermerEchec);
+        echec.appendChild(fermer);
+        temoin.appendChild(echec);
+
+        document.body.appendChild(temoin);
+        return temoin;
+    }
+
+    function enregistre(cle) {
+        if (!document.body) return;
+        const temoin = _noeud();
+        if (cleEchec !== null && cle === cleEchec) fermerEchec();
+        const succes = temoin.querySelector('.temoin-enregistrement-succes');
+        if (succes.textContent !== 'Enregistré') succes.textContent = 'Enregistré';
+        succes.classList.add('visible');
+        clearTimeout(minuterieEnregistre);
+        minuterieEnregistre = setTimeout(() => succes.classList.remove('visible'), DUREE_ENREGISTRE_MS);
+    }
+
+    function nonEnregistre(raison, geste, cle) {
+        if (!document.body) return;
+        const temoin = _noeud();
+        cleEchec = cle === undefined ? '' : cle;
+        clearTimeout(minuterieEnregistre);
+        temoin.querySelector('.temoin-enregistrement-succes').classList.remove('visible');
+        const echec = temoin.querySelector('.temoin-enregistrement-echec');
+        echec.querySelector('.temoin-enregistrement-echec-texte').textContent = geste
+            ? 'Non enregistré – ' + String(geste) + ' : ' + String(raison)
+            : 'Non enregistré : ' + String(raison);
+        echec.classList.add('visible');
+    }
+
+    function fermerEchec() {
+        cleEchec = null;
+        const temoin = document.getElementById(ID);
+        if (!temoin) return;
+        const echec = temoin.querySelector('.temoin-enregistrement-echec');
+        echec.classList.remove('visible');
+        echec.querySelector('.temoin-enregistrement-echec-texte').textContent = '';
+    }
+
+    window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec };
+})();

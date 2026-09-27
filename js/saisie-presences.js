@@ -1730,7 +1730,10 @@ function enregistrerPresences() {
         }
     });
 
-    sauvegarderDonneesSelonMode('presences', presences);
+    // Lot B de l'enregistrement (#618) : « Présences enregistrées » ne part que sur une
+    // écriture réelle (mesuré au navigateur le 26 sept. : il partait sur un quota dépassé).
+    if (sauvegarderDonneesSelonMode('presences', presences,
+        { geste: 'Enregistrement des présences' }) !== true) return;
 
     notifications.succes('Présences enregistrées');
 

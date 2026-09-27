@@ -2281,7 +2281,13 @@ function supprimerEvaluation(evaluationId) {
 
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
-    const resultatEcriture = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered);
+    // Lot B de l'enregistrement (#618) : sur un échec, rien de ce qui suit — ni détachement
+    // du fichier, ni message « Évaluation supprimée ». Le témoin commun dit l'échec.
+    // ⚠ (relecture de Cowork, « commenter ») `restaurerOriginaleSiReprise` a déjà muté le tableau
+    // lu : pour une clé servie par le cache mémoire de `db`, la séance peut voir l'originale
+    // restaurée jusqu'au rechargement. Même famille que le cadenas (R4) ; sans suite.
+    if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered,
+        { geste: 'Suppression de l\'évaluation' }) !== true) return;
 
     // #612 (T6.6) — le fichier de la reprise part avec elle. Le geste vit dans
     // `evaluation-jetons.js` (#607) et n'est pas réécrit ici : une seconde
@@ -2289,16 +2295,11 @@ function supprimerEvaluation(evaluationId) {
     //
     // ORDRE : le détachement suit IMMÉDIATEMENT l'écriture des évaluations,
     // sans point d'attente entre les deux — et seulement si l'écriture a
-    // VRAIMENT eu lieu. `sauvegarderDonneesSelonMode` rend trois valeurs
-    // (`modes.js`) : `true`, `'error'`, et la chaîne `'quota'`, truthy alors
-    // que RIEN n'a été enregistré. Un refus rendu n'est pas une exception, il se
-    // LIT : d'où le `=== true` et non la simple véracité. Détacher plus tôt, ou
-    // sur un `'quota'`, mettrait le fichier à la corbeille pour une suppression
-    // qui n'a pas eu lieu — un état incohérent définitif.
-    // ⚠ Que la SUITE de cette fonction traite `'quota'` comme un succès est un
-    //   défaut PRÉEXISTANT, inscrit en #618. Il n'est pas creusé ici.
+    // VRAIMENT eu lieu (retour plus haut). Détacher plus tôt, ou sur un refus,
+    // mettrait le fichier à la corbeille pour une suppression qui n'a pas eu
+    // lieu — un état incohérent définitif.
     let nbFichiersCorbeille = 0;
-    if (originaleRestauree && resultatEcriture === true
+    if (originaleRestauree
         && typeof window._detacherFichiersDeEvaluation === 'function') {
         nbFichiersCorbeille = window._detacherFichiersDeEvaluation(evaluationId, 'corbeille');
     }
@@ -2959,8 +2960,13 @@ function supprimerFichierDefinitivement(id) {
             if (evaluations.length < avant) {
                 // #560 — par le garde des modes, comme `supprimerEvaluation`. Depuis le lot A
                 // de l'enregistrement (26 sept. 2026), l'anonymisation y écrit comme le mode normal.
-                sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-                nbEvalsRetirees = avant - evaluations.length;
+                // Lot B (#618) : « Fichier et N évaluations supprimés » ne compte que ce qui
+                // l'a vraiment été. Sur un échec, le message dit le fichier seul (il est
+                // bien supprimé) et le témoin commun dit l'échec pour les évaluations.
+                if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
+                    { geste: 'Suppression des évaluations du fichier' }) === true) {
+                    nbEvalsRetirees = avant - evaluations.length;
+                }
                 // Tier 6.3 : Invalider les caches de moyennes
                 window._moyennesQualifies = null;
                 window._moyennesToutes = null;
@@ -3053,8 +3059,10 @@ function viderTouteCorbeille() {
                 });
             });
             if (evaluations.length < avant) {
-                // #560 — même garde que ci-dessus.
-                sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+                // #560 — même garde que ci-dessus. « Corbeille vidée. » reste vrai sur un échec
+                // (les fichiers sont partis) ; le témoin commun dit celui des évaluations.
+                sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
+                    { geste: 'Suppression des évaluations de la corbeille' });
                 // Tier 6.3 : Invalider les caches de moyennes
                 window._moyennesQualifies = null;
                 window._moyennesToutes = null;

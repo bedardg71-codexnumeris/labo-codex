@@ -40,6 +40,7 @@ const srcSauvegarde = readFileSync(path.join(racineProjet, 'js', 'evaluation-sau
 
 function monter({ ecritureRefusee }) {
     const erreurs = [];
+    const gestes = [];
     const evaluations = [
         { id: 'E1', etudiantDA: '111', productionId: 'P1', jetonDelaiApplique: true, delaiAccorde: true }
     ];
@@ -48,10 +49,13 @@ function monter({ ecritureRefusee }) {
         cle: (k) => k,
         echapperHtml: (s) => String(s == null ? '' : s),
         obtenirDonneesSelonMode: () => evaluations,
-        // Le cœur du test : l'écriture est REFUSÉE. Réancré le 26 sept. 2026 (lot A de
-        // l'enregistrement) : l'anonymisation ne refuse plus (`false` n'est plus rendu) ; le refus
-        // modélisé est celui du stockage, `'error'` (`modes.js`).
-        sauvegarderDonneesSelonMode: () => (ecritureRefusee ? 'error' : true),
+        // Le cœur du test : l'écriture est REFUSÉE. Lot B de l'enregistrement (27 sept. 2026) :
+        // la fonction rend `false` sur tout refus (plus de chaîne), et c'est ELLE qui dit
+        // l'échec par le témoin commun, avec le geste reçu en option.
+        sauvegarderDonneesSelonMode: (cle, donnees, options) => {
+            gestes.push(options && options.geste);
+            return !ecritureRefusee;
+        },
         obtenirPreference: () => null,
         notifications: {
             erreur: (titre, msg) => erreurs.push(titre + ' | ' + msg),
@@ -61,7 +65,7 @@ function monter({ ecritureRefusee }) {
     const win = chargerScript('js/evaluation-jetons.js', stubs, {
         addEventListener: () => {}, removeEventListener: () => {}
     });
-    return { win, erreurs, evaluations };
+    return { win, erreurs, gestes, evaluations };
 }
 
 describe('#563 · une écriture de jeton refusée ne passe plus pour un succès', () => {
@@ -70,12 +74,11 @@ describe('#563 · une écriture de jeton refusée ne passe plus pour un succès'
         expect(win.retirerJetonDelai('E1')).toBe(false);
     });
 
-    it('l’échec est DIT à l’utilisateur, pas seulement journalisé', () => {
-        const { win, erreurs } = monter({ ecritureRefusee: true });
+    it('l’échec est DIT une fois, par le témoin commun : le geste lui est passé, aucun toast propre', () => {
+        const { win, erreurs, gestes } = monter({ ecritureRefusee: true });
         win.retirerJetonDelai('E1');
-        expect(erreurs).toHaveLength(1);
-        expect(erreurs[0]).toContain('Modification non enregistrée');
-        expect(erreurs[0]).toContain('le stockage a refusé l\'écriture');
+        expect(gestes).toEqual(['Retrait du jeton de délai']);
+        expect(erreurs).toHaveLength(0);
     });
 
     it('contrôle : écriture acceptée → succès, aucune alarme (garde ciblée)', () => {
@@ -91,7 +94,7 @@ describe('#563 · une écriture de jeton refusée ne passe plus pour un succès'
         // Et le point unique doit bien exister et examiner ce retour.
         expect(nu).toContain('function _persisterEvaluationsJetons');
         const corps = nu.slice(nu.indexOf('function _persisterEvaluationsJetons'));
-        expect(corps.slice(0, 600)).toContain('if (!ok)');
+        expect(corps.slice(0, 600)).toContain('{ geste }) === true');
     });
 });
 

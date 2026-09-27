@@ -1119,12 +1119,12 @@ describe('G · reprise, retrait, héritage', () => {
         expect(reprise.repriseDeId).toBe('EV_ORIG'); expect(origSubsiste).toBe(false);
         expect(apres.repriseDeId).toBeUndefined(); expect(apres.noteFinale).toBe(60);
     });
-    it('G5 · (H2, #563, ↻ #725) écriture refusée au retrait : SEULE « Modification non enregistrée » est notifiée (avant #725 : « succès » d\'abord, puis l\'erreur)', () => {
+    it('G5 · (H2, #563, ↻ #725, ↻ lot B) écriture refusée au retrait : AUCUNE notification du module — l\'échec est dit par le témoin commun de `sauvegarderDonneesSelonMode` (avant #725 : « succès » d\'abord, puis l\'erreur ; avant le lot B : « Modification non enregistrée »)', () => {
         const b = monter(jeuSOM(), { avecJetons: true, refuserEcriture: true });
         const ok = b.win.retirerJetonReprise('EV_S2_NEW');
         noter('G5', { ok, notifs: b.notifs.map(n => n.type + ':' + n.t) });
         expect(ok).toBe(false);
-        expect(b.notifs.map(n => n.type)).toEqual(['erreur']);   // avant #725 : ['succes', 'erreur']
+        expect(b.notifs.map(n => n.type)).toEqual([]);   // avant #725 : ['succes', 'erreur'] ; avant le lot B : ['erreur']
     });
     it('G6 · (↻ #617) écriture refusée au retrait : le fichier de la reprise RESTE actif, l\'évaluation aussi (avant #617 : fichier à la corbeille, évaluation intacte)', () => {
         const b = monter(jeuSOM(), { avecJetons: true, refuserEcriture: true, avecFichiers: true, store: { test_fichiersTravaux: [{ id: 'F_REP', evaluationId: 'EV_S2_NEW', etudiantDA: DA.SOM, productionId: 'P2' }] } });
