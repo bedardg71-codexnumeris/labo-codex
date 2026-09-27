@@ -259,6 +259,40 @@ describe('lot D · 7 bis. la ligne d’une absence motivée, touchée, garde sa 
     });
 });
 
+describe('lot D · 9. une présence RàI seule ne rend pas la séance « saisie » (décision de Grégoire, 27 sept.)', () => {
+    const RAI = { date: DATE, da: '2000002', periodesPresentes: 1, notes: '', coursId: 'GC1', facultatif: true };
+
+    it('fiche RàI seule : la séance n’est pas saisie — l’assiduité ne la compte pas, l’écran n’inscrit personne absent', () => {
+        const store = storeSeance([RAI]);
+        const b = monterSeance(store);
+        expect(b.win.construireDatesSaisiesGroupe('2000001', store.test_presences).has(DATE)).toBe(false);
+        // Alice n'a aucune séance saisie : son assiduité est inconnue, pas 0 (avant : 0 / 2).
+        expect(b.win.calculerAssiduite('2000001', '2026-09-06').nombreSeances).toBe(0);
+        let html = '';
+        b.document.getElementById('tbody-saisie-presences').appendChild = (tr) => { html += tr.innerHTML; };
+        try { b.win.initialiserSaisiePresences(); } catch { /* idem */ }
+        expect(html).not.toContain('Non saisi·e');
+    });
+
+    it('fiche RàI seule : le premier geste saisit la séance, les autres présents, la fiche RàI intacte', () => {
+        const store = storeSeance([RAI]);
+        const b = monterSeance(store, { valeurs: { '2000001': 0 } });
+        geste(b, '2000001');
+        b.avancer(1500);
+        const fiches = fichesDu(store, DATE);
+        expect(fiches.find((p) => p.da === '2000001').periodesPresentes).toBe(0);
+        expect(fiches.find((p) => p.da === '2000003').periodesPresentes).toBe(2);
+        expect(fiches.filter((p) => p.da === '2000002')).toEqual([RAI]);
+    });
+
+    it('fiche RàI ET fiche ordinaire : la séance est saisie', () => {
+        const store = storeSeance([RAI, { date: DATE, da: '2000001', periodesPresentes: 2, notes: '', coursId: 'GC1' }]);
+        const b = monterSeance(store);
+        expect(b.win.construireDatesSaisiesGroupe('2000003', store.test_presences).has(DATE)).toBe(true);
+        expect(b.win.calculerAssiduite('2000003', '2026-09-06').nombreSeances).toBe(1);   // compté·e absent·e
+    });
+});
+
 describe('lot D · 8. un échec d’écriture ne dit aucun succès', () => {
     it('base intacte, aucune notification de succès', () => {
         const store = storeSeance();
@@ -285,4 +319,5 @@ describe('lot D · 8. un échec d’écriture ne dit aucun succès', () => {
  *   M9.  les lignes cachées par la recherche sautées                     → 1 rouge (2)
  *   M10. délai de 1,5 s ramené à 0                                       → 1 rouge (2)
  *   M11. le verrou dit toujours « Séance verrouillée. »                  → 1 rouge (6)
+ *   M12. `facultatif !== true` retiré de construireDatesSaisiesGroupe (indices.js) → 2 rouges (9)
  */

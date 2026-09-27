@@ -86,7 +86,7 @@ Texte proposé par Cowork, retenu sans retouche :
 3. **Lot C – L'évaluation d'une copie (D1).**
 4. **Lot D – Les présences (D2).**
 5. **Lots E – Créer ou modifier (D3)**, par zone : Conception, puis Cadre et élèves, puis productions, interventions et volet confidentiel.
-6. **Lot F – Les mots (D4)** : codex, Réserve, copie de secours, et relevé des textes de l'Aide.
+6. **Lot F – Les mots (D4)** : codex, Réserve, copie de secours, et relevé des textes de l'Aide. Ajouté par Cowork le 27 sept. (relecture du lot D) : la fenêtre d'aide « Saisir les présences efficacement » liste des états (« Justifié », « Retard ») que l'écran n'offre pas.
 
 
 ## D2 bis · Les présences, deux cas limites – arrêtés le 27 sept. vers 10 h 36 (arrêt du lot D, avant le code)
