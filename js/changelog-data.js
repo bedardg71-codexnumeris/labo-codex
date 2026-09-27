@@ -33,7 +33,9 @@
                 // 1.160.2 (#960) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
                 'Évaluer&nbsp;: ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide.',
                 // 1.160.3 (#961) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
-                'Évaluer&nbsp;: une rétroaction finale que tu as réécrite à la main n\'est plus remplacée quand tu changes un niveau&nbsp;; «&nbsp;Régénérer&nbsp;» la refait à la demande. Sur une copie évaluée avant le 26 septembre, l\'application te le demande une fois.'
+                'Évaluer&nbsp;: une rétroaction finale que tu as réécrite à la main n\'est plus remplacée quand tu changes un niveau&nbsp;; «&nbsp;Régénérer&nbsp;» la refait à la demande. Sur une copie évaluée avant le 26 septembre, l\'application te le demande une fois.',
+                // 1.160.4 (accueil) — ACCEPTÉ par Grégoire le 27 sept. 2026, tel quel (texte de Cowork).
+                'Accueil&nbsp;: «&nbsp;Par où commencer&nbsp;?&nbsp;» se lit en trois étapes, et un bouton ouvre les tutoriels de Labo Codex sur le blogue Codex Numeris.'
             ]
         },
         {
