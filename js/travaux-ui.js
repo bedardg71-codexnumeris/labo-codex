@@ -7162,6 +7162,10 @@
         if (index === -1) return;
 
         evaluations[index].retroactionFinale = textarea.value;
+        // #961 (D7) — un texte retouché ici est réécrit à la main : il ne suit plus les niveaux.
+        // C1 (contre-vérification de Cowork) — sans retouche, la clé n'est pas écrite : une
+        // évaluation d'avant D7 garde sa question (« Garder la mienne » / « Remplacer »).
+        if (textarea.value !== textarea.defaultValue) evaluations[index].retroactionReecrite = true;
         evaluations[index].dateModification = new Date().toISOString();
         const resultat = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 

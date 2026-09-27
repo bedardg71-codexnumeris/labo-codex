@@ -42,7 +42,9 @@
    Variables module-scope encapsulées (anti-pattern §5.10) : aucune
    (toutes les locals sont à l'intérieur des function bodies).
 
-   6 exports window.X :
+   10 exports window.X (6 d'origine + 4 de #961, estRetroactionReecrite,
+   poserRetroactionReecrite, preparerRetroactionEnregistree, marqueRetroactionAEcrire,
+   en fin de fichier) :
      · window.genererRetroaction (préservé du bloc principal L5409)
      · window.regenererRetroactionAvecFeedback (préservé export dispersé L282)
      · window.copierRetroaction (préservé du bloc principal L5410)
@@ -290,6 +292,16 @@ function genererRetroaction(num) {
     // et ses commentaires : sans elle, ils manquent, le reste s'écrit.
     const zoneRetroaction = document.getElementById('retroactionFinale1');
     if (!zoneRetroaction) return;
+    // #961 (D7) — une rétroaction réécrite à la main ne suit plus les niveaux : aucune
+    // génération automatique ne la remplace. « Régénérer » efface le marqueur d'abord.
+    if (estRetroactionReecrite()) return;
+    // #961 R2 — stock d'avant D7 (clé absente, texte non vide) : on demande, une fois par copie,
+    // et rien ne s'écrit avant la réponse. Pendant un chargement, ni question ni écriture : le
+    // chargeur pose ensuite le texte enregistré (neutralité #960).
+    if (_estADemander()) {
+        if (!_chargementEnCours()) _demanderPourLeStock();
+        return;
+    }
     if (!evaluationEnCours || !evaluationEnCours.grilleId) {
         zoneRetroaction.value = '';
         return;
@@ -338,6 +350,101 @@ function genererRetroaction(num) {
 }
 
 /**
+ * #961 (D7, 26 sept. 2026) — LA RÉTROACTION RÉÉCRITE À LA MAIN.
+ *
+ * Une frappe dans la zone (`retroactionModifiee`, l'événement `input` que `.value = …` ne
+ * déclenche pas) la marque ; « Régénérer » seul efface la marque, et le changement de
+ * cartouche confirmé (#944, qui annonce la perte des retouches). La marque vit sur la zone,
+ * attachée à la copie (élève + production) : ouvrir une autre copie ne l'emporte pas. Elle
+ * s'enregistre avec l'évaluation (`retroactionReecrite`) et revient à l'ouverture.
+ */
+function _cleCopieRetroaction(copie) {
+    const c = copie || ((typeof window.etatVivantEvaluationEnCours === 'function')
+        ? window.etatVivantEvaluationEnCours() : (window.evaluationEnCours || {}));
+    return (c && c.etudiantDA && c.productionId) ? c.etudiantDA + '|' + c.productionId : '';
+}
+
+/** La rétroaction de la copie ouverte (ou de `copie`) est-elle réécrite à la main ? */
+function estRetroactionReecrite(copie) {
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction(copie);
+    return !!(zone && zone.dataset && cleCopie && zone.dataset.reecritePour === cleCopie);
+}
+
+/** Pose ou retire la marque pour la copie ouverte, et l'avis sous la zone. Toute réponse
+ *  (frappe, « Régénérer », cartouche confirmée, question du stock) tranche : plus rien à demander. */
+function poserRetroactionReecrite(reecrite) {
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction();
+    if (zone && zone.dataset) {
+        if (reecrite && cleCopie) zone.dataset.reecritePour = cleCopie;
+        else delete zone.dataset.reecritePour;
+        delete zone.dataset.aDemanderPour;
+    }
+    const avis = document.getElementById('avisRetroactionReecrite');
+    if (avis) avis.classList.toggle('u-hide', !estRetroactionReecrite());
+}
+
+/**
+ * #961 R2 (Grégoire, 26 sept., option c) — LE STOCK D'AVANT D7. Une évaluation sans clé
+ * `retroactionReecrite` et avec une rétroaction : au premier geste qui la régénérerait, une
+ * question, une fois par copie. La clé absente est le signal ; le texte n'est pas comparé.
+ * Posé par les chargeurs (`preparerRetroactionEnregistree`), levé par toute réponse.
+ */
+function _estADemander() {
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction();
+    return !!(zone && zone.dataset && cleCopie && zone.dataset.aDemanderPour === cleCopie);
+}
+
+function _chargementEnCours() {
+    return !!(window._autoSaveSuspendu || window._chargementsEvaluationEnCours > 0);
+}
+
+/** Les chargeurs : la marque (ou la question due) de l'évaluation qu'ils viennent de poser. */
+function preparerRetroactionEnregistree(evaluation) {
+    const texte = !!(evaluation && evaluation.retroactionFinale);
+    poserRetroactionReecrite(texte && evaluation.retroactionReecrite === true);
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction();
+    if (texte && evaluation.retroactionReecrite === undefined && zone && zone.dataset && cleCopie) {
+        zone.dataset.aDemanderPour = cleCopie;
+    }
+}
+
+/** Ce que les écrivains enregistrent : `true`/`false`, ou `undefined` (clé laissée absente)
+ *  tant que la question du stock n'a pas eu sa réponse. */
+function marqueRetroactionAEcrire(copie) {
+    const zone = document.getElementById('retroactionFinale1');
+    const cleCopie = _cleCopieRetroaction(copie);
+    if (zone && zone.dataset && cleCopie && zone.dataset.aDemanderPour === cleCopie) return undefined;
+    return estRetroactionReecrite(copie);
+}
+
+let _questionStockEnCours = false;
+async function _demanderPourLeStock() {
+    if (_questionStockEnCours || !window.uiDialogues || typeof window.uiDialogues.confirmerAction !== 'function') return;
+    _questionStockEnCours = true;
+    const cleCopie = _cleCopieRetroaction();
+    let remplacer = false;
+    try {
+        // « Garder la mienne » a le focus (variante danger) ; Entrée suit le bouton ; Échap garde.
+        remplacer = await window.uiDialogues.confirmerAction({
+            message: 'Cette rétroaction a été enregistrée avant le 26 septembre. La remplacer par la version régénérée ?',
+            texteConfirmer: 'Remplacer',
+            texteAnnuler: 'Garder la mienne',
+            variante: 'danger'
+        });
+    } finally {
+        _questionStockEnCours = false;
+    }
+    if (_cleCopieRetroaction() !== cleCopie) return;   // une autre copie entre-temps : rien
+    poserRetroactionReecrite(!remplacer);
+    if (remplacer) genererRetroaction(1);
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
+}
+
+/**
  * Régénère la rétroaction avec feedback visuel (avant/après)
  */
 function regenererRetroactionAvecFeedback() {
@@ -347,7 +454,11 @@ function regenererRetroactionAvecFeedback() {
     const ancienTexte = textarea.value;
     const ancienMots = ancienTexte.trim().length === 0 ? 0 : ancienTexte.trim().split(/\s+/).length;
 
+    // #961 — le geste qui rend la rétroaction aux niveaux : la marque part, le texte généré
+    // la remplace, et l'auto-save l'écrit (comme une frappe), marque comprise.
+    poserRetroactionReecrite(false);
     genererRetroaction(1);
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
 
     const nouveauTexte = textarea.value;
     const nouveauMots = nouveauTexte.trim().length === 0 ? 0 : nouveauTexte.trim().split(/\s+/).length;
@@ -1321,7 +1432,7 @@ function sauvegarderRetroactionFinale(productionNum) {
 }
 
 // =====================================================================
-// Exports window.X (6) — voir en-tête pour détails
+// Exports window.X (10) — voir en-tête pour détails
 // =====================================================================
 
 // Préservés depuis bloc principal evaluation.js :
@@ -1335,5 +1446,11 @@ window.regenererRetroactionAvecFeedback = regenererRetroactionAvecFeedback;
 
 // Promotion §5.6 nouvelle (session B 2e sous-module) :
 window.mettreAJourCompteurMots = mettreAJourCompteurMots;
+
+// #961 — la marque de la rétroaction réécrite à la main (frappe, ouverture, enregistrement).
+window.estRetroactionReecrite = estRetroactionReecrite;
+window.poserRetroactionReecrite = poserRetroactionReecrite;
+window.preparerRetroactionEnregistree = preparerRetroactionEnregistree;   // R2 — les chargeurs
+window.marqueRetroactionAEcrire = marqueRetroactionAEcrire;               // R2 — les écrivains
 
 })();

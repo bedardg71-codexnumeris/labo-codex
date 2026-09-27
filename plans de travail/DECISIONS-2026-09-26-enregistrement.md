@@ -71,6 +71,14 @@ Texte proposé par Cowork, retenu sans retouche :
 - Livrée au lot #960.
 - Vaut jusqu'au PDF de l'élève et à « Copier tout » : un commentaire enregistré vide s'imprime vide (Grégoire, 26 sept., option a).
 
+## D7 · Une rétroaction réécrite à la main ne suit plus les niveaux – arrêtée le 26 sept., option b
+
+- **Une rétroaction finale réécrite à la main ne suit plus les niveaux.** Changer un niveau ou des points ne la remplace plus. Une ligne d'avis, sous la zone de rétroaction, le dit : « Tu as réécrit cette rétroaction : elle ne suit plus les niveaux. », avec un bouton « Régénérer » qui, lui seul, remplace le texte par la version générée (après quoi elle suit de nouveau les niveaux).
+- Motifs (proposés par Cowork, retenus) : « ce qui est enregistré fait foi » (#939, #946, #960) appliqué jusqu'au bout, et aucun texte perdu ; une fenêtre à chaque changement de niveau interromprait plusieurs fois par copie.
+- Les deux textes (l'avis et « Régénérer ») sont acceptés avec l'option ; `[à vérifier]` s'ils tiennent sur iPad à côté de la zone.
+- Livrée au lot #961.
+- Les rétroactions enregistrées avant D7 (sans marque) : au premier geste qui les régénérerait, une question, une fois par copie – « Garder la mienne » ou « Remplacer » (Grégoire, 26 sept., option c).
+
 ## Ordre des lots (tranché par Cowork, question technique)
 
 1. **Lot A – Anonymisation (D5)** : on enregistre comme en mode normal ; garde contre les valeurs de substitution ; rien d'identifiant à l'écran (#751). Arrête une perte vécue : l'évaluation faite en anonymisation qui disparaît au rechargement. Rend #736 sans objet.
