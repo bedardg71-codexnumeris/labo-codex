@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 7 H 45 : **LOT B DE L'ENREGISTREMENT (1.161.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 9 H 20 : **LOT C DE L'ENREGISTREMENT (1.162.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `21af8288` (1.161.0, poussé) + la branche `lot-c-evaluation-verrouiller` (`4483262d` porte unique du verrou, enregistrement automatique des champs algorithmiques et de l'intégrité, « Non verrouillée », banc WebKit neuf ; `d9cb6783` R1 de la relecture de Cowork, mutation rouge 2/2, mots et Aide acceptés ; `e640e645` release build 0927-0910) + `1fe86c15` fusion + ce relais. Relecture : `plans de travail/RELECTURE-2026-09-27-lot-C-evaluation.md` (réponse versée ; pas de contre-vérification, règle de Cowork).
+
+**Nouvelles acceptées par Grégoire le 27 sept. (option 1)** : phrase de Cowork, « statut de remise » remplacé par « intégrité » (aucun geste ne change le statut de remise à l'écran).
+
+**Reste** : constater « en ligne » chez Netlify (1.160.3 à 1.162.0) ; retirer la branche `lot-c-evaluation-verrouiller` une fois le push constaté ; porte terrain du lot C (iPad, copie réelle : nombre d'erreurs puis élève suivant, revenir ; verrouiller par le bouton, déverrouiller par le cadenas ; « Non verrouillée » dans la Liste) — markdown et artefact à produire (Cowork publie). **Prochain lot : lot D, les présences (D2)**, puis #962. Non commité, laissé : `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 7 H 45 : **LOT B DE L'ENREGISTREMENT (1.161.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `de0b00f1` (1.160.4, poussé) + la branche `lot-b-temoin-enregistrement` (`c3931672` contrat de `sauvegarderDonneesSelonMode` + témoin commun + bancs, `5d9f1541` mots acceptés, `19a5b8ac` retouches R1-R4 de la relecture + #962 inscrite, `043d5dce` release build 0927-0734, contre-vérification verte de Cowork versée, #618 et #786 cochées) + `529ef105` fusion + ce relais.
 
