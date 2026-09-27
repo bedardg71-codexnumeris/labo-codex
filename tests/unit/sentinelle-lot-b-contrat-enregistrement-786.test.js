@@ -116,7 +116,9 @@ describe('lot B · les sites vivants ne disent un succès que sur `true` (#618) 
     // redevient un appel nu ou un `if (!…)` que `'quota'` traverserait.
     const lire = (f) => readFileSync(path.join(racineProjet, 'js', f), 'utf8');
     const cas = [
-        ['saisie-presences.js', "sauvegarderDonneesSelonMode('presences', presences,", "notifications.succes('Présences enregistrées')"],
+        // Lot D : « Présences enregistrées » est parti (le témoin le dit) ; le recalcul de l'assiduité
+        // et l'état de la séance ne suivent qu'une écriture réelle.
+        ['saisie-presences.js', "sauvegarderDonneesSelonMode('presences', presences, { geste }) !== true) return false;", 'calculerEtSauvegarderIndicesAssiduite();'],
         // Lot C : le geste est le verrouillage, et l'échec rend le tableau lu (R4) avant de sortir.
         ['evaluation.js', "{ geste: 'Verrouillage de l\\'évaluation' }) !== true) {", '_traiterPostRepriseMod(evaluations, indexEval, evaluationId);'],
         ['evaluation-sauvegarde.js', "{ geste: 'Verrouillage de l\\'évaluation' }) !== true) {", '_postSauvegardeSauv(evaluation, groupeCoursActif);'],

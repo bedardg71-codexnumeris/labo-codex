@@ -88,8 +88,9 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
         // Au moins les trois boutons connus au 7 sept., sans figer la liste :
         // la vérification qui compte est la 3, qui les prend TOUS tels qu'ils sont.
         expect(actions).toContain('ouvrirModaleRapportPresences');
-        expect(actions).toContain('enregistrerPresences');
-        expect(actions).toContain('afficherSousSection');
+        // Lot D (27 sept. 2026) : « Enregistrer » → « Confirmer la séance », « Annuler » → « Fermer ».
+        expect(actions).toContain('confirmerSeancePresences');
+        expect(actions).toContain('fermerSaisiePresences');
         // #782 : ce contrôle n'existait QUE dans le gabarit JS, d'où sa disparition
         // quand le gabarit est parti. Il vit désormais dans index.html.
         expect(ids).toContain('controle-verrouillage-presences');
@@ -146,9 +147,12 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
         expect(els['actions-presences-bar'].innerHTML).toBe(MARQUEUR);
     });
 
-    it('4. « Annuler » vise une sous-section que config.js déclare', () => {
-        const { bloc } = barreStatique();
-        const cible = (bloc.match(/data-action="afficherSousSection" data-param="([^"]+)"/) || [])[1];
+    it('4. « Fermer » (ex-« Annuler ») vise une sous-section que config.js déclare', () => {
+        // Lot D : le bouton passe par `fermerSaisiePresences`, qui vide l'écriture en attente
+        // avant d'aller à la liste ; la cible se lit dans la fonction.
+        const js = lire('js/saisie-presences.js');
+        const cible = (js.split('function fermerSaisiePresences')[1].split('\n}')[0]
+            .match(/afficherSousSection\('([^']+)'\)/) || [])[1];
         const config = lire('js/config.js');
         const declare = config.match(/'suivi':\s*\[([\s\S]*?)\]/)[1];
         const valides = [...declare.matchAll(/id:\s*'([^']+)'/g)].map(m => 'suivi-' + m[1]);

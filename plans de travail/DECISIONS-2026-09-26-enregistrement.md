@@ -86,5 +86,13 @@ Texte proposé par Cowork, retenu sans retouche :
 3. **Lot C – L'évaluation d'une copie (D1).**
 4. **Lot D – Les présences (D2).**
 5. **Lots E – Créer ou modifier (D3)**, par zone : Conception, puis Cadre et élèves, puis productions, interventions et volet confidentiel.
-6. **Lot F – Les mots (D4)** : codex, Réserve, copie de secours, et relevé des textes de l'Aide.
+6. **Lot F – Les mots (D4)** : codex, Réserve, copie de secours, et relevé des textes de l'Aide. Ajouté par Cowork le 27 sept. (relecture du lot D) : la fenêtre d'aide « Saisir les présences efficacement » liste des états (« Justifié », « Retard ») que l'écran n'offre pas.
 
+
+## D2 bis · Les présences, deux cas limites – arrêtés le 27 sept. vers 10 h 36 (arrêt du lot D, avant le code)
+
+Constat de Claude Code : l'assiduité ne regarde pas les élèves un par un. Dès qu'un·e élève d'un sous-groupe a une présence enregistrée pour une séance, tout le sous-groupe est saisi, et un·e élève sans présence enregistrée compte absent·e (`js/indices.js`, vers les l. 158 et 197).
+
+- **(a) Une recherche qui cache des élèves – « Les autres présents »** (option recommandée par Cowork, retenue). Marquer absent·e l'élève qu'on vient de chercher saisit la séance, et les élèves non marqués comptent présents, cachés ou non. C'est D2 appliqué tel quel : chercher l'absent·e, c'est faire l'appel en ne marquant que les absences. L'écran dit « Séance saisie ». Écartées : ne rien enregistrer pendant une recherche (le geste le plus rapide ne s'enregistrerait plus) ; n'écrire que les lignes visibles (les élèves cachés compteraient absents : des absences inventées).
+- **(b) Un·e élève sans présence dans une séance déjà saisie – « Le signaler, ne rien écrire »** (option recommandée par Cowork, retenue). Un geste sur une autre ligne n'écrit jamais sa ligne : « ce qui est enregistré fait foi », et son indice A ne change pas sans qu'on ait touché sa ligne. Sa ligne dit la vérité au lieu d'afficher « présent·e » : texte proposé, à faire accepter avec les mots du lot, « Non saisi·e : compté·e absent·e ». Toucher sa ligne l'écrit comme toute autre. Écartées : l'inscrire présent·e au premier geste sur la séance (son indice A changerait sans geste sur sa ligne) ; ne rien écrire sans le signaler (l'écran continuerait de mentir).
+- Portée de (b) : une séance **jamais** saisie suit D2 (au premier geste, tous les élèves non marqués comptent présents). (b) ne vaut que pour une séance **déjà** saisie.

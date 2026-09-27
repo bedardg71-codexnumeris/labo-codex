@@ -42,7 +42,7 @@ const AUJOURDHUI = '2026-09-06';
 const K1 = 'test_datesVerrouillees_gc_GC1';
 const K2 = 'test_datesVerrouillees_gc_GC2';
 const INTERNES = ['validerDateSaisie', 'verifierConfigurationFormatHoraire', 'cleDatesVerrouillees', 'obtenirDatesVerrouillees',
-    'sauvegarderPresencesSansValidation', 'derniereSeancePassee'];
+    'derniereSeancePassee'];
 
 function storeSaisie() {
     const store = storeBase();
@@ -274,22 +274,24 @@ describe('#749 lot 3 · f/g. le bandeau dit vrai, à chaque initialisation ; la 
 });
 
 describe('#749 lot 3 · h. sans cours actif, rien n’est écrit', () => {
-    it('enregistrerPresences avec coursId nul : la fiche GC2 d’Alice survit, aucune écriture, aucun mot neuf', () => {
+    // Lot D (27 sept. 2026) : les deux écrivains d'avant (`enregistrerPresences`, le verrou) sont
+    // devenus un seul, `ecrirePresencesSeance`. La garde vit en lui ; les deux portes la traversent.
+    it('« Confirmer la séance » avec coursId nul : la fiche GC2 d’Alice survit, aucune écriture, aucun mot neuf', () => {
         const store = storeSaisie();
         store.test_presences = [{ date: DATE, da: '2000001', periodesPresentes: 2, notes: 'GC2', coursId: 'GC2' }];
         const b = monterS(store, { coursIdNul: true });
-        b.win.enregistrerPresences();
+        b.win.confirmerSeancePresences();
         expect(store.test_presences).toEqual([{ date: DATE, da: '2000001', periodesPresentes: 2, notes: 'GC2', coursId: 'GC2' }]);
         expect(ecrituresSur(b, 'test_presences')).toHaveLength(0);
         expect(b.notifs).toHaveLength(0);
         expect(b.avertissements).toHaveLength(0);
     });
 
-    it('sauvegarderPresencesSansValidation avec coursId nul : même garde', () => {
+    it('le verrou avec coursId nul : même garde', () => {
         const store = storeSaisie();
         store.test_presences = [{ date: DATE, da: '2000001', periodesPresentes: 2, notes: 'GC2', coursId: 'GC2' }];
         const b = monterS(store, { coursIdNul: true });
-        b.interne['saisie-presences.js'].sauvegarderPresencesSansValidation(DATE);
+        b.win.basculerVerrouillageDate(DATE);
         expect(store.test_presences[0].coursId).toBe('GC2');
         expect(ecrituresSur(b, 'test_presences')).toHaveLength(0);
     });
@@ -306,7 +308,7 @@ describe('#749 lot 3 · h. sans cours actif, rien n’est écrit', () => {
  *   f.     bandeau sur le seul horaire                            → 1 rouge  (f)
  *   f bis. bandeau plus réévalué par initialiserSaisiePresences   → 1 rouge  (f bis)
  *   g.     `derniereSeancePassee` rend null                       → 2 rouges (e démarrage, g)
- *   h.     garde `!coursId` retirée d'enregistrerPresences        → 1 rouge  (h)
+ *   h.     garde `!coursId` retirée d'enregistrerPresences (lot D : d'ecrirePresencesSeance)       → 1 rouge  (h)
  *   d.     résidu du DOM gardé quand la préférence manque         → 1 rouge  (e, démarrage)
  * Reprises de la relecture croisée (même jour, 16 essais verts avant et après) :
  *   r1. semis autorisé en démo (`trimestreActif === 'demo'` retiré)  → 1 rouge

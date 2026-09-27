@@ -192,9 +192,9 @@ test('R4 notes d\'intégrité en anonymisation : masquées à l\'écran, gardée
 });
 
 // -----------------------------------------------------------------------
-// (b) + (c) + (d) — LES PRÉSENCES : « Enregistrer » écrit ; DA et notes masqués ; la note garde sa valeur
+// (b) + (c) + (d) — LES PRÉSENCES : le geste s'enregistre (lot D) ; DA et notes masqués ; la note garde sa valeur
 // -----------------------------------------------------------------------
-test('(b)(c)(d) présences en anonymisation : « Enregistrer » écrit, le DA et la note sont masqués, la note n\'est pas effacée', async ({ page }) => {
+test('(b)(c)(d) présences en anonymisation : le geste s\'enregistre, le DA et la note sont masqués, la note n\'est pas effacée', async ({ page }) => {
     test.setTimeout(90000);
     brancherEcouteurs(page);
     await packDemo(page);
@@ -204,8 +204,12 @@ test('(b)(c)(d) présences en anonymisation : « Enregistrer » écrit, le DA et
     // Témoin en mode normal : une note posée sur DEMO004, visible, avec son DA.
     const NOTE = 'Rencontre prévue avec Césaire';
     await page.evaluate((note) => {
-        document.getElementById('notes_DEMO004').value = note;
-        window.enregistrerPresences();
+        // Lot D (27 sept. 2026) : plus de bouton « Enregistrer » — la frappe arme l'écriture, le
+        // vidage la fait partir tout de suite.
+        const champ = document.getElementById('notes_DEMO004');
+        champ.value = note;
+        window.notePresenceModifiee(champ);
+        window.viderEnregistrementPresences();
     }, NOTE);
     const temoin = await page.evaluate(() => ({
         note: document.getElementById('notes_DEMO004').value,
@@ -230,10 +234,12 @@ test('(b)(c)(d) présences en anonymisation : « Enregistrer » écrit, le DA et
     expect(anonyme.texte).not.toContain('DEMO004');
     expect(anonyme.texte).not.toContain('Césaire');
 
-    // (b) Le geste : DEMO006 absent, « Enregistrer ».
+    // (b) Le geste : DEMO006 absent, l'écriture en attente vidée.
     const date = await page.evaluate(() => {
-        document.getElementById('periodes_DEMO006').value = '0';
-        window.enregistrerPresences();
+        const champ = document.getElementById('periodes_DEMO006');
+        champ.value = '0';
+        window.mettreAJourLignePeriodesHandler(champ);
+        window.viderEnregistrementPresences();
         return document.getElementById('date-cours').value;
     });
     const ecrit = await page.evaluate((d) => (window.db.getSync(cle('presences'), []) || []).filter(p => p.date === d), date);
@@ -422,6 +428,9 @@ test('R5 présences par sous-groupe : après la bascule en anonymisation, la sé
         const champ = document.querySelector('#tbody-saisie-presences input[id^="periodes_"]');
         const da = champ.id.slice('periodes_'.length);
         champ.value = '0';
+        // Lot D (27 sept. 2026) : un VRAI geste (le `change` du champ). Le verrou écrit les lignes
+        // touchées ; il ne réécrit plus depuis l'écran une ligne que personne n'a touchée.
+        champ.dispatchEvent(new Event('change', { bubbles: true }));
         const date = document.getElementById('date-cours').value;
         basculerVerrouillageDateActive();
         const p = (db.getSync(cle('presences'), []) || []).find(x => x.date === date && x.da === da);

@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.163.0 (lot D de l'enregistrement, D2, D2 bis) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026
+            // (« Tous acceptés », texte de Cowork).
+            version: '1.163',
+            couleur: 'vert',
+            titre: 'Confirmer la séance',
+            items: [
+                'Présences&nbsp;: tout changement dans une séance s\'enregistre tout seul, et le témoin le dit&nbsp;; les élèves que tu n\'as pas touché·es comptent présent·es. Une séance à laquelle tu n\'as pas touché le dit&nbsp;: «&nbsp;Séance non saisie&nbsp;». «&nbsp;Enregistrer&nbsp;» devient «&nbsp;Confirmer la séance&nbsp;», pour une séance où tout le monde était là.'
+            ]
+        },
+        {
             // 1.162.0 (lot C de l'enregistrement, D1) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026 (option 1) :
             // texte de Cowork, « statut de remise » remplacé par « intégrité » (aucun geste ne change le statut de remise).
             version: '1.162',
