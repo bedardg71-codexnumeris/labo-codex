@@ -93,10 +93,10 @@ Gestes passés au témoin : « Enregistrement de l'évaluation », « Verrouilla
 
 **Ce qu'il faudrait** : que `_trackOperation` émette un signal d'échec (sur le modèle de `_signalerEcriture` / `surEcriture`), auquel `modes.js` s'abonne pour appeler `temoinEnregistrement.nonEnregistre(raison)` – sans geste (on ne sait plus lequel), ou avec un geste retrouvé par la clé. Le « Non enregistré » restant jusqu'à la prochaine écriture réussie, il faudrait aussi qu'une écriture synchrone qui « réussit » ne l'efface pas tant que l'écriture IDB de la même clé n'a pas commit. Chantier distinct, à trancher.
 
-## 8 · Ce qui remonte à Grégoire
+## 8 · Ce qui remonte à Grégoire – TRANCHÉ le 27 sept. 2026, vers 6 h 45
 
-- Les mots du § 5, dont la phrase de la mémoire pleine qui propose un geste **irréversible** (supprimer un trimestre).
-- La phrase des Nouvelles.
+- **Mémoire pleine** : trois suites lui ont été proposées (nommer la Bibliothèque ; la phrase seule ; « Fais une copie de secours, puis… »). Il garde **« Nommer la Bibliothèque »**, telle que codée : « … Pour libérer de la place : Cadre › Trimestre › Bibliothèque, « Supprimer… » sur un ancien trimestre. »
+- **Les autres mots du § 5 et la phrase des Nouvelles** : **« Oui, tels quels »**.
 
 ## 9 · Livraison prévue après ta relecture
 
