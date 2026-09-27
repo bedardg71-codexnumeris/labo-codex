@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 9 H 20 : **LOT C DE L'ENREGISTREMENT (1.162.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 11 H 20 : **LOT D DE L'ENREGISTREMENT (1.163.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `06af5089` (1.162.0, poussé) + la branche `lot-d-presences` (`fd22ec76` écrivain unique des présences, enregistrement automatique, « Confirmer la séance », « Séance non saisie », D2 bis ; `709993d5` demande de relecture ; `cac4486d` trouvaille 1 corrigée sur décision de Grégoire : une fiche `facultatif` ne rend plus une séance « saisie », mutation M12 rouge ; `cbad96be` release build 0927-1112) + `18f6c759` fusion + ce relais. Relecture de Cowork : `plans de travail/RELECTURE-2026-09-27-lot-D-presences.md` (verte).
+
+**Mots et Nouvelles acceptés par Grégoire le 27 sept. (« Tous acceptés »)**, § 5 de `plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-D-presences.md`.
+
+**Reste** : constater « en ligne » chez Netlify (1.160.3 à 1.163.0) ; retirer la branche `lot-d-presences` une fois le push constaté ; porte terrain du lot D (iPad, groupe réel : absence puis séance suivante puis retour ; « Séance non saisie » ; « Confirmer la séance » ; verrouiller) — markdown et artefact à produire (Cowork publie). La fenêtre d'aide « Saisir les présences efficacement » (« Justifié », « Retard ») part au lot F. **Prochain lot : les lots E (D3, créer ou modifier), puis #962.**
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 9 H 20 : **LOT C DE L'ENREGISTREMENT (1.162.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `21af8288` (1.161.0, poussé) + la branche `lot-c-evaluation-verrouiller` (`4483262d` porte unique du verrou, enregistrement automatique des champs algorithmiques et de l'intégrité, « Non verrouillée », banc WebKit neuf ; `d9cb6783` R1 de la relecture de Cowork, mutation rouge 2/2, mots et Aide acceptés ; `e640e645` release build 0927-0910) + `1fe86c15` fusion + ce relais. Relecture : `plans de travail/RELECTURE-2026-09-27-lot-C-evaluation.md` (réponse versée ; pas de contre-vérification, règle de Cowork).
 
