@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './charger-script.js';
+import { chargerScript, completerEcrivainsParDefaut } from './charger-script.js';
 import { chargerPredicatsCopie } from './predicats-copie.js';
 
 export const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -23,6 +23,7 @@ export function chargerAvecInterne(chemin, globaux, win, noms) {
         + noms.map(n => 'get ' + n + '() { return ' + n + '; }' + (/^(_|etat|donnees)/.test(n) ? ', set ' + n + '(v) { ' + n + ' = v; }' : '')).join(', ') + '};\n';
     const fin = code.lastIndexOf('})();');
     code = fin >= 0 ? code.slice(0, fin) + expo + code.slice(fin) : code + expo;
+    globaux = completerEcrivainsParDefaut(globaux, win);   // lot E1 (voir charger-script.js)
     const { document: doc, localStorage: ls, ...autres } = globaux;
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     const nomsG = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];

@@ -105,14 +105,17 @@ describe('Conception · uniformité des confirmations (panneau glissant)', () =>
 
     it('chaque éditeur de Conception confirme sa sauvegarde par notifications.succes', () => {
         // Les cinq boutons « Enregistrer » de la section, un par objet de travail.
+        // ↻ Lot E1 (D3, 27 sept. 2026) : pour la grille, l'échelle, la cartouche et la pratique,
+        // modifier s'enregistre tout seul (le témoin commun le dit) ; seul le geste de CRÉATION
+        // garde son panneau glissant, « … créée. » — celui de la pratique vit dans l'assistant.
         // On épingle l'appel exact : si quelqu'un le retire ou le remplace par un
         // alert(), la sentinelle tombe même si le vocabulaire change.
         const confirmations = [
             { fichier: 'js/productions.js',       objet: 'Production', appel: 'notifications.succes(estModification ?' },
-            { fichier: 'js/grilles.js',           objet: 'Grille',     appel: 'notifications.succes(`Grille "${nomGrille}" sauvegardée !`);' },
-            { fichier: 'js/echelles.js',          objet: 'Échelle',    appel: 'notifications.succes(`Échelle "${nom}" sauvegardée !`);' },
-            { fichier: 'js/cartouches.js',        objet: 'Cartouche',  appel: 'notifications.succes(`Cartouche "${nomCartouche}" sauvegardée !`);' },
-            { fichier: 'js/pratiques-gestion.js', objet: 'Pratique',   appel: "notifications.succes('Pratique enregistrée');" }
+            { fichier: 'js/grilles.js',           objet: 'Grille',     appel: 'notifications.succes(`Grille «\\u00a0${nomGrille}\\u00a0» créée.`);' },
+            { fichier: 'js/echelles.js',          objet: 'Échelle',    appel: 'notifications.succes(`Échelle «\\u00a0${nom}\\u00a0» créée.`);' },
+            { fichier: 'js/cartouches.js',        objet: 'Cartouche',  appel: 'notifications.succes(`Cartouche «\\u00a0${nomCartouche}\\u00a0» créée.`);' },
+            { fichier: 'js/wizard-pratique-v2.js', objet: 'Pratique',  appel: ': `Pratique «\\u00a0${pratique.nom}\\u00a0» créée.`);' }
         ];
 
         for (const { fichier, objet, appel } of confirmations) {
@@ -129,8 +132,10 @@ describe('Conception · uniformité des confirmations (panneau glissant)', () =>
         // #466/CO-16 : grilles.js refusait déjà bruyamment l'écriture d'un objet
         // absent du trimestre actif. Échelles et cartouches annonçaient encore
         // « sauvegardée » après un refus — les deux relaient désormais un verdict.
+        // ↻ Lot E1 (D3) : la branche « Enregistrer une échelle existante » est retirée avec son
+        // bouton ; la création écrit par `modifierEtAnnoncer`, qui REJETTE sur un échec — le
+        // « créée. » qui suit n'est donc jamais atteint après un refus.
         const verdicts = [
-            { fichier: 'js/echelles.js',   garde: 'const ecrite = await sauvegarderNomEchelle();' },
             { fichier: 'js/cartouches.js', garde: 'const ecrite = await sauvegarderCartouche();' }
         ];
 

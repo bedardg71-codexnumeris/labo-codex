@@ -197,7 +197,7 @@ describe('#573 · « Enregistrer » ne ferme plus la cartouche qu\'il enregistre
         await win.sauvegarderCommentaire('CR_1_W');
 
         expect(avertissements).toHaveLength(1);
-        expect(avertissements[0]).toMatch(/pas encore enregistrée/);
+        expect(avertissements[0]).toMatch(/pas encore créée/);   // lot E1 (D3) : « Créer la cartouche »
     });
 
     it('il le dit UNE fois, pas à chaque frappe', async () => {
@@ -227,7 +227,7 @@ describe('#573 · « Enregistrer » ne ferme plus la cartouche qu\'il enregistre
         await win.sauvegarderContexteCartouche();
 
         expect(avertissements).toHaveLength(1);
-        expect(avertissements[0]).toMatch(/pas encore enregistrée/);
+        expect(avertissements[0]).toMatch(/pas encore créée/);   // lot E1 (D3) : « Créer la cartouche »
     });
 
     it('mais il REVIENT sur une autre cartouche — le drapeau retombe', async () => {

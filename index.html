@@ -4954,10 +4954,10 @@
                                         <button id="btnSupprimerGrille" class="btn btn-supprimer u-hide" data-action="supprimerGrilleActive" title="Supprimer cette grille">
                                             Supprimer
                                         </button>
-                                        <button class="btn btn-annuler" data-action="annulerFormGrille">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderGrilleComplete">
-                                            <span id="btnTexteGrille">Enregistrer</span>
-                                        </button>
+                                        <!-- Lot E1 (D3) : une grille existante s'enregistre toute seule ;
+                                             « Créer la grille » ne paraît qu'en création (rendreModeFicheGrille). -->
+                                        <button class="btn btn-annuler" data-action="fermerFicheGrille">Fermer</button>
+                                        <button id="btnCreerGrille" class="btn btn-confirmer u-hide" data-action="sauvegarderGrilleComplete">Créer la grille</button>
                                     </div>
                                 </div>
 
@@ -5150,10 +5150,10 @@
                                         <button id="btnSupprimerEchelle" class="btn btn-supprimer u-hide" data-action="supprimerEchelleActive" title="Supprimer cette échelle">
                                             Supprimer
                                         </button>
-                                        <button class="btn btn-annuler" data-action="annulerFormEchelle">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderEchelleComplete">
-                                            <span id="btnTexteEchelle">Enregistrer</span>
-                                        </button>
+                                        <!-- Lot E1 (D3) : une échelle existante s'enregistre toute seule ;
+                                             « Créer l'échelle » ne paraît qu'en création (rendreModeFicheEchelle). -->
+                                        <button class="btn btn-annuler" data-action="fermerFicheEchelle">Fermer</button>
+                                        <button id="btnCreerEchelle" class="btn btn-confirmer u-hide" data-action="sauvegarderEchelleComplete">Créer l'échelle</button>
                                     </div>
                                 </div>
 
@@ -5279,10 +5279,10 @@
                                             <button id="btnSupprimerCartouche" class="btn btn-supprimer u-hide" data-action="supprimerCartoucheActive" title="Supprimer cette cartouche">
                                                 Supprimer
                                             </button>
-                                            <button class="btn btn-annuler" data-action="annulerFormCartouche">Annuler</button>
-                                            <button class="btn btn-confirmer" data-action="sauvegarderCartoucheComplete">
-                                                Enregistrer
-                                            </button>
+                                            <!-- Lot E1 (D3) : une cartouche existante s'enregistre toute seule ;
+                                                 « Créer la cartouche » ne paraît qu'en création (rendreModeFicheCartouche). -->
+                                            <button class="btn btn-annuler" data-action="fermerFicheCartouche">Fermer</button>
+                                            <button id="btnCreerCartouche" class="btn btn-confirmer u-hide" data-action="sauvegarderCartoucheComplete">Créer la cartouche</button>
                                         </div>
                                     </div>
 
@@ -5291,7 +5291,7 @@
                                          les tenir à part, et elles ne se recouvrent pas :
 
                                          · `#actionsFicheCartouche` porte les actions de FICHE, et rien
-                                           d'autre — Dupliquer, Supprimer, Annuler, Enregistrer. C'est
+                                           d'autre — Dupliquer, Supprimer, Fermer, Créer (lot E1). C'est
                                            exactement la composition de la grille et de l'échelle, et
                                            c'est ce qui rend les trois écrans lisibles de la même façon.
                                          · ⚠ #531 — « Télécharger un modèle » ne porte PAS `u-hide` : il
@@ -5342,7 +5342,7 @@
                             <div data-tooltip="cn-cartouche-selectors" class="u-flex-gap-15 u-mb-20 u-flex-wrap" style="align-items: flex-start">
                                 <div class="groupe-form u-flex-1" style="min-width: 250px; margin: 0">
                                     <label>Nom de la cartouche <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> :</label>
-                                    <input type="text" id="nomCartouche" class="controle-form"
+                                    <input type="text" id="nomCartouche" class="controle-form" data-on-change="sauvegarderNomCartouche"
                                         placeholder="Ex: Dissertation argumentative - H2026">
                                 </div>
                                 <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
@@ -5412,6 +5412,7 @@
                             <div class="groupe-form">
                                 <label>Contexte de la rétroaction spécifique (optionnel) :</label>
                                 <textarea id="contexteSpecifiqueCartouche" class="controle-form" rows="3"
+                                    data-on-change="sauvegarderContexteSpecifiqueCartouche"
                                     placeholder="Ex: Les tampons et codes d'erreur ci-dessous identifient des points précis dans ta production."></textarea>
                                 <small class="u-texte-petit" style="color: var(--gris-moyen)">Apparaît au-dessus des tampons et erreurs de français dans le PDF de rétroaction.</small>
                             </div>
@@ -6024,7 +6025,7 @@
                                         <!-- Checkbox maître pour activer/désactiver le système -->
                                         <div class="groupe-form u-mb-20 u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                                             <label class="u-flex-gap-10 u-texte-gras u-align-center" style="cursor: pointer">
-                                                <input type="checkbox" id="mat-jetons-actif" data-on-change="toggleSystemeJetonsMat">
+                                                <input type="checkbox" id="mat-jetons-actif" data-on-change="onJetonsActifChangeMat">
                                                 Activer le système de jetons
                                             </label>
                                         </div>
@@ -6037,7 +6038,7 @@
                                                 <label for="mat-jetons-nombre" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                                     Nombre de jetons alloués par étudiant·e
                                                 </label>
-                                                <input type="number" id="mat-jetons-nombre" class="controle-form" value="2" min="0" max="20" style="max-width: 100px;">
+                                                <input type="number" id="mat-jetons-nombre" class="controle-form" data-on-change="sauvegarderConfigPratiqueMat" value="2" min="0" max="20" style="max-width: 100px;">
                                             </div>
 
                                             <!-- Types de jetons -->
@@ -6056,14 +6057,14 @@
                                                             Durée du délai :
                                                         </label>
                                                         <div class="u-flex-gap-8 u-align-center">
-                                                            <input type="number" id="mat-delai-duree" class="controle-form" min="1" max="30" value="2" style="width: 70px;">
+                                                            <input type="number" id="mat-delai-duree" class="controle-form" data-on-change="sauvegarderConfigPratiqueMat" min="1" max="30" value="2" style="width: 70px;">
                                                             <span class="u-texte-09">jours</span>
                                                         </div>
                                                     </div>
                                                     <!-- #853 (13 sept. 2026) : réglage de la pratique, décoché par défaut (comportement antérieur) -->
                                                     <div class="groupe-form u-mt-10">
                                                         <label class="u-texte-petit u-align-center" style="display: inline-flex; cursor: pointer">
-                                                            <input type="checkbox" id="mat-delai-sur-reprise">
+                                                            <input type="checkbox" id="mat-delai-sur-reprise" data-on-change="sauvegarderConfigPratiqueMat">
                                                             <span class="u-ml-6">Permettre un délai sur une reprise</span>
                                                         </label>
                                                     </div>
@@ -6084,11 +6085,11 @@
                                                         </label>
                                                         <div class="u-flex-col" style="display: flex; gap: 4px">
                                                             <label class="u-texte-petit u-align-center" style="display: inline-flex; cursor: pointer">
-                                                                <input type="radio" name="mat-reprise-originale" value="archiver" checked>
+                                                                <input type="radio" name="mat-reprise-originale" value="archiver" checked data-on-change="sauvegarderConfigPratiqueMat">
                                                                 <span class="u-ml-6">Garder en archive</span>
                                                             </label>
                                                             <label class="u-texte-petit u-align-center" style="display: inline-flex; cursor: pointer">
-                                                                <input type="radio" name="mat-reprise-originale" value="supprimer">
+                                                                <input type="radio" name="mat-reprise-originale" value="supprimer" data-on-change="sauvegarderConfigPratiqueMat">
                                                                 <span class="u-ml-6">Supprimer</span>
                                                             </label>
                                                         </div>
@@ -6099,7 +6100,7 @@
                                                 <div class="u-p-12" style="background: var(--bleu-tres-pale); border-radius: 6px">
                                                     <div class="form-group u-mb-8">
                                                         <label style="cursor: pointer;">
-                                                            <input type="checkbox" id="mat-jeton-ciblee-actif" checked>
+                                                            <input type="checkbox" id="mat-jeton-ciblee-actif" checked data-on-change="sauvegarderConfigPratiqueMat">
                                                             <strong style="margin-left: 8px;">Reprise ciblée</strong>
                                                         </label>
                                                     </div>
@@ -6110,7 +6111,7 @@
                                                         <label for="mat-ciblee-plafond" class="u-texte-09 u-texte-medium" style="display: block; margin-bottom: 6px">
                                                             Note maximale :
                                                         </label>
-                                                        <select id="mat-ciblee-plafond" class="controle-form u-w-100">
+                                                        <select id="mat-ciblee-plafond" class="controle-form u-w-100" data-on-change="sauvegarderConfigPratiqueMat">
                                                             <option value="">— Sélectionner l'échelle d'abord —</option>
                                                         </select>
                                                     </div>
@@ -6128,9 +6129,8 @@
                                     <button data-action="appliquerPratiqueAuCoursActive" class="btn btn-principal" data-tooltip="cn-pratique-appliquer">
                                         Appliquer au cours actif
                                     </button>
-                                    <button data-action="sauvegarderPratiqueMaterielComplet" class="btn btn-confirmer">
-                                        Enregistrer la pratique
-                                    </button>
+                                    <!-- Lot E1 (D0 point 3) : « Enregistrer la pratique » est retiré, jetons compris,
+                                         tout s'enregistre au changement de champ. -->
                                 </div>
 
                             </div><!-- fin conteneurEditionPratique -->
@@ -14357,7 +14357,7 @@
     <script src="js/modes.js?v=20260927e"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/temoin-enregistrement.js?v=20260927d"></script> <!-- Lot B de l'enregistrement (27 sept. 2026) : témoin commun « Enregistré » / « Non enregistré », parlé par sauvegarderDonneesSelonMode -->
-    <script src="js/ui-dialogues.js?v=20260925b"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
+    <script src="js/ui-dialogues.js?v=20260927a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
 
 
@@ -14401,7 +14401,7 @@
     <script src="js/bibliotheque-ui.js?v=20260909a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js?v=20260911a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260923b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20260923e"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
+    <script src="js/pratiques-gestion.js?v=20260927a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20260911a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260921b"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260923b"></script>
@@ -14421,11 +14421,11 @@
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
     <script src="js/codes-annotation.js?v=20260903e"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260926c"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20260927a"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20260926c"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
+    <script src="js/echelles.js?v=20260927a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/cartouches.js?v=20260915a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
+    <script src="js/cartouches.js?v=20260927a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260911m"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20260912c"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=20260912i"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -14472,7 +14472,7 @@
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20260923b"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
-    <script src="js/wizard-pratique-v2.js?v=20260923f"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
+    <script src="js/wizard-pratique-v2.js?v=20260927a"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260924b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
@@ -14752,7 +14752,7 @@
                         Suivant →
                     </button>
                     <button id="wizard-v2-btn-creer" class="btn btn-confirmer u-hide" data-action="creerPratiqueV2">
-                        ✓ Créer la pratique
+                        Créer la pratique
                     </button>
                 </div>
             </div>
