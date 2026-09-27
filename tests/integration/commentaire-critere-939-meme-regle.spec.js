@@ -63,6 +63,9 @@ async function monter(page) {
                 { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60, retroaction: ENREGISTRE },
                 { critereId: 'c2', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 40, retroaction: '[Non défini]' }
             ],
+            // #961 R2 — une évaluation d'après D7, qui suit les niveaux : sans la clé, le niveau changé
+            // de `regenererEtCopier` poserait la question du stock au lieu de régénérer.
+            retroactionReecrite: false,
             retroactionFinale: 'Voici quelques observations :\n\nCritère 1 (Contenu) — M\n' + ENREGISTRE
         }]);
         window.db.setSync(T + '_fichiersTravaux', [{

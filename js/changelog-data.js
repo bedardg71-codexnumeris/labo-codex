@@ -31,7 +31,9 @@
                 // 1.160.1 (#959) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
                 'Évaluer&nbsp;: une évaluation ouverte depuis la copie garde son statut d\'intégrité et ses notes quand tu l\'enregistres.',
                 // 1.160.2 (#960) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
-                'Évaluer&nbsp;: ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide.'
+                'Évaluer&nbsp;: ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide.',
+                // 1.160.3 (#961) — ACCEPTÉ par Grégoire le 26 sept. 2026, tel quel (texte de Cowork).
+                'Évaluer&nbsp;: une rétroaction finale que tu as réécrite à la main n\'est plus remplacée quand tu changes un niveau&nbsp;; «&nbsp;Régénérer&nbsp;» la refait à la demande. Sur une copie évaluée avant le 26 septembre, l\'application te le demande une fois.'
             ]
         },
         {
