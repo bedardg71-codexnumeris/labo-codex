@@ -314,7 +314,7 @@ async function sauvegarderCritere() {
     // Vérifier qu'on a un nom de grille
     const nomGrille = document.getElementById('nomGrilleTemplate')?.value?.trim();
     if (!nomGrille) {
-        alert('Veuillez d\'abord donner un nom à la grille');
+        alert('Donne d\'abord un nom à la grille.');
         const nomInput = document.getElementById('nomGrilleTemplate');
         if (nomInput) nomInput.focus();
         return;
@@ -639,6 +639,9 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     if (!nomGrille) {
         if (!silencieux) {
             alert('Le nom de la grille est obligatoire');
+        } else if (grilleTemplateActuelle && window.temoinEnregistrement) {
+            // Lot E1 (D3) : un nom vidé sur une grille existante le dit, par le témoin.
+            window.temoinEnregistrement.nonEnregistre('le nom ne peut pas être vide.', 'Modifier la grille', cle('grillesTemplates'));
         }
         return;
     }
@@ -1828,7 +1831,7 @@ async function importerDansGrilleActive(event) {
 
     // Récupérer l'ID de la grille active
     if (!grilleTemplateActuelle) {
-        alert('Aucune grille sélectionnée. Veuillez d\'abord sélectionner une grille à remplacer.');
+        alert('Aucune grille sélectionnée. Sélectionne d\'abord la grille à remplacer.');
         event.target.value = ''; // Reset input
         return;
     }
@@ -3196,7 +3199,7 @@ async function ajouterGrillesABibliotheque() {
     const checkboxes = document.querySelectorAll('#listeGrillesDisponibles input[type="checkbox"]:checked');
 
     if (checkboxes.length === 0) {
-        alert('Veuillez sélectionner au moins une grille à ajouter');
+        alert('Sélectionne au moins une grille à ajouter.');
         return;
     }
 
@@ -4292,8 +4295,10 @@ function _idCollectionChoisie(valeur) {
 }
 
 function _direCollectionDisparue() {
-    if (typeof notifications !== 'undefined' && notifications.avertissement) {
-        notifications.avertissement('Cette collection n\'existe plus.', 'Rien n\'a été changé sur le critère.');
+    // Lot E1 : `notifications.avertissement` n'existe pas (l'API est succes / erreur /
+    // warning / info) ; la garde rendait ce message muet. Branché sur la vraie méthode.
+    if (typeof notifications !== 'undefined' && notifications.warning) {
+        notifications.warning('Cette collection n\'existe plus.', 'Rien n\'a été changé sur le critère.');
     }
 }
 
@@ -6288,8 +6293,11 @@ function marquerChampRefuse(el, raison) {
     if (!raison) { el.classList.remove('champ-refuse'); return; }
     const dejaMarque = el.classList.contains('champ-refuse');
     el.classList.add('champ-refuse');
-    if (!dejaMarque && typeof notifications !== 'undefined' && notifications.erreur) {
-        notifications.erreur(raison, 'La modification n\'a pas été enregistrée.');
+    // Lot E1 (D3) : un seul message, par le témoin commun — « Non enregistré : ‹raison› ».
+    // Avant : un panneau d'erreur à deux phrases, en plus du champ marqué. Le témoin
+    // s'efface à la prochaine écriture réussie de la même clé.
+    if (!dejaMarque && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(raison), undefined, cle('grillesTemplates'));
     }
 }
 

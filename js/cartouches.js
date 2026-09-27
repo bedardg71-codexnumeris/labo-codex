@@ -1066,7 +1066,7 @@ async function sauvegarderCartouche() {
 
     let nom = document.getElementById('nomCartouche').value.trim();
     if (!nom) {
-        alert('Veuillez donner un nom à la cartouche');
+        alert('Donne un nom à la cartouche.');
         return false;
     }
 
@@ -2077,7 +2077,7 @@ function importerCartoucheDepuisTxt(eventOuEl) {
     if (!file) return;
 
     if (!cartoucheActuel) {
-        alert('Veuillez d\'abord sélectionner une grille et créer/sélectionner une cartouche');
+        alert('Sélectionne d\'abord une grille, puis crée ou choisis une cartouche.');
         target.value = '';
         return;
     }
@@ -2779,7 +2779,7 @@ function importerDansCartoucheActive(event) {
 
     // Récupérer l'ID de la cartouche active
     if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
-        alert('Aucune cartouche sélectionnée. Veuillez d\'abord sélectionner une cartouche à remplacer.');
+        alert('Aucune cartouche sélectionnée. Sélectionne d\'abord la cartouche à remplacer.');
         event.target.value = ''; // Reset input
         return;
     }
@@ -3740,13 +3740,13 @@ function importerDepuisMarkdown() {
 
     const markdown = textarea.value.trim();
     if (!markdown) {
-        alert('Veuillez coller du texte Markdown dans la zone prévue');
+        alert('Colle du texte Markdown dans la zone prévue.');
         return;
     }
 
     // Vérifier qu'une cartouche est chargée
     if (!window.cartoucheActuel) {
-        alert('Veuillez d\'abord créer ou charger une cartouche');
+        alert('Crée ou ouvre d\'abord une cartouche.');
         return;
     }
 
@@ -3828,12 +3828,12 @@ function importerPartiel() {
     const textarea = document.getElementById('markdownImportPartiel');
 
     if (checkboxes.length === 0) {
-        alert('Veuillez cocher au moins un critère à importer');
+        alert('Coche au moins un critère à importer.');
         return;
     }
 
     if (!textarea || !textarea.value.trim()) {
-        alert('Veuillez coller du texte Markdown dans la zone prévue');
+        alert('Colle du texte Markdown dans la zone prévue.');
         return;
     }
 
@@ -4626,7 +4626,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 
         // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
         if (grilleManquante) {
-            alert('Veuillez d\'abord importer la grille associée depuis la bibliothèque de grilles.');
+            alert('Importe d\'abord la grille associée depuis la bibliothèque de grilles.');
             return;
         }
         if (nomEnConflit) {

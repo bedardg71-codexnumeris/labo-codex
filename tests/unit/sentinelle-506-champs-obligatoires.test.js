@@ -64,9 +64,9 @@ const BLOQUANTS = [
     // chemin VIVANT, `sauvegarderEchelleComplete()` (le refus y existait déjà :
     // l'astérisque disait vrai, c'est sa preuve qui regardait ailleurs).
     ['index.html', "Nom de l'échelle",
-     ["async function sauvegarderEchelleComplete", "Veuillez entrer un nom pour l\\'échelle"]],
+     ["async function sauvegarderEchelleComplete", "Donne un nom à l\\'échelle."]],   // lot E1 : tutoiement
     ['index.html', 'Nom de la cartouche',
-     ["Veuillez donner un nom à la cartouche"]],
+     ["Donne un nom à la cartouche."]],   // lot E1 : tutoiement
     // ⚠⚠ #516 (26 août 2026) — CETTE PREUVE-LÀ PASSAIT À VIDE.
     // La chaîne existait bien… dans `sauvegarderCritere()`, qui lit `#critereNom`
     // — un id ABSENT d'index.html — et que plus aucun chemin n'appelle. La garde
