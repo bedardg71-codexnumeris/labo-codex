@@ -140,7 +140,7 @@ test('#705 · une évaluation d\'AVANT l\'ajout d\'un critère : son PDF conclut
     await page.waitForFunction(() => !!document.getElementById('avisCriteresAjoutesDepuis'), null, { timeout: 15000 });
     const avis = await page.evaluate(() => document.getElementById('avisCriteresAjoutesDepuis').textContent);
     expect(avis).toBe('Un critère a été ajouté à la grille après cette évaluation' + 'Sources (10 %)'
-        + 'La note enregistrée ne le couvre pas et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra lui donner un niveau avant d\'enregistrer.');
+        + 'La note enregistrée ne le couvre pas et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra lui donner un niveau avant de verrouiller.');   // lot C (D1)
     await page.evaluate(() => new Promise((r) => setTimeout(r, 2500)));   // au-delà du débounce de l'auto-save (1,5 s)
     expect(await page.evaluate(() => !!document.getElementById('avisCriteresAjoutesDepuis')), 'l\'avis survit aux réécritures de la liste').toBe(true);
     const enBaseApres = await page.evaluate(() => JSON.stringify(window.db.getSync(window.cle('evaluationsSauvegardees'), [])));
