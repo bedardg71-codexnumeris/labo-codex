@@ -395,8 +395,14 @@ for (const retouche of [true, false]) {
         await page.evaluate(() => document.querySelector('[data-action="travauxUI.sauvegarderRetroactionDepuisModal"]').click());
         await page.waitForTimeout(500);
         const b = await base(page);
-        // R2 — tous les écrivains portent la clé : sans retouche, `false` (la fixture n'en a pas).
-        expect(b.retroactionReecrite).toBe(retouche);
+        // C1 — sans retouche, la clé reste absente (la fixture n'en a pas) : la question reste due.
+        expect.soft(b.retroactionReecrite).toBe(retouche ? true : undefined);
+        if (!retouche) {
+            await ouvrir(page, 'liste');
+            await changerNiveau(page, 'E');
+            const q = await question(page);
+            expect(q.message, 'la question du stock, après la modale').toBe(QUESTION);
+        }
     });
 }
 
