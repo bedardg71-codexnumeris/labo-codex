@@ -117,12 +117,18 @@ const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les prése
     'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions'];
 
 // Les mots arrêtés par Grégoire (consigne § 2), dans l'ordre où l'accueil les rend.
+// 27 sept. 2026 — « Par où commencer ? » en trois étapes et la ligne de l'orthopédagogue gardée
+// (texte de Cowork accepté par Grégoire le 26 sept., consigne « accueil et tutoriels »).
 const MOTS_BANDEAU = [
     'Par où commencer ?',
-    'Je suis enseignant·e',
-    '— Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations — tu peux les élaborer et les partager avec tes collègues.',
-    'Je suis orthopédagogue',
-    '— Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.',
+    'Pose ton cadre.',
+    'Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les saisis une fois : l’application s’en sert partout.',
+    'Conçois tes productions et tes évaluations.',
+    'Tu peux les élaborer seul·e ou les partager avec tes collègues.',
+    'Apprends geste par geste.',
+    'Les tutoriels de Labo Codex, sur le blogue Codex Numeris, montrent chaque étape en images.',
+    'Tu es orthopédagogue ?',
+    'Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.',
     'Certains concepts sont nouveaux ?',
     'Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».',
     'Ton courriel, une fois par mois.',
@@ -194,12 +200,39 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         const iCarte = html.indexOf('class="accueil-porte-ortho"');
         curseur = iCarte;
         for (const mot of MOTS_CARTE) {
-            const i = html.indexOf(mot);
+            // Cherché À PARTIR de la carte : « Tu es orthopédagogue ? » est aussi dans le bandeau.
+            const i = html.indexOf(mot, curseur + 1);
             expect(i, mot).toBeGreaterThan(curseur);
             curseur = i;
         }
         expect(html).not.toContain('Certains concepts sont nouveaux pour toi');
         expect(html).not.toContain('L’identification est requise');
+    });
+
+    it('les étapes sont une vraie liste numérotée ; la ligne de l\'orthopédagogue suit la liste, à part ; aucun « — » dans le bandeau', () => {
+        const { html } = rendreAccueil();
+        const bandeau = tranche(html, 'id="banniere-bienvenue"', 'class="accueil-porte-ortho"');
+        const liste = bandeau.match(/<ol[^>]*>([\s\S]*?)<\/ol>/);
+        expect(liste, 'une <ol>').not.toBeNull();
+        expect((liste[1].match(/<li>/g) || []).length).toBe(3);
+        const apres = tranche(bandeau, '</ol>');
+        expect(apres.indexOf('<p><strong>Tu es orthopédagogue ?</strong>'), 'paragraphe à part, après la liste').toBeGreaterThan(0);
+        expect(bandeau).not.toContain('—');
+        expect(bandeau).not.toContain('<br>');
+    });
+
+    it('le troisième bouton ouvre les tutoriels du blogue dans un nouvel onglet, sûrement, et le dit aux lecteurs d\'écran', () => {
+        const { html } = rendreAccueil();
+        const actions = tranche(html, 'class="banniere-bienvenue-actions"');
+        const lien = actions.match(/<a [^>]*>[\s\S]*?<\/a>/);
+        expect(lien, 'un lien après les deux boutons').not.toBeNull();
+        expect(actions.indexOf(lien[0])).toBeGreaterThan(actions.indexOf('Voir les guides p'));
+        expect(lien[0]).toContain('href="https://codexnumeris.org/tutoriels"');
+        expect(lien[0]).toContain('target="_blank"');
+        expect(lien[0]).toMatch(/rel="[^"]*\bnoopener\b[^"]*"/);
+        expect(lien[0]).toContain('class="btn btn-secondaire"');
+        expect(lien[0]).toContain('Voir les tutoriels <span aria-hidden="true">↗</span>');
+        expect(lien[0]).toMatch(/<span class="u-lecteur-ecran">[^<]*nouvel onglet[^<]*<\/span>/);
     });
 
     it('chaque mot n\'est écrit qu\'une fois, dans js/accueil.js — ni ailleurs dans js/, ni dans index.html', () => {

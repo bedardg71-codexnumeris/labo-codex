@@ -71,6 +71,9 @@ function afficherAccueil() {
  * Source texte d'origine : docs/refonte-textes/textes-manquants-bloc4.md
  * (validé 19 avril 2026).
  */
+// La question de l'orthopédagogue, que disent le bandeau ET la carte : écrite une fois (sentinelle #846, B3).
+const QUESTION_ORTHOPEDAGOGUE = 'Tu es orthopédagogue ?';
+
 function genererBanniereBienvenue() {
     const replie = (typeof obtenirPreference === 'function') && obtenirPreference('banniereAccueilRepliee') === true;
 
@@ -87,9 +90,13 @@ function genererBanniereBienvenue() {
             </button>
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
             <p>Labo Codex est un outil de soutien à l’enseignement et de suivi des apprentissages. L’application te propose de numériser ton travail. Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
-            <p><strong>Par où commencer ?</strong><br>
-                <strong>Je suis enseignant·e</strong> — Configure ton trimestre, ton cours et ton groupe dans l’onglet Cadre : tu saisis tout une fois, l’app s’en sert partout. Ensuite, crée tes productions et tes évaluations — tu peux les élaborer et les partager avec tes collègues.<br>
-                <strong>Je suis orthopédagogue</strong> — Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.</p>
+            <p class="banniere-bienvenue-titre-etapes"><strong>Par où commencer ?</strong></p>
+            <ol class="banniere-bienvenue-etapes">
+                <li><strong>Pose ton cadre.</strong> Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les saisis une fois : l’application s’en sert partout.</li>
+                <li><strong>Conçois tes productions et tes évaluations.</strong> Tu peux les élaborer seul·e ou les partager avec tes collègues.</li>
+                <li><strong>Apprends geste par geste.</strong> Les tutoriels de Labo Codex, sur le blogue Codex Numeris, montrent chaque étape en images.</li>
+            </ol>
+            <p><strong>${QUESTION_ORTHOPEDAGOGUE}</strong> Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.</p>
             <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».</p>
             <p><strong>Ton courriel, une fois par mois.</strong> Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil.</p>
             ${paragrapheCommunaute}
@@ -100,6 +107,7 @@ function genererBanniereBienvenue() {
                 <button class="btn btn-secondaire" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">
                     Voir les guides p\u00e9dagogiques
                 </button>
+                <a class="btn btn-secondaire" href="https://codexnumeris.org/tutoriels" target="_blank" rel="noopener noreferrer">Voir les tutoriels <span aria-hidden="true">↗</span><span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a>
             </div>
             </div>
         </div>
@@ -158,7 +166,7 @@ function afficherAccueilContenu(conteneur) {
 
         <div class="accueil-porte-ortho" id="accueil-porte-ortho">
             <div>
-                <div class="accueil-porte-ortho-titre">Tu es orthopédagogue ?</div>
+                <div class="accueil-porte-ortho-titre">${QUESTION_ORTHOPEDAGOGUE}</div>
                 <div class="accueil-porte-ortho-desc">Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.</div>
             </div>
             <button type="button" class="accueil-porte-ortho-lien" data-action="naviguerAccueilCarte" data-param="suivi|suivi-rencontres">Commencer →</button>
