@@ -1,53 +1,53 @@
-# Consigne – lot B de l'enregistrement : un seul témoin, et aucun « enregistré » sur un échec
+# Consigne – lot C de l'enregistrement : l'évaluation d'une copie (D1)
 
-> Écrite le 27 septembre 2026, à 6 h 09 (Toronto), par Cowork. Source qui fait foi : `plans de travail/DECISIONS-2026-09-26-enregistrement.md` (D0, point 2 ; ordre des lots). Constat : `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md` § 4, § 5 point 5, annexe A2 et A4. Fiches : #618, #786.
+> Écrite le 27 septembre 2026, à 8 h 11 (Toronto), par Cowork. Source qui fait foi : `plans de travail/DECISIONS-2026-09-26-enregistrement.md`, **D1** (et D0). Constat : `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md`, § 3 « Évaluer » et « Liste des évaluations », annexe A3 « Évaluer ».
 >
-> **Condition de départ** : `git log origin/main` montre `de0b00f1` (1.160.4) ou plus récent, et l'arbre ne porte aucun changement dans `js/`. L'ancienne consigne (accueil et tutoriels) est déjà archivée par Cowork sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-27-accueil-tutoriels.md` : commite le déplacement avec ce lot. Travaille sur une branche (`lot-b-temoin-enregistrement`) ; ne fusionne qu'après la relecture croisée.
+> **Condition de départ** : `git log origin/main` montre `21af8288` (1.161.0) ou plus récent, et l'arbre ne porte aucun changement dans `js/`. L'ancienne consigne (lot B) est archivée par Cowork sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-27-lot-B-enregistrement.md` : commite le déplacement avec ce lot. Branche `lot-c-evaluation-verrouiller` ; fusion après la relecture croisée seulement.
 >
-> **Tout ce qui suit est à remesurer avant le code** : les numéros de ligne et les comptes viennent de l'inventaire du 26 et de ma lecture du 27 (31 lignes d'appel de `sauvegarderDonneesSelonMode`, commentaires compris). Le lot A (1.160.0) a changé la branche anonymisation de la fonction : elle ne rend plus `false` en anonymisation.
+> **À remesurer avant le code** : numéros de ligne et comptes ci-dessous viennent de l'inventaire du 26 et de ma lecture du 27 vers 8 h 10.
 
-## 1 · Ce que Grégoire a décidé (D0, point 2, 26 sept. vers 13 h 10)
+## 1 · Ce que Grégoire a décidé (D1, 26 sept. vers 13 h 28, « c'est bon, je garde »)
 
-« Un seul témoin, le même partout, dit « Enregistré » après chaque écriture. Si l'écriture échoue, il dit « Non enregistré », avec la raison. » Le modèle existe : le message des jetons, « Modification non enregistrée – {geste} : {cause} » (`js/evaluation-jetons.js`, vers la l. 284).
+- Pendant qu'on évalue, le témoin commun dit « Enregistré » après chaque geste. **Le nombre d'erreurs, le nombre de mots et le statut de remise s'enregistrent eux aussi tout seuls** (aujourd'hui, ils se perdent si on change d'élève).
+- Le bouton « Enregistrer » devient **« Verrouiller l'évaluation »**, et il **fusionne avec le cadenas**.
+- Dans la Liste des évaluations, au profil et dans les messages, **« Non enregistrée » devient « Non verrouillée »**, avec une courte aide : « ne compte pas encore dans la note ».
+- **Aucun avertissement** quand on quitte une évaluation non verrouillée.
 
-## 2 · Ce que le lot fait, et ce qu'il ne fait pas
+## 2 · Ce que j'ai mesuré, et ce qui en découle (décisions techniques de Cowork)
 
-**Fait** :
+- **« Ne compte pas encore dans la note » est vrai** : `pratique-registre.js` (vers la l. 833) écarte `verrouillee === false` ; la sommative et le profil disent déjà « non comptée ». À revérifier pour chaque famille de pratique (SOM, STD, SPE, DEN) ; si une famille compte une évaluation non verrouillée, **arrête-toi et dis-le** : l'aide mentirait.
+- **Une évaluation verrouillée ne s'écrit pas en arrière-plan** (`evaluation-chargement.js`, vers la l. 2051) et son formulaire est en lecture seule. Pour la corriger, on la déverrouille (elle ne compte plus jusqu'à ce qu'on la reverrouille), c'est déjà le trajet d'aujourd'hui : **aucune question de didactique**, on ne change pas cette règle.
+- **Une seule fonction verrouille** : « Verrouiller l'évaluation » et tous les cadenas (formulaire, palette, badges de la barre latérale et de la barre d'outils, Liste) passent par elle. Verrouiller **fait les vérifications que fait aujourd'hui « Enregistrer »** (échelle résolue #697, etc.) et crée l'évaluation si elle n'existe pas encore ; le cadenas, qui verrouillait sans vérifier, perd ce raccourci. Déverrouiller ne vérifie rien. Les évaluations déjà verrouillées ne sont pas revérifiées (rien n'est réécrit).
+- **Relève d'abord toutes les surfaces** qui portent un « Enregistrer » d'évaluation ou un cadenas d'évaluation (formulaire, visionneuse, Annoter, palettes, badges, Liste, bulle) et dis lesquelles passent par quelle fonction ; les fonctions sans appelant vivant (inventaire A7 : `verrouillerEvaluationIndividuelle`, `deverrouiller…`, `verrouillerToutesEvaluations`, la Banque) **ne se branchent pas** : commente-les.
+- **Enregistrement automatique** : le nombre d'erreurs, le nombre de mots, le statut de remise **et l'intégrité** (statut IA, notes d'intégrité : même trou, relevé par l'inventaire) déclenchent le même enregistrement automatique que les niveaux (`_debouncerAutoSave`), avec le témoin. Les gardes de #959, #960 et #961 (chargement, rétroaction réécrite) doivent tenir : un chargement n'écrit rien.
+- **Les messages de succès propres à l'évaluation** : « Évaluation sauvegardée : … » (`evaluation-sauvegarde.js`) et « Évaluation modifiée : … » (`evaluation.js`) partent ; le verrouillage dit « Évaluation verrouillée : ‹étudiant·e› – ‹production› », le déverrouillage « Évaluation déverrouillée : … » (mots du § 3). Un seul message par geste.
+- **Les mots historiques ne se réécrivent pas** : les anciennes entrées de « Nouvelles » (`changelog-data.js`, 1.14x et avant) restent telles qu'elles ont été publiées.
+- **Aide** : relève les textes de l'Aide qui parlent d'« Enregistrer » une évaluation (par exemple `index.html`, vers la l. 11715, « Clique sur Enregistrer… ») et du statut « Non enregistrée » ; ils changent avec le lot (D4 : Grégoire relit les textes touchés).
+- **Identifiants internes** (`'non-enregistree'`, `nonEnregistree`) : garde-les si un réglage mémorisé (filtre retenu) les porte ; ne change que ce que l'écran affiche. Dis ce que tu as choisi.
+- **Fiches** : cherche dans `BACKLOG.md` ET `Retours des testeurs/SUIVI-BUGS.md` les fiches ouvertes que ce lot règle (mots-clés : nombre d'erreurs, nombre de mots, statut de remise, « non enregistrée », cadenas, verrouiller) et liste-les dans la demande de relecture, avec « réglée / en partie / non ».
 
-1. **Le contrat de `sauvegarderDonneesSelonMode`** (`js/modes.js`, #786). Aujourd'hui : `true`, ou les chaînes `'quota'` et `'error'`, *truthy*, que les appelants en `if (!…)` lisent comme un succès. **Décision de Cowork (technique)** : la fonction ne rend `true` que si l'écriture a eu lieu, `false` sinon, et c'est ELLE qui fait parler le témoin (succès comme échec). La raison reste lisible par un accesseur pour les rares appelants qui en ont besoin (`evaluation-sauvegarde.js`, ses quatre messages). Si tu mesures qu'un appelant vivant distingue `'quota'` de `'error'` pour agir (et pas seulement pour afficher), arrête-toi et dis-le avant de changer le contrat.
-2. **La garde #340** (`db._ecritureAutorisee`, `js/db.js` vers les l. 453 et 1522) fait un `return` nu : la fonction rend alors `true` sans rien écrire. Elle doit se lire comme un échec, avec sa raison.
-3. **Le faux message de mémoire pleine** : « Les données sont sauvegardées, mais l'espace disponible est limité… » est retiré ; le témoin dit l'échec.
-4. **Les sites vivants qui affichent un succès sur un échec** (inventaire A2, à remesurer) : `evaluation.js` (modification, cadenas), `liste-evaluations.js` (trois sites), `saisie-presences.js` (mesuré au navigateur par l'inventaire). Un message de succès ne part que sur `=== true`. Les sites morts ou injoignables nommés en A2 ne se corrigent pas : commente-les dans ta demande de relecture (issue « commenter »).
-5. **Le témoin commun** : un seul composant, posé une fois, que tout écrivain passant par `sauvegarderDonneesSelonMode` fait parler. Charge le skill `design-interface` avant. Mes contraintes :
-   - « Enregistré » : discret et bref (il se montrera à chaque auto-enregistrement de l'évaluation, toutes les secondes et demie) ; `role="status"`, `aria-live="polite"`.
-   - « Non enregistré : ‹raison› » : visible, et **il reste affiché jusqu'à la prochaine écriture réussie** ou jusqu'à ce qu'on le ferme ; `role="alert"`. Un échec qu'on n'a pas vu est exactement le mal que ce lot répare.
-   - Il ne se pose PAS à côté du témoin du Codex (`#codex-menu-statut-haut`, « Tout est enregistré ») : ses mots changent au lot F (D4), pas ici, et deux « enregistré » côte à côte redonneraient la confusion de l'inventaire § 4.
-   - Mesure à 360, 768 et 1024 px, en clair et en sombre ; il ne masque aucun bouton de la barre d'Annoter ni de la saisie des présences.
-6. **Un échec ne se dit qu'une fois.** Là où un appelant dit déjà l'échec avec son geste (jetons, `evaluation-sauvegarde.js`), le geste passe dans le témoin (« Non enregistré – ‹geste› : ‹raison› », sur le modèle des jetons) et son propre message part. Relève les textes retirés dans ta demande de relecture.
+## 3 · Les mots – à faire accepter par Grégoire AVANT le push
 
-**Ne fait pas** (lots suivants, D1 à D4) : retirer les boutons « Enregistrer » et les messages de succès propres à chaque écran (« Présences enregistrées », « Grille … sauvegardée ! ») ; ils coexistent avec le témoin jusqu'aux lots C à E, **mais seulement sur un succès réel**. Ne touche pas aux 384 appels directs de `db.setSync` (ils n'auront le témoin qu'avec leur écran), ni au double message du Cadre et des seuils (D3, lot E), ni aux mots du Codex (D4, lot F).
+Déjà décidés (D1) : « Verrouiller l'évaluation » ; « Non verrouillée » ; l'aide « ne compte pas encore dans la note ».
 
-**À mesurer, sans coder** : un échec asynchrone d'IndexedDB (`db.js`, vers la l. 1597) n'est qu'un `console.warn`, alors que le témoin aura déjà dit « Enregistré ». Dis dans ta demande de relecture si c'est atteignable dans l'usage, et ce qu'il faudrait pour que le témoin le rattrape.
-
-## 3 · Les mots – proposés par Cowork, à faire accepter par Grégoire AVANT le push
-
-- Succès : « Enregistré »
-- Mémoire pleine : « Non enregistré : la mémoire du navigateur est pleine. » ⚠ Si Réglages offre un vrai geste pour libérer de la place, ajoute la phrase qui le nomme **par ce que l'écran affiche** (vérifie le bouton et son appelant vivant ; l'ancien message disait « nettoyer les anciens trimestres dans Réglages », à vérifier contre l'écran).
-- Autre erreur d'écriture : « Non enregistré : le navigateur a refusé l'écriture. »
-- Garde #340 : « Non enregistré : ces données ne correspondent pas au trimestre ouvert. »
-- **Nouvelles** : « Partout où l'application enregistre toute seule, un même témoin dit « Enregistré ». Si une écriture échoue, il dit « Non enregistré » et pourquoi, au lieu d'un message de réussite. » (À ajuster à ce que le lot couvre réellement : s'il ne couvre pas « partout », la phrase le dit.)
+Proposés par Cowork :
+- Bouton sur une évaluation verrouillée : **« Déverrouiller l'évaluation »**.
+- Infobulles du cadenas : **« Verrouillée – clique pour déverrouiller »** / **« Non verrouillée – clique pour verrouiller »** (remplacent « Modifiable - Clique pour verrouiller »).
+- Badge et filtre de la Liste : **« Non verrouillée »**, avec l'infobulle **« Non verrouillée : ne compte pas encore dans la note. »**
+- Profil et bilan : **« évaluation non verrouillée, non comptée »** (et `· non comptée` là où c'est la forme actuelle).
+- Messages : **« Évaluation verrouillée : ‹étudiant·e› – ‹production› »** ; **« Évaluation déverrouillée : ‹étudiant·e› – ‹production› »**. En anonymisation, le nom affiché est celui de l'anonymisation (règle du lot A).
+- **Nouvelles** : « Évaluer : ton évaluation s'enregistre toute seule pendant que tu évalues, nombre d'erreurs, nombre de mots et statut de remise compris ; le témoin le dit. Le bouton « Enregistrer » devient « Verrouiller l'évaluation », et le cadenas fait la même chose : une évaluation compte dans la note une fois verrouillée. Dans la Liste, « Non enregistrée » devient « Non verrouillée ». »
 
 ## 4 · Preuves
 
-- Par comportement, pas par le texte (erreur 16 de Cowork) : pour chaque site vivant du point 4, simule `db.setSync` qui lève `QuotaExceededError`, puis `Error`, puis la garde #340 qui refuse → aucun message de succès, le témoin dit « Non enregistré : ‹raison› », la base est inchangée. Puis une écriture réussie → « Enregistré », et le « Non enregistré » précédent disparaît.
-- Banc WebKit du témoin : visible, rôle et `aria-live` justes, à 360, 768 et 1024 px ; il ne recouvre ni la barre d'Annoter ni les boutons des présences.
-- Mutations, chacune rouge : un site remis en `if (!…)` avec la fonction rendant `'quota'` ; le toast « Les données sont sauvegardées » remis ; la garde #340 rendue silencieuse (`true` sans écriture) ; le « Non enregistré » effacé par un simple délai au lieu d'une écriture réussie ; le témoin posé deux fois.
-- Vitest complet vert ; les bancs voisins de l'évaluation (#959, #960, #961), des présences et des jetons, verts.
+- Par comportement : (a) changer le nombre d'erreurs, puis changer d'élève sans autre geste → la valeur est en base, le témoin a dit « Enregistré » ; idem nombre de mots, statut de remise, intégrité. (b) « Verrouiller l'évaluation » et chaque cadenas vivant appellent la même fonction et font la même vérification : une évaluation sans échelle résolue est refusée **par le cadenas aussi**. (c) Déverrouiller puis reverrouiller : la note du cours retire puis remet l'évaluation. (d) Un chargement (copie, Liste, en série) n'écrit rien (bancs #959-#961 verts). (e) La Liste, le profil et le bilan disent « Non verrouillée » / « non verrouillée, non comptée » ; plus aucun « Non enregistrée » à l'écran (`grep` sur ce qui s'affiche, historique de « Nouvelles » exclu).
+- Mutations, chacune rouge : le nombre d'erreurs sans enregistrement automatique ; un cadenas qui verrouille sans la vérification ; un chargement qui écrit ; « Non enregistrée » laissé dans un badge ; deux messages pour un seul verrouillage.
+- Vitest complet ; bancs WebKit voisins (#959, #960, #961, #939, #944, #946, lot A, lot B, `evaluation-*`) verts. Placement du bouton renommé (texte plus long) à 360, 768, 1024 et 1180 px : il ne passe pas sous le témoin du lot B ni ne pousse la barre.
 
 ## 5 · Livraison
 
-- **Relecture croisée exigée** (contrat d'une fonction d'écriture centrale) : commit → demande de relecture (`plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-B-enregistrement.md`) → relecture de Cowork → corrections → verdict → fusion.
-- **Cases à cocher à la livraison** : #618 et #786, **seulement si** tous leurs sites vivants sont couverts ; sinon, la ligne exacte de ce qui reste sous la fiche, et elle reste ouverte.
-- **Stock** : aucun, le lot n'écrit aucune donnée d'utilisateur et n'en efface aucune.
-- Release `minor` (un composant d'écran neuf). Les mots du § 3 acceptés par Grégoire avant le push.
-- **Porte terrain** : le témoin sur l'iPad, pendant qu'on évalue une copie réelle (il ne doit ni gêner le Pencil ni masquer la barre).
+- **Relecture croisée exigée** (ce qui fait entrer une évaluation dans la note) : commit → `plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-C-evaluation.md` → relecture de Cowork → corrections → verdict → fusion.
+- **Cases à cocher** : celles que ta recherche du § 2 trouve réglées, et elles seules ; ligne exacte sous les fiches réglées en partie.
+- **Stock** : rien n'est réécrit. Une évaluation non verrouillée le reste ; une verrouillée le reste.
+- Release `minor`. Les mots du § 3 et les textes de l'Aide acceptés par Grégoire avant le push.
+- **Porte terrain** (iPad, copie réelle) : changer le nombre d'erreurs puis passer à l'élève suivant, revenir – la valeur est là ; verrouiller par le bouton, puis déverrouiller par le cadenas de la barre ; la Liste dit « Non verrouillée » pour une copie évaluée sans verrou.

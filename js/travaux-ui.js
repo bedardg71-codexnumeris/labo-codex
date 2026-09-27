@@ -59,7 +59,7 @@
 
     // Badge chrono, dans la barre du haut de la visionneuse (retour testeur du 23 sept. 2026)
     var _chronoBadgeIds = ['chrono-badge'];
-    var _CHRONO_TITRE = 'Démarre à la 1re annotation et s\'arrête à l\'enregistrement.';
+    var _CHRONO_TITRE = 'Démarre à la 1re annotation et s\'arrête au verrouillage.';
 
     function _majAffichageChrono() {
         // Le groupe n'existe dans la barre que si la préférence est cochée.
@@ -1208,7 +1208,7 @@
                             <span class="travaux-separateur"></span>
                             <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran"><img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon"></button>
                             <!-- Retour testeur du 23 sept. 2026 — le chronomètre revient dans la barre : en palette, il prenait de la place sur la copie. -->
-                            <div id="travaux-chrono-toolbar" class="travaux-chrono-toolbar u-hide" title="Démarre à la 1re annotation et s'arrête à l'enregistrement.">
+                            <div id="travaux-chrono-toolbar" class="travaux-chrono-toolbar u-hide" title="Démarre à la 1re annotation et s'arrête au verrouillage.">
                                 <span class="travaux-separateur"></span>
                                 <img src="icons/icons8-stopwatch.svg" alt="Chronomètre" class="nav-seq-icon travaux-chrono-icone">
                                 <span id="chrono-badge" class="travaux-chrono-badge">--:--</span>
@@ -5287,7 +5287,7 @@
         const btnVerrou = document.createElement('button');
         btnVerrou.id = 'btnVerrouPalette';
         btnVerrou.className = 'btn btn-compact';
-        btnVerrou.title = 'Verrouiller/Déverrouiller l\'évaluation';
+        btnVerrou.title = 'Non verrouillée – clique pour verrouiller';   // lot C ; `mettreAJourBoutonVerrouillage` le tient ensuite
         btnVerrou.style.cssText = 'font-size:12px; padding:2px 6px; margin-right:4px; display:none;';
         btnVerrou.innerHTML = '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">'; // security-ok: constante, aucune donnée
         btnVerrou.addEventListener('click', function() {

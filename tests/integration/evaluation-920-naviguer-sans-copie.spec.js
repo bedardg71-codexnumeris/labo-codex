@@ -165,7 +165,7 @@ test('#920 · par « Consulter », évaluation verrouillée : la barre est là, 
         const niveau = document.getElementById('eval_c1');
         niveau.value = 'E';
         niveau.dispatchEvent(new Event('change', { bubbles: true }));
-        document.querySelector('[data-action="sauvegarderEvaluation"]').click();
+        document.getElementById('btnVerrouillerEvaluation').click();
     });
     await page.waitForFunction((T) => window.db.getSync(T + '_evaluationsSauvegardees', [])
         .some((e) => e.id === 'EVAL920B' && (e.criteres || []).some((c) => c.niveauSelectionne === 'E')), T, { timeout: 10000 }).catch(() => {});

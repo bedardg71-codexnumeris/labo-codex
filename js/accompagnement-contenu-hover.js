@@ -317,7 +317,7 @@ const TOOLTIPS = {
     'eval-filtre-production':
         'Filtre les évaluations par production. Permet de voir les résultats d\'un seul travail à la fois.',
     'eval-filtre-statut':
-        'Filtre par statut de progression : non reçu, reçu, importé, annoté, évalué — ou par type de jeton.',
+        'Filtre par statut de progression : non reçu, reçu, importé, annoté, évalué, non verrouillée (ne compte pas encore dans la note) — ou par type de jeton.',
 
     // --- Interface d'évaluation ---
 
@@ -368,7 +368,7 @@ const TOOLTIPS = {
     // --- Actions du formulaire d'évaluation (#18, déploiement 13 mai 2026) ---
 
     'eval-btn-sauvegarder':
-        'Enregistre l\'évaluation courante. Sauvegarde les niveaux par critère, la rétroaction, la note finale et les jetons appliqués.',
+        'L\'évaluation s\'enregistre toute seule pendant que tu évalues. La verrouiller la fait compter dans la note ; une évaluation verrouillée se déverrouille par ce même bouton ou par le cadenas.',
     'eval-profil-rapide':
         'Ouvre le profil de l\'étudiant·e dans un nouvel onglet. Pratique pour consulter l\'historique sans perdre l\'évaluation en cours.',
     'eval-btn-regenerer-retro':

@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.162.0 (lot C de l'enregistrement, D1) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026 (option 1) :
+            // texte de Cowork, « statut de remise » remplacé par « intégrité » (aucun geste ne change le statut de remise).
+            version: '1.162',
+            couleur: 'vert',
+            titre: 'Verrouiller l\'évaluation',
+            items: [
+                'Évaluer&nbsp;: ton évaluation s\'enregistre toute seule pendant que tu évalues, nombre d\'erreurs, nombre de mots et intégrité compris&nbsp;; le témoin le dit. Le bouton «&nbsp;Enregistrer&nbsp;» devient «&nbsp;Verrouiller l\'évaluation&nbsp;», et le cadenas fait la même chose&nbsp;: une évaluation compte dans la note une fois verrouillée. Dans la Liste, «&nbsp;Non enregistrée&nbsp;» devient «&nbsp;Non verrouillée&nbsp;».'
+            ]
+        },
+        {
             // 1.161.0 (lot B de l'enregistrement, #618, #786) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026,
             // telle quelle (« Oui, tels quels ») ; titre repris de ses mots, comme en 1.160.
             version: '1.161',
