@@ -978,7 +978,7 @@ function _etatLignesSeance(dateStr, presencesCours) {
         const aFiche = presencesCours.some(p => p.date === dateStr && p.da === e.da);
         const groupeSaisi = typeof construireDatesSaisiesGroupe === 'function'
             ? construireDatesSaisiesGroupe(e.da, presencesCours).has(dateStr)
-            : presencesCours.some(p => p.date === dateStr);
+            : presencesCours.some(p => p.date === dateStr && p.facultatif !== true);
         lignes.push({ da: e.da, aFiche, groupeSaisi });
     });
     return lignes;

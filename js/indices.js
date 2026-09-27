@@ -170,9 +170,12 @@ function construireDatesSaisiesGroupe(da, presences) {
         dasGroupe.add(String(e.da));
     });
 
+    // Lot D de l'enregistrement (27 sept. 2026, décision de Grégoire) — une présence RàI (`facultatif`)
+    // n'est pas l'appel du cours : elle ne rend pas la séance « saisie ». Avant, une intervention notée
+    // à la date d'un cours faisait compter absents tous les autres élèves du sous-groupe.
     var datesSaisies = new Set();
     presences.forEach(function(p) {
-        if (p.date && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
+        if (p.date && p.facultatif !== true && dasGroupe.has(String(p.da))) datesSaisies.add(p.date);
     });
     return datesSaisies;
 }
