@@ -1546,8 +1546,9 @@ function poserCartoucheParChargeur(select, cartoucheId) {
  */
 async function choisirCartoucheEval(select) {
     if (_cartouchePoseeParChargeur || !select || !evaluationEnCours) return cartoucheSelectionnee();
-    // #961 — le geste de l'enseignant remplace la rétroaction, retouches comprises (la question
-    // ci-dessous le dit) : elle suit de nouveau les niveaux. Comportement d'avant D7, inchangé.
+    // #961 — le remplacement CONFIRMÉ remplace la rétroaction, retouches comprises (la question
+    // le dit) : elle suit de nouveau les niveaux. Les chemins sans question (R1 de Cowork) gardent
+    // la marque : les commentaires des critères s'appliquent, la garde garde le texte.
     const changerAuGeste = () => {
         if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);
         return cartoucheSelectionnee();
@@ -1560,14 +1561,14 @@ async function choisirCartoucheEval(select) {
     const dejaConfirme = r && vivant && r.etudiantDA === vivant.etudiantDA
         && r.productionId === vivant.productionId && r.cartoucheId === nouvelle;
     if (!nouvelle || !evaluation || nouvelle === evaluation.cartoucheId || dejaConfirme) {
-        return changerAuGeste();
+        return cartoucheSelectionnee();
     }
     // Rien d'écrit à perdre : pas de question, mais c'est bien le geste de l'enseignant. Il vaut
     // remplacement, sans quoi un commentaire enregistré vide resterait vide (#960, D6) sous la
     // cartouche qu'il vient de choisir.
     if (!_aDesCommentairesEnregistres(evaluation)) {
         _remplacementConfirme = { etudiantDA: vivant.etudiantDA, productionId: vivant.productionId, cartoucheId: nouvelle };
-        return changerAuGeste();
+        return cartoucheSelectionnee();
     }
 
     const precedente = evaluationEnCours.cartoucheId || evaluation.cartoucheId || '';
@@ -1912,8 +1913,12 @@ function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     evalExistante.niveauFinal = (document.getElementById('niveauProduction1') || {}).textContent || evalExistante.niveauFinal;
     var retroEl = document.getElementById('retroactionFinale1');
     if (retroEl) evalExistante.retroactionFinale = retroEl.value;
-    // #961 — la marque voyage avec le texte, lue pour la copie de l'instantané.
-    if (retroEl && typeof window.estRetroactionReecrite === 'function') evalExistante.retroactionReecrite = window.estRetroactionReecrite(ec);
+    // #961 — la marque voyage avec le texte, lue pour la copie de l'instantané ; question du stock
+    // sans réponse (R2) : la clé reste absente.
+    if (retroEl && typeof window.marqueRetroactionAEcrire === 'function') {
+        const marque = window.marqueRetroactionAEcrire(ec);
+        if (marque !== undefined) evalExistante.retroactionReecrite = marque;
+    }
     // #882 (16 sept. 2026) — « Note chiffrée / Niveau de performance » et les cases d'affichage
     // suivent l'écran : seul « Enregistrer » les écrivait, et le PDF de l'élève relisait le choix
     // d'avant. Seulement si le panneau est là : absent, la lecture rendrait des cases décochées.
@@ -1993,7 +1998,7 @@ function _construireNouvelleEvaluationAutoSave(ec, grille, criteres) {
         optionsAffichage: _lireOptionsAffichageAutoSave(),
         donneesAlgorithmiques: ec.donneesAlgorithmiques || {},
         pointsAnalytiques: ec.pointsAnalytiques || {},   // lot 2
-        retroactionReecrite: (typeof window.estRetroactionReecrite === 'function') ? window.estRetroactionReecrite(ec) : false,   // #961
+        retroactionReecrite: (typeof window.marqueRetroactionAEcrire === 'function') ? window.marqueRetroactionAEcrire(ec) === true : false,   // #961 — copie neuve : jamais « à demander »
         verrouillee: false
     }, champsDOM);
 }

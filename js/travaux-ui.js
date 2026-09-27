@@ -7163,7 +7163,9 @@
 
         evaluations[index].retroactionFinale = textarea.value;
         // #961 (D7) — un texte retouché ici est réécrit à la main : il ne suit plus les niveaux.
+        // R2 — tous les écrivains portent la clé : sans clé et sans retouche, `false`.
         if (textarea.value !== textarea.defaultValue) evaluations[index].retroactionReecrite = true;
+        else if (evaluations[index].retroactionReecrite === undefined) evaluations[index].retroactionReecrite = false;
         evaluations[index].dateModification = new Date().toISOString();
         const resultat = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 

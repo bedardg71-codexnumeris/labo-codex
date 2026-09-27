@@ -660,12 +660,9 @@ function verifierEtChargerEvaluationExistante() {
                 : evaluationExistante.retroactionFinale;
             retroaction.value = texteRetroaction;
         }
-        // #961 (D7) — la marque enregistrée revient avec le texte. Sans marque (stock d'avant
-        // D7), la rétroaction suit les niveaux comme avant : la comparaison au texte généré
-        // n'est pas fiable (gabarits et générateur changés depuis) — volet laissé ouvert.
-        if (typeof window.poserRetroactionReecrite === 'function') {
-            window.poserRetroactionReecrite(!!(evaluationExistante.retroactionFinale && evaluationExistante.retroactionReecrite === true));
-        }
+        // #961 (D7) — la marque enregistrée revient avec le texte ; sans clé (stock d'avant D7),
+        // la question due au premier geste qui régénérerait (R2).
+        if (typeof window.preparerRetroactionEnregistree === 'function') window.preparerRetroactionEnregistree(evaluationExistante);
         // Patch §5.6 — promotion mettreAJourCompteurMots vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
         window.mettreAJourCompteurMots();
 
@@ -1582,10 +1579,8 @@ function _chargerOptionsEtRetroactionModif(evaluation) {
             : (evaluation.retroactionFinale || '');
         retroaction.value = texteRetroaction;
     }
-    // #961 (D7) — la marque enregistrée revient avec le texte (jumeau de l'ouverture par la copie).
-    if (typeof window.poserRetroactionReecrite === 'function') {
-        window.poserRetroactionReecrite(!!(evaluation.retroactionFinale && evaluation.retroactionReecrite === true));
-    }
+    // #961 (D7) — la marque (ou la question due, R2) revient avec le texte (jumeau de la copie).
+    if (typeof window.preparerRetroactionEnregistree === 'function') window.preparerRetroactionEnregistree(evaluation);
 }
 
 function _gererIndicateurEtVerrouillageModif(evaluation, estVerrouillee) {
@@ -1761,8 +1756,10 @@ function _lireChampsDOMMod(maintenant) {
         ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value,
-        retroactionReecrite: (typeof window.estRetroactionReecrite === 'function') ? window.estRetroactionReecrite() : false   // #961
+        retroactionReecrite: (typeof window.marqueRetroactionAEcrire === 'function') ? window.marqueRetroactionAEcrire() : false   // #961
     };
+    // #961 R2 — question du stock sans réponse : la clé reste absente.
+    if (champs.retroactionReecrite === undefined) delete champs.retroactionReecrite;
     // Lot A, R4 : notes d'intégrité masquées en anonymisation — la fusion garde celles de la base.
     if (typeof champMasqueAnonymisation === 'function'
         && champMasqueAnonymisation(document.getElementById('notesIntegrite'))) delete champs.notesIntegrite;

@@ -77,6 +77,7 @@ Texte proposé par Cowork, retenu sans retouche :
 - Motifs (proposés par Cowork, retenus) : « ce qui est enregistré fait foi » (#939, #946, #960) appliqué jusqu'au bout, et aucun texte perdu ; une fenêtre à chaque changement de niveau interromprait plusieurs fois par copie.
 - Les deux textes (l'avis et « Régénérer ») sont acceptés avec l'option ; `[à vérifier]` s'ils tiennent sur iPad à côté de la zone.
 - Livrée au lot #961.
+- Les rétroactions enregistrées avant D7 (sans marque) : au premier geste qui les régénérerait, une question, une fois par copie – « Garder la mienne » ou « Remplacer » (Grégoire, 26 sept., option c).
 
 ## Ordre des lots (tranché par Cowork, question technique)
 
