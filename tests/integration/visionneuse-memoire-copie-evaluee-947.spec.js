@@ -113,7 +113,7 @@ async function laisserPasserLaRestauration(page) {
 }
 
 async function enregistrer(page) {
-    await page.evaluate(() => document.querySelector('[data-action="sauvegarderEvaluation"]').click());
+    await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').click());
     await page.waitForTimeout(1500);
     await page.waitForFunction(() => !window._timerAutoSave, null, { timeout: 10000 });
 }

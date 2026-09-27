@@ -1273,8 +1273,8 @@ function verifierPorteeAvantSauvegarde() {
     if (window.noteCalculeeCourante === null) {
         const echelleId = (evaluationEnCours && evaluationEnCours.echelleId) || document.getElementById('selectEchelle1')?.value || '';
         const details = echelleId
-            ? 'L\'échelle « ' + echelleId + ' » de cette évaluation n\'existe plus dans ce trimestre : aucune note ne peut être calculée. Choisis une échelle de performance, puis enregistre.'
-            : 'Aucune échelle de performance n\'est choisie : aucune note ne peut être calculée. Choisis une échelle, puis enregistre.';
+            ? 'L\'échelle « ' + echelleId + ' » de cette évaluation n\'existe plus dans ce trimestre : aucune note ne peut être calculée. Choisis une échelle de performance, puis verrouille.'
+            : 'Aucune échelle de performance n\'est choisie : aucune note ne peut être calculée. Choisis une échelle, puis verrouille.';
         if (typeof notifications !== 'undefined' && notifications && typeof notifications.erreur === 'function') {
             notifications.erreur('Échelle introuvable', details);
         }
@@ -1302,7 +1302,7 @@ function verifierPorteeAvantSauvegarde() {
         }
     }
     const details = phrasesPorteeIncomplete(portee).join(' ')
-        + ' Ton travail est conservé, mais l\'évaluation n\'est pas enregistrée : complète-la, puis enregistre.';
+        + ' Ton travail est enregistré, mais l\'évaluation n\'est pas verrouillée : complète-la, puis verrouille.';   // lot C (D1)
     if (typeof notifications !== 'undefined' && notifications && typeof notifications.erreur === 'function') {
         notifications.erreur('Évaluation incomplète', details);
     }

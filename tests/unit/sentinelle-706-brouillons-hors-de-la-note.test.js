@@ -7,7 +7,7 @@
  * réévaluée, copie déverrouillée), ou dont la portée `ponderationCouverte` est nulle,
  * n'entre pas dans la note du cours — dans les QUATRE familles et dans les DEUX systèmes
  * (calculerDetailsNoteFinale et chaque calculerPerformance). Le profil et l'export disent
- * combien ont été écartées : « 2 évaluations non enregistrées, non comptées ».
+ * combien ont été écartées : « 2 évaluations non verrouillées, non comptées ».
  *
  * Les quatre élèves de banc de l'audit, AVANT le correctif (mesuré au banc) :
  *   SOM  C2 : le brouillon « 95 sur 50 % » comptait 95 → 87,5  (sans lui : 8830/101 = 87,43)
@@ -142,13 +142,13 @@ function phraseDuProfil() {
 }
 
 describe('#706 · un brouillon n\'entre pas dans la note du cours — les quatre familles, les deux systèmes', () => {
-    it('SOM · le brouillon « 95 sur 50 % » ne compte plus : 87,43 (8830/101), par l\'instance ET par la configurable ; le récit le nomme « évaluation non enregistrée · non comptée »', () => {
+    it('SOM · le brouillon « 95 sur 50 % » ne compte plus : 87,43 (8830/101), par l\'instance ET par la configurable ; le récit le nomme « évaluation non verrouillée · non comptée »', () => {
         const b = monter(jeuSOM(BROUILLON95));
         const som = b.win.obtenirPratiqueParId('sommative');
         expect(r2(som.calculerPerformance(DA.SOM) * 100)).toBe(87.43);                       // avant : 87,5
         expect(r2(b.win.obtenirPratiqueParId('som-banc').calculerPerformance(DA.SOM) * 100)).toBe(87.43);
         const ecartee = som.decrireCalcul(DA.SOM).resultats.find(x => x.sort === 'ecarte');
-        expect(ecartee).toMatchObject({ label: 'Quiz', note: 95, detail: 'évaluation non enregistrée · non comptée' });
+        expect(ecartee).toMatchObject({ label: 'Quiz', note: 95, detail: 'évaluation non verrouillée · non comptée' });
         expect(b.win.compterEvaluationsEcarteesDeLaNote(DA.SOM)).toEqual({ brouillons: 1, sansPortee: 0, total: 1 });
     });
     it('SOM · le brouillon « 0 sur 50 % » ne pèse plus 0 : 87,43 aussi (avant : 86,57)', () => {
@@ -161,7 +161,7 @@ describe('#706 · un brouillon n\'entre pas dans la note du cours — les quatre
         expect(r2(d.noteFinale)).toBe(79.45);                                                   // avant : 83,2
         expect(d.portfolio.artefactsRetenus.map(a => a.productionId)).not.toContain('A6');
         expect(d.ecartees).toEqual({ brouillons: 1, sansPortee: 0, total: 1 });
-        expect(d.recit.resultats.find(x => x.label === 'Artefact 6')).toMatchObject({ sort: 'ecarte', detail: 'évaluation non enregistrée · non comptée' });
+        expect(d.recit.resultats.find(x => x.label === 'Artefact 6')).toMatchObject({ sort: 'ecarte', detail: 'évaluation non verrouillée · non comptée' });
         expect(r2(b.win.obtenirPratiqueParId('standards').calculerPerformance(DA.STD) * 100)).toBe(79.45);
         const s = b.win.simulerIndices(DA.STD, 'std-banc');
         expect([s.P, r2(s.noteFinale), s.ecartees.total]).toEqual([79, 79.45, 1]);
@@ -224,10 +224,10 @@ describe('#706 · le profil et l\'export DISENT combien ont été écartées', (
         const sans = X.construireLignesSynthese([{ da: DA.STD, nom: 'N', prenom: 'P' }], { pratiqueId: 'x' }, () => ({ P: 80, noteConstructible: true }))[0];
         expect(sans[10]).toBe('');
     });
-    it('les mots du profil : « 2 évaluations non enregistrées, non comptées » · « 1 évaluation sans critère évalué, non comptée » (mot arrêté par Grégoire le 5 sept. 2026 : sans « aucun ») ; rien quand rien n\'est écarté', () => {
+    it('les mots du profil : « 2 évaluations non verrouillées, non comptées » · « 1 évaluation sans critère évalué, non comptée » (mot arrêté par Grégoire le 5 sept. 2026 : sans « aucun ») ; rien quand rien n\'est écarté', () => {
         const phrase = phraseDuProfil();
-        expect(phrase({ brouillons: 2, sansPortee: 0, total: 2 })).toContain('2 évaluations non enregistrées, non comptées');
-        expect(phrase({ brouillons: 1, sansPortee: 0, total: 1 })).toContain('1 évaluation non enregistrée, non comptée');
+        expect(phrase({ brouillons: 2, sansPortee: 0, total: 2 })).toContain('2 évaluations non verrouillées, non comptées');
+        expect(phrase({ brouillons: 1, sansPortee: 0, total: 1 })).toContain('1 évaluation non verrouillée, non comptée');
         expect(phrase({ brouillons: 0, sansPortee: 1, total: 1 })).toContain('1 évaluation sans critère évalué, non comptée');
         expect(phrase({ brouillons: 0, sansPortee: 2, total: 2 })).toContain('2 évaluations sans critère évalué, non comptées');
         expect(phrase({ brouillons: 1, sansPortee: 1, total: 2 })).not.toContain('aucun');

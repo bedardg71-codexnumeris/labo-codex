@@ -604,7 +604,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             !window.evaluationEntreDansLaNote(e))
         .forEach(e => {
             _resultatsRecit.push(_resArtefact(e, 'ecarte',
-                e.verrouillee === false ? 'évaluation non enregistrée · non comptée' : 'sans critère évalué · non comptée'));
+                e.verrouillee === false ? 'évaluation non verrouillée · non comptée' : 'sans critère évalué · non comptée'));
         });
     if (productionTerminale && noteTerminale !== null) {
         _resultatsRecit.push({

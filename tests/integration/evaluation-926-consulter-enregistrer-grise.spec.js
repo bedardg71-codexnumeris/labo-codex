@@ -80,7 +80,8 @@ async function consulter(page, evalId, da, c1) {
 
 const etat = (page) => page.evaluate(() => ({
     cadenasOuvert: /icon-open-lock/.test(document.getElementById('btnVerrouPalette').innerHTML),
-    enregistrerEteint: document.querySelector('[data-action="sauvegarderEvaluation"]').disabled,
+    enregistrerEteint: document.getElementById('btnVerrouillerEvaluation').disabled,
+    bouton: document.getElementById('btnVerrouillerEvaluation').textContent.trim(),   // lot C (D1)
     niveauEteint: document.getElementById('eval_c1').disabled
 }));
 
@@ -95,9 +96,11 @@ test('#927 · la liste nomme l\'évaluation non enregistrée, et le filtre « No
         .map((tr) => ({ id: tr.dataset.evaluationId, badge: tr.querySelector('.travaux-badge-pill').textContent.trim(),
             classe: tr.querySelector('.travaux-badge-pill').className.replace('travaux-badge-pill', '').trim() }))
         .sort((a, b) => a.id.localeCompare(b.id)));
+    expect(await page.evaluate(() => document.querySelector('tr[data-evaluation-id="EVAL926B"] .travaux-badge-pill').title),
+        'lot C : l\'aide courte').toBe('Non verrouillée : ne compte pas encore dans la note.');
     expect(await badges()).toEqual([
         { id: 'EVAL926A', badge: 'Évalué', classe: 'evalue' },
-        { id: 'EVAL926B', badge: 'Non enregistrée', classe: 'non-enregistree' }
+        { id: 'EVAL926B', badge: 'Non verrouillée', classe: 'non-enregistree' }   // lot C (D1)
     ]);
 
     await page.evaluate(() => {
@@ -117,13 +120,14 @@ test('#926 · « Consulter » une évaluation non enregistrée APRÈS une verrou
 
     await consulter(page, 'EVAL926A', 'TEST926A', 'M');
     // La prémisse, mesurée : la verrouillée éteint bien le formulaire — c'est cet état que le panneau gardait.
-    expect(await etat(page)).toEqual({ cadenasOuvert: false, enregistrerEteint: true, niveauEteint: true });
+    // Lot C (D1) : sous le verrou, le bouton n'est plus éteint — il devient « Déverrouiller l'évaluation ».
+    expect(await etat(page)).toEqual({ cadenasOuvert: false, enregistrerEteint: false, bouton: 'Déverrouiller l\'évaluation', niveauEteint: true });
 
     await consulter(page, 'EVAL926B', 'TEST926B', 'I');
-    expect(await etat(page), 'le cadenas et le bouton disent la même chose').toEqual({ cadenasOuvert: true, enregistrerEteint: false, niveauEteint: false });
+    expect(await etat(page), 'le cadenas et le bouton disent la même chose').toEqual({ cadenasOuvert: true, enregistrerEteint: false, bouton: 'Verrouiller l\'évaluation', niveauEteint: false });
 
     await page.waitForFunction(() => !window._autoSaveSuspendu, null, { timeout: 5000 });
-    await page.evaluate(() => document.querySelector('[data-action="sauvegarderEvaluation"]').click());
+    await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').click());
     await page.waitForFunction((T) => window.db.getSync(T + '_evaluationsSauvegardees', [])
         .some((e) => e.id === 'EVAL926B' && e.verrouillee === true), T, { timeout: 10000 }).catch(() => {});
 

@@ -228,3 +228,42 @@ test('Porte #868 · sans copie, puis avec, puis sans : un seul cadenas, une seul
     expect(suivi.dialogues).toEqual([]);
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
+
+// LOT C DE L'ENREGISTREMENT (D1) — « Enregistrer » devient « Verrouiller l'évaluation », et « Déverrouiller
+// l'évaluation » sous le verrou : le plus long des deux libellés, sur les deux surfaces (palette « Paramètres »
+// avec copie, formulaire sans copie), à 360, 768, 1024 et 1180 px. Il tient dans sa ligne sans être coupé, ne
+// passe pas sous le témoin commun (lot B, affiché en échec : sa plus grande forme), et ne pousse pas la barre :
+// le bouton ↺ reste sur la même ligne, et le bouton reste dans son panneau. ⚠ Mesuré le 27 sept. : à 360 px avec
+// copie, la palette « Paramètres » commence déjà hors de la vue (−74 px), avec « Enregistrer » comme avec le nouveau
+// libellé (bouton de 152 px dans les deux cas) : ce n'est pas le libellé, la mesure se fait donc contre le panneau.
+for (const largeur of [360, 768, 1024, 1180]) {
+    for (const avecCopie of [true, false]) {
+        test(`lot C · « Déverrouiller l'évaluation » à ${largeur} px, ${avecCopie ? 'avec' : 'sans'} copie : entier, hors du témoin, sur sa ligne`, async ({ page }) => {
+            await page.setViewportSize({ width: largeur, height: { 360: 740, 768: 1024, 1024: 768, 1180: 820 }[largeur] });
+            const suivi = await monter(page);
+            await evaluerDepuisLeProfil(page, avecCopie ? 'p868-2' : 'p868-1');
+            if (avecCopie) await attendreCopieEnModeEvaluer(page, 'FT868');
+            else await attendreSansCopie(page, 'p868-1');
+            const m = await page.evaluate(() => {
+                window.afficherOuMasquerBoutonVerrouillage(true, true);   // l'état verrouillé : le libellé long
+                window.temoinEnregistrement.nonEnregistre('la mémoire du navigateur est pleine. Pour libérer de la place : Cadre › Trimestre › Bibliothèque, « Supprimer… » sur un ancien trimestre.',
+                    'Verrouillage de l\'évaluation');
+                const b = document.getElementById('btnVerrouillerEvaluation');
+                const r = b.getBoundingClientRect();
+                const t = document.querySelector('#temoin-enregistrement .temoin-enregistrement-echec').getBoundingClientRect();
+                const voisin = b.parentElement.querySelector('[data-action="reinitialiserFormulaire"]').getBoundingClientRect();
+                const panneau = b.closest('.palette-flottante, .travaux-panneau-lateral').getBoundingClientRect();
+                return {
+                    texte: b.textContent.trim(),
+                    visible: r.width > 0 && r.height > 0,
+                    coupe: b.scrollWidth > b.clientWidth + 1,
+                    sousLeTemoin: r.left < t.right && r.right > t.left && r.top < t.bottom && r.bottom > t.top,
+                    memeLigne: Math.abs(voisin.top - r.top) < 4,
+                    dansSonPanneau: r.left >= panneau.left - 1 && r.right <= panneau.right + 1
+                };
+            });
+            expect(m).toEqual({ texte: 'Déverrouiller l\'évaluation', visible: true, coupe: false, sousLeTemoin: false, memeLigne: true, dansSonPanneau: true });
+            expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
+        });
+    }
+}
