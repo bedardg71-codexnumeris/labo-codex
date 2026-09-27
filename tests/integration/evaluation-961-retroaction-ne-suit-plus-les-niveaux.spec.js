@@ -364,7 +364,7 @@ test('#961 · par la Liste, réécrite puis « Enregistrer » : la marque s\'éc
     await ouvrir(page, 'liste');
     await reecrire(page, REECRIT);
     await page.evaluate(() => { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; window._pendingAutoSaveSnapshot = null; });
-    await page.evaluate(() => document.querySelector('[data-action="sauvegarderEvaluation"]').click());
+    await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').click());
     await page.waitForTimeout(1500);
     const b = await base(page);
     expect.soft(b.retroactionFinale).toBe(REECRIT);
@@ -418,7 +418,7 @@ test('#961 · copie neuve, réécrite puis « Enregistrer » avant l\'auto-save 
     await page.evaluate(() => { const s = document.getElementById('eval_c1'); s.value = 'M'; s.dispatchEvent(new Event('change', { bubbles: true })); });
     await reecrire(page, REECRIT);
     await page.evaluate(() => { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; window._pendingAutoSaveSnapshot = null; });
-    await page.evaluate(() => document.querySelector('[data-action="sauvegarderEvaluation"]').click());
+    await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').click());
     await page.waitForTimeout(1500);
     const b = await page.evaluate((T) => window.db.getSync(T + '_evaluationsSauvegardees', []).find(e => e.etudiantDA === 'TEST961'), T);
     expect.soft(b && b.retroactionFinale).toBe(REECRIT);

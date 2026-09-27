@@ -18,6 +18,18 @@
 (function() {
 'use strict';
 
+/**
+ * Lot C de l'enregistrement (D1) — le nombre d'erreurs et le nombre de mots s'enregistrent
+ * tout seuls, comme un niveau choisi : seul « Enregistrer » les écrivait, et ils se perdaient
+ * au changement d'élève. Armé ICI, dans le geste, et non dans le calcul : la porte du
+ * verrouillage recalcule elle aussi (`_forcerRecalculAlgorithmiqueAvantSauvegarde`). Un
+ * chargeur qui relance le calcul par `input` passe par ici : les gardes de `_debouncerAutoSave`
+ * (suspension, compteur #960) le font taire.
+ */
+function _armerEnregistrementAutomatique() {
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
+}
+
 /** Handler oninput pour calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) */
 function calculerNoteAlgoSimpleHandler(el) {
     if (typeof window.calculerNoteAlgorithmiqueSimple !== 'function') return;
@@ -26,6 +38,7 @@ function calculerNoteAlgoSimpleHandler(el) {
         parseFloat(el.dataset.ponderation),
         parseFloat(el.dataset.facteur)
     );
+    _armerEnregistrementAutomatique();
 }
 
 /** Handler oninput pour calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) */
@@ -37,6 +50,7 @@ function calculerNoteAlgoCatHandler(el) {
         parseFloat(el.dataset.facteur),
         el.dataset.critereGrilleId || ''
     );
+    _armerEnregistrementAutomatique();
 }
 
 /**
