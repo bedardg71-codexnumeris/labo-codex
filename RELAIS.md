@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 2 H 30 : **LOT ACCUEIL ET TUTORIELS (1.160.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `caffeinate -i scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 7 H 45 : **LOT B DE L'ENREGISTREMENT (1.161.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `de0b00f1` (1.160.4, poussé) + la branche `lot-b-temoin-enregistrement` (`c3931672` contrat de `sauvegarderDonneesSelonMode` + témoin commun + bancs, `5d9f1541` mots acceptés, `19a5b8ac` retouches R1-R4 de la relecture + #962 inscrite, `043d5dce` release build 0927-0734, contre-vérification verte de Cowork versée, #618 et #786 cochées) + `529ef105` fusion + ce relais.
+
+**Nouvelles acceptées par Grégoire le 27 sept., telles quelles** (entrée 1.161, titre « Un même témoin » repris de la phrase) : « Quand l'application enregistre une évaluation, un jeton, une rétroaction ou des présences, un même témoin dit « Enregistré » en bas de l'écran. Si l'écriture échoue, il dit « Non enregistré » et pourquoi, et reste affiché jusqu'à la prochaine écriture réussie – au lieu d'un message de réussite. »
+
+**Reste** : constater « en ligne » chez Netlify (1.160.3, 1.160.4, 1.161.0) ; retirer la branche `lot-b-temoin-enregistrement` une fois le push constaté ; porte terrain du lot B (le témoin sur l'iPad pendant l'évaluation d'une copie réelle) et celles de #961. **Prochain lot : le lot C de l'enregistrement** (D1, `plans de travail/DECISIONS-2026-09-26-enregistrement.md`), puis #962. Non commité, laissé : `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 2 H 30 : **LOT ACCUEIL ET TUTORIELS (1.160.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `caffeinate -i scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `4e86ba62` (1.160.3, poussé : verdict vert, push constaté le 27 sept. vers 2 h ; le premier verdict, lancé à 20 h 41 sur batterie, avait été gelé cinq heures par la veille du Mac, puis arrêté et relancé sous `caffeinate`) + la branche `lot-accueil-tutoriels` (`1c68f3b4` « Par où commencer ? » en trois étapes, bouton « Voir les tutoriels ↗ », sentinelle #846 aux nouveaux mots, consigne archivée ; `af9e62a7` release build 0927-0225) + la fusion + ce relais.
 
