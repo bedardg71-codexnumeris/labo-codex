@@ -333,7 +333,7 @@ function calculerEtSauvegarderIndicesAssiduite() {
             indices.sommatif[etudiant.da] = calculerAssiduite(etudiant.da, null);
         });
 
-        sauvegarderDonneesSelonMode('indicesAssiduite', indices);
+        sauvegarderDonneesSelonMode('indicesAssiduite', indices, { discret: true });   // recalcul : l'usager n'a rien écrit
 
         if (typeof calculerEtStockerIndicesCP === 'function') {
             calculerEtStockerIndicesCP();
