@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 20 H 45 : **LOT #961 (1.160.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 2 H 30 : **LOT ACCUEIL ET TUTORIELS (1.160.4) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `caffeinate -i scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `4e86ba62` (1.160.3, poussé : verdict vert, push constaté le 27 sept. vers 2 h ; le premier verdict, lancé à 20 h 41 sur batterie, avait été gelé cinq heures par la veille du Mac, puis arrêté et relancé sous `caffeinate`) + la branche `lot-accueil-tutoriels` (`1c68f3b4` « Par où commencer ? » en trois étapes, bouton « Voir les tutoriels ↗ », sentinelle #846 aux nouveaux mots, consigne archivée ; `af9e62a7` release build 0927-0225) + la fusion + ce relais.
+
+**Nouvelles acceptées par Grégoire le 27 sept., telles quelles** (entrée 1.160) : « Accueil : « Par où commencer ? » se lit en trois étapes, et un bouton ouvre les tutoriels de Labo Codex sur le blogue Codex Numeris. »
+
+**Reste** : constater « en ligne » chez Netlify (1.160.3 et 1.160.4) ; retirer la branche `lot-accueil-tutoriels` une fois le push constaté ; portes terrain de #961 (l'avis de la rétroaction réécrite sur iPad, la frappe au clavier par la Liste). **Prochain lot : le lot B de l'enregistrement** (`plans de travail/DECISIONS-2026-09-26-enregistrement.md`). ⚠ Un verdict Playwright sur batterie se gèle à la veille : brancher le Mac, lancer sous `caffeinate -i`. Non commité, laissé : `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 20 H 45 : **LOT #961 (1.160.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `958683a7` (1.160.2) + la branche `lot-retroaction-ne-suit-plus-les-niveaux` (`e7bebd96` correctif D7 + consigne + fiche #961 + demande de relecture, `ff36ea10`/`6d1b0998` R1 et R2 + relecture de Cowork, `c16f8537` C1 + contre-vérification verte, `8f65a355` release build 0926-2038) + `2f753a15` fusion + ce relais.
 
