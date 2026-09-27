@@ -118,4 +118,16 @@
     }
 
     window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec };
+
+    /**
+     * Lot E1 (D3) — une raison écrite comme une phrase (« Le nom du critère est
+     * obligatoire ») devient la fin de « Non enregistré : ‹raison› » : minuscule
+     * initiale, point final.
+     */
+    window.raisonPourTemoin = function (raison) {
+        const texte = String(raison || '').trim();
+        if (!texte) return texte;
+        const debut = texte.charAt(0).toLowerCase() + texte.slice(1);
+        return /[.!?]$/.test(debut) ? debut : debut + '.';
+    };
 })();

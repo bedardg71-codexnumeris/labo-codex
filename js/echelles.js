@@ -573,6 +573,10 @@ async function initialiserModuleEchelles() {
  */
 async function sauvegarderNomEchelle() {
     const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
+    // Lot E1 (D3) : un nom vidé sur une échelle existante le dit, par le témoin.
+    if (!nom && echelleTemplateActuelle && echelleTemplateActuelle.id && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre('le nom ne peut pas être vide.', 'Modifier l\'échelle', cle('echellesTemplates'));
+    }
     if (echelleTemplateActuelle && echelleTemplateActuelle.id && nom) {
         // #957 (26 sept. 2026) — L'ÉCRITURE PART DE L'ÉCHELLE EN BASE, pas de
         // `echelleTemplateActuelle`. La garde qui précédait ne resynchronisait
@@ -906,7 +910,7 @@ async function importerDansEchelleActive(event) {
 
     // Récupérer l'ID de l'échelle active
     if (!echelleTemplateActuelle || !echelleTemplateActuelle.id) {
-        alert('Aucune échelle sélectionnée. Veuillez d\'abord sélectionner une échelle à remplacer.');
+        alert('Aucune échelle sélectionnée. Sélectionne d\'abord l\'échelle à remplacer.');
         event.target.value = ''; // Reset input
         return;
     }
@@ -1651,7 +1655,7 @@ async function ajouterEchellesABibliotheque() {
     const checkboxes = document.querySelectorAll('#listeEchellesDisponibles input[type="checkbox"]:checked');
 
     if (checkboxes.length === 0) {
-        alert('Veuillez sélectionner au moins une échelle à ajouter');
+        alert('Sélectionne au moins une échelle à ajouter.');
         return;
     }
 
@@ -1775,7 +1779,7 @@ function afficherEchellesTrimestreModal() {
 async function importerToutEchellesTrimestreModal() {
     const select = document.getElementById('selectTrimestreImportEchelles');
     if (!select || !select.value) {
-        alert('Veuillez d\'abord sélectionner un trimestre.');
+        alert('Sélectionne d\'abord un trimestre.');
         return;
     }
 
@@ -3504,7 +3508,7 @@ async function sauvegarderEchelleComplete() {
 
     // Vérifier le nom
     if (!nom) {
-        alert('Veuillez entrer un nom pour l\'échelle');
+        alert('Donne un nom à l\'échelle.');
         return;
     }
 
@@ -3543,7 +3547,7 @@ async function sauvegarderEchelleComplete() {
         const niveaux = window._niveauxNouvelleEchelle;
 
         if (niveaux.length === 0) {
-            alert('Veuillez ajouter au moins un niveau de performance');
+            alert('Ajoute au moins un niveau de performance.');
             return;
         }
 
@@ -3633,8 +3637,11 @@ function marquerChampRefuseEchelle(el, raison) {
     if (!raison) { el.classList.remove('champ-refuse'); return; }
     const dejaMarque = el.classList.contains('champ-refuse');
     el.classList.add('champ-refuse');
-    if (!dejaMarque && typeof notifications !== 'undefined' && notifications.erreur) {
-        notifications.erreur(raison, 'La modification n\'a pas été enregistrée.');
+    // Lot E1 (D3) : un seul message, par le témoin commun — « Non enregistré : ‹raison› ».
+    // Avant : un panneau d'erreur à deux phrases, en plus du champ marqué. Le témoin
+    // s'efface à la prochaine écriture réussie de la même clé.
+    if (!dejaMarque && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(raison), undefined, cle('echellesTemplates'));
     }
 }
 

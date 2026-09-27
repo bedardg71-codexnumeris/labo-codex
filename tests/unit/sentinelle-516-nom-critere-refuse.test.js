@@ -62,7 +62,14 @@ function monter({ grilles }) {
             createElement: () => ({ style: {}, classList: { add() {}, remove() {} } })
         }
     };
-    const win = chargerScript('js/grilles.js', globaux);
+    // Lot E1 (D3) : le refus est dit par le témoin commun — le VRAI module (sa
+    // `raisonPourTemoin`), dont seul l'affichage est remplacé par le journal.
+    const win = chargerScript('js/temoin-enregistrement.js', { document: globaux.document });
+    win.temoinEnregistrement = {
+        enregistre: () => {}, fermer: () => {},
+        nonEnregistre: (raison, geste, k) => journal.push(['nonEnregistre', raison, geste, k])
+    };
+    chargerScript('js/grilles.js', globaux, win);
     return { win, store, journal };
 }
 
@@ -129,8 +136,10 @@ describe('#516 · B — le refus ne peut pas être silencieux', () => {
         win.marquerChampRefuse(el, win.REFUS_NOM_CRITERE);
 
         expect(el._classes.has('champ-refuse'), 'la marque visuelle').toBe(true);
-        expect(journal).toEqual([['erreur', 'Le nom du critère est obligatoire',
-                                 'La modification n\'a pas été enregistrée.']]);
+        // Lot E1 : « Non enregistré : le nom du critère est obligatoire. », sur la clé
+        // des grilles (la prochaine écriture réussie l'efface).
+        expect(journal).toEqual([['nonEnregistre', 'le nom du critère est obligatoire.',
+                                 undefined, 'a2026_grillesTemplates']]);
     });
 
     it('B.b LE PIÈGE : trois blurs ne font pas trois bandeaux', () => {
