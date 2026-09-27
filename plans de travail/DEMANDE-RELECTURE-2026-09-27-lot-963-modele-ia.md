@@ -43,7 +43,7 @@
 - **Vitest complet** (depuis `tests/`, sur l'arbre du commit) : **645 fichiers, 7 511 essais verts**, code de sortie 0. Premier passage : 1 rouge, `sentinelle-ci-paths-ignore` (le banc lisait `plans de travail/`, corrigé, § 3).
 - **Playwright complet : non lancé.** WebKit n'existe pas dans ce conteneur ; seul le spec du lot a tourné, sous Chromium. **Le verdict de la suite complète (WebKit) se prend sur le Mac de Grégoire**, avant toute fusion.
 
-## 5 · Les mots – à faire accepter par Grégoire avant le push
+## 5 · Les mots – acceptés par Grégoire le 27 sept. 2026 (« Tout est ok »), tels que ci-dessous
 
 | Où | Texte |
 |---|---|
