@@ -9084,6 +9084,24 @@ function initialiser() {
         panneauExportPlan.addEventListener('click', function(e) { e.stopPropagation(); });
     }
 
+    // #963 — « Je fais relire ma carte par une IA ». Même patron que le
+    // panneau de l'export du plan : Actions ▸ panneau ▸ Télécharger.
+    var btnModeleIA = document.getElementById('planif-btn-modele-ia');
+    var panneauModeleIA = document.getElementById('planif-modele-ia-panel');
+    if (btnModeleIA && panneauModeleIA) {
+        btnModeleIA.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dropdownActions = document.getElementById('planif-actions-dropdown');
+            if (dropdownActions) dropdownActions.classList.remove('ouvert');
+            rendrePanneauModeleIA();
+            panneauModeleIA.classList.add('ouvert');
+        });
+        document.addEventListener('click', function() {
+            panneauModeleIA.classList.remove('ouvert');
+        });
+        panneauModeleIA.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
     // Modale de l'export personnalisé (#431) : fermeture par le bouton et
     // par un clic sur le voile.
     var modaleExportPerso = document.getElementById('modalExportPersonnalise');
@@ -10389,6 +10407,63 @@ function rendrePanneauExportPlan() {
         } else {
             copierExportFallback(doc); copieReussie();
         }
+    });
+}
+
+// === MODÈLE « JE FAIS RELIRE MA CARTE PAR UNE IA » (#963, 27 sept. 2026) ===
+//
+// Le panneau ne fait que DEUX choix — l'étape et la semaine jusqu'où la carte
+// est bâtie — puis télécharge. La composition vit dans planification-export.js
+// (`genererModeleCarte`), qui ne lit que la carte et n'écrit rien.
+// L'étape retenue survit à la fermeture du panneau (session seulement) ; la
+// semaine, non : son défaut suit la carte, qui a pu grandir entre-temps.
+var modeleIAEtape = 'construire';
+
+function rendrePanneauModeleIA() {
+    var panneau = document.getElementById('planif-modele-ia-panel');
+    var exporteur = window.planificationExport;
+    if (!panneau || !exporteur) return;
+
+    var nbSemaines = exporteur.nombreSemainesTrimestre();
+    var parDefaut = exporteur.semaineParDefautModele();
+    var borne = Math.max(nbSemaines || 0, parDefaut || 0, 1);
+    var semaine = parDefaut || borne;
+
+    // Libellés statiques des constantes du module — echapperHtml par principe.
+    var html = '<div class="planif-import-tri-groupe">Mon étape</div>';
+    exporteur.ETAPES_MODELE.forEach(function(et) {
+        html += '<label class="planif-checkbox-label planif-export-plan-choix">' +
+            '<input type="radio" name="planif-modele-ia-etape" value="' + echapperHtml(et.id) + '"' +
+            (et.id === modeleIAEtape ? ' checked' : '') + '> ' + echapperHtml(et.label) +
+            '</label>';
+    });
+    html += '<div class="planif-import-tri-groupe">Carte bâtie jusqu’à la semaine</div>' +
+        '<div class="planif-import-tri-ligne">' +
+        '<select id="planif-modele-ia-semaine" class="planif-select-carte" aria-label="Carte bâtie jusqu’à la semaine">';
+    for (var s = 1; s <= borne; s++) {
+        html += '<option value="' + s + '"' + (s === semaine ? ' selected' : '') + '>Semaine ' + s + '</option>';
+    }
+    html += '</select></div>' +
+        '<div class="planif-export-plan-note">Le fichier contient des consignes, puis ta carte telle qu’elle est. Colle-le dans l’IA de ton choix : ta carte n’est pas modifiée.</div>' +
+        '<div class="planif-import-tri-ligne planif-export-plan-actions">' +
+        '<button type="button" class="planif-btn-carte" id="planif-modele-ia-telecharger">Télécharger</button>' +
+        '</div>';
+    panneau.innerHTML = html;
+
+    panneau.querySelectorAll('input[name="planif-modele-ia-etape"]').forEach(function(radio) {
+        radio.addEventListener('change', function() { modeleIAEtape = radio.value; });
+    });
+    document.getElementById('planif-modele-ia-telecharger').addEventListener('click', function() {
+        var sel = document.getElementById('planif-modele-ia-semaine');
+        var doc = exporteur.genererModeleCarte({
+            etape: modeleIAEtape,
+            semaine: sel ? parseInt(sel.value, 10) : semaine,
+            nbSemaines: nbSemaines
+        });
+        if (!doc) { afficherToastLien('Le modèle n’a pas pu être produit : aucune carte active.'); return; }
+        telechargerFichier(doc, exporteur.nomFichierModele(), 'text/markdown');
+        afficherToastLien('Modèle téléchargé : colle-le dans l’IA de ton choix.');
+        panneau.classList.remove('ouvert');
     });
 }
 
@@ -11944,6 +12019,7 @@ window.planificationCarte = {
     // Exposée pour la sentinelle du panneau d'export (#424 Lot D) : le rendu
     // se vérifie en RENDANT le panneau, pas en relisant la source.
     rendrePanneauExportPlan: rendrePanneauExportPlan,
+    rendrePanneauModeleIA: rendrePanneauModeleIA,
     // Exposées pour la sentinelle de la corbeille (#433) : le dépôt se
     // vérifie en l'EXERÇANT sur une géométrie connue, pas en lisant la source.
     pointSurCorbeille: pointSurCorbeille,
@@ -11993,6 +12069,10 @@ window.planificationCarte = {
     definirHorsClasse: definirHorsClasse,
     TYPES_HORS_CLASSE: TYPES_HORS_CLASSE,
     TYPES_AVEC_NIVEAU_COGNITIF: TYPES_AVEC_NIVEAU_COGNITIF,
+    // #963 — lectures du modèle « relire ma carte par une IA » (lecture seule).
+    NIVEAUX_COGNITIFS: NIVEAUX_COGNITIFS,
+    trouverClones: trouverClones,
+    deriverRangeesGrille: deriverRangeesGrille,
     definirRangSeance: definirRangSeance,
     selecteurRangSeanceHTML: selecteurRangSeanceHTML,
     peuplerSelecteurRangSeance: peuplerSelecteurRangSeance,
