@@ -70,3 +70,33 @@ Aussi verts : Vitest (642 fichiers, 7 462 essais) et, en WebKit, les bancs voisi
 **Nouvelles** proposées par Cowork : « Évaluer : une rétroaction finale que tu as réécrite à la main n'est plus remplacée quand tu changes un niveau ; le bouton « Régénérer » la refait à la demande. » Si la garde centrale est retenue (§ 2), la phrase reste vraie, et elle vaut aussi pour les cases d'affichage.
 
 **Case à cocher à la livraison** : #961 (BACKLOG).
+
+---
+
+## 7 · Complément – réponse à la relecture de Cowork (R1, R2), commit `6d1b0998`
+
+> Ajouté le 26 septembre 2026, en soirée, par Claude Code, sur `6d1b0998` (branche inchangée). Relecture versée : `plans de travail/RELECTURE-2026-09-26-961.md`. Diff : `git diff e7bebd96..6d1b0998`. **Pas de verdict Playwright, pas de push, pas de release** : Cowork contre-vérifie avant la fusion.
+
+**R1 · les chemins sans question gardent la marque.** `changerAuGeste` (qui efface la marque) ne sert plus qu'au remplacement CONFIRMÉ. Tous les chemins sans question passent par `cartoucheSelectionnee()` : copie pas encore enregistrée, retour à la cartouche de l'évaluation, `dejaConfirme` et copie sans commentaire enregistré. Les commentaires des critères s'appliquent, et la garde centrale garde le texte et l'avis. Deux essais WebKit : copie sans commentaire enregistré (commentaire `AUTRE c1_M` posé, texte et avis gardés), et copie neuve réécrite puis cartouche choisie.
+
+**R2 · le stock d'avant D7 (option c de Grégoire).** La garde centrale n'a pas eu à attendre : quand une question est due, `genererRetroaction` **n'écrit rien** et la pose. C'est la réponse qui agit : « Garder » pose la marque, « Remplacer » l'efface puis régénère, et dans les deux cas elle arme l'auto-save. Il n'y a pas de seconde règle.
+- **Signal** : la clé `retroactionReecrite` est absente ET la rétroaction n'est pas vide. Les chargeurs le posent (`preparerRetroactionEnregistree`, les deux mêmes sites que la marque), et toute réponse le lève (frappe, « Régénérer », cartouche confirmée, remises à zéro, la question elle-même).
+- **Pendant un chargement** (`_autoSaveSuspendu` ou le compteur de #960), il n'y a ni question ni écriture. Les restaurations de niveaux du chargeur ne la déclenchent donc pas, et l'ouverture n'écrit toujours rien.
+- **La question** : `confirmerAction`, variante `danger`, avec les mots de Grégoire, **sans titre** (aucun mot de plus que ceux qu'il a acceptés). Le focus est sur « Garder la mienne », Entrée suit le bouton (#945), Échap ou la fermeture valent « garder ». Si on a changé de copie entre-temps, la réponse n'agit pas.
+- **Tant que la question est sans réponse, la clé reste absente en base** (`marqueRetroactionAEcrire` rend `undefined`, et les écrivains ne l'écrivent pas). Sans cela, l'auto-save du niveau changé, qui tombe 1,5 s après le geste pendant que la question est ouverte, aurait écrit `false` : la question n'aurait plus été posée à la réouverture.
+- **Les écrivains qui portent la clé** : les cinq écrivains de la rétroaction l'écrivent tous désormais. Ce sont l'auto-save d'une évaluation existante, l'auto-save d'une copie neuve, « Enregistrer » d'une copie neuve, « Enregistrer » d'une modification, et la modale de Travaux (`true` si retouchée ; sinon `false` quand l'évaluation n'a pas de clé). Aucun ne manquait avant R2 sauf la modale non retouchée. La copie d'archive (`travaux-archivage.js`) reprend l'objet entier, clé comprise.
+- **À regarder, mesuré** : avec la règle de Cowork, une évaluation du stock ouverte dans la modale et sauvegardée **sans retouche** reçoit `false`. Elle suit alors les niveaux sans question. Je l'ai appliquée telle quelle.
+- **Ligne exacte ajoutée sous D7.** Fiche #961 : la phrase sur le stock suit la décision.
+
+**Preuves.** Le banc `evaluation-961-…` compte maintenant **24 cas, tous verts** en WebKit. Les nouveaux cas R2, par la copie et par la Liste : « Garder la mienne » et « Remplacer ». Chacun vérifie les mots, le focus, qu'aucune question ne s'ouvre et que rien n'est écrit à l'ouverture, que rien n'est réécrit pendant la question, que la clé reste absente jusqu'à la réponse, la réponse en base, l'avis, et qu'aucune seconde question ne vient au niveau suivant. S'y ajoutent Échap, la rétroaction vide (pas de question, génération) et la clé à `false` (pas de question). Vitest : 642 fichiers, 7 462 essais verts. Bancs voisins en WebKit : 81 cas verts, dont #959/#960, #944, #946, #882, #947, #699 et #911.
+
+| | Mutation | Résultat |
+|---|---|---|
+| R1m | chemin sans question (copie non enregistrée, retour, `dejaConfirme`) efface la marque | rouge (verte au premier passage : aucun cas ne couvrait ce chemin ; cas « copie neuve » ajouté) |
+| R1m′ | chemin « sans commentaire enregistré » efface la marque | rouge |
+| R2a | question retirée | rouge, 5 cas |
+| R2b | réponse non persistée | rouge, 4 cas (verte au premier passage : l'auto-save du niveau, tombé APRÈS une réponse éclair, l'écrivait à sa place ; les cas répondent maintenant après 2,5 s) |
+| R2c | question posée aussi quand la clé vaut `false` | rouge |
+| R2d | modale sans clé n'écrit pas `false` | rouge |
+
+**Preuve voisine ajustée** : dans `commentaire-critere-939-meme-regle.spec.js`, la fixture est un stock sans clé avec une rétroaction. Son geste (un niveau changé, puis « Copier tout ») posait désormais la question au lieu de régénérer : c'est R2, voulu. Le banc éprouve la règle du commentaire DANS le texte généré, donc sa fixture porte maintenant `retroactionReecrite: false` (une évaluation d'après D7). Rouge avant cet ajustement, vert après.
