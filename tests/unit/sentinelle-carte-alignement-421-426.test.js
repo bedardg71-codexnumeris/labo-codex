@@ -160,7 +160,9 @@ describe('#421 · le guide intégré couvre l’objectif de leçon', () => {
         const bloc = blocGuidePages();
         const nbPages = (bloc.match(/^\s{8}titre: /gm) || []).length;
         expect(nbPages).toBeGreaterThan(1);
-        expect(bloc).toContain('propose ' + (nbPages - 1) + '\\u00a0étapes');
+        // ↻ Réancré le 27 sept. 2026 (#966) : le texte validé par Grégoire dit
+        // « repères » et non plus « étapes ». Le compte, lui, reste calculé.
+        expect(bloc).toContain('propose ' + (nbPages - 1) + '\\u00a0repères');
     });
 
     it('l’infobulle du bouton Guide annonce le bon nombre de PAGES', () => {

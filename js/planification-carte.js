@@ -1840,17 +1840,30 @@ function legendePastillesObjectifHTML() {
 // === GUIDE INTÉGRÉ — 8 pages (7 pédagogiques + 1 technique import/export) ===
 var GUIDE_PAGES = [
     {
+        // #966 (27 sept. 2026) — textes validés par Grégoire, reproduits tels
+        // quels (typographie du guide : apostrophes courbes, espaces insécables).
+        // Le lien unesdoc est RETIRÉ sur sa demande : il le vérifiera à la main.
         titre: 'Construis ta carte d\u2019alignement',
         contenu:
-            '<p>Cette carte t\u2019aide à vérifier que tout ce que tu enseignes est relié à ce que tu évalues. C\u2019est ça, l\u2019alignement pédagogique.</p>' +
-            '<p>Chaque élément affiche deux <strong>badges</strong> (gauche\u00a0= amont, droite\u00a0= aval) qui t\u2019indiquent l\u2019état de ses connexions\u00a0:</p>' +
+            '<p>Un principe guide toute la carte\u00a0: tu évalues ce que tu enseignes, et tu enseignes ce que tu évalues, au même niveau d\u2019exigence. C\u2019est ça, l\u2019alignement pédagogique.</p>' +
+            '<p>La carte le rend visible sur trois étages\u00a0:</p>' +
             '<ul>' +
-                '<li><span class="guide-glyphe guide-glyphe--check">\u2713</span> = cet élément est bien relié (le badge prend la couleur de l\u2019élément).</li>' +
-                '<li><span class="guide-glyphe guide-glyphe--gris">!</span> (badge gris) = il manque une connexion.</li>' +
-                '<li><span class="guide-glyphe guide-glyphe--warning">\u26A0</span> = attention, une évaluation manque quelque part dans la chaîne.</li>' +
+                '<li>la <strong>compétence</strong>, ce que le programme exige (Anderson parle d\u2019alignement curriculaire)\u00a0;</li>' +
+                '<li>les <strong>idées maîtresses</strong>, l\u2019essentiel autour duquel tu organises ton contenu (Gauthier, Bissonnette et Richard)\u00a0;</li>' +
+                '<li>tes <strong>leçons</strong>, où objectifs, activités et évaluations sont reliés par un même verbe (Biggs parle d\u2019alignement constructif).</li>' +
             '</ul>' +
-            '<p>Ce guide te propose 8\u00a0étapes pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.</p>' +
-            '<p class="planif-guide-ref">Anderson, L.\u00a0W. (2026). <em>Curricular alignment: A re-examination</em> (Educational Practices Series, No.\u00a037). UNESCO International Bureau of Education. <a href="https://unesdoc.unesco.org/ark:/48223/pf0000397143.locale=en" target="_blank" rel="noopener">unesdoc.unesco.org</a></p>'
+            '<p>Deux chemins mènent à une carte alignée\u00a0: partir de tes objectifs et descendre jusqu\u2019à tes séances, comme le propose ce guide, ou bâtir d\u2019abord tes séances, puis relier et vérifier. La carte vérifie les liens, quel que soit l\u2019ordre dans lequel tu les poses.</p>' +
+            '<p>Trois signaux t\u2019aident à vérifier ta carte\u00a0:</p>' +
+            '<ul>' +
+                '<li>Les <strong>badges</strong> de chaque bloc (gauche\u00a0= ce qui le relie en amont, droite\u00a0= ce qui le relie en aval)\u00a0: <span class="guide-glyphe guide-glyphe--check">\u2713</span> quand le lien est posé (le badge prend la couleur du bloc), <span class="guide-glyphe guide-glyphe--gris">!</span> sur fond gris quand il en manque un.</li>' +
+                '<li>Le <span class="guide-glyphe guide-glyphe--warning">\u26A0</span> sur une compétence ou une idée maîtresse\u00a0: aucune évaluation ne vérifie encore un objectif qui s\u2019y rattache.</li>' +
+                '<li>Les <strong>pastilles</strong> des objectifs et des évaluations\u00a0: elles disent si ce que tu enseignes est évalué, et si ce que tu évalues a été enseigné avant (pages 5 et 8).</li>' +
+            '</ul>' +
+            '<p>Ce guide te propose 8\u00a0repères pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.</p>' +
+            '<p class="planif-guide-ref"><strong>Références\u00a0:</strong><br>' +
+                'Anderson, L.\u00a0W. (2026). <em>Curriculum alignment</em> (Educational Practices Series, no\u00a037). International Academy of Education\u00a0; Bureau international d\u2019éducation de l\u2019UNESCO.<br>' +
+                'Biggs, J. (2014). Constructive alignment in university teaching. <em>HERDSA Review of Higher Education, 1</em>, 5-22.<br>' +
+                'Gauthier, C., Bissonnette, S. et Richard, M. (2013). <em>Enseignement explicite et réussite des élèves\u00a0: la gestion des apprentissages</em>. De Boeck.</p>'
     },
     {
         titre: 'Commence par le pourquoi',
@@ -1860,7 +1873,9 @@ var GUIDE_PAGES = [
                 '<li>Glisse un élément <span class="planif-guide-type" style="background:var(--planif-couleur-competence)"></span> <strong>Compétence</strong> de la palette sur le canevas.</li>' +
                 '<li>Double-clique dessus pour écrire l\u2019énoncé de compétence.</li>' +
             '</ol>' +
-            '<div class="planif-guide-astuce">Sélectionne la compétence et utilise le <strong>sélecteur de niveau cognitif</strong> dans l\u2019<strong>Inspecteur</strong> (panneau de droite) pour choisir le niveau visé (ex.\u00a0: Analyser, Créer). Les verbes suggérés t\u2019aideront à formuler ton énoncé.</div>'
+            '<div class="planif-guide-astuce">Sélectionne la compétence et utilise le <strong>sélecteur de niveau cognitif</strong> dans l\u2019<strong>Inspecteur</strong> (panneau de droite) pour choisir le niveau visé (ex.\u00a0: Analyser, Créer). Les verbes suggérés t\u2019aideront à formuler ton énoncé.</div>' +
+            // #966 — ligne ajoutée, texte validé par Grégoire (27 sept. 2026).
+            '<p>Ces niveaux sont les processus cognitifs de la taxonomie révisée d\u2019Anderson et Krathwohl, du plus simple au plus exigeant\u00a0: mémoriser, comprendre, appliquer, analyser, évaluer, créer. Le verbe que tu choisis ici, tes activités devront le faire exercer et tes évaluations devront l\u2019exiger.</p>'
     },
     {
         titre: 'Ce que l\u2019étudiant doit retenir',
@@ -1873,14 +1888,16 @@ var GUIDE_PAGES = [
             '</ol>'
     },
     {
+        // #966 — remplacée par le texte validé (27 sept. 2026) : la séquence
+        // devient facultative ; la leçon porte sa semaine et sa séance.
         titre: 'Organise dans le temps',
         contenu:
-            '<p class="planif-guide-pourquoi">Les séquences et les leçons structurent ton cours dans le temps. Une séquence regroupe des leçons qui poursuivent les mêmes idées maîtresses.</p>' +
+            '<p class="planif-guide-pourquoi">Tes leçons structurent ton cours dans le temps\u00a0: chacune porte sa semaine et sa séance.</p>' +
             '<ol>' +
-                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-sequence)"></span> <strong>Séquence</strong> sur le canevas, puis des <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçons</strong> à l\u2019intérieur.</li>' +
-                '<li>Relie chaque leçon à une ou plusieurs idées maîtresses. Le verbe <em>«\u00a0se concrétise dans\u00a0»</em> apparaît.</li>' +
+                '<li>Glisse des <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçons</strong> sur le canevas et pose leur semaine dans l\u2019<strong>Inspecteur</strong>.</li>' +
+                '<li>Relie chaque leçon à une ou plusieurs idées maîtresses. Le verbe <em>«\u00a0se concrétise dans\u00a0»</em> apparaît. C\u2019est ce lien qui fait remonter tes objectifs et tes évaluations jusqu\u2019à la compétence.</li>' +
             '</ol>' +
-            '<div class="planif-guide-astuce">Tu peux déplacer une leçon d\u2019une séquence à l\u2019autre en la glissant.</div>'
+            '<div class="planif-guide-astuce">Facultatif\u00a0: une <span class="planif-guide-type" style="background:var(--planif-couleur-sequence)"></span> <strong>Séquence</strong> regroupe des leçons qui poursuivent les mêmes idées maîtresses. Elle aide à voir ton cours par blocs, mais l\u2019alignement n\u2019en a pas besoin. Tu peux déplacer une leçon d\u2019une séquence à l\u2019autre en la glissant.</div>'
     },
     {
         // Ajoutée le 9 août 2026 (#421). Le guide faisait construire la carte
@@ -1911,6 +1928,8 @@ var GUIDE_PAGES = [
                 '<li><span class="planif-guide-type" style="background:var(--planif-couleur-procedurale)"></span> <strong>Procédurale</strong> — des méthodes, techniques, savoir-faire. <em>(Ex.\u00a0: résoudre une équation, rédiger une introduction.)</em></li>' +
                 '<li><span class="planif-guide-type" style="background:var(--planif-couleur-metacognitive)"></span> <strong>Métacognitive</strong> — la conscience de son propre apprentissage. <em>(Ex.\u00a0: planifier son étude, s\u2019autoévaluer.)</em></li>' +
             '</ul>' +
+            // #966 — ligne ajoutée, texte validé par Grégoire (27 sept. 2026).
+            '<p>Ces quatre types viennent de la taxonomie révisée d\u2019Anderson et Krathwohl. Si tu connais plutôt les connaissances déclaratives, procédurales et conditionnelles\u00a0: les déclaratives regroupent les factuelles et les conceptuelles, et les conditionnelles (quand et pourquoi agir) relèvent de la métacognitive.</p>' +
             '<ol>' +
                 '<li>Glisse le type de connaissance approprié dans une <strong>Leçon</strong>.</li>' +
                 '<li>Double-clique pour nommer la connaissance.</li>' +
@@ -1929,15 +1948,20 @@ var GUIDE_PAGES = [
             '<div class="planif-guide-astuce">La famille compte d\u2019autres blocs\u00a0: <span class="planif-guide-type" style="background:var(--planif-couleur-expose)"></span> <strong>Exposé</strong> pose ton temps d\u2019enseignement\u00a0; <span class="planif-guide-type" style="background:var(--planif-couleur-soutien)"></span> <strong>Soutien</strong> sert à l\u2019aide supplémentaire et <span class="planif-guide-type" style="background:var(--planif-couleur-revision)"></span> <strong>Révision</strong> au réinvestissement\u00a0; et les cinq étapes de l\u2019<strong>enseignement explicite</strong> (Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture) sont des activités à part entière.</div>'
     },
     {
+        // #966 — remplacée par le texte validé (27 sept. 2026) : l'évaluation
+        // coche les objectifs qu'elle vérifie (#964) et porte une pastille (#965).
+        // La légende est celle de l'Inspecteur, depuis la même fonction.
         titre: 'Vérifie que c\u2019est acquis',
         contenu:
-            '<p class="planif-guide-pourquoi">L\u2019évaluation ferme la boucle de l\u2019alignement. Elle doit vérifier ce que tu as enseigné, au niveau cognitif que tu as visé — ni plus, ni moins.</p>' +
+            '<p class="planif-guide-pourquoi">L\u2019évaluation ferme la boucle\u00a0: elle vérifie ce que tu as enseigné, au niveau que tu as visé, ni plus, ni moins.</p>' +
             '<ol>' +
-                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-evaluation)"></span> <strong>Évaluation</strong> sur le canevas.</li>' +
-                '<li>Relie-la aux éléments qu\u2019elle évalue\u00a0: idées maîtresses, connaissances ou activités. Le verbe <em>«\u00a0se vérifie par\u00a0»</em> apparaît.</li>' +
-                '<li>Quand une compétence est atteinte par au moins une évaluation à travers la chaîne, son badge d\u2019avertissement disparaît.</li>' +
+                '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-evaluation)"></span> <strong>Évaluation</strong> dans la leçon où elle a lieu.</li>' +
+                '<li>Dans l\u2019<strong>Inspecteur</strong>, coche les objectifs qu\u2019elle vérifie\u00a0: ceux de cette leçon ou d\u2019une leçon précédente.</li>' +
+                '<li>Choisis son niveau cognitif. Il devrait correspondre au verbe de ces objectifs.</li>' +
             '</ol>' +
-            '<p class="planif-guide-conclusion">L\u2019objectif\u00a0: quand tous les badges de ta carte affichent <span class="guide-glyphe guide-glyphe--check">\u2713</span> et qu\u2019il n\u2019y a plus de <span class="guide-glyphe guide-glyphe--warning">\u26A0</span>, ton cours est aligné — chaque compétence est enseignée et évaluée de manière cohérente.</p>'
+            '<p class="planif-guide-pourquoi">Chaque évaluation porte une <strong>pastille</strong> qui dit où elle en est\u00a0:</p>' +
+            legendePastillesEvaluationHTML() +
+            '<p class="planif-guide-conclusion">Ta carte est alignée quand chaque objectif est servi et vérifié, et que chaque évaluation ne vérifie que des objectifs déjà enseignés.</p>'
     },
     {
         // Réécrite le 8 août 2026 (1.57.0 a supprimé la page « Plan de la
@@ -12261,6 +12285,8 @@ window.planificationCarte = {
     evaluerBadge: evaluerBadge,
     // #965 — la pastille d'une évaluation (lecture seule).
     evaluerPastilleEvaluation: evaluerPastilleEvaluation,
+    // #966 — les pages du guide (lecture seule), pour la sentinelle des textes validés.
+    GUIDE_PAGES: GUIDE_PAGES,
     SYMBOLES_PASTILLE_EVALUATION: SYMBOLES_PASTILLE_EVALUATION,
     LEGENDE_PASTILLES_EVALUATION: LEGENDE_PASTILLES_EVALUATION,
     afficherMenuLien: afficherMenuLien,
