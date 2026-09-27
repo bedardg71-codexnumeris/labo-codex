@@ -23930,6 +23930,42 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1px solid transparent;
 }
 
+/* === #965 — pastille d'une évaluation (proposition ; Grégoire tranche à l'écran) ===
+   Même gabarit que la pastille d'objectif, dont elle reprend la logique de
+   couleur : gris pointillé = rien encore, orange = à regarder, plein = bon.
+   Le ✕ (rien n'enseigne ce qu'on évalue) prend le rouge d'erreur existant.
+   Couleur de base : celle de l'évaluation, comme la pastille d'objectif prend
+   celle de la leçon. */
+.planif-noeud-entete .planif-eval-pastille { margin-top: 0; margin-right: 2px; }
+
+.planif-eval-pastille--aucun {
+    background: transparent;
+    color: var(--planif-couleur-evaluation);
+    border: 1px dashed color-mix(in srgb, var(--planif-couleur-evaluation) 55%, transparent);
+    opacity: 0.55;
+}
+
+.planif-eval-pastille--nonEnseigne {
+    background: transparent;
+    color: var(--rouge-erreur, #e84057);
+    border: 1px solid var(--rouge-erreur, #e84057);
+}
+
+.planif-eval-pastille--apres {
+    background: transparent;
+    color: #F59E0B;
+    border: 1px solid #F59E0B;
+}
+
+/* ✓ en CONTOUR, et non plein comme celui de l'objectif : posée dans l'en-tête,
+   à côté du badge amont (✓ plein, même couleur), une pastille pleine était
+   indiscernable du badge (mesuré sur capture, 27 sept.). */
+.planif-eval-pastille--avant {
+    background: transparent;
+    color: var(--planif-couleur-evaluation);
+    border: 1.5px solid var(--planif-couleur-evaluation);
+}
+
 /* === #445 — légende des pastilles d'objectif ===
    Le sens des pastilles ne vivait que dans l'attribut `title` : une infobulle
    au SURVOL, donc inexistante sur iPad et indevinable ailleurs. Cette légende

@@ -1687,6 +1687,132 @@ var LEGENDE_PASTILLES_OBJECTIF = [
     { etat: 'verifie', libelle: 'Servi et vérifié par une évaluation.' }
 ];
 
+// #965 (27 sept. 2026) — LA PASTILLE D'UNE ÉVALUATION : ce qu'elle vérifie
+// a-t-il été enseigné, et AVANT elle ? Symboles et textes validés par Grégoire
+// (consigne du lot), reproduits tels quels. Du pire au meilleur : ✕, ⚠, ✓.
+var SYMBOLES_PASTILLE_EVALUATION = { aucun: '!', nonEnseigne: '\u2715', apres: '\u26A0', avant: '\u2713' };
+
+var LEGENDE_PASTILLES_EVALUATION = [
+    { etat: 'aucun', libelle: 'Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.' },
+    { etat: 'nonEnseigne', libelle: 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.' },
+    { etat: 'apres', libelle: 'Un objectif vérifié n\'est servi qu\'après cette évaluation.' },
+    { etat: 'avant', libelle: 'Chaque objectif vérifié a été enseigné avant cette évaluation.' }
+];
+
+/**
+ * #965 — État de la pastille d'une évaluation. LECTURE SEULE.
+ *
+ * Pour chaque objectif qu'elle coche (`objectifsVerifiesPar`, #964), on cherche
+ * les blocs NON-évaluation qui le servent (`objectifsServisPar`, où qu'ils
+ * soient), et l'on juge chacun « avant » ou « après » elle :
+ *   - même leçon : l'ORDRE DES BLOCS fait foi, du haut vers le bas (choix de
+ *     Grégoire, 27 sept. ; mesuré fiable : `reLayoutConteneur` retrie
+ *     `enfants` par position verticale à chaque mise en page) ;
+ *   - autre leçon : la semaine, puis le rang de séance ; même séance (deux
+ *     leçons au même rang) : « avant », l'ordre n'étant pas connu ;
+ *   - une leçon sans semaine, une séance non posée dans la même semaine, une
+ *     évaluation hors leçon : on NE CONCLUT PAS — « avant », et le cas est
+ *     marqué `inconclusif` (consigne : Grégoire décidera).
+ * Un objectif servi à la fois avant et après compte comme enseigné avant.
+ * Le pire état l'emporte (✕, puis ⚠, puis ✓) ; aucun objectif coché : « ! ».
+ * Les liens « se vérifie par » hérités ne créent AUCUN objectif vérifié.
+ *
+ * @returns {{etat: string, message: string, inconclusif: boolean}}
+ */
+function evaluerPastilleEvaluation(evaluation) {
+    var index = indexObjectifsCarte();
+    var objectifs = objectifsVerifiesPar(evaluation, index);
+    var libelle = function(etatP) {
+        for (var li = 0; li < LEGENDE_PASTILLES_EVALUATION.length; li++) {
+            if (LEGENDE_PASTILLES_EVALUATION[li].etat === etatP) return LEGENDE_PASTILLES_EVALUATION[li].libelle;
+        }
+        return '';
+    };
+    if (objectifs.length === 0) return { etat: 'aucun', message: libelle('aucun'), inconclusif: false };
+
+    var leconEval = leconParenteDe(evaluation);
+    var servants = [];
+    for (var entryPE of etat.noeuds) {
+        var n = entryPE[1];
+        if (n.type === 'evaluation' || TYPES_SERVANTS_OBJECTIF.indexOf(n.type) === -1) continue;
+        servants.push({ noeud: n, objectifs: objectifsServisPar(n) });
+    }
+
+    var inconclusif = false;
+    // 'avant' | 'apres' pour un bloc servant, relativement à l'évaluation.
+    function position(bloc) {
+        var leconBloc = leconParenteDe(bloc);
+        if (!leconEval || !leconBloc) { inconclusif = true; return 'avant'; }
+        if (leconBloc.id === leconEval.id) {
+            var ordre = leconEval.enfants || [];
+            return ordre.indexOf(bloc.id) < ordre.indexOf(evaluation.id) ? 'avant' : 'apres';
+        }
+        var sb = semaineDeLecon(leconBloc), se = semaineDeLecon(leconEval);
+        if (sb === null || se === null) { inconclusif = true; return 'avant'; }
+        if (sb !== se) return sb < se ? 'avant' : 'apres';
+        var rb = rangSeanceDeLecon(leconBloc), re = rangSeanceDeLecon(leconEval);
+        if (rb === null || re === null) { inconclusif = true; return 'avant'; }
+        return rb <= re ? 'avant' : 'apres';
+    }
+
+    var pire = 'avant';
+    for (var oi = 0; oi < objectifs.length; oi++) {
+        var positions = servants
+            .filter(function(sv) { return sv.objectifs.indexOf(objectifs[oi]) !== -1; })
+            .map(function(sv) { return position(sv.noeud); });
+        var etatObjectif = positions.length === 0 ? 'nonEnseigne'
+            : (positions.indexOf('avant') !== -1 ? 'avant' : 'apres');
+        if (etatObjectif === 'nonEnseigne') pire = 'nonEnseigne';
+        else if (etatObjectif === 'apres' && pire === 'avant') pire = 'apres';
+    }
+    return { etat: pire, message: libelle(pire), inconclusif: inconclusif };
+}
+
+/** La pastille, rendue dans l'en-tête du bloc Évaluation (même facture que celle d'un objectif). */
+function pastilleEvaluationHTML(n) {
+    if (!n || n.type !== 'evaluation') return '';
+    var res = evaluerPastilleEvaluation(n);
+    // security-ok: res.etat vaut l'une des quatre clés littérales de
+    // SYMBOLES_PASTILLE_EVALUATION ; le message est un littéral de ce fichier.
+    return '<span class="planif-obj-pastille planif-eval-pastille planif-eval-pastille--' + res.etat + '"' +
+           ' title="' + echapperHtml(res.message) + '" aria-label="' + echapperHtml(res.message) + '">' +
+           SYMBOLES_PASTILLE_EVALUATION[res.etat] + '</span>';
+}
+
+/** Recalcul sur place, branché dans mettreAJourBadge comme celles des objectifs. */
+function rafraichirPastilleEvaluation(n) {
+    if (!n || n.type !== 'evaluation') return;
+    var el = document.getElementById(n.id);
+    if (!el) return;
+    var p = el.querySelector('.planif-eval-pastille');
+    if (!p) return;
+    var res = evaluerPastilleEvaluation(n);
+    p.className = 'planif-obj-pastille planif-eval-pastille planif-eval-pastille--' + res.etat;
+    p.textContent = SYMBOLES_PASTILLE_EVALUATION[res.etat];
+    p.title = res.message;
+    p.setAttribute('aria-label', res.message);
+}
+
+/** Le bloc de l'Inspecteur : titre et légende, tout en littéraux de ce fichier. */
+function blocLegendeEvaluationHTML() {
+    return '<label>Pastille de l\'évaluation</label>' + legendePastillesEvaluationHTML();
+}
+
+function legendePastillesEvaluationHTML() {
+    var html = '<div class="planif-legende-pastilles">';
+    for (var i = 0; i < LEGENDE_PASTILLES_EVALUATION.length; i++) {
+        var e = LEGENDE_PASTILLES_EVALUATION[i];
+        // security-ok: états et libellés sont des littéraux de ce fichier.
+        html += '<div class="planif-legende-pastille-ligne">' +
+            '<span class="planif-obj-pastille planif-eval-pastille planif-eval-pastille--' + e.etat + '">' +
+                SYMBOLES_PASTILLE_EVALUATION[e.etat] +
+            '</span>' +
+            '<span class="planif-legende-pastille-texte">' + e.libelle + '</span>' +
+        '</div>';
+    }
+    return html + '</div>';
+}
+
 /**
  * #445 — La légende des pastilles, rendue à l'identique partout.
  *
@@ -2580,6 +2706,9 @@ function mettreAJourBadge(donnees) {
     // de leurs liens — elles se rafraîchissent donc au même moment que les
     // badges, par le même point d'entrée.
     if (donnees.type === 'lecon') rafraichirPastillesObjectifs(donnees);
+    // #965 — la pastille d'une évaluation dépend d'autres nœuds (les blocs qui
+    // servent ses objectifs, leurs leçons) : même point de rafraîchissement.
+    if (donnees.type === 'evaluation') rafraichirPastilleEvaluation(donnees);
 
     mettreAJourIndicateurClone(donnees);
 }
@@ -2969,6 +3098,11 @@ function ouvrirPanneau(id) {
         extra.innerHTML +=
             '<label>Pastilles des objectifs</label>' +
             legendePastillesObjectifHTML();
+    }
+    // #965 — même raison pour la pastille d'une évaluation : toujours affichée,
+    // puisque l'évaluation porte toujours sa pastille (« ! » sans objectif).
+    if (donnees.type === 'evaluation') {
+        extra.innerHTML += blocLegendeEvaluationHTML();
     }
 
     // « Dans la leçon » — déplacement SANS geste, depuis l'inspecteur (friction
@@ -5913,7 +6047,9 @@ function contenuNoeudHTML(n) {
             enTeteIdentiteHTML(n) +
             (estConteneur
                 ? compteurDureeHTML(n) + selecteurSemaineHTML(n) + selecteurRangSeanceHTML(n) + badgeObjectifHTML(n)
-                : dureeControleHTML(n)) +
+                // #965 — la pastille d'une évaluation ouvre la rangée de la
+                // durée, hors du couloir calibré de la poignée et du badge amont.
+                : pastilleEvaluationHTML(n) + dureeControleHTML(n)) +
         '</div>';
     var ports =
         '<div class="planif-noeud-port planif-port-droite" data-dir="droite"></div>' +
@@ -12123,6 +12259,10 @@ window.planificationCarte = {
     leconEstAvant: leconEstAvant,
     leconsProposeesAEvaluation: leconsProposeesAEvaluation,
     evaluerBadge: evaluerBadge,
+    // #965 — la pastille d'une évaluation (lecture seule).
+    evaluerPastilleEvaluation: evaluerPastilleEvaluation,
+    SYMBOLES_PASTILLE_EVALUATION: SYMBOLES_PASTILLE_EVALUATION,
+    LEGENDE_PASTILLES_EVALUATION: LEGENDE_PASTILLES_EVALUATION,
     afficherMenuLien: afficherMenuLien,
     definirObjectifsServis: definirObjectifsServis,
     evaluerObjectif: evaluerObjectif,
