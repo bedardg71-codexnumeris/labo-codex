@@ -23997,6 +23997,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     .planif-objectif-servi-ligne { min-height: 44px; align-items: center; }
 }
 
+/* #964 — Inspecteur d'une évaluation : un titre par leçon (« Cette leçon »,
+   puis les leçons placées avant elle). Même facture que les titres de groupe
+   des panneaux du menu Actions ; tokens existants seulement. */
+.planif-objectifs-servis-groupe {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texte-muted, #5a7a88);
+    padding: 6px 4px 2px;
+}
+
 .mode-clair .planif-badge-objectif:hover {
     background: color-mix(in srgb, var(--planif-couleur-lecon) 14%, transparent);
 }

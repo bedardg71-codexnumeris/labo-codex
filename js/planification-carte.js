@@ -196,6 +196,90 @@ function objectifsServisPar(n) {
     return n.metadata.objectifsServis.filter(function(id) { return idsLecon[id]; });
 }
 
+/**
+ * #964 (27 sept. 2026) — UNE ÉVALUATION SE RELIE À DES OBJECTIFS, ET À RIEN
+ * D'AUTRE (décision didactique de Grégoire : un seul geste, un seul signal).
+ *
+ * Elle coche, dans son Inspecteur, les objectifs de sa leçon ou d'une leçon
+ * placée avant elle (`leconsProposeesAEvaluation`). À la LECTURE, en revanche,
+ * tout objectif coché qui existe encore sur la carte compte, quelle que soit sa
+ * leçon — et c'est voulu, pas laxiste :
+ *   - déplacer une leçon après l'évaluation ne doit pas effacer en silence ce
+ *     que l'enseignant·e a coché (le filtre de `objectifsServisPar` le ferait) ;
+ *   - le lot suivant (#965) signale justement « servi qu'après cette
+ *     évaluation » : il a besoin que ce cas reste lisible.
+ * Un identifiant qui ne résout plus rien (objectif retiré) est écarté, comme
+ * partout ailleurs.
+ *
+ * ⚠ Les blocs NON-évaluation gardent `objectifsServisPar` et sa règle : un bloc
+ * sert les objectifs de SA leçon.
+ */
+function indexObjectifsCarte() {
+    var index = {};
+    for (var entryIO of etat.noeuds) {
+        var n = entryIO[1];
+        if (n.type !== 'lecon') continue;
+        var objs = objectifsDeLecon(n);
+        for (var io = 0; io < objs.length; io++) index[objs[io].id] = n;
+    }
+    return index;
+}
+
+function objectifsVerifiesPar(evaluation, index) {
+    if (!evaluation || evaluation.type !== 'evaluation') return [];
+    if (!evaluation.metadata || !Array.isArray(evaluation.metadata.objectifsServis)) return [];
+    var idx = index || indexObjectifsCarte();
+    return evaluation.metadata.objectifsServis.filter(function(id) { return !!idx[id]; });
+}
+
+/** Vrai si la leçon `a` est placée STRICTEMENT avant `b` : semaine antérieure, ou même semaine et séance antérieure. */
+function leconEstAvant(a, b) {
+    var sa = semaineDeLecon(a), sb = semaineDeLecon(b);
+    if (sa === null || sb === null) return false;
+    if (sa !== sb) return sa < sb;
+    var ra = rangSeanceDeLecon(a), rb = rangSeanceDeLecon(b);
+    return ra !== null && rb !== null && ra < rb;
+}
+
+/**
+ * Leçons dont une évaluation peut cocher les objectifs (#964, choix de Grégoire
+ * du 27 sept.) : la sienne d'abord, puis celles placées avant elle, de la plus
+ * proche à la plus ancienne. Une leçon sans semaine n'est jamais « avant » ;
+ * une évaluation dans une leçon sans semaine ne voit que sa leçon ; une
+ * évaluation hors de toute leçon n'en voit aucune.
+ */
+function leconsProposeesAEvaluation(evaluation) {
+    var hote = leconParenteDe(evaluation);
+    if (!hote) return [];
+    var avant = [];
+    for (var entryLP of etat.noeuds) {
+        var n = entryLP[1];
+        if (n.type === 'lecon' && n.id !== hote.id && leconEstAvant(n, hote)) avant.push(n);
+    }
+    avant.sort(function(a, b) {
+        return (semaineDeLecon(b) - semaineDeLecon(a))
+            || ((rangSeanceDeLecon(b) || 0) - (rangSeanceDeLecon(a) || 0))
+            || ((a.x || 0) - (b.x || 0)) || ((a.y || 0) - (b.y || 0));
+    });
+    return [hote].concat(avant);
+}
+
+/** Vrai si au moins une évaluation de la carte, où qu'elle soit, coche cet objectif. */
+function objectifVerifieParUneEvaluation(objectifId, index) {
+    var idx = index || indexObjectifsCarte();
+    for (var entryOV of etat.noeuds) {
+        var n = entryOV[1];
+        if (n.type === 'evaluation' && objectifsVerifiesPar(n, idx).indexOf(objectifId) !== -1) return true;
+    }
+    return false;
+}
+
+/** Vrai si au moins un objectif de cette leçon est vérifié par une évaluation. */
+function leconAObjectifVerifie(lecon, index) {
+    var idx = index || indexObjectifsCarte();
+    return objectifsDeLecon(lecon).some(function(o) { return objectifVerifieParUneEvaluation(o.id, idx); });
+}
+
 /** Écriture — porte unique, comme appliquerObjectifs l'est pour les objectifs. */
 function definirObjectifsServis(noeudId, ids) {
     var n = etat.noeuds.get(noeudId);
@@ -1244,25 +1328,16 @@ var VERBES_AUTO = {
     'soutien>conceptuelle':        { verbe: 's_acquiert_par', inverser: true },
     'soutien>procedurale':         { verbe: 's_acquiert_par', inverser: true },
     'soutien>metacognitive':       { verbe: 's_acquiert_par', inverser: true },
-    // Idée maîtresse → Évaluation (se vérifie par)
-    'idee-maitresse>evaluation':   { verbe: 'se_verifie_par' },
-    'evaluation>idee-maitresse':   { verbe: 'se_verifie_par', inverser: true },
-    // Connaissance → Évaluation (se vérifie par)
-    'factuelle>evaluation':        { verbe: 'se_verifie_par' },
-    'conceptuelle>evaluation':     { verbe: 'se_verifie_par' },
-    'procedurale>evaluation':      { verbe: 'se_verifie_par' },
-    'metacognitive>evaluation':    { verbe: 'se_verifie_par' },
-    'evaluation>factuelle':        { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>conceptuelle':     { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>procedurale':      { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>metacognitive':    { verbe: 'se_verifie_par', inverser: true },
-    // Activité → Évaluation (se vérifie par)
-    'activite>evaluation':         { verbe: 'se_verifie_par' },
-    'soutien>evaluation':          { verbe: 'se_verifie_par' },
-    'revision>evaluation':         { verbe: 'se_verifie_par' },
-    'evaluation>activite':         { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>soutien':          { verbe: 'se_verifie_par', inverser: true },
-    'evaluation>revision':         { verbe: 'se_verifie_par', inverser: true },
+    // ⚠ LES SEIZE PAIRES « …>evaluation » (se vérifie par) SONT RETIRÉES le
+    // 27 sept. 2026 (#964, décision didactique de Grégoire) : une évaluation se
+    // relie UNIQUEMENT à des objectifs, cochés dans son Inspecteur. Tracer vers
+    // une évaluation est donc refusé, avec un message qui oriente vers ce geste
+    // (`afficherMenuLien`). Le repli sur la famille (étape 1 bis de
+    // `resoudreVerbe`) n'en retrouve aucune : il ne consulte que cette table.
+    // ⮕ CE QUI N'EST PAS RETIRÉ, et ne doit pas l'être : l'entrée
+    // `se_verifie_par` de `TYPES_LIENS` et ses correspondances de
+    // `VERBES_COMPAT`. Les liens déjà tracés restent stockés, affichés et
+    // comptés (non négociable, consigne du lot).
 };
 
 // Groupes de types pour normalisation (verbes horizontaux)
@@ -1884,8 +1959,9 @@ function resoudreVerbe(sourceId, cibleId) {
     // serait de l'empilement, et il faudrait recommencer au type suivant. On
     // rabat sur la FAMILLE, comme #415 avait rabattu les six triplets en dur
     // sur TYPES_ACTIVITE. `conceptuelle>modelisation` retombe ainsi sur
-    // `conceptuelle>activite` (« s'acquiert par ») et `modelisation>evaluation`
-    // sur `activite>evaluation` (« se vérifie par »).
+    // `conceptuelle>activite` (« s'acquiert par »). (`modelisation>evaluation`
+    // retombait sur `activite>evaluation` jusqu'au 27 sept. 2026 ; #964 a
+    // retiré cette paire : aucun verbe ne mène plus à une évaluation.)
     //
     // ⚠ C'est un SECOURS, jamais un remplacement : la correspondance brute est
     // consultée d'abord et gagne toujours. Un type de la famille qui mériterait
@@ -2152,10 +2228,16 @@ function ideeMaitresseAtteinEvaluation(noeudId, visited) {
         // Descendre via leçon/séquence → enfants → évaluation
         if (l.noeudType === 'lecon' || l.noeudType === 'sequence') {
             var conteneur = etat.noeuds.get(l.noeudId);
+            // #964 — une leçon reliée dont un objectif est vérifié par une
+            // évaluation, où qu'elle soit sur la carte, lève le ⚠. Même
+            // profondeur que la règle des liens : la leçon reliée, ou une leçon
+            // enfant directe de la séquence reliée.
+            if (conteneur && conteneur.type === 'lecon' && leconAObjectifVerifie(conteneur)) return true;
             if (conteneur && conteneur.enfants) {
                 for (var j = 0; j < conteneur.enfants.length; j++) {
                     var enfant = etat.noeuds.get(conteneur.enfants[j]);
                     if (!enfant) continue;
+                    if (enfant.type === 'lecon' && leconAObjectifVerifie(enfant)) return true;
                     var liensEnfant = getLiensDeNoeud(enfant.id);
                     if (liensEnfant.some(function(le) { return le.noeudType === 'evaluation'; })) return true;
                     // Connaissance (factuelle/conceptuelle/procédurale/métacognitive) → activité → évaluation
@@ -2212,9 +2294,9 @@ function evaluerObjectif(lecon, objectifId) {
         return { etat: 'invitation', message: 'Aucune activité ne sert cet objectif' };
     }
 
-    var verifieDirect = enfants.some(function(e) {
-        return e.type === 'evaluation' && objectifsServisPar(e).indexOf(objectifId) !== -1;
-    });
+    // #964 — vérifié dès qu'une évaluation, dans n'importe quelle leçon, le
+    // coche. (Avant : seulement une évaluation de la même leçon.)
+    var verifieDirect = objectifVerifieParUneEvaluation(objectifId);
 
     var verifieTransitif = !verifieDirect && servants.some(function(s) {
         var clones = trouverClones(s.id);
@@ -2346,6 +2428,9 @@ function evaluerBadge(noeud) {
                     : { valide: false, message: "Aucune activité reliée (tracer un lien)" }
             };
 
+        // #964 — l'Exposé rejoint le calcul des activités. Il tombait dans le
+        // `default` (✓/✓ sans condition) depuis son ajout du 8 août.
+        case 'expose':
         case 'activite':
         case 'soutien':
         case 'revision':
@@ -2402,13 +2487,18 @@ function evaluerBadge(noeud) {
 
         case 'evaluation':
             var typesAmontEval = ['idee-maitresse', 'factuelle', 'conceptuelle', 'procedurale', 'metacognitive'];
+            // Les liens « se vérifie par » déjà tracés comptent comme avant
+            // (compatibilité, #964) ; le geste neuf est l'objectif coché.
             var lieeActiviteOuContenu = liens.some(function(l) {
                 return typesAmontEval.indexOf(l.noeudType) !== -1 || TYPES_ACTIVITE.indexOf(l.noeudType) !== -1;
             });
+            var nbVerifies = objectifsVerifiesPar(noeud).length;
             return {
-                entree: lieeActiviteOuContenu
-                    ? { valide: true, message: "Vérifie un objectif, une connaissance ou une activité" }
-                    : { valide: false, message: "Aucun élément relié (tracer un lien vers une activité ou un contenu)" },
+                entree: nbVerifies > 0
+                    ? { valide: true, message: 'Vérifie ' + nbVerifies + ' objectif' + (nbVerifies > 1 ? 's' : '') }
+                    : lieeActiviteOuContenu
+                        ? { valide: true, message: "Vérifie un objectif, une connaissance ou une activité" }
+                        : { valide: false, message: "Aucun objectif coché : coche dans l’Inspecteur les objectifs qu’elle vérifie" },
                 // Le message de sortie DIT la visée : c'est la seule surface où
                 // la nuance formative / certificative se lit en toutes lettres
                 // sur la carte, l'en-tête ne montrant que la forme courte.
@@ -2918,7 +3008,47 @@ function ouvrirPanneau(id) {
     // sur le canevas, et la liste est bornée aux objectifs de SA leçon — on ne
     // peut pas se tromper de cible. La section n'apparaît pas quand il n'y a
     // rien à servir : une leçon sans objectif reste un usage complet.
-    if (TYPES_SERVANTS_OBJECTIF.indexOf(donnees.type) !== -1) {
+    if (donnees.type === 'evaluation') {
+        // #964 — l'évaluation coche les objectifs qu'elle VÉRIFIE : ceux de sa
+        // leçon, puis ceux des leçons placées avant elle. Un objectif déjà
+        // coché dont la leçon n'est plus proposée (déplacée après, ou sans
+        // semaine) reste affiché dans son groupe, pour qu'on puisse le décocher.
+        var idxEval = indexObjectifsCarte();
+        var dejaVerifies = objectifsVerifiesPar(donnees, idxEval);
+        var groupes = leconsProposeesAEvaluation(donnees);
+        dejaVerifies.forEach(function(oid) {
+            var lec = idxEval[oid];
+            if (lec && groupes.indexOf(lec) === -1) groupes.push(lec);
+        });
+        var hoteEval = leconParenteDe(donnees);
+        var htmlVerifies = '';
+        groupes.forEach(function(lec) {
+            var objs = objectifsDeLecon(lec);
+            if (objs.length === 0) return;
+            var sem = semaineDeLecon(lec);
+            var seance = lettreRangSeance(rangSeanceDeLecon(lec));
+            var titreGroupe = lec === hoteEval
+                ? 'Cette leçon'
+                : 'Leçon « ' + (lec.titre || 'Sans titre') + ' »'
+                    + (sem !== null ? ' (semaine ' + sem + (seance ? ', séance ' + seance : '') + ')' : '');
+            htmlVerifies += '<div class="planif-objectifs-servis-groupe">' + echapperHtml(titreGroupe) + '</div>';
+            objs.forEach(function(o) {
+                htmlVerifies +=
+                    '<label class="planif-checkbox-label planif-objectif-servi-ligne">' +
+                        '<input type="checkbox" class="planif-objectif-servi"' +
+                        ' data-obj-id="' + echapperHtml(o.id) + '"' +
+                        (dejaVerifies.indexOf(o.id) !== -1 ? ' checked' : '') + '>' +
+                        ' <span>' + echapperHtml(o.texte) + '</span>' +
+                    '</label>';
+            });
+        });
+        if (htmlVerifies) {
+            // security-ok: htmlVerifies est construit ci-dessus, chaque titre de
+            // groupe, id et texte d'objectif passé par echapperHtml().
+            extra.innerHTML += '<label>Objectifs vérifiés</label>' +
+                '<div class="planif-objectifs-servis" id="planif-objectifs-servis">' + htmlVerifies + '</div>';
+        }
+    } else if (TYPES_SERVANTS_OBJECTIF.indexOf(donnees.type) !== -1) {
         var leconHote = leconParenteDe(donnees);
         var objsHote = leconHote ? objectifsDeLecon(leconHote) : [];
         if (objsHote.length > 0) {
@@ -3631,8 +3761,13 @@ function dupliquerConteneurEnProfondeur(noeudId, silencieux, cloneDemande) {
             });
         }
         if (Array.isArray(nouveau.metadata.objectifsServis)) {
+            // #964 — une ÉVALUATION peut vérifier l'objectif d'une leçon placée
+            // avant la sienne : cet id n'est pas dans la copie, il vise une
+            // leçon qui existe toujours, il se garde tel quel. Les autres blocs
+            // ne servent que leur leçon : un id hors correspondance y reste écarté.
+            var estEvaluation = nouveau.type === 'evaluation';
             nouveau.metadata.objectifsServis = nouveau.metadata.objectifsServis
-                .map(function(oid) { return correspondanceObjectifs.get(oid) || null; })
+                .map(function(oid) { return correspondanceObjectifs.get(oid) || (estEvaluation ? oid : null); })
                 .filter(Boolean);
             if (nouveau.metadata.objectifsServis.length === 0) {
                 delete nouveau.metadata.objectifsServis;
@@ -4074,6 +4209,30 @@ function deposerLienSurObjectif(sourceId, ligneEl) {
     var leconEl = ligneEl.closest('.planif-noeud');
     var leconObjectif = leconEl ? etat.noeuds.get(leconEl.id) : null;
     var leconSource = leconParenteDe(source);
+
+    // #964 — une évaluation coche les objectifs de sa leçon ou d'une leçon
+    // placée avant elle : le même ensemble que son Inspecteur propose.
+    if (source.type === 'evaluation') {
+        if (!leconObjectif || leconsProposeesAEvaluation(source).indexOf(leconObjectif) === -1) {
+            afficherToastLien('Une évaluation coche les objectifs de sa leçon ou d’une leçon placée avant elle.');
+            return true;
+        }
+        var dejaVerifies = objectifsVerifiesPar(source);
+        if (dejaVerifies.indexOf(objectifId) !== -1) {
+            afficherToastLien('Déjà coché : cette évaluation vérifie cet objectif.');
+            return true;
+        }
+        enregistrerPourUndo();
+        definirObjectifsServis(sourceId, dejaVerifies.concat([objectifId]));
+        if (etat.panneauOuvert && etat.panneauNoeudId === sourceId) {
+            var caseEval = document.querySelector(
+                '.planif-objectif-servi[data-obj-id="' + (window.CSS && CSS.escape ? CSS.escape(objectifId) : objectifId) + '"]');
+            if (caseEval) caseEval.checked = true;
+        }
+        afficherToastLien('Objectif coché : cette évaluation le vérifie désormais.');
+        return true;
+    }
+
     if (!leconObjectif || !leconSource || leconObjectif.id !== leconSource.id) {
         // Refus assumé, et pas défensif : `objectifsServisPar` filtre à la leçon
         // parente. Écrire un id étranger produirait une case cochée que la
@@ -4750,6 +4909,12 @@ function afficherMenuLien(x, y, sourceId, cibleId) {
         var cbl = etat.noeuds.get(cibleId);
         var srcLabel = src ? (TYPES[src.type] ? TYPES[src.type].label : src.type) : '?';
         var cblLabel = cbl ? (TYPES[cbl.type] ? TYPES[cbl.type].label : cbl.type) : '?';
+        // #964 — une évaluation ne se relie plus par un lien : le message dit
+        // le bon geste au lieu de seulement refuser.
+        if ((src && src.type === 'evaluation') || (cbl && cbl.type === 'evaluation')) {
+            afficherToastLien('Une évaluation se relie à ses objectifs : ouvre son Inspecteur et coche ceux qu’elle vérifie.');
+            return;
+        }
         afficherToastLien('Ce lien n\'est pas possible entre ' + srcLabel + ' et ' + cblLabel + '.');
         return;
     }
@@ -11952,6 +12117,13 @@ window.planificationCarte = {
     TYPES_SERVANTS_OBJECTIF: TYPES_SERVANTS_OBJECTIF,
     leconParenteDe: leconParenteDe,
     objectifsServisPar: objectifsServisPar,
+    // #964 — l'évaluation vérifie des objectifs, sa leçon ou une leçon avant.
+    objectifsVerifiesPar: objectifsVerifiesPar,
+    indexObjectifsCarte: indexObjectifsCarte,
+    leconEstAvant: leconEstAvant,
+    leconsProposeesAEvaluation: leconsProposeesAEvaluation,
+    evaluerBadge: evaluerBadge,
+    afficherMenuLien: afficherMenuLien,
     definirObjectifsServis: definirObjectifsServis,
     evaluerObjectif: evaluerObjectif,
     // #445 — exposées pour la sentinelle, et pour la même raison que les

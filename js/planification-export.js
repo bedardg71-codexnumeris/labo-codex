@@ -140,11 +140,21 @@ function construireElement(nd, contexte) {
     }
 
     // #403 — objectifs servis, résolus en TEXTES contre la leçon parente.
-    var servis = c.objectifsServisPar(nd);
-    if (servis.length > 0 && contexte.objectifsParId) {
-        el.objectifsServis = servis
-            .map(function(id) { return contexte.objectifsParId[id]; })
-            .filter(Boolean);
+    // #964 — une évaluation vérifie aussi les objectifs d'une leçon placée
+    // avant la sienne : ils se résolvent contre toute la carte.
+    if (nd.type === 'evaluation' && typeof c.objectifsVerifiesPar === 'function') {
+        var idx = c.indexObjectifsCarte();
+        el.objectifsServis = c.objectifsVerifiesPar(nd, idx).map(function(id) {
+            var o = c.objectifsDeLecon(idx[id]).find(function(x) { return x.id === id; });
+            return o ? o.texte : null;
+        }).filter(Boolean);
+    } else {
+        var servis = c.objectifsServisPar(nd);
+        if (servis.length > 0 && contexte.objectifsParId) {
+            el.objectifsServis = servis
+                .map(function(id) { return contexte.objectifsParId[id]; })
+                .filter(Boolean);
+        }
     }
     return el;
 }
