@@ -234,7 +234,7 @@ function _lireChampsDOMSauv() {
         ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: document.getElementById('niveauProduction1').textContent,
         retroactionFinale: document.getElementById('retroactionFinale1').value,
-        retroactionReecrite: (typeof window.estRetroactionReecrite === 'function') ? window.estRetroactionReecrite() : false   // #961
+        retroactionReecrite: (typeof window.marqueRetroactionAEcrire === 'function') ? window.marqueRetroactionAEcrire() === true : false   // #961 — copie neuve : jamais « à demander »
     };
 }
 

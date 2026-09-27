@@ -20,7 +20,7 @@ const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwA
 const T = 't961';
 const A_LA_MAIN = 'Réécrite à la main : relis ta conclusion à voix haute avant de la remettre.';
 
-async function monter(page, { analytique = false, marque, deuxieme = false, sansEvaluation = false } = {}) {
+async function monter(page, { analytique = false, marque, deuxieme = false, sansEvaluation = false, sansCommentaires = false, retroaction = A_LA_MAIN } = {}) {
     const erreurs = [];
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
@@ -28,7 +28,7 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.travauxUI && window.travauxStockage
         && typeof window.evaluerProduction === 'function');
-    await page.evaluate(({ png, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation }) => {
+    await page.evaluate(({ png, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation, sansCommentaires, retroaction }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
         const coursId = 'cours-961';
         const crit = [{ id: 'c1', nom: 'Contenu', ponderation: 60, type: 'holistique' },
@@ -67,8 +67,9 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
                 { critereId: 'c2', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 40, retroaction: 'CARTOUCHE c2_D' }
             ],
             pointsAnalytiques: analytique ? { c2: 26 } : {},
-            retroactionFinale: A_LA_MAIN
+            retroactionFinale: retroaction
         };
+        if (sansCommentaires) evaluation.criteres.forEach((c) => { c.retroaction = ''; });
         if (marque !== undefined) evaluation.retroactionReecrite = marque;
         // Le second élève (trajet « série ») : son évaluation porte la marque.
         const seconde = Object.assign(JSON.parse(JSON.stringify(evaluation)), { id: 'EV961B', etudiantDA: 'TEST961B', retroactionReecrite: true });
@@ -88,7 +89,7 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
         const copie = new Blob([octets], { type: 'image/png' });
         const original = window.travauxStockage.recupererBlob;
         window.travauxStockage.recupererBlob = async function (id) { return id === 'FT961' ? copie : original.apply(this, arguments); };
-    }, { png: PNG, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation });
+    }, { png: PNG, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation, sansCommentaires, retroaction });
     return erreurs;
 }
 
@@ -194,14 +195,102 @@ for (const chemin of ['copie', 'liste']) {
     });
 }
 
-test('#961 · marque absente (stock d\'avant D7) : la rétroaction suit les niveaux, comme avant, et aucun avis', async ({ page }) => {
+// R2 (Grégoire, 26 sept., option c) — le stock d'avant D7 : clé ABSENTE et rétroaction non vide.
+// Au premier geste qui régénérerait, une question, une fois par copie ; la réponse s'enregistre.
+const QUESTION = 'Cette rétroaction a été enregistrée avant le 26 septembre. La remplacer par la version régénérée ?';
+async function question(page) {
+    await page.waitForSelector('#overlay-ui-dialogue', { timeout: 5000 });
+    return page.evaluate(() => ({
+        message: document.querySelector('#overlay-ui-dialogue .modal-section').textContent.trim(),
+        focus: (document.activeElement || {}).textContent
+    }));
+}
+const questionOuverte = (page) => page.evaluate(() => !!document.getElementById('overlay-ui-dialogue'));
+
+for (const chemin of ['copie', 'liste']) {
+    for (const reponse of ['Garder la mienne', 'Remplacer']) {
+        test(`#961 R2 · stock sans clé, par ${nom(chemin)} : un niveau changé pose la question ; « ${reponse} »`, async ({ page }) => {
+            test.setTimeout(90000);
+            await monter(page);
+            await ouvrir(page, chemin);
+            expect.soft(await questionOuverte(page), 'aucune question à l\'ouverture').toBe(false);
+            expect.soft((await base(page)).retroactionReecrite, 'rien écrit à l\'ouverture').toBeUndefined();
+            await changerNiveau(page, 'E');
+            const q = await question(page);
+            expect.soft(q.message, 'les mots').toBe(QUESTION);
+            expect.soft(q.focus, 'le focus sur l\'option sûre').toBe('Garder la mienne');
+            expect.soft(await zone(page), 'rien réécrit pendant la question').toBe(A_LA_MAIN);
+            // Répondre APRÈS l'auto-save du niveau (1,5 s) : c'est la réponse qui doit s'écrire,
+            // pas l'auto-save du geste qui l'a précédée (mutation « réponse non persistée »).
+            await page.waitForTimeout(APRES_AUTOSAVE);
+            expect.soft((await base(page)).retroactionReecrite, 'clé absente tant qu\'on n\'a pas répondu').toBeUndefined();
+            await page.evaluate((l) => Array.from(document.querySelectorAll('#overlay-ui-dialogue button')).find(b => b.textContent === l).click(), reponse);
+            await page.waitForFunction(() => !document.getElementById('overlay-ui-dialogue'));
+            await page.waitForTimeout(APRES_AUTOSAVE);
+            const garder = reponse === 'Garder la mienne';
+            const b1 = await base(page);
+            expect.soft(b1.retroactionReecrite, 'réponse en base').toBe(garder);
+            expect.soft(await avisVisible(page), 'avis').toBe(garder);
+            if (garder) expect.soft(b1.retroactionFinale, 'texte gardé').toBe(A_LA_MAIN);
+            else expect.soft(await zone(page), 'texte généré').toContain('CARTOUCHE c2_E');
+            await changerNiveau(page, 'I');
+            await page.waitForTimeout(APRES_AUTOSAVE);
+            expect.soft(await questionOuverte(page), 'la question ne revient pas').toBe(false);
+            if (garder) expect(await zone(page)).toBe(A_LA_MAIN);
+            else expect(await zone(page)).toContain('CARTOUCHE c2_I');
+        });
+    }
+}
+
+test('#961 R2 · stock sans clé, Échap : garder', async ({ page }) => {
     test.setTimeout(90000);
     await monter(page);
     await ouvrir(page, 'liste');
-    expect.soft(await avisVisible(page), 'aucun avis').toBe(false);
+    await changerNiveau(page, 'E');
+    await question(page);
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.getElementById('overlay-ui-dialogue'));
+    await page.waitForTimeout(APRES_AUTOSAVE);
+    expect.soft(await zone(page)).toBe(A_LA_MAIN);
+    expect((await base(page)).retroactionReecrite).toBe(true);
+});
+
+test('#961 R2 · clé absente et rétroaction VIDE : aucune question, la génération se fait', async ({ page }) => {
+    test.setTimeout(90000);
+    await monter(page, { retroaction: '' });
+    await ouvrir(page, 'liste');
     await changerNiveau(page, 'E');
     await page.waitForTimeout(APRES_AUTOSAVE);
+    expect.soft(await questionOuverte(page), 'aucune question').toBe(false);
     expect(await zone(page)).toContain('CARTOUCHE c2_E');
+});
+
+test('#961 R2 · clé à false : aucune question, le texte suit', async ({ page }) => {
+    test.setTimeout(90000);
+    await monter(page, { marque: false });
+    await ouvrir(page, 'liste');
+    await changerNiveau(page, 'E');
+    await page.waitForTimeout(APRES_AUTOSAVE);
+    expect.soft(await questionOuverte(page), 'aucune question').toBe(false);
+    expect(await zone(page)).toContain('CARTOUCHE c2_E');
+});
+
+// R1 de Cowork — les chemins SANS question gardent la marque : copie sans commentaire de critère
+// enregistré, rétroaction réécrite, cartouche choisie → commentaires posés, texte et avis gardés.
+test('#961 R1 · sans commentaire enregistré, cartouche choisie au menu : les commentaires s\'appliquent, le texte réécrit reste', async ({ page }) => {
+    test.setTimeout(90000);
+    await monter(page, { marque: true, sansCommentaires: true });
+    await ouvrir(page, 'liste');
+    await page.evaluate(() => {
+        const s = document.getElementById('selectCartoucheEval');
+        s.value = 'CT961R';
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.waitForTimeout(APRES_AUTOSAVE);
+    expect.soft(await questionOuverte(page), 'aucune question').toBe(false);
+    expect.soft(await page.evaluate(() => document.getElementById('comm_c1').textContent), 'commentaire du critère').toContain('AUTRE c1_M');
+    expect.soft(await avisVisible(page), 'avis gardé').toBe(true);
+    expect(await zone(page), 'texte gardé').toBe(A_LA_MAIN);
 });
 
 test('#961 · la marque d\'une copie ne passe pas à une autre copie ouverte ensuite', async ({ page }) => {
@@ -306,7 +395,8 @@ for (const retouche of [true, false]) {
         await page.evaluate(() => document.querySelector('[data-action="travauxUI.sauvegarderRetroactionDepuisModal"]').click());
         await page.waitForTimeout(500);
         const b = await base(page);
-        expect(b.retroactionReecrite).toBe(retouche ? true : undefined);
+        // R2 — tous les écrivains portent la clé : sans retouche, `false` (la fixture n'en a pas).
+        expect(b.retroactionReecrite).toBe(retouche);
     });
 }
 
@@ -327,4 +417,23 @@ test('#961 · copie neuve, réécrite puis « Enregistrer » avant l\'auto-save 
     const b = await page.evaluate((T) => window.db.getSync(T + '_evaluationsSauvegardees', []).find(e => e.etudiantDA === 'TEST961'), T);
     expect.soft(b && b.retroactionFinale).toBe(REECRIT);
     expect(b && b.retroactionReecrite).toBe(true);
+});
+
+// R1 — l'autre chemin sans question : une copie pas encore enregistrée (aucune évaluation).
+test('#961 R1 · copie neuve réécrite, cartouche choisie au menu : pas de question, le texte réécrit reste', async ({ page }) => {
+    test.setTimeout(90000);
+    await monter(page, { sansEvaluation: true });
+    await page.evaluate(() => window.evaluerProduction('TEST961', 'p961'));
+    await page.waitForFunction(() => document.getElementById('eval_c2'), null, { timeout: 15000 });
+    await page.waitForTimeout(3500);
+    await reecrire(page, REECRIT);
+    await page.evaluate(() => {
+        const s = document.getElementById('selectCartoucheEval');
+        s.value = 'CT961R';
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await page.waitForTimeout(APRES_AUTOSAVE);
+    expect.soft(await questionOuverte(page), 'aucune question').toBe(false);
+    expect.soft(await avisVisible(page), 'avis gardé').toBe(true);
+    expect(await zone(page), 'texte gardé').toBe(REECRIT);
 });
