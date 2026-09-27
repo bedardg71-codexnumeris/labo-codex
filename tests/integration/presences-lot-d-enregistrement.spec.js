@@ -234,7 +234,7 @@ test('(f) une absence motivée RàI survit à « Tous présents » et à l’enr
         const da = document.querySelector('#tbody-saisie-presences input[id^="periodes_"]').id.slice(9);
         const p = db.getSync(cle('presences'), []);
         p.push({ date: d, da, periodesPresentes: 0, notes: '', coursId: obtenirCoursActifId(), facultatif: true });
-        db.setSync(cle('presences'), p);
+        db.setSync(cle('presences'), p);   // security-ok: fixture littérale du banc (pack démo)
         return da;
     }, date);
     await page.evaluate((d) => window.__ouvrir(d), date);
@@ -280,7 +280,7 @@ test('D2 bis (b) : dans une séance saisie, l’élève sans fiche le dit, et un
     // Un·e élève retiré·e de la séance saisie : le cas « arrivé·e après la saisie ».
     const da = await page.evaluate((d) => {
         const da = document.querySelector('#tbody-saisie-presences input[id^="periodes_"]').id.slice(9);
-        db.setSync(cle('presences'), db.getSync(cle('presences'), []).filter((p) => !(p.date === d && p.da === da)));
+        db.setSync(cle('presences'), db.getSync(cle('presences'), []).filter((p) => !(p.date === d && p.da === da)));   // security-ok: fixture du banc (pack démo)
         return da;
     }, date);
     await page.evaluate(() => initialiserSaisiePresences());
