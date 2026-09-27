@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 18 H 45 : **LOT #960 (1.160.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 20 H 45 : **LOT #961 (1.160.3) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `958683a7` (1.160.2) + la branche `lot-retroaction-ne-suit-plus-les-niveaux` (`e7bebd96` correctif D7 + consigne + fiche #961 + demande de relecture, `ff36ea10`/`6d1b0998` R1 et R2 + relecture de Cowork, `c16f8537` C1 + contre-vérification verte, `8f65a355` release build 0926-2038) + `2f753a15` fusion + ce relais.
+
+**Nouvelles acceptées par Grégoire le 26 sept., telles quelles** (entrée 1.160 de `js/changelog-data.js`) : « Évaluer : une rétroaction finale que tu as réécrite à la main n'est plus remplacée quand tu changes un niveau ; « Régénérer » la refait à la demande. Sur une copie évaluée avant le 26 septembre, l'application te le demande une fois. »
+
+**Reste** : constater « en ligne » chez Netlify ; retirer la branche `lot-retroaction-ne-suit-plus-les-niveaux` une fois le push constaté ; portes terrain de #961 : l'avis tient-il sur iPad dans le pied de la zone, et la frappe au clavier par la Liste (`plans de travail/DEMANDE-RELECTURE-2026-09-26-961.md` § 5). **Prochain lot : accueil et tutoriels** (`plans de travail/CONSIGNE-LOT-accueil-tutoriels.md`, Grégoire veut accepter sa phrase des Nouvelles AVANT le push) ; puis le lot B de l'enregistrement. Non commité, laissé : `Claude outputs/`.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 26 SEPT. 2026, ≈ 18 H 45 : **LOT #960 (1.160.2) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS PAR `scripts/pousser.sh origin main`** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `99b022aa` + `680a84b8` (relais d'attente) + la branche `lot-960-retroaction-a-la-main` (`c0255246` correctif + consignes, `81a0cada` demande de relecture, `a749e717` D6 jusqu'au PDF, `988c6249` complément, `63abebb9` R1-R3 + M1 + relecture de Cowork, `82a4f1b8` réponse, `9c7e16e2` B1 + contre-vérification, `5c6ac282` release build 0926-1828) + `c440eaa6` fusion + cette clôture. Contre-vérification de Cowork VERTE sous B1 (livrée). **Nouvelles acceptées par Grégoire le 26 sept., telles quelles** : « Évaluer : ouvrir une copie ne remplace plus ta rétroaction finale réécrite à la main, et un commentaire de critère laissé vide reste vide. » Vitest 7 462 / 7 462 après la release.
 
