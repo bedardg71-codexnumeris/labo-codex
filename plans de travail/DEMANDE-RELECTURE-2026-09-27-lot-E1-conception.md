@@ -28,7 +28,7 @@
 
 ## 3 · Bancs adaptés (le geste change, pas l'invariant)
 
-#957 WebKit (le `change` du champ nom remplace le clic « Enregistrer » ; même écrivain, même invariant), #503 (Fermer), #516 et #524 (le refus par le témoin, vrai module), #522 lots 2b, 2c, 3a, 3b et pratiques, #647, #648 (la file se reconnaît aussi à `modifierEtAnnoncer(` ; 3b : quinze → seize écritures par la file, la seizième est le nom de cartouche), #573 (« pas encore créée »), confirmations de la Conception (seule la création a son panneau), #506 (tutoiement), #717 (« Enregistrer la pratique » retiré), collections (vraie API `warning`).
+Confirmations de la Conception et type de grille, WebKit (§ 9) ; #957 WebKit (le `change` du champ nom remplace le clic « Enregistrer » ; même écrivain, même invariant), #503 (Fermer), #516 et #524 (le refus par le témoin, vrai module), #522 lots 2b, 2c, 3a, 3b et pratiques, #647, #648 (la file se reconnaît aussi à `modifierEtAnnoncer(` ; 3b : quinze → seize écritures par la file, la seizième est le nom de cartouche), #573 (« pas encore créée »), confirmations de la Conception (seule la création a son panneau), #506 (tutoiement), #717 (« Enregistrer la pratique » retiré), collections (vraie API `warning`).
 
 ## 4 · Preuves
 
@@ -97,7 +97,7 @@ Rien n'est réécrit ni effacé. Une grille, une échelle, une cartouche ou une 
 
 ## 9 · Bancs WebKit voisins
 
-(complété en fin de passe)
+41 fichiers (grilles, échelles, cartouches, pratiques, assistant, témoin du lot B, #898, confirmations, type de grille, et ce lot) : **142 essais, 138 verts au premier passage, 4 rouges, tous dus au lot et attendus** : trois essais de `confirmations-conception-uniformes.spec.js` enregistraient une fiche EXISTANTE et attendaient « sauvegardée ! », et `type-grille-lot1.spec.js` appelait `creerNouvelleGrille` sans `await` (elle est devenue asynchrone). Adaptés : les deux preuves de forme du bandeau passent par la création (« … créée. ») ; le refus #466/CO-16 passe par `sauvegarderNomEchelle` (le `change` du nom). Relancés : 5 sur 5 verts.
 
 ## 10 · Porte terrain (Mac ou iPad, données réelles)
 
