@@ -1109,6 +1109,64 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
 }
 
 /**
+ * Lot E1 de l'enregistrement (D0 point 2, D3 — 27 sept. 2026) : le pendant de
+ * `sauvegarderDonneesSelonMode` pour les écritures LUE-MODIFIÉE-ÉCRITE par `db.modifier`
+ * (#510), celles des éditeurs de la Conception. Elles ne passaient pas par le témoin :
+ * un champ de grille, d'échelle, de cartouche ou de pratique s'écrivait sans que rien
+ * ne le dise, et un échec n'était qu'une promesse rejetée.
+ *
+ * Même contrat de parole : « Enregistré » après une écriture qui a eu lieu, « Non
+ * enregistré – ‹geste› : ‹raison› » sur un échec, rien quand le mutateur a renoncé
+ * (`undefined` : grille introuvable, index hors bornes — l'appelant dit son refus).
+ *
+ * ⚠ Un échec est RELANCÉ après que le témoin l'a dit : les appelants gardaient déjà
+ * leur comportement sur une promesse rejetée (aucun succès affiché ensuite), et ce
+ * lot ne le change pas.
+ * ⚠ `db.set` refuse une écriture de la garde #340 par un `return` nu : le mutateur
+ * enveloppé consulte la même garde AVANT de rendre sa valeur, pour ne pas annoncer
+ * « Enregistré » sur un refus.
+ *
+ * @param {string} cleEffective - Clé DÉJÀ namespacée (`cle('grillesTemplates')`)
+ * @param {function} mutateur - Voir `db.modifier`
+ * @param {*} [defaut] - Voir `db.modifier`
+ * @param {Object} [options] - `{ geste, discret }`, comme `sauvegarderDonneesSelonMode`
+ * @returns {Promise<*>} ce que le mutateur a rendu (`undefined` sur un refus de garde)
+ */
+async function modifierEtAnnoncer(cleEffective, mutateur, defaut = null, options) {
+    const { geste, discret } = options || {};
+    const temoin = window.temoinEnregistrement;
+    let refuse = false;
+    let ecrit = false;
+    try {
+        const resultat = await db.modifier(cleEffective, async (lues) => {
+            const valeur = await mutateur(lues);
+            if (valeur === undefined) return undefined;
+            if (typeof db._ecritureAutorisee === 'function' && !db._ecritureAutorisee(cleEffective, valeur)) {
+                refuse = true;
+                return undefined;
+            }
+            ecrit = true;
+            return valeur;
+        }, defaut);
+        if (refuse) {
+            if (temoin) temoin.nonEnregistre(RAISONS_NON_ENREGISTRE.garde, geste, cleEffective);
+            return undefined;
+        }
+        if (ecrit) {
+            invaliderCacheLecture(cleEffective);
+            if (temoin && !discret) temoin.enregistre(cleEffective);
+        }
+        return resultat;
+    } catch (error) {
+        const quota = error && (error.name === 'QuotaExceededError' ||
+            (error.message && error.message.includes('quota')));
+        console.error(`❌ Écriture échouée ${cleEffective}${quota ? ' (quota)' : ''}:`, error);
+        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste, cleEffective);
+        throw error;
+    }
+}
+
+/**
  * Obtient l'option d'affichage du DA en mode anonymisation
  * @returns {boolean} - true pour afficher le DA réel, false pour "ANONYME"
  */
@@ -1431,6 +1489,7 @@ window.effacerContexteSimulation = effacerContexteSimulation;
 window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;
 window.contexteImposeNoteProvisoire = contexteImposeNoteProvisoire;   // lot N2 (#716)
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
+window.modifierEtAnnoncer = modifierEtAnnoncer;
 window.anonymiserNom = anonymiserNom;
 window.anonymiserGroupe = anonymiserGroupe;
 // 14 sept. 2026 : lu par la liste d'élèves du Cadre (trimestre-v2-etudiants.js), qui
