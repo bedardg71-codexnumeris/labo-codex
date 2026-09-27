@@ -6104,6 +6104,102 @@ a.soutien-action:focus {
     min-width: 0;
 }
 
+/* ===============================
+   TÉMOIN D'ENREGISTREMENT (lot B, D0 point 2 — js/temoin-enregistrement.js)
+   En bas, loin du témoin du Codex (menu du haut) et de la barre d'Annoter (en
+   haut à toutes les largeurs). Au-dessus des modales et du plein écran
+   d'Annoter (9999), comme les toasts. Il ne capte aucun pointeur, sauf son
+   bouton Fermer.
+   LE COIN DÉPEND DE LA LARGEUR — mesuré au banc WebKit le 27 sept., écran de
+   saisie des présences au premier affichage :
+   · à 768 px (iPad debout), « Rapport · Enregistrer » passe à la ligne et
+     commence à x = 294 px au bas de l'écran : à droite, ou plus large que
+     278 px à gauche, le « Non enregistré » la recouvrait — au moment précis
+     où l'on veut réessayer. D'où : à gauche, 270 px au plus ;
+   · à 1024 px, « ← Précédent » et la date sont à gauche vers y = 590 : à
+     270 px de large, le message le plus long (mémoire pleine) montait
+     jusqu'à eux. D'où : à droite, 420 px au plus, à partir de 900 px.
+   =============================== */
+
+.temoin-enregistrement {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 11000;
+    max-width: min(270px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+@media (min-width: 900px) {
+    .temoin-enregistrement {
+        left: auto;
+        right: 16px;
+        max-width: 420px;
+        text-align: right;
+    }
+    .temoin-enregistrement-echec {
+        text-align: left;
+    }
+}
+
+.temoin-enregistrement-succes,
+.temoin-enregistrement-echec {
+    display: none;
+}
+
+.temoin-enregistrement-succes.visible {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    color: var(--alerte-texte-succes);
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-prononce);
+}
+
+.temoin-enregistrement-echec.visible {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 8px 10px 14px;
+    color: var(--texte-principal);
+    /* Fond d'alerte translucide posé sur la surface opaque : le témoin flotte
+       au-dessus du contenu, un fond transparent le rendrait illisible. */
+    background: linear-gradient(var(--alerte-fond-erreur), var(--alerte-fond-erreur)), var(--surface-carte);
+    border: 1px solid var(--alerte-bordure-erreur);
+    border-left-width: 4px;
+    border-radius: var(--radius-moyen);
+    box-shadow: var(--shadow-prononce);
+}
+
+.temoin-enregistrement-echec-texte {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+    font-size: 0.9rem;
+}
+
+.temoin-enregistrement-fermer {
+    pointer-events: auto;
+    flex-shrink: 0;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -10px -4px -10px 0;
+    font-size: 1.3rem;
+    line-height: 1;
+    color: var(--texte-principal);
+    background: none;
+    border: none;
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+}
+
+.temoin-enregistrement-fermer:focus-visible {
+    outline: 2px solid var(--alerte-bordure-erreur);
+    outline-offset: -2px;
+}
+
 /* Lot C #286 suite — helper d'icône SVG inline pour badges textuels.
    Le SVG est rendu via mask-image et coloré par background-color: currentColor :
    l'icône hérite donc automatiquement de la couleur sémantique du badge parent

@@ -243,13 +243,11 @@ describe('#607 · retirer un jeton de reprise emporte le fichier de la reprise',
 // IMMÉDIATEMENT après : le pire cas redevient l'ancien comportement (fichier
 // resté actif), pas une perte.
 //
-// ⚠ ET INVERSER L'ORDRE NE SUFFIT PAS. `sauvegarderDonneesSelonMode` rend
-// TROIS valeurs (`modes.js:751`) : `true`, `false`, et la chaîne `'quota'` —
-// truthy, alors que rien n'a été écrit. Un refus RENDU n'est pas une exception :
-// il doit être LU. Le détachement est donc conditionné à `=== true`, pas à la
-// véracité. Les deux cas « écriture refusée » et « quota dépassé » ci-dessous
-// verrouillent ce choix ; c'est le second qui rougit si quelqu'un réécrit la
-// garde en test truthy.
+// ⚠ ET INVERSER L'ORDRE NE SUFFIT PAS. Un refus RENDU n'est pas une exception :
+// il doit être LU. `sauvegarderDonneesSelonMode` rendait la chaîne `'quota'`,
+// truthy alors que rien n'était écrit ; depuis le lot B de l'enregistrement
+// (27 sept. 2026, #786), elle rend `true` ou `false`, et `supprimerEvaluation`
+// s'arrête sur tout ce qui n'est pas `true` (#618) : ni détachement, ni succès.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -281,10 +279,8 @@ function monterListe({ evaluations, fichiers, reponseConfirm = true, retourEcrit
         // son try/catch avalerait une ReferenceError. On la nourrit de vide —
         // un banc vert qui journalise une erreur finit par masquer la vraie.
         obtenirDonneesSelonMode: () => [],
-        // `sauvegarderDonneesSelonMode` rend TROIS choses (`modes.js:751`) :
-        // `true`, `false` (mode anonymisation) et la chaîne `'quota'` — truthy,
-        // alors que RIEN n'a été écrit. Le faux magasin reproduit les trois, et
-        // n'écrit que sur `true`.
+        // `sauvegarderDonneesSelonMode` rend `true` ou `false` (lot B, #786) ;
+        // le faux magasin n'écrit que sur `true`.
         sauvegarderDonneesSelonMode: (k, v) => {
             if (retourEcriture !== true) return retourEcriture;
             stores[k] = v;
@@ -397,17 +393,15 @@ describe('#612 T6.6 · supprimer une reprise depuis la LISTE emporte son fichier
         expect(travauxStockage._corbeille).toEqual([]);
     });
 
-    it('ÉCRITURE REFUSÉE (erreur du stockage) : le fichier n\'est PAS mis à la corbeille', () => {
+    it('ÉCRITURE REFUSÉE : le fichier n\'est PAS mis à la corbeille, et aucun succès n\'est annoncé (#618)', () => {
         // Le cas qui décide de l'ORDRE. Détacher avant de persister laisserait
         // le fichier à la corbeille et l'évaluation en place — définitivement.
-        // Réancré le 26 sept. 2026 (lot A de l'enregistrement) : le refus modélisé était celui
-        // du mode anonymisation (`false`), qui n'existe plus — l'anonymisation écrit. Le refus
-        // restant est `'error'`. Le message d'échec n'est plus asserté ici : `'error'` et
-        // `'quota'` sont truthy, la suite les prend pour un succès (#618, lot B).
-        const { win, stores, travauxStockage } = monterListe({
+        // Lot B de l'enregistrement (27 sept. 2026) : le refus est `false` (plus de
+        // `'quota'`/`'error'`), et l'échec est dit par le témoin commun, pas ici.
+        const { win, stores, travauxStockage, notifs } = monterListe({
             evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
             fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE],
-            retourEcriture: 'error'
+            retourEcriture: false
         });
 
         win.supprimerEvaluation('EVAL_B');
@@ -415,27 +409,7 @@ describe('#612 T6.6 · supprimer une reprise depuis la LISTE emporte son fichier
         expect(travauxStockage._corbeille).toEqual([]);
         expect(travauxStockage._actifs.map(f => f.id)).toEqual(['F_ORIG', 'F_REPR']);
         expect(stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A', 'EVAL_B']);
-    });
-
-    it('QUOTA DÉPASSÉ (retour \'quota\', truthy) : le fichier n\'est PAS mis à la corbeille', () => {
-        // Le cas qui rougira si quelqu'un réécrit la garde en test truthy.
-        // `'quota'` veut dire « l'écriture a levé, rien n'est enregistré » — le
-        // geste destructeur ne doit donc pas partir. La suite de
-        // `supprimerEvaluation` traite `'quota'` comme un succès : bug latent
-        // PRÉEXISTANT, inscrit en #618, hors périmètre de T6.6. Ce cas verrouille
-        // seulement que la CORBEILLE, elle, n'y touche pas.
-        const { win, stores, travauxStockage } = monterListe({
-            evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
-            fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE],
-            retourEcriture: 'quota'
-        });
-
-        win.supprimerEvaluation('EVAL_B');
-
-        expect(travauxStockage._corbeille).toEqual([]);
-        expect(travauxStockage._actifs.map(f => f.id)).toEqual(['F_ORIG', 'F_REPR']);
-        // Rien n'a été enregistré : c'est ce que dit `'quota'`.
-        expect(stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A', 'EVAL_B']);
+        expect(notifs.filter(n => n.type === 'succes')).toEqual([]);
     });
 
     it('supprimer une évaluation ORDINAIRE n\'emporte aucun fichier et n\'annonce rien', () => {

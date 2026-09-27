@@ -163,8 +163,10 @@ describe('#340 · câblage db.js (la garde est consultée avant toute persistanc
 
     it('setSync consulte _ecritureAutorisee et abandonne si bloqué', () => {
         // La garde doit être appelée dans setSync ET la fonction doit return
-        // (donc ne rien persister) quand l'écriture est refusée.
-        expect(dbSource).toMatch(/setSync\(key, value\)\s*\{[\s\S]*?if \(!this\._ecritureAutorisee\(key, value\)\) return;/);
+        // (donc ne rien persister) quand l'écriture est refusée — en rendant `false`
+        // depuis le lot B de l'enregistrement (27 sept. 2026), pour que
+        // `sauvegarderDonneesSelonMode` dise « Non enregistré » au lieu d'un succès.
+        expect(dbSource).toMatch(/setSync\(key, value\)\s*\{[\s\S]*?if \(!this\._ecritureAutorisee\(key, value\)\) return false;/);
     });
 
     it('set (async) consulte _ecritureAutorisee et abandonne si bloqué', () => {

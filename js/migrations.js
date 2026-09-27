@@ -1033,7 +1033,7 @@ function migrerDescriptionVersActivite() {
         }
     });
     if (nb > 0) {
-        sauvegarderDonneesSelonMode('productions', productions);
+        sauvegarderDonneesSelonMode('productions', productions, { discret: true });
         console.warn('[migrations] ' + nb + ' productions : description → activiteApprentissage');
     }
     db.setSync(flag, true);

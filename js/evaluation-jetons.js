@@ -255,9 +255,8 @@ function verifierDisponibiliteJeton(da, type) {
 /**
  * #563 — Persiste les évaluations et DIT si l'écriture a été refusée.
  *
- * `sauvegarderDonneesSelonMode` rend `false` en mode anonymisation (écriture
- * bloquée) comme sur erreur de stockage. Les six sites d'écriture de ce module
- * ignoraient ce retour : le jeton n'était pas enregistré, mais l'interface se
+ * Les six sites d'écriture de ce module ignoraient le retour de
+ * `sauvegarderDonneesSelonMode` : le jeton n'était pas enregistré, mais l'interface se
  * mettait à jour comme si tout allait bien — badges, notification de succès,
  * rafraîchissement de la liste. Au rechargement, le jeton avait disparu sans que
  * personne n'ait rien vu passer.
@@ -265,25 +264,17 @@ function verifierDisponibiliteJeton(da, type) {
  * Point de persistance UNIQUE : le prochain site d'écriture n'a plus à se
  * souvenir d'examiner le retour, il a juste à passer par ici.
  *
+ * Lot B de l'enregistrement (27 sept. 2026) : l'échec est dit UNE fois, par le témoin
+ * commun, que `sauvegarderDonneesSelonMode` fait parler avec le geste (« Non enregistré –
+ * ‹geste› : ‹raison› »). L'ancien toast « Modification non enregistrée » est retiré. La
+ * fonction rend `true` ou `false`, jamais une chaîne (#786).
+ *
  * @param {Array} evaluations - Le tableau complet à persister
  * @param {string} geste - Ce que l'utilisateur croyait faire, pour le message
- * #617/#725 (13 sept. 2026) : `sauvegarderDonneesSelonMode` rend deux refus — `'quota'` et
- * `'error'` (l'écriture a levé, `modes.js`) ; l'anonymisation n'en est plus un depuis le lot A
- * de l'enregistrement (26 sept. 2026). Ce sont des chaînes, donc truthy : l'ancien `return ok` les laissait passer pour un succès
- * chez tous les appelants. Seul `true` est un succès — même contrat que `supprimerEvaluation`.
- *
- * @returns {boolean} true si l'écriture a bien eu lieu, false sinon (jamais une chaîne)
+ * @returns {boolean} true si l'écriture a bien eu lieu, false sinon
  */
 function _persisterEvaluationsJetons(evaluations, geste) {
-    const retour = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    const ok = retour === true;
-    if (!ok) {
-        const cause = retour === 'quota' ? "l'espace de stockage est plein."
-            : "le stockage a refusé l'écriture.";
-        console.warn('[Jetons] Écriture refusée (' + String(retour) + ') — ' + geste);
-        notifications.erreur('Modification non enregistrée', geste + ' : ' + cause);
-    }
-    return ok;
+    return sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, { geste }) === true;
 }
 
 /**
@@ -771,7 +762,7 @@ function retirerJetonReprise(evaluationId) {
     }
 
     // Sauvegarder via sauvegarderDonneesSelonMode (bloque en mode anonymisation).
-    // Refus (false, 'quota' ou 'error') → rien n'a bougé : ni succès annoncé, ni fichier déplacé.
+    // Refus (`false`) → rien n'a bougé : ni succès annoncé, ni fichier déplacé ; le témoin commun dit l'échec.
     if (!_persisterEvaluationsJetons(evaluations, 'Retrait du jeton de reprise')) return false;
 
     // #607 — l'écriture a eu lieu : le détachement la suit sans point d'attente.

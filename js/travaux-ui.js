@@ -3794,7 +3794,8 @@
             // du trimestre (lot A de l'enregistrement, 26 sept. 2026).
             const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
             const evaluationsMaj = evaluations.filter(e => e.id !== evalAssociee.id);
-            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj);
+            sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsMaj,
+                { geste: 'Suppression de l\'évaluation du fichier' });
         } else {
             if (!confirm('Supprimer ce fichier importé ?')) return;
         }
@@ -7167,14 +7168,14 @@
         // évaluation d'avant D7 garde sa question (« Garder la mienne » / « Remplacer »).
         if (textarea.value !== textarea.defaultValue) evaluations[index].retroactionReecrite = true;
         evaluations[index].dateModification = new Date().toISOString();
-        const resultat = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+        // Lot B de l'enregistrement : l'échec est dit par le témoin commun, avec le geste.
+        const resultat = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
+            { geste: 'Enregistrement de la rétroaction' });
 
         fermerModalRetroaction();
 
         if (resultat === true) {
             notifications.succes('Rétroaction sauvegardée');
-        } else if (resultat === 'quota') {
-            notifications.erreur('Espace de stockage insuffisant', 'Impossible de sauvegarder la rétroaction.');
         }
     }
 

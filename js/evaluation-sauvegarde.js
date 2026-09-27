@@ -324,20 +324,6 @@ function _basculerEnModificationActiveSauv(existanteActive) {
     }
 }
 
-function _gererErreurPersistanceSauv(resultatSauvegarde) {
-    if (resultatSauvegarde === 'quota') {
-        notifications.erreur(
-            'Espace de stockage insuffisant',
-            'Le quota de stockage du navigateur est dépassé. Exporte tes données (Réglages → Données) puis supprime des évaluations anciennes.'
-        );
-    } else {
-        notifications.erreur(
-            'Erreur de sauvegarde',
-            'Une erreur inattendue s\'est produite. Consulte la console pour plus de détails.'
-        );
-    }
-}
-
 function _synchroniserGroupeCoursFichierSauv(groupeCoursActif) {
     // 🔧 FIX (5 mars 2026) : Synchroniser UNIQUEMENT le groupeCoursId du fichier.
     // NE PAS écraser productionId ni etudiantDA — cela corrompait les métadonnées
@@ -482,11 +468,11 @@ function sauvegarderEvaluation() {
     }
 
     evaluations.push(evaluation);
-    const resultatSauvegarde = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
-    if (resultatSauvegarde !== true) {
-        _gererErreurPersistanceSauv(resultatSauvegarde);
-        return;
-    }
+    // Lot B de l'enregistrement (27 sept. 2026) : l'échec est dit par le témoin commun, avec
+    // le geste ; les deux toasts propres à ce module (« Espace de stockage insuffisant »,
+    // « Erreur de sauvegarde ») sont retirés — un échec ne se dit qu'une fois.
+    if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
+        { geste: 'Enregistrement de l\'évaluation' }) !== true) return;
 
     _postSauvegardeSauv(evaluation, groupeCoursActif);
 }
