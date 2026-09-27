@@ -1741,6 +1741,510 @@ function nomFichierExport(niveauId, formatId) {
     return propre + '-' + niveauId + (format ? format.extension : '.txt');
 }
 
+// ---------------------------------------------------------------------------
+// #963 — « JE FAIS RELIRE MA CARTE PAR UNE IA » (27 sept. 2026)
+//
+// Un fichier .md : les consignes validées par Grégoire, puis la carte en
+// l'état. L'enseignant·e le colle dans l'IA de son choix et lit la réponse.
+// ALLER SIMPLE : rien ne se réimporte, et ce code n'écrit RIEN — ni dans la
+// carte, ni dans le magasin. Même esprit que le modèle de cartouche
+// (`composerModeleCartouche`, cartouches.js) : consignes en blockquote en
+// tête, données ensuite.
+//
+// Deux temps, comme l'export du plan : `construireDonneesModele` lit la carte
+// UNE fois, `composerModeleCarte` met en forme sans rien relire. La seconde
+// est pure : c'est elle que les tests exercent sur une carte fictive.
+//
+// ⚠ AUCUN VOCABULAIRE DISCIPLINAIRE ICI. Tout mot qui vient d'une discipline
+// (littérature, ELLAC, enseignement explicite comme norme) vient de la carte
+// elle-même : titres, objectifs, types de blocs tels qu'affichés.
+//
+// ⚠ CE QUE LE MODÈLE LIT AUTREMENT QUE L'EXPORT DU PLAN, et pourquoi. Trois
+// lectures de l'export du plan taisent une donnée que la consigne du lot
+// exige ; le modèle lit la donnée à sa source, sans toucher à l'export (les
+// constats sont inscrits au suivi des bugs, lot #963) :
+//   1. les objectifs servis sont résolus contre TOUTE la carte, pas seulement
+//      la leçon parente (`objectifsServisPar` filtre ; un clone porte les
+//      objectifs de la leçon de son original) ;
+//   2. l'échelle vient de la PRODUCTION (`production.echelleId`), pas de
+//      `grille.echelleId`, que l'éditeur de grille n'écrit jamais ;
+//   3. la production est cherchée dans TOUTES les productions du trimestre,
+//      pas dans la projection filtrée du sélecteur de l'Inspecteur.
+// ---------------------------------------------------------------------------
+
+var ETAPES_MODELE = [
+    { id: 'construire', label: 'Construire les séances' },
+    { id: 'relier',     label: 'Relier' },
+    { id: 'verifier',   label: 'Vérifier' }
+];
+
+// LE TEXTE VALIDÉ PAR GRÉGOIRE (27 sept. 2026), tel quel. Les jetons entre
+// accolades sont les crochets de la consigne, remplis à l'export. Un test
+// compare ces lignes à la consigne du lot (plans de travail/), octet pour
+// octet : ne rien retoucher ici sans que le texte validé ait changé.
+var CONSIGNES_MODELE = [
+    '# Carte d\'alignement : {NOM}',
+    '',
+    '> CONSIGNES : à lire par l\'assistant, puis à laisser telles quelles.',
+    '>',
+    '> Tu reçois ci-dessous la carte d\'alignement d\'un cours, telle que l\'enseignant·e l\'a construite dans Labo Codex. Tu en fais la lecture critique ; tu ne la réécris pas. L\'enseignant·e décidera seul·e de ce qu\'il faut modifier.',
+    '>',
+    '> LE PRINCIPE',
+    '> Évaluer ce qu\'on enseigne, et enseigner ce qu\'on évalue, au même niveau d\'exigence.',
+    '>',
+    '> OÙ EN EST L\'ENSEIGNANT·E',
+    '> Étape : {ETAPE}. Carte bâtie jusqu\'à la semaine {N}{SUR}.',
+    '> - Construire les séances : les objectifs et les liens ne sont pas encore posés. Ne signale ni leur absence ni ce qui suit la semaine {N} ; lis les séances déjà bâties par leurs titres et leur ordre.',
+    '> - Relier : signale aussi les objectifs sans lien et les évaluations qui ne vérifient aucun objectif.',
+    '> - Vérifier : lis la carte comme terminée.',
+    '>',
+    '> CE QUE TU VÉRIFIES',
+    '> La carte calcule déjà les liens manquants. Ton rôle est ce qu\'un calcul ne voit pas : le sens de ces liens.',
+    '> - Ce qui est évalué a-t-il été enseigné ? Pour chaque évaluation, pars des objectifs qu\'elle vérifie (à défaut, de son titre) et repère où la carte les enseigne et les fait pratiquer. Signale ce qu\'elle exige sans que la carte montre où cela a été appris.',
+    '> - Ce qui est enseigné est-il évalué ? Signale ce qui est enseigné sans être évalué nulle part, en admettant que ce puisse être voulu (un préalable, une mise en route).',
+    '> - L\'ordre : ce qui est évalué a-t-il été enseigné avant l\'évaluation ?',
+    '> - Le verbe : repère le verbe de chaque objectif (identifier, expliquer, concevoir…). Vérifie que les activités font exercer ce verbe et que l\'évaluation exige ce même verbe, pas un verbe plus exigeant. Compare aussi ce verbe au niveau cognitif indiqué sur l\'évaluation.',
+    '> - Les liens eux-mêmes : un lien posé ne prouve pas l\'alignement. Signale un objectif coché par une activité ou une évaluation qui, d\'après son titre, ne le travaille pas.',
+    '> - La démarche : si la carte montre une progression (des étapes, des types d\'activités), vérifie qu\'elle suit la sienne. Ne lui impose aucune démarche qu\'elle ne montre pas.',
+    '>',
+    '> CE QUE TU RENDS',
+    '> 1. Les trous : ce qui manque, en nommant les blocs concernés.',
+    '> 2. Les incohérences : ce qui se contredit, en nommant les blocs et le lien en cause.',
+    '> 3. Les questions : ce que la carte ne permet pas de trancher.',
+    '> 4. Au plus trois suggestions, classées par importance.',
+    '>',
+    '> ANCRAGE',
+    '> - Tu ne connais pas la discipline de ce cours et tu n\'en juges pas le contenu. Emploie uniquement les termes de la carte ; suis-les d\'un bloc à l\'autre pour vérifier que ce qui est évalué a été enseigné, et que ce qui est enseigné est évalué. N\'introduis aucun concept qui n\'y figure pas.',
+    '> - Appuie chaque remarque sur un bloc ou un lien présent dans la carte, cité par son nom et sa semaine.',
+    '> - Distingue ce que la carte montre de ce que tu en infères.',
+    '> - Aucune note, aucune félicitation.'
+];
+
+/**
+ * Les consignes remplies. `nbSemaines` absent (le Cadre du trimestre n'est pas
+ * configuré) : la phrase s'arrête à « jusqu'à la semaine N » plutôt que
+ * d'affirmer un total deviné.
+ */
+function lignesConsignesModele(nomCarte, etapeId, semaine, nbSemaines) {
+    var etape = ETAPES_MODELE.find(function(e) { return e.id === etapeId; }) || ETAPES_MODELE[0];
+    var sur = nbSemaines ? ' sur ' + nbSemaines : '';
+    return CONSIGNES_MODELE.map(function(l) {
+        return l.split('{NOM}').join(nomCarte)
+            .split('{ETAPE}').join(etape.label)
+            .split('{N}').join(String(semaine))
+            .split('{SUR}').join(sur);
+    });
+}
+
+/** « 1 h 50 » n'est pas le format de la carte : elle écrit des minutes. */
+function dureeModele(min) {
+    return min ? min + ' min' : '';
+}
+
+function guillemets(t) {
+    return '« ' + String(t == null ? '' : t).trim() + ' »';
+}
+
+/**
+ * LA carte en données, lue une fois. Rien ici n'écrit.
+ * @returns {Object|null} null sans carte active
+ */
+function construireDonneesModele() {
+    var c = carte();
+    if (!c || !c.etat) return null;
+    var etat = c.etat;
+
+    var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
+    var nomCarte = 'Sans titre';
+    if (index && index.cartes) {
+        var infos = index.cartes.find(function(cc) { return cc.id === index.active; });
+        if (infos && infos.nom) nomCarte = infos.nom;
+    }
+
+    // --- Le cours rattaché, s'il y en a un ---
+    var cours = null;
+    var pd = window.planificationDonnees;
+    if (pd && typeof pd.resoudreCoursDeCarte === 'function' && index && index.active) {
+        var fiche = pd.resoudreCoursDeCarte(index.active);
+        if (fiche) {
+            cours = {
+                code: fiche.codeCours || fiche.sigle || fiche.code || '',
+                nom: fiche.nomCours || fiche.titre || '',
+                numeroCompetence: fiche.numeroCompetence || '',
+                competence: fiche.competence || '',
+                elements: String(fiche.elementsCompetence || '').split('\n')
+                    .map(function(l) { return l.trim(); }).filter(Boolean)
+            };
+        }
+    }
+
+    // --- Index des objectifs de TOUTES les leçons (lecture 1 ci-dessus) ---
+    var objectifsGlobaux = {};
+    etat.noeuds.forEach(function(nd) {
+        if (nd.type !== 'lecon') return;
+        c.objectifsDeLecon(nd).forEach(function(o) {
+            objectifsGlobaux[o.id] = { texte: o.texte, lecon: nd };
+        });
+    });
+
+    // --- Productions, grilles, échelles : lues brutes, une fois ---
+    var magasin = { productions: [], grilles: [], echelles: [] };
+    if (typeof db !== 'undefined' && typeof window.cle === 'function') {
+        try {
+            magasin.productions = db.getSync(window.cle('productions'), []) || [];
+            magasin.grilles = db.getSync(window.cle('grillesTemplates'), []) || [];
+            magasin.echelles = db.getSync(window.cle('echellesTemplates'), []) || [];
+        } catch (e) { console.warn('[Modèle IA] lecture des productions impossible :', e.message || e); }
+    }
+    var gcActif = null;
+    if (typeof window.obtenirIdContexteActif === 'function' && typeof db !== 'undefined') {
+        try { gcActif = window.obtenirIdContexteActif(db.getSync('infoCours', null)); } catch (e2) { gcActif = null; }
+    }
+
+    function leconDe(nd) {
+        var vus = {};
+        var cur = nd;
+        while (cur && cur.parent && !vus[cur.id]) {
+            vus[cur.id] = true;
+            cur = etat.noeuds.get(cur.parent);
+            if (cur && cur.type === 'lecon') return cur;
+        }
+        return null;
+    }
+
+    function semaineDe(nd) {
+        if (nd.type === 'lecon') return c.semaineDeLecon(nd);
+        var l = leconDe(nd);
+        return l ? c.semaineDeLecon(l) : null;
+    }
+
+    /** « « Titre » (Type, semaine N) » — ce qui permet à l'IA de citer un bloc. */
+    function designation(nd) {
+        var label = c.obtenirLabelNoeud(nd) || nd.type;
+        var s = semaineDe(nd);
+        return guillemets(nd.titre || 'Sans titre') + ' (' + label + (s !== null ? ', semaine ' + s : '') + ')';
+    }
+
+    function niveauCognitif(nd) {
+        var id = nd.metadata && nd.metadata.niveauCognitif;
+        if (!id || c.TYPES_AVEC_NIVEAU_COGNITIF.indexOf(nd.type) === -1) return '';
+        var nc = (c.NIVEAUX_COGNITIFS || []).find(function(n) { return n.id === id; });
+        return nc ? nc.label : '';
+    }
+
+    /**
+     * Les liens en phrases, agrégés sur les clones : un clone est le MÊME bloc,
+     * et les badges de la carte comptent déjà ses liens ainsi. Sans ça, l'IA
+     * signalerait comme « sans lien » un clone dont l'original est relié.
+     */
+    function liensEnPhrases(nd) {
+        var instances = typeof c.trouverClones === 'function' ? c.trouverClones(nd.id) : [nd];
+        if (instances.length === 0) instances = [nd];
+        var vus = {};
+        var phrases = [];
+        instances.forEach(function(inst) {
+            c.getLiensDeNoeud(inst.id).forEach(function(l) {
+                var autre = etat.noeuds.get(l.noeudId);
+                if (!autre) return;
+                var cleLien = inst.id + '|' + l.noeudId + '|' + l.lienLabel + '|' + l.direction;
+                if (vus[cleLien]) return;
+                vus[cleLien] = true;
+                phrases.push(l.direction === 'sortant'
+                    ? designation(nd) + ' ' + l.lienLabel + ' ' + designation(autre) + '.'
+                    : designation(autre) + ' ' + l.lienLabel + ' ' + designation(nd) + '.');
+            });
+        });
+        return phrases;
+    }
+
+    function objectifsServis(nd, leconHote) {
+        var ids = (nd.metadata && Array.isArray(nd.metadata.objectifsServis)) ? nd.metadata.objectifsServis : [];
+        var resultat = [];
+        var vus = {};
+        ids.forEach(function(id) {
+            var o = objectifsGlobaux[id];
+            // Un id qui ne résout rien (objectif retiré depuis) n'a pas de
+            // texte à écrire : il est omis, comme la carte l'omet à l'écran.
+            if (!o || vus[id]) return;
+            vus[id] = true;
+            var ailleurs = !leconHote || o.lecon.id !== leconHote.id;
+            var s = c.semaineDeLecon(o.lecon);
+            resultat.push(guillemets(o.texte) + (ailleurs
+                ? ' (objectif de la leçon ' + guillemets(o.lecon.titre || 'Sans titre')
+                    + (s !== null ? ', semaine ' + s : '') + ')'
+                : ''));
+        });
+        return resultat;
+    }
+
+    function production(nd) {
+        var pid = nd.metadata && nd.metadata.productionId;
+        if (!pid) return null;
+        var p = magasin.productions.find(function(x) { return x && x.id === pid; });
+        if (!p) return { introuvable: true };
+        var g = p.grilleId ? magasin.grilles.find(function(x) { return x && x.id === p.grilleId; }) : null;
+        var e = p.echelleId ? magasin.echelles.find(function(x) { return x && (x.id === p.echelleId || x.idOriginal === p.echelleId); }) : null;
+        var echeance = p.dateEcheance || null;
+        if (typeof window.obtenirEcheanceEffective === 'function') {
+            try { echeance = window.obtenirEcheanceEffective(p, gcActif).date || null; } catch (e3) { /* garde la date brute */ }
+        }
+        return {
+            titre: p.titre || 'Sans titre',
+            ponderation: p.ponderation || 0,
+            grille: g ? (g.nom || 'Sans nom') : '',
+            echelle: e ? (e.nom || 'Sans nom') : '',
+            echeance: echeance
+        };
+    }
+
+    function bloc(nd, leconHote) {
+        var b = {
+            designation: guillemets(nd.titre || 'Sans titre'),
+            type: c.obtenirLabelNoeud(nd) || nd.type,
+            duree: (nd.metadata && parseInt(nd.metadata.duree, 10)) || 0,
+            horsClasse: !!(nd.metadata && nd.metadata.horsClasse === true),
+            niveau: niveauCognitif(nd),
+            objectifsServis: objectifsServis(nd, leconHote),
+            liens: liensEnPhrases(nd),
+            evaluation: null
+        };
+        if (nd.type === 'evaluation') {
+            var v = c.viseeChoisie(nd);
+            b.evaluation = { visee: v || '', production: production(nd) };
+        }
+        return b;
+    }
+
+    // --- Compétences et idées maîtresses ---
+    var intentions = [];
+    etat.noeuds.forEach(function(nd) {
+        if (nd.type !== 'competence' && nd.type !== 'idee-maitresse') return;
+        intentions.push(nd);
+    });
+    intentions.sort(function(a, b) {
+        if (a.type !== b.type) return a.type === 'competence' ? -1 : 1;
+        return ((a.y || 0) - (b.y || 0)) || ((a.x || 0) - (b.x || 0));
+    });
+
+    // --- Leçons : semaine, puis rang, puis position (même tri que le plan) ---
+    var lecons = [];
+    etat.noeuds.forEach(function(nd) { if (nd.type === 'lecon') lecons.push(nd); });
+    lecons = trierLeconsTemporel(lecons).map(function(nd) {
+        var parent = nd.parent ? etat.noeuds.get(nd.parent) : null;
+        return {
+            titre: nd.titre || 'Sans titre',
+            semaine: c.semaineDeLecon(nd),
+            seance: c.lettreRangSeance(c.rangSeanceDeLecon(nd)),
+            sequence: parent && parent.type === 'sequence' ? c.cheminSequence(parent) : '',
+            duree: c.dureeRollupNoeud(nd) || 0,
+            objectifs: c.objectifsDeLecon(nd).map(function(o) { return o.texte; }),
+            ideesMaitresses: c.trouverIdeesMaitressesAncetres(nd.id).map(function(im) {
+                return guillemets(im.titre || 'Sans titre');
+            }),
+            blocs: (nd.enfants || []).map(function(eid) { return etat.noeuds.get(eid); })
+                .filter(Boolean)
+                .map(function(enf) { return bloc(enf, nd); })
+        };
+    });
+
+    // --- Blocs rattachés à aucune leçon ---
+    var horsLecon = [];
+    etat.noeuds.forEach(function(nd) {
+        if (['competence', 'idee-maitresse', 'sequence', 'lecon'].indexOf(nd.type) !== -1) return;
+        if (leconDe(nd)) return;
+        var b = bloc(nd, null);
+        var parent = nd.parent ? etat.noeuds.get(nd.parent) : null;
+        b.sequence = parent && parent.type === 'sequence' ? c.cheminSequence(parent) : '';
+        horsLecon.push(b);
+    });
+
+    return {
+        nomCarte: nomCarte,
+        cours: cours,
+        intentions: intentions.map(function(nd) {
+            return {
+                type: c.obtenirLabelNoeud(nd),
+                designation: guillemets(nd.titre || 'Sans titre'),
+                niveau: niveauCognitif(nd),
+                liens: liensEnPhrases(nd)
+            };
+        }),
+        lecons: lecons,
+        horsLecon: horsLecon
+    };
+}
+
+/** Semaines du trimestre selon le Cadre, ou null s'il n'est pas configuré. */
+function nombreSemainesTrimestre() {
+    var c = carte();
+    if (!c || typeof c.deriverRangeesGrille !== 'function') return null;
+    var derive = c.deriverRangeesGrille();
+    if (!derive || derive.source !== 'cadre') return null;
+    var n = derive.rangees.filter(function(r) { return r.type === 'semaine'; }).length;
+    return n > 0 ? n : null;
+}
+
+/** Défaut de la consigne : la dernière semaine qui contient une leçon. */
+function semaineParDefautModele() {
+    var c = carte();
+    if (!c || !c.etat) return null;
+    var max = null;
+    c.etat.noeuds.forEach(function(nd) {
+        var s = c.semaineDeLecon(nd);
+        if (s !== null && (max === null || s > max)) max = s;
+    });
+    return max;
+}
+
+function lignesBloc(b, retrait) {
+    var r = retrait || '';
+    var entete = r + '- ' + b.type + ' ' + b.designation;
+    var precisions = [];
+    if (b.duree) precisions.push(dureeModele(b.duree) + (b.horsClasse ? ' hors classe' : ''));
+    else if (b.horsClasse) precisions.push('hors classe');
+    if (b.niveau) precisions.push('niveau cognitif : ' + b.niveau);
+    if (b.sequence) precisions.push('dans la séquence ' + guillemets(b.sequence));
+    var lignes = [entete + (precisions.length ? ' (' + precisions.join(' ; ') + ')' : '')];
+
+    if (b.evaluation) {
+        lignes.push(r + '  - Objectifs vérifiés : ' + (b.objectifsServis.length ? b.objectifsServis.join(' ; ') : 'aucun'));
+        lignes.push(r + '  - Visée : ' + (b.evaluation.visee || 'non précisée'));
+        var p = b.evaluation.production;
+        if (!p) {
+            lignes.push(r + '  - Production : aucune');
+        } else if (p.introuvable) {
+            lignes.push(r + '  - Production : introuvable dans ce trimestre');
+        } else {
+            lignes.push(r + '  - Production : ' + guillemets(p.titre) + (p.ponderation ? ' (' + p.ponderation + ' %)' : ''));
+            lignes.push(r + '  - Grille : ' + (p.grille ? guillemets(p.grille) : 'aucune'));
+            lignes.push(r + '  - Échelle : ' + (p.echelle ? guillemets(p.echelle) : 'aucune'));
+            lignes.push(r + '  - Échéance : ' + (p.echeance || 'aucune'));
+        }
+    } else if (b.objectifsServis.length) {
+        lignes.push(r + '  - Objectifs servis : ' + b.objectifsServis.join(' ; '));
+    }
+    b.liens.forEach(function(ph) { lignes.push(r + '  - ' + ph); });
+    return lignes;
+}
+
+function lignesLecon(l) {
+    var lignes = [];
+    lignes.push('#### Leçon ' + guillemets(l.titre) + (l.seance ? ', séance ' + l.seance : ''));
+    lignes.push('');
+    if (l.sequence) lignes.push('Séquence : ' + guillemets(l.sequence));
+    if (l.duree) lignes.push('Durée : ' + dureeModele(l.duree));
+    lignes.push('Idées maîtresses : ' + (l.ideesMaitresses.length ? l.ideesMaitresses.join(' ; ') : 'aucune'));
+    if (l.objectifs.length) {
+        lignes.push('Objectifs de la leçon :');
+        l.objectifs.forEach(function(o) { lignes.push('- ' + o); });
+    } else {
+        lignes.push('Objectifs de la leçon : aucun');
+    }
+    lignes.push('');
+    if (l.blocs.length) {
+        lignes.push('Blocs de la leçon :');
+        l.blocs.forEach(function(b) { lignes.push.apply(lignes, lignesBloc(b)); });
+    } else {
+        lignes.push('Blocs de la leçon : aucun');
+    }
+    lignes.push('');
+    return lignes;
+}
+
+/**
+ * LE fichier du modèle — fonction pure : aucune lecture, aucune écriture.
+ * @param {Object} donnees - rendu de `construireDonneesModele`
+ * @param {Object} options - { etape, semaine, nbSemaines }
+ * @returns {string} le contenu Markdown
+ */
+function composerModeleCarte(donnees, options) {
+    var opts = options || {};
+    var lignes = lignesConsignesModele(donnees.nomCarte, opts.etape, opts.semaine, opts.nbSemaines);
+    lignes.push('');
+    lignes.push('---');
+    lignes.push('');
+
+    lignes.push('## Le cours');
+    lignes.push('');
+    var co = donnees.cours;
+    if (!co) {
+        lignes.push('Aucun cours n\'est rattaché à cette carte.');
+    } else {
+        lignes.push('Cours : ' + [co.code, co.nom].filter(Boolean).join(', '));
+        if (co.competence) {
+            lignes.push('Compétence' + (co.numeroCompetence ? ' ' + co.numeroCompetence : '') + ' : ' + co.competence);
+        }
+        if (co.elements.length) {
+            lignes.push('Éléments de la compétence :');
+            co.elements.forEach(function(e) { lignes.push('- ' + e); });
+        }
+    }
+    lignes.push('');
+
+    lignes.push('## Compétences et idées maîtresses de la carte');
+    lignes.push('');
+    if (donnees.intentions.length === 0) {
+        lignes.push('Aucune compétence ni idée maîtresse n\'est posée sur la carte.');
+    } else {
+        donnees.intentions.forEach(function(it) {
+            lignes.push('- ' + it.type + ' ' + it.designation + (it.niveau ? ' (niveau cognitif : ' + it.niveau + ')' : ''));
+            it.liens.forEach(function(ph) { lignes.push('  - ' + ph); });
+        });
+    }
+    lignes.push('');
+
+    lignes.push('## Semaine par semaine');
+    lignes.push('');
+    var planifiees = donnees.lecons.filter(function(l) { return l.semaine !== null; });
+    var sansSemaine = donnees.lecons.filter(function(l) { return l.semaine === null; });
+    if (planifiees.length === 0) {
+        lignes.push('Aucune leçon n\'a encore de semaine.');
+        lignes.push('');
+    }
+    var semaineCourante = null;
+    planifiees.forEach(function(l) {
+        if (l.semaine !== semaineCourante) {
+            semaineCourante = l.semaine;
+            lignes.push('### Semaine ' + l.semaine);
+            lignes.push('');
+        }
+        lignes.push.apply(lignes, lignesLecon(l));
+    });
+    if (sansSemaine.length) {
+        lignes.push('### Leçons sans semaine');
+        lignes.push('');
+        sansSemaine.forEach(function(l) { lignes.push.apply(lignes, lignesLecon(l)); });
+    }
+
+    lignes.push('## Blocs rattachés à aucune leçon');
+    lignes.push('');
+    if (donnees.horsLecon.length === 0) {
+        lignes.push('Aucun.');
+    } else {
+        donnees.horsLecon.forEach(function(b) { lignes.push.apply(lignes, lignesBloc(b)); });
+    }
+    lignes.push('');
+    return lignes.join('\n');
+}
+
+/** Le modèle de la carte active. null sans carte. */
+function genererModeleCarte(options) {
+    var donnees = construireDonneesModele();
+    if (!donnees) return null;
+    return composerModeleCarte(donnees, options);
+}
+
+/** « modele-ia-<carte>.md », caractères sûrs — même règle que l'export. */
+function nomFichierModele() {
+    var nom = 'alignement';
+    var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
+    if (index && index.cartes) {
+        var infos = index.cartes.find(function(cc) { return cc.id === index.active; });
+        if (infos && infos.nom) nom = infos.nom;
+    }
+    return 'modele-ia-' + nom.replace(/[^a-zA-Z0-9À-ſ _-]/g, '').trim().replace(/\s+/g, '-') + '.md';
+}
+
 window.planificationExport = {
     NIVEAUX: NIVEAUX,
     FORMATS: FORMATS,
@@ -1784,7 +2288,16 @@ window.planificationExport = {
     // #431 — niveau Personnalisé : constantes et portes de la modale.
     // ⚠ Ce qui reste de #431 sert UNIQUEMENT à la migration : traduire une
     // config héritée en colonnes. Plus rien n'en dépend à l'écran.
-    normaliserConfigPersonnalisee: normaliserConfigPersonnalisee
+    normaliserConfigPersonnalisee: normaliserConfigPersonnalisee,
+    // #963 — le modèle « Je fais relire ma carte par une IA ».
+    ETAPES_MODELE: ETAPES_MODELE,
+    CONSIGNES_MODELE: CONSIGNES_MODELE,
+    construireDonneesModele: construireDonneesModele,
+    composerModeleCarte: composerModeleCarte,
+    genererModeleCarte: genererModeleCarte,
+    nombreSemainesTrimestre: nombreSemainesTrimestre,
+    semaineParDefautModele: semaineParDefautModele,
+    nomFichierModele: nomFichierModele
 };
 
 })();

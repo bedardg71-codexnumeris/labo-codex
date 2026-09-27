@@ -4214,6 +4214,10 @@
                         <span>Carte d'alignement</span>
                     </h2>
                     <p class="text-muted">Organiser visuellement les séquences, leçons et activités du cours</p>
+                    <!-- #963 (27 sept. 2026) : le principe de la carte, texte validé par Grégoire.
+                         `text-muted` n'est pas décoratif : le plein écran masque
+                         `#conception-carte > .text-muted`, comme le sous-titre. -->
+                    <p class="text-muted"><em>Évaluer ce qu'on enseigne, et enseigner ce qu'on évalue, au même niveau d'exigence.</em></p>
                     <div class="planif-wrapper">
 
                         <!-- Barre supérieure -->
@@ -4238,11 +4242,15 @@
                                             <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
                                             <button class="planif-action-item" id="planif-btn-exporter-plan">Exporter le plan&hellip;</button>
                                             <button class="planif-action-item" id="planif-btn-exporter-carte">Exporter cette carte</button>
+                                            <!-- #963 : faire relire sa carte par une IA (aller simple, rien n'est écrit) -->
+                                            <button class="planif-action-item" id="planif-btn-modele-ia">Télécharger un modèle&hellip;</button>
                                             <hr class="planif-action-sep">
                                             <button class="planif-action-item planif-danger" id="planif-btn-supprimer-carte">Supprimer cette carte</button>
                                         </div>
                                         <!-- Panneau d'export du plan : 3 niveaux × 3 formats (portage #424, même patron) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-export-plan-panel"></div>
+                                        <!-- Panneau du modèle « relire ma carte par une IA » (#963, même patron) -->
+                                        <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-modele-ia-panel"></div>
                                         <!-- Panneau import inter-trimestre (rempli par JS, patron Brique C) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-import-tri-panel"></div>
                                         <!-- Panneau du cours rattaché (même patron, rempli par JS) -->
@@ -14509,8 +14517,8 @@
     <script src="js/planification-donnees.js?v=20260903b"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20260924b"></script> <!-- Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
-    <script src="js/planification-export.js?v=20260924b"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
+    <script src="js/planification-carte.js?v=20260927a"></script> <!-- Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-export.js?v=20260927a"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
     <!-- BETA 96.3 : Module Travaux (import, annotation, archivage) -->
