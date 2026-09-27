@@ -807,7 +807,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'presences-saisie':
-        'Marque qui est présent·e à cette séance. Les présences alimentent le taux d’assiduité de chaque étudiant·e et le suivi du groupe.',
+        'Marque qui est présent·e à cette séance. Chaque changement s’enregistre tout seul, et les élèves que tu n’as pas marqué·es comptent présent·es. Les présences alimentent le taux d’assiduité de chaque étudiant·e et le suivi du groupe.',
     'presences-date':
         'La séance dont tu saisis les présences. Les flèches « Précédent » / « Suivant » passent d’une séance de cours à l’autre.',
     'presences-tri':

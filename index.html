@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260927e"> <!-- #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20260927f"> <!-- #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -7962,10 +7962,11 @@
                                     <span>Absents : <span id="nb-absents">0</span></span>
                                     <span>Total : <span id="nb-total">0</span></span>
                                     <span>Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span></span>
-                                    <span id="actions-presences-bar" class="u-flex-gap-8 u-align-center" style="margin-left: auto">
+                                    <span id="actions-presences-bar" class="u-flex-gap-8 u-align-center" style="margin-left: auto; flex-wrap: wrap; justify-content: flex-end">
                                         <button class="btn btn-principal btn-compact" data-action="ouvrirModaleRapportPresences">Rapport</button>
-                                        <button class="btn btn-confirmer btn-compact" data-action="enregistrerPresences">Enregistrer</button>
-                                        <button class="btn btn-annuler btn-compact" data-action="afficherSousSection" data-param="suivi-liste">Annuler</button>
+                                        <span id="etat-seance-presences" class="u-hide u-texte-petit" style="white-space: nowrap"></span>
+                                        <button class="btn btn-confirmer btn-compact u-hide" data-action="confirmerSeancePresences">Confirmer la séance</button>
+                                        <button class="btn btn-annuler btn-compact" data-action="fermerSaisiePresences">Fermer</button>
                                         <span id="controle-verrouillage-presences" class="u-hide u-flex-gap-6 u-align-center u-texte-petit" style="display: flex">
                                             <input type="checkbox" id="checkbox-verrouillage-presences"
                                                    style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer"
@@ -14475,8 +14476,8 @@
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260924b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20260927c"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
-    <script src="js/indices.js?v=20260927c"></script>
+    <script src="js/saisie-presences.js?v=20260927d"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/indices.js?v=20260927d"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=20260924b"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
@@ -14606,7 +14607,7 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260927b"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260927c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20260926c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260917b"></script>
     <script src="js/guides-pedagogiques.js?v=20260917b"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->

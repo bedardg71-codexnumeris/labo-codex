@@ -637,6 +637,9 @@ window.calculerAssiduitePourAffichage = calculerAssiduitePourAffichage;
 // Lot D (#735, #743) : la date d'arrivée et la forme unique de l'assiduité inconnue
 window.obtenirDateArrivee = obtenirDateArrivee;
 window.lireIndiceAssiduite = lireIndiceAssiduite;
+// Lot D de l'enregistrement (27 sept. 2026) : la saisie des présences dit « Séance saisie » /
+// « Non saisi·e : compté·e absent·e » par la MÊME règle que l'assiduité.
+window.construireDatesSaisiesGroupe = construireDatesSaisiesGroupe;
 
 
 })();

@@ -575,19 +575,21 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
             'periodes_2000001': elementDom({ value: '2' }), 'periodes_2000002': elementDom({ value: '0' }), 'periodes_2000003': elementDom({ value: '1.5' }),
             'notes_2000001': elementDom({ value: ' en retard ' }), 'notes_2000002': elementDom({ value: '' }), 'notes_2000003': elementDom({ value: '' }) }, opts.elements || {});
         const selecteurs = Object.assign({ '.input-periodes': ['2000001', '2000002', '2000003'].map(da => Object.assign(elements['periodes_' + da], { id: 'periodes_' + da, dataset: { da } })) }, opts.selecteurs || {});
-        const b = monter(store, Object.assign({}, opts, { modules: [{ chemin: 'js/saisie-presences.js', internes: ['restaurerCompteurPresences', 'sauvegarderPresencesSansValidation', 'validerDateSaisie', 'verifierConfigurationFormatHoraire'] }], globaux, elements, selecteurs }));
+        const b = monter(store, Object.assign({}, opts, { modules: [{ chemin: 'js/saisie-presences.js', internes: ['restaurerCompteurPresences', 'validerDateSaisie', 'verifierConfigurationFormatHoraire'] }], globaux, elements, selecteurs }));
         b.compteurs = compteurs;
         return b;
     }
     const presencesEcrites = (store) => clone(store.test_presences).map(p => ({ date: p.date, da: p.da, periodesPresentes: p.periodesPresentes, notes: p.notes, coursId: p.coursId, facultatif: p.facultatif, heures: p.heures }));
 
-    it('S-1 · Enregistrer : un enregistrement par (da, date, coursId), forme {date, da, periodesPresentes, notes, coursId} ; répété deux fois → identique ; relu tel quel', () => {
+    // Lot D (27 sept. 2026) : « Enregistrer » est devenu « Confirmer la séance » (écrivain unique
+    // `ecrirePresencesSeance`). Sur une séance saisie, le répéter n'a plus rien à écrire.
+    it('S-1 · Confirmer la séance : un enregistrement par (da, date, coursId), forme {date, da, periodesPresentes, notes, coursId} ; répété deux fois → identique ; relu tel quel', () => {
         const store = storeBase();
         store.test_presences = [{ date: DATE, da: '2000004', periodesPresentes: 2, notes: '', coursId: 'GC2' }];   // une fiche d'un autre cours, même jour
         const b = monterS(store);
-        b.win.enregistrerPresences();
+        b.win.confirmerSeancePresences();
         const premiere = presencesEcrites(store);
-        b.win.enregistrerPresences();
+        b.win.confirmerSeancePresences();
         const seconde = presencesEcrites(store);
         const b2 = monterS(store);
         const relu = b2.db.getSync('test_presences');
@@ -605,9 +607,10 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
     it('S-2 · Deux gestes à la suite (2 périodes puis 0 pour Alice) : le second remplace le premier — pas de doublon, pas de fusion', () => {
         const store = storeBase(); store.test_presences = [];
         const b = monterS(store);
-        b.win.enregistrerPresences();
+        b.win.confirmerSeancePresences();
         b.elements['periodes_2000001'].value = '0';
-        b.win.enregistrerPresences();
+        b.win.mettreAJourLignePeriodesHandler({ dataset: { da: '2000001', dateStr: DATE, nbPeriodes: '2' } });
+        b.win.viderEnregistrementPresences();
         const alice = store.test_presences.filter(p => p.da === '2000001');
         noter('S2', { fichesAlice: alice.length, periodes: alice[0] && alice[0].periodesPresentes });
         expect(alice.length).toBe(1);
@@ -618,7 +621,7 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         const store = storeBase();
         store.test_presences = [{ date: DATE, da: '2000001', periodesPresentes: 2, notes: 'GC2', coursId: 'GC2' }];   // Alice suit aussi GC2
         const b = monterS(store, { coursIdNul: true });
-        b.win.enregistrerPresences();
+        b.win.confirmerSeancePresences();
         const alice = store.test_presences.filter(p => p.da === '2000001');
         noter('S3', { fichesAlice: alice.map(p => ({ coursId: p.coursId, notes: p.notes })), ecritures: b.journal.filter(j => j.k === 'test_presences').length });
         expect(alice.length).toBe(1);
@@ -662,10 +665,14 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         // La ligne porte `<div id="suivi-saisie" class="sous-section">` : [1] = de la sous-section de
         // saisie jusqu'à la suivante.
         const indexHtml = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('id="suivi-saisie"')[1].split('class="sous-section"')[1];
-        noter('S5', { rapportDansBarre: html.includes('ouvrirModaleRapportPresences'), rapportDansIndex: indexHtml.includes('ouvrirModaleRapportPresences'), annulerVise: (html.match(/data-param="([^"]+)"/) || [])[1], sousSectionsSuivi: sousSectionsSuivi.map(x => x.replace(/id:\s*'/, '').replace(/'$/, '')) });
+        noter('S5', { rapportDansBarre: html.includes('ouvrirModaleRapportPresences'), rapportDansIndex: indexHtml.includes('ouvrirModaleRapportPresences'), fermer: html.includes('data-action="fermerSaisiePresences"'), sousSectionsSuivi: sousSectionsSuivi.map(x => x.replace(/id:\s*'/, '').replace(/'$/, '')) });
         expect(indexHtml).toContain('ouvrirModaleRapportPresences');
         expect(html).toContain('ouvrirModaleRapportPresences');                   // avant #768 : absent de la barre reconstruite
-        expect(html).toContain('data-param="suivi-liste"');                        // avant #768 : suivi-apercu-legacy
+        // Lot D : « Annuler » devient « Fermer » (fermerSaisiePresences vide l'écriture en attente,
+        // puis va à suivi-liste). Avant #768 : suivi-apercu-legacy.
+        expect(html).toContain('data-action="fermerSaisiePresences"');
+        const js = readFileSync(path.join(RACINE, 'js/saisie-presences.js'), 'utf8');
+        expect(js.split('function fermerSaisiePresences')[1].split('\n}')[0]).toContain("afficherSousSection('suivi-liste')");
         expect(html).not.toContain('apercu-legacy');
     });
 

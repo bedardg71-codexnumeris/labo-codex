@@ -78,17 +78,19 @@ describe('UI · la rangée de séance tient sur une seule ligne', () => {
 describe('UI · le bouton « Rapport » vit dans la barre d\'actions', () => {
     const html = lire('index.html');
 
-    it('il est dans la barre bleue, À GAUCHE d\'« Enregistrer »', () => {
+    // Lot D (27 sept. 2026) : « Enregistrer » est devenu « Confirmer la séance ». La barre porte
+    // désormais un <span> d'état : on la borne à son </div>, plus au premier </span>.
+    it('il est dans la barre bleue, À GAUCHE de « Confirmer la séance »', () => {
         const barre = html.slice(html.indexOf('id="actions-presences-bar"'));
-        const fin = barre.indexOf('</span>');
+        const fin = barre.indexOf('</div>');
         const contenu = barre.slice(0, fin);
 
         const posRapport = contenu.indexOf('>Rapport<');
-        const posEnregistrer = contenu.indexOf('>Enregistrer<');
+        const posConfirmer = contenu.indexOf('>Confirmer la séance<');
 
         expect(posRapport, '« Rapport » absent de la barre d\'actions').toBeGreaterThan(-1);
-        expect(posEnregistrer, '« Enregistrer » absent de la barre d\'actions').toBeGreaterThan(-1);
-        expect(posRapport, '« Rapport » doit précéder « Enregistrer »').toBeLessThan(posEnregistrer);
+        expect(posConfirmer, '« Confirmer la séance » absent de la barre d\'actions').toBeGreaterThan(-1);
+        expect(posRapport, '« Rapport » doit précéder « Confirmer la séance »').toBeLessThan(posConfirmer);
     });
 
     it('il a quitté l\'en-tête foncé « Enregistrement »', () => {
