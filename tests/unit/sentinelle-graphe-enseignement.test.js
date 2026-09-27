@@ -168,10 +168,13 @@ describe('correctif #415 · les nœuds d’enseignement explicite se relient enf
         expect(r.cible).toBe('n-src');
     });
 
-    it('une étape de méthode se vérifie par une évaluation', () => {
-        const r = verbeEntre(api, 'pratique-autonome', 'evaluation');
-        expect(r).not.toBeNull();
-        expect(r.verbe).toBe('se_verifie_par');
+    it('une étape de méthode ne se relie PAS à une évaluation (#964)', () => {
+        // ↻ RÉANCRÉ LE 27 SEPT. 2026 (#964), délibérément : décision didactique de
+        // Grégoire, une évaluation se relie UNIQUEMENT à des objectifs, cochés
+        // dans son Inspecteur. Les seize paires « …>evaluation » sont retirées de
+        // VERBES_AUTO ; tracer vers une évaluation est refusé. Les liens déjà
+        // tracés restent lus (sentinelle-badges-objectifs-964).
+        expect(verbeEntre(api, 'pratique-autonome', 'evaluation')).toBeNull();
     });
 });
 
@@ -221,8 +224,7 @@ describe('le repli est un SECOURS, jamais un remplacement', () => {
         const attendus = [
             ['factuelle', 'activite', 's_acquiert_par'],
             ['conceptuelle', 'soutien', 's_acquiert_par'],
-            ['activite', 'evaluation', 'se_verifie_par'],
-            ['idee-maitresse', 'evaluation', 'se_verifie_par'],
+            // (#964 : les paires « …>evaluation » ne sont plus des paires brutes.)
             ['competence', 'idee-maitresse', 'se_decline_en'],
             ['idee-maitresse', 'lecon', 'se_concretise_dans']
         ];
@@ -265,10 +267,13 @@ describe('nœud « Exposé » · le temps de parole du prof entre dans la carte'
         expect(sourceCarte).not.toMatch(/'expose>[a-z-]+'\s*:/);
     });
 
-    it('il se vérifie par une évaluation', () => {
-        const r = verbeEntre(api, 'expose', 'evaluation');
-        expect(r).not.toBeNull();
-        expect(r.verbe).toBe('se_verifie_par');
+    it('il ne se relie PAS à une évaluation (#964)', () => {
+        // ↻ RÉANCRÉ LE 27 SEPT. 2026 (#964), délibérément : décision didactique de
+        // Grégoire, une évaluation se relie UNIQUEMENT à des objectifs, cochés
+        // dans son Inspecteur. Les seize paires « …>evaluation » sont retirées de
+        // VERBES_AUTO ; tracer vers une évaluation est refusé. Les liens déjà
+        // tracés restent lus (sentinelle-badges-objectifs-964).
+        expect(verbeEntre(api, 'expose', 'evaluation')).toBeNull();
     });
 
     it('c’est un frère d’Activité : durée, rollup, objectifs servis, leçon', () => {

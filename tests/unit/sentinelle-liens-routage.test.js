@@ -387,11 +387,14 @@ describe('liens · D — on RÉACTIVE dans une Ouverture, on n’y acquiert pas'
         }
     });
 
-    it('… mais « révision ↔ évaluation » garde « se vérifie par »', () => {
-        // Le retrait ne devait toucher que le verbe d'ACQUISITION. Une révision
-        // se vérifie bien par une évaluation : ce verbe n'a jamais été en cause,
-        // et l'emporter au passage aurait été un dommage collatéral silencieux.
-        expect(verbe('revision', 'evaluation').verbe).toBe('se_verifie_par');
+    it('… et « révision ↔ évaluation » n\'est plus un lien (#964)', () => {
+        // Le retrait du 15 août ne touchait que le verbe d'ACQUISITION.
+        // ↻ RÉANCRÉ LE 27 SEPT. 2026 (#964), délibérément : décision didactique de
+        // Grégoire, une évaluation se relie UNIQUEMENT à des objectifs, cochés
+        // dans son Inspecteur. Les seize paires « …>evaluation » sont retirées de
+        // VERBES_AUTO ; tracer vers une évaluation est refusé. Les liens déjà
+        // tracés restent lus (sentinelle-badges-objectifs-964).
+        expect(verbe('revision', 'evaluation')).toBeNull();
     });
 });
 
