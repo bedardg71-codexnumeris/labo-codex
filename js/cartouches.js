@@ -813,7 +813,7 @@ async function persisterCartouchePartielle(appliquer, cible = cartoucheActuel) {
     // #593 — `cible` : la cartouche visée au moment du geste, pas celle qui est
     // ouverte au moment où la promesse se résout.
     if (!cible || !cible.id || !cible.grilleId) return false;
-    const resultat = await db.modifier(cle(`cartouches_${cible.grilleId}`), (lues) => {
+    const resultat = await modifierEtAnnoncer(cle(`cartouches_${cible.grilleId}`), (lues) => {
         const cartouches = lues || [];
         const enBase = cartouches.find(c => c.id === cible.id);
         if (!enBase) return undefined;              // pas encore enregistrée
@@ -821,7 +821,7 @@ async function persisterCartouchePartielle(appliquer, cible = cartoucheActuel) {
         appliquer(enBase);
         enBase.dateModification = new Date().toISOString();
         return cartouches;
-    }, []);
+    }, [], { geste: 'Modifier la cartouche' });
     return resultat !== undefined;
 }
 
@@ -891,6 +891,114 @@ async function sauvegarderContexteCartouche() {
 }
 
 /**
+ * Lot E1 (D3) — le contexte SPÉCIFIQUE, jumeau du contexte général : il s'enregistrait
+ * au seul bouton, et quitter la fiche le perdait alors que son voisin était gardé.
+ */
+async function sauvegarderContexteSpecifiqueCartouche() {
+    if (!cartoucheActuel) return;
+    const champ = document.getElementById('contexteSpecifiqueCartouche');
+    if (!champ) return;
+    const valeur = champ.value.trim();
+    cartoucheActuel.contexteSpecifique = valeur;
+    const ecrit = await persisterCartouchePartielle(c => { c.contexteSpecifique = valeur; });
+    signalerAutosaveCartoucheMuette(ecrit);
+}
+
+/** Lot E1 : la cartouche ouverte est-elle en base ? (lecture synchrone du stock) */
+function cartoucheEstEnBase(cartouche) {
+    if (!cartouche || !cartouche.id || !cartouche.grilleId) return false;
+    const liste = db.getSync(cle(`cartouches_${cartouche.grilleId}`), []) || [];
+    return liste.some(c => c.id === cartouche.id);
+}
+
+/**
+ * Lot E1 (D3) — le NOM d'une cartouche existante s'enregistre au changement de champ
+ * (à la sortie, pas à chaque frappe), comme celui d'une grille (`sauvegarderNomGrille`).
+ * La question du doublon est posée à ce moment-là : une question par nom changé, pas
+ * par frappe (la crainte de #517 tient, le `change` la respecte).
+ * En création, rien : c'est « Créer la cartouche » qui écrit.
+ */
+async function sauvegarderNomCartouche() {
+    const cible = cartoucheActuel;
+    if (!cartoucheEstEnBase(cible)) return;
+    const champ = document.getElementById('nomCartouche');
+    if (!champ) return;
+    let nom = champ.value.trim();
+    if (!nom) {
+        // D3 : un champ vérifié dit « Non enregistré : ‹raison› ».
+        if (window.temoinEnregistrement) {
+            window.temoinEnregistrement.nonEnregistre('le nom ne peut pas être vide.', 'Modifier la cartouche', cle(`cartouches_${cible.grilleId}`));
+        }
+        return;
+    }
+    const cartouches = await db.get(cle(`cartouches_${cible.grilleId}`)) || [];
+    const enBase = cartouches.find(c => c.id === cible.id);
+    if (!enBase || enBase.nom === nom) return;
+
+    let ecraserLeDoublon = false;
+    if (typeof verifierEtGererDoublon === 'function') {
+        const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, cible.id);
+        if (resultat === null) {
+            champ.value = enBase.nom || '';    // question annulée : le nom en base reste
+            return;
+        }
+        if (resultat && resultat.action === 'renommer') {
+            nom = resultat.nouveauNom;
+            champ.value = nom;
+        }
+        if (resultat && resultat.action === 'ecraser') ecraserLeDoublon = true;
+    }
+
+    const resultat = await modifierEtAnnoncer(cle(`cartouches_${cible.grilleId}`), (lues) => {
+        let liste = lues || [];
+        if (ecraserLeDoublon) liste = liste.filter(c => c.id === cible.id || c.nom !== nom);
+        const cartouche = liste.find(c => c.id === cible.id);
+        if (!cartouche) return undefined;
+        cartouche.nom = nom;
+        cartouche.dateModification = new Date().toISOString();
+        return liste;
+    }, [], { geste: 'Modifier la cartouche' }).catch(() => undefined);
+    if (resultat === undefined) return;
+    cible.nom = nom;
+    await afficherBanqueCartouches();
+    definirCartoucheActive(cible.id);
+}
+
+/**
+ * Lot E1 (D3) — une cartouche existante s'enregistre toute seule : son pied ne montre
+ * que « Fermer ». En création, « Créer la cartouche » : rien n'est écrit avant ce clic.
+ * @param {boolean} enCreation
+ */
+function rendreModeFicheCartouche(enCreation) {
+    const btnCreer = document.getElementById('btnCreerCartouche');
+    if (btnCreer) btnCreer.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/** Lot E1 : « ma fiche est en création et porte une saisie » (ui-dialogues.js). */
+function cartoucheEnCreationSaisie() {
+    const info = document.getElementById('infoCartouche');
+    if (!info || info.classList.contains('u-hide')) return false;
+    if (cartoucheEstEnBase(cartoucheActuel)) return false;
+    const valeur = (id) => (document.getElementById(id)?.value || '').trim();
+    const commentaires = Object.values((cartoucheActuel && cartoucheActuel.commentaires) || {})
+        .some(v => String(v || '').trim());
+    return !!(valeur('nomCartouche') || valeur('contexteCartouche') || valeur('contexteSpecifiqueCartouche') || commentaires);
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('cartouche', cartoucheEnCreationSaisie);
+
+/** Lot E1 (D3) : « Fermer » (il n'annulait rien) — avec la question, en création. */
+async function fermerFicheCartouche() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('cartouche'))) return;
+    annulerFormCartouche();
+}
+
+/** Lot E1 : ouvrir une autre cartouche depuis la liste, sans perdre une création en cours. */
+async function ouvrirCartoucheDepuisListe(cartoucheId, grilleId) {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('cartouche'))) return;
+    await chargerCartouchePourModif(cartoucheId, grilleId);
+}
+
+/**
  * #573 — dire quand l'enregistrement automatique n'a RIEN écrit.
  *
  * ⚠⚠ LES DEUX APPELANTS DE `persisterCartouchePartielle` IGNORAIENT SON VERDICT.
@@ -915,10 +1023,11 @@ function signalerAutosaveCartoucheMuette(ecrit) {
     if (!id || _autosaveCartoucheDejaSignalee === id) return;
     _autosaveCartoucheDejaSignalee = id;
     if (typeof notifications !== 'undefined' && typeof notifications.warning === 'function') {
+        // Lot E1 (D3) : relu contre la nouvelle règle — le bouton s'appelle « Créer la cartouche ».
         notifications.warning(
-            'Cette cartouche n\'est pas encore enregistrée',
-            'Ce que tu tapes n\'est gardé qu\'à l\'écran. Clique sur « Enregistrer » pour la créer, '
-            + 'puis la saisie se conservera au fil de la frappe.'
+            'Cette cartouche n\'est pas encore créée',
+            'Ce que tu tapes n\'est gardé qu\'à l\'écran. Clique sur « Créer la cartouche » ; '
+            + 'ensuite, chaque champ s\'enregistrera tout seul.'
         );
     }
 }
@@ -1023,7 +1132,7 @@ async function sauvegarderCartouche() {
 
     // Sauvegarder. La collection est relue DANS la file : celle d'avant la
     // question du doublon ne vaut plus rien.
-    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
+    await modifierEtAnnoncer(cle(`cartouches_${grilleId}`), (lues) => {
         let liste = lues || [];
 
         // L'homonyme n'est retiré qu'ici.
@@ -1043,7 +1152,7 @@ async function sauvegarderCartouche() {
             liste.push(cartoucheActuel);
         }
         return liste;
-    }, []);
+    }, [], { geste: isCreation ? 'Créer la cartouche' : 'Modifier la cartouche' });
 
     // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
     await afficherBanqueCartouches();
@@ -1383,7 +1492,7 @@ async function calculerPourcentageComplete() {
  */
 async function dupliquerCartouche(cartoucheId, grilleId) {
     let copieCreee = null;
-        await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
+        await modifierEtAnnoncer(cle(`cartouches_${grilleId}`), (lues) => {
         const cartouches = lues || [];
         const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
 
@@ -1411,7 +1520,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             return cartouches;
         }
         return undefined;
-    }, []);
+    }, [], { geste: 'Modifier la cartouche' });
 
     if (copieCreee) {
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
@@ -1458,6 +1567,7 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         const btnExportTexteEdit = document.getElementById('btnExporterTexteCartouche');
         if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
         if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
+        rendreModeFicheCartouche(false);
         if (btnExportPDFEdit) btnExportPDFEdit.classList.remove('u-hide');
         if (btnExportTexteEdit) btnExportTexteEdit.classList.remove('u-hide');
 
@@ -1570,9 +1680,9 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         }
         // La collection est relue DANS la file : celle d'avant la confirmation
         // ne vaut plus rien.
-        await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
+        await modifierEtAnnoncer(cle(`cartouches_${grilleId}`), (lues) => {
             return (lues || []).filter(c => c.id !== cartoucheId);
-        }, []);
+        }, [], { geste: 'Modifier la cartouche' });
 
         // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
         await afficherBanqueCartouches();
@@ -2560,6 +2670,7 @@ async function ajouterCartoucheAGrille(grilleId) {
     if (btnImporter) btnImporter.classList.add('u-hide');
     if (btnImporterTxt) btnImporterTxt.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    rendreModeFicheCartouche(true);
     if (btnExportPDFInit) btnExportPDFInit.classList.add('u-hide');
     if (btnExportTexteInit) btnExportTexteInit.classList.add('u-hide');
 
@@ -2838,7 +2949,8 @@ async function sauvegarderCartoucheComplete() {
     // Le nom est relu dans le champ : `sauvegarderCartouche` y réécrit le nom
     // retenu quand le dialogue de doublon a mené à un renommage.
     const nomCartouche = document.getElementById('nomCartouche')?.value?.trim() || '';
-    notifications.succes(`Cartouche "${nomCartouche}" sauvegardée !`);
+    // Lot E1 (D3) : le bouton ne paraît qu'en création ; en modification, le témoin parle.
+    notifications.succes(`Cartouche «\u00a0${nomCartouche}\u00a0» créée.`);
 
     // 🆕 BETA 95.1 : Réouvrir la cartouche en mode édition pour qu'elle reste visible
     if (idSauvegarde && grilleIdSauvegarde && typeof chargerCartouchePourModif === 'function') {
@@ -3010,6 +3122,10 @@ window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
 window.sauvegarderCartouche = sauvegarderCartouche;
 window.sauvegarderCommentaire = sauvegarderCommentaire;
 window.persisterCartouchePartielle = persisterCartouchePartielle;           // #517
+window.sauvegarderContexteSpecifiqueCartouche = sauvegarderContexteSpecifiqueCartouche; // lot E1
+window.sauvegarderNomCartouche = sauvegarderNomCartouche;                             // lot E1
+window.fermerFicheCartouche = fermerFicheCartouche;                                   // lot E1
+window.ouvrirCartoucheDepuisListe = ouvrirCartoucheDepuisListe;                       // lot E1
 window.sauvegarderContexteCartouche = sauvegarderContexteCartouche;         // #517
 window.codesNiveauxPourLecture = codesNiveauxPourLecture;                   // #531
 window.lireLigneCommentaire = lireLigneCommentaire;                         // #531
@@ -3212,7 +3328,7 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
             <div class="sidebar-item ${estActive ? 'active' : ''}"
                  data-cartouche-id="${cart.id}"
                  data-grille-id="${cart.grilleId}"
-                 data-action="chargerCartouchePourModif" data-param="${cart.id}" data-param2="${cart.grilleId}">
+                 data-action="ouvrirCartoucheDepuisListe" data-param="${cart.id}" data-param2="${cart.grilleId}">
                 <div class="sidebar-item-titre">${echapperHtml(cart.nom)}</div>
                 <div class="sidebar-item-badges"><span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
             </div>
@@ -3536,6 +3652,8 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
  * Affiche le formulaire avec dropdowns pour sélectionner grille ET échelle
  */
 async function creerNouvelleCartouche() {
+    // Lot E1 (D3) : une cartouche en cours de création ne se perd pas sans question.
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('cartouche'))) return;
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const echelles = await db.get(cle('echellesTemplates')) || [];
 
@@ -3556,6 +3674,7 @@ async function creerNouvelleCartouche() {
     const btnExportTexteCreation = document.getElementById('btnExporterTexteCartouche');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    rendreModeFicheCartouche(true);
     if (btnExportPDFCreation) btnExportPDFCreation.classList.add('u-hide');
     if (btnExportTexteCreation) btnExportTexteCreation.classList.add('u-hide');
 

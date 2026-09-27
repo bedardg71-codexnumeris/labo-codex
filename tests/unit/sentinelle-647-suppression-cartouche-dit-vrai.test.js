@@ -214,7 +214,7 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
 
     it('invariant couplé : ce chemin n\'écrit QUE l\'ancrage de la grille, jamais la bibliothèque', () => {
         const c = corps(cartouchesJs, 'supprimerCartoucheConfirm');
-        expect(c).toContain('db.modifier(cle(`cartouches_${grilleId}`)');
+        expect(c).toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\(`cartouches_\$\{grilleId\}`\)/);   // lot E1 : la même file, annoncée
         expect(c).not.toContain('retirerCartoucheDeLaBibliotheque(');
     });
 
@@ -280,7 +280,7 @@ describe('#647 · chemin 3 (section 1) — la question dit d\'où part la cartou
 
     it('invariant couplé : ce chemin écrit l\'ancrage ET la bibliothèque — la question dit les deux', () => {
         const c = corps(cartouchesJs, 'supprimerCartoucheDefinitivement');
-        expect(c).toContain('db.modifier(cle(`cartouches_${grilleId}`)');
+        expect(c).toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\(`cartouches_\$\{grilleId\}`\)/);   // lot E1 : la même file, annoncée
         expect(c).toContain('retirerCartoucheDeLaBibliotheque(');
     });
 

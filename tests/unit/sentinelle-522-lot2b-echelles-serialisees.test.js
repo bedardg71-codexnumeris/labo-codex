@@ -278,7 +278,7 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // monte parce qu'une écriture de plus respecte la règle, pas parce que la
         // règle a cédé : C.a et C.b ci-dessus continuent d'exiger qu'AUCUNE
         // écriture directe ne subsiste.
-        const parLaFile = (echelles.match(/db\.modifier\(cle\('echellesTemplates'\)/g) || []).length;
+        const parLaFile = (echelles.match(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/g) || []).length;
         // #648 (3 sept. 2026) : 25 → 22. Les trois suppressions de Conception (liste,
         // zone d'édition, section 1) écrivaient chacune leur retrait ; elles passent
         // par UN cœur (`supprimerOuRemplacerEchelle`), qui écrit une fois. Moins de
@@ -305,7 +305,7 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
             expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
             const corps = echelles.slice(debut, debut + 4000);
             expect(corps, `${nom} : n'écrit pas par la file`)
-                .toMatch(/db\.modifier\(cle\('echellesTemplates'\)/);
+                .toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/);
             expect(corps, `${nom} : garde une écriture directe`)
                 .not.toMatch(/db\.set\(cle\('echellesTemplates'\)/);
         }

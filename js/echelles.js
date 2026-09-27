@@ -589,7 +589,7 @@ async function sauvegarderNomEchelle() {
         // l'éditeur local, jamais un fichier importé : les imports passent par
         // confirmerImportEchelles.
         let ecrite = false;
-        await db.modifier(cle('echellesTemplates'), (lues) => {
+        await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
             const echelles = lues || [];
             const index = echelles.findIndex(e => e.id === idEdite);
             if (index === -1) return undefined;
@@ -602,7 +602,7 @@ async function sauvegarderNomEchelle() {
             echelleTemplateActuelle = echelle;
             ecrite = true;
             return echelles;
-        }, []);
+        }, [], { geste: 'Modifier l\'échelle' });
 
         if (!ecrite) {
             // 🔧 #466/CO-16 (21 août 2026) : silence total quand l'échelle éditée
@@ -1216,7 +1216,7 @@ async function afficherListeEchelles() {
         const nomEchelle = echelle.nom || 'Sans titre';
         const nbNiveaux = echelle.niveaux?.length || 0;
         return `
-            <div class="sidebar-item" data-id="${echelle.id}" data-action="chargerEchellePourModif" data-param="${echelle.id}">
+            <div class="sidebar-item" data-id="${echelle.id}" data-action="ouvrirEchelleDepuisListe" data-param="${echelle.id}">
                 <div class="sidebar-item-titre">${nomEchelle}</div>
                 <div class="sidebar-item-badges"><span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
             </div>
@@ -1857,6 +1857,8 @@ async function importerUneEchelleTrimestre(cleTrimestre, echelleId) {
 }
 
 async function creerNouvelleEchelle() {
+    // Lot E1 (D3) : une échelle en cours de création ne se perd pas sans question.
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('echelle'))) return;
     document.getElementById('accueilEchelles').classList.add('u-hide');
     document.getElementById('conteneurEditionEchelle').classList.remove('u-hide');
 
@@ -1869,6 +1871,7 @@ async function creerNouvelleEchelle() {
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    rendreModeFicheEchelle(true);
 
     // Réinitialiser le formulaire
     document.getElementById('nomEchelleTemplate').value = '';
@@ -2297,6 +2300,39 @@ function deplacerNiveauTempBas(index) {
 /**
  * Annule l'édition d'une échelle et retourne à l'accueil
  */
+/**
+ * Lot E1 (D3) — une échelle existante s'enregistre toute seule : son pied ne montre
+ * que « Fermer ». En création, « Créer l'échelle » : rien n'est écrit avant ce clic.
+ * @param {boolean} enCreation
+ */
+function rendreModeFicheEchelle(enCreation) {
+    const btnCreer = document.getElementById('btnCreerEchelle');
+    if (btnCreer) btnCreer.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/** Lot E1 : « ma fiche est en création et porte une saisie » (ui-dialogues.js). */
+function echelleEnCreationSaisie() {
+    const conteneur = document.getElementById('conteneurEditionEchelle');
+    if (echelleTemplateActuelle || !conteneur || conteneur.classList.contains('u-hide')) return false;
+    const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
+    const description = document.getElementById('descriptionEchelle')?.value?.trim();
+    const niveaux = (window._niveauxNouvelleEchelle || []).some(n => String(n.code || '').trim() || String(n.nom || '').trim());
+    return !!(nom || description || niveaux);
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('echelle', echelleEnCreationSaisie);
+
+/** Lot E1 (D3) : « Fermer » (il n'annulait rien) — avec la question, en création. */
+async function fermerFicheEchelle() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('echelle'))) return;
+    annulerFormEchelle();
+}
+
+/** Lot E1 : ouvrir une autre échelle depuis la liste, sans perdre une création en cours. */
+async function ouvrirEchelleDepuisListe(id) {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('echelle'))) return;
+    await chargerEchellePourModif(id);
+}
+
 function annulerFormEchelle() {
     // Nettoyer les niveaux temporaires, et les repères qui vont avec (#555 (e))
     window._niveauxNouvelleEchelle = null;
@@ -2337,6 +2373,7 @@ async function chargerEchellePourModif(id) {
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
     if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
     if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
+    rendreModeFicheEchelle(false);
 
     // Remplir le formulaire
     document.getElementById('nomEchelleTemplate').value = echelle.nom || '';
@@ -2832,7 +2869,7 @@ async function ecrireRepereEchelle(echelleId, champ, valeur) {
     let refus = null;
     let echelleModifiee = null;
 
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const index = echelles.findIndex((e) => e.id === echelleId);
         if (index === -1) {
@@ -2853,7 +2890,7 @@ async function ecrireRepereEchelle(echelleId, champ, valeur) {
         echelles[index] = echelle;
         echelleModifiee = echelle;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     if (refus) return { refuse: refus };
     if (!echelleModifiee) return { refuse: null };
@@ -2889,7 +2926,7 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
     // instantané et le second effaçait le premier, en silence. `db.modifier`
     // sérialise la séquence par clé (cf. db.js).
     let echelleModifiee = null;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
@@ -2912,7 +2949,7 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
         echelles[echelleIndex] = echelle;
         echelleModifiee = echelle;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     if (!echelleModifiee) return { refuse: null };
 
@@ -2932,7 +2969,7 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
  */
 async function ajouterNiveauEchelle(echelleId) {
     let echelleApres = null;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const index = echelles.findIndex(e => e.id === echelleId);
         if (index === -1) return undefined;
@@ -2961,7 +2998,7 @@ async function ajouterNiveauEchelle(echelleId) {
         echelles[index] = echelle;
         echelleApres = echelle;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     if (!echelleApres) {
         console.error('❌ Échelle non trouvée:', echelleId);
@@ -2982,9 +3019,10 @@ async function ajouterNiveauEchelle(echelleId) {
     await afficherListeEchelles();
 
     // Notification de succès
+    // Lot E1 (D3) : le niveau est déjà écrit ; le message ne demande plus d'enregistrer.
     notifications.succes(
-        'Niveau ajouté !',
-        `L'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x). Ajuste ses propriétés (code, nom, min, max), puis enregistre.`
+        'Niveau ajouté.',
+        `L'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x). Ajuste son code, son nom, ses bornes et sa valeur : chaque champ s'enregistre tout seul.`
     );
 }
 
@@ -2998,7 +3036,7 @@ async function supprimerNiveauEchelle(echelleId, index) {
 
     let echelleApres = null;
     let refusDernierNiveau = false;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const echelleIndex = echelles.findIndex(e => e.id === echelleId);
         if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return undefined;
@@ -3018,7 +3056,7 @@ async function supprimerNiveauEchelle(echelleId, index) {
         echelles[echelleIndex] = echelle;
         echelleApres = echelle;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     // Le message vit HORS du mutateur : la file ne doit porter que l'écriture.
     if (refusDernierNiveau) {
@@ -3048,7 +3086,7 @@ async function deplacerNiveauEchelleHaut(echelleId, index) {
     if (index === 0) return;
 
     let echelleApres = null;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const echelleIndex = echelles.findIndex(e => e.id === echelleId);
         if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return undefined;
@@ -3063,7 +3101,7 @@ async function deplacerNiveauEchelleHaut(echelleId, index) {
         echelles[echelleIndex] = echelle;
         echelleApres = echelle;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     if (!echelleApres) return;
     echelleTemplateActuelle = echelleApres;
@@ -3080,7 +3118,7 @@ async function deplacerNiveauEchelleHaut(echelleId, index) {
  */
 async function deplacerNiveauEchelleBas(echelleId, index) {
     let echelleApres = null;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const echelleIndex = echelles.findIndex(e => e.id === echelleId);
         if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return undefined;
@@ -3097,7 +3135,7 @@ async function deplacerNiveauEchelleBas(echelleId, index) {
         echelles[echelleIndex] = echelle;
         echelleApres = echelle;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     if (!echelleApres) return;
     echelleTemplateActuelle = echelleApres;
@@ -3120,7 +3158,7 @@ async function definirEchelleActive(id) {
 
 async function dupliquerEchelleDepuisSidebar(id) {
     let copieCreee = null;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const echelle = echelles.find(e => e.id === id);
 
@@ -3144,7 +3182,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
         echelles.push(copie);
         copieCreee = copie;
         return echelles;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     if (!copieCreee) return;
     const copie = copieCreee;
@@ -3177,7 +3215,7 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
     // notification. Compter dans le `return` du mutateur annoncerait un tableau.
     let nbMigrees = 0;
 
-    await db.modifier(cle('evaluationsSauvegardees'), (lues) => {
+    await modifierEtAnnoncer(cle('evaluationsSauvegardees'), (lues) => {
         const evaluations = lues || [];
         nbMigrees = 0;
 
@@ -3194,7 +3232,7 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
         // rafale vient d'y poser.
         if (nbMigrees === 0) return undefined;
         return evaluations;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
 
     return nbMigrees;
 }
@@ -3319,12 +3357,12 @@ function decrirePorteursEchelle(nb) {
 /** Réécrit un magasin par la file ; rend le nombre d'objets touchés (0 = rien écrit). */
 async function _repointerEchelle(cleMagasin, estCible, appliquer) {
     let n = 0;
-    await db.modifier(cleMagasin, (lues) => {
+    await modifierEtAnnoncer(cleMagasin, (lues) => {
         const liste = Array.isArray(lues) ? lues : (lues ? [lues] : []);
         n = 0;
         liste.forEach(x => { if (x && estCible(x)) { appliquer(x); n++; } });
         return n === 0 ? undefined : liste;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
     return n;
 }
 
@@ -3404,13 +3442,13 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         window.marquerRessourceSupprimee(id);
     }
     let supprimee = false;
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const liste = lues || [];
         const restants = liste.filter(e => !(e && e.id === id));
         if (restants.length === liste.length) return undefined;
         supprimee = true;
         return restants;
-    }, []);
+    }, [], { geste: 'Modifier l\'échelle' });
     return { supprimee, nb: ecrits, successeur };
 }
 
@@ -3494,9 +3532,9 @@ async function sauvegarderEchelleComplete() {
 
         if (resultat && resultat.action === 'ecraser') {
             // Supprimer l'échelle existante avec le même nom
-            echelles = await db.modifier(cle('echellesTemplates'), (lues) => {
+            echelles = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
                 return (lues || []).filter(e => e.nom !== nom);
-            }, []) || [];
+            }, [], { geste: 'Créer l\'échelle' }) || [];
         }
     }
 
@@ -3546,11 +3584,11 @@ async function sauvegarderEchelleComplete() {
 
         // Sauvegarder dans la base. La file relit : la collection écrite est
         // celle de l'instant, pas celle lue avant la question du doublon.
-        await db.modifier(cle('echellesTemplates'), (lues) => {
+        await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
             const liste = lues || [];
             liste.push(nouvelleEchelle);
             return liste;
-        }, []);
+        }, [], { geste: 'Créer l\'échelle' });
 
         // Nettoyer les niveaux temporaires, et les repères qui vont avec
         window._niveauxNouvelleEchelle = null;
@@ -3559,17 +3597,13 @@ async function sauvegarderEchelleComplete() {
         // Définir comme échelle actuelle
         echelleTemplateActuelle = nouvelleEchelle;
 
-        // Message de confirmation
-        notifications.succes(`Échelle "${nom}" sauvegardée !`);
+        // Message de confirmation (lot E1, D3 : le geste de création a son message)
+        notifications.succes(`Échelle «\u00a0${nom}\u00a0» créée.`);
     } else {
-        // Cas 2: Modification d'une échelle existante
-        // #466/CO-16 : on n'annonce la sauvegarde QUE si l'écriture a eu lieu.
-        // `sauvegarderNomEchelle` refuse quand l'échelle éditée n'appartient pas
-        // au trimestre actif (édition à cheval sur une bascule) et affiche alors
-        // sa propre notification d'erreur.
-        const ecrite = await sauvegarderNomEchelle();
-        if (!ecrite) return;
-        notifications.succes(`Échelle "${nom}" sauvegardée !`);
+        // Lot E1 (D3) : une échelle existante s'enregistre toute seule, champ par
+        // champ ; « Créer l'échelle » ne paraît qu'en création. L'ancienne branche
+        // « Enregistrer » d'une échelle existante est retirée avec son bouton.
+        return;
     }
 
     // Recharger la liste pour refléter les changements
@@ -3675,6 +3709,8 @@ function reinitialiserEditeurEchellesApresBascule() {
 window.reinitialiserEditeurEchellesApresBascule = reinitialiserEditeurEchellesApresBascule;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
 window.annulerFormEchelle = annulerFormEchelle;
+window.fermerFicheEchelle = fermerFicheEchelle;
+window.ouvrirEchelleDepuisListe = ouvrirEchelleDepuisListe;
 window.chargerEchellePourModif = chargerEchellePourModif;
 window.dupliquerEtEditerEchelle = dupliquerEtEditerEchelle;
 window.dupliquerEchelleDepuisSidebar = dupliquerEchelleDepuisSidebar;
