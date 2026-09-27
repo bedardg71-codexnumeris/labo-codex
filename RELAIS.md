@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 11 H 20 : **LOT D DE L'ENREGISTREMENT (1.163.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, APRÈS-MIDI : **LOT E1 DE L'ENREGISTREMENT (CONCEPTION, D3) SUR SA BRANCHE, EN ATTENTE DE LA RELECTURE CROISÉE DE COWORK** — rien de fusionné, rien de publié
+
+**Où vit le travail** : `main` = `df359bfe` (1.163.0 + plan et consignes de la carte d'alignement, #963 à #966 inscrites, poussé) + la branche **locale** `lot-e1-conception`, dans le worktree `.claude/worktrees/lot-e1-conception` (non poussée, comme `lot-d-presences`) : `3255ca58` consigne du jour ; `d8f619c0` `modifierEtAnnoncer` (le témoin pour les écritures par `db.modifier`) ; `6c70db4e` modifier s'enregistre tout seul, « Créer la … », « Fermer », question « … n'est pas encore créée », jetons et nom de cartouche automatiques, assistant ; `ca9ab0c0` « Non enregistré : ‹raison› », 16 `alert` au tutoiement, `notifications.avertissement` branché ; `1117d0ab` et `21f17196` bancs WebKit et demande de relecture.
+
+**À lire** : `plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-E1-conception.md` (sur la branche). Vitest 7 502/7 502 ; WebKit : banc neuf 8/8, #957 6/6, 41 fichiers voisins verts après adaptation ; six mutations rouges.
+
+**Reste, dans l'ordre** : relecture croisée de Cowork → corrections → **Grégoire accepte les mots du § 5** (boutons, question de sortie, messages de création, témoin, 16 `alert`, Nouvelles) → release `minor` → verdict → fusion → push. Puis la porte terrain (§ 10). Le fichier non suivi `plans de travail/CONSIGNE-LOT-E1-conception.md` de l'arbre principal est le double de la `CONSIGNE-DU-JOUR.md` de la branche : à retirer à la fusion.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 11 H 20 : **LOT D DE L'ENREGISTREMENT (1.163.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = `06af5089` (1.162.0, poussé) + la branche `lot-d-presences` (`fd22ec76` écrivain unique des présences, enregistrement automatique, « Confirmer la séance », « Séance non saisie », D2 bis ; `709993d5` demande de relecture ; `cac4486d` trouvaille 1 corrigée sur décision de Grégoire : une fiche `facultatif` ne rend plus une séance « saisie », mutation M12 rouge ; `cbad96be` release build 0927-1112) + `18f6c759` fusion + ce relais. Relecture de Cowork : `plans de travail/RELECTURE-2026-09-27-lot-D-presences.md` (verte).
 
