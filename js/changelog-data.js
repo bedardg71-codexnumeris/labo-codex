@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.161.0 (lot B de l'enregistrement, #618, #786) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026,
+            // telle quelle (« Oui, tels quels ») ; titre repris de ses mots, comme en 1.160.
+            version: '1.161',
+            couleur: 'vert',
+            titre: 'Un même témoin',
+            items: [
+                'Quand l\'application enregistre une évaluation, un jeton, une rétroaction ou des présences, un même témoin dit «&nbsp;Enregistré&nbsp;» en bas de l\'écran. Si l\'écriture échoue, il dit «&nbsp;Non enregistré&nbsp;» et pourquoi, et reste affiché jusqu\'à la prochaine écriture réussie – au lieu d\'un message de réussite.'
+            ]
+        },
+        {
             // 1.160.0 (lot A de l'enregistrement, #751, #736) — Nouvelles VALIDÉES par Grégoire le 26 sept. 2026,
             // telles quelles (texte de Cowork) ; titre repris de leurs premiers mots.
             version: '1.160',

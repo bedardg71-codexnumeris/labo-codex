@@ -62,3 +62,16 @@ R1 à R4 appliquées sur la branche ; #962 inscrite (numéro libre, compteur mis
 | M4 : le cadenas ne remet pas `verrouillee` dans le tableau lu | WebKit, essai R4 (a) |
 
 **Suites** : Vitest 643/643 fichiers, 7 473/7 473 tests, 0 « Errors » ; WebKit, le banc du lot B (14 essais) avec #958 (lecture brute), #961 et le lot A : 48/48.
+
+## Contre-vérification de Cowork – 7 h 32 (Toronto), sur `19a5b8ac` : **VERTE**
+
+- **Vitest, par exécution**, sur un clone de `19a5b8ac` : 643 fichiers, **7 473 / 7 473**.
+- **Trois mutations de Cowork**, posées par script et vérifiées posées, clone restauré entre chacune (`git status` vide) :
+  - R2, le drapeau posé malgré le refus : **rouge** (Vitest, sentinelle du lot B, R2) ;
+  - R1, `sauvegarderDonneesSelonMode` ne transmet plus la clé au succès : **rouge** (Vitest, sentinelle du lot B, R1) ;
+  - R1, le témoin efface l'échec sans comparer la clé : verte en Vitest, **couverte par le banc WebKit** (l. 265-266, « le succès d'une autre clé ne retire pas l'échec ») – lu, non exécuté : le banc WebKit n'est pas à ma portée.
+- R3 (fenêtre ouverte sur un échec, l. 408-450), R4 (a) (cadenas sur 30 000 caractères, l. 202) et R4 (b) (1180 × 820, l. 486-492) : présents au banc WebKit, lus ; leurs mutations rouges sont celles de Claude Code.
+- #962 inscrite (l. 133 du BACKLOG), compteur à #962 : conforme.
+- Aucun verrou dans `.git` après ma lecture.
+
+**Suite** : release `minor`, verdict Playwright **Cowork fermé**, fusion dans `main`, push ; cases #618 et #786 ; mots et Nouvelles déjà acceptés par Grégoire. Porte terrain : le témoin sur l'iPad, pendant l'évaluation d'une copie réelle.
