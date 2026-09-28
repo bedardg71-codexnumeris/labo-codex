@@ -8674,16 +8674,11 @@
                 </div>
 
                 <div id="labo-accompagnement" class="sous-section">
-                    <!-- #806 (9 sept. 2026) — le bouton d'enregistrement remonte auprès du
-                         titre. Il vivait en pleine largeur tout en bas de la page, après les
-                         trois sections dépliables : Grégoire ne le voyait pas, et le patron
-                         de toutes les autres pages (Cadre du trimestre, Présences) le place
-                         compact, à droite du titre. -->
+                    <!-- Lot E3 (D0, 28 sept. 2026) : le bouton « Enregistrer » est parti — chaque réglage
+                         s'écrit dès qu'on le change, et le témoin commun le dit (#806 l'avait remonté
+                         auprès du titre). -->
                     <div class="u-flex-between u-mb-12">
                         <h2 class="u-mb-0">Outils d'observation</h2>
-                        <button class="btn btn-confirmer btn-compact" data-action="sauvegarderToutesPreferencesV2">
-                            Enregistrer
-                        </button>
                     </div>
                     <p class="text-muted u-mb-12" style="max-width: 72ch">
                         Trois piliers de l'accompagnement : la structure des apprentissages (SOLO), les micro-données du contexte (ACP) et la planification des interventions (RàI). Chaque réglage s'enregistre dès que tu le changes.
@@ -9243,14 +9238,10 @@
 
                 <!-- Onglet 2: Préférences (Beta 95) -->
                 <div id="reglages-preferences" class="sous-section">
-                    <!-- #806 — même geste que pour « Outils d'observation » : les deux pages
-                         partagent le même bouton (`sauvegarderToutesPreferencesV2`), elles
-                         doivent le placer au même endroit. -->
+                    <!-- Lot E3 (D0, 28 sept. 2026) : même geste que pour « Outils d'observation » — le
+                         bouton « Enregistrer » est parti, chaque réglage s'écrit au changement. -->
                     <div class="u-flex-between u-mb-12">
                         <h2 class="u-mb-0">Préférences</h2>
-                        <button class="btn btn-confirmer btn-compact" data-action="sauvegarderToutesPreferencesV2">
-                            Enregistrer
-                        </button>
                     </div>
                     <p class="text-muted">
                         Personnalise ton expérience : outils à exploiter, affichage et navigation.
@@ -14354,7 +14345,7 @@
     <script src="js/securite-echappement.js?v=20260821a"></script> <!-- CT-29 : echapperAttribut — echapperHtml n'encode pas les guillemets, insuffisant en contexte d'attribut -->
     <script src="js/identite-naturelle.js?v=20260824a"></script> <!-- CT-15 : source unique de l'identite NATURELLE d'une entite du cadre (code de cours #455, courriel, triplet du groupe-cours) -->
     <script src="js/navigation.js?v=20260918a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260911a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
+    <script src="js/preferences.js?v=20260928a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
     <script src="js/modes.js?v=20260928d"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
@@ -14373,7 +14364,7 @@
     <script src="js/demo-activation.js?v=20260911o"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestres.js?v=20260928c"></script> <!-- Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
+    <script src="js/trimestres.js?v=20260928d"></script> <!-- Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
     <script src="js/productions-namespace-garde.js?v=20260822a"></script> <!-- #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/horaire-fusion.js?v=20260821a"></script> <!-- CT-04 : source unique de la fusion entités horaires → horaireHebdo (dédup par jour ET heure) -->
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
@@ -14404,7 +14395,7 @@
     <script src="js/repertoires-bibliotheque.js?v=20260911a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260923b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=20260928a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
-    <script src="js/preferences-v2.js?v=20260911a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/preferences-v2.js?v=20260928a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20260921b"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260923b"></script>
     <script src="js/productions-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14498,14 +14489,14 @@
 
     <!-- Module Bilan réflexif -->
     <script src="js/bilan-reflexif-data.js?v=2026032801"></script>
-    <script src="js/bilan-reflexif-core.js?v=20260515f"></script> <!-- §4.1.c+d+f : styles + état + persistance + finders + aide + tronquer -->
+    <script src="js/bilan-reflexif-core.js?v=20260928a"></script> <!-- §4.1.c+d+f : styles + état + persistance + finders + aide + tronquer -->
     <script src="js/bilan-reflexif-editeur.js?v=20260515f"></script> <!-- §4.1.d : éditeur de questionnaire -->
     <script src="js/bilan-reflexif-parcours.js?v=20260515f"></script> <!-- §4.1.e : parcours d'apprentissage -->
-    <script src="js/bilan-reflexif-reflexion.js?v=20260515f"></script> <!-- §4.1.e : auto-réflexion enseignant -->
+    <script src="js/bilan-reflexif-reflexion.js?v=20260928a"></script> <!-- §4.1.e : auto-réflexion enseignant -->
     <script src="js/bilan-reflexif-import-export-texte.js?v=20260515f"></script> <!-- §4.1.f : import/export texte du questionnaire -->
     <script src="js/bilan-reflexif-csv.js?v=20260515f"></script> <!-- §4.1.f : import CSV des résultats étudiants -->
     <script src="js/bilan-reflexif-rapport.js?v=20260515f"></script> <!-- §4.1.g : rapport d'analyse + Chart.js + export PDF -->
-    <script src="js/bilan-reflexif.js?v=20260515f"></script> <!-- §4.1.g : résidu (init + navigation + hooks) -->
+    <script src="js/bilan-reflexif.js?v=20260928a"></script> <!-- §4.1.g : résidu (init + navigation + hooks) -->
 
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=20260903b"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->

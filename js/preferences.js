@@ -178,10 +178,13 @@
         const prefs = lireStockage();
         const ancienne = prefs[cle];
         prefs[cle] = valeur;
-        ecrireStockage(prefs);
+        // Lot E3 (D0 point 2, 28 sept. 2026) : le résultat de l'écriture remonte, pour que la page
+        // qui écrit (Réglages) le dise par le témoin commun. Rien d'autre ne change.
+        const ecrit = ecrireStockage(prefs);
         if (ancienne !== valeur) {
             notifierAbonnes(cle, valeur);
         }
+        return ecrit;
     }
 
     /**
@@ -247,11 +250,13 @@
         }
     }
 
+    /** @returns {boolean} false si l'écriture a été refusée (garde #340) ou a levé. */
     function ecrireStockage(prefs) {
         try {
-            db.setSync(CLE_STOCKAGE, prefs);
+            return db.setSync(CLE_STOCKAGE, prefs) !== false;
         } catch (e) {
             console.error('[preferences] Erreur écriture stockage :', e);
+            return false;
         }
     }
 

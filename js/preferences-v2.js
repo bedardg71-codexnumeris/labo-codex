@@ -255,11 +255,11 @@
     function _sauvegarderGrilleReferenceSiFiable() {
         const select = document.getElementById('v2-pref-grille-reference');
         if (!select) return;
+        // Lot E3 : rend le résultat de l'écriture (undefined quand rien n'est écrit).
 
         const choisie = select.value || '';
         if (choisie) {
-            definirPreference('grilleReferenceDepistage', choisie);
-            return;
+            return definirPreference('grilleReferenceDepistage', choisie);
         }
 
         const actuelle = obtenirPreference('grilleReferenceDepistage') || '';
@@ -267,25 +267,35 @@
 
         const offerte = Array.from(select.options || []).some(o => o.value === actuelle);
         if (offerte) {
-            definirPreference('grilleReferenceDepistage', '');
+            return definirPreference('grilleReferenceDepistage', '');
         } else {
             console.warn('[preferences-v2] Sélecteur de grille désynchronisé — la préférence "'
                 + actuelle + '" est CONSERVÉE plutôt qu\'effacée (#806)');
         }
     }
 
+    // Lot E3 (D0 point 2) : les gestes nommés par le témoin commun.
+    const GESTE_PREFERENCES = 'Préférences';
+    const GESTE_SEUILS = 'Seuils';
+
     /**
      * Sauvegarde les préférences via l'API.
+     * Lot E3 (D3, D0) : appelée à chaque changement (le bouton « Enregistrer » est parti) ; le témoin
+     * commun dit « Enregistré », ou « Non enregistré – Préférences : … » si une écriture a échoué.
+     * `definirPreference` écrit ; `ecrireEtAnnoncer` fait parler le témoin après (patron du lot E2).
+     * @returns {Promise<boolean>}
      */
-    function sauvegarderPreferencesV2() {
+    async function sauvegarderPreferencesV2() {
+        const resultats = [];
+        const definir = (cle, valeur) => { resultats.push(definirPreference(cle, valeur) !== false); };
         // SSOT Lot 0 : l'écriture des toggles afficherSommatif/afficherAlternatif
         // est retirée — plus aucun lecteur ne les honorait depuis Session C (#303),
         // l'affichage dérive de la pratique active (determinerModeAffichageTableauBord).
 
         // Préférences utilisateur : via l'API centralisée
-        definirPreference('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);
-        definirPreference('afficherDescriptionsSOLO', document.getElementById('v2-pref-solo')?.checked !== false);
-        definirPreference('activerActionsRLO', document.getElementById('v2-pref-actions-rlo')?.checked === true);
+        definir('activerRai', document.getElementById('v2-pref-rai')?.checked !== false);
+        definir('afficherDescriptionsSOLO', document.getElementById('v2-pref-solo')?.checked !== false);
+        definir('activerActionsRLO', document.getElementById('v2-pref-actions-rlo')?.checked === true);
         // ⛔ #806 — LE DEUXIÈME CHEMIN QUI EFFAÇAIT LE CHOIX DE GRÉGOIRE.
         // `sauvegarderPreferencesV2` écrit TOUT le panneau à chaque `change` de
         // N'IMPORTE LEQUEL de ses contrôles. Le `|| ''` transformait donc un
@@ -295,22 +305,22 @@
         // ⮕ On n'écrit '' que si c'est un GESTE : le dropdown propose bien la
         // grille actuellement désignée, et l'utilisateur a quand même choisi de
         // la retirer. Sinon on ne touche pas à ce qu'il a réglé.
-        _sauvegarderGrilleReferenceSiFiable();
+        resultats.push(_sauvegarderGrilleReferenceSiFiable() !== false);
 
-        definirPreference('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
-        definirPreference('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
+        definir('depistageAcp', document.getElementById('v2-pref-depistage-acp')?.checked !== false);
+        definir('afficherGraphiques', document.getElementById('v2-pref-graphiques')?.checked !== false);
         // #321 note différée : true seulement si la case est cochée (défaut false)
-        definirPreference('noteDifferee', document.getElementById('v2-pref-note-differee')?.checked === true);
-        definirPreference('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
-        definirPreference('afficherDeveloppementHabiletes', document.getElementById('v2-pref-developpement-habiletes')?.checked !== false);
+        definir('noteDifferee', document.getElementById('v2-pref-note-differee')?.checked === true);
+        definir('afficherSeuilsVisuels', document.getElementById('v2-pref-seuils-visuels')?.checked !== false);
+        definir('afficherDeveloppementHabiletes', document.getElementById('v2-pref-developpement-habiletes')?.checked !== false);
 
         const animationActive = document.getElementById('v2-pref-animation-points')?.checked !== false;
-        definirPreference('animationPoints', animationActive);
+        definir('animationPoints', animationActive);
         appliquerAnimationPoints(animationActive);
 
-        definirPreference('afficherContexteGraphiques', document.getElementById('v2-pref-contexte-graphiques')?.checked !== false);
-        definirPreference('chronoEvaluation', document.getElementById('v2-pref-chrono-eval')?.checked === true);
-        definirPreference('sisDefaut', document.getElementById('v2-pref-sis')?.value || 'lea');
+        definir('afficherContexteGraphiques', document.getElementById('v2-pref-contexte-graphiques')?.checked !== false);
+        definir('chronoEvaluation', document.getElementById('v2-pref-chrono-eval')?.checked === true);
+        definir('sisDefaut', document.getElementById('v2-pref-sis')?.value || 'lea');
 
         // Les toggles `activerActionsRLO` (catégorie `action`) et
         // `afficherDescriptionsSOLO` (catégorie `comprehension`) régissent
@@ -319,6 +329,13 @@
         if (typeof travauxOutils !== 'undefined' && travauxOutils.rafraichirPalettesApresPersonnalisation) {
             travauxOutils.rafraichirPalettesApresPersonnalisation();
         }
+
+        const ecrit = resultats.every(Boolean);
+        await ecrireEtAnnoncer('preferencesUtilisateur', async () => ecrit, { geste: GESTE_PREFERENCES });
+        if (!ecrit && window.temoinEnregistrement) {
+            window.temoinEnregistrement.nonEnregistre('le navigateur a refusé l\'écriture.', GESTE_PREFERENCES, 'preferencesUtilisateur');
+        }
+        return ecrit;
     }
 
     /**
@@ -328,16 +345,23 @@
      * pour préserver la structure mixte (champs plats + sous-objets idme/risque/interpretation).
      */
     function sauvegarderSeuilsV2() {
-        const seuils = db.getSync('seuilsInterpretation') || {};
+        // Lot E3 : la collection lue est COPIÉE avant d'être modifiée (lot E2, R1).
+        const seuils = JSON.parse(JSON.stringify(db.getSync('seuilsInterpretation') || {}));
 
         const fragile = parseInt(document.getElementById('v2-seuil-fragile')?.value) || 70;
         const acceptable = parseInt(document.getElementById('v2-seuil-acceptable')?.value) || 80;
         const bon = parseInt(document.getElementById('v2-seuil-bon')?.value) || 85;
 
-        // Validation : fragile < acceptable < bon
+        // Validation : fragile < acceptable < bon.
+        // Lot E3 (D0, D3) : le refus parle par le témoin — une alerte PUIS « Préférences enregistrées »
+        // disaient le contraire l'une de l'autre (inventaire du 26 sept.). Les trois champs reviennent à
+        // ce qui est enregistré ; rien n'est écrit, aucun succès.
         if (fragile >= acceptable || acceptable >= bon) {
-            alert('Erreur : Les seuils doivent être ordonnés (Fragile < Acceptable < Bon)');
-            return;
+            _remettreSeuilsInterpretationEnregistres();
+            if (window.temoinEnregistrement) {
+                window.temoinEnregistrement.nonEnregistre('les seuils doivent aller du plus bas au plus haut (Fragile < Acceptable < Bon).', GESTE_SEUILS, 'seuilsInterpretation');
+            }
+            return false;
         }
 
         // #818 suite — ÉCRIRE DANS LA BRANCHE QUE LES CONSOMMATEURS LISENT.
@@ -380,7 +404,19 @@
             seuils.defiSpecifique = _pointsEnFraction(seuilDefi.value, 0.70);
         }
 
-        db.setSync('seuilsInterpretation', seuils);
+        // Lot E3 (D0 point 2) : par le témoin commun (clé globale, inscrite à CLES_GLOBALES).
+        return sauvegarderDonneesSelonMode('seuilsInterpretation', seuils, { geste: GESTE_SEUILS });
+    }
+
+    /** Lot E3 : les trois seuils d'interprétation reprennent ce qui est enregistré (le chargement le fait pareil). */
+    function _remettreSeuilsInterpretationEnregistres() {
+        const poser = (id, chemin) => {
+            const champ = document.getElementById(id);
+            if (champ) champ.value = Math.round(obtenirSeuil(chemin) * 100);
+        };
+        poser('v2-seuil-fragile', 'interpretation.acceptable');
+        poser('v2-seuil-acceptable', 'interpretation.bon');
+        poser('v2-seuil-bon', 'interpretation.excellent');
     }
 
     /**
@@ -395,8 +431,8 @@
         if (seuilAcceptable) seuilAcceptable.value = 80;
         if (seuilBon) seuilBon.value = 85;
 
-        sauvegarderSeuilsV2();
-        notifications.succes('Seuils d\'interprétation restaurés');
+        // Lot E3 : le message du geste ne suit qu'une écriture réussie.
+        if (sauvegarderSeuilsV2()) notifications.succes('Seuils d\'interprétation restaurés');
     }
 
     /**
@@ -415,8 +451,8 @@
         if (seuilRisque) seuilRisque.value = 5;
         if (seuilDefi) seuilDefi.value = 70;
 
-        sauvegarderSeuilsV2(); // #823 : la fenêtre y passe aussi
-        notifications.succes('Seuils de détection restaurés');
+        // #823 : la fenêtre y passe aussi. Lot E3 : le message ne suit qu'une écriture réussie.
+        if (sauvegarderSeuilsV2()) notifications.succes('Seuils de détection restaurés');
     }
 
     /**
@@ -435,15 +471,6 @@
     function _pointsEnFraction(points, defaut) {
         const p = parseInt(points, 10);
         return p > 0 ? Math.round(p) / 100 : defaut;
-    }
-
-    /**
-     * Sauvegarde toutes les préférences
-     */
-    function sauvegarderToutesPreferencesV2() {
-        sauvegarderPreferencesV2();
-        sauvegarderSeuilsV2();
-        notifications.succes('Préférences enregistrées');
     }
 
     // =========================================================================
@@ -475,7 +502,6 @@
     window.sauvegarderSeuilsV2 = sauvegarderSeuilsV2;
     window.restaurerSeuilsInterpretationDefautV2 = restaurerSeuilsInterpretationDefautV2;
     window.restaurerSeuilsDetectionDefautV2 = restaurerSeuilsDetectionDefautV2;
-    window.sauvegarderToutesPreferencesV2 = sauvegarderToutesPreferencesV2;
     // 🆕 BETA 96.1 : Animation des points
     window.appliquerAnimationPoints = appliquerAnimationPoints;
 

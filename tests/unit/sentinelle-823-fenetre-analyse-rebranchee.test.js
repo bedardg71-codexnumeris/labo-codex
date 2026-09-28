@@ -72,7 +72,9 @@ function monter({ store = {}, champs = {} } = {}) {
     const win = { addEventListener() {}, removeEventListener() {}, dbReady: false, obtenirTrimestreId: () => 'test' };
     const globaux = {
         db,
-        cle: (k) => 'test_' + k,
+        // ↻ Lot E3 (28 sept. 2026) : `seuilsInterpretation` s'écrit par le témoin commun, qui passe par
+        // `cle()` ; elle est inscrite à CLES_GLOBALES (jamais préfixée), comme dans l'application.
+        cle: (k) => (k === 'seuilsInterpretation' ? k : 'test_' + k),
         obtenirDonneesSelonMode: () => [],
         obtenirPreference: (n) => (store.preferencesUtilisateur && n in store.preferencesUtilisateur) ? store.preferencesUtilisateur[n] : null,
         definirPreference: (n, v) => { prefsEcrites[n] = v; },

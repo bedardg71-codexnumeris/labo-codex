@@ -324,8 +324,10 @@ function sauvegarderParcours() {
     db.setSync(CLE_PARCOURS(), etat.parcours);
 }
 
+// Lot E3 (D0 point 2, 28 sept. 2026) : l'auto-réflexion s'écrit par le témoin commun (même clé :
+// `autoreflexionBilan`, namespacée). Ses écrivains sont des gestes (réponse, bascule, sortie d'un champ).
 function sauvegarderReflexion() {
-    db.setSync(CLE_REFLEXION(), etat.reflexion);
+    return sauvegarderDonneesSelonMode('autoreflexionBilan', etat.reflexion, { geste: 'Auto-réflexion' });
 }
 
 /* ===============================

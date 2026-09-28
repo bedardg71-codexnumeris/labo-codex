@@ -274,7 +274,6 @@ window.BilanReflexif = {
     repondreReflexionOuiNon: BilanReflexifReflexion.repondreReflexionOuiNon,
     ajouterQuestionReflexion: BilanReflexifReflexion.ajouterQuestionReflexion,
     supprimerQuestionReflexion: BilanReflexifReflexion.supprimerQuestionReflexion,
-    sauvegarderReflexionExplicite: BilanReflexifReflexion.sauvegarderReflexionExplicite,
     // Aide — déplacé vers BilanReflexifCore (§4.1.f), forwarder
     toggleAide: BilanReflexifCore.toggleAide,
     // Import CSV — déplacé vers BilanReflexifCSV (§4.1.f), forwarders
