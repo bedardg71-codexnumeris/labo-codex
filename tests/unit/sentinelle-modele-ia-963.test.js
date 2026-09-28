@@ -100,6 +100,11 @@ function monter({ avecCadre = true, avecCours = true } = {}) {
             const jour = String(s).padStart(2, '0');
             cal[`2026-09-${jour}`] = { statut: 'cours', numeroSemaine: s };
         }
+        // R1 (relecture de Cowork, 28 sept.) : un Cadre réel porte aussi une
+        // semaine de planification et une semaine d'examens. Elles ne sont PAS
+        // des semaines du trimestre au sens du modèle (15, pas 17).
+        cal['2026-08-25'] = { statut: 'semaine-planification' };
+        cal['2026-12-20'] = { statut: 'semaine-examens' };
         store['a2026_calendrierComplet'] = cal;
     }
     const db = {
@@ -288,6 +293,43 @@ describe('#963 — les données après les consignes', () => {
 
     it('ne laisse passer aucun identifiant technique', () => {
         expect(doc).not.toMatch(/planif-noeud|prod-|grille-ciel|ech-quatre|obj-[ab]\b|cours-astro|carte_1|\blec[123]\b|\bact[12]\b/);
+    });
+});
+
+// R1 (relecture de Cowork, 28 sept.) — les liens d'un bloc CLONÉ.
+// Un clone est le même bloc : ses liens sont agrégés sur toutes ses instances,
+// mais chaque phrase désigne l'instance qui PORTE le lien, avec sa semaine.
+function ajouterClones() {
+    noeud('lec6', 'lecon', 'Reprendre le carnet', { x: 200, metadata: { semaine: 6, rangSeance: 1 } });
+    // Clone en semaine 6, sans lien propre : il hérite du lien de l'original (semaine 4).
+    noeud('act2-c6', 'activite', 'Relecture du planisphère', { parent: 'lec6', cloneSourceId: 'act2', metadata: { duree: 20 } });
+    // Clone en semaine 4, relié lui aussi à la même évaluation : même phrase que l'original.
+    noeud('lec2b', 'lecon', 'Tenir un carnet, suite', { x: 150, metadata: { semaine: 4, rangSeance: 3 } });
+    noeud('act2-c4', 'activite', 'Relecture du planisphère', { parent: 'lec2b', cloneSourceId: 'act2', metadata: { duree: 20 } });
+    lien('l5', 'act2-c4', 'eval', 'se_verifie_par');
+    api.reconstruireIndexClones();
+}
+
+describe('#963 R1 — les liens d\'un bloc cloné', () => {
+    const PHRASE = '« Relecture du planisphère » (Activité, semaine 4) se vérifie par « Carnet n°1 » (Évaluation certificative, semaine 4).';
+    const blocDe = (donnees, titreLecon) => donnees.lecons.find((l) => l.titre === titreLecon)
+        .blocs.find((b) => b.designation === '« Relecture du planisphère »');
+
+    beforeEach(() => ajouterClones());
+
+    it('le clone de semaine 6 écrit le lien de l\'original avec la semaine de l\'original, pas la sienne', () => {
+        const d = exporteur.construireDonneesModele();
+        expect(blocDe(d, 'Reprendre le carnet').liens).toEqual([PHRASE]);
+        expect(JSON.stringify(d)).not.toContain('(Activité, semaine 6) se vérifie par');
+    });
+
+    it('un original et son clone reliés à la même évaluation, même semaine : la phrase n\'est écrite qu\'une fois', () => {
+        const d = exporteur.construireDonneesModele();
+        expect(blocDe(d, 'Tenir un carnet').liens.filter((p) => p === PHRASE)).toHaveLength(1);
+    });
+
+    it('le Cadre compte ses semaines de cours, pas la planification ni les examens', () => {
+        expect(exporteur.nombreSemainesTrimestre()).toBe(15);
     });
 });
 
