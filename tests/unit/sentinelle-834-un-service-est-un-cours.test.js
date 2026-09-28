@@ -112,14 +112,16 @@ describe('A2 · le formulaire du Cadre : un service avec le seul nom passe ; un 
         Object.entries(valeurs).forEach(([id, v]) => { document.getElementById(id).value = v; });
         const n = notifs();
         const appels = [];
-        const win = { addEventListener() {} };
+        // Lot E2 (28 sept. 2026, D3) : les refus passent par le témoin commun.
+        const temoin = { refus: [], nonEnregistre(raison, geste) { this.refus.push({ raison, geste }); }, enregistre() {} };
+        const win = { addEventListener() {}, temoinEnregistrement: temoin, raisonPourTemoin: (r) => r.charAt(0).toLowerCase() + r.slice(1) };
         const store = { cours: [], infoCours: null };
         const base = { document, db: dbBanc(store), notifications: n.api, echapperHtml: (s) => String(s == null ? '' : s),
             // Le stub fait ce que l'entité fait : il range la fiche, sinon `_postSauvegardeCoursV2` ne la retrouve pas.
             CoursEntite: { creer: async (d) => { appels.push(d); const c = Object.assign({ id: 'COURS_X' }, d); store.cours.push(c); return c; }, mettreAJour: async () => null, chercherDoublonCode: async () => null },
             confirm: () => true, toggleDisplay() {}, setTimeout: () => 0 };
         chargerScript('js/trimestre-v2-cours.js', base, win);
-        return { win, n, appels, elements };
+        return { win, n, appels, elements, temoin };
     }
     it('service + nom → CoursEntite.creer reçoit nature \'service\', code / discipline / pondération vides', async () => {
         const b = monterForm({ 'v2-natureCours': 'service', 'v2-nomCours': 'Aide à la réussite', 'v2-codeCours': '', 'v2-disciplineCours': '', 'v2-ponderation': '' });
@@ -131,20 +133,26 @@ describe('A2 · le formulaire du Cadre : un service avec le seul nom passe ; un 
         expect(b.appels[0].codeCours).toBe('');
         expect(b.appels[0].discipline).toBe('');
         expect(b.appels[0].ponderation).toBe('');
-        // Consigne du 12 sept. 2026 : le mot vient du point unique (« Service d’orthopédagogie créé »).
-        expect(b.n.j.some(x => x.type === 'succes' && /Service d’orthopédagogie créé/.test(x.t))).toBe(true);
+        // Consigne du 12 sept. 2026 : le mot vient du point unique ; lot E2 : « Service d’orthopédagogie « … » créé. »
+        expect(b.n.j.some(x => x.type === 'succes' && /^Service d’orthopédagogie «\u00a0Aide à la réussite\u00a0» créé\.$/.test(x.t))).toBe(true);
+        expect(b.temoin.refus).toEqual([]);
     });
     it('service SANS nom → refusé, rien n\'est créé', async () => {
         const b = monterForm({ 'v2-natureCours': 'service', 'v2-nomCours': '' });
         await b.win.sauvegarderCoursV2();
         expect(b.appels.length).toBe(0);
-        expect(b.n.j.some(x => x.type === 'erreur' && /Nom du service requis/.test(x.t))).toBe(true);
+        // Lot E2 : « Non enregistré – Créer le service : le nom du service est requis… », aucun succès.
+        expect(b.temoin.refus).toHaveLength(1);
+        expect(b.temoin.refus[0].geste).toBe('Créer le service');
+        expect(b.temoin.refus[0].raison).toMatch(/^le nom du service est requis/);
+        expect(b.n.j.some(x => x.type === 'succes')).toBe(false);
     });
     it('cours ordinaire SANS code → toujours refusé (#540 tient) ; avec ses trois champs → créé en nature \'cours\'', async () => {
         const refus = monterForm({ 'v2-natureCours': 'cours', 'v2-nomCours': 'Écriture', 'v2-codeCours': '' });
         await refus.win.sauvegarderCoursV2();
         expect(refus.appels.length).toBe(0);
-        expect(refus.n.j.some(x => x.type === 'erreur' && /Code du cours requis/.test(x.t))).toBe(true);
+        expect(refus.temoin.refus[0]).toMatchObject({ geste: 'Créer le cours' });
+        expect(refus.temoin.refus[0].raison).toMatch(/^le code du cours est requis/);
         const ok = monterForm({ 'v2-natureCours': 'cours', 'v2-nomCours': 'Écriture', 'v2-codeCours': '601-101-MQ', 'v2-disciplineCours': '601 Français', 'v2-ponderation': '2-2-3' });
         await ok.win.sauvegarderCoursV2();
         expect(ok.appels.length).toBe(1);

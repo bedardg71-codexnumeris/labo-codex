@@ -96,8 +96,12 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         // #842 (12 sept. 2026) : le TITRE vient du point unique (js/mots-nature.js, « Nouveau cours » / « Nouveau
         // service » selon la fiche) — l'ancre est l'appel `_titrerFormCoursV2('nouveau')` ; l'objet de cette sentinelle
         // reste la mécanique Créer / Enregistrer du BOUTON, qui ne bouge pas.
-        expect(cours).toMatch(/_titrerFormCoursV2\('nouveau'\);[\s\S]{0,200}btnTexte\.textContent = 'Créer';/);
-        expect(cours).toMatch(/_titrerFormCoursV2\('modifier'\);[\s\S]{0,120}btnTexte\.textContent = 'Enregistrer';/);
+        // ↻ Lot E2 (28 sept. 2026, D3) : Cours — plus de bouton « Enregistrer » en édition (la fiche
+        // s'enregistre champ par champ) ; « Créer le cours » / « Créer le service » paraît en
+        // création seulement, son mot vient du point unique (mots-nature.js, clé `creer`).
+        expect(cours).toMatch(/_titrerFormCoursV2\('nouveau'\);[\s\S]{0,200}rendreModeFicheCoursV2\(true\);/);
+        expect(cours).toMatch(/_titrerFormCoursV2\('modifier'\);[\s\S]{0,200}rendreModeFicheCoursV2\(false\);/);
+        expect(cours).toMatch(/btnCreer\.textContent = mots\.creer;/);
         expect(cours).not.toMatch(/titre\.textContent = '(Nouveau|Modifier le|Dupliquer le) cours'/);
         // Horaire (ENTITÉ) : « Nouvel horaire » → « Créer » (était « Ajouter »).
         // NB : le sous-formulaire de SÉANCE (v2-btnConfirmerSeance) garde « Ajouter »

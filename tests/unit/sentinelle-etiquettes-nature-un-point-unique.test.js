@@ -160,14 +160,17 @@ describe('B · le formulaire du Cadre : la VALEUR reste \'service\' après l\'al
         expect(b.store.cours[0].nature, 'LA VALEUR EN BASE : \'service\', jamais le mot affiché').toBe('service');
         expect(b.store.cours[0].nomCours).toBe('Aide à la réussite (revu)');
         expect(JSON.stringify(b.store.cours)).not.toMatch(/Orthopédagogie|Enseignement/);
-        expect(b.n.j.some(x => x.type === 'succes' && /^Service d’orthopédagogie modifié/.test(x.t))).toBe(true);
+        // ↻ Lot E2 (D3) : une fiche existante s'enregistre toute seule — le témoin commun dit
+        // « Enregistré », plus de message « … modifié ». La création garde le sien.
+        expect(b.n.j.some(x => x.type === 'succes' && /modifié/.test(x.t))).toBe(false);
+        expect(b.n.j.some(x => x.type === 'succes' && /^Service d’orthopédagogie «\u00a0Aide à la réussite\u00a0» créé\.$/.test(x.t))).toBe(true);
     });
 
-    it('le même aller-retour sur un cours ordinaire : \'cours\' reste \'cours\', et « Cours créé » / « Cours modifié »', async () => {
+    it('le même aller-retour sur un cours ordinaire : \'cours\' reste \'cours\', et « Cours « … » créé. » (lot E2 : plus de « modifié »)', async () => {
         const b = monterForm({ 'v2-natureCours': 'cours', 'v2-nomCours': 'Écriture', 'v2-codeCours': '601-101-MQ', 'v2-disciplineCours': '601 Français', 'v2-ponderation': '2-2-3' });
         await b.win.sauvegarderCoursV2();
         expect(b.store.cours[0].nature).toBe('cours');
-        expect(b.n.j.some(x => x.type === 'succes' && /^Cours créé/.test(x.t))).toBe(true);
+        expect(b.n.j.some(x => x.type === 'succes' && /^Cours «\u00a0601-101-MQ\u00a0» créé\.$/.test(x.t))).toBe(true);
         b.elements['v2-selectCours'].value = 'COURS_X';
         await b.win.modifierCoursSelectionneV2();
         expect(b.elements['v2-natureCours'].value).toBe('cours');

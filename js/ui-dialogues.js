@@ -359,14 +359,16 @@
     const QUITTER_SANS = {};
 
     /**
-     * @param {string} genre - 'grille' | 'echelle' | 'cartouche'
+     * @param {string} genre - 'grille' | 'echelle' | 'cartouche' | les fiches du Cadre (lot E2)
+     * @param {string} [titre] - lot E2 : le titre, quand il dépend de la fiche (« Ce cours… » /
+     *   « Ce service… », depuis mots-nature.js) ; sinon celui du genre
      * @returns {Promise<boolean>} true si on peut quitter (rien à perdre, ou
      *   « Quitter sans créer »), false si l'usager reste (« Rester », Échap, Entrée).
      */
-    async function quitterCreationSiConfirme(genre) {
+    async function quitterCreationSiConfirme(genre, titre) {
         if (!_saisieEnCreation(genre)) return true;
         return confirmerAction({
-            titre: TITRES_CREATION[genre] || 'Ce n\'est pas encore créé.',
+            titre: titre || TITRES_CREATION[genre] || 'Ce n\'est pas encore créé.',
             message: 'Ce que tu as saisi n\'est gardé qu\'à l\'écran. Si tu quittes, il sera perdu.',
             texteAnnuler: 'Rester',
             texteConfirmer: QUITTER_SANS[genre] || 'Quitter sans créer',

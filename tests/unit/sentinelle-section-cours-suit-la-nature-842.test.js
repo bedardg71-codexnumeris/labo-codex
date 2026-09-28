@@ -291,7 +291,7 @@ describe('5 · #842 — le titre du formulaire et le bandeau suivent la FICHE ; 
         b.win.dupliquerCoursSelectionneV2();
         expect(titre(b)).toBe('Dupliquer le service');
         expect(b.elements['v2-nomCours'].value).toBe('Aide à la réussite (copie)');
-        b.win.annulerFormCoursV2();
+        await b.win.fermerFicheCoursV2();   // lot E2 : « Annuler » devient « Fermer » (sans saisie en création : aucune question)
         const apres = titre(b);
         b.elements['v2-natureCours'].value = 'service'; b.win.changerNatureCoursV2();
         expect(titre(b), 'formulaire fermé : rien à re-titrer').toBe(apres);

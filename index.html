@@ -6443,7 +6443,7 @@
 
                                     <div class="groupe-form u-mt-15">
                                         <label class="libelle-selection"><span data-mot-nature="Objet">Cours</span> :</label>
-                                        <select id="v2-selectCours" class="controle-form" data-on-change="changerCoursSelectionneV2">
+                                        <select id="v2-selectCours" class="controle-form" data-on-change="choisirCoursV2">
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
@@ -6481,7 +6481,7 @@
                                                  sans code, sans discipline, sans compétence. Seul le nom est requis. -->
                                             <div class="groupe-form u-mb-15">
                                                 <label>Nature</label>
-                                                <select id="v2-natureCours" class="controle-form" data-on-change="changerNatureCoursV2">
+                                                <select id="v2-natureCours" class="controle-form" data-on-change="changerNatureFicheCoursV2">
                                                     <!-- Les libellés viennent de js/mots-nature.js (changerNatureCoursV2 les pose) : aucun mot en dur ici. -->
                                                     <option value="cours"></option>
                                                     <option value="service"></option>
@@ -6493,34 +6493,34 @@
                                             <div class="grille-form-2col u-mb-15">
                                                 <div class="groupe-form" id="v2-champCodeCours">
                                                     <label>Code du cours <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
-                                                    <input type="text" id="v2-codeCours" class="controle-form" placeholder="Ex: 601-101-MQ">
+                                                    <input type="text" id="v2-codeCours" class="controle-form" placeholder="Ex: 601-101-MQ" data-on-change="sauvegarderChampCoursV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label id="v2-labelNomCours">Nom du cours</label>
-                                                    <input type="text" id="v2-nomCours" class="controle-form" placeholder="Ex: Écriture et littérature">
+                                                    <input type="text" id="v2-nomCours" class="controle-form" placeholder="Ex: Écriture et littérature" data-on-change="sauvegarderChampCoursV2">
                                                 </div>
                                             </div>
 
                                             <div class="grille-form-2col u-mb-15" id="v2-ligneCompetence" data-tooltip="reglages-cours-competence">
                                                 <div class="groupe-form">
                                                     <label>N° de la compétence</label>
-                                                    <input type="text" id="v2-numeroCompetence" class="controle-form" placeholder="Ex: 4EF0">
+                                                    <input type="text" id="v2-numeroCompetence" class="controle-form" placeholder="Ex: 4EF0" data-on-change="sauvegarderChampCoursV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label>Compétence</label>
-                                                    <input type="text" id="v2-competence" class="controle-form" placeholder="Ex: Analyser des textes littéraires">
+                                                    <input type="text" id="v2-competence" class="controle-form" placeholder="Ex: Analyser des textes littéraires" data-on-change="sauvegarderChampCoursV2">
                                                 </div>
                                             </div>
 
                                             <div class="grille-form-2col u-mb-15" id="v2-lignePonderation" data-tooltip="reglages-cours-ponderation-heures">
                                                 <div class="groupe-form">
                                                     <label>Pondération <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span> <button class="btn-aide-contextuelle" data-aide="cadre-cours-balises" aria-label="Aide : les balises du cours"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></label>
-                                                    <input type="text" id="v2-ponderation" class="controle-form" placeholder="Ex: 2-2-3" data-on-input="proposerHeuresEnseignementDepuisPonderation" data-on-change="normaliserPonderationCoursV2">
+                                                    <input type="text" id="v2-ponderation" class="controle-form" placeholder="Ex: 2-2-3" data-on-input="proposerHeuresEnseignementDepuisPonderation" data-on-change="changerPonderationCoursV2">
                                                     <span id="v2-repereUnites" class="u-texte-075 u-texte-gris"></span>
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label>Heures d'enseignement</label>
-                                                    <input type="number" id="v2-heuresEnseignement" class="controle-form" placeholder="Ex: 60" min="0" step="1">
+                                                    <input type="number" id="v2-heuresEnseignement" class="controle-form" placeholder="Ex: 60" min="0" step="1" data-on-change="sauvegarderChampCoursV2">
                                                     <span class="u-texte-075 u-texte-gris">Total d'heures d'enseignement (RREC). Sert à vérifier la conformité.</span>
                                                     <span id="v2-repereHeures" class="u-texte-075 u-texte-gris"></span>
                                                 </div>
@@ -6529,7 +6529,7 @@
                                             <div class="grille-form-2col u-mb-15" id="v2-ligneDiscipline">
                                                 <div class="groupe-form">
                                                     <label>Discipline <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
-                                                    <select id="v2-disciplineCours" class="controle-form">
+                                                    <select id="v2-disciplineCours" class="controle-form" data-on-change="sauvegarderChampCoursV2">
                                                         <option value="">— Sélectionner —</option>
                                                         <optgroup label="Sciences de la santé et techniques (100)">
                                                             <option value="101 Biologie">101 Biologie</option>
@@ -6675,7 +6675,7 @@
                                                 </div>
                                                 <div class="groupe-form" data-tooltip="reglages-cours-elements">
                                                     <label>Éléments de compétence</label>
-                                                    <textarea id="v2-elementsCompetence" class="controle-form" rows="2"
+                                                    <textarea id="v2-elementsCompetence" class="controle-form" rows="2" data-on-change="sauvegarderChampCoursV2"
                                                         placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes"></textarea>
                                                 </div>
                                             </div>
@@ -6695,12 +6695,10 @@
                                                     </button>
                                                 </div>
                                                 <div>
-                                                    <button class="btn btn-annuler" data-action="annulerFormCoursV2">
-                                                        Annuler
+                                                    <button class="btn btn-annuler" data-action="fermerFicheCoursV2">
+                                                        Fermer
                                                     </button>
-                                                    <button class="btn btn-confirmer" data-action="sauvegarderCoursV2">
-                                                        <span id="v2-btnTexteCours">Enregistrer</span>
-                                                    </button>
+                                                    <button id="v2-btnCreerCours" class="btn btn-confirmer u-hide" data-action="sauvegarderCoursV2">Créer le cours</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -14334,7 +14332,7 @@
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
     <script src="version.js?v=09281009"></script>
     <script src="js/db.js?v=20260927c"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
-    <script src="js/mots-nature.js?v=20260912g"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
+    <script src="js/mots-nature.js?v=20260928a"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
     <script src="js/pratiques/modalites-evaluation.js?v=20260810a"></script> <!-- SSOT #328 Lot 1 : module propriétaire de modalitesEvaluation (seul point d'écriture), chargé avec la couche stockage -->
     <script src="js/securite-hash.js?v=2026050615"></script> <!-- Beta 99.36 b0506-1400 : Défense H — sceau SHA-256 sur ressources partagées -->
@@ -14360,10 +14358,10 @@
     <script src="js/navigation.js?v=20260918a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=20260911a"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
-    <script src="js/modes.js?v=20260928a"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
+    <script src="js/modes.js?v=20260928b"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/temoin-enregistrement.js?v=20260928a"></script> <!-- Lot B de l'enregistrement (27 sept. 2026) : témoin commun « Enregistré » / « Non enregistré », parlé par sauvegarderDonneesSelonMode -->
-    <script src="js/ui-dialogues.js?v=20260928b"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
+    <script src="js/ui-dialogues.js?v=20260928c"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
 
 
@@ -14386,7 +14384,7 @@
     <script src="js/trimestre-v2-enseignants.js?v=20260928a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260926a"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
     <script src="js/trimestre-v2-liste.js?v=20260920b"></script> <!-- #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
-    <script src="js/trimestre-v2-cours.js?v=20260919b"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
+    <script src="js/trimestre-v2-cours.js?v=20260928a"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20260926c"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
     <script src="js/registre-longitudinal.js?v=20260924b"></script> <!-- #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20260918c"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->

@@ -270,6 +270,13 @@ test('#540-G · lot B — la proposition d\'heures suit le calendrier réel', as
 
         const essai = async (nbSemaines, ponderation) => {
             poser(nbSemaines);
+            // ↻ Lot E2 (28 sept. 2026, D3) : rouvrir « + Nouveau cours » sur une création qui porte
+            // une saisie pose la question de sortie (« Ce cours n'est pas encore créé. »). Ce banc
+            // éprouve la proposition d'heures, pas la question : on vide la saisie de l'essai d'avant.
+            for (const id of ['v2-ponderation', 'v2-heuresEnseignement']) {
+                const champ = document.getElementById(id);
+                if (champ) champ.value = '';
+            }
             await window.nouveauCoursV2();
             const pond = document.getElementById('v2-ponderation');
             const heures = document.getElementById('v2-heuresEnseignement');

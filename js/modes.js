@@ -1167,6 +1167,37 @@ async function modifierEtAnnoncer(cleEffective, mutateur, defaut = null, options
 }
 
 /**
+ * Lot E2 de l'enregistrement (D0 point 2, D3 — 28 sept. 2026) : le pendant de
+ * `modifierEtAnnoncer` pour une écriture faite par une ENTITÉ qui possède sa collection
+ * (`CoursEntite` : garde des doublons, forme de la fiche). L'entité écrit ; le témoin
+ * commun parle après, sur le même contrat :
+ *   - « Enregistré » quand `ecrire` rend une valeur (l'objet écrit) ;
+ *   - rien quand elle rend null / undefined / false : l'entité a refusé, l'appelant le dit ;
+ *   - « Non enregistré – ‹geste› : ‹raison› » sur un échec, RELANCÉ ensuite (même règle
+ *     que `modifierEtAnnoncer`).
+ * @param {string} cleEffective - la clé écrite par l'entité (celle qui efface un échec affiché)
+ * @param {function(): Promise<*>} ecrire
+ * @param {Object} [options] - `{ geste, discret }`
+ * @returns {Promise<*>} ce que `ecrire` a rendu
+ */
+async function ecrireEtAnnoncer(cleEffective, ecrire, options) {
+    const { geste, discret } = options || {};
+    const temoin = window.temoinEnregistrement;
+    try {
+        const resultat = await ecrire();
+        if (resultat && temoin && !discret) temoin.enregistre(cleEffective);
+        if (resultat) invaliderCacheLecture(cleEffective);
+        return resultat;
+    } catch (error) {
+        const quota = error && (error.name === 'QuotaExceededError' ||
+            (error.message && error.message.includes('quota')));
+        console.error(`❌ Écriture échouée ${cleEffective}${quota ? ' (quota)' : ''}:`, error);
+        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste, cleEffective);
+        throw error;
+    }
+}
+
+/**
  * Obtient l'option d'affichage du DA en mode anonymisation
  * @returns {boolean} - true pour afficher le DA réel, false pour "ANONYME"
  */
@@ -1490,6 +1521,7 @@ window.obtenirDonneesSimulationOuNull = obtenirDonneesSimulationOuNull;
 window.contexteImposeNoteProvisoire = contexteImposeNoteProvisoire;   // lot N2 (#716)
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.modifierEtAnnoncer = modifierEtAnnoncer;
+window.ecrireEtAnnoncer = ecrireEtAnnoncer;
 window.anonymiserNom = anonymiserNom;
 window.anonymiserGroupe = anonymiserGroupe;
 // 14 sept. 2026 : lu par la liste d'élèves du Cadre (trimestre-v2-etudiants.js), qui
