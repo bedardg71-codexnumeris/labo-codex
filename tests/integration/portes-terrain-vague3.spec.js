@@ -135,7 +135,7 @@ test.describe('portes terrain vague 3 (WebKit)', () => {
         expect(erreurs).toEqual([]);
     });
 
-    test('#306 · assemblage : « Créer » en création (4 sections) et save EXPLICITE du Trimestre', async ({ page }) => {
+    test('#306 ↻ lot E2 · assemblage : « Créer » en création (4 sections) ; le Trimestre s\'enregistre au changement', async ({ page }) => {
         const erreurs = [];
         attacherCaptureErreurs(page, erreurs);
         await page.setViewportSize({ width: 1470, height: 956 });
@@ -157,7 +157,9 @@ test.describe('portes terrain vague 3 (WebKit)', () => {
         });
         expect(libelles).toEqual({ cours: 'Créer', horaire: 'Créer', enseignant: 'Créer', groupeCours: 'Créer' });
 
-        // Save explicite : modifier une borne SANS cliquer ne persiste rien
+        // ↻ Lot E2 (28 sept. 2026, D3) : la décision #306 (« save explicite ») est renversée —
+        // un trimestre existant s'enregistre champ par champ. Modifier une borne, sans autre
+        // geste, l'écrit.
         const saveExplicite = await page.evaluate(() => {
             const avant = JSON.stringify(window.db.getSync(window.cle('cadreCalendrier'), null));
             const champ = document.getElementById('v2-debutTrimestre');
@@ -167,7 +169,7 @@ test.describe('portes terrain vague 3 (WebKit)', () => {
             const apres = JSON.stringify(window.db.getSync(window.cle('cadreCalendrier'), null));
             return avant === apres ? 'rien-sans-clic' : 'persiste-sans-clic';
         });
-        expect(saveExplicite).toBe('rien-sans-clic');
+        expect(saveExplicite).toBe('persiste-sans-clic');
 
         expect(erreurs).toEqual([]);
     });

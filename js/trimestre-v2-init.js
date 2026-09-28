@@ -123,7 +123,36 @@ function chargerIdentificationTrimestreV2() {
         if (elemSession) elemSession.value = '';
         if (elemAnnee) elemAnnee.value = '';
     }
+    rendreModeFicheTrimestreV2(!trimestre);
 }
+
+/**
+ * Lot E2 (D3) — un trimestre existant s'enregistre tout seul, champ par champ : la carte
+ * n'a plus de bouton. Sans trimestre actif, la fiche CRÉE : « Créer le trimestre » paraît,
+ * et rien n'est écrit avant ce clic.
+ * @param {boolean} enCreation
+ */
+function rendreModeFicheTrimestreV2(enCreation) {
+    const btn = document.getElementById('v2-btnCreerTrimestre');
+    if (btn && btn.classList) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/** Lot E2 : le trimestre actif du registre, ou null (lecture synchrone du stock). */
+function _trimestreActifDuRegistre() {
+    // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
+    // écriture qui échoue le laisserait faux en mémoire.
+    const trimestres = JSON.parse(JSON.stringify(db.getSync('trimestres', []) || []));
+    return trimestres.find(t => t && t.actif === true) || null;
+}
+
+/** Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js, rechargement). */
+function trimestreEnCreationSaisi() {
+    if (_trimestreActifDuRegistre()) return false;
+    const valeur = (id) => (document.getElementById(id)?.value || '').trim();
+    return ['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
+        'v2-finCours', 'v2-finTrimestre'].some(id => valeur(id));
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('trimestre', trimestreEnCreationSaisi);
 
 /**
  * #379 — Détecte si un trimestre possède des données namespacées.
@@ -151,116 +180,43 @@ function _trimestreADesDonnees(trimestreId) {
     return false;
 }
 
+const GESTE_IDENTIFICATION = 'Identification du trimestre';
+const SESSIONS_CODES = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' };
+
 /**
- * Sauvegarde l'identification du trimestre depuis les champs v2-
- * Crée un nouveau trimestre si nécessaire ou met à jour l'existant
+ * Lot E2 (D3, décisions techniques de Cowork du 28 sept.) — lit l'identification saisie.
+ * Rend null tant qu'elle n'est pas COMPLÈTE ET VALIDE : un état intermédiaire (session
+ * changée, année pas encore) n'est ni une erreur ni une écriture.
  */
-function sauvegarderIdentificationTrimestreV2() {
+function _identificationSaisieV2() {
     const nom = document.getElementById('v2-nomTrimestre')?.value?.trim() || '';
     const session = document.getElementById('v2-sessionTrimestre')?.value || '';
-    const annee = document.getElementById('v2-anneeTrimestre')?.value || '';
+    const annee = String(document.getElementById('v2-anneeTrimestre')?.value || '').trim();
+    if (!SESSIONS_CODES[session] || !/^\d{4}$/.test(annee)) return null;
+    const sessionCode = SESSIONS_CODES[session];
+    return {
+        id: `${sessionCode.toLowerCase()}${annee}`,
+        nom: nom || `${session.charAt(0).toUpperCase() + session.slice(1)} ${annee}`,
+        session: sessionCode,
+        annee: parseInt(annee, 10)
+    };
+}
 
-    // #390 (audit 5 août, rapport B7) : plus de retour SILENCIEUX — sous le
-    // bouton Enregistrer unique (#306), l'utilisateur voyait ensuite « Cadre
-    // du trimestre sauvegardé » et croyait l'identification enregistrée.
-    if (!session || !annee) {
-        notifications.erreur(
-            'Identification incomplète',
-            'Choisis la session et l\'année du trimestre — elles déterminent où ses données sont rangées.'
-        );
-        return;
+/** Lot E2 : un refus d'identification, par le témoin commun ; les champs reviennent au stock. */
+function _refuserIdentificationV2(phrase, geste) {
+    if (window.temoinEnregistrement) {
+        const raison = typeof window.raisonPourTemoin === 'function' ? window.raisonPourTemoin(phrase) : phrase;
+        window.temoinEnregistrement.nonEnregistre(raison, geste || GESTE_IDENTIFICATION, 'trimestres');
     }
+    chargerIdentificationTrimestreV2();
+    return false;
+}
 
-    // Convertir session : hiver → H, automne → A, ete → E
-    const sessionMap = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' };
-    const sessionCode = sessionMap[session] || 'H';
-    const id = `${sessionCode.toLowerCase()}${annee}`;
-
-    // Générer le nom si vide
-    const nomTrimestre = nom || `${session.charAt(0).toUpperCase() + session.slice(1)} ${annee}`;
-
-    // Récupérer les trimestres existants
-    const trimestres = db.getSync('trimestres', []);
-    const index = trimestres.findIndex(t => t.actif === true);
-
-    if (index >= 0) {
-        // Mettre à jour le trimestre actif
-        const ancienId = trimestres[index].id;
-
-        // #379 — changer session/année change l'ID, donc le préfixe de TOUTES
-        // les clés namespacées du trimestre. Aucune migration n'existe : sans
-        // garde, les données restent sous l'ancien préfixe et « disparaissent »
-        // (famille de l'incident « cartes perdues » du 4 août). Deux gardes :
-        if (ancienId !== id) {
-            // 1. Collision : l'id cible appartient déjà à un AUTRE trimestre
-            //    du registre (deux entrées de même id = données partagées).
-            const collision = trimestres.some(function(t, i) { return i !== index && t.id === id; });
-            if (collision) {
-                notifications.erreur(
-                    'Trimestre déjà existant',
-                    'Le trimestre « ' + id + ' » existe déjà dans le registre. Pour y travailler, active-le depuis la bibliothèque des trimestres au lieu de renommer celui-ci.'
-                );
-                chargerIdentificationTrimestreV2();
-                return;
-            }
-            // 2. Orphelinage : des données vivent sous l'ancien préfixe.
-            if (_trimestreADesDonnees(ancienId)) {
-                notifications.erreur(
-                    'Changement bloqué',
-                    'Ce trimestre (« ' + ancienId + ' ») contient des données : changer sa session ou son année les rendrait invisibles. Crée plutôt un nouveau trimestre pour la nouvelle session.'
-                );
-                chargerIdentificationTrimestreV2();
-                return;
-            }
-        }
-
-        trimestres[index].id = id;
-        trimestres[index].nom = nomTrimestre;
-        trimestres[index].session = sessionCode;
-        trimestres[index].annee = parseInt(annee);
-
-        db.setSync('trimestres', trimestres);
-
-        // Synchroniser les miroirs window.trimestreActif + clé storage
-        window.trimestreActif = id;
-        db.setSync('trimestreActif', id);
-
-    } else {
-        // #379 — même garde de collision à la création : ne jamais pousser un
-        // doublon d'id dans le registre (un trimestre inactif peut déjà le porter).
-        if (trimestres.some(function(t) { return t.id === id; })) {
-            notifications.erreur(
-                'Trimestre déjà existant',
-                'Le trimestre « ' + id + ' » existe déjà — active-le depuis la bibliothèque des trimestres.'
-            );
-            return;
-        }
-
-        // Créer un nouveau trimestre
-        const nouveauTrimestre = {
-            id: id,
-            nom: nomTrimestre,
-            session: sessionCode,
-            annee: parseInt(annee),
-            dateCreation: new Date().toISOString().split('T')[0],
-            actif: true
-        };
-
-        // Désactiver les autres trimestres
-        trimestres.forEach(t => t.actif = false);
-        trimestres.push(nouveauTrimestre);
-
-        db.setSync('trimestres', trimestres);
-        window.trimestreActif = id;
-        db.setSync('trimestreActif', id);
-
-    }
-
+function _rafraichirListesTrimestresV2() {
     // Rafraîchir la liste dans Gestion des trimestres (extrait dans trimestre-v2-liste.js — session A, 17 mai 2026)
     if (typeof window.afficherListeTrimestreGestion === 'function') {
         window.afficherListeTrimestreGestion();
     }
-
     // Rafraîchir le dropdown trimestre
     if (typeof window.populerDropdownTrimestreV2 === 'function') {
         window.populerDropdownTrimestreV2();
@@ -268,15 +224,118 @@ function sauvegarderIdentificationTrimestreV2() {
 }
 
 /**
- * #306 Lot 2 (3 juillet 2026) : point de persistance UNIQUE du Trimestre.
- * L'auto-save par champ (data-on-change) est retiré du HTML — seul le bouton
- * « Enregistrer » de la section appelle cette fonction, qui sauvegarde
- * l'identification PUIS le cadre (l'identification fixe l'id du trimestre
- * dont dépend cle('cadreCalendrier')).
+ * Lot E2 (D3) — le NOM du trimestre actif s'enregistre au changement du champ, seul :
+ * il ne touche ni l'id ni le préfixe des clés. Vide : le nom généré (« Automne 2026 »),
+ * comme avant. Sans trimestre actif, rien : c'est « Créer le trimestre » qui écrit.
  */
-function sauvegarderTrimestreCompletV2() {
-    sauvegarderIdentificationTrimestreV2();
-    sauvegarderCadreCalendrierV2();
+function sauvegarderNomTrimestreV2() {
+    const actif = _trimestreActifDuRegistre();
+    if (!actif) return false;
+    const champ = document.getElementById('v2-nomTrimestre');
+    let nom = champ?.value?.trim() || '';
+    if (!nom) {
+        const libelles = { H: 'Hiver', A: 'Automne', E: 'Été' };
+        nom = `${libelles[actif.session] || ''} ${actif.annee || ''}`.trim();
+        if (champ) champ.value = nom;
+    }
+    if (actif.nom === nom) return true;
+    // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
+    // écriture qui échoue le laisserait faux en mémoire.
+    const trimestres = JSON.parse(JSON.stringify(db.getSync('trimestres', []) || []));
+    const index = trimestres.findIndex(t => t && t.actif === true);
+    trimestres[index].nom = nom;
+    if (!sauvegarderDonneesSelonMode('trimestres', trimestres, { geste: GESTE_IDENTIFICATION })) return false;
+    _rafraichirListesTrimestresV2();
+    return true;
+}
+
+/**
+ * Lot E2 (D3) — la SESSION et l'ANNÉE du trimestre actif s'écrivent ENSEMBLE, au
+ * changement de l'un ou l'autre champ, et seulement quand les deux sont valides.
+ *
+ * ⚠ Elles fixent l'id du trimestre, donc le préfixe de TOUTES ses clés (#379). L'écriture
+ * par champ avait été retirée pour cette raison (#306 lot 2) ; elle revient derrière les
+ * mêmes gardes, inchangées : la collision, et « Changement bloqué » quand des données vivent
+ * sous l'ancien préfixe. AUCUNE migration de clés : un refus remet les champs au stock et
+ * le dit par le témoin (« Non enregistré – Identification du trimestre : … »), sans succès.
+ * Sans trimestre actif, rien : c'est « Créer le trimestre » qui écrit.
+ * @returns {boolean} true si l'identification en base est celle des champs
+ */
+function sauvegarderIdentificationTrimestreV2() {
+    const actif = _trimestreActifDuRegistre();
+    if (!actif) return false;
+    const saisie = _identificationSaisieV2();
+    if (!saisie) return false;                         // état intermédiaire : ni écriture, ni erreur
+    if (saisie.id === actif.id) return true;           // rien ne change (le nom a son propre champ)
+
+    // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
+    // écriture qui échoue le laisserait faux en mémoire.
+    const trimestres = JSON.parse(JSON.stringify(db.getSync('trimestres', []) || []));
+    const index = trimestres.findIndex(t => t && t.actif === true);
+    const ancienId = trimestres[index].id;
+    // #379 — deux gardes, inchangées ; leurs phrases sont reprises telles quelles.
+    // 1. Collision : l'id cible appartient déjà à un AUTRE trimestre du registre.
+    if (trimestres.some(function(t, i) { return i !== index && t.id === saisie.id; })) {
+        return _refuserIdentificationV2('Le trimestre « ' + saisie.id + ' » existe déjà dans le registre. Pour y travailler, active-le depuis la bibliothèque des trimestres au lieu de renommer celui-ci.');
+    }
+    // 2. Orphelinage : des données vivent sous l'ancien préfixe.
+    if (_trimestreADesDonnees(ancienId)) {
+        return _refuserIdentificationV2('Ce trimestre (« ' + ancienId + ' ») contient des données : changer sa session ou son année les rendrait invisibles. Crée plutôt un nouveau trimestre pour la nouvelle session.');
+    }
+
+    trimestres[index].id = saisie.id;
+    trimestres[index].session = saisie.session;
+    trimestres[index].annee = saisie.annee;
+    if (!sauvegarderDonneesSelonMode('trimestres', trimestres, { geste: GESTE_IDENTIFICATION })) {
+        chargerIdentificationTrimestreV2();
+        return false;
+    }
+    // Synchroniser les miroirs window.trimestreActif + clé storage
+    window.trimestreActif = saisie.id;
+    db.setSync('trimestreActif', saisie.id);
+    _rafraichirListesTrimestresV2();
+    return true;
+}
+
+/**
+ * Lot E2 (D3) — « Créer le trimestre » : le seul geste qui crée, quand aucun trimestre
+ * n'est actif. Rien n'est écrit avant ce clic. L'identification d'abord (elle fixe l'id),
+ * PUIS le cadre, sous l'id en vigueur après elle — jamais sous un id intermédiaire.
+ */
+function creerTrimestreV2() {
+    const geste = 'Créer le trimestre';
+    if (_trimestreActifDuRegistre()) return false;
+    const saisie = _identificationSaisieV2();
+    if (!saisie) {
+        return _refuserIdentificationV2('Choisis la session et l\'année du trimestre — elles déterminent où ses données sont rangées.', geste);
+    }
+    // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
+    // écriture qui échoue le laisserait faux en mémoire.
+    const trimestres = JSON.parse(JSON.stringify(db.getSync('trimestres', []) || []));
+    // #379 — même garde de collision à la création : jamais de doublon d'id dans le registre.
+    if (trimestres.some(function(t) { return t.id === saisie.id; })) {
+        return _refuserIdentificationV2('Le trimestre « ' + saisie.id + ' » existe déjà — active-le depuis la bibliothèque des trimestres.', geste);
+    }
+    trimestres.forEach(t => t.actif = false);
+    trimestres.push({
+        id: saisie.id,
+        nom: saisie.nom,
+        session: saisie.session,
+        annee: saisie.annee,
+        dateCreation: new Date().toISOString().split('T')[0],
+        actif: true
+    });
+    if (!sauvegarderDonneesSelonMode('trimestres', trimestres, { geste })) return false;
+    window.trimestreActif = saisie.id;
+    db.setSync('trimestreActif', saisie.id);
+    // Le cadre, sous l'id qui vient d'être posé (cle() le lit dans trimestreActif).
+    sauvegarderCadreCalendrierV2({ discret: true });
+    const champNom = document.getElementById('v2-nomTrimestre');
+    if (champNom) champNom.value = saisie.nom;
+    rendreModeFicheTrimestreV2(false);
+    _rafraichirListesTrimestresV2();
+    notifications.succes(`Trimestre «\u00a0${saisie.nom}\u00a0» créé.`);
+    return true;
 }
 
 /* ===============================
@@ -339,9 +398,21 @@ function chargerCadreCalendrierV2() {
 }
 
 /**
- * Sauvegarde le cadre calendrier depuis les champs v2-
+ * Lot E2 (D3) — le cadre calendaire s'enregistre tout seul, au changement de chaque date ;
+ * le bouton « Enregistrer » de la carte est retiré. Le témoin commun le dit.
+ *
+ * Les trois dates obligatoires (#215 : début, fin des cours, fin du trimestre) ne bloquent
+ * plus l'écriture : champ par champ, la première date saisie serait sinon perdue en quittant.
+ * Tant qu'il en manque une, le calendrier généré est RETIRÉ (même règle que
+ * « Réinitialiser les bornes », #390 B5 : ne pas fabriquer un calendrier sur des bornes
+ * vides) ; l'avertissement de cohérence de la carte (#369) le montre. Complet, le
+ * calendrier est régénéré.
+ * Sans trimestre actif, rien : c'est « Créer le trimestre » qui écrit.
+ * @param {{discret?: boolean}} [options] - `discret` : écriture faite par un autre geste
+ * @returns {boolean} true si le cadre a été écrit
  */
-function sauvegarderCadreCalendrierV2() {
+function sauvegarderCadreCalendrierV2(options) {
+    if (!_trimestreActifDuRegistre()) return false;
     const cadre = {
         dateDebut: document.getElementById('v2-debutTrimestre')?.value || '',
         finCours: document.getElementById('v2-finCours')?.value || '',
@@ -352,47 +423,28 @@ function sauvegarderCadreCalendrierV2() {
         semaineExamensDebut: document.getElementById('v2-semaineExamensDebut')?.value || '',
         semaineExamensFin: document.getElementById('v2-semaineExamensFin')?.value || ''
     };
+    const discret = !!(options && options.discret);
+    if (!sauvegarderDonneesSelonMode('cadreCalendrier', cadre, { geste: 'Modifier le cadre du trimestre', discret })) return false;
 
-    // Validation #215 : dateDebut + finCours + finTrimestre sont obligatoires.
-    // Sans ces dates, les fonctions de semaine, échéances et snapshots cassent.
-    const manquants = [];
-    if (!cadre.dateDebut) manquants.push({ id: 'v2-debutTrimestre', label: 'Début du trimestre' });
-    if (!cadre.finCours) manquants.push({ id: 'v2-finCours', label: 'Fin des cours réguliers' });
-    if (!cadre.finTrimestre) manquants.push({ id: 'v2-finTrimestre', label: 'Fin du trimestre' });
-
-    if (manquants.length > 0) {
-        const details = manquants.map(c => '• ' + c.label).join('\n');
-        notifications.erreur(
-            'Dates obligatoires manquantes',
-            'Renseigne ces champs avant de continuer :\n' + details
-        );
-        // Focus sur le premier champ vide
-        const premier = document.getElementById(manquants[0].id);
-        if (premier) premier.focus();
-        return;
-    }
-
-    db.setSync(cle('cadreCalendrier'), cadre);
-
-    // Régénérer le calendrier complet
-    if (typeof genererCalendrierComplet === 'function') {
-        genererCalendrierComplet();
+    if (cadre.dateDebut && cadre.finCours && cadre.finTrimestre) {
+        if (typeof genererCalendrierComplet === 'function') {
+            genererCalendrierComplet();
+        } else {
+            console.warn('[Trimestre V2] Fonction genererCalendrierComplet non disponible');
+        }
     } else {
-        console.warn('[Trimestre V2] Fonction genererCalendrierComplet non disponible');
+        db.removeSync(cle('calendrierComplet'));
     }
 
     // Rafraîchir la vue calendaire si visible (sinon stale jusqu'au prochain changement d'onglet)
     if (typeof afficherCalendrierScolaire === 'function') {
         afficherCalendrierScolaire();
     }
-
     // Mettre à jour les statistiques après un délai pour laisser le temps à la synchronisation
     setTimeout(() => {
         window.afficherStatistiquesTrimestreV2();
     }, 300);
-
-    // Notification
-    notifications.succes('Cadre du trimestre sauvegardé');
+    return true;
 }
 
 /**
@@ -422,7 +474,8 @@ function reinitialiserBornesTrimestreV2() {
     cadre.finCours = '';
     cadre.finTrimestre = '';
     cadre.remiseNotes = '';
-    db.setSync(cle('cadreCalendrier'), cadre);
+    // Lot E2 (D3) : par le témoin commun, qui dit le succès comme l'échec.
+    if (!sauvegarderDonneesSelonMode('cadreCalendrier', cadre, { geste: 'Réinitialiser les bornes' })) return;
 
     // #390 (audit 5 août, rapport B5) : purger le calendrier généré — la
     // sidebar gardait « 15 sem. · 75 jours » après réinitialisation. NE PAS
@@ -434,9 +487,6 @@ function reinitialiserBornesTrimestreV2() {
     }
     // Stats + avertissements à l'état vide (source unique #366)
     window.afficherStatistiquesTrimestreV2();
-
-    // Notification
-    notifications.succes('Bornes du trimestre réinitialisées');
 }
 
 /**
@@ -466,7 +516,8 @@ function reinitialiserSemainesSpecialesV2() {
     cadre.semainePlanificationFin = '';
     cadre.semaineExamensDebut = '';
     cadre.semaineExamensFin = '';
-    db.setSync(cle('cadreCalendrier'), cadre);
+    // Lot E2 (D3) : par le témoin commun, qui dit le succès comme l'échec.
+    if (!sauvegarderDonneesSelonMode('cadreCalendrier', cadre, { geste: 'Réinitialiser les semaines spéciales' })) return;
 
     // #390 (audit 5 août, rapport B5) : les semaines spéciales influencent le
     // statut des jours — régénérer le calendrier (bornes toujours présentes)
@@ -478,9 +529,6 @@ function reinitialiserSemainesSpecialesV2() {
         afficherCalendrierScolaire();
     }
     window.afficherStatistiquesTrimestreV2();
-
-    // Notification
-    notifications.succes('Semaines spéciales réinitialisées');
 }
 
 /**
@@ -651,12 +699,12 @@ function confirmerEvenementV2() {
     }
 
     if (!dateEvenement || !description) {
-        alert('Veuillez remplir la date et la description.');
+        alert('Remplis la date et la description.');
         return;
     }
 
     if (dateReprise && !horaireReprise) {
-        alert('Veuillez indiquer quel jour de cours est remplacé.');
+        alert('Indique quel jour de cours est remplacé.');
         return;
     }
 
@@ -697,7 +745,8 @@ function confirmerEvenementV2() {
         });
     }
 
-    db.setSync(cle('journeesSansCours'), evenements); // security-ok: filtrage local d'une liste existante (suppression par id) // security-ok: saisie locale du formulaire (champs value/trim), pas de source externe
+    // Lot E2 (D3) : par le témoin commun ; le message du geste ne part qu'après une écriture.
+    if (!sauvegarderDonneesSelonMode('journeesSansCours', evenements, { geste: evenementEnEditionV2 ? 'Modifier la journée' : 'Ajouter la journée' })) return;
     rafraichirApresChangementEvenementV2(evenementEnEditionV2 ? 'Journée modifiée' : 'Journée ajoutée');
     annulerFormEvenementV2();
 }
@@ -719,7 +768,7 @@ function supprimerEvenementV2(id) {
 
     let evenements = db.getSync(cle('journeesSansCours'), []);
     evenements = evenements.filter(e => e.id !== id);
-    db.setSync(cle('journeesSansCours'), evenements);
+    if (!sauvegarderDonneesSelonMode('journeesSansCours', evenements, { geste: 'Supprimer la journée' })) return;
 
     rafraichirApresChangementEvenementV2('Journée supprimée');
 }
@@ -750,7 +799,9 @@ window.chargerIdentificationTrimestreV2 = chargerIdentificationTrimestreV2;
 window.sauvegarderIdentificationTrimestreV2 = sauvegarderIdentificationTrimestreV2;
 window.chargerCadreCalendrierV2 = chargerCadreCalendrierV2;
 window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
-window.sauvegarderTrimestreCompletV2 = sauvegarderTrimestreCompletV2;
+window.sauvegarderNomTrimestreV2 = sauvegarderNomTrimestreV2;
+window.creerTrimestreV2 = creerTrimestreV2;
+window.rendreModeFicheTrimestreV2 = rendreModeFicheTrimestreV2;
 window.reinitialiserBornesTrimestreV2 = reinitialiserBornesTrimestreV2;
 window.reinitialiserSemainesSpecialesV2 = reinitialiserSemainesSpecialesV2;
 window.chargerJourneesSansCoursV2 = chargerJourneesSansCoursV2;
