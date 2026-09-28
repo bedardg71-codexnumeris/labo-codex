@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.165.0 (carte d'alignement, #963 à #966) — titre et phrases ACCEPTÉS par Grégoire le 28 sept. 2026
+            // (§ 12 de la relecture après rebase ; phrases de a133389c, mot pour mot).
+            version: '1.165',
+            couleur: 'vert',
+            titre: 'Carte d\'alignement',
+            items: [
+                'Carte d\'alignement&nbsp;: Actions ▸ «&nbsp;Télécharger un modèle…&nbsp;» produit un fichier à coller dans l\'IA de ton choix, pour faire relire ta carte. Rien n\'est modifié dans ta carte. Le principe «&nbsp;Évaluer ce qu\'on enseigne, et enseigner ce qu\'on évalue, au même niveau d\'exigence.&nbsp;» s\'affiche sous le titre.',
+                'Une évaluation se relie désormais à ses objectifs&nbsp;: dans son Inspecteur, coche ceux qu\'elle vérifie, dans sa leçon ou dans une leçon placée avant elle. Ses badges et ceux de tes objectifs suivent ces cases. Les liens «&nbsp;se vérifie par&nbsp;» déjà tracés restent en place et comptent comme avant.',
+                'Chaque évaluation porte une pastille qui dit si ce qu\'elle vérifie a été enseigné avant elle&nbsp;: ✓ oui, ⚠ seulement après, ✕ jamais, ? impossible de le dire, ! aucun objectif coché.',
+                'Le guide de la carte décrit ces nouveautés.'
+            ]
+        },
+        {
             // 1.164.0 (lot E1 de l'enregistrement, Conception, D3) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026
             // (tous les mots du § 5 de la demande de relecture, Nouvelles telles quelles). Titre : nom de D3.
             version: '1.164',
