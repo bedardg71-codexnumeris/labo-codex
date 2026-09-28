@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 17 H 15 : **LOT E2 (1.166.0) EN LIGNE DEPUIS 16 H 15 ; PORTE TERRAIN PASSÉE (8/8) ; BRANCHE RETIRÉE** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, SOIR : **LOT E3 FAIT SUR LA BRANCHE `lot-e3-productions-interventions` (arbre principal), NON FUSIONNÉ ; RELECTURE DE COWORK ATTENDUE** — lire `git log main..lot-e3-productions-interventions`
+
+**Où vit le travail** : la branche locale `lot-e3-productions-interventions` (non poussée), partie de `main` = `15effd08` (1.166.1). Sept commits : la consigne du jour posée, les quatre étapes (productions, interventions et rencontres, volet confidentiel, réglages et bilan), le compte rendu d'étape, le placement et la demande finale. **Aucune release, aucun bump.**
+
+**À lire** : `plans de travail/DEMANDE-RELECTURE-2026-09-28-lot-E3-productions-interventions.md` (finale) et `…-lot-E3-etapes-1-2.md` (compte rendu d'étape). Point à trancher en premier : **le report des présences** (la prémisse de la consigne était fausse ; il n'a plus lieu qu'au passage à « Complétée », après une question neuve dont les mots vont à Grégoire).
+
+**Mesuré** : Vitest 659 fichiers, 7 692/7 692 ; banc WebKit du lot 15/15 (35/35 avec E1 et E2) ; mutations au § 6 de la demande.
+
+**Reste, dans l'ordre** : relecture de Cowork → corrections → Grégoire accepte les mots et les Nouvelles → release `minor` → Vitest → verdict WebKit complet (Cowork et navigateurs fermés) → fusion → push → porte terrain. Le lot F (les mots) attend la livraison de E3.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 17 H 15 : **LOT E2 (1.166.0) EN LIGNE DEPUIS 16 H 15 ; PORTE TERRAIN PASSÉE (8/8) ; BRANCHE RETIRÉE** — lire `git log origin/main`
 
 **Fait** : porte terrain de 1.166.0 passée par Grégoire sur l'iPad à 17 h 10, **8 rangées sur 8, aucun échec** (le DA ne se laisse pas effacer ; « (essai) » tient en ouvrant directement une autre fiche ; programme d'origine rétabli) ; relevé dans `plans de travail/PORTES-TERRAIN-2026-09-28-lot-E2-cadre-eleves.md`. La branche `lot-e2-cadre-eleves` (fusionnée dans `main`) et son worktree sont retirés.
 
