@@ -7142,7 +7142,7 @@
                                     <!-- Sélection de l'horaire -->
                                     <div class="groupe-form">
                                         <label class="label-compact">Horaire :</label>
-                                        <select id="v2-selectHoraire" class="controle-form" data-on-change="changerHoraireSelectionneV2">
+                                        <select id="v2-selectHoraire" class="controle-form" data-on-change="choisirHoraireV2">
                                             <option value="">— Sélectionner —</option>
                                         </select>
                                     </div>
@@ -7174,7 +7174,7 @@
                                         <!-- Groupe associé (obligatoire) -->
                                         <div class="groupe-form u-mb-15">
                                             <label>Groupe associé <span class="champ-requis">*</span></label>
-                                            <select id="v2-hor-groupeAssocie" class="controle-form">
+                                            <select id="v2-hor-groupeAssocie" class="controle-form" data-on-change="sauvegarderChampHoraireV2">
                                                 <option value="">— Sélectionner un groupe —</option>
                                             </select>
                                             <p class="texte-aide u-mt-5" style="font-size: 0.75rem">L'horaire sera lié à ce groupe d'étudiants.</p>
@@ -7182,7 +7182,7 @@
 
                                         <div class="groupe-form u-mb-15">
                                             <label>Nom de l'horaire <span class="champ-requis">*</span></label>
-                                            <input type="text" id="v2-hor-nom" class="controle-form" placeholder="Ex: Lun-Mer 10h">
+                                            <input type="text" id="v2-hor-nom" class="controle-form" placeholder="Ex: Lun-Mer 10h" data-on-change="sauvegarderChampHoraireV2">
                                         </div>
 
                                         <div class="grille-form-2col u-mb-15" data-tooltip="reglages-horaire-periodes">
@@ -7218,12 +7218,10 @@
                                                 Supprimer
                                             </button>
                                             <div>
-                                                <button class="btn btn-annuler" data-action="annulerFormHoraireV2">
-                                                    Annuler
+                                                <button class="btn btn-annuler" data-action="fermerFicheHoraireV2">
+                                                    Fermer
                                                 </button>
-                                                <button class="btn btn-confirmer" data-action="sauvegarderHoraireV2">
-                                                    <span id="v2-btnTexteHoraire">Enregistrer</span>
-                                                </button>
+                                                <button id="v2-btnCreerHoraire" class="btn btn-confirmer u-hide" data-action="sauvegarderHoraireV2">Créer l'horaire</button>
                                             </div>
                                         </div>
                                     </div>
@@ -14361,7 +14359,7 @@
     <script src="js/modes.js?v=20260928b"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/temoin-enregistrement.js?v=20260928a"></script> <!-- Lot B de l'enregistrement (27 sept. 2026) : témoin commun « Enregistré » / « Non enregistré », parlé par sauvegarderDonneesSelonMode -->
-    <script src="js/ui-dialogues.js?v=20260928c"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
+    <script src="js/ui-dialogues.js?v=20260928d"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
 
 
@@ -14382,7 +14380,7 @@
     <script src="js/trimestre-v2.js?v=20260918c"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
     <script src="js/trimestre-v2-init.js?v=20260928a"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
     <script src="js/trimestre-v2-enseignants.js?v=20260928a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
-    <script src="js/trimestre-v2-horaires.js?v=20260926a"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
+    <script src="js/trimestre-v2-horaires.js?v=20260928a"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
     <script src="js/trimestre-v2-liste.js?v=20260920b"></script> <!-- #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
     <script src="js/trimestre-v2-cours.js?v=20260928a"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20260926c"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->

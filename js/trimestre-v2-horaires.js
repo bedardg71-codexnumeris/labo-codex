@@ -700,7 +700,8 @@ function populerDropdownGroupesHoraireV2(etudiantsOpt) {
 /**
  * Affiche le formulaire pour un nouvel horaire
  */
-function nouveauHoraireV2() {
+async function nouveauHoraireV2() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('horaire'))) return;
     horaireEnEditionId = null;
 
     // Populer le dropdown des groupes
@@ -718,10 +719,8 @@ function nouveauHoraireV2() {
 
     // Mettre à jour le titre
     const titre = document.getElementById('v2-titreFormHoraire');
-    const btnTexte = document.getElementById('v2-btnTexteHoraire');
     if (titre) titre.textContent = 'Nouvel horaire';
-    // #306 Lot 1 : libellé canonique « Créer » en création (« Enregistrer » en édition)
-    if (btnTexte) btnTexte.textContent = 'Créer';
+    rendreModeFicheHoraireV2(true);
 
     // Masquer le bouton supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
@@ -761,9 +760,8 @@ function editerHoraireV2(horaire) {
 
     // Mettre à jour le titre
     const titre = document.getElementById('v2-titreFormHoraire');
-    const btnTexte = document.getElementById('v2-btnTexteHoraire');
     if (titre) titre.textContent = 'Modifier l\'horaire';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+    rendreModeFicheHoraireV2(false);
 
     // Afficher le bouton supprimer (mode édition)
     const btnSupprimer = document.getElementById('v2-btnSupprimerHoraire');
@@ -816,9 +814,69 @@ function editerHoraireV2(horaire) {
 }
 
 /**
- * Annule le formulaire horaire
+ * Lot E2 (D3) — un horaire existant s'enregistre tout seul : « Créer l'horaire » ne paraît
+ * qu'en création.
  */
-function annulerFormHoraireV2() {
+function rendreModeFicheHoraireV2(enCreation) {
+    const btn = document.getElementById('v2-btnCreerHoraire');
+    if (btn) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/**
+ * Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js). Le jour et
+ * les heures des séances naissent avec un défaut (08:00, 10:00) : ils ne comptent pas.
+ */
+function horaireEnCreationSaisi() {
+    const formulaire = document.getElementById('v2-formulaireHoraire');
+    if (!formulaire || formulaire.classList.contains('u-hide')) return false;
+    if (horaireEnEditionId) return false;
+    const val = (id) => String(document.getElementById(id)?.value || '').trim();
+    if (val('v2-hor-nom') || val('v2-hor-groupeAssocie')) return true;
+    for (let i = 0; document.getElementById(`v2-hor-seance-${i}-jour`); i++) {
+        if (val(`v2-hor-seance-${i}-periodes`) || val(`v2-hor-seance-${i}-local`)) return true;
+    }
+    return false;
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('horaire', horaireEnCreationSaisi);
+
+/** Lot E2 : choisir un horaire dans le menu ; pendant une création, la question de sortie. */
+async function choisirHoraireV2(el) {
+    const select = document.getElementById('v2-selectHoraire');
+    const horaireId = (el && el.value !== undefined) ? el.value : select?.value;
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('horaire'))) {
+        if (select) select.value = '';
+        return;
+    }
+    changerHoraireSelectionneV2(horaireId);
+}
+
+/** Lot E2 (D3) : « Annuler » devient « Fermer » — il n'annulait rien. En création, la question. */
+async function fermerFicheHoraireV2() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('horaire'))) return;
+    _fermerFormHoraireV2();
+}
+
+/**
+ * Lot E2 (D3) — un champ d'un horaire EXISTANT (séances comprises) s'enregistre au
+ * changement, par le même écrivain que la création. En création, rien.
+ */
+function sauvegarderChampHoraireV2() {
+    if (!horaireEnEditionId) return false;
+    return sauvegarderHoraireV2();
+}
+
+/** Lot E2 : un refus de vérification, par le témoin commun. */
+function _refuserHoraireV2(phrase, geste) {
+    if (window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(phrase), geste, cle('horaires'));
+    }
+    return false;
+}
+
+/**
+ * Referme le formulaire horaire (ex-annulerFormHoraireV2, sans question).
+ */
+function _fermerFormHoraireV2() {
     afficherEtatVideHoraireV2();
 
     // Désélectionner dans le dropdown
@@ -828,10 +886,15 @@ function annulerFormHoraireV2() {
 }
 
 /**
- * Sauvegarde l'horaire (ajout ou modification)
+ * L'écrivain unique d'un horaire : « Créer l'horaire » en création, chaque champ en
+ * modification (lot E2, D3). Mêmes vérifications dans les deux cas ; un refus dit
+ * « Non enregistré – ‹geste› : ‹raison› » par le témoin commun.
  * 🆕 (10 jan 2026) : Local par séance au lieu de global
+ * @returns {boolean} true si l'horaire a été écrit
  */
 function sauvegarderHoraireV2() {
+    const creation = !horaireEnEditionId;
+    const geste = creation ? 'Créer l\'horaire' : 'Modifier l\'horaire';
     const groupeAssocie = document.getElementById('v2-hor-groupeAssocie')?.value;
     const nom = document.getElementById('v2-hor-nom')?.value?.trim();
     const nbSeances = parseInt(document.getElementById('v2-hor-nbSeances')?.value) || 2;
@@ -845,21 +908,18 @@ function sauvegarderHoraireV2() {
         // après la PREMIÈRE phrase — dans l'ordre inverse, l'accordéon n'était jamais lu.
         const selectGroupe = document.getElementById('v2-hor-groupeAssocie');
         const aucunGroupe = !selectGroupe || !Array.from(selectGroupe.options).some(o => o.value);
+        // Lot E2 : les mêmes phrases, par le témoin (il reste affiché : la seconde est lue).
         if (aucunGroupe) {
-            notifications.erreur(
-                'Aucun groupe d\'étudiant·es pour l\'instant',
+            return _refuserHoraireV2(
+                'Aucun groupe d\'étudiant·es pour l\'instant. ' +
                 'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus. ' +
-                'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e.'
-            );
-        } else {
-            notifications.erreur('Veuillez sélectionner un groupe associé');
+                'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e.', geste);
         }
-        return;
+        return _refuserHoraireV2('Choisis le groupe associé.', geste);
     }
 
     if (!nom) {
-        notifications.erreur('Le nom de l\'horaire est requis');
-        return;
+        return _refuserHoraireV2('Le nom de l\'horaire est requis.', geste);
     }
 
     // Collecter les séances (avec local par séance)
@@ -876,18 +936,13 @@ function sauvegarderHoraireV2() {
         const local = document.getElementById(`v2-hor-seance-${i}-local`)?.value?.trim() || '';
 
         if (!heureDebut) {
-            notifications.erreur(
-                `Séance ${i + 1} : heure de début manquante`,
-                'Sans elle, la durée de la séance ne peut pas être calculée — et c\'est cette durée qui sert à l\'assiduité.');
-            return;
+            return _refuserHoraireV2(`Séance ${i + 1} : heure de début manquante. ` +
+                'Sans elle, la durée de la séance ne peut pas être calculée — et c\'est cette durée qui sert à l\'assiduité.', geste);
         }
 
         const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '';
         if (!heureFin) {
-            notifications.erreur(
-                `Séance ${i + 1} : heure de fin manquante`,
-                'Elle situe la séance dans la journée.');
-            return;
+            return _refuserHoraireV2(`Séance ${i + 1} : heure de fin manquante. Elle situe la séance dans la journée.`, geste);
         }
 
         // #540 lot E1 : le nombre de périodes est SAISI, jamais déduit des heures — une
@@ -896,17 +951,18 @@ function sauvegarderHoraireV2() {
         // que d'en proposer un.
         const nombrePeriodes = parseInt(document.getElementById(`v2-hor-seance-${i}-periodes`)?.value, 10);
         if (!(nombrePeriodes > 0)) {
-            notifications.erreur(
-                `Séance ${i + 1} : nombre de périodes manquant`,
-                'C\'est lui qui compte au dénominateur de l\'assiduité — il ne se déduit pas des heures, puisqu\'une période comprend sa pause.');
-            return;
+            return _refuserHoraireV2(`Séance ${i + 1} : nombre de périodes manquant. ` +
+                'C\'est lui qui compte au dénominateur de l\'assiduité — il ne se déduit pas des heures, puisqu\'une période comprend sa pause.', geste);
         }
 
         seances.push({ jour, heureDebut, heureFin, nombrePeriodes, local });
     }
 
     const cleHoraires = cle('horaires');
-    let horaires = db.getSync(cleHoraires, []);
+    // Une COPIE : modifier l'objet du cache de `db` avant une écriture qui échoue le
+    // laisserait faux en mémoire (lot E2, même règle que le registre des trimestres).
+    let horaires = JSON.parse(JSON.stringify(db.getSync(cleHoraires, []) || []));
+    let idEcrit = horaireEnEditionId;
 
     if (horaireEnEditionId) {
         // Modification
@@ -918,11 +974,7 @@ function sauvegarderHoraireV2() {
             // (changerTrimestreActifV2 + chargerHorairesV2). Sans ce garde, la branche ne
             // faisait RIEN tout en affichant « modifié » → modification silencieusement perdue.
             console.warn('[Horaire V2] Sauvegarde refusée : horaire', horaireEnEditionId, 'absent du trimestre actif', cleHoraires);
-            notifications.erreur(
-                'Impossible d\'enregistrer cet horaire',
-                'Il n\'appartient pas au trimestre actif. Bascule sur son trimestre pour le modifier.'
-            );
-            return;
+            return _refuserHoraireV2('Il n\'appartient pas au trimestre actif. Bascule sur son trimestre pour le modifier.', geste);
         }
         horaires[index] = {
             ...horaires[index],
@@ -935,7 +987,6 @@ function sauvegarderHoraireV2() {
         // lisible, et sert justement à pré-remplir les séances d'avant au chargement.
         // Supprimer l'ancien champ local global s'il existe (migration)
         delete horaires[index].local;
-        notifications.succes(`Horaire "${nom}" modifié`);
     } else {
         // Ajout
         const nouvelHoraire = {
@@ -945,11 +996,13 @@ function sauvegarderHoraireV2() {
             seances
         };
         horaires.push(nouvelHoraire);
-        horaireEnEditionId = nouvelHoraire.id;
-        notifications.succes(`Horaire "${nom}" créé`);
+        idEcrit = nouvelHoraire.id;
     }
 
-    db.setSync(cleHoraires, horaires);
+    // Lot E2 (D3) : par le témoin commun ; le message du geste ne part qu'après l'écriture.
+    if (!sauvegarderDonneesSelonMode('horaires', horaires, { geste })) return false;
+    horaireEnEditionId = idEcrit;
+    if (creation) notifications.succes(`Horaire «\u00a0${nom}\u00a0» créé.`);
 
     // 🆕 FIX (22 jan 2026) : Synchroniser horaireHebdo pour que le calendrier reconnaisse les jours de cours
     // Fusionner les séances de TOUS les horaires pour couvrir tous les groupes-cours
@@ -957,8 +1010,8 @@ function sauvegarderHoraireV2() {
     // fusionnerSeancesHoraires — la dédup par jour seul perdait la 2e séance
     // d'un même jour (deux groupes, deux heures).
     const toutesSeances = fusionnerSeancesHoraires(horaires);
-    const cleHoraireHebdo = cle('horaireHebdo');
-    db.setSync(cleHoraireHebdo, toutesSeances);
+    // Écriture DÉRIVÉE de celle ci-dessus : discrète (un seul « Enregistré »), un échec est dit.
+    sauvegarderDonneesSelonMode('horaireHebdo', toutesSeances, { geste, discret: true });
 
     // Regénérer le calendrier avec les nouveaux jours de cours
     if (typeof genererCalendrierComplet === 'function') {
@@ -986,7 +1039,7 @@ function sauvegarderHoraireV2() {
 
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
-
+    return true;
 }
 
 /**
@@ -1095,25 +1148,44 @@ function mettreAJourSeancesHoraireV2() {
         html += `
             <div class="seance-horaire-ligne">
                 <label>Séance ${i + 1}</label>
-                <select id="v2-hor-seance-${i}-jour" class="controle-form">
+                <select id="v2-hor-seance-${i}-jour" class="controle-form" data-on-change="sauvegarderChampHoraireV2">
                     ${jours.map(j => `<option value="${j}" ${j === jourDefaut ? 'selected' : ''}>${j}</option>`).join('')}
                 </select>
-                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}">
+                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}" data-on-change="sauvegarderChampHoraireV2">
                 <span>à</span>
-                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}">
+                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}" data-on-change="sauvegarderChampHoraireV2">
                 <div class="seance-horaire-periodes">
                     <input type="number" id="v2-hor-seance-${i}-periodes" class="controle-form controle-form-compact"
                            min="1" max="8" step="1" title="Nombre de périodes de cette séance"
                            aria-describedby="v2-hor-seance-${i}-periodes-unite"
-                           data-on-input="majResumeFormatHoraireV2">
+                           data-on-input="majResumeFormatHoraireV2" data-on-change="sauvegarderChampHoraireV2">
                     <span id="v2-hor-seance-${i}-periodes-unite" class="seance-horaire-unite">pér.</span>
                 </div>
-                <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local">
+                <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local" data-on-change="sauvegarderChampHoraireV2">
             </div>
         `;
     }
 
     conteneur.innerHTML = html;
+
+    // Lot E2 (28 sept. 2026) — LES DÉFAUTS SE POSENT, ILS NE S'HÉRITENT PAS. Mesuré dans WebKit :
+    // une ligne régénérée par innerHTML, aux mêmes identifiants, reprenait l'heure et les
+    // périodes de la ligne qu'elle remplaçait (le jour, lui, revenait au défaut). Invisible
+    // tant qu'un seul geste régénérait ; depuis qu'un horaire existant s'enregistre au
+    // changement du nombre de séances, « + Nouvel horaire » héritait de l'horaire précédent
+    // (CT-01). Les valeurs sont donc posées ici, explicitement ; les appelants qui remplissent
+    // (édition, changement de format) le font APRÈS.
+    for (let i = 0; i < nbSeances; i++) {
+        const poser = (suffixe, valeur) => {
+            const champ = document.getElementById(`v2-hor-seance-${i}-${suffixe}`);
+            if (champ) champ.value = valeur;
+        };
+        poser('jour', jours[i % jours.length]);
+        poser('debut', DEBUT_PAR_DEFAUT);
+        poser('fin', FIN_PAR_DEFAUT);
+        poser('periodes', '');
+        poser('local', '');
+    }
 }
 
 /**
@@ -1155,6 +1227,9 @@ function changerFormatSeancesHoraireV2() {
         if (inputPeriodes) inputPeriodes.value = s.periodes;
     });
     majResumeFormatHoraireV2();
+    // Lot E2 : sur un horaire existant, le nouveau nombre de séances s'enregistre (une séance
+    // ajoutée sans périodes est refusée et dite, jusqu'à ce qu'elle soit remplie).
+    sauvegarderChampHoraireV2();
 }
 
 /**
@@ -1177,8 +1252,11 @@ function calculerHeureFin(heureDebut, nbPeriodes) {
 // Exports globaux pour les fonctions horaire
 window.nouveauHoraireV2 = nouveauHoraireV2;
 window.changerHoraireSelectionneV2 = changerHoraireSelectionneV2;
-window.annulerFormHoraireV2 = annulerFormHoraireV2;
+window.fermerFicheHoraireV2 = fermerFicheHoraireV2;
+window.choisirHoraireV2 = choisirHoraireV2;
 window.sauvegarderHoraireV2 = sauvegarderHoraireV2;
+window.sauvegarderChampHoraireV2 = sauvegarderChampHoraireV2;
+window.rendreModeFicheHoraireV2 = rendreModeFicheHoraireV2;
 window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
 window.changerFormatSeancesHoraireV2 = changerFormatSeancesHoraireV2;
 window.chargerHorairesV2 = chargerHorairesV2;

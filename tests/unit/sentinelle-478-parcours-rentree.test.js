@@ -54,7 +54,9 @@ describe('#478 B — le refus d\'un menu vide dit où naît un groupe', () => {
     const corps = corpsDe(horaires, 'sauvegarderHoraireV2');
 
     it('porte les mots approuvés, titre et détail — LE GESTE D\'ABORD', () => {
-        expect(corps).toContain('\'Aucun groupe d\\\'étudiant·es pour l\\\'instant\'');
+        // ↻ Lot E2 (28 sept. 2026) : les mêmes phrases, dans le même ordre, par le témoin commun
+        // (« Non enregistré – Créer l'horaire : … », qui reste affiché) — le titre suivi d'un point.
+        expect(corps).toContain('\'Aucun groupe d\\\'étudiant·es pour l\\\'instant. \'');
         const geste = '\'Ajoute ou importe ta liste dans l\\\'accordéon « Groupe d\\\'étudiant·es », juste au-dessus. \'';
         const explication = '\'Un groupe apparaît dans ce menu dès qu\\\'un·e étudiant·e y est inscrit·e.\'';
         expect(corps).toContain(geste);
@@ -66,15 +68,16 @@ describe('#478 B — le refus d\'un menu vide dit où naît un groupe', () => {
 
     it('le message se choisit sur ce que le menu OFFRE : vide ⇒ les mots neufs', () => {
         expect(corps).toContain('const aucunGroupe = !selectGroupe || !Array.from(selectGroupe.options).some(o => o.value);');
-        expect(corps).toMatch(/if \(aucunGroupe\) \{\s*notifications\.erreur\(\s*'Aucun groupe d\\'étudiant·es/);
+        expect(corps).toMatch(/if \(aucunGroupe\) \{\s*return _refuserHoraireV2\(\s*'Aucun groupe d\\'étudiant·es/);
     });
 
     it('l\'accordéon nommé existe à l\'écran sous ce libellé exact', () => {
         expect(index).toMatch(/id="accordeon-groupe-etudiants"[\s\S]{0,400}<\/span> Groupe d'étudiant·es\s*<\/h3>/);
     });
 
-    it('menu garni sans choix : le refus d\'avant est conservé', () => {
-        expect(corps).toContain('notifications.erreur(\'Veuillez sélectionner un groupe associé\')');
+    it('menu garni sans choix : le refus d\'avant est conservé (lot E2 : par le témoin, au tutoiement)', () => {
+        expect(corps).toContain('_refuserHoraireV2(\'Choisis le groupe associé.\', geste)');
+        expect(corps).not.toContain('Veuillez');
     });
 });
 

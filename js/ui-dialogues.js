@@ -353,7 +353,8 @@
         grille: 'Cette grille n\'est pas encore créée.',
         echelle: 'Cette échelle n\'est pas encore créée.',
         cartouche: 'Cette cartouche n\'est pas encore créée.',
-        enseignant: 'Ce profil n\'est pas encore créé.'
+        enseignant: 'Ce profil n\'est pas encore créé.',
+        horaire: 'Cet horaire n\'est pas encore créé.'
     };
     // Le bouton qui quitte : « Quitter sans créer », sauf pour un geste qui ne « crée » pas.
     const QUITTER_SANS = {};

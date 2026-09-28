@@ -154,7 +154,7 @@ test('#478 (b) · un·e étudiant·e ajouté·e fait apparaître son groupe dans
         db.setSync('trimestreActif', 'a2026');
         naviguerVers('calendrier', 'trimestre');
         await pause(600);
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         await pause(300);
         const lire = () => Array.from(document.getElementById('v2-hor-groupeAssocie').options).map((o) => o.value);
         const avant = lire();
@@ -183,34 +183,36 @@ test('#478 (b) · menu vide : le refus dit OÙ naît un groupe ; menu garni : le
         db.setSync('trimestreActif', 'a2026');
         naviguerVers('calendrier', 'trimestre');
         await pause(600);
-        window.__erreurs478 = [];
-        const original = window.notifications.erreur;
-        window.notifications.erreur = (titre, details, options) => {
-            window.__erreurs478.push({ titre, details: details || '' });
-            return original(titre, details, options);
+        // ↻ Lot E2 (28 sept. 2026, D3) : le refus parle par le témoin commun (« Non enregistré –
+        // Créer l'horaire : … »), qui reste affiché ; on lit son texte.
+        const texteTemoin = () => {
+            const el = document.querySelector('#temoin-enregistrement .temoin-enregistrement-echec');
+            return el && el.classList.contains('visible') ? el.querySelector('.temoin-enregistrement-echec-texte').textContent : '';
         };
         const tenter = async () => {
-            window.nouveauHoraireV2();
+            // Lot E2 : rouvrir « + Nouvel horaire » sur une saisie pose la question de sortie ;
+            // ce banc éprouve le refus, pas la question — on vide la saisie de l'essai d'avant.
+            const nom = document.getElementById('v2-hor-nom');
+            if (nom) nom.value = '';
+            await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
             await pause(300);
             document.getElementById('v2-hor-nom').value = 'Mardi matin';
-            window.__erreurs478.length = 0;
+            window.temoinEnregistrement.fermer();
             window.sauvegarderHoraireV2();
-            return { ...window.__erreurs478[0] };
+            return texteTemoin();
         };
         const menuVide = await tenter();
         db.setSync(cle('groupeEtudiants'), [{ da: '2000001', nom: 'Eleve', prenom: 'Test', groupe: '00001' }]); // security-ok: fixture de test locale
         const menuGarni = await tenter();
         return { menuVide, menuGarni, horaires: (db.getSync(cle('horaires'), []) || []).length };
     });
-    expect(r.menuVide.titre).toBe('Aucun groupe d\'étudiant·es pour l\'instant');
-    // Porte 2.3b (13 sept. 2026) : la bulle disparaît après la PREMIÈRE phrase — le geste
-    // (où aller) doit l'être ; l'ordre inverse faisait rater l'accordéon.
-    expect(r.menuVide.details, 'le geste d\'abord, l\'explication ensuite').toBe(
+    // Porte 2.3b (13 sept. 2026) : le geste (où aller) avant l'explication — l'ordre tient.
+    expect(r.menuVide).toBe(
+        'Non enregistré – Créer l\'horaire : aucun groupe d\'étudiant·es pour l\'instant. ' +
         'Ajoute ou importe ta liste dans l\'accordéon « Groupe d\'étudiant·es », juste au-dessus. ' +
         'Un groupe apparaît dans ce menu dès qu\'un·e étudiant·e y est inscrit·e.'
     );
-    expect(r.menuGarni.titre, 'des groupes existent, aucun choisi : le refus d\'avant suffit').toBe('Veuillez sélectionner un groupe associé');
-    expect(r.menuGarni.details).toBe('');
+    expect(r.menuGarni, 'des groupes existent, aucun choisi : le refus d\'avant, au tutoiement').toBe('Non enregistré – Créer l\'horaire : choisis le groupe associé.');
     expect(r.horaires, 'les deux refus n\'écrivent rien').toBe(0);
     expect(erreurs, 'erreurs console').toEqual([]);
 });

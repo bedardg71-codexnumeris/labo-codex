@@ -195,7 +195,7 @@ describe('#540-C/C — le format ne se déclare plus globalement', () => {
         const i = SRC_HORAIRES.indexOf('function sauvegarderHoraireV2');
         const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}\n', i) + 2);
         expect(corps).toContain('nombrePeriodes');
-        expect(corps).toContain('notifications.erreur');
+        expect(corps).toContain('_refuserHoraireV2(');   // lot E2 : le refus passe par le témoin commun
     });
 
     it('le résumé additionne les périodes SAISIES, sans convertir', () => {
@@ -265,7 +265,7 @@ describe('#540-C/D — plus rien n\'est fabriqué dans le module horaires', () =
     it('la sauvegarde REFUSE un début manquant au lieu de l\'inventer', () => {
         const i = SRC_HORAIRES.indexOf('function sauvegarderHoraireV2');
         const corps = SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}\n', i) + 2);
-        expect(corps).toContain('notifications.erreur');
+        expect(corps).toContain('_refuserHoraireV2(');   // lot E2 : le refus passe par le témoin commun
         expect(corps).not.toContain("'08:00'");
         expect(corps).not.toContain("'10:00'");
     });

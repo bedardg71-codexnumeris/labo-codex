@@ -66,7 +66,7 @@ test('CT-01 · passer de 2 à 3 séances préserve les séances saisies, et Enre
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const r = await page.evaluate(({ setupSrc, lireSrc }) => {
+    const r = await page.evaluate(async ({ setupSrc, lireSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);
         const lireLignes = new Function(`return (${lireSrc})()`);
 
@@ -127,7 +127,7 @@ test('CT-01 · modifier les périodes d\'une séance ne touche pas aux autres', 
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const r = await page.evaluate(({ setupSrc, lireSrc }) => {
+    const r = await page.evaluate(async ({ setupSrc, lireSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);
         const lireLignes = new Function(`return (${lireSrc})()`);
 
@@ -167,7 +167,7 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    const r = await page.evaluate(({ setupSrc, lireSrc }) => {
+    const r = await page.evaluate(async ({ setupSrc, lireSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);
         const lireLignes = new Function(`return (${lireSrc})()`);
 
@@ -179,7 +179,7 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
 
         // Garde-fou inverse : le formulaire « Nouvel horaire » ne doit PAS hériter
         // des séances de l'horaire précédemment ouvert (régénération aux défauts voulue).
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         const lignesNeuves = lireLignes();
 
         return { lignesReduites, lignesNeuves };

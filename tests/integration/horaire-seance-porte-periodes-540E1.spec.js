@@ -53,7 +53,7 @@ test('#540-E1 · le nombre saisi arrive intact au dénominateur de l\'assiduité
             await new Promise((res) => setTimeout(res, 500));
         }
 
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         await new Promise((res) => setTimeout(res, 200));
         set('v2-hor-groupeAssocie', '00001');
         set('v2-hor-nom', 'Bloc de trois heures');
@@ -105,7 +105,7 @@ test('#540-E1 · une séance sans nombre de périodes ne s\'enregistre pas', asy
     const r = await page.evaluate(async () => {
         const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
 
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         set('v2-hor-nom', 'Horaire incomplet 540E1');
         const grp = document.getElementById('v2-hor-groupeAssocie');
         if (grp && grp.options.length > 1) grp.value = grp.options[1].value;
@@ -169,7 +169,7 @@ test('#540-E1 · le résumé DIT ce qui manque au lieu d\'un total partiel', asy
     await preparer(page);
 
     const r = await page.evaluate(async () => {
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         const nb = document.getElementById('v2-hor-nbSeances');
         nb.value = '2';
         nb.dispatchEvent(new Event('change', { bubbles: true }));

@@ -100,7 +100,7 @@ test('#540-C · un horaire ne s\'enregistre plus avec des heures fabriquées', a
     await preparer(page);
 
     const r = await page.evaluate(async () => {
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         const nom = document.getElementById('v2-hor-nom');
         if (nom) nom.value = 'Horaire de test 540C';
 
