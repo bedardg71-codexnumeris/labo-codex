@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.167.0 (lot E3 de l'enregistrement : productions, interventions, volet confidentiel, réglages) —
+            // titre et texte ACCEPTÉS par Grégoire le 28 sept. 2026, 19 h 46, mot pour mot (relecture de Cowork).
+            version: '1.167',
+            couleur: 'vert',
+            titre: 'Productions et interventions&nbsp;: créer ou modifier',
+            items: [
+                'Productions, interventions, rencontres et le volet confidentiel du profil s\'enregistrent tout seuls, champ par champ&nbsp;; le témoin le dit. Pour en créer une nouvelle, un bouton nomme le geste («&nbsp;Créer la production&nbsp;», «&nbsp;Créer l\'intervention&nbsp;»), et l\'application te prévient si tu fermes la fiche ou recharges la page avant. «&nbsp;Annuler&nbsp;» devient «&nbsp;Fermer&nbsp;». Quand tu marques une intervention complétée, tu choisis si la présence de tes étudiant·es compense une absence au cours&nbsp;: rien ne s\'écrit dans l\'assiduité sans ce choix. Dans Réglages et dans ton auto-réflexion, le bouton «&nbsp;Enregistrer&nbsp;» disparaît&nbsp;: chaque réglage s\'écrit dès que tu le changes, et des seuils dans le désordre sont refusés sans rien enregistrer.'
+            ]
+        },
+        {
             // 1.166.0 (lot E2 de l'enregistrement, le Cadre) — titre et texte ACCEPTÉS par Grégoire le
             // 28 sept. 2026, 14 h 03, mot pour mot (relecture finale de Cowork).
             version: '1.166',
