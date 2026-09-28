@@ -937,7 +937,7 @@ function sauvegarderHoraireV2() {
 
         if (!heureDebut) {
             return _refuserHoraireV2(`Séance ${i + 1} : heure de début manquante. ` +
-                'Sans elle, la durée de la séance ne peut pas être calculée — et c\'est cette durée qui sert à l\'assiduité.', geste);
+                'Sans elle, la durée de la séance ne peut pas être calculée ; c\'est cette durée qui sert à l\'assiduité.', geste);
         }
 
         const heureFin = document.getElementById(`v2-hor-seance-${i}-fin`)?.value || '';
@@ -952,7 +952,7 @@ function sauvegarderHoraireV2() {
         const nombrePeriodes = parseInt(document.getElementById(`v2-hor-seance-${i}-periodes`)?.value, 10);
         if (!(nombrePeriodes > 0)) {
             return _refuserHoraireV2(`Séance ${i + 1} : nombre de périodes manquant. ` +
-                'C\'est lui qui compte au dénominateur de l\'assiduité — il ne se déduit pas des heures, puisqu\'une période comprend sa pause.', geste);
+                'C\'est lui qui compte au dénominateur de l\'assiduité ; il ne se déduit pas des heures, puisqu\'une période comprend sa pause.', geste);
         }
 
         seances.push({ jour, heureDebut, heureFin, nombrePeriodes, local });

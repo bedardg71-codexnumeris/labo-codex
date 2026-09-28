@@ -156,9 +156,16 @@ function monter(store, opts = {}) {
         normaliserNumeroGroupe: winModes.normaliserNumeroGroupe,
         // #834 lot E (cadrage « Rencontres », 12 sept. 2026) : l'identifiant du contexte, point unique de modes.js.
         obtenirIdContexteActif: winModes.obtenirIdContexteActif, contexteActifEstService: winModes.contexteActifEstService,
-        libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || '')
+        libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || ''),
+        // Lot E2 (28 sept. 2026) : le Cadre écrit les fiches d'élève par `modifierEtAnnoncer` (la file + le témoin).
+        modifierEtAnnoncer: winModes.modifierEtAnnoncer
     });
     Object.assign(globaux, opts.globaux || {});
+    // Lot E2 : un refus parle par le témoin commun ; il est rangé avec les notifications.
+    if (!win.temoinEnregistrement) {
+        win.temoinEnregistrement = { nonEnregistre(raison, geste) { notifs.push({ type: 'nonEnregistre', t: raison, geste }); }, enregistre() {} };
+        win.raisonPourTemoin = (r) => { const t = String(r || '').trim(); const d = t.charAt(0).toLowerCase() + t.slice(1); return /[.!?]$/.test(d) ? d : d + '.'; };
+    }
     // Lot 5 du cadrage 11 (12 sept. 2026) : la lettre du bilan d'une intervention sort d'`obtenirNiveauIDMEDepuisPourcentage`
     // (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app) — la VRAIE, branchée sur l'`obtenirSeuil` du banc.
     if (!('obtenirNiveauIDMEDepuisPourcentage' in globaux)) {
@@ -538,7 +545,8 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         const fiches = store.test_groupeEtudiants.filter(e => e.da === '2000001');
         noter('L6', { erreur, nbFichesMemeDA: fiches.length, groupeEcrit: fiches[1] && fiches[1].groupe, notifs: b.notifs.map(n => n.type + ':' + n.t) });
         expect(fiches.length).toBe(1);
-        expect(b.notifs.some(n => n.type === 'erreur' && /Ce DA est déjà dans le groupe : Alice Assidu\./.test(n.t))).toBe(true);
+        // ↻ Lot E2 (28 sept. 2026) : le refus parle par le témoin commun (« Non enregistré – Ajouter l'étudiant·e : … »).
+        expect(b.notifs.some(n => n.type === 'nonEnregistre' && /^ce DA est déjà dans le groupe : Alice Assidu\./.test(n.t))).toBe(true);
         // Et un DA neuf, groupe « 1 » : écrit PADÉ (L-9)
         b.document.getElementById('v2-etudiantDA').value = '2000099';
         await b.win.soumettreEtudiantV2();

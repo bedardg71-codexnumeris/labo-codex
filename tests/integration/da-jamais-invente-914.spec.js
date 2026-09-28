@@ -48,12 +48,22 @@ test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonst
         const champ = (id) => document.getElementById(id);
         const stock = () => JSON.parse(JSON.stringify(obtenirDonneesSelonMode('groupeEtudiants') || []));
         const liste = () => texte(champ('v2-listeEtudiants')) || '';
-        const retirerNotifs = () => document.querySelectorAll('.notification-erreur, .notification-succes').forEach(n => n.remove());
-        // Ce que l'écran DIT après le geste : le texte des notifications d'erreur, puis de succès.
-        const lireNotifs = () => ({
-            erreurs: [...document.querySelectorAll('.notification-erreur .notification-texte')].map(texte),
-            succes: [...document.querySelectorAll('.notification-succes:not(.notification-erreur) .notification-texte')].map(texte),
-        });
+        const retirerNotifs = () => {
+            document.querySelectorAll('.notification-erreur, .notification-succes').forEach(n => n.remove());
+            if (window.temoinEnregistrement) window.temoinEnregistrement.fermer();
+            document.querySelector('#temoin-enregistrement .temoin-enregistrement-succes')?.classList.remove('visible');
+        };
+        // Ce que l'écran DIT après le geste. ↻ Lot E2 (28 sept. 2026, D3) : un refus parle par le
+        // témoin commun (« Non enregistré – ‹geste› : ‹raison› ») ; une modification dit « Enregistré ».
+        const lireNotifs = () => {
+            const echec = document.querySelector('#temoin-enregistrement .temoin-enregistrement-echec');
+            const succesTemoin = document.querySelector('#temoin-enregistrement .temoin-enregistrement-succes');
+            return {
+                erreurs: echec && echec.classList.contains('visible') ? [texte(echec.querySelector('.temoin-enregistrement-echec-texte'))] : [],
+                succes: [...document.querySelectorAll('.notification-succes:not(.notification-erreur) .notification-texte')].map(texte),
+                enregistre: !!(succesTemoin && succesTemoin.classList.contains('visible')),
+            };
+        };
         const soumettre = async ({ da, nom, prenom }) => {
             retirerNotifs();
             if (da !== undefined) champ('v2-etudiantDA').value = da;
@@ -111,9 +121,9 @@ test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonst
     for (const da of ['', '123456', '12345678', 'DA1234567', '123 4567']) {
         const e = m.essais['ajout:' + da];
         expect(e.notifs.erreurs.length, 'une notification d\'erreur pour « ' + da + ' »').toBe(1);
-        expect(e.notifs.erreurs[0]).toContain(da === '' ? 'DA manquant' : 'DA invalide');
+        expect(e.notifs.erreurs[0]).toContain(da === '' ? 'le DA est manquant' : 'le DA est invalide');
         expect(e.notifs.erreurs[0]).toContain('sept chiffres');
-        expect(e.notifs.erreurs[0]).toContain('Rien n\'a été enregistré');
+        expect(e.notifs.erreurs[0]).toMatch(/^Non enregistré – Ajouter l'étudiant·e : /);
         expect(e.notifs.succes).toEqual([]);
         expect(e.stockInchange).toBe(true);
         expect(e.listeInchangee).toBe(true);
@@ -132,7 +142,9 @@ test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonst
     expect(m.menuTrouve).toBe(true);
     expect(m.champDAEnEdition).toBe(m.daDemo);
     expect(m.editionDemo.notifs.erreurs).toEqual([]);
-    expect(m.editionDemo.notifs.succes.length).toBe(1);
+    // Lot E2 : une modification ne fait plus de message, le témoin dit « Enregistré ».
+    expect(m.editionDemo.notifs.succes.length).toBe(0);
+    expect(m.editionDemo.notifs.enregistre).toBe(true);
     expect(m.editionDemo.programmeAvant).not.toBe('914.T0');
     expect(m.editionDemo.fiche && m.editionDemo.fiche.programme).toBe('914.T0');
     expect(m.editionDemo.fiche.da).toBe(m.daDemo);
@@ -140,7 +152,7 @@ test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonst
     // 4 · DA effacé en édition : refusé, fiche intacte.
     expect(m.menuTrouve2).toBe(true);
     expect(m.editionEffacee.notifs.erreurs.length).toBe(1);
-    expect(m.editionEffacee.notifs.erreurs[0]).toContain('DA manquant');
+    expect(m.editionEffacee.notifs.erreurs[0]).toContain('le DA est manquant');
     expect(m.editionEffacee.stockInchange).toBe(true);
 
     expect(m.fabriques).toBe(0);

@@ -617,9 +617,48 @@ let etudiantEnEditionIndex = -1;
 let etudiantEnEditionDA = null;
 
 /**
- * Soumet le formulaire étudiant (ajout ou modification)
+ * Lot E2 (D3) : un refus de vérification, par le témoin commun (« Non enregistré – ‹geste› :
+ * ‹raison› »), au lieu d'un toast d'erreur.
+ */
+function _refuserEtudiantV2(phrase, geste) {
+    if (window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(phrase), geste, cle('groupeEtudiants'));
+    }
+    return false;
+}
+
+/** Lot E2 : « le formulaire d'ajout porte une saisie » (ui-dialogues.js). Le groupe est prérempli : il ne compte pas. */
+function etudiantEnAjoutSaisi() {
+    if (etudiantEnEditionIndex >= 0) return false;
+    return ['v2-etudiantDA', 'v2-etudiantNom', 'v2-etudiantPrenom', 'v2-etudiantProgramme', 'v2-etudiantDateArrivee']
+        .some(id => String(document.getElementById(id)?.value || '').trim());
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('eleve', etudiantEnAjoutSaisi);
+
+/**
+ * Lot E2 (D3) — un champ d'une fiche EXISTANTE s'enregistre au changement, par le même
+ * écrivain que l'ajout (mêmes vérifications : DA #914, doublon L-8, fiche retrouvée #382).
+ * Dans le formulaire d'ajout, rien : c'est « Ajouter l'étudiant·e » qui écrit.
+ */
+async function sauvegarderChampEtudiantV2() {
+    if (etudiantEnEditionIndex < 0) return false;
+    return soumettreEtudiantV2();
+}
+
+/** Lot E2 (D3) : « Annuler » devient « Fermer » — retour au formulaire d'ajout. */
+function fermerFicheEtudiantV2() {
+    reinitialiserFormEtudiantV2();
+}
+
+/**
+ * L'écrivain unique d'une fiche d'élève : « Ajouter l'étudiant·e » en ajout, chaque champ en
+ * modification (lot E2, D3). Un refus parle par le témoin ; le message de l'ajout ne part
+ * qu'après l'écriture ; une modification ne dit que « Enregistré » (le témoin).
+ * @returns {Promise<boolean>} true si la fiche a été écrite
  */
 async function soumettreEtudiantV2() {
+    const edition = etudiantEnEditionIndex >= 0;
+    const geste = edition ? 'Modifier l\'étudiant·e' : 'Ajouter l\'étudiant·e';
     let da = document.getElementById('v2-etudiantDA')?.value?.trim();
     let nom = document.getElementById('v2-etudiantNom')?.value?.trim();
     let prenom = document.getElementById('v2-etudiantPrenom')?.value?.trim();
@@ -641,8 +680,7 @@ async function soumettreEtudiantV2() {
     const dateArrivee = /^\d{4}-\d{2}-\d{2}$/.test(dateArriveeSaisie) ? dateArriveeSaisie : '';
 
     if (!nom || !prenom) {
-        notifications.erreur('Le nom et le prénom sont obligatoires.');
-        return;
+        return _refuserEtudiantV2('Le nom et le prénom sont obligatoires.', geste);
     }
 
     // #914 (19 sept. 2026) — règle de Grégoire : « Aucune DA ne devrait être inventé de toute pièce dans
@@ -654,9 +692,9 @@ async function soumettreEtudiantV2() {
     const daInchange = etudiantEnEditionIndex >= 0 && etudiantEnEditionDA !== null
         && da === String(etudiantEnEditionDA).trim();
     if (!daInchange && !/^\d{7}$/.test(da || '')) {
-        notifications.erreur(da ? 'DA invalide' : 'DA manquant',
-            'Le DA est celui du collège : sept chiffres, rien d\'autre. Rien n\'a été enregistré.');
-        return;
+        // La phrase commence par « Le » : le témoin met l'initiale en minuscule (« dA » sinon).
+        return _refuserEtudiantV2('Le DA est ' + (da ? 'invalide' : 'manquant') +
+            ' : c\'est celui du collège, sept chiffres, rien d\'autre.', geste);
     }
 
     const coursActif = db.getSync('infoCours', null);
@@ -692,7 +730,9 @@ async function soumettreEtudiantV2() {
     // concurrente survenue APRÈS sa lecture.
     let introuvable = false;
     let daEnDouble = null;
-    await db.modifier(cleEtud, (lus) => {
+    // Lot E2 : par le témoin commun (modifierEtAnnoncer relance un échec après l'avoir dit).
+    try {
+    await modifierEtAnnoncer(cleEtud, (lus) => {
         const etudiants = lus || [];
 
         // L-8 (#749 lot 2) : un DA déjà porté par une autre fiche est REFUSÉ — tout
@@ -732,19 +772,23 @@ async function soumettreEtudiantV2() {
         }
 
         return etudiants;
-    }, []);
+    }, [], { geste });
+    } catch (e) { return false; }
 
     // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
     if (daEnDouble) {
-        // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire.
-        notifications.erreur('Ce DA est déjà dans le groupe : ' + _nomAfficheV2(daEnDouble) + '.');
-        return;
+        // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire ; lot E2 : par le témoin.
+        if (edition) {   // le DA changé à l'écran revient à celui de la fiche
+            const champDA = document.getElementById('v2-etudiantDA');
+            if (champDA && champDA.dataset?.masqueAnonymisation !== '1') champDA.value = etudiantEnEditionDA ?? '';
+        }
+        return _refuserEtudiantV2('Ce DA est déjà dans le groupe : ' + _nomAfficheV2(daEnDouble) + '.', geste);
     }
     if (introuvable) {
-        notifications.erreur('Étudiant introuvable', 'La liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant avant d\'enregistrer.');
-        return;
+        return _refuserEtudiantV2('Étudiant introuvable : la liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant.', geste);
     }
-    notifications.succes(`${_nomAfficheV2({ da: etudiant.da, prenom, nom })} ${etudiantEnEditionIndex >= 0 ? 'modifié' : 'ajouté'}`);
+    // Mots tranchés par Grégoire le 28 sept. (13 h 30), patron du lot : « Étudiant·e « … » ajouté·e. »
+    if (!edition) notifications.succes(`Étudiant·e «\u00a0${_nomAfficheV2({ da: etudiant.da, prenom, nom })}\u00a0» ajouté·e.`);
 
     // #735 : l'assiduité se compte depuis la date d'arrivée — le magasin des indices A suit la fiche
     // (même producteur qu'après une saisie de présences ; il enchaîne C et P).
@@ -752,9 +796,15 @@ async function soumettreEtudiantV2() {
         try { calculerEtSauvegarderIndicesAssiduite(); } catch (e) { console.warn('[Étudiants] Recalcul de l\'assiduité impossible :', e); }
     }
 
-    // Réinitialiser le formulaire et le mode
-    reinitialiserFormEtudiantV2();
+    // Ajout : le formulaire revient à l'ajout suivant. Modification : la fiche reste ouverte, et
+    // son DA d'origine suit un DA changé (lot E2 : la fiche s'écrit champ par champ).
+    if (edition) {
+        if (!daInchange) etudiantEnEditionDA = etudiant.da;
+    } else {
+        reinitialiserFormEtudiantV2();
+    }
     chargerListeEtudiantsV2();
+    return true;
 }
 
 function _anonymisationV2() {
@@ -787,7 +837,8 @@ function _masquerIdentiteV2(masquer) {
  * Passe en mode édition pour un étudiant
  * 🆕 FIX (4 fév 2026) : Utiliser DA au lieu de l'index pour éviter décalage avec liste filtrée
  */
-function editerEtudiantV2(da) {
+async function editerEtudiantV2(da) {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('eleve'))) return;
     const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
     const index = etudiants.findIndex(e => e.da === da);
@@ -821,20 +872,15 @@ function editerEtudiantV2(da) {
     const formContainer = document.getElementById('v2-formEtudiant');
 
     if (titre) titre.textContent = 'Modifier l\'étudiant·e';
-    if (btnSoumettre) btnSoumettre.textContent = 'Enregistrer les modifications';
+    // Lot E2 (D3) : une fiche existante s'enregistre toute seule — plus de bouton « Enregistrer
+    // les modifications » ; « Fermer » (ex-« Annuler ») ramène au formulaire d'ajout.
+    if (btnSoumettre) btnSoumettre.classList.add('u-hide');
     if (btnAnnuler) btnAnnuler.classList.remove('u-hide');
     if (formContainer) formContainer.classList.add('mode-edition');
     rafraichirRattachementEtudiantsV2();   // #872 B : la phrase dit le cours de LA FICHE
 
     // Scroller vers le formulaire
     formContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-/**
- * Annule l'édition et revient au mode ajout
- */
-function annulerEditionEtudiantV2() {
-    reinitialiserFormEtudiantV2();
 }
 
 /**
@@ -864,7 +910,7 @@ function reinitialiserFormEtudiantV2() {
     const formContainer = document.getElementById('v2-formEtudiant');
 
     if (titre) titre.textContent = 'Ajouter un·e étudiant·e';
-    if (btnSoumettre) btnSoumettre.textContent = 'Ajouter l\'étudiant·e';
+    if (btnSoumettre) btnSoumettre.classList.remove('u-hide');
     if (btnAnnuler) btnAnnuler.classList.add('u-hide');
     if (formContainer) formContainer.classList.remove('mode-edition');
     rafraichirRattachementEtudiantsV2();   // #872 B : retour à la phrase de l'ajout
@@ -976,17 +1022,22 @@ async function supprimerEtudiantV2(da) {
 
     if (index === -1 || !confirm(`Supprimer ${_nomAfficheV2(etudiant)} ?`)) return;
 
-    await db.modifier(cleEtud, (lus) => {
-        const liste = lus || [];
-        const i = liste.findIndex(e => e.da === da);
-        if (i === -1) return undefined;
-        liste.splice(i, 1);
-        return liste;
-    }, []);
+    // Lot E2 : par le témoin commun ; rien d'autre ne change à la suppression.
+    let supprime = false;
+    try {
+        await modifierEtAnnoncer(cleEtud, (lus) => {
+            const liste = lus || [];
+            const i = liste.findIndex(e => e.da === da);
+            if (i === -1) return undefined;
+            liste.splice(i, 1);
+            supprime = true;
+            return liste;
+        }, [], { geste: 'Supprimer l\'étudiant·e' });
+    } catch (e) { return; }
 
     chargerListeEtudiantsV2();
 
-    notifications.succes('Étudiant supprimé');
+    if (supprime) notifications.succes('Étudiant supprimé');
 }
 
 /**
@@ -1044,13 +1095,16 @@ async function changerStatutEtudiantV2(da, nouveauStatut) {
         if (!confirm('Marquer ' + nomComplet.trim() + ' en décrochage ?\n\nSes résultats seront affichés jusqu\'à sa dernière présence, mais ne seront plus comptés dans les calculs du groupe.')) return;
     }
 
-    await db.modifier(cleEtud, function(lus) {
-        var liste = lus || [];
-        var i = liste.findIndex(function(e) { return e.da === da; });
-        if (i === -1) return undefined;
-        liste[i].statut = nouveauStatut;
-        return liste;
-    }, []);
+    // Lot E2 : par le témoin commun ; le message du geste ne part qu'après l'écriture.
+    try {
+        await modifierEtAnnoncer(cleEtud, function(lus) {
+            var liste = lus || [];
+            var i = liste.findIndex(function(e) { return e.da === da; });
+            if (i === -1) return undefined;
+            liste[i].statut = nouveauStatut;
+            return liste;
+        }, [], { geste: 'Modifier l\'étudiant·e' });
+    } catch (e) { return; }
 
     chargerListeEtudiantsV2();
 
@@ -1246,7 +1300,9 @@ async function confirmerImportV2() {
     let nbAjoutes = 0;
     let nbDejaPresents = 0;
     let ecartees = [];
-    await db.modifier(cleEtud, (lus) => {
+    // Lot E2 : par le témoin commun ; le compte rendu de l'import ne part qu'après l'écriture.
+    try {
+    await modifierEtAnnoncer(cleEtud, (lus) => {
         const etudiants = lus || [];
         nbAjoutes = 0; nbDejaPresents = 0; ecartees = [];
 
@@ -1262,7 +1318,8 @@ async function confirmerImportV2() {
 
         // Rien à écrire : le mutateur rend `undefined`, aucune écriture.
         return nbAjoutes > 0 ? etudiants : undefined;
-    }, []);
+    }, [], { geste: 'Importer la liste' });
+    } catch (e) { return; }
 
     // Vérification immédiate : le compte relu en base (tout le groupe), et le compte du lot importé.
     // #771 (6 sept. 2026) — la notification lisait `etudiants`, le paramètre du mutateur ci-dessus,
@@ -1352,7 +1409,10 @@ async function reinitialiserEtudiantsV2() {
     const etudiants = await db.get(cleEtud) || [];
     if (!confirm(`Supprimer les ${etudiants.length} étudiant(s) ? Cette action est irréversible.`)) return;
 
-    await db.set(cleEtud, []);
+    // Lot E2 : par le témoin commun ; le message ne part qu'après l'écriture.
+    try {
+        await modifierEtAnnoncer(cleEtud, () => [], [], { geste: 'Vider la liste' });
+    } catch (e) { return; }
     chargerListeEtudiantsV2();
 
     notifications.succes('Liste réinitialisée');
@@ -1403,9 +1463,12 @@ async function supprimerGroupeSelectionneV2() {
     // Garder uniquement les étudiants des autres groupes. ⚠ Le filtre est
     // rejoué DANS la file : la liste d'avant la confirmation ne vaut plus rien,
     // et un étudiant ajouté pendant la question serait sinon effacé.
-    await db.modifier(cleEtud, (lus) => {
-        return (lus || []).filter(e => !_ficheEstDuGroupeV2(e, groupeSelectionne));
-    }, []);
+    // Lot E2 : par le témoin commun ; le message ne part qu'après l'écriture.
+    try {
+        await modifierEtAnnoncer(cleEtud, (lus) => {
+            return (lus || []).filter(e => !_ficheEstDuGroupeV2(e, groupeSelectionne));
+        }, [], { geste: 'Supprimer le groupe' });
+    } catch (e) { return; }
 
     // Reset le dropdown à "Tous les groupes"
     const selectGroupe = document.getElementById('v2-selectGroupe');
@@ -1503,7 +1566,8 @@ window.remarqueEtudiantV2 = remarqueEtudiantV2;
 window.remarqueEtudiantV2Handler = remarqueEtudiantV2Handler;
 window.changerStatutEtudiantV2 = changerStatutEtudiantV2;
 window.soumettreEtudiantV2 = soumettreEtudiantV2;
-window.annulerEditionEtudiantV2 = annulerEditionEtudiantV2;
+window.fermerFicheEtudiantV2 = fermerFicheEtudiantV2;
+window.sauvegarderChampEtudiantV2 = sauvegarderChampEtudiantV2;
 window.creerNouveauGroupeV2 = creerNouveauGroupeV2;
 window.filtrerParGroupeV2 = filtrerParGroupeV2;
 window.importerFichierEtudiantsV2 = importerFichierEtudiantsV2;

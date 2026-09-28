@@ -307,7 +307,7 @@ test('(c)(d) intervention en anonymisation : description, observations et notes 
 // -----------------------------------------------------------------------
 // (c) — LA FICHE D'ÉLÈVE : l'identité masquée n'est pas réécrite, le reste s'enregistre
 // -----------------------------------------------------------------------
-test('(c) fiche d\'élève en anonymisation : « Enregistrer les modifications » garde DA, nom et prénom réels', async ({ page }) => {
+test('(c) fiche d\'élève en anonymisation : une modification (lot E2 : au changement du champ) garde DA, nom et prénom réels', async ({ page }) => {
     test.setTimeout(90000);
     brancherEcouteurs(page);
     await packDemo(page);
@@ -319,8 +319,10 @@ test('(c) fiche d\'élève en anonymisation : « Enregistrer les modifications �
     await page.waitForTimeout(500);
     await page.locator('#v2-listeEtudiants select[data-da="DEMO004"]').first().selectOption('editer');
     await page.waitForTimeout(400);
+    // ↻ Lot E2 (28 sept. 2026, D3) : le champ s'enregistre au changement (« Enregistrer les
+    // modifications » est retiré) ; le témoin commun dit « Enregistré ».
     await page.locator('#v2-etudiantProgramme').fill('Arts, lettres et communication');
-    await page.evaluate(() => window.soumettreEtudiantV2());
+    await page.locator('#v2-etudiantProgramme').dispatchEvent('change');
     await page.waitForTimeout(600);
 
     const apres = await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e.da === 'DEMO004'));
@@ -331,8 +333,10 @@ test('(c) fiche d\'élève en anonymisation : « Enregistrer les modifications �
     expect({ da: apres.da, nom: apres.nom, prenom: apres.prenom })
         .toEqual({ da: avant.da, nom: avant.nom, prenom: avant.prenom });
     expect(JSON.stringify(apres)).not.toMatch(/Élève \d+|Gr\. [A-Z]|ANONYME|daReel|groupeReel/);
-    // Le message nomme le pseudonyme, pas l'élève.
-    await expect(page.getByText(/Élève \d+ modifié/)).toBeVisible();
+    // Lot E2 : plus de message nommant l'élève (« Élève N modifié ») — le témoin dit « Enregistré »,
+    // qui ne nomme personne.
+    await expect(page.locator('#temoin-enregistrement .temoin-enregistrement-succes')).toHaveText('Enregistré');
+    await expect(page.getByText(/modifié$/)).toHaveCount(0);
 });
 
 // -----------------------------------------------------------------------

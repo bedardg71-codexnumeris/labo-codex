@@ -307,14 +307,14 @@ function creerTrimestreV2() {
     if (_trimestreActifDuRegistre()) return false;
     const saisie = _identificationSaisieV2();
     if (!saisie) {
-        return _refuserIdentificationV2('Choisis la session et l\'année du trimestre — elles déterminent où ses données sont rangées.', geste);
+        return _refuserIdentificationV2('Choisis la session et l\'année du trimestre ; elles déterminent où ses données sont rangées.', geste);
     }
     // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
     // écriture qui échoue le laisserait faux en mémoire.
     const trimestres = JSON.parse(JSON.stringify(db.getSync('trimestres', []) || []));
     // #379 — même garde de collision à la création : jamais de doublon d'id dans le registre.
     if (trimestres.some(function(t) { return t.id === saisie.id; })) {
-        return _refuserIdentificationV2('Le trimestre « ' + saisie.id + ' » existe déjà — active-le depuis la bibliothèque des trimestres.', geste);
+        return _refuserIdentificationV2('Le trimestre « ' + saisie.id + ' » existe déjà ; active-le depuis la bibliothèque des trimestres.', geste);
     }
     trimestres.forEach(t => t.actif = false);
     trimestres.push({
