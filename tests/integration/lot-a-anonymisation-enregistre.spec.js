@@ -386,7 +386,9 @@ test('(d) volet confidentiel : ses notes s\'affichent en mode normal, rien ne s\
     expect(anonyme.texte).not.toContain(NOTE_PRESENCE);
     expect(anonyme.texte).toContain('Masqué en anonymisation');
     expect(anonyme.fls).toBe(false);
-    await expect(page.locator('#confidentiel-btn-enregistrer')).toBeHidden();
+    // ↻ Lot E3 (D3, 28 sept. 2026) : le bouton « Enregistrer » du volet est parti (chaque champ s'écrit seul) ;
+    // qu'un volet masqué n'écrive rien est prouvé au banc du lot, `lot-e3-creer-ou-modifier.spec.js` (C-b).
+    expect(await page.locator('#confidentiel-btn-enregistrer').count()).toBe(0);
     expect(await pastille(), 'R2 : pas de pastille en anonymisation').toBe(false);
 });
 

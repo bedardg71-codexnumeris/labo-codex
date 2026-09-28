@@ -14478,7 +14478,7 @@
     <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260924b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20260927g"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20260928a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260927g"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -14487,7 +14487,7 @@
     <script src="js/profil-etudiant-calculs.js?v=20260923b"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20260924b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
-    <script src="js/profil-etudiant-confidentiel.js?v=20260926c"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
+    <script src="js/profil-etudiant-confidentiel.js?v=20260928a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260927c"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
     <script src="js/profil-etudiant-sections-affichage.js?v=20260927c"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20260917b"></script>
@@ -14892,7 +14892,7 @@
     <!-- ========================================= -->
     <div id="modalConfidentiel" class="modal-overlay">
         <div class="modal-contenu" style="max-width: 750px; padding: 16px;">
-            <button data-action="fermerModalConfidentiel" class="modal-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+            <button data-action="fermerModalConfidentiel" class="modal-fermer" aria-label="Fermer" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
 
             <h2 class="modal-titre u-texte-11" style="margin-bottom: 4px"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Informations confidentielles <button class="btn-aide-contextuelle" data-aide="modal-confidentiel" aria-label="Aide : fiche confidentielle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
             <p class="u-mb-10" style="color: var(--texte-secondaire); font-size: 0.8rem">
@@ -15016,13 +15016,11 @@
                 </div>
             </fieldset>
 
-            <!-- Boutons -->
+            <!-- Lot E3 (D3) : chaque champ s'enregistre tout seul (le témoin le dit) ; « Annuler » et
+                 « Enregistrer » sont partis, « Fermer » reste. -->
             <div class="btn-groupe u-flex-gap-8" style="justify-content: flex-end; margin-top: 12px">
                 <button data-action="fermerModalConfidentiel" class="btn btn-annuler u-texte-petit" style="padding: 6px 12px">
-                    Annuler
-                </button>
-                <button id="confidentiel-btn-enregistrer" data-action="sauvegarderConfidentiel" class="btn btn-confirmer u-texte-petit" style="padding: 6px 12px">
-                    Enregistrer
+                    Fermer
                 </button>
             </div>
         </div>

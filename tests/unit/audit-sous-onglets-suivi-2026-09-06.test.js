@@ -833,6 +833,10 @@ describe('4 · Profils individuels — écritures du profil, anonymisation, grap
         b.document.getElementById('confidentiel-notes').value = 'TDAH — plan adapté';
         const caseSA = b.document.getElementById('confidentiel-services-adaptes');
         b.win.sauvegarderConfidentiel();
+        // ↻ Lot E3 (D3, 28 sept. 2026) : plus de cascade à « Enregistrer » — chaque note de présence
+        // s'écrit à son propre changement, par le témoin (`enregistrerNotePresenceConfidentiel`).
+        expect(b.modifs).toEqual([]);
+        b.win.enregistrerNotePresenceConfidentiel(ta);
         const ecrit = store.test_confidentielEtudiants;
         noter('P2', { cles: Object.keys(store).filter(k => /confid/i.test(k)), da: ecrit[DA], autreDA: ecrit['2000002'], cascade: b.modifs, enClair: JSON.stringify(ecrit).includes('TDAH'), caseSA: { checked: caseSA.checked, disabled: caseSA.disabled } });
         expect(ecrit[DA].notes).toBe('TDAH — plan adapté');
