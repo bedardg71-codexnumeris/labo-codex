@@ -22,12 +22,14 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // enregistrée, sans l'écriture IndexedDB — et `window.tempCriteres` se lit
 // directement, ce qui rend la persistance vérifiable sans attendre.
 
-const OUVRIR = `(enoncesExistants) => {
+const OUVRIR = `async (enoncesExistants) => {
     db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
     db.setSync('trimestreActif', 'a2026');
     window.afficherSection('conception');
     window.afficherSousSection('conception-grille-criteres');
-    window.creerNouvelleGrille();
+    // ↻ Lot E1 (27 sept. 2026) : creerNouvelleGrille est asynchrone ; sans l'attendre, sa fin
+    // efface les critères posés ci-dessous.
+    await window.creerNouvelleGrille();
     // security-ok: fixture littérale du spec, aucune source externe.
     const critere = { id: 'CR_T', nom: 'Précision des calculs', ponderation: 20, type: 'algorithmique' };
     if (enoncesExistants) critere.enonces = enoncesExistants;
