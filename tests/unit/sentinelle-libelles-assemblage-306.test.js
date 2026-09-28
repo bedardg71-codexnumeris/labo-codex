@@ -87,7 +87,7 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         expect(html).toMatch(/data-action="fermerFicheEnseignantV2">\s*Fermer\s*<\/button>/);
     });
 
-    it('statique — création = « Créer » dans Cours, Horaire et Groupe-cours ; édition = « Enregistrer »', () => {
+    it('statique — lot E2 : « Créer le … » en création seulement dans Cours, Horaire et Groupe-cours ; plus de bouton en édition', () => {
         const cours = readFileSync(path.join(racine, 'js', 'trimestre-v2-cours.js'), 'utf8');
         const horaires = readFileSync(path.join(racine, 'js', 'trimestre-v2-horaires.js'), 'utf8');
         const gc = readFileSync(path.join(racine, 'js', 'trimestre-v2-groupes-cours.js'), 'utf8');
@@ -111,8 +111,10 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         expect(horaires).toMatch(/titre\.textContent = 'Nouvel horaire';[\s\S]{0,120}rendreModeFicheHoraireV2\(true\);/);
         expect(horaires).toMatch(/titre\.textContent = 'Modifier l\\'horaire';[\s\S]{0,120}rendreModeFicheHoraireV2\(false\);/);
         expect(horaires).not.toContain('v2-btnTexteHoraire');   // le sous-formulaire de séance garde le sien
-        // Groupe-cours : conformité conservée
-        expect(gc).toMatch(/titre\.textContent = 'Nouveau groupe-cours';[\s\S]{0,120}btnTexte\.textContent = 'Créer';/);
+        // ↻ Lot E2 (D3) : Groupe-cours — « Créer le groupe-cours » en création seulement.
+        expect(gc).toMatch(/titre\.textContent = 'Nouveau groupe-cours';[\s\S]{0,120}rendreModeFicheGroupeCoursV2\(true\);/);
+        expect(gc).toMatch(/titre\.textContent = 'Modifier le groupe-cours';[\s\S]{0,120}rendreModeFicheGroupeCoursV2\(false\);/);
+        expect(gc).not.toContain('v2-btnTexteGroupeCours');
     });
 
     it('zéro-dette — les fonctions mortes de l\'orchestre sont retirées', () => {

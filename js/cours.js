@@ -251,8 +251,10 @@ async function reprendreCoursDansTrimestreActif(coursId) {
     }
 
     // Nouveau groupe-cours brouillon, description pré-sélectionnée (aucun doublon de cours)
-    if (typeof nouveauGroupeCoursV2 === 'function') {
-        nouveauGroupeCoursV2();
+    // Lot E2 (28 sept. 2026) : `nouveauGroupeCoursV2` est asynchrone — il pose d'abord la
+    // question de sortie si une création est en cours. On l'ATTEND, sinon sa remise à zéro
+    // effaçait le cours présélectionné ; « Rester » (false) laisse la création en cours.
+    if (typeof nouveauGroupeCoursV2 === 'function' && await nouveauGroupeCoursV2()) {
         const selectCours = document.getElementById('v2-gc-cours');
         if (selectCours) selectCours.value = coursId;
         if (typeof mettreAJourNomGroupeCoursV2 === 'function') {

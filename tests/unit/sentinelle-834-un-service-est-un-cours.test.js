@@ -187,11 +187,13 @@ describe('B1 · le groupe-cours : l\'horaire est facultatif pour un service, req
         document.getElementById('v2-gc-horaire').value = horaireId;
         document.getElementById('v2-gc-enseignant').value = 'ENS1';
         const n = notifs();
-        const win = monterIdentite({ addEventListener() {} });
+        // Lot E2 (28 sept. 2026, D3) : les refus passent par le témoin commun.
+        const temoin = { refus: [], nonEnregistre(raison, geste) { this.refus.push({ raison, geste }); }, enregistre() {} };
+        const win = monterIdentite({ addEventListener() {}, temoinEnregistrement: temoin, raisonPourTemoin: (r) => r.charAt(0).toLowerCase() + r.slice(1) });
         const base = { document, db: dbBanc(store), cle, notifications: n.api, echapperHtml: (s) => String(s == null ? '' : s), genererIdUnique: (p) => p + 'X1',
             trouverDoublonNaturel: win.trouverDoublonNaturel, cleNaturelleGroupeCours: win.cleNaturelleGroupeCours, obtenirTrimestreActif: () => store.trimestres[0], confirm: () => true };
         chargerScript('js/trimestre-v2-groupes-cours.js', base, win);
-        return { win, store, n, elements };
+        return { win, store, n, elements, temoin };
     }
     it('service sans horaire → enregistré, horaireId null, le nom du service dans le nom du groupe-cours', () => {
         const b = monterGC('C_SERVICE', '');
@@ -206,7 +208,8 @@ describe('B1 · le groupe-cours : l\'horaire est facultatif pour un service, req
         const b = monterGC('C_COURS', '');
         b.win.sauvegarderGroupeCoursV2();
         expect(b.store.test_groupesCours.length).toBe(0);
-        expect(b.n.j.some(x => x.type === 'erreur' && /horaire/i.test(x.t))).toBe(true);
+        expect(b.temoin.refus).toEqual([{ raison: 'choisis l\'horaire.', geste: 'Créer le groupe-cours' }]);
+        expect(b.n.j.some(x => x.type === 'succes')).toBe(false);
     });
     it('le formulaire le DIT : l\'astérisque cède la place à « facultatif pour un service »', () => {
         const b = monterGC('C_SERVICE', '');

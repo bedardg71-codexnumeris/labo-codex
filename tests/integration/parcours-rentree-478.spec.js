@@ -89,7 +89,7 @@ test('#478 (c) · poste vierge, UN trimestre créé : actif sans question, prés
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));
         naviguerVers('calendrier', 'trimestre');
         await pause(600);
-        window.nouveauGroupeCoursV2();
+        await window.nouveauGroupeCoursV2();   // lot E2 : async (question de sortie)
         await pause(300);
         const out = {
             registre: db.getSync('trimestres', []).map((t) => ({ id: t.id, actif: t.actif })),
@@ -97,14 +97,10 @@ test('#478 (c) · poste vierge, UN trimestre créé : actif sans question, prés
             valeurTrimestre: document.getElementById('v2-gc-trimestre').value,
             cleGroupesCours: cle('groupesCours')
         };
-        window.__erreurs478 = [];
-        const original = window.notifications.erreur;
-        window.notifications.erreur = (titre, details, options) => {
-            window.__erreurs478.push({ titre, details: details || '' });
-            return original(titre, details, options);
-        };
+        // ↻ Lot E2 (28 sept. 2026, D3) : le refus parle par le témoin commun ; on lit son texte.
         window.sauvegarderGroupeCoursV2(); // rien d'autre de rempli : le PREMIER refus dit ce qui manque
-        out.premierRefus = window.__erreurs478[0]?.titre ?? null;
+        const echec = document.querySelector('#temoin-enregistrement .temoin-enregistrement-echec');
+        out.premierRefus = echec && echec.classList.contains('visible') ? echec.querySelector('.temoin-enregistrement-echec-texte').textContent : null;
         return out;
     });
 
@@ -113,7 +109,7 @@ test('#478 (c) · poste vierge, UN trimestre créé : actif sans question, prés
     expect(etat.cleTrimestreActif).toBe('a2026');
     expect(etat.cleGroupesCours, 'le Cadre doit écrire sous le préfixe du trimestre').toBe('a2026_groupesCours');
     expect(etat.valeurTrimestre, 'LE CAS DE CT-28 : l\'unique trimestre est présélectionné').toBe('a2026');
-    expect(etat.premierRefus, 'le mur « trimestre » ne se lève plus ; le premier manque est le cours').toBe('Veuillez sélectionner un cours');
+    expect(etat.premierRefus, 'le mur « trimestre » ne se lève plus ; le premier manque est le cours').toBe('Non enregistré – Créer le groupe-cours : choisis le cours.');
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
