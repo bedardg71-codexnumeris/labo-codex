@@ -1890,7 +1890,7 @@ var GUIDE_PAGES = [
             '<p class="planif-guide-ref"><strong>Références\u00a0:</strong><br>' +
                 'Anderson, L.\u00a0W. (2026). <em>Curriculum alignment</em> (Educational Practices Series, no\u00a037). International Academy of Education\u00a0; Bureau international d\u2019éducation de l\u2019UNESCO.<br>' +
                 'Biggs, J. (2014). Constructive alignment in university teaching. <em>HERDSA Review of Higher Education, 1</em>, 5-22.<br>' +
-                'Gauthier, C., Bissonnette, S. et Richard, M. (2013). <em>Enseignement explicite et réussite des élèves\u00a0: la gestion des apprentissages</em>. De Boeck.</p>'
+                'Gauthier, C., Bissonnette, S. et Richard, M. (avec la collaboration de M. Castonguay) (2013). <em>Enseignement explicite et réussite des élèves\u00a0: la gestion des apprentissages</em>. ERPI.</p>'
     },
     {
         titre: 'Commence par le pourquoi',

@@ -61,7 +61,7 @@ const PAGE_1 = [
     'Références :',
     'Anderson, L. W. (2026). Curriculum alignment (Educational Practices Series, no 37). International Academy of Education ; Bureau international d\'éducation de l\'UNESCO.',
     'Biggs, J. (2014). Constructive alignment in university teaching. HERDSA Review of Higher Education, 1, 5-22.',
-    'Gauthier, C., Bissonnette, S. et Richard, M. (2013). Enseignement explicite et réussite des élèves : la gestion des apprentissages. De Boeck.'
+    'Gauthier, C., Bissonnette, S. et Richard, M. (avec la collaboration de M. Castonguay) (2013). Enseignement explicite et réussite des élèves : la gestion des apprentissages. ERPI.'
 ];
 
 const LIGNE_PAGE_2 = 'Ces niveaux sont les processus cognitifs de la taxonomie révisée d\'Anderson et Krathwohl, du plus simple au plus exigeant : mémoriser, comprendre, appliquer, analyser, évaluer, créer. Le verbe que tu choisis ici, tes activités devront le faire exercer et tes évaluations devront l\'exiger.';

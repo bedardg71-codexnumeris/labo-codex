@@ -32,7 +32,7 @@ Ce guide te propose 8 repères pour construire ta carte et exporter ton plan. Tu
 Références :
 Anderson, L. W. (2026). Curriculum alignment (Educational Practices Series, no 37). International Academy of Education ; Bureau international d'éducation de l'UNESCO.
 Biggs, J. (2014). Constructive alignment in university teaching. HERDSA Review of Higher Education, 1, 5-22.
-Gauthier, C., Bissonnette, S. et Richard, M. (2013). Enseignement explicite et réussite des élèves : la gestion des apprentissages. De Boeck.
+Gauthier, C., Bissonnette, S. et Richard, M. (avec la collaboration de M. Castonguay) (2013). *Enseignement explicite et réussite des élèves : la gestion des apprentissages*. ERPI. *(Édition ERPI retenue par Grégoire le 28 sept. 2026.)*
 
 Retire le lien unesdoc actuel : Grégoire le vérifiera à la main et te dira s'il faut le remettre.
 
