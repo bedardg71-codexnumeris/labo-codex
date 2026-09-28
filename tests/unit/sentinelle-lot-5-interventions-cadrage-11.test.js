@@ -86,28 +86,35 @@ describe('A · « Planifier » n\'écrit rien ; « Enregistrer » écrit, une fo
     });
 
     // Relecture croisée de Cowork (12 sept. 2026, 13 h 10) : « Intervention enregistrée » s'affichait même quand rien n'était écrit.
-    it('un id ni en base ni en brouillon : zéro écriture, AUCUNE notification de succès, une erreur qui le dit', () => {
+    // ↻ Lot E3 (D0 point 2, 28 sept. 2026) : le refus se dit par le témoin commun, plus par un panneau d'erreur.
+    const temoin = (b) => { b.win.temoinEnregistrement = { nonEnregistre: vi.fn(), enregistre: vi.fn() };
+        b.win.raisonPourTemoin = (r) => { const t = String(r || '').trim(); const d = t.charAt(0).toLowerCase() + t.slice(1); return /[.!?]$/.test(d) ? d : d + '.'; };
+        return b.win.temoinEnregistrement; };
+
+    it('un id ni en base ni en brouillon : zéro écriture, AUCUNE notification de succès, le témoin le dit', () => {
         const erreurConsole = vi.spyOn(console, 'error').mockImplementation(() => {});
         const b = banc({ interventions: [intervention({ id: 'I_OK' })] });
+        const t = temoin(b);
         b.win.sauvegarderPresencesIntervention('I_INCONNU');
         expect(b.ecritures()).toBe(0);
         expect(b.notifs.filter(n => n.type === 'succes')).toEqual([]);
-        expect(b.notifs.filter(n => n.type === 'erreur').map(n => n.t)).toEqual(['Intervention non trouvée.']);
+        expect(t.nonEnregistre).toHaveBeenCalledWith('intervention non trouvée.', 'Modifier l\'intervention', 'test_interventions');
         expect(erreurConsole).toHaveBeenCalled();
         expect(b.store.test_interventions.map(i => i.id)).toEqual(['I_OK']);
     });
 
-    it('« Enregistrer » sur un brouillon déjà annulé : rien n\'est écrit, rien n\'est annoncé comme enregistré', () => {
+    it('« Créer » sur un brouillon déjà fermé : rien n\'est écrit, rien n\'est annoncé comme enregistré', async () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
         const b = banc({ vue: 'rencontres' });
+        const t = temoin(b);
         b.win.afficherFormulaireIntervention();
         const id = b.idDuFormulaire();
-        b.win.annulerNouvelleIntervention(id);
+        await b.win.fermerFicheIntervention(id);
         b.win.sauvegarderPresencesIntervention(id);
         expect(b.ecritures()).toBe(0);
         expect(b.store.test_interventions).toEqual([]);
         expect(b.notifs.filter(n => n.type === 'succes')).toEqual([]);
-        expect(b.notifs.filter(n => n.type === 'erreur').map(n => n.t)).toEqual(['Rencontre introuvable.']);
+        expect(t.nonEnregistre).toHaveBeenCalledWith('rencontre introuvable.', 'Modifier la rencontre', 'test_interventions');
     });
 
     it('changer d\'onglet sans enregistrer : la liste ré-affichée ne montre rien, et rien n\'a été écrit', () => {
@@ -121,12 +128,13 @@ describe('A · « Planifier » n\'écrit rien ; « Enregistrer » écrit, une fo
         expect(b.liste()).not.toContain(id);
     });
 
-    it('« Annuler » : le brouillon est jeté — aucune écriture, aucune confirmation', () => {
+    // ↻ Lot E3 (D3) : « Annuler » devient « Fermer » ; la question de sortie (ui-dialogues) n'est pas chargée ici.
+    it('« Fermer » : le brouillon est jeté — aucune écriture, aucune confirmation', async () => {
         const b = banc();
         b.win.afficherFormulaireIntervention();
         const id = b.idDuFormulaire();
-        expect(b.conteneur().innerHTML).toContain('data-action="annulerNouvelleIntervention" data-param="' + id + '"');
-        b.win.annulerNouvelleIntervention(id);
+        expect(b.conteneur().innerHTML).toContain('data-action="fermerFicheIntervention" data-param="' + id + '"');
+        await b.win.fermerFicheIntervention(id);
         expect(b.ecritures()).toBe(0);
         expect(b.confirmations).toEqual([]);
         expect(b.win.obtenirIntervention(id)).toBeNull();

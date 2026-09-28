@@ -94,7 +94,7 @@ async function ouvrirProductionEvaluee(page) {
         const p = liste.find(x => x.grilleId && x.cartoucheId && evals.some(e => e.productionId === x.id))
             || liste.find(x => x.grilleId && evals.some(e => e.productionId === x.id));
         p.isDemo = false; p.auteur = 'Banc E3'; p.auteurOriginal = 'Banc E3'; delete p.metadata_cc;
-        await db.set(cle('productions'), liste);
+        await db.set(cle('productions'), liste);   // security-ok: banc, la collection lue dans l'essai, marque « démo » retirée
         return p.id;
     });
     await page.evaluate((id) => chargerProductionPourModif(id), id);
@@ -205,4 +205,114 @@ test('(P-d) un nom vidé : « Non enregistré – Modifier la production : le no
     await changer(page, '#productionTitre', '');
     expect(await temoinEchec(page)).toBe('Non enregistré – Modifier la production : le nom de la production est requis.');
     expect((await productions(page)).find(p => p.id === id).titre).toBe(titre);
+});
+
+/* ────────────────────────────────────────────────────────────── interventions */
+//   (I-a) une intervention COMPLÉTÉE modifiée : écrite sans bouton, AUCUNE présence écrite (empreinte) ;
+//   (I-b) le passage à « Complétée » : la question ; « Annuler » n'écrit rien ; « Marquer complétée » reporte ;
+//   (I-c) une nouvelle intervention n'existe pas avant « Créer l'intervention » ; « Fermer » pose la question ;
+//   (I-d) changer de sous-onglet puis revenir : la création en cours est toujours là.
+
+const interventions = (page) => page.evaluate(() => JSON.parse(JSON.stringify(db.getSync(cle('interventions'), []) || [])));
+const empreintePresences = (page) => page.evaluate(() => JSON.stringify(db.getSync(cle('presences'), []) || []));
+
+async function ouvrirInterventions(page, stock) {
+    await ouvrirDemo(page);
+    if (stock) await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
+    await page.evaluate(() => naviguerVers('suivi', 'interventions'));
+    await pause(page, 900);
+}
+
+async function uneIntervention(page, extra) {
+    return page.evaluate((extra) => {
+        const e = (obtenirEtudiantsCoursActif() || [])[0];
+        return Object.assign({ id: 'INT-E3', titre: 'Rattrapage fictif banc E3', date: '2026-09-10', heure: '', duree: 2, type: 'groupe', niveauRai: 2,
+            contexte: 'en-classe', description: '', etudiants: [e.da], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: [],
+            objectifVise: '', bilan: null, statut: 'en-cours', groupeCoursId: obtenirIdContexteActif() }, extra);
+    }, extra || {});
+}
+
+test('(I-a) intervention complétée modifiée : écrite sans bouton, aucune présence écrite', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page);
+    const stock = [await uneIntervention(page, { statut: 'completee' })];
+    await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
+    await page.evaluate(() => naviguerVers('suivi', 'interventions'));
+    await pause(page, 900);
+    await page.evaluate(() => ouvrirIntervention('INT-E3'));
+    await pause(page, 700);
+    const avant = await empreintePresences(page);
+    await page.evaluate(() => { window.__toasts = []; });
+    await changer(page, '#interventionDate', '2026-09-11');
+    await changer(page, '#observationsIntervention', 'Observation fictive banc E3');
+    const i = (await interventions(page)).find(x => x.id === 'INT-E3');
+    expect(i).toMatchObject({ date: '2026-09-11', observations: 'Observation fictive banc E3', statut: 'completee' });
+    expect(await temoinSucces(page)).toBe(true);
+    expect(await empreintePresences(page), 'aucune présence écrite par une modification').toBe(avant);
+    expect(await page.evaluate(() => window.__toasts)).toEqual([]);
+    expect(await questionOuverte(page)).toBe('');
+});
+
+test('(I-b) passage à « Complétée » : la question ; « Annuler » n\'écrit rien ; « Marquer complétée » reporte les présences', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page);
+    const stock = [await uneIntervention(page)];
+    await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
+    await page.evaluate(() => naviguerVers('suivi', 'interventions'));
+    await pause(page, 900);
+    await page.evaluate(() => ouvrirIntervention('INT-E3'));
+    await pause(page, 700);
+    const avant = await empreintePresences(page);
+    await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
+    expect(await questionOuverte(page)).toBe('Marquer cette intervention complétée ?');
+    await repondre(page, 'Annuler');
+    expect((await interventions(page))[0].statut).toBe('en-cours');
+    expect(await empreintePresences(page)).toBe(avant);
+    expect(await page.evaluate(() => document.querySelector('input[name="interventionStatut"][value="en-cours"]').checked)).toBe(true);
+
+    await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
+    await repondre(page, 'Marquer complétée');
+    await pause(page, 500);
+    expect((await interventions(page))[0].statut).toBe('completee');
+    const da = stock[0].etudiants[0];
+    const reportees = await page.evaluate(({ da }) => (db.getSync(cle('presences'), []) || []).filter(p => p.da === da && p.date === '2026-09-10' && p.facultatif), { da });
+    expect(reportees.length, 'le report a eu lieu, une fois').toBe(1);
+    expect(await visible(page, '#observationsBilan'), 'le bilan paraît').toBe(true);
+});
+
+test('(I-c) nouvelle intervention : rien avant « Créer l\'intervention » ; « Fermer » pose la question', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirInterventions(page, []);
+    await cliquer(page, '[data-action="afficherFormulaireIntervention"]');
+    await changer(page, '#interventionTitre', 'Atelier fictif banc E3');
+    expect(await interventions(page)).toEqual([]);
+    await cliquer(page, '[data-action="fermerFicheIntervention"]');
+    expect(await questionOuverte(page)).toBe('Cette intervention n\'est pas encore créée.');
+    await repondre(page, 'Rester');
+    expect(await page.evaluate(() => document.getElementById('interventionTitre').value)).toBe('Atelier fictif banc E3');
+    expect(await interventions(page)).toEqual([]);
+
+    await page.evaluate(() => { window.__toasts = []; });
+    const n = await page.evaluate(() => { const b = [...document.querySelectorAll('[data-action="sauvegarderPresencesIntervention"]')].find(x => x.textContent.trim() === 'Créer l\'intervention'); if (!b) return 0; b.click(); return 1; });
+    expect(n, 'bouton « Créer l\'intervention »').toBe(1);
+    await pause(page, 700);
+    const liste = await interventions(page);
+    expect(liste.map(i => i.titre)).toEqual(['Atelier fictif banc E3']);
+    expect(await page.evaluate(() => window.__toasts.some(t => t.includes('Intervention créée.')))).toBe(true);
+    expect(await page.evaluate(() => [...document.querySelectorAll('[data-action="sauvegarderPresencesIntervention"]')].length), 'elle existe : « Fermer » seul').toBe(0);
+    await cliquer(page, '[data-action="fermerFicheIntervention"]');
+    expect(await questionOuverte(page)).toBe('');
+});
+
+test('(I-d) changer de sous-onglet puis revenir : la création en cours est toujours là, rien d\'écrit', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirInterventions(page, []);
+    await cliquer(page, '[data-action="afficherFormulaireIntervention"]');
+    await changer(page, '#interventionTitre', 'Brouillon fictif banc E3');
+    await page.evaluate(() => naviguerVers('suivi', 'liste'));
+    await pause(page, 700);
+    await page.evaluate(() => naviguerVers('suivi', 'interventions'));
+    await pause(page, 900);
+    expect(await page.evaluate(() => document.getElementById('interventionTitre')?.value)).toBe('Brouillon fictif banc E3');
+    expect(await interventions(page)).toEqual([]);
 });

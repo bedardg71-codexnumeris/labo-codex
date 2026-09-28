@@ -189,7 +189,7 @@ function monter(store, opts = {}) {
    5 · INTERVENTIONS — js/interventions.js
    ============================================================================================= */
 describe('5 · Interventions — gestes et écritures', () => {
-    const MODULES_I = [{ chemin: 'js/interventions.js', internes: ['sauvegarderInterventions', 'genererAffichageNotesIndividuelles'] }];
+    const MODULES_I = [{ chemin: 'js/interventions.js', internes: ['genererAffichageNotesIndividuelles'] }];   // ↻ lot E3 : `sauvegarderInterventions` retirée (écritures par le témoin)
     const GLOBAUX_I = {
         determinerNiveauRaiPedagogique: () => ({ niveau: 2, pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
         calculerMoyennesCriteres: () => ({ structure: 0.645, rigueur: 0.75 }), obtenirGrilleReferenceDepistage: () => null, libelleNiveauSOLO: () => '',
