@@ -1,60 +1,52 @@
-# Consigne – lot E2 de l'enregistrement : créer ou modifier, zone Cadre et élèves (D3)
+# Consigne – lot E3 de l'enregistrement : créer ou modifier, productions, interventions, volet confidentiel, et les réglages (D3, D0)
 
-> Écrite le 28 septembre 2026, à 8 h 05 (Toronto), par Cowork. Source qui fait foi : `plans de travail/DECISIONS-2026-09-26-enregistrement.md`, **D3** (et D0). Constat : `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md`, § 3 « Cadre », annexe A3 « Cadre ». Modèle : le lot E1 (1.164.0, porte passée sur l'iPad le 28 à 7 h 56), `DEMANDE-RELECTURE-2026-09-27-lot-E1-conception.md` et `RELECTURE-2026-09-27-lot-E1-conception.md`. Reprends ses mécanismes (témoin commun, question « … n'est pas encore créé », « Fermer », `beforeunload` commun) au lieu d'en inventer d'autres.
+> Écrite le 28 septembre 2026, à 17 h 14 (Toronto), par Cowork. Source qui fait foi : `plans de travail/DECISIONS-2026-09-26-enregistrement.md`, **D3** (« partout ailleurs ») et **D0** (un seul témoin ; plus de bouton « Enregistrer » là où tout s'écrit déjà ; un échec ne se déguise pas en réussite). Constat : `INVENTAIRE-ENREGISTREMENT-2026-09-26.md`, § 3 (Conception › Production ; Interventions et rencontres ; Profil ; Réglages ; Autres écrans) et annexe A3. **Modèles : les lots E1 (1.164.0) et E2 (1.166.0)**, leurs demandes et relectures dans `plans de travail/`. Reprends leurs mécanismes (témoin commun, `modifierEtAnnoncer` / `ecrireEtAnnoncer`, `quitterCreationSiConfirme`, « Fermer », `beforeunload` commun, `raisonPourTemoin`), n'en invente pas.
 >
-> **Au début du lot** : archive l'actuelle `CONSIGNE-DU-JOUR.md` (lot E1, livré) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-27-lot-E1-conception.md`, puis renomme celle-ci en `CONSIGNE-DU-JOUR.md`.
+> **Au début du lot** : archive `CONSIGNE-DU-JOUR.md` (lot E2, livré) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-28-lot-E2-cadre-eleves.md`, puis renomme celle-ci en `CONSIGNE-DU-JOUR.md`.
 >
-> **Condition de départ** *(remplacée le 28 sept. à la demande de Cowork ; l'ancienne citait `6a43e278`, `185eba31` et la carte d'alignement en attente)* : branche `lot-e2-cadre-eleves` partie de `c8572cf0` (1.165.0, carte d'alignement livrée), rebasée sur `main` après le commit documentaire de la porte de 1.165.0 ; aucun autre lot dans `js/`. Fusion après la relecture croisée seulement.
+> **Condition de départ** : `main` contient 1.166.0 (`e4149cb1` ou plus récent), aucun autre lot en cours dans `js/`. Branche `lot-e3-productions-interventions` ; fusion après la relecture croisée seulement.
 >
-> **À remesurer avant le code** : les lignes citées viennent de l'inventaire du 26 et de ma lecture du 28 vers 8 h ; elles ont pu bouger avec les lots B à E1.
+> **À remesurer avant le code** : les lignes citées viennent de l'inventaire du 26 ; mesuré par Cowork le 28 vers 17 h 30 : « Production modifiée avec succès » (`productions.js`), « Intervention enregistrée » / « Rencontre enregistrée » (`interventions.js`), « Préférences enregistrées » après un refus des seuils (`preferences-v2.js` l. 443-446) existent toujours ; aucun de ces fichiers ni `profil-etudiant-confidentiel.js` ne passe encore par le témoin.
 
-## 1 · Ce que Grégoire a décidé (D3, 26 sept. vers 13 h 41, « excellent, je garde »)
+## 1 · Ce que Grégoire a décidé (D3, D0)
 
-- **Créer** quelque chose de neuf (ici : trimestre, cours ou service, horaire, groupe-cours, élève) : un bouton qui nomme le geste. Tant qu'on n'a pas cliqué, rien n'existe ; quitter avant avertit.
-- **Modifier** ce qui existe : tout s'enregistre tout seul, champ par champ – Cadre du trimestre, profil enseignant, élèves compris.
-- Dans une fiche existante, **« Annuler » devient « Fermer »**.
-- Les champs que l'application vérifie (session et année du trimestre…) disent **« Non enregistré : ‹raison› »** au lieu de deux messages contradictoires.
+- **Créer** : un bouton qui nomme le geste ; rien n'existe avant ; quitter avant avertit.
+- **Modifier** : tout s'enregistre tout seul, champ par champ.
+- Dans une fiche existante, « Annuler » devient « Fermer ».
+- Un seul témoin ; là où tout s'écrit déjà, le bouton « Enregistrer » disparaît ; un refus n'est jamais suivi d'un succès.
 
-## 2 · Ce que j'ai lu, et les décisions techniques de Cowork
+## 2 · Les zones, et les décisions techniques de Cowork
 
-- **Le Cadre du trimestre, identification** (`trimestre-v2-init.js`, `sauvegarderIdentificationTrimestreV2` vers la l. 158, `sauvegarderTrimestreCompletV2` vers la l. 277). ⚠ C'est le point délicat du lot. La session et l'année **fixent l'identifiant du trimestre, donc le préfixe de toutes ses clés** (#379) ; l'écriture par champ avait été retirée exprès en juillet pour cette raison (#306, lot 2). Décision de Cowork :
-  - le **nom** du trimestre s'enregistre seul, comme tout champ ;
-  - la **session et l'année** s'écrivent **ensemble**, au changement (`change`, pas à la frappe), et seulement quand les deux sont valides ; un état intermédiaire (session changée, année pas encore) ne s'écrit pas et ne déclenche aucune erreur de collision ; la garde de collision et la garde « Changement bloqué » restent telles quelles et disent leur refus par le témoin, « Non enregistré : ‹raison› », en remettant les champs à la valeur enregistrée ;
-  - le **double message** mesuré (« Identification incomplète » puis « Cadre du trimestre sauvegardé ») disparaît : un refus n'est jamais suivi d'un succès ;
-  - le cadre calendaire s'écrit sous l'identifiant **en vigueur après** l'identification, jamais sous un identifiant intermédiaire ;
-  - **aucune migration de clés** : si un chemin que tu trouves déplace ou renomme des données d'un trimestre, **arrête-toi et dis-le** (ça remonte à Grégoire : ses données réelles).
-  - S'il n'y a **aucun trimestre actif**, l'identification **crée** un trimestre : c'est un geste de création, avec son bouton (« Créer le trimestre »).
-- **Le cadre calendaire** (dates, bornes, semaines spéciales, journées sans cours) : les dates s'enregistrent seules ; les gestes déjà automatiques (vers les l. 401-483 et 700-743) passent par le témoin. Le bouton « Enregistrer » de la carte disparaît.
-- **Profil enseignant** (`trimestre-v2-enseignants.js`, vers les l. 81-93) : s'enregistre seul, champ par champ. La carte de synthèse ne montre plus que ce qui est écrit.
-- **Cours ou service, horaire, groupe-cours** (`trimestre-v2-horaires.js` vers les l. 834-961, `groupes-cours.js` vers les l. 618-830) : existant → automatique ; neuf → « Créer le … », rien en base avant, la question de sortie du lot E1 à « Fermer », à l'ouverture d'une autre fiche et au rechargement. Aujourd'hui, **le message de réussite part avant l'écriture** : le témoin parle après avoir lu le retour de l'écriture, jamais avant.
-- **Élèves** (`etudiants.js` vers les l. 622-740, `await db.modifier` sans `try` ; `trimestre-v2-etudiants.js`) : une fiche d'élève existante s'enregistre seule ; un élève neuf n'existe qu'au clic sur le bouton d'ajout. Le mode anonymisation suit ce que le lot A a posé (on travaille normalement, rien d'identifiant ne s'affiche) : vérifie que les gardes « Modification impossible » (vers les l. 354 et 965) sont cohérentes avec le lot A, sans les affaiblir.
-- **Retirer un élève, supprimer un horaire ou un cours** : **ne change rien** aux suppressions (confirmation, portée). Aucun code neuf ne supprime une donnée.
-- **La navigation** vit dans `js/navigation.js`, **zone protégée** (CLAUDE.md) : même règle qu'au lot E1. Si l'avertissement exige `navigation.js`, arrête-toi et dis-le.
-- **Ne touche pas** : l'**archivage d'un trimestre** (moratoire actif, #622 ; son « Erreur: undefined » est inscrit là) ; la Conception (E1, livrée) ; les productions, interventions et volet confidentiel (E3) ; l'Alignement ; les mots du codex, de la Réserve et de la copie de secours (lot F).
-- **En passant, dans ces fichiers** : les `alert` bloquants et au vouvoiement du Cadre (#678 pour ceux du parcours de création) : relève-les pour Grégoire, en tableau avant / après ; ne les remplace que si le lot touche déjà la fonction.
-- **Fiches** : cherche dans `BACKLOG.md` et `SUIVI-BUGS.md` celles que le lot règle, au moins #678, #791, #472, #477 ; liste-les avec « réglée / en partie / non ».
+**Étape 1 · Productions** (`productions.js`, vers les l. 2020-2112) : une production existante s'enregistre champ par champ ; une nouvelle n'existe qu'au clic sur « Créer la production » ; « Fermer » et la question de sortie ; « Production modifiée avec succès ! » disparaît (le témoin dit « Enregistré »). ⚠ Une production est reliée à des évaluations, des grilles, des cartouches : **ne change aucune de ces références** ; si un champ modifiable touche un lien (grille, cartouche, pondération d'une production déjà évaluée), mesure ce que l'écriture automatique déclencherait sur les évaluations existantes. **Si une écriture de champ recalcule ou réécrit une évaluation déjà faite, arrête-toi et dis-le** : ça remonte à Grégoire (ses données réelles).
 
-## 3 · Les mots – à faire accepter par Grégoire AVANT le push
+**Étape 2 · Interventions et rencontres** (`interventions.js`, vers les l. 1423-1580) : une intervention ou une rencontre existante s'enregistre seule ; une nouvelle attend « Créer l'intervention » / « Créer la rencontre » ; la perte silencieuse au changement d'onglet (l. 1690-1697) devient la question de sortie pendant une création. ⚠ **Le report vers les présences** (l. 1567-1573, `saisie-presences.js` l. 2345-2362) : une intervention « complétée » écrit des présences. **N'automatise pas ce report** : une modification champ par champ d'une intervention complétée ne doit pas réécrire de présences à chaque frappe. Mesure d'abord ce qui se passe aujourd'hui quand on modifie une intervention complétée (l'inventaire le dit probablement sans effet sur les présences, `[lu]`). Si la règle juste exige de toucher aux présences déjà saisies, **arrête-toi et dis-le**. « Créer mon service » : inchangé.
 
-Déjà décidés (D3) : « Créer le … » ; « Fermer » ; « … n'est pas encore créé. » ; « Non enregistré : ‹raison› ».
+**Étape 3 · Le volet confidentiel du profil** (`profil-etudiant-confidentiel.js`, vers la l. 264 ; notes de présence l. 201-219) : les champs s'enregistrent seuls, par le témoin ; « Annuler » et × deviennent « Fermer » ; la pastille verte ne remplace plus un mot. Le lot A a posé le mode anonymisation (volet masqué, « Masqué en anonymisation ») : **ne l'affaiblis pas**, et vérifie que rien ne s'écrit depuis un volet masqué.
 
-Proposés par Cowork (sur le patron du lot E1) :
-- Boutons : **« Créer le trimestre »**, **« Créer le cours »**, **« Créer l'horaire »**, **« Créer le groupe-cours »**, **« Ajouter l'élève »** (« créer » un élève sonne faux ; le geste existant dit « Ajouter l'étudiant·e » : à trancher par Grégoire).
-- Question de sortie : **« Ce cours n'est pas encore créé. »** (et ses jumeaux ; pour l'élève : « Cet élève n'est pas encore ajouté. »), boutons **« Rester »** / **« Quitter sans créer »** (« Quitter sans ajouter » pour l'élève).
-- Refus d'identification : **« Non enregistré – Identification du trimestre : ‹raison› »**, les raisons actuelles reprises telles quelles.
-- Les `alert` relevés : tableau avant / après.
-- **Nouvelles** : « Cadre et élèves : le trimestre, ton profil, un cours, un horaire, un groupe-cours ou un élève existant s'enregistrent tout seuls, champ par champ ; le témoin le dit. Pour en créer un nouveau, un bouton nomme le geste, et l'application te prévient si tu quittes avant. « Annuler » devient « Fermer ». » (À ajuster à ce que le lot couvre réellement.)
+**Étape 4 · Réglages et bilan** : 
+- Préférences et Outils d'observation (`preferences-v2.js`, aides `index.html` ~l. 8686 et 11235) : déjà automatiques au changement ; **le bouton « Enregistrer » disparaît** ; les écritures passent par le témoin.
+- **Les seuils mal ordonnés** : aujourd'hui une alerte d'erreur **et** « Préférences enregistrées » (mesuré à l'inventaire) : le refus parle par le témoin, « Non enregistré – Seuils : ‹raison› », le champ revient à la valeur enregistrée, aucun succès.
+- Auto-réflexion du bilan réflexif (`bilan-reflexif-reflexion.js`, l. 50, 349-353, 408-415) : déjà automatique à la sortie du champ ; le bouton disparaît ; le témoin.
+
+**Hors du lot** (ne touche pas ; inscris ce qui n'a pas de fiche) : Codex, Réserve, copie de secours et textes de l'Aide (lot F, les mots) ; le texte modifiable du Rapport et sa bulle (lot F) ; « Charger les données de démonstration » du bilan réflexif, qui remplace sans confirmation (fiche, issue 2) ; Tirage (fiche) ; `navigation.js` (zone protégée : si un avertissement l'exige, arrête-toi) ; l'archivage d'un trimestre (moratoire #622).
+
+**Fiches** : cherche dans `BACKLOG.md` et `SUIVI-BUGS.md` celles que le lot règle ; liste-les « réglée / en partie / non ».
+
+## 3 · Les mots – Cowork les soumet à Grégoire avant le push
+
+Sur le patron de E1 et E2, proposés : « Créer la production », « Créer l'intervention », « Créer la rencontre » ; « Cette production n'est pas encore créée. » (et jumeaux), « Rester » / « Quitter sans créer » ; « Production « … » créée. », « Intervention créée. », « Rencontre créée. » ; « Non enregistré – Seuils : les seuils doivent aller du plus bas au plus haut. » (à vérifier contre la raison actuelle). Tous les messages neufs au tutoiement, sans tiret cadratin (réservé aux dialogues chez Grégoire). **Nouvelles** : à proposer à la fin, pour la zone réellement couverte.
 
 ## 4 · Preuves
 
-- Par comportement : (a) modifier le nom du trimestre, une date, un champ du profil enseignant, un champ d'un élève existant, puis changer d'écran sans autre geste → en base, le témoin a dit « Enregistré ». (b) Identification : changer la session seule n'écrit rien et ne dit aucune erreur ; changer session et année vers une paire libre sur un trimestre vide → écrit, une seule fois ; vers une paire prise → « Non enregistré », champs remis, **aucune clé déplacée** (compte des clés du trimestre avant / après) ; sur un trimestre qui a des données → « Changement bloqué » par le témoin, aucun succès. (c) Nouveau cours, horaire, groupe-cours, élève : rien en base avant le clic ; « Fermer » pose la question, « Rester » ne perd rien, « Quitter sans créer » n'écrit rien. (d) Un échec d'écriture sur un champ du Cadre : « Non enregistré – ‹geste› : … », aucun succès. (e) Le message de réussite d'un horaire ou d'un groupe-cours ne précède plus l'écriture.
-- Mutations, chacune rouge : l'identification écrite à la frappe ; l'état intermédiaire écrit ; un succès après un refus ; un écrivain du Cadre sans témoin ; « Créer le cours » qui écrit avant le clic ; la question de sortie retirée.
-- Vitest complet ; bancs WebKit voisins (lot B, lot E1, #379 et ses gardes, parcours de rentrée, import d'élèves) verts ; placement des boutons renommés à 360, 768, 1024 et 1180 px, hors du témoin.
+- Par comportement, par étape : fiche existante modifiée puis quittée → en base, le témoin dit « Enregistré » ; nouvelle fiche : rien en base avant le bouton, « Fermer » pose la question, « Rester » ne perd rien, « Quitter sans créer » n'écrit rien ; un échec d'écriture → « Non enregistré – ‹geste› : … », aucun succès ; seuils mal ordonnés → aucun succès, champ revenu.
+- **Interventions** : un essai qui prouve que modifier une intervention complétée n'écrit aucune présence (empreinte des présences avant / après).
+- **Confidentiel** : en anonymisation, aucune écriture depuis le volet masqué.
+- Mutations, chacune rouge : un écrivain sans témoin ; « Créer la production » qui écrit avant le clic ; la question de sortie retirée ; le succès des préférences rendu après un refus ; le report de présences déclenché par une modification.
+- Vitest complet ; bancs WebKit voisins verts ; placement des boutons renommés à 360, 768, 1024 et 1180 px, hors du témoin. Banc WebKit du lot sur le vrai `index.html`.
 
 ## 5 · Livraison
 
-- **Relecture croisée exigée** (identifiant du trimestre, données d'élèves) : commit → `plans de travail/DEMANDE-RELECTURE-2026-09-28-lot-E2-cadre-eleves.md` → relecture de Cowork → corrections → verdict → fusion.
-- **Cases à cocher** : celles que ta recherche trouve réglées, et elles seules.
-- **Stock** : rien n'est réécrit, déplacé ni effacé.
-- Release `minor`. Mots, relevé des `alert` et Nouvelles acceptés par Grégoire avant le push.
-- **Porte terrain** : seulement ce qu'aucun test ne peut juger, sur ses données réelles et **sans rien créer de fictif** (il ne crée pas de données pour tester) ; un geste qui modifie une donnée réelle prévoit sa rangée de retour à l'état d'origine, comme au lot E1.
+- **Relecture croisée par Cowork exigée** (productions reliées aux évaluations, présences, volet confidentiel) : `DEMANDE-RELECTURE-2026-09-28-lot-E3-…md`. Un compte rendu d'étape est bienvenu après l'étape 2.
+- Stock : rien n'est réécrit, déplacé ni effacé.
+- Release `minor` ; mots et Nouvelles acceptés par Grégoire avant le push ; verdict WebKit complet avec Cowork et les navigateurs fermés (mémoire du Mac), puis `caffeinate -i scripts/pousser.sh origin main`.
+- **Porte terrain** : seulement ce qu'aucun test ne peut juger, sur ses données réelles, sans rien de fictif, une rangée de retour pour tout geste qui modifie.
