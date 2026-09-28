@@ -29,8 +29,19 @@ const wizardState = {
     historique: [],          // Pile des étapes visitées pour navigation arrière
     reponses: {},            // Réponses collectées à chaque étape
     modeEdition: false,      // true si modification d'une pratique existante
-    pratiqueId: null         // ID de la pratique en édition (null si création)
+    pratiqueId: null,        // ID de la pratique en édition (null si création)
+    grilleDeBase: null       // Lot E1 : la grille de base proposée, pas encore écrite
 };
+
+/**
+ * Lot E1 (D3 : « tant qu'on n'a pas cliqué, rien n'existe ») — les grilles que
+ * l'assistant peut proposer : celles en base, plus la grille de base générée à sa
+ * demande, qui n'est écrite qu'avec la pratique (`finaliserCreationPratique`).
+ */
+function grillesDuWizard() {
+    const grilles = db.getSync(cle('grillesTemplates'), []) || [];
+    return wizardState.grilleDeBase ? grilles.concat([wizardState.grilleDeBase]) : grilles;
+}
 
 // Familles canoniques → badge (code court + libellé + description du diagnostic).
 // SSOT du vocabulaire de famille dans l'assistant : consommé par le récapitulatif
@@ -1773,8 +1784,8 @@ function wizardV2ModifierRepereEchelle(el) {
  * Génère un sélecteur de grille
  */
 function genererSelectGrille(champ) {
-    // Récupérer les grilles existantes
-    const grilles = db.getSync(cle('grillesTemplates'), []);
+    // Récupérer les grilles existantes (et la grille de base en attente, lot E1)
+    const grilles = grillesDuWizard();
 
     if (grilles.length === 0) {
         return `
@@ -1791,7 +1802,7 @@ function genererSelectGrille(champ) {
 
     let options = grilles.map(g => {
         const criteres = g.criteres ? g.criteres.length : 0;
-        return `<option value="${echapperHtml(g.id)}">${g.nom || 'Sans nom'} (${criteres} critères)</option>`;
+        return `<option value="${echapperHtml(g.id)}">${echapperHtml(g.nom || 'Sans nom')} (${criteres} critères)</option>`;
     }).join('');
 
     return `
@@ -1822,9 +1833,9 @@ function wizardV2CreerGrilleDemo() {
         dateCreation: new Date().toISOString()
     };
 
-    const grilles = db.getSync(cle('grillesTemplates'), []);
-    grilles.push(grilleDemo);
-    db.setSync(cle('grillesTemplates'), grilles);
+    // Lot E1 (D3) : RIEN n'est écrit ici. Avant, la grille entrait en base à ce clic
+    // et y restait même si l'assistant était abandonné. Elle attend « Créer la pratique ».
+    wizardState.grilleDeBase = grilleDemo;
 
     // Stocker l'ID pour pré-sélection
     wizardState.reponses.grilleId = grilleDemo.id;
@@ -2070,8 +2081,7 @@ function genererRecapitulatif() {
             html += `<p><strong>Échelle (rétroaction) :</strong> ${echelle?.nom || r.echelleId}</p>`;
         }
         if (r.grilleId) {
-            const grilles = db.getSync(cle('grillesTemplates'), []);
-            const grille = grilles.find(g => g.id === r.grilleId);
+            const grille = grillesDuWizard().find(g => g.id === r.grilleId);
             html += `<p><strong>Grille (rétroaction) :</strong> ${grille?.nom || r.grilleId}</p>`;
         }
         html += '</div>';
@@ -2097,8 +2107,7 @@ function genererRecapitulatif() {
             }
         }
         if (r.grilleId) {
-            const grilles = db.getSync(cle('grillesTemplates'), []);
-            const grille = grilles.find(g => g.id === r.grilleId);
+            const grille = grillesDuWizard().find(g => g.id === r.grilleId);
             html += `<p><strong>Grille\u00a0:</strong> ${grille?.nom || r.grilleId}</p>`;
         } else {
             html += `<p><strong>Grille\u00a0:</strong> <em>À configurer plus tard</em></p>`;
@@ -2211,6 +2220,8 @@ function mettreAJourBoutons() {
     }
     if (btnCreer) {
         toggleDisplay(btnCreer, estDerniereEtape);
+        // Lot E1 (D3) : le bouton final nomme le geste.
+        btnCreer.textContent = wizardState.modeEdition ? 'Appliquer à la pratique' : 'Créer la pratique';
     }
 }
 
@@ -2742,14 +2753,31 @@ async function creerPratiqueV2() {
  * @param {Object} pratique - Objet pratique prêt à être persisté
  */
 async function finaliserCreationPratique(pratique) {
-    // Sauvegarder la pratique (attendre pour s'assurer que c'est fait)
-    await sauvegarderPratique(pratique);
+    // Lot E1 (D3) : le mode est lu AVANT la fermeture, qui le remet à « création ».
+    const enModification = wizardState.modeEdition === true;
+
+    // Lot E1 : la grille de base proposée par l'assistant n'entre en base qu'ici, et
+    // seulement si la pratique la retient.
+    const grilleDeBase = wizardState.grilleDeBase;
+    if (grilleDeBase && pratique.configuration && pratique.configuration.grilleId === grilleDeBase.id) {
+        const ecrite = await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
+            const grilles = lues || [];
+            return grilles.some(g => g.id === grilleDeBase.id) ? grilles : grilles.concat([grilleDeBase]);
+        }, [], { geste: 'Créer la pratique', discret: true }).catch(() => undefined);
+        if (!ecrite) return;
+        wizardState.grilleDeBase = null;
+    }
+
+    // Un échec : le témoin l'a dit ; l'assistant reste ouvert, rien n'est perdu.
+    if (!(await sauvegarderPratique(pratique))) return;
 
     // Fermer le wizard
     fermerWizardV2();
 
-    // Notification de succès
-    notifications.succes(`Pratique «\u00a0${pratique.nom}\u00a0» créée.`);
+    // D3 : l'assistant disait « créée » même en modification.
+    notifications.succes(enModification
+        ? `Pratique «\u00a0${pratique.nom}\u00a0» mise à jour.`
+        : `Pratique «\u00a0${pratique.nom}\u00a0» créée.`);
 
     // Rafraîchir l'interface si nécessaire
     if (typeof chargerPratiques === 'function') {
@@ -2893,6 +2921,7 @@ function conserverConfigurationSpecifications(pratique, existante) {
  * Sauvegarde la pratique dans le stockage
  * 🆕 FIX (20 jan 2026) : Sauvegarde robuste avec vérification
  * @param {Object} pratique - Objet pratique à sauvegarder
+ * @returns {boolean} true si l'écriture a eu lieu (lot E1 : le témoin dit l'échec)
  */
 async function sauvegarderPratique(pratique) {
     // Récupérer les pratiques existantes
@@ -2927,13 +2956,17 @@ async function sauvegarderPratique(pratique) {
         pratiques.push(pratique);
     }
 
-    // Sauvegarde localStorage + IndexedDB (setSync écrit dans les deux stores)
-    db.setSync(cle('pratiquesConfigurables'), pratiques);
+    // Lot E1 (D0 point 2) : par le témoin commun. Avant, `db.setSync` direct : un échec
+    // n'était dit nulle part, et l'assistant annonçait « créée » quand même.
+    const ecrite = sauvegarderDonneesSelonMode('pratiquesConfigurables', pratiques, {
+        geste: wizardState.modeEdition ? 'Appliquer à la pratique' : 'Créer la pratique'
+    });
 
     // #328 L2-b2 : plus AUCUNE synchronisation miroir — le type de la pratique
     // active se dérive partout de la SSOT groupesCours[].pratiqueId via
     // obtenirTypePratiqueActive (helper D2). Sauvegarder une pratique ne touche
     // plus modalitesEvaluation.
+    return ecrite;
 }
 
 // ============================================================================
@@ -3033,6 +3066,7 @@ function fermerWizardV2() {
     wizardState.reponses = {};
     wizardState.modeEdition = false;
     wizardState.pratiqueId = null;
+    wizardState.grilleDeBase = null;   // lot E1 : abandonner l'assistant n'écrit aucune grille
 }
 
 /**

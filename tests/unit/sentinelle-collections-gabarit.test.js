@@ -91,13 +91,16 @@ function monter(grilles, collections, opts) {
         echapperHtml: echapper,
         genererIdUnique: (p) => (p || 'ID_') + Math.random().toString(36).slice(2, 8),
         alert() {}, confirm: (m) => { confirmations.push(m); return !(opts && opts.refuser); },
-        notifications: { succes: (m, d) => notes.push(['succes', m, d]), erreur: (m, d) => notes.push(['erreur', m, d]), info: (m) => notes.push(['info', m]), avertissement: (m, d) => notes.push(['avertissement', m, d]) },
+        notifications: { succes: (m, d) => notes.push(['succes', m, d]), erreur: (m, d) => notes.push(['erreur', m, d]), info: (m) => notes.push(['info', m]), warning: (m, d) => notes.push(['warning', m, d]) }, // lot E1 : la VRAIE méthode (warning) ; « avertissement » n'existe pas
         BibliothequeUI: { obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null,
                           filtrerParModeDemo: (l) => l, repertoires: { rendre() {} } },
         obtenirIdentiteCCUtilisateur: () => 'banc',
         grilleTemplateActuelle: null
     };
     const win = chargerScript('js/ui-blocs.js', globaux);
+    // Lot E1 (D3) : un champ refusé est dit par le témoin commun — le vrai module, affichage journalisé.
+    chargerScript('js/temoin-enregistrement.js', { document: globaux.document }, win);
+    win.temoinEnregistrement = { enregistre() {}, fermer() {}, nonEnregistre: (raison) => notes.push(['nonEnregistre', raison]) };
     chargerScript('js/grilles.js', globaux, win);
     chargerScript('js/collections-projection.js', globaux, win);
     win.formulesAlgo = require(path.join(racine, 'js/evaluation-formules.js'));
@@ -213,7 +216,7 @@ describe('collections · B — choisir une collection COPIE ses valeurs dans le 
         expect(selectDe(projection)).not.toMatch(/collection:coll_euf"[^>]*selected/);
         expect((projection.match(/class="sous-critere-item palier-projection"/g) || []).length).toBe(6);
         expect(projection).toContain('value="Passerelle +"');
-        expect(m.notes.filter((n) => n[0] === 'avertissement')).toEqual([]);
+        expect(m.notes.filter((n) => n[0] === 'warning')).toEqual([]);
     });
 
     it('B.b un id disparu : rien n\'est écrit, le critère ne bouge pas, et on le dit', async () => {
@@ -223,7 +226,7 @@ describe('collections · B — choisir une collection COPIE ses valeurs dans le 
         await m.win.modifierModeleProjectionGrilleHandler({ value: 'collection:coll_disparue', dataset: { grilleId: 'G2', critereIndex: '0' } });
         expect(JSON.stringify(m.store[CLE_G])).toBe(avant);
         expect(m.ecrits).toEqual([]);
-        expect(m.notes.some((n) => n[0] === 'avertissement' && /n'existe plus/.test(n[1]))).toBe(true);
+        expect(m.notes.some((n) => n[0] === 'warning' && /n'existe plus/.test(n[1]))).toBe(true);
     });
 
     it('B.c en création : le handler temp copie dans `tempCriteres` ; un modèle livré passe toujours par le chemin d\'avant', () => {
@@ -316,7 +319,7 @@ describe('collections · C — enregistrer sous un nom, inline, avec un état en
         expect(input.classList.contains('champ-refuse')).toBe(true);
         expect(m.ecrits).toEqual([]);
         expect(CLE_C in m.store).toBe(false);
-        expect(m.notes.some((n) => n[0] === 'erreur' && /Donne un nom/.test(n[1]))).toBe(true);
+        expect(m.notes.some((n) => n[0] === 'nonEnregistre' && n[1] === 'donne un nom à la collection.')).toBe(true);   // lot E1
     });
 });
 

@@ -326,7 +326,7 @@ describe('#522 lot 3a · C — la course ne peut pas se rouvrir en silence', () 
     it('C.b chaque fichier écrit par la file', () => {
         for (const f of FICHIERS) {
             expect(lire(f), `${f} : aucune écriture par la file`)
-                .toMatch(/db\.modifier\(\s*(getCleProductions\(\)|cleProductions\b|cle\('productions'\))/);
+                .toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(\s*(getCleProductions\(\)|cleProductions\b|cle\('productions'\))/);
         }
     });
 

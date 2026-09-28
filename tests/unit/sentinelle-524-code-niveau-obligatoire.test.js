@@ -71,6 +71,9 @@ function monter({ echelles = [], niveauxNeufs = null } = {}) {
     // (boutons de réordonnancement). Deux modules dans le MÊME sandbox.
     const win = chargerScript('js/ui-blocs.js', globaux);
     win.travauxOutils = { renderPickerCouleur: () => '' };
+    // Lot E1 (D3) : un champ refusé est dit par le témoin commun — le vrai module, affichage journalisé.
+    chargerScript('js/temoin-enregistrement.js', { document: globaux.document }, win);
+    win.temoinEnregistrement = { enregistre() {}, fermer() {}, nonEnregistre: (raison, geste, k) => journal.push(['nonEnregistre', raison, k]) };
     chargerScript('js/echelles.js', globaux, win);
     if (niveauxNeufs) win._niveauxNouvelleEchelle = niveauxNeufs;
     return { win, store, journal };
@@ -159,7 +162,8 @@ describe('#524 · C — le refus n\'est pas silencieux', () => {
         win.marquerChampRefuseEchelle(el, win.REFUS_CODE_NIVEAU);
         expect(el._classes.has('champ-refuse')).toBe(true);
         expect(journal).toHaveLength(1);
-        expect(journal[0][1]).toBe('Le code du niveau est obligatoire');
+        // Lot E1 : « Non enregistré : le code du niveau est obligatoire. »
+        expect(journal[0]).toEqual(['nonEnregistre', 'le code du niveau est obligatoire.', 'a2026_echellesTemplates']);
     });
 });
 

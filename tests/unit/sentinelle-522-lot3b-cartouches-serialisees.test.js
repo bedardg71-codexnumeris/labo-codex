@@ -295,9 +295,11 @@ describe('#522 lot 3b · C — la course ne peut pas se rouvrir en silence', () 
 
     // ↻ #864 (14 sept. 2026) : seize → quinze. La seizième était la bascule de
     // verrouillage (`basculerVerrouillageCartouche`), retirée avec le verrouillage.
-    it('C.b les quinze écritures-modifications passent par la file', () => {
-        const n = (lire('js/cartouches.js').match(/db\.modifier\(\s*(?:cle\()?\s*[`']cartouches_/g) || []).length;
-        expect(n, 'lot 3b, lot 4 et les conversions antérieures, moins la bascule retirée par #864').toBe(15);
+    // ↻ Lot E1 (27 sept. 2026) : quinze → seize. La seizième est le NOM d'une cartouche
+    // existante, qui s'enregistre désormais au changement (`sauvegarderNomCartouche`, D3).
+    it('C.b les seize écritures-modifications passent par la file', () => {
+        const n = (lire('js/cartouches.js').match(/(?:db\.modifier|modifierEtAnnoncer)\(\s*(?:cle\()?\s*[`']cartouches_/g) || []).length;
+        expect(n, 'lot 3b, lot 4 et les conversions antérieures, moins la bascule retirée par #864, plus le nom (lot E1)').toBe(16);
     });
 
     it('C.c la seule écriture directe restante du dépôt est NOMMÉE, et sa raison tient', () => {
@@ -321,7 +323,7 @@ describe('#522 lot 3b · C — la course ne peut pas se rouvrir en silence', () 
             expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
             const corps = src.slice(debut, debut + 5000);
             expect(corps, `${nom} : n'écrit pas par la file`)
-                .toMatch(/db\.modifier\(\s*(?:cle\()?\s*[`']cartouches_/);
+                .toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(\s*(?:cle\()?\s*[`']cartouches_/);
         }
     });
 
@@ -332,7 +334,7 @@ describe('#522 lot 3b · C — la course ne peut pas se rouvrir en silence', () 
         const debut = src.indexOf('function assurerCartoucheGenerique(');
         expect(debut, 'assurerCartoucheGenerique introuvable').toBeGreaterThan(-1);
         const corps = src.slice(debut, debut + 6000);
-        const posFile = corps.indexOf('db.modifier(');
+        const posFile = corps.search(/(?:db\.modifier|modifierEtAnnoncer)\(/);   // lot E1 : la même file, annoncée
         const posTest = corps.indexOf("some(c => c.id === 'CART_GENERIQUE')");
         expect(posFile, 'la file est absente').toBeGreaterThan(-1);
         expect(posTest, 'le test de présence est absent').toBeGreaterThan(posFile);

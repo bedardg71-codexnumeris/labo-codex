@@ -102,8 +102,10 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
         // (les deux exports, le modèle vide) vivent à côté, pas dedans.
         const barre = indexHtml.match(/<div id="actionsFicheCartouche"[\s\S]*?\n {36}<\/div>/);
         expect(barre, 'barre actionsFicheCartouche trouvée').toBeTruthy();
+        // ↻ Lot E1 (D3, 27 sept. 2026) : « Annuler » devient « Fermer » (`fermerFicheCartouche`) ;
+        // `sauvegarderCartoucheComplete` porte désormais « Créer la cartouche ».
         for (const action of ['dupliquerCartoucheActive', 'supprimerCartoucheActive',
-                              'annulerFormCartouche', 'sauvegarderCartoucheComplete']) {
+                              'fermerFicheCartouche', 'sauvegarderCartoucheComplete']) {
             expect(barre[0], action).toContain(action);
         }
         for (const dehors of ['btnExporterPDFCartouche', 'btnExporterTexteCartouche', 'btnModeleCartouche']) {

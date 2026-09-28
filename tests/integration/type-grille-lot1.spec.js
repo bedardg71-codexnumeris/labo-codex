@@ -30,7 +30,7 @@ const SEMER = `async () => {
     ]);
     window.afficherSection('conception');
     window.afficherSousSection('conception-grille-criteres');
-    window.creerNouvelleGrille();
+    await window.creerNouvelleGrille();   // lot E1 : async (la question « pas encore créée » la précède)
     return {
         menu: document.getElementById('typeGrille').value,
         nCriteres: document.querySelectorAll('#listeCriteres select[data-on-change="modifierTypeCritereTempHandler"]').length,

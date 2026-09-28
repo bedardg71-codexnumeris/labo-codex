@@ -21,6 +21,12 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // garantie du principe (l'écriture part de la base), pas seulement des chemins connus.
 //
 // ⚠ Stockage propre à chaque essai : un contexte Playwright neuf par test.
+//
+// ↻ LOT E1 DE L'ENREGISTREMENT (D3, 27 sept. 2026) : une grille ou une échelle EXISTANTE
+// n'a plus de bouton « Enregistrer » — elle s'enregistre au changement de champ. Le même
+// écrivain (`sauvegarderGrilleTemplate`, `sauvegarderNomEchelle`) part désormais du
+// `change` du champ nom : c'est lui que ce banc déclenche à la place du clic. L'invariant
+// ne bouge pas — l'écriture du formulaire part de la base, jamais de la copie mémoire.
 
 const pause = (page, ms) => page.waitForTimeout(ms);
 
@@ -62,7 +68,15 @@ async function cliquer(page, selecteur) {
     await pause(page, 900);
 }
 
-const ENREGISTRER = '[data-action="sauvegarderGrilleComplete"]';
+/** Le geste qui a remplacé « Enregistrer » : le `change` du champ nom (lot E1). */
+async function ecrireLeFormulaire(page, champ = 'nomGrilleTemplate') {
+    const n = await page.evaluate((champ) => {
+        const el = document.getElementById(champ); if (!el) return 0;
+        el.dispatchEvent(new Event('change', { bubbles: true })); return 1;
+    }, champ);
+    expect(n, 'champ introuvable : ' + champ).toBe(1);
+    await pause(page, 900);
+}
 const premiereGrille = () => (db.getSync(cle('grillesTemplates'), []) || []).find(g => (g.criteres || []).length >= 2)?.id;
 const grilleAvecSousCriteres = () => {
     for (const g of db.getSync(cle('grillesTemplates'), []) || []) {
@@ -82,11 +96,13 @@ test('#957 — critère : « + Ajouter un critère » puis « Enregistrer » gar
     await cliquer(page, `[data-action="ajouterCritereGrille"][data-param="${id}"]`);
     expect((await lireGrille(page, id)).criteres.length, 'l\'ajout écrit en base').toBe(avant + 1);
 
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     const apres = await lireGrille(page, id);
     expect(apres.criteres.length, 'LE CAS DU 26 SEPT. : « Enregistrer » effaçait le critère ajouté (5 → 6 → 5)').toBe(avant + 1);
     expect(apres.criteres.at(-1).nom).toBe('Nouveau critère');
-    expect(await page.evaluate(() => window.__toasts)).toContainEqual(expect.stringMatching(/sauvegardée !/));
+    // Lot E1 : plus de panneau « sauvegardée ! » en modification ; le témoin commun parle.
+    expect(await page.evaluate(() => window.__toasts)).not.toContainEqual(expect.stringMatching(/sauvegardée/));
+    expect(await page.evaluate(() => document.querySelector('#temoin-enregistrement .temoin-enregistrement-succes')?.textContent || '')).toMatch(/Enregistré/);
 });
 
 test('#957 — sous-critères : ajouter, modifier, supprimer, puis « Enregistrer » — rien n\'est défait', async ({ page }) => {
@@ -101,7 +117,7 @@ test('#957 — sous-critères : ajouter, modifier, supprimer, puis « Enregistre
     // Ajouter
     await cliquer(page, `[data-action="ajouterSousCritere"][data-param="${id}"][data-param2="${idx}"]`);
     expect(await nbSc()).toBe(n0 + 1);
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     expect(await nbSc(), 'ajout d\'un sous-critère défait par « Enregistrer »').toBe(n0 + 1);
 
     // Modifier (le vrai champ, au change)
@@ -111,14 +127,14 @@ test('#957 — sous-critères : ajouter, modifier, supprimer, puis « Enregistre
     }, { id, idx });
     await pause(page, 700);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres[0].nom).toBe('Nom fictif du banc 957');
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres[0].nom, 'modification d\'un sous-critère défaite par « Enregistrer »').toBe('Nom fictif du banc 957');
 
     // Supprimer (confirmation acceptée)
     const avantSupp = await nbSc();
     await cliquer(page, `[data-action="supprimerSousCritere"][data-param="${id}"][data-param2="${idx}"][data-param3="0"]`);
     expect(await nbSc()).toBe(avantSupp - 1);
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     expect(await nbSc(), 'suppression d\'un sous-critère défaite par « Enregistrer »').toBe(avantSupp - 1);
 });
 
@@ -136,19 +152,19 @@ test('#957 — sous-critères par défaut (0-10), puis « Enregistrer » : les o
     await pause(page, 900);
     await cliquer(page, `[data-action="initialiserSousCriteresParDefaut"][data-param="${id}"][data-param2="${idx}"]`);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length).toBe(11);
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length, 'sous-critères par défaut défaits par « Enregistrer »').toBe(11);
 });
 
-test('#957 — témoin : « Enregistrer » écrit encore le nom tapé dans le formulaire', async ({ page }) => {
+test('#957 — témoin : le changement du nom écrit encore le nom tapé dans le formulaire', async ({ page }) => {
     test.setTimeout(90000);
     brancher(page);
     await ouvrirDemo(page);
     const id = await ouvrirGrille(page, premiereGrille);
-    // Valeur posée SANS `change` : c'est le bouton, et lui seul, qui doit l'écrire.
+    // Valeur posée SANS `change` : c'est le `change` du champ, et lui seul, qui doit l'écrire.
     await page.evaluate(() => { document.getElementById('nomGrilleTemplate').value = 'Grille fictive banc 957'; });
     expect((await lireGrille(page, id)).nom).not.toBe('Grille fictive banc 957');
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     expect((await lireGrille(page, id)).nom).toBe('Grille fictive banc 957');
 });
 
@@ -182,7 +198,7 @@ test('#957 — le principe : une écriture inconnue en base survit à « Enregis
         const g = l.find(x => x.id === id); g.champEcritAilleurs957 = 'présent'; return l;
     }, []), id);
     await pause(page, 300);
-    await cliquer(page, ENREGISTRER);
+    await ecrireLeFormulaire(page);
     expect((await lireGrille(page, id)).champEcritAilleurs957, 'grille : la copie mémoire écrasait une écriture faite ailleurs').toBe('présent');
 
     // Échelle
@@ -197,8 +213,8 @@ test('#957 — le principe : une écriture inconnue en base survit à « Enregis
     }, []), eid);
     await page.evaluate(() => { document.getElementById('nomEchelleTemplate').value = 'Échelle fictive banc 957'; });
     await pause(page, 300);
-    await cliquer(page, '[data-action="sauvegarderEchelleComplete"]');
+    await ecrireLeFormulaire(page, 'nomEchelleTemplate');
     const e = await page.evaluate((eid) => JSON.parse(JSON.stringify((db.getSync(cle('echellesTemplates'), []) || []).find(x => x.id === eid))), eid);
     expect(e.champEcritAilleurs957, 'échelle : la copie mémoire écrasait une écriture faite ailleurs').toBe('présent');
-    expect(e.nom, 'échelle : le nom tapé est écrit par le bouton').toBe('Échelle fictive banc 957');
+    expect(e.nom, 'échelle : le nom tapé est écrit au changement du champ').toBe('Échelle fictive banc 957');
 });

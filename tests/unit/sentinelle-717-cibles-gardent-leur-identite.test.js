@@ -379,7 +379,7 @@ describe('lot N6 · zéro cible : refusé par la règle du composant, dans les d
         expect(a.win.EditeurCibles.motifRefus([{ id: 'c1', nom: 'Lire' }])).toBeNull();
     });
 
-    it('la gestion REFUSE zéro cible : rien n\'est écrit, le motif s\'affiche, « Enregistrer » n\'annonce pas de succès', async () => {
+    it('la gestion REFUSE zéro cible : rien n\'est écrit, le motif s\'affiche, aucun succès annoncé', async () => {
         const g = monterGestion(PRATIQUE_GESTION, { P_DEN: { [DA1]: jugement({ cible_a: true, cible_b: true }) } });
         await g.win.chargerPratiquePourModif('P_DEN');
         const avant = clone(g.store.test_pratiquesConfigurables);
@@ -388,9 +388,7 @@ describe('lot N6 · zéro cible : refusé par la règle du composant, dans les d
         expect(g.store.test_pratiquesConfigurables).toEqual(avant);
         expect(g.notifs).toEqual([['erreur', 'Aucune cible', MOTIF_N6]]);
         expect(g.questions).toEqual([]);                                   // refusé AVANT la question des coches
-        await g.win.sauvegarderPratiqueMaterielComplet();
-        // Le refus, et RIEN d'autre : ni « Pratique enregistrée », ni la suite de l'enregistrement (nom, description…).
-        expect(g.notifs).toEqual([['erreur', 'Aucune cible', MOTIF_N6], ['erreur', 'Aucune cible', MOTIF_N6]]);
+        // Lot E1 : « Enregistrer la pratique » est retiré (D0 point 3) ; le refus au changement de champ suffit.
         expect(g.store.test_pratiquesConfigurables).toEqual(avant);
         expect(noteMoteur(g.store, 'P_DEN', DA1)).toBe(78);                // la pratique garde ses deux cibles
     });
