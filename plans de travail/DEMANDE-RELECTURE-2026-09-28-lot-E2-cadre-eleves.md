@@ -57,7 +57,8 @@ Le lot n'écrit rien de lui-même : chaque écriture suit un geste. À connaîtr
 - **Profil** : la première modification réécrit le miroir `profilEnseignant` (comme avant).
 - **Piège « dates d'abord »** (gardé, ta décision) : corriger la session d'un trimestre après avoir saisi ses dates donne « Changement bloqué » ; le témoin dit quoi faire.
 - **Profil de démonstration** (mesuré) : sans courriel ni institution, obligatoires ; un de ses champs modifié seul est refusé, et le témoin le dit, tant que ces deux champs ne sont pas remplis. Même règle qu'au bouton d'avant.
-- ⚠ **À trancher : changer le DA d'une fiche existante.** C'était possible au bouton (sept chiffres, pas de doublon, #914) ; c'est désormais un seul `change`. Le DA identifie l'élève (évaluations, présences) : un DA changé laisse ses évaluations et présences sous l'ancien. **Je n'ai rien changé à la règle** (ni migration, ni refus neuf). Question : garder, demander confirmation, ou refuser en modification ?
+- **Le DA d'une fiche existante** (tranché par Grégoire, 28 sept., 14 h 01) : **refusé en modification**. Le champ est en lecture seule en édition (`readOnly`, et l'écrivain ne le lit plus : il réécrit celui de la fiche), une phrase sous le champ dit pourquoi. Aucune donnée touchée : le stock garde ses DA ; un DA non conforme d'avant (« DEMO015 ») reste tel quel et sa fiche reste modifiable (#914). Corriger une coquille de DA sans détacher ses données : **#976**.
+- **Session et année ensemble** (limite écrite sur décision de Cowork, relecture finale) : la garde ne couvre que l'année vide ou invalide. Changer la session **garde l'année en place**, donc la paire intermédiaire est valide et s'écrit : passer de a2026 à h2027 sur un trimestre vide écrit h2026, puis h2027. Si h2026 existe déjà, la collision refuse au premier geste : il faut changer l'année d'abord. Sans perte (le trimestre est vide, ou le changement est bloqué) ; cas étroit. Gardé, pas de porte.
 
 ## 6 · Les mots – à faire accepter par Grégoire avant le push
 
@@ -95,6 +96,7 @@ Le lot n'écrit rien de lui-même : chaque écriture suit un geste. À connaîtr
 - **#472** (nom du groupe-cours recalculé à l'affichage) : **non**.
 - **#791** (formulaire d'élève de `groupe.js`, sept ids absents) : **non** (le formulaire du Cadre est `trimestre-v2-etudiants.js` ; `groupe.js` non touché).
 - **#975** : inscrite (§ 3).
+- **#976** : inscrite (le DA, § 5).
 
 ## 8 · Preuves
 
@@ -119,6 +121,19 @@ Le lot n'écrit rien de lui-même : chaque écriture suit un geste. À connaîtr
 | M16 (WebKit) les défauts de séance non posés | rouge |
 | M7 le profil écrit avant « Créer le profil » (première garde retirée) | **survit, équivalente** : une seconde garde (index −1) arrête l'écriture |
 
+### Après la relecture finale (R1 et le DA)
+
+| Mutation | Résultat |
+|---|---|
+| R1-a les horaires modifiés sans copie | rouge (1 sur 9) |
+| R1-b les groupes-cours modifiés sans copie | rouge (1 sur 10) |
+| DA-a le champ DA laissé modifiable en édition | rouge (1 sur 9) |
+| DA-b l'écrivain relit le champ DA en édition | rouge (3 sur 24) |
+| DA-c la phrase sous le champ changée | rouge |
+| DA-d « Resélectionne l'étudiant. » d'avant | rouge |
+
+R1 : le harnais des deux bancs rend désormais la collection stockée **par référence** (comme le cache de `db`), sans quoi la copie ne se voyait pas. DA : essai Vitest (quatre saisies, dont un DA pris, vide et neuf à sept chiffres : la base garde le DA, le programme s'écrit), #914 E et E bis réalignés (le DA effacé ou changé ne bouge plus, sans refus), essai WebKit (c ter) au clavier et par le formulaire ; #914 WebKit partie 4 réalignée.
+
 ## 9 · Trouvailles en chemin (issues)
 
 1. **Régression de l'étape 5, corrigée** (issue 1) : « Reprendre dans ce trimestre » (`cours.js`) n'attendait pas `nouveauGroupeCoursV2`, devenue asynchrone : le cours présélectionné était effacé. Attrapée par le banc « Chantier E ».
@@ -127,6 +142,7 @@ Le lot n'écrit rien de lui-même : chaque écriture suit un geste. À connaîtr
 4. **Les gardes « Modification impossible »** citées par la consigne n'existent plus : le lot A les a remplacées par des champs d'identité masqués (rien à affaiblir).
 5. **La consigne cite `groupes-cours.js`** : `trimestre-v2-groupes-cours.js` ; et `etudiants.js` l. 622-740 : c'est `trimestre-v2-etudiants.js`.
 6. **Le trimestre de démonstration** a l'id « demo », la session « D » (hors du menu, qui reste vide) et une année en texte. Sans effet sur le lot (les gardes refusent tout changement : il a des données).
+7. **WebKit (Playwright) : la touche retour arrière sur un champ en lecture seule** navigue vers la page précédente ; l'essai clavier tape des chiffres sans elle (issue 3, commentée dans le banc).
 
 ## 10 · Ce que je te demande de relire
 

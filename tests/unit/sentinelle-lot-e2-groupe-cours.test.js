@@ -45,7 +45,9 @@ function monter({ groupesCours = [GC], confirmer = true, quitter = true, echec =
     const win = chargerScript('js/identite-naturelle.js', {}, { addEventListener() {}, temoinEnregistrement: temoin, raisonPourTemoin: (r) => r.charAt(0).toLowerCase() + r.slice(1), uiDialogues });
     chargerScript('js/trimestre-v2-groupes-cours.js', {
         document, cle, sauvegarderDonneesSelonMode: sauvegarder,
-        db: { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = clone(v); } },
+        // R1 (relecture finale de Cowork) : `getSync` rend l'OBJET STOCKÉ, comme le cache de `db` — une
+        // écriture qui modifierait la collection lue sans la copier se verrait après un échec.
+        db: { getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = clone(v); } },
         notifications: { succes: (t) => toasts.push(t), erreur: (t) => toasts.push('ERREUR ' + t) },
         echapperHtml: (s) => String(s == null ? '' : s), echapperAttribut: (s) => String(s == null ? '' : s), genererIdUnique: (p) => p + 'NEUF',
         trouverDoublonNaturel: win.trouverDoublonNaturel, cleNaturelleGroupeCours: win.cleNaturelleGroupeCours,
@@ -86,7 +88,7 @@ describe('lot E2 · groupe-cours existant — chaque sélection s\'enregistre, p
         expect(e.el('v2-gc-cours').value).toBe('C_COURS');
     });
 
-    it('un échec d\'écriture : la fiche en base ne bouge pas, aucun message', () => {
+    it('un échec d\'écriture : la fiche en base ne bouge pas (la collection lue est copiée, R1), aucun message', () => {
         const e = monter({ echec: true });
         e.ouvrir('GC_1');
         expect(e.choisir('pratique', 'PRAT_1')).toBe(false);

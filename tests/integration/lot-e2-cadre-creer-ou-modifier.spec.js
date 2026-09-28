@@ -242,6 +242,35 @@ test('(c bis) étudiant·e : ouvrir une autre fiche pendant un ajout pose la que
     expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').value)).toBe(da);
 });
 
+test('(c ter) étudiant·e : le DA d\'une fiche existante ne se modifie pas, au clavier comme par le formulaire (décision de Grégoire, 28 sept.)', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirCadre(page);
+    const da = await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || [])[0].da);
+    await page.evaluate((da) => { window.editerEtudiantV2(da); }, da);
+    await pause(page, 500);
+    expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').readOnly)).toBe(true);
+    await expect(page.locator('#v2-etudiantDAAide')).toBeVisible();
+    await expect(page.locator('#v2-etudiantDAAide')).toHaveText('Le DA ne se modifie pas ici : il relie les évaluations et les présences de l\'étudiant·e.');
+    // Au clavier : le champ ne bouge pas.
+    await page.focus('#v2-etudiantDA');
+    await page.keyboard.press('End');
+    await page.keyboard.type('99');   // (pas de retour arrière : sur un champ en lecture seule, WebKit le lit comme « page précédente »)
+    expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').value)).toBe(da);
+    // Par le formulaire (valeur forcée), puis un autre champ enregistré : la base garde le DA.
+    await page.evaluate(async () => {
+        document.getElementById('v2-etudiantDA').value = '2999777';
+        document.getElementById('v2-etudiantProgramme').value = 'E2.DA';
+        await window.sauvegarderChampEtudiantV2();
+    });
+    const fiche = await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e.programme === 'E2.DA') || null);
+    expect(fiche && fiche.da).toBe(da);
+    expect(await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || []).some(e => e.da === '2999777'))).toBe(false);
+    // « Fermer » : l'ajout retrouve un champ DA modifiable, sans la phrase.
+    await page.evaluate(() => window.fermerFicheEtudiantV2());
+    expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').readOnly)).toBe(false);
+    await expect(page.locator('#v2-etudiantDAAide')).toBeHidden();
+});
+
 test('(d) un échec d\'écriture sur un champ du Cadre : « Non enregistré – ‹geste› : … », aucun succès', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirCadre(page);
