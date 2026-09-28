@@ -219,7 +219,7 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             // Zone Confidentiel — 8 exports (session B 18 mai 2026 : 6 existants + 2 promus window.X)
             'ouvrirModalConfidentiel',
             'chargerNotesPresencesConfidentiel',
-            'sauvegarderNotesPresencesConfidentiel',
+            'enregistrerNotePresenceConfidentiel',   // ↻ lot E3 : une note à la fois (remplace sauvegarderNotesPresencesConfidentiel)
             'fermerModalConfidentiel',
             'sauvegarderConfidentiel',
             'toggleServicesAdaptes',

@@ -2400,14 +2400,19 @@ document.addEventListener('DOMContentLoaded', function() {
  *   multi-cours (un meme etudiant peut etre enrole dans plusieurs cours
  *   le meme jour ; sans coursId, la 1ere entree (da, date) etait ecrasee
  *   au lieu de celle du cours en cours de consultation).
- * @returns {boolean} true si modifié
+ * @returns {boolean|null} true si modifié et écrit ; false si l'écriture a échoué (le témoin l'a
+ *   dit) ; null si aucune présence ne correspond (rien d'écrit).
+ * Lot E3 (D0 point 2, 28 sept. 2026) : par le témoin commun. Seul appelant : le volet
+ * confidentiel du profil, qui écrit une note à la fois.
  */
 window.modifierNotesPresence = function(da, date, notes, coursId) {
     if (coursId === undefined && typeof obtenirCoursActifId === 'function') {
         coursId = obtenirCoursActifId();
     }
     var clePresences = cle('presences');
-    var presences = db.getSync(clePresences, []);
+    // Lot E3 : la collection lue est COPIÉE avant d'être modifiée (lot E2, R1) — `db.getSync` peut
+    // rendre l'objet de son cache, et une écriture qui échoue le laisserait faux en mémoire.
+    var presences = JSON.parse(JSON.stringify(db.getSync(clePresences, []) || []));
     var modifie = false;
 
     for (var i = 0; i < presences.length; i++) {
@@ -2423,11 +2428,9 @@ window.modifierNotesPresence = function(da, date, notes, coursId) {
         }
     }
 
-    if (modifie) {
-        db.setSync(clePresences, presences);
-        // Pas de recalcul d'indices nécessaire (les notes n'affectent pas l'assiduité)
-    }
-    return modifie;
+    if (!modifie) return null;
+    // Pas de recalcul d'indices nécessaire (les notes n'affectent pas l'assiduité)
+    return sauvegarderDonneesSelonMode('presences', presences, { geste: 'Note de présence' });
 };
 
 /**

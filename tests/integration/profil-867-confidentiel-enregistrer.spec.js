@@ -21,6 +21,19 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 const DA = 'TEST867A';
 
+// ↻ Lot E3 (D3, 28 sept. 2026) : le volet s'enregistre tout seul, champ par champ ; « Enregistrer » est
+// parti, « Fermer » reste. Le geste de #867 devient donc : un champ changé, puis « Fermer » — et c'est
+// « Fermer » qui rafraîchit le profil (la pastille), avec le DA tenu AVANT d'être vidé.
+async function ecrireNoteEtFermer(page, texte) {
+    await page.evaluate((texte) => {
+        const champ = document.getElementById('confidentiel-notes');
+        if (texte !== undefined) champ.value = texte;
+        champ.dispatchEvent(new Event('change', { bubbles: true }));
+    }, texte);
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { document.querySelector('#modalConfidentiel .btn-annuler[data-action="fermerModalConfidentiel"]').click(); });
+}
+
 async function monter(page) {
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.afficherProfilComplet === 'function'
@@ -51,8 +64,7 @@ test('Porte #867 · enregistrer une note confidentielle : aucune alerte, et le p
     // Ouvrir le volet, écrire une note, enregistrer — les gestes que fait l'enseignant.
     await page.evaluate((da) => { window.ouvrirModalConfidentiel(da); }, DA);
     await page.waitForFunction(() => !!document.getElementById('confidentiel-notes'));
-    await page.evaluate(() => { document.getElementById('confidentiel-notes').value = 'Message du 15 sept. : 7 h d\'absences sur 16 h.'; });
-    await page.evaluate(() => { window.sauvegarderConfidentiel(); });
+    await ecrireNoteEtFermer(page, 'Message du 15 sept. : 7 h d\'absences sur 16 h.');
     await page.waitForTimeout(600);
 
     const etat = await page.evaluate((da) => ({
@@ -75,7 +87,7 @@ test('Porte #867 · après l\'enregistrement, la barre latérale du profil répo
     await monter(page);
     await page.evaluate((da) => { window.ouvrirModalConfidentiel(da); }, DA);
     await page.waitForFunction(() => !!document.getElementById('confidentiel-notes'));
-    await page.evaluate(() => { window.sauvegarderConfidentiel(); });
+    await ecrireNoteEtFermer(page, 'Note fictive #867');
     await page.waitForTimeout(600);
 
     // Le geste suivant de l'enseignant : changer de sous-section.

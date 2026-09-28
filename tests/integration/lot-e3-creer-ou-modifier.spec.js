@@ -316,3 +316,59 @@ test('(I-d) changer de sous-onglet puis revenir : la création en cours est touj
     expect(await page.evaluate(() => document.getElementById('interventionTitre')?.value)).toBe('Brouillon fictif banc E3');
     expect(await interventions(page)).toEqual([]);
 });
+
+/* ─────────────────────────────────────────────────────────────── volet confidentiel */
+//   (C-a) un champ du volet s'écrit sans bouton, le témoin le dit ; « Fermer » redessine le profil (la pastille) ;
+//   (C-b) en anonymisation, le volet est masqué et RIEN ne s'écrit depuis lui, même un changement forcé.
+
+const confidentiel = (page) => page.evaluate(() => JSON.stringify(db.getSync(cle('confidentielEtudiants'), {}) || {}));
+
+async function ouvrirVolet(page) {
+    const da = await page.evaluate(() => (obtenirEtudiantsCoursActif() || [])[0].da);
+    await page.evaluate((da) => {
+        db.setSync(cle('confidentielEtudiants'), {});
+        naviguerVers('suivi', 'profil');
+        window.afficherProfilComplet(da);
+        window.changerSectionProfil('accompagnement');
+    }, da);
+    await pause(page, 700);
+    await page.evaluate((da) => window.ouvrirModalConfidentiel(da), da);
+    await pause(page, 400);
+    return da;
+}
+const pastille = (page) => page.evaluate(() => {
+    const b = document.querySelector('[data-action="ouvrirModalConfidentiel"]');
+    return b ? b.textContent.includes('●') : null;
+});
+
+test('(C-a) volet confidentiel : un champ s\'écrit sans bouton ; « Fermer » redessine la pastille', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page);
+    const da = await ouvrirVolet(page);
+    expect(await pastille(page), 'aucune information au départ').toBe(false);
+    expect(await page.locator('#modalConfidentiel button', { hasText: 'Enregistrer' }).count()).toBe(0);
+    await changer(page, '#confidentiel-notes', 'Note confidentielle fictive banc E3');
+    expect(JSON.parse(await confidentiel(page))[da].notes).toBe('Note confidentielle fictive banc E3');
+    expect(await temoinSucces(page)).toBe(true);
+    await changer(page, '#confidentiel-defi-fls', true);
+    expect(JSON.parse(await confidentiel(page))[da]).toMatchObject({ notes: 'Note confidentielle fictive banc E3', defiFLS: true });
+    await cliquer(page, '#modalConfidentiel .btn-annuler[data-action="fermerModalConfidentiel"]');
+    expect(await page.evaluate(() => document.getElementById('modalConfidentiel').classList.contains('actif'))).toBe(false);
+    expect(await pastille(page), 'le profil redessiné montre la pastille').toBe(true);
+});
+
+test('(C-b) anonymisation : le volet est masqué et rien ne s\'écrit depuis lui', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page);
+    await page.evaluate(async () => { await changerMode('anonymisation'); });
+    await pause(page, 800);
+    await ouvrirVolet(page);
+    expect(await visible(page, '#confidentiel-champs')).toBe(false);
+    const avant = await confidentiel(page);
+    // Un changement forcé sur un champ masqué (aucun geste ne peut l'atteindre, un script si).
+    await changer(page, '#confidentiel-notes', 'écrit depuis un volet masqué');
+    await changer(page, '#confidentiel-epgc', true);
+    expect(await confidentiel(page)).toBe(avant);
+    expect(await page.evaluate(() => window.sauvegarderConfidentiel())).toBe(false);
+    expect(await confidentiel(page)).toBe(avant);
+});

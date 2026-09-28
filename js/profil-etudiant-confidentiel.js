@@ -28,6 +28,12 @@
 
 // Variable pour stocker le DA de l'étudiant en cours d'édition
 let _confidentielDaActuel = null;
+// Lot E3 : un champ a été écrit depuis l'ouverture — « Fermer » rafraîchit alors le profil (la pastille).
+let _ecritDepuisOuverture = false;
+
+// Lot E3 (D0 point 2) : le geste nommé par le témoin commun.
+const GESTE_CONFIDENTIEL = 'Informations confidentielles';
+const GESTE_NOTE_PRESENCE = 'Note de présence';
 
 // Sous-catégories pour les services adaptés
 const SOUS_CATEGORIES_SERVICES = {
@@ -85,6 +91,7 @@ function _viderChampsConfidentiel() {
  */
 function ouvrirModalConfidentiel(da) {
     _confidentielDaActuel = da;
+    _ecritDepuisOuverture = false;
 
     // Récupérer les infos de l'étudiant
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
@@ -98,7 +105,7 @@ function ouvrirModalConfidentiel(da) {
     // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
     // l'écran : parcours, diagnostic, défis, notes libres et notes de présences ne sont ni lus ni
     // affichés, et le volet n'a rien à enregistrer. Avant : il lisait le store brut, sans garde.
-    ['confidentiel-champs', 'confidentiel-bloc-notes-presences', 'confidentiel-btn-enregistrer'].forEach(id => {
+    ['confidentiel-champs', 'confidentiel-bloc-notes-presences'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('u-hide', masquer);
     });
@@ -227,49 +234,49 @@ function chargerNotesPresencesConfidentiel(da) {
 }
 
 /**
- * Sauvegarde les notes de présences modifiées dans le modal Confidentiel
+ * Lot E3 (D3) — une note de présence modifiée dans le volet s'écrit toute seule, par le témoin
+ * (`modifierNotesPresence`, saisie-presences.js). Avant : toutes à la fois, à « Enregistrer », sans
+ * rien dire d'un échec.
+ * @param {HTMLTextAreaElement} textarea - la note modifiée (`data-da`, `data-date`)
+ * @returns {boolean} true si la note a été écrite
  */
-function sauvegarderNotesPresencesConfidentiel() {
-    const textareas = document.querySelectorAll('#confidentiel-notes-presences .note-presence-editable');
-    if (textareas.length === 0) return;
-
-    // Tier 6.4 : utiliser l'API centralisée de saisie-presences.js
-    let modifications = 0;
-
-    textareas.forEach(textarea => {
-        const date = textarea.dataset.date;
-        const da = textarea.dataset.da;
-        const nouvelleNote = textarea.value.trim();
-
-        if (typeof window.modifierNotesPresence === 'function') {
-            if (window.modifierNotesPresence(da, date, nouvelleNote)) {
-                modifications++;
-            }
-        }
-    });
+function enregistrerNotePresenceConfidentiel(textarea) {
+    if (!textarea || _voletMasque() || typeof window.modifierNotesPresence !== 'function') return false;
+    const resultat = window.modifierNotesPresence(textarea.dataset.da, textarea.dataset.date, textarea.value.trim());
+    if (resultat === null && window.temoinEnregistrement) {
+        // La présence de cette date n'existe plus (séance retirée depuis l'ouverture) : rien d'écrit, et on le dit.
+        window.temoinEnregistrement.nonEnregistre('la présence de cette date n\'existe plus ; ferme et rouvre le volet.', GESTE_NOTE_PRESENCE, cle('presences'));
+    }
+    if (resultat === true) _ecritDepuisOuverture = true;
+    return resultat === true;
 }
 
 /**
- * Ferme le modal des informations confidentielles
+ * Lot E3 (D3) — « Fermer » (« Annuler » et × n'annulaient rien : chaque champ est déjà écrit).
+ * Le profil se redessine si un champ a été écrit : sa pastille suit.
  */
 function fermerModalConfidentiel() {
+    // #867 — tenir le DA AVANT de le vider : le rafraîchissement le reçoit.
+    const daEnCours = _confidentielDaActuel;
+    const rafraichir = _ecritDepuisOuverture;
     document.getElementById('modalConfidentiel').classList.remove('actif');
     _confidentielDaActuel = null;
+    _ecritDepuisOuverture = false;
+    if (rafraichir && daEnCours && typeof window.afficherProfilComplet === 'function') {
+        window.afficherProfilComplet(daEnCours);
+    }
 }
 
 /**
- * Sauvegarde les informations confidentielles
+ * Lot E3 (D3, D0 point 2) — L'ÉCRIVAIN DU VOLET : les informations confidentielles s'enregistrent toutes
+ * seules, champ par champ, par le témoin commun. Il relit tout le volet, comme le bouton d'avant.
+ * Masqué en anonymisation (lot A) : rien n'est lu, rien ne s'écrit — les champs sont vidés à l'ouverture,
+ * les écrire effacerait le volet.
+ * @returns {boolean} true si le volet a été écrit
  */
 function sauvegarderConfidentiel() {
-    if (!_confidentielDaActuel) return;
-    // Masqué en anonymisation : les champs n'ont pas été remplis, les écrire effacerait le volet.
-    if (_voletMasque()) { fermerModalConfidentiel(); return; }
-
-    // #867 (15 sept. 2026) — TENIR LE DA AVANT DE FERMER. `fermerModalConfidentiel()`
-    // remet `_confidentielDaActuel` à null ; le rafraîchissement d'en bas recevait donc
-    // null et le profil répondait « Étudiant·e introuvable » sur un enregistrement déjà
-    // réussi. La variable de module ne survit pas à la fermeture : on en prend copie.
-    const daEnCours = _confidentielDaActuel;
+    if (!_confidentielDaActuel) return false;
+    if (_voletMasque()) return false;
 
     const infos = {
         epgc: document.getElementById('confidentiel-epgc').checked,
@@ -290,22 +297,36 @@ function sauvegarderConfidentiel() {
         // (D.2 : retirés) — l'objet entier est réécrit, le stock ancien tombe ici.
     };
 
-    // Sauvegarder les infos confidentielles
-    const cleConfidentiel = cle('confidentielEtudiants');
-    const donnees = db.getSync(cleConfidentiel, {});
+    // La collection lue est COPIÉE avant d'être modifiée (lot E2, R1) : `db.getSync` peut rendre
+    // l'objet de son cache, et une écriture qui échoue le laisserait faux en mémoire.
+    const donnees = JSON.parse(JSON.stringify(db.getSync(cle('confidentielEtudiants'), {}) || {}));
     donnees[_confidentielDaActuel] = infos;
-    db.setSync(cleConfidentiel, donnees);
+    const ecrit = sauvegarderDonneesSelonMode('confidentielEtudiants', donnees, { geste: GESTE_CONFIDENTIEL });
+    if (ecrit) _ecritDepuisOuverture = true;
+    return ecrit;
+}
 
-    // Sauvegarder les notes de présences modifiées
-    sauvegarderNotesPresencesConfidentiel();
+/**
+ * Lot E3 — l'écouteur unique du volet. Les autres écouteurs du même changement agissent d'abord
+ * (la catégorie repeuple ses sous-catégories, par le dispatcher du document).
+ * @param {Element} champ
+ */
+async function surChangementConfidentiel(champ) {
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (!_confidentielDaActuel || _voletMasque() || !champ) return false;
+    if (champ.classList && champ.classList.contains('note-presence-editable')) return enregistrerNotePresenceConfidentiel(champ);
+    if (typeof champ.closest === 'function' && champ.closest('#confidentiel-champs')) return sauvegarderConfidentiel();
+    return false;
+}
 
-    // Fermer le modal
-    fermerModalConfidentiel();
-
-    // Rafraîchir le profil si nécessaire
-    if (typeof window.afficherProfilComplet === 'function') {
-        window.afficherProfilComplet(daEnCours);   // #867 — surtout pas `_confidentielDaActuel` : il vient d'être vidé
-    }
+// ⚠ Délégué au DOCUMENT : ce script est chargé AVANT le HTML de la fenêtre (index.html), qui
+// n'existe donc pas encore ici. Un écouteur posé sur `#modalConfidentiel` au chargement ne voyait
+// rien (mesuré en WebKit, banc #867 réaligné).
+if (typeof document.addEventListener === 'function') {
+    document.addEventListener('change', (e) => {
+        const cible = e.target;
+        if (cible && typeof cible.closest === 'function' && cible.closest('#modalConfidentiel')) surChangementConfidentiel(cible);
+    });
 }
 
 /**
@@ -360,7 +381,8 @@ function aDesInfosConfidentielles(da) {
     // === EXPORTS window.X (6 existants + 2 promus session B convention systématique) ===
     window.ouvrirModalConfidentiel               = ouvrirModalConfidentiel;
     window.chargerNotesPresencesConfidentiel     = chargerNotesPresencesConfidentiel;
-    window.sauvegarderNotesPresencesConfidentiel = sauvegarderNotesPresencesConfidentiel;
+    window.enregistrerNotePresenceConfidentiel   = enregistrerNotePresenceConfidentiel;   // Lot E3
+    window.surChangementConfidentiel             = surChangementConfidentiel;             // Lot E3
     window.fermerModalConfidentiel               = fermerModalConfidentiel;
     window.sauvegarderConfidentiel               = sauvegarderConfidentiel;
     window.toggleServicesAdaptes                 = toggleServicesAdaptes;

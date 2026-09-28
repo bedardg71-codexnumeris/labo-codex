@@ -453,8 +453,9 @@ describe('A · les présences saisies deviennent l\'indice A', () => {
         const parMode = (src.match(/sauvegarderDonneesSelonMode\('presences'/g) || []).length;
         const directes = (src.match(/db\.setSync\(clePresences, presences\)/g) || []).length;
         noter('A6', { parMode, directes });
-        expect(parMode).toBe(1);   // ecrirePresencesSeance
-        expect(directes).toBe(2);  // modifierNotesPresence, ajouterPresencesIntervention
+        // ↻ Lot E3 (D0 point 2, 28 sept. 2026) : `modifierNotesPresence` (le volet confidentiel) passe au témoin commun.
+        expect(parMode).toBe(2);   // ecrirePresencesSeance, modifierNotesPresence
+        expect(directes).toBe(1);  // ajouterPresencesIntervention
     });
 });
 
