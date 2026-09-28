@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.166.0 (lot E2 de l'enregistrement, le Cadre) — titre et texte ACCEPTÉS par Grégoire le
+            // 28 sept. 2026, 14 h 03, mot pour mot (relecture finale de Cowork).
+            version: '1.166',
+            couleur: 'vert',
+            titre: 'Cadre&nbsp;: créer ou modifier',
+            items: [
+                'Cadre&nbsp;: le trimestre, ton profil, un cours, un horaire, un groupe-cours ou la fiche d\'un·e étudiant·e s\'enregistrent tout seuls, champ par champ&nbsp;; le témoin le dit. Pour en créer un nouveau, un bouton nomme le geste («&nbsp;Créer le cours&nbsp;», «&nbsp;Ajouter l\'étudiant·e&nbsp;»), et l\'application te prévient si tu fermes la fiche ou recharges la page avant. «&nbsp;Annuler&nbsp;» devient «&nbsp;Fermer&nbsp;». Le DA d\'une fiche existante ne se modifie plus&nbsp;: il relie ses évaluations et ses présences.'
+            ]
+        },
+        {
             // 1.165.0 (carte d'alignement, #963 à #966) — titre et phrases ACCEPTÉS par Grégoire le 28 sept. 2026
             // (§ 12 de la relecture après rebase ; phrases de a133389c, mot pour mot).
             version: '1.165',
