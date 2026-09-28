@@ -295,3 +295,88 @@ test('placement : « Fermer » et « Créer la … » à 360, 768, 1024 et 1180 
         await page.evaluate(() => annulerFormGrille());
     }
 });
+
+// ── Relecture croisée de Cowork (27 sept. 2026) ─────────────────────────────────────────────
+// R1 : la question du doublon arrive APRÈS le blur, donc pendant qu'une autre cartouche s'ouvre.
+// Annuler ne doit pas réécrire le champ de celle-ci avec le nom de la première : le prochain
+// `change` la renommerait.
+test('R1 : question du doublon annulée pendant qu\'une autre cartouche s\'ouvre — son champ garde son nom', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    await page.evaluate(() => naviguerVers('conception', 'retroactions'));
+    await pause(page, 900);
+    // A et B : deux cartouches de la même grille, aux noms différents (la question porte sur
+    // les cartouches de la grille de A).
+    const paire = await page.evaluate(() => {
+        for (const g of db.getSync(cle('grillesTemplates'), []) || []) {
+            const cs = (db.getSync(cle('cartouches_' + g.id), []) || []).filter(c => c.nom);
+            for (const a of cs) {
+                const b = cs.find(x => x.id !== a.id && x.nom !== a.nom);
+                if (b) return { grilleId: g.id, a: { id: a.id, nom: a.nom }, b: { id: b.id, nom: b.nom } };
+            }
+        }
+        return null;
+    });
+    expect(paire, 'la démonstration doit porter deux cartouches d\'une même grille').toBeTruthy();
+    await page.evaluate(({ a, grilleId }) => chargerCartouchePourModif(a.id, grilleId), paire);
+    await pause(page, 900);
+
+    // A prend le nom de B : la question du doublon s'ouvre (sans attendre sa réponse).
+    await page.evaluate((nom) => {
+        const el = document.getElementById('nomCartouche');
+        el.value = nom;
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }, paire.b.nom);
+    await pause(page, 600);
+    expect(await page.evaluate(() => document.getElementById('modalConflitDoublon')?.classList.contains('actif')),
+        'la question du doublon est ouverte').toBe(true);
+
+    // Pendant la question, l'usager ouvre B depuis la liste.
+    await page.evaluate(({ b, grilleId }) => ouvrirCartoucheDepuisListe(b.id, grilleId), paire);
+    await pause(page, 900);
+    expect(await page.evaluate(() => document.getElementById('nomCartouche').value)).toBe(paire.b.nom);
+
+    // Puis il annule la question.
+    await cliquer(page, '#btnDoublonAnnuler');
+    expect(await page.evaluate(() => document.getElementById('nomCartouche').value),
+        'le champ de B affiche toujours le nom de B').toBe(paire.b.nom);
+    const noms = await page.evaluate(({ a, b, grilleId }) => {
+        const l = db.getSync(cle('cartouches_' + grilleId), []) || [];
+        return { a: l.find(c => c.id === a.id).nom, b: l.find(c => c.id === b.id).nom };
+    }, paire);
+    expect(noms, 'rien n\'est renommé en base').toEqual({ a: paire.a.nom, b: paire.b.nom });
+});
+
+// Trouvaille 1 (a), décision de Grégoire : « Écraser » un homonyme ne supprime rien si la
+// création échoue à ses vérifications. Avant : l'ancienne échelle partait, la nouvelle n'était
+// pas créée. (Les références à l'ancien id quand tout réussit : BACKLOG #967, lot à part.)
+test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancienne échelle est toujours là', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    const ancienne = await page.evaluate(() => {
+        const e = (db.getSync(cle('echellesTemplates'), []) || []).find(x => x && x.nom);
+        return e ? { id: e.id, nom: e.nom } : null;
+    });
+    expect(ancienne, 'la démonstration doit porter une échelle').toBeTruthy();
+    await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
+    await pause(page, 800);
+    const avant = await page.evaluate(() => (db.getSync(cle('echellesTemplates'), []) || []).length);
+    await cliquer(page, '[data-action="creerNouvelleEchelle"]');
+    await page.evaluate((nom) => { document.getElementById('nomEchelleTemplate').value = nom; }, ancienne.nom);
+    // Retirer tous les niveaux par le geste de la fiche.
+    await page.evaluate(() => { while ((window._niveauxNouvelleEchelle || []).length) supprimerNiveauTemp(0); });
+    expect(await page.evaluate(() => window._niveauxNouvelleEchelle.length)).toBe(0);
+
+    await cliquer(page, '#btnCreerEchelle');
+    expect(await page.evaluate(() => document.getElementById('modalConflitDoublon')?.classList.contains('actif')),
+        'la question du doublon est ouverte').toBe(true);
+    await cliquer(page, '#btnDoublonEcraser');
+    await pause(page, 600);
+
+    const apres = await page.evaluate((id) => {
+        const l = db.getSync(cle('echellesTemplates'), []) || [];
+        return { n: l.length, present: l.some(e => e && e.id === id) };
+    }, ancienne.id);
+    expect(apres.present, 'l\'ancienne échelle n\'a pas été supprimée').toBe(true);
+    expect(apres.n, 'aucune échelle créée ni retirée').toBe(avant);
+});

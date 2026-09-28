@@ -3186,7 +3186,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
         echelles.push(copie);
         copieCreee = copie;
         return echelles;
-    }, [], { geste: 'Modifier l\'échelle' });
+    }, [], { geste: 'Dupliquer l\'échelle' });
 
     if (!copieCreee) return;
     const copie = copieCreee;
@@ -3236,7 +3236,7 @@ async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleE
         // rafale vient d'y poser.
         if (nbMigrees === 0) return undefined;
         return evaluations;
-    }, [], { geste: 'Modifier l\'échelle' });
+    }, [], { geste: 'Remplacer l\'échelle' });
 
     return nbMigrees;
 }
@@ -3366,7 +3366,7 @@ async function _repointerEchelle(cleMagasin, estCible, appliquer) {
         n = 0;
         liste.forEach(x => { if (x && estCible(x)) { appliquer(x); n++; } });
         return n === 0 ? undefined : liste;
-    }, [], { geste: 'Modifier l\'échelle' });
+    }, [], { geste: 'Remplacer l\'échelle' });
     return n;
 }
 
@@ -3452,7 +3452,7 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         if (restants.length === liste.length) return undefined;
         supprimee = true;
         return restants;
-    }, [], { geste: 'Modifier l\'échelle' });
+    }, [], { geste: 'Supprimer l\'échelle' });
     return { supprimee, nb: ecrits, successeur };
 }
 
@@ -3520,6 +3520,7 @@ async function sauvegarderEchelleComplete() {
     const idActuel = echelleTemplateActuelle?.id || null;
     const isCreation = !echelleTemplateActuelle;
     const isNameChange = echelleTemplateActuelle && echelleTemplateActuelle.nom !== nom;
+    let ecraserHomonyme = false;
 
     if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
         const resultat = await verifierEtGererDoublon('echelle', nom, echelles, idActuel);
@@ -3534,12 +3535,11 @@ async function sauvegarderEchelleComplete() {
             document.getElementById('nomEchelleTemplate').value = nom;
         }
 
-        if (resultat && resultat.action === 'ecraser') {
-            // Supprimer l'échelle existante avec le même nom
-            echelles = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
-                return (lues || []).filter(e => e.nom !== nom);
-            }, [], { geste: 'Créer l\'échelle' }) || [];
-        }
+        // Relecture du lot E1, trouvaille 1 (a) : « Écraser » ne retire plus l'homonyme
+        // ICI, avant les vérifications — une échelle sans niveau (ou aux repères refusés)
+        // supprimait l'ancienne sans créer la nouvelle. Le retrait part dans l'écriture
+        // de création, comme pour la grille. Les références à l'ancien id : BACKLOG #967.
+        if (resultat && resultat.action === 'ecraser') ecraserHomonyme = true;
     }
 
     // Cas 1: Création d'une nouvelle échelle (echelleTemplateActuelle est null)
@@ -3589,7 +3589,8 @@ async function sauvegarderEchelleComplete() {
         // Sauvegarder dans la base. La file relit : la collection écrite est
         // celle de l'instant, pas celle lue avant la question du doublon.
         await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
-            const liste = lues || [];
+            let liste = lues || [];
+            if (ecraserHomonyme) liste = liste.filter(e => e.nom !== nom);
             liste.push(nouvelleEchelle);
             return liste;
         }, [], { geste: 'Créer l\'échelle' });

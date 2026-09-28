@@ -938,13 +938,19 @@ async function sauvegarderNomCartouche() {
     let ecraserLeDoublon = false;
     if (typeof verifierEtGererDoublon === 'function') {
         const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, cible.id);
+        // Relecture R1 : pendant la question, l'usager a pu ouvrir une AUTRE cartouche
+        // (le `change` part au blur, donc au clic dans la liste). Le champ montre alors
+        // le nom de celle-là : le réécrire lui donnerait le nom de `cible`, et le
+        // prochain `change` la renommerait. On ne touche au champ que s'il est encore
+        // celui de `cible`.
+        const champDeLaCible = cartoucheActuel === cible;
         if (resultat === null) {
-            champ.value = enBase.nom || '';    // question annulée : le nom en base reste
+            if (champDeLaCible) champ.value = enBase.nom || '';    // question annulée : le nom en base reste
             return;
         }
         if (resultat && resultat.action === 'renommer') {
             nom = resultat.nouveauNom;
-            champ.value = nom;
+            if (champDeLaCible) champ.value = nom;
         }
         if (resultat && resultat.action === 'ecraser') ecraserLeDoublon = true;
     }
@@ -961,7 +967,8 @@ async function sauvegarderNomCartouche() {
     if (resultat === undefined) return;
     cible.nom = nom;
     await afficherBanqueCartouches();
-    definirCartoucheActive(cible.id);
+    // R1 : la liste surligne la cartouche OUVERTE, qui n'est plus forcément `cible`.
+    if (cartoucheActuel) definirCartoucheActive(cartoucheActuel.id);
 }
 
 /**
@@ -1520,7 +1527,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             return cartouches;
         }
         return undefined;
-    }, [], { geste: 'Modifier la cartouche' });
+    }, [], { geste: 'Dupliquer la cartouche' });
 
     if (copieCreee) {
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
@@ -1682,7 +1689,7 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         // ne vaut plus rien.
         await modifierEtAnnoncer(cle(`cartouches_${grilleId}`), (lues) => {
             return (lues || []).filter(c => c.id !== cartoucheId);
-        }, [], { geste: 'Modifier la cartouche' });
+        }, [], { geste: 'Supprimer la cartouche' });
 
         // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
         await afficherBanqueCartouches();
