@@ -430,3 +430,55 @@ test('(B-a) auto-réflexion : plus de bouton « Enregistrer » ; un geste s\'éc
     expect(await page.evaluate(() => (db.getSync(cle('autoreflexionBilan'), {}) || {}).etat)).toBe('apres_resultats');
     expect(await temoinSucces(page)).toBe(true);
 });
+
+/* ─────────────────────────────────────────────────────────────── placement */
+//   Les boutons renommés à 360, 768, 1024 et 1180 px : visibles, dans l'écran, hors du témoin.
+
+const mesurerBoutons = (page, selecteurs) => page.evaluate((selecteurs) => {
+    const r = (el) => { if (!el) return null; const b = el.getBoundingClientRect(); return { g: b.left, d: b.right, h: b.top, b: b.bottom, l: b.width }; };
+    const out = {};
+    for (const [nom, s] of Object.entries(selecteurs)) out[nom] = r(document.querySelector(s));
+    out.__temoin = r(document.querySelector('#temoin-enregistrement .visible'));
+    out.__largeur = document.documentElement.clientWidth;
+    return out;
+}, selecteurs);
+const chevauche = (a, b) => !!(a && b && a.g < b.d && b.g < a.d && a.h < b.b && b.h < a.b);
+
+async function verifierPlacement(page, largeur, selecteurs, preparer) {
+    await page.setViewportSize({ width: largeur, height: 900 });
+    await preparer();
+    await pause(page, 500);
+    await page.evaluate((s) => { document.querySelector(s)?.scrollIntoView({ block: 'center' }); }, Object.values(selecteurs)[0]);
+    await pause(page, 300);
+    await page.evaluate(() => window.temoinEnregistrement.enregistre('banc'));
+    const m = await mesurerBoutons(page, selecteurs);
+    for (const nom of Object.keys(selecteurs)) {
+        const b = m[nom];
+        expect(b && b.l > 0, `${largeur} px : « ${nom} » visible`).toBe(true);
+        expect(b.g >= 0 && b.d <= m.__largeur, `${largeur} px : « ${nom} » dans l'écran`).toBe(true);
+        expect(chevauche(b, m.__temoin), `${largeur} px : « ${nom} » sous le témoin`).toBe(false);
+    }
+    await page.evaluate(() => { window.temoinEnregistrement.fermer(); });
+}
+
+test('placement : « Fermer » et « Créer la production » / « Créer l\'intervention », « Fermer » du volet, à quatre largeurs', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirDemo(page);
+    const da = await page.evaluate(() => (obtenirEtudiantsCoursActif() || [])[0].da);
+    for (const largeur of [360, 768, 1024, 1180]) {
+        await verifierPlacement(page, largeur,
+            { 'Fermer (production)': '[data-action="fermerFicheProduction"]', 'Créer la production': '#btnCreerProduction' },
+            async () => { await page.evaluate(async () => { naviguerVers('conception', 'productions'); await window.creerNouvelleProduction(); }); });
+        await verifierPlacement(page, largeur,
+            { 'Fermer (intervention)': '[data-action="fermerFicheIntervention"]', 'Créer l\'intervention': '.actions-fiche-intervention [data-action="sauvegarderPresencesIntervention"]' },
+            async () => { await page.evaluate(async () => {
+                naviguerVers('suivi', 'interventions');
+                // Une création laissée par le tour précédent : on la ferme sans question (rien de saisi).
+                afficherFormulaireIntervention();
+            }); });
+        await verifierPlacement(page, largeur,
+            { 'Fermer (volet)': '#modalConfidentiel .btn-annuler[data-action="fermerModalConfidentiel"]' },
+            async () => { await page.evaluate((da) => { naviguerVers('suivi', 'profil'); window.afficherProfilComplet(da); window.ouvrirModalConfidentiel(da); }, da); });
+        await page.evaluate(() => window.fermerModalConfidentiel());
+    }
+});
