@@ -49,7 +49,7 @@ function creerDom() {
         'v2-btnSupprimerHoraire': creerElement([UHIDE]),
         'v2-selectHoraire': creerElement(),
         'v2-titreFormHoraire': creerElement(),
-        'v2-btnTexteHoraire': creerElement(),
+        'v2-btnCreerHoraire': creerElement(),
         'v2-carteResumeHoraire': creerElement(),
         'v2-horaireEtatVide': creerElement(),
         'v2-formulaireHoraire': creerElement(),
@@ -125,11 +125,11 @@ describe('Terrain 2.4 · un horaire créé est immédiatement supprimable', () =
         ).toBe(true);
     });
 
-    it('B · le formulaire passe en mode édition (titre et libellé du bouton)', () => {
+    it('B · le formulaire passe en mode édition (titre ; « Créer l\'horaire » se cache, lot E2)', () => {
         win.sauvegarderHoraireV2();
 
         expect(dom.ids['v2-titreFormHoraire'].textContent).toBe('Modifier l\'horaire');
-        expect(dom.ids['v2-btnTexteHoraire'].textContent).toBe('Enregistrer');
+        expect(dom.ids['v2-btnCreerHoraire'].classList.contains('u-hide')).toBe(true);
     });
 
     it('C · l\'horaire est bien enregistré et retrouvable par son id', () => {

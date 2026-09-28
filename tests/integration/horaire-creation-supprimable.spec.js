@@ -57,7 +57,7 @@ test('terrain 2.4 · un horaire qu\'on vient de créer porte un bouton Supprimer
         const btn = () => document.getElementById('v2-btnSupprimerHoraire');
 
         // « + Nouvel horaire » : en création, le bouton est légitimement caché
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         await new Promise((res) => setTimeout(res, 200));
         out.cacheEnCreation = btn().classList.contains('u-hide');
 

@@ -127,7 +127,7 @@ describe('#540-E1/B — chaque séance porte ses périodes, et c\'est exigé', (
     it('et le REFUSE absent, plutôt que d\'en proposer un', () => {
         const corps = corpsDe(SRC_HORAIRES, 'sauvegarderHoraireV2');
         expect(corps).toMatch(/nombrePeriodes\s*>\s*0/);
-        expect(corps).toContain('notifications.erreur');
+        expect(corps).toContain('_refuserHoraireV2(');   // lot E2 : le refus passe par le témoin commun
     });
 
     it('la régénération des lignes ne perd pas une saisie (leçon #460)', () => {

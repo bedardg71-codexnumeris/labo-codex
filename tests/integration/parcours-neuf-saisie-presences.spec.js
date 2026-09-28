@@ -99,7 +99,7 @@ test('parcours neuf · de la configuration à la première présence saisissable
         await pause(700);
 
         // ── 1. L'HORAIRE, tel qu'on le crée à l'écran ────────────────────────
-        window.nouveauHoraireV2();
+        await window.nouveauHoraireV2();   // lot E2 : async (question de sortie)
         await pause(250);
         document.getElementById('v2-hor-groupeAssocie').value = '00001';
         document.getElementById('v2-hor-nom').value = 'Mardi matin';

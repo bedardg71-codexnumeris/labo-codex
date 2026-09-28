@@ -107,8 +107,10 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         // NB : le sous-formulaire de SÉANCE (v2-btnConfirmerSeance) garde « Ajouter »
         // à dessein — c'est un ajout à une collection, comme le Groupe d'étudiants
         // (décision du 29 mai : modèle « ajout immédiat » conservé).
-        expect(horaires).toMatch(/titre\.textContent = 'Nouvel horaire';[\s\S]{0,200}btnTexte\.textContent = 'Créer';/);
-        expect(horaires).not.toMatch(/titre\.textContent = 'Nouvel horaire';[\s\S]{0,200}btnTexte\.textContent = 'Ajouter';/);
+        // ↻ Lot E2 (D3) : Horaire — « Créer l'horaire » en création seulement, plus de bouton en édition.
+        expect(horaires).toMatch(/titre\.textContent = 'Nouvel horaire';[\s\S]{0,120}rendreModeFicheHoraireV2\(true\);/);
+        expect(horaires).toMatch(/titre\.textContent = 'Modifier l\\'horaire';[\s\S]{0,120}rendreModeFicheHoraireV2\(false\);/);
+        expect(horaires).not.toContain('v2-btnTexteHoraire');   // le sous-formulaire de séance garde le sien
         // Groupe-cours : conformité conservée
         expect(gc).toMatch(/titre\.textContent = 'Nouveau groupe-cours';[\s\S]{0,120}btnTexte\.textContent = 'Créer';/);
     });
