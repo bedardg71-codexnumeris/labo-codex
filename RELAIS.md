@@ -7,11 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 10 H 30 : **CARTE D'ALIGNEMENT (1.165.0) FUSIONNÉE DANS `main` ; VERDICT WEBKIT PUIS PUSH À LANCER** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 12 H 10 : **CARTE D'ALIGNEMENT (1.165.0) POUSSÉE, EN LIGNE DEPUIS 10 H 49 ; PORTE TERRAIN PASSÉE ; LOT E2 EN COURS SUR SA BRANCHE** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = la branche `carte-alignement-963-966` en avance rapide (le chantier #963 à #966 rebasé sur `185eba31`, R1 à R8, pastille « ? », page 5, référence ERPI) + `cddc49a3` release **1.165.0** (build `0928-1009`) + ce relais et la porte terrain. Nouvelles acceptées par Grégoire le 28 sept. : titre « Carte d'alignement », quatre phrases de `a133389c` mot pour mot. Relectures de Cowork vertes (`RELECTURE-2026-09-28-carte-alignement-apres-rebase.md`, non suivie sur `main`). Vitest 649 fichiers, 7 583/7 583 après le bump. La copie non suivie de la relecture du 27 est rangée dans `.git/_to_delete/`.
 
-**Reste, dans l'ordre** : **`caffeinate -i scripts/pousser.sh origin main`** (verdict WebKit complet, puis push ; Cowork et navigateurs fermés si la mémoire manque) → constater 1.165.0 en ligne (Netlify) → **porte terrain** : `plans de travail/PORTES-TERRAIN-2026-09-28-carte-alignement-963-a-966.md` (artefact à publier par Cowork ; couleurs des cinq pastilles) → retirer les cinq branches distantes `claude/carte-alignement-*`, la branche locale `carte-alignement-963-966` et son worktree. **Ensuite** : le lot E2 (`plans de travail/CONSIGNE-2026-09-28-lot-E2-cadre-eleves.md`).
+**Fait** : verdict WebKit complet (aucune rougeur nouvelle ; `carac-476-volet2-duplication` vert au second essai, sans rapport) et push `6a43e278..c8572cf0` ; **1.165.0 en ligne depuis 10 h 49** (Netlify, `commit_ref` `c8572cf0`, « ready ») ; les cinq branches `claude/carte-alignement-*`, la branche locale et son worktree retirés. **Porte terrain passée par Grégoire sur l'iPad le 28 sept. à 12 h 05 : 5/5, aucun échec** (flèches « se vérifie par » intactes sur sa carte réelle, cocher puis décocher un objectif, retour à l'état d'origine) ; **couleurs des cinq pastilles gardées**.
+
+**En cours** : le lot E2 (Cadre et élèves, D3), branche locale `lot-e2-cadre-eleves`, worktree `.claude/worktrees/lot-e2-cadre-eleves` ; consigne : `plans de travail/CONSIGNE-DU-JOUR.md` sur la branche. Ce relais et le relevé de la porte partent avec lui.
 
 ## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 21 H 15 : **LOT E1 DE L'ENREGISTREMENT (1.164.0) FUSIONNÉ DANS `main` ; POUSSÉ LE 28 SEPT. AU MATIN, EN LIGNE DEPUIS 7 H 47 ; PORTE TERRAIN PASSÉE** — lire `git log origin/main`
 

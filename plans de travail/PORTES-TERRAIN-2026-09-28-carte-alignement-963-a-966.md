@@ -1,26 +1,26 @@
 # Portes terrain – carte d'alignement (1.165.0) : objectifs vérifiés, pastille de l'évaluation
 
 > Écrite le 28 septembre 2026 par Claude Code. **Artefact jumeau : à publier par Cowork** (bouton « Copier mes résultats » ; les rangées du §3 prennent un champ de saisie, pas une case).
-> ⚠ **Cette porte attend le push** : tant que `https://app.codexnumeris.org` n'affiche pas **1.165.0**, elle jugerait la version d'avant.
+> ✅ **Poussée le 28 sept.** : `c8572cf0` publié sur `https://app.codexnumeris.org` à 10 h 49 (Netlify, « ready »).
 > Ce qui échoue devient une fiche au BACKLOG, pas une note mentale.
 > **Rien de fictif à créer** : tout se fait sur ta carte réelle, et chaque geste qui la modifie a sa rangée de retour.
 
 ## §0 · Préalable
 
-- [ ] Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, et lis le numéro en bas de page.
+- [x] Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, et lis le numéro en bas de page.
       ⮕ Attendu : **1.165.0**. Sinon, s'arrêter là : la carte n'est pas encore en ligne. `iPad`
 
 ## §1 · ⚠⚠ Données — ta carte réelle
 
 > **POURQUOI** — Avant 1.165.0, une évaluation se reliait par des flèches « se vérifie par ». Maintenant, elle coche dans son Inspecteur les objectifs qu'elle vérifie. Tes flèches déjà tracées doivent rester là et compter comme avant. Les tests le prouvent sur une carte inventée ; seule ta carte « Écriture et littérature (A26) v3 » dit que ça tient sur la vraie.
 
-- [ ] Ouvre la carte « Écriture et littérature (A26) v3 » et regarde une évaluation que tu avais reliée par une flèche « se vérifie par ».
+- [x] Ouvre la carte « Écriture et littérature (A26) v3 » et regarde une évaluation que tu avais reliée par une flèche « se vérifie par ».
       ⮕ Attendu : la flèche est toujours là. `iPad` `⚠⚠ Données`
-- [ ] Touche deux fois cette évaluation pour ouvrir son Inspecteur.
+- [x] Touche deux fois cette évaluation pour ouvrir son Inspecteur.
       ⮕ Attendu : une rubrique **« Objectifs vérifiés »**, avec « Cette leçon », puis les leçons placées avant elle. `iPad`
-- [ ] Coche au doigt un objectif qui n'était pas coché.
+- [x] Coche au doigt un objectif qui n'était pas coché.
       ⮕ Attendu : la case se coche, et la pastille de l'évaluation, dans son en-tête, change ou reste selon ce que cet objectif ajoute. `iPad` `⚠⚠ Données`
-- [ ] Décoche ce même objectif.
+- [x] Décoche ce même objectif.
       ⮕ Attendu : la case se décoche, la pastille revient à ce qu'elle montrait avant. C'est le retour à l'état d'origine. `iPad` `⚠⚠ Données`
 
 ## §2 · Interface
@@ -45,7 +45,7 @@ Rien. Ces gestes sont tenus par les bancs WebKit `planif-modele-ia-963`, `planif
   | **?** impossible de le dire | gris, trait plein |
   | **✓** enseigné avant | contour de la couleur de l'évaluation |
 
-  Écris « gardées », ou ce que tu veux changer (quelle pastille, dans quel mode) : ________
+  Écris « gardées », ou ce que tu veux changer (quelle pastille, dans quel mode) : **gardées** (Grégoire, 28 sept. 2026).
 
 ## §4 · Ce que je n'ai pas pu vérifier
 
@@ -54,3 +54,7 @@ Rien. Ces gestes sont tenus par les bancs WebKit `planif-modele-ia-963`, `planif
 - **Les couleurs** : proposées, contraste mesuré par Cowork pour le gris (6,5:1 en sombre, 5,6:1 en clair) ; les autres reprennent celles des pastilles d'objectif.
 - **Fiches inscrites, non corrigées** : #970 (la carte démo montre encore l'ancien geste), #971 (coût de la pastille sur une grande carte), #972 (lecteur d'écran), #973 (semaine par défaut du panneau modèle), #974 (l'export du plan tait l'objectif servi dans une autre leçon).
 - **Erreurs de la session** : au rebase, le numéro #967 était pris deux fois (renuméroté #974) ; la relecture versée par la session infonuagique n'était qu'un résumé (texte intégral versé) ; un essai de la pastille « ? » que j'avais écrit ne prouvait pas son titre (retiré) ; et une demande de relecture a cité l'empreinte d'un commit amendé (corrigé).
+
+## Relevé de Grégoire – 28 sept. 2026, 12 h 05 (iPad)
+
+**5 passées · 0 échec · 0 non traitée.** §0 : 1.165.0 lu en bas de page. §1, sur sa carte réelle : les flèches « se vérifie par » sont intactes ; l'Inspecteur de l'évaluation montre « Objectifs vérifiés » ; cocher puis décocher un objectif ramène la carte à son état d'origine. §3 : couleurs des cinq pastilles **gardées**. **Carte d'alignement (1.165.0) : porte passée.**
