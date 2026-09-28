@@ -33,7 +33,12 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 /* ------------------------------------------------------------------ harnais */
 
+// ↻ Lot E3 (D0 point 2, 28 sept. 2026) : un refus ne passe plus par `alert` mais par le
+// témoin commun (« Non enregistré – Créer la production : ‹raison› »). `alertes` recueille
+// désormais l'une ET l'autre voie : le compte de ces essais garde son sens (un refus, dit
+// une fois ; aucun refus, rien de dit).
 function chargerProductions(alertes = []) {
+    const win = { temoinEnregistrement: { nonEnregistre: (raison, geste) => alertes.push(String(geste) + ' : ' + String(raison)) } };
     return chargerScript('js/productions.js', {
         db: {
             get: async () => null,
@@ -49,7 +54,7 @@ function chargerProductions(alertes = []) {
             querySelectorAll: () => [], addEventListener() {}
         },
         echapperHtml: (t) => String(t == null ? '' : t)
-    });
+    }, win);
 }
 
 // Formulaire complet et valide : chaque test n'en retire QUE ce qu'il éprouve.

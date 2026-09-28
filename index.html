@@ -4633,10 +4633,10 @@
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div class="u-flex-gap-10">
-                                        <button class="btn btn-annuler" data-action="annulerFormProduction">Annuler</button>
-                                        <button class="btn btn-confirmer" data-action="sauvegarderProduction">
-                                            <span id="btnTexteEvaluation">Enregistrer</span>
-                                        </button>
+                                        <!-- Lot E3 (D3) : une production existante s'enregistre toute seule ;
+                                             « Créer la production » ne paraît qu'en création (rendreModeFicheProduction). -->
+                                        <button class="btn btn-annuler" data-action="fermerFicheProduction">Fermer</button>
+                                        <button id="btnCreerProduction" class="btn btn-confirmer u-hide" data-action="sauvegarderProduction">Créer la production</button>
                                     </div>
                                 </div>
 
@@ -14359,7 +14359,7 @@
     <script src="js/modes.js?v=20260928d"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/temoin-enregistrement.js?v=20260928a"></script> <!-- Lot B de l'enregistrement (27 sept. 2026) : témoin commun « Enregistré » / « Non enregistré », parlé par sauvegarderDonneesSelonMode -->
-    <script src="js/ui-dialogues.js?v=20260928h"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
+    <script src="js/ui-dialogues.js?v=20260928i"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
 
 
@@ -14412,9 +14412,9 @@
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
          l'ordre reste la garantie la plus simple à relire. -->
     <script src="js/ui-blocs.js?v=20260905b"></script>
-    <script src="js/productions.js?v=20260922b"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20260928a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260903b"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
-    <script src="js/productions-liste.js?v=20260903b"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
+    <script src="js/productions-liste.js?v=20260928a"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20260903b"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/evaluation-formules.js?v=20260901a"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
     <script src="js/evaluation-projection.js?v=20260908b"></script>

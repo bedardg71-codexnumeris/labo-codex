@@ -108,10 +108,11 @@ describe('Conception · uniformité des confirmations (panneau glissant)', () =>
         // ↻ Lot E1 (D3, 27 sept. 2026) : pour la grille, l'échelle, la cartouche et la pratique,
         // modifier s'enregistre tout seul (le témoin commun le dit) ; seul le geste de CRÉATION
         // garde son panneau glissant, « … créée. » — celui de la pratique vit dans l'assistant.
+        // ↻ Lot E3 (D3, 28 sept. 2026) : la production suit, « Production « … » créée. ».
         // On épingle l'appel exact : si quelqu'un le retire ou le remplace par un
         // alert(), la sentinelle tombe même si le vocabulaire change.
         const confirmations = [
-            { fichier: 'js/productions.js',       objet: 'Production', appel: 'notifications.succes(estModification ?' },
+            { fichier: 'js/productions.js',       objet: 'Production', appel: 'notifications.succes(`Production «\\u00a0${productionData.titre}\\u00a0» créée.`);' },
             { fichier: 'js/grilles.js',           objet: 'Grille',     appel: 'notifications.succes(`Grille «\\u00a0${nomGrille}\\u00a0» créée.`);' },
             { fichier: 'js/echelles.js',          objet: 'Échelle',    appel: 'notifications.succes(`Échelle «\\u00a0${nom}\\u00a0» créée.`);' },
             { fichier: 'js/cartouches.js',        objet: 'Cartouche',  appel: 'notifications.succes(`Cartouche «\\u00a0${nomCartouche}\\u00a0» créée.`);' },

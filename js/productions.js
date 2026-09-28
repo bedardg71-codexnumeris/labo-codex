@@ -789,6 +789,8 @@ function supprimerChampPersonnalise(ref) {
     if (ancreParCle(ref)) return;
     _blocsConsignes = lireBlocsConsignesDepuisFormulaire().filter(b => b.ref !== ref);
     rendreBlocsConsignes();
+    // Lot E3 (D3) : sur une production existante, retirer un bloc s'enregistre.
+    if (productionEnEdition) enregistrerProductionModifiee();
 }
 
 function deplacerBlocConsigneHaut(ref) { deplacerBlocConsigne(ref, -1); }
@@ -802,6 +804,8 @@ function deplacerBlocConsigne(ref, sens) {
     const tmp = blocs[i]; blocs[i] = blocs[j]; blocs[j] = tmp;
     _blocsConsignes = blocs;
     rendreBlocsConsignes();
+    // Lot E3 (D3) : sur une production existante, l'ordre s'enregistre.
+    if (productionEnEdition) enregistrerProductionModifiee();
 }
 
 /** Compat : l'ancien nom, gardé le temps que les appels existants s'alignent. */
@@ -1400,6 +1404,9 @@ function afficherEcartAvecLaCarte(inputDate, spanInfo, proposee, contexte) {
         inputDate.value = proposee;
         if (spanInfo) afficherInfoSeanceEcheance(spanInfo, proposee, contexte);
         zone.remove();
+        // Lot E3 (D3) : une valeur posée par script n'émet aucun « change » ; sans
+        // lui, la date choisie ne s'enregistrerait pas sur une production existante.
+        inputDate.dispatchEvent(new Event('change', { bubbles: true }));
     });
     zone.appendChild(bouton);
 
@@ -1518,14 +1525,13 @@ function poserReferenceSelect(select, id, libelle) {
 // Pré-remplit le formulaire en mode modification (refactor étape 4, 16 mai 2026)
 async function prerenseignerFormulaireProduction(prod) {
     const titre = document.getElementById('titreFormEvaluation');
-    const btnTexte = document.getElementById('btnTexteEvaluation');
     const selectGrille = document.getElementById('productionGrille');
     const selectEchelle = document.getElementById('productionEchelle');
     const selectCartouche = document.getElementById('productionCartouche');
 
     productionEnEdition = prod.id;
     if (titre) titre.textContent = 'Modifier l\'évaluation';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+    rendreModeFicheProduction(false);   // Lot E3 (D3) : elle s'enregistre toute seule
 
     document.getElementById('productionTitre').value = prod.titre;
     document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
@@ -1576,14 +1582,13 @@ async function prerenseignerFormulaireProduction(prod) {
 // Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
 function reinitialiserFormulaireProduction() {
     const titre = document.getElementById('titreFormEvaluation');
-    const btnTexte = document.getElementById('btnTexteEvaluation');
     const selectGrille = document.getElementById('productionGrille');
     const selectEchelle = document.getElementById('productionEchelle');
     const selectCartouche = document.getElementById('productionCartouche');
 
     productionEnEdition = null;
     if (titre) titre.textContent = 'Nouvelle production';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+    rendreModeFicheProduction(true);    // Lot E3 (D3) : rien n'existe avant « Créer la production »
 
     // Réinitialiser les champs
     document.getElementById('productionTitre').value = '';
@@ -1650,12 +1655,9 @@ async function afficherFormProduction(id) {
     // 🆕 Peupler le select Échelle de performance
     await peuplerEchellesProduction();
 
-    // Listener : repeupler cartouches quand la grille change. onchange
-    // (propriété) plutôt qu'addEventListener → idempotent, pas d'empilement
-    // de handlers si afficherFormProduction est rappelée.
-    if (selectGrille) {
-        selectGrille.onchange = () => peuplerCartouchesProduction(selectGrille.value);
-    }
+    // Lot E3 : repeupler les cartouches quand la grille change se fait dans
+    // `surChangementFormulaireProduction`, AVANT l'écriture de la fiche : sinon la
+    // cartouche de l'ancienne grille s'écrirait avec la nouvelle.
 
     // Peupler cartouches avec la grille initiale (si déjà sélectionnée)
     if (selectGrille && selectGrille.value) {
@@ -1814,26 +1816,46 @@ function lireDonneesFormulaireProduction() {
  * ceux-là sont déjà filtrés, et un bloc écarté n'y figure plus. Chercher
  * l'oubli dans la liste dont il a été retiré ne l'aurait jamais trouvé.
  */
-function validerBlocsNommes() {
-    if (typeof lireChampsPersonnalisesDepuisFormulaire !== 'function') return true;
-    const orphelins = lireChampsPersonnalisesDepuisFormulaire()
-        .filter(c => !String(c.titre || '').trim() && String(c.contenu || '').trim());
-    if (orphelins.length === 0) return true;
+function compterBlocsOrphelins() {
+    if (typeof lireChampsPersonnalisesDepuisFormulaire !== 'function') return 0;
+    return lireChampsPersonnalisesDepuisFormulaire()
+        .filter(c => !String(c.titre || '').trim() && String(c.contenu || '').trim()).length;
+}
 
-    const message = orphelins.length === 1
+// Lot E3 : la question ne se pose plus qu'à la création (« Créer la production ») ;
+// une fiche existante le dit par le témoin (`enregistrerProductionModifiee`).
+function validerBlocsNommes() {
+    const orphelins = compterBlocsOrphelins();
+    if (orphelins === 0) return true;
+
+    const message = orphelins === 1
         ? 'Un bloc de consignes est rempli mais n\'a pas de nom : il ne sera pas conservé.\n\n'
-          + 'Enregistrer quand même ?'
-        : orphelins.length + ' blocs de consignes sont remplis mais n\'ont pas de nom : ils ne '
-          + 'seront pas conservés.\n\nEnregistrer quand même ?';
+          + 'Créer quand même ?'
+        : orphelins + ' blocs de consignes sont remplis mais n\'ont pas de nom : ils ne '
+          + 'seront pas conservés.\n\nCréer quand même ?';
     return confirm(message);
 }
 
-function validerChampsObligatoiresProduction(d) {
-    if (!d.titre || !d.type || (d.type !== 'artefact-portfolio' && d.ponderation === 0)) {
-        alert('Veuillez remplir tous les champs obligatoires (Titre, Type et Pondération)');
-        return false;
-    }
-    return true;
+// Lot E3 (D0 point 2, D3) : les gestes nommés par le témoin commun.
+const GESTE_CREER_PRODUCTION = 'Créer la production';
+const GESTE_MODIFIER_PRODUCTION = 'Modifier la production';
+
+/**
+ * Lot E3 : la raison d'un refus, dite par le témoin (« Non enregistré – ‹geste› :
+ * ‹raison› ») au lieu d'une alerte ; '' quand rien ne manque.
+ */
+function raisonChampsObligatoiresProduction(d) {
+    if (!d.titre) return 'le nom de la production est requis.';
+    if (!d.type) return 'choisis le type de la production.';
+    if (d.type !== 'artefact-portfolio' && d.ponderation === 0) return 'la pondération est requise : plus de 0 %.';
+    return '';
+}
+
+function validerChampsObligatoiresProduction(d, geste = GESTE_CREER_PRODUCTION) {
+    const raison = raisonChampsObligatoiresProduction(d);
+    if (!raison) return true;
+    if (window.temoinEnregistrement) window.temoinEnregistrement.nonEnregistre(raison, geste, cle('productions'));
+    return false;
 }
 
 // 🆕 Beta 98.4 : Vérifie les dates vs bornes du trimestre (confirm si hors limites)
@@ -1874,8 +1896,8 @@ function validerEcheancesDansTrimestre(d) {
     const labelDebut = dateMinTri ? formaterDateCourte(dateMinTri) : '?';
     const labelFin = dateMaxTri ? formaterDateCourte(dateMaxTri) : '?';
     const msg = horsLimites.length === 1
-        ? `L'échéance ${horsLimites[0]} est en dehors du trimestre (${labelDebut} – ${labelFin}). Sauvegarder quand même ?`
-        : `Les échéances suivantes sont en dehors du trimestre (${labelDebut} – ${labelFin}) :\n- ${horsLimites.join('\n- ')}\n\nSauvegarder quand même ?`;
+        ? `L'échéance ${horsLimites[0]} est en dehors du trimestre (${labelDebut} – ${labelFin}). Créer quand même ?`
+        : `Les échéances suivantes sont en dehors du trimestre (${labelDebut} – ${labelFin}) :\n- ${horsLimites.join('\n- ')}\n\nCréer quand même ?`;
     return confirm(msg);
 }
 
@@ -1992,32 +2014,170 @@ function construireProductionData(d, evaluations, idEnEdition) {
     return productionData;
 }
 
-async function rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification) {
+/**
+ * Lot E3 (D3) — après une modification enregistrée : la barre latérale (nom, type,
+ * pondération), le total et les avertissements STD suivent. La fiche reste ouverte,
+ * telle quelle : aucune réouverture, qui déplacerait le curseur.
+ */
+async function rafraichirApresModificationProduction() {
     await afficherTableauProductions();
-    await afficherToutesLesProductionsParType();
     await mettreAJourPonderationTotale();
-
-    notifications.succes(estModification ?
-        'Production modifiée avec succès !' :
-        'Production ajoutée avec succès !');
-
-    if (typeof window.chargerProductionsDansSelect === 'function') {
-        window.chargerProductionsDansSelect();
+    await afficherListeProductions();
+    // La barre latérale est redessinée : l'élément de la fiche ouverte reste surligné.
+    if (productionEnEdition) {
+        const item = document.querySelector(`.sidebar-item[data-id="${productionEnEdition}"]`);
+        if (item) item.classList.add('active');
     }
-
-    if (typeof window.rechargerFiltreProduction === 'function') {
-        window.rechargerFiltreProduction();
-    }
-
-    // 🆕 BETA 95.1 : Réouvrir la production en mode édition pour qu'elle reste visible
-    if (idSauvegarde && typeof modifierProduction === 'function') {
-        setTimeout(() => {
-            modifierProduction(idSauvegarde);
-        }, 100);
-    }
+    if (typeof window.chargerProductionsDansSelect === 'function') window.chargerProductionsDansSelect();
+    if (typeof window.rechargerFiltreProduction === 'function') window.rechargerFiltreProduction();
 }
 
+/**
+ * Lot E3 (D3, D0 point 2) — UNE PRODUCTION EXISTANTE S'ENREGISTRE TOUTE SEULE.
+ *
+ * Un seul écrivain, appelé à chaque changement du formulaire : il relit TOUT le
+ * formulaire, comme « Enregistrer » le faisait, et l'écrit par le témoin commun. Les
+ * gardes restent celles du bouton d'avant : `construireProductionData` ne repose
+ * jamais les champs d'état (#468) ni un marqueur diagnostique non rendu (#790) ; les
+ * références non résolues font l'aller-retour (#453).
+ *
+ * ⚠ Aucune évaluation n'est touchée : une évaluation porte sa propre grille, son
+ * échelle, sa cartouche et ses critères (`evaluation-sauvegarde.js`). Changer la
+ * grille ou la pondération d'une production évaluée écrit la production, rien d'autre.
+ *
+ * Refus, par le témoin et sans écriture : un champ obligatoire vide ; le nom d'une
+ * autre production refusé à la question du doublon (le nom revient). Un bloc de
+ * consignes rempli sans nom : le reste s'écrit, le témoin dit que ce bloc n'est pas
+ * conservé (« un refus n'est jamais suivi d'un succès »).
+ * Une échéance hors du trimestre s'écrit : l'avertissement sous le champ le dit déjà
+ * (`verifierDateHorsTrimestre`) ; la question ne se pose plus qu'à la création.
+ *
+ * @param {Element} [champ] - le champ qui a changé
+ * @returns {Promise<boolean>} true si la production a été écrite
+ */
+async function enregistrerProductionModifiee(champ) {
+    const id = productionEnEdition;
+    if (!id) return false;
+    const cleProductions = cle('productions');
+    const temoin = window.temoinEnregistrement;
+
+    const donnees = lireDonneesFormulaireProduction();
+    if (!validerChampsObligatoiresProduction(donnees, GESTE_MODIFIER_PRODUCTION)) return false;
+
+    // Le nom : la question du doublon, comme au bouton d'avant (elle ne se pose que
+    // si le nom a changé). Sa réponse « Annuler » remet le nom enregistré.
+    let idsRetires = [];
+    if (champ && champ.id === 'productionTitre') {
+        const lues = await db.get(cleProductions) || [];
+        const resultat = await gererDoublonProduction(donnees.titre, lues, id);
+        if (resultat.annule) {
+            const stockee = lues.find(e => e.id === id);
+            if (stockee) champ.value = stockee.titre || '';
+            return false;
+        }
+        donnees.titre = resultat.titre;
+        idsRetires = lues.filter(e => !resultat.evaluations.some(x => x.id === e.id)).map(e => e.id);
+    }
+    // Une autre fiche a été ouverte pendant la question : ce qu'on a lu n'est plus la sienne.
+    if (productionEnEdition !== id) return false;
+
+    const orphelins = compterBlocsOrphelins();
+    let introuvable = false;
+    let ecrit;
+    try {
+        ecrit = await modifierEtAnnoncer(cleProductions, (lues) => {
+            const evaluations = (lues || []).filter(e => !idsRetires.includes(e.id));
+            const index = evaluations.findIndex(e => e.id === id);
+            if (index === -1) { introuvable = true; return undefined; }
+            const productionData = construireProductionData(donnees, evaluations, id);
+            evaluations[index] = { ...evaluations[index], ...productionData };
+            // 🆕 Beta 99.05 : Mise à jour dateModification systématique
+            evaluations[index].dateModification = new Date().toISOString();
+            // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
+            if (typeof ajouterContributeurSiNecessaire === 'function') {
+                evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
+            }
+            return evaluations;
+        }, [], { geste: GESTE_MODIFIER_PRODUCTION, discret: orphelins > 0 });
+    } catch (e) {
+        return false;   // le témoin a dit l'échec
+    }
+
+    if (introuvable) {
+        if (temoin) temoin.nonEnregistre('cette production n\'est plus dans le trimestre actif. Ferme la fiche et rouvre-la depuis la liste.', GESTE_MODIFIER_PRODUCTION, cleProductions);
+        return false;
+    }
+    if (!ecrit) return false;
+    if (orphelins > 0 && temoin) {
+        temoin.nonEnregistre(orphelins === 1
+            ? 'un bloc de consignes est rempli mais n\'a pas de nom ; il n\'est pas conservé. Donne-lui un nom.'
+            : orphelins + ' blocs de consignes sont remplis mais n\'ont pas de nom ; ils ne sont pas conservés. Donne-leur un nom.',
+            GESTE_MODIFIER_PRODUCTION, cleProductions);
+    }
+    await rafraichirApresModificationProduction();
+    return true;
+}
+
+/**
+ * Lot E3 — l'écouteur unique du formulaire. En création, il ne fait que suivre la
+ * grille (les cartouches) : rien n'est écrit avant « Créer la production ».
+ */
+async function surChangementFormulaireProduction(champ) {
+    // La grille d'abord : ses cartouches remplacent celles de l'ancienne grille,
+    // AVANT que la fiche ne soit relue et écrite.
+    if (champ && champ.id === 'productionGrille') await peuplerCartouchesProduction(champ.value);
+    // Les autres écouteurs du même changement agissent d'abord : le type adapte les
+    // champs (`gererChangementTypeProduction`, par le dispatcher du document).
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (!productionEnEdition) return;
+    const formulaire = document.getElementById('formulaireProduction');
+    if (!formulaire || formulaire.classList.contains('u-hide')) return;
+    await enregistrerProductionModifiee(champ);
+}
+
+function brancherEnregistrementProduction() {
+    const formulaire = document.getElementById('formulaireProduction');
+    if (!formulaire || typeof formulaire.addEventListener !== 'function') return;
+    formulaire.addEventListener('change', (e) => { surChangementFormulaireProduction(e.target); });
+}
+
+/**
+ * Lot E3 (D3) — une production existante montre « Fermer » seul ; une production
+ * en création montre aussi « Créer la production ».
+ */
+function rendreModeFicheProduction(enCreation) {
+    const btnCreer = document.getElementById('btnCreerProduction');
+    if (btnCreer) btnCreer.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/**
+ * Lot E3 : « ma fiche est en création et porte une saisie » — lu par la question de
+ * sortie et par le `beforeunload` communs (`ui-dialogues.js`).
+ */
+function productionEnCreationSaisie() {
+    const formulaire = document.getElementById('formulaireProduction');
+    if (productionEnEdition || !formulaire || formulaire.classList.contains('u-hide')) return false;
+    const d = lireDonneesFormulaireProduction();
+    const dates = Object.values(d.echeancesParGroupe || {}).some(e => e && e.date);
+    return !!(d.titre || d.activiteApprentissage || d.type || d.ponderation || d.grilleId
+        || d.echelleId || d.cartoucheId || d.objectif || d.tache || d.detailTache
+        || d.champsPersonnalises.length || compterBlocsOrphelins() || d.dateEcheance || dates);
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('production', productionEnCreationSaisie);
+
+/** Lot E3 (D3) : « Fermer » (il n'annulait rien) — avec la question, en création. */
+async function fermerFicheProduction() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('production'))) return;
+    window.annulerFormProduction();
+}
+
+/**
+ * Lot E3 (D3) — « Créer la production ». Une production existante ne passe plus par
+ * ici : elle s'enregistre champ par champ (`enregistrerProductionModifiee`).
+ */
 async function sauvegarderProduction() {
+    if (productionEnEdition) return enregistrerProductionModifiee();
+
     const donnees = lireDonneesFormulaireProduction();
 
     if (!validerChampsObligatoiresProduction(donnees)) return;
@@ -2035,7 +2195,7 @@ async function sauvegarderProduction() {
     // ce qui s'enregistre pendant serait écrasé par la collection lue avant.
     const evaluationsLues = await db.get(cleProductions) || [];
 
-    const resultatDoublons = await gererDoublonProduction(donnees.titre, evaluationsLues, productionEnEdition);
+    const resultatDoublons = await gererDoublonProduction(donnees.titre, evaluationsLues, null);
     if (resultatDoublons.annule) return;
     donnees.titre = resultatDoublons.titre;
 
@@ -2046,29 +2206,15 @@ async function sauvegarderProduction() {
         .filter(e => !resultatDoublons.evaluations.some(x => x.id === e.id))
         .map(e => e.id);
 
+    // Lot E3 (D0 point 2) : par le témoin commun ; le message du geste ne part
+    // qu'après l'écriture.
     let productionData = null;
-    await db.modifier(cleProductions, (lues) => {
-        const evaluations = (lues || []).filter(e => !idsRetires.includes(e.id));
+    let ecrit;
+    try {
+        ecrit = await modifierEtAnnoncer(cleProductions, (lues) => {
+            const evaluations = (lues || []).filter(e => !idsRetires.includes(e.id));
 
-        productionData = construireProductionData(donnees, evaluations, productionEnEdition);
-
-        if (productionEnEdition) {
-            // Modifier la production existante
-            const index = evaluations.findIndex(e => e.id === productionEnEdition);
-            if (index !== -1) {
-                evaluations[index] = { ...evaluations[index], ...productionData };
-                // 🆕 Beta 99.05 : Mise à jour dateModification systématique
-                evaluations[index].dateModification = new Date().toISOString();
-
-                // 🆕 Beta 95.4 : Ajouter contributeur si l'utilisateur actif n'est pas l'auteur
-                if (typeof ajouterContributeurSiNecessaire === 'function') {
-                    evaluations[index] = ajouterContributeurSiNecessaire(evaluations[index]);
-                }
-            } else {
-                console.error('❌ Index non trouvé pour ID:', productionEnEdition);
-            }
-        } else {
-            // Ajouter nouvelle production
+            productionData = construireProductionData(donnees, evaluations, null);
             productionData.id = genererIdUnique('PROD_');
             // 🆕 Beta 99.05 : Dates de création et modification
             productionData.dateCreation = new Date().toISOString();
@@ -2081,23 +2227,33 @@ async function sauvegarderProduction() {
             if (!productionData.metadata_cc.contributeurs) productionData.metadata_cc.contributeurs = [];
 
             evaluations.push(productionData);
-        }
+            return evaluations;
+        }, [], { geste: GESTE_CREER_PRODUCTION });
+    } catch (e) {
+        return;   // le témoin a dit l'échec ; la fiche reste ouverte, saisie comprise
+    }
+    if (!ecrit || !productionData) return;
 
-        return evaluations;
-    }, []);
+    notifications.succes(`Production «\u00a0${productionData.titre}\u00a0» créée.`);
 
-    // 🆕 BETA 95.1 : Garder l'ID pour réafficher après sauvegarde
-    const idSauvegarde = productionEnEdition || productionData.id;
-    const estModification = !!productionEnEdition;
-
+    // La fiche fermée d'abord (plus rien « en création »), puis rouverte : elle existe.
     annulerFormProduction();
-    await rafraichirInterfaceApresSauvegarde(idSauvegarde, estModification);
+    await afficherTableauProductions();
+    await afficherToutesLesProductionsParType();
+    await mettreAJourPonderationTotale();
+    if (typeof window.chargerProductionsDansSelect === 'function') window.chargerProductionsDansSelect();
+    if (typeof window.rechargerFiltreProduction === 'function') window.rechargerFiltreProduction();
 
     // #626 (31 août 2026) — fusion des couches d'override (constat M4). Ce
     // rafraîchissement de la barre latérale vivait dans un wrapper posé en fin de
     // fichier, qui rappelait la fonction ci-dessus puis l'ajoutait. Une seule
     // couche désormais ; l'ordre des deux gestes est inchangé.
     await afficherListeProductions();
+    // 🆕 BETA 95.1 : la production reste visible, ouverte comme une fiche existante
+    // (Dupliquer, Supprimer, « Fermer »).
+    if (typeof window.chargerProductionPourModif === 'function') {
+        await window.chargerProductionPourModif(productionData.id);
+    }
 }
 
 /* ===============================
@@ -2976,6 +3132,14 @@ window.afficherToutesLesProductionsParType = afficherToutesLesProductionsParType
 window.ajouterProductionAuType = ajouterProductionAuType;
 window.afficherFormProduction = afficherFormProduction;
 window.sauvegarderProduction = sauvegarderProduction;
+// Lot E3 (D3) : créer ou modifier.
+window.enregistrerProductionModifiee = enregistrerProductionModifiee;
+window.surChangementFormulaireProduction = surChangementFormulaireProduction;
+window.fermerFicheProduction = fermerFicheProduction;
+window.rendreModeFicheProduction = rendreModeFicheProduction;
+window.productionEnCreationSaisie = productionEnCreationSaisie;
+window.raisonChampsObligatoiresProduction = raisonChampsObligatoiresProduction;
+brancherEnregistrementProduction();
 // #468/CO-17 : exportée pour la sentinelle (création vs modification).
 window.construireProductionData = construireProductionData;
 // #468/CO-17 : exportée pour la sentinelle ET pour creerNouvelleProduction
