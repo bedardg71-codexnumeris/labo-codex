@@ -1708,13 +1708,16 @@ var LEGENDE_PASTILLES_OBJECTIF = [
 
 // #965 (27 sept. 2026) — LA PASTILLE D'UNE ÉVALUATION : ce qu'elle vérifie
 // a-t-il été enseigné, et AVANT elle ? Symboles et textes validés par Grégoire
-// (consigne du lot), reproduits tels quels. Du pire au meilleur : ✕, ⚠, ✓.
-var SYMBOLES_PASTILLE_EVALUATION = { aucun: '!', nonEnseigne: '\u2715', apres: '\u26A0', avant: '\u2713' };
+// (consigne du lot), reproduits tels quels. Du pire au meilleur : ✕, ⚠, ?, ✓.
+// « ? » (28 sept. 2026, décision didactique de Grégoire) : l'application ne peut
+// pas trancher. Il remplace le ✓ qu'elle donnait par défaut dans ce cas.
+var SYMBOLES_PASTILLE_EVALUATION = { aucun: '!', nonEnseigne: '\u2715', apres: '\u26A0', incertain: '?', avant: '\u2713' };
 
 var LEGENDE_PASTILLES_EVALUATION = [
     { etat: 'aucun', libelle: 'Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.' },
     { etat: 'nonEnseigne', libelle: 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.' },
     { etat: 'apres', libelle: 'Un objectif vérifié n\'est servi qu\'après cette évaluation.' },
+    { etat: 'incertain', libelle: 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.' },
     { etat: 'avant', libelle: 'Chaque objectif vérifié a été enseigné avant cette évaluation.' }
 ];
 
@@ -1730,10 +1733,13 @@ var LEGENDE_PASTILLES_EVALUATION = [
  *   - autre leçon : la semaine, puis le rang de séance ; même séance (deux
  *     leçons au même rang) : « avant », l'ordre n'étant pas connu ;
  *   - une leçon sans semaine, une séance non posée dans la même semaine, une
- *     évaluation hors leçon : on NE CONCLUT PAS — « avant », et le cas est
- *     marqué `inconclusif` (consigne : Grégoire décidera).
+ *     évaluation ou un bloc hors leçon : on NE CONCLUT PAS, et le cas est
+ *     marqué `inconclusif`.
  * Un objectif servi à la fois avant et après compte comme enseigné avant.
- * Le pire état l'emporte (✕, puis ⚠, puis ✓) ; aucun objectif coché : « ! ».
+ * « ? » (28 sept., décision de Grégoire, préséance tranchée par Cowork) : un
+ * objectif est INCERTAIN quand aucun bloc ne le sert sûrement avant et qu'un
+ * bloc au moins ne peut pas être situé. Avant : « avant » par défaut, donc ✓.
+ * Le pire état l'emporte (✕, puis ⚠, puis ?, puis ✓) ; aucun objectif coché : « ! ».
  * Les liens « se vérifie par » hérités ne créent AUCUN objectif vérifié.
  *
  * @returns {{etat: string, message: string, inconclusif: boolean}}
@@ -1758,31 +1764,33 @@ function evaluerPastilleEvaluation(evaluation) {
     }
 
     var inconclusif = false;
-    // 'avant' | 'apres' pour un bloc servant, relativement à l'évaluation.
+    // 'avant' | 'apres' | 'inconnu' pour un bloc servant, relativement à l'évaluation.
     function position(bloc) {
         var leconBloc = leconParenteDe(bloc);
-        if (!leconEval || !leconBloc) { inconclusif = true; return 'avant'; }
+        if (!leconEval || !leconBloc) { inconclusif = true; return 'inconnu'; }
         if (leconBloc.id === leconEval.id) {
             var ordre = leconEval.enfants || [];
             return ordre.indexOf(bloc.id) < ordre.indexOf(evaluation.id) ? 'avant' : 'apres';
         }
         var sb = semaineDeLecon(leconBloc), se = semaineDeLecon(leconEval);
-        if (sb === null || se === null) { inconclusif = true; return 'avant'; }
+        if (sb === null || se === null) { inconclusif = true; return 'inconnu'; }
         if (sb !== se) return sb < se ? 'avant' : 'apres';
         var rb = rangSeanceDeLecon(leconBloc), re = rangSeanceDeLecon(leconEval);
-        if (rb === null || re === null) { inconclusif = true; return 'avant'; }
+        if (rb === null || re === null) { inconclusif = true; return 'inconnu'; }
         return rb <= re ? 'avant' : 'apres';
     }
 
+    var GRAVITE = { avant: 0, incertain: 1, apres: 2, nonEnseigne: 3 };
     var pire = 'avant';
     for (var oi = 0; oi < objectifs.length; oi++) {
         var positions = servants
             .filter(function(sv) { return sv.objectifs.indexOf(objectifs[oi]) !== -1; })
             .map(function(sv) { return position(sv.noeud); });
         var etatObjectif = positions.length === 0 ? 'nonEnseigne'
-            : (positions.indexOf('avant') !== -1 ? 'avant' : 'apres');
-        if (etatObjectif === 'nonEnseigne') pire = 'nonEnseigne';
-        else if (etatObjectif === 'apres' && pire === 'avant') pire = 'apres';
+            : positions.indexOf('avant') !== -1 ? 'avant'
+            : positions.indexOf('inconnu') !== -1 ? 'incertain'
+            : 'apres';
+        if (GRAVITE[etatObjectif] > GRAVITE[pire]) pire = etatObjectif;
     }
     return { etat: pire, message: libelle(pire), inconclusif: inconclusif };
 }
@@ -1791,7 +1799,7 @@ function evaluerPastilleEvaluation(evaluation) {
 function pastilleEvaluationHTML(n) {
     if (!n || n.type !== 'evaluation') return '';
     var res = evaluerPastilleEvaluation(n);
-    // security-ok: res.etat vaut l'une des quatre clés littérales de
+    // security-ok: res.etat vaut l'une des cinq clés littérales de
     // SYMBOLES_PASTILLE_EVALUATION ; le message est un littéral de ce fichier.
     return '<span class="planif-obj-pastille planif-eval-pastille planif-eval-pastille--' + res.etat + '"' +
            ' title="' + echapperHtml(res.message) + '" aria-label="' + echapperHtml(res.message) + '">' +
@@ -1930,8 +1938,8 @@ var GUIDE_PAGES = [
             '<ol>' +
                 '<li>Sur un bloc <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçon</strong>, clique le badge <strong>🎯</strong> de l’en-tête : il déplie la zone des objectifs. Grisé, il t’indique qu’aucun objectif n’est encore posé.</li>' +
                 '<li>Écris l’objectif. Le <strong>+</strong> en ajoute un autre, le <strong>−</strong> retire celui de la ligne — une leçon en porte souvent plusieurs.</li>' +
-                '<li>Dans l’<strong>Inspecteur</strong> d’une activité, d’un exposé ou d’une évaluation de cette leçon, coche les <strong>objectifs servis</strong>. C’est ainsi que tu vérifies qu’aucun objectif ne reste sans moyen.</li>' +
-                '<li>Plus rapide : <strong>trace un lien</strong> depuis le bloc et <strong>dépose-le sur la ligne de l’objectif</strong> — la case se coche toute seule. Le bloc doit être dans la même leçon que l’objectif.</li>' +
+                '<li>Dans l’<strong>Inspecteur</strong> d’une activité ou d’un exposé de cette leçon, coche les <strong>objectifs servis</strong> ; dans celui d’une évaluation, les <strong>objectifs vérifiés</strong>, ceux de sa leçon ou d’une leçon placée avant elle. C’est ainsi que tu vérifies qu’aucun objectif ne reste sans moyen.</li>' +
+                '<li>Plus rapide : <strong>trace un lien</strong> depuis le bloc et <strong>dépose-le sur la ligne de l’objectif</strong> — la case se coche toute seule. Une activité ou un exposé doit être dans la même leçon que l’objectif ; une évaluation, dans cette leçon ou une leçon placée après.</li>' +
             '</ol>' +
             '<p class="planif-guide-pourquoi">Chaque objectif porte une <strong>pastille</strong> qui dit où il en est\u00a0:</p>' +
             legendePastillesObjectifHTML() +

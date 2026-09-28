@@ -69,7 +69,8 @@ test.describe('#966 · le guide de la carte', () => {
             }
             if (p === 8) {
                 const corps = guide.locator('.planif-guide-corps');
-                await expect(corps.locator('.planif-eval-pastille')).toHaveCount(4);
+                await expect(corps.locator('.planif-eval-pastille')).toHaveCount(5);   // « ? » depuis le 28 sept.
+                await expect(corps.locator('.planif-eval-pastille--incertain')).toHaveText('?');
                 await expect(corps.locator('.planif-eval-pastille--nonEnseigne')).toHaveText('✕');
                 await expect(corps).not.toContainText('se vérifie par');
             }

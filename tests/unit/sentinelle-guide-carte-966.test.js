@@ -84,6 +84,9 @@ const PAGE_8 = [
     '! Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.',
     '✕ Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.',
     '⚠ Un objectif vérifié n\'est servi qu\'après cette évaluation.',
+    // 28 sept. 2026 : la légende est rendue par la fonction de la carte ; elle porte
+    // le cinquième état décidé par Grégoire (« ? »), texte accepté mot pour mot.
+    '? Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.',
     '✓ Chaque objectif vérifié a été enseigné avant cette évaluation.',
     'Ta carte est alignée quand chaque objectif est servi et vérifié, et que chaque évaluation ne vérifie que des objectifs déjà enseignés.'
 ];
@@ -132,7 +135,7 @@ describe('#966 — les textes validés, tels quels', () => {
     });
 
     it('page 8 : la légende est celle des pastilles d\'évaluation (mêmes classes que la carte)', () => {
-        for (const cle of ['aucun', 'nonEnseigne', 'apres', 'avant']) {
+        for (const cle of ['aucun', 'nonEnseigne', 'apres', 'incertain', 'avant']) {
             expect(pages[7].contenu).toContain('planif-eval-pastille--' + cle);
         }
     });
@@ -147,9 +150,25 @@ describe('#966 — les textes validés, tels quels', () => {
     });
 });
 
-describe('#966 — les pages 3, 5, 7 et 9 ne changent pas', () => {
-    it('même empreinte qu\'avant le lot (mesurée sur main, df359bf)', () => {
-        const empreinte = (i) => crypto.createHash('sha256').update(pages[i].titre + '|' + pages[i].contenu).digest('hex').slice(0, 16);
-        expect([2, 4, 6, 8].map(empreinte)).toEqual(['4f95ffea44a91cab', '8fe3a8e048b00535', '1e4fe6a19353548d', '6e57061b206939f8']);
+// Page 5 : deux retouches acceptées par Grégoire le 28 sept. (mot pour mot), le
+// reste de la page inchangé. Les apostrophes typographiques sont celles de la page.
+const P5_POINT3_AVANT = '<li>Dans l’<strong>Inspecteur</strong> d’une activité, d’un exposé ou d’une évaluation de cette leçon, coche les <strong>objectifs servis</strong>. C’est ainsi que tu vérifies qu’aucun objectif ne reste sans moyen.</li>';
+const P5_POINT3 = '<li>Dans l’<strong>Inspecteur</strong> d’une activité ou d’un exposé de cette leçon, coche les <strong>objectifs servis</strong> ; dans celui d’une évaluation, les <strong>objectifs vérifiés</strong>, ceux de sa leçon ou d’une leçon placée avant elle. C’est ainsi que tu vérifies qu’aucun objectif ne reste sans moyen.</li>';
+const P5_POINT4_AVANT = 'Le bloc doit être dans la même leçon que l’objectif.</li>';
+const P5_POINT4 = 'Une activité ou un exposé doit être dans la même leçon que l’objectif ; une évaluation, dans cette leçon ou une leçon placée après.</li>';
+
+describe('#966 — les pages 3, 7 et 9 ne changent pas ; la page 5, de ses deux retouches seulement', () => {
+    const empreinte = (titre, contenu) => crypto.createHash('sha256').update(titre + '|' + contenu).digest('hex').slice(0, 16);
+    it('pages 3, 7 et 9 : même empreinte qu\'avant le lot (mesurée sur main, df359bf)', () => {
+        expect([2, 6, 8].map((i) => empreinte(pages[i].titre, pages[i].contenu))).toEqual(['4f95ffea44a91cab', '1e4fe6a19353548d', '6e57061b206939f8']);
+    });
+    it('page 5 : les deux phrases acceptées le 28 sept., une fois chacune', () => {
+        expect(pages[4].contenu.split(P5_POINT3).length - 1).toBe(1);
+        expect(pages[4].contenu.split(P5_POINT4).length - 1).toBe(1);
+        expect(pages[4].contenu).not.toContain('Le bloc doit être dans la même leçon');
+    });
+    it('page 5 : les deux phrases remises à l\'ancienne, on retrouve l\'empreinte d\'avant (rien d\'autre n\'a bougé)', () => {
+        const ancienne = pages[4].contenu.replace(P5_POINT3, P5_POINT3_AVANT).replace(P5_POINT4, P5_POINT4_AVANT);
+        expect(empreinte(pages[4].titre, ancienne)).toBe('8fe3a8e048b00535');
     });
 });

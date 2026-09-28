@@ -8,7 +8,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // elle), ✓ (tout est enseigné avant). Textes et symboles validés par Grégoire.
 // « Avant » : semaine, puis rang de séance ; dans la MÊME leçon, l'ordre des
 // blocs du haut vers le bas (choix de Grégoire du 27 sept.). Leçon sans
-// semaine : on ne conclut pas (« avant », marqué inconclusif).
+// semaine : on ne conclut pas — « ? » depuis le 28 sept. (décision de Grégoire ;
+// avant : « avant », donc ✓ par défaut), marqué inconclusif.
 //
 // Sentinelle COMPORTEMENTALE : le vrai module, une carte fictive
 // (« Apiculture martienne »). Calcul en lecture seule : vérifié en fin de banc.
@@ -168,10 +169,10 @@ describe('#965 — la règle retenue par Grégoire, et les bords', () => {
         cocher(['oT', 'oJ']);
         expect(pastille('ev').etat).toBe('nonEnseigne');
     });
-    it('leçon sans semaine : on ne conclut pas — « avant », marqué inconclusif', () => {
+    it('leçon sans semaine : on ne conclut pas — « ? », marqué inconclusif', () => {
         cocher(['oX']);
         const p = pastille('ev');
-        expect(p.etat).toBe('avant');
+        expect(p.etat).toBe('incertain');
         expect(p.inconclusif).toBe(true);
         cocher(['oA']);
         expect(pastille('ev').inconclusif).toBe(false);
@@ -188,11 +189,12 @@ describe('#965 — la règle retenue par Grégoire, et les bords', () => {
 describe('#965 — les textes validés, et la lecture seule', () => {
     beforeEach(() => { monter(); carte(); });
 
-    it('les quatre infobulles sont celles de la consigne, mot pour mot', () => {
+    it('les cinq infobulles sont celles de la consigne et de la décision du 28 sept., mot pour mot', () => {
         expect(api.LEGENDE_PASTILLES_EVALUATION.map((l) => [api.SYMBOLES_PASTILLE_EVALUATION[l.etat], l.libelle])).toEqual([
             ['!', 'Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.'],
             ['\u2715', 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.'],
             ['\u26A0', 'Un objectif vérifié n\'est servi qu\'après cette évaluation.'],
+            ['?', 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.'],
             ['\u2713', 'Chaque objectif vérifié a été enseigné avant cette évaluation.']
         ]);
         cocher(['oT']);
@@ -228,26 +230,84 @@ describe('#965 R4 — les branches restantes de la pastille', () => {
         expect(pastille('ev').etat).toBe('nonEnseigne');
     });
 
-    it('même semaine, séance non posée : on ne conclut pas (avant, inconclusif)', () => {
+    it('même semaine, séance non posée : on ne conclut pas (« ? », inconclusif)', () => {
         lecon('s4n', 'Semaine 4, séance non posée', 4, null, [{ id: 'oN', texte: 'Séance inconnue' }]);
         noeud('bN', 'activite', 'Bloc séance inconnue', { parent: 's4n', metadata: { objectifsServis: ['oN'] } });
         cocher(['oN']);
         const p = pastille('ev');
-        expect(p.etat).toBe('avant');
+        expect(p.etat).toBe('incertain');
         expect(p.inconclusif).toBe(true);
     });
 
-    it('leçon de l\'ÉVALUATION sans semaine : on ne conclut pas (avant, inconclusif)', () => {
+    it('leçon de l\'ÉVALUATION sans semaine : on ne conclut pas (« ? », inconclusif)', () => {
         noeud('evX', 'evaluation', 'Évaluation rêveuse', { parent: 'sX', metadata: { objectifsServis: ['oT'] } });
         const p = pastille('evX');
-        expect(p.etat).toBe('avant');
+        expect(p.etat).toBe('incertain');
         expect(p.inconclusif).toBe(true);
     });
 
-    it('évaluation hors de toute leçon : on ne conclut pas (avant, inconclusif)', () => {
+    it('évaluation hors de toute leçon : on ne conclut pas (« ? », inconclusif)', () => {
         noeud('evL', 'evaluation', 'Évaluation libre', { metadata: { objectifsServis: ['oT'] } });
         const p = pastille('evL');
-        expect(p.etat).toBe('avant');
+        expect(p.etat).toBe('incertain');
         expect(p.inconclusif).toBe(true);
+    });
+});
+
+// « ? » — 28 sept. 2026 : quand l'application ne peut pas trancher, une pastille
+// distincte (décision didactique de Grégoire) ; préséance tranchée par Cowork :
+// ✕ puis ⚠ l'emportent sur « ? », « ? » l'emporte sur ✓.
+describe('#965 « ? » — l\'application ne peut pas trancher', () => {
+    beforeEach(() => { monter(); carte(); });
+
+    it('« ? » a son symbole, sa classe et son texte', () => {
+        cocher(['oX']);
+        const p = pastille('ev');
+        expect(p.etat).toBe('incertain');
+        expect(p.message).toBe('Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.');
+        const html = api.contenuNoeudHTML(api.etat.noeuds.get('ev'));
+        expect(html).toContain('planif-eval-pastille--incertain');
+        expect(html).toContain('>?</span>');
+    });
+
+    it('« ? » et ⚠ donnent ⚠, dans les deux ordres', () => {
+        cocher(['oX', 'oT']);
+        expect(pastille('ev').etat).toBe('apres');
+        cocher(['oT', 'oX']);
+        expect(pastille('ev').etat).toBe('apres');
+    });
+
+    it('« ? » et ✕ donnent ✕, dans les deux ordres', () => {
+        cocher(['oX', 'oJ']);
+        expect(pastille('ev').etat).toBe('nonEnseigne');
+        cocher(['oJ', 'oX']);
+        expect(pastille('ev').etat).toBe('nonEnseigne');
+    });
+
+    it('« ? » l\'emporte sur ✓, dans les deux ordres', () => {
+        cocher(['oA', 'oX']);
+        expect(pastille('ev').etat).toBe('incertain');
+        cocher(['oX', 'oA']);
+        expect(pastille('ev').etat).toBe('incertain');
+    });
+
+    it('tout « avant », sans incertitude : ✓', () => {
+        cocher(['oA', 'oM', 'oH', 'oS']);
+        const p = pastille('ev');
+        expect(p.etat).toBe('avant');
+        expect(p.inconclusif).toBe(false);
+    });
+
+    it('un bloc hors de toute leçon ne sert aucun objectif : il ne rend rien incertain (✕ s\'il est seul)', () => {
+        // Cas nommé par la décision du 28 sept. (« le bloc qui sert l'objectif, hors
+        // de toute leçon ») : il n'arrive pas, `objectifsServisPar` rend [] pour un
+        // bloc sans leçon parente (un bloc sert les objectifs de SA leçon).
+        noeud('bLibre', 'activite', 'Bloc libre', { metadata: { objectifsServis: ['oJ'] } });
+        cocher(['oJ']);
+        expect(pastille('ev').etat).toBe('nonEnseigne');
+    });
+
+    it('la légende montre les cinq états, « ? » entre ⚠ et ✓', () => {
+        expect(api.LEGENDE_PASTILLES_EVALUATION.map((l) => l.etat)).toEqual(['aucun', 'nonEnseigne', 'apres', 'incertain', 'avant']);
     });
 });

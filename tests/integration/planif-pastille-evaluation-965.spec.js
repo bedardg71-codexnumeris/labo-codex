@@ -11,7 +11,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Une évaluation de la carte démo (fictive) passe par les quatre états, sans
 // reconstruire la carte : la pastille de son en-tête suit (même point de
 // rafraîchissement que les pastilles d'objectifs). L'Inspecteur de
-// l'évaluation montre la légende des quatre états.
+// l'évaluation montre la légende des cinq états (« ? » depuis le 28 sept.).
 // Avec CAPTURES_965=<dossier>, l'essai dépose une capture de chaque état, en
 // mode sombre puis clair : c'est ce que Grégoire juge (couleurs).
 
@@ -54,18 +54,22 @@ const preparer = (page) => page.evaluate(() => {
     const ev = enfants(l1).find(n => n.type === 'evaluation');
     const ordre = l1.enfants;
     api.definirObjectifsServis(ev.id, []);
-    return { ev: ev.id, oAvant, oJamais, oTard, actAuDessus: ordre.indexOf(act1.id) < ordre.indexOf(ev.id) };
+    return { ev: ev.id, l2: l2.id, oAvant, oJamais, oTard, actAuDessus: ordre.indexOf(act1.id) < ordre.indexOf(ev.id) };
 });
 
 const ETATS = [
     { cle: 'aucun', symbole: '!', objectifs: () => [], texte: 'Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.' },
     { cle: 'nonEnseigne', symbole: '✕', objectifs: (ids) => [ids.oJamais], texte: 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.' },
     { cle: 'apres', symbole: '⚠', objectifs: (ids) => [ids.oTard], texte: 'Un objectif vérifié n\'est servi qu\'après cette évaluation.' },
+    // « ? » : la leçon qui sert l'objectif perd sa semaine le temps de l'état, puis la retrouve.
+    { cle: 'incertain', symbole: '?', objectifs: (ids) => [ids.oTard], texte: 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.',
+      avant: (ids) => window.planificationCarte.definirSemaineLecon(ids.l2, ''),
+      apres: (ids) => window.planificationCarte.definirSemaineLecon(ids.l2, 2) },
     { cle: 'avant', symbole: '✓', objectifs: (ids) => [ids.oAvant], texte: 'Chaque objectif vérifié a été enseigné avant cette évaluation.' }
 ];
 
 test.describe('#965 · la pastille d’une évaluation', () => {
-    test('quatre états, suivis sans reconstruire la carte ; légende dans l’Inspecteur', async ({ page }) => {
+    test('cinq états, suivis sans reconstruire la carte ; légende dans l’Inspecteur', async ({ page }) => {
         await ouvrirCarte(page);
         const ids = await preparer(page);
         // Précondition de la carte démo : l'activité est AU-DESSUS de l'évaluation.
@@ -76,6 +80,7 @@ test.describe('#965 · la pastille d’une évaluation', () => {
         for (const theme of dossier ? ['sombre', 'clair'] : ['sombre']) {
             await page.evaluate((t) => document.body.classList.toggle('mode-clair', t === 'clair'), theme);
             for (const e of ETATS) {
+                if (e.avant) await page.evaluate(e.avant, ids);
                 await page.evaluate(([id, objs]) => window.planificationCarte.definirObjectifsServis(id, objs), [ids.ev, e.objectifs(ids)]);
                 await expect(pastille).toHaveClass(new RegExp('planif-eval-pastille--' + e.cle + '(\\s|$)'));
                 await expect(pastille).toHaveText(e.symbole);
@@ -83,6 +88,7 @@ test.describe('#965 · la pastille d’une évaluation', () => {
                 if (dossier) {
                     await page.locator('#' + ids.ev).screenshot({ path: path.join(dossier, `965-${theme}-${e.cle}.png`) });
                 }
+                if (e.apres) await page.evaluate(e.apres, ids);
             }
         }
 
