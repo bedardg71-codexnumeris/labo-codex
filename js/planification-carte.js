@@ -12072,6 +12072,8 @@ window.planificationCarte = {
     // #963 — lectures du modèle « relire ma carte par une IA » (lecture seule).
     NIVEAUX_COGNITIFS: NIVEAUX_COGNITIFS,
     trouverClones: trouverClones,
+    // R1 (28 sept.) — reconstruit l'index inverse des clones (idempotent) ; sert aux bancs.
+    reconstruireIndexClones: _reconstruireCloneIndex,
     deriverRangeesGrille: deriverRangeesGrille,
     definirRangSeance: definirRangSeance,
     selecteurRangSeanceHTML: selecteurRangSeanceHTML,

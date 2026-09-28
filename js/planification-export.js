@@ -1946,12 +1946,20 @@ function construireDonneesModele() {
             c.getLiensDeNoeud(inst.id).forEach(function(l) {
                 var autre = etat.noeuds.get(l.noeudId);
                 if (!autre) return;
-                var cleLien = inst.id + '|' + l.noeudId + '|' + l.lienLabel + '|' + l.direction;
-                if (vus[cleLien]) return;
-                vus[cleLien] = true;
-                phrases.push(l.direction === 'sortant'
-                    ? designation(nd) + ' ' + l.lienLabel + ' ' + designation(autre) + '.'
-                    : designation(autre) + ' ' + l.lienLabel + ' ' + designation(nd) + '.');
+                // ⚠ R1 (relecture de Cowork, 28 sept.) : la phrase désigne
+                // l'INSTANCE qui porte le lien, avec SA semaine — pas le bloc
+                // en cours d'écriture. Sinon un clone de semaine 6 écrivait le
+                // lien de son original de semaine 2 à sa propre semaine : un
+                // lien qui n'existe pas, et un faux « évalué avant d'être
+                // enseigné » pour l'IA.
+                var phrase = l.direction === 'sortant'
+                    ? designation(inst) + ' ' + l.lienLabel + ' ' + designation(autre) + '.'
+                    : designation(autre) + ' ' + l.lienLabel + ' ' + designation(inst) + '.';
+                // Dédoublonné sur la PHRASE : un original et son clone reliés à
+                // la même évaluation, dans la même semaine, disent la même chose.
+                if (vus[phrase]) return;
+                vus[phrase] = true;
+                phrases.push(phrase);
             });
         });
         return phrases;
