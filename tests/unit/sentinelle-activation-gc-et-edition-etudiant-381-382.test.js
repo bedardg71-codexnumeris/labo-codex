@@ -83,13 +83,15 @@ function envEtudiants(etudiants) {
         querySelectorAll: () => []
     };
     const notifications = { succes: vi.fn(), erreur: vi.fn() };
+    // Lot E2 (28 sept. 2026, D3) : un refus parle par le témoin commun.
+    const temoin = { nonEnregistre: vi.fn(), enregistre: vi.fn() };
     const win = chargerScript('js/trimestre-v2-etudiants.js', {
         db, cle: (k) => k, document: fauxDocument, notifications,
         estEnModeDemo: () => false, genererIdUnique: (p) => p + 'X',
         // #749 lot 2 : la normalisation du numéro de groupe vit dans modes.js (non chargé ici)
         normaliserNumeroGroupe: (g) => String(g || '').padStart(5, '0')
-    });
-    return { win, store, elements, notifications };
+    }, { temoinEnregistrement: temoin, raisonPourTemoin: (r) => r });
+    return { win, store, elements, notifications, temoin };
 }
 
 describe('#382 · éditer un étudiant préserve ses champs hors formulaire et vise le bon étudiant', () => {
@@ -119,14 +121,15 @@ describe('#382 · éditer un étudiant préserve ses champs hors formulaire et v
     });
 
     it('REFUS EXPLICITE : étudiant disparu entre ouverture et save → erreur, pas de faux succès ni d\'écriture', async () => {
-        const { win, store, elements, notifications } = envEtudiants([
+        const { win, store, elements, notifications, temoin } = envEtudiants([
             { da: '111', nom: 'Cible', prenom: 'C', groupe: '00001' }
         ]);
         win.editerEtudiantV2('111');
         store.groupeEtudiants = []; // disparu (purge, changement de trimestre…)
         elements['v2-etudiantNom'].value = 'Perdu';
         await win.soumettreEtudiantV2();
-        expect(notifications.erreur).toHaveBeenCalledTimes(1);
+        expect(temoin.nonEnregistre).toHaveBeenCalledTimes(1);   // lot E2 : par le témoin
+        expect(temoin.nonEnregistre.mock.calls[0][0]).toMatch(/^Étudiant introuvable/);
         expect(notifications.succes).not.toHaveBeenCalled();
         expect(store.groupeEtudiants).toHaveLength(0); // rien écrit
     });

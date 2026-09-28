@@ -127,10 +127,15 @@ test('#872 B · deux cours portent « 00001 » : deux entrées, liste, ajout, é
             sel.dispatchEvent(new Event('change', { bubbles: true }));
             await pause(400);
             const phrase = texte(champ('v2-ajoutRattachement'));
+            // ↻ Lot E2 (28 sept. 2026, D3) : la fiche s'enregistre au changement du champ et RESTE
+            // ouverte ; « Fermer » ramène au formulaire d'ajout (et à sa phrase).
             champ('v2-etudiantPrenom').value = prenom;
-            champ('v2-btnSoumettreEtudiant').click();
+            champ('v2-etudiantPrenom').dispatchEvent(new Event('change', { bubbles: true }));
             await pause(900);
-            return { phrase, fiche: stock().find(e => e.da === da) || null, phraseApres: texte(champ('v2-ajoutRattachement')) };
+            const phraseOuverte = texte(champ('v2-ajoutRattachement'));
+            window.fermerFicheEtudiantV2();
+            await pause(200);
+            return { phrase, phraseOuverte, fiche: stock().find(e => e.da === da) || null, phraseApres: texte(champ('v2-ajoutRattachement')) };
         };
         r.editionB = await editer('8722001', 'Modifié');
         // … et une fiche d'avant, sans `coursId` : elle n'en reçoit pas.
@@ -211,6 +216,7 @@ test('#872 B · deux cours portent « 00001 » : deux entrées, liste, ajout, é
     // 4 · Édition : la fiche garde son cours ; la phrase le dit, puis revient à celle de l'ajout.
     expect(m.editionB.phrase).toBe('Rattaché·e à : 601-872 Second cours du banc');
     expect(m.editionB.fiche).toMatchObject({ prenom: 'Modifié', coursId: 'COURS-872-B' });
+    expect(m.editionB.phraseOuverte, 'la fiche reste ouverte après l\'enregistrement : sa phrase').toBe('Rattaché·e à : 601-872 Second cours du banc');
     expect(m.editionB.phraseApres).toBe('Sera rattaché·e à : 601-872 Second cours du banc');
     expect(m.listeSansCours).toEqual(['8723001']);
     expect(m.editionAncienne.phrase).toBe('Rattaché·e à aucun cours.');

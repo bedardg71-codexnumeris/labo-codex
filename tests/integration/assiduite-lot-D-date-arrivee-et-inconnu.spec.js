@@ -103,7 +103,7 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         const avecDate = { fiche: JSON.parse(JSON.stringify(fiche('9100001'))), indices: calculerTousLesIndices('9100001'), magasin: obtenirDonneesSelonMode('indicesAssiduite').sommatif['9100001'] };
         editerEtudiantV2('9100001'); await pause(300);
         const champReluApres = champ('v2-etudiantDateArrivee').value;
-        annulerEditionEtudiantV2(); await pause(200);
+        fermerFicheEtudiantV2(); await pause(200);   // lot E2 : « Annuler » devient « Fermer »
 
         // L'aller-retour : la fiche sérialisée comme un export l'écrit, relue comme un import la pose (clé entière, sans liste blanche).
         const allerRetour = JSON.parse(JSON.stringify(obtenirDonneesSelonMode('groupeEtudiants'))).find(e => e.da === '9100001').dateArrivee;

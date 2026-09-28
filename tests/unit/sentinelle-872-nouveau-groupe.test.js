@@ -431,6 +431,10 @@ describe('#872 B — un groupe, c\'est un numéro dans un cours', () => {
         b.champ('v2-etudiantPrenom').value = 'Zoé-Anne';
         await b.win.soumettreEtudiantV2();
         expect(b.store.test_groupeEtudiants.find(e => e.da === '2000001')).toMatchObject({ prenom: 'Zoé-Anne', coursId: 'C2' });
+        // ↻ Lot E2 (D3) : la fiche s'enregistre champ par champ et RESTE ouverte — la phrase dit
+        // toujours son cours ; « Fermer » ramène au formulaire d'ajout, et à la phrase de l'ajout.
+        expect(b.champ('v2-ajoutRattachement').textContent).toBe('Rattaché·e à : 601-102-MQ Littérature et imaginaire');
+        b.win.fermerFicheEtudiantV2();
         expect(b.champ('v2-ajoutRattachement').textContent).toBe('Sera rattaché·e à : 601-101-MQ Écriture et littérature');
 
         // Une fiche d'avant, sans `coursId` : l'édition ne lui en donne pas (stock intact).

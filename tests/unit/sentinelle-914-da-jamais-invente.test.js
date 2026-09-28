@@ -76,7 +76,10 @@ function monter(store) {
         notifications: { succes(t, m) { notifs.push({ type: 'succes', t, m }); }, erreur(t, m) { notifs.push({ type: 'erreur', t, m }); }, info() {}, warning() {} },
         prompt: () => null, alert() {}, confirm: () => true, toggleDisplay() {},
     };
-    const win = { addEventListener() {}, cle, db };
+    // Lot E2 (28 sept. 2026, D3) : un refus parle par le témoin commun ; rangé avec les notifications.
+    const win = { addEventListener() {}, cle, db,
+        temoinEnregistrement: { nonEnregistre(raison, geste) { notifs.push({ type: 'nonEnregistre', t: raison, geste }); }, enregistre() {} },
+        raisonPourTemoin: (r) => { const t = String(r || '').trim(); const d = t.charAt(0).toLowerCase() + t.slice(1); return /[.!?]$/.test(d) ? d : d + '.'; } };
     chargerScript('js/trimestre-v2-etudiants.js', globaux, win);
     const champ = (id) => document.getElementById(id);
     async function soumettre(da, nom = 'Neuf', prenom = 'Nora') {
@@ -98,7 +101,11 @@ function storeBanc() {
     };
 }
 
-const refusDA = (b) => b.notifs.filter(n => n.type === 'erreur' && /^DA (manquant|invalide)$/.test(n.t));
+// ↻ Lot E2 : le refus est dit par le témoin (« Non enregistré – ‹geste› : le DA est manquant : c'est celui du
+// collège, sept chiffres… ») ; ramené ici à « DA manquant » / « DA invalide », le texte entier en `m`.
+const refusDA = (b) => b.notifs
+    .filter(n => n.type === 'nonEnregistre' && /^le DA est (manquant|invalide) : /.test(n.t))
+    .map(n => ({ t: 'DA ' + n.t.match(/^le DA est (manquant|invalide)/)[1], m: n.t, geste: n.geste }));
 const succes = (b) => b.notifs.filter(n => n.type === 'succes');
 
 describe('#914 — l\'application n\'invente plus de DA', () => {
@@ -153,7 +160,7 @@ describe('#914 — l\'application n\'invente plus de DA', () => {
         await b.soumettre('1000001');
         expect(store.test_groupeEtudiants.length).toBe(2);
         expect(refusDA(b)).toEqual([]);
-        expect(b.notifs.some(n => n.type === 'erreur' && /^Ce DA est déjà dans le groupe/.test(n.t))).toBe(true);
+        expect(b.notifs.some(n => n.type === 'nonEnregistre' && /^ce DA est déjà dans le groupe/.test(n.t))).toBe(true);
     });
 
     it('D. édition d\'un élève « DEMO015 » sans toucher au DA : enregistrée, DA gardé tel quel', async () => {
@@ -168,7 +175,7 @@ describe('#914 — l\'application n\'invente plus de DA', () => {
         expect(fiche.isDemo).toBe(true);                       // la fusion garde les champs hors formulaire
         expect(store.test_groupeEtudiants.length).toBe(2);
         expect(refusDA(b)).toEqual([]);
-        expect(succes(b).length).toBe(1);
+        expect(succes(b).length).toBe(0);   // lot E2 : une modification ne dit que « Enregistré » (le témoin)
     });
 
     it('E. édition qui EFFACE le DA : refusée, fiche intacte (l\'élève garde son identifiant)', async () => {
@@ -197,7 +204,7 @@ describe('#914 — l\'application n\'invente plus de DA', () => {
         b.champ('v2-etudiantDA').value = '2000015';
         await b.win.soumettreEtudiantV2();
         expect(store.test_groupeEtudiants.map(e => e.da)).toEqual(['1000001', '2000015']);
-        expect(succes(b).length).toBe(1);
+        expect(succes(b).length).toBe(0);   // lot E2 : une modification ne dit que « Enregistré » (le témoin)
     });
 
     it('G. stock d\'avant : un DA porteur d\'une espace, édité sans y toucher, garde son identifiant EXACT', async () => {

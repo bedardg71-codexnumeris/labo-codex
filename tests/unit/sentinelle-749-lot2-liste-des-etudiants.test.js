@@ -150,7 +150,12 @@ function monter(store, opts = {}) {
         filtrerEtudiantsParMode: winModes.filtrerEtudiantsParMode, estModeeLectureSeule: winModes.estModeeLectureSeule,
         demarrerCacheLecture: winModes.demarrerCacheLecture, terminerCacheLecture: winModes.terminerCacheLecture,
         normaliserNumeroGroupe: winModes.normaliserNumeroGroupe,
+        // Lot E2 (28 sept. 2026) : le Cadre écrit les fiches par `modifierEtAnnoncer` (la file + le témoin).
+        modifierEtAnnoncer: winModes.modifierEtAnnoncer,
     });
+    // Lot E2 : un refus parle par le témoin commun ; il est rangé dans le même journal que les notifications.
+    win.temoinEnregistrement = { nonEnregistre(raison, geste) { notifs.push({ type: 'nonEnregistre', t: raison, geste }); }, enregistre() {} };
+    win.raisonPourTemoin = (r) => { const t = String(r || '').trim(); const d = t.charAt(0).toLowerCase() + t.slice(1); return /[.!?]$/.test(d) ? d : d + '.'; };
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;
     // Les exports `window.X =` des modules montés sont aiguillés à l'appel (résolution tardive, patron du banc d'audit) :
     // un module qui appelle librement `obtenirCouleurSelonSeuils(...)` trouve la fonction que interpretation-config.js a posée sur `win`.
@@ -308,7 +313,8 @@ describe('#749 lot 2 · G — un DA en double refusé ; le groupe padé à l\'é
         const b = monter(store, { elements: champs('2000001', '1') });
         await b.win.soumettreEtudiantV2();
         expect(store.test_groupeEtudiants.filter(e => e.da === '2000001').length).toBe(1);
-        expect(b.notifs.some(n => n.type === 'erreur' && n.t === 'Ce DA est déjà dans le groupe : Aimé Césaire.')).toBe(true);
+        // ↻ Lot E2 : « Non enregistré – Ajouter l'étudiant·e : ce DA est déjà dans le groupe : … », par le témoin.
+        expect(b.notifs.some(n => n.type === 'nonEnregistre' && n.t === 'ce DA est déjà dans le groupe : Aimé Césaire.' && n.geste === 'Ajouter l\'étudiant·e')).toBe(true);
         expect(b.notifs.some(n => n.type === 'succes')).toBe(false);
     });
 

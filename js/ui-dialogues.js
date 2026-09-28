@@ -355,10 +355,12 @@
         cartouche: 'Cette cartouche n\'est pas encore créée.',
         enseignant: 'Ce profil n\'est pas encore créé.',
         horaire: 'Cet horaire n\'est pas encore créé.',
-        groupeCours: 'Ce groupe-cours n\'est pas encore créé.'
+        groupeCours: 'Ce groupe-cours n\'est pas encore créé.',
+        // Mots tranchés par Grégoire le 28 sept. (13 h 30) : « étudiant·e », comme partout dans l'application.
+        eleve: 'Cet·te étudiant·e n\'est pas encore ajouté·e.'
     };
     // Le bouton qui quitte : « Quitter sans créer », sauf pour un geste qui ne « crée » pas.
-    const QUITTER_SANS = {};
+    const QUITTER_SANS = { eleve: 'Quitter sans ajouter' };
 
     /**
      * @param {string} genre - 'grille' | 'echelle' | 'cartouche' | les fiches du Cadre (lot E2)

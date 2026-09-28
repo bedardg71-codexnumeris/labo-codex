@@ -85,5 +85,8 @@ test('en anonymisation, « Modifier » ouvre la fiche sans le vrai nom : DA, nom
         await expect(page.locator(id)).toBeDisabled();
         await expect(page.locator(id)).toHaveAttribute('placeholder', 'Masqué en anonymisation');
     }
-    await expect(page.locator('#v2-btnSoumettreEtudiant')).toHaveText('Enregistrer les modifications');
+    // ↻ Lot E2 (D3) : une fiche existante s'enregistre au changement — plus de bouton « Enregistrer
+    // les modifications » ; « Fermer » ramène au formulaire d'ajout.
+    await expect(page.locator('#v2-btnSoumettreEtudiant')).toBeHidden();
+    await expect(page.locator('#v2-btnAnnulerEdition')).toHaveText('Fermer');
 });

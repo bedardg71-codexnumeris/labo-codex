@@ -291,7 +291,9 @@ describe('#522 lot 5a · C — la course ne peut pas se rouvrir en silence', () 
                            'sauvegarderGroupeEtudiantsV2']) {
             const corps = corpsDeLaFonction(src, nom);
             expect(corps, `${nom} : introuvable`).toBeTruthy();
-            expect(corps, `${nom} : n'écrit pas par la file`).toMatch(/db\.modifier\(\s*cleEtud/);
+            // ↻ Lot E2 (28 sept. 2026) : `modifierEtAnnoncer` (modes.js) EST la file (`db.modifier`) plus
+            // le témoin commun ; `sauvegarderGroupeEtudiantsV2`, sans appelant, garde `db.modifier`.
+            expect(corps, `${nom} : n'écrit pas par la file`).toMatch(/(db\.modifier|modifierEtAnnoncer)\(\s*cleEtud/);
             expect(corps, `${nom} : garde une écriture directe`).not.toMatch(/db\.set\(\s*cleEtud\s*,\s*(etudiants|liste|tousLesEtudiants|etudiantsRestants)/);
         }
     });
@@ -300,13 +302,13 @@ describe('#522 lot 5a · C — la course ne peut pas se rouvrir en silence', () 
         // Vérifié hors file, ce contrôle attrape les changements antérieurs à SA
         // lecture — pas ceux de la fenêtre qu'il prétend couvrir.
         const corps = corpsDeLaFonction(src, 'soumettreEtudiantV2');
-        const posFile = corps.indexOf('db.modifier(');
+        const posFile = corps.indexOf('modifierEtAnnoncer(');   // lot E2 : la file, avec le témoin
         const posRefus = corps.indexOf('indexReel === -1');
         expect(posFile, 'la file est absente').toBeGreaterThan(-1);
         expect(posRefus, 'le refus précède la file').toBeGreaterThan(posFile);
     });
 
-    it('C.c la seule écriture directe restante est NOMMÉE, et ce n\'est PAS une course', () => {
+    it('C.c plus aucune écriture directe : « vider la liste » passe par la file (lot E2)', () => {
         // `reinitialiserEtudiantsV2` lit la liste pour CHIFFRER sa question, puis
         // écrit une CONSTANTE. La valeur écrite ne dérive pas de la lecture :
         // `scripts/mesurer-522.py` la signale à tort. Ne pas la « corriger ».
@@ -315,13 +317,15 @@ describe('#522 lot 5a · C — la course ne peut pas se rouvrir en silence', () 
         // `cleEtud` : une mutation qui réécrivait par `db.set(cle('groupeEtudiants'), …)`
         // passait au vert. La clé s'écrit de deux façons, comme celle des
         // productions — c'est le piège du lot 3, sur une autre clé.
+        // ↻ Lot E2 (28 sept. 2026) : « vider la liste » passe aussi par la file et le témoin
+        // (`modifierEtAnnoncer(cleEtud, () => [], …)`) — il ne reste AUCUNE écriture directe.
         const directes = [...src.matchAll(/db\.set(Sync)?\(\s*(cleEtud|cle\('groupeEtudiants'\))\s*,/g)];
-        expect(directes.length, 'une seule écriture directe').toBe(1);
+        expect(directes.length, 'aucune écriture directe').toBe(0);
 
         const corps = corpsDeLaFonction(src, 'reinitialiserEtudiantsV2');
         expect(corps, 'reinitialiserEtudiantsV2 : introuvable').toBeTruthy();
-        expect(corps, 'l\'écriture directe n\'est pas celle attendue')
-            .toMatch(/db\.set\(\s*cleEtud\s*,\s*\[\]\s*\)/);
+        expect(corps, 'vider la liste passe par la file et le témoin')
+            .toMatch(/modifierEtAnnoncer\(\s*cleEtud\s*,\s*\(\)\s*=>\s*\[\]/);
     });
 
     it('C.d l\'outil de mesure est DANS le dépôt, pas dans un scratchpad', () => {
