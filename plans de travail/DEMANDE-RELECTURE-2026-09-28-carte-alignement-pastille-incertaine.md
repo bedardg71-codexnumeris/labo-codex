@@ -22,6 +22,21 @@
 **« Le bloc qui sert l'objectif, hors de toute leçon » ne peut pas arriver** : `objectifsServisPar` rend `[]` pour un bloc sans leçon parente (un bloc sert les objectifs de SA leçon). Un tel bloc ne rend rien incertain ; l'objectif qu'il croyait servir reste ✕ s'il est seul. Écrit en essai sous cette forme. La branche `!leconBloc` de `position()` reste, sans effet (issue 3).
 **Et un quatrième cas incertain existe** : même semaine, **séance non posée** (déjà marqué `inconclusif` au lot, R4). Il donne « ? » lui aussi. Le texte accepté (« une leçon n'a pas encore de semaine, ou l'évaluation n'est dans aucune leçon ») ne le nomme pas : c'est à Grégoire de dire si le texte doit le couvrir. Je ne l'ai pas touché.
 
+## § 10 – la référence Gauthier, Bissonnette et Richard, édition ERPI
+
+Commit à relire aussi : **la tête de la branche**, qui ajoute ce paragraphe (`git show carte-alignement-963-966`). Texte unique, repris de ton § 10 :
+« Gauthier, C., Bissonnette, S. et Richard, M. (avec la collaboration de M. Castonguay) (2013). *Enseignement explicite et réussite des élèves : la gestion des apprentissages*. ERPI. »
+
+| Endroit | Avant | Forme posée |
+|---|---|---|
+| `js/planification-carte.js` l. 1893 (guide, page 1) | … De Boeck. | titre en `<em>`, espace insécable avant le deux-points (celle qu'y portait déjà la page) |
+| `tests/unit/sentinelle-guide-carte-966.test.js` l. 64 | … De Boeck. | la même, en texte normalisé |
+| `index.html` l. 14218 (références de l'accompagnement) | … *La gestion des apprentissages*. Gaëtan Morin Éditeur. | titre en `<em>` ; « la » en minuscule, comme ton texte |
+| `plans de travail/CARTE-ALIGNEMENT-2026-09-27-4-…md` l. 35 | … De Boeck. | la même, titre en italique, et la note « *(Édition ERPI retenue par Grégoire le 28 sept. 2026.)* » |
+
+`git grep -i "De Boeck\|Gaëtan Morin"` : **plus aucune occurrence pour cet ouvrage**. Il en reste deux, d'**autres** ouvrages, laissées telles quelles : `index.html` l. 14216 (Gauthier et Bissonnette, 2023, *Enseignement explicite et données probantes*) et l. 14220 (Gauthier et Tardif, 2017, *La pédagogie*). Hors de l'application, `Plan Accompagnement/PLAN_guides_pedagogiques.md` l. 336 citait déjà l'édition ERPI (autre format, avec collection et pages) : non touché.
+Jeton : `planification-carte.js` `20260927h`. Vitest **7 582 / 7 582** ; WebKit, banc du guide, vert.
+
 ## Pas fait
 
 Pas de release, pas de Nouvelles, pas de push. RELAIS.md non retouché.
