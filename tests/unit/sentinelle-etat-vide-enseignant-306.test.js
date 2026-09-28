@@ -50,7 +50,7 @@ function creerDom() {
         'enseignant-formulaire-edition': creerElement([UHIDE]),
         'v2-selectEnseignant': creerElement(),
         'v2-titreFormEnseignant': creerElement(),
-        'v2-btnTexteEnseignant': creerElement()
+        'v2-btnCreerEnseignant': creerElement([UHIDE])
     };
     ['prenom', 'nom', 'courriel', 'institution', 'departement', 'discipline', 'siteWeb']
         .forEach(ch => { ids['v2-ens-' + ch] = creerElement(); });
@@ -133,21 +133,21 @@ describe('#306 · Enseignant·e : patron « état vide masqué »', () => {
         expect(estVisible(dom.ids['enseignant-formulaire-edition'])).toBe(false);
     });
 
-    it('D · « + Nouveau profil » ouvre le formulaire en mode « Créer »', () => {
-        win.nouveauProfilEnseignantV2();
+    it('D · « + Nouveau profil » ouvre le formulaire en création (« Créer le profil », lot E2)', async () => {
+        await win.nouveauProfilEnseignantV2();
 
         expect(estVisible(dom.ids['enseignant-formulaire-edition'])).toBe(true);
         expect(estVisible(dom.ids['enseignant-etat-vide'])).toBe(false);
         expect(dom.ids['v2-titreFormEnseignant'].textContent).toBe('Nouveau profil');
-        expect(dom.ids['v2-btnTexteEnseignant'].textContent).toBe('Créer');
+        expect(estVisible(dom.ids['v2-btnCreerEnseignant'])).toBe(true);
     });
 
-    it('E · « Annuler » referme le formulaire ET désélectionne (patron Cours)', () => {
+    it('E · « Fermer » (ex-« Annuler », lot E2) referme le formulaire ET désélectionne (patron Cours)', async () => {
         charger([PROFIL]);
         dom.ids['v2-selectEnseignant'].value = PROFIL.id;
         win.chargerEnseignantSelectionneV2();
 
-        win.annulerFormEnseignantV2();
+        await win.fermerFicheEnseignantV2();
 
         expect(estVisible(dom.ids['enseignant-etat-vide'])).toBe(true);
         expect(estVisible(dom.ids['enseignant-formulaire-edition'])).toBe(false);

@@ -263,13 +263,24 @@ describe('CT-15 · les trois formulaires du cadre portent leur garde', () => {
     });
 
     it('H · l\'enseignant garde le courriel, à la création ET à l\'édition', () => {
-        const corps = corpsDe('js/trimestre-v2-enseignants.js', 'sauvegarderEnseignantV2');
+        // ↻ Lot E2 (28 sept. 2026) : la création (« Créer le profil ») et la modification
+        // (champ par champ) ont chacune leur écrivain ; la garde vit dans UN helper, appelé
+        // par les deux AVANT d'écrire.
+        const garde = corpsDe('js/trimestre-v2-enseignants.js', '_confirmerCourrielPartage');
+        expect(garde).toMatch(/cleNaturelleEnseignant/);
+        expect(garde).toMatch(/confirm\(/);
+        expect(garde).toMatch(/exclureId/);
 
-        expect(corps).toMatch(/cleNaturelleEnseignant/);
-        expect(corps).toMatch(/confirm\(/);
-        expect(corps).toMatch(/exclureId:\s*enseignantEnEditionId/);
-        expect(corps.indexOf('cleNaturelleEnseignant'))
-            .toBeLessThan(corps.indexOf('enseignants.push('));
+        const creation = corpsDe('js/trimestre-v2-enseignants.js', 'creerProfilEnseignantV2');
+        expect(creation.indexOf('_confirmerCourrielPartage'))
+            .toBeGreaterThan(-1);
+        expect(creation.indexOf('_confirmerCourrielPartage'))
+            .toBeLessThan(creation.indexOf('enseignants.push('));
+
+        const edition = corpsDe('js/trimestre-v2-enseignants.js', 'sauvegarderChampEnseignantV2');
+        expect(edition).toMatch(/_confirmerCourrielPartage\(enseignants, profil\.courriel, enBase\.id\)/);
+        expect(edition.indexOf('_confirmerCourrielPartage'))
+            .toBeLessThan(edition.indexOf('sauvegarderDonneesSelonMode('));
     });
 
     it('H · la migration du vieux profil compare avec la MÊME clé', () => {

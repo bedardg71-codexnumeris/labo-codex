@@ -181,7 +181,7 @@ describe('trimestre-v2 — régression refactoring 2026-mai (canari + sentinelle
             'sauvegarderGroupeCoursV2',
             // Zone 7 — Enseignants
             'chargerProfilEnseignantV2',
-            'sauvegarderEnseignantV2',
+            'creerProfilEnseignantV2',
             // Zone 8 — Orchestre
             'peuplerDropdownGroupeCoursActif',
             'changerGroupeCoursActifV2',

@@ -204,7 +204,12 @@
         // construction — un élève, N dossiers figés. Global, jamais préfixé ; survit à
         // supprimerTrimestre (le filtre `includes(id)` ne l'atteint pas). Seul écrivain :
         // js/registre-longitudinal.js.
-        'registreLongitudinal'
+        'registreLongitudinal',
+        // Lot E2 de l'enregistrement (28 sept. 2026) : les profils enseignants sont partagés
+        // entre trimestres depuis toujours (lus et écrits sans préfixe). Inscrits ici pour que
+        // `sauvegarderDonneesSelonMode('enseignants', …)` — le témoin commun — les écrive au
+        // même endroit, sans l'avertissement de cle(). Aucun changement de rangement.
+        'enseignants'
     ];
 
     // ✅ AJOUT (28 janvier 2026) : Templates à copier lors de l'archivage

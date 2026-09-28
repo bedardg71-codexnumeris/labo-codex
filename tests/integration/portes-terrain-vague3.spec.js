@@ -151,11 +151,11 @@ test.describe('portes terrain vague 3 (WebKit)', () => {
             return {
                 cours: lire('v2-btnTexteCours'),
                 horaire: lire('v2-btnTexteHoraire'),
-                enseignant: lire('v2-btnTexteEnseignant'),
+                enseignant: lire('v2-btnCreerEnseignant'),   // lot E2 : « Créer le profil »
                 groupeCours: lire('v2-btnTexteGroupeCours')
             };
         });
-        expect(libelles).toEqual({ cours: 'Créer', horaire: 'Créer', enseignant: 'Créer', groupeCours: 'Créer' });
+        expect(libelles).toEqual({ cours: 'Créer', horaire: 'Créer', enseignant: 'Créer le profil', groupeCours: 'Créer' });
 
         // ↻ Lot E2 (28 sept. 2026, D3) : la décision #306 (« save explicite ») est renversée —
         // un trimestre existant s'enregistre champ par champ. Modifier une borne, sans autre
