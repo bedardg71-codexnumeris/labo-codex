@@ -61,5 +61,5 @@ Rien n'est écrit. **Ce qui change à la lecture, sur des cartes existantes** : 
 ## 7 · Trouvailles en chemin
 
 - **La page 8 du guide** (`GUIDE_PAGES`, l. ~1811) dit encore « Relie-la aux éléments qu'elle évalue : idées maîtresses, connaissances ou activités. Le verbe « se vérifie par »… ». **Fausse depuis ce lot.** Hors lot par consigne (« Ne touche pas au guide ») : le lot 4 (#966) la réécrit, et part dans la même version. Issue 2, déjà couverte par #966.
-- **#967** (objectif servi d'une autre leçon, tu dans l'export) : réglé ici **pour les évaluations seulement** ; reste ouvert pour les autres blocs.
+- **#974** (d'abord #967 ; objectif servi d'une autre leçon, tu dans l'export) : réglé ici **pour les évaluations seulement** ; reste ouvert pour les autres blocs.
 - Dans le viewport de l'essai navigateur, une palette flottante recouvre l'Inspecteur et intercepte le clic (Chromium sans interface). Pas de symptôme vécu : issue 3, noté ici.
