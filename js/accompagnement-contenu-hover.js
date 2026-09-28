@@ -619,7 +619,7 @@ const TOOLTIPS = {
     'planif-structure':
         'Quand enseigner : la séquence regroupe des leçons qui poursuivent les mêmes idées maîtresses ; c\'est la leçon qui porte sa semaine. Ces deux-là n\'ont PAS de menu de type dans leur en-tête : elles ne sont pas interchangeables, une leçon portant une semaine et un rang de séance qu\'une séquence n\'a pas.',
     'planif-design-apprentissages':
-        'Vérification : l\'évaluation ferme la boucle — relie-la à ce qu\'elle vérifie (idées maîtresses, connaissances ou activités). Le menu de son en-tête choisit sa visée : formative ou certificative. Tant que tu n\'as rien choisi, tes exports écrivent « Évaluation », comme avant.',
+        'Vérification : l\'évaluation ferme la boucle – coche dans son Inspecteur les objectifs qu\'elle vérifie, ceux de sa leçon ou d\'une leçon placée avant elle. Le menu de son en-tête choisit sa visée : formative ou certificative. Tant que tu n\'as rien choisi, tes exports écrivent « Évaluation », comme avant.',
 
     // --- Nœuds ---
 
