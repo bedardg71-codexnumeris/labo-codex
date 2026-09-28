@@ -2179,7 +2179,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
         const fraiches = lues || [];
         fraiches.push(copie);
         return fraiches;
-    }, [], { geste: 'Modifier la pratique' });
+    }, [], { geste: 'Dupliquer la pratique' });
 
     await afficherListePratiquesMateriel();
     await chargerPratiquePourModif(copie.id);
@@ -2197,7 +2197,7 @@ async function supprimerPratiqueMateriel(pratiqueId) {
 
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         return (lues || []).filter(p => p.id !== pratiqueId);
-    }, [], { geste: 'Modifier la pratique' });
+    }, [], { geste: 'Supprimer la pratique' });
 
     pratiqueEnEditionMateriel = null;
 

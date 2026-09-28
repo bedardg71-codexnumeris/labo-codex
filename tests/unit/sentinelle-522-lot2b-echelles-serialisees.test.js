@@ -290,7 +290,11 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // tableau de niveaux, qui rendait dans `#tableauNiveaux` (conteneur caché
         // d'index.html) et portait ses seuls déclencheurs. Même motif : un site de
         // moins, aucune écriture directe de plus.
-        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(20);
+        // Lot E1, trouvaille 1 (a) de la relecture (27 sept. 2026) : 20 → 19. « Écraser »
+        // retirait l'homonyme dans sa propre écriture, AVANT les vérifications de
+        // « Créer l'échelle » ; le retrait passe dans l'écriture de création. Deux
+        // écritures deviennent une, toujours par la file.
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(19);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {

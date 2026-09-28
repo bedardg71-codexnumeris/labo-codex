@@ -1064,7 +1064,7 @@ async function dupliquerGrille(grilleId) {
         const liste = lues || [];
         liste.push(nouvelleGrille);
         return liste;
-    }, [], { geste: 'Modifier la grille' });
+    }, [], { geste: 'Dupliquer la grille' });
 
     // Charger la nouvelle grille en édition
     grilleTemplateActuelle = nouvelleGrille;
@@ -2929,12 +2929,12 @@ async function deplacerCartouchesVersAutreGrille(ancienneGrilleId, nouvelleGrill
         const ajouts = remappees.filter(c => !idsExistants.has(c.id));
         if (ajouts.length === 0) return undefined;
         return existantes.concat(ajouts);
-    }, [], { geste: 'Modifier la grille' });
+    }, [], { geste: 'Supprimer la grille' });
 
     await modifierEtAnnoncer(cle(`cartouches_${ancienneGrilleId}`), (lues) => {
         if (!Array.isArray(lues) || lues.length === 0) return undefined;
         return [];
-    }, [], { geste: 'Modifier la grille' });
+    }, [], { geste: 'Supprimer la grille' });
 
     return { nbDeplacees: remappees.length, orphelins, sansCritere };
 }
@@ -3086,7 +3086,7 @@ async function _retirerGrilleDeLaListe(grilleId, options = {}) {
         liste.splice(i, 1);
         supprimee = true;
         return liste;
-    }, [], { geste: 'Modifier la grille' });
+    }, [], { geste: 'Supprimer la grille' });
     return supprimee;
 }
 
@@ -5359,7 +5359,7 @@ async function dupliquerGrilleDepuisSidebar(id) {
         grilles.push(copie);
         copieCreee = copie;
         return grilles;
-    }, [], { geste: 'Modifier la grille' });
+    }, [], { geste: 'Dupliquer la grille' });
 
     if (!copieCreee) return;
     const copie = copieCreee;
