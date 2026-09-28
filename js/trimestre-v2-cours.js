@@ -341,12 +341,11 @@ function changerCoursSelectionneV2(coursId) {
         if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
 
         // Mettre à jour le titre (#842 : « Modifier le cours » / « Modifier le service », selon la fiche)
-        const btnTexte = document.getElementById('v2-btnTexteCours');
         _titrerFormCoursV2('modifier');
-        if (btnTexte) btnTexte.textContent = 'Enregistrer';
 
         // Remplir le formulaire
         remplirFormCoursV2(coursSelectionne);
+        rendreModeFicheCoursV2(false);
         afficherSyntheseCours(coursSelectionne);  // Beta 95.3 : synthèse sidebar
         if (typeof window.chargerGroupesCoursV2 === 'function') {
             window.chargerGroupesCoursV2(coursId);
@@ -610,13 +609,13 @@ async function afficherFormCoursV2() {
  * 🆕 BETA 95.2
  */
 async function nouveauCoursV2() {
+    if (!(await _quitterCreationCoursSiConfirme())) return;
     coursEnEditionV2 = null;
     _cacherBandeauEdition();
     _mettreAJourBoutonActiverCours(null);
 
     const etatVide = document.getElementById('cours-etat-vide');
     const formulaire = document.getElementById('cours-formulaire-edition');
-    const btnTexte = document.getElementById('v2-btnTexteCours');
     const selectCours = document.getElementById('v2-selectCours');
 
     // Désélectionner dans le dropdown
@@ -626,11 +625,10 @@ async function nouveauCoursV2() {
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
     _titrerFormCoursV2('nouveau'); // #842 : « Nouveau cours » / « Nouveau service », selon le menu Nature
-    // #306 Lot 1 : libellé canonique « Créer » en création (« Enregistrer » en édition)
-    if (btnTexte) btnTexte.textContent = 'Créer';
 
     // Réinitialiser tous les champs
     reinitialiserFormCoursV2();
+    rendreModeFicheCoursV2(true);
 
     // Masquer le bouton Supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
@@ -1278,6 +1276,8 @@ function changerNatureCoursV2() {
     const nom = document.getElementById('v2-nomCours');
     if (nom) nom.placeholder = service ? 'Ex: Aide à la réussite en français' : 'Ex: Écriture et littérature';
     _titrerFormCoursV2(); // #842 : le titre suit la fiche (« Nouveau service » dès que le menu bascule)
+    const btnCreer = document.getElementById('v2-btnCreerCours');
+    if (btnCreer) btnCreer.textContent = mots.creer;     // lot E2 : « Créer le cours » / « Créer le service »
 }
 
 /** Les options du menu Nature et sa phrase d'aide : le mot de chaque nature, depuis le point unique. */
@@ -1301,9 +1301,99 @@ function setValue(id, value) {
 }
 
 /**
- * Annule le formulaire et revient à l'aperçu
+ * Lot E2 (D3) — une fiche existante s'enregistre toute seule : « Créer le cours » (ou
+ * « Créer le service », selon le menu Nature) ne paraît qu'en création.
  */
-function annulerFormCoursV2() {
+function rendreModeFicheCoursV2(enCreation) {
+    const btn = document.getElementById('v2-btnCreerCours');
+    if (btn) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/** Lot E2 : la nature choisie dans le formulaire ('cours' | 'service'). */
+function _natureFormCoursV2() {
+    return document.getElementById('v2-natureCours')?.value === 'service' ? 'service' : 'cours';
+}
+
+/** Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js). */
+function coursEnCreationSaisi() {
+    const formulaire = document.getElementById('cours-formulaire-edition');
+    if (!formulaire || formulaire.classList.contains('u-hide')) return false;
+    if (coursEnEditionV2) return false;
+    return ['v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-disciplineCours',
+        'v2-elementsCompetence', 'v2-heuresEnseignement', 'v2-ponderation']
+        .some(id => String(document.getElementById(id)?.value || '').trim());
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('cours', coursEnCreationSaisi);
+
+/** Lot E2 : la question de sortie, au titre de la fiche (« Ce cours… » / « Ce service… »). */
+async function _quitterCreationCoursSiConfirme() {
+    if (!window.uiDialogues) return true;
+    return window.uiDialogues.quitterCreationSiConfirme('cours', motsNature(_natureFormCoursV2()).pasEncoreCree);
+}
+
+/**
+ * Lot E2 : choisir une fiche dans le menu. Pendant une création, la question de sortie ;
+ * « Rester » garde la création à l'écran.
+ */
+async function choisirCoursV2(el) {
+    const select = document.getElementById('v2-selectCours');
+    const coursId = (el && el.value !== undefined) ? el.value : select?.value;
+    if (!(await _quitterCreationCoursSiConfirme())) {
+        if (select) select.value = '';
+        return;
+    }
+    changerCoursSelectionneV2(coursId);
+}
+
+/** Lot E2 (D3) : « Annuler » devient « Fermer » — il n'annulait rien. En création, la question. */
+async function fermerFicheCoursV2() {
+    if (!(await _quitterCreationCoursSiConfirme())) return;
+    _fermerFormCoursV2();
+}
+
+/**
+ * Lot E2 (D3) — un champ d'une fiche EXISTANTE s'enregistre au changement (par le même
+ * écrivain que la création, `sauvegarderCoursV2` : mêmes vérifications, même garde #455).
+ * En création, rien : c'est « Créer le cours » qui écrit.
+ */
+async function sauvegarderChampCoursV2() {
+    if (!coursEnEditionV2) return false;
+    return sauvegarderCoursV2();
+}
+
+/** Lot E2 : la pondération se normalise (#540), puis s'enregistre sur une fiche existante. */
+async function changerPonderationCoursV2() {
+    normaliserPonderationCoursV2();
+    return sauvegarderChampCoursV2();
+}
+
+/**
+ * Lot E2 : changer la nature. Le formulaire suit (#834), et sur une fiche existante la
+ * nature s'enregistre. ⚠ Un cours qui devient service perd en base son code, sa discipline,
+ * sa compétence et sa pondération (un service n'en a pas, #834) : quand la fiche en porte,
+ * on le demande d'abord ; « Annuler » remet le menu.
+ */
+async function changerNatureFicheCoursV2() {
+    changerNatureCoursV2();
+    if (!coursEnEditionV2) return false;
+    const enBase = (db.getSync('cours', []) || []).find(c => c.id === coursEnEditionV2);
+    if (enBase && enBase.nature !== 'service' && _natureFormCoursV2() === 'service') {
+        const porteDesDonnees = ['codeCours', 'discipline', 'ponderation', 'numeroCompetence', 'competence', 'elementsCompetence']
+            .some(ch => String(enBase[ch] || '').trim()) || (enBase.heuresContact === 0 || !!enBase.heuresContact);
+        if (porteDesDonnees && !confirm(
+            'Ce cours deviendra un service : son code, sa discipline, sa compétence et sa pondération seront effacés.\n\nContinuer ?')) {
+            setValue('v2-natureCours', 'cours');
+            changerNatureCoursV2();
+            return false;
+        }
+    }
+    return sauvegarderCoursV2();
+}
+
+/**
+ * Referme le formulaire et revient à l'état vide (ex-annulerFormCoursV2, sans question).
+ */
+function _fermerFormCoursV2() {
     coursEnEditionV2 = null;
     modeFormCoursV2 = null;
     _cacherBandeauEdition();
@@ -1381,23 +1471,50 @@ function _activerSiPremierCours(coursSauve) {
     db.setSync('infoCours', { ...coursSauve, actif: true });
 }
 
-function _postSauvegardeCoursV2(cours) {
-    const objet = motsNature(cours).ObjetLong;
-    notifications.succes(coursEnEditionV2 ? objet + ' modifié avec succès' : objet + ' créé avec succès');
-    annulerFormCoursV2();
+/**
+ * Lot E2 (D3) : un refus de vérification dit « Non enregistré – ‹geste› : ‹raison› » par le
+ * témoin commun (avant : un toast d'erreur, à côté d'un message de réussite possible).
+ */
+function _refuserCoursV2(phrase, geste) {
+    if (window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(phrase), geste, 'cours');
+    }
+    return false;
+}
+
+/**
+ * Après l'écriture. Création : « Cours « … » créé. » (ou « Service d'orthopédagogie « … »
+ * créé. »), puis la fiche s'ouvre en modification. Modification : le témoin a dit
+ * « Enregistré » ; le formulaire reste ouvert, menus et synthèse relus.
+ */
+function _apresEcritureCoursV2(cours, creation) {
     chargerDropdownCoursV2();
     const selectCours = document.getElementById('v2-selectCours');
-    if (selectCours) {
-        selectCours.value = cours.id;
+    if (creation) {
+        const mots = motsNature(cours);
+        notifications.succes(`${mots.ObjetLong} «\u00a0${cours.codeCours || cours.nomCours || ''}\u00a0» créé.`);
+        if (selectCours) selectCours.value = cours.id;
         changerCoursSelectionneV2(cours.id);
+    } else {
+        if (selectCours) selectCours.value = cours.id;
+        afficherSyntheseCours(cours);
+        _afficherBandeauEdition(cours);
     }
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
 }
 
+/**
+ * L'écrivain unique d'une fiche de cours ou de service : « Créer le cours » en création,
+ * chaque champ en modification (lot E2, D3). Mêmes vérifications dans les deux cas.
+ * @returns {Promise<boolean>} true si la fiche a été écrite
+ */
 async function sauvegarderCoursV2() {
     const d = _lireDonneesFormCoursV2();
+    const creation = !coursEnEditionV2;
+    const motsFiche = motsNature(d.nature);
+    const geste = creation ? motsFiche.creer : motsFiche.modifier;
 
     // Cadrage « Rencontres » (12 sept. 2026) — un SERVICE n'a que son nom. Les trois
     // exigences #540 ci-dessous (code, discipline, pondération) décrivent un devis
@@ -1405,10 +1522,7 @@ async function sauvegarderCoursV2() {
     // garde de doublon par code (#455) ne le voit pas : son identité n'est pas un code.
     if (d.nature === 'service') {
         if (!d.nomCours) {
-            const mots = motsNature('service');
-            notifications.erreur('Nom du ' + mots.objet + ' requis',
-                'C\'est le seul champ d\'un ' + mots.objetLong + ' : il s\'affiche partout où un cours montre son code.');
-            return;
+            return _refuserCoursV2('Le nom du ' + motsFiche.objet + ' est requis : c\'est le seul champ d\'un ' + motsFiche.objetLong + '.', geste);
         }
         d.codeCours = '';
         d.discipline = '';
@@ -1418,61 +1532,40 @@ async function sauvegarderCoursV2() {
         d.elementsCompetence = '';
         d.heuresContact = null;
         let coursService;
-        if (coursEnEditionV2) {
-            coursService = await CoursEntite.mettreAJour(coursEnEditionV2, d);
-            if (!coursService) {
-                notifications.erreur('Service introuvable',
-                    'La fiche a peut-être été supprimée depuis un autre onglet. Recharge la page.');
-                return;
-            }
-            _resyncInfoCoursSiActif(coursService);
-        } else {
-            coursService = await CoursEntite.creer(d);
-            if (!coursService) {
-                notifications.erreur('Création refusée', 'Le service n\'a pas pu être enregistré.');
-                return;
-            }
-            _activerSiPremierCours(coursService);
+        try {
+            coursService = await ecrireEtAnnoncer('cours', () => (creation
+                ? CoursEntite.creer(d)
+                : CoursEntite.mettreAJour(coursEnEditionV2, d)), { geste });
+        } catch (e) { return false; }
+        if (!coursService) {
+            return _refuserCoursV2(creation
+                ? 'Le ' + motsFiche.objet + ' n\'a pas pu être enregistré.'
+                : 'La fiche a peut-être été supprimée depuis un autre onglet. Recharge la page.', geste);
         }
-        _postSauvegardeCoursV2(coursService);
-        return;
+        if (creation) _activerSiPremierCours(coursService); else _resyncInfoCoursSiActif(coursService);
+        _apresEcritureCoursV2(coursService, creation);
+        return true;
     }
 
-    // #540 (26 août 2026) — TROIS champs requis, et tous les trois le DISENT désormais
-    // à l'écran (astérisque `champ-requis`, légende sous le formulaire). Le code et la
-    // discipline étaient déjà refusés ici depuis toujours, sans qu'aucune marque ne
-    // l'annonce : l'obligation existait sans être dite.
-    // Refus par `notifications.erreur` et non plus par `alert()` — le reste de
-    // l'application n'utilise pas de dialogue natif pour ça, et une alerte bloque tout.
+    // #540 (26 août 2026) — TROIS champs requis, et tous les trois le DISENT à l'écran
+    // (astérisque `champ-requis`, légende sous le formulaire). Lot E2 (D3) : le refus passe
+    // par le témoin commun, « Non enregistré – ‹geste› : ‹raison› ».
     if (!d.codeCours) {
-        notifications.erreur('Code du cours requis',
-            'Le code identifie la fiche pour tous les trimestres. Ex. : 601-101-MQ.');
-        return;
+        return _refuserCoursV2('Le code du cours est requis : il identifie la fiche pour tous les trimestres. Ex. : 601-101-MQ.', geste);
     }
     if (!d.discipline) {
-        notifications.erreur('Discipline requise',
-            'Choisis la discipline dans la liste.');
-        return;
+        return _refuserCoursV2('Choisis la discipline dans la liste.', geste);
     }
 
     // #540 — La pondération devient la SOURCE de la durée hebdomadaire d'enseignement :
     // `(théorie + labo)` est le nombre d'heures en classe par semaine — 4 h en littérature
-    // (2-2-3), 4 h en philosophie (3-1-3), 5 h en chimie (3-2-3). C'est elle que le
-    // recoupement avec l'horaire confrontera (lot D). Une fiche sans pondération ne peut
-    // donc plus s'enregistrer.
-    //
-    // RÈGLE UNIQUE, tranchée par Grégoire le 26 août : la même exigence pour une fiche
-    // ancienne et pour une fiche neuve. Une fiche incomplète se complète au premier
-    // passage — c'est une friction assumée, pas un oubli.
+    // (2-2-3), 4 h en philosophie (3-1-3), 5 h en chimie (3-2-3). RÈGLE UNIQUE, tranchée par
+    // Grégoire le 26 août : la même exigence pour une fiche ancienne et pour une fiche neuve.
     if (!d.ponderation) {
-        notifications.erreur('Pondération requise',
-            'Elle donne les heures de cours par semaine. Format du devis ministériel : 2-2-3.');
-        return;
+        return _refuserCoursV2('La pondération est requise : elle donne les heures de cours par semaine. Format du devis ministériel : 2-2-3.', geste);
     }
     if (!_parserPonderation(d.ponderation)) {
-        notifications.erreur('Pondération non reconnue',
-            'Attendu : trois nombres, comme sur le devis ministériel. Ex. : 2-2-3.');
-        return;
+        return _refuserCoursV2('La pondération n\'est pas reconnue : trois nombres, comme sur le devis ministériel. Ex. : 2-2-3.', geste);
     }
 
     // #455 : le cours est GLOBAL — une fiche par code, servie à tous les
@@ -1483,11 +1576,10 @@ async function sauvegarderCoursV2() {
     // CT-15 (23 août 2026) : la DÉTECTION est passée à `CoursEntite`, qui la
     // refait de son côté au point d'écriture. Ici on ne fait plus que PARLER à
     // Grégoire — et son oui est reporté à l'entité par `doublonAssume`.
-    // Deux détections, une seule règle : celle de `cleNaturelleCours`.
     //
     // ⚠ L'ÉDITION EST GARDÉE ELLE AUSSI. Renommer le code d'une fiche pour lui
     // donner celui d'une autre fabrique exactement le doublon que la création
-    // refuse, par un chemin que personne ne surveillait avant CT-15.
+    // refuse. Lot E2 : en modification, « Annuler » remet le code en base dans le champ.
     const dejaLa = await CoursEntite.chercherDoublonCode(
         d, coursEnEditionV2 ? { exclureId: coursEnEditionV2 } : undefined);
     let doublonAssume = false;
@@ -1500,36 +1592,36 @@ async function sauvegarderCoursV2() {
                 ? 'Donner quand même ce code à cette fiche ?'
                 : 'Créer quand même une seconde fiche ?')
         );
-        if (!quandMeme) return;
+        if (!quandMeme) {
+            if (!creation) {
+                const enBase = (db.getSync('cours', []) || []).find(c => c.id === coursEnEditionV2);
+                if (enBase) setValue('v2-codeCours', enBase.codeCours || enBase.sigle || enBase.code || '');
+            }
+            return false;
+        }
         doublonAssume = true;
     }
 
     // Refonte chantier C : persistance routée par CoursEntite (source unique du modèle
-    // cours = description ministérielle pure, ID COURS_*). Plus de fabrication d'objet
-    // gras ni d'ID embarquant la période. Édition = ID préservé (coursEnEditionV2),
-    // champs legacy conservés par mettreAJour jusqu'au chantier D.
+    // cours = description ministérielle pure, ID COURS_*). Édition = ID préservé
+    // (coursEnEditionV2), champs legacy conservés par mettreAJour jusqu'au chantier D.
+    // Lot E2 : le témoin commun parle après l'écriture de l'entité (ecrireEtAnnoncer).
     let coursSauve;
-    if (coursEnEditionV2) {
-        coursSauve = await CoursEntite.mettreAJour(coursEnEditionV2, d, { doublonAssume });
-        if (!coursSauve) {
-            notifications.erreur('Cours introuvable',
-                'La fiche a peut-être été supprimée depuis un autre onglet. Recharge la page.');
-            return;
-        }
-        _resyncInfoCoursSiActif(coursSauve);
-    } else {
-        coursSauve = await CoursEntite.creer(d, { doublonAssume });
-        if (!coursSauve) {
-            // La garde de l'entité a refusé alors qu'on venait de demander :
-            // état incohérent, on le DIT plutôt que d'annoncer un succès.
-            notifications.erreur('Création refusée',
-                'Une fiche porte déjà ce code.');
-            return;
-        }
-        _activerSiPremierCours(coursSauve);
+    try {
+        coursSauve = await ecrireEtAnnoncer('cours', () => (creation
+            ? CoursEntite.creer(d, { doublonAssume })
+            : CoursEntite.mettreAJour(coursEnEditionV2, d, { doublonAssume })), { geste });
+    } catch (e) { return false; }
+    if (!coursSauve) {
+        // La garde de l'entité a refusé alors qu'on venait de demander : état
+        // incohérent, on le DIT plutôt que d'annoncer un succès.
+        return _refuserCoursV2(creation
+            ? 'Une fiche porte déjà ce code.'
+            : 'La fiche a peut-être été supprimée depuis un autre onglet. Recharge la page.', geste);
     }
-
-    _postSauvegardeCoursV2(coursSauve);
+    if (creation) _activerSiPremierCours(coursSauve); else _resyncInfoCoursSiActif(coursSauve);
+    _apresEcritureCoursV2(coursSauve, creation);
+    return true;
 }
 
 /**
@@ -1550,8 +1642,13 @@ window.supprimerCoursV2 = supprimerCoursV2;
 window.activerCoursV2 = activerCoursV2;
 window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
 window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
-window.annulerFormCoursV2 = annulerFormCoursV2;
+window.fermerFicheCoursV2 = fermerFicheCoursV2;
+window.choisirCoursV2 = choisirCoursV2;
 window.sauvegarderCoursV2 = sauvegarderCoursV2;
+window.sauvegarderChampCoursV2 = sauvegarderChampCoursV2;
+window.changerPonderationCoursV2 = changerPonderationCoursV2;
+window.changerNatureFicheCoursV2 = changerNatureFicheCoursV2;
+window.rendreModeFicheCoursV2 = rendreModeFicheCoursV2;
 window.afficherSyntheseCours = afficherSyntheseCours;
 window.afficherSyntheseEnseignant = afficherSyntheseEnseignant;
 window.afficherSyntheseGroupeEtudiants = afficherSyntheseGroupeEtudiants;

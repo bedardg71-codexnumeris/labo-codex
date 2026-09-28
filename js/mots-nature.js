@@ -49,6 +49,8 @@ const MOTS_NATURE = Object.freeze({
         nouveau: 'Nouveau cours',                         // titre du formulaire (création)
         modifier: 'Modifier le cours',                    // titre du formulaire (édition)
         dupliquer: 'Dupliquer le cours',                  // titre du formulaire (duplication)
+        creer: 'Créer le cours',                          // lot E2 (D3) : le bouton qui crée la fiche
+        pasEncoreCree: 'Ce cours n\'est pas encore créé.',  // lot E2 : la question de sortie, en création
         // Cadre › Groupe-cours : ce qui est obligatoire (l'horaire l'est pour un cours, pas pour un service)
         elementsObligatoires: 'renseigne les 5 éléments obligatoires : trimestre, cours, numéro de groupe, horaire et enseignant·e. La pratique de notation est facultative.',
         nbElementsObligatoires: '5 éléments obligatoires',
@@ -72,6 +74,8 @@ const MOTS_NATURE = Object.freeze({
         nouveau: 'Nouveau service',
         modifier: 'Modifier le service',
         dupliquer: 'Dupliquer le service',
+        creer: 'Créer le service',
+        pasEncoreCree: 'Ce service n\'est pas encore créé.',
         elementsObligatoires: 'renseigne les 4 éléments obligatoires : trimestre, service d’orthopédagogie, numéro de groupe et orthopédagogue. L’horaire et la pratique de notation sont facultatifs.',
         nbElementsObligatoires: '4 éléments obligatoires',
         elementsObligatoiresForm: 'Renseigne les 4 éléments obligatoires (l’horaire et la pratique de notation sont facultatifs).',

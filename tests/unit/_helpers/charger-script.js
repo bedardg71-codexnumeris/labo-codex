@@ -43,6 +43,15 @@ export function completerEcrivainsParDefaut(globaux, fauxWindow) {
             return dbHarnais.modifier(cle, mutateur, defaut === undefined ? null : defaut);
         };
     }
+    // Lot E2 (28 sept. 2026) : `ecrireEtAnnoncer` (modes.js) — l'entité écrit, le témoin parle.
+    if (typeof globaux.ecrireEtAnnoncer !== 'function') {
+        ajouts.ecrireEtAnnoncer = function (cle, ecrire, options) {
+            if (fauxWindow && typeof fauxWindow.ecrireEtAnnoncer === 'function') {
+                return fauxWindow.ecrireEtAnnoncer(cle, ecrire, options);
+            }
+            return Promise.resolve().then(ecrire);
+        };
+    }
     if (typeof globaux.sauvegarderDonneesSelonMode !== 'function') {
         const cleHarnais = globaux.cle;
         ajouts.sauvegarderDonneesSelonMode = function (cleBase, donnees, options) {

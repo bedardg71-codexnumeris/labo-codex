@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-import { position } from './_helpers/tranche.js';
+import { position, tranche } from './_helpers/tranche.js';
 
 // =======================================================================
 // SENTINELLE #540 LOT A — LA PONDÉRATION EST REQUISE, ET DITE COMME TELLE
@@ -302,8 +302,13 @@ describe('#540-E — le refus est dit, sans dialogue natif', () => {
         expect(corps).toContain('_parserPonderation(d.ponderation)');
     });
 
-    it('le refus passe par notifications.erreur', () => {
-        expect(corps).toContain('notifications.erreur');
+    // ↻ Lot E2 (28 sept. 2026, D3) : le refus passe par le témoin commun (« Non enregistré –
+    // ‹geste› : ‹raison› »), par `_refuserCoursV2`, et plus par notifications.erreur.
+    it('le refus passe par le témoin commun (_refuserCoursV2), pas par un toast', () => {
+        expect(corps).toContain('_refuserCoursV2(');
+        expect(corps).not.toContain('notifications.erreur');
+        const refus = tranche(SRC_COURS, 'function _refuserCoursV2', '\n}');
+        expect(refus).toContain('temoinEnregistrement.nonEnregistre');
     });
 
     it('plus aucun alert() dans la validation', () => {
