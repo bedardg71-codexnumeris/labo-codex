@@ -56,6 +56,15 @@ function afficherRencontres() {
     const conteneur = document.getElementById('conteneurRencontres');
     if (!conteneur) return;
 
+    // Lot E3 (D3) : une rencontre en cours de création reste à l'écran au retour sur le sous-onglet
+    // (elle était perdue en silence) ; la question de sortie ne peut pas être posée en partant,
+    // `navigation.js` étant une zone protégée.
+    if (typeof interventionEnCreationAffichee === 'function' && interventionEnCreationAffichee()
+        && conteneur.querySelector('[data-fiche-intervention]')) {
+        if (typeof definirVocabulaireInterventions === 'function') definirVocabulaireInterventions('rencontres');
+        return;
+    }
+
     const trimestre = _trimestreActifOuNull();
     const contexte = trimestre ? _contexteActifOuNull() : null;
 

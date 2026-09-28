@@ -108,7 +108,13 @@ const VOCABULAIRES = {
         videAide: 'Clique sur «Planifier une intervention» pour commencer.',
         introuvable: 'Intervention non trouvée.',
         supprimer: 'Supprimer cette intervention ?',
-        enregistree: 'Intervention enregistrée',
+        // Lot E3 (D3, 28 sept. 2026) : créer ou modifier ; mots proposés à Grégoire.
+        creer: 'Créer l\'intervention',
+        modifier: 'Modifier l\'intervention',
+        creee: 'Intervention créée.',
+        pasEncoreCree: 'Cette intervention n\'est pas encore créée.',
+        completerTitre: 'Marquer cette intervention complétée ?',
+        completerTexte: 'Les présences des participant·es seront reportées dans la saisie des présences. Ce report ne se refait pas si tu modifies l\'intervention ensuite.',
         labelNiveau: 'Niveau R\u00e0I :',
         niveau2: 'Niveau 2 (Groupe cibl\u00e9)',
         niveau3: 'Niveau 3 (Individuel)',
@@ -126,7 +132,13 @@ const VOCABULAIRES = {
         videAide: 'Clique sur « + Nouvelle rencontre » pour en créer une.',
         introuvable: 'Rencontre introuvable.',
         supprimer: 'Supprimer cette rencontre ?',
-        enregistree: 'Rencontre enregistrée',
+        // Lot E3 (D3, 28 sept. 2026) : créer ou modifier ; mots proposés à Grégoire.
+        creer: 'Créer la rencontre',
+        modifier: 'Modifier la rencontre',
+        creee: 'Rencontre créée.',
+        pasEncoreCree: 'Cette rencontre n\'est pas encore créée.',
+        completerTitre: 'Marquer cette rencontre complétée ?',
+        completerTexte: 'Les présences des participant·es seront reportées dans la saisie des présences. Ce report ne se refait pas si tu modifies la rencontre ensuite.',
         labelNiveau: 'Rencontre :',
         niveau2: 'En sous-groupe',
         niveau3: 'Individuelle',
@@ -225,14 +237,6 @@ function _interventionsLisibles(interventions, dire) {
         console.warn('Interventions : ' + (interventions.length - lisibles.length) + ' brouillon(s) d\'avant le 12 sept. 2026 ignoré(s) — jamais enregistré(s), laissé(s) en base.');
     }
     return lisibles;
-}
-
-/**
- * Sauvegarder les interventions dans localStorage
- * @param {Array} interventions - Liste des interventions
- */
-function sauvegarderInterventions(interventions) {
-    db.setSync(cle('interventions'), interventions);
 }
 
 /* ===============================
@@ -376,7 +380,8 @@ function analyserSousGroupe(dasEtudiants) {
 function supprimerIntervention(interventionId) {
     let interventions = obtenirInterventions();
     interventions = interventions.filter(i => i.id !== interventionId);
-    sauvegarderInterventions(interventions);
+    // Lot E3 (D0 point 2) : par le témoin commun, comme les suppressions du Cadre (lot E2).
+    return sauvegarderDonneesSelonMode('interventions', interventions, { geste: _enVueRencontres() ? 'Supprimer la rencontre' : 'Supprimer l\'intervention' });
 }
 
 /* ===============================
@@ -836,13 +841,45 @@ function afficherFormulaireIntervention(daPreselectionne) {
 }
 
 /**
- * Annuler la création d'une intervention : le brouillon n'a jamais été écrit, on le jette —
- * sans écriture ni confirmation (lot 5 du cadrage 11 ; avant, cette fonction supprimait en base).
- * @param {string} interventionId - ID du brouillon
+ * Lot E3 (D3) — « ma fiche est en création et porte une saisie » : lu par la question de sortie et
+ * par le `beforeunload` communs (`ui-dialogues.js`). La date du jour, la durée et le niveau posés à
+ * l'ouverture ne sont pas une saisie.
  */
-function annulerNouvelleIntervention(interventionId) {
-    if (_estBrouillon(interventionId)) _brouillon = null;
+function interventionEnCreationSaisie() {
+    if (!_brouillon) return false;
+    const fiche = document.querySelector('[data-fiche-intervention="' + _brouillon.id + '"]');
+    if (!fiche) return false;
+    const valeur = (id) => { const el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; };
+    const coches = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked').length > 0;
+    const notes = Array.from(document.querySelectorAll('#listeEtudiantsIntervention textarea')).some(t => String(t.value || '').trim());
+    const statut = document.querySelector('input[name="interventionStatut"]:checked');
+    return !!(valeur('interventionTitre') || valeur('interventionDescription') || valeur('observationsIntervention')
+        || valeur('interventionHeure') || valeur('objectifVise') || coches || notes
+        || valeur('interventionDate') !== (_brouillon.date || '')
+        || (statut && statut.value === 'completee'));
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('intervention', interventionEnCreationSaisie);
+
+/**
+ * Lot E3 (D3) — « Fermer » (il n'annulait rien). En création : la question, puis le brouillon est
+ * jeté sans rien écrire (lot 5 du cadrage 11). Une intervention existante est déjà enregistrée.
+ * @param {string} interventionId
+ */
+async function fermerFicheIntervention(interventionId) {
+    if (_estBrouillon(interventionId)) {
+        if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('intervention', V().pasEncoreCree))) return;
+        _brouillon = null;
+    }
     afficherListeInterventions();
+}
+
+/**
+ * Lot E3 (D3) — au retour sur le sous-onglet, une création en cours n'est plus remplacée par la liste :
+ * elle était perdue en silence (inventaire du 26 sept.). Changer de sous-onglet passe par
+ * `navigation.js` (zone protégée), où la question ne peut pas être posée ; la fiche, elle, reste.
+ */
+function interventionEnCreationAffichee() {
+    return !!(_brouillon && document.querySelector('[data-fiche-intervention="' + _brouillon.id + '"]'));
 }
 
 /**
@@ -950,7 +987,7 @@ function ouvrirIntervention(interventionId, options) {
     // coché. Masquée, pas supprimée : un besoin semblable peut revenir. Hors service, rien ne change. Conteneur
     // absent ⇒ sauvegarderPresencesIntervention ne touche ni `criteresCibles` ni `objectifVise`.
     container.innerHTML = `
-        <div class="carte">
+        <div class="carte" data-fiche-intervention="${echapperHtml(interventionId)}">
             <h3 style="margin: 0 0 20px 0;">${options.modeCreation ? V().titreNouvelle : echapperHtml(_titreAffiche(intervention))}</h3>
 
             <!-- Section informations éditables -->
@@ -1206,16 +1243,22 @@ function ouvrirIntervention(interventionId, options) {
                 '</div>';
             })()}
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <!-- Lot E3 (D3) : une intervention existante s'enregistre toute seule ; le bouton qui crée
+                 ne paraît que sur un brouillon. -->
+            <div class="actions-fiche-intervention" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button data-action="fermerFicheIntervention" data-param="${interventionId}" class="btn btn-secondaire">Fermer</button>
                 ${_estBrouillon(interventionId)
-                    ? '<button data-action="annulerNouvelleIntervention" data-param="' + interventionId + '" class="btn btn-secondaire">Annuler</button>'
-                    : '<button data-action="afficherListeInterventions" class="btn btn-secondaire">Annuler</button>'}
-                <button data-action="sauvegarderPresencesIntervention" data-param="${interventionId}" class="btn btn-principal">
-                    Enregistrer
-                </button>
+                    ? '<button data-action="sauvegarderPresencesIntervention" data-param="' + interventionId + '" class="btn btn-principal">' + echapperHtml(V().creer) + '</button>'
+                    : ''}
             </div>
         </div>
     `;
+
+    // Lot E3 (D3) : l'écouteur unique de la fiche (un nœud neuf à chaque rendu : rien ne s'empile).
+    const fiche = container.querySelector('[data-fiche-intervention]');
+    if (fiche && typeof fiche.addEventListener === 'function') {
+        fiche.addEventListener('change', (e) => { surChangementFicheIntervention(interventionId, e.target); });
+    }
 
     // Initialiser la visibilité des blocs contexte/absences
     gererVisibiliteContexteIntervention();
@@ -1389,14 +1432,14 @@ function suggererObjectifIntervention(interventionId) {
     var dasSelectionnes = Array.from(checkboxes).map(function(cb) { return cb.value; });
 
     if (dasSelectionnes.length === 0) {
-        objectifField.value = '';
+        _poserObjectif(objectifField, '');
         return;
     }
 
     // Trouver le critère ciblé le plus faible
     var criteresCibles = Array.from(document.querySelectorAll('.critere-cible-cb:checked')).map(function(cb) { return cb.value; });
     if (criteresCibles.length === 0) {
-        objectifField.value = '';
+        _poserObjectif(objectifField, '');
         return;
     }
 
@@ -1442,15 +1485,26 @@ function suggererObjectifIntervention(interventionId) {
         suggestion = 'Stabiliser ' + plusFaible + ' au-dessus de ' + Math.round(seuilDeveloppement * 100) + ' %';
     }
 
-    objectifField.value = suggestion;
+    _poserObjectif(objectifField, suggestion);
+}
+
+/** Lot E3 (D3) : une valeur posée par script n'émet aucun « change » ; sans lui, l'objectif suggéré ne
+ * s'enregistrerait pas sur une intervention existante. */
+function _poserObjectif(champ, valeur) {
+    champ.value = valeur;
+    if (typeof champ.dispatchEvent === 'function' && typeof Event === 'function') {
+        champ.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 }
 
 /**
- * Sauvegarder toutes les informations d'une intervention (infos de base + présences + observations + statut)
- * @param {string} interventionId - ID de l'intervention
+ * Lot E3 (D3) — ce que le formulaire dit, posé sur l'intervention EN MÉMOIRE ; l'appelant écrit.
+ * Le corps de l'ancien « Enregistrer », inchangé : #772 (ce que le formulaire n'a pas montré n'est pas
+ * touché), lot A (un texte masqué en anonymisation ne s'écrit pas), lot C (critères absents sur un
+ * service), lot D (le contexte au premier geste).
+ * @param {Object} intervention
  */
-function sauvegarderPresencesIntervention(interventionId) {
-
+function _poserFormulaireSurIntervention(intervention) {
     const checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
     const dasSelectionnes = Array.from(checkboxes).map(cb => cb.value);
     // #772 (6 sept. 2026) — ce que le formulaire n'a pas MONTRÉ n'est pas touché. Le formulaire ne construit
@@ -1464,30 +1518,10 @@ function sauvegarderPresencesIntervention(interventionId) {
     const statutRadio = document.querySelector('input[name="interventionStatut"]:checked');
     const nouveauStatut = statutRadio ? statutRadio.value : 'en-cours';
 
-    // Lot 5 du cadrage 11 (12 sept. 2026, audit du 6 sept. I-1 et § 5.1) : UNE lecture, UNE écriture (il y
-    // en avait deux complètes par clic). Un brouillon (« Planifier ») entre en base ici, et seulement ici.
-    const interventions = obtenirInterventions();
-    let index = interventions.findIndex(i => i.id === interventionId);
-    if (index === -1 && _estBrouillon(interventionId)) {
-        interventions.push(_brouillon);
-        index = interventions.length - 1;
-    }
-
-    // Relecture croisée de Cowork (12 sept. 2026, 13 h 10) : un id qui n'est ni en base ni le brouillon n'écrit rien,
-    // et le dit. Avant, le bloc était sauté mais « Intervention enregistrée » s'affichait quand même — et le seul
-    // témoin de ce cas (le console.error de `marquerPresences`) était parti avec elle.
-    if (index === -1) {
-        console.error('Interventions : rien d\'enregistré — id ni en base ni en brouillon :', interventionId);
-        notifications.erreur(V().introuvable);
-        return;
-    }
-
-    const ancienStatut = interventions[index].statut;
-
     // Les présences (etudiants et analyse) : les cochés du formulaire, plus les participants que le
     // formulaire n'a pas montrés (#772).
-    const participantsNonAffiches = (interventions[index].etudiants || []).filter(da => !dasAffiches.includes(da));
-    _appliquerPresences(interventions[index], [...new Set(participantsNonAffiches.concat(dasSelectionnes))]);
+    const participantsNonAffiches = (intervention.etudiants || []).filter(da => !dasAffiches.includes(da));
+    _appliquerPresences(intervention, [...new Set(participantsNonAffiches.concat(dasSelectionnes))]);
 
     // Dériver contexte, type et absences depuis le formulaire
     var niveauSave = parseInt(document.getElementById('interventionNiveau').value);
@@ -1499,34 +1533,34 @@ function sauvegarderPresencesIntervention(interventionId) {
     else if (niveauSave === 3) typeSave = 'individuel';
 
     // Mettre à jour les informations de base
-    interventions[index].titre = _texteDuChamp(document.getElementById('interventionTitre'), interventions[index].titre);
-    interventions[index].date = document.getElementById('interventionDate').value;
-    interventions[index].heure = document.getElementById('interventionHeure').value;
-    interventions[index].duree = parseFloat(document.getElementById('interventionDuree').value) || 2;
-    interventions[index].niveauRai = niveauSave;
-    interventions[index].contexte = contexteSave;
-    interventions[index].type = typeSave;
-    interventions[index].description = _texteDuChamp(document.getElementById('interventionDescription'), interventions[index].description);
+    intervention.titre = _texteDuChamp(document.getElementById('interventionTitre'), intervention.titre);
+    intervention.date = document.getElementById('interventionDate').value;
+    intervention.heure = document.getElementById('interventionHeure').value;
+    intervention.duree = parseFloat(document.getElementById('interventionDuree').value) || 2;
+    intervention.niveauRai = niveauSave;
+    intervention.contexte = contexteSave;
+    intervention.type = typeSave;
+    intervention.description = _texteDuChamp(document.getElementById('interventionDescription'), intervention.description);
 
     // Absences seulement si rattrapage
     if (contexteSave === 'rattrapage') {
-        interventions[index].seanceConcernee = document.getElementById('interventionSeance').value || null;
-        interventions[index].marquerNonParticipantsMotives = true;
+        intervention.seanceConcernee = document.getElementById('interventionSeance').value || null;
+        intervention.marquerNonParticipantsMotives = true;
     } else {
-        interventions[index].seanceConcernee = null;
-        interventions[index].marquerNonParticipantsMotives = false;
+        intervention.seanceConcernee = null;
+        intervention.marquerNonParticipantsMotives = false;
     }
 
     // Mettre à jour le statut
-    interventions[index].statut = nouveauStatut;
+    intervention.statut = nouveauStatut;
 
     // Mettre à jour observations
-    interventions[index].observations = _texteDuChamp(observationsField, interventions[index].observations);
+    intervention.observations = _texteDuChamp(observationsField, intervention.observations);
 
     // Notes individuelles (#772) : on part de celles en base et on n'écrit que ce que le formulaire a
     // montré — un champ affiché vide efface la note, un champ affiché rempli la pose (coché ou non) ;
     // les DA sans champ (autre groupe-cours, élève parti) gardent la leur.
-    const notesIndividuelles = Object.assign({}, interventions[index].notesIndividuelles || {});
+    const notesIndividuelles = Object.assign({}, intervention.notesIndividuelles || {});
     dasAffiches.forEach(da => {
         const noteField = document.getElementById(`note-${da}`);
         // Masqué en anonymisation : la note en base reste telle quelle.
@@ -1535,12 +1569,12 @@ function sauvegarderPresencesIntervention(interventionId) {
         if (texte) notesIndividuelles[da] = texte;
         else delete notesIndividuelles[da];
     });
-    interventions[index].notesIndividuelles = notesIndividuelles;
+    intervention.notesIndividuelles = notesIndividuelles;
 
     // Snapshot incrémental par étudiant (Phase 4 — PT-2 + PT-3)
-    if (!interventions[index].snapshotAvant) interventions[index].snapshotAvant = {};
+    if (!intervention.snapshotAvant) intervention.snapshotAvant = {};
     dasSelectionnes.forEach(function(da) {
-        if (!interventions[index].snapshotAvant[da]) {
+        if (!intervention.snapshotAvant[da]) {
             var indicesSnap = typeof calculerTousLesIndices === 'function' ? calculerTousLesIndices(da) : null;
             var moyennesSnap = typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null;
             var criteresSnap = {};
@@ -1549,7 +1583,7 @@ function sauvegarderPresencesIntervention(interventionId) {
                     if (typeof moyennesSnap[k] === 'number') criteresSnap[k] = moyennesSnap[k];
                 });
             }
-            interventions[index].snapshotAvant[da] = {
+            intervention.snapshotAvant[da] = {
                 P: indicesSnap ? indicesSnap.P : null,
                 criteres: criteresSnap
             };
@@ -1561,53 +1595,131 @@ function sauvegarderPresencesIntervention(interventionId) {
     // (une liste vide lue dans un conteneur absent effacerait des critères que personne n'a décochés).
     if (document.getElementById('criteresCiblesContainer')) {
         var criteresCiblesCbs = document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked');
-        interventions[index].criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
+        intervention.criteresCibles = Array.from(criteresCiblesCbs).map(function(cb) { return cb.value; });
     }
     var objectifField = document.getElementById('objectifVise');
-    if (objectifField) interventions[index].objectifVise = objectifField.value;
+    if (objectifField) intervention.objectifVise = objectifField.value;
 
     // Sauvegarder le bilan si l'intervention est complétée (Phase 4)
     if (nouveauStatut === 'completee') {
         var bilanAtteintRadio = document.querySelector('input[name="bilanAtteint"]:checked');
         var bilanSuiteRadio = document.querySelector('input[name="bilanSuite"]:checked');
         var observationsBilanField = document.getElementById('observationsBilan');
-        interventions[index].bilan = {
+        intervention.bilan = {
             atteint: bilanAtteintRadio ? bilanAtteintRadio.value : null,
             suite: bilanSuiteRadio ? bilanSuiteRadio.value : null,
-            observationsBilan: _texteDuChamp(observationsBilanField, (interventions[index].bilan || {}).observationsBilan),
+            observationsBilan: _texteDuChamp(observationsBilanField, (intervention.bilan || {}).observationsBilan),
             dateBilan: Date.now()
         };
     }
 
     // Lot 5 : le drapeau `jamaisSauvegardee` n'existe plus (le brouillon vit en mémoire). Une intervention
     // du stock qui le porte encore (à false) le perd ici, à son propre Enregistrer — jamais en masse.
-    delete interventions[index].jamaisSauvegardee;
+    delete intervention.jamaisSauvegardee;
 
     // Lot D : une intervention d'avant le lot prend son contexte au premier Enregistrer
     // qui la touche — celui où l'enseignant la rouvre. Jamais réécrite en masse.
-    if (!interventions[index].groupeCoursId) {
+    if (!intervention.groupeCoursId) {
         const contexteNaissance = obtenirIdContexteActif();
-        if (contexteNaissance) interventions[index].groupeCoursId = contexteNaissance;
+        if (contexteNaissance) intervention.groupeCoursId = contexteNaissance;
     }
 
-    interventions[index].dateModification = Date.now();
-    sauvegarderInterventions(interventions);
-    if (_estBrouillon(interventionId)) _brouillon = null;
-    // Si l'intervention vient d'être marquée comme complétée, transférer les présences
+    intervention.dateModification = Date.now();
+}
+
+/**
+ * Lot E3 (D3, D0 point 2) — L'ÉCRIVAIN UNIQUE DE LA FICHE, pour créer comme pour modifier.
+ *
+ * · Un brouillon (« Planifier ») n'entre en base qu'ici, par « Créer l'intervention » / « Créer la
+ *   rencontre » (lot 5 du cadrage 11) ; le message de la création suit l'écriture ; la fiche se rouvre,
+ *   existante.
+ * · Une intervention existante s'enregistre toute seule, champ par champ (`surChangementFicheIntervention`) :
+ *   aucun message, la fiche reste ouverte ; le témoin commun parle.
+ *
+ * ⚠⚠ LE REPORT VERS LES PRÉSENCES (`transfererPresencesVersModule`) n'a lieu qu'au PASSAGE à « Complétée »
+ * (ou à la création d'une intervention déjà complétée). Avant ce lot, chaque « Enregistrer » d'une
+ * intervention complétée le relançait ; champ par champ, il écrirait des présences à chaque geste, et une
+ * date corrigée en laisserait à l'ancienne date (`ajouterPresencesIntervention` ajoute, ne retire jamais).
+ * Consigne du lot E3 : ne pas l'automatiser. Aucune présence déjà écrite n'est touchée.
+ *
+ * @param {string} interventionId
+ * @returns {boolean} true si l'intervention a été écrite
+ */
+function sauvegarderPresencesIntervention(interventionId) {
+    const creation = _estBrouillon(interventionId);
+    // La collection lue est COPIÉE avant d'être modifiée (lot E2, R1) : `db.getSync` peut rendre l'objet
+    // de son cache, et une écriture qui échoue le laisserait faux en mémoire.
+    const interventions = JSON.parse(JSON.stringify(obtenirInterventions()));
+    let index = interventions.findIndex(i => i.id === interventionId);
+    if (index === -1 && creation) {
+        interventions.push(JSON.parse(JSON.stringify(_brouillon)));
+        index = interventions.length - 1;
+    }
+
+    // Relecture croisée de Cowork (12 sept. 2026, 13 h 10) : un id qui n'est ni en base ni le brouillon
+    // n'écrit rien, et le dit (lot E3 : par le témoin).
+    const geste = creation ? V().creer : V().modifier;
+    if (index === -1) {
+        console.error('Interventions : rien d\'enregistré — id ni en base ni en brouillon :', interventionId);
+        if (window.temoinEnregistrement) window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(V().introuvable), geste, cle('interventions'));
+        return false;
+    }
+
+    const ancienStatut = creation ? null : interventions[index].statut;
+    _poserFormulaireSurIntervention(interventions[index]);
+    const nouveauStatut = interventions[index].statut;
+
+    if (!sauvegarderDonneesSelonMode('interventions', interventions, { geste })) return false;
+    if (creation) _brouillon = null;
+
+    // Le report, au seul passage à « Complétée » (voir l'en-tête).
     if (nouveauStatut === 'completee' && ancienStatut !== 'completee') {
         transfererPresencesVersModule(interventionId);
     }
-    // Si l'intervention est déjà complétée, re-transférer les présences au cas où il y aurait des changements
-    else if (nouveauStatut === 'completee') {
-        transfererPresencesVersModule(interventionId);
+
+    if (creation) {
+        notifications.succes(V().creee);
+        ouvrirIntervention(interventionId);
+    } else if (nouveauStatut !== ancienStatut) {
+        // Le bilan paraît (ou disparaît) avec « Complétée ».
+        ouvrirIntervention(interventionId);
     }
+    return true;
+}
 
-    // Retourner à la liste
-    afficherListeInterventions();
+/**
+ * Lot E3 (D3) — un changement dans la fiche. En création, rien n'est écrit avant le bouton. Sur une
+ * intervention existante, l'écrivain unique ; le passage à « Complétée » demande d'abord confirmation,
+ * parce qu'il écrit des présences (sauf un MIO, qui n'en écrit pas).
+ * @param {string} interventionId
+ * @param {Element} [champ]
+ */
+async function surChangementFicheIntervention(interventionId, champ) {
+    // Les écouteurs du même changement agissent d'abord (contexte, analyse, critères pré-cochés).
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (_estBrouillon(interventionId)) return false;
+    if (!document.querySelector('[data-fiche-intervention="' + interventionId + '"]')) return false;
 
-    // Notification de succès
-    notifications.succes(V().enregistree);
-
+    if (champ && champ.name === 'interventionStatut' && champ.value === 'completee') {
+        const enBase = obtenirInterventions().find(i => i.id === interventionId);
+        const niveau = parseInt((document.getElementById('interventionNiveau') || {}).value, 10);
+        const contexte = (document.getElementById('interventionContexte') || {}).value;
+        const mio = niveau === 2 && contexte === 'mio' && !_surService();
+        if (enBase && enBase.statut !== 'completee' && !mio && window.uiDialogues) {
+            const ok = await window.uiDialogues.confirmerAction({
+                titre: V().completerTitre,
+                message: V().completerTexte,
+                texteAnnuler: 'Annuler',
+                texteConfirmer: 'Marquer complétée'
+            });
+            if (!ok) {
+                const enPreparation = document.querySelector('input[name="interventionStatut"][value="en-cours"]');
+                if (enPreparation) enPreparation.checked = true;
+                return false;
+            }
+        }
+    }
+    return sauvegarderPresencesIntervention(interventionId);
 }
 
 /**
@@ -1720,7 +1832,8 @@ function initialiserModuleInterventions() {
         const sousSection = document.getElementById('suivi-interventions');
         if (sousSection && sousSection.classList.contains('active')) {
             definirVocabulaireInterventions('interventions');
-            afficherListeInterventions();
+            // Lot E3 : une création en cours reste à l'écran (voir interventionEnCreationAffichee).
+            if (!interventionEnCreationAffichee()) afficherListeInterventions();
         }
     });
 
@@ -1805,7 +1918,9 @@ window.supprimerIntervention = supprimerIntervention;
 window.afficherListeInterventions = afficherListeInterventions;
 window.afficherFormulaireIntervention = afficherFormulaireIntervention;
 window.gererVisibiliteContexteIntervention = gererVisibiliteContexteIntervention;
-window.annulerNouvelleIntervention = annulerNouvelleIntervention;
+window.fermerFicheIntervention = fermerFicheIntervention;                     // Lot E3 (D3)
+window.surChangementFicheIntervention = surChangementFicheIntervention;       // Lot E3 (D3)
+window.interventionEnCreationAffichee = interventionEnCreationAffichee;       // Lot E3 : rencontres.js, au retour
 window.ouvrirIntervention = ouvrirIntervention;
 window.onChangementSelectionEtudiants = onChangementSelectionEtudiants;
 window.mettreAJourCriteresCibles = mettreAJourCriteresCibles;

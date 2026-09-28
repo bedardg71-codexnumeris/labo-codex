@@ -846,11 +846,15 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         expect((sans.match(/<strong>(\d+)<\/strong>/) || [])[1]).toBe('1');   // le compteur dit 1, et la ligne est là
     });
 
-    it('E4 · la porte d\'écriture : db.setSync direct, jamais sauvegarderDonneesSelonMode — le mode anonymisation n\'arrête aucune écriture d\'intervention', () => {
+    // ↻ Lot E3 de l'enregistrement (D0 point 2, 28 sept. 2026) : la fiche et la suppression écrivent par
+    // `sauvegarderDonneesSelonMode`, pour que le témoin commun parle. Le constat d'origine (le mode anonymisation
+    // n'arrête aucune écriture d'intervention) tient toujours : depuis le lot A, cette fonction écrit aussi en
+    // anonymisation. Restent en direct : l'initialisation de la clé vide et le repli du report de présences.
+    it('E4 · la porte d\'écriture : par sauvegarderDonneesSelonMode (témoin) ; le mode anonymisation n\'arrête aucune écriture d\'intervention', () => {
         const src = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
         const res = noter('E4', { setSync: (src.match(/db\.setSync\(/g) || []).length, parMode: (src.match(/sauvegarderDonneesSelonMode\(/g) || []).length });
-        expect(res.parMode).toBe(0);
-        expect(res.setSync).toBeGreaterThanOrEqual(3);
+        expect(res.parMode).toBe(2);
+        expect(res.setSync).toBe(2);
     });
 
     it('E5 · le bilan avant/après traduisait une moyenne 0-1 en lettre par 0,85 / 0,75 / 0,65 écrits en clair — depuis le lot 5 du cadrage 11, par les seuils configurés (valeur d\'après ; le comportement : audit du 6, I-5, et la sentinelle du lot)', () => {
