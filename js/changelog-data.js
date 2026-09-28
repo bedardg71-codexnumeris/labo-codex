@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.164.0 (lot E1 de l'enregistrement, Conception, D3) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026
+            // (tous les mots du § 5 de la demande de relecture, Nouvelles telles quelles). Titre : nom de D3.
+            version: '1.164',
+            couleur: 'vert',
+            titre: 'Créer ou modifier',
+            items: [
+                'Conception&nbsp;: une grille, une échelle, une cartouche ou une pratique existante s\'enregistre toute seule, champ par champ, nom et jetons compris&nbsp;; le témoin le dit. Pour en créer une nouvelle, un bouton nomme le geste («&nbsp;Créer la grille&nbsp;»), et l\'application te prévient si tu fermes la fiche ou recharges la page avant. «&nbsp;Annuler&nbsp;» devient «&nbsp;Fermer&nbsp;».'
+            ]
+        },
+        {
             // 1.163.0 (lot D de l'enregistrement, D2, D2 bis) — phrase ACCEPTÉE par Grégoire le 27 sept. 2026
             // (« Tous acceptés », texte de Cowork).
             version: '1.163',
