@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 14 H 30 : **LOT E2 DE L'ENREGISTREMENT (1.166.0) RELU, FUSIONNÉ DANS `main` EN AVANCE RAPIDE ; VERDICT WEBKIT ET PUSH À LANCER** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 16 H 20 : **LOT E2 (1.166.0) POUSSÉ, EN LIGNE DEPUIS 16 H 15 ; PORTE TERRAIN À PASSER** — lire `git log origin/main`
+
+**Fait** : verdict WebKit complet (aucune rougeur nouvelle) et push `c8572cf0..e4149cb1` ; **1.166.0 en ligne depuis 16 h 15** (Netlify, `commit_ref` `e4149cb1`, « ready »).
+
+**Reste** : la porte terrain `plans de travail/PORTES-TERRAIN-2026-09-28-lot-E2-cadre-eleves.md` (une fiche d'étudiant·e au doigt sur l'iPad, et son DA) — **Cowork publie l'artefact** ; puis retirer la branche `lot-e2-cadre-eleves` et son worktree (sur demande). Ce relais et la porte sont commités sur `main`, **non poussés**.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 14 H 30 : **LOT E2 DE L'ENREGISTREMENT (1.166.0) RELU, FUSIONNÉ DANS `main` EN AVANCE RAPIDE ; VERDICT WEBKIT ET PUSH À LANCER** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = la branche `lot-e2-cadre-eleves` en avance rapide (les six étapes du lot E2, la relecture d'étape, `693211d6` R1 et le DA en lecture seule) + la release **1.166.0** (build `0928-1413`) + ce relais. Les deux relectures de Cowork (`RELECTURE-2026-09-28-lot-E2-etapes-1-a-5.md`, `RELECTURE-2026-09-28-lot-E2-cadre-eleves.md`) partent avec la fusion.
 
