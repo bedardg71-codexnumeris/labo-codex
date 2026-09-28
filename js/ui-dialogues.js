@@ -348,11 +348,15 @@
     }
 
     // Mots de D3 (« Cette grille n'est pas encore créée. ») et de Cowork (boutons).
+    // Lot E2 (28 sept. 2026) : les fiches du Cadre, mots proposés à Grégoire.
     const TITRES_CREATION = {
         grille: 'Cette grille n\'est pas encore créée.',
         echelle: 'Cette échelle n\'est pas encore créée.',
-        cartouche: 'Cette cartouche n\'est pas encore créée.'
+        cartouche: 'Cette cartouche n\'est pas encore créée.',
+        enseignant: 'Ce profil n\'est pas encore créé.'
     };
+    // Le bouton qui quitte : « Quitter sans créer », sauf pour un geste qui ne « crée » pas.
+    const QUITTER_SANS = {};
 
     /**
      * @param {string} genre - 'grille' | 'echelle' | 'cartouche'
@@ -365,7 +369,7 @@
             titre: TITRES_CREATION[genre] || 'Ce n\'est pas encore créé.',
             message: 'Ce que tu as saisi n\'est gardé qu\'à l\'écran. Si tu quittes, il sera perdu.',
             texteAnnuler: 'Rester',
-            texteConfirmer: 'Quitter sans créer',
+            texteConfirmer: QUITTER_SANS[genre] || 'Quitter sans créer',
             variante: 'danger'
         });
     }

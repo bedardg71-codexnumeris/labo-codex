@@ -75,22 +75,92 @@ function chargerProfilEnseignantV2() {
 }
 
 /**
- * Met à jour la carte résumé de l'enseignant
- * Appelée à chaque modification des champs du formulaire
+ * Met à jour la carte résumé de l'enseignant.
+ * Lot E2 (D3, 28 sept. 2026) : elle ne montre plus que ce qui est ÉCRIT — le profil en
+ * base, jamais la saisie en cours (avant, elle changeait pendant la frappe et montrait
+ * comme acquis ce qui ne l'était pas). Un profil en création n'a rien d'écrit : carte vide.
  */
 function mettreAJourCarteEnseignant() {
-    // 🆕 Beta 95.3 : Utilise afficherSyntheseEnseignant() pour unifier la logique
-    const enseignant = {
-        prenom: document.getElementById('v2-ens-prenom')?.value?.trim() || '',
-        nom: document.getElementById('v2-ens-nom')?.value?.trim() || '',
-        courriel: document.getElementById('v2-ens-courriel')?.value?.trim() || '',
-        institution: document.getElementById('v2-ens-institution')?.value?.trim() || '',
-        departement: document.getElementById('v2-ens-departement')?.value?.trim() || ''
-    };
     if (typeof window.afficherSyntheseEnseignant === 'function') {
-        window.afficherSyntheseEnseignant(enseignant);
+        window.afficherSyntheseEnseignant(_enseignantEnBase());
     }
 }
+
+/** Lot E2 : le profil ouvert, tel qu'il est en base (null en création). */
+function _enseignantEnBase() {
+    if (!enseignantEnEditionId) return null;
+    return (db.getSync('enseignants', []) || []).find(e => e.id === enseignantEnEditionId) || null;
+}
+
+/** Lot E2 : les champs du formulaire, en objet profil. */
+function _profilDesChamps() {
+    const val = (id) => document.getElementById(id)?.value?.trim() || '';
+    return {
+        prenom: val('v2-ens-prenom'),
+        nom: val('v2-ens-nom'),
+        courriel: val('v2-ens-courriel'),
+        institution: val('v2-ens-institution'),
+        departement: val('v2-ens-departement'),
+        discipline: val('v2-ens-discipline'),
+        siteWeb: val('v2-ens-siteWeb')
+    };
+}
+
+/** Les champs obligatoires ; la phrase de refus, inchangée, ou null. */
+function _raisonProfilIncomplet(profil) {
+    if (!profil.prenom || !profil.nom) return 'Le prénom et le nom sont requis';
+    if (!profil.courriel) return 'Le courriel est requis';
+    if (!profil.institution) return 'L\'institution est requise';
+    return null;
+}
+
+/**
+ * CT-15 (23 août 2026) — GARDE SUR LE COURRIEL, pour la création comme pour la modification.
+ *
+ * ⚠ L'IDENTITÉ EST LE COURRIEL, PAS LE NOM. Deux enseignants homonymes existent ; c'est la
+ * leçon #450 transposée hors des bibliothèques — on ne bloque jamais sur un nom.
+ * ⚠ ON N'INTERDIT PAS : un même courriel peut légitimement porter deux profils (deux
+ * institutions, deux départements). Règle #455 : le geste reste possible, jamais silencieux.
+ * @returns {boolean} true si on peut écrire
+ */
+function _confirmerCourrielPartage(enseignants, courriel, exclureId) {
+    const memeCourriel = trouverDoublonNaturel(
+        enseignants,
+        { courriel },
+        cleNaturelleEnseignant,
+        exclureId ? { exclureId } : undefined
+    );
+    if (!memeCourriel) return true;
+    return confirm(
+        'Un profil utilise déjà « ' + courriel + ' » : ' +
+        ((memeCourriel.prenom || '') + ' ' + (memeCourriel.nom || '')).trim() +
+        '.\n\n' +
+        'Deux profils au même courriel sont indiscernables dans les menus ' +
+        'de groupe-cours.\n\n' +
+        (exclureId ? 'Enregistrer quand même ?' : 'Créer quand même un second profil ?')
+    );
+}
+
+/**
+ * Lot E2 (D3) — un profil existant s'enregistre tout seul : « Créer le profil » ne paraît
+ * qu'en création, et le titre suit.
+ */
+function rendreModeFicheEnseignantV2(enCreation) {
+    const btn = document.getElementById('v2-btnCreerEnseignant');
+    if (btn) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
+    const titre = document.getElementById('v2-titreFormEnseignant');
+    if (titre) titre.textContent = enCreation ? 'Nouveau profil' : 'Modifier le profil';
+}
+
+/** Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js). */
+function enseignantEnCreationSaisi() {
+    const formulaire = document.getElementById('enseignant-formulaire-edition');
+    if (!formulaire || formulaire.classList.contains('u-hide')) return false;
+    if (enseignantEnEditionId) return false;
+    const p = _profilDesChamps();
+    return !!(p.prenom || p.nom || p.courriel || p.institution || p.departement || p.siteWeb);
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('enseignant', enseignantEnCreationSaisi);
 
 // Variable pour suivre l'enseignant en édition (Beta 95.2)
 let enseignantEnEditionId = null;
@@ -133,19 +203,21 @@ function populerDropdownEnseignantsV2() {
 
 /**
  * Charge l'enseignant sélectionné dans le formulaire (Beta 95.2)
+ * Lot E2 : choisir un autre profil pendant une création pose la question de sortie.
  */
-function chargerEnseignantSelectionneV2() {
+async function chargerEnseignantSelectionneV2() {
     const select = document.getElementById('v2-selectEnseignant');
     const enseignantId = select?.value;
 
-    // #306 Lot 1 : bascule du libellé (« Créer » en création, « Enregistrer » en édition)
-    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('enseignant'))) {
+        if (select) select.value = '';     // « Rester » : la création reste à l'écran
+        return;
+    }
 
     if (!enseignantId) {
         // Aucune sélection : état vide (#306)
-        viderFormulaireEnseignantV2();
         enseignantEnEditionId = null;
-        if (btnTexte) btnTexte.textContent = 'Créer';
+        viderFormulaireEnseignantV2();
         _basculerFormulaireEnseignant(false);
         return;
     }
@@ -154,9 +226,8 @@ function chargerEnseignantSelectionneV2() {
     const enseignant = enseignants.find(e => e.id === enseignantId);
 
     if (!enseignant) {
-        viderFormulaireEnseignantV2();
         enseignantEnEditionId = null;
-        if (btnTexte) btnTexte.textContent = 'Créer';
+        viderFormulaireEnseignantV2();
         _basculerFormulaireEnseignant(false);
         return;
     }
@@ -178,18 +249,15 @@ function chargerEnseignantSelectionneV2() {
     setValue('v2-ens-discipline', enseignant.discipline);
     setValue('v2-ens-siteWeb', enseignant.siteWeb);
 
-    // Mettre à jour le titre et la carte
-    const titre = document.getElementById('v2-titreFormEnseignant');
-    if (titre) titre.textContent = 'Modifier le profil';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
-
+    rendreModeFicheEnseignantV2(false);
     mettreAJourCarteEnseignant();
 }
 
 /**
  * Prépare le formulaire pour un nouveau profil (Beta 95.2)
  */
-function nouveauProfilEnseignantV2() {
+async function nouveauProfilEnseignantV2() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('enseignant'))) return;
     enseignantEnEditionId = null;
 
     // Désélectionner dans le dropdown
@@ -199,13 +267,7 @@ function nouveauProfilEnseignantV2() {
     // Vider le formulaire
     viderFormulaireEnseignantV2();
 
-    // Mettre à jour le titre
-    const titre = document.getElementById('v2-titreFormEnseignant');
-    if (titre) titre.textContent = 'Nouveau profil';
-
-    // #306 Lot 1 : libellé canonique « Créer » en création
-    const btnTexte = document.getElementById('v2-btnTexteEnseignant');
-    if (btnTexte) btnTexte.textContent = 'Créer';
+    rendreModeFicheEnseignantV2(true);
 
     // #306 : le geste explicite ouvre le formulaire
     _basculerFormulaireEnseignant(true);
@@ -226,115 +288,91 @@ function viderFormulaireEnseignantV2() {
     mettreAJourCarteEnseignant();
 }
 
-/**
- * Sauvegarde le profil enseignant (Beta 95.2 - multi-profils)
- */
-async function sauvegarderEnseignantV2() {
-    const prenom = document.getElementById('v2-ens-prenom')?.value?.trim() || '';
-    const nom = document.getElementById('v2-ens-nom')?.value?.trim() || '';
-    const courriel = document.getElementById('v2-ens-courriel')?.value?.trim() || '';
-    const institution = document.getElementById('v2-ens-institution')?.value?.trim() || '';
-
-    // Validation
-    if (!prenom || !nom) {
-        notifications.erreur('Le prénom et le nom sont requis');
-        return;
-    }
-    if (!courriel) {
-        notifications.erreur('Le courriel est requis');
-        return;
-    }
-    if (!institution) {
-        notifications.erreur('L\'institution est requise');
-        return;
-    }
-
-    const profil = {
-        prenom: prenom,
-        nom: nom,
-        courriel: courriel,
-        institution: institution,
-        departement: document.getElementById('v2-ens-departement')?.value?.trim() || '',
-        discipline: document.getElementById('v2-ens-discipline')?.value?.trim() || '',
-        siteWeb: document.getElementById('v2-ens-siteWeb')?.value?.trim() || ''
-    };
-
-    let enseignants = db.getSync('enseignants', []);
-
-    // CT-15 (23 août 2026) — GARDE SUR LE COURRIEL.
-    //
-    // La création manuelle ne vérifiait rien, alors que la migration du vieux
-    // `profilEnseignant` — trente lignes plus haut, dans ce même fichier —
-    // vérifie, elle : `enseignants.some(e => e.courriel === …)`. Deux chemins
-    // vers la même collection, un seul gardé.
-    //
-    // ⚠ L'IDENTITÉ EST LE COURRIEL, PAS LE NOM. Deux enseignants homonymes
-    // existent ; c'est la leçon #450 transposée hors des bibliothèques — on ne
-    // bloque jamais sur un nom.
-    //
-    // ⚠ ON N'INTERDIT PAS : un même courriel peut légitimement porter deux
-    // profils (deux institutions, deux départements). Règle #455 : le geste
-    // reste possible, jamais silencieux.
-    const memeCourriel = trouverDoublonNaturel(
-        enseignants,
-        { courriel },
-        cleNaturelleEnseignant,
-        enseignantEnEditionId ? { exclureId: enseignantEnEditionId } : undefined
-    );
-    if (memeCourriel) {
-        const quandMeme = confirm(
-            'Un profil utilise déjà « ' + courriel + ' » : ' +
-            ((memeCourriel.prenom || '') + ' ' + (memeCourriel.nom || '')).trim() +
-            '.\n\n' +
-            'Deux profils au même courriel sont indiscernables dans les menus ' +
-            'de groupe-cours.\n\n' +
-            (enseignantEnEditionId
-                ? 'Enregistrer quand même ?'
-                : 'Créer quand même un second profil ?')
-        );
-        if (!quandMeme) return;
-    }
-
-    if (enseignantEnEditionId) {
-        // Modification d'un profil existant
-        const index = enseignants.findIndex(e => e.id === enseignantEnEditionId);
-        if (index >= 0) {
-            enseignants[index] = { ...enseignants[index], ...profil };
-        }
-        notifications.succes('Profil enseignant modifié');
-    } else {
-        // Nouveau profil
-        const nouveauProfil = {
-            id: genererIdUnique('ENS_'),
-            ...profil,
-            dateCreation: new Date().toISOString()
-        };
-        enseignants.push(nouveauProfil);
-        enseignantEnEditionId = nouveauProfil.id;
-        notifications.succes('Profil enseignant créé');
-    }
-
-    db.setSync('enseignants', enseignants);
-
+/** Après une écriture : menus et carte relus du stock. */
+function _apresEcritureEnseignant(profil) {
     // Synchroniser profilEnseignant (utilisé en fallback par d'autres modules)
     db.setSync('profilEnseignant', profil);
-
-    // Rafraîchir les dropdowns
     populerDropdownEnseignantsV2();
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
-
-    // Mettre à jour le titre
-    const titre = document.getElementById('v2-titreFormEnseignant');
-    if (titre) titre.textContent = 'Modifier le profil';
+    mettreAJourCarteEnseignant();
 }
 
 /**
- * Annule et revient à l'état vide (#306 : même geste que chez Cours —
- * désélection + formulaire refermé, en édition comme en création).
+ * Lot E2 (D3) — un profil EXISTANT s'enregistre tout seul, au changement de chaque champ.
+ * Un champ obligatoire vidé : « Non enregistré : ‹raison› », rien n'est écrit. Le courriel
+ * déjà porté par un autre profil pose la question de CT-15 ; « Annuler » remet le courriel
+ * en base dans le champ. En création, rien : c'est « Créer le profil » qui écrit.
+ * @returns {boolean} true si le profil a été écrit
  */
-function annulerFormEnseignantV2() {
+function sauvegarderChampEnseignantV2(el) {
+    const enBase = _enseignantEnBase();
+    if (!enBase) return false;
+    const profil = _profilDesChamps();
+    const geste = 'Modifier le profil';
+    const raison = _raisonProfilIncomplet(profil);
+    if (raison) {
+        if (window.temoinEnregistrement) {
+            window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(raison), geste, cle('enseignants'));
+        }
+        return false;
+    }
+    const enseignants = JSON.parse(JSON.stringify(db.getSync('enseignants', []) || []));
+    if (profil.courriel !== enBase.courriel &&
+        !_confirmerCourrielPartage(enseignants, profil.courriel, enBase.id)) {
+        const champ = document.getElementById('v2-ens-courriel');
+        if (champ) champ.value = enBase.courriel || '';
+        return false;
+    }
+    const index = enseignants.findIndex(e => e.id === enBase.id);
+    if (index < 0) return false;
+    enseignants[index] = { ...enseignants[index], ...profil };
+    if (!sauvegarderDonneesSelonMode('enseignants', enseignants, { geste })) return false;
+    _apresEcritureEnseignant(profil);
+    return true;
+}
+
+/**
+ * Lot E2 (D3) — « Créer le profil » : le seul geste qui crée un profil. Rien n'est écrit
+ * avant ce clic ; le message du geste ne part qu'après l'écriture.
+ * @returns {boolean} true si le profil a été créé
+ */
+function creerProfilEnseignantV2() {
+    if (enseignantEnEditionId) return false;
+    const profil = _profilDesChamps();
+    const geste = 'Créer le profil';
+    const raison = _raisonProfilIncomplet(profil);
+    if (raison) {
+        if (window.temoinEnregistrement) {
+            window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(raison), geste, cle('enseignants'));
+        }
+        return false;
+    }
+    const enseignants = JSON.parse(JSON.stringify(db.getSync('enseignants', []) || []));
+    if (!_confirmerCourrielPartage(enseignants, profil.courriel, null)) return false;
+    const nouveauProfil = {
+        id: genererIdUnique('ENS_'),
+        ...profil,
+        dateCreation: new Date().toISOString()
+    };
+    enseignants.push(nouveauProfil);
+    if (!sauvegarderDonneesSelonMode('enseignants', enseignants, { geste })) return false;
+    enseignantEnEditionId = nouveauProfil.id;
+    _apresEcritureEnseignant(profil);
+    const select = document.getElementById('v2-selectEnseignant');
+    if (select) select.value = nouveauProfil.id;
+    rendreModeFicheEnseignantV2(false);
+    notifications.succes(`Profil «\u00a0${`${profil.prenom} ${profil.nom}`.trim()}\u00a0» créé.`);
+    return true;
+}
+
+/**
+ * Lot E2 (D3) : « Annuler » devient « Fermer » — il n'annulait rien. En création, la
+ * question de sortie ; sinon, retour à l'état vide (#306 : désélection + formulaire refermé).
+ */
+async function fermerFicheEnseignantV2() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('enseignant'))) return;
     enseignantEnEditionId = null;
 
     const select = document.getElementById('v2-selectEnseignant');
@@ -342,7 +380,6 @@ function annulerFormEnseignantV2() {
 
     viderFormulaireEnseignantV2();
     _basculerFormulaireEnseignant(false);
-    notifications.succes('Modifications annulées');
 }
 
 /**
@@ -370,9 +407,9 @@ async function supprimerProfilEnseignantV2() {
         return;
     }
 
-    // Supprimer de la liste
+    // Supprimer de la liste (lot E2 : par le témoin ; rien ne change à la suppression)
     const nouvellesListe = enseignants.filter(e => e.id !== enseignantEnEditionId);
-    db.setSync('enseignants', nouvellesListe);
+    if (!sauvegarderDonneesSelonMode('enseignants', nouvellesListe, { geste: 'Supprimer le profil' })) return;
 
     // Réinitialiser
     enseignantEnEditionId = null;
@@ -393,8 +430,9 @@ async function supprimerProfilEnseignantV2() {
 
 // Exports globaux
 window.mettreAJourCarteEnseignant = mettreAJourCarteEnseignant;
-window.sauvegarderEnseignantV2 = sauvegarderEnseignantV2;
-window.annulerFormEnseignantV2 = annulerFormEnseignantV2;
+window.sauvegarderChampEnseignantV2 = sauvegarderChampEnseignantV2;
+window.creerProfilEnseignantV2 = creerProfilEnseignantV2;
+window.fermerFicheEnseignantV2 = fermerFicheEnseignantV2;
 window.chargerProfilEnseignantV2 = chargerProfilEnseignantV2;
 window.supprimerProfilEnseignantV2 = supprimerProfilEnseignantV2;
 window.populerDropdownEnseignantsV2 = populerDropdownEnseignantsV2;

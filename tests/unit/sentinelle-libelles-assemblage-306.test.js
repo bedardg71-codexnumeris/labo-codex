@@ -29,8 +29,9 @@ const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 // formulaire enseignant ; renvoie null ailleurs (les fonctions sont tolérantes).
 function creerFauxDom() {
     const noeud = () => ({ value: '', textContent: '', focus() {}, classList: { add() {}, remove() {}, contains: () => false } });
+    const bouton = () => { const classes = new Set(['u-hide']); return { classes, classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c), contains: (c) => classes.has(c) } }; };
     const elements = {
-        'v2-btnTexteEnseignant': noeud(),
+        'v2-btnCreerEnseignant': bouton(),
         'v2-selectEnseignant': noeud(),
         'v2-titreFormEnseignant': noeud(),
     };
@@ -58,36 +59,32 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         fenetre = chargerScript('js/trimestre-v2-enseignants.js', { document: dom.document, db: dbStub });
     });
 
-    it('nouveau profil → le bouton affiche « Créer »', () => {
-        dom.elements['v2-btnTexteEnseignant'].textContent = 'Enregistrer'; // état sale volontaire
+    // ↻ Lot E2 (28 sept. 2026, D3) : un profil existant s'enregistre champ par champ — plus de
+    // bouton en édition ; « Créer le profil » ne paraît qu'en création. Le span qui basculait
+    // entre « Créer » et « Enregistrer » est retiré.
+    const btnCache = () => dom.elements['v2-btnCreerEnseignant'].classes.has('u-hide');
+
+    it('nouveau profil → « Créer le profil » paraît, titre « Nouveau profil »', () => {
+        dom.elements['v2-btnCreerEnseignant'].classes.add('u-hide');   // état sale volontaire
         fenetre.nouveauProfilEnseignantV2();
-        expect(dom.elements['v2-btnTexteEnseignant'].textContent).toBe('Créer');
+        expect(btnCache()).toBe(false);
         expect(dom.elements['v2-titreFormEnseignant'].textContent).toBe('Nouveau profil');
     });
 
-    it('profil existant sélectionné → le bouton affiche « Enregistrer »', () => {
+    it('profil existant sélectionné → aucun bouton d\'enregistrement, titre « Modifier le profil »', () => {
+        dom.elements['v2-btnCreerEnseignant'].classes.delete('u-hide');
         dom.elements['v2-selectEnseignant'].value = 'ENS1';
         fenetre.chargerEnseignantSelectionneV2();
-        expect(dom.elements['v2-btnTexteEnseignant'].textContent).toBe('Enregistrer');
+        expect(btnCache()).toBe(true);
+        expect(dom.elements['v2-titreFormEnseignant'].textContent).toBe('Modifier le profil');
         expect(dom.elements['v2-ens-prenom'].value).toBe('Ada');
     });
 
-    it('désélection (ou id introuvable) → retour en mode création, bouton « Créer »', () => {
-        // Cas 1 : aucune sélection
-        dom.elements['v2-selectEnseignant'].value = '';
-        dom.elements['v2-btnTexteEnseignant'].textContent = 'Enregistrer';
-        fenetre.chargerEnseignantSelectionneV2();
-        expect(dom.elements['v2-btnTexteEnseignant'].textContent).toBe('Créer');
-        // Cas 2 : id qui ne correspond à aucun profil
-        dom.elements['v2-selectEnseignant'].value = 'FANTOME';
-        dom.elements['v2-btnTexteEnseignant'].textContent = 'Enregistrer';
-        fenetre.chargerEnseignantSelectionneV2();
-        expect(dom.elements['v2-btnTexteEnseignant'].textContent).toBe('Créer');
-    });
-
-    it('le HTML porte le span dynamique (plus de bouton figé)', () => {
+    it('le HTML : « Créer le profil » caché par défaut, « Fermer », plus de span « Créer »/« Enregistrer »', () => {
         const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
-        expect(html).toContain('<span id="v2-btnTexteEnseignant">Créer</span>');
+        expect(html).toContain('<button id="v2-btnCreerEnseignant" class="btn btn-confirmer u-hide" data-action="creerProfilEnseignantV2">Créer le profil</button>');
+        expect(html).not.toContain('v2-btnTexteEnseignant');
+        expect(html).toMatch(/data-action="fermerFicheEnseignantV2">\s*Fermer\s*<\/button>/);
     });
 
     it('statique — création = « Créer » dans Cours, Horaire et Groupe-cours ; édition = « Enregistrer »', () => {

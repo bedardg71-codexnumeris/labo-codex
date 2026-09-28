@@ -6759,33 +6759,33 @@
                                     <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
                                             <label>Prénom <span class="champ-requis">*</span></label>
-                                            <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" data-on-change="mettreAJourCarteEnseignant">
+                                            <input type="text" id="v2-ens-prenom" class="controle-form" placeholder="Ex: Marie" data-on-change="sauvegarderChampEnseignantV2">
                                         </div>
                                         <div class="groupe-form">
                                             <label>Nom <span class="champ-requis">*</span></label>
-                                            <input type="text" id="v2-ens-nom" class="controle-form" placeholder="Ex: Tremblay" data-on-change="mettreAJourCarteEnseignant">
+                                            <input type="text" id="v2-ens-nom" class="controle-form" placeholder="Ex: Tremblay" data-on-change="sauvegarderChampEnseignantV2">
                                         </div>
                                     </div>
 
                                     <div class="groupe-form u-mb-15">
                                         <label>Courriel <span class="champ-requis">*</span></label>
-                                        <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" data-on-change="mettreAJourCarteEnseignant">
+                                        <input type="email" id="v2-ens-courriel" class="controle-form" placeholder="Ex: marie.tremblay@cegep.qc.ca" data-on-change="sauvegarderChampEnseignantV2">
                                     </div>
 
                                     <div class="grille-form-2col u-mb-15">
                                         <div class="groupe-form">
                                             <label>Institution <span class="champ-requis">*</span></label>
-                                            <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" data-on-change="mettreAJourCarteEnseignant">
+                                            <input type="text" id="v2-ens-institution" class="controle-form" placeholder="Ex: Cégep de Drummondville" data-on-change="sauvegarderChampEnseignantV2">
                                         </div>
                                         <div class="groupe-form">
                                             <label>Département</label>
-                                            <input type="text" id="v2-ens-departement" class="controle-form" placeholder="Ex: Littérature et communication">
+                                            <input type="text" id="v2-ens-departement" class="controle-form" placeholder="Ex: Littérature et communication" data-on-change="sauvegarderChampEnseignantV2">
                                         </div>
                                     </div>
 
                                     <div class="groupe-form u-mb-15">
                                         <label>Discipline</label>
-                                        <select id="v2-ens-discipline" class="controle-form">
+                                        <select id="v2-ens-discipline" class="controle-form" data-on-change="sauvegarderChampEnseignantV2">
                                             <option value="">— Sélectionner —</option>
                                             <optgroup label="Sciences de la santé et techniques (100)">
                                                 <option value="101 Biologie">101 Biologie</option>
@@ -6932,7 +6932,7 @@
 
                                     <div class="groupe-form u-mb-15">
                                         <label>Site web personnel <span style="color: var(--gris-texte-pale); font-weight: normal;">(optionnel)</span></label>
-                                        <input type="url" id="v2-ens-siteWeb" class="controle-form" placeholder="Ex: https://monsite.com">
+                                        <input type="url" id="v2-ens-siteWeb" class="controle-form" placeholder="Ex: https://monsite.com" data-on-change="sauvegarderChampEnseignantV2">
                                     </div>
 
                                     <!-- Boutons d'action -->
@@ -6941,12 +6941,10 @@
                                             Supprimer
                                         </button>
                                         <div>
-                                            <button class="btn btn-annuler" data-action="annulerFormEnseignantV2">
-                                                Annuler
+                                            <button class="btn btn-annuler" data-action="fermerFicheEnseignantV2">
+                                                Fermer
                                             </button>
-                                            <button class="btn btn-confirmer" data-action="sauvegarderEnseignantV2">
-                                                <span id="v2-btnTexteEnseignant">Créer</span>
-                                            </button>
+                                            <button id="v2-btnCreerEnseignant" class="btn btn-confirmer u-hide" data-action="creerProfilEnseignantV2">Créer le profil</button>
                                         </div>
                                     </div>
                                     </div><!-- FIN #enseignant-formulaire-edition (#306) -->
@@ -14365,7 +14363,7 @@
     <script src="js/modes.js?v=20260928a"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/temoin-enregistrement.js?v=20260928a"></script> <!-- Lot B de l'enregistrement (27 sept. 2026) : témoin commun « Enregistré » / « Non enregistré », parlé par sauvegarderDonneesSelonMode -->
-    <script src="js/ui-dialogues.js?v=20260928a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
+    <script src="js/ui-dialogues.js?v=20260928b"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
     <script src="js/rechargement-sur.js?v=20260909b"></script> <!-- #795 : le rechargement post-import sonde le serveur avant de partir — un 404 ne remplace plus l'app juste après une écriture -->
 
 
@@ -14379,13 +14377,13 @@
     <script src="js/demo-activation.js?v=20260911o"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestres.js?v=20260921e"></script> <!-- Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
+    <script src="js/trimestres.js?v=20260928a"></script> <!-- Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
     <script src="js/productions-namespace-garde.js?v=20260822a"></script> <!-- #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/horaire-fusion.js?v=20260821a"></script> <!-- CT-04 : source unique de la fusion entités horaires → horaireHebdo (dédup par jour ET heure) -->
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
     <script src="js/trimestre-v2.js?v=20260918c"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
     <script src="js/trimestre-v2-init.js?v=20260928a"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
-    <script src="js/trimestre-v2-enseignants.js?v=20260912e"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
+    <script src="js/trimestre-v2-enseignants.js?v=20260928a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260926a"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
     <script src="js/trimestre-v2-liste.js?v=20260920b"></script> <!-- #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
     <script src="js/trimestre-v2-cours.js?v=20260919b"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->

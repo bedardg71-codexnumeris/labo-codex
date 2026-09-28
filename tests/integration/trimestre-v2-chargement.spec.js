@@ -72,7 +72,7 @@ test('Défense refactor · sentinelle exports browser trimestre-v2', async ({ pa
         sauvegarderCoursV2: typeof window.sauvegarderCoursV2,
         sauvegarderGroupeCoursV2: typeof window.sauvegarderGroupeCoursV2,
         sauvegarderHoraireV2: typeof window.sauvegarderHoraireV2,
-        sauvegarderEnseignantV2: typeof window.sauvegarderEnseignantV2,
+        creerProfilEnseignantV2: typeof window.creerProfilEnseignantV2,
         peuplerDropdownGroupeCoursActif: typeof window.peuplerDropdownGroupeCoursActif,
         mettreAJourBarreContexte: typeof window.mettreAJourBarreContexte
     }));
@@ -83,7 +83,7 @@ test('Défense refactor · sentinelle exports browser trimestre-v2', async ({ pa
     expect(surface.sauvegarderCoursV2).toBe('function');
     expect(surface.sauvegarderGroupeCoursV2).toBe('function');
     expect(surface.sauvegarderHoraireV2).toBe('function');
-    expect(surface.sauvegarderEnseignantV2).toBe('function');
+    expect(surface.creerProfilEnseignantV2).toBe('function');
     expect(surface.peuplerDropdownGroupeCoursActif).toBe('function');
     expect(surface.mettreAJourBarreContexte).toBe('function');
 });
