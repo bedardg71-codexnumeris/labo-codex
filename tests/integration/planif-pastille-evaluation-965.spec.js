@@ -62,7 +62,7 @@ const ETATS = [
     { cle: 'nonEnseigne', symbole: '✕', objectifs: (ids) => [ids.oJamais], texte: 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.' },
     { cle: 'apres', symbole: '⚠', objectifs: (ids) => [ids.oTard], texte: 'Un objectif vérifié n\'est servi qu\'après cette évaluation.' },
     // « ? » : la leçon qui sert l'objectif perd sa semaine le temps de l'état, puis la retrouve.
-    { cle: 'incertain', symbole: '?', objectifs: (ids) => [ids.oTard], texte: 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.',
+    { cle: 'incertain', symbole: '?', objectifs: (ids) => [ids.oTard], texte: 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore sa semaine ou sa séance, ou l\'évaluation n\'est dans aucune leçon.',
       avant: (ids) => window.planificationCarte.definirSemaineLecon(ids.l2, ''),
       apres: (ids) => window.planificationCarte.definirSemaineLecon(ids.l2, 2) },
     { cle: 'avant', symbole: '✓', objectifs: (ids) => [ids.oAvant], texte: 'Chaque objectif vérifié a été enseigné avant cette évaluation.' }

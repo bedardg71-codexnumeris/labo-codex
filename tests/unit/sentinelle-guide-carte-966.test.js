@@ -86,7 +86,7 @@ const PAGE_8 = [
     '⚠ Un objectif vérifié n\'est servi qu\'après cette évaluation.',
     // 28 sept. 2026 : la légende est rendue par la fonction de la carte ; elle porte
     // le cinquième état décidé par Grégoire (« ? »), texte accepté mot pour mot.
-    '? Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.',
+    '? Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore sa semaine ou sa séance, ou l\'évaluation n\'est dans aucune leçon.',
     '✓ Chaque objectif vérifié a été enseigné avant cette évaluation.',
     'Ta carte est alignée quand chaque objectif est servi et vérifié, et que chaque évaluation ne vérifie que des objectifs déjà enseignés.'
 ];

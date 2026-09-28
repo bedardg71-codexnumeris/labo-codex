@@ -1717,7 +1717,7 @@ var LEGENDE_PASTILLES_EVALUATION = [
     { etat: 'aucun', libelle: 'Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.' },
     { etat: 'nonEnseigne', libelle: 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.' },
     { etat: 'apres', libelle: 'Un objectif vérifié n\'est servi qu\'après cette évaluation.' },
-    { etat: 'incertain', libelle: 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.' },
+    { etat: 'incertain', libelle: 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore sa semaine ou sa séance, ou l\'évaluation n\'est dans aucune leçon.' },
     { etat: 'avant', libelle: 'Chaque objectif vérifié a été enseigné avant cette évaluation.' }
 ];
 
