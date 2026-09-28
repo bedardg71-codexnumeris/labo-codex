@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, FIN D'APRÈS-MIDI : **LOT E2 DE L'ENREGISTREMENT (CADRE ET ÉTUDIANT·ES, D3) FAIT SUR SA BRANCHE, EN ATTENTE DE LA RELECTURE FINALE DE COWORK** — rien de fusionné, rien de publié
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 14 H 30 : **LOT E2 DE L'ENREGISTREMENT (1.166.0) RELU, FUSIONNÉ DANS `main` EN AVANCE RAPIDE ; VERDICT WEBKIT ET PUSH À LANCER** — lire `git log origin/main`
+
+**Où vit le travail** : `main` = la branche `lot-e2-cadre-eleves` en avance rapide (les six étapes du lot E2, la relecture d'étape, `693211d6` R1 et le DA en lecture seule) + la release **1.166.0** (build `0928-1413`) + ce relais. Les deux relectures de Cowork (`RELECTURE-2026-09-28-lot-E2-etapes-1-a-5.md`, `RELECTURE-2026-09-28-lot-E2-cadre-eleves.md`) partent avec la fusion.
+
+**Relecture finale de Cowork : verte après R1.** R1 posé (la collection lue est copiée : essais horaire et groupe-cours, mutations R1-a et R1-b rouges). **Décisions de Grégoire (28 sept., 14 h 01 à 14 h 03)** : le DA d'une fiche existante est refusé en modification (lecture seule, phrase sous le champ, mutations DA-a à DA-d rouges ; **#976** pour corriger une coquille sans détacher les données) ; mots du § 6 acceptés, avec « Étudiant·e introuvable : … Resélectionne l'étudiant·e. » ; Nouvelles « Cadre : créer ou modifier », mot pour mot. Vitest 654 fichiers, 7 644/7 644.
+
+**Reste, dans l'ordre** : verdict WebKit complet et push (`caffeinate -i scripts/pousser.sh origin main`, Cowork et navigateurs fermés) → constater 1.166.0 en ligne (Netlify) → porte terrain `plans de travail/PORTES-TERRAIN-2026-09-28-lot-E2-cadre-eleves.md` (Cowork publie l'artefact) → retirer la branche `lot-e2-cadre-eleves` et son worktree une fois le push constaté.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, FIN D'APRÈS-MIDI : **LOT E2 DE L'ENREGISTREMENT (CADRE ET ÉTUDIANT·ES, D3) FAIT SUR SA BRANCHE, EN ATTENTE DE LA RELECTURE FINALE DE COWORK** — rien de fusionné, rien de publié
 
 **Où vit le travail** : `main` = `53adedfd` (1.165.0 en ligne, porte de la carte passée ; ce commit documentaire n'est pas poussé) + la branche **locale** `lot-e2-cadre-eleves`, worktree `.claude/worktrees/lot-e2-cadre-eleves` : les six étapes (trimestre, profil, cours, horaire, groupe-cours, étudiant·e), le banc WebKit du lot, la demande finale. Relecture d'étape de Cowork appliquée (`RELECTURE-2026-09-28-lot-E2-etapes-1-a-5.md`, non suivie sur `main`). #975 inscrite.
 
