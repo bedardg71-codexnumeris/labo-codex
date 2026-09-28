@@ -129,7 +129,7 @@ describe('#382 · éditer un étudiant préserve ses champs hors formulaire et v
         elements['v2-etudiantNom'].value = 'Perdu';
         await win.soumettreEtudiantV2();
         expect(temoin.nonEnregistre).toHaveBeenCalledTimes(1);   // lot E2 : par le témoin
-        expect(temoin.nonEnregistre.mock.calls[0][0]).toMatch(/^Étudiant introuvable/);
+        expect(temoin.nonEnregistre.mock.calls[0][0]).toMatch(/^Étudiant·e introuvable : la liste a changé depuis l'ouverture du formulaire\. Resélectionne l'étudiant·e\.$/);
         expect(notifications.succes).not.toHaveBeenCalled();
         expect(store.groupeEtudiants).toHaveLength(0); // rien écrit
     });

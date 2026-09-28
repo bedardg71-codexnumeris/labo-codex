@@ -17,7 +17,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // chaque enregistrement.
 // ⚠ Stockage vidé UNE fois, avant le reload (pas en addInitScript : il se rejouerait au reload).
 
-test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonstration encore modifiable, DA effacé en édition refusé', async ({ page }) => {
+test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonstration encore modifiable, DA d\'une fiche existante en lecture seule (lot E2)', async ({ page }) => {
     test.setTimeout(180000);
     const erreurs = [];
     page.on('dialog', (d) => d.dismiss());
@@ -105,11 +105,14 @@ test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonst
         const notifsDemo = await soumettre({});
         r.editionDemo = { notifs: notifsDemo, programmeAvant, fiche: stock().find(e => e.da === daDemo) || null, nbFiches: stock().length };
 
-        // 4 · Édition qui EFFACE le DA : refusée, fiche intacte, aucune fiche à identifiant fabriqué.
-        const avantEffacement = stock();
+        // 4 · Lot E2 (décision de Grégoire, 28 sept. 2026) : en édition, le DA est en lecture seule et
+        // l'écrivain ne le lit pas. Effacé par script : la fiche garde son DA, le nom s'écrit.
         r.menuTrouve2 = await ouvrirEdition(daDemo);
-        const notifsEfface = await soumettre({ da: '', nom: 'Ne doit pas passer' });
-        r.editionEffacee = { notifs: notifsEfface, stockInchange: JSON.stringify(stock()) === JSON.stringify(avantEffacement) };
+        r.daLectureSeule = champ('v2-etudiantDA').readOnly;
+        r.aideVisible = !champ('v2-etudiantDAAide').classList.contains('u-hide');
+        const notifsEfface = await soumettre({ da: '', nom: 'Nom-E2' });
+        const ficheE2 = stock().find(e => e.nom === 'Nom-E2') || null;
+        r.editionEffacee = { notifs: notifsEfface, da: ficheE2 && ficheE2.da, nbFiches: stock().length };
 
         r.fabriques = stock().filter(e => /^(DA|AUTO-)\d{10,}$/.test(String(e.da))).length;
         r.nbAjoutees = stock().length - r.stockDepart.length;
@@ -149,11 +152,13 @@ test('#914 · DA vide ou non conforme refusé au formulaire, élève de démonst
     expect(m.editionDemo.fiche && m.editionDemo.fiche.programme).toBe('914.T0');
     expect(m.editionDemo.fiche.da).toBe(m.daDemo);
 
-    // 4 · DA effacé en édition : refusé, fiche intacte.
+    // 4 · DA effacé en édition : lecture seule, la phrase visible, la fiche garde son DA (lot E2).
     expect(m.menuTrouve2).toBe(true);
-    expect(m.editionEffacee.notifs.erreurs.length).toBe(1);
-    expect(m.editionEffacee.notifs.erreurs[0]).toContain('le DA est manquant');
-    expect(m.editionEffacee.stockInchange).toBe(true);
+    expect(m.daLectureSeule).toBe(true);
+    expect(m.aideVisible).toBe(true);
+    expect(m.editionEffacee.notifs.erreurs).toEqual([]);
+    expect(m.editionEffacee.da).toBe(m.daDemo);
+    expect(m.editionEffacee.nbFiches).toBe(m.stockDepart.length + 1);
 
     expect(m.fabriques).toBe(0);
     expect(m.nbAjoutees).toBe(1);

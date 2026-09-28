@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { chargerScript } from './_helpers/charger-script.js';
 
 // LOT E2 DE L'ENREGISTREMENT — LA FICHE D'UN·E ÉTUDIANT·E (D3, 28 sept. 2026)
@@ -83,15 +85,31 @@ describe('lot E2 · fiche existante — champ par champ, par le témoin', () => 
         expect(e.temoin.nonEnregistre).toHaveBeenCalledWith('le nom et le prénom sont obligatoires.', 'Modifier l\'étudiant·e', 'test_groupeEtudiants');
     });
 
-    it('un DA changé pour un DA pris : refus par le témoin, le champ revient au DA de la fiche', async () => {
+    it('le DA d\'une fiche existante ne se modifie pas : lecture seule, la phrase dit pourquoi, la base garde le DA (décision de Grégoire, 28 sept.)', async () => {
         const e = monter();
         e.store.test_groupeEtudiants.push({ da: '1000002', nom: 'Bédard', prenom: 'Zoé', groupe: '00001', coursId: 'C1' });
         await e.win.editerEtudiantV2('1000001');
-        e.champ('v2-etudiantDA').value = '1000002';
-        expect(await e.win.sauvegarderChampEtudiantV2()).toBe(false);
-        expect(e.temoin.nonEnregistre.mock.calls[0][0]).toMatch(/^ce DA est déjà dans le groupe/);
-        expect(e.champ('v2-etudiantDA').value).toBe('1000001');
-        expect(e.store.test_groupeEtudiants.map(x => x.da)).toEqual(['1000001', '1000002']);
+        expect(e.champ('v2-etudiantDA').readOnly).toBe(true);
+        expect(e.champ('v2-etudiantDAAide').classList.contains('u-hide')).toBe(false);
+        // Quoi qu'on fasse du champ (formulaire, script, DA pris, DA vide, DA valide neuf) : la fiche garde son DA.
+        for (const saisi of ['1000002', '', '2000077', 'abc']) {
+            e.champ('v2-etudiantDA').value = saisi;
+            e.champ('v2-etudiantProgramme').value = 'P' + saisi;
+            expect(await e.win.sauvegarderChampEtudiantV2()).toBe(true);
+            expect(e.store.test_groupeEtudiants.map(x => x.da)).toEqual(['1000001', '1000002']);
+            expect(e.store.test_groupeEtudiants[0].programme).toBe('P' + saisi);
+        }
+        expect(e.temoin.nonEnregistre).not.toHaveBeenCalled();
+        // « Fermer » : le champ redevient modifiable pour l'ajout, la phrase se cache.
+        e.win.fermerFicheEtudiantV2();
+        expect(e.champ('v2-etudiantDA').readOnly).toBe(false);
+        expect(e.champ('v2-etudiantDAAide').classList.contains('u-hide')).toBe(true);
+    });
+
+    it('la phrase sous le DA, mot pour mot, et le champ n\'écrit plus rien de lui-même', () => {
+        const html = readFileSync(path.resolve(__dirname, '../../index.html'), 'utf8');
+        expect(html).toContain('<p id="v2-etudiantDAAide" class="texte-aide u-mt-5 u-hide">Le DA ne se modifie pas ici : il relie les évaluations et les présences de l\'étudiant·e.</p>');
+        expect(html.match(/<input[^>]*id="v2-etudiantDA"[^>]*>/)[0]).not.toMatch(/data-on-change/);
     });
 
     it('« Fermer » ramène au formulaire d\'ajout', async () => {

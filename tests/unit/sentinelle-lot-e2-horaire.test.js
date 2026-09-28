@@ -40,7 +40,9 @@ function monter({ horaires = [EXISTANT], quitter = true, echec = false } = {}) {
     };
     const win = chargerScript('js/trimestre-v2-horaires.js', {
         document: { getElementById: (id) => ids[id] || null, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [], createElement: () => element() },
-        db: { getSync: (k, d) => (k in stores ? JSON.parse(JSON.stringify(stores[k])) : d), setSync: (k, v) => { stores[k] = v; } },
+        // R1 (relecture finale de Cowork) : `getSync` rend l'OBJET STOCKÉ, comme le cache de `db` — une
+        // écriture qui modifierait la collection lue sans la copier se verrait après un échec.
+        db: { getSync: (k, d) => (k in stores ? stores[k] : d), setSync: (k, v) => { stores[k] = v; } },
         cle: (n) => 'a2026_' + n,
         sauvegarderDonneesSelonMode: sauvegarder,
         echapperHtml: (s) => String(s == null ? '' : s), echapperAttribut: (s) => String(s == null ? '' : s),
@@ -79,7 +81,7 @@ describe('lot E2 · horaire existant — champ par champ, par le témoin', () =>
         expect(e.temoin.nonEnregistre.mock.calls[0][0]).toMatch(/^séance 1 : nombre de périodes manquant/);
     });
 
-    it('un échec d\'écriture : l\'horaire en base ne bouge pas, aucun message', () => {
+    it('un échec d\'écriture : l\'horaire en base ne bouge pas (la collection lue est copiée, R1), aucun message', () => {
         const e = monter({ echec: true });
         e.ouvrir('HOR_1');
         e.remplirSeance();

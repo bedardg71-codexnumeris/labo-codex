@@ -178,32 +178,31 @@ describe('#914 — l\'application n\'invente plus de DA', () => {
         expect(succes(b).length).toBe(0);   // lot E2 : une modification ne dit que « Enregistré » (le témoin)
     });
 
-    it('E. édition qui EFFACE le DA : refusée, fiche intacte (l\'élève garde son identifiant)', async () => {
+    // Lot E2 (décision de Grégoire, 28 sept. 2026) : le DA d'une fiche existante ne se modifie plus —
+    // champ en lecture seule, et l'écrivain ne le lit pas en édition. Effacé ou changé à l'écran, il ne
+    // bouge pas en base ; les autres champs s'écrivent (la fiche « DEMO015 » reste modifiable).
+    it('E. édition qui EFFACE le DA : le DA reste, l\'élève garde son identifiant', async () => {
         const store = storeBanc();
-        const avant = clone(store.test_groupeEtudiants);
         const b = monter(store);
         b.win.editerEtudiantV2('1000001');
         b.champ('v2-etudiantDA').value = '';
-        b.champ('v2-etudiantNom').value = 'Ne doit pas passer';
+        b.champ('v2-etudiantNom').value = 'Nom-corrigé';
         await b.win.soumettreEtudiantV2();
-        expect(store.test_groupeEtudiants).toEqual(avant);
-        expect(refusDA(b).map(n => n.t)).toEqual(['DA manquant']);
-        expect(succes(b)).toEqual([]);
+        expect(store.test_groupeEtudiants.map(e => e.da)).toEqual(['1000001', 'DEMO015']);
+        expect(store.test_groupeEtudiants[0].nom).toBe('Nom-corrigé');
+        expect(refusDA(b)).toEqual([]);
     });
 
-    it('E bis. édition qui CHANGE le DA : non conforme → refusée ; sept chiffres → acceptée', async () => {
+    it('E bis. édition qui CHANGE le DA (non conforme ou sept chiffres) : le DA de la fiche reste', async () => {
         const store = storeBanc();
-        const avant = clone(store.test_groupeEtudiants);
         const b = monter(store);
         b.win.editerEtudiantV2('DEMO015');
-        b.champ('v2-etudiantDA').value = 'DEMO016';
-        await b.win.soumettreEtudiantV2();
-        expect(store.test_groupeEtudiants).toEqual(avant);
-        expect(refusDA(b).map(n => n.t)).toEqual(['DA invalide']);
-        // Le formulaire est resté en édition : on corrige et on enregistre.
-        b.champ('v2-etudiantDA').value = '2000015';
-        await b.win.soumettreEtudiantV2();
-        expect(store.test_groupeEtudiants.map(e => e.da)).toEqual(['1000001', '2000015']);
+        for (const saisi of ['DEMO016', '2000015']) {
+            b.champ('v2-etudiantDA').value = saisi;
+            await b.win.soumettreEtudiantV2();
+            expect(store.test_groupeEtudiants.map(e => e.da)).toEqual(['1000001', 'DEMO015']);
+        }
+        expect(refusDA(b)).toEqual([]);
         expect(succes(b).length).toBe(0);   // lot E2 : une modification ne dit que « Enregistré » (le témoin)
     });
 

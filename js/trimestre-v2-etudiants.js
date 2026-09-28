@@ -666,6 +666,9 @@ async function soumettreEtudiantV2() {
     // champs vides à l'écran ne disent rien de la fiche : son DA, son nom et son prénom sont
     // réécrits tels qu'ils sont en base.
     const identiteMasquee = document.getElementById('v2-etudiantNom')?.dataset?.masqueAnonymisation === '1';
+    // Lot E2 (décision de Grégoire, 28 sept. 2026) : le DA d'une fiche EXISTANTE ne se modifie pas — il
+    // relie ses évaluations et ses présences. Il vient de la fiche, jamais du champ (en lecture seule).
+    if (edition && etudiantEnEditionDA !== null) da = String(etudiantEnEditionDA).trim();
     if (identiteMasquee && etudiantEnEditionDA !== null) {
         const fiche = (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e.da === etudiantEnEditionDA);
         if (fiche) { da = String(fiche.da).trim(); nom = fiche.nom; prenom = fiche.prenom; }
@@ -687,8 +690,8 @@ async function soumettreEtudiantV2() {
     // l'application. Il n'existe qu'un seul format, et c'est celui créé par le collège » : sept chiffres.
     // Avant, un DA vide devenait « DA » + horodatage, en silence — et en édition, un DA effacé à l'écran
     // changeait l'identifiant de l'élève (évaluations et présences orphelines). Le DA est jugé à la
-    // CRÉATION, et en édition SEULEMENT s'il a changé : un DA déjà en base et non conforme (« DEMO015 »
-    // du pack démo, stock d'avant) se garde tel quel, sans quoi sa fiche ne serait plus modifiable.
+    // CRÉATION ; en édition il ne change plus (lot E2, plus haut) : un DA déjà en base et non conforme
+    // (« DEMO015 » du pack démo, stock d'avant) se garde tel quel, et sa fiche reste modifiable.
     const daInchange = etudiantEnEditionIndex >= 0 && etudiantEnEditionDA !== null
         && da === String(etudiantEnEditionDA).trim();
     if (!daInchange && !/^\d{7}$/.test(da || '')) {
@@ -778,14 +781,10 @@ async function soumettreEtudiantV2() {
     // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
     if (daEnDouble) {
         // Mots lus par les collègues — proposition Cowork du 11 sept., soumise à Grégoire ; lot E2 : par le témoin.
-        if (edition) {   // le DA changé à l'écran revient à celui de la fiche
-            const champDA = document.getElementById('v2-etudiantDA');
-            if (champDA && champDA.dataset?.masqueAnonymisation !== '1') champDA.value = etudiantEnEditionDA ?? '';
-        }
         return _refuserEtudiantV2('Ce DA est déjà dans le groupe : ' + _nomAfficheV2(daEnDouble) + '.', geste);
     }
     if (introuvable) {
-        return _refuserEtudiantV2('Étudiant introuvable : la liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant.', geste);
+        return _refuserEtudiantV2('Étudiant·e introuvable : la liste a changé depuis l\'ouverture du formulaire. Resélectionne l\'étudiant·e.', geste);
     }
     // Mots tranchés par Grégoire le 28 sept. (13 h 30), patron du lot : « Étudiant·e « … » ajouté·e. »
     if (!edition) notifications.succes(`Étudiant·e «\u00a0${_nomAfficheV2({ da: etudiant.da, prenom, nom })}\u00a0» ajouté·e.`);
@@ -796,13 +795,8 @@ async function soumettreEtudiantV2() {
         try { calculerEtSauvegarderIndicesAssiduite(); } catch (e) { console.warn('[Étudiants] Recalcul de l\'assiduité impossible :', e); }
     }
 
-    // Ajout : le formulaire revient à l'ajout suivant. Modification : la fiche reste ouverte, et
-    // son DA d'origine suit un DA changé (lot E2 : la fiche s'écrit champ par champ).
-    if (edition) {
-        if (!daInchange) etudiantEnEditionDA = etudiant.da;
-    } else {
-        reinitialiserFormEtudiantV2();
-    }
+    // Ajout : le formulaire revient à l'ajout suivant. Modification : la fiche reste ouverte (lot E2).
+    if (!edition) reinitialiserFormEtudiantV2();
     chargerListeEtudiantsV2();
     return true;
 }
@@ -834,6 +828,19 @@ function _masquerIdentiteV2(masquer) {
 }
 
 /**
+ * Lot E2 (décision de Grégoire, 28 sept. 2026) — le DA d'une fiche existante est en lecture seule,
+ * et une phrase sous le champ dit pourquoi. `readOnly` (et non `disabled`, que tient l'anonymisation) :
+ * le DA reste lisible et sélectionnable, jamais modifiable. L'écrivain, lui, ne lit plus le champ en
+ * modification (soumettreEtudiantV2) : ni le clavier ni le formulaire ne changent le DA.
+ */
+function _verrouillerDAV2(verrouille) {
+    const champ = document.getElementById('v2-etudiantDA');
+    if (champ) champ.readOnly = !!verrouille;
+    const aide = document.getElementById('v2-etudiantDAAide');
+    if (aide && aide.classList) aide.classList[verrouille ? 'remove' : 'add']('u-hide');
+}
+
+/**
  * Passe en mode édition pour un étudiant
  * 🆕 FIX (4 fév 2026) : Utiliser DA au lieu de l'index pour éviter décalage avec liste filtrée
  */
@@ -859,6 +866,7 @@ async function editerEtudiantV2(da) {
     document.getElementById('v2-etudiantNom').value = masquer ? '' : (etudiant.nom || '');
     document.getElementById('v2-etudiantPrenom').value = masquer ? '' : (etudiant.prenom || '');
     _masquerIdentiteV2(masquer);
+    _verrouillerDAV2(true);
     document.getElementById('v2-etudiantGroupe').value = etudiant.groupe || '';
     document.getElementById('v2-etudiantProgramme').value = etudiant.programme || '';
     document.getElementById('v2-etudiantSA').value = etudiant.sa || '';
@@ -892,6 +900,7 @@ function reinitialiserFormEtudiantV2() {
 
     // Vider les champs
     _masquerIdentiteV2(false);
+    _verrouillerDAV2(false);
     document.getElementById('v2-etudiantDA').value = '';
     document.getElementById('v2-etudiantNom').value = '';
     document.getElementById('v2-etudiantPrenom').value = '';
