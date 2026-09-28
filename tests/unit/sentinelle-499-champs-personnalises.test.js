@@ -70,6 +70,9 @@ function charger(champsAffiches = null) {
         GabaritsUtils: { lirePratiquesSelectionnees: () => [] },
         alert: () => {},
         genererIdUnique: (p) => p + Math.floor(Math.random() * 1e9),
+        // Déclarée dans js/config.js. Lot E3 : retirer ou déplacer un bloc la lit
+        // (une production existante s'enregistre) ; ici, une fiche en création.
+        productionEnEdition: null,
         document: {
             getElementById: (id) => els[id] || null,
             querySelector: () => null, querySelectorAll: () => [],

@@ -357,7 +357,9 @@
         horaire: 'Cet horaire n\'est pas encore créé.',
         groupeCours: 'Ce groupe-cours n\'est pas encore créé.',
         // Mots tranchés par Grégoire le 28 sept. (13 h 30) : « étudiant·e », comme partout dans l'application.
-        eleve: 'Cet·te étudiant·e n\'est pas encore ajouté·e.'
+        eleve: 'Cet·te étudiant·e n\'est pas encore ajouté·e.',
+        // Lot E3 (28 sept. 2026) : mots proposés à Grégoire.
+        production: 'Cette production n\'est pas encore créée.'
     };
     // Le bouton qui quitte : « Quitter sans créer », sauf pour un geste qui ne « crée » pas.
     const QUITTER_SANS = { eleve: 'Quitter sans ajouter' };

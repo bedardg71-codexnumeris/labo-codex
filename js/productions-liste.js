@@ -166,6 +166,8 @@ async function afficherListeProductions(filtreType = '') {
  * Appelée par le clic sur un item de la sidebar
  */
 async function chargerProductionPourModif(id) {
+    // Lot E3 (D3) : une production en cours de création ne se perd pas sans question.
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('production'))) return;
 
     // Masquer le message d'accueil
     const accueil = document.getElementById('accueilProductions');
@@ -218,8 +220,11 @@ async function chargerProductionPourModif(id) {
 /**
  * Crée une nouvelle production (formulaire vide)
  * Appelée par le bouton "+ Nouvelle production"
+ * Lot E3 (D3) : rien n'existe avant « Créer la production » ; une création en cours
+ * ne se remet pas à neuf sans question.
  */
-function creerNouvelleProduction() {
+async function creerNouvelleProduction() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('production'))) return;
     // Masquer le message d'accueil
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.classList.add('u-hide');
@@ -292,11 +297,11 @@ function creerNouvelleProduction() {
     // (cartes contextuelles, notes, champs grisés, etc.)
     gererChangementTypeProduction();
 
-    // Changer le titre et le bouton
-    document.getElementById('btnTexteEvaluation').textContent = 'Enregistrer';
-
     // Réinitialiser productionEnEdition
     productionEnEdition = null;
+
+    // Lot E3 (D3) : « Créer la production » paraît ; une fiche existante n'a que « Fermer ».
+    if (typeof window.rendreModeFicheProduction === 'function') window.rendreModeFicheProduction(true);
 
     // Réinitialiser les métriques - DÉSACTIVÉ (cartes métriques supprimées)
     // mettreAJourMetriquesProduction(null);

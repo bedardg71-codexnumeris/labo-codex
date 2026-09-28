@@ -121,6 +121,10 @@ function element(tag = 'div') {
         },
         addEventListener(evt, fn) { (el._ecouteurs[evt] ||= []).push(fn); },
         declencher(evt) { (el._ecouteurs[evt] || []).forEach(fn => fn()); },
+        // Lot E3 : « Utiliser cette date » émet un « change » (la production existante
+        // s'enregistre par lui) ; le mini-DOM le relaie et le garde pour l'essai T5.c.
+        emis: [],
+        dispatchEvent(ev) { el.emis.push(ev); (el._ecouteurs[ev.type] || []).forEach(fn => fn(ev)); return true; },
         _ecouteurs: {}
     };
     return el;
@@ -360,6 +364,8 @@ describe('#493 · T5 — la carte propose, elle ne dispose pas', () => {
         bouton.declencher('click');
         expect(input.value).toBe('2026-02-16');
         expect(parent.querySelector('.echeance-ecart-carte')).toBeNull();
+        // Lot E3 (D3) : sans ce « change », la date adoptée ne s'enregistrerait pas.
+        expect(input.emis.map(e => e.type + ':' + e.bubbles)).toEqual(['change:true']);
     });
 
     it('T5.d Champ déjà d\'accord avec la carte : aucun signal', () => {

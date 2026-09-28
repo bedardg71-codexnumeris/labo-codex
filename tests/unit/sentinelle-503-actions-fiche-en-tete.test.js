@@ -33,8 +33,10 @@ describe('#503 · les actions de la fiche ont monté en tête', () => {
     it('a. Les quatre boutons sont dans la barre de section, hors du formulaire', () => {
         const barre = indexHtml.match(/<div id="actionsFicheProduction"[\s\S]*?\n {32}<\/div>/);
         expect(barre, 'barre actionsFicheProduction trouvée').toBeTruthy();
+        // ↻ Lot E3 (D3, 28 sept. 2026) : « Annuler » devient « Fermer » (`fermerFicheProduction`) ;
+        // `sauvegarderProduction` porte désormais « Créer la production ».
         for (const action of ['dupliquerProductionActive', 'supprimerProductionActive',
-                              'annulerFormProduction', 'sauvegarderProduction']) {
+                              'fermerFicheProduction', 'sauvegarderProduction']) {
             expect(barre[0], action).toContain(action);
         }
         // Et elle précède le formulaire dans le document.
