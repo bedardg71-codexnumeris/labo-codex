@@ -264,6 +264,25 @@ function leconsProposeesAEvaluation(evaluation) {
     return [hote].concat(avant);
 }
 
+/**
+ * Les rubriques de l'Inspecteur d'une évaluation : les leçons proposées, PUIS
+ * celles des objectifs déjà cochés qui ne sont plus proposées (leçon passée
+ * après l'évaluation, sans semaine, évaluation déplacée…).
+ * ⚠ Ce second ajout n'est pas cosmétique (R3 a, relecture de Cowork) : les
+ * cases de l'Inspecteur RÉÉCRIVENT la liste entière au premier clic
+ * (`appliquerCasesServies`). Un objectif coché sans case serait effacé en
+ * silence dès qu'on coche autre chose.
+ */
+function leconsInspecteurEvaluation(evaluation, index) {
+    var idx = index || indexObjectifsCarte();
+    var groupes = leconsProposeesAEvaluation(evaluation);
+    objectifsVerifiesPar(evaluation, idx).forEach(function(oid) {
+        var lec = idx[oid];
+        if (lec && groupes.indexOf(lec) === -1) groupes.push(lec);
+    });
+    return groupes;
+}
+
 /** Vrai si au moins une évaluation de la carte, où qu'elle soit, coche cet objectif. */
 function objectifVerifieParUneEvaluation(objectifId, index) {
     var idx = index || indexObjectifsCarte();
@@ -3173,11 +3192,7 @@ function ouvrirPanneau(id) {
         // semaine) reste affiché dans son groupe, pour qu'on puisse le décocher.
         var idxEval = indexObjectifsCarte();
         var dejaVerifies = objectifsVerifiesPar(donnees, idxEval);
-        var groupes = leconsProposeesAEvaluation(donnees);
-        dejaVerifies.forEach(function(oid) {
-            var lec = idxEval[oid];
-            if (lec && groupes.indexOf(lec) === -1) groupes.push(lec);
-        });
+        var groupes = leconsInspecteurEvaluation(donnees, idxEval);
         var hoteEval = leconParenteDe(donnees);
         var htmlVerifies = '';
         groupes.forEach(function(lec) {
@@ -3893,7 +3908,25 @@ function dupliquerConteneurEnProfondeur(noeudId, silencieux, cloneDemande) {
     // copie naît avec des liens pointant vers les objectifs de l'ORIGINALE,
     // que objectifsServisPar() écarterait silencieusement. La leçon est copiée
     // avant ses enfants : la correspondance est toujours prête à temps.
+    // ⚠ R2 (relecture de Cowork, 28 sept.) : « toujours prête à temps » était
+    // faux depuis #964. Une évaluation peut cocher l'objectif d'une AUTRE leçon
+    // du sous-arbre ; si cette leçon vient après elle dans `enfants`, son
+    // objectif n'était pas encore renuméroté quand l'évaluation était copiée,
+    // et la copie gardait l'objectif de l'ORIGINALE. Deux passes désormais :
+    // toute la correspondance des objectifs du sous-arbre d'abord, la copie
+    // ensuite.
     var correspondanceObjectifs = new Map();
+    (function preparerObjectifs(nid, vus) {
+        var n = etat.noeuds.get(nid);
+        if (!n || vus[nid]) return;
+        vus[nid] = true;
+        if (n.metadata && Array.isArray(n.metadata.objectifs)) {
+            n.metadata.objectifs.forEach(function(o) {
+                if (o && o.id && !correspondanceObjectifs.has(o.id)) correspondanceObjectifs.set(o.id, nouvelIdObjectif());
+            });
+        }
+        (n.enfants || []).forEach(function(eid) { preparerObjectifs(eid, vus); });
+    })(noeudId, {});
 
     function copier(nid, parentId) {
         var n = etat.noeuds.get(nid);
@@ -3913,9 +3946,7 @@ function dupliquerConteneurEnProfondeur(noeudId, silencieux, cloneDemande) {
         if (Array.isArray(nouveau.metadata.objectifs)) {
             nouveau.metadata.objectifs.forEach(function(o) {
                 if (!o) return;
-                var ancienIdObj = o.id;
-                o.id = nouvelIdObjectif();
-                if (ancienIdObj) correspondanceObjectifs.set(ancienIdObj, o.id);
+                o.id = (o.id && correspondanceObjectifs.get(o.id)) || nouvelIdObjectif();
             });
         }
         if (Array.isArray(nouveau.metadata.objectifsServis)) {
@@ -12282,6 +12313,7 @@ window.planificationCarte = {
     indexObjectifsCarte: indexObjectifsCarte,
     leconEstAvant: leconEstAvant,
     leconsProposeesAEvaluation: leconsProposeesAEvaluation,
+    leconsInspecteurEvaluation: leconsInspecteurEvaluation,
     evaluerBadge: evaluerBadge,
     // #965 — la pastille d'une évaluation (lecture seule).
     evaluerPastilleEvaluation: evaluerPastilleEvaluation,
