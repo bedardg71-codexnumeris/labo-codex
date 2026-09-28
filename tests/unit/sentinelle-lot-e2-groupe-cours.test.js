@@ -96,7 +96,10 @@ describe('lot E2 · groupe-cours existant — chaque sélection s\'enregistre, p
 });
 
 describe('lot E2 · nouveau groupe-cours — rien avant « Créer le groupe-cours »', () => {
-    const remplir = (e) => { e.el('v2-gc-trimestre').value = 'test'; e.el('v2-gc-cours').value = 'C_AUTRE'; e.el('v2-gc-groupe').value = '00002'; e.el('v2-gc-horaire').value = 'HOR1'; e.el('v2-gc-enseignant').value = 'ENS1'; };
+    // Le groupe 00001 porte l'horaire HOR1 : la mise à jour du nom (qui ré-associe l'horaire au
+    // groupe) le garde. Une saisie COMPLÈTE et valide — sinon « rien n'est écrit » se prouverait
+    // par un refus, pas par la création qui attend son bouton (mutation M9, relevée le 28 sept.).
+    const remplir = (e) => { e.el('v2-gc-trimestre').value = 'test'; e.el('v2-gc-cours').value = 'C_AUTRE'; e.el('v2-gc-groupe').value = '00001'; e.el('v2-gc-horaire').value = 'HOR1'; e.el('v2-gc-enseignant').value = 'ENS1'; };
 
     it('les sélections n\'écrivent rien ; « Créer le groupe-cours » paraît ; la fiche retient le rechargement', async () => {
         const e = monter();
@@ -104,6 +107,7 @@ describe('lot E2 · nouveau groupe-cours — rien avant « Créer le groupe-cour
         remplir(e);
         expect(e.win.changerChampGroupeCoursV2(e.el('v2-gc-enseignant'))).toBe(false);
         expect(e.sauvegarder).not.toHaveBeenCalled();
+        expect(e.temoin.nonEnregistre).not.toHaveBeenCalled();   // pas un refus : la création attend son bouton
         expect(e.el('v2-btnCreerGroupeCours').classList.contains('u-hide')).toBe(false);
         expect(e.fiches.groupeCours()).toBe(true);
     });
