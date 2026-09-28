@@ -113,8 +113,10 @@ const VOCABULAIRES = {
         modifier: 'Modifier l\'intervention',
         creee: 'Intervention créée.',
         pasEncoreCree: 'Cette intervention n\'est pas encore créée.',
+        // Mots acceptés par Grégoire le 28 sept. (19 h 46), mot pour mot.
         completerTitre: 'Marquer cette intervention complétée ?',
-        completerTexte: 'Les présences des participant·es seront reportées dans la saisie des présences. Ce report ne se refait pas si tu modifies l\'intervention ensuite.',
+        caseReport: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.',
+        caseReportUneFois: 'Le report se fait une seule fois : il ne se refait pas si tu modifies l\'intervention ensuite.',
         labelNiveau: 'Niveau R\u00e0I :',
         niveau2: 'Niveau 2 (Groupe cibl\u00e9)',
         niveau3: 'Niveau 3 (Individuel)',
@@ -137,8 +139,10 @@ const VOCABULAIRES = {
         modifier: 'Modifier la rencontre',
         creee: 'Rencontre créée.',
         pasEncoreCree: 'Cette rencontre n\'est pas encore créée.',
+        // Même phrase, « rencontre » pour « intervention » (comme le titre accepté).
         completerTitre: 'Marquer cette rencontre complétée ?',
-        completerTexte: 'Les présences des participant·es seront reportées dans la saisie des présences. Ce report ne se refait pas si tu modifies la rencontre ensuite.',
+        caseReport: 'Reporter les présences dans la saisie des présences : la présence à cette rencontre compensera une absence au cours.',
+        caseReportUneFois: 'Le report se fait une seule fois : il ne se refait pas si tu modifies la rencontre ensuite.',
         labelNiveau: 'Rencontre :',
         niveau2: 'En sous-groupe',
         niveau3: 'Individuelle',
@@ -1637,16 +1641,26 @@ function _poserFormulaireSurIntervention(intervention) {
  *   aucun message, la fiche reste ouverte ; le témoin commun parle.
  *
  * ⚠⚠ LE REPORT VERS LES PRÉSENCES (`transfererPresencesVersModule`) n'a lieu qu'au PASSAGE à « Complétée »
- * (ou à la création d'une intervention déjà complétée). Avant ce lot, chaque « Enregistrer » d'une
- * intervention complétée le relançait ; champ par champ, il écrirait des présences à chaque geste, et une
- * date corrigée en laisserait à l'ancienne date (`ajouterPresencesIntervention` ajoute, ne retire jamais).
- * Consigne du lot E3 : ne pas l'automatiser. Aucune présence déjà écrite n'est touchée.
+ * (ou à la création d'une intervention déjà complétée), ET SEULEMENT SI L'USAGER L'A CHOISI : la case
+ * « Reporter les présences… » de la question de complétion, décochée par défaut. Décision de Grégoire
+ * (28 sept., 19 h 43) : « la compensation d'une absence par la présence à une intervention est laissée à
+ * la discrétion de l'usager ». Sans ce choix (`options.reporter !== true`), rien ne s'écrit dans les
+ * présences : ni présence RàI, ni absence motivée de rattrapage.
+ * Avant ce lot, chaque « Enregistrer » d'une intervention complétée relançait le report ; une date
+ * corrigée en laissait à l'ancienne date (`ajouterPresencesIntervention` ajoute, ne retire jamais).
+ * Aucune présence déjà écrite n'est touchée (le passé reste tel quel, Grégoire, 19 h 45).
  *
  * @param {string} interventionId
- * @returns {boolean} true si l'intervention a été écrite
+ * @param {{reporter: boolean}} [options] - la réponse à la question de complétion
+ * @returns {boolean|Promise<boolean>} true si l'intervention a été écrite ; une promesse quand la
+ *   création d'une intervention déjà complétée doit d'abord poser la question
  */
-function sauvegarderPresencesIntervention(interventionId) {
+function sauvegarderPresencesIntervention(interventionId, options) {
     const creation = _estBrouillon(interventionId);
+    // Créer une intervention déjà « Complétée » : la même question qu'au passage, AVANT toute écriture.
+    if (creation && options === undefined && _statutDuFormulaire() === 'completee' && !_mioDuFormulaire()) {
+        return _demanderReport().then(reponse => (reponse ? sauvegarderPresencesIntervention(interventionId, reponse) : false));
+    }
     // La collection lue est COPIÉE avant d'être modifiée (lot E2, R1) : `db.getSync` peut rendre l'objet
     // de son cache, et une écriture qui échoue le laisserait faux en mémoire.
     const interventions = JSON.parse(JSON.stringify(obtenirInterventions()));
@@ -1672,8 +1686,8 @@ function sauvegarderPresencesIntervention(interventionId) {
     if (!sauvegarderDonneesSelonMode('interventions', interventions, { geste })) return false;
     if (creation) _brouillon = null;
 
-    // Le report, au seul passage à « Complétée » (voir l'en-tête).
-    if (nouveauStatut === 'completee' && ancienStatut !== 'completee') {
+    // Le report, au seul passage à « Complétée », et seulement si la case est cochée (voir l'en-tête).
+    if (nouveauStatut === 'completee' && ancienStatut !== 'completee' && options && options.reporter === true) {
         transfererPresencesVersModule(interventionId);
     }
 
@@ -1687,10 +1701,44 @@ function sauvegarderPresencesIntervention(interventionId) {
     return true;
 }
 
+function _statutDuFormulaire() {
+    const radio = document.querySelector('input[name="interventionStatut"]:checked');
+    return radio ? radio.value : 'en-cours';
+}
+
+/** Un MIO n'écrit pas de présences : pas de question, pas de case. */
+function _mioDuFormulaire() {
+    const niveau = parseInt((document.getElementById('interventionNiveau') || {}).value, 10);
+    const contexte = (document.getElementById('interventionContexte') || {}).value;
+    return niveau === 2 && contexte === 'mio' && !_surService();
+}
+
+/**
+ * La question de complétion, avec sa case DÉCOCHÉE par défaut (mots de Grégoire, 28 sept., 19 h 46).
+ * Pour un rattrapage (les non-participant·es reçoivent une absence motivée), la case le dit aussi.
+ * @returns {Promise<{reporter: boolean}|null>} null si « Annuler »
+ */
+async function _demanderReport() {
+    if (!window.uiDialogues) return { reporter: false };   // sans question, aucun report
+    const contexte = (document.getElementById('interventionContexte') || {}).value;
+    const niveau = parseInt((document.getElementById('interventionNiveau') || {}).value, 10);
+    const rattrapage = niveau === 2 && contexte === 'rattrapage' && !_surService();
+    const texte = rattrapage
+        ? V().caseReport.replace(/\.$/, '') + ' ; les non-participant·es auront une absence motivée.'
+        : V().caseReport;
+    const reponse = await window.uiDialogues.confirmerAction({
+        titre: V().completerTitre,
+        caseACocher: { texte: texte, aide: V().caseReportUneFois },
+        texteAnnuler: 'Annuler',
+        texteConfirmer: 'Marquer complétée'
+    });
+    return reponse ? { reporter: reponse.coche === true } : null;
+}
+
 /**
  * Lot E3 (D3) — un changement dans la fiche. En création, rien n'est écrit avant le bouton. Sur une
- * intervention existante, l'écrivain unique ; le passage à « Complétée » demande d'abord confirmation,
- * parce qu'il écrit des présences (sauf un MIO, qui n'en écrit pas).
+ * intervention existante, l'écrivain unique ; le passage à « Complétée » pose d'abord la question, dont
+ * la case (décochée) décide du report des présences (sauf un MIO, qui n'en écrit pas).
  * @param {string} interventionId
  * @param {Element} [champ]
  */
@@ -1700,26 +1748,20 @@ async function surChangementFicheIntervention(interventionId, champ) {
     if (_estBrouillon(interventionId)) return false;
     if (!document.querySelector('[data-fiche-intervention="' + interventionId + '"]')) return false;
 
+    let options = { reporter: false };
     if (champ && champ.name === 'interventionStatut' && champ.value === 'completee') {
         const enBase = obtenirInterventions().find(i => i.id === interventionId);
-        const niveau = parseInt((document.getElementById('interventionNiveau') || {}).value, 10);
-        const contexte = (document.getElementById('interventionContexte') || {}).value;
-        const mio = niveau === 2 && contexte === 'mio' && !_surService();
-        if (enBase && enBase.statut !== 'completee' && !mio && window.uiDialogues) {
-            const ok = await window.uiDialogues.confirmerAction({
-                titre: V().completerTitre,
-                message: V().completerTexte,
-                texteAnnuler: 'Annuler',
-                texteConfirmer: 'Marquer complétée'
-            });
-            if (!ok) {
+        if (enBase && enBase.statut !== 'completee' && !_mioDuFormulaire()) {
+            const reponse = await _demanderReport();
+            if (!reponse) {
                 const enPreparation = document.querySelector('input[name="interventionStatut"][value="en-cours"]');
                 if (enPreparation) enPreparation.checked = true;
                 return false;
             }
+            options = reponse;
         }
     }
-    return sauvegarderPresencesIntervention(interventionId);
+    return sauvegarderPresencesIntervention(interventionId, options);
 }
 
 /**

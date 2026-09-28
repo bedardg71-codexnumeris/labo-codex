@@ -27644,6 +27644,35 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 0.8rem;
 }
 
+/* Lot E3 (28 sept. 2026) — la case d'une fenêtre de confirmation (`confirmerAction`,
+   option `caseACocher`) : même forme que le marqueur diagnostique ci-dessus. Le label
+   enveloppe la case et son texte : cible tactile de 44 px sur toute la rangée. */
+.ui-dialogue-case {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 44px;
+    padding: 12px 0 4px 0;
+    margin: 0;
+    cursor: pointer;
+    font-weight: normal;
+    line-height: 1.5;
+}
+
+.ui-dialogue-case input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 2px 0 0 0;
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.ui-dialogue-case-aide {
+    margin: 0 0 0 30px;
+    color: var(--gris-moyen);
+    font-size: 0.85rem;
+}
+
 /* #790 — la case « ce palier lève un signalement », dans l'éditeur de paliers de
    projection. Discrète : elle est un réglage du palier, pas son sujet. Le label
    enveloppe la case et son texte, donc la cible tactile de 44 px porte sur toute
