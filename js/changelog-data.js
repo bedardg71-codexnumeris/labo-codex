@@ -27,7 +27,9 @@
             couleur: 'vert',
             titre: 'Cadre&nbsp;: créer ou modifier',
             items: [
-                'Cadre&nbsp;: le trimestre, ton profil, un cours, un horaire, un groupe-cours ou la fiche d\'un·e étudiant·e s\'enregistrent tout seuls, champ par champ&nbsp;; le témoin le dit. Pour en créer un nouveau, un bouton nomme le geste («&nbsp;Créer le cours&nbsp;», «&nbsp;Ajouter l\'étudiant·e&nbsp;»), et l\'application te prévient si tu fermes la fiche ou recharges la page avant. «&nbsp;Annuler&nbsp;» devient «&nbsp;Fermer&nbsp;». Le DA d\'une fiche existante ne se modifie plus&nbsp;: il relie ses évaluations et ses présences.'
+                'Cadre&nbsp;: le trimestre, ton profil, un cours, un horaire, un groupe-cours ou la fiche d\'un·e étudiant·e s\'enregistrent tout seuls, champ par champ&nbsp;; le témoin le dit. Pour en créer un nouveau, un bouton nomme le geste («&nbsp;Créer le cours&nbsp;», «&nbsp;Ajouter l\'étudiant·e&nbsp;»), et l\'application te prévient si tu fermes la fiche ou recharges la page avant. «&nbsp;Annuler&nbsp;» devient «&nbsp;Fermer&nbsp;». Le DA d\'une fiche existante ne se modifie plus&nbsp;: il relie ses évaluations et ses présences.',
+                // 1.166.1 (#977) — proposé par Claude Code, à relire par Grégoire.
+                'Labo › Suivi longitudinal&nbsp;: en mode anonymisation, les élèves y sont désormais nommés «&nbsp;Élève R1&nbsp;», «&nbsp;Élève R2&nbsp;»… partout, rétroactions comprises. Leurs vrais noms s\'affichaient.'
             ]
         },
         {

@@ -138,6 +138,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (28 septembre 2026 — le Suivi longitudinal respecte le mode anonymisation)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 977 | Grégoire (`BUG_"grégoire"_2026-09-28_17-13-50.txt` + capture de 16 h 40, 1.160.4, Chrome/Mac ; Labo › Suivi longitudinal) | 28 sept. 2026, 17 h 13 | **« Le mode anonymisation ne fonctionne pas dans la page de Suivi longitudinal. »** Sous le bandeau « MODE ANONYMISATION », le sélecteur « Élève » et la liste des inscrit·es montraient les vrais noms. Cause : `registre-longitudinal.js` bâtissait ses noms depuis `nom`/`prenom` sans passer par aucune anonymisation — six sites (recherche, choix, sélecteur de saisie, inscrit·es, « en attente », `data-confirm`), plus la rétroaction copiée au dossier. | **1.166.1**. Un seul point de passage (`nomAffiche`) : en anonymisation, « Élève R&lt;rang&gt; » (rang = ordre des DA, tous trimestres et registre ; aucune écriture), liste triée par pseudonyme, prénom et nom réécrits dans la rétroaction. `anonymiserNom` n'a pas servi : il ne connaît que le trimestre actif (un DA d'H2026 y devient « Étudiant Inconnu », le même pour tous). Affichage seul : aucun stock touché. Sentinelle `sentinelle-registre-longitudinal-anonymisation.test.js` (5 essais, rouges sur l'ancien code ; chacun des six sites, le tri et la rétroaction mutés un à un → rouge) ; essai WebKit R6 de `registre-longitudinal-915.spec.js` (bascule par `changerMode` sur la vraie page, rouge sur l'ancien code). |
+
 ## Corrigés (25 septembre 2026 — l'export des travaux anonymisé jusqu'au bout ; arrêter un export en cours)
 
 | # | Testeur | Date | Description | Correctif |

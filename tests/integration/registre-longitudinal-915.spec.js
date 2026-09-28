@@ -429,4 +429,40 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(await stockDesTrimestres(page)).toEqual(avant);
         expect(erreurs).toEqual([]);
     });
+
+    // Bogue signalé par Grégoire le 28 sept. 2026 (1.160.4) : bandeau « MODE ANONYMISATION », et l'écran disait « A., Benjamin ».
+    // Sur la vraie page : le bouton de l'en-tête (changerMode) redessine le sous-onglet, les noms deviennent des pseudonymes
+    // — liste, sélecteur de saisie, data-confirm — puis reviennent au retour en mode normal.
+    test('R6 · mode anonymisation : aucun vrai nom à l\'écran, et la bascule redessine le sous-onglet', async ({ page }) => {
+        const erreurs = await monter(page);
+        await ouvrirLeSousOnglet(page);
+        await chercher(page, 'gag');
+        await page.waitForFunction(() => document.querySelectorAll('#rl-resultats .rl-resultat').length === 1);
+        await cliquer(page, '#rl-resultats .rl-resultat-bouton');
+        await page.waitForFunction(() => !!document.getElementById('rl-inscrire'));
+        await cliquer(page, '#rl-inscrire');
+        await page.waitForFunction(() => document.querySelectorAll('#rl-zone-inscrits .rl-eleve').length === 1, null, { timeout: 10000 });
+
+        const lireEcran = () => page.evaluate(() => {
+            const c = document.getElementById('registre-longitudinal-conteneur');
+            const confirms = Array.from(c.querySelectorAll('[data-confirm]')).map((b) => b.getAttribute('data-confirm'));
+            return { texte: c.textContent, confirms: confirms.join(' | '), options: Array.from(c.querySelectorAll('#rl-zone-saisie select option')).map((o) => o.textContent) };
+        });
+        expect((await lireEcran()).texte).toContain('Gagnon, Léa');
+
+        await page.evaluate(() => changerMode(MODES.ANONYMISATION));
+        await page.waitForFunction(() => document.getElementById('registre-longitudinal-conteneur').textContent.includes('Élève R'), null, { timeout: 10000 });
+        const anonyme = await lireEcran();
+        for (const vrai of ['Gagnon', 'Léa']) {
+            expect(anonyme.texte).not.toContain(vrai);
+            expect(anonyme.confirms).not.toContain(vrai);
+        }
+        expect(anonyme.options).toEqual(['Élève R1']);
+        expect(anonyme.confirms).toContain('Élève R1');
+
+        await page.evaluate(() => changerMode(MODES.NORMAL));
+        await page.waitForFunction(() => document.getElementById('registre-longitudinal-conteneur').textContent.includes('Gagnon, Léa'), null, { timeout: 10000 });
+        expect((await lireEcran()).texte).not.toContain('Élève R');
+        expect(erreurs).toEqual([]);
+    });
 });
