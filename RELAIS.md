@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 12 H 10 : **CARTE D'ALIGNEMENT (1.165.0) POUSSÉE, EN LIGNE DEPUIS 10 H 49 ; PORTE TERRAIN PASSÉE ; LOT E2 EN COURS SUR SA BRANCHE** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, FIN D'APRÈS-MIDI : **LOT E2 DE L'ENREGISTREMENT (CADRE ET ÉTUDIANT·ES, D3) FAIT SUR SA BRANCHE, EN ATTENTE DE LA RELECTURE FINALE DE COWORK** — rien de fusionné, rien de publié
+
+**Où vit le travail** : `main` = `53adedfd` (1.165.0 en ligne, porte de la carte passée ; ce commit documentaire n'est pas poussé) + la branche **locale** `lot-e2-cadre-eleves`, worktree `.claude/worktrees/lot-e2-cadre-eleves` : les six étapes (trimestre, profil, cours, horaire, groupe-cours, étudiant·e), le banc WebKit du lot, la demande finale. Relecture d'étape de Cowork appliquée (`RELECTURE-2026-09-28-lot-E2-etapes-1-a-5.md`, non suivie sur `main`). #975 inscrite.
+
+**À lire** : `plans de travail/DEMANDE-RELECTURE-2026-09-28-lot-E2-cadre-eleves.md` (relecture finale). Vitest 654 fichiers, 7 643/7 643 ; banc WebKit du lot 8/8 ; bancs voisins verts par étape ; seize mutations, quinze rouges, une équivalente.
+
+**Reste, dans l'ordre** : relecture finale de Cowork → corrections → **Grégoire accepte les mots du § 6 et les Nouvelles** (et tranche le DA d'une fiche existante, § 5) → release `minor` → Vitest → verdict WebKit complet (Cowork et navigateurs fermés) → fusion → push → porte terrain. À la fusion : la copie non suivie `RELECTURE-2026-09-28-lot-E2-etapes-1-a-5.md` sur `main` a un nom distinct de tout fichier de la branche (ne bloque pas).
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 12 H 10 : **CARTE D'ALIGNEMENT (1.165.0) POUSSÉE, EN LIGNE DEPUIS 10 H 49 ; PORTE TERRAIN PASSÉE ; LOT E2 EN COURS SUR SA BRANCHE** — lire `git log origin/main`
 
 **Où vit le travail** : `main` = la branche `carte-alignement-963-966` en avance rapide (le chantier #963 à #966 rebasé sur `185eba31`, R1 à R8, pastille « ? », page 5, référence ERPI) + `cddc49a3` release **1.165.0** (build `0928-1009`) + ce relais et la porte terrain. Nouvelles acceptées par Grégoire le 28 sept. : titre « Carte d'alignement », quatre phrases de `a133389c` mot pour mot. Relectures de Cowork vertes (`RELECTURE-2026-09-28-carte-alignement-apres-rebase.md`, non suivie sur `main`). Vitest 649 fichiers, 7 583/7 583 après le bump. La copie non suivie de la relecture du 27 est rangée dans `.git/_to_delete/`.
 
