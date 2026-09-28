@@ -7,7 +7,7 @@
    Charger AVANT : bilan-reflexif.js (résidu)
 
    Dépendances :
-   - BilanReflexifCore : etat, genId, afficherToast, sauvegarderReflexion
+   - BilanReflexifCore : etat, genId, sauvegarderReflexion
    - BILAN_REFLEXIF_DATA : ECHELLE_LIKERT4 (pour rendu Likert miroir)
    - Globaux projet : echapperHtml
    =============================== */
@@ -17,7 +17,6 @@
 
 var etat = BilanReflexifCore.etat;
 var genId = BilanReflexifCore.genId;
-var afficherToast = BilanReflexifCore.afficherToast;
 var sauvegarderReflexion = BilanReflexifCore.sauvegarderReflexion;
 var tronquer = BilanReflexifCore.tronquer;
 
@@ -46,8 +45,8 @@ function rendreReflexion() {
     html.push('<span style="font-size:13px;color:var(--texte-secondaire);margin-right:4px">\u00c9tat\u00a0:</span>');
     html.push('<button class="bilan-btn ' + (modeApres ? 'bilan-btn-secondaire' : 'bilan-btn-principal') + '" data-action="BilanReflexif.changerEtatReflexion" data-param="avant_resultats">Avant les r\u00e9sultats</button>');
     html.push('<button class="bilan-btn ' + (modeApres ? 'bilan-btn-principal' : 'bilan-btn-secondaire') + '" data-action="BilanReflexif.changerEtatReflexion" data-param="apres_resultats">Apr\u00e8s les r\u00e9sultats</button>');
-    html.push('<div style="flex:1"></div>');
-    html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.sauvegarderReflexionExplicite">Enregistrer</button>');
+    // Lot E3 (D0) : le bouton « Enregistrer » est parti — chaque réponse s'écrit au geste ou à la
+    // sortie du champ, et le témoin commun le dit.
     html.push('</div>');
 
     // === BLOC A — Miroir Likert ===
@@ -346,12 +345,6 @@ function supprimerQuestionReflexion(nomBloc, questionId) {
     rendreReflexion();
 }
 
-function sauvegarderReflexionExplicite() {
-    collecterReponsesReflexion();
-    sauvegarderReflexion();
-    afficherToast('Auto-r\u00e9flexion sauvegard\u00e9e');
-}
-
 function collecterReponsesReflexion() {
     var r = etat.reflexion;
     var cle = r.etat === 'apres_resultats' ? 'apres' : 'avant';
@@ -435,10 +428,7 @@ window.BilanReflexifReflexion = {
 
     // CRUD questions
     ajouterQuestionReflexion: ajouterQuestionReflexion,
-    supprimerQuestionReflexion: supprimerQuestionReflexion,
-
-    // Sauvegarde explicite (déclenchée par UI)
-    sauvegarderReflexionExplicite: sauvegarderReflexionExplicite
+    supprimerQuestionReflexion: supprimerQuestionReflexion
 };
 
 })();

@@ -209,7 +209,10 @@
         // entre trimestres depuis toujours (lus et écrits sans préfixe). Inscrits ici pour que
         // `sauvegarderDonneesSelonMode('enseignants', …)` — le témoin commun — les écrive au
         // même endroit, sans l'avertissement de cle(). Aucun changement de rangement.
-        'enseignants'
+        'enseignants',
+        // Lot E3 (28 sept. 2026) : les seuils d'interprétation (Réglages) sont lus et écrits sans
+        // préfixe depuis toujours ; même motif que `enseignants`. Aucun changement de rangement.
+        'seuilsInterpretation'
     ];
 
     // ✅ AJOUT (28 janvier 2026) : Templates à copier lors de l'archivage

@@ -75,6 +75,8 @@ describe('#321 — réglage Préférences câblé', () => {
     it('preferences-v2.js charge ET sauvegarde la préférence', () => {
         const src = lire('js/preferences-v2.js');
         expect(src).toContain("obtenirPreference('noteDifferee')");
-        expect(src).toContain("definirPreference('noteDifferee', document.getElementById('v2-pref-note-differee')?.checked === true)");
+        // ↻ Lot E3 (28 sept. 2026) : `definir` enveloppe `definirPreference` pour que le témoin commun parle.
+        expect(src).toContain("definir('noteDifferee', document.getElementById('v2-pref-note-differee')?.checked === true)");
+        expect(src).toContain("const definir = (cle, valeur) => { resultats.push(definirPreference(cle, valeur) !== false); };");
     });
 });

@@ -372,3 +372,61 @@ test('(C-b) anonymisation : le volet est masqué et rien ne s\'écrit depuis lui
     expect(await page.evaluate(() => window.sauvegarderConfidentiel())).toBe(false);
     expect(await confidentiel(page)).toBe(avant);
 });
+
+/* ────────────────────────────────────────────────────────────── réglages */
+//   (R-a) des seuils mal ordonnés : « Non enregistré – Seuils : … », les champs reviennent, rien d'écrit, aucun succès ;
+//   (R-b) une préférence changée : écrite, le témoin dit « Enregistré » ; plus aucun bouton « Enregistrer ».
+
+test('(R-a) seuils mal ordonnés : « Non enregistré – Seuils : … », les champs reviennent, aucun succès', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    await page.evaluate(() => naviguerVers('labo', 'accompagnement'));
+    await pause(page, 900);
+    const avant = await page.evaluate(() => JSON.stringify(db.getSync('seuilsInterpretation', null)));
+    const valeurs = await page.evaluate(() => ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => document.getElementById(id).value));
+    await page.evaluate(() => { window.__toasts = []; });
+    await changer(page, '#v2-seuil-fragile', '89');
+    expect(await temoinEchec(page)).toBe('Non enregistré – Seuils : les seuils doivent aller du plus bas au plus haut (Fragile < Acceptable < Bon).');
+    expect(await temoinSucces(page)).toBe(false);
+    expect(await page.evaluate(() => ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => document.getElementById(id).value))).toEqual(valeurs);
+    expect(await page.evaluate(() => JSON.stringify(db.getSync('seuilsInterpretation', null)))).toBe(avant);
+    expect(await page.evaluate(() => window.__toasts)).toEqual([]);
+    // Une valeur juste ensuite : écrite, et le « Non enregistré » s'efface (même clé).
+    await changer(page, '#v2-seuil-fragile', String(Number(valeurs[0]) - 1));
+    expect(await temoinEchec(page)).toBe('');
+    expect(await page.evaluate(() => db.getSync('seuilsInterpretation', {}).interpretation.acceptable)).toBe((Number(valeurs[0]) - 1) / 100);
+});
+
+test('(R-b) une préférence changée s\'écrit, le témoin le dit ; aucun bouton « Enregistrer » sur les deux pages', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    await page.evaluate(() => naviguerVers('reglages', 'preferences'));
+    await pause(page, 900);
+    const avant = await page.evaluate(() => obtenirPreference('chronoEvaluation'));
+    await changer(page, '#v2-pref-chrono-eval', !avant);
+    expect(await page.evaluate(() => obtenirPreference('chronoEvaluation'))).toBe(!avant);
+    expect(await temoinSucces(page)).toBe(true);
+    for (const page_ of ['#reglages-preferences', '#labo-accompagnement']) {
+        expect(await page.locator(page_ + ' button', { hasText: /^\s*Enregistrer\s*$/ }).count(), page_).toBe(0);
+    }
+});
+
+/* ────────────────────────────────────────────────────────── bilan réflexif */
+//   (B-a) l'auto-réflexion n'a plus de bouton « Enregistrer » ; un geste s'écrit, le témoin le dit.
+
+test('(B-a) auto-réflexion : plus de bouton « Enregistrer » ; un geste s\'écrit, le témoin le dit', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    await page.evaluate(() => { window.initialiserBilanReflexif(); BilanReflexif.afficherVue('reflexion'); });
+    await pause(page, 600);
+    const vue = await page.evaluate(() => {
+        const racine = document.getElementById('bilan-conteneur-principal') || document.body;
+        return { html: racine.innerHTML, boutons: [...racine.querySelectorAll('button')].map(b => b.textContent.trim()) };
+    });
+    expect(vue.html).toContain('Avant les r');
+    expect(vue.boutons).not.toContain('Enregistrer');
+    expect(vue.html).not.toContain('sauvegarderReflexionExplicite');
+    await cliquer(page, '[data-action="BilanReflexif.changerEtatReflexion"][data-param="apres_resultats"]');
+    expect(await page.evaluate(() => (db.getSync(cle('autoreflexionBilan'), {}) || {}).etat)).toBe('apres_resultats');
+    expect(await temoinSucces(page)).toBe(true);
+});
