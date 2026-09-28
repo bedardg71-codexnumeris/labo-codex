@@ -4,7 +4,7 @@
 >
 > **Au début du lot** : archive l'actuelle `CONSIGNE-DU-JOUR.md` (lot E1, livré) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-27-lot-E1-conception.md`, puis renomme celle-ci en `CONSIGNE-DU-JOUR.md`.
 >
-> **Condition de départ** : `git log origin/main` montre `6a43e278` (1.164.0) ou plus récent ; le commit documentaire local `185eba31` peut partir avec ce lot. Aucun autre lot en cours dans `js/` (le chantier de la carte d'alignement attend son tour : **un seul lot à la fois dans `js/`**). Branche `lot-e2-cadre-eleves` ; fusion après la relecture croisée seulement.
+> **Condition de départ** *(remplacée le 28 sept. à la demande de Cowork ; l'ancienne citait `6a43e278`, `185eba31` et la carte d'alignement en attente)* : branche `lot-e2-cadre-eleves` partie de `c8572cf0` (1.165.0, carte d'alignement livrée), rebasée sur `main` après le commit documentaire de la porte de 1.165.0 ; aucun autre lot dans `js/`. Fusion après la relecture croisée seulement.
 >
 > **À remesurer avant le code** : les lignes citées viennent de l'inventaire du 26 et de ma lecture du 28 vers 8 h ; elles ont pu bouger avec les lots B à E1.
 
