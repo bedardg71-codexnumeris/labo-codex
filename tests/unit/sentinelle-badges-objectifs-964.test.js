@@ -360,3 +360,58 @@ describe('#964 — l\'export du plan', () => {
         expect(ev.objectifsServis).toEqual(['Nommer les phases', 'Juger une récolte']);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Relecture croisée de Cowork (28 sept.) — R2 et R3
+// ---------------------------------------------------------------------------
+
+describe('#964 R2 — dupliquer une séquence : l\'évaluation copiée suit l\'objectif copié, quel que soit l\'ordre', () => {
+    it('leçon B (qui évalue) AVANT leçon A (qui porte l\'objectif) dans la séquence : B′ coche oA′, pas oA', () => {
+        monter();
+        noeud('seq', 'sequence', 'Saison des semis');
+        lecon('lecB', 'Évaluer les semis', 2, 1, [], { parent: 'seq' });
+        lecon('lecA', 'Semer', 1, 1, [{ id: 'oA', texte: 'Semer en ligne' }], { parent: 'seq' });
+        expect(api.etat.noeuds.get('seq').enfants).toEqual(['lecB', 'lecA']);
+        noeud('evB', 'evaluation', 'Contrôle des semis', { parent: 'lecB', metadata: { objectifsServis: ['oA'] } });
+
+        const racine = api.dupliquerConteneurEnProfondeur('seq', true);
+        const copie = api.etat.noeuds.get(racine);
+        const [lecBc, lecAc] = copie.enfants.map((id) => api.etat.noeuds.get(id));
+        const oAc = api.objectifsDeLecon(lecAc)[0].id;
+        const evBc = api.etat.noeuds.get(lecBc.enfants[0]);
+        expect(oAc).not.toBe('oA');
+        expect(evBc.metadata.objectifsServis).toEqual([oAc]);
+        // L'original n'a pas bougé.
+        expect(api.etat.noeuds.get('evB').metadata.objectifsServis).toEqual(['oA']);
+    });
+});
+
+describe('#964 R3 — trois protections du lot', () => {
+    beforeEach(() => { monter(); carteDeuxLecons(); });
+
+    it('(a) un objectif coché dont la leçon n\'est plus proposée garde sa rubrique dans l\'Inspecteur', () => {
+        api.definirObjectifsServis('e2', ['o1']);
+        // La leçon 1 passe APRÈS l'évaluation : elle n'est plus proposée…
+        api.etat.noeuds.get('lec1').metadata.semaine = 6;
+        const e2 = api.etat.noeuds.get('e2');
+        expect(api.leconsProposeesAEvaluation(e2).map((l) => l.id)).not.toContain('lec1');
+        // … mais sa rubrique reste, pour que la case existe. Sans elle, cocher
+        // une autre case réécrirait la liste sans o1 (appliquerCasesServies).
+        expect(api.leconsInspecteurEvaluation(e2).map((l) => l.id)).toContain('lec1');
+    });
+
+    it('(b) glisser deux fois sur le même objectif : un seul id, « Vérifie 1 objectif »', () => {
+        const ligne = { querySelector: () => ({ getAttribute: () => 'o1' }), closest: () => ({ id: 'lec1' }) };
+        api.deposerLienSurObjectif('e2', ligne);
+        api.deposerLienSurObjectif('e2', ligne);
+        expect(api.etat.noeuds.get('e2').metadata.objectifsServis).toEqual(['o1']);
+        expect(toasts.pop()).toBe('Déjà coché : cette évaluation vérifie cet objectif.');
+        expect(api.evaluerBadge(api.etat.noeuds.get('e2')).entree.message).toBe('Vérifie 1 objectif');
+    });
+
+    it('(c) même semaine ET même séance : pas « avant »', () => {
+        lecon('lecM', 'Même séance', 3, 2, [{ id: 'oM', texte: 'Même séance' }]);
+        expect(api.leconEstAvant(api.etat.noeuds.get('lecM'), api.etat.noeuds.get('lec2'))).toBe(false);
+        expect(api.leconsProposeesAEvaluation(api.etat.noeuds.get('e2')).map((l) => l.id)).not.toContain('lecM');
+    });
+});

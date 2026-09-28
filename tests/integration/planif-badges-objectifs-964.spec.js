@@ -94,4 +94,29 @@ test.describe('#964 · l’évaluation coche les objectifs qu’elle vérifie', 
         expect(await page.evaluate((id) => window.planificationCarte.etat.noeuds.get(id).metadata.objectifsServis, ids.ev2))
             .toEqual([ids.o1]);
     });
+
+    // R3 (a) — relecture de Cowork, 28 sept. : les cases de l'Inspecteur
+    // réécrivent la liste entière. Un objectif coché dont la leçon n'est plus
+    // « avant » doit garder sa case, sinon cocher autre chose l'efface.
+    test('un objectif coché d’une leçon devenue postérieure survit quand on coche une autre case', async ({ page }) => {
+        await ouvrirCarte(page);
+        const ids = await preparer(page);
+        const o2 = await page.evaluate(({ l2, ev2, o1 }) => {
+            const api = window.planificationCarte;
+            api.definirObjectifsLecon(l2, ['Objectif fictif de la leçon 2']);
+            api.definirObjectifsServis(ev2, [o1]);
+            api.definirSemaineLecon(l2, 1);   // leçon 2 (celle de l'évaluation) → semaine 1
+            return api.objectifsDeLecon(api.etat.noeuds.get(l2))[0].id;
+        }, ids);
+        await page.evaluate(({ l1 }) => window.planificationCarte.definirSemaineLecon(l1, 3), ids); // leçon 1 → semaine 3, APRÈS
+
+        await page.locator('#' + ids.ev2).dispatchEvent('dblclick');
+        const bloc = page.locator('#planif-objectifs-servis');
+        await expect(bloc.locator('input[data-obj-id="' + ids.o1 + '"]')).toBeChecked();
+        await bloc.locator('input[data-obj-id="' + o2 + '"]').evaluate((el) => el.click());
+
+        const coches = await page.evaluate((id) => window.planificationCarte.etat.noeuds.get(id).metadata.objectifsServis, ids.ev2);
+        expect(coches).toHaveLength(2);
+        expect(coches).toEqual(expect.arrayContaining([ids.o1, o2]));
+    });
 });

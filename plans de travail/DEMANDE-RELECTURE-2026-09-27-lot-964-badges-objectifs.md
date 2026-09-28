@@ -56,6 +56,8 @@
 
 Rien n'est écrit. **Ce qui change à la lecture, sur des cartes existantes** : (1) une évaluation qui cochait déjà un objectif de sa leçon (possible depuis #403) gagne son ✓ amont, et le ⚠ de son idée maîtresse ou de sa compétence peut se lever ; (2) tout Exposé non relié à une connaissance passe de ✓/✓ à « ! » ; (3) une évaluation **clonée** dans une autre leçon porte les objectifs cochés de son original (métadonnées partagées) : ils comptent désormais pour les pastilles de la leçon d'origine. Ce sont les deux effets voulus par la consigne, plus ce troisième, qui en découle ; je le nomme pour que Grégoire le sache.
 
+**(4) Tranché par Cowork (relecture du 28 sept.), sans code** : rien ne nettoie `objectifsServis` quand un bloc change de leçon. Une évaluation **déplacée, copiée, hors leçon ou posée dans une séquence** compte désormais l'objectif qu'elle cochait (sur `main`, il était écarté à la lecture par `objectifsServisPar`). C'est cohérent avec le modèle retenu (lecture large, proposition bornée), et l'objectif reste visible et décochable dans sa rubrique de l'Inspecteur (R3 a).
+
 ## 7 · Trouvailles en chemin
 
 - **La page 8 du guide** (`GUIDE_PAGES`, l. ~1811) dit encore « Relie-la aux éléments qu'elle évalue : idées maîtresses, connaissances ou activités. Le verbe « se vérifie par »… ». **Fausse depuis ce lot.** Hors lot par consigne (« Ne touche pas au guide ») : le lot 4 (#966) la réécrit, et part dans la même version. Issue 2, déjà couverte par #966.
