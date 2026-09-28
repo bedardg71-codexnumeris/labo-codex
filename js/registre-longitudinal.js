@@ -156,6 +156,8 @@
         // Décision 3.1 (Grégoire, 18 sept. 2026) : retirer du registre « pour corriger une erreur » — un geste de
         // réparation : il confirme, et il DIT ce qu'il emporte.
         retirerDuRegistre: 'Retirer du registre',
+        // Mode anonymisation (bogue signalé par Grégoire le 28 sept. 2026) : le nom d'élève que l'écran peut dire.
+        pseudonyme: (rang) => 'Élève R' + rang,
         // Texte de Grégoire (1.146.1). L'accord « Son résultat… sera effacé » / « Ses N résultats… seront effacés » porte sur
         // toute la phrase : accorder() ne suffit pas ici, d'où les deux formes écrites.
         confirmerRetrait: (nomComplet, texteDossiers, dateCopie, resultats, nbDuCadre) => 'Retirer ' + nomComplet + ' du registre ? '
@@ -197,13 +199,15 @@
         return brut;
     }
 
-    /** Les élèves inscrits, triés par nom puis prénom. */
+    /** Les élèves inscrits, triés par nom puis prénom — en anonymisation, par pseudonyme : l'ordre alphabétique trahirait les noms. */
     function elevesInscrits() {
         const eleves = lireRegistre().eleves;
-        return Object.keys(eleves)
+        const liste = Object.keys(eleves)
             .map((da) => eleves[da])
-            .filter((e) => e && typeof e === 'object')
-            .sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || ''), 'fr')
+            .filter((e) => e && typeof e === 'object');
+        const pseudos = pseudonymes();
+        if (pseudos) return liste.sort((a, b) => nomAffiche(a, pseudos).localeCompare(nomAffiche(b, pseudos), 'fr', { numeric: true }));
+        return liste.sort((a, b) => String(a.nom || '').localeCompare(String(b.nom || ''), 'fr')
                 || String(a.prenom || '').localeCompare(String(b.prenom || ''), 'fr'));
     }
 
@@ -256,6 +260,43 @@
         });
         return Array.from(parDa.values())
             .sort((a, b) => a.nom.localeCompare(b.nom, 'fr') || a.prenom.localeCompare(b.prenom, 'fr'));
+    }
+
+    /* ---------- Mode anonymisation : le nom que l'écran peut dire ---------- */
+
+    function anonymisation() {
+        return typeof window.estModeAnonymisation === 'function' && window.estModeAnonymisation();
+    }
+
+    /**
+     * Le pseudonyme d'un·e élève dans le registre : « Élève R<rang> ». Le registre traverse les trimestres, alors
+     * que `anonymiserNom` ne connaît que le trimestre actif (un DA d'H2026 y devient « Étudiant Inconnu », le même
+     * pour tous). Le rang suit l'ordre des DA (tous les trimestres ET le registre, qui garde un·e élève dont le
+     * trimestre n'est plus là) : aucune écriture, rien de dérivé du nom, stable d'un écran à l'autre. Le « R » le
+     * sépare des « Élève 12 » du trimestre actif, qui désignent quelqu'un d'autre.
+     * Une Map calculée UNE fois par rendu (elle lit tous les trimestres) ; hors anonymisation, null.
+     */
+    function pseudonymes() {
+        if (!anonymisation()) return null;
+        const das = new Set(elevesDeTousLesTrimestres().map((e) => e.da));
+        Object.keys(lireRegistre().eleves).forEach((da) => das.add(String(da)));
+        const ordre = Array.from(das).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+        return new Map(ordre.map((da, i) => [da, MOTS.pseudonyme(i + 1)]));
+    }
+
+    function nomAffiche(eleve, pseudos) {
+        if (pseudos) return pseudos.get(String(eleve && eleve.da)) || MOTS.pseudonyme('?');
+        return String((eleve && eleve.nom) || '') + ', ' + String((eleve && eleve.prenom) || '');
+    }
+
+    /** La rétroaction copiée nomme l'élève : en anonymisation, son prénom et son nom deviennent son pseudonyme. */
+    function texteAffiche(texte, eleve, pseudos) {
+        let sortie = String(texte || '');
+        if (!pseudos || !eleve || typeof _remplacerPrenomEntier !== 'function') return sortie;
+        const pseudo = nomAffiche(eleve, pseudos);
+        [eleve.prenom, eleve.nom].filter(Boolean).map(String).sort((a, b) => b.length - a.length)
+            .forEach((mot) => { sortie = _remplacerPrenomEntier(sortie, mot, pseudo, '', 'giu'); });
+        return sortie;
     }
 
     function normaliser(texte) {
@@ -614,6 +655,7 @@
         const motif = normaliser(texte);
         if (!motif) return; // rien tapé : rien listé (200 noms n'ont pas à s'afficher d'un coup)
         const trouves = rechercherEleves(motif);
+        const pseudos = pseudonymes();
         if (!trouves.length) {
             poser(liste, 'li', 'rl-vide', MOTS.aucunResultat);
             return;
@@ -624,7 +666,7 @@
             bouton.type = 'button';
             bouton.setAttribute('data-action', 'choisirEleveLongitudinal');
             bouton.dataset.da = e.da;
-            poser(bouton, 'span', 'rl-nom', e.nom + ', ' + e.prenom);
+            poser(bouton, 'span', 'rl-nom', nomAffiche(e, pseudos));
             poser(bouton, 'span', 'rl-meta', e.presences.map(libellePresence).join(' · '));
         });
         if (trouves.length > MAX_RESULTATS_RECHERCHE) poser(liste, 'li', 'rl-vide', MOTS.tropDeResultats);
@@ -639,7 +681,7 @@
         if (!eleve) return;
         const inscrit = lireRegistre().eleves[daChoisi];
         const dejaInscrit = !!inscrit;
-        const nomComplet = eleve.nom + ', ' + eleve.prenom;
+        const nomComplet = nomAffiche(eleve, pseudonymes());
         poser(zone, 'p', 'rl-nom', nomComplet);
         poser(zone, 'p', 'rl-meta', eleve.presences.map(libellePresence).join(' · '));
         // #917 : une fois l'élève inscrit·e, refaire la copie est le geste RARE — il quitte le style principal.
@@ -710,7 +752,7 @@
      * date, note et niveau — sert de <summary>, donc AUCUN mot neuf ; critères et rétroaction se déplient DEDANS. Une
      * évaluation qui n'a ni critère ni rétroaction est une tuile simple : un triangle qui n'ouvrirait sur rien mentirait.
      */
-    function rendreEvaluation(liste, ev, echelles) {
+    function rendreEvaluation(liste, ev, echelles, eleve, pseudos) {
         const echelle = echelles[ev.echelleId] || null;
         const criteres = (Array.isArray(ev.criteres) ? ev.criteres : []).filter(Boolean);
         const depliable = criteres.length > 0 || !!ev.retroactionFinale;
@@ -740,12 +782,12 @@
         }
         if (ev.retroactionFinale) {
             poser(tuile, 'p', 'rl-sous-titre', MOTS.retroaction);
-            poser(tuile, 'p', 'rl-retroaction-texte', String(ev.retroactionFinale));
+            poser(tuile, 'p', 'rl-retroaction-texte', texteAffiche(ev.retroactionFinale, eleve, pseudos));
         }
     }
 
     /** Le dossier d'un·e inscrit·e, replié par défaut. Rend, n'écrit rien. */
-    function rendreDossier(li, eleve, modeles) {
+    function rendreDossier(li, eleve, modeles, pseudos) {
         const dossiers = Array.isArray(eleve.dossiers) ? eleve.dossiers : [];
         if (!dossiers.length) return;
         const details = poser(li, 'details', 'rl-dossier');
@@ -769,7 +811,7 @@
             // Le flux des badges du profil (`.badges-centres` : flex, wrap, gap 10 px), aligné à gauche et en haut par `.rl-tuiles` :
             // l'ordre du DOM reste l'ordre chronologique, lu de gauche à droite puis de haut en bas.
             const liste = poser(bloc, 'div', 'badges-centres rl-tuiles');
-            evaluations.forEach((ev) => rendreEvaluation(liste, ev, echelles));
+            evaluations.forEach((ev) => rendreEvaluation(liste, ev, echelles, eleve, pseudos));
         });
     }
 
@@ -795,12 +837,13 @@
             return;
         }
         if (!inscrits.some((e) => String(e.da) === daSaisie)) daSaisie = String(inscrits[0].da);
+        const pseudos = pseudonymes();
         const formulaire = poser(zone, 'form', 'rl-saisie');
         formulaire.setAttribute('novalidate', '');
         const selecteur = champSaisie(formulaire, MOTS.eleve, 'select', 'eleve');
         selecteur.setAttribute('data-on-change', 'choisirEleveSaisieLongitudinal');
         inscrits.forEach((e) => {
-            const option = poser(selecteur, 'option', '', String(e.nom || '') + ', ' + String(e.prenom || ''));
+            const option = poser(selecteur, 'option', '', nomAffiche(e, pseudos));
             option.value = String(e.da);
             if (String(e.da) === daSaisie) option.selected = true;
         });
@@ -827,6 +870,7 @@
     function rendreEnAttente(zone) {
         const enAttente = enAttenteDuCadre();
         if (!enAttente.length) return;
+        const pseudos = pseudonymes();
         const bloc = poser(zone, 'div', 'rl-en-attente');
         poser(bloc, 'p', 'rl-meta', MOTS.enAttenteTitre);
         const liste = poser(bloc, 'ul', 'rl-resultats');
@@ -836,7 +880,7 @@
             bouton.type = 'button';
             bouton.setAttribute('data-action', 'choisirEleveLongitudinal');
             bouton.dataset.da = e.da;
-            poser(bouton, 'span', 'rl-nom', e.nom + ', ' + e.prenom);
+            poser(bouton, 'span', 'rl-nom', nomAffiche(e, pseudos));
             poser(bouton, 'span', 'rl-meta', accorder(e.nb, MOTS.resultats));
         });
         poser(bloc, 'p', 'texte-aide', MOTS.enAttenteAide);
@@ -853,9 +897,10 @@
         }
         const liste = poser(zone, 'ul', 'rl-eleves');
         const modeles = lireRegistre().modeles;
+        const pseudos = pseudonymes();
         inscrits.forEach((e) => {
             const da = String(e.da || '');
-            const nomComplet = String(e.nom || '') + ', ' + String(e.prenom || '');
+            const nomComplet = nomAffiche(e, pseudos);
             const li = poser(liste, 'li', 'rl-eleve');
             li.dataset.da = da;
             const entete = poser(li, 'div', 'rl-eleve-entete');
@@ -877,7 +922,7 @@
             retrait.setAttribute('data-confirm', MOTS.confirmerRetrait(nomComplet, accorder(dossiers.length, MOTS.dossiers), formaterDate(derniere),
                 resultats.map(libelleResultat), resultats.filter((r) => r.origine === 'cadre').length));
 
-            rendreDossier(li, e, modeles);
+            rendreDossier(li, e, modeles, pseudos);
             if (!resultats.length) return;
             const sousListe = poser(li, 'ul', 'rl-resultats-ulterieurs');
             resultats.forEach((r, i) => {
@@ -1006,6 +1051,6 @@
         lire: lireRegistre, inscrits: elevesInscrits,
         trimestres: trimestresRepertories, eleves: elevesDeTousLesTrimestres, rechercher: rechercherEleves,
         capturerDossier, inscrire, mesurerPoidsTrimestre,
-        lignesIndices, libelleNiveau, resultatsDe, stock913, enAttenteDuCadre, ajouterResultat, retirerResultat, retirerDuRegistre, lireNote, accorder
+        lignesIndices, libelleNiveau, resultatsDe, pseudonymes, nomAffiche, stock913, enAttenteDuCadre, ajouterResultat, retirerResultat, retirerDuRegistre, lireNote, accorder
     };
 })();
