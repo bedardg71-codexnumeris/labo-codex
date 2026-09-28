@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, APRÈS-MIDI : **LOT E1 DE L'ENREGISTREMENT (CONCEPTION, D3) SUR SA BRANCHE, EN ATTENTE DE LA RELECTURE CROISÉE DE COWORK** — rien de fusionné, rien de publié
+## POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, ≈ 21 H 15 : **LOT E1 DE L'ENREGISTREMENT (1.164.0) FUSIONNÉ DANS `main` ; VERDICT PLAYWRIGHT PUIS PUSH LANCÉS** (Cowork fermé) — lire `git log origin/main`
+
+**Où vit le travail** : `main` = `dd84c3a1` (relais d'après-midi) + la branche locale `lot-e1-conception` (six commits du lot, puis `93d15df6` : la relecture croisée de Cowork appliquée – R1, garde `cartoucheActuel === cible` avant de réécrire le champ du nom après la question du doublon ; R2, le témoin nomme le geste, Supprimer / Remplacer / Dupliquer ; trouvaille 1 (a), « Écraser » une échelle homonyme ne retire l'ancienne qu'à la création, après les vérifications ; deux essais WebKit, deux mutations rouges, donc pas de nouvelle relecture) + `3112cdd1` fusion + `11ce9131` release 1.164.0 (build 0927-2108) + ce relais. Relecture de Cowork et sa suite donnée : `plans de travail/RELECTURE-2026-09-27-lot-E1-conception.md`. Vitest 7 502/7 502 sur `main` après le bump.
+
+**Mots et Nouvelles acceptés par Grégoire le 27 sept. : tous les mots du § 5** de `plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-E1-conception.md`, **R2 compris**, Nouvelles telles quelles (titre de l'entrée : « Créer ou modifier », le nom de D3). Trouvaille 1 (b) inscrite : **#967**. Le double non suivi `CONSIGNE-LOT-E1-conception.md` est rangé dans `.git/_to_delete/`.
+
+**Ordre des fusions, tranché par Cowork** : E1 d'abord (fait) ; ensuite les branches cloud de la carte d'alignement, **#963 seule**, puis **#964-#965-#966 ensemble** (le guide part avec le lot 3), chacune **rebasée sur `main` et relue par Cowork avant sa fusion** ; aucune release sur une branche, le numéro se prend à la fusion. CI GitHub rouge : c'est #955, sans effet sur ce push.
+
+**Reste** : constater « en ligne » chez Netlify (1.164.0) ; retirer la branche `lot-e1-conception` et son worktree une fois le push constaté ; porte terrain du lot E1 (§ 10 de la demande) – markdown par Claude Code, artefact publié par Cowork. **Prochain lot : #963 rebasée sur `main`, relue par Cowork.**
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 27 SEPT. 2026, APRÈS-MIDI : **LOT E1 DE L'ENREGISTREMENT (CONCEPTION, D3) SUR SA BRANCHE, EN ATTENTE DE LA RELECTURE CROISÉE DE COWORK** — rien de fusionné, rien de publié
 
 **Où vit le travail** : `main` = `df359bfe` (1.163.0 + plan et consignes de la carte d'alignement, #963 à #966 inscrites, poussé) + la branche **locale** `lot-e1-conception`, dans le worktree `.claude/worktrees/lot-e1-conception` (non poussée, comme `lot-d-presences`) : `3255ca58` consigne du jour ; `d8f619c0` `modifierEtAnnoncer` (le témoin pour les écritures par `db.modifier`) ; `6c70db4e` modifier s'enregistre tout seul, « Créer la … », « Fermer », question « … n'est pas encore créée », jetons et nom de cartouche automatiques, assistant ; `ca9ab0c0` « Non enregistré : ‹raison› », 16 `alert` au tutoiement, `notifications.avertissement` branché ; `1117d0ab` et `21f17196` bancs WebKit et demande de relecture.
 
