@@ -194,7 +194,7 @@ describe('#965 — les textes validés, et la lecture seule', () => {
             ['!', 'Aucun objectif relié : cette évaluation ne dit pas ce qu\'elle vérifie.'],
             ['\u2715', 'Un objectif vérifié n\'est servi par aucun bloc : il n\'a pas été enseigné.'],
             ['\u26A0', 'Un objectif vérifié n\'est servi qu\'après cette évaluation.'],
-            ['?', 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.'],
+            ['?', 'Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore sa semaine ou sa séance, ou l\'évaluation n\'est dans aucune leçon.'],
             ['\u2713', 'Chaque objectif vérifié a été enseigné avant cette évaluation.']
         ]);
         cocher(['oT']);
@@ -264,7 +264,7 @@ describe('#965 « ? » — l\'application ne peut pas trancher', () => {
         cocher(['oX']);
         const p = pastille('ev');
         expect(p.etat).toBe('incertain');
-        expect(p.message).toBe('Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore de semaine, ou l\'évaluation n\'est dans aucune leçon.');
+        expect(p.message).toBe('Impossible de dire si chaque objectif a été enseigné avant : une leçon n\'a pas encore sa semaine ou sa séance, ou l\'évaluation n\'est dans aucune leçon.');
         const html = api.contenuNoeudHTML(api.etat.noeuds.get('ev'));
         expect(html).toContain('planif-eval-pastille--incertain');
         expect(html).toContain('>?</span>');
@@ -296,6 +296,18 @@ describe('#965 « ? » — l\'application ne peut pas trancher', () => {
         const p = pastille('ev');
         expect(p.etat).toBe('avant');
         expect(p.inconclusif).toBe(false);
+    });
+
+    it('R8 — un objectif servi SÛREMENT avant ET par un bloc non situable : ✓, pas « ? »', () => {
+        // Un bloc ne sert que les objectifs de SA leçon : le cas demande deux leçons
+        // qui portent le même objectif — ce que font des leçons clones (métadonnées
+        // partagées). La leçon de semaine 2 et une leçon sans semaine portent oA.
+        lecon('sY', 'Clone sans semaine', null, null, [{ id: 'oA', texte: 'Nommer les ruches' }]);
+        noeud('bY', 'activite', 'Bloc du clone', { parent: 'sY', metadata: { objectifsServis: ['oA'] } });
+        cocher(['oA']);
+        const p = pastille('ev');
+        expect(p.etat).toBe('avant');
+        expect(p.inconclusif).toBe(true);   // un bloc n'a pas pu être situé, mais un autre suffit
     });
 
     it('un bloc hors de toute leçon ne sert aucun objectif : il ne rend rien incertain (✕ s\'il est seul)', () => {
