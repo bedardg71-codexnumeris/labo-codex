@@ -7,25 +7,25 @@
 
 ## §0 · Préalable
 
-- [ ] Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, et lis le numéro en bas de page.
+- [x] Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, et lis le numéro en bas de page.
       ⮕ Attendu : **1.166.0**. Sinon, s'arrêter là : le lot n'est pas encore en ligne. `iPad`
-- [ ] Fais une sauvegarde Codex avant le §1 : la porte modifie la fiche d'un·e de tes étudiant·es, puis la remet comme avant.
+- [x] Fais une sauvegarde Codex avant le §1 : la porte modifie la fiche d'un·e de tes étudiant·es, puis la remet comme avant.
 
 ## §1 · ⚠⚠ Données — la fiche d'un·e étudiant·e, au doigt
 
 > **POURQUOI** — Avant 1.166.0, une fiche d'étudiant·e ne s'enregistrait qu'au bouton « Enregistrer ». Maintenant, chaque champ s'enregistre tout seul **quand tu le quittes**. Sur le Mac, les tests le prouvent. Sur l'iPad, toucher directement une autre fiche ne quitte pas toujours le champ : si c'est le cas ici, ce que tu viens de taper serait perdu sans rien dire. Et le DA ne doit plus pouvoir changer : un DA changé laissait les évaluations et les présences sous l'ancien.
 
-- [ ] Dans Cadre › Groupe d'étudiant·es, ouvre la fiche d'un·e de tes étudiant·es (menu « Action » de sa rangée, « Modifier »).
+- [x] Dans Cadre › Groupe d'étudiant·es, ouvre la fiche d'un·e de tes étudiant·es (menu « Action » de sa rangée, « Modifier »).
       ⮕ Attendu : la fiche s'ouvre ; sous le DA, la phrase « Le DA ne se modifie pas ici : il relie les évaluations et les présences de l'étudiant·e. » `iPad`
-- [ ] Touche le champ DA et essaie d'effacer un chiffre.
+- [x] Touche le champ DA et essaie d'effacer un chiffre.
       ⮕ Attendu : le DA ne change pas. `iPad`
-- [ ] Touche la fin du champ « Programme » et ajoute « (essai) ».
+- [x] Touche la fin du champ « Programme » et ajoute « (essai) ».
       ⮕ Attendu : le programme se termine par « (essai) ». Rien d'autre ne se passe encore. `iPad` `⚠⚠ Données`
-- [ ] Sans toucher ailleurs, ouvre **directement la fiche d'un·e autre étudiant·e** (menu « Action » de sa rangée, « Modifier »).
+- [x] Sans toucher ailleurs, ouvre **directement la fiche d'un·e autre étudiant·e** (menu « Action » de sa rangée, « Modifier »).
       ⮕ Attendu : l'autre fiche s'ouvre, avec son propre programme (pas celui que tu viens de taper). `iPad`
-- [ ] Rouvre la première fiche.
+- [x] Rouvre la première fiche.
       ⮕ Attendu : son programme se termine toujours par « (essai) », et son DA est celui d'avant. Avant 1.166.0, le programme serait revenu à l'ancien. `iPad` `⚠⚠ Données`
-- [ ] Retire « (essai) », puis ouvre une autre fiche, puis reviens sur la première.
+- [x] Retire « (essai) », puis ouvre une autre fiche, puis reviens sur la première.
       ⮕ Attendu : le programme est revenu à celui d'origine. C'est le ménage de la porte. `iPad` `⚠⚠ Données`
 
 ## §2 · Interface
@@ -50,3 +50,7 @@ Aucune : tes décisions du 28 sept. (le DA, les mots, les Nouvelles) sont posée
 - **Session et année d'un trimestre vide** : changer la session garde l'année ; passer de a2026 à h2027 écrit h2026, puis h2027. Si h2026 existe, le changement est refusé : changer l'année d'abord. Sans perte ; gardé (décision de Cowork).
 - **Corriger une coquille de DA** n'est plus possible à la fiche : il faut supprimer et rajouter l'étudiant·e, ce qui détache ses données. Inscrit en #976.
 - **Erreurs de la session** : deux essais de la relecture (horaire, groupe-cours) ne voyaient pas la copie de la collection, parce que le banc la copiait déjà lui-même ; corrigés (R1). La première version de l'essai clavier du DA utilisait la touche retour arrière, que le navigateur de test lit comme « page précédente » ; retirée.
+
+## Relevé de Grégoire – 28 sept. 2026, 17 h 10 (iPad)
+
+**8 passées · 0 échec · 0 non traitée.** §0 : 1.166.0 lu en bas de page ; sauvegarde Codex faite. §1 : la phrase sous le DA s'affiche, et le DA ne se laisse pas effacer ; « (essai) » a tenu en ouvrant directement la fiche d'un·e autre étudiant·e, le DA inchangé ; le programme d'origine a été rétabli. **Lot E2 : porte passée.**
