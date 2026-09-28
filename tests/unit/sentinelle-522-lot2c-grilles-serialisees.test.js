@@ -280,7 +280,9 @@ function fonctionContenant(src, offset) {
 // suspension entre la lecture et l'écriture, rien ne peut s'intercaler.
 const SETSYNC_ADMIS = {
     'js/grilles.js': ['importerGrillesExternes'],
-    'js/wizard-pratique-v2.js': ['wizardV2CreerGrilleDemo'],
+    // ↻ Lot E1 (27 sept. 2026) : `wizardV2CreerGrilleDemo` n'écrit plus rien (D3) ; la grille
+    // de base est écrite par `finaliserCreationPratique`, dans la file (`modifierEtAnnoncer`).
+    'js/wizard-pratique-v2.js': [],
     'js/import-export.js': ['executerImportConfigComplete', 'executerImportSelectif']
 };
 
@@ -326,7 +328,7 @@ describe('#522 lot 2c · C — la course ne peut pas se rouvrir en silence', () 
 
     it('C.b chaque fichier converti écrit par la file, au compte attendu', () => {
         for (const [f, attendu] of Object.entries(PAR_LA_FILE)) {
-            const n = (lire(f).match(/db\.modifier\(cle\('grillesTemplates'\)/g) || []).length;
+            const n = (lire(f).match(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('grillesTemplates'\)/g) || []).length;
             expect(n, `${f} : écritures par la file`).toBe(attendu);
         }
     });
@@ -356,7 +358,7 @@ describe('#522 lot 2c · C — la course ne peut pas se rouvrir en silence', () 
             expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
             const corps = src.slice(debut, debut + 5000);
             expect(corps, `${nom} : n'écrit pas par la file`)
-                .toMatch(/db\.modifier\(cle\('grillesTemplates'\)/);
+                .toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('grillesTemplates'\)/);
         }
 
         // ⮕ LE MAILLON AJOUTÉ, pas remplacé (#624). Les quatre portes de suppression
@@ -379,7 +381,7 @@ describe('#522 lot 2c · C — la course ne peut pas se rouvrir en silence', () 
         const src = lire('js/grilles.js');
         const debut = src.indexOf('function assurerGrilleGenerique(');
         const corps = src.slice(debut, src.indexOf('function initialiserModuleGrilles', debut));
-        const posFile = corps.indexOf('db.modifier(');
+        const posFile = corps.search(/(?:db\.modifier|modifierEtAnnoncer)\(/);   // lot E1 : la même file, annoncée
         const posTest = corps.indexOf("some(g => g.id === 'GRILLE_GENERIQUE')");
         expect(posFile, 'la file est absente').toBeGreaterThan(-1);
         expect(posTest, 'le test de présence est absent').toBeGreaterThan(posFile);

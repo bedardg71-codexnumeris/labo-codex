@@ -23,6 +23,39 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
  *   Si fourni, les nouveaux exports y sont ajoutés au lieu de créer un sandbox vide.
  * @returns {object} un objet window-like contenant les exports
  */
+/**
+ * Lot E1 de l'enregistrement (27 sept. 2026) — les éditeurs de la Conception écrivent par
+ * `modifierEtAnnoncer` (modes.js, enveloppe de `db.modifier` qui fait parler le témoin), et
+ * l'assistant de pratique par `sauvegarderDonneesSelonMode`. Même règle que
+ * `obtenirIdContexteActif` ci-dessous : un défaut fourni seulement quand le harnais n'en donne
+ * pas. Il est PARESSEUX : si le vrai modes.js a été chargé dans le même window, c'est lui qui
+ * répond ; sinon, délégation au `db` du harnais (même retour, même rejet). Le témoin lui-même
+ * est éprouvé par sentinelle-lot-e1-modifier-et-annoncer.test.js, sur le vrai modes.js.
+ */
+export function completerEcrivainsParDefaut(globaux, fauxWindow) {
+    const dbHarnais = globaux.db;
+    const ajouts = {};
+    if (typeof globaux.modifierEtAnnoncer !== 'function') {
+        ajouts.modifierEtAnnoncer = function (cle, mutateur, defaut, options) {
+            if (fauxWindow && typeof fauxWindow.modifierEtAnnoncer === 'function') {
+                return fauxWindow.modifierEtAnnoncer(cle, mutateur, defaut, options);
+            }
+            return dbHarnais.modifier(cle, mutateur, defaut === undefined ? null : defaut);
+        };
+    }
+    if (typeof globaux.sauvegarderDonneesSelonMode !== 'function') {
+        const cleHarnais = globaux.cle;
+        ajouts.sauvegarderDonneesSelonMode = function (cleBase, donnees, options) {
+            if (fauxWindow && typeof fauxWindow.sauvegarderDonneesSelonMode === 'function') {
+                return fauxWindow.sauvegarderDonneesSelonMode(cleBase, donnees, options);
+            }
+            const cleEffective = typeof cleHarnais === 'function' ? cleHarnais(cleBase) : cleBase;
+            return dbHarnais.setSync(cleEffective, donnees) !== false;
+        };
+    }
+    return Object.keys(ajouts).length ? Object.assign({}, globaux, ajouts) : globaux;
+}
+
 export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
     const code = readFileSync(chemin, 'utf8');
@@ -113,6 +146,9 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
             }
         });
     }
+
+    // Lot E1 de l'enregistrement (27 sept. 2026) : voir `completerEcrivainsParDefaut`.
+    globaux = completerEcrivainsParDefaut(globaux, fauxWindow);
 
     // Consigne du 12 sept. 2026 (les étiquettes) — `motsNature` / `motNature` (js/mots-nature.js) est
     // LE point unique du mot de chaque nature de cours ; le formulaire du Cadre, les cartes de

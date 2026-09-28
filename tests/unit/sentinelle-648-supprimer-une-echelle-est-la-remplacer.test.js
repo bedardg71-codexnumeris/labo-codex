@@ -274,7 +274,7 @@ describe('#648 · D — les chemins : trois passent par le cœur, la section 2 n
     it('la liste, la zone d\'édition et la section 1 appellent supprimerOuRemplacerEchelle', () => {
         for (const nom of ['supprimerEchelle', 'supprimerEchelleDepuisSidebar', 'supprimerEchelleDefinitivement']) {
             expect(corps(echellesSrc, nom), nom).toContain('supprimerOuRemplacerEchelle(');
-            expect(corps(echellesSrc, nom), nom + ' : plus de retrait local').not.toContain("db.modifier(cle('echellesTemplates')");
+            expect(corps(echellesSrc, nom), nom + ' : plus de retrait local').not.toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/);
         }
     });
     it('la section 2 (Bibliothèque seule) ne remplace rien : les évaluations lisent l\'ancrage, pas la Bibliothèque', () => {
@@ -284,8 +284,9 @@ describe('#648 · D — les chemins : trois passent par le cœur, la section 2 n
     });
     it('le cœur est le seul à retirer de l\'ancrage, par la file, après ses questions', () => {
         const c = corps(echellesSrc, 'supprimerOuRemplacerEchelle');
-        expect(c).toContain("db.modifier(cle('echellesTemplates')");
-        expect(c.indexOf('prompt(')).toBeLessThan(c.indexOf("db.modifier(cle('echellesTemplates')"));
+        // Lot E1 : la même file, annoncée par le témoin (`modifierEtAnnoncer`).
+        expect(c).toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/);
+        expect(c.indexOf('prompt(')).toBeLessThan(c.search(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/));
         expect(c).toContain('remplacerEchellePartout(');
     });
     it('l\'ancienne garde à un seul porteur a disparu, et son export avec', () => {

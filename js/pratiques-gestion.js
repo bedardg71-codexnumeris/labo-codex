@@ -1462,7 +1462,7 @@ async function mettreAJourNomPratiqueMat() {
     // du même formulaire : les quitter l'un après l'autre est le geste qui
     // lançait deux enregistrements sur le même instantané.
     let ecrit = false;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -1470,7 +1470,7 @@ async function mettreAJourNomPratiqueMat() {
         configurations[index].nom = nouveauNom;
         ecrit = true;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (ecrit) {
         // Mettre à jour le titre et la sidebar
@@ -1489,7 +1489,7 @@ async function mettreAJourDescriptionPratiqueMat() {
     const nouvelleDescription = getValeurChamp('mat-pratique-description');
 
     let pratiqueApres = null;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -1497,7 +1497,7 @@ async function mettreAJourDescriptionPratiqueMat() {
         configurations[index].description = nouvelleDescription;
         pratiqueApres = configurations[index];
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (pratiqueApres) {
         // Mettre à jour l'en-tête
@@ -1515,14 +1515,14 @@ async function mettreAJourDisciplinePratiqueMat() {
     if (!pratiqueEnEditionMateriel) return;
 
     const discipline = getValeurChamp('mat-pratique-discipline');
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
 
         configurations[index].discipline = discipline;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 }
 
 /**
@@ -1577,7 +1577,7 @@ async function sauvegarderConfigPratiqueMat() {
         }
     }
 
-    await db.modifier(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, []);
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, [], { geste: 'Modifier la pratique' });
     return true;
 }
 
@@ -1719,32 +1719,6 @@ function appliquerFormulaireDansCollection(lues) {
     // collection hors de la file après un échec d'écriture y remettrait
     // exactement l'instantané que la file sert à ne plus perdre.
     return configurations;
-}
-
-/**
- * Sauvegarde complète avec notification et vérification
- */
-async function sauvegarderPratiqueMaterielComplet() {
-    try {
-        // Lot N6 : un refus (dénotation sans cible, retrait annulé) n'annonce pas « enregistrée ».
-        if (await sauvegarderConfigPratiqueMat() === false) return;
-        await mettreAJourNomPratiqueMat();
-        await mettreAJourDescriptionPratiqueMat();
-        await mettreAJourDisciplinePratiqueMat();
-
-        // Vérification que la pratique existe toujours
-        const verification = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        const pratiqueTrouvee = verification.find(p => p.id === pratiqueEnEditionMateriel);
-
-        if (pratiqueTrouvee) {
-            notifications.succes('Pratique enregistrée');
-        } else {
-            throw new Error('Pratique introuvable après sauvegarde');
-        }
-    } catch (erreur) {
-        console.error('[pratiques-gestion] ❌ Erreur sauvegarde complète:', erreur);
-        notifications.erreur('Erreur lors de la sauvegarde. Vérifie la console.');
-    }
 }
 
 /* ===============================
@@ -1935,7 +1909,7 @@ async function ajouterTypeTravailMat() {
     if (!pratiqueEnEditionMateriel) return;
 
     let typesApres = null;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -1952,7 +1926,7 @@ async function ajouterTypeTravailMat() {
 
         typesApres = configurations[index].configuration.typesTravaux;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (typesApres) afficherTypesTravauxMat(typesApres);
 }
@@ -1960,7 +1934,7 @@ async function ajouterTypeTravailMat() {
 async function modifierTypeTravailMat(indexType, propriete, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -1972,14 +1946,14 @@ async function modifierTypeTravailMat(indexType, propriete, valeur) {
 
         types[indexType][propriete] = valeur;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 }
 
 async function supprimerTypeTravailMat(indexType) {
     if (!pratiqueEnEditionMateriel) return;
 
     let typesApres = null;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1 || !configurations[index].configuration?.typesTravaux) return undefined;
@@ -1987,7 +1961,7 @@ async function supprimerTypeTravailMat(indexType) {
         configurations[index].configuration.typesTravaux.splice(indexType, 1);
         typesApres = configurations[index].configuration.typesTravaux;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (typesApres) afficherTypesTravauxMat(typesApres);
 }
@@ -2039,7 +2013,7 @@ async function ajouterForfaitMat() {
     if (!pratiqueEnEditionMateriel) return;
 
     let apres = null;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -2057,7 +2031,7 @@ async function ajouterForfaitMat() {
 
         apres = configurations[index].configuration;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (apres) afficherForfaitsMat(apres.forfaits, apres.typesTravaux || []);
 }
@@ -2066,7 +2040,7 @@ async function modifierForfaitMat(indexForfait, propriete, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
     if (propriete === 'note') valeur = parseInt(valeur) || 0;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -2076,14 +2050,14 @@ async function modifierForfaitMat(indexForfait, propriete, valeur) {
 
         forfaits[indexForfait][propriete] = valeur;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 }
 
 async function modifierTravailForfaitMat(indexForfait, typeTravailId, valeur) {
     if (!pratiqueEnEditionMateriel) return;
 
     const quantite = parseInt(valeur) || 0;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1) return undefined;
@@ -2094,14 +2068,14 @@ async function modifierTravailForfaitMat(indexForfait, typeTravailId, valeur) {
         if (!forfaits[indexForfait].travaux) forfaits[indexForfait].travaux = {};
         forfaits[indexForfait].travaux[typeTravailId] = quantite;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 }
 
 async function supprimerForfaitMat(indexForfait) {
     if (!pratiqueEnEditionMateriel) return;
 
     let apres = null;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1 || !configurations[index].configuration?.forfaits) return undefined;
@@ -2109,7 +2083,7 @@ async function supprimerForfaitMat(indexForfait) {
         configurations[index].configuration.forfaits.splice(indexForfait, 1);
         apres = configurations[index].configuration;
         return configurations;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (apres) afficherForfaitsMat(apres.forfaits, apres.typesTravaux || []);
 }
@@ -2201,11 +2175,11 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
 
     // #522 — l'ajout de la copie se fait DANS la file : la collection lue plus
     // haut a servi à NOMMER la copie, elle ne doit pas servir à réécrire le tout.
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const fraiches = lues || [];
         fraiches.push(copie);
         return fraiches;
-    }, []);
+    }, [], { geste: 'Dupliquer la pratique' });
 
     await afficherListePratiquesMateriel();
     await chargerPratiquePourModif(copie.id);
@@ -2221,9 +2195,9 @@ async function supprimerPratiqueMateriel(pratiqueId) {
         return;
     }
 
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         return (lues || []).filter(p => p.id !== pratiqueId);
-    }, []);
+    }, [], { geste: 'Supprimer la pratique' });
 
     pratiqueEnEditionMateriel = null;
 
@@ -2552,6 +2526,18 @@ function toggleSystemeJetonsMat() {
 }
 
 /**
+ * Lot E1 (D3) : la case « Système de jetons », cochée par l'usager. Les jetons
+ * s'enregistrent comme leurs voisins, au changement ; avant, seul « Enregistrer la
+ * pratique » les écrivait, et quitter la fiche les perdait.
+ * ⚠ Séparée de `toggleSystemeJetonsMat`, que le CHARGEMENT du formulaire appelle :
+ * enregistrer depuis elle écrirait un formulaire à moitié rempli.
+ */
+function onJetonsActifChangeMat() {
+    toggleSystemeJetonsMat();
+    sauvegarderConfigPratiqueMat();
+}
+
+/**
  * 🆕 #24 : Gère le changement du mode de sélection portfolio
  * Active automatiquement les catégories si "hybride" est sélectionné
  */
@@ -2719,7 +2705,7 @@ function genererCheckboxesCategorie(productions, categorie) {
  */
 async function toggleProductionCategorie(prodId, categorie, checked) {
     let trouvee = false;
-    await db.modifier(cle('productions'), (lues) => {
+    await modifierEtAnnoncer(cle('productions'), (lues) => {
         const productions = lues || [];
         const prod = productions.find(p => p.id === prodId);
         if (!prod) return undefined;
@@ -2727,7 +2713,7 @@ async function toggleProductionCategorie(prodId, categorie, checked) {
         prod.categorie = checked ? categorie : null;
         trouvee = true;
         return productions;
-    }, []);
+    }, [], { geste: 'Modifier la pratique' });
 
     if (trouvee) {
         // Rafraîchir les deux listes (pour gérer l'exclusivité)
@@ -2910,7 +2896,6 @@ window.dupliquerPratiqueMateriel = dupliquerPratiqueMateriel;
 window.supprimerPratiqueMateriel = supprimerPratiqueMateriel;
 window.appliquerPratiqueAuCours = appliquerPratiqueAuCours;
 window.sauvegarderPratiqueMateriel = sauvegarderPratiqueMateriel;
-window.sauvegarderPratiqueMaterielComplet = sauvegarderPratiqueMaterielComplet;
 window.partagerPratiqueMateriel = partagerPratiqueMateriel;
 window.exporterPratiquesUtilisateur = exporterPratiquesUtilisateur;
 window.importerPratiquesUtilisateur = importerPratiquesUtilisateur;
@@ -2922,6 +2907,7 @@ window.mettreAJourDescriptionPratiqueMat = mettreAJourDescriptionPratiqueMat;
 window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
 window.sauvegarderConfigPratiqueMat = sauvegarderConfigPratiqueMat;
 window.toggleSystemeJetonsMat = toggleSystemeJetonsMat;
+window.onJetonsActifChangeMat = onJetonsActifChangeMat;
 window.toggleCategoriesMat = toggleCategoriesMat;  // 🆕 Beta 95.4
 window.onPortfolioSelectionChangeMat = onPortfolioSelectionChangeMat;  // 🆕 #24
 window.chargerProductionsPourCategories = chargerProductionsPourCategories;  // 🆕 Beta 95.4

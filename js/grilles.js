@@ -314,7 +314,7 @@ async function sauvegarderCritere() {
     // Vérifier qu'on a un nom de grille
     const nomGrille = document.getElementById('nomGrilleTemplate')?.value?.trim();
     if (!nomGrille) {
-        alert('Veuillez d\'abord donner un nom à la grille');
+        alert('Donne d\'abord un nom à la grille.');
         const nomInput = document.getElementById('nomGrilleTemplate');
         if (nomInput) nomInput.focus();
         return;
@@ -639,6 +639,9 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     if (!nomGrille) {
         if (!silencieux) {
             alert('Le nom de la grille est obligatoire');
+        } else if (grilleTemplateActuelle && window.temoinEnregistrement) {
+            // Lot E1 (D3) : un nom vidé sur une grille existante le dit, par le témoin.
+            window.temoinEnregistrement.nonEnregistre('le nom ne peut pas être vide.', 'Modifier la grille', cle('grillesTemplates'));
         }
         return;
     }
@@ -676,7 +679,9 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
 
     let horsTrimestreActif = false;
 
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    // Lot E1 (D0 point 2) : par le témoin commun. Un échec y est dit ; ici, on se tait.
+    try {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
     let grillesEnFile = lues || [];
 
     // L'homonyme n'est retiré qu'ici : entre la question et l'écriture, la
@@ -755,7 +760,10 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     }
 
     return grillesEnFile;
-    }, []);
+    }, [], { geste: isCreation ? 'Créer la grille' : 'Modifier la grille' });
+    } catch (e) {
+        return;
+    }
 
     if (horsTrimestreActif) {
         console.warn('[Grilles] Sauvegarde refusée : grille', grilleTemplateActuelle.id, 'absente du trimestre actif', cle('grillesTemplates'));
@@ -781,8 +789,10 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
         select.value = grilleTemplateActuelle.id;
     }
 
-    if (!silencieux) {
-        notifications.succes(`Grille "${nomGrille}" sauvegardée !`);
+    // Lot E1 (D3) : en modification, le témoin a dit « Enregistré » ; seul le geste
+    // de création a son message.
+    if (!silencieux && isCreation) {
+        notifications.succes(`Grille «\u00a0${nomGrille}\u00a0» créée.`);
     }
 }
 
@@ -1050,11 +1060,11 @@ async function dupliquerGrille(grilleId) {
     };
 
     // Sauvegarder
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const liste = lues || [];
         liste.push(nouvelleGrille);
         return liste;
-    }, []);
+    }, [], { geste: 'Dupliquer la grille' });
 
     // Charger la nouvelle grille en édition
     grilleTemplateActuelle = nouvelleGrille;
@@ -1821,7 +1831,7 @@ async function importerDansGrilleActive(event) {
 
     // Récupérer l'ID de la grille active
     if (!grilleTemplateActuelle) {
-        alert('Aucune grille sélectionnée. Veuillez d\'abord sélectionner une grille à remplacer.');
+        alert('Aucune grille sélectionnée. Sélectionne d\'abord la grille à remplacer.');
         event.target.value = ''; // Reset input
         return;
     }
@@ -2238,7 +2248,7 @@ async function afficherListeGrilles() {
             : '';
         const badgeDepistage = genererBadgeGrilleDepistage(grille);
         return `
-            <div class="sidebar-item" data-id="${grille.id}" data-action="chargerGrillePourModif" data-param="${grille.id}">
+            <div class="sidebar-item" data-id="${grille.id}" data-action="ouvrirGrilleDepuisListe" data-param="${grille.id}">
                 <div class="sidebar-item-titre">${echapperHtml(nomGrille)}</div>
                 <div class="sidebar-item-badges">${badgeComposition}${badgeDepistage} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
             </div>
@@ -2913,18 +2923,18 @@ async function deplacerCartouchesVersAutreGrille(ancienneGrilleId, nouvelleGrill
     // existent en double — récupérable. L'ordre inverse les ferait disparaître.
     // (Motif de #650 : `db.set` après un dialogue écrase ce qui s'est enregistré
     // pendant. Ici les dialogues sont TOUS passés avant d'arriver ici.)
-    await db.modifier(cle(`cartouches_${nouvelleGrilleId}`), (lues) => {
+    await modifierEtAnnoncer(cle(`cartouches_${nouvelleGrilleId}`), (lues) => {
         const existantes = Array.isArray(lues) ? lues : [];
         const idsExistants = new Set(existantes.map(c => c.id));
         const ajouts = remappees.filter(c => !idsExistants.has(c.id));
         if (ajouts.length === 0) return undefined;
         return existantes.concat(ajouts);
-    }, []);
+    }, [], { geste: 'Supprimer la grille' });
 
-    await db.modifier(cle(`cartouches_${ancienneGrilleId}`), (lues) => {
+    await modifierEtAnnoncer(cle(`cartouches_${ancienneGrilleId}`), (lues) => {
         if (!Array.isArray(lues) || lues.length === 0) return undefined;
         return [];
-    }, []);
+    }, [], { geste: 'Supprimer la grille' });
 
     return { nbDeplacees: remappees.length, orphelins, sansCritere };
 }
@@ -3064,7 +3074,7 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
  */
 async function _retirerGrilleDeLaListe(grilleId, options = {}) {
     let supprimee = false;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const liste = lues || [];
         const i = liste.findIndex(g => g.id === grilleId);
         if (i === -1) return undefined;
@@ -3076,7 +3086,7 @@ async function _retirerGrilleDeLaListe(grilleId, options = {}) {
         liste.splice(i, 1);
         supprimee = true;
         return liste;
-    }, []);
+    }, [], { geste: 'Supprimer la grille' });
     return supprimee;
 }
 
@@ -3189,7 +3199,7 @@ async function ajouterGrillesABibliotheque() {
     const checkboxes = document.querySelectorAll('#listeGrillesDisponibles input[type="checkbox"]:checked');
 
     if (checkboxes.length === 0) {
-        alert('Veuillez sélectionner au moins une grille à ajouter');
+        alert('Sélectionne au moins une grille à ajouter.');
         return;
     }
 
@@ -3433,7 +3443,9 @@ async function appliquerTypeGrilleAuxCriteresSansType() {
     afficherCriteresGrille(grilleTemplateActuelle);
 }
 
-function creerNouvelleGrille() {
+async function creerNouvelleGrille() {
+    // Lot E1 (D3) : une grille en cours de création ne se perd pas sans question.
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('grille'))) return;
     document.getElementById('accueilGrilles').classList.add('u-hide');
     document.getElementById('conteneurEditionGrille').classList.remove('u-hide');
 
@@ -3445,6 +3457,7 @@ function creerNouvelleGrille() {
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
+    rendreModeFicheGrille(true);
 
     // Réinitialiser grilleTemplateActuelle
     grilleTemplateActuelle = null;
@@ -4282,8 +4295,10 @@ function _idCollectionChoisie(valeur) {
 }
 
 function _direCollectionDisparue() {
-    if (typeof notifications !== 'undefined' && notifications.avertissement) {
-        notifications.avertissement('Cette collection n\'existe plus.', 'Rien n\'a été changé sur le critère.');
+    // Lot E1 : `notifications.avertissement` n'existe pas (l'API est succes / erreur /
+    // warning / info) ; la garde rendait ce message muet. Branché sur la vraie méthode.
+    if (typeof notifications !== 'undefined' && notifications.warning) {
+        notifications.warning('Cette collection n\'existe plus.', 'Rien n\'a été changé sur le critère.');
     }
 }
 
@@ -4562,7 +4577,7 @@ function rendreCartesGabaritAlgo(critere, ctx) {
  */
 async function modifierFormuleCritereGrille(grilleId, critereIndex, modeleId, params) {
     let grilleModifiee = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grille = grilles.find(g => g.id === grilleId);
         if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
@@ -4570,7 +4585,7 @@ async function modifierFormuleCritereGrille(grilleId, critereIndex, modeleId, pa
         grille.dateModification = new Date().toISOString();
         grilleModifiee = grille;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
 
     if (!grilleModifiee) return null;
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
@@ -4589,7 +4604,7 @@ async function modifierFormuleCritereGrille(grilleId, critereIndex, modeleId, pa
  */
 async function modifierParamFormuleCritereGrille(grilleId, critereIndex, cleParam, valeur) {
     let grilleModifiee = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grille = grilles.find(g => g.id === grilleId);
         if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
@@ -4601,7 +4616,7 @@ async function modifierParamFormuleCritereGrille(grilleId, critereIndex, clePara
         grille.dateModification = new Date().toISOString();
         grilleModifiee = grille;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
 
     if (!grilleModifiee) return null;
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
@@ -4679,7 +4694,7 @@ function deplacerCritereTempBas(index) {
 async function deplacerCritereGrilleHaut(grilleId, index) {
     if (index <= 0) return;
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g || !g.criteres || !g.criteres[index] || !g.criteres[index - 1]) return undefined;
@@ -4688,7 +4703,7 @@ async function deplacerCritereGrilleHaut(grilleId, index) {
         g.dateModification = new Date().toISOString();
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
@@ -4708,7 +4723,7 @@ async function deplacerCritereGrilleHaut(grilleId, index) {
  */
 async function _deplacerSousCritere(grilleId, critereIndex, scIndex, vers) {
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         const scs = g && g.criteres && g.criteres[critereIndex] && g.criteres[critereIndex].sousCriteres;
@@ -4717,7 +4732,7 @@ async function _deplacerSousCritere(grilleId, critereIndex, scIndex, vers) {
         g.dateModification = new Date().toISOString();
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
         grilleTemplateActuelle = grille;
@@ -4732,7 +4747,7 @@ async function deplacerSousCritereBas(grilleId, critereIndex, scIndex) { await _
  */
 async function deplacerCritereGrilleBas(grilleId, index) {
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g || !g.criteres) return undefined;
@@ -4743,7 +4758,7 @@ async function deplacerCritereGrilleBas(grilleId, index) {
         g.dateModification = new Date().toISOString();
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
@@ -4771,6 +4786,7 @@ async function chargerGrillePourModif(id) {
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.classList.remove('u-hide');
     if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
+    rendreModeFicheGrille(false);
 
     // Définir la grille actuelle (objet complet, pas juste l'ID)
     grilleTemplateActuelle = grille;
@@ -4990,7 +5006,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     // ⚠ Le mutateur rend `undefined` pour ANNULER l'écriture : une grille ou un
     // critère introuvable ne doit pas réécrire la collection telle quelle.
     let grilleModifiee = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grille = grilles.find(g => g.id === grilleId);
         if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
@@ -5001,7 +5017,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
         grille.dateModification = new Date().toISOString();
         grilleModifiee = grille;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
 
     if (!grilleModifiee) return { refuse: null };   // grille ou critère introuvable
     const grille = grilleModifiee;
@@ -5112,7 +5128,7 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
         }
     ];
 
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
@@ -5120,7 +5136,7 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
         g.criteres[critereIndex].sousCriteres = sousCriteresParDefaut;
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // Réafficher la grille
@@ -5135,7 +5151,7 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
  */
 async function ajouterSousCritere(grilleId, critereIndex) {
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
@@ -5158,7 +5174,7 @@ async function ajouterSousCritere(grilleId, critereIndex) {
 
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // Réafficher la grille
@@ -5177,7 +5193,7 @@ async function ajouterSousCritere(grilleId, critereIndex) {
 async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, valeur) {
     // ⚠ C'est LE geste de #510 : le `change` d'un champ de sous-critère part au
     // blur, donc au moment précis où l'on clique dans le champ suivant.
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
 
@@ -5188,7 +5204,7 @@ async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, cha
         // Mettre à jour le champ
         g.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
 
 }
 
@@ -5202,7 +5218,7 @@ async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
     if (!confirm('Supprimer ce sous-critère ?')) return;
 
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
 
@@ -5213,7 +5229,7 @@ async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
         g.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // Réafficher la grille
@@ -5227,7 +5243,7 @@ async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
  */
 async function ajouterCritereGrille(grilleId) {
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g) return undefined;
@@ -5259,7 +5275,7 @@ async function ajouterCritereGrille(grilleId) {
 
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // Réafficher la liste des critères (calculera automatiquement le total)
@@ -5278,7 +5294,7 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
     }
 
     let grille = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
@@ -5288,7 +5304,7 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
         g.dateModification = new Date().toISOString();
         grille = g;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
     if (!grille) return;
 
     // FIX (10 jan 2026) : Synchroniser grilleTemplateActuelle
@@ -5314,7 +5330,7 @@ function definirGrilleActive(id) {
 
 async function dupliquerGrilleDepuisSidebar(id) {
     let copieCreee = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grille = grilles.find(g => g.id === id);
 
@@ -5343,7 +5359,7 @@ async function dupliquerGrilleDepuisSidebar(id) {
         grilles.push(copie);
         copieCreee = copie;
         return grilles;
-    }, []);
+    }, [], { geste: 'Dupliquer la grille' });
 
     if (!copieCreee) return;
     const copie = copieCreee;
@@ -5382,6 +5398,43 @@ async function supprimerGrilleDepuisSidebar(id) {
 /**
  * Annule l'édition de grille et retourne à l'accueil
  */
+/**
+ * Lot E1 (D3) — une grille existante s'enregistre toute seule, champ par champ : son
+ * pied ne montre que « Fermer ». Une grille en création montre « Créer la grille » :
+ * rien n'est écrit avant ce clic.
+ * @param {boolean} enCreation
+ */
+function rendreModeFicheGrille(enCreation) {
+    const btnCreer = document.getElementById('btnCreerGrille');
+    if (btnCreer) btnCreer.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/**
+ * Lot E1 : « ma fiche est en création et porte une saisie » — lu par la question de
+ * sortie et par le `beforeunload` communs (`ui-dialogues.js`).
+ */
+function grilleEnCreationSaisie() {
+    const conteneur = document.getElementById('conteneurEditionGrille');
+    if (grilleTemplateActuelle || !conteneur || conteneur.classList.contains('u-hide')) return false;
+    const nom = document.getElementById('nomGrilleTemplate')?.value?.trim();
+    const description = document.getElementById('descriptionGrille')?.value?.trim();
+    const criteres = (window.tempCriteres || []).some(c => (c.nom || '').trim() || (c.description || '').trim());
+    return !!(nom || description || criteres || window.tempTypeGrille);
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('grille', grilleEnCreationSaisie);
+
+/** Lot E1 (D3) : « Fermer » (il n'annulait rien) — avec la question, en création. */
+async function fermerFicheGrille() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('grille'))) return;
+    annulerFormGrille();
+}
+
+/** Lot E1 : ouvrir une autre grille depuis la liste, sans perdre une création en cours. */
+async function ouvrirGrilleDepuisListe(id) {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('grille'))) return;
+    await chargerGrillePourModif(id);
+}
+
 function annulerFormGrille() {
     document.getElementById('conteneurEditionGrille').classList.add('u-hide');
     // Note: optionsImportExportGrilles supprimé en Beta 92
@@ -5571,13 +5624,13 @@ async function sauvegarderCategoriesErreurs(grilleId, critereIndex) {
     });
 
     // Sauvegarder dans localStorage
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grilleIndex = grilles.findIndex(g => g.id === grilleId);
         if (grilleIndex === -1) return undefined;
         grilles[grilleIndex] = grille;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
 
     // Fermer le modal et rafraîchir l'affichage
     fermerModalCategoriesErreurs();
@@ -5600,6 +5653,8 @@ window.chargerGrillePourModif = chargerGrillePourModif;
 window.dupliquerGrilleDepuisSidebar = dupliquerGrilleDepuisSidebar;
 window.supprimerGrilleDepuisSidebar = supprimerGrilleDepuisSidebar;
 window.annulerFormGrille = annulerFormGrille;
+window.fermerFicheGrille = fermerFicheGrille;
+window.ouvrirGrilleDepuisListe = ouvrirGrilleDepuisListe;
 window.dupliquerGrilleActive = dupliquerGrilleActive;
 window.supprimerGrilleActive = supprimerGrilleActive;
 window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;
@@ -5704,7 +5759,7 @@ function modifierCritereTempHandler(el) {
  */
 async function modifierProjectionCritereGrille(grilleId, critereIndex, muter) {
     let grilleModifiee = null;
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grille = grilles.find(g => g.id === grilleId);
         if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
@@ -5712,7 +5767,7 @@ async function modifierProjectionCritereGrille(grilleId, critereIndex, muter) {
         grille.dateModification = new Date().toISOString();
         grilleModifiee = grille;
         return grilles;
-    }, []);
+    }, [], { geste: 'Modifier la grille' });
 
     if (!grilleModifiee) return null;
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
@@ -6238,8 +6293,11 @@ function marquerChampRefuse(el, raison) {
     if (!raison) { el.classList.remove('champ-refuse'); return; }
     const dejaMarque = el.classList.contains('champ-refuse');
     el.classList.add('champ-refuse');
-    if (!dejaMarque && typeof notifications !== 'undefined' && notifications.erreur) {
-        notifications.erreur(raison, 'La modification n\'a pas été enregistrée.');
+    // Lot E1 (D3) : un seul message, par le témoin commun — « Non enregistré : ‹raison› ».
+    // Avant : un panneau d'erreur à deux phrases, en plus du champ marqué. Le témoin
+    // s'efface à la prochaine écriture réussie de la même clé.
+    if (!dejaMarque && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(raison), undefined, cle('grillesTemplates'));
     }
 }
 

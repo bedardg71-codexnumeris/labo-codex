@@ -323,10 +323,71 @@
         });
     }
 
+    /* ─────────────────────────────────────────────────────────────────────────
+     * Lot E1 de l'enregistrement (D0 point 4, D3 — 27 sept. 2026) : « Créer
+     * quelque chose de neuf : un bouton qui nomme le geste. Tant qu'on n'a pas
+     * cliqué, rien n'existe ; quitter avant avertit. »
+     *
+     * Chaque éditeur qui crée (grille, échelle, cartouche) déclare un prédicat :
+     * « ma fiche est en création et porte une saisie ». Deux lecteurs :
+     *   · `quitterCreationSiConfirme(genre)`, que l'éditeur appelle avant de fermer
+     *     sa fiche ou d'en ouvrir une autre ;
+     *   · un seul `beforeunload`, pour le rechargement et la fermeture de l'onglet.
+     * ⚠ Changer de section passe par `navigation.js`, zone protégée : ce chemin-là
+     * n'avertit pas (dit à Grégoire, lot E1).
+     * ───────────────────────────────────────────────────────────────────────── */
+    const _fichesEnCreation = new Map();
+
+    function declarerFicheEnCreation(genre, predicat) {
+        if (typeof predicat === 'function') _fichesEnCreation.set(genre, predicat);
+    }
+
+    function _saisieEnCreation(genre) {
+        const predicat = _fichesEnCreation.get(genre);
+        try { return !!(predicat && predicat()); } catch (e) { return false; }
+    }
+
+    // Mots de D3 (« Cette grille n'est pas encore créée. ») et de Cowork (boutons).
+    const TITRES_CREATION = {
+        grille: 'Cette grille n\'est pas encore créée.',
+        echelle: 'Cette échelle n\'est pas encore créée.',
+        cartouche: 'Cette cartouche n\'est pas encore créée.'
+    };
+
+    /**
+     * @param {string} genre - 'grille' | 'echelle' | 'cartouche'
+     * @returns {Promise<boolean>} true si on peut quitter (rien à perdre, ou
+     *   « Quitter sans créer »), false si l'usager reste (« Rester », Échap, Entrée).
+     */
+    async function quitterCreationSiConfirme(genre) {
+        if (!_saisieEnCreation(genre)) return true;
+        return confirmerAction({
+            titre: TITRES_CREATION[genre] || 'Ce n\'est pas encore créé.',
+            message: 'Ce que tu as saisi n\'est gardé qu\'à l\'écran. Si tu quittes, il sera perdu.',
+            texteAnnuler: 'Rester',
+            texteConfirmer: 'Quitter sans créer',
+            variante: 'danger'
+        });
+    }
+
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('beforeunload', function (e) {
+            for (const genre of _fichesEnCreation.keys()) {
+                if (_saisieEnCreation(genre)) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    return '';
+                }
+            }
+        });
+    }
+
     window.uiDialogues = {
         confirmerAction: confirmerAction,
         demanderSaisie: demanderSaisie,
         informer: informer,
-        demanderChoix: demanderChoix
+        demanderChoix: demanderChoix,
+        declarerFicheEnCreation: declarerFicheEnCreation,
+        quitterCreationSiConfirme: quitterCreationSiConfirme
     };
 })();

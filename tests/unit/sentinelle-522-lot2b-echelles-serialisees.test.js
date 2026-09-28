@@ -278,7 +278,7 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // monte parce qu'une écriture de plus respecte la règle, pas parce que la
         // règle a cédé : C.a et C.b ci-dessus continuent d'exiger qu'AUCUNE
         // écriture directe ne subsiste.
-        const parLaFile = (echelles.match(/db\.modifier\(cle\('echellesTemplates'\)/g) || []).length;
+        const parLaFile = (echelles.match(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/g) || []).length;
         // #648 (3 sept. 2026) : 25 → 22. Les trois suppressions de Conception (liste,
         // zone d'édition, section 1) écrivaient chacune leur retrait ; elles passent
         // par UN cœur (`supprimerOuRemplacerEchelle`), qui écrit une fois. Moins de
@@ -290,7 +290,11 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // tableau de niveaux, qui rendait dans `#tableauNiveaux` (conteneur caché
         // d'index.html) et portait ses seuls déclencheurs. Même motif : un site de
         // moins, aucune écriture directe de plus.
-        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(20);
+        // Lot E1, trouvaille 1 (a) de la relecture (27 sept. 2026) : 20 → 19. « Écraser »
+        // retirait l'homonyme dans sa propre écriture, AVANT les vérifications de
+        // « Créer l'échelle » ; le retrait passe dans l'écriture de création. Deux
+        // écritures deviennent une, toujours par la file.
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(19);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {
@@ -305,7 +309,7 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
             expect(debut, `${nom} : introuvable`).toBeGreaterThan(-1);
             const corps = echelles.slice(debut, debut + 4000);
             expect(corps, `${nom} : n'écrit pas par la file`)
-                .toMatch(/db\.modifier\(cle\('echellesTemplates'\)/);
+                .toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\('echellesTemplates'\)/);
             expect(corps, `${nom} : garde une écriture directe`)
                 .not.toMatch(/db\.set\(cle\('echellesTemplates'\)/);
         }

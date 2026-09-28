@@ -1,57 +1,55 @@
-# Consigne – lot D de l'enregistrement : les présences (D2)
+# Consigne – lot E1 de l'enregistrement : créer ou modifier, zone Conception (D3)
 
-> Écrite le 27 septembre 2026, à 10 h 32 (Toronto), par Cowork. Source qui fait foi : `plans de travail/DECISIONS-2026-09-26-enregistrement.md`, **D2** (et D0). Constat : `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md`, § 3 « Présences », annexe A1 (scénarios mesurés).
+> Écrite le 27 septembre 2026, à 11 h 53 (Toronto), par Cowork (la session qui a mené les lots A à D ; une autre session Cowork prend le relais). Source qui fait foi : `plans de travail/DECISIONS-2026-09-26-enregistrement.md`, **D3** (et D0). Constat : `plans de travail/INVENTAIRE-ENREGISTREMENT-2026-09-26.md`, § 3 « Conception », annexe A3 « Conception ». Les lots E sont trois, par zone (ordre des lots, point 5) : **E1 Conception (celle-ci)**, E2 Cadre et élèves, E3 productions, interventions et volet confidentiel.
 >
-> **Condition de départ** : `git log origin/main` montre `06af5089` (1.162.0) ou plus récent, et l'arbre ne porte aucun changement dans `js/`. Supprime d'abord la branche locale `lot-c-evaluation-verrouiller` (fusionnée et poussée). L'ancienne consigne (lot C) est archivée par Cowork sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-27-lot-C-evaluation.md` : commite le déplacement avec ce lot. Branche `lot-d-presences` ; fusion après la relecture croisée seulement.
+> **Ce fichier porte un nom à lui, exprès** : le chantier de la carte d'alignement (autre session Cowork) a aussi des lots prêts. **Un seul lot à la fois dans `js/`.** Au début du lot : archive l'actuelle `CONSIGNE-DU-JOUR.md` (lot D, livré) sous `_ancienne-CONSIGNE-DU-JOUR-2026-09-27-lot-D-presences.md`, puis renomme celle-ci en `CONSIGNE-DU-JOUR.md`.
 >
-> **À remesurer avant le code** : ce qui suit vient de l'inventaire du 26 et de ma lecture de `js/saisie-presences.js` et d'`index.html` (vers la l. 7967) le 27 vers 10 h 30.
+> **Condition de départ** : `git log origin/main` montre `295b9e99` (1.163.0) ou plus récent, aucun autre lot en cours sur une branche, et l'arbre ne porte aucun changement dans `js/`. Branche `lot-e1-conception` ; fusion après la relecture croisée seulement.
+>
+> **À remesurer avant le code** : ce qui suit vient de l'inventaire du 26 et de ma lecture du 27 vers 11 h 50. ⚠ Le critère perdu à « Enregistrer » (inventaire § 2) est **déjà corrigé** (#957, 1.159.13) : ne le recorrige pas, vérifie seulement qu'il le reste.
 
-## 1 · Ce que Grégoire a décidé (D2, 26 sept. vers 13 h 39, « bien pensé ! je garde »)
+## 1 · Ce que Grégoire a décidé (D3, 26 sept. vers 13 h 41, « excellent, je garde »)
 
-- Tout changement dans une séance s'enregistre tout seul ; le témoin commun dit « Enregistré ».
-- **Dès qu'on change quelque chose dans une séance, elle devient saisie** : les élèves qu'on n'a pas touchés comptent présents (pratique « on ne marque que les absences »).
-- Une séance jamais saisie le dit : **« Séance non saisie »**. Elle reste « en attente » dans l'assiduité, comme aujourd'hui. **Aucune présence n'est inventée pour une séance qu'on n'a pas touchée.**
-- Le bouton « Enregistrer » devient **« Confirmer la séance »** (tout le monde présent, rien à changer) ; la séance passe à « saisie ».
-- « Verrouiller » garde son rôle, mais dit qu'il enregistre la séance quand il le fait.
+- **Créer** quelque chose de neuf (ici : grille, échelle, cartouche, pratique) : un bouton qui nomme le geste (« Créer la grille »). Tant qu'on n'a pas cliqué, rien n'existe ; quitter avant avertit : « Cette grille n'est pas encore créée. »
+- **Modifier** ce qui existe : tout s'enregistre tout seul, champ par champ – nom d'une cartouche et son contexte spécifique, jetons d'une pratique compris.
+- Dans une fiche existante, **« Annuler » devient « Fermer »** (il n'annulait rien).
+- **L'assistant de pratique** garde un bouton final : « Créer la pratique » ou « Appliquer à la pratique » selon le cas (il dit aujourd'hui « créée » même en modification).
+- Les champs que l'application vérifie disent **« Non enregistré : ‹raison› »** au lieu de deux messages contradictoires.
 
 ## 2 · Ce que j'ai lu, et les décisions techniques de Cowork
 
-- **Deux écrivains aujourd'hui** : `enregistrerPresences` (bouton, avec validation) et `sauvegarderPresencesSansValidation` (appelée par le verrou). **Un seul écrivain après le lot**, qui passe par `sauvegarderDonneesSelonMode` avec un geste (le témoin du lot B), et que l'enregistrement automatique, « Confirmer la séance », « Tous présents » et le verrou appellent tous. Il garde les protections existantes : la garde #749 (aucun cours actif → rien n'est écrit), la règle #785 (**ne retirer que ce qui sera réécrit** : seules les lignes rendues au tableau s'écrivent), les absences motivées RàI (`facultatif`) préservées, les notes par `_notesDuChamp`.
-- **Enregistrement automatique** : changer les périodes d'un·e élève, taper une note, « Tous présents » → écriture après un court délai (même patron que l'évaluation : délai de 1,5 s pour la frappe, **vidage** de l'écriture en attente avant tout changement de date, de séance, de groupe, de tri, d'onglet, et au rechargement). Les pertes mesurées par l'inventaire (A1 : saisie puis séance suivante, puis `naviguerVers`) doivent disparaître.
-- **Un chargement n'écrit rien** : ouvrir une séance jamais saisie n'écrit aucune présence (c'est le cœur de « aucune présence inventée ») ; ouvrir une séance saisie ne la réécrit pas. Même famille que #960.
-- **La validation** (`validerDateSaisie`, jour sans cours, etc.) : l'enregistrement automatique n'écrit que ce que « Confirmer la séance » accepterait ; un refus se dit **une fois** (pas à chaque frappe), et rien n'est écrit.
-- **Séance verrouillée** : ses champs restent en lecture seule ; rien ne s'écrit en arrière-plan.
-- **« Réinitialiser »** met tout le monde absent et vide les notes, **sans confirmation** (`reinitialiserSaisie`, « pour être plus rapide »). Avec l'enregistrement automatique, un seul toucher remplacerait une séance déjà saisie : c'est une perte que la règle de Grégoire du 20 sept. interdit de laisser passer en silence. **Sur une séance saisie**, « Réinitialiser » demande confirmation (patron #945 : « Annuler » sélectionné, Entrée suit la sélection) ; sur une séance non saisie, rien ne change.
-- **« Annuler »** (barre des présences) n'annule rien : il ramène à la liste. Il devient **« Fermer »** (même logique que D3), sous réserve des mots du § 3.
-- **Le message « Présences enregistrées »** part : le témoin le dit.
+- **Le témoin commun parle pour toutes les écritures de ces écrans.** Aujourd'hui, les écritures automatiques de la Conception passent par `db.modifier` / `db.setSync` directs (grilles vers les l. 5013-5210, échelles, cartouches vers les l. 711-892, pratiques vers les l. 1457-1581) : elles n'ont pas le témoin (lot B). Fais-les passer par `sauvegarderDonneesSelonMode` avec un geste, ou fais parler le témoin depuis leur écrivain ; dis ce que tu as choisi. Un échec d'écriture se dit par le témoin, jamais par un succès.
+- **Modifier, sans bouton** : sur une grille, une échelle, une cartouche ou une pratique **existante**, le bouton « Enregistrer » disparaît. Ce qui était manuel devient automatique : le **nom** et le **contexte spécifique** d'une cartouche (`index.html` vers la l. 5414, `cartouches.js` vers les l. 881-884, 1007), le **système de jetons** d'une pratique (`pratiques-gestion.js`, jetons sans gestionnaire vers les l. 2545 et 1691-1710 ; « Enregistrer la pratique » vers les l. 1727-1747). Le message « pas encore enregistrée » d'une cartouche (vers les l. 912-924) se relit contre la nouvelle règle.
+- **Créer, avec un bouton** : une nouvelle grille, échelle, cartouche ou pratique n'est écrite qu'au clic sur « Créer la … ». **Rien n'est écrit avant** : l'assistant crée aujourd'hui une grille de base même si on annule (`wizard-pratique-v2.js`, vers les l. 1811-1827) – ça s'arrête. Après le clic, la fiche passe en modification (automatique).
+- **L'avertissement « … n'est pas encore créée »** : aucune garde de sortie n'existe hors du Codex, et la navigation vit dans `js/navigation.js`, **zone protégée** (CLAUDE.md). Pose l'avertissement là où la fiche le permet sans toucher `navigation.js` (changer de fiche, « Fermer », rechargement). **Si l'avertissement exige `navigation.js`, arrête-toi et dis-le** : c'est à Grégoire d'autoriser.
+- **L'assistant** : le bouton final dit « Créer la pratique » en création et « Appliquer à la pratique » en modification ; le message suit (plus de « créée » en modification, vers les l. 2199-2215).
+- **Échelle** : « Niveau ajouté ! … puis enregistre. » (`echelles.js`, vers les l. 2990-2993) ne demande plus d'enregistrer ce qui l'est déjà.
+- **Champs vérifiés** : par exemple le nom d'un critère vidé (« La modification n'a pas été enregistrée. ») : un seul message, par le témoin, « Non enregistré : ‹raison› ». Relève les autres.
+- **En passant, dans ces fichiers** : `notifications.avertissement` n'existe pas (`grilles.js` vers la l. 4285, déjà gardé par un `if`) : branche sur la vraie méthode ou retire la garde morte ; les `alert` au vouvoiement (« Veuillez… », 16 lignes relevées dans `grilles.js`, `echelles.js`, `cartouches.js`, `pratiques-gestion.js`, `wizard-pratique-v2.js`) passent au tutoiement – ce sont des mots que les collègues lisent : relève-les pour Grégoire.
+- **Ne touche pas** : les productions (lot E3), le Cadre et les élèves (E2), l'Alignement (chantier de l'autre session Cowork), les mots du Codex et de la Réserve (lot F).
+- **Fiches** : cherche dans `BACKLOG.md` et `SUIVI-BUGS.md` celles que le lot règle (cartouche, nom perdu, jetons perdus, assistant, #938 « jetons perdus à la réédition » à relire, #618 et #786 closes) ; liste-les avec « réglée / en partie / non ».
 
-## 3 · Ce qui s'arrête et remonte à Grégoire (arrête-toi et dis-le, sans coder cette partie)
+## 3 · Les mots – à faire accepter par Grégoire AVANT le push
 
-1. **Un filtre qui cache des élèves.** Si la séance est déclarée « saisie » pour tout le groupe (et non élève par élève) et qu'un filtre de sous-groupe ou de recherche cache des élèves au moment du premier geste, D2 compterait présents des élèves que l'enseignant·e n'a pas vus. Mesure comment l'assiduité décide qu'une séance est « en attente » (par élève ou par séance) : **si c'est par élève**, écrire seulement les lignes rendues suffit, continue ; **si c'est par séance**, arrête-toi et décris le cas.
-2. **Une séance en partie saisie** (des élèves écrits, d'autres non, par exemple un·e élève arrivé·e après la saisie) : dis ce que l'écran affiche aujourd'hui et ce que l'assiduité en fait. Si D2 changerait leur compte, arrête-toi.
-
-## 4 · Les mots – à faire accepter par Grégoire AVANT le push
-
-Déjà décidés (D2) : « Séance non saisie » ; « Confirmer la séance ».
+Déjà décidés (D3) : « Créer la grille » (et « Créer l'échelle », « Créer la cartouche », « Créer la pratique ») ; « Appliquer à la pratique » ; « Fermer » ; « Cette grille n'est pas encore créée. » (et ses jumeaux) ; « Non enregistré : ‹raison› ».
 
 Proposés par Cowork :
-- Sur une séance saisie, à la place du bouton : **« Séance saisie »** (texte d'état, pas un bouton).
-- Au verrouillage d'une séance non saisie : **« Séance saisie et verrouillée : les élèves non marqué·es comptent présent·es. »** ; d'une séance déjà saisie : **« Séance verrouillée. »**
-- Confirmation de « Réinitialiser » sur une séance saisie : **« Mettre tout le monde absent et vider les notes de cette séance ? »**, boutons **« Annuler »** / **« Réinitialiser »**.
-- **« Fermer »** à la place d'« Annuler » dans la barre des présences.
-- **Nouvelles** : « Présences : tout changement dans une séance s'enregistre tout seul, et le témoin le dit ; les élèves que tu n'as pas touché·es comptent présent·es. Une séance à laquelle tu n'as pas touché le dit : « Séance non saisie ». « Enregistrer » devient « Confirmer la séance », pour une séance où tout le monde était là. »
-- **Aide** : relève les textes de l'Aide et de l'accompagnement qui parlent d'« Enregistrer » les présences ; ils changent avec le lot, Grégoire les relit.
+- Boutons de l'avertissement : **« Rester »** (sélectionné, Entrée le suit, patron #945) / **« Quitter sans créer »**.
+- Après la création : **« Grille « … » créée. »** (et ses jumeaux) ; après « Appliquer à la pratique » : **« Pratique « … » mise à jour. »**
+- Échelle, niveau ajouté : **« Niveau ajouté. Ajuste son code, son nom et ses bornes : chaque champ s'enregistre tout seul. »** (à vérifier contre les champs que l'écran affiche).
+- Les `alert` au tutoiement : le relevé, présenté en tableau avant / après.
+- **Nouvelles** : « Conception : une grille, une échelle, une cartouche ou une pratique existante s'enregistre toute seule, champ par champ, nom et jetons compris ; le témoin le dit. Pour en créer une nouvelle, un bouton nomme le geste (« Créer la grille »), et l'application te prévient si tu quittes avant. « Annuler » devient « Fermer ». » (À ajuster à ce que le lot couvre réellement, notamment si l'avertissement de sortie reste partiel.)
 
-## 5 · Preuves
+## 4 · Preuves
 
-- Par comportement : (a) marquer une absence, passer à la séance suivante sans autre geste, revenir → l'absence est en base, le témoin a dit « Enregistré », les autres élèves sont présents ; idem avec une note tapée, puis rechargement dans la seconde et demie ; idem par changement d'onglet. (b) Ouvrir une séance jamais saisie : **aucune** présence écrite, l'écran dit « Séance non saisie », l'assiduité la compte « en attente ». (c) « Confirmer la séance » : tous présents en base, l'écran dit « Séance saisie ». (d) Verrouiller une séance non saisie : elle devient saisie et verrouillée, un seul message. (e) « Réinitialiser » sur une séance saisie : confirmation, « Annuler » ne change rien, Entrée sur « Annuler » ne change rien. (f) Une absence motivée RàI survit à « Tous présents » et à l'enregistrement automatique. (g) Échec d'écriture : le témoin dit « Non enregistré – Enregistrement des présences : … », aucun succès.
-- Mutations, chacune rouge : un chargement qui écrit ; l'écriture qui retire aussi les lignes non rendues (#785) ; pas de vidage au changement de séance ; « Réinitialiser » sans confirmation sur une séance saisie ; le verrou qui passe par l'ancien écrivain.
-- Vitest complet ; bancs WebKit des présences (#749, #768, #785, parcours neuf, lot B) verts ; placement de la barre à 360, 768, 1024 et 1180 px (le libellé « Confirmer la séance » est plus long qu'« Enregistrer » : il ne passe pas sous le témoin).
+- Par comportement : (a) modifier le nom et le contexte spécifique d'une cartouche existante, puis changer de cartouche sans autre geste → en base, le témoin a dit « Enregistré » ; idem les jetons d'une pratique. (b) Nouvelle grille, remplie, puis « Fermer » → l'avertissement, « Rester » ne perd rien, « Quitter sans créer » n'écrit rien ; **rien en base avant « Créer la grille »**. (c) L'assistant ouvert puis abandonné n'écrit **aucune** grille ; en modification, il dit « Appliquer à la pratique ». (d) Le critère ajouté à une grille existante reste (#957 vert). (e) Un échec d'écriture sur un champ de la Conception : le témoin dit « Non enregistré – ‹geste› : … », aucun succès.
+- Mutations, chacune rouge : un écrivain de la Conception sans témoin ; le nom de cartouche redevenu manuel ; les jetons redevenus manuels ; l'assistant qui crée sa grille de base à l'ouverture ; « Créer la grille » qui écrit avant le clic ; l'avertissement retiré.
+- Vitest complet ; bancs WebKit voisins (#957, #898, #938, lot B, cartouches, assistant, grilles, échelles) verts ; placement des boutons renommés à 360, 768, 1024 et 1180 px, hors du témoin.
 
-## 6 · Livraison
+## 5 · Livraison
 
-- **Relecture croisée exigée** (l'assiduité entre dans le dépistage et l'indice A) : commit → `plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-D-presences.md` → relecture de Cowork → corrections → verdict → fusion.
-- **Fiches** : cherche dans `BACKLOG.md` et `SUIVI-BUGS.md` les fiches ouvertes que le lot règle (présences perdues, séance non saisie, verrou qui enregistre, #785…) ; coche celles-là seules, ligne exacte sous celles réglées en partie.
-- **Stock** : rien n'est réécrit ; une séance jamais saisie le reste tant qu'on n'y touche pas.
-- Release `minor`. Mots et Aide acceptés par Grégoire avant le push.
-- **Porte terrain** (iPad, groupe réel) : marquer une absence, passer à la séance suivante, revenir ; une séance jamais touchée dit « Séance non saisie » ; « Confirmer la séance » ; verrouiller.
+- **Relecture croisée exigée** (les gabarits de la Conception alimentent toutes les évaluations) : commit → `plans de travail/DEMANDE-RELECTURE-2026-09-27-lot-E1-conception.md` → relecture de Cowork → corrections → verdict → fusion.
+- **Cases à cocher** : celles que ta recherche trouve réglées, et elles seules.
+- **Stock** : rien n'est réécrit ni effacé. Une grille, une échelle, une cartouche ou une pratique existante le reste.
+- Release `minor`. Mots, relevé des `alert` et Nouvelles acceptés par Grégoire avant le push.
+- **Porte terrain** (Mac ou iPad, données réelles) : renommer une cartouche puis changer de cartouche, revenir ; commencer une nouvelle grille puis « Fermer » ; ouvrir l'assistant et l'abandonner.

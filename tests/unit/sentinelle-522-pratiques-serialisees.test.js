@@ -351,7 +351,7 @@ describe('#522 · C — cliquet : la clé `pratiquesConfigurables` s\'écrit par
         let parLaFile = 0;
         for (const f of ['js/pratiques-gestion.js', 'js/pratiques.js']) {
             const src = sansCommentaires(readFileSync(path.join(racine, f), 'utf8'));
-            parLaFile += [...src.matchAll(/db\.modifier\s*\(\s*cle\(\s*'pratiquesConfigurables'\s*\)/g)].length;
+            parLaFile += [...src.matchAll(/(?:db\.modifier|modifierEtAnnoncer)\s*\(\s*cle\(\s*'pratiquesConfigurables'\s*\)/g)].length;
         }
         // 22 sites convertis le 30 août ; le compte ne doit pas retomber.
         expect(parLaFile, 'les écritures de la clé passent par `db.modifier`').toBeGreaterThanOrEqual(22);
