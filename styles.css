@@ -23957,6 +23957,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border: 1px solid #F59E0B;
 }
 
+/* « ? » (28 sept. 2026, décision de Grégoire) : l'application ne peut pas
+   trancher. Gris des jetons existants (--gris-moyen : 5,7:1 sur blanc en mode
+   clair), trait PLEIN pour ne pas se confondre avec le « ! » en pointillé.
+   Proposition : Grégoire juge les couleurs à l'écran (porte terrain). */
+.planif-eval-pastille--incertain {
+    background: transparent;
+    color: var(--gris-moyen);
+    border: 1px solid var(--gris-moyen);
+}
+
 /* ✓ en CONTOUR, et non plein comme celui de l'objectif : posée dans l'en-tête,
    à côté du badge amont (✓ plein, même couleur), une pastille pleine était
    indiscernable du badge (mesuré sur capture, 27 sept.). */
