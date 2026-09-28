@@ -253,7 +253,7 @@ test('(I-a) intervention complétée modifiée : écrite sans bouton, aucune pr�
     expect(await questionOuverte(page)).toBe('');
 });
 
-test('(I-b) passage à « Complétée » : la question ; « Annuler » n\'écrit rien ; « Marquer complétée » reporte les présences', async ({ page }) => {
+test('(I-b) passage à « Complétée » : la question et sa case DÉCOCHÉE ; « Annuler » n\'écrit rien ; sans la case, aucune présence ; cochée, le report', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page);
     const stock = [await uneIntervention(page)];
@@ -263,21 +263,38 @@ test('(I-b) passage à « Complétée » : la question ; « Annuler » n\'écrit
     await page.evaluate(() => ouvrirIntervention('INT-E3'));
     await pause(page, 700);
     const avant = await empreintePresences(page);
+    const laCase = () => page.evaluate(() => {
+        const c = document.querySelector('#overlay-ui-dialogue input[type="checkbox"]');
+        return c ? { coche: c.checked, texte: c.parentElement.textContent.trim() } : null;
+    });
+
+    // (1) « Annuler » : rien d'écrit, le statut revient.
     await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
     expect(await questionOuverte(page)).toBe('Marquer cette intervention complétée ?');
+    expect(await laCase()).toEqual({ coche: false, texte: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.' });
     await repondre(page, 'Annuler');
     expect((await interventions(page))[0].statut).toBe('en-cours');
     expect(await empreintePresences(page)).toBe(avant);
     expect(await page.evaluate(() => document.querySelector('input[name="interventionStatut"][value="en-cours"]').checked)).toBe(true);
 
+    // (2) « Marquer complétée » sans toucher la case : complétée, AUCUNE présence.
     await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
     await repondre(page, 'Marquer complétée');
     await pause(page, 500);
     expect((await interventions(page))[0].statut).toBe('completee');
+    expect(await empreintePresences(page), 'case décochée : rien dans les présences').toBe(avant);
+    expect(await visible(page, '#observationsBilan'), 'le bilan paraît').toBe(true);
+
+    // (3) De retour « En préparation », puis complétée case COCHÉE : le report, une fois.
+    await changer(page, 'input[name="interventionStatut"][value="en-cours"]', true);
+    await pause(page, 400);
+    await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
+    await page.evaluate(() => { document.querySelector('#overlay-ui-dialogue input[type="checkbox"]').click(); });
+    await repondre(page, 'Marquer complétée');
+    await pause(page, 500);
     const da = stock[0].etudiants[0];
     const reportees = await page.evaluate(({ da }) => (db.getSync(cle('presences'), []) || []).filter(p => p.da === da && p.date === '2026-09-10' && p.facultatif), { da });
-    expect(reportees.length, 'le report a eu lieu, une fois').toBe(1);
-    expect(await visible(page, '#observationsBilan'), 'le bilan paraît').toBe(true);
+    expect(reportees.length, 'case cochée : le report a eu lieu, une fois').toBe(1);
 });
 
 test('(I-c) nouvelle intervention : rien avant « Créer l\'intervention » ; « Fermer » pose la question', async ({ page }) => {

@@ -80,7 +80,11 @@
      * @param {string} [options.texteConfirmer] Libellé du bouton d'action (défaut « Confirmer »).
      * @param {string} [options.texteAnnuler]   Libellé du bouton d'annulation (défaut « Annuler »).
      * @param {string} [options.variante]       'danger' → bouton destructif rouge + focus sur Annuler.
-     * @returns {Promise<boolean>} true si confirmé, false sinon.
+     * @param {object} [options.caseACocher]    Lot E3 (28 sept. 2026) : une case, TOUJOURS décochée à
+     *   l'ouverture — `{ texte, aide }` (l'aide s'écrit sous la case). Un choix que l'usager fait
+     *   lui-même : rien ne le coche pour lui.
+     * @returns {Promise<boolean|{coche: boolean}>} true si confirmé, false sinon ; avec `caseACocher`,
+     *   `{ coche }` si confirmé, false sinon.
      */
     function confirmerAction(options) {
         options = options || {};
@@ -93,6 +97,19 @@
                 // `preformate` : préserve les sauts de ligne (résumés multi-lignes, ex. fusion codex).
                 if (options.preformate && p.style) p.style.whiteSpace = 'pre-wrap';
                 base.section.appendChild(p);
+            }
+
+            let caseChoix = null;
+            if (options.caseACocher) {
+                const libelle = _creer('label', { className: 'ui-dialogue-case' });
+                caseChoix = _creer('input', { attrs: { type: 'checkbox' } });
+                caseChoix.checked = false;
+                libelle.appendChild(caseChoix);
+                libelle.appendChild(_creer('span', { texte: options.caseACocher.texte || '' }));
+                base.section.appendChild(libelle);
+                if (options.caseACocher.aide) {
+                    base.section.appendChild(_creer('p', { className: 'ui-dialogue-case-aide', texte: options.caseACocher.aide }));
+                }
             }
 
             const estDanger = options.variante === 'danger';
@@ -109,7 +126,7 @@
                 document.removeEventListener('keydown', surTouche, true);
                 if (base.overlay && base.overlay.remove) base.overlay.remove();
                 _rendreFocus(focusPrecedent);
-                resolve(valeur);
+                resolve(valeur && caseChoix ? { coche: caseChoix.checked === true } : valeur);
             }
             // #945 — Entrée fait ce que ferait le bouton qui a le focus ; hors des deux boutons,
             // l'action sûre de la variante (danger : annuler). Sans cela, un Entrée réflexe

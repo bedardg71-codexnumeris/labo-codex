@@ -271,3 +271,42 @@ describe('#945 · confirmerAction — Entrée suit le bouton qui a le focus', ()
         await expect(p2).resolves.toBe(false);
     });
 });
+
+// Lot E3 (28 sept. 2026) — la case d'une confirmation (`caseACocher`), pour le report des présences
+// d'une intervention complétée. Décision de Grégoire : DÉCOCHÉE par défaut ; le choix est à l'usager.
+describe('lot E3 · uiDialogues.confirmerAction, option caseACocher', () => {
+    const laCase = () => registre.find(e => e.tagName === 'INPUT' && e._attrs.type === 'checkbox');
+    const OPTIONS = { titre: 'Marquer cette intervention complétée ?', texteConfirmer: 'Marquer complétée',
+        caseACocher: { texte: 'Reporter les présences…', aide: 'Le report se fait une seule fois…' } };
+
+    it('la case naît décochée ; confirmer sans y toucher → { coche: false }', async () => {
+        const p = uiDialogues.confirmerAction(OPTIONS);
+        expect(laCase()).toBeTruthy();
+        expect(laCase().checked).toBe(false);
+        expect(registre.some(e => e.textContent === 'Reporter les présences…')).toBe(true);
+        expect(registre.some(e => e.textContent === 'Le report se fait une seule fois…')).toBe(true);
+        cliquer(bouton('Marquer complétée'));
+        await expect(p).resolves.toEqual({ coche: false });
+    });
+
+    it('cochée par l\'usager → { coche: true }', async () => {
+        const p = uiDialogues.confirmerAction(OPTIONS);
+        laCase().checked = true;
+        cliquer(bouton('Marquer complétée'));
+        await expect(p).resolves.toEqual({ coche: true });
+    });
+
+    it('« Annuler » → false, cochée ou non', async () => {
+        const p = uiDialogues.confirmerAction(OPTIONS);
+        laCase().checked = true;
+        cliquer(bouton('Annuler'));
+        await expect(p).resolves.toBe(false);
+    });
+
+    it('sans l\'option : aucune case, la réponse reste un booléen', async () => {
+        const p = uiDialogues.confirmerAction({ titre: 'X' });
+        expect(laCase()).toBeUndefined();
+        cliquer(bouton('Confirmer'));
+        await expect(p).resolves.toBe(true);
+    });
+});

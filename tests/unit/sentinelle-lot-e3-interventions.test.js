@@ -20,11 +20,11 @@ const intervention = (extra) => Object.assign({ id: 'I1', titre: 'Rattrapage', d
     contexte: 'en-classe', description: '', etudiants: ['2000001'], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: [],
     objectifVise: '', bilan: null, statut: 'en-cours', groupeCoursId: 'GC1' }, extra);
 
-function banc({ interventions = [], vue = 'interventions', statut = 'en-cours', quitter = true, confirmer = true } = {}) {
+function banc({ interventions = [], vue = 'interventions', statut = 'en-cours', quitter = true, confirmer = true, coche = false, contexte = 'en-classe' } = {}) {
     const store = storeBase();
     store.test_interventions = interventions;
     store.test_presences = [{ da: '2000001', date: '2026-08-25', heures: 2, coursId: 'GC1' }];
-    const champs = { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'en-classe' }),
+    const champs = { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: contexte }),
         interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }),
         interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }),
         observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) };
@@ -38,11 +38,13 @@ function banc({ interventions = [], vue = 'interventions', statut = 'en-cours', 
         '#criteresCiblesContainer .critere-cible-cb:checked': [],
         '[data-fiche-intervention="I1"]': elementDom()
     };
-    const fiches = {}; const questions = []; const confirmations = [];
+    const fiches = {}; const questions = []; const confirmations = []; const cases = [];
     const uiDialogues = {
         declarerFicheEnCreation: (g, p) => { fiches[g] = p; },
         quitterCreationSiConfirme: vi.fn(async (g, titre) => { if (!fiches[g] || !fiches[g]()) return true; questions.push(titre); return quitter; }),
-        confirmerAction: vi.fn(async (o) => { confirmations.push(o.titre); return confirmer; })
+        // Décision de Grégoire (28 sept., 19 h 43) : la question porte une case, décochée par défaut ;
+        // la vraie fenêtre rend `{ coche }` (essais dans ui-dialogues-315), ce banc joue la réponse.
+        confirmerAction: vi.fn(async (o) => { confirmations.push(o.titre); cases.push(o.caseACocher); return confirmer ? { coche } : false; })
     };
     const b = monter(store, { modules: ['js/interventions.js'],
         globaux: { determinerNiveauRaiPedagogique: () => ({ niveau: 2 }), calculerTousLesIndices: () => ({ P: 80 }), calculerMoyennesCriteres: () => ({}),
@@ -54,7 +56,7 @@ function banc({ interventions = [], vue = 'interventions', statut = 'en-cours', 
     b.win.temoinEnregistrement = b.temoin;
     b.winModes.temoinEnregistrement = b.temoin;   // `sauvegarderDonneesSelonMode` lit le témoin de SA fenêtre
     b.win.raisonPourTemoin = (r) => String(r);
-    b.fiches = fiches; b.questions = questions; b.confirmations = confirmations; b.uiDialogues = uiDialogues;
+    b.fiches = fiches; b.questions = questions; b.confirmations = confirmations; b.cases = cases; b.uiDialogues = uiDialogues;
     // ⚠ `b.selecteurs` est la table COPIÉE par le harnais : c'est elle que lit le document.
     b.radioStatut = radioStatut; b.radioEnCours = radioEnCours;
     b.champ = (id) => b.document.getElementById(id);
@@ -103,8 +105,23 @@ describe('lot E3 · intervention existante — champ par champ, par le témoin',
         expect(b.radioEnCours.checked).toBe(true);
     });
 
-    it('« Marquer complétée » : l\'intervention s\'écrit et les présences sont reportées, une fois', async () => {
-        const b = banc({ interventions: [intervention()], statut: 'completee', confirmer: true });
+    it('LA CASE DÉCOCHÉE (défaut) : l\'intervention est complétée, AUCUNE présence écrite', async () => {
+        const b = banc({ interventions: [intervention()], statut: 'completee', confirmer: true, coche: false });
+        b.win.uiDialogues = b.uiDialogues;
+        const avant = JSON.stringify(b.store.test_presences);
+        expect(await b.changer(b.radioStatut)).toBe(true);
+        expect(b.store.test_interventions[0].statut).toBe('completee');
+        expect(JSON.stringify(b.store.test_presences)).toBe(avant);
+        expect(b.ecritures('test_presences')).toBe(0);
+        // Les mots de Grégoire, mot pour mot (28 sept., 19 h 46).
+        expect(b.cases).toEqual([{
+            texte: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.',
+            aide: 'Le report se fait une seule fois : il ne se refait pas si tu modifies l\'intervention ensuite.'
+        }]);
+    });
+
+    it('LA CASE COCHÉE : l\'intervention s\'écrit et les présences sont reportées, une fois', async () => {
+        const b = banc({ interventions: [intervention()], statut: 'completee', confirmer: true, coche: true });
         b.win.uiDialogues = b.uiDialogues;
         expect(await b.changer(b.radioStatut)).toBe(true);
         expect(b.store.test_interventions[0].statut).toBe('completee');
@@ -114,6 +131,31 @@ describe('lot E3 · intervention existante — champ par champ, par le témoin',
         b.champ('interventionDate').value = '2026-09-03';
         await b.changer(b.champ('interventionDate'));
         expect(JSON.stringify(b.store.test_presences)).toBe(apres);
+    });
+
+    it('rattrapage : la case dit aussi l\'absence motivée ; cochée, les non-participant·es la reçoivent ; décochée, rien', async () => {
+        const b = banc({ interventions: [intervention({ contexte: 'rattrapage', marquerNonParticipantsMotives: true })], statut: 'completee', coche: true, contexte: 'rattrapage' });
+        b.win.uiDialogues = b.uiDialogues;
+        expect(await b.changer(b.radioStatut)).toBe(true);
+        expect(b.cases[0].texte).toBe('Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours ; les non-participant·es auront une absence motivée.');
+        const du1er = b.store.test_presences.filter(p => p.date === '2026-09-01');
+        expect(du1er.find(p => p.da === '2000001')).toMatchObject({ heures: 2 });
+        expect(du1er.filter(p => p.da !== '2000001').every(p => p.heures === 0 && p.notes === 'Absence motivée RàI')).toBe(true);
+        expect(du1er.length).toBeGreaterThan(1);
+
+        const c = banc({ interventions: [intervention({ contexte: 'rattrapage', marquerNonParticipantsMotives: true })], statut: 'completee', coche: false, contexte: 'rattrapage' });
+        c.win.uiDialogues = c.uiDialogues;
+        await c.changer(c.radioStatut);
+        expect(c.ecritures('test_presences')).toBe(0);
+    });
+
+    it('un MIO (aucune présence) : ni question ni case ; complété, rien de reporté', async () => {
+        const b = banc({ interventions: [intervention({ type: 'mio', contexte: 'mio' })], statut: 'completee', contexte: 'mio' });
+        b.win.uiDialogues = b.uiDialogues;
+        expect(await b.changer(b.radioStatut)).toBe(true);
+        expect(b.confirmations).toEqual([]);
+        expect(b.store.test_interventions[0].statut).toBe('completee');
+        expect(b.ecritures('test_presences')).toBe(0);
     });
 
     it('une fiche fermée n\'écrit plus rien', async () => {
@@ -151,6 +193,23 @@ describe('lot E3 · nouvelle intervention — rien avant « Créer l\'interventi
         expect(b.notifs.filter(n => n.type === 'succes').map(n => n.t)).toEqual(['Intervention créée.']);
         expect(b.conteneur().innerHTML).toContain('data-fiche-intervention="' + id + '"');
         expect(b.conteneur().innerHTML).not.toContain('Créer l\'intervention');
+    });
+
+    it('créer une intervention DÉJÀ complétée pose la même question : « Annuler » n\'écrit rien ; décochée, aucune présence ; cochée, le report', async () => {
+        for (const [confirmer, coche, attendu] of [[false, false, 'rien'], [true, false, 'sans report'], [true, true, 'report']]) {
+            const b = banc({ statut: 'completee', confirmer, coche });
+            b.win.uiDialogues = b.uiDialogues;
+            const id = ouvrirBrouillon(b);
+            const r = await b.win.sauvegarderPresencesIntervention(id);
+            expect(b.confirmations, attendu).toEqual(['Marquer cette intervention complétée ?']);
+            if (attendu === 'rien') {
+                expect(r).toBe(false);
+                expect(b.ecritures()).toBe(0);
+                continue;
+            }
+            expect(b.store.test_interventions.map(i => i.statut), attendu).toEqual(['completee']);
+            expect(b.ecritures('test_presences'), attendu).toBe(attendu === 'report' ? 1 : 0);
+        }
     });
 
     it('rencontre : « Créer la rencontre », « Rencontre créée. »', () => {
