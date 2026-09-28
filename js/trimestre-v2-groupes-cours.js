@@ -478,7 +478,9 @@ function afficherTrimestreGroupeCoursV2() {
 /**
  * Affiche le formulaire pour un nouveau groupe-cours
  */
-function nouveauGroupeCoursV2() {
+/** @returns {Promise<boolean>} true si le formulaire s'est ouvert, false sur « Rester » (lot E2). */
+async function nouveauGroupeCoursV2() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('groupeCours'))) return false;
     groupeCoursEnEditionId = null;
     _mettreAJourBoutonActiverGroupeCours(null);
 
@@ -506,9 +508,8 @@ function nouveauGroupeCoursV2() {
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
-    const btnTexte = document.getElementById('v2-btnTexteGroupeCours');
     if (titre) titre.textContent = 'Nouveau groupe-cours';
-    if (btnTexte) btnTexte.textContent = 'Créer';
+    rendreModeFicheGroupeCoursV2(true);
 
     // Mettre à jour l'aperçu du nom
     mettreAJourNomGroupeCoursV2();
@@ -538,6 +539,7 @@ function nouveauGroupeCoursV2() {
     const select = document.getElementById('v2-selectGroupeCours');
     if (select) select.value = '';
     mettreAJourCarteResumeGroupeCoursV2(null);
+    return true;
 }
 
 /**
@@ -572,9 +574,8 @@ function editerGroupeCoursV2(gc) {
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
-    const btnTexte = document.getElementById('v2-btnTexteGroupeCours');
     if (titre) titre.textContent = 'Modifier le groupe-cours';
-    if (btnTexte) btnTexte.textContent = 'Enregistrer';
+    rendreModeFicheGroupeCoursV2(false);
 
     // Mettre à jour l'aperçu du nom
     mettreAJourNomGroupeCoursV2();
@@ -601,9 +602,72 @@ function editerGroupeCoursV2(gc) {
 }
 
 /**
- * Annule le formulaire groupe-cours
+ * Lot E2 (D3) — un groupe-cours existant s'enregistre tout seul : « Créer le groupe-cours »
+ * ne paraît qu'en création.
  */
-function annulerFormGroupeCoursV2() {
+function rendreModeFicheGroupeCoursV2(enCreation) {
+    const btn = document.getElementById('v2-btnCreerGroupeCours');
+    if (btn) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
+}
+
+/**
+ * Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js). Le trimestre
+ * est prérempli (le trimestre actif) : il ne compte pas.
+ */
+function groupeCoursEnCreationSaisi() {
+    const formulaire = document.getElementById('v2-formulaireGroupeCours');
+    if (!formulaire || formulaire.classList.contains('u-hide')) return false;
+    if (groupeCoursEnEditionId) return false;
+    return ['v2-gc-cours', 'v2-gc-groupe', 'v2-gc-enseignant', 'v2-gc-pratique']
+        .some(id => String(document.getElementById(id)?.value || '').trim());
+}
+if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('groupeCours', groupeCoursEnCreationSaisi);
+
+/** Lot E2 : choisir un groupe-cours dans le menu ; pendant une création, la question de sortie. */
+async function choisirGroupeCoursV2(el) {
+    const select = document.getElementById('v2-selectGroupeCours');
+    const gcId = (el && el.value !== undefined) ? el.value : select?.value;
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('groupeCours'))) {
+        if (select) select.value = '';
+        return;
+    }
+    changerGroupeCoursSelectionneV2(gcId);
+}
+
+/** Lot E2 (D3) : « Annuler » devient « Fermer » — il n'annulait rien. En création, la question. */
+async function fermerFicheGroupeCoursV2() {
+    if (window.uiDialogues && !(await window.uiDialogues.quitterCreationSiConfirme('groupeCours'))) return;
+    _fermerFormGroupeCoursV2();
+}
+
+/**
+ * Lot E2 (D3) — un champ du formulaire change : l'aperçu du nom suit (comme avant), et sur
+ * un groupe-cours EXISTANT la fiche s'enregistre, par le même écrivain que la création.
+ */
+function changerChampGroupeCoursV2(el) {
+    mettreAJourNomGroupeCoursV2(el);
+    if (!groupeCoursEnEditionId) return false;
+    return sauvegarderGroupeCoursV2();
+}
+
+/** Lot E2 : un refus de vérification, par le témoin commun. */
+function _refuserGroupeCoursV2(phrase, geste) {
+    if (window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(phrase), geste, cle('groupesCours'));
+    }
+    return false;
+}
+
+/** Lot E2 : un refus sur un groupe-cours existant remet ses champs au stock. */
+function _remettreGroupeCoursEnBaseV2() {
+    const gc = (db.getSync(cle('groupesCours'), []) || []).find(g => g.id === groupeCoursEnEditionId);
+    if (gc) editerGroupeCoursV2(gc);
+}
+
+/**
+ * Referme le formulaire groupe-cours (ex-annulerFormGroupeCoursV2, sans question).
+ */
+function _fermerFormGroupeCoursV2() {
     afficherEtatVideGroupeCoursV2();
     _mettreAJourBoutonActiverGroupeCours(null);
 
@@ -613,9 +677,14 @@ function annulerFormGroupeCoursV2() {
 }
 
 /**
- * Sauvegarde le groupe-cours (ajout ou modification)
+ * L'écrivain unique d'un groupe-cours : « Créer le groupe-cours » en création, chaque champ
+ * en modification (lot E2, D3). Mêmes vérifications dans les deux cas ; un refus dit
+ * « Non enregistré – ‹geste› : ‹raison› » par le témoin commun.
+ * @returns {boolean} true si le groupe-cours a été écrit
  */
 function sauvegarderGroupeCoursV2() {
+    const creation = !groupeCoursEnEditionId;
+    const geste = creation ? 'Créer le groupe-cours' : 'Modifier le groupe-cours';
     const trimestreId = document.getElementById('v2-gc-trimestre')?.value;  // Beta 95.2
     const coursId = document.getElementById('v2-gc-cours')?.value;
     const groupeNum = document.getElementById('v2-gc-groupe')?.value;
@@ -623,28 +692,15 @@ function sauvegarderGroupeCoursV2() {
     const enseignantId = document.getElementById('v2-gc-enseignant')?.value;
     const pratiqueId = document.getElementById('v2-gc-pratique')?.value || null;  // Beta 95.3
 
-    // Validation (5 éléments requis)
-    if (!trimestreId) {
-        notifications.erreur('Veuillez sélectionner un trimestre');
-        return;
-    }
-    if (!coursId) {
-        notifications.erreur('Veuillez sélectionner un cours');
-        return;
-    }
-    if (!groupeNum) {
-        notifications.erreur('Veuillez sélectionner un groupe d\'étudiants');
-        return;
-    }
+    // Validation (5 éléments requis). Lot E2 : par le témoin, au tutoiement (relevé des mots).
+    if (!trimestreId) return _refuserGroupeCoursV2('Choisis le trimestre.', geste);
+    if (!coursId) return _refuserGroupeCoursV2('Choisis le cours.', geste);
+    if (!groupeNum) return _refuserGroupeCoursV2('Choisis le groupe d\'étudiant·es.', geste);
     // Cadrage « Rencontres » (12 sept. 2026) : un groupe-cours de SERVICE peut n'avoir aucun
     // horaire — ses rencontres ont chacune leur date. Pour un cours ordinaire, rien ne change.
-    if (!horaireId && !_coursSelectionneEstServiceV2()) {
-        notifications.erreur('Veuillez sélectionner un horaire');
-        return;
-    }
+    if (!horaireId && !_coursSelectionneEstServiceV2()) return _refuserGroupeCoursV2('Choisis l\'horaire.', geste);
     if (!enseignantId) {
-        notifications.erreur('Veuillez sélectionner un enseignant');
-        return;
+        return _refuserGroupeCoursV2('Choisis l\'' + motsNature(_coursSelectionneEstServiceV2() ? 'service' : 'cours').personne + '.', geste);
     }
 
     // Phase 4.C : interdire les références à des items démo (Plan §3.4)
@@ -656,8 +712,8 @@ function sauvegarderGroupeCoursV2() {
             { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }
         ]);
         if (violation) {
-            notifications.erreur('Référence démo non autorisée', violation.message);
-            return;
+            if (!creation) _remettreGroupeCoursEnBaseV2();
+            return _refuserGroupeCoursV2(violation.message, geste);
         }
     }
 
@@ -665,7 +721,11 @@ function sauvegarderGroupeCoursV2() {
     const nom = genererNomGroupeCoursV2();
 
     const cleGC = cle('groupesCours');
-    let groupesCours = db.getSync(cleGC, []);
+    // Une COPIE : modifier l'objet du cache de `db` avant une écriture qui échoue le
+    // laisserait faux en mémoire (lot E2).
+    let groupesCours = JSON.parse(JSON.stringify(db.getSync(cleGC, []) || []));
+    let idEcrit = groupeCoursEnEditionId;
+    let premierActif = null;
 
     // CT-15 (23 août 2026) — GARDE SUR LE TRIPLET (trimestre, cours, groupe).
     //
@@ -699,7 +759,10 @@ function sauvegarderGroupeCoursV2() {
                 ? 'Enregistrer quand même ?'
                 : 'Créer quand même un second groupe-cours ?')
         );
-        if (!quandMeme) return;
+        if (!quandMeme) {
+            if (!creation) _remettreGroupeCoursEnBaseV2();   // lot E2 : « Annuler » remet la fiche
+            return false;
+        }
     }
 
     if (groupeCoursEnEditionId) {
@@ -710,8 +773,7 @@ function sauvegarderGroupeCoursV2() {
         // affichait quand même « Groupe-cours modifié » et réécrivait l'array
         // inchangé → no-op silencieux avec succès trompeur, modif perdue.
         if (index < 0) {
-            notifications.erreur('Groupe-cours introuvable', 'Resélectionne-le dans la liste avant d\'enregistrer.');
-            return;
+            return _refuserGroupeCoursV2('Groupe-cours introuvable : resélectionne-le dans la liste.', geste);
         }
         groupesCours[index] = {
             ...groupesCours[index],
@@ -724,7 +786,6 @@ function sauvegarderGroupeCoursV2() {
             pratiqueId,   // Beta 95.3
             dateModification: new Date().toISOString()
         };
-        notifications.succes('Groupe-cours modifié');
     } else {
         // Ajout : actif = true SEULEMENT si premier groupe-cours créé.
         // Pour activer un autre GC après coup, utiliser le bouton « Activer ce groupe-cours »
@@ -743,14 +804,22 @@ function sauvegarderGroupeCoursV2() {
             actif: estPremier
         };
         groupesCours.push(nouveauGC);
-        groupeCoursEnEditionId = nouveauGC.id;
-        if (estPremier) {
-            db.setSync('groupeCoursActif', nouveauGC);
-        }
-        notifications.succes('Groupe-cours créé');
+        idEcrit = nouveauGC.id;
+        if (estPremier) premierActif = nouveauGC;
     }
 
-    db.setSync(cleGC, groupesCours);
+    // Lot E2 (D3) : par le témoin commun ; le message du geste ne part qu'après l'écriture.
+    if (!sauvegarderDonneesSelonMode('groupesCours', groupesCours, { geste })) return false;
+    groupeCoursEnEditionId = idEcrit;
+    if (premierActif) db.setSync('groupeCoursActif', premierActif);
+    if (creation) {
+        notifications.succes(`Groupe-cours «\u00a0${nom}\u00a0» créé.`);
+        rendreModeFicheGroupeCoursV2(false);
+        const titre = document.getElementById('v2-titreFormGroupeCours');
+        if (titre) titre.textContent = 'Modifier le groupe-cours';
+        const btnSupprimer = document.getElementById('v2-btnSupprimerGroupeCours');
+        if (btnSupprimer) btnSupprimer.classList.remove('u-hide');
+    }
 
     // Rafraîchir l'interface
     populerDropdownGroupeCoursV2();
@@ -767,6 +836,7 @@ function sauvegarderGroupeCoursV2() {
     }
 
     // Mettre à jour le guide groupe-cours
+    return true;
 }
 
 /**
@@ -1085,8 +1155,11 @@ window.afficherEtatVideGroupeCoursV2 = afficherEtatVideGroupeCoursV2;
 window.mettreAJourCarteResumeGroupeCoursV2 = mettreAJourCarteResumeGroupeCoursV2;
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
 window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
-window.annulerFormGroupeCoursV2 = annulerFormGroupeCoursV2;
+window.fermerFicheGroupeCoursV2 = fermerFicheGroupeCoursV2;
+window.choisirGroupeCoursV2 = choisirGroupeCoursV2;
+window.changerChampGroupeCoursV2 = changerChampGroupeCoursV2;
 window.sauvegarderGroupeCoursV2 = sauvegarderGroupeCoursV2;
+window.rendreModeFicheGroupeCoursV2 = rendreModeFicheGroupeCoursV2;
 window.mettreAJourNomGroupeCoursV2 = mettreAJourNomGroupeCoursV2;
 window.supprimerGroupeCoursV2 = supprimerGroupeCoursV2;
 window.activerGroupeCoursV2 = activerGroupeCoursV2;

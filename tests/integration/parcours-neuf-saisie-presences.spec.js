@@ -128,7 +128,7 @@ test('parcours neuf · de la configuration à la première présence saisissable
         const horaireId = horaires[0]?.id;
 
         // ── 2. LE GROUPE-COURS, qui relie tout ───────────────────────────────
-        if (typeof window.nouveauGroupeCoursV2 === 'function') window.nouveauGroupeCoursV2();
+        if (typeof window.nouveauGroupeCoursV2 === 'function') await window.nouveauGroupeCoursV2();   // lot E2 : async
         await pause(250);
         const poser = (id, valeur) => {
             const el = document.getElementById(id);
