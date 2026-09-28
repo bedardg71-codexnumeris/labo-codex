@@ -380,3 +380,28 @@ test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancien
     expect(apres.present, 'l\'ancienne échelle n\'a pas été supprimée').toBe(true);
     expect(apres.n, 'aucune échelle créée ni retirée').toBe(avant);
 });
+
+// Rechargement ou fermeture de l'onglet pendant une création (Nouvelles de 1.164 : « l'application te
+// prévient si tu […] recharges la page avant »). L'évènement est émis par script, annulable comme celui
+// du navigateur : la question native elle-même ne se pose pas sous Playwright.
+test('rechargement : une grille neuve saisie retient la page ; vide ou déjà créée, non', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    const retient = () => page.evaluate(() => {
+        const e = new Event('beforeunload', { cancelable: true });
+        window.dispatchEvent(e);
+        return e.defaultPrevented;
+    });
+    await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
+    await pause(page, 800);
+    expect(await retient(), 'aucune fiche en création : rien ne retient la page').toBe(false);
+
+    await cliquer(page, '[data-action="creerNouvelleGrille"]');
+    expect(await retient(), 'fiche neuve encore vide : rien à perdre').toBe(false);
+    await page.evaluate(() => { document.getElementById('nomGrilleTemplate').value = 'Grille fictive banc E1'; });
+    expect(await retient(), 'une saisie en création retient la page').toBe(true);
+
+    await cliquer(page, '#btnCreerGrille');
+    await pause(page, 600);
+    expect(await retient(), 'une fois créée, la grille s\'enregistre toute seule : rien ne retient la page').toBe(false);
+});
