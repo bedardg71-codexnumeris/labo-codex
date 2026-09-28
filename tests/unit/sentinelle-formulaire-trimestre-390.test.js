@@ -14,6 +14,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 //      infoCours pointer un GC effacé.
 // B7 : sauvegarderIdentificationTrimestreV2 retournait en SILENCE sans
 //      session/année — suivi de « Cadre sauvegardé », faux succès.
+//      ↻ Lot E2 (28 sept. 2026, D3) : l'invariant reste « jamais un succès après un
+//      refus ». Sur un trimestre existant, session et année s'écrivent au changement :
+//      un état intermédiaire n'écrit rien et ne dit rien. « Créer le trimestre »
+//      incomplet parle par le témoin commun.
 
 function envInit({ store = {}, champs = {} } = {}) {
     const donnees = { ...store };
@@ -31,15 +35,16 @@ function envInit({ store = {}, champs = {} } = {}) {
         querySelectorAll: () => []
     };
     const notifications = { erreur: vi.fn(), succes: vi.fn() };
+    const temoin = { nonEnregistre: vi.fn(), enregistre: vi.fn() };
     const genererCalendrierComplet = vi.fn();
     const win = chargerScript('js/trimestre-v2-init.js', {
         db, document: fauxDocument, notifications, cle: (k) => k,
         localStorage: { get length() { return 0; }, key: () => null, getItem: () => null, setItem: () => {}, removeItem: () => {} },
         setValue: () => {}, genererIdUnique: (p) => p + 'X', confirm: () => true,
         genererCalendrierComplet
-    });
+    }, { temoinEnregistrement: temoin, raisonPourTemoin: (r) => r });
     win.afficherStatistiquesTrimestreV2 = vi.fn();
-    return { win, donnees, db, notifications, genererCalendrierComplet };
+    return { win, donnees, db, notifications, temoin, genererCalendrierComplet };
 }
 
 describe('#390 B5 · réinitialisations : calendrier purgé/régénéré + stats rafraîchies', () => {
@@ -63,13 +68,28 @@ describe('#390 B5 · réinitialisations : calendrier purgé/régénéré + stats
     });
 });
 
-describe('#390 B7 · identification incomplète = erreur VISIBLE, pas un retour silencieux', () => {
-    it('session/année manquantes → notifications.erreur', () => {
-        const { win, notifications } = envInit({
+describe('#390 B7 · identification incomplète : jamais un succès après un refus (lot E2)', () => {
+    it('« Créer le trimestre » sans session ni année : « Non enregistré », rien d\'écrit, aucun succès', () => {
+        const { win, donnees, notifications, temoin } = envInit({
             champs: { 'v2-nomTrimestre': '', 'v2-sessionTrimestre': '', 'v2-anneeTrimestre': '' }
         });
-        win.sauvegarderIdentificationTrimestreV2();
-        expect(notifications.erreur).toHaveBeenCalledTimes(1);
+        expect(win.creerTrimestreV2()).toBe(false);
+        expect(temoin.nonEnregistre).toHaveBeenCalledTimes(1);
+        expect(temoin.nonEnregistre.mock.calls[0][1]).toBe('Créer le trimestre');
+        expect(notifications.succes).not.toHaveBeenCalled();
+        expect(donnees.trimestres).toBeUndefined();
+    });
+    it('trimestre existant, session changée sans année : état intermédiaire — rien d\'écrit, rien de dit', () => {
+        const registre = [{ id: 'a2026', nom: 'Automne 2026', session: 'A', annee: 2026, actif: true }];
+        const { win, donnees, notifications, temoin } = envInit({
+            store: { trimestres: JSON.parse(JSON.stringify(registre)) },
+            champs: { 'v2-nomTrimestre': 'Automne 2026', 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '' }
+        });
+        expect(win.sauvegarderIdentificationTrimestreV2()).toBe(false);
+        expect(temoin.nonEnregistre).not.toHaveBeenCalled();
+        expect(notifications.erreur).not.toHaveBeenCalled();
+        expect(notifications.succes).not.toHaveBeenCalled();
+        expect(donnees.trimestres).toEqual(registre);
     });
 });
 

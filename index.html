@@ -6254,11 +6254,11 @@
                                         <div class="grille-identification">
                                             <div class="groupe-form">
                                                 <label>Nom du trimestre <span class="champ-requis u-texte-medium">*</span></label>
-                                                <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026">
+                                                <input type="text" class="controle-form" id="v2-nomTrimestre" placeholder="Ex: Hiver 2026" data-on-change="sauvegarderNomTrimestreV2">
                                             </div>
                                             <div class="groupe-form">
                                                 <label>Session <span class="champ-requis u-texte-medium">*</span></label>
-                                                <select class="controle-form" id="v2-sessionTrimestre">
+                                                <select class="controle-form" id="v2-sessionTrimestre" data-on-change="sauvegarderIdentificationTrimestreV2">
                                                     <option value="">— Sélectionner —</option>
                                                     <option value="automne">Automne</option>
                                                     <option value="hiver">Hiver</option>
@@ -6267,7 +6267,7 @@
                                             </div>
                                             <div class="groupe-form">
                                                 <label>Année <span class="champ-requis u-texte-medium">*</span></label>
-                                                <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026">
+                                                <input type="number" class="controle-form" id="v2-anneeTrimestre" min="2020" max="2050" placeholder="2026" data-on-change="sauvegarderIdentificationTrimestreV2">
                                             </div>
                                         </div>
                                         <p class="texte-aide u-mt-10" style="margin-bottom: 0">
@@ -6285,19 +6285,19 @@
                                             <div class="grille-2col-gap15">
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium">Début du trimestre <span class="champ-requis" title="Champ obligatoire">*</span> :</label>
-                                                    <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre" required>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre" required data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium">Fin des cours réguliers <span class="champ-requis" title="Champ obligatoire">*</span> :</label>
-                                                    <input type="date" class="controle-form controle-form-compact" id="v2-finCours" required>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-finCours" required data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium">Fin du trimestre <span class="champ-requis" title="Champ obligatoire">*</span> :</label>
-                                                    <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre" required>
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre" required data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                                 <div class="groupe-form">
                                                     <label class="u-texte-medium">Remise des notes :</label>
-                                                    <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes">
+                                                    <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes" data-on-change="sauvegarderCadreCalendrierV2">
                                                 </div>
                                             </div>
                                         </div>
@@ -6316,12 +6316,12 @@
                                                     <div class="d-flex-gap-10-center">
                                                         <div class="groupe-form flex-1">
                                                             <label>Du :</label>
-                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut">
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut" data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                         <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                                         <div class="groupe-form flex-1">
                                                             <label>&nbsp;</label>
-                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin">
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin" data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -6331,12 +6331,12 @@
                                                     <div class="d-flex-gap-10-center">
                                                         <div class="groupe-form flex-1">
                                                             <label>Du :</label>
-                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut">
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut" data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                         <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                                         <div class="groupe-form flex-1">
                                                             <label>&nbsp;</label>
-                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin">
+                                                            <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin" data-on-change="sauvegarderCadreCalendrierV2">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -6411,7 +6411,7 @@
                                          masqués quand la saisie est cohérente. -->
                                     <div id="v2-avertissementsCadre" class="alerte alerte-attention u-hide u-mt-15" style="text-align: left;"></div>
                                     <div class="u-mt-15 u-text-right">
-                                        <button class="btn btn-confirmer btn-tres-compact" data-action="sauvegarderTrimestreCompletV2">Enregistrer</button>
+                                        <button id="v2-btnCreerTrimestre" class="btn btn-confirmer btn-tres-compact u-hide" data-action="creerTrimestreV2">Créer le trimestre</button>
                                     </div>
                                     <!-- Anciens spans masqués pour compatibilité -->
                                     <span id="v2-nombreSemaines" class="u-hide">0</span>
@@ -14384,7 +14384,7 @@
     <script src="js/horaire-fusion.js?v=20260821a"></script> <!-- CT-04 : source unique de la fusion entités horaires → horaireHebdo (dédup par jour ET heure) -->
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
     <script src="js/trimestre-v2.js?v=20260918c"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
-    <script src="js/trimestre-v2-init.js?v=20260906a"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
+    <script src="js/trimestre-v2-init.js?v=20260928a"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
     <script src="js/trimestre-v2-enseignants.js?v=20260912e"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
     <script src="js/trimestre-v2-horaires.js?v=20260926a"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
     <script src="js/trimestre-v2-liste.js?v=20260920b"></script> <!-- #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->

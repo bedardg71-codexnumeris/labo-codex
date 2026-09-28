@@ -256,15 +256,23 @@ test('#374 · Fusion « Journées sans cours » : migration des 2 anciennes clé
     expect(erreurs).toEqual([]);
 });
 
-test('#372 · Bouton Enregistrer du Trimestre : plus d\'encadré info-box vide autour', async ({ page }) => {
+// ↻ Lot E2 (28 sept. 2026, D3) : le bouton « Enregistrer » du Trimestre est retiré (un
+// trimestre existant s'enregistre champ par champ). Son successeur, « Créer le trimestre »,
+// est caché quand un trimestre est actif (la démo en a un) ; l'invariant #372 tient pour lui.
+test('#372 · Bouton du Trimestre : plus d\'encadré info-box vide autour ; « Créer le trimestre » caché sur un trimestre existant', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);
     await page.setViewportSize({ width: 1470, height: 956 });
     await ouvrirAppEnDemo(page);
     await montrerTrimestre(page);
 
-    const bouton = page.locator('#calendrier-trimestre [data-action="sauvegarderTrimestreCompletV2"]');
-    await expect(bouton).toBeVisible();
+    // Ce que fait la navigation à l'affichage du Cadre (#763) : la fiche relit le stock.
+    await page.evaluate(() => window.initialiserModuleTrimestre());
+    await page.waitForTimeout(400);
+    await expect(page.locator('#calendrier-trimestre [data-action="sauvegarderTrimestreCompletV2"]')).toHaveCount(0);
+    const bouton = page.locator('#calendrier-trimestre #v2-btnCreerTrimestre');
+    await expect(bouton).toHaveCount(1);
+    await expect(bouton).toBeHidden();
 
     // Le conteneur direct du bouton n'est plus une info-box (encadré bleu).
     const conteneurClasse = await bouton.evaluate(el => el.parentElement.className);
