@@ -216,3 +216,38 @@ describe('#965 — les textes validés, et la lecture seule', () => {
         expect(JSON.stringify([...api.etat.noeuds.entries()]) + JSON.stringify([...api.etat.liens.entries()])).toBe(avant);
     });
 });
+
+// R4 — relecture de Cowork (28 sept.) : quatre branches sans essai.
+describe('#965 R4 — les branches restantes de la pastille', () => {
+    beforeEach(() => { monter(); carte(); });
+
+    it('✕ l\'emporte sur un ⚠ DÉJÀ trouvé (ordre ✕ après ⚠ dans la liste)', () => {
+        cocher(['oT', 'oJ']);
+        expect(pastille('ev').etat).toBe('nonEnseigne');
+        cocher(['oJ', 'oT']);
+        expect(pastille('ev').etat).toBe('nonEnseigne');
+    });
+
+    it('même semaine, séance non posée : on ne conclut pas (avant, inconclusif)', () => {
+        lecon('s4n', 'Semaine 4, séance non posée', 4, null, [{ id: 'oN', texte: 'Séance inconnue' }]);
+        noeud('bN', 'activite', 'Bloc séance inconnue', { parent: 's4n', metadata: { objectifsServis: ['oN'] } });
+        cocher(['oN']);
+        const p = pastille('ev');
+        expect(p.etat).toBe('avant');
+        expect(p.inconclusif).toBe(true);
+    });
+
+    it('leçon de l\'ÉVALUATION sans semaine : on ne conclut pas (avant, inconclusif)', () => {
+        noeud('evX', 'evaluation', 'Évaluation rêveuse', { parent: 'sX', metadata: { objectifsServis: ['oT'] } });
+        const p = pastille('evX');
+        expect(p.etat).toBe('avant');
+        expect(p.inconclusif).toBe(true);
+    });
+
+    it('évaluation hors de toute leçon : on ne conclut pas (avant, inconclusif)', () => {
+        noeud('evL', 'evaluation', 'Évaluation libre', { metadata: { objectifsServis: ['oT'] } });
+        const p = pastille('evL');
+        expect(p.etat).toBe('avant');
+        expect(p.inconclusif).toBe(true);
+    });
+});
