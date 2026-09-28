@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 16 H 20 : **LOT E2 (1.166.0) POUSSÉ, EN LIGNE DEPUIS 16 H 15 ; PORTE TERRAIN À PASSER** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 17 H 15 : **LOT E2 (1.166.0) EN LIGNE DEPUIS 16 H 15 ; PORTE TERRAIN PASSÉE (8/8) ; BRANCHE RETIRÉE** — lire `git log origin/main`
+
+**Fait** : porte terrain de 1.166.0 passée par Grégoire sur l'iPad à 17 h 10, **8 rangées sur 8, aucun échec** (le DA ne se laisse pas effacer ; « (essai) » tient en ouvrant directement une autre fiche ; programme d'origine rétabli) ; relevé dans `plans de travail/PORTES-TERRAIN-2026-09-28-lot-E2-cadre-eleves.md`. La branche `lot-e2-cadre-eleves` (fusionnée dans `main`) et son worktree sont retirés.
+
+**Reste** : ce relais et la porte sont commités sur `main`, **non poussés** (documentation seule : ils partent avec le prochain push). Aucun lot ouvert.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 16 H 20 : **LOT E2 (1.166.0) POUSSÉ, EN LIGNE DEPUIS 16 H 15 ; PORTE TERRAIN À PASSER** — lire `git log origin/main`
 
 **Fait** : verdict WebKit complet (aucune rougeur nouvelle) et push `c8572cf0..e4149cb1` ; **1.166.0 en ligne depuis 16 h 15** (Netlify, `commit_ref` `e4149cb1`, « ready »).
 
