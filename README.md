@@ -307,10 +307,11 @@ Labo Codex — laboratoire de codexnumeris.org
 
 Cette application est en **développement actif (Beta)**. Elle est
 fonctionnelle et utilisée en classe, mais peut contenir des bugs. Effectuez
-des sauvegardes régulières de vos données :
+des copies de secours régulières de vos données :
 
-- **Réglages → Archives → Archiver le groupe-cours**
-- ou **Réglages → Codex → Enregistrer le codex** (export ZIP portable)
+- **Réglages → Données → Faire une copie de secours**
+- ou **Codex (menu du haut) → Mettre à jour le codex** (fichier ZIP portable)
+- et, en fin de trimestre, **Codex → Archiver** (un groupe-cours dans les archives)
 
 Voir [`docs/architecture/ECOSYSTEME-DONNEES.md`](docs/architecture/ECOSYSTEME-DONNEES.md)
 pour comprendre les différents formats de sauvegarde.

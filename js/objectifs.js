@@ -56,6 +56,7 @@ function chargerEnsemblesObjectifs() {
  */
 function sauvegarderEnsemblesObjectifs(ensembles) {
     db.setSync('objectifsTemplates', ensembles);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager('objectifsTemplates');   // lot F : geste hors témoin (sauvegarderEnsemblesObjectifs)
     mettreAJourStatsObjectifs();
     afficherListeEnsemblesObjectifs();
 }
@@ -335,7 +336,7 @@ function genererFormulaireEnsemble(ensemble) {
                     Annuler
                 </button>
                 <button data-action="sauvegarderEnsembleObjectifs" class="btn btn-confirmer" id="btnSauvegarderEnsemble">
-                    Sauvegarder
+                    Enregistrer
                 </button>
             </div>
         </div>
@@ -510,7 +511,7 @@ function calculerTotalPoidsEnsemble() {
 function marquerEnsembleModifie() {
     const btnSauvegarder = document.getElementById('btnSauvegarderEnsemble');
     if (btnSauvegarder) {
-        btnSauvegarder.textContent = 'Sauvegarder *';
+        btnSauvegarder.textContent = 'Enregistrer *';
         // Le bouton reste vert (btn-confirmer) même avec des modifications
     }
 }
@@ -565,7 +566,7 @@ function sauvegarderEnsembleObjectifs() {
     // Valider le total
     const total = calculerTotalPoidsEnsemble();
     if (total !== 100) {
-        if (!confirm(`Le total des pondérations est de ${total}% au lieu de 100%.\n\nVeux-tu quand même sauvegarder ?`)) {
+        if (!confirm(`Le total des pondérations est de ${total}% au lieu de 100%.\n\nVeux-tu quand même enregistrer ?`)) {
             return;
         }
     }
@@ -598,7 +599,7 @@ function sauvegarderEnsembleObjectifs() {
         btnsExporter.forEach(btn => btn.classList.remove('u-hide'));
     }
 
-    alert('✅ Ensemble d\'objectifs sauvegardé !');
+    alert('✅ Ensemble d\'objectifs enregistré !');
 }
 
 /**

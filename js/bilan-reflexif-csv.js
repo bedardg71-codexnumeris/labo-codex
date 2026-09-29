@@ -575,6 +575,7 @@ function confirmerImport() {
     };
 
     db.setSync(CLE_RESULTATS(), etat.resultats);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_RESULTATS());   // lot F : geste hors témoin (importer des réponses)
     etat.donneesCSVParsees = null;
     etat.mappingImport = null;
 

@@ -80,7 +80,7 @@ async function ajouterGrilleALaBibliotheque(grille) {
     // concurrents du même item passaient tous les deux, et la bibliothèque
     // partagée gardait un doublon que rien ne signalait.
     let dejaPresente = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
         const bibliotheque = lues || [];
 
         const existe = bibliotheque.some(g => g.id === grilleSafe.id);
@@ -102,6 +102,7 @@ async function ajouterGrilleALaBibliotheque(grille) {
         bibliotheque.push(grilleBiblio);
         return bibliotheque;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_GRILLES);   // lot F : geste hors témoin (ajouterGrilleALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -120,7 +121,7 @@ async function retirerGrilleDeLaBibliotheque(grilleId) {
     // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
         const bibliotheque = lues || [];
         const restants = bibliotheque.filter(g => g.id !== grilleId);
 
@@ -130,6 +131,7 @@ async function retirerGrilleDeLaBibliotheque(grilleId) {
         retiree = true;
         return restants;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_GRILLES);   // lot F : geste hors témoin (retirerGrilleDeLaBibliotheque)
 
     if (!retiree) {
         return false;

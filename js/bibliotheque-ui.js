@@ -530,6 +530,7 @@
         });
 
         if (!copieCreee) return;
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(d.prefixeId || 'duplication');   // lot F : geste hors témoin (Dupliquer)
 
         // ⚠ HORS de la section critique, et il faut que ça le reste : ces trois
         // rappels touchent l'UI (rafraîchissement, chargement du formulaire,
@@ -625,6 +626,7 @@
             return null;
         }
         if (!copieCreee) return null;
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(d.prefixeId || 'duplication');   // lot F : geste hors témoin (Dupliquer)
 
         if (typeof d.rafraichirUI === 'function') await d.rafraichirUI();
         return copieCreee;

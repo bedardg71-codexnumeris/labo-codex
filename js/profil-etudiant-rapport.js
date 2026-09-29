@@ -193,7 +193,7 @@ function genererSectionRapport(da) {
                 <!-- Conseil Primo: Informations sur le rapport -->
                 <div id="conseil-rapport" class="carte-info-toggle carte-info-conseil" style="display: none;">
                     <strong>À propos du rapport :</strong>
-                    <p>Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Tu peux modifier le texte avant de le copier.</p>
+                    <p>Le rapport est généré à la demande avec les données actuelles. Son texte ne s'enregistre nulle part : si tu le modifies, copie-le avant de quitter l'écran. Tes notes, dans le champ du dessous, s'enregistrent.</p>
                 </div>
 
                 <!-- Grid 2 colonnes : Paramètres + Actions -->
@@ -458,6 +458,7 @@ function ecrireNotesRapportEnAttente() {
         toutes[String(da)] = texte;
     }
     db.setSync(cle('notesRapport'), toutes); // security-ok: texte saisi par l'enseignant dans son propre champ (aucune source externe), échappé par echapperHtml au rendu
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('notesRapport'));   // lot F : geste hors témoin (ecrireNotesRapportEnAttente)
 }
 
 /**

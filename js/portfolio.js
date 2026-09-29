@@ -429,6 +429,7 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
         };
 
         db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('portfoliosEleves'));   // lot F : geste hors témoin (cocher un artefact)
 
         // 🔄 Recalculer les indices C et P après modification de sélection
         if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -448,7 +449,7 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
 
     } catch (error) {
         console.error('Erreur toggle artefact:', error);
-        alert('Erreur lors de la sauvegarde');
+        alert('Erreur lors de l\'enregistrement');
     }
 }
 

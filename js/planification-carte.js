@@ -8630,7 +8630,8 @@ function changerCarte(carteId) {
     if (!index) return;
     sauvegarder();
     index.active = carteId;
-    window.planificationDonnees.sauvegarderIndex(index);
+    // Changer d'onglet de carte n'est pas un changement de données (lot F).
+    window.planificationDonnees.sauvegarderIndex(index, { discret: true });
     chargerCarte(carteId);
     mettreAJourListeCartes();
 }

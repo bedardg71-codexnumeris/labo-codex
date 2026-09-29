@@ -1242,8 +1242,8 @@ function confirmerSeances() {
     // Notification
     const nbSeances = seancesAEnregistrer.length;
     const message = nbSeances === 1
-        ? 'Séance sauvegardée avec succès'
-        : `${nbSeances} séances sauvegardées avec succès`;
+        ? 'Séance enregistrée'
+        : `${nbSeances} séances enregistrées`;
     notifications.succes(message);
 
     // Réinitialiser seancesEnCours
@@ -1326,7 +1326,7 @@ function genererCarteSeanceEdition(seance, index) {
         <strong class="item-carte-titre">Séance ${nomSeance}${groupeEchappe ? ` - Groupe ${groupeEchappe}` : ''}</strong>
         <div class="item-carte-actions">
             <button class="btn btn-annuler btn-sm" data-action="annulerEditionSeanceEnPlace">Annuler</button>
-            <button class="btn btn-confirmer btn-sm" data-action="sauvegarderEditionSeanceEnPlace" data-param="${index}">Sauvegarder</button>
+            <button class="btn btn-confirmer btn-sm" data-action="sauvegarderEditionSeanceEnPlace" data-param="${index}">Enregistrer</button>
         </div>
     </div>
     <div class="grille-4col-form">

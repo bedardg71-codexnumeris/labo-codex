@@ -307,6 +307,7 @@ function getPratiqueParDefaut() {
  */
 function definirPratiqueParDefaut(pratiqueId) {
     db.setSync('pratiqueParDefaut', pratiqueId);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager('pratiqueParDefaut');   // lot F : geste hors témoin (definirPratiqueParDefaut)
 
     const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Standards';
 
@@ -1025,7 +1026,7 @@ async function adopterMaquette(id) {
     // instantané lu hors file : deux occasions de perdre une modification
     // voisine, pour une seule bascule de drapeau.
     let nomAdoptee = null;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    const ecritLotF = await db.modifier(cle('pratiquesConfigurables'), (lues) => {
         const pratiques = lues || [];
         const pratique = pratiques.find(p => p.id === id);
         if (!pratique || pratique.estMaquette !== true) return undefined;
@@ -1040,6 +1041,7 @@ async function adopterMaquette(id) {
         nomAdoptee = pratique.nom || 'Sans titre';
         return pratiques;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (adopterMaquette)
 
     if (nomAdoptee === null) return false;   // introuvable, ou déjà adoptée
 
@@ -1471,7 +1473,7 @@ function fermerModalBibliothequePratiques() {
  */
 async function retirerPratiqueDeBibliotheque(pratiqueId) {
     let trouvee = false;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    const ecritLotF = await db.modifier(cle('pratiquesConfigurables'), (lues) => {
         const pratiques = lues || [];
         const pratique = pratiques.find(p => p.id === pratiqueId);
         if (!pratique) return undefined;
@@ -1480,6 +1482,7 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
         trouvee = true;
         return pratiques;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (retirerPratiqueDeBibliotheque)
 
     if (!trouvee) {
         alert('Pratique introuvable');
@@ -1500,7 +1503,7 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
  */
 async function ajouterPratiqueIndividuelle(pratiqueId) {
     let trouvee = false;
-    await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+    const ecritLotF = await db.modifier(cle('pratiquesConfigurables'), (lues) => {
         const pratiques = lues || [];
         const pratique = pratiques.find(p => p.id === pratiqueId);
         if (!pratique) return undefined;
@@ -1509,6 +1512,7 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
         trouvee = true;
         return pratiques;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (ajouterPratiqueIndividuelle)
 
     if (!trouvee) {
         alert('Pratique introuvable');
@@ -1566,13 +1570,14 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
         // Supprimer de pratiquesConfigurables — dans la file : la collection
         // lue plus haut a servi aux vérifications, la question de confirmation
         // s'est intercalée entre-temps.
-        await db.modifier(cle('pratiquesConfigurables'), (lues) => {
+        const ecritLotF = await db.modifier(cle('pratiquesConfigurables'), (lues) => {
             const fraiches = lues || [];
             const index = fraiches.findIndex(p => p.id === pratiqueId);
             if (index === -1) return undefined;
             fraiches.splice(index, 1);
             return fraiches;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueHorsBibliotheque)
 
 
         // Rafraîchir le modal

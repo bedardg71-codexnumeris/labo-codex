@@ -290,7 +290,7 @@ async function ajouterProductionIndividuelle(id) {
         let titreEnConflit = null;
         let sourceIntrouvable = false;
 
-        await db.modifier(cleProductions, async (lues) => {
+        const ecritLotF = await db.modifier(cleProductions, async (lues) => {
         let productions = lues || [];
         prod = productions.find(p => p.id === id);
 
@@ -347,6 +347,7 @@ async function ajouterProductionIndividuelle(id) {
 
         return productions;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cleProductions);   // lot F : geste hors témoin (ajouterProductionIndividuelle)
 
         // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
         if (titreEnConflit) {
@@ -661,7 +662,7 @@ async function retirerProductionDeBibliotheque(id) {
         // ⚠ La collection est relue DANS la file : celle d'avant la confirmation
         // ne vaut plus rien.
         let trouvee = false;
-        await db.modifier(getCleProductions(), (lues) => {
+        const ecritLotF = await db.modifier(getCleProductions(), (lues) => {
             const productions = lues || [];
             const production = productions.find(p => p.id === id);
             if (!production) return undefined;
@@ -670,6 +671,7 @@ async function retirerProductionDeBibliotheque(id) {
             trouvee = true;
             return productions;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (retirerProductionDeBibliotheque)
 
         if (!trouvee) {
             throw new Error('Production introuvable');
@@ -711,9 +713,10 @@ async function supprimerProductionDefinitivement(id) {
 
     // Suppression définitive du store local, DANS la file : la collection
     // filtrée est celle qui existe au moment de l'écriture.
-    await db.modifier(getCleProductions(), (lues) => {
+    const ecritLotF = await db.modifier(getCleProductions(), (lues) => {
         return (lues || []).filter(p => p.id !== id);
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionDefinitivement)
 
     // Suppression du store partagé
     if (typeof retirerDeLaBibliotheque === 'function') {

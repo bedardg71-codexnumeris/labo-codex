@@ -199,7 +199,7 @@ function fusionnerDemoVersGlobaux() {
     // via le module propriétaire (SSOT #328 Lot 1)
     var modDemo = db.getSync('demo_modalitesEvaluation', null);
     if (modDemo) {
-        window.modalitesEvaluation.remplacer(modDemo);
+        window.modalitesEvaluation.remplacer(modDemo, { discret: true });   // mode démo (lot F)
     }
 
     // 7. cartouches_* : lire depuis PACK_DEMARRAGE (Phase 1 ne les peuple pas
@@ -516,7 +516,7 @@ async function desactiverModeDemo() {
 
             if (etat.modalitesEvaluation) {
                 // Restauration via le module propriétaire (SSOT #328 Lot 1)
-                window.modalitesEvaluation.remplacer(etat.modalitesEvaluation);
+                window.modalitesEvaluation.remplacer(etat.modalitesEvaluation, { discret: true });   // sortie du mode démo (lot F)
             }
 
             // Force normal si valeur legacy 'simulation'

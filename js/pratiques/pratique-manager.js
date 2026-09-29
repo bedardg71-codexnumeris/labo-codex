@@ -82,6 +82,7 @@ const PratiqueManager = {
         // mais on ne la laisse pas contredire ce qui vient d'être activé).
         gcActif.pratiqueId = pratiqueId;
         db.setSync('groupeCoursActif', gcActif);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('groupeCoursActif');   // lot F : geste hors témoin (changerPratiqueActive)
 
         // Invalider le cache de pratique-registre.js
         if (window.invaliderCachePratique) {
@@ -187,8 +188,10 @@ const PratiqueManager = {
     /**
      * Sauvegarde une nouvelle pratique configurable
      * @param {object} pratique - Objet { id, nom, auteur, description, config, dansBibliotheque }
+     * @param {{discret?: boolean}} [options] - lot F : `discret` pour les pratiques
+     *   prédéfinies posées sans geste ; sinon le codex apprend l'écriture
      */
-    async sauvegarderPratique(pratique) {
+    async sauvegarderPratique(pratique, options) {
         const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
         // Vérifier unicité de l'ID
@@ -206,6 +209,9 @@ const PratiqueManager = {
 
         pratiques.push(pratique);
         db.setSync(cle('pratiquesConfigurables'), pratiques);
+        if (!(options && options.discret) && window.signalerEcritureUsager) {
+            window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin
+        }
 
     },
 
@@ -231,6 +237,7 @@ const PratiqueManager = {
 
         pratiques.splice(index, 1);
         db.setSync(cle('pratiquesConfigurables'), pratiques);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratique)
 
     },
 
@@ -295,7 +302,7 @@ const PratiqueManager = {
                 };
 
                 try {
-                    await this.sauvegarderPratique(pratique);
+                    await this.sauvegarderPratique(pratique, { discret: true });   // prédéfinies (lot F)
                 } catch (error) {
                     console.error(`   ❌ Erreur sauvegarde ${pratique.nom}:`, error);
                 }

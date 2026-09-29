@@ -7501,15 +7501,6 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     font-weight: normal;
 }
 
-.codex-menu-statut {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
-    color: var(--texte-secondaire, #8ba4b0);
-    font-size: 0.82rem;
-}
-
 .codex-menu-statut-haut {
     padding: 10px 16px;
     font-size: 0.82rem;

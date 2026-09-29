@@ -288,10 +288,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "États de présence disponibles",
                 items: [
-                    "Présent : l'étudiant était présent au cours",
-                    "Absent : absence non justifiée",
-                    "Justifié : absence avec motif valide (maladie, etc.)",
-                    "Retard : arrivée tardive au cours"
+                    "Présent : toutes les périodes de la séance",
+                    "Absent : 0 période",
+                    "Présence partielle : moins de périodes que la séance (arrivée tardive, départ hâtif)"
                 ]
             },
             {
@@ -411,7 +410,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Les autres boutons",
                 items: [
                     "<strong>Dupliquer</strong> : crée une copie indépendante avec un nouvel ID, idéal pour créer une variante",
-                    "<strong>Exporter</strong> : télécharge l'élément en fichier JSON pour le partager ou le sauvegarder",
+                    "<strong>Exporter</strong> : télécharge l'élément en fichier JSON pour le partager ou le garder",
                     "<strong>Ajouter</strong> : transfère un élément disponible vers ta barre latérale"
                 ]
             },
@@ -1216,7 +1215,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Ce qui est archivé",
                 items: [
-                    "Les étudiant·es du groupe (liste, présences, évaluations sauvegardées)",
+                    "Les étudiant·es du groupe (liste, présences, évaluations enregistrées)",
                     "Les fichiers travaux importés pour ce groupe (photos, PDF)",
                     "Les bibliothèques actives au moment de l’archive (grilles, échelles, cartouches, productions, pratiques, tampons)",
                     "Les snapshots et les données de planification du trimestre"
@@ -1386,7 +1385,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "<strong>Étudiant·es</strong> : nombre et liste détaillée. Le toggle <em>Anonymiser les noms</em> remplace les vrais noms par <code>Élève 1, 2, 3…</code> — utile pour une démo ou un partage d'écran.",
                     "<strong>Productions distinctes</strong> : nombre de titres uniques de production présents dans l’archive.",
-                    "<strong>Évaluations</strong> : nombre total d'évaluations sauvegardées.",
+                    "<strong>Évaluations</strong> : nombre total d'évaluations enregistrées.",
                     "<strong>Fichiers travaux</strong> : photos et PDF déposés par les étudiant·es.",
                     "<strong>Présences, snapshots, interventions</strong> : autres traces pédagogiques."
                 ]
@@ -1552,12 +1551,12 @@ const AIDE_CONTEXTUELLE = {
                     "<strong>5. Échelle de performance</strong> — niveaux et leur poids dans la note.",
                     "<strong>6. Critères</strong> — modèle de grille par défaut.",
                     "<strong>7. Rétroaction</strong> — modèle de cartouche par défaut.",
-                    "<strong>8. Récapitulatif</strong> — relecture avant sauvegarde."
+                    "<strong>8. Récapitulatif</strong> : relecture avant l'enregistrement."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Tu peux quitter l'assistant à tout moment avec la croix — rien n'est sauvegardé tant que tu n'as pas atteint la dernière étape. Une pratique créée peut être éditée plus tard sans repasser par l'assistant."
+                contenu: "Tu peux quitter l'assistant à tout moment avec la croix : rien n'est enregistré tant que tu n'as pas atteint la dernière étape. Une pratique créée peut être éditée plus tard sans repasser par l'assistant."
             }
         ],
         voirAussi: ['construction-pratiques']
@@ -1605,7 +1604,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "Cette information voyage avec ton Codex (la sauvegarde complète). Si tu partages un Codex avec quelqu'un, vérifie d'abord que ces données ne doivent pas y être."
+                contenu: "Cette information voyage avec ton codex et tes copies de secours. Si tu partages un codex avec quelqu'un, vérifie d'abord que ces données ne doivent pas y être."
             },
             {
                 type: 'conseil',
@@ -1615,11 +1614,11 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'modal-export': {
-        titre: "Exporter une sauvegarde sélective",
+        titre: "Faire une copie de secours",
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette modale permet de choisir précisément quelles clés de stockage exporter dans un fichier JSON (ou ZIP si tu inclus les fichiers travaux). Pour une sauvegarde complète, préfère le Codex (Réglages > Données)."
+                contenu: "Cette fenêtre te laisse choisir quelles clés de stockage mettre dans ta copie de secours : un fichier JSON, ou ZIP si tu inclus les fichiers de travaux. Coche « Toutes les clés » pour une copie complète. Pour transporter ton travail d'un appareil à l'autre, préfère le codex (menu Codex, en haut)."
             },
             {
                 type: 'liste',
@@ -1648,7 +1647,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette modale accepte des fichiers JSON ou ZIP générés par Labo Codex. L'import écrase les clés correspondantes — utilise-le pour restaurer une sauvegarde ou migrer un trimestre d'un appareil à l'autre."
+                contenu: "Cette modale accepte des fichiers JSON ou ZIP générés par Labo Codex. L'import écrase les clés correspondantes : utilise-le pour restaurer une copie de secours ou migrer un trimestre d'un appareil à l'autre."
             },
             {
                 type: 'alerte',
@@ -1659,14 +1658,14 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Formats acceptés",
                 items: [
-                    "<strong>.json</strong> — sauvegarde sélective sans fichiers travaux.",
-                    "<strong>.zip</strong> — sauvegarde sélective avec fichiers travaux, ou export configuration complète.",
-                    "<strong>.codex.zip</strong> — fichier Codex complet (passer plutôt par Réglages > Données)."
+                    "<strong>.json</strong> : copie de secours sans fichiers de travaux.",
+                    "<strong>.zip</strong> : copie de secours avec fichiers de travaux, ou configuration partagée.",
+                    "<strong>codex-‹nom›-‹date›.zip</strong> : fichier codex complet (passer plutôt par Réglages > Données)."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Fais toujours un Codex de sauvegarde avant un import — c'est ton filet de sécurité si l'import écrase des données que tu voulais garder."
+                contenu: "Fais toujours une copie de secours avant un import : c'est ton filet de sécurité si l'import écrase des données que tu voulais garder."
             }
         ]
     },
