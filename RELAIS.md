@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 20 H : **LOT E3 (1.167.0) RELU VERT, RELEASE POSÉE ; VERDICT WEBKIT, FUSION ET PUSH EN COURS** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 22 H 10 : **LOT E3 (1.167.0) EN LIGNE DEPUIS 22 H 02 ; PORTE TERRAIN À PASSER** — lire `git log origin/main`
+
+**Fait** : verdict WebKit complet sur `2dcd905b` (aucune rougeur ; 5 essais verts au second essai, dont le cas (c) du banc E2 et `productions-ajout-refus-garde-340`, à surveiller s'ils reviennent) ; `main` avancée en avance rapide sur la branche du lot ; push `2f93bbcc..2dcd905b` ; **1.167.0 en ligne depuis 22 h 02** (Netlify, `commit_ref` `2dcd905b`, « ready »). Le second verdict relancé par `pousser.sh` sur le même commit a été arrêté, le premier restant valable (#980 : `pousser.sh` ne réutilise pas un verdict déjà posé et juge la branche de l'arbre).
+
+**Reste** : la porte terrain `plans de travail/PORTES-TERRAIN-2026-09-28-lot-E3-productions-interventions.md` (deux portes au doigt sur l'iPad, chacune avec son retour) — **Cowork publie l'artefact** ; puis retirer la branche `lot-e3-productions-interventions` (sur demande). Le lot F (les mots) peut s'ouvrir : E3 est livré.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 20 H : **LOT E3 (1.167.0) RELU VERT, RELEASE POSÉE ; VERDICT WEBKIT, FUSION ET PUSH EN COURS** — lire `git log origin/main`
 
 **Où vit le travail** : branche `lot-e3-productions-interventions` (arbre principal) = les quatre étapes du lot E3, la case de report des présences (`d2cc7bde`, décision de Grégoire, 19 h 43), la release **1.167.0** (build `0928-1959`, `2bf7c5f1`, Nouvelles acceptées mot pour mot à 19 h 46) et `main` fusionnée dedans (relais `2f93bbcc`). Relectures de Cowork : `RELECTURE-2026-09-28-lot-E3-productions-interventions.md` (verte ; dernière section : la case, verte). Vitest 659 fichiers, 7 700/7 700 après le bump.
 
