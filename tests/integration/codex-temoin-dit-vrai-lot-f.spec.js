@@ -25,7 +25,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //       ecrireEtAnnoncer) le rend « pas à jour » ; une écriture `discret` ne le touche pas ;
 //   (c) « Mettre à jour le codex » réussi → « à jour », et le fichier a été écrit ;
 //   (d) aperçu annulé → toujours « pas à jour », aucun succès, aucune erreur ;
-//   (e) l'enregistrement automatique reste inerte (décision de Grégoire attendue).
+//   (e) l'enregistrement automatique est retiré : aucun minuteur n'écrit le fichier.
 //
 // Le fichier est un faux `showSaveFilePicker` : aucune écriture disque. Pack démo, noms fictifs.
 
@@ -63,13 +63,16 @@ async function viderLeStockage(page) {
     await page.waitForTimeout(1500);
 }
 
-/** Relève les minuteurs de l'enregistrement automatique (`_executerAutoSave`), dès le chargement. */
+/**
+ * Relève, dès le chargement, tout minuteur répété d'au moins une minute : le banc les
+ * déclenche ensuite lui-même (le temps qui passe), et vérifie qu'aucun n'écrit le fichier.
+ */
 async function espionnerMinuteurs(page) {
     await page.addInitScript(() => {
-        window.__minuteurs5min = 0;
+        window.__minuteursLongs = [];
         const orig = window.setInterval;
         window.setInterval = function (fn, delai, ...reste) {
-            if (fn && fn.name === '_executerAutoSave') window.__minuteurs5min++;
+            if (typeof fn === 'function' && delai >= 60 * 1000) window.__minuteursLongs.push(fn);
             return orig.call(window, fn, delai, ...reste);
         };
     });
@@ -119,7 +122,7 @@ const PAS_A_JOUR = 'Ton codex n\'a pas tes derniers changements';
 test.describe('Lot F — le témoin du codex dit vrai', () => {
     test.setTimeout(120000);
 
-    test('ouverture, écritures, mise à jour, aperçu annulé, automatique inerte', async ({ page }) => {
+    test('ouverture, écritures, mise à jour, aperçu annulé, aucun enregistrement automatique', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);
         await espionnerMinuteurs(page);
         await viderLeStockage(page);
@@ -197,11 +200,19 @@ test.describe('Lot F — le témoin du codex dit vrai', () => {
         expect(await lireTemoinCodex(page)).toEqual({ texte: PAS_A_JOUR, pasAJour: true });
         await page.evaluate(() => { window.showSaveFilePicker = window.__pickerOrig; });
 
-        // (e) L'automatique reste inerte : un fichier est tenu (handle), mais aucun minuteur
-        // de 5 minutes n'a été posé, et le menu ne l'annonce pas.
-        expect(await page.evaluate(() => window.__minuteurs5min)).toBe(0);
-        expect(await page.evaluate(() => Codex.etat().autoSaveActif)).toBe(false);
+        // (e) L'enregistrement automatique est retiré (décision de Grégoire, 29 sept.) : un
+        // fichier est tenu (handle), le codex n'est pas à jour, et chaque minuteur long de
+        // l'application, déclenché trois fois, n'écrit pas le fichier.
         expect(await page.evaluate(() => Codex.etat().handleFSAPI)).toBe(true);
+        const ecrituresAvant = await page.evaluate(() => window.__ecrituresFichier);
+        await page.evaluate(async () => {
+            for (let tour = 0; tour < 3; tour++) {
+                for (const fn of window.__minuteursLongs) { try { await fn(); } catch (e) { /* voisin */ } }
+            }
+        });
+        await page.waitForTimeout(3000);
+        expect(await page.evaluate(() => window.__ecrituresFichier)).toBe(ecrituresAvant);
+        expect(await page.evaluate(() => document.getElementById('codex-menu-autosave'))).toBeNull();
 
         expect(erreurs).toEqual([]);
     });
