@@ -160,7 +160,7 @@ test.describe('Lot F — gestes hors témoin raccordés au codex', () => {
     test('la chaîne entière : un geste hors témoin rend le codex « pas à jour »', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);
         await demarrerDemo(page);
-        await page.evaluate(() => db.setSync('_codex_etat', { actif: true, nom: 'Codex du banc', derniereSauvegarde: new Date().toISOString(), modificationsDepuis: null, manifeste: null }));
+        await page.evaluate(() => db.setSync('_codex_etat', { actif: true, nom: 'Codex du banc', derniereSauvegarde: new Date().toISOString(), modificationsDepuis: null, manifeste: null, temoinFiable: true }));
         await page.reload();
         await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(4000);

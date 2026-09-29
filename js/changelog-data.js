@@ -21,6 +21,23 @@
 
     var CHANGELOG = [
         {
+            // 1.168.0 (lot F de l'enregistrement, les mots D4) — titre et huit lignes ACCEPTÉS par
+            // Grégoire le 29 sept. 2026, 6 h 08, mot pour mot (relecture finale de Cowork).
+            version: '1.168',
+            couleur: 'bleu',
+            titre: 'Des mots qui disent vrai&nbsp;: enregistré, codex, copie de secours',
+            items: [
+                '«&nbsp;Enregistré&nbsp;» ne veut plus dire qu\'une chose&nbsp;: écrit dans l\'application, sur ton appareil.',
+                'Le codex a son verbe&nbsp;: «&nbsp;Mettre à jour le codex&nbsp;». Son menu te dit si ton codex est à jour ou s\'il n\'a pas tes derniers changements.',
+                'Au premier lancement de cette version, ton codex est marqué «&nbsp;pas à jour&nbsp;»&nbsp;: mets-le à jour une fois pour repartir d\'un état juste.',
+                'L\'enregistrement automatique du codex toutes les 5 minutes est retiré&nbsp;: ton fichier ne change que lorsque tu le mets à jour.',
+                'La sauvegarde de Réglages › Données s\'appelle maintenant «&nbsp;Copie de secours&nbsp;», sur l\'Accueil comme dans le rappel, qui t\'y mène directement.',
+                'Le codex et la copie de secours n\'ont pas le même rôle. Le codex contient toutes tes données et les copies de tes étudiant·es&nbsp;; tu l\'emportes d\'un appareil à l\'autre, et son menu te dit s\'il est à jour. La copie de secours contient ce que tu coches (tout, avec «&nbsp;Toutes les clés&nbsp;»)&nbsp;: c\'est une photo de tes données, que tu gardes à part pour les retrouver si ton navigateur les perd.',
+                'Archiver un groupe dit «&nbsp;Groupe archivé&nbsp;»&nbsp;; sous Safari, une archive annulée n\'apparaît plus dans la liste.',
+                'L\'Aide, la foire aux questions et plusieurs écrans ont été relus selon ces mots.'
+            ]
+        },
+        {
             // 1.167.0 (lot E3 de l'enregistrement : productions, interventions, volet confidentiel, réglages) —
             // titre et texte ACCEPTÉS par Grégoire le 28 sept. 2026, 19 h 46, mot pour mot (relecture de Cowork).
             version: '1.167',

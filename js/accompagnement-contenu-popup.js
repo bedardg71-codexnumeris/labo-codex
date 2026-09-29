@@ -1660,7 +1660,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "<strong>.json</strong> : copie de secours sans fichiers de travaux.",
                     "<strong>.zip</strong> : copie de secours avec fichiers de travaux, ou configuration partagée.",
-                    "<strong>.codex.zip</strong> — fichier Codex complet (passer plutôt par Réglages > Données)."
+                    "<strong>codex-‹nom›-‹date›.zip</strong> : fichier codex complet (passer plutôt par Réglages > Données)."
                 ]
             },
             {

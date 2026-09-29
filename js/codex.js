@@ -211,6 +211,7 @@ function initialiserCodex() {
             var etatMigre = db.getSync(CLE_ETAT_CODEX, null);
             if (etatMigre && etatMigre.actif) {
                 _etat = Object.assign({}, _etat, etatMigre);
+                _marquerStockAvantLotF(etatMigre);
                 _mettreAJourIndicateur();
             }
         }
@@ -240,6 +241,7 @@ function initialiserCodex() {
     var etatSauve = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
     if (etatSauve && etatSauve.actif) {
         _etat = Object.assign({}, _etat, etatSauve);
+        _marquerStockAvantLotF(etatSauve);
     } else {
         // #142 — quand localStorage est saturé, _codex_etat est refoulé en
         // IndexedDB seulement : à DOMContentLoaded la lecture synchrone tombe
@@ -252,6 +254,7 @@ function initialiserCodex() {
             var etatTardif = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
             if (etatTardif && etatTardif.actif) {
                 _etat = Object.assign({}, _etat, etatTardif);
+                _marquerStockAvantLotF(etatTardif);
                 _mettreAJourIndicateur();
             }
         };
@@ -273,13 +276,39 @@ function initialiserCodex() {
  * Persiste l'état courant du codex
  */
 function _sauvegarderEtat() {
-    db.setSync(CLE_ETAT_CODEX, {
+    db.setSync(CLE_ETAT_CODEX, _instantaneEtat());
+}
+
+/**
+ * L'état tel qu'il est persisté. `temoinFiable` : écrit par une version dont le
+ * témoin dit vrai (lot F) — voir _marquerStockAvantLotF.
+ */
+function _instantaneEtat() {
+    return {
         actif: _etat.actif,
         nom: _etat.nom,
         derniereSauvegarde: _etat.derniereSauvegarde,
         modificationsDepuis: _etat.modificationsDepuis,
-        manifeste: _etat.manifeste
-    });
+        manifeste: _etat.manifeste,
+        temoinFiable: true
+    };
+}
+
+/**
+ * Lot F, le stock (décision de Grégoire, 29 sept., option b) : avant le lot, rien ne
+ * marquait les changements, et un codex actif disait « à jour » depuis sa dernière
+ * écriture. Un état actif écrit avant le lot (sans `temoinFiable`) est donc posé
+ * « pas à jour », une seule fois : l'écriture ajoute le drapeau. N'écrit que
+ * `_codex_etat`, jamais les données ; sans codex actif, rien.
+ * La marque est posée en mémoire tout de suite (le menu dit vrai dès l'ouverture),
+ * et persistée après db-ready : écrite avant, la synchronisation IDB → cache du
+ * démarrage la réécrasait par l'ancien état (mesuré par le banc du stock).
+ * @param {Object} etatLu - l'état relu du stockage
+ */
+function _marquerStockAvantLotF(etatLu) {
+    if (!etatLu || !etatLu.actif || etatLu.temoinFiable) return;
+    if (!_etat.modificationsDepuis) _etat.modificationsDepuis = new Date().toISOString();
+    window.auDbPret(_sauvegarderEtat);
 }
 
 /* ===============================
@@ -2972,13 +3001,7 @@ async function actionRenommer() {
     _sauvegarderEtat();
     // ✅ CORRIGÉ (16 mars 2026) : forcer l'écriture IDB pour que syncToLocalStorageCache
     // au prochain chargement ne réécrase pas le nouveau nom avec l'ancien
-    await db.set(CLE_ETAT_CODEX, {
-        actif: _etat.actif,
-        nom: _etat.nom,
-        derniereSauvegarde: _etat.derniereSauvegarde,
-        modificationsDepuis: _etat.modificationsDepuis,
-        manifeste: _etat.manifeste
-    });
+    await db.set(CLE_ETAT_CODEX, _instantaneEtat());
 }
 
 /**
