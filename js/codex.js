@@ -334,6 +334,7 @@ async function genererCodex(options = {}) {
 
     _afficherProgression('Génération du codex');
     _prog(0, 'Lecture des données…');
+    if (options.suivreTentative) _noterTentative({ etape: 'lecture des données' });
     await _yield(); // laisser le navigateur peindre l'overlay
 
     try {
@@ -438,6 +439,10 @@ async function genererCodex(options = {}) {
     };
 
     zip.file(NOM_MANIFESTE, JSON.stringify(manifeste, null, 2));
+    // Lot G (#988) : la taille se voit AVANT (aperçu). Les travaux (PDF, images) se
+    // compressent peu : la taille non compressée est une estimation honnête du fichier.
+    var tailleEstimee = manifeste.contenu.tailleTotaleOctets;
+    if (options.suivreTentative) _noterTentative({ etape: 'aperçu', tailleEstimeeOctets: tailleEstimee });
 
     // Défense K — valider que le ZIP ne contient que les entrées attendues
     // avant de le sérialiser. Si un payload a tenté d'ajouter un fichier
@@ -457,7 +462,7 @@ async function genererCodex(options = {}) {
     // attend dans le noir pendant generateAsync.
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
-        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'codex');
+        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'codex', { taille: _formaterTailleEnviron(tailleEstimee) });
         if (!ok) {
             return null;
         }
@@ -467,6 +472,7 @@ async function genererCodex(options = {}) {
     }
 
     // 5. Générer le blob ZIP
+    if (options.suivreTentative) _noterTentative({ etape: 'compression' });
     _prog(70, 'Compression du ZIP…', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
@@ -1237,20 +1243,30 @@ async function _ecrireViaHandle(handle, blob) {
  * 2. navigator.share (iPad Safari — "Enregistrer dans Fichiers")
  * 3. <a download> (fallback — dossier Téléchargements)
  *
+ * Lot G (#988) : `options.sansRepli` (la mise à jour du codex) : un partage qui échoue,
+ * AbortError comprise, rend `{ methode: 'echec' }` au lieu de glisser en silence vers le
+ * téléchargement ; l'appelant le dit et propose lui-même « Télécharger à la place »
+ * (`options.telechargementDirect`). Sans ces options (export sélectif), rien ne change.
+ * Chaque résultat nomme sa `strategie` ; un échec porte son `erreur`.
+ *
  * @param {Blob} blob - Le blob ZIP du codex
  * @param {string} nomFichier - Le nom de fichier suggéré
  * @param {Object} [options]
  * @param {boolean} [options.forcerDialogue=false] - Force le dialogue même si un handle existe
- * @returns {Promise<{methode: string}>}
+ * @param {boolean} [options.sansRepli=false] - Un échec du partage est rendu, pas replié
+ * @param {boolean} [options.telechargementDirect=false] - Stratégie 3 seule
+ * @returns {Promise<{methode: string, strategie: string, erreur?: Error}>}
  */
 async function sauvegarderVersDestination(blob, nomFichier, options) {
     var forcerDialogue = options && options.forcerDialogue;
+    var sansRepli = !!(options && options.sansRepli);
+    if (options && options.telechargementDirect) return _telechargerDirectement(blob, nomFichier);
 
     // Stratégie 1a : Ré-écriture directe via handle FSAPI existant (pas de dialogue)
     if (_fileHandle && !forcerDialogue) {
         try {
             await _ecrireViaHandle(_fileHandle, blob);
-            return { methode: 'fsapi' };
+            return { methode: 'fsapi', strategie: 'fichier tenu (FSAPI)' };
         } catch (e) {
             // Handle invalide (fichier déplacé, clé USB retirée, etc.)
             console.warn('📂 Handle FSAPI invalide, on redemande...', e.message);
@@ -1271,12 +1287,15 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             await _ecrireViaHandle(handle, blob);
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
-            return { methode: 'fsapi' };
+            return { methode: 'fsapi', strategie: 'fenêtre de choix (FSAPI)' };
         } catch (e) {
+            // Ici, AbortError ne vient que de l'usager (« Annuler » de la fenêtre de choix) :
+            // elle reste une annulation, comme l'aperçu refusé (banc du lot F, g).
             if (e.name === 'AbortError') {
-                return { methode: 'annule' };
+                return { methode: 'annule', strategie: 'fenêtre de choix (FSAPI)', erreur: e };
             }
             console.warn('📂 FSAPI échoué, fallback...', e.message);
+            if (sansRepli) return { methode: 'echec', strategie: 'fenêtre de choix (FSAPI)', erreur: e };
         }
     }
 
@@ -1288,16 +1307,36 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
                 files: [fichier],
                 title: 'Codex Labo Codex'
             });
-            return { methode: 'share' };
+            return { methode: 'share', strategie: 'partage (Enregistrer dans Fichiers)' };
         } catch (e) {
+            // #988 : sur l'iPad, AbortError vient de l'usager qui ferme la feuille OU d'un
+            // refus du système ; on ne peut pas les distinguer. Avec `sansRepli`, c'est un
+            // échec dit, jamais une sortie muette.
+            console.warn('[Codex] Partage du fichier échoué : ' + e.name + ' – ' + e.message);
+            if (sansRepli) return { methode: 'echec', strategie: 'partage (Enregistrer dans Fichiers)', erreur: e };
             if (e.name === 'AbortError') {
-                return { methode: 'annule' };
+                return { methode: 'annule', strategie: 'partage (Enregistrer dans Fichiers)', erreur: e };
             }
-            console.warn('📂 Share API échoué, fallback...', e.message);
         }
     }
 
     // Stratégie 3 : Téléchargement classique (fallback universel)
+    return _telechargerDirectement(blob, nomFichier);
+}
+
+/**
+ * Lot G (#988) : délai avant de libérer l'URL d'un téléchargement direct. Libérée tout de
+ * suite, Safari pouvait ne plus rien avoir à écrire pour un gros fichier (un codex d'environ
+ * 1 Go). Cinq minutes : un délai long, choisi plutôt que `pagehide` pour que la mémoire du
+ * fichier ne reste pas prise toute la séance.
+ */
+var DELAI_LIBERATION_URL_MS = 5 * 60 * 1000;
+
+/**
+ * Stratégie 3 : téléchargement par un lien. Rend `download` : le téléchargement est
+ * LANCÉ ; l'application ne peut pas savoir s'il s'est terminé.
+ */
+function _telechargerDirectement(blob, nomFichier) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
@@ -1305,8 +1344,8 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    return { methode: 'download' };
+    setTimeout(function() { URL.revokeObjectURL(url); }, DELAI_LIBERATION_URL_MS);
+    return { methode: 'download', strategie: 'téléchargement direct' };
 }
 
 /**
@@ -2863,58 +2902,197 @@ async function actionOuvrir() {
  * Si un handle FSAPI est disponible, ré-écrit directement sans dialogue.
  */
 async function actionEnregistrer() {
-    _fermerMenu();
-
-    try {
-        var avaitHandle = !!_fileHandle;
-        var resultat = await genererCodex();
-        // Lot F : aperçu annulé → ni succès, ni « à jour » (avant : « Cannot read
-        // properties of null » affiché comme une erreur).
-        if (!resultat) return;
-        var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier);
-
-        if (sauvegarde.methode === 'annule') return;
-        await _marquerCodexAJour(resultat);
-
-        var methodeLabel = avaitHandle ? 'même fichier' :
-                           sauvegarde.methode === 'fsapi' ? 'fichier choisi' :
-                           sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
-        notifications.succes(
-            'Codex mis à jour',
-            _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
-        );
-    } catch (e) {
-        console.error('📂 Erreur enregistrement codex:', e);
-        notifications.erreur('Erreur', e.message);
-    }
+    await _mettreAJourLeCodex(false);
 }
 
 /**
  * Enregistrer sous... (force le dialogue de destination, même si un handle existe).
  */
 async function actionEnregistrerSous() {
-    _fermerMenu();
+    await _mettreAJourLeCodex(true);
+}
 
+/* ===============================
+   LOT G (#988) — L'ÉCHEC SE DIT, LA CAUSE SE LIT
+   ===============================
+   Le 29 sept., sur l'iPad (codex d'environ 1 Go), « Mettre à jour le codex » n'a écrit
+   aucun fichier et n'a rien dit. Trois règles :
+   1. Seul un refus de l'usager sort sans message : « Annuler » de l'aperçu, ou de la
+      fenêtre de choix de Chrome. Toute autre issue sans fichier dit « Codex non mis à
+      jour » par le témoin commun, qui reste affiché, et propose « Réessayer » (le même
+      fichier, sans le refaire) ou « Télécharger à la place ».
+   2. Un téléchargement direct est LANCÉ, pas vérifié : l'état « à jour » n'est posé que
+      si l'usager dit avoir trouvé le fichier.
+   3. La dernière tentative (heure, étape, taille, stratégie, erreur) est gardée pour le
+      rapport de bug, et survit au rechargement de l'onglet (sessionStorage) : une page
+      tuée pendant la tentative se lit « interrompue ». Rien de personnel : ni nom de
+      fichier, ni contenu.
+   =============================== */
+
+var CLE_TEMOIN_CODEX = '_codex_fichier';
+var CLE_DERNIERE_TENTATIVE = 'labo_codex_derniere_maj_codex';
+var _derniereTentative = null;
+
+function _memoriserTentative() {
+    try { sessionStorage.setItem(CLE_DERNIERE_TENTATIVE, JSON.stringify(_derniereTentative)); }
+    catch (e) { /* stockage de session refusé : la mémoire vive suffit */ }
+}
+
+function _debuterTentative(forcerDialogue) {
+    _derniereTentative = {
+        debut: new Date().toISOString(),
+        geste: forcerDialogue ? 'Enregistrer sous' : 'Mettre à jour le codex',
+        etape: 'début',
+        tailleEstimeeOctets: null,
+        tailleOctets: null,
+        essais: 0,
+        strategie: null,
+        erreur: null,
+        issue: 'en cours',
+        fin: null
+    };
+    _memoriserTentative();
+}
+
+function _noterTentative(champs) {
+    if (!_derniereTentative) return;
+    Object.assign(_derniereTentative, champs);
+    _memoriserTentative();
+}
+
+function _finirTentative(issue, erreur) {
+    var champs = { issue: issue, fin: new Date().toISOString() };
+    if (erreur) champs.erreur = { nom: String(erreur.name || 'Error'), message: String(erreur.message || '').slice(0, 300) };
+    _noterTentative(champs);
+}
+
+/**
+ * La dernière tentative de mise à jour du codex, pour le rapport de bug. Après un
+ * rechargement, relue du stockage de session : restée « en cours », elle a été interrompue.
+ * @returns {Object|null}
+ */
+function derniereTentative() {
+    if (_derniereTentative) return Object.assign({}, _derniereTentative);
     try {
-        var resultat = await genererCodex();
-        // Lot F : aperçu annulé → ni succès, ni « à jour » (avant : « Cannot read
-        // properties of null » affiché comme une erreur).
-        if (!resultat) return;
-        var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier, { forcerDialogue: true });
+        var lu = JSON.parse(sessionStorage.getItem(CLE_DERNIERE_TENTATIVE) || 'null');
+        if (lu && lu.issue === 'en cours') lu.issue = 'interrompue (la page a été rechargée pendant la tentative)';
+        return lu;
+    } catch (e) {
+        return null;
+    }
+}
 
-        if (sauvegarde.methode === 'annule') return;
-        await _marquerCodexAJour(resultat);
+/**
+ * « environ 1,0 Go », « environ 350 Mo » : la taille dite à l'usager.
+ */
+function _formaterTailleEnviron(octets) {
+    var go = 1024 * 1024 * 1024, mo = 1024 * 1024;
+    if (octets >= go) return 'environ ' + (octets / go).toFixed(1).replace('.', ',') + ' Go';
+    if (octets >= mo) return 'environ ' + Math.round(octets / mo) + ' Mo';
+    return 'environ ' + Math.max(1, Math.round(octets / 1024)) + ' Ko';
+}
 
-        var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouveau fichier' :
-                           sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
-        notifications.succes(
-            'Codex mis à jour',
-            _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
-        );
+function _direNonMisAJour(raison) {
+    if (window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(raison, undefined, CLE_TEMOIN_CODEX, 'Codex non mis à jour');
+    }
+}
+
+async function _mettreAJourLeCodex(forcerDialogue) {
+    _fermerMenu();
+    _debuterTentative(forcerDialogue);
+
+    var avaitHandle = !!_fileHandle && !forcerDialogue;
+    var resultat;
+    try {
+        resultat = await genererCodex({ suivreTentative: true });
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
-        notifications.erreur('Erreur', e.message);
+        _finirTentative('échec de la préparation du fichier', e);
+        _direNonMisAJour('le fichier n\'a pas pu être préparé (' + (e && e.message ? e.message : 'erreur inconnue') + '). Tes données restent dans l\'application.');
+        return;
     }
+    // Aperçu refusé par l'usager : la seule sortie sans message.
+    if (!resultat) {
+        _finirTentative('aperçu refusé par l\'usager');
+        return;
+    }
+
+    var taille = _formaterTailleEnviron(resultat.blob.size);
+    var options = { forcerDialogue: forcerDialogue, sansRepli: true };
+    while (true) {
+        _noterTentative({
+            etape: 'enregistrement du fichier',
+            tailleOctets: resultat.blob.size,
+            essais: _derniereTentative.essais + 1,
+            erreur: null
+        });
+        var sauvegarde;
+        try {
+            sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier, options);
+        } catch (e) {
+            console.warn('[Codex] Écriture du fichier échouée : ' + (e && e.name) + ' – ' + (e && e.message));
+            sauvegarde = { methode: 'echec', strategie: 'inconnue', erreur: e };
+        }
+        _noterTentative({ strategie: sauvegarde.strategie || sauvegarde.methode });
+
+        if (sauvegarde.methode === 'annule') {
+            _finirTentative('fenêtre de choix refusée par l\'usager', sauvegarde.erreur);
+            return;
+        }
+
+        var ecrit = sauvegarde.methode === 'fsapi' || sauvegarde.methode === 'share';
+        if (sauvegarde.methode === 'download') {
+            _noterTentative({ etape: 'téléchargement lancé, en attente de l\'usager' });
+            ecrit = await _confirmerTelechargement(resultat.nomFichier, taille);
+            if (!ecrit) console.warn('[Codex] Téléchargement direct : fichier non trouvé par l\'usager.');
+        }
+
+        if (ecrit) {
+            await _marquerCodexAJour(resultat);
+            if (window.temoinEnregistrement) window.temoinEnregistrement.fermerSi(CLE_TEMOIN_CODEX);
+            _finirTentative(sauvegarde.methode === 'download' ? 'téléchargement confirmé par l\'usager' : 'réussie');
+            var methodeLabel = avaitHandle ? 'même fichier' :
+                               sauvegarde.methode === 'fsapi' ? (forcerDialogue ? 'nouveau fichier' : 'fichier choisi') :
+                               sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
+            notifications.succes('Codex mis à jour', _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel);
+            return;
+        }
+
+        // Aucun fichier écrit : le témoin le dit et reste ; le menu garde « pas à jour ».
+        _finirTentative(sauvegarde.methode === 'download' ? 'téléchargement non trouvé par l\'usager' : 'échec de l\'écriture du fichier', sauvegarde.erreur);
+        _direNonMisAJour('le fichier (' + taille + ') n\'a pas été enregistré. Tes données restent dans l\'application.');
+        var geste = await uiDialogues.demanderAction({
+            titre: 'Codex non mis à jour',
+            message: 'Le fichier (' + taille + ') n\'a pas été enregistré. Si ton appareil manque d\'espace, ' +
+                     'libères-en, puis réessaie. Tes données restent dans l\'application.',
+            actions: [
+                { valeur: 'telecharger', texte: 'Télécharger à la place' },
+                { valeur: 'reessayer', texte: 'Réessayer', principal: true }
+            ]
+        });
+        if (geste === 'reessayer') {
+            options = { forcerDialogue: forcerDialogue, sansRepli: true };
+        } else if (geste === 'telecharger') {
+            options = { telechargementDirect: true };
+        } else {
+            return;
+        }
+    }
+}
+
+/**
+ * Règle du téléchargement direct (#988) : l'application ne peut pas savoir s'il s'est
+ * terminé ; c'est l'usager qui le dit. « Il y est » → à jour ; sinon, rien n'est posé.
+ */
+async function _confirmerTelechargement(nomFichier, taille) {
+    return await uiDialogues.confirmerAction({
+        titre: 'Téléchargement lancé',
+        message: 'L\'application ne peut pas savoir si le téléchargement s\'est terminé. ' +
+                 'Vérifie que le fichier « ' + nomFichier + ' » (' + taille + ') est dans tes Téléchargements.',
+        texteConfirmer: 'Il y est',
+        texteAnnuler: 'Il n\'y est pas'
+    }) === true;
 }
 
 /**
@@ -3709,6 +3887,7 @@ window.Codex = {
     toggleMenu: toggleMenu,
     actionOuvrir: actionOuvrir,
     actionEnregistrer: actionEnregistrer,
+    derniereTentative: derniereTentative,
     actionEnregistrerSous: actionEnregistrerSous,
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,

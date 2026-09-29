@@ -8,6 +8,7 @@
  *   const ok = await uiDialogues.confirmerAction({ titre, message, variante });
  *   const saisie = await uiDialogues.demanderSaisie({ titre, message, valeurInitiale });
  *   const valeur = await uiDialogues.demanderChoix({ titre, message, choix, texteConfirmer });
+ *   const geste = await uiDialogues.demanderAction({ titre, message, actions, texteFermer });
  *
  * `confirmerAction` résout `true` (confirmer) / `false` (annuler, Échap, clic dehors).
  * `demanderSaisie`  résout la chaîne saisie / `null` (annuler, Échap, clic dehors)
@@ -340,6 +341,61 @@
         });
     }
 
+    /**
+     * Lot G (#988, 29 sept. 2026) : un message et PLUSIEURS gestes nommés, plus « Fermer »
+     * (codex non mis à jour : « Réessayer » · « Télécharger à la place »). Fermer, Échap et
+     * le clic dehors ne font rien : aucun geste n'est choisi à la place de l'usager.
+     * @param {object} options
+     * @param {string} [options.titre]
+     * @param {string} [options.message]
+     * @param {Array<{valeur:string, texte:string, principal?:boolean}>} options.actions
+     * @param {string} [options.texteFermer] Libellé du bouton qui ne fait rien (défaut « Fermer »).
+     * @returns {Promise<string|null>} la valeur du geste choisi, ou null.
+     */
+    function demanderAction(options) {
+        options = options || {};
+        const actions = Array.isArray(options.actions) ? options.actions : [];
+        return new Promise(function (resolve) {
+            const focusPrecedent = (typeof document !== 'undefined' && document.activeElement) || null;
+            const base = _construireBase(options);
+
+            if (options.message) base.section.appendChild(_creer('p', { texte: options.message }));
+
+            let termine = false;
+            function repondre(valeur) {
+                if (termine) return;
+                termine = true;
+                document.removeEventListener('keydown', surTouche, true);
+                if (base.overlay && base.overlay.remove) base.overlay.remove();
+                _rendreFocus(focusPrecedent);
+                resolve(valeur);
+            }
+            function surTouche(e) {
+                if (e.key === 'Escape') { e.preventDefault(); repondre(null); }
+            }
+
+            const btnFermer = _creer('button', { className: 'btn btn-neutre', texte: options.texteFermer || 'Fermer' });
+            btnFermer.addEventListener('click', function () { repondre(null); });
+            base.actions.appendChild(btnFermer);
+            let premierPrincipal = null;
+            actions.forEach(function (a) {
+                const btn = _creer('button', {
+                    className: 'btn ' + (a.principal ? 'btn-principal' : 'btn-neutre'),
+                    texte: a.texte,
+                    attrs: { 'data-valeur': String(a.valeur) }
+                });
+                btn.addEventListener('click', function () { repondre(String(a.valeur)); });
+                base.actions.appendChild(btn);
+                if (a.principal && !premierPrincipal) premierPrincipal = btn;
+            });
+            base.overlay.addEventListener('click', function (e) { if (e.target === base.overlay) repondre(null); });
+            document.addEventListener('keydown', surTouche, true);
+
+            document.body.appendChild(base.overlay);
+            _rendreFocus(premierPrincipal || btnFermer);
+        });
+    }
+
     /* ─────────────────────────────────────────────────────────────────────────
      * Lot E1 de l'enregistrement (D0 point 4, D3 — 27 sept. 2026) : « Créer
      * quelque chose de neuf : un bouton qui nomme le geste. Tant qu'on n'a pas
@@ -418,6 +474,7 @@
         demanderSaisie: demanderSaisie,
         informer: informer,
         demanderChoix: demanderChoix,
+        demanderAction: demanderAction,
         declarerFicheEnCreation: declarerFicheEnCreation,
         quitterCreationSiConfirme: quitterCreationSiConfirme
     };

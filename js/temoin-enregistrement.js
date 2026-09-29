@@ -14,7 +14,7 @@
 // `window.signalerEcritureUsager(cle)` émet le même événement, sans rien afficher, pour
 // les gestes qui écrivent hors du témoin commun.
 //
-// API : window.temoinEnregistrement.{ enregistre, nonEnregistre, fermer }
+// API : window.temoinEnregistrement.{ enregistre, nonEnregistre, fermer, fermerSi }
 //   enregistre(cle)                   → « Enregistré », discret, s'efface seul ;
 //                                       retire le « Non enregistré » affiché
 //                                       SEULEMENT s'il porte la même clé.
@@ -29,6 +29,12 @@
 //                                       petite qui réussit juste après — l'échec
 //                                       partait avant d'avoir été lu).
 //   fermer()                          → retire le « Non enregistré » (bouton Fermer).
+//   fermerSi(cle)                     → le retire SEULEMENT s'il porte cette clé, sans
+//                                       rien annoncer (lot G : le codex écrit, son
+//                                       échec s'efface ; `enregistre` dirait « pas à jour »).
+//
+// Lot G (#988) : `nonEnregistre` prend un 4ᵉ argument, le verdict, quand l'échec n'est
+// pas celui d'une écriture dans l'application : « Codex non mis à jour : ‹raison› ».
 //
 // UN SEUL NŒUD : `#temoin-enregistrement`, posé au premier appel et retrouvé par
 // son id ensuite. Deux régions vivantes dedans, parce qu'un même nœud ne peut
@@ -110,16 +116,17 @@
         minuterieEnregistre = setTimeout(() => succes.classList.remove('visible'), DUREE_ENREGISTRE_MS);
     }
 
-    function nonEnregistre(raison, geste, cle) {
+    function nonEnregistre(raison, geste, cle, verdict) {
         if (!document.body) return;
         const temoin = _noeud();
         cleEchec = cle === undefined ? '' : cle;
         clearTimeout(minuterieEnregistre);
         temoin.querySelector('.temoin-enregistrement-succes').classList.remove('visible');
         const echec = temoin.querySelector('.temoin-enregistrement-echec');
+        const debut = verdict ? String(verdict) : 'Non enregistré';
         echec.querySelector('.temoin-enregistrement-echec-texte').textContent = geste
-            ? 'Non enregistré – ' + String(geste) + ' : ' + String(raison)
-            : 'Non enregistré : ' + String(raison);
+            ? debut + ' – ' + String(geste) + ' : ' + String(raison)
+            : debut + ' : ' + String(raison);
         echec.classList.add('visible');
     }
 
@@ -132,7 +139,11 @@
         echec.querySelector('.temoin-enregistrement-echec-texte').textContent = '';
     }
 
-    window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec };
+    function fermerSi(cle) {
+        if (cleEchec !== null && cle === cleEchec) fermerEchec();
+    }
+
+    window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec, fermerSi };
 
     /**
      * Lot F (relecture de Cowork, 29 sept.) : un geste de l'usager qui écrit en `db` DIRECT,
