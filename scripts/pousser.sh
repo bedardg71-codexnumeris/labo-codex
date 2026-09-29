@@ -57,7 +57,7 @@ set -eu
 #   pèse sur le disque, et l'application se charge par file://. La charge moyenne la voit
 #   monter (93 ce jour-là), mais rien ne prouve que ce seuil-ci la juge bien.
 # ⚠ La garde juge le LANCEMENT, pas la durée du verdict : une charge qui arrive pendant
-#   les ~15 min de la suite n'est pas vue.
+#   les ~45 min de la suite n'est pas vue (#987 : mesure du 29 sept.).
 #
 # Les trois variables LABO_* servent à la sentinelle et à la démonstration sous charge
 # fabriquée. Lever le seuil pour forcer un lancement est un geste explicite, jamais un défaut.
@@ -122,7 +122,7 @@ if [ $LANCER -eq 1 ]; then
         exit 3
     fi
 
-    printf "${VERT}→ Sentinelle Playwright, AVANT d'ouvrir la connexion (~15 min)...${RAZ}\n"
+    printf "${VERT}→ Sentinelle Playwright, AVANT d'ouvrir la connexion (~45 min)...${RAZ}\n"
     # Le script dépose son verdict dans scripts/.verdict-playwright.json ; le
     # hook pré-push le lira. `set -e` ne doit pas tuer le script sur un code
     # non nul : c'est nous qui décidons quoi en faire.
