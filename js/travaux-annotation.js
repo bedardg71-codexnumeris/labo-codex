@@ -129,12 +129,15 @@
 
         // Sauvegarder les annotations ET flusher l'évaluation avant rechargement/fermeture
         window.addEventListener('beforeunload', () => {
+            const traitEnAttente = !!timerSauvegarde;
             if (timerSauvegarde) {
                 clearTimeout(timerSauvegarde);
                 timerSauvegarde = null;
             }
             if (annotationActive && annotationCourante) {
-                sauvegarderAnnotation();
+                // Lot F : un geste n'est signalé au codex que s'il restait un trait en
+                // attente ; sinon, la même écriture, discrète (rien n'a changé).
+                sauvegarderAnnotation(traitEnAttente ? undefined : { discret: true });
             }
             // Flusher l'auto-save évaluation en attente
             if (typeof window._flusherAutoSave === 'function') {
@@ -267,12 +270,14 @@
         if (!annotationActive) return;
 
         // Flush du debounce en attente avant sauvegarde finale
+        const traitEnAttente = !!timerSauvegarde;
         if (timerSauvegarde) {
             clearTimeout(timerSauvegarde);
             timerSauvegarde = null;
         }
 
-        sauvegarderAnnotation();
+        // Lot F : signalé au codex seulement s'il restait un trait en attente.
+        sauvegarderAnnotation(traitEnAttente ? undefined : { discret: true });
         detacherEvenements();
         annotationActive = false;
 
@@ -3231,12 +3236,14 @@
 
     /**
      * Sauvegarde l'annotation courante
+     * @param {{discret?: boolean}} [options] - `discret` : réécriture sans trait neuf, que
+     *   le codex n'a pas à apprendre (lot F, voir travaux-stockage `_signalerSiGeste`)
      */
-    function sauvegarderAnnotation() {
+    function sauvegarderAnnotation(options) {
         if (!annotationCourante) return;
 
         annotationCourante.dateModification = new Date().toISOString();
-        travauxStockage.sauvegarderAnnotationFichier(annotationCourante);
+        travauxStockage.sauvegarderAnnotationFichier(annotationCourante, options);
     }
 
     /**

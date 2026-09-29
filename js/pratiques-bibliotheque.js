@@ -359,7 +359,7 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
     // concurrents du même item passaient tous les deux, et la bibliothèque
     // partagée gardait un doublon que rien ne signalait.
     let dejaPresente = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
         const bibliotheque = lues || [];
 
         const existe = bibliotheque.some(p => p.id === configSafe.id);
@@ -381,6 +381,7 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
         bibliotheque.push(configBiblio);
         return bibliotheque;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (ajouterPratiqueALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -431,7 +432,7 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
     // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
         const bibliotheque = lues || [];
         const restants = bibliotheque.filter(p => p.id !== configId);
 
@@ -441,6 +442,7 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
         retiree = true;
         return restants;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (retirerPratiqueDeLaBibliotheque)
 
     if (!retiree) {
         return false;

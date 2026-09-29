@@ -43,10 +43,17 @@
      * Écriture interne unique. Tout chemin d'écriture du module passe ici.
      * Clé en littéral (pas via CLE) : la sentinelle SSOT greppe le littéral
      * pour repérer les écrivains — celui-ci doit être le seul visible.
+     * Lot F (D4) : les gestes (objectifs, grille de conversion, types de travaux) écrivent
+     * ici, hors du témoin commun ; ce point le dit au codex. La migration, l'ouverture et
+     * le mode démo passent `{ discret: true }`.
      * @param {object} modalites
+     * @param {{discret?: boolean}} [options]
      */
-    function _ecrire(modalites) {
+    function _ecrire(modalites, options) {
         db.setSync(cle('modalitesEvaluation'), modalites);
+        if (!(options && options.discret) && window.signalerEcritureUsager) {
+            window.signalerEcritureUsager(cle('modalitesEvaluation'));
+        }
     }
 
     /**
@@ -55,12 +62,13 @@
      * (affectations, `delete`, sections imbriquées) ; l'objet est ensuite
      * réécrit d'un bloc.
      * @param {function(object): void} mutateur
+     * @param {{discret?: boolean}} [options] - voir _ecrire
      * @returns {object} l'objet modalités après écriture
      */
-    function modifier(mutateur) {
+    function modifier(mutateur, options) {
         const modalites = lire();
         if (typeof mutateur === 'function') mutateur(modalites);
-        _ecrire(modalites);
+        _ecrire(modalites, options);
         return modalites;
     }
 
@@ -69,11 +77,12 @@
      * bascule/restauration du mode démo). Refuse les valeurs non-objet
      * pour ne jamais stocker null/undefined à la place de la config.
      * @param {object} objet
+     * @param {{discret?: boolean}} [options] - voir _ecrire
      * @returns {boolean} vrai si écrit
      */
-    function remplacer(objet) {
+    function remplacer(objet, options) {
         if (!objet || typeof objet !== 'object') return false;
-        _ecrire(objet);
+        _ecrire(objet, options);
         return true;
     }
 

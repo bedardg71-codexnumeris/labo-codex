@@ -123,6 +123,7 @@
             date: (saisie && saisie.date) || _aujourdhui()
         };
         db.setSync(cle(CLE_JUGEMENTS), tout);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle(CLE_JUGEMENTS));   // lot F : geste hors témoin (ecrireJugementDenotation)
         return true;
     }
 

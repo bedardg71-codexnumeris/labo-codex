@@ -253,7 +253,7 @@
                     grilleConversion: modalites.comptageObjectifs.grilleConversion || {}
                 }
             };
-            window.modalitesEvaluation.remplacer(modalites);
+            window.modalitesEvaluation.remplacer(modalites, { discret: true });   // migration à l'ouverture (lot F)
         }
 
         const config = modalites.parObjectifs || CONFIG_PAR_OBJECTIFS_DEFAUT;

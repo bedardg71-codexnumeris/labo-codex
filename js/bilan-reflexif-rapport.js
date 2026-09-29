@@ -659,6 +659,7 @@ function detruireGraphiques() {
 function supprimerResultats() {
     etat.resultats = null;
     db.removeSync(CLE_RESULTATS());
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_RESULTATS());   // lot F : geste hors témoin (supprimer les résultats)
     detruireGraphiques();
     BilanReflexif.rendreInterface();
     BilanReflexif.afficherVue('editeur');

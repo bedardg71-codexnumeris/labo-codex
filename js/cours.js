@@ -394,6 +394,7 @@ async function retirerCoursDeBibliotheque(id) {
         cours[coursIndex].actif = false; // Un cours retiré ne peut plus être actif
 
         await db.set('cours', cours);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('cours');   // lot F : geste hors témoin (retirer un cours de ma sélection)
         fermerModalBibliothequeCours();
         alert('Cours retiré de ta sélection');
     }
@@ -540,6 +541,7 @@ async function supprimerFicheCoursAvecGarde(coursId) {
     for (const r of plan.refs) { await db.set(r.cle, r.garde); }
     const magasin = db.getSync('cours', []) || [];
     db.setSync('cours', magasin.filter(c => !(c && c.id === coursId)));
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager('cours');   // lot F : geste hors témoin (supprimer une fiche de cours)
     if (plan.pointeurVise) db.setSync('infoCours', null); // security-ok: remise à null, aucune donnée externe
     if (typeof db.flush === 'function') { try { await db.flush(); } catch (e) { /* durabilité best-effort */ } }
     return true;
@@ -570,6 +572,7 @@ async function ajouterCoursIndividuel(id) {
         cours[coursIndex].dansBibliotheque = true;
 
         await db.set('cours', cours);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('cours');   // lot F : geste hors témoin (ajouter un cours à ma sélection)
         fermerModalBibliothequeCours();
         alert('Cours ajouté à ta sélection avec succès !');
     }
@@ -696,6 +699,7 @@ async function importerCoursSimple(eventOuEl) {
 
             if (nbAjoutes > 0) {
                 await db.set('cours', coursExistants);
+                if (window.signalerEcritureUsager) window.signalerEcritureUsager('cours');   // lot F : geste hors témoin (importer des cours)
             }
 
             // Message récapitulatif
@@ -766,6 +770,7 @@ async function partagerCours(id) {
 
         // Sauvegarder
         await db.set('cours', cours);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('cours');   // lot F : geste hors témoin (déposer un cours)
 
         // Rafraîchir modal
         fermerModalBibliothequeCours();

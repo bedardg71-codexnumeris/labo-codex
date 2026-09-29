@@ -5,13 +5,14 @@
 // témoin, le même partout, dit « Enregistré » après chaque écriture. Si
 // l'écriture échoue, il dit « Non enregistré », avec la raison. »
 //
-// Qui le fait parler : `sauvegarderDonneesSelonMode` (`modes.js`), et elle seule.
-// Un écrivain n'appelle pas ce module : il passe par la fonction centrale, qui
-// dit le succès comme l'échec. Les 384 `db.setSync` directs n'ont PAS le témoin
-// (ils l'auront avec leur écran, lots C à E).
+// Qui le fait parler : `sauvegarderDonneesSelonMode`, `modifierEtAnnoncer` et
+// `ecrireEtAnnoncer` (`modes.js`). Un écrivain n'appelle pas `enregistre` lui-même :
+// il passe par ces fonctions, qui disent le succès comme l'échec.
 //
 // Lot F (D4) : `enregistre` émet aussi l'événement `donnees-enregistrees` ({ cle }),
 // écouté par le codex pour savoir que le fichier n'a plus les derniers changements.
+// `window.signalerEcritureUsager(cle)` émet le même événement, sans rien afficher, pour
+// les gestes qui écrivent hors du témoin commun.
 //
 // API : window.temoinEnregistrement.{ enregistre, nonEnregistre, fermer }
 //   enregistre(cle)                   → « Enregistré », discret, s'efface seul ;
@@ -87,11 +88,18 @@
         return temoin;
     }
 
-    function enregistre(cle) {
-        // Lot F (D4) : une écriture réussie de l'usager rend le codex « pas à jour ».
-        // Le témoin l'annonce par un événement ; `codex.js` l'écoute (un seul point
-        // d'accroche, et ce module ne connaît pas le codex).
+    /**
+     * Lot F (D4) : une écriture réussie de l'usager rend le codex « pas à jour ». Le
+     * témoin l'annonce par un événement ; `codex.js` l'écoute (un seul point d'accroche,
+     * et ce module ne connaît pas le codex). Appelé par `enregistre`, et directement par
+     * les gestes qui écrivent HORS du témoin commun (`signalerEcritureUsager`).
+     */
+    function annoncerEcriture(cle) {
         window.dispatchEvent(new CustomEvent('donnees-enregistrees', { detail: { cle: cle } }));
+    }
+
+    function enregistre(cle) {
+        annoncerEcriture(cle);
         if (!document.body) return;
         const temoin = _noeud();
         if (cleEchec !== null && cle === cleEchec) fermerEchec();
@@ -125,6 +133,16 @@
     }
 
     window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec };
+
+    /**
+     * Lot F (relecture de Cowork, 29 sept.) : un geste de l'usager qui écrit en `db` DIRECT,
+     * hors de `sauvegarderDonneesSelonMode` / `modifierEtAnnoncer` / `ecrireEtAnnoncer`,
+     * le dit ici, après son écriture réussie. Le codex apprend qu'une donnée a changé ;
+     * l'écran ne change pas (aucun « Enregistré » affiché : ce serait étendre D0, une
+     * décision de Grégoire). Les écritures de la machine (démarrage, migration, recalcul)
+     * ne l'appellent pas.
+     */
+    window.signalerEcritureUsager = function (cle) { annoncerEcriture(cle); };
 
     /**
      * Lot E1 (D3) — une raison écrite comme une phrase (« Le nom du critère est

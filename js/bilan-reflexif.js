@@ -60,7 +60,7 @@ function initialiserBilanReflexif() {
         etat.questionnaire = qSauve;
     } else {
         etat.questionnaire = BILAN_REFLEXIF_DATA.creerQuestionnaireDemoComplet();
-        sauvegarderQuestionnaire();
+        sauvegarderQuestionnaire({ discret: true });   // ouverture (lot F)
     }
 
     // Charger le parcours existant ou créer un vide
@@ -70,11 +70,11 @@ function initialiserBilanReflexif() {
         // Migration : ajouter questionsParActivite si absent (parcours créés avant la refonte)
         if (!etat.parcours.questionsParActivite) {
             etat.parcours.questionsParActivite = JSON.parse(JSON.stringify(BILAN_REFLEXIF_DATA.QUESTIONS_PAR_ACTIVITE_DEFAUT));
-            sauvegarderParcours();
+            sauvegarderParcours({ discret: true });   // migration (lot F)
         }
     } else {
         etat.parcours = BILAN_REFLEXIF_DATA.creerParcoursVide();
-        sauvegarderParcours();
+        sauvegarderParcours({ discret: true });   // ouverture (lot F)
     }
 
     // Charger l'auto-réflexion existante ou en créer une
