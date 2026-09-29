@@ -21,11 +21,12 @@
 
     var CHANGELOG = [
         {
-            // 1.169.0 (lot G, #988) — la ligne est le texte 6 ACCEPTÉ par Grégoire le 29 sept. 2026
-            // (réponse relue avec Cowork) ; le titre est proposé par Claude Code, à valider.
+            // 1.169 (lot G, #988) — la ligne est le texte 6 ACCEPTÉ par Grégoire le 29 sept. 2026
+            // (réponse relue avec Cowork). Titre retenu par Grégoire (1.169.1) : le codex se « met à
+            // jour » ; « enregistré » veut seulement dire écrit dans l'application (D4, 26 sept.).
             version: '1.169',
             couleur: 'orange',
-            titre: 'Le codex dit quand il n\'a pas pu s\'enregistrer',
+            titre: 'Le codex dit quand il n\'a pas pu être mis à jour',
             items: [
                 'Si «&nbsp;Mettre à jour le codex&nbsp;» n\'arrive pas à enregistrer le fichier, l\'application le dit maintenant, avec sa taille, et te propose de réessayer ou de le télécharger à la place. Après un téléchargement, c\'est toi qui confirmes que le fichier est bien là.'
             ]
