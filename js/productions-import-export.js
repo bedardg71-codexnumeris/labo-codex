@@ -431,7 +431,7 @@ window.confirmerImportProductions = async function(donnees) {
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
 
-        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+        const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
@@ -450,6 +450,7 @@ window.confirmerImportProductions = async function(donnees) {
 
             return bibliotheque;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportProductions)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeProductions')) {
