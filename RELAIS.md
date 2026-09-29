@@ -11,13 +11,13 @@
 
 **Où vit le travail** : branche locale `lot-f-les-mots` (non poussée), partie de `main` = `053d96cb` (1.167.0) : l'étape 1 (le témoin du codex), l'automatique retiré (décision de Grégoire), les mots (D4), les gestes hors témoin raccordés (décision de Cowork), la demande finale. **Aucune release.**
 
-⚠ **Deux fichiers modifiés, NON commités, rangés dans un `git stash`** (« lot F : import-export et cc-license en attente de la suite complète ») : `js/import-export.js` (trois textes) et `js/cc-license.js` (un bouton, un raccord). Règle de sécurité de CLAUDE.md : `npm test` complet avant leur commit. **Reprendre par `git switch lot-f-les-mots && git stash pop`.** Sans eux, `sentinelle-lot-F-gestes-hors-temoin` rougit sur `cc-license.js` (1 raccord attendu).
+⚠ **Deux fichiers modifiés, NON commités, dans l'arbre de travail de la branche `lot-f-les-mots`** : `js/import-export.js` (trois textes) et `js/cc-license.js` (un bouton, un raccord). Règle de sécurité de CLAUDE.md : `npm test` complet avant leur commit. Ne pas les perdre en changeant de branche (`git status` d'abord). Sans eux, `sentinelle-lot-F-gestes-hors-temoin` rougit sur `cc-license.js` (1 raccord attendu).
 
 **À lire** : `plans de travail/DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots.md` (tableau des 112 textes, arbitrages, question du stock pour Grégoire, Nouvelles proposées) et son annexe `INVENTAIRE-2026-09-29-lot-F-ecritures-hors-temoin.md`.
 
 **Mesuré** : Vitest 661 fichiers, 7 756/7 756 (arbre complet, stash compris) ; bancs WebKit du lot 9/9 ; mutations 13/13 rouges. Fiche neuve : #981.
 
-**Reste, dans l'ordre** : relecture croisée de Cowork → mots, stock et Nouvelles acceptés par Grégoire → `git stash pop`, suite complète (Cowork et navigateurs fermés), commit des deux fichiers → release `minor` → verdict WebKit complet → fusion → push → porte terrain. La porte terrain de E3 reste à passer ; garder la branche `lot-e3-productions-interventions` jusqu'à son verdict.
+**Reste, dans l'ordre** : relecture croisée de Cowork → mots, stock et Nouvelles acceptés par Grégoire → suite complète (Cowork et navigateurs fermés), commit des deux fichiers → release `minor` → verdict WebKit complet → fusion → push → porte terrain. La porte terrain de E3 reste à passer ; garder la branche `lot-e3-productions-interventions` jusqu'à son verdict.
 
 ## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 22 H 30 : **LOT F OUVERT SUR LA BRANCHE `lot-f-les-mots` (arbre principal), ÉTAPE 1 FAITE, NON FUSIONNÉE ; ARRÊT : QUESTION DE L'AUTOMATIQUE À GRÉGOIRE** — lire `git log main..lot-f-les-mots`
 
