@@ -31,7 +31,9 @@ Un seul parcours pour « Mettre à jour le codex » et « Enregistrer sous » (`
 
 **En une phrase : l'application ne peut pas savoir si un téléchargement s'est terminé ; le codex n'est dit « à jour » que si tu confirmes avoir trouvé le fichier.** Elle vaut aussi pour les navigateurs sans partage ni fenêtre de choix (Firefox), qui passaient par ce chemin et se disaient « à jour » sans rien savoir.
 
-## 4 · Mots d'écran, à faire accepter par Grégoire avant la release
+## 4 · Mots d'écran — **tranchés par Grégoire (réponse relue avec Cowork, 29 sept.)**
+
+> Règle du § 3 acceptée. Textes 1, 2 et 6 acceptés tels quels ; 3, 4 et 5 remplacés, appliqués au commit suivant (voir § 8). Ci-dessous, la version d'origine, pour la trace.
 
 1. Modale d'échec — titre « Codex non mis à jour » ; texte « Le fichier (environ ‹taille›) n'a pas été enregistré. Si ton appareil manque d'espace, libères-en, puis réessaie. Tes données restent dans l'application. » ; boutons « Fermer » · « Télécharger à la place » · « Réessayer » (Cowork, mot pour mot ; « Fermer » ajouté : sortir sans geste).
 2. Témoin commun — « Codex non mis à jour : le fichier (environ ‹taille›) n'a pas été enregistré. Tes données restent dans l'application. »
@@ -42,7 +44,15 @@ Un seul parcours pour « Mettre à jour le codex » et « Enregistrer sous » (`
 
 Format de taille : « environ 1,0 Go », « environ 350 Mo », « environ 12 Ko ».
 
-## 5 · Preuves
+## 8 · Après la réponse de Grégoire (second commit)
+
+- **Texte 3** : « Codex non mis à jour : le fichier n'a pas pu être préparé. Tes données restent dans l'application. Si ça se répète, utilise « Signaler un bug » : le détail y sera. » Le message du navigateur n'est plus à l'écran ; il est dans la section du rapport (`Erreur: ‹nom› – ‹message›`), vérifié au banc.
+- **Texte 4** : accordé au nombre, dans l'aperçu (« 1 fichier ou dossier à inclure », « ‹N› fichiers ou dossiers à inclure » ; vaut aussi pour l'aperçu de l'archive, même fonction) et dans la barre de progression (« 0 fichier », « 1 fichier », « ‹N› fichiers » : `_nombreDeFichiers`).
+- **Texte 5** : « L'application ne peut pas savoir si le téléchargement s'est terminé. Attends qu'il le soit, puis vérifie que le fichier « ‹nom› » (environ ‹taille›) se trouve dans tes Téléchargements. »
+- **« Toute réponse autre que « Il y est » »** : mesuré, c'était déjà le comportement du premier commit. `_confirmerTelechargement` rend `false` sans rien dire, mais son appelant passe alors au bloc d'échec : témoin du texte 2 (qui reste), issue « téléchargement non trouvé par l'usager » au rapport, et la modale d'échec **réaffichée** (« Réessayer » · « Télécharger à la place »). Le banc l'affirmait pour « Il n'y est pas » ; **ajouté : Échap**. Mutation M9 (« Il n'y est pas » redevenu muet) : rouge.
+- Banc : 3 essais (ajouté : préparation échouée, aperçu réel accordé à 1 et à 3, progression sans « (s) »). **Mutations : 12 / 12 rouges** (M10 message du navigateur remis à l'écran ; M11 aperçu remis en « (s) » ; M12 progression remise en « (s) »).
+
+## 5 · Preuves (premier commit)
 
 - Banc WebKit `tests/integration/lot-g-codex-ipad-echec-se-dit.spec.js`, 2 essais verts : aperçu refusé (seul muet) ; partage `AbortError`, puis « Réessayer » → `NotAllowedError`, puis réussi (même fichier, aucune nouvelle génération) ; « Télécharger à la place » (URL non libérée, rien de posé avant la réponse, « Il n'y est pas » puis « Il y est ») ; « Fermer » ; page rechargée pendant la tentative → « interrompue ». Pour chaque cas : message, état du menu, section du rapport lue par la vraie fenêtre « Signaler un bug ».
 - **Mutations, 8 / 8 rouges**, arbre restauré par copie et empreinte : sortie muette remise ; `revokeObjectURL` immédiat ; « à jour » posé sur un échec ; « à jour » posé après téléchargement sans demander ; section du rapport retirée ; témoin non effacé après réussite ; tentative non gardée au rechargement ; « Réessayer » qui regénère le fichier.

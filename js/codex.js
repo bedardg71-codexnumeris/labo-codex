@@ -468,12 +468,12 @@ async function genererCodex(options = {}) {
         }
         // Recréer l'overlay pour la phase compression (peut être longue).
         _afficherProgression('Génération du codex');
-        _prog(70, 'Compression du ZIP…', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
+        _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
     }
 
     // 5. Générer le blob ZIP
     if (options.suivreTentative) _noterTentative({ etape: 'compression' });
-    _prog(70, 'Compression du ZIP…', nbBlobs + ' fichier(s), ' + _formaterTaille(tailleTotale));
+    _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
     const zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
         function(meta) {
@@ -2982,6 +2982,11 @@ function derniereTentative() {
     }
 }
 
+/** « 1 fichier », « 12 fichiers » (mots de Grégoire, 29 sept. : plus de « (s) »). */
+function _nombreDeFichiers(n) {
+    return n + (n > 1 ? ' fichiers' : ' fichier');
+}
+
 /**
  * « environ 1,0 Go », « environ 350 Mo » : la taille dite à l'usager.
  */
@@ -3009,7 +3014,9 @@ async function _mettreAJourLeCodex(forcerDialogue) {
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
         _finirTentative('échec de la préparation du fichier', e);
-        _direNonMisAJour('le fichier n\'a pas pu être préparé (' + (e && e.message ? e.message : 'erreur inconnue') + '). Tes données restent dans l\'application.');
+        // Le message du navigateur reste dans la tentative (rapport de bug), pas à l'écran.
+        _direNonMisAJour('le fichier n\'a pas pu être préparé. Tes données restent dans l\'application. ' +
+                         'Si ça se répète, utilise « Signaler un bug » : le détail y sera.');
         return;
     }
     // Aperçu refusé par l'usager : la seule sortie sans message.
@@ -3089,7 +3096,8 @@ async function _confirmerTelechargement(nomFichier, taille) {
     return await uiDialogues.confirmerAction({
         titre: 'Téléchargement lancé',
         message: 'L\'application ne peut pas savoir si le téléchargement s\'est terminé. ' +
-                 'Vérifie que le fichier « ' + nomFichier + ' » (' + taille + ') est dans tes Téléchargements.',
+                 'Attends qu\'il le soit, puis vérifie que le fichier « ' + nomFichier + ' » (' + taille + ') ' +
+                 'se trouve dans tes Téléchargements.',
         texteConfirmer: 'Il y est',
         texteAnnuler: 'Il n\'y est pas'
     }) === true;
