@@ -2,7 +2,7 @@
 
 > Écrite le 29 septembre 2026 par Claude Code, sur la branche `lot-f-les-mots` (partie de `main` = `053d96cb`, 1.167.0). Consigne : `plans de travail/CONSIGNE-DU-JOUR.md`. Réponse d'étape de Cowork : `RELECTURE-2026-09-29-lot-F-etape-1.md` (non suivie, sur `main`). Compte rendu d'étape : `DEMANDE-RELECTURE-2026-09-28-lot-F-etape-1.md`. **Aucune release, aucun push.** Relecture croisée de Cowork exigée avant la fusion ; puis les mots et les Nouvelles vont à Grégoire.
 
-Commits : `5a6831a3` consigne · `1393e54a` étape 1 (le témoin) · `6ddc20b8` l'automatique retiré · `1ec9ea09` les mots · `0241d8ea` les gestes hors témoin · (ce commit) la demande, #981, le banc de placement.
+Commits : `5a6831a3` consigne · `1393e54a` étape 1 (le témoin) · `6ddc20b8` l'automatique retiré · `1ec9ea09` les mots · `0241d8ea` les gestes hors témoin · `7d277ee0` la demande, #981, le banc de placement · `31cf4efc` un raccord oublié par le commit des gestes (`productions-import-export.js`, écarté par un filtre trop large sur « import-export.js »).
 
 ⚠ **Deux fichiers modifiés, pas encore commités** : `js/import-export.js` (trois textes de l'import, lignes 51 à 53 du tableau § 3) et `js/cc-license.js` (le bouton « Enregistrer », un raccord). CLAUDE.md exige `cd tests && npm test` (Vitest et Playwright) avant tout commit qui les touche : ils partent avec la suite complète, qui demande Cowork, Chrome, Safari et GitHub Desktop fermés. Ils sont lisibles dans l'arbre de travail.
 
