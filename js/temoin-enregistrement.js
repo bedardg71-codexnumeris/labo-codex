@@ -10,6 +10,9 @@
 // dit le succès comme l'échec. Les 384 `db.setSync` directs n'ont PAS le témoin
 // (ils l'auront avec leur écran, lots C à E).
 //
+// Lot F (D4) : `enregistre` émet aussi l'événement `donnees-enregistrees` ({ cle }),
+// écouté par le codex pour savoir que le fichier n'a plus les derniers changements.
+//
 // API : window.temoinEnregistrement.{ enregistre, nonEnregistre, fermer }
 //   enregistre(cle)                   → « Enregistré », discret, s'efface seul ;
 //                                       retire le « Non enregistré » affiché
@@ -85,6 +88,10 @@
     }
 
     function enregistre(cle) {
+        // Lot F (D4) : une écriture réussie de l'usager rend le codex « pas à jour ».
+        // Le témoin l'annonce par un événement ; `codex.js` l'écoute (un seul point
+        // d'accroche, et ce module ne connaît pas le codex).
+        window.dispatchEvent(new CustomEvent('donnees-enregistrees', { detail: { cle: cle } }));
         if (!document.body) return;
         const temoin = _noeud();
         if (cleEchec !== null && cle === cleEchec) fermerEchec();
