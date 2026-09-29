@@ -2990,6 +2990,7 @@ function _nombreDeFichiers(n) {
 /**
  * « environ 1,0 Go », « environ 350 Mo » : la taille dite à l'usager.
  */
+// Juste sous 1 Go, peut dire « environ 1024 Mo » : cosmétique, sans suite (relecture de Cowork, lot G, issue 3).
 function _formaterTailleEnviron(octets) {
     var go = 1024 * 1024 * 1024, mo = 1024 * 1024;
     if (octets >= go) return 'environ ' + (octets / go).toFixed(1).replace('.', ',') + ' Go';

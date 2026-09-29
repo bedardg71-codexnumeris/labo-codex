@@ -10,7 +10,7 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page. | **1.168.0**. Un autre numéro : arrête-toi. |
+| 0.1 | Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page. | **1.168.0**, ou **1.169.0** à la reprise après le lot G (#988). Un autre numéro : arrête-toi. |
 
 ## §1 · Mettre ton codex à jour `iPad` `⚠⚠ Données`
 
@@ -19,7 +19,7 @@
 | | Geste | Attendu |
 |---|---|---|
 | 1.1 | Bouton « Codex » (en haut à gauche) ; lis la ligne sous le nom du codex. **Champ de constat.** | « Ton codex n'a pas tes derniers changements », pastille orange (marque du premier lancement, `_marquerStockAvantLotF`). « Aucun codex actif » : le noter, le reste ne s'applique pas sur cet iPad. |
-| 1.2 | « Mettre à jour le codex » (sous-texte « Télécharge un nouveau fichier ») ; aperçu « Télécharger » ; « Enregistrer dans Fichiers ». | « Codex mis à jour » ; le menu dit « Ton codex est à jour », pastille verte. |
+| 1.2 | « Mettre à jour le codex » (sous-texte « Télécharge un nouveau fichier ») ; aperçu « Télécharger » ; « Enregistrer dans Fichiers ». | « Codex mis à jour » ; le menu dit « Ton codex est à jour », pastille verte. **Depuis 1.169.0 (lot G, #988)**, si ça échoue : « Codex non mis à jour » (en bas à gauche, reste affiché) et une fenêtre « Réessayer » · « Télécharger à la place » ; faire alors « Signaler un bug » et verser le rapport (section « DERNIÈRE MISE À JOUR DU CODEX »). **Champ de constat (réserve de Cowork, issue 2)** : si la page s'est rechargée seule pendant la mise à jour, le rapport de bug dit-il « interrompue » ou « Aucune tentative dans cet onglet » ? Les deux réponses renseignent : la seconde veut dire que la trace se perd dans le cas même qu'on cherche à lire (un onglet tué par manque de mémoire n'est pas mesuré ; seul un rechargement l'est). |
 | 1.3 | App Fichiers, dans le dossier choisi. **Champ : taille.** | Un fichier `codex-‹nom›-2026-09-29-‹heure›.zip` à l'heure de 1.2. |
 | 1.4 | Revenir, recharger, rouvrir le menu « Codex ». | Toujours « Ton codex est à jour » : la marque ne revient pas. |
 
