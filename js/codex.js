@@ -66,6 +66,17 @@ var _autoSaveTimerId = null;
 var _autoSaveEnCours = false;
 var _derniereAutoSave = null;          // Date ISO de la dernière auto-save réussie
 
+// Lot F (D4, 28 sept. 2026) : l'enregistrement automatique reste INERTE. Il ne partait
+// jamais avant le lot F, faute de modification marquée ; depuis que le témoin du codex
+// sait qu'une donnée a changé, il écrirait le fichier de l'usager toutes les 5 minutes
+// sans geste de sa part. Ce choix revient à Grégoire (question posée par Cowork) : d'ici
+// sa réponse, le minuteur ne démarre pas.
+var AUTO_SAVE_AUTORISE = false;
+
+// Lot F (D4) : compte les modifications marquées. Une écriture du fichier ne remet le
+// codex « à jour » que si aucune modification n'est survenue PENDANT sa génération.
+var _compteurModifications = 0;
+
 /* ===============================
    MIGRATION CLASSEUR → CODEX
    =============================== */
@@ -193,6 +204,13 @@ async function _purgerCodexHistLegacy() {
  * Restaure l'état du codex depuis le stockage (au démarrage de l'app)
  */
 function initialiserCodex() {
+    // Lot F (D4) : le témoin du codex dit vrai. Chaque « Enregistré » du témoin commun
+    // (une écriture faite par l'usager) rend le codex « pas à jour ». Les écritures
+    // silencieuses de l'application (indices recalculés, migrations : `discret`) ne
+    // parlent pas au témoin commun, et ne touchent donc pas celui du codex : mesuré le
+    // 28 sept., chaque ouverture réécrit une quinzaine de clés sans geste de l'usager.
+    window.addEventListener('donnees-enregistrees', function() { marquerModification(); });
+
     // Lancer la migration (async, non bloquante pour le premier rendu)
     _migrerClesClasseurVersCodex().then(function(resultat) {
         if (resultat.migrees > 0) {
@@ -288,6 +306,7 @@ async function genererCodex(options = {}) {
     }
 
     var silencieux = !!options.silencieux;
+    var compteurAuDebut = _compteurModifications;
 
     const debut = performance.now();
     // En mode silencieux (auto-save), pas d'overlay de progression
@@ -373,9 +392,8 @@ async function genererCodex(options = {}) {
         }
     }
 
-    // 3. Mettre à jour le snapshot de référence pour la fusion 3-way —
-    //    index haché depuis #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
-    await _ecrireSnapshotAvant(donnees);
+    // 3. Le snapshot de référence pour la fusion 3-way n'est plus écrit ici : il décrit
+    //    le FICHIER, et le fichier n'existe qu'après son écriture (lot F, _marquerCodexAJour).
 
     // 4. Manifeste
     const maintenant = new Date().toISOString();
@@ -443,15 +461,10 @@ async function genererCodex(options = {}) {
         }
     );
 
-    // 6. Mettre à jour l'état
+    // 6. L'état « à jour » n'est PAS posé ici (lot F, D4) : le fichier n'est pas encore
+    //    écrit. Avant, un aperçu annulé ou une écriture refusée laissait « Tout est
+    //    enregistré ». C'est `_marquerCodexAJour`, après l'écriture réussie, qui le pose.
     _prog(98, 'Finalisation…');
-    _etat.actif = true;
-    _etat.nom = manifeste.nom;
-    _etat.derniereSauvegarde = maintenant;
-    _etat.modificationsDepuis = null;
-    _etat.manifeste = manifeste;
-    _sauvegarderEtat();
-    _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
 
@@ -466,7 +479,7 @@ async function genererCodex(options = {}) {
     // Nom de fichier avec horodatage
     const nomFichier = _genererNomFichier(manifeste.nom);
 
-    return { blob: zipBlob, nomFichier, manifeste };
+    return { blob: zipBlob, nomFichier, manifeste, donnees, compteurAuDebut };
 
     } catch (erreur) {
         _progMasquer();
@@ -1122,15 +1135,42 @@ function etatCodex() {
 }
 
 /**
- * Marque qu'une modification a eu lieu depuis la dernière sauvegarde.
- * Appelé par les autres modules lorsqu'ils modifient des données.
+ * Marque qu'une modification a eu lieu depuis la dernière écriture du fichier.
+ * Lot F (D4) : appelé à chaque « Enregistré » du témoin commun (événement
+ * `donnees-enregistrees`, voir initialiserCodex), plus le renommage et la fusion.
  */
 function marquerModification() {
+    _compteurModifications++;
     if (!_etat.actif) return;
     if (!_etat.modificationsDepuis) {
         _etat.modificationsDepuis = new Date().toISOString();
         _sauvegarderEtat();
     }
+    _mettreAJourIndicateur();
+}
+
+/**
+ * Lot F (D4) : pose l'état « Ton codex est à jour », APRÈS l'écriture réussie du
+ * fichier, et seulement là. Le snapshot de référence de la fusion 3-way décrit lui
+ * aussi le fichier : il est écrit ici, pas avant (un aperçu annulé le laissait
+ * pointer vers un fichier qui n'existait pas).
+ * Une modification survenue pendant la génération n'est pas dans le fichier : le
+ * codex reste alors « pas à jour ».
+ * @param {{manifeste: Object, donnees: Object, compteurAuDebut: number}} resultat - rendu par genererCodex
+ */
+async function _marquerCodexAJour(resultat) {
+    var donnees = resultat.donnees;
+    await _ecrireSnapshotAvant(donnees);
+    _etat.actif = true;
+    _etat.nom = resultat.manifeste.nom;
+    _etat.derniereSauvegarde = resultat.manifeste.dateDerniereModification;
+    _etat.manifeste = resultat.manifeste;
+    if (_compteurModifications === resultat.compteurAuDebut) {
+        _etat.modificationsDepuis = null;
+    } else if (!_etat.modificationsDepuis) {
+        _etat.modificationsDepuis = new Date().toISOString();
+    }
+    _sauvegarderEtat();
     _mettreAJourIndicateur();
 }
 
@@ -2562,6 +2602,7 @@ function _formaterTaille(octets) {
  * Ne fait rien si pas de handle FSAPI ou si déjà démarré.
  */
 function _demarrerAutoSave() {
+    if (!AUTO_SAVE_AUTORISE) return;   // lot F : inerte jusqu'à la décision de Grégoire
     if (!_fileHandle || _autoSaveTimerId) return;
     _autoSaveTimerId = setInterval(_executerAutoSave, AUTO_SAVE_DELAI);
     _mettreAJourIndicateur();
@@ -2596,17 +2637,12 @@ async function _executerAutoSave() {
 
     _autoSaveEnCours = true;
 
-    // Capture du marqueur AVANT que genererCodex ne le mette a null en interne
-    // (cf. _etat.modificationsDepuis = null dans genererCodex). Si l'ecriture
-    // FSAPI echoue ensuite, il faut restaurer le marqueur sinon les modifs
-    // apparaissent comme « sauvees » alors que le fichier disque ne les a pas
-    // (data loss invisible pour l'utilisateur).
-    var marqueurModifsAvant = _etat.modificationsDepuis;
-
     try {
         var resultat = await genererCodex({ silencieux: true });
         // Ré-écriture directe via le handle (pas de dialogue)
         await _ecrireViaHandle(_fileHandle, resultat.blob);
+        // Lot F : l'état « à jour » suit l'écriture, il ne la précède plus.
+        await _marquerCodexAJour(resultat);
 
         _derniereAutoSave = new Date().toISOString();
 
@@ -2616,15 +2652,8 @@ async function _executerAutoSave() {
         );
     } catch (e) {
         console.warn('📂 Auto-save échoué :', e.message);
-        // Restaurer le marqueur de modifications : genererCodex a deja mis
-        // modificationsDepuis a null en interne, mais l'ecriture FSAPI a
-        // echoue donc les modifs sont en realite toujours non sauvees.
-        // L'indicateur d'en-tete reste « modifie » et l'utilisateur sait.
-        if (_etat.modificationsDepuis === null && marqueurModifsAvant) {
-            _etat.modificationsDepuis = marqueurModifsAvant;
-            _sauvegarderEtat();
-            _mettreAJourIndicateur();
-        }
+        // Rien à restaurer : l'état « à jour » n'est posé qu'après une écriture
+        // réussie (lot F), il reste donc « pas à jour » sur un échec.
         // Handle devenu invalide — arrêter l'auto-save
         if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'InvalidStateError') {
             _fileHandle = null;
@@ -2734,7 +2763,7 @@ function _actualiserMenu() {
         if (_etat.actif) {
             var modifie = !!_etat.modificationsDepuis;
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';
-            var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
+            var texteEtat = modifie ? 'Ton codex n\'a pas tes derniers changements' : 'Ton codex est à jour';
             // _etat.nom est saisi par l'utilisateur (renommage codex). echapper
             // pour eviter qu'un nom contenant <script> ou des attributs event-handler
             // ne soit injecte dans le DOM via innerHTML (XSS).
@@ -2936,9 +2965,13 @@ async function actionEnregistrer() {
     try {
         var avaitHandle = !!_fileHandle;
         var resultat = await genererCodex();
+        // Lot F : aperçu annulé → ni succès, ni « à jour » (avant : « Cannot read
+        // properties of null » affiché comme une erreur).
+        if (!resultat) return;
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier);
 
         if (sauvegarde.methode === 'annule') return;
+        await _marquerCodexAJour(resultat);
 
         var methodeLabel = avaitHandle ? 'même emplacement' :
                            sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
@@ -2961,9 +2994,13 @@ async function actionEnregistrerSous() {
 
     try {
         var resultat = await genererCodex();
+        // Lot F : aperçu annulé → ni succès, ni « à jour » (avant : « Cannot read
+        // properties of null » affiché comme une erreur).
+        if (!resultat) return;
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier, { forcerDialogue: true });
 
         if (sauvegarde.methode === 'annule') return;
+        await _marquerCodexAJour(resultat);
 
         var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
