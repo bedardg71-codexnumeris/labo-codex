@@ -178,8 +178,15 @@ process.stderr.write(`${VERT}→ Sentinelle Playwright : exécution de la suite 
 // du passage : le délai d'un essai court pendant la veille. `caffeinate -i`
 // empêche la veille d'inactivité tant que CE processus vit (-w), quel que soit
 // l'appelant : pousser.sh, fin-de-session, ou un lancement à la main.
+// ⚠ Il n'empêche pas la veille quand on ferme le couvercle du MacBook.
+// L'écouteur 'error' est obligatoire : sans lui, un caffeinate absent fait tomber
+// ce processus APRÈS la suite et AVANT le dépôt du verdict. On juge sans lui.
 if (process.platform === 'darwin') {
-    spawn('caffeinate', ['-i', '-w', String(process.pid)], { stdio: 'ignore', detached: true }).unref();
+    spawn('caffeinate', ['-i', '-w', String(process.pid)], { stdio: 'ignore', detached: true })
+        .on('error', (erreur) => {
+            console.warn(`⚠ caffeinate n'a pas pu être lancé (${erreur.message}) : le Mac peut s'endormir pendant la suite (#987).`);
+        })
+        .unref();
 }
 
 const execution = spawnSync('npx', ['playwright', 'test', '--reporter=json'], {

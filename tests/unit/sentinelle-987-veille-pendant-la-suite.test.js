@@ -30,6 +30,11 @@ describe('#987 — caffeinate pendant le verdict Playwright', () => {
         expect(ligne).toMatch(/\['-i',\s*'-w',\s*String\(process\.pid\)\]/);
     });
 
+    it('un caffeinate absent avertit au lieu de faire tomber le verdict (écouteur error)', () => {
+        const chaine = VERIF.slice(appel, VERIF.indexOf('.unref()', appel));
+        expect(chaine).toMatch(/\.on\(\s*'error'\s*,[\s\S]*console\.warn\(/);
+    });
+
     it('il n’est pas commenté ni enfermé dans une condition autre que macOS', () => {
         const avant = VERIF.slice(VERIF.lastIndexOf('\n', appel - 1) + 1, appel);
         expect(avant.trim()).not.toMatch(/^\/\//);

@@ -49,6 +49,8 @@ Les fichiers du 19 sept. coûtent toujours le « ~15 min » annoncé à l'époqu
 - `scripts/verifier-playwright.mjs` lance `caffeinate -i -w <pid>` (macOS seulement) avant la suite : tous les appelants sont couverts (pousser.sh, fin-de-session, lancement à la main). Éprouvé : `pmset -g assertions` montre « PreventUserIdleSystemSleep 1, on behalf of Process ID … », et `caffeinate` disparaît avec son processus. Son message passe de « ~4 min » (périmé) à « ~45 min ».
 - `scripts/pousser.sh` : « ~15 min » devient « ~45 min », aux lignes 60 et 125.
 - `tests/unit/sentinelle-987-veille-pendant-la-suite.test.js` : 3 essais, verts, qui vérifient que l'appel existe, qu'il est placé avant la suite, qu'il porte `-i -w pid` et qu'il n'est ni commenté ni neutralisé. 4 mutations, 4 rouges (retirer l'appel, retirer `-i`, le commenter, rendre la condition fausse), fichier restauré par copie, empreinte identique.
+- **Ajout après la relecture de Cowork** : un écouteur `'error'` sur le lancement de `caffeinate`. Sans lui, un `caffeinate` absent ou en échec faisait tomber le verdict **après** la suite et **avant** le dépôt de son résultat. Désormais, `console.warn` avertit et la suite se juge sans `caffeinate`. Éprouvé sur un binaire absent : sans écouteur, `Error: spawn … ENOENT` et aucun dépôt ; avec l'écouteur, l'avertissement puis le dépôt. La sentinelle passe à 4 essais : 5 mutations, 5 rouges (écouteur retiré, avertissement retiré, et les trois mutations précédentes).
+- **Limite, dite et non corrigée** : `caffeinate -i` n'empêche pas la veille quand on **ferme le couvercle** du MacBook. Fermer le couvercle pendant un verdict le fait encore dériver.
 - **Source ou stock** : sans objet, aucune donnée d'utilisateur n'est touchée.
 
 ## 4 · Trouvailles
