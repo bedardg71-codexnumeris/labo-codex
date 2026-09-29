@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 22 H 10 : **LOT E3 (1.167.0) EN LIGNE DEPUIS 22 H 02 ; PORTE TERRAIN À PASSER** — lire `git log origin/main`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 22 H 30 : **LOT F OUVERT SUR LA BRANCHE `lot-f-les-mots` (arbre principal), ÉTAPE 1 FAITE, NON FUSIONNÉE ; ARRÊT : QUESTION DE L'AUTOMATIQUE À GRÉGOIRE** — lire `git log main..lot-f-les-mots`
+
+**Où vit le travail** : branche locale `lot-f-les-mots` (non poussée), partie de `main` = `053d96cb` (1.167.0). Deux commits : la consigne du jour posée (celle de E3 archivée) ; l'étape 1, le témoin du codex dit vrai (`1393e54a`). Aucune release.
+
+**À lire** : `plans de travail/DEMANDE-RELECTURE-2026-09-28-lot-F-etape-1.md`. Son § 3 porte la mesure de l'enregistrement automatique « Toutes les 5 min », laissé **inerte** (`AUTO_SAVE_AUTORISE = false`), et une question fermée pour Grégoire (a/b/c), à poser par Cowork. Son § 2 nomme une supposition à trancher (le codex s'accroche au témoin commun, pas à `db`).
+
+**Mesuré** : banc WebKit `codex-temoin-dit-vrai-lot-f.spec.js` 1/1 ; mutations 6/6 rouges ; Vitest 659 fichiers, 7 700/7 700.
+
+**Reste, dans l'ordre** : réponse de Grégoire sur l'automatique et relecture de l'étape 1 par Cowork → étapes 2 à 4 (les mots, tableau avant / après) → relecture croisée → release `minor` → verdict WebKit complet → fusion → push → porte terrain. La porte terrain de E3 reste à passer ; garder la branche `lot-e3-productions-interventions` jusqu'à son verdict.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 22 H 10 : **LOT E3 (1.167.0) EN LIGNE DEPUIS 22 H 02 ; PORTE TERRAIN À PASSER** — lire `git log origin/main`
 
 **Fait** : verdict WebKit complet sur `2dcd905b` (aucune rougeur ; 5 essais verts au second essai, dont le cas (c) du banc E2 et `productions-ajout-refus-garde-340`, à surveiller s'ils reviennent) ; `main` avancée en avance rapide sur la branche du lot ; push `2f93bbcc..2dcd905b` ; **1.167.0 en ligne depuis 22 h 02** (Netlify, `commit_ref` `2dcd905b`, « ready »). Le second verdict relancé par `pousser.sh` sur le même commit a été arrêté, le premier restant valable (#980 : `pousser.sh` ne réutilise pas un verdict déjà posé et juge la branche de l'arbre).
 
