@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 13 H 30 : **LOT G LIVRÉ (1.169.0 EN LIGNE) ; 1.169.1 (TITRE DES NOUVELLES) POUSSÉE PAR `pousser.sh`** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 15 H 15 : **1.169.1 EN LIGNE ; PORTE DES LOTS F ET G CLOSE (9/9) ; #988 AUX CORRIGÉS** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Mesuré** : 1.169.1 en ligne depuis 14 h 10 (Netlify « ready », `commit_ref` `4eb6e363`) ; verdict WebKit vert avant le push. Porte des lots F et G : relevé de Grégoire à 15 h 03, en 1.169.0, 9 passées, 0 échec ; la 1.2 bis n'a pas été faite (sans objet).
+
+**#988 aux corrigés** : son critère est rempli (une mise à jour réussie sur l'iPad). **La cause de l'échec du matin n'est pas trouvée.** La question du `sessionStorage` quand Safari tue la page reste ouverte, à lire au prochain échec réel, et ne justifie aucun lot. #988 n'a pas de case au BACKLOG (seule la ligne du compteur la nomme) : il n'y avait rien à cocher.
+
+**Reste** : #987 ; OU-EN-EST-ON.md à rattraper pour E1 à E3 ; le cap suivant n'est pas fixé (à Grégoire).
+
+## (relais précédent) 29 SEPT. 2026, ≈ 13 H 30 : **LOT G LIVRÉ (1.169.0 EN LIGNE) ; 1.169.1 (TITRE DES NOUVELLES) POUSSÉE PAR `pousser.sh`** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
 
 **Fait** : lot G (#988, « Mettre à jour le codex » sur l'iPad ne disait rien quand il échouait) : l'échec se dit (témoin « Codex non mis à jour », « Réessayer » · « Télécharger à la place »), « à jour » après un téléchargement seulement si l'usager confirme, la cause devient lisible (section « DERNIÈRE MISE À JOUR DU CODEX » du rapport de bug). Relecture croisée de Cowork verte (`735aa45f`), mots tranchés par Grégoire. Branche `lot-g-codex-ipad` fusionnée (`530892f2`) et retirée.
 
