@@ -47,3 +47,11 @@ Aucune : le stock (b), les textes et les Nouvelles sont acceptés (29 sept., 5 h
 - **Le stock (b)** : relu par Cowork dans le code le 29 vers 7 h 15 (`_marquerStockAvantLotF` : n'agit que sur un état actif sans `temoinFiable`, n'écrit que `_codex_etat`, après db-ready ; `_instantaneEtat` pose `temoinFiable: true`, donc une seule fois). Pas rejoué par Cowork ; les mutations du banc et de la sentinelle sont celles de Claude Code.
 - **Les archives fantômes déjà listées sous Safari** restent dans `_manifesteReserve` : ni mesurées, ni réparées.
 - **Le verdict WebKit complet de 1.168.0** : vert, rendu le 29 au matin par Claude Code, après environ une heure (deux fois de suite) ; quatre essais verts au second essai.
+
+## Relevé — 29 septembre 2026, 15 h 03 (Grégoire, sur l'iPad, 1.169.0)
+
+**9 passées, 0 échec.** Porte des lots F et G close. Relevé transmis par Grégoire (relu avec Cowork), reporté ici par Claude Code.
+
+- **La rangée 1.2 est passée** : la mise à jour du codex a réussi sur l'iPad. C'était le critère de fermeture de #988, qui passe aux corrigés.
+- **La 1.2 bis n'a pas été faite, et elle était sans objet** : la page ne s'est pas rechargée seule pendant la mise à jour. Le champ de constat « interrompue » ou « Aucune tentative dans cet onglet » n'a donc pas été lu. La question reste ouverte, à lire au prochain échec réel, et ne justifie aucun lot. (Dans ce markdown, la 1.2 bis est le champ de constat ajouté à la rangée 1.2 ; l'artefact de Cowork en fait une rangée à part.)
+- **Version lue : 1.169.0**, alors que 1.169.1 était en ligne depuis 14 h 10 (Netlify, `4eb6e363`). Les deux versions ne diffèrent que par le titre des Nouvelles : le relevé vaut pour le lot G.
