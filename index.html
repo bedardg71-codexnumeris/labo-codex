@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260928e"> <!-- Lot F : la règle du bloc « Enregistrement auto » retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20260928e"> <!-- Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3865,12 +3865,12 @@
                                 <button class="codex-menu-item" data-action="Codex.actionEnregistrer">
                                     <span class="codex-menu-icone"><img src="icons/icon-usb-memory.svg" alt=""></span>
                                     <span class="codex-menu-contenu">
-                                        <span id="codex-menu-enreg-label">Enregistrer le codex</span>
+                                        <span id="codex-menu-enreg-label">Mettre à jour le codex</span>
                                         <span id="codex-menu-enreg-info" class="codex-menu-sous-texte u-hide"></span>
                                     </span>
                                 </button>
                                 <button class="codex-menu-item" data-action="Codex.actionEnregistrerSous">
-                                    <span class="codex-menu-icone"><img src="icons/icon-downloading.svg" alt=""></span> Enregistrer sous…
+                                    <span class="codex-menu-icone"><img src="icons/icon-downloading.svg" alt=""></span> Mettre à jour dans un autre fichier…
                                 </button>
                                 <div class="codex-menu-sep"></div>
                                 <button class="codex-menu-item" data-action="Codex.actionNouveau">
@@ -9380,23 +9380,23 @@
                          CARTE 1 : CODEX (espace de travail actif)
                          ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu" data-tooltip="donnees-codex">Codex (espace de travail actif)</h3>
+                        <h3 class="carte-titre-bleu" data-tooltip="donnees-codex">Copie de secours, ouverture et partage</h3>
                         <p class="text-muted u-mb-20">
-                            Le Codex est ton espace de travail trimestriel. Exporte-le pour le transporter sur clé USB, ouvre-en un existant, ou exporte ta configuration pédagogique pour la partager.
+                            Fais une copie de secours de tes données, ouvre un fichier (codex, copie de secours ou configuration partagée), ou exporte ta configuration pédagogique pour la partager. Pour transporter ton travail sur ta clé USB, utilise le menu Codex, en haut de l'écran.
                         </p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                             <!-- Exporter le Codex -->
                             <div class="carte-bleu-pale-p15">
                                 <h4 class="u-mb-10 u-texte-bleu" data-tooltip="donnees-codex-export">
-                                    Exporter le Codex
+                                    Copie de secours
                                 </h4>
                                 <p class="u-mb-15 u-texte-09" style="color: var(--gris-moyen)">
-                                    ZIP complet du trimestre actif : données, bibliothèques et fichiers étudiants.
-                                    <br><em class="u-texte-gris">Pour transporter sur clé USB ou restaurer ailleurs.</em>
+                                    Un fichier avec les données que tu choisis ; coche « Toutes les clés » pour tout garder.
+                                    <br><em class="u-texte-gris">Pour restaurer tes données sur cet appareil ou un autre.</em>
                                 </p>
                                 <button class="btn btn-principal" data-action="ouvrirModalExport">
-                                    Exporter le Codex
+                                    Faire une copie de secours
                                 </button>
                             </div>
 
@@ -9420,7 +9420,7 @@
                                     Ouvrir un Codex
                                 </h4>
                                 <p class="u-mb-15 u-texte-09" style="color: var(--gris-moyen)">
-                                    Importe un Codex complet ou une configuration partagée.
+                                    Ouvre un codex, une copie de secours ou une configuration partagée.
                                     <br><em class="u-texte-gris">Le type est détecté automatiquement.</em>
                                 </p>
                                 <button class="btn btn-principal" data-action="ouvrirModalImport">
@@ -9463,7 +9463,7 @@
                             <!-- Tableau des archives -->
                             <div class="u-mt-20">
                                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
-                                    <h4 class="u-mb-0 u-texte-bleu">Archives enregistrées</h4>
+                                    <h4 class="u-mb-0 u-texte-bleu">Archives</h4>
                                     <span id="reserve-reglages-resume" class="text-muted u-texte-petit"></span>
                                 </div>
                                 <div id="reserve-reglages-table-conteneur" class="table-ressources-container" style="min-height: 80px;">
@@ -11178,7 +11178,7 @@
                                 <h4 class="u-mb-10 u-texte-bleu">Que se passe-t-il lors de l'archivage ?</h4>
                                 <ul class="lh-2">
                                     <li>Le trimestre passe en <strong>mode lecture seule</strong> (aucune modification possible)</li>
-                                    <li>Les statistiques finales sont calculées et sauvegardées</li>
+                                    <li>Les statistiques finales sont calculées et enregistrées</li>
                                     <li>Une <strong>capture des ressources</strong> (productions, grilles, échelles, pratiques) est créée</li>
                                     <li>Le trimestre reste accessible pour consultation dans la liste</li>
                                 </ul>
@@ -11218,7 +11218,7 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Réglages → Préférences</p>
 
-                            <p>Les préférences te permettent d'adapter l'application à ton style de travail. Tout changement est sauvegardé automatiquement.</p>
+                            <p>Les préférences te permettent d'adapter l'application à ton style de travail. Tout changement s'enregistre automatiquement.</p>
 
                             <div class="carte-gradient-bleu">
                                 <p class="titre-11-bold-bleu-mb15">Les cartes de préférences :</p>
@@ -11268,7 +11268,7 @@
                                 <p><strong>Utilisation professionnelle</strong> — Tes vraies données</p>
                                 <ul class="mt-8">
                                     <li>Tes étudiant·es, tes évaluations, tes présences</li>
-                                    <li>Données sauvegardées localement sur ton appareil</li>
+                                    <li>Données enregistrées sur ton appareil</li>
                                     <li>Mode par défaut pour l'usage quotidien</li>
                                 </ul>
                             </div>
@@ -11646,7 +11646,7 @@
                             <p>Avant d'annoter, tu peux réordonner ou supprimer des pages depuis la zone « Modifier un document ».</p>
 
                             <div class="alerte alerte-information">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Stockage :</strong> Les fichiers sont sauvegardés automatiquement. Sur Mac, ils peuvent aussi être stockés directement sur ton disque.
+                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Stockage :</strong> Les fichiers s'enregistrent automatiquement dans l'application. Sur Mac, ils peuvent aussi être rangés directement sur ton disque.
                             </div>
                         </div>
                     </div>
@@ -12196,7 +12196,7 @@
                             <p class="mb-10-only">Pour les <strong>cartouches de rétroaction</strong> uniquement, tu peux aussi :</p>
                             <ul class="lh-16">
                                 <li>Rédiger tes commentaires dans un document texte (Word, Google Docs, etc.)</li>
-                                <li>Sauvegarder au format .txt avec structure Markdown</li>
+                                <li>Enregistrer au format .txt avec structure Markdown</li>
                                 <li>Importer directement dans une cartouche en édition</li>
                                 <li>Gain de temps : rédaction dans ton environnement préféré</li>
                             </ul>
@@ -12470,7 +12470,7 @@
                                 <li>Le transfert automatique se déclenche quand tu cliques sur « Marquer comme complétée »</li>
                                 <li>Si tu modifies l'intervention (ajouter/retirer des étudiant·es), les changements se propagent automatiquement aux présences</li>
                                 <li>Le tableau de présences se recharge automatiquement quand tu reviens sur la section</li>
-                                <li>Si tu sauvegardes sans compléter, les données restent dans le module Interventions seulement</li>
+                                <li>Si tu enregistres sans compléter, les données restent dans le module Interventions seulement</li>
                                 <li>Le recalcul des indices d'assiduité se fait automatiquement après chaque modification</li>
                             </ul>
                         </div>
@@ -12542,7 +12542,7 @@
                             </ul>
 
                             <div class="alerte alerte-succes">
-                                <strong>✅ Persistance :</strong> Les annotations sont sauvegardées sur ton appareil et persistent entre les séances. Tu retrouves ton document annoté à la prochaine ouverture.
+                                <strong>✅ Persistance :</strong> Les annotations s'enregistrent sur ton appareil et restent d'une séance à l'autre. Tu retrouves ton document annoté à la prochaine ouverture.
                             </div>
                         </div>
                     </div>
@@ -13672,8 +13672,8 @@
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Données perdues</h4>
                             <p><strong>Cause :</strong> Les données du navigateur ont été supprimées (navigation privée ou nettoyage du navigateur)</p>
-                            <p><strong>Solution :</strong> Utiliser Réglages → Données régulièrement pour créer des sauvegardes JSON</p>
-                            <p><strong>Prévention :</strong> Exporter tes données régulièrement via le Codex ou Réglages → Données</p>
+                            <p><strong>Solution :</strong> Restaurer ta dernière copie de secours (Réglages → Données → Ouvrir un Codex…)</p>
+                            <p><strong>Prévention :</strong> Faire une copie de secours régulièrement (Réglages → Données), et mettre à jour ton codex</p>
                         </div>
                         </div>
                     </div>
@@ -13721,9 +13721,11 @@
                             <h4 class="titre-bleu-mb8">Questions techniques</h4>
 
                             <details class="carte-grise-info">
-                                <summary class="titre-cliquable">Mes données sont-elles sauvegardées automatiquement ?</summary>
+                                <summary class="titre-cliquable">Mes données s'enregistrent-elles toutes seules ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p><strong>Oui,</strong> toutes les modifications sont sauvegardées automatiquement dans ton navigateur.</p>
+                                    <p><strong>Oui, dans l'application.</strong> Ce que tu fais s'enregistre dans ton navigateur, sur cet appareil, et le témoin « Enregistré », en bas de l'écran, te le confirme. Quelques écrans de création (une production, une intervention, une fiche du Cadre) attendent leur bouton : tant que tu ne l'as pas cliqué, rien n'est écrit, et l'application te prévient si tu quittes sans l'avoir fait.</p>
+                                <p><strong>Le codex</strong> est un fichier, sur ta clé USB par exemple. Il ne change que lorsque tu choisis « Mettre à jour le codex », et le menu Codex te dit s'il est à jour.</p>
+                                <p><strong>La copie de secours</strong> (Réglages → Données) est un fichier que tu gardes par précaution, pour retrouver tes données si le navigateur les perd.</p>
                                     <div class="alerte alerte-attention mt-10">
                                         <strong>⚠️ Important :</strong> Tes données peuvent être perdues si tu :
                                         <ul class="m-10-0-0-20">
@@ -13732,7 +13734,7 @@
                                             <li>Changes de navigateur ou d'appareil</li>
                                         </ul>
                                     </div>
-                                    <p class="mt-10"><strong>Recommandation :</strong> Exporte tes données régulièrement via Réglages → Données pour créer des sauvegardes JSON.</p>
+                                    <p class="mt-10"><strong>Recommandation :</strong> Fais une copie de secours régulièrement (Réglages → Données).</p>
                                 </div>
                             </details>
 
@@ -13878,7 +13880,7 @@
                                 <dd class="ml-20-mb-10">Matrice de commentaires prédéfinis organisés par critère de la grille et par niveau de l'échelle. Permet de générer rapidement des rétroactions personnalisées et cohérentes. Peut être verrouillée une fois finalisée.</dd>
 
                                 <dt class="titre-section-aide">Codex</dt>
-                                <dd class="ml-20-mb-10">Fichier de sauvegarde portable (format ZIP) contenant toutes les donn&eacute;es d'un trimestre. Permet le transfert entre appareils via cl&eacute; USB et la sauvegarde hors-ligne. G&eacute;r&eacute; par le module Codex (menu en haut &agrave; droite).</dd>
+                                <dd class="ml-20-mb-10">Fichier portable (format ZIP) contenant toutes tes donn&eacute;es et les fichiers de travaux. Permet de passer d'un appareil &agrave; l'autre avec une cl&eacute; USB. Il ne change que lorsque tu choisis &laquo;&nbsp;Mettre &agrave; jour le codex&nbsp;&raquo; (menu Codex, en haut &agrave; droite).</dd>
 
                                 <dt class="titre-section-aide">Complétion (C)</dt>
                                 <dd class="ml-20-mb-10">Indice primaire mesurant la remise des travaux. Formule : (nombre d'artefacts complétés / nombre d'artefacts attendus) × 100. Reflète la mobilisation de l'étudiant. Calculé automatiquement à partir de tes évaluations.</dd>
@@ -13936,8 +13938,8 @@
                             <h4 class="titre-section-principal">L</h4>
 
                             <dl class="ml-10">
-                                <dt class="titre-section-aide">Sauvegarde locale</dt>
-                                <dd class="ml-20-mb-10">Espace de sauvegarde dans ton navigateur. Tes données restent sur ton appareil, sans aucun transfert vers le cloud. Important : si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. Pense à exporter régulièrement via le Codex.</dd>
+                                <dt class="titre-section-aide">Local (stockage)</dt>
+                                <dd class="ml-20-mb-10">L'espace de ton navigateur où tes données s'enregistrent. Elles restent sur ton appareil, sans aucun transfert vers le cloud. Important : si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. Pense à faire une copie de secours régulièrement.</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">M</h4>
@@ -14026,38 +14028,38 @@
                     <div class="carte accordeon" id="accordeon-aide-export-import">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Exporter et sauvegarder tes données
+                                <span class="accordeon-chevron">▼</span> Copie de secours et partage de tes données
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Réglages → Données</p>
 
-                            <p>La section Données offre trois options de sauvegarde et restauration :</p>
+                            <p>La section Données offre trois options pour protéger, restaurer et partager tes données :</p>
 
                             <div class="carte-gradient-bleu">
                                 <p class="titre-11-bold-bleu-mb15">Trois options d'export :</p>
                                 <ol class="lh-2">
-                                    <li><strong>Sauvegarde complète</strong> : Toutes tes données (cours, étudiant·es, présences, évaluations, configurations). Pour restaurer sur cet appareil ou un autre.</li>
+                                    <li><strong>Copie de secours</strong> : Les données que tu coches, toutes si tu veux (cours, étudiant·es, présences, évaluations, configurations). Pour restaurer sur cet appareil ou un autre.</li>
                                     <li><strong>Configuration pédagogique</strong> : Uniquement les outils (grilles, échelles, productions, cartouches). Pour partager avec des collègues sous licence CC BY-NC-SA.</li>
-                                    <li><strong>Importer un fichier</strong> : Restaure une sauvegarde personnelle ou importe la configuration d'un collègue. Le type de fichier est détecté automatiquement.</li>
+                                    <li><strong>Importer un fichier</strong> : Restaure une copie de secours ou importe la configuration d'un collègue. Le type de fichier est détecté automatiquement.</li>
                                 </ol>
                             </div>
 
                             <p><strong>Bonnes pratiques :</strong></p>
                             <ul>
-                                <li><strong>Exporte régulièrement</strong> : Clique « Exporter le Codex » pour créer une sauvegarde JSON complète</li>
-                                <li><strong>Avant un changement majeur</strong> : Sauvegarde avant de modifier tes pratiques ou grilles</li>
+                                <li><strong>Fais une copie de secours régulièrement</strong> : Clique « Faire une copie de secours » et coche « Toutes les clés »</li>
+                                <li><strong>Avant un changement majeur</strong> : Fais une copie de secours avant de modifier tes pratiques ou grilles</li>
                                 <li><strong>Partage entre trimestres</strong> : Utilise l'export de configuration pédagogique pour réutiliser tes outils d'un trimestre à l'autre</li>
                                 <li><strong>Transfert d'appareil</strong> : Exporte sur l'ancien appareil, importe sur le nouveau</li>
                             </ul>
 
                             <div class="alerte alerte-attention">
-                                <strong>⚠️ Important :</strong> Les données sont stockées dans le navigateur. Si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. L'export JSON est ta seule protection.
+                                <strong>⚠️ Important :</strong> Les données sont stockées dans le navigateur. Si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. Ta copie de secours et ton codex sont tes seules protections.
                             </div>
 
                             <!-- #862 (15 sept. 2026) — ce que la Loi 25 demande à l'enseignant. Texte approuvé par Grégoire. -->
                             <div class="alerte alerte-attention">
-                                <strong>Important — les données de tes élèves et la Loi 25.</strong> Elles restent dans ton navigateur, sur ton appareil&nbsp;: Labo Codex ne les envoie nulle part, et personne d'autre ne peut les consulter. Elles demeurent sous la responsabilité de ton établissement, exactement comme si tu les saisissais dans un chiffrier sur le même ordinateur. Garde donc cet appareil personnel, verrouillé par un mot de passe, avec un disque chiffré. Personne ne sauvegarde à ta place&nbsp;: utilise «&nbsp;Exporter le Codex&nbsp;» régulièrement. «&nbsp;Réinitialiser toutes les données&nbsp;» efface tout, sans retour possible. Pour le détail&nbsp;: <a href="https://codexnumeris.org/labo-codex-ou-vivent-vos-donnees" target="_blank" rel="noopener noreferrer"><em>Labo Codex&nbsp;: où vivent vos données&nbsp;?</em></a> Une question&nbsp;: labo@codexnumeris.org.
+                                <strong>Important — les données de tes élèves et la Loi 25.</strong> Elles restent dans ton navigateur, sur ton appareil&nbsp;: Labo Codex ne les envoie nulle part, et personne d'autre ne peut les consulter. Elles demeurent sous la responsabilité de ton établissement, exactement comme si tu les saisissais dans un chiffrier sur le même ordinateur. Garde donc cet appareil personnel, verrouillé par un mot de passe, avec un disque chiffré. Personne ne fait de copie de secours à ta place&nbsp;: utilise «&nbsp;Faire une copie de secours&nbsp;» régulièrement. «&nbsp;Réinitialiser toutes les données&nbsp;» efface tout, sans retour possible. Pour le détail&nbsp;: <a href="https://codexnumeris.org/labo-codex-ou-vivent-vos-donnees" target="_blank" rel="noopener noreferrer"><em>Labo Codex&nbsp;: où vivent vos données&nbsp;?</em></a> Une question&nbsp;: labo@codexnumeris.org.
                             </div>
 
                             <p><strong>Captures de progression (Snapshots) :</strong></p>
@@ -14097,16 +14099,16 @@
                             <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Flux de travail typique</p>
                             <ol class="lh-2">
                                 <li><strong>Au début du trimestre</strong> : Crée un nouveau codex (Codex → Nouveau codex)</li>
-                                <li><strong>Au bureau (MacBook)</strong> : Travaille normalement. Avant de partir, enregistre le codex sur ta clé USB (Codex → Enregistrer)</li>
-                                <li><strong>En classe (iPad ou autre poste)</strong> : Ouvre le codex depuis la clé USB (Codex → Ouvrir). Saisis tes présences, évalue. Enregistre avant de partir</li>
+                                <li><strong>Au bureau (MacBook)</strong> : Travaille normalement. Avant de partir, mets à jour le codex sur ta clé USB (Codex → Mettre à jour le codex)</li>
+                                <li><strong>En classe (iPad ou autre poste)</strong> : Ouvre le codex depuis la clé USB (Codex → Ouvrir). Saisis tes présences, évalue. Mets à jour le codex avant de partir</li>
                                 <li><strong>De retour au bureau</strong> : Ouvre le codex à jour depuis la clé USB. Tes données suivent d'un appareil à l'autre</li>
                             </ol>
 
                             <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Fonctions du menu Codex</p>
                             <ul class="lh-2">
                                 <li><strong>Ouvrir un codex</strong> : Charge un fichier <code>.codex.zip</code> depuis ton disque ou ta clé USB</li>
-                                <li><strong>Enregistrer le codex</strong> : Sauvegarde vers le même emplacement (Chrome/Edge : sans dialogue grâce à l'auto-save)</li>
-                                <li><strong>Enregistrer sous</strong> : Sauvegarde vers un nouvel emplacement</li>
+                                <li><strong>Mettre à jour le codex</strong> : Écrit tes données actuelles dans le fichier du codex. Chrome et Edge réécrivent le même fichier, sans fenêtre ; Safari et l'iPad téléchargent un nouveau fichier</li>
+                                <li><strong>Mettre à jour dans un autre fichier</strong> : Écrit tes données actuelles dans un nouveau fichier, à l'endroit que tu choisis</li>
                                 <li><strong>Nouveau codex</strong> : Crée un codex à partir des données actuelles en mémoire</li>
                                 <li><strong>Archiver</strong> : Archive le groupe-cours d'un trimestre terminé dans tes archives locales (voir l'onglet Archives)</li>
                                 <li><strong>Ouvrir une archive</strong> : Récupère des grilles, échelles ou tampons d'une archive</li>
@@ -14115,17 +14117,16 @@
                                 <li><strong>Fermer le codex</strong> : Détache le codex sans supprimer les données en mémoire</li>
                             </ul>
 
-                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Auto-save (Chrome et Edge)</p>
-                            <p>Sur Chrome et Edge, quand tu ouvres un codex avec le sélecteur de fichier natif, l'application obtient un accès en écriture au fichier. L'auto-save se déclenche alors automatiquement toutes les 5 minutes — tes données sont écrites directement sur la clé USB sans aucune intervention. Le statut apparaît dans le menu Codex.</p>
-                            <p>Sur Safari et iPad, l'auto-save n'est pas disponible (limitation du navigateur). Tu dois enregistrer manuellement.</p>
+                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Ton codex est-il à jour ?</p>
+                            <p>Tout ce que tu fais s'enregistre dans l'application, sur cet appareil. Le fichier du codex, lui, ne change que lorsque tu choisis « Mettre à jour le codex ». Le menu Codex te dit où il en est : « Ton codex est à jour », ou « Ton codex n'a pas tes derniers changements ».</p>
 
                             <div class="alerte alerte-attention" style="margin-top: 15px;">
-                                <strong>Codex vs Sauvegarde — quelle différence ?</strong>
+                                <strong>Codex ou copie de secours : quelle différence ?</strong>
                                 <table style="width: 100%; margin-top: 10px; font-size: 0.9rem;">
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px;"></td>
                                         <td style="padding: 6px 8px; font-weight: bold;">Codex</td>
-                                        <td style="padding: 6px 8px; font-weight: bold;">Sauvegarde (Réglages → Données)</td>
+                                        <td style="padding: 6px 8px; font-weight: bold;">Copie de secours (Réglages → Données)</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px; font-weight: 600;">But</td>
@@ -14135,12 +14136,12 @@
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px; font-weight: 600;">Format</td>
                                         <td style="padding: 6px 8px;"><code>.codex.zip</code> (ZIP structuré)</td>
-                                        <td style="padding: 6px 8px;"><code>.json</code> (texte brut)</td>
+                                        <td style="padding: 6px 8px;"><code>.json</code> (texte brut), ou <code>.zip</code> avec les fichiers de travaux</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px; font-weight: 600;">Contenu</td>
                                         <td style="padding: 6px 8px;">Données + fichiers de travaux</td>
-                                        <td style="padding: 6px 8px;">Données seulement (pas de fichiers)</td>
+                                        <td style="padding: 6px 8px;">Les données que tu coches ; les fichiers de travaux s'y ajoutent si tu les coches</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
                                         <td style="padding: 6px 8px; font-weight: 600;">Archivage long terme</td>
@@ -14148,9 +14149,9 @@
                                         <td style="padding: 6px 8px;">Non (un seul instantané)</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid var(--gris-pale);">
-                                        <td style="padding: 6px 8px; font-weight: 600;">Auto-save</td>
-                                        <td style="padding: 6px 8px;">Oui (Chrome/Edge, toutes les 5 min)</td>
-                                        <td style="padding: 6px 8px;">Non (rappel périodique seulement)</td>
+                                        <td style="padding: 6px 8px; font-weight: 600;">Mise à jour</td>
+                                        <td style="padding: 6px 8px;">Quand tu choisis « Mettre à jour le codex »</td>
+                                        <td style="padding: 6px 8px;">Quand tu la fais ; un rappel te la propose</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 6px 8px; font-weight: 600;">Fusion</td>
@@ -14158,7 +14159,7 @@
                                         <td style="padding: 6px 8px;">Non (remplacement complet)</td>
                                     </tr>
                                 </table>
-                                <p style="margin-top: 10px; font-size: 0.85rem;"><strong>En résumé :</strong> le codex est ton outil de travail quotidien. La sauvegarde JSON est ton filet de sécurité. Les deux sont complémentaires — utilise le codex pour travailler, fais une sauvegarde JSON de temps en temps comme assurance.</p>
+                                <p style="margin-top: 10px; font-size: 0.85rem;"><strong>En résumé :</strong> le codex est ton outil de travail quotidien. La copie de secours est ton filet de sécurité. Les deux se complètent : utilise le codex pour travailler, et fais une copie de secours de temps en temps, par précaution.</p>
                             </div>
                         </div>
                     </div>
@@ -14366,8 +14367,8 @@
     <script src="js/trimestre-v2-horaires.js?v=20260928d"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
     <script src="js/trimestre-v2-liste.js?v=20260920b"></script> <!-- #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
     <script src="js/trimestre-v2-cours.js?v=20260928c"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
-    <script src="js/trimestre-v2-etudiants.js?v=20260928d"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
-    <script src="js/registre-longitudinal.js?v=20260928b"></script> <!-- #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
+    <script src="js/trimestre-v2-etudiants.js?v=20260928e"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
+    <script src="js/registre-longitudinal.js?v=20260928c"></script> <!-- #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20260928c"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
     <script src="js/trimestre-v2-orchestre.js?v=20260919b"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
@@ -14406,7 +14407,7 @@
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
     <script src="js/codes-annotation.js?v=20260903e"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20260928a"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20260928b"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20260928a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260903b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14458,9 +14459,9 @@
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20260923b"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
     <script src="js/wizard-pratique-v2.js?v=20260928a"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
-    <script src="js/objectifs.js?v=20260903b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
+    <script src="js/objectifs.js?v=20260928a"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
-    <script src="js/portfolio.js?v=20260924b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
+    <script src="js/portfolio.js?v=20260928a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
     <script src="js/saisie-presences.js?v=20260928b"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260927g"></script>
 
@@ -14468,7 +14469,7 @@
     <script src="js/tableau-bord-apercu.js?v=20260924b"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20260923b"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-calculs.js?v=20260923b"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-rapport.js?v=20260924b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
+    <script src="js/profil-etudiant-rapport.js?v=20260928a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260928b"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20260927c"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
@@ -14503,9 +14504,9 @@
     <script src="libs/jszip.min.js?v=3.10.1"></script>
     <script src="libs/html2canvas.min.js?v=1.4.1"></script>
     <script src="js/travaux-stockage.js?v=20260922c"></script> <!-- Relecture #932/#934 (22 sept.) : deux copies sans élève ne sont pas en conflit -->
-    <script src="js/reserve.js?v=20260805a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) -->
+    <script src="js/reserve.js?v=20260928a"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) -->
     <script src="js/reserve-ouvrir.js?v=20260926f"></script> <!-- Beta 99.38 b0508-1440 : #262 label « Choisir un fichier .zip d'archive » -->
-    <script src="js/reserve-reglages.js?v=2026050559"></script> <!-- #259 : strings UI Réserve → Archives -->
+    <script src="js/reserve-reglages.js?v=20260928a"></script> <!-- #259 : strings UI Réserve → Archives -->
     <script src="js/securite-prefs.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — toggle persistance FSAPI -->
     <script src="js/codex-data.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur extraction codex data -->
     <script src="js/codex-data-ui.js?v=2026050603"></script> <!-- #251 : UI Réglages > Données carte 3 -->
@@ -14524,12 +14525,12 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=2026050225"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=20260927d"></script>
-    <script src="js/travaux-ui.js?v=20260927g"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
+    <script src="js/travaux-ui.js?v=20260928a"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
     <script src="js/actions-rlo.js?v=20260924b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
-    <script src="js/horaire.js?v=20260911l"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
+    <script src="js/horaire.js?v=20260928a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
     <script src="js/groupe.js?v=20260926c"></script>
     <script src="js/interventions.js?v=20260928c"></script> <!-- cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
     <script src="js/rencontres.js?v=20260928b"></script> <!-- cadrage « Rencontres » (12 sept. 2026) : le sous-onglet Suivi › Rencontres, les trois questions -->
@@ -14549,8 +14550,8 @@
     <script src="js/partage-import.js?v=20260926c"></script>
     <script src="js/partage-section.js?v=20260901a"></script>
     <script src="js/import-export.js?v=20260926c"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
-    <script src="js/codex.js?v=20260928b"></script> <!-- Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
-    <script src="js/liste-evaluations.js?v=20260927f"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
+    <script src="js/codex.js?v=20260928c"></script> <!-- Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
+    <script src="js/liste-evaluations.js?v=20260928a"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
@@ -14564,17 +14565,17 @@
     <script src="js/evaluation-calcul.js?v=20260927c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260927a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20260927f"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20260927f"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation.js?v=20260928a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260927c"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
-    <script src="js/modal-backup-reminder.js?v=2025122803"></script>
+    <script src="js/modal-backup-reminder.js?v=20260928a"></script>
 
     <!-- MIGRATIONS BETA 93.5 - Ajout coursId aux données (Beta 93.5) -->
     <script src="js/migrations.js?v=20260927d"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=20260927b"></script> <!-- Refonte nav SP5 : data-param calendrier -->
+    <script src="js/accueil.js?v=20260928a"></script> <!-- Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
@@ -14592,8 +14593,8 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20260928b"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20260926c"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-hover.js?v=20260928c"></script> <!-- Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20260928a"></script> <!-- Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260917b"></script>
     <script src="js/guides-pedagogiques.js?v=20260917b"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20260923b"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
@@ -14629,7 +14630,7 @@
      background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
         <div
             class="modal-content-scroll">
-            <h3 class="titre-bleu-mb-20">Exporter les données <button class="btn-aide-contextuelle" data-aide="modal-export" aria-label="Aide : export sélectif"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
+            <h3 class="titre-bleu-mb-20">Copie de secours <button class="btn-aide-contextuelle" data-aide="modal-export" aria-label="Aide : export sélectif"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
 
             <div class="mb-20">
                 <label

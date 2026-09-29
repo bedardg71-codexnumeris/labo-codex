@@ -110,32 +110,20 @@
     }
 
     /**
-     * Navigue vers la section Import/Export
+     * Lot F (D4, étape 3) : le bouton mène VRAIMENT à la copie de secours. Il ouvre
+     * Réglages › Données, puis la fenêtre de la copie de secours. Avant, « Exporter
+     * maintenant » n'ouvrait que la section (mesuré le 29 sept.) : il n'exportait rien,
+     * et son repli (`[data-sous-section="import-export"]`) visait un onglet disparu.
      */
-    function allerVersExport() {
+    function allerVersCopieDeSecours() {
         fermerModal();
-        // Définir un rappel dans 7 jours par défaut après export
+        // Rappel repoussé de 7 jours, comme avant.
         definirProchainRappel(7);
-
-        // Navigation vers Réglages → Gestion des données
-        if (typeof afficherSection === 'function') {
-            afficherSection('reglages');
-            setTimeout(() => {
-                if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('reglages-donnees');
-                }
-            }, 100);
-        } else {
-            // Fallback : clic sur les éléments de navigation
-            const ongletReglages = document.querySelector('[data-section="reglages"]');
-            if (ongletReglages) {
-                ongletReglages.click();
-                setTimeout(() => {
-                    const sousOnglet = document.querySelector('[data-sous-section="import-export"]');
-                    if (sousOnglet) sousOnglet.click();
-                }, 100);
-            }
-        }
+        afficherSection('reglages');
+        setTimeout(() => {
+            afficherSousSection('reglages-donnees');
+            if (typeof window.ouvrirModalExport === 'function') window.ouvrirModalExport();
+        }, 100);
     }
 
     /**
@@ -186,7 +174,7 @@
 
         modal.innerHTML = `
             <button class="modal-fermer" data-action="backupReminder.fermerModal"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-            <h3 class="modal-titre">Protège tes données</h3>
+            <h3 class="modal-titre">Fais une copie de secours</h3>
 
             <div class="modal-section">
                 <div class="alerte alerte-attention">
@@ -201,8 +189,8 @@
                 </div>
 
                 <div class="alerte alerte-information" style="margin-bottom: 0">
-                    <strong>Solution :</strong> Exporte régulièrement tes données via
-                    <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
+                    <strong>Solution :</strong> fais régulièrement une copie de secours
+                    (<strong>Réglages → Données</strong>). Ce fichier se réimporte
                     à tout moment pour restaurer tes données.
                 </div>
             </div>
@@ -220,8 +208,8 @@
                 <button class="btn btn-neutre" data-action="backupReminder.gererChoixRappel">
                     J'ai compris
                 </button>
-                <button class="btn btn-principal" data-action="backupReminder.allerVersExport">
-                    Exporter maintenant
+                <button class="btn btn-principal" data-action="backupReminder.allerVersCopieDeSecours">
+                    Faire une copie de secours
                 </button>
             </div>
         `;
@@ -262,7 +250,7 @@
         verifierEtAfficher: verifierEtAfficher,
         definirProchainRappel: definirProchainRappel,
         desactiverRappels: desactiverRappels,
-        allerVersExport: allerVersExport,
+        allerVersCopieDeSecours: allerVersCopieDeSecours,
         gererChoixRappel: gererChoixRappel,
         fermerModal: fermerModal,
         // Exposé pour la sentinelle du seuil « vraies données » (retour terrain 8 juin).

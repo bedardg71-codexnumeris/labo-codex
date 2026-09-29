@@ -386,7 +386,7 @@ async function sauvegarderCritere() {
     critereEnEdition = null;
 
     // Notification
-    notifications.succes(`Critère "${nom}" ajouté et grille "${nomGrille}" sauvegardée !`);
+    notifications.succes(`Critère "${nom}" ajouté et grille "${nomGrille}" enregistrée !`);
 }
 
 /* ===============================
@@ -5596,7 +5596,7 @@ async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
 
                 <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
                     <button class="btn btn-annuler" data-action="fermerModalCategoriesErreurs">Annuler</button>
-                    <button class="btn btn-confirmer" data-action="sauvegarderCategoriesErreurs" data-param="${grilleId}" data-param2="${critereIndex}">Sauvegarder</button>
+                    <button class="btn btn-confirmer" data-action="sauvegarderCategoriesErreurs" data-param="${grilleId}" data-param2="${critereIndex}">Enregistrer</button>
                 </div>
             </div>
         </div>
@@ -5636,7 +5636,7 @@ async function sauvegarderCategoriesErreurs(grilleId, critereIndex) {
     fermerModalCategoriesErreurs();
     afficherCriteresGrille(grille);
 
-    notifications.succes('Catégories d\'erreurs sauvegardées !');
+    notifications.succes('Catégories d\'erreurs enregistrées !');
 }
 
 /**

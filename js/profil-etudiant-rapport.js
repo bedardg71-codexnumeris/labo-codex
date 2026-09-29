@@ -193,7 +193,7 @@ function genererSectionRapport(da) {
                 <!-- Conseil Primo: Informations sur le rapport -->
                 <div id="conseil-rapport" class="carte-info-toggle carte-info-conseil" style="display: none;">
                     <strong>À propos du rapport :</strong>
-                    <p>Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Tu peux modifier le texte avant de le copier.</p>
+                    <p>Le rapport est généré à la demande avec les données actuelles. Il ne s'enregistre nulle part : si tu modifies le texte, copie-le avant de quitter l'écran.</p>
                 </div>
 
                 <!-- Grid 2 colonnes : Paramètres + Actions -->
