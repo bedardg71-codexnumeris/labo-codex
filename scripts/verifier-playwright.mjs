@@ -26,7 +26,7 @@
  * Code de sortie : 0 = rien de neuf · 1 = échec nouveau · 2 = impossible à juger.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -169,7 +169,25 @@ if (webkitAbsent) {
 const dossierTemporaire = mkdtempSync(path.join(tmpdir(), 'pw-sentinelle-'));
 const fichierRapport = path.join(dossierTemporaire, 'rapport.json');
 
-process.stderr.write(`${VERT}→ Sentinelle Playwright : exécution de la suite WebKit (~4 min)...${RAZ}\n`);
+process.stderr.write(`${VERT}→ Sentinelle Playwright : exécution de la suite WebKit (~45 min)...${RAZ}\n`);
+
+// #987 (29 sept. 2026) — le Mac s'endormait PENDANT la suite. Mesuré ce jour-là
+// sur 1.169.1 : 115 min au mur, dont 75 min dans 13 essais qui ont chacun
+// commencé à la seconde d'une veille du journal `pmset -g log` (« Idle Sleep »,
+// réglage `sleep 1`). Ces 13 essais expliquaient les 2 échecs et les 10 reprises
+// du passage : le délai d'un essai court pendant la veille. `caffeinate -i`
+// empêche la veille d'inactivité tant que CE processus vit (-w), quel que soit
+// l'appelant : pousser.sh, fin-de-session, ou un lancement à la main.
+// ⚠ Il n'empêche pas la veille quand on ferme le couvercle du MacBook.
+// L'écouteur 'error' est obligatoire : sans lui, un caffeinate absent fait tomber
+// ce processus APRÈS la suite et AVANT le dépôt du verdict. On juge sans lui.
+if (process.platform === 'darwin') {
+    spawn('caffeinate', ['-i', '-w', String(process.pid)], { stdio: 'ignore', detached: true })
+        .on('error', (erreur) => {
+            console.warn(`⚠ caffeinate n'a pas pu être lancé (${erreur.message}) : le Mac peut s'endormir pendant la suite (#987).`);
+        })
+        .unref();
+}
 
 const execution = spawnSync('npx', ['playwright', 'test', '--reporter=json'], {
     cwd: DOSSIER_TESTS,
