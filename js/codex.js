@@ -2711,14 +2711,13 @@ function _actualiserMenu() {
         else comparerItem.classList.add('u-hide');
     }
 
-    // Libellé canonique « Enregistrer le codex » partout (décision Grégoire,
-    // 11 juin 2026 — ECOSYSTEME-DONNEES.md : verbes ouvrir/enregistrer ; l'ancien
-    // « Télécharger » Safari ne disait pas la direction). La mécanique Safari
-    // (téléchargement d'un nouveau fichier) reste dite par le sous-texte ci-dessous.
+    // Libellé canonique « Mettre à jour le codex » partout (D4, Grégoire, 26 sept. 2026 :
+    // « Enregistré » ne veut plus dire qu'écrit dans l'application ; le codex a son verbe).
+    // La mécanique Safari (téléchargement d'un nouveau fichier) reste dite par le sous-texte.
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var enregLabel = document.getElementById('codex-menu-enreg-label');
     if (enregLabel) {
-        enregLabel.textContent = 'Enregistrer le codex';
+        enregLabel.textContent = 'Mettre à jour le codex';
     }
 
     // Sous-texte "Enregistrer" : montre le bon mode selon le contexte
@@ -2728,7 +2727,7 @@ function _actualiserMenu() {
             enregInfo.textContent = 'Télécharge un nouveau fichier';
             enregInfo.classList.remove('u-hide');
         } else if (_fileHandle) {
-            enregInfo.textContent = 'Vers le même emplacement';
+            enregInfo.textContent = 'Dans le même fichier';
             enregInfo.classList.remove('u-hide');
         } else {
             enregInfo.classList.add('u-hide');
@@ -2831,7 +2830,7 @@ async function actionOuvrir() {
 }
 
 /**
- * Enregistrer le codex (génère + sauvegarde).
+ * Mettre à jour le codex (génère + écrit le fichier).
  * Si un handle FSAPI est disponible, ré-écrit directement sans dialogue.
  */
 async function actionEnregistrer() {
@@ -2848,11 +2847,11 @@ async function actionEnregistrer() {
         if (sauvegarde.methode === 'annule') return;
         await _marquerCodexAJour(resultat);
 
-        var methodeLabel = avaitHandle ? 'même emplacement' :
-                           sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
+        var methodeLabel = avaitHandle ? 'même fichier' :
+                           sauvegarde.methode === 'fsapi' ? 'fichier choisi' :
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
         notifications.succes(
-            'Codex enregistré',
+            'Codex mis à jour',
             _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
         );
     } catch (e) {
@@ -2877,10 +2876,10 @@ async function actionEnregistrerSous() {
         if (sauvegarde.methode === 'annule') return;
         await _marquerCodexAJour(resultat);
 
-        var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
+        var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouveau fichier' :
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
         notifications.succes(
-            'Codex enregistré',
+            'Codex mis à jour',
             _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
         );
     } catch (e) {
@@ -2921,13 +2920,13 @@ function actionDetails() {
 
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var noteFsapi = fsapiOk
-        ? '\n\nMode : enregistrement direct sur le fichier ouvert (Chrome/Edge).'
-        : '\n\nMode : téléchargement d\'un nouveau fichier à chaque enregistrement (Safari/iPad). Pense à remplacer manuellement le fichier précédent sur ta clé USB.';
+        ? '\n\nMode : mise à jour directe du fichier ouvert (Chrome/Edge).'
+        : '\n\nMode : téléchargement d\'un nouveau fichier à chaque mise à jour (Safari/iPad). Pense à remplacer toi-même le fichier précédent sur ta clé USB.';
 
     if (!_etat.manifeste) {
         uiDialogues.informer({
             titre: 'Aucun codex actif',
-            message: 'Pour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles' + noteFsapi,
+            message: 'Pour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Mettre à jour le codex » pour mettre tes données actuelles dans un fichier' + noteFsapi,
             preformate: true
         });
         return;
@@ -2940,7 +2939,7 @@ function actionDetails() {
         'Appareil : ' + (m.appareil || 'inconnu') + '\n' +
         'Version app : ' + (m.appVersion || '?') + '\n' +
         '\nCréé : ' + _formaterDateLocale(m.dateCreation) + '\n' +
-        'Dernière sauvegarde : ' + _formaterDateLocale(m.dateDerniereModification) + '\n' +
+        'Dernière mise à jour : ' + _formaterDateLocale(m.dateDerniereModification) + '\n' +
         '\nContenu :\n' +
         '  ' + (m.contenu.cles ? m.contenu.cles.length : '?') + ' clés de données\n' +
         '  ' + (m.contenu.nombreFichiersTravaux || 0) + ' fichiers travaux\n' +
@@ -2990,7 +2989,7 @@ async function actionFusionner() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
+        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou mets à jour le codex avec tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
         return;
     }
 
@@ -3150,7 +3149,7 @@ async function actionFusionner() {
         resume += 'Erreurs fichiers : ' + statsTravaux.erreurs.length + '\n';
     }
 
-    resume += '\nPense à enregistrer le codex pour sauvegarder la fusion.';
+    resume += '\nPense à mettre à jour le codex pour y mettre la fusion.';
 
     await uiDialogues.informer({ titre: 'Fusion terminée', message: resume, preformate: true });
 
@@ -3180,7 +3179,7 @@ async function actionComparer() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou enregistre tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
+        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou mets à jour le codex avec tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
         return;
     }
 
@@ -3254,13 +3253,13 @@ function _construireRapportComparaison(externe, analyse, analyseTravaux) {
     lignes.push('');
     lignes.push('Codex local   : ' + nomLocal);
     if (_etat.manifeste) {
-        lignes.push('  Dernière sauvegarde : ' + _formaterDateLocale(_etat.manifeste.dateDerniereModification));
+        lignes.push('  Dernière mise à jour : ' + _formaterDateLocale(_etat.manifeste.dateDerniereModification));
         lignes.push('  Trimestre : ' + (_etat.manifeste.trimestre || 'non défini'));
     }
     lignes.push('');
     lignes.push('Codex externe : ' + nomExterne);
     if (externe.manifeste) {
-        lignes.push('  Dernière sauvegarde : ' + _formaterDateLocale(externe.manifeste.dateDerniereModification));
+        lignes.push('  Dernière mise à jour : ' + _formaterDateLocale(externe.manifeste.dateDerniereModification));
         lignes.push('  Trimestre : ' + (externe.manifeste.trimestre || 'non défini'));
         lignes.push('  Auteur : ' + (externe.manifeste.auteur || 'non défini'));
     }
@@ -3411,7 +3410,7 @@ async function actionExporterSelection() {
     }
 
     if (trimestres.length === 1) {
-        notifications.info('Un seul trimestre détecté (' + trimestres[0] + ').', 'Utilise « Enregistrer le codex » pour un export complet.');
+        notifications.info('Un seul trimestre détecté (' + trimestres[0] + ').', 'Utilise « Mettre à jour le codex » pour un export complet.');
         return;
     }
 
@@ -3580,7 +3579,7 @@ async function actionExporterSelection() {
     if (resultatSave.methode !== 'annule') {
 
         notifications.succes(
-            'Export sélectif enregistré',
+            'Export sélectif terminé',
             nomsTrimestres + ' — ' + _formaterTaille(zipBlob.size)
         );
     }
@@ -3615,8 +3614,8 @@ async function actionFermer() {
 
     if (_etat.modificationsDepuis) {
         if (!(await uiDialogues.confirmerAction({
-            titre: 'Modifications non enregistrées',
-            message: 'Des modifications ne sont pas enregistrées. Fermer quand même ?',
+            titre: 'Ton codex n\'a pas tes derniers changements',
+            message: 'Tes données restent dans l\'application ; seul le fichier du codex n\'est pas à jour. Fermer le codex quand même ?',
             texteConfirmer: 'Fermer'
         }))) {
             return;

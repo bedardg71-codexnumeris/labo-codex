@@ -1885,7 +1885,7 @@ function ouvrirProprieteFichier(fichierId) {
             '</select>' +
             '<small style="display:block;color:var(--gris-moyen);margin:-12px 0 16px 0;font-size:0.75em">Lier ce fichier \u00e0 une \u00e9valuation sp\u00e9cifique (originale ou reprise).</small>' +
             '<div class="modal-actions" style="display:flex;gap:8px">' +
-                '<button class="btn btn-confirmer" id="prop-fichier-btn-sauver">Sauvegarder</button>' +
+                '<button class="btn btn-confirmer" id="prop-fichier-btn-sauver">Enregistrer</button>' +
                 '<button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>' +
             '</div>' +
         '</div>';

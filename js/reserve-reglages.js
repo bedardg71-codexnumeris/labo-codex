@@ -178,7 +178,7 @@ function _rendreTableau() {
     if (entrees.length === 0) {
         conteneur.innerHTML =
             '<p class="text-muted text-center" style="padding: 24px;">' +
-                'Aucune archive enregistrée. Utilise <strong>Codex › Archiver…</strong> ' +
+                'Aucune archive pour l’instant. Utilise <strong>Codex › Archiver…</strong> ' +
                 'pour archiver un groupe-cours.' +
             '</p>';
         return;

@@ -448,7 +448,7 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
 
     } catch (error) {
         console.error('Erreur toggle artefact:', error);
-        alert('Erreur lors de la sauvegarde');
+        alert('Erreur lors de l\'enregistrement');
     }
 }
 
