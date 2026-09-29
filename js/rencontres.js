@@ -411,6 +411,7 @@ async function creerMonService() {
     };
     groupesCours.push(gc);
     db.setSync(cleGC, groupesCours);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleGC);   // lot F : geste hors témoin (créer mon service)
 
     // 5. Le service devient le contexte actif ; l'en-tête et le Cadre le montrent.
     if (typeof changerGroupeCoursActifV2 === 'function') await changerGroupeCoursActifV2(gc.id);

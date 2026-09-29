@@ -56,6 +56,7 @@ function chargerEnsemblesObjectifs() {
  */
 function sauvegarderEnsemblesObjectifs(ensembles) {
     db.setSync('objectifsTemplates', ensembles);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager('objectifsTemplates');   // lot F : geste hors témoin (sauvegarderEnsemblesObjectifs)
     mettreAJourStatsObjectifs();
     afficherListeEnsemblesObjectifs();
 }

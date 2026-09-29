@@ -2048,7 +2048,7 @@ window.confirmerImportGrilles = async function(donnees) {
         let nbMisesAJour = 0;
         let idsImportes = [];
 
-        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+        const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
@@ -2078,6 +2078,7 @@ window.confirmerImportGrilles = async function(donnees) {
 
             return bibliotheque;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportGrilles)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert, PUIS conduire l'œil
         // au résultat. Rapport testeur du 8 septembre 2026 : « la bibliothèque
@@ -2659,7 +2660,7 @@ async function ajouterGrilleIndividuelle(id) {
         let nomEnConflit = null;
         let sourceIntrouvable = false;
 
-        await db.modifier(cle('grillesTemplates'), async (lues) => {
+        const ecritLotF = await db.modifier(cle('grillesTemplates'), async (lues) => {
             let grilles = lues || [];
 
             // Vérifier si la grille existe déjà (par ID direct ou par idOriginal pour les imports)
@@ -2704,6 +2705,7 @@ async function ajouterGrilleIndividuelle(id) {
             grille = trouvee;
             return grilles;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('grillesTemplates'));   // lot F : geste hors témoin (ajouterGrilleIndividuelle)
 
         if (nomEnConflit) {
             alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
@@ -2744,7 +2746,7 @@ async function ajouterGrilleIndividuelle(id) {
  * @param {string} id - ID de la grille à retirer
  */
 async function retirerGrilleDeBibliotheque(id) {
-    await db.modifier(cle('grillesTemplates'), (lues) => {
+    const ecritLotF = await db.modifier(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const grille = grilles.find(g => g.id === id);
         if (!grille) return undefined;
@@ -2753,6 +2755,7 @@ async function retirerGrilleDeBibliotheque(id) {
         grille.dansBibliotheque = false;
         return grilles;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('grillesTemplates'));   // lot F : geste hors témoin (retirerGrilleDeBibliotheque)
 
     // Rafraîchir les affichages
     await afficherListeGrilles();

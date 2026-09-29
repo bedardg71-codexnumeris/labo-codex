@@ -285,11 +285,26 @@
     }
 
     /**
+     * Lot F (D4) : les gestes de l'usager sur les copies (import, renommer, réassigner,
+     * corbeille…) écrivent ici, hors du témoin commun : ce point le dit au codex, une
+     * seule fois pour tous (`signalerEcritureUsager`). Les appelants de la machine
+     * (migrations, purge au démarrage, drapeau « exporté ») passent `{ discret: true }`.
+     * @param {string} cleEcrite
+     * @param {{discret?: boolean}} [options]
+     */
+    function _signalerSiGeste(cleEcrite, options) {
+        if (options && options.discret) return;
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleEcrite);
+    }
+
+    /**
      * Sauvegarde la liste des fichiers travaux
      * @param {Array} fichiers - Liste mise a jour
+     * @param {{discret?: boolean}} [options] - voir _signalerSiGeste
      */
-    function sauvegarderFichiersTravaux(fichiers) {
+    function sauvegarderFichiersTravaux(fichiers, options) {
         db.setSync(cle('fichiersTravaux'), fichiers);
+        _signalerSiGeste(cle('fichiersTravaux'), options);
     }
 
     /**
@@ -889,9 +904,11 @@
     /**
      * Sauvegarde les annotations
      * @param {Array} annotations - Liste des annotations
+     * @param {{discret?: boolean}} [options] - voir _signalerSiGeste
      */
-    function sauvegarderAnnotations(annotations) {
+    function sauvegarderAnnotations(annotations, options) {
         db.setSync(cle('annotationsTravaux'), annotations);
+        _signalerSiGeste(cle('annotationsTravaux'), options);
     }
 
     /**
@@ -907,8 +924,9 @@
     /**
      * Sauvegarde l'annotation d'un fichier
      * @param {Object} annotation - L'annotation a sauvegarder
+     * @param {{discret?: boolean}} [options] - voir _signalerSiGeste
      */
-    function sauvegarderAnnotationFichier(annotation) {
+    function sauvegarderAnnotationFichier(annotation, options) {
         const annotations = obtenirAnnotations();
         const index = annotations.findIndex(a => a.id === annotation.id);
 
@@ -919,7 +937,7 @@
         }
 
         annotation.dateModification = new Date().toISOString();
-        sauvegarderAnnotations(annotations);
+        sauvegarderAnnotations(annotations, options);
     }
 
     /* ===============================
@@ -939,9 +957,11 @@
     /**
      * Sauvegarde la corbeille
      * @param {Array} corbeille
+     * @param {{discret?: boolean}} [options] - voir _signalerSiGeste
      */
-    function sauvegarderCorbeille(corbeille) {
+    function sauvegarderCorbeille(corbeille, options) {
         db.setSync(cle('corbeilleFichiers'), corbeille);
+        _signalerSiGeste(cle('corbeilleFichiers'), options);
     }
 
     /**
@@ -1041,15 +1061,16 @@
      * #572 — Retire les annotations des fichiers donnés (suppression définitive,
      * purge de la corbeille). N'écrit rien s'il n'y a rien à retirer.
      * @param {string[]} ids
+     * @param {{discret?: boolean}} [options] - voir _signalerSiGeste
      * @returns {number} nombre d'annotations retirées
      */
-    function supprimerAnnotationsFichiers(ids) {
+    function supprimerAnnotationsFichiers(ids, options) {
         const cibles = new Set(ids || []);
         if (cibles.size === 0) return 0;
         const annotations = obtenirAnnotations();
         const restantes = annotations.filter(a => !(a && cibles.has(a.fichierId)));
         const retirees = annotations.length - restantes.length;
-        if (retirees > 0) sauvegarderAnnotations(restantes);
+        if (retirees > 0) sauvegarderAnnotations(restantes, options);
         return retirees;
     }
 
@@ -1074,8 +1095,8 @@
 
         if (expirees.length === 0) return 0;
 
-        // #572 — leurs annotations aussi.
-        supprimerAnnotationsFichiers(expirees.map(f => f.id));
+        // #572 — leurs annotations aussi. Purge au démarrage : pas un geste (lot F).
+        supprimerAnnotationsFichiers(expirees.map(f => f.id), { discret: true });
 
         // Supprimer les blobs expirés
         for (const f of expirees) {
@@ -1086,7 +1107,7 @@
             }
         }
 
-        sauvegarderCorbeille(restantes);
+        sauvegarderCorbeille(restantes, { discret: true });
         return expirees.length;
     }
 
@@ -1152,7 +1173,7 @@
             }
         }
         if (modifie) {
-            sauvegarderFichiersTravaux(fichiers);
+            sauvegarderFichiersTravaux(fichiers, { discret: true });
         }
     }
 
@@ -1166,7 +1187,7 @@
         if (f) {
             f.blobStatut = 'exporte';
             f.dateExport = new Date().toISOString();
-            sauvegarderFichiersTravaux(fichiers);
+            sauvegarderFichiersTravaux(fichiers, { discret: true });
         }
     }
 
@@ -1196,7 +1217,7 @@
             }
         }
         if (compteur > 0) {
-            sauvegarderFichiersTravaux(fichiers);
+            sauvegarderFichiersTravaux(fichiers, { discret: true });
         }
 
         // 2. Migrer la corbeille
@@ -1211,7 +1232,7 @@
             }
         }
         if (compteurCorbeille > 0) {
-            sauvegarderCorbeille(corbeille);
+            sauvegarderCorbeille(corbeille, { discret: true });
         }
 
         db.setSync('_migration_thumbnails_done', true);

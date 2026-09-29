@@ -324,7 +324,7 @@ async function creerNouvelleProduction() {
  */
 async function dupliquerProduction(id) {
     let copieCreee = null;
-    await db.modifier(getCleProductions(), (lues) => {
+    const ecritLotF = await db.modifier(getCleProductions(), (lues) => {
         const productions = lues || [];
         const production = productions.find(p => p.id === id);
 
@@ -356,6 +356,7 @@ async function dupliquerProduction(id) {
         copieCreee = copie;
         return productions;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (dupliquerProduction)
 
     if (!copieCreee) return;
     const copie = copieCreee;
@@ -405,9 +406,10 @@ async function supprimerProductionActive() {
 
     // ⚠ La collection est relue DANS la file : celle d'avant la confirmation ne
     // vaut plus rien.
-    await db.modifier(getCleProductions(), (lues) => {
+    const ecritLotF = await db.modifier(getCleProductions(), (lues) => {
         return (lues || []).filter(e => e.id !== productionEnEdition);
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionActive)
 
     // Fermer le formulaire et retourner à l'accueil
     annulerFormProduction();

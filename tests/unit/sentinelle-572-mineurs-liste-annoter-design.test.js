@@ -53,7 +53,7 @@ describe('#572 · annotations purgées avec le fichier', () => {
         const a = stockage.indexOf('async function supprimerDefinitivement(');
         expect(stockage.slice(a, stockage.indexOf('\n    }\n', a))).toContain('supprimerAnnotationsFichiers([id])');
         const b = stockage.indexOf('async function purgerCorbeilleExpiree(');
-        expect(stockage.slice(b, stockage.indexOf('\n    }\n', b))).toContain('supprimerAnnotationsFichiers(expirees.map(f => f.id))');
+        expect(stockage.slice(b, stockage.indexOf('\n    }\n', b))).toContain('supprimerAnnotationsFichiers(expirees.map(f => f.id), { discret: true })');   // lot F : purge au démarrage, pas un geste
     });
     it('supprimerAnnotationsFichiers ne retire que les annotations visées, et n\'écrit rien à vide', () => {
         const store = { test_annotationsTravaux: [{ fichierId: 'F1', x: 1 }, { fichierId: 'F2', x: 2 }, { fichierId: 'F3', x: 3 }] };

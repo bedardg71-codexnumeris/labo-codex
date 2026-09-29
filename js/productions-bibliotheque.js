@@ -85,7 +85,7 @@ async function ajouterALaBibliotheque(production) {
     // concurrents du même item passaient tous les deux, et la bibliothèque
     // partagée gardait un doublon que rien ne signalait.
     let dejaPresente = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
         const bibliotheque = lues || [];
 
         // Vérifier si déjà présente (par ID)
@@ -114,6 +114,7 @@ async function ajouterALaBibliotheque(production) {
         bibliotheque.push(productionBiblio);
         return bibliotheque;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRODUCTIONS);   // lot F : geste hors témoin (ajouterALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -132,7 +133,7 @@ async function retirerDeLaBibliotheque(productionId) {
     // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_PRODUCTIONS, (lues) => {
         const bibliotheque = lues || [];
         const restants = bibliotheque.filter(p => p.id !== productionId);
 
@@ -142,6 +143,7 @@ async function retirerDeLaBibliotheque(productionId) {
         retiree = true;
         return restants;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRODUCTIONS);   // lot F : geste hors témoin (retirerDeLaBibliotheque)
 
     if (!retiree) {
         return false;

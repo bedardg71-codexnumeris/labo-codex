@@ -1126,7 +1126,7 @@ window.confirmerImportEchelles = async function(donnees) {
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
 
-        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+        const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
@@ -1143,6 +1143,7 @@ window.confirmerImportEchelles = async function(donnees) {
 
             return bibliotheque;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportEchelles)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeEchelles')) {
@@ -1449,7 +1450,7 @@ async function ajouterEchelleIndividuelle(id) {
         let nomEnConflit = null;
         let sourceIntrouvable = false;
 
-        await db.modifier(cle('echellesTemplates'), async (lues) => {
+        const ecritLotF = await db.modifier(cle('echellesTemplates'), async (lues) => {
             let echelles = lues || [];
             let trouvee = echelles.find(e => e.id === id);
             if (!trouvee) {
@@ -1486,6 +1487,7 @@ async function ajouterEchelleIndividuelle(id) {
             echelle = trouvee;
             return echelles;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (ajouterEchelleIndividuelle)
 
         if (nomEnConflit) {
             alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
@@ -1518,7 +1520,7 @@ async function ajouterEchelleIndividuelle(id) {
 }
 
 async function retirerEchelleDeBibliotheque(id) {
-    await db.modifier(cle('echellesTemplates'), (lues) => {
+    const ecritLotF = await db.modifier(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const echelle = echelles.find(e => e.id === id);
         if (!echelle) return undefined;
@@ -1527,6 +1529,7 @@ async function retirerEchelleDeBibliotheque(id) {
         echelle.dansBibliotheque = false;
         return echelles;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (retirerEchelleDeBibliotheque)
 
     // Rafraîchir les affichages
     await afficherListeEchelles();
