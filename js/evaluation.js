@@ -1015,7 +1015,7 @@ function _afficherCriteresDepuisEvaluation(evaluation) {
 
     conteneur.innerHTML = `
         <div class="alerte alerte-attention" style="margin-bottom: 1rem">
-            Grille d'origine introuvable dans les modèles actuels — affichage depuis les données sauvegardées.
+            Grille d'origine introuvable dans les modèles actuels : affichage depuis les données enregistrées.
         </div>
         ${html}`;
 }

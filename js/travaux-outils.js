@@ -1234,6 +1234,7 @@
             raccourcis[itemId] = '';
         }
         db.setSync('raccourcisAnnotation', raccourcis);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('raccourcisAnnotation');   // lot F : geste hors témoin (définir un raccourci)
         _raccourcisCache = raccourcis;
     }
 
@@ -3003,6 +3004,7 @@
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
         notifications.succes('Tampons et r\u00e9troactions enregistr\u00e9s');
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('tamponsPersonnalises');   // lot F : geste hors témoin (enregistrer les tampons et rétroactions)
     }
 
     function reinitialiserRetroObservations() {
@@ -3028,6 +3030,7 @@
         db.setSync('couleursCategories', null);
         // Supprimer les tampons personnalises
         db.setSync('tamponsPersonnalises', null);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('tamponsPersonnalises');   // lot F : geste hors témoin (réinitialiser les tampons)
         for (var i = AUTOCOLLANTS.length - 1; i >= 0; i--) {
             if (AUTOCOLLANTS[i].custom) AUTOCOLLANTS.splice(i, 1);
         }
@@ -3539,6 +3542,7 @@
             }
 
             notifications.succes(tamponsImport.length + ' tampon(s) import\u00e9(s)');
+            if (window.signalerEcritureUsager) window.signalerEcritureUsager('tamponsPersonnalises');   // lot F : geste hors témoin (importer un fichier de tampons)
         } catch (err) {
             console.error('[Tampons] Erreur confirmerImport:', err);
             alert('Erreur lors de l\u2019import.\n' + err.message);
@@ -3728,6 +3732,7 @@
         rafraichirPalettesApresPersonnalisation();
         modal.remove();
         notifications.succes('Codes d\u2019erreurs et r\u00e9troactions enregistr\u00e9s');
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('retroactionsErreursFr');   // lot F : geste hors témoin (enregistrer les codes d'erreurs)
     }
 
     function reinitialiserRetroErreursFr() {
@@ -3735,6 +3740,7 @@
         db.setSync('retroactionsErreursFr', null);
         db.setSync('personnalisationErreursFr', null);
         db.setSync('ordreErreursFr', null);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('retroactionsErreursFr');   // lot F : geste hors témoin (réinitialiser les codes d'erreurs)
         appliquerPersonnalisations();
         // Rouvrir le modal pour refleter l'ordre et les valeurs par defaut
         ouvrirEditionRetroErreursFr();
@@ -3841,6 +3847,7 @@
 
     function changerModeSyntheseErrFr(mode) {
         db.setSync('errfrModeSynthese', mode);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager('errfrModeSynthese');   // lot F : geste hors témoin (mode de synthèse des erreurs)
     }
 
     function obtenirModeSyntheseErrFr() {

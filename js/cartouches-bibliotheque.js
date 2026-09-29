@@ -84,7 +84,7 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
     // concurrents du même item passaient tous les deux, et la bibliothèque
     // partagée gardait un doublon que rien ne signalait.
     let dejaPresente = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
         const bibliotheque = lues || [];
 
         const existe = bibliotheque.some(c => c.id === cartoucheSafe.id);
@@ -106,6 +106,7 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
         bibliotheque.push(cartoucheBiblio);
         return bibliotheque;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_CARTOUCHES);   // lot F : geste hors témoin (ajouterCartoucheALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -124,7 +125,7 @@ async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
     // concurrents sur la MÊME Bibliothèque s'écrasaient l'un l'autre :
     // les cinq familles écrivent dans un seul magasin, pas un par famille.
     let retiree = false;
-    await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
+    const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_CARTOUCHES, (lues) => {
         const bibliotheque = lues || [];
         const restants = bibliotheque.filter(c => c.id !== cartoucheId);
 
@@ -134,6 +135,7 @@ async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
         retiree = true;
         return restants;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_CARTOUCHES);   // lot F : geste hors témoin (retirerCartoucheDeLaBibliotheque)
 
     if (!retiree) {
         return false;

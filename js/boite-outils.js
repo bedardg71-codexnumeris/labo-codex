@@ -909,6 +909,7 @@ function changerCategorieQuestion(questionId, nouvelleCategorieId) {
 
     question.categorieId = nouvelleCategorieId || null;
     sauvegarderEtatQuestions();
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(obtenirCleQuestions());   // lot F : geste hors témoin (questions saisies)
 
     // Rafraîchir la liste (la question va changer de groupe)
     rafraichirListeQuestionsModal();
@@ -1049,6 +1050,7 @@ function ajouterCategorie() {
 
     etatQuestions.categories.push(nouvelleCategorie);
     sauvegarderEtatQuestions();
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(obtenirCleQuestions());   // lot F : geste hors témoin (questions saisies)
 
     // Rafraîchir le modal sans le fermer
     rafraichirListeQuestionsModal();
@@ -1075,6 +1077,7 @@ function supprimerCategorie(categorieId) {
     // Supprimer la catégorie
     etatQuestions.categories = etatQuestions.categories.filter(c => c.id !== categorieId);
     sauvegarderEtatQuestions();
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(obtenirCleQuestions());   // lot F : geste hors témoin (questions saisies)
 
     // Rafraîchir le modal sans le fermer
     rafraichirListeQuestionsModal();
@@ -1101,6 +1104,7 @@ function ajouterQuestion() {
 
     etatQuestions.questions.push(nouvelleQuestion);
     sauvegarderEtatQuestions();
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(obtenirCleQuestions());   // lot F : geste hors témoin (questions saisies)
 
     // Vider le champ
     if (texteEl) texteEl.value = '';
@@ -1126,6 +1130,7 @@ function modifierQuestion(questionId) {
 
     question.texte = nouveauTexte.trim();
     sauvegarderEtatQuestions();
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(obtenirCleQuestions());   // lot F : geste hors témoin (questions saisies)
 
     // Rafraîchir le modal sans le fermer
     rafraichirListeQuestionsModal();
@@ -1140,6 +1145,7 @@ function supprimerQuestion(questionId) {
     etatQuestions.questions = etatQuestions.questions.filter(q => q.id !== questionId);
     etatQuestions.dejaPositions = etatQuestions.dejaPositions.filter(id => id !== questionId);
     sauvegarderEtatQuestions();
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(obtenirCleQuestions());   // lot F : geste hors témoin (questions saisies)
 
     // Rafraîchir le modal sans le fermer
     rafraichirListeQuestionsModal();

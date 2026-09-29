@@ -6310,7 +6310,7 @@
                     <div class="editeur-pages-boutons">
                         <button class="btn btn-secondaire" data-action="travauxUI.ajouterPagesEditeur">+ Ajouter des pages</button>
                         <button class="btn btn-secondaire" data-action="travauxUI.ouvrirModalFusionEditeur">Fusionner</button>
-                        <button class="btn btn-principal" data-action="travauxUI.sauvegarderEdition">Sauvegarder</button>
+                        <button class="btn btn-principal" data-action="travauxUI.sauvegarderEdition">Enregistrer</button>
                     </div>
                 </div>
             </div>
@@ -6629,7 +6629,7 @@
             notifications.succes(message);
         } catch (err) {
             console.error('[Editeur Pages] Erreur sauvegarde:', err);
-            alert('Erreur lors de la sauvegarde : ' + err.message);
+            alert('Erreur lors de l\'enregistrement : ' + err.message);
         }
     }
 
@@ -7131,7 +7131,7 @@
 
                 <div class="modal-actions" style="margin-top: 12px;">
                     <button class="btn btn-secondaire" data-action="travauxUI.fermerModalRetroaction">Annuler</button>
-                    <button class="btn btn-principal" data-action="travauxUI.sauvegarderRetroactionDepuisModal" data-param="${fichierId}">Sauvegarder</button>
+                    <button class="btn btn-principal" data-action="travauxUI.sauvegarderRetroactionDepuisModal" data-param="${fichierId}">Enregistrer</button>
                 </div>
             </div>
         </div>`;
@@ -7178,7 +7178,7 @@
             { geste: 'Enregistrement de la rétroaction' }) !== true) return;
 
         fermerModalRetroaction();
-        notifications.succes('Rétroaction sauvegardée');
+        notifications.succes('Rétroaction enregistrée');
     }
 
     /**

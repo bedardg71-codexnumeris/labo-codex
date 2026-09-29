@@ -517,7 +517,7 @@
                         for (const e of aPurger) {
                             delete m[e.champ];
                         }
-                    });
+                    }, { discret: true });   // migration (lot F)
                 }
             }
 

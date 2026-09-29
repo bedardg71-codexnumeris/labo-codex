@@ -32,7 +32,7 @@ const TOOLTIPS = {
     // --- Codex ---
 
     'entete-codex':
-        'Ton cahier de travail portable sur clé USB — toutes tes données dans un fichier que tu enregistres et ouvres manuellement. Pastille verte = enregistré, orange = modifications non enregistrées.',
+        'Ton cahier de travail portable sur clé USB : toutes tes données dans un fichier que tu mets à jour et ouvres toi-même. Pastille verte : ton codex est à jour. Orange : il n\'a pas tes derniers changements.',
 
     // --- Assistance ---
 
@@ -186,11 +186,11 @@ const TOOLTIPS = {
     'donnees-captures':
         'Tes captures de suivi longitudinal et l\'export anonymisé pour la recherche en éducation.',
     'donnees-codex':
-        'Le Codex est ton espace de travail trimestriel. Exporte-le, ouvre un Codex existant, ou exporte ta configuration pédagogique pour la partager.',
+        'Fais une copie de secours de tes données, ouvre un fichier (codex, copie de secours ou configuration partagée), ou exporte ta configuration pédagogique pour la partager.',
     'donnees-codex-export':
-        'ZIP complet de ton trimestre actif : données, bibliothèques et fichiers étudiants. Pour transporter sur clé USB ou restaurer ailleurs.',
+        'Un fichier avec les données que tu choisis ; coche « Toutes les clés » pour tout garder. Pour restaurer tes données sur cet appareil ou un autre.',
     'donnees-codex-ouvrir':
-        'Importe un Codex complet ou une configuration partagée. Le type est détecté automatiquement.',
+        'Ouvre un codex, une copie de secours ou une configuration partagée. Le type est détecté automatiquement.',
     'donnees-codex-data':
         'Format léger sans blobs (5–30 Mo), multi-trimestres, pour la recherche longitudinale au Labo. À venir : extraction depuis tes Archives.',
     'donnees-voute':
@@ -576,7 +576,7 @@ const TOOLTIPS = {
     'interv-gestion-absences':
         'Lie l\'intervention à une séance. Les absences sont motivées automatiquement (congé motivé). Attention, ce peut être différent du système de gestion institutionnel.',
     'interv-bilan':
-        'Bilan post-intervention. Comparaison automatique avant/après sur les critères ciblés. L\'«avant» est capturé au moment de la première sauvegarde, l\'«après» est calculé en temps réel.',
+        'Bilan post-intervention. Comparaison automatique avant/après sur les critères ciblés. L\'«avant» est capturé au premier enregistrement, l\'«après» est calculé en temps réel.',
 
     // =================================================================
     // T9 — CONCEPTION — Carte d'alignement
@@ -667,7 +667,7 @@ const TOOLTIPS = {
     'nav-labo-accompagnement':
         'Outils d\'observation des apprentissages (SOLO, actions RLO, ACP) et configuration du dépistage RàI (seuils de détection et d\'interprétation).',
     'nav-reg-donnees':
-        'Sauvegarde, restauration, captures A-C-P, export anonymisé, réinitialisation et maintenance.',
+        'Copie de secours, restauration, captures A-C-P, export anonymisé, réinitialisation et maintenance.',
     'nav-reg-apropos':
         'Informations sur l\'application et sa version.',
 

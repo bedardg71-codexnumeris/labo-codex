@@ -236,6 +236,7 @@
 
     function sauvegarderFichiers() {
         db.setSync(cle(CLE_FICHIERS), fichiers);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle(CLE_FICHIERS));   // lot F : geste hors témoin (modélisation : ouvrir un fichier, supprimer)
     }
 
     /* ===============================

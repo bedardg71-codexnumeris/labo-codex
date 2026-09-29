@@ -60,11 +60,15 @@ let _etat = {
 // Perdu au rechargement de la page (comportement normal).
 var _fileHandle = null;
 
-// Auto-save — sauvegarde silencieuse à intervalle quand un handle FSAPI existe.
-var AUTO_SAVE_DELAI = 5 * 60 * 1000;  // 5 minutes par défaut
-var _autoSaveTimerId = null;
-var _autoSaveEnCours = false;
-var _derniereAutoSave = null;          // Date ISO de la dernière auto-save réussie
+// Lot F (29 sept. 2026) : l'enregistrement automatique « Toutes les 5 min » est RETIRÉ,
+// décision de Grégoire (« on ne peut pas produire un backup de 1 Go à chaque 5 minutes ») :
+// le codex est sa copie de sûreté, un automate qui l'écrase sans aperçu pourrait remplacer
+// une bonne copie par un état fautif. Le fichier ne s'écrit que par « Mettre à jour le
+// codex ». Aucun réglage n'était persisté (mesuré) : rien à ignorer à la lecture.
+
+// Lot F (D4) : compte les modifications marquées. Une écriture du fichier ne remet le
+// codex « à jour » que si aucune modification n'est survenue PENDANT sa génération.
+var _compteurModifications = 0;
 
 /* ===============================
    MIGRATION CLASSEUR → CODEX
@@ -193,6 +197,13 @@ async function _purgerCodexHistLegacy() {
  * Restaure l'état du codex depuis le stockage (au démarrage de l'app)
  */
 function initialiserCodex() {
+    // Lot F (D4) : le témoin du codex dit vrai. Chaque « Enregistré » du témoin commun
+    // (une écriture faite par l'usager) rend le codex « pas à jour ». Les écritures
+    // silencieuses de l'application (indices recalculés, migrations : `discret`) ne
+    // parlent pas au témoin commun, et ne touchent donc pas celui du codex : mesuré le
+    // 28 sept., chaque ouverture réécrit une quinzaine de clés sans geste de l'usager.
+    window.addEventListener('donnees-enregistrees', function() { marquerModification(); });
+
     // Lancer la migration (async, non bloquante pour le premier rendu)
     _migrerClesClasseurVersCodex().then(function(resultat) {
         if (resultat.migrees > 0) {
@@ -200,6 +211,7 @@ function initialiserCodex() {
             var etatMigre = db.getSync(CLE_ETAT_CODEX, null);
             if (etatMigre && etatMigre.actif) {
                 _etat = Object.assign({}, _etat, etatMigre);
+                _marquerStockAvantLotF(etatMigre);
                 _mettreAJourIndicateur();
             }
         }
@@ -229,6 +241,7 @@ function initialiserCodex() {
     var etatSauve = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
     if (etatSauve && etatSauve.actif) {
         _etat = Object.assign({}, _etat, etatSauve);
+        _marquerStockAvantLotF(etatSauve);
     } else {
         // #142 — quand localStorage est saturé, _codex_etat est refoulé en
         // IndexedDB seulement : à DOMContentLoaded la lecture synchrone tombe
@@ -241,6 +254,7 @@ function initialiserCodex() {
             var etatTardif = db.getSync(CLE_ETAT_CODEX, null) || db.getSync(CLE_ETAT_ANCIEN, null);
             if (etatTardif && etatTardif.actif) {
                 _etat = Object.assign({}, _etat, etatTardif);
+                _marquerStockAvantLotF(etatTardif);
                 _mettreAJourIndicateur();
             }
         };
@@ -262,13 +276,39 @@ function initialiserCodex() {
  * Persiste l'état courant du codex
  */
 function _sauvegarderEtat() {
-    db.setSync(CLE_ETAT_CODEX, {
+    db.setSync(CLE_ETAT_CODEX, _instantaneEtat());
+}
+
+/**
+ * L'état tel qu'il est persisté. `temoinFiable` : écrit par une version dont le
+ * témoin dit vrai (lot F) — voir _marquerStockAvantLotF.
+ */
+function _instantaneEtat() {
+    return {
         actif: _etat.actif,
         nom: _etat.nom,
         derniereSauvegarde: _etat.derniereSauvegarde,
         modificationsDepuis: _etat.modificationsDepuis,
-        manifeste: _etat.manifeste
-    });
+        manifeste: _etat.manifeste,
+        temoinFiable: true
+    };
+}
+
+/**
+ * Lot F, le stock (décision de Grégoire, 29 sept., option b) : avant le lot, rien ne
+ * marquait les changements, et un codex actif disait « à jour » depuis sa dernière
+ * écriture. Un état actif écrit avant le lot (sans `temoinFiable`) est donc posé
+ * « pas à jour », une seule fois : l'écriture ajoute le drapeau. N'écrit que
+ * `_codex_etat`, jamais les données ; sans codex actif, rien.
+ * La marque est posée en mémoire tout de suite (le menu dit vrai dès l'ouverture),
+ * et persistée après db-ready : écrite avant, la synchronisation IDB → cache du
+ * démarrage la réécrasait par l'ancien état (mesuré par le banc du stock).
+ * @param {Object} etatLu - l'état relu du stockage
+ */
+function _marquerStockAvantLotF(etatLu) {
+    if (!etatLu || !etatLu.actif || etatLu.temoinFiable) return;
+    if (!_etat.modificationsDepuis) _etat.modificationsDepuis = new Date().toISOString();
+    window.auDbPret(_sauvegarderEtat);
 }
 
 /* ===============================
@@ -279,7 +319,6 @@ function _sauvegarderEtat() {
  * Génère un Codex ZIP depuis les données IndexedDB actuelles.
  * @param {Object} [options]
  * @param {string} [options.nom] - Nom du codex
- * @param {boolean} [options.silencieux=false] - Si true, pas d'overlay de progression (auto-save)
  * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object}>}
  */
 async function genererCodex(options = {}) {
@@ -287,14 +326,13 @@ async function genererCodex(options = {}) {
         throw new Error('JSZip non disponible. Impossible de générer le codex.');
     }
 
-    var silencieux = !!options.silencieux;
+    var compteurAuDebut = _compteurModifications;
 
     const debut = performance.now();
-    // En mode silencieux (auto-save), pas d'overlay de progression
-    var _prog = silencieux ? function() {} : _majProgression;
-    var _progMasquer = silencieux ? function() {} : _masquerProgression;
+    var _prog = _majProgression;
+    var _progMasquer = _masquerProgression;
 
-    if (!silencieux) _afficherProgression('Génération du codex');
+    _afficherProgression('Génération du codex');
     _prog(0, 'Lecture des données…');
     await _yield(); // laisser le navigateur peindre l'overlay
 
@@ -373,9 +411,8 @@ async function genererCodex(options = {}) {
         }
     }
 
-    // 3. Mettre à jour le snapshot de référence pour la fusion 3-way —
-    //    index haché depuis #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
-    await _ecrireSnapshotAvant(donnees);
+    // 3. Le snapshot de référence pour la fusion 3-way n'est plus écrit ici : il décrit
+    //    le FICHIER, et le fichier n'existe qu'après son écriture (lot F, _marquerCodexAJour).
 
     // 4. Manifeste
     const maintenant = new Date().toISOString();
@@ -411,15 +448,14 @@ async function genererCodex(options = {}) {
 
     // K-β — preview UI : montrer la liste des fichiers à l'utilisateur
     // avant compression et téléchargement. L'utilisateur peut annuler.
-    // Sautée si silencieux (auto-save) ou si le module preview n'est pas
-    // chargé (dégradation gracieuse).
+    // Sautée seulement si le module preview n'est pas chargé (dégradation gracieuse).
     //
     // Important UX : on masque l'overlay de progression avant la modale
     // (sinon double affichage), puis on le RÉAFFICHE après le clic
     // Télécharger pour montrer la compression (qui peut prendre plusieurs
     // minutes avec beaucoup de fichiers). Sans réaffichage, l'utilisateur
     // attend dans le noir pendant generateAsync.
-    if (!silencieux && window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
+    if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
         const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'codex');
         if (!ok) {
@@ -443,30 +479,23 @@ async function genererCodex(options = {}) {
         }
     );
 
-    // 6. Mettre à jour l'état
+    // 6. L'état « à jour » n'est PAS posé ici (lot F, D4) : le fichier n'est pas encore
+    //    écrit. Avant, un aperçu annulé ou une écriture refusée laissait « Tout est
+    //    enregistré ». C'est `_marquerCodexAJour`, après l'écriture réussie, qui le pose.
     _prog(98, 'Finalisation…');
-    _etat.actif = true;
-    _etat.nom = manifeste.nom;
-    _etat.derniereSauvegarde = maintenant;
-    _etat.modificationsDepuis = null;
-    _etat.manifeste = manifeste;
-    _sauvegarderEtat();
-    _mettreAJourIndicateur();
 
     const duree = Math.round(performance.now() - debut);
 
     _prog(100, 'Codex prêt !', _formaterTaille(zipBlob.size));
 
-    // Pause brève pour que l'utilisateur voie "100%" (sauf auto-save)
-    if (!silencieux) {
-        await new Promise(function(r) { setTimeout(r, 500); });
-    }
+    // Pause brève pour que l'utilisateur voie "100%"
+    await new Promise(function(r) { setTimeout(r, 500); });
     _progMasquer();
 
     // Nom de fichier avec horodatage
     const nomFichier = _genererNomFichier(manifeste.nom);
 
-    return { blob: zipBlob, nomFichier, manifeste };
+    return { blob: zipBlob, nomFichier, manifeste, donnees, compteurAuDebut };
 
     } catch (erreur) {
         _progMasquer();
@@ -1115,17 +1144,17 @@ function etatCodex() {
         modificationsNonSauvees: _etat.modificationsDepuis !== null,
         modificationsDepuis: _etat.modificationsDepuis,
         manifeste: _etat.manifeste ? Object.assign({}, _etat.manifeste) : null,
-        handleFSAPI: !!_fileHandle,     // true si ré-écriture directe possible (Chrome/Edge)
-        autoSaveActif: !!_autoSaveTimerId,
-        derniereAutoSave: _derniereAutoSave
+        handleFSAPI: !!_fileHandle      // true si ré-écriture directe possible (Chrome/Edge)
     };
 }
 
 /**
- * Marque qu'une modification a eu lieu depuis la dernière sauvegarde.
- * Appelé par les autres modules lorsqu'ils modifient des données.
+ * Marque qu'une modification a eu lieu depuis la dernière écriture du fichier.
+ * Lot F (D4) : appelé à chaque « Enregistré » du témoin commun (événement
+ * `donnees-enregistrees`, voir initialiserCodex), plus le renommage et la fusion.
  */
 function marquerModification() {
+    _compteurModifications++;
     if (!_etat.actif) return;
     if (!_etat.modificationsDepuis) {
         _etat.modificationsDepuis = new Date().toISOString();
@@ -1135,10 +1164,34 @@ function marquerModification() {
 }
 
 /**
+ * Lot F (D4) : pose l'état « Ton codex est à jour », APRÈS l'écriture réussie du
+ * fichier, et seulement là. Le snapshot de référence de la fusion 3-way décrit lui
+ * aussi le fichier : il est écrit ici, pas avant (un aperçu annulé le laissait
+ * pointer vers un fichier qui n'existait pas).
+ * Une modification survenue pendant la génération n'est pas dans le fichier : le
+ * codex reste alors « pas à jour ».
+ * @param {{manifeste: Object, donnees: Object, compteurAuDebut: number}} resultat - rendu par genererCodex
+ */
+async function _marquerCodexAJour(resultat) {
+    var donnees = resultat.donnees;
+    await _ecrireSnapshotAvant(donnees);
+    _etat.actif = true;
+    _etat.nom = resultat.manifeste.nom;
+    _etat.derniereSauvegarde = resultat.manifeste.dateDerniereModification;
+    _etat.manifeste = resultat.manifeste;
+    if (_compteurModifications === resultat.compteurAuDebut) {
+        _etat.modificationsDepuis = null;
+    } else if (!_etat.modificationsDepuis) {
+        _etat.modificationsDepuis = new Date().toISOString();
+    }
+    _sauvegarderEtat();
+    _mettreAJourIndicateur();
+}
+
+/**
  * Désactive le codex actif (retour au mode local seul).
  */
 function fermerCodex() {
-    _arreterAutoSave();
     _etat.actif = false;
     _etat.nom = '';
     _etat.derniereSauvegarde = null;
@@ -1202,7 +1255,6 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             // Handle invalide (fichier déplacé, clé USB retirée, etc.)
             console.warn('📂 Handle FSAPI invalide, on redemande...', e.message);
             _fileHandle = null;
-            _arreterAutoSave();
         }
     }
 
@@ -1219,7 +1271,6 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             await _ecrireViaHandle(handle, blob);
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
-            _demarrerAutoSave();
             return { methode: 'fsapi' };
         } catch (e) {
             if (e.name === 'AbortError') {
@@ -2554,101 +2605,6 @@ function _formaterTaille(octets) {
 }
 
 /* ===============================
-   AUTO-SAVE FSAPI
-   =============================== */
-
-/**
- * Démarre le timer d'auto-save.
- * Ne fait rien si pas de handle FSAPI ou si déjà démarré.
- */
-function _demarrerAutoSave() {
-    if (!_fileHandle || _autoSaveTimerId) return;
-    _autoSaveTimerId = setInterval(_executerAutoSave, AUTO_SAVE_DELAI);
-    _mettreAJourIndicateur();
-}
-
-/**
- * Arrête le timer d'auto-save.
- */
-function _arreterAutoSave() {
-    if (_autoSaveTimerId) {
-        clearInterval(_autoSaveTimerId);
-        _autoSaveTimerId = null;
-    }
-    _derniereAutoSave = null;
-    _autoSaveEnCours = false;
-    _mettreAJourIndicateur();
-}
-
-/**
- * Exécute une sauvegarde automatique silencieuse.
- * Ne se déclenche que si :
- * - un handle FSAPI est disponible
- * - il y a des modifications non sauvegardées
- * - aucune auto-save n'est déjà en cours
- */
-async function _executerAutoSave() {
-    // Gardes
-    if (!_fileHandle) { _arreterAutoSave(); return; }
-    if (!_etat.actif) return;
-    if (!_etat.modificationsDepuis) return;
-    if (_autoSaveEnCours) return;
-
-    _autoSaveEnCours = true;
-
-    // Capture du marqueur AVANT que genererCodex ne le mette a null en interne
-    // (cf. _etat.modificationsDepuis = null dans genererCodex). Si l'ecriture
-    // FSAPI echoue ensuite, il faut restaurer le marqueur sinon les modifs
-    // apparaissent comme « sauvees » alors que le fichier disque ne les a pas
-    // (data loss invisible pour l'utilisateur).
-    var marqueurModifsAvant = _etat.modificationsDepuis;
-
-    try {
-        var resultat = await genererCodex({ silencieux: true });
-        // Ré-écriture directe via le handle (pas de dialogue)
-        await _ecrireViaHandle(_fileHandle, resultat.blob);
-
-        _derniereAutoSave = new Date().toISOString();
-
-        notifications.succes(
-            'Enregistrement auto',
-            _formaterTaille(resultat.blob.size) + ' — ' + _formaterHeureLocale(_derniereAutoSave)
-        );
-    } catch (e) {
-        console.warn('📂 Auto-save échoué :', e.message);
-        // Restaurer le marqueur de modifications : genererCodex a deja mis
-        // modificationsDepuis a null en interne, mais l'ecriture FSAPI a
-        // echoue donc les modifs sont en realite toujours non sauvees.
-        // L'indicateur d'en-tete reste « modifie » et l'utilisateur sait.
-        if (_etat.modificationsDepuis === null && marqueurModifsAvant) {
-            _etat.modificationsDepuis = marqueurModifsAvant;
-            _sauvegarderEtat();
-            _mettreAJourIndicateur();
-        }
-        // Handle devenu invalide — arrêter l'auto-save
-        if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'InvalidStateError') {
-            _fileHandle = null;
-            _arreterAutoSave();
-        }
-    } finally {
-        _autoSaveEnCours = false;
-    }
-}
-
-/**
- * Formate une heure locale courte (ex: "11h45")
- */
-function _formaterHeureLocale(dateISO) {
-    if (!dateISO) return '';
-    try {
-        var d = new Date(dateISO);
-        return d.getHours() + 'h' + String(d.getMinutes()).padStart(2, '0');
-    } catch (e) {
-        return '';
-    }
-}
-
-/* ===============================
    INDICATEUR EN-TÊTE
    =============================== */
 
@@ -2734,7 +2690,7 @@ function _actualiserMenu() {
         if (_etat.actif) {
             var modifie = !!_etat.modificationsDepuis;
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';
-            var texteEtat = modifie ? 'Modifications non enregistrées' : 'Tout est enregistré';
+            var texteEtat = modifie ? 'Ton codex n\'a pas tes derniers changements' : 'Ton codex est à jour';
             // _etat.nom est saisi par l'utilisateur (renommage codex). echapper
             // pour eviter qu'un nom contenant <script> ou des attributs event-handler
             // ne soit injecte dans le DOM via innerHTML (XSS).
@@ -2784,14 +2740,13 @@ function _actualiserMenu() {
         else comparerItem.classList.add('u-hide');
     }
 
-    // Libellé canonique « Enregistrer le codex » partout (décision Grégoire,
-    // 11 juin 2026 — ECOSYSTEME-DONNEES.md : verbes ouvrir/enregistrer ; l'ancien
-    // « Télécharger » Safari ne disait pas la direction). La mécanique Safari
-    // (téléchargement d'un nouveau fichier) reste dite par le sous-texte ci-dessous.
+    // Libellé canonique « Mettre à jour le codex » partout (D4, Grégoire, 26 sept. 2026 :
+    // « Enregistré » ne veut plus dire qu'écrit dans l'application ; le codex a son verbe).
+    // La mécanique Safari (téléchargement d'un nouveau fichier) reste dite par le sous-texte.
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var enregLabel = document.getElementById('codex-menu-enreg-label');
     if (enregLabel) {
-        enregLabel.textContent = 'Enregistrer le codex';
+        enregLabel.textContent = 'Mettre à jour le codex';
     }
 
     // Sous-texte "Enregistrer" : montre le bon mode selon le contexte
@@ -2801,32 +2756,10 @@ function _actualiserMenu() {
             enregInfo.textContent = 'Télécharge un nouveau fichier';
             enregInfo.classList.remove('u-hide');
         } else if (_fileHandle) {
-            enregInfo.textContent = 'Vers le même emplacement';
+            enregInfo.textContent = 'Dans le même fichier';
             enregInfo.classList.remove('u-hide');
         } else {
             enregInfo.classList.add('u-hide');
-        }
-    }
-
-    // Indicateur auto-save dans le menu
-    var autoSaveItem = document.getElementById('codex-menu-autosave');
-    var autoSaveSep = document.getElementById('codex-menu-autosave-sep');
-    if (autoSaveItem) {
-        if (_autoSaveTimerId) {
-            autoSaveItem.classList.remove('u-hide');
-            if (autoSaveSep) autoSaveSep.classList.remove('u-hide');
-            var detail = document.getElementById('codex-menu-autosave-detail');
-            if (detail) {
-                var intervMin = Math.round(AUTO_SAVE_DELAI / 60000);
-                var texte = 'Toutes les ' + intervMin + ' min';
-                if (_derniereAutoSave) {
-                    texte += ' — dernier : ' + _formaterHeureLocale(_derniereAutoSave);
-                }
-                detail.textContent = texte;
-            }
-        } else {
-            autoSaveItem.classList.add('u-hide');
-            if (autoSaveSep) autoSaveSep.classList.add('u-hide');
         }
     }
 }
@@ -2859,7 +2792,6 @@ async function actionOuvrir() {
             fichier = await handle.getFile();
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
-            _demarrerAutoSave();
         } catch (e) {
             if (e.name === 'AbortError') return; // Annulé par l'utilisateur
             console.warn('📂 showOpenFilePicker échoué, fallback input file', e.message);
@@ -2927,7 +2859,7 @@ async function actionOuvrir() {
 }
 
 /**
- * Enregistrer le codex (génère + sauvegarde).
+ * Mettre à jour le codex (génère + écrit le fichier).
  * Si un handle FSAPI est disponible, ré-écrit directement sans dialogue.
  */
 async function actionEnregistrer() {
@@ -2936,15 +2868,19 @@ async function actionEnregistrer() {
     try {
         var avaitHandle = !!_fileHandle;
         var resultat = await genererCodex();
+        // Lot F : aperçu annulé → ni succès, ni « à jour » (avant : « Cannot read
+        // properties of null » affiché comme une erreur).
+        if (!resultat) return;
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier);
 
         if (sauvegarde.methode === 'annule') return;
+        await _marquerCodexAJour(resultat);
 
-        var methodeLabel = avaitHandle ? 'même emplacement' :
-                           sauvegarde.methode === 'fsapi' ? 'emplacement choisi' :
+        var methodeLabel = avaitHandle ? 'même fichier' :
+                           sauvegarde.methode === 'fsapi' ? 'fichier choisi' :
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
         notifications.succes(
-            'Codex enregistré',
+            'Codex mis à jour',
             _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
         );
     } catch (e) {
@@ -2961,14 +2897,18 @@ async function actionEnregistrerSous() {
 
     try {
         var resultat = await genererCodex();
+        // Lot F : aperçu annulé → ni succès, ni « à jour » (avant : « Cannot read
+        // properties of null » affiché comme une erreur).
+        if (!resultat) return;
         var sauvegarde = await sauvegarderVersDestination(resultat.blob, resultat.nomFichier, { forcerDialogue: true });
 
         if (sauvegarde.methode === 'annule') return;
+        await _marquerCodexAJour(resultat);
 
-        var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouvel emplacement' :
+        var methodeLabel = sauvegarde.methode === 'fsapi' ? 'nouveau fichier' :
                            sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
         notifications.succes(
-            'Codex enregistré',
+            'Codex mis à jour',
             _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel
         );
     } catch (e) {
@@ -3009,13 +2949,13 @@ function actionDetails() {
 
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var noteFsapi = fsapiOk
-        ? '\n\nMode : enregistrement direct sur le fichier ouvert (Chrome/Edge).'
-        : '\n\nMode : téléchargement d\'un nouveau fichier à chaque enregistrement (Safari/iPad). Pense à remplacer manuellement le fichier précédent sur ta clé USB.';
+        ? '\n\nMode : mise à jour directe du fichier ouvert (Chrome/Edge).'
+        : '\n\nMode : téléchargement d\'un nouveau fichier à chaque mise à jour (Safari/iPad). Pense à remplacer toi-même le fichier précédent sur ta clé USB.';
 
     if (!_etat.manifeste) {
         uiDialogues.informer({
             titre: 'Aucun codex actif',
-            message: 'Pour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Enregistrer le codex » pour sauvegarder tes données actuelles' + noteFsapi,
+            message: 'Pour commencer :\n• « Ouvrir un codex » pour charger un fichier existant\n• « Nouveau codex » pour en créer un\n• « Mettre à jour le codex » pour mettre tes données actuelles dans un fichier' + noteFsapi,
             preformate: true
         });
         return;
@@ -3028,7 +2968,7 @@ function actionDetails() {
         'Appareil : ' + (m.appareil || 'inconnu') + '\n' +
         'Version app : ' + (m.appVersion || '?') + '\n' +
         '\nCréé : ' + _formaterDateLocale(m.dateCreation) + '\n' +
-        'Dernière sauvegarde : ' + _formaterDateLocale(m.dateDerniereModification) + '\n' +
+        'Dernière mise à jour : ' + _formaterDateLocale(m.dateDerniereModification) + '\n' +
         '\nContenu :\n' +
         '  ' + (m.contenu.cles ? m.contenu.cles.length : '?') + ' clés de données\n' +
         '  ' + (m.contenu.nombreFichiersTravaux || 0) + ' fichiers travaux\n' +
@@ -3061,13 +3001,7 @@ async function actionRenommer() {
     _sauvegarderEtat();
     // ✅ CORRIGÉ (16 mars 2026) : forcer l'écriture IDB pour que syncToLocalStorageCache
     // au prochain chargement ne réécrase pas le nouveau nom avec l'ancien
-    await db.set(CLE_ETAT_CODEX, {
-        actif: _etat.actif,
-        nom: _etat.nom,
-        derniereSauvegarde: _etat.derniereSauvegarde,
-        modificationsDepuis: _etat.modificationsDepuis,
-        manifeste: _etat.manifeste
-    });
+    await db.set(CLE_ETAT_CODEX, _instantaneEtat());
 }
 
 /**
@@ -3078,7 +3012,7 @@ async function actionFusionner() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou enregistre tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
+        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou mets à jour le codex avec tes données), puis utilise « Fusionner » pour combiner avec un autre codex.');
         return;
     }
 
@@ -3238,7 +3172,7 @@ async function actionFusionner() {
         resume += 'Erreurs fichiers : ' + statsTravaux.erreurs.length + '\n';
     }
 
-    resume += '\nPense à enregistrer le codex pour sauvegarder la fusion.';
+    resume += '\nPense à mettre à jour le codex pour y mettre la fusion.';
 
     await uiDialogues.informer({ titre: 'Fusion terminée', message: resume, preformate: true });
 
@@ -3268,7 +3202,7 @@ async function actionComparer() {
     _fermerMenu();
 
     if (!_etat.actif) {
-        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou enregistre tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
+        notifications.info('Aucun codex actif', 'Ouvre d\'abord un codex (ou mets à jour le codex avec tes données), puis utilise « Comparer » pour analyser les différences avec un autre codex.');
         return;
     }
 
@@ -3342,13 +3276,13 @@ function _construireRapportComparaison(externe, analyse, analyseTravaux) {
     lignes.push('');
     lignes.push('Codex local   : ' + nomLocal);
     if (_etat.manifeste) {
-        lignes.push('  Dernière sauvegarde : ' + _formaterDateLocale(_etat.manifeste.dateDerniereModification));
+        lignes.push('  Dernière mise à jour : ' + _formaterDateLocale(_etat.manifeste.dateDerniereModification));
         lignes.push('  Trimestre : ' + (_etat.manifeste.trimestre || 'non défini'));
     }
     lignes.push('');
     lignes.push('Codex externe : ' + nomExterne);
     if (externe.manifeste) {
-        lignes.push('  Dernière sauvegarde : ' + _formaterDateLocale(externe.manifeste.dateDerniereModification));
+        lignes.push('  Dernière mise à jour : ' + _formaterDateLocale(externe.manifeste.dateDerniereModification));
         lignes.push('  Trimestre : ' + (externe.manifeste.trimestre || 'non défini'));
         lignes.push('  Auteur : ' + (externe.manifeste.auteur || 'non défini'));
     }
@@ -3499,7 +3433,7 @@ async function actionExporterSelection() {
     }
 
     if (trimestres.length === 1) {
-        notifications.info('Un seul trimestre détecté (' + trimestres[0] + ').', 'Utilise « Enregistrer le codex » pour un export complet.');
+        notifications.info('Un seul trimestre détecté (' + trimestres[0] + ').', 'Utilise « Mettre à jour le codex » pour un export complet.');
         return;
     }
 
@@ -3668,7 +3602,7 @@ async function actionExporterSelection() {
     if (resultatSave.methode !== 'annule') {
 
         notifications.succes(
-            'Export sélectif enregistré',
+            'Export sélectif terminé',
             nomsTrimestres + ' — ' + _formaterTaille(zipBlob.size)
         );
     }
@@ -3703,8 +3637,8 @@ async function actionFermer() {
 
     if (_etat.modificationsDepuis) {
         if (!(await uiDialogues.confirmerAction({
-            titre: 'Modifications non enregistrées',
-            message: 'Des modifications ne sont pas enregistrées. Fermer quand même ?',
+            titre: 'Ton codex n\'a pas tes derniers changements',
+            message: 'Tes données restent dans l\'application ; seul le fichier du codex n\'est pas à jour. Fermer le codex quand même ?',
             texteConfirmer: 'Fermer'
         }))) {
             return;

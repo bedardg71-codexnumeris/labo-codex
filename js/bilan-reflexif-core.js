@@ -316,12 +316,17 @@ function CLE_REFLEXION()     { return window.cle ? window.cle('autoreflexionBila
    SECTION 4 : PERSISTANCE (couche db)
    =============================== */
 
-function sauvegarderQuestionnaire() {
+// Lot F (D4) : l'éditeur et le parcours écrivent ici, hors du témoin commun ; ce point le
+// dit au codex. L'initialisation (questionnaire de démo, parcours vide, migration) passe
+// `{ discret: true }`.
+function sauvegarderQuestionnaire(options) {
     db.setSync(CLE_QUESTIONNAIRE(), etat.questionnaire);
+    if (!(options && options.discret)) if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_QUESTIONNAIRE());
 }
 
-function sauvegarderParcours() {
+function sauvegarderParcours(options) {
     db.setSync(CLE_PARCOURS(), etat.parcours);
+    if (!(options && options.discret)) if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_PARCOURS());
 }
 
 // Lot E3 (D0 point 2, 28 sept. 2026) : l'auto-réflexion s'écrit par le témoin commun (même clé :

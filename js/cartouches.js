@@ -1993,7 +1993,7 @@ window.confirmerImportCartouches = async function(donnees) {
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
 
-        await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
+        const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
@@ -2029,6 +2029,7 @@ window.confirmerImportCartouches = async function(donnees) {
 
             return bibliotheque;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportCartouches)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeCartouches')) {
@@ -4398,6 +4399,7 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
 
     // security-ok: la source est une copie d'archive écrite par l'app elle-même, pas un fichier externe.
     await db.set(cleDest, garde.liste);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleDest);   // lot F : geste hors témoin (copierCartoucheDepuisTrimestre)
     return { ajoutee: true, conflit: null, grilleCreee: null, grilleAccueil };
 }
 
@@ -4589,7 +4591,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         let sourceIntrouvable = false;
         let grilleManquante = false;
 
-        await db.modifier(cle(`cartouches_${grilleIdLocal}`), async (lues) => {
+        const ecritLotF = await db.modifier(cle(`cartouches_${grilleIdLocal}`), async (lues) => {
         let cartouches = lues || [];
         cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) {
@@ -4630,6 +4632,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 
         return cartouches;
         }, []);
+        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle(`cartouches_${grilleIdLocal}`));   // lot F : geste hors témoin (ajouterCartoucheIndividuelle)
 
         // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
         if (grilleManquante) {
@@ -4668,7 +4671,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 
 async function retirerCartoucheDeBibliotheque(id, grilleId) {
     let trouvee = false;
-    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
+    const ecritLotF = await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         const cartouches = lues || [];
         const cartouche = cartouches.find(c => c.id === id);
         if (!cartouche) return undefined;
@@ -4677,6 +4680,7 @@ async function retirerCartoucheDeBibliotheque(id, grilleId) {
         trouvee = true;
         return cartouches;
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (retirerCartoucheDeBibliotheque)
 
     if (trouvee) {
         // Rafraîchir le modal et la sidebar
@@ -4739,9 +4743,10 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     }
 
     // Suppression définitive du store local, DANS la file.
-    await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
+    const ecritLotF = await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         return (lues || []).filter(c => c.id !== id);
     }, []);
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (supprimerCartoucheDefinitivement)
 
     // Suppression du store partagé
     if (typeof retirerCartoucheDeLaBibliotheque === 'function') {

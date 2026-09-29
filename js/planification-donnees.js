@@ -141,10 +141,18 @@ function getDonnees() {
 
 /**
  * Sauvegarde toutes les données de planification.
+ * Lot F (D4) : un geste sur la carte écrit ici, hors du témoin commun ; ce point le dit
+ * au codex (`signalerEcritureUsager`). L'initialisation, la migration, le changement
+ * d'onglet et une sauvegarde qui ne change rien passent `{ discret: true }`.
+ * @param {Object} donnees
+ * @param {{discret?: boolean}} [options]
  */
-function setDonnees(donnees) {
+function setDonnees(donnees, options) {
     try {
         db.setSync(cle(CLE_DONNEES), donnees);
+        if (!(options && options.discret) && window.signalerEcritureUsager) {
+            window.signalerEcritureUsager(cle(CLE_DONNEES));
+        }
     } catch (e) {
         console.warn('[Planification] Erreur sauvegarde données :', e);
     }
@@ -160,15 +168,17 @@ function getIndex() {
 
 /**
  * Sauvegarde l'index des cartes.
+ * @param {Object} index
+ * @param {{discret?: boolean}} [options] - voir setDonnees
  */
-function sauvegarderIndex(index) {
+function sauvegarderIndex(index, options) {
     let donnees = getDonnees();
     if (!donnees) {
         donnees = { index: index, cartes: {} };
     } else {
         donnees.index = index;
     }
-    setDonnees(donnees);
+    setDonnees(donnees, options);
 }
 
 /**
@@ -180,8 +190,11 @@ function sauvegarderCarte(carteId, contenu) {
         donnees = { index: null, cartes: {} };
     }
     if (!donnees.cartes) donnees.cartes = {};
+    // Lot F : `sauvegarder()` de la carte réécrit tout, à chaque appel (56 sites, dont le
+    // changement d'onglet) ; seule une carte qui a changé le dit au codex.
+    const inchangee = JSON.stringify(donnees.cartes[carteId]) === JSON.stringify(contenu);
     donnees.cartes[carteId] = contenu;
-    setDonnees(donnees);
+    setDonnees(donnees, { discret: inchangee });
 }
 
 /**
@@ -216,7 +229,7 @@ function initialiserSiNecessaire() {
             cartes: [creerEntreeIndex('carte_1', 'Sans titre')]
         };
         donnees = { index: index, cartes: {} };
-        setDonnees(donnees);
+        setDonnees(donnees, { discret: true });   // ouverture, sans geste (lot F)
         return index;
     }
 
@@ -233,7 +246,7 @@ function initialiserSiNecessaire() {
             'Fallback sur "' + nouvelleActive + '".'
         );
         donnees.index.active = nouvelleActive;
-        setDonnees(donnees);
+        setDonnees(donnees, { discret: true });   // réparation silencieuse (lot F)
     }
 
     return donnees.index;
@@ -278,7 +291,7 @@ function migrerDonneesProto() {
             index: index,
             cartes: { 'carte_1': ancienneCarteUnique }
         };
-        setDonnees(donnees);
+        setDonnees(donnees, { discret: true });   // migration (lot F)
         // Nettoyer le localStorage proto
         localStorage.removeItem('proto_carte_mentale');
         return true;
@@ -298,7 +311,7 @@ function migrerDonneesProto() {
             index: protoIndex,
             cartes: cartes
         };
-        setDonnees(donnees);
+        setDonnees(donnees, { discret: true });   // migration (lot F)
 
         // Nettoyer le localStorage proto
         localStorage.removeItem(PROTO_CLE_INDEX);

@@ -1226,9 +1226,9 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
             var nomDossierRacine = handleReserve.name || 'Archives';
             notifications.succes(
-                'Archive enregistrée',
+                'Groupe archivé',
                 statsDonnees.nombreEtudiants + ' étudiant(s), ' +
-                collecteBlobs.trouves + ' fichier(s) — ' +
+                collecteBlobs.trouves + ' fichier(s) : ' +
                 nomDossierRacine + '/' + ecriture.cheminDossier
             );
 
@@ -1252,11 +1252,16 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         _prog(72, 'Construction du ZIP…', dossier);
         await _yield();
 
-        // Manifeste local : upsert AVANT la construction du ZIP pour
-        // inclure le snapshot complet de l'historique (cf. #248).
-        var manifesteLocal = _manifesteSkeleton();
-        try { manifesteLocal = _upsertEntreeManifesteLocal(dossier, patch.patch); }
-        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
+        // Manifeste local : l'entrée est CALCULÉE avant la construction du ZIP, pour que
+        // le ZIP porte l'historique complet (#248), mais elle n'est INSCRITE à la liste
+        // qu'après le téléchargement (lot F, D0 : un échec ne se déguise pas en réussite).
+        // Avant, un aperçu annulé ou une compression échouée laissait l'archive listée
+        // sans qu'aucun fichier n'existe (mesuré sous Safari). Copie de `archives` : la
+        // lecture rend l'objet du cache mémoire, qu'il ne faut pas muter.
+        var manifesteLocal = _lireManifesteLocal();
+        manifesteLocal.archives = Object.assign({}, manifesteLocal.archives);
+        manifesteLocal.archives[dossier] = patch.patch;
+        manifesteLocal.derniere_mise_a_jour = new Date().toISOString();
 
         var zip = new JSZip();
         var dossierBase = zip.folder('trimestres').folder(dossier);
@@ -1324,12 +1329,16 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
+        // Lot F : inscrite à la liste seulement maintenant, le fichier parti.
+        try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
+        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
+
         _prog(100, 'Archive prête !', _formaterTaille(zipBlob.size));
         await new Promise(function(r) { setTimeout(r, 600); });
         _progHide();
 
         notifications.succes(
-            'Archive téléchargée',
+            'Groupe archivé : fichier téléchargé',
             statsDonnees.nombreEtudiants + ' étudiant(s), ' +
             collecteBlobs.trouves + ' fichier(s) (' + _formaterTaille(zipBlob.size) + ')'
         );
@@ -1353,7 +1362,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     } catch (err) {
         _progHide();
         console.error('[Archives] Erreur d’archivage:', err);
-        notifications.erreur('Erreur de archive', err.message || String(err));
+        notifications.erreur('Groupe non archivé', err.message || String(err));
         throw err;
     }
 }
@@ -1523,9 +1532,9 @@ async function _majBandeauStatut() {
             'pour compléter l’archive.';
     } else if (!statut.persiste) {
         html =
-            '<strong>Mode automatique</strong> (Chrome/Edge) — au premier archivage, ' +
-            'choisis le dossier <em>Archives</em> où enregistrer. ' +
-            'Les archives suivants iront automatiquement au même endroit.';
+            '<strong>Mode automatique</strong> (Chrome/Edge) : au premier archivage, ' +
+            'choisis le dossier <em>Archives</em> où ranger tes archives. ' +
+            'Les suivantes iront automatiquement au même endroit.';
     } else if (statut.permission === 'granted' || statut.permission === 'prompt') {
         html =
             '<strong>Mode automatique</strong> — dossier d’archives&nbsp;: <code>' +

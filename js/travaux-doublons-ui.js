@@ -34,6 +34,7 @@
         // Indispensable pour que mettreAJourBandeau (db.getSync) voie la
         // nouvelle valeur juste après l'application des validations.
         db.setSync(cle(CLE_VALIDATIONS), liste);
+        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle(CLE_VALIDATIONS));   // lot F : geste hors témoin (valider des doublons)
     }
 
     function _estCasValide(d) {

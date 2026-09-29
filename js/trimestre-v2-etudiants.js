@@ -1526,7 +1526,7 @@ async function sauvegarderGroupeEtudiantsV2() {
     }, []);
 
     // Notification de succès
-    notifications.succes(`Groupe ${numeroGroupe} sauvegardé (${etudiants.length} étudiants)`);
+    notifications.succes(`Groupe ${numeroGroupe} enregistré (${etudiants.length} étudiants)`);
 
     // 🆕 BETA 95.2 : Rafraîchir le dropdown groupe-cours pour inclure ce groupe
     if (typeof peuplerDropdownGroupeCours === 'function') {

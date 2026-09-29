@@ -1817,10 +1817,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const sourceLabel = estCollègue
         ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
         : restaurationNouvelAppareil
-            ? `Restauration de ${auteurImport.split(' ')[0] || 'ta sauvegarde'}`
+            ? `Restauration de ${auteurImport.split(' ')[0] || 'ta copie de secours'}`
             : sourceInconnue
                 ? 'Source inconnue'
-                : 'Sauvegarde personnelle';
+                : 'Copie de secours personnelle';
 
     // Stocker pour utilisation dans executerImportSelectif
     analyseImportEnCours.estCollègue = estCollègue;
@@ -1987,7 +1987,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         </p>
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 6px; border: 2px solid var(--btn-annuler);">
                             <input type="checkbox" id="confirmMaSauvegarde" data-on-change="toggleDonneesPersoImportFromEl" style="width: 20px; height: 20px;">
-                            <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est ma propre sauvegarde</strong> – Je confirme que ce fichier m'appartient</span>
+                            <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est ma propre copie de secours</strong> – Je confirme que ce fichier m'appartient</span>
                         </label>
                         <div id="checkboxesDonneesPerso" style="display: none; margin-top: 12px; padding: 12px; background: var(--alerte-fond-succes, #d4edda); border-radius: 6px;">
                             ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)') : ''}

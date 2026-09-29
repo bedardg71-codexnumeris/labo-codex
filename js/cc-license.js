@@ -1406,7 +1406,7 @@ function creerModalEditionMetadonnees() {
 
             <div class="modal-actions">
                 <button type="button" class="btn btn-annuler" data-action="fermerModalEditionMetadonnees">Annuler</button>
-                <button type="button" class="btn btn-confirmer" data-action="sauvegarderMetadonnees">Sauvegarder</button>
+                <button type="button" class="btn btn-confirmer" data-action="sauvegarderMetadonnees">Enregistrer</button>
             </div>
         </div>
     `;
@@ -1478,6 +1478,7 @@ async function sauvegarderMetadonnees() {
 
     // Sauvegarder
     await db.set(cleStockage, liste);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleStockage);   // lot F : geste hors témoin (sauvegarderMetadonnees)
 
     // Fermer le modal
     fermerModalEditionMetadonnees();

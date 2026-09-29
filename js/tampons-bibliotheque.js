@@ -29,6 +29,7 @@ async function obtenirTous() {
 
 async function sauvegarder(items) {
     await db.set(CLE_BIBLIO, items);
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIO);   // lot F : geste hors témoin (bibliothèque de tampons : partager, supprimer, importer)
 }
 
 async function ajouterALaBibliotheque(tampon) {
@@ -166,6 +167,7 @@ async function ajouterDepuisBibliotheque(tamponId) {
         imagesCustom[tampon.id] = tampon.imageBase64;
         db.setSync('tamponsImages', imagesCustom);
     }
+    if (window.signalerEcritureUsager) window.signalerEcritureUsager('tamponsPersonnalises');   // lot F : geste hors témoin (ajouter un tampon depuis la bibliothèque)
 
     notifications.succes('Tampon « ' + tampon.nom + ' » ajouté à ta palette');
     rafraichirModal();
