@@ -307,6 +307,46 @@ window.addEventListener('unhandledrejection', (event) => {
     }
 });
 
+// Lot G (#988) : les avertissements du CODEX seulement (préfixe « [Codex] » ou « 📂 »),
+// pour lire la cause d'une mise à jour qui échoue. Les autres modules avertissent beaucoup,
+// et ce rapport se lit à la main. Message tronqué, sans pile.
+const derniersAvertissementsCodex = [];
+const originalConsoleWarn = console.warn;
+console.warn = function(...args) {
+    originalConsoleWarn.apply(console, args);
+    const premier = typeof args[0] === 'string' ? args[0] : '';
+    if (premier.indexOf('[Codex]') !== 0 && premier.indexOf('📂') !== 0) return;
+    const message = args.map(a => (a instanceof Error ? a.message : String(a))).join(' ').slice(0, 300);
+    derniersAvertissementsCodex.push({ timestamp: new Date().toLocaleTimeString('fr-CA'), message });
+    if (derniersAvertissementsCodex.length > MAX_ERREURS) derniersAvertissementsCodex.shift();
+};
+
+/**
+ * Lot G (#988) : la section « DERNIÈRE MISE À JOUR DU CODEX ». Ce que `Codex.derniereTentative`
+ * garde : heure, étape atteinte, tailles, stratégie, erreur, issue. Ni nom de fichier ni contenu.
+ */
+function sectionDerniereMiseAJourCodex() {
+    let t = null;
+    try {
+        t = (window.Codex && typeof window.Codex.derniereTentative === 'function') ? window.Codex.derniereTentative() : null;
+    } catch (e) { t = null; }
+    let texte = `--- DERNIÈRE MISE À JOUR DU CODEX ---\n`;
+    if (!t) return texte + `Aucune tentative dans cet onglet\n\n`;
+    const heure = (iso) => (iso ? new Date(iso).toLocaleString('fr-CA') : '—');
+    const octets = (n) => (typeof n === 'number' ? `${n} octets` : '—');
+    texte += `Geste: ${t.geste || '—'}\n`;
+    texte += `Début: ${heure(t.debut)}\n`;
+    texte += `Étape atteinte: ${t.etape || '—'}\n`;
+    texte += `Taille estimée: ${octets(t.tailleEstimeeOctets)}\n`;
+    texte += `Taille du fichier: ${octets(t.tailleOctets)}\n`;
+    texte += `Essais d'écriture: ${t.essais || 0}\n`;
+    texte += `Stratégie: ${t.strategie || '—'}\n`;
+    texte += `Erreur: ${t.erreur ? `${t.erreur.nom} – ${t.erreur.message}` : '—'}\n`;
+    texte += `Issue: ${t.issue || '—'}\n`;
+    texte += `Fin: ${heure(t.fin)}\n\n`;
+    return texte;
+}
+
 // ===============================
 // HISTORIQUE DES ACTIONS
 // ===============================
@@ -669,6 +709,13 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
         dernieresActions.forEach(action => {
             rapport += `[${action.timestamp}] ${action.type}: ${action.details}\n`;
         });
+        rapport += `\n`;
+    }
+
+    rapport += sectionDerniereMiseAJourCodex();
+    if (derniersAvertissementsCodex.length > 0) {
+        rapport += `--- AVERTISSEMENTS DU CODEX (${derniersAvertissementsCodex.length}) ---\n`;
+        derniersAvertissementsCodex.forEach(a => { rapport += `[${a.timestamp}] ${a.message}\n`; });
         rapport += `\n`;
     }
 

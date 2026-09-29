@@ -185,14 +185,19 @@
      * Affiche une preview pour un objet JSZip et demande confirmation.
      * @param {JSZip} zip
      * @param {string} libelle - mot-clé pour le titre (ex. 'codex', 'archive')
+     * @param {Object} [options]
+     * @param {string} [options.taille] - lot G (#988) : la taille du fichier, dite par
+     *   l'appelant (« environ 1,0 Go »), ajoutée au sous-titre. Texte, jamais du HTML.
      * @returns {Promise<boolean>}
      */
-    async function previewZipEtConfirmer(zip, libelle) {
+    async function previewZipEtConfirmer(zip, libelle, options) {
         if (!zip || typeof zip.forEach !== 'function') return true; // on ne bloque pas si l'argument est invalide
         var entrees = _construireListeZip(zip);
+        var taille = options && options.taille ? ' – ' + String(options.taille) : '';
         return await _afficherModale({
             titre: 'Confirmer l\'export ' + (libelle || ''),
-            sousTitre: entrees.length + ' fichier(s) ou dossier(s) à inclure',
+            // Accordé au nombre (mots de Grégoire, lot G, 29 sept. 2026 : plus de « (s) »).
+            sousTitre: entrees.length + (entrees.length > 1 ? ' fichiers ou dossiers' : ' fichier ou dossier') + ' à inclure' + taille,
             lignes: entrees,
             note: 'Vérifie qu\'aucun nom de fichier n\'est inattendu avant de continuer.'
         });
