@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 8 H 45 : **1.168.0 POUSSÉE ET EN LIGNE ; RIEN EN COURS SUR UNE BRANCHE** — `main` fait foi
+## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 13 H 30 : **LOT G LIVRÉ (1.169.0 EN LIGNE) ; 1.169.1 (TITRE DES NOUVELLES) POUSSÉE PAR `pousser.sh`** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Fait** : lot G (#988, « Mettre à jour le codex » sur l'iPad ne disait rien quand il échouait) : l'échec se dit (témoin « Codex non mis à jour », « Réessayer » · « Télécharger à la place »), « à jour » après un téléchargement seulement si l'usager confirme, la cause devient lisible (section « DERNIÈRE MISE À JOUR DU CODEX » du rapport de bug). Relecture croisée de Cowork verte (`735aa45f`), mots tranchés par Grégoire. Branche `lot-g-codex-ipad` fusionnée (`530892f2`) et retirée.
+
+**Mesuré** : verdict WebKit complet vert avant le push de 1.169.0 ; en ligne depuis 12 h 48 (Netlify « ready », `commit_ref` `530892f2`). 1.169.1 : le titre des Nouvelles seul (« Le codex dit quand il n'a pas pu être mis à jour », choix de Grégoire, D4) ; Vitest vert ; verdict et mise en ligne : voir le relais suivant ou `git log`.
+
+**Reste** : la porte du lot F à reprendre à sa rangée 1.2 sur l'iPad (réserve de Cowork : « interrompue » ou « Aucune tentative dans cet onglet ») ; **#988 ouverte à dessein** jusqu'à une mise à jour réussie sur l'iPad ; #987 ; OU-EN-EST-ON.md à rattraper pour E1 à E3 ; le cap suivant n'est pas fixé (à Grégoire).
+
+## (relais précédent) 29 SEPT. 2026, ≈ 8 H 45 : **1.168.0 POUSSÉE ET EN LIGNE ; RIEN EN COURS SUR UNE BRANCHE** — `main` fait foi
 
 **Mesuré** : poussée à 8 h 31 (`053d96cb..27fa681d`, par le port 443 : le port 22 de GitHub expirait sur ce réseau) ; en ligne depuis 8 h 26 (Netlify « ready », `commit_ref` `27fa681d`, constaté par Cowork). Verdict WebKit vert au second passage (quatre essais verts au second essai : #959/#960, #866) ; le premier avait rougi par délai dépassé (#957, vert 19/19 rejoué seul). La suite a duré environ une heure, deux fois : #987.
 
