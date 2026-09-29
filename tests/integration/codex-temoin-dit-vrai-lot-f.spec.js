@@ -129,10 +129,11 @@ test.describe('Lot F — le témoin du codex dit vrai', () => {
         await page.evaluate(() => activerModeDemo());
         await page.waitForTimeout(3000);
 
-        // Un codex actif et à jour, puis une réouverture de l'application.
+        // Un codex actif et à jour, écrit par cette version (`temoinFiable` : voir le banc
+        // du stock, lot-f-stock-codex-pas-a-jour), puis une réouverture de l'application.
         await page.evaluate(() => db.setSync('_codex_etat', {
             actif: true, nom: 'Codex du banc', derniereSauvegarde: new Date().toISOString(),
-            modificationsDepuis: null, manifeste: null
+            modificationsDepuis: null, manifeste: null, temoinFiable: true
         }));
         await page.reload();
         await page.waitForLoadState('domcontentloaded');

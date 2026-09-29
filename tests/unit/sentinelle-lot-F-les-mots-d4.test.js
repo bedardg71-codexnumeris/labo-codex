@@ -25,7 +25,10 @@ const REFUSES = [
     'Erreur de archive',             // la coquille de l'échec d'archivage
     'Exporter maintenant',           // le bouton du rappel qui n'exportait rien
     'Protège tes données',           // le rappel est celui de la copie de secours
-    'Enregistrement auto'            // l'enregistrement automatique est retiré (29 sept.)
+    'Enregistrement auto',           // l'enregistrement automatique est retiré (29 sept.)
+    'si tu quittes sans l\'avoir fait', // R1 de Cowork : faux pour un changement de section
+    '<code>.codex.zip</code>',       // R2 de Cowork : le fichier du codex finit par .zip
+    '<strong>.codex.zip</strong>'
 ];
 
 function fichiersJs(dossier) {

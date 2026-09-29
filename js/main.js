@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '0928-1959';
+window._SCRIPT_BUILD_main = '0929-0624';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
