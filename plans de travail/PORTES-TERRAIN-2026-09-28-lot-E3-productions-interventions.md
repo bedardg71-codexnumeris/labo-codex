@@ -1,6 +1,6 @@
 # Portes terrain – lot E3 (1.167.0) : productions, interventions, volet confidentiel, réglages
 
-> Écrites le 28 septembre 2026, au soir, par Claude Code. **Cowork publie l'artefact** (bouton « Copier mes résultats » obligatoire). Sur tes **données réelles**, à l'adresse `https://app.codexnumeris.org`, **sans rien créer de fictif** ; chaque geste qui modifie a sa rangée de retour. Ce qui échoue devient une fiche du BACKLOG.
+> Écrites le 28 septembre 2026, au soir, par Claude Code. **Cowork publie l'artefact** : « Porte · Production et confidentiel », https://claude.ai/artifact/1gr5vrxBHgFmwwnAGeTHVn (bouton « Copier mes résultats » obligatoire). Sur tes **données réelles**, à l'adresse `https://app.codexnumeris.org`, **sans rien créer de fictif** ; chaque geste qui modifie a sa rangée de retour. Ce qui échoue devient une fiche du BACKLOG.
 >
 > **Deux portes seulement** : le reste est mesuré par les tests (Vitest 7 700, WebKit, dont le banc du lot : 15 essais sur le vrai `index.html`). Ce qu'aucune machine ne juge : que ce que tu changes **au doigt sur l'iPad**, sur **ta** production et **ta** fiche confidentielle, soit encore là après un rechargement.
 
@@ -8,7 +8,7 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page. | **1.167.0**, build **0928-1959**. Un autre numéro : arrête-toi, la version n'est pas encore en ligne. |
+| 0.1 | Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page. | **1.167.0**, build **0928-1959**, ou plus récent (**1.168.0** contient ce lot ; ajouté par Cowork le 29 sept. au matin, pour qu'elle ne rougisse pas à la version suivante). Un numéro plus ancien : arrête-toi, la version n'est pas encore en ligne. |
 
 ## §1 · Interface, sur l'iPad
 
@@ -43,3 +43,9 @@ Aucune : les mots et les Nouvelles sont acceptés (28 sept., 19 h 46).
 - **La question de complétion d'une intervention, avec sa case, au doigt sur l'iPad** : aucune intervention réelle n'existe cet automne, et en créer une fictive est exclu. Les tests la jugent dans WebKit (case décochée à l'ouverture, aucune présence écrite sans elle, report une fois cochée). À ta première vraie intervention complétée : si la case ne se coche pas au doigt, ou si des présences apparaissent sans que tu l'aies cochée, dis-le.
 - **Le changement de sous-onglet pendant une création** (production ou intervention) ne pose pas la question de sortie : il passe par une zone protégée de l'application. Une intervention en cours de création reste à l'écran au retour (mesuré) ; pour une production en cours de création, ce retour n'a pas été mesuré.
 - **Le passé** : des présences en double laissées par d'anciennes interventions complétées puis redatées ne sont ni mesurées ni corrigées (ta décision du 28 sept., 19 h 45 ; fiche #978 pour la suite).
+
+## Relevé — 29 septembre 2026, 7 h 23 (Grégoire, sur l'iPad, 1.167.0)
+
+**9 passées, 0 échec, 0 non traitée.** Porte close. Relevé collé dans la conversation Cowork, reporté ici par Cowork.
+
+**Son observation, en plus** : « ça fonctionne bien, mais il faut s'assurer que le clavier iPad disparaisse pour voir la notification « Enregistré » en bas à gauche. » ⮕ Le témoin est en `position: fixed; bottom: 16px` (`styles.css`, « TÉMOIN D'ENREGISTREMENT ») et ne reste visible que 2 s (`DUREE_ENREGISTRE_MS`) : sur l'iPad, le clavier à l'écran le recouvre. Symptôme vécu : **à inscrire** (issue 2), texte dans `CONSIGNE-DEMARRAGE-COWORK.md` § 4 b. La branche `lot-e3-productions-interventions` peut être retirée.

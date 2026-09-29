@@ -1,7 +1,7 @@
 # Consigne de démarrage – la session Cowork qui prend le relais
 
-> **Réécrite le lundi 21 septembre 2026, 19 h 41 (Toronto)**, en fin de journée : 1.152.0 à 1.153.0 poussées dans la journée.
-> Elle REMPLACE toute version précédente ; celle du 21 à 8 h 05 est archivée sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-21-08h05.md` (sections 1, 2, 5, 6 inchangées).
+> **Réécrite le mardi 29 septembre 2026, 7 h 20 (Toronto)**, en ouverture de journée, à la demande de Grégoire : elle n'avait pas été réécrite depuis le 21 au soir (erreur 32). 1.153.1 à 1.168.0 sont passées entre-temps.
+> Elle REMPLACE toute version précédente ; celle du 21 à 19 h 41 est archivée sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-21-19h41.md` (sections 1, 5, 6 reprises ; section 2, un compte mis à jour ; 3 et 4 réécrites).
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées.
@@ -38,7 +38,7 @@ demande-toi de QUEL objet chacun parle. Un verdict se rend sur un SHA : redis le
 
 1. `git clone --shared --quiet --branch main "$HOME/mnt/Monitorage_v6" "$HOME/banc"` – instantané.
 2. `cd "$HOME/banc/tests" && npm install --silent --no-audit --no-fund` – ~40 s.
-3. `cd "$HOME/banc/tests" && timeout 165 npx vitest run --reporter=dot` – ~26 s. Claude Code rapporte **606 fichiers / 6 913 essais** sur 1.151.6. ⚠ Le 17, `npm ci` sur un clone `--no-hardlinks` a pris ~2 s (cache chaud) ; un lien symbolique vers le `node_modules` du Mac échoue (rollup natif macOS).
+3. `cd "$HOME/banc/tests" && timeout 165 npx vitest run --reporter=dot` – ~26 s. Claude Code rapporte **662 fichiers / 7 762 essais** sur 1.168.0. ⚠ Le 17, `npm ci` sur un clone `--no-hardlinks` a pris ~2 s (cache chaud) ; un lien symbolique vers le `node_modules` du Mac échoue (rollup natif macOS).
 
 ⛔ **Lecture seule sur le dépôt de Grégoire** : aucun `gc`, `prune`, `push`, et **jamais `git worktree`** (l'entrée reste fantôme
 dans son `.git`). ⚠ **Efface ton banc à la fin** (`rm -rf "$HOME/banc"`). ⚠ Un `npx vitest` lancé en arrière-plan MEURT à la fin de
@@ -60,37 +60,33 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 
 ---
 
-## 3 · L'ÉTAT MESURÉ – le 21 septembre 2026, 19 h 41 (Toronto)
+## 3 · L'ÉTAT MESURÉ – le 29 septembre 2026, 7 h 20 (Toronto)
 
-**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` · `git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`. Détail : en-tête d'`OU-EN-EST-ON.md`, premier bloc de `RELAIS.md`, page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, **version 48**, à jour de 1.153.0).
+**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` · `git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`. Détail : en-tête d'`OU-EN-EST-ON.md`, premier bloc de `RELAIS.md`, page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, **version 89**, à jour de 1.168.0 en ligne et de la porte E3).
 
-- **Poussé : `1.153.0`** (build `0921-1756`), `origin/main` = `602907b1` (journal). Troisième verdict WebKit vert, Mac au repos, Cowork fermé ; le deuxième avait rougi par la CHARGE (Vitest venait de finir) – **ne jamais prendre un verdict juste après Vitest.** Vitest 615 / 7 027. **Aucun lot en cours.**
-- **Parti le 21, en gestes** : créer ou adopter une pratique, l'écran promet ce qui s'applique (1.152.0) ; l'en-tête de l'export recherche (1.152.1) ; « tous » veut dire tous, l'export dit qu'il arrondit (1.152.2) ; un critère « Français… » revient au diagnostic (1.152.3) ; le bilan de l'élève sans « artefact » ni « niveau É » (1.152.4) ; une note en ,5 monte partout, 59,5 → 60 tranché par Grégoire (1.152.5) ; le PDF de synthèse sans « artefact », « Voici la production retenue » (1.152.6) ; **la pratique active se trouve d'une seule façon, sans pratique assignée aucune note** (1.153.0, lots N1a + N1b).
-- **Comptes** : 206 cases ouvertes, gabarit compris → **205 fiches**, page du tri égale par ensembles. ⚠ **#710, #711, #712, #719 sont LIVRÉES en 1.153.0 mais leurs cases ne sont PAS cochées** ; #713 livrée pour son volet registre seulement (le plancher de 50 reste, lot N4). La page les garde ouvertes avec « livré en 1.153.0 ». ⮕ **À faire cocher par Claude Code en tête de journée, sans release**, puis reporter à la page.
-- **`DEPLOY.md` modifié, non commité** : v1.10, §3.4 ter (Web Analytics et Real User Monitoring de Netlify désactivés le 21 sept.), écrit par une autre session Cowork (Cloudflare / Netlify), identifié par Grégoire le 21 au soir. Documentation seule, contenu relu : **à faire commiter par Claude Code avec le prochain commit de relais**, sans release.
-- ⚠ **Le run planifié GitHub du 21 au matin est rouge à l'étape « Garde »** : le correctif `9151a595` n'est éprouvé qu'au run de 4 h le 22. À lire en ouverture, sans release.
-- **Retours testeurs** : aucun neuf le 21.
+- **`main` = `27fa681d` : 1.168.0** (build `0929-0624`), lot F fusionné vers 6 h 25. **`origin/main` = `053d96cb` : 1.167.0.** ↻ **8 h 31 : 1.168.0 poussée** (`053d96cb..27fa681d`, par le port 443, le port 22 de GitHub étant bloqué sur ce réseau) et **en ligne depuis 8 h 26** (Netlify, `commit_ref` `27fa681d`, « ready », constaté par Cowork). Verdict WebKit vert, quatre essais verts au second essai (#959/#960, #866) ; la suite a duré environ une heure, deux fois, contre 15 min annoncées : fiche proposée par Claude Code, acceptée par Cowork. Vitest rapporté par Claude Code sur 1.168.0 : 662 fichiers, 7 762 essais.
+- **Le chantier de l'enregistrement est au bout** : les six décisions du 26 (D0 à D5, `plans de travail/DECISIONS-2026-09-26-enregistrement.md`) sont appliquées, lots A à F, de 1.160.0 à 1.168.0. La carte d'alignement (quatre lots) est partie en 1.165.0. Le Suivi longitudinal anonymisé, en 1.166.1 (retour #977, corrigé le jour même). **Le cap suivant n'est pas fixé** : le demander à Grégoire.
+- **Comptes, par ensembles** : le backlog porte **208 fiches ouvertes** (209 cases numérotées non cochées moins le gabarit ; une sous-case sans numéro, ligne « Note persistante sous le menu Groupe associé VIDE », n'est pas une fiche), la page **205**. Écart expliqué : ⚠ **#963 à #966 livrées en 1.165.0 et NON cochées au backlog** (erreur 31 refaite ; #963 est aussi encore sous « Ouverts » dans `SUIVI-BUGS.md`) ; **#974 n'a pas de bloc au backlog**, seulement sa ligne au registre des retours, ouverte (renumérotée au rebase du 28 : le bloc s'est perdu). 205 − 1 + 4 = 208.
+- **Fichiers non suivis à faire commiter** (par Claude Code, sans release) : `plans de travail/RELECTURE-2026-09-28-carte-alignement-apres-rebase.md`, `RELECTURE-2026-09-28-lot-E3-productions-interventions.md`, `RELECTURE-2026-09-29-lot-F-etape-1.md`, `RELECTURE-2026-09-29-lot-F-les-mots.md`, `PORTES-TERRAIN-2026-09-29-lot-F-codex.md`, `_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-21-19h41.md`, et ce fichier ; `PORTES-TERRAIN-2026-09-28-lot-E3-productions-interventions.md` est modifié (rangée 0.1, lien de l'artefact). ⚠ D'autres non suivis ne sont pas à Cowork (`Claude outputs/`, `ignorés/`, `docs/projet de développement/`, `guide-alignement-actuel.md`, `Retours des testeurs/jean-françois/`, `Modèle de consigne…txt`) : ne pas les faire commiter sans Grégoire.
+- **Retours testeurs** : aucun neuf depuis #977. Ouverts au registre, constats de Cowork sur sa carte : #974, #968, #969.
+- `OU-EN-EST-ON.md` n'a pas les lignes de 1.164.0 à 1.167.0 (E1 à E3) : à rattraper par Claude Code.
 
 ---
 
 ## 4 · CE QUI EST DÛ – dans l'ordre
 
-**a) À l'ouverture** : remesurer ; un retour de la CoP, de l'orthopédagogue ou de Mathieu passe AVANT tout ; lire le run planifié GitHub du 22 ≈ 4 h (la Garde) ; faire cocher les quatre cases de 1.153.0.
+**a) À l'ouverture** : remesurer ; un retour de la CoP, de l'orthopédagogue ou d'un·e testeur·se passe AVANT tout. **(Fait le 29 à 8 h 26 pour 1.168.0.)** Si une version n'est pas sur `origin/main` : Claude Code reprend le verdict WebKit complet (Cowork fermé, Mac au repos, pas juste après Vitest), puis `pousser.sh`, puis « en ligne » chez Netlify. Demande à Grégoire de fermer Cowork, en une phrase, bloc de relais donné AVANT.
 
-**b) LE MATIN DU 22 : TERMINER LA NOTATION** (cap du 21 à 13 h 08, ordre confirmé par Grégoire le 21 au soir : la notation d'abord, l'exportation ensuite) : les fiches de notation qui restent, PUIS **la synthèse des rétroactions – son prochain « Labo » portera là-dessus.** Les lots de notation, remesurés et groupés dans `plans de travail/FILE-DES-LOTS.md` (§« Les dix fiches de notation ») :
-1. **N3 – le panneau « Développement des habiletés » lit la note et n'écrit rien** (#714). Isolé, aucune question. **Recommandé en premier.**
-2. **N2 – le P historique suit la note du cours** (#716). ⚠ Porte le **constat de didactique de N1a** : pour une Standards, le niveau de la note globale se lit dans deux échelles selon l'instance (registre : échelle commune aux évaluations de l'élève, règle #575 ; configurable : échelle rangée dans la pratique). **À Grégoire**, avec une recommandation, au moment de lancer N2.
-3. **N4 – spécifications : le plancher de 50 et la réédition** (#713 reste, #854 volet SPE). **Didactique, à Grégoire** : que doit dire la note d'un·e élève qui n'atteint aucun forfait ?
-4. **N5 – dénotation : une cible renommée qui plafonne en silence** (#717). À Grégoire : ids stables (recommandé) ou message.
-5. **N6 – zéro-dette : les réglages que rien ne lit** (#900). À joindre à un lot qui passe par l'assistant.
+**b) Sans release, avec le prochain commit de relais** : inscrire au backlog, au prochain numéro, la fiche vécue de la porte E3 : « **Sur l'iPad, le clavier à l'écran cache le témoin « Enregistré ».** Constat de Grégoire à la porte terrain de 1.167.0 (29 sept. 2026, 7 h 23) : il faut fermer le clavier pour voir la notification en bas à gauche. Le témoin est en `position: fixed; bottom: 16px` (`styles.css`, « TÉMOIN D'ENREGISTREMENT ») et ne dure que 2 s (`DUREE_ENREGISTRE_MS`, `js/temoin-enregistrement.js`). Symptôme vécu. Intermédiaire ; se juge sur l'iPad. » ; cocher #963 à #966 au backlog (et passer #963 aux corrigés du registre) ; décider si #974 reçoit un bloc au backlog ou vit seulement au registre (technique : à Claude Code, qu'il le dise) ; commiter la liste du § 3.
 
-**b2) ENSUITE, APRÈS LA NOTATION : l'écran « Exporter et archiver »** (ordre de Grégoire, 21 sept. au soir). Des cinq fiches de l'audit du 16, quatre sont livrées (#891, #894 en 1.142.17 ; #893 en 1.151.4 ; #892 en 1.151.6). **Reste #895 : une seule carte « Exporter des travaux »**, tranchée le 17 (forme des dossiers et compression en options ; « Toutes / Tous » = export complet ; texte dans la ligne ✅ TRANCHÉ de la fiche). À remesurer avant d'écrire la consigne : ce que « Trimestre complet » produit en plus (`_resume.json`, arborescence), et **ce qu'on retire de l'écran ne doit rien effacer** (limite du 20 sept.). #870 (classes CSS fantômes, dont `.texte-muted`) peut s'y joindre si elle passe par les mêmes fichiers.
+**c) Les deux portes terrain sur l'iPad** (artefacts publiés le 29 vers 7 h 20) :
+- ✅ **1.167.0, productions et volet confidentiel** : https://claude.ai/artifact/1gr5vrxBHgFmwwnAGeTHVn — **PASSÉE le 29 à 7 h 23, 9/9**, relevé reporté au markdown. Son observation (le clavier cache « Enregistré ») : la fiche du point b. La branche `lot-e3-productions-interventions` peut être retirée.
+- **1.168.0, ton codex sur l'iPad** : https://claude.ai/artifact/TUTdxw4GjEAhYfC27jVyhB (neuf rangées ; §1 mettre le vrai codex à jour et le retrouver dans Fichiers ; §2 un geste le rend « pas à jour »). **Faisable : 1.168.0 est en ligne depuis 8 h 26.** Ses rangées 2.1 et 2.3 disent de fermer le clavier (constat E3).
+- Au retour : relevé collé → échecs triés (défaut ou version en retard) → fiches → markdown mis à jour. Puis retirer la branche `lot-e3-productions-interventions` (sur demande).
 
-**c) EN FILE, tranchées, code seulement** : le suffixe « pér. » d'une séance d'horaire (#888) ; une seule carte « Exporter des travaux » (#895).
+**d) À Grégoire, une à la fois, au moment où elles se posent** : afficher « Enregistré » sur les écrans sans témoin, étendre D0 (#982) ; retirer ou réécrire les anciens guides de `docs/utilisateur/` (#984) ; le seuil par défaut des spécifications (#935). ⛔ **#985 (simplifier codex et copie de secours) : ne pas préparer**, il la tranchera plus tard.
 
-**d) À GRÉGOIRE, rangées dans la file** : la phrase de la barre « Assiduité » sans périodes (#830) ; F4-2 (« En prévision de l'EUF ») ; F3-6 (l'export recherche compte les niveaux par I / D / M / E).
-
-**e) TROUS DE PREUVE CONNUS, sans lot** (à fermer au prochain lot qui passe là) : une note à quatre décimales juste sous une demie (59,4996 → 59) dans `portfolio.js` ; la garde « évaluation précédente sans critère » du bilan de l'élève (écran et PDF) ; ceux du lot F (inchangé).
+**e) Trous de preuve connus, sans lot** : une note à quatre décimales juste sous une demie (59,4996 → 59) dans `portfolio.js` ; la garde « évaluation précédente sans critère » du bilan de l'élève ; les passages planifiés Playwright de GitHub en échec ou annulés depuis le 21 (#979, voisine de #955) ; `pousser.sh` qui juge la branche de l'arbre (#980).
 
 **f) CE QUI NE SE ROUVRE PAS** : inchangé (archive du 17) ; #915 reste ouverte exprès jusqu'au retour de la porte des lots 3-4.
 
@@ -157,6 +153,10 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 
 30. **UNE CONDITION DE CONSIGNE QUI COMPTAIT DES OCCURRENCES, PAS DES SITES** (N1b : « 53 / 13 / 34 », réels 22 / 13 / 14). J'avais recopié les comptes de Claude Code sans les remesurer. ⮕ **Un compte de sites se remesure par appel réel**, et se dit « occurrences » quand c'en est.
 31. **UN LOT LIVRÉ SANS SES CASES COCHÉES** (1.153.0). La consigne ne demandait pas de cocher. ⮕ **Toute consigne de lot porte la liste des cases à cocher à la livraison**, et la fiche restée ouverte à dessein.
+
+32. ⚠⚠ **LA CONSIGNE DE DÉMARRAGE N'A PAS ÉTÉ RÉÉCRITE PENDANT HUIT JOURS** (21 → 29 sept.) : l'erreur 28, refaite, et pire. Les sessions intermédiaires ont tenu la page du tri, les relectures et les portes ; la session du 29 a ouvert sur « 1.153.0, matin du 22 : terminer la notation » quand le dépôt était à 1.168.0, chantier de l'enregistrement fini. ⮕ **Ce fichier se réécrit à la fin de chaque journée Cowork, sans exception.** Si tu ne sais pas si la journée finit, réécris-le quand même après chaque lot livré : trois lignes au § 3 suffisent.
+33. **UNE PORTE DONT LE PRÉALABLE EXIGE UN NUMÉRO EXACT ROUGIT À LA VERSION SUIVANTE.** La porte de 1.167.0 attendait « 1.167.0 » ; dès 1.168.0 en ligne, sa rangée 0.1 aurait été un faux rouge (corrigée le 29 avant usage). ⮕ **Une porte encore due quand une version suivante part s'écrit « X ou plus récent »**, et se relit à chaque livraison.
+34. **UNE FICHE PERDUE AU REBASE** : #974 (d'abord #967 sur la branche de la carte) n'a plus de bloc au backlog, seulement sa mention dans l'en-tête et sa ligne au registre. ⮕ **Après un rebase qui renumérote, compte par ensembles** : c'est ce qui l'a trouvée.
 
 ### Ce qui a tenu, et qu'il faut refaire
 - **COUPER UN LOT LOURD EN DEUX, SUR BRANCHE, ET NE LIVRER QUE LE TOUT** (N1a sur `lot-n1a`, puis N1b) : les écrivains et les lecteurs ne se contredisent jamais en ligne.
