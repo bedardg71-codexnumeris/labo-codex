@@ -260,7 +260,9 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         await page.waitForTimeout(1500);
         // L'URL du fichier n'est pas libérée tout de suite (Safari écrit après le clic).
         expect(await page.evaluate(() => window.__urlsLiberees)).toBe(liberationsAvant);
-        expect((await lireModale(page)).boutons).toEqual(['Il n\'y est pas', 'Il y est']);
+        const modaleTelechargement = await lireModale(page);
+        expect(modaleTelechargement.boutons).toEqual(['Il n\'y est pas', 'Il y est']);
+        expect(modaleTelechargement.message).toMatch(/^L'application ne peut pas savoir si le téléchargement s'est terminé\. Attends qu'il le soit, puis vérifie que le fichier « codex-.+\.zip » \(environ \d+ (Ko|Mo)\) se trouve dans tes Téléchargements\.$/);
         // Tant que l'usager n'a rien dit, rien n'est posé.
         expect((await lireEtat(page)).menu).toBe(PAS_A_JOUR);
         section = sectionDuRapport(await rapport(page));
@@ -283,11 +285,23 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
         expect(sectionDuRapport(await rapport(page))).toContain('Issue: téléchargement confirmé par l\'usager');
 
-        // « Fermer » la modale : pas à jour, le témoin reste.
+        // Échap sur « Téléchargement lancé » : comme « Il n'y est pas », l'échec se dit.
         await page.evaluate(() => sauvegarderDonneesSelonMode('banc_lotG_c', { n: 3 }));
         await page.evaluate(() => { window.__reponsesPartage = ['AbortError']; });
         await page.evaluate(() => { Codex.actionEnregistrer(); });
         await attendreModale(page, 'Codex non mis à jour');
+        await page.evaluate(() => { if (window.temoinEnregistrement) window.temoinEnregistrement.fermer(); });
+        await cliquerBouton(page, 'Télécharger à la place');
+        await attendreModale(page, 'Téléchargement lancé');
+        expect((await lireEtat(page)).temoin).toBeNull();
+        await page.keyboard.press('Escape');
+        await attendreModale(page, 'Codex non mis à jour');
+        etat = await lireEtat(page);
+        expect(etat.menu).toBe(PAS_A_JOUR);
+        expect(etat.temoin).toMatch(TEMOIN_ECHEC);
+        expect(sectionDuRapport(await rapport(page))).toContain('Issue: téléchargement non trouvé par l\'usager');
+
+        // « Fermer » la modale : pas à jour, le témoin reste.
         await cliquerBouton(page, 'Fermer');
         await page.waitForTimeout(500);
         expect(await lireModale(page)).toBeNull();
@@ -296,6 +310,65 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         expect(etat.temoin).toMatch(TEMOIN_ECHEC);
 
         expect(erreurs).toEqual([]);
+    });
+
+    test('préparation échouée (texte 3), aperçu et progression accordés au nombre', async ({ page }) => {
+        const erreurs = brancherEcouteurs(page);
+        await viderLeStockage(page);
+        await page.evaluate(() => activerModeDemo());
+        await page.waitForTimeout(3000);
+
+        // L'aperçu RÉEL : « 1 fichier ou dossier », « 3 fichiers ou dossiers », jamais « (s) ».
+        const sousTitres = await page.evaluate(async () => {
+            const faux = (n) => ({ forEach: (fn) => { for (let i = 0; i < n; i++) fn('f' + i + '.json', { dir: false, _data: { uncompressedSize: 10 } }); } });
+            const lire = async (n) => {
+                const p = window.SecuriteExportPreview.previewZipEtConfirmer(faux(n), 'codex', { taille: 'environ 1,0 Go' });
+                const t = document.querySelector('.export-preview-soustitre').textContent;
+                Array.from(document.querySelectorAll('.export-preview-modal button')).find((b) => b.textContent === 'Annuler').click();
+                await p;
+                return t;
+            };
+            return [await lire(1), await lire(3)];
+        });
+        expect(sousTitres).toEqual([
+            '1 fichier ou dossier à inclure – environ 1,0 Go',
+            '3 fichiers ou dossiers à inclure – environ 1,0 Go'
+        ]);
+
+        // La barre de progression : « ‹N› fichier(s) » accordé (le pack démo n'a aucune copie : « 0 fichier »).
+        await page.evaluate(() => {
+            window.__statsProgression = [];
+            new MutationObserver(() => {
+                const el = document.getElementById('progression-stats');
+                if (el && el.textContent) window.__statsProgression.push(el.textContent);
+            }).observe(document.body, { childList: true, subtree: true, characterData: true });
+        });
+        await poserOutils(page);
+        await page.evaluate(() => { window.__reponsesPartage = ['ok']; });
+        await page.evaluate(() => Codex.actionEnregistrer());
+        await page.waitForFunction(() => window.__partages === 1, null, { timeout: 30000 });
+        const stats = await page.evaluate(() => window.__statsProgression);
+        expect(stats.some((t) => /^0 fichier, /.test(t))).toBe(true);
+        expect(stats.filter((t) => t.includes('(s)'))).toEqual([]);
+
+        // Texte 3 : le message du navigateur n'est pas à l'écran ; il est au rapport.
+        await page.evaluate(() => {
+            window.SecuriteExportPreview.previewZipEtConfirmer = async () => { throw new Error('panne simulée de préparation'); };
+            Codex.actionEnregistrer();
+        });
+        await page.waitForFunction(() => {
+            const e = document.querySelector('#temoin-enregistrement .temoin-enregistrement-echec.visible');
+            return !!e;
+        }, null, { timeout: 30000 });
+        const etat = await lireEtat(page);
+        expect(etat.temoin).toBe('Codex non mis à jour : le fichier n\'a pas pu être préparé. Tes données restent dans l\'application. Si ça se répète, utilise « Signaler un bug » : le détail y sera.');
+        expect(etat.temoin).not.toContain('panne simulée');
+        expect(await lireModale(page)).toBeNull();
+        const section = sectionDuRapport(await rapport(page));
+        expect(section).toContain('Issue: échec de la préparation du fichier');
+        expect(section).toContain('Erreur: Error – panne simulée de préparation');
+        // Seule erreur console attendue : celle, voulue, de la préparation.
+        expect(erreurs.filter((m) => !m.includes('Erreur enregistrement codex'))).toEqual([]);
     });
 
     test('une page rechargée pendant la tentative se lit « interrompue » dans le rapport', async ({ page }) => {

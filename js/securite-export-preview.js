@@ -196,7 +196,8 @@
         var taille = options && options.taille ? ' – ' + String(options.taille) : '';
         return await _afficherModale({
             titre: 'Confirmer l\'export ' + (libelle || ''),
-            sousTitre: entrees.length + ' fichier(s) ou dossier(s) à inclure' + taille,
+            // Accordé au nombre (mots de Grégoire, lot G, 29 sept. 2026 : plus de « (s) »).
+            sousTitre: entrees.length + (entrees.length > 1 ? ' fichiers ou dossiers' : ' fichier ou dossier') + ' à inclure' + taille,
             lignes: entrees,
             note: 'Vérifie qu\'aucun nom de fichier n\'est inattendu avant de continuer.'
         });
