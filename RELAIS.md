@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 6 H 30 : **LOT F FUSIONNÉ DANS `main` EN 1.168.0 ; VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh`** — « poussé » se lit dans le message de fin de session
+
+**Où vit le travail** : `main` (fusion de `lot-f-les-mots`). Commit du lot `611d7dcd` : R1 et R2 de la relecture finale de Cowork, le stock (b) décidé par Grégoire (un codex actif d'avant le lot, sans `temoinFiable`, posé « pas à jour » une fois), les deux fichiers de sécurité, les Nouvelles 1.168 mot pour mot, BACKLOG #982 à #985.
+
+**Mesuré** : Vitest 662 fichiers, 7 762/7 762 ; bancs WebKit du lot 9/9 + banc du stock 2/2 ; mutations du stock : 4 rouges au banc, 3 rouges à la sentinelle (ce que la course rend invisible au banc), 1 équivalente nommée.
+
+**Assumé** : le stock (b) n'a pas été relu par Cowork (Cowork fermé pour la suite complète) ; à relire à froid avec la porte terrain. OU-EN-EST-ON.md n'a pas les lignes de E1 à E3 (1.164 à 1.167) : à rattraper.
+
+**Reste** : constater « en ligne » chez Netlify ; porte terrain du lot F (markdown par Claude Code, artefact par Cowork) ; porte terrain de E3 toujours due (garder la branche `lot-e3-productions-interventions`).
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, MATIN : **LOT F FAIT SUR LA BRANCHE `lot-f-les-mots` (arbre principal), NON FUSIONNÉ ; RELECTURE CROISÉE DE COWORK ATTENDUE** — lire `git log main..lot-f-les-mots`
 
 **Où vit le travail** : branche locale `lot-f-les-mots` (non poussée), partie de `main` = `053d96cb` (1.167.0) : l'étape 1 (le témoin du codex), l'automatique retiré (décision de Grégoire), les mots (D4), les gestes hors témoin raccordés (décision de Cowork), la demande finale. **Aucune release.**
