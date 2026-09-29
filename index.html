@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20260928d"> <!-- #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20260928e"> <!-- Lot F : la règle du bloc « Enregistrement auto » retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3872,14 +3872,6 @@
                                 <button class="codex-menu-item" data-action="Codex.actionEnregistrerSous">
                                     <span class="codex-menu-icone"><img src="icons/icon-downloading.svg" alt=""></span> Enregistrer sous…
                                 </button>
-                                <div id="codex-menu-autosave-sep" class="codex-menu-sep u-hide"></div>
-                                <div id="codex-menu-autosave" class="codex-menu-statut u-hide">
-                                    <span class="codex-menu-icone"><img src="icons/icon-flash-on.svg" alt=""></span>
-                                    <span class="codex-menu-contenu">
-                                        <span id="codex-menu-autosave-texte">Enregistrement auto actif</span>
-                                        <span id="codex-menu-autosave-detail" class="codex-menu-sous-texte"></span>
-                                    </span>
-                                </div>
                                 <div class="codex-menu-sep"></div>
                                 <button class="codex-menu-item" data-action="Codex.actionNouveau">
                                     <span class="codex-menu-icone"><img src="icons/icon-plus.svg" alt=""></span> Nouveau codex
@@ -14557,7 +14549,7 @@
     <script src="js/partage-import.js?v=20260926c"></script>
     <script src="js/partage-section.js?v=20260901a"></script>
     <script src="js/import-export.js?v=20260926c"></script> <!-- Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
-    <script src="js/codex.js?v=20260928a"></script> <!-- Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique reste inerte · #614 : la fusion valide les magic bytes -->
+    <script src="js/codex.js?v=20260928b"></script> <!-- Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
     <script src="js/liste-evaluations.js?v=20260927f"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->

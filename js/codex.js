@@ -60,18 +60,11 @@ let _etat = {
 // Perdu au rechargement de la page (comportement normal).
 var _fileHandle = null;
 
-// Auto-save — sauvegarde silencieuse à intervalle quand un handle FSAPI existe.
-var AUTO_SAVE_DELAI = 5 * 60 * 1000;  // 5 minutes par défaut
-var _autoSaveTimerId = null;
-var _autoSaveEnCours = false;
-var _derniereAutoSave = null;          // Date ISO de la dernière auto-save réussie
-
-// Lot F (D4, 28 sept. 2026) : l'enregistrement automatique reste INERTE. Il ne partait
-// jamais avant le lot F, faute de modification marquée ; depuis que le témoin du codex
-// sait qu'une donnée a changé, il écrirait le fichier de l'usager toutes les 5 minutes
-// sans geste de sa part. Ce choix revient à Grégoire (question posée par Cowork) : d'ici
-// sa réponse, le minuteur ne démarre pas.
-var AUTO_SAVE_AUTORISE = false;
+// Lot F (29 sept. 2026) : l'enregistrement automatique « Toutes les 5 min » est RETIRÉ,
+// décision de Grégoire (« on ne peut pas produire un backup de 1 Go à chaque 5 minutes ») :
+// le codex est sa copie de sûreté, un automate qui l'écrase sans aperçu pourrait remplacer
+// une bonne copie par un état fautif. Le fichier ne s'écrit que par « Mettre à jour le
+// codex ». Aucun réglage n'était persisté (mesuré) : rien à ignorer à la lecture.
 
 // Lot F (D4) : compte les modifications marquées. Une écriture du fichier ne remet le
 // codex « à jour » que si aucune modification n'est survenue PENDANT sa génération.
@@ -297,7 +290,6 @@ function _sauvegarderEtat() {
  * Génère un Codex ZIP depuis les données IndexedDB actuelles.
  * @param {Object} [options]
  * @param {string} [options.nom] - Nom du codex
- * @param {boolean} [options.silencieux=false] - Si true, pas d'overlay de progression (auto-save)
  * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object}>}
  */
 async function genererCodex(options = {}) {
@@ -305,15 +297,13 @@ async function genererCodex(options = {}) {
         throw new Error('JSZip non disponible. Impossible de générer le codex.');
     }
 
-    var silencieux = !!options.silencieux;
     var compteurAuDebut = _compteurModifications;
 
     const debut = performance.now();
-    // En mode silencieux (auto-save), pas d'overlay de progression
-    var _prog = silencieux ? function() {} : _majProgression;
-    var _progMasquer = silencieux ? function() {} : _masquerProgression;
+    var _prog = _majProgression;
+    var _progMasquer = _masquerProgression;
 
-    if (!silencieux) _afficherProgression('Génération du codex');
+    _afficherProgression('Génération du codex');
     _prog(0, 'Lecture des données…');
     await _yield(); // laisser le navigateur peindre l'overlay
 
@@ -429,15 +419,14 @@ async function genererCodex(options = {}) {
 
     // K-β — preview UI : montrer la liste des fichiers à l'utilisateur
     // avant compression et téléchargement. L'utilisateur peut annuler.
-    // Sautée si silencieux (auto-save) ou si le module preview n'est pas
-    // chargé (dégradation gracieuse).
+    // Sautée seulement si le module preview n'est pas chargé (dégradation gracieuse).
     //
     // Important UX : on masque l'overlay de progression avant la modale
     // (sinon double affichage), puis on le RÉAFFICHE après le clic
     // Télécharger pour montrer la compression (qui peut prendre plusieurs
     // minutes avec beaucoup de fichiers). Sans réaffichage, l'utilisateur
     // attend dans le noir pendant generateAsync.
-    if (!silencieux && window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
+    if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
         const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'codex');
         if (!ok) {
@@ -470,10 +459,8 @@ async function genererCodex(options = {}) {
 
     _prog(100, 'Codex prêt !', _formaterTaille(zipBlob.size));
 
-    // Pause brève pour que l'utilisateur voie "100%" (sauf auto-save)
-    if (!silencieux) {
-        await new Promise(function(r) { setTimeout(r, 500); });
-    }
+    // Pause brève pour que l'utilisateur voie "100%"
+    await new Promise(function(r) { setTimeout(r, 500); });
     _progMasquer();
 
     // Nom de fichier avec horodatage
@@ -1128,9 +1115,7 @@ function etatCodex() {
         modificationsNonSauvees: _etat.modificationsDepuis !== null,
         modificationsDepuis: _etat.modificationsDepuis,
         manifeste: _etat.manifeste ? Object.assign({}, _etat.manifeste) : null,
-        handleFSAPI: !!_fileHandle,     // true si ré-écriture directe possible (Chrome/Edge)
-        autoSaveActif: !!_autoSaveTimerId,
-        derniereAutoSave: _derniereAutoSave
+        handleFSAPI: !!_fileHandle      // true si ré-écriture directe possible (Chrome/Edge)
     };
 }
 
@@ -1178,7 +1163,6 @@ async function _marquerCodexAJour(resultat) {
  * Désactive le codex actif (retour au mode local seul).
  */
 function fermerCodex() {
-    _arreterAutoSave();
     _etat.actif = false;
     _etat.nom = '';
     _etat.derniereSauvegarde = null;
@@ -1242,7 +1226,6 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             // Handle invalide (fichier déplacé, clé USB retirée, etc.)
             console.warn('📂 Handle FSAPI invalide, on redemande...', e.message);
             _fileHandle = null;
-            _arreterAutoSave();
         }
     }
 
@@ -1259,7 +1242,6 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             await _ecrireViaHandle(handle, blob);
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
-            _demarrerAutoSave();
             return { methode: 'fsapi' };
         } catch (e) {
             if (e.name === 'AbortError') {
@@ -2594,90 +2576,6 @@ function _formaterTaille(octets) {
 }
 
 /* ===============================
-   AUTO-SAVE FSAPI
-   =============================== */
-
-/**
- * Démarre le timer d'auto-save.
- * Ne fait rien si pas de handle FSAPI ou si déjà démarré.
- */
-function _demarrerAutoSave() {
-    if (!AUTO_SAVE_AUTORISE) return;   // lot F : inerte jusqu'à la décision de Grégoire
-    if (!_fileHandle || _autoSaveTimerId) return;
-    _autoSaveTimerId = setInterval(_executerAutoSave, AUTO_SAVE_DELAI);
-    _mettreAJourIndicateur();
-}
-
-/**
- * Arrête le timer d'auto-save.
- */
-function _arreterAutoSave() {
-    if (_autoSaveTimerId) {
-        clearInterval(_autoSaveTimerId);
-        _autoSaveTimerId = null;
-    }
-    _derniereAutoSave = null;
-    _autoSaveEnCours = false;
-    _mettreAJourIndicateur();
-}
-
-/**
- * Exécute une sauvegarde automatique silencieuse.
- * Ne se déclenche que si :
- * - un handle FSAPI est disponible
- * - il y a des modifications non sauvegardées
- * - aucune auto-save n'est déjà en cours
- */
-async function _executerAutoSave() {
-    // Gardes
-    if (!_fileHandle) { _arreterAutoSave(); return; }
-    if (!_etat.actif) return;
-    if (!_etat.modificationsDepuis) return;
-    if (_autoSaveEnCours) return;
-
-    _autoSaveEnCours = true;
-
-    try {
-        var resultat = await genererCodex({ silencieux: true });
-        // Ré-écriture directe via le handle (pas de dialogue)
-        await _ecrireViaHandle(_fileHandle, resultat.blob);
-        // Lot F : l'état « à jour » suit l'écriture, il ne la précède plus.
-        await _marquerCodexAJour(resultat);
-
-        _derniereAutoSave = new Date().toISOString();
-
-        notifications.succes(
-            'Enregistrement auto',
-            _formaterTaille(resultat.blob.size) + ' — ' + _formaterHeureLocale(_derniereAutoSave)
-        );
-    } catch (e) {
-        console.warn('📂 Auto-save échoué :', e.message);
-        // Rien à restaurer : l'état « à jour » n'est posé qu'après une écriture
-        // réussie (lot F), il reste donc « pas à jour » sur un échec.
-        // Handle devenu invalide — arrêter l'auto-save
-        if (e.name === 'NotAllowedError' || e.name === 'NotFoundError' || e.name === 'InvalidStateError') {
-            _fileHandle = null;
-            _arreterAutoSave();
-        }
-    } finally {
-        _autoSaveEnCours = false;
-    }
-}
-
-/**
- * Formate une heure locale courte (ex: "11h45")
- */
-function _formaterHeureLocale(dateISO) {
-    if (!dateISO) return '';
-    try {
-        var d = new Date(dateISO);
-        return d.getHours() + 'h' + String(d.getMinutes()).padStart(2, '0');
-    } catch (e) {
-        return '';
-    }
-}
-
-/* ===============================
    INDICATEUR EN-TÊTE
    =============================== */
 
@@ -2836,28 +2734,6 @@ function _actualiserMenu() {
             enregInfo.classList.add('u-hide');
         }
     }
-
-    // Indicateur auto-save dans le menu
-    var autoSaveItem = document.getElementById('codex-menu-autosave');
-    var autoSaveSep = document.getElementById('codex-menu-autosave-sep');
-    if (autoSaveItem) {
-        if (_autoSaveTimerId) {
-            autoSaveItem.classList.remove('u-hide');
-            if (autoSaveSep) autoSaveSep.classList.remove('u-hide');
-            var detail = document.getElementById('codex-menu-autosave-detail');
-            if (detail) {
-                var intervMin = Math.round(AUTO_SAVE_DELAI / 60000);
-                var texte = 'Toutes les ' + intervMin + ' min';
-                if (_derniereAutoSave) {
-                    texte += ' — dernier : ' + _formaterHeureLocale(_derniereAutoSave);
-                }
-                detail.textContent = texte;
-            }
-        } else {
-            autoSaveItem.classList.add('u-hide');
-            if (autoSaveSep) autoSaveSep.classList.add('u-hide');
-        }
-    }
 }
 
 /* ===============================
@@ -2888,7 +2764,6 @@ async function actionOuvrir() {
             fichier = await handle.getFile();
             // Conserver le handle pour les sauvegardes suivantes
             _fileHandle = handle;
-            _demarrerAutoSave();
         } catch (e) {
             if (e.name === 'AbortError') return; // Annulé par l'utilisateur
             console.warn('📂 showOpenFilePicker échoué, fallback input file', e.message);
