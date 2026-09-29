@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 15 H 15 : **1.169.1 EN LIGNE ; PORTE DES LOTS F ET G CLOSE (9/9) ; #988 AUX CORRIGÉS** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 18 H 45 : **LOT H (#987) FUSIONNÉ DANS `main`, VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh` ; LOT I (#985) OUVERT EN MESURE SUR `lot-i-rappel-codex`**
+
+**Lot H** : la suite durait une heure parce que le Mac se mettait en VEILLE pendant qu'elle tournait (`pmset` `sleep 1` ; 13 essais nés à l'instant d'une veille, 75 des 115 min, tous les échecs). `verifier-playwright.mjs` lance maintenant `caffeinate -i -w pid`, avec un écouteur `'error'` ajouté après la relecture de Cowork. Après : 42,8 min, 0 échec. Rapport : `plans de travail/RAPPORT-2026-09-29-987-duree-suite.md`. Aucune version (rien de visible). #987 cochée. Retrait de `Formation/` et « Exemples de feedback pour Claude/ » par Grégoire, enregistré (`7c12e3a8`).
+
+**Reste** : le push de `main` — vérifier `git log origin/main` (verdict en cours au moment d'écrire) ; lot I, dans le worktree de sa branche (mesure, inventaire, mots à proposer ; rien de poussé) ; la CI GitHub à 60 min (#979), décision de Grégoire (`PLAN-2026-09-29-fin-carte-et-enregistrement.md`) ; OU-EN-EST-ON.md pour E1 à E3.
+
+## (relais précédent) 29 SEPT. 2026, ≈ 15 H 15 : **1.169.1 EN LIGNE ; PORTE DES LOTS F ET G CLOSE (9/9) ; #988 AUX CORRIGÉS** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
 
 **Mesuré** : 1.169.1 en ligne depuis 14 h 10 (Netlify « ready », `commit_ref` `4eb6e363`) ; verdict WebKit vert avant le push. Porte des lots F et G : relevé de Grégoire à 15 h 03, en 1.169.0, 9 passées, 0 échec ; la 1.2 bis n'a pas été faite (sans objet).
 
