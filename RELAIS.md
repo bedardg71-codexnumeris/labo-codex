@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 6 H 30 : **LOT F FUSIONNÉ DANS `main` EN 1.168.0 ; VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh`** — « poussé » se lit dans le message de fin de session
+## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 8 H 45 : **1.168.0 POUSSÉE ET EN LIGNE ; RIEN EN COURS SUR UNE BRANCHE** — `main` fait foi
+
+**Mesuré** : poussée à 8 h 31 (`053d96cb..27fa681d`, par le port 443 : le port 22 de GitHub expirait sur ce réseau) ; en ligne depuis 8 h 26 (Netlify « ready », `commit_ref` `27fa681d`, constaté par Cowork). Verdict WebKit vert au second passage (quatre essais verts au second essai : #959/#960, #866) ; le premier avait rougi par délai dépassé (#957, vert 19/19 rejoué seul). La suite a duré environ une heure, deux fois : #987.
+
+**Fait depuis** : porte terrain de 1.167.0 passée (9/9, 29 sept. 7 h 23), branche `lot-e3-productions-interventions` retirée ; porte du lot F écrite et publiée par Cowork (`plans de travail/PORTES-TERRAIN-2026-09-29-lot-F-codex.md`), le code du stock relu par Cowork (conforme) ; #986 (le clavier de l'iPad cache « Enregistré ») et #987 inscrites ; #963 à #966 cochées, #963 aux corrigés ; #974 reste au registre des retours seulement, comme #968 et #969 (décision de Claude Code). Fichiers de Cowork commités.
+
+**Reste** : la porte du lot F sur l'iPad (Grégoire) ; #987, mesurer 1.167.0 contre 1.168.0, machine au repos ; OU-EN-EST-ON.md à rattraper pour E1 à E3 ; le cap suivant n'est pas fixé (à Grégoire).
+
+## (relais précédent) 29 SEPT. 2026, ≈ 6 H 30 : **LOT F FUSIONNÉ DANS `main` EN 1.168.0 ; VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh`**
 
 **Où vit le travail** : `main` (fusion de `lot-f-les-mots`). Commit du lot `611d7dcd` : R1 et R2 de la relecture finale de Cowork, le stock (b) décidé par Grégoire (un codex actif d'avant le lot, sans `temoinFiable`, posé « pas à jour » une fois), les deux fichiers de sécurité, les Nouvelles 1.168 mot pour mot, BACKLOG #982 à #985.
 
