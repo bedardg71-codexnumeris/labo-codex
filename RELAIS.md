@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, SOIR : **LOT E3 FAIT SUR LA BRANCHE `lot-e3-productions-interventions` (arbre principal), NON FUSIONNÉ ; RELECTURE DE COWORK ATTENDUE** — lire `git log main..lot-e3-productions-interventions`
+## POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, ≈ 20 H : **LOT E3 (1.167.0) RELU VERT, RELEASE POSÉE ; VERDICT WEBKIT, FUSION ET PUSH EN COURS** — lire `git log origin/main`
+
+**Où vit le travail** : branche `lot-e3-productions-interventions` (arbre principal) = les quatre étapes du lot E3, la case de report des présences (`d2cc7bde`, décision de Grégoire, 19 h 43), la release **1.167.0** (build `0928-1959`, `2bf7c5f1`, Nouvelles acceptées mot pour mot à 19 h 46) et `main` fusionnée dedans (relais `2f93bbcc`). Relectures de Cowork : `RELECTURE-2026-09-28-lot-E3-productions-interventions.md` (verte ; dernière section : la case, verte). Vitest 659 fichiers, 7 700/7 700 après le bump.
+
+**Reste, dans l'ordre** : verdict WebKit complet (Cowork et navigateurs fermés) → fusion de la branche dans `main` (avance rapide) → `caffeinate -i scripts/pousser.sh origin main` → porte terrain `plans de travail/PORTES-TERRAIN-2026-09-28-lot-E3-productions-interventions.md` (Cowork publie l'artefact). Si ce relais est lu sur `main` sans que 1.167.0 soit sur `origin/main`, le verdict ou le push n'a pas abouti : reprendre là. Fiches neuves : #978, #979, #980.
+
+## (relais précédent) POUR LA SESSION QUI PREND LE RELAIS — 28 SEPT. 2026, SOIR : **LOT E3 FAIT SUR LA BRANCHE `lot-e3-productions-interventions` (arbre principal), NON FUSIONNÉ ; RELECTURE DE COWORK ATTENDUE** — lire `git log main..lot-e3-productions-interventions`
 
 **Où vit le travail** : la branche locale `lot-e3-productions-interventions` (non poussée), partie de `main` = `15effd08` (1.166.1). Sept commits : la consigne du jour posée, les quatre étapes (productions, interventions et rencontres, volet confidentiel, réglages et bilan), le compte rendu d'étape, le placement et la demande finale. **Aucune release, aucun bump.**
 
