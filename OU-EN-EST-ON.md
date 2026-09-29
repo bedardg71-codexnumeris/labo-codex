@@ -15,6 +15,12 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+◐ **LIVRÉ EN 1.169.0 (29 SEPTEMBRE 2026, midi ; relecture croisée de Cowork verte ; tes mots appliqués tels que tu les as tranchés ; verdict au navigateur et mise en ligne : à constater) — QUAND LE CODEX N'A PAS PU S'ENREGISTRER, L'APPLICATION LE DIT.**
+
+**Ce que tu verras** : si « Mettre à jour le codex » n'écrit pas le fichier, « Codex non mis à jour » s'affiche en bas à gauche et y reste, avec la taille du fichier, et une fenêtre propose « Réessayer » (le même fichier, sans le refaire) ou « Télécharger à la place ». Après un téléchargement, c'est toi qui dis « Il y est » : sans ça, le codex n'est pas dit « à jour ». L'aperçu dit la taille du fichier. Le rapport de bug a une section « DERNIÈRE MISE À JOUR DU CODEX » (étape atteinte, taille, méthode, erreur).
+**Vérifié comment** : au navigateur (WebKit), avec un faux partage de l'iPad : aperçu refusé (seul cas sans message), partage refusé deux fois puis réussi, « Télécharger à la place » (« Il n'y est pas », Échap, « Il y est »), préparation en panne, page rechargée pendant la tentative ; douze mutations, toutes rouges ; 7 762 essais Vitest verts. **Pas vérifié** : la vraie feuille de partage de l'iPad. **Ce qui ne marche pas encore** : la mise à jour de ton codex d'environ 1 Go sur l'iPad ; la cause n'est pas trouvée, le prochain essai la rendra lisible (porte du lot F, rangée 1.2). *(#988)*
+**Tes données** : rien n'est écrit dedans.
+
 ✅ **FAIT EN 1.168.0 (29 SEPTEMBRE 2026, vers 6 h 30 ; relecture croisée de Cowork verte après ses deux corrections de mots ; tes décisions sur le stock, les textes et les « Nouvelles » appliquées telles quelles ; verdict au navigateur vert ; en ligne depuis 8 h 26, constaté chez Netlify) — DES MOTS QUI DISENT VRAI : ENREGISTRÉ, CODEX, COPIE DE SECOURS.**
 
 **Ce que tu verras** : le menu du codex dit « Ton codex est à jour » ou « Ton codex n'a pas tes derniers changements » ; son bouton s'appelle « Mettre à jour le codex ». Plus d'enregistrement automatique du codex. Au premier lancement de 1.168.0, si un codex est ouvert, il est marqué « pas à jour » : mets-le à jour une fois. La sauvegarde de Réglages › Données s'appelle « Copie de secours » (carte de l'Accueil, rappel, bouton « Faire une copie de secours », qui ouvre vraiment sa fenêtre). Archiver dit « Groupe archivé » ; sous Safari, une archive annulée n'apparaît plus dans la liste. L'Aide et la foire aux questions parlent comme ça.
