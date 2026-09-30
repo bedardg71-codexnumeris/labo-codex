@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 9 H 20 : **LOT J0 BIS (#988) EN LIGNE EN 1.170.2 ; LA PORTE SUR L'IPAD PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 11 H 50 : **1.171.0 EN LIGNE ; #988 AUX CORRIGÉS (PORTE PASSÉE SUR L'IPAD) ; LOT J0 TER LIVRÉ** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Porte du lot J0 bis (iPad, 1.170.2, 10 h 38)** : passée. La barre à 100 % en 12 s environ, « Ton codex est prêt », « Enregistrer », la feuille de partage sans passer par « Codex non mis à jour », fichier du jour de 1,31 Go, deux réouvertures sans rappel. Réserve de Cowork : relevé coché sur la page de la porte du lot J0 ; la fenêtre est attestée par la réponse écrite de Grégoire. #988 est aux corrigés de `SUIVI-BUGS.md` ; les deux portes du 30 sept. portent leur résultat en tête.
+
+**Lot J0 ter** (`cb8619a9`) : relevé par Grégoire à la porte, un délai avant la feuille de partage. `_afficherAttentePartage` (`js/codex.js`) : la fenêtre de progression du parcours, sans barre ni bouton, « Ouverture de la feuille de partage… » (mots acceptés par Grégoire), posée de façon synchrone juste avant `navigator.share`, retirée quand il se termine ; dans les trois entrées du partage (direct, « Enregistrer », « Réessayer »). Pas de relecture préalable de Cowork (tranché par Cowork : de l'affichage) ; **Cowork relit après coup**. Release `1fcf412f` : Nouvelles de 1.171, titre et ligne acceptés par Grégoire, « Un gros codex se met à jour sur l'iPad ».
+
+**Mesuré** : banc `lot-j0-bis-partage-apres-preparation` étendu, 2/2, rouge sur le code de 1.170.2 ; 14 mutations, 14 rouges (dont une minuterie nulle entre le message et le partage : l'activation simulée s'éteint à la tâche suivant le clic). Vitest 664 fichiers, 7 791/7 791 sur `1fcf412f`. Verdict WebKit complet vert sur `1fcf412f`, rendu à 11 h 43 (≈ 42 min, Cowork fermé et remesuré, charge 7,6 au lancement, sous `caffeinate`), **aucune spec au second essai**. Poussé (`c8185a4d..1fcf412f`). **En ligne depuis 11 h 45** (Netlify « ready », `commit_ref` `1fcf412f`, `published_at` 15:45:30 Z). Branche `lot-j0-ter-attente-partage` fusionnée en avance rapide et retirée.
+
+**Non mesurable au banc, dit tel quel** : le délai lui-même (iPadOS prépare le fichier pour la feuille). **Un risque nommé, non observé** : le message n'a pas de bouton ; si le partage ne rendait jamais la main, il resterait à l'écran jusqu'au rechargement de la page (les données sont intactes, rien n'est écrit avant la réussite).
+
+**Reste** : la relecture après coup du lot J0 ter par Cowork ; Grégoire verra le message à sa prochaine mise à jour (pas de porte : apparence) ; §1 de la porte du lot I ; #992 (un codex de plus de 2 Go ne se rouvre pas, priorité haute) à remonter ; **une consigne suivante attend** : `plans de travail/CONSIGNE-SUIVANTE-archives-mesure.md` (chantier des archives, lot de mesure, aucun code), après lecture de `CADRAGE-2026-09-30-codex-et-archives-coherence.md` ; puis le lot I bis (D9) ; la CI GitHub à 60 min (#979) ; OU-EN-EST-ON.md pour E1 à E3.
+
+## (relais précédent) 30 SEPT. 2026, ≈ 9 H 20 : **LOT J0 BIS (#988) EN LIGNE EN 1.170.2 ; LA PORTE SUR L'IPAD PEUT SE FAIRE**
 
 **Porte du lot J0 (iPad, 1.170.1, 7 h 28)** : la préparation aboutit (12 s, sans rechargement : le lot J0 tient), mais le premier enregistrement est refusé (`NotAllowedError`) ; « Réessayer » réussit. Le fichier de l'iPad (7 h 34, une seconde préparation) est sain : `unzip -tq` sans erreur, 503 entrées, 1 314 934 513 octets.
 
