@@ -19,7 +19,8 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //       codex », sans codex ouvert ; la réussite repousse le rappel de 14 jours, le clic seul
 //       ne pose rien (aperçu refusé : rien) ;
 //   (2) depuis le menu : un partage refusé et « Il n'y est pas » ne repoussent rien ;
-//       « Il y est » repousse ;
+//       « Il y est » repousse ; 30 jours choisis au rappel puis un échec ne valent pas pour
+//       la mise à jour suivante par le menu (14 jours) ;
 //   (3) la croix repousse de 14 jours ;
 //   (4) le stock : « Ne plus rappeler » reste posé après une mise à jour (definirProchainRappel
 //       l'efface : le report ne doit pas passer par elle) ; une date plus lointaine déjà
@@ -209,6 +210,24 @@ test.describe('Lot I (#985) — le rappel mène au codex', () => {
         await cliquerBouton(page, 'Télécharger à la place');
         await attendreModale(page, 'Téléchargement lancé');
         await cliquerBouton(page, 'Il y est');
+        await codexAJour(page);
+        expect(await lireRappel(page)).toEqual({ jours: 14, nePlusRappeler: null });
+
+        // (2 bis) Relecture de Cowork : 30 jours choisis au rappel, puis un échec ; la mise à
+        // jour réussie plus tard par le menu repousse de 14 jours, pas de 30.
+        await effacerRappel(page);
+        await page.evaluate(() => sauvegarderDonneesSelonMode('banc_lotI_c', { n: 3 }));
+        await page.evaluate(() => backupReminder.afficherModal());
+        await page.evaluate(() => { document.getElementById('select-rappel-backup').value = '30'; });
+        await page.evaluate(() => { window.__reponsesPartage = ['NotAllowedError']; });
+        await noterAvant(page);
+        await page.evaluate(() => document.querySelector('[data-action="backupReminder.mettreAJourLeCodex"]').click());
+        await attendreModale(page, 'Codex non mis à jour');
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(() => !document.getElementById('overlay-ui-dialogue'), null, { timeout: 10000 });
+        expect(await lireRappel(page)).toEqual({ jours: null, nePlusRappeler: null });
+        await page.evaluate(() => { window.__reponsesPartage = ['ok']; });
+        await page.evaluate(() => Codex.actionEnregistrer());
         await codexAJour(page);
         expect(await lireRappel(page)).toEqual({ jours: 14, nePlusRappeler: null });
         expect(erreurs).toEqual([]);

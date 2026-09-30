@@ -122,9 +122,13 @@
      * rapproche pas une date plus lointaine déjà choisie : le stock est respecté.
      */
     function reporterApresMiseAJourDuCodex() {
+        // Le délai choisi ne sert qu'une fois, même quand le report est écarté (relecture de
+        // Cowork) : sinon 30 jours choisis, puis un échec, valaient encore pour le menu plus tard.
+        const delai = delaiApresMiseAJour;
+        delaiApresMiseAJour = DELAI_PAR_DEFAUT;
         if (db.getSync(CLE_NE_PLUS_RAPPELER, null) === 'true') return;
         const report = new Date();
-        report.setDate(report.getDate() + delaiApresMiseAJour);
+        report.setDate(report.getDate() + delai);
         const dejaPose = db.getSync(CLE_PROCHAIN_RAPPEL, null);
         if (dejaPose && new Date(dejaPose) > report) return;
         db.setSync(CLE_PROCHAIN_RAPPEL, report.toISOString());
@@ -145,7 +149,11 @@
             delaiApresMiseAJour = parseInt(valeur, 10) || DELAI_PAR_DEFAUT;
         }
         if (window.Codex && typeof window.Codex.actionEnregistrer === 'function') {
-            window.Codex.actionEnregistrer();
+            // Le délai choisi ne vaut que pour CETTE tentative : un échec ou une annulation le
+            // rendent au défaut, pour la mise à jour suivante par le menu (banc, essai 2 bis).
+            Promise.resolve(window.Codex.actionEnregistrer()).finally(() => {
+                delaiApresMiseAJour = DELAI_PAR_DEFAUT;
+            });
         }
     }
 
@@ -193,6 +201,8 @@
         if (document.getElementById('modal-backup-reminder')) {
             return;
         }
+        // Un délai choisi lors d'une ouverture précédente ne vaut pas pour celle-ci.
+        delaiApresMiseAJour = DELAI_PAR_DEFAUT;
 
         // Overlay (classe standard DS)
         const overlay = document.createElement('div');
