@@ -1,5 +1,11 @@
 # Portes terrain – lot J0 : sur l'iPad, la mise à jour du codex aboutit (#988 rouverte)
 
+> **RÉSULTAT – 30 septembre 2026.** Deux passages sur l'iPad.
+> - **7 h 28, en 1.170.1** : §1 passé jusqu'à la préparation (la barre à 100 % en 12 s environ, sans rechargement : le lot J0 tient) ; **1.3 en échec au premier essai** (partage refusé, `NotAllowedError`), réussi par « Réessayer » ; fichier de 7 h 34 jugé sur le Mac en lecture seule (`unzip -tq` sans erreur, 503 entrées, 1 314 934 513 octets). Suite : lot J0 bis (1.170.2).
+> - **10 h 38, en 1.170.2** : relevé de Grégoire coché **sur cette page** : la barre à 100 % en 12 s environ ; la feuille de partage sans passer par « Codex non mis à jour » ; fichier du jour dans Fichiers (1,31 Go) ; §2 passé (application fermée puis rouverte deux fois, aucun rappel) ; 17 Go libres après une restauration de l'iPad (le matin : 2,88 Go).
+> - ⚠ **Réserve de Cowork** : ce second relevé aurait dû se faire sur la page de la porte du lot J0 bis. Les rangées cochées sont celles de cette page-ci ; la rangée propre au lot J0 bis (la fenêtre « Ton codex est prêt ») est attestée par la réponse écrite de Grégoire (« OUI »), pas par une coche.
+> - **#988 passe aux corrigés.** Un défaut relevé par Grégoire, le délai avant la feuille de partage : lot J0 ter (1.171.0).
+>
 > Écrites le 30 septembre 2026, vers 6 h 20, par Claude Code (le markdown ; **Cowork publie l'artefact**, bouton « Copier mes résultats »). Sur tes **données réelles**, à l'adresse `https://app.codexnumeris.org`, sur l'iPad. Ce qui échoue devient une fiche du BACKLOG.
 >
 > ✅ **Le lot est en ligne : la porte peut se faire.** 1.170.1 (`e9fb94a2`), relu par Cowork (« le lot part, sans correction »), verdict WebKit complet vert, en ligne depuis le 30 sept. à 7 h 19 (Netlify « ready », `commit_ref` `e9fb94a2`). Le numéro attendu en 0.1 est **1.170.1**.

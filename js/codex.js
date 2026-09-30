@@ -1454,6 +1454,8 @@ async function _ecrireViaHandle(handle, blob) {
  * @param {function(string): Promise<boolean>} [options.toucherFrais] - Lot J0 bis : appelée
  *   avant le partage quand le toucher n'est plus actif ; rend true si l'usager en a donné un
  *   frais, false s'il renonce (rendu `annule`, avec `toucherRefuse`)
+ * @param {function(boolean): void} [options.attentePartage] - Lot J0 ter : appelée, de façon
+ *   synchrone, avec true juste avant `navigator.share`, puis avec false quand il se termine
  * @returns {Promise<{methode: string, strategie: string, erreur?: Error, toucherRefuse?: boolean}>}
  */
 async function sauvegarderVersDestination(blob, nomFichier, options) {
@@ -1506,8 +1508,12 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
         if (motifToucher && !(await options.toucherFrais(motifToucher))) {
             return { methode: 'annule', strategie: 'partage (Enregistrer dans Fichiers)', toucherRefuse: true };
         }
+        var attentePartage = options && typeof options.attentePartage === 'function' ? options.attentePartage : null;
         try {
             var fichier = new File([blob], nomFichier, { type: 'application/zip' });
+            // Lot J0 ter (#988) : le message d'attente se pose de façon SYNCHRONE, juste avant
+            // l'appel. Rien d'asynchrone (ni await, ni minuterie) entre le toucher et le partage.
+            if (attentePartage) attentePartage(true);
             await navigator.share({
                 files: [fichier],
                 title: 'Codex Labo Codex'
@@ -1522,6 +1528,9 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             if (e.name === 'AbortError') {
                 return { methode: 'annule', strategie: 'partage (Enregistrer dans Fichiers)', erreur: e };
             }
+        } finally {
+            // Réussite, échec ou feuille refermée : le message d'attente s'en va.
+            if (attentePartage) attentePartage(false);
         }
     }
 
@@ -3218,6 +3227,20 @@ function _formaterTailleEnviron(octets) {
     return 'environ ' + Math.max(1, Math.round(octets / 1024)) + ' Ko';
 }
 
+/**
+ * Lot J0 ter (#988) : le message d'attente pendant que l'appareil prépare le fichier pour la
+ * feuille de partage. Vécu sur l'iPad le 30 sept. 2026 : un délai assez long pour qu'on se
+ * demande s'il y a un problème. C'est la fenêtre de progression du parcours, sans sa barre :
+ * il n'y a rien à mesurer. Mots acceptés par Grégoire le 30 sept. 2026.
+ * ⚠ SYNCHRONE : appelée entre le toucher et `navigator.share` ; n'y mettre ni await ni minuterie.
+ */
+function _afficherAttentePartage(taille) {
+    _afficherProgression('Ouverture de la feuille de partage…');
+    _majProgression(0, 'Ton appareil prépare le fichier (' + taille + '). Ça peut prendre un moment : elle va s\'ouvrir.');
+    var piste = document.querySelector('#progression-overlay .progression-piste');
+    if (piste) piste.classList.add('u-hide');
+}
+
 function _direNonMisAJour(raison) {
     if (window.temoinEnregistrement) {
         window.temoinEnregistrement.nonEnregistre(raison, undefined, CLE_TEMOIN_CODEX, 'Codex non mis à jour');
@@ -3260,7 +3283,15 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         _noterTentative({ toucherFrais: 'demandé (' + motif + '), ' + (accorde ? 'accordé' : 'refusé') });
         return accorde;
     };
-    var options = { forcerDialogue: forcerDialogue, sansRepli: true, toucherFrais: toucherFrais };
+    // Lot J0 ter (#988) : le message d'attente, tant que le partage est en cours. L'affichage
+    // ne doit jamais empêcher le partage : une panne de la fenêtre est avalée ici.
+    var attentePartage = function(enCours) {
+        try {
+            if (enCours) _afficherAttentePartage(taille);
+            else _masquerProgression();
+        } catch (e) { /* le partage continue sans le message */ }
+    };
+    var options = { forcerDialogue: forcerDialogue, sansRepli: true, toucherFrais: toucherFrais, attentePartage: attentePartage };
     while (true) {
         _noterTentative({
             etape: 'enregistrement du fichier',
@@ -3315,7 +3346,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         });
         if (geste === 'reessayer') {
             // Sans `toucherFrais` : le clic sur « Réessayer » en est un, et le partage le suit aussitôt.
-            options = { forcerDialogue: forcerDialogue, sansRepli: true };
+            options = { forcerDialogue: forcerDialogue, sansRepli: true, attentePartage: attentePartage };
         } else if (geste === 'telecharger') {
             options = { telechargementDirect: true };
         } else {

@@ -25,6 +25,16 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //      bon. ⚠ `page.evaluate` accorde lui-même une activation d'environ 5 s (mesuré) : entre
 //      le clic et le partage, ce banc n'en fait AUCUN ; il attend côté Node.
 //
+// LOT J0 TER (30 sept. 2026) — LE MESSAGE D'ATTENTE. Vécu sur l'iPad à la porte du lot J0 bis :
+// entre « Enregistrer » et la feuille de partage, un délai assez long pour inquiéter. Dès que le
+// partage est lancé, « Ouverture de la feuille de partage… » est à l'écran ; il disparaît quand le
+// partage se termine. Le banc « simulé » le lit À L'APPEL du partage (posé de façon synchrone), puis
+// pendant que le partage est retenu, dans les trois entrées (direct, « Enregistrer », « Réessayer »),
+// et constate sa disparition après réussite, échec et feuille refermée. Sa fausse activation s'éteint
+// à la tâche suivant le clic : une minuterie, même nulle, entre le toucher et le partage le fait rougir.
+// Le banc « réel » reste vert : le message ne vole pas le toucher. ⚠ Le délai lui-même (iPadOS prépare
+// le fichier pour la feuille) n'existe pas au banc : il n'est ni mesuré ni simulé en chiffre.
+//
 // Pack démo, noms fictifs. Aucune écriture disque.
 
 const patternsAttendus = [
@@ -76,6 +86,17 @@ async function poserReleves(page) {
     await page.evaluate(() => {
         window.__toasts = [];
         window.__titresModales = [];
+        // Lot J0 ter : le message d'attente tel qu'il est à l'écran, ou null.
+        window.__lireAttente = () => {
+            const o = document.getElementById('progression-overlay');
+            if (!o) return null;
+            return {
+                titre: o.querySelector('.progression-titre').textContent,
+                texte: o.querySelector('.progression-detail').textContent,
+                barreCachee: getComputedStyle(o.querySelector('.progression-piste')).display === 'none',
+                boutons: o.querySelectorAll('button').length
+            };
+        };
         new MutationObserver((muts) => muts.forEach((m) => m.addedNodes.forEach((n) => {
             if (n.nodeType !== 1) return;
             if (n.classList.contains('notification-avec-icone')) {
@@ -136,6 +157,14 @@ const TITRE_PRET = 'Ton codex est prêt';
 // Les mots acceptés par Grégoire le 30 sept. 2026 ; la taille est celle que dit déjà le message d'échec.
 const MESSAGE_PRET = /^Le fichier \(environ \d+ (Ko|Mo)\) est préparé\. Touche « Enregistrer » pour choisir où le ranger\.$/;
 const REFUS_WEBKIT = 'The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission.';
+// Lot J0 ter : les mots acceptés par Grégoire le 30 sept. 2026 ; pas de barre, pas de bouton.
+const TITRE_ATTENTE = 'Ouverture de la feuille de partage…';
+const TEXTE_ATTENTE = /^Ton appareil prépare le fichier \(environ \d+ (Ko|Mo)\)\. Ça peut prendre un moment : elle va s'ouvrir\.$/;
+function messageDAttenteAttendu(lu) {
+    expect(lu).not.toBeNull();
+    expect({ titre: lu.titre, barreCachee: lu.barreCachee, boutons: lu.boutons }).toEqual({ titre: TITRE_ATTENTE, barreCachee: true, boutons: 0 });
+    expect(lu.texte).toMatch(TEXTE_ATTENTE);
+}
 const succes = (toasts) => toasts.filter((t) => t.startsWith('succes:Codex mis à jour'));
 
 test.describe('Lot J0 bis (#988) — le partage du codex après une préparation longue', () => {
@@ -156,7 +185,12 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
             window.__activation = { active: false };
             window.__apiAbsente = false;
             window.__preparationLongue = true;
-            document.addEventListener('click', () => { window.__activation.active = true; }, true);
+            // Lot J0 ter : l'activation d'un clic s'éteint à la tâche suivante. Entre le clic et le
+            // partage, seules des microtâches passent ; une minuterie, même nulle, la laisse s'éteindre.
+            document.addEventListener('click', () => {
+                window.__activation.active = true;
+                setTimeout(() => { window.__activation.active = false; }, 0);
+            }, true);
             Object.defineProperty(navigator, 'userActivation', {
                 configurable: true,
                 get: () => (window.__apiAbsente ? undefined : { get isActive() { return window.__activation.active; } })
@@ -164,12 +198,16 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
 
             window.__partages = 0;
             window.__refusSansActivation = 0;
+            window.__messagesAuPartage = [];        // le message d'attente, lu à chaque appel du partage
+            window.__retenirPartage = false;        // vrai : le partage reste en attente jusqu'à `__lacherPartage()`
+            window.__lacherPartage = null;
             window.__reponsesPartage = [];          // après le contrôle d'activation : 'AbortError' | 'ok'
             Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
             Object.defineProperty(navigator, 'share', {
                 configurable: true,
                 value: async () => {
                     window.__partages++;
+                    window.__messagesAuPartage.push(window.__lireAttente());    // de façon synchrone, à l'appel
                     if (!window.__activation.active) {
                         window.__refusSansActivation++;
                         const e = new Error(refus);
@@ -177,6 +215,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
                         throw e;
                     }
                     window.__activation.active = false;
+                    if (window.__retenirPartage) await new Promise((lacher) => { window.__lacherPartage = lacher; });
                     const r = window.__reponsesPartage.shift() || 'ok';
                     if (r === 'ok') return;
                     const e = new Error('refus simulé (' + r + ')');
@@ -199,6 +238,15 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         const cliquerBouton = (texte) => page.evaluate((t) => {
             Array.from(document.querySelectorAll('#overlay-ui-dialogue .modal-actions button')).find((x) => x.textContent === t).click();
         }, texte);
+        const retenirLeProchainPartage = () => page.evaluate(() => { window.__retenirPartage = true; });
+        const attendreLePartageRetenu = () => page.waitForFunction(() => typeof window.__lacherPartage === 'function', null, { timeout: 30000 });
+        const lacherLePartage = () => page.evaluate(() => {
+            const lacher = window.__lacherPartage;
+            window.__lacherPartage = null;
+            window.__retenirPartage = false;
+            lacher();
+        });
+        const lireAttente = () => page.evaluate(() => window.__lireAttente());
         const modifier = (cle) => page.evaluate((c) => sauvegarderDonneesSelonMode(c, { n: 1 }), cle);
 
         // (a) Préparation longue : la fenêtre, les mots, et AUCUN partage tenté.
@@ -218,8 +266,21 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         expect(section).toContain('Issue: en cours');
 
         // (b) « Enregistrer » : le partage du MÊME fichier, une fois, dans le geste ; « à jour ».
+        //     Lot J0 ter : tant que le partage est en attente, le message est à l'écran, à la place de
+        //     la fenêtre « prêt », avec la même taille ; il était déjà posé À L'APPEL du partage.
+        const tailleDite = modale.message.match(/\((environ [^)]+)\)/)[1];
+        expect(await lireAttente()).toBeNull();
+        await retenirLeProchainPartage();
         await cliquerBouton('Enregistrer');
+        await attendreLePartageRetenu();
+        let attente = await lireAttente();
+        messageDAttenteAttendu(attente);
+        expect(attente.texte).toContain('(' + tailleDite + ')');
+        expect(await lireModale(page)).toBeNull();
+        expect(await page.evaluate(() => window.__messagesAuPartage)).toEqual([attente]);
+        await lacherLePartage();
         await page.waitForFunction(() => !Codex.etat().modificationsNonSauvees, null, { timeout: 10000 });
+        expect(await lireAttente()).toBeNull();                 // disparu après la réussite
         expect(await compteurs()).toEqual({ partages: 1, refus: 0, generations: 1 });
         expect(await lireModale(page)).toBeNull();
         expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
@@ -244,6 +305,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
             await page.waitForTimeout(600);
             expect(await lireModale(page)).toBeNull();
             expect(await page.evaluate(() => window.__titresModales)).toEqual([TITRE_PRET]);
+            expect(await lireAttente()).toBeNull();             // aucun partage lancé : aucun message d'attente
             expect(await page.evaluate(() => window.__toasts)).toEqual([]);
             expect(await lireEtat(page)).toEqual({ menu: PAS_A_JOUR, temoin: null });
             expect(await compteurs()).toEqual({ partages: avant.partages, refus: 0, generations: avant.generations + 1 });
@@ -256,8 +318,13 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         // (d) Préparation courte : le toucher tient encore, partage direct, AUCUNE fenêtre.
         await page.evaluate(() => { window.__preparationLongue = false; window.__titresModales.length = 0; window.__toasts.length = 0; });
         let avant = await compteurs();
+        await retenirLeProchainPartage();
         await page.evaluate(() => { Codex.actionEnregistrer(); });
+        await attendreLePartageRetenu();
+        messageDAttenteAttendu(await lireAttente());            // lot J0 ter : l'entrée directe
+        await lacherLePartage();
         await page.waitForFunction(() => !Codex.etat().modificationsNonSauvees, null, { timeout: 30000 });
+        expect(await lireAttente()).toBeNull();
         expect(await compteurs()).toEqual({ partages: avant.partages + 1, refus: 0, generations: avant.generations + 1 });
         expect(await page.evaluate(() => window.__titresModales)).toEqual([]);
         expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
@@ -288,7 +355,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         await page.evaluate(() => {
             window.__apiAbsente = true;
             window.__preparationLongue = true;
-            window.__reponsesPartage = ['AbortError'];
+            window.__reponsesPartage = ['AbortError', 'DataError'];
             window.__titresModales.length = 0;
             window.__toasts.length = 0;
         });
@@ -297,6 +364,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         await attendreModale(page, TITRE_PRET);
         await cliquerBouton('Enregistrer');
         await attendreModale(page, 'Codex non mis à jour');
+        expect(await lireAttente()).toBeNull();                 // disparu après la feuille refermée (AbortError)
         modale = await lireModale(page);
         expect(modale.boutons).toEqual(['Fermer', 'Télécharger à la place', 'Réessayer']);
         let etat = await lireEtat(page);
@@ -306,14 +374,53 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         expect(section).toContain('Toucher frais: demandé (activation illisible), accordé');
         expect(section).toContain('Erreur: AbortError – refus simulé (AbortError)');
         expect(section).toContain('Issue: échec de l\'écriture du fichier');
+        //     Un second essai échoue pour de bon (DataError) : le message a disparu là aussi.
         await cliquerBouton('Réessayer');
+        await page.waitForFunction((n) => window.__partages === n, avant.partages + 2, { timeout: 10000 });
+        await attendreModale(page, 'Codex non mis à jour');
+        expect(await lireAttente()).toBeNull();                 // disparu après l'échec
+        expect(sectionDuRapport(await rapport(page))).toContain('Erreur: DataError – refus simulé (DataError)');
+        //     Le troisième : retenu, pour lire le message dans l'entrée « Réessayer » ; puis réussi.
+        await retenirLeProchainPartage();
+        await cliquerBouton('Réessayer');
+        await attendreLePartageRetenu();
+        messageDAttenteAttendu(await lireAttente());
+        expect(await lireModale(page)).toBeNull();
+        await lacherLePartage();
         await page.waitForFunction(() => !Codex.etat().modificationsNonSauvees, null, { timeout: 10000 });
-        expect(await compteurs()).toEqual({ partages: avant.partages + 2, refus: 0, generations: avant.generations + 1 });
-        expect(await page.evaluate(() => window.__titresModales)).toEqual([TITRE_PRET, 'Codex non mis à jour']);
+        expect(await lireAttente()).toBeNull();
+        expect(await compteurs()).toEqual({ partages: avant.partages + 3, refus: 0, generations: avant.generations + 1 });
+        expect(await page.evaluate(() => window.__titresModales)).toEqual([TITRE_PRET, 'Codex non mis à jour', 'Codex non mis à jour']);
         expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
         section = sectionDuRapport(await rapport(page));
-        expect(section).toContain('Essais d\'écriture: 2');
+        expect(section).toContain('Essais d\'écriture: 3');
         expect(section).toContain('Issue: réussie');
+
+        // Lot J0 ter : à CHAQUE appel du partage de ce banc, le message était déjà à l'écran.
+        const messages = await page.evaluate(() => window.__messagesAuPartage);
+        expect(messages).toHaveLength((await compteurs()).partages);
+        messages.forEach(messageDAttenteAttendu);
+
+        // (g) Lot J0 ter : une panne de l'AFFICHAGE du message n'empêche pas le partage.
+        await modifier('banc_j0ter_g');
+        await page.evaluate(() => {
+            window.__apiAbsente = false;
+            window.__preparationLongue = false;
+            window.__titresModales.length = 0;
+            const vraie = document.querySelector.bind(document);
+            document.querySelector = (selecteur) => {
+                if (selecteur === '#progression-overlay .progression-piste') throw new Error('panne simulée de l\'affichage');
+                return vraie(selecteur);
+            };
+        });
+        avant = await compteurs();
+        await page.evaluate(() => { Codex.actionEnregistrer(); });
+        await page.waitForFunction(() => !Codex.etat().modificationsNonSauvees, null, { timeout: 30000 });
+        await page.evaluate(() => { delete document.querySelector; });
+        expect(await compteurs()).toEqual({ partages: avant.partages + 1, refus: 0, generations: avant.generations + 1 });
+        expect(await page.evaluate(() => window.__titresModales)).toEqual([]);
+        expect(await lireAttente()).toBeNull();
+        expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
 
         expect(erreurs).toEqual([]);
     });
@@ -330,7 +437,8 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
             Object.defineProperty(navigator, 'share', {
                 configurable: true,
                 value: (donnees) => {
-                    const ligne = { actif: navigator.userActivation.isActive, issue: 'en cours' };
+                    const attente = window.__lireAttente();
+                    const ligne = { actif: navigator.userActivation.isActive, attente: attente && attente.titre, issue: 'en cours' };
                     window.__journalPartage.push(ligne);
                     return vraiPartage(donnees).then(
                         (v) => { ligne.issue = 'résolu'; return v; },
@@ -394,7 +502,8 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         await page.mouse.click(enregistrer.x, enregistrer.y);
         await attendreCoteNode(2000);
         lu = await lireLeJournal();
-        expect(lu.journal).toEqual([{ actif: true, issue: 'résolu' }]);
+        expect(lu.journal).toEqual([{ actif: true, attente: TITRE_ATTENTE, issue: 'résolu' }]);
+        expect(await page.evaluate(() => window.__lireAttente())).toBeNull();
         expect(lu.titres).toEqual([TITRE_PRET]);
         expect(succes(lu.toasts)).toHaveLength(1);
         expect(await lireModale(page)).toBeNull();
@@ -409,14 +518,16 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         await page.keyboard.press('Enter');
         await attendreCoteNode(2000);
         lu = await lireLeJournal();
-        expect(lu.journal).toEqual([{ actif: true, issue: 'résolu' }]);
+        expect(lu.journal).toEqual([{ actif: true, attente: TITRE_ATTENTE, issue: 'résolu' }]);
+        expect(await page.evaluate(() => window.__lireAttente())).toBeNull();
         expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
 
         // 3. Préparation courte : partage direct sur le toucher de l'aperçu, aucune fenêtre.
         await mettreAJourParLeMenu(0);
         await attendreCoteNode(4000);
         lu = await lireLeJournal();
-        expect(lu.journal).toEqual([{ actif: true, issue: 'résolu' }]);
+        expect(lu.journal).toEqual([{ actif: true, attente: TITRE_ATTENTE, issue: 'résolu' }]);
+        expect(await page.evaluate(() => window.__lireAttente())).toBeNull();
         expect(lu.titres).toEqual([]);
         expect(succes(lu.toasts)).toHaveLength(1);
         expect(await lireEtat(page)).toEqual({ menu: A_JOUR, temoin: null });
