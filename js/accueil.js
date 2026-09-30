@@ -235,8 +235,8 @@ function afficherAccueilContenu(conteneur) {
             <div class="accueil-utilitaire-demi" role="button" tabindex="0" data-action="ouvrirModalBackup">
                 <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-usb-memory"></span></div>
                 <div>
-                    <div class="accueil-utilitaire-titre">Copie de secours</div>
-                    <div class="accueil-utilitaire-desc">Export, restauration, stockage 100 % local.</div>
+                    <div class="accueil-utilitaire-titre">Ton codex</div>
+                    <div class="accueil-utilitaire-desc">Mets-le à jour : une copie complète de tes données.</div>
                 </div>
             </div>
 

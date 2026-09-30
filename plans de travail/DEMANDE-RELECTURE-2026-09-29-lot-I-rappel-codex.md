@@ -65,3 +65,9 @@ Chaque mutation posée seule, le banc relancé (WebKit, sans second essai), puis
 ## 6 · Pour Grégoire, en deux phrases
 
 Le rappel qui s'affiche à l'ouverture te propose maintenant de mettre ton codex à jour, et son bouton lance la même mise à jour que le menu du codex. Il ne revient pas avant 14 jours après une mise à jour réussie, ou après l'avoir fermé par la croix ; si tu avais choisi « Ne plus rappeler », il reste éteint.
+
+## 7 · Complément avant 1.170.0 (consigne du jour, 20 h 50)
+
+- **Le délai choisi ne survit plus à son usage.** Remis au défaut dans `reporterApresMiseAJourDuCodex` (même quand le report est écarté) et à chaque ouverture du rappel, comme demandé. ⚠ Ces deux remises ne suffisaient pas : l'essai demandé (30 jours choisis → échec → mise à jour par le menu) est resté rouge, 30 jours reçus, parce qu'un échec n'atteint jamais le report. J'ai ajouté une troisième remise, **à la fin de la tentative lancée par le rappel, quelle qu'en soit l'issue** (`.finally` sur `Codex.actionEnregistrer()`). C'est elle que l'essai départage : les deux premières sont redondantes avec elle, gardées selon la relecture, sans essai propre.
+- **La carte de l'Accueil** : « Ton codex », « Mets-le à jour : une copie complète de tes données. » (mots de Grégoire, option a). Geste inchangé ; icône de clé USB gardée (le codex est le fichier sur la clé).
+- **Preuves** : banc 4/4 vert (essai 2 complété, « 2 bis ») ; M7, sans la remise en fin de tentative → essai (2) rouge ; M8, l'ancien titre remis sur la carte → sentinelle des mots rouge. Fichiers restaurés, empreintes identiques.
