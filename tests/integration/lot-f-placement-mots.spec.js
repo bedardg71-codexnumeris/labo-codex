@@ -9,7 +9,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // LOT F (D4) — LES BOUTONS RENOMMÉS TIENNENT AUX QUATRE LARGEURS (29 sept. 2026).
 // « Mettre à jour dans un autre fichier… » remplace « Enregistrer sous… » (plus long),
 // « Faire une copie de secours » remplace « Exporter le Codex », « Copie de secours » remplace
-// « Sauvegarder » sur l'Accueil. Mesure : aucun débordement du texte hors de son élément
+// « Sauvegarder » sur l'Accueil (devenue « Ton codex » au lot I, #985, avec son sous-titre). Mesure : aucun débordement du texte hors de son élément
 // (scrollWidth ≤ clientWidth), aucun élément hors de l'écran. Pack démo.
 
 const LARGEURS = [[768, 1024], [1024, 768], [1180, 820], [1470, 956]];
@@ -78,10 +78,16 @@ for (const [largeur, hauteur] of LARGEURS) {
         await page.evaluate(() => { afficherSection('accueil'); });
         await page.waitForTimeout(800);
         const carte = await page.evaluate(() => {
-            const el = [...document.querySelectorAll('.accueil-utilitaire-titre')].find((x) => x.textContent.trim() === 'Copie de secours');
+            const el = [...document.querySelectorAll('.accueil-utilitaire-titre')].find((x) => x.textContent.trim() === 'Ton codex');
             if (!el) return { absent: true };
-            return { deborde: el.scrollWidth > el.clientWidth + 1 };
+            const desc = el.parentElement.querySelector('.accueil-utilitaire-desc');
+            const r = desc.getBoundingClientRect();
+            return {
+                deborde: el.scrollWidth > el.clientWidth + 1,
+                descDeborde: desc.scrollWidth > desc.clientWidth + 1,
+                descDansLEcran: r.right <= window.innerWidth && r.width > 0
+            };
         });
-        expect(carte).toEqual({ deborde: false });
+        expect(carte).toEqual({ deborde: false, descDeborde: false, descDansLEcran: true });
     });
 }
