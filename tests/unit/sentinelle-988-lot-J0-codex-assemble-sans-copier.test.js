@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
+import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
 
 // =====================================================================
 // SENTINELLE #988, LOT J0 — LE FICHIER DU CODEX EST ASSEMBLÉ SANS COPIER LES COPIES
@@ -13,8 +14,13 @@ import JSZip from 'jszip';
 // rechargée pendant « Compression du ZIP… », avant toute écriture. Mesuré sous WebKit
 // (plans de travail/MESURE-2026-09-30-lot-J0-codex-memoire.md) : confier les copies à
 // JSZip prenait en mémoire cinq fois la taille du codex et posait le fichier entier une
-// fois de plus sur le disque. Depuis le lot, `_assemblerCodexZip` range les copies telles
-// quelles (STORE), par référence ; seuls les textes passent par JSZip.
+// fois de plus sur le disque. Depuis le lot, l'assemblage range les copies telles quelles
+// (STORE), par référence ; seuls les textes passent par JSZip.
+//
+// Lot A1 (30 sept. 2026) : la pièce a quitté js/codex.js pour js/fichier-sortant.js
+// (`FichierSortant.assemblerZip`), que l'archive emploie aussi. Ce banc juge toujours le
+// trajet du CODEX ; ses mutations portent sur l'un ou l'autre fichier. L'archive a le sien :
+// sentinelle-lot-A1-archive-sans-copier.test.js.
 //
 // CE QUE CE BANC JUGE : LE CONTENU.
 //   (a) un codex produit APRÈS le lot et un codex au format d'AVANT (1.170.0, écrit ici
@@ -28,8 +34,8 @@ import JSZip from 'jszip';
 // CE QU'IL NE JUGE PAS : le pic de mémoire ni le disque (Node n'est pas WebKit : voir le
 // fichier de mesure), ni le partage de l'iPad (porte terrain).
 //
-// TÉMOINS : chaque invariant a le sien, par mutation de la source EN MÉMOIRE ; une
-// mutation qui ne remplace rien est refusée (« Témoin inerte »). Noms fictifs.
+// TÉMOINS : chaque invariant a le sien, par mutation des sources EN MÉMOIRE ; une
+// mutation qui ne remplace rien, ni dans un fichier ni dans l'autre, est refusée (« Témoin inerte »). Noms fictifs.
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -101,9 +107,12 @@ function monterCodex(db, options = {}) {
         removeItem(k) { delete this._d[k]; },
         clear() { this._d = {}; }
     });
+    const sortant = monterFichierSortant(win, { document: doc, muter: options.muter });
     const brut = readFileSync(path.join(racine, 'js/codex.js'), 'utf8');
     const code = options.muter ? options.muter(brut) : brut;
-    if (options.muter && code === brut) throw new Error('Témoin inerte : la mutation de js/codex.js n\'a rien remplacé.');
+    if (options.muter && code === brut && !sortant.mute) {
+        throw new Error('Témoin inerte : la mutation n\'a rien remplacé, ni dans js/codex.js ni dans js/fichier-sortant.js.');
+    }
     const fn = new Function(
         'window', 'document', 'console', 'localStorage', 'sessionStorage', 'db',
         'travauxStockage', 'JSZip', 'FileReader', 'requestAnimationFrame',
@@ -114,7 +123,13 @@ function monterCodex(db, options = {}) {
         options.magasin, JSZip, FauxFileReader, (cb) => setTimeout(cb, 0),
         { confirmerAction: async () => true, demanderSaisie: async () => null },
         undefined, (cb) => setTimeout(cb, 0), { userAgent: 'BacASable/988-J0 (Node; test)' });
+    win.Codex.__fichierSortant = win.FichierSortant;
     return win.Codex;
+}
+
+/** L'assembleur seul, tel que le codex le reçoit (mutable comme le reste). */
+function assembleur(options = {}) {
+    return monterCodex(creerDb({}), options).__fichierSortant.assemblerZip;
 }
 
 /** Octets déterministes, incompressibles en pratique (comme un PDF ou une image). */
@@ -361,10 +376,9 @@ describe('#988 lot J0 · (b) la forme du fichier', () => {
     }, 30000);
 
     it('un nom hors de l\'ASCII est relu tel quel (drapeau UTF-8)', async () => {
-        const codex = monterCodex(creerDb({}), {});
         const textes = new JSZip();
         textes.file('donnees.json', '{}');
-        const blob = await codex._assemblerCodexZip(textes, [
+        const blob = await assembleur()(textes, [
             { nom: 'travaux/copie-élève-fictif.pdf', blob: new Blob([octets(1000, 9)]) }
         ]);
         const { empreintes } = await empreintesDuFichier(blob);
@@ -504,41 +518,38 @@ describe('#988 lot J0 · (e) les bornes du format sont refusées, pas écrites f
     }
 
     it('une copie de plus de 4 Go : refus, sans l\'avoir lue', async () => {
-        const codex = monterCodex(creerDb({}), {});
         const textes = new JSZip(); textes.file('donnees.json', '{}');
         const journal = [];
-        await expect(codex._assemblerCodexZip(textes, [{ nom: 'travaux/FT_j0_enorme.pdf', blob: blobQuiSeDit(0x100000000, journal) }]))
+        await expect(assembleur()(textes, [{ nom: 'travaux/FT_j0_enorme.pdf', blob: blobQuiSeDit(0x100000000, journal) }]))
             .rejects.toThrow(/dépasse ce que le format ZIP peut contenir \(4 Go\)/);
         expect(journal).toEqual([]);
     });
 
     it('un total de plus de 4 Go, aucune copie ne l\'étant seule : refus, sans en avoir lu aucune', async () => {
-        const codex = monterCodex(creerDb({}), {});
         const textes = new JSZip(); textes.file('donnees.json', '{}');
         const journal = [];
         const copies = [
             { nom: 'travaux/FT_j0_p.pdf', blob: blobQuiSeDit(0x80000000, journal) },
             { nom: 'travaux/FT_j0_q.pdf', blob: blobQuiSeDit(0x7FFFFF00, journal) }
         ];
-        await expect(codex._assemblerCodexZip(textes, copies)).rejects.toThrow(/4 Go/);
+        await expect(assembleur()(textes, copies)).rejects.toThrow(/4 Go/);
         expect(journal).toEqual([]);
     });
 
     it('plus de 65 535 entrées : refus', async () => {
-        const codex = monterCodex(creerDb({}), {});
         const textes = new JSZip(); textes.file('donnees.json', '{}');
         const vide = new Blob([]);
         const copies = Array.from({ length: 65535 }, (_, i) => ({ nom: 'travaux/FT_j0_' + i + '.pdf', blob: vide }));
-        await expect(codex._assemblerCodexZip(textes, copies)).rejects.toThrow(/trop de fichiers pour le format ZIP \(65536\)/);
+        await expect(assembleur()(textes, copies)).rejects.toThrow(/trop de fichiers pour le format ZIP \(65536\)/);
     });
 
     it('TÉMOIN — sans la garde de taille, la copie énorme serait lue', async () => {
-        const codex = monterCodex(creerDb({}), {
+        const assembler = assembleur({
             muter: (s) => s.replace('if (tailleFinale > LIMITE_ZIP_OCTETS) {', 'if (false) {')
         });
         const textes = new JSZip(); textes.file('donnees.json', '{}');
         const journal = [];
-        await codex._assemblerCodexZip(textes, [{ nom: 'travaux/FT_j0_enorme.pdf', blob: blobQuiSeDit(0x100000000, journal) }]).catch(() => {});
+        await assembler(textes, [{ nom: 'travaux/FT_j0_enorme.pdf', blob: blobQuiSeDit(0x100000000, journal) }]).catch(() => {});
         expect(journal.length).toBeGreaterThan(0);
     });
 });

@@ -93,3 +93,33 @@ Les étapes 3 à 5 touchent tes données réelles : chacune passe par toi.
 3. **L'application ne garde rien en double sur l'iPad** (mesuré par Grégoire, Réglages de l'iPad, 30 sept. à 11 h 08, après une restauration de l'iPad le matin) : « Données de sites », `codexnumeris.org` : 1,3 Go, pour un codex de 1,31 Go. Le défaut de juin (#336, l'espace précédent non retiré à l'ouverture d'un codex) n'est pas en cause dans cet état.
 4. **Safari occupe pourtant 2,78 Go** (« Documents et données », 11 h 06). Surplus d'environ 1,5 Go, hors de l'application. Inférence de Cowork, non vérifiée : la copie de passage du fichier de 1,31 Go posée pour la feuille de partage de 10 h 38. À relire le lendemain, sans nouvelle mise à jour du codex entre-temps : si Safari redescend vers 1,3 Go, l'iPad nettoie ce reste de lui-même.
 5. **Relecture après coup du lot J0 ter (1.171.0)** par Cowork : rien à corriger. Le message se pose de façon synchrone avant le partage, s'en va dans un `finally`, une panne d'affichage est avalée sans empêcher le partage, et la barre cachée ne fuit pas vers la progression suivante (la fenêtre est reconstruite à chaque ouverture, lu dans `js/progression.js`).
+
+## 10 · Ce que la mesure corrige dans ce cadrage (30 septembre 2026, 12 h 33 ; source : `MESURE-2026-09-30-archives.md`)
+
+**Deux erreurs de Cowork, corrigées par la mesure :**
+
+1. **§ 3, « une copie peut déjà exister sans son fichier » : faux.** L'état « exporté » ne veut pas dire « sans fichier » : les 103 copies « exportées » du codex réel ont toutes leur fichier, et aucun geste ne produit une fiche sans fichier. Le plan demande **un état neuf** (« copie aux archives »), à concevoir.
+2. **§ 4, « le tien porte trois trimestres » : vrai pour les données, trompeur pour le poids.** Sur 1,31 Go : H2026 pèse 1,10 Go (394 copies, 84 %), A2026 0,20 Go (106 copies), A2025 et A2024 aucune copie. Données de tous les trimestres : 26 Mo. **Le poids, c'est H2026.** Et H2026 n'est pas clos dans l'application : seul A2025 l'est.
+
+**Ce que la mesure confirme :**
+
+- « Archiver… » sous Safari, plus gros groupe (205 copies, 607 Mo) : 3,4 Go de mémoire, 0,6 Go posé sur le disque avant écriture, 23 s. Le mur du codex d'avant le lot J0.
+- « Ouvrir une archive… » ne rend aucune copie.
+- Une archive se vérifie par le compte et la taille, pas par le contenu : il faut une empreinte par copie.
+- 41 textes d'écran disent « archivé » pour l'état clos, plus 7 lignes des Nouvelles passées ; et le mot a deux sens de plus (« Exporter et archiver » les copies ; l'évaluation « archivée » après un jeton).
+- L'application pèse environ 17 Mo.
+
+**Ce que la mesure ajoute, et que ce cadrage ne voyait pas :**
+
+- **Au banc, l'appel du partage charge le fichier entier en mémoire : 2,6 Go pour 1,3 Go.** Non mesuré sur l'iPad (qui a réussi deux fois à 1,31 Go). C'est peut-être le délai vu par Grégoire, et c'est le prochain mur si le codex grossit. Conséquence pour le chantier : ne pas bâtir l'archive de l'iPad sur le partage d'un seul gros fichier sans l'avoir mesuré ; alléger le codex (H2026 aux archives) réduit ce risque d'un facteur six.
+
+**Dispositions des trouvailles de la mesure (§ 6), par Cowork :**
+
+| | Disposition |
+|---|---|
+| 6.1 le partage charge tout en mémoire | **Inscrire**, priorité haute, « à mesurer sur l'iPad » ; entre dans le plan du chantier |
+| 6.2 « Archiver… » annonce la réussite sans la vérifier | Dans le lot « fabriquer l'archive comme le codex » |
+| 6.3 « exporté » ≠ sans fichier | Corrigé ici ; l'état neuf entre dans le plan |
+| 6.4 une copie d'H2026 marquée « manquante » alors que son fichier est là | **Inscrire** ; touche les données de Grégoire : à lui dire dans le lot qui la répare, pas avant |
+| 6.5 59 vignettes sans copie | Rien |
+| 6.6 l'aide de la clôture dit qu'elle « libère l'espace » | Avec la table des mots |

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
+import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
 
 // =====================================================================
 // SENTINELLE #635 — LE CODEX EST L'INSTRUMENT DE SAUVEGARDE DE S5 (#623)
@@ -225,6 +226,9 @@ function monterCodex(db, options = {}) {
         removeItem(k) { delete this._d[k]; },
         clear() { this._d = {}; }
     });
+
+    // Lot A1 (30 sept. 2026) : `genererCodex` assemble par `window.FichierSortant`.
+    monterFichierSortant(win, { document: doc });
 
     monterSource(
         'js/codex.js',

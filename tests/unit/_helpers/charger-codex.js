@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { monterFichierSortant } from './monter-fichier-sortant.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..', '..');
@@ -60,6 +61,10 @@ export function chargerCodex(dbOverride = null, globaux = {}) {
         removeItem(k) { delete this._data[k]; },
         clear() { this._data = {}; }
     });
+
+    // Lot A1 (30 sept. 2026) : l'assemblage et le téléchargement du fichier vivent dans
+    // js/fichier-sortant.js, que `genererCodex` appelle par `window.FichierSortant`.
+    monterFichierSortant(fauxWindow, { document: fauxDocument });
 
     const fn = new Function(
         'window', 'document', 'console', 'localStorage', 'sessionStorage', 'db',

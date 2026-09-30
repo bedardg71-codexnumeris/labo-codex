@@ -1,61 +1,47 @@
-# Consigne du jour – lot J0 ter : le message d'attente avant la feuille de partage, et la ligne des Nouvelles (#988 se ferme)
+# Consigne du jour – chantier des archives, lot A1 : une archive fabriquée comme le codex de ce matin
 
-> Écrite le 30 septembre 2026 à 10 h 42 (Toronto) par Cowork.
-> **Condition de départ** : `main` à `c8185a4d` ou plus récent (1.170.2 en ligne). Branche neuve `lot-j0-ter-attente-partage`.
+> Écrite le 30 septembre 2026 à 12 h 39 (Toronto) par Cowork. Premier lot de `PLAN-2026-09-30-chantier-archives.md` (ordre approuvé par Grégoire). Lis d'abord ce plan, puis le § 10 de `CADRAGE-2026-09-30-codex-et-archives-coherence.md`. Ta mesure de ce midi (`MESURE-2026-09-30-archives.md`, § 2 et § 3.3) est le point de départ.
+> **Condition de départ** : `main` à `e92f2001` ou plus récent. Branche neuve `lot-a1-archive-sans-copier`. **Ni release ni push avant la relecture de Cowork** : une archive est ce sur quoi reposera le retrait des copies.
 
-## 1 · La porte du lot J0 bis est passée (vécu, iPad, 1.170.2)
+## 1 · Ce que le lot doit produire, en gestes
 
-Relevé de Grégoire, 30 sept. à 10 h 38, complété par sa réponse écrite à Cowork :
+« Archiver… » sur un groupe lourd (205 copies, 607 Mo) : le fichier sort sans que la page prenne des gigaoctets de mémoire ; il porte de quoi vérifier chaque copie plus tard ; et l'application ne dit « archivé » que si l'usager confirme que le fichier est là.
 
-- La barre va à 100 % en 12 secondes environ.
-- La fenêtre « Ton codex est prêt » s'ouvre ; « Enregistrer » amène la feuille de partage, **sans passer par « Codex non mis à jour »** (confirmé par lui, « OUI »).
-- Fichier du jour dans Fichiers : 1,31 Go (de nouvelles copies importées et évaluées depuis le matin).
-- Application fermée puis rouverte, deux fois : aucun rappel.
-- Espace libre : 17 Go, après une restauration de l'iPad (le matin : 2,88 Go).
-- ⚠ Le relevé a été fait sur la page de la porte du lot J0 (celle de 1.170.1), pas sur la neuve : les rangées cochées sont celles de l'ancienne page. La rangée propre au lot J0 bis (la fenêtre) est attestée par sa réponse écrite, pas par une coche.
-
-**Un défaut relevé par lui, mot pour mot** : « Il y a un délai avant l'apparition de la feuille de partage, suffisamment long pour qu'un utilisateur se demande ce qui se passe et s'il y a un problème. » Durée non chiffrée.
+**Tes données, Grégoire** : rien n'est écrit ni effacé dans tes trimestres. Seul le registre local des archives reçoit une ligne, après ta confirmation.
 
 ## 2 · Ce que tu fais
 
-### 2.1 · Le message d'attente
+1. **La fabrication, mode fichier (Safari)** : les copies ne passent plus par JSZip. Réemploi de la pièce du lot J0 (`_assemblerCodexZip`) : à toi de choisir comment la partager entre `codex.js` et `reserve.js` (la sortir dans un module commun, ou autrement) ; dis ce que tu as retenu et pourquoi. La spécification d'avril voulait `reserve.js` sans dépendance à `codex.js` : respecte-la si ça ne coûte pas un doublon.
+2. **Le format ne bouge pas** : mêmes chemins (`trimestres/<dossier>/donnees.json`, `travaux/`, `meta.json`, `manifeste-archives-patch.json`, `manifeste-archives.json`), `meta.json` toujours écrit en dernier dans le dossier. Une archive d'avant s'ouvre dans le lot ; une archive du lot s'ouvre dans 1.171.0.
+3. **Une empreinte par copie** (SHA-256), rangée dans `meta.json` ou dans un fichier voisin, à ton choix, dans les **deux** modes (fichier et dossier). Contrainte : la mémoire prise ne dépend pas du poids total du groupe (une copie à la fois est acceptable ; la plus grosse copie réelle pèse 23,6 Mo). Un lecteur d'avant le lot ignore ce champ sans broncher.
+4. **La Défense K et l'aperçu** reçoivent la liste complète des entrées, comme au lot J0.
+5. **L'écriture** : l'adresse du fichier n'est plus libérée aussitôt (reprends le délai du lot G). **La réussite n'est plus annoncée d'office** : reprends le parcours du codex téléchargé, où c'est l'usager qui confirme que le fichier est là ; l'archive n'entre au registre qu'après cette confirmation. Si de nouveaux mots sont nécessaires, **propose-les dans la demande de relecture** : ils sont à Grégoire, ne les livre pas sans son accord.
+6. **Le mode dossier (Chrome, Edge)** : seulement l'empreinte par copie. Rien d'autre.
 
-Dans le parcours « Mettre à jour le codex », stratégie du partage : **dès que le partage est lancé, un message d'attente est à l'écran ; il disparaît quand le partage se termine** (réussite, échec ou annulation). Il vaut pour les trois entrées du partage : direct, après « Enregistrer » de « Ton codex est prêt », après « Réessayer ».
+## 3 · Une question à trancher par le code, pour le plan
 
-- **Mots acceptés par Grégoire le 30 sept. (« ok »), à ne pas modifier** :
-  - Titre : « Ouverture de la feuille de partage… »
-  - Texte : « Ton appareil prépare le fichier (TAILLE). Ça peut prendre un moment : elle va s'ouvrir. »
-  - TAILLE : la même écriture que dans « Ton codex est prêt ».
-- **La contrainte qui commande** : rien d'asynchrone ne s'intercale entre le toucher et `navigator.share`. Le message se pose de façon synchrone, avant l'appel ; aucun `await`, aucune minuterie avant le partage. Sinon on rouvre le défaut du lot J0 bis.
-- La forme (composant existant de progression ou autre) est à toi : prends ce qui existe déjà à l'écran pour ce parcours. Pas de bouton : ce n'est pas une question.
-- Si tu constates qu'il faut toucher à autre chose que l'affichage autour de l'appel, arrête-toi et demande une relecture avant de livrer.
+**Une copie peut-elle changer après son import ?** (annotations écrites dans le fichier plutôt que dans les données, remplacement, rotation…). Si oui, dis par quels gestes : une archive vérifiée hier ne vaudrait plus pour une copie modifiée depuis, et le lot A4 doit le savoir.
 
-**Non mesurable au banc** : le délai lui-même (c'est iPadOS qui prépare le fichier pour la feuille). Dis-le, ne le simule pas en chiffre.
+## 4 · La preuve attendue
 
-### 2.2 · La ligne des Nouvelles
+- **La mesure, avant et après**, au banc de ce midi (205 copies aux tailles réelles) : mémoire de la page, disque posé avant écriture, durée.
+- **Le fichier** : mêmes entrées et mêmes octets restitués qu'une archive d'avant le lot (rédacteur de référence figé dans le banc) ; relu par JSZip avec CRC et par `unzip -tq` à taille réelle ; chaque empreinte recalculée égale celle que l'archive porte.
+- **L'ouverture croisée** dans WebKit : archive du lot dans 1.171.0, archive de 1.171.0 dans le lot.
+- **La confirmation** : sans elle, rien au registre, et l'écran ne dit pas « archivé ».
+- Mutations, chacune rouge. Vitest complet. Playwright ciblé ; le verdict complet est dû sur le commit de release.
 
-Version **1.171**, couleur orange. Titre et ligne **acceptés par Grégoire le 30 sept. (« accepté »)**, à reprendre tels quels, avec les espaces insécables des entrées voisines :
+## 5 · Inscriptions au BACKLOG (dispositions de Cowork, cadrage § 10)
 
-> **Titre** : « Un gros codex se met à jour sur l'iPad »
->
-> **Ligne** : « Sur l'iPad, la mise à jour d'un gros codex pouvait s'arrêter en chemin : la page se rechargeait, ou le fichier n'était pas enregistré au premier essai. Le fichier est maintenant préparé sans charger tes copies en mémoire, et beaucoup plus vite. Quand il est prêt, la fenêtre « Ton codex est prêt » te demande de toucher « Enregistrer » pour choisir où le ranger. Le fichier pèse un peu plus lourd (environ 3 %) : tes copies y sont rangées telles quelles. »
+- Au banc, le partage charge le fichier entier en mémoire (2,6 Go pour 1,3 Go) : **priorité haute, à mesurer sur l'iPad**.
+- Une copie d'H2026 marquée « manquante » alors que son fichier est là : à réparer au lot A3 ou A4.
+- Les cinq lots du chantier, chacun avec sa ligne, renvoyant au plan.
 
-### 2.3 · La fermeture
+## 6 · Ce que tu ne fais pas
 
-- #988 passe aux bugs réglés de `SUIVI-BUGS.md`, avec la porte du § 1.
-- Les deux markdowns de porte du 30 sept. (lot J0, lot J0 bis) reçoivent leur résultat en tête, avec la réserve du § 1 sur la page utilisée.
-- `OU-EN-EST-ON.md` : la mise à jour du codex sur l'iPad passe à « fait, vécu sur l'iPad ».
+Aucune vérification d'archive, aucun retour de copies, aucun retrait, aucun changement du mot « archivé » : ce sont les lots A2 à A5. « Ouvrir une archive… » n'est pas touché. « Exporter une sélection » (#991) non plus.
 
-## 3 · La preuve attendue, et l'ordre
+## 7 · Ce que tu rends
 
-- Le banc du lot J0 bis étendu : le message est à l'écran pendant que le partage est en attente, dans les trois entrées ; il a disparu après réussite, après échec, après annulation ; le banc « réel » (vraie activation, vrai partage, préparation longue) reste vert, ce qui prouve que le message ne vole pas le toucher. Mutations, chacune rouge.
-- Vitest complet. Release 1.171, verdict Playwright complet sur le commit de release, push, « en ligne » lu chez Netlify, `RELAIS.md`.
-- **Pas de relecture préalable de Cowork pour ce lot** (tranché par Cowork) : il n'écrit ni n'efface aucune donnée, et un raté se voit et se reprend par « Réessayer ». Cowork relit après coup. La réserve du § 2.1 tient : autre chose que de l'affichage, et tu t'arrêtes.
-
-## 4 · Ce que tu ne fais pas
-
-Rien sur #990 à #995. Pas de porte terrain : c'est de l'apparence, Grégoire le verra à sa prochaine mise à jour.
-
-## 5 · Ce que tu rends à Grégoire
-
-Trois lignes : le numéro en ligne, le verdict Playwright, ce qu'il verra à sa prochaine mise à jour du codex.
+- `DEMANDE-RELECTURE-2026-09-30-lot-A1-archive.md`.
+- `PORTES-TERRAIN-2026-09-30-lot-A1-archive.md` : une porte courte, **sur le Mac** (Safari), données réelles : archiver le plus gros groupe de l'hiver 2026, confirmer, retrouver le fichier, noter sa taille. Cowork publie l'artefact.
+- À Grégoire, trois lignes : ce qui change à l'écran, la mesure avant et après, ce qui lui revient.
