@@ -27467,6 +27467,25 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-secondaire);
 }
 
+/* Lot A2 (30 sept. 2026) : « Vérifiée le … » / « Non vérifiée » dans la liste des archives */
+.badge-verif-ok,
+.badge-verif-non {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.badge-verif-ok {
+    background: var(--vert-pale);
+    color: var(--vert-leger);
+}
+.badge-verif-non {
+    background: rgba(138, 164, 176, 0.15); /* pas `--gris-pale` : variable fantôme (#595) */
+    color: var(--texte-secondaire);
+}
+
 /* ============================================================================
    ACCESSIBILITÉ — prefers-reduced-motion (Phase 5.3 axe-core, 22 mai 2026)
    ----------------------------------------------------------------------------
