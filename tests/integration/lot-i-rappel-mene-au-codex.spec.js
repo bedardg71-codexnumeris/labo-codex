@@ -133,6 +133,14 @@ const TEXTE_D8 = 'Tes données vivent dans ce navigateur : elles peuvent être p
 test.describe('Lot I (#985) — le rappel mène au codex', () => {
     test.setTimeout(180000);
 
+    // Lot J0 bis (#988) : ce banc lance la mise à jour du codex par `page.evaluate`, qui accorde
+    // environ 5 s d'activation du toucher (mesuré). Elle est épinglée « active » ici, pour que la
+    // fenêtre « Ton codex est prêt » ne dépende pas de la charge de la machine ; cette fenêtre a son
+    // banc (lot-j0-bis-partage-apres-preparation.spec.js).
+    test.beforeEach(async ({ page }) => {
+        await page.addInitScript(() => Object.defineProperty(navigator, 'userActivation', { configurable: true, value: { isActive: true } }));
+    });
+
     test('(1) le rappel propose le codex ; sa réussite le repousse, pas son clic', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);
         await demarrerDemo(page);

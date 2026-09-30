@@ -122,6 +122,14 @@ const PAS_A_JOUR = 'Ton codex n\'a pas tes derniers changements';
 test.describe('Lot F — le témoin du codex dit vrai', () => {
     test.setTimeout(120000);
 
+    // Lot J0 bis (#988) : ce banc lance la mise à jour du codex par `page.evaluate`, qui accorde
+    // environ 5 s d'activation du toucher (mesuré). Elle est épinglée « active » ici, pour que la
+    // fenêtre « Ton codex est prêt » ne dépende pas de la charge de la machine ; cette fenêtre a son
+    // banc (lot-j0-bis-partage-apres-preparation.spec.js).
+    test.beforeEach(async ({ page }) => {
+        await page.addInitScript(() => Object.defineProperty(navigator, 'userActivation', { configurable: true, value: { isActive: true } }));
+    });
+
     test('ouverture, écritures, mise à jour, aperçu annulé, aucun enregistrement automatique', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);
         await espionnerMinuteurs(page);

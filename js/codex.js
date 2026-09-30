@@ -1451,7 +1451,10 @@ async function _ecrireViaHandle(handle, blob) {
  * @param {boolean} [options.forcerDialogue=false] - Force le dialogue même si un handle existe
  * @param {boolean} [options.sansRepli=false] - Un échec du partage est rendu, pas replié
  * @param {boolean} [options.telechargementDirect=false] - Stratégie 3 seule
- * @returns {Promise<{methode: string, strategie: string, erreur?: Error}>}
+ * @param {function(string): Promise<boolean>} [options.toucherFrais] - Lot J0 bis : appelée
+ *   avant le partage quand le toucher n'est plus actif ; rend true si l'usager en a donné un
+ *   frais, false s'il renonce (rendu `annule`, avec `toucherRefuse`)
+ * @returns {Promise<{methode: string, strategie: string, erreur?: Error, toucherRefuse?: boolean}>}
  */
 async function sauvegarderVersDestination(blob, nomFichier, options) {
     var forcerDialogue = options && options.forcerDialogue;
@@ -1497,6 +1500,12 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
 
     // Stratégie 2 : Web Share API (iPad Safari)
     if (_peutPartagerFichier(blob, nomFichier)) {
+        // Lot J0 bis (#988) : le partage exige un toucher encore actif. Expiré (préparation
+        // longue), on en demande un frais au lieu d'aller au refus.
+        var motifToucher = options && typeof options.toucherFrais === 'function' ? _motifToucherFrais() : null;
+        if (motifToucher && !(await options.toucherFrais(motifToucher))) {
+            return { methode: 'annule', strategie: 'partage (Enregistrer dans Fichiers)', toucherRefuse: true };
+        }
         try {
             var fichier = new File([blob], nomFichier, { type: 'application/zip' });
             await navigator.share({
@@ -1518,6 +1527,20 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
 
     // Stratégie 3 : Téléchargement classique (fallback universel)
     return _telechargerDirectement(blob, nomFichier);
+}
+
+/**
+ * Lot J0 bis (#988) : faut-il un toucher frais avant `navigator.share` ? WebKit refuse le
+ * partage (NotAllowedError) quand l'activation du dernier toucher a expiré : environ 5 s,
+ * mesuré le 30 sept. 2026 sous WebKit 26.4 (actif à 4,5 s, éteint à 5,5 s), et vécu sur
+ * l'iPad le même jour (préparation de 8 s, codex de 1,3 Go). `navigator.userActivation.isActive`
+ * lit cette même activation. API absente (Safari d'avant 16.4) : on ne sait pas, on demande.
+ * @returns {string|null} le motif de la demande, ou null si le toucher est encore actif
+ */
+function _motifToucherFrais() {
+    var activation = navigator.userActivation;
+    if (!activation) return 'activation illisible';
+    return activation.isActive === true ? null : 'toucher expiré';
 }
 
 /**
@@ -3143,6 +3166,7 @@ function _debuterTentative(forcerDialogue) {
         tailleOctets: null,
         essais: 0,
         strategie: null,
+        toucherFrais: null,
         erreur: null,
         issue: 'en cours',
         fin: null
@@ -3223,7 +3247,20 @@ async function _mettreAJourLeCodex(forcerDialogue) {
     }
 
     var taille = _formaterTailleEnviron(resultat.blob.size);
-    var options = { forcerDialogue: forcerDialogue, sansRepli: true };
+    // Lot J0 bis (#988) : la fenêtre du toucher frais. Mots acceptés par Grégoire le
+    // 30 sept. 2026. « Enregistrer » résout dans son clic : le partage part dans le geste.
+    var toucherFrais = async function(motif) {
+        _noterTentative({ toucherFrais: 'demandé (' + motif + ')' });
+        var accorde = await uiDialogues.confirmerAction({
+            titre: 'Ton codex est prêt',
+            message: 'Le fichier (' + taille + ') est préparé. Touche « Enregistrer » pour choisir où le ranger.',
+            texteAnnuler: 'Annuler',
+            texteConfirmer: 'Enregistrer'
+        }) === true;
+        _noterTentative({ toucherFrais: 'demandé (' + motif + '), ' + (accorde ? 'accordé' : 'refusé') });
+        return accorde;
+    };
+    var options = { forcerDialogue: forcerDialogue, sansRepli: true, toucherFrais: toucherFrais };
     while (true) {
         _noterTentative({
             etape: 'enregistrement du fichier',
@@ -3241,7 +3278,8 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         _noterTentative({ strategie: sauvegarde.strategie || sauvegarde.methode });
 
         if (sauvegarde.methode === 'annule') {
-            _finirTentative('fenêtre de choix refusée par l\'usager', sauvegarde.erreur);
+            _finirTentative(sauvegarde.toucherRefuse ? 'fenêtre « Ton codex est prêt » refusée par l\'usager'
+                                                     : 'fenêtre de choix refusée par l\'usager', sauvegarde.erreur);
             return;
         }
 
@@ -3276,6 +3314,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
             ]
         });
         if (geste === 'reessayer') {
+            // Sans `toucherFrais` : le clic sur « Réessayer » en est un, et le partage le suit aussitôt.
             options = { forcerDialogue: forcerDialogue, sansRepli: true };
         } else if (geste === 'telecharger') {
             options = { telechargementDirect: true };
