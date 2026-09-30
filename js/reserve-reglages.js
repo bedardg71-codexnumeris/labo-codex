@@ -13,6 +13,8 @@
      - Reserve (window.Reserve) — lireManifesteLocal, statutHandle,
        supporteFSAPI, obtenirHandle, effacerLiaisonFSAPI,
        hydrateDepuisFSAPI, purgerEntreeManifeste
+     - ReserveVerifier (window.ReserveVerifier) — lot A2 (30 sept. 2026) : l'état de
+       vérification d'une archive et son bouton (leurs mots vivent là-bas, pas ici)
      - echapperHtml (window.echapperHtml)
 */
 
@@ -50,6 +52,26 @@ function _formaterTaille(octets) {
     var mo = ko / 1024;
     if (mo < 1024) return mo.toFixed(1) + ' Mo';
     return (mo / 1024).toFixed(2) + ' Go';
+}
+
+/** Lot A2 : ce que la liste dit de la vérification d'une archive (mots dans ReserveVerifier.MOTS). */
+function _badgeVerification(entree) {
+    var RV = window.ReserveVerifier;
+    if (!RV || typeof RV.etatVerification !== 'function') return '';
+    var etat = RV.etatVerification(entree);
+    return '<span class="' + (etat.verifiee ? 'badge-verif-ok' : 'badge-verif-non') + '">' +
+        _echapper(etat.texte) + '</span>';
+}
+
+function _boutonVerifier(dossier) {
+    var RV = window.ReserveVerifier;
+    if (!RV || typeof RV.actionVerifier !== 'function') return '';
+    return '<button class="btn btn-secondaire btn-compact" ' +
+        'data-action="ReserveVerifier.actionVerifier" ' +
+        'data-param="' + _echapper(dossier) + '" ' +
+        'title="Relire cette archive, copie par copie">' +
+        _echapper(RV.MOTS.bouton) +
+    '</button> ';
 }
 
 function _badgeMode(mode) {
@@ -211,7 +233,9 @@ function _rendreTableau() {
                 '<td class="u-text-right">' + libelleFich + '</td>' +
                 '<td class="u-text-right">' + _echapper(taille) + '</td>' +
                 '<td>' + _badgeMode(e.mode_archive) + '</td>' +
+                '<td>' + _badgeVerification(e) + '</td>' +
                 '<td class="u-text-center">' +
+                    _boutonVerifier(e._dossier) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +
@@ -236,6 +260,7 @@ function _rendreTableau() {
                         '<th class="u-text-right">Fich.</th>' +
                         '<th class="u-text-right">Taille</th>' +
                         '<th>Mode</th>' +
+                        '<th>Vérification</th>' +
                         '<th class="u-text-center">Actions</th>' +
                     '</tr>' +
                 '</thead>' +

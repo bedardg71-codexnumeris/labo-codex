@@ -615,6 +615,48 @@ Sentinelle : `tests/unit/sentinelle-lot-A1-archive-sans-copier.test.js`.
 
 ---
 
+## 14. Ajout du lot A2 (30 septembre 2026) : vérifier une archive
+
+Deuxième lot du chantier des archives (#999). Module neuf `js/reserve-verifier.js`
+(`window.ReserveVerifier`) ; bouton « Vérifier » sur chaque ligne de Réglages › Données › Archives
+(`js/reserve-reglages.js`). Le format de l'archive ne change pas.
+
+- **Ce qui est vérifié** : pour chaque nom de `integrite.travaux_sha256`, la copie est présente
+  sous `travaux/` et son SHA-256 recalculé égale l'empreinte déclarée ; `donnees.json` égale
+  `integrite.donnees_json_sha256` ; tout fichier de `travaux/` hors de la liste est signalé
+  (« en trop ») ; et la **couverture** : chaque fiche de copie du groupe telle qu'elle est
+  aujourd'hui dans l'application (`<trim>_fichiersTravaux`, `groupeCoursId` du groupe) a sa copie
+  dans l'archive (rapprochement par l'`id`, sans l'extension). Une copie dont l'empreinte diffère
+  est dite « tronquée » si sa taille diffère du `tailleFichier` de sa fiche dans `donnees.json`,
+  « altérée » sinon.
+- **Les deux modes** : le mode suit `mode_archive` de l'entrée de la liste — `fsapi` → le dossier
+  des archives (`trimestres/<dossier>/`, itération de `travaux/`) ; `zip` → le fichier désigné par
+  l'usager.
+- **Lecture du ZIP par tranches** (mode fichier) : la clôture (22 octets + commentaire) puis le
+  répertoire central sont lus par `File.slice`, puis chaque entrée par sa propre tranche, une à
+  la fois. Les copies (STORE) sont lues telles quelles ; les textes (DEFLATE) sont gonflés par
+  `DecompressionStream('deflate-raw')` jusqu'à leur taille déclarée, pas au-delà. Jamais
+  `JSZip.loadAsync`. Sans ZIP64 (aucun rédacteur du projet n'en écrit). Défenses : répertoire
+  central ≤ 64 Mo, entrée ≤ 1 Go (lue en entier, puis rendue), noms suspects refusés (mêmes
+  règles que `validerZipSecurite`, sans sa borne de 2 Go, qui ne s'applique pas à ce geste).
+- **Une archive sans `travaux_sha256`** (avant 1.171.1) : état `a_refaire`, compte et poids des
+  fichiers de `travaux/` donnés sans valoir vérification.
+- **L'état retenu** : `_manifesteReserve.archives[<dossier>].verification =
+  { etat: verifiee | incomplete | a_refaire, date, version_app, nombre_copies, uuid, meta_sha256 }`
+  (`uuid` lu dans `meta.json`, `meta_sha256` = SHA-256 du texte de `meta.json`). Rien d'autre n'est
+  écrit. La liste dit « Vérifiée le JOUR » seulement si `etat === 'verifiee'` et que `verification.uuid`
+  égale l'`uuid` de l'entrée. Un nouvel archivage du groupe remplace l'entrée entière (l'état
+  retombe). Un fichier dont l'`uuid` n'est pas celui de la ligne n'est ni jugé ni retenu.
+- **Le dossier choisi dans Chrome/Edge** : gardé dans une variable de la page (`_handleSession`,
+  `reserve.js`) le temps de celle-ci, que la préférence D-03 (persistance entre sessions) soit
+  activée ou non ; `statutHandle()` rend maintenant `handle`. Un dossier nommé `trimestres` ou
+  `travaux`, ou qui contient `meta.json` ou `donnees.json`, est refusé (erreur `DossierRefuse`).
+
+Sentinelles : `tests/unit/sentinelle-lot-A2-verifier-archive.test.js` ;
+`tests/integration/lot-a2-verifier-archive.spec.js` (WebKit, mode fichier, le vrai bouton).
+
+---
+
 ## Historique du document
 
 | Date       | Changement                                                    |
@@ -622,3 +664,4 @@ Sentinelle : `tests/unit/sentinelle-lot-A1-archive-sans-copier.test.js`.
 | 2026-04-26 | Création. Spécification complète v1 validée en session Cowork. |
 | 2026-04-26 | Granularité par groupe-cours : API `verserGroupeCours(trimestre, groupeCoursId)` remplace `verserTrimestre(trimestre)`. UUID v4 par versement. Filtrage en deux passes (trimestre puis groupe). Convention de nommage `{trimestre}-{cours}-gr{groupe}`. Ajout `listerGroupesVersables()`. Tests mis à jour. |
 | 2026-09-30 | Lot A1 du chantier des archives : section 13 (assemblage sans copier les copies, empreinte par copie, confirmation par l'usager). |
+| 2026-09-30 | Lot A2 du chantier des archives : section 14 (vérifier une archive, lecture du ZIP par tranches, état retenu, dossier gardé le temps de la page). |

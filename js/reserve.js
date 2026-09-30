@@ -152,6 +152,15 @@ var FSAPI_DB_VERSION = 1;
 var FSAPI_STORE = 'handles';
 var FSAPI_KEY_RACINE = 'dossierRacine';
 
+// Lot A2 (30 sept. 2026) : le dossier choisi dans CETTE page, gardé jusqu'à sa fermeture.
+// Mesuré à la porte du lot A1 : sans la préférence « Mémoriser le dossier … entre les
+// sessions » (Défense D-03, refusée par défaut), rien ne retenait le dossier, même d'un
+// geste au suivant dans la même page : Chrome le redemandait à chaque archivage, et l'écran
+// « Archives » disait « Aucun dossier lié » juste après un archivage réussi. D-03 vise la
+// PERSISTANCE entre sessions (un handle rémanent dans IndexedDB) : une variable de la page
+// meurt avec elle et n'y contrevient pas.
+var _handleSession = null;
+
 function _supporteFSAPI() {
     return typeof window.showDirectoryPicker === 'function';
 }
@@ -210,6 +219,7 @@ function _ecrireHandlePersiste(handle) {
 }
 
 function _supprimerHandlePersiste() {
+    _handleSession = null;
     return _ouvrirStoreHandles().then(function(idb) {
         return new Promise(function(resolve, reject) {
             var tx = idb.transaction(FSAPI_STORE, 'readwrite');
@@ -256,27 +266,75 @@ async function _obtenirHandleReserve(opts) {
     var forcer = !!(opts && opts.forcer);
 
     if (!forcer) {
+        // Lot A2 : le dossier de cette page d'abord (sa permission est revérifiée).
+        if (_handleSession) {
+            if (await _verifierPermissionHandle(_handleSession)) return _handleSession;
+            _handleSession = null;
+        }
         var persiste = await _lireHandlePersiste();
         if (persiste) {
             var ok = await _verifierPermissionHandle(persiste);
-            if (ok) return persiste;
+            if (ok) { _handleSession = persiste; return persiste; }
             await _supprimerHandlePersiste();
         }
     }
 
+    var nouveau;
     try {
-        var nouveau = await window.showDirectoryPicker({
+        nouveau = await window.showDirectoryPicker({
             id: 'reserve-labo-codex',
             mode: 'readwrite',
             startIn: 'documents'
         });
-        await _ecrireHandlePersiste(nouveau);
-        return nouveau;
     } catch (e) {
         if (e.name === 'AbortError') return null;
         console.warn('[Reserve] showDirectoryPicker echoue', e.message || e);
         return null;
     }
+    // Lot A2 : garde-fou du mauvais niveau (porte du lot A1, 16 h 17 : « trimestres » choisi à
+    // la place de sa racine, d'où un manifeste-archives.json isolé dans trimestres/).
+    if (await _dossierMalChoisi(nouveau)) {
+        notifications.erreur(MOTS_DOSSIER.mauvaisNiveau.titre, MOTS_DOSSIER.mauvaisNiveau.texte);
+        // Pas `null` : null veut dire « pas de dossier », et « Archiver… » basculerait en mode
+        // fichier (un ZIP à télécharger dans Chrome). Le geste s'arrête, l'usager recommence.
+        var refus = new Error(MOTS_DOSSIER.mauvaisNiveau.texte);
+        refus.name = 'DossierRefuse';
+        throw refus;
+    }
+    _handleSession = nouveau;
+    await _ecrireHandlePersiste(nouveau);
+    return nouveau;
+}
+
+// Mots du garde-fou, en un seul endroit (non soumis à Grégoire : voir la demande de relecture du lot A2).
+var MOTS_DOSSIER = {
+    mauvaisNiveau: {
+        titre: 'Dossier à choisir de nouveau',
+        texte: 'Choisis le dossier qui contient « trimestres » (la racine de tes archives), ' +
+               'pas « trimestres » lui-même ni le dossier d\'une archive.'
+    }
+};
+
+/**
+ * Lot A2 : le dossier choisi est-il « trimestres », « travaux », ou le dossier d'une archive
+ * (il contient meta.json ou donnees.json) ? Tout autre dossier est accepté : la racine des
+ * archives peut porter n'importe quel nom, et peut être vide.
+ */
+async function _dossierMalChoisi(handle) {
+    if (!handle) return false;
+    if (handle.name === 'trimestres' || handle.name === 'travaux') return true;
+    var temoins = ['meta.json', 'donnees.json'];
+    for (var i = 0; i < temoins.length; i++) {
+        try {
+            await handle.getFileHandle(temoins[i]);
+            return true;
+        } catch (e) {
+            if (!e || e.name !== 'NotFoundError') {
+                console.warn('[Reserve] Garde-fou du dossier : lecture échouée', e && e.message || e);
+            }
+        }
+    }
+    return false;
 }
 
 /**
@@ -286,11 +344,16 @@ async function _obtenirHandleReserve(opts) {
  * @returns {Promise<{supporte: boolean, persiste: boolean, nom: string, permission: string}>}
  */
 async function _statutHandleReserve() {
-    var statut = { supporte: _supporteFSAPI(), persiste: false, nom: '', permission: 'inconnu' };
+    var statut = { supporte: _supporteFSAPI(), persiste: false, nom: '', permission: 'inconnu', handle: null };
     if (!statut.supporte) return statut;
-    var h = await _lireHandlePersiste();
+    // Lot A2 : le dossier de cette page compte aussi. Avant, seul le persisté était lu, et le
+    // champ `handle` que l'écran « Archives » lisait n'existait pas : il disait toujours
+    // « Aucun dossier d'archives n'est actuellement lié » (mesuré à la porte du lot A1).
+    var persiste = await _lireHandlePersiste();
+    var h = persiste || _handleSession;
     if (!h) return statut;
-    statut.persiste = true;
+    statut.persiste = !!persiste;
+    statut.handle = h;
     statut.nom = h.name || '';
     if (typeof h.queryPermission === 'function') {
         try {
@@ -865,7 +928,9 @@ function listerGroupesVersables(trimestre) {
                 groupe: _normaliserGroupe(gc.groupeNum),
                 source: 'groupe-cours'
             };
-            info.dossier = _nomDossier(trimestreId, info);
+            // Lot A2 : `_nomDossier` lit `codeCours`, que `info` nomme `cours` ; le champ rendait
+            // « a2026-cours-gr00007 » (sans lecteur jusqu'à « Vérifier », qui s'en sert pour la couverture).
+            info.dossier = _nomDossier(trimestreId, { codeCours: info.cours, groupe: info.groupe });
             resultats.push(info);
         });
         return resultats;
@@ -885,7 +950,7 @@ function listerGroupesVersables(trimestre) {
             groupe: _normaliserGroupe(lc.groupe),
             source: 'liste-cours'
         };
-        info.dossier = _nomDossier(trimestreId, info);
+        info.dossier = _nomDossier(trimestreId, { codeCours: info.cours, groupe: info.groupe });
         resultats.push(info);
     });
 
@@ -1136,7 +1201,14 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
     // Detection du mode FSAPI : appel TOT pour preserver le user gesture du clic.
     // Retourne null si non supporte (Safari) ou si l'utilisateur annule le picker.
-    var handleReserve = await _obtenirHandleReserve();
+    var handleReserve;
+    try {
+        handleReserve = await _obtenirHandleReserve();
+    } catch (eDossier) {
+        // Lot A2 : le dossier choisi est refusé (mauvais niveau) ; l'usager a été prévenu.
+        if (eDossier && eDossier.name === 'DossierRefuse') return null;
+        throw eDossier;
+    }
     var modeFSAPI = !!handleReserve;
 
     if (!modeFSAPI && (typeof JSZip === 'undefined' || !window.FichierSortant)) {
@@ -1633,7 +1705,12 @@ async function _majBandeauStatut() {
  */
 async function actionChangerDossier() {
     await _supprimerHandlePersiste();
-    var nouveau = await _obtenirHandleReserve();
+    var nouveau = null;
+    try {
+        nouveau = await _obtenirHandleReserve();
+    } catch (e) {
+        if (!e || e.name !== 'DossierRefuse') console.warn('[Reserve] Changement de dossier échoué', e && e.message || e);
+    }
     await _majBandeauStatut();
     if (nouveau) {
         notifications.succes('Dossier d’archives mis à jour', nouveau.name || '');
