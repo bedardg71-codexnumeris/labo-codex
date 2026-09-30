@@ -12,7 +12,7 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page. | **Le numéro de la release du lot J0** (supérieur à 1.170.0). Encore 1.170.0 : arrête-toi, le lot n'est pas en ligne. |
+| 0.1 | Sur l'iPad, ouvre `https://app.codexnumeris.org`, recharge, lis le numéro en bas de page. | **1.170.1** (la release du lot J0). Encore 1.170.0 : arrête-toi, le lot n'est pas en ligne. |
 | 0.2 | Réglages › Général › Stockage iPad : **note l'espace libre** (champ de saisie). | Mesure d'entrée, aucun chiffre n'est un échec ici. Le 30 sept. à 5 h 31 : environ 3 Go libres sur 64. Le fichier du codex pèse environ 1,3 Go. |
 | 0.3 | Une fenêtre « Mets ton codex à jour » s'est-elle ouverte au chargement ? | Possible. **Ne la ferme ni par la croix ni par « Plus tard »** (14 jours de silence : le §2 ne prouverait plus rien) ; touche « Mettre à jour le codex » et fais 1.1 depuis l'aperçu. Pas de fenêtre : fais 1.1 par le menu. |
 
