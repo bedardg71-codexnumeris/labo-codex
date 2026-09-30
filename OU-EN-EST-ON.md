@@ -15,6 +15,13 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **PAS ENCORE (30 SEPTEMBRE 2026 ; correctif prêt sur une branche, ni relu par Cowork, ni livré, ni éprouvé sur ton iPad) — SUR L'IPAD, LA MISE À JOUR DU CODEX N'ABOUTIT PAS.**
+
+**Ce que tu as vécu** : le 30 sept. à 5 h 12 et à 5 h 20, « Mettre à jour le codex » s'arrête pendant « Compression du ZIP… », la page se recharge, aucun fichier n'est écrit. Ton dernier fichier de codex reste celui du 29 sept. à 15 h. Tes données sont intactes dans l'application.
+**Ce qui est prêt** : le fichier du codex est fabriqué autrement. Tes copies y sont rangées telles quelles, sans être chargées en mémoire ni recopiées sur le disque. L'aperçu, le partage vers Fichiers et les messages ne changent pas. Le fichier pèsera environ 3 % de plus ; il s'ouvre dans la version actuelle, et l'inverse.
+**Vérifié comment** : mesuré sous WebKit sur le Mac, à la taille de ton codex (500 copies fictives, 1,3 Go) : la préparation prenait 6,5 Go de mémoire et posait 1,25 Go sur le disque ; elle prend 0,3 Go et ne pose rien, en 7 secondes au lieu de 47. Le fichier produit est jugé par un outil indépendant (`unzip -t`) et par une ouverture croisée avec 1.170.0 (mêmes empreintes). **Pas vérifié** : ton iPad, et l'étape du partage vers Fichiers, qui ne se mesure que là. La ligne ne passe à « fait » qu'à la porte terrain.
+**Tes données** : rien n'est écrit ni effacé. *(#988 rouverte, lot J0)*
+
 ✅ **FAIT EN 1.169.0 (29 SEPTEMBRE 2026 ; porte terrain passée sur ton iPad à 15 h 03, 9/9 ; relecture croisée de Cowork verte ; tes mots appliqués tels que tu les as tranchés ; verdict au navigateur vert ; en ligne depuis 12 h 48, constaté chez Netlify ; en 1.169.1, le titre des Nouvelles devient « Le codex dit quand il n'a pas pu être mis à jour », ton choix) — QUAND LE CODEX N'A PAS PU ÊTRE MIS À JOUR, L'APPLICATION LE DIT.**
 
 **Ce que tu verras** : si « Mettre à jour le codex » n'écrit pas le fichier, « Codex non mis à jour » s'affiche en bas à gauche et y reste, avec la taille du fichier, et une fenêtre propose « Réessayer » (le même fichier, sans le refaire) ou « Télécharger à la place ». Après un téléchargement, c'est toi qui dis « Il y est » : sans ça, le codex n'est pas dit « à jour ». L'aperçu dit la taille du fichier. Le rapport de bug a une section « DERNIÈRE MISE À JOUR DU CODEX » (étape atteinte, taille, méthode, erreur).
