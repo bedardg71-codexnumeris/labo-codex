@@ -11,10 +11,8 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // UNE ARCHIVE ANNULÉE N'EST PLUS LISTÉE (29 sept. 2026)
 // =======================================================================
 //
-// (1) Le rappel de la copie de secours : mesuré avant le lot, « Exporter maintenant » ouvrait
-//     Réglages › Données et repoussait le rappel de 7 jours, sans rien exporter ni ouvrir la
-//     fenêtre d'export. Son bouton « Faire une copie de secours » ouvre maintenant la section
-//     ET la fenêtre de la copie de secours.
+// (1) Retiré au lot I (#985, D8) : le rappel ne mène plus à la copie de secours, mais au
+//     codex. Son banc : lot-i-rappel-mene-au-codex.spec.js.
 // (2) Codex › Archiver sous Safari (mode ZIP, pas d'accès direct au disque) : l'archive était
 //     inscrite à la liste AVANT l'aperçu ; un aperçu annulé la laissait listée sans fichier.
 //     Elle n'est inscrite qu'après le téléchargement.
@@ -60,32 +58,6 @@ async function demarrerDemo(page) {
 
 test.describe('Lot F — rappel de la copie de secours, et archive annulée', () => {
     test.setTimeout(120000);
-
-    test('(1) « Faire une copie de secours » ouvre Réglages › Données et la fenêtre de la copie de secours', async ({ page }) => {
-        const erreurs = brancherEcouteurs(page);
-        await demarrerDemo(page);
-        await page.evaluate(() => backupReminder.afficherModal());
-        await expect(page.locator('#modal-backup-reminder .modal-titre')).toHaveText('Fais une copie de secours');
-        const bouton = page.locator('[data-action="backupReminder.allerVersCopieDeSecours"]');
-        await expect(bouton).toHaveText('Faire une copie de secours');
-        await bouton.click();
-        await page.waitForFunction(() => {
-            const m = document.getElementById('modalExport');
-            return !!m && !m.classList.contains('u-hide');
-        }, null, { timeout: 10000 });
-        const r = await page.evaluate(() => {
-            const v = (el) => !!el && el.getClientRects().length > 0 && !el.classList.contains('u-hide');
-            return {
-                donnees: v(document.getElementById('reglages-donnees')),
-                fenetre: v(document.getElementById('modalExport')),
-                titre: document.querySelector('#modalExport h3').firstChild.textContent.trim(),
-                rappelRepousse: !!db.getSync('backupProchainRappel', null),
-                rappelFerme: !document.getElementById('overlay-backup-reminder')
-            };
-        });
-        expect(r).toEqual({ donnees: true, fenetre: true, titre: 'Copie de secours', rappelRepousse: true, rappelFerme: true });
-        expect(erreurs).toEqual([]);
-    });
 
     test('(2) Codex › Archiver en mode ZIP : un aperçu annulé ne laisse aucune archive dans la liste', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);

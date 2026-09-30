@@ -24,7 +24,8 @@ const REFUSES = [
     'Archive enregistrée',           // la Réserve dit « Groupe archivé »
     'Erreur de archive',             // la coquille de l'échec d'archivage
     'Exporter maintenant',           // le bouton du rappel qui n'exportait rien
-    'Protège tes données',           // le rappel est celui de la copie de secours
+    'Protège tes données',           // l'ancien titre du rappel
+    'Fais une copie de secours</h3>', // lot I (D8) : le titre du rappel est « Mets ton codex à jour »
     'Enregistrement auto',           // l'enregistrement automatique est retiré (29 sept.)
     'si tu quittes sans l\'avoir fait', // R1 de Cowork : faux pour un changement de section
     '<code>.codex.zip</code>',       // R2 de Cowork : le fichier du codex finit par .zip
@@ -69,7 +70,11 @@ describe('Lot F (D4) : les anciens mots ont quitté l\'application', () => {
         expect(html).toContain('<span id="codex-menu-enreg-label">Mettre à jour le codex</span>');
         expect(codex).toContain("'Ton codex n\\'a pas tes derniers changements' : 'Ton codex est à jour'");
         expect(reserve).toContain("'Groupe archivé'");
-        expect(rappel).toContain('Faire une copie de secours');
-        expect(accueil).toContain('<div class="accueil-utilitaire-titre">Copie de secours</div>');
+        // Lot I (#985, D8) : le rappel mène au codex.
+        expect(rappel).toContain('Mettre à jour le codex');
+        // Lot I (#985, option a de Grégoire, 29 sept.) : la carte de l'Accueil est celle du codex.
+        expect(accueil).toContain('<div class="accueil-utilitaire-titre">Ton codex</div>');
+        expect(accueil).toContain('<div class="accueil-utilitaire-desc">Mets-le à jour : une copie complète de tes données.</div>');
+        expect(accueil).not.toContain('<div class="accueil-utilitaire-titre">Copie de secours</div>');
     });
 });

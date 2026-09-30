@@ -1192,6 +1192,10 @@ async function _marquerCodexAJour(resultat) {
     }
     _sauvegarderEtat();
     _mettreAJourIndicateur();
+    // Lot I (#985, D8) : un codex à jour repousse le rappel. Posé ici, pas au clic.
+    if (window.backupReminder && typeof window.backupReminder.reporterApresMiseAJourDuCodex === 'function') {
+        window.backupReminder.reporterApresMiseAJourDuCodex();
+    }
 }
 
 /**
