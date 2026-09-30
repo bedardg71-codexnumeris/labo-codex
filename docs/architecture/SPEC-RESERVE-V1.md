@@ -590,9 +590,35 @@ reportées et ne doivent PAS être implémentées maintenant :
 
 ---
 
+## 13. Ajout du lot A1 (30 septembre 2026) : une archive fabriquée comme le codex
+
+Premier lot du chantier des archives (`plans de travail/PLAN-2026-09-30-chantier-archives.md`).
+Les chemins du format ne changent pas ; ce qui suit s'ajoute aux sections 2.1 (étapes 5, 6, 8 et 9).
+
+- **Assemblage (mode fichier, Safari)** : les copies ne passent plus par JSZip. Elles sont
+  rangées telles quelles (STORE) et par référence, par `FichierSortant.assemblerZip`
+  (`js/fichier-sortant.js`), la pièce du lot J0 du codex. Seuls les textes (`donnees.json`,
+  `meta.json`, le patch, le manifeste) sont compressés par JSZip. `reserve.js` ne dépend
+  toujours pas de `codex.js` : les deux dépendent de `fichier-sortant.js`.
+- **Une empreinte par copie**, dans les deux modes (fichier et dossier) :
+  `meta.json` → `integrite.travaux_sha256`, un objet
+  `{ "<id>.<ext>" : "<SHA-256 en hexadécimal>" }` dont chaque clé est le nom du fichier
+  sous `travaux/`. Il vaut `null` si `crypto.subtle` est indisponible. Un lecteur d'avant
+  le lot ignore ce champ. Chaque copie est lue une à la fois pour son empreinte.
+- **Écriture (mode fichier)** : l'adresse du fichier n'est libérée qu'après cinq minutes
+  (`FichierSortant.telecharger`), et la réussite n'est plus annoncée d'office : l'usager
+  confirme que le fichier est là (« Il y est »). L'archive n'entre au registre local
+  (`_manifesteReserve`) qu'après cette confirmation.
+- **Mode dossier (Chrome, Edge)** : seule l'empreinte par copie s'ajoute.
+
+Sentinelle : `tests/unit/sentinelle-lot-A1-archive-sans-copier.test.js`.
+
+---
+
 ## Historique du document
 
 | Date       | Changement                                                    |
 |------------|---------------------------------------------------------------|
 | 2026-04-26 | Création. Spécification complète v1 validée en session Cowork. |
 | 2026-04-26 | Granularité par groupe-cours : API `verserGroupeCours(trimestre, groupeCoursId)` remplace `verserTrimestre(trimestre)`. UUID v4 par versement. Filtrage en deux passes (trimestre puis groupe). Convention de nommage `{trimestre}-{cours}-gr{groupe}`. Ajout `listerGroupesVersables()`. Tests mis à jour. |
+| 2026-09-30 | Lot A1 du chantier des archives : section 13 (assemblage sans copier les copies, empreinte par copie, confirmation par l'usager). |

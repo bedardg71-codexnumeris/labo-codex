@@ -11,6 +11,8 @@
    - trimestres.js (cle() pour namespacing)
    - travaux-stockage.js (recupererBlob, stockerBlob)
    - JSZip (libs/jszip.min.js)
+   - fichier-sortant.js (assemblerZip, entreesDuZip, telecharger,
+     confirmerTelechargement, tailleEnviron)
    =============================== */
 
 (function() {
@@ -376,7 +378,8 @@ async function genererCodex(options = {}) {
     const clesFT = toutesLesCles.filter(function(c) { return c.includes('fichiersTravaux'); });
     zip.folder(DOSSIER_TRAVAUX);
     // Lot J0 (#988) : les copies ne sont plus confiées à JSZip, qui les lisait toutes en
-    // mémoire dès leur dépôt. On n'en garde que la référence ; `_assemblerCodexZip` les range.
+    // mémoire dès leur dépôt. On n'en garde que la référence ; `FichierSortant.assemblerZip`
+    // les range (la pièce vit dans js/fichier-sortant.js depuis le lot A1 : l'archive l'emploie aussi).
     const copies = [];
     const rangDeLaCopie = {};
 
@@ -463,7 +466,7 @@ async function genererCodex(options = {}) {
     // avant de le sérialiser. Si un payload a tenté d'ajouter un fichier
     // annexe (cf. MODELE-MENACES.md §X-02), l'export est bloqué ici.
     if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportCodex === 'function') {
-        window.SecuriteExportValidation.validerExportCodex(_entreesDuCodex(zip, copies));
+        window.SecuriteExportValidation.validerExportCodex(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'));
     }
 
     // K-β — preview UI : montrer la liste des fichiers à l'utilisateur
@@ -477,7 +480,7 @@ async function genererCodex(options = {}) {
     // attend dans le noir pendant generateAsync.
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
-        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(_entreesDuCodex(zip, copies), 'codex', { taille: _formaterTailleEnviron(tailleEstimee) });
+        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'), 'codex', { taille: window.FichierSortant.tailleEnviron(tailleEstimee) });
         if (!ok) {
             return null;
         }
@@ -489,7 +492,7 @@ async function genererCodex(options = {}) {
     // 5. Générer le blob ZIP
     if (options.suivreTentative) _noterTentative({ etape: 'compression' });
     _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
-    const zipBlob = await _assemblerCodexZip(zip, copies, function(pourcent) {
+    const zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
         _prog(
             70 + Math.round(pourcent * 0.28),
             'Compression du ZIP…',
@@ -519,186 +522,6 @@ async function genererCodex(options = {}) {
         _progMasquer();
         throw erreur;
     }
-}
-
-/* ===============================
-   ASSEMBLAGE DU FICHIER (lot J0, #988)
-   =============================== */
-
-// Sur l'iPad, la page mourait pendant « Compression du ZIP… » (codex réel de 1,33 Go,
-// 30 sept. 2026). Mesuré sous WebKit : confier les copies à JSZip prenait en mémoire cinq
-// fois la taille du codex, et posait le fichier entier une fois de plus sur le disque avant
-// toute écriture. Les copies (PDF, images) sont déjà compressées : DEFLATE n'y gagnait que
-// 3,4 %. Elles sont donc rangées telles quelles (STORE), et par RÉFÉRENCE : le Blob rendu
-// pointe vers les copies du stockage, il ne les recopie pas. Seuls les textes (données,
-// manifeste) passent encore par JSZip. Le fichier reste un ZIP ordinaire, lu comme avant.
-// Mesure : plans de travail/MESURE-2026-09-30-lot-J0-codex-memoire.md.
-
-/** Sans ZIP64, ni une entrée ni le fichier ne dépassent 4 Go, ni 65 535 entrées. */
-var LIMITE_ZIP_OCTETS = 0xFFFFFFFF;
-var LIMITE_ZIP_ENTREES = 0xFFFF;
-/** Une copie est lue par tranches pour son CRC : la mémoire prise est celle d'une tranche. */
-var TRANCHE_CRC_OCTETS = 4 * 1024 * 1024;
-
-var _tableCrc32 = null;
-
-/** CRC-32 (celui du format ZIP) d'une suite d'octets, à la suite de `crc` (0 au départ). */
-function _crc32(octets, crc) {
-    if (!_tableCrc32) {
-        _tableCrc32 = new Uint32Array(256);
-        for (var n = 0; n < 256; n++) {
-            var c = n;
-            for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-            _tableCrc32[n] = c >>> 0;
-        }
-    }
-    var table = _tableCrc32;
-    var etat = (crc ^ 0xFFFFFFFF) >>> 0;
-    for (var i = 0; i < octets.length; i++) {
-        etat = table[(etat ^ octets[i]) & 0xFF] ^ (etat >>> 8);
-    }
-    return (etat ^ 0xFFFFFFFF) >>> 0;
-}
-
-/**
- * Ce que le fichier contiendra, sous la forme que lisent la Défense K et l'aperçu
- * (`forEach(chemin, entree)`), dans l'ordre d'avant le lot J0 : les copies sous leur dossier.
- * @param {JSZip} zipTextes
- * @param {Array<{nom: string, blob: Blob}>} copies
- */
-function _entreesDuCodex(zipTextes, copies) {
-    return {
-        forEach: function(rappel) {
-            zipTextes.forEach(function(chemin, entree) {
-                rappel(chemin, entree);
-                if (chemin === DOSSIER_TRAVAUX + '/') {
-                    copies.forEach(function(copie) { rappel(copie.nom, { dir: false }); });
-                }
-            });
-        }
-    };
-}
-
-/**
- * Assemble le fichier du codex : les entrées de `zipTextes` compressées par JSZip, puis
- * les copies rangées telles quelles, par référence (voir l'en-tête de la section).
- * @param {JSZip} zipTextes - données, manifeste, dossier des travaux
- * @param {Array<{nom: string, blob: Blob}>} copies
- * @param {function(number): void} [surProgression] - pourcentage de 0 à 100
- * @returns {Promise<Blob>}
- */
-async function _assemblerCodexZip(zipTextes, copies, surProgression) {
-    var textes = await zipTextes.generateAsync(
-        { type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 6 } }
-    );
-    // Le ZIP de JSZip finit par son répertoire central puis 22 octets de clôture (sans
-    // commentaire). On le rouvre là : ses entrées restent en tête du fichier, à leurs
-    // positions ; son répertoire est repris tel quel, suivi de celui des copies.
-    var vue = new DataView(textes.buffer, textes.byteOffset, textes.byteLength);
-    var cloture = textes.length - 22;
-    if (cloture < 0 || vue.getUint32(cloture, true) !== 0x06054b50) {
-        throw new Error('Assemblage du codex : clôture du ZIP des textes introuvable.');
-    }
-    var nbTextes = vue.getUint16(cloture + 10, true);
-    var tailleRepertoire = vue.getUint32(cloture + 12, true);
-    var debutRepertoire = vue.getUint32(cloture + 16, true);
-    if (debutRepertoire + tailleRepertoire !== cloture) {
-        throw new Error('Assemblage du codex : répertoire du ZIP des textes inattendu.');
-    }
-    if (nbTextes + copies.length > LIMITE_ZIP_ENTREES) {
-        throw new Error('Le codex compte trop de fichiers pour le format ZIP (' + (nbTextes + copies.length) + ').');
-    }
-
-    // Les bornes du format se jugent AVANT de lire une seule copie : tout est déjà connu
-    // (30 octets d'entrée et 46 de fiche par copie, son nom deux fois, son contenu une fois).
-    var encodeur = new TextEncoder();
-    var noms = [];
-    var octetsTotal = 0;
-    var tailleFinale = textes.length;
-    for (var t = 0; t < copies.length; t++) {
-        noms.push(encodeur.encode(copies[t].nom));
-        octetsTotal += copies[t].blob.size;
-        tailleFinale += 30 + 46 + 2 * noms[t].length + copies[t].blob.size;
-    }
-    if (tailleFinale > LIMITE_ZIP_OCTETS) {
-        throw new Error('Le codex dépasse ce que le format ZIP peut contenir (4 Go).');
-    }
-
-    var morceaux = [textes.subarray(0, debutRepertoire)];
-    var repertoire = [textes.subarray(debutRepertoire, cloture)];
-    var position = debutRepertoire;
-    // Heure et date au format DOS, en temps universel comme le fait JSZip.
-    var d = new Date();
-    var heureDos = (d.getUTCHours() << 11) | (d.getUTCMinutes() << 5) | (d.getUTCSeconds() >> 1);
-    var dateDos = ((d.getUTCFullYear() - 1980) << 9) | ((d.getUTCMonth() + 1) << 5) | d.getUTCDate();
-
-    var octetsLus = 0;
-
-    for (var i = 0; i < copies.length; i++) {
-        var blob = copies[i].blob;
-        var nom = noms[i];
-        var taille = blob.size;
-        var crc = 0;
-        for (var o = 0; o < taille; o += TRANCHE_CRC_OCTETS) {
-            var tampon = await blob.slice(o, o + TRANCHE_CRC_OCTETS).arrayBuffer();
-            crc = _crc32(new Uint8Array(tampon), crc);
-            octetsLus += tampon.byteLength;
-            // Rendre la tranche tout de suite : laissées au ramasse-miettes, elles
-            // s'empilaient (mesuré : jusqu'à 1,2 Go pour 2,4 Go de copies).
-            if (typeof tampon.transfer === 'function') tampon.transfer(0);
-            if (surProgression) surProgression(octetsTotal ? (octetsLus / octetsTotal) * 100 : 100);
-        }
-        // Drapeau 0x0800 : nom en UTF-8, s'il sort de l'ASCII.
-        var drapeaux = copies[i].nom.length === nom.length ? 0 : 0x0800;
-
-        var enTete = new Uint8Array(30 + nom.length);
-        var v = new DataView(enTete.buffer);
-        v.setUint32(0, 0x04034b50, true);   // entrée locale
-        v.setUint16(4, 10, true);           // version requise : 1.0 (STORE)
-        v.setUint16(6, drapeaux, true);
-        v.setUint16(8, 0, true);            // méthode : STORE
-        v.setUint16(10, heureDos, true);
-        v.setUint16(12, dateDos, true);
-        v.setUint32(14, crc, true);
-        v.setUint32(18, taille, true);      // taille rangée
-        v.setUint32(22, taille, true);      // taille réelle
-        v.setUint16(26, nom.length, true);
-        v.setUint16(28, 0, true);
-        enTete.set(nom, 30);
-
-        var fiche = new Uint8Array(46 + nom.length);
-        var w = new DataView(fiche.buffer);
-        w.setUint32(0, 0x02014b50, true);   // fiche du répertoire central
-        w.setUint16(4, 0x0014, true);       // produit par : DOS, 2.0 (comme JSZip)
-        w.setUint16(6, 10, true);
-        w.setUint16(8, drapeaux, true);
-        w.setUint16(10, 0, true);
-        w.setUint16(12, heureDos, true);
-        w.setUint16(14, dateDos, true);
-        w.setUint32(16, crc, true);
-        w.setUint32(20, taille, true);
-        w.setUint32(24, taille, true);
-        w.setUint16(28, nom.length, true);
-        w.setUint32(42, position, true);    // où commence l'entrée locale
-        fiche.set(nom, 46);
-
-        // Lu seulement à l'écriture du fichier : une copie retirée du stockage entre-temps ferait échouer l'écriture.
-        morceaux.push(enTete, blob);        // le Blob lui-même : une référence, pas une lecture
-        repertoire.push(fiche);
-        position += enTete.length + taille;
-        tailleRepertoire += fiche.length;
-    }
-
-    var fin = new Uint8Array(22);
-    var x = new DataView(fin.buffer);
-    x.setUint32(0, 0x06054b50, true);
-    x.setUint16(8, nbTextes + copies.length, true);
-    x.setUint16(10, nbTextes + copies.length, true);
-    x.setUint32(12, tailleRepertoire, true);
-    x.setUint32(16, position, true);
-
-    if (surProgression) surProgression(100);
-    return new Blob(morceaux.concat(repertoire, [fin]), { type: 'application/zip' });
 }
 
 /* ===============================
@@ -1461,7 +1284,7 @@ async function _ecrireViaHandle(handle, blob) {
 async function sauvegarderVersDestination(blob, nomFichier, options) {
     var forcerDialogue = options && options.forcerDialogue;
     var sansRepli = !!(options && options.sansRepli);
-    if (options && options.telechargementDirect) return _telechargerDirectement(blob, nomFichier);
+    if (options && options.telechargementDirect) return window.FichierSortant.telecharger(blob, nomFichier);
 
     // Stratégie 1a : Ré-écriture directe via handle FSAPI existant (pas de dialogue)
     if (_fileHandle && !forcerDialogue) {
@@ -1534,8 +1357,9 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
         }
     }
 
-    // Stratégie 3 : Téléchargement classique (fallback universel)
-    return _telechargerDirectement(blob, nomFichier);
+    // Stratégie 3 : Téléchargement classique (fallback universel). Rend `download` : il est
+    // LANCÉ ; l'application ne peut pas savoir s'il s'est terminé (js/fichier-sortant.js).
+    return window.FichierSortant.telecharger(blob, nomFichier);
 }
 
 /**
@@ -1550,30 +1374,6 @@ function _motifToucherFrais() {
     var activation = navigator.userActivation;
     if (!activation) return 'activation illisible';
     return activation.isActive === true ? null : 'toucher expiré';
-}
-
-/**
- * Lot G (#988) : délai avant de libérer l'URL d'un téléchargement direct. Libérée tout de
- * suite, Safari pouvait ne plus rien avoir à écrire pour un gros fichier (un codex d'environ
- * 1 Go). Cinq minutes : un délai long, choisi plutôt que `pagehide` pour que la mémoire du
- * fichier ne reste pas prise toute la séance.
- */
-var DELAI_LIBERATION_URL_MS = 5 * 60 * 1000;
-
-/**
- * Stratégie 3 : téléchargement par un lien. Rend `download` : le téléchargement est
- * LANCÉ ; l'application ne peut pas savoir s'il s'est terminé.
- */
-function _telechargerDirectement(blob, nomFichier) {
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = nomFichier;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function() { URL.revokeObjectURL(url); }, DELAI_LIBERATION_URL_MS);
-    return { methode: 'download', strategie: 'téléchargement direct' };
 }
 
 /**
@@ -3217,17 +3017,6 @@ function _nombreDeFichiers(n) {
 }
 
 /**
- * « environ 1,0 Go », « environ 350 Mo » : la taille dite à l'usager.
- */
-// Juste sous 1 Go, peut dire « environ 1024 Mo » : cosmétique, sans suite (relecture de Cowork, lot G, issue 3).
-function _formaterTailleEnviron(octets) {
-    var go = 1024 * 1024 * 1024, mo = 1024 * 1024;
-    if (octets >= go) return 'environ ' + (octets / go).toFixed(1).replace('.', ',') + ' Go';
-    if (octets >= mo) return 'environ ' + Math.round(octets / mo) + ' Mo';
-    return 'environ ' + Math.max(1, Math.round(octets / 1024)) + ' Ko';
-}
-
-/**
  * Lot J0 ter (#988) : le message d'attente pendant que l'appareil prépare le fichier pour la
  * feuille de partage. Vécu sur l'iPad le 30 sept. 2026 : un délai assez long pour qu'on se
  * demande s'il y a un problème. C'est la fenêtre de progression du parcours, sans sa barre :
@@ -3269,7 +3058,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         return;
     }
 
-    var taille = _formaterTailleEnviron(resultat.blob.size);
+    var taille = window.FichierSortant.tailleEnviron(resultat.blob.size);
     // Lot J0 bis (#988) : la fenêtre du toucher frais. Mots acceptés par Grégoire le
     // 30 sept. 2026. « Enregistrer » résout dans son clic : le partage part dans le geste.
     var toucherFrais = async function(motif) {
@@ -3317,7 +3106,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         var ecrit = sauvegarde.methode === 'fsapi' || sauvegarde.methode === 'share';
         if (sauvegarde.methode === 'download') {
             _noterTentative({ etape: 'téléchargement lancé, en attente de l\'usager' });
-            ecrit = await _confirmerTelechargement(resultat.nomFichier, taille);
+            ecrit = await window.FichierSortant.confirmerTelechargement(resultat.nomFichier, taille);
             if (!ecrit) console.warn('[Codex] Téléchargement direct : fichier non trouvé par l\'usager.');
         }
 
@@ -3353,21 +3142,6 @@ async function _mettreAJourLeCodex(forcerDialogue) {
             return;
         }
     }
-}
-
-/**
- * Règle du téléchargement direct (#988) : l'application ne peut pas savoir s'il s'est
- * terminé ; c'est l'usager qui le dit. « Il y est » → à jour ; sinon, rien n'est posé.
- */
-async function _confirmerTelechargement(nomFichier, taille) {
-    return await uiDialogues.confirmerAction({
-        titre: 'Téléchargement lancé',
-        message: 'L\'application ne peut pas savoir si le téléchargement s\'est terminé. ' +
-                 'Attends qu\'il le soit, puis vérifie que le fichier « ' + nomFichier + ' » (' + taille + ') ' +
-                 'se trouve dans tes Téléchargements.',
-        texteConfirmer: 'Il y est',
-        texteAnnuler: 'Il n\'y est pas'
-    }) === true;
 }
 
 /**
@@ -4150,8 +3924,6 @@ window.Codex = {
     // #614 — la fusion est une voie d'entrée de blobs vers le store `fichiers`
     // au même titre que `chargerCodex` : elle doit être testable directement.
     _fusionnerTravaux: _fusionnerTravaux,
-    // Lot J0 (#988) : l'assemblage du fichier se juge sans monter l'application.
-    _assemblerCodexZip: _assemblerCodexZip,
 
     // #336 Lot D (phase preview) : exécution manuelle du dernier plan de purge
     purgerEspacePrecedent: purgerEspacePrecedent,

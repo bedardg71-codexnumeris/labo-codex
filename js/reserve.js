@@ -24,7 +24,11 @@
      - db.js (window.db)
      - trimestres.js (window.obtenirTrimestres, window.cle)
      - travaux-stockage.js (window.travauxStockage.recupererBlob)
-     - JSZip (libs/jszip.min.js)
+     - JSZip (libs/jszip.min.js) : les textes de l'archive seulement
+     - fichier-sortant.js (window.FichierSortant) : l'assemblage du fichier sans
+       faire passer les copies par la mémoire, son téléchargement, et la
+       confirmation par l'usager (lot A1, 30 sept. 2026)
+     - ui-dialogues.js (window.uiDialogues.demanderAction)
      - import-export.js (window.estRessourceDemo / filtrerRessourcesNonDemo)
      - progression.js (window.afficherProgression / majProgression / masquerProgression)
 
@@ -376,6 +380,25 @@ async function _calculerSHA256(jsonStr) {
     }
 }
 
+/**
+ * Lot A1 (30 sept. 2026) : l'empreinte SHA-256 d'UNE copie, en hexadécimal. C'est elle qui
+ * permettra de vérifier l'archive copie par copie (lot A2), dans les deux modes : le CRC du
+ * ZIP n'existe pas en mode dossier, et « Ouvrir une archive… » ne le contrôle pas.
+ * La copie est lue en entier, une à la fois, et son tampon est rendu aussitôt : la mémoire
+ * prise est celle de la plus grosse copie, pas celle du groupe.
+ * Une copie illisible n'est pas avalée : l'erreur remonte, et le groupe n'est pas archivé.
+ * @param {Blob} blob
+ * @returns {Promise<string|null>} null si `crypto.subtle` est indisponible
+ */
+async function _empreinteDeLaCopie(blob) {
+    if (typeof crypto === 'undefined' || !crypto.subtle) return null;
+    var tampon = await blob.arrayBuffer();
+    var condense = await crypto.subtle.digest('SHA-256', tampon);
+    // Rendre le tampon tout de suite : laissés au ramasse-miettes, ils s'empilent (lot J0).
+    if (typeof tampon.transfer === 'function') tampon.transfer(0);
+    return Array.from(new Uint8Array(condense)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
 function _codeCoursCourt(codeCours) {
     // Extrait le préfixe numérique (ex. "601-101" depuis "601-101-MQ")
     var m = String(codeCours || '').match(/^(\d{3}-\d{3})/);
@@ -717,34 +740,45 @@ async function _collecterBlobs(donnees, trimestre, onProg) {
     var cleFichiers = trimestre + '_fichiersTravaux';
     var fichiers = donnees[cleFichiers];
     if (!Array.isArray(fichiers) || fichiers.length === 0) {
-        return { blobs: [], trouves: 0, manquants: 0, tailleTotale: 0 };
+        return { blobs: [], trouves: 0, manquants: 0, tailleTotale: 0, empreintes: {} };
     }
 
     if (typeof window.travauxStockage === 'undefined' ||
         typeof window.travauxStockage.recupererBlob !== 'function') {
         console.warn('[Archives] travauxStockage indisponible — aucun blob versé');
-        return { blobs: [], trouves: 0, manquants: fichiers.length, tailleTotale: 0 };
+        return { blobs: [], trouves: 0, manquants: fichiers.length, tailleTotale: 0, empreintes: {} };
     }
 
     var blobs = [];
     var manquants = 0;
     var tailleTotale = 0;
+    // Lot A1 : nom du fichier sous `travaux/` → empreinte SHA-256. Un même nom cité deux
+    // fois : la dernière copie l'emporte, comme dans le fichier.
+    var empreintes = {};
 
     for (var j = 0; j < fichiers.length; j++) {
         var f = fichiers[j];
+        var blob = null;
         try {
-            var blob = await window.travauxStockage.recupererBlob(f.id);
-            if (blob) {
-                var ext = _extensionDepuisNomFichier(f.nomFichier);
-                blobs.push({ id: f.id, ext: ext, blob: blob });
-                tailleTotale += blob.size || 0;
-            } else {
+            blob = await window.travauxStockage.recupererBlob(f.id);
+            if (!blob) {
                 manquants++;
                 console.warn('[Archives] Blob introuvable pour ' + f.id);
             }
         } catch (e) {
             manquants++;
             console.warn('[Archives] Erreur récupération blob ' + f.id, e.message || e);
+        }
+        if (blob) {
+            var ext = _extensionDepuisNomFichier(f.nomFichier);
+            // JSZip acceptait aussi un tampon d'octets : on l'enveloppe, pour ne pas perdre
+            // une copie qui ne serait pas stockée en Blob.
+            if (!(blob instanceof Blob)) blob = new Blob([blob]);
+            // Hors du try : une copie présente mais illisible fait échouer l'archivage, comme
+            // avant le lot (JSZip échouait à la lire) ; elle n'est pas comptée « manquante ».
+            empreintes[f.id + '.' + ext] = await _empreinteDeLaCopie(blob);
+            blobs.push({ id: f.id, ext: ext, blob: blob });
+            tailleTotale += blob.size || 0;
         }
 
         if (j % 5 === 0) {
@@ -759,7 +793,8 @@ async function _collecterBlobs(donnees, trimestre, onProg) {
         blobs: blobs,
         trouves: blobs.length,
         manquants: manquants,
-        tailleTotale: tailleTotale
+        tailleTotale: tailleTotale,
+        empreintes: empreintes
     };
 }
 
@@ -1104,7 +1139,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     var handleReserve = await _obtenirHandleReserve();
     var modeFSAPI = !!handleReserve;
 
-    if (!modeFSAPI && typeof JSZip === 'undefined') {
+    if (!modeFSAPI && (typeof JSZip === 'undefined' || !window.FichierSortant)) {
         var msgZip = 'Bibliotheque de compression non chargee.';
         notifications.erreur('Erreur', msgZip);
         throw new Error(msgZip);
@@ -1144,6 +1179,12 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         await _yield();
         var collecteBlobs = await _collecterBlobs(donnees, trimestre, _prog);
 
+        // Lot A1 : une empreinte par copie, dans les deux modes. Sans `crypto.subtle`, aucune
+        // n'a pu être calculée : le champ vaut null, comme celui des données.
+        var empreintesCopies = Object.keys(collecteBlobs.empreintes).every(function(n) {
+            return !!collecteBlobs.empreintes[n];
+        }) ? collecteBlobs.empreintes : null;
+
         // 3. Construction de meta.json et du patch (commun aux deux modes)
         var dateArchive = new Date().toISOString();
         var meta = {
@@ -1161,7 +1202,10 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             integrite: {
                 donnees_json_sha256: donneesSha256,
                 algorithme: donneesSha256 ? 'SHA-256' : null,
-                date_calcul: donneesSha256 ? dateArchive : null
+                date_calcul: donneesSha256 ? dateArchive : null,
+                // Lot A1 : { « <id>.<ext> » (le nom sous travaux/) : SHA-256 en hexadécimal }.
+                // Un lecteur d'avant le lot ignore ce champ.
+                travaux_sha256: empreintesCopies
             },
             contenu: {
                 donnees: true,
@@ -1254,10 +1298,10 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
         // Manifeste local : l'entrée est CALCULÉE avant la construction du ZIP, pour que
         // le ZIP porte l'historique complet (#248), mais elle n'est INSCRITE à la liste
-        // qu'après le téléchargement (lot F, D0 : un échec ne se déguise pas en réussite).
-        // Avant, un aperçu annulé ou une compression échouée laissait l'archive listée
-        // sans qu'aucun fichier n'existe (mesuré sous Safari). Copie de `archives` : la
-        // lecture rend l'objet du cache mémoire, qu'il ne faut pas muter.
+        // qu'une fois le fichier confirmé par l'usager (lot F, D0, puis lot A1 : un échec ne
+        // se déguise pas en réussite). Avant, un aperçu annulé ou une compression échouée
+        // laissait l'archive listée sans qu'aucun fichier n'existe (mesuré sous Safari).
+        // Copie de `archives` : la lecture rend l'objet du cache mémoire, qu'il ne faut pas muter.
         var manifesteLocal = _lireManifesteLocal();
         manifesteLocal.archives = Object.assign({}, manifesteLocal.archives);
         manifesteLocal.archives[dossier] = patch.patch;
@@ -1268,10 +1312,24 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
         dossierBase.file('donnees.json', JSON.stringify(donnees, null, 0));
 
-        var dossierTravaux = dossierBase.folder('travaux');
+        // Lot A1 : les copies ne sont plus confiées à JSZip, qui les lisait toutes en mémoire
+        // (mesuré : 3,4 Go pour 607 Mo de copies). On n'en garde que la référence ;
+        // `FichierSortant.assemblerZip` les range telles quelles, comme pour le codex (lot J0).
+        dossierBase.folder('travaux');
+        var cheminTravaux = 'trimestres/' + dossier + '/travaux/';
+        var copies = [];
+        var rangDeLaCopie = {};
         for (var b = 0; b < collecteBlobs.blobs.length; b++) {
             var entree2 = collecteBlobs.blobs[b];
-            dossierTravaux.file(entree2.id + '.' + entree2.ext, entree2.blob);
+            // Un même nom déposé deux fois : le dernier l'emporte, à la place du premier
+            // (ce que faisait JSZip).
+            var nomEntree = cheminTravaux + entree2.id + '.' + entree2.ext;
+            if (Object.prototype.hasOwnProperty.call(rangDeLaCopie, nomEntree)) {
+                copies[rangDeLaCopie[nomEntree]].blob = entree2.blob;
+            } else {
+                rangDeLaCopie[nomEntree] = copies.length;
+                copies.push({ nom: nomEntree, blob: entree2.blob });
+            }
         }
 
         dossierBase.file('meta.json', JSON.stringify(meta, null, 2));
@@ -1282,22 +1340,25 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
         // archives précédents dans n'importe quel ZIP récent.
         zip.file('manifeste-archives.json', JSON.stringify(manifesteLocal, null, 2));
 
+        // Ce que le fichier contiendra : les textes et les copies, dans l'ordre d'avant le lot.
+        var entreesArchive = window.FichierSortant.entreesDuZip(zip, copies, cheminTravaux);
+
         // Défense K — valider la structure du ZIP avant compression. Si un
         // payload a tenté d'ajouter une entrée annexe transportant des
         // données identifiantes (cf. MODELE-MENACES.md §X-02), l'export
         // est bloqué ici et l'utilisateur reçoit une alerte claire.
         if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportReserve === 'function') {
-            window.SecuriteExportValidation.validerExportReserve(zip);
+            window.SecuriteExportValidation.validerExportReserve(entreesArchive);
         }
 
         // K-β — preview UI avant compression. L'utilisateur peut annuler.
         // On masque l'overlay avant la modale (sinon double affichage)
         // puis on le réaffiche après le clic Télécharger pour montrer la
         // compression. Sans réaffichage, l'utilisateur attend dans le
-        // noir pendant generateAsync.
+        // noir pendant l'assemblage.
         if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
             _progHide();
-            var okPreview = await window.SecuriteExportPreview.previewZipEtConfirmer(zip, 'archive');
+            var okPreview = await window.SecuriteExportPreview.previewZipEtConfirmer(entreesArchive, 'archive');
             if (!okPreview) {
                 return null;
             }
@@ -1306,36 +1367,55 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
 
         _prog(80, 'Compression du ZIP…', '');
         await _yield();
-        var zipBlob = await zip.generateAsync(
-            { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
-            function(metaCompr) {
-                _prog(80 + Math.round(metaCompr.percent * 0.18),
-                    'Compression du ZIP…',
-                    Math.round(metaCompr.percent) + '% compressé');
-            }
-        );
+        var zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
+            _prog(80 + Math.round(pourcent * 0.18),
+                'Compression du ZIP…',
+                Math.round(pourcent) + '% compressé');
+        });
 
         // Convention #262 : préfixe `archive-` + dossier + date + extension simple.
         // CONFIDENTIEL- retiré (l'archive est implicitement personnelle).
         var nomFichier = 'archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_ARCHIVE;
-        _prog(99, 'Téléchargement…', nomFichier);
 
-        var url = URL.createObjectURL(zipBlob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = nomFichier;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        // Lot F : inscrite à la liste seulement maintenant, le fichier parti.
-        try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
-        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
-
+        // Le fichier est assemblé ; il n'est pas encore écrit.
         _prog(100, 'Archive prête !', _formaterTaille(zipBlob.size));
         await new Promise(function(r) { setTimeout(r, 600); });
         _progHide();
+
+        var statsZip = {
+            etudiants: statsDonnees.nombreEtudiants,
+            cles: statsDonnees.nombreCles,
+            fichiersTrouves: collecteBlobs.trouves,
+            fichiersManquants: collecteBlobs.manquants,
+            tailleZip: zipBlob.size,
+            tailleTravaux: collecteBlobs.tailleTotale
+        };
+
+        // Lot A1 : le parcours du codex téléchargé (lot G, #988). L'application ne peut pas
+        // savoir si un téléchargement s'est terminé : la réussite n'est plus annoncée
+        // d'office, c'est l'usager qui dit si le fichier est là. Sans son « Il y est », rien
+        // n'entre au registre et l'écran ne dit pas « archivé ». L'adresse du fichier n'est
+        // plus libérée aussitôt (`FichierSortant.telecharger`).
+        var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size);
+        while (true) {
+            window.FichierSortant.telecharger(zipBlob, nomFichier);
+            if (await window.FichierSortant.confirmerTelechargement(nomFichier, tailleDite)) break;
+
+            console.warn('[Archives] Téléchargement : fichier non trouvé par l\'usager.');
+            var geste = await window.uiDialogues.demanderAction({
+                titre: 'Groupe non archivé',
+                message: 'Le fichier (' + tailleDite + ') n\'a pas été enregistré. Si ton appareil manque d\'espace, ' +
+                         'libères-en, puis réessaie. Tes données restent dans l\'application.',
+                actions: [{ valeur: 'reessayer', texte: 'Réessayer', principal: true }]
+            });
+            if (geste !== 'reessayer') {
+                return { succes: false, nonConfirme: true, uuid: uuid, dossier: dossier, nomFichier: nomFichier, mode: 'zip', stats: statsZip };
+            }
+        }
+
+        // Inscrite à la liste seulement maintenant : le fichier est là, l'usager l'a dit.
+        try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
+        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
 
         notifications.succes(
             'Groupe archivé : fichier téléchargé',
@@ -1349,14 +1429,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             dossier: dossier,
             nomFichier: nomFichier,
             mode: 'zip',
-            stats: {
-                etudiants: statsDonnees.nombreEtudiants,
-                cles: statsDonnees.nombreCles,
-                fichiersTrouves: collecteBlobs.trouves,
-                fichiersManquants: collecteBlobs.manquants,
-                tailleZip: zipBlob.size,
-                tailleTravaux: collecteBlobs.tailleTotale
-            }
+            stats: statsZip
         };
 
     } catch (err) {

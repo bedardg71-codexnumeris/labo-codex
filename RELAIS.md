@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 12 H 30 : **CHANTIER DES ARCHIVES, LOT DE MESURE RENDU (AUCUN CODE)** — 1.171.0 en ligne ; `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 13 H 40 : **CHANTIER DES ARCHIVES, LOT A1 FAIT SUR UNE BRANCHE, EN ATTENTE DE LA RELECTURE DE COWORK** — ⚠ LE TRAVAIL LE PLUS RÉCENT EST SUR `lot-a1-archive-sans-copier`, PAS SUR `main`
+
+**Où** : branche `lot-a1-archive-sans-copier`, partie de `main` à `e92f2001` (1.171.0). **Ni poussée, ni fusionnée, ni livrée** (consigne de Cowork : « ni release ni push avant la relecture »). `main` et `origin/main` sont restés à `e92f2001` ; ⚠ **cette entrée du relais n'est donc pas sur `main`** tant que Grégoire n'a pas demandé de l'y pousser.
+
+**Fait** (consigne `plans de travail/CONSIGNE-DU-JOUR.md` de 12 h 39, lot A1 du plan `PLAN-2026-09-30-chantier-archives.md`) : « Archiver… » en mode fichier (Safari) range les copies sans les charger en mémoire, par `js/fichier-sortant.js` (module neuf : l'assemblage du lot J0, le téléchargement à libération différée, la fenêtre « Téléchargement lancé » et la taille dite, sortis de `js/codex.js`) ; l'archive porte une empreinte SHA-256 par copie (`meta.json`, `integrite.travaux_sha256`), dans les deux modes ; elle n'entre au registre qu'après le « Il y est » de l'usager.
+
+**Mesuré** (banc WebKit du Mac, 205 copies aux tailles réelles, 607 Mo) : mémoire de la page 3 262 Mo → 228 Mo ; disque avant l'écriture 607 Mo → 2 Mo ; du geste au téléchargement 22 s → 4,6 s. Fichier : `unzip -tq` sans erreur, CRC relus, 205 empreintes recalculées égales ; ouverture croisée avec 1.171.0 dans les deux sens. Vitest 665 fichiers, 7 825/7 825. Playwright ciblé 26/26 (9 specs). 17 mutations Vitest rouges ; 4 mutations WebKit rouges, dont une d'abord survivante (assertion vacante de ma spec, corrigée). **Verdict WebKit complet : non rendu**, dû sur le commit de release.
+
+**Reste** : la relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-09-30-lot-A1-archive.md`) ; les mots de la fenêtre « Groupe non archivé » et la ligne des Nouvelles, à Grégoire (§ 5 de la demande) ; puis release `minor`, verdict complet, push, fusion ; puis la porte sur le Mac (`PORTES-TERRAIN-2026-09-30-lot-A1-archive.md`, artefact à publier par Cowork, **seulement une fois le lot en ligne**). BACKLOG : #996 à #1002 inscrits (sur la branche). `OU-EN-EST-ON.md` : pas touché, une ligne à la livraison.
+
+## (relais précédent) 30 SEPT. 2026, ≈ 12 H 30 : **CHANTIER DES ARCHIVES, LOT DE MESURE RENDU (AUCUN CODE)** — 1.171.0 en ligne ; `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
 
 **Rendu** : `plans de travail/MESURE-2026-09-30-archives.md` et son annexe (l'inventaire du mot « archive »), sur la consigne `CONSIGNE-SUIVANTE-archives-mesure.md` et le cadrage `CADRAGE-2026-09-30-codex-et-archives-coherence.md` (§ 8 et § 9 : décisions de Grégoire). Aucun fichier de `js/` modifié.
 

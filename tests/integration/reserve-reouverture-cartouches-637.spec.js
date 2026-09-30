@@ -86,6 +86,8 @@ async function verser(browser, erreurs, { cartouchesNues, pratiques } = {}) {
     // Défense K-β : l'aperçu du ZIP attend « Télécharger » — le geste de l'enseignant·e.
     await page.locator('.export-preview-modal button.btn-confirmer').click({ timeout: 20000 });
     const telechargement = await telechargementAttendu;
+    // Lot A1 (30 sept. 2026) : le fichier parti, c'est l'usager qui dit s'il est là.
+    await page.getByRole('button', { name: 'Il y est' }).click({ timeout: 20000 });
     await versement;
     const chemin = await telechargement.path();
     const octets = readFileSync(chemin);
