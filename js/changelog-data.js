@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.171 (lots J0, J0 bis et J0 ter, #988) — titre et ligne ACCEPTÉS par Grégoire le
+            // 30 sept. 2026 (« accepté », consigne du jour de Cowork), après la porte passée sur l'iPad.
+            version: '1.171',
+            couleur: 'orange',
+            titre: 'Un gros codex se met à jour sur l\'iPad',
+            items: [
+                'Sur l\'iPad, la mise à jour d\'un gros codex pouvait s\'arrêter en chemin&nbsp;: la page se rechargeait, ou le fichier n\'était pas enregistré au premier essai. Le fichier est maintenant préparé sans charger tes copies en mémoire, et beaucoup plus vite. Quand il est prêt, la fenêtre «&nbsp;Ton codex est prêt&nbsp;» te demande de toucher «&nbsp;Enregistrer&nbsp;» pour choisir où le ranger. Le fichier pèse un peu plus lourd (environ 3&nbsp;%)&nbsp;: tes copies y sont rangées telles quelles.'
+            ]
+        },
+        {
             // 1.170 (lot I, #985, D8) — titre et ligne ACCEPTÉS par Grégoire le 29 sept. 2026 vers
             // 20 h 50, « Oui, telle quelle » (consigne du jour de Cowork).
             version: '1.170',
