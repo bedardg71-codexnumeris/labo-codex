@@ -378,6 +378,37 @@ describe('lot A2 · (b) chaque défaut est dit, et aucun ne passe pour « vérif
         expect(rapport.etat).toBe('incomplete');
     }, 30000);
 
+    it('les fichiers cachés du système (.DS_Store, Thumbs.db, desktop.ini) ne sont ni des copies ni des fichiers en trop, dans les deux modes ; un vrai fichier en trop reste dit', async () => {
+        const banc = await archiverEnDossier();
+        const t = travauxDe(banc.dossier);
+        t.set('.DS_Store', new Blob([octets(6148, 42)]));
+        t.set('Thumbs.db', new Blob([octets(300, 43)]));
+        t.set('desktop.ini', new Blob([octets(120, 44)]));
+        t.set('._FT_a2_a.pdf', new Blob([octets(4096, 45)])); // le double « AppleDouble » d'une copie
+        const d = await verifierDossier(banc, banc.dossier);
+        expect(d.etat).toBe('verifiee');
+        expect(d.enTrop).toEqual([]);
+        expect(d.nombreFichiers).toBe(4);
+        const f = await verifierFichier(banc, await zipDepuisDossier(banc.dossier));
+        expect(f.etat).toBe('verifiee');
+        expect(f.enTrop).toEqual([]);
+        // Le vrai fichier en trop, lui, est toujours dit — à côté des fichiers cachés.
+        MUTATIONS.enTrop(banc.dossier);
+        expect((await verifierDossier(banc, banc.dossier)).enTrop).toEqual(['FT_intrus.pdf']);
+        expect((await verifierFichier(banc, await zipDepuisDossier(banc.dossier))).enTrop).toEqual(['FT_intrus.pdf']);
+    }, 30000);
+
+    it('le détail sous « Archive incomplète » s\'accorde en nombre', () => {
+        const banc = monter(creerDb({}));
+        const cr = (r) => banc.verifier.compteRendu(Object.assign({ etat: 'incomplete', total: 9, problemes: [], enTrop: [], nonCouvertes: [], couvertureMesuree: true, donneesConcordent: true }, r));
+        expect(cr({ problemes: [{ type: 'absente' }] }).message).toBe('1 copies sur 9 manquent ou ne concordent pas. Archive de nouveau ce groupe.\n1 copie absente');
+        expect(cr({ problemes: [{ type: 'absente' }, { type: 'absente' }, { type: 'tronquee' }, { type: 'alteree' }, { type: 'alteree' }, { type: 'illisible' }] }).message.split('\n').slice(1))
+            .toEqual(['2 copies absentes', '1 copie tronquée', '2 copies altérées', '1 copie illisible']);
+        expect(cr({ enTrop: ['x'] }).message).toBe('1 fichier en trop dans l\'archive');
+        expect(cr({ enTrop: ['x', 'y'], nonCouvertes: ['a'] }).message).toBe('2 fichiers en trop dans l\'archive\n1 fiche du groupe sans copie dans l\'archive');
+        expect(cr({ nonCouvertes: ['a', 'b'] }).message).toBe('2 fiches du groupe sans copie dans l\'archive');
+    });
+
     it('la couverture se mesure sur les fiches d\'AUJOURD\'HUI, pas sur celles de l\'archive : une fiche retirée de l\'application ne manque à rien', async () => {
         const banc = await archiverEnDossier();
         banc.db.setSync(TRIMESTRE + '_fichiersTravaux', banc.db.getSync(TRIMESTRE + '_fichiersTravaux').filter((f) => f.id !== 'FT_a2_vide'));
@@ -539,8 +570,8 @@ describe('lot A2 · (d) l\'état retenu survit, et un nouvel archivage le remet 
         await banc.verifier.executer(DOSSIER, banc.registre()[DOSSIER], banc.verifier.sourceDossier(banc.dossier, DOSSIER));
         expect(banc.journal.fenetres[0].titre).toBe('Archive incomplète');
         expect(banc.journal.fenetres[0].message.split('\n')[0]).toBe('2 copies sur 4 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
-        expect(banc.journal.fenetres[0].message).toContain('1 absentes');
-        expect(banc.journal.fenetres[0].message).toContain('1 altérées');
+        expect(banc.journal.fenetres[0].message).toContain('1 copie absente');
+        expect(banc.journal.fenetres[0].message).toContain('1 copie altérée');
         expect(banc.registre()[DOSSIER].verification.etat).toBe('incomplete');
         expect(banc.verifier.etatVerification(banc.registre()[DOSSIER]).texte).toBe('Non vérifiée');
     }, 30000);
