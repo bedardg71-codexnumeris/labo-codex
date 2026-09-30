@@ -323,7 +323,7 @@ console.warn = function(...args) {
 
 /**
  * Lot G (#988) : la section « DERNIÈRE MISE À JOUR DU CODEX ». Ce que `Codex.derniereTentative`
- * garde : heure, étape atteinte, tailles, stratégie, erreur, issue. Ni nom de fichier ni contenu.
+ * garde : heure, étape atteinte, tailles, stratégie, toucher frais, erreur, issue. Ni nom de fichier ni contenu.
  */
 function sectionDerniereMiseAJourCodex() {
     let t = null;
@@ -341,6 +341,8 @@ function sectionDerniereMiseAJourCodex() {
     texte += `Taille du fichier: ${octets(t.tailleOctets)}\n`;
     texte += `Essais d'écriture: ${t.essais || 0}\n`;
     texte += `Stratégie: ${t.strategie || '—'}\n`;
+    // Lot J0 bis (#988) : la fenêtre « Ton codex est prêt » a-t-elle été ouverte, et son issue.
+    texte += `Toucher frais: ${t.toucherFrais || 'non demandé'}\n`;
     texte += `Erreur: ${t.erreur ? `${t.erreur.nom} – ${t.erreur.message}` : '—'}\n`;
     texte += `Issue: ${t.issue || '—'}\n`;
     texte += `Fin: ${heure(t.fin)}\n\n`;

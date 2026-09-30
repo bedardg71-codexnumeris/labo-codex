@@ -169,6 +169,14 @@ const TEMOIN_ECHEC = /^Codex non mis à jour : le fichier \(environ \d+ (Ko|Mo)\
 test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', () => {
     test.setTimeout(180000);
 
+    // Lot J0 bis (#988) : ce banc lance la mise à jour du codex par `page.evaluate`, qui accorde
+    // environ 5 s d'activation du toucher (mesuré). Elle est épinglée « active » ici, pour que la
+    // fenêtre « Ton codex est prêt » ne dépende pas de la charge de la machine ; cette fenêtre a son
+    // banc (lot-j0-bis-partage-apres-preparation.spec.js).
+    test.beforeEach(async ({ page }) => {
+        await page.addInitScript(() => Object.defineProperty(navigator, 'userActivation', { configurable: true, value: { isActive: true } }));
+    });
+
     test('aperçu refusé, partage refusé, réessayer, télécharger à la place', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);
         await viderLeStockage(page);
