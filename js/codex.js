@@ -682,6 +682,7 @@ async function _assemblerCodexZip(zipTextes, copies, surProgression) {
         w.setUint32(42, position, true);    // où commence l'entrée locale
         fiche.set(nom, 46);
 
+        // Lu seulement à l'écriture du fichier : une copie retirée du stockage entre-temps ferait échouer l'écriture.
         morceaux.push(enTete, blob);        // le Blob lui-même : une référence, pas une lecture
         repertoire.push(fiche);
         position += enTete.length + taille;
