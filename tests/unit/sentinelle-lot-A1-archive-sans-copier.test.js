@@ -624,7 +624,7 @@ describe('lot A1 · (e) l\'écriture : l\'adresse reste, et c\'est l\'usager qui
         expect(journal.notifications).toEqual([]);
         expect(journal.fenetres.map((f) => f.fenetre)).toEqual(['Téléchargement lancé', 'Groupe non archivé']);
         expect(journal.fenetres[1].boutons).toEqual(['Réessayer']);
-        expect(journal.fenetres[1].message).toBe('Le fichier (environ 9 Mo) n\'a pas été enregistré. Si ton appareil manque d\'espace, libères-en, puis réessaie. Tes données restent dans l\'application.');
+        expect(journal.fenetres[1].message).toBe('Le fichier (environ 9 Mo) n\'a pas été enregistré. Tes données restent dans l\'application.');
         // Aucun des mots vus ne dit « archivé » comme un fait accompli.
         expect(journal.fenetres.map((f) => f.fenetre + ' ' + f.message).join(' ')).not.toMatch(/Groupe archivé|archive prête/i);
     }, 30000);

@@ -1404,8 +1404,7 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             console.warn('[Archives] Téléchargement : fichier non trouvé par l\'usager.');
             var geste = await window.uiDialogues.demanderAction({
                 titre: 'Groupe non archivé',
-                message: 'Le fichier (' + tailleDite + ') n\'a pas été enregistré. Si ton appareil manque d\'espace, ' +
-                         'libères-en, puis réessaie. Tes données restent dans l\'application.',
+                message: 'Le fichier (' + tailleDite + ') n\'a pas été enregistré. Tes données restent dans l\'application.',
                 actions: [{ valeur: 'reessayer', texte: 'Réessayer', principal: true }]
             });
             if (geste !== 'reessayer') {
