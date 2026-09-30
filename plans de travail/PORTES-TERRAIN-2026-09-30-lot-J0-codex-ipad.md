@@ -2,7 +2,7 @@
 
 > Écrites le 30 septembre 2026, vers 6 h 20, par Claude Code (le markdown ; **Cowork publie l'artefact**, bouton « Copier mes résultats »). Sur tes **données réelles**, à l'adresse `https://app.codexnumeris.org`, sur l'iPad. Ce qui échoue devient une fiche du BACKLOG.
 >
-> ⚠ **La porte attend le lot en ligne.** Au moment où ces lignes sont écrites, il est commité sur la branche `lot-j0-codex-ipad-memoire`, sans relecture, sans release, sans push. Le numéro de version attendu en 0.1 est à inscrire ici par celui qui fera la release (il sera supérieur à 1.170.0) ; « en ligne » se lit chez Netlify.
+> ✅ **Le lot est en ligne : la porte peut se faire.** 1.170.1 (`e9fb94a2`), relu par Cowork (« le lot part, sans correction »), verdict WebKit complet vert, en ligne depuis le 30 sept. à 7 h 19 (Netlify « ready », `commit_ref` `e9fb94a2`). Le numéro attendu en 0.1 est **1.170.1**.
 >
 > **Pourquoi si peu de rangées, par les deux règles de tête.** Les machines ont déjà répondu sur le contenu du fichier (banc Vitest, épreuve croisée avec 1.170.0 dans WebKit, `unzip -t` à 1,3 Go) et sur la mémoire et le disque sous WebKit du Mac. Elles ne peuvent pas répondre sur ton iPad avec ton codex réel : sa mémoire, son espace libre, et la feuille de partage vers Fichiers. C'est une copie de secours : un raté compte.
 >

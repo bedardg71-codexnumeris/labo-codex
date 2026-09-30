@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 21 H : **LOT I (#985) LIVRÉ EN 1.170.0, FUSIONNÉ DANS `main` ; VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh`**
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 7 H 25 : **LOT J0 (#988) EN LIGNE EN 1.170.1 ; LA PORTE SUR L'IPAD PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Lot J0** : sur l'iPad, la page mourait pendant « Compression du ZIP… » (codex réel de 1,33 Go). Le fichier du codex est maintenant assemblé sans charger les copies en mémoire (`_assemblerCodexZip`, `js/codex.js`, commit `4cbcdc12`). Relecture croisée de Cowork : « le lot part, sans correction » (`plans de travail/VERDICT-RELECTURE-2026-09-30-lot-J0-codex-ipad.md`). Release en correctif, **sans entrée aux Nouvelles** (elle attend la porte ; la ligne proposée reste en réserve chez Cowork).
+
+**Mesuré** : Vitest 664 fichiers, 7 791/7 791 sur `e9fb94a2` ; verdict WebKit complet vert sur `e9fb94a2`, rendu à 7 h 18 (≈ 40 min, Cowork fermé et remesuré, charge 6,6 au lancement, sous `caffeinate`), **une spec verte au second essai** : `cours-actif-hors-bibliotheque-916` (déjà vue instable, sans rapport avec le lot ; issue 3, rien d'inscrit). Poussé (`0502e0f8..e9fb94a2`). **En ligne depuis 7 h 19** (Netlify « ready », `commit_ref` `e9fb94a2`, `published_at` 11:19:53 Z). Branche `lot-j0-codex-ipad-memoire` fusionnée en avance rapide et retirée.
+
+**Inscrit, pas corrigé** : #991 (« Exporter une sélection » fabrique à l'ancienne, sans priorité) ; **#992 (un codex de plus de 2 Go ne se rouvre pas, priorité haute** ; extrapolation sur deux points : borne atteinte début à mi-novembre ; Cowork le remonte à Grégoire après la porte) ; #990 (présences initialisées avant que le trimestre soit connu).
+
+**Reste** : la porte terrain sur l'iPad (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-J0-codex-ipad.md`, 1.170.1 à la rangée 0.1 ; artefact à publier par Cowork) ; **#988 ouverte à dessein** jusqu'à la porte ; après la porte : la ligne des Nouvelles (à soumettre à Grégoire par Cowork), #992 à remonter, §1 de la porte du lot I à refaire ; puis le lot I bis (D9) ; la CI GitHub à 60 min (#979) ; OU-EN-EST-ON.md pour E1 à E3.
+
+## (relais précédent) 29 SEPT. 2026, ≈ 21 H : **LOT I (#985) LIVRÉ EN 1.170.0, FUSIONNÉ DANS `main` ; VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh`** — ↻ 30 sept. : 1.170.0 a été **en ligne depuis le 29 à 22 h 34** (Netlify « ready », `commit_ref` `0502e0f8`, constaté par Cowork le 30 à 5 h 08)
 
 **Lot I** : le rappel mène au codex (D8). « Mets ton codex à jour », son bouton lance la mise à jour du menu ; une mise à jour réussie (au point `_marquerCodexAJour`, « Il y est » compris) le repousse de 14 jours ; la croix aussi ; « Ne plus rappeler » et une date plus lointaine respectés. Complément après la relecture de Cowork : le délai choisi au rappel ne vaut que pour sa tentative ; la carte de l'Accueil devient « Ton codex » (option a de Grégoire). Banc `lot-i-rappel-mene-au-codex` 4/4, 8 mutations, 8 rouges ; Vitest 663/7767. Nouvelles de 1.170 mot pour mot (Grégoire, « Oui, telle quelle »). Branche `lot-i-rappel-codex` fusionnée (`5e6a3f05`).
 
