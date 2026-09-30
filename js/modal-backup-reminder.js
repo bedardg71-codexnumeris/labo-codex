@@ -1,9 +1,10 @@
 /**
  * modal-backup-reminder.js
- * Modal de rappel pour la sauvegarde des données
+ * Rappel de mettre le codex à jour
  *
- * Affiche un avertissement sur les risques de perte de données
- * et rappelle comment effectuer un backup.
+ * Lot I (#985, D8, 29 sept. 2026) : le rappel mène au codex, plus à la copie de
+ * secours. Une mise à jour réussie du codex le repousse (codex.js, _marquerCodexAJour) ;
+ * la croix vaut « plus tard ».
  *
  * Déclencheurs :
  * - Premier lancement (aucun rappel enregistré)
@@ -19,6 +20,10 @@
     // Clés localStorage
     const CLE_PROCHAIN_RAPPEL = 'backupProchainRappel';
     const CLE_NE_PLUS_RAPPELER = 'backupNePlusRappeler';
+    // Le choix par défaut du sélecteur : la croix et une mise à jour du codex repoussent d'autant.
+    const DELAI_PAR_DEFAUT = 14;
+    // Délai choisi au sélecteur avant « Mettre à jour le codex » : appliqué seulement si la mise à jour réussit.
+    let delaiApresMiseAJour = DELAI_PAR_DEFAUT;
 
     /**
      * Vérifie si l'utilisateur possède de VRAIES données à protéger.
@@ -110,20 +115,55 @@
     }
 
     /**
-     * Lot F (D4, étape 3) : le bouton mène VRAIMENT à la copie de secours. Il ouvre
-     * Réglages › Données, puis la fenêtre de la copie de secours. Avant, « Exporter
-     * maintenant » n'ouvrait que la section (mesuré le 29 sept.) : il n'exportait rien,
-     * et son repli (`[data-sous-section="import-export"]`) visait un onglet disparu.
+     * Lot I (#985, D8) : une mise à jour RÉUSSIE du codex repousse le rappel. Appelé par
+     * codex.js au point où le codex est dit « à jour » (_marquerCodexAJour) : un échec, un
+     * aperçu refusé ou « Il n'y est pas » n'y arrivent pas.
+     * N'efface pas « Ne plus rappeler » (contrairement à definirProchainRappel) et ne
+     * rapproche pas une date plus lointaine déjà choisie : le stock est respecté.
      */
-    function allerVersCopieDeSecours() {
+    function reporterApresMiseAJourDuCodex() {
+        // Le délai choisi ne sert qu'une fois, même quand le report est écarté (relecture de
+        // Cowork) : sinon 30 jours choisis, puis un échec, valaient encore pour le menu plus tard.
+        const delai = delaiApresMiseAJour;
+        delaiApresMiseAJour = DELAI_PAR_DEFAUT;
+        if (db.getSync(CLE_NE_PLUS_RAPPELER, null) === 'true') return;
+        const report = new Date();
+        report.setDate(report.getDate() + delai);
+        const dejaPose = db.getSync(CLE_PROCHAIN_RAPPEL, null);
+        if (dejaPose && new Date(dejaPose) > report) return;
+        db.setSync(CLE_PROCHAIN_RAPPEL, report.toISOString());
+    }
+
+    /**
+     * Le geste principal du rappel : le parcours de « Mettre à jour le codex » du menu,
+     * tel quel (lot G : mêmes messages d'échec). Sans codex ouvert, ce parcours le crée.
+     * Rien n'est posé ici : c'est la réussite qui repousse le rappel.
+     */
+    function mettreAJourLeCodex() {
+        const select = document.getElementById('select-rappel-backup');
+        const valeur = select ? select.value : String(DELAI_PAR_DEFAUT);
         fermerModal();
-        // Rappel repoussé de 7 jours, comme avant.
-        definirProchainRappel(7);
-        afficherSection('reglages');
-        setTimeout(() => {
-            afficherSousSection('reglages-donnees');
-            if (typeof window.ouvrirModalExport === 'function') window.ouvrirModalExport();
-        }, 100);
+        if (valeur === 'jamais') {
+            desactiverRappels();
+        } else {
+            delaiApresMiseAJour = parseInt(valeur, 10) || DELAI_PAR_DEFAUT;
+        }
+        if (window.Codex && typeof window.Codex.actionEnregistrer === 'function') {
+            // Le délai choisi ne vaut que pour CETTE tentative : un échec ou une annulation le
+            // rendent au défaut, pour la mise à jour suivante par le menu (banc, essai 2 bis).
+            Promise.resolve(window.Codex.actionEnregistrer()).finally(() => {
+                delaiApresMiseAJour = DELAI_PAR_DEFAUT;
+            });
+        }
+    }
+
+    /**
+     * La croix vaut « plus tard », au délai par défaut. Avant le lot I, elle ne posait
+     * aucune date : le rappel revenait à chaque ouverture.
+     */
+    function fermerPlusTard() {
+        definirProchainRappel(DELAI_PAR_DEFAUT);
+        fermerModal();
     }
 
     /**
@@ -161,6 +201,8 @@
         if (document.getElementById('modal-backup-reminder')) {
             return;
         }
+        // Un délai choisi lors d'une ouverture précédente ne vaut pas pour celle-ci.
+        delaiApresMiseAJour = DELAI_PAR_DEFAUT;
 
         // Overlay (classe standard DS)
         const overlay = document.createElement('div');
@@ -172,26 +214,17 @@
         modal.id = 'modal-backup-reminder';
         modal.className = 'modal-contenu modal-compact';
 
+        // security-ok: gabarit constant, aucune donnée utilisateur
         modal.innerHTML = `
-            <button class="modal-fermer" data-action="backupReminder.fermerModal"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-            <h3 class="modal-titre">Fais une copie de secours</h3>
+            <button class="modal-fermer" data-action="backupReminder.fermerPlusTard"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+            <h3 class="modal-titre">Mets ton codex à jour</h3>
 
             <div class="modal-section">
-                <div class="alerte alerte-attention">
-                    Tes données sont stockées <strong>localement dans ton navigateur</strong>.
-                    Personne d'autre n'y a accès, mais elles peuvent être <strong>perdues</strong> si :
-                    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.25rem">
-                        <li>Tu effaces l'historique de navigation <em>(avec « données de sites »)</em></li>
-                        <li>Tu utilises la <strong>navigation privée</strong></li>
-                        <li>Tu changes de navigateur <em>(Chrome ≠ Safari ≠ Firefox)</em></li>
-                        <li>Tu réinstalles ton navigateur ou changes d'ordinateur</li>
-                    </ul>
-                </div>
-
                 <div class="alerte alerte-information" style="margin-bottom: 0">
-                    <strong>Solution :</strong> fais régulièrement une copie de secours
-                    (<strong>Réglages → Données</strong>). Ce fichier se réimporte
-                    à tout moment pour restaurer tes données.
+                    Tes données vivent dans ce navigateur : elles peuvent être perdues si tu effaces
+                    les données de sites, changes de navigateur ou d'ordinateur. Ton codex en garde
+                    une copie complète, copies de tes étudiant·es comprises, que tu rouvres sur
+                    n'importe quel appareil.
                 </div>
             </div>
 
@@ -206,10 +239,10 @@
                     </select>
                 </div>
                 <button class="btn btn-neutre" data-action="backupReminder.gererChoixRappel">
-                    J'ai compris
+                    Plus tard
                 </button>
-                <button class="btn btn-principal" data-action="backupReminder.allerVersCopieDeSecours">
-                    Faire une copie de secours
+                <button class="btn btn-principal" data-action="backupReminder.mettreAJourLeCodex">
+                    Mettre à jour le codex
                 </button>
             </div>
         `;
@@ -250,8 +283,10 @@
         verifierEtAfficher: verifierEtAfficher,
         definirProchainRappel: definirProchainRappel,
         desactiverRappels: desactiverRappels,
-        allerVersCopieDeSecours: allerVersCopieDeSecours,
+        mettreAJourLeCodex: mettreAJourLeCodex,
+        reporterApresMiseAJourDuCodex: reporterApresMiseAJourDuCodex,
         gererChoixRappel: gererChoixRappel,
+        fermerPlusTard: fermerPlusTard,
         fermerModal: fermerModal,
         // Exposé pour la sentinelle du seuil « vraies données » (retour terrain 8 juin).
         utilisateurADesDonnees: utilisateurADesDonnees
