@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 17 H 10 : **CHANTIER DES ARCHIVES, LOT A2 (VÉRIFIER UNE ARCHIVE) FAIT SUR UNE BRANCHE, EN ATTENTE DE LA RELECTURE DE COWORK** — le travail le plus récent est sur `lot-a2-verifier-archive`, pas sur `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 17 h 50 : **CHANTIER DES ARCHIVES, LOT A2 EN LIGNE EN 1.172.0 ; LA PORTE SUR LE MAC (CHROME) PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Livré** : release `95ed3124` (1.172.0, mineure, ligne des Nouvelles acceptée par Grégoire, réécrite par Cowork). Elle porte le lot A2 (`c202c0b0`, relu par Cowork : « le lot part après UNE correction », `plans de travail/VERDICT-RELECTURE-2026-09-30-lot-A2-verifier.md`), la correction demandée (les fichiers cachés du système — `.DS_Store`, `Thumbs.db`, `desktop.ini`, tout nom qui commence par un point — ne sont ni des copies ni des fichiers en trop ; Cowork l'avait rejoué sur l'archive réelle : un `.DS_Store` la rendait « incomplète »), l'accord en nombre du détail sous « Archive incomplète », et les deux textes acceptés par Grégoire (« Ce n'est pas cette archive », « Dossier à choisir de nouveau »).
+
+**Mesuré** : deux mutations de plus (fichiers cachés non ignorés ; accord cassé), rouges ; Vitest 666 fichiers, 7 870/7 870 sur `95ed3124` ; **verdict WebKit complet sur `95ed3124` : vert, 0 échec, 0 spec au second essai, 43 min (17 h 06 → 17 h 49)** (Cowork fermé, mesuré : aucune VM ; mémoire libre 58 % ; charge 3 avant le Vitest, la garde de `pousser.sh` a attendu qu'elle retombe). Poussé (`2ca29f83..95ed3124`). **En ligne depuis 17 h 50** (Netlify « ready », `commit_ref` `95ed3124`, `published_at` 21:49:51 Z). Branche `lot-a2-verifier-archive` fusionnée en avance rapide et retirée.
+
+**Au plan** (`PLAN-2026-09-30-chantier-archives.md`, lot A4) : ce que « vérifiée » doit vouloir dire pour le retrait — les deux identifiants égaux, l'empreinte de `meta.json`, la couverture mesurée (verdict, remarque 1).
+
+**Reste** : **la porte sur le Mac, dans Chrome** (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-A2-verifier.md`, numéro 1.172.0 inscrit ; **artefact jumeau à publier par Cowork**) : vérifier l'archive du groupe 00008 de l'hiver 2026, attendu 205 sur 205. Puis les lots A3 à A5 (#1000 à #1002), A5 recommandé avant A4. #1004 (Chrome a servi 1.170.2) reste à mesurer dans le Chrome de Grégoire.
+
+## (relais précédent) 30 SEPT. 2026, ≈ 17 H 10 : **CHANTIER DES ARCHIVES, LOT A2 (VÉRIFIER UNE ARCHIVE) FAIT SUR UNE BRANCHE, EN ATTENTE DE LA RELECTURE DE COWORK** — le travail le plus récent était sur `lot-a2-verifier-archive` (résolu à 17 h 50 : relu, corrigé, livré en 1.172.0)
 
 **Où** : branche `lot-a2-verifier-archive`, partie de `main` à `2ca29f83` (1.171.1). **Ni poussée, ni fusionnée, ni livrée** (consigne de Cowork de 16 h 24 : « ni release ni push avant la relecture »). `main` et `origin/main` restent à `2ca29f83`. ⚠ **Cette entrée du relais n'est donc pas sur `main`** tant que Grégoire n'a pas demandé de l'y pousser.
 
