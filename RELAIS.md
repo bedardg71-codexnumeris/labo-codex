@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 18 H 45 : **LOT H (#987) FUSIONNÉ DANS `main`, VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh` ; LOT I (#985) OUVERT EN MESURE SUR `lot-i-rappel-codex`**
+## POUR LA SESSION QUI PREND LE RELAIS — 29 SEPT. 2026, ≈ 21 H : **LOT I (#985) LIVRÉ EN 1.170.0, FUSIONNÉ DANS `main` ; VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh`**
+
+**Lot I** : le rappel mène au codex (D8). « Mets ton codex à jour », son bouton lance la mise à jour du menu ; une mise à jour réussie (au point `_marquerCodexAJour`, « Il y est » compris) le repousse de 14 jours ; la croix aussi ; « Ne plus rappeler » et une date plus lointaine respectés. Complément après la relecture de Cowork : le délai choisi au rappel ne vaut que pour sa tentative ; la carte de l'Accueil devient « Ton codex » (option a de Grégoire). Banc `lot-i-rappel-mene-au-codex` 4/4, 8 mutations, 8 rouges ; Vitest 663/7767. Nouvelles de 1.170 mot pour mot (Grégoire, « Oui, telle quelle »). Branche `lot-i-rappel-codex` fusionnée (`5e6a3f05`).
+
+**Reste** : vérifier le push (`git log origin/main`) et « en ligne » chez Netlify ; la porte terrain iPad (`plans de travail/PORTES-TERRAIN-2026-09-29-lot-I-rappel-codex.md`, artefact à publier par Cowork) ; **#985 ouverte à dessein** : D9 (on élimine la copie de secours) est le lot I bis ; retirer le worktree `lot-i-rappel-codex` une fois le push confirmé ; la CI GitHub à 60 min (#979) ; OU-EN-EST-ON.md pour E1 à E3.
+
+## (relais précédent) 29 SEPT. 2026, ≈ 18 H 45 : **LOT H (#987) FUSIONNÉ DANS `main`, VERDICT WEBKIT ET PUSH LANCÉS PAR `pousser.sh` ; LOT I (#985) OUVERT EN MESURE SUR `lot-i-rappel-codex`**
 
 **Lot H** : la suite durait une heure parce que le Mac se mettait en VEILLE pendant qu'elle tournait (`pmset` `sleep 1` ; 13 essais nés à l'instant d'une veille, 75 des 115 min, tous les échecs). `verifier-playwright.mjs` lance maintenant `caffeinate -i -w pid`, avec un écouteur `'error'` ajouté après la relecture de Cowork. Après : 42,8 min, 0 échec. Rapport : `plans de travail/RAPPORT-2026-09-29-987-duree-suite.md`. Aucune version (rien de visible). #987 cochée. Retrait de `Formation/` et « Exemples de feedback pour Claude/ » par Grégoire, enregistré (`7c12e3a8`).
 
