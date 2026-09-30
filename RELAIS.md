@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 7 H 25 : **LOT J0 (#988) EN LIGNE EN 1.170.1 ; LA PORTE SUR L'IPAD PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 9 H 20 : **LOT J0 BIS (#988) EN LIGNE EN 1.170.2 ; LA PORTE SUR L'IPAD PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Porte du lot J0 (iPad, 1.170.1, 7 h 28)** : la préparation aboutit (12 s, sans rechargement : le lot J0 tient), mais le premier enregistrement est refusé (`NotAllowedError`) ; « Réessayer » réussit. Le fichier de l'iPad (7 h 34, une seconde préparation) est sain : `unzip -tq` sans erreur, 503 entrées, 1 314 934 513 octets.
+
+**Lot J0 bis** (`bd471ed4`) : `navigator.share` exige l'activation du dernier toucher, éteinte après 5 s environ (mesuré sous WebKit 26.4 : active à 4,5 s, éteinte à 5,5 s ; même message que l'iPad). Toucher expiré (ou API absente) → fenêtre « Ton codex est prêt » (mots acceptés par Grégoire), « Enregistrer » lance le partage dans le geste ; « Annuler » suit l'annulation existante ; le rapport de bug a sa ligne « Toucher frais ». Relecture de Cowork : « le lot part, sans correction » (`plans de travail/VERDICT-RELECTURE-2026-09-30-lot-J0-bis.md`). Release en correctif, **sans entrée aux Nouvelles**.
+
+**Mesuré** : banc `lot-j0-bis-partage-apres-preparation` 2/2 (simulé, et réel : vrais clics, vraie activation, vrai partage), rouge sur `main` d'avant ; 16 mutations, 15 rouges, 1 équivalente nommée. Vitest 664 fichiers, 7 791/7 791 sur `51d096ba`. Verdict WebKit complet vert sur `51d096ba`, rendu à 9 h 12 (≈ 44 min, Cowork fermé et remesuré, charge 7,8 au lancement, sous `caffeinate`), **une spec verte au second essai** : `evaluation-959-neutralite-chargeur` (#959 P1(a), déjà vue instable le 29 sept., sans rapport avec le lot ; issue 3, rien d'inscrit). Poussé (`3193c288..51d096ba`). **En ligne depuis 9 h 13** (Netlify « ready », `commit_ref` `51d096ba`, `published_at` 13:13:00 Z). Branche `lot-j0-bis-partage-apres-preparation` fusionnée en avance rapide et retirée.
+
+⚠ **Pour qui écrit un banc** : `page.evaluate` accorde lui-même environ 5 s d'activation du toucher. Quatre bancs existants (lots F, G, I) épinglent maintenant `navigator.userActivation` à « active ».
+
+**Inscrit, pas corrigé** : #993 (la taille affichée, Gio contre Go) ; #994 (le message d'échec nomme l'espace) ; #995 (Chrome : la fenêtre de choix de fichier exige aussi un toucher actif, à mesurer avant de corriger) ; le refus replié en silence ajouté à #991.
+
+**Reste** : la porte terrain sur l'iPad (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-J0-bis-codex-ipad.md`, markdown et artefact de Cowork ; son §2 reprend les rangées non faites de la porte du lot J0) ; **#988 ouverte à dessein** jusqu'à la porte ; après la porte : la ligne des Nouvelles (à soumettre à Grégoire par Cowork), #992 à remonter, §1 de la porte du lot I ; puis le lot I bis (D9) ; la CI GitHub à 60 min (#979) ; OU-EN-EST-ON.md pour E1 à E3.
+
+## (relais précédent) 30 SEPT. 2026, ≈ 7 H 25 : **LOT J0 (#988) EN LIGNE EN 1.170.1 ; LA PORTE SUR L'IPAD PEUT SE FAIRE**
 
 **Lot J0** : sur l'iPad, la page mourait pendant « Compression du ZIP… » (codex réel de 1,33 Go). Le fichier du codex est maintenant assemblé sans charger les copies en mémoire (`_assemblerCodexZip`, `js/codex.js`, commit `4cbcdc12`). Relecture croisée de Cowork : « le lot part, sans correction » (`plans de travail/VERDICT-RELECTURE-2026-09-30-lot-J0-codex-ipad.md`). Release en correctif, **sans entrée aux Nouvelles** (elle attend la porte ; la ligne proposée reste en réserve chez Cowork).
 
