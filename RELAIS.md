@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 11 H 50 : **1.171.0 EN LIGNE ; #988 AUX CORRIGÉS (PORTE PASSÉE SUR L'IPAD) ; LOT J0 TER LIVRÉ** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 12 H 30 : **CHANTIER DES ARCHIVES, LOT DE MESURE RENDU (AUCUN CODE)** — 1.171.0 en ligne ; `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Rendu** : `plans de travail/MESURE-2026-09-30-archives.md` et son annexe (l'inventaire du mot « archive »), sur la consigne `CONSIGNE-SUIVANTE-archives-mesure.md` et le cadrage `CADRAGE-2026-09-30-codex-et-archives-coherence.md` (§ 8 et § 9 : décisions de Grégoire). Aucun fichier de `js/` modifié.
+
+**Mesuré, en bref** : copies d'H2026 = 1 100,8 Mo sur 1 305,5 (394 sur 500), A2026 = 204,7 Mo, A2025 et A2024 sans copie ; données 26,3 Mo. « Archiver… » sous WebKit, 205 copies et 607 Mo : 3,4 Go de mémoire de page, 0,6 Go posés sur le disque avant l'écriture (le mur du codex d'avant le lot J0). « Ouvrir une archive… » ne rend aucune copie. « Exporté » ne veut pas dire « sans fichier » (103 copies « exportées », toutes avec leur fichier). 41 textes d'écran disent « archivé » pour l'état clos. L'application pèse environ 17 Mo.
+
+⚠ **Constat hors consigne, à disposer par Cowork** (§ 6.1 de la mesure) : au banc, `navigator.share` charge le fichier entier en mémoire, 2,6 Go pour 1,3 Go. Non mesuré sur l'iPad.
+
+**Reste** : la relecture de la mesure par Cowork, et les dispositions de ses six trouvailles (aucune n'est inscrite au BACKLOG) ; les mots de la table du § 4 sont à Grégoire ; puis le reste du relais précédent.
+
+## (relais précédent) 30 SEPT. 2026, ≈ 11 H 50 : **1.171.0 EN LIGNE ; #988 AUX CORRIGÉS (PORTE PASSÉE SUR L'IPAD) ; LOT J0 TER LIVRÉ**
 
 **Porte du lot J0 bis (iPad, 1.170.2, 10 h 38)** : passée. La barre à 100 % en 12 s environ, « Ton codex est prêt », « Enregistrer », la feuille de partage sans passer par « Codex non mis à jour », fichier du jour de 1,31 Go, deux réouvertures sans rappel. Réserve de Cowork : relevé coché sur la page de la porte du lot J0 ; la fenêtre est attestée par la réponse écrite de Grégoire. #988 est aux corrigés de `SUIVI-BUGS.md` ; les deux portes du 30 sept. portent leur résultat en tête.
 

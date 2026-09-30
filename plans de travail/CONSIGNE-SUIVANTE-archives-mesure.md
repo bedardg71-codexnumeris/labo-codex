@@ -24,3 +24,11 @@ Tout texte que l'usager lit et qui emploie « archive », « archivé », « arc
 ## 5 · Ce que tu rends à Grégoire
 
 Quatre lignes : le poids de chaque trimestre ; ce qu'« Archiver… » donne à grande taille ; les trois réponses ; le nombre de textes à renommer.
+
+## 6 · Ajouts du 30 septembre, 12 h 03 (Cowork)
+
+Lis aussi le § 9 du cadrage. Deux mesures de plus, et une décision qui oriente les questions du § 3.
+
+- **Décision de Grégoire** : à l'archivage, **les copies seulement** quittent l'application ; les données restent. La question 3.1 devient donc : que faut-il pour qu'une archive **rende ses copies** à un trimestre dont les données n'ont pas bougé (rapprochement par identifiant de copie, état « exporté » repassé à « présent ») ?
+- **Le poids de l'application elle-même** : la taille totale de ce que le navigateur télécharge (HTML, JS, CSS, bibliothèques, icônes). Grégoire l'estimait à 1 Go ; Cowork l'estime à quelques dizaines de Mo au plus, sans l'avoir mesuré.
+- **Le reste laissé par le partage** : au banc WebKit du Mac, ce que le partage ou le téléchargement d'un fichier de 1,3 Go laisse sur le disque après coup, et si c'est nettoyé. Sur l'iPad, Grégoire a relevé 2,78 Go pour Safari contre 1,3 Go de données de site (§ 9 du cadrage). Si le banc ne peut pas le dire, dis-le.
