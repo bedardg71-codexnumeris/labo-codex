@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 13 H 40 : **CHANTIER DES ARCHIVES, LOT A1 FAIT SUR UNE BRANCHE, EN ATTENTE DE LA RELECTURE DE COWORK** — ⚠ LE TRAVAIL LE PLUS RÉCENT EST SUR `lot-a1-archive-sans-copier`, PAS SUR `main`
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 16 H 15 : **CHANTIER DES ARCHIVES, LOT A1 EN LIGNE EN 1.171.1 ; LA PORTE SUR LE MAC PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Livré** : release `cdfef4ea` (1.171.1, correctif, sans ligne aux Nouvelles — tranché par Cowork, la ligne viendra avec le lot A2). Elle porte le lot A1 (`6187882f`, relu par Cowork : « le lot part, sans correction de code », `plans de travail/VERDICT-RELECTURE-2026-09-30-lot-A1-archive.md`) et les mots de la fenêtre « Groupe non archivé », option (b) acceptée par Grégoire : « Le fichier (TAILLE) n'a pas été enregistré. Tes données restent dans l'application. », bouton « Réessayer ». Le message du codex (« Codex non mis à jour ») n'est pas touché : c'est #994.
+
+**Mesuré** : break-test du banc du lot (l'ancienne phrase remise rougit l'assertion, restauré par copie) ; Vitest 665 fichiers, 7 825/7 825 sur `cdfef4ea` ; verdict WebKit complet vert sur `cdfef4ea`, rendu à 16 h 04 (≈ 43 min, Cowork fermé et remesuré : aucune VM ; charge 1,5 au lancement ; sous `caffeinate`), **aucune spec au second essai**. Poussé (`e92f2001..cdfef4ea`). **En ligne depuis 16 h 05** (Netlify « ready », `commit_ref` `cdfef4ea`, `published_at` 20:04:53 Z). Branche `lot-a1-archive-sans-copier` fusionnée en avance rapide et retirée.
+
+**Au plan** (`PLAN-2026-09-30-chantier-archives.md`, lot A4) : les empreintes se comparent **au moment du retrait** — une copie peut changer après son import (éditeur de pages, « Ré-importer », ouverture ou fusion d'un codex) ; la question du § 6 est répondue.
+
+**Reste** : **la porte sur le Mac** (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-A1-archive.md`, numéro 1.171.1 inscrit ; **artefact jumeau à publier par Cowork**) ; #998 ouvert à dessein jusqu'à la porte ; puis les lots A2 à A5 (#999 à #1002), dans l'ordre du plan (A5 recommandé avant A4). Remarque de Cowork, sans correction : l'empreinte est calculée à la collecte, avant l'aperçu — un aperçu annulé a coûté la lecture de toutes les copies (4,6 s ; à surveiller sur l'iPad). Hors consigne, inscrit et continué : le run Playwright de GitHub n'a plus conclu depuis le 25 sept. (plafond 60 min, #979).
+
+## (relais précédent) 30 SEPT. 2026, ≈ 13 H 40 : **CHANTIER DES ARCHIVES, LOT A1 FAIT SUR UNE BRANCHE, EN ATTENTE DE LA RELECTURE DE COWORK** — le travail le plus récent était sur `lot-a1-archive-sans-copier`, pas sur `main` (résolu à 16 h 15 : fusionnée)
 
 **Où** : branche `lot-a1-archive-sans-copier`, partie de `main` à `e92f2001` (1.171.0). **Ni poussée, ni fusionnée, ni livrée** (consigne de Cowork : « ni release ni push avant la relecture »). `main` et `origin/main` sont restés à `e92f2001` ; ⚠ **cette entrée du relais n'est donc pas sur `main`** tant que Grégoire n'a pas demandé de l'y pousser.
 

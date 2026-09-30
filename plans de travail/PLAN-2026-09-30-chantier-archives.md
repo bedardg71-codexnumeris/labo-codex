@@ -50,6 +50,7 @@ La règle 4 commande l'ordre des lots : on bâtit la vérification et le retour 
 ### Lot A4 · Alléger un groupe archivé et vérifié (G4)
 
 - **Ce qui change** : un état neuf pour une copie, « aux archives » (nom à toi), distinct d'« exporté ». « Alléger » n'est offert que si l'archive du groupe a été vérifiée dans ce navigateur, copie par copie ; sinon il est refusé, et dit pourquoi. Les écrans montrent la copie comme partie aux archives, avec « Faire revenir ». Le codex sait qu'il n'attend pas ces fichiers.
+- **Les empreintes se comparent au moment du retrait** (noté le 30 sept., réponse du lot A1) : une copie peut changer après son import (éditeur de pages, « Ré-importer » sur un fac-similé, ouverture ou fusion d'un codex). L'archive vérifiée hier ne prouve donc pas que la copie d'aujourd'hui y est : juste avant de retirer une copie, son empreinte du moment est comparée à celle de l'archive, et la copie qui a changé depuis n'est pas retirée.
 - **Tes données** : c'est **le seul lot qui retire quelque chose**. Filet proposé : l'application exige, juste avant, un codex complet du jour ; et le premier allègement se fait sur un seul groupe.
 - **Ce qui te revient** : le nom de l'état, les mots du refus et de la confirmation ; une porte sur tes données réelles, en trois temps (alléger un groupe ; constater le poids du codex ; faire revenir ses copies et constater qu'elles sont toutes là).
 
@@ -77,4 +78,4 @@ La règle 4 commande l'ordre des lots : on bâtit la vérification et le retour 
 - Ce que fait l'iPad pour tout ce qui est mesuré au banc du Mac.
 - Le mode dossier d'« Archiver… » (Chrome, Edge) : non mesuré ; le plan vise le mode fichier, celui de Safari.
 - La durée de chaque lot : non estimée.
-- Si une copie peut changer après son import (annotations dans le fichier plutôt que dans les données) : à vérifier au lot A1 ; l'empreinte par copie le révélerait.
+- Si une copie peut changer après son import (annotations dans le fichier plutôt que dans les données) : à vérifier au lot A1 ; l'empreinte par copie le révélerait. **Répondu au lot A1 : oui**, par trois chemins ; la conséquence est inscrite au lot A4.

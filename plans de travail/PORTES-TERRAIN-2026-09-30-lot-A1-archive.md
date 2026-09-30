@@ -2,7 +2,7 @@
 
 > Écrites le 30 septembre 2026, vers 13 h 35 (Toronto), par Claude Code (ce markdown : la trace). **Cowork publie l'artefact jumeau** (cases, champs de saisie, bouton « Copier mes résultats »).
 > Sur le **Mac**, dans **Safari**, données réelles, `https://app.codexnumeris.org`.
-> ⚠ **La porte attend que le lot soit en ligne.** Le 30 sept. à 13 h 35, il est sur la branche `lot-a1-archive-sans-copier`, ni relu ni poussé : la version en ligne (1.171.0) est celle d'avant. **Le numéro à lire en 0.1 est à inscrire ici à la release.**
+> ✅ **Le lot est en ligne : 1.171.1** (30 sept., 16 h 05, mesuré chez Netlify : déploiement de production prêt sur `cdfef4ea`, publié à 20:04:53 Z ; relecture croisée de Cowork verte ; verdict au navigateur vert, aucune spec au second essai). **La porte peut se faire.** *(Écrit à 13 h 35 : le lot était sur la branche `lot-a1-archive-sans-copier`, ni relu ni poussé, et la version en ligne était 1.171.0.)*
 > **Pourquoi si peu de rangées** : le fichier (contenu, empreintes, mémoire, disque) est jugé par les bancs. Seul ton Safari, avec tes vraies copies, peut dire que le fichier arrive dans tes Téléchargements. C'est sur cette archive que reposera, plus tard, le retrait des copies : un raté compte.
 > **Tes données** : rien n'est écrit ni effacé dans tes trimestres. Seule la liste de tes archives reçoit une ligne, après ton « Il y est ».
 > Ce qui échoue devient un item du BACKLOG, pas une note.
@@ -11,7 +11,7 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | Dans Safari, sur le Mac, ouvre l'application, recharge, lis le numéro en bas de page. | **Le numéro de la release du lot A1** (à inscrire ici ; plus grand que 1.171.0). Si tu lis 1.171.0 : arrête-toi, le lot n'est pas en ligne. |
+| 0.1 | Dans Safari, sur le Mac, ouvre l'application, recharge, lis le numéro en bas de page. | **1.171.1**. Si tu lis 1.171.0 : arrête-toi, le lot n'est pas en ligne. |
 | 0.2 | Vérifie que tes données de l'hiver 2026 sont dans ce Safari (le trimestre « Hiver 2026 » s'ouvre, avec ses copies). | Elles y sont. Sinon : arrête-toi et dis-le, on ne fait pas la porte sur un autre appareil. |
 
 ## §1 · Archiver le plus gros groupe de l'hiver 2026 `Données réelles`
