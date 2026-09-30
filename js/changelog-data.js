@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.170 (lot I, #985, D8) — titre et ligne ACCEPTÉS par Grégoire le 29 sept. 2026 vers
+            // 20 h 50, « Oui, telle quelle » (consigne du jour de Cowork).
+            version: '1.170',
+            couleur: 'orange',
+            titre: 'Le rappel te propose de mettre ton codex à jour',
+            items: [
+                'À l\'ouverture, le rappel te propose maintenant de mettre ton codex à jour, au lieu de faire une copie de secours. Après une mise à jour réussie, ou si tu le fermes par la croix, il ne revient pas avant 14 jours. Sur l\'Accueil, la carte «&nbsp;Ton codex&nbsp;» y mène aussi.'
+            ]
+        },
+        {
             // 1.169 (lot G, #988) — la ligne est le texte 6 ACCEPTÉ par Grégoire le 29 sept. 2026
             // (réponse relue avec Cowork). Titre retenu par Grégoire (1.169.1) : le codex se « met à
             // jour » ; « enregistré » veut seulement dire écrit dans l'application (D4, 26 sept.).
