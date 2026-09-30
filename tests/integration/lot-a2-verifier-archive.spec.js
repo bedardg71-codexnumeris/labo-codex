@@ -164,7 +164,7 @@ test.describe('Lot A2 — « Vérifier » une archive depuis l\'écran Archives 
             const ko = await verifierParLeBouton(page, archive.dossier, fichier);
             expect(ko.titre).toBe('Archive incomplète');
             expect(ko.message).toContain('1 copies sur 3 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
-            expect(ko.message).toContain('1 altérées');
+            expect(ko.message).toContain('1 copie altérée');
             await expect(tableau(page)).toContainText('Non vérifiée');
             expect(await tableau(page).innerText()).not.toContain('Vérifiée le');
             expect(await page.evaluate((d) => db.getSync('_manifesteReserve').archives[d].verification.etat, archive.dossier)).toBe('incomplete');

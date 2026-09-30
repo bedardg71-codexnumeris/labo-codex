@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.172 (chantier des archives, lots A1 et A2, #998 et #999) — titre et ligne ACCEPTÉS par
+            // Grégoire le 30 sept. 2026 (« j'accepte », consigne de release de Cowork de 16 h 59),
+            // réécrits plus court par Cowork.
+            version: '1.172',
+            couleur: 'vert',
+            titre: 'Vérifier une archive, copie par copie',
+            items: [
+                'Dans Réglages › Données › Archives, «&nbsp;Vérifier&nbsp;» relit une archive et dit si chaque copie y est, intacte. La liste garde la date de la vérification. Une archive faite avant cette version est à refaire&nbsp;: «&nbsp;Archiver…&nbsp;» range maintenant chaque copie avec son empreinte, sans charger tout le groupe en mémoire.'
+            ]
+        },
+        {
             // 1.171 (lots J0, J0 bis et J0 ter, #988) — titre et ligne ACCEPTÉS par Grégoire le
             // 30 sept. 2026 (« accepté », consigne du jour de Cowork), après la porte passée sur l'iPad.
             version: '1.171',

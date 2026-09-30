@@ -306,7 +306,7 @@ async function _obtenirHandleReserve(opts) {
     return nouveau;
 }
 
-// Mots du garde-fou, en un seul endroit (non soumis à Grégoire : voir la demande de relecture du lot A2).
+// Mots du garde-fou, en un seul endroit. Acceptés par Grégoire le 30 sept. 2026 (consigne de release du lot A2).
 var MOTS_DOSSIER = {
     mauvaisNiveau: {
         titre: 'Dossier à choisir de nouveau',

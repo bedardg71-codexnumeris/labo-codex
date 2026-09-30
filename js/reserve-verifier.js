@@ -75,20 +75,22 @@ var MOTS = {
         verifiee: function(jour) { return 'Vérifiée le ' + jour; },
         nonVerifiee: 'Non vérifiée'
     },
-    // --- Non soumis à Grégoire ---
-    // Le détail sous le texte d'échec : ce que chaque copie a.
+    // Le détail sous le texte d'échec : ce que chaque copie a. Accord en nombre tranché par
+    // Cowork (verdict de relecture du lot A2, 16 h 57).
     detail: {
-        absentes: 'absentes', tronquees: 'tronquées', alterees: 'altérées', illisibles: 'illisibles',
-        enTrop: 'fichiers en trop dans l\'archive', nonCouvertes: 'fiches du groupe sans copie dans l\'archive',
+        copies: function(n, adjectif) { return n + ' copie' + (n > 1 ? 's ' : ' ') + adjectif + (n > 1 ? 's' : ''); },
+        absente: 'absente', tronquee: 'tronquée', alteree: 'altérée', illisible: 'illisible',
+        enTrop: function(n) { return n + ' fichier' + (n > 1 ? 's' : '') + ' en trop dans l\'archive'; },
+        nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du groupe sans copie dans l\'archive'; },
         donneesKo: 'les données de l\'archive ne concordent pas avec leur empreinte',
         couvertureNonMesuree: 'couverture non mesurée : ce groupe n\'est plus dans l\'application'
     },
-    // Le fichier choisi n'est pas l'archive de la ligne.
+    // Le fichier choisi n'est pas l'archive de la ligne. Accepté par Grégoire le 30 sept. 2026.
     autreArchive: {
         titre: 'Ce n\'est pas cette archive',
         texte: 'Le fichier choisi est l\'archive d\'un autre groupe ou d\'une autre date. Choisis le fichier de cette ligne.'
     },
-    // L'archive n'a pas pu être lue.
+    // L'archive n'a pas pu être lue (non soumis à Grégoire ; relu par Cowork, tel quel).
     illisible: { titre: 'Archive illisible' },
     aRefaireDetail: function(nb, taille) { return nb + ' copies, ' + taille + ' (compte et taille seulement, sans valoir vérification).'; },
     erreurs: {
@@ -160,6 +162,16 @@ async function _sha256(octets) {
 
 function _sha256Texte(texte) {
     return _sha256(new TextEncoder().encode(texte));
+}
+
+/**
+ * Un fichier que le système pose de lui-même dans un dossier (`.DS_Store` du Finder, `Thumbs.db`
+ * et `desktop.ini` de Windows, tout nom qui commence par un point) : ni une copie, ni un fichier
+ * en trop. Relecture de Cowork (30 sept. 2026) : l'archive réelle vit dans iCloud et s'ouvre dans
+ * le Finder ; sans cette règle, « vérifiée » aurait tenu quelques jours.
+ */
+function _fichierDuSysteme(nom) {
+    return nom.charAt(0) === '.' || nom === 'Thumbs.db' || nom === 'desktop.ini';
 }
 
 /** Le nom d'une copie sous travaux/ (« <id>.<ext> ») → l'id de sa fiche. */
@@ -428,7 +440,7 @@ async function verifierArchive(source, entree, dossier, onProg) {
         return rapport;
     }
 
-    var copies = await source.listerCopies();
+    var copies = (await source.listerCopies()).filter(function(c) { return !_fichierDuSysteme(c.nom); });
     rapport.nombreFichiers = copies.length;
     rapport.tailleFichiers = copies.reduce(function(s, c) { return s + (c.taille || 0); }, 0);
 
@@ -556,12 +568,12 @@ function compteRendu(rapport) {
     var parType = {};
     rapport.problemes.forEach(function(p) { parType[p.type] = (parType[p.type] || 0) + 1; });
     var lignes = [];
-    if (parType.absente) lignes.push(parType.absente + ' ' + MOTS.detail.absentes);
-    if (parType.tronquee) lignes.push(parType.tronquee + ' ' + MOTS.detail.tronquees);
-    if (parType.alteree) lignes.push(parType.alteree + ' ' + MOTS.detail.alterees);
-    if (parType.illisible) lignes.push(parType.illisible + ' ' + MOTS.detail.illisibles);
-    if (rapport.enTrop.length) lignes.push(rapport.enTrop.length + ' ' + MOTS.detail.enTrop);
-    if (rapport.nonCouvertes.length) lignes.push(rapport.nonCouvertes.length + ' ' + MOTS.detail.nonCouvertes);
+    if (parType.absente) lignes.push(MOTS.detail.copies(parType.absente, MOTS.detail.absente));
+    if (parType.tronquee) lignes.push(MOTS.detail.copies(parType.tronquee, MOTS.detail.tronquee));
+    if (parType.alteree) lignes.push(MOTS.detail.copies(parType.alteree, MOTS.detail.alteree));
+    if (parType.illisible) lignes.push(MOTS.detail.copies(parType.illisible, MOTS.detail.illisible));
+    if (rapport.enTrop.length) lignes.push(MOTS.detail.enTrop(rapport.enTrop.length));
+    if (rapport.nonCouvertes.length) lignes.push(MOTS.detail.nonCouvertes(rapport.nonCouvertes.length));
     if (rapport.donneesConcordent !== true) lignes.push(MOTS.detail.donneesKo);
     if (!rapport.couvertureMesuree) lignes.push(MOTS.detail.couvertureNonMesuree);
     var n = rapport.problemes.length;

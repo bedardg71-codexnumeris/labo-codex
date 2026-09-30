@@ -2,7 +2,7 @@
 
 > Écrites le 30 septembre 2026, vers 17 h (Toronto), par Claude Code (ce markdown : la trace). **Cowork publie l'artefact jumeau** (cases, champs de saisie, bouton « Copier mes résultats »).
 > Sur le **Mac**, dans **Chrome** (le navigateur de la porte du lot A1), données réelles, `https://app.codexnumeris.org`.
-> ⚠ **Le lot n'est pas en ligne** : il est sur la branche `lot-a2-verifier-archive`, en attente de la relecture de Cowork, puis d'une release mineure. **La porte ne peut se faire qu'une fois le numéro en ligne relevé ici : ______** (Claude Code l'inscrit à la release).
+> **Le numéro à lire : 1.172.0** (release du 30 sept., 17 h 03, après la relecture de Cowork ; verdict au navigateur et mise en ligne consignés dans `RELAIS.md`). *(Écrit à 17 h : le lot était sur la branche `lot-a2-verifier-archive`, ni relu ni poussé.)*
 > **Pourquoi si peu de rangées** : la vérification (chaque défaut dit, la mémoire, l'état retenu) est jugée par les bancs. Seul ton Chrome, avec ta vraie archive et tes vraies fiches, peut dire « 205 sur 205 » sur tes données.
 > **Tes données** : rien n'est écrit dans tes trimestres ni dans l'archive. Seule ta liste d'archives note « Vérifiée le … ».
 > Ce qui échoue devient un item du BACKLOG, pas une note.
@@ -11,7 +11,7 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 | Dans Chrome, sur le Mac, ouvre l'application et **recharge de force** (⌘ + Maj + R). Lis le numéro en bas de page. | Le numéro de la release du lot A2 (champ : le numéro lu). Si tu lis 1.171.1 ou moins : arrête-toi, le lot n'est pas en ligne (#1004 : un onglet ouvert garde l'ancienne version). |
+| 0.1 | Dans Chrome, sur le Mac, ouvre l'application et **recharge de force** (⌘ + Maj + R). Lis le numéro en bas de page. | **1.172.0** (champ : le numéro lu). Si tu lis 1.171.1 ou moins : arrête-toi, le lot n'est pas en ligne (#1004 : un onglet ouvert garde l'ancienne version). |
 | 0.2 | Les données de l'hiver 2026 sont dans ce Chrome (le trimestre s'ouvre, avec ses copies). | Elles y sont. Sinon : arrête-toi et dis-le. |
 
 ## §1 · Vérifier l'archive du groupe 00008 de l'hiver 2026 `Données réelles`
