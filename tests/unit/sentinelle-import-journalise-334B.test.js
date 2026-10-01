@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // Sentinelle statique — #334 session B (10 juin 2026), import journalisé.
 // Verrouille trois défenses contre un retour silencieux du bug terrain iPad
@@ -58,11 +59,16 @@ describe('sentinelle · import codex journalisé (#334 B)', () => {
         expect(corps).toMatch(/db\.set\(clesFTImport\[k\]/);
     });
 
-    it('actionOuvrir route le cas incomplet vers notifications.warning + bilan', () => {
-        const apres = codex.slice(codex.indexOf('async function actionOuvrir'));
-        expect(apres).toContain('resultat.stats.incomplet');
-        expect(apres).toContain('construireBilanImport(resultat.stats)');
-        expect(apres).toContain('notifications.warning');
+    it('l\'ouverture route le cas incomplet vers le bilan, porté par la fenêtre de rechargement (#1012)', () => {
+        // Bornée à la fonction : de `_ouvrirLeFichierChoisi` à la fonction suivante.
+        // `tranche()` refuse une tranche vide (#858) : l'assertion négative plus bas en dépend.
+        const suite = tranche(codex, 'async function _ouvrirLeFichierChoisi(', 'async function actionEnregistrer(');
+        expect(suite).toContain('resultat.stats.incomplet');
+        expect(suite).toContain('construireBilanImport(resultat.stats)');
+        expect(suite).toContain("titre: bilan ? bilan.titre : 'Recharger la page'");
+        expect(suite).toContain('bilan.message');
+        // Le bilan ne passe plus par un bandeau qui s'en va (remarque de Grégoire, 1er oct. 2026).
+        expect(suite).not.toContain('notifications.warning');
     });
 
     it('stockerBlob accepte options.notifier et n\'a PAS de limite de taille par fichier', () => {

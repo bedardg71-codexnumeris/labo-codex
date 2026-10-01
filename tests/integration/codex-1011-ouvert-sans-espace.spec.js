@@ -18,8 +18,10 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // écrites.
 //
 // CE QUE CE BANC JUGE, par le vrai geste (la case de Réglages › Données, le menu Codex) :
-//  (1) et (2) : copies refusées, puis liste des copies refusée → le bilan « Import
-//      incomplet », la proposition de recharger, le codex actif ; aucun message d'erreur.
+//  (1) et (2) : copies refusées, puis liste des copies refusée → le bilan de l'ouverture
+//      incomplète, la proposition de recharger, le codex actif ; aucun message d'erreur.
+//      Depuis #1012, le bilan est porté par la fenêtre de rechargement (mots de Grégoire du
+//      1er oct., 12 h 40), plus par un bandeau qui s'en va.
 //      La liste garde ses statuts d'avant, en mémoire comme dans le stockage ;
 //  (3) toute écriture refusée après les copies (l'espace est plein pour de bon) → même fin ;
 //      un ancien snapshot de référence est retiré plutôt que laissé au codex précédent ; le
@@ -61,8 +63,11 @@ const COPIES_FICTIVES = [1, 2, 3].map((i) => ({
 const STATUTS_D_AVANT = COPIES_FICTIVES.map((c) => c.id + ':stocke');
 const PNG_1PX = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
-const BILAN = 'Import incomplet : 3 fichiers sur 3 n\'ont pas été restaurés.';
 const QUESTION = 'Recharger la page pour appliquer les données ?';
+const TITRE_DU_BILAN = 'Codex ouvert, mais incomplet';
+const BILAN = '3 copies sur 3 n\'ont pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
+    + '\n\nPour retrouver ces copies : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+    + '\n\n' + QUESTION;
 
 async function demarrer(page) {
     await page.goto(indexHtml);
@@ -188,11 +193,17 @@ const etatDeLEspace = (page) => page.evaluate(async ({ cleGroupe, cleCopies, cle
 /** La fin attendue : le bilan, la question du rechargement, le codex actif, pas d'erreur. */
 async function attendreLeBilan(page) {
     await expect(page.getByText(QUESTION), 'le rechargement est proposé').toBeVisible({ timeout: 30000 });
+    // #1012 : le bilan est dans la fenêtre, qui reste tant qu'on n'a pas répondu.
+    const fenetre = await page.evaluate(() => ({
+        titre: document.getElementById('ui-dialogue-titre').textContent,
+        message: document.querySelector('#overlay-ui-dialogue .modal-section p').textContent
+    }));
+    expect(fenetre, 'la fenêtre de rechargement porte le bilan').toEqual({ titre: TITRE_DU_BILAN, message: BILAN });
     const etat = await etatDeLEspace(page);
     expect(etat.journal.filter((l) => l.indexOf('copie refusée') === 0), 'témoin : les trois copies ont été refusées').toHaveLength(3);
     expect(etat.journal, 'témoin : la liste des copies a été refusée').toContain('clé refusée ' + CLE_COPIES);
     expect(etat.messages.filter((m) => m.sorte === 'erreur'), 'aucun bandeau d\'erreur').toEqual([]);
-    expect(etat.messages.filter((m) => m.sorte === 'warning').map((m) => m.titre)).toEqual([BILAN]);
+    expect(etat.messages.filter((m) => m.sorte === 'warning'), 'plus de bandeau pour le bilan').toEqual([]);
     expect(etat.groupe, 'les données du codex sont dans l\'espace').toEqual(GROUPE_FICTIF);
     expect({ actif: etat.codexActif, nom: etat.codexNom }).toEqual({ actif: true, nom: NOM_CODEX });
     return etat;
