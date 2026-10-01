@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 17 h 50 : **CHANTIER DES ARCHIVES, LOT A2 EN LIGNE EN 1.172.0 ; LA PORTE SUR LE MAC (CHROME) PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 20 h 20 : **PORTE DU LOT A2 PASSÉE (6 SUR 6) ; TROIS COMMITS DE DOCUMENTS NON POUSSÉS** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+
+**Fait ce soir, documents seulement** : `b7410620` (les trois fichiers de Cowork, tels quels : résultat de la porte, règle 11 de `PROTOCOLE.md`, `CONSIGNE-DEMARRAGE-COWORK.md`), `ea6639da` (trouvailles de la porte : #1005 inscrite, notes à #999 et #1002 ; `OU-EN-EST-ON.md` dit la porte passée), et ce bloc. Le dernier commit de code reste `95ed3124` (1.172.0, en ligne) ; Vitest 666 fichiers, 7 870/7 870 (mesuré à 20 h 15).
+
+**Non poussé** : `main` est en avance sur `origin/main` (`bf0b9065`). Le push attend le signal de Grégoire.
+
+⚠ **L'audit d'ouverture a lancé la suite Playwright entière à 20 h 12** (PID 2486, sous `caffeinate`) : le skill `debut-de-session-labo-codex` (§ 2, l. 145) prescrit `node ../scripts/verifier-playwright.mjs` comme une mesure « de dix secondes », alors que ce script lance toute la suite (≈ 43 min). Ni arrêtée ni corrigée ce soir : décision à Grégoire. ⮕ À corriger dans le skill : lire le verdict déjà rendu, ne pas relancer.
+
+**Mandat suivant** (ordre arrêté par Grégoire le 30 à 17 h 25, `CONSIGNE-DEMARRAGE-COWORK.md` § 3) : le codex d'abord (lot I bis, D9, #985), puis les archives (A3, A5, A4), puis le reste du plan du 29. `plans de travail/CONSIGNE-DU-JOUR.md` porte encore le lot A2, déjà exécuté : aucune consigne neuve.
+
+---
+
+## BLOC PRÉCÉDENT — 30 SEPT. 2026, ≈ 17 h 50 : **CHANTIER DES ARCHIVES, LOT A2 EN LIGNE EN 1.172.0 ; LA PORTE SUR LE MAC (CHROME) PEUT SE FAIRE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
 
 **Livré** : release `95ed3124` (1.172.0, mineure, ligne des Nouvelles acceptée par Grégoire, réécrite par Cowork). Elle porte le lot A2 (`c202c0b0`, relu par Cowork : « le lot part après UNE correction », `plans de travail/VERDICT-RELECTURE-2026-09-30-lot-A2-verifier.md`), la correction demandée (les fichiers cachés du système — `.DS_Store`, `Thumbs.db`, `desktop.ini`, tout nom qui commence par un point — ne sont ni des copies ni des fichiers en trop ; Cowork l'avait rejoué sur l'archive réelle : un `.DS_Store` la rendait « incomplète »), l'accord en nombre du détail sous « Archive incomplète », et les deux textes acceptés par Grégoire (« Ce n'est pas cette archive », « Dossier à choisir de nouveau »).
 
