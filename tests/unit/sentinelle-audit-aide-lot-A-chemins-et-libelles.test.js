@@ -78,7 +78,7 @@ describe('Aide — les boutons qu\'elle dit de cliquer existent', () => {
     // l'interface (index.html hors Aide).
     const boutons = [
         'Régénérer',
-        'Faire une copie de secours',   // lot F (D4) : l'ancien « Exporter le Codex »
+        'Mettre à jour le codex',       // lot I bis (D9) : remplace le bouton de l'ancien fichier de secours, retiré
         'Recalculer les captures',
         "Appliquer une adaptation du modèle de la Réponse à l'intervention",
     ];
@@ -92,6 +92,7 @@ describe('Aide — les boutons qu\'elle dit de cliquer existent', () => {
 
     it('les libellés périmés ont disparu de l\'Aide', () => {
         for (const perime of ['Générer le calendrier complet', 'Exporter mes données', 'Exporter le Codex',
+                              'Faire une copie de secours',   // lot I bis (D9) : le bouton est retiré
                               'Reconstruire les snapshots historiques',
                               'Activer RàI et détection des patterns']) {
             expect(AIDE_TXT).not.toContain(perime);

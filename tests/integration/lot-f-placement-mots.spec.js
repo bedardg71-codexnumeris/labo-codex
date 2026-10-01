@@ -8,8 +8,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // LOT F (D4) — LES BOUTONS RENOMMÉS TIENNENT AUX QUATRE LARGEURS (29 sept. 2026).
 // « Mettre à jour dans un autre fichier… » remplace « Enregistrer sous… » (plus long),
-// « Faire une copie de secours » remplace « Exporter le Codex », « Copie de secours » remplace
-// « Sauvegarder » sur l'Accueil (devenue « Ton codex » au lot I, #985, avec son sous-titre). Mesure : aucun débordement du texte hors de son élément
+// « Copie de secours » remplace « Sauvegarder » sur l'Accueil (devenue « Ton codex » au lot I,
+// #985, avec son sous-titre). Lot I bis (D9, 30 sept.) : le bouton « Faire une copie de
+// secours » de Réglages › Données est retiré ; la carte y a deux cases, mesurées ici. Mesure : aucun débordement du texte hors de son élément
 // (scrollWidth ≤ clientWidth), aucun élément hors de l'écran. Pack démo.
 
 const LARGEURS = [[768, 1024], [1024, 768], [1180, 820], [1470, 956]];
@@ -61,18 +62,45 @@ for (const [largeur, hauteur] of LARGEURS) {
         for (const m of mesures) expect({ sel: m.sel, deborde: m.deborde, horsEcran: m.horsEcran }).toEqual({ sel: m.sel, deborde: false, horsEcran: false });
         await page.evaluate(() => Codex.toggleMenu());
 
-        // Réglages › Données : la carte de la copie de secours.
+        // Réglages › Données : la carte « Ouverture et partage ». RÉANCRÉ au lot I bis (D9,
+        // 30 sept. 2026) : la case de l'ancien fichier de secours et son bouton sont retirés ;
+        // la carte a DEUX cases, côte à côte, et ses mots sont ceux validés par Grégoire.
         await page.evaluate(() => { afficherSection('reglages'); });
         await page.waitForTimeout(300);
         await page.evaluate(() => { afficherSousSection('reglages-donnees'); });
         await page.waitForTimeout(500);
-        const bouton = await page.evaluate(() => {
-            const el = document.querySelector('#reglages-donnees [data-action="ouvrirModalExport"]');
-            const r = el.getBoundingClientRect();
-            const carte = el.closest('.carte-bleu-pale-p15').getBoundingClientRect();
-            return { texte: el.textContent.trim(), deborde: el.scrollWidth > el.clientWidth + 1, dansLaCarte: r.left >= carte.left - 1 && r.right <= carte.right + 1 };
+        const carteDonnees = await page.evaluate(() => {
+            const txt = (el) => el.textContent.replace(/\s+/g, ' ').trim();
+            const carte = document.querySelector('#reglages-donnees [data-tooltip="donnees-codex"]').closest('.carte');
+            const cases = Array.from(carte.querySelectorAll('.carte-bleu-pale-p15')).map((c) => {
+                const b = c.querySelector('button');
+                const r = b.getBoundingClientRect();
+                const rc = c.getBoundingClientRect();
+                return {
+                    titre: txt(c.querySelector('h4')), texte: txt(c.querySelector('p')), bouton: txt(b), action: b.dataset.action,
+                    boutonDeborde: b.scrollWidth > b.clientWidth + 1,
+                    boutonDansLaCase: r.left >= rc.left - 1 && r.right <= rc.right + 1,
+                    dansLEcran: rc.left >= 0 && rc.right <= window.innerWidth + 1 && rc.width > 0,
+                    haut: Math.round(rc.top), gauche: Math.round(rc.left)
+                };
+            });
+            return {
+                titre: txt(carte.querySelector('h3')), sousTitre: txt(carte.querySelector('p')),
+                ancienBouton: document.querySelectorAll('[data-action="ouvrirModalExport"]').length,
+                coteACote: cases.length === 2 && cases[0].haut === cases[1].haut && cases[0].gauche < cases[1].gauche,
+                cases: cases.map(({ haut, gauche, ...reste }) => reste)
+            };
         });
-        expect(bouton).toEqual({ texte: 'Faire une copie de secours', deborde: false, dansLaCarte: true });
+        expect(carteDonnees).toEqual({
+            titre: 'Ouverture et partage',
+            sousTitre: 'Ouvre un codex ou une configuration partagée, ou exporte ta configuration pédagogique pour la partager. Pour mettre ton travail en sûreté ou le transporter, mets ton codex à jour : menu Codex, en haut de l\'écran.',
+            ancienBouton: 0,
+            coteACote: true,
+            cases: [
+                { titre: 'Exporter ma config', texte: 'ZIP léger sans données étudiants : grilles, échelles, productions, cartouches. Pour partager avec des collègues (CC BY-NC-SA).', bouton: 'Exporter ma config', action: 'exporterConfigurationComplete', boutonDeborde: false, boutonDansLaCase: true, dansLEcran: true },
+                { titre: 'Ouvrir un Codex', texte: 'Ouvre un codex ou une configuration partagée. Le type est détecté automatiquement.', bouton: 'Ouvrir un Codex…', action: 'ouvrirModalImport', boutonDeborde: false, boutonDansLaCase: true, dansLEcran: true }
+            ]
+        });
 
         // Accueil : la carte des utilitaires.
         await page.evaluate(() => { afficherSection('accueil'); });

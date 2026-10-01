@@ -1,0 +1,79 @@
+{
+  "_lisezMoi": "Ce que l'ouverture de chaque ancien fichier écrit dans un espace vide, relevé au code de 1.172.0 (commit 6a0f61a4, avant le retrait de la fabrication, lot I bis) par tests/integration/lot-i-bis-anciens-fichiers-s-ouvrent.spec.js, deux passages identiques. Horloge figée au 2031-10-01T12:00:00Z. Une empreinte = les 16 premiers caractères du SHA-256 de la valeur sérialisée, clés d'objet triées. NE PAS RÉAJUSTER pour faire repasser l'essai : une empreinte qui change veut dire que l'ouverture d'un ancien fichier ne restitue plus la même chose.",
+  "releveLe": "2026-09-30",
+  "commit": "6a0f61a4934e7d25ca49406a506eb07f1ebaae3b",
+  "version": "1.172.0",
+  "json": {
+    "etiquette": "Restauration de camille",
+    "cases": [
+      "import-annotationsTravaux",
+      "import-calendrier",
+      "import-configuration",
+      "import-etudiants",
+      "import-evaluations",
+      "import-grilles",
+      "import-groupesCours",
+      "import-horaires",
+      "import-presences",
+      "import-productions"
+    ],
+    "bilan": "Import réussi !\n\n3 grille(s)\n12 production(s)\n2 étudiant(s)\n315 date(s) de présences\nÉvaluations/Notes\nConfiguration du cours\n1 groupe-cours\n1 horaire(s)\n2 config(s) calendrier\n1 annotation(s) sur les travaux\n\nTotal : 23 élément(s) importé(s).",
+    "empreintes": {
+      "a2031_annotationsTravaux": "caa6ce1fbc531ee5",
+      "a2031_evaluationsSauvegardees": "706ae6e7f9a64feb",
+      "a2031_groupeEtudiants": "970b0518b9011a56",
+      "a2031_indicesAssiduite": "21198f207a116a9f",
+      "a2031_indicesCP": "fafe8cb473d89cd3",
+      "a2031_indicesPatternsRaI": "27583bd9e90ac75d",
+      "a2031_presences": "aea90ceb0cb80d9f",
+      "a2031_seancesCompletes": "44136fa355b3678a",
+      "demo_groupeEtudiants": "4f53cda18c2baa0c",
+      "grillesTemplates": "e50994bc435db86b",
+      "infoCours": "e2d4c02a8cab60b7",
+      "productions": "75eb49489cf5abfe",
+      "trimestres": "d205c576fa2e9692"
+    }
+  },
+  "zip": {
+    "etiquette": "Restauration de camille",
+    "cases": [
+      "import-annotationsTravaux",
+      "import-calendrier",
+      "import-configuration",
+      "import-etudiants",
+      "import-evaluations",
+      "import-fichiersTravaux",
+      "import-grilles",
+      "import-groupesCours",
+      "import-horaires",
+      "import-presences",
+      "import-productions"
+    ],
+    "bilan": "Import réussi !\n\n3 grille(s)\n12 production(s)\n2 étudiant(s)\n315 date(s) de présences\nÉvaluations/Notes\nConfiguration du cours\n1 groupe-cours\n1 horaire(s)\n2 config(s) calendrier\n1 fichier(s) travaux + 1 PDF restauré(s)\n1 annotation(s) sur les travaux\n\nTotal : 24 élément(s) importé(s).",
+    "empreintes": {
+      "a2031_annotationsTravaux": "caa6ce1fbc531ee5",
+      "a2031_evaluationsSauvegardees": "706ae6e7f9a64feb",
+      "a2031_fichiersTravaux": "e665d8fea5aa2a19",
+      "a2031_groupeEtudiants": "970b0518b9011a56",
+      "a2031_indicesAssiduite": "21198f207a116a9f",
+      "a2031_indicesCP": "fafe8cb473d89cd3",
+      "a2031_indicesPatternsRaI": "27583bd9e90ac75d",
+      "a2031_presences": "aea90ceb0cb80d9f",
+      "a2031_seancesCompletes": "44136fa355b3678a",
+      "demo_groupeEtudiants": "4f53cda18c2baa0c",
+      "grillesTemplates": "e50994bc435db86b",
+      "infoCours": "e2d4c02a8cab60b7",
+      "productions": "75eb49489cf5abfe",
+      "trimestres": "d205c576fa2e9692"
+    },
+    "blobs": [
+      {
+        "id": "FT_BANC_1",
+        "da": "9000001",
+        "productionId": "PROD_BANC_1",
+        "taille": 70,
+        "sha": "c414cd0e204de974"
+      }
+    ]
+  }
+}

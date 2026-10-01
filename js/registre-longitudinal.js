@@ -91,7 +91,7 @@
 
     const MOTS = Object.freeze({
         sousTitre: 'Les élèves que tu suis d\'un trimestre à l\'autre : une copie figée de leur dossier, et les notes qu\'ils obtiennent ensuite.',
-        perennite: 'Le registre voyage dans ton codex, et dans ta copie de secours si tu coches toutes les clés (Réglages › Données) ; pas dans l\'archive d\'un trimestre.',
+        perennite: 'Le registre voyage dans ton codex ; pas dans l\'archive d\'un trimestre.',
         rechercheTitre: 'Inscrire un·e élève',
         rechercheAide: 'Cherche par nom, dans tous les trimestres de l\'application.',
         recherchePlaceholder: 'Nom ou prénom…',
