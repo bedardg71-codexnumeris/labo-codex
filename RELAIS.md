@@ -7,13 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 20 h 20 : **PORTE DU LOT A2 PASSÉE (6 SUR 6) ; TROIS COMMITS DE DOCUMENTS NON POUSSÉS** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 20 h 20 : **PORTE DU LOT A2 PASSÉE (6 SUR 6) ; COMMITS DE DOCUMENTS POUSSÉS SUR DEMANDE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
 
 **Fait ce soir, documents seulement** : `b7410620` (les trois fichiers de Cowork, tels quels : résultat de la porte, règle 11 de `PROTOCOLE.md`, `CONSIGNE-DEMARRAGE-COWORK.md`), `ea6639da` (trouvailles de la porte : #1005 inscrite, notes à #999 et #1002 ; `OU-EN-EST-ON.md` dit la porte passée), et ce bloc. Le dernier commit de code reste `95ed3124` (1.172.0, en ligne) ; Vitest 666 fichiers, 7 870/7 870 (mesuré à 20 h 15).
 
-**Non poussé** : `main` est en avance sur `origin/main` (`bf0b9065`). Le push attend le signal de Grégoire.
+**Poussé le 30 vers 20 h 50, sur le « pousse ce soir » de Grégoire**, par `scripts/pousser.sh` depuis `origin/main` = `bf0b9065`. ⚠ « En ligne » se mesure chez Netlify, pas ici. **Non commités, à Cowork** : `CONSIGNE-DEMARRAGE-COWORK.md` et `plans de travail/CONSIGNE-DU-JOUR.md`, réécrits pendant la soirée, et `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-30-lot-A2-release.md` ; ils ne sont pas partis avec ce push.
 
-⚠ **L'audit d'ouverture a lancé la suite Playwright entière à 20 h 12** (PID 2486, sous `caffeinate`) : le skill `debut-de-session-labo-codex` (§ 2, l. 145) prescrit `node ../scripts/verifier-playwright.mjs` comme une mesure « de dix secondes », alors que ce script lance toute la suite (≈ 43 min). Ni arrêtée ni corrigée ce soir : décision à Grégoire. ⮕ À corriger dans le skill : lire le verdict déjà rendu, ne pas relancer.
+⚠ **L'audit d'ouverture a lancé la suite Playwright entière à 20 h 12** (PID 2486, sous `caffeinate`) : le skill `debut-de-session-labo-codex` (§ 2, l. 145) prescrit `node ../scripts/verifier-playwright.mjs` comme une mesure « de dix secondes », alors que ce script lance toute la suite (≈ 43 min). **Elle n'a rendu aucun verdict** : le harnais l'a tuée à 20 h 44, à sa limite de 30 min en arrière-plan, et `scripts/.verdict-playwright.json` porte toujours le vert de 17 h 49 sur `95ed3124`, seul verdict valable. Le push de ce soir (demandé par Grégoire à 20 h 19) n'emporte que des documents : `pousser.sh` le juge « sans objet » pour Playwright. ⮕ À corriger dans le skill : lire le verdict déjà rendu, ne pas relancer.
 
 **Mandat suivant** (ordre arrêté par Grégoire le 30 à 17 h 25, `CONSIGNE-DEMARRAGE-COWORK.md` § 3) : le codex d'abord (lot I bis, D9, #985), puis les archives (A3, A5, A4), puis le reste du plan du 29. `plans de travail/CONSIGNE-DU-JOUR.md` porte encore le lot A2, déjà exécuté : aucune consigne neuve.
 
