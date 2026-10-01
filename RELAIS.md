@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 13 h 48 : **RELEASE 1.173.3 COMMITÉE SUR LA BRANCHE LOCALE `fix-1012-fichier-d-origine-et-bilan` (#1012, PREMIER LOT) ; RELECTURE DE COWORK VERTE ; RIEN N'EST POUSSÉ : LE PUSH A ÉTÉ REFUSÉ PAR LE GARDE DE PERMISSIONS DE CLAUDE CODE ; VERDICT COMPLET, PUSHS, FUSION ET MESURE CHEZ NETLIFY RESTENT À FAIRE** — voir la dernière ligne de ce bloc
+
+**Décisions** : verdict de relecture de Cowork (13 h 38, sur `39241b59`) : vert, aucune correction. Grégoire a accepté la ligne des Nouvelles à 13 h 40 (rapporté par la consigne de Cowork). Consigne de release de Cowork de 13 h 40, que Grégoire a demandé d'exécuter.
+
+**Sur `main`, en local** (4 commits de documents en avance sur `origin/main`, `560e5baa`) : les fichiers de Cowork commités tels quels (`e27aa6f0` : le verdict, la consigne, deux consignes archivées) ; deux inscriptions sous #1012, rien de corrigé (`a50a9128` : « Exporter une sélection » entre dans le lot de l'avertissement, avec la règle de Cowork ; l'ancien fichier ouvert par la case, à mesurer par le geste dans le même lot).
+
+**Sur la branche** (reposée sur `main` : le correctif relu `39241b59` y est `d39d3452`, même contenu, `git patch-id` identique, aucune ligne d'écart sur `js/`, `tests/` et `index.html`) : la release 1.173.3, build `1001-1346`, `db055c2f`. La ligne des Nouvelles est dans l'entrée 1.173, son titre en tête (« Le bilan d'un codex incomplet reste à l'écran. »), posée telle quelle. Puis ce relais, `OU-EN-EST-ON.md` et la porte.
+
+**Mesuré** : Vitest complet sur `db055c2f`, 669 fichiers, 7 887 essais verts, aucune erreur hors essais ; l'ancien build absent des quatre points de vérité et d'`index.html`. À l'ouverture, Vitest sur `main` : 669 fichiers, 7 884 essais verts.
+
+**Non fait, et pourquoi** : `scripts/pousser.sh origin main` (les 4 commits de documents) a été refusé à 13 h 45 par le classifieur du mode auto de Claude Code (« Production Deploy »). Non contourné. Le verdict complet au navigateur n'est pas pris : à 13 h 48, le Mac était sur batterie (64 %, aucun adaptateur) et la machine virtuelle de Cowork tournait (règle 8 : Grégoire ferme Cowork avant le verdict). Rien n'est en ligne ; chez Netlify, c'est toujours 1.173.2.
+
+**La porte** : `plans de travail/PORTES-TERRAIN-2026-10-01-1012-bilan-qui-reste.md`, trois rangées, Chrome sur le Mac, fenêtre privée ; aucune n'écrit dans le fichier de Grégoire. Elle se fait une fois 1.173.3 lu en bas de page. Cowork publie l'artefact jumeau.
+
+**Ce qui reste, dans l'ordre** : (1) Grégoire ferme Cowork et branche le Mac ; (2) depuis la branche, `bash scripts/pousser.sh origin fix-1012-fichier-d-origine-et-bilan` (verdict complet, ≈ 45 min, puis push de la branche) — lancé par Grégoire, ou par Claude Code s'il ajoute une règle de permission ; (3) lire le jeton `scripts/.verdict-playwright.json` (SHA, `instables`) ; si le verdict demande une correction de code, s'arrêter et la rendre à Cowork ; (4) `git checkout main && git merge --ff-only fix-1012-fichier-d-origine-et-bilan && git push origin main` ; (5) mesurer chez Netlify (`commit_ref`, état, heure) ; (6) écrire l'heure en ligne dans ce fichier, `OU-EN-EST-ON.md` et l'en-tête de la porte. La fiche #1012 reste ouverte : l'avertissement, les mots des autres causes, l'export de sélection, l'ancien fichier par la case. Les branches `fix-1009-charge-lot-non-assigne` et `fix-1011-codex-ouvert-sans-espace`, fusionnées, attendent le mot de Grégoire.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 13 h 32 : **#1012, PREMIER LOT CODÉ SUR LA BRANCHE LOCALE `fix-1012-fichier-d-origine-et-bilan` (`39241b59`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; PORTE DU LOT I BIS PASSÉE, #1011 CLOSE**
 
 **La porte** : Grégoire a rejoué la rangée 2.4 à 12 h 37 (fenêtre privée de Chrome, 1.173.2, son vrai codex) : passée, onze rangées sur onze. #1011 est cochée, son retour est aux corrigés de `SUIVI-BUGS.md`, la porte porte son § 6, ses deux remarques sont sous #1012.
