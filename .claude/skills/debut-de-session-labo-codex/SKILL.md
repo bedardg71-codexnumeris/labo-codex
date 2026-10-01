@@ -142,18 +142,32 @@ Elles prennent dix secondes et elles ont trouvé deux retards le 31 août.
 
 ```bash
 git rev-list --count origin/main..HEAD    # doit rendre 0
-cd tests && node ../scripts/verifier-playwright.mjs
+cat scripts/.verdict-playwright.json      # LIRE le verdict déjà rendu : sha, code, rendule
+git rev-parse HEAD                        # à comparer au sha du jeton
 ```
 
 ⮕ La première rendait **8** : tout le travail d'un trio, son propre relais compris,
 ne vivait que sur cette machine.
-⮕ La seconde n'avait pas tourné depuis cinq jours, sur 299 commits dont 35
-touchant `tests/integration/`. **Aucun push n'avait été bloqué par un rouge
-Playwright, parce qu'aucun push ne l'avait jamais consultée.**
+⮕ La seconde lit le dernier verdict Playwright. Le 31 août, il n'avait pas été
+rendu depuis cinq jours, sur 299 commits dont 35 touchant `tests/integration/`.
+**Aucun push n'avait été bloqué par un rouge Playwright, parce qu'aucun push ne
+l'avait jamais consulté.**
+
+⛔ **À L'OUVERTURE, ON LIT LE VERDICT, ON NE RELANCE RIEN** (corrigé le 30 septembre
+2026 ; ce skill prescrivait `node ../scripts/verifier-playwright.mjs` comme une
+mesure de dix secondes). Ce script lance **toute la suite Playwright** : environ
+43 minutes sur cette machine. Le 30 septembre à 20 h 44, l'audit d'ouverture l'a
+lancé ; il a été tué à 30 minutes, sans verdict. Ni `verifier-playwright.mjs`, ni
+`npx playwright test` sans nom de spec, ni `npm test` dans ce rituel.
 
 ⚠ **Lire le JETON** (`scripts/.verdict-playwright.json`), pas un code de sortie
 tuyauté : `echo "CODE=$?"` après un `| tail` rend le code de `tail`. Le jeton porte
-le SHA du commit jugé ; **s'il ne correspond pas à `HEAD`, le verdict est périmé.**
+le SHA du commit jugé (`sha`), le résultat (`code`, 0 = vert) et l'heure (`rendule`,
+en UTC) ; **s'il ne correspond pas à `HEAD`, le verdict est périmé.** Un verdict
+périmé ou absent se RAPPORTE (sha jugé, heure, nombre de commits depuis :
+`git rev-list --count <sha>..HEAD`, et combien touchent `js/` ou `tests/`) ; il ne
+se rattrape pas ici. Le verdict complet se prend à la clôture, par
+`scripts/pousser.sh` (skill `fin-de-session-labo-codex`, §4.5).
 ⚠ **Un spec seul se lance en secondes** et départage mieux qu'une suite complète :
 `cd tests && npx playwright test integration/<spec>.js`.
 
