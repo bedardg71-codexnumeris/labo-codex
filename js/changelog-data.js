@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.174 (#1012, l'avertissement) — titre et ligne proposés par Claude Code, relus par
+            // Cowork, ACCEPTÉS par Grégoire le 1er oct. 2026 à 18 h 57 (« c'est ok », consigne de
+            // release de Cowork), posés tels quels. Le titre perd son point final : usage de ce fichier.
+            version: '1.174',
+            couleur: 'vert',
+            titre: 'Ton codex te prévient quand des copies lui manquent',
+            items: [
+                'Si des copies ne sont pas dans l\'application quand tu écris ton codex, une fenêtre le dit avant d\'écrire, puis l\'application te demande où ranger le fichier au lieu de remplacer l\'ancien. «&nbsp;Exporter une sélection&nbsp;» n\'écrit plus dans ton fichier de codex. Et le bilan d\'un codex ouvert incomplet dit, pour chaque cause, si le rouvrir peut ramener les copies.'
+            ]
+        },
+        {
             // 1.173 (lot I bis, #985, D9 : un seul terme) — titre et ligne VALIDÉS par Grégoire le
             // 1er oct. 2026, entre 2 h 07 et 2 h 12 (consigne du jour de Cowork), mot pour mot.
             version: '1.173',
