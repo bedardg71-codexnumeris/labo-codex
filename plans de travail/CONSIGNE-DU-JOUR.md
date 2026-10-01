@@ -1,33 +1,36 @@
-# Consigne du jour – mettre en ligne le premier lot de #1012 (le bilan qui reste, le fichier d'origine tenu à bon droit)
+# Consigne du jour – l'avertissement à la mise à jour d'un codex auquel des copies manquent (#1012, suite)
 
-> Écrite par Cowork le 1er octobre 2026 à 13 h 40 (Toronto, mesurée par `date`). Remplace la consigne de 12 h 41, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-01-1012-fichier-d-origine-et-bilan.md`. L'ordre des chantiers de 13 h 02 ne change pas ; il est dans `RELAIS.md`.
+> Écrite par Cowork le 1er octobre 2026 à 17 h 52 (Toronto, mesurée par `date`). Remplace la consigne de la mesure de 16 h 56, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-01-1012-mesure-des-copies.md`. L'ordre des chantiers de 13 h 02 ne change pas : ce lot est la fin du point 1 (le codex).
 
 ## Où on en est
 
-Ton commit `39241b59` (branche locale `fix-1012-fichier-d-origine-et-bilan`) est relu : **vert, aucune correction**. Lis `plans de travail/VERDICT-RELECTURE-2026-10-01-1012-fichier-d-origine-et-bilan.md` en entier avant de commencer. Grégoire a accepté la ligne des Nouvelles (« ça marche », à 13 h 40).
+Ta mesure de 17 h 03 : chez Grégoire, 500 copies, 500 fichiers, aucune copie attendue sans fichier. L'avertissement ne s'afficherait pas à chaque mise à jour : il peut avertir sans refuser, comme tu le proposais (§ 5.3 de ta demande de relecture). **Grégoire a accepté les mots** (« oui », à 17 h 52).
 
-## Ce que tu fais, dans cet ordre
+## D'abord
 
-1. **Pousse les deux commits de documents de `main`** (règle de relais). Commite avec eux les fichiers de Cowork qui traînent dans l'arbre : le verdict, cette consigne, les anciennes consignes archivées.
-2. **Inscris sous #1012**, sans rien corriger : (a) « Exporter une sélection » entre dans le lot de l'avertissement, avec la règle du verdict (jamais dans le fichier tenu, destination jamais adoptée, toujours demander) ; (b) l'ancien fichier ouvert par la case, qui écrit dans l'espace sans faire oublier le fichier tenu : lu par Cowork, pas exécuté, à mesurer par le geste dans le lot de l'avertissement.
-3. **La release, en patch** (skill `release-et-changelog`, `scripts/release.mjs`). La ligne des Nouvelles, acceptée par Grégoire, à poser telle quelle dans l'entrée de la mineure 1.173, titre en tête, espaces insécables selon l'usage du fichier :
-   - Titre : « Le bilan d'un codex incomplet reste à l'écran. »
-   - Texte : « Quand des copies n'ont pas pu revenir à l'ouverture d'un codex, une fenêtre le dit, explique comment les retrouver, et reste là jusqu'à ta réponse. Dans Chrome, un fichier que tu as choisi puis refusé n'est plus celui que « Mettre à jour le codex » réécrit. »
-4. **Verdict Playwright complet, puis push, puis fusion vers `main`**, dans l'ordre de la règle 2 : rien n'a changé depuis la relecture, hormis la release. Si le verdict demande une correction de code, arrête-toi et rends-la à Cowork avant de pousser.
-5. **Constate la mise en ligne chez Netlify** (numéro servi), et dis l'heure mesurée.
-6. **La porte terrain, le markdown** (skill `portes-terrain`) : `plans de travail/PORTES-TERRAIN-2026-10-01-1012-bilan-qui-reste.md`. Cowork publiera l'artefact jumeau. Trois rangées, aucune n'écrit dans le vrai fichier de Grégoire, et il ne clique nulle part « Mettre à jour le codex » :
-   - le numéro de version affiché ;
-   - dans une fenêtre privée de Chrome, son vrai codex ouvert par le menu Codex : la fenêtre « Codex ouvert, mais incomplet » porte ses mots, reste à l'écran tant qu'il n'a pas répondu, et aucun bandeau jaune ne passe ;
-   - après « Annuler » dans cette fenêtre, le menu Codex : sous « Mettre à jour le codex », le sous-texte « Dans le même fichier » n'apparaît pas. Il regarde, il ne clique pas.
-   Ce que la porte ne lève pas, dis-le dans le markdown : qu'un fichier refusé avant toute écriture laisse le fichier d'avant tenu, dans le vrai Chrome. Le voir demanderait d'écrire dans son vrai codex.
-7. **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** La fiche #1012 reste ouverte : il lui reste l'avertissement, les mots des autres causes, l'export de sélection, l'ancien fichier par la case.
+Pousse `dcf5cd5a` sur `main`, avec les fichiers de Cowork qui traînent dans l'arbre (cette consigne, les anciennes archivées). Supprime aussi chez `origin` les trois branches fusionnées, si le garde de permissions le laisse faire ; sinon dis-le et continue.
+
+## Ce que tu fais, sur une branche
+
+1. **L'avertissement.** Quand l'usager écrit le codex entier (« Mettre à jour le codex », « Enregistrer sous… », le partage de l'iPad, le téléchargement : tous les chemins de ton § 5.1) et que des copies attendues n'ont pas de fichier dans l'application, une fenêtre le dit **avant** toute écriture hors de l'application. Le signal est celui de ton § 5.2 : compté à la génération, pas lu dans les statuts. Redis dans ta demande ce que « attendue » veut dire, au mot près, et ce que deviennent le « manquant » qui a son fichier et les « exporte » qui ont le leur (ta mesure en a trouvé chez Grégoire).
+   Les mots, acceptés par Grégoire, à poser tels quels :
+   - Titre : « Ce codex n'aura pas toutes tes copies »
+   - Texte : « {N} copies sur {M} ne sont pas dans l'application. Le codex que tu vas écrire ne les contiendra pas. »
+   - Puis : « Si un autre fichier de codex les contient encore, ne le remplace pas : donne un autre nom à celui-ci. »
+   - Boutons : « Annuler » et « Écrire sans ces copies ».
+   - L'accord en nombre (« 1 copie sur 3 n'est pas dans l'application », « ne la contiendra pas ») : tranche-le, c'est de la grammaire.
+2. **Tant que des copies manquent, l'application demande toujours où écrire** : jamais de réécriture en place, même si un fichier est tenu, et la destination choisie n'est pas adoptée. Décision de Cowork, technique : c'est ce qui rend utile la dernière phrase de l'avertissement. Sur « Annuler » : rien n'est écrit, et le témoin ne dit pas « Codex mis à jour ».
+3. **« Exporter une sélection »** (ta trouvaille 6.1) : reproduis par le geste, puis corrige selon la règle du verdict : jamais dans le fichier tenu, destination jamais adoptée, toujours demander où écrire. Les mots de l'avertissement disent « ce codex » : ne les pose pas sur un export de sélection. Dis ce qui arrive à une sélection dont des copies manquent, et inscris-le si c'est un défaut.
+4. **L'ancien fichier ouvert par la case** (relevé du verdict) : mesure par le geste. Un codex A tenu, puis un ancien fichier ouvert par la case « Ouvrir un Codex… » : que remplace cet import dans l'espace, et où écrit ensuite « Mettre à jour le codex » ? Si c'est le défaut de ce matin par une autre porte et qu'il se corrige sans mot neuf (l'application oublie le fichier tenu quand l'espace est remplacé), corrige ; sinon rends la mesure et arrête-toi là pour ce point.
+5. **La preuve** : des bancs qui jugent par le geste (quel fichier reçoit quoi, ou qu'une destination est demandée, ou que rien n'est écrit après « Annuler »), un témoin sans copie manquante où aucune fenêtre ne s'affiche, des mutations rouges, Vitest complet. Dis ce qui reste inféré pour Chrome et pour le partage de l'iPad.
+6. **Source ou stock** : dis-le. Aucune écriture dans les données de l'usager n'est attendue de ce lot ; si tu en trouves une nécessaire, arrête-toi.
+7. **Arrête-toi à la demande de relecture** : `plans de travail/DEMANDE-RELECTURE-2026-10-01-1012-avertissement.md`, avec une proposition de ligne pour les Nouvelles. Ni release, ni push du code.
 
 ## Ce que tu ne fais pas
 
-- Tu ne codes ni l'avertissement, ni les mots des autres causes, ni la correction de l'export de sélection : ils attendent les mots de Grégoire et auront leur consigne.
-- Tu ne lis pas l'espace de travail réel de Grégoire : le compte des copies sans fichier se fera au lot suivant, avec son accord.
-- Tu ne supprimes pas les branches fusionnées de toi-même.
+- Les mots des trois autres causes d'une ouverture incomplète (ton § 4.3) : Grégoire ne les a pas encore tranchés. Ils auront leur lot.
+- Aucune lecture nouvelle de l'espace réel de Grégoire.
 
 ## Ce que tu rends
 
-À Grégoire, trois lignes : le numéro en ligne et l'heure constatée ; le résultat du verdict complet (instables compris) ; où est la porte. Ce que tu as supposé, en une ligne.
+À Grégoire, trois lignes en gestes : ce qui est codé ; ce que la mesure du point 4 a montré ; ce qui l'attend. Ce que tu as supposé, en une ligne.
