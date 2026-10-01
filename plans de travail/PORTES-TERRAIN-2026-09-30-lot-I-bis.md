@@ -60,3 +60,15 @@ Avant, un fichier de codex choisi dans cette case recevait une alerte qui renvoy
 - **Un gros codex par la case, sur l'iPad** : non essayé. Au banc, la case ne lit que la fin du fichier (environ 64 Ko et le répertoire du ZIP) avant de le confier au codex, même pour un fichier de 1,1 Go ; ensuite, c'est le chemin du menu. Sur l'iPad, le menu Codex reste le chemin éprouvé. La porte 2.3 ne se fait pas sur l'iPad : en navigation privée, Safari accorde trop peu de place, et dans la fenêtre normale le geste remplacerait tes données.
 - **Le sélecteur de fichier de Chrome dans la case** : au banc, le fichier est donné au champ par l'outil de test (porte 2.3).
 - **Le cas « codex à jour » sur tes données** : non rejoué, exprès (il mène à une vraie suppression).
+
+## §5 · Relevé de Grégoire (1er oct. 2026, 8 h 51 min 49 s ; reçu par Cowork, rapporté par sa consigne de 8 h 51)
+
+**Tel que coché : 9 passées, 2 échecs, 0 non traitée.** Aucun champ de constat rempli.
+
+| Rangées | Relevé |
+|---|---|
+| 0.1, 0.2, 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.5 | **Passées**, sur le Mac dans Chrome et sur l'iPad dans Safari. |
+| 2.3 | **Passée** (cochée en échec, corrigée par sa réponse). La pile de son rapport de 8 h 48 montre que la case a confié le fichier au codex, sans l'ancienne alerte. **Tranché par Grégoire à 8 h 53** : au choix du fichier, il a vu « une ouverture qui démarre puis finit en « Erreur » », pas l'ancienne alerte ; sa coche portait sur la fin. |
+| 2.4 | **En échec.** Aucune des deux fins attendues : un bandeau rouge « Erreur », ni « Recharger la page », ni « Espace insuffisant pour ouvrir ce codex ». Retour inscrit : **#1011**. |
+
+**Un seul échec réel : dix rangées sur onze.** Le chantier du codex reste « en ligne, porte incomplète » tant que #1011 est ouverte.
