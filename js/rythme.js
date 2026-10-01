@@ -198,7 +198,13 @@
             // Ventiler par groupe-cours
             gcIds.forEach(function (gcId) {
                 var entree = echeances[gcId];
-                if (!entree || entree.assignee === false) return;
+                // #1009 (1er oct. 2026) : la charge se mesure aux copies EN MAIN,
+                // pas à la case « Consignes transmises ». Un lot dont la case est
+                // restée décochée mais dont les copies sont importées est du
+                // travail à faire ; l'écarter ici faisait disparaître la ligne
+                // entière. Un groupe non assigné ET sans copie ni évaluation reste
+                // absent : `estimerPourLot` rend null dans ce cas.
+                if (!entree) return;
                 var gc = groupesCours.find(function (g) { return g.id === gcId; });
                 var groupeNum = gc ? (gc.groupeNum || '') : '';
                 var est = estimerPourLot(prod, gcId, groupeNum, fichiers, evaluations, stats, prefs);
@@ -1285,6 +1291,7 @@
         obtenirJoursCalendrier: obtenirJoursCalendrier,
         collecterDurees: collecterDurees,
         calculerStatsParActivite: calculerStatsParActivite,
+        estimerCharge: estimerCharge,
         sauvegarderPreferences: sauvegarderPreferences,
         verifierBienEtre: verifierBienEtre,
         arreterRappelPause: arreterRappelPause
