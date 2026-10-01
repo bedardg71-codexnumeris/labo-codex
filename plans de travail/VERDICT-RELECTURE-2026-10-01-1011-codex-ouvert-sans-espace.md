@@ -61,3 +61,32 @@ Puis, **seulement quand `prevol.quotaFaible` est vrai, comme aujourd'hui** : « 
 **§ 6.2, le titre du bandeau « Erreur »** : tranché par Grégoire à 11 h 11 (« oui » à ta proposition). Le titre devient « Le codex n'a pas pu être ouvert » ; le détail technique en dessous ne change pas. Seulement pour l'échec de l'ouverture d'un codex (`_ouvrirLeFichierChoisi`), pas pour les autres bandeaux « Erreur » de l'application. À poser dans la même release.
 
 Fichier de Cowork à commiter tel quel : ce verdict, et `plans de travail/CONSIGNE-DU-JOUR.md` (ajout de 9 h 50, resté dans l'arbre).
+
+---
+
+# Second verdict, sur la correction – rendu le 1er octobre 2026 à 11 h 30 (Toronto), sur `8f930884`
+
+## Verdict : **vert. Le lot part.** Vitest par exécution ; la spec WebKit par lecture.
+
+## Ce que j'ai fait
+
+- **Lu** le diff `40521da7..8f930884` : `_fileHandle = null` quand `stats.incomplet` est vrai, dans `_ouvrirLeFichierChoisi` ; le texte du pré-vol ; le titre du bandeau ; la sentinelle du pré-vol mise à jour ; les essais (4) et (5) de la spec.
+- **Les mots** : comparés caractère par caractère à ceux que Grégoire a acceptés. Identiques. La phrase de la navigation privée reste sous `prevol.quotaFaible`.
+- **Exécuté** sur un clone à `8f930884` : Vitest complet, 669 fichiers, 7 884 essais verts, code 0. Une mutation posée par moi et vérifiée posée (« rouvre l'app » revient) : la sentinelle du pré-vol est rouge sur un essai ; restauration, arbre propre.
+- **Pas fait** : la spec `codex-1011-ouvert-sans-espace` (WebKit, hors de mon banc) ni ses dix mutations. Tes trois limites sont dites, je les reprends telles quelles.
+
+## Trouvaille de relecture, issue 2 : à inscrire sous #1012, pas dans cette release
+
+**Lu, non exécuté.** `actionOuvrir` pose `_fileHandle = handle` **avant** l'ouverture (ligne 2925 à `8f930884`), et rien ne le défait quand l'ouverture n'aboutit pas : ni l'annulation à la garde de modèle antérieur (« Import annulé : ton espace de travail n'a pas été modifié »), ni le refus du pré-vol, ni une autre erreur. L'application tient alors le fichier B qu'on vient de choisir, avec les données A d'avant. « Mettre à jour le codex » écrirait A dans B, « même fichier », sans rien demander. Dans Chrome seulement ; non vécu.
+
+C'est le même trou que le cœur de #1012, par une autre porte, et il existe en ligne depuis avant ce lot : ce lot ne l'élargit pas. Je ne le fais donc pas entrer dans cette release. **Inscris-le sous #1012 comme sa première pièce**, avec cette règle à juger au lot suivant : l'application n'adopte un fichier d'origine qu'après une ouverture complète ; après une annulation ou un refus d'avant toute écriture, elle garde celui d'avant ; après toute autre fin, elle n'en tient aucun.
+
+## Les Nouvelles : proposition de Cowork, à poser seulement si Grégoire l'accepte dans son message
+
+Version de correctif (patch). Titre : « Ouvrir un codex quand l'espace manque ». Ligne : « Quand l'espace vient à manquer pendant l'ouverture d'un codex, l'application va jusqu'au bout et te dit combien de copies n'ont pas pu revenir, au lieu d'un simple « Erreur ». Le message de refus d'espace ne suppose plus que tu es sur un iPad. »
+
+## Pour la livraison
+
+Release, puis le verdict complet par `scripts/pousser.sh`, Cowork fermé et le Mac branché, fusion, mesure chez Netlify. Grégoire rejoue ensuite la rangée 2.4 de la porte du lot I bis, en fenêtre privée. #1011 reste ouverte jusque-là, #1012 reste ouverte pour le lot suivant.
+
+Fichier de Cowork à commiter tel quel : ce verdict.
