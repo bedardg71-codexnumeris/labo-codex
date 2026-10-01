@@ -7,6 +7,18 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 35 : **RELEASE 1.173.2 COMMITÉE SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`74a0329f`) ; SECOND VERDICT DE COWORK VERT ; VERDICT COMPLET AU NAVIGATEUR, PUSH ET FUSION À SUIVRE** — voir la dernière ligne de ce bloc
+
+**Décisions de Grégoire (vers 11 h 32)** : il confirme #1009 sur son écran (1.173.1) ; il accepte la ligne des Nouvelles proposée par Cowork ; il demande la release. Second verdict de Cowork (11 h 30, sur `8f930884`) : vert, le lot part ; Vitest par exécution, la spec WebKit par lecture. Commité tel quel.
+
+**Sur la branche** (reposée deux fois sur `main` : le correctif `40521da7` puis `8e9af496` y est `6ed01261` ; la correction relue `8f930884` y est `601000f6` ; mêmes contenus) : la release 1.173.2, build `1001-1133`, `74a0329f`. La ligne des Nouvelles est entrée dans l'entrée 1.173, son titre en tête (« Ouvrir un codex quand l'espace manque. »), comme pour 1.166.1 : une entrée par version mineure. La trouvaille du second verdict (la poignée posée avant l'ouverture, que rien ne défait si l'ouverture n'aboutit pas) est inscrite sous #1012, comme sa première pièce. #1009 est notée confirmée dans `SUIVI-BUGS.md` ; la ligne 1011 y est complétée et reste aux « Ouverts ».
+
+**Mesuré** : Vitest complet sur `74a0329f`, 669 fichiers, 7 884 essais verts ; l'ancien build absent des quatre points de vérité et d'`index.html`.
+
+**Ce qui reste, dans l'ordre** : `scripts/pousser.sh` sur le sommet de la branche, Cowork fermé et Mac branché (mesurés au lancement) ; vert : push, fusion vers `main`, mesure chez Netlify ; rouge : pas de push, liste des échecs. Puis Grégoire rejoue la rangée 2.4 de la porte du lot I bis en fenêtre privée ; #1011 reste ouverte jusque-là. Ensuite : #1012 (lot suivant, proche), puis le lot A3 des archives. **Si ce bloc se lit sur `main`, le push et la fusion ont eu lieu** ; sinon, tout est encore sur la branche, en local.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 25 : **#1011 : LA CORRECTION DEMANDÉE PAR COWORK (LE CŒUR DE #1012) ET LES MOTS DE GRÉGOIRE SONT POSÉS SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`8f930884`) ; ARRÊT POUR LA RELECTURE DE GRÉGOIRE ; NI RELEASE NI PUSH DU CODE**
 
 **Verdict de Cowork** (`plans de travail/VERDICT-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace.md`, 11 h 08, par lecture) : le lot part après une correction. Commité tel quel sur `main` avec la consigne du jour (autorisation de Grégoire).
