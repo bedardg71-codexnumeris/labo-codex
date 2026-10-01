@@ -38,3 +38,13 @@ Aucune dans cette porte. Ce qui attend tes mots (l'avertissement à la mise à j
 - **Les autres causes d'une ouverture incomplète** (copie absente du fichier, copie illisible, mélange de causes) : la fenêtre porte encore les phrases d'avant, sous le titre « Recharger la page ». Leur conseil « rouvre le même ZIP » y reste : leurs mots ne sont pas tranchés.
 - **Après « Recharger »** : rien ne se souvient que l'ouverture était incomplète. C'est le lot de l'avertissement, non codé.
 - **La suite complète au navigateur** : prise après l'écriture de cette porte, sur `56a94cd8` : verte, 0 échec, aucune spec instable (rendue à 14 h 39). Elle tourne dans WebKit, pas dans Chrome.
+
+## §5 · Relevé de Grégoire (1er oct. 2026, 16 h 55 ; reçu par Cowork, rapporté par sa consigne de 16 h 56)
+
+**PORTE PASSÉE : trois rangées sur trois.** Dans Chrome, en fenêtre privée, avec son vrai codex. Aucun constat écrit.
+
+| Rangées | Relevé |
+|---|---|
+| 0.1, 1.1, 1.2 | **Passées.** |
+
+**Non relevé** : les deux nombres de la fenêtre (rangée 1.1) ; ce n'était pas un attendu. Les quatre points du §4 restent tels quels : cette porte ne les levait pas.
