@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 12 h 25 : **1.173.2 EN LIGNE (#1011, CŒUR DE #1012), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` ; RESTE LA RANGÉE 2.4 À REJOUER PAR GRÉGOIRE, PUIS #1012**
+
+**Mesuré** : verdict complet au navigateur par `scripts/pousser.sh` sur `01f3da1e`, lancé à 11 h 37 min 39 s, rendu à 12 h 22 min 47 s, vert : 0 échec, aucune spec instable (jeton : `instables: []`). Au lancement : Cowork fermé (ni application Claude ni machine virtuelle ; seul l'assistant de l'extension Chrome tournait), charge 5,1, 57 % de mémoire libre, fichier d'échange à 0, Time Machine à l'arrêt. **Écart** : lancé sur batterie (33 %, aucun adaptateur détecté) sur le « go » de Grégoire, qui évaluait des copies dans l'application pendant la passe ; sous `caffeinate -di` ; à la fin, le Mac était branché (64 %, en charge). Branche `fix-1011-codex-ouvert-sans-espace` poussée, puis `main` avancée sur le même commit (avance rapide) et poussée à 12 h 24 ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abe89413909aa0008cba7a7`, état « ready », `commit_ref` `01f3da1e`, publié à 12 h 24 min 45 s (Toronto). Le numéro 1.173.2 (build `1001-1133`) est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu.
+
+**Ce qui reste** : Grégoire rejoue la rangée 2.4 de `plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md` en fenêtre privée de Chrome, en 1.173.2 (attendu : « Import incomplet… » puis « Recharger la page », ou « Espace insuffisant pour ouvrir ce codex ») ; #1011 et la ligne 1011 de `SUIVI-BUGS.md` restent ouvertes jusque-là, et le chantier du codex « en ligne, porte incomplète ». **Pas établi** : pourquoi le pré-vol n'avait pas refusé (relevé chez Grégoire remis à plus tard, sur l'avis de Cowork). Ensuite : #1012 (lot suivant, proche : sa première pièce, l'avertissement, le chemin frère de `js/import-export.js`), #1010 (le signal au début de l'évaluation, décidé par Grégoire), l'inventaire de #1007, puis le lot A3 des archives. Les branches `fix-1009-charge-lot-non-assigne` et `fix-1011-codex-ouvert-sans-espace` sont fusionnées et existent encore, en local et chez origin : à supprimer quand Grégoire le dit.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 35 : **RELEASE 1.173.2 COMMITÉE SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`74a0329f`) ; SECOND VERDICT DE COWORK VERT ; VERDICT COMPLET AU NAVIGATEUR, PUSH ET FUSION À SUIVRE** — voir la dernière ligne de ce bloc
 
 **Décisions de Grégoire (vers 11 h 32)** : il confirme #1009 sur son écran (1.173.1) ; il accepte la ligne des Nouvelles proposée par Cowork ; il demande la release. Second verdict de Cowork (11 h 30, sur `8f930884`) : vert, le lot part ; Vitest par exécution, la spec WebKit par lecture. Commité tel quel.
