@@ -323,7 +323,11 @@ function _marquerStockAvantLotF(etatLu) {
  * Génère un Codex ZIP depuis les données IndexedDB actuelles.
  * @param {Object} [options]
  * @param {string} [options.nom] - Nom du codex
- * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object}>}
+ * @param {function(number, number): Promise<boolean>} [options.confirmerCopiesManquantes] - #1012 :
+ *   appelée avec (manquantes, attendues) quand des copies attendues n'ont pas de fichier, avant
+ *   l'aperçu ; rend false pour renoncer (la génération rend alors null, comme un aperçu refusé)
+ * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object,
+ *   copies: {attendues: number, manquantes: number}}|null>}
  */
 async function genererCodex(options = {}) {
     if (typeof JSZip === 'undefined') {
@@ -384,6 +388,14 @@ async function genererCodex(options = {}) {
     // les range (la pièce vit dans js/fichier-sortant.js depuis le lot A1 : l'archive l'emploie aussi).
     const copies = [];
     const rangDeLaCopie = {};
+    // #1012 — le signal de l'avertissement, COMPTÉ ici et non lu dans les statuts (un marquage
+    // « manquant » refusé faute d'espace laisse des copies absentes se dire présentes).
+    // « Attendue » : une entrée de la liste des copies dont le statut déclaré n'est pas
+    // « exporte » (celle-là a quitté l'application, c'est voulu). Une copie attendue dont le
+    // fichier ne se lit pas ne sera pas dans le codex : elle manque. Le statut ne décide de rien
+    // d'autre : tout fichier présent part dans le codex, « exporte » et « manquant » compris.
+    let nbCopiesAttendues = 0;
+    let nbCopiesManquantes = 0;
 
     if (clesFT.length > 0 && typeof travauxStockage !== 'undefined') {
         // Aplatir tous les fichiersTravaux des differents trimestres
@@ -395,9 +407,13 @@ async function genererCodex(options = {}) {
         });
         for (var j = 0; j < fichiers.length; j++) {
             var f = fichiers[j];
+            var copieAttendue = f.blobStatut !== 'exporte';
+            var copieTrouvee = false;
+            if (copieAttendue) nbCopiesAttendues++;
             try {
                 var blob = await travauxStockage.recupererBlob(f.id);
                 if (blob) {
+                    copieTrouvee = true;
                     // Extension : si nomFichier ne contient pas de point,
                     // 'bin' (sinon split('.').pop() retourne le nom complet,
                     // produisant FT_abc.monfichier au lieu de FT_abc.bin). (M3)
@@ -421,6 +437,7 @@ async function genererCodex(options = {}) {
             } catch (e) {
                 console.warn('📂 Codex : blob ignoré pour ' + f.id, e.message);
             }
+            if (copieAttendue && !copieTrouvee) nbCopiesManquantes++;
             if (j % 5 === 0) {
                 _prog(
                     20 + Math.round((j / fichiers.length) * 50),
@@ -430,6 +447,19 @@ async function genererCodex(options = {}) {
                 await _yield();
             }
         }
+    }
+
+    // 2c. #1012 — des copies attendues manquent : l'appelant qui va écrire le codex hors de
+    //     l'application le dit AVANT l'aperçu et avant toute écriture. Un refus sort comme un
+    //     aperçu refusé : rien n'est préparé, rien n'est écrit.
+    if (nbCopiesManquantes > 0 && typeof options.confirmerCopiesManquantes === 'function') {
+        _progMasquer();
+        if (options.suivreTentative) _noterTentative({ etape: 'avertissement des copies manquantes' });
+        if (!(await options.confirmerCopiesManquantes(nbCopiesManquantes, nbCopiesAttendues))) {
+            return null;
+        }
+        _afficherProgression('Génération du codex');
+        _prog(70, 'Préparation du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
     }
 
     // 3. Le snapshot de référence pour la fusion 3-way n'est plus écrit ici : il décrit
@@ -518,7 +548,10 @@ async function genererCodex(options = {}) {
     // Nom de fichier avec horodatage
     const nomFichier = _genererNomFichier(manifeste.nom);
 
-    return { blob: zipBlob, nomFichier, manifeste, donnees, compteurAuDebut };
+    return {
+        blob: zipBlob, nomFichier, manifeste, donnees, compteurAuDebut,
+        copies: { attendues: nbCopiesAttendues, manquantes: nbCopiesManquantes }
+    };
 
     } catch (erreur) {
         _progMasquer();
@@ -952,10 +985,17 @@ async function chargerCodex(fichierZip) {
  * Fonction pure : ne lit ni le DOM ni le stockage — testable en Vitest. Appelée seulement
  * quand il manque au moins une copie (`stats.incomplet`).
  *
- * Deux textes. Quand TOUTES les copies manquantes ont été refusées faute d'espace : les
- * mots acceptés par Grégoire le 1er oct. 2026 (12 h 40). Pour toute autre cause, et pour
- * les mélanges : les mots de #334, inchangés, sous le titre d'avant — leur réécriture
- * attend sa décision.
+ * Un seul cadre, celui du manque d'espace (mots acceptés par Grégoire le 1er oct. 2026,
+ * 12 h 40) : le titre, une première phrase qui compte, « Tes données, elles, sont
+ * complètes… », le conseil, la question. Seuls la première phrase et le conseil changent
+ * avec la cause ; les mots des trois autres causes ont été acceptés par Grégoire le même
+ * jour (17 h 55) et remplacent les phrases de #334.
+ *
+ * Un MÉLANGE de causes (composition de Cowork) : une première phrase qui donne le nombre par
+ * cause, puis le conseil de chaque cause présente, celui de l'espace en premier. Chaque
+ * conseil y est précédé du nom de sa cause, repris de la première phrase : sans lui, « rouvre
+ * le même codex » et « rouvrir le même codex ne les ramènera pas » se suivraient sans qu'on
+ * sache de quelles copies chacun parle.
  * @param {{nbCles: number, nbBlobs: number, nbBlobsAttendus: number,
  *          blobsEchecs: Array<{id: string, raison: string}>,
  *          blobsRefusesMagic: string[], blobsAbsentsDuZip: string[]}} stats
@@ -963,43 +1003,95 @@ async function chargerCodex(fichierZip) {
  */
 function construireBilanImport(stats) {
     var echecs = stats.blobsEchecs || [];
-    var magic = stats.blobsRefusesMagic || [];
-    var absents = stats.blobsAbsentsDuZip || [];
     var nbQuota = echecs.filter(function(e) { return e.raison === 'quota'; }).length;
-    var nbErreurs = echecs.length - nbQuota;
-    var nbManquants = echecs.length + magic.length + absents.length;
-    var question = 'Recharger la page pour appliquer les données ?';
+    var compte = function(n) { return n + (n === 1 ? ' copie' : ' copies') + ' sur ' + stats.nbBlobsAttendus; };
 
-    if (nbQuota === nbManquants) {
-        var uneSeule = nbManquants === 1;
-        return {
-            titre: 'Codex ouvert, mais incomplet',
-            message: nbManquants + (uneSeule ? ' copie' : ' copies') + ' sur ' + stats.nbBlobsAttendus +
-                (uneSeule ? ' n\'a pas pu revenir' : ' n\'ont pas pu revenir') + ', faute d\'espace. ' +
-                'Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.\n\n' +
-                'Pour retrouver ' + (uneSeule ? 'cette copie' : 'ces copies') + ' : si tu es en navigation privée, ' +
-                'rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de ' +
-                'l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.\n\n' +
-                question
-        };
+    // Dans l'ordre de la phrase d'un mélange, qui est aussi celui des conseils.
+    var causes = [
+        {
+            n: nbQuota,
+            phrase: function(une) { return (une ? ' n\'a pas pu revenir' : ' n\'ont pas pu revenir') + ', faute d\'espace.'; },
+            part: function() { return 'faute d\'espace'; },
+            conseil: function(une) {
+                return 'Pour retrouver ' + (une ? 'cette copie' : 'ces copies') + ' : si tu es en navigation privée, ' +
+                    'rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de ' +
+                    'l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.';
+            }
+        },
+        {
+            n: (stats.blobsAbsentsDuZip || []).length,
+            phrase: function(une) { return (une ? ' n\'est pas' : ' ne sont pas') + ' dans ce fichier de codex.'; },
+            part: function(une) { return (une ? 'absente' : 'absentes') + ' du fichier'; },
+            conseil: function(une) {
+                return (une ? 'Elle manquait' : 'Elles manquaient') + ' déjà quand ce codex a été écrit : le rouvrir ne ' +
+                    (une ? 'la' : 'les') + ' ramènera pas. ' + (une ? 'Cherche-la' : 'Cherche-les') +
+                    ' dans un codex plus ancien ou dans une archive.';
+            }
+        },
+        {
+            n: (stats.blobsRefusesMagic || []).length,
+            phrase: function(une) {
+                return (une ? ' n\'a pas été reprise : son contenu' : ' n\'ont pas été reprises : leur contenu') +
+                    ' n\'est ni une image ni un PDF.';
+            },
+            part: function() { return 'dans un format non reconnu'; },
+            conseil: function(une) { return 'Rouvrir le même codex ne ' + (une ? 'la' : 'les') + ' ramènera pas.'; }
+        },
+        {
+            n: echecs.length - nbQuota,
+            phrase: function(une) { return (une ? ' n\'a pas pu revenir' : ' n\'ont pas pu revenir') + ', à cause d\'une erreur.'; },
+            part: function() { return 'à cause d\'une erreur'; },
+            // Sans « : le détail y sera » (mots proposés) : mesuré par le geste le 1er oct. 2026,
+            // le détail de l'erreur est dans le signalement tant que la page n'est pas rechargée,
+            // et n'y est plus après « Recharger », le bouton principal de cette même fenêtre.
+            conseil: function(une) {
+                return 'Pour retrouver ' + (une ? 'cette copie' : 'ces copies') + ' : rouvre le même codex. Si l\'erreur ' +
+                    'revient, utilise « Signaler un bug ou donner ton avis ».';
+            }
+        }
+    ].filter(function(c) { return c.n > 0; });
+
+    var nbManquantes = causes.reduce(function(somme, c) { return somme + c.n; }, 0);
+    var premiere, conseils;
+    if (causes.length === 1) {
+        premiere = compte(nbManquantes) + causes[0].phrase(nbManquantes === 1);
+        conseils = [causes[0].conseil(nbManquantes === 1)];
+    } else {
+        premiere = compte(nbManquantes) + ' n\'ont pas pu revenir : ' +
+            causes.map(function(c) { return c.n + ' ' + c.part(c.n === 1); }).join(', ') + '.';
+        conseils = causes.map(function(c) {
+            var nom = c.part(c.n === 1);
+            return nom.charAt(0).toUpperCase() + nom.slice(1) + '. ' + c.conseil(c.n === 1);
+        });
     }
 
-    var titre = 'Import incomplet : ' + nbManquants + ' fichier' + (nbManquants > 1 ? 's' : '') +
-        ' sur ' + stats.nbBlobsAttendus + ' n\'' + (nbManquants > 1 ? 'ont' : 'a') + ' pas été restauré' +
-        (nbManquants > 1 ? 's' : '') + '.';
+    return {
+        titre: 'Codex ouvert, mais incomplet',
+        message: premiere + ' Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.\n\n' +
+            conseils.join('\n\n') + '\n\n' +
+            'Recharger la page pour appliquer les données ?'
+    };
+}
 
-    var causes = [];
-    if (nbQuota > 0) causes.push(nbQuota + ' refusé' + (nbQuota > 1 ? 's' : '') + ' faute d\'espace de stockage');
-    if (magic.length > 0) causes.push(magic.length + ' au format non reconnu');
-    if (absents.length > 0) causes.push(absents.length + ' absent' + (absents.length > 1 ? 's' : '') + ' du ZIP');
-    if (nbErreurs > 0) causes.push(nbErreurs + ' en erreur technique');
-
-    var details = 'Les données du codex, elles, sont complètes (' + stats.nbCles + ' clés). ' +
-        'Fichiers manquants : ' + causes.join(', ') + '.';
-    if (nbQuota > 0 || nbErreurs > 0) {
-        details += ' Libère de l\'espace puis rouvre le même ZIP : l\'import réécrit tout et complétera les fichiers manquants.';
-    }
-    return { titre: 'Recharger la page', message: titre + ' ' + details + '\n\n' + question };
+/**
+ * #1012 — les mots de l'avertissement à l'écriture d'un codex auquel des copies manquent
+ * (acceptés par Grégoire le 1er oct. 2026, 17 h 52 ; l'accord en nombre est de la grammaire).
+ * Fonction pure, testable en Vitest.
+ * @param {number} manquantes - copies attendues sans fichier dans l'application (au moins 1)
+ * @param {number} attendues - copies attendues (statut autre que « exporte »)
+ * @returns {{titre: string, message: string, texteConfirmer: string}}
+ */
+function construireAvertissementCopiesManquantes(manquantes, attendues) {
+    var une = manquantes === 1;
+    return {
+        titre: 'Ce codex n\'aura pas toutes tes copies',
+        message: manquantes + (une ? ' copie' : ' copies') + ' sur ' + attendues +
+            (une ? ' n\'est pas' : ' ne sont pas') + ' dans l\'application. ' +
+            'Le codex que tu vas écrire ne ' + (une ? 'la' : 'les') + ' contiendra pas.\n\n' +
+            'Si un autre fichier de codex ' + (une ? 'la' : 'les') + ' contient encore, ne le remplace pas : ' +
+            'donne un autre nom à celui-ci.',
+        texteConfirmer: une ? 'Écrire sans cette copie' : 'Écrire sans ces copies'
+    };
 }
 
 /* ===============================
@@ -1359,13 +1451,15 @@ async function _ecrireViaHandle(handle, blob) {
  * Lot G (#988) : `options.sansRepli` (la mise à jour du codex) : un partage qui échoue,
  * AbortError comprise, rend `{ methode: 'echec' }` au lieu de glisser en silence vers le
  * téléchargement ; l'appelant le dit et propose lui-même « Télécharger à la place »
- * (`options.telechargementDirect`). Sans ces options (export sélectif), rien ne change.
+ * (`options.telechargementDirect`). Sans ces options (export sélectif), un partage qui
+ * échoue glisse encore vers le téléchargement.
  * Chaque résultat nomme sa `strategie` ; un échec porte son `erreur`.
  *
  * @param {Blob} blob - Le blob ZIP du codex
  * @param {string} nomFichier - Le nom de fichier suggéré
  * @param {Object} [options]
  * @param {boolean} [options.forcerDialogue=false] - Force le dialogue même si un handle existe
+ * @param {boolean} [options.sansAdoption=false] - #1012 : la destination choisie n'est pas tenue ensuite
  * @param {boolean} [options.sansRepli=false] - Un échec du partage est rendu, pas replié
  * @param {boolean} [options.telechargementDirect=false] - Stratégie 3 seule
  * @param {function(string): Promise<boolean>} [options.toucherFrais] - Lot J0 bis : appelée
@@ -1378,6 +1472,7 @@ async function _ecrireViaHandle(handle, blob) {
 async function sauvegarderVersDestination(blob, nomFichier, options) {
     var forcerDialogue = options && options.forcerDialogue;
     var sansRepli = !!(options && options.sansRepli);
+    var sansAdoption = !!(options && options.sansAdoption);
     if (options && options.telechargementDirect) return window.FichierSortant.telecharger(blob, nomFichier);
 
     // Stratégie 1a : Ré-écriture directe via handle FSAPI existant (pas de dialogue)
@@ -1403,8 +1498,10 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
                 }]
             });
             await _ecrireViaHandle(handle, blob);
-            // Conserver le handle pour les sauvegardes suivantes
-            _fileHandle = handle;
+            // Conserver le handle pour les sauvegardes suivantes — sauf `sansAdoption` (#1012) :
+            // ce fichier-là n'est pas le codex de l'espace (une sélection, ou un codex écrit
+            // sans toutes ses copies) ; le réécrire en place plus tard serait le défaut.
+            if (!sansAdoption) _fileHandle = handle;
             return { methode: 'fsapi', strategie: 'fenêtre de choix (FSAPI)' };
         } catch (e) {
             // Ici, AbortError ne vient que de l'usager (« Annuler » de la fenêtre de choix) :
@@ -3170,10 +3267,28 @@ async function _mettreAJourLeCodex(forcerDialogue) {
     _fermerMenu();
     _debuterTentative(forcerDialogue);
 
-    var avaitHandle = !!_fileHandle && !forcerDialogue;
+    // #1012 — l'avertissement : des copies attendues n'ont pas de fichier dans l'application.
+    // Mots acceptés par Grégoire le 1er oct. 2026 (17 h 52). Il avertit sans refuser : un refus
+    // bloquerait pour toujours quelqu'un dont des copies sont vraiment perdues. « Annuler » a le
+    // focus (variante `danger`) : une touche Entrée donnée par réflexe n'écrit rien.
+    var avertissementRefuse = false;
+    var confirmerCopiesManquantes = async function(manquantes, attendues) {
+        var avertissement = construireAvertissementCopiesManquantes(manquantes, attendues);
+        var accepte = await uiDialogues.confirmerAction({
+            titre: avertissement.titre,
+            message: avertissement.message,
+            texteAnnuler: 'Annuler',
+            texteConfirmer: avertissement.texteConfirmer,
+            variante: 'danger',
+            preformate: true
+        }) === true;
+        avertissementRefuse = !accepte;
+        return accepte;
+    };
+
     var resultat;
     try {
-        resultat = await genererCodex({ suivreTentative: true });
+        resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: confirmerCopiesManquantes });
     } catch (e) {
         console.error('📂 Erreur enregistrement codex:', e);
         _finirTentative('échec de la préparation du fichier', e);
@@ -3182,11 +3297,20 @@ async function _mettreAJourLeCodex(forcerDialogue) {
                          'Si ça se répète, utilise « Signaler un bug » : le détail y sera.');
         return;
     }
-    // Aperçu refusé par l'usager : la seule sortie sans message.
+    // Avertissement ou aperçu refusé par l'usager : les seules sorties sans message.
     if (!resultat) {
-        _finirTentative('aperçu refusé par l\'usager');
+        _finirTentative(avertissementRefuse ? 'avertissement des copies manquantes refusé par l\'usager'
+                                            : 'aperçu refusé par l\'usager');
         return;
     }
+
+    // #1012 — tant que des copies manquent, l'application demande toujours où écrire : jamais
+    // dans le fichier tenu (qui reste tenu, pour le jour où les copies seront revenues), et la
+    // destination choisie n'est pas adoptée. C'est ce qui rend utile la dernière phrase de
+    // l'avertissement (« donne un autre nom à celui-ci »). Décision de Cowork, 1er oct. 2026.
+    var copiesManquent = resultat.copies.manquantes > 0;
+    var demanderOuEcrire = forcerDialogue || copiesManquent;
+    var avaitHandle = !!_fileHandle && !demanderOuEcrire;
 
     var taille = window.FichierSortant.tailleEnviron(resultat.blob.size);
     // Lot J0 bis (#988) : la fenêtre du toucher frais. Mots acceptés par Grégoire le
@@ -3210,7 +3334,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
             else _masquerProgression();
         } catch (e) { /* le partage continue sans le message */ }
     };
-    var options = { forcerDialogue: forcerDialogue, sansRepli: true, toucherFrais: toucherFrais, attentePartage: attentePartage };
+    var options = { forcerDialogue: demanderOuEcrire, sansAdoption: copiesManquent, sansRepli: true, toucherFrais: toucherFrais, attentePartage: attentePartage };
     while (true) {
         _noterTentative({
             etape: 'enregistrement du fichier',
@@ -3265,7 +3389,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         });
         if (geste === 'reessayer') {
             // Sans `toucherFrais` : le clic sur « Réessayer » en est un, et le partage le suit aussitôt.
-            options = { forcerDialogue: forcerDialogue, sansRepli: true, attentePartage: attentePartage };
+            options = { forcerDialogue: demanderOuEcrire, sansAdoption: copiesManquent, sansRepli: true, attentePartage: attentePartage };
         } else if (geste === 'telecharger') {
             options = { telechargementDirect: true };
         } else {
@@ -3948,9 +4072,12 @@ async function actionExporterSelection() {
     _majProgression(98, 'Enregistrement…');
     await _yield();
 
-    // 9. Sauvegarder
+    // 9. Sauvegarder. #1012 (règle de Cowork, 1er oct. 2026) : une sélection n'est pas le codex
+    //    de l'espace. Elle ne s'écrit jamais dans le fichier tenu, demande toujours où écrire,
+    //    et sa destination n'est jamais adoptée : « Mettre à jour le codex » y écrirait ensuite
+    //    le codex entier, « Dans le même fichier ».
     var nomFichier = _genererNomFichier(manifeste.nom);
-    var resultatSave = await sauvegarderVersDestination(zipBlob, nomFichier);
+    var resultatSave = await sauvegarderVersDestination(zipBlob, nomFichier, { forcerDialogue: true, sansAdoption: true });
 
     _majProgression(100, 'Export terminé !');
     await new Promise(function(r) { setTimeout(r, 500); });
@@ -4042,6 +4169,7 @@ window.Codex = {
     estUnFichierDeCodex: estUnFichierDeCodex,
     lireExterne: lireCodexExterne,
     construireBilanImport: construireBilanImport,
+    construireAvertissementCopiesManquantes: construireAvertissementCopiesManquantes,
     evaluerPrevolStockage: evaluerPrevolStockage,
     // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible ;
     // #335 C — vérification de persistance post-import ; #336 D — purge)
