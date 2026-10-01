@@ -137,6 +137,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (1er octobre 2026 — la charge d'évaluation d'une production dont les consignes ne sont pas marquées transmises)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1009 | Grégoire (`BUG_"grégoire"_2026-10-01_08-26-51.txt`, 1.172.0, Chrome 154 sur le Mac ; gravité « gênant » ; aucune erreur console) | 1er oct. 2026, 8 h 26 | **« La projection de la durée d'évaluation […] ne semble pas fonctionner. J'ai 6 copies évaluées et je n'ai pas d'estimation pour le reste de mon groupe » (Labo › Rythme de travail, « Estimation de la charge »).** La production en cours figure au tableau des durées (N = 6) mais pas à celui de la charge, ni à la planification. | **2.1 filtrage** : `estimerCharge` (`js/rythme.js`) écartait tout lot dont l'entrée `echeancesParGroupe` porte `assignee: false`. **Mesuré en lecture seule dans ses données** (onglet à part, IndexedDB `readonly`, aucun DA sorti) : la case « Consignes transmises » de la production est décochée, échéance au 29 sept., 26 copies importées, 6 évaluations avec critères. **Correctif (1.173.1)** : la garde d'assignation est retirée ; la charge se mesure aux copies en main, et un lot sans copie ni évaluation reste absent (`estimerPourLot` rend null). Ligne attendue chez lui : 6 évaluées, 20 restantes, environ 2 h 48. **Preuve** : `tests/unit/sentinelle-1009-charge-lot-non-assigne.test.js` (3 essais, dont le cas vécu), 2 mutations, 2 rouges. **Palier** : éprouvé sur la fonction de calcul, pas sur l'écran (le code d'affichage n'a pas changé) ; à confirmer par Grégoire sur son écran. **Source et stock** : la source seule ; la case décochée reste dans ses données, c'est son geste, et tant qu'elle l'est la production reste hors du calendrier, des graphiques et des snapshots (règle de #494). **Trouvaille inscrite : #1010** (aucun signal quand des copies arrivent sur une production non transmise). |
+
 ## Corrigés (30 septembre 2026 — un gros codex se met à jour sur l'iPad ; passé aux corrigés le 30 septembre, sur la porte de 10 h 38)
 
 | # | Testeur | Date | Description | Correctif |
