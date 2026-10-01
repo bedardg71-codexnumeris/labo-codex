@@ -84,7 +84,7 @@ describe('sentinelle · câblage du pré-vol (#334 A)', () => {
         expect(posPrevol).toBeGreaterThan(-1);
         expect(posExtraction).toBeGreaterThan(posPrevol);
         expect(corps).toContain('Espace insuffisant pour ouvrir ce codex');
-        expect(corps).toContain('rouvre l\\\'app dans une fenêtre normale');
+        expect(corps).toContain('rouvre l\\\'application dans une fenêtre normale');
     });
 
     it('chargerCodex revérifie persisted() et demande persist() sur geste utilisateur (D1)', () => {
