@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 22 h : **LOT I BIS (« UN SEUL TERME ») CODÉ SUR LA BRANCHE `lot-i-bis-un-seul-terme`, EN ATTENTE DE LA RELECTURE DE COWORK** — ni release, ni push ; `main` porte trois commits de documents non poussés
+
+**Où est le travail** : la branche `lot-i-bis-un-seul-terme` = `main` + un commit (« feat(codex): lot I bis… »). C'est elle qui est sortie dans l'arbre de travail, pour que Cowork relise le code. Pièces : `plans de travail/DEMANDE-RELECTURE-2026-09-30-lot-I-bis-un-seul-terme.md` (la mesure, la table avant / après de l'Aide, la variante « sans codex », la ligne des Nouvelles proposée, six trouvailles et leur issue) et `plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md` (due après la mise en ligne ; l'artefact est à Cowork).
+
+**Mesuré sur la branche** (30 sept., ≈ 22 h) : Vitest 667 fichiers, 7 876/7 876, aucune erreur hors essai ; Playwright ciblé, 19 specs, 54 verts sans reprise ; 10 mutations, 10 rouges, fichiers restaurés à l'identique. **Le verdict Playwright complet n'est pas rendu** : le jeton dit toujours `95ed3124` (1.172.0, code 0, 17 h 49) ; il est dû sur le commit de release.
+
+**Ce qui reste, dans l'ordre** : (1) relecture de Cowork ; (2) corrections ; (3) à Grégoire, à froid : la phrase du refus quand il n'y a pas de codex, et « garde ce fichier » (dans Chrome, la mise à jour suivante du codex réécrit le même fichier, le trimestre supprimé n'y est plus) ; (4) Nouvelles, release mineure par `scripts/release.mjs`, cocher #985, fusion vers `main` ; (5) verdict complet, Cowork fermé, puis push ; (6) la porte (Mac dans Chrome, iPad dans Safari), où Grégoire ne supprime aucun trimestre.
+
+**Sur `main`, en local, non poussés** (aucun push demandé ce soir) : `0ae5aaaf` (les trois fichiers de Cowork de 21 h 15, tels quels), `6a0f61a4` (le skill `debut-de-session-labo-codex` LIT le verdict Playwright au lieu de relancer la suite ; à éprouver à la prochaine ouverture), et ce bloc. Documents et skill seulement : `pousser.sh` n'a pas besoin d'un verdict neuf.
+
+**Inscrit** : #1006 (l'export d'un trimestre rend un fichier qu'aucun écran ne sait rouvrir ; chantier des archives), sur la branche du lot.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 20 h 20 : **PORTE DU LOT A2 PASSÉE (6 SUR 6) ; COMMITS DE DOCUMENTS POUSSÉS SUR DEMANDE** — `main` fait foi ; RIEN EN COURS SUR UNE BRANCHE
 
 **Fait ce soir, documents seulement** : `b7410620` (les trois fichiers de Cowork, tels quels : résultat de la porte, règle 11 de `PROTOCOLE.md`, `CONSIGNE-DEMARRAGE-COWORK.md`), `ea6639da` (trouvailles de la porte : #1005 inscrite, notes à #999 et #1002 ; `OU-EN-EST-ON.md` dit la porte passée), et ce bloc. Le dernier commit de code reste `95ed3124` (1.172.0, en ligne) ; Vitest 666 fichiers, 7 870/7 870 (mesuré à 20 h 15).
