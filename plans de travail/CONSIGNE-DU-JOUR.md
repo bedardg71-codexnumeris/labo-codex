@@ -1,26 +1,36 @@
-# Consigne du jour – lot I bis, fin : la vérification de la nuit n'a rien rendu ; comprendre, refaire, envoyer
+# Consigne du jour – un codex ouvert sans assez d'espace finit par « Erreur » : inscrire, mesurer, corriger dans un lot à part
 
-> Écrite le 1er octobre 2026 à 7 h 33 (Toronto) par Cowork. Remplace la consigne de 2 h 12, archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-10-01-lot-I-bis-corrections.md`.
-> **Condition de départ** : branche `lot-i-bis-un-seul-terme` à `d7f5efb4`, `version.json` à 1.173.0, `origin/main` à `3736e044`. En ligne : 1.172.0 (Netlify, `commit_ref` `3736e044`, constaté par Cowork le 1er à 7 h 10). Si l'un de ces points est faux chez toi, arrête-toi et dis lequel.
+> Écrite le 1er octobre 2026 à 8 h 51 (Toronto) par Cowork, à la demande de Grégoire. Remplace la consigne de 7 h 33 (exécutée, 1.173.0 en ligne), archivée sous `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-10-01-lot-I-bis-verification.md`.
+> **Condition de départ** : le correctif que tu prépares pour 1.173.1 est terminé, ou rangé. Cette consigne ne passe pas devant lui et ne s'y mêle pas : un lot à part, sur sa branche.
 
-## Ce que Cowork a mesuré, en lecture seule, le 1er à 7 h 10
+## Le constat, à la porte du lot I bis (rangées 2.3 et 2.4)
 
-- `scripts/.verdict-playwright.json` porte toujours `95ed3124` (1.172.0), rendu le 30 à 17 h 49 : aucun verdict sur 1.173.0.
-- `tests/test-results/` : 52 `error-context.md`, écrits de 3 h 12 à 6 h 32 (20 dans l'heure de 3 h, 13 à 4 h, 15 à 5 h, 4 à 6 h). Premier message de chacun : 23 fois `TimeoutError: browserType.launch: Timeout 180000ms exceeded`, 28 fois `Test timeout of 30000ms / 90000ms exceeded` (dont 8 pendant la mise en place de la page, du contexte ou d'un `beforeEach`), 1 fois une vraie comparaison.
-- La vraie comparaison : `cours-actif-hors-bibliothe…-se-remplit-rien-ne-boucle-webkit`, à 3 h 16, `Expected: "COURS1766455789356"`, `Received: "a2026-601-101-MQ"`.
-- 23 dossiers `-retry1` : des essais ont échoué deux fois. Si cette passe tourne encore, elle ne peut plus rendre vert.
-- ⚠ Inféré, pas mesuré : une machine qui ne répondait plus (veille, couvercle, mémoire). Cowork ne voit ni les processus du Mac ni son journal de veille. C'est à toi de l'établir.
+Grégoire, le 1er octobre à 8 h 47, Chrome 154 sur le Mac, fenêtre de navigation privée, 1.173.0 (build 1001-0306) : Réglages › Données › « Ouvrir un Codex… », son vrai codex. Rapport de bug `BUG_"grégoire"_2026-10-01_08-48-22.txt`, gravité « gênant » ; il l'a enregistré, demande-lui où si tu veux le ranger sous `Retours des testeurs/`.
+
+**Mesuré dans son rapport** :
+- La pile passe par `Codex.ouvrirFichier` → `_ouvrirLeFichierChoisi` → `chargerCodex` (`js/codex.js?v=20261001b`, lignes 2918, 2924, 759) : la case confie bien le fichier au codex, sans l'alerte d'avant. **Le geste que jugeait la rangée 2.3 a donc eu lieu** (cochée en échec, puis corrigée par sa réponse : voir l'étape 1).
+- À 8 h 47 min 30 s : au moins vingt « 📂 Codex : blob ignoré pour FT_… (quota) », chacun précédé de « [DB] Transaction storeBlob avortée » (le rapport ne garde que vingt lignes).
+- Puis « [DB] Transaction IndexedDB avortée clé "a2026_fichiersTravaux" », puis « 📂 Erreur ouverture codex ».
+- À l'écran (capture) : un bandeau rouge « Erreur », le sélecteur dit « -- Sélectionne un trimestre -- ». Ni « Recharger la page », ni « Espace insuffisant pour ouvrir ce codex ». **La rangée 2.4 est en échec** : aucune des deux fins attendues.
+- État au moment du rapport : `trimestreActif: a2026`, 27 étudiants, 647 clés en localStorage. Les données sont donc écrites, sans rechargement proposé.
+
+**Lu au code par Cowork sur `main`, pas reproduit** :
+- Les copies refusées sont comptées sans arrêter l'ouverture (boucle des blobs, `blobsEchecs`). Ensuite, l'étape qui marque ces copies « manquantes » réécrit les clés des copies par `await db.set(clesFTImport[k], …)`, sans garde. Hypothèse : c'est cette écriture qui a été avortée, faute d'espace elle aussi ; l'exception remonte à `_ouvrirLeFichierChoisi`, qui affiche `notifications.erreur('Erreur', e.message)`. Le bilan honnête de #334 (« Import incomplet : N fichiers sur M… ») et la proposition de recharger ne sont jamais atteints.
+- Le lot I bis n'a pas écrit ce chemin : il y mène la case. Le menu Codex doit avoir le même défaut. À confirmer.
+- Le message du pré-vol (`msgPrevol`) parle de « Safari » et de « Stockage iPad » : faux dans Chrome sur un Mac. Pas vu par Grégoire, puisque le pré-vol n'a pas refusé.
+
+**Pas établi** : pourquoi le pré-vol n'a pas refusé d'emblée (les valeurs d'`estimate()` dans une fenêtre privée de Chrome, le poids décompressé du codex, le verdict rendu : « ok » ou « inconnu »).
 
 ## Ce que tu fais, dans cet ordre
 
-1. **Dis d'abord si la vérification de la nuit tourne encore** (processus Playwright, WebKit, `verifier-playwright.mjs`, `pousser.sh`). Si oui, arrête-la proprement : ses échecs répétés la condamnent déjà. Ne lance rien d'autre avant.
-2. **Établis ce qui s'est passé entre 3 h 10 et 6 h 32**, par mesure : le journal de veille du Mac (`pmset -g log`, lignes Sleep, Wake, DarkWake de la plage), l'état du garde-éveil posé au lot H (#987) pendant cette passe, la sortie de la passe si elle est gardée quelque part, et qui l'a lancée (toi à 3 h 10, ou un autre outil). Rends une cause mesurée, ou dis « pas établie » et ce qui manque. ⛔ Ne corrige rien dans les scripts de vérification à cette étape : si le garde-éveil a un trou, inscris une fiche.
-3. **Juge la seule vraie comparaison avant la passe complète** : rejoue cette spec seule, trois fois, sur l'arbre actuel. Verte trois fois : note-la instable dans ton rapport et continue. Rouge de façon stable : arrête-toi, pas de passe complète, pas de push ; dis si le défaut vient du lot I bis (`820fe58e`, `b9998ffd`) ou s'il existait à 1.172.0 (rejoue-la sur `95ed3124` pour le savoir).
-4. **Commite les cinq fichiers de Cowork tels quels**, sur la branche : `CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/CONSIGNE-DU-JOUR.md`, `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-30-lot-I-bis.md`, `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-10-01-lot-I-bis-corrections.md`, `plans de travail/VERDICT-RELECTURE-2026-10-01-lot-I-bis-un-seul-terme.md`. Ton garde de permissions a refusé ce commit cette nuit ; Grégoire l'autorise en te relayant cette consigne. Si le garde refuse encore, demande-lui un oui explicite et continue sans eux en attendant.
-5. **La passe complète au navigateur**, par le chemin habituel (`scripts/pousser.sh`), sur le commit que tu pousseras. Avant de la lancer, demande à Grégoire de confirmer deux choses : Cowork est fermé ; le MacBook est ouvert et branché. Ne la lance pas sans sa réponse.
-6. **Verte** : push, fusion vers `main`, mesure chez Netlify (numéro servi, `commit_ref`, heure). **Rouge** : pas de push ; rends la liste des échecs en séparant les délais dépassés des comparaisons fausses, et arrête-toi.
+1. **Inscris le retour** au registre des retours testeurs et sa fiche au backlog, après avoir vérifié les deux registres. Le constat ci-dessus, avec sa part mesurée et sa part lue. Mets à jour `plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md` d'après le relevé de Grégoire du 1er octobre à 8 h 51 min 49 s (reçu par Cowork après l'écriture de cette consigne) : **9 passées, 2 échecs, 0 non traitée**. Passées : 0.1, 0.2, 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.5, sur le Mac dans Chrome et sur l'iPad dans Safari ; aucun champ de constat rempli. En échec : 2.3 et 2.4. ⚠ Pour 2.3, sa coche et sa trace ne disent pas la même chose : il l'a cochée en échec, mais la pile de son rapport montre que la case a confié le fichier au codex, sans l'ancienne alerte. **Tranché par Grégoire le 1er octobre à 8 h 53** : au choix du fichier, il a vu « une ouverture qui démarre puis finit en « Erreur » », pas l'ancienne alerte. L'attendu de 2.3 a donc eu lieu ; sa coche portait sur la fin. Écris : 2.3 passée (cochée en échec, corrigée par sa réponse), 2.4 en échec. Un seul échec réel : dix rangées sur onze.
+2. **Reproduis au banc avant de corriger**, sur le code de `main` : une ouverture de codex où le stockage des copies est refusé pour manque d'espace, puis où la réécriture de la liste des copies l'est aussi. Dis si mon hypothèse tient (quelle écriture est avortée, quel message arrive à l'écran), par le menu Codex et par la case. Si elle ne tient pas, arrête-toi et dis ce que tu vois.
+3. **Mesure ce qui reste de l'espace après l'échec** : quelles clés sont écrites, lesquelles manquent, le codex est-il « actif », que montre l'application si on recharge à la main. C'est ce que vivrait quelqu'un dans sa fenêtre normale, sur un appareil presque plein.
+4. **Corrige, sur une branche, sans release** : quand des copies sont refusées, l'ouverture va jusqu'à son bilan, « Import incomplet… », et propose de recharger, même si le marquage « manquante » ne peut pas s'écrire. Rien ne doit se terminer par un « Erreur » nu. Sentinelle au banc, mutations rouges.
+5. **Le pré-vol** : dis pourquoi il n'a pas refusé si tu peux l'établir au banc ; sinon écris « pas établi » et ce qu'il faudrait relever chez Grégoire. Ne change pas ses seuils dans ce lot.
+6. **Les mots** : tout texte neuf ou modifié que l'usager lit (un nouveau message, `msgPrevol` sans « Safari » ni « iPad » quand ce n'est ni l'un ni l'autre) remonte à Grégoire avant d'être posé. Propose le texte dans ta demande de relecture ; ne le tranche pas.
+7. **Arrête-toi à la demande de relecture** : `plans de travail/DEMANDE-RELECTURE-2026-10-01-<sujet>.md`. Ce chemin écrit les données de l'usager : relecture croisée de Cowork avant la release (règle 2 du protocole). Pas de version, pas de push du code.
 
 ## Ce que tu rends
 
-À Grégoire, trois lignes : ce qui s'est passé cette nuit (cause mesurée ou pas établie) ; le verdict et le numéro en ligne, mesuré chez Netlify ; la porte à faire (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md`, où il ne supprime aucun trimestre ; l'artefact de la porte est à Cowork).
-`RELAIS.md` et `OU-EN-EST-ON.md` à jour. Rappel de la règle 11 : le chantier du codex se dit « clos » quand ce lot est en ligne et sa porte passée ; la suite, arrêtée par Grégoire, est le retour aux archives (lot A3).
+À Grégoire, trois lignes : le numéro de la fiche ; si l'hypothèse tient, et ce qui reste dans l'espace après l'échec ; ce qui attend sa décision (les mots). `RELAIS.md` à jour. Le chantier du codex reste « en ligne, porte incomplète » tant que cette fiche est ouverte : la rangée 2.4 est en échec.
