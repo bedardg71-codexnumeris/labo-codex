@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 14 h 42 : **1.173.3 EN LIGNE (#1012, PREMIER LOT), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; RESTE LA PORTE DE GRÉGOIRE (TROIS RANGÉES), ET L'ARTEFACT JUMEAU À PUBLIER PAR COWORK ; LA FICHE #1012 RESTE OUVERTE**
+
+**Mesuré** : verdict complet au navigateur par `scripts/pousser.sh` sur `56a94cd8`, lancé à 13 h 52 min 39 s, rendu à 14 h 39 min 33 s, vert : 0 échec, aucune spec instable (jeton : `instables: []`). Au lancement : Cowork fermé par Grégoire (ni application Claude ni machine virtuelle), charge 2,6, 74 % de mémoire libre, fichier d'échange à 2,3 Go sur 3, Time Machine à l'arrêt. **Écart** : lancé sur batterie (63 %, aucun adaptateur), sur le mot de Grégoire, qui évaluait des copies dans l'application pendant la passe ; sous `caffeinate -di` ; aucune veille au journal pendant la passe ; à la fin, toujours sur batterie (44 %). Branche `fix-1012-fichier-d-origine-et-bilan` poussée à 14 h 40, puis `main` avancée sur le même commit (avance rapide) et poussée à 14 h 41 ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abea956c139910008816b12`, état « ready », `commit_ref` `56a94cd8`, publié à 14 h 41 min 37 s (Toronto). Le numéro 1.173.3 (build `1001-1346`) est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu.
+
+**Le refus de 13 h 45** : le premier push (les documents de `main`) avait été refusé par le garde de permissions de Claude Code. Grégoire a ensuite dit lui-même « Tu pousses » (question fermée, vers 13 h 49), puis « Cowork est fermé » ; les pushs sont passés.
+
+**Ce qui reste** : (1) Cowork publie l'artefact jumeau de `plans de travail/PORTES-TERRAIN-2026-10-01-1012-bilan-qui-reste.md` ; (2) Grégoire fait la porte : trois rangées, Chrome sur le Mac, fenêtre privée, aucune n'écrit dans son fichier de codex. Elle ne lève pas qu'un fichier refusé avant toute écriture laisse le fichier d'avant tenu, dans le vrai Chrome : inféré. (3) La fiche #1012 reste ouverte : l'avertissement à la mise à jour (attend les mots de Grégoire, aura sa consigne), les mots des trois autres causes d'une ouverture incomplète, « Exporter une sélection » (règle de Cowork inscrite), l'ancien fichier ouvert par la case (à mesurer par le geste). Puis l'ordre des chantiers de 13 h 02, inchangé (bloc de 13 h 32, plus bas). Les branches `fix-1009-charge-lot-non-assigne`, `fix-1011-codex-ouvert-sans-espace` et `fix-1012-fichier-d-origine-et-bilan`, fusionnées, existent encore en local et chez origin : à supprimer quand Grégoire le dit.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 13 h 48 : **RELEASE 1.173.3 COMMITÉE SUR LA BRANCHE LOCALE `fix-1012-fichier-d-origine-et-bilan` (#1012, PREMIER LOT) ; RELECTURE DE COWORK VERTE ; RIEN N'EST POUSSÉ : LE PUSH A ÉTÉ REFUSÉ PAR LE GARDE DE PERMISSIONS DE CLAUDE CODE ; VERDICT COMPLET, PUSHS, FUSION ET MESURE CHEZ NETLIFY RESTENT À FAIRE** — voir la dernière ligne de ce bloc
 
 **Décisions** : verdict de relecture de Cowork (13 h 38, sur `39241b59`) : vert, aucune correction. Grégoire a accepté la ligne des Nouvelles à 13 h 40 (rapporté par la consigne de Cowork). Consigne de release de Cowork de 13 h 40, que Grégoire a demandé d'exécuter.

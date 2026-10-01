@@ -1,7 +1,7 @@
 # Portes terrain – chantier du codex, #1012, premier lot : le bilan qui reste
 
 > Écrites le 1er octobre 2026, à 13 h 47 (Toronto, mesurée par `date`), par Claude Code (ce markdown : la trace). **Cowork publie l'artefact jumeau** (cases, champs de saisie, bouton « Copier mes résultats »).
-> **Le numéro à lire : 1.173.3** (build `1001-1346`). ⚠ **À l'écriture, ce numéro n'est pas en ligne** : la release est commitée sur une branche locale, le verdict complet et le push restent à faire. La porte se fait une fois ce numéro lu en bas de page.
+> **Le numéro à lire : 1.173.3** (build `1001-1346`). **En ligne depuis 14 h 41, le 1er octobre 2026** (mesuré chez Netlify : déploiement de production prêt sur `56a94cd8`, publié à 14 h 41 min 37 s ; le fichier servi lui-même n'a pas été lu). La porte peut se faire.
 > Un seul appareil : **Mac, dans Chrome**. Adresse : `https://app.codexnumeris.org`. L'iPad n'est pas concerné : dans Safari, « Mettre à jour le codex » télécharge toujours un nouveau fichier.
 > **Pourquoi trois rangées seulement** : les mots de la fenêtre, le bandeau retiré, et le fichier dans lequel le codex est écrit après chaque fin d'ouverture sont jugés par les bancs (WebKit). Seul ton Chrome, avec ton vrai codex, peut dire que la fenêtre reste à l'écran chez toi et que le menu ne propose plus d'écrire dans le même fichier.
 > **Tes données** : ⛔ **aucune rangée n'écrit dans ton fichier de codex, et tu ne cliques nulle part « Mettre à jour le codex ».** Tout se passe dans une fenêtre de navigation privée : elle a son propre espace, vide, et l'oublie à sa fermeture. Ta fenêtre normale et tes données de travail ne sont pas touchées.
@@ -37,4 +37,4 @@ Aucune dans cette porte. Ce qui attend tes mots (l'avertissement à la mise à j
 - **Chrome lui-même** : tous les bancs tournent dans WebKit. La rangée 1.2 est la seule vue du vrai Chrome sur le fichier tenu, et elle ne regarde que le cas « ouverture incomplète ».
 - **Les autres causes d'une ouverture incomplète** (copie absente du fichier, copie illisible, mélange de causes) : la fenêtre porte encore les phrases d'avant, sous le titre « Recharger la page ». Leur conseil « rouvre le même ZIP » y reste : leurs mots ne sont pas tranchés.
 - **Après « Recharger »** : rien ne se souvient que l'ouverture était incomplète. C'est le lot de l'avertissement, non codé.
-- **La suite complète au navigateur** : à l'écriture de cette porte, le verdict complet n'est pas pris sur la release. Vitest est vert dessus (669 fichiers, 7 887 essais).
+- **La suite complète au navigateur** : prise après l'écriture de cette porte, sur `56a94cd8` : verte, 0 échec, aucune spec instable (rendue à 14 h 39). Elle tourne dans WebKit, pas dans Chrome.
