@@ -23,12 +23,21 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //      La liste garde ses statuts d'avant, en mémoire comme dans le stockage ;
 //  (3) toute écriture refusée après les copies (l'espace est plein pour de bon) → même fin ;
 //      un ancien snapshot de référence est retiré plutôt que laissé au codex précédent ; le
-//      codex est encore actif après un rechargement.
+//      codex est encore actif après un rechargement ;
+//  (4) le cœur de #1012 (verdict de relecture de Cowork) : après une ouverture INCOMPLÈTE par
+//      le menu, l'application oublie le fichier d'origine — « Mettre à jour le codex » ne peut
+//      plus le réécrire en place sans les copies qui manquent ; après une ouverture COMPLÈTE,
+//      elle le garde (témoin) ;
+//  (5) les mots tranchés par Grégoire le 1er oct. : le refus du pré-vol ne nomme plus de
+//      navigateur, et le bandeau d'échec s'intitule « Le codex n'a pas pu être ouvert ».
 //
 // CE QU'IL NE JUGE PAS : le refus d'espace est INJECTÉ (`db.storeBlob` et l'écriture
 // IndexedDB des clés rendent une `QuotaExceededError`). Le vrai manque d'espace de Chrome en
 // navigation privée, et ce que `navigator.storage.estimate()` y répond au pré-vol, ne se
-// mesurent que chez Grégoire.
+// mesurent que chez Grégoire. En (4), WebKit n'a pas de `showOpenFilePicker` : le banc en
+// pose un qui rend un faux fichier « tenu » (un objet avec `getFile`). Que Chrome rende une vraie
+// poignée, et que « Mettre à jour le codex » demande alors où écrire, reste inféré. En (5), ce
+// que le navigateur dit de l'espace (`navigator.storage.estimate`) est remplacé.
 //
 // Le codex du banc est fabriqué par le vrai `Codex.generer`, sur un jeu fictif, et ouvert dans
 // un autre contexte de navigateur (stockage à part, vide).
@@ -167,6 +176,7 @@ const etatDeLEspace = (page) => page.evaluate(async ({ cleGroupe, cleCopies, cle
         groupe: await db.get(cleGroupe, null),
         codexActif: Codex.etat().actif === true,
         codexNom: Codex.etat().nom || null,
+        fichierTenu: Codex.etat().handleFSAPI === true,
         copiesStockees: statuts(await lireLeStockage(cleCopies)),
         copiesEnMemoire: statuts(db.getSync(cleCopies, null)),
         snapshot: await lireLeStockage(cleSnapshot),
@@ -221,6 +231,8 @@ test.describe('#1011 — un codex ouvert sans assez d\'espace va jusqu\'à son b
         const etat = await attendreLeBilan(neuf.page);
         expect(etat.copiesStockees).toEqual(STATUTS_D_AVANT);
         expect(etat.copiesEnMemoire).toEqual(etat.copiesStockees);
+        // #1012 : le fichier d'origine n'est plus tenu, il ne sera pas réécrit en place.
+        expect(etat.fichierTenu, 'après une ouverture incomplète, le fichier d\'origine est oublié').toBe(false);
         await neuf.page.getByRole('button', { name: 'Annuler', exact: true }).click();
         await neuf.page.evaluate(() => window.__parLeMenu);
         await neuf.contexte.close();
@@ -254,4 +266,58 @@ test.describe('#1011 — un codex ouvert sans assez d\'espace va jusqu\'à son b
         expect({ actif: apres.codexActif, nom: apres.codexNom }).toEqual({ actif: true, nom: NOM_CODEX });
         await neuf.contexte.close();
     });
+
+    test('(4) témoin de #1012 : après une ouverture complète par le menu, le fichier d\'origine reste tenu', async ({ page, browser }) => {
+        test.setTimeout(120000);
+        const fichier = test.info().outputPath('codex-du-banc.zip');
+        await fabriquerCodex(page, fichier);
+
+        const neuf = await ouvrirEspaceNeuf(browser);
+        // Les copies sont acceptées (le contexte éphémère de WebKit ne les stockerait pas) :
+        // l'ouverture est complète.
+        await neuf.page.evaluate(() => { db.storeBlob = async () => {}; });
+        await ouvrirParLeMenu(neuf.page, fichier);
+        await expect(neuf.page.getByText('Codex chargé depuis « codex-du-menu.zip »')).toBeVisible({ timeout: 30000 });
+        const etat = await etatDeLEspace(neuf.page);
+        expect(etat.messages.filter((m) => m.sorte === 'succes').map((m) => m.titre)).toEqual(['Codex ouvert : ' + NOM_CODEX]);
+        expect(etat.messages.filter((m) => m.sorte === 'warning' || m.sorte === 'erreur')).toEqual([]);
+        expect(etat.fichierTenu, 'après une ouverture complète, le fichier d\'origine reste tenu').toBe(true);
+        await neuf.page.getByRole('button', { name: 'Annuler', exact: true }).click();
+        await neuf.page.evaluate(() => window.__parLeMenu);
+        await neuf.contexte.close();
+    });
+
+    for (const cas of [
+        { nom: 'peu d\'espace accordé (navigation privée probable)', quota: 50 * 1024 * 1024, usage: 0, phrasePrivee: true },
+        { nom: 'espace accordé mais presque tout pris', quota: 600 * 1024 * 1024, usage: 590 * 1024 * 1024, phrasePrivee: false }
+    ]) {
+        test('(5) les mots du refus du pré-vol — ' + cas.nom, async ({ page, browser }) => {
+            test.setTimeout(120000);
+            const fichier = test.info().outputPath('codex-du-banc.zip');
+            await fabriquerCodex(page, fichier);
+
+            const neuf = await ouvrirEspaceNeuf(browser);
+            await neuf.page.evaluate(({ quota, usage }) => {
+                // Sur le prototype : sous WebKit, la même propriété posée sur `navigator.storage` n'est pas lue.
+                StorageManager.prototype.estimate = async () => ({ quota, usage });
+            }, cas);
+            expect(await neuf.page.evaluate(() => navigator.storage.estimate()), 'témoin : le navigateur dit l\'espace du banc')
+                .toEqual({ quota: cas.quota, usage: cas.usage });
+            await ouvrirParLaCase(neuf.page, fichier);
+            await expect.poll(async () => (await etatDeLEspace(neuf.page)).messages.length, { timeout: 30000 }).toBe(1);
+
+            const etat = await etatDeLEspace(neuf.page);
+            const [message] = etat.messages;
+            expect({ sorte: message.sorte, titre: message.titre }).toEqual({ sorte: 'erreur', titre: 'Le codex n\'a pas pu être ouvert' });
+            const texte = /^Espace insuffisant pour ouvrir ce codex\. Il a besoin d'environ .+?, mais le navigateur n'accorde que .+? à l'application\. Libère environ .+? sur l'appareil, puis réessaie\. Sur un iPad : Réglages → Général → Stockage iPad\.(.*)$/;
+            expect(message.detail).toMatch(texte);
+            const suite = message.detail.match(texte)[1];
+            expect(suite, 'la phrase de la navigation privée, seulement quand peu d\'espace est accordé')
+                .toBe(cas.phrasePrivee ? ' Si tu navigues en privé, rouvre l\'application dans une fenêtre normale.' : '');
+            // Le refus vient AVANT toute écriture.
+            expect(etat.groupe, 'rien du codex n\'est écrit').toBeNull();
+            expect(etat.codexActif).toBe(false);
+            await neuf.contexte.close();
+        });
+    }
 });

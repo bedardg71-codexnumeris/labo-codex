@@ -634,14 +634,17 @@ async function chargerCodex(fichierZip) {
     var prevol = evaluerPrevolStockage(validation._tailleDecompressee || 0, fichierZip.size, estimationStockage);
     if (prevol.verdict === 'refus') {
         _masquerProgression();
+        // Mots tranchés par Grégoire le 1er oct. 2026 (#1011) : un seul texte partout,
+        // sans nommer de navigateur ; le chemin de l'iPad est dans le texte même,
+        // sans détection d'appareil (un iPad se présente souvent comme un Mac).
         var msgPrevol = 'Espace insuffisant pour ouvrir ce codex. Il a besoin d\'environ ' +
-            _formaterTaille(prevol.besoin) + ', mais Safari n\'accorde que ' +
-            _formaterTaille(prevol.disponible) + ' à l\'application parce que l\'appareil est presque plein. ' +
+            _formaterTaille(prevol.besoin) + ', mais le navigateur n\'accorde que ' +
+            _formaterTaille(prevol.disponible) + ' à l\'application. ' +
             'Libère environ ' + _formaterTaille(prevol.manque * 2) +
-            ' (Réglages → Général → Stockage iPad), puis réessaie. ' +
-            'Astuce : les anciens ZIP de codex dans Fichiers prennent beaucoup de place.';
+            ' sur l\'appareil, puis réessaie. ' +
+            'Sur un iPad : Réglages → Général → Stockage iPad.';
         if (prevol.quotaFaible) {
-            msgPrevol += ' Si tu navigues en privé, rouvre l\'app dans une fenêtre normale.';
+            msgPrevol += ' Si tu navigues en privé, rouvre l\'application dans une fenêtre normale.';
         }
         throw new Error(msgPrevol);
     }
@@ -2955,6 +2958,12 @@ async function _ouvrirLeFichierChoisi(fichier) {
     try {
         var resultat = await chargerCodex(fichier);
         if (resultat.stats.incomplet) {
+            // #1012 (verdict de relecture de #1011, 1er oct. 2026) : après une
+            // ouverture incomplète, l'application oublie le fichier d'origine.
+            // Sinon « Mettre à jour le codex » réécrirait EN PLACE, sans les copies
+            // qui manquent, le seul fichier qui les portait toutes. Il demandera
+            // où écrire.
+            _fileHandle = null;
             // Bilan honnête (#334 session B) : ne pas déclarer « ouvert » un
             // codex dont des fichiers travaux manquent.
             var bilan = construireBilanImport(resultat.stats);
@@ -3000,7 +3009,7 @@ async function _ouvrirLeFichierChoisi(fichier) {
             return;
         }
         console.error('📂 Erreur ouverture codex:', e);
-        notifications.erreur('Erreur', e.message);
+        notifications.erreur('Le codex n\'a pas pu être ouvert', e.message);
     }
 }
 
