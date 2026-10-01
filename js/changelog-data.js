@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.173 (lot I bis, #985, D9 : un seul terme) — titre et ligne VALIDÉS par Grégoire le
+            // 1er oct. 2026, entre 2 h 07 et 2 h 12 (consigne du jour de Cowork), mot pour mot.
+            version: '1.173',
+            couleur: 'bleu',
+            titre: 'La copie de secours cède la place au codex',
+            items: [
+                'Dans Réglages › Données, le bouton «&nbsp;Faire une copie de secours&nbsp;» disparaît&nbsp;: pour mettre ton travail en sûreté, mets ton codex à jour. Un fichier de copie de secours déjà fait s\'ouvre toujours, par «&nbsp;Ouvrir un Codex…&nbsp;», qui ouvre maintenant aussi un codex. Supprimer un trimestre demande un codex à jour.'
+            ]
+        },
+        {
             // 1.172 (chantier des archives, lots A1 et A2, #998 et #999) — titre et ligne ACCEPTÉS par
             // Grégoire le 30 sept. 2026 (« j'accepte », consigne de release de Cowork de 16 h 59),
             // réécrits plus court par Cowork.
