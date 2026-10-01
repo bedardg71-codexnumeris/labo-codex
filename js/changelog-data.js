@@ -31,7 +31,11 @@
                 // 1.173.2 (#1011) — titre et ligne proposés par Cowork (second verdict de relecture,
                 // 1er oct. 2026, 11 h 30), ACCEPTÉS par Grégoire le même jour. Correctif : la ligne
                 // entre dans l'entrée de sa mineure, son titre en tête.
-                '<strong>Ouvrir un codex quand l\'espace manque.</strong> Quand l\'espace vient à manquer pendant l\'ouverture d\'un codex, l\'application va jusqu\'au bout et te dit combien de copies n\'ont pas pu revenir, au lieu d\'un simple «&nbsp;Erreur&nbsp;». Le message de refus d\'espace ne suppose plus que tu es sur un iPad.'
+                '<strong>Ouvrir un codex quand l\'espace manque.</strong> Quand l\'espace vient à manquer pendant l\'ouverture d\'un codex, l\'application va jusqu\'au bout et te dit combien de copies n\'ont pas pu revenir, au lieu d\'un simple «&nbsp;Erreur&nbsp;». Le message de refus d\'espace ne suppose plus que tu es sur un iPad.',
+                // 1.173.3 (#1012, premier lot) — titre et ligne proposés par Cowork, ACCEPTÉS par
+                // Grégoire le 1er oct. 2026 à 13 h 40 (« ça marche », consigne de release de Cowork),
+                // posés tels quels. Même usage : la ligne entre dans l'entrée de sa mineure.
+                '<strong>Le bilan d\'un codex incomplet reste à l\'écran.</strong> Quand des copies n\'ont pas pu revenir à l\'ouverture d\'un codex, une fenêtre le dit, explique comment les retrouver, et reste là jusqu\'à ta réponse. Dans Chrome, un fichier que tu as choisi puis refusé n\'est plus celui que «&nbsp;Mettre à jour le codex&nbsp;» réécrit.'
             ]
         },
         {
