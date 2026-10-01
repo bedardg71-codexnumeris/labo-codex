@@ -27,7 +27,11 @@
             couleur: 'bleu',
             titre: 'La copie de secours cède la place au codex',
             items: [
-                'Dans Réglages › Données, le bouton «&nbsp;Faire une copie de secours&nbsp;» disparaît&nbsp;: pour mettre ton travail en sûreté, mets ton codex à jour. Un fichier de copie de secours déjà fait s\'ouvre toujours, par «&nbsp;Ouvrir un Codex…&nbsp;», qui ouvre maintenant aussi un codex. Supprimer un trimestre demande un codex à jour.'
+                'Dans Réglages › Données, le bouton «&nbsp;Faire une copie de secours&nbsp;» disparaît&nbsp;: pour mettre ton travail en sûreté, mets ton codex à jour. Un fichier de copie de secours déjà fait s\'ouvre toujours, par «&nbsp;Ouvrir un Codex…&nbsp;», qui ouvre maintenant aussi un codex. Supprimer un trimestre demande un codex à jour.',
+                // 1.173.2 (#1011) — titre et ligne proposés par Cowork (second verdict de relecture,
+                // 1er oct. 2026, 11 h 30), ACCEPTÉS par Grégoire le même jour. Correctif : la ligne
+                // entre dans l'entrée de sa mineure, son titre en tête.
+                '<strong>Ouvrir un codex quand l\'espace manque.</strong> Quand l\'espace vient à manquer pendant l\'ouverture d\'un codex, l\'application va jusqu\'au bout et te dit combien de copies n\'ont pas pu revenir, au lieu d\'un simple «&nbsp;Erreur&nbsp;». Le message de refus d\'espace ne suppose plus que tu es sur un iPad.'
             ]
         },
         {
