@@ -1,6 +1,6 @@
 # Demande de relecture – #1011 : un codex ouvert sans assez d'espace finit par « Erreur »
 
-> Écrite le 1er octobre 2026, vers 11 h 30 (Toronto), par Claude Code, pour Cowork. Exécute `plans de travail/CONSIGNE-DU-JOUR.md` (8 h 51, ajout de 9 h 50). Branche `fix-1011-codex-ouvert-sans-espace` : le commit de code est `40521da7`. **Ni release ni push du code.** Ce chemin écrit les données de l'usager : relecture croisée avant toute release (règle 2).
+> Écrite le 1er octobre 2026, vers 11 h (Toronto ; l'en-tête disait « 11 h 30 », heure estimée et fausse, corrigée sur l'heure du commit), par Claude Code, pour Cowork. Exécute `plans de travail/CONSIGNE-DU-JOUR.md` (8 h 51, ajout de 9 h 50). Branche `fix-1011-codex-ouvert-sans-espace` : le commit de code est `40521da7`. **Ni release ni push du code.** Ce chemin écrit les données de l'usager : relecture croisée avant toute release (règle 2).
 > Chaque constat dit s'il est **mesuré** (par exécution), **lu** au code, ou **inféré**. Je ne suis pas un pair développeur : ce qui suit est une mesure et une lecture, à relire comme telles.
 
 ## Pour Grégoire, en trois lignes
@@ -106,3 +106,37 @@ Dans les deux cas, la phrase finale reste : « Si tu navigues en privé, rouvre 
 ## 9 · À la livraison
 
 Après la relecture et les mots de Grégoire : release, verdict complet par `scripts/pousser.sh` (Cowork fermé, Mac branché), fusion vers `main`. La rangée 2.4 de la porte du lot I bis se rejoue ensuite par Grégoire ; #1011 reste ouverte jusque-là.
+
+## 10 · Après le verdict de Cowork (11 h 08) : la correction, et les mots posés
+
+> Ajouté le 1er octobre 2026, vers 11 h 25, par Claude Code. Répond à `plans de travail/VERDICT-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace.md`. La branche a été reposée sur `main` : le commit du correctif `40521da7` y est devenu `8e9af496` (même contenu). **Le commit à relire est `8f930884`.** Toujours ni release ni push du code : arrêt pour la relecture de Grégoire.
+
+**10.1 – Le cœur de #1012.** `js/codex.js`, `_ouvrirLeFichierChoisi` : `_fileHandle = null` dès que `stats.incomplet` est vrai, avant le bilan. Par la case, la poignée était déjà nulle (`ouvrirFichier`). Aucun mot d'écran.
+
+**10.2 – Les mots, tels que le verdict les donne.** Le refus du pré-vol (§ 6.1) : « Espace insuffisant pour ouvrir ce codex. Il a besoin d'environ {besoin}, mais le navigateur n'accorde que {disponible} à l'application. Libère environ {à libérer} sur l'appareil, puis réessaie. Sur un iPad : Réglages → Général → Stockage iPad. », puis, seulement quand `prevol.quotaFaible` est vrai : « Si tu navigues en privé, rouvre l'application dans une fenêtre normale. » Les trois valeurs sont inchangées. Le titre du bandeau d'échec (§ 6.2) : « Le codex n'a pas pu être ouvert », dans `_ouvrirLeFichierChoisi` seulement ; le détail ne change pas.
+
+**10.3 – Une sentinelle tenait l'ancien texte** : `tests/unit/sentinelle-prevol-stockage-2026-06.test.js` exigeait « rouvre l'app dans une fenêtre normale » ; elle exige maintenant « rouvre l'application… ». `sentinelle-onglets-perimes-299` exige « Réglages → Général → Stockage iPad » dans `js/codex.js` : toujours vrai, non touchée.
+
+**10.4 – La preuve.** La spec passe de 3 à 6 essais :
+
+| Essai | Ce qu'il tient |
+|---|---|
+| (2), complété | après une ouverture incomplète par le menu, l'état ne porte plus de poignée (`handleFSAPI: false`) |
+| (4) témoin | après une ouverture complète par le menu (mêmes trois copies, acceptées), la poignée reste (`handleFSAPI: true`) |
+| (5), deux cas | le refus du pré-vol : le titre du bandeau, le texte entier, et la phrase de la navigation privée présente à 50 Mo de quota, absente à 600 Mo presque pleins ; rien du codex n'est écrit |
+
+| État muté | Rouges |
+|---|---|
+| M5 – le fichier d'origine n'est plus oublié après une ouverture incomplète | (2) |
+| M6 – le titre redevient « Erreur » | les deux (5) |
+| M7 – le refus nomme Safari | les deux (5) |
+| M8 – la phrase de la navigation privée est toujours dite | le second (5) |
+| M9 – le fichier d'origine est oublié même après une ouverture complète | (4) |
+
+Cinq mutations, cinq rouges, chacune sur les essais attendus et eux seuls ; restauration par copie, empreinte identique ; contrôle final vert (6 sur 6). Avec les cinq du § 4 : dix états mutés, dix rouges. Vitest complet sur le commit : voir le relais.
+
+**10.5 – Comment la poignée est simulée, et ce qui reste inféré pour Chrome.** WebKit n'a pas de `showOpenFilePicker`. Le banc en pose un qui rend un objet avec `name` et `getFile` : `actionOuvrir` le range dans `_fileHandle` comme il rangerait une vraie poignée, et `Codex.etat().handleFSAPI` dit si elle y est encore. **Mesuré** : la poignée est oubliée ou gardée selon le cas. **Inféré, non exécuté** : que Chrome, sans poignée, ouvre bien sa fenêtre de destination à « Mettre à jour le codex » (c'est le chemin de tout premier enregistrement).
+
+**10.6 – Pour le pré-vol, `navigator.storage.estimate` est remplacé** sur `StorageManager.prototype` (posé sur `navigator.storage`, WebKit ne le lisait pas ; un témoin vérifie que le remplacement répond).
+
+**10.7 – Ce qui reste à #1012, hors de ce lot** (verdict de Cowork) : un codex regénéré depuis un espace où des copies manquent les perd sans le dire, et rien n'empêche de choisir le même fichier dans la fenêtre de destination. Il faut un avertissement, donc des mots de Grégoire. La fiche reste ouverte.

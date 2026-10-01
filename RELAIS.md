@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 45 : **#1011 (UN CODEX OUVERT SANS ASSEZ D'ESPACE FINIT PAR « ERREUR ») REPRODUIT ET CORRIGÉ SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`40521da7`) ; NI RELEASE NI PUSH DU CODE ; RELECTURE DE COWORK ET MOTS DE GRÉGOIRE ATTENDUS**
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 25 : **#1011 : LA CORRECTION DEMANDÉE PAR COWORK (LE CŒUR DE #1012) ET LES MOTS DE GRÉGOIRE SONT POSÉS SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`8f930884`) ; ARRÊT POUR LA RELECTURE DE GRÉGOIRE ; NI RELEASE NI PUSH DU CODE**
+
+**Verdict de Cowork** (`plans de travail/VERDICT-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace.md`, 11 h 08, par lecture) : le lot part après une correction. Commité tel quel sur `main` avec la consigne du jour (autorisation de Grégoire).
+
+**Sur la branche, en local seulement** (reposée sur `main` : `40521da7` y est devenu `8e9af496`), puis `8f930884` : (1) après une ouverture incomplète, l'application oublie le fichier d'origine — « Mettre à jour le codex » ne le réécrit plus en place ; (2) le refus du pré-vol, tel que tranché par Grégoire à 11 h 10 : « … mais le navigateur n'accorde que… Libère environ… sur l'appareil, puis réessaie. Sur un iPad : Réglages → Général → Stockage iPad. », et la phrase de la navigation privée seulement quand peu d'espace est accordé ; (3) le bandeau d'échec de l'ouverture d'un codex s'intitule « Le codex n'a pas pu être ouvert » (tranché à 11 h 11).
+
+**Mesuré** : la spec `codex-1011-ouvert-sans-espace` a 6 essais, verts ; cinq mutations de plus, cinq rouges, chacune sur les essais attendus (dix états mutés en tout) ; Vitest complet vert sur le commit (669 fichiers, 7 884 essais) ; `sentinelle-prevol-stockage-2026-06` mise à jour (elle tenait l'ancien texte) ; les deux specs voisines qui ouvrent un codex ou un ancien fichier, vertes sur `8f930884` (8 essais, sans reprise). **Simulé** : la poignée de fichier (WebKit n'a pas de `showOpenFilePicker`) et ce que le navigateur dit de l'espace. **Inféré** : que Chrome, sans poignée, demande où écrire. **Pas fait** : la suite Playwright complète.
+
+**La supposition 2, dite telle qu'elle est** (demandé par le verdict) : quand le marquage « manquant » est refusé, les statuts d'avant sont remis. Mémoire et stockage sont alors d'accord, et tous deux disent « stockée » pour une copie absente. Après le rechargement, rien ne se souvient que l'ouverture était incomplète. Acceptée faute de mieux ; c'est un argument pour l'avertissement de #1012.
+
+**#1012 reste ouverte** (lot suivant, proche) : un codex regénéré depuis un espace où des copies manquent les perd sans le dire, et rien n'empêche de choisir le même fichier à la destination ; il faut un avertissement, donc des mots de Grégoire. Le chemin frère (`js/import-export.js`) et l'étape 5 bis sans garde restent inscrits sous #1011 et #1012. Le pré-vol : « pas établi », relevé chez Grégoire remis à plus tard (ne pas le lui demander dans ce lot).
+
+**Ce qui reste, dans l'ordre** : la relecture de Grégoire ; la relecture de Cowork sur `8f930884` (§ 10 de la demande) ; la release (une ligne aux Nouvelles à lui proposer : deux textes d'écran changent) ; le verdict par `scripts/pousser.sh` (Cowork fermé, Mac branché) ; la fusion ; la rangée 2.4 rejouée par Grégoire. Toujours attendue : sa confirmation à l'écran de #1009. Ensuite : #1012, puis le lot A3 des archives.
+
+---
+
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 03 (ce titre disait « 11 h 45 », heure estimée et fausse ; corrigée sur l'heure du commit) : **#1011 (UN CODEX OUVERT SANS ASSEZ D'ESPACE FINIT PAR « ERREUR ») REPRODUIT ET CORRIGÉ SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`40521da7`) ; NI RELEASE NI PUSH DU CODE ; RELECTURE DE COWORK ET MOTS DE GRÉGOIRE ATTENDUS**
 
 **Consigne suivie** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 1er oct., 8 h 51, ajout de 9 h 50), jusqu'à son étape 7. Le fichier de la consigne, modifié par Cowork à 9 h 50, est resté dans l'arbre, non commité (c'est le sien).
 
