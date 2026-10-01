@@ -451,8 +451,10 @@ spécifiques ci-dessus.
 ## Priorités d'implémentation
 
 1. **Codex allégé** — retirer le TimeMachine du codex. Gain immédiat.
-2. **Compression de l'export données** — ajouter DEFLATE à `executerExport()`.
-   Correctif technique simple (une ligne).
+2. ~~**Compression de l'export données** — ajouter DEFLATE à `executerExport()`.~~
+   Sans objet depuis le lot I bis (30 sept. 2026) : cet export (la fenêtre des clés
+   de Réglages › Données) est retiré, l'application ne fabrique plus que le codex.
+   Un fichier déjà fait s'ouvre toujours.
 3. **Archives** — structure de répertoire, archivage, consultation.
 4. **Codex data** — extraction depuis les archives, format JSON.
 5. **Labo autonome** — sortir le Labo de la section Suivi, lui permettre

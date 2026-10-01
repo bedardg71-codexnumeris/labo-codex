@@ -25,11 +25,12 @@ const CARTE = debut > -1 ? AIDE.slice(debut, AIDE.indexOf('accordeon-aide-', deb
 const texte = (s) => s.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
 
 describe('#862 · l\'Aide dit ce que la Loi 25 demande', () => {
-    // Lot F (D4, 29 sept.) : la section s'appelle « Copie de secours et partage de tes données »,
-    // et le bouton « Exporter le Codex » est devenu « Faire une copie de secours ».
-    it('la section « Copie de secours et partage de tes données » de l\'Aide existe (la tranche n\'est pas vide)', () => {
+    // RÉANCRÉ au lot I bis (D9, 30 sept. 2026, « un seul terme ») : la section s'appelle
+    // « Ouverture et partage de tes données », et l'encadré renvoie au geste qui reste,
+    // « Mettre à jour le codex » (le bouton de l'ancien fichier de secours est retiré).
+    it('la section « Ouverture et partage de tes données » de l\'Aide existe (la tranche n\'est pas vide)', () => {
         expect(CARTE.length).toBeGreaterThan(500);
-        expect(texte(CARTE)).toMatch(/Copie de secours et partage de tes données/);
+        expect(texte(CARTE)).toMatch(/Ouverture et partage de tes données/);
     });
 
     it('elle porte l\'encadré « Important » qui nomme la Loi 25', () => {
@@ -45,9 +46,9 @@ describe('#862 · l\'Aide dit ce que la Loi 25 demande', () => {
 
     it('les deux boutons qu\'elle nomme existent sous ces mots, hors de l\'Aide', () => {
         const horsAide = html.replace(AIDE, '');
-        expect(horsAide).toMatch(/>\s*Faire une copie de secours\s*</);
+        expect(horsAide).toMatch(/>\s*Mettre à jour le codex\s*</);
         expect(horsAide).toMatch(/>\s*Réinitialiser toutes les données\s*</);
-        expect(texte(CARTE)).toMatch(/« Faire une copie de secours »/);
+        expect(texte(CARTE)).toMatch(/Personne ne met ton codex à jour à ta place : utilise « Mettre à jour le codex » régulièrement\./);
         expect(texte(CARTE)).toMatch(/« Réinitialiser toutes les données »/);
     });
 });

@@ -186,11 +186,9 @@ const TOOLTIPS = {
     'donnees-captures':
         'Tes captures de suivi longitudinal et l\'export anonymisé pour la recherche en éducation.',
     'donnees-codex':
-        'Fais une copie de secours de tes données, ouvre un fichier (codex, copie de secours ou configuration partagée), ou exporte ta configuration pédagogique pour la partager.',
-    'donnees-codex-export':
-        'Un fichier avec les données que tu choisis ; coche « Toutes les clés » pour tout garder. Pour restaurer tes données sur cet appareil ou un autre.',
+        'Ouvre un codex ou une configuration partagée, ou exporte ta configuration pédagogique pour la partager. Pour mettre ton travail en sûreté ou le transporter, mets ton codex à jour : menu Codex, en haut de l\'écran.',
     'donnees-codex-ouvrir':
-        'Ouvre un codex, une copie de secours ou une configuration partagée. Le type est détecté automatiquement.',
+        'Ouvre un codex ou une configuration partagée. Le type est détecté automatiquement.',
     'donnees-codex-data':
         'Format léger sans blobs (5–30 Mo), multi-trimestres, pour la recherche longitudinale au Labo. À venir : extraction depuis tes Archives.',
     'donnees-voute':
@@ -667,7 +665,7 @@ const TOOLTIPS = {
     'nav-labo-accompagnement':
         'Outils d\'observation des apprentissages (SOLO, actions RLO, ACP) et configuration du dépistage RàI (seuils de détection et d\'interprétation).',
     'nav-reg-donnees':
-        'Copie de secours, restauration, captures A-C-P, export anonymisé, réinitialisation et maintenance.',
+        'Codex, restauration, captures A-C-P, export anonymisé, réinitialisation et maintenance.',
     'nav-reg-apropos':
         'Informations sur l\'application et sa version.',
 

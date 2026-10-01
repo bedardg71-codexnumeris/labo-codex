@@ -252,18 +252,22 @@ function verifierUniciteIds(tableau, nomCollection) {
  * MODULE: import-export.js
  *
  * RÔLE:
- * Gère l'exportation et l'importation sélective de données
- * stockées via db.js sous forme de fichiers JSON
+ * Gère l'export de la configuration pédagogique et l'importation sélective
+ * de données stockées via db.js (fichiers JSON ou ZIP)
  *
  * FONCTIONNALITÉS:
- * - Export sélectif des clés (backup complet)
+ * - Export de la configuration pédagogique (« Exporter ma config »)
  * - Import avec aperçu et confirmation
- * - Sélection "Toutes les clés"
- * - Validation des fichiers JSON
+ * - Validation des fichiers JSON et ZIP
  *
- * NOTE TECHNIQUE:
- * Ce module manipule localStorage directement (pas db.js) car il fait
- * des backups complets et manipule des strings JSON brutes pour export/import.
+ * LOT I BIS (D9, 30 sept. 2026) — la fenêtre des clés (« Toutes les clés ») et son
+ * export sont RETIRÉS : l'application ne parle plus que du codex, et le cliquet
+ * tests/unit/sentinelle-lot-I-bis-un-seul-terme.test.js refuse l'ancien nom de ce
+ * fichier partout dans le dossier js/ et index.html. L'OUVERTURE d'un fichier déjà
+ * fait (.json, ou .zip avec les travaux) reste, par previsualiserImport →
+ * afficherModalPreviewLocalStorageBrut → executerImportSelectif : ces fichiers
+ * existent chez les gens. Banc :
+ * tests/integration/lot-i-bis-anciens-fichiers-s-ouvrent.spec.js.
  *
  * ORIGINE:
  * Code extrait et adapté de index 35-M5 10-10-2025a
@@ -275,12 +279,10 @@ function verifierUniciteIds(tableau, nomCollection) {
 
 function initialiserModuleImportExport() {
 
-    const modalExport = document.getElementById('modalExport');
     const modalImport = document.getElementById('modalImport');
 
-    if (modalExport && modalImport) {
-    } else {
-        console.warn('   Modales import/export manquantes');
+    if (!modalImport) {
+        console.warn('   Modale d\'import manquante');
     }
 }
 
@@ -292,7 +294,7 @@ function initialiserModuleImportExport() {
 /**
  * Détecte si une ressource est du matériel démo basé sur des patterns connus
  * @param {Object} ressource - La ressource à vérifier
- * @param {string} type - Type de ressource ('grille', 'echelle', 'production', 'cartouche', 'pratique', 'etudiant')
+ * @param {string} type - Type de ressource ('grille', 'echelle', 'production', 'cartouche', 'pratique')
  * @returns {boolean} - True si c'est du matériel démo
  */
 function estRessourceDemo(ressource, type) {
@@ -338,13 +340,6 @@ function estRessourceDemo(ressource, type) {
 
     // Détection spécifique par type
     switch (type) {
-        case 'etudiant':
-            // Étudiants démo : groupe 9999 ou DA commençant par 9999
-            if (ressource.groupe === '9999' || ressource.groupe === 9999) return true;
-            if (ressource.da && ressource.da.toString().startsWith('9999')) return true;
-            if (ressource.coursId && ressource.coursId.includes('9999')) return true;
-            break;
-
         case 'grille':
             // Grilles avec noms spécifiques démo
             if (nom.includes('grille générique') || nom.includes('grille démo')) return true;
@@ -353,11 +348,6 @@ function estRessourceDemo(ressource, type) {
         case 'echelle':
             // Échelles avec noms spécifiques démo
             if (nom.includes('échelle générique') || nom.includes('echelle générique')) return true;
-            break;
-
-        case 'cours':
-            // Cours démo : groupe 9999
-            if (ressource.groupe === '9999' || ressource.groupe === 9999) return true;
             break;
     }
 
@@ -1016,333 +1006,6 @@ function estCleCalendrierImport(cle) {
 }
 
 /* ===============================
-   EXPORT DES DONNÉES
-   =============================== */
-
-async function ouvrirModalExport() {
-    const modal = document.getElementById('modalExport');
-    const liste = document.getElementById('listeClesExport');
-
-    // 🆕 Beta 96.2 : Récupérer toutes les clés depuis IndexedDB (pas seulement localStorage)
-    // Cela inclut les données volumineuses qui ne tiennent pas dans localStorage
-    let cles = [];
-    try {
-        cles = await db.keys();
-    } catch (e) {
-        // Fallback vers localStorage si erreur
-        console.warn('[Export] Erreur lecture IndexedDB, fallback localStorage:', e);
-        cles = Object.keys(localStorage);
-    }
-
-    // Construire la liste des clés avec leurs tailles
-    // #401 : tailles SANS matérialiser les valeurs — l'ancienne boucle faisait
-    // `await db.get(cle)` PAR clé (transactions IDB + sérialisations, y compris
-    // les blobs de plusieurs Mo) juste pour afficher des Ko : 473-488 ms mesurés
-    // à chaque ouverture du modal (Safari, codex réel, 5 août soir). Après le
-    // boot, chaque clé vit dans localStorage (la chaîne est déjà là) ou dans
-    // db.memoryCache (l'objet est déjà en RAM : stringify seul, zéro I/O).
-    let html = '';
-    for (const cle of cles) {
-        let tailleKo = '?';
-        try {
-            const chaineLS = localStorage.getItem(cle);
-            if (chaineLS !== null) {
-                tailleKo = ((cle.length + chaineLS.length) / 1024).toFixed(2);
-            } else if (db.memoryCache && db.memoryCache.has(cle)) {
-                const jsonStr = JSON.stringify(db.memoryCache.get(cle));
-                tailleKo = ((cle.length + jsonStr.length) / 1024).toFixed(2);
-            }
-        } catch (e) {
-            // Ignorer les erreurs de lecture
-        }
-
-        html += `
-            <label style="display: flex; align-items: center; padding: 8px;
-                   background: var(--bleu-tres-pale); margin-bottom: 5px;
-                   border-radius: 4px; border: 1px solid var(--bleu-pale);
-                   transition: all 0.2s; cursor: pointer;">
-                <input type="checkbox" class="cle-export" value="${echapperHtml(cle)}"
-                       style="margin-right: 10px; transform: scale(1.2);">
-                <span style="flex: 1; font-family: monospace; font-size: 0.9rem;">${echapperHtml(cle)}</span>
-                <span style="color: var(--bleu-leger); font-size: 0.85rem;">${tailleKo} Ko</span>
-            </label>
-        `;
-    }
-
-    liste.innerHTML = html;
-    document.getElementById('checkToutesLes').checked = false;
-    modal.classList.remove('u-hide');
-}
-
-function fermerModalExport() {
-    document.getElementById('modalExport').classList.add('u-hide');
-    document.getElementById('checkToutesLes').checked = false;
-}
-
-function toggleToutesLesCles() {
-    const checkTous = document.getElementById('checkToutesLes').checked;
-    document.querySelectorAll('.cle-export').forEach(cb => {
-        cb.checked = checkTous;
-    });
-}
-
-async function executerExport() {
-    const clesSelectionnees = [];
-    document.querySelectorAll('.cle-export:checked').forEach(cb => {
-        clesSelectionnees.push(cb.value);
-    });
-
-    if (clesSelectionnees.length === 0) {
-        alert('Aucune clé sélectionnée');
-        return;
-    }
-
-    // Détecter si des clés contiennent des données personnelles
-    const CLES_DONNEES_PERSONNELLES = ['groupeEtudiants', 'presences', 'evaluationsSauvegardees', 'snapshots'];
-    const contientDonneesPerso = clesSelectionnees.some(cle =>
-        CLES_DONNEES_PERSONNELLES.some(pattern => cle.includes(pattern))
-    );
-
-    if (contientDonneesPerso) {
-        const continuer = confirm(
-            'Ce fichier contiendra des données personnelles d\'étudiants (noms, DA, notes, présences).\n\n' +
-            'Ne le partagez pas.\n\n' +
-            'Continuer l\'export ?'
-        );
-        if (!continuer) return;
-    }
-
-    const _hasProg = typeof window.afficherProgression === 'function';
-    if (_hasProg) {
-        window.afficherProgression('Export sélectif');
-        window.majProgression(0, 'Lecture des clés...', clesSelectionnees.length + ' clés');
-        await new Promise(r => setTimeout(r, 0));
-    }
-
-    try {
-
-    const donnees = {};
-    let nbDemoExclus = 0;
-    let _iCle = 0;
-
-    // 🆕 Beta 96.2 : Utiliser db.get() pour lire depuis IndexedDB (pas seulement localStorage)
-    for (const cle of clesSelectionnees) {
-        let valeur = null;
-        if (_hasProg) {
-            const pct = Math.round((_iCle / clesSelectionnees.length) * 50);
-            window.majProgression(pct, 'Lecture des clés...', (_iCle + 1) + '/' + clesSelectionnees.length + ' · ' + cle);
-        }
-        _iCle++;
-
-        try {
-            // Récupérer la valeur depuis IndexedDB (ou localStorage en fallback)
-            valeur = await db.get(cle, null);
-        } catch (e) {
-            console.warn(`[Export] Erreur lecture clé "${cle}":`, e);
-            continue;
-        }
-
-        // ✅ AJOUTÉ (6 jan 2026) : Filtrer les données démo avant export
-        if (valeur !== null) {
-            // Filtrer les étudiants démo (groupe 9999)
-            if (cle.includes('groupeEtudiants') && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = valeur.filter(e => !estRessourceDemo(e, 'etudiant'));
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Filtrer les cours démo (groupe 9999)
-            if (cle === 'listeCours' && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = valeur.filter(c => !estRessourceDemo(c, 'cours'));
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Filtrer les grilles démo
-            if (cle === 'grillesTemplates' && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = filtrerRessourcesNonDemo(valeur, 'grille');
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Filtrer les échelles démo
-            if (cle === 'echellesTemplates' && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = filtrerRessourcesNonDemo(valeur, 'echelle');
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Filtrer les productions démo
-            if (cle.includes('productions') && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = valeur.filter(p => !p.estDemo);
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Filtrer les évaluations démo
-            if (cle.includes('evaluationsSauvegardees') && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = valeur.filter(ev => !ev.estDemo);
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Filtrer les presences démo
-            if (cle.includes('presences') && Array.isArray(valeur)) {
-                const avant = valeur.length;
-                valeur = valeur.filter(p => !p.estDemo);
-                nbDemoExclus += avant - valeur.length;
-            }
-
-            // Retirer les noms des étudiants dans les snapshots exportés
-            // (le nom sera re-résolu localement à l'import via la liste d'étudiants)
-            if (cle.includes('snapshots') && valeur && typeof valeur === 'object') {
-                const retirerNomsSnapshots = (snapArray) => {
-                    if (!Array.isArray(snapArray)) return snapArray;
-                    return snapArray.map(snap => {
-                        if (snap && Array.isArray(snap.etudiants)) {
-                            return {
-                                ...snap,
-                                etudiants: snap.etudiants.map(e => {
-                                    const { nom, prenom, ...sansNom } = e;
-                                    return sansNom;
-                                })
-                            };
-                        }
-                        return snap;
-                    });
-                };
-                if (valeur.hebdomadaires) valeur.hebdomadaires = retirerNomsSnapshots(valeur.hebdomadaires);
-                if (valeur.interventions) valeur.interventions = retirerNomsSnapshots(valeur.interventions);
-            }
-
-            // Pour les ressources partageables, vérifier qu'aucun champ personnel ne s'y glisse
-            if ((cle === 'grillesTemplates' || cle === 'echellesTemplates' || cle === 'pratiquesConfigurables' || cle.includes('productions')) && Array.isArray(valeur)) {
-                valeur = valeur.map(item => {
-                    const copie = { ...item };
-                    // Retirer les champs personnels qui ne devraient pas être dans les ressources
-                    delete copie.etudiantDA;
-                    delete copie.da;
-                    delete copie.prenom;
-                    // Ne pas supprimer 'nom' car c'est le nom de la ressource, pas d'un étudiant
-                    return copie;
-                });
-            }
-
-            // 🔧 FIX (Beta 97.9) : Convertir les tableaux sparse en Object
-            // Un DA étudiant utilisé comme index crée des millions de slots null
-            if (Array.isArray(valeur) && valeur.length > 10000) {
-                const nbNonNull = valeur.filter(v => v != null).length;
-                if (nbNonNull < valeur.length * 0.01) {
-                    // Tableau sparse détecté (>99% de slots null)
-                    const converti = {};
-                    for (let i = 0; i < valeur.length; i++) {
-                        if (valeur[i] != null) {
-                            converti[String(i)] = valeur[i];
-                        }
-                    }
-                    valeur = converti;
-                }
-            }
-
-            // Stocker la valeur
-            donnees[cle] = valeur;
-        }
-    }
-
-    if (nbDemoExclus > 0) {
-    }
-
-    if (_hasProg) window.majProgression(55, 'Sérialisation JSON...');
-    const json = JSON.stringify(donnees, null, 2);
-
-    // 🆕 FIX #56 (1er fév 2026) : Horodatage complet pour éviter confusion entre exports
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
-
-    // Convention #262 : préfixe `sauvegarde-{auteur}-{date}` (sans
-    // « CONFIDENTIEL- » ni « monitorage », accents préservés).
-    // contientDonneesPerso reste consommé par le dialog de confirmation au-dessus.
-    const infoCours = db.getSync ? db.getSync('infoCours', {}) : {};
-    const auteurBrut = infoCours?.enseignant;
-    const auteur = (typeof auteurBrut === 'string') ? auteurBrut : '';
-    const auteurNettoye = auteur
-        ? auteur.replace(/[^a-z0-9àâäéèêëïîôùûüç]/gi, '-').replace(/-+/g, '-').toLowerCase()
-        : '';
-    const partieAuteur = auteurNettoye ? `-${auteurNettoye}` : '';
-
-    // 🆕 Export ZIP si fichiersTravaux est sélectionné (inclut les blobs)
-    // #384 (audit 5 août, rapport A3) : TOUTES les clés fichiersTravaux
-    // sélectionnées (une par trimestre) — l'ancien `find` n'embarquait les
-    // blobs QUE de la première clé trouvée : backup multi-trimestre incomplet,
-    // perte découverte à la restauration.
-    const clesFT = clesSelectionnees.filter(c => c.includes('fichiersTravaux'));
-    if (clesFT.length > 0 && typeof JSZip !== 'undefined' && typeof travauxStockage !== 'undefined') {
-        if (_hasProg) window.majProgression(65, 'Préparation du ZIP...');
-        const zip = new JSZip();
-        zip.file('donnees.json', json);
-
-        const metadonnees = [];
-        for (const cleFT of clesFT) {
-            if (Array.isArray(donnees[cleFT])) metadonnees.push(...donnees[cleFT]);
-        }
-        if (Array.isArray(metadonnees)) {
-            const dossier = zip.folder('travaux');
-            let nbBlobs = 0;
-            let _iBlob = 0;
-            for (const f of metadonnees) {
-                if (_hasProg && _iBlob % 5 === 0) {
-                    const pct = 65 + Math.round((_iBlob / Math.max(1, metadonnees.length)) * 10);
-                    window.majProgression(pct, 'Ajout des fichiers travaux...', nbBlobs + '/' + metadonnees.length);
-                }
-                _iBlob++;
-                const blobTravail = await travauxStockage.recupererBlob(f.id);
-                if (blobTravail) {
-                    const ext = (f.nomFichier || 'bin').split('.').pop();
-                    dossier.file(f.id + '.' + ext, blobTravail);
-                    nbBlobs++;
-                }
-            }
-        }
-
-        const zipBlob = await zip.generateAsync({
-            type: 'blob',
-            compression: 'DEFLATE',
-            compressionOptions: { level: 6 }
-        }, function(meta) {
-            if (_hasProg) {
-                const pct = 75 + Math.round(meta.percent * 0.23);
-                window.majProgression(pct, 'Compression du ZIP...', Math.round(meta.percent) + '%');
-            }
-        });
-        const nomFichier = `sauvegarde${partieAuteur}-${dateStr}.zip`;
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(zipBlob);
-        a.download = nomFichier;
-        a.click();
-        URL.revokeObjectURL(a.href);
-    } else {
-        // Export JSON classique (sans fichiersTravaux)
-        if (_hasProg) window.majProgression(90, 'Préparation du téléchargement...');
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const nomFichier = `sauvegarde${partieAuteur}-${dateStr}.json`;
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nomFichier;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    fermerModalExport();
-
-    notifications.succes(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
-
-    } finally {
-        if (_hasProg) window.masquerProgression();
-    }
-}
-
-/* ===============================
    IMPORT DES DONNÉES
    =============================== */
 
@@ -1817,10 +1480,10 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const sourceLabel = estCollègue
         ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
         : restaurationNouvelAppareil
-            ? `Restauration de ${auteurImport.split(' ')[0] || 'ta copie de secours'}`
+            ? `Restauration de ${auteurImport.split(' ')[0] || 'tes données'}`
             : sourceInconnue
                 ? 'Source inconnue'
-                : 'Copie de secours personnelle';
+                : 'Fichier personnel';
 
     // Stocker pour utilisation dans executerImportSelectif
     analyseImportEnCours.estCollègue = estCollègue;
@@ -1987,7 +1650,7 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                         </p>
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 6px; border: 2px solid var(--btn-annuler);">
                             <input type="checkbox" id="confirmMaSauvegarde" data-on-change="toggleDonneesPersoImportFromEl" style="width: 20px; height: 20px;">
-                            <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est ma propre copie de secours</strong> – Je confirme que ce fichier m'appartient</span>
+                            <span style="font-size: 0.9rem; color: var(--gris-fonce);"><strong>C'est mon propre fichier</strong> – Je confirme qu'il m'appartient</span>
                         </label>
                         <div id="checkboxesDonneesPerso" style="display: none; margin-top: 12px; padding: 12px; background: var(--alerte-fond-succes, #d4edda); border-radius: 6px;">
                             ${analyse.donnees.etudiants.count > 0 ? genererLigneDonnee('etudiants', 'Étudiants', analyse.donnees.etudiants.count + ' étudiant(s)') : ''}
@@ -3579,12 +3242,6 @@ window.executerImportConfigComplete = executerImportConfigComplete;
 window.fermerModalPreviewConfigComplete = fermerModalPreviewConfigComplete;
 window.exporterConfigurationComplete = exporterConfigurationComplete;
 window.executerImportSelectif = executerImportSelectif; // 🆕 BETA 95.1
-
-// 🆕 Beta 96.2 : Export des fonctions d'export (corrigées pour IndexedDB)
-window.ouvrirModalExport = ouvrirModalExport;
-window.fermerModalExport = fermerModalExport;
-window.toggleToutesLesCles = toggleToutesLesCles;
-window.executerExport = executerExport;
 
 // Filtrage des données démo — réutilisé par js/reserve.js
 window.estRessourceDemo = estRessourceDemo;

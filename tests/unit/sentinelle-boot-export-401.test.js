@@ -9,27 +9,13 @@ import { chargerScript } from './_helpers/charger-script.js';
 //      sur la même chaîne que celle écrite — avant : double stringify, 243 ms
 //      de CPU mesurés au boot sur 5,2 Mo/120 clés, payés aussi par chaque
 //      setSync de grosse clé) ;
-//  (c) ouvrirModalExport affiche les tailles SANS matérialiser les valeurs
-//      (chaîne déjà dans localStorage, objet déjà dans memoryCache — zéro
-//      db.get, zéro transaction IDB).
+//  (c) [retiré au lot I bis, 30 sept. 2026 : la fenêtre des clés n'existe plus]
 
 const CustomEvent = class { constructor(t, o) { this.type = t; this.detail = o && o.detail; } };
 
-// localStorage partagé entre modules d'un même scénario (db.js écrit, le modal lit)
-function creerStoragePartage() {
-    return {
-        _data: {},
-        getItem(k) { return k in this._data ? this._data[k] : null; },
-        setItem(k, v) { this._data[k] = String(v); },
-        removeItem(k) { delete this._data[k]; },
-        clear() { this._data = {}; }
-    };
-}
-
-function chargerDb(jsonSpy, storage) {
+function chargerDb(jsonSpy) {
     const globaux = { CustomEvent };
     if (jsonSpy) globaux.JSON = jsonSpy;
-    if (storage) globaux.localStorage = storage;
     return chargerScript('js/db.js', globaux, {
         addEventListener: () => {},
         dispatchEvent: () => {}
@@ -110,42 +96,6 @@ describe('#401 (b) · une seule sérialisation par écriture', () => {
     });
 });
 
-describe('#401 (c) · modal export — tailles sans matérialiser les valeurs', () => {
-    function chargerModal(db, doc, storage) {
-        return chargerScript('js/import-export.js', {
-            db,
-            cle: (k) => k,
-            echapperHtml: (v) => String(v),
-            document: doc,
-            localStorage: storage
-        });
-    }
-
-    it('ouvrirModalExport ne fait AUCUN db.get (chaîne localStorage / objet memoryCache suffisent)', async () => {
-        const storage = creerStoragePartage();
-        const db = chargerDb(null, storage);
-        db.useIndexedDB = false;
-        db.setSync('petiteCle', { a: 1 });                 // vit dans localStorage
-        db.memoryCache.set('grosseCle', { blob: 'x'.repeat(1000) }); // vit en RAM
-        let appelsGet = 0;
-        db.get = async () => { appelsGet++; return null; };
-        db.keys = async () => ['petiteCle', 'grosseCle'];
-
-        const zones = {};
-        const doc = {
-            addEventListener: () => {}, removeEventListener: () => {},
-            querySelectorAll: () => [], querySelector: () => null,
-            getElementById: (id) => (zones[id] = zones[id] || { innerHTML: '', checked: false, style: {}, classList: { add() {}, remove() {} } }),
-            createElement: () => ({ setAttribute() {}, appendChild() {}, addEventListener() {}, style: {}, classList: { add() {}, remove() {} } }),
-            body: { addEventListener() {}, appendChild() {}, setAttribute() {}, classList: { add() {}, remove() {} }, style: {} }
-        };
-        const win = chargerModal(db, doc, storage);
-        await win.ouvrirModalExport();
-
-        expect(appelsGet).toBe(0); // le cœur P5 : zéro matérialisation
-        const html = zones['listeClesExport'].innerHTML;
-        expect(html).toContain('petiteCle');
-        expect(html).toContain('grosseCle');
-        expect(html).not.toContain('? Ko'); // les deux tailles sont calculées
-    });
-});
+// (c) RETIRÉ au lot I bis (D9, 30 sept. 2026) : `ouvrirModalExport` affichait les tailles
+// sans matérialiser les valeurs. La fenêtre des clés et sa fonction n'existent plus (le
+// cliquet sentinelle-lot-I-bis-un-seul-terme refuse leur retour) : il n'y a plus rien à juger.

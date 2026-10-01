@@ -306,11 +306,10 @@ Labo Codex — laboratoire de codexnumeris.org
 ## Avertissement
 
 Cette application est en **développement actif (Beta)**. Elle est
-fonctionnelle et utilisée en classe, mais peut contenir des bugs. Effectuez
-des copies de secours régulières de vos données :
+fonctionnelle et utilisée en classe, mais peut contenir des bugs. Mettez
+régulièrement votre codex à jour :
 
-- **Réglages → Données → Faire une copie de secours**
-- ou **Codex (menu du haut) → Mettre à jour le codex** (fichier ZIP portable)
+- **Codex (menu du haut) → Mettre à jour le codex** (fichier ZIP portable)
 - et, en fin de trimestre, **Codex → Archiver** (un groupe-cours dans les archives)
 
 Voir [`docs/architecture/ECOSYSTEME-DONNEES.md`](docs/architecture/ECOSYSTEME-DONNEES.md)

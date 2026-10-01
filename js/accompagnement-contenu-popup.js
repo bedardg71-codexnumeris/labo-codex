@@ -1604,40 +1604,11 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "Cette information voyage avec ton codex et tes copies de secours. Si tu partages un codex avec quelqu'un, vérifie d'abord que ces données ne doivent pas y être."
+                contenu: "Cette information voyage avec ton codex. Si tu partages un codex avec quelqu'un, vérifie d'abord que ces données ne doivent pas y être."
             },
             {
                 type: 'conseil',
                 contenu: "Limite-toi à ce qui est utile à ta pratique. Évite les jugements personnels — la fiche peut être consultée par toi plus tard, dans un contexte différent."
-            }
-        ]
-    },
-
-    'modal-export': {
-        titre: "Faire une copie de secours",
-        sections: [
-            {
-                type: 'texte',
-                contenu: "Cette fenêtre te laisse choisir quelles clés de stockage mettre dans ta copie de secours : un fichier JSON, ou ZIP si tu inclus les fichiers de travaux. Coche « Toutes les clés » pour une copie complète. Pour transporter ton travail d'un appareil à l'autre, préfère le codex (menu Codex, en haut)."
-            },
-            {
-                type: 'liste',
-                titre: "Quelques clés courantes",
-                items: [
-                    "<strong>groupeEtudiants</strong> — liste nominale des étudiants du cours.",
-                    "<strong>evaluationsSauvegardees</strong> — toutes les évaluations, critères et rétroactions.",
-                    "<strong>fichiersTravaux</strong> — métadonnées des fichiers (cocher déclenche un ZIP avec les blobs).",
-                    "<strong>grillesTemplates / echellesTemplates / productions</strong> — matériel pédagogique."
-                ]
-            },
-            {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: "Si tu sélectionnes groupeEtudiants, evaluationsSauvegardees, presences ou snapshots, le fichier contient des données nominales d'étudiants. Une boîte de dialogue te le rappellera. Ne le partage pas."
-            },
-            {
-                type: 'conseil',
-                contenu: "Pour partager du matériel pédagogique propre (sans données étudiantes), utilise plutôt les exports de bibliothèque (grilles, échelles, etc.) qui filtrent automatiquement les champs personnels."
             }
         ]
     },
@@ -1647,7 +1618,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette modale accepte des fichiers JSON ou ZIP générés par Labo Codex. L'import écrase les clés correspondantes : utilise-le pour restaurer une copie de secours ou migrer un trimestre d'un appareil à l'autre."
+                contenu: "Cette modale accepte des fichiers JSON ou ZIP générés par Labo Codex. L'import écrase les clés correspondantes. Pour transporter ton travail d'un appareil à l'autre, passe par le codex (menu Codex, en haut de l'écran)."
             },
             {
                 type: 'alerte',
@@ -1658,14 +1629,14 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Formats acceptés",
                 items: [
-                    "<strong>.json</strong> : copie de secours sans fichiers de travaux.",
-                    "<strong>.zip</strong> : copie de secours avec fichiers de travaux, ou configuration partagée.",
+                    "<strong>.json</strong> : fichier de données d'une version antérieure, sans fichiers de travaux.",
+                    "<strong>.zip</strong> : configuration partagée, ou fichier de données d'une version antérieure avec ses fichiers de travaux.",
                     "<strong>codex-‹nom›-‹date›.zip</strong> : fichier codex complet (passer plutôt par Réglages > Données)."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Fais toujours une copie de secours avant un import : c'est ton filet de sécurité si l'import écrase des données que tu voulais garder."
+                contenu: "Mets toujours ton codex à jour avant un import : c'est ton filet de sécurité si l'import écrase des données que tu voulais garder."
             }
         ]
     },

@@ -378,13 +378,49 @@ function archiverTrimestreActif() {
 }
 
 /**
+ * « À jour » au sens exact de l'état que le menu du codex affiche (« Ton codex est à
+ * jour » : un codex actif, sans changement depuis sa dernière écriture — codex.js,
+ * `_actualiserMenu`). Module absent : pas à jour, on refuse dans le doute.
+ * @returns {{actif: boolean, aJour: boolean}}
+ */
+function etatDuCodexPourSuppression() {
+    const etat = (typeof Codex !== 'undefined' && Codex && typeof Codex.etat === 'function') ? Codex.etat() : null;
+    const actif = !!(etat && etat.actif);
+    return { actif: actif, aJour: actif && !etat.modificationsNonSauvees };
+}
+
+/**
+ * Le refus : une fenêtre de l'application, dont le bouton lance la mise à jour du
+ * codex (ou sa création) par le chemin du menu. Mots validés par Grégoire le 30 sept.
+ * 2026 ; la variante « sans codex » est proposée dans la demande de relecture du lot.
+ */
+function refuserSuppressionCodexPasAJour(codexActif) {
+    uiDialogues.demanderAction({
+        titre: 'Mets d\'abord ton codex à jour',
+        message: codexActif
+            ? 'Supprimer un trimestre efface ses données pour de bon. Ton codex n\'a pas tes derniers changements : mets-le à jour, puis recommence.'
+            : 'Supprimer un trimestre efface ses données pour de bon. Tu n\'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence.',
+        actions: [{ valeur: 'mettre-a-jour', texte: 'Mettre à jour le codex', principal: true }]
+    }).then(function(geste) {
+        if (geste === 'mettre-a-jour') Codex.actionEnregistrer();
+    });
+}
+
+/**
  * 🆕 #361 (2 juillet 2026) : parcours de suppression DÉFINITIVE d'un trimestre.
  * Remplace le stub supprimerTrimestreActif (retiré — le trimestre ACTIF ne
  * peut justement PAS être supprimé, garde anti-actif dans trimestres.js).
  *
- * Parcours : garde anti-actif → explication archivage vs suppression →
- * confirmation forte (ressaisir le nom exact) → export de sauvegarde
- * automatique → suppression → message d'état.
+ * Parcours : garde anti-actif → garde du codex → confirmation → confirmation
+ * forte (ressaisir le nom exact) → suppression → message d'état.
+ *
+ * LOT I BIS (D9, 30 sept. 2026) — LE FILET EST LE CODEX. La suppression est REFUSÉE
+ * tant que le codex n'est pas à jour ; pas de codex : même refus. Elle ne télécharge
+ * plus rien : l'ancien filet (`exporterTrimestreArchive`) rendait un fichier sans le
+ * contenu des copies, qu'aucun écran ne sait rouvrir (#1006). Seul chemin de
+ * suppression d'un trimestre (les quatre boutons « Supprimer… » mènent ici) : la
+ * garde vit donc ici.
+ * Banc : tests/integration/lot-i-bis-suppression-trimestre-codex-a-jour.spec.js.
  */
 function confirmerSuppressionTrimestre(id) {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
@@ -404,11 +440,16 @@ function confirmerSuppressionTrimestre(id) {
         return;
     }
 
+    const codex = etatDuCodexPourSuppression();
+    if (!codex.aJour) {
+        refuserSuppressionCodexPasAJour(codex.actif);
+        return;
+    }
+
     const continuer = confirm(
-        `Supprimer définitivement le trimestre "${trimestre.nom}" ?\n\n` +
-        `⚠️ Contrairement à l'archivage (lecture seule, données conservées), la suppression EFFACE toutes les données de ce trimestre : étudiants, évaluations, présences, productions, captures et modèles.\n\n` +
-        `Un export de sauvegarde sera téléchargé automatiquement avant la suppression.\n\n` +
-        `Continuer ?`
+        `Supprimer définitivement le trimestre « ${trimestre.nom} » ? ` +
+        `Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. ` +
+        `Ton codex à jour les contient encore : garde ce fichier.`
     );
     if (!continuer) return;
 
@@ -421,20 +462,6 @@ function confirmerSuppressionTrimestre(id) {
     if (saisie.trim() !== trimestre.nom) {
         alert('Le nom saisi ne correspond pas. Suppression annulée.');
         return;
-    }
-
-    // Export de sauvegarde AVANT la suppression (filet de sécurité)
-    let exportOk = false;
-    if (typeof exporterTrimestreArchive === 'function') {
-        const resExport = exporterTrimestreArchive(id);
-        exportOk = !!(resExport && resExport.success);
-    }
-    if (!exportOk) {
-        const sansExport = confirm(
-            'L\'export de sauvegarde a échoué.\n\n' +
-            'Supprimer quand même, SANS copie de secours ?'
-        );
-        if (!sansExport) return;
     }
 
     supprimerTrimestre(id).then(function(result) {

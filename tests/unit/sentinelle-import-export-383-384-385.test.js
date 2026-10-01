@@ -60,11 +60,10 @@ describe('#383 · import sélectif des cartouches par clé de grille', () => {
 });
 
 describe('#384 · blobs travaux de TOUTES les clés fichiersTravaux', () => {
-    it('l\'export ZIP boucle sur toutes les clés sélectionnées', () => {
-        expect(source).toMatch(/clesSelectionnees\.filter\(c => c\.includes\('fichiersTravaux'\)\)/);
-        expect(source).not.toMatch(/clesSelectionnees\.find\(c => c\.includes\('fichiersTravaux'\)\)/);
-    });
-
+    // RETIRÉ au lot I bis (D9, 30 sept. 2026) : « l'export ZIP boucle sur toutes les clés
+    // sélectionnées ». L'export qu'il jugeait (la fenêtre des clés) n'existe plus. La
+    // restauration, elle, reste : ci-dessous, et par exécution sur un vrai fichier dans
+    // tests/integration/lot-i-bis-anciens-fichiers-s-ouvrent.spec.js.
     it('la restauration boucle sur toutes les clés du fichier', () => {
         expect(source).toMatch(/Object\.keys\(donnees\)\.filter\(c => c\.includes\('fichiersTravaux'\)\)/);
         expect(source).not.toMatch(/Object\.keys\(donnees\)\.find\(c => c\.includes\('fichiersTravaux'\)\)/);

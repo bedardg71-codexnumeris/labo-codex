@@ -8,8 +8,9 @@ import { fileURLToPath } from 'node:url';
 // « Enregistré » ne veut plus dire qu'une chose : écrit dans l'application. Le codex (le
 // fichier sur la clé USB) a son verbe, « Mettre à jour le codex », et son témoin dit « Ton
 // codex est à jour » ou « Ton codex n'a pas tes derniers changements ». La Réserve parle
-// d'archives (« Groupe archivé »). La copie de secours (Réglages › Données) s'appelle
-// « Copie de secours », rappel compris.
+// d'archives (« Groupe archivé »). Lot I bis (D9, 30 sept. 2026) : la copie de secours
+// (Réglages › Données) est retirée, le terme avec elle ; son absence est tenue par le
+// cliquet sentinelle-lot-I-bis-un-seul-terme.
 //
 // Les anciens textes sont refusés dans js/ et index.html, commentaires compris (un nom
 // périmé s'y réinstalle tout seul). Une seule exception : js/changelog-data.js, les
@@ -60,7 +61,7 @@ describe('Lot F (D4) : les anciens mots ont quitté l\'application', () => {
         });
     }
 
-    it('les mots décidés sont en place : le bouton, le témoin, la Réserve, la copie de secours', () => {
+    it('les mots décidés sont en place : le bouton, le témoin, la Réserve, la carte du codex', () => {
         const codex = readFileSync(path.join(racineProjet, 'js/codex.js'), 'utf8');
         const html = readFileSync(path.join(racineProjet, 'index.html'), 'utf8');
         const reserve = readFileSync(path.join(racineProjet, 'js/reserve.js'), 'utf8');
