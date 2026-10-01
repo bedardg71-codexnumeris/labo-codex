@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🔧 **CODÉ SUR UNE BRANCHE, PAS EN LIGNE, EN ATTENTE DE LA RELECTURE DE COWORK (1er OCTOBRE 2026, 18 h 47 ; branche locale `fix-1012-avertissement`, `8377dba0` ; ni release ni push) — TON CODEX TE PRÉVIENT QUAND DES COPIES LUI MANQUENT**
+
+**Ce que tu verras, une fois en ligne** : si des copies attendues ne sont pas dans l'application au moment d'écrire ton codex, la fenêtre « Ce codex n'aura pas toutes tes copies » passe avant tout, avec tes mots de 17 h 52 ; « Annuler » n'écrit rien. Tant que des copies manquent, l'application demande où ranger le fichier, même dans Chrome où elle tient ton fichier de codex. « Exporter une sélection » demande toujours où écrire et ne touche plus à ton fichier de codex. Le bilan d'un codex ouvert incomplet dit tes mots de 17 h 55 pour chaque cause.
+**Vérifié comment** : au navigateur (WebKit), par les vrais boutons du menu Codex : le banc regarde ce qui sort de l'application, dans l'ordre, et dans quel fichier. L'export de sélection qui écrivait dans le fichier du codex a été reproduit avant d'être corrigé. Vingt-sept mutations, vingt-sept rouges. Vitest complet vert sur le commit (669 fichiers, 7 893 essais). **Pas vérifié** : Chrome lui-même et le partage de l'iPad (le banc les imite) ; la suite complète au navigateur (elle se prend avant le push).
+**Tes données** : rien n'y est écrit par ce lot. Chez toi aujourd'hui, aucune copie ne manque : tu ne verrais pas la fenêtre.
+**Ce qui t'attend, trois choix d'un mot** (`plans de travail/DEMANDE-RELECTURE-2026-10-01-1012-avertissement.md`, § 9) : dans un bilan à plusieurs causes, garder ou non le nom de la cause devant chaque conseil ; « le détail y sera » (je ne l'ai pas posé : après « Recharger », le détail de l'erreur n'est plus dans le signalement) ; le bouton rouge de l'avertissement. Puis ta ligne des « Nouvelles » (§ 12).
+**Mesuré, non corrigé** : un ancien fichier ouvert par la case n'efface rien, il ajoute ou remplace ce que tu coches ; ton fichier de codex reste tenu et « Mettre à jour le codex » y écrit ensuite. Une sélection dont des copies manquent s'exporte sans le dire. Les deux sont inscrits (#1012).
+
 ✅ **FAIT, VU SUR TON ÉCRAN : PORTE PASSÉE, TROIS RANGÉES SUR TROIS (1er OCTOBRE 2026, 16 h 55, dans Chrome, en fenêtre privée, avec ton vrai codex ; en ligne en 1.173.3 depuis 14 h 41, mesuré chez Netlify : déploiement de production prêt sur `56a94cd8` ; relecture de Cowork verte ; ta ligne des « Nouvelles » acceptée) — APRÈS UNE OUVERTURE INCOMPLÈTE : UN BILAN QUI RESTE, ET UN FICHIER DE CODEX QUI N'EST PAS RÉÉCRIT PAR ERREUR**
 
 **Ce que tu as vécu** : à la porte, le bilan « Import incomplet… » est parti trop vite, et son conseil (« libère de l'espace ») ne disait pas comment, ni qu'en fenêtre privée il n'y a rien à libérer.
