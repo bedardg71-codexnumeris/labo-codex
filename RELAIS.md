@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 8 h 50 : **RETOUR TESTEUR #1009 CORRIGÉ, RELEASE 1.173.1 COMMITÉE SUR LA BRANCHE `fix-1009-charge-lot-non-assigne` ; RELECTURE DE COWORK, VERDICT COMPLET, PUSH ET FUSION À SUIVRE** — voir la dernière ligne de ce bloc
+
+**Le retour** (Grégoire, 8 h 26, 1.172.0) : « Estimation de la charge » (Labo › Rythme de travail) n'affichait pas la production en cours d'évaluation. **Mesuré en lecture seule dans ses données**, avec son accord : la case « Consignes transmises » de la production est décochée, 26 copies importées, 6 évaluées. **Lu** : `estimerCharge` (`js/rythme.js`) écartait tout lot non assigné.
+
+**Fait sur la branche** : `e0fdb1dc`, release 1.173.1 (build `1001-0843`), correctif sans entrée aux Nouvelles — la garde d'assignation retirée, banc `tests/unit/sentinelle-1009-charge-lot-non-assigne.test.js` (3 essais, 2 mutations, 2 rouges), ligne #1009 dans `SUIVI-BUGS.md`, fiche #1010 au backlog (aucun signal quand des copies arrivent sur une production non transmise ; à décider par Grégoire), compteur à #1010. Vitest complet sur `e0fdb1dc` : 669 fichiers, 7 884 essais verts. **Palier** : la fonction de calcul, pas l'écran. **Source seule** : rien n'a été écrit dans les données de Grégoire ; sa case reste son geste.
+
+**Ce qui reste, dans l'ordre** : la relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-10-01-1009-charge-lot-non-assigne.md`, règle 2) ; Grégoire ferme Cowork ; `scripts/pousser.sh` sur le sommet de la branche ; vert : push, fusion vers `main`, mesure chez Netlify ; Grégoire confirme la ligne sur son écran. Ensuite, inchangé : la porte du lot I bis, puis le lot A3 des archives ; #1007 attend sa décision. **Si ce bloc se lit sur `main`, le push et la fusion ont eu lieu** ; sinon, tout est encore sur la branche, en local.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 8 h 35 : **1.173.0 EN LIGNE (LOT I BIS, « UN SEUL TERME »), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` ; RESTE LA PORTE, PUIS LE LOT A3 DES ARCHIVES**
 
 **Mesuré** : verdict complet au navigateur par `scripts/pousser.sh` sur `e8830100`, lancé à 7 h 40 min 36 s, rendu à 8 h 24 min 45 s, vert : 0 échec, 1 spec verte au second essai (#916, voir plus bas). Pendant la passe, relevé toutes les cinq minutes : charge 2,4 à 4,4, fichier d'échange à 0, 60 à 65 % de mémoire libre, aucune veille au journal. Cowork fermé (mesuré : ni application Claude ni machine virtuelle). **Écart assumé par Grégoire** : la passe a tourné sur batterie (78 %, aucun adaptateur détecté), pas branchée comme le demandait la consigne ; lancée sous `caffeinate -di` pour tenir l'écran allumé (aucun script modifié). Branche poussée, puis `main` avancée sur le même commit (avance rapide) et poussée à 8 h 27 min 22 s ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abe51abc87b280008d19fc1`, état « ready », `commit_ref` `e8830100`, publié à 8 h 27 min 33 s (Toronto). Le numéro 1.173.0 est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu (pas de route vers le site depuis Claude Code).
