@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 8 h : **LE VERDICT DE LA NUIT N'A RIEN RENDU (MAC EN VEILLE, MÉMOIRE SATURÉE, REDÉMARRÉ DE FORCE À 7 H 05) ; 1.173.0 TOUJOURS SUR LA BRANCHE `lot-i-bis-un-seul-terme`, LE VERDICT COMPLET EST À REFAIRE PAR `scripts/pousser.sh`** — voir la dernière ligne de ce bloc
+
+**Consigne suivie** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 1er oct., 7 h 33). Conditions de départ confirmées par mesure (`d7f5efb4`, 1.173.0, `origin/main` à `3736e044`, Vitest 668 fichiers et 7 881 essais verts sur `d7f5efb4`).
+
+**Ce qui s'est passé cette nuit (mesuré : `pmset -g log`, transcription de la session, `tests/test-results/`, `ResetCounter`)** : le verdict a été lancé à 3 h 09 min 13 s par la session Claude Code de la nuit, à la main (`nohup caffeinate -i node scripts/verifier-playwright.mjs`, hors `pousser.sh`), sur un Mac qui s'était endormi à 2 h 43 et n'était revenu qu'en éveil sombre, écran éteint. À 3 h 48 : charge 157, fichier d'échange à 14,6 Go sur 15,4. Malgré deux `caffeinate -i` vivants, deux veilles de maintenance (4 h 08 et 4 h 17, 32 min) ; ensuite WebKit ne se lance plus (23 lancements à 180 s). Journal de veille muet après 6 h 00, dernier échec écrit à 6 h 32, redémarrage par le bouton à 7 h 05 min 46 s. Plus rien ne tournait à 7 h 34. **Inféré** : le mécanisme (l'éveil sombre ne respecte pas `caffeinate -i`), l'origine de la mémoire prise. Détail et pistes : **#1008** (inscrite, aucun script corrigé).
+
+**La seule vraie comparaison de la nuit** (`tests/integration/cours-actif-hors-bibliotheque-916.spec.js`, 3 h 16, attendu `COURS1766455789356`, reçu `a2026-601-101-MQ`) : rejouée seule sur `d7f5efb4`, sans reprise, 3 verts sur 3 (1,4 à 1,8 s, charge 4,3). Tenue pour **instable sous charge**, pas pour un défaut du lot ; cette nuit, elle n'a laissé aucun dossier `-retry1`. Si elle rougit au verdict complet machine calme, la rejouer sur `95ed3124` avant de juger.
+
+**Commité sur la branche** : les cinq fichiers de Cowork, tels quels, sur autorisation de Grégoire (`682d47fc`) ; puis ce relais et la fiche #1008.
+
+**Ce qui reste, dans l'ordre** : Grégoire confirme « Cowork fermé, MacBook ouvert et branché » ; `scripts/pousser.sh` sur le sommet de la branche (jamais `verifier-playwright.mjs` à la main) ; vert : push, fusion vers `main`, mesure chez Netlify ; rouge : pas de push, liste des échecs en séparant délais et comparaisons. Puis la porte (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md`, artefact à Cowork ; Grégoire n'y supprime aucun trimestre). Le chantier du codex se dit « clos » quand ce lot est en ligne et sa porte passée ; ensuite, le retour aux archives (lot A3). **Si ce bloc se lit sur `main`, le push et la fusion ont eu lieu** ; sinon, tout est encore sur la branche, en local.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 3 h 15 : **LOT I BIS RELU, CORRIGÉ, RELEASE 1.173.0 COMMITÉE SUR LA BRANCHE `lot-i-bis-un-seul-terme`** — verdict complet au navigateur, push et fusion vers `main` : voir la dernière ligne de ce bloc
 
 **Où est le travail** : la branche `lot-i-bis-un-seul-terme` = `main` + quatre commits : `820fe58e` (le lot, 30 sept.), `b9998ffd` (les deux corrections de la relecture de Cowork, les mots de Grégoire du 1er oct., la fiche #1007), `c6e99ea0` (release 1.173.0, #985 coché), puis ce relais. Consigne suivie : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 1er oct., 2 h 12), d'après `plans de travail/VERDICT-RELECTURE-2026-10-01-lot-I-bis-un-seul-terme.md`.
