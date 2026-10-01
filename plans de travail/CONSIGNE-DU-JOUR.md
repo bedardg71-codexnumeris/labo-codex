@@ -34,3 +34,18 @@ Grégoire, le 1er octobre à 8 h 47, Chrome 154 sur le Mac, fenêtre de navigati
 ## Ce que tu rends
 
 À Grégoire, trois lignes : le numéro de la fiche ; si l'hypothèse tient, et ce qui reste dans l'espace après l'échec ; ce qui attend sa décision (les mots). `RELAIS.md` à jour. Le chantier du codex reste « en ligne, porte incomplète » tant que cette fiche est ouverte : la rangée 2.4 est en échec.
+
+## Ajout de 9 h 50 – deux décisions de Grégoire, à poser sous leurs fiches (étape 1, avec le reste)
+
+Rendues dans la conversation avec Cowork le 1er octobre vers 9 h 50, après la mise en ligne de 1.173.1. Ses mots, tels quels. Tu les écris sous les fiches ; tu ne codes rien de ces deux fiches dans ce lot.
+
+**Sous #1007** (un codex à part avant de supprimer un trimestre) : « Il faudrait toujours proposer à l'utilisateur de faire un Codex avant de supprimer quoi que ce soit, parce que c'est irréversible. »
+- Ce que ça tranche : oui, l'application offre de faire un codex avant une suppression.
+- Ce que ça élargit : « quoi que ce soit », pas seulement un trimestre. La fiche devient un principe, et il lui faut un **inventaire mesuré des gestes qui suppriment pour de bon** (trimestre, groupe, étudiant·e, production, évaluation, copie, archive, et ce que tu trouveras) : pour chacun, ce qui est effacé, ce que dit l'écran aujourd'hui, et si un codex le rendrait. L'inventaire est un lot de mesure à part, pas dans celui-ci.
+- **Tranché par Grégoire à 9 h 51** (proposition de Cowork, sa réponse : « oui ») : l'application **exige** un codex à jour pour supprimer un trimestre ou un groupe ; elle le **propose** pour le reste (une évaluation, une copie, et les gestes du même ordre), où un refus à chaque geste deviendrait pénible. L'inventaire dira, geste par geste, de quel côté chacun tombe ; les cas qui ne sont ni l'un ni l'autre lui reviennent.
+- Reste ouvert, à lui poser avec l'inventaire : si ce codex est le codex habituel mis à jour, ou un fichier à part sous un autre nom (la proposition d'origine de la fiche, née de ce que Chrome réécrit le même fichier).
+
+**Sous #1010** (aucun signal quand des copies arrivent sur une production non transmise) : « Il faudrait signaler à l'utilisateur que la consigne ne semble pas avoir été transmise si la case n'est pas cochée et qu'il commence à évaluer. »
+- Ce que ça tranche : oui, un signal ; son moment est le début de l'évaluation, pas l'import des copies ; son ton est un constat (« ne semble pas »), pas un blocage.
+- Les mots du signal lui reviennent. Proposition de Cowork, à lui faire valider quand le lot s'ouvrira, pas avant : « Les consignes de cette production ne sont pas marquées comme transmises. », avec un bouton « Marquer comme transmises » et un « Plus tard ».
+- À mesurer à l'ouverture du lot : où commence une évaluation (les entrées possibles), et si le signal doit revenir à chaque copie ou une fois par production.
