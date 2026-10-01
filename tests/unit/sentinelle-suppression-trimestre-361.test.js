@@ -202,7 +202,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
 
         expect(refus).toEqual([]);
         expect(questions).toEqual([
-            'Supprimer définitivement le trimestre « Automne 2024 » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. Ton codex à jour les contient encore : garde ce fichier.'
+            'Supprimer définitivement le trimestre « Automne 2024 » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. Ton codex à jour les contient encore, jusqu\'à ta prochaine mise à jour : pour pouvoir revenir en arrière, fais d\'abord une copie de ce fichier.'
         ]);
         expect(supprimerTrimestreMock).toHaveBeenCalledWith('a2024');
         expect(exporterMock).not.toHaveBeenCalled();

@@ -33,19 +33,30 @@ Avant ce lot, supprimer un trimestre téléchargeait un fichier puis effaçait. 
 | 2.1 `Mac · Chrome` | Réglages → Données. Regarde la première carte. | Titre « **Ouverture et partage** ». Deux cases côte à côte : « Exporter ma config » et « Ouvrir un Codex ». Plus de case ni de bouton « Copie de secours ». |
 | 2.2 `iPad · Safari` | Même écran sur l'iPad, tenu à la verticale puis à l'horizontale. | Les deux cases tiennent dans la carte, aucun bouton coupé. |
 
-## §3 · Décisions
+## §2 bis · La case « Ouvrir un Codex » ouvre un codex (ajout du 1er oct., correction 1 de la relecture)
 
-Ce ne sont pas des vérifications : ce sont deux choix posés dans la demande de relecture, que Cowork te soumettra.
+Avant, un fichier de codex choisi dans cette case recevait une alerte qui renvoyait au menu Codex. Maintenant, il s'ouvre par le même chemin que le menu. Les bancs le jugent dans WebKit ; ton Chrome et ton vrai fichier, eux seuls peuvent le dire chez toi.
+
+⛔ **Ce geste se fait dans une fenêtre de navigation privée, pas dans ta fenêtre normale.** Ouvrir un codex remplace les données de l'espace où on l'ouvre. Une fenêtre privée a son propre espace, vide, et l'oublie à sa fermeture : tes données de travail n'y sont pas, et rien ne les touche.
+
+| | Geste | Attendu |
+|---|---|---|
+| 2.3 `Mac · Chrome` `fenêtre privée` | Ouvre une fenêtre de navigation privée (⌘ + Maj + N), et l'application dedans. Réglages → Données → « Ouvrir un Codex… », puis choisis le fichier de ton codex. | La fenêtre « Importer les données » se ferme et « Ouverture du codex » s'affiche. **Aucune** alerte « Ce fichier est un codex… utilise le bouton Codex ». (champ : ce que tu vois ; le poids du fichier) |
+| 2.4 `Mac · Chrome` `fenêtre privée` | Laisse l'ouverture se terminer. | L'une de ces deux fins : « Recharger la page » (clique « Recharger » : tes trimestres sont là) ; ou « Espace insuffisant pour ouvrir ce codex » (une fenêtre privée a peu de place). Les deux sont la réponse du codex, donc la porte est passée. (champ : laquelle) |
+| 2.5 `Mac · Chrome` | Ferme la fenêtre privée. Reviens à ta fenêtre normale. | Rien n'y a changé. |
+
+## §3 · Décisions (rendues par Grégoire le 1er oct. 2026, entre 2 h 07 et 2 h 12 ; rapportées par la consigne de Cowork)
 
 | | Question | Verdict |
 |---|---|---|
-| 3.1 | Le texte du refus **quand il n'y a pas de codex du tout** : « Supprimer un trimestre efface ses données pour de bon. Tu n'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence. » | (champ : tel quel, ou tes mots) |
-| 3.2 | « Garde ce fichier » : dans Chrome, la prochaine mise à jour du codex réécrit le même fichier, et le trimestre supprimé n'y est plus. Faut-il le dire à l'écran, ou faire autre chose ? | (champ) |
+| 3.1 | Le texte du refus **quand il n'y a pas de codex du tout** : « Supprimer un trimestre efface ses données pour de bon. Tu n'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence. » | **Tel quel.** |
+| 3.2 | « Garde ce fichier » : dans Chrome, la prochaine mise à jour du codex réécrit le même fichier, et le trimestre supprimé n'y est plus. Faut-il le dire à l'écran, ou faire autre chose ? | **Dit à l'écran.** La question devient : « … Ton codex à jour les contient encore, jusqu'à ta prochaine mise à jour : pour pouvoir revenir en arrière, fais d'abord une copie de ce fichier. » Un filet plus fort (un codex écrit à part avant la suppression) est inscrit : **#1007**, ta décision à venir. |
 
 ## §4 · Ce qui n'a pas pu être vérifié
 
 - **Chrome sur le Mac** : les bancs tournent dans WebKit. Que le bouton « Mettre à jour le codex » de la fenêtre de refus ouvre bien le sélecteur de fichier de Chrome est une inférence (au banc, c'est le chemin de l'iPad qui est joué, avec un faux partage).
 - **L'iPad réel** : la fenêtre de refus avec le clavier ou en mode clair, la carte en orientation verticale.
 - **Tes vrais anciens fichiers** : tu n'en as jamais fait (ton mot du 29 sept.). Les bancs rouvrent deux fichiers fictifs fabriqués au code de 1.172.0. Un fichier d'un·e collègue, fait par une version plus ancienne, n'a pas été essayé.
-- **« Restauration de tes données »** : un repli de la fenêtre d'ouverture que je n'ai pas su atteindre par un geste.
+- **Un gros codex par la case, sur l'iPad** : non essayé. Au banc, la case ne lit que la fin du fichier (environ 64 Ko et le répertoire du ZIP) avant de le confier au codex, même pour un fichier de 1,1 Go ; ensuite, c'est le chemin du menu. Sur l'iPad, le menu Codex reste le chemin éprouvé. La porte 2.3 ne se fait pas sur l'iPad : en navigation privée, Safari accorde trop peu de place, et dans la fenêtre normale le geste remplacerait tes données.
+- **Le sélecteur de fichier de Chrome dans la case** : au banc, le fichier est donné au champ par l'outil de test (porte 2.3).
 - **Le cas « codex à jour » sur tes données** : non rejoué, exprès (il mène à une vraie suppression).
