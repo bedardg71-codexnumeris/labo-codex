@@ -136,8 +136,12 @@ async function ouvrirEspaceNeuf(browser) {
             throw new DOMException('Fenêtre de destination refermée par le banc', 'AbortError');
         };
         window.SecuriteExportPreview.previewZipEtConfirmer = async () => true;
-        // Les copies sont acceptées (le contexte éphémère de WebKit ne les stockerait pas).
-        db.storeBlob = async () => {};
+        // Les copies vivent dans un magasin en mémoire (le contexte éphémère de WebKit ne les
+        // stockerait pas). Elles doivent se relire : depuis la suite de #1012, une copie attendue
+        // sans fichier fait passer la mise à jour par un avertissement.
+        window.__copies = new Map();
+        db.storeBlob = async (enr) => { window.__copies.set(enr.id, enr); };
+        db.getBlob = async (id) => window.__copies.get(id) || null;
     }, CLE_GROUPE);
     expect(await page.evaluate((cle) => db.get(cle, null), CLE_GROUPE), 'témoin : l\'espace neuf est vide').toBeNull();
     return { contexte, page };
@@ -194,7 +198,7 @@ async function annulerALaGarde(page) {
  * Le vrai geste : le menu Codex, « Mettre à jour le codex ». Rend ce qui s'est passé : les
  * écritures reçues par les poignées, et le nombre de fois où une destination a été demandée.
  */
-async function mettreAJourLeCodex(page) {
+async function mettreAJourLeCodex(page, { copiesManquantes = false } = {}) {
     const avant = await page.evaluate(() => ({ ecritures: window.__ecritures.length, destinations: window.__destinationsDemandees }));
     await page.locator('#btn-codex').click();
     const sousTexte = await page.evaluate(() => {
@@ -202,6 +206,12 @@ async function mettreAJourLeCodex(page) {
         return el.classList.contains('u-hide') ? null : el.textContent;
     });
     await page.locator('#codex-menu [data-action="Codex.actionEnregistrer"]').click();
+    if (copiesManquantes) {
+        // Des copies de l'espace n'ont pas de fichier : l'avertissement passe d'abord (banc
+        // `codex-1012-avertissement`). Ici, on le traverse pour voir où le codex serait écrit.
+        await expect(page.locator('#overlay-ui-dialogue .modal-titre')).toHaveText('Ce codex n\'aura pas toutes tes copies', { timeout: 30000 });
+        await page.locator('#overlay-ui-dialogue').getByRole('button', { name: 'Écrire sans ces copies', exact: true }).click();
+    }
     await expect.poll(() => page.evaluate(() => window.__ecritures.length + window.__destinationsDemandees), { timeout: 30000 })
         .toBe(avant.ecritures + avant.destinations + 1);
     return page.evaluate(({ avant, sousTexte }) => ({
@@ -296,8 +306,10 @@ test.describe('#1012 — le fichier d\'origine n\'est tenu qu\'après une ouvert
         expect(await neuf.page.evaluate(() => window.__journal), 'témoin : le refus est celui du banc').toEqual(['clé refusée ' + CLE_PRODUCTIONS]);
         expect(await neuf.page.evaluate((cle) => db.get(cle, null), CLE_GROUPE), 'témoin : des données de B sont déjà dans l\'espace').toEqual(B.donnees[CLE_GROUPE]);
 
-        // Ni A (dont les données ne sont plus celles de l'espace), ni B (ouvert à moitié).
-        expect(await mettreAJourLeCodex(neuf.page), 'la mise à jour demande où écrire').toEqual(DEMANDE_OU_ECRIRE);
+        // Ni A (dont les données ne sont plus celles de l'espace), ni B (ouvert à moitié). La liste
+        // des copies de B est écrite, pas ses fichiers : la mise à jour passe par l'avertissement.
+        expect(await neuf.page.evaluate(() => Codex.etat().handleFSAPI), 'aucun fichier tenu').toBe(false);
+        expect(await mettreAJourLeCodex(neuf.page, { copiesManquantes: true }), 'la mise à jour demande où écrire').toEqual(DEMANDE_OU_ECRIRE);
         await neuf.contexte.close();
     });
 
@@ -321,8 +333,11 @@ test.describe('#1012 — le fichier d\'origine n\'est tenu qu\'après une ouvert
         expect(await messages(neuf.page, 'erreur'), 'témoin : pas d\'échec, une ouverture incomplète').toEqual([]);
         expect(await neuf.page.evaluate((cle) => db.get(cle, null), CLE_GROUPE), 'témoin : les données de B sont dans l\'espace').toEqual(B.donnees[CLE_GROUPE]);
 
-        // Ni B (le seul fichier qui porte toutes ses copies), ni A (un autre codex).
-        expect(await mettreAJourLeCodex(neuf.page), 'la mise à jour demande où écrire').toEqual(DEMANDE_OU_ECRIRE);
+        // Ni B (le seul fichier qui porte toutes ses copies), ni A (un autre codex). Les copies de B
+        // manquent : la mise à jour passe par l'avertissement, qui demanderait où écrire même si un
+        // fichier était tenu. Ce qui juge ici, c'est qu'aucun ne l'est (et le menu qui ne dit rien).
+        expect(await neuf.page.evaluate(() => Codex.etat().handleFSAPI), 'aucun fichier tenu').toBe(false);
+        expect(await mettreAJourLeCodex(neuf.page, { copiesManquantes: true }), 'la mise à jour demande où écrire').toEqual(DEMANDE_OU_ECRIRE);
         await neuf.contexte.close();
     });
 
