@@ -13,6 +13,8 @@
    - JSZip (libs/jszip.min.js)
    - fichier-sortant.js (assemblerZip, entreesDuZip, telecharger,
      confirmerTelechargement, tailleEnviron)
+   - reserve-verifier.js (lireRepertoireZip : reconnaître un codex sans le lire
+     en entier, estUnFichierDeCodex)
    =============================== */
 
 (function() {
@@ -1098,6 +1100,33 @@ async function lireManifeste(fichierZip) {
     }
     const str = await entree.async('string');
     return JSON.parse(str);
+}
+
+/**
+ * Ce fichier est-il un codex ? Répond en ne lisant que le répertoire central du ZIP (la
+ * fin du fichier, où le nom de chaque entrée est écrit) : ni le fichier entier, ni JSZip.
+ *
+ * LOT I BIS (1er oct. 2026) — la case « Ouvrir un Codex » de Réglages › Données doit savoir
+ * à qui confier le fichier AVANT de le lire : un codex pèse jusqu'à 1 Go environ sur
+ * l'iPad, et le lire une fois pour le reconnaître puis une fois pour l'ouvrir doublerait
+ * la mémoire demandée. Cette réponse ne VALIDE rien, elle aiguille : le fichier reconnu
+ * passe ensuite par chargerCodex, donc par validerCodex et validerZipSecurite, comme
+ * au menu.
+ *
+ * @param {File|Blob} fichier
+ * @returns {Promise<boolean|null>} true : le manifeste d'un codex y est nommé ; false : un
+ *   ZIP lisible, sans ce manifeste ; null : illisible par ce moyen (pas un ZIP, ZIP64,
+ *   répertoire hors du fichier ou trop lourd) — à l'appelant de retomber sur sa lecture.
+ */
+async function estUnFichierDeCodex(fichier) {
+    try {
+        var entrees = await window.ReserveVerifier.lireRepertoireZip(fichier);
+        return entrees.some(function(e) {
+            return e.nom === NOM_MANIFESTE || e.nom === NOM_MANIFESTE_ANCIEN;
+        });
+    } catch (e) {
+        return null;
+    }
 }
 
 /* ===============================
@@ -2873,6 +2902,24 @@ async function actionOuvrir() {
 
     if (!fichier) return;
 
+    await _ouvrirLeFichierChoisi(fichier);
+}
+
+/**
+ * Ouvrir un codex dont le fichier est DÉJÀ choisi (lot I bis, 1er oct. 2026) : la case
+ * « Ouvrir un Codex » de Réglages › Données, qui reçoit son fichier d'un champ de
+ * fichier. Même chemin que le menu, mêmes confirmations. Pas de handle : un fichier
+ * venu d'un champ ne se réécrit pas en place, comme au repli d'actionOuvrir.
+ * @param {File} fichier
+ */
+async function ouvrirFichier(fichier) {
+    if (!fichier) return;
+    _fileHandle = null;
+    await _ouvrirLeFichierChoisi(fichier);
+}
+
+/** La suite commune du menu et de la case : charger, dire le bilan, proposer de recharger. */
+async function _ouvrirLeFichierChoisi(fichier) {
     try {
         var resultat = await chargerCodex(fichier);
         if (resultat.stats.incomplet) {
@@ -3909,6 +3956,7 @@ window.Codex = {
     // Validation / lecture
     valider: validerCodex,
     lireManifeste: lireManifeste,
+    estUnFichierDeCodex: estUnFichierDeCodex,
     lireExterne: lireCodexExterne,
     construireBilanImport: construireBilanImport,
     evaluerPrevolStockage: evaluerPrevolStockage,
@@ -3935,6 +3983,7 @@ window.Codex = {
     // Menu en-tête
     toggleMenu: toggleMenu,
     actionOuvrir: actionOuvrir,
+    ouvrirFichier: ouvrirFichier,
     actionEnregistrer: actionEnregistrer,
     derniereTentative: derniereTentative,
     actionEnregistrerSous: actionEnregistrerSous,

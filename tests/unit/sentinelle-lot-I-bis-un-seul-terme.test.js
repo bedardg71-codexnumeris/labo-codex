@@ -15,8 +15,10 @@ import { fileURLToPath } from 'node:url';
 // réinstalle tout seul (même choix que la sentinelle des mots du lot F).
 // Une seule exception : js/changelog-data.js, les Nouvelles déjà lues, qu'on ne réécrit pas.
 //
-// Le motif se cherche sur le texte APLATI (entités d'espace et retours de ligne ramenés à une
-// espace) : « copie&nbsp;de&nbsp;secours » ou un terme coupé par une fin de ligne sont pris.
+// Le motif se cherche sur le texte APLATI (espaces écrites autrement et retours de ligne
+// ramenés à une espace) : « copie&nbsp;de&nbsp;secours », « copie\u00a0de\u00a0secours » (le
+// code de l'application écrit ses accents et ses espaces en échappement) ou un terme coupé
+// par une fin de ligne sont pris.
 //
 // Règle 10 : une absence ne prouve rien sur une tranche vide. Le balayage prouve donc qu'il
 // a lu (nombre de fichiers, volume), et le MÊME motif rend autre chose ailleurs : il trouve
@@ -38,12 +40,21 @@ function fichiersJs(dossier) {
     return resultats;
 }
 
+// Les écritures d'une espace insécable (U+00A0) ou fine (U+202F) qui ne sont PAS le caractère
+// lui-même : entités HTML, et échappements d'une chaîne JS (une barre oblique suivie de
+// u00a0, xa0 ou u202f). Les caractères eux-mêmes, `\s` du motif les prend déjà.
+// Correction du 1er oct. 2026 (relecture de Cowork) : deux mutations survivaient, le terme
+// revenu avec `\u00a0` dans le dossier js/ et avec `&#8239;` dans index.html.
+const ESPACES_ECRITES = /&nbsp;|&#160;|&#xa0;|&#8239;|&#x202f;|\\u00a0|\\xa0|\\u202f/gi;
+
+/** Aplatir SANS changer la longueur : chaque écriture devient autant d'espaces qu'elle a de
+ *  caractères, pour que la position d'une occurrence rende la bonne ligne. */
+const aplatir = (texte) => texte.replace(ESPACES_ECRITES, (m) => ' '.repeat(m.length));
+
 /** Les occurrences du terme dans un fichier : « chemin:ligne ». */
 function occurrences(fichier) {
     const source = readFileSync(fichier, 'utf8');
-    // Aplatir SANS changer la longueur : chaque entité d'espace devient autant d'espaces
-    // qu'elle a de caractères, pour que la position rende la bonne ligne.
-    const aplati = source.replace(/&nbsp;|&#160;|&#xa0;/gi, (m) => ' '.repeat(m.length)).replace(/ /g, ' ');
+    const aplati = aplatir(source);
     const trouvees = [];
     for (const m of aplati.matchAll(MOTIF)) {
         const ligne = source.slice(0, m.index).split('\n').length;
@@ -72,12 +83,27 @@ describe('Lot I bis (D9) : un seul terme, le codex', () => {
         expect(occurrences(NOUVELLES).trouvees.length).toBeGreaterThan(0);
     });
 
-    it('le motif prend toute casse, le pluriel, l\'espace insécable et la fin de ligne', () => {
-        for (const texte of ['Copie de secours', 'copies de secours', 'COPIE DE SECOURS', 'copie&nbsp;de&nbsp;secours', 'copie de secours', 'copie de\n        secours']) {
-            const aplati = texte.replace(/&nbsp;/gi, (m) => ' '.repeat(m.length)).replace(/ /g, ' ');
-            expect(aplati.match(MOTIF), texte).toBeTruthy();
+    it('le motif prend toute casse, le pluriel, la fin de ligne, et l\'espace insécable ou fine sous toutes ses écritures', () => {
+        const ecritures = [
+            'Copie de secours', 'copies de secours', 'COPIE DE SECOURS', 'copie de\n        secours',
+            // Les caractères eux-mêmes : U+00A0, U+202F.
+            'copie\u00a0de\u00a0secours', 'copie\u202fde\u202fsecours',
+            // Les entités HTML.
+            'copie&nbsp;de&nbsp;secours', 'copie&#160;de&#160;secours', 'copie&#xa0;de&#xA0;secours',
+            'copie&#8239;de&#8239;secours', 'copie&#x202f;de&#x202F;secours',
+            // Les échappements tels qu'ils s'écrivent dans une chaîne du dossier js/ : la barre
+            // oblique est ici un caractère du texte, pas un échappement de cet essai.
+            'copie\\u00a0de\\u00A0secours', 'copie\\xa0de\\xA0secours', 'copie\\u202fde\\u202Fsecours'
+        ];
+        expect(ecritures.length).toBe(14);
+        for (const texte of ecritures) {
+            expect(aplatir(texte).match(MOTIF), JSON.stringify(texte)).toBeTruthy();
+            // L'aplatissement ne déplace rien : la ligne rendue reste la bonne.
+            expect(aplatir(texte).length, JSON.stringify(texte)).toBe(texte.length);
         }
-        expect('une copie complète de tes données'.match(MOTIF)).toBeNull();
+        // Garde : les trois dernières écritures portent bien une barre oblique dans le TEXTE.
+        expect(ecritures.slice(-3).every((t) => t.includes(String.fromCharCode(92)))).toBe(true);
+        expect(aplatir('une copie complète de tes données').match(MOTIF)).toBeNull();
     });
 
     it('aucun texte de js/ ni d\'index.html ne dit plus « copie de secours »', () => {

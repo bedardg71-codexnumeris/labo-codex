@@ -392,7 +392,7 @@ function etatDuCodexPourSuppression() {
 /**
  * Le refus : une fenêtre de l'application, dont le bouton lance la mise à jour du
  * codex (ou sa création) par le chemin du menu. Mots validés par Grégoire le 30 sept.
- * 2026 ; la variante « sans codex » est proposée dans la demande de relecture du lot.
+ * 2026 ; la variante « sans codex », le 1er oct. 2026.
  */
 function refuserSuppressionCodexPasAJour(codexActif) {
     uiDialogues.demanderAction({
@@ -446,10 +446,13 @@ function confirmerSuppressionTrimestre(id) {
         return;
     }
 
+    // Mots validés par Grégoire le 1er oct. 2026. « Jusqu'à ta prochaine mise à jour » : dans
+    // Chrome et Edge, la mise à jour suivante réécrit le même fichier, et le trimestre
+    // supprimé n'y est plus (un filet plus fort est inscrit, #1007).
     const continuer = confirm(
         `Supprimer définitivement le trimestre « ${trimestre.nom} » ? ` +
         `Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. ` +
-        `Ton codex à jour les contient encore : garde ce fichier.`
+        `Ton codex à jour les contient encore, jusqu'à ta prochaine mise à jour : pour pouvoir revenir en arrière, fais d'abord une copie de ce fichier.`
     );
     if (!continuer) return;
 

@@ -1022,12 +1022,33 @@ function fermerModalImport() {
     document.getElementById('modalImport').classList.add('u-hide');
 }
 
-function previsualiserImport(event) {
+/**
+ * LOT I BIS (1er oct. 2026) — un codex choisi dans la case « Ouvrir un Codex » s'ouvre par
+ * le chemin du menu Codex, avec ses confirmations (modèle antérieur, rechargement). Avant,
+ * la case le refusait par une alerte qui renvoyait au menu, alors que ses mots disent
+ * « Ouvre un codex ou une configuration partagée ». La fenêtre d'import se ferme : la suite
+ * (progression, bilan, rechargement) appartient au codex.
+ */
+function confierAuCodex(fichier) {
+    fermerModalImport();
+    return window.Codex.ouvrirFichier(fichier);
+}
+
+async function previsualiserImport(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
+    const estZip = fichier.name.endsWith('.zip') || fichier.type === 'application/zip';
+
+    // Un codex part au codex AVANT la limite de taille et AVANT toute lecture complète : le
+    // menu Codex n'a pas cette limite, et le reconnaître ne lit que le répertoire du ZIP
+    // (un codex d'environ 1 Go ne passe donc pas deux fois par la mémoire).
+    if (estZip && await window.Codex.estUnFichierDeCodex(fichier) === true) {
+        return confierAuCodex(fichier);
+    }
+
     // Limite de taille : 1 Go pour ZIP, 50 Mo pour JSON
-    const limiteOctets = (fichier.name.endsWith('.zip') || fichier.type === 'application/zip')
+    const limiteOctets = estZip
         ? 1024 * 1024 * 1024
         : TAILLE_MAX_IMPORT_OCTETS;
 
@@ -1039,7 +1060,7 @@ function previsualiserImport(event) {
     const nomFichier = fichier.name;
 
     // 🆕 Détection format ZIP (backup avec fichiers travaux)
-    if ((fichier.name.endsWith('.zip') || fichier.type === 'application/zip') && typeof JSZip !== 'undefined') {
+    if (estZip && typeof JSZip !== 'undefined') {
         const lecteurZip = new FileReader();
         lecteurZip.onload = async function(e) {
             try {
@@ -1052,9 +1073,12 @@ function previsualiserImport(event) {
                     return;
                 }
 
-                // Bloquer les codex : ils doivent passer par le bouton Codex
+                // Filet (lot I bis) : un codex que la lecture du r\u00e9pertoire n'a pas su
+                // reconna\u00eetre (octets ajout\u00e9s devant le ZIP, par exemple) et que JSZip, plus
+                // tol\u00e9rant, lit quand m\u00eame. Il part au codex lui aussi : sans ce filet, son
+                // donnees.json serait pris pour un fichier de donn\u00e9es d'une version ant\u00e9rieure.
                 if (zip.file('codex-manifeste.json') || zip.file('classeur-manifeste.json')) {
-                    alert('Ce fichier est un codex (donn\u00e9es portables USB).\n\nPour l\u2019ouvrir, utilise le bouton Codex dans l\u2019en-t\u00eate de l\u2019application, puis \u00ab\u00a0Ouvrir un codex...\u00a0\u00bb.');
+                    confierAuCodex(fichier);
                     return;
                 }
 
@@ -1477,10 +1501,13 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
     const sourceInconnue = !auteurImport; // Seulement si le FICHIER n'a pas d'auteur
     const restaurationNouvelAppareil = auteurImport && !utilisateurActuel;
 
+    // Le prénom n'a pas de repli (retirés le 1er oct. 2026 : « collègue », « tes données ») :
+    // les deux branches exigent un nom d'auteur·e non vide, et extraireNomEnseignant le rend
+    // sans espace au début. Son premier mot existe donc toujours ; aucun geste n'atteignait le repli.
     const sourceLabel = estCollègue
-        ? `Configuration de ${auteurImport.split(' ')[0] || 'collègue'}`
+        ? `Configuration de ${auteurImport.split(' ')[0]}`
         : restaurationNouvelAppareil
-            ? `Restauration de ${auteurImport.split(' ')[0] || 'tes données'}`
+            ? `Restauration de ${auteurImport.split(' ')[0]}`
             : sourceInconnue
                 ? 'Source inconnue'
                 : 'Fichier personnel';

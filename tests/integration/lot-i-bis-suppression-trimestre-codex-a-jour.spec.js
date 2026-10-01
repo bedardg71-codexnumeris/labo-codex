@@ -42,7 +42,7 @@ const NOM = 'Automne 2030 (banc)';
 const TITRE_REFUS = 'Mets d\'abord ton codex à jour';
 const TEXTE_REFUS = 'Supprimer un trimestre efface ses données pour de bon. Ton codex n\'a pas tes derniers changements : mets-le à jour, puis recommence.';
 const TEXTE_REFUS_SANS_CODEX = 'Supprimer un trimestre efface ses données pour de bon. Tu n\'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence.';
-const QUESTION = 'Supprimer définitivement le trimestre « ' + NOM + ' » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. Ton codex à jour les contient encore : garde ce fichier.';
+const QUESTION = 'Supprimer définitivement le trimestre « ' + NOM + ' » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. Ton codex à jour les contient encore, jusqu\'à ta prochaine mise à jour : pour pouvoir revenir en arrière, fais d\'abord une copie de ce fichier.';
 
 /** Écoute la page. Les dialogues natifs sont consignés ; `reponses` dit quoi répondre, dans l'ordre. */
 function brancher(page) {
