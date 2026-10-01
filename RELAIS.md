@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 9 h 50 : **1.173.1 EN LIGNE (RETOUR TESTEUR #1009), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` ; RESTE LA CONFIRMATION DE GRÉGOIRE À L'ÉCRAN, PUIS LA CONSIGNE DU JOUR DE 8 H 51**
+
+**Mesuré** : relecture de Cowork verte par exécution, sans correction (`plans de travail/VERDICT-RELECTURE-2026-10-01-1009-charge-lot-non-assigne.md`, 8 h 56). Verdict complet au navigateur par `scripts/pousser.sh` sur `f49ac4a6`, lancé à 8 h 58 min 04 s, rendu à 9 h 42 min 33 s, vert : 0 échec, aucune spec instable (jeton : `instables: []`). Au lancement : Cowork fermé (ni application Claude ni machine virtuelle), charge 2,9, 61 % de mémoire libre, fichier d'échange à 0, Time Machine à l'arrêt. **Écart** : la passe a tourné sur batterie (51 %, aucun adaptateur détecté) alors que Grégoire avait dit « go » pour un Mac branché ; lancée sous `caffeinate -di`, signalé à Grégoire au lancement. Branche `fix-1009-charge-lot-non-assigne` poussée, puis `main` avancée sur le même commit (avance rapide) et poussée à 9 h 44 ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abe63bb8cbd3e00082cbd66`, état « ready », `commit_ref` `f49ac4a6`, publié à 9 h 44 min 42 s (Toronto). Le numéro 1.173.1 (build `1001-0843`) est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu.
+
+**Ce qui reste** : Grégoire confirme sur son écran, en 1.173.1, que sa production en cours apparaît à « Estimation de la charge » (attendu : 6 évaluées, 20 restantes ; le compte bouge s'il évalue entre-temps) — le palier du correctif est la fonction, pas l'écran. Sa case « Consignes transmises » reste décochée dans ses données : son geste. Fiche #1010 à trancher à froid. Ensuite : la consigne du jour de 8 h 51 (`plans de travail/CONSIGNE-DU-JOUR.md` : un codex ouvert sans assez d'espace finit par « Erreur » ; lot à part, sur sa branche), la porte du lot I bis (sa rangée 2.4 y est dite en échec), puis le lot A3 des archives ; #1007 attend sa décision. La branche `fix-1009-charge-lot-non-assigne` existe encore en local et chez origin, fusionnée : à supprimer quand Grégoire le dit.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 8 h 50 : **RETOUR TESTEUR #1009 CORRIGÉ, RELEASE 1.173.1 COMMITÉE SUR LA BRANCHE `fix-1009-charge-lot-non-assigne` ; RELECTURE DE COWORK, VERDICT COMPLET, PUSH ET FUSION À SUIVRE** — voir la dernière ligne de ce bloc
 
 **Le retour** (Grégoire, 8 h 26, 1.172.0) : « Estimation de la charge » (Labo › Rythme de travail) n'affichait pas la production en cours d'évaluation. **Mesuré en lecture seule dans ses données**, avec son accord : la case « Consignes transmises » de la production est décochée, 26 copies importées, 6 évaluées. **Lu** : `estimerCharge` (`js/rythme.js`) écartait tout lot non assigné.
