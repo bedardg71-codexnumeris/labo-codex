@@ -34,3 +34,17 @@ Pousse `dcf5cd5a` sur `main`, avec les fichiers de Cowork qui traînent dans l'a
 ## Ce que tu rends
 
 À Grégoire, trois lignes en gestes : ce qui est codé ; ce que la mesure du point 4 a montré ; ce qui l'attend. Ce que tu as supposé, en une ligne.
+
+## Ajout de 17 h 55 – les mots des trois autres causes entrent dans ce lot
+
+Grégoire les a acceptés (« oui », à 17 h 55). La section « Ce que tu ne fais pas » ne les exclut plus : pose-les dans ce lot, dans `construireBilanImport`, à la place des phrases de #334. Ils partiront avec l'avertissement, dans la même relecture.
+
+Le cadre est celui du manque d'espace, inchangé : titre « Codex ouvert, mais incomplet » ; deuxième phrase « Tes données, elles, sont complètes, et ton fichier de codex n'a pas changé. » ; à la fin, « Recharger la page pour appliquer les données ? ». Seuls changent la première phrase et le conseil :
+
+- **Copies absentes du fichier.** « {N} copies sur {M} ne sont pas dans ce fichier de codex. » Conseil : « Elles manquaient déjà quand ce codex a été écrit : le rouvrir ne les ramènera pas. Cherche-les dans un codex plus ancien ou dans une archive. »
+- **Format non reconnu.** « {N} copies sur {M} n'ont pas été reprises : leur contenu n'est ni une image ni un PDF. » Conseil : « Rouvrir le même codex ne les ramènera pas. »
+- **Erreur technique.** « {N} copies sur {M} n'ont pas pu revenir, à cause d'une erreur. » Conseil : « Pour retrouver ces copies : rouvre le même codex. Si l'erreur revient, utilise « Signaler un bug ou donner ton avis » : le détail y sera. »
+  ⚠ Le nom du bouton est celui d'`index.html` (lu par Cowork, l. 3927). **Vérifie par le geste que le détail de l'erreur se retrouve bien dans le signalement** avant de poser « le détail y sera ». S'il n'y est pas, pose le conseil sans ces quatre mots et dis-le dans ta demande : Grégoire tranchera.
+- **Mélange de causes** (composition tranchée par Cowork, c'est de l'assemblage) : une première phrase qui donne le nombre par cause, sur ton modèle (« {N} copies sur {M} n'ont pas pu revenir : {a} faute d'espace, {b} absentes du fichier, {c} dans un format non reconnu, {d} à cause d'une erreur. », seules les causes présentes) ; puis le conseil de chaque cause présente, celui de l'espace en premier. Les accords en nombre : tranche-les.
+
+Le titre « Recharger la page » ne sert donc plus qu'à l'ouverture complète, et « rouvre le même ZIP » disparaît. Mets à jour les bancs et les mutations en conséquence.
