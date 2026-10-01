@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 17 h 05 : **PORTE DE #1012 (PREMIER LOT) PASSÉE, TROIS RANGÉES SUR TROIS ; LE COMPTE CHEZ GRÉGOIRE EST ÉTABLI : AUCUNE COPIE ATTENDUE SANS FICHIER (500 SUR 500) ; RIEN N'EST CODÉ ; `main` PORTE UN COMMIT DE DOCUMENTS NON POUSSÉ ; RIEN EN COURS SUR UNE BRANCHE**
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 18 h 47 : **#1012, LOT DE L'AVERTISSEMENT CODÉ SUR LA BRANCHE LOCALE `fix-1012-avertissement` (`8377dba0`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH DU CODE ; `main` PORTE CE RELAIS ET LES DOCUMENTS DU LOT, NON POUSSÉS (`origin/main` = `feb616b4`)** — le travail le plus récent est sur cette branche, pas sur `main` ; l'arbre de travail est laissé sur la branche, pour que Cowork y lise le code
+
+**Fait d'abord** : `dcf5cd5a` et les fichiers de Cowork (`feb616b4`) poussés sur `main` à 17 h 54 par `scripts/pousser.sh` (Vitest vert au hook, aucun code observable). **Refusé par le garde de permissions de Claude Code** : la suppression chez `origin` des trois branches fusionnées (« Git Destructive ») ; non réessayé ; elles restent chez `origin`.
+
+**Le lot** (`plans de travail/DEMANDE-RELECTURE-2026-10-01-1012-avertissement.md`) : l'avertissement compté à la génération, avant l'aperçu, avec les mots de Grégoire de 17 h 52 ; tant que des copies manquent, destination toujours demandée et jamais adoptée ; « Exporter une sélection » reproduite par le geste puis corrigée (jamais dans le fichier tenu) ; les mots des trois autres causes et du mélange (17 h 55) dans `construireBilanImport`. **Mesuré** : banc neuf `tests/integration/codex-1012-avertissement.spec.js` (6 essais), banc du fichier d'origine mis à jour, cinq bancs sans reprise (24 essais verts), huit bancs voisins verts, 27 mutations et 27 rouges, Vitest complet vert sur `8377dba0` (669 fichiers, 7 893 essais). **Pas pris** : la suite complète au navigateur.
+
+**Trois choix qui attendent Grégoire** (§ 9 de la demande) : le nom de la cause devant chaque conseil d'un mélange (ajouté par moi) ; « le détail y sera » (non posé : mesuré, le détail de l'erreur n'est plus dans le signalement après « Recharger ») ; le bouton rouge de l'avertissement. **Deux règles pour Cowork**, inscrites sous #1012, non corrigées : l'ancien fichier ouvert par la case (l'espace est amendé, pas remplacé ; le fichier tenu le reste ; avec un `.zip`, la liste des copies est remplacée et le codex réécrit perd des copies sans fenêtre) ; la sélection dont des copies manquent.
+
+**Ce qui reste** : la relecture de Cowork ; les choix de Grégoire et sa ligne des « Nouvelles » (proposée au § 12) ; puis la release, le verdict complet (`scripts/pousser.sh`, Cowork fermé, Mac branché), le push sur le mot de Grégoire, la fusion, la mesure chez Netlify, et une porte terrain (Chrome et iPad). `plans de travail/CONSIGNE-DU-JOUR.md` (l'ajout de 17 h 55, de Cowork) est commité tel quel sur la branche.
+
+---
+
+## (relais précédent) 1er OCT. 2026, 17 h 05 : **PORTE DE #1012 (PREMIER LOT) PASSÉE, TROIS RANGÉES SUR TROIS ; LE COMPTE CHEZ GRÉGOIRE EST ÉTABLI : AUCUNE COPIE ATTENDUE SANS FICHIER (500 SUR 500) ; RIEN N'EST CODÉ ; `main` PORTE UN COMMIT DE DOCUMENTS NON POUSSÉ ; RIEN EN COURS SUR UNE BRANCHE**
 
 **La porte** (relevé de Grégoire, 16 h 55, rapporté par la consigne de Cowork de 16 h 56) : dans Chrome, en fenêtre privée, avec son vrai codex, trois rangées sur trois, aucun constat écrit ; les deux nombres de la fenêtre ne sont pas relevés. Inscrite dans le fichier de la porte (§5), dans `OU-EN-EST-ON.md` et dans la fiche #1012.
 
