@@ -7,6 +7,24 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 3 h 15 : **LOT I BIS RELU, CORRIGÉ, RELEASE 1.173.0 COMMITÉE SUR LA BRANCHE `lot-i-bis-un-seul-terme`** — verdict complet au navigateur, push et fusion vers `main` : voir la dernière ligne de ce bloc
+
+**Où est le travail** : la branche `lot-i-bis-un-seul-terme` = `main` + quatre commits : `820fe58e` (le lot, 30 sept.), `b9998ffd` (les deux corrections de la relecture de Cowork, les mots de Grégoire du 1er oct., la fiche #1007), `c6e99ea0` (release 1.173.0, #985 coché), puis ce relais. Consigne suivie : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 1er oct., 2 h 12), d'après `plans de travail/VERDICT-RELECTURE-2026-10-01-lot-I-bis-un-seul-terme.md`.
+
+**Ce qui a été fait le 1er oct.** : (1) la case « Ouvrir un Codex » (Réglages › Données) ouvre un codex par le chemin du menu (`Codex.ouvrirFichier`), reconnu par le répertoire de son ZIP (`Codex.estUnFichierDeCodex`, sur `ReserveVerifier.lireRepertoireZip` du lot A2), avant la limite de 1 Go de la case et sans lecture complète ; (2) le cliquet du mot prend les espaces insécable et fine écrites en échappement ou en entité ; (3) la confirmation de suppression porte les mots de Grégoire du 1er oct. ; (4) #1007 inscrite (un codex écrit à part avant de supprimer un trimestre ; décision de Grégoire à venir) ; (5) le repli « Restauration de tes données » retiré (aucun geste ne l'atteignait), avec son jumeau « collègue » ; (6) Nouvelles 1.173, mots validés.
+
+**Mesuré** (1er oct., ≈ 3 h 10) : Vitest sur `c6e99ea0`, 668 fichiers, 7 881/7 881, aucune erreur hors essai ; Playwright ciblé sur l'arbre de `b9998ffd`, 6 specs, 23 verts sans reprise ; 29 mutations, 29 rouges (14 pour le cliquet, 13 pour la case, 2 pour les mots), fichiers restaurés par copie, empreintes vérifiées.
+
+**Décidé seul, à relire** : reconnaître le codex par le répertoire du ZIP plutôt qu'après une lecture complète (sinon un codex de plus de 1 Go restait refusé par la limite de la case, et tout codex passait deux fois par la mémoire) ; `Codex.ouvrirFichier` remet à zéro le fichier retenu par Chrome (sinon « Mettre à jour le codex » aurait réécrit le fichier d'un codex ouvert avant par le menu) ; la porte 2.3 se fait en fenêtre privée, sur le Mac seulement.
+
+**⚠ Les quatre fichiers de Cowork ne sont PAS commités** (`CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/CONSIGNE-DU-JOUR.md`, `plans de travail/_ancienne-CONSIGNE-DU-JOUR-2026-09-30-lot-I-bis.md`, `plans de travail/VERDICT-RELECTURE-2026-10-01-lot-I-bis-un-seul-terme.md`) : l'étape 1 de la consigne a été refusée par le garde de permissions de Claude Code (« Modify Shared Resources »), et je ne l'ai pas contournée. Ils sont dans l'arbre de travail, intacts ; à commiter sur l'autorisation de Grégoire.
+
+**Le skill d'ouverture (`6a0f61a4`) n'est toujours pas éprouvé** : l'audit du 1er oct. a lu le verdict sans relancer la suite, mais ma demande le lui interdisait.
+
+**Ce qui reste, dans l'ordre** : verdict complet au navigateur sur ce commit, Cowork fermé ; push ; fusion vers `main` ; mesure chez Netlify ; la porte (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md`, artefact à publier par Cowork : s'y ajoute la porte 2.3). Puis le retour aux archives (lot A3). **Si ce bloc se lit sur `main`, le push et la fusion ont eu lieu** ; sinon, tout est encore sur la branche, en local.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 30 SEPT. 2026, ≈ 22 h : **LOT I BIS (« UN SEUL TERME ») CODÉ SUR LA BRANCHE `lot-i-bis-un-seul-terme`, EN ATTENTE DE LA RELECTURE DE COWORK** — ni release, ni push ; `main` porte trois commits de documents non poussés
 
 **Où est le travail** : la branche `lot-i-bis-un-seul-terme` = `main` + un commit (« feat(codex): lot I bis… »). C'est elle qui est sortie dans l'arbre de travail, pour que Cowork relise le code. Pièces : `plans de travail/DEMANDE-RELECTURE-2026-09-30-lot-I-bis-un-seul-terme.md` (la mesure, la table avant / après de l'Aide, la variante « sans codex », la ligne des Nouvelles proposée, six trouvailles et leur issue) et `plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md` (due après la mise en ligne ; l'artefact est à Cowork).
