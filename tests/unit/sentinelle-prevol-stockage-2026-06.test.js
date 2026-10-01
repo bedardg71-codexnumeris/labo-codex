@@ -103,8 +103,9 @@ describe('sentinelle · câblage du pré-vol (#334 A)', () => {
         const corpsAction = codex.slice(posAction, codex.indexOf('async function actionEnregistrer('));
         expect(corpsAction).toContain('reste dans Fichiers');
         // Le conseil de suppression doit rester sur la branche non-incomplet
-        // (un import incomplet conseille au contraire de ROUVRIR le même ZIP).
+        // (un import incomplet conseille au contraire de ROUVRIR le même codex).
+        // Depuis #1012, la branche incomplète est le message du bilan.
         expect(corpsAction).toContain('resultat.stats.incomplet');
-        expect(corpsAction).toMatch(/incomplet\s*\?\s*'Recharger la page/);
+        expect(corpsAction).toMatch(/msgReload = bilan\s*\?\s*bilan\.message\s*:\s*'Codex chargé depuis/);
     });
 });

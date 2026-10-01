@@ -87,7 +87,7 @@ describe('codex.js — sanity load', () => {
 //     it.todo('_peutPartagerFichier détecte correctement le support navigator.share');
 // });
 
-describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
+describe('codex.js — bilan d\'import incomplet (#334 session B ; porté par la fenêtre de rechargement depuis #1012)', () => {
 
     it('expose construireBilanImport (fonction pure)', () => {
         expect(typeof win.Codex.construireBilanImport).toBe('function');
@@ -106,14 +106,17 @@ describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
             blobsRefusesMagic: ['FT_d'],
             blobsAbsentsDuZip: ['FT_e']
         });
-        expect(bilan.titre).toContain('5 fichiers sur 12');
-        expect(bilan.details).toContain('120 clés');
-        expect(bilan.details).toContain('2 refusés faute d\'espace');
-        expect(bilan.details).toContain('1 en erreur technique');
-        expect(bilan.details).toContain('1 au format non reconnu');
-        expect(bilan.details).toContain('1 absent du ZIP');
+        // Un mélange de causes : les mots de #334, sous le titre d'avant (#1012).
+        expect(bilan.titre).toBe('Recharger la page');
+        expect(bilan.message).toContain('Import incomplet : 5 fichiers sur 12');
+        expect(bilan.message).toContain('120 clés');
+        expect(bilan.message).toContain('2 refusés faute d\'espace');
+        expect(bilan.message).toContain('1 en erreur technique');
+        expect(bilan.message).toContain('1 au format non reconnu');
+        expect(bilan.message).toContain('1 absent du ZIP');
         // Du quota est en cause → le conseil de ré-import doit apparaître.
-        expect(bilan.details).toContain('rouvre le même ZIP');
+        expect(bilan.message).toContain('rouvre le même ZIP');
+        expect(bilan.message.endsWith('\n\nRecharger la page pour appliquer les données ?')).toBe(true);
     });
 
     it('singulier correct et pas de conseil de ré-import si la cause n\'est pas corrigeable ainsi', () => {
@@ -127,9 +130,11 @@ describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
             blobsRefusesMagic: ['FT_x'],
             blobsAbsentsDuZip: []
         });
-        expect(bilan.titre).toContain('1 fichier sur 10');
-        expect(bilan.titre).toContain('n\'a pas été restauré');
-        expect(bilan.details).not.toContain('rouvre le même ZIP');
+        expect(bilan.titre).toBe('Recharger la page');
+        expect(bilan.message).toContain('Import incomplet : 1 fichier sur 10 n\'a pas été restauré.');
+        // Témoin de l'absence : la phrase existe bien dans le cas voisin (essai suivant).
+        expect(bilan.message).not.toContain('rouvre le même ZIP');
+        expect(bilan.message).not.toContain('faute d\'espace');
     });
 
     it('erreur technique seule → conseil de ré-import présent', () => {
@@ -141,7 +146,58 @@ describe('codex.js — bilan d\'import incomplet (#334 session B)', () => {
             blobsRefusesMagic: [],
             blobsAbsentsDuZip: []
         });
-        expect(bilan.details).toContain('1 en erreur technique');
-        expect(bilan.details).toContain('rouvre le même ZIP');
+        expect(bilan.titre).toBe('Recharger la page');
+        expect(bilan.message).toContain('1 en erreur technique');
+        expect(bilan.message).toContain('rouvre le même ZIP');
+    });
+
+    // #1012 — les mots acceptés par Grégoire le 1er oct. 2026 (12 h 40), pour le seul cas
+    // où toutes les copies manquantes ont été refusées faute d'espace. Tenus en entier.
+    it('faute d\'espace seulement → les mots de Grégoire, au pluriel', () => {
+        const bilan = win.Codex.construireBilanImport({
+            nbCles: 1014,
+            nbBlobs: 330,
+            nbBlobsAttendus: 397,
+            blobsEchecs: Array.from({ length: 67 }, (_, i) => ({ id: 'FT_' + i, raison: 'quota' })),
+            blobsRefusesMagic: [],
+            blobsAbsentsDuZip: []
+        });
+        expect(bilan).toEqual({
+            titre: 'Codex ouvert, mais incomplet',
+            message: '67 copies sur 397 n\'ont pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
+                + '\n\nPour retrouver ces copies : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+                + '\n\nRecharger la page pour appliquer les données ?'
+        });
+    });
+
+    it('faute d\'espace seulement, une seule copie → accord au singulier', () => {
+        const bilan = win.Codex.construireBilanImport({
+            nbCles: 10,
+            nbBlobs: 2,
+            nbBlobsAttendus: 3,
+            blobsEchecs: [{ id: 'FT_z', raison: 'quota' }],
+            blobsRefusesMagic: [],
+            blobsAbsentsDuZip: []
+        });
+        expect(bilan).toEqual({
+            titre: 'Codex ouvert, mais incomplet',
+            message: '1 copie sur 3 n\'a pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
+                + '\n\nPour retrouver cette copie : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+                + '\n\nRecharger la page pour appliquer les données ?'
+        });
+    });
+
+    it('faute d\'espace ET une autre cause → pas les mots de Grégoire (ils ne couvrent pas le mélange)', () => {
+        const bilan = win.Codex.construireBilanImport({
+            nbCles: 10,
+            nbBlobs: 1,
+            nbBlobsAttendus: 3,
+            blobsEchecs: [{ id: 'FT_q', raison: 'quota' }],
+            blobsRefusesMagic: [],
+            blobsAbsentsDuZip: ['FT_a']
+        });
+        expect(bilan.titre).toBe('Recharger la page');
+        expect(bilan.message).toContain('Import incomplet : 2 fichiers sur 3');
+        expect(bilan.message).not.toContain('n\'ont pas pu revenir');
     });
 });

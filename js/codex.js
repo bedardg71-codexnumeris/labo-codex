@@ -673,6 +673,14 @@ async function chargerCodex(fichierZip) {
         _majProgression(15, 'Extraction des données…');
     }
 
+    // #1012 (1er oct. 2026) : à partir d'ici, l'espace change. Le fichier d'origine
+    // tenu jusque-là portait les données d'AVANT : l'application l'oublie, pour que
+    // « Mettre à jour le codex » ne puisse y écrire ni les données d'un autre codex,
+    // ni un espace à moitié remplacé. Avant ce point (fichier refusé, pré-vol, garde
+    // de modèle antérieur), rien n'a bougé : elle le garde. `_ouvrirLeFichierChoisi`
+    // adopte le fichier choisi, une fois l'ouverture complète.
+    _fileHandle = null;
+
     var entreesData = Object.entries(donnees).filter(function(e) { return !e[0].startsWith('_'); });
     let nbCles = 0;
     for (var i = 0; i < entreesData.length; i++) {
@@ -792,7 +800,7 @@ async function chargerCodex(fichierZip) {
         if (Object.keys(idsManquants).length > 0) {
             // #1011 (1er oct. 2026) : quand l'espace manque, cette réécriture est
             // refusée elle aussi. Elle ne doit pas emporter l'ouverture : les
-            // données sont écrites, le bilan « Import incomplet » doit être rendu
+            // données sont écrites, le bilan de l'ouverture incomplète doit être rendu
             // et le rechargement proposé. Une clé dont le marquage n'a pas pu
             // s'écrire reprend ses statuts d'avant, pour que la mémoire et le
             // snapshot de l'étape 5 disent ce qui est réellement stocké.
@@ -939,12 +947,19 @@ async function chargerCodex(fichierZip) {
 }
 
 /**
- * Construit le bilan d'un import incomplet (#334 session B).
- * Fonction pure : ne lit ni le DOM ni le stockage — testable en Vitest.
+ * Construit le bilan d'une ouverture incomplète (#334 session B), tel que le porte la
+ * fenêtre de rechargement (#1012) : son titre, et son message qui finit par la question.
+ * Fonction pure : ne lit ni le DOM ni le stockage — testable en Vitest. Appelée seulement
+ * quand il manque au moins une copie (`stats.incomplet`).
+ *
+ * Deux textes. Quand TOUTES les copies manquantes ont été refusées faute d'espace : les
+ * mots acceptés par Grégoire le 1er oct. 2026 (12 h 40). Pour toute autre cause, et pour
+ * les mélanges : les mots de #334, inchangés, sous le titre d'avant — leur réécriture
+ * attend sa décision.
  * @param {{nbCles: number, nbBlobs: number, nbBlobsAttendus: number,
  *          blobsEchecs: Array<{id: string, raison: string}>,
  *          blobsRefusesMagic: string[], blobsAbsentsDuZip: string[]}} stats
- * @returns {{titre: string, details: string}}
+ * @returns {{titre: string, message: string}}
  */
 function construireBilanImport(stats) {
     var echecs = stats.blobsEchecs || [];
@@ -953,6 +968,21 @@ function construireBilanImport(stats) {
     var nbQuota = echecs.filter(function(e) { return e.raison === 'quota'; }).length;
     var nbErreurs = echecs.length - nbQuota;
     var nbManquants = echecs.length + magic.length + absents.length;
+    var question = 'Recharger la page pour appliquer les données ?';
+
+    if (nbQuota === nbManquants) {
+        var uneSeule = nbManquants === 1;
+        return {
+            titre: 'Codex ouvert, mais incomplet',
+            message: nbManquants + (uneSeule ? ' copie' : ' copies') + ' sur ' + stats.nbBlobsAttendus +
+                (uneSeule ? ' n\'a pas pu revenir' : ' n\'ont pas pu revenir') + ', faute d\'espace. ' +
+                'Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.\n\n' +
+                'Pour retrouver ' + (uneSeule ? 'cette copie' : 'ces copies') + ' : si tu es en navigation privée, ' +
+                'rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de ' +
+                'l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.\n\n' +
+                question
+        };
+    }
 
     var titre = 'Import incomplet : ' + nbManquants + ' fichier' + (nbManquants > 1 ? 's' : '') +
         ' sur ' + stats.nbBlobsAttendus + ' n\'' + (nbManquants > 1 ? 'ont' : 'a') + ' pas été restauré' +
@@ -969,7 +999,7 @@ function construireBilanImport(stats) {
     if (nbQuota > 0 || nbErreurs > 0) {
         details += ' Libère de l\'espace puis rouvre le même ZIP : l\'import réécrit tout et complétera les fichiers manquants.';
     }
-    return { titre: titre, details: details };
+    return { titre: 'Recharger la page', message: titre + ' ' + details + '\n\n' + question };
 }
 
 /* ===============================
@@ -2902,12 +2932,15 @@ function _actualiserMenu() {
 /**
  * Ouvrir un codex depuis un fichier.
  * Sur Chrome/Edge, utilise showOpenFilePicker pour obtenir un handle FSAPI
- * réutilisable lors de la prochaine sauvegarde.
+ * réutilisable lors de la prochaine sauvegarde. #1012 : ce handle n'est PAS rangé
+ * ici. L'application ne l'adopte qu'après une ouverture complète
+ * (`_ouvrirLeFichierChoisi`) ; d'ici là, elle tient le fichier d'avant.
  */
 async function actionOuvrir() {
     _fermerMenu();
 
     var fichier = null;
+    var poignee = null;
 
     // Chrome/Edge : showOpenFilePicker donne un handle réutilisable
     if (window.showOpenFilePicker) {
@@ -2921,23 +2954,21 @@ async function actionOuvrir() {
             });
             var handle = handles[0];
             fichier = await handle.getFile();
-            // Conserver le handle pour les sauvegardes suivantes
-            _fileHandle = handle;
+            poignee = handle;
         } catch (e) {
             if (e.name === 'AbortError') return; // Annulé par l'utilisateur
             console.warn('📂 showOpenFilePicker échoué, fallback input file', e.message);
         }
     }
 
-    // Fallback : input file classique (iPad, Firefox, etc.)
+    // Fallback : input file classique (iPad, Firefox, etc.) — pas de handle disponible
     if (!fichier) {
         fichier = await ouvrirDialogueFichier();
-        _fileHandle = null; // Pas de handle disponible
     }
 
     if (!fichier) return;
 
-    await _ouvrirLeFichierChoisi(fichier);
+    await _ouvrirLeFichierChoisi(fichier, poignee);
 }
 
 /**
@@ -2949,26 +2980,37 @@ async function actionOuvrir() {
  */
 async function ouvrirFichier(fichier) {
     if (!fichier) return;
-    _fileHandle = null;
-    await _ouvrirLeFichierChoisi(fichier);
+    await _ouvrirLeFichierChoisi(fichier, null);
 }
 
-/** La suite commune du menu et de la case : charger, dire le bilan, proposer de recharger. */
-async function _ouvrirLeFichierChoisi(fichier) {
+/**
+ * La suite commune du menu et de la case : charger, dire le bilan, proposer de recharger.
+ *
+ * #1012 — le fichier d'origine n'est tenu qu'à bon droit (règle de Cowork, 1er oct. 2026) :
+ *  - après une ouverture COMPLÈTE, l'application adopte le fichier choisi (`poignee`, ou
+ *    aucun quand le fichier vient d'un champ) ;
+ *  - après une annulation ou un refus d'AVANT toute écriture, elle garde celui d'avant ;
+ *  - après toute autre fin (incomplète, échec en cours d'écriture), elle n'en tient aucun.
+ * `chargerCodex` oublie le fichier d'avant à sa première écriture ; il ne reste ici qu'à
+ * adopter le nouveau.
+ * @param {File} fichier
+ * @param {FileSystemFileHandle|null} poignee - rendue par le sélecteur de Chrome, sinon null
+ */
+async function _ouvrirLeFichierChoisi(fichier, poignee) {
     try {
         var resultat = await chargerCodex(fichier);
+        // Bilan honnête (#334 session B) : ne pas déclarer « ouvert » un codex dont
+        // des fichiers travaux manquent. Le bilan est porté par la fenêtre de
+        // rechargement, qui reste à l'écran tant qu'on n'a pas répondu (#1012,
+        // remarque de Grégoire à la porte : « Le message ne reste pas longtemps »).
+        var bilan = null;
         if (resultat.stats.incomplet) {
-            // #1012 (verdict de relecture de #1011, 1er oct. 2026) : après une
-            // ouverture incomplète, l'application oublie le fichier d'origine.
-            // Sinon « Mettre à jour le codex » réécrirait EN PLACE, sans les copies
-            // qui manquent, le seul fichier qui les portait toutes. Il demandera
-            // où écrire.
-            _fileHandle = null;
-            // Bilan honnête (#334 session B) : ne pas déclarer « ouvert » un
-            // codex dont des fichiers travaux manquent.
-            var bilan = construireBilanImport(resultat.stats);
-            notifications.warning(bilan.titre, bilan.details);
+            // Le fichier choisi n'est PAS adopté : « Mettre à jour le codex » réécrirait
+            // EN PLACE, sans les copies qui manquent, le seul fichier qui les portait
+            // toutes. Il demandera où écrire.
+            bilan = construireBilanImport(resultat.stats);
         } else {
+            if (poignee) _fileHandle = poignee;
             notifications.succes(
                 'Codex ouvert : ' + resultat.manifeste.nom,
                 resultat.stats.nbCles + ' clés, ' + resultat.stats.nbBlobs + ' fichiers'
@@ -2985,14 +3027,14 @@ async function _ouvrirLeFichierChoisi(fichier) {
         // Proposer de recharger pour appliquer les données. Le rappel « tu
         // peux supprimer le ZIP » (piste 5 du plan #334) ne vaut que pour un
         // import COMPLET : en cas d'import incomplet, le bilan conseille au
-        // contraire de rouvrir le même ZIP — ne pas suggérer de le supprimer.
-        var msgReload = resultat.stats.incomplet
-            ? 'Recharger la page pour appliquer les données ?'
+        // contraire de rouvrir le même codex — ne pas suggérer de le supprimer.
+        var msgReload = bilan
+            ? bilan.message
             : 'Codex chargé depuis « ' + fichier.name + ' » (' + _formaterTaille(fichier.size) +
               ').\n\nLe fichier ZIP d\'origine reste dans Fichiers — tu peux le supprimer ' +
               'pour récupérer de l\'espace. Recharger la page pour appliquer les données ?';
         if (await uiDialogues.confirmerAction({
-            titre: 'Recharger la page',
+            titre: bilan ? bilan.titre : 'Recharger la page',
             message: msgReload,
             texteConfirmer: 'Recharger',
             preformate: true
