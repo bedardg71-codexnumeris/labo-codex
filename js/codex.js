@@ -787,18 +787,50 @@ async function chargerCodex(fichierZip) {
         blobsAbsentsDuZip.forEach(function(id) { idsManquants[id] = true; });
         blobsEchecs.forEach(function(e) { idsManquants[e.id] = true; });
         if (Object.keys(idsManquants).length > 0) {
-            fichiers.forEach(function(fic) {
-                if (idsManquants[fic.id]) fic.blobStatut = 'manquant';
-            });
+            // #1011 (1er oct. 2026) : quand l'espace manque, cette réécriture est
+            // refusée elle aussi. Elle ne doit pas emporter l'ouverture : les
+            // données sont écrites, le bilan « Import incomplet » doit être rendu
+            // et le rechargement proposé. Une clé dont le marquage n'a pas pu
+            // s'écrire reprend ses statuts d'avant, pour que la mémoire et le
+            // snapshot de l'étape 5 disent ce qui est réellement stocké.
             for (var k = 0; k < clesFTImport.length; k++) {
-                await db.set(clesFTImport[k], donnees[clesFTImport[k]]);
+                var listeFT = donnees[clesFTImport[k]];
+                if (!Array.isArray(listeFT)) continue;
+                var statutsAvant = [];
+                listeFT.forEach(function(fic) {
+                    if (!idsManquants[fic.id]) return;
+                    statutsAvant.push({ fic: fic, avait: Object.prototype.hasOwnProperty.call(fic, 'blobStatut'), statut: fic.blobStatut });
+                    fic.blobStatut = 'manquant';
+                });
+                if (statutsAvant.length === 0) continue;
+                try {
+                    await db.set(clesFTImport[k], listeFT);
+                } catch (eMarquage) {
+                    statutsAvant.forEach(function(s) {
+                        if (s.avait) s.fic.blobStatut = s.statut;
+                        else delete s.fic.blobStatut;
+                    });
+                    console.warn('[Codex] Marquage des copies manquantes non écrit pour ' + clesFTImport[k] + ' :', eMarquage && (eMarquage.message || eMarquage.name));
+                }
             }
         }
     }
 
     // 5. Stocker l'index haché des données chargées comme snapshot de référence
     //    pour la fusion 3-way — #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
-    await _ecrireSnapshotAvant(donnees);
+    //    #1011 : un snapshot refusé (espace plein) n'emporte pas l'ouverture non
+    //    plus. On tente alors de retirer l'ancien, pour qu'une fusion ne se
+    //    réfère pas au codex précédent.
+    try {
+        await _ecrireSnapshotAvant(donnees);
+    } catch (eSnapshot) {
+        console.warn('[Codex] Snapshot de référence non écrit :', eSnapshot && (eSnapshot.message || eSnapshot.name));
+        try {
+            await db.remove(CLE_SNAPSHOT_AVANT);
+        } catch (eRetrait) {
+            console.warn('[Codex] Ancien snapshot de référence non retiré :', eRetrait && (eRetrait.message || eRetrait.name));
+        }
+    }
 
     // 5 bis. Vérification d'écriture (#335 Lot C, 11 juin 2026) : relire en
     // IndexedDB les clés témoins du modèle et comparer à ce qui vient d'être
