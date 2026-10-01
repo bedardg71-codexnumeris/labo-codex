@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 11 h 45 : **#1011 (UN CODEX OUVERT SANS ASSEZ D'ESPACE FINIT PAR « ERREUR ») REPRODUIT ET CORRIGÉ SUR LA BRANCHE LOCALE `fix-1011-codex-ouvert-sans-espace` (`40521da7`) ; NI RELEASE NI PUSH DU CODE ; RELECTURE DE COWORK ET MOTS DE GRÉGOIRE ATTENDUS**
+
+**Consigne suivie** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 1er oct., 8 h 51, ajout de 9 h 50), jusqu'à son étape 7. Le fichier de la consigne, modifié par Cowork à 9 h 50, est resté dans l'arbre, non commité (c'est le sien).
+
+**Sur `main`, poussé (documents seulement)** : le retour inscrit (ligne 1011 aux « Ouverts » de `SUIVI-BUGS.md`, fiche #1011), le relevé de la porte du lot I bis (dix rangées sur onze ; 2.3 passée sur la réponse de Grégoire, 2.4 en échec), les décisions de Grégoire de 9 h 50 posées sous #1007 et #1010, la fiche #1012, la demande de relecture, ce relais.
+
+**Sur la branche, en local seulement** : `40521da7` — `js/codex.js` (`chargerCodex` : le marquage « manquant » et le snapshot de référence sous garde), `tests/integration/codex-1011-ouvert-sans-espace.spec.js`, le jeton anti-cache de `js/codex.js`. La branche part de `071ec2be` ; `main` a avancé depuis par des documents seulement : à reposer sur `main` avant la release. **La branche n'existe pas chez origin** (la consigne interdit le push du code ; un push de branche neuve lancerait la suite complète).
+
+**Mesuré** : au banc (WebKit, refus d'espace injecté), l'hypothèse de Cowork tient par la case et par le menu ; après l'échec, toutes les clés du codex sont écrites, aucune copie, codex inactif même après rechargement. Avec le correctif : bilan « Import incomplet… », rechargement proposé, codex actif. 3 essais, 5 états mutés, 5 rouges ; Vitest complet vert (669 fichiers, 7 884 essais) ; les deux specs voisines vertes (8 essais). **Pas fait** : la suite Playwright complète. **Pas établi** : pourquoi le pré-vol n'a pas refusé (à relever chez Grégoire : `navigator.storage.estimate()` dans une fenêtre privée de Chrome).
+
+**Ce qui reste, dans l'ordre** : la relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace.md`), qui dit aussi si #1012 doit précéder la release ; les mots de Grégoire (§ 6 de la demande : le refus du pré-vol, le bandeau « Erreur ») ; puis release, verdict par `scripts/pousser.sh` (Cowork fermé, Mac branché), fusion ; puis la rangée 2.4 rejouée par Grégoire. Le chantier du codex reste « en ligne, porte incomplète ». Toujours en attente de Grégoire : sa confirmation à l'écran de #1009 (1.173.1). Ensuite : le lot A3 des archives.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 9 h 50 : **1.173.1 EN LIGNE (RETOUR TESTEUR #1009), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` ; RESTE LA CONFIRMATION DE GRÉGOIRE À L'ÉCRAN, PUIS LA CONSIGNE DU JOUR DE 8 H 51**
 
 **Mesuré** : relecture de Cowork verte par exécution, sans correction (`plans de travail/VERDICT-RELECTURE-2026-10-01-1009-charge-lot-non-assigne.md`, 8 h 56). Verdict complet au navigateur par `scripts/pousser.sh` sur `f49ac4a6`, lancé à 8 h 58 min 04 s, rendu à 9 h 42 min 33 s, vert : 0 échec, aucune spec instable (jeton : `instables: []`). Au lancement : Cowork fermé (ni application Claude ni machine virtuelle), charge 2,9, 61 % de mémoire libre, fichier d'échange à 0, Time Machine à l'arrêt. **Écart** : la passe a tourné sur batterie (51 %, aucun adaptateur détecté) alors que Grégoire avait dit « go » pour un Mac branché ; lancée sous `caffeinate -di`, signalé à Grégoire au lancement. Branche `fix-1009-charge-lot-non-assigne` poussée, puis `main` avancée sur le même commit (avance rapide) et poussée à 9 h 44 ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abe63bb8cbd3e00082cbd66`, état « ready », `commit_ref` `f49ac4a6`, publié à 9 h 44 min 42 s (Toronto). Le numéro 1.173.1 (build `1001-0843`) est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu.
