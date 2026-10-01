@@ -1,7 +1,7 @@
 # Portes terrain – chantier du codex, lot I bis : un seul terme
 
 > Écrites le 30 septembre 2026, vers 22 h (Toronto), par Claude Code (ce markdown : la trace). **Cowork publie l'artefact jumeau** (cases, champs de saisie, bouton « Copier mes résultats »).
-> **Cette porte attend la mise en ligne.** À l'écriture, le lot est sur la branche `lot-i-bis-un-seul-terme`, ni relu ni poussé. **Le numéro à lire** sera celui de la release (une version mineure après 1.172.0 ; à inscrire ici à la release).
+> **Le numéro à lire : 1.173.0** (release du 1er octobre 2026, après la relecture de Cowork et ses deux corrections). La porte se fait une fois ce numéro en ligne.
 > Deux appareils : **Mac, dans Chrome** ; **iPad, dans Safari**. Adresse : `https://app.codexnumeris.org`.
 > **Pourquoi si peu de rangées** : les mots, la carte à quatre largeurs, les anciens fichiers qui s'ouvrent et la suppression dans les trois cas sont jugés par les bancs (WebKit). Seuls ton Chrome et ton iPad, avec tes vrais trimestres, peuvent dire que le refus s'affiche chez toi.
 > **Tes données** : ⛔ **tu ne supprimes aucun trimestre.** La porte s'arrête au refus, qui n'écrit rien. Si l'écran te pose la question « Supprimer définitivement… », réponds **Annuler**.
@@ -11,7 +11,7 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| 0.1 `Mac · Chrome` | Ouvre l'application et recharge de force (⌘ + Maj + R). Lis le numéro en bas de page. | Le numéro de la release du lot (champ : le numéro lu). Si tu lis 1.172.0 ou moins : arrête-toi, le lot n'est pas en ligne. |
+| 0.1 `Mac · Chrome` | Ouvre l'application et recharge de force (⌘ + Maj + R). Lis le numéro en bas de page. | **1.173.0** (champ : le numéro lu). Si tu lis 1.172.0 ou moins : arrête-toi, le lot n'est pas en ligne. |
 | 0.2 `iPad · Safari` | Ouvre l'application, recharge. Lis le numéro en bas de page. | Le même numéro (champ : le numéro lu). |
 
 ## §1 · Données : le refus de supprimer `Données réelles`
