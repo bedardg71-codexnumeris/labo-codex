@@ -573,3 +573,17 @@ délibéré, pas une compression.
 **Mesuré le 13 septembre sur les 665 fichiers d'essai** : 142 tranches portent une assertion négative de texte ; **82 ont leur garde, 60 ne l'ont pas**, et 30 de celles-là sont découpées par `indexOf`. La règle n'est donc pas neuve, elle est appliquée une fois sur deux. La réparation des 30 et le cliquet qui rendra la règle mécanique sont à #858.
 
 **Ce qu'elle coûte** : une ligne par essai. **Ce qu'elle rend** : qu'un vert veuille dire quelque chose. Un cas a vécu du 10 au 13 septembre sans que personne le sache.
+
+---
+
+## Règle 11 — on n'ouvre pas un chantier sans écrire l'état de celui qu'on quitte (30 septembre 2026)
+
+*Acceptée par Grégoire le 30 septembre à 17 h 28, après son constat : « on a dérivé un peu trop vite ».*
+
+**Le 30 septembre, trois chantiers étaient ouverts en même temps** (la carte d'alignement et l'enregistrement, le codex, les archives), et la page du tri n'en montrait qu'un. Chaque passage avait sa raison : un échec sur ses vraies données le matin, puis la borne de 2 Go du codex. Aucun n'avait laissé de trace de ce qu'il interrompait. Grégoire a découvert l'empilement en posant la question.
+
+⮕ **Avant d'ouvrir un chantier, Cowork écrit sur la page du tri l'état de celui qu'on quitte : « clos », ou « suspendu, il reste X »**, X dit en gestes d'utilisateur. La même ligne va au § 3 de `CONSIGNE-DEMARRAGE-COWORK.md`.
+
+**Elle n'empêche pas de changer de cap** : un retour de testeur passe toujours avant tout, et Grégoire décide de l'ordre. Elle oblige à voir ce qu'on laisse. **Un plan qui nomme des lots restants est un chantier ouvert** tant que la page ne dit pas le contraire : à l'ouverture d'une session, Cowork compte les plans ouverts, pas seulement le lot en cours.
+
+**Ce qu'elle coûte** : une entrée sur la page. **Ce qu'elle rend** : que « où en est-on » ait une seule réponse.

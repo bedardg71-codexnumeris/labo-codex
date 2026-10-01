@@ -39,3 +39,26 @@ Aucune : les mots sont acceptés (16 h 26). Les mots hors § 3 (détail sous « 
 - **Le mode fichier sur ton Mac** (Safari, un .zip désigné) : jugé au banc à 607 Mo ; tu n'as pas d'archive .zip de 1.171.1 (celle de 15 h 04 est de 1.170.2 : elle dirait « Archive à refaire », et c'est juste).
 - **L'iPad** : hors de cette porte.
 - **Le mauvais niveau** : le refus est jugé au banc ; non rejoué dans un vrai Chrome.
+
+---
+
+## Résultat de la porte, 30 septembre 2026, 20 h 09 (Cowork)
+
+**Passée : 6 rangées sur 6**, dans Chrome sur le Mac, en 1.172.0 (numéro lu par Grégoire, et visible sur sa capture de 20 h 01 : « BÊTA PUBLIQUE 1.172.0 (BUILD 0930-1703) »). Relevés de 20 h 05 (5 sur 6) et de 20 h 09 (6 sur 6, après le rechargement). Captures lues avant le compteur.
+
+**Ce que les captures montrent** :
+
+- Avant : encadré « Aucun dossier d'archives n'est actuellement lié » ; ligne `h2026 · 601-101-MQ · gr00008 · 30 sept. 2026, 16 h 19 · 26 · 205 · 579.2 Mo · Disque (FSAPI)` ; « Non vérifiée » ; boutons « Vérifier » et « Retirer ».
+- Après : encadré « Dossier lié : Réserve_LaboCodex Backup », « Permission accordée » ; la ligne dit « Vérifiée le 30 septembre 2026 ». Après rechargement : « tout est comme prévu » (mot de Grégoire ; pas de capture).
+- Constat de Grégoire en 1.2 : « C'est très rapide. »
+- **La fenêtre « Archive vérifiée » n'a pas été capturée** : son texte (« Les 205 copies… ») n'est attesté que par la coche de la rangée 1.2 et par l'état de la ligne.
+
+**Prouvé en plus, sans rangée** : à 20 h 03, Grégoire a d'abord choisi le mauvais niveau ; l'application a répondu « Dossier à choisir de nouveau – Choisis le dossier qui contient « trimestres » (la racine de tes archives), pas « trimestres » lui-même ni le dossier d'une archive. » Le garde-fou de #1003 fonctionne dans un vrai Chrome (il n'était jugé qu'au banc).
+
+**Trouvailles, à inscrire par Claude Code au prochain passage** :
+
+1. **Chrome demande « Autoriser ce site à modifier les fichiers ? » pour une vérification, qui ne fait que lire.** Lu au code par Cowork : la permission se demande en `readwrite` (`js/reserve.js`, l. 244-247 et 286). Le lot promet « rien n'est écrit dans l'archive » ; la question de Chrome dit le contraire à l'usager. ⮕ « Vérifier » devrait demander la lecture seule. Sans urgence ; des mots que l'usager lit, par Chrome interposé.
+2. **« dernière maj » passe de 16 h 20 à 20 h 04 après la vérification.** Lu au code : c'est `derniere_mise_a_jour` de la liste locale (`js/reserve-reglages.js`, l. 194), pas la date du `manifeste-archives.json` du disque ; l'écriture sur disque (`_fusionnerManifesteGlobal`) n'a qu'un appelant, l'archivage (`js/reserve.js`, l. 1330). **Non mesuré sur le disque de Grégoire** (le dossier iCloud n'était pas connecté à cette session). Le libellé peut faire croire que l'archive a changé : à voir avec les mots du lot A5.
+3. **La carte « Archives (dépôt local) » est repliée par défaut** : Grégoire a d'abord ouvert « Codex › Archiver… » faute de la trouver. La rangée 1.1 aurait dû dire « déplie la carte ». Erreur de la porte, pas de l'application ; à retenir pour les portes suivantes.
+
+**Reste non prouvé** : le chemin de Safari (un fichier .zip désigné) ; l'iPad.
