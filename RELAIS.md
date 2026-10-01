@@ -7,7 +7,29 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 14 h 42 : **1.173.3 EN LIGNE (#1012, PREMIER LOT), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; RESTE LA PORTE DE GRÉGOIRE (TROIS RANGÉES), ET L'ARTEFACT JUMEAU À PUBLIER PAR COWORK ; LA FICHE #1012 RESTE OUVERTE**
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 17 h 05 : **PORTE DE #1012 (PREMIER LOT) PASSÉE, TROIS RANGÉES SUR TROIS ; LE COMPTE CHEZ GRÉGOIRE EST ÉTABLI : AUCUNE COPIE ATTENDUE SANS FICHIER (500 SUR 500) ; RIEN N'EST CODÉ ; `main` PORTE UN COMMIT DE DOCUMENTS NON POUSSÉ ; RIEN EN COURS SUR UNE BRANCHE**
+
+**La porte** (relevé de Grégoire, 16 h 55, rapporté par la consigne de Cowork de 16 h 56) : dans Chrome, en fenêtre privée, avec son vrai codex, trois rangées sur trois, aucun constat écrit ; les deux nombres de la fenêtre ne sont pas relevés. Inscrite dans le fichier de la porte (§5), dans `OU-EN-EST-ON.md` et dans la fiche #1012.
+
+**La mesure** (17 h 03, lecture seule, accord de Grégoire de 16 h 56 rapporté par la même consigne ; il m'a demandé d'exécuter cette consigne). **Mesuré** dans son Chrome, espace de `app.codexnumeris.org`, depuis la page « introuvable » de la même origine (l'application n'y démarre pas), IndexedDB ouverte sans numéro de version, transactions `readonly`, des nombres seulement, onglet fermé ensuite :
+
+| Trimestre | Copies | Avec fichier | Attendues sans fichier | « exporte » | Par statut déclaré | Évaluations |
+|---|---|---|---|---|---|---|
+| `a2026` | 106 | 106 | **0** | 80 (toutes avec fichier) | present 26, exporte 80 | 100 (1 sans entrée de copie) |
+| `h2026` | 394 | 394 | **0** | 23 (toutes avec fichier) | present 369, exporte 23, facsimile 1, manquant 1 (avec fichier) | 408 (8 sans entrée de copie) |
+| `a2025` | aucune liste | – | – | – | – | 303 |
+| `a2024` | aucune liste | – | – | – | – | 103 |
+| **Total** | **500** | **500** | **0** | **103** | | |
+
+**Lu** : la génération parcourt les listes `…_fichiersTravaux` et lit le magasin `fichiers` quand le stockage sur disque n'est pas actif ; chez lui, 500 entrées sur 500 disent « indexeddb », aucune poignée de dossier n'est stockée, aucune liste ne vit dans le seul localStorage. **Inféré** : l'avertissement ne s'afficherait pas à chaque mise à jour de son codex, aujourd'hui, dans cet espace. **Pas mesuré** : l'iPad et Safari ; 10 fichiers du magasin sans entrée dans une liste de copies (corbeille ou modélisation, inféré). **Supposé** : son espace de travail réel est celui de ce Chrome, sur ce Mac. **À retenir pour le signal** : le statut seul aurait compté 1 « manquant » qui a son fichier ; les 103 « exporte » ont tous encore leur fichier.
+
+**Les branches** : `fix-1009-charge-lot-non-assigne`, `fix-1011-codex-ouvert-sans-espace` et `fix-1012-fichier-d-origine-et-bilan` supprimées en local par `git branch -d` (0 commit hors `main`, remesuré après `git fetch --prune`). Elles existent encore chez origin : la consigne ne demandait que le local.
+
+**Ce qui reste** : les mots de Grégoire pour l'avertissement (proposition au § 5.3 de la demande de relecture), puis la consigne du lot ; rien n'est codé (ni l'avertissement, ni les mots des autres causes, ni l'export de sélection, ni l'ancien fichier par la case). Le commit de documents de cette session n'est pas poussé : le push attend le mot de Grégoire. `plans de travail/CONSIGNE-DU-JOUR.md` et l'ancienne consigne archivée, écrits par Cowork, sont laissés dans l'arbre, non commités. **Relevé par l'audit d'ouverture, hors mandat** : chez GitHub, le job planifié au navigateur finit « cancelled » depuis le 26 septembre (plafond de 60 min, inféré) ; rien d'inscrit.
+
+---
+
+## (relais précédent) 1er OCT. 2026, 14 h 42 : **1.173.3 EN LIGNE (#1012, PREMIER LOT), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; RESTE LA PORTE DE GRÉGOIRE (TROIS RANGÉES), ET L'ARTEFACT JUMEAU À PUBLIER PAR COWORK ; LA FICHE #1012 RESTE OUVERTE**
 
 **Mesuré** : verdict complet au navigateur par `scripts/pousser.sh` sur `56a94cd8`, lancé à 13 h 52 min 39 s, rendu à 14 h 39 min 33 s, vert : 0 échec, aucune spec instable (jeton : `instables: []`). Au lancement : Cowork fermé par Grégoire (ni application Claude ni machine virtuelle), charge 2,6, 74 % de mémoire libre, fichier d'échange à 2,3 Go sur 3, Time Machine à l'arrêt. **Écart** : lancé sur batterie (63 %, aucun adaptateur), sur le mot de Grégoire, qui évaluait des copies dans l'application pendant la passe ; sous `caffeinate -di` ; aucune veille au journal pendant la passe ; à la fin, toujours sur batterie (44 %). Branche `fix-1012-fichier-d-origine-et-bilan` poussée à 14 h 40, puis `main` avancée sur le même commit (avance rapide) et poussée à 14 h 41 ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abea956c139910008816b12`, état « ready », `commit_ref` `56a94cd8`, publié à 14 h 41 min 37 s (Toronto). Le numéro 1.173.3 (build `1001-1346`) est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu.
 
