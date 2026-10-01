@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 8 h 35 : **1.173.0 EN LIGNE (LOT I BIS, « UN SEUL TERME »), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` ; RESTE LA PORTE, PUIS LE LOT A3 DES ARCHIVES**
+
+**Mesuré** : verdict complet au navigateur par `scripts/pousser.sh` sur `e8830100`, lancé à 7 h 40 min 36 s, rendu à 8 h 24 min 45 s, vert : 0 échec, 1 spec verte au second essai (#916, voir plus bas). Pendant la passe, relevé toutes les cinq minutes : charge 2,4 à 4,4, fichier d'échange à 0, 60 à 65 % de mémoire libre, aucune veille au journal. Cowork fermé (mesuré : ni application Claude ni machine virtuelle). **Écart assumé par Grégoire** : la passe a tourné sur batterie (78 %, aucun adaptateur détecté), pas branchée comme le demandait la consigne ; lancée sous `caffeinate -di` pour tenir l'écran allumé (aucun script modifié). Branche poussée, puis `main` avancée sur le même commit (avance rapide) et poussée à 8 h 27 min 22 s ; le hook a relu Vitest (vert) et le verdict du même commit. **Chez Netlify** : déploiement de production `6abe51abc87b280008d19fc1`, état « ready », `commit_ref` `e8830100`, publié à 8 h 27 min 33 s (Toronto). Le numéro 1.173.0 est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu (pas de route vers le site depuis Claude Code).
+
+**La spec #916 (`cours-actif-hors-bibliotheque-916.spec.js`) est revenue** : verte au second essai dans la passe complète, machine calme, avec la même comparaison que cette nuit (attendu `COURS1766455789356`, reçu `a2026-601-101-MQ`) ; verte 3 sur 3 rejouée seule. Cette instabilité est antérieure au lot I bis : elle figure déjà plus bas dans ce fichier (tableau du run GitHub sur `ba6486a6`, même valeur reçue, inférence non mesurée sur `chargerDropdownCoursV2`, `trimestre-v2-cours.js:213`). Pas de fiche ouverte ce matin ; trois occurrences en comptant le runner : à inscrire si elle revient au prochain verdict, et à mesurer avant de conclure (défaut du banc, ou miroir `infoCours` réécrit par l'application).
+
+**Ce qui reste** : la porte, par Grégoire (`plans de travail/PORTES-TERRAIN-2026-09-30-lot-I-bis.md` ; il n'y supprime aucun trimestre ; l'artefact de la porte est à publier par Cowork). Le chantier du codex se dit « clos » quand cette porte est passée (règle 11). Ensuite, arrêté par Grégoire : le retour aux archives, lot A3. Décision qui l'attend à froid : #1007. Fiche ouverte ce matin : #1008 (garde-éveil et mémoire pendant la suite). Le skill d'ouverture (`6a0f61a4`) n'est toujours pas éprouvé seul : l'interdiction de lancer Playwright figurait encore dans la demande faite au subagent.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, ≈ 8 h : **LE VERDICT DE LA NUIT N'A RIEN RENDU (MAC EN VEILLE, MÉMOIRE SATURÉE, REDÉMARRÉ DE FORCE À 7 H 05) ; 1.173.0 TOUJOURS SUR LA BRANCHE `lot-i-bis-un-seul-terme`, LE VERDICT COMPLET EST À REFAIRE PAR `scripts/pousser.sh`** — voir la dernière ligne de ce bloc
 
 **Consigne suivie** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 1er oct., 7 h 33). Conditions de départ confirmées par mesure (`d7f5efb4`, 1.173.0, `origin/main` à `3736e044`, Vitest 668 fichiers et 7 881 essais verts sur `d7f5efb4`).
