@@ -72,3 +72,17 @@ Avant, un fichier de codex choisi dans cette case recevait une alerte qui renvoy
 | 2.4 | **En échec.** Aucune des deux fins attendues : un bandeau rouge « Erreur », ni « Recharger la page », ni « Espace insuffisant pour ouvrir ce codex ». Retour inscrit : **#1011**. |
 
 **Un seul échec réel : dix rangées sur onze.** Le chantier du codex reste « en ligne, porte incomplète » tant que #1011 est ouverte.
+
+## §6 · La rangée 2.4 rejouée (1er oct. 2026, 12 h 37 ; rapportée par la consigne de Cowork de 12 h 41)
+
+Après le correctif de #1011, en ligne en **1.173.2**. Chrome sur le Mac, fenêtre privée, son vrai codex.
+
+| Rangée | Relevé |
+|---|---|
+| 2.4 | **Passée.** Sa capture : le bandeau « Import incomplet : 67 fichiers sur 397 n'ont pas été restaurés. Les données du codex, elles, sont complètes (1014 clés). Fichiers manquants : 67 refusés faute d'espace de stockage. Libère de l'espace puis rouvre le même ZIP… », et la fenêtre « Recharger la page ». C'est la première des deux fins attendues, avec le bilan d'une ouverture incomplète. |
+
+**Onze rangées sur onze : la porte est passée.** #1011 est close ; son retour est aux corrigés de `Retours des testeurs/SUIVI-BUGS.md`.
+
+**Ses deux remarques à la porte**, inscrites sous **#1012** : « Le message ne reste pas longtemps » ; « Reste à savoir comment libérer de l'espace ». Constat de Cowork : dans une fenêtre privée, il n'y a rien à libérer, et le conseil du bandeau y est faux.
+
+**Non relevé** : s'il a cliqué « Recharger », et ce que l'écran montrait ensuite ; pourquoi le pré-vol n'a pas refusé d'emblée (330 copies sur 397 sont entrées avant que l'espace manque).
