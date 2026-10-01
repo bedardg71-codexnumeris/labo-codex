@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 18 h 47 : **#1012, LOT DE L'AVERTISSEMENT CODÉ SUR LA BRANCHE LOCALE `fix-1012-avertissement` (`8377dba0`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH DU CODE ; `main` PORTE CE RELAIS ET LES DOCUMENTS DU LOT, NON POUSSÉS (`origin/main` = `feb616b4`)** — le travail le plus récent est sur cette branche, pas sur `main` ; l'arbre de travail est laissé sur la branche, pour que Cowork y lise le code
+## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 19 h 04 : **RELEASE 1.174.0 COMMITÉE SUR LA BRANCHE LOCALE `fix-1012-avertissement` (#1012, L'AVERTISSEMENT) ; RELECTURE DE COWORK VERTE ; VERDICT COMPLET AU NAVIGATEUR, PUSH, FUSION ET MESURE CHEZ NETLIFY À SUIVRE** — voir la dernière ligne de ce bloc
+
+**Fait** : les trois commits de documents de `main` poussés à 18 h 59 par `scripts/pousser.sh` (`feb616b4..8eb94a62` ; Vitest vert au hook ; aucun code observable), fichiers de Cowork compris (verdict, consigne de 18 h 57, ancienne consigne archivée). Branche reposée sur `main` : le correctif relu y est `9db9c934` (même contenu que `8377dba0`). Les quatre relevés du verdict inscrits sous #1012 et #1001, rien de corrigé. Release par `scripts/release.mjs minor` : **1.174.0, build `1001-1900`** (`4839f5e7`, 19 h 00) ; mineure, parce qu'un geste nouveau paraît à l'écran ; entrée 1.174 aux « Nouvelles », ligne acceptée par Grégoire à 18 h 57, titre sans son point final (usage du fichier). **Mesuré** sur `4839f5e7` : Vitest complet vert, 669 fichiers, 7 893 essais.
+
+**La porte** : `plans de travail/PORTES-TERRAIN-2026-10-01-1012-avertissement.md` (markdown ; l'artefact jumeau est à publier par Cowork). Chrome sur le Mac, fenêtre privée, cinq rangées et une sans échéance ; aucune n'écrit dans le fichier de codex. Au bilan de l'ouverture, Grégoire répond « Annuler » : c'est ce que le banc (1) éprouve.
+
+**Deux points lus en écrivant la porte, non exécutés** (inscrits sous #1012) : le bilan de l'ouverture compte toute copie refusée, l'avertissement seulement les copies attendues, donc les deux fenêtres peuvent dire deux nombres différents ; dans Chrome, la fenêtre d'enregistrement exige un clic récent et peut être refusée après une préparation longue (« Codex non mis à jour », puis « Réessayer ») : la rangée 1.4 le mesure.
+
+**Ce qui reste** : le chantier du codex n'est pas clos. Il lui reste **deux lots**, chacun en attente d'une décision de Grégoire : l'ancien `.zip` ouvert par la case, qui remplace la liste des copies ; la sélection exportée sans ses copies. Une troisième décision attend, sans lot nommé : la copie vraiment perdue, qui fait revenir la fenêtre à chaque mise à jour. Les trois branches fusionnées du matin existent encore chez `origin` (suppression refusée par le garde de permissions à 17 h 55).
+
+**Dernière ligne, écrite avant le verdict** : le verdict complet au navigateur se prend par `scripts/pousser.sh` sur le commit de ce relais ; s'il est vert, la branche est poussée, `main` avancée sur le même commit et poussée, puis la mise en ligne mesurée chez Netlify. Si ce bloc est le dernier du fichier, rien de cela n'est fait : mesurer `git rev-parse origin/main` avant tout geste.
+
+---
+
+## (relais précédent) 1er OCT. 2026, 18 h 47 : **#1012, LOT DE L'AVERTISSEMENT CODÉ SUR LA BRANCHE LOCALE `fix-1012-avertissement` (`8377dba0`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH DU CODE ; `main` PORTE CE RELAIS ET LES DOCUMENTS DU LOT, NON POUSSÉS (`origin/main` = `feb616b4`)** — le travail le plus récent est sur cette branche, pas sur `main` ; l'arbre de travail est laissé sur la branche, pour que Cowork y lise le code
 
 **Fait d'abord** : `dcf5cd5a` et les fichiers de Cowork (`feb616b4`) poussés sur `main` à 17 h 54 par `scripts/pousser.sh` (Vitest vert au hook, aucun code observable). **Refusé par le garde de permissions de Claude Code** : la suppression chez `origin` des trois branches fusionnées (« Git Destructive ») ; non réessayé ; elles restent chez `origin`.
 
