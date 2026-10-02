@@ -1044,6 +1044,24 @@ async function supprimerEtudiantV2(da) {
         }, [], { geste: 'Supprimer l\'étudiant·e' });
     } catch (e) { return; }
 
+    // #1012, l'élève désinscrit (décision de Grégoire, 2 oct. 2026) : supprimer, c'est
+    // désinscrire ; on garde son DA pour qu'un ancien fichier ne le ramène pas (l'import par
+    // cases lit cette trace). Seul ce geste l'écrit : le décrochage et l'inactivité sont des
+    // statuts, l'élève reste dans la liste. `db` n'écrit pas deux clés d'un seul geste : la
+    // trace suit la fiche ; si elle échoue, le témoin le dit et l'import fait comme avant.
+    if (supprime) {
+        try {
+            await modifierEtAnnoncer(cle('elevesDesinscrits'), (lus) => {
+                const trace = Array.isArray(lus) ? lus : [];
+                const date = new Date().toISOString();
+                const deja = trace.find(t => t && String(t.da) === String(da));
+                if (deja) deja.date = date;
+                else trace.push({ da: da, date: date });
+                return trace;
+            }, [], { geste: 'Supprimer l\'étudiant·e', discret: true });
+        } catch (e) { /* le témoin l'a dit */ }
+    }
+
     chargerListeEtudiantsV2();
 
     if (supprime) notifications.succes('Étudiant supprimé');
