@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 13 h 58 : **1.174.4 EN LIGNE (#1012, L'ÉLÈVE DÉSINSCRIT), MESURÉ CHEZ NETLIFY ; BRANCHE `fix/1012-eleve-desinscrit` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 15 h 35 : **#1012, LES MOTS : RELEASE 1.174.5 COMMITÉE SUR `fix/1012-mots-codex` ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
+
+**Où vit le travail** : la branche `fix/1012-mots-codex`, partie de `main` à `fcf4fe4a` (fichiers de Cowork commités tels quels, consigne de 15 h 08 ; non poussé seul) : le lot (`4f015d60`), la release (`f0839613`, build `1002-1534`), puis ce relais.
+
+**Fait, consigne de Cowork de 15 h 08** : (1) la fenêtre d'une ouverture complète dit « Ton fichier de codex n'a pas changé : garde-le, c'est ta copie hors de l'application. » ; (3) « N date(s) de présences » compte des dates distinctes, à l'aperçu et au bilan (au bilan, les dates d'une fiche entrée) ; (4) la ligne des élèves écartés au bilan. Inscrits au BACKLOG : points 2 et 5 sans lot sous #1012, point 6 en fiche à part **#1013**. Ligne des « Nouvelles » posée telle quelle (retouche de Cowork, acceptée par Grégoire). Vitest vert après le bump (673 fichiers, 7 938 essais). Pas de relecture croisée (décision de Cowork). Pas de porte terrain.
+
+**Ce qui reste** : le verdict complet, la fusion de `main` en avance rapide et `git push origin main`, la mesure chez Netlify ; puis **le chantier du codex est clos** (décision de Grégoire de 15 h 08).
+
+---
+
+## (relais précédent) 2 OCT. 2026, 13 h 58 : **1.174.4 EN LIGNE (#1012, L'ÉLÈVE DÉSINSCRIT), MESURÉ CHEZ NETLIFY ; BRANCHE `fix/1012-eleve-desinscrit` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
 
 **Où vit le travail** : tout est sur `main`. Correctif relu `8d20dc3f`, BACKLOG `8763e25a`, release 1.174.4 (build `1002-1258`, `c5e58e88`), relais `95ffb41b`, puis ce relais. `main` avancée en avance rapide sur la branche et poussée par `git push origin main` (le hook a relu le jeton du même commit).
 
