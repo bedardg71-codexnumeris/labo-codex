@@ -1,7 +1,7 @@
 # Portes terrain – chantier du codex, #1012 : ton codex te prévient quand des copies lui manquent
 
 > Écrites le 1er octobre 2026, à 19 h 02 (Toronto, mesurée par `date`), par Claude Code (ce markdown : la trace). **Cowork publie l'artefact jumeau** (cases, champs de saisie, bouton « Copier mes résultats »).
-> **Le numéro à lire : 1.174.0** (build `1001-1900`). ⏳ **Pas encore en ligne au moment d'écrire : la porte attend la ligne « en ligne depuis… » ci-dessous.**
+> **Le numéro à lire : 1.174.0** (build `1001-1900`). **En ligne depuis 20 h 05, le 1er octobre 2026** (mesuré chez Netlify : déploiement de production prêt sur `740a984c`, publié à 20 h 05 min 15 s ; le fichier servi lui-même n'a pas été lu). La porte peut se faire.
 > Un seul appareil : **Mac, dans Chrome**. Adresse : `https://app.codexnumeris.org`.
 > **Pourquoi cinq rangées seulement** : les mots de la fenêtre, le compte des copies, « Annuler » qui n'écrit rien, le fichier qui reçoit le codex et l'export de sélection sont jugés par les bancs (WebKit). Seul ton Chrome peut dire que **sa** fenêtre d'enregistrement s'ouvre bien après l'avertissement : le banc l'imite.
 > **Tes données** : ⛔ **aucune rangée n'écrit dans ton fichier de codex.** Les rangées 1.1 à 1.4 se font dans une fenêtre de navigation privée : elle a son propre espace, vide, et l'oublie à sa fermeture. Tu n'y cliques jamais « Enregistrer » dans la fenêtre de Chrome. Ta fenêtre normale et tes données de travail ne sont pas touchées.
@@ -47,4 +47,4 @@ Aucune dans cette porte. Trois décisions t'attendent ailleurs, chacune avec son
 - **Le compte sur un vrai espace** : la mesure de 17 h 03 a compté chez toi avec une sonde, pas avec ce code. La rangée 2.1 dira si les deux s'accordent.
 - **« Exporter une sélection »** : jugée au banc seulement (elle demande toujours où écrire, et n'écrit plus dans le fichier du codex). Aucune rangée : un raté s'y verrait sans rien abîmer, la fenêtre de Chrome s'ouvrirait ou non.
 - **Les mots des trois autres causes** d'une ouverture incomplète (copie absente du fichier, format non reconnu, erreur) et du mélange : jugés au banc. Ton codex en fenêtre privée ne montre que le manque d'espace.
-- **La suite complète au navigateur** : prise après l'écriture de cette porte ; son résultat est au relais.
+- **La suite complète au navigateur** : prise après l'écriture de cette porte, sur `740a984c` : verte, 0 échec, aucune spec instable (rendue à 19 h 52). Elle tourne dans WebKit, pas dans Chrome.
