@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 16 h 45 : **1.174.5 EN LIGNE (#1012, LES MOTS), MESURÉ CHEZ NETLIFY ; BRANCHE `fix/1012-mots-codex` FUSIONNÉE ; LE CHANTIER DU CODEX EST CLOS ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 18 h 45 : **#1014 (LE CODEX COMPLET) + ÉCHAPPEMENT DES RAPPORTS ARCHIVÉS : COMMITÉ SUR `claude/1014-codex-complet` (`b9f98e27`), EN RELECTURE ; NI RELEASE, NI PUSH ; `main` A 2 COMMITS DE DOCUMENTS NON POUSSÉS**
+
+**Où vit le travail** : la branche `claude/1014-codex-complet` (worktree `.claude/worktrees/1014-codex-complet`), partie de `main` à `e1bb1df6`. Demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-02-1014-codex-complet.md` (sur la branche). Fusion vers `main` après la relecture de Cowork.
+
+**Refusé par le garde de permissions, non contourné** : le commit « tels quels » des deux fichiers de consigne de Cowork (ils restent dans l'arbre principal). Push des commits de documents de `main` (`65f1f8e4`, `e1bb1df6`) non tenté : à Grégoire.
+
+**Fait** : banc #1014 (6 essais) et essai B verts, 9 mutations sur 9 rouges, Vitest 7 938 verts, 11 specs voisines du codex vertes (1 instable au second essai). Pas de verdict Playwright complet (viendra avec la release). Inscriptions dues à `BACKLOG.md` : texte au § 10 de la demande.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 16 h 45 : **1.174.5 EN LIGNE (#1012, LES MOTS), MESURÉ CHEZ NETLIFY ; BRANCHE `fix/1012-mots-codex` FUSIONNÉE ; LE CHANTIER DU CODEX EST CLOS ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
 
 **Où vit le travail** : tout est sur `main`. Fichiers de Cowork `fcf4fe4a`, lot `4f015d60`, release 1.174.5 (build `1002-1534`, `f0839613`), relais `c33dcd0e`, puis ce relais. `main` avancée en avance rapide sur la branche et poussée par `git push origin main` (le hook a relu le jeton du même commit).
 
