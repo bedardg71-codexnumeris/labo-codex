@@ -37,7 +37,11 @@
                 // 1.174.2 (#1012, la sélection) — titre et ligne proposés par Claude Code, ACCEPTÉS par
                 // Grégoire le 2 oct. 2026 avec sa correction (« avant, il l'écrivait sans elles, sans
                 // rien dire »), posés tels quels. La ligne entre dans l'entrée de sa mineure.
-                '<strong>Une sélection exportée te prévient aussi.</strong> Quand des copies ne sont pas dans l\'application, «&nbsp;Exporter une sélection&nbsp;» le dit dans une fenêtre avant d\'écrire le fichier&nbsp;; avant, il l\'écrivait sans elles, sans rien dire.'
+                '<strong>Une sélection exportée te prévient aussi.</strong> Quand des copies ne sont pas dans l\'application, «&nbsp;Exporter une sélection&nbsp;» le dit dans une fenêtre avant d\'écrire le fichier&nbsp;; avant, il l\'écrivait sans elles, sans rien dire.',
+                // 1.174.3 (#1012, les quatre cases) — titre et ligne ACCEPTÉS par Grégoire le 2 oct.
+                // 2026 à 11 h 22 (« oui », consigne de Cowork de 11 h 22), posés tels quels. La ligne
+                // entre dans l'entrée de sa mineure, son titre en tête.
+                '<strong>Ouvrir un ancien fichier ne remplace plus tes élèves, tes présences, tes notes ni tes annotations.</strong> Quand tu coches ces cases dans «&nbsp;Ouvrir un Codex…&nbsp;», ce que le fichier apporte de neuf s\'ajoute à ce que tu as&nbsp;; ce que tu as déjà ne change pas.'
             ]
         },
         {
