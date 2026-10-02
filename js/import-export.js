@@ -1200,6 +1200,104 @@ function fusionnerCopiesImportees(copiesEspace, copiesFichier) {
 }
 
 /**
+ * #1012 (les quatre cases, consigne de Cowork du 2 oct. 2026) — ce qui fait « la même chose »
+ * dans les données personnelles d'un trimestre. Chaque famille rend les MARQUES d'une entrée ;
+ * une entrée du fichier qui partage une marque avec une entrée de l'espace est déjà là.
+ * `espace` : les marques publiées par une entrée de l'espace ; `fichier` : celles qu'une entrée
+ * du fichier cherche.
+ *  · étudiants : le DA ;
+ *  · présences : la date, le DA et le cours ; un `coursId` absent d'un côté = même cours
+ *    (comme saisie-presences.js) ;
+ *  · notes : l'`id`, et le couple élève × production. Une évaluation du fichier n'entre que si
+ *    l'espace n'a AUCUNE évaluation de ce couple : une reprise du fichier sur une originale de
+ *    l'espace laisserait deux évaluations actives (l'originale de l'espace n'étant pas archivée),
+ *    et changerait la note de l'élève ;
+ *  · annotations : l'`id`, et la copie annotée (une copie n'a qu'une annotation).
+ * Une entrée sans aucune marque se reconnaît à son contenu entier.
+ */
+const MARQUES_DONNEES_PERSO = {
+    etudiants: {
+        espace: e => (e.da ? ['da:' + e.da] : []),
+        fichier: e => (e.da ? ['da:' + e.da] : [])
+    },
+    presences: {
+        espace: p => (p.date && p.da ? ['p:' + p.date + '|' + p.da + '|' + (p.coursId || ''), 'p:' + p.date + '|' + p.da + '|*'] : []),
+        fichier: p => (p.date && p.da ? (p.coursId ? ['p:' + p.date + '|' + p.da + '|' + p.coursId, 'p:' + p.date + '|' + p.da + '|']
+                                                     : ['p:' + p.date + '|' + p.da + '|*']) : [])
+    },
+    notes: {
+        espace: e => _marquesEvaluation(e),
+        fichier: e => _marquesEvaluation(e)
+    },
+    annotations: {
+        espace: a => _marquesAnnotation(a),
+        fichier: a => _marquesAnnotation(a)
+    }
+};
+
+function _marquesEvaluation(e) {
+    const m = [];
+    if (e.id) m.push('id:' + e.id);
+    if (e.etudiantDA && e.productionId) m.push('couple:' + e.etudiantDA + '|' + e.productionId);
+    return m;
+}
+
+function _marquesAnnotation(a) {
+    const m = [];
+    if (a.id) m.push('id:' + a.id);
+    if (a.fichierId) m.push('fichier:' + a.fichierId);
+    return m;
+}
+
+function _estValeurVide(v) {
+    if (v === null || v === undefined) return true;
+    if (Array.isArray(v)) return v.length === 0;
+    return typeof v === 'object' && Object.keys(v).length === 0;
+}
+
+/**
+ * #1012 — les cases « Étudiants », « Présences », « Notes » et « Annotations » de l'import par
+ * cases. Avant, chacune REMPLAÇAIT la valeur de l'espace par celle du fichier (`db.set`). Ce que
+ * le fichier apporte s'ajoute ; rien de ce que l'espace a ne perd son entrée ni n'est réécrit ;
+ * une même chose des deux côtés (MARQUES_DONNEES_PERSO), l'espace l'emporte. Les entrées du
+ * fichier ne se comparent qu'à l'espace : le même fichier rouvert ne double rien.
+ * Une valeur qui n'est pas une liste (un ancien format) n'est écrite que si l'espace n'a rien.
+ * Fonction pure, testable en Vitest.
+ * @param {*} valeurEspace - la valeur de la clé dans l'espace (null si absente)
+ * @param {*} valeurFichier - la valeur de la même clé dans le fichier
+ * @param {string} famille - 'etudiants' | 'presences' | 'notes' | 'annotations'
+ * @returns {{valeur: *, ecrire: boolean, entrees: number}} `entrees` : ce qui est entré
+ */
+function fusionnerDonneesPersoImportees(valeurEspace, valeurFichier, famille) {
+    const marques = MARQUES_DONNEES_PERSO[famille];
+    if (!marques) throw new Error('Famille inconnue : ' + famille);
+    if (!Array.isArray(valeurFichier)) {
+        if (valeurFichier && typeof valeurFichier === 'object' && _estValeurVide(valeurEspace)) {
+            return { valeur: valeurFichier, ecrire: true, entrees: Object.keys(valeurFichier).length };
+        }
+        return { valeur: valeurEspace, ecrire: false, entrees: 0 };
+    }
+    if (!Array.isArray(valeurEspace) && !_estValeurVide(valeurEspace)) {
+        return { valeur: valeurEspace, ecrire: false, entrees: 0 };
+    }
+    const base = Array.isArray(valeurEspace) ? valeurEspace : [];
+    const dejaLa = new Set();
+    base.forEach(e => {
+        if (!e || typeof e !== 'object') return;
+        const m = marques.espace(e);
+        if (m.length === 0) dejaLa.add('contenu:' + JSON.stringify(e));
+        m.forEach(x => dejaLa.add(x));
+    });
+    const nouvelles = valeurFichier.filter(e => {
+        if (!e || typeof e !== 'object') return false;
+        const m = marques.fichier(e);
+        if (m.length === 0) return !dejaLa.has('contenu:' + JSON.stringify(e));
+        return !m.some(x => dejaLa.has(x));
+    });
+    return { valeur: base.concat(nouvelles), ecrire: nouvelles.length > 0, entrees: nouvelles.length };
+}
+
+/**
  * #1012 — la case « Fichiers travaux » de l'import par cases. Avant, chaque liste du
  * fichier REMPLAÇAIT celle de l'espace (`db.set`) : les copies de l'espace n'avaient
  * plus d'entrée, leurs fichiers restaient au magasin sans rien qui les désigne, et
@@ -2883,7 +2981,10 @@ async function executerImportSelectif() {
             }
         }
 
-        // ========== DONNÉES DU COURS (écrasement) ==========
+        // ========== DONNÉES DU COURS ==========
+        // #1012 : « Étudiants », « Présences », « Notes » et « Annotations » s'AJOUTENT à ce que
+        // l'espace a (fusionnerDonneesPersoImportees) ; les comptes disent ce qui est entré.
+        // Les autres cases remplacent encore (inscrit sous #1012).
         // 🆕 Beta 96.2 : Bloquer import données perso SEULEMENT si collègue ou source vraiment inconnue
         // Permettre si : sauvegarde personnelle OU restauration sur nouvel appareil OU confirmation utilisateur
         const bloquerDonneesPerso = analyseImportEnCours &&
@@ -2897,8 +2998,9 @@ async function executerImportSelectif() {
                 if (cleEtu === 'groupeEtudiants' || cleEtu.endsWith('_groupeEtudiants')) {
                     var etudiants = parseValeur(donnees[cleEtu]);
                     if (Array.isArray(etudiants)) {
-                        await db.set(cleEtu, etudiants);
-                        nbEtudiants += etudiants.length;
+                        var resEtu = fusionnerDonneesPersoImportees(await db.get(cleEtu, null), etudiants, 'etudiants');
+                        if (resEtu.ecrire) await db.set(cleEtu, resEtu.valeur);
+                        nbEtudiants += resEtu.entrees;
                     }
                 }
             }
@@ -2915,8 +3017,10 @@ async function executerImportSelectif() {
                 if (clePres === 'presences' || clePres.endsWith('_presences')) {
                     var presences = parseValeur(donnees[clePres]);
                     if (presences && typeof presences === 'object') {
-                        await db.set(clePres, presences);
-                        nbDates += Object.keys(presences).length;
+                        // Le compte est celui des fiches entrées (le mot « date(s) » du bilan ment, relevé).
+                        var resPres = fusionnerDonneesPersoImportees(await db.get(clePres, null), presences, 'presences');
+                        if (resPres.ecrire) await db.set(clePres, resPres.valeur);
+                        nbDates += resPres.entrees;
                     }
                 }
             }
@@ -2934,9 +3038,10 @@ async function executerImportSelectif() {
                     cleEval === 'evaluationsSauvegardees' || cleEval.endsWith('_evaluationsSauvegardees') ||
                     cleEval === 'notesEtudiants' || cleEval.endsWith('_notesEtudiants')) {
                     var data = parseValeur(donnees[cleEval]);
-                    if (data) {
-                        await db.set(cleEval, data);
-                        nbEvals += Array.isArray(data) ? data.length : 1;
+                    if (data && typeof data === 'object') {
+                        var resEval = fusionnerDonneesPersoImportees(await db.get(cleEval, null), data, 'notes');
+                        if (resEval.ecrire) await db.set(cleEval, resEval.valeur);
+                        nbEvals += resEval.entrees;
                     }
                 }
             }
@@ -3068,8 +3173,9 @@ async function executerImportSelectif() {
                 if (cleAT.includes('annotationsTravaux')) {
                     var annotations = parseValeur(donnees[cleAT]);
                     if (Array.isArray(annotations) && annotations.length > 0) {
-                        await db.set(cleAT, annotations);
-                        nbAnnotations += annotations.length;
+                        var resAT = fusionnerDonneesPersoImportees(await db.get(cleAT, null), annotations, 'annotations');
+                        if (resAT.ecrire) await db.set(cleAT, resAT.valeur);
+                        nbAnnotations += resAT.entrees;
                     }
                 }
             }
@@ -3383,6 +3489,7 @@ window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
 window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé pour ses essais
+window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
 window.signatureContenu = signatureContenu;         // #448
 
 })();

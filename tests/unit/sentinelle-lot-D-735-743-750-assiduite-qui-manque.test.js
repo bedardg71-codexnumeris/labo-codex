@@ -159,7 +159,10 @@ describe('lot D · verrous structurels', () => {
 
     it('(g) la fiche d\'un·e élève voyage ENTIÈRE : ni l\'export ni l\'import ne passent `groupeEtudiants` par une liste blanche de champs', () => {
         const code = sansCommentaires(readFileSync(path.join(RACINE, 'js/import-export.js'), 'utf8'));
-        expect(code).toMatch(/cleEtu\.endsWith\('_groupeEtudiants'\)\)\s*\{\s*var etudiants = parseValeur\(donnees\[cleEtu\]\);\s*if \(Array\.isArray\(etudiants\)\) \{\s*await db\.set\(cleEtu, etudiants\);/);
+        // #1012 (2 oct. 2026) : l'import n'écrit plus la liste du fichier telle quelle, il l'AJOUTE à celle de
+        // l'espace (fusionnerDonneesPersoImportees) — fiches entières des deux côtés, sans liste de champs.
+        expect(code).toMatch(/cleEtu\.endsWith\('_groupeEtudiants'\)\)\s*\{\s*var etudiants = parseValeur\(donnees\[cleEtu\]\);\s*if \(Array\.isArray\(etudiants\)\) \{\s*var resEtu = fusionnerDonneesPersoImportees\(await db\.get\(cleEtu, null\), etudiants, 'etudiants'\);/);
+        expect(code).toMatch(/return \{ valeur: base\.concat\(nouvelles\), ecrire: nouvelles\.length > 0, entrees: nouvelles\.length \};/);
         expect(code).not.toMatch(/SCHEMAS_IMPORT\.etudiant/);
     });
 
