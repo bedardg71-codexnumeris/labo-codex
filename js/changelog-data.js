@@ -45,7 +45,11 @@
                 // 1.174.4 (#1012, l'élève désinscrit) — titre et ligne retouchés par Cowork, ACCEPTÉS
                 // par Grégoire le 2 oct. 2026 à 12 h 54 (« oui », consigne de Cowork de 12 h 54),
                 // posés tels quels. La ligne entre dans l'entrée de sa mineure, son titre en tête.
-                '<strong>Un élève que tu supprimes ne revient plus par un ancien fichier.</strong> Quand tu ouvres un ancien fichier par «&nbsp;Ouvrir un Codex…&nbsp;», rien de lui n\'entre&nbsp;: ni sa fiche, ni ses copies, ni ses notes, ni ses présences, ni ses annotations. Cela vaut pour les élèves supprimés à partir de cette version&nbsp;; un élève en décrochage n\'est pas touché.'
+                '<strong>Un élève que tu supprimes ne revient plus par un ancien fichier.</strong> Quand tu ouvres un ancien fichier par «&nbsp;Ouvrir un Codex…&nbsp;», rien de lui n\'entre&nbsp;: ni sa fiche, ni ses copies, ni ses notes, ni ses présences, ni ses annotations. Cela vaut pour les élèves supprimés à partir de cette version&nbsp;; un élève en décrochage n\'est pas touché.',
+                // 1.174.5 (#1012, les mots) — titre et ligne proposés par Claude Code, retouchés par
+                // Cowork, ACCEPTÉS par Grégoire le 2 oct. 2026, posés tels quels. La ligne entre dans
+                // l'entrée de sa mineure, son titre en tête.
+                '<strong>La fenêtre d\'ouverture ne te conseille plus de supprimer ton codex.</strong> Après une ouverture complète, elle te dit de le garder&nbsp;: c\'est ta copie hors de l\'application. Au bilan de «&nbsp;Ouvrir un Codex…&nbsp;», les présences se comptent en dates de cours, et une ligne te dit combien d\'élèves que tu avais supprimés n\'ont pas été ramenés.'
             ]
         },
         {
