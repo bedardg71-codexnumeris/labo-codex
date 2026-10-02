@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 13 h 05 : **#1012, L'ÉLÈVE DÉSINSCRIT : RELU VERT, RELEASE 1.174.4 COMMITÉE SUR `fix/1012-eleve-desinscrit` ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 13 h 58 : **1.174.4 EN LIGNE (#1012, L'ÉLÈVE DÉSINSCRIT), MESURÉ CHEZ NETLIFY ; BRANCHE `fix/1012-eleve-desinscrit` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+
+**Où vit le travail** : tout est sur `main`. Correctif relu `8d20dc3f`, BACKLOG `8763e25a`, release 1.174.4 (build `1002-1258`, `c5e58e88`), relais `95ffb41b`, puis ce relais. `main` avancée en avance rapide sur la branche et poussée par `git push origin main` (le hook a relu le jeton du même commit).
+
+**Fait** : verdict complet par `scripts/pousser.sh` sur `95ffb41b` : **vert, 0 échec, aucune spec instable**, rendu à 13 h 52 (après 90 s d'attente de charge). **Netlify : production prête sur `95ffb41b`, publiée à 13 h 54 min 12 s.**
+
+**Pas de porte terrain** : elle demanderait un ancien `.zip` que Grégoire n'a pas ; le banc juge par le geste.
+
+**Le chantier du codex n'a plus de lot de code.** Il lui reste, tout à Grégoire : la copie vraiment perdue (des mots) ; « fichier ZIP » dans la fenêtre d'une ouverture complète (des mots) ; les mots du bilan de l'import (« N date(s) », et s'il veut une ligne pour les élèves écartés) ; ce qui reste visible d'un élève supprimé (une décision : un lot ou non). C'est Grégoire qui dira si le chantier est clos.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 13 h 05 : **#1012, L'ÉLÈVE DÉSINSCRIT : RELU VERT, RELEASE 1.174.4 COMMITÉE SUR `fix/1012-eleve-desinscrit` ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
 
 **Où vit le travail** : la branche `fix/1012-eleve-desinscrit`, reposée sur `main` (`ee6372d7`) sans changement de code : le correctif relu (`8d20dc3f`, ex-`8985dd12`), l'inscription au BACKLOG (`8763e25a`), la release (`c5e58e88`), puis ce relais. `main` a été poussée avec les documents (`cc3d92e6`, `3a2252ab`, `ee6372d7` : verdict de relecture de 12 h 53, consigne de 12 h 54 et ancienne consigne, fichiers de Cowork commités tels quels), par `scripts/pousser.sh` (documents seuls, sans suite).
 
