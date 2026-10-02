@@ -98,13 +98,16 @@ describe('sentinelle · câblage du pré-vol (#334 A)', () => {
         expect(corps).toContain('validation._tailleDecompressee');
     });
 
-    it('actionOuvrir rappelle le ZIP source supprimable sur import COMPLET seulement (piste 5)', () => {
+    it('actionOuvrir rappelle de GARDER le fichier de codex sur import COMPLET, et ne conseille plus de le supprimer (#1012, 2 oct. 2026)', () => {
         const posAction = codex.indexOf('async function actionOuvrir(');
         const corpsAction = codex.slice(posAction, codex.indexOf('async function actionEnregistrer('));
-        expect(corpsAction).toContain('reste dans Fichiers');
-        // Le conseil de suppression doit rester sur la branche non-incomplet
-        // (un import incomplet conseille au contraire de ROUVRIR le même codex).
-        // Depuis #1012, la branche incomplète est le message du bilan.
+        // La piste 5 (#334) conseillait de supprimer le ZIP d'origine : c'est la seule copie
+        // hors de l'application (limite de Grégoire du 20 septembre), le conseil est retiré.
+        expect(corpsAction).toContain("Ton fichier de codex n\\'a pas changé : garde-le, c\\'est ta copie hors de ' +");
+        expect(corpsAction).not.toContain('reste dans Fichiers');
+        expect(corpsAction).not.toContain('tu peux le supprimer');
+        // Le rappel reste sur la branche non-incomplet (un import incomplet conseille
+        // de ROUVRIR le même codex). Depuis #1012, la branche incomplète est le message du bilan.
         expect(corpsAction).toContain('resultat.stats.incomplet');
         expect(corpsAction).toMatch(/msgReload = bilan\s*\?\s*bilan\.message\s*:\s*'Codex chargé depuis/);
     });

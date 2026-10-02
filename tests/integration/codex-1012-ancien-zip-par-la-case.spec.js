@@ -185,7 +185,8 @@ const lireCopies = (page) => page.evaluate(async (cle) => {
 /**
  * Le geste entier de la case : Réglages › Données, « Ouvrir un Codex… », le fichier, la fenêtre aux
  * cases à cocher (tout coché, sauf `sauf` ; ou `seulement` ces cases-là), « Importer ». On ne
- * recharge pas : l'état se lit tel que l'import vient de l'écrire. Rend le bilan dit à l'écran.
+ * recharge pas : l'état se lit tel que l'import vient de l'écrire. Rend le bilan dit à l'écran, et
+ * le texte de l'aperçu (la fenêtre aux cases) tel qu'il était avant « Importer ».
  */
 async function ouvrirParLaCase(page, fichier, { sauf = [], seulement = null } = {}) {
     const dialogues = [];
@@ -224,6 +225,7 @@ async function ouvrirParLaCase(page, fichier, { sauf = [], seulement = null } = 
         });
         return Array.from(m.querySelectorAll('input[type="checkbox"][id^="import-"]')).filter((cb) => cb.checked).map((cb) => cb.id).sort();
     }, { sauf, seulement });
+    const apercu = await page.locator('#modalPreviewConfigComplete').innerText();
     await page.click('#modalPreviewConfigComplete [data-action="executerImportSelectif"]');
     await expect.poll(() => dialogues.some((d) => d.type === 'alert'), { timeout: 20000 }).toBe(true);
     const bilan = dialogues.find((d) => d.type === 'alert').message;
@@ -231,7 +233,7 @@ async function ouvrirParLaCase(page, fichier, { sauf = [], seulement = null } = 
     if (/^Import réussi/.test(bilan)) await expect.poll(() => dialogues.some((d) => /^Recharger la page/.test(d.message)), { timeout: 20000 }).toBe(true);
     await page.waitForTimeout(500);
     page.off('dialog', ecouteur);
-    return { cases, bilan };
+    return { cases, bilan, apercu };
 }
 
 /** Le vrai geste : le menu Codex, « Mettre à jour le codex », jusqu'à la fin de la tentative. */
@@ -728,6 +730,14 @@ test.describe('#1012 — un élève supprimé ne revient plus par un ancien fich
         await test.step('la copie de Camille ne dépose pas son fichier au magasin ; celle de Bao, oui', async () => {
             expect.soft((await lireCopies(neuf.page)).depots).toEqual([COPIE_DE_BAO]);
         });
+        await test.step('le bilan le dit, en une ligne qui compte les élèves (Camille écartée dans cinq familles : un élève)', async () => {
+            expect.soft(r.bilan).toContain('\n\n1 élève que tu avais supprimé n\'a pas été ramené.\n\nTotal : ');
+            expect.soft(r.bilan).not.toContain('élèves que tu avais supprimés');
+        });
+        await test.step('rien d\'autre n\'entre : la ligne paraît quand même, sous « Aucune nouvelle donnée à importer. »', async () => {
+            const rien = await ouvrirParLaCase(neuf.page, ancien, { seulement: ['import-etudiants', 'import-presences', 'import-evaluations', 'import-annotationsTravaux', 'import-fichiersTravaux'] });
+            expect.soft(rien.bilan).toBe('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).\n\n1 élève que tu avais supprimé n\'a pas été ramené.');
+        });
         await test.step('la trace ne bouge pas, et ce qui restait de Camille dans l\'espace non plus', async () => {
             expect.soft(apres[CLE_TRACE]).toEqual(avant[CLE_TRACE]);
         });
@@ -768,8 +778,12 @@ test.describe('#1012 — un élève supprimé ne revient plus par un ancien fich
         const avant = await lireCinq(neuf.page);
         expect(avant[CLE_TRACE], 'le décrochage n\'écrit pas la trace').toBeNull();
 
-        await ouvrirParLaCase(neuf.page, ancien);
+        const r = await ouvrirParLaCase(neuf.page, ancien);
         const apres = await lireCinq(neuf.page);
+        await test.step('personne n\'est écarté : le bilan n\'a pas de ligne pour eux', async () => {
+            expect.soft(r.bilan).toMatch(/^Import réussi/);
+            expect.soft(r.bilan).not.toContain('que tu avais supprimé');
+        });
         await test.step('sa fiche de l\'espace reste telle quelle (l\'espace l\'emporte), et ce que le fichier apporte d\'elle entre', async () => {
             expect.soft(apres[CLE_GROUPE].find((e) => e.da === CAMILLE)).toEqual(avant[CLE_GROUPE].find((e) => e.da === CAMILLE));
             expect.soft(apres[CLE_GROUPE].map((e) => e.da)).toEqual(['9000001', CAMILLE, '9000002']);
@@ -787,6 +801,49 @@ test.describe('#1012 — un élève supprimé ne revient plus par un ancien fich
             await remarque('');
             neuf.page.off('dialog', accepter);
             expect.soft(await neuf.page.evaluate((c) => db.get(c, null), CLE_TRACE)).toBeNull();
+        });
+        await neuf.contexte.close();
+    });
+});
+
+// #1012, les mots (décision de Grégoire, 2 oct. 2026, 15 h 05) — « N date(s) de présences » COMPTE
+// DES DATES distinctes (une date de cours, tous élèves confondus), et non des fiches (une par élève et
+// par jour) : à l'aperçu (la fenêtre aux cases) comme au bilan. Au bilan, seules les dates d'au moins
+// une fiche entrée comptent.
+// Les fichiers du banc vident `demo_presences` de la fixture (32 dates), que l'aperçu compte aussi.
+const DATES_DU_BANC = ['2031-09-02', '2031-09-04', '2031-09-09'];
+const fichesDe = (dates) => dates.flatMap((date) => Array.from({ length: 10 }, (_, i) =>
+    ({ date, da: String(9000100 + i), periodesPresentes: 2, notes: '', coursId: 'cours-banc' })));
+const nombreDeDatesALApercu = (apercu) => {
+    const m = /Présences\s+(\d+) date\(s\)/.exec(apercu);
+    return m ? Number(m[1]) : null;
+};
+
+test.describe('#1012 — « N date(s) de présences » compte des dates', () => {
+    test.beforeEach(async ({ page }) => { page.setDefaultTimeout(15000); });
+
+    test('(7) 3 dates × 10 élèves : « 3 date(s) » à l\'aperçu et au bilan ; rouvert avec une date de plus, le bilan ne compte que la date entrée', async ({ page, browser }) => {
+        test.setTimeout(300000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier), { ...A.donnees, ...ESPACE });
+        const trente = await deriverZipDesQuatre(page, test.info().outputPath('trois-dates.zip'), { [CLE_PRESENCES]: fichesDe(DATES_DU_BANC), demo_presences: [] });
+        const quarante = await deriverZipDesQuatre(page, test.info().outputPath('quatre-dates.zip'), { [CLE_PRESENCES]: fichesDe([...DATES_DU_BANC, '2031-09-11']), demo_presences: [] });
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+
+        const r = await ouvrirParLaCase(neuf.page, trente, { seulement: ['import-presences'] });
+        expect(r.cases, 'témoin : seule la case des présences est cochée').toEqual(['import-presences']);
+        await test.step('30 fiches, 3 dates : l\'aperçu et le bilan disent 3', async () => {
+            expect.soft(nombreDeDatesALApercu(r.apercu), 'aperçu').toBe(3);
+            expect.soft(r.bilan).toContain('\n3 date(s) de présences\n');
+            expect.soft((await neuf.page.evaluate((c) => db.get(c, null), CLE_PRESENCES)).length, 'témoin : les 30 fiches sont entrées').toBe(ESPACE[CLE_PRESENCES].length + 30);
+        });
+
+        const r2 = await ouvrirParLaCase(neuf.page, quarante, { seulement: ['import-presences'] });
+        await test.step('40 fiches, 4 dates, dont 3 déjà là : l\'aperçu dit 4 (le fichier), le bilan dit 1 (ce qui est entré)', async () => {
+            expect.soft(nombreDeDatesALApercu(r2.apercu), 'aperçu').toBe(4);
+            expect.soft(r2.bilan).toContain('\n1 date(s) de présences\n');
+            expect.soft(r2.bilan).not.toContain('que tu avais supprimé');
         });
         await neuf.contexte.close();
     });

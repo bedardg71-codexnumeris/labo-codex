@@ -1298,6 +1298,34 @@ function fusionnerDonneesPersoImportees(valeurEspace, valeurFichier, famille) {
 }
 
 /**
+ * #1012, les mots (décision de Grégoire, 2 oct. 2026, 15 h 05) — « N date(s) de présences »
+ * compte des DATES distinctes (une date de cours, tous élèves confondus), et non des fiches
+ * (une par élève et par jour). Une valeur qui n'est pas une liste (un ancien format, rangé
+ * par date) compte ses clés. Fonction pure.
+ * @param {*} valeur - une liste de fiches `{ date, da, … }`, ou un ancien objet
+ * @returns {number}
+ */
+function compterDatesPresences(valeur) {
+    if (Array.isArray(valeur)) {
+        return new Set(valeur.filter(p => p && typeof p === 'object' && p.date).map(p => String(p.date))).size;
+    }
+    return valeur && typeof valeur === 'object' ? Object.keys(valeur).length : 0;
+}
+
+/**
+ * #1012, les mots (décision de Grégoire, 2 oct. 2026, 15 h 07) — la ligne du bilan pour les
+ * élèves supprimés que l'import a écartés. Vide quand il n'y en a aucun. Fonction pure.
+ * @param {number} n - le nombre d'élèves (DA distincts) écartés
+ * @returns {string}
+ */
+function ligneElevesEcartes(n) {
+    if (!n) return '';
+    return n === 1
+        ? '1 élève que tu avais supprimé n\'a pas été ramené.'
+        : n + ' élèves que tu avais supprimés n\'ont pas été ramenés.';
+}
+
+/**
  * #1012, l'élève désinscrit (décision de Grégoire, 2 oct. 2026) — les élèves qu'un ancien
  * fichier ne ramène plus : les DA de la trace `<trim>_elevesDesinscrits` (écrite par
  * « Supprimer ») qui ne sont pas dans la liste du trimestre. Un DA ajouté de nouveau à la
@@ -1329,22 +1357,31 @@ const DA_PAR_FAMILLE = {
  * #1012, l'élève désinscrit — retire d'une liste du fichier ce qui appartient à un élève
  * écarté (`dasElevesEcartes`), AVANT la fusion : rien de lui n'entre, et une copie écartée
  * ne dépose pas son fichier. Une annotation s'écarte aussi par la copie qu'elle annote
- * (`idsCopiesEcartees`), quand elle ne porte pas le DA. Fonction pure.
+ * (`idsCopiesEcartees`), quand elle ne porte pas le DA. Fonction pure, sauf `vus` : le DA de
+ * chaque entrée écartée y est ajouté (la ligne du bilan compte les élèves, pas les entrées).
  * @param {Array} liste - la liste du fichier
  * @param {string} famille - une clé de DA_PAR_FAMILLE
  * @param {Set<string>} ecartes
- * @param {Set<string>} [idsCopiesEcartees]
+ * @param {Set<string>|Map<string,string>} [idsCopiesEcartees] - une Map donne le DA de la copie
+ * @param {Set<string>} [vus] - reçoit les DA écartés
  * @returns {Array} la liste sans eux (la même liste quand rien n'est écarté)
  */
-function ecarterElevesDesinscrits(liste, famille, ecartes, idsCopiesEcartees) {
+function ecarterElevesDesinscrits(liste, famille, ecartes, idsCopiesEcartees, vus) {
     const daDe = DA_PAR_FAMILLE[famille];
     if (!daDe) throw new Error('Famille inconnue : ' + famille);
     if (!Array.isArray(liste) || !ecartes || ecartes.size === 0) return liste;
     return liste.filter(e => {
         if (!e || typeof e !== 'object') return true;
         const da = daDe(e);
-        if (da && ecartes.has(String(da))) return false;
-        if (famille === 'annotations' && idsCopiesEcartees && e.fichierId && idsCopiesEcartees.has(e.fichierId)) return false;
+        if (da && ecartes.has(String(da))) {
+            if (vus) vus.add(String(da));
+            return false;
+        }
+        if (famille === 'annotations' && idsCopiesEcartees && e.fichierId && idsCopiesEcartees.has(e.fichierId)) {
+            const daCopie = typeof idsCopiesEcartees.get === 'function' ? idsCopiesEcartees.get(e.fichierId) : null;
+            if (vus && daCopie) vus.add(String(daCopie));
+            return false;
+        }
         return true;
     });
 }
@@ -2194,7 +2231,7 @@ function analyserRessourcesDetaillees(config) {
         if (cle === 'presences' || cle.endsWith('_presences')) {
             const presences = parseValeur(config[cle]);
             if (presences && typeof presences === 'object') {
-                const nbDates = Object.keys(presences).length;
+                const nbDates = compterDatesPresences(presences);
                 if (nbDates > 0) {
                     result.donnees.presences.cles.push(cle);
                     result.donnees.presences.count += nbDates;
@@ -2830,18 +2867,19 @@ async function executerImportSelectif() {
     // l'import écrit), les DA qu'un ancien fichier ne ramène plus, et les copies de ces élèves
     // (du fichier et de l'espace) par lesquelles une annotation sans DA s'écarte.
     const ecartesParPrefixe = new Map();
+    const dasEcartesVus = new Set();
     const elevesEcartes = async (cleFichier, nom) => {
         const i = cleFichier.indexOf(nom);
         const prefixe = i > 0 ? cleFichier.slice(0, i) : '';
         if (!ecartesParPrefixe.has(prefixe)) {
             const das = dasElevesEcartes(await db.get(prefixe + 'elevesDesinscrits', []),
                                          await db.get(prefixe + 'groupeEtudiants', []));
-            const copies = new Set();
+            const copies = new Map();
             if (das.size > 0) {
                 const fichier = parseValeur(donnees[prefixe + 'fichiersTravaux']);
                 const espace = await db.get(prefixe + 'fichiersTravaux', []);
                 [fichier, espace].forEach(l => (Array.isArray(l) ? l : []).forEach(f => {
-                    if (f && f.id && f.etudiantDA && das.has(String(f.etudiantDA))) copies.add(f.id);
+                    if (f && f.id && f.etudiantDA && das.has(String(f.etudiantDA))) copies.set(f.id, String(f.etudiantDA));
                 }));
             }
             ecartesParPrefixe.set(prefixe, { das: das, copies: copies });
@@ -3073,7 +3111,7 @@ async function executerImportSelectif() {
                 if (cleEtu === 'groupeEtudiants' || cleEtu.endsWith('_groupeEtudiants')) {
                     var etudiants = parseValeur(donnees[cleEtu]);
                     if (Array.isArray(etudiants)) {
-                        etudiants = ecarterElevesDesinscrits(etudiants, 'etudiants', (await elevesEcartes(cleEtu, 'groupeEtudiants')).das);
+                        etudiants = ecarterElevesDesinscrits(etudiants, 'etudiants', (await elevesEcartes(cleEtu, 'groupeEtudiants')).das, null, dasEcartesVus);
                         var resEtu = fusionnerDonneesPersoImportees(await db.get(cleEtu, null), etudiants, 'etudiants');
                         if (resEtu.ecrire) await db.set(cleEtu, resEtu.valeur);
                         nbEtudiants += resEtu.entrees;
@@ -3093,11 +3131,15 @@ async function executerImportSelectif() {
                 if (clePres === 'presences' || clePres.endsWith('_presences')) {
                     var presences = parseValeur(donnees[clePres]);
                     if (presences && typeof presences === 'object') {
-                        presences = ecarterElevesDesinscrits(presences, 'presences', (await elevesEcartes(clePres, 'presences')).das);
-                        // Le compte est celui des fiches entrées (le mot « date(s) » du bilan ment, relevé).
+                        presences = ecarterElevesDesinscrits(presences, 'presences', (await elevesEcartes(clePres, 'presences')).das, null, dasEcartesVus);
                         var resPres = fusionnerDonneesPersoImportees(await db.get(clePres, null), presences, 'presences');
                         if (resPres.ecrire) await db.set(clePres, resPres.valeur);
-                        nbDates += resPres.entrees;
+                        // #1012, les mots : les dates distinctes des fiches ENTRÉES, pas les fiches.
+                        // Une fiche entrée est une fiche du fichier que la fusion a gardée telle quelle.
+                        var gardeesPres = new Set(Array.isArray(resPres.valeur) ? resPres.valeur : []);
+                        var entreesPres = Array.isArray(presences) ? presences.filter(p => gardeesPres.has(p))
+                            : (resPres.ecrire ? resPres.valeur : []);
+                        nbDates += compterDatesPresences(entreesPres);
                     }
                 }
             }
@@ -3118,7 +3160,7 @@ async function executerImportSelectif() {
                     if (data && typeof data === 'object') {
                         var nomEval = cleEval.endsWith('evaluationsSauvegardees') ? 'evaluationsSauvegardees'
                             : cleEval.endsWith('notesEtudiants') ? 'notesEtudiants' : 'evaluations';
-                        data = ecarterElevesDesinscrits(data, 'notes', (await elevesEcartes(cleEval, nomEval)).das);
+                        data = ecarterElevesDesinscrits(data, 'notes', (await elevesEcartes(cleEval, nomEval)).das, null, dasEcartesVus);
                         var resEval = fusionnerDonneesPersoImportees(await db.get(cleEval, null), data, 'notes');
                         if (resEval.ecrire) await db.set(cleEval, resEval.valeur);
                         nbEvals += resEval.entrees;
@@ -3224,7 +3266,7 @@ async function executerImportSelectif() {
                 if (cleFT.includes('fichiersTravaux')) {
                     var fichiersTravaux = parseValeur(donnees[cleFT]);
                     if (Array.isArray(fichiersTravaux)) {
-                        fichiersTravaux = ecarterElevesDesinscrits(fichiersTravaux, 'copies', (await elevesEcartes(cleFT, 'fichiersTravaux')).das);
+                        fichiersTravaux = ecarterElevesDesinscrits(fichiersTravaux, 'copies', (await elevesEcartes(cleFT, 'fichiersTravaux')).das, null, dasEcartesVus);
                     }
                     if (Array.isArray(fichiersTravaux) && fichiersTravaux.length > 0) listesCopies[cleFT] = fichiersTravaux;
                 }
@@ -3257,7 +3299,7 @@ async function executerImportSelectif() {
                     var annotations = parseValeur(donnees[cleAT]);
                     if (Array.isArray(annotations) && annotations.length > 0) {
                         var ecartesAT = await elevesEcartes(cleAT, 'annotationsTravaux');
-                        annotations = ecarterElevesDesinscrits(annotations, 'annotations', ecartesAT.das, ecartesAT.copies);
+                        annotations = ecarterElevesDesinscrits(annotations, 'annotations', ecartesAT.das, ecartesAT.copies, dasEcartesVus);
                         var resAT = fusionnerDonneesPersoImportees(await db.get(cleAT, null), annotations, 'annotations');
                         if (resAT.ecrire) await db.set(cleAT, resAT.valeur);
                         nbAnnotations += resAT.entrees;
@@ -3292,15 +3334,18 @@ async function executerImportSelectif() {
 
         // Message de résumé
         const total = compteurs.ressources + compteurs.donnees;
+        // #1012, les mots : la ligne des élèves supprimés écartés paraît même quand rien n'entre.
+        const ligneEcartes = ligneElevesEcartes(dasEcartesVus.size);
+        const suiteEcartes = ligneEcartes ? '\n\n' + ligneEcartes : '';
 
         if (total === 0) {
             if (!quelqueChoseCoche) {
                 alert('Coche au moins un élément à importer.');
             } else {
-                alert('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).');
+                alert('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).' + suiteEcartes);
             }
         } else {
-            const message = `Import réussi !\n\n${details.join('\n')}\n\nTotal : ${total} élément(s) importé(s).`;
+            const message = `Import réussi !\n\n${details.join('\n')}${suiteEcartes}\n\nTotal : ${total} élément(s) importé(s).`;
 
             notifications.succes(message);
             alert(message);
@@ -3577,6 +3622,9 @@ window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé p
 window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
 window.dasElevesEcartes = dasElevesEcartes; // #1012, l'élève désinscrit : exposé pour ses essais
 window.ecarterElevesDesinscrits = ecarterElevesDesinscrits; // #1012, l'élève désinscrit : exposé pour ses essais
+window.compterDatesPresences = compterDatesPresences; // #1012, les mots : exposé pour ses essais
+window.ligneElevesEcartes = ligneElevesEcartes; // #1012, les mots : exposé pour ses essais
+window.analyserRessourcesDetaillees = analyserRessourcesDetaillees; // #1012, les mots : exposé pour l'essai du compte de l'aperçu
 window.signatureContenu = signatureContenu;         // #448
 
 })();
