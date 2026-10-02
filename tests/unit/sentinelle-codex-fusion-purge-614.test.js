@@ -270,9 +270,14 @@ describe('#614 · sentinelle statique — ce que le fichier doit continuer de di
         const i = codeSeul.indexOf('function _planifierPurgeEspace');
         const j = codeSeul.indexOf('\n}', i);
         const corps = codeSeul.slice(i, j);
-        expect(corps).toMatch(/fichiersTravaux/);
-        expect(corps).toMatch(/corbeilleFichiers/);
-        expect(corps).toMatch(/fichiersModelisation/);
+        // #1014 (2 oct. 2026) : la liste vit dans une constante du module, que le codex emploie aussi
+        // pour emporter et rendre les fichiers. Le recensement la lit ; la constante nomme les trois.
+        expect(corps).toMatch(/LISTES_DE_FICHIERS\.some\(/);
+        const constante = codeSeul.match(/const LISTES_DE_FICHIERS = \[([^\]]*)\];/);
+        expect(constante, 'la constante des listes de fichiers existe').not.toBeNull();
+        expect(constante[1]).toMatch(/'fichiersTravaux'/);
+        expect(constante[1]).toMatch(/'corbeilleFichiers'/);
+        expect(constante[1]).toMatch(/'fichiersModelisation'/);
     });
 
     it('la garde blobStatut du chemin « ouvrir » est intacte (hors périmètre #614)', () => {

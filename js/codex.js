@@ -34,6 +34,13 @@ const NOM_MANIFESTE_ANCIEN = 'classeur-manifeste.json';
 const NOM_DONNEES = 'donnees.json';
 const DOSSIER_TRAVAUX = 'travaux';
 
+// #1014 — les trois listes qui désignent un fichier du magasin `fichiers` : les copies de travail,
+// la corbeille (le fichier y reste intact et restaurable), la Modélisation (ses fichiers sous le
+// même id que leurs métadonnées). Le codex emporte les fichiers des trois, rangés côte à côte dans
+// DOSSIER_TRAVAUX, et le manifeste les déclare (`contenu.listesDeFichiers`) : un codex d'avant
+// ne les déclare pas, et l'absence de leurs fichiers n'y est pas un manque.
+const LISTES_DE_FICHIERS = ['fichiersTravaux', 'corbeilleFichiers', 'fichiersModelisation'];
+
 // Clés de stockage (non namespacées — globales)
 // Migré de _classeur_* vers _codex_* — voir _migrerClesClasseurVersCodex()
 const CLE_ETAT_CODEX = '_codex_etat';
@@ -329,6 +336,38 @@ function _marquerStockAvantLotF(etatLu) {
  * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object,
  *   copies: {attendues: number, manquantes: number}}|null>}
  */
+/**
+ * #1014 — les clés de `cles` qui portent une des `listes` (LISTES_DE_FICHIERS), tous trimestres.
+ * Les copies de travail gardent leur règle d'avant (toute clé qui contient le nom, H5) ; les deux
+ * autres listes se reconnaissent à leur nom exact, nu ou préfixé d'un trimestre, pour ne pas
+ * prendre leur sauvegarde de migration (`corbeilleFichiers_backup_v1`).
+ * @returns {Array<{cle: string, liste: string}>}
+ */
+function _clesDesListesDeFichiers(cles, listes) {
+    var trouvees = [];
+    cles.forEach(function(c) {
+        for (var i = 0; i < listes.length; i++) {
+            var liste = listes[i];
+            var porte = (liste === 'fichiersTravaux')
+                ? c.includes(liste)
+                : new RegExp('^(?:(?:[aeh]\\d{4}|demo)_)?' + liste + '$').test(c);
+            if (porte) { trouvees.push({ cle: c, liste: liste }); return; }
+        }
+    });
+    return trouvees;
+}
+
+/**
+ * #1014 — l'extension d'une entrée du codex. Celle du nom de fichier quand elle tient dans la
+ * liste blanche de l'export (lettres et chiffres), sinon 'bin' : un nom de Modélisation est celui
+ * du fichier choisi sur l'appareil, et une extension hors liste bloquerait tout le codex.
+ */
+function _extensionDansLeCodex(nomFichier) {
+    var nf = nomFichier || '';
+    var ext = (nf.indexOf('.') !== -1) ? nf.split('.').pop() : 'bin';
+    return /^[A-Za-z0-9]+$/.test(ext) ? ext : 'bin';
+}
+
 async function genererCodex(options = {}) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip non disponible. Impossible de générer le codex.');
@@ -381,7 +420,8 @@ async function genererCodex(options = {}) {
     // plusieurs trimestres (h2026_fichiersTravaux + a2025_fichiersTravaux,
     // etc.). find() ne retournait que la premiere, les blobs des autres
     // trimestres etaient ignores. (H5)
-    const clesFT = toutesLesCles.filter(function(c) { return c.includes('fichiersTravaux'); });
+    // #1014 : et celles de la corbeille et de la Modélisation, par le même chemin.
+    const clesFT = _clesDesListesDeFichiers(toutesLesCles, LISTES_DE_FICHIERS);
     zip.folder(DOSSIER_TRAVAUX);
     // Lot J0 (#988) : les copies ne sont plus confiées à JSZip, qui les lisait toutes en
     // mémoire dès leur dépôt. On n'en garde que la référence ; `FichierSortant.assemblerZip`
@@ -394,11 +434,16 @@ async function genererCodex(options = {}) {
     const compteDesCopies = _creerCompteDesCopies();
 
     if (clesFT.length > 0 && typeof travauxStockage !== 'undefined') {
-        // Aplatir tous les fichiersTravaux des differents trimestres
+        // Aplatir les listes des differents trimestres ; seules les copies de travail comptent
+        // pour l'avertissement (#1014 : il ne change pas).
         var fichiers = [];
-        clesFT.forEach(function(cle) {
-            if (Array.isArray(donnees[cle])) {
-                fichiers = fichiers.concat(donnees[cle]);
+        var estUneCopie = [];
+        clesFT.forEach(function(c) {
+            if (Array.isArray(donnees[c.cle])) {
+                donnees[c.cle].forEach(function(f) {
+                    fichiers.push(f);
+                    estUneCopie.push(c.liste === 'fichiersTravaux');
+                });
             }
         });
         for (var j = 0; j < fichiers.length; j++) {
@@ -411,8 +456,7 @@ async function genererCodex(options = {}) {
                     // Extension : si nomFichier ne contient pas de point,
                     // 'bin' (sinon split('.').pop() retourne le nom complet,
                     // produisant FT_abc.monfichier au lieu de FT_abc.bin). (M3)
-                    var nf = f.nomFichier || '';
-                    var ext = (nf.indexOf('.') !== -1) ? nf.split('.').pop() : 'bin';
+                    var ext = _extensionDansLeCodex(f.nomFichier);
                     // JSZip acceptait aussi un tampon d'octets : on l'enveloppe, pour ne pas
                     // perdre une copie qui ne serait pas stockée en Blob.
                     if (!(blob instanceof Blob)) blob = new Blob([blob]);
@@ -431,7 +475,7 @@ async function genererCodex(options = {}) {
             } catch (e) {
                 console.warn('📂 Codex : blob ignoré pour ' + f.id, e.message);
             }
-            compteDesCopies.noter(f, copieTrouvee);
+            if (estUneCopie[j]) compteDesCopies.noter(f, copieTrouvee);
             if (j % 5 === 0) {
                 _prog(
                     20 + Math.round((j / fichiers.length) * 50),
@@ -478,7 +522,8 @@ async function genererCodex(options = {}) {
         contenu: {
             cles: toutesLesCles.filter(c => !c.startsWith('_codex_')),
             nombreFichiersTravaux: nbBlobs,
-            tailleTotaleOctets: new Blob([json]).size + tailleTotale
+            tailleTotaleOctets: new Blob([json]).size + tailleTotale,
+            listesDeFichiers: LISTES_DE_FICHIERS.slice()   // #1014
         }
     };
 
@@ -763,7 +808,12 @@ async function chargerCodex(fichierZip) {
     var nbBlobsAttendus = 0;
     // Memes raisons que cote export (genererCodex) : un codex peut contenir
     // plusieurs trimestres, on doit toutes les capturer. (H5)
-    const clesFTImport = Object.keys(donnees).filter(function(c) { return c.includes('fichiersTravaux'); });
+    // #1014 : les listes que le codex déclare emporter ; un codex d'avant n'en déclare aucune et
+    // n'emportait que les copies de travail — il s'ouvre comme avant.
+    var listesDeclarees = (manifeste && manifeste.contenu && Array.isArray(manifeste.contenu.listesDeFichiers))
+        ? LISTES_DE_FICHIERS.filter(function(l) { return l === 'fichiersTravaux' || manifeste.contenu.listesDeFichiers.indexOf(l) !== -1; })
+        : ['fichiersTravaux'];
+    const clesFTImport = _clesDesListesDeFichiers(Object.keys(donnees), listesDeclarees).map(function(c) { return c.cle; });
     if (clesFTImport.length > 0 && typeof travauxStockage !== 'undefined') {
         var fichiers = [];
         clesFTImport.forEach(function(cle) {
@@ -2005,10 +2055,9 @@ function _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage) {
     // (modelisation.js:276 et :290). Les omettre revenait a recenser des
     // blobs VIVANTS en « orphelins » : un enseignant qui suivait la console
     // apres ouverture d'un codex detruisait sa corbeille restaurable.
-    var CLES_REFERENCANT_BLOBS = ['fichiersTravaux', 'corbeilleFichiers', 'fichiersModelisation'];
     var idsReferences = {};
     Object.keys(donnees || {}).forEach(function(c) {
-        var referenceDesBlobs = CLES_REFERENCANT_BLOBS.some(function(motif) {
+        var referenceDesBlobs = LISTES_DE_FICHIERS.some(function(motif) {
             return c.indexOf(motif) !== -1;
         });
         if (!referenceDesBlobs) return;
@@ -4036,17 +4085,21 @@ async function actionExporterSelection() {
     var dossier = zip.folder(DOSSIER_TRAVAUX);
 
     // Collecter les IDs de fichiers référencés dans les données filtrées
-    var cleFT = Object.keys(donneesFiltrees).filter(function(c) {
-        return c.includes('fichiersTravaux');
-    });
+    // #1014 : les trois listes, comme le codex entier ; seules les copies de travail comptent
+    // pour l'avertissement.
+    var cleFT = _clesDesListesDeFichiers(Object.keys(donneesFiltrees), LISTES_DE_FICHIERS);
     var compteDesCopies = _creerCompteDesCopies();
 
     if (cleFT.length > 0 && typeof travauxStockage !== 'undefined') {
         var tousLesFichiers = [];
+        var estUneCopieSel = [];
         for (var ft = 0; ft < cleFT.length; ft++) {
-            var liste = donneesFiltrees[cleFT[ft]];
+            var liste = donneesFiltrees[cleFT[ft].cle];
             if (Array.isArray(liste)) {
-                tousLesFichiers = tousLesFichiers.concat(liste);
+                for (var lf = 0; lf < liste.length; lf++) {
+                    tousLesFichiers.push(liste[lf]);
+                    estUneCopieSel.push(cleFT[ft].liste === 'fichiersTravaux');
+                }
             }
         }
 
@@ -4057,7 +4110,7 @@ async function actionExporterSelection() {
                 var blob = await travauxStockage.recupererBlob(f.id);
                 if (blob) {
                     copieTrouvee = true;
-                    var ext = (f.nomFichier || 'bin').split('.').pop();
+                    var ext = _extensionDansLeCodex(f.nomFichier);
                     dossier.file(f.id + '.' + ext, blob);
                     nbBlobs++;
                     tailleTotale += blob.size || 0;
@@ -4065,7 +4118,7 @@ async function actionExporterSelection() {
             } catch (e) {
                 console.warn('📂 Export sélectif : blob ignoré pour ' + f.id, e.message);
             }
-            compteDesCopies.noter(f, copieTrouvee);
+            if (estUneCopieSel[j]) compteDesCopies.noter(f, copieTrouvee);
             if (j % 5 === 0) {
                 _majProgression(25 + Math.round((j / tousLesFichiers.length) * 35),
                     'Ajout des fichiers travaux…', nbBlobs + '/' + tousLesFichiers.length);
@@ -4110,7 +4163,8 @@ async function actionExporterSelection() {
         contenu: {
             cles: Object.keys(donneesFiltrees),
             nombreFichiersTravaux: nbBlobs,
-            tailleTotaleOctets: new Blob([json]).size + tailleTotale
+            tailleTotaleOctets: new Blob([json]).size + tailleTotale,
+            listesDeFichiers: LISTES_DE_FICHIERS.slice()   // #1014
         },
         historique: []
     };
