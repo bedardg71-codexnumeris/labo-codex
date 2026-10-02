@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 10 h 20 : **1.174.2 EN LIGNE (#1012, LA SÉLECTION EXPORTÉE DIT QUAND DES COPIES LUI MANQUENT), MESURÉ CHEZ NETLIFY ; BRANCHE `fix-1012-selection-sans-copies` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; AUCUNE PORTE TERRAIN POUR CE LOT**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 11 h 17 : **#1012, LES QUATRE CASES : CODÉES SUR LA BRANCHE LOCALE `fix-1012-quatre-cases` (`d0927efb`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; `main` EN AVANCE DE DEUX COMMITS DE DOCUMENTS SUR `origin/main`, NON POUSSÉS**
+
+**Où vit le travail** : le correctif et ses essais sont sur la branche locale `fix-1012-quatre-cases`, un commit (`d0927efb`) au-dessus de `5e8a46f8` (la consigne de Cowork de 10 h 33, commitée telle quelle sur `main`). Elle n'existe pas chez `origin`. Les documents (ce relais, la demande de relecture, le BACKLOG, `OU-EN-EST-ON.md`) sont sur `main`, en local.
+
+**Ce qui est codé** (`plans de travail/DEMANDE-RELECTURE-2026-10-02-1012-quatre-cases.md`) : « Étudiants », « Présences », « Notes » et « Annotations » de l'import par cases ajoutent ce que le fichier apporte ; une même chose des deux côtés, l'espace l'emporte (`fusionnerDonneesPersoImportees`). **Reproduit par le geste avant correctif** (les quatre familles de l'espace remplacées). **Écart à trancher par Cowork** : pour les notes, la règle du couple élève × production, plus stricte que « même reprise » (§ 3 et § 8 de la demande).
+
+**Mesuré sur `d0927efb`** : Vitest complet, 671 fichiers, 7 919 essais verts ; Playwright sans reprise, le banc du lot et quatre voisins, 24 essais verts ; neuf mutations, toutes rouges, fichier restauré à l'empreinte. Le banc du lot I bis nomme deux écarts à sa référence de 1.172.0, sans la réajuster (§ 8.3). **Pas pris** : la suite complète au navigateur.
+
+**Ce qui reste** : (1) la relecture croisée de Cowork ; (2) puis la release `patch` (1.174.3), la ligne des « Nouvelles » à accepter par Grégoire (§ 11), le verdict complet, la fusion et les pushs ; (3) les deux affaires de mots du chantier du codex. C'est Grégoire qui dira s'il est « clos ».
+
+---
+
+## (relais précédent) 2 OCT. 2026, 10 h 20 : **1.174.2 EN LIGNE (#1012, LA SÉLECTION EXPORTÉE DIT QUAND DES COPIES LUI MANQUENT), MESURÉ CHEZ NETLIFY ; BRANCHE `fix-1012-selection-sans-copies` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; AUCUNE PORTE TERRAIN POUR CE LOT**
 
 **Où vit le travail** : tout est sur `main`. Correctif `cd4aba75`, release 1.174.2 (build `1002-0923`, `80e3ba01`), puis `e074a48d` (BACKLOG). `main` avancée en avance rapide ; mon commit de relais intermédiaire (`f356cfab`, local, jamais poussé) a été retiré par cette avance et remplacé par ce relais.
 
