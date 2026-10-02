@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 6 h 57 : **LA PORTE DE L'AVERTISSEMENT N'A PAS PU VOIR LA FENÊTRE (LE CODEX DE GRÉGOIRE S'EST OUVERT EN ENTIER) ; LOT OUVERT SUR LA CONSIGNE DE COWORK DE 6 h 54 : L'ANCIEN `.zip` OUVERT PAR LA CASE (#1012, SUITE)**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 7 h 36 : **#1012, L'ANCIEN `.zip` PAR LA CASE : CODÉ SUR LA BRANCHE LOCALE `fix-1012-ancien-zip-par-la-case` (`d49e7100`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; `main` EN AVANCE DE DEUX COMMITS DE DOCUMENTS SUR `origin/main`, NON POUSSÉS**
+
+**Où vit le travail** : le correctif et ses essais sont sur la branche locale `fix-1012-ancien-zip-par-la-case`, un seul commit (`d49e7100`) au-dessus de `b5d3770b`. Elle n'existe pas chez `origin`. Les documents (ce relais, la demande de relecture, `OU-EN-EST-ON.md`) sont sur `main`, en local. **Rien n'est poussé** : le push attend le mot de Grégoire.
+
+**Ce qui est codé** (`plans de travail/DEMANDE-RELECTURE-2026-10-02-1012-ancien-zip-par-la-case.md`) : les copies d'un ancien `.zip` ouvert par la case « Ouvrir un Codex… » s'ajoutent à celles de l'espace ; aucune entrée déjà là n'est réécrite. Un identifiant déjà là : l'espace l'emporte ; seul un fichier absent du magasin revient du `.zip`, jamais pour une copie « exporte ». **Reproduit par le geste avant correctif** : « Mettre à jour le codex » écrivait 1 copie au lieu de 4.
+
+**Mesuré sur `d49e7100`** : Vitest complet, 670 fichiers, 7 901 essais verts, aucune erreur hors essai ; Playwright sans reprise, le banc du lot et ses six voisins, 32 essais verts ; seize mutations, vingt et un états jugés, tous rouges, fichier restauré à l'empreinte. **Pas pris** : la suite complète au navigateur (au verdict, avant un push).
+
+**Ce qui reste** : (1) la relecture croisée de Cowork (ce chemin écrit les données de l'usager) ; (2) puis la release, la ligne des « Nouvelles » à accepter par Grégoire, le verdict complet, les pushs ; (3) **`BACKLOG.md` n'est pas écrit** : l'écriture m'a été refusée par le garde de permissions à 6 h 57, sept lignes sont dues sous #1012, leur texte est au § 10 de la demande ; (4) trouvé autour, mesuré, non corrigé : les cases « Annotations », « Notes », « Étudiants » et « Présences » du même import remplacent encore ce que l'espace a (§ 5 de la demande). (5) Un fichier de Cowork attend dans l'arbre, non commité, non exécuté : `plans de travail/CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md` (7 h 22) ; son en-tête dit qu'il ne s'ouvre qu'une fois ce lot fusionné sur `main`.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 6 h 57 : **LA PORTE DE L'AVERTISSEMENT N'A PAS PU VOIR LA FENÊTRE (LE CODEX DE GRÉGOIRE S'EST OUVERT EN ENTIER) ; LOT OUVERT SUR LA CONSIGNE DE COWORK DE 6 h 54 : L'ANCIEN `.zip` OUVERT PAR LA CASE (#1012, SUITE)**
 
 **Mesuré à l'ouverture (6 h 55)** : `main` = `origin/main` = `99af4e4f` après `git fetch --prune` ; 1.174.0, build `1001-1900`, aux quatre points de vérité ; Vitest depuis `tests/` : 669 fichiers, 7 893 essais verts, aucune erreur hors essai ; un seul worktree, aucune suite en cours. Le jeton du verdict au navigateur porte sur `740a984c` ; `740a984c..HEAD` ne touche que des documents.
 
