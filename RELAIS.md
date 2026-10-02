@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 11 h 28 : **#1012, LES QUATRE CASES : RELU VERT, RELEASE 1.174.3 COMMITÉE SUR `fix-1012-quatre-cases` (`b2e9d8b6`) ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 12 h 25 : **1.174.3 EN LIGNE (#1012, LES QUATRE CASES), MESURÉ CHEZ NETLIFY ; BRANCHE `fix-1012-quatre-cases` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+
+**Où vit le travail** : tout est sur `main`. Correctif relu `90917b40`, release 1.174.3 (build `1002-1126`, `b2e9d8b6`), relais `a1f3009f`, puis ce relais. `main` avancée en avance rapide sur la branche et poussée par `git push origin main` (le hook a relu le jeton du même commit).
+
+**Fait, dans l'ordre de la consigne de Cowork de 11 h 22** : (1) fichiers de Cowork commités tels quels (`c178969f`), poussés ; (2) sous #1012 : la copie neuve dont l'évaluation n'entre pas (issue 2), l'élève supprimé qui revient (décision de Grégoire) (`94c07168`) ; (3) release `patch`, ligne des « Nouvelles » posée telle quelle dans l'entrée 1.174 ; Vitest vert après le bump, 671 fichiers, 7 919 essais ; (4) verdict complet par `scripts/pousser.sh` sur `a1f3009f` : **vert, 0 échec, aucune spec instable**, rendu à 12 h 20 (après 120 s d'attente de charge) ; (5) **Netlify : production prête sur `a1f3009f`, publiée à 12 h 22 min 56 s**.
+
+**Pas de porte terrain** : elle demanderait un ancien `.zip` que Grégoire n'a pas (sa réponse de 8 h 50) ; le banc juge par le geste.
+
+**Le chantier du codex** : le lot des quatre cases était son dernier lot de code prévu. Il lui reste, tout à Grégoire : la copie vraiment perdue (des mots) ; « fichier ZIP » dans la fenêtre d'une ouverture complète (des mots) ; les deux relevés de mots de l'import (le bilan et l'aperçu disent « N date(s) » et comptent des fiches). **L'élève supprimé qui revient** : Grégoire a décidé vers 11 h 26 (« ok », consignée par Cowork dans `plans de travail/CONSIGNE-SUIVANTE-2026-10-02-1012-eleve-desinscrit.md`, non suivi, déposé pendant la mise en ligne) : une suppression garde une trace du DA, et un ancien fichier ne ramène plus rien de l'élève. Ce lot s'ouvre sur une consigne de Cowork, maintenant que 1.174.3 est en ligne. Les autres cases qui remplacent (« Configuration », « Cadre », « Groupe-cours », « Horaires », « Enseignants ») sont inscrites, hors du chantier tant qu'aucun symptôme n'est vécu. C'est Grégoire qui dira si le chantier est clos. Hors du chantier, toujours ouvert : #991.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 11 h 28 : **#1012, LES QUATRE CASES : RELU VERT, RELEASE 1.174.3 COMMITÉE SUR `fix-1012-quatre-cases` (`b2e9d8b6`) ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
 
 **Où vit le travail** : la branche `fix-1012-quatre-cases`, reposée sur `main` (`94c07168`) sans changement de code : le correctif relu (`90917b40`, ex-`d0927efb`), puis la release (`b2e9d8b6`), puis ce relais. `main` a été poussée avec les documents (`c178969f` : verdict de relecture, consigne de 11 h 22 et ancienne consigne, fichiers de Cowork commités tels quels) ; le commit du BACKLOG (`94c07168`) est sur `main` en local et part avec la fusion.
 
