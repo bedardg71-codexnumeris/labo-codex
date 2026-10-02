@@ -1159,9 +1159,111 @@ async function previsualiserImport(event) {
     lecteur.readAsText(fichier);
 }
 
+/** Les entrées d'un ZIP importé qui portent le fichier d'une copie (`travaux/<id>.<ext>`). */
+function _entreesZipDeLaCopie(zip, id) {
+    return zip.file(new RegExp('^travaux/' + String(id).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.')) || [];
+}
+
+/**
+ * #1012 — la liste des copies d'un fichier importé par les cases S'AJOUTE à celle de
+ * l'espace : aucune copie déjà là ne perd son entrée, et aucune entrée déjà là n'est
+ * réécrite. Une copie dont l'identifiant existe déjà : l'espace l'emporte.
+ *
+ * Pas `fusionnerParIdentite` : devant un même id au contenu différent, elle renomme
+ * l'entrant et garde les deux. Pour une copie, l'id est aussi la clé de son fichier
+ * au magasin : une entrée renommée n'aurait pas de fichier.
+ *
+ * @param {Array} copiesEspace - la liste de l'espace, telle que stockée
+ * @param {Array} copiesFichier - la liste du fichier importé
+ * @returns {{liste: Array, nouvelles: Array, dejaLa: Array}} `liste` : les entrées de
+ *          l'espace, intactes et dans leur ordre, puis les `nouvelles` ; `dejaLa` : les
+ *          entrées DE L'ESPACE dont l'id est aussi dans le fichier.
+ */
+function fusionnerCopiesImportees(copiesEspace, copiesFichier) {
+    const base = Array.isArray(copiesEspace) ? copiesEspace : [];
+    const parId = new Map();
+    base.forEach(f => { if (f && f.id) parId.set(f.id, f); });
+
+    const nouvelles = [];
+    const dejaLa = [];
+    const vus = new Set();
+    (Array.isArray(copiesFichier) ? copiesFichier : []).forEach(f => {
+        if (!f) return;
+        // Sans identifiant, rien ne permet de dire « déjà là » : elle entre, comme avant.
+        if (!f.id) { nouvelles.push(f); return; }
+        if (vus.has(f.id)) return;
+        vus.add(f.id);
+        if (parId.has(f.id)) dejaLa.push(parId.get(f.id));
+        else nouvelles.push(f);
+    });
+    return { liste: base.concat(nouvelles), nouvelles: nouvelles, dejaLa: dejaLa };
+}
+
+/**
+ * #1012 — la case « Fichiers travaux » de l'import par cases. Avant, chaque liste du
+ * fichier REMPLAÇAIT celle de l'espace (`db.set`) : les copies de l'espace n'avaient
+ * plus d'entrée, leurs fichiers restaient au magasin sans rien qui les désigne, et
+ * « Mettre à jour le codex » écrivait ensuite un codex sans elles, sans fenêtre
+ * (l'avertissement compte les entrées de la liste).
+ *
+ * Une copie déjà là garde son entrée ET son fichier. Seule exception, qui ne détruit
+ * rien : le magasin n'a pas de fichier pour elle, elle n'est pas « exporte » (celle-là
+ * a quitté l'application, c'est voulu), et le ZIP en porte un. Le fichier entre alors,
+ * rangé sous l'association de l'espace, et un statut « manquant » redevient « present »
+ * (comme le geste « Re-déposer » de travaux-import.js).
+ *
+ * @param {Object<string, Array>} listesDuFichier - clé `*fichiersTravaux` → liste du fichier
+ * @param {Object|null} zipTravaux - le ZIP importé, ou null (un `.json` n'a pas de copies)
+ * @returns {Promise<{ajoutees: number, blobs: {restaures: number, manquants: number}|null}>}
+ *          `blobs` : null quand aucun fichier ne pouvait être restauré (pas de ZIP).
+ */
+async function _ajouterCopiesImportees(listesDuFichier, zipTravaux) {
+    const magasinOffert = !!zipTravaux && typeof travauxStockage !== 'undefined';
+    const donneesBlobs = { _zipTravaux: zipTravaux };
+    const idsAttendusDeRetour = new Set();
+    let ajoutees = 0;
+
+    for (const cleFT of Object.keys(listesDuFichier)) {
+        const fusion = fusionnerCopiesImportees(await db.get(cleFT, []), listesDuFichier[cleFT]);
+        if (fusion.nouvelles.length > 0) await db.set(cleFT, fusion.liste);
+        ajoutees += fusion.nouvelles.length;
+        if (!magasinOffert) continue;
+
+        const sansFichier = [];
+        for (const f of fusion.dejaLa) {
+            if (f.blobStatut === 'exporte' || _entreesZipDeLaCopie(zipTravaux, f.id).length === 0) continue;
+            // Dans le doute (le magasin ne répond pas), on ne remplace rien.
+            let fichierAuMagasin = true;
+            try { fichierAuMagasin = !!(await travauxStockage.recupererBlob(f.id)); } catch (e) { /* on ne remplace rien */ }
+            if (!fichierAuMagasin) { sansFichier.push(f); idsAttendusDeRetour.add(f.id); }
+        }
+        donneesBlobs[cleFT] = fusion.nouvelles.concat(sansFichier);
+    }
+    if (!magasinOffert) return { ajoutees: ajoutees, blobs: null };
+
+    const bilan = await _restaurerBlobsDepuisZip(donneesBlobs);
+    // Revenu ou non : on le lit au magasin lui-même, pas dans le compte de la restauration.
+    const revenues = new Set();
+    for (const id of idsAttendusDeRetour) {
+        try { if (await travauxStockage.recupererBlob(id)) revenues.add(id); } catch (e) { /* pas revenu */ }
+    }
+    if (revenues.size > 0) {
+        for (const cleFT of Object.keys(listesDuFichier)) {
+            const liste = await db.get(cleFT, []);
+            if (!Array.isArray(liste)) continue;
+            let change = false;
+            liste.forEach(f => {
+                if (f && revenues.has(f.id) && f.blobStatut === 'manquant') { f.blobStatut = 'present'; change = true; }
+            });
+            if (change) await db.set(cleFT, liste);
+        }
+    }
+    return { ajoutees: ajoutees, blobs: bilan };
+}
+
 /**
  * 🆕 Restaure les blobs travaux depuis un ZIP importé
- * Utilisé par executerImport() et executerImportLocalStorageBrut()
+ * Utilisé par executerImportLocalStorageBrut() et _ajouterCopiesImportees()
  * @param {Object} donnees - Données importées, avec éventuellement _zipTravaux
  * @returns {Promise<{restaures: number, manquants: number}>} Bilan de la restauration
  */
@@ -1194,8 +1296,8 @@ async function _restaurerBlobsDepuisZip(donnees) {
         // un import où rien n'est perdu.
         const blobAttendu = f.blobStatut !== 'exporte';
         try {
-            const entries = zip.file(new RegExp('^travaux/' + f.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\.'));
-            if (entries && entries.length > 0) {
+            const entries = _entreesZipDeLaCopie(zip, f.id);
+            if (entries.length > 0) {
                 const blob = await entries[0].async('blob');
                 // #385 (audit 5 août, rapport A4) : même garde que le chemin
                 // codex (codex.js) — un ZIP altéré peut contenir un blob
@@ -2929,39 +3031,34 @@ async function executerImportSelectif() {
         }
 
         // Fichiers travaux (métadonnées + blobs ZIP)
+        // #1012 : les copies du fichier s'AJOUTENT à celles de l'espace (elles ne
+        // remplacent plus la liste) ; les comptes disent ce qui est entré.
         if (isChecked('fichiersTravaux')) {
-            let nbFichiers = 0;
+            var listesCopies = {};
             for (var cleFT of Object.keys(donnees)) {
                 if (cleFT.includes('fichiersTravaux')) {
                     var fichiersTravaux = parseValeur(donnees[cleFT]);
-                    if (Array.isArray(fichiersTravaux) && fichiersTravaux.length > 0) {
-                        await db.set(cleFT, fichiersTravaux);
-                        nbFichiers += fichiersTravaux.length;
-                    }
+                    if (Array.isArray(fichiersTravaux) && fichiersTravaux.length > 0) listesCopies[cleFT] = fichiersTravaux;
                 }
             }
-            // Restaurer les blobs depuis le ZIP si disponible
-            // _restaurerBlobsDepuisZip a besoin des clés fichiersTravaux + _zipTravaux
             var zipTravaux = configCompleteEnAttente ? configCompleteEnAttente._zipTravaux : null;
-            if (zipTravaux && typeof travauxStockage !== 'undefined') {
-                var donneesBlobs = { _zipTravaux: zipTravaux };
-                for (var cleB of Object.keys(donnees)) {
-                    if (cleB.includes('fichiersTravaux')) donneesBlobs[cleB] = parseValeur(donnees[cleB]);
-                }
-                var resBlobs = await _restaurerBlobsDepuisZip(donneesBlobs);
+            var resCopies = await _ajouterCopiesImportees(listesCopies, zipTravaux);
+            let nbFichiers = resCopies.ajoutees;
+            var resBlobs = resCopies.blobs;
+            if (resBlobs) {
                 // #613 : les fichiers non restaurés sont dits, pas avalés.
                 var suffixeManquants = resBlobs.manquants
                     ? ' — ' + resBlobs.manquants + ' non restauré(s), marqué(s) « manquant »'
                     : '';
                 if (resBlobs.restaures > 0) {
                     details.push(nbFichiers + ' fichier(s) travaux + ' + resBlobs.restaures + ' PDF restauré(s)' + suffixeManquants);
-                } else {
+                } else if (nbFichiers > 0 || resBlobs.manquants > 0) {
                     details.push(nbFichiers + ' fichier(s) travaux (métadonnées)' + suffixeManquants);
                 }
             } else if (nbFichiers > 0) {
                 details.push(nbFichiers + ' fichier(s) travaux (métadonnées, sans blobs)');
             }
-            if (nbFichiers > 0) compteurs.donnees++;
+            if (nbFichiers > 0 || (resBlobs && resBlobs.restaures > 0)) compteurs.donnees++;
         }
 
         // Annotations travaux
@@ -3285,6 +3382,7 @@ window.CLES_ECHELLE_NON_TRANSPORTEES = CLES_ECHELLE_NON_TRANSPORTEES;
 window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
+window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé pour ses essais
 window.signatureContenu = signatureContenu;         // #448
 
 })();

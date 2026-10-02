@@ -1,0 +1,463 @@
+import { test, expect } from '@playwright/test';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
+
+// #1012, suite (consigne de Cowork du 2 oct. 2026, 6 h 54) — L'ANCIEN FICHIER `.zip` OUVERT PAR
+// LA CASE NE FAIT PLUS PERDRE DE COPIES.
+//
+// Mesuré avant le lot (1er oct., puis rejoué ici avant de corriger) : un codex A tenu, trois
+// copies ; un ancien `.zip` avec une copie ouvert par « Ouvrir un Codex… » de Réglages › Données,
+// tout coché. La liste des copies de l'espace était REMPLACÉE par celle du fichier : les trois
+// copies de A n'avaient plus d'entrée, et « Mettre à jour le codex » écrivait dans A un codex
+// d'une copie, sans fenêtre.
+//
+// LA RÈGLE JUGÉE ICI, par le geste (la case, la fenêtre aux cases à cocher, le menu Codex) :
+//   1. Les copies du fichier S'AJOUTENT à celles de l'espace. Aucune copie déjà là ne perd son
+//      entrée ; la mise à jour du codex les écrit toutes.
+//   2. Une copie dont l'identifiant existe déjà : l'espace l'emporte. Son entrée n'est pas
+//      réécrite, son fichier au magasin n'est pas remplacé.
+//   3. Seule exception, et elle ne détruit rien : le magasin n'a PAS de fichier pour cette copie,
+//      son entrée n'est pas « exporte », et le `.zip` en porte un. Le fichier entre, et un statut
+//      « manquant » redevient « present » (comme le geste « Re-déposer »).
+//   4. Un fichier sans copies, ou la case des copies décochée : la liste n'est pas touchée.
+//
+// CE QUE CE BANC NE JUGE PAS : Chrome lui-même (WebKit n'a pas `showOpenFilePicker` : le banc pose
+// une fausse poignée qui consigne ce qu'on lui écrit). Les copies vivent dans un magasin en
+// mémoire : le contexte éphémère de WebKit ne stocke pas de Blob dans IndexedDB.
+
+const FIXTURES = path.join(racineProjet, 'tests', 'fixtures', 'copies-de-secours-1.172.0');
+const ANCIEN_ZIP = path.join(FIXTURES, 'copie-de-secours-avec-travaux.zip');
+const ANCIEN_JSON = path.join(FIXTURES, 'copie-de-secours.json');
+
+const CLE_GROUPE = 'a2031_groupeEtudiants';
+const CLE_COPIES = 'a2031_fichiersTravaux';
+const CLE_PRODUCTIONS = 'a2031_productions';
+// Deux PNG d'un pixel, d'octets différents : celui des copies de A, celui de l'ancien fichier.
+const PNG_DE_A = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+const PNG_DU_FICHIER = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+const COPIES = ['FT_banc_A_1', 'FT_banc_A_2', 'FT_banc_A_3'];
+const COPIE_DU_FICHIER = 'FT_BANC_1';
+
+const A = {
+    nom: 'Codex A du banc',
+    fichier: 'codex-A.zip',
+    donnees: {
+        [CLE_GROUPE]: [{ da: '9000001', nom: 'Fictif', prenom: 'Alix', groupe: '00001' }],
+        [CLE_PRODUCTIONS]: [{ id: 'PROD_banc_A', titre: 'Production fictive A', coursId: 'COURS_BANC_A', remplissage: 'x'.repeat(30 * 1024) }],
+        [CLE_COPIES]: COPIES.map((id, i) => ({
+            id, nomFichier: 'copie-' + (i + 1) + '.png', typeMIME: 'image/png',
+            etudiantDA: '9000001', productionId: 'PROD_banc_A', blobStatut: 'present',
+            remplissage: 'x'.repeat(12 * 1024)
+        }))
+    }
+};
+
+async function demarrer(page) {
+    // Budget propre au chargement : sous charge, le délai court des gestes (15 s) n'y suffit pas
+    // (vu le 2 oct. pendant les mutations : `page.goto` expiré, un rouge qui ne jugeait rien).
+    await page.goto(indexHtml, { timeout: 60000 });
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(3000);
+}
+
+/** Le codex du banc, par le vrai `Codex.generer`, écrit sur le disque du banc. */
+async function fabriquerCodex(page, chemin) {
+    const rendu = await page.evaluate(async ({ donnees, cleCopies, png, nom }) => {
+        Object.keys(donnees).forEach((cle) => db.setSync(cle, donnees[cle]));
+        await db.flush();
+        const octets = Uint8Array.from(atob(png), (c) => c.charCodeAt(0));
+        const ids = donnees[cleCopies].map((c) => c.id);
+        const origine = window.travauxStockage.recupererBlob;
+        window.travauxStockage.recupererBlob = async (id) => (ids.includes(id) ? new Blob([octets], { type: 'image/png' }) : origine(id));
+        window.SecuriteExportPreview.previewZipEtConfirmer = async () => true;
+        const codex = await Codex.generer({ nom });
+        const zip = await JSZip.loadAsync(await codex.blob.arrayBuffer());
+        const nbCopies = Object.keys(zip.files).filter((n) => n.indexOf('travaux/') === 0 && !n.endsWith('/')).length;
+        const o = new Uint8Array(await codex.blob.arrayBuffer());
+        let binaire = '';
+        for (let i = 0; i < o.length; i += 0x8000) binaire += String.fromCharCode.apply(null, o.subarray(i, i + 0x8000));
+        return { b64: btoa(binaire), nbCopies };
+    }, { donnees: A.donnees, cleCopies: CLE_COPIES, png: PNG_DE_A, nom: A.nom });
+    expect(rendu.nbCopies, 'témoin : le codex fabriqué porte ses trois copies').toBe(3);
+    fs.writeFileSync(chemin, Buffer.from(rendu.b64, 'base64'));
+    return chemin;
+}
+
+/**
+ * Un espace neuf, dans un autre contexte, équipé comme Chrome. Ce qui sort de l'application est
+ * consigné dans `__journal` ; chaque dépôt au magasin des copies, dans `__depots`.
+ */
+async function ouvrirEspaceNeuf(browser) {
+    const contexte = await browser.newContext();
+    const page = await contexte.newPage();
+    page.setDefaultTimeout(15000);
+    await demarrer(page);
+    await page.evaluate((cleCopies) => {
+        window.__messages = [];
+        ['succes', 'erreur', 'warning', 'info'].forEach((sorte) => {
+            const origine = window.notifications[sorte];
+            window.notifications[sorte] = function (titre, detail) { window.__messages.push({ sorte, titre, detail }); return origine.apply(this, arguments); };
+        });
+        window.__journal = [];
+        window.__ecritures = [];
+        window.__destinationsDemandees = 0;
+        // Ce que le fichier écrit porte : les copies (les fichiers du dossier travaux/) et la liste.
+        window.__decrire = async (blob, fichier) => {
+            const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+            const donnees = JSON.parse(await zip.file('donnees.json').async('string'));
+            return {
+                fichier,
+                copies: Object.keys(zip.files).filter((n) => n.indexOf('travaux/') === 0 && !n.endsWith('/')).map((n) => n.slice('travaux/'.length).replace(/\.[^.]+$/, '')).sort(),
+                liste: (donnees[cleCopies] || []).map((c) => c.id).sort()
+            };
+        };
+        window.__poignee = (nom, fichier) => ({
+            kind: 'file',
+            name: nom,
+            getFile: async () => fichier,
+            createWritable: async () => {
+                let recu = null;
+                return {
+                    write: async (blob) => { recu = blob; },
+                    abort: async () => {},
+                    close: async () => {
+                        window.__journal.push('écriture dans ' + nom);
+                        window.__ecritures.push(await window.__decrire(recu, nom));
+                    }
+                };
+            }
+        });
+        window.showSaveFilePicker = async () => {
+            window.__destinationsDemandees++;
+            window.__journal.push('destination demandée');
+            throw new DOMException('Fenêtre de destination refermée par le banc', 'AbortError');
+        };
+        window.SecuriteExportPreview.previewZipEtConfirmer = async () => { window.__journal.push('aperçu'); return true; };
+
+        // Le magasin des copies, en mémoire. `__refus` : id → 'quota'.
+        window.__copies = new Map();
+        window.__depots = [];
+        window.__refus = {};
+        db.storeBlob = async (enr) => {
+            if (window.__refus[enr.id] === 'quota') throw new DOMException('Quota du banc', 'QuotaExceededError');
+            window.__depots.push(enr.id);
+            window.__copies.set(enr.id, enr);
+        };
+        db.getBlob = async (id) => window.__copies.get(id) || null;
+    }, CLE_COPIES);
+    expect(await page.evaluate((cle) => db.get(cle, null), CLE_GROUPE), 'témoin : l\'espace neuf est vide').toBeNull();
+    return { contexte, page };
+}
+
+/** Une ouverture complète de A par le menu, dans Chrome : A est tenu, la page reste la même. */
+async function ouvrirAEnEntier(page, chemin) {
+    await page.evaluate(({ b64, nom }) => {
+        const octets = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const leFichier = new File([octets], nom, { type: 'application/zip' });
+        window.showOpenFilePicker = async () => [window.__poignee(nom, leFichier)];
+        window.__ouverture = Codex.actionOuvrir();
+    }, { b64: fs.readFileSync(chemin).toString('base64'), nom: A.fichier });
+    await expect(page.getByText('Codex chargé depuis « ' + A.fichier + ' »')).toBeVisible({ timeout: 30000 });
+    await page.locator('#overlay-ui-dialogue').getByRole('button', { name: 'Annuler', exact: true }).click();
+    await page.evaluate(() => window.__ouverture);
+    expect(await page.evaluate(() => window.__copies.size), 'témoin : les trois copies de A sont dans l\'application').toBe(3);
+    expect(await page.evaluate(() => Codex.etat().handleFSAPI), 'témoin : A est tenu').toBe(true);
+    await page.evaluate(() => { window.__journal.length = 0; window.__ecritures.length = 0; window.__messages.length = 0; window.__depots.length = 0; });
+}
+
+/** L'état des copies dans l'espace : la liste telle quelle, et les octets de chaque fichier au magasin. */
+const lireCopies = (page) => page.evaluate(async (cle) => {
+    const magasin = {};
+    for (const [id, enr] of window.__copies) {
+        const o = new Uint8Array(await enr.blob.arrayBuffer());
+        magasin[id] = btoa(String.fromCharCode.apply(null, o));
+    }
+    return { liste: await db.get(cle, null), magasin, depots: window.__depots.slice() };
+}, CLE_COPIES);
+
+/**
+ * Le geste entier de la case : Réglages › Données, « Ouvrir un Codex… », le fichier, la fenêtre aux
+ * cases à cocher (tout coché, sauf `sauf` ; ou `seulement` ces cases-là), « Importer ». On ne
+ * recharge pas : l'état se lit tel que l'import vient de l'écrire. Rend le bilan dit à l'écran.
+ */
+async function ouvrirParLaCase(page, fichier, { sauf = [], seulement = null } = {}) {
+    const dialogues = [];
+    const ecouteur = (d) => {
+        dialogues.push({ type: d.type(), message: d.message() });
+        if (d.type() === 'confirm' && /^Recharger la page/.test(d.message())) d.dismiss().catch(() => {});
+        else d.accept().catch(() => {});
+    };
+    page.on('dialog', ecouteur);
+    await page.evaluate(() => { afficherSection('reglages'); });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { afficherSousSection('reglages-donnees'); });
+    await page.waitForTimeout(500);
+    const boutonOuvrir = page.locator('#reglages-donnees [data-action="ouvrirModalImport"]');
+    await expect(boutonOuvrir).toHaveText(/Ouvrir un Codex…/);
+    await boutonOuvrir.click();
+    await page.setInputFiles('#fichierImport', fichier);
+    await page.waitForSelector('#modalPreviewConfigComplete');
+    const cases = await page.evaluate(({ sauf, seulement }) => {
+        const m = document.getElementById('modalPreviewConfigComplete');
+        const confirmer = m.querySelector('#confirmMaSauvegarde');
+        if (confirmer && !confirmer.checked) confirmer.click();
+        if (seulement) {
+            // Les cases de catégorie d'abord (elles entraînent leurs éléments), puis chaque case.
+            m.querySelectorAll('.import-category-toggle').forEach((cb) => { if (cb.checked) cb.click(); });
+            m.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+                if (cb === confirmer) return;
+                if (cb.checked !== seulement.includes(cb.id)) cb.click();
+            });
+            return Array.from(m.querySelectorAll('input[type="checkbox"]:checked')).filter((cb) => cb !== confirmer).map((cb) => cb.id || cb.className).sort();
+        }
+        m.querySelectorAll('.import-category-toggle').forEach((cb) => { if (!cb.checked) cb.click(); });
+        m.querySelectorAll('input[type="checkbox"][id^="import-"]').forEach((cb) => {
+            const voulue = !sauf.includes(cb.id);
+            if (cb.checked !== voulue) cb.click();
+        });
+        return Array.from(m.querySelectorAll('input[type="checkbox"][id^="import-"]')).filter((cb) => cb.checked).map((cb) => cb.id).sort();
+    }, { sauf, seulement });
+    await page.click('#modalPreviewConfigComplete [data-action="executerImportSelectif"]');
+    await expect.poll(() => dialogues.some((d) => d.type === 'alert'), { timeout: 20000 }).toBe(true);
+    const bilan = dialogues.find((d) => d.type === 'alert').message;
+    // Un import qui a écrit propose de recharger : on attend la question, pour y répondre non.
+    if (/^Import réussi/.test(bilan)) await expect.poll(() => dialogues.some((d) => /^Recharger la page/.test(d.message)), { timeout: 20000 }).toBe(true);
+    await page.waitForTimeout(500);
+    page.off('dialog', ecouteur);
+    return { cases, bilan };
+}
+
+/** Le vrai geste : le menu Codex, « Mettre à jour le codex », jusqu'à la fin de la tentative. */
+async function mettreAJourLeCodex(page) {
+    await page.locator('#btn-codex').click();
+    await page.locator('#codex-menu [data-action="Codex.actionEnregistrer"]').click();
+    await expect.poll(() => page.evaluate(() => (Codex.derniereTentative() || {}).issue), { timeout: 30000 }).not.toBe('en cours');
+    return page.evaluate(() => ({
+        issue: Codex.derniereTentative().issue,
+        fenetre: (document.querySelector('#overlay-ui-dialogue .modal-titre') || {}).textContent || null,
+        journal: window.__journal.slice(),
+        ecritures: window.__ecritures.slice(),
+        destinationsDemandees: window.__destinationsDemandees
+    }));
+}
+
+/**
+ * Un ancien `.zip` dérivé de la fixture, à l'exécution : sa liste des copies et son dossier
+ * travaux/ sont ceux qu'on lui donne. `copies` : [{ entree, png }] ; `png` absent : la copie est
+ * dans la liste, pas dans le dossier.
+ */
+async function deriverAncienZip(page, chemin, copies) {
+    const b64 = await page.evaluate(async ({ source, cle, copies }) => {
+        const zip = await JSZip.loadAsync(Uint8Array.from(atob(source), (c) => c.charCodeAt(0)));
+        const donnees = JSON.parse(await zip.file('donnees.json').async('string'));
+        donnees[cle] = copies.map((c) => c.entree);
+        zip.file('donnees.json', JSON.stringify(donnees));
+        Object.keys(zip.files).filter((n) => n.indexOf('travaux/') === 0 && !n.endsWith('/')).forEach((n) => zip.remove(n));
+        copies.forEach((c) => { if (c.png) zip.file('travaux/' + c.entree.id + '.png', Uint8Array.from(atob(c.png), (x) => x.charCodeAt(0))); });
+        return zip.generateAsync({ type: 'base64' });
+    }, { source: fs.readFileSync(ANCIEN_ZIP).toString('base64'), cle: CLE_COPIES, copies });
+    fs.writeFileSync(chemin, Buffer.from(b64, 'base64'));
+    return chemin;
+}
+
+const entreeDuFichier = (id, plus = {}) => ({ id, nomFichier: 'nom-venu-du-fichier.png', typeMIME: 'image/png', etudiantDA: '9000002', productionId: 'PROD_BANC_1', ...plus });
+
+test.describe('#1012 — l\'ancien fichier .zip ouvert par la case ne fait plus perdre de copies', () => {
+    test.beforeEach(async ({ page }) => { page.setDefaultTimeout(15000); });
+
+    test('(1) les copies du fichier s\'ajoutent à celles de l\'espace, et la mise à jour du codex les écrit toutes', async ({ page, browser }) => {
+        test.setTimeout(240000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier));
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+        const avant = await lireCopies(neuf.page);
+        expect(avant.liste.map((c) => c.id), 'témoin : la liste de l\'espace est celle de A').toEqual(COPIES);
+
+        const r = await ouvrirParLaCase(neuf.page, ANCIEN_ZIP);
+        expect(r.cases, 'témoin : la case des copies est cochée').toContain('import-fichiersTravaux');
+        const apres = await lireCopies(neuf.page);
+
+        // Les trois pas d'état sont en `expect.soft` : le geste qui suit (la mise à jour du codex) se
+        // joue toujours, et son résultat se lit même quand l'état est déjà faux.
+        await test.step('après l\'import : les trois copies de A ont toujours leur entrée, telle quelle, et celle du fichier est entrée', async () => {
+            expect.soft(apres.liste.map((c) => c.id)).toEqual([...COPIES, COPIE_DU_FICHIER]);
+            expect.soft(apres.liste.slice(0, 3), 'les entrées de l\'espace ne sont pas réécrites').toEqual(avant.liste);
+            expect.soft(apres.liste[3]).toMatchObject({ id: COPIE_DU_FICHIER, etudiantDA: '9000001', productionId: 'PROD_BANC_1' });
+        });
+
+        await test.step('au magasin : les fichiers de A ne sont pas touchés, celui du fichier est déposé', async () => {
+            expect.soft(apres.depots, 'un seul dépôt : la copie du fichier').toEqual([COPIE_DU_FICHIER]);
+            expect.soft(apres.magasin).toEqual({ [COPIES[0]]: PNG_DE_A, [COPIES[1]]: PNG_DE_A, [COPIES[2]]: PNG_DE_A, [COPIE_DU_FICHIER]: PNG_DU_FICHIER });
+        });
+
+        await test.step('le bilan compte ce qui est entré : une copie, un fichier', async () => {
+            expect.soft(r.bilan).toContain('1 fichier(s) travaux + 1 PDF restauré(s)');
+            expect.soft(r.bilan).not.toContain('non restauré');
+        });
+
+        await test.step('le même fichier rouvert une seconde fois ne double rien, et le bilan ne compte plus de copie', async () => {
+            const r2 = await ouvrirParLaCase(neuf.page, ANCIEN_ZIP);
+            expect.soft(await lireCopies(neuf.page), 'ni la liste, ni le magasin, ni les dépôts ne bougent').toEqual(apres);
+            expect.soft(r2.bilan).toMatch(/^Import réussi/);
+            expect.soft(r2.bilan).not.toContain('fichier(s) travaux');
+        });
+
+        await test.step('« Mettre à jour le codex » : dans A, sans fenêtre, les quatre copies', async () => {
+            const sortie = await mettreAJourLeCodex(neuf.page);
+            const toutes = [...COPIES, COPIE_DU_FICHIER].sort();
+            expect(sortie).toEqual({
+                issue: 'réussie',
+                fenetre: null,
+                journal: ['aperçu', 'écriture dans ' + A.fichier],
+                ecritures: [{ fichier: A.fichier, copies: toutes, liste: toutes }],
+                destinationsDemandees: 0
+            });
+        });
+        await neuf.contexte.close();
+    });
+
+    test('(2) témoins : un fichier sans copies, ou la case des copies décochée, ne touchent ni la liste ni le magasin', async ({ page, browser }) => {
+        test.setTimeout(240000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier));
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+        const avant = await lireCopies(neuf.page);
+
+        await test.step('l\'ancien `.json`, sans copies, tout coché', async () => {
+            const r = await ouvrirParLaCase(neuf.page, ANCIEN_JSON);
+            expect(r.cases.length, 'témoin : des cases sont cochées, l\'import a bien eu lieu').toBeGreaterThan(3);
+            expect(r.cases, 'témoin : ce fichier n\'offre pas la case des copies').not.toContain('import-fichiersTravaux');
+            expect(r.bilan).toMatch(/^Import réussi/);
+            expect(await lireCopies(neuf.page)).toEqual(avant);
+        });
+
+        await test.step('l\'ancien `.zip`, la case des copies décochée', async () => {
+            const r = await ouvrirParLaCase(neuf.page, ANCIEN_ZIP, { sauf: ['import-fichiersTravaux'] });
+            expect(r.cases.length, 'témoin : les autres cases sont cochées').toBeGreaterThan(3);
+            expect(r.cases).not.toContain('import-fichiersTravaux');
+            expect(r.bilan).toMatch(/^Import réussi/);
+            expect(r.bilan).not.toContain('fichier(s) travaux');
+            expect(await lireCopies(neuf.page)).toEqual(avant);
+        });
+
+        await test.step('« Mettre à jour le codex » : dans A, les trois copies', async () => {
+            const sortie = await mettreAJourLeCodex(neuf.page);
+            expect(sortie.ecritures).toEqual([{ fichier: A.fichier, copies: COPIES, liste: COPIES }]);
+            expect(sortie.fenetre).toBeNull();
+        });
+        await neuf.contexte.close();
+    });
+
+    test('(3) un identifiant déjà là : l\'espace l\'emporte ; seul un fichier absent du magasin revient, et jamais pour une copie « exporte »', async ({ page, browser }) => {
+        test.setTimeout(240000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier));
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+
+        // L'espace : la copie 1 a son fichier ; la copie 2 est « manquant », sans fichier ; la
+        // copie 3 est « exporte », sans fichier (elle a quitté l'application, c'est voulu).
+        await neuf.page.evaluate(async ({ cle, ids }) => {
+            const liste = await db.get(cle, []);
+            liste[1].blobStatut = 'manquant';
+            liste[2].blobStatut = 'exporte';
+            db.setSync(cle, liste);
+            await db.flush();
+            window.__copies.delete(ids[1]);
+            window.__copies.delete(ids[2]);
+        }, { cle: CLE_COPIES, ids: COPIES });
+        const avant = await lireCopies(neuf.page);
+        expect(Object.keys(avant.magasin), 'témoin : une seule copie a son fichier').toEqual([COPIES[0]]);
+
+        // L'ancien fichier porte les trois mêmes identifiants, d'autres métadonnées, d'autres octets.
+        const memesIds = await deriverAncienZip(neuf.page, test.info().outputPath('ancien-memes-identifiants.zip'),
+            COPIES.map((id) => ({ entree: entreeDuFichier(id), png: PNG_DU_FICHIER })));
+        const r = await ouvrirParLaCase(neuf.page, memesIds);
+        expect(r.cases, 'témoin : la case des copies est cochée').toContain('import-fichiersTravaux');
+        const apres = await lireCopies(neuf.page);
+
+        // Pas d'état en `expect.soft` : chaque copie dit son rouge, sans masquer les suivantes.
+        await test.step('la copie 1 (entrée et fichier dans l\'espace) : rien ne bouge', async () => {
+            expect.soft(apres.liste[0]).toEqual(avant.liste[0]);
+            expect.soft(apres.magasin[COPIES[0]], 'le fichier de l\'espace n\'est pas remplacé par celui du .zip').toBe(PNG_DE_A);
+        });
+        await test.step('la copie 2 (« manquant », sans fichier) : son fichier revient du .zip, son statut redevient « present », le reste de l\'entrée ne bouge pas', async () => {
+            expect.soft(apres.magasin[COPIES[1]]).toBe(PNG_DU_FICHIER);
+            expect.soft(apres.liste[1]).toEqual({ ...avant.liste[1], blobStatut: 'present' });
+            // Le fichier revenu est rangé sous l'association de l'ESPACE, pas sous celle du fichier.
+            expect.soft(await neuf.page.evaluate((id) => { const e = window.__copies.get(id); return { da: e.etudiantDA, productionId: e.productionId }; }, COPIES[1]))
+                .toEqual({ da: '9000001', productionId: 'PROD_banc_A' });
+        });
+        await test.step('la copie 3 (« exporte ») : ni l\'entrée ni le magasin ne bougent', async () => {
+            expect.soft(apres.liste[2]).toEqual(avant.liste[2]);
+            expect.soft(apres.magasin[COPIES[2]]).toBeUndefined();
+        });
+        await test.step('la liste garde trois entrées, un seul dépôt au magasin, et le bilan dit ce qui est entré', async () => {
+            expect.soft(apres.liste.map((c) => c.id)).toEqual(COPIES);
+            expect.soft(apres.depots).toEqual([COPIES[1]]);
+            expect.soft(r.bilan).toContain('0 fichier(s) travaux + 1 PDF restauré(s)');
+            expect.soft(r.bilan).not.toContain('non restauré');
+        });
+
+        await test.step('un fichier qui ne revient pas ne change rien : absent du .zip, ou refusé faute d\'espace', async () => {
+            // La copie 1 perd son fichier (statut « present », qui ment) : le .zip ne le porte pas.
+            // La copie 2 reperd le sien et redevient « manquant » : le .zip le porte, le magasin le refuse.
+            await neuf.page.evaluate(async ({ cle, ids }) => {
+                const liste = await db.get(cle, []);
+                liste[1].blobStatut = 'manquant';
+                db.setSync(cle, liste);
+                await db.flush();
+                window.__copies.delete(ids[0]);
+                window.__copies.delete(ids[1]);
+                window.__depots.length = 0;
+                window.__refus = { [ids[1]]: 'quota' };
+            }, { cle: CLE_COPIES, ids: COPIES });
+            const avant2 = await lireCopies(neuf.page);
+            expect(Object.keys(avant2.magasin), 'témoin : plus aucun fichier au magasin').toEqual([]);
+            const sansLeFichier = await deriverAncienZip(neuf.page, test.info().outputPath('ancien-sans-le-fichier.zip'), [
+                { entree: entreeDuFichier(COPIES[0]) },
+                { entree: entreeDuFichier(COPIES[1]), png: PNG_DU_FICHIER }
+            ]);
+            const r2 = await ouvrirParLaCase(neuf.page, sansLeFichier);
+            const apres2 = await lireCopies(neuf.page);
+            expect(apres2.liste[0], 'la copie 1 n\'est pas marquée par un fichier qui ne la porte pas').toEqual(avant2.liste[0]);
+            expect(apres2.liste[1].blobStatut, 'la copie 2 reste « manquant » : son fichier n\'est pas entré').toBe('manquant');
+            expect(apres2.liste).toEqual(avant2.liste);
+            expect(apres2.magasin).toEqual({});
+            expect(r2.bilan).toContain('1 non restauré(s), marqué(s) « manquant »');
+        });
+
+        await test.step('seule la case des copies est cochée, et un fichier revient : c\'est un import réussi, compté', async () => {
+            await neuf.page.evaluate(() => { window.__refus = {}; window.__depots.length = 0; });
+            const r3 = await ouvrirParLaCase(neuf.page, memesIds, { seulement: ['import-fichiersTravaux'] });
+            expect(r3.cases, 'témoin : aucune autre case n\'est cochée').toEqual(['import-fichiersTravaux']);
+            const apres3 = await lireCopies(neuf.page);
+            // Les copies 1 et 2 n'avaient plus de fichier : ils reviennent. La copie 3 est « exporte ».
+            expect(apres3.depots).toEqual([COPIES[0], COPIES[1]]);
+            expect(apres3.liste.map((c) => c.blobStatut)).toEqual(['present', 'present', 'exporte']);
+            expect(r3.bilan).toBe('Import réussi !\n\n0 fichier(s) travaux + 2 PDF restauré(s)\n\nTotal : 1 élément(s) importé(s).');
+        });
+
+        await test.step('dans le doute (le magasin ne répond pas pour une copie), rien n\'est remplacé ; et un import qui n\'apporte rien le dit', async () => {
+            await neuf.page.evaluate((id) => {
+                window.__depots.length = 0;
+                const lire = db.getBlob;
+                db.getBlob = async (i) => { if (i === id) throw new Error('panne du magasin, posée par le banc'); return lire(i); };
+            }, COPIES[0]);
+            const avant4 = await lireCopies(neuf.page);
+            const r4 = await ouvrirParLaCase(neuf.page, memesIds, { seulement: ['import-fichiersTravaux'] });
+            const apres4 = await lireCopies(neuf.page);
+            expect(apres4.depots, 'aucun dépôt : ni la copie dont le magasin ne répond pas, ni les deux autres').toEqual([]);
+            expect(apres4).toEqual(avant4);
+            expect(r4.bilan).toBe('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).');
+        });
+        await neuf.contexte.close();
+    });
+});
