@@ -49,7 +49,11 @@
                 // 1.174.5 (#1012, les mots) — titre et ligne proposés par Claude Code, retouchés par
                 // Cowork, ACCEPTÉS par Grégoire le 2 oct. 2026, posés tels quels. La ligne entre dans
                 // l'entrée de sa mineure, son titre en tête.
-                '<strong>La fenêtre d\'ouverture ne te conseille plus de supprimer ton codex.</strong> Après une ouverture complète, elle te dit de le garder&nbsp;: c\'est ta copie hors de l\'application. Au bilan de «&nbsp;Ouvrir un Codex…&nbsp;», les présences se comptent en dates de cours, et une ligne te dit combien d\'élèves que tu avais supprimés n\'ont pas été ramenés.'
+                '<strong>La fenêtre d\'ouverture ne te conseille plus de supprimer ton codex.</strong> Après une ouverture complète, elle te dit de le garder&nbsp;: c\'est ta copie hors de l\'application. Au bilan de «&nbsp;Ouvrir un Codex…&nbsp;», les présences se comptent en dates de cours, et une ligne te dit combien d\'élèves que tu avais supprimés n\'ont pas été ramenés.',
+                // 1.174.6 (#1014, le codex complet) — titre et ligne ACCEPTÉS par Grégoire le 2 oct.
+                // 2026 à 19 h 12 (« oui », consigne de Cowork de 19 h 12), posés tels quels. La ligne
+                // entre dans l'entrée de sa mineure, son titre en tête.
+                '<strong>Ton codex emporte maintenant aussi ta corbeille et ta Modélisation.</strong> Les copies que tu as mises à la corbeille et les fichiers ouverts en Modélisation partent dans le codex, et reviennent quand tu l\'ouvres sur un autre appareil.'
             ]
         },
         {
