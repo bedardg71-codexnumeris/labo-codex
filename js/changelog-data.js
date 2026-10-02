@@ -41,7 +41,11 @@
                 // 1.174.3 (#1012, les quatre cases) — titre et ligne ACCEPTÉS par Grégoire le 2 oct.
                 // 2026 à 11 h 22 (« oui », consigne de Cowork de 11 h 22), posés tels quels. La ligne
                 // entre dans l'entrée de sa mineure, son titre en tête.
-                '<strong>Ouvrir un ancien fichier ne remplace plus tes élèves, tes présences, tes notes ni tes annotations.</strong> Quand tu coches ces cases dans «&nbsp;Ouvrir un Codex…&nbsp;», ce que le fichier apporte de neuf s\'ajoute à ce que tu as&nbsp;; ce que tu as déjà ne change pas.'
+                '<strong>Ouvrir un ancien fichier ne remplace plus tes élèves, tes présences, tes notes ni tes annotations.</strong> Quand tu coches ces cases dans «&nbsp;Ouvrir un Codex…&nbsp;», ce que le fichier apporte de neuf s\'ajoute à ce que tu as&nbsp;; ce que tu as déjà ne change pas.',
+                // 1.174.4 (#1012, l'élève désinscrit) — titre et ligne retouchés par Cowork, ACCEPTÉS
+                // par Grégoire le 2 oct. 2026 à 12 h 54 (« oui », consigne de Cowork de 12 h 54),
+                // posés tels quels. La ligne entre dans l'entrée de sa mineure, son titre en tête.
+                '<strong>Un élève que tu supprimes ne revient plus par un ancien fichier.</strong> Quand tu ouvres un ancien fichier par «&nbsp;Ouvrir un Codex…&nbsp;», rien de lui n\'entre&nbsp;: ni sa fiche, ni ses copies, ni ses notes, ni ses présences, ni ses annotations. Cela vaut pour les élèves supprimés à partir de cette version&nbsp;; un élève en décrochage n\'est pas touché.'
             ]
         },
         {
