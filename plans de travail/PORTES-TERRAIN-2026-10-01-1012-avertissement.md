@@ -48,3 +48,22 @@ Aucune dans cette porte. Trois décisions t'attendent ailleurs, chacune avec son
 - **« Exporter une sélection »** : jugée au banc seulement (elle demande toujours où écrire, et n'écrit plus dans le fichier du codex). Aucune rangée : un raté s'y verrait sans rien abîmer, la fenêtre de Chrome s'ouvrirait ou non.
 - **Les mots des trois autres causes** d'une ouverture incomplète (copie absente du fichier, format non reconnu, erreur) et du mélange : jugés au banc. Ton codex en fenêtre privée ne montre que le manque d'espace.
 - **La suite complète au navigateur** : prise après l'écriture de cette porte, sur `740a984c` : verte, 0 échec, aucune spec instable (rendue à 19 h 52). Elle tourne dans WebKit, pas dans Chrome.
+
+## §5 · Résultat – 2 octobre 2026, 6 h 50
+
+> Rapporté par la consigne de Cowork du 2 octobre, 6 h 54, sur la capture de Grégoire. Inscrit par Claude Code à 6 h 57 ; la capture elle-même n'a pas été relue par Claude Code.
+
+**La porte n'a pas pu voir la fenêtre d'avertissement. Elle n'a pas échoué.**
+
+| Rangée | Résultat |
+|---|---|
+| 0.1 | Non rapporté par la consigne (le numéro lu n'y est pas). |
+| 1.1 | **A fini autrement** (la rangée « Si 1.1 finit autrement ») : en fenêtre privée de Chrome, le codex de Grégoire (1,22 Go, écrit le 1er octobre à 18 h 50) s'est ouvert **en entier** : « Recharger la page », sans le mot « incomplet ». Toutes ses copies sont entrées. |
+| 1.2 à 1.4 | **Non faites** : aucune copie ne manquait, donc aucune fenêtre d'avertissement à voir. Elles attendent un cas réel ; Grégoire ne fabrique pas de données pour elles. |
+| 2.1 | Reste à voir, sans échéance. |
+
+**Ce qui reste inféré, faute de porte** : que la fenêtre d'enregistrement de Chrome s'ouvre après l'avertissement (§4, premier point). Le banc l'imite ; rien ne l'a vécue.
+
+**Un écart, non expliqué** : aux portes du 1er octobre (12 h 37 et 16 h 55), la même ouverture en fenêtre privée s'arrêtait faute d'espace ; ce matin elle est passée entière. Rien n'a été mesuré là-dessus.
+
+**Relevé par Cowork sur la capture** (inscrit sous #1012, issue 2) : la fenêtre d'une ouverture complète dit encore « Le fichier ZIP d'origine reste dans Fichiers — tu peux le supprimer pour récupérer de l'espace » (`js/codex.js`, l. 3131). Ce fichier est le codex de l'usager, et le mot arrêté est « codex ». Ce sont des mots : décision de Grégoire, plus tard.

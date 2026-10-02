@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 1er OCT. 2026, 20 h 24 : **1.174.0 EN LIGNE (#1012, L'AVERTISSEMENT), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; RESTE LA PORTE DE GRÉGOIRE ET L'ARTEFACT JUMEAU À PUBLIER PAR COWORK ; LE CHANTIER DU CODEX N'EST PAS CLOS : DEUX LOTS RESTENT**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 6 h 57 : **LA PORTE DE L'AVERTISSEMENT N'A PAS PU VOIR LA FENÊTRE (LE CODEX DE GRÉGOIRE S'EST OUVERT EN ENTIER) ; LOT OUVERT SUR LA CONSIGNE DE COWORK DE 6 h 54 : L'ANCIEN `.zip` OUVERT PAR LA CASE (#1012, SUITE)**
+
+**Mesuré à l'ouverture (6 h 55)** : `main` = `origin/main` = `99af4e4f` après `git fetch --prune` ; 1.174.0, build `1001-1900`, aux quatre points de vérité ; Vitest depuis `tests/` : 669 fichiers, 7 893 essais verts, aucune erreur hors essai ; un seul worktree, aucune suite en cours. Le jeton du verdict au navigateur porte sur `740a984c` ; `740a984c..HEAD` ne touche que des documents.
+
+**La porte (rapporté par la consigne de Cowork de 6 h 54, sur la capture de Grégoire ; non relu par Claude Code)** : le 2 octobre à 6 h 50, en fenêtre privée de Chrome, son codex (1,22 Go, écrit le 1er à 18 h 50) s'est ouvert en entier, « Recharger la page », sans le mot « incomplet ». La porte n'a pas échoué ; ses rangées 1.2 à 1.4 attendent un cas réel, Grégoire ne fabrique pas de données pour elles ; la rangée 2.1 reste à voir, sans échéance. Trace : § 5 de `plans de travail/PORTES-TERRAIN-2026-10-01-1012-avertissement.md`. **Relevé de Cowork sur la capture** : la fenêtre d'une ouverture complète dit encore « Le fichier ZIP d'origine reste dans Fichiers » (`js/codex.js`, l. 3131) ; des mots, décision de Grégoire, plus tard.
+
+**⚠ Dû, non fait** : les deux inscriptions sous #1012 dans `BACKLOG.md` (le résultat de la porte ; le relevé de la capture, issue 2). L'écriture dans `BACKLOG.md` a été refusée par le garde de permissions à 6 h 57 ; rien n'a été contourné. Le texte des deux lignes est dans la demande de relecture du lot.
+
+**Le lot en cours** : sur la consigne de 6 h 54 (Grégoire a dit « oui » à 6 h 54, rapporté par Cowork ; il a transmis la consigne à 6 h 55), l'ancien `.zip` ouvert par la case « Ouvrir un Codex… » ne doit plus faire perdre l'entrée des copies de l'espace. Sur une branche ; arrêt à la demande de relecture ; ni release ni push du code. Si ce bloc est le premier du fichier, le lot n'est pas rendu : mesurer `git branch --list 'fix-1012-*'` avant tout geste.
+
+---
+
+## (relais précédent) 1er OCT. 2026, 20 h 24 : **1.174.0 EN LIGNE (#1012, L'AVERTISSEMENT), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; RESTE LA PORTE DE GRÉGOIRE ET L'ARTEFACT JUMEAU À PUBLIER PAR COWORK ; LE CHANTIER DU CODEX N'EST PAS CLOS : DEUX LOTS RESTENT**
 
 **Mesuré** : verdict complet au navigateur par `scripts/pousser.sh` sur `740a984c`, lancé à 19 h 04 min 39 s, rendu à 19 h 52 min 27 s, vert : 0 échec, aucune spec instable (jeton : `instables: []`). Au lancement : Cowork fermé sur le mot de Grégoire, et mesuré (aucune machine virtuelle) ; charge 2,5 ; 68 % de mémoire libre ; fichier d'échange à 1,0 Go sur 2 ; Time Machine à l'arrêt ; écran allumé. **Écart** : lancé sur batterie (57 %, aucun adaptateur), sous `caffeinate -di` ; aucune veille au journal pendant la passe ; à la fin, 43 %. Branche `fix-1012-avertissement` poussée à 19 h 53. **Chez Netlify** : déploiement de production `6abef53051638f0009b53c2b`, état « ready », `commit_ref` `740a984c`, publié à 20 h 05 min 15 s (Toronto). Le numéro 1.174.0 (build `1001-1900`) est celui de `version.json` à ce commit ; le fichier servi lui-même n'a pas été lu.
 
