@@ -15,6 +15,12 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **1.174.5 PRÊTE, PAS ENCORE EN LIGNE (2 OCTOBRE 2026, 15 h 35 ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée, avec la retouche de Cowork ; suite complète au navigateur en cours) — LES MOTS DU CODEX : LA FENÊTRE D'OUVERTURE NE TE CONSEILLE PLUS DE SUPPRIMER TON CODEX**
+
+**Ce que tu verras, une fois en ligne** : après l'ouverture complète d'un codex, la fenêtre dit « Ton fichier de codex n'a pas changé : garde-le, c'est ta copie hors de l'application. » Quand tu ouvres un ancien fichier par « Ouvrir un Codex… », l'aperçu et le bilan comptent les présences en dates de cours (3 dates pour 10 élèves : « 3 date(s) », plus 30) ; au bilan, seules les dates où quelque chose est entré. Si l'import écarte un élève que tu avais supprimé, le bilan le dit en une ligne (« 1 élève que tu avais supprimé n'a pas été ramené. »), même quand rien d'autre n'entre.
+**Vérifié comment** : au navigateur (WebKit), par la vraie case et la vraie fenêtre aux cases : 3 dates × 10 élèves rendent « 3 date(s) » à l'aperçu et au bilan ; rouvert avec une date de plus, l'aperçu dit 4 et le bilan 1 ; la ligne des élèves écartés paraît quand l'un est écarté et pas sinon ; la fenêtre d'ouverture porte tes mots. Douze mutations, onze rouges (la douzième a montré une clause inutile, retirée). Vitest complet vert sur la release (673 fichiers, 7 938 essais). Pas de relecture croisée (décision de Cowork : des mots et un compte, rien n'est écrit dans tes données).
+**Pas de vérification à faire de ton côté.**
+
 ✅ **EN LIGNE EN 1.174.4 (2 OCTOBRE 2026 ; en ligne depuis 13 h 54, mesuré chez Netlify : déploiement de production prêt sur `95ffb41b` ; relue par Cowork, verte ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée à 12 h 54) — UN ÉLÈVE QUE TU SUPPRIMES NE REVIENT PLUS PAR UN ANCIEN FICHIER**
 
 **Ce que tu verras, une fois en ligne** : quand tu supprimes un élève dans le Cadre, puis ouvres un ancien fichier par « Ouvrir un Codex… », rien de lui n'entre : ni sa fiche, ni ses copies, ni ses notes, ni ses présences, ni ses annotations. Cela vaut pour les élèves supprimés à partir de cette version ; un élève en décrochage n'est pas touché. Aucun mot neuf à l'écran, sauf ta ligne des « Nouvelles ».
