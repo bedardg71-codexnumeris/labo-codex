@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 7 h 36 : **#1012, L'ANCIEN `.zip` PAR LA CASE : CODÉ SUR LA BRANCHE LOCALE `fix-1012-ancien-zip-par-la-case` (`d49e7100`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; `main` EN AVANCE DE DEUX COMMITS DE DOCUMENTS SUR `origin/main`, NON POUSSÉS**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 8 h 47 : **1.174.1 EN LIGNE (#1012, L'ANCIEN `.zip` PAR LA CASE), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; LA BRANCHE `fix-1012-ancien-zip-par-la-case` EST FUSIONNÉE ; PORTE ÉCRITE, ELLE ATTEND UN ANCIEN `.zip` AVEC COPIES CHEZ GRÉGOIRE**
+
+**Où vit le travail** : tout est sur `main`. La release 1.174.1 (build `1002-0752`, `44843fc0`) est le correctif relu (`d49e7100`, reposé sur `main` sans changement : `git diff` vide sur `js/`, `tests/`, `index.html`) plus le bump. La branche a été poussée puis fusionnée en avance rapide.
+
+**Fait, dans l'ordre de la consigne de Cowork de 7 h 50** : (1) les fichiers de Cowork commités tels quels (`8278669b`), `main` poussé ; (2) neuf lignes sous #1012 dans `BACKLOG.md` (`e61777f5`), sur l'accord de Grégoire : le garde de permissions n'a rien refusé cette fois ; (3) release `patch` (aucun geste nouveau à l'écran), la ligne des « Nouvelles » posée telle quelle dans l'entrée 1.174 ; Vitest vert après le commit du bump, 670 fichiers, 7 901 essais ; (4) verdict complet par `scripts/pousser.sh` sur `44843fc0` : **vert, 0 échec, aucune spec instable** (rendu à 8 h 44), branche poussée, `main` avancée et poussée à 8 h 46 ; (5) **chez Netlify : déploiement de production prêt, `commit_ref` `44843fc0`, publié à 8 h 46 min 28 s** ; (6) porte : `plans de travail/PORTES-TERRAIN-2026-10-02-1012-ancien-zip-par-la-case.md` (Cowork publie l'artefact jumeau).
+
+**La porte attend un cas réel** : sa rangée 0.1 demande à Grégoire s'il a déjà un ancien `.zip` avec copies ; sinon elle attend, il ne fabrique rien. En fenêtre privée de Chrome, une seule case (« Fichiers travaux »), aucune rangée ne clique « Mettre à jour le codex ». Le compte se lit dans Évaluations › Exporter et archiver (« N fichiers en stock », groupe actif seulement) et dans le texte du bilan.
+
+**Le chantier du codex n'est pas clos.** Il lui reste : (a) **la sélection exportée sans ses copies** — consigne prête, `plans de travail/CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md`, à ouvrir sur une consigne de Cowork ; (b) **les quatre cases** (« Annotations », « Notes », « Étudiants », « Présences »), qui remplacent encore : un lot, après la sélection ; (c) deux affaires de mots, qui attendent Grégoire : la copie vraiment perdue, et « fichier ZIP » dans la fenêtre d'une ouverture complète.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 7 h 36 : **#1012, L'ANCIEN `.zip` PAR LA CASE : CODÉ SUR LA BRANCHE LOCALE `fix-1012-ancien-zip-par-la-case` (`d49e7100`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; `main` EN AVANCE DE DEUX COMMITS DE DOCUMENTS SUR `origin/main`, NON POUSSÉS**
 
 **Où vit le travail** : le correctif et ses essais sont sur la branche locale `fix-1012-ancien-zip-par-la-case`, un seul commit (`d49e7100`) au-dessus de `b5d3770b`. Elle n'existe pas chez `origin`. Les documents (ce relais, la demande de relecture, `OU-EN-EST-ON.md`) sont sur `main`, en local. **Rien n'est poussé** : le push attend le mot de Grégoire.
 
