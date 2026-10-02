@@ -635,4 +635,107 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             await neuf.contexte.close();
         });
     });
+
+    // #1012, la sélection (consigne de Cowork du 2 oct. 2026, mots acceptés par Grégoire à 7 h 21).
+    // Mesuré avant le lot : la boucle des copies de l'export sélectif sautait en silence toute copie
+    // sans fichier, puis l'écran disait « Export sélectif terminé » (1 copie sur 3 dans le fichier).
+    test('(7) « Exporter une sélection » à laquelle des copies manquent : la fenêtre avant d\'écrire, « Annuler » n\'écrit rien ; « exporte » sans fichier ne compte pas', async ({ page, browser }) => {
+        test.setTimeout(300000);
+        await demarrer(page);
+        const fichier = await fabriquerCodex(page, test.info().outputPath(A.fichier));
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirSansCertainesCopies(neuf.page, fichier, { [COPIES[1]]: 'quota', [COPIES[2]]: 'quota' });
+        expect(await neuf.page.evaluate(() => window.__copies.size), 'témoin : une seule copie est dans l\'application').toBe(1);
+
+        const SELECTION = 'Cette sélection n\'aura pas toutes ses copies';
+        const motsSelection = (n, m) => n === 1
+            ? {
+                titre: SELECTION,
+                message: '1 copie sur ' + m + ' n\'est pas dans l\'application. Le fichier que tu vas écrire ne la contiendra pas.',
+                boutons: ['Annuler', 'Écrire sans cette copie']
+            }
+            : {
+                titre: SELECTION,
+                message: n + ' copies sur ' + m + ' ne sont pas dans l\'application. Le fichier que tu vas écrire ne les contiendra pas.',
+                boutons: ['Annuler', 'Écrire sans ces copies']
+            };
+        /** Le geste jusqu'au « Continuer » du résumé ; ce qui suit dépend de l'essai. */
+        const choisirLaSelection = async () => {
+            await gesteDuMenu(neuf.page, EXPORTER_SELECTION);
+            await attendreFenetre(neuf.page, 'Export sélectif');
+            await neuf.page.locator('#ui-dialogue-saisie').fill('tous');
+            await bouton(neuf.page, 'OK').click();
+            await expect(neuf.page.locator('#overlay-ui-dialogue .modal-section')).toContainText('Continuer ?', { timeout: 30000 });
+            await bouton(neuf.page, 'Continuer').click();
+        };
+        const attendreLaFinDeLExport = async () => {
+            await expect(neuf.page.locator('#overlay-ui-dialogue')).toHaveCount(0, { timeout: 30000 });
+            await expect(neuf.page.locator('#progression-overlay')).toBeHidden({ timeout: 30000 });
+        };
+
+        await test.step('la fenêtre, avant toute sortie, « Annuler » ayant le focus', async () => {
+            await choisirLaSelection();
+            expect(await attendreFenetre(neuf.page, SELECTION)).toEqual(motsSelection(2, 3));
+            expect(await sorties(neuf.page), 'rien n\'est sorti de l\'application').toEqual(RIEN_N_EST_SORTI);
+            expect(await neuf.page.evaluate(() => document.activeElement && document.activeElement.textContent)).toBe('Annuler');
+            await neuf.page.screenshot({ path: test.info().outputPath('selection-incomplete.png') });
+        });
+
+        await test.step('« Annuler » : rien n\'est écrit, rien n\'est demandé, rien ne dit « Export sélectif terminé »', async () => {
+            await bouton(neuf.page, 'Annuler').click();
+            await attendreLaFinDeLExport();
+            expect(await sorties(neuf.page)).toEqual(RIEN_N_EST_SORTI);
+            expect(await titresDesSucces(neuf.page)).toEqual([]);
+            expect(await messages(neuf.page, 'erreur')).toEqual([]);
+        });
+
+        await test.step('« Écrire sans ces copies » : la destination demandée, puis le fichier, avec la seule copie présente', async () => {
+            await neuf.page.evaluate(() => { window.__reponsesDestination = ['selection.zip']; });
+            await choisirLaSelection();
+            await attendreFenetre(neuf.page, SELECTION);
+            await bouton(neuf.page, 'Écrire sans ces copies').click();
+            await expect.poll(() => neuf.page.evaluate(() => window.__ecritures.length), { timeout: 30000 }).toBe(1);
+            await attendreLaFinDeLExport();
+            expect(await sorties(neuf.page)).toEqual({
+                journal: ['destination demandée', 'écriture dans selection.zip'],
+                ecritures: [{ fichier: 'selection.zip', donneesDe: 'Alix', copies: 1, selection: true }],
+                destinationsDemandees: 1
+            });
+            expect(await titresDesSucces(neuf.page)).toEqual(['Export sélectif terminé']);
+            await viderLeJournal(neuf.page);
+        });
+
+        await test.step('une copie « exporte » sans fichier ne compte pas : 1 copie sur 2, au singulier', async () => {
+            await neuf.page.evaluate(async ({ cle, id }) => {
+                const liste = await db.get(cle, []);
+                liste.forEach((c) => { if (c.id === id) c.blobStatut = 'exporte'; });
+                db.setSync(cle, liste);
+                await db.flush();
+            }, { cle: CLE_COPIES, id: COPIES[2] });
+            await choisirLaSelection();
+            expect(await attendreFenetre(neuf.page, SELECTION)).toEqual(motsSelection(1, 2));
+            await bouton(neuf.page, 'Annuler').click();
+            await attendreLaFinDeLExport();
+            expect(await sorties(neuf.page)).toEqual(RIEN_N_EST_SORTI);
+        });
+
+        await test.step('témoin : la seule copie attendue manquante devient « exporte » ; aucune fenêtre, le fichier s\'écrit', async () => {
+            await neuf.page.evaluate(async ({ cle, id }) => {
+                const liste = await db.get(cle, []);
+                liste.forEach((c) => { if (c.id === id) c.blobStatut = 'exporte'; });
+                db.setSync(cle, liste);
+                await db.flush();
+            }, { cle: CLE_COPIES, id: COPIES[1] });
+            await neuf.page.evaluate(() => { window.__reponsesDestination = ['selection-2.zip']; });
+            await choisirLaSelection();
+            await expect.poll(() => neuf.page.evaluate(() => window.__ecritures.length), { timeout: 30000 }).toBe(1);
+            await attendreLaFinDeLExport();
+            expect(await sorties(neuf.page)).toEqual({
+                journal: ['destination demandée', 'écriture dans selection-2.zip'],
+                ecritures: [{ fichier: 'selection-2.zip', donneesDe: 'Alix', copies: 1, selection: true }],
+                destinationsDemandees: 1
+            });
+        });
+        await neuf.contexte.close();
+    });
 });
