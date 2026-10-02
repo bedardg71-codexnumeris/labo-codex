@@ -15,6 +15,11 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.174.2 (2 OCTOBRE 2026 ; en ligne depuis 10 h 19, mesuré chez Netlify : déploiement de production prêt sur `e074a48d` ; ta ligne des « Nouvelles » acceptée avec ta correction) — UNE SÉLECTION EXPORTÉE TE PRÉVIENT AUSSI**
+
+**Ce que tu verras** : quand des copies ne sont pas dans l'application, « Exporter une sélection » ouvre une fenêtre avant d'écrire le fichier : « Cette sélection n'aura pas toutes ses copies », avec « Annuler » (qui n'écrit rien) et « Écrire sans ces copies ». Avant, le fichier s'écrivait sans elles, sans rien dire. Une copie que tu as exportée volontairement ne compte pas.
+**Vérifié comment** : le défaut a été reproduit par le geste avant d'être corrigé (aucune fenêtre). Au navigateur (WebKit), par le vrai menu Codex : la fenêtre, « Annuler » qui n'écrit rien, « Écrire sans ces copies » qui écrit le fichier avec la seule copie présente, l'accord au singulier, et aucune fenêtre quand rien ne manque. Huit mutations, toutes rouges. Vitest complet vert (670 fichiers, 7 903 essais). La suite complète au navigateur, verte, 0 échec. **Pas vérifié** : Chrome lui-même. **Pas de porte** : il faudrait fabriquer un espace où des copies manquent.
+
 🔧 **EN LIGNE EN 1.174.1 ; TA PORTE ATTEND UN ANCIEN FICHIER `.zip` AVEC COPIES (2 OCTOBRE 2026 ; en ligne depuis 8 h 46, mesuré chez Netlify : déploiement de production prêt sur `44843fc0` ; relecture de Cowork verte à 7 h 48, aucune correction ; ta ligne des « Nouvelles » acceptée à 7 h 49) — UN ANCIEN FICHIER `.zip` OUVERT DANS RÉGLAGES NE FAIT PLUS PERDRE DE COPIES**
 
 **Ce que tu verras** : quand tu ouvres un ancien fichier `.zip` par « Ouvrir un Codex… » de Réglages › Données et que tu coches « Fichiers travaux », ses copies s'ajoutent aux tiennes. Avant, elles prenaient leur place : tes copies sortaient de la liste, et « Mettre à jour le codex » écrivait ensuite un codex sans elles, sans rien dire. Aucun mot neuf à l'écran.

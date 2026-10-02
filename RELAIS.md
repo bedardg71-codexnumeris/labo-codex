@@ -7,11 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 8 h 55 : **LA PORTE DE 1.174.1 ATTEND UN CAS RÉEL ; LOT OUVERT SUR LA CONSIGNE DE COWORK : LA SÉLECTION EXPORTÉE DIT QUAND DES COPIES LUI MANQUENT (#1012)**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 10 h 20 : **1.174.2 EN LIGNE (#1012, LA SÉLECTION EXPORTÉE DIT QUAND DES COPIES LUI MANQUENT), MESURÉ CHEZ NETLIFY ; BRANCHE `fix-1012-selection-sans-copies` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; AUCUNE PORTE TERRAIN POUR CE LOT**
 
-**La porte** (`plans de travail/PORTES-TERRAIN-2026-10-02-1012-ancien-zip-par-la-case.md`) : Grégoire n'a pas d'ancien `.zip` avec copies (réponse à la rangée 0.1, 8 h 50). Elle n'a pas échoué ; elle attend un cas réel, rien n'est fabriqué pour elle.
+**Où vit le travail** : tout est sur `main`. Correctif `cd4aba75`, release 1.174.2 (build `1002-0923`, `80e3ba01`), puis `e074a48d` (BACKLOG). `main` avancée en avance rapide ; mon commit de relais intermédiaire (`f356cfab`, local, jamais poussé) a été retiré par cette avance et remplacé par ce relais.
 
-**Le lot ouvert** : `plans de travail/CONSIGNE-DU-JOUR.md` (l'ancienne `CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md`), sur une branche. Ce relais sera remplacé à la fin du lot.
+**Fait, dans l'ordre de la consigne de Cowork** : (1) la porte de 1.174.1 inscrite « attend un cas réel » (porte, RELAIS, OU-EN-EST-ON) et les fichiers de consigne de Cowork commités tels quels (`d3364aa6`) ; `guide-alignement-actuel.md` et `Claude outputs/` (septembre) laissés hors du commit, non suivis ; (2) défaut reproduit par le geste (aucune fenêtre) ; (3) correctif : fenêtre « Cette sélection n'aura pas toutes ses copies » avant d'écrire, « Annuler » ayant le focus et n'écrivant rien, compte des attendues partagé (`_creerCompteDesCopies`), mots en fonction sœur (`construireAvertissementSelectionIncomplete`) ; (4) preuve : essai (7) de `codex-1012-avertissement.spec.js` et voisins, 12 verts sans reprise ; huit mutations, toutes rouges, fichier restauré à l'empreinte ; Vitest 670 fichiers, 7 903 essais, avant et après le bump ; (5) ligne des « Nouvelles » acceptée par Grégoire avec sa correction, posée dans l'entrée 1.174 ; (6) verdict complet par `scripts/pousser.sh` sur `80e3ba01` : **vert, 0 échec**, deux specs vertes au second essai sans rapport avec le lot (`doublons-bandeau-291`, `evaluation-961-…` R2), rendu à 10 h 16 ; (7) **Netlify : production prête sur `e074a48d`, publiée à 10 h 19 min 20 s**.
+
+**Pas de porte terrain** : la fenêtre ne se voit dans Chrome que si des copies manquent vraiment, ce qui demanderait de fabriquer une ouverture incomplète ; le banc la juge par le geste.
+
+**Le chantier du codex** : il lui reste (a) **les quatre cases** (« Annotations », « Notes », « Étudiants », « Présences »), qui remplacent encore ; (b) deux affaires de mots qui attendent Grégoire : la copie vraiment perdue, et « fichier ZIP » dans la fenêtre d'une ouverture complète. C'est Grégoire qui dira s'il est « clos ». Hors du lot, toujours ouvert : #991.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 8 h 55 : **LA PORTE DE 1.174.1 ATTEND UN CAS RÉEL ; LOT DE LA SÉLECTION OUVERT** — voir le bloc ci-dessus.
+
+---
 
 ## (relais précédent) 2 OCT. 2026, 8 h 47 : **1.174.1 EN LIGNE (#1012, L'ANCIEN `.zip` PAR LA CASE), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; LA BRANCHE `fix-1012-ancien-zip-par-la-case` EST FUSIONNÉE ; PORTE ÉCRITE, ELLE ATTEND UN ANCIEN `.zip` AVEC COPIES CHEZ GRÉGOIRE**
 
