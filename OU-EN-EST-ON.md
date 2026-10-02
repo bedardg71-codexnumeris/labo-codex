@@ -15,6 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🔧 **CODÉ SUR UNE BRANCHE, EN ATTENTE DE LA RELECTURE DE COWORK ; RIEN N'EST EN LIGNE (2 OCTOBRE 2026, 7 h 36) — UN ANCIEN FICHIER `.zip` OUVERT DANS RÉGLAGES NE FAIT PLUS PERDRE DE COPIES**
+
+**Ce que tu verras, une fois en ligne** : quand tu ouvres un ancien fichier `.zip` par « Ouvrir un Codex… » de Réglages › Données et que tu coches « Fichiers travaux », ses copies s'ajoutent aux tiennes. Avant, elles prenaient leur place : tes copies sortaient de la liste, et « Mettre à jour le codex » écrivait ensuite un codex sans elles, sans rien dire. Aucun mot neuf à l'écran.
+**Vérifié comment** : le défaut a été reproduit par le geste avant d'être corrigé (un codex de trois copies tenu, l'ancien `.zip`, tout coché, puis la mise à jour : 1 copie écrite ; après le correctif : 4). Au navigateur (WebKit), par la vraie case, la vraie fenêtre aux cases à cocher et le vrai menu Codex. Seize mutations, toutes rouges. Vitest complet vert (670 fichiers, 7 901 essais). **Pas vérifié** : Chrome lui-même (le banc imite son fichier tenu) ; la suite complète au navigateur, qui se prend avant un push.
+**Tes données** : rien n'y est écrit. Le correctif change ce que le geste fera à l'avenir ; chez quelqu'un qui a déjà fait cet import, les copies d'alors restent dans l'application sans leur entrée, et rien n'est réparé d'office.
+**Trouvé autour, mesuré, non corrigé** : dans la même fenêtre, les cases « Annotations », « Notes », « Étudiants » et « Présences » remplacent encore ce que tu as. Avec « Annotations » cochée, les annotations de tes copies sont remplacées par celles du fichier.
+**Ce qui t'attend** : la relecture de Cowork d'abord (`plans de travail/DEMANDE-RELECTURE-2026-10-02-1012-ancien-zip-par-la-case.md`) ; puis ta ligne des « Nouvelles ». Et un mot : l'écriture dans le backlog m'a été refusée ce matin par le garde de permissions ; sept lignes y sont dues, leur texte est prêt.
+**Le chantier du codex n'est pas clos** : il lui reste la sélection exportée sans ses copies, et ta décision sur la copie vraiment perdue.
+
 🔧 **EN LIGNE EN 1.174.0 ; TA PORTE DU 2 OCTOBRE, 6 h 50, N'A PAS PU VOIR LA FENÊTRE : TON CODEX S'EST OUVERT EN ENTIER (1er OCTOBRE 2026 ; en ligne depuis 20 h 05, mesuré chez Netlify : déploiement de production prêt sur `740a984c` ; relecture de Cowork verte à 18 h 54, aucune correction ; ta ligne des « Nouvelles » acceptée à 18 h 57) — TON CODEX TE PRÉVIENT QUAND DES COPIES LUI MANQUENT**
 
 **Ce que tu verras** : si des copies attendues ne sont pas dans l'application au moment d'écrire ton codex, la fenêtre « Ce codex n'aura pas toutes tes copies » passe avant tout, avec tes mots de 17 h 52 ; « Annuler » n'écrit rien. Tant que des copies manquent, l'application demande où ranger le fichier, même dans Chrome où elle tient ton fichier de codex. « Exporter une sélection » demande toujours où écrire et ne touche plus à ton fichier de codex. Le bilan d'un codex ouvert incomplet dit tes mots de 17 h 55 pour chaque cause.
