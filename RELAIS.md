@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 8 h 47 : **1.174.1 EN LIGNE (#1012, L'ANCIEN `.zip` PAR LA CASE), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; LA BRANCHE `fix-1012-ancien-zip-par-la-case` EST FUSIONNÉE ; PORTE ÉCRITE, ELLE ATTEND UN ANCIEN `.zip` AVEC COPIES CHEZ GRÉGOIRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 8 h 55 : **LA PORTE DE 1.174.1 ATTEND UN CAS RÉEL ; LOT OUVERT SUR LA CONSIGNE DE COWORK : LA SÉLECTION EXPORTÉE DIT QUAND DES COPIES LUI MANQUENT (#1012)**
+
+**La porte** (`plans de travail/PORTES-TERRAIN-2026-10-02-1012-ancien-zip-par-la-case.md`) : Grégoire n'a pas d'ancien `.zip` avec copies (réponse à la rangée 0.1, 8 h 50). Elle n'a pas échoué ; elle attend un cas réel, rien n'est fabriqué pour elle.
+
+**Le lot ouvert** : `plans de travail/CONSIGNE-DU-JOUR.md` (l'ancienne `CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md`), sur une branche. Ce relais sera remplacé à la fin du lot.
+
+## (relais précédent) 2 OCT. 2026, 8 h 47 : **1.174.1 EN LIGNE (#1012, L'ANCIEN `.zip` PAR LA CASE), MESURÉ CHEZ NETLIFY ; `main` = `origin/main` À CE RELAIS PRÈS ; LA BRANCHE `fix-1012-ancien-zip-par-la-case` EST FUSIONNÉE ; PORTE ÉCRITE, ELLE ATTEND UN ANCIEN `.zip` AVEC COPIES CHEZ GRÉGOIRE**
 
 **Où vit le travail** : tout est sur `main`. La release 1.174.1 (build `1002-0752`, `44843fc0`) est le correctif relu (`d49e7100`, reposé sur `main` sans changement : `git diff` vide sur `js/`, `tests/`, `index.html`) plus le bump. La branche a été poussée puis fusionnée en avance rapide.
 

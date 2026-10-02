@@ -1,34 +1,35 @@
-# Consigne du jour – mettre en ligne l'ancien `.zip` par la case (#1012, suite)
+# Consigne du jour – une sélection exportée dit quand des copies lui manquent (#1012, dernier lot du codex avant les quatre cases)
 
-> Écrite par Cowork le 2 octobre 2026 à 7 h 50 (Toronto, mesurée par `date`). Remplace la consigne de 6 h 54, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-02-1012-ancien-zip-par-la-case.md`. L'ordre des chantiers du 1er octobre, 13 h 02, ne change pas.
+> Écrite par Cowork le 2 octobre 2026 à 7 h 22, pendant le lot de la case, sous le nom `CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md` (commitée dans `8278669b`) ; **ouverte à 8 h 51** (Toronto, mesurée par `date`), le lot de la case étant en ligne et fusionné (1.174.1, `main` = `a64d976a`). Remplace la consigne de mise en ligne de 7 h 50, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-02-1012-release-1.174.1.md`. Le fichier `CONSIGNE-SUIVANTE-…` n'existe plus : il est devenu celui-ci. L'ordre des chantiers du 1er octobre ne change pas.
 
-## Où on en est
+## D'abord
 
-Ton commit `d49e7100` (branche locale `fix-1012-ancien-zip-par-la-case`) est relu : **vert, aucune correction**. Lis `plans de travail/VERDICT-RELECTURE-2026-10-02-1012-ancien-zip-par-la-case.md` en entier avant de commencer : ton exception du § 3 est retenue, tes deux suppositions sont justes. Grégoire a accepté la ligne des Nouvelles (« oui », à 7 h 49).
+**La porte de 1.174.1 attend un cas réel** : Grégoire n'a pas d'ancien `.zip` avec copies (sa réponse à la rangée 0.1, 8 h 50). La porte n'a pas échoué ; il ne fabrique pas de fichier pour elle. Inscris-le dans `PORTES-TERRAIN-2026-10-02-1012-ancien-zip-par-la-case.md`, `RELAIS.md` et `OU-EN-EST-ON.md`, et commite avec eux les fichiers de Cowork qui traînent dans l'arbre, tels quels.
 
-**`BACKLOG.md` : Grégoire t'autorise à y écrire.** En te transmettant cette consigne, il donne son accord pour les inscriptions ci-dessous. Si le garde de permissions refuse encore, arrête-toi sur ce seul point, n'y touche par aucun détour, et dis-le-lui : il répondra à l'invite.
+## Le défaut, lu par Cowork ce matin
 
-## Ce que tu fais, dans cet ordre
+Sur `main` (`js/codex.js`, `actionExporterSelection`, l. 4006 à 4035 environ) : la boucle des copies saute en silence toute copie dont `travauxStockage.recupererBlob` ne rend rien, puis l'écran dit « Export sélectif terminé », sans compte de copies. Mesuré par le geste par Claude Code le 1er octobre (BACKLOG, sous #1012) : après une ouverture où deux copies sur trois sont refusées, le fichier porte 1 copie sur 3. **Remesure avant d'ouvrir** : vérifie que le défaut vit encore là.
 
-1. **Commite et pousse les commits de documents de `main`**, avec les fichiers de Cowork qui traînent dans l'arbre, tels quels : le verdict, cette consigne, l'ancienne archivée, et `CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md` (ne l'exécute pas : elle s'ouvre après la fusion de ce lot, sur une consigne de Cowork).
-2. **Inscris sous #1012**, sans rien corriger : les sept lignes du § 10 de ta demande, puis les deux relevés du verdict (copies et notes de deux sources ; le coût de la vérification au magasin). Écris aussi que **les quatre cases (« Annotations », « Notes », « Étudiants », « Présences ») forment un lot du chantier du codex**, après la sélection : sans lui, le chantier n'est pas « clos ».
-3. **La release** (skill `release-et-changelog`, `scripts/release.mjs`). L'intention, à toi de la juger par le skill : aucun geste nouveau à l'écran, je penche pour un patch. La ligne des Nouvelles, acceptée par Grégoire, à poser telle quelle, espaces insécables selon l'usage du fichier :
-   - Titre : « Un ancien fichier ouvert dans Réglages ne fait plus perdre de copies. »
-   - Texte : « Quand tu ouvres un ancien fichier .zip par « Ouvrir un Codex… » et que tu coches « Fichiers travaux », ses copies s'ajoutent maintenant aux tiennes au lieu de prendre leur place. Ton codex, à sa prochaine mise à jour, les contient toutes. »
-4. **Verdict Playwright complet, puis push, puis fusion vers `main`** (règle 2). Si le verdict demande une correction de code, arrête-toi et rends-la à Cowork avant de pousser.
-5. **Constate la mise en ligne chez Netlify**, et dis l'heure mesurée.
-6. **La porte terrain, le markdown** : `plans de travail/PORTES-TERRAIN-2026-10-02-1012-ancien-zip-par-la-case.md`. Cowork publiera l'artefact jumeau. Ce qu'elle lève : ton § 9, le vrai magasin de Chrome, que ton banc imite. Les contraintes :
-   - **en fenêtre privée de Chrome**, sur le Mac ; **rien n'écrit dans le vrai fichier de codex de Grégoire** : aucune rangée ne clique « Mettre à jour le codex » si l'application tient son fichier ;
-   - elle demande **un ancien `.zip` avec copies** que Grégoire a déjà. Première rangée : en a-t-il un ? S'il n'en a pas, la porte attend un cas réel ; il ne fabrique pas de fichier pour elle ;
-   - **une seule case cochée, « Fichiers travaux »** : les quatre autres remplacent encore (inscrit, non corrigé), et la porte ne doit pas le montrer comme un échec ;
-   - le résultat se lit **à l'écran, en nombres** : combien de copies avant, combien après, à un endroit que tu nommes au mot près (la Liste des évaluations, ou ce que ton banc lit de plus proche) ; le bilan de l'import, son texte attendu.
-   Le « si ça finit autrement » : une ouverture de son codex refusée faute d'espace en fenêtre privée n'est pas un échec de la porte.
-7. **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** Le chantier du codex n'est pas clos : il lui reste la sélection exportée sans ses copies (consigne prête) et les quatre cases ; et deux affaires de mots, qui attendent Grégoire (la copie vraiment perdue, « fichier ZIP » dans la fenêtre d'une ouverture complète). Écris-le ainsi.
+## La règle (technique, tranchée par Cowork)
 
-## Ce que tu ne fais pas
+La même fenêtre que l'avertissement de 1.174.0, posée avant d'écrire, « Annuler » ayant le focus, « Annuler » n'écrit rien. Elle compte les copies **attendues** de la sélection comme l'avertissement les compte (statut déclaré autre que « exporte ») : une copie « exporte » sans fichier n'est pas manquante. Aucune copie attendue ne manque : aucune fenêtre, rien ne change.
 
-Ni la sélection, ni les quatre cases, ni les mots en attente : chacun a son lot.
+## Les mots, acceptés par Grégoire le 2 octobre à 7 h 21
+
+- Titre : « Cette sélection n'aura pas toutes ses copies »
+- Message : « N copies sur M ne sont pas dans l'application. Le fichier que tu vas écrire ne les contiendra pas. » (accord au singulier : « 1 copie sur M n'est pas… ne la contiendra pas », comme pour l'avertissement)
+- Bouton : « Écrire sans ces copies » / « Écrire sans cette copie »
+
+Pas de seconde phrase (« ne le remplace pas… ») : une sélection demande toujours où écrire et ne s'écrit jamais dans le fichier tenu (règle du 1er octobre). Aucun autre mot neuf.
+
+## Ce que tu fais, sur une branche
+
+1. Reproduis par le geste avant de corriger.
+2. Corrige : de préférence une fonction de mots sœur de `construireAvertissementCopiesManquantes`, et le compte des attendues partagé avec l'avertissement plutôt que recopié.
+3. La preuve : un banc par le geste (fenêtre, « Annuler » n'écrit rien, « Écrire sans ces copies » écrit le fichier), un témoin (une sélection complète ne montre aucune fenêtre ; une copie « exporte » sans fichier ne déclenche rien), des mutations rouges, Vitest complet.
+4. Hors du lot : #991 (la sélection fabrique encore son fichier à l'ancienne, tout en mémoire). Même fonction, mais aucun symptôme vécu : issue 2, déjà inscrite. Ne le corrige pas.
+5. Ce chemin n'écrit rien dans les données de l'usager : il écrit un fichier neuf, et l'avertissement ajoute un arrêt. Pas de relecture croisée obligatoire ; arrête-toi quand même avant la release pour une ligne des Nouvelles, proposée à Grégoire.
 
 ## Ce que tu rends
 
-À Grégoire, trois lignes : le numéro en ligne et l'heure constatée ; le résultat du verdict complet (instables compris) ; où est la porte, et si elle attend un ancien `.zip`. Ce que tu as supposé, en une ligne.
+À Grégoire, trois lignes en gestes : ce qui est codé ; ce qui l'attend ; ce que tu as supposé, en une ligne. Une fois ce lot en ligne, il ne restera au chantier du codex que deux affaires de mots (la copie vraiment perdue, la fenêtre d'une ouverture complète qui dit « fichier ZIP ») ; c'est Grégoire qui dira si le chantier est « clos ».
