@@ -388,14 +388,10 @@ async function genererCodex(options = {}) {
     // les range (la pièce vit dans js/fichier-sortant.js depuis le lot A1 : l'archive l'emploie aussi).
     const copies = [];
     const rangDeLaCopie = {};
-    // #1012 — le signal de l'avertissement, COMPTÉ ici et non lu dans les statuts (un marquage
-    // « manquant » refusé faute d'espace laisse des copies absentes se dire présentes).
-    // « Attendue » : une entrée de la liste des copies dont le statut déclaré n'est pas
-    // « exporte » (celle-là a quitté l'application, c'est voulu). Une copie attendue dont le
-    // fichier ne se lit pas ne sera pas dans le codex : elle manque. Le statut ne décide de rien
-    // d'autre : tout fichier présent part dans le codex, « exporte » et « manquant » compris.
-    let nbCopiesAttendues = 0;
-    let nbCopiesManquantes = 0;
+    // #1012 — le signal de l'avertissement, COMPTÉ ici et non lu dans les statuts (cf.
+    // _creerCompteDesCopies). Le statut ne décide de rien d'autre : tout fichier présent part dans
+    // le codex, « exporte » et « manquant » compris.
+    const compteDesCopies = _creerCompteDesCopies();
 
     if (clesFT.length > 0 && typeof travauxStockage !== 'undefined') {
         // Aplatir tous les fichiersTravaux des differents trimestres
@@ -407,9 +403,7 @@ async function genererCodex(options = {}) {
         });
         for (var j = 0; j < fichiers.length; j++) {
             var f = fichiers[j];
-            var copieAttendue = f.blobStatut !== 'exporte';
             var copieTrouvee = false;
-            if (copieAttendue) nbCopiesAttendues++;
             try {
                 var blob = await travauxStockage.recupererBlob(f.id);
                 if (blob) {
@@ -437,7 +431,7 @@ async function genererCodex(options = {}) {
             } catch (e) {
                 console.warn('📂 Codex : blob ignoré pour ' + f.id, e.message);
             }
-            if (copieAttendue && !copieTrouvee) nbCopiesManquantes++;
+            compteDesCopies.noter(f, copieTrouvee);
             if (j % 5 === 0) {
                 _prog(
                     20 + Math.round((j / fichiers.length) * 50),
@@ -452,10 +446,10 @@ async function genererCodex(options = {}) {
     // 2c. #1012 — des copies attendues manquent : l'appelant qui va écrire le codex hors de
     //     l'application le dit AVANT l'aperçu et avant toute écriture. Un refus sort comme un
     //     aperçu refusé : rien n'est préparé, rien n'est écrit.
-    if (nbCopiesManquantes > 0 && typeof options.confirmerCopiesManquantes === 'function') {
+    if (compteDesCopies.manquantes > 0 && typeof options.confirmerCopiesManquantes === 'function') {
         _progMasquer();
         if (options.suivreTentative) _noterTentative({ etape: 'avertissement des copies manquantes' });
-        if (!(await options.confirmerCopiesManquantes(nbCopiesManquantes, nbCopiesAttendues))) {
+        if (!(await options.confirmerCopiesManquantes(compteDesCopies.manquantes, compteDesCopies.attendues))) {
             return null;
         }
         _afficherProgression('Génération du codex');
@@ -550,7 +544,7 @@ async function genererCodex(options = {}) {
 
     return {
         blob: zipBlob, nomFichier, manifeste, donnees, compteurAuDebut,
-        copies: { attendues: nbCopiesAttendues, manquantes: nbCopiesManquantes }
+        copies: { attendues: compteDesCopies.attendues, manquantes: compteDesCopies.manquantes }
     };
 
     } catch (erreur) {
@@ -1085,13 +1079,54 @@ function construireAvertissementCopiesManquantes(manquantes, attendues) {
     var une = manquantes === 1;
     return {
         titre: 'Ce codex n\'aura pas toutes tes copies',
-        message: manquantes + (une ? ' copie' : ' copies') + ' sur ' + attendues +
-            (une ? ' n\'est pas' : ' ne sont pas') + ' dans l\'application. ' +
-            'Le codex que tu vas écrire ne ' + (une ? 'la' : 'les') + ' contiendra pas.\n\n' +
+        message: _direCopiesAbsentes(manquantes, attendues, 'Le codex') + '\n\n' +
             'Si un autre fichier de codex ' + (une ? 'la' : 'les') + ' contient encore, ne le remplace pas : ' +
             'donne un autre nom à celui-ci.',
         texteConfirmer: une ? 'Écrire sans cette copie' : 'Écrire sans ces copies'
     };
+}
+
+/**
+ * #1012 — les mots de l'avertissement à l'export d'une sélection à laquelle des copies manquent
+ * (acceptés par Grégoire le 2 oct. 2026, 7 h 21). Pas de seconde phrase : une sélection demande
+ * toujours où écrire et ne s'écrit jamais dans le fichier tenu. Fonction pure, testable en Vitest.
+ * @param {number} manquantes - copies attendues sans fichier dans l'application (au moins 1)
+ * @param {number} attendues - copies attendues de la sélection (statut autre que « exporte »)
+ * @returns {{titre: string, message: string, texteConfirmer: string}}
+ */
+function construireAvertissementSelectionIncomplete(manquantes, attendues) {
+    return {
+        titre: 'Cette sélection n\'aura pas toutes ses copies',
+        message: _direCopiesAbsentes(manquantes, attendues, 'Le fichier'),
+        texteConfirmer: manquantes === 1 ? 'Écrire sans cette copie' : 'Écrire sans ces copies'
+    };
+}
+
+/** #1012 — les deux phrases communes aux deux avertissements ; `sujet` : « Le codex » ou « Le fichier ». */
+function _direCopiesAbsentes(manquantes, attendues, sujet) {
+    var une = manquantes === 1;
+    return manquantes + (une ? ' copie' : ' copies') + ' sur ' + attendues +
+        (une ? ' n\'est pas' : ' ne sont pas') + ' dans l\'application. ' +
+        sujet + ' que tu vas écrire ne ' + (une ? 'la' : 'les') + ' contiendra pas.';
+}
+
+/**
+ * #1012 — le compte des copies attendues et manquantes, partagé par la génération du codex et
+ * l'export d'une sélection. « Attendue » : une entrée de la liste des copies dont le statut
+ * déclaré n'est pas « exporte » (celle-là a quitté l'application, c'est voulu). Une copie
+ * attendue dont le fichier ne se lit pas ne sera pas dans le fichier écrit : elle manque.
+ * Compté à la lecture des fichiers, jamais lu dans les statuts (un marquage « manquant » refusé
+ * faute d'espace laisse des copies absentes se dire présentes).
+ * @returns {{attendues: number, manquantes: number, noter: function(Object, boolean)}}
+ */
+function _creerCompteDesCopies() {
+    var compte = { attendues: 0, manquantes: 0 };
+    compte.noter = function(copie, trouvee) {
+        if (copie.blobStatut === 'exporte') return;
+        compte.attendues++;
+        if (!trouvee) compte.manquantes++;
+    };
+    return compte;
 }
 
 /* ===============================
@@ -4003,6 +4038,7 @@ async function actionExporterSelection() {
     var cleFT = Object.keys(donneesFiltrees).filter(function(c) {
         return c.includes('fichiersTravaux');
     });
+    var compteDesCopies = _creerCompteDesCopies();
 
     if (cleFT.length > 0 && typeof travauxStockage !== 'undefined') {
         var tousLesFichiers = [];
@@ -4015,9 +4051,11 @@ async function actionExporterSelection() {
 
         for (var j = 0; j < tousLesFichiers.length; j++) {
             var f = tousLesFichiers[j];
+            var copieTrouvee = false;
             try {
                 var blob = await travauxStockage.recupererBlob(f.id);
                 if (blob) {
+                    copieTrouvee = true;
                     var ext = (f.nomFichier || 'bin').split('.').pop();
                     dossier.file(f.id + '.' + ext, blob);
                     nbBlobs++;
@@ -4026,12 +4064,31 @@ async function actionExporterSelection() {
             } catch (e) {
                 console.warn('📂 Export sélectif : blob ignoré pour ' + f.id, e.message);
             }
+            compteDesCopies.noter(f, copieTrouvee);
             if (j % 5 === 0) {
                 _majProgression(25 + Math.round((j / tousLesFichiers.length) * 35),
                     'Ajout des fichiers travaux…', nbBlobs + '/' + tousLesFichiers.length);
                 await _yield();
             }
         }
+    }
+
+    // 7b bis. #1012 — des copies attendues de la sélection n'ont pas de fichier : la même fenêtre
+    //     que l'avertissement du codex, avant d'écrire. « Annuler » a le focus (variante `danger`)
+    //     et n'écrit rien, sans message.
+    if (compteDesCopies.manquantes > 0) {
+        _masquerProgression();
+        var avertissement = construireAvertissementSelectionIncomplete(compteDesCopies.manquantes, compteDesCopies.attendues);
+        if (await uiDialogues.confirmerAction({
+            titre: avertissement.titre,
+            message: avertissement.message,
+            texteAnnuler: 'Annuler',
+            texteConfirmer: avertissement.texteConfirmer,
+            variante: 'danger',
+            preformate: true
+        }) !== true) return;
+        _afficherProgression('Export sélectif');
+        _majProgression(60, 'Préparation du ZIP…');
     }
 
     // 7c. Manifeste (partiel)
@@ -4170,6 +4227,7 @@ window.Codex = {
     lireExterne: lireCodexExterne,
     construireBilanImport: construireBilanImport,
     construireAvertissementCopiesManquantes: construireAvertissementCopiesManquantes,
+    construireAvertissementSelectionIncomplete: construireAvertissementSelectionIncomplete,
     evaluerPrevolStockage: evaluerPrevolStockage,
     // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible ;
     // #335 C — vérification de persistance post-import ; #336 D — purge)

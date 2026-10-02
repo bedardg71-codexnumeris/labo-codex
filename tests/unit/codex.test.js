@@ -259,6 +259,27 @@ describe('codex.js — avertissement des copies manquantes (#1012)', () => {
     });
 });
 
+// #1012 — l'avertissement à l'export d'une sélection à laquelle des copies manquent. Mots acceptés
+// par Grégoire le 2 oct. 2026 (7 h 21) ; pas de seconde phrase. Tenus en entier.
+describe('codex.js — avertissement d\'une sélection incomplète (#1012)', () => {
+
+    it('au pluriel', () => {
+        expect(win.Codex.construireAvertissementSelectionIncomplete(2, 3)).toEqual({
+            titre: 'Cette sélection n\'aura pas toutes ses copies',
+            message: '2 copies sur 3 ne sont pas dans l\'application. Le fichier que tu vas écrire ne les contiendra pas.',
+            texteConfirmer: 'Écrire sans ces copies'
+        });
+    });
+
+    it('une seule copie → accord au singulier, jusqu\'au bouton', () => {
+        expect(win.Codex.construireAvertissementSelectionIncomplete(1, 2)).toEqual({
+            titre: 'Cette sélection n\'aura pas toutes ses copies',
+            message: '1 copie sur 2 n\'est pas dans l\'application. Le fichier que tu vas écrire ne la contiendra pas.',
+            texteConfirmer: 'Écrire sans cette copie'
+        });
+    });
+});
+
 // #1012 — verrou structurel : l'avertissement vit dans l'appelant de la génération. Tout site
 // qui génère le codex entier pour l'écrire hors de l'application doit passer la confirmation ;
 // un second appelant qui l'oublierait écrirait un codex amputé sans rien dire.
