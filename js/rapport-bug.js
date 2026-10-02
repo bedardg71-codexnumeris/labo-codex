@@ -147,6 +147,10 @@ function ouvrirModalRapportsArchives() {
     const listeHTML = archives.length === 0
         ? '<p style="text-align: center; color: var(--gris-moyen); padding: 30px;">Aucun rapport archivé</p>'
         : archives.map(r => {
+            // Règle 1 : les archives voyagent dans le codex ; tout ce qui vient d'elles passe par
+            // echapperHtml, texte comme attributs (data-param).
+            const id = echapperHtml(r.id);
+            const description = String(r.description || 'Aucune description');
             const couleurBordure = obtenirCouleurArchive(r);
             const opacite = estArchiveConfirme(r) ? '0.6' : '1';
             const typeBadge = r.type === 'commentaire'
@@ -156,17 +160,17 @@ function ouvrirModalRapportsArchives() {
             <div style="background: var(--gris-tres-pale); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid ${couleurBordure}; opacity: ${opacite};">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                     <div>
-                        <strong style="color: var(--accent-primaire);">${r.prenom}</strong>${typeBadge}
-                        <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 10px;">${formatDate(r.date)}</span>
+                        <strong style="color: var(--accent-primaire);">${echapperHtml(r.prenom)}</strong>${typeBadge}
+                        <span style="color: var(--gris-moyen); font-size: 0.85rem; margin-left: 10px;">${echapperHtml(formatDate(r.date))}</span>
                     </div>
-                    <button data-action="supprimerEtRafraichirArchive" data-param="${r.id}" style="
+                    <button data-action="supprimerEtRafraichirArchive" data-param="${id}" style="
                         background: none; border: none; cursor: pointer; font-size: 1.2rem;
                         padding: 0;" title="Supprimer"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                 </div>
                 <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--gris-fonce);">
-                    ${(r.description || 'Aucune description').substring(0, 100)}${r.description?.length > 100 ? '…' : ''}
+                    ${echapperHtml(description.substring(0, 100))}${description.length > 100 ? '…' : ''}
                 </p>
-                <button data-action="afficherRapportComplet" data-param="${r.id}" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
+                <button data-action="afficherRapportComplet" data-param="${id}" class="btn btn-secondaire" style="font-size: 0.8rem; padding: 4px 10px;">
                     Voir le rapport complet
                 </button>
             </div>
