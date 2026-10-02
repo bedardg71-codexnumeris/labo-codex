@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 18 h 45 : **#1014 (LE CODEX COMPLET) + ÉCHAPPEMENT DES RAPPORTS ARCHIVÉS : COMMITÉ SUR `claude/1014-codex-complet` (`b9f98e27`), EN RELECTURE ; NI RELEASE, NI PUSH ; `main` A 2 COMMITS DE DOCUMENTS NON POUSSÉS**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 19 h 21 : **1.174.6 (#1014, LE CODEX COMPLET) COMMITÉE SUR `claude/1014-codex-complet` (`7cda4e71`) ; RELUE VERTE PAR COWORK ; VERDICT PLAYWRIGHT COMPLET LANCÉ PAR `pousser.sh` ; FUSION VERS `main` APRÈS LE VERDICT ; PAS DE PORTE TERRAIN**
+
+**Où vit le travail** : la branche `claude/1014-codex-complet` (worktree `.claude/worktrees/1014-codex-complet`) : le lot (`b9f98e27`), `main` fusionnée dedans (`e2f37147`), la release 1.174.6 (`7cda4e71`, build `1002-1919`), puis ce relais. `main` = `origin/main` à `5a57bf54` (fichiers de Cowork `20b59ccf` et inscriptions #1014 `5a57bf54`, poussés à 19 h 18 et ci-après).
+
+**Fait** : fichiers de Cowork commités tels quels et poussés ; quatre trouvailles inscrites sous #1014 (issue 2) ; ligne des Nouvelles posée telle quelle ; Vitest 7 938 / 7 938 sur la release.
+
+**Pas de porte terrain** : le banc ouvre le codex sur un espace neuf ; Grégoire n'a rien à vérifier. Son codex deviendra complet à sa prochaine mise à jour habituelle, faite depuis le navigateur qui a ces fichiers (corbeille et Modélisation).
+
+**Suite de l'ordre** : les décisions de #1007, une famille à la fois, avec Cowork ; puis le garde-éveil de la vérification, le signal au début de l'évaluation, et #1013.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 18 h 45 : **#1014 (LE CODEX COMPLET) + ÉCHAPPEMENT DES RAPPORTS ARCHIVÉS : COMMITÉ SUR `claude/1014-codex-complet` (`b9f98e27`), EN RELECTURE ; NI RELEASE, NI PUSH ; `main` A 2 COMMITS DE DOCUMENTS NON POUSSÉS**
 
 **Où vit le travail** : la branche `claude/1014-codex-complet` (worktree `.claude/worktrees/1014-codex-complet`), partie de `main` à `e1bb1df6`. Demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-02-1014-codex-complet.md` (sur la branche). Fusion vers `main` après la relecture de Cowork.
 
