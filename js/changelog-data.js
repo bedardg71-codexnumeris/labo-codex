@@ -28,7 +28,12 @@
             couleur: 'vert',
             titre: 'Ton codex te prévient quand des copies lui manquent',
             items: [
-                'Si des copies ne sont pas dans l\'application quand tu écris ton codex, une fenêtre le dit avant d\'écrire, puis l\'application te demande où ranger le fichier au lieu de remplacer l\'ancien. «&nbsp;Exporter une sélection&nbsp;» n\'écrit plus dans ton fichier de codex. Et le bilan d\'un codex ouvert incomplet dit, pour chaque cause, si le rouvrir peut ramener les copies.'
+                'Si des copies ne sont pas dans l\'application quand tu écris ton codex, une fenêtre le dit avant d\'écrire, puis l\'application te demande où ranger le fichier au lieu de remplacer l\'ancien. «&nbsp;Exporter une sélection&nbsp;» n\'écrit plus dans ton fichier de codex. Et le bilan d\'un codex ouvert incomplet dit, pour chaque cause, si le rouvrir peut ramener les copies.',
+                // 1.174.1 (#1012, l'ancien .zip par la case) — titre et ligne proposés par Claude Code
+                // (§ 11 de la demande de relecture), ACCEPTÉS par Grégoire le 2 oct. 2026 à 7 h 49
+                // (« oui », consigne de Cowork de 7 h 50), posés tels quels. La ligne entre dans
+                // l'entrée de sa mineure, son titre en tête.
+                '<strong>Un ancien fichier ouvert dans Réglages ne fait plus perdre de copies.</strong> Quand tu ouvres un ancien fichier .zip par «&nbsp;Ouvrir un Codex…&nbsp;» et que tu coches «&nbsp;Fichiers travaux&nbsp;», ses copies s\'ajoutent maintenant aux tiennes au lieu de prendre leur place. Ton codex, à sa prochaine mise à jour, les contient toutes.'
             ]
         },
         {
