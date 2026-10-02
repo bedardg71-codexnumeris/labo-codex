@@ -7,6 +7,8 @@
 > **Tes données** : ⛔ **rien n'écrit dans ton fichier de codex.** Tout se fait dans une fenêtre privée : elle a son propre espace, vide, et l'oublie à sa fermeture. ⛔ **Aucune rangée ne clique « Mettre à jour le codex »** : après l'ouverture de ton codex, l'application tient ton fichier, et cette commande l'écrirait. Ta fenêtre normale et tes données de travail ne sont pas touchées.
 > Ce qui échoue devient un item du BACKLOG, pas une note.
 
+> **État au 2 octobre 2026, 8 h 50 : la porte attend un cas réel.** Réponse de Grégoire à la rangée 0.1 : il n'a pas d'ancien `.zip` avec copies. La porte n'a pas échoué, elle n'a rien vu ; aucun fichier n'est fabriqué pour elle. Elle se rouvre le jour où un ancien `.zip` avec copies se présente.
+
 ## §0 · Préalables
 
 | | Geste | Attendu |
