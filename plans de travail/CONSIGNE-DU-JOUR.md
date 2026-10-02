@@ -1,35 +1,39 @@
-# Consigne du jour – une sélection exportée dit quand des copies lui manquent (#1012, dernier lot du codex avant les quatre cases)
+# Consigne du jour – les quatre cases de l'import ne remplacent plus les données de l'usager (#1012, dernier lot du codex)
 
-> Écrite par Cowork le 2 octobre 2026 à 7 h 22, pendant le lot de la case, sous le nom `CONSIGNE-SUIVANTE-2026-10-02-1012-selection.md` (commitée dans `8278669b`) ; **ouverte à 8 h 51** (Toronto, mesurée par `date`), le lot de la case étant en ligne et fusionné (1.174.1, `main` = `a64d976a`). Remplace la consigne de mise en ligne de 7 h 50, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-02-1012-release-1.174.1.md`. Le fichier `CONSIGNE-SUIVANTE-…` n'existe plus : il est devenu celui-ci. L'ordre des chantiers du 1er octobre ne change pas.
+> Écrite par Cowork le 2 octobre 2026 à 10 h 33 (Toronto, mesurée par `date`), sur `main` à `3947a6e4` (1.174.2 en ligne). Remplace la consigne de la sélection, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-02-1012-selection.md`. Grégoire a dit « oui » à ce lot à 10 h 32. L'ordre des chantiers du 1er octobre ne change pas : c'est le dernier lot de code du point 1 (le codex, jusqu'à « clos »).
 
-## D'abord
+## Le défaut, lu par Cowork
 
-**La porte de 1.174.1 attend un cas réel** : Grégoire n'a pas d'ancien `.zip` avec copies (sa réponse à la rangée 0.1, 8 h 50). La porte n'a pas échoué ; il ne fabrique pas de fichier pour elle. Inscris-le dans `PORTES-TERRAIN-2026-10-02-1012-ancien-zip-par-la-case.md`, `RELAIS.md` et `OU-EN-EST-ON.md`, et commite avec eux les fichiers de Cowork qui traînent dans l'arbre, tels quels.
+Dans `executerImportSelectif` (`js/import-export.js`, l. 2894 à 2948 et 3065 à 3080 sur `main`), quatre cases font encore `db.set` avec la valeur du fichier : **« Étudiants »** (`groupeEtudiants`), **« Présences »** (`presences`), **« Notes »** (clé de case `evaluations` : `evaluations`, `evaluationsSauvegardees`, `notesEtudiants`), **« Annotations »** (`annotationsTravaux`). Tu l'as mesuré par le geste ce matin à 7 h 10 (ta demande de relecture de la case, § 5). Le geste par défaut aggrave le cas : « C'est ma propre sauvegarde » coche toutes les cases de données personnelles (`toggleDonneesPersoImport`). **Remesure avant d'ouvrir.**
 
-## Le défaut, lu par Cowork ce matin
+## La règle (technique, tranchée par Cowork ; Grégoire en est informé)
 
-Sur `main` (`js/codex.js`, `actionExporterSelection`, l. 4006 à 4035 environ) : la boucle des copies saute en silence toute copie dont `travauxStockage.recupererBlob` ne rend rien, puis l'écran dit « Export sélectif terminé », sans compte de copies. Mesuré par le geste par Claude Code le 1er octobre (BACKLOG, sous #1012) : après une ouverture où deux copies sur trois sont refusées, le fichier porte 1 copie sur 3. **Remesure avant d'ouvrir** : vérifie que le défaut vit encore là.
+La même que pour les copies, dans la ligne de sa limite du 20 septembre : **ce que le fichier apporte s'ajoute ; rien de ce que l'espace a ne perd son entrée ni n'est réécrit. Quand une même chose est des deux côtés, l'espace l'emporte.** « La même chose » se juge par son identité métier, pas seulement par l'`id` :
 
-## La règle (technique, tranchée par Cowork)
+- **Étudiants** : un élève du fichier entre si son DA n'est pas dans le groupe ; sinon la fiche de l'espace reste telle quelle.
+- **Présences** : un tableau de fiches (`saisie-presences.js`, l. 1034 à 1064). Une fiche du fichier entre si aucune fiche de l'espace n'a la même date, le même DA et le même cours (`coursId` absent = même cours, comme le fait `saisie-presences.js`) ; sinon celle de l'espace reste.
+- **Notes** : une évaluation du fichier entre si son `id` n'est pas dans l'espace **et** si l'espace n'a pas déjà une évaluation pour le même élève, la même production et la même reprise. Mesure toi-même ce qui fait l'unicité d'une évaluation (reprises : `repriseDeId`, `jetonRepriseApplique`, ids `EVAL_REPRISE_`) et dis-le. **Aucune note de l'espace ne doit changer** : c'est la preuve première de ce lot. `evaluations` et `notesEtudiants` : je ne leur trouve aucun lecteur hors de l'import (lu, `grep`) ; mesure, et si ce sont des clés mortes, traite-les comme le reste (ajouter sans réécrire) sans rien retirer dans ce lot ; inscris leur retrait, issue 2.
+- **Annotations** : une copie a une seule annotation (`obtenirAnnotationFichier` rend la première par `fichierId`). Une annotation du fichier entre si son `id` n'est pas dans l'espace **et** si aucune annotation de l'espace ne porte sur le même `fichierId` ; sinon celle de l'espace reste.
 
-La même fenêtre que l'avertissement de 1.174.0, posée avant d'écrire, « Annuler » ayant le focus, « Annuler » n'écrit rien. Elle compte les copies **attendues** de la sélection comme l'avertissement les compte (statut déclaré autre que « exporte ») : une copie « exporte » sans fichier n'est pas manquante. Aucune copie attendue ne manque : aucune fenêtre, rien ne change.
+Si pour l'une des quatre aucune règle n'est sans perte, arrête-toi et rends le cas à Cowork. Ce qui toucherait au sens d'une note remonte à Grégoire par Cowork.
 
-## Les mots, acceptés par Grégoire le 2 octobre à 7 h 21
+**Supposition de Cowork, dite à Grégoire** : un élève du fichier absent du groupe entre, puisque l'usager a coché « Étudiants ». Un élève retiré exprès du groupe pourrait donc revenir. Mesure comment l'application retire un élève (suppression ou statut) et dis ce que tu en vois ; ne change rien de plus.
 
-- Titre : « Cette sélection n'aura pas toutes ses copies »
-- Message : « N copies sur M ne sont pas dans l'application. Le fichier que tu vas écrire ne les contiendra pas. » (accord au singulier : « 1 copie sur M n'est pas… ne la contiendra pas », comme pour l'avertissement)
-- Bouton : « Écrire sans ces copies » / « Écrire sans cette copie »
-
-Pas de seconde phrase (« ne le remplace pas… ») : une sélection demande toujours où écrire et ne s'écrit jamais dans le fichier tenu (règle du 1er octobre). Aucun autre mot neuf.
+**Aucun mot neuf à l'écran.** Les nombres du bilan disent ce qui est entré, comme pour les copies. Relève sans y toucher les mots qui mentent (« N date(s) de présences » compte des fiches, pas des dates).
 
 ## Ce que tu fais, sur une branche
 
-1. Reproduis par le geste avant de corriger.
-2. Corrige : de préférence une fonction de mots sœur de `construireAvertissementCopiesManquantes`, et le compte des attendues partagé avec l'avertissement plutôt que recopié.
-3. La preuve : un banc par le geste (fenêtre, « Annuler » n'écrit rien, « Écrire sans ces copies » écrit le fichier), un témoin (une sélection complète ne montre aucune fenêtre ; une copie « exporte » sans fichier ne déclenche rien), des mutations rouges, Vitest complet.
-4. Hors du lot : #991 (la sélection fabrique encore son fichier à l'ancienne, tout en mémoire). Même fonction, mais aucun symptôme vécu : issue 2, déjà inscrite. Ne le corrige pas.
-5. Ce chemin n'écrit rien dans les données de l'usager : il écrit un fichier neuf, et l'avertissement ajoute un arrêt. Pas de relecture croisée obligatoire ; arrête-toi quand même avant la release pour une ligne des Nouvelles, proposée à Grégoire.
+1. **Reproduis par le geste**, avant de corriger, chacune des quatre cases : un espace semé, un ancien `.zip` qui a les mêmes choses et d'autres, tout coché par « C'est ma propre sauvegarde ». Ce que l'espace a perdu, compté.
+2. **Corrige** selon la règle. Une fonction pure de fusion par famille (ou une seule paramétrée par la clé d'identité), testable en Vitest ; pas `fusionnerParIdentite`, qui renomme au lieu de garder.
+3. **Regarde autour, sans corriger** : les cases qui remplacent et que l'écran annonce (« Configuration », « Cadre du trimestre ») ; « Groupe-cours », « Horaires », « Enseignants », qui remplacent sans le dire. Dis, lu ou mesuré, ce qu'une copie ou une évaluation y perd. Inscris, issue 2.
+4. **Source et stock** : ce lot tarit la source. Chez qui a déjà fait cet import, ce qui a été remplacé est perdu ; dis seulement si on peut le reconnaître. Ne répare rien.
+5. **La preuve** : un banc par le geste (après l'import, tout ce que l'espace avait y est, intact ; ce que le fichier apportait de neuf y est aussi ; aucune note de l'espace ne change ; la mise à jour du codex écrit le tout), des témoins (une case décochée ne touche rien ; le même fichier rouvert ne double rien), des mutations rouges, Vitest complet.
+6. **Arrête-toi à la demande de relecture** : `plans de travail/DEMANDE-RELECTURE-2026-10-02-1012-quatre-cases.md`, avec une proposition de ligne pour les Nouvelles. Ni release, ni push du code. Ce chemin écrit les données de l'usager, notes comprises : relecture croisée avant toute release (règle 2).
+
+## Ce que tu ne fais pas
+
+Les copies d'un collègue (relevé du matin, § 5), `executerImportLocalStorageBrut`, les mots en attente de Grégoire : chacun a sa fiche.
 
 ## Ce que tu rends
 
-À Grégoire, trois lignes en gestes : ce qui est codé ; ce qui l'attend ; ce que tu as supposé, en une ligne. Une fois ce lot en ligne, il ne restera au chantier du codex que deux affaires de mots (la copie vraiment perdue, la fenêtre d'une ouverture complète qui dit « fichier ZIP ») ; c'est Grégoire qui dira si le chantier est « clos ».
+À Grégoire, trois lignes en gestes : ce qui est codé ; ce que tu as trouvé autour ; ce qui l'attend. Ce que tu as supposé, en une ligne.
