@@ -66,7 +66,7 @@ async function demarrer(page) {
 }
 
 /** Le codex du banc, par le vrai `Codex.generer`, écrit sur le disque du banc. */
-async function fabriquerCodex(page, chemin) {
+async function fabriquerCodex(page, chemin, donneesDuCodex = A.donnees) {
     const rendu = await page.evaluate(async ({ donnees, cleCopies, png, nom }) => {
         Object.keys(donnees).forEach((cle) => db.setSync(cle, donnees[cle]));
         await db.flush();
@@ -82,7 +82,7 @@ async function fabriquerCodex(page, chemin) {
         let binaire = '';
         for (let i = 0; i < o.length; i += 0x8000) binaire += String.fromCharCode.apply(null, o.subarray(i, i + 0x8000));
         return { b64: btoa(binaire), nbCopies };
-    }, { donnees: A.donnees, cleCopies: CLE_COPIES, png: PNG_DE_A, nom: A.nom });
+    }, { donnees: donneesDuCodex, cleCopies: CLE_COPIES, png: PNG_DE_A, nom: A.nom });
     expect(rendu.nbCopies, 'témoin : le codex fabriqué porte ses trois copies').toBe(3);
     fs.writeFileSync(chemin, Buffer.from(rendu.b64, 'base64'));
     return chemin;
@@ -113,7 +113,9 @@ async function ouvrirEspaceNeuf(browser) {
             return {
                 fichier,
                 copies: Object.keys(zip.files).filter((n) => n.indexOf('travaux/') === 0 && !n.endsWith('/')).map((n) => n.slice('travaux/'.length).replace(/\.[^.]+$/, '')).sort(),
-                liste: (donnees[cleCopies] || []).map((c) => c.id).sort()
+                liste: (donnees[cleCopies] || []).map((c) => c.id).sort(),
+                // Les familles suivies par un essai (les quatre cases) : ce que le fichier écrit en porte.
+                ...(window.__clesSuivies ? { familles: Object.fromEntries(window.__clesSuivies.map((c) => [c, donnees[c] === undefined ? null : donnees[c]])) } : {})
             };
         };
         window.__poignee = (nom, fichier) => ({
@@ -458,6 +460,158 @@ test.describe('#1012 — l\'ancien fichier .zip ouvert par la case ne fait plus 
             expect(apres4).toEqual(avant4);
             expect(r4.bilan).toBe('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).');
         });
+        await neuf.contexte.close();
+    });
+});
+
+// #1012, les quatre cases (consigne de Cowork du 2 oct. 2026, 10 h 33) — « ÉTUDIANTS », « PRÉSENCES »,
+// « NOTES » ET « ANNOTATIONS » NE REMPLACENT PLUS CE QUE L'ESPACE A.
+//
+// Mesuré avant le lot, par ce banc : avec « C'est ma propre sauvegarde » (qui coche toutes les
+// données personnelles), chacune des quatre cases remplaçait la valeur de l'espace par celle du
+// fichier (`db.set`).
+//
+// LA RÈGLE JUGÉE ICI : ce que le fichier apporte s'ajoute ; rien de ce que l'espace a ne perd son
+// entrée ni n'est réécrit ; une même chose des deux côtés, l'espace l'emporte. « La même chose » :
+//   · un élève : son DA ;
+//   · une fiche de présence : la date, le DA et le cours (`coursId` absent d'un côté = même cours) ;
+//   · une évaluation : son `id`, et le couple élève × production (une évaluation du fichier n'entre
+//     que si l'espace n'a AUCUNE évaluation de ce couple : ni l'originale, ni une reprise) ;
+//   · une annotation : son `id`, et la copie qu'elle annote (`fichierId`).
+const CLE_PRESENCES = 'a2031_presences';
+const CLE_EVALS = 'a2031_evaluationsSauvegardees';
+const CLE_ANNOTATIONS = 'a2031_annotationsTravaux';
+const QUATRE = [CLE_GROUPE, CLE_PRESENCES, CLE_EVALS, CLE_ANNOTATIONS];
+
+const ESPACE = {
+    [CLE_GROUPE]: [
+        { da: '9000001', nom: 'Fictif', prenom: 'Alix', groupe: '00001' },
+        { da: '9000003', nom: 'Fictif', prenom: 'Camille', groupe: '00001' }
+    ],
+    [CLE_PRESENCES]: [
+        { date: '2031-09-02', da: '9000001', periodesPresentes: 3, notes: 'de l\'espace', coursId: 'cours-banc' },
+        { date: '2031-09-16', da: '9000003', periodesPresentes: 2, notes: '', coursId: 'cours-banc' }
+    ],
+    [CLE_EVALS]: [
+        { id: 'EVAL_ESP_1', etudiantDA: '9000001', productionId: 'PROD_BANC_1', noteFinale: 85, statutRemise: 'evalue', criteres: [] },
+        { id: 'EVAL_ESP_2', etudiantDA: '9000003', productionId: 'PROD_BANC_1', noteFinale: 60, statutRemise: 'evalue', criteres: [] }
+    ],
+    [CLE_ANNOTATIONS]: [
+        { id: 'ANN_ESP_1', fichierId: COPIES[0], page: 1, type: 'texte', texte: 'annotation de l\'espace', x: 1, y: 2 }
+    ]
+};
+
+const DU_FICHIER = {
+    [CLE_GROUPE]: [
+        { id: 1, da: '9000001', nom: 'Fictif', prenom: 'Alix (version du fichier)', groupe: '01' },
+        { id: 2, da: '9000002', nom: 'Fictif', prenom: 'Bao', groupe: '01' }
+    ],
+    [CLE_PRESENCES]: [
+        // Même date, même DA, cours absent : la même fiche que celle de l'espace.
+        { date: '2031-09-02', da: '9000001', periodesPresentes: 0, notes: 'du fichier' },
+        { date: '2031-09-09', da: '9000001', periodesPresentes: 2, notes: '', coursId: 'cours-banc' }
+    ],
+    [CLE_EVALS]: [
+        // Même id que l'espace, contenu autre.
+        { id: 'EVAL_ESP_1', etudiantDA: '9000001', productionId: 'PROD_BANC_1', noteFinale: 10, statutRemise: 'evalue', criteres: [] },
+        // Id autre, même couple : l'espace a déjà une évaluation d'Alix pour cette production.
+        { id: 'EVAL_9000001_BANC_1', etudiantDA: '9000001', productionId: 'PROD_BANC_1', noteFinale: 72, statutRemise: 'evalue', criteres: [] },
+        // Une reprise du fichier, sur l'évaluation de l'espace : le couple est déjà là.
+        { id: 'EVAL_REPRISE_F', etudiantDA: '9000001', productionId: 'PROD_BANC_1', noteFinale: 90, repriseDeId: 'EVAL_ESP_1', jetonRepriseApplique: true, statutRemise: 'evalue', criteres: [] },
+        // Un couple absent de l'espace : elle entre.
+        { id: 'EVAL_F_3', etudiantDA: '9000002', productionId: 'PROD_BANC_1', noteFinale: 66, statutRemise: 'evalue', criteres: [] }
+    ],
+    [CLE_ANNOTATIONS]: [
+        { id: 'ANN_F_1', fichierId: COPIES[0], page: 1, type: 'texte', texte: 'du fichier, même copie', x: 5, y: 5 },
+        { id: 'ANN_ESP_1', fichierId: 'FT_AUTRE', page: 1, type: 'texte', texte: 'même id, autre copie', x: 5, y: 5 },
+        { id: 'ANN_F_2', fichierId: COPIE_DU_FICHIER, page: 1, type: 'texte', texte: 'Bonne idée directrice', x: 10, y: 20 }
+    ]
+};
+
+const ATTENDU = {
+    [CLE_GROUPE]: [...ESPACE[CLE_GROUPE], DU_FICHIER[CLE_GROUPE][1]],
+    [CLE_PRESENCES]: [...ESPACE[CLE_PRESENCES], DU_FICHIER[CLE_PRESENCES][1]],
+    [CLE_EVALS]: [...ESPACE[CLE_EVALS], DU_FICHIER[CLE_EVALS][3]],
+    [CLE_ANNOTATIONS]: [...ESPACE[CLE_ANNOTATIONS], DU_FICHIER[CLE_ANNOTATIONS][2]]
+};
+
+/** Un ancien `.zip` dérivé de la fixture : les quatre familles sont celles qu'on lui donne. */
+async function deriverZipDesQuatre(page, chemin, familles) {
+    const b64 = await page.evaluate(async ({ source, familles }) => {
+        const zip = await JSZip.loadAsync(Uint8Array.from(atob(source), (c) => c.charCodeAt(0)));
+        const donnees = JSON.parse(await zip.file('donnees.json').async('string'));
+        Object.keys(familles).forEach((cle) => { donnees[cle] = familles[cle]; });
+        zip.file('donnees.json', JSON.stringify(donnees));
+        return zip.generateAsync({ type: 'base64' });
+    }, { source: fs.readFileSync(ANCIEN_ZIP).toString('base64'), familles });
+    fs.writeFileSync(chemin, Buffer.from(b64, 'base64'));
+    return chemin;
+}
+
+const lireQuatre = (page) => page.evaluate(async (cles) => {
+    const r = {};
+    for (const c of cles) r[c] = await db.get(c, null);
+    return r;
+}, QUATRE);
+
+test.describe('#1012 — les quatre cases de l\'import ne remplacent plus ce que l\'espace a', () => {
+    test.beforeEach(async ({ page }) => { page.setDefaultTimeout(15000); });
+
+    test('(3) tout coché par « C\'est ma propre sauvegarde » : rien de l\'espace ne bouge, le neuf entre, la mise à jour du codex écrit le tout', async ({ page, browser }) => {
+        test.setTimeout(300000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier), { ...A.donnees, ...ESPACE });
+        const ancien = await deriverZipDesQuatre(page, test.info().outputPath('ancien-quatre.zip'), DU_FICHIER);
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+        expect(await lireQuatre(neuf.page), 'témoin : l\'espace porte ses quatre familles').toEqual(ESPACE);
+
+        const r = await ouvrirParLaCase(neuf.page, ancien);
+        expect(r.cases, 'témoin : les quatre cases sont cochées').toEqual(expect.arrayContaining(['import-etudiants', 'import-presences', 'import-evaluations', 'import-annotationsTravaux']));
+        const apres = await lireQuatre(neuf.page);
+
+        await test.step('après l\'import : chaque entrée de l\'espace est là, telle quelle, et le neuf du fichier est entré à la suite', async () => {
+            for (const c of QUATRE) expect.soft(apres[c], c).toEqual(ATTENDU[c]);
+        });
+
+        await test.step('aucune note de l\'espace ne change', async () => {
+            const notes = (liste) => (liste || []).filter((e) => e.id.startsWith('EVAL_ESP_')).map((e) => [e.id, e.noteFinale, e.remplaceeParId || null]);
+            expect.soft(notes(apres[CLE_EVALS])).toEqual([['EVAL_ESP_1', 85, null], ['EVAL_ESP_2', 60, null]]);
+        });
+
+        await test.step('le bilan compte ce qui est entré', async () => {
+            expect.soft(r.bilan).toContain('1 étudiant(s)');
+            expect.soft(r.bilan).toContain('1 date(s) de présences');
+            expect.soft(r.bilan).toContain('1 annotation(s) sur les travaux');
+        });
+
+        await test.step('le même fichier rouvert ne double rien', async () => {
+            await ouvrirParLaCase(neuf.page, ancien);
+            expect.soft(await lireQuatre(neuf.page)).toEqual(apres);
+        });
+
+        await test.step('« Mettre à jour le codex » : dans A, sans fenêtre, le tout', async () => {
+            await neuf.page.evaluate((cles) => { window.__clesSuivies = cles; }, QUATRE);
+            const sortie = await mettreAJourLeCodex(neuf.page);
+            expect(sortie.issue).toBe('réussie');
+            expect(sortie.fenetre).toBeNull();
+            expect(sortie.ecritures.length).toBe(1);
+            expect(sortie.ecritures[0].fichier).toBe(A.fichier);
+            expect(sortie.ecritures[0].familles).toEqual(ATTENDU);
+        });
+        await neuf.contexte.close();
+    });
+
+    test('(4) témoin : les quatre cases décochées ne touchent rien', async ({ page, browser }) => {
+        test.setTimeout(240000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier), { ...A.donnees, ...ESPACE });
+        const ancien = await deriverZipDesQuatre(page, test.info().outputPath('ancien-quatre.zip'), DU_FICHIER);
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+        const r = await ouvrirParLaCase(neuf.page, ancien, { sauf: ['import-etudiants', 'import-presences', 'import-evaluations', 'import-annotationsTravaux'] });
+        expect(r.cases).not.toContain('import-etudiants');
+        expect(await lireQuatre(neuf.page)).toEqual(ESPACE);
         await neuf.contexte.close();
     });
 });
