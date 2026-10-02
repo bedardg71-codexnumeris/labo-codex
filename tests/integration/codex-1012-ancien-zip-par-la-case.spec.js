@@ -615,3 +615,179 @@ test.describe('#1012 — les quatre cases de l\'import ne remplacent plus ce que
         await neuf.contexte.close();
     });
 });
+
+// #1012, l'élève désinscrit (décision de Grégoire, 2 oct. 2026, vers 11 h 26 et 11 h 31 ; consigne
+// de Cowork de 11 h 28) — UN ÉLÈVE SUPPRIMÉ NE REVIENT PLUS PAR UN ANCIEN FICHIER.
+//
+// Supprimer, c'est désinscrire : retirer le nom de l'élève dans le Cadre. Le geste garde une trace de
+// son DA (`<trim>_elevesDesinscrits`) ; l'import par cases ne laisse plus rien entrer de lui : ni sa
+// fiche, ni ses copies (ni leur fichier au magasin), ni ses évaluations, ni ses présences, ni ses
+// annotations (par son DA, ou par la copie annotée). Ce qui reste de lui dans l'espace n'est pas effacé.
+// Seul « Supprimer » écrit la trace : le décrochage est un statut, l'élève reste dans la liste.
+const CLE_TRACE = 'a2031_elevesDesinscrits';
+const CINQ = [CLE_GROUPE, CLE_PRESENCES, CLE_EVALS, CLE_ANNOTATIONS, CLE_COPIES];
+const CAMILLE = '9000003';
+const COPIE_DE_CAMILLE = 'FT_BANC_CAMILLE';
+const COPIE_DE_BAO = 'FT_BANC_BAO';
+
+// L'ancien fichier : Camille (supprimée dans l'espace) et Bao (absent de l'espace), chacun avec
+// une copie (et son fichier), une évaluation, une présence et une annotation. Une annotation de
+// Camille ne porte pas de DA : elle s'écarte par la copie qu'elle annote.
+const ANCIEN_DESINSCRIT = {
+    [CLE_GROUPE]: [
+        { da: CAMILLE, nom: 'Fictif', prenom: 'Camille', groupe: '00001' },
+        { da: '9000002', nom: 'Fictif', prenom: 'Bao', groupe: '00001' }
+    ],
+    [CLE_PRESENCES]: [
+        { date: '2031-09-23', da: CAMILLE, periodesPresentes: 1, notes: '', coursId: 'cours-banc' },
+        { date: '2031-09-23', da: '9000002', periodesPresentes: 2, notes: '', coursId: 'cours-banc' }
+    ],
+    [CLE_EVALS]: [
+        { id: 'EVAL_F_CAMILLE', etudiantDA: CAMILLE, productionId: 'PROD_BANC_2', noteFinale: 70, statutRemise: 'evalue', criteres: [] },
+        { id: 'EVAL_F_BAO', etudiantDA: '9000002', productionId: 'PROD_BANC_2', noteFinale: 75, statutRemise: 'evalue', criteres: [] }
+    ],
+    [CLE_ANNOTATIONS]: [
+        { id: 'ANN_F_CAMILLE_SANS_DA', fichierId: COPIE_DE_CAMILLE, page: 1, type: 'texte', texte: 'sans DA', x: 1, y: 1 },
+        { id: 'ANN_F_CAMILLE', fichierId: 'FT_ABSENTE', etudiantDA: CAMILLE, page: 1, type: 'texte', texte: 'avec DA', x: 1, y: 1 },
+        { id: 'ANN_F_BAO', fichierId: COPIE_DE_BAO, etudiantDA: '9000002', page: 1, type: 'texte', texte: 'de Bao', x: 1, y: 1 }
+    ]
+};
+const COPIES_DE_L_ANCIEN = [
+    { entree: entreeDuFichier(COPIE_DE_CAMILLE, { etudiantDA: CAMILLE }), png: PNG_DU_FICHIER },
+    { entree: entreeDuFichier(COPIE_DE_BAO), png: PNG_DU_FICHIER }
+];
+
+async function deriverAncienDesinscrit(page, chemin) {
+    const b64 = await page.evaluate(async ({ source, familles, cleCopies, copies }) => {
+        const zip = await JSZip.loadAsync(Uint8Array.from(atob(source), (c) => c.charCodeAt(0)));
+        const donnees = JSON.parse(await zip.file('donnees.json').async('string'));
+        Object.keys(familles).forEach((cle) => { donnees[cle] = familles[cle]; });
+        donnees[cleCopies] = copies.map((c) => c.entree);
+        zip.file('donnees.json', JSON.stringify(donnees));
+        Object.keys(zip.files).filter((n) => n.indexOf('travaux/') === 0 && !n.endsWith('/')).forEach((n) => zip.remove(n));
+        copies.forEach((c) => zip.file('travaux/' + c.entree.id + '.png', Uint8Array.from(atob(c.png), (x) => x.charCodeAt(0))));
+        return zip.generateAsync({ type: 'base64' });
+    }, { source: fs.readFileSync(ANCIEN_ZIP).toString('base64'), familles: ANCIEN_DESINSCRIT, cleCopies: CLE_COPIES, copies: COPIES_DE_L_ANCIEN });
+    fs.writeFileSync(chemin, Buffer.from(b64, 'base64'));
+    return chemin;
+}
+
+const lireCinq = (page) => page.evaluate(async (cles) => {
+    const r = {};
+    for (const c of cles) r[c] = await db.get(c, null);
+    return r;
+}, [...CINQ, CLE_TRACE]);
+
+/** Le vrai geste du Cadre : le menu d'actions de la ligne de l'élève, « Supprimer », la question acceptée. */
+async function supprimerParLeCadre(page, da) {
+    await page.evaluate(() => naviguerVers('calendrier', 'trimestre'));
+    const menu = page.locator('#v2-listeEtudiants select[data-on-change="actionEtudiantV2Handler"][data-da="' + da + '"]');
+    await expect(menu).toBeVisible();
+    const questions = [];
+    const ecouteur = (d) => { questions.push(d.message()); d.accept().catch(() => {}); };
+    page.on('dialog', ecouteur);
+    await menu.selectOption('supprimer');
+    await expect.poll(() => page.evaluate((d) => (db.getSync('a2031_groupeEtudiants', []) || []).some((e) => e.da === d), da)).toBe(false);
+    await page.waitForTimeout(500);
+    page.off('dialog', ecouteur);
+    expect(questions, 'témoin : la question de suppression a été posée et acceptée').toEqual([expect.stringMatching(/^Supprimer /)]);
+}
+
+/** L'espace de A et des quatre cases, le trimestre du banc actif : le Cadre montre sa liste. */
+const ESPACE_DESINSCRIT = { ...A.donnees, ...ESPACE, trimestres: [{ id: 'a2031', nom: 'Automne 2031', actif: true }], trimestreActif: 'a2031' };
+
+test.describe('#1012 — un élève supprimé ne revient plus par un ancien fichier', () => {
+    test.beforeEach(async ({ page }) => { page.setDefaultTimeout(15000); });
+
+    test('(5) supprimée dans le Cadre, Camille ne revient pas : rien d\'elle n\'entre, Bao entre ; la trace survit au codex mis à jour', async ({ page, browser }) => {
+        test.setTimeout(300000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier), ESPACE_DESINSCRIT);
+        const ancien = await deriverAncienDesinscrit(page, test.info().outputPath('ancien-desinscrit.zip'));
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+        expect(await neuf.page.evaluate(() => cle('groupeEtudiants')), 'témoin : le trimestre actif est celui du banc').toBe(CLE_GROUPE);
+
+        await supprimerParLeCadre(neuf.page, CAMILLE);
+        const avant = await lireCinq(neuf.page);
+        expect(avant[CLE_TRACE], 'la trace porte le DA de Camille').toEqual([{ da: CAMILLE, date: expect.any(String) }]);
+        expect(avant[CLE_GROUPE].map((e) => e.da), 'témoin : Camille n\'est plus dans la liste').toEqual(['9000001']);
+        expect(avant[CLE_EVALS].map((e) => e.id), 'ce qui reste d\'elle dans l\'espace n\'est pas effacé').toContain('EVAL_ESP_2');
+
+        const r = await ouvrirParLaCase(neuf.page, ancien);
+        expect(r.cases, 'témoin : les cinq cases sont cochées').toEqual(expect.arrayContaining(['import-etudiants', 'import-presences', 'import-evaluations', 'import-annotationsTravaux', 'import-fichiersTravaux']));
+        const apres = await lireCinq(neuf.page);
+
+        await test.step('rien de Camille n\'entre : fiche, présence, évaluation, annotations, copie', async () => {
+            expect.soft(apres[CLE_GROUPE].map((e) => e.da)).toEqual(['9000001', '9000002']);
+            expect.soft(apres[CLE_PRESENCES]).toEqual([...avant[CLE_PRESENCES], ANCIEN_DESINSCRIT[CLE_PRESENCES][1]]);
+            expect.soft(apres[CLE_EVALS]).toEqual([...avant[CLE_EVALS], ANCIEN_DESINSCRIT[CLE_EVALS][1]]);
+            expect.soft(apres[CLE_ANNOTATIONS]).toEqual([...avant[CLE_ANNOTATIONS], ANCIEN_DESINSCRIT[CLE_ANNOTATIONS][2]]);
+            expect.soft(apres[CLE_COPIES].map((c) => c.id)).toEqual([...COPIES, COPIE_DE_BAO]);
+        });
+        await test.step('la copie de Camille ne dépose pas son fichier au magasin ; celle de Bao, oui', async () => {
+            expect.soft((await lireCopies(neuf.page)).depots).toEqual([COPIE_DE_BAO]);
+        });
+        await test.step('la trace ne bouge pas, et ce qui restait de Camille dans l\'espace non plus', async () => {
+            expect.soft(apres[CLE_TRACE]).toEqual(avant[CLE_TRACE]);
+        });
+
+        await test.step('« Mettre à jour le codex » : la trace est écrite dans A', async () => {
+            await neuf.page.evaluate((cles) => { window.__clesSuivies = cles; }, [CLE_TRACE, CLE_GROUPE]);
+            const sortie = await mettreAJourLeCodex(neuf.page);
+            expect(sortie.issue).toBe('réussie');
+            expect(sortie.ecritures.map((e) => e.familles)).toEqual([{ [CLE_TRACE]: avant[CLE_TRACE], [CLE_GROUPE]: apres[CLE_GROUPE] }]);
+        });
+
+        await test.step('la trace survit à un rechargement', async () => {
+            await neuf.page.reload();
+            await neuf.page.waitForLoadState('domcontentloaded');
+            await expect.poll(() => neuf.page.evaluate((c) => (window.db ? db.get(c, null) : null), CLE_TRACE), { timeout: 20000 }).toEqual(avant[CLE_TRACE]);
+        });
+        await neuf.contexte.close();
+    });
+
+    test('(6) témoins : sans suppression, et en décrochage, Camille entre comme avant et aucune trace n\'est écrite', async ({ page, browser }) => {
+        test.setTimeout(300000);
+        await demarrer(page);
+        const fichierA = await fabriquerCodex(page, test.info().outputPath(A.fichier), ESPACE_DESINSCRIT);
+        const ancien = await deriverAncienDesinscrit(page, test.info().outputPath('ancien-desinscrit.zip'));
+        const neuf = await ouvrirEspaceNeuf(browser);
+        await ouvrirAEnEntier(neuf.page, fichierA);
+
+        // Le décrochage par le vrai menu « Remarque » de la ligne de Camille, la question acceptée.
+        await neuf.page.evaluate(() => naviguerVers('calendrier', 'trimestre'));
+        const accepter = (d) => d.accept().catch(() => {});
+        neuf.page.on('dialog', accepter);
+        const remarque = async (valeur) => {
+            await neuf.page.locator('#v2-listeEtudiants select[data-on-change="remarqueEtudiantV2Handler"][data-da="' + CAMILLE + '"]').selectOption(valeur);
+            await expect.poll(() => neuf.page.evaluate((d) => ((db.getSync('a2031_groupeEtudiants', []) || []).find((e) => e.da === d) || {}).statut || '', CAMILLE)).toBe(valeur);
+        };
+        await remarque('décrochage');
+        neuf.page.off('dialog', accepter);
+        const avant = await lireCinq(neuf.page);
+        expect(avant[CLE_TRACE], 'le décrochage n\'écrit pas la trace').toBeNull();
+
+        await ouvrirParLaCase(neuf.page, ancien);
+        const apres = await lireCinq(neuf.page);
+        await test.step('sa fiche de l\'espace reste telle quelle (l\'espace l\'emporte), et ce que le fichier apporte d\'elle entre', async () => {
+            expect.soft(apres[CLE_GROUPE].find((e) => e.da === CAMILLE)).toEqual(avant[CLE_GROUPE].find((e) => e.da === CAMILLE));
+            expect.soft(apres[CLE_GROUPE].map((e) => e.da)).toEqual(['9000001', CAMILLE, '9000002']);
+            expect.soft(apres[CLE_PRESENCES]).toEqual([...avant[CLE_PRESENCES], ...ANCIEN_DESINSCRIT[CLE_PRESENCES]]);
+            expect.soft(apres[CLE_EVALS]).toEqual([...avant[CLE_EVALS], ...ANCIEN_DESINSCRIT[CLE_EVALS]]);
+            expect.soft(apres[CLE_ANNOTATIONS]).toEqual([...avant[CLE_ANNOTATIONS], ...ANCIEN_DESINSCRIT[CLE_ANNOTATIONS]]);
+            expect.soft(apres[CLE_COPIES].map((c) => c.id)).toEqual([...COPIES, COPIE_DE_CAMILLE, COPIE_DE_BAO]);
+            expect.soft((await lireCopies(neuf.page)).depots).toEqual([COPIE_DE_CAMILLE, COPIE_DE_BAO]);
+            expect.soft(apres[CLE_TRACE]).toBeNull();
+        });
+        await test.step('l\'inactivité et la réactivation n\'écrivent pas la trace non plus', async () => {
+            neuf.page.on('dialog', accepter);
+            await neuf.page.evaluate(() => naviguerVers('calendrier', 'trimestre'));
+            await remarque('inactif');
+            await remarque('');
+            neuf.page.off('dialog', accepter);
+            expect.soft(await neuf.page.evaluate((c) => db.get(c, null), CLE_TRACE)).toBeNull();
+        });
+        await neuf.contexte.close();
+    });
+});

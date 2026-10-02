@@ -1298,6 +1298,58 @@ function fusionnerDonneesPersoImportees(valeurEspace, valeurFichier, famille) {
 }
 
 /**
+ * #1012, l'élève désinscrit (décision de Grégoire, 2 oct. 2026) — les élèves qu'un ancien
+ * fichier ne ramène plus : les DA de la trace `<trim>_elevesDesinscrits` (écrite par
+ * « Supprimer ») qui ne sont pas dans la liste du trimestre. Un DA ajouté de nouveau à la
+ * liste après sa suppression n'est plus écarté : il est inscrit.
+ * @param {Array} trace - `[{ da, date }]`
+ * @param {Array} etudiantsEspace - la liste `groupeEtudiants` du même trimestre
+ * @returns {Set<string>}
+ */
+function dasElevesEcartes(trace, etudiantsEspace) {
+    const inscrits = new Set((Array.isArray(etudiantsEspace) ? etudiantsEspace : [])
+        .filter(e => e && e.da).map(e => String(e.da)));
+    const ecartes = new Set();
+    (Array.isArray(trace) ? trace : []).forEach(t => {
+        if (t && t.da && !inscrits.has(String(t.da))) ecartes.add(String(t.da));
+    });
+    return ecartes;
+}
+
+/** Le DA porté par une entrée de chaque famille de l'import par cases. */
+const DA_PAR_FAMILLE = {
+    etudiants: e => e.da,
+    presences: p => p.da,
+    notes: e => e.etudiantDA,
+    copies: f => f.etudiantDA,
+    annotations: a => a.etudiantDA
+};
+
+/**
+ * #1012, l'élève désinscrit — retire d'une liste du fichier ce qui appartient à un élève
+ * écarté (`dasElevesEcartes`), AVANT la fusion : rien de lui n'entre, et une copie écartée
+ * ne dépose pas son fichier. Une annotation s'écarte aussi par la copie qu'elle annote
+ * (`idsCopiesEcartees`), quand elle ne porte pas le DA. Fonction pure.
+ * @param {Array} liste - la liste du fichier
+ * @param {string} famille - une clé de DA_PAR_FAMILLE
+ * @param {Set<string>} ecartes
+ * @param {Set<string>} [idsCopiesEcartees]
+ * @returns {Array} la liste sans eux (la même liste quand rien n'est écarté)
+ */
+function ecarterElevesDesinscrits(liste, famille, ecartes, idsCopiesEcartees) {
+    const daDe = DA_PAR_FAMILLE[famille];
+    if (!daDe) throw new Error('Famille inconnue : ' + famille);
+    if (!Array.isArray(liste) || !ecartes || ecartes.size === 0) return liste;
+    return liste.filter(e => {
+        if (!e || typeof e !== 'object') return true;
+        const da = daDe(e);
+        if (da && ecartes.has(String(da))) return false;
+        if (famille === 'annotations' && idsCopiesEcartees && e.fichierId && idsCopiesEcartees.has(e.fichierId)) return false;
+        return true;
+    });
+}
+
+/**
  * #1012 — la case « Fichiers travaux » de l'import par cases. Avant, chaque liste du
  * fichier REMPLAÇAIT celle de l'espace (`db.set`) : les copies de l'espace n'avaient
  * plus d'entrée, leurs fichiers restaient au magasin sans rien qui les désigne, et
@@ -2774,6 +2826,29 @@ async function executerImportSelectif() {
         return cb && cb.checked;
     };
 
+    // #1012, l'élève désinscrit : par trimestre (le préfixe de la clé du fichier, celle que
+    // l'import écrit), les DA qu'un ancien fichier ne ramène plus, et les copies de ces élèves
+    // (du fichier et de l'espace) par lesquelles une annotation sans DA s'écarte.
+    const ecartesParPrefixe = new Map();
+    const elevesEcartes = async (cleFichier, nom) => {
+        const i = cleFichier.indexOf(nom);
+        const prefixe = i > 0 ? cleFichier.slice(0, i) : '';
+        if (!ecartesParPrefixe.has(prefixe)) {
+            const das = dasElevesEcartes(await db.get(prefixe + 'elevesDesinscrits', []),
+                                         await db.get(prefixe + 'groupeEtudiants', []));
+            const copies = new Set();
+            if (das.size > 0) {
+                const fichier = parseValeur(donnees[prefixe + 'fichiersTravaux']);
+                const espace = await db.get(prefixe + 'fichiersTravaux', []);
+                [fichier, espace].forEach(l => (Array.isArray(l) ? l : []).forEach(f => {
+                    if (f && f.id && f.etudiantDA && das.has(String(f.etudiantDA))) copies.add(f.id);
+                }));
+            }
+            ecartesParPrefixe.set(prefixe, { das: das, copies: copies });
+        }
+        return ecartesParPrefixe.get(prefixe);
+    };
+
     try {
         let compteurs = { ressources: 0, donnees: 0 };
         let details = [];
@@ -2998,6 +3073,7 @@ async function executerImportSelectif() {
                 if (cleEtu === 'groupeEtudiants' || cleEtu.endsWith('_groupeEtudiants')) {
                     var etudiants = parseValeur(donnees[cleEtu]);
                     if (Array.isArray(etudiants)) {
+                        etudiants = ecarterElevesDesinscrits(etudiants, 'etudiants', (await elevesEcartes(cleEtu, 'groupeEtudiants')).das);
                         var resEtu = fusionnerDonneesPersoImportees(await db.get(cleEtu, null), etudiants, 'etudiants');
                         if (resEtu.ecrire) await db.set(cleEtu, resEtu.valeur);
                         nbEtudiants += resEtu.entrees;
@@ -3017,6 +3093,7 @@ async function executerImportSelectif() {
                 if (clePres === 'presences' || clePres.endsWith('_presences')) {
                     var presences = parseValeur(donnees[clePres]);
                     if (presences && typeof presences === 'object') {
+                        presences = ecarterElevesDesinscrits(presences, 'presences', (await elevesEcartes(clePres, 'presences')).das);
                         // Le compte est celui des fiches entrées (le mot « date(s) » du bilan ment, relevé).
                         var resPres = fusionnerDonneesPersoImportees(await db.get(clePres, null), presences, 'presences');
                         if (resPres.ecrire) await db.set(clePres, resPres.valeur);
@@ -3039,6 +3116,9 @@ async function executerImportSelectif() {
                     cleEval === 'notesEtudiants' || cleEval.endsWith('_notesEtudiants')) {
                     var data = parseValeur(donnees[cleEval]);
                     if (data && typeof data === 'object') {
+                        var nomEval = cleEval.endsWith('evaluationsSauvegardees') ? 'evaluationsSauvegardees'
+                            : cleEval.endsWith('notesEtudiants') ? 'notesEtudiants' : 'evaluations';
+                        data = ecarterElevesDesinscrits(data, 'notes', (await elevesEcartes(cleEval, nomEval)).das);
                         var resEval = fusionnerDonneesPersoImportees(await db.get(cleEval, null), data, 'notes');
                         if (resEval.ecrire) await db.set(cleEval, resEval.valeur);
                         nbEvals += resEval.entrees;
@@ -3143,6 +3223,9 @@ async function executerImportSelectif() {
             for (var cleFT of Object.keys(donnees)) {
                 if (cleFT.includes('fichiersTravaux')) {
                     var fichiersTravaux = parseValeur(donnees[cleFT]);
+                    if (Array.isArray(fichiersTravaux)) {
+                        fichiersTravaux = ecarterElevesDesinscrits(fichiersTravaux, 'copies', (await elevesEcartes(cleFT, 'fichiersTravaux')).das);
+                    }
                     if (Array.isArray(fichiersTravaux) && fichiersTravaux.length > 0) listesCopies[cleFT] = fichiersTravaux;
                 }
             }
@@ -3173,6 +3256,8 @@ async function executerImportSelectif() {
                 if (cleAT.includes('annotationsTravaux')) {
                     var annotations = parseValeur(donnees[cleAT]);
                     if (Array.isArray(annotations) && annotations.length > 0) {
+                        var ecartesAT = await elevesEcartes(cleAT, 'annotationsTravaux');
+                        annotations = ecarterElevesDesinscrits(annotations, 'annotations', ecartesAT.das, ecartesAT.copies);
                         var resAT = fusionnerDonneesPersoImportees(await db.get(cleAT, null), annotations, 'annotations');
                         if (resAT.ecrire) await db.set(cleAT, resAT.valeur);
                         nbAnnotations += resAT.entrees;
@@ -3490,6 +3575,8 @@ window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCo
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
 window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé pour ses essais
 window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
+window.dasElevesEcartes = dasElevesEcartes; // #1012, l'élève désinscrit : exposé pour ses essais
+window.ecarterElevesDesinscrits = ecarterElevesDesinscrits; // #1012, l'élève désinscrit : exposé pour ses essais
 window.signatureContenu = signatureContenu;         // #448
 
 })();

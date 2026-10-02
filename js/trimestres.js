@@ -133,6 +133,11 @@
         // l'archive du trimestre, il est LU par registre-longitudinal.js (reprise) et par
         // exporterFormatRecherche (repli), il n'est ni réécrit ni effacé.
         'resultatsUlterieurs',
+        // #1012, l'élève désinscrit (2 oct. 2026) : la trace des DA supprimés, une liste
+        // de { da, date } par trimestre. Seul « Supprimer » l'écrit
+        // (trimestre-v2-etudiants.js) ; l'import par cases la lit (import-export.js).
+        // Sans semis ; elle voyage comme toute clé du trimestre.
+        'elevesDesinscrits',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre
