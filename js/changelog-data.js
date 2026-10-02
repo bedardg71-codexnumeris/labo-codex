@@ -33,7 +33,11 @@
                 // (§ 11 de la demande de relecture), ACCEPTÉS par Grégoire le 2 oct. 2026 à 7 h 49
                 // (« oui », consigne de Cowork de 7 h 50), posés tels quels. La ligne entre dans
                 // l'entrée de sa mineure, son titre en tête.
-                '<strong>Un ancien fichier ouvert dans Réglages ne fait plus perdre de copies.</strong> Quand tu ouvres un ancien fichier .zip par «&nbsp;Ouvrir un Codex…&nbsp;» et que tu coches «&nbsp;Fichiers travaux&nbsp;», ses copies s\'ajoutent maintenant aux tiennes au lieu de prendre leur place. Ton codex, à sa prochaine mise à jour, les contient toutes.'
+                '<strong>Un ancien fichier ouvert dans Réglages ne fait plus perdre de copies.</strong> Quand tu ouvres un ancien fichier .zip par «&nbsp;Ouvrir un Codex…&nbsp;» et que tu coches «&nbsp;Fichiers travaux&nbsp;», ses copies s\'ajoutent maintenant aux tiennes au lieu de prendre leur place. Ton codex, à sa prochaine mise à jour, les contient toutes.',
+                // 1.174.2 (#1012, la sélection) — titre et ligne proposés par Claude Code, ACCEPTÉS par
+                // Grégoire le 2 oct. 2026 avec sa correction (« avant, il l'écrivait sans elles, sans
+                // rien dire »), posés tels quels. La ligne entre dans l'entrée de sa mineure.
+                '<strong>Une sélection exportée te prévient aussi.</strong> Quand des copies ne sont pas dans l\'application, «&nbsp;Exporter une sélection&nbsp;» le dit dans une fenêtre avant d\'écrire le fichier&nbsp;; avant, il l\'écrivait sans elles, sans rien dire.'
             ]
         },
         {
