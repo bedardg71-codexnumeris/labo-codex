@@ -15,6 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **1.174.4 PRÊTE, PAS ENCORE EN LIGNE (2 OCTOBRE 2026, 13 h ; relue par Cowork, verte ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée à 12 h 54 ; suite complète au navigateur en cours) — UN ÉLÈVE QUE TU SUPPRIMES NE REVIENT PLUS PAR UN ANCIEN FICHIER**
+
+**Ce que tu verras, une fois en ligne** : quand tu supprimes un élève dans le Cadre, puis ouvres un ancien fichier par « Ouvrir un Codex… », rien de lui n'entre : ni sa fiche, ni ses copies, ni ses notes, ni ses présences, ni ses annotations. Cela vaut pour les élèves supprimés à partir de cette version ; un élève en décrochage n'est pas touché. Aucun mot neuf à l'écran, sauf ta ligne des « Nouvelles ».
+**Vérifié comment** : le défaut a été reproduit par le geste avant d'être corrigé (l'élève supprimé revenait avec ses copies). Au navigateur (WebKit), par le vrai bouton « Supprimer » et la vraie fenêtre aux cases : rien de l'élève n'entre, les autres élèves entrent comme avant. Douze mutations, toutes rouges ; relu par Cowork (vert, aucune correction, quatre mutations de plus, toutes rouges). Vitest complet vert sur la release (672 fichiers, 7 929 essais).
+**Pas de vérification à faire de ton côté** : elle demanderait un ancien `.zip` que tu n'as pas ; le banc juge par le geste.
+**Trouvé autour, non corrigé** : une très ancienne forme de fichier (présences rangées autrement) n'est pas filtrée, et seulement si ton espace n'a encore rien : très rare. Et ce qui reste d'un élève supprimé **reste visible** : ses copies dans la Liste des évaluations (« Fichier non associé ») et dans Travaux (« Inconnu »), un PDF possible, des comptes du tableau de bord. C'est de l'affichage, rien n'est effacé ni corrigé ; **à toi de dire si tu en veux un lot.**
+
+**Le chantier du codex n'a plus de lot de code.** Il lui reste, tout à toi : des mots pour la copie vraiment perdue ; « fichier ZIP » dans la fenêtre d'une ouverture complète ; les mots du bilan de l'import (« N date(s) », et si tu veux une ligne pour les élèves écartés) ; et ce qui reste visible d'un élève supprimé (une décision : un lot ou non). C'est toi qui diras s'il est clos.
+
 ✅ **EN LIGNE EN 1.174.3 (2 OCTOBRE 2026 ; en ligne depuis 12 h 22, mesuré chez Netlify : déploiement de production prêt sur `a1f3009f` ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée) — OUVRIR UN ANCIEN FICHIER NE REMPLACE PLUS TES ÉLÈVES, TES PRÉSENCES, TES NOTES NI TES ANNOTATIONS**
 
 **Ce que tu verras, une fois en ligne** : dans « Ouvrir un Codex… » de Réglages › Données, les cases « Étudiants », « Présences », « Notes » et « Annotations » ajoutent ce que le fichier apporte de neuf ; ce que tu as déjà ne change pas. Avant, chacune remplaçait tout. Aucun mot neuf à l'écran ; ta ligne des « Nouvelles » est posée telle que tu l'as acceptée (11 h 22).
