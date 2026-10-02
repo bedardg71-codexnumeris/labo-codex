@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 12 h 25 : **1.174.3 EN LIGNE (#1012, LES QUATRE CASES), MESURÉ CHEZ NETLIFY ; BRANCHE `fix-1012-quatre-cases` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 12 h 52 : **#1012, L'ÉLÈVE DÉSINSCRIT : CODÉ SUR LA BRANCHE LOCALE `fix/1012-eleve-desinscrit` (`8985dd12`), EN ATTENTE DE LA RELECTURE DE COWORK ; NI RELEASE NI PUSH ; `main` A DEUX COMMITS DE DOCUMENTS NON POUSSÉS**
+
+**Où vit le travail** : la branche locale `fix/1012-eleve-desinscrit`, partie de `main` à `cc3d92e6` (les fichiers de Cowork commités tels quels, consigne de 11 h 28). Elle n'est pas fusionnée : le chemin écrit les données de l'usager, la relecture croisée passe avant (règle 2). Sur `main` : `cc3d92e6`, puis ce relais ; ni l'un ni l'autre n'est poussé.
+
+**Fait** : « Supprimer » (Cadre) écrit le DA dans `<trim>_elevesDesinscrits` ; l'import par cases n'en laisse rien entrer (fiche, copies et leur fichier, évaluations, présences, annotations). Banc par le geste (5) et (6), 10 essais Vitest, douze mutations rouges, Vitest complet vert (672 fichiers, 7 929 essais). Inscrit sous #1012 (sur la branche) : le lot, `groupe.js` sans bouton, le relevé de ce qui reste visible d'un élève supprimé.
+
+**La demande** : `plans de travail/DEMANDE-RELECTURE-2026-10-02-1012-eleve-desinscrit.md` (sur la branche). Elle porte une supposition (un DA de nouveau dans la liste n'est plus écarté), deux propositions de mots pour le bilan, non posées, et la ligne des « Nouvelles ».
+
+**Ce qui reste** : la relecture de Cowork ; puis la release `patch`, le verdict complet, la fusion et le push, sur le mot de Grégoire.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 12 h 25 : **1.174.3 EN LIGNE (#1012, LES QUATRE CASES), MESURÉ CHEZ NETLIFY ; BRANCHE `fix-1012-quatre-cases` FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
 
 **Où vit le travail** : tout est sur `main`. Correctif relu `90917b40`, release 1.174.3 (build `1002-1126`, `b2e9d8b6`), relais `a1f3009f`, puis ce relais. `main` avancée en avance rapide sur la branche et poussée par `git push origin main` (le hook a relu le jeton du même commit).
 
