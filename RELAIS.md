@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 11 h 17 : **#1012, LES QUATRE CASES : CODÉES SUR LA BRANCHE LOCALE `fix-1012-quatre-cases` (`d0927efb`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; `main` EN AVANCE DE DEUX COMMITS DE DOCUMENTS SUR `origin/main`, NON POUSSÉS**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 11 h 28 : **#1012, LES QUATRE CASES : RELU VERT, RELEASE 1.174.3 COMMITÉE SUR `fix-1012-quatre-cases` (`b2e9d8b6`) ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
+
+**Où vit le travail** : la branche `fix-1012-quatre-cases`, reposée sur `main` (`94c07168`) sans changement de code : le correctif relu (`90917b40`, ex-`d0927efb`), puis la release (`b2e9d8b6`), puis ce relais. `main` a été poussée avec les documents (`c178969f` : verdict de relecture, consigne de 11 h 22 et ancienne consigne, fichiers de Cowork commités tels quels) ; le commit du BACKLOG (`94c07168`) est sur `main` en local et part avec la fusion.
+
+**Fait, dans l'ordre de la consigne de Cowork de 11 h 22** : (1) fichiers de Cowork commités tels quels, `main` poussée par `scripts/pousser.sh` (documents seuls, sans suite) ; (2) sous #1012 dans `BACKLOG.md` : la copie neuve dont l'évaluation n'entre pas (issue 2), et l'élève supprimé qui revient, marqué **décision de Grégoire, sans lot** — le garde de permissions n'a rien refusé ; (3) release `patch` 1.174.3 (build `1002-1126`), la ligne des « Nouvelles » posée telle quelle dans l'entrée 1.174, son titre en tête ; Vitest vert après le commit du bump, 671 fichiers, 7 919 essais.
+
+**Pas de porte terrain** : elle demanderait un ancien `.zip` que Grégoire n'a pas (sa réponse de 8 h 50) ; le banc juge par le geste.
+
+**Ce qui reste à ce lot** : le verdict complet, la fusion en avance rapide de `main`, le push, et le constat chez Netlify. Si le verdict demande une correction de code : arrêt, rendue à Cowork avant tout push.
+
+**Le chantier du codex n'a plus de lot de code.** Il lui reste, tout à Grégoire : la copie vraiment perdue (des mots) ; « fichier ZIP » dans la fenêtre d'une ouverture complète (des mots) ; les deux relevés de mots de l'import (le bilan et l'aperçu disent « N date(s) » et comptent des fiches) ; l'élève supprimé qui revient (une décision). Les autres cases qui remplacent (« Configuration », « Cadre », « Groupe-cours », « Horaires », « Enseignants ») sont inscrites, hors du chantier tant qu'aucun symptôme n'est vécu. C'est Grégoire qui dira si le chantier est clos. Hors du chantier, toujours ouvert : #991.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 11 h 17 : **#1012, LES QUATRE CASES : CODÉES SUR LA BRANCHE LOCALE `fix-1012-quatre-cases` (`d0927efb`) ; ARRÊT À LA DEMANDE DE RELECTURE ; NI RELEASE NI PUSH ; `main` EN AVANCE DE DEUX COMMITS DE DOCUMENTS SUR `origin/main`, NON POUSSÉS**
 
 **Où vit le travail** : le correctif et ses essais sont sur la branche locale `fix-1012-quatre-cases`, un commit (`d0927efb`) au-dessus de `5e8a46f8` (la consigne de Cowork de 10 h 33, commitée telle quelle sur `main`). Elle n'existe pas chez `origin`. Les documents (ce relais, la demande de relecture, le BACKLOG, `OU-EN-EST-ON.md`) sont sur `main`, en local.
 
