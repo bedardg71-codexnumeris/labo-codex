@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 15 h 35 : **#1012, LES MOTS : RELEASE 1.174.5 COMMITÉE SUR `fix/1012-mots-codex` ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 16 h 45 : **1.174.5 EN LIGNE (#1012, LES MOTS), MESURÉ CHEZ NETLIFY ; BRANCHE `fix/1012-mots-codex` FUSIONNÉE ; LE CHANTIER DU CODEX EST CLOS ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+
+**Où vit le travail** : tout est sur `main`. Fichiers de Cowork `fcf4fe4a`, lot `4f015d60`, release 1.174.5 (build `1002-1534`, `f0839613`), relais `c33dcd0e`, puis ce relais. `main` avancée en avance rapide sur la branche et poussée par `git push origin main` (le hook a relu le jeton du même commit).
+
+**Fait** : verdict complet par `scripts/pousser.sh` sur `c33dcd0e` : **vert, 0 échec**, rendu vers 16 h 30 (après 30 s d'attente de charge) ; **une spec verte au second essai seulement**, sans lien avec le lot : `evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js` › #961 R2 (#534/#685 : à surveiller si elle revient). **Netlify : production prête sur `c33dcd0e`, publiée à 16 h 31 min 19 s.** ⚠ Un sondage par `curl` de `version.json` rend un 302 de Cloudflare : il ne mesure rien, seul le connecteur Netlify mesure.
+
+**LE CHANTIER DU CODEX EST CLOS** (décision de Grégoire, 15 h 08). Reste inscrit sous #1012, **sans lot** : la copie vraiment perdue (en attente d'un cas réel) ; les deux relevés de mots du bilan de la case ; les autres cases qui remplacent encore ; la porte de 1.174.1 (en attente d'un ancien `.zip`). **#1013** (ce qui reste visible d'un élève supprimé, masquer sans effacer) est un lot isolé, hors du chantier.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 15 h 35 : **#1012, LES MOTS : RELEASE 1.174.5 COMMITÉE SUR `fix/1012-mots-codex` ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
 
 **Où vit le travail** : la branche `fix/1012-mots-codex`, partie de `main` à `fcf4fe4a` (fichiers de Cowork commités tels quels, consigne de 15 h 08 ; non poussé seul) : le lot (`4f015d60`), la release (`f0839613`, build `1002-1534`), puis ce relais.
 
