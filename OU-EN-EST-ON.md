@@ -15,6 +15,12 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🔧 **CODÉ, EN RELECTURE (2 OCTOBRE 2026, 11 h 17) — OUVRIR UN ANCIEN FICHIER NE REMPLACE PLUS TES ÉLÈVES, TES PRÉSENCES, TES NOTES NI TES ANNOTATIONS**
+
+**Ce que tu verras, une fois en ligne** : dans « Ouvrir un Codex… » de Réglages › Données, les cases « Étudiants », « Présences », « Notes » et « Annotations » ajoutent ce que le fichier apporte de neuf ; ce que tu as déjà ne change pas. Avant, chacune remplaçait tout. Aucun mot neuf à l'écran.
+**Vérifié comment** : le défaut a été reproduit par le geste avant d'être corrigé (une note de 85 devenue 10, une élève et des présences disparues, une annotation réécrite). Au navigateur (WebKit), par la vraie case et la vraie fenêtre aux cases : tout ce que l'espace avait reste tel quel, le neuf entre, le même fichier rouvert ne double rien, la mise à jour du codex écrit le tout. Neuf mutations, toutes rouges. Vitest complet vert (671 fichiers, 7 919 essais). **Pas encore** : la relecture de Cowork, la suite complète au navigateur, la mise en ligne.
+**Trouvé autour, non corrigé** : « Configuration du cours », « Cadre du trimestre », « Groupe-cours », « Horaires » et « Enseignants » remplacent encore (non cochées par défaut) ; un élève supprimé revient si l'ancien fichier le porte.
+
 ✅ **EN LIGNE EN 1.174.2 (2 OCTOBRE 2026 ; en ligne depuis 10 h 19, mesuré chez Netlify : déploiement de production prêt sur `e074a48d` ; ta ligne des « Nouvelles » acceptée avec ta correction) — UNE SÉLECTION EXPORTÉE TE PRÉVIENT AUSSI**
 
 **Ce que tu verras** : quand des copies ne sont pas dans l'application, « Exporter une sélection » ouvre une fenêtre avant d'écrire le fichier : « Cette sélection n'aura pas toutes ses copies », avec « Annuler » (qui n'écrit rien) et « Écrire sans ces copies ». Avant, le fichier s'écrivait sans elles, sans rien dire. Une copie que tu as exportée volontairement ne compte pas.
