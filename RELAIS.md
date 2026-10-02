@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 12 h 52 : **#1012, L'ÉLÈVE DÉSINSCRIT : CODÉ SUR LA BRANCHE LOCALE `fix/1012-eleve-desinscrit` (`8985dd12`), EN ATTENTE DE LA RELECTURE DE COWORK ; NI RELEASE NI PUSH ; `main` A DEUX COMMITS DE DOCUMENTS NON POUSSÉS**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 13 h 05 : **#1012, L'ÉLÈVE DÉSINSCRIT : RELU VERT, RELEASE 1.174.4 COMMITÉE SUR `fix/1012-eleve-desinscrit` ; VERDICT COMPLET AU NAVIGATEUR LANCÉ SUR LA BRANCHE ; PAS ENCORE FUSIONNÉE NI EN LIGNE**
+
+**Où vit le travail** : la branche `fix/1012-eleve-desinscrit`, reposée sur `main` (`ee6372d7`) sans changement de code : le correctif relu (`8d20dc3f`, ex-`8985dd12`), l'inscription au BACKLOG (`8763e25a`), la release (`c5e58e88`), puis ce relais. `main` a été poussée avec les documents (`cc3d92e6`, `3a2252ab`, `ee6372d7` : verdict de relecture de 12 h 53, consigne de 12 h 54 et ancienne consigne, fichiers de Cowork commités tels quels), par `scripts/pousser.sh` (documents seuls, sans suite).
+
+**Fait, dans l'ordre de la consigne de Cowork de 12 h 54** : (1) fichiers de Cowork commités tels quels et poussés ; (2) sous #1012 : l'ancienne valeur qui n'est pas une liste, non filtrée (issue 2) ; ce qui reste visible d'un élève supprimé, **décision de Grégoire** (un lot ou non) — le garde de permissions n'a rien refusé ; (3) release `patch` 1.174.4 (build `1002-1258`), la ligne des « Nouvelles » posée telle quelle dans l'entrée 1.174, son titre en tête ; Vitest vert après le commit du bump, 672 fichiers, 7 929 essais.
+
+**Pas de porte terrain** : elle demanderait un ancien `.zip` que Grégoire n'a pas (sa réponse de 8 h 50) ; le banc juge par le geste.
+
+**Ce qui reste** : le verdict complet au navigateur, la fusion de `main` en avance rapide et `git push origin main` (le hook relit le jeton du même commit), la mesure chez Netlify. **Le chantier du codex n'a plus de lot de code.** Il lui reste, tout à Grégoire : la copie vraiment perdue (des mots) ; « fichier ZIP » dans la fenêtre d'une ouverture complète (des mots) ; les mots du bilan de l'import (« N date(s) », et s'il veut une ligne pour les élèves écartés) ; ce qui reste visible d'un élève supprimé (une décision). C'est Grégoire qui dira si le chantier est clos.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 12 h 52 : **#1012, L'ÉLÈVE DÉSINSCRIT : CODÉ SUR LA BRANCHE LOCALE `fix/1012-eleve-desinscrit` (`8985dd12`), EN ATTENTE DE LA RELECTURE DE COWORK ; NI RELEASE NI PUSH ; `main` A DEUX COMMITS DE DOCUMENTS NON POUSSÉS**
 
 **Où vit le travail** : la branche locale `fix/1012-eleve-desinscrit`, partie de `main` à `cc3d92e6` (les fichiers de Cowork commités tels quels, consigne de 11 h 28). Elle n'est pas fusionnée : le chemin écrit les données de l'usager, la relecture croisée passe avant (règle 2). Sur `main` : `cc3d92e6`, puis ce relais ; ni l'un ni l'autre n'est poussé.
 
