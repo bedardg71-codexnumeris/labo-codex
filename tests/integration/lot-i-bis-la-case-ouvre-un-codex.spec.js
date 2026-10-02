@@ -122,6 +122,13 @@ const etatDeLEspace = (page) => page.evaluate(async (cle) => ({
 async function attendreLeCodexOuvert(page, dialogues, nomFichier) {
     await expect(boutonRecharger(page)).toBeVisible({ timeout: 30000 });
     await expect(page.getByText('Codex chargé depuis « ' + nomFichier + ' »')).toBeVisible();
+    // #1012, les mots (2 oct. 2026) : le fichier de codex est la seule copie hors de
+    // l'application — la fenêtre dit de le garder, et plus de le supprimer.
+    const fenetre = page.locator('#overlay-ui-dialogue [role="dialog"]');
+    const texte = await fenetre.innerText();
+    expect(texte).toContain('Ton fichier de codex n\'a pas changé : garde-le, c\'est ta copie hors de l\'application.');
+    expect(texte).toContain('Recharger la page pour appliquer les données ?');
+    expect(texte).not.toContain('supprimer');
     const etat = await etatDeLEspace(page);
     expect(etat.groupe, 'les données du codex sont dans l\'espace').toEqual(GROUPE_FICTIF);
     expect(etat.codex).toEqual({ actif: true, nom: NOM_CODEX });

@@ -3156,15 +3156,16 @@ async function _ouvrirLeFichierChoisi(fichier, poignee) {
         // données, elles, sont écrites. Bug terrain iPad 10 juin 2026.
         // (confirm bloque la boucle d'événements : flush AVANT le dialogue.)
         await db.flush();
-        // Proposer de recharger pour appliquer les données. Le rappel « tu
-        // peux supprimer le ZIP » (piste 5 du plan #334) ne vaut que pour un
-        // import COMPLET : en cas d'import incomplet, le bilan conseille au
-        // contraire de rouvrir le même codex — ne pas suggérer de le supprimer.
+        // Proposer de recharger pour appliquer les données. Une ouverture
+        // COMPLÈTE rappelle de garder le fichier de codex (#1012, 2 oct. 2026) :
+        // c'est la seule copie hors de l'application — l'ancien conseil de le
+        // supprimer (piste 5 du plan #334) est retiré. En cas d'import
+        // incomplet, le bilan conseille de rouvrir le même codex.
         var msgReload = bilan
             ? bilan.message
             : 'Codex chargé depuis « ' + fichier.name + ' » (' + _formaterTaille(fichier.size) +
-              ').\n\nLe fichier ZIP d\'origine reste dans Fichiers — tu peux le supprimer ' +
-              'pour récupérer de l\'espace. Recharger la page pour appliquer les données ?';
+              ').\n\nTon fichier de codex n\'a pas changé : garde-le, c\'est ta copie hors de ' +
+              'l\'application. Recharger la page pour appliquer les données ?';
         if (await uiDialogues.confirmerAction({
             titre: bilan ? bilan.titre : 'Recharger la page',
             message: msgReload,
