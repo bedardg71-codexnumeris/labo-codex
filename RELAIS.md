@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 11 h 15 : **#1007 LOT 2a-2 (LE CODEX PROPOSÉ SUR LES GESTES QUI RESTENT) COMMITÉ SUR `claude/1007-propose-codex-2` (`719c9544`), NON POUSSÉ ; VITEST VERT ; EN ATTENTE DE LA RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 12 h 35 : **1.177.0 EN LIGNE (#1007 LOT 2a-2, LE CODEX PROPOSÉ SUR LES GESTES QUI RESTENT), MESURÉ CHEZ NETLIFY SUR `99a21e47` (PUBLIÉ À 12 h 27, CONSTATÉ À 12 h 28) ; VERDICT COMPLET VERT ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
+
+**Relecture** : verte sans correction (Cowork, 11 h 24). Quatre phrases retouchées mot pour mot (`remplacement`, `seance`, `annotationsPage`, `registreLongitudinal`) ; R4 du banc du registre suit.
+
+**Release** : 1.177.0 (`11942354`), minor ; ligne des Nouvelles telle quelle ; titre de Claude Code : « Ton codex à jour, avant d'autres effacements ».
+
+**Verdict** : complet, sur `11942354`, rendu à 12 h 25 : 0 échec, 0 instable. Branche poussée par `pousser.sh`, fusionnée dans `main` (`99a21e47`) : la fusion ne diffère du commit jugé que par des documents. `main` poussé par `git push origin main`.
+
+**Ménage** : worktree `1007-propose-codex-2` retiré, sa branche locale supprimée (fusionnée ; elle existe chez origin). Aucun worktree restant.
+
+**Porte terrain** : `plans de travail/PORTES-TERRAIN-2026-10-03-1007-propose-codex-2.md` (réinitialiser une séance déjà saisie, puis jamais saisie, sur les données démo, en fenêtre privée). Pas de rangée registre : le registre écarte le trimestre démo. Cowork publie l'artefact jumeau.
+
+**Suite** : le lot 2b (les lignes d'éditeur qui portent des notes d'élèves), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 11 h 15 : **#1007 LOT 2a-2 (LE CODEX PROPOSÉ SUR LES GESTES QUI RESTENT) COMMITÉ SUR `claude/1007-propose-codex-2` (`719c9544`), NON POUSSÉ ; VITEST VERT ; EN ATTENTE DE LA RELECTURE DE COWORK**
 
 **Où vit le travail** : la branche locale `claude/1007-propose-codex-2` (worktree `.claude/worktrees/1007-propose-codex-2`, `tests/node_modules` en lien vers l'arbre principal), partie de `main` à `6877d08c`. Ni push du code ni release (consigne : relecture croisée d'abord). Version 1.176.0, inchangée. Sur `main`, en local, non poussé : le commit de ce relais (consigne de Cowork, demande, BACKLOG, relais).
 
