@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 3 h 32 : **1.175.0 (#1007 PREMIER LOT, LE CODEX À PART) COMMITÉE SUR `claude/1007-codex-a-part` ; VITEST VERT ; VERDICT COMPLET AU NAVIGATEUR LANCÉ ; NI PUSH NI FUSION ENCORE**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 4 h 44 : **1.175.0 EN LIGNE (#1007 PREMIER LOT, LE CODEX À PART), MESURÉ CHEZ NETLIFY SUR `119d3c29` À 4 h 33 ; VERDICT COMPLET VERT (0 ÉCHEC, 5 INSTABLES, AUCUN DU LOT) ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
+
+**Verdict** : `pousser.sh` sur `119d3c29`, rendu à 4 h 32 : 0 échec. Verts au second essai seulement : `dossier-912-synthese-sans-copie`, `evaluation-961-retroaction-ne-suit-plus-les-niveaux`, `horaire-duree-derivee-540C`, `lot-e1-conception-creer-ou-modifier`, `source-unique-codes`. La spec du lot (`1007-codex-a-part-avant-suppression`) n'en est pas.
+
+**Fusion** : `main` avancée en avance rapide sur la branche et poussée par `git push origin main`. Worktree `1007-codex-a-part` retiré.
+
+**Porte terrain** : `plans de travail/PORTES-TERRAIN-2026-10-03-1007-codex-a-part.md` ; Cowork publie l'artefact jumeau.
+
+**Laissé tel quel** : `plans de travail/CONSIGNE-SUIVANTE-2026-10-03-1007-second-lot.md`, déposé par Cowork pendant le verdict, non suivi, non lu.
+
+**Suite** : le second lot de #1007, sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 3 h 32 : **1.175.0 (#1007 PREMIER LOT, LE CODEX À PART) COMMITÉE SUR `claude/1007-codex-a-part` ; VITEST VERT ; VERDICT COMPLET AU NAVIGATEUR LANCÉ ; NI PUSH NI FUSION ENCORE**
 
 **Où vit le travail** : la branche `claude/1007-codex-a-part` (worktree `.claude/worktrees/1007-codex-a-part`) : le lot (`3a55b547`), `main` fusionnée dedans (`19179b7b`), la release 1.175.0 (`2f492142`, build `1003-0331`), puis ce relais. `main` = `origin/main` à `38927fb9` ; `5f69716d` (inscriptions sous #1007) commité sur `main`, non poussé, emporté par la branche.
 
