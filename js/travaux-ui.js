@@ -3698,7 +3698,7 @@
      * rien ne s'efface. Textes validés par Grégoire le 20 sept. 2026 (accords
      * au singulier compris) : aucun mot neuf sans repasser par lui.
      */
-    function proposerNettoyage() {
+    async function proposerNettoyage() {
         const fichiers = travauxStockage.obtenirFichiersGroupeActif();
         const tri = travauxStockage.selectionnerCopiesARetirer(fichiers, travauxStockage.obtenirAnnotations());
         const aRetirer = tri.aRetirer;
@@ -3743,6 +3743,8 @@
         // La liste CAPTURÉE à l'affichage est celle qui part (#556) : pas de relecture au clic.
         const ids = aRetirer.map(f => f.id);
 
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('copiesExportees'))) return;
         afficherModalePipeline('Libérer de l\'espace',
             `<p>${intro}</p><ul class="travaux-nettoyage-liste">${lignes}</ul>${phraseEvaluees}${phraseAnciennes}`,
             [

@@ -6,6 +6,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
+// #1007, second lot (3 oct. 2026) : ce banc ne juge pas le codex proposé avant une suppression
+// (jugé par 1007-propose-codex-avant-suppression.spec.js). Doublure « codex à jour » : la fenêtre
+// qui propose ne paraît pas, et le geste se déroule comme avant le lot.
+test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Codex) window.Codex.proposerAvantSuppression = async () => true;
+        });
+    });
+});
+
 // =======================================================================
 // LOT B DE L'ENREGISTREMENT — UN SEUL TÉMOIN, ET AUCUN « ENREGISTRÉ » SUR UN ÉCHEC (27 sept. 2026)
 // =======================================================================
@@ -350,7 +361,7 @@ test('lot B · corbeille : le message ne compte que les évaluations vraiment re
         window.__toasts = [];
         if (mode) window.__poserPanne('evaluationsSauvegardees', mode);
         try {
-            (0, eval)(ouvrir);
+            await (0, eval)(ouvrir);   // #1007 : la porte est async (le codex proposé la précède)
             await document.getElementById(bouton).onclick();
         } finally { window.__retirerPanne(); }
         await new Promise((res) => setTimeout(res, 300));

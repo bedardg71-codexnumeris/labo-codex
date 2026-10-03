@@ -1582,6 +1582,8 @@ async function supprimerEchelleDeBibliothequePartagee(id) {
     const echelle = biblio.find(e => e.id === id);
     if (!echelle) return;
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('echelleBibliotheque'))) return;
     if (!confirm(`Supprimer définitivement «${echelle.nom || 'Sans titre'}» de la Bibliothèque ?\n\nCette action est irréversible.`)) return;
 
     // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
@@ -3419,6 +3421,8 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
 
     if (nb.total === 0) {
         // Témoin négatif : rien ne la nomme — la question d'avant, sans un mot de plus.
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('echelle'))) return { supprimee: false, annulee: true };
         if (!confirm(options.questionSimple || 'Supprimer cette échelle ?')) return { supprimee: false, annulee: true };
     } else {
         if (window.estTrimestreArchive && window.estTrimestreArchive()) {
@@ -3438,6 +3442,8 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         if (ecartes > 0) {
             question += `\n(${ecartes} autre(s) échelle(s) du trimestre n'ont pas les mêmes niveaux et ne sont pas proposées.)\n`;
         }
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('echelle'))) return { supprimee: false, annulee: true };
         const choix = prompt(question + '\nEntre le numéro, ou Annuler pour ne rien changer :');
         const numero = parseInt(choix, 10);
         if (!numero || numero < 1 || numero > candidats.length) return { supprimee: false, annulee: true, nb };

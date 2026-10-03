@@ -3470,6 +3470,11 @@ async function _ecrireLeCodexPrepare(resultat, reglage) {
     }
 }
 
+/**
+ * « Mettre à jour le codex », du menu ou de la fenêtre qui propose le codex avant une
+ * suppression (#1007, second lot) : le même chemin, une seule fois écrit.
+ * @returns {Promise<boolean>} true seulement si le fichier est écrit
+ */
 async function _mettreAJourLeCodex(forcerDialogue) {
     _fermerMenu();
     _debuterTentative(forcerDialogue ? 'Enregistrer sous' : 'Mettre à jour le codex');
@@ -3484,13 +3489,13 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         // Le message du navigateur reste dans la tentative (rapport de bug), pas à l'écran.
         _direNonMisAJour('le fichier n\'a pas pu être préparé. Tes données restent dans l\'application. ' +
                          'Si ça se répète, utilise « Signaler un bug » : le détail y sera.');
-        return;
+        return false;
     }
     // Avertissement ou aperçu refusé par l'usager : les seules sorties sans message.
     if (!resultat) {
         _finirTentative(avertissement.refuse() ? 'avertissement des copies manquantes refusé par l\'usager'
                                                : 'aperçu refusé par l\'usager');
-        return;
+        return false;
     }
 
     // #1012 — tant que des copies manquent, l'application demande toujours où écrire : jamais
@@ -3514,7 +3519,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
             };
         }
     });
-    if (!ecriture.ecrit) return;
+    if (!ecriture.ecrit) return false;
 
     await _marquerCodexAJour(resultat);
     if (window.temoinEnregistrement) window.temoinEnregistrement.fermerSi(CLE_TEMOIN_CODEX);
@@ -3522,6 +3527,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
                        ecriture.methode === 'fsapi' ? (forcerDialogue ? 'nouveau fichier' : 'fichier choisi') :
                        ecriture.methode === 'share' ? 'Fichiers' : 'Téléchargements';
     notifications.succes('Codex mis à jour', _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel);
+    return true;
 }
 
 /* ===============================
@@ -3596,6 +3602,108 @@ async function ecrireCodexAPartAvantSuppression(premierePhrase) {
     });
     if (ecriture.ecrit) notifications.succes('Codex à part écrit', resultat.nomFichier);
     return ecriture.ecrit;
+}
+
+/* ===============================
+   #1007 (SECOND LOT, 2a) — AVANT DE SUPPRIMER, LE CODEX PROPOSÉ
+   ===============================
+   Les gestes du côté « propose » (décisions de Grégoire du 2 oct. 2026, § 1, 2 et 8) :
+   les données de classe, l'évaluation et les copies, le matériel pédagogique, la corbeille
+   et la Modélisation, et deux paramètres de configuration (`enseignants`,
+   `modalitesEvaluation`). Codex à jour : rien ne change. Sinon, avant la confirmation
+   habituelle du geste, une fenêtre propose la mise à jour, par le chemin même de
+   « Mettre à jour le codex » (`_mettreAJourLeCodex`). Une seule fonction pour toutes
+   les portes. Mots de la fenêtre acceptés par Grégoire le 2 oct. 2026 (20 h 29) ; les
+   variantes de la première phrase, une par geste, sont dans ce registre et à lui.
+   =============================== */
+
+/**
+ * Une variante par geste : la première phrase, et le pronom de la seconde (« te la
+ * rendre »). Une porte passe sa clé ; une clé absente de ce registre ne supprime rien.
+ */
+var PROPOSITIONS_AVANT_SUPPRESSION = {
+    // Structure et données de classe
+    cours:                 { premiere: 'Supprimer cette fiche de cours l\'efface pour de bon.', pronom: 'la' },
+    eleve:                 { premiere: 'Supprimer la fiche de cet·te étudiant·e l\'efface pour de bon.', pronom: 'la' },
+    enseignant:            { premiere: 'Supprimer ce profil l\'efface pour de bon.', pronom: 'le' },
+    horaire:               { premiere: 'Supprimer cet horaire l\'efface pour de bon.', pronom: 'le' },
+    // Évaluation et copies
+    production:            { premiere: 'Supprimer cette production l\'efface pour de bon.', pronom: 'la' },
+    evaluation:            { premiere: 'Supprimer cette évaluation l\'efface pour de bon.', pronom: 'la' },
+    copiesExportees:       { premiere: 'Retirer ces copies les efface pour de bon.', pronom: 'les' },
+    intervention:          { premiere: 'Supprimer cette intervention l\'efface pour de bon.', pronom: 'la' },
+    rencontre:             { premiere: 'Supprimer cette rencontre l\'efface pour de bon.', pronom: 'la' },
+    questionnaire:         { premiere: 'Remplacer ce questionnaire l\'efface pour de bon.', pronom: 'le' },
+    // Matériel pédagogique et bibliothèques
+    grille:                { premiere: 'Supprimer cette grille l\'efface pour de bon.', pronom: 'la' },
+    grilleBibliotheque:    { premiere: 'Supprimer cette grille de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
+    collection:            { premiere: 'Supprimer cette collection l\'efface pour de bon.', pronom: 'la' },
+    echelle:               { premiere: 'Supprimer cette échelle l\'efface pour de bon.', pronom: 'la' },
+    echelleBibliotheque:   { premiere: 'Supprimer cette échelle de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
+    cartouche:             { premiere: 'Supprimer cette cartouche l\'efface pour de bon.', pronom: 'la' },
+    cartoucheBibliotheque: { premiere: 'Supprimer cette cartouche de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
+    pratique:              { premiere: 'Supprimer cette pratique l\'efface pour de bon.', pronom: 'la' },
+    pratiqueBibliotheque:  { premiere: 'Supprimer cette pratique de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
+    maquette:              { premiere: 'Jeter cette maquette l\'efface pour de bon.', pronom: 'la' },
+    ressource:             { premiere: 'Supprimer cette ressource l\'efface pour de bon.', pronom: 'la' },
+    productionBibliotheque: { premiere: 'Supprimer cette production de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
+    tampon:                { premiere: 'Supprimer ce tampon l\'efface pour de bon.', pronom: 'le' },
+    carte:                 { premiere: 'Supprimer cette carte l\'efface pour de bon.', pronom: 'la' },
+    carteBibliotheque:     { premiere: 'Supprimer cette carte de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
+    // Corbeille et Modélisation
+    copieCorbeille:        { premiere: 'Supprimer cette copie l\'efface pour de bon.', pronom: 'la' },
+    corbeille:             { premiere: 'Vider la corbeille efface pour de bon ces copies.', pronom: 'les' },
+    fichierModelisation:   { premiere: 'Supprimer ce fichier l\'efface pour de bon.', pronom: 'le' },
+    // Configuration (`enseignants`, `modalitesEvaluation` seulement)
+    parametre:             { premiere: 'Supprimer ce paramètre l\'efface pour de bon.', pronom: 'le' }
+};
+
+/**
+ * Le message de la fenêtre, pour un geste du registre.
+ * @param {string} geste - une clé de PROPOSITIONS_AVANT_SUPPRESSION
+ * @returns {string|null} null si la clé est inconnue
+ */
+function messageDeLaProposition(geste) {
+    var v = Object.prototype.hasOwnProperty.call(PROPOSITIONS_AVANT_SUPPRESSION, geste) ? PROPOSITIONS_AVANT_SUPPRESSION[geste] : null;
+    if (!v) return null;
+    return v.premiere + ' Ton codex à jour pourra te ' + v.pronom + ' rendre, jusqu\'à ta mise à jour suivante.';
+}
+
+/**
+ * Avant une suppression du côté « propose ». L'appelant ne supprime que sur `true`, et
+ * ne fait rien d'autre sur `false` ; sa confirmation habituelle vient APRÈS.
+ * - codex à jour : true, sans rien afficher ;
+ * - sinon, la fenêtre : « Annuler » (focus) → false ; « Supprimer sans mettre à jour »
+ *   → true ; « Mettre à jour, puis supprimer » → le chemin de « Mettre à jour le codex »,
+ *   avertissement des copies manquantes compris : true seulement si le fichier est écrit.
+ * - aucun codex actif : la même fenêtre ; le bouton du milieu dit « Supprimer sans codex »
+ *   (mots acceptés par Grégoire le 3 oct. 2026, 7 h 56) et le troisième écrit un codex (même
+ *   chemin : sans fichier tenu, la destination est demandée).
+ * @param {string} geste - une clé de PROPOSITIONS_AVANT_SUPPRESSION
+ * @returns {Promise<boolean>}
+ */
+async function proposerCodexAvantSuppression(geste) {
+    var message = messageDeLaProposition(geste);
+    if (message === null) {
+        // Une porte mal branchée ne supprime pas : la sentinelle #1007 le verrouille aussi.
+        console.error('[Codex] Geste inconnu avant une suppression : ' + geste);
+        return false;
+    }
+    if (_etat.actif && !_etat.modificationsDepuis) return true;
+
+    var sansCodex = !_etat.actif;
+    var choix = await uiDialogues.demanderAction({
+        titre: sansCodex ? 'Écrire un codex avant de supprimer ?' : 'Mettre ton codex à jour avant de supprimer ?',
+        message: message,
+        texteFermer: 'Annuler',   // sans bouton « principal », c'est lui qui a le focus
+        actions: [
+            { valeur: 'sans', texte: sansCodex ? 'Supprimer sans codex' : 'Supprimer sans mettre à jour' },
+            { valeur: 'maj', texte: sansCodex ? 'Écrire un codex, puis supprimer' : 'Mettre à jour, puis supprimer' }
+        ]
+    });
+    if (choix === 'sans') return true;
+    if (choix !== 'maj') return false;
+    return (await _mettreAJourLeCodex(false)) === true;
 }
 
 /**
@@ -4427,6 +4535,8 @@ window.Codex = {
     derniereTentative: derniereTentative,
     actionEnregistrerSous: actionEnregistrerSous,
     ecrireAPartAvantSuppression: ecrireCodexAPartAvantSuppression,   // #1007
+    proposerAvantSuppression: proposerCodexAvantSuppression,         // #1007, second lot
+    messageDeLaProposition: messageDeLaProposition,
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,
     actionRenommer: actionRenommer,

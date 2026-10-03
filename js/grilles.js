@@ -2995,6 +2995,8 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
         message += 'Ces cartouches deviendraient introuvables si la grille partait sans elles.\n\n';
         message += 'Veux-tu les déplacer vers une autre grille ?';
 
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('grille'))) return false;
         if (!confirm(message)) {
             alert('Suppression annulée. Les cartouches sont préservées.');
             return false;
@@ -3053,6 +3055,8 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
         return supprimee;
     }
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('grille'))) return false;
     if (!confirm(`Supprimer la grille « ${nomGrille} » ?`)) return false;
 
     const supprimee = await _retirerGrilleDeLaListe(grilleId, options);
@@ -3124,6 +3128,8 @@ async function supprimerGrilleDeBibliothequePartagee(id) {
     const grille = biblio.find(g => g.id === id);
     if (!grille) return;
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('grilleBibliotheque'))) return;
     if (!confirm(`Supprimer définitivement «${grille.nom || 'Sans titre'}» de la Bibliothèque ?\n\nCette action est irréversible.`)) return;
 
     // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,
@@ -4287,6 +4293,8 @@ async function enregistrerCollectionProjection(cible, index) {
 async function supprimerCollectionProjection(id, cible, index) {
     const c = window.collectionsProjection.obtenir(id);
     if (!c) { await _redessinerCibleCollection(cible); return; }
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('collection'))) return;
     if (!confirm(`Supprimer la collection « ${c.nom} » ? Les grilles qui l'ont copiée ne changent pas.`)) return;
     await window.collectionsProjection.supprimer(id);
     await _redessinerCibleCollection(cible);

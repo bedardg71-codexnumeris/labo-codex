@@ -414,6 +414,8 @@
        =============================== */
 
     async function supprimerFichierModelisation(id) {
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('fichierModelisation'))) return;
         if (!confirm('Supprimer ce fichier et ses annotations ?')) return;
 
         if (id === fichierOuvertId) {

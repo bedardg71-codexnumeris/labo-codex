@@ -975,6 +975,8 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
     if (!pratique) return;
 
     // Confirmation
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('pratique'))) return;
     if (!confirm(`Supprimer définitivement la pratique «${pratique.nom}» ?\n\nCette action est irréversible.`)) {
         return;
     }
@@ -1026,6 +1028,8 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
     }
     const pratique = items.find(p => p.id === pratiqueId);
     const nom = (pratique && pratique.nom) || pratiqueId;
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('pratiqueBibliotheque'))) return;
     if (!confirm('Supprimer définitivement la pratique « ' + nom + ' » de la bibliothèque ?\n\nCette action est irréversible.')) return;
     const ok = await retirerPratiqueDeLaBibliotheque(pratiqueId);
     if (!ok) {
@@ -2195,6 +2199,8 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
  * Supprime une pratique
  */
 async function supprimerPratiqueMateriel(pratiqueId) {
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('pratique'))) return;
     if (!confirm('Es-tu sûr de vouloir supprimer cette pratique ?')) {
         return;
     }

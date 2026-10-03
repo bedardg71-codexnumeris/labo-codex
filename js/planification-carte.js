@@ -8585,14 +8585,20 @@ function importerCarte(fichier) {
     lecteur.readAsText(fichier);
 }
 
-function supprimerCarteActive() {
+async function supprimerCarteActive() {
     var index = window.planificationDonnees.getIndex();
     if (!index || index.cartes.length <= 1) {
         console.warn('[Planification] Impossible de supprimer la dernière carte.');
         return;
     }
     var carte = index.cartes.find(function(c) { return c.id === index.active; });
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('carte'))) return;
     if (!confirm('Supprimer la carte « ' + (carte ? carte.nom : '') + ' » ?')) return;
+    // #1007 : l'index est relu après l'attente de la fenêtre ; celui d'avant ne vaut plus rien.
+    var idVise = carte ? carte.id : index.active;
+    index = window.planificationDonnees.getIndex();
+    if (!index || index.cartes.length <= 1 || index.active !== idVise) return;
 
     window.planificationDonnees.supprimerCarte(index.active);
     index.cartes = index.cartes.filter(function(c) { return c.id !== index.active; });
