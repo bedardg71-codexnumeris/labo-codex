@@ -416,6 +416,11 @@ async function supprimerAlignementDuTrimestre(carteId) {
         variante: 'danger'
     });
     if (!okSuppr) return;
+    // #1007 : l'index est relu après l'attente (la fenêtre, puis la question) ; celui d'avant
+    // ne vaut plus rien.
+    index = window.planificationDonnees.getIndex();
+    if (!index || !index.cartes || index.cartes.length <= 1
+        || !index.cartes.some(function (c) { return c.id === carteId; })) return;
 
     window.planificationDonnees.supprimerCarte(carteId);
     index.cartes = index.cartes.filter(function (c) { return c.id !== carteId; });

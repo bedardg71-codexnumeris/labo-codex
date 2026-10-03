@@ -14271,8 +14271,8 @@
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
     <script src="js/trimestre-v2.js?v=20260918c"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
     <script src="js/trimestre-v2-init.js?v=20260928d"></script> <!-- Fusion #374 : jeu unique de fonctions Journées sans cours (5 août) -->
-    <script src="js/trimestre-v2-enseignants.js?v=20261003a"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
-    <script src="js/trimestre-v2-horaires.js?v=20261003a"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
+    <script src="js/trimestre-v2-enseignants.js?v=20261003b"></script> <!-- #306 Lot 1 (3 juil.) : bascule Créer/Enregistrer du bouton profil -->
+    <script src="js/trimestre-v2-horaires.js?v=20261003b"></script> <!-- #478 (13 sept.) : « Groupe associé » vide dit où naît un groupe, le geste d'abord (porte 2.3b) ; son rafraîchisseur exporté -->
     <script src="js/trimestre-v2-liste.js?v=20261003a"></script> <!-- Lot I bis (1er oct.) : la confirmation de suppression dit jusqu'où le codex sert de filet (mots de Grégoire) · Lot I bis (30 sept.) : la suppression d'un trimestre exige un codex à jour, plus de téléchargement · #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
     <script src="js/trimestre-v2-cours.js?v=20260928c"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20261003b"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
@@ -14321,7 +14321,7 @@
     <script src="js/cartouches-bibliotheque.js?v=20260929b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20261003a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260911m"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
-    <script src="js/cours.js?v=20261003a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
+    <script src="js/cours.js?v=20261003b"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=20260912i"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
@@ -14402,8 +14402,8 @@
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=20260929b"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
-    <script src="js/planification-bibliotheque.js?v=20261003a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20261003a"></script> <!-- Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-bibliotheque.js?v=20261003b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
+    <script src="js/planification-carte.js?v=20261003b"></script> <!-- Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260928c"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14460,8 +14460,8 @@
     <script src="js/partage-import.js?v=20260929b"></script>
     <script src="js/partage-section.js?v=20260929b"></script>
     <script src="js/import-export.js?v=20261003a"></script> <!-- #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
-    <script src="js/codex.js?v=20261003b"></script> <!-- Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
-    <script src="js/liste-evaluations.js?v=20261003a"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
+    <script src="js/codex.js?v=20261003c"></script> <!-- Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
+    <script src="js/liste-evaluations.js?v=20261003b"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->

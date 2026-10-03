@@ -578,8 +578,8 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         await page.evaluate((id) => { supprimerEvaluation(id); }, cible);
         // Aucun codex actif : la fenêtre qui propose, pas celle qui exige.
         expect((await attendreFenetre(page, 'Écrire un codex avant de supprimer ?')).boutons)
-            .toEqual(['Annuler', 'Supprimer sans mettre à jour', 'Écrire un codex, puis supprimer']);
-        await cliquerDansFenetre(page, 'Supprimer sans mettre à jour');
+            .toEqual(['Annuler', 'Supprimer sans codex', 'Écrire un codex, puis supprimer']);
+        await cliquerDansFenetre(page, 'Supprimer sans codex');
         await expect.poll(() => ecoute.dialogues.length).toBe(1);
         expect(ecoute.dialogues[0].message).toMatch(/^Veux-tu vraiment supprimer .+\n\nCette action est irréversible\.$/s);
         await expect.poll(async () => (await evals()).length).toBe(avant.length - 1);

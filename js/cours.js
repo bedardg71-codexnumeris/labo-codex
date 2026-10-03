@@ -495,18 +495,13 @@ async function recenserDependancesCours(coursId) {
 }
 
 /**
- * Le geste complet : recense, REFUSE ou confirme, exécute.
- * Partagé par la Bibliothèque (menu ⋮) et le Cadre (`supprimerCoursV2`) —
- * un seul mécanisme, zéro suppression nue.
- *
- * @param {string} coursId
- * @returns {Promise<boolean>} true si la fiche a été supprimée
+ * Les refus du geste : fiche introuvable, ou cours qui porte encore des données.
+ * Dit le refus et rend true ; rend false si rien ne s'y oppose.
  */
-async function supprimerFicheCoursAvecGarde(coursId) {
-    const plan = await recenserDependancesCours(coursId);
+function _refuserLaSuppressionDuCours(plan, coursId) {
     if (plan.fiches.length === 0) {
         alert('Cette fiche de cours est introuvable — elle a peut-être déjà été supprimée. Recharge la page.');
-        return false;
+        return true;
     }
     const f = plan.fiches[0];
     const nom = (f.codeCours || f.sigle || f.code || coursId) + (f.nomCours ? ' — ' + f.nomCours : '');
@@ -524,8 +519,24 @@ async function supprimerFicheCoursAvecGarde(coursId) {
             'mécanisme du bug des productions inaccessibles d\'août. Retire\n' +
             'd\'abord ce qui s\'y rattache, ou dis-le-moi en session s\'il\n' +
             's\'agit de données de test à nettoyer.');
-        return false;
+        return true;
     }
+    return false;
+}
+
+/**
+ * Le geste complet : recense, REFUSE ou confirme, exécute.
+ * Partagé par la Bibliothèque (menu ⋮) et le Cadre (`supprimerCoursV2`) —
+ * un seul mécanisme, zéro suppression nue.
+ *
+ * @param {string} coursId
+ * @returns {Promise<boolean>} true si la fiche a été supprimée
+ */
+async function supprimerFicheCoursAvecGarde(coursId) {
+    let plan = await recenserDependancesCours(coursId);
+    if (_refuserLaSuppressionDuCours(plan, coursId)) return false;
+    const f = plan.fiches[0];
+    const nom = (f.codeCours || f.sigle || f.code || coursId) + (f.nomCours ? ' — ' + f.nomCours : '');
 
     const details = plan.refs.map(r => '· ' + r.cle + ' : ' + r.retire.length + ' groupe(s)-cours vide(s) retiré(s)');
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
@@ -536,6 +547,11 @@ async function supprimerFicheCoursAvecGarde(coursId) {
         '\nCette action est irréversible (filet : ton backup Codex).')) {
         return false;
     }
+    // #1007 (relecture de Cowork) : la fenêtre a pu attendre des minutes (une mise à jour du
+    // codex). Le plan est recensé de nouveau : on écrit celui de MAINTENANT, et les mêmes
+    // refus valent s'il a changé entre-temps.
+    plan = await recenserDependancesCours(coursId);
+    if (_refuserLaSuppressionDuCours(plan, coursId)) return false;
 
     // Exécution — les références d'abord, la fiche ensuite, le pointeur en
     // dernier. Tous les exemplaires portant cet id partent ensemble (les

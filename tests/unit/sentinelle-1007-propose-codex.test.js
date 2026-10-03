@@ -68,6 +68,20 @@ const PORTES = [
     { g: 'Configuration', f: 'js/donnees-v2.js', sig: 'async function supprimerParametreConfig(', cle: "'parametre'", question: "if (!confirm('Supprimer le paramètre « '", efface: 'db.setSync(cle, null)' }
 ];
 
+// Relecture de Cowork (3 oct. 2026, 7 h 55) : la fenêtre peut attendre des minutes (une mise
+// à jour du codex), et la page vit pendant ce temps. Ces six portes écrivaient à partir
+// d'une lecture faite AVANT l'attente ; elles relisent désormais APRÈS la question, avant
+// d'écrire. Les trente autres relisaient déjà (file, `db.modifier`, fonction par id) ou
+// détruisent exprès la liste capturée à l'affichage (#556) : tableau dans la release.
+const RELECTURES = [
+    { g: 'P1', relit: 'plan = await recenserDependancesCours(coursId);' },
+    { g: 'P3', relit: "db.getSync('enseignants', [])" },
+    { g: 'P4', relit: 'db.getSync(cleHoraires, [])' },
+    { g: 'P8', relit: "evaluations = db.getSync(cle('evaluationsSauvegardees'), []);" },
+    { g: 'P37a', relit: 'index = window.planificationDonnees.getIndex();' },
+    { g: 'P37b', relit: 'index = window.planificationDonnees.getIndex();' }
+];
+
 /** Le corps d'une fonction : de sa signature à l'accolade fermante posée à la même indentation. */
 function corps(source, sig) {
     const i = position(source, sig);
@@ -94,6 +108,17 @@ describe('#1007, second lot — aucune porte n\'efface sans le codex proposé', 
             const ligne = c.slice(c.lastIndexOf('\n', iAppel) + 1, finLigne);
             expect(ligne).toMatch(/^\s*if \(.*!\(await Codex\.proposerAvantSuppression\(.*\)\)\) return\b[^;]*;$/);
             expect(position(c, p.efface, iAppel)).toBeGreaterThan(iAppel);
+        });
+    }
+
+    for (const r of RELECTURES) {
+        it(`${r.g} : ce qui s'écrit après l'attente est relu après la question`, () => {
+            const p = PORTES.find((q) => q.g === r.g);
+            const c = corps(lire(p.f), p.sig);
+            const iQuestion = position(c, p.question);
+            const iRelit = c.indexOf(r.relit, iQuestion);
+            expect(iRelit, `${r.g} : aucune relecture « ${r.relit} » après la question`).toBeGreaterThan(iQuestion);
+            expect(position(c, p.efface, iQuestion)).toBeGreaterThan(iRelit);
         });
     }
 
