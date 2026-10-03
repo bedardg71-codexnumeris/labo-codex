@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 21 h 01 : **#1007 PREMIER LOT (LE CODEX À PART AVANT LES CINQ GESTES EXIGÉS) COMMITÉ SUR `claude/1007-codex-a-part` (`3a55b547`), NON POUSSÉ, EN ATTENTE DE LA RELECTURE DE COWORK ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE RELEASE**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 3 h 32 : **1.175.0 (#1007 PREMIER LOT, LE CODEX À PART) COMMITÉE SUR `claude/1007-codex-a-part` ; VITEST VERT ; VERDICT COMPLET AU NAVIGATEUR LANCÉ ; NI PUSH NI FUSION ENCORE**
+
+**Où vit le travail** : la branche `claude/1007-codex-a-part` (worktree `.claude/worktrees/1007-codex-a-part`) : le lot (`3a55b547`), `main` fusionnée dedans (`19179b7b`), la release 1.175.0 (`2f492142`, build `1003-0331`), puis ce relais. `main` = `origin/main` à `38927fb9` ; `5f69716d` (inscriptions sous #1007) commité sur `main`, non poussé, emporté par la branche.
+
+**Fait** : relecture de Cowork verte (`plans de travail/VERDICT-RELECTURE-2026-10-03-1007-codex-a-part.md`) ; mots du § 5 et ligne des Nouvelles acceptés par Grégoire à 3 h 25, posés tels quels ; fichiers de Cowork commités tels quels et poussés ; deux constats inscrits sous #1007 (issue 2) ; Vitest 7 937 / 7 937 sur la release.
+
+**Suite** : verdict `pousser.sh` → push de la branche → fusion vers `main` → mise en ligne constatée chez Netlify → porte terrain (markdown) → `OU-EN-EST-ON.md`. Puis le second lot de #1007, sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 2 OCT. 2026, 21 h 01 : **#1007 PREMIER LOT (LE CODEX À PART AVANT LES CINQ GESTES EXIGÉS) COMMITÉ SUR `claude/1007-codex-a-part` (`3a55b547`), NON POUSSÉ, EN ATTENTE DE LA RELECTURE DE COWORK ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE RELEASE**
 
 **Où vit le travail** : la branche locale `claude/1007-codex-a-part` (dans l'arbre principal, pas de worktree), un commit `3a55b547` sur `main` à `5d370562`. L'arbre principal est laissé sur `main`.
 
