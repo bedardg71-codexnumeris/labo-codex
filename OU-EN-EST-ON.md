@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.177.1 (3 OCTOBRE 2026 ; en ligne depuis 18 h 58, mesuré chez Netlify sur `d6cfe732`) — LE BOUTON « ✓ N pér. » DE LA SAISIE DES PRÉSENCES**
+
+**Ce que tu verras** : dans Suivi › Saisie des présences, le bouton qui met tout le monde présent dit « ✓ 2 pér. » (le nombre de la séance) ; son infobulle et le lecteur d'écran disent « Mettre tout le monde présent (2 périodes) ». Le bouton ↻ dit « Réinitialiser (tout le monde absent) ».
+
+**Vérifié comment** : mesuré au navigateur (WebKit) à 1024, 768 et 390 px : une ligne partout (l'ancien en prenait deux sur iPad en portrait), colonne un peu plus étroite. Banc des présences vert, Vitest complet vert (7 999), verdict complet au navigateur sans échec (7 tests verts au second essai, aucun dans les présences).
+
+**Pas de vérification à faire de ton côté** : tu le verras en usage.
+
 ✅ **EN LIGNE EN 1.177.0 (3 OCTOBRE 2026 ; en ligne depuis 12 h 27, mesuré chez Netlify : déploiement de production prêt sur `99a21e47` ; relue par Cowork, verte sans correction ; tes mots, avec les quatre retouches, et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 11 h 25) — LE CODEX PROPOSÉ SUR LES GESTES QUI RESTAIENT**
 
 **Ce que tu verras** : la même fenêtre qu'en 1.176.0 paraît aussi quand tu fusionnes des copies, retires des pages d'une copie, supprimes une copie importée, appliques un jeton de reprise qui efface l'originale (ou retires ce jeton), remplaces un élément du même nom, réinitialises une séance déjà saisie, cliques « Effacer tout » sur une page annotée, retires un·e élève du registre longitudinal ou supprimes les résultats du bilan réflexif. Seulement si quelque chose sera vraiment effacé, et seulement si ton codex n'est pas à jour.

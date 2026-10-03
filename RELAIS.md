@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 17 h 50 : **LE BOUTON « TOUT LE MONDE PRÉSENT » EN ATTENTE DE GRÉGOIRE : IL PASSE SUR QUATRE LIGNES À 768 ET 390 px ; RIEN DE LIVRÉ, 1.177.0 RESTE EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 19 h 00 : **1.177.1 (LE BOUTON « ✓ N pér. » DE LA SAISIE DES PRÉSENCES) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `d6cfe732` (PUBLIÉ À 18 h 58) ; VERDICT COMPLET VERT ; PAS DE PORTE**
+
+**Décision de Grégoire** (17 h 48, consigne de Cowork) : « ✓ N pér. », infobulle et `aria-label` « Mettre tout le monde présent (N périodes) » ; ↻ : « Réinitialiser (tout le monde absent) », aussi en `aria-label` ; le texte visible des deux boutons est `aria-hidden`. Le gabarit d'`index.html` suit (« ✓ » seul, réécrit au rendu).
+
+**Mesure** (WebKit, pack démo, l'ancien libellé dans la même page) : une ligne à 1024, 768 et 390 px (l'ancien en prenait deux à 768 et 390, en-tête 128 → 112 px) ; colonne de 147 px à 1024 (160 avant).
+
+**Release** : 1.177.1 (`743c1572`), patch ; ligne ajoutée à l'entrée 1.177 des Nouvelles. **Verdict** complet sur `743c1572`, rendu à 18 h 55 : 0 échec, 7 instables, aucun dans les présences (carac-476 duplication, chrono-barre-annoter-937, codex-1014, evaluation-652, evaluation-chargement, import-bandeaux-612, témoin lot B). Fusion : seuls des documents diffèrent du commit jugé.
+
+**Ménage** : worktree `bouton-presents` retiré, sa branche locale supprimée.
+
+**Suite** : le lot 2b de #1007 (les lignes d'éditeur qui portent des notes d'élèves), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 17 h 50 : **LE BOUTON « TOUT LE MONDE PRÉSENT » EN ATTENTE DE GRÉGOIRE : IL PASSE SUR QUATRE LIGNES À 768 ET 390 px ; RIEN DE LIVRÉ, 1.177.0 RESTE EN LIGNE**
 
 **Consigne** : Cowork, 17 h 39 (« Tout le monde présent (N pér.) », infobulles « Mettre tout le monde présent (N périodes) » et « Réinitialiser (tout le monde absent) »). Point 3 de la consigne : arrêt si le bouton casse l'en-tête.
 
