@@ -3664,10 +3664,10 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     repriseOriginale:      { premiere: 'Appliquer ce jeton de reprise efface pour de bon l\'évaluation originale.', pronom: 'la' },
     reprise:               { premiere: 'Retirer ce jeton de reprise efface pour de bon la reprise.', pronom: 'la' },
     pages:                 { premiere: 'Retirer ces pages les efface pour de bon.', pronom: 'les' },
-    remplacement:          { premiere: 'Remplacer l\'existante l\'efface pour de bon.', pronom: 'la' },
-    seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences.', pronom: 'les' },
-    annotationsPage:       { premiere: 'Effacer tout efface pour de bon les annotations de cette page.', pronom: 'les' },
-    registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon ses dossiers.', pronom: 'les' },
+    remplacement:          { premiere: 'Remplacer celle qui porte déjà ce nom l\'efface pour de bon.', pronom: 'la' },
+    seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences et ses notes.', pronom: 'les' },
+    annotationsPage:       { premiere: '« Effacer tout » efface pour de bon les annotations de cette page.', pronom: 'les' },
+    registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs.', pronom: 'les' },
     resultatsBilan:        { premiere: 'Supprimer ces résultats les efface pour de bon.', pronom: 'les' }
 };
 

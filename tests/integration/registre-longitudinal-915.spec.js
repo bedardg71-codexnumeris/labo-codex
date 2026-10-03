@@ -327,7 +327,7 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         await retirerLea();
         const f = await fenetreDuCodex(page, 'Annuler');
         expect(f).toEqual({ titre: 'Écrire un codex avant de supprimer ?',
-            texte: 'Retirer cet·te étudiant·e du registre efface pour de bon ses dossiers. Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.' });
+            texte: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs. Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.' });
         await page.waitForTimeout(300);
         expect(dialogues.recus).toEqual([]);
         expect(await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)))).toBe(registreAvant);
