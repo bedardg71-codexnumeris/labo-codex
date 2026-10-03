@@ -2346,7 +2346,7 @@ function chargerEvaluationDepuisBanque(evaluationId) {
  * et charge le duplicata pour modification immédiate
  * @param {string} evaluationId - ID de l'évaluation originale
  */
-function appliquerJetonRepriseDepuisBanque(evaluationId) {
+async function appliquerJetonRepriseDepuisBanque(evaluationId) {
     // Utiliser le module evaluation-jetons.js pour appliquer le jeton
     if (typeof appliquerJetonReprise !== 'function') {
         notifications.erreur('Erreur', 'Module jetons non disponible');
@@ -2354,7 +2354,7 @@ function appliquerJetonRepriseDepuisBanque(evaluationId) {
     }
 
     // Appliquer le jeton (archiver l'originale par défaut)
-    const nouvelleEvaluation = appliquerJetonReprise(evaluationId, true);
+    const nouvelleEvaluation = await appliquerJetonReprise(evaluationId, true);   // #1007 (2a-2) : async
 
     if (!nouvelleEvaluation) {
         // L'erreur a déjà été affichée par le module

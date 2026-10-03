@@ -3247,9 +3247,31 @@
     }
 
     /**
-     * Efface toutes les annotations de la page courante
+     * « Effacer tout » : les annotations de la page courante.
+     * #1007 (2a-2) — le codex est proposé seulement si la page en porte au moins une. Après
+     * l'attente, la page est relue (`_viderPageCourante`), et rien n'est effacé si le fichier
+     * ou la page affichés ont changé pendant ce temps.
      */
-    function effacerPage() {
+    async function effacerPage() {
+        if (_compterAnnotationsPage() === 0) return;
+        const fichierAvant = fichierId;
+        const pageAvant = travauxVisionneuse.getPageActuelle();
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('annotationsPage'))) return;
+        if (fichierId !== fichierAvant || travauxVisionneuse.getPageActuelle() !== pageAvant) return;
+        _viderPageCourante();
+    }
+
+    /** Le nombre d'annotations de la page courante (0 sans annotation ouverte). */
+    function _compterAnnotationsPage() {
+        if (!annotationCourante) return 0;
+        const donneesPage = annotationCourante.pages[travauxVisionneuse.getPageActuelle() - 1];
+        if (!donneesPage) return 0;
+        return (donneesPage.strokes || []).length + (donneesPage.textAnnotations || []).length
+            + (donneesPage.shapes || []).length + (donneesPage.stickers || []).length;
+    }
+
+    /** Vide la page courante, relue à l'instant (le retour arrière de l'annotation le défait). */
+    function _viderPageCourante() {
         if (!annotationCourante) return;
 
         const page = travauxVisionneuse.getPageActuelle() - 1;

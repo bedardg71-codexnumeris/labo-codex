@@ -922,8 +922,9 @@
             retrait.type = 'button';
             retrait.setAttribute('data-action', 'retirerEleveLongitudinal');
             retrait.dataset.da = da;
-            // Posé par setAttribute, lu par confirm() dans le dispatcher : du texte, jamais du HTML. Il DIT ce qu'il emporte.
-            retrait.setAttribute('data-confirm', MOTS.confirmerRetrait(nomComplet, accorder(dossiers.length, MOTS.dossiers), formaterDate(derniere),
+            // Posé par setAttribute, lu par confirm() dans `retirerEleveLongitudinal` : du texte, jamais du HTML. Il DIT
+            // ce qu'il emporte. #1007 (2a-2) : plus `data-confirm` (le dispatcher, synchrone, la posait AVANT le codex proposé).
+            retrait.setAttribute('data-question', MOTS.confirmerRetrait(nomComplet, accorder(dossiers.length, MOTS.dossiers), formaterDate(derniere),
                 resultats.map(libelleResultat), resultats.filter((r) => r.origine === 'cadre').length));
 
             rendreDossier(li, e, modeles, pseudos);
@@ -1028,9 +1029,15 @@
         return issue;
     }
 
-    /** « Retirer du registre » : la confirmation (data-confirm) est passée AVANT, dans le dispatcher. */
+    /**
+     * « Retirer du registre ». #1007 (2a-2) : la question (les mots du bouton, `data-question`)
+     * est posée ICI, après le codex proposé ; elle l'était avant, par le dispatcher. Le
+     * registre est relu au moment d'écrire (`retirerDuRegistre`).
+     */
     async function retirerEleveLongitudinal(el) {
         const da = el && el.dataset ? String(el.dataset.da || '') : '';
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('registreLongitudinal'))) return { ok: false, refus: '' };
+        if (el && el.dataset && el.dataset.question && !confirm(el.dataset.question)) return { ok: false, refus: '' };
         const issue = await retirerDuRegistre(da);
         if (!issue.ok) return issue;
         if (dernierResume && dernierResume.da === da) dernierResume = null;

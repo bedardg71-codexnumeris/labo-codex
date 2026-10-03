@@ -127,25 +127,25 @@ describe('#607 · retirer un jeton de reprise emporte le fichier de la reprise',
         expect(resolu.id).toBe('F_REPR');
     });
 
-    it('après retirerJetonReprise(reprise), le fichier de reprise est EN CORBEILLE', () => {
+    it('après retirerJetonReprise(reprise), le fichier de reprise est EN CORBEILLE', async () => {
         const { win, travauxStockage } = monter({
             evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
             fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE]
         });
 
-        expect(win.retirerJetonReprise('EVAL_B')).toBe(true);
+        expect(await win.retirerJetonReprise('EVAL_B')).toBe(true);
 
         expect(travauxStockage._actifs.map(f => f.id)).toEqual(['F_ORIG']);
         expect(travauxStockage._corbeille.map(f => f.id)).toEqual(['F_REPR']);
     });
 
-    it('après le retrait, la ligne de l\'originale résout le fichier ORIGINAL', () => {
+    it('après le retrait, la ligne de l\'originale résout le fichier ORIGINAL', async () => {
         const { win } = monter({
             evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
             fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE]
         });
 
-        win.retirerJetonReprise('EVAL_B');
+        await win.retirerJetonReprise('EVAL_B');
 
         const resolu = win.travauxResolution.trouverFichierPourEvaluation({
             etudiantDA: DA, productionId: PRODUCTION
@@ -154,31 +154,31 @@ describe('#607 · retirer un jeton de reprise emporte le fichier de la reprise',
         expect(resolu.id).toBe('F_ORIG');
     });
 
-    it('la notification DIT le nombre de fichiers mis à la corbeille', () => {
+    it('la notification DIT le nombre de fichiers mis à la corbeille', async () => {
         const { win, notifs } = monter({
             evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
             fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE]
         });
 
-        win.retirerJetonReprise('EVAL_B');
+        await win.retirerJetonReprise('EVAL_B');
 
         const succes = notifs.filter(n => n.type === 'succes').map(n => String(n.t) + ' ' + String(n.m));
         expect(succes.some(s => /corbeille/i.test(s))).toBe(true);
     });
 
-    it('branche #141 (retrait depuis l\'ORIGINALE remplacée) : le fichier de la reprise part aussi', () => {
+    it('branche #141 (retrait depuis l\'ORIGINALE remplacée) : le fichier de la reprise part aussi', async () => {
         const { win, travauxStockage } = monter({
             evaluations: [EVAL_ORIGINALE, EVAL_REPRISE],
             fichiers: [FICHIER_ORIGINAL, FICHIER_REPRISE]
         });
 
         // Appelée sur l'ORIGINALE : restaure l'originale et supprime la reprise.
-        expect(win.retirerJetonReprise('EVAL_A')).toBe(true);
+        expect(await win.retirerJetonReprise('EVAL_A')).toBe(true);
 
         expect(travauxStockage._corbeille.map(f => f.id)).toEqual(['F_REPR']);
     });
 
-    it('appliquerJetonReprise avec archiverOriginale:false DÉLIE le fichier de l\'originale supprimée', () => {
+    it('appliquerJetonReprise avec archiverOriginale:false DÉLIE le fichier de l\'originale supprimée', async () => {
         const originaleSeule = {
             id: 'EVAL_A', etudiantDA: DA, productionId: PRODUCTION, noteFinale: 60
         };
@@ -189,7 +189,7 @@ describe('#607 · retirer un jeton de reprise emporte le fichier de la reprise',
             fichiers: [fichierLie]
         });
 
-        const reprise = win.appliquerJetonReprise('EVAL_A', false, { silencieux: true });
+        const reprise = await win.appliquerJetonReprise('EVAL_A', false, { silencieux: true });
         expect(reprise).not.toBeNull();
 
         // Le fichier n'est PAS mis à la corbeille — l'élève a bien remis ce
@@ -200,7 +200,7 @@ describe('#607 · retirer un jeton de reprise emporte le fichier de la reprise',
         expect(f.estReprise).toBe(false);
     });
 
-    it('un module chargé sans travauxStockage ne lève pas (garde typeof)', () => {
+    it('un module chargé sans travauxStockage ne lève pas (garde typeof)', async () => {
         // ⚠ COPIER le corpus. `retirerJetonReprise` retire les quatre marqueurs
         // d'archivage EN PLACE : monté sans copie, ce cas vidait `EVAL_ORIGINALE`
         // pour tous les `describe` suivants, qui héritaient d'une originale déjà
@@ -217,7 +217,7 @@ describe('#607 · retirer un jeton de reprise emporte le fichier de la reprise',
             confirm: () => true,
             genererIdUnique: (p) => p + '1'
         });
-        expect(() => win.retirerJetonReprise('EVAL_B')).not.toThrow();
+        await expect(win.retirerJetonReprise('EVAL_B')).resolves.toBeDefined();
     });
 });
 

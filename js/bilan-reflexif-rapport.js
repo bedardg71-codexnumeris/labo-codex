@@ -49,7 +49,7 @@ function rendreRapport() {
     // Bouton export PDF
     html.push('<div class="bilan-actions">');
     html.push('<button class="bilan-btn bilan-btn-principal" data-action="BilanReflexif.exporterPDF">\u{1F4C4} Exporter en PDF</button>');
-    html.push('<button class="bilan-btn bilan-btn-danger" data-action="BilanReflexif.supprimerResultats" data-confirm="Supprimer les r\u00e9sultats import\u00e9s ?">Supprimer les r\u00e9sultats</button>');
+    html.push('<button class="bilan-btn bilan-btn-danger" data-action="BilanReflexif.supprimerResultats">Supprimer les r\u00e9sultats</button>');
     html.push('</div>');
 
     // === Vue d'ensemble ===
@@ -656,7 +656,14 @@ function detruireGraphiques() {
     etat.graphiques = {};
 }
 
-function supprimerResultats() {
+/**
+ * « Supprimer les résultats ». #1007 (2a-2) : la question est posée ICI, après le codex
+ * proposé, aux mots d'avant ; elle l'était par le dispatcher (`data-confirm`, synchrone).
+ * Rien de lu n'est réécrit : la clé est retirée.
+ */
+async function supprimerResultats() {
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('resultatsBilan'))) return;
+    if (!confirm('Supprimer les r\u00e9sultats import\u00e9s ?')) return;
     etat.resultats = null;
     db.removeSync(CLE_RESULTATS());
     if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_RESULTATS());   // lot F : geste hors témoin (supprimer les résultats)
