@@ -1620,13 +1620,13 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                 <button class="btn btn-principal btn-tres-compact"
                         data-action="tousPresents"
                         ${estVerrouille ? 'disabled' : ''}
-                        title="Mettre tous présents (${nombrePeriodesSeance} périodes)">
-                    Tous ${nombrePeriodesSeance} pér.
+                        title="Mettre tout le monde présent (${nombrePeriodesSeance} périodes)">
+                    Tout le monde présent (${nombrePeriodesSeance} pér.)
                 </button>
                 <button class="btn btn-annuler btn-tres-compact"
                         data-action="reinitialiserSaisie"
                         ${estVerrouille ? 'disabled' : ''}
-                        title="Réinitialiser (tous absents)">
+                        title="Réinitialiser (tout le monde absent)">
                     ↻
                 </button>
             </div>
