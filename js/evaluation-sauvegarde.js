@@ -1007,8 +1007,49 @@ async function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
     }
 }
 
+/**
+ * #1007, lot 2b (3 oct. 2026) — UNE LIGNE D'ÉDITEUR PORTE-T-ELLE DES NOTES ? Lecture
+ * seule, au moment du geste. Vrai si au moins une évaluation du trimestre actif l'emploie :
+ * - `{ grilleId, critere }` : une évaluation de cette grille a une entrée pour ce critère
+ *   (par `critereId` ; un critère sans identifiant, #674, par `critereNom` parmi les entrées
+ *   sans identifiant) ;
+ * - `{ grilleId, critere, sousCritereCode }` : une évaluation de cette grille a ce code
+ *   dans les catégories saisies du critère (`donneesAlgorithmiques[critereId].codes`) ;
+ * - `{ echelleId, niveauCode }` : une évaluation de cette échelle porte ce code de niveau
+ *   (`niveauSelectionne` d'un critère, ou `niveauFinal`).
+ * Les évaluations sont lues sous `cle()`, comme les grilles et les échelles que les éditeurs
+ * écrivent : même trimestre par construction. Brouillons compris : ils portent des notes
+ * en devenir. (Les cibles de dénotation ont leur propre lecture : `EditeurCibles`.)
+ * @returns {boolean}
+ */
+function ligneEmployeeParUneEvaluation(ligne) {
+    if (!ligne) return false;
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+    if (ligne.echelleId) {
+        const code = ligne.niveauCode;
+        if (code === undefined || code === null || String(code).trim() === '') return false;
+        return evaluations.some(ev => ev && ev.echelleId === ligne.echelleId && (
+            ev.niveauFinal === code
+            || (Array.isArray(ev.criteres) && ev.criteres.some(c => c && c.niveauSelectionne === code))));
+    }
+    const critere = ligne.critere;
+    if (!ligne.grilleId || !critere) return false;
+    const deLaGrille = evaluations.filter(ev => ev && ev.grilleId === ligne.grilleId);
+    if (ligne.sousCritereCode !== undefined) {
+        const code = ligne.sousCritereCode;
+        if (!critere.id || code === null || String(code).trim() === '') return false;
+        return deLaGrille.some(ev => {
+            const algo = ev.donneesAlgorithmiques && ev.donneesAlgorithmiques[critere.id];
+            return !!(algo && Array.isArray(algo.codes) && algo.codes.includes(code));
+        });
+    }
+    return deLaGrille.some(ev => Array.isArray(ev.criteres) && ev.criteres.some(c => c && (critere.id
+        ? c.critereId === critere.id
+        : !c.critereId && c.critereNom === critere.nom)));
+}
+
 // =====================================================================
-// Exports window.X (12) — voir en-tête pour détails
+// Exports window.X (13) — voir en-tête pour détails
 // =====================================================================
 
 // Préservés depuis bloc principal evaluation.js :
@@ -1025,5 +1066,8 @@ window.retirerJetonDepuisSidebar = retirerJetonDepuisSidebar;
 window.majBadgesApresEvaluation = majBadgesApresEvaluation;
 window.afficherBadgesJetons = afficherBadgesJetons;
 window.afficherGestionJetons = afficherGestionJetons;
+
+// #1007, lot 2b : lue par les éditeurs de grilles et d'échelles avant de retirer une ligne.
+window.ligneEmployeeParUneEvaluation = ligneEmployeeParUneEvaluation;
 
 })();
