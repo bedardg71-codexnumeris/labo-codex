@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.176.0 (3 OCTOBRE 2026 ; en ligne depuis 10 h 12, mesuré chez Netlify : déploiement de production prêt sur `7618e8d8` ; relue par Cowork, verte sous une correction, faite ; tes mots et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 7 h 56) — AVANT D'EFFACER, TON CODEX À JOUR PROPOSÉ**
+
+**Ce que tu verras** : avant d'effacer une évaluation, une production, une grille, une pratique, une échelle, une cartouche, un·e élève, une copie de la corbeille ou un autre élément de ton matériel, si ton codex n'est pas à jour, une fenêtre « Mettre ton codex à jour avant de supprimer ? » vient d'abord : « Annuler », « Supprimer sans mettre à jour », « Mettre à jour, puis supprimer ». Sans codex, « Écrire un codex avant de supprimer ? », avec « Supprimer sans codex ». Codex à jour : rien ne change, la question habituelle vient seule. Une dizaine de gestes plus difficiles à brancher attendent le lot suivant.
+
+**Vérifié comment** : au navigateur (WebKit), le banc du lot (trois essais : l'évaluation par tous les chemins, une porte par famille, et une écriture faite pendant que la fenêtre attend, qui n'est pas perdue) ; une sentinelle sur les 36 gestes ; mutations rouges, dont celle de la correction demandée par Cowork. Vitest complet vert (7 982). Verdict complet au navigateur : aucun échec, un test voisin vert au second essai seulement.
+
+**Ta vérification** : une porte, en fenêtre privée de Chrome, sans tes vraies données : `plans de travail/PORTES-TERRAIN-2026-10-03-1007-propose-codex.md` (Cowork publie la version à cocher). Elle supprime des productions d'essai par les quatre chemins : sans codex, en écrivant un codex, codex à jour, après une modification.
+
+**La suite** : le reste du lot (une dizaine de gestes : présences, éditeur de pages, jetons de reprise…), sur une consigne de Cowork (#1007).
+
 ✅ **EN LIGNE EN 1.175.0 (3 OCTOBRE 2026 ; en ligne depuis 4 h 33, mesuré chez Netlify : déploiement de production prêt sur `119d3c29` ; relue par Cowork, verte ; tes mots et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 3 h 25) — AVANT DE SUPPRIMER, UN CODEX À PART**
 
 **Ce que tu verras** : quand tu supprimes un trimestre, un groupe-cours, un groupe d'élèves, toute la liste ou toutes tes données, une fenêtre « Avant de supprimer, un codex à part » vient d'abord. L'application écrit ce codex sous un autre nom (elle te demande où), et **seulement ensuite** viennent les confirmations habituelles. « Annuler » ou un échec, à n'importe quelle étape : rien n'est supprimé. Ton codex habituel n'est pas touché. Le refus « mets d'abord ton codex à jour » du trimestre disparaît.

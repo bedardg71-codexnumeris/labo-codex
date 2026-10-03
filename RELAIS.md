@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 7 h 50 : **#1007 SECOND LOT, 2a-1 (LE CODEX PROPOSÉ, 36 PORTES) COMMITÉ SUR `claude/1007-propose-codex` (`22de2db9`), NON POUSSÉ ; VITEST VERT ; EN ATTENTE DE LA RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 10 h 15 : **1.176.0 EN LIGNE (#1007 SECOND LOT, 2a-1, LE CODEX PROPOSÉ), MESURÉ CHEZ NETLIFY SUR `7618e8d8` (PUBLIÉ À 10 h 12, CONSTATÉ À 10 h 13) ; VERDICT COMPLET VERT ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
+
+**Correction du verdict de Cowork** (`6dd4d519`) : sur les 36 portes, six écrivaient à partir d'une lecture faite avant l'attente (P1, P3, P4, P8, P37a, P37b) ; elles relisent après la question, sans texte changé. Tableau des 36 : § 11 de `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-propose-codex.md`. Essai WebKit neuf (une écriture pendant l'attente survit) ; mutation « relecture de P8 retirée » : rouge par l'assertion attendue. Mots : « Supprimer sans codex » sans codex actif.
+
+**Release** : 1.176.0 (`7519e3dc`), minor ; ligne des Nouvelles telle quelle ; titre de Claude Code : « Avant d'effacer, ton codex à jour ».
+
+**Verdicts** : le premier (sur `7519e3dc`) a bloqué sur `collections-projection.spec.js` (P22, la fenêtre attendait) : doublure « codex à jour » (`624a4dc1`), comme les trois bancs voisins. Le second, sur `624a4dc1`, rendu à 10 h 10 : 0 échec ; un instable, `nettoyage-sans-perte-892` (un banc voisin du lot, déjà doublé : à surveiller s'il revient). Branche poussée, fusionnée dans `main` (`7618e8d8`, commit de fusion) et poussée par `git push origin main` ; le hook a noté l'absence de verdict pour le SHA de fusion (même code que `624a4dc1`, plus des documents).
+
+**Ménage** : worktree `1014-codex-complet` retiré, sa branche locale supprimée (fusionnée). Le worktree `1007-propose-codex` reste (branche fusionnée, retirable).
+
+**Porte terrain** : `plans de travail/PORTES-TERRAIN-2026-10-03-1007-propose-codex.md` ; Cowork publie l'artefact jumeau.
+
+**Suite** : 2a-2, sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 7 h 50 : **#1007 SECOND LOT, 2a-1 (LE CODEX PROPOSÉ, 36 PORTES) COMMITÉ SUR `claude/1007-propose-codex` (`22de2db9`), NON POUSSÉ ; VITEST VERT ; EN ATTENTE DE LA RELECTURE DE COWORK**
 
 **Où vit le travail** : la branche locale `claude/1007-propose-codex` (worktree `.claude/worktrees/1007-propose-codex`), partie de `main` à `bd810533`. Ni push du code ni release (consigne : relecture croisée d'abord). Version 1.175.0, inchangée. Sur `main`, en local, non poussés : `bd810533` (mise en place de la consigne) et le commit de ce relais (demande, BACKLOG, relais).
 
