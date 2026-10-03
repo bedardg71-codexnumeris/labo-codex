@@ -2219,7 +2219,7 @@ function restaurerOriginaleSiReprise(evaluations, evaluationId) {
  * ⮕ Les deux apports de la version retirée sont absorbés ici : la garde
  * « évaluation introuvable » et la confirmation qui NOMME ce qu'on détruit.
  */
-function supprimerEvaluation(evaluationId) {
+async function supprimerEvaluation(evaluationId) {
     // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
@@ -2274,6 +2274,8 @@ function supprimerEvaluation(evaluationId) {
         ? `\n\nLe ou les ${nbFichiersAnnonces} fichier(s) remis pour la reprise iront à la corbeille (récupérables 30 jours).`
         : '';
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('evaluation'))) return;
     if (!confirm(`Veux-tu vraiment supprimer ${quoi} ?${mentionFichiers}\n\nCette action est irréversible.`)) {
         return;
     }
@@ -2899,9 +2901,11 @@ function compterEvaluationsDuCouple(fichier, evaluations) {
 /**
  * Supprime définitivement un fichier de la corbeille avec confirmation
  */
-function supprimerFichierDefinitivement(id) {
+async function supprimerFichierDefinitivement(id) {
     if (typeof travauxStockage === 'undefined') return;
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('copieCorbeille'))) return;
     // #560 (3 septembre 2026) — la portée est MESURÉE à l'ouverture, sur les
     // mêmes sources que la destruction : la corbeille pour le fichier,
     // `cle('evaluationsSauvegardees')` pour ce qui part avec lui.
@@ -2999,12 +3003,14 @@ function supprimerFichierDefinitivement(id) {
 /**
  * Vide entièrement la corbeille avec confirmation
  */
-function viderTouteCorbeille() {
+async function viderTouteCorbeille() {
     if (typeof travauxStockage === 'undefined') return;
 
     const corbeille = travauxStockage.obtenirCorbeille();
     if (corbeille.length === 0) return;
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('corbeille'))) return;
     // #560 — ce qui part avec les fichiers, compté sur la même source et par le
     // même prédicat que la destruction ; rien de plus n'est dit s'il n'y a rien.
     const nbEvalsLiees = db.getSync(cle('evaluationsSauvegardees'), [])

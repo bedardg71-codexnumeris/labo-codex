@@ -401,6 +401,8 @@ async function supprimerProfilEnseignantV2() {
 
     // Confirmation
     const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('enseignant'))) return;
     const confirme = confirm(`Veux-tu vraiment supprimer le profil de ${nomComplet} ?\n\nCette action est irréversible.`);
 
     if (!confirme) {

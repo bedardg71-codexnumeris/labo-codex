@@ -208,7 +208,7 @@ describe('#892 · l\'écrivain porte sa garde : il ne peut pas effacer un fichie
 });
 
 describe('#892 · l\'écran : la liste est vue, et les textes sont ceux que Grégoire a validés', () => {
-    const fonction = tranche(ui, '    function proposerNettoyage() {', '       PREPARATION DES IMAGES', { longueurMin: 3000 });
+    const fonction = tranche(ui, '    async function proposerNettoyage() {', '       PREPARATION DES IMAGES', { longueurMin: 3000 });
 
     it('l\'écran passe par la sélection et ne trie plus par moitié', () => {
         expect(fonction).toContain('travauxStockage.selectionnerCopiesARetirer(');

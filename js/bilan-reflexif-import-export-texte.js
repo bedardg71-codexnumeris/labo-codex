@@ -818,7 +818,7 @@ function fermerModaleImport() {
     if (modale) modale.classList.remove('actif');
 }
 
-function appliquerImport() {
+async function appliquerImport() {
     var textarea = document.getElementById('bilan-import-textarea');
     var zoneErreurs = document.getElementById('bilan-import-erreurs');
     if (!textarea) return;
@@ -852,6 +852,8 @@ function appliquerImport() {
         + '\u2022 ' + nbBlocs + ' bloc(s)\n'
         + '\u2022 ' + nbQ + ' question(s) au total'
         + (nbQp > 0 ? ('\n\u2022 ' + nbQp + ' question(s) personnalis\u00e9e(s)') : '');
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('questionnaire'))) return;
     if (!confirm(msg)) return;
 
     etat.questionnaire = resultat.questionnaire;

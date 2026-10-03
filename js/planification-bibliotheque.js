@@ -407,6 +407,8 @@ async function supprimerAlignementDuTrimestre(carteId) {
         notifications.warning('Impossible de supprimer la dernière carte du trimestre actif.');
         return;
     }
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('carte'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer la carte',
         message: 'Supprimer définitivement la carte « ' + carte.nom + ' » du trimestre actif ?',
@@ -444,6 +446,8 @@ async function supprimerAlignementDeBibliotheque(id) {
     const messageSuppr = (id === ID_DEMO)
         ? 'Supprimer la carte démo de la bibliothèque ? Elle sera recréée au prochain chargement.'
         : 'Supprimer cette carte d\'alignement de la Bibliothèque ? Cette action est irréversible.';
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('carteBibliotheque'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer de la bibliothèque',
         message: messageSuppr,

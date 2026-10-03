@@ -881,7 +881,9 @@
     /**
      * Supprime un paramètre de configuration après confirmation
      */
-    function supprimerParametreConfig(cle, label) {
+    async function supprimerParametreConfig(cle, label) {
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if ((cle === 'enseignants' || cle === 'modalitesEvaluation' || /_modalitesEvaluation$/.test(cle)) && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('parametre'))) return;
         if (!confirm('Supprimer le paramètre « ' + label + ' » (' + cle + ') ?\n\nCette action est irréversible.')) {
             return;
         }
@@ -1405,7 +1407,7 @@
     /**
      * Ouvre la modal de confirmation de suppression
      */
-    function ouvrirModalSuppressionRessource(type, id) {
+    async function ouvrirModalSuppressionRessource(type, id) {
         const modal = document.getElementById('modal-suppression-ressource');
         if (!modal) {
             console.error('[donnees-v2] Modal de suppression non trouvée');
@@ -1467,6 +1469,8 @@
             return;
         }
 
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (dependances.length === 0 && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('ressource'))) return;
         // Stocker pour la confirmation
         ressourceASupprimer = {
             type,

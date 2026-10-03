@@ -1029,6 +1029,8 @@ async function supprimerEtudiantV2(da) {
     const index = etudiants.findIndex(e => e.da === da);
     const etudiant = etudiants[index];
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (index !== -1 && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('eleve'))) return;
     if (index === -1 || !confirm(`Supprimer ${_nomAfficheV2(etudiant)} ?`)) return;
 
     // Lot E2 : par le témoin commun ; rien d'autre ne change à la suppression.
