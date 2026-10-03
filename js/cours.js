@@ -528,6 +528,8 @@ async function supprimerFicheCoursAvecGarde(coursId) {
     }
 
     const details = plan.refs.map(r => '· ' + r.cle + ' : ' + r.retire.length + ' groupe(s)-cours vide(s) retiré(s)');
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('cours'))) return false;
     if (!confirm('Supprimer la fiche « ' + nom + ' » ?\n\n' +
         'Le cours est global : la fiche disparaît de TOUS les trimestres.\n' +
         (details.length ? '\nSera aussi retiré (aucune donnée d\'étudiant, d\'évaluation ou de présence) :\n' + details.join('\n') + '\n' : '') +

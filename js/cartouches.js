@@ -1681,6 +1681,8 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         survivance += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
     }
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('cartouche'))) return;
     if (confirm(`Supprimer la cartouche «${cartouche?.nom}» de sa grille « ${grille ? grille.nom : grilleId} » ?\n\n${survivance ? survivance + '\n' : ''}Cette action est irréversible.`)) {
         if (window.IDS_GABARITS_HARDCODES && window.IDS_GABARITS_HARDCODES.includes(cartoucheId)) {
             window.marquerRessourceSupprimee(cartoucheId);
@@ -4733,6 +4735,8 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     }
 
     // Confirmation
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('cartouche'))) return;
     if (!confirm(`Supprimer définitivement la cartouche «${cartouche.nom}» de sa grille « ${grille ? grille.nom : grilleId} » ?\n\n${portee ? portee + '\n' : ''}Cette action est irréversible.`)) {
         return;
     }
@@ -4786,6 +4790,8 @@ async function supprimerCartoucheDeBibliothequePartagee(id) {
             question = `Retirer «${nomCartouche}» de la Bibliothèque ?\n\nLe retrait est irréversible ; la cartouche reste dans sa grille « ${grille ? grille.nom : cartouche.grilleId} ».`;
         }
     }
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('cartoucheBibliotheque'))) return;
     if (!confirm(question)) return;
 
     // #468/CO-25 (21 août 2026) : poser le tombstone AVANT le retrait. Sans lui,

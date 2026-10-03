@@ -4,6 +4,17 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
+// #1007, second lot (3 oct. 2026) : ce banc ne juge pas le codex proposé avant une suppression
+// (jugé par 1007-propose-codex-avant-suppression.spec.js). Doublure « codex à jour » : la fenêtre
+// qui propose ne paraît pas, et le geste se déroule comme avant le lot.
+test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Codex) window.Codex.proposerAvantSuppression = async () => true;
+        });
+    });
+});
+
 // Sentinelle — supprimer une grille ne peut pas rendre ses cartouches introuvables
 // (24 août 2026).
 //

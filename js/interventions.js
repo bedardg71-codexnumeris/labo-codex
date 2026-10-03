@@ -1944,7 +1944,9 @@ function obtenirAbsencesMotiveesParDate(date) {
    =============================== */
 
 /** Supprimer intervention avec confirmation + rafraichir liste */
-function supprimerInterventionEtRafraichir(interventionId) {
+async function supprimerInterventionEtRafraichir(interventionId) {
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression(_enVueRencontres() ? 'rencontre' : 'intervention'))) return;
     if (confirm(V().supprimer)) {
         supprimerIntervention(interventionId);
         afficherListeInterventions();

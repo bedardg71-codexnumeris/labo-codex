@@ -568,17 +568,20 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         expect(apres).toEqual({ trimestreDuBanc: false, elevesDuBanc: null });
     });
 
-    test('témoin : le second lot n\'est pas commencé — une évaluation se supprime comme aujourd\'hui, sans codex à part', async ({ page }) => {
+    test('témoin : une évaluation ne demande pas de codex à part — le second lot lui PROPOSE la mise à jour (jugé par 1007-propose-codex-avant-suppression.spec.js)', async ({ page }) => {
         const ecoute = brancher(page);
         await demarrer(page);
         const evals = () => page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || []).map((e) => e.id));
         const avant = await evals();
         const cible = await page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || []).find((e) => !e.verrouillee).id);
         ecoute.reponses.push(true);
-        await page.evaluate((id) => supprimerEvaluation(id), cible);
+        await page.evaluate((id) => { supprimerEvaluation(id); }, cible);
+        // Aucun codex actif : la fenêtre qui propose, pas celle qui exige.
+        expect((await attendreFenetre(page, 'Écrire un codex avant de supprimer ?')).boutons)
+            .toEqual(['Annuler', 'Supprimer sans mettre à jour', 'Écrire un codex, puis supprimer']);
+        await cliquerDansFenetre(page, 'Supprimer sans mettre à jour');
         await expect.poll(() => ecoute.dialogues.length).toBe(1);
         expect(ecoute.dialogues[0].message).toMatch(/^Veux-tu vraiment supprimer .+\n\nCette action est irréversible\.$/s);
-        expect(await fenetre(page)).toBeNull();
         await expect.poll(async () => (await evals()).length).toBe(avant.length - 1);
         expect(await evals()).not.toContain(cible);
         expect(ecoute.erreurs).toEqual([]);
