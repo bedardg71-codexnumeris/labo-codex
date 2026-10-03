@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 10 h 15 : **1.176.0 EN LIGNE (#1007 SECOND LOT, 2a-1, LE CODEX PROPOSÉ), MESURÉ CHEZ NETLIFY SUR `7618e8d8` (PUBLIÉ À 10 h 12, CONSTATÉ À 10 h 13) ; VERDICT COMPLET VERT ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 11 h 15 : **#1007 LOT 2a-2 (LE CODEX PROPOSÉ SUR LES GESTES QUI RESTENT) COMMITÉ SUR `claude/1007-propose-codex-2` (`719c9544`), NON POUSSÉ ; VITEST VERT ; EN ATTENTE DE LA RELECTURE DE COWORK**
+
+**Où vit le travail** : la branche locale `claude/1007-propose-codex-2` (worktree `.claude/worktrees/1007-propose-codex-2`, `tests/node_modules` en lien vers l'arbre principal), partie de `main` à `6877d08c`. Ni push du code ni release (consigne : relecture croisée d'abord). Version 1.176.0, inchangée. Sur `main`, en local, non poussé : le commit de ce relais (consigne de Cowork, demande, BACKLOG, relais).
+
+**Fait** : les huit gestes de la consigne et `supprimerFichierImporte`, sans coupe (dix appels neufs à `Codex.proposerAvantSuppression`). Les jetons de reprise sont devenus async, et leurs six appelants attendent la promesse. Pour P6 et P16, la question passe du dispatcher à la fonction. Sentinelle : 62 essais. Banc WebKit neuf `1007-propose-codex-2a2.spec.js` ; P6 jugé en R4 du banc du registre. Onze mutations, onze rouges. Doublure « codex à jour » dans deux bancs voisins. Vitest 7 999 / 7 999. **Pas de verdict Playwright complet** (consigne).
+
+**Demande** : `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-propose-codex-2.md`. Mots à Grégoire : dix premières phrases (§ 3), les Nouvelles (§ 6). Suppositions : § 7 (P12 dans la fonction, après ses gardes, donc après la question de la case ; un seul codex proposé par import en lot).
+
+**Suite** : relecture de Cowork → mots acceptés → release minor (verdict complet, puis push et fusion).
+
+**Ménage** : worktree `1007-propose-codex` retiré, sa branche locale supprimée (fusionnée ; elle existe encore chez origin).
+
+**Signalé, non inscrit** : les runs planifiés de GitHub annulés côté WebKit depuis au moins le 26 sept. (audit d'ouverture) ; § 5 de la demande.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 10 h 15 : **1.176.0 EN LIGNE (#1007 SECOND LOT, 2a-1, LE CODEX PROPOSÉ), MESURÉ CHEZ NETLIFY SUR `7618e8d8` (PUBLIÉ À 10 h 12, CONSTATÉ À 10 h 13) ; VERDICT COMPLET VERT ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
 
 **Correction du verdict de Cowork** (`6dd4d519`) : sur les 36 portes, six écrivaient à partir d'une lecture faite avant l'attente (P1, P3, P4, P8, P37a, P37b) ; elles relisent après la question, sans texte changé. Tableau des 36 : § 11 de `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-propose-codex.md`. Essai WebKit neuf (une écriture pendant l'attente survit) ; mutation « relecture de P8 retirée » : rouge par l'assertion attendue. Mots : « Supprimer sans codex » sans codex actif.
 
