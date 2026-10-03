@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.175.0 (3 OCTOBRE 2026 ; en ligne depuis 4 h 33, mesuré chez Netlify : déploiement de production prêt sur `119d3c29` ; relue par Cowork, verte ; tes mots et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 3 h 25) — AVANT DE SUPPRIMER, UN CODEX À PART**
+
+**Ce que tu verras** : quand tu supprimes un trimestre, un groupe-cours, un groupe d'élèves, toute la liste ou toutes tes données, une fenêtre « Avant de supprimer, un codex à part » vient d'abord. L'application écrit ce codex sous un autre nom (elle te demande où), et **seulement ensuite** viennent les confirmations habituelles. « Annuler » ou un échec, à n'importe quelle étape : rien n'est supprimé. Ton codex habituel n'est pas touché. Le refus « mets d'abord ton codex à jour » du trimestre disparaît.
+
+**Vérifié comment** : au navigateur (WebKit), par les vrais boutons des cinq gestes : le banc du lot (sept essais) ; treize mutations, treize rouges ; relecture de Cowork verte, avec une mutation de son cru. Vitest complet vert sur la release (7 937). Verdict complet au navigateur : aucun échec, cinq tests verts au second essai seulement, aucun du lot.
+
+**Ta vérification** : une porte, en fenêtre privée de Chrome, sans tes vraies données : `plans de travail/PORTES-TERRAIN-2026-10-03-1007-codex-a-part.md` (Cowork publie la version à cocher). Elle supprime un trimestre d'essai, puis rouvre le codex à part dans un espace neuf pour voir le trimestre revenir.
+
+**Trouvé autour, inscrit** : un groupe-cours supprimé laisse ses élèves, évaluations et présences sans accès par l'écran ; la question « As-tu exporté tes données ? » de la réinitialisation, devenue redondante.
+
+**La suite** : le second lot (proposer de mettre le codex à jour avant une suppression ordinaire), sur une consigne de Cowork (#1007).
+
 ✅ **EN LIGNE EN 1.174.6 (2 OCTOBRE 2026 ; en ligne depuis 20 h 19, mesuré chez Netlify : déploiement de production prêt sur `e9146c4c` ; relue par Cowork, verte ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée) — TON CODEX EMPORTE AUSSI TA CORBEILLE ET TA MODÉLISATION**
 
 **Ce que tu verras** : rien de neuf à l'écran. Les copies mises à la corbeille et les fichiers ouverts en Modélisation partent maintenant dans le codex (et dans « Exporter une sélection »), et reviennent quand tu l'ouvres sur un autre appareil. Un codex écrit avant s'ouvre comme avant. Au passage, la fenêtre des rapports de bug archivés n'affiche plus leurs champs sans les échapper.
