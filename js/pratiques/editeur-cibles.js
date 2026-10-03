@@ -171,9 +171,15 @@
     /**
      * La question posée AVANT d'écrire, si une cible retirée porte des coches : elle
      * nomme la cible et le nombre d'étudiant·es (mots validés par Grégoire le 23 sept. 2026). Rien à demander → vrai.
-     * @returns {boolean} vrai si l'écran peut écrire
+     * #1007, lot 2b (3 oct. 2026) : une cible cochée porte des notes ; le codex est proposé
+     * AVANT cette question (même condition : la lecture des coches ci-dessus). Les coches
+     * sont relues après l'attente : la question nomme ce qui est vrai au moment de répondre.
+     * Une cible jamais enregistrée n'est pas dans `anciennes` : elle ne propose jamais rien.
+     * @returns {Promise<boolean>} vrai si l'écran peut écrire
      */
-    function confirmerRetraitCibles(pratiqueId, anciennes, nouvelles) {
+    async function confirmerRetraitCibles(pratiqueId, anciennes, nouvelles) {
+        const porteDesNotes = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles).length > 0;
+        if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('cible'))) return false;
         const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);
         if (retraits.length === 0) return true;
         const lignes = retraits.map(r => `« ${r.cible.nom || r.cible.id} » : cochée pour ${r.nbEleves} ${r.nbEleves > 1 ? 'étudiant·es' : 'étudiant·e'}`);

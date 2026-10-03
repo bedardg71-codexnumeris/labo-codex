@@ -467,6 +467,25 @@ function modifierCritere(id) {
     afficherFormCritere(id);
 }
 
+/**
+ * #1007, lot 2b — la ligne qu'on retire porte-t-elle des notes ? (lecture seule,
+ * `ligneEmployeeParUneEvaluation`, evaluation-sauvegarde.js)
+ */
+function _lignePorteDesNotes(ligne) {
+    return typeof window.ligneEmployeeParUneEvaluation === 'function' && window.ligneEmployeeParUneEvaluation(ligne);
+}
+
+/** #1007, lot 2b — le critère tel qu'il est écrit, lu avant l'attente de la fenêtre. */
+function _critereEnBase(grilleId, critereIndex) {
+    const g = (db.getSync(cle('grillesTemplates'), []) || []).find(x => x.id === grilleId);
+    return (g && g.criteres && g.criteres[critereIndex]) || null;
+}
+
+/** #1007, lot 2b — après l'attente, la ligne à cet index est-elle encore celle qu'on a lue ? */
+function _memeCritere(c, lu) {
+    return !lu || !!(c && (lu.id ? c.id === lu.id : (!c.id && c.nom === lu.nom)));
+}
+
 /* ===============================
    FONCTION: SUPPRIMER CRITÈRE
    Supprime un critère après confirmation
@@ -495,6 +514,11 @@ async function supprimerCritere(id) {
         return;
     }
 
+    // #1007, lot 2b : un critère qu'une évaluation emploie porte des notes ; le codex est
+    // proposé avant la question. Une grille neuve (`tempCriteres`) ne propose jamais rien.
+    const critereLu = grilleTemplateActuelle ? (grilleTemplateActuelle.criteres || []).find(c => c.id === id) : null;
+    const porteDesNotes = !!critereLu && _lignePorteDesNotes({ grilleId: grilleTemplateActuelle.id, critere: critereLu });
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('critere'))) return;
     if (confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {
         if (grilleTemplateActuelle) {
             // #957 : retiré de la version en base, pas de l'objet mémoire.
@@ -5226,6 +5250,11 @@ async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, cha
  * @param {number} sousCritereIndex - Index du sous-critère
  */
 async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
+    // #1007, lot 2b : un code de catégorie qu'une évaluation a saisi porte des notes.
+    const critereLu = _critereEnBase(grilleId, critereIndex);
+    const sousCritereLu = (critereLu && critereLu.sousCriteres && critereLu.sousCriteres[sousCritereIndex]) || null;
+    const porteDesNotes = !!sousCritereLu && _lignePorteDesNotes({ grilleId, critere: critereLu, sousCritereCode: sousCritereLu.code });
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('sousCritere'))) return;
     if (!confirm('Supprimer ce sous-critère ?')) return;
 
     let grille = null;
@@ -5235,6 +5264,10 @@ async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
 
         if (!g || !g.criteres || !g.criteres[critereIndex] ||
             !g.criteres[critereIndex].sousCriteres) return undefined;
+        // Relu après l'attente : la ligne a changé de place, rien n'est retiré.
+        if (!_memeCritere(g.criteres[critereIndex], critereLu)) return undefined;
+        const sc = g.criteres[critereIndex].sousCriteres[sousCritereIndex];
+        if (sousCritereLu && !(sc && sc.code === sousCritereLu.code)) return undefined;
 
         // Supprimer le sous-critère
         g.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
@@ -5300,6 +5333,10 @@ async function ajouterCritereGrille(grilleId) {
  * @param {number} critereIndex - Index du critère à supprimer
  */
 async function supprimerCritereGrille(grilleId, critereIndex) {
+    // #1007, lot 2b : un critère qu'une évaluation emploie porte des notes.
+    const critereLu = _critereEnBase(grilleId, critereIndex);
+    const porteDesNotes = !!critereLu && _lignePorteDesNotes({ grilleId, critere: critereLu });
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('critere'))) return;
     if (!confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {
         return;
     }
@@ -5309,6 +5346,8 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
         if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
+        // Relu après l'attente : la ligne a changé de place, rien n'est retiré.
+        if (!_memeCritere(g.criteres[critereIndex], critereLu)) return undefined;
 
         // Supprimer le critère
         g.criteres.splice(critereIndex, 1);
