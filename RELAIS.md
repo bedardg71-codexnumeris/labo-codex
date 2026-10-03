@@ -7,7 +7,27 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 12 h 35 : **1.177.0 EN LIGNE (#1007 LOT 2a-2, LE CODEX PROPOSÉ SUR LES GESTES QUI RESTENT), MESURÉ CHEZ NETLIFY SUR `99a21e47` (PUBLIÉ À 12 h 27, CONSTATÉ À 12 h 28) ; VERDICT COMPLET VERT ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 17 h 50 : **LE BOUTON « TOUT LE MONDE PRÉSENT » EN ATTENTE DE GRÉGOIRE : IL PASSE SUR QUATRE LIGNES À 768 ET 390 px ; RIEN DE LIVRÉ, 1.177.0 RESTE EN LIGNE**
+
+**Consigne** : Cowork, 17 h 39 (« Tout le monde présent (N pér.) », infobulles « Mettre tout le monde présent (N périodes) » et « Réinitialiser (tout le monde absent) »). Point 3 de la consigne : arrêt si le bouton casse l'en-tête.
+
+**Mesure** (WebKit, pack démo, Suivi › Saisie des présences, séance à 2 périodes ; l'ancien libellé mesuré dans la même page) :
+
+| Largeur | Ancien « Tous 2 pér. » | Neuf « Tout le monde présent (2 pér.) » |
+|---|---|---|
+| 1024 px | 1 ligne, bouton 96 × 28, colonne 160 px | 1 ligne, bouton 223 × 28, colonne **246 px** (+86, prise sur « Notes ») |
+| 768 px | 2 lignes, bouton 82 × 44, en-tête 128 px | **4 lignes**, bouton 82 × 76, en-tête **160 px** |
+| 390 px | 2 lignes (le tableau défile déjà à l'horizontale, avant comme après) | **4 lignes**, en-tête 160 px |
+
+Aucun débordement, aucun texte coupé ; c'est la cassure en quatre lignes (« Tout le / monde / présent (2 / pér.) ») qui arrête le lot. **La forme courte revient à Grégoire.**
+
+**Où vit le travail** : branche locale `claude/bouton-tout-le-monde-present` (`ed058d0a`, non poussée), worktree `.claude/worktrees/bouton-presents`. Les trois libellés de `js/saisie-presences.js` et le jeton anti-cache ; aucun essai ne citait l'ancien libellé.
+
+**Autre occurrence affichée trouvée, non changée** : le gabarit statique du même bouton dans `index.html` (« Tous 2h », infobulle « Mettre tous présents »), réécrit par le rendu de la séance à chaque affichage.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 12 h 35 : **1.177.0 EN LIGNE (#1007 LOT 2a-2, LE CODEX PROPOSÉ SUR LES GESTES QUI RESTENT), MESURÉ CHEZ NETLIFY SUR `99a21e47` (PUBLIÉ À 12 h 27, CONSTATÉ À 12 h 28) ; VERDICT COMPLET VERT ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
 
 **Relecture** : verte sans correction (Cowork, 11 h 24). Quatre phrases retouchées mot pour mot (`remplacement`, `seance`, `annotationsPage`, `registreLongitudinal`) ; R4 du banc du registre suit.
 
