@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 4 h 44 : **1.175.0 EN LIGNE (#1007 PREMIER LOT, LE CODEX À PART), MESURÉ CHEZ NETLIFY SUR `119d3c29` À 4 h 33 ; VERDICT COMPLET VERT (0 ÉCHEC, 5 INSTABLES, AUCUN DU LOT) ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 7 h 50 : **#1007 SECOND LOT, 2a-1 (LE CODEX PROPOSÉ, 36 PORTES) COMMITÉ SUR `claude/1007-propose-codex` (`22de2db9`), NON POUSSÉ ; VITEST VERT ; EN ATTENTE DE LA RELECTURE DE COWORK**
+
+**Où vit le travail** : la branche locale `claude/1007-propose-codex` (worktree `.claude/worktrees/1007-propose-codex`), partie de `main` à `bd810533`. Ni push du code ni release (consigne : relecture croisée d'abord). Version 1.175.0, inchangée. Sur `main`, en local, non poussés : `bd810533` (mise en place de la consigne) et le commit de ce relais (demande, BACKLOG, relais).
+
+**Fait** : la fenêtre « Mettre ton codex à jour avant de supprimer ? » branchée sur 36 portes, par une seule fonction (`Codex.proposerAvantSuppression`). La sentinelle et le banc WebKit neufs sont verts ; sept mutations au total, toutes rouges. Les bancs voisins sont corrigés et verts. Vitest 7 976 / 7 976. **Pas de verdict Playwright complet** (consigne) : la suite peut encore trouver un banc que mon grep n'a pas vu.
+
+**Coupe** : la remesure compte une cinquantaine de portes. Dix gestes partent en 2a-2 (P5, P6, P10 à P14, P16, P21), inscrits sous #1007 avec trois portes absentes de l'inventaire.
+
+**Demande** : `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-propose-codex.md`. Mots à Grégoire : les variantes (§ 4), la fenêtre sans codex (§ 5), les Nouvelles (§ 7).
+
+**Suite** : relecture de Cowork → mots acceptés → 2a-2, ou la release de 2a-1 seul, selon son choix.
+
+**Ménage** : le worktree `.claude/worktrees/1014-codex-complet` est fusionné, propre, retirable (audit d'ouverture). `tests/node_modules` du worktree du lot est un lien vers celui de l'arbre principal.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 4 h 44 : **1.175.0 EN LIGNE (#1007 PREMIER LOT, LE CODEX À PART), MESURÉ CHEZ NETLIFY SUR `119d3c29` À 4 h 33 ; VERDICT COMPLET VERT (0 ÉCHEC, 5 INSTABLES, AUCUN DU LOT) ; BRANCHE FUSIONNÉE ; PORTE TERRAIN ÉCRITE (MARKDOWN), ARTEFACT À COWORK**
 
 **Verdict** : `pousser.sh` sur `119d3c29`, rendu à 4 h 32 : 0 échec. Verts au second essai seulement : `dossier-912-synthese-sans-copie`, `evaluation-961-retroaction-ne-suit-plus-les-niveaux`, `horaire-duree-derivee-540C`, `lot-e1-conception-creer-ou-modifier`, `source-unique-codes`. La spec du lot (`1007-codex-a-part-avant-suppression`) n'en est pas.
 
