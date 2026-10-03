@@ -3278,10 +3278,10 @@ function _memoriserTentative() {
     catch (e) { /* stockage de session refusé : la mémoire vive suffit */ }
 }
 
-function _debuterTentative(forcerDialogue) {
+function _debuterTentative(geste) {
     _derniereTentative = {
         debut: new Date().toISOString(),
-        geste: forcerDialogue ? 'Enregistrer sous' : 'Mettre à jour le codex',
+        geste: geste,
         etape: 'début',
         tailleEstimeeOctets: null,
         tailleOctets: null,
@@ -3348,55 +3348,49 @@ function _direNonMisAJour(raison) {
     }
 }
 
-async function _mettreAJourLeCodex(forcerDialogue) {
-    _fermerMenu();
-    _debuterTentative(forcerDialogue);
-
-    // #1012 — l'avertissement : des copies attendues n'ont pas de fichier dans l'application.
-    // Mots acceptés par Grégoire le 1er oct. 2026 (17 h 52). Il avertit sans refuser : un refus
-    // bloquerait pour toujours quelqu'un dont des copies sont vraiment perdues. « Annuler » a le
-    // focus (variante `danger`) : une touche Entrée donnée par réflexe n'écrit rien.
-    var avertissementRefuse = false;
-    var confirmerCopiesManquantes = async function(manquantes, attendues) {
-        var avertissement = construireAvertissementCopiesManquantes(manquantes, attendues);
-        var accepte = await uiDialogues.confirmerAction({
-            titre: avertissement.titre,
-            message: avertissement.message,
-            texteAnnuler: 'Annuler',
-            texteConfirmer: avertissement.texteConfirmer,
-            variante: 'danger',
-            preformate: true
-        }) === true;
-        avertissementRefuse = !accepte;
-        return accepte;
+/**
+ * #1012 — l'avertissement : des copies attendues n'ont pas de fichier dans l'application.
+ * Mots acceptés par Grégoire le 1er oct. 2026 (17 h 52). Il avertit sans refuser : un refus
+ * bloquerait pour toujours quelqu'un dont des copies sont vraiment perdues. « Annuler » a le
+ * focus (variante `danger`) : une touche Entrée donnée par réflexe n'écrit rien.
+ * #1007 : partagé par la mise à jour et le codex à part, comme toute écriture de codex.
+ * @returns {{confirmer: function(number, number): Promise<boolean>, refuse: function(): boolean}}
+ */
+function _avertissementDesCopies() {
+    var refuse = false;
+    return {
+        confirmer: async function(manquantes, attendues) {
+            var avertissement = construireAvertissementCopiesManquantes(manquantes, attendues);
+            var accepte = await uiDialogues.confirmerAction({
+                titre: avertissement.titre,
+                message: avertissement.message,
+                texteAnnuler: 'Annuler',
+                texteConfirmer: avertissement.texteConfirmer,
+                variante: 'danger',
+                preformate: true
+            }) === true;
+            refuse = !accepte;
+            return accepte;
+        },
+        refuse: function() { return refuse; }
     };
+}
 
-    var resultat;
-    try {
-        resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: confirmerCopiesManquantes });
-    } catch (e) {
-        console.error('📂 Erreur enregistrement codex:', e);
-        _finirTentative('échec de la préparation du fichier', e);
-        // Le message du navigateur reste dans la tentative (rapport de bug), pas à l'écran.
-        _direNonMisAJour('le fichier n\'a pas pu être préparé. Tes données restent dans l\'application. ' +
-                         'Si ça se répète, utilise « Signaler un bug » : le détail y sera.');
-        return;
-    }
-    // Avertissement ou aperçu refusé par l'usager : les seules sorties sans message.
-    if (!resultat) {
-        _finirTentative(avertissementRefuse ? 'avertissement des copies manquantes refusé par l\'usager'
-                                            : 'aperçu refusé par l\'usager');
-        return;
-    }
-
-    // #1012 — tant que des copies manquent, l'application demande toujours où écrire : jamais
-    // dans le fichier tenu (qui reste tenu, pour le jour où les copies seront revenues), et la
-    // destination choisie n'est pas adoptée. C'est ce qui rend utile la dernière phrase de
-    // l'avertissement (« donne un autre nom à celui-ci »). Décision de Cowork, 1er oct. 2026.
-    var copiesManquent = resultat.copies.manquantes > 0;
-    var demanderOuEcrire = forcerDialogue || copiesManquent;
-    var avaitHandle = !!_fileHandle && !demanderOuEcrire;
-
+/**
+ * L'écriture d'un codex préparé par `genererCodex`, jusqu'au bout : le fichier est écrit, ou
+ * l'usager renonce. Le même chemin pour la mise à jour et pour le codex à part (#1007), sur
+ * chaque navigateur : la fenêtre de choix (Chrome, Edge), la feuille de partage (iPad), le
+ * téléchargement dit trouvé (« Il y est »). Un échec se dit, et propose « Réessayer » ou
+ * « Télécharger à la place ».
+ * @param {Object} resultat - ce que rend `genererCodex`
+ * @param {Object} reglage
+ * @param {boolean} reglage.forcerDialogue - demander où écrire, même si un fichier est tenu
+ * @param {boolean} reglage.sansAdoption - la destination choisie n'est pas tenue ensuite
+ * @param {function(string): {titre: string, message: string}} reglage.echec - les mots de
+ *   l'échec, selon la taille dite ; appelée quand aucun fichier n'a été écrit
+ * @returns {Promise<{ecrit: boolean, methode?: string}>}
+ */
+async function _ecrireLeCodexPrepare(resultat, reglage) {
     var taille = window.FichierSortant.tailleEnviron(resultat.blob.size);
     // Lot J0 bis (#988) : la fenêtre du toucher frais. Mots acceptés par Grégoire le
     // 30 sept. 2026. « Enregistrer » résout dans son clic : le partage part dans le geste.
@@ -3419,7 +3413,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
             else _masquerProgression();
         } catch (e) { /* le partage continue sans le message */ }
     };
-    var options = { forcerDialogue: demanderOuEcrire, sansAdoption: copiesManquent, sansRepli: true, toucherFrais: toucherFrais, attentePartage: attentePartage };
+    var options = { forcerDialogue: reglage.forcerDialogue, sansAdoption: reglage.sansAdoption, sansRepli: true, toucherFrais: toucherFrais, attentePartage: attentePartage };
     while (true) {
         _noterTentative({
             etape: 'enregistrement du fichier',
@@ -3439,7 +3433,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         if (sauvegarde.methode === 'annule') {
             _finirTentative(sauvegarde.toucherRefuse ? 'fenêtre « Ton codex est prêt » refusée par l\'usager'
                                                      : 'fenêtre de choix refusée par l\'usager', sauvegarde.erreur);
-            return;
+            return { ecrit: false };
         }
 
         var ecrit = sauvegarde.methode === 'fsapi' || sauvegarde.methode === 'share';
@@ -3450,23 +3444,16 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         }
 
         if (ecrit) {
-            await _marquerCodexAJour(resultat);
-            if (window.temoinEnregistrement) window.temoinEnregistrement.fermerSi(CLE_TEMOIN_CODEX);
             _finirTentative(sauvegarde.methode === 'download' ? 'téléchargement confirmé par l\'usager' : 'réussie');
-            var methodeLabel = avaitHandle ? 'même fichier' :
-                               sauvegarde.methode === 'fsapi' ? (forcerDialogue ? 'nouveau fichier' : 'fichier choisi') :
-                               sauvegarde.methode === 'share' ? 'Fichiers' : 'Téléchargements';
-            notifications.succes('Codex mis à jour', _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel);
-            return;
+            return { ecrit: true, methode: sauvegarde.methode };
         }
 
-        // Aucun fichier écrit : le témoin le dit et reste ; le menu garde « pas à jour ».
+        // Aucun fichier écrit : on le dit, et on propose de réessayer.
         _finirTentative(sauvegarde.methode === 'download' ? 'téléchargement non trouvé par l\'usager' : 'échec de l\'écriture du fichier', sauvegarde.erreur);
-        _direNonMisAJour('le fichier (' + taille + ') n\'a pas été enregistré. Tes données restent dans l\'application.');
+        var echec = reglage.echec(taille);
         var geste = await uiDialogues.demanderAction({
-            titre: 'Codex non mis à jour',
-            message: 'Le fichier (' + taille + ') n\'a pas été enregistré. Si ton appareil manque d\'espace, ' +
-                     'libères-en, puis réessaie. Tes données restent dans l\'application.',
+            titre: echec.titre,
+            message: echec.message,
             actions: [
                 { valeur: 'telecharger', texte: 'Télécharger à la place' },
                 { valeur: 'reessayer', texte: 'Réessayer', principal: true }
@@ -3474,13 +3461,141 @@ async function _mettreAJourLeCodex(forcerDialogue) {
         });
         if (geste === 'reessayer') {
             // Sans `toucherFrais` : le clic sur « Réessayer » en est un, et le partage le suit aussitôt.
-            options = { forcerDialogue: demanderOuEcrire, sansAdoption: copiesManquent, sansRepli: true, attentePartage: attentePartage };
+            options = { forcerDialogue: reglage.forcerDialogue, sansAdoption: reglage.sansAdoption, sansRepli: true, attentePartage: attentePartage };
         } else if (geste === 'telecharger') {
             options = { telechargementDirect: true };
         } else {
-            return;
+            return { ecrit: false };
         }
     }
+}
+
+async function _mettreAJourLeCodex(forcerDialogue) {
+    _fermerMenu();
+    _debuterTentative(forcerDialogue ? 'Enregistrer sous' : 'Mettre à jour le codex');
+
+    var avertissement = _avertissementDesCopies();
+    var resultat;
+    try {
+        resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer });
+    } catch (e) {
+        console.error('📂 Erreur enregistrement codex:', e);
+        _finirTentative('échec de la préparation du fichier', e);
+        // Le message du navigateur reste dans la tentative (rapport de bug), pas à l'écran.
+        _direNonMisAJour('le fichier n\'a pas pu être préparé. Tes données restent dans l\'application. ' +
+                         'Si ça se répète, utilise « Signaler un bug » : le détail y sera.');
+        return;
+    }
+    // Avertissement ou aperçu refusé par l'usager : les seules sorties sans message.
+    if (!resultat) {
+        _finirTentative(avertissement.refuse() ? 'avertissement des copies manquantes refusé par l\'usager'
+                                               : 'aperçu refusé par l\'usager');
+        return;
+    }
+
+    // #1012 — tant que des copies manquent, l'application demande toujours où écrire : jamais
+    // dans le fichier tenu (qui reste tenu, pour le jour où les copies seront revenues), et la
+    // destination choisie n'est pas adoptée. C'est ce qui rend utile la dernière phrase de
+    // l'avertissement (« donne un autre nom à celui-ci »). Décision de Cowork, 1er oct. 2026.
+    var copiesManquent = resultat.copies.manquantes > 0;
+    var demanderOuEcrire = forcerDialogue || copiesManquent;
+    var avaitHandle = !!_fileHandle && !demanderOuEcrire;
+
+    var ecriture = await _ecrireLeCodexPrepare(resultat, {
+        forcerDialogue: demanderOuEcrire,
+        sansAdoption: copiesManquent,
+        echec: function(taille) {
+            // Le témoin le dit et reste ; le menu garde « pas à jour ».
+            _direNonMisAJour('le fichier (' + taille + ') n\'a pas été enregistré. Tes données restent dans l\'application.');
+            return {
+                titre: 'Codex non mis à jour',
+                message: 'Le fichier (' + taille + ') n\'a pas été enregistré. Si ton appareil manque d\'espace, ' +
+                         'libères-en, puis réessaie. Tes données restent dans l\'application.'
+            };
+        }
+    });
+    if (!ecriture.ecrit) return;
+
+    await _marquerCodexAJour(resultat);
+    if (window.temoinEnregistrement) window.temoinEnregistrement.fermerSi(CLE_TEMOIN_CODEX);
+    var methodeLabel = avaitHandle ? 'même fichier' :
+                       ecriture.methode === 'fsapi' ? (forcerDialogue ? 'nouveau fichier' : 'fichier choisi') :
+                       ecriture.methode === 'share' ? 'Fichiers' : 'Téléchargements';
+    notifications.succes('Codex mis à jour', _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel);
+}
+
+/* ===============================
+   #1007 (PREMIER LOT) — AVANT DE SUPPRIMER, UN CODEX À PART
+   ===============================
+   Cinq gestes effacent un trimestre, un groupe ou toutes les données : supprimer un
+   trimestre, un groupe-cours, « Supprimer un groupe… », « Vider la liste », « Réinitialiser
+   toutes les données ». Décision de Grégoire (2 oct. 2026) : ils EXIGENT un fichier à part,
+   sous un autre nom, écrit sans être adopté (la mise à jour suivante n'y touche pas),
+   confirmé avant que la suppression puisse se faire. Une seule fonction pour les cinq.
+   Mots de la fenêtre acceptés par Grégoire le 2 oct. 2026 (20 h 28).
+   =============================== */
+
+/** Le nom du codex à part : le nom habituel, suivi de « avant-suppression » (la date suit, `_genererNomFichier`). */
+function _nomDuCodexAPart() {
+    return (_etat.nom || _genererNomCodex()) + ' avant-suppression';
+}
+
+/**
+ * La fenêtre, puis l'écriture du codex à part. L'appelant ne supprime que sur `true`.
+ * Rien n'est adopté, et l'état « à jour » du codex habituel n'est pas touché : ce fichier
+ * n'est pas le codex de l'espace.
+ * @param {string} premierePhrase - ce que le geste efface (la variante de la première phrase)
+ * @returns {Promise<boolean>} true seulement si le fichier à part est écrit (téléchargement :
+ *   dit trouvé, « Il y est ») ; « Annuler » ou un échec, à n'importe quelle étape : false
+ */
+async function ecrireCodexAPartAvantSuppression(premierePhrase) {
+    var accepte = await uiDialogues.confirmerAction({
+        titre: 'Avant de supprimer, un codex à part',
+        message: premierePhrase + '\n' +
+            'L\'application va d\'abord écrire un codex à part, sous un autre nom. ' +
+            'Tes prochaines mises à jour n\'y toucheront pas : il te permettra de revenir en arrière.',
+        texteAnnuler: 'Annuler',
+        texteConfirmer: 'Écrire le codex à part',
+        variante: 'danger',   // « Annuler » a le focus : une touche Entrée réflexe n'écrit rien
+        preformate: true
+    }) === true;
+    if (!accepte) return false;
+
+    _debuterTentative('Codex à part avant une suppression');
+    var avertissement = _avertissementDesCopies();
+    var resultat;
+    try {
+        resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer, nom: _nomDuCodexAPart() });
+    } catch (e) {
+        console.error('[Codex] Codex à part non préparé :', e);
+        _finirTentative('échec de la préparation du fichier', e);
+        await uiDialogues.demanderAction({
+            titre: 'Codex à part non écrit',
+            message: 'Le fichier n\'a pas pu être préparé : rien n\'a été supprimé. ' +
+                     'Si ça se répète, utilise « Signaler un bug » : le détail y sera.',
+            actions: []
+        });
+        return false;
+    }
+    if (!resultat) {
+        _finirTentative(avertissement.refuse() ? 'avertissement des copies manquantes refusé par l\'usager'
+                                               : 'aperçu refusé par l\'usager');
+        return false;
+    }
+
+    var ecriture = await _ecrireLeCodexPrepare(resultat, {
+        forcerDialogue: true,
+        sansAdoption: true,
+        echec: function(taille) {
+            return {
+                titre: 'Codex à part non écrit',
+                message: 'Le fichier (' + taille + ') n\'a pas été enregistré : rien n\'a été supprimé. ' +
+                         'Si ton appareil manque d\'espace, libères-en, puis réessaie.'
+            };
+        }
+    });
+    if (ecriture.ecrit) notifications.succes('Codex à part écrit', resultat.nomFichier);
+    return ecriture.ecrit;
 }
 
 /**
@@ -4311,6 +4426,7 @@ window.Codex = {
     actionEnregistrer: actionEnregistrer,
     derniereTentative: derniereTentative,
     actionEnregistrerSous: actionEnregistrerSous,
+    ecrireAPartAvantSuppression: ecrireCodexAPartAvantSuppression,   // #1007
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,
     actionRenommer: actionRenommer,

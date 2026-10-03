@@ -1538,7 +1538,15 @@ async function _restaurerBlobsDepuisZip(donnees) {
    RÉINITIALISATION
    =============================== */
 
-function reinitialiserDonnees() {
+async function reinitialiserDonnees() {
+    // #1007 (2 oct. 2026) : un codex à part d'abord (`Codex.ecrireAPartAvantSuppression`) ; les
+    // trois confirmations ensuite, telles qu'avant. Module du codex absent : rien n'est effacé.
+    if (typeof Codex === 'undefined' || !Codex || typeof Codex.ecrireAPartAvantSuppression !== 'function') return;
+    if (!(await Codex.ecrireAPartAvantSuppression(
+        'Réinitialiser efface pour de bon toutes tes données : tes trimestres, tes étudiant·es, tes évaluations, ' +
+        'tes présences, tes productions, tes captures, tes modèles et tes réglages.'
+    ))) return;
+
     if (!confirm('ATTENTION : Cette action va effacer TOUTES les données de l\'application.\n\nEs-tu sûr de vouloir continuer ?')) {
         return;
     }

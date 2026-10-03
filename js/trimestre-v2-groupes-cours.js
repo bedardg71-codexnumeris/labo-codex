@@ -840,10 +840,21 @@ function sauvegarderGroupeCoursV2() {
 }
 
 /**
+ * #1007 (2 oct. 2026) : avant de supprimer un groupe-cours, par l'une ou l'autre porte, un
+ * codex à part (`Codex.ecrireAPartAvantSuppression`). Module du codex absent : false, rien
+ * n'est supprimé (dans le doute, on refuse).
+ * @returns {Promise<boolean>} true seulement si le codex à part est écrit
+ */
+async function _codexAPartAvantSuppressionGroupeCours(nomGC) {
+    if (typeof Codex === 'undefined' || !Codex || typeof Codex.ecrireAPartAvantSuppression !== 'function') return false;
+    return await Codex.ecrireAPartAvantSuppression(`Supprimer le groupe-cours « ${nomGC} » l'efface pour de bon.`);
+}
+
+/**
  * Supprime le groupe-cours actuellement sélectionné
  * Beta 95.2 (8 jan 2026)
  */
-function supprimerGroupeCoursV2() {
+async function supprimerGroupeCoursV2() {
     if (!groupeCoursEnEditionId) {
         console.warn('[Trimestre V2] Aucun groupe-cours sélectionné pour suppression');
         return;
@@ -858,14 +869,15 @@ function supprimerGroupeCoursV2() {
         return;
     }
 
-    // Confirmation
+    // #1007 : le codex à part d'abord ; la confirmation ensuite, telle qu'avant.
     const nomGC = gc.nom || gc.id;
+    if (!(await _codexAPartAvantSuppressionGroupeCours(nomGC))) return;
     if (!confirm(`Supprimer le groupe-cours "${nomGC}" ?\n\nCette action est irréversible.`)) {
         return;
     }
 
-    // Supprimer de la liste
-    const groupesCoursFiltre = groupesCours.filter(g => g.id !== groupeCoursEnEditionId);
+    // Supprimer de la liste (relue : l'écriture du codex à part a pris du temps)
+    const groupesCoursFiltre = db.getSync(cleGC, []).filter(g => g.id !== groupeCoursEnEditionId);
     db.setSync(cleGC, groupesCoursFiltre);
     if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleGC);   // lot F : geste hors témoin (supprimer un groupe-cours)
 
@@ -1045,7 +1057,8 @@ async function activerGroupeCoursDepuisBibliotheque(gcId) {
     ouvrirModalBibliothequeGroupeCours();
 }
 
-function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
+async function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
+    if (!(await _codexAPartAvantSuppressionGroupeCours(nomGC))) return;   // #1007
     if (!confirm(`Supprimer le groupe-cours "${nomGC}" ?\n\nCette action est irréversible.`)) {
         return;
     }

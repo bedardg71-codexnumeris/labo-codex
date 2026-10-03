@@ -1421,6 +1421,21 @@ function exporterEtudiantsV2() {
 }
 
 /**
+ * #1007 (2 oct. 2026) : avant « Vider la liste » et « Supprimer un groupe… », un codex à part
+ * (`Codex.ecrireAPartAvantSuppression`). Module du codex absent : false, rien n'est supprimé.
+ * @returns {Promise<boolean>} true seulement si le codex à part est écrit
+ */
+async function _codexAPartAvantSuppressionEtudiants(premierePhrase) {
+    if (typeof Codex === 'undefined' || !Codex || typeof Codex.ecrireAPartAvantSuppression !== 'function') return false;
+    return await Codex.ecrireAPartAvantSuppression(premierePhrase);
+}
+
+/** « tes 12 étudiant·es » / « ton étudiant·e » ; `ses`/`son` pour un groupe. */
+function _sesEtudiantsV2(n, possessifs) {
+    return n === 1 ? possessifs[0] + ' étudiant·e' : possessifs[1] + ' ' + n + ' étudiant·es';
+}
+
+/**
  * Réinitialise la liste des étudiants
  */
 async function reinitialiserEtudiantsV2() {
@@ -1434,6 +1449,10 @@ async function reinitialiserEtudiantsV2() {
     // confirmation serait effacé — mais c'est ce que « supprimer tous les
     // étudiants » veut dire. Passer par la file ne changerait rien au résultat.
     const etudiants = await db.get(cleEtud) || [];
+    // #1007 : le codex à part d'abord ; la confirmation ensuite, telle qu'avant.
+    if (!(await _codexAPartAvantSuppressionEtudiants(
+        `Vider la liste efface pour de bon toute la liste : ${_sesEtudiantsV2(etudiants.length, ['ton', 'tes'])}, de tous les groupes.`
+    ))) return;
     if (!confirm(`Supprimer les ${etudiants.length} étudiant(s) ? Cette action est irréversible.`)) return;
 
     // Lot E2 : par le témoin commun ; le message ne part qu'après l'écriture.
@@ -1483,6 +1502,10 @@ async function supprimerGroupeSelectionneV2() {
 
     // #872 B : la question nomme le groupe par son libellé (numéro ET cours). Le « 00001 » d'un
     // autre cours n'est pas touché — la mention « répartis dans N cours » de #885 n'a plus d'objet.
+    // #1007 : le codex à part d'abord ; la confirmation ensuite, telle qu'avant.
+    if (!(await _codexAPartAvantSuppressionEtudiants(
+        `Supprimer le groupe « ${libelleGroupe} » efface pour de bon ${_sesEtudiantsV2(etudiantsDuGroupe.length, ['son', 'ses'])}.`
+    ))) return;
     if (!confirm(`Supprimer les ${etudiantsDuGroupe.length} étudiant(s) du groupe ${libelleGroupe} ? Cette action est irréversible.`)) {
         return;
     }

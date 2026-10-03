@@ -146,6 +146,9 @@ test('#872 B · deux cours portent « 00001 » : deux entrées, liste, ajout, é
 
         // 5 · « SUPPRIMER LE GROUPE » sur le 00001 du cours A laisse celui du cours B intact.
         await choisir(r.libelleA);
+        // #1007 : le codex à part précède la suppression ; il est éprouvé par son propre banc
+        // (1007-codex-a-part-avant-suppression.spec.js). Ici, une doublure qui dit « écrit ».
+        Codex.ecrireAPartAvantSuppression = async (phrase) => { r.codexAPart = phrase; return true; };
         champ('v2-btnSupprimerGroupe').click();
         await pause(1200);
         const apresSuppr = stock();
@@ -227,6 +230,7 @@ test('#872 B · deux cours portent « 00001 » : deux entrées, liste, ajout, é
     const question = dialogues.find(d => d.type === 'confirm');
     expect(question && question.message).toBe(`Supprimer les 2 étudiant(s) du groupe ${m.libelleA} ? Cette action est irréversible.`);
     expect(m.apresSuppr.resteA).toBe(0);
+    expect(m.codexAPart).toBe(`Supprimer le groupe « ${m.libelleA} » efface pour de bon ses 2 étudiant·es.`);
     expect(m.apresSuppr.resteB).toEqual(['8722001', '8722002', '8722003', '8722009']);
     expect(m.apresSuppr.resteDemo).toBe(m.nbDemo);
     expect(m.apresSuppr.options).not.toContain(m.libelleA);
