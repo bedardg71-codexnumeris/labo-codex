@@ -298,6 +298,19 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(erreurs).toEqual([]);
     });
 
+    // #1007 (2a-2, 3 oct. 2026) — la question n'est plus posée par le dispatcher (`data-confirm`) mais par
+    // `retirerEleveLongitudinal`, APRÈS la fenêtre du codex proposé (aucun codex actif dans ce banc : la
+    // fenêtre « sans codex »). « Annuler » : aucune question, rien ne bouge ; « Supprimer sans codex » :
+    // la question d'avant, mot pour mot.
+    const FENETRE_CODEX = '#overlay-ui-dialogue';
+    async function fenetreDuCodex(page, bouton) {
+        await page.waitForFunction((sel) => { const o = document.querySelector(sel); return !!o && o.getClientRects().length > 0; }, FENETRE_CODEX, { timeout: 10000 });
+        const f = await page.evaluate((sel) => { const o = document.querySelector(sel);
+            return { titre: o.querySelector('.modal-titre').textContent, texte: o.querySelector('.modal-section').textContent.replace(/\s+/g, ' ').trim() }; }, FENETRE_CODEX);
+        await page.locator(FENETRE_CODEX + ' .modal-actions button', { hasText: bouton }).click();
+        return f;
+    }
+
     test('R4 · lot 3 — « Retirer du registre » : le dialogue dit ce qu\'il emporte ; refusé, rien ne bouge ; accepté, l\'élève part et les trimestres restent', async ({ page }) => {
         const dialogues = { recus: [], accepter: false };
         const erreurs = await monter(page, { dialogues });
@@ -310,8 +323,18 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         const registreAvant = await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)));
         const retirerLea = () => page.evaluate((da) => Array.from(document.querySelectorAll('#rl-zone-inscrits .rl-eleve')).find((li) => li.dataset.da === da).querySelector('[data-action="retirerEleveLongitudinal"]').click(), DA1);
 
+        // #1007 (2a-2) : la fenêtre du codex d'abord ; « Annuler » : aucune question, rien ne bouge.
+        await retirerLea();
+        const f = await fenetreDuCodex(page, 'Annuler');
+        expect(f).toEqual({ titre: 'Écrire un codex avant de supprimer ?',
+            texte: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs. Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.' });
+        await page.waitForTimeout(300);
+        expect(dialogues.recus).toEqual([]);
+        expect(await page.evaluate(() => JSON.stringify(window.db.getSync('registreLongitudinal', null)))).toBe(registreAvant);
+
         // Refusé au dialogue : rien ne bouge.
         await retirerLea();
+        await fenetreDuCodex(page, 'Supprimer sans codex');
         await expect.poll(() => dialogues.recus.length).toBe(1);
         expect(dialogues.recus[0]).toMatch(/^Retirer Gagnon, Léa du registre \? Sa copie du \d{4}-\d{2}-\d{2} \(2 dossiers\) sera effacée et ne pourra pas être retrouvée\./);
         expect(dialogues.recus[0]).toContain('Son résultat ultérieur sera effacé aussi : 601-102-MQ · H2026 · 78,5.');
@@ -321,6 +344,7 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         // Accepté : l'élève, ses dossiers et ses résultats partent ; l'autre reste ; le choix en cours redevient « Inscrire au registre ».
         dialogues.accepter = true;
         await retirerLea();
+        await fenetreDuCodex(page, 'Supprimer sans codex');
         await page.waitForFunction(() => document.querySelectorAll('#rl-zone-inscrits .rl-eleve').length === 1, null, { timeout: 10000 });
         const registre = await page.evaluate(() => window.db.getSync('registreLongitudinal', null));
         expect(Object.keys(registre.eleves)).toEqual([DA2]);
@@ -445,7 +469,8 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
 
         const lireEcran = () => page.evaluate(() => {
             const c = document.getElementById('registre-longitudinal-conteneur');
-            const confirms = Array.from(c.querySelectorAll('[data-confirm]')).map((b) => b.getAttribute('data-confirm'));
+            // #1007 (2a-2) : la question de « Retirer du registre » vit dans `data-question` (posée par la fonction).
+            const confirms = Array.from(c.querySelectorAll('[data-confirm], [data-question]')).map((b) => b.getAttribute('data-confirm') || b.getAttribute('data-question'));
             return { texte: c.textContent, confirms: confirms.join(' | '), options: Array.from(c.querySelectorAll('#rl-zone-saisie select option')).map((o) => o.textContent) };
         });
         expect((await lireEcran()).texte).toContain('Gagnon, Léa');

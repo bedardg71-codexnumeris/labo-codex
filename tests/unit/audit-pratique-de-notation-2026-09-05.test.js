@@ -1076,10 +1076,10 @@ describe('F · le zéro qui a l\'air d\'un résultat', () => {
    G · LES JETONS DÉCIDENT QUELLE ÉVALUATION COMPTE
    ============================================================================================= */
 describe('G · reprise, retrait, héritage', () => {
-    it('G1 · retirer le jeton de la reprise (90) restaure l\'originale (50) : la note SOM passe de 87,43 à 63,66 (6430/101 ; ↻ #706 sans le brouillon — avant 86,57 → 63,04) — l\'originale n\'est plus « remplacée »', () => {
+    it('G1 · retirer le jeton de la reprise (90) restaure l\'originale (50) : la note SOM passe de 87,43 à 63,66 (6430/101 ; ↻ #706 sans le brouillon — avant 86,57 → 63,04) — l\'originale n\'est plus « remplacée »', async () => {
         const b = monter(jeuSOM(), { avecJetons: true });
         const avant = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
-        const ok = b.win.retirerJetonReprise('EV_S2_NEW');
+        const ok = await b.win.retirerJetonReprise('EV_S2_NEW');
         const evals = b.store.test_evaluationsSauvegardees;
         const orig = evals.find(e => e.id === 'EV_S2_OLD');
         const apres = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
@@ -1087,48 +1087,48 @@ describe('G · reprise, retrait, héritage', () => {
         expect(ok).toBe(true); expect(avant).toBe(87.43); expect(apres).toBe(63.66);   // avant #706 : 86.57 → 63.04
         expect(orig.remplaceeParId).toBeUndefined(); expect(orig.archivee).toBeUndefined();
     });
-    it('G2 · (N2, ↻ #720) la reprise ne recopie plus `jetonDelaiApplique` : après un jeton de délai puis une reprise, l\'élève a « 1 » délai utilisé pour un accordé (avant #720 : 2)', () => {
+    it('G2 · (N2, ↻ #720) la reprise ne recopie plus `jetonDelaiApplique` : après un jeton de délai puis une reprise, l\'élève a « 1 » délai utilisé pour un accordé (avant #720 : 2)', async () => {
         const jeu = jeuSOM(); jeu.evaluations = [ev('EV_ORIG', DA.SOM, 'P1', 60, 'D', { jetonDelaiApplique: true, delaiAccorde: true })];
         const b = monter(jeu, { avecJetons: true });
         const avant = b.win.compterJetonsUtilises(DA.SOM, 'delai');
-        const reprise = b.win.appliquerJetonReprise('EV_ORIG');
+        const reprise = await b.win.appliquerJetonReprise('EV_ORIG');
         const apres = b.win.compterJetonsUtilises(DA.SOM, 'delai');
         noter('G2', { avant, apres, repriseHerite: reprise && reprise.jetonDelaiApplique, repriseNote: reprise && reprise.noteFinale, repriseVerrou: reprise && reprise.verrouillee });
         expect(avant).toBe(1); expect(apres).toBe(1);   // avant #720 : 2
         expect(reprise.jetonDelaiApplique).toBeUndefined(); expect(reprise.delaiAccorde).toBeUndefined();
         expect(reprise.noteFinale).toBe(60); expect(reprise.verrouillee).toBe(false);
     });
-    it('G3 · (N5, ↻ #724) une originale déjà « remplacée » par réconciliation (#360) ne reçoit plus de jeton de reprise : refus, rien d\'écrit (avant #724 : reprise créée avec `remplaceeParId` hérité — invisible au calcul)', () => {
+    it('G3 · (N5, ↻ #724) une originale déjà « remplacée » par réconciliation (#360) ne reçoit plus de jeton de reprise : refus, rien d\'écrit (avant #724 : reprise créée avec `remplaceeParId` hérité — invisible au calcul)', async () => {
         const jeu = jeuSOM(); jeu.evaluations = [ev('EV_SURV', DA.SOM, 'P1', 80, 'M'), ev('EV_DOUBLON', DA.SOM, 'P1', 80, 'M', { remplaceeParId: 'EV_SURV', reconcilieParDoublon: true })];
         const b = monter(jeu, { avecJetons: true });
-        const reprise = b.win.appliquerJetonReprise('EV_DOUBLON');
+        const reprise = await b.win.appliquerJetonReprise('EV_DOUBLON');
         const p = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
         noter('G3', { repriseCreee: !!reprise, nbEvals: b.store.test_evaluationsSauvegardees.length, notifs: b.notifs.map(n => n.type + ':' + n.t), P: p });
         expect(reprise).toBeNull();   // avant #724 : reprise créée, remplaceeParId === 'EV_SURV'
         expect(b.store.test_evaluationsSauvegardees.map(e => e.id)).toEqual(['EV_SURV', 'EV_DOUBLON']);
         expect(b.notifs.map(n => n.type)).toEqual(['erreur']);
     });
-    it('G4 · (N8) `archiverOriginale: false` supprime l\'originale et laisse `repriseDeId` pointer un id disparu ; retirer ensuite le jeton nettoie sans restaurer', () => {
+    it('G4 · (N8) `archiverOriginale: false` supprime l\'originale et laisse `repriseDeId` pointer un id disparu ; retirer ensuite le jeton nettoie sans restaurer', async () => {
         const jeu = jeuSOM(); jeu.evaluations = [ev('EV_ORIG', DA.SOM, 'P1', 60, 'D')];
         const b = monter(jeu, { avecJetons: true });
-        const reprise = b.win.appliquerJetonReprise('EV_ORIG', false);
+        const reprise = await b.win.appliquerJetonReprise('EV_ORIG', false);
         const origSubsiste = !!b.store.test_evaluationsSauvegardees.find(e => e.id === 'EV_ORIG');
-        const ok = b.win.retirerJetonReprise(reprise.id);
+        const ok = await b.win.retirerJetonReprise(reprise.id);
         const apres = b.store.test_evaluationsSauvegardees.find(e => e.id === reprise.id);
         noter('G4', { repriseDeId: reprise.repriseDeId, origSubsiste, retrait: ok, apres: apres && { repriseDeId: apres.repriseDeId, jeton: apres.jetonRepriseApplique, note: apres.noteFinale }, notifs: b.notifs.map(n => n.t) });
         expect(reprise.repriseDeId).toBe('EV_ORIG'); expect(origSubsiste).toBe(false);
         expect(apres.repriseDeId).toBeUndefined(); expect(apres.noteFinale).toBe(60);
     });
-    it('G5 · (H2, #563, ↻ #725, ↻ lot B) écriture refusée au retrait : AUCUNE notification du module — l\'échec est dit par le témoin commun de `sauvegarderDonneesSelonMode` (avant #725 : « succès » d\'abord, puis l\'erreur ; avant le lot B : « Modification non enregistrée »)', () => {
+    it('G5 · (H2, #563, ↻ #725, ↻ lot B) écriture refusée au retrait : AUCUNE notification du module — l\'échec est dit par le témoin commun de `sauvegarderDonneesSelonMode` (avant #725 : « succès » d\'abord, puis l\'erreur ; avant le lot B : « Modification non enregistrée »)', async () => {
         const b = monter(jeuSOM(), { avecJetons: true, refuserEcriture: true });
-        const ok = b.win.retirerJetonReprise('EV_S2_NEW');
+        const ok = await b.win.retirerJetonReprise('EV_S2_NEW');
         noter('G5', { ok, notifs: b.notifs.map(n => n.type + ':' + n.t) });
         expect(ok).toBe(false);
         expect(b.notifs.map(n => n.type)).toEqual([]);   // avant #725 : ['succes', 'erreur'] ; avant le lot B : ['erreur']
     });
-    it('G6 · (↻ #617) écriture refusée au retrait : le fichier de la reprise RESTE actif, l\'évaluation aussi (avant #617 : fichier à la corbeille, évaluation intacte)', () => {
+    it('G6 · (↻ #617) écriture refusée au retrait : le fichier de la reprise RESTE actif, l\'évaluation aussi (avant #617 : fichier à la corbeille, évaluation intacte)', async () => {
         const b = monter(jeuSOM(), { avecJetons: true, refuserEcriture: true, avecFichiers: true, store: { test_fichiersTravaux: [{ id: 'F_REP', evaluationId: 'EV_S2_NEW', etudiantDA: DA.SOM, productionId: 'P2' }] } });
-        b.win.retirerJetonReprise('EV_S2_NEW');
+        await b.win.retirerJetonReprise('EV_S2_NEW');
         const repriseSubsiste = !!b.store.test_evaluationsSauvegardees.find(e => e.id === 'EV_S2_NEW');
         noter('G6', { fichiers: b.fichiers, repriseSubsiste });
         expect(b.fichiers).toEqual([]);   // avant #617 : [{ id: 'F_REP', geste: 'corbeille' }]

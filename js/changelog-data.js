@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.177 (#1007, lot 2a-2) — ligne proposée par Claude Code (§ 6 de la demande de
+            // relecture), ACCEPTÉE par Grégoire le 3 oct. 2026 à 11 h 25 (« oui », consigne de Cowork),
+            // posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.
+            version: '1.177',
+            couleur: 'vert',
+            titre: 'Ton codex à jour, avant d\'autres effacements',
+            items: [
+                'La proposition de mettre ton codex à jour avant d\'effacer s\'étend à la fusion de copies, aux pages retirées d\'une copie, aux jetons de reprise, au remplacement d\'un élément du même nom, à la réinitialisation d\'une séance, à «&nbsp;Effacer tout&nbsp;» sur une page annotée, au registre longitudinal et aux résultats du bilan réflexif.'
+            ]
+        },
+        {
             // 1.176 (#1007, second lot, 2a-1) — ligne proposée par Claude Code (§ 7 de la demande de
             // relecture), ACCEPTÉE par Grégoire le 3 oct. 2026 à 7 h 56 (« oui », consigne de Cowork),
             // posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.

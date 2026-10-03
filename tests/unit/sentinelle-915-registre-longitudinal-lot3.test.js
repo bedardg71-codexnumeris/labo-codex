@@ -274,7 +274,10 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
         expect(bouton.dataset.da).toBe(DA);
         // Ni .btn-ajouter ni .btn-supprimer : la garde CSS du mode archive les fermerait, et le registre n'est pas un trimestre.
         expect(bouton.className).not.toMatch(/btn-supprimer|btn-ajouter|btn-modifier/);
-        const dialogue = bouton.getAttribute('data-confirm');
+        // #1007 (2a-2) : la question est posée par la fonction (après le codex proposé), plus par
+        // le dispatcher ; l'attribut change de nom, les mots non.
+        expect(bouton.getAttribute('data-confirm')).toBeNull();
+        const dialogue = bouton.getAttribute('data-question');
         // Texte de Grégoire (1.146.1, relu avec Cowork le 18 sept.).
         expect(dialogue).toMatch(/^Retirer Assidu, Alice du registre \? Sa copie du \d{4}-\d{2}-\d{2} \(2 dossiers\) sera effacée et ne pourra pas être retrouvée\. Ses 3 résultats ultérieurs seront effacés aussi : /);
         expect(dialogue).toContain('601-102-MQ · H2025 · 78,5');

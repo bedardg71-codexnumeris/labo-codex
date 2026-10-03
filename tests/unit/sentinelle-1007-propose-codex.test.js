@@ -65,7 +65,18 @@ const PORTES = [
     { g: 'G1', f: 'js/liste-evaluations.js', sig: 'async function supprimerFichierDefinitivement(', cle: "'copieCorbeille'", question: 'const fichierCible = travauxStockage.obtenirCorbeille()', efface: 'await travauxStockage.supprimerDefinitivement(id)' },
     { g: 'G2', f: 'js/liste-evaluations.js', sig: 'async function viderTouteCorbeille(', cle: "'corbeille'", question: 'const nbEvalsLiees = db.getSync(', efface: 'await travauxStockage.viderCorbeille(' },
     { g: 'G3', f: 'js/modelisation.js', sig: 'async function supprimerFichierModelisation(', cle: "'fichierModelisation'", question: "if (!confirm('Supprimer ce fichier et ses annotations ?'))", efface: 'supprimerBlob(id)' },
-    { g: 'Configuration', f: 'js/donnees-v2.js', sig: 'async function supprimerParametreConfig(', cle: "'parametre'", question: "if (!confirm('Supprimer le paramètre « '", efface: 'db.setSync(cle, null)' }
+    { g: 'Configuration', f: 'js/donnees-v2.js', sig: 'async function supprimerParametreConfig(', cle: "'parametre'", question: "if (!confirm('Supprimer le paramètre « '", efface: 'db.setSync(cle, null)' },
+    // Lot 2a-2 (3 oct. 2026). `cles` : les clés d'un argument calculé (P10-P11).
+    { g: 'P10-P11', f: 'js/travaux-ui.js', sig: 'async function sauvegarderEdition(', cle: 'efface', cles: ['fusionCopies', 'pages'], question: 'if (!editionFichierId || editionPages.length === 0) return;\n\n        const fichier = travauxStockage.obtenirFichierParId(editionFichierId);', efface: 'await travauxStockage.stockerBlob(editionFichierId' },
+    { g: 'Copie importée', f: 'js/travaux-ui.js', sig: 'async function supprimerFichierImporte(', cle: "'copieImportee'", question: 'if (evalAssociee) {\n            const choix = confirm(', efface: 'await travauxStockage.supprimerFichierTravail(fichierId)' },
+    { g: 'P12', f: 'js/evaluation-jetons.js', sig: 'async function appliquerJetonReprise(', cle: "'repriseOriginale'", question: 'return appliquerJetonReprise(evaluationOriginaleId, archiverOriginale,', efface: 'evaluations.splice(indexOriginal, 1)' },
+    { g: 'P13 (sur l\'originale)', f: 'js/evaluation-jetons.js', sig: 'async function retirerJetonReprise(', cle: "'reprise'", question: "return retirerJetonReprise(evaluationId, { codexPropose: true });\n        }\n        const confirmer = confirm(\n            'Cette évaluation est l\\'ORIGINALE", efface: 'evaluations.splice(indexRepriseLiee, 1)' },
+    { g: 'P13 (sur la reprise)', f: 'js/evaluation-jetons.js', sig: 'async function retirerJetonReprise(', cle: "'reprise'", question: "return retirerJetonReprise(evaluationId, { codexPropose: true });\n        }\n        const confirmer = confirm(\n            `Retirer le jeton de reprise", efface: 'evaluations.splice(indexReprise, 1)' },
+    { g: 'P21', f: 'js/modal-doublon.js', sig: 'async function verifierEtGererDoublon(', cle: "'remplacement'", question: 'return resultat;', efface: 'return resultat;' },
+    { g: 'P5', f: 'js/saisie-presences.js', sig: 'async function reinitialiserSaisie(', cle: "'seance'", question: 'const ok = await uiDialogues.confirmerAction({', efface: '_armerEnregistrementPresences(dateStr, touches)' },
+    { g: 'P14', f: 'js/travaux-annotation.js', sig: 'async function effacerPage(', cle: "'annotationsPage'", question: 'if (fichierId !== fichierAvant', efface: '_viderPageCourante();' },
+    { g: 'P6', f: 'js/registre-longitudinal.js', sig: 'async function retirerEleveLongitudinal(', cle: "'registreLongitudinal'", question: 'if (el && el.dataset && el.dataset.question && !confirm(el.dataset.question))', efface: 'await retirerDuRegistre(da)' },
+    { g: 'P16', f: 'js/bilan-reflexif-rapport.js', sig: 'async function supprimerResultats(', cle: "'resultatsBilan'", question: "if (!confirm('Supprimer les r\\u00e9sultats import\\u00e9s ?')) return;", efface: 'db.removeSync(CLE_RESULTATS())' }
 ];
 
 // Relecture de Cowork (3 oct. 2026, 7 h 55) : la fenêtre peut attendre des minutes (une mise
@@ -79,7 +90,9 @@ const RELECTURES = [
     { g: 'P4', relit: 'db.getSync(cleHoraires, [])' },
     { g: 'P8', relit: "evaluations = db.getSync(cle('evaluationsSauvegardees'), []);" },
     { g: 'P37a', relit: 'index = window.planificationDonnees.getIndex();' },
-    { g: 'P37b', relit: 'index = window.planificationDonnees.getIndex();' }
+    { g: 'P37b', relit: 'index = window.planificationDonnees.getIndex();' },
+    // Lot 2a-2 : la séance affichée a changé pendant l'attente → rien n'est réinitialisé.
+    { g: 'P5', relit: "document.getElementById('date-cours').value !== dateStr" }
 ];
 
 /** Le corps d'une fonction : de sa signature à l'accolade fermante posée à la même indentation. */
@@ -127,12 +140,71 @@ describe('#1007, second lot — aucune porte n\'efface sans le codex proposé', 
         const registre = tranche(codex, 'var PROPOSITIONS_AVANT_SUPPRESSION = {', '\n};', { longueurMin: 500 });
         const cles = [...registre.matchAll(/^\s+(\w+):\s+\{ premiere: '/gm)].map((m) => m[1]);
         expect(cles.length).toBeGreaterThan(20);
-        const employees = new Set(PORTES.flatMap((p) => [...p.cle.matchAll(/'(\w+)'/g)].map((m) => m[1])));
+        const employees = new Set(PORTES.flatMap((p) => p.cles || [...p.cle.matchAll(/'(\w+)'/g)].map((m) => m[1])));
         for (const k of employees) expect(cles, `clé « ${k} » absente du registre`).toContain(k);
         for (const k of cles) expect([...employees], `clé « ${k} » du registre sans porte`).toContain(k);
         // la phrase : la variante, puis la seconde phrase acceptée le 2 oct.
         const fn = corps(codex, 'function messageDeLaProposition(');
         expect(fn).toContain("' Ton codex à jour pourra te ' + v.pronom + ' rendre, jusqu\\'à ta mise à jour suivante.'");
+    });
+
+    // Lot 2a-2 : les gestes sans question n'appellent la fenêtre que si quelque chose sera effacé.
+    // (Le banc WebKit le démontre sur la fusion et le jeton ; ici, la condition de chacun.)
+    it('P10-P11 : la fenêtre seulement si la fusion absorbe une copie ou si une page a été retirée', () => {
+        const src = lire('js/travaux-ui.js');
+        const c = corps(src, 'async function sauvegarderEdition(');
+        expect(sansCommentaires(c)).toContain(sansCommentaires("const efface = (editionModeFusion && editionFichiersASupprimer.length > 0) ? 'fusionCopies' : (editionPageRetiree ? 'pages' : null);"));
+        expect(sansCommentaires(corps(src, 'function supprimerPageEditeur('))).toContain('editionPages.splice(index,1);editionPageRetiree=true;');
+        // remis à faux partout où l'état de l'éditeur l'est (ouverture, fusion, fermeture, enregistrement)
+        expect(src.split('editionPageRetiree = false;').length).toBe(src.split('editionFichiersASupprimer = [];').length + 1);
+    });
+
+    it('P12 : la fenêtre seulement pour « supprimer l\'originale », après les gardes', () => {
+        const c = corps(lire('js/evaluation-jetons.js'), 'async function appliquerJetonReprise(');
+        const iAppel = position(c, APPEL);
+        expect(c.lastIndexOf('if (!archiverOriginale && !(options && options.codexPropose)) {', iAppel)).toBeGreaterThan(-1);
+        expect(position(c, 'maxParProduction')).toBeLessThan(iAppel);
+    });
+
+    it('P12, P13 : devenues async, chaque appel dans js/ attend la promesse (un objet Promise passerait pour un succès)', () => {
+        const nonAttendus = [];
+        for (const f of fs.readdirSync(path.join(racine, 'js'), { recursive: true })) {
+            if (!String(f).endsWith('.js')) continue;
+            lire(path.join('js', String(f))).split('\n').forEach((l, i) => {
+                const code = l.replace(/\/\/.*$/, '');
+                for (const m of code.matchAll(/(\S*\s*)\b(appliquerJetonReprise|retirerJetonReprise)\(/g)) {
+                    if (/function\s*$|await\s*$|return\s*$/.test(m[1]) || /^(window\.)?$/.test(m[1].trim()) && /function /.test(code)) continue;
+                    nonAttendus.push(`${f}:${i + 1} ${l.trim()}`);
+                }
+            });
+        }
+        expect(nonAttendus).toEqual([]);
+    });
+
+    it('P5, P14, P13 : rien à effacer, aucune fenêtre', () => {
+        const p5 = corps(lire('js/saisie-presences.js'), 'async function reinitialiserSaisie(');
+        expect(p5.lastIndexOf('if (seanceSaisie && typeof uiDialogues !== \'undefined\') {', position(p5, APPEL))).toBeGreaterThan(-1);
+        const p14 = corps(lire('js/travaux-annotation.js'), 'async function effacerPage(');
+        expect(position(p14, 'if (_compterAnnotationsPage() === 0) return;')).toBeLessThan(position(p14, APPEL));
+        const p13 = corps(lire('js/evaluation-jetons.js'), 'async function retirerJetonReprise(');
+        expect(p13).toContain('if (indexRepriseLiee !== -1 && !codexPropose) {');
+    });
+
+    it('P21 : seulement après « Remplacer l\'existante » ; « Annuler » rend null, l\'annulation que lisent les cinq appelants', () => {
+        const c = corps(lire('js/modal-doublon.js'), 'async function verifierEtGererDoublon(');
+        const ligne = c.split('\n').find((l) => l.includes(APPEL));
+        expect(ligne).toMatch(/^\s*if \(resultat && resultat\.action === 'ecraser' && .*\) return null;$/);
+        for (const f of ['js/echelles.js', 'js/grilles.js', 'js/cartouches.js', 'js/productions.js']) {
+            expect(lire(f), f).toMatch(/await verifierEtGererDoublon\([^\n]*\);\n(?:\s*\/\/[^\n]*\n)*\s*if \(resultat === null\)/);
+        }
+    });
+
+    it('P6, P16 : la question passe du dispatcher à la fonction, mots inchangés', () => {
+        const rapport = lire('js/bilan-reflexif-rapport.js');
+        expect(rapport).not.toMatch(/data-action="BilanReflexif\.supprimerResultats"[^>]*data-confirm/);
+        const registre = lire('js/registre-longitudinal.js');
+        expect(registre).toContain("retrait.setAttribute('data-question', MOTS.confirmerRetrait(");
+        expect(registre).not.toContain("retrait.setAttribute('data-confirm'");
     });
 
     it('le compte des appels dans js/ égale le registre de ce banc', () => {

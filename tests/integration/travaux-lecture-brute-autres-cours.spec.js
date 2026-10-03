@@ -74,6 +74,9 @@ test('bulle « Rétroaction » : l\'évaluation de l\'autre cours survit à l\'e
 
 test('supprimer une copie avec son évaluation : l\'évaluation de l\'autre cours survit', async ({ page }) => {
     await fixtureDeuxCours(page);
+    // #1007 (2a-2) : doublure « codex à jour ». Ce banc juge la lecture brute, pas la proposition du
+    // codex (jugée par sentinelle-1007-propose-codex) ; sans elle, la fenêtre attend une réponse.
+    await page.evaluate(() => { Codex.proposerAvantSuppression = async () => true; });
     await page.evaluate(async () => { await travauxUI.supprimerFichierImporte('F1'); });
 
     const evals = await lireEvaluations(page);

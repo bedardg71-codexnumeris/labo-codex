@@ -916,7 +916,7 @@ function gererChangementCheckboxJetonDelai() {
  * Gère le changement de la checkbox jeton de reprise
  * Applique ou retire le jeton selon l'état de la checkbox
  */
-function gererChangementCheckboxJetonReprise() {
+async function gererChangementCheckboxJetonReprise() {
     const checkbox = document.getElementById('checkboxJetonReprise');
     const evaluationId = window.evaluationEnCours?.idModification;
 
@@ -935,7 +935,7 @@ function gererChangementCheckboxJetonReprise() {
         );
 
         if (confirmer) {
-            const nouvelleEval = appliquerJetonReprise(evaluationId);
+            const nouvelleEval = await appliquerJetonReprise(evaluationId);   // #1007 (2a-2) : async
             if (nouvelleEval) {
                 // Charger la nouvelle évaluation dans le formulaire
                 setTimeout(() => {
@@ -954,7 +954,7 @@ function gererChangementCheckboxJetonReprise() {
     } else {
         // Retirer le jeton — si l'utilisateur annule le confirm, rien n'a
         // changé : la checkbox doit refléter l'état réel (jeton en place).
-        const retire = retirerJetonReprise(evaluationId);
+        const retire = await retirerJetonReprise(evaluationId);   // #1007 (2a-2) : async
         if (!retire) {
             checkbox.checked = true;
         }
@@ -975,12 +975,12 @@ function gererChangementCheckboxJetonReprise() {
  *   (29 août 2026), la case qui APPLIQUAIT ce jeton est retirée : une reprise
  *   ciblée ne peut plus naître, seules les anciennes subsistent.
  */
-function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
+async function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
 
     if (typeJeton === 'reprise') {
         // Utiliser le module evaluation-jetons.js pour retirer le jeton de reprise
         if (typeof retirerJetonReprise === 'function') {
-            retirerJetonReprise(evaluationId);
+            await retirerJetonReprise(evaluationId);
         } else {
             console.error('❌ Fonction retirerJetonReprise non disponible');
             notifications.erreur('Erreur', 'Module jetons non disponible');
