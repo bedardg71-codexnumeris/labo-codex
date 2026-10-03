@@ -28,7 +28,9 @@
             couleur: 'vert',
             titre: 'Ton codex à jour, avant d\'autres effacements',
             items: [
-                'La proposition de mettre ton codex à jour avant d\'effacer s\'étend à la fusion de copies, aux pages retirées d\'une copie, aux jetons de reprise, au remplacement d\'un élément du même nom, à la réinitialisation d\'une séance, à «&nbsp;Effacer tout&nbsp;» sur une page annotée, au registre longitudinal et aux résultats du bilan réflexif.'
+                'La proposition de mettre ton codex à jour avant d\'effacer s\'étend à la fusion de copies, aux pages retirées d\'une copie, aux jetons de reprise, au remplacement d\'un élément du même nom, à la réinitialisation d\'une séance, à «&nbsp;Effacer tout&nbsp;» sur une page annotée, au registre longitudinal et aux résultats du bilan réflexif.',
+                // 1.177.1 — ligne de Claude Code sur la consigne de Cowork de 17 h 48 (décision de Grégoire, « oui »).
+                'Dans la saisie des présences, le bouton qui met tout le monde présent dit «&nbsp;✓&nbsp;»&nbsp;; son infobulle et le lecteur d\'écran disent «&nbsp;Mettre tout le monde présent&nbsp;».'
             ]
         },
         {
