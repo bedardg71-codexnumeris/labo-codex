@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 20 h 21 : **1.174.6 EN LIGNE (#1014, LE CODEX COMPLET), MESURÉ CHEZ NETLIFY SUR `e9146c4c` À 20 h 19 ; VERDICT COMPLET VERT (0 ÉCHEC, 3 INSTABLES) ; BRANCHE FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 21 h 01 : **#1007 PREMIER LOT (LE CODEX À PART AVANT LES CINQ GESTES EXIGÉS) COMMITÉ SUR `claude/1007-codex-a-part` (`3a55b547`), NON POUSSÉ, EN ATTENTE DE LA RELECTURE DE COWORK ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE RELEASE**
+
+**Où vit le travail** : la branche locale `claude/1007-codex-a-part` (dans l'arbre principal, pas de worktree), un commit `3a55b547` sur `main` à `5d370562`. L'arbre principal est laissé sur `main`.
+
+**Demande de relecture** : `plans de travail/DEMANDE-RELECTURE-2026-10-02-1007-codex-a-part.md` (sur `main`). Les mots neufs du § 5 (quatre variantes, trois phrases d'échec et de réussite) et la ligne des Nouvelles (§ 10) sont à Grégoire.
+
+**Mesuré** : banc WebKit `1007-codex-a-part-avant-suppression.spec.js` 7/7 ; treize mutations rouges ; Vitest 7 937/7 937 ; `groupe-nomme-son-cours-872b` vert. **Pas** de verdict Playwright complet : il viendra avec la release.
+
+**Suite** : relecture de Cowork → mots acceptés → release (proposition : minor) → fusion ; puis le second lot de #1007 (les gestes du côté « propose », § 8 des décisions).
+
+---
+
+## (relais précédent) 2 OCT. 2026, 20 h 21 : **1.174.6 EN LIGNE (#1014, LE CODEX COMPLET), MESURÉ CHEZ NETLIFY SUR `e9146c4c` À 20 h 19 ; VERDICT COMPLET VERT (0 ÉCHEC, 3 INSTABLES) ; BRANCHE FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
 
 **Verdict** : `pousser.sh` sur `e9146c4c`, rendu à 20 h 17 : 0 échec. Vertes au second essai seulement : `codex-1014-codex-complet.spec.js` (« Exporter une sélection » emporte aussi la corbeille et la Modélisation — la spec neuve du lot ; le journal condensé ne garde pas l'erreur du premier essai), `cours-actif-hors-bibliotheque-916`, `evaluation-959-neutralite-chargeur`. ⮕ Si la spec du lot rougit encore au premier essai, c'est un vrai sujet (#685) : lire son « Error: » en `--retries=0 --repeat-each=5`.
 
