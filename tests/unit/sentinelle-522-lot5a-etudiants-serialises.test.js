@@ -125,6 +125,8 @@ async function monterEtudiants() {
         estEnModeDemo: () => false,
         genererIdUnique: (p) => (p || 'X') + Math.random().toString(36).slice(2, 8),
         alert: () => {}, confirm: () => true,
+        // #1007 : le codex à part précède la suppression d'un groupe (doublure : « écrit »).
+        Codex: { ecrireAPartAvantSuppression: async () => true },
         chargerListeEtudiantsV2: () => {},
         echapperHtml: (t) => String(t == null ? '' : t)
     });

@@ -289,14 +289,17 @@ describe('codex.js — tout appelant de la génération passe l\'avertissement (
         .filter((f) => String(f).endsWith('.js'))
         .map((f) => ({ nom: String(f), code: readFileSync(path.join(racine, 'js', String(f)), 'utf8') }));
 
-    it('un seul site appelle la génération, et il passe `confirmerCopiesManquantes`', () => {
+    it('deux sites appellent la génération (la mise à jour, le codex à part de #1007), et passent `confirmerCopiesManquantes`', () => {
         const appels = [];
         fichiersJs.forEach(({ nom, code }) => {
             code.split('\n').forEach((ligne) => {
                 if (/(^|[^.\w])genererCodex\(|Codex\.generer\(/.test(ligne) && !/function genererCodex\(/.test(ligne)) appels.push(nom + ' : ' + ligne.trim());
             });
         });
-        expect(appels).toEqual(['codex.js : resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: confirmerCopiesManquantes });']);
+        expect(appels).toEqual([
+            'codex.js : resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer });',
+            'codex.js : resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer, nom: _nomDuCodexAPart() });'
+        ]);
     });
 
     it('l\'export d\'une sélection demande toujours où écrire et n\'adopte jamais sa destination', () => {

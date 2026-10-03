@@ -94,7 +94,7 @@ describe('#390 B7 · identification incomplète : jamais un succès après un re
 });
 
 describe('#390 B6 · supprimer le groupe-cours ACTIF purge le couple groupeCoursActif+infoCours', () => {
-    it('la garde compare gcActif.id (plus jamais objet === id) et purge les deux clés', () => {
+    it('la garde compare gcActif.id (plus jamais objet === id) et purge les deux clés', async () => {
         const donnees = {
             groupesCours: [{ id: 'GC_1', coursId: 'C1' }],
             groupeCoursActif: { id: 'GC_1', coursId: 'C1' },
@@ -109,10 +109,12 @@ describe('#390 B6 · supprimer le groupe-cours ACTIF purge le couple groupeCours
             db, cle: (k) => k, confirm: () => true, echapperHtml: (s) => s,
             notifications: { succes: vi.fn(), erreur: vi.fn() },
             BibliothequeUI: { fermerModal: () => {}, creerModal: () => {}, renderCarteSelection: () => '' },
-            estEnModeDemo: () => false, genererIdUnique: (p) => p + 'X'
+            estEnModeDemo: () => false, genererIdUnique: (p) => p + 'X',
+            // #1007 : le codex à part précède la suppression (doublure : « écrit »).
+            Codex: { ecrireAPartAvantSuppression: async () => true }
         });
         win.changerGroupeCoursSelectionneV2('GC_1'); // passe GC_1 en édition
-        win.supprimerGroupeCoursV2();
+        await win.supprimerGroupeCoursV2();
         expect(donnees.groupeCoursActif).toBeNull();
         expect(donnees.infoCours).toBeNull();
         expect(donnees.groupesCours).toHaveLength(0);

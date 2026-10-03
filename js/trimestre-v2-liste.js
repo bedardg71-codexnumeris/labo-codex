@@ -378,35 +378,6 @@ function archiverTrimestreActif() {
 }
 
 /**
- * « À jour » au sens exact de l'état que le menu du codex affiche (« Ton codex est à
- * jour » : un codex actif, sans changement depuis sa dernière écriture — codex.js,
- * `_actualiserMenu`). Module absent : pas à jour, on refuse dans le doute.
- * @returns {{actif: boolean, aJour: boolean}}
- */
-function etatDuCodexPourSuppression() {
-    const etat = (typeof Codex !== 'undefined' && Codex && typeof Codex.etat === 'function') ? Codex.etat() : null;
-    const actif = !!(etat && etat.actif);
-    return { actif: actif, aJour: actif && !etat.modificationsNonSauvees };
-}
-
-/**
- * Le refus : une fenêtre de l'application, dont le bouton lance la mise à jour du
- * codex (ou sa création) par le chemin du menu. Mots validés par Grégoire le 30 sept.
- * 2026 ; la variante « sans codex », le 1er oct. 2026.
- */
-function refuserSuppressionCodexPasAJour(codexActif) {
-    uiDialogues.demanderAction({
-        titre: 'Mets d\'abord ton codex à jour',
-        message: codexActif
-            ? 'Supprimer un trimestre efface ses données pour de bon. Ton codex n\'a pas tes derniers changements : mets-le à jour, puis recommence.'
-            : 'Supprimer un trimestre efface ses données pour de bon. Tu n\'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence.',
-        actions: [{ valeur: 'mettre-a-jour', texte: 'Mettre à jour le codex', principal: true }]
-    }).then(function(geste) {
-        if (geste === 'mettre-a-jour') Codex.actionEnregistrer();
-    });
-}
-
-/**
  * 🆕 #361 (2 juillet 2026) : parcours de suppression DÉFINITIVE d'un trimestre.
  * Remplace le stub supprimerTrimestreActif (retiré — le trimestre ACTIF ne
  * peut justement PAS être supprimé, garde anti-actif dans trimestres.js).
@@ -414,15 +385,14 @@ function refuserSuppressionCodexPasAJour(codexActif) {
  * Parcours : garde anti-actif → garde du codex → confirmation → confirmation
  * forte (ressaisir le nom exact) → suppression → message d'état.
  *
- * LOT I BIS (D9, 30 sept. 2026) — LE FILET EST LE CODEX. La suppression est REFUSÉE
- * tant que le codex n'est pas à jour ; pas de codex : même refus. Elle ne télécharge
- * plus rien : l'ancien filet (`exporterTrimestreArchive`) rendait un fichier sans le
- * contenu des copies, qu'aucun écran ne sait rouvrir (#1006). Seul chemin de
- * suppression d'un trimestre (les quatre boutons « Supprimer… » mènent ici) : la
- * garde vit donc ici.
- * Banc : tests/integration/lot-i-bis-suppression-trimestre-codex-a-jour.spec.js.
+ * #1007 (2 oct. 2026) — LE FILET EST UN CODEX À PART. Avant les confirmations, un
+ * fichier à part, sous un autre nom, que les mises à jour suivantes ne touchent pas
+ * (`Codex.ecrireAPartAvantSuppression`) ; il remplace le refus « codex pas à jour » du
+ * lot I bis. Seul chemin de suppression d'un trimestre (les quatre boutons
+ * « Supprimer… » mènent ici).
+ * Banc : tests/integration/1007-codex-a-part-avant-suppression.spec.js.
  */
-function confirmerSuppressionTrimestre(id) {
+async function confirmerSuppressionTrimestre(id) {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const trimestre = trimestres.find(t => t.id === id);
 
@@ -440,19 +410,17 @@ function confirmerSuppressionTrimestre(id) {
         return;
     }
 
-    const codex = etatDuCodexPourSuppression();
-    if (!codex.aJour) {
-        refuserSuppressionCodexPasAJour(codex.actif);
-        return;
-    }
+    // Module du codex absent : rien n'est supprimé (dans le doute, on refuse).
+    if (typeof Codex === 'undefined' || !Codex || typeof Codex.ecrireAPartAvantSuppression !== 'function') return;
+    const ecrit = await Codex.ecrireAPartAvantSuppression(
+        `Supprimer le trimestre « ${trimestre.nom} » efface pour de bon ses étudiant·es, ses évaluations, ses présences, ses productions, ses captures et ses modèles.`
+    );
+    if (!ecrit) return;
 
-    // Mots validés par Grégoire le 1er oct. 2026. « Jusqu'à ta prochaine mise à jour » : dans
-    // Chrome et Edge, la mise à jour suivante réécrit le même fichier, et le trimestre
-    // supprimé n'y est plus (un filet plus fort est inscrit, #1007).
+    // Mots validés par Grégoire le 1er oct. 2026 ; la phrase sur le codex à jour est retirée (#1007).
     const continuer = confirm(
         `Supprimer définitivement le trimestre « ${trimestre.nom} » ? ` +
-        `Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. ` +
-        `Ton codex à jour les contient encore, jusqu'à ta prochaine mise à jour : pour pouvoir revenir en arrière, fais d'abord une copie de ce fichier.`
+        `Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.`
     );
     if (!continuer) return;
 

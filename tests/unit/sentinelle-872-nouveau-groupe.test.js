@@ -69,7 +69,7 @@ function normaliserNumeroGroupeReel() {
 }
 
 function monter(store) {
-    const etat = { prefixe: 'test_', reponsePrompt: null, defautsProposes: [], confirmations: [], affichages: {}, reponseConfirm: true };
+    const etat = { prefixe: 'test_', reponsePrompt: null, defautsProposes: [], confirmations: [], affichages: {}, reponseConfirm: true, codexAPart: [], reponseCodexAPart: true };
     const cle = (k) => etat.prefixe + k;
     const db = {
         getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)),
@@ -93,6 +93,8 @@ function monter(store) {
         prompt: (msg, defaut) => { etat.defautsProposes.push(defaut); return etat.reponsePrompt; },
         alert() {}, confirm: (m) => { etat.confirmations.push(m); return etat.reponseConfirm; },
         toggleDisplay(el, montrer) { if (el) etat.affichages[el.id] = Boolean(montrer); },
+        // #1007 : le codex à part, avant toute suppression d'élèves par groupe (doublure).
+        Codex: { ecrireAPartAvantSuppression: async (phrase) => { etat.codexAPart.push(phrase); return etat.reponseCodexAPart; } },
     };
     const win = { addEventListener() {}, cle, db };
     chargerScript('js/trimestre-v2-etudiants.js', globaux, win);
@@ -290,6 +292,7 @@ describe('#885 — supprimer un groupe entier sans passer élève par élève', 
         expect(b.champ('v2-btnSupprimerGroupe').textContent).toBe('Supprimer un groupe…');
         await b.win.supprimerGroupeSelectionneV2();
         expect(b.notifs.at(-1)).toMatchObject({ type: 'erreur', t: 'Choisis d\'abord un groupe' });
+        expect(b.etat.codexAPart).toEqual([]);
         expect(b.etat.confirmations).toEqual([]);
         expect(b.store.test_groupeEtudiants).toHaveLength(3);
     });
@@ -302,8 +305,21 @@ describe('#885 — supprimer un groupe entier sans passer élève par élève', 
         expect(b.etat.affichages['v2-btnSupprimerGroupe']).toBe(true);
         expect(b.champ('v2-btnSupprimerGroupe').textContent).toBe('Supprimer le groupe 00001 · 601-101-MQ');
         await b.win.supprimerGroupeSelectionneV2();
+        expect(b.etat.codexAPart).toEqual(['Supprimer le groupe « 00001 · 601-101-MQ » efface pour de bon ses 2 étudiant·es.']);
         expect(b.etat.confirmations.at(-1)).toBe('Supprimer les 2 étudiant(s) du groupe 00001 · 601-101-MQ ? Cette action est irréversible.');
         expect(b.store.test_groupeEtudiants.map(e => e.da)).toEqual(['2000001']);
+    });
+
+    it('K (#1007). le codex à part non écrit : ni question, ni suppression', async () => {
+        const b = monter(storeDeuxGroupes());
+        await b.win.chargerListeEtudiantsV2();
+        b.select().value = V('C1', '00001');
+        await b.win.filtrerParGroupeV2();
+        b.etat.reponseCodexAPart = false;
+        await b.win.supprimerGroupeSelectionneV2();
+        expect(b.etat.codexAPart).toHaveLength(1);   // le parcours a bien atteint le codex à part
+        expect(b.etat.confirmations).toEqual([]);
+        expect(b.store.test_groupeEtudiants).toHaveLength(3);
     });
 
     it('K (témoin). refuser la question ne supprime rien', async () => {

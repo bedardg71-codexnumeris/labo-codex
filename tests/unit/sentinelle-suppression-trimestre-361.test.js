@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // #361 — sentinelle suppression définitive de trimestre (2 juillet 2026).
 // Remplace le stub supprimerTrimestreActif (alert « pas encore disponible »).
@@ -16,14 +21,13 @@ import { chargerScript } from './_helpers/charger-script.js';
 //     la fiche partagée que les autres trimestres pointent encore) ;
 //  4. parcours UI : garde anti-actif AVANT toute confirmation ; nom ressaisi
 //     inexact → annulation sans suppression.
-//  5. RÉANCRÉ au lot I bis (D9, 30 sept. 2026) — LE FILET EST LE CODEX : la
-//     suppression est REFUSÉE tant que le codex n'est pas à jour (pas de codex :
-//     même refus), par une fenêtre dont le bouton lance la mise à jour ; codex à
-//     jour → confirmation, nom, suppression, et PLUS AUCUN téléchargement
-//     (l'ancien point 4 disait « export de sauvegarde PUIS suppression »).
+//  5. RÉANCRÉ à #1007 (2 oct. 2026) — LE FILET EST UN CODEX À PART : après la
+//     garde anti-actif, `Codex.ecrireAPartAvantSuppression` d'abord (la phrase
+//     du trimestre) ; rien d'écrit (Annuler, échec, module absent) → aucune
+//     question, aucune suppression ; écrit → confirmation, nom, suppression,
+//     aucun téléchargement. Le refus « codex pas à jour » du lot I bis est retiré.
 //     Ici, l'ordre des gestes avec des doublures. Le COMPORTEMENT sur la vraie
-//     page (ce que l'application contient après) est jugé par
-//     tests/integration/lot-i-bis-suppression-trimestre-codex-a-jour.spec.js.
+//     page est jugé par tests/integration/1007-codex-a-part-avant-suppression.spec.js.
 
 const REGISTRE = () => ([
     { id: 'h2026', nom: 'Hiver 2026', session: 'H', annee: 2026, actif: true },
@@ -133,20 +137,14 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
     let exporterMock;
     let reponses;   // { confirm: [...], prompt: [...] }
     let questions;  // les textes passés à confirm()
-    let refus;      // les fenêtres de refus ouvertes (options de demanderAction)
-    let gesteDuRefus; // ce que l'usager choisit dans la fenêtre de refus
-    let misesAJour; // appels de Codex.actionEnregistrer
+    let codexAPart; // les phrases passées à Codex.ecrireAPartAvantSuppression
+    let codexEcrit; // ce que rend le codex à part
 
-    const A_JOUR = { actif: true, modificationsNonSauvees: false };
-    const PAS_A_JOUR = { actif: true, modificationsNonSauvees: true };
-    const SANS_CODEX = { actif: false, modificationsNonSauvees: false };
-
-    function creerUI(etatCodex) {
+    function creerUI(avecCodex) {
         alertes = [];
         questions = [];
-        refus = [];
-        misesAJour = 0;
-        gesteDuRefus = null;
+        codexAPart = [];
+        codexEcrit = true;
         supprimerTrimestreMock = vi.fn(async () => ({ success: true, nbCles: 4, nom: 'Automne 2024' }));
         exporterMock = vi.fn(() => ({ success: true, nomFichier: 'x.json' }));
 
@@ -155,8 +153,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
             obtenirTrimestreActif: () => REGISTRE().find(t => t.actif),
             supprimerTrimestre: supprimerTrimestreMock,
             exporterTrimestreArchive: exporterMock,
-            Codex: etatCodex === undefined ? undefined : { etat: () => etatCodex, actionEnregistrer: () => { misesAJour++; } },
-            uiDialogues: { demanderAction: (options) => { refus.push(options); return Promise.resolve(gesteDuRefus); } },
+            Codex: avecCodex ? { ecrireAPartAvantSuppression: async (phrase) => { codexAPart.push(phrase); return codexEcrit; } } : undefined,
             alert: (msg) => { alertes.push(String(msg)); },
             confirm: (msg) => { questions.push(String(msg)); return reponses.confirm.shift(); },
             prompt: () => reponses.prompt.shift()
@@ -165,82 +162,69 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
 
     beforeEach(() => {
         reponses = { confirm: [], prompt: [] };
-        creerUI(A_JOUR);
+        creerUI(true);
     });
 
-    it('zéro-dette : le stub supprimerTrimestreActif est retiré', () => {
+    it('zéro-dette : le stub supprimerTrimestreActif et la garde « codex à jour » sont retirés', () => {
         expect(win.supprimerTrimestreActif).toBeUndefined();
+        // Fonctions privées (jamais posées sur window) : lues dans la source.
+        const source = readFileSync(path.resolve(__dirname, '..', '..', 'js', 'trimestre-v2-liste.js'), 'utf8');
+        expect(source).not.toMatch(/etatDuCodexPourSuppression|refuserSuppressionCodexPasAJour|fais d'abord une copie de ce fichier/);
         expect(typeof win.confirmerSuppressionTrimestre).toBe('function');
     });
 
-    it('garde anti-actif AVANT toute confirmation : alerte, aucune suppression', () => {
-        win.confirmerSuppressionTrimestre('h2026');
+    it('garde anti-actif AVANT tout : alerte, ni codex à part, ni suppression', async () => {
+        await win.confirmerSuppressionTrimestre('h2026');
 
         expect(alertes.join(' ')).toMatch(/ne peut pas être supprimé/i);
         expect(supprimerTrimestreMock).not.toHaveBeenCalled();
-        expect(refus).toEqual([]);
+        expect(codexAPart).toEqual([]);
         expect(questions).toEqual([]);
     });
 
-    it('nom ressaisi inexact → suppression annulée', () => {
+    it('nom ressaisi inexact → suppression annulée', async () => {
         reponses.confirm = [true];
         reponses.prompt = ['Automne 2025']; // faute de frappe
 
-        win.confirmerSuppressionTrimestre('a2024');
+        await win.confirmerSuppressionTrimestre('a2024');
 
         expect(questions.length).toBe(1); // le parcours a bien atteint la saisie du nom
         expect(alertes.join(' ')).toMatch(/ne correspond pas/i);
         expect(supprimerTrimestreMock).not.toHaveBeenCalled();
     });
 
-    it('codex à jour : la confirmation (mots validés), le nom, puis la suppression — aucun téléchargement', async () => {
+    it('codex à part écrit : sa phrase, puis la confirmation (sans la phrase du codex à jour), le nom, la suppression', async () => {
         reponses.confirm = [true];
         reponses.prompt = ['Automne 2024']; // nom exact
 
-        win.confirmerSuppressionTrimestre('a2024');
+        await win.confirmerSuppressionTrimestre('a2024');
         await new Promise(r => setTimeout(r, 0));
 
-        expect(refus).toEqual([]);
+        expect(codexAPart).toEqual([
+            'Supprimer le trimestre « Automne 2024 » efface pour de bon ses étudiant·es, ses évaluations, ses présences, ses productions, ses captures et ses modèles.'
+        ]);
         expect(questions).toEqual([
-            'Supprimer définitivement le trimestre « Automne 2024 » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. Ton codex à jour les contient encore, jusqu\'à ta prochaine mise à jour : pour pouvoir revenir en arrière, fais d\'abord une copie de ce fichier.'
+            'Supprimer définitivement le trimestre « Automne 2024 » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.'
         ]);
         expect(supprimerTrimestreMock).toHaveBeenCalledWith('a2024');
         expect(exporterMock).not.toHaveBeenCalled();
         expect(alertes.join(' ')).toMatch(/supprimé/i);
     });
 
-    for (const [cas, etat, texte] of [
-        ['codex pas à jour', PAS_A_JOUR, 'Supprimer un trimestre efface ses données pour de bon. Ton codex n\'a pas tes derniers changements : mets-le à jour, puis recommence.'],
-        ['sans codex', SANS_CODEX, 'Supprimer un trimestre efface ses données pour de bon. Tu n\'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence.'],
-        ['module du codex absent', undefined, 'Supprimer un trimestre efface ses données pour de bon. Tu n\'as pas encore de codex : crée-le avec le bouton ci-dessous, puis recommence.']
-    ]) {
-        it(`${cas} : refus AVANT toute confirmation, aucune suppression, et le bouton nomme le geste`, async () => {
-            creerUI(etat);
+    for (const [cas, avecCodex] of [['codex à part non écrit (Annuler ou échec)', true], ['module du codex absent', false]]) {
+        it(`${cas} : ni question, ni suppression`, async () => {
+            creerUI(avecCodex);
+            codexEcrit = false;
             reponses.confirm = [true];
             reponses.prompt = ['Automne 2024'];
 
-            win.confirmerSuppressionTrimestre('a2024');
+            await win.confirmerSuppressionTrimestre('a2024');
             await new Promise(r => setTimeout(r, 0));
 
-            expect(refus.length).toBe(1);
-            expect(refus[0].titre).toBe('Mets d\'abord ton codex à jour');
-            expect(refus[0].message).toBe(texte);
-            expect(refus[0].actions).toEqual([{ valeur: 'mettre-a-jour', texte: 'Mettre à jour le codex', principal: true }]);
+            expect(codexAPart).toHaveLength(avecCodex ? 1 : 0);
             expect(questions).toEqual([]);
             expect(supprimerTrimestreMock).not.toHaveBeenCalled();
             expect(exporterMock).not.toHaveBeenCalled();
-            expect(misesAJour).toBe(0); // la fenêtre fermée sans choisir ne lance rien
         });
     }
-
-    it('le bouton du refus lance la mise à jour du codex par le chemin du menu, et ne supprime rien', async () => {
-        creerUI(PAS_A_JOUR);
-        gesteDuRefus = 'mettre-a-jour';
-
-        win.confirmerSuppressionTrimestre('a2024');
-        await new Promise(r => setTimeout(r, 0));
-
-        expect(misesAJour).toBe(1);
-        expect(supprimerTrimestreMock).not.toHaveBeenCalled();
-    });
 });
