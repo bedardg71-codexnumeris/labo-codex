@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.177.0 (3 OCTOBRE 2026 ; en ligne depuis 12 h 27, mesuré chez Netlify : déploiement de production prêt sur `99a21e47` ; relue par Cowork, verte sans correction ; tes mots, avec les quatre retouches, et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 11 h 25) — LE CODEX PROPOSÉ SUR LES GESTES QUI RESTAIENT**
+
+**Ce que tu verras** : la même fenêtre qu'en 1.176.0 paraît aussi quand tu fusionnes des copies, retires des pages d'une copie, supprimes une copie importée, appliques un jeton de reprise qui efface l'originale (ou retires ce jeton), remplaces un élément du même nom, réinitialises une séance déjà saisie, cliques « Effacer tout » sur une page annotée, retires un·e élève du registre longitudinal ou supprimes les résultats du bilan réflexif. Seulement si quelque chose sera vraiment effacé, et seulement si ton codex n'est pas à jour.
+
+**Vérifié comment** : au navigateur (WebKit), le banc du lot (la fusion ; le jeton de reprise, dont une écriture faite pendant que la fenêtre attend, qui n'est pas perdue) et le registre sur son vrai bouton ; une sentinelle sur les dix gestes ; onze mutations, onze rouges. Vitest complet vert (7 999). Verdict complet au navigateur : aucun échec, aucun instable.
+
+**Ta vérification** : une porte courte, en fenêtre privée de Chrome, sur les données démo : `plans de travail/PORTES-TERRAIN-2026-10-03-1007-propose-codex-2.md` (Cowork publie la version à cocher). Réinitialiser une séance déjà saisie (la fenêtre, puis « Annuler »), puis une séance jamais saisie (aucune fenêtre).
+
+**La suite** : le lot 2b (les lignes d'éditeur qui portent des notes d'élèves), sur une consigne de Cowork (#1007).
+
 ✅ **EN LIGNE EN 1.176.0 (3 OCTOBRE 2026 ; en ligne depuis 10 h 12, mesuré chez Netlify : déploiement de production prêt sur `7618e8d8` ; relue par Cowork, verte sous une correction, faite ; tes mots et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 7 h 56) — AVANT D'EFFACER, TON CODEX À JOUR PROPOSÉ**
 
 **Ce que tu verras** : avant d'effacer une évaluation, une production, une grille, une pratique, une échelle, une cartouche, un·e élève, une copie de la corbeille ou un autre élément de ton matériel, si ton codex n'est pas à jour, une fenêtre « Mettre ton codex à jour avant de supprimer ? » vient d'abord : « Annuler », « Supprimer sans mettre à jour », « Mettre à jour, puis supprimer ». Sans codex, « Écrire un codex avant de supprimer ? », avec « Supprimer sans codex ». Codex à jour : rien ne change, la question habituelle vient seule. Une dizaine de gestes plus difficiles à brancher attendent le lot suivant.
