@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.175 (#1007, premier lot) — ligne proposée par Claude Code (§ 10 de la demande de
+            // relecture), ACCEPTÉE par Grégoire le 3 oct. 2026 à 3 h 25 (« oui », consigne de Cowork),
+            // posée telle quelle. Titre de Claude Code, proposé à Grégoire au rendu.
+            version: '1.175',
+            couleur: 'vert',
+            titre: 'Avant de supprimer, un codex à part',
+            items: [
+                'Avant d\'effacer un trimestre, un groupe-cours, un groupe d\'élèves, toute ta liste ou toutes tes données, l\'application écrit d\'abord un codex à part, sous un autre nom&nbsp;: tes mises à jour suivantes n\'y touchent pas, et il te permet de revenir en arrière.'
+            ]
+        },
+        {
             // 1.174 (#1012, l'avertissement) — titre et ligne proposés par Claude Code, relus par
             // Cowork, ACCEPTÉS par Grégoire le 1er oct. 2026 à 18 h 57 (« c'est ok », consigne de
             // release de Cowork), posés tels quels. Le titre perd son point final : usage de ce fichier.
