@@ -7950,13 +7950,15 @@
                                         <div class="mt-8-flex-col-gap4">
                                             <button class="btn btn-principal btn-tres-compact"
                                                     data-action="tousPresents"
-                                                    title="Mettre tous présents">
-                                                Tous 2h
+                                                    title="Mettre tout le monde présent"
+                                                    aria-label="Mettre tout le monde présent">
+                                                <span aria-hidden="true">✓</span>
                                             </button>
                                             <button class="btn btn-annuler btn-tres-compact"
                                                     data-action="reinitialiserSaisie"
-                                                    title="Réinitialiser">
-                                                ↻
+                                                    title="Réinitialiser (tout le monde absent)"
+                                                    aria-label="Réinitialiser (tout le monde absent)">
+                                                <span aria-hidden="true">↻</span>
                                             </button>
                                         </div>
                                     </th>
@@ -14220,7 +14222,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=10031128"></script>
+    <script src="version.js?v=10031753"></script>
     <script src="js/db.js?v=20260927c"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260928c"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14276,7 +14278,7 @@
     <script src="js/trimestre-v2-liste.js?v=20261003b"></script> <!-- Lot I bis (1er oct.) : la confirmation de suppression dit jusqu'où le codex sert de filet (mots de Grégoire) · Lot I bis (30 sept.) : la suppression d'un trimestre exige un codex à jour, plus de téléchargement · #478 (13 sept.) : sans trimestre actif, le trimestre créé est activé sans demander -->
     <script src="js/trimestre-v2-cours.js?v=20260928c"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20261003d"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
-    <script src="js/registre-longitudinal.js?v=20261003b"></script> <!-- Lot I bis (30 sept.) : le registre voyage dans le codex · #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
+    <script src="js/registre-longitudinal.js?v=20261003c"></script> <!-- Lot I bis (30 sept.) : le registre voyage dans le codex · #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20261003b"></script> <!-- Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
     <script src="js/trimestre-v2-orchestre.js?v=20260919b"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
@@ -14362,7 +14364,7 @@
     <script src="js/cc-license.js?v=20260929b"></script> <!-- Beta 99.42 b0512-0641 : fix Safari #264 — renommage "Nom de ta pratique" → "Titre de ce partage" -->
 
     <!-- Gestion des doublons (Beta 95.1) -->
-    <script src="js/modal-doublon.js?v=20261003b"></script>
+    <script src="js/modal-doublon.js?v=20261003c"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20260929b"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
@@ -14370,7 +14372,7 @@
     <script src="js/objectifs.js?v=20260929b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260929b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20261003c"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20261003d"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260927g"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -14396,7 +14398,7 @@
     <script src="js/bilan-reflexif-reflexion.js?v=20260929a"></script> <!-- §4.1.e : auto-réflexion enseignant -->
     <script src="js/bilan-reflexif-import-export-texte.js?v=20261003c"></script> <!-- §4.1.f : import/export texte du questionnaire -->
     <script src="js/bilan-reflexif-csv.js?v=20260929b"></script> <!-- §4.1.f : import CSV des résultats étudiants -->
-    <script src="js/bilan-reflexif-rapport.js?v=20261003b"></script> <!-- §4.1.g : rapport d'analyse + Chart.js + export PDF -->
+    <script src="js/bilan-reflexif-rapport.js?v=20261003c"></script> <!-- §4.1.g : rapport d'analyse + Chart.js + export PDF -->
     <script src="js/bilan-reflexif.js?v=20260929b"></script> <!-- §4.1.g : résidu (init + navigation + hooks) -->
 
     <!-- Module Planification (Carte mentale) -->
@@ -14427,7 +14429,7 @@
     <script src="js/travaux-visionneuse.js?v=20260917b"></script> <!-- Beta 1.106.14 b0831 : zoom molette/trackpad proportionnel a deltaY + apercu CSS pendant le geste -->
     <script src="js/travaux-outils.js?v=20260929b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 menu ⋮ dans modales Personnaliser tampons + codes erreurs -->
     <script src="js/tampons-bibliotheque.js?v=20261003c"></script> <!-- Beta 99.41 : #264 progression sur exporterBibliotheque (sealing) -->
-    <script src="js/travaux-annotation.js?v=20261003b"></script>
+    <script src="js/travaux-annotation.js?v=20261003c"></script>
     <script src="js/travaux-archivage.js?v=20260925g"></script> <!-- Beta 99.41 : #264 progression sur lancerExport{Etudiant,Production,} ; #565 try/catch par item + bilan d'export -->
     <script src="js/synthese-retroaction-data.js?v=20260926c"></script>
     <script src="js/synthese-retroaction-rendu.js?v=20260924k"></script>
@@ -14435,7 +14437,7 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=20260929b"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=20260927d"></script>
-    <script src="js/travaux-ui.js?v=20261003d"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
+    <script src="js/travaux-ui.js?v=20261003e"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
     <script src="js/actions-rlo.js?v=20260924b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14460,8 +14462,8 @@
     <script src="js/partage-import.js?v=20260929b"></script>
     <script src="js/partage-section.js?v=20260929b"></script>
     <script src="js/import-export.js?v=20261003b"></script> <!-- #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
-    <script src="js/codex.js?v=20261003f"></script> <!-- Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
-    <script src="js/liste-evaluations.js?v=20261003e"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
+    <script src="js/codex.js?v=20261003g"></script> <!-- Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
+    <script src="js/liste-evaluations.js?v=20261003f"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
@@ -14470,12 +14472,12 @@
         <script src="js/impact-jetons.js?v=20260911m"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation-jetons.js?v=20261003b"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 ; #725/#617/#724/#720 jetons de reprise -->
+    <script src="js/evaluation-jetons.js?v=20261003c"></script> <!-- #612 T6.6 : detachement des fichiers exporte a la liste ; #563 ; #725/#617/#724/#720 jetons de reprise -->
     <script src="js/evaluation-chargement.js?v=20260927d"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260927c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260927a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20261003b"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20261003b"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation-sauvegarde.js?v=20261003c"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation.js?v=20261003c"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260927c"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
@@ -14490,7 +14492,7 @@
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20261003c"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20261003d"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14511,11 +14513,11 @@
     <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20261003c"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20261003d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20261003c"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20261003d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
