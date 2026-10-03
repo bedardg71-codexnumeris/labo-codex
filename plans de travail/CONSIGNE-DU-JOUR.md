@@ -1,23 +1,42 @@
-# Consigne du jour – le bouton « ✓ N pér. » dans la saisie des présences
+# Consigne du jour – #1007, lot 2b : le codex proposé avant de retirer une ligne qui porte des notes
 
-> Écrite par Cowork le 3 octobre 2026 à 17 h 48 (Toronto, mesurée par `date`). Remplace la consigne de 17 h 39, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-03-bouton-tout-le-monde-present.md`.
+> Écrite par Cowork le 3 octobre 2026 à 19 h 05 (Toronto, mesurée par `date`). Remplace la consigne de 17 h 48, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-03-bouton-coche-1.177.1.md`.
+> Référence : `DECISIONS-2026-10-02-1007-suppressions.md` (§ 3), `INVENTAIRE-2026-10-02-1007-gestes-qui-suppriment.md` (§ 2.3, famille c), les deux verdicts de 2a.
 
 ## Où on en est
 
-Ta mesure a arrêté « Tout le monde présent (N pér.) » : la colonne passe de 160 à 246 px à 1024 px, et l'en-tête monte à quatre lignes à 768 et 390 px. **Décision de Grégoire** (« oui », 17 h 48), sur la proposition de Cowork : le bouton dit **« ✓ N pér. »** (le nombre lu dans la séance, comme avant), avec l'infobulle **« Mettre tout le monde présent (N périodes) »**. Motif : neutre, aussi court que l'ancien, et en écho au bouton voisin ↻, déjà une icône seule expliquée par son infobulle.
+1.177.1 est en ligne. Les côtés « exige » (1.175.0) et « propose » (1.176.0, 1.177.0) sont livrés, portes passées. **Ce lot clôt #1007.**
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md` et à pousser. Si le garde de permissions refuse, arrête-toi sur ce seul point et dis-le-lui.
+**La décision de Grégoire** (§ 3, 2 oct., 20 h 25) : rien avant de supprimer une ligne d'éditeur, **sauf** si elle porte des notes d'élèves (un critère, un sous-critère, un niveau d'échelle ou une cible de dénotation **déjà employés dans au moins une évaluation**) : le codex est alors proposé. Le test « déjà employé » se mesure au moment du geste ; à toi de dire où le lire.
 
-## Ce que tu fais
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork et à écrire dans `BACKLOG.md`. **Ni push du code ni release** : relecture croisée d'abord (règle 2).
 
-1. **Commite** les fichiers de Cowork tels quels, et pousse.
-2. Sur ta branche `claude/bouton-tout-le-monde-present` : le libellé devient « ✓ ${nombrePeriodesSeance} pér. » ; l'infobulle « Mettre tout le monde présent (N périodes) » est gardée ; l'infobulle de ↻, « Réinitialiser (tout le monde absent) », aussi. **Tranché par Cowork** : un `aria-label` égal à l'infobulle sur les deux boutons, pour que le lecteur d'écran dise la phrase et non « crochet » ; le crochet lui-même `aria-hidden` si la structure le permet simplement. Le gabarit d'`index.html` (« Tous 2h ») suit, pour qu'aucun texte non neutre ne reste dans le code affichable.
-3. **Mesure** aux trois largeurs (1024, 768, 390 px), comme tu l'as fait, l'ancien libellé dans la même page. Livre si la colonne ne s'élargit pas de plus de quelques pixels et si l'en-tête ne gagne pas de ligne par rapport à « Tous 2 pér. » ; sinon, arrête-toi et rends la mesure.
-4. Vitest complet ; le banc des présences sous WebKit.
-5. **Release patch** (1.177.1), ligne des Nouvelles à toi, une phrase (par exemple : « Dans la saisie des présences, le bouton qui met tout le monde présent dit « ✓ » ; son infobulle et le lecteur d'écran disent « Mettre tout le monde présent ». »). Pas de relecture croisée. **Verdict Playwright complet**, puis push et fusion ; constate la mise en ligne chez Netlify (connecteur) et dis l'heure.
-6. **Pas de porte.**
-7. **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** Suite : le lot 2b de #1007, sur une consigne de Cowork.
+## 1 · Remesure, avant d'ouvrir
 
-## Ce que tu rends
+Pour chacune des quatre lignes (critère, sous-critère, niveau d'échelle, cible de dénotation) : où vit le geste (fichier, fonction, **toutes les portes**, éditeur de Conception et bibliothèques comprises) ; ce qu'il demande aujourd'hui ; **quand l'effacement s'écrit réellement** (au clic, par l'enregistrement automatique de la Conception depuis 1.164.0, ou à « Créer… » / « Enregistrer ») ; et **ce qu'il advient des évaluations qui l'emploient** (notes recalculées, coches orphelines, rétroactions). Rends-le en tableau. Signale toute autre ligne d'éditeur qui porterait des notes et que la décision n'a pas nommée : ne la branche pas, rends-la.
 
-À Grégoire, deux lignes : le numéro en ligne et l'heure ; la mesure aux trois largeurs, en une phrase.
+## 2 · Le test « déjà employé »
+
+Une seule fonction par famille (ou une seule en tout, si la forme des données le permet), qui dit au moment du geste si la ligne est employée par au moins une évaluation **du trimestre où vit la grille ou l'échelle** ; dis comment tu traites une grille ou une échelle de la Bibliothèque partagée, employée dans plusieurs trimestres. Lecture seule, sans effet. La fenêtre ne paraît que si le test dit oui **et** si le codex n'est pas à jour. **Une ligne neuve, jamais enregistrée, ne propose jamais rien.**
+
+## 3 · Le branchement
+
+La même fonction `Codex.proposerAvantSuppression`, la même fenêtre, les mêmes boutons. Elle vient **avant** la question existante quand il y en a une (la cible de dénotation en a une : « Tu retires une cible déjà cochée… »), au geste sinon. **La leçon des verdicts** : ce qui est écrit après l'attente est relu après elle ; le tableau des portes dans ta demande. **L'enregistrement automatique** de la Conception : dis comment l'attente s'insère sans qu'une sauvegarde différée écrive la ligne retirée pendant qu'elle dure, ni la perde après un « Annuler ».
+
+## 4 · Les mots
+
+Une première phrase par geste dans `PROPOSITIONS_AVANT_SUPPRESSION`, sur le modèle accepté, **sans autre mot neuf**. Elles sont à Grégoire : propose-les en tableau. Si dire le nombre d'évaluations concernées te paraît nécessaire (« déjà employé dans N évaluations »), propose-le comme variante à part, il tranchera.
+
+## 5 · La preuve
+
+- La sentinelle de 2a s'étend : registre, compte, forme de la ligne ; et pour chaque famille, un essai qui démontre que **la fenêtre ne paraît pas** quand la ligne n'est employée par aucune évaluation.
+- Le banc WebKit : au moins un critère employé (fenêtre, « Annuler » ne retire rien, rien n'est écrit) et un critère non employé (aucune fenêtre) ; une cible de dénotation cochée (la fenêtre avant la question existante).
+- Mutations démontrées rouges ; Vitest complet ; bancs voisins de la Conception lancés (doublure « codex à jour » si le banc juge autre chose). Pas de verdict Playwright complet : il viendra avec la release.
+
+## 6 · Ce que tu rends
+
+1. Commit sur une branche locale `claude/1007-lignes-notes`, non poussée ; l'arbre principal laissé sur `main`.
+2. `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-lignes-notes.md` : en tête, pour Grégoire, trois lignes en gestes d'utilisateur ; puis la remesure, le test « déjà employé », le tableau des lectures, les phrases proposées, la ligne des Nouvelles, ce que tu as supposé.
+3. `RELAIS.md` à jour.
+
+À Grégoire, trois lignes : ce que le lot fera à l'écran ; ce qui l'attend ; ce que tu as supposé.
