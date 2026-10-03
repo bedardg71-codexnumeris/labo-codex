@@ -3613,8 +3613,10 @@ async function ecrireCodexAPartAvantSuppression(premierePhrase) {
    `modalitesEvaluation`). Codex à jour : rien ne change. Sinon, avant la confirmation
    habituelle du geste, une fenêtre propose la mise à jour, par le chemin même de
    « Mettre à jour le codex » (`_mettreAJourLeCodex`). Une seule fonction pour toutes
-   les portes. Mots de la fenêtre acceptés par Grégoire le 2 oct. 2026 (20 h 29) ; les
-   variantes de la première phrase, une par geste, sont dans ce registre et à lui.
+   les portes. Lot 2a-2 : les gestes sans question (fusion, pages, « Effacer tout »)
+   ne l'appellent que si quelque chose sera effacé. Mots de la fenêtre acceptés par
+   Grégoire le 2 oct. 2026 (20 h 29) ; les variantes de la première phrase, une par
+   geste, sont dans ce registre et à lui.
    =============================== */
 
 /**
@@ -3655,7 +3657,18 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     corbeille:             { premiere: 'Vider la corbeille efface pour de bon ces copies.', pronom: 'les' },
     fichierModelisation:   { premiere: 'Supprimer ce fichier l\'efface pour de bon.', pronom: 'le' },
     // Configuration (`enseignants`, `modalitesEvaluation` seulement)
-    parametre:             { premiere: 'Supprimer ce paramètre l\'efface pour de bon.', pronom: 'le' }
+    parametre:             { premiere: 'Supprimer ce paramètre l\'efface pour de bon.', pronom: 'le' },
+    // Lot 2a-2 (3 oct. 2026) : les gestes qui demandaient un travail de structure
+    fusionCopies:          { premiere: 'Fusionner ces copies efface pour de bon celles qui sont absorbées.', pronom: 'les' },
+    copieImportee:         { premiere: 'Supprimer cette copie l\'efface pour de bon.', pronom: 'la' },
+    repriseOriginale:      { premiere: 'Appliquer ce jeton de reprise efface pour de bon l\'évaluation originale.', pronom: 'la' },
+    reprise:               { premiere: 'Retirer ce jeton de reprise efface pour de bon la reprise.', pronom: 'la' },
+    pages:                 { premiere: 'Retirer ces pages les efface pour de bon.', pronom: 'les' },
+    remplacement:          { premiere: 'Remplacer l\'existante l\'efface pour de bon.', pronom: 'la' },
+    seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences.', pronom: 'les' },
+    annotationsPage:       { premiere: 'Effacer tout efface pour de bon les annotations de cette page.', pronom: 'les' },
+    registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon ses dossiers.', pronom: 'les' },
+    resultatsBilan:        { premiere: 'Supprimer ces résultats les efface pour de bon.', pronom: 'les' }
 };
 
 /**

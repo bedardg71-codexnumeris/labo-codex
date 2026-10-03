@@ -208,6 +208,9 @@ test('(e) « Réinitialiser » sur une séance saisie : confirmation ; « Annule
     await page.evaluate((d) => window.__ouvrir(d), date);
     await page.click('[data-action="confirmerSeancePresences"]');
     const avant = await page.evaluate((d) => JSON.stringify(window.__fiches(d)), date);
+    // #1007 (2a-2) : doublure « codex à jour ». Ce banc juge la confirmation de la séance ; la fenêtre du
+    // codex, qui la précède quand le codex n'est pas à jour, est jugée par sentinelle-1007-propose-codex.
+    await page.evaluate(() => { Codex.proposerAvantSuppression = async () => true; });
 
     await page.click('#colonneHeuresTitre [data-action="reinitialiserSaisie"]');
     const dialogue = page.locator('[role="dialog"]');

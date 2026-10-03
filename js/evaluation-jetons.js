@@ -489,10 +489,13 @@ function retirerJetonDelai(evaluationId) {
  *
  * @param {string} evaluationOriginaleId - ID de l'évaluation à remplacer
  * @param {boolean} archiverOriginale - Si true, archive l'originale; sinon la supprime (optionnel, lit config si omis)
- * @param {Object} [options] - { silencieux: false } pour supprimer les notifications
- * @returns {object|null} La nouvelle évaluation créée, ou null si échec
+ * @param {Object} [options] - { silencieux: false } pour supprimer les notifications ;
+ *   #1007 (2a-2) : `codexPropose: true` saute la proposition du codex (déjà faite par
+ *   l'appelant pour tout un lot) ; sur « Annuler » dans la fenêtre, la fonction pose
+ *   `options.codexRefuse = true` avant de rendre null (un appelant en lot s'arrête là).
+ * @returns {Promise<object|null>} La nouvelle évaluation créée, ou null si échec
  */
-function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options) {
+async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options) {
     if (archiverOriginale === undefined) archiverOriginale = null;
     var silencieux = options && options.silencieux;
 
@@ -552,6 +555,15 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     // Si le paramètre n'est pas fourni, utiliser la valeur de la config
     if (archiverOriginale === null) {
         archiverOriginale = config.reprise.archiverOriginale;
+    }
+
+    // #1007 (2a-2) — la pratique « supprimer l'originale » l'efface pour de bon : le codex est
+    // proposé, après les gardes (un refus ne propose rien). L'archivage n'efface rien.
+    // Après l'attente, la fonction repart du début : tout est relu et revérifié, sans redemander.
+    if (!archiverOriginale && !(options && options.codexPropose)) {
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('repriseOriginale'))) return _codexRefuse(options);
+        return appliquerJetonReprise(evaluationOriginaleId, archiverOriginale,
+            Object.assign({}, options, { codexPropose: true }));
     }
 
 
@@ -632,14 +644,23 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, options
     return nouvelleEvaluation;
 }
 
+/** #1007 (2a-2) — « Annuler » dans la fenêtre du codex : rien n'est fait, et l'appelant le sait. */
+function _codexRefuse(options) {
+    if (options) options.codexRefuse = true;
+    return null;
+}
+
 /**
  * Retire un jeton de reprise d'une évaluation
  * Demande à l'utilisateur s'il veut archiver ou supprimer l'originale
  *
  * @param {string} evaluationId - ID de l'évaluation de reprise
- * @returns {boolean} Succès ou échec
+ * @param {Object} [options] - #1007 (2a-2) : `codexPropose: true` après la proposition
+ *   (la fonction repart du début, tout relu, sans redemander)
+ * @returns {Promise<boolean>} Succès ou échec
  */
-function retirerJetonReprise(evaluationId) {
+async function retirerJetonReprise(evaluationId, options) {
+    const codexPropose = !!(options && options.codexPropose);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
@@ -673,6 +694,11 @@ function retirerJetonReprise(evaluationId) {
         const noteRepriseLiee = indexRepriseLiee !== -1 ? (evaluations[indexRepriseLiee].noteFinale || 0) : null;
         // #607 — même annonce du côté de l'originale.
         const nbFichiersLiesAnnonces = _compterFichiersDeEvaluation(evaluationReprise.remplaceeParId);
+        // #1007 (2a-2) — la reprise liée part pour de bon (s'il y en a une) ; relu après l'attente.
+        if (indexRepriseLiee !== -1 && !codexPropose) {
+            if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('reprise'))) return false;
+            return retirerJetonReprise(evaluationId, { codexPropose: true });
+        }
         const confirmer = confirm(
             'Cette évaluation est l\'ORIGINALE, remplacée par une reprise'
             + (noteRepriseLiee !== null ? ` (${noteRepriseLiee}%)` : '') + '.\n\n'
@@ -729,6 +755,11 @@ function retirerJetonReprise(evaluationId) {
             ? `\n\nLe ou les ${nbFichiersAnnonces} fichier(s) remis pour la reprise iront à la corbeille (récupérables 30 jours).`
             : '';
 
+        // #1007 (2a-2) — la reprise part pour de bon ; relu après l'attente.
+        if (!codexPropose) {
+            if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('reprise'))) return false;
+            return retirerJetonReprise(evaluationId, { codexPropose: true });
+        }
         const confirmer = confirm(
             `Retirer le jeton de reprise ?\n\n` +
             `La reprise (${noteReprise}%) sera supprimée et l'originale (${noteOriginale}%) sera restaurée.` +

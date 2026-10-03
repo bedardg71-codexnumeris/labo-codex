@@ -72,18 +72,18 @@ describe('Geste 1 · retirer une reprise : sur un refus d\'écriture, rien ne bo
     // Les deux portes : décocher sur la REPRISE (EVAL_B), ou restaurer depuis l'ORIGINALE (EVAL_A).
     for (const porte of ['EVAL_B', 'EVAL_A']) {
         for (const refus of REFUS) {
-            it(`porte ${porte}, retour ${JSON.stringify(refus)} : false, aucune notification propre (le témoin dit l'échec, avec le geste), aucun fichier déplacé`, () => {
+            it(`porte ${porte}, retour ${JSON.stringify(refus)} : false, aucune notification propre (le témoin dit l'échec, avec le geste), aucun fichier déplacé`, async () => {
                 const b = monter({ evaluations: [ORIGINALE, REPRISE], fichiers: [F_REPRISE], retourEcriture: refus });
-                expect(b.win.retirerJetonReprise(porte)).toBe(false);
+                expect(await b.win.retirerJetonReprise(porte)).toBe(false);
                 expect(b.notifs).toEqual([]);
                 expect(b.gestes).toEqual(['Retrait du jeton de reprise']);
                 expect(b.travauxStockage._corbeille).toEqual([]);
                 expect(b.travauxStockage._actifs.map(f => f.id)).toEqual(['F_REPR']);
             });
         }
-        it(`porte ${porte}, écriture acceptée : succès annoncé APRÈS, fichier de reprise à la corbeille, compte dit`, () => {
+        it(`porte ${porte}, écriture acceptée : succès annoncé APRÈS, fichier de reprise à la corbeille, compte dit`, async () => {
             const b = monter({ evaluations: [ORIGINALE, REPRISE], fichiers: [F_REPRISE] });
-            expect(b.win.retirerJetonReprise(porte)).toBe(true);
+            expect(await b.win.retirerJetonReprise(porte)).toBe(true);
             expect(b.notifs.map(n => n.type)).toEqual(['succes']);
             expect(b.notifs[0].t).toMatch(/originale restaurée/i);
             expect(b.notifs[0].t).toMatch(/1 fichier\(s\) de reprise mis à la corbeille/);
@@ -101,29 +101,29 @@ describe('Geste 1 · retirer une reprise : sur un refus d\'écriture, rien ne bo
 });
 
 describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise née propre (#720)', () => {
-    it('une évaluation déjà remplacée est refusée PAR LA GARDE (« Conflit »), rien d\'écrit', () => {
+    it('une évaluation déjà remplacée est refusée PAR LA GARDE (« Conflit »), rien d\'écrit', async () => {
         // Aucune reprise concurrente sur cette production : la limite `maxParProduction` (défaut 1)
         // ne peut pas répondre à la place de la garde. Le titre départage les deux refus.
         const b = monter({ evaluations: [{ id: 'EVAL_A', etudiantDA: DA, productionId: P, noteFinale: 60,
             remplaceeParId: 'EVAL_AILLEURS', archivee: true }] });
-        expect(b.win.appliquerJetonReprise('EVAL_A')).toBeNull();
+        expect(await b.win.appliquerJetonReprise('EVAL_A')).toBeNull();
         expect(b.stores.evaluationsSauvegardees.map(e => e.id)).toEqual(['EVAL_A']);
         expect(b.notifs.map(n => n.type + ':' + n.t)).toEqual(['erreur:Conflit']);
     });
 
-    it('un doublon réconcilié (#360) est refusé PAR LA GARDE (« Conflit »), même sans `remplaceeParId`', () => {
+    it('un doublon réconcilié (#360) est refusé PAR LA GARDE (« Conflit »), même sans `remplaceeParId`', async () => {
         const b = monter({ evaluations: [{ id: 'EVAL_D', etudiantDA: DA, productionId: P, noteFinale: 70, reconcilieParDoublon: true }] });
-        expect(b.win.appliquerJetonReprise('EVAL_D')).toBeNull();
+        expect(await b.win.appliquerJetonReprise('EVAL_D')).toBeNull();
         expect(b.stores.evaluationsSauvegardees).toHaveLength(1);
         expect(b.notifs.map(n => n.type + ':' + n.t)).toEqual(['erreur:Conflit']);
     });
 
-    it('la reprise naît SANS délai, remplacement, archivage, réconciliation ni reprise ciblée hérités ; la note est conservée', () => {
+    it('la reprise naît SANS délai, remplacement, archivage, réconciliation ni reprise ciblée hérités ; la note est conservée', async () => {
         const origine = { id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55,
             jetonDelaiApplique: true, dateApplicationJetonDelai: '2026-09-02', delaiAccorde: true, dureeDelaiJours: 2,
             jetonRepriseCibleeApplique: true, archivee: true, dateArchivage: '2026-09-02' };
         const b = monter({ evaluations: [origine] });
-        const r = b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
+        const r = await b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
         expect(r).not.toBeNull();
         for (const champ of ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
             'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee', 'dateArchivage', 'reconcilieParDoublon']) {
@@ -138,12 +138,12 @@ describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise n
         expect(o.remplaceeParId).toBe(r.id);
     });
 
-    it('quota de délais compté juste après une reprise : 1 utilisé sur 2, un nouveau délai reste possible ailleurs', () => {
+    it('quota de délais compté juste après une reprise : 1 utilisé sur 2, un nouveau délai reste possible ailleurs', async () => {
         const b = monter({ evaluations: [
             { id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55, jetonDelaiApplique: true, delaiAccorde: true },
             { id: 'EVAL_X', etudiantDA: DA, productionId: 'PROD_2', noteFinale: 70 }
         ] });
-        b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
+        await b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
         expect(b.win.compterJetonsUtilises(DA, 'delai')).toBe(1);   // avant #720 : 2
         expect(b.win.verifierDisponibiliteJeton(DA, 'delai')).toBe(true);
         expect(b.win.appliquerJetonDelai('EVAL_X')).toBe(true);
@@ -152,17 +152,17 @@ describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise n
     const F_ORIG_LIE = { id: 'F_ORIG', etudiantDA: DA, productionId: P, evaluationId: 'EVAL_O', estReprise: false };
 
     for (const refus of REFUS) {
-        it(`originale supprimée (archiverOriginale: false), retour ${JSON.stringify(refus)} : le fichier de l'originale n'est PAS délié`, () => {
+        it(`originale supprimée (archiverOriginale: false), retour ${JSON.stringify(refus)} : le fichier de l'originale n'est PAS délié`, async () => {
             const b = monter({ evaluations: [{ id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55 }],
                 fichiers: [F_ORIG_LIE], retourEcriture: refus });
-            expect(b.win.appliquerJetonReprise('EVAL_O', false, { silencieux: true })).toBeNull();
+            expect(await b.win.appliquerJetonReprise('EVAL_O', false, { silencieux: true })).toBeNull();
             expect(b.travauxStockage._actifs[0].evaluationId).toBe('EVAL_O');
         });
     }
 
-    it('originale supprimée (archiverOriginale: false), écriture ACCEPTÉE : le fichier de l\'originale EST délié, pas jeté', () => {
+    it('originale supprimée (archiverOriginale: false), écriture ACCEPTÉE : le fichier de l\'originale EST délié, pas jeté', async () => {
         const b = monter({ evaluations: [{ id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55 }], fichiers: [F_ORIG_LIE] });
-        expect(b.win.appliquerJetonReprise('EVAL_O', false, { silencieux: true })).not.toBeNull();
+        expect(await b.win.appliquerJetonReprise('EVAL_O', false, { silencieux: true })).not.toBeNull();
         expect(b.travauxStockage._actifs.map(f => [f.id, f.evaluationId])).toEqual([['F_ORIG', '']]);
         expect(b.travauxStockage._corbeille).toEqual([]);
     });

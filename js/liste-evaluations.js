@@ -1940,7 +1940,7 @@ function ouvrirProprieteFichier(fichierId) {
         // Jeton de reprise (#561) : APRÈS le verdict de la réassignation, jamais avant.
         // En dernier : l'évaluation de reprise qu'il crée devient l'évaluation liée.
         if (appliquerJeton && nouvelleProd) {
-            appliquerJetonRepriseSurCopie(fichierId, nouveauDA, nouvelleProd);
+            await appliquerJetonRepriseSurCopie(fichierId, nouveauDA, nouvelleProd);
             modifie = true;
         }
 
@@ -1962,14 +1962,14 @@ window.ouvrirProprieteFichier = ouvrirProprieteFichier;
  * @param {string} da
  * @param {string} productionId
  */
-function appliquerJetonRepriseSurCopie(fichierId, da, productionId) {
+async function appliquerJetonRepriseSurCopie(fichierId, da, productionId) {
     travauxStockage.mettreAJourFichier(fichierId, { estReprise: true });
     var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     var evalActive = evaluations.find(function(e) {
         return e.etudiantDA === da && e.productionId === productionId && !e.remplaceeParId;
     });
     if (evalActive && typeof appliquerJetonReprise === 'function') {
-        var nouvelleEval = appliquerJetonReprise(evalActive.id);
+        var nouvelleEval = await appliquerJetonReprise(evalActive.id);   // #1007 (2a-2) : async
         if (nouvelleEval) {
             travauxStockage.mettreAJourFichier(fichierId, { evaluationId: nouvelleEval.id });
         }

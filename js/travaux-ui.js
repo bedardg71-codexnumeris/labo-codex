@@ -3783,6 +3783,9 @@
         const evalAssociee = travauxResolution.trouverEvaluationPourFichier(fichier);
 
         // 3. Adapter le message de confirmation
+        // #1007 (2a-2) — la copie (et son évaluation) part sans corbeille. Après l'attente,
+        // les évaluations sont relues au moment d'écrire, la copie est effacée par son id.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('copieImportee'))) return;
         if (evalAssociee) {
             const choix = confirm(
                 'Ce fichier a une évaluation associée (' + (evalAssociee.noteFinale || evalAssociee.note || '--') + '%).\n\n' +
@@ -4328,8 +4331,12 @@
                                 e.productionId === d.productionId && !e.remplaceeParId;
                         });
                         if (evalActive) {
-                            var nouvelleEval = appliquerJetonReprise(evalActive.id, null, { silencieux: true });
-                            if (!nouvelleEval) {
+                            var optsJeton = { silencieux: true };
+                            var nouvelleEval = await appliquerJetonReprise(evalActive.id, null, optsJeton);
+                            if (!nouvelleEval && optsJeton.codexRefuse) {
+                                // #1007 (2a-2) — « Annuler » devant le codex : le fichier est importé
+                                // comme reprise, sans jeton, et l'usager vient de le choisir.
+                            } else if (!nouvelleEval) {
                                 // #608 — le refus était muet : le fichier entrait
                                 // comme reprise, aucun jeton n'était consommé, et
                                 // rien à l'écran ne le disait.
@@ -4456,6 +4463,10 @@
 
         var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         var echecsSansEval = [];
+        // #1007 (2a-2) — un seul codex proposé pour tout le lot : après le premier jeton accordé,
+        // les suivants ne redemandent pas ; « Annuler » arrête les jetons du lot (les fichiers
+        // restent importés comme reprises, sans jeton, comme au refus d'une limite).
+        var optsJeton = { silencieux: true };
 
         for (var i = 0; i < fichiersReprise.length; i++) {
             var fichier = fichiersReprise[i];
@@ -4499,7 +4510,8 @@
             }
 
             // Appliquer le jeton de reprise (silencieux)
-            var nouvelleEval = appliquerJetonReprise(evaluation.id, null, { silencieux: true });
+            var nouvelleEval = await appliquerJetonReprise(evaluation.id, null, optsJeton);
+            if (optsJeton.codexRefuse) break;
             if (!nouvelleEval) {
                 // Ne pas notifier si c'est juste une limite — le fichier est importé quand même
                 continue;
@@ -4512,6 +4524,8 @@
             if (fichierOriginal && !fichierOriginal.evaluationId) {
                 travauxStockage.mettreAJourFichier(fichierOriginal.id, { evaluationId: evaluation.id });
             }
+
+            optsJeton.codexPropose = true;
 
             // Rafraîchir la liste des évaluations pour la prochaine itération
             evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
@@ -6124,6 +6138,7 @@
     let editionPageSelectionnee = 0;
     let editionModeFusion = false;
     let editionFichiersASupprimer = []; // IDs des fichiers a supprimer apres fusion
+    let editionPageRetiree = false;      // #1007 (2a-2) : une page retirée part à « Enregistrer »
 
     /**
      * Initialise la zone de drop pour l'edition (zone droite)
@@ -6181,6 +6196,7 @@
         editionPageSelectionnee = 0;
         editionModeFusion = false;
         editionFichiersASupprimer = [];
+        editionPageRetiree = false;
 
         // Afficher le conteneur d'edition avec message de chargement
         const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
@@ -6362,6 +6378,7 @@
     function supprimerPageEditeur(index) {
         if (editionPages.length <= 1) return;
         editionPages.splice(index, 1);
+        editionPageRetiree = true;
         if (editionPageSelectionnee >= editionPages.length) {
             editionPageSelectionnee = editionPages.length - 1;
         }
@@ -6565,6 +6582,15 @@
     async function sauvegarderEdition() {
         if (!editionFichierId || editionPages.length === 0) return;
 
+        // #1007 (2a-2) — « Enregistrer » efface sans question : les copies absorbées par une
+        // fusion (P11, sans corbeille), ou les pages retirées (P10). Le codex n'est proposé que
+        // si l'un des deux arrive. Tout ce qui s'écrit plus bas (le fichier, les pages, les
+        // copies à effacer) est lu APRÈS l'attente ; l'éditeur reste ouvert pendant ce temps.
+        const efface = (editionModeFusion && editionFichiersASupprimer.length > 0) ? 'fusionCopies'
+            : (editionPageRetiree ? 'pages' : null);
+        if (efface && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression(efface))) return;
+        if (!editionFichierId || editionPages.length === 0) return;
+
         const fichier = travauxStockage.obtenirFichierParId(editionFichierId);
         if (!fichier) return;
 
@@ -6621,6 +6647,7 @@
             editionPageSelectionnee = 0;
             editionModeFusion = false;
             editionFichiersASupprimer = [];
+            editionPageRetiree = false;
             selectionFusion.clear();
             afficherImport();
 
@@ -6644,6 +6671,7 @@
         editionPageSelectionnee = 0;
         editionModeFusion = false;
         editionFichiersASupprimer = [];
+        editionPageRetiree = false;
         afficherImport();
     }
 
@@ -6953,6 +6981,7 @@
         editionPageSelectionnee = 0;
         editionModeFusion = true;
         editionFichiersASupprimer = fichiersIds.slice(1); // tous sauf le premier
+        editionPageRetiree = false;
 
         const etudiant = travauxImport.trouverEtudiantParDA(fichierPrincipal.etudiantDA);
         const nomEtudiant = etudiant

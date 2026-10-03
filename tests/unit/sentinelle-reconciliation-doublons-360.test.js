@@ -201,7 +201,7 @@ describe('#360 · collision Option A · retirerJetonReprise branche else (compor
         retirer = win.retirerJetonReprise;
     });
 
-    it('décocher le jeton restaure l\'ORIGINALE archivée, jamais un doublon réconcilié (break-test)', () => {
+    it('décocher le jeton restaure l\'ORIGINALE archivée, jamais un doublon réconcilié (break-test)', async () => {
         // R = reprise survivante ; O = originale archivée par R ; D = doublon réconcilié
         // pointant aussi R, placé AVANT O dans l'ordre de disque (piège du find non gardé).
         store = [
@@ -209,7 +209,7 @@ describe('#360 · collision Option A · retirerJetonReprise branche else (compor
             { id: 'O', etudiantDA: 'DA1', productionId: 'P1', noteFinale: 77.3, remplaceeParId: 'R', archivee: true },
             { id: 'R', etudiantDA: 'DA1', productionId: 'P1', noteFinale: 77.3, repriseDeId: 'O', jetonRepriseApplique: true }
         ];
-        const ok = retirer('R');               // l'enseignant décoche le jeton de la reprise
+        const ok = await retirer('R');               // l'enseignant décoche le jeton de la reprise
 
         expect(ok).toBe(true);
         const o = store.find(e => e.id === 'O');

@@ -1890,6 +1890,8 @@ async function reinitialiserSaisie() {
     viderEnregistrementPresences();
     const seanceSaisie = _etatLignesSeance(dateStr, _presencesDuCours()).some(l => l.aFiche);
     if (seanceSaisie && typeof uiDialogues !== 'undefined') {
+        // #1007 (2a-2) — seulement quand la séance est en base : sinon rien n'est effacé.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('seance'))) return;
         const ok = await uiDialogues.confirmerAction({
             titre: 'Réinitialiser la séance',
             message: 'Mettre tout le monde absent et vider les notes de cette séance ?',
@@ -1897,6 +1899,9 @@ async function reinitialiserSaisie() {
             variante: 'danger'
         });
         if (!ok) return;
+        // #1007 (2a-2) — relu après l'attente : une autre date affichée entre-temps, rien
+        // n'est réinitialisé (les champs lus plus bas seraient ceux d'une autre séance).
+        if (!document.getElementById('date-cours') || document.getElementById('date-cours').value !== dateStr) return;
     }
 
     const touches = [];

@@ -273,7 +273,12 @@
         }
 
         // Afficher le modal
-        return await afficherModalDoublon(typeRessource, nomNouveau, options);
+        const resultat = await afficherModalDoublon(typeRessource, nomNouveau, options);
+        // #1007 (2a-2) — « Remplacer l'existante » l'efface pour de bon : le codex est proposé
+        // après ce choix, avant le remplacement ; « Annuler » vaut l'annulation de la modale.
+        // Les cinq appelants retirent l'homonyme au moment d'écrire (file, ids rejoués).
+        if (resultat && resultat.action === 'ecraser' && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('remplacement'))) return null;
+        return resultat;
     }
 
     // Exposer globalement
