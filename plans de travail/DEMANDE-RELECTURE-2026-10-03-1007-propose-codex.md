@@ -175,3 +175,50 @@ Release proposée : **minor** (un comportement neuf sur 36 portes). Elle ne vien
 ## 10 · Ce qui reste à Grégoire
 
 Les variantes du § 4, les mots du § 5 et la ligne du § 7. Puis la coupe : accepter 2a-2 comme lot suivant.
+
+## 11 · La correction du verdict de 7 h 55 : ce qui s'écrit après l'attente
+
+> Ajouté par Claude Code le 3 octobre 2026, vers 8 h 10, sur `6dd4d519` (branche `claude/1007-propose-codex`).
+
+La question, porte par porte : ce qui est écrit après l'attente vient-il d'une lecture faite avant ? **Six oui, corrigées** (relecture après la question, aucun texte changé) ; trente non.
+
+| # | Porte | Disposition |
+|---|---|---|
+| P1 | `supprimerFicheCoursAvecGarde` | **relu après l'attente, corrigé** : le plan est recensé de nouveau ; les mêmes refus, aux mêmes mots, valent s'il a changé (`_refuserLaSuppressionDuCours`) |
+| P2 | `supprimerEtudiantV2` | relit (`modifierEtAnnoncer`) |
+| P3 | `supprimerProfilEnseignantV2` | **relu après l'attente, corrigé** (`enseignants`) |
+| P4 | `supprimerHoraireV2` | **relu après l'attente, corrigé** (`horaires` ; `horaireHebdo` en découle) |
+| P7a | `supprimerProductionActive` | relit (`db.modifier`) |
+| P7b | `supprimerProduction` | relit (`db.modifier`) |
+| P8 | `supprimerEvaluation` | **relu après l'attente, corrigé** ; disparue entre-temps : « Évaluation introuvable » (le message existant) |
+| P9 | `proposerNettoyage` | liste capturée exprès (#556) |
+| P15 | `supprimerInterventionEtRafraichir` | relit (`supprimerIntervention` lit au moment d'écrire) |
+| P17a | `reinitialiserDemo` | n'écrit rien de lu : le modèle d'origine |
+| P17b | `appliquerImport` | n'écrit rien de lu en base : le texte importé |
+| P18 | `supprimerGrilleAvecPorteDeSortie`, grille porteuse | relit (`deplacerCartouchesVersAutreGrille` et `_retirerGrilleDeLaListe` lisent au moment d'écrire ; seule la liste des grilles proposées vient d'avant) |
+| P19 | idem, grille simple | relit (`_retirerGrilleDeLaListe`, dans la file) |
+| P20 | `supprimerGrilleDeBibliothequePartagee` | relit (`retirerGrilleDeLaBibliotheque`, `db.modifier`) |
+| P22 | `supprimerCollectionProjection` | relit (`collectionsProjection.supprimer`, `modifier`) |
+| P23 | `supprimerOuRemplacerEchelle`, remplacée | relit (`remplacerEchellePartout`, puis `modifierEtAnnoncer` ; seuls les candidats proposés viennent d'avant) |
+| P24 | idem, sans porteur | relit (`modifierEtAnnoncer`) |
+| P25 | `supprimerEchelleDeBibliothequePartagee` | relit (`db.modifier`) |
+| P26 | `supprimerCartoucheConfirm` | relit (`modifierEtAnnoncer`) |
+| P27 | `supprimerCartoucheDefinitivement` | relit (`db.modifier`, puis la Bibliothèque par la file) |
+| P28 | `supprimerCartoucheDeBibliothequePartagee` | relit (`db.modifier`) |
+| P29 | `supprimerPratiqueMateriel` | relit (`modifierEtAnnoncer`) |
+| P30 | `supprimerPratiqueDefinitivement` | relit (`db.modifier`) |
+| P31 | `supprimerPratiqueDeBibliothequePartagee` | relit (`db.modifier`) |
+| P32 | `_jeterMaquette` | relit (`PratiqueManager.supprimerPratique(id)`) |
+| P33 | `ouvrirModalSuppressionRessource` | relit (la suppression part de la modale, par id) |
+| P34 | `supprimerProductionDefinitivement` | relit (`db.modifier`) |
+| P35 | `supprimerProductionDeBibliothequePartagee` | relit (`db.modifier`) |
+| P36 | `supprimerDeBibliotheque` (tampon) | relit (`retirerDeLaBibliotheque` lit au moment d'écrire) |
+| P37a | `supprimerCarteActive` | **relu après l'attente, corrigé** (l'index ; la carte active a changé : rien) |
+| P37b | `supprimerAlignementDuTrimestre` | **relu après l'attente, corrigé** (l'index ; l'attente existait déjà avec `confirmerAction`) |
+| P38 | `supprimerAlignementDeBibliotheque` | relit (`retirerAlignementDeLaBibliotheque`) |
+| G1 | `supprimerFichierDefinitivement` | relit (au clic de la modale) |
+| G2 | `viderTouteCorbeille` | liste capturée exprès (#556) ; les évaluations sont relues au clic |
+| G3 | `supprimerFichierModelisation` | relit (les annotations au moment d'écrire ; la liste du module est son état vivant) |
+| Config. | `supprimerParametreConfig` | n'écrit rien de lu (`null`) |
+
+**Preuve.** L'essai WebKit neuf : une évaluation écrite pendant que la fenêtre attend survit à « Supprimer sans mettre à jour ». Mutation (relecture de `supprimerEvaluation` retirée) : rouge par l'assertion attendue, `EVAL_BANC_CONCURRENTE` perdue ; restauré par copie et empreinte. La sentinelle verrouille les six relectures (six essais ; la même mutation la rougit). Vitest 7 982 / 7 982.
