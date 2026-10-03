@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 19 h 00 : **1.177.1 (LE BOUTON « ✓ N pér. » DE LA SAISIE DES PRÉSENCES) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `d6cfe732` (PUBLIÉ À 18 h 58) ; VERDICT COMPLET VERT ; PAS DE PORTE**
+## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 19 h 27 : **#1007, LOT 2b (LES LIGNES D'ÉDITEUR QUI PORTENT DES NOTES) SUR LA BRANCHE LOCALE `claude/1007-lignes-notes` (`8a222108`), NON POUSSÉE, EN RELECTURE ; 1.177.1 RESTE EN LIGNE**
+
+**Consigne** : Cowork, 19 h 05. **Demande** : `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-lignes-notes.md` (sur la branche). Worktree `.claude/worktrees/1007-lignes-notes`.
+
+**Ce qui est fait** : critère (deux rendus), sous-critère, niveau d'échelle, cible de dénotation ; la fenêtre de 2a avant la question habituelle, seulement si une évaluation du trimestre emploie la ligne. Vitest 8 024 verts ; banc WebKit neuf vert ; 13 mutations rouges ; voisins de la Conception verts. **Pas de verdict complet** : il viendra avec la release.
+
+**Ce qui attend** : le verdict de Cowork ; les quatre phrases et la ligne des Nouvelles à Grégoire (§ 4 de la demande) ; trois lignes non branchées à classer (palier de projection, type de travail et forfait PAN, résultat ultérieur du registre). Puis release (minor) et fusion vers `main`.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 19 h 00 : **1.177.1 (LE BOUTON « ✓ N pér. » DE LA SAISIE DES PRÉSENCES) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `d6cfe732` (PUBLIÉ À 18 h 58) ; VERDICT COMPLET VERT ; PAS DE PORTE**
 
 **Décision de Grégoire** (17 h 48, consigne de Cowork) : « ✓ N pér. », infobulle et `aria-label` « Mettre tout le monde présent (N périodes) » ; ↻ : « Réinitialiser (tout le monde absent) », aussi en `aria-label` ; le texte visible des deux boutons est `aria-hidden`. Le gabarit d'`index.html` suit (« ✓ » seul, réécrit au rendu).
 
