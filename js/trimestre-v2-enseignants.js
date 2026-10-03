@@ -401,6 +401,8 @@ async function supprimerProfilEnseignantV2() {
 
     // Confirmation
     const nomComplet = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim();
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('enseignant'))) return;
     const confirme = confirm(`Veux-tu vraiment supprimer le profil de ${nomComplet} ?\n\nCette action est irréversible.`);
 
     if (!confirme) {
@@ -408,7 +410,8 @@ async function supprimerProfilEnseignantV2() {
     }
 
     // Supprimer de la liste (lot E2 : par le témoin ; rien ne change à la suppression)
-    const nouvellesListe = enseignants.filter(e => e.id !== enseignantEnEditionId);
+    // #1007 : relue après l'attente de la fenêtre ; celle d'avant ne vaut plus rien.
+    const nouvellesListe = db.getSync('enseignants', []).filter(e => e.id !== enseignantEnEditionId);
     if (!sauvegarderDonneesSelonMode('enseignants', nouvellesListe, { geste: 'Supprimer le profil' })) return;
 
     // Réinitialiser

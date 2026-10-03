@@ -768,7 +768,9 @@ function modifierConsigneConditionnelle(elem) {
     sauvegarderQuestionnaire();
 }
 
-function reinitialiserDemo() {
+async function reinitialiserDemo() {
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('questionnaire'))) return;
     if (!confirm('Remplacer le questionnaire actuel par le mod\u00e8le d\u2019origine\u00a0?')) return;
     etat.questionnaire = BILAN_REFLEXIF_DATA.creerQuestionnaireDemoComplet();
     etat.blocOuvert = null;

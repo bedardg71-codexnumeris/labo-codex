@@ -424,6 +424,8 @@ function rafraichirModal() {
 }
 
 async function supprimerDeBibliotheque(tamponId) {
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('tampon'))) return;
     await retirerDeLaBibliotheque(tamponId);
     notifications.succes('Tampon retiré de la bibliothèque');
     rafraichirModal();

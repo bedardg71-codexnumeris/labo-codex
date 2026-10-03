@@ -635,6 +635,8 @@
     }
 
     async function _jeterMaquette(id) {
+        // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('maquette'))) return;
         var ok = (typeof uiDialogues !== 'undefined' && uiDialogues.confirmerAction)
             ? await uiDialogues.confirmerAction({
                 titre: 'Jeter la maquette',

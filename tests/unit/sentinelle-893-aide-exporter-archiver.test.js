@@ -91,7 +91,7 @@ describe('#893 · la fiche d\'accompagnement suit l\'écran', () => {
 
 describe('#893 · le bloc d\'espace parle français, accents compris', () => {
     // Borné à la fonction suivante : `proposerNettoyage` est hors périmètre (#892).
-    const quota = tranche(ui, 'async function chargerQuota()', '    function proposerNettoyage()', { longueurMin: 900 });
+    const quota = tranche(ui, 'async function chargerQuota()', '    async function proposerNettoyage()', { longueurMin: 900 });
     // Le texte RENDU : le gabarit posé dans innerHTML, sans le code autour.
     const rendu = tranche(quota, 'info.innerHTML = `', '\n        `;', { longueurMin: 600 });
 

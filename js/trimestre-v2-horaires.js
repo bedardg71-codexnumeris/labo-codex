@@ -1047,7 +1047,7 @@ function sauvegarderHoraireV2() {
  * Supprime l'horaire en cours d'édition
  * Beta 95.2 - Les horaires changent à chaque trimestre, pas de banque nécessaire
  */
-function supprimerHoraireV2() {
+async function supprimerHoraireV2() {
     if (!horaireEnEditionId) {
         notifications.erreur('Aucun horaire sélectionné');
         return;
@@ -1064,12 +1064,15 @@ function supprimerHoraireV2() {
 
     // Confirmation
     const nomHoraire = horaire.nom || 'cet horaire';
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('horaire'))) return;
     if (!confirm(`Supprimer l'horaire "${nomHoraire}" ?\n\nCette action est irréversible.`)) {
         return;
     }
 
     // Supprimer de la liste
-    horaires = horaires.filter(h => h.id !== horaireEnEditionId);
+    // #1007 : relue après l'attente de la fenêtre ; celle d'avant ne vaut plus rien.
+    horaires = db.getSync(cleHoraires, []).filter(h => h.id !== horaireEnEditionId);
     db.setSync(cleHoraires, horaires);
     if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleHoraires);   // lot F : geste hors témoin (supprimer un horaire)
 

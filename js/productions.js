@@ -3413,6 +3413,8 @@ window.annulerFormProduction = function() {
  * partie ; la version dans la file est celle qui reste.
  */
 async function supprimerProduction(id) {
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('production'))) return;
     if (!confirm('Supprimer cette production ?')) return;
 
     // ⚠ L'index est recalculé DANS la file : celui d'avant la confirmation ne

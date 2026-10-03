@@ -701,6 +701,8 @@ async function supprimerProductionDefinitivement(id) {
     if (!production) return;
 
     // Confirmation
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('production'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer définitivement',
         message: `Supprimer définitivement la production «${production.titre}» ? Cette action est irréversible.`,
@@ -741,6 +743,8 @@ async function supprimerProductionDeBibliothequePartagee(id) {
     const prod = biblio.find(p => p.id === id);
     if (!prod) return;
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('productionBibliotheque'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer de la Bibliothèque',
         message: `Supprimer définitivement «${prod.titre || 'Sans titre'}» de la Bibliothèque ? Cette action est irréversible.`,

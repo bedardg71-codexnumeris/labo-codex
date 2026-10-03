@@ -400,6 +400,8 @@ async function supprimerProductionActive() {
         return;
     }
 
+    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('production'))) return;
     if (!confirm('Es-tu sûr de vouloir supprimer cette production ?')) {
         return;
     }
