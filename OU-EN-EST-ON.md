@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.174.6 (2 OCTOBRE 2026 ; en ligne depuis 20 h 19, mesuré chez Netlify : déploiement de production prêt sur `e9146c4c` ; relue par Cowork, verte ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée) — TON CODEX EMPORTE AUSSI TA CORBEILLE ET TA MODÉLISATION**
+
+**Ce que tu verras** : rien de neuf à l'écran. Les copies mises à la corbeille et les fichiers ouverts en Modélisation partent maintenant dans le codex (et dans « Exporter une sélection »), et reviennent quand tu l'ouvres sur un autre appareil. Un codex écrit avant s'ouvre comme avant. Au passage, la fenêtre des rapports de bug archivés n'affiche plus leurs champs sans les échapper.
+**Vérifié comment** : au navigateur (WebKit), par les vrais boutons du menu Codex, sur un espace neuf : le banc du lot (six essais) et l'ouverture d'un codex d'avant, verts ; neuf mutations, neuf rouges. Relecture de Cowork verte, avec une mutation de son cru. Vitest complet vert sur la release (673 fichiers, 7 938 essais). Suite complète au navigateur verte, 0 échec (20 h 17) ; trois specs vertes au second essai seulement, dont celle de l'export de sélection de ce lot — à surveiller si elle revient.
+**Pas de vérification à faire de ton côté.** Ton codex deviendra complet à ta prochaine mise à jour habituelle, faite depuis le navigateur qui a ces fichiers.
+
+**La suite** : tes décisions sur l'inventaire des gestes qui suppriment, une famille à la fois, avec Cowork (#1007) ; puis le garde-éveil de la vérification, le signal au début de l'évaluation, et ce qui reste visible d'un élève supprimé (#1013). Quatre petites trouvailles du lot attendent, inscrites (#1014).
+
 ✅ **EN LIGNE EN 1.174.5 (2 OCTOBRE 2026 ; en ligne depuis 16 h 31, mesuré chez Netlify : déploiement de production prêt sur `c33dcd0e` ; ta ligne des « Nouvelles » posée telle que tu l'as acceptée, avec la retouche de Cowork) — LES MOTS DU CODEX : LA FENÊTRE D'OUVERTURE NE TE CONSEILLE PLUS DE SUPPRIMER TON CODEX**
 
 **Ce que tu verras, une fois en ligne** : après l'ouverture complète d'un codex, la fenêtre dit « Ton fichier de codex n'a pas changé : garde-le, c'est ta copie hors de l'application. » Quand tu ouvres un ancien fichier par « Ouvrir un Codex… », l'aperçu et le bilan comptent les présences en dates de cours (3 dates pour 10 élèves : « 3 date(s) », plus 30) ; au bilan, seules les dates où quelque chose est entré. Si l'import écarte un élève que tu avais supprimé, le bilan le dit en une ligne (« 1 élève que tu avais supprimé n'a pas été ramené. »), même quand rien d'autre n'entre.

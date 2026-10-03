@@ -7,7 +7,13 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 19 h 21 : **1.174.6 (#1014, LE CODEX COMPLET) COMMITÉE SUR `claude/1014-codex-complet` (`7cda4e71`) ; RELUE VERTE PAR COWORK ; VERDICT PLAYWRIGHT COMPLET LANCÉ PAR `pousser.sh` ; FUSION VERS `main` APRÈS LE VERDICT ; PAS DE PORTE TERRAIN**
+## POUR LA SESSION QUI PREND LE RELAIS — 2 OCT. 2026, 20 h 21 : **1.174.6 EN LIGNE (#1014, LE CODEX COMPLET), MESURÉ CHEZ NETLIFY SUR `e9146c4c` À 20 h 19 ; VERDICT COMPLET VERT (0 ÉCHEC, 3 INSTABLES) ; BRANCHE FUSIONNÉE ; `main` = `origin/main` À CE RELAIS PRÈS ; PAS DE PORTE TERRAIN**
+
+**Verdict** : `pousser.sh` sur `e9146c4c`, rendu à 20 h 17 : 0 échec. Vertes au second essai seulement : `codex-1014-codex-complet.spec.js` (« Exporter une sélection » emporte aussi la corbeille et la Modélisation — la spec neuve du lot ; le journal condensé ne garde pas l'erreur du premier essai), `cours-actif-hors-bibliotheque-916`, `evaluation-959-neutralite-chargeur`. ⮕ Si la spec du lot rougit encore au premier essai, c'est un vrai sujet (#685) : lire son « Error: » en `--retries=0 --repeat-each=5`.
+
+**Fusion** : `main` avancée en avance rapide sur la branche (`e9146c4c`) et poussée par `git push origin main` (le jeton du verdict vit dans le worktree ; même SHA).
+
+(Ce qui suit est l'état de 19 h 21, avant le verdict.)
 
 **Où vit le travail** : la branche `claude/1014-codex-complet` (worktree `.claude/worktrees/1014-codex-complet`) : le lot (`b9f98e27`), `main` fusionnée dedans (`e2f37147`), la release 1.174.6 (`7cda4e71`, build `1002-1919`), puis ce relais. `main` = `origin/main` à `5a57bf54` (fichiers de Cowork `20b59ccf` et inscriptions #1014 `5a57bf54`, poussés à 19 h 18 et ci-après).
 
