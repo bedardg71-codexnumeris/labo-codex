@@ -3676,8 +3676,9 @@ function messageDeLaProposition(geste) {
  * - sinon, la fenêtre : « Annuler » (focus) → false ; « Supprimer sans mettre à jour »
  *   → true ; « Mettre à jour, puis supprimer » → le chemin de « Mettre à jour le codex »,
  *   avertissement des copies manquantes compris : true seulement si le fichier est écrit.
- * - aucun codex actif : la même fenêtre ; le troisième bouton écrit un codex (même chemin :
- *   sans fichier tenu, la destination est demandée).
+ * - aucun codex actif : la même fenêtre ; le bouton du milieu dit « Supprimer sans codex »
+ *   (mots acceptés par Grégoire le 3 oct. 2026, 7 h 56) et le troisième écrit un codex (même
+ *   chemin : sans fichier tenu, la destination est demandée).
  * @param {string} geste - une clé de PROPOSITIONS_AVANT_SUPPRESSION
  * @returns {Promise<boolean>}
  */
@@ -3696,7 +3697,7 @@ async function proposerCodexAvantSuppression(geste) {
         message: message,
         texteFermer: 'Annuler',   // sans bouton « principal », c'est lui qui a le focus
         actions: [
-            { valeur: 'sans', texte: 'Supprimer sans mettre à jour' },
+            { valeur: 'sans', texte: sansCodex ? 'Supprimer sans codex' : 'Supprimer sans mettre à jour' },
             { valeur: 'maj', texte: sansCodex ? 'Écrire un codex, puis supprimer' : 'Mettre à jour, puis supprimer' }
         ]
     });

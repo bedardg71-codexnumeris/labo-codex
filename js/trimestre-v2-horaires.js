@@ -1071,7 +1071,8 @@ async function supprimerHoraireV2() {
     }
 
     // Supprimer de la liste
-    horaires = horaires.filter(h => h.id !== horaireEnEditionId);
+    // #1007 : relue après l'attente de la fenêtre ; celle d'avant ne vaut plus rien.
+    horaires = db.getSync(cleHoraires, []).filter(h => h.id !== horaireEnEditionId);
     db.setSync(cleHoraires, horaires);
     if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleHoraires);   // lot F : geste hors témoin (supprimer un horaire)
 

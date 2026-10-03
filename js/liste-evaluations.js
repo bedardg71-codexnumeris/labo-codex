@@ -2221,7 +2221,7 @@ function restaurerOriginaleSiReprise(evaluations, evaluationId) {
  */
 async function supprimerEvaluation(evaluationId) {
     // CORRECTION: Lire TOUTES les évaluations (pas seulement celles du cours actif)
-    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
 
     // #557 : absorbé de la version retirée d'`evaluation.js`. Sans cette garde,
@@ -2277,6 +2277,14 @@ async function supprimerEvaluation(evaluationId) {
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('evaluation'))) return;
     if (!confirm(`Veux-tu vraiment supprimer ${quoi} ?${mentionFichiers}\n\nCette action est irréversible.`)) {
+        return;
+    }
+    // #1007 (relecture de Cowork) : la fenêtre a pu attendre des minutes (une mise à jour du
+    // codex) ; une écriture de la même clé pendant ce temps serait perdue. On écrit à partir
+    // de ce qui est en base MAINTENANT, pas de la lecture d'avant l'attente.
+    evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+    if (!evaluations.some(ev => ev.id === evaluationId)) {
+        notifications.erreur('Erreur', 'Évaluation introuvable');
         return;
     }
 

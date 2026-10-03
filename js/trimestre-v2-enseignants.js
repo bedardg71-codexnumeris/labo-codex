@@ -410,7 +410,8 @@ async function supprimerProfilEnseignantV2() {
     }
 
     // Supprimer de la liste (lot E2 : par le témoin ; rien ne change à la suppression)
-    const nouvellesListe = enseignants.filter(e => e.id !== enseignantEnEditionId);
+    // #1007 : relue après l'attente de la fenêtre ; celle d'avant ne vaut plus rien.
+    const nouvellesListe = db.getSync('enseignants', []).filter(e => e.id !== enseignantEnEditionId);
     if (!sauvegarderDonneesSelonMode('enseignants', nouvellesListe, { geste: 'Supprimer le profil' })) return;
 
     // Réinitialiser

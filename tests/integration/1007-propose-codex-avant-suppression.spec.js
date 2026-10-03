@@ -16,8 +16,10 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // « Annuler » ne supprime rien, « Supprimer sans mettre à jour » mène à la question
 // habituelle, « Mettre à jour, puis supprimer » prend le chemin de « Mettre à jour le
 // codex » et seulement s'il réussit, la question habituelle. Un échec ou un abandon de
-// l'écriture : rien n'est supprimé. Sans codex actif, la même fenêtre, le troisième
-// bouton écrit un codex.
+// l'écriture : rien n'est supprimé. Sans codex actif, la même fenêtre ; le bouton du
+// milieu dit « Supprimer sans codex » (3 oct., 7 h 56) et le troisième écrit un codex.
+// Relecture de Cowork (3 oct.) : une écriture de la même clé PENDANT que la fenêtre attend
+// survit à la suppression (P8 relit après l'attente).
 //
 // Un geste par famille : structure (P2, un·e élève), évaluation (P8, tous les chemins),
 // matériel (P29, une pratique), corbeille (G1), configuration (`enseignants`, et une
@@ -40,7 +42,7 @@ const TITRE_SANS_CODEX = 'Écrire un codex avant de supprimer ?';
 const SUITE_LA = 'Ton codex à jour pourra te la rendre, jusqu\'à ta mise à jour suivante.';
 const SUITE_LE = 'Ton codex à jour pourra te le rendre, jusqu\'à ta mise à jour suivante.';
 const BOUTONS = ['Annuler', 'Supprimer sans mettre à jour', 'Mettre à jour, puis supprimer'];
-const BOUTONS_SANS_CODEX = ['Annuler', 'Supprimer sans mettre à jour', 'Écrire un codex, puis supprimer'];
+const BOUTONS_SANS_CODEX = ['Annuler', 'Supprimer sans codex', 'Écrire un codex, puis supprimer'];
 
 function brancher(page) {
     const etat = { erreurs: [], dialogues: [], reponses: [] };
@@ -355,6 +357,32 @@ test.describe('#1007, second lot — avant de supprimer, le codex proposé', () 
         await page.locator('#supprimer-definitif-btn-confirmer').click();
         await expect.poll(() => corbeille(page)).toEqual([]);
         expect(ecoute.dialogues).toHaveLength(4);
+        expect(ecoute.erreurs).toEqual([]);
+    });
+    test('P8 : une écriture de la même clé PENDANT que la fenêtre attend survit à la suppression (relecture après l\'attente)', async ({ page }) => {
+        const ecoute = brancher(page);
+        await demarrer(page);
+        await poserOutils(page);
+        await mettreAJour(page);
+        await rendrePasAJour(page);
+
+        await supprimerEval(page, 'EVAL_BANC_1');
+        await attendreFenetre(page, TITRE);
+        // La page vit pendant l'attente : un enregistrement de la même clé tombe maintenant.
+        await page.evaluate(() => {
+            const cleEv = cle('evaluationsSauvegardees');
+            db.setSync(cleEv, (db.getSync(cleEv, []) || []).concat([
+                { id: 'EVAL_BANC_CONCURRENTE', etudiantDA: '9000109', productionId: 'PROD_BANC', noteFinale: 80 }
+            ]));
+        });
+        expect(await evaluations(page)).toEqual(['EVAL_BANC_1', 'EVAL_BANC_2', 'EVAL_BANC_3', 'EVAL_BANC_4', 'EVAL_BANC_CONCURRENTE']);
+
+        ecoute.reponses.push(true);
+        await cliquerDansFenetre(page, 'Supprimer sans mettre à jour');
+        await expect.poll(() => ecoute.dialogues.length).toBe(1);
+        expect(ecoute.dialogues[0].message).toMatch(QUESTION_P8);
+        // Ce qui était visé part ; ce qui a été écrit pendant l'attente reste.
+        await expect.poll(() => evaluations(page)).toEqual(['EVAL_BANC_2', 'EVAL_BANC_3', 'EVAL_BANC_4', 'EVAL_BANC_CONCURRENTE']);
         expect(ecoute.erreurs).toEqual([]);
     });
 });
