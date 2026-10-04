@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.179.0 (4 OCTOBRE 2026 ; en ligne depuis 10 h 30, mesuré chez Netlify : déploiement de production prêt sur `3bca545f` ; ton texte tel quel et le bouton « Cocher la case », acceptés ce matin) — LE SIGNAL QUAND LES CONSIGNES NE SEMBLENT PAS TRANSMISES**
+
+**Ce que tu verras** : quand tu ouvres l'évaluation d'une copie dont le groupe a la case « Consignes transmises » décochée pour cette production, un bandeau le dit sous le nom de l'élève, à chaque ouverture, et nomme ce que la case retire : la production n'est pas au calendrier, et ses copies ne comptent pas dans les courbes de progression. Le bouton « Cocher la case » la coche pour ce groupe ; le bandeau part. Rien n'est coché sans ton clic. Le bandeau ne nomme aucun élève.
+
+**Vérifié comment** : essai au navigateur (Safari, largeur iPad) : case décochée, le bandeau paraît, aussi en passant à l'élève suivant ; le bouton coche la case (la date reste) et le bandeau part ; case cochée, rien ; un autre groupe décoché, rien. Retirer le bandeau du code fait échouer l'essai. Vérification complète au navigateur verte sur le commit qui est parti, sans aucun essai instable.
+
+**Tes données** : rien n'y est écrit sans ton clic. Si la production du 1er octobre a encore sa case décochée chez toi (non mesuré depuis), ses copies afficheront le bandeau à la prochaine ouverture.
+
+**Ce qui reste** : l'aide de la fiche production dit que la case décochée retire la production « des indices C et P » ; mesuré ce matin, C, P et la note ne bougent sous aucune pratique. Corriger l'aide, ou faire que C l'écarte vraiment : c'est à toi (#1016).
+
+**La suite** : ce qui reste visible d'un élève supprimé (#1013), avant les archives.
+
 🔧 **OUTILLAGE, 4 OCTOBRE 2026, 8 h 20 (rien ne change dans l'application ; 1.178.0 reste en ligne) — LA VÉRIFICATION COMPLÈTE NE S'ENDORT PLUS ET NE FIGE PLUS LE MAC**
 
 **Ce qui change pour toi** : la vérification complète au navigateur (les ~45 min avant un envoi) rallume l'écran et tient le Mac éveillé elle-même, quel que soit celui qui la lance. Si la mémoire s'emballe pendant qu'elle tourne, elle s'arrête d'elle-même et dit « non jugé : mémoire » plutôt que de laisser le Mac se figer jusqu'au bouton, comme la nuit du 1er octobre. Rien n'est envoyé dans ce cas.
