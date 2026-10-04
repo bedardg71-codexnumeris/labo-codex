@@ -3668,7 +3668,13 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences et ses notes.', pronom: 'les' },
     annotationsPage:       { premiere: '« Effacer tout » efface pour de bon les annotations de cette page.', pronom: 'les' },
     registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs.', pronom: 'les' },
-    resultatsBilan:        { premiere: 'Supprimer ces résultats les efface pour de bon.', pronom: 'les' }
+    resultatsBilan:        { premiere: 'Supprimer ces résultats les efface pour de bon.', pronom: 'les' },
+    // Lot 2b (3 oct. 2026) : une ligne d'éditeur, seulement si une évaluation l'emploie
+    critere:               { premiere: 'Supprimer ce critère l\'efface pour de bon.', pronom: 'le' },
+    sousCritere:           { premiere: 'Supprimer ce sous-critère l\'efface pour de bon.', pronom: 'le' },
+    niveau:                { premiere: 'Supprimer ce niveau l\'efface pour de bon.', pronom: 'le' },
+    cible:                 { premiere: 'Retirer cette cible l\'efface pour de bon.', pronom: 'la' },
+    cibles:                { premiere: 'Retirer ces cibles les efface pour de bon.', pronom: 'les' }
 };
 
 /**

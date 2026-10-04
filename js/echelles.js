@@ -3041,6 +3041,14 @@ async function ajouterNiveauEchelle(echelleId) {
  * @param {number} index - Index du niveau à supprimer
  */
 async function supprimerNiveauEchelle(echelleId, index) {
+    // #1007, lot 2b : un code de niveau qu'une évaluation porte est une note ; le codex est
+    // proposé avant la question (lecture seule, evaluation-sauvegarde.js). Une échelle
+    // neuve (`_niveauxNouvelleEchelle`) ne passe pas ici et ne propose jamais rien.
+    const echelleLue = (db.getSync(cle('echellesTemplates'), []) || []).find(e => e.id === echelleId);
+    const niveauLu = (echelleLue && echelleLue.niveaux && echelleLue.niveaux[index]) || null;
+    const porteDesNotes = !!niveauLu && typeof window.ligneEmployeeParUneEvaluation === 'function'
+        && window.ligneEmployeeParUneEvaluation({ echelleId, niveauCode: niveauLu.code });
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('niveau'))) return;
     if (!confirm('Supprimer ce niveau ?')) return;
 
     let echelleApres = null;
@@ -3057,6 +3065,9 @@ async function supprimerNiveauEchelle(echelleId, index) {
             refusDernierNiveau = true;
             return undefined;
         }
+
+        // Relu après l'attente : la ligne a changé de place, rien n'est retiré.
+        if (niveauLu && !(echelle.niveaux[index] && echelle.niveaux[index].code === niveauLu.code)) return undefined;
 
         // Supprimer le niveau
         echelle.niveaux.splice(index, 1);

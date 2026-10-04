@@ -28,6 +28,10 @@ async function preparer(page) {
     await page.evaluate(({ PRATIQUE, JUGEMENTS }) => {
         window.db.setSync(window.cle('pratiquesConfigurables'), [PRATIQUE]);
         window.db.setSync(window.cle('jugementsDenotation'), JUGEMENTS);
+        // #1007, lot 2b : une cible cochée porte des notes, le codex est proposé avant la
+        // question. Ce banc juge les identités et la question : doublure « codex à jour »
+        // (la fenêtre est jugée par 1007-lignes-notes-2b.spec.js).
+        window.Codex.proposerAvantSuppression = async () => true;
     }, { PRATIQUE, JUGEMENTS });
 }
 const objectifs = (page) => page.evaluate(() => window.db.getSync(window.cle('pratiquesConfigurables'), [])[0].configuration.objectifs);

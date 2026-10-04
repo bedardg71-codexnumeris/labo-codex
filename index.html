@@ -14222,7 +14222,7 @@
          donc jamais lu sur Safari ni sur iPad. Un script, lui, se charge. Généré
          par scripts/release.mjs en même temps que version.json — les deux ne
          peuvent pas diverger. Chargé AVANT tout le reste : init-inline.js le lit. -->
-    <script src="version.js?v=10031753"></script>
+    <script src="version.js?v=10040010"></script>
     <script src="js/db.js?v=20260927c"></script> <!-- #353 Option 1 (3 juil.) : observabilité budget localStorage + purgerBackupsV1 (console) -->
     <script src="js/mots-nature.js?v=20260928c"></script> <!-- consigne du 12 sept. 2026 : LE point unique du mot de chaque nature de cours (Enseignement / Orthopédagogie) -->
     <script src="js/date-utils.js?v=20260805a"></script> <!-- #398 : SSOT « aujourd'hui » en date LOCALE (fin des bascules UTC à 20 h) -->
@@ -14297,7 +14297,7 @@
     <script src="js/bibliotheque-ui.js?v=20260929b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js?v=20260929b"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20260929b"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20261003c"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
+    <script src="js/pratiques-gestion.js?v=20261004a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20260929a"></script> <!-- Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20261003c"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260923b"></script>
@@ -14317,9 +14317,9 @@
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
     <script src="js/codes-annotation.js?v=20260903e"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20260929b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20261003c"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20261004a"></script> <!-- texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20260929b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/echelles.js?v=20261003c"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
+    <script src="js/echelles.js?v=20261004a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20260929b"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20261003c"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/export-pdf.js?v=20260911m"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
@@ -14334,7 +14334,7 @@
     <!-- DEN couche 2 (#318, DEN-0) : SSOT de jugementsDenotation, lu par le moteur (DEN-1) -->
     <script src="js/pratiques/denotation-jugements.js?v=20260929b"></script>
     <!-- #717 : éditeur des cibles DEN, commun à l'assistant et à la gestion des pratiques -->
-    <script src="js/pratiques/editeur-cibles.js?v=20260923h"></script>
+    <script src="js/pratiques/editeur-cibles.js?v=20261004a"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
     <script src="js/pratiques/pratique-configurable.js?v=20260923c"></script>
     <script src="js/pratiques/pratique-registre.js?v=20260921c"></script>
@@ -14368,11 +14368,11 @@
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20260929b"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
-    <script src="js/wizard-pratique-v2.js?v=20260928a"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
+    <script src="js/wizard-pratique-v2.js?v=20261004a"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20260929b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20260929b"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20261003d"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20261004a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20260927g"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -14462,7 +14462,7 @@
     <script src="js/partage-import.js?v=20260929b"></script>
     <script src="js/partage-section.js?v=20260929b"></script>
     <script src="js/import-export.js?v=20261003b"></script> <!-- #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
-    <script src="js/codex.js?v=20261003g"></script> <!-- Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
+    <script src="js/codex.js?v=20261004a"></script> <!-- Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
     <script src="js/liste-evaluations.js?v=20261003f"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20260923b"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
@@ -14476,7 +14476,7 @@
     <script src="js/evaluation-chargement.js?v=20260927d"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260927c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260927a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20261003c"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation-sauvegarde.js?v=20261004a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20261003c"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260927c"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
@@ -14492,7 +14492,7 @@
     <script src="js/guidage-demo.js?v=20260913d"></script> <!-- Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20261003d"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20261004a"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->
@@ -14513,11 +14513,11 @@
     <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=20261003d"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
+    <script src="js/main.js?v=20261004a"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20260523a"></script> <!-- Chrome unifié (23 mai 2026) : popover utilitaires mobile + selects mobile nav/sous-nav -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20261003d"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20261004a"></script> <!-- Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>
