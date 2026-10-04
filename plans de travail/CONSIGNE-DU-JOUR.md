@@ -1,34 +1,39 @@
-# Consigne du jour – les décisions de Grégoire sur l'élève supprimé, puis mettre #1013 en ligne
+# Consigne du jour – archives, lot A3 : faire revenir des copies (#1000)
 
-> Écrite par Cowork le 4 octobre 2026 à 11 h 04 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 10 h 36, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-1013-masquer.md`.
+> Écrite par Cowork le 4 octobre 2026 à 12 h 19 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 11 h 04, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-1013-mise-en-ligne.md`.
 
 ## Où on en est
 
-Ton commit `e5dfd5be` sur `claude/1013-eleve-supprime` est lu par Cowork (8 fichiers, 221 lignes) ; tes choix techniques sont acceptés (`dasElevesSupprimes()`, `obtenirFichiersAffiches()`, l'élève fictif du banc). Grégoire a tranché tes trois questions le 4 oct. au matin, chacune par « oui » ou « j'accepte », sur la recommandation de Cowork :
+1.180.0 est en ligne (#1013 close, relais bceeb2a6), relu par Cowork à 12 h 18. Le chantier des quatre lots isolés est clos ; **le chantier des archives est ouvert**, à mener jusqu'au chantier clos : ce lot (A3), puis les mots « clos » (A5), puis alléger (A4). Ordre de Grégoire.
 
-1. **L'export recherche et les seuils « en attente » du tableau de bord écartent l'élève supprimé** : ses présences et ses évaluations n'y entrent plus.
-2. **La règle, pour toute sortie de ses données** : **ce qui montre ou envoie à quelqu'un écarte l'élève supprimé** (l'écran, Léa, les chercheurs) ; **ce qui garde emporte tout** (le codex, les archives). Motif retenu : sinon l'archive laisserait ses copies pour toujours dans le navigateur, et alléger un groupe deviendrait impossible.
-3. **La phrase**, quand toutes les copies du groupe sont celles d'élèves supprimés, à la place de « Aucun fichier importé. » : « Aucune copie à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es. »
+Lis en entier : la fiche #1000 et la fiche #997 au BACKLOG ; `plans de travail/PLAN-2026-09-30-chantier-archives.md` (§ 2, les quatre règles de Grégoire ; § 4, lot A3) ; les verdicts de relecture des lots A1 et A2 (`VERDICT-RELECTURE-2026-09-30-lot-A1-archive.md`, `…-A2-verifier.md`). Ce lot **écrit des copies dans les données de l'utilisateur** : il passe par la relecture croisée (règle 2 de `PROTOCOLE.md`).
 
-La ligne des Nouvelles ci-dessous est de Cowork, acceptée par Grégoire avant qu'il te transmette cette consigne.
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, et à travailler sur une branche `claude/1000-faire-revenir`. **Ne pousse pas le lot et ne fais pas de release** : tu t'arrêtes au point 6.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, à pousser (les documents de `main` dès maintenant, puis le lot) et à fusionner. Si le garde de permissions refuse, arrête-toi sur ce seul point et dis-le-lui.
+## Les décisions de Cowork (techniques, ou conséquences directes de décisions de Grégoire ; dis-moi si une mesure les dément)
+
+1. **Où** : dans Réglages › Données › Archives, sur la ligne d'une archive, à côté de « Vérifier ». Le geste n'est offert que pour une archive **vérifiée dans ce navigateur** (lot A2).
+2. **Il ne remplace rien et n'efface rien.** Pour chaque copie de l'archive, **son empreinte est recomparée au moment du geste**, en lisant (pas de confiance dans la vérification d'hier, cf. #1001), puis :
+   - la fiche existe et le navigateur n'a pas le fichier, ou la fiche le dit « manquant » → la copie est écrite, et la fiche redevient présente (c'est ce qui répare #997, **par le geste de l'utilisateur, jamais d'office**) ;
+   - le navigateur a déjà le fichier, même empreinte → rien ;
+   - le navigateur a un fichier d'empreinte différente → **rien**, la copie est comptée « changée depuis l'archive » ;
+   - aucune fiche dans l'application → rien, comptée ;
+   - la copie d'un élève supprimé (`dasElevesSupprimes()`) → rien, comptée. C'est la décision de Grégoire du 2 oct. : un ancien fichier ne ramène plus rien de lui.
+   - une copie dont l'empreinte ne correspond pas à celle de l'archive (archive abîmée depuis la vérification) → rien, comptée, et le bilan le dit en tête.
+3. **Mémoire** : lecture par morceaux, comme « Vérifier » (lot A2) ; jamais l'archive entière ni toutes les copies en mémoire. Visé : le plus gros groupe de Grégoire (205 copies, ~1,1 Go pour l'hiver 2026), sur le Mac **et** l'iPad.
+4. **Un bilan à la fin**, en nombres : revenues, déjà là, changées, sans fiche, d'élèves supprimés, abîmées. Ses mots sont à Grégoire ; les tiens sont provisoires.
+5. **Le codex** : une copie revenue est une copie ordinaire ; mesure que la fenêtre « Ce codex n'aura pas toutes tes copies » (#1012) ne s'ouvre pas à tort après un retour.
+6. **Hors du lot** : « Exporter les données » d'un trimestre (#1006) et les mots « clos » (#1002). N'y touche pas.
 
 ## Ce que tu fais, dans cet ordre
 
 1. **Commite** cette consigne et son archive sur `main`, pousse `main`.
-2. **Décision 1** : l'export recherche et les seuils du tableau de bord lisent `dasElevesSupprimes()`. Le codex n'y touche pas.
-3. **Décision 2, « Exporter et archiver » du module Travaux** : mesure d'abord chaque sortie (la grille des copies et son aperçu PDF, « N fichiers en stock », l'export ZIP « Toutes / Tous », la sélection de l'export pour Léa), puis classe-la par la règle : montre ou envoie → écarte ; garde → emporte tout. Une sortie que la règle ne classe pas sans doute (ce qu'elle fait réellement de ses fichiers en décide) : **ne la touche pas**, écris-la dans la fiche close avec ta mesure, et dis-la dans ton rendu ; elle ne bloque pas le lot. Les archives (`js/reserve.js`) ne changent pas : elles gardent.
-4. **Décision 3** : la phrase telle quelle, à l'endroit mesuré, seulement quand le groupe a des copies et qu'elles sont toutes masquées ; « Aucun fichier importé. » reste vrai pour un groupe sans copie.
-5. **Tests** : le banc de #1013 suit (export recherche sans ses présences ni ses évaluations ; seuils sans elles ; le codex les écrit toujours ; la phrase ; chaque sortie classée). Une mutation de plus démontrée rouge : l'export recherche ramené à l'ancienne lecture. Vitest complet.
-6. **La release** : **minor** (1.180.0). Titre à toi, dit à Grégoire au rendu. La ligne des Nouvelles, posée telle quelle :
-   > Quand tu supprimes un·e étudiant·e dans le Cadre, ses copies ne paraissent plus dans la Liste des évaluations ni dans «&nbsp;Annoter et évaluer&nbsp;», et ses données ne partent plus dans l'export pour la recherche. Rien n'est effacé&nbsp;: ton codex garde tout.
-   Si ta mesure du point 3 écarte aussi l'élève de l'export pour Léa, ajoute « ni dans l'export pour Léa » à la fin de la première phrase, et dis-le au rendu ; rien d'autre ne change dans la ligne.
-7. **Verdict Playwright complet sur le commit qui part, puis push, puis fusion vers `main`** ; si la fusion change autre chose que des documents, rejuge-la. Nomme les instables, et dis l'éveil et la mémoire.
-8. **Constate la mise en ligne chez Netlify** (par le connecteur), et dis l'heure. **Pas de porte terrain** : le banc répond.
-9. **Clos #1013** au BACKLOG ; ce qui reste (les élèves supprimés avant 1.174.4, sans trace ; une sortie non classée) s'écrit dans la fiche close.
-10. **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** Suite : le chantier des archives, en commençant par « faire revenir des copies » (#1000), sur une consigne de Cowork.
+2. **Mesure avant de coder** : ce que fait aujourd'hui « Ouvrir une archive… » (il compte sans rendre, lu au plan) ; le rapprochement copie ↔ fiche par identifiant (lu au code, à remesurer) ; où vit l'état « vérifiée ». Dis si une de ces mesures dément une décision ci-dessus.
+3. **Code** sur `claude/1000-faire-revenir`, mots provisoires.
+4. **Tests** : un banc sur le pack démo. Archiver un groupe, retirer au banc le fichier de quelques copies (au banc seulement), marquer une fiche « manquant », changer une copie, supprimer un élève, puis faire revenir : chaque cas du point 2 donne ce qu'il doit, les octets revenus sont identiques à l'archive, rien d'autre n'a bougé dans l'espace. Mutations démontrées rouges : la recomparaison d'empreinte retirée ; le cas « empreinte différente » qui remplace. Un essai à la largeur de l'iPad (768 px). Vitest complet.
+5. **La mémoire, mesurée** : un retour sur une archive de taille réelle fabriquée au banc (au moins quelques centaines de Mo), pic de mémoire relevé.
+6. **Arrête-toi et rends** : le commit sur la branche et une `DEMANDE-RELECTURE-2026-10-04-1000-faire-revenir.md` dans `plans de travail/` (ce que fait le geste, cas par cas, avec le témoin du banc ; le pic de mémoire ; ce qui reste) ; et, pour Grégoire, **les mots exacts** du bouton, de la fenêtre et du bilan, tels qu'ils s'affichent. Pas de verdict complet, pas de push du lot, pas de release.
 
 ## Ce que tu rends
 
-À Grégoire, trois lignes : le numéro en ligne et l'heure ; le verdict complet, l'éveil, la mémoire et les instables nommés ; comment chaque sortie de « Exporter et archiver » a été classée. Ce que tu as supposé, en une ligne.
+À Grégoire, deux lignes : ce que fait « faire revenir », et ce qu'il ne fait jamais. Les mots exacts dans un bloc à part. Ce que tu as supposé, en une ligne.
