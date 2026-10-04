@@ -667,7 +667,13 @@ window.ReserveVerifier = {
     etatVerification: etatVerification,
     compteRendu: compteRendu,
     executer: _executer,
-    actionVerifier: actionVerifier
+    actionVerifier: actionVerifier,
+    // Lot A3 (#1000) : « Faire revenir » (reserve-revenir.js) relit l'archive par les mêmes pièces.
+    sha256: _sha256,
+    sha256Texte: _sha256Texte,
+    idDeLaCopie: _idDeLaCopie,
+    fichierDuSysteme: _fichierDuSysteme,
+    choisirFichier: _choisirFichier
 };
 
 })();

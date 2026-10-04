@@ -15,6 +15,8 @@
        hydrateDepuisFSAPI, purgerEntreeManifeste
      - ReserveVerifier (window.ReserveVerifier) — lot A2 (30 sept. 2026) : l'état de
        vérification d'une archive et son bouton (leurs mots vivent là-bas, pas ici)
+     - ReserveRevenir (window.ReserveRevenir) — lot A3 (4 oct. 2026) : le bouton « Faire
+       revenir » d'une archive vérifiée (ses mots vivent là-bas)
      - echapperHtml (window.echapperHtml)
 */
 
@@ -71,6 +73,22 @@ function _boutonVerifier(dossier) {
         'data-param="' + _echapper(dossier) + '" ' +
         'title="Relire cette archive, copie par copie">' +
         _echapper(RV.MOTS.bouton) +
+    '</button> ';
+}
+
+/**
+ * Lot A3 (#1000) : « Faire revenir », offert seulement pour une archive vérifiée dans ce
+ * navigateur (la garde est aussi dans l'action). Mots dans ReserveRevenir.MOTS.
+ */
+function _boutonFaireRevenir(entree) {
+    var RR = window.ReserveRevenir;
+    var RV = window.ReserveVerifier;
+    if (!RR || typeof RR.actionFaireRevenir !== 'function' || !RV || !RV.etatVerification(entree).verifiee) return '';
+    return '<button class="btn btn-secondaire btn-compact" ' +
+        'data-action="ReserveRevenir.actionFaireRevenir" ' +
+        'data-param="' + _echapper(entree._dossier) + '" ' +
+        'title="' + _echapper(RR.MOTS.infobulle) + '">' +
+        _echapper(RR.MOTS.bouton) +
     '</button> ';
 }
 
@@ -236,6 +254,7 @@ function _rendreTableau() {
                 '<td>' + _badgeVerification(e) + '</td>' +
                 '<td class="u-text-center">' +
                     _boutonVerifier(e._dossier) +
+                    _boutonFaireRevenir(e) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +
