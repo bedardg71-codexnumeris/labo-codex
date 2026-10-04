@@ -308,6 +308,8 @@ function actionFaireRevenir(dossier) {
         return;
     }
     entree = Object.assign({ dossier: dossier }, entree);
+    // E1 (#1022) : l'archive d'un trimestre entier n'a pas ce bouton (reserve-reglages.js) ; son retour
+    // sera E2. Aucune garde ici : rien d'autre que ce bouton n'appelle l'action.
     if (!RV.etatVerification(entree).verifiee) {
         _informer({ titre: MOTS.refus.titre, message: MOTS.refus.nonVerifiee });
         return;
