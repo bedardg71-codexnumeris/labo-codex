@@ -430,6 +430,20 @@
         return fichiers.filter(f => f.groupeCoursId === gcActif.id);
     }
 
+    /**
+     * #1013 — les copies que les listes MONTRENT : celles du groupe-cours actif, sans celles
+     * d'un élève supprimé (`dasElevesSupprimes`, import-export.js). Un filtre d'affichage :
+     * rien n'est écrit, la liste stockée et le codex gardent tout. Les lecteurs qui comptent,
+     * importent ou exportent restent sur `obtenirFichiersGroupeActif`.
+     * @returns {Array}
+     */
+    function obtenirFichiersAffiches() {
+        const fichiers = obtenirFichiersGroupeActif();
+        const supprimes = typeof window.dasElevesSupprimes === 'function' ? window.dasElevesSupprimes() : null;
+        if (!supprimes || supprimes.size === 0) return fichiers;
+        return fichiers.filter(f => !f.etudiantDA || !supprimes.has(String(f.etudiantDA)));
+    }
+
     // Champs protégés — seul reassocierFichier() peut les modifier
     const CHAMPS_PROTEGES = ['productionId', 'etudiantDA'];
 
@@ -1365,6 +1379,7 @@
         // Metadonnees
         obtenirFichiersTravaux: obtenirFichiersTravaux,
         obtenirFichiersGroupeActif: obtenirFichiersGroupeActif,
+        obtenirFichiersAffiches: obtenirFichiersAffiches, // #1013
         ajouterFichierTravail: ajouterFichierTravail,
         supprimerFichierTravail: supprimerFichierTravail,
         obtenirFichiersEtudiant: obtenirFichiersEtudiant,

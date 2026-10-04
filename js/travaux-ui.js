@@ -708,7 +708,7 @@
                 // Cas 1 : fichier deja ouvert dans la visionneuse — reactiver + restaurer palettes
                 // #881 — la copie ouverte a pu partir à la corbeille depuis « Exporter et
                 // archiver » : ne pas la rouvrir, laisser la reconstruction générale plus bas.
-                const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                const fichiersTravaux = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
                 const fichierOuvertBrut = travauxVisionneuse.getFichierActuel();
                 const fichierOuvert = (fichierOuvertBrut && fichiersTravaux.some(function(f) { return f.id === fichierOuvertBrut.id; }))
                     ? fichierOuvertBrut : null;
@@ -1077,7 +1077,7 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
 
-        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+        const fichiersTravaux = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
 
         if (fichiersTravaux.length === 0) {
             // #911 (17 sept. 2026) — sauver les panneaux eval avant d'écraser le conteneur, comme la
@@ -3348,7 +3348,7 @@
             if (conteneur) {
                 // Générer les badges si pas encore fait (ex: session restaurée sans passer par afficherFichiers)
                 if (!_htmlBadgesGrille) {
-                    const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                    const fichiersTravaux = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
                     if (fichiersTravaux.length > 0) {
                         _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
                     }
@@ -3567,7 +3567,7 @@
      * @param {string} da - DA de l'etudiant (vide = tous)
      */
     function filtrerParEtudiant(da) {
-        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        let fichiers = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
         if (da) {
             fichiers = fichiers.filter(f => f.etudiantDA === da);
         }
