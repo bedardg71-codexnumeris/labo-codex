@@ -69,7 +69,7 @@ test('évaluation · case « Consignes transmises » décochée : le bandeau le 
     await expect(page.locator('#travaux-eval-signal-consignes-texte')).toHaveText(
         'Les consignes de «\u00a0Artefact 1\u00a0» ne semblent pas avoir été transmises à ce groupe\u00a0: la case «\u00a0Consignes transmises\u00a0» est décochée. '
         + 'Tant qu\u2019elle l\u2019est, cette production n\u2019apparaît pas au calendrier et ses copies ne comptent pas dans les courbes de progression.');
-    await expect(page.locator('#travaux-eval-signal-consignes-btn')).toHaveText('Cocher «\u00a0Consignes transmises\u00a0»');
+    await expect(page.locator('#travaux-eval-signal-consignes-btn')).toHaveText('Cocher la case');
     // Il ne nomme personne.
     const texte = await page.locator('#travaux-eval-signal-consignes-texte').textContent();
     const noms = await page.evaluate(() => obtenirDonneesSelonMode('groupeEtudiants').flatMap(e => [e.nom, e.prenom]).filter(Boolean));

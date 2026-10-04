@@ -2033,7 +2033,7 @@ async function rafraichirApresModificationProduction() {
     if (typeof window.rechargerFiltreProduction === 'function') window.rechargerFiltreProduction();
 }
 
-const GESTE_COCHER_CONSIGNES = 'Cocher « Consignes transmises »';
+const GESTE_COCHER_CONSIGNES = 'Cocher la case';
 
 /**
  * #1010 (4 oct. 2026) — COCHER « CONSIGNES TRANSMISES » DEPUIS L'ÉCRAN D'ÉVALUATION.
