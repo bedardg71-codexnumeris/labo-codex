@@ -1,50 +1,40 @@
-# Consigne du jour – mettre les mots « clos » en ligne (#1002), puis mesurer « emprunter et rendre un trimestre »
+# Consigne du jour – archiver un trimestre entier (E1)
 
-> Écrite par Cowork le 4 octobre 2026 à 14 h 41, complétée à 14 h 54 (points 7 et 8 ; Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 14 h 17, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-1002-mots-clos.md`.
+> Écrite par Cowork le 4 octobre 2026 à 16 h 27 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 14 h 41, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-1002-mise-en-ligne-et-mesure.md`.
 
 ## Où on en est
 
-Ton commit `be7785c0` sur `claude/1002-mots-clos` est accepté (42 textes, la sentinelle, #1017 inscrite). **Grégoire a tranché tes cinq vrais choix**, chacun sur ta recommandation et celle de Cowork :
+1.182.0 est en ligne (#1002 close) ; ta mesure est lue par Cowork. **Grégoire a approuvé à 16 h 27 le plan et son ordre** : `plans de travail/PLAN-2026-10-04-emprunter-et-rendre-un-trimestre.md` (lis-le en entier). Trois gestes : **archiver le trimestre (E1, ce lot)**, l'emprunter (E2), le rendre (E3). Ils passent avant l'enregistrement et la carte d'alignement, à cause de la marge du codex.
 
-1. **L'aide de la clôture** : « Clore un trimestre le fige en lecture seule, une fois terminé ; tu peux ensuite en commencer un nouveau. Clore ne libère aucun espace. » (« oui », 4 oct.)
-2. **Le fichier de la clôture** : **clore ne télécharge plus** `trimestre-<id>-archive-<date>.json` ; les phrases « Un export automatique sera généré. » et « Un fichier d'export a été téléchargé. » sont retirées. Les trois boutons « Exporter les données » de la bibliothèque **ne changent pas** : ils restent sous #1006, qui reste ouverte pour eux. (« oui »)
-3. **Le registre longitudinal** : « … pas dans l'archive d'un groupe-cours. » (« j'accepte »)
-4. **Sous la liste des archives** : « · liste mise à jour le <date> » ; le code qui écrit la date ne change pas.
-5. **La carte Archives** : l'encadré dit « → Archiver… » ; l'aide ajoute « Vérifier relit une archive copie par copie ; une archive vérifiée offre Faire revenir. » et dit « d'un groupe-cours archivé ».
+Ce lot fabrique l'exemplaire dont tout le reste dépend : il passe par la **relecture croisée** (règle 2 de `PROTOCOLE.md`), bien qu'il n'écrive rien dans les données.
 
-La ligne des Nouvelles ci-dessous est de Cowork, acceptée par Grégoire avant qu'il te transmette cette consigne.
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, et à travailler sur une branche `claude/e1-archiver-trimestre`. **Ne pousse pas le lot et ne fais pas de release** : tu t'arrêtes au point 6.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, à pousser (les documents de `main` dès maintenant, puis le lot) et à fusionner. Si le garde de permissions refuse, arrête-toi sur ce seul point et dis-le-lui.
+## D'abord, les inscriptions (décisions de Cowork sur tes trouvailles)
 
-## Les décisions de Cowork sur tes trouvailles et ta question
+1. **Inscris** (issue 2) : la suppression d'un trimestre laisse les fichiers de ses copies dans le navigateur (E0 de ta mesure) ; le stock déjà orphelin est une question de données, à Grégoire, plus tard.
+2. **Inscris**, en une fiche : rouvrir un codex (dont le codex à part) remet tout l'espace à son état d'avant, et le codex à part devient le codex actif sous le nom « avant-suppression » ; les mots de la fenêtre reviendront à Grégoire.
+3. **Inscris** : l'archive d'un groupe emporte entières les clés `{[da]}` inconnues (inféré, à mesurer).
+4. **Ferme #1001** comme dépassée par le plan du 4 oct. (E3). Note à #1006 que le plan propose de retirer les trois boutons quand E1 sera livré : décision à Grégoire, au point 6.
 
-- **« Erreur: undefined » au refus de la clôture** (la confirmation lit `result.error`, le refus remplit `result.message`) : **corrige-la dans ce lot**. C'est le parcours « clore » que ce lot réécrit, et une fenêtre « undefined » s'y montre à l'usager ; une ligne, un essai, la mutation rouge.
-- **« Clore » offert sur le trimestre actif, toujours refusé** : **inscris-le** (issue 2) ; ne le corrige pas ici.
-- **`ECOSYSTEME-DONNEES.md`** : reporte-y le vocabulaire (clos / archivé), puisque la fiche le demande ; quelques lignes de documentation, rien d'autre.
-- **RELAIS.md** : sans objet, le lot part aujourd'hui.
+## Les décisions de Cowork pour E1 (techniques ; dis-moi si une mesure les dément)
+
+1. **Où** : dans la bibliothèque des trimestres, sur un trimestre **clos** seulement (ordre de vie : clos → archivé). Pas sur le trimestre actif ni sur un trimestre en cours.
+2. **Ce que l'archive emporte** : toutes les clés `<trimestre>_*` ; les séances vivantes `seancesCompletes_gc_<id>` des groupes de ce trimestre ; tous les fichiers des copies de ce trimestre, corbeille comprise. **Aucune clé globale n'y entre comme donnée à réécrire** ; celles que le trimestre lit (cours, profil…) peuvent y figurer **pour mémoire**, dans une section que E2 ne réécrira jamais, si c'est utile pour lire l'archive seule. Tranche, et dis-le.
+3. **Une empreinte par fichier et une par clé**, dans un manifeste qui dit aussi la version de l'application, le trimestre, la date et la liste des clés.
+4. **Le socle des lots A1 et A2** : même assemblage sans charger les copies en mémoire, mêmes modes (fichier sous Safari, dossier sous Chrome), même confirmation par l'usager que le fichier est là, même liste des archives. **« Vérifier » s'étend** à l'archive d'un trimestre (fichiers et clés).
+5. **Rien n'est retiré, rien n'est écrit dans les données** : seule la liste des archives gagne une entrée.
+6. **Hors du lot** : emprunter, rendre, les boutons « Exporter les données » (#1006), la suppression (E0).
 
 ## Ce que tu fais, dans cet ordre
 
-1. **Commite** cette consigne et son archive sur `main`, pousse `main`.
-2. **Les cinq choix** et **le correctif « undefined »** sur la branche. Le choix 2 retire l'appel au téléchargement dans le parcours de clôture seulement ; mesure qu'aucun autre appelant ne dépendait de ce téléchargement. La sentinelle et les essais suivent ; mutations rouges : le téléchargement remis à la clôture ; « undefined » remis.
-3. **La release** : **minor** (1.182.0). Titre à toi, dit à Grégoire au rendu. La ligne des Nouvelles, posée telle quelle :
-   > Un trimestre terminé se dit maintenant «&nbsp;clos&nbsp;» : dans la bibliothèque des trimestres, «&nbsp;Clore&nbsp;» et «&nbsp;Rouvrir&nbsp;» remplacent «&nbsp;Archiver&nbsp;» et «&nbsp;Désarchiver&nbsp;», et clore un trimestre ne télécharge plus de fichier.
-4. **Verdict Playwright complet sur le commit qui part, puis push, puis fusion vers `main`** ; si la fusion change autre chose que des documents, rejuge-la. Nomme les instables ; dis l'éveil et la mémoire.
-5. **Constate la mise en ligne chez Netlify**, et dis l'heure. **Pas de porte terrain** : la sentinelle répond.
-6. **Clos #1002** ; **note à #1006** que la clôture ne télécharge plus le fichier et que restent les trois boutons de la bibliothèque.
-7. **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** **Alléger (#1001, lot A4) n'est plus la suite** : Grégoire a changé le but du chantier (point 8). N'ouvre pas #1001.
-8. **Puis, la mesure – lecture seule, aucun code, rien d'écrit dans ses données.**
-
-   **Le but nouveau, dans les mots de Grégoire** (4 oct., 14 h 50) : retirer **le trimestre d'hiver 2026 entier** (données et copies) de l'application **et du codex**, le déposer dans une archive sur son Mac, hors de l'application ; au besoin le **réintégrer** pour le lire, le consulter, en extraire des données ou des images ; puis le **retourner** à l'archive, « comme un livre à la bibliothèque ». Il garde H2026 entier tant que ce chemin n'est pas prouvé (ses deux groupes, aux dynamiques différentes, lui servent aux démonstrations et à comparer automne et hiver, avec ses doubleurs). Hypothèse de Cowork, à éprouver : un trimestre **clos** est en lecture seule, donc le livre rendu est celui qu'on a emprunté, et le rendre n'est qu'un retrait, sans réécrire l'archive.
-
-   Rends `plans de travail/MESURE-2026-10-04-emprunter-un-trimestre.md`, chaque constat marqué *mesuré* (commande ou banc, et témoin), *lu* (code), ou *inféré* :
-
-   1. **Ce que l'archive d'un groupe-cours emporte aujourd'hui** (lots A1-A3) : les copies, et quelles clés de données ?
-   2. **Le codex à part** écrit avant de supprimer un trimestre (1.175.0) : que contient-il ? Sur la démo, dans un espace jetable : supprimer un trimestre, puis « Ouvrir un Codex » sur ce codex à part — le trimestre revient-il, seul, entier, sans toucher aux autres trimestres ni aux réglages ? Ce qui revient, ce qui manque, ce qui est écrasé.
-   3. **Ce qu'un trimestre partage avec les autres** : les clés globales (cours, listes, enseignants, cartouches, bibliothèques ; skill `integrite-globaux`), les élèves présents dans plusieurs trimestres (doubleurs), le registre et le suivi longitudinal, l'alignement. Pour chacun : que voit-on dans les autres trimestres quand H2026 n'est plus là, et que faut-il pour qu'il revienne intact ?
-   4. **La marge du codex** : sa taille réelle aujourd'hui (le plus récent sur iCloud, lecture seule : des comptes et des octets, aucun nom d'étudiant·e) ; la croissance des copies d'A2026 depuis la rentrée ; une projection à la fin de l'automne, hypothèses écrites ; et ce qui se passe réellement au-delà de 2 Go (#992 : mesuré, ou lu ?).
-   5. **Les morceaux qui manquent** pour « emprunter et rendre un trimestre », en lots, chacun avec sa taille estimée et ce qui reviendrait à Grégoire. Une proposition, pas une décision. Dis aussi ce que deviennent #1001 (alléger un groupe) et #1006 (les boutons « Exporter les données ») dans ce chemin.
+1. **Commite** cette consigne, son archive et le plan sur `main` ; les inscriptions ; pousse `main`.
+2. **Code** E1 sur la branche, mots provisoires.
+3. **Tests** : un banc sur un trimestre fictif clos (deux groupes, un doubleur, des copies dont une à la corbeille, des séances vivantes) : l'archive contient exactement ce que dit le point 2, aucune clé d'un autre trimestre, chaque empreinte juste ; « Vérifier » la dit intacte, puis abîmée après un octet altéré. Mutations rouges : une clé globale qui entre ; une copie de la corbeille oubliée. Largeur iPad. Vitest complet.
+4. **La mémoire, mesurée** : une archive de taille réelle fabriquée au banc (de l'ordre de 1,1 Go, la taille de l'hiver 2026), pic relevé, sous WebKit.
+5. **Écris** `plans de travail/DEMANDE-RELECTURE-2026-10-04-e1-archiver-trimestre.md` (ce que l'archive contient, avec le témoin ; ce qu'elle n'emporte pas, et pourquoi ; la mémoire ; ce qui reste pour E2).
+6. **Arrête-toi et rends** : le commit sur la branche ; **les mots exacts** du geste (bouton, fenêtre, confirmation, liste) ; et ta recommandation sur les trois boutons « Exporter les données » (#1006). Pas de verdict complet, pas de push du lot, pas de release.
 
 ## Ce que tu rends
 
-À Grégoire, trois lignes pour la mise en ligne : le numéro en ligne et l'heure ; le verdict complet, l'éveil, la mémoire, les instables ; où il verra « clos » en premier. Puis, pour la mesure, trois lignes : ce qui existe déjà pour emprunter et rendre un trimestre ; ce qui manque, en gestes ; la marge du codex avant 2 Go. Ce que tu as supposé, en une ligne.
+À Grégoire, deux lignes : ce que l'archive d'un trimestre emporte, et ce qu'elle laisse. Les mots dans un bloc à part. Ce que tu as supposé, en une ligne.
