@@ -657,6 +657,37 @@ Sentinelles : `tests/unit/sentinelle-lot-A2-verifier-archive.test.js` ;
 
 ---
 
+## 15. Ajout d'E1 (4 octobre 2026) : l'archive d'un trimestre clos entier
+
+Plan : `plans de travail/PLAN-2026-10-04-emprunter-et-rendre-un-trimestre.md` (E1, #1022). Module :
+`js/reserve-trimestre.js`. Geste : bibliothèque des trimestres, menu ⋮ d'un trimestre **clos**.
+
+- **Même forme que l'archive d'un groupe** : `trimestres/<trimestre>-trimestre/` avec `donnees.json`,
+  `meta.json`, `manifeste-archives-patch.json`, `travaux/<id>.<ext>` (la liste blanche de la Défense K
+  ne change pas). Même dépôt (`_deposerArchive`, sorti de `verserGroupeCours`) : deux modes, copies
+  rangées sans passer par la mémoire, aperçu, « Il y est », inscription à la liste.
+- **`donnees.json`** : toutes les clés `<trimestre>_*`, entières (aucun filtre de groupe ni d'élève),
+  et les séances vivantes `seancesCompletes_gc_<id>` des groupes de `<trimestre>_groupesCours`.
+  **Aucune clé globale.**
+- **`travaux/`** : les fichiers de `<trimestre>_fichiersTravaux` ET de `<trimestre>_corbeilleFichiers`.
+- **`meta.json`** : `type_archive: 'trimestre'`, `trimestre`, `nom_trimestre`, `application_version`,
+  `date_archive` ; `integrite.travaux_sha256` (par fichier), `integrite.cles_sha256` (par clé :
+  SHA-256 de `JSON.stringify(valeur)`), `integrite.donnees_json_sha256` ; `contenu.cles` (la liste),
+  `contenu.seances_vivantes`, les comptes ; `pour_memoire` (l'entrée du registre `trimestres` et le
+  code et le nom des cours des groupes), **pour lire l'archive seule, jamais réécrit au retour**.
+- **L'entrée de la liste** porte `type_archive: 'trimestre'` ; l'écran Archives dit « Trimestre
+  entier » et n'offre pas « Faire revenir » (le retour d'un trimestre est E2).
+- **« Vérifier »** : en plus des copies, chaque clé contre son empreinte (absente, altérée, en trop) ;
+  la couverture est celle de toutes les fiches du trimestre (travail et corbeille). Sans
+  `cles_sha256` : `a_refaire`.
+- **Rien n'est écrit dans les données**, et seul un trimestre clos est accepté (garde dans
+  `archiverTrimestre`, pas seulement au menu).
+
+Sentinelles : `tests/unit/sentinelle-e1-archiver-trimestre.test.js` ;
+`tests/integration/e1-archiver-trimestre.spec.js` (WebKit, largeur iPad, le vrai menu).
+
+---
+
 ## Historique du document
 
 | Date       | Changement                                                    |
@@ -665,3 +696,4 @@ Sentinelles : `tests/unit/sentinelle-lot-A2-verifier-archive.test.js` ;
 | 2026-04-26 | Granularité par groupe-cours : API `verserGroupeCours(trimestre, groupeCoursId)` remplace `verserTrimestre(trimestre)`. UUID v4 par versement. Filtrage en deux passes (trimestre puis groupe). Convention de nommage `{trimestre}-{cours}-gr{groupe}`. Ajout `listerGroupesVersables()`. Tests mis à jour. |
 | 2026-09-30 | Lot A1 du chantier des archives : section 13 (assemblage sans copier les copies, empreinte par copie, confirmation par l'usager). |
 | 2026-09-30 | Lot A2 du chantier des archives : section 14 (vérifier une archive, lecture du ZIP par tranches, état retenu, dossier gardé le temps de la page). |
+| 2026-10-04 | E1 : section 15 (l'archive d'un trimestre clos entier, empreinte par clé, « Vérifier » étendu). |

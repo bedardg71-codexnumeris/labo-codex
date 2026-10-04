@@ -90,6 +90,16 @@ var MOTS = {
         titre: 'Ce n\'est pas cette archive',
         texte: 'Le fichier choisi est l\'archive d\'un autre groupe ou d\'une autre date. Choisis le fichier de cette ligne.'
     },
+    // E1 (#1022, 4 oct. 2026) : l'archive d'un trimestre entier. Mots provisoires, à Grégoire.
+    trimestre: {
+        reussite: function(m, k) { return 'Les ' + m + ' copies et les ' + k + ' clés de données sont présentes et intactes.'; },
+        echec: function(n, m) { return n + ' copies sur ' + m + ' manquent ou ne concordent pas. Archive de nouveau ce trimestre.'; },
+        sansEmpreintes: 'Cette archive ne porte pas les empreintes de ses clés : elle ne peut pas être vérifiée. Archive de nouveau ce trimestre.',
+        cles: function(n, adjectif) { return n + ' clé' + (n > 1 ? 's ' : ' ') + adjectif + (n > 1 ? 's' : ''); },
+        clesEnTrop: function(n) { return n + ' clé' + (n > 1 ? 's' : '') + ' en trop dans l\'archive'; },
+        nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du trimestre sans copie dans l\'archive'; },
+        couvertureNonMesuree: 'couverture non mesurée : ce trimestre n\'est plus dans l\'application'
+    },
     // L'archive n'a pas pu être lue (non soumis à Grégoire ; relu par Cowork, tel quel).
     illisible: { titre: 'Archive illisible' },
     aRefaireDetail: function(nb, taille) { return nb + ' copies, ' + taille + ' (compte et taille seulement, sans valoir vérification).'; },
@@ -392,8 +402,16 @@ function sourceDossier(handleRacine, dossier) {
    LA VÉRIFICATION
    =============================== */
 
-/** Les fiches de copie du groupe, telles qu'elles sont AUJOURD'HUI dans l'application ; null si le groupe n'y est plus. */
+/**
+ * Les fiches de copie du groupe, telles qu'elles sont AUJOURD'HUI dans l'application ; null si le groupe n'y est plus.
+ * E1 (#1022) : pour l'archive d'un trimestre entier, toutes les fiches du trimestre, travail ET corbeille.
+ */
 function _fichesDuGroupe(entree, dossier) {
+    if (entree && entree.type_archive === 'trimestre') {
+        var RT = window.ReserveTrimestre;
+        if (!RT || !RT.estDansLApplication(entree.trimestre)) return null;
+        return RT.fichesDuTrimestre(entree.trimestre).map(function(x) { return x.fiche; });
+    }
     var Reserve = window.Reserve;
     if (!entree || !entree.trimestre || !Reserve || typeof Reserve.listerGroupesVersables !== 'function') return null;
     var gc = Reserve.listerGroupesVersables(entree.trimestre).find(function(g) { return g.dossier === dossier; });
@@ -419,7 +437,9 @@ async function verifierArchive(source, entree, dossier, onProg) {
         uuid: null, meta_sha256: null, version_archive: null, date_archive: null,
         total: 0, verifiees: 0, problemes: [], enTrop: [], nonCouvertes: [],
         couvertureMesuree: false, donneesConcordent: null,
-        nombreFichiers: 0, tailleFichiers: 0
+        nombreFichiers: 0, tailleFichiers: 0,
+        // E1 (#1022) : l'archive d'un trimestre entier porte aussi une empreinte par clé.
+        trimestreEntier: false, totalCles: 0, clesVerifiees: 0, clesProblemes: [], clesEnTrop: []
     };
 
     await source.ouvrir();
@@ -444,8 +464,12 @@ async function verifierArchive(source, entree, dossier, onProg) {
     rapport.nombreFichiers = copies.length;
     rapport.tailleFichiers = copies.reduce(function(s, c) { return s + (c.taille || 0); }, 0);
 
+    rapport.trimestreEntier = meta.type_archive === 'trimestre';
+    if (entree && rapport.trimestreEntier) entree = Object.assign({}, entree, { type_archive: 'trimestre' });
     var empreintes = meta.integrite && meta.integrite.travaux_sha256;
-    if (!empreintes || typeof empreintes !== 'object') {
+    var empreintesCles = meta.integrite && meta.integrite.cles_sha256;
+    if (!empreintes || typeof empreintes !== 'object' ||
+        (rapport.trimestreEntier && (!empreintesCles || typeof empreintesCles !== 'object'))) {
         rapport.etat = 'a_refaire';
         return rapport;
     }
@@ -458,14 +482,36 @@ async function verifierArchive(source, entree, dossier, onProg) {
     rapport.donneesConcordent = donneesTexte != null && !!attenduDonnees &&
         (await _sha256Texte(donneesTexte)) === attenduDonnees;
     var tailleFiche = {};
-    if (donneesTexte != null && entree && entree.trimestre) {
-        try {
-            var donnees = JSON.parse(donneesTexte);
-            var fichesArchive = donnees[entree.trimestre + '_fichiersTravaux'];
+    var trimestreDesDonnees = (entree && entree.trimestre) || (rapport.trimestreEntier ? meta.trimestre : null);
+    var donnees = null;
+    if (donneesTexte != null) {
+        try { donnees = JSON.parse(donneesTexte); } catch (e) { /* les données illisibles sont déjà dites par leur empreinte */ }
+    }
+    if (donnees && typeof donnees === 'object' && trimestreDesDonnees) {
+        // E1 : la corbeille aussi, dont l'archive d'un trimestre range les copies.
+        ['_fichiersTravaux', '_corbeilleFichiers'].forEach(function(suffixe) {
+            var fichesArchive = donnees[trimestreDesDonnees + suffixe];
             if (Array.isArray(fichesArchive)) {
                 fichesArchive.forEach(function(f) { if (f && f.id && f.tailleFichier > 0) tailleFiche[f.id] = f.tailleFichier; });
             }
-        } catch (e) { /* les données illisibles sont déjà dites par leur empreinte */ }
+        });
+    }
+
+    // E1 (#1022) : chaque clé de l'archive d'un trimestre, contre son empreinte.
+    if (rapport.trimestreEntier) {
+        var nomsCles = Object.keys(empreintesCles);
+        rapport.totalCles = nomsCles.length;
+        var lisibles = !!(donnees && typeof donnees === 'object' && !Array.isArray(donnees));
+        for (var c = 0; c < nomsCles.length; c++) {
+            var cle = nomsCles[c];
+            if (!lisibles) { rapport.clesProblemes.push({ nom: cle, type: 'illisible' }); continue; }
+            if (!Object.prototype.hasOwnProperty.call(donnees, cle)) { rapport.clesProblemes.push({ nom: cle, type: 'absente' }); continue; }
+            if ((await _sha256Texte(JSON.stringify(donnees[cle]))) === empreintesCles[cle]) rapport.clesVerifiees++;
+            else rapport.clesProblemes.push({ nom: cle, type: 'alteree' });
+        }
+        if (lisibles) {
+            rapport.clesEnTrop = Object.keys(donnees).filter(function(k) { return !Object.prototype.hasOwnProperty.call(empreintesCles, k); });
+        }
     }
 
     // Les copies, une à la fois.
@@ -512,7 +558,8 @@ async function verifierArchive(source, entree, dossier, onProg) {
     }
 
     rapport.etat = (rapport.problemes.length === 0 && rapport.enTrop.length === 0 &&
-        rapport.nonCouvertes.length === 0 && rapport.donneesConcordent === true) ? 'verifiee' : 'incomplete';
+        rapport.nonCouvertes.length === 0 && rapport.donneesConcordent === true &&
+        rapport.clesProblemes.length === 0 && rapport.clesEnTrop.length === 0) ? 'verifiee' : 'incomplete';
     return rapport;
 }
 
@@ -556,11 +603,12 @@ function etatVerification(entree) {
    =============================== */
 
 function compteRendu(rapport) {
+    var T = rapport.trimestreEntier ? MOTS.trimestre : null;
     if (rapport.etat === 'verifiee') {
-        return { titre: MOTS.reussite.titre, message: MOTS.reussite.texte(rapport.total) };
+        return { titre: MOTS.reussite.titre, message: T ? T.reussite(rapport.total, rapport.totalCles) : MOTS.reussite.texte(rapport.total) };
     }
     if (rapport.etat === 'a_refaire') {
-        return { titre: MOTS.sansEmpreintes.titre, message: MOTS.sansEmpreintes.texte + '\n' + MOTS.aRefaireDetail(rapport.nombreFichiers, _formaterTaille(rapport.tailleFichiers)) };
+        return { titre: MOTS.sansEmpreintes.titre, message: (T ? T.sansEmpreintes : MOTS.sansEmpreintes.texte) + '\n' + MOTS.aRefaireDetail(rapport.nombreFichiers, _formaterTaille(rapport.tailleFichiers)) };
     }
     if (rapport.etat === 'autre_archive') {
         return { titre: MOTS.autreArchive.titre, message: MOTS.autreArchive.texte };
@@ -573,11 +621,19 @@ function compteRendu(rapport) {
     if (parType.alteree) lignes.push(MOTS.detail.copies(parType.alteree, MOTS.detail.alteree));
     if (parType.illisible) lignes.push(MOTS.detail.copies(parType.illisible, MOTS.detail.illisible));
     if (rapport.enTrop.length) lignes.push(MOTS.detail.enTrop(rapport.enTrop.length));
-    if (rapport.nonCouvertes.length) lignes.push(MOTS.detail.nonCouvertes(rapport.nonCouvertes.length));
+    if (rapport.nonCouvertes.length) lignes.push((T ? T.nonCouvertes : MOTS.detail.nonCouvertes)(rapport.nonCouvertes.length));
+    if (T) {
+        var clesParType = {};
+        rapport.clesProblemes.forEach(function(p) { clesParType[p.type] = (clesParType[p.type] || 0) + 1; });
+        ['absente', 'alteree', 'illisible'].forEach(function(type) {
+            if (clesParType[type]) lignes.push(T.cles(clesParType[type], MOTS.detail[type]));
+        });
+        if (rapport.clesEnTrop.length) lignes.push(T.clesEnTrop(rapport.clesEnTrop.length));
+    }
     if (rapport.donneesConcordent !== true) lignes.push(MOTS.detail.donneesKo);
-    if (!rapport.couvertureMesuree) lignes.push(MOTS.detail.couvertureNonMesuree);
+    if (!rapport.couvertureMesuree) lignes.push(T ? T.couvertureNonMesuree : MOTS.detail.couvertureNonMesuree);
     var n = rapport.problemes.length;
-    var message = (n > 0 ? MOTS.echec.texte(n, rapport.total) + '\n' : '') + lignes.join('\n');
+    var message = (n > 0 ? (T ? T.echec : MOTS.echec.texte)(n, rapport.total) + '\n' : '') + lignes.join('\n');
     return { titre: MOTS.echec.titre, message: message };
 }
 

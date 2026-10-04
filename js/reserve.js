@@ -1185,6 +1185,213 @@ async function _hydrateManifesteDepuisFSAPI(handleRacine) {
 }
 
 /* ===============================
+   DÉPÔT D'UNE ARCHIVE (commun au groupe-cours et au trimestre entier)
+   ===============================
+   E1 (#1022, 4 oct. 2026) : l'étape 4 de `verserGroupeCours`, sortie telle quelle pour que
+   l'archive d'un trimestre entier (reserve-trimestre.js) passe par le MÊME dépôt : mêmes
+   deux modes, même assemblage sans charger les copies en mémoire, même aperçu (défense K),
+   même « Il y est » de l'usager, même inscription à la liste. Seuls les mots changent.
+*/
+
+/**
+ * Écrit l'archive (dossier lié, ou fichier téléchargé) et l'inscrit à la liste.
+ * @param {Object} o
+ * @param {Object|null} o.handleReserve - le dossier des archives (Chrome), ou null (fichier)
+ * @param {string} o.dossier
+ * @param {Object} o.donnees - le contenu de donnees.json
+ * @param {Object} o.meta - le contenu de meta.json
+ * @param {Object} o.patch - { dossier, patch } : l'entrée de la liste
+ * @param {Array<{id, ext, blob}>} o.blobs - les copies, par référence
+ * @param {Object} o.stats - les comptes rendus à l'appelant (sans la taille du ZIP)
+ * @param {Object} o.mots - { archive(stats, chemin), telecharge(stats, taille), nonArchive }
+ * @returns {Promise<Object|null>} le résultat ; null si l'aperçu est annulé
+ */
+async function _deposerArchive(o) {
+    var dossier = o.dossier;
+    var patch = o.patch;
+    var mots = o.mots;
+
+    if (o.handleReserve) {
+        // === MODE FSAPI : écriture directe ===
+        _prog(72, 'Écriture sur disque…', dossier);
+        await _yield();
+
+        var ecriture = await _ecrireVersementDirect(
+            o.handleReserve, dossier, o.donnees, o.meta, patch, o.blobs, _prog
+        );
+
+        _prog(98, 'Mise à jour du manifeste global…', '');
+        await _yield();
+        try {
+            await _fusionnerManifesteGlobal(o.handleReserve, dossier, patch.patch);
+        } catch (eFusion) {
+            console.warn('[Archives] Fusion manifeste-archives.json échouée, l’archive reste valide :', eFusion.message || eFusion);
+        }
+
+        // Manifeste local : toujours mis à jour, même si la fusion FSAPI a échoué
+        try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
+        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
+
+        _prog(100, 'Archivage réussi !', ecriture.cheminDossier);
+        await new Promise(function(r) { setTimeout(r, 600); });
+        _progHide();
+
+        var nomDossierRacine = o.handleReserve.name || 'Archives';
+        var annonce = mots.archive(o.stats, nomDossierRacine + '/' + ecriture.cheminDossier);
+        notifications.succes(annonce.titre, annonce.texte);
+
+        return {
+            succes: true,
+            uuid: patch.patch.uuid,
+            dossier: dossier,
+            mode: 'fsapi',
+            cheminDossier: ecriture.cheminDossier,
+            stats: o.stats
+        };
+    }
+
+    // === MODE ZIP : flux v1 (téléchargement manuel) ===
+    _prog(72, 'Construction du ZIP…', dossier);
+    await _yield();
+
+    // Manifeste local : l'entrée est CALCULÉE avant la construction du ZIP, pour que
+    // le ZIP porte l'historique complet (#248), mais elle n'est INSCRITE à la liste
+    // qu'une fois le fichier confirmé par l'usager (lot F, D0, puis lot A1 : un échec ne
+    // se déguise pas en réussite). Avant, un aperçu annulé ou une compression échouée
+    // laissait l'archive listée sans qu'aucun fichier n'existe (mesuré sous Safari).
+    // Copie de `archives` : la lecture rend l'objet du cache mémoire, qu'il ne faut pas muter.
+    var manifesteLocal = _lireManifesteLocal();
+    manifesteLocal.archives = Object.assign({}, manifesteLocal.archives);
+    manifesteLocal.archives[dossier] = patch.patch;
+    manifesteLocal.derniere_mise_a_jour = new Date().toISOString();
+
+    var zip = new JSZip();
+    var dossierBase = zip.folder('trimestres').folder(dossier);
+
+    dossierBase.file('donnees.json', JSON.stringify(o.donnees, null, 0));
+
+    // Lot A1 : les copies ne sont plus confiées à JSZip, qui les lisait toutes en mémoire
+    // (mesuré : 3,4 Go pour 607 Mo de copies). On n'en garde que la référence ;
+    // `FichierSortant.assemblerZip` les range telles quelles, comme pour le codex (lot J0).
+    dossierBase.folder('travaux');
+    var cheminTravaux = 'trimestres/' + dossier + '/travaux/';
+    var copies = [];
+    var rangDeLaCopie = {};
+    for (var b = 0; b < o.blobs.length; b++) {
+        var entree2 = o.blobs[b];
+        // Un même nom déposé deux fois : le dernier l'emporte, à la place du premier
+        // (ce que faisait JSZip).
+        var nomEntree = cheminTravaux + entree2.id + '.' + entree2.ext;
+        if (Object.prototype.hasOwnProperty.call(rangDeLaCopie, nomEntree)) {
+            copies[rangDeLaCopie[nomEntree]].blob = entree2.blob;
+        } else {
+            rangDeLaCopie[nomEntree] = copies.length;
+            copies.push({ nom: nomEntree, blob: entree2.blob });
+        }
+    }
+
+    dossierBase.file('meta.json', JSON.stringify(o.meta, null, 2));
+    dossierBase.file('manifeste-archives-patch.json', JSON.stringify(patch, null, 2));
+
+    // Manifeste local agrégé à la racine du ZIP (sous le nom canonique).
+    // Permet à l'utilisateur de retrouver l'historique de tous ses
+    // archives précédents dans n'importe quel ZIP récent.
+    zip.file('manifeste-archives.json', JSON.stringify(manifesteLocal, null, 2));
+
+    // Ce que le fichier contiendra : les textes et les copies, dans l'ordre d'avant le lot.
+    var entreesArchive = window.FichierSortant.entreesDuZip(zip, copies, cheminTravaux);
+
+    // Défense K — valider la structure du ZIP avant compression. Si un
+    // payload a tenté d'ajouter une entrée annexe transportant des
+    // données identifiantes (cf. MODELE-MENACES.md §X-02), l'export
+    // est bloqué ici et l'utilisateur reçoit une alerte claire.
+    if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportReserve === 'function') {
+        window.SecuriteExportValidation.validerExportReserve(entreesArchive);
+    }
+
+    // K-β — preview UI avant compression. L'utilisateur peut annuler.
+    // On masque l'overlay avant la modale (sinon double affichage)
+    // puis on le réaffiche après le clic Télécharger pour montrer la
+    // compression. Sans réaffichage, l'utilisateur attend dans le
+    // noir pendant l'assemblage.
+    if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
+        _progHide();
+        var okPreview = await window.SecuriteExportPreview.previewZipEtConfirmer(entreesArchive, 'archive');
+        if (!okPreview) {
+            return null;
+        }
+        _progShow('Génération de l\'archive');
+    }
+
+    _prog(80, 'Compression du ZIP…', '');
+    await _yield();
+    var zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
+        _prog(80 + Math.round(pourcent * 0.18),
+            'Compression du ZIP…',
+            Math.round(pourcent) + '% compressé');
+    });
+
+    // Convention #262 : préfixe `archive-` + dossier + date + extension simple.
+    // CONFIDENTIEL- retiré (l'archive est implicitement personnelle).
+    var nomFichier = 'archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_ARCHIVE;
+
+    // Le fichier est assemblé ; il n'est pas encore écrit.
+    _prog(100, 'Archive prête !', _formaterTaille(zipBlob.size));
+    await new Promise(function(r) { setTimeout(r, 600); });
+    _progHide();
+
+    var statsZip = Object.assign({}, o.stats, { tailleZip: zipBlob.size });
+
+    // Lot A1 : le parcours du codex téléchargé (lot G, #988). L'application ne peut pas
+    // savoir si un téléchargement s'est terminé : la réussite n'est plus annoncée
+    // d'office, c'est l'usager qui dit si le fichier est là. Sans son « Il y est », rien
+    // n'entre au registre et l'écran ne dit pas « archivé ». L'adresse du fichier n'est
+    // plus libérée aussitôt (`FichierSortant.telecharger`).
+    var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size);
+    while (true) {
+        window.FichierSortant.telecharger(zipBlob, nomFichier);
+        if (await window.FichierSortant.confirmerTelechargement(nomFichier, tailleDite)) break;
+
+        console.warn('[Archives] Téléchargement : fichier non trouvé par l\'usager.');
+        var geste = await window.uiDialogues.demanderAction({
+            titre: mots.nonArchive,
+            message: 'Le fichier (' + tailleDite + ') n\'a pas été enregistré. Tes données restent dans l\'application.',
+            actions: [{ valeur: 'reessayer', texte: 'Réessayer', principal: true }]
+        });
+        if (geste !== 'reessayer') {
+            return { succes: false, nonConfirme: true, uuid: patch.patch.uuid, dossier: dossier, nomFichier: nomFichier, mode: 'zip', stats: statsZip };
+        }
+    }
+
+    // Inscrite à la liste seulement maintenant : le fichier est là, l'usager l'a dit.
+    try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
+    catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
+
+    var annonceZip = mots.telecharge(o.stats, _formaterTaille(zipBlob.size));
+    notifications.succes(annonceZip.titre, annonceZip.texte);
+
+    return {
+        succes: true,
+        uuid: patch.patch.uuid,
+        dossier: dossier,
+        nomFichier: nomFichier,
+        mode: 'zip',
+        stats: statsZip
+    };
+}
+
+/** Les mots du dépôt de l'archive d'un groupe-cours (inchangés par E1). */
+var MOTS_DEPOT_GROUPE = {
+    archive: function(stats, chemin) {
+        return { titre: 'Groupe archivé', texte: stats.etudiants + ' étudiant(s), ' + stats.fichiersTrouves + ' fichier(s) : ' + chemin };
+    },
+    telecharge: function(stats, taille) {
+        return { titre: 'Groupe archivé : fichier téléchargé', texte: stats.etudiants + ' étudiant(s), ' + stats.fichiersTrouves + ' fichier(s) (' + taille + ')' };
+    },
+    nonArchive: 'Groupe non archivé'
+};
+
+/* ===============================
    API : VERSEMENT
    =============================== */
 
@@ -1313,195 +1520,23 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
             }
         };
 
-        // 4. Branche selon le mode
-        if (modeFSAPI) {
-            // === MODE FSAPI : écriture directe ===
-            _prog(72, 'Écriture sur disque…', dossier);
-            await _yield();
-
-            var ecriture = await _ecrireVersementDirect(
-                handleReserve, dossier, donnees, meta, patch,
-                collecteBlobs.blobs, _prog
-            );
-
-            _prog(98, 'Mise à jour du manifeste global…', '');
-            await _yield();
-            try {
-                await _fusionnerManifesteGlobal(handleReserve, dossier, patch.patch);
-            } catch (eFusion) {
-                console.warn('[Archives] Fusion manifeste-archives.json échouée, l’archive reste valide :', eFusion.message || eFusion);
-            }
-
-            // Manifeste local : toujours mis à jour, même si la fusion FSAPI a échoué
-            try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
-            catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
-
-            _prog(100, 'Archivage réussi !', ecriture.cheminDossier);
-            await new Promise(function(r) { setTimeout(r, 600); });
-            _progHide();
-
-            var nomDossierRacine = handleReserve.name || 'Archives';
-            notifications.succes(
-                'Groupe archivé',
-                statsDonnees.nombreEtudiants + ' étudiant(s), ' +
-                collecteBlobs.trouves + ' fichier(s) : ' +
-                nomDossierRacine + '/' + ecriture.cheminDossier
-            );
-
-            return {
-                succes: true,
-                uuid: uuid,
-                dossier: dossier,
-                mode: 'fsapi',
-                cheminDossier: ecriture.cheminDossier,
-                stats: {
-                    etudiants: statsDonnees.nombreEtudiants,
-                    cles: statsDonnees.nombreCles,
-                    fichiersTrouves: collecteBlobs.trouves,
-                    fichiersManquants: collecteBlobs.manquants,
-                    tailleTravaux: collecteBlobs.tailleTotale
-                }
-            };
-        }
-
-        // === MODE ZIP : flux v1 (téléchargement manuel) ===
-        _prog(72, 'Construction du ZIP…', dossier);
-        await _yield();
-
-        // Manifeste local : l'entrée est CALCULÉE avant la construction du ZIP, pour que
-        // le ZIP porte l'historique complet (#248), mais elle n'est INSCRITE à la liste
-        // qu'une fois le fichier confirmé par l'usager (lot F, D0, puis lot A1 : un échec ne
-        // se déguise pas en réussite). Avant, un aperçu annulé ou une compression échouée
-        // laissait l'archive listée sans qu'aucun fichier n'existe (mesuré sous Safari).
-        // Copie de `archives` : la lecture rend l'objet du cache mémoire, qu'il ne faut pas muter.
-        var manifesteLocal = _lireManifesteLocal();
-        manifesteLocal.archives = Object.assign({}, manifesteLocal.archives);
-        manifesteLocal.archives[dossier] = patch.patch;
-        manifesteLocal.derniere_mise_a_jour = new Date().toISOString();
-
-        var zip = new JSZip();
-        var dossierBase = zip.folder('trimestres').folder(dossier);
-
-        dossierBase.file('donnees.json', JSON.stringify(donnees, null, 0));
-
-        // Lot A1 : les copies ne sont plus confiées à JSZip, qui les lisait toutes en mémoire
-        // (mesuré : 3,4 Go pour 607 Mo de copies). On n'en garde que la référence ;
-        // `FichierSortant.assemblerZip` les range telles quelles, comme pour le codex (lot J0).
-        dossierBase.folder('travaux');
-        var cheminTravaux = 'trimestres/' + dossier + '/travaux/';
-        var copies = [];
-        var rangDeLaCopie = {};
-        for (var b = 0; b < collecteBlobs.blobs.length; b++) {
-            var entree2 = collecteBlobs.blobs[b];
-            // Un même nom déposé deux fois : le dernier l'emporte, à la place du premier
-            // (ce que faisait JSZip).
-            var nomEntree = cheminTravaux + entree2.id + '.' + entree2.ext;
-            if (Object.prototype.hasOwnProperty.call(rangDeLaCopie, nomEntree)) {
-                copies[rangDeLaCopie[nomEntree]].blob = entree2.blob;
-            } else {
-                rangDeLaCopie[nomEntree] = copies.length;
-                copies.push({ nom: nomEntree, blob: entree2.blob });
-            }
-        }
-
-        dossierBase.file('meta.json', JSON.stringify(meta, null, 2));
-        dossierBase.file('manifeste-archives-patch.json', JSON.stringify(patch, null, 2));
-
-        // Manifeste local agrégé à la racine du ZIP (sous le nom canonique).
-        // Permet à l'utilisateur de retrouver l'historique de tous ses
-        // archives précédents dans n'importe quel ZIP récent.
-        zip.file('manifeste-archives.json', JSON.stringify(manifesteLocal, null, 2));
-
-        // Ce que le fichier contiendra : les textes et les copies, dans l'ordre d'avant le lot.
-        var entreesArchive = window.FichierSortant.entreesDuZip(zip, copies, cheminTravaux);
-
-        // Défense K — valider la structure du ZIP avant compression. Si un
-        // payload a tenté d'ajouter une entrée annexe transportant des
-        // données identifiantes (cf. MODELE-MENACES.md §X-02), l'export
-        // est bloqué ici et l'utilisateur reçoit une alerte claire.
-        if (window.SecuriteExportValidation && typeof window.SecuriteExportValidation.validerExportReserve === 'function') {
-            window.SecuriteExportValidation.validerExportReserve(entreesArchive);
-        }
-
-        // K-β — preview UI avant compression. L'utilisateur peut annuler.
-        // On masque l'overlay avant la modale (sinon double affichage)
-        // puis on le réaffiche après le clic Télécharger pour montrer la
-        // compression. Sans réaffichage, l'utilisateur attend dans le
-        // noir pendant l'assemblage.
-        if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
-            _progHide();
-            var okPreview = await window.SecuriteExportPreview.previewZipEtConfirmer(entreesArchive, 'archive');
-            if (!okPreview) {
-                return null;
-            }
-            _progShow('Génération de l\'archive');
-        }
-
-        _prog(80, 'Compression du ZIP…', '');
-        await _yield();
-        var zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
-            _prog(80 + Math.round(pourcent * 0.18),
-                'Compression du ZIP…',
-                Math.round(pourcent) + '% compressé');
-        });
-
-        // Convention #262 : préfixe `archive-` + dossier + date + extension simple.
-        // CONFIDENTIEL- retiré (l'archive est implicitement personnelle).
-        var nomFichier = 'archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_ARCHIVE;
-
-        // Le fichier est assemblé ; il n'est pas encore écrit.
-        _prog(100, 'Archive prête !', _formaterTaille(zipBlob.size));
-        await new Promise(function(r) { setTimeout(r, 600); });
-        _progHide();
-
-        var statsZip = {
-            etudiants: statsDonnees.nombreEtudiants,
-            cles: statsDonnees.nombreCles,
-            fichiersTrouves: collecteBlobs.trouves,
-            fichiersManquants: collecteBlobs.manquants,
-            tailleZip: zipBlob.size,
-            tailleTravaux: collecteBlobs.tailleTotale
-        };
-
-        // Lot A1 : le parcours du codex téléchargé (lot G, #988). L'application ne peut pas
-        // savoir si un téléchargement s'est terminé : la réussite n'est plus annoncée
-        // d'office, c'est l'usager qui dit si le fichier est là. Sans son « Il y est », rien
-        // n'entre au registre et l'écran ne dit pas « archivé ». L'adresse du fichier n'est
-        // plus libérée aussitôt (`FichierSortant.telecharger`).
-        var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size);
-        while (true) {
-            window.FichierSortant.telecharger(zipBlob, nomFichier);
-            if (await window.FichierSortant.confirmerTelechargement(nomFichier, tailleDite)) break;
-
-            console.warn('[Archives] Téléchargement : fichier non trouvé par l\'usager.');
-            var geste = await window.uiDialogues.demanderAction({
-                titre: 'Groupe non archivé',
-                message: 'Le fichier (' + tailleDite + ') n\'a pas été enregistré. Tes données restent dans l\'application.',
-                actions: [{ valeur: 'reessayer', texte: 'Réessayer', principal: true }]
-            });
-            if (geste !== 'reessayer') {
-                return { succes: false, nonConfirme: true, uuid: uuid, dossier: dossier, nomFichier: nomFichier, mode: 'zip', stats: statsZip };
-            }
-        }
-
-        // Inscrite à la liste seulement maintenant : le fichier est là, l'usager l'a dit.
-        try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
-        catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
-
-        notifications.succes(
-            'Groupe archivé : fichier téléchargé',
-            statsDonnees.nombreEtudiants + ' étudiant(s), ' +
-            collecteBlobs.trouves + ' fichier(s) (' + _formaterTaille(zipBlob.size) + ')'
-        );
-
-        return {
-            succes: true,
-            uuid: uuid,
+        // 4. Le dépôt, commun à l'archive d'un trimestre entier (E1, #1022)
+        return await _deposerArchive({
+            handleReserve: handleReserve,
             dossier: dossier,
-            nomFichier: nomFichier,
-            mode: 'zip',
-            stats: statsZip
-        };
+            donnees: donnees,
+            meta: meta,
+            patch: patch,
+            blobs: collecteBlobs.blobs,
+            stats: {
+                etudiants: statsDonnees.nombreEtudiants,
+                cles: statsDonnees.nombreCles,
+                fichiersTrouves: collecteBlobs.trouves,
+                fichiersManquants: collecteBlobs.manquants,
+                tailleTravaux: collecteBlobs.tailleTotale
+            },
+            mots: MOTS_DEPOT_GROUPE
+        });
 
     } catch (err) {
         _progHide();
@@ -1804,7 +1839,16 @@ window.Reserve = {
     upsertEntreeManifeste: _upsertEntreeManifesteLocal,
     fusionnerManifesteRecu: _fusionnerManifesteRecu,
     purgerEntreeManifeste: _purgerEntreeManifesteLocal,
-    hydrateDepuisFSAPI: _hydrateManifesteDepuisFSAPI
+    hydrateDepuisFSAPI: _hydrateManifesteDepuisFSAPI,
+    // E1 (#1022) : l'archive d'un trimestre entier (reserve-trimestre.js) passe par le même
+    // dépôt et les mêmes empreintes.
+    deposerArchive: _deposerArchive,
+    empreinteDeLaCopie: _empreinteDeLaCopie,
+    empreinteDuTexte: _calculerSHA256,
+    extensionDuNom: _extensionDepuisNomFichier,
+    nouvelUuid: _genererUUIDv4,
+    appareil: _identifierAppareil,
+    versionApp: _versionApp
 };
 
 })();
