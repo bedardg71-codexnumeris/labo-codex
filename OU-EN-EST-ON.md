@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.178.0 (4 OCTOBRE 2026 ; en ligne depuis 1 h 20, mesuré chez Netlify : déploiement de production prêt sur `a74bd2b7` ; relue par Cowork, verte sans correction de code ; tes mots, avec le pluriel de la cible et sans le nombre d'évaluations, et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 0 h 07) — LE CODEX PROPOSÉ AVANT DE RETIRER UNE LIGNE QUI PORTE DES NOTES**
+
+**Ce que tu verras** : dans la Conception, quand tu retires un critère, un sous-critère ou un niveau d'échelle qu'au moins une évaluation emploie, ou une cible de dénotation déjà cochée, la fenêtre « Mettre ton codex à jour avant de supprimer ? » paraît avant la question habituelle, si ton codex n'est pas à jour. « Annuler » ne retire rien. Une ligne qu'aucune évaluation n'emploie, ou une ligne neuve, se retire comme avant.
+
+**Vérifié comment** : au navigateur (WebKit), par les vrais boutons : un critère employé (la fenêtre, « Annuler » ne retire rien et n'écrit rien), un critère que personne n'emploie (aucune fenêtre), une cible cochée (la fenêtre avant la question que tu connais), deux cibles cochées retirées d'un coup dans l'assistant (la phrase au pluriel). Un banc par famille, quatorze mutations, quatorze rouges. Vitest complet vert (8 025). Verdict complet au navigateur : aucun échec, 7 tests verts au second essai (un seul déjà vu la veille).
+
+**Ta vérification** : une porte courte, en fenêtre privée de Chrome, sur les données démo : `plans de travail/PORTES-TERRAIN-2026-10-04-1007-lignes-notes.md` (Cowork publie la version à cocher). Retirer « Nuance » de « Grille-4 » (la fenêtre, puis « Annuler ») ; ajouter un critère et le retirer (aucune fenêtre).
+
+**Le chantier « un codex avant de supprimer » est terminé.** Reste une mesure à part : savoir si un type de travail ou un forfait des pratiques par spécifications porte des notes (#1015).
+
+**La suite** : le garde-éveil de la vérification complète (#1008), sur une consigne de Cowork.
+
 ✅ **EN LIGNE EN 1.177.1 (3 OCTOBRE 2026 ; en ligne depuis 18 h 58, mesuré chez Netlify sur `d6cfe732`) — LE BOUTON « ✓ N pér. » DE LA SAISIE DES PRÉSENCES**
 
 **Ce que tu verras** : dans Suivi › Saisie des présences, le bouton qui met tout le monde présent dit « ✓ 2 pér. » (le nombre de la séance) ; son infobulle et le lecteur d'écran disent « Mettre tout le monde présent (2 périodes) ». Le bouton ↻ dit « Réinitialiser (tout le monde absent) ».
