@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.184 (#1023, E2 : faire revenir un trimestre archivé) — ligne de Cowork, acceptée par
+            // Grégoire le 4 oct. 2026 (consigne de 19 h 46), posée telle quelle. Titre de Claude Code.
+            version: '1.184',
+            couleur: 'vert',
+            titre: 'Faire revenir un trimestre archivé',
+            items: [
+                'Dans Réglages › Données › Archives, «&nbsp;Faire revenir&nbsp;» ramène aussi un trimestre archivé entier dans l\'application, clos, tel qu\'il a été archivé, sans toucher aux autres trimestres, aux cours ni aux réglages.'
+            ]
+        },
+        {
             // 1.183 (#1022, E1 : archiver un trimestre clos entier ; #1006) — ligne de Cowork, acceptée
             // par Grégoire le 4 oct. 2026 (consigne de 17 h 19), posée telle quelle. Titre de Claude Code.
             version: '1.183',
