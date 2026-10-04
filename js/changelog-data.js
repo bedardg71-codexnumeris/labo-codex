@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.179 (#1010) — ligne de Cowork, ACCEPTÉE par Grégoire le 4 oct. 2026 avant la
+            // consigne de 9 h 28, posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.
+            version: '1.179',
+            couleur: 'vert',
+            titre: 'Des consignes pas encore transmises, signalées à l\'évaluation',
+            items: [
+                'Quand tu ouvres l\'évaluation d\'une copie dont le groupe a la case «&nbsp;Consignes transmises&nbsp;» décochée, un bandeau te le signale, et un bouton coche la case.'
+            ]
+        },
+        {
             // 1.178 (#1007, lot 2b) — ligne proposée par Claude Code (§ 4 de la demande de
             // relecture), ACCEPTÉE par Grégoire le 4 oct. 2026 à 0 h 07 (« oui sans le nombre »,
             // consigne de Cowork), posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.
