@@ -1,33 +1,25 @@
-# Consigne du jour – le signal au début de l'évaluation (#1010)
+# Consigne du jour – les mots du bandeau, puis mettre #1010 en ligne
 
-> Écrite par Cowork le 4 octobre 2026 à 8 h 18 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 7 h 04, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-1008-garde-eveil.md`.
+> Écrite par Cowork le 4 octobre 2026 à 9 h 28 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 8 h 18, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-1010-signal-consigne.md`.
 
 ## Où on en est
 
-#1008 est close, sur `main` (56684d55, relais b43abfb6) ; relu par Cowork à 8 h 17. Ordre du jour, confirmé par Grégoire : ce lot, puis masquer ce qui reste d'un élève supprimé (#1013), puis les archives, l'enregistrement, la carte d'alignement.
+Ton commit `a9fdd47a` sur `claude/1010-signal-consigne` est lu par Cowork (diff de 7 fichiers, 252 lignes) ; tes deux écarts sont acceptés : `marquerConsignesTransmises` par `modifierEtAnnoncer`, et la case de la fiche ouverte cochée avec elle. **Grégoire a accepté les mots** (« j'accepte », 4 oct.) : le texte du bandeau **tel quel**, et le bouton devient **« Cocher la case »** (sans guillemets imbriqués). La ligne des Nouvelles ci-dessous est de Cowork, acceptée par Grégoire avant qu'il te transmette cette consigne.
 
-Lis la fiche #1010 au BACKLOG en entier. **Ce qui est tranché** (Grégoire, 1er oct.) : quand la case « Consignes transmises » d'une production est décochée pour un groupe et qu'il commence à évaluer une copie de ce groupe, l'application lui signale que la consigne ne semble pas avoir été transmise. Pas de coche automatique. **Ce qui lui revient** : les mots de l'écran. Rien d'autre.
-
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, et à travailler sur une branche `claude/1010-signal-consigne`. **Ne pousse pas le lot et ne fais pas de release avant que ses mots soient acceptés** : tu t'arrêtes au point 5.
-
-## Les décisions de Cowork (techniques, prises seul ; dis-moi si une mesure les dément)
-
-1. **Un bandeau dans l'écran d'évaluation, pas une fenêtre** : il informe, il ne bloque rien. Il paraît à chaque ouverture d'une évaluation sur une copie dont le groupe a la case décochée pour cette production, et disparaît dès que la case est cochée. Pas de mémoire « déjà vu » : tant que la case est décochée, c'est vrai.
-2. **Un bouton dans le bandeau qui coche la case** pour ce groupe-cours, sur son clic seulement ; c'est son geste, pas une écriture d'office. Il passe par l'écriture existante de `js/productions.js` (l. ~1435-1460), pas par une seconde.
-3. **La règle de lecture est celle de `obtenirEcheanceEffective`** (`js/productions.js` l. ~150-160, `assignee !== false`) : une seule lecture, pas une nouvelle.
-4. **Tous les chemins qui ouvrent une évaluation** : mesure-les d'abord (au moins l'évaluation depuis la Liste, et depuis la copie dans Annoter / la visionneuse). Le bandeau est posé à un seul endroit que ces chemins traversent ; s'il n'y en a pas, dis-le et pose-le dans chacun.
-5. **Le bandeau ne nomme personne** (mode anonymisation compris) et passe `echapperHtml()` pour le titre de la production.
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, à pousser (les documents de `main` dès maintenant, puis le lot), à fusionner, et à retirer le worktree du lot une fois fusionné. Si le garde de permissions refuse, arrête-toi sur ce seul point et dis-le-lui.
 
 ## Ce que tu fais, dans cet ordre
 
 1. **Commite** cette consigne et son archive sur `main`, pousse `main`.
-2. **Mesure** : les chemins d'ouverture d'une évaluation ; et ce que la case décochée retire réellement (indices, graphiques, PAN, calendrier ; la fiche le lit au code, ne l'a pas mesuré). Le texte du bandeau ne dira que ce qui est mesuré.
-3. **Code** sur `claude/1010-signal-consigne`, avec ces mots provisoires, à remplacer par les siens :
-   - texte : « Les consignes de « {titre} » ne semblent pas avoir été transmises à ce groupe : la case « Consignes transmises » est décochée. » ; puis, seulement si ta mesure le prouve, une phrase sur ce que cela retire (« Tant qu'elle l'est, … »).
-   - bouton : « Cocher « Consignes transmises » ».
-4. **Tests** : un essai Playwright (case décochée → bandeau ; clic → case cochée et bandeau parti ; case cochée → aucun bandeau ; un autre groupe de la même production, coché → aucun bandeau), et la mutation démontrée rouge (le bandeau retiré). Mac et iPad : la largeur du bandeau à 768 px.
-5. **Arrête-toi et rends** : le commit sur la branche, les chemins mesurés, ce que la case retire réellement, et **les mots exacts du bandeau, tels qu'ils s'affichent**, pour que Cowork les porte à Grégoire. Pas de verdict complet, pas de push du lot, pas de release : ils viendront après ses mots, sur une consigne de Cowork.
+2. **Le bouton** : « Cocher la case », partout où il est écrit (`index.html`, `GESTE_COCHER_CONSIGNES`, l'essai). Rien d'autre ne change dans les mots. L'essai suit ; le cas « bandeau retiré » reste démontré rouge.
+3. **La release** : **minor** (1.179.0). Titre à toi, dit à Grégoire au rendu. La ligne des Nouvelles, posée telle quelle :
+   > Quand tu ouvres l'évaluation d'une copie dont le groupe a la case «&nbsp;Consignes transmises&nbsp;» décochée, un bandeau te le signale, et un bouton coche la case.
+4. **Verdict Playwright complet sur le commit qui part** (avec la garde de #1008 : son rapport dit l'éveil, les veilles, la mémoire), **puis push, puis fusion vers `main`** ; si la fusion change autre chose que des documents, rejuge-la. Nomme les instables, et dis si ce sont ceux de 1.178.0.
+5. **Constate la mise en ligne chez Netlify** (par le connecteur), et dis l'heure.
+6. **Pas de porte terrain** : ton essai WebKit à 768 px répond aux quatre cas.
+7. **Clos #1010** au BACKLOG. **Ta trouvaille 1** (l'aide de la fiche production dit « ni au calendrier ni dans les indices C et P », inexact hors de la famille par standards) devient **une fiche à part** : ce sont des mots d'écran, la décision est à Grégoire ; mesure d'abord, sur la démo et sous une pratique par standards, ce que la case retire de C, pour que la fiche porte une mesure et pas une lecture. **Ta trouvaille 2** (le contexte de la démo sans identifiant de groupe-cours) reste écrite dans la fiche close : non vécue, elle ne bloque rien.
+8. **Retire le worktree**, puis **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** Suite : masquer ce qui reste d'un élève supprimé (#1013), sur une consigne de Cowork.
 
 ## Ce que tu rends
 
-À Grégoire, deux lignes : où le bandeau paraît, et ce que la case décochée retire réellement. Les mots exacts dans un bloc à part. Ce que tu as supposé, en une ligne.
+À Grégoire, trois lignes : le numéro en ligne et l'heure ; le verdict complet, ce que son rapport dit de l'éveil et de la mémoire, et les instables nommés ; le numéro de la fiche neuve et ce qu'elle a mesuré. Ce que tu as supposé, en une ligne.
