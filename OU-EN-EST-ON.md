@@ -15,7 +15,19 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-✅ **EN LIGNE EN 1.181.0 (4 OCTOBRE 2026 ; en ligne depuis 13 h 57, mesuré chez Netlify : déploiement de production prêt sur `a3dbb81d` ; tes mots, une retouche) — « FAIRE REVENIR » LES COPIES D'UNE ARCHIVE VÉRIFIÉE**
+✅ **EN LIGNE EN 1.182.0 (4 OCTOBRE 2026 ; en ligne depuis 16 h 01, mesuré chez Netlify : déploiement de production prêt sur `af586f45` ; tes cinq choix) — UN TRIMESTRE TERMINÉ SE DIT « CLOS »**
+
+**Ce que tu verras** : dans la bibliothèque des trimestres, le badge « Clos », les boutons « Clore » et « Rouvrir », la section « Trimestres clos » ; le bandeau « LECTURE SEULE — Trimestre clos » ; l'aide « Qu'est-ce que clore un trimestre ? » avec ta phrase (« Clore ne libère aucun espace »). Clore un trimestre ne télécharge plus de fichier. Sous la liste des archives : « liste mise à jour le … » ; l'aide de la carte Archives nomme « Vérifier » et « Faire revenir ». « Archivé » ne désigne plus que ce qui est déposé dans tes Archives.
+
+**Vérifié comment** : un essai lit tous les textes que tu lis sur ces écrans et refuse « archiv » pour l'état gelé ; un autre clôt un trimestre et constate qu'aucun fichier n'est fabriqué ; un troisième rejoue un refus de clôture et constate que la fenêtre dit son motif, pas « undefined ». Remettre un ancien mot, le téléchargement ou « undefined » fait échouer ces essais (douze fois). Vérification complète au navigateur verte sur le commit livré. **Pas vérifié** : ton écran, ton iPad.
+
+**Tes données** : rien n'est réécrit. Les fichiers déjà téléchargés à une clôture passée restent illisibles par l'application ; les trois boutons « Exporter les données » de la bibliothèque en produisent encore (à trancher).
+
+**La suite** : non plus « alléger un groupe », mais ton nouveau but : emprunter et rendre un trimestre entier, comme un livre. Une mesure, sans rien écrire, dit ce qui existe et ce qui manque ; rien ne commence avant ta décision.
+
+---
+
+(précédent) ✅ **EN LIGNE EN 1.181.0 (4 OCTOBRE 2026 ; en ligne depuis 13 h 57, mesuré chez Netlify : déploiement de production prêt sur `a3dbb81d` ; tes mots, une retouche) — « FAIRE REVENIR » LES COPIES D'UNE ARCHIVE VÉRIFIÉE**
 
 **Ce que tu verras** : dans Réglages › Données › Archives, une archive « Vérifiée le … » porte un bouton « Faire revenir ». Tu désignes le fichier de l'archive (ou ton dossier des archives dans Chrome), une fenêtre dit ce qui va se passer, puis un bilan en nombres : copies revenues, déjà là, changées depuis l'archive, sans fiche, d'étudiant·es supprimé·es, et en tête les copies abîmées dans l'archive s'il y en a. Une copie dite « manquante » dont le fichier est là redevient présente.
 
