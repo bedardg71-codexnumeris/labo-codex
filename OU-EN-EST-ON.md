@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE EN 1.180.0 (4 OCTOBRE 2026 ; en ligne depuis 12 h 15, mesuré chez Netlify : déploiement de production prêt sur `bc36e957` ; tes trois décisions de ce matin) — UN·E ÉTUDIANT·E SUPPRIMÉ·E NE PARAÎT PLUS, ET SES DONNÉES NE PARTENT PLUS**
+
+**Ce que tu verras** : quand tu supprimes un·e étudiant·e dans le Cadre, ses copies quittent la Liste des évaluations (le compte « N résultat(s) » baisse d'autant), « Annoter et évaluer » et la grille d'« Exporter et archiver ». L'export pour Léa, l'export pour la recherche et les seuils « en attente » du tableau de bord l'écartent. Si toutes les copies d'un groupe sont celles d'élèves supprimés, « Annoter et évaluer » le dit avec ta phrase.
+
+**Vérifié comment** : essai au navigateur (WebKit) sur la démo, par le vrai bouton « Supprimer » : l'élève disparaît de chacune de ces vues et sorties ; ses copies, évaluations et présences restent en base ; le codex les écrit ; réinscrit par le formulaire du Cadre, il revient avec tout. Ramener chaque vue à l'ancienne lecture fait échouer l'essai (sept fois). Vérification complète au navigateur verte sur le commit livré.
+
+**Tes données** : rien n'est effacé ni réécrit. Ce qui garde emporte tout : ton codex, tes archives, et l'export ZIP « Toutes / Tous » d'« Exporter et archiver » (c'est lui qui permet ensuite de retirer les copies du navigateur).
+
+**Ce qui reste** : un·e étudiant·e supprimé·e avant la version du 2 octobre (1.174.4) n'a pas laissé de trace et reste visible. Le compte « N fichiers en stock » compte encore ses copies, puisqu'elles sont toujours dans le navigateur : il n'a pas été changé (#1013).
+
+**La suite** : le chantier des archives, en commençant par « faire revenir des copies ».
+
 ✅ **EN LIGNE EN 1.179.0 (4 OCTOBRE 2026 ; en ligne depuis 10 h 30, mesuré chez Netlify : déploiement de production prêt sur `3bca545f` ; ton texte tel quel et le bouton « Cocher la case », acceptés ce matin) — LE SIGNAL QUAND LES CONSIGNES NE SEMBLENT PAS TRANSMISES**
 
 **Ce que tu verras** : quand tu ouvres l'évaluation d'une copie dont le groupe a la case « Consignes transmises » décochée pour cette production, un bandeau le dit sous le nom de l'élève, à chaque ouverture, et nomme ce que la case retire : la production n'est pas au calendrier, et ses copies ne comptent pas dans les courbes de progression. Le bouton « Cocher la case » la coche pour ce groupe ; le bandeau part. Rien n'est coché sans ton clic. Le bandeau ne nomme aucun élève.
