@@ -175,4 +175,44 @@ test.describe('#1007, lot 2b — le codex proposé avant de retirer une ligne qu
         expect(ecoute.questions).toHaveLength(1);
         expect(ecoute.erreurs).toEqual([]);
     });
+
+    test('assistant : deux cibles cochées retirées d\'un coup, la fenêtre au pluriel ; « Annuler » n\'écrit rien', async ({ page }) => {
+        const ecoute = brancher(page);
+        await page.setViewportSize({ width: 768, height: 1024 });
+        await page.goto(indexHtml);
+        await page.waitForFunction(() => typeof window.ouvrirWizardV2 === 'function' && !!window.EditeurCibles && typeof window.db !== 'undefined', null, { timeout: 15000 });
+        const PRATIQUE = {
+            id: 'P_DEN_2B_PL', nom: 'DEN 2b pluriel', type: 'denotation', pratiques: ['DEN'], dansBibliotheque: true, auteur: 'Banc',
+            calcul_note: { methode: 'jugement_global' },
+            configuration: { type: 'denotation', modeDEN: 'eliminee',
+                objectifs: [{ id: 'cible_lire', nom: 'Lire' }, { id: 'cible_ecrire', nom: 'Écrire' }, { id: 'cible_dire', nom: 'Dire' }],
+                suggestion: { methode: 'mode' }, echelleId: null, grilleId: null }
+        };
+        await page.evaluate((P) => {
+            db.setSync(cle('pratiquesConfigurables'), [P]);
+            db.setSync(cle('jugementsDenotation'), { P_DEN_2B_PL: { 9000101: { ciblesAtteintes: { cible_lire: true, cible_ecrire: true, cible_dire: false }, noteFinale: 78, justification: 'banc', date: '2026-09-01' } } });
+            window.ouvrirWizardV2(true, 'P_DEN_2B_PL');
+            window.wizardState.etapeActuelle = 'config-denotation';
+            window.afficherEtapeWizardV2('config-denotation');
+        }, PRATIQUE);
+        const liste = page.locator('#wizardv2-ciblesDenotation');
+        await expect(liste.locator('.editeur-cibles-ligne')).toHaveCount(3);
+        // « Lire » et « Écrire », toutes deux cochées, partent avant d'enregistrer
+        await liste.locator('.editeur-cibles-ligne').first().locator('[data-action="EditeurCibles.retirer"]').click();
+        await liste.locator('.editeur-cibles-ligne').first().locator('[data-action="EditeurCibles.retirer"]').click();
+        await expect(liste.locator('.editeur-cibles-ligne')).toHaveCount(1);
+        await page.locator('#wizard-v2-btn-suivant').click();
+        await expect.poll(() => page.evaluate(() => window.wizardState.reponses.ciblesDenotation)).toEqual([{ id: 'cible_dire', nom: 'Dire' }]);
+        await page.evaluate(() => { window.__creation = window.creerPratiqueV2(); });
+
+        const f = await attendreFenetre(page);
+        expect(f.texte).toBe('Retirer ces cibles les efface pour de bon. Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.');
+        expect(ecoute.questions, 'la question existante vient APRÈS la fenêtre').toEqual([]);
+        await cliquerDansFenetre(page, 'Annuler');
+        await aucuneFenetre(page);
+        await page.evaluate(() => window.__creation);
+        expect(ecoute.questions).toEqual([]);
+        expect(await page.evaluate(() => db.getSync(cle('pratiquesConfigurables'), [])[0].configuration.objectifs)).toEqual(PRATIQUE.configuration.objectifs);
+        expect(ecoute.erreurs).toEqual([]);
+    });
 });

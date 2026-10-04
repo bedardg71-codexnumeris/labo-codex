@@ -178,8 +178,11 @@
      * @returns {Promise<boolean>} vrai si l'écran peut écrire
      */
     async function confirmerRetraitCibles(pratiqueId, anciennes, nouvelles) {
-        const porteDesNotes = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles).length > 0;
-        if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('cible'))) return false;
+        // Le pluriel (verdict de Cowork, 4 oct.) : dans l'assistant, plusieurs cibles cochées
+        // peuvent partir d'un coup ; la phrase de la fenêtre suit leur nombre.
+        const nbCochees = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles).length;
+        const porteDesNotes = nbCochees > 0;
+        if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression(nbCochees > 1 ? 'cibles' : 'cible'))) return false;
         const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);
         if (retraits.length === 0) return true;
         const lignes = retraits.map(r => `« ${r.cible.nom || r.cible.id} » : cochée pour ${r.nbEleves} ${r.nbEleves > 1 ? 'étudiant·es' : 'étudiant·e'}`);

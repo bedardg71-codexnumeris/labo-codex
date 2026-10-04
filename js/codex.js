@@ -3673,7 +3673,8 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     critere:               { premiere: 'Supprimer ce critère l\'efface pour de bon.', pronom: 'le' },
     sousCritere:           { premiere: 'Supprimer ce sous-critère l\'efface pour de bon.', pronom: 'le' },
     niveau:                { premiere: 'Supprimer ce niveau l\'efface pour de bon.', pronom: 'le' },
-    cible:                 { premiere: 'Retirer cette cible l\'efface pour de bon.', pronom: 'la' }
+    cible:                 { premiere: 'Retirer cette cible l\'efface pour de bon.', pronom: 'la' },
+    cibles:                { premiere: 'Retirer ces cibles les efface pour de bon.', pronom: 'les' }
 };
 
 /**

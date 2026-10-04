@@ -256,10 +256,22 @@ describe('#1007, lot 2b — B et C. cible de dénotation', () => {
             Codex: codex, confirm: (m) => { questions.push(m); return true; }, document: fauxDocument()
         });
         win.denotationJugements = { lireTousLesJugements: () => ({
-            PRAT_DEN: { 9000101: { ciblesAtteintes: { CIB_COCHEE: true } } } }) };
+            PRAT_DEN: { 9000101: { ciblesAtteintes: { CIB_COCHEE: true, CIB_COCHEE_2: true } } } }) };
         return win;
     }
     const anciennes = [{ id: 'CIB_COCHEE', nom: 'Thèse' }, { id: 'CIB_LIBRE', nom: 'Plan' }];
+
+    it('deux cibles cochées retirées d\'un coup (l\'assistant) : la fenêtre au pluriel', async () => {
+        const codex = fauxCodex(false); const questions = [];
+        const win = monterCibles(codex, questions);
+        const trois = anciennes.concat([{ id: 'CIB_COCHEE_2', nom: 'Exemples' }]);
+        expect(await win.EditeurCibles.confirmerRetraits('PRAT_DEN', trois, [trois[1]])).toBe(false);
+        expect(codex.fenetres).toEqual(['cibles']);
+        // une seule des deux : le singulier
+        const codex1 = fauxCodex(false);
+        await monterCibles(codex1, []).EditeurCibles.confirmerRetraits('PRAT_DEN', trois, [trois[0], trois[1]]);
+        expect(codex1.fenetres).toEqual(['cible']);
+    });
 
     it('non cochée : aucune fenêtre, aucune question', async () => {
         const codex = fauxCodex(false); const questions = [];
