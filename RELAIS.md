@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 10 h 40 : **1.179.0 (#1010, LE BANDEAU « CONSIGNES NON TRANSMISES » AU DÉBUT DE L'ÉVALUATION) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `3bca545f` (PUBLIÉ À 10 h 30) ; VERDICT COMPLET VERT ; #1010 CLOSE, #1016 OUVERTE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 12 h 20 : **1.180.0 (#1013, L'ÉLÈVE SUPPRIMÉ NE PARAÎT PLUS ET NE PART PLUS ; LE CODEX GARDE TOUT) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `bc36e957` (PUBLIÉ À 12 h 15) ; VERDICT COMPLET VERT ; #1013 CLOSE**
+
+**Consignes** : Cowork, 10 h 36 (lot, arrêt au point 5 ; commit `e5dfd5be`) et 11 h 04 (les trois décisions de Grégoire, la ligne des Nouvelles, la mise en ligne). Consignes et archives commitées telles quelles (`c85a1597`, `141734ee`).
+
+**Ce qui est fait** : une lecture, `dasElevesSupprimes()` (`js/import-export.js`, la règle de l'import sur la trace et la liste entière du trimestre) ; `travauxStockage.obtenirFichiersAffiches()` pour ce qui montre ou envoie. Écartent l'élève supprimé : la Liste des évaluations (copies, « N résultat(s) »), « Annoter et évaluer » (tableau, badges, miniatures, retour à la visionneuse), la grille d'« Exporter et archiver » et son aperçu PDF, l'export pour Léa, l'export recherche, les seuils « en attente ». Gardent tout : l'export ZIP « Toutes / Tous » (il marque « exporté », seule voie de l'allègement), le compte « en stock » (classé avec un doute, non touché), le codex, les archives. La phrase de Grégoire quand toutes les copies du groupe sont masquées. Banc `tests/integration/eleve-supprime-masque-1013.spec.js`, sept mutations rouges.
+
+**Release** : 1.180.0 (`41b94bc5`), minor ; titre de Claude Code : « Un·e étudiant·e supprimé·e ne paraît plus dans tes listes » ; Nouvelles : ligne de Cowork, « ni dans l'export pour Léa » ajouté comme la consigne le prévoyait. **Verdict** complet sur `41b94bc5` : 0 échec, 0 instable ; éveil complet tenu (batterie), 0 veille, échange au plus haut 3,9 Go, pression 2 ; ≈ 53 min, après 120 s d'attente de charge (33,75 au lancement). Fusion vers `main` par un commit de fusion (`bc36e957`) qui n'ajoute que les deux documents de la consigne de 11 h 04 : pas rejugée.
+
+**Ménage** : aucun worktree ; la branche `claude/1013-eleve-supprime` reste chez origin. Pas de porte terrain (consigne, point 8).
+
+**Suite** : le chantier des archives, en commençant par « faire revenir des copies » (#1000), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 10 h 40 : **1.179.0 (#1010, LE BANDEAU « CONSIGNES NON TRANSMISES » AU DÉBUT DE L'ÉVALUATION) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `3bca545f` (PUBLIÉ À 10 h 30) ; VERDICT COMPLET VERT ; #1010 CLOSE, #1016 OUVERTE**
 
 **Consignes** : Cowork, 8 h 18 (lot, mots provisoires) et 9 h 28 (mots acceptés par Grégoire : texte tel quel, bouton « Cocher la case » ; ligne des Nouvelles de Cowork). Consignes et archives commitées telles quelles (`4c5580bc`, `2a4ab57c`).
 
