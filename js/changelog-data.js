@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.182 (#1002, lot A5 du chantier des archives) — ligne de Cowork, acceptée par
+            // Grégoire le 4 oct. 2026 (consigne de 14 h 41), posée telle quelle. Titre de Claude Code.
+            version: '1.182',
+            couleur: 'bleu',
+            titre: 'Un trimestre terminé se dit «&nbsp;clos&nbsp;»',
+            items: [
+                'Un trimestre terminé se dit maintenant «&nbsp;clos&nbsp;» : dans la bibliothèque des trimestres, «&nbsp;Clore&nbsp;» et «&nbsp;Rouvrir&nbsp;» remplacent «&nbsp;Archiver&nbsp;» et «&nbsp;Désarchiver&nbsp;», et clore un trimestre ne télécharge plus de fichier.'
+            ]
+        },
+        {
             // 1.181 (#1000, lot A3 du chantier des archives) — ligne de Cowork, acceptée par
             // Grégoire le 4 oct. 2026 (consigne de 12 h 47), posée telle quelle. Titre de Claude Code.
             version: '1.181',

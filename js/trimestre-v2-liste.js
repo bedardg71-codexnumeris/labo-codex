@@ -127,7 +127,7 @@ function afficherListeTrimestreGestion() {
         if (estActif) {
             badge = '<span class="badge-trimestre actif">Actif</span>';
         } else if (estArchive) {
-            badge = '<span class="badge-trimestre archive">Archivé</span>';
+            badge = '<span class="badge-trimestre archive">Clos</span>';
         }
 
         // Statistiques si archivé
@@ -135,7 +135,7 @@ function afficherListeTrimestreGestion() {
         if (estArchive && t.statistiquesFinales) {
             const stats = t.statistiquesFinales;
             statsInfo = `<div class="item-trimestre-stats">
-                ${stats.nbEtudiants || 0} étudiant(s)${t.dateFin ? ` • Archivé le ${t.dateFin}` : ''}
+                ${stats.nbEtudiants || 0} étudiant(s)${t.dateFin ? ` • Clos le ${t.dateFin}` : ''}
             </div>`;
         }
 
@@ -152,8 +152,8 @@ function afficherListeTrimestreGestion() {
                 <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                     Exporter
                 </button>
-                <button class="btn btn-secondaire btn-compact" data-action="confirmerDesarchivage" data-param="${t.id}" title="Désarchiver pour permettre les modifications">
-                    Désarchiver
+                <button class="btn btn-secondaire btn-compact" data-action="confirmerDesarchivage" data-param="${t.id}" title="Rouvrir pour permettre les modifications">
+                    Rouvrir
                 </button>
                 <button class="btn btn-supprimer btn-compact" data-action="confirmerSuppressionTrimestre" data-param="${t.id}" title="Supprimer définitivement ce trimestre et toutes ses données">
                     Supprimer…
@@ -164,8 +164,8 @@ function afficherListeTrimestreGestion() {
                 <button class="btn btn-principal btn-compact" data-action="changerTrimestreActifV2" data-param="${t.id}" title="Activer ce trimestre">
                     Activer
                 </button>
-                <button class="btn btn-secondaire btn-compact" data-action="confirmerArchivage" data-param="${t.id}" title="Archiver ce trimestre (lecture seule)">
-                    Archiver
+                <button class="btn btn-secondaire btn-compact" data-action="confirmerArchivage" data-param="${t.id}" title="Clore ce trimestre (lecture seule)">
+                    Clore
                 </button>
                 <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
                     Exporter
@@ -206,19 +206,19 @@ function confirmerArchivage(id) {
     }
 
     const confirme = confirm(
-        `Archiver le trimestre "${trimestre.nom}" ?\n\n` +
-        `Un trimestre archivé passe en lecture seule et ne peut plus être modifié.\n` +
-        `Un export automatique sera généré.\n\n` +
-        `Cette action est réversible via le bouton "Désarchiver".`
+        `Clore le trimestre "${trimestre.nom}" ?\n\n` +
+        `Un trimestre clos passe en lecture seule et ne peut plus être modifié.\n` +
+        `Cette action est réversible par le bouton « Rouvrir ».`
     );
 
     if (confirme) {
         const result = archiverTrimestre(id);
         if (result.success) {
-            alert(`Trimestre "${trimestre.nom}" archivé avec succès.\n\nUn fichier d'export a été téléchargé.`);
+            alert(`Trimestre "${trimestre.nom}" clos.`);
             afficherListeTrimestreGestion();
         } else {
-            alert(`Erreur: ${result.error}`);
+            // Un refus de clôture remplit `message`, pas `error` (#1002).
+            alert(`Erreur: ${result.error || result.message}`);
         }
     }
 }
@@ -236,14 +236,14 @@ function confirmerDesarchivage(id) {
     }
 
     const confirme = confirm(
-        `Désarchiver le trimestre "${trimestre.nom}" ?\n\n` +
+        `Rouvrir le trimestre "${trimestre.nom}" ?\n\n` +
         `Cela permettra de modifier à nouveau les données de ce trimestre.`
     );
 
     if (confirme) {
         const result = desarchiverTrimestre(id);
         if (result.success) {
-            alert(`Trimestre "${trimestre.nom}" désarchivé.`);
+            alert(`Trimestre "${trimestre.nom}" rouvert.`);
             afficherListeTrimestreGestion();
         } else {
             alert(`Erreur: ${result.error}`);
@@ -291,23 +291,23 @@ function ouvrirBibliothequeTrimestreV2() {
     function genererCarteTrim(t, estArchive) {
         const estActif = !!t.actif;
         const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
-        const meta = estArchive ? 'Archivé' : (estActif ? 'Trimestre actuellement actif' : 'Disponible');
+        const meta = estArchive ? 'Clos' : (estActif ? 'Trimestre actuellement actif' : 'Disponible');
 
         let primaire = null;
         const actions = [];
         if (estArchive) {
-            primaire = { label: 'Désarchiver', action: 'desarchiverTrimestre', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
+            primaire = { label: 'Rouvrir', action: 'desarchiverTrimestre', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
             // #361 : suppression définitive (jamais sur le trimestre actif)
             actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else if (!estActif) {
             primaire = { label: 'Activer', action: 'changerTrimestreActifV2', param: t.id, classe: 'btn-confirmer', title: 'Définir comme trimestre actif' };
-            actions.push({ label: 'Archiver', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
+            actions.push({ label: 'Clore', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
             // #361 : suppression définitive (jamais sur le trimestre actif)
             actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else {
             // Actif courant : aucune action primaire (déjà actif). Menu : archiver pour basculer ailleurs avant.
             // Pas de « Supprimer » ici — garde anti-actif (#361).
-            actions.push({ label: 'Archiver', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
+            actions.push({ label: 'Clore', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
         }
 
         return BibliothequeUI.renderCarteSelection({
@@ -331,14 +331,14 @@ function ouvrirBibliothequeTrimestreV2() {
     let contenuSection2 = '';
     let titreSection2 = '';
     if (trimestresArchives.length > 0) {
-        titreSection2 = 'Trimestres archivés';
+        titreSection2 = 'Trimestres clos';
         trimestresArchives.forEach(t => { contenuSection2 += genererCarteTrim(t, true); });
     }
 
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeTrimestres',
         titre: '📚 Bibliothèque des trimestres',
-        sousTitre: 'Activez, archivez ou restaurez vos trimestres.',
+        sousTitre: 'Active, clos ou rouvre tes trimestres.',
         onFermerAction: 'fermerModalBibliothequeTrimestres',
         doublonsHTML: '',
         titreSection1: 'Trimestres disponibles',
@@ -370,7 +370,7 @@ function archiverTrimestreActif() {
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
 
     if (!trimestreActif) {
-        alert('Aucun trimestre actif à archiver.');
+        alert('Aucun trimestre actif à clore.');
         return;
     }
 
@@ -405,7 +405,7 @@ async function confirmerSuppressionTrimestre(id) {
     if ((trimestreActif && trimestreActif.id === id) || trimestre.actif === true) {
         alert(
             'Le trimestre actif ne peut pas être supprimé.\n\n' +
-            'Active un autre trimestre d\'abord, ou utilise l\'archivage pour le conserver en lecture seule.'
+            'Active un autre trimestre d\'abord, ou clos-le pour le conserver en lecture seule.'
         );
         return;
     }
