@@ -1,36 +1,31 @@
-# Consigne du jour – emprunter un trimestre (E2, #1023)
+# Consigne du jour – la correction d'E2, ses mots (« Faire revenir »), puis E2 en ligne (#1023)
 
-> Écrite par Cowork le 4 octobre 2026 à 19 h 06 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 17 h 19, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-e1-mise-en-ligne.md`.
+> Écrite par Cowork le 4 octobre 2026 à 19 h 46, complétée à 19 h 49 (Toronto, mesurée par `date`). Remplace la consigne du 4 octobre à 19 h 06, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-04-e2-emprunter.md`.
 
 ## Où on en est
 
-1.183.0 est en ligne (E1, #1022 close ; #1006 close), relu par Cowork à 19 h 04. Plan : `PLAN-2026-10-04-emprunter-et-rendre-un-trimestre.md` ; ce lot est **E2, emprunter**. Lis aussi les fiches #1023 et #1024, et le § 3 de `MESURE-2026-10-04-emprunter-un-trimestre.md` (ce que les trimestres partagent).
+E2 est relu : **vert, avec une correction** (la dérogation à la garde #340, à limiter au temps du geste) et une décision sur les vignettes. Lis `plans de travail/VERDICT-RELECTURE-2026-10-04-e2-emprunter-trimestre.md` en entier. **Grégoire a changé le verbe** (4 oct., 19 h 49, sur la recommandation de Cowork) : **« Emprunter » devient « Faire revenir »**, le mot du bouton qui existe déjà pour les copies d'un groupe dans la même liste : un mot pour le même mouvement, de l'archive vers l'application. Le geste suivant (E3) s'appellera **« Renvoyer aux archives »** (reporte-le à la fiche #1024). Dans tous les textes d'écran d'E2 :
+   - bouton : « Faire revenir » (sur la ligne d'une archive de trimestre) ;
+   - fenêtre : « Faire revenir Hiver 2026 ? », le reste de ton texte tel quel ;
+   - bilan : titre « Trimestre revenu », le reste tel quel ;
+   - refus : titre « Impossible de faire revenir le trimestre » (comme « Impossible de faire revenir les copies »), et pour « déjà là » **ta** retouche : « Hiver 2026 est déjà dans l'application : ouvre-le depuis la bibliothèque des trimestres. Rien n'a été écrit. » (le refus est gardé, sans option « remplacer ») ;
+   - plus aucun « emprunt », « emprunter » ou « emprunté » dans un texte que l'usager lit (une sentinelle le dit). Les noms internes (\`reserve-emprunter.js\`) peuvent rester.
+Et la ligne des Nouvelles ci-dessous.
 
-Ce lot **écrit dans les données de l'utilisateur** (il ramène un trimestre entier) : **relecture croisée** obligatoire (règle 2 de `PROTOCOLE.md`).
-
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, et à travailler sur une branche `claude/e2-emprunter-trimestre`. **Ne pousse pas le lot et ne fais pas de release** : tu t'arrêtes au point 6. Pousse `RELAIS.md` seul sur `main` en t'arrêtant (règle du 8 août).
-
-## Les décisions de Cowork (techniques ; dis-moi si une mesure les dément)
-
-1. **D'où** : depuis la liste des archives (Réglages › Données › Archives), sur une archive de trimestre **vérifiée dans ce navigateur**, comme « Faire revenir ». Une archive venue d'un autre appareil entre dans la liste par le chemin qui existe (« Ouvrir une archive… », `upsertEntreeManifeste`) puis se vérifie : mesure que ce chemin accepte une archive de trimestre, sinon dis ce qui manque.
-2. **Refus d'abord, rien d'écrit** : si le trimestre est au registre `trimestres`, ou si une seule clé `<trimestre>_*` existe déjà, ou si une séance `seancesCompletes_gc_<id>` de l'archive existe déjà : **refus en entier**. (Ce que dit l'écran dans ce cas est à Grégoire : point 6.)
-3. **Tout est recomparé au moment du geste** : `meta.json` à la vérification, chaque clé à son empreinte, chaque fichier à son empreinte. Une seule différence : refus en entier, rien d'écrit.
-4. **Ce qui est écrit, dans cet ordre** : les fichiers des copies (par la pièce de « Faire revenir ») ; puis les clés `<trimestre>_*` et les séances, telles quelles ; **puis en dernier** l'entrée du trimestre au registre `trimestres` (depuis `pour_memoire`), **ajoutée** sans modifier aucune autre entrée, **marquée clos**. Le trimestre n'apparaît dans la bibliothèque qu'une fois tout écrit.
-5. **Aucune autre clé globale n'est écrite** : ni `cours`, ni profil, ni registre longitudinal, ni bibliothèques. Mesure que le trimestre revenu se lit quand même (le cours qu'il cite existe-t-il ? s'il n'existe plus, dis ce que l'écran montre).
-6. **En cas d'échec en cours de route** : retire **seulement ce que ce geste a écrit**, dans l'ordre inverse, et dis-le ; rien d'autre n'est touché.
-7. **Les vignettes** (`thumbnail_<id>`) ne sont pas dans l'archive : mesure qu'elles se régénèrent à l'affichage.
-8. **Clos, et ensuite** : le trimestre revient clos. Mesure ce qui arrive quand l'usager l'**active** pour le consulter (la mesure du 4 dit que le démarrage réécrit les indices du trimestre actif même clos, et que le bandeau offre une permission d'écriture) : liste les clés que cette consultation change, sans rien corriger. C'est ce dont E3 aura besoin pour savoir si le livre rendu est celui qu'on a emprunté.
-9. **Mémoire** : une copie à la fois, comme « Faire revenir » ; mesure sur une archive de taille réelle (~1,1 Go).
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, à pousser (les documents de `main` dès maintenant, puis le lot), et à fusionner. Si le garde de permissions refuse, arrête-toi sur ce seul point et dis-le-lui.
 
 ## Ce que tu fais, dans cet ordre
 
-1. **Commite** cette consigne et son archive sur `main`, pousse `main`.
-2. **Mesure avant de coder** : le point 1 (une archive de trimestre entre-t-elle dans la liste sur un navigateur neuf ?) ; dis si une mesure dément une décision.
-3. **Code** sur la branche, mots provisoires.
-4. **Tests** : un banc sur un espace qui porte un trimestre en cours (avec un doubleur) et des réglages : archiver un trimestre clos fictif (E1), le **supprimer**, faire **évoluer** l'espace (une élève ajoutée ailleurs, le profil changé), puis emprunter. Témoins : le trimestre revient entier et clos ; **rien d'autre n'a changé** (toutes les clés hors du trimestre comparées avant et après) ; les cas de refus du point 2 et du point 3 n'écrivent rien ; un échec provoqué au milieu ne laisse que ce qu'il y avait avant. Mutations rouges : une clé globale réécrite ; le registre écrit avant les clés ; une empreinte non recomparée. Largeur iPad. Vitest complet.
-5. **La mémoire et le point 8**, mesurés.
-6. **Arrête-toi et rends** : le commit sur la branche ; une `DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre.md` ; et, pour Grégoire, **les mots exacts** (bouton, fenêtre, bilan, refus), avec **le refus « déjà là »** et ta recommandation. Pas de verdict complet, pas de push du lot, pas de release.
+1. **Commite** cette consigne, son archive et le verdict sur `main`, pousse `main`.
+2. **La correction** de la garde #340 (verdict), son essai et sa mutation rouge.
+3. **Les vignettes** (verdict), avec la mesure de durée ; ou l'inscription si elle dépasse une minute.
+4. **Les mots** ci-dessus (« Faire revenir ») et la sentinelle ; le banc suit.
+5. **La release** : **minor** (1.184.0). Titre à toi, dit à Grégoire au rendu. La ligne des Nouvelles, posée telle quelle :
+   > Dans Réglages › Données › Archives, «&nbsp;Faire revenir&nbsp;» ramène aussi un trimestre archivé entier dans l'application, clos, tel qu'il a été archivé, sans toucher aux autres trimestres, aux cours ni aux réglages.
+6. **Verdict Playwright complet sur le commit qui part, puis push, puis fusion vers `main`** ; si la fusion change autre chose que des documents, rejuge-la. Nomme les instables ; dis l'éveil et la mémoire.
+7. **Constate la mise en ligne chez Netlify**, et dis l'heure. **Pas de porte terrain** maintenant : la porte d'E2 s'écrit avec celle d'E3, quand l'hiver 2026 sera clos et archivé.
+8. **Clos #1023** au BACKLOG. **`RELAIS.md` et `OU-EN-EST-ON.md` à jour.** Suite : renvoyer un trimestre aux archives (E3, #1024), sur une consigne de Cowork.
 
 ## Ce que tu rends
 
-À Grégoire, deux lignes : ce que fait « emprunter », et ce qu'il ne touche jamais. Les mots dans un bloc à part, avec le cas « déjà là ». Ce que tu as supposé, en une ligne.
+À Grégoire, trois lignes : le numéro en ligne et l'heure ; le verdict complet, l'éveil, la mémoire, les instables ; les vignettes, faites ou inscrites. Ce que tu as supposé, en une ligne.
