@@ -5435,6 +5435,12 @@
             labelAnnotProd.textContent = labelProd ? labelProd.textContent : '--';
         }
 
+        // #1010 — tous les chemins qui ouvrent une évaluation passent ici : le signal
+        // « consignes non transmises » se pose (ou se retire) avec l'en-tête.
+        if (typeof window.mettreAJourSignalConsignes === 'function') {
+            window.mettreAJourSignalConsignes(etudiantDA, prodId);
+        }
+
         // Synchroniser le select production dans la toolbar
         if (prodId) {
             const select = document.querySelector('.annot-toolbar .travaux-filtre-production') ||

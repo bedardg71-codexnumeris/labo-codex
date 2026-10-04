@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261001a"> <!-- Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261004a"> <!-- Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -8423,6 +8423,12 @@
                                 <span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-eval-label-production">—</span>
                             </div>
 
+                            <!-- #1010 : la case « Consignes transmises » décochée pour le groupe de cette copie (rempli par mettreAJourSignalConsignes, evaluation.js) -->
+                            <div id="travaux-eval-signal-consignes" class="alerte alerte-attention signal-consignes u-hide" role="status">
+                                <p id="travaux-eval-signal-consignes-texte" class="signal-consignes-texte"></p>
+                                <button type="button" id="travaux-eval-signal-consignes-btn" class="btn btn-secondaire btn-tres-compact" data-action="cocherConsignesDepuisEvaluation">Cocher «&nbsp;Consignes transmises&nbsp;»</button>
+                            </div>
+
                             <!-- Selects cachés — utilisés par sauvegarderEvaluation() et le pré-remplissage -->
                             <div id="travaux-eval-correction" class="u-hide" aria-hidden="true">
                                 <select id="selectGroupeEval" class="controle-form"
@@ -14306,7 +14312,7 @@
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
          l'ordre reste la garantie la plus simple à relire. -->
     <script src="js/ui-blocs.js?v=20260905b"></script>
-    <script src="js/productions.js?v=20261003c"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20261004a"></script> <!-- Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20260929b"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20261003c"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20261003c"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
@@ -14437,7 +14443,7 @@
     <script src="js/travaux-resolution.js?v=20260702a"></script> <!-- #145 (2 juil.) : refus de la résolution par DA seul (PDF étranger) -->
     <script src="js/travaux-doublons-ui.js?v=20260929b"></script> <!-- Beta 99.31 b0502-0940 : db.setSync (écriture localStorage immédiate) — bandeau se met à jour après validations -->
     <script src="js/migration-diagnostic.js?v=20260927d"></script>
-    <script src="js/travaux-ui.js?v=20261003e"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
+    <script src="js/travaux-ui.js?v=20261004a"></script> <!-- #932 (22 sept.) : reassignerCopie, le seul écrivain de l'association d'une copie ; la porte nomme l'élève quand il change, « élève non identifié·e » sinon -->
     <script src="js/actions-rlo.js?v=20260924b"></script> <!-- Beta 99.17 (b0417-1100) : fix lecture LIVE prioritaire dans obtenirEvolutionRLOEtudiant -->
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
@@ -14477,7 +14483,7 @@
     <script src="js/evaluation-calcul.js?v=20260927c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20260927a"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
     <script src="js/evaluation-sauvegarde.js?v=20261004a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
-    <script src="js/evaluation.js?v=20261003c"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
+    <script src="js/evaluation.js?v=20261004a"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260927c"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 
     <!-- RAPPEL BACKUP - Avertissement perte de données (Beta 95) -->
