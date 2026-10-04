@@ -30,3 +30,7 @@ Retirer le trimestre d'hiver 2026 **entier** (données et copies) de l'applicati
 - **Supprimer un trimestre laisse les fichiers de ses copies dans le navigateur** (E0) : à inscrire ; E3 le corrige pour son propre geste.
 - **#1001 (alléger un groupe)** : fermée comme dépassée par E3.
 - **La marge du codex** : environ 770 Mo avant 2 Go ; au rythme haut des remises d'automne, atteinte possible vers fin novembre (*inféré*, hypothèses dans la mesure § 4). Les trois gestes passent donc avant l'enregistrement et la carte d'alignement.
+
+## Les mots des gestes (4 oct., 19 h 49)
+
+Sur la recommandation de Cowork, Grégoire a écarté la métaphore de l'emprunt : E2 s'appelle **« Faire revenir »** (le même mot que pour les copies d'un groupe, dans la même liste des archives), et E3 **« Renvoyer aux archives »**.

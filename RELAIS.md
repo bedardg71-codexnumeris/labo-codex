@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 18 h 35 : **1.183.0 (E1, #1022 : ARCHIVER UN TRIMESTRE CLOS ENTIER ; #1006 : « EXPORTER LES DONNÉES » RETIRÉ) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `143a22ef` (PUBLIÉ À 18 h 31) ; VERDICT COMPLET VERT ; #1022 ET #1006 CLOSES**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 19 h 34 : **E2 (#1023, EMPRUNTER UN TRIMESTRE) CODÉ SUR `claude/e2-emprunter-trimestre` (`3dd4fddc`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+
+**Consigne** : Cowork, 19 h 06 (E2 ; arrêt au point 6). Consigne et archive commitées et poussées sur `main` (`1847b3d3`).
+
+**Ce qui est fait, sur la branche (locale, non poussée)** : `js/reserve-emprunter.js` (« Emprunter » sur la ligne d'une archive de trimestre vérifiée) ; refus sans rien écrire ; fichiers, puis clés relues, puis registre en dernier ; retrait de ce que le geste a écrit en cas d'échec. Garde #340 corrigée (un trimestre absent du registre n'est pas jugé ; elle bloquait l'emprunt, mesuré). Bancs : `sentinelle-e2-emprunter-trimestre` (30 essais, mutations rouges sur disque), `e2-emprunter-trimestre.spec.js` (WebKit, 820 px, vrai bouton). Vitest 679 fichiers, 8131 essais verts ; WebKit ciblé 10 verts. Mémoire sur 1,15 Go : 210 Mo, 2,3 s. #1025 inscrite (« Ouvrir une archive… » charge l'archive entière, 1 242 Mo).
+
+**À lire** : `plans de travail/DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre.md` (sur la branche) — deux écarts aux décisions (séances et copies déjà là identiques ; garde #340), les mesures des points 1, 5, 7, 8, 9, et les mots pour Grégoire (§ 4).
+
+**La suite** : verdict de Cowork ; les mots de Grégoire ; puis release et verdict complet sur la branche.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 18 h 35 : **1.183.0 (E1, #1022 : ARCHIVER UN TRIMESTRE CLOS ENTIER ; #1006 : « EXPORTER LES DONNÉES » RETIRÉ) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `143a22ef` (PUBLIÉ À 18 h 31) ; VERDICT COMPLET VERT ; #1022 ET #1006 CLOSES**
 
 **Consigne** : Cowork, 17 h 19 (verdict de relecture vert sans correction ; mots acceptés par Grégoire avec deux retouches ; release minor ; porte écrite, pas lancée). Consigne, archive et verdict commités tels quels (`36ea9163`).
 
