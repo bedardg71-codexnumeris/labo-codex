@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 8 h 20 : **#1008 (LE GARDE-ÉVEIL ET LA GARDE MÉMOIRE DU VERDICT PLAYWRIGHT) FUSIONNÉ SUR `main` (`56684d55`) ; VERDICT COMPLET VERT AVEC LA NOUVELLE GARDE ; AUCUNE RELEASE (forge seulement) ; 1.178.0 RESTE EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 10 h 40 : **1.179.0 (#1010, LE BANDEAU « CONSIGNES NON TRANSMISES » AU DÉBUT DE L'ÉVALUATION) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `3bca545f` (PUBLIÉ À 10 h 30) ; VERDICT COMPLET VERT ; #1010 CLOSE, #1016 OUVERTE**
+
+**Consignes** : Cowork, 8 h 18 (lot, mots provisoires) et 9 h 28 (mots acceptés par Grégoire : texte tel quel, bouton « Cocher la case » ; ligne des Nouvelles de Cowork). Consignes et archives commitées telles quelles (`4c5580bc`, `2a4ab57c`).
+
+**Ce qui est fait** : `mettreAJourSignalConsignes` (`js/evaluation.js`), appelé par `travauxUI.ecrireLabelsIdentite`, le point que tous les chemins d'ouverture traversent ; lecture `obtenirEcheanceEffective` sur `syntheseRetroactionData.groupeCoursIdDeLEleve`. Bouton : `marquerConsignesTransmises` (`js/productions.js`, par `modifierEtAnnoncer`), qui coche aussi la case de la fiche ouverte. Banc `tests/integration/signal-consignes-1010.spec.js` (WebKit, 768 px) ; mutations rouges : appel retiré, groupe ignoré, bouton sans écriture, bouton sans rafraîchissement.
+
+**Release** : 1.179.0 (`3bca545f`), minor ; titre de Claude Code : « Des consignes pas encore transmises, signalées à l'évaluation ». **Verdict** complet sur `3bca545f` : 0 échec, 0 instable (1.178.0 en avait 7 : aucun ne revient) ; éveil complet tenu (batterie), 0 veille, échange au plus haut 3,9 Go, pression 1. Fusion vers `main` en avance rapide : `main` = le commit jugé.
+
+**Mesure de #1016** (sonde jetable, retirée) : sous `demo-std-litt` (standards), `demo-spe-litt` (spécifications) et la sommative, case décochée : C, P et note inchangés pour les 10 élèves. Toute pratique de la bibliothèque passe par `PratiqueConfigurable`, dont le C ne lit pas `assignee`.
+
+**Ménage** : aucun worktree (le lot a vécu dans l'arbre principal) ; branche locale supprimée, la distante reste chez origin. Pas de porte terrain (consigne, point 6).
+
+**Suite** : masquer ce qui reste d'un élève supprimé (#1013), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 8 h 20 : **#1008 (LE GARDE-ÉVEIL ET LA GARDE MÉMOIRE DU VERDICT PLAYWRIGHT) FUSIONNÉ SUR `main` (`56684d55`) ; VERDICT COMPLET VERT AVEC LA NOUVELLE GARDE ; AUCUNE RELEASE (forge seulement) ; 1.178.0 RESTE EN LIGNE**
 
 **Consigne** : Cowork, 7 h 04. Étape 1 : consigne et archive commitées telles quelles, #1014 cochée (`9af9eeab`).
 
