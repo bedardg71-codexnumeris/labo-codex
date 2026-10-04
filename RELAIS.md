@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 16 h 55 : **E1 (#1022, ARCHIVER UN TRIMESTRE CLOS ENTIER) CODÉ SUR `claude/e1-archiver-trimestre` (`2cbd5016`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 18 h 35 : **1.183.0 (E1, #1022 : ARCHIVER UN TRIMESTRE CLOS ENTIER ; #1006 : « EXPORTER LES DONNÉES » RETIRÉ) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `143a22ef` (PUBLIÉ À 18 h 31) ; VERDICT COMPLET VERT ; #1022 ET #1006 CLOSES**
+
+**Consigne** : Cowork, 17 h 19 (verdict de relecture vert sans correction ; mots acceptés par Grégoire avec deux retouches ; release minor ; porte écrite, pas lancée). Consigne, archive et verdict commités tels quels (`36ea9163`).
+
+**Ce qui est fait** : les deux retouches (« étudiant·es » ; « Vérifier » dit « les données du trimestre », jamais « clés ») ; #1006 : la liste aux trois boutons « Exporter les données » (sans conteneur dans la page), `exporterTrimestreArchive` et `afficherTrimestreCibleExport` retirés, six preuves textuelles adaptées, verrou dans `sentinelle-e1-archiver-trimestre.test.js` (démontré rouge) ; fiche d'E3 (#1024) : vignettes `thumbnail_<id>` et refus si l'archive n'a pas toutes les copies.
+
+**Release** : 1.183.0 (`143a22ef`, build 1004-1731). Vitest 678 fichiers, 8097 essais verts. Verdict Playwright complet vert sur `143a22ef` : 0 échec, 0 instable ; éveil complet tenu (batterie, 0 veille) ; échange au plus haut 3,9 Go, pression 1. `main` avancée sur le commit jugé (avance rapide, rien d'autre), poussée par `git push origin main`.
+
+**Porte** : `plans de travail/PORTES-TERRAIN-2026-10-04-e1-archiver-trimestre.md`, pour le jour où Grégoire clôt l'hiver 2026 (Safari sur le Mac) ; non lancée. Cowork publie l'artefact jumeau.
+
+**La suite** : emprunter un trimestre (E2, #1023), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 16 h 55 : **E1 (#1022, ARCHIVER UN TRIMESTRE CLOS ENTIER) CODÉ SUR `claude/e1-archiver-trimestre` (`2cbd5016`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
 
 **Consigne** : Cowork, 16 h 27 (plan « emprunter et rendre un trimestre » approuvé par Grégoire ; E1 ; arrêt au point 6). Consigne, archive et plan commités sur `main` avec les inscriptions #1019-#1024, #1001 fermée, note à #1006 (`2838ee8b`, poussé).
 
