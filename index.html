@@ -14274,7 +14274,7 @@
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=20261004g"></script> <!-- #1006 (4 oct.) : « Exporter les données » retiré, sans écran ni lecteur · Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
-    <script src="js/productions-namespace-garde.js?v=20261004h"></script> <!-- E2 (4 oct.) : un trimestre absent du registre (en cours d'emprunt) n'est pas jugé · #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
+    <script src="js/productions-namespace-garde.js?v=20261004i"></script> <!-- E2 (4 oct.) : seul le trimestre qu'on fait revenir, le temps du geste, n'est pas jugé · #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/horaire-fusion.js?v=20260821a"></script> <!-- CT-04 : source unique de la fusion entités horaires → horaireHebdo (dédup par jour ET heure) -->
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
     <script src="js/trimestre-v2.js?v=20260918c"></script> <!-- #366+#369+#374 relais : stats, validations, clé unique (5 août) -->
@@ -14426,7 +14426,7 @@
     <script src="js/reserve-verifier.js?v=20261004g"></script> <!-- E1 (4 oct.) : « les données du trimestre », mots acceptés · E1 (4 oct.) : vérifie aussi l'archive d'un trimestre, clé par clé · Lot A3 (4 oct.) : expose ses pièces à « Faire revenir » · Lot A2 (30 sept.) : « Vérifier » une archive, copie par copie, dans les deux modes, sans charger le fichier en entier -->
     <script src="js/reserve-revenir.js?v=20261004f"></script> <!-- E1 (4 oct.) : note sur l'archive d'un trimestre · Lot A3 (4 oct.) : « Faire revenir » les copies d'une archive vérifiée, sans rien remplacer ni effacer -->
     <script src="js/reserve-trimestre.js?v=20261004g"></script> <!-- E1 (4 oct.) : mots acceptés par Grégoire (« étudiant·es ») · E1 (4 oct.) : archiver un trimestre clos entier (#1022) -->
-    <script src="js/reserve-emprunter.js?v=20261004h"></script> <!-- E2 (4 oct.) : emprunter un trimestre depuis son archive vérifiée (#1023), mots provisoires -->
+    <script src="js/reserve-emprunter.js?v=20261004i"></script> <!-- E2 (4 oct.) : « Faire revenir » (mots de Grégoire), dérogation #340 le temps du geste · E2 (4 oct.) : emprunter un trimestre depuis son archive vérifiée (#1023), mots provisoires -->
     <script src="js/reserve-reglages.js?v=20261004h"></script> <!-- E2 (4 oct.) : bouton « Emprunter » sur l'archive vérifiée d'un trimestre · E1 (4 oct.) : la ligne d'une archive de trimestre · Lot A3 (4 oct.) : bouton « Faire revenir » sur une archive vérifiée · Lot A2 (30 sept.) : colonne « Vérification » et bouton « Vérifier » · #259 : strings UI Réserve → Archives -->
     <script src="js/securite-prefs.js?v=2026050613"></script> <!-- Beta 99.36 b0506-1335 : Défense D — toggle persistance FSAPI -->
     <script src="js/codex-data.js?v=20260511c"></script> <!-- Beta 99.41 : #264 progression sur extraction codex data -->

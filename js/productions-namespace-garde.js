@@ -160,15 +160,18 @@ function construireMapCoursTrimestre() {
 function gardeProductions(cleEcrite, valeur) {
     if (typeof db === 'undefined' || !db.getSync) return { coherent: true };
 
-    // E2 (#1023, 4 oct. 2026) : un trimestre ABSENT du registre ne se juge pas. La table
-    // ci-dessous ne lit que les trimestres du registre : les cours de celui-là n'y sont pas, et
-    // un cours qu'il partage avec un autre lui paraîtrait étranger. Mesuré : l'emprunt d'un
-    // trimestre (qui n'entre au registre qu'en dernier) voyait ses productions bloquées, le
-    // cours 601-101 étant aussi celui du trimestre en cours. Le cas #340 (deux trimestres du
-    // registre) est jugé comme avant.
+    // E2 (#1023, 4 oct. 2026) : le trimestre qu'on FAIT REVENIR d'une archive, et lui seul,
+    // pendant ce geste seulement. La table ci-dessous ne lit que les trimestres du registre, où
+    // il n'entre qu'en dernier : un cours qu'il partage avec un autre lui paraîtrait étranger
+    // (mesuré : ses productions étaient bloquées, le cours 601-101 étant aussi celui du
+    // trimestre en cours). Hors du geste, un trimestre absent du registre est jugé comme avant :
+    // l'écrivain fautif de #340 n'a jamais été prouvé (verdict de Cowork, 4 oct., 19 h 46).
     var mCible = typeof cleEcrite === 'string' ? cleEcrite.match(/^([aeh]\d{4})_productions$/) : null;
+    var RE = typeof window !== 'undefined' ? window.ReserveEmprunter : null;
+    var enRetour = RE && typeof RE.trimestreEnCours === 'function' ? RE.trimestreEnCours() : null;
     var registre = db.getSync('trimestres', []) || [];
-    if (mCible && Array.isArray(registre) && !registre.some(function (t) { return t && t.id === mCible[1]; })) {
+    if (mCible && enRetour === mCible[1] && Array.isArray(registre) &&
+        !registre.some(function (t) { return t && t.id === mCible[1]; })) {
         return { coherent: true };
     }
 
