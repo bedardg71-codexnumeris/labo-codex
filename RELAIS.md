@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 1 h 25 : **1.178.0 (#1007, LOT 2b : LE CODEX PROPOSÉ AVANT DE RETIRER UNE LIGNE QUI PORTE DES NOTES) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a74bd2b7` (PUBLIÉ À 1 h 20) ; VERDICT COMPLET VERT ; #1007 CLOSE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 8 h 20 : **#1008 (LE GARDE-ÉVEIL ET LA GARDE MÉMOIRE DU VERDICT PLAYWRIGHT) FUSIONNÉ SUR `main` (`56684d55`) ; VERDICT COMPLET VERT AVEC LA NOUVELLE GARDE ; AUCUNE RELEASE (forge seulement) ; 1.178.0 RESTE EN LIGNE**
+
+**Consigne** : Cowork, 7 h 04. Étape 1 : consigne et archive commitées telles quelles, #1014 cochée (`9af9eeab`).
+
+**Ce qui est fait** : `scripts/garde-eveil.mjs` (fonctions pures), branché dans `scripts/verifier-playwright.mjs` : `caffeinate -u` puis `-d -i -s -w pid` vérifiés au lancement ; suite asynchrone en groupe propre, relevé mémoire toutes les 30 s (seuils en tête du script, `LABO_ECHANGE_SEUIL_MO`, `LABO_ECHANGE_LANCEMENT_MO`, `LABO_PRESSION_SEUIL`, `LABO_GARDE_PAS_S`) ; veilles lues au journal `pmset -g log` (l'horloge monotone de Node compte la veille : mesuré). Le jeton porte `garde`. `pousser.sh` s'arrête (code 3) sur un code 2 de la garde ; `lire-verdict.mjs` en dit la raison. Sentinelle #1008 (21 tests) remplace celle de #987 ; Vitest 8 042 verts ; deux mutations rouges.
+
+**Verdict** sur `56684d55`, lancé après `pmset displaysleepnow` (écran rallumé en 4 s) : 0 échec, 0 instable, éveil complet tenu, 0 veille, échange au plus haut 5,4 Go (107 relevés), pression 1 ; 54 min, sur batterie (44 % ⮕ 27 %). Contre-épreuve mémoire à seuil abaissé : arrêt au deuxième relevé, « non jugé : mémoire ».
+
+**À surveiller** : premier verdict sur secteur — la garde refuse si le total `PreventSystemSleep` reste à 0 (non mesuré sur secteur). Le couvercle fermé reste sans garde (écrit dans la fiche close).
+
+**Suite** : le signal au début de l'évaluation (#1010), puis masquer ce qui reste d'un élève supprimé (#1013), avant les archives ; sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 1 h 25 : **1.178.0 (#1007, LOT 2b : LE CODEX PROPOSÉ AVANT DE RETIRER UNE LIGNE QUI PORTE DES NOTES) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a74bd2b7` (PUBLIÉ À 1 h 20) ; VERDICT COMPLET VERT ; #1007 CLOSE**
 
 **Consigne** : Cowork, 0 h 07 ; verdict de relecture vert (0 h 05), une retouche : le pluriel de la cible (« Retirer ces cibles les efface pour de bon. », clé `cibles`). Mots acceptés par Grégoire sans la variante du nombre (0 h 07).
 

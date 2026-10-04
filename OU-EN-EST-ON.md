@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🔧 **OUTILLAGE, 4 OCTOBRE 2026, 8 h 20 (rien ne change dans l'application ; 1.178.0 reste en ligne) — LA VÉRIFICATION COMPLÈTE NE S'ENDORT PLUS ET NE FIGE PLUS LE MAC**
+
+**Ce qui change pour toi** : la vérification complète au navigateur (les ~45 min avant un envoi) rallume l'écran et tient le Mac éveillé elle-même, quel que soit celui qui la lance. Si la mémoire s'emballe pendant qu'elle tourne, elle s'arrête d'elle-même et dit « non jugé : mémoire » plutôt que de laisser le Mac se figer jusqu'au bouton, comme la nuit du 1er octobre. Rien n'est envoyé dans ce cas.
+
+**Vérifié comment** : lancée écran éteint ce matin : l'écran s'est rallumé en 4 s, aucune veille pendant 54 min, mémoire stable, verdict vert. Seuil de mémoire abaissé exprès : la vérification s'est arrêtée au deuxième relevé et l'a dit.
+
+**Ce qui reste** : fermer le couvercle du portable l'endort quand même ; rien ne l'empêche.
+
+**La suite** : le signal au début de l'évaluation (#1010), puis ce qui reste visible d'un élève supprimé (#1013), avant les archives.
+
 ✅ **EN LIGNE EN 1.178.0 (4 OCTOBRE 2026 ; en ligne depuis 1 h 20, mesuré chez Netlify : déploiement de production prêt sur `a74bd2b7` ; relue par Cowork, verte sans correction de code ; tes mots, avec le pluriel de la cible et sans le nombre d'évaluations, et ta ligne des « Nouvelles » posés tels que tu les as acceptés à 0 h 07) — LE CODEX PROPOSÉ AVANT DE RETIRER UNE LIGNE QUI PORTE DES NOTES**
 
 **Ce que tu verras** : dans la Conception, quand tu retires un critère, un sous-critère ou un niveau d'échelle qu'au moins une évaluation emploie, ou une cible de dénotation déjà cochée, la fenêtre « Mettre ton codex à jour avant de supprimer ? » paraît avant la question habituelle, si ton codex n'est pas à jour. « Annuler » ne retire rien. Une ligne qu'aucune évaluation n'emploie, ou une ligne neuve, se retire comme avant.
