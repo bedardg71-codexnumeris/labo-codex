@@ -27,6 +27,11 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
+import {
+    lireEchangeMo, lirePression, lireCapacites, lireAlimentation,
+    lireAssertionsSysteme, lireAssertionsDuProcessus, jugerEveil,
+    jugerMemoire, jugerLancementMemoire, memoireAuPlusHaut, lireVeillesDuJournal, formaterMo
+} from './garde-eveil.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -51,6 +56,30 @@ const BASELINE = path.join(__dirname, 'playwright-baseline.json');
 // redemande la garde — c'est voulu.
 const VERDICT = process.env.VERDICT_PLAYWRIGHT || path.join(__dirname, '.verdict-playwright.json');
 
+// ── Seuils de la garde mémoire (#1008, 4 oct. 2026) ──────────────────────────
+// Ils vivent ICI, et non dans pousser.sh, parce que tout verdict passe par ce
+// script, quel que soit l'appelant (fin-de-session, lancement à la main) ; celui
+// de la nuit du 1er oct. avait contourné pousser.sh.
+//
+// MESURÉ : au repos, le 4 oct. à 7 h 09, l'échange était à 5 524 Mo (pression 1,
+// Mac de 16 Go). La nuit du 1er, à 3 h 48, il était à 14,6 Go sur 15,4 (charge
+// 157), et le Mac a fini figé, redémarré par le bouton.
+// ECHANGE_LANCEMENT_MO = 10 Go : deux fois le repos ; au-delà, la suite part sur
+//   une machine déjà en manque, on ne lance pas.
+// ECHANGE_SEUIL_MO = 12 Go : sous les 14,6 Go de la nuit du 1er, avec la marge
+//   d'un relevé (30 s). Au-delà, sur deux relevés de suite, on arrête la suite.
+// PRESSION_SEUIL = 4 : le niveau « critique » de kern.memorystatus_vm_pressure_level
+//   (1 normal, 2 avertissement, 4 critique).
+// GARDE_PAS_S = 30 : un relevé, comme la garde de charge.
+// ⚠ NON MESURÉ au moment d'écrire : le plus haut d'échange d'une suite saine. Le
+//   rapport le relève désormais (garde.memoire) ; c'est lui qui dira si 12 Go est juste.
+// Les variables LABO_* servent à la contre-épreuve ; les lever pour forcer un
+// lancement est un geste explicite, jamais un défaut.
+const ECHANGE_LANCEMENT_MO = Number(process.env.LABO_ECHANGE_LANCEMENT_MO || 10 * 1024);
+const ECHANGE_SEUIL_MO = Number(process.env.LABO_ECHANGE_SEUIL_MO || 12 * 1024);
+const PRESSION_SEUIL = Number(process.env.LABO_PRESSION_SEUIL || 4);
+const GARDE_PAS_S = Math.max(1, Number(process.env.LABO_GARDE_PAS_S || 30));
+
 /**
  * Dépose le verdict pour le commit courant.
  *
@@ -58,7 +87,7 @@ const VERDICT = process.env.VERDICT_PLAYWRIGHT || path.join(__dirname, '.verdict
  * jeton non écrit fait retomber le hook sur « pas de verdict » — il redemandera
  * la garde. C'est le bon repli : jamais un push non vérifié.
  */
-function deposerVerdict(code, echecs, instables = []) {
+function deposerVerdict(code, echecs, instables = [], garde = null) {
     try {
         const tete = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: RACINE, encoding: 'utf8' });
         if (tete.status !== 0) return;
@@ -73,6 +102,9 @@ function deposerVerdict(code, echecs, instables = []) {
             // sans dire « au second essai ». Un vert rattrapé ressemblait à un
             // vert franc — exactement ce que la doc de flakyDuRapport() interdit.
             instables,
+            // #1008 — l'éveil, les veilles et la mémoire de la suite (null hors macOS).
+            // `garde.nonJuge` nomme la garde qui a refusé de juger (code 2).
+            garde,
             rendule: new Date().toISOString()
         }, null, 4)}\n`, 'utf8');
     } catch {
@@ -165,42 +197,139 @@ if (webkitAbsent) {
     process.exit(2);
 }
 
+// ── Garde-éveil, au lancement (#987, puis #1008) ──────────────────────────────
+// #987 (29 sept. 2026) : 75 des 115 min d'un passage tombaient dans des essais
+// commencés à l'instant d'une veille d'inactivité ; `caffeinate -i` y répondait.
+// #1008 (nuit du 1er oct.) : lancé écran éteint, en éveil sombre, le verdict de
+// 1.173.0 a subi deux « Maintenance Sleep » malgré `caffeinate -i`.
+// D'où trois gestes : déclarer l'utilisateur actif (-u, ramène l'écran — mesuré
+// après `pmset displaysleepnow`), tenir écran, inactivité et système (-d -i -s)
+// le temps de CE processus (-w), puis VÉRIFIER que c'est tenu. Sinon, on ne
+// lance pas : un verdict rendu dans un Mac qui dort ne juge pas le code.
+// Les décisions sont dans garde-eveil.mjs (fonctions pures, sentinelle #1008).
+// ⚠ Rien n'empêche la veille quand on ferme le couvercle du MacBook.
+const surMac = process.platform === 'darwin';
+const lire = (commande, args) => {
+    const r = spawnSync(commande, args, { encoding: 'utf8' });
+    return r.status === 0 ? r.stdout : '';
+};
+const releverMemoire = () => ({
+    instant: new Date().toISOString(),
+    echangeMo: lireEchangeMo(lire('sysctl', ['vm.swapusage'])),
+    pression: lirePression(lire('sysctl', ['-n', 'kern.memorystatus_vm_pressure_level']))
+});
+const garde = surMac ? { eveilCompletTenu: null, alimentation: null, systemeRetenu: null, veilles: [], nombreVeilles: 0, dureeVeillesS: 0, memoire: null, nonJuge: null, raison: '' } : null;
+
+/** Refus d'une garde : code 2, une ligne qui dit pourquoi. */
+function nonJuge(quoi, raison) {
+    garde.nonJuge = quoi;
+    garde.raison = raison;
+    process.stderr.write(`${ROUGE}✗ Sentinelle Playwright NON JUGÉE (${quoi}) : ${raison}.${RAZ}\n`);
+    deposerVerdict(2, [], [], garde);
+    process.exit(2);
+}
+
+let caffeinate = null;
+if (surMac) {
+    spawnSync('caffeinate', ['-u', '-t', '2']);
+    caffeinate = spawn('caffeinate', ['-d', '-i', '-s', '-w', String(process.pid)], { stdio: 'ignore', detached: true });
+    // Sans écouteur, un caffeinate absent ferait tomber ce processus plus tard ;
+    // ici il n'y a rien à tolérer : la vérification ci-dessous refusera.
+    caffeinate.on('error', () => {});
+    caffeinate.unref();
+    spawnSync('sleep', ['2']);
+
+    const assertions = lire('pmset', ['-g', 'assertions']);
+    garde.alimentation = lireAlimentation(lire('pmset', ['-g', 'ps']));
+    const eveil = jugerEveil({
+        capacites: lireCapacites(lire('pmset', ['-g', 'systemstate'])),
+        assertionsProcessus: lireAssertionsDuProcessus(assertions, caffeinate.pid),
+        assertionsSysteme: lireAssertionsSysteme(assertions),
+        alimentation: garde.alimentation
+    });
+    garde.systemeRetenu = eveil.systemeRetenu;
+    if (!eveil.ok) nonJuge('éveil', eveil.raison);
+    garde.eveilCompletTenu = true;
+
+    const auLancement = releverMemoire();
+    const lancement = jugerLancementMemoire(auLancement, ECHANGE_LANCEMENT_MO);
+    if (!lancement.ok) nonJuge('mémoire', lancement.raison);
+    process.stderr.write(`${VERT}✓ Éveil complet tenu (caffeinate -d -i -s, ${garde.alimentation ?? 'alimentation illisible'}${garde.systemeRetenu ? '' : ', -s inopérant sur batterie'}) ; échange ${formaterMo(auLancement.echangeMo)}, pression ${auLancement.pression ?? '?'}.${RAZ}\n`);
+}
+
 // ── Exécution ─────────────────────────────────────────────────────────────────
 const dossierTemporaire = mkdtempSync(path.join(tmpdir(), 'pw-sentinelle-'));
 const fichierRapport = path.join(dossierTemporaire, 'rapport.json');
 
 process.stderr.write(`${VERT}→ Sentinelle Playwright : exécution de la suite WebKit (~45 min)...${RAZ}\n`);
 
-// #987 (29 sept. 2026) — le Mac s'endormait PENDANT la suite. Mesuré ce jour-là
-// sur 1.169.1 : 115 min au mur, dont 75 min dans 13 essais qui ont chacun
-// commencé à la seconde d'une veille du journal `pmset -g log` (« Idle Sleep »,
-// réglage `sleep 1`). Ces 13 essais expliquaient les 2 échecs et les 10 reprises
-// du passage : le délai d'un essai court pendant la veille. `caffeinate -i`
-// empêche la veille d'inactivité tant que CE processus vit (-w), quel que soit
-// l'appelant : pousser.sh, fin-de-session, ou un lancement à la main.
-// ⚠ Il n'empêche pas la veille quand on ferme le couvercle du MacBook.
-// L'écouteur 'error' est obligatoire : sans lui, un caffeinate absent fait tomber
-// ce processus APRÈS la suite et AVANT le dépôt du verdict. On juge sans lui.
-if (process.platform === 'darwin') {
-    spawn('caffeinate', ['-i', '-w', String(process.pid)], { stdio: 'ignore', detached: true })
-        .on('error', (erreur) => {
-            console.warn(`⚠ caffeinate n'a pas pu être lancé (${erreur.message}) : le Mac peut s'endormir pendant la suite (#987).`);
-        })
-        .unref();
+// #1008 — lancement ASYNCHRONE, dans un groupe de processus à soi (detached) :
+// un spawnSync bloquait la boucle d'événements les ~45 min, et rien ne pouvait
+// surveiller. Le groupe permet d'arrêter la suite ENTIÈRE, WebKit compris.
+const debutMs = Date.now();
+const sorties = { stdout: '', stderr: '' };
+const garder = (cle) => (morceau) => { sorties[cle] = (sorties[cle] + morceau).slice(-64 * 1024); };
+const suite = spawn('npx', ['playwright', 'test', '--reporter=json'], {
+    cwd: DOSSIER_TESTS,
+    env: { ...process.env, PLAYWRIGHT_JSON_OUTPUT_NAME: fichierRapport },
+    stdio: ['ignore', 'pipe', 'pipe'],
+    detached: true
+});
+suite.stdout.setEncoding('utf8').on('data', garder('stdout'));
+suite.stderr.setEncoding('utf8').on('data', garder('stderr'));
+
+let arretMemoire = '';
+const arreterLaSuite = () => {
+    try { process.kill(-suite.pid, 'SIGTERM'); } catch { /* déjà terminée */ }
+    setTimeout(() => { try { process.kill(-suite.pid, 'SIGKILL'); } catch { /* idem */ } }, 10_000).unref();
+};
+for (const signal of ['SIGINT', 'SIGTERM']) {
+    process.on(signal, () => { arreterLaSuite(); process.exit(130); });
 }
 
-const execution = spawnSync('npx', ['playwright', 'test', '--reporter=json'], {
-    cwd: DOSSIER_TESTS,
-    encoding: 'utf8',
-    env: { ...process.env, PLAYWRIGHT_JSON_OUTPUT_NAME: fichierRapport },
-    maxBuffer: 64 * 1024 * 1024
-});
+// La surveillance, toutes les GARDE_PAS_S : la mémoire (arrêt sur dépassement
+// tenu), l'éveil complet, et le réveil (kern.waketime bouge = une veille a eu
+// lieu ; le compte exact se lit au journal à la fin, l'horloge de Node comptant
+// le temps de veille — mesuré, cf. garde-eveil.mjs).
+const releves = [];
+let reveilConnu = surMac ? lire('sysctl', ['-n', 'kern.waketime']) : '';
+const surveillance = surMac ? setInterval(() => {
+    const releve = releverMemoire();
+    releves.push(releve);
+    const memoire = jugerMemoire(releves, { echangeSeuilMo: ECHANGE_SEUIL_MO, pressionSeuil: PRESSION_SEUIL });
+    if (memoire.arreter && !arretMemoire) {
+        arretMemoire = memoire.raison;
+        process.stderr.write(`${ROUGE}✗ Mémoire : ${memoire.raison} — arrêt de la suite.${RAZ}\n`);
+        arreterLaSuite();
+    }
+    if (!lireCapacites(lire('pmset', ['-g', 'systemstate'])).includes('Graphics')) garde.eveilCompletTenu = false;
+    const reveil = lire('sysctl', ['-n', 'kern.waketime']);
+    if (reveil && reveil !== reveilConnu) {
+        reveilConnu = reveil;
+        process.stderr.write(`${JAUNE}⚠ Le Mac s'est endormi pendant la suite (réveil à ${releve.instant}).${RAZ}\n`);
+    }
+}, GARDE_PAS_S * 1000) : null;
+
+await new Promise((fin) => suite.on('close', fin).on('error', fin));
+if (surveillance) clearInterval(surveillance);
+
+if (surMac) {
+    garde.veilles = lireVeillesDuJournal(lire('pmset', ['-g', 'log']), debutMs, Date.now());
+    garde.nombreVeilles = garde.veilles.length;
+    garde.dureeVeillesS = garde.veilles.reduce((s, v) => s + v.dureeS, 0);
+    garde.memoire = { ...memoireAuPlusHaut(releves), releves: releves.length };
+    process.stderr.write(`  Garde : éveil complet ${garde.eveilCompletTenu ? 'tenu' : 'NON tenu'} ; ${garde.nombreVeilles} veille(s) (${garde.dureeVeillesS} s) ; mémoire au plus haut : échange ${formaterMo(garde.memoire.echangeMo)}, pression ${garde.memoire.pression ?? '?'}.\n`);
+    if (arretMemoire) {
+        rmSync(dossierTemporaire, { recursive: true, force: true });
+        nonJuge('mémoire', arretMemoire);
+    }
+}
 
 if (!existsSync(fichierRapport)) {
     process.stderr.write(`${ROUGE}✗ Sentinelle Playwright : aucun rapport produit — la suite n'a pas pu s'exécuter.${RAZ}\n`);
-    process.stderr.write(`${execution.stderr || execution.stdout || '(aucune sortie)'}\n`);
+    process.stderr.write(`${sorties.stderr || sorties.stdout || '(aucune sortie)'}\n`);
     rmSync(dossierTemporaire, { recursive: true, force: true });
-    deposerVerdict(2, []);
+    deposerVerdict(2, [], [], garde);
     process.exit(2);
 }
 
@@ -210,7 +339,7 @@ try {
 } catch (erreur) {
     process.stderr.write(`${ROUGE}✗ Rapport JSON illisible : ${erreur.message}${RAZ}\n`);
     rmSync(dossierTemporaire, { recursive: true, force: true });
-    deposerVerdict(2, []);
+    deposerVerdict(2, [], [], garde);
     process.exit(2);
 }
 rmSync(dossierTemporaire, { recursive: true, force: true });
@@ -244,7 +373,7 @@ if (ecrire) {
 if (!existsSync(BASELINE)) {
     process.stderr.write(`${ROUGE}✗ Baseline absente (${path.relative(RACINE, BASELINE)}).${RAZ}\n`);
     process.stderr.write('  La créer : node scripts/verifier-playwright.mjs --ecrire\n');
-    deposerVerdict(2, []);
+    deposerVerdict(2, [], [], garde);
     process.exit(2);
 }
 
@@ -262,7 +391,12 @@ if (reparees.length > 0) {
 }
 
 if (nouveaux.length > 0) {
-    deposerVerdict(1, echecs, instables);
+    deposerVerdict(1, echecs, instables, garde);
+    // #1008 — un rouge rendu après une veille le dit EN TÊTE : le délai d'un
+    // essai court pendant la veille, et ces rougeurs-là ne jugent pas le code.
+    if (garde && garde.nombreVeilles > 0) {
+        process.stderr.write(`\n${JAUNE}⚠ VERDICT ROUGE RENDU APRÈS ${garde.nombreVeilles} VEILLE(S) (${garde.dureeVeillesS} s) — relancer, Mac éveillé, avant d'y croire.${RAZ}\n`);
+    }
     process.stderr.write(`\n${ROUGE}✗ ${nouveaux.length} spec(s) Playwright NOUVELLEMENT rouge(s) — push bloqué.${RAZ}\n\n`);
     for (const spec of nouveaux) process.stderr.write(`    · ${spec}\n`);
     process.stderr.write(`\n${ROUGE}Ces specs ne sont pas dans la dette connue de #456 : c'est une régression.${RAZ}\n`);
@@ -270,6 +404,6 @@ if (nouveaux.length > 0) {
     process.exit(1);
 }
 
-deposerVerdict(0, echecs, instables);
+deposerVerdict(0, echecs, instables, garde);
 process.stderr.write(`${VERT}✓ Sentinelle Playwright : aucune rougeur nouvelle (${echecs.length} échec(s) connu(s), inchangé).${RAZ}\n`);
 process.exit(0);

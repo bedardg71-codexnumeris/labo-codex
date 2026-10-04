@@ -48,4 +48,9 @@ try {
 if (!jeton.sha || (shaAttendu && jeton.sha !== shaAttendu)) process.exit(3);
 
 const code = Number(jeton.code);
+// #1008 — un code 2 de la garde n'est pas « WebKit absent » : le dire, sans
+// quoi le message du hook ment sur la raison.
+if (code === 2 && jeton.garde?.nonJuge) {
+    process.stderr.write(`⚠ Verdict non jugé (${jeton.garde.nonJuge}) : ${jeton.garde.raison}\n`);
+}
 process.exit(code === 0 || code === 1 || code === 2 ? code : 3);
