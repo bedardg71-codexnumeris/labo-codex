@@ -135,6 +135,13 @@ if [ $LANCER -eq 1 ]; then
         printf "\n${ROUGE}✗ Rougeur nouvelle — rien n'a été poussé.${RAZ}\n"
         exit 1
     fi
+    # #1008 — un code 2 rendu par la garde-éveil ou la garde mémoire n'est pas
+    # « WebKit absent » : le Mac pouvait juger, il n'était pas en état. Comme la
+    # garde de charge, on ne pousse pas ; le hook, lui, laisserait passer.
+    if [ $CODE_PW -eq 2 ] && node -e 'process.exit(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).garde?.nonJuge ? 0 : 1)' "${VERDICT_PLAYWRIGHT:-$REPO_ROOT/scripts/.verdict-playwright.json}" 2>/dev/null; then
+        printf "\n${ROUGE}✗ Verdict non jugé par la garde (raison ci-dessus) — rien n'a été poussé.${RAZ}\n"
+        exit 3
+    fi
 else
     printf "${VERT}✓ Sentinelle Playwright : sans objet (aucun code observable dans ce lot).${RAZ}\n"
 fi

@@ -269,6 +269,10 @@ Le jeton porte alors le SHA du commit, et le hook affiche « ✓ Sentinelle
 Playwright : **verdict vert à jour pour ce commit** » au lieu de « aucun verdict
 local ». **C'est la seule façon qu'un push soit réellement jugé.**
 
+Les gardes du verdict (éveil complet, veilles, mémoire ; #1008) vivent dans
+`scripts/verifier-playwright.mjs` lui-même : un lancement à la main en est
+couvert comme `pousser.sh`, et un code 2 « non jugé » dit laquelle a refusé.
+
 ⚠ **Un commit APRÈS le verdict le périme.** Refaire dans cet ordre, ou accepter
 que le push passe sans jugement, et le DIRE.
 ⚠ **Le verdict est le DERNIER geste avant le push, jamais avant la relecture** :

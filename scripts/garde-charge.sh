@@ -13,6 +13,9 @@
 # mesure qui les justifie. Ce fragment lit CHARGE_SEUIL, CHARGE_PLAFOND_S et
 # CHARGE_PAS_S.
 #
+# La charge PENDANT la suite n'est pas jugée ici : l'éveil, les veilles et la
+# mémoire de la suite sont gardés dans verifier-playwright.mjs (#1008).
+#
 # Un fragment à part pour la même raison que lot-observable.sh : une sentinelle
 # peut le sourcer et remplacer `lire_charge`, sans toucher à la machine.
 
