@@ -405,6 +405,8 @@ La copie arrive dans ses archives ou directement dans son Labo.
 | **Ouvrir**    | Charger un codex dans l'application pour travailler.          |
 | **Enregistrer** | Sauvegarder le codex sur la clé USB.                       |
 | **Archiver**    | Archiver un groupe-cours dans les archives (fin de trimestre, dépôt). |
+| **Clore**     | Figer un trimestre terminé en lecture seule, dans l'application (bibliothèque des trimestres). Ne dépose rien et ne libère aucun espace. |
+| **Rouvrir**   | Remettre un trimestre clos en mode édition. |
 | **Réimporter**| Recopier une ressource d'une archive (grille, échelle, production, cartouche, tampon) vers les bibliothèques actives de l'application. |
 | **Ouvrir une archive** | Charger une archive de les archives en namespace temporaire (lecture seule) pour démo, formation ou consultation, sans toucher au trimestre actif. |
 | **Extraire**  | Créer un codex data à partir d'un ou plusieurs archives de les archives. |
@@ -412,6 +414,12 @@ La copie arrive dans ses archives ou directement dans son Labo.
 | **Anonymiser**| Retirer les données personnelles d'un codex data avant partage. |
 | **Déposer**   | Publier dans la voûte (configuration ou codex data anonymisé). |
 | **Emprunter** | Copier depuis la voûte vers ses archives ou son Labo.           |
+
+**« Clos » et « archivé » ne se confondent pas** (Grégoire, 30 sept. 2026 ; lot A5, #1002) :
+un trimestre **clos** est gelé en lecture seule dans l'application ; un groupe-cours
+**archivé** est déposé hors du navigateur, dans les Archives, et vérifié. Les noms
+internes de l'état clos gardent leur ancien mot (`archiverTrimestre`, `trimestre.archive`,
+`mode-archive`) ; seuls les textes lus par l'usager ont changé.
 
 **Terme retiré** : « sauvegarde ». Trop ambigu — remplacé par les verbes
 spécifiques ci-dessus.
@@ -428,6 +436,7 @@ spécifiques ci-dessus.
 | « Configuration pédagogique complète » | → **Dépôt** dans la voûte (type : configuration) |
 | « TimeMachine / Historique des versions » | → **Instantanés** dans les archives |
 | « Labo » (sous-section de Suivi)   | → **Labo** (section dédiée, autonome) |
+| « Archiver » / « Désarchiver » un trimestre | → **Clore** / **Rouvrir** (1.182.0, #1002) |
 
 ---
 
@@ -472,3 +481,4 @@ spécifiques ci-dessus.
 | 2026-04-26 | Création. Définition des 4 concepts, vocabulaire, flux, structure archives. |
 | 2026-04-26 | Ajout granularité par groupe-cours, UUID par archive, convention de nommage `{trimestre}-{cours}-gr{groupe}`. Codex data : clé `groupes` remplace `trimestres`. |
 | 2026-04-26 | Clarification de la double fonction de les Archives (dépôt + fonds consultable). Ajout des verbes *réimporter* et *ouvrir une archive* au tableau de référence. Nouveau sous-flux « Voie de retour » liant ces verbes aux items #254 (mécanisme) et #251 (codex data). |
+| 2026-10-04 | Vocabulaire de l'état gelé (#1002, lot A5) : *clore* et *rouvrir* un trimestre, distincts d'*archiver* un groupe-cours. |

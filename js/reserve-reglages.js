@@ -211,7 +211,7 @@ function _rendreTableau() {
         } else {
             var maj = manifeste.derniere_mise_a_jour;
             resume.textContent = entrees.length + ' archive' + (entrees.length > 1 ? 's' : '') +
-                (maj ? ' · dernière maj ' + _formaterDate(maj) : '');
+                (maj ? ' · liste mise à jour le ' + _formaterDate(maj) : '');
         }
     }
 

@@ -208,17 +208,17 @@ function confirmerArchivage(id) {
     const confirme = confirm(
         `Clore le trimestre "${trimestre.nom}" ?\n\n` +
         `Un trimestre clos passe en lecture seule et ne peut plus être modifié.\n` +
-        `Un export automatique sera généré.\n\n` +
         `Cette action est réversible par le bouton « Rouvrir ».`
     );
 
     if (confirme) {
         const result = archiverTrimestre(id);
         if (result.success) {
-            alert(`Trimestre "${trimestre.nom}" clos.\n\nUn fichier d'export a été téléchargé.`);
+            alert(`Trimestre "${trimestre.nom}" clos.`);
             afficherListeTrimestreGestion();
         } else {
-            alert(`Erreur: ${result.error}`);
+            // Un refus de clôture remplit `message`, pas `error` (#1002).
+            alert(`Erreur: ${result.error || result.message}`);
         }
     }
 }

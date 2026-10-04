@@ -1424,12 +1424,16 @@ const AIDE_CONTEXTUELLE = {
                 ]
             },
             {
+                type: 'texte',
+                contenu: "<em>Vérifier</em> relit une archive copie par copie ; une archive vérifiée offre <em>Faire revenir</em>."
+            },
+            {
                 type: 'conseil',
                 contenu: "<strong>Retirer</strong> une ligne de l'index ne supprime <strong>aucun fichier</strong> sur disque. C'est juste un nettoyage de l'index. Pour vraiment supprimer une archive, supprime le ZIP toi-même dans le Finder."
             },
             {
                 type: 'texte',
-                titre: "Où sont les données pédagogiques d'un trimestre archivé ?",
+                titre: "Où sont les données pédagogiques d'un groupe-cours archivé ?",
                 contenu: "Archiver n'a <strong>rien supprimé</strong> dans ton codex. Les étudiant·es, présences, évaluations et fichiers du trimestre que tu as archivé sont toujours dans ton application. Pour les consulter, change le <strong>trimestre actif</strong> dans le sélecteur du haut. L’archive, elle, est une copie de sécurité figée."
             },
             {
