@@ -143,15 +143,26 @@ describe('#340 · garde-fou anti-contamination productions inter-trimestres', ()
         expect(garde('h2026_productions', [prodA25('a1'), prodA25('a2')]).coherent).toBe(true);
     });
 
-    it('E2 · un trimestre ABSENT du registre (en cours d\'emprunt) n\'est pas jugé : ses productions passent', () => {
-        // Le cas mesuré le 4 oct. 2026 : h2026 supprimé, a2025 seul porte le cours partagé ;
-        // l'emprunt écrit h2026_productions AVANT l'entrée du registre.
-        const store = {
-            trimestres: [{ id: 'a2025' }],
-            a2025_groupesCours: [{ id: 'GC_A25', coursId: 'COURS1766455789356' }]
-        };
-        const { garde } = chargerGarde(store);
+    // Le cas mesuré le 4 oct. 2026 : h2026 supprimé, a2025 seul porte le cours partagé ; le
+    // geste « Faire revenir » (E2) écrit h2026_productions AVANT l'entrée du registre.
+    const SANS_H2026 = () => ({
+        trimestres: [{ id: 'a2025' }],
+        a2025_groupesCours: [{ id: 'GC_A25', coursId: 'COURS1766455789356' }]
+    });
+
+    it('E2 · PENDANT le geste qui fait revenir h2026 (et lui seul) : ses productions passent', () => {
+        const { garde, fauxWindow } = chargerGarde(SANS_H2026());
+        fauxWindow.ReserveEmprunter = { trimestreEnCours: () => 'h2026' };
         expect(garde('h2026_productions', [prodA25('p1'), prodA25('p2')]).coherent).toBe(true);
+    });
+
+    it('E2 · HORS du geste, un trimestre absent du registre est jugé comme avant : bloqué', () => {
+        const { garde, fauxWindow } = chargerGarde(SANS_H2026());
+        expect(garde('h2026_productions', [prodA25('p1'), prodA25('p2')]).coherent).toBe(false);
+        fauxWindow.ReserveEmprunter = { trimestreEnCours: () => null };
+        expect(garde('h2026_productions', [prodA25('p1'), prodA25('p2')]).coherent).toBe(false);
+        fauxWindow.ReserveEmprunter = { trimestreEnCours: () => 'h2030' }; // un AUTRE trimestre revient
+        expect(garde('h2026_productions', [prodA25('p1'), prodA25('p2')]).coherent).toBe(false);
     });
 
     it('E2 · le même tableau, quand h2026 EST au registre : bloqué comme avant (#340)', () => {

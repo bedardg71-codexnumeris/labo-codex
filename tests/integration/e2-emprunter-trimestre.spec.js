@@ -152,7 +152,7 @@ test.describe('E2 — « Emprunter » l\'archive vérifiée d\'un trimestre (mod
     test.setTimeout(180000);
     test.use({ viewport: IPAD_PORTRAIT });
 
-    test('archiver, vérifier, supprimer, faire évoluer l\'espace, emprunter : le trimestre revient entier et clos, rien d\'autre ne change ; un second emprunt est refusé « déjà là »', async ({ page }) => {
+    test('archiver, vérifier, supprimer, faire évoluer l\'espace, faire revenir : le trimestre revient entier et clos, rien d\'autre ne change ; un second retour est refusé « déjà là »', async ({ page }) => {
         page.setDefaultTimeout(15000);
         const erreurs = brancherEcouteurs(page);
         await poserEspace(page);
@@ -221,7 +221,7 @@ test.describe('E2 — « Emprunter » l\'archive vérifiée d\'un trimestre (mod
             const bouton = ligne.locator('[data-action="ReserveEmprunter.actionEmprunter"]');
             await expect(bouton).toHaveCount(1);
             await expect(bouton).toBeVisible();
-            await expect(bouton).toHaveText('Emprunter');
+            await expect(bouton).toHaveText('Faire revenir');
             await bouton.scrollIntoViewIfNeeded();
             const boite = await bouton.boundingBox();
             expect(boite.x).toBeGreaterThanOrEqual(0);
@@ -233,15 +233,15 @@ test.describe('E2 — « Emprunter » l\'archive vérifiée d\'un trimestre (mod
             await bouton.click();
             await (await attente).setFiles(fichier);
             let f = await lireFenetre(page);
-            expect(f.titre).toBe('Emprunter Hiver 2032 ?');
+            expect(f.titre).toBe('Faire revenir Hiver 2032 ?');
             expect(f.message).toBe('Hiver 2032 revient dans l\'application tel qu\'il a été archivé, clos : 3 étudiant·es, 3 copies.\n\n' +
                 'Rien d\'autre n\'est touché : les autres trimestres, les cours et les réglages restent tels quels.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Emprunter' }).click();
-            await expect(page.locator('#ui-dialogue-titre')).not.toHaveText('Emprunter Hiver 2032 ?', { timeout: 30000 });
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
+            await expect(page.locator('#ui-dialogue-titre')).not.toHaveText('Faire revenir Hiver 2032 ?', { timeout: 30000 });
             f = await lireFenetre(page);
             expect({ titre: f.titre, message: f.message }).toEqual({
-                titre: 'Trimestre emprunté',
+                titre: 'Trimestre revenu',
                 message: 'Hiver 2032 est revenu, clos. Tu le trouves dans la bibliothèque des trimestres.\n\n2 copies revenues\n1 copie déjà là'
             });
             await fermerFenetre(page);
@@ -271,8 +271,8 @@ test.describe('E2 — « Emprunter » l\'archive vérifiée d\'un trimestre (mod
             await bouton.click();
             f = await lireFenetre(page);
             expect({ titre: f.titre, message: f.message }).toEqual({
-                titre: 'Trimestre non emprunté',
-                message: 'Hiver 2032 est déjà dans l\'application. Rien n\'a été écrit.'
+                titre: 'Impossible de faire revenir le trimestre',
+                message: 'Hiver 2032 est déjà dans l\'application : ouvre-le depuis la bibliothèque des trimestres. Rien n\'a été écrit.'
             });
             await fermerFenetre(page);
             expect(selecteurOuvert).toBe(false);

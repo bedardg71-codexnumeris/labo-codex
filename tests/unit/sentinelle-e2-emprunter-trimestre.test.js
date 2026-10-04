@@ -310,9 +310,55 @@ describe('E2 · (a) le trimestre revient entier et clos ; rien d\'autre n\'a cha
     it('le compte rendu dit le nom, les copies revenues, et où trouver le trimestre', async () => {
         const banc = await preparer();
         const cr = banc.win.ReserveEmprunter.compteRendu(await emprunter(banc));
-        expect(cr.titre).toBe('Trimestre emprunté');
+        expect(cr.titre).toBe('Trimestre revenu');
         expect(cr.message).toContain('Hiver 2032 est revenu, clos');
         expect(cr.message).toContain('4 copies revenues');
+    });
+});
+
+describe('E2 · les mots (acceptés par Grégoire le 4 oct. : « Faire revenir »)', () => {
+    it('aucun « emprunt », « emprunter » ni « emprunté » dans un texte que l\'usager lit', () => {
+        const { win } = monter(creerDb(), creerMagasin(creerDb()));
+        const RE = win.ReserveEmprunter;
+        const textes = [RE.MOTS.bouton, RE.MOTS.infobulle, RE.MOTS.enCours, RE.MOTS.fenetre.titre('Hiver 2032'),
+            RE.MOTS.fenetre.texte({ nom: 'Hiver 2032', etudiants: 2, copies: 3 }), RE.MOTS.fenetre.confirmer];
+        const bilans = [{ etat: 'fait', nom: 'Hiver 2032', revenues: ['a', 'b'], dejaLa: ['c'], supprimes: ['d'], sansFichier: ['e'] }];
+        for (const motif of Object.keys(RE.MOTS.refus).filter((k) => k !== 'titre')) bilans.push({ etat: 'refus', motif, nom: 'Hiver 2032' });
+        for (const motif of ['copieAbimee', 'nonEcrite', 'apparu']) {
+            bilans.push({ etat: 'echec', motif, nom: 'Hiver 2032', resteEcrit: null });
+            bilans.push({ etat: 'echec', motif, nom: 'Hiver 2032', resteEcrit: { cles: 2, copies: 1 } });
+        }
+        for (const b of bilans) { const cr = RE.compteRendu(b); textes.push(cr.titre, cr.message); }
+        expect(textes.filter((t) => !t)).toEqual([]);
+        expect(textes.filter((t) => /emprunt/i.test(t))).toEqual([]);
+        expect(RE.MOTS.bouton).toBe('Faire revenir');
+        expect(RE.MOTS.fenetre.titre('Hiver 2026')).toBe('Faire revenir Hiver 2026 ?');
+        expect(RE.compteRendu(bilans[0]).titre).toBe('Trimestre revenu');
+        expect(RE.compteRendu({ etat: 'refus', motif: 'dejaLa', nom: 'Hiver 2026' })).toEqual({
+            titre: 'Impossible de faire revenir le trimestre',
+            message: 'Hiver 2026 est déjà dans l\'application : ouvre-le depuis la bibliothèque des trimestres. Rien n\'a été écrit.'
+        });
+    });
+});
+
+describe('E2 · le marqueur de la garde #340 ne vit que le temps des clés', () => {
+    it('posé à chaque écriture d\'une clé du trimestre, absent pendant les copies et le registre, retiré après', async () => {
+        const banc = await preparer();
+        const vus = [];
+        const set = banc.db.set;
+        banc.db.set = async (k, v) => { vus.push([k, banc.win.ReserveEmprunter.trimestreEnCours()]); return set(k, v); };
+        const stocker = banc.magasin.stockerBlob;
+        banc.magasin.stockerBlob = async function(id, b) { vus.push(['copie:' + id, banc.win.ReserveEmprunter.trimestreEnCours()]); return stocker.call(this, id, b); };
+        expect((await emprunter(banc)).etat).toBe('fait');
+        for (const [k, marque] of vus) expect([k, marque]).toEqual([k, k.startsWith('h2032_') ? 'h2032' : null]);
+        expect(banc.win.ReserveEmprunter.trimestreEnCours()).toBe(null);
+    });
+
+    it('retiré aussi quand l\'écriture d\'une clé échoue', async () => {
+        const banc = await preparer();
+        banc.db.echouer = (k) => k === [...CLES_H].sort()[1];
+        expect((await emprunter(banc)).etat).toBe('echec');
+        expect(banc.win.ReserveEmprunter.trimestreEnCours()).toBe(null);
     });
 });
 
@@ -330,7 +376,7 @@ describe('E2 · (b) les refus n\'écrivent RIEN', () => {
         const banc = await preparer();
         banc.db._map.get('trimestres').push({ id: 'h2032', nom: 'Hiver 2032', archive: true });
         const bilan = await refuse(banc, 'dejaLa');
-        expect(banc.win.ReserveEmprunter.compteRendu(bilan).message).toBe('Hiver 2032 est déjà dans l\'application. Rien n\'a été écrit.');
+        expect(banc.win.ReserveEmprunter.compteRendu(bilan).message).toBe('Hiver 2032 est déjà dans l\'application : ouvre-le depuis la bibliothèque des trimestres. Rien n\'a été écrit.');
         expect(banc.win.ReserveEmprunter.refusDejaLaImmediat(TRIM)).toBe('dejaLa');
     });
 

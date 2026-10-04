@@ -32,6 +32,8 @@
         AJOUTÉE sans toucher aux autres, marquée close. Le trimestre n'apparaît dans la
         bibliothèque qu'une fois tout écrit.
      Aucune autre clé globale (cours, profil, registre longitudinal, bibliothèques, vignettes).
+     Les vignettes `thumbnail_<id>` ne sont pas refaites : mesuré sur 394 copies, environ une
+     minute et 1,4 Go retenus par le processus graphique (WebKit, 4 oct.) ; inscrit (#1026).
      Les copies d'un·e étudiant·e supprimé·e ne reviennent pas (règle de « Faire revenir »).
 
    En cas d'échec en cours de route (décision 6)
@@ -57,26 +59,28 @@
 /* ===============================
    LES MOTS — UN SEUL ENDROIT
    ===============================
-   PROVISOIRES : à Grégoire (consigne de Cowork de 19 h 06, point 6).
+   Acceptés par Grégoire le 4 oct. 2026 (consigne de Cowork de 19 h 46) : le verbe est
+   « Faire revenir », celui des copies d'un groupe dans la même liste ; aucun « emprunt » dans un
+   texte que l'usager lit (sentinelle-e2-emprunter-trimestre). Les noms internes restent.
 */
 function _pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
 
 var MOTS = {
-    bouton: 'Emprunter',
+    bouton: 'Faire revenir',
     infobulle: 'Ramener ce trimestre dans l\'application, clos, pour le consulter',
-    enCours: 'Emprunt du trimestre…',
+    enCours: 'Retour du trimestre…',
     fenetre: {
-        titre: function(nom) { return 'Emprunter ' + nom + ' ?'; },
+        titre: function(nom) { return 'Faire revenir ' + nom + ' ?'; },
         texte: function(c) {
             return c.nom + ' revient dans l\'application tel qu\'il a été archivé, clos : ' +
                 _pluriel(c.etudiants, 'étudiant·e', 'étudiant·es') + ', ' +
                 _pluriel(c.copies, 'copie', 'copies') + '.\n\n' +
                 'Rien d\'autre n\'est touché : les autres trimestres, les cours et les réglages restent tels quels.';
         },
-        confirmer: 'Emprunter'
+        confirmer: 'Faire revenir'
     },
     bilan: {
-        titre: 'Trimestre emprunté',
+        titre: 'Trimestre revenu',
         texte: function(b) {
             var lignes = [b.nom + ' est revenu, clos. Tu le trouves dans la bibliothèque des trimestres.', ''];
             lignes.push(_pluriel(b.revenues, 'copie revenue', 'copies revenues'));
@@ -87,9 +91,9 @@ var MOTS = {
         }
     },
     refus: {
-        titre: 'Trimestre non emprunté',
-        // Le cas « déjà là » : à Grégoire.
-        dejaLa: function(nom) { return nom + ' est déjà dans l\'application. Rien n\'a été écrit.'; },
+        titre: 'Impossible de faire revenir le trimestre',
+        // Le cas « déjà là » : refusé, sans option « remplacer » (décision de Grégoire, 4 oct.).
+        dejaLa: function(nom) { return nom + ' est déjà dans l\'application : ouvre-le depuis la bibliothèque des trimestres. Rien n\'a été écrit.'; },
         debris: function(nom) { return 'Des données de ' + nom + ' sont déjà dans l\'application, sans qu\'il soit dans la bibliothèque des trimestres. Rien n\'a été écrit.'; },
         differe: function(nom) { return 'Une séance ou une copie de ' + nom + ' est déjà dans l\'application et ne concorde pas avec l\'archive. Rien n\'a été écrit.'; },
         nonVerifiee: 'Cette archive n\'est pas vérifiée dans ce navigateur. Vérifie-la d\'abord.',
@@ -99,15 +103,15 @@ var MOTS = {
         sansMagasin: 'Le stockage des copies n\'est pas disponible dans cette page.'
     },
     echec: {
-        titre: 'Trimestre non emprunté',
-        texte: function(raison) { return 'L\'emprunt s\'est arrêté en cours de route (' + raison + '). Ce qu\'il avait écrit a été retiré : l\'application est comme avant.'; },
+        titre: 'Impossible de faire revenir le trimestre',
+        texte: function(raison) { return 'Le retour s\'est arrêté en cours de route (' + raison + '). Ce qu\'il avait écrit a été retiré : l\'application est comme avant.'; },
         resteEcrit: function(raison, cles, copies) {
-            return 'L\'emprunt s\'est arrêté en cours de route (' + raison + '), et ce qu\'il avait écrit n\'a pas pu être retiré en entier : ' +
+            return 'Le retour s\'est arrêté en cours de route (' + raison + '), et ce qu\'il avait écrit n\'a pas pu être retiré en entier : ' +
                 _pluriel(cles, 'donnée', 'données') + ' et ' + _pluriel(copies, 'copie', 'copies') + ' restent.';
         },
         copieAbimee: 'une copie de l\'archive ne concorde pas avec son empreinte',
         nonEcrite: 'l\'espace du navigateur a refusé une écriture',
-        apparu: 'le trimestre est apparu pendant l\'emprunt'
+        apparu: 'le trimestre est apparu pendant son retour'
     }
 };
 
@@ -174,6 +178,13 @@ function refusDejaLaImmediat(trimestre) {
     var cles = typeof window.db.keysSync === 'function' ? window.db.keysSync() : [];
     return cles.some(function(k) { return typeof k === 'string' && k.indexOf(prefixe) === 0; }) ? 'debris' : null;
 }
+
+/**
+ * Le trimestre dont ce geste écrit les clés, le temps de l'étape 2 seulement ; null sinon. La
+ * garde #340 (productions-namespace-garde.js) ne déroge que pour lui (verdict de Cowork, 4 oct.).
+ */
+var _enCours = null;
+function trimestreEnCours() { return _enCours; }
 
 class Abandon extends Error {
     constructor(raison) { super(raison); this.name = 'Abandon'; this.raison = raison; }
@@ -321,14 +332,19 @@ async function emprunter(source, entree, onProg) {
         }
 
         // 2. Les clés du trimestre et les séances, telles quelles, chacune relue.
-        for (var j = 0; j < aEcrire.length; j++) {
-            var cleE = aEcrire[j];
-            onProg(j, aEcrire.length, 'donnees');
-            ecrit.cles.push(cleE);
-            await window.db.set(cleE, donnees[cleE]);
-            var relue = await window.db.get(cleE, null);
-            if ((await RV.sha256Texte(JSON.stringify(relue))) !== empreintesCles[cleE]) throw new Abandon('nonEcrite');
-            bilan.cles.push(cleE);
+        _enCours = trimestre;
+        try {
+            for (var j = 0; j < aEcrire.length; j++) {
+                var cleE = aEcrire[j];
+                onProg(j, aEcrire.length, 'donnees');
+                ecrit.cles.push(cleE);
+                await window.db.set(cleE, donnees[cleE]);
+                var relue = await window.db.get(cleE, null);
+                if ((await RV.sha256Texte(JSON.stringify(relue))) !== empreintesCles[cleE]) throw new Abandon('nonEcrite');
+                bilan.cles.push(cleE);
+            }
+        } finally {
+            _enCours = null;
         }
 
         // 3. EN DERNIER, l'entrée du registre : ajoutée, close, sans toucher aux autres.
@@ -513,6 +529,7 @@ window.ReserveEmprunter = {
     MOTS: MOTS,
     refusDejaLa: refusDejaLa,
     refusDejaLaImmediat: refusDejaLaImmediat,
+    trimestreEnCours: trimestreEnCours,
     emprunter: emprunter,
     compteRendu: compteRendu,
     executer: _executer,
