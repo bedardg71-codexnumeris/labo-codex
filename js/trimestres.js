@@ -2026,12 +2026,18 @@
             const tousLesEtudiants = etudiants;
             const etudiantsActifs = etudiants.filter(e => !estEtudiantExclu(e));
             const productions = obtenirDonneesSelonMode('productions');
-            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            const presences = obtenirDonneesSelonMode('presences');
+            // #1013 (décision de Grégoire, 4 oct. 2026) : ce qui part chez quelqu'un écarte l'élève
+            // supprimé — ni ses présences, ni ses évaluations, ni ses lignes de snapshots. Le codex,
+            // lui, garde tout. Écarté ici, à la source : aucun identifiant anonyme n'est créé pour lui.
+            const supprimes = typeof window.dasElevesSupprimes === 'function' ? window.dasElevesSupprimes() : new Set();
+            const garde = (da) => !da || !supprimes.has(String(da));
+            const evaluations = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => garde(e.etudiantDA));
+            const presences = (obtenirDonneesSelonMode('presences') || []).filter(p => garde(p.da));
             const snapshotsRaw = db.getSync(cle('snapshots'), { hebdomadaires: [], interventions: [] });
             // Les snapshots sont stockés comme { hebdomadaires: [...], interventions: [...], metadata: {...} }
             // On exporte les snapshots hebdomadaires
-            const snapshots = snapshotsRaw.hebdomadaires || [];
+            const snapshots = (snapshotsRaw.hebdomadaires || []).map(s => (s && Array.isArray(s.etudiants))
+                ? Object.assign({}, s, { etudiants: s.etudiants.filter(e => garde(e && e.da)) }) : s);
             // #358 Option A : modèles de travail du trimestre ACTIF (cohérent avec les
             // étudiants/productions/évaluations namespacés collectés juste au-dessus).
             const grilles = db.getSync(cle('grillesTemplates'), []);

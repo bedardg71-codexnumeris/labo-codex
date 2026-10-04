@@ -708,7 +708,7 @@
                 // Cas 1 : fichier deja ouvert dans la visionneuse — reactiver + restaurer palettes
                 // #881 — la copie ouverte a pu partir à la corbeille depuis « Exporter et
                 // archiver » : ne pas la rouvrir, laisser la reconstruction générale plus bas.
-                const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                const fichiersTravaux = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
                 const fichierOuvertBrut = travauxVisionneuse.getFichierActuel();
                 const fichierOuvert = (fichierOuvertBrut && fichiersTravaux.some(function(f) { return f.id === fichierOuvertBrut.id; }))
                     ? fichierOuvertBrut : null;
@@ -1077,9 +1077,11 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv) evalDiv.classList.add('u-hide');
 
-        const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+        const fichiersTravaux = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
 
         if (fichiersTravaux.length === 0) {
+            // #1013 : le groupe a des copies, toutes d'élèves supprimés (mots de Grégoire, 4 oct. 2026).
+            const toutesMasquees = travauxStockage.obtenirFichiersGroupeActif().length > 0;
             // #911 (17 sept. 2026) — sauver les panneaux eval avant d'écraser le conteneur, comme la
             // branche « visionneuse déjà ouverte » plus bas. Une copie évaluée dans un trimestre, puis
             // bascule vers un trimestre SANS copie (Automne 2025 de Grégoire) : les trois panneaux du
@@ -1093,8 +1095,12 @@
             conteneur.innerHTML = `
                 <div class="conteneur" style="padding: 24px;">
                     <h2 style="margin: 0 0 12px 0;">Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
-                    <p class="text-muted" style="margin: 0;">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
+                    <p class="text-muted" style="margin: 0;" id="travaux-fichiers-message-vide">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
                 </div>`;
+            if (toutesMasquees) {
+                conteneur.querySelector('#travaux-fichiers-message-vide').textContent =
+                    'Aucune copie à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es.';
+            }
             return;
         }
 
@@ -1264,6 +1270,10 @@
         const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const productions = obtenirDonneesSelonMode('productions');
         const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+        // #1013 (règle de Grégoire, 4 oct. 2026) : la grille MONTRE, elle écarte les copies d'un
+        // élève supprimé (et leur aperçu PDF). Le compte « en stock » et l'export ZIP gardent
+        // tout : l'export marque les copies « exportées », ce qui seul permet de les retirer.
+        const fichiersMontres = travauxStockage.obtenirFichiersAffiches();
         const dasActifs = new Set(fichiersTravaux.map(f => f.etudiantDA).filter(Boolean));
         const etudiants = tousEtudiants.filter(e => dasActifs.has(e.da));
         const tailleFiltree = fichiersTravaux.reduce((acc, f) => acc + (f.tailleFichier || 0), 0);
@@ -1276,7 +1286,7 @@
             <p class="texte-muted">${fichiersTravaux.length} ${pluriel(fichiersTravaux.length, 'fichier', 'fichiers')} en stock (${tailleFormatee})</p>
 
             ${fichiersTravaux.length > 0
-                ? genererGrilleFichiers(fichiersTravaux, 'ouvrirPreviewInline')
+                ? (fichiersMontres.length > 0 ? genererGrilleFichiers(fichiersMontres, 'ouvrirPreviewInline') : '')
                 : `<p class="placeholder-vide">Aucun fichier en stock pour ce groupe. Importe des travaux dans « Préparer et importer » : ils apparaîtront ici, prêts à être exportés ou archivés.</p>`}
 
             <div class="travaux-archivage-options">
@@ -3348,7 +3358,7 @@
             if (conteneur) {
                 // Générer les badges si pas encore fait (ex: session restaurée sans passer par afficherFichiers)
                 if (!_htmlBadgesGrille) {
-                    const fichiersTravaux = travauxStockage.obtenirFichiersGroupeActif();
+                    const fichiersTravaux = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
                     if (fichiersTravaux.length > 0) {
                         _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
                     }
@@ -3567,7 +3577,7 @@
      * @param {string} da - DA de l'etudiant (vide = tous)
      */
     function filtrerParEtudiant(da) {
-        let fichiers = travauxStockage.obtenirFichiersGroupeActif();
+        let fichiers = travauxStockage.obtenirFichiersAffiches(); // #1013 : sans les copies d'un élève supprimé
         if (da) {
             fichiers = fichiers.filter(f => f.etudiantDA === da);
         }

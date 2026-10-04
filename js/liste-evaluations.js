@@ -1075,8 +1075,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
 
     // Ajouter des lignes dédiées pour les fichiers non associés
     // (DA vide OU productionId orphelin) — une ligne par FICHIER réel
-    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersGroupeActif === 'function') {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+    if (typeof travauxStockage !== 'undefined' && typeof travauxStockage.obtenirFichiersAffiches === 'function') {
+        const fichiers = travauxStockage.obtenirFichiersAffiches() || []; // #1013 : ni lignes ni compte pour les copies d'un élève supprimé
         const productionIdsConnus = new Set(productions.map(p => p.id));
 
         // Fichiers sans étudiant (DA vide)
