@@ -2605,7 +2605,7 @@ function afficherGrillesTrimestreModal() {
  */
 async function importerToutGrillesTrimestreModal() {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des grilles.');
+        alert('Import impossible : le trimestre actif est clos (consultation). Active un trimestre courant pour importer des grilles.');
         return;
     }
     const select = document.getElementById('selectTrimestreImportGrilles');
@@ -2648,7 +2648,7 @@ async function importerToutGrillesTrimestreModal() {
  */
 async function importerUneGrilleTrimestre(srcId, grilleId) {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des grilles.');
+        alert('Import impossible : le trimestre actif est clos (consultation). Active un trimestre courant pour importer des grilles.');
         return;
     }
     const grilles = db.getSync(cleSource('grillesTemplates', srcId), []) || [];

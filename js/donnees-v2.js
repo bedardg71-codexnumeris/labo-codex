@@ -1212,7 +1212,7 @@
             if (nb.total === 0) return { dependances, avertissements, remplacement };
             remplacement.requis = true;
             if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-                dependances.push(`Ce trimestre est archivé : remplacer cette échelle toucherait ${window.decrirePorteursEchelle(nb)}, dont des notes déjà remises.`);
+                dependances.push(`Ce trimestre est clos : remplacer cette échelle toucherait ${window.decrirePorteursEchelle(nb)}, dont des notes déjà remises.`);
                 return { dependances, avertissements, remplacement };
             }
             const echelles = db.getSync(cle('echellesTemplates'), []) || [];
