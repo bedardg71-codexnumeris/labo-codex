@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.181 (#1000, lot A3 du chantier des archives) — ligne de Cowork, acceptée par
+            // Grégoire le 4 oct. 2026 (consigne de 12 h 47), posée telle quelle. Titre de Claude Code.
+            version: '1.181',
+            couleur: 'vert',
+            titre: 'Faire revenir les copies d\'une archive',
+            items: [
+                'Dans Réglages › Données › Archives, «&nbsp;Faire revenir&nbsp;» remet dans l\'application les copies d\'une archive vérifiée qui n\'y sont plus. Rien n\'est remplacé ni effacé.'
+            ]
+        },
+        {
             // 1.180 (#1013) — ligne de Cowork, ACCEPTÉE par Grégoire le 4 oct. 2026 avant la
             // consigne de 11 h 04, posée telle quelle ; « ni dans l'export pour Léa » ajouté comme
             // la consigne le prévoit (le banc l'écarte de l'export pour Léa). Titre de Claude Code.

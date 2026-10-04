@@ -219,7 +219,7 @@ test.describe('Lot A3 — « Faire revenir » les copies d\'une archive vérifi�
                 '2 copies déjà là',
                 '1 copie changée depuis l\'archive, laissée telle quelle',
                 '1 copie sans fiche dans l\'application',
-                '1 copie d\'un élève supprimé'
+                '1 copie d\'un·e étudiant·e supprimé·e'
             ]);
 
             // Le magasin : seules r1 et r2 ont été écrites, octet pour octet ; c4 n'a pas bougé.
@@ -243,6 +243,47 @@ test.describe('Lot A3 — « Faire revenir » les copies d\'une archive vérifi�
 
             // Le codex (#1012) : n'attend plus que d5 (élève supprimé) et a7 (abîmée).
             expect(await compteDuCodex(page)).toEqual({ manquantes: 2, attendues: 7 });
+        } finally {
+            rmSync(dossierTmp, { recursive: true, force: true });
+        }
+        expect(erreurs).toEqual([]);
+    });
+
+    test('verdict de relecture : une fiche « exporte » sans fichier revient, garde « exporte », et le codex l\'écrit sans ouvrir la fenêtre de #1012', async ({ page }) => {
+        const erreurs = brancherEcouteurs(page);
+        await demarrerDemo(page);
+        const { gc, trimestre } = await poserCopies(page);
+        const dossierTmp = path.join(__dirname, '.tmp-lot-a3-exporte');
+        mkdirSync(dossierTmp, { recursive: true });
+        const fichier = path.join(dossierTmp, 'archive-banc.zip');
+        try {
+            const archive = await archiverVersDisque(page, gc, trimestre, fichier);
+            await rafraichirTableau(page);
+            expect((await verifierParLeBouton(page, archive.dossier, fichier)).titre).toBe('Archive vérifiée');
+            // La copie libérée après l'export ZIP de Travaux : « exporte », sans fichier.
+            await page.evaluate(async () => {
+                await travauxStockage.supprimerBlob('FT_r1');
+                const fiches = db.getSync(cle('fichiersTravaux')).map((f) => Object.assign({}, f));
+                Object.assign(fiches.find((f) => f.id === 'FT_r1'), { blobStatut: 'exporte', dateExport: '2026-10-01T12:00:00.000Z' });
+                db.setSync(cle('fichiersTravaux'), fiches);
+            });
+            const attente = page.waitForEvent('filechooser', { timeout: 15000 });
+            await page.evaluate((d) => {
+                document.querySelector('[data-action="ReserveRevenir.actionFaireRevenir"][data-param="' + d + '"]').click();
+            }, archive.dossier);
+            await (await attente).setFiles(fichier);
+            await lireEtFermer(page, 'Faire revenir');
+            expect((await lireEtFermer(page)).message.split('\n')).toEqual(['1 copie revenue', '7 copies déjà là']);
+            expect(await page.evaluate(() => db.getSync(cle('fichiersTravaux')).find((f) => f.id === 'FT_r1').blobStatut)).toBe('exporte');
+
+            // Le codex : la fenêtre n'est pas appelée, et la copie revenue est dans le fichier.
+            const codex = await page.evaluate(async () => {
+                let fenetre = false;
+                const r = await Codex.generer({ confirmerCopiesManquantes: async () => { fenetre = true; return false; } });
+                const noms = r ? (await ReserveVerifier.lireRepertoireZip(r.blob)).map((e) => e.nom) : [];
+                return { fenetre, copies: r && r.copies, r1: noms.filter((n) => /\/FT_r1\.pdf$/.test(n)).length };
+            });
+            expect(codex).toEqual({ fenetre: false, copies: { attendues: 7, manquantes: 0 }, r1: 1 });
         } finally {
             rmSync(dossierTmp, { recursive: true, force: true });
         }

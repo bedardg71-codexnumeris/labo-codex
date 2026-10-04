@@ -349,8 +349,9 @@ describe('Lot A3 — faire revenir les copies d\'une archive vérifiée', () => 
             '2 copies déjà là',
             '1 copie changée depuis l\'archive, laissée telle quelle',
             '1 copie sans fiche dans l\'application',
-            '1 copie d\'un élève supprimé'
+            '1 copie d\'un·e étudiant·e supprimé·e'
         ]);
+        expect(banc.revenir.MOTS.bilan.supprimes(2)).toBe('2 copies d\'étudiant·es supprimé·es');
     });
 });
 
