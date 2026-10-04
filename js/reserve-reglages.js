@@ -17,6 +17,8 @@
        vérification d'une archive et son bouton (leurs mots vivent là-bas, pas ici)
      - ReserveRevenir (window.ReserveRevenir) — lot A3 (4 oct. 2026) : le bouton « Faire
        revenir » d'une archive vérifiée (ses mots vivent là-bas)
+     - ReserveEmprunter (window.ReserveEmprunter) — E2 (4 oct. 2026) : le bouton « Emprunter »
+       de l'archive vérifiée d'un trimestre entier (ses mots vivent là-bas)
      - echapperHtml (window.echapperHtml)
 */
 
@@ -89,6 +91,22 @@ function _boutonFaireRevenir(entree) {
         'data-param="' + _echapper(entree._dossier) + '" ' +
         'title="' + _echapper(RR.MOTS.infobulle) + '">' +
         _echapper(RR.MOTS.bouton) +
+    '</button> ';
+}
+
+/**
+ * E2 (#1023) : « Emprunter », offert seulement pour l'archive VÉRIFIÉE d'un trimestre entier
+ * (les gardes sont aussi dans l'action). Mots dans ReserveEmprunter.MOTS.
+ */
+function _boutonEmprunter(entree) {
+    var RE = window.ReserveEmprunter;
+    var RV = window.ReserveVerifier;
+    if (!RE || typeof RE.actionEmprunter !== 'function' || !RV || !RV.etatVerification(entree).verifiee) return '';
+    return '<button class="btn btn-secondaire btn-compact" ' +
+        'data-action="ReserveEmprunter.actionEmprunter" ' +
+        'data-param="' + _echapper(entree._dossier) + '" ' +
+        'title="' + _echapper(RE.MOTS.infobulle) + '">' +
+        _echapper(RE.MOTS.bouton) +
     '</button> ';
 }
 
@@ -258,8 +276,8 @@ function _rendreTableau() {
                 '<td>' + _badgeVerification(e) + '</td>' +
                 '<td class="u-text-center">' +
                     _boutonVerifier(e._dossier) +
-                    // E1 : « Faire revenir » ne connaît que l'archive d'un groupe ; le retour d'un trimestre sera E2.
-                    (estTrimestre ? '' : _boutonFaireRevenir(e)) +
+                    // « Faire revenir » ne connaît que l'archive d'un groupe ; un trimestre s'emprunte (E2).
+                    (estTrimestre ? _boutonEmprunter(e) : _boutonFaireRevenir(e)) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +

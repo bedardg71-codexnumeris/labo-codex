@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+**EN RELECTURE (4 OCTOBRE 2026, 19 h 35) — EMPRUNTER UN TRIMESTRE ARCHIVÉ (E2)** : pas encore en ligne ; pas encore « fait ».
+
+**Ce que tu verras, une fois livré** : dans Réglages › Données › Archives, la ligne « Trimestre entier » d'une archive vérifiée offre « Emprunter ». Le trimestre revient tel qu'il a été archivé, clos, avec ses copies ; rien d'autre ne bouge. S'il est déjà là, c'est refusé, sans rien écrire.
+
+**Où en est la vérification** : un banc sur un espace fictif (archiver, supprimer, faire évoluer l'espace, emprunter) et le vrai bouton à la largeur d'un iPad, sous le moteur de Safari ; mémoire sur 1,15 Go : 210 Mo. Relecture de Cowork à venir ; **les mots sont à toi** (`plans de travail/DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre.md`, § 4).
+
+---
+
 ✅ **EN LIGNE EN 1.183.0 (4 OCTOBRE 2026 ; en ligne depuis 18 h 31, mesuré chez Netlify : déploiement de production prêt sur `143a22ef` ; tes mots, deux retouches) — ARCHIVER UN TRIMESTRE CLOS TOUT ENTIER**
 
 **Ce que tu verras** : dans la bibliothèque des trimestres, le menu ⋮ d'un trimestre clos offre « Archiver le trimestre… ». Une fenêtre dit ce qui part (étudiant·es, groupes, copies, dont celles de la corbeille, et la taille) et que rien n'est retiré de l'application. Le fichier se range hors de l'application ; dans Réglages › Données › Archives, sa ligne dit « Trimestre entier », et « Vérifier » relit chaque copie et les données du trimestre. Les trois boutons « Exporter les données », qui ne s'affichaient nulle part, sont retirés : tu ne verras rien changer.

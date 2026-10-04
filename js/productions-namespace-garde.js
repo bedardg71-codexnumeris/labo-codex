@@ -160,6 +160,18 @@ function construireMapCoursTrimestre() {
 function gardeProductions(cleEcrite, valeur) {
     if (typeof db === 'undefined' || !db.getSync) return { coherent: true };
 
+    // E2 (#1023, 4 oct. 2026) : un trimestre ABSENT du registre ne se juge pas. La table
+    // ci-dessous ne lit que les trimestres du registre : les cours de celui-là n'y sont pas, et
+    // un cours qu'il partage avec un autre lui paraîtrait étranger. Mesuré : l'emprunt d'un
+    // trimestre (qui n'entre au registre qu'en dernier) voyait ses productions bloquées, le
+    // cours 601-101 étant aussi celui du trimestre en cours. Le cas #340 (deux trimestres du
+    // registre) est jugé comme avant.
+    var mCible = typeof cleEcrite === 'string' ? cleEcrite.match(/^([aeh]\d{4})_productions$/) : null;
+    var registre = db.getSync('trimestres', []) || [];
+    if (mCible && Array.isArray(registre) && !registre.some(function (t) { return t && t.id === mCible[1]; })) {
+        return { coherent: true };
+    }
+
     var mapCoursTrimestre = construireMapCoursTrimestre();
     if (Object.keys(mapCoursTrimestre).length === 0) {
         // Rien d'attribuable : ne jamais bloquer sur une base vide.

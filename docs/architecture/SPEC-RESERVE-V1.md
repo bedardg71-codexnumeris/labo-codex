@@ -686,6 +686,28 @@ Plan : `plans de travail/PLAN-2026-10-04-emprunter-et-rendre-un-trimestre.md` (E
 Sentinelles : `tests/unit/sentinelle-e1-archiver-trimestre.test.js` ;
 `tests/integration/e1-archiver-trimestre.spec.js` (WebKit, largeur iPad, le vrai menu).
 
+## 16. Ajout d'E2 (4 octobre 2026) : emprunter un trimestre
+
+Module : `js/reserve-emprunter.js` (`window.ReserveEmprunter`). Bouton « Emprunter » sur la
+ligne d'une archive de trimestre **vérifiée** dans ce navigateur (Réglages › Données › Archives).
+
+- **Refus, rien d'écrit** : trimestre au registre (« déjà là ») ; une clé `<trimestre>_*` déjà
+  présente (« débris ») ; meta.json, donnees.json ou une clé qui ne concorde plus avec la
+  vérification ; une clé de `donnees.json` qui n'est ni `<trimestre>_*` ni la séance vivante
+  d'un groupe de `<trimestre>_groupesCours` ; une séance vivante ou une copie déjà dans le
+  navigateur et différente de l'archive. Déjà là et identique : laissée telle quelle.
+- **Ordre d'écriture** : les fichiers des copies (travail et corbeille, sauf celles d'un·e
+  étudiant·e supprimé·e), chacun recomparé à son empreinte puis relu ; les clés, chacune relue
+  et recomparée ; **en dernier**, l'entrée de `pour_memoire.trimestre` ajoutée au registre,
+  `archive: true`, sans `actif`. Aucune autre clé globale.
+- **Échec en cours de route** : ce que ce geste a écrit est retiré, dans l'ordre inverse.
+- **Mémoire** : une copie à la fois (sources de « Vérifier ») ; mesuré : 1,15 Go, 394 copies,
+  pic de la page à 210 Mo, 2,3 s (WebKit, Mac).
+- La garde #340 (`productions-namespace-garde.js`) ne juge pas un trimestre absent du registre.
+
+Sentinelles : `tests/unit/sentinelle-e2-emprunter-trimestre.test.js` ;
+`tests/integration/e2-emprunter-trimestre.spec.js` (WebKit, largeur iPad, le vrai bouton).
+
 ---
 
 ## Historique du document
@@ -697,3 +719,4 @@ Sentinelles : `tests/unit/sentinelle-e1-archiver-trimestre.test.js` ;
 | 2026-09-30 | Lot A1 du chantier des archives : section 13 (assemblage sans copier les copies, empreinte par copie, confirmation par l'usager). |
 | 2026-09-30 | Lot A2 du chantier des archives : section 14 (vérifier une archive, lecture du ZIP par tranches, état retenu, dossier gardé le temps de la page). |
 | 2026-10-04 | E1 : section 15 (l'archive d'un trimestre clos entier, empreinte par clé, « Vérifier » étendu). |
+| 2026-10-04 | E2 : section 16 (emprunter un trimestre depuis son archive vérifiée). |

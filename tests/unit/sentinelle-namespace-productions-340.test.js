@@ -143,6 +143,23 @@ describe('#340 · garde-fou anti-contamination productions inter-trimestres', ()
         expect(garde('h2026_productions', [prodA25('a1'), prodA25('a2')]).coherent).toBe(true);
     });
 
+    it('E2 · un trimestre ABSENT du registre (en cours d\'emprunt) n\'est pas jugé : ses productions passent', () => {
+        // Le cas mesuré le 4 oct. 2026 : h2026 supprimé, a2025 seul porte le cours partagé ;
+        // l'emprunt écrit h2026_productions AVANT l'entrée du registre.
+        const store = {
+            trimestres: [{ id: 'a2025' }],
+            a2025_groupesCours: [{ id: 'GC_A25', coursId: 'COURS1766455789356' }]
+        };
+        const { garde } = chargerGarde(store);
+        expect(garde('h2026_productions', [prodA25('p1'), prodA25('p2')]).coherent).toBe(true);
+    });
+
+    it('E2 · le même tableau, quand h2026 EST au registre : bloqué comme avant (#340)', () => {
+        const store = { ...CONTEXTE, h2026_productions: [prodH26('p1')] };
+        const { garde } = chargerGarde(store);
+        expect(garde('h2026_productions', [prodA25('p1'), prodA25('p2')]).coherent).toBe(false);
+    });
+
     it('NE BLOQUE PAS une clé non namespacée (boot/legacy)', () => {
         const store = { ...CONTEXTE };
         const { garde } = chargerGarde(store);
