@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.180 (#1013) — ligne de Cowork, ACCEPTÉE par Grégoire le 4 oct. 2026 avant la
+            // consigne de 11 h 04, posée telle quelle ; « ni dans l'export pour Léa » ajouté comme
+            // la consigne le prévoit (le banc l'écarte de l'export pour Léa). Titre de Claude Code.
+            version: '1.180',
+            couleur: 'vert',
+            titre: 'Un·e étudiant·e supprimé·e ne paraît plus dans tes listes',
+            items: [
+                'Quand tu supprimes un·e étudiant·e dans le Cadre, ses copies ne paraissent plus dans la Liste des évaluations ni dans «&nbsp;Annoter et évaluer&nbsp;», et ses données ne partent plus dans l\'export pour la recherche ni dans l\'export pour Léa. Rien n\'est effacé&nbsp;: ton codex garde tout.'
+            ]
+        },
+        {
             // 1.179 (#1010) — ligne de Cowork, ACCEPTÉE par Grégoire le 4 oct. 2026 avant la
             // consigne de 9 h 28, posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.
             version: '1.179',

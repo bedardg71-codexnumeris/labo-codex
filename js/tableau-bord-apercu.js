@@ -1646,14 +1646,19 @@ function afficherMetriquesGlobales(etudiants) {
     // - Évaluations = productions distinctes évaluées
 
     // Compter le nombre de séances du groupe (dates distinctes avec présences)
+    // #1013 (décision de Grégoire, 4 oct. 2026) : les présences et les évaluations d'un élève
+    // supprimé n'entrent plus dans les seuils du groupe.
+    const supprimes = typeof window.dasElevesSupprimes === 'function' ? window.dasElevesSupprimes() : new Set();
     let presences = obtenirDonneesSelonMode('presences') || [];
     if (!Array.isArray(presences)) presences = [];
+    presences = presences.filter(p => !p.da || !supprimes.has(String(p.da)));
     const datesSeances = [...new Set(presences.filter(p => !p.facultatif).map(p => p.date))];
     const nbSeancesGroupe = datesSeances.length;
 
     // Compter le nombre d'évaluations du groupe (productions distinctes évaluées)
     let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     if (!Array.isArray(evaluations)) evaluations = [];
+    evaluations = evaluations.filter(e => !e.etudiantDA || !supprimes.has(String(e.etudiantDA)));
     const productionsDistinctes = [...new Set(evaluations.filter(function(e) { return !e.remplaceeParId; }).map(e => e.productionId || e.artefactId))];
     const nbEvaluationsGroupe = productionsDistinctes.length;
 

@@ -32,7 +32,7 @@ describe('#569 · l\'écran Exporter et archiver', () => {
         expect(ui).not.toContain('<h3>Archivage des travaux');
     });
     it('sans fichier, le module rend un état vide au lieu de rien', () => {
-        expect(ui).toMatch(/fichiersTravaux\.length > 0\s*\?\s*genererGrilleFichiers\(fichiersTravaux, 'ouvrirPreviewInline'\)\s*:\s*`<p class="placeholder-vide">/);
+        expect(ui).toMatch(/fichiersTravaux\.length > 0\s*\?\s*\(fichiersMontres\.length > 0 \? genererGrilleFichiers\(fichiersMontres, 'ouvrirPreviewInline'\) : ''\)\s*:\s*`<p class="placeholder-vide">/);
         expect(css).toMatch(/^\.placeholder-vide\s*\{/m);
     });
 });

@@ -1344,6 +1344,18 @@ function dasElevesEcartes(trace, etudiantsEspace) {
     return ecartes;
 }
 
+/**
+ * #1013 — les élèves supprimés du trimestre actif, pour l'affichage : la même règle que
+ * l'import (`dasElevesEcartes`), lue dans la trace et la liste ENTIÈRE du trimestre (tous
+ * cours confondus : la liste filtrée par cours ferait passer un élève d'un autre cours pour
+ * supprimé). Un élève ajouté de nouveau à la liste n'y est plus, et revient avec tout.
+ * Les vues filtrent par elle à l'affichage ; rien n'est écrit, aucune clé n'est touchée.
+ * @returns {Set<string>}
+ */
+function dasElevesSupprimes() {
+    return dasElevesEcartes(db.getSync(cle('elevesDesinscrits'), []), db.getSync(cle('groupeEtudiants'), []));
+}
+
 /** Le DA porté par une entrée de chaque famille de l'import par cases. */
 const DA_PAR_FAMILLE = {
     etudiants: e => e.da,
@@ -3630,6 +3642,7 @@ window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé p
 window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
 window.dasElevesEcartes = dasElevesEcartes; // #1012, l'élève désinscrit : exposé pour ses essais
 window.ecarterElevesDesinscrits = ecarterElevesDesinscrits; // #1012, l'élève désinscrit : exposé pour ses essais
+window.dasElevesSupprimes = dasElevesSupprimes; // #1013 : la lecture que les vues appellent (Liste des évaluations, Travaux)
 window.compterDatesPresences = compterDatesPresences; // #1012, les mots : exposé pour ses essais
 window.ligneElevesEcartes = ligneElevesEcartes; // #1012, les mots : exposé pour ses essais
 window.analyserRessourcesDetaillees = analyserRessourcesDetaillees; // #1012, les mots : exposé pour l'essai du compte de l'aperçu

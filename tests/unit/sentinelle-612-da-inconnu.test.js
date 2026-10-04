@@ -51,6 +51,7 @@ function faireFichier(nom) {
 
 const STOCKAGE_MUET = {
     obtenirFichiersGroupeActif: () => [],
+    obtenirFichiersAffiches: () => [], // #1013 : la lecture des listes
     obtenirFichiersTravaux: () => [],
     genererMiniaturePDF: async () => ({ thumbnail: '', nombrePages: 1 }),
     genererMiniatureImage: async () => '',
@@ -235,6 +236,7 @@ function chargerListe(fichiers, productions = PRODUCTIONS_T6) {
         travauxStockage: {
             obtenirFichiersTravaux: () => fichiers,
             obtenirFichiersGroupeActif: () => fichiers,
+            obtenirFichiersAffiches: () => fichiers, // #1013 : la lecture des listes
             obtenirAnnotationFichier: () => null
         },
         travauxResolution: { trouverFichierPourEvaluation: () => null },

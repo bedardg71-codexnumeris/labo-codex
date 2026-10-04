@@ -58,6 +58,7 @@ function monter({ genererDocPDF }) {
         obtenirTrimestreActif: () => ({ id: 'h2026', nom: 'Hiver 2026' }),
         travauxStockage: {
             obtenirFichiersGroupeActif: () => fichiers,
+            obtenirFichiersAffiches: () => fichiers, // #1013 : la lecture de ce qui montre ou envoie
             obtenirAnnotationFichier: () => null,
             recupererBlob: async () => ({ taille: 1 })
         },
