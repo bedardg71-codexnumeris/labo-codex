@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 3 OCT. 2026, 19 h 27 : **#1007, LOT 2b (LES LIGNES D'ÉDITEUR QUI PORTENT DES NOTES) SUR LA BRANCHE LOCALE `claude/1007-lignes-notes` (`8a222108`), NON POUSSÉE, EN RELECTURE ; 1.177.1 RESTE EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 1 h 25 : **1.178.0 (#1007, LOT 2b : LE CODEX PROPOSÉ AVANT DE RETIRER UNE LIGNE QUI PORTE DES NOTES) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a74bd2b7` (PUBLIÉ À 1 h 20) ; VERDICT COMPLET VERT ; #1007 CLOSE**
+
+**Consigne** : Cowork, 0 h 07 ; verdict de relecture vert (0 h 05), une retouche : le pluriel de la cible (« Retirer ces cibles les efface pour de bon. », clé `cibles`). Mots acceptés par Grégoire sans la variante du nombre (0 h 07).
+
+**Release** : 1.178.0 (`e861dd68`), minor ; Nouvelles 1.178, ligne de la demande telle quelle, titre de Claude Code : « Ton codex à jour, avant de retirer une ligne notée ». **Verdict** complet sur `e861dd68` : 0 échec, 7 instables (cours-actif-hors-bibliotheque-916, horaire-format-preserve-seances, lot-e1-conception-creer-ou-modifier, maquettes-decouvrabilite-326, ponderation-requise-540, recoupement-horaire-devis-540D, temoin-enregistrement-lot-b). Un seul commun avec les sept de 1.177.1 : le témoin lot B. Le voisin de la Conception (lot-e1) rejoué seul trois fois : 33 sur 33 verts. Fusion `a74bd2b7` : seuls des documents diffèrent du commit jugé.
+
+**Porte** : `plans de travail/PORTES-TERRAIN-2026-10-04-1007-lignes-notes.md` (Cowork publie l'artefact). Chemins vérifiés par les vrais clics sur la démo (« Grille-4 », « Nuance », 38 évaluations).
+
+**BACKLOG** : #1007 close ; #1015 ouverte (un type de travail ou un forfait PAN porte-t-il des notes ? mesure à faire).
+
+**Ménage** : worktree `1007-lignes-notes` retiré, sa branche locale supprimée (la distante reste chez origin).
+
+**Suite** : le garde-éveil de la vérification (#1008), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 3 OCT. 2026, 19 h 27 : **#1007, LOT 2b (LES LIGNES D'ÉDITEUR QUI PORTENT DES NOTES) SUR LA BRANCHE LOCALE `claude/1007-lignes-notes` (`8a222108`), NON POUSSÉE, EN RELECTURE ; 1.177.1 RESTE EN LIGNE**
 
 **Consigne** : Cowork, 19 h 05. **Demande** : `plans de travail/DEMANDE-RELECTURE-2026-10-03-1007-lignes-notes.md` (sur la branche). Worktree `.claude/worktrees/1007-lignes-notes`.
 
