@@ -28,7 +28,7 @@ function monter({ anonyme, genererDocPDF }) {
         cle: (k) => k,
         obtenirDonneesSelonMode: (k) => store[k] || [],
         obtenirTrimestreActif: () => ({ id: 'a2026', nom: 'Automne 2026' }),
-        travauxStockage: { obtenirFichiersGroupeActif: () => fichiers, obtenirAnnotationFichier: () => null, recupererBlob: async () => ({ taille: 1 }) },
+        travauxStockage: { obtenirFichiersGroupeActif: () => fichiers, obtenirFichiersAffiches: () => fichiers, /* #1013 */ obtenirAnnotationFichier: () => null, recupererBlob: async () => ({ taille: 1 }) },
         travauxResolution: { trouverFichierPourEvaluation: (ev) => fichiers.find(f => f.etudiantDA === ev.etudiantDA) },
         travauxExportPDF: { genererDocPDF: genererDocPDF || (async () => ({ doc: { output: () => ({ pdf: 1 }) }, synthese: { ajoutee: true } })) },
         alert: () => {},
