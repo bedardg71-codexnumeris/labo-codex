@@ -376,7 +376,9 @@
      *   `sansFichier` = les évaluations qui n'en donneront PAS (pas de fichier résolu).
      */
     function selectionnerEvaluationsLea(productionId, da, reprisesSeulement) {
-        const fichiers = travauxStockage.obtenirFichiersGroupeActif() || [];
+        // #1013 (règle de Grégoire, 4 oct. 2026) : l'export pour Léa ENVOIE, il écarte l'élève
+        // supprimé — ni son PDF, ni sa place au compteur de l'écran.
+        const fichiers = travauxStockage.obtenirFichiersAffiches() || [];
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
         // Partir des ÉVALUATIONS actives (non remplacées) plutôt que des fichiers,

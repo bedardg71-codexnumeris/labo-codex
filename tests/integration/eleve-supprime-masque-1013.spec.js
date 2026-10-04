@@ -109,6 +109,38 @@ async function lireCopies(page) {
     });
 }
 
+/** L'export recherche, par la vraie fonction : ce qui part (le fichier anonyme) et la table privée. */
+async function lireExportRecherche(page) {
+    return page.evaluate(async (da) => {
+        const blobs = [];
+        const origine = URL.createObjectURL;
+        const clic = HTMLAnchorElement.prototype.click;
+        URL.createObjectURL = (b) => { blobs.push(b); return origine.call(URL, b); };
+        HTMLAnchorElement.prototype.click = function () {};
+        try {
+            const r = await exporterFormatRecherche({ cleSecrete: 'banc-1013' });
+            const table = JSON.parse(await blobs[1].text());
+            return { nbEvaluations: r.nbEvaluations, nbPresences: r.nbPresences, sonDA: Object.values(table.correspondances).includes(da) };
+        } finally {
+            URL.createObjectURL = origine;
+            HTMLAnchorElement.prototype.click = clic;
+        }
+    }, DA);
+}
+
+/** « Exporter et archiver » : la grille (ses copies), le compte en stock, Léa, et l'export ZIP. */
+async function lireArchivage(page, productionLea) {
+    return page.evaluate(async ({ prod }) => {
+        travauxUI.afficherArchivage();
+        const zone = document.getElementById('evaluations-contenu-archivage');
+        const grille = [...new Set([...zone.querySelectorAll('[data-fichier-id]')].map((b) => b.dataset.fichierId))].sort();
+        const stock = parseInt(zone.querySelector('p.texte-muted').textContent, 10);
+        const lea = travauxArchivage.selectionnerEvaluationsLea(prod, null, false).fichiers.map((f) => f.id).sort();
+        const zip = await travauxArchivage.exporterTravaux({ compression: false });
+        return { grille, stock, lea, zip: (zip.exportes || []).slice().sort() };
+    }, { prod: productionLea });
+}
+
 test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; ses données restent et le codex les écrit', async ({ page }) => {
     test.setTimeout(120000);
     page.setDefaultTimeout(15000);
@@ -119,6 +151,17 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
     // Une ligne par production à évaluer (évaluée ou non), plus sa copie sans production.
     expect(avant.deLui, 'témoin : il a ses lignes dans la Liste (' + avant.deLui + ')').toBeGreaterThan(2);
     expect(await lireCopies(page), 'témoin : ses deux copies et celle du voisin').toEqual([...COPIES_DE_LUI, COPIE_TEMOIN]);
+    const prodA = await page.evaluate((id) => {
+        const octets = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+        window.travauxStockage.recupererBlob = async () => new Blob([octets], { type: 'image/png' });
+        window.SecuriteExportPreview.previewZipEtConfirmer = async () => true;
+        return db.getSync(cle('fichiersTravaux'), []).find((f) => f.id === id).productionId;
+    }, COPIES_DE_LUI[0]);
+    const rechercheAvant = await lireExportRecherche(page);
+    expect(rechercheAvant.sonDA, 'témoin : l\'export recherche part avec lui').toBe(true);
+    const archivageAvant = await lireArchivage(page, prodA);
+    expect(archivageAvant.grille, 'témoin : la grille d\'« Exporter et archiver » montre ses copies').toEqual([...COPIES_DE_LUI, COPIE_TEMOIN].sort());
+    expect(archivageAvant.lea, 'témoin : l\'export pour Léa prend sa copie évaluée').toContain(COPIES_DE_LUI[0]);
 
     // LE GESTE : « Supprimer » du Cadre (le codex proposé est écarté, la question acceptée).
     await page.evaluate(async (da) => {
@@ -134,6 +177,19 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
     expect(apres.resultats, '« N résultat(s) » baisse exactement de ses lignes (' + avant.compteur + ' → ' + apres.compteur + ')').toBe(avant.resultats - avant.deLui);
     expect(await lireCopies(page), 'ses copies ont quitté le tableau des copies ; celle du voisin reste').toEqual([COPIE_TEMOIN]);
 
+    // Ce qui part chez quelqu'un l'écarte : l'export recherche (ni ses présences, ni ses évaluations).
+    const rechercheApres = await lireExportRecherche(page);
+    expect(rechercheApres, 'l\'export recherche part sans lui : deux évaluations et une présence de moins, aucun identifiant pour lui').toEqual({
+        nbEvaluations: rechercheAvant.nbEvaluations - 2, nbPresences: rechercheAvant.nbPresences - 1, sonDA: false
+    });
+
+    // « Exporter et archiver » : ce qui montre ou envoie l'écarte ; ce qui garde emporte tout.
+    const archivageApres = await lireArchivage(page, prodA);
+    expect(archivageApres.grille, 'la grille (et son aperçu PDF) ne montre plus ses copies').toEqual([COPIE_TEMOIN]);
+    expect(archivageApres.lea, 'l\'export pour Léa ne l\'envoie plus').not.toContain(COPIES_DE_LUI[0]);
+    expect(archivageApres.stock, 'le compte « en stock » garde ses copies').toBe(archivageAvant.stock);
+    expect(archivageApres.zip, 'l\'export ZIP « Toutes / Tous » emporte tout, ses copies comprises (elles deviennent « exportées », retirables)').toEqual([...COPIES_DE_LUI, COPIE_TEMOIN].sort());
+
     // 3 : rien n'est effacé, et le codex écrit tout.
     const base = await page.evaluate((da) => ({
         copies: db.getSync(cle('fichiersTravaux'), []).filter((f) => f.etudiantDA === da).map((f) => f.id).sort(),
@@ -143,9 +199,6 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
     expect(base, 'ses données sont toujours en base').toEqual({ copies: COPIES_DE_LUI, evaluations: 2, presences: 1 });
 
     const codex = await page.evaluate(async (da) => {
-        const octets = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
-        window.travauxStockage.recupererBlob = async () => new Blob([octets], { type: 'image/png' });
-        window.SecuriteExportPreview.previewZipEtConfirmer = async () => true;
         const rendu = await Codex.generer({ nom: 'Codex du banc 1013' });
         const zip = await JSZip.loadAsync(await rendu.blob.arrayBuffer());
         const donnees = JSON.parse(await zip.file('donnees.json').async('string'));
@@ -175,6 +228,61 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
     expect(await page.evaluate((da) => db.getSync(cle('groupeEtudiants'), []).some((e) => e.da === da), DA), 'témoin : le formulaire l\'a réinscrit').toBe(true);
     expect((await lireListe(page)).deLui, 'réinscrit, ses lignes reviennent').toBe(avant.deLui);
     expect(await lireCopies(page), 'réinscrit, ses copies reviennent').toEqual([...COPIES_DE_LUI, COPIE_TEMOIN]);
+
+    expect(erreurs, 'aucune erreur de page').toEqual([]);
+});
+
+test('#1013 — seuils « en attente » sans ses présences ni ses évaluations ; la phrase quand toutes les copies du groupe sont masquées', async ({ page }) => {
+    test.setTimeout(120000);
+    page.setDefaultTimeout(15000);
+    const { erreurs } = await demarrer(page);
+    // Le groupe ne garde que LUI : sa présence est la seule séance, ses deux évaluations les
+    // seules productions évaluées, ses deux copies les seules du groupe.
+    await page.evaluate(async ({ da, copies }) => {
+        db.setSync(cle('presences'), db.getSync(cle('presences'), []).filter((p) => p.da === da));
+        db.setSync(cle('evaluationsSauvegardees'), db.getSync(cle('evaluationsSauvegardees'), []).filter((e) => e.etudiantDA === da));
+        db.setSync(cle('fichiersTravaux'), db.getSync(cle('fichiersTravaux'), []).filter((f) => copies.includes(f.id)));
+        await db.flush();
+    }, { da: DA, copies: COPIES_DE_LUI });
+
+    const lire = () => page.evaluate(async () => {
+        chargerTableauBordApercu();
+        await new Promise((r) => setTimeout(r, 800));
+        const carte = document.getElementById('carte-indicateurs-acpe').textContent;
+        travauxUI.afficherFichiers();
+        const message = document.getElementById('travaux-fichiers-message-vide');
+        return {
+            seanceEnAttente: /\d+ séance en attente/.test(carte),
+            barresEvaluationsEnAttente: (carte.match(/\d+ évaluations? en attente/g) || []).length,
+            copies: document.querySelectorAll('#travaux-tableau-fichiers tbody tr').length,
+            message: message ? message.textContent : null
+        };
+    });
+
+    const avant = await lire();
+    expect(avant, 'témoin : sa séance et ses évaluations font les seuils ; ses copies sont au tableau').toMatchObject({ seanceEnAttente: false, copies: 2, message: null });
+    expect(avant.barresEvaluationsEnAttente, 'témoin : C a ses évaluations (seul P peut attendre)').toBeLessThan(2);
+
+    await page.evaluate(async (da) => {
+        Codex.proposerAvantSuppression = async () => true;
+        await supprimerEtudiantV2(da);
+        await db.flush();
+    }, DA);
+
+    const apres = await lire();
+    expect(apres.seanceEnAttente, 'sa présence ne compte plus : « 1 séance en attente »').toBe(true);
+    expect(apres.barresEvaluationsEnAttente, 'ses évaluations ne comptent plus : C et P attendent tous deux').toBe(2);
+    expect(apres.copies, 'aucune copie au tableau').toBe(0);
+    expect(apres.message, 'la phrase de Grégoire, quand le groupe a des copies toutes masquées').toBe('Aucune copie à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es.');
+
+    // Un groupe sans aucune copie garde « Aucun fichier importé. ».
+    const vide = await page.evaluate(async () => {
+        db.setSync(cle('fichiersTravaux'), []);
+        await db.flush();
+        travauxUI.afficherFichiers();
+        return document.getElementById('travaux-fichiers-message-vide').textContent;
+    });
+    expect(vide, 'sans copie, la phrase d\'avant').toBe('Aucun fichier importé. Importe des travaux depuis l\'onglet « Préparer et importer ».');
 
     expect(erreurs, 'aucune erreur de page').toEqual([]);
 });

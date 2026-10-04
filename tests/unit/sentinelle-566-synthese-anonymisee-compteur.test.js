@@ -70,7 +70,7 @@ function chargerArchivage({ fichiers, evaluations, resoudre }) {
         obtenirDonneesSelonMode: (k) => (k === 'evaluationsSauvegardees' ? evaluations : []),
         sauvegarderDonneesSelonMode: () => true,
         obtenirTrimestreActif: () => null,
-        travauxStockage: { obtenirFichiersGroupeActif: () => fichiers },
+        travauxStockage: { obtenirFichiersGroupeActif: () => fichiers, obtenirFichiersAffiches: () => fichiers /* #1013 */ },
         travauxResolution: { trouverFichierPourEvaluation: resoudre },
         travauxExportPDF: {},
         alert: () => {}, JSZip: function () {}
