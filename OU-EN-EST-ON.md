@@ -15,7 +15,21 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-✅ **EN LIGNE EN 1.182.0 (4 OCTOBRE 2026 ; en ligne depuis 16 h 01, mesuré chez Netlify : déploiement de production prêt sur `af586f45` ; tes cinq choix) — UN TRIMESTRE TERMINÉ SE DIT « CLOS »**
+✅ **EN LIGNE EN 1.183.0 (4 OCTOBRE 2026 ; en ligne depuis 18 h 31, mesuré chez Netlify : déploiement de production prêt sur `143a22ef` ; tes mots, deux retouches) — ARCHIVER UN TRIMESTRE CLOS TOUT ENTIER**
+
+**Ce que tu verras** : dans la bibliothèque des trimestres, le menu ⋮ d'un trimestre clos offre « Archiver le trimestre… ». Une fenêtre dit ce qui part (étudiant·es, groupes, copies, dont celles de la corbeille, et la taille) et que rien n'est retiré de l'application. Le fichier se range hors de l'application ; dans Réglages › Données › Archives, sa ligne dit « Trimestre entier », et « Vérifier » relit chaque copie et les données du trimestre. Les trois boutons « Exporter les données », qui ne s'affichaient nulle part, sont retirés : tu ne verras rien changer.
+
+**Vérifié comment** : un banc sur un trimestre fictif clos (deux groupes, un doubleur, une copie à la corbeille, à côté d'un trimestre en cours) relit l'archive : exactement les données de ce trimestre et ses séances, toutes ses copies, chaque empreinte juste, aucune donnée partagée ni d'un autre trimestre, rien d'écrit dans les données. Faire entrer une donnée partagée ou oublier la copie de la corbeille fait échouer le banc. « Vérifier » la dit intacte, puis incomplète après un octet changé. Le vrai menu et la vraie fenêtre, à la largeur d'un iPad, sous le moteur de Safari. Mémoire sur 1,1 Go de copies : la page passe de 161 à 215 Mo, 5,4 s. Vérification complète au navigateur verte sur le commit livré. **Pas vérifié** : un vrai téléchargement dans ton Safari, ton iPad, Chrome avec un vrai dossier.
+
+**Tes données** : rien n'est écrit ; seule la liste des archives gagne une ligne. Aucun trimestre n'a été archivé chez toi.
+
+**Ta vérification** : une porte, pour le jour où tu clos l'hiver 2026 : `plans de travail/PORTES-TERRAIN-2026-10-04-e1-archiver-trimestre.md` (Cowork publie la version à cocher). Clore, archiver dans Safari sur le Mac, ranger le fichier, « Vérifier ».
+
+**La suite** : emprunter un trimestre depuis son archive (E2), puis le rendre (E3).
+
+---
+
+(précédent) ✅ **EN LIGNE EN 1.182.0 (4 OCTOBRE 2026 ; en ligne depuis 16 h 01, mesuré chez Netlify : déploiement de production prêt sur `af586f45` ; tes cinq choix) — UN TRIMESTRE TERMINÉ SE DIT « CLOS »**
 
 **Ce que tu verras** : dans la bibliothèque des trimestres, le badge « Clos », les boutons « Clore » et « Rouvrir », la section « Trimestres clos » ; le bandeau « LECTURE SEULE — Trimestre clos » ; l'aide « Qu'est-ce que clore un trimestre ? » avec ta phrase (« Clore ne libère aucun espace »). Clore un trimestre ne télécharge plus de fichier. Sous la liste des archives : « liste mise à jour le … » ; l'aide de la carte Archives nomme « Vérifier » et « Faire revenir ». « Archivé » ne désigne plus que ce qui est déposé dans tes Archives.
 
