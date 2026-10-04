@@ -143,13 +143,16 @@ test('#622 · le fichier exporte porte les donnees du trimestre EXPORTE, pas cel
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(600);
 
-    // L'archivage declenche un telechargement : on l'attend et on LIT le fichier.
-    // C'est ce qu'un test manuel ne fait pas — il verrait un fichier arriver, pas
-    // ce qu'il contient. Or c'est le contenu qui etait faux (B2).
+    // On clot, puis on exporte par « Exporter les donnees » de la bibliotheque, et on
+    // LIT le fichier. C'est ce qu'un test manuel ne fait pas — il verrait un fichier
+    // arriver, pas ce qu'il contient. Or c'est le contenu qui etait faux (B2).
+    // #1002 (4 oct. 2026) : la cloture ne telecharge plus ce fichier ; seul le bouton
+    // de la bibliotheque l'exporte encore (#1006).
     const attenteTelechargement = page.waitForEvent('download', { timeout: 15000 });
     await page.evaluate(async ({ setupSrc }) => {
         (new Function('db', setupSrc))(window.db);
         window.archiverTrimestre('e2099');
+        window.exporterTrimestreArchive('e2099');
         await new Promise(res => setTimeout(res, 300));
     }, { setupSrc: `(${SETUP.toString()})()` });
 

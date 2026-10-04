@@ -724,7 +724,7 @@ function etatImportPratiques() {
 
 async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des pratiques.');
+        alert('Import impossible : le trimestre actif est clos (consultation). Active un trimestre courant pour importer des pratiques.');
         return;
     }
     const pratiques = (db.getSync(cleSource('pratiquesConfigurables', srcId), []) || [])
@@ -755,7 +755,7 @@ async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
  */
 async function importerToutPratiquesTrimestreModal() {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des pratiques.');
+        alert('Import impossible : le trimestre actif est clos (consultation). Active un trimestre courant pour importer des pratiques.');
         return;
     }
     const select = document.getElementById('selectTrimestreImportPratiques');

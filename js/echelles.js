@@ -3437,7 +3437,7 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         if (!confirm(options.questionSimple || 'Supprimer cette échelle ?')) return { supprimee: false, annulee: true };
     } else {
         if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-            alert(`Ce trimestre est archivé : remplacer l'échelle «${nomEchelle}» toucherait ${decrirePorteursEchelle(nb)}, dont des notes déjà remises.\n\nRien n'a été modifié.`);
+            alert(`Ce trimestre est clos : remplacer l'échelle «${nomEchelle}» toucherait ${decrirePorteursEchelle(nb)}, dont des notes déjà remises.\n\nRien n'a été modifié.`);
             return { supprimee: false, refusee: 'archive', nb };
         }
         const autres = echelles.filter(e => e && e.id !== id);

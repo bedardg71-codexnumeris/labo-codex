@@ -688,12 +688,12 @@
 
         if (trimestre.archive) {
             console.warn(`[Trimestres] Trimestre déjà archivé: ${id}`);
-            return { success: false, error: 'Trimestre déjà archivé' };
+            return { success: false, error: 'Trimestre déjà clos' };
         }
 
         if (trimestre.actif) {
             console.error(`[Trimestres] Impossible d'archiver le trimestre actif`);
-            return { success: false, error: 'Impossible d\'archiver le trimestre actif. Changez de trimestre d\'abord.' };
+            return { success: false, error: 'Impossible de clore le trimestre actif. Change de trimestre d\'abord.' };
         }
 
         // Calculer les statistiques finales
@@ -727,15 +727,14 @@
 
         db.setSync('trimestres', trimestres);
 
-        // Générer export automatique
-        const exportResult = exporterTrimestreArchive(id);
-
+        // #1002 (4 oct. 2026, décision de Grégoire) : clore ne télécharge plus de
+        // fichier. L'export `trimestre-<id>-archive-<date>.json` n'a aucun lecteur
+        // (#1006) ; il reste offert par « Exporter les données » de la bibliothèque.
         return {
             success: true,
             trimestre: trimestre,
             statistiques: stats,
-            snapshotRessources: snapshotResult,
-            exportGenere: exportResult.success
+            snapshotRessources: snapshotResult
         };
     }
 
@@ -932,7 +931,7 @@
                     success: false,
                     refus: 'cartouches-non-migrees',
                     grilles: grillesNonMigrees,
-                    message: `Archivage refusé : les cartouches de ${grillesNonMigrees.length} ` +
+                    message: `Clôture refusée : les cartouches de ${grillesNonMigrees.length} ` +
                              `grille(s) (${details}) n'ont pas encore été migrées. ` +
                              `Recharge l'application, puis réessaie.`
                 };
@@ -1291,7 +1290,7 @@
 
         if (!trimestre.archive) {
             console.warn(`[Trimestres] Trimestre pas archivé: ${id}`);
-            return { success: false, error: 'Trimestre non archivé' };
+            return { success: false, error: 'Trimestre non clos' };
         }
 
         // Retirer le flag archivé
