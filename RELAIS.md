@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 12 h 20 : **1.180.0 (#1013, L'ÉLÈVE SUPPRIMÉ NE PARAÎT PLUS ET NE PART PLUS ; LE CODEX GARDE TOUT) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `bc36e957` (PUBLIÉ À 12 h 15) ; VERDICT COMPLET VERT ; #1013 CLOSE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 12 h 50 : **LE LOT A3 (#1000, « FAIRE REVENIR » DES COPIES) EST SUR `claude/1000-faire-revenir` (`8fce6734`), RELU VERT PAR COWORK (12 h 47) ; MISE EN LIGNE EN COURS (1.181.0)**
+
+**Consignes** : Cowork, 12 h 19 (lot, arrêt au point 6) et 12 h 47 (mots acceptés par Grégoire, une retouche ; release minor ; mise en ligne). Verdict : `plans de travail/VERDICT-RELECTURE-2026-10-04-1000-faire-revenir.md`.
+
+**Où est le travail** : la branche `claude/1000-faire-revenir`, pas encore poussée ni fusionnée. Le code : `js/reserve-revenir.js` (neuf), `reserve-reglages.js`, `reserve-verifier.js`, `index.html` ; bancs `tests/unit/sentinelle-lot-A3-faire-revenir.test.js`, `tests/integration/lot-a3-faire-revenir.spec.js`. Demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-04-1000-faire-revenir.md`.
+
+**Reste à faire (consigne de 12 h 47)** : la retouche « étudiant·e supprimé·e » ; la mesure de la fiche « exporte » sans fichier ; #997 en lecture seule ; release 1.181.0 ; verdict complet, push, fusion ; Netlify ; #1000 close.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 12 h 20 : **1.180.0 (#1013, L'ÉLÈVE SUPPRIMÉ NE PARAÎT PLUS ET NE PART PLUS ; LE CODEX GARDE TOUT) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `bc36e957` (PUBLIÉ À 12 h 15) ; VERDICT COMPLET VERT ; #1013 CLOSE**
 
 **Consignes** : Cowork, 10 h 36 (lot, arrêt au point 5 ; commit `e5dfd5be`) et 11 h 04 (les trois décisions de Grégoire, la ligne des Nouvelles, la mise en ligne). Consignes et archives commitées telles quelles (`c85a1597`, `141734ee`).
 
