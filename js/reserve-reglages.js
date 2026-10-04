@@ -232,7 +232,11 @@ function _rendreTableau() {
     });
 
     var lignes = entrees.map(function(e) {
-        var libelleCours = _echapper(e.cours || '—');
+        // E1 (#1022) : l'archive d'un trimestre entier n'a ni cours ni groupe.
+        var estTrimestre = e.type_archive === 'trimestre';
+        var libelleCours = estTrimestre && window.ReserveTrimestre
+            ? _echapper(window.ReserveTrimestre.MOTS.liste.cours)
+            : _echapper(e.cours || '—');
         if (e.nom_cours && e.nom_cours !== e.cours) {
             libelleCours += ' <span class="u-texte-gris u-texte-petit">' + _echapper(e.nom_cours) + '</span>';
         }
@@ -254,7 +258,8 @@ function _rendreTableau() {
                 '<td>' + _badgeVerification(e) + '</td>' +
                 '<td class="u-text-center">' +
                     _boutonVerifier(e._dossier) +
-                    _boutonFaireRevenir(e) +
+                    // E1 : « Faire revenir » ne connaît que l'archive d'un groupe ; le retour d'un trimestre sera E2.
+                    (estTrimestre ? '' : _boutonFaireRevenir(e)) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +

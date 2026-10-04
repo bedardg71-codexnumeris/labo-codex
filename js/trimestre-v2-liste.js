@@ -297,6 +297,10 @@ function ouvrirBibliothequeTrimestreV2() {
         const actions = [];
         if (estArchive) {
             primaire = { label: 'Rouvrir', action: 'desarchiverTrimestre', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
+            // E1 (#1022) : archiver un trimestre clos entier, hors du navigateur (mots dans ReserveTrimestre.MOTS)
+            if (window.ReserveTrimestre) {
+                actions.push({ label: ReserveTrimestre.MOTS.menu, action: ReserveTrimestre.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveTrimestre.MOTS.menuTitre });
+            }
             // #361 : suppression définitive (jamais sur le trimestre actif)
             actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else if (!estActif) {
