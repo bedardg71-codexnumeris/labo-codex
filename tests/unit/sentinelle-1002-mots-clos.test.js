@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
+import { chargerScript } from './_helpers/charger-script.js';
 
 // SENTINELLE #1002 (4 octobre 2026) — L'ÉTAT GELÉ D'UN TRIMESTRE SE DIT « CLOS ».
 //
@@ -34,13 +35,11 @@ const SURFACES_JS = [
     'echelles.js',
 ];
 
-// Exceptions nommées : chacune est un texte en attente d'une décision de Grégoire
-// (les « vrais choix » du lot), ou une chaîne de console que l'usager ne lit pas.
+// Exceptions nommées : le nom du fichier de « Exporter les données » (#1006, ouverte
+// pour les trois boutons de la bibliothèque), ou une chaîne de console.
 const EXCEPTIONS = [
-    // Vrai choix : le nom du fichier téléchargé à la clôture (#1006).
+    // Le fichier de « Exporter les données » (#1006) ; la clôture ne le télécharge plus.
     'trimestre-${id}-archive-',
-    // Vrai choix : l'aide de la clôture, qui dit que clore « libère l'espace ».
-    'L\'archivage permet de',
     // Console seulement (suite d'un console.error de `archiverTrimestre`).
     'Archiver maintenant produirait un snapshot',
 ];
@@ -112,10 +111,13 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
         expect(lignes.filter((l) => /archiv/i.test(l))).toEqual([]);
     });
 
-    it('l\'aide de la clôture ne dit « archiv » que dans la phrase en attente de Grégoire', () => {
+    it('l\'aide de la clôture ne dit plus « archiv », ni que clore libère de l\'espace', () => {
         const lignes = texteHtml(aideCloture);
-        expect(lignes.join(' ')).toContain('Qu\'est-ce que clore un trimestre ?');
-        expect(lignes.filter((l) => /archiv/i.test(l) && !estException(l))).toEqual([]);
+        const texte = lignes.join(' ');
+        expect(texte).toContain('Qu\'est-ce que clore un trimestre ?');
+        // Les mots acceptés par Grégoire le 4 oct. (vrai choix 1).
+        expect(texte).toContain('Clore un trimestre le fige en lecture seule, une fois terminé ; tu peux ensuite en commencer un nouveau. Clore ne libère aucun espace.');
+        expect(lignes.filter((l) => /archiv/i.test(l))).toEqual([]);
     });
 
     it('la bibliothèque des trimestres nomme les gestes « Clore » et « Rouvrir »', () => {
@@ -139,5 +141,86 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
             if (/d[ée]sarchiv/i.test(l)) fautifs.push('index.html : ' + l.slice(0, 80));
         }
         expect(fautifs).toEqual([]);
+    });
+
+    // Vrais choix 3 à 5 (Grégoire, 4 oct.) : les mots des Archives qui parlaient du trimestre.
+    it('les Archives parlent d\'un groupe-cours et nomment Vérifier et Faire revenir', () => {
+        expect(lire('js', 'registre-longitudinal.js')).toContain('pas dans l\\\'archive d\\\'un groupe-cours.\'');
+        expect(lire('js', 'reserve-reglages.js')).toContain('\' · liste mise à jour le \'');
+        expect(lire('js', 'reserve-reglages.js')).not.toContain('dernière maj');
+        const aide = tranche(lire('js', 'accompagnement-contenu-popup.js'), '\'reglages-reserve\': {', 'voirAussi:', { longueurMin: 1000 });
+        expect(aide).toContain('<em>Vérifier</em> relit une archive copie par copie ; une archive vérifiée offre <em>Faire revenir</em>.');
+        expect(aide).toContain('d\'un groupe-cours archivé ?');
+        expect(index).toContain('→ <em>Archiver…</em>.');
+        expect(index).not.toContain('Archiver dans les archives');
+    });
+});
+
+/* ------------------------------------------ le parcours « clore », exécuté */
+
+const dbDepuisStore = (store) => ({
+    get: async (c) => (c in store ? store[c] : null),
+    getSync: (c, d) => (c in store ? store[c] : (d !== undefined ? d : null)),
+    set: async (c, v) => { store[c] = v; },
+    setSync: (c, v) => { store[c] = v; },
+    removeSync: (c) => { delete store[c]; }
+});
+
+describe('#1002 — clore ne télécharge plus de fichier (vrai choix 2)', () => {
+    it('archiverTrimestre réussit sans fabriquer ni télécharger aucun fichier', () => {
+        const store = {
+            trimestres: [
+                { id: 'h2026', actif: true, archive: false },
+                { id: 'a2025', actif: false, archive: false, nom: 'Automne 2025' }
+            ],
+            a2025_productions: []
+        };
+        const fichiers = { blobs: 0, urls: 0, ancres: 0 };
+        const win = chargerScript('js/trimestres.js', {
+            db: dbDepuisStore(store),
+            Blob: class { constructor() { fichiers.blobs++; } },
+            URL: { createObjectURL: () => { fichiers.urls++; return 'blob:x'; }, revokeObjectURL: () => {} },
+            document: {
+                addEventListener: () => {}, removeEventListener: () => {},
+                querySelector: () => null, querySelectorAll: () => [],
+                getElementById: () => null,
+                createElement: () => { fichiers.ancres++; return { click: () => {}, setAttribute: () => {}, style: {} }; },
+                body: { addEventListener: () => {}, appendChild: () => {}, removeChild: () => {}, style: {},
+                        classList: { add: () => {}, remove: () => {}, contains: () => false } },
+                documentElement: { addEventListener: () => {} }
+            }
+        });
+
+        const r = win.archiverTrimestre('a2025');
+
+        // Le succès d'abord : un rouge doit venir du téléchargement, pas du banc.
+        expect(r.success).toBe(true);
+        expect(store.trimestres.find((t) => t.id === 'a2025').archive).toBe(true);
+        expect(fichiers).toEqual({ blobs: 0, urls: 0, ancres: 0 });
+    });
+
+    it('la confirmation et le message de réussite ne promettent plus de fichier', () => {
+        const liste = lire('js', 'trimestre-v2-liste.js');
+        const confirmer = tranche(liste, 'function confirmerArchivage(id)', 'function confirmerDesarchivage(id)', { longueurMin: 400 });
+        expect(confirmer).not.toMatch(/export automatique|fichier d'export|téléchargé/);
+        expect(confirmer).toContain('`Trimestre "${trimestre.nom}" clos.`');
+    });
+});
+
+describe('#1002 — un refus de clôture dit son motif, pas « undefined »', () => {
+    it('confirmerArchivage affiche le message du refus', () => {
+        const alertes = [];
+        const motif = 'Clôture refusée : les cartouches de 1 grille(s) (G1) n\'ont pas encore été migrées. Recharge l\'application, puis réessaie.';
+        const win = chargerScript('js/trimestre-v2-liste.js', {
+            obtenirTrimestres: () => [{ id: 'a2025', nom: 'Automne 2025' }],
+            archiverTrimestre: () => ({ success: false, refus: 'cartouches-non-migrees', message: motif }),
+            confirm: () => true,
+            alert: (m) => alertes.push(m),
+            afficherListeTrimestreGestion: () => {}
+        });
+
+        win.confirmerArchivage('a2025');
+
+        expect(alertes).toEqual(['Erreur: ' + motif]);
     });
 });

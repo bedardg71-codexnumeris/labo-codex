@@ -727,15 +727,14 @@
 
         db.setSync('trimestres', trimestres);
 
-        // Générer export automatique
-        const exportResult = exporterTrimestreArchive(id);
-
+        // #1002 (4 oct. 2026, décision de Grégoire) : clore ne télécharge plus de
+        // fichier. L'export `trimestre-<id>-archive-<date>.json` n'a aucun lecteur
+        // (#1006) ; il reste offert par « Exporter les données » de la bibliothèque.
         return {
             success: true,
             trimestre: trimestre,
             statistiques: stats,
-            snapshotRessources: snapshotResult,
-            exportGenere: exportResult.success
+            snapshotRessources: snapshotResult
         };
     }
 
