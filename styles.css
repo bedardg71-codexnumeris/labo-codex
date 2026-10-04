@@ -17090,6 +17090,18 @@ tr.ligne-import-ecartee td {
     gap: 2px;
     padding: 4px 0;
 }
+/* #1010 : le bandeau « consignes non transmises » de l'écran d'évaluation — un constat
+   dans une palette étroite : la marge et la taille de `.alerte` y sont réduites. */
+.signal-consignes {
+    margin: 6px 0;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+.signal-consignes-texte {
+    margin: 0 0 6px 0;
+    overflow-wrap: anywhere;
+}
 .btn-profil-rapide {
     background: none;
     border: none;

@@ -2910,6 +2910,64 @@ function ouvrirProfilDepuisEvaluation() {
 }
 
 /**
+ * #1010 (4 oct. 2026) — LE SIGNAL AU DÉBUT DE L'ÉVALUATION.
+ *
+ * Décision de Grégoire (1er oct.) : quand la case « Consignes transmises » d'une
+ * production est décochée pour le groupe de l'élève et qu'il commence à évaluer,
+ * l'application le lui signale. Un constat, pas un blocage ; pas de coche
+ * automatique. Le bandeau paraît à CHAQUE ouverture tant que la case est décochée
+ * (aucune mémoire « déjà vu » : tant qu'elle l'est, c'est vrai) et part dès qu'elle
+ * est cochée.
+ *
+ * ▣ UN SEUL POINT D'APPEL : `travauxUI.ecrireLabelsIdentite`, l'en-tête élève /
+ * production de l'écran. Mesuré le 4 oct. : tous les chemins qui ouvrent une
+ * évaluation l'écrivent — la copie ouverte en mode Évaluer (première ouverture et
+ * retour), la copie changée dans la visionneuse, la réassignation, le formulaire
+ * sans copie (`_evaluerSansCopie`, « Évaluer » de la Liste), `modifierEvaluation`,
+ * et les flèches élève précédent / suivant.
+ *
+ * ▣ UNE SEULE LECTURE : `obtenirEcheanceEffective` (`assignee !== false`), sur le
+ * groupe-cours de l'ÉLÈVE (`groupeCoursIdDeLEleve`, celui de la synthèse), pas du
+ * contexte affiché. Le bandeau ne nomme personne ; le titre passe par `textContent`.
+ */
+function mettreAJourSignalConsignes(etudiantDA, productionId) {
+    const bandeau = document.getElementById('travaux-eval-signal-consignes');
+    if (!bandeau) return;
+    const masquer = () => {
+        bandeau.classList.add('u-hide');
+        delete bandeau.dataset.productionId;
+        delete bandeau.dataset.gcId;
+        delete bandeau.dataset.da;
+    };
+    if (!etudiantDA || !productionId || typeof obtenirEcheanceEffective !== 'function') return masquer();
+
+    const production = (obtenirDonneesSelonMode('productions') || []).find(p => p && p.id === productionId);
+    const synthese = window.syntheseRetroactionData;
+    const gcId = (synthese && typeof synthese.groupeCoursIdDeLEleve === 'function')
+        ? synthese.groupeCoursIdDeLEleve(etudiantDA) : null;
+    if (!production || !gcId || obtenirEcheanceEffective(production, gcId).assignee !== false) return masquer();
+
+    const titre = production.titre || production.nom || '';
+    document.getElementById('travaux-eval-signal-consignes-texte').textContent =
+        `Les consignes de «\u00a0${titre}\u00a0» ne semblent pas avoir été transmises à ce groupe\u00a0: ` +
+        'la case «\u00a0Consignes transmises\u00a0» est décochée. Tant qu\u2019elle l\u2019est, cette production ' +
+        'n\u2019apparaît pas au calendrier et ses copies ne comptent pas dans les courbes de progression.';
+    bandeau.dataset.productionId = productionId;
+    bandeau.dataset.gcId = gcId;
+    bandeau.dataset.da = etudiantDA;
+    bandeau.classList.remove('u-hide');
+}
+
+/** Le bouton du bandeau #1010 : coche la case pour ce groupe-cours, sur ce clic seulement. */
+async function cocherConsignesDepuisEvaluation() {
+    const bandeau = document.getElementById('travaux-eval-signal-consignes');
+    if (!bandeau || !bandeau.dataset.productionId) return;
+    const { productionId, gcId, da } = bandeau.dataset;
+    const ecrit = await marquerConsignesTransmises(productionId, gcId);
+    if (ecrit) mettreAJourSignalConsignes(da, productionId);
+}
+
+/**
  * Ouvre le travail de l'etudiant en vue cote-a-cote depuis l'evaluation
  * 🆕 BETA 96.3 : Integration module Travaux
  */
@@ -3136,6 +3194,8 @@ window.naviguerEtudiantPrecedent = naviguerEtudiantPrecedent;
 window.naviguerEtudiantSuivant = naviguerEtudiantSuivant;
 window.mettreAJourNavigationSansCopie = mettreAJourNavigationSansCopie;
 window.retirerJeton = retirerJeton;
+window.mettreAJourSignalConsignes = mettreAJourSignalConsignes;     // #1010 : appelé par travauxUI.ecrireLabelsIdentite
+window.cocherConsignesDepuisEvaluation = cocherConsignesDepuisEvaluation;
 
 // Exports manqués lors de l'extraction de evaluation-chargement.js et autres
 // sous-modules (refactor évaluation 18-21 mai 2026). Sans ces exports, les

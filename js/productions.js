@@ -2033,6 +2033,55 @@ async function rafraichirApresModificationProduction() {
     if (typeof window.rechargerFiltreProduction === 'function') window.rechargerFiltreProduction();
 }
 
+const GESTE_COCHER_CONSIGNES = 'Cocher « Consignes transmises »';
+
+/**
+ * #1010 (4 oct. 2026) — COCHER « CONSIGNES TRANSMISES » DEPUIS L'ÉCRAN D'ÉVALUATION.
+ *
+ * Le bouton du bandeau (`mettreAJourSignalConsignes`, evaluation.js) écrit ICI, sur
+ * son clic seulement : c'est le geste de l'enseignant, jamais une écriture d'office
+ * (décision de Grégoire du 1er oct. : pas de coche automatique). Le modèle est celui
+ * de la case de la fiche (`lireEcheancesParGroupeDepuisFormulaire`) : une entrée
+ * `echeancesParGroupe[gcId]` dont seul `assignee` change — la date reste la sienne.
+ *
+ * ⚠ LA FICHE OUVERTE RELIT TOUT LE FORMULAIRE à chaque changement
+ * (`enregistrerProductionModifiee`). Si c'est celle de cette production, sa case
+ * décochée réécrirait `assignee: false` au prochain champ touché : on la coche aussi.
+ *
+ * @param {string} productionId
+ * @param {string} groupeCoursId - l'id du groupe-cours, celui que la case de la fiche écrit
+ * @returns {Promise<boolean>} true si la production a été écrite
+ */
+async function marquerConsignesTransmises(productionId, groupeCoursId) {
+    if (!productionId || !groupeCoursId) return false;
+    let ecrit;
+    try {
+        ecrit = await modifierEtAnnoncer(cle('productions'), (lues) => {
+            const productions = Array.isArray(lues) ? lues : [];
+            const index = productions.findIndex(p => p && p.id === productionId);
+            if (index === -1) return undefined;
+            const production = productions[index];
+            const entree = (production.echeancesParGroupe || {})[groupeCoursId];
+            if (!entree || entree.assignee !== false) return undefined;   // rien à cocher
+            productions[index] = {
+                ...production,
+                echeancesParGroupe: { ...production.echeancesParGroupe, [groupeCoursId]: { ...entree, assignee: true } },
+                dateModification: new Date().toISOString()
+            };
+            return productions;
+        }, [], { geste: GESTE_COCHER_CONSIGNES });
+    } catch (e) {
+        return false;   // le témoin a dit l'échec
+    }
+    if (!ecrit) return false;
+
+    if (productionEnEdition === productionId) {
+        const caseFiche = document.querySelector(`#productionEcheanceAssignee[data-gc-id="${groupeCoursId}"], .echeance-gc-checkbox[data-gc-id="${groupeCoursId}"]`);
+        if (caseFiche) caseFiche.checked = true;
+    }
+    return true;
+}
+
 /**
  * Lot E3 (D3, D0 point 2) — UNE PRODUCTION EXISTANTE S'ENREGISTRE TOUTE SEULE.
  *
@@ -3137,6 +3186,7 @@ window.afficherFormProduction = afficherFormProduction;
 window.sauvegarderProduction = sauvegarderProduction;
 // Lot E3 (D3) : créer ou modifier.
 window.enregistrerProductionModifiee = enregistrerProductionModifiee;
+window.marquerConsignesTransmises = marquerConsignesTransmises;
 window.surChangementFormulaireProduction = surChangementFormulaireProduction;
 window.fermerFicheProduction = fermerFicheProduction;
 window.rendreModeFicheProduction = rendreModeFicheProduction;
