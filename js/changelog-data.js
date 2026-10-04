@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.183 (#1022, E1 : archiver un trimestre clos entier ; #1006) — ligne de Cowork, acceptée
+            // par Grégoire le 4 oct. 2026 (consigne de 17 h 19), posée telle quelle. Titre de Claude Code.
+            version: '1.183',
+            couleur: 'vert',
+            titre: 'Archiver un trimestre entier',
+            items: [
+                'Dans la bibliothèque des trimestres, un trimestre clos peut être archivé tout entier, avec ses données et ses copies, dans un fichier hors de l\'application, puis vérifié. Rien n\'est retiré de l\'application.'
+            ]
+        },
+        {
             // 1.182 (#1002, lot A5 du chantier des archives) — ligne de Cowork, acceptée par
             // Grégoire le 4 oct. 2026 (consigne de 14 h 41), posée telle quelle. Titre de Claude Code.
             version: '1.182',
