@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 16 h 05 : **1.182.0 (#1002, UN TRIMESTRE TERMINÉ SE DIT « CLOS » ; CLORE NE TÉLÉCHARGE PLUS DE FICHIER) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `af586f45` (PUBLIÉ À 16 h 01) ; VERDICT COMPLET VERT ; #1002 CLOSE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 16 h 55 : **E1 (#1022, ARCHIVER UN TRIMESTRE CLOS ENTIER) CODÉ SUR `claude/e1-archiver-trimestre` (`2cbd5016`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+
+**Consigne** : Cowork, 16 h 27 (plan « emprunter et rendre un trimestre » approuvé par Grégoire ; E1 ; arrêt au point 6). Consigne, archive et plan commités sur `main` avec les inscriptions #1019-#1024, #1001 fermée, note à #1006 (`2838ee8b`, poussé).
+
+**Ce qui est fait, sur la branche (locale, non poussée)** : `js/reserve-trimestre.js` (« Archiver le trimestre… » au menu ⋮ d'un trimestre clos) ; le dépôt sort de `verserGroupeCours` dans `_deposerArchive` (archive d'un groupe identique octet pour octet, banc A1) ; « Vérifier » compare aussi chaque clé ; la liste dit « Trimestre entier ». Bancs : `sentinelle-e1-archiver-trimestre` (20 essais, mutations rouges sur disque), `e1-archiver-trimestre.spec.js` (WebKit, largeur iPad). Vitest 678 fichiers, 8094 essais verts ; WebKit ciblé 23 verts. Mémoire à 1,1 Go : pic de la page 161 → 215 Mo, 5,4 s.
+
+**Demande de relecture** : `plans de travail/DEMANDE-RELECTURE-2026-10-04-e1-archiver-trimestre.md` (sur la branche ET sur `main`). Mots provisoires, à Grégoire. **#1006** : les trois boutons « Exporter les données » ne sont montés sur aucun écran (mesuré) ; recommandation : retirer, à Grégoire.
+
+**La suite** : verdict de Cowork, mots de Grégoire, puis verdict complet, fusion et release. ⚠ La branche n'existe que sur ce Mac.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 16 h 05 : **1.182.0 (#1002, UN TRIMESTRE TERMINÉ SE DIT « CLOS » ; CLORE NE TÉLÉCHARGE PLUS DE FICHIER) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `af586f45` (PUBLIÉ À 16 h 01) ; VERDICT COMPLET VERT ; #1002 CLOSE**
 
 **Consignes** : Cowork, 14 h 17 (lot A5, arrêt au point 5 ; commit `be7785c0`) et 14 h 41, complétée à 14 h 54 (les cinq vrais choix tranchés par Grégoire ; correctif « undefined » ; release ; mise en ligne ; puis la mesure « emprunter un trimestre »). Complément de 14 h 56 (question 6 de la mesure). Consignes et archives commitées telles quelles (`18c2574b`, `7e221713`).
 
