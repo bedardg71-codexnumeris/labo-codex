@@ -122,7 +122,7 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
 
     it('la bibliothèque des trimestres nomme les gestes « Clore » et « Rouvrir »', () => {
         const liste = lire('js', 'trimestre-v2-liste.js');
-        expect(liste).toContain('<span class="badge-trimestre archive">Clos</span>');
+        // Le badge « Clos » vivait dans la liste sans conteneur, retirée le 4 oct. 2026 (#1006).
         expect(liste).toContain('titreSection2 = \'Trimestres clos\';');
         expect(liste.match(/\{ label: 'Clore', action: 'confirmerArchivage'/g)).toHaveLength(2);
         expect(liste).toContain('{ label: \'Rouvrir\', action: \'desarchiverTrimestre\'');
@@ -215,8 +215,7 @@ describe('#1002 — un refus de clôture dit son motif, pas « undefined »', ()
             obtenirTrimestres: () => [{ id: 'a2025', nom: 'Automne 2025' }],
             archiverTrimestre: () => ({ success: false, refus: 'cartouches-non-migrees', message: motif }),
             confirm: () => true,
-            alert: (m) => alertes.push(m),
-            afficherListeTrimestreGestion: () => {}
+            alert: (m) => alertes.push(m)
         });
 
         win.confirmerArchivage('a2025');

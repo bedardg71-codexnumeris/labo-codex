@@ -1421,86 +1421,6 @@
         }
     }
 
-    /**
-     * Exporte les données complètes d'un trimestre archivé
-     *
-     * @param {string} id - ID du trimestre à exporter
-     * @returns {Object} Résultat de l'export
-     */
-    function exporterTrimestreArchive(id) {
-        const trimestres = obtenirTrimestres();
-        const trimestre = trimestres.find(t => t.id === id);
-
-        if (!trimestre) {
-            return { success: false, error: 'Trimestre non trouvé' };
-        }
-
-        try {
-            // Collecter toutes les données du trimestre
-            const exportData = {
-                meta: {
-                    type: 'archive-trimestre',
-                    trimestreId: id,
-                    trimestreNom: trimestre.nom,
-                    dateExport: new Date().toISOString(),
-                    version: 'Beta 95'
-                },
-                trimestre: trimestre,
-                donnees: {}
-            };
-
-            // Données namespacées du trimestre
-            CLES_NAMESPACEES.forEach(nomCle => {
-                const cleComplete = `${id}_${nomCle}`;
-                const valeur = db.getSync(cleComplete, null);
-                if (valeur !== null) {
-                    exportData.donnees[nomCle] = valeur;
-                }
-            });
-
-            // Cours liés au trimestre. `cours` est une clé GLOBALE : chaque cours porte
-            // son `trimestreId`, le filtre est donc la bonne lecture ici.
-            const listeCours = db.getSync('cours', []);
-            exportData.donnees.cours = listeCours.filter(c => c.trimestreId === id);
-
-            // #622/B2 — RETIRÉ : quatre lectures via `obtenirDonneesSelonMode` et
-            // `cle()`, qui résolvent toutes leur clé par le trimestre ACTIF (modes.js,
-            // via `obtenirTrimestreId`). Elles servaient un export dont la CIBLE est
-            // `id`, un trimestre par construction NON actif — on exporte pour archiver,
-            // pour supprimer, ou depuis une ligne inactive.
-            // Deux d'entre elles ÉCRASAIENT en outre des champs que la boucle
-            // CLES_NAMESPACEES ci-dessus avait déjà remplis correctement : `presences`
-            // et `snapshots` sont l'une et l'autre au registre. Résultat mesuré :
-            // présences VIDÉES, captures d'un AUTRE trimestre — dans le fichier même
-            // que la modale de suppression définitive présente comme une copie de
-            // secours (trimestre-v2-liste.js).
-            // Les deux champs alias `etudiants` et `evaluations` partent avec elles :
-            // ils dupliquaient `groupeEtudiants` et `evaluationsSauvegardees` sous un
-            // autre nom, avec une valeur fausse, et aucun lecteur nulle part ne les
-            // attend (grep du 31 août : les occurrences d'`import-export.js` portent
-            // sur `analyse.donnees.*`, un objet d'analyse à `.count`/`.cles`, pas sur
-            // le champ d'un fichier d'archive).
-
-            // Déclencher le téléchargement
-            const nomFichier = `trimestre-${id}-archive-${new Date().toISOString().split('T')[0]}.json`;
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = nomFichier;
-            a.click();
-
-            URL.revokeObjectURL(url);
-
-            return { success: true, nomFichier: nomFichier };
-
-        } catch (error) {
-            console.error('[Trimestres] Erreur export:', error);
-            return { success: false, error: error.message };
-        }
-    }
-
     /* ===============================
        SUPPRESSION DÉFINITIVE D'UN TRIMESTRE (#361)
        =============================== */
@@ -2804,45 +2724,6 @@
         if (modal) modal.remove();
     }
 
-    /**
-     * Affiche le trimestre qui sera ciblé par l'export anonymisé
-     * Basé sur le cours actif (qui contient les données)
-     */
-    function afficherTrimestreCibleExport() {
-        const container = document.getElementById('export-trimestre-info');
-        if (!container) return;
-
-        // Refonte chantier B : on cible le trimestre ACTIF (où vivent les données via
-        // le namespacing), plus celui qui était embarqué dans le cours actif.
-        const trimestres = db.getSync('trimestres', []);
-        let trimestre = trimestres.find(t => t.actif);
-        let source = trimestre ? 'trimestre actif' : '';
-
-        if (!trimestre && trimestres.length > 0) {
-            trimestre = trimestres[0];
-            source = 'premier trimestre';
-        }
-
-        if (trimestre) {
-            // Compter les données disponibles
-            // ✅ NAMESPACING (Beta 95.5)
-            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-            const nbEtudiants = etudiants.filter(e => !estEtudiantExclu(e)).length;
-            const nbEvaluations = evaluations.length;
-
-            container.innerHTML = `
-                <span>Trimestre ciblé :</span>
-                <strong>${trimestre.nom}</strong>
-                <span class="texte-muted">(${nbEtudiants} étudiants, ${nbEvaluations} évaluations)</span>
-            `;
-        } else {
-            container.innerHTML = `
-                <span class="texte-muted">Aucun trimestre avec données disponible pour l'export.</span>
-            `;
-        }
-    }
-
     /* ===============================
        MODE ÉCRITURE TEMPORAIRE
        =============================== */
@@ -2943,7 +2824,6 @@
     window.toutesGrillesTravail = toutesGrillesTravail;
     window.toutesEchellesTravail = toutesEchellesTravail;
     window.resoudreModeleParId = resoudreModeleParId;
-    window.exporterTrimestreArchive = exporterTrimestreArchive;
     window.calculerStatistiquesFinales = calculerStatistiquesFinales;
     window.mettreAJourBandeauArchive = mettreAJourBandeauArchive;
     window.basculerModeEcritureTemp = basculerModeEcritureTemp;
@@ -2954,7 +2834,6 @@
     window.genererCleAnonymisation = genererCleAnonymisation;
     window.lancerExportRecherche = lancerExportRecherche;
     window.fermerModalExportRecherche = fermerModalExportRecherche;
-    window.afficherTrimestreCibleExport = afficherTrimestreCibleExport;
 
     // Purge des trimestres orphelins (5.5.4)
     function listerTrimestresOrphelins() {

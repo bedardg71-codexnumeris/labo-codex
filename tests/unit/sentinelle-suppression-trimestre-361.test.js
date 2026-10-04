@@ -134,7 +134,6 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
     let win;
     let alertes;
     let supprimerTrimestreMock;
-    let exporterMock;
     let reponses;   // { confirm: [...], prompt: [...] }
     let questions;  // les textes passés à confirm()
     let codexAPart; // les phrases passées à Codex.ecrireAPartAvantSuppression
@@ -146,13 +145,11 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
         codexAPart = [];
         codexEcrit = true;
         supprimerTrimestreMock = vi.fn(async () => ({ success: true, nbCles: 4, nom: 'Automne 2024' }));
-        exporterMock = vi.fn(() => ({ success: true, nomFichier: 'x.json' }));
 
         win = chargerScript('js/trimestre-v2-liste.js', {
             obtenirTrimestres: () => REGISTRE(),
             obtenirTrimestreActif: () => REGISTRE().find(t => t.actif),
             supprimerTrimestre: supprimerTrimestreMock,
-            exporterTrimestreArchive: exporterMock,
             Codex: avecCodex ? { ecrireAPartAvantSuppression: async (phrase) => { codexAPart.push(phrase); return codexEcrit; } } : undefined,
             alert: (msg) => { alertes.push(String(msg)); },
             confirm: (msg) => { questions.push(String(msg)); return reponses.confirm.shift(); },
@@ -207,7 +204,6 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
             'Supprimer définitivement le trimestre « Automne 2024 » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.'
         ]);
         expect(supprimerTrimestreMock).toHaveBeenCalledWith('a2024');
-        expect(exporterMock).not.toHaveBeenCalled();
         expect(alertes.join(' ')).toMatch(/supprimé/i);
     });
 
@@ -224,7 +220,6 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
             expect(codexAPart).toHaveLength(avecCodex ? 1 : 0);
             expect(questions).toEqual([]);
             expect(supprimerTrimestreMock).not.toHaveBeenCalled();
-            expect(exporterMock).not.toHaveBeenCalled();
         });
     }
 });

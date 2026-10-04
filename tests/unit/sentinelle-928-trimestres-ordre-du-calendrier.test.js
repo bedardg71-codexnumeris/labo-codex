@@ -50,8 +50,8 @@ describe('#928 · les trimestres se lisent dans l\'ordre du calendrier', () => {
         expect(ids(registre), 'une copie, jamais le tableau du registre').toEqual(avant);
     });
 
-    it('les deux listes de l\'écran passent par ce tri : le menu et la liste de gestion', () => {
+    it('le menu de l\'écran passe par ce tri', () => {
+        // La « liste de gestion » (sans conteneur dans la page) est retirée le 4 oct. 2026 (#1006).
         expect(source).toContain('trierTrimestresChronologique(trimestres).forEach(');
-        expect(source).toContain('container.innerHTML = trierTrimestresChronologique(trimestres).map(');
     });
 });

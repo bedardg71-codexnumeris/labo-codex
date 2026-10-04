@@ -19,8 +19,8 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //
 // CE QU'ELLE AJOUTE À LA SENTINELLE VITEST. Vitest tourne dans node, contre un faux
 // `db` injecté : il prouve la LOGIQUE. Ici on charge le vrai `index.html`, le vrai
-// `db.js`, le vrai chemin `archiverTrimestre` → `creerSnapshotRessources` →
-// `exporterTrimestreArchive`, et on lit le fichier RÉELLEMENT téléchargé.
+// `db.js`, le vrai chemin `archiverTrimestre` → `creerSnapshotRessources`. (Le fichier
+// « Exporter les donnees » qu'elle lisait aussi est retiré le 4 oct. 2026, #1006.)
 //
 // ⚠ CE QU'ELLE NE TOUCHE PAS. Le trimestre `e2099` est jetable et semé par la spec.
 // Playwright ouvre son PROPRE navigateur, avec son propre profil : le Safari de
@@ -137,42 +137,5 @@ test('#622 · le snapshot enregistre les collections COMPLETES et les cartouches
     expect(resultat.snapshot.utilises.grilleIds).toEqual(['GJ1']);
 });
 
-test('#622 · le fichier exporte porte les donnees du trimestre EXPORTE, pas celles de l\'actif', async ({ page }) => {
-    const erreurs = brancherEcouteurs(page);
-    await page.goto(indexHtml);
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(600);
-
-    // On clot, puis on exporte par « Exporter les donnees » de la bibliotheque, et on
-    // LIT le fichier. C'est ce qu'un test manuel ne fait pas — il verrait un fichier
-    // arriver, pas ce qu'il contient. Or c'est le contenu qui etait faux (B2).
-    // #1002 (4 oct. 2026) : la cloture ne telecharge plus ce fichier ; seul le bouton
-    // de la bibliotheque l'exporte encore (#1006).
-    const attenteTelechargement = page.waitForEvent('download', { timeout: 15000 });
-    await page.evaluate(async ({ setupSrc }) => {
-        (new Function('db', setupSrc))(window.db);
-        window.archiverTrimestre('e2099');
-        window.exporterTrimestreArchive('e2099');
-        await new Promise(res => setTimeout(res, 300));
-    }, { setupSrc: `(${SETUP.toString()})()` });
-
-    const telechargement = await attenteTelechargement;
-    const flux = await telechargement.createReadStream();
-    const morceaux = [];
-    for await (const m of flux) morceaux.push(m);
-    const contenu = JSON.parse(Buffer.concat(morceaux).toString('utf8'));
-
-    expect(contenu.meta.trimestreId).toBe('e2099');
-
-    // B2 : ces deux champs etaient ecrases par une lecture du trimestre ACTIF.
-    // Les presences etaient VIDEES, et les captures venaient d'un AUTRE trimestre —
-    // dans le fichier meme que la modale de suppression presente comme un filet.
-    expect(contenu.donnees.presences).toEqual([{ coursId: 'CJ', seance: '1a' }]);
-    expect(contenu.donnees.snapshots.hebdomadaires.map(s => s.id)).toEqual(['SNAP-E2099']);
-
-    // Les deux champs alias ont disparu : ils dupliquaient sous un faux nom.
-    expect('etudiants' in contenu.donnees).toBe(false);
-    expect('evaluations' in contenu.donnees).toBe(false);
-
-    expect(erreurs, `erreurs console inattendues : ${erreurs.join(' | ')}`).toEqual([]);
-});
+// Le troisième essai (le fichier « Exporter les donnees ») est retiré le 4 oct. 2026 avec la fonction
+// (#1006 : aucun écran ne l'appelait) ; l'archive d'un trimestre est E1 (#1022).

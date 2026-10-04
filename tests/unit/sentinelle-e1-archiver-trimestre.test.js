@@ -298,7 +298,7 @@ describe('E1 · (d) « Vérifier » l\'archive d\'un trimestre', () => {
         const { rapport, cr } = await verifier(banc, banc.blob);
         expect(rapport).toMatchObject({ etat: 'verifiee', trimestreEntier: true, total: 4, verifiees: 4, totalCles: CLES_ATTENDUES.length, clesVerifiees: CLES_ATTENDUES.length, couvertureMesuree: true });
         expect(rapport.nonCouvertes).toEqual([]);
-        expect(cr).toEqual({ titre: 'Archive vérifiée', message: 'Les 4 copies et les ' + CLES_ATTENDUES.length + ' clés de données sont présentes et intactes.' });
+        expect(cr).toEqual({ titre: 'Archive vérifiée', message: 'Les 4 copies et les données du trimestre sont présentes et intactes.' });
     });
 
     it('un octet altéré dans une copie (la corbeille) : incomplète, « 1 copie altérée »', async () => {
@@ -321,7 +321,7 @@ describe('E1 · (d) « Vérifier » l\'archive d\'un trimestre', () => {
         expect(rapport.etat).toBe('incomplete');
         expect(rapport.clesProblemes).toEqual([{ nom: 'h2032_evaluationsSauvegardees', type: 'alteree' }]);
         expect(rapport.donneesConcordent).toBe(false);
-        expect(cr.message).toContain('1 clé altérée');
+        expect(cr.message).toContain('1 donnée du trimestre altérée');
     });
 
     it('une clé glissée dans les données : incomplète, « 1 clé en trop »', async () => {
@@ -329,7 +329,7 @@ describe('E1 · (d) « Vérifier » l\'archive d\'un trimestre', () => {
         const abime = await remplacerTexte(banc.blob, BASE + 'donnees.json', (t) => t.replace(/^\{/, '{"cours":[],'));
         const { rapport, cr } = await verifier(banc, abime);
         expect(rapport.clesEnTrop).toEqual(['cours']);
-        expect(cr.message).toContain('1 clé en trop dans l\'archive');
+        expect(cr.message).toContain('1 donnée en trop dans l\'archive');
     });
 
     it('une archive de trimestre sans empreintes de clés : à refaire', async () => {
@@ -366,6 +366,13 @@ describe('E1 · (e) rien n\'est écrit dans les données ; refusé hors d\'un tr
         expect(cleListe.archives[DOSSIER]).toMatchObject({ type_archive: 'trimestre', trimestre: TRIM, nombre_fichiers_travaux: 4 });
     });
 
+    it('le message de fin dit « étudiant·es » (mots acceptés par Grégoire le 4 oct.)', async () => {
+        const banc = await archiver();
+        expect(banc.journal.notifications.filter((n) => n.type === 'succes')).toEqual([
+            { type: 'succes', titre: 'Trimestre archivé : fichier téléchargé', message: expect.stringMatching(/^3 étudiant·es, 4 copie\(s\) \(.+\)$/) }
+        ]);
+    });
+
     it('un trimestre en cours : refusé, rien téléchargé, rien inscrit', async () => {
         const banc = await archiver({ trimestre: 'a2032' });
         expect(banc.rendu).toMatchObject({ succes: false });
@@ -380,7 +387,7 @@ describe('E1 · (e) rien n\'est écrit dans les données ; refusé hors d\'un tr
         expect(banc.journal.telechargements).toEqual([]);
         expect(banc.journal.fenetres[0]).toEqual({
             titre: 'Archiver Hiver 2032 ?',
-            message: 'L\'archive emporte tout le trimestre : 3 étudiants, 2 groupes, 4 copies (dont 1 à la corbeille), environ 80.0 Ko.\nRien n\'est retiré de l\'application : le trimestre reste là, clos.',
+            message: 'L\'archive emporte tout le trimestre : 3 étudiant·es, 2 groupes, 4 copies (dont 1 à la corbeille), environ 80.0 Ko.\nRien n\'est retiré de l\'application : le trimestre reste là, clos.',
             bouton: 'Archiver'
         });
     });
@@ -433,5 +440,14 @@ describe('E1 · (g) témoins : le banc rougit quand l\'archive ment', () => {
         const entree = banc.win.Reserve.lireManifesteLocal().archives[DOSSIER];
         const rapport = await RV.verifierArchive(RV.sourceFichier(abime), entree, DOSSIER);
         expect(rapport.clesProblemes).toEqual([]); // le témoin : sans la comparaison, rien ne le dit
+    });
+});
+
+describe('#1006 · les trois boutons « Exporter les données » sont retirés, avec leur fonction (4 oct. 2026)', () => {
+    // Mesuré le 4 oct. : la liste qui les portait n'avait pas de conteneur dans la page. E1 fait ce
+    // que ce fichier promettait. Un retour de l'un de ces noms rougit ici.
+    const fichiers = ['index.html', 'js/trimestres.js', 'js/trimestre-v2-liste.js', 'js/trimestre-v2-init.js'];
+    it.each(['exporterTrimestreArchive', 'afficherListeTrimestreGestion', 'listeTrimestreGestion', 'afficherTrimestreCibleExport', 'archive-trimestre'])('« %s » n\'apparaît plus', (nom) => {
+        for (const f of fichiers) expect(readFileSync(path.join(racine, f), 'utf8')).not.toContain(nom);
     });
 });

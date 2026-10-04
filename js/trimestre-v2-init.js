@@ -213,10 +213,6 @@ function _refuserIdentificationV2(phrase, geste) {
 }
 
 function _rafraichirListesTrimestresV2() {
-    // Rafraîchir la liste dans Gestion des trimestres (extrait dans trimestre-v2-liste.js — session A, 17 mai 2026)
-    if (typeof window.afficherListeTrimestreGestion === 'function') {
-        window.afficherListeTrimestreGestion();
-    }
     // Rafraîchir le dropdown trimestre
     if (typeof window.populerDropdownTrimestreV2 === 'function') {
         window.populerDropdownTrimestreV2();
