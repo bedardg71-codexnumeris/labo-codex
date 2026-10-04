@@ -15,7 +15,19 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-✅ **EN LIGNE EN 1.180.0 (4 OCTOBRE 2026 ; en ligne depuis 12 h 15, mesuré chez Netlify : déploiement de production prêt sur `bc36e957` ; tes trois décisions de ce matin) — UN·E ÉTUDIANT·E SUPPRIMÉ·E NE PARAÎT PLUS, ET SES DONNÉES NE PARTENT PLUS**
+✅ **EN LIGNE EN 1.181.0 (4 OCTOBRE 2026 ; en ligne depuis 13 h 57, mesuré chez Netlify : déploiement de production prêt sur `a3dbb81d` ; tes mots, une retouche) — « FAIRE REVENIR » LES COPIES D'UNE ARCHIVE VÉRIFIÉE**
+
+**Ce que tu verras** : dans Réglages › Données › Archives, une archive « Vérifiée le … » porte un bouton « Faire revenir ». Tu désignes le fichier de l'archive (ou ton dossier des archives dans Chrome), une fenêtre dit ce qui va se passer, puis un bilan en nombres : copies revenues, déjà là, changées depuis l'archive, sans fiche, d'étudiant·es supprimé·es, et en tête les copies abîmées dans l'archive s'il y en a. Une copie dite « manquante » dont le fichier est là redevient présente.
+
+**Vérifié comment** : essais au navigateur (WebKit) sur la démo, par le vrai bouton : une copie par cas, chacune donne ce qu'elle doit ; les copies revenues sont identiques octet pour octet à l'archive ; rien d'autre ne bouge dans l'espace ; ton codex ne réclame ensuite que les copies qui manquent vraiment ; à la largeur de l'iPad, par de vrais clics. Retirer la recomparaison de l'empreinte, ou laisser une copie changée être remplacée, fait échouer les essais. Sur une archive de 607 Mo (205 copies), la mémoire de la page monte de 39 Mo. Vérification complète au navigateur verte sur le commit livré. **Pas vérifié** : ton écran, ton iPad, une de tes vraies archives.
+
+**Tes données** : rien n'est remplacé ni effacé ; le geste n'écrit que les copies qui manquent, et le statut « présent » de leurs fiches. Ta copie de l'hiver 2026 marquée « manquante » : son fichier est dans l'archive du groupe 00008 (lu sans rien écrire) ; ton geste la remettra présente.
+
+**La suite** : les mots « clos » partout, puis alléger un groupe archivé.
+
+---
+
+(précédent) ✅ **EN LIGNE EN 1.180.0 (4 OCTOBRE 2026 ; en ligne depuis 12 h 15, mesuré chez Netlify : déploiement de production prêt sur `bc36e957` ; tes trois décisions de ce matin) — UN·E ÉTUDIANT·E SUPPRIMÉ·E NE PARAÎT PLUS, ET SES DONNÉES NE PARTENT PLUS**
 
 **Ce que tu verras** : quand tu supprimes un·e étudiant·e dans le Cadre, ses copies quittent la Liste des évaluations (le compte « N résultat(s) » baisse d'autant), « Annoter et évaluer » et la grille d'« Exporter et archiver ». L'export pour Léa, l'export pour la recherche et les seuils « en attente » du tableau de bord l'écartent. Si toutes les copies d'un groupe sont celles d'élèves supprimés, « Annoter et évaluer » le dit avec ta phrase.
 

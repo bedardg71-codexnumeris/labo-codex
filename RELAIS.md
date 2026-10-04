@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 12 h 50 : **LE LOT A3 (#1000, « FAIRE REVENIR » DES COPIES) EST SUR `claude/1000-faire-revenir` (`8fce6734`), RELU VERT PAR COWORK (12 h 47) ; MISE EN LIGNE EN COURS (1.181.0)**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 14 h 00 : **1.181.0 (#1000, « FAIRE REVENIR » LES COPIES D'UNE ARCHIVE VÉRIFIÉE) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a3dbb81d` (PUBLIÉ À 13 h 57) ; VERDICT COMPLET VERT ; #1000 CLOSE**
+
+**Consignes** : Cowork, 12 h 19 (lot, arrêt au point 6 ; commit `8fce6734`) et 12 h 47 (mots acceptés par Grégoire, retouche « étudiant·e supprimé·e » ; ligne des Nouvelles ; mise en ligne). Consignes, archives et verdict commités tels quels (`72f5525b`, `1ad11461`).
+
+**Ce qui est fait** : `js/reserve-revenir.js` ; le bouton « Faire revenir » sur la ligne d'une archive vérifiée (Réglages › Données › Archives). Rien n'est remplacé ni effacé ; l'empreinte est recomparée au geste ; une fiche « manquant » dont le fichier est là redevient « present ». Mesure du verdict de relecture : une fiche « exporte » sans fichier revient, garde « exporte », et le codex l'écrit sans ouvrir la fenêtre de #1012 (essai WebKit ajouté). Mémoire : +39 Mo de pic pour 607 Mo (WebKit, profil persistant). #997 lu en lecture seule : la copie est dans l'archive du groupe 00008 ; le geste de Grégoire la remettra « present ».
+
+**Release** : 1.181.0 (`e47dffcb`), minor ; titre de Claude Code : « Faire revenir les copies d'une archive » ; Nouvelles : ligne de Cowork, telle quelle. **Verdict** complet sur `e47dffcb` : 0 échec, 0 instable ; éveil complet tenu (batterie), 0 veille, échange au plus haut 4,2 Go, pression 2 ; ≈ 60 min, après 90 s d'attente de charge (22,98 au lancement). Fusion vers `main` (`a3dbb81d`) : n'ajoute que quatre documents, pas rejugée.
+
+**Ménage** : aucun worktree ; la branche `claude/1000-faire-revenir` reste chez origin. Pas de porte terrain (plan § 4, lot A3).
+
+**Suite** : les mots « clos » (#1002, lot A5), sur une consigne de Cowork ; puis alléger (#1001, lot A4).
+
+---
+
+## (relais précédent) 4 OCT. 2026, 12 h 50 : **LE LOT A3 (#1000, « FAIRE REVENIR » DES COPIES) EST SUR `claude/1000-faire-revenir` (`8fce6734`), RELU VERT PAR COWORK (12 h 47) ; MISE EN LIGNE EN COURS (1.181.0)**
 
 **Consignes** : Cowork, 12 h 19 (lot, arrêt au point 6) et 12 h 47 (mots acceptés par Grégoire, une retouche ; release minor ; mise en ligne). Verdict : `plans de travail/VERDICT-RELECTURE-2026-10-04-1000-faire-revenir.md`.
 
