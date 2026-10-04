@@ -2725,7 +2725,7 @@ async function creerPratiqueV2() {
         if (wizardState.modeEdition && wizardState.pratiqueId) {
             const existante = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === wizardState.pratiqueId);
             const anciennes = (existante && existante.configuration && existante.configuration.objectifs) || [];
-            if (!window.EditeurCibles.confirmerRetraits(wizardState.pratiqueId, anciennes, cibles)) return;
+            if (!(await window.EditeurCibles.confirmerRetraits(wizardState.pratiqueId, anciennes, cibles))) return;
         }
 
         pratique.configuration = {

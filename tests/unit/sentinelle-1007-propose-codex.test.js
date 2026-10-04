@@ -76,7 +76,15 @@ const PORTES = [
     { g: 'P5', f: 'js/saisie-presences.js', sig: 'async function reinitialiserSaisie(', cle: "'seance'", question: 'const ok = await uiDialogues.confirmerAction({', efface: '_armerEnregistrementPresences(dateStr, touches)' },
     { g: 'P14', f: 'js/travaux-annotation.js', sig: 'async function effacerPage(', cle: "'annotationsPage'", question: 'if (fichierId !== fichierAvant', efface: '_viderPageCourante();' },
     { g: 'P6', f: 'js/registre-longitudinal.js', sig: 'async function retirerEleveLongitudinal(', cle: "'registreLongitudinal'", question: 'if (el && el.dataset && el.dataset.question && !confirm(el.dataset.question))', efface: 'await retirerDuRegistre(da)' },
-    { g: 'P16', f: 'js/bilan-reflexif-rapport.js', sig: 'async function supprimerResultats(', cle: "'resultatsBilan'", question: "if (!confirm('Supprimer les r\\u00e9sultats import\\u00e9s ?')) return;", efface: 'db.removeSync(CLE_RESULTATS())' }
+    { g: 'P16', f: 'js/bilan-reflexif-rapport.js', sig: 'async function supprimerResultats(', cle: "'resultatsBilan'", question: "if (!confirm('Supprimer les r\\u00e9sultats import\\u00e9s ?')) return;", efface: 'db.removeSync(CLE_RESULTATS())' },
+    // Lot 2b (3 oct. 2026) : une ligne d'éditeur, seulement si elle porte des notes
+    // (`porteDesNotes`, lu juste avant l'appel ; tests/unit/sentinelle-1007-lignes-notes.test.js
+    // juge le comportement, famille par famille).
+    { g: 'Critère (liste)', f: 'js/grilles.js', sig: 'async function supprimerCritere(id)', cle: "'critere'", question: "if (confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {", efface: 'g.criteres = (g.criteres || []).filter(c => c.id !== id);' },
+    { g: 'Critère (zone d\'édition)', f: 'js/grilles.js', sig: 'async function supprimerCritereGrille(', cle: "'critere'", question: "if (!confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {", efface: 'g.criteres.splice(critereIndex, 1);' },
+    { g: 'Sous-critère', f: 'js/grilles.js', sig: 'async function supprimerSousCritere(', cle: "'sousCritere'", question: "if (!confirm('Supprimer ce sous-critère ?')) return;", efface: '.sousCriteres.splice(sousCritereIndex, 1);' },
+    { g: 'Niveau d\'échelle', f: 'js/echelles.js', sig: 'async function supprimerNiveauEchelle(', cle: "'niveau'", question: "if (!confirm('Supprimer ce niveau ?')) return;", efface: 'echelle.niveaux.splice(index, 1);' },
+    { g: 'Cible de dénotation', f: 'js/pratiques/editeur-cibles.js', sig: 'async function confirmerRetraitCibles(', cle: "nbCochees > 1 ? 'cibles' : 'cible'", question: 'const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);', efface: 'return confirm(message);' }
 ];
 
 // Relecture de Cowork (3 oct. 2026, 7 h 55) : la fenêtre peut attendre des minutes (une mise

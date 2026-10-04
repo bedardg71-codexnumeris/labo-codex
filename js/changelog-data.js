@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.178 (#1007, lot 2b) — ligne proposée par Claude Code (§ 4 de la demande de
+            // relecture), ACCEPTÉE par Grégoire le 4 oct. 2026 à 0 h 07 (« oui sans le nombre »,
+            // consigne de Cowork), posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.
+            version: '1.178',
+            couleur: 'vert',
+            titre: 'Ton codex à jour, avant de retirer une ligne notée',
+            items: [
+                'Avant de retirer un critère, un sous-critère, un niveau d\'échelle ou une cible de dénotation déjà employés dans une évaluation, l\'application te propose de mettre ton codex à jour. Une ligne qu\'aucune évaluation n\'emploie se retire comme avant.'
+            ]
+        },
+        {
             // 1.177 (#1007, lot 2a-2) — ligne proposée par Claude Code (§ 6 de la demande de
             // relecture), ACCEPTÉE par Grégoire le 3 oct. 2026 à 11 h 25 (« oui », consigne de Cowork),
             // posée telle quelle. Titre de Claude Code, dit à Grégoire au rendu.

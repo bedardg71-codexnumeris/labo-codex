@@ -1579,7 +1579,7 @@ async function sauvegarderConfigPratiqueMat() {
             notifications.erreur('Aucune cible', motif);
             return false;
         }
-        if (!window.EditeurCibles.confirmerRetraits(pratiqueEnEditionMateriel, anciennes, cibles)) {
+        if (!(await window.EditeurCibles.confirmerRetraits(pratiqueEnEditionMateriel, anciennes, cibles))) {
             window.EditeurCibles.poser(conteneur, anciennes);
             return false;
         }
