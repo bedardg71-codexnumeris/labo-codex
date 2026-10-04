@@ -195,7 +195,7 @@ describe('#648 · C — le cœur : supprimerOuRemplacerEchelle', () => {
         expect(r.supprimee).toBe(false);
         expect(r.refusee).toBe('archive');
         expect(appels.alertes).toHaveLength(1);
-        expect(appels.alertes[0]).toContain('archivé');
+        expect(appels.alertes[0]).toContain('Ce trimestre est clos');
         expect(appels.alertes[0]).toContain('2 évaluations');
         expect(appels.alertes[0]).toContain('notes déjà remises');
         expect(appels.prompts).toEqual([]);

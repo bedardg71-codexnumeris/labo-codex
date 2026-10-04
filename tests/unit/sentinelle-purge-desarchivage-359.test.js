@@ -144,7 +144,7 @@ describe('#359 (réconcilié #358) · désarchiver préserve les modèles vivant
         const win = chargerTrimestres(store);
         const r = win.desarchiverTrimestre('a2025');
         expect(r.success).toBe(false);
-        expect(r.error).toBe('Trimestre non archivé');
+        expect(r.error).toBe('Trimestre non clos');
         expect('a2025_grillesTemplates' in store).toBe(true); // un refus ne purge rien
     });
 
@@ -154,6 +154,6 @@ describe('#359 (réconcilié #358) · désarchiver préserve les modèles vivant
         win.desarchiverTrimestre('a2025');
         const r2 = win.desarchiverTrimestre('a2025');
         expect(r2.success).toBe(false);
-        expect(r2.error).toBe('Trimestre non archivé');
+        expect(r2.error).toBe('Trimestre non clos');
     });
 });

@@ -4471,7 +4471,7 @@ async function afficherCartouchesTrimestreModal() {
  */
 async function importerUneCartoucheTrimestre(srcId, grilleId, cartoucheId) {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des cartouches.');
+        alert('Import impossible : le trimestre actif est clos (consultation). Active un trimestre courant pour importer des cartouches.');
         return;
     }
 
@@ -4514,7 +4514,7 @@ async function importerUneCartoucheTrimestre(srcId, grilleId, cartoucheId) {
  */
 async function importerToutCartouchesTrimestreModal() {
     if (window.estTrimestreArchive && window.estTrimestreArchive()) {
-        alert('Import impossible : le trimestre actif est archivé (consultation). Active un trimestre courant pour importer des cartouches.');
+        alert('Import impossible : le trimestre actif est clos (consultation). Active un trimestre courant pour importer des cartouches.');
         return;
     }
 
