@@ -57,7 +57,8 @@ describe('#386 · dropdowns/listes trimestre-v2 : libellés utilisateur échapp�
     it('les libellés passent par echapperHtml', () => {
         expect(tv2).toMatch(/>\$\{echapperHtml\(labelCours\(c\)\)\}<\/option>/);
         expect(tv2orch).toMatch(/>\$\{echapperHtml\(label\)\}<\/option>/);
-        expect(tv2liste).toMatch(/>\$\{echapperHtml\(t\.nom\)\}<\/span>/);
+        // La liste de gestion (`${echapperHtml(t.nom)}`) est retirée le 4 oct. 2026 (#1006) ; la carte de la bibliothèque reste.
+        expect(tv2liste).toContain('nom: echapperHtml(t.nom || t.id) + badgeActif');
     });
 });
 

@@ -166,7 +166,7 @@ test.describe('E1 — « Archiver le trimestre… » depuis la bibliothèque des
         await expect(fenetre).toBeVisible();
         await expect(fenetre.locator('#ui-dialogue-titre')).toHaveText('Archiver Hiver 2032 ?');
         await expect(fenetre.locator('.modal-section')).toHaveText(
-            'L\'archive emporte tout le trimestre : 3 étudiants, 2 groupes, 3 copies (dont 1 à la corbeille), environ 188.5 Ko.\n' +
+            'L\'archive emporte tout le trimestre : 3 étudiant·es, 2 groupes, 3 copies (dont 1 à la corbeille), environ 188.5 Ko.\n' +
             'Rien n\'est retiré de l\'application : le trimestre reste là, clos.');
         const largeur = await page.evaluate(() => document.documentElement.scrollWidth);
         expect(largeur).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
@@ -213,7 +213,7 @@ test.describe('E1 — « Archiver le trimestre… » depuis la bibliothèque des
 
             const ok = await verifierParLeBouton(page, 'h2032-trimestre', fichier);
             expect(ok.titre).toBe('Archive vérifiée');
-            expect(ok.message).toBe('Les 3 copies et les ' + Object.keys(donnees).length + ' clés de données sont présentes et intactes.');
+            expect(ok.message).toBe('Les 3 copies et les données du trimestre sont présentes et intactes.');
             await expect(ligne).toContainText(/Vérifiée le \d{1,2} \S+ \d{4}/);
             await expect(ligne.locator('[data-action="ReserveRevenir.actionFaireRevenir"]')).toHaveCount(0);
 

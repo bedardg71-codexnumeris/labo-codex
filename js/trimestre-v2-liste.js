@@ -94,103 +94,6 @@ function populerDropdownTrimestreV2() {
         select.value = trimestreActif.id;
     }
 
-    // Mettre à jour aussi la liste de gestion des trimestres
-    afficherListeTrimestreGestion();
-}
-
-/**
- * Affiche la liste des trimestres avec boutons de gestion (archiver, exporter, etc.)
- */
-function afficherListeTrimestreGestion() {
-    const container = document.getElementById('listeTrimestreGestion');
-    if (!container) return;
-
-    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
-    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
-
-    if (trimestres.length === 0) {
-        container.innerHTML = '<p class="texte-muted">Aucun trimestre configuré.</p>';
-        return;
-    }
-
-    container.innerHTML = trierTrimestresChronologique(trimestres).map(t => {
-        const estActif = trimestreActif && t.id === trimestreActif.id;
-        const estArchive = t.archive === true;
-
-        // Classes CSS pour l'item
-        const itemClasses = ['item-trimestre'];
-        if (estActif) itemClasses.push('actif');
-        if (estArchive) itemClasses.push('archive');
-
-        // Badge d'état
-        let badge = '';
-        if (estActif) {
-            badge = '<span class="badge-trimestre actif">Actif</span>';
-        } else if (estArchive) {
-            badge = '<span class="badge-trimestre archive">Clos</span>';
-        }
-
-        // Statistiques si archivé
-        let statsInfo = '';
-        if (estArchive && t.statistiquesFinales) {
-            const stats = t.statistiquesFinales;
-            statsInfo = `<div class="item-trimestre-stats">
-                ${stats.nbEtudiants || 0} étudiant(s)${t.dateFin ? ` • Clos le ${t.dateFin}` : ''}
-            </div>`;
-        }
-
-        // Boutons d'action
-        let boutons = '';
-        if (estActif) {
-            // Le trimestre actif ne peut pas être archivé
-            boutons = `<button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
-                Exporter
-            </button>`;
-        } else if (estArchive) {
-            // Trimestre archivé : exporter, désarchiver ou supprimer (#361)
-            boutons = `
-                <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
-                    Exporter
-                </button>
-                <button class="btn btn-secondaire btn-compact" data-action="confirmerDesarchivage" data-param="${t.id}" title="Rouvrir pour permettre les modifications">
-                    Rouvrir
-                </button>
-                <button class="btn btn-supprimer btn-compact" data-action="confirmerSuppressionTrimestre" data-param="${t.id}" title="Supprimer définitivement ce trimestre et toutes ses données">
-                    Supprimer…
-                </button>`;
-        } else {
-            // Trimestre inactif : peut être activé, archivé ou supprimé (#361)
-            boutons = `
-                <button class="btn btn-principal btn-compact" data-action="changerTrimestreActifV2" data-param="${t.id}" title="Activer ce trimestre">
-                    Activer
-                </button>
-                <button class="btn btn-secondaire btn-compact" data-action="confirmerArchivage" data-param="${t.id}" title="Clore ce trimestre (lecture seule)">
-                    Clore
-                </button>
-                <button class="btn btn-secondaire btn-compact" data-action="exporterTrimestreArchive" data-param="${t.id}" title="Exporter les données">
-                    Exporter
-                </button>
-                <button class="btn btn-supprimer btn-compact" data-action="confirmerSuppressionTrimestre" data-param="${t.id}" title="Supprimer définitivement ce trimestre et toutes ses données">
-                    Supprimer…
-                </button>`;
-        }
-
-        return `
-            <div class="${itemClasses.join(' ')}">
-                <div class="item-trimestre-info">
-                    <span class="item-trimestre-nom">${echapperHtml(t.nom)}</span>${badge}
-                    ${statsInfo}
-                </div>
-                <div class="item-trimestre-actions">
-                    ${boutons}
-                </div>
-            </div>`;
-    }).join('');
-
-    // Mettre à jour l'info du trimestre ciblé pour l'export
-    if (typeof afficherTrimestreCibleExport === 'function') {
-        afficherTrimestreCibleExport();
-    }
 }
 
 /**
@@ -215,7 +118,6 @@ function confirmerArchivage(id) {
         const result = archiverTrimestre(id);
         if (result.success) {
             alert(`Trimestre "${trimestre.nom}" clos.`);
-            afficherListeTrimestreGestion();
         } else {
             // Un refus de clôture remplit `message`, pas `error` (#1002).
             alert(`Erreur: ${result.error || result.message}`);
@@ -244,7 +146,6 @@ function confirmerDesarchivage(id) {
         const result = desarchiverTrimestre(id);
         if (result.success) {
             alert(`Trimestre "${trimestre.nom}" rouvert.`);
-            afficherListeTrimestreGestion();
         } else {
             alert(`Erreur: ${result.error}`);
         }
@@ -673,7 +574,6 @@ function ouvrirModalNouveauTrimestre() {
 // Exports — 11 fonctions migrées du bloc principal résidu (L4470-4480 originelles).
 window.trierTrimestresChronologique = trierTrimestresChronologique;
 window.populerDropdownTrimestreV2 = populerDropdownTrimestreV2;
-window.afficherListeTrimestreGestion = afficherListeTrimestreGestion;
 window.confirmerArchivage = confirmerArchivage;
 window.confirmerDesarchivage = confirmerDesarchivage;
 window.afficherFormulaireTrimestreActif = afficherFormulaireTrimestreActif;

@@ -90,13 +90,14 @@ var MOTS = {
         titre: 'Ce n\'est pas cette archive',
         texte: 'Le fichier choisi est l\'archive d\'un autre groupe ou d\'une autre date. Choisis le fichier de cette ligne.'
     },
-    // E1 (#1022, 4 oct. 2026) : l'archive d'un trimestre entier. Mots provisoires, à Grégoire.
+    // E1 (#1022, 4 oct. 2026) : l'archive d'un trimestre entier. Acceptés par Grégoire (consigne de 17 h 19) :
+    // « les données du trimestre », jamais « clés », un mot technique qu'un enseignant ne lit pas.
     trimestre: {
-        reussite: function(m, k) { return 'Les ' + m + ' copies et les ' + k + ' clés de données sont présentes et intactes.'; },
+        reussite: function(m) { return 'Les ' + m + ' copies et les données du trimestre sont présentes et intactes.'; },
         echec: function(n, m) { return n + ' copies sur ' + m + ' manquent ou ne concordent pas. Archive de nouveau ce trimestre.'; },
-        sansEmpreintes: 'Cette archive ne porte pas les empreintes de ses clés : elle ne peut pas être vérifiée. Archive de nouveau ce trimestre.',
-        cles: function(n, adjectif) { return n + ' clé' + (n > 1 ? 's ' : ' ') + adjectif + (n > 1 ? 's' : ''); },
-        clesEnTrop: function(n) { return n + ' clé' + (n > 1 ? 's' : '') + ' en trop dans l\'archive'; },
+        sansEmpreintes: 'Cette archive ne porte pas les empreintes de ses données : elle ne peut pas être vérifiée. Archive de nouveau ce trimestre.',
+        cles: function(n, adjectif) { return n + ' donnée' + (n > 1 ? 's' : '') + ' du trimestre ' + adjectif + (n > 1 ? 's' : ''); },
+        clesEnTrop: function(n) { return n + ' donnée' + (n > 1 ? 's' : '') + ' en trop dans l\'archive'; },
         nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du trimestre sans copie dans l\'archive'; },
         couvertureNonMesuree: 'couverture non mesurée : ce trimestre n\'est plus dans l\'application'
     },
@@ -605,7 +606,7 @@ function etatVerification(entree) {
 function compteRendu(rapport) {
     var T = rapport.trimestreEntier ? MOTS.trimestre : null;
     if (rapport.etat === 'verifiee') {
-        return { titre: MOTS.reussite.titre, message: T ? T.reussite(rapport.total, rapport.totalCles) : MOTS.reussite.texte(rapport.total) };
+        return { titre: MOTS.reussite.titre, message: T ? T.reussite(rapport.total) : MOTS.reussite.texte(rapport.total) };
     }
     if (rapport.etat === 'a_refaire') {
         return { titre: MOTS.sansEmpreintes.titre, message: (T ? T.sansEmpreintes : MOTS.sansEmpreintes.texte) + '\n' + MOTS.aRefaireDetail(rapport.nombreFichiers, _formaterTaille(rapport.tailleFichiers)) };

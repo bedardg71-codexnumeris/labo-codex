@@ -41,8 +41,12 @@
 'use strict';
 
 /* ===============================
-   LES MOTS — UN SEUL ENDROIT (provisoires, à Grégoire)
-   =============================== */
+   LES MOTS — UN SEUL ENDROIT
+   ===============================
+   Acceptés par Grégoire le 4 oct. 2026 (consigne de Cowork de 17 h 19), avec « étudiant·e ».
+*/
+function _etudiants(n) { return n + (n > 1 ? ' étudiant·es' : ' étudiant·e'); }
+
 var MOTS = {
     menu: 'Archiver le trimestre…',
     menuTitre: 'Déposer une copie complète de ce trimestre hors du navigateur',
@@ -50,7 +54,7 @@ var MOTS = {
         titre: function(nom) { return 'Archiver ' + nom + ' ?'; },
         texte: function(c) {
             return 'L\'archive emporte tout le trimestre : ' +
-                c.etudiants + ' étudiant' + (c.etudiants > 1 ? 's' : '') + ', ' +
+                c.etudiants + ' étudiant·e' + (c.etudiants > 1 ? 's' : '') + ', ' +
                 c.groupes + ' groupe' + (c.groupes > 1 ? 's' : '') + ', ' +
                 c.copies + ' copie' + (c.copies > 1 ? 's' : '') +
                 (c.corbeille ? ' (dont ' + c.corbeille + ' à la corbeille)' : '') +
@@ -60,10 +64,10 @@ var MOTS = {
         bouton: 'Archiver'
     },
     archive: function(stats, chemin) {
-        return { titre: 'Trimestre archivé', texte: stats.etudiants + ' étudiant(s), ' + stats.fichiersTrouves + ' copie(s) : ' + chemin };
+        return { titre: 'Trimestre archivé', texte: _etudiants(stats.etudiants) + ', ' + stats.fichiersTrouves + ' copie(s) : ' + chemin };
     },
     telecharge: function(stats, taille) {
-        return { titre: 'Trimestre archivé : fichier téléchargé', texte: stats.etudiants + ' étudiant(s), ' + stats.fichiersTrouves + ' copie(s) (' + taille + ')' };
+        return { titre: 'Trimestre archivé : fichier téléchargé', texte: _etudiants(stats.etudiants) + ', ' + stats.fichiersTrouves + ' copie(s) (' + taille + ')' };
     },
     nonArchive: 'Trimestre non archivé',
     refus: {
