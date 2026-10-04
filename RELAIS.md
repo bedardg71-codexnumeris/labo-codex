@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 14 h 00 : **1.181.0 (#1000, « FAIRE REVENIR » LES COPIES D'UNE ARCHIVE VÉRIFIÉE) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a3dbb81d` (PUBLIÉ À 13 h 57) ; VERDICT COMPLET VERT ; #1000 CLOSE**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 16 h 05 : **1.182.0 (#1002, UN TRIMESTRE TERMINÉ SE DIT « CLOS » ; CLORE NE TÉLÉCHARGE PLUS DE FICHIER) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `af586f45` (PUBLIÉ À 16 h 01) ; VERDICT COMPLET VERT ; #1002 CLOSE**
+
+**Consignes** : Cowork, 14 h 17 (lot A5, arrêt au point 5 ; commit `be7785c0`) et 14 h 41, complétée à 14 h 54 (les cinq vrais choix tranchés par Grégoire ; correctif « undefined » ; release ; mise en ligne ; puis la mesure « emprunter un trimestre »). Complément de 14 h 56 (question 6 de la mesure). Consignes et archives commitées telles quelles (`18c2574b`, `7e221713`).
+
+**Ce qui est fait** : 42 textes de l'état gelé disent « clos », « clore », « rouvrir » (bibliothèque des trimestres, bandeau de lecture seule, aide de la clôture, gardes d'import, erreurs de `trimestres.js`) ; les cinq choix de Grégoire ; `archiverTrimestre` n'appelle plus `exporterTrimestreArchive` (les trois boutons « Exporter les données » restent, #1006) ; `confirmerArchivage` lit `result.error || result.message`. Vocabulaire dans `docs/architecture/ECOSYSTEME-DONNEES.md`. Sentinelle `tests/unit/sentinelle-1002-mots-clos.test.js` (15 essais, douze mutations démontrées rouges) ; spec #622 : l'export se fait par le bouton.
+
+**Release** : 1.182.0 (`8429d05e`, build 1004-1459). Vitest 677 fichiers, 8072 essais verts. Verdict Playwright complet vert sur `8429d05e` : 0 échec, 0 instable, éveil complet tenu (0 veille), mémoire au plus haut : échange 4,0 Go, pression 1. Fusion `af586f45` (ne diffère du commit jugé que par deux documents), poussée par `git push origin main`.
+
+**BACKLOG** : #1002 close ; #1006 annotée (la clôture ne télécharge plus ; restent les trois boutons) ; #1017 (deux autres sens d'« archiver ») et #1018 (« Clore » offert sur le trimestre actif, toujours refusé) inscrites.
+
+**La suite** : #1001 (alléger un groupe) N'EST PLUS LA SUITE : Grégoire a changé le but du chantier (emprunter et rendre un trimestre entier, « comme un livre à la bibliothèque »). La mesure en lecture seule est rendue dans `plans de travail/MESURE-2026-10-04-emprunter-un-trimestre.md` ; aucun lot n'est ouvert avant la décision de Grégoire.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 14 h 00 : **1.181.0 (#1000, « FAIRE REVENIR » LES COPIES D'UNE ARCHIVE VÉRIFIÉE) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a3dbb81d` (PUBLIÉ À 13 h 57) ; VERDICT COMPLET VERT ; #1000 CLOSE**
 
 **Consignes** : Cowork, 12 h 19 (lot, arrêt au point 6 ; commit `8fce6734`) et 12 h 47 (mots acceptés par Grégoire, retouche « étudiant·e supprimé·e » ; ligne des Nouvelles ; mise en ligne). Consignes, archives et verdict commités tels quels (`72f5525b`, `1ad11461`).
 
