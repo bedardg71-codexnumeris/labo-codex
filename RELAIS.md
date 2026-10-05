@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 7 h 27 : **E3 (#1024) : LES TROIS CORRECTIONS DU VERDICT DE COWORK FAITES SUR `claude/e3-renvoyer-trimestre` (`d17b0749`) ; NI POUSSÉ NI PUBLIÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 7 h 57 : **1.185.0 (E3, #1024, « RENVOYER AUX ARCHIVES ») FUSIONNÉE ET COMMITÉE SUR `main` (`b3a9c9a1`) ; VERDICT PLAYWRIGHT COMPLET EN COURS, PUIS PUSH**
+
+**Consigne** : Cowork, 7 h 51 (livraison ; corrections vertes, mots tranchés par Grégoire). Verdict, consigne et archive commités (`9c95dc4a`).
+
+**Ce qui est fait** : les mots exacts du verdict dans `ReserveRenvoyer.MOTS` ; « Finir de renvoyer » remplacé partout par « Terminer le renvoi » ; une seule fonction de taille à virgule décimale pour tout l'écran des archives (`Reserve.formaterTaille`) ; **#1028 inscrite** (archiver les copies d'un trimestre clos en gardant ses données, non prioritaire) ; #1024 et #1027 cochées. Branche fusionnée (`5260f253`), release minor 1.185.0 (`b3a9c9a1`, build 1005-0756). Vitest 680 fichiers, 8176 essais verts après le commit du bump.
+
+**Si cette ligne est encore là** : le verdict ou le push n'a pas abouti. Lire `scripts/.verdict-playwright.json` (SHA, échecs, instables) et `git reflog show origin/main` ; ne pas supposer.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 7 h 27 : **E3 (#1024) : LES TROIS CORRECTIONS DU VERDICT DE COWORK FAITES SUR `claude/e3-renvoyer-trimestre` (`d17b0749`) ; NI POUSSÉ NI PUBLIÉ**
 
 **Consigne** : Cowork, 7 h 19 (verdict orange, trois corrections ; arrêt après les tests). Verdict, consigne et archive commités sur la branche (`d9f20f38`).
 
