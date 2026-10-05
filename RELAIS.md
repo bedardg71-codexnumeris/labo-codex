@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 10 h 00 : **#1028 : LES CORRECTIONS DU VERDICT DE COWORK FAITES SUR `claude/1028-archiver-copies` (`ce564b52`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 10 h 23 : **1.186.0 (#1028 : « ARCHIVER LES COPIES… ») PRÊTE SUR `claude/1028-archiver-copies`, RELEASE COMMITÉE ; VERDICT PLAYWRIGHT COMPLET, FUSION DANS `main` ET PUSH À SUIVRE**
+
+**Consigne** : Cowork, 10 h 10 (livraison ; relecture des corrections `ce564b52` verte). Mots, consigne et archive commités sur la branche (`087ff2ee`).
+
+**Ce qui est fait** : les mots de Grégoire dans `ReserveCopies.MOTS` (fenêtre, bilan, copies changées, interrompu, une copie aux archives, « Trimestre non archivé » pour E1 et l'archive d'un groupe), tels qu'au fichier `plans de travail/MOTS-2026-10-05-1028-archiver-copies.md` ; un essai les fige tous. **Essai « Rouvrir »** (WebKit, `1028-archiver-copies.spec.js`) : un trimestre dont les copies sont aux archives est rouvert ; seul le registre `trimestres` change ; la marque reste, les copies restent « aux archives » (jamais « manquantes », codex compris) ; E1 refuse (pas clos ; clos de nouveau : « Trimestre non archivé ») ; « Faire revenir » les ramène, chaque fichier égal à l'avant. Mutation (« Rouvrir » efface la marque) : rouge. `main` intégrée dans la branche (`d744896b`) ; release minor 1.186.0 (`d391a8cd`, build 1005-1022) ; #1028 cochée.
+
+**Tests** : Vitest 682 fichiers, 8205 essais verts après le commit du bump ; spec #1028 : 5 sur 5 sous WebKit.
+
+**La suite** : le verdict complet sur le commit de ce relais, puis `main` avancée sur la branche (avance rapide) et `git push origin main`, puis la mise en ligne mesurée chez Netlify.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 10 h 00 : **#1028 : LES CORRECTIONS DU VERDICT DE COWORK FAITES SUR `claude/1028-archiver-copies` (`ce564b52`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE**
 
 **Consigne** : Cowork, 9 h 35 (verdict vert, trois corrections et un essai de plus) ; verdict, consigne et archive commités sur la branche (`214ae7ee`).
 
