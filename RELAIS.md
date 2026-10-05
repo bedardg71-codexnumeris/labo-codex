@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 5 h 20 : **E3 (#1024, « RENVOYER AUX ARCHIVES ») CODÉ SUR `claude/e3-renvoyer-trimestre` (`2cf725f0`, demande `ae4f06cd`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 5 h 16 : **E3 (#1024, « RENVOYER AUX ARCHIVES ») CODÉ SUR `claude/e3-renvoyer-trimestre` (`2cf725f0`, demande `ae4f06cd`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
 
 **Consigne** : Cowork, 4 h 36 (E3 ; arrêt au point 6). Consigne et archive commitées et poussées sur `main` (`7af302e0`).
 
