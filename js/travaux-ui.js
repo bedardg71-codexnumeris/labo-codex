@@ -2762,7 +2762,8 @@
 
         const nbMisAJour = Object.keys(modifications).length;
         if (nbMisAJour > 0) {
-            travauxStockage.mettreAJourFichiersBatch(modifications);
+            // #982 : correction de la machine, au démarrage — l'écran se tait.
+            travauxStockage.mettreAJourFichiersBatch(modifications, { discret: true });
         }
     }
 

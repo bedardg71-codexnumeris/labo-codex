@@ -31,7 +31,7 @@ function _lire() {
 
 function _ecrire(repertoires) {
     db.setSync(CLE_REPERTOIRES, repertoires);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_REPERTOIRES);   // lot F : geste hors témoin (_ecrire)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_REPERTOIRES);   // lot F : geste hors témoin (_ecrire)
 }
 
 function _genererId() {

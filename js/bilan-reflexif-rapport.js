@@ -666,7 +666,7 @@ async function supprimerResultats() {
     if (!confirm('Supprimer les r\u00e9sultats import\u00e9s ?')) return;
     etat.resultats = null;
     db.removeSync(CLE_RESULTATS());
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_RESULTATS());   // lot F : geste hors témoin (supprimer les résultats)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_RESULTATS());   // lot F : geste hors témoin (supprimer les résultats)
     detruireGraphiques();
     BilanReflexif.rendreInterface();
     BilanReflexif.afficherVue('editeur');

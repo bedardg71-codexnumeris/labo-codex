@@ -478,7 +478,7 @@ async function typerProductionCommeTerminale(productionId) {
         cible.type = 'terminale';
         return liste;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (typerProductionCommeTerminale)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (typerProductionCommeTerminale)
 
     // Recalculer les indices avec le nouveau rôle, puis rafraîchir la vue.
     if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
@@ -2452,7 +2452,7 @@ async function monterEvaluation(id) {
         deplacee = true;
         return evaluations;
     }, []);
-    if (deplacee && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (monterEvaluation)
+    if (deplacee && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (monterEvaluation)
 
     if (deplacee) {
         await afficherTableauProductions();
@@ -2497,7 +2497,7 @@ async function descendreEvaluation(id) {
         deplacee = true;
         return evaluations;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (descendreEvaluation)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (descendreEvaluation)
 
     if (deplacee) {
         await afficherTableauProductions();
@@ -3479,7 +3479,7 @@ async function supprimerProduction(id) {
         supprimee = true;
         return productions;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProduction)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProduction)
 
     if (!supprimee) return;
 

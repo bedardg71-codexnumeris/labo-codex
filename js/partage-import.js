@@ -106,7 +106,7 @@
             throw new Error('[partage-import] db indisponible — écriture impossible');
         }
         db.setSync(cle, valeur);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle);   // lot F : geste hors témoin (ecrire)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle);   // lot F : geste hors témoin (ecrire)
     }
 
     function clonerProfond(v) {

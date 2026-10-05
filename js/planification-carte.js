@@ -6336,6 +6336,10 @@ function retablir() {
 }
 
 // === SAUVEGARDE ===
+// #982 : vrai pendant les écritures de la MACHINE au chargement d'une carte (migrations,
+// réparation des liens) — elles préviennent le codex, sans « Enregistré » à l'écran.
+var _ecritureMachine = false;
+
 function sauvegarder() {
     var index = window.planificationDonnees.getIndex();
     if (!index) return;
@@ -6345,7 +6349,7 @@ function sauvegarder() {
         noeuds: Array.from(etat.noeuds.values()),
         liens: Array.from(etat.liens.values())
     };
-    window.planificationDonnees.sauvegarderCarte(index.active, donnees);
+    window.planificationDonnees.sauvegarderCarte(index.active, donnees, { machine: _ecritureMachine });
 
     mettreAJourTousLesBadges();
     rafraichirDateInspecteur();
@@ -6486,13 +6490,18 @@ function chargerCarte(carteId) {
 
     // Bascule des objectifs de leçon vers le nœud (idempotente, avant le rendu
     // pour que la carte affiche déjà les objectifs migrés).
-    migrerObjectifsVersMetadata();
-    // Ablation de l'ancrage porté par la séquence, avant le rendu pour que
-    // l'étendue affichée soit déjà la dérivée et non l'ancienne valeur saisie.
-    migrerAncrageTemporelVersLecon();
+    _ecritureMachine = true;
+    try {
+        migrerObjectifsVersMetadata();
+        // Ablation de l'ancrage porté par la séquence, avant le rendu pour que
+        // l'étendue affichée soit déjà la dérivée et non l'ancienne valeur saisie.
+        migrerAncrageTemporelVersLecon();
 
-    reconstruireDOM();
-    if (liensModifies) sauvegarder();
+        reconstruireDOM();
+        if (liensModifies) sauvegarder();
+    } finally {
+        _ecritureMachine = false;
+    }
 
     /* ⚠ UNE TRANSFORMATION DE SES DONNÉES SE DIT. Elle est étroite et
        réversible d'un clic, mais elle reste une réécriture de ce qu'il a

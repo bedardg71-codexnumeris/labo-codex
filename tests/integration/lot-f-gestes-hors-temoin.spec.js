@@ -58,15 +58,31 @@ async function demarrerDemo(page) {
     await page.evaluate(() => {
         window.__signaux = [];
         window.addEventListener('donnees-enregistrees', (e) => window.__signaux.push(e.detail && e.detail.cle));
+        // #982 : chaque « Enregistré » affiché, compté (le vrai témoin, enveloppé).
+        window.__enregistres = [];
+        const t = window.temoinEnregistrement;
+        const vrai = t.enregistre;
+        t.enregistre = function (cle) { window.__enregistres.push(cle); return vrai.apply(this, arguments); };
     });
 }
 
-/** Rend le nombre de signaux émis pendant `geste` (une fonction évaluée dans la page). */
-async function signauxPendant(page, geste, arg) {
-    await page.evaluate(() => { window.__signaux.length = 0; });
+/**
+ * #982 : ce que le geste a fait dire. Le codex (`signaux`) apprend tout de suite ; « Enregistré »
+ * (`enregistres`) vient après la fenêtre qui regroupe un geste (100 ms) et ses commits.
+ */
+async function effetsDe(page, geste, arg) {
+    await page.evaluate(() => { window.__signaux.length = 0; window.__enregistres.length = 0; });
     await page.evaluate(geste, arg);
-    await page.waitForTimeout(150);
-    return page.evaluate(() => window.__signaux.length);
+    await page.waitForTimeout(500);
+    return page.evaluate(() => ({ signaux: window.__signaux.length, enregistres: window.__enregistres.length }));
+}
+
+/** #982 : un GESTE prévient le codex et dit « Enregistré » UNE fois ; rend le nombre de signaux. */
+async function signauxPendant(page, geste, arg) {
+    const e = await effetsDe(page, geste, arg);
+    if (e.signaux > 0) expect(e.enregistres, '#982 : un geste dit « Enregistré », une fois').toBe(1);
+    else expect(e.enregistres, '#982 : une écriture discrète ne dit rien').toBe(0);
+    return e.signaux;
 }
 
 test.describe('Lot F — gestes hors témoin raccordés au codex', () => {
@@ -154,6 +170,35 @@ test.describe('Lot F — gestes hors témoin raccordés au codex', () => {
             });
         })).toBeGreaterThan(0);
 
+        expect(erreurs).toEqual([]);
+    });
+
+    test('#982 · un geste à deux raccords (retirer une grille de la bibliothèque) : UN « Enregistré » ; un échec provoqué → « Non enregistré »', async ({ page }) => {
+        const erreurs = brancherEcouteurs(page);
+        await demarrerDemo(page);
+        const deux = await effetsDe(page, async () => {
+            db.setSync('bibliothequeGrilles', [{ id: 'G_BANC', nom: 'Grille du banc' }]);
+            const r = await retirerGrilleDeLaBibliotheque('G_BANC');
+            if (r === false) throw new Error('retrait refusé : le banc ne mesure rien');
+        });
+        expect(deux.signaux, 'deux raccords : la bibliothèque et les dossiers').toBeGreaterThanOrEqual(2);
+        expect(deux.enregistres, 'un seul « Enregistré » pour le geste').toBe(1);
+
+        // Échec provoqué sur un geste de la liste : la clé des dossiers refuse son commit.
+        const texte = await page.evaluate(async () => {
+            const vraie = db._setIndexedDB.bind(db);
+            db._setIndexedDB = (k, v) => k === 'repertoiresBibliotheques'
+                ? Promise.reject(new DOMException('The quota has been exceeded.', 'QuotaExceededError'))
+                : vraie(k, v);
+            window.__enregistres.length = 0;
+            repertoiresBibliotheque.creer('Dossier qui échoue', 'pratiques');
+            await new Promise((r) => setTimeout(r, 500));
+            db._setIndexedDB = vraie;
+            const e = document.querySelector('.temoin-enregistrement-echec.visible .temoin-enregistrement-echec-texte');
+            return { echec: e ? e.textContent : null, enregistres: window.__enregistres.length };
+        });
+        expect(texte.echec).toMatch(/^Non enregistré : la mémoire du navigateur est pleine/);
+        expect(texte.enregistres, 'jamais « Enregistré » sur un échec').toBe(0);
         expect(erreurs).toEqual([]);
     });
 

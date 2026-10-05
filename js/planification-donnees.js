@@ -145,13 +145,18 @@ function getDonnees() {
  * au codex (`signalerEcritureUsager`). L'initialisation, la migration, le changement
  * d'onglet et une sauvegarde qui ne change rien passent `{ discret: true }`.
  * @param {Object} donnees
- * @param {{discret?: boolean}} [options]
+ * @param {{discret?: boolean, machine?: boolean}} [options]
  */
 function setDonnees(donnees, options) {
     try {
         db.setSync(cle(CLE_DONNEES), donnees);
-        if (!(options && options.discret) && window.signalerEcritureUsager) {
-            window.signalerEcritureUsager(cle(CLE_DONNEES));
+        // #982 : un geste sur la carte dit « Enregistré » ; une transformation de la
+        // machine au chargement (`machine`) prévient le codex sans rien afficher.
+        if (options && options.discret) return;
+        if (options && options.machine) {
+            if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle(CLE_DONNEES));
+        } else if (window.annoncerEcritureUsager) {
+            window.annoncerEcritureUsager(cle(CLE_DONNEES));
         }
     } catch (e) {
         console.warn('[Planification] Erreur sauvegarde données :', e);
@@ -184,7 +189,7 @@ function sauvegarderIndex(index, options) {
 /**
  * Sauvegarde le contenu d'une carte spécifique.
  */
-function sauvegarderCarte(carteId, contenu) {
+function sauvegarderCarte(carteId, contenu, options) {
     let donnees = getDonnees();
     if (!donnees) {
         donnees = { index: null, cartes: {} };
@@ -194,7 +199,7 @@ function sauvegarderCarte(carteId, contenu) {
     // changement d'onglet) ; seule une carte qui a changé le dit au codex.
     const inchangee = JSON.stringify(donnees.cartes[carteId]) === JSON.stringify(contenu);
     donnees.cartes[carteId] = contenu;
-    setDonnees(donnees, { discret: inchangee });
+    setDonnees(donnees, { discret: inchangee, machine: !!(options && options.machine) });
 }
 
 /**

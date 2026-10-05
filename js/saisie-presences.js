@@ -869,7 +869,7 @@ function basculerVerrouillageDate(dateStr) {
     }
 
     db.setSync(cleDatesVerrouillees(), datesVerrouillees);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleDatesVerrouillees());   // lot F : geste hors témoin (verrouiller une date)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleDatesVerrouillees());   // lot F : geste hors témoin (verrouiller une date)
     initialiserSaisiePresences();
     if (message && typeof notifications !== 'undefined') notifications.succes(message);
 }
