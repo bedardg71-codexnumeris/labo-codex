@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 5 h 16 : **E3 (#1024, « RENVOYER AUX ARCHIVES ») CODÉ SUR `claude/e3-renvoyer-trimestre` (`2cf725f0`, demande `ae4f06cd`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 7 h 27 : **E3 (#1024) : LES TROIS CORRECTIONS DU VERDICT DE COWORK FAITES SUR `claude/e3-renvoyer-trimestre` (`d17b0749`) ; NI POUSSÉ NI PUBLIÉ**
+
+**Consigne** : Cowork, 7 h 19 (verdict orange, trois corrections ; arrêt après les tests). Verdict, consigne et archive commités sur la branche (`d9f20f38`).
+
+**Ce qui est fait** : (1) le contenu de chaque copie de l'archive est relu au renvoi (394 copies, 1,08 Go : comparaison 2,9 s au lieu de 1,3 s, pic de la page 201 Mo) ; (2) une clé `<trimestre>_*` vide part avec les autres (et « Faire revenir » ne la prend pas pour un débris) ; (3) #1027 : une fiche déclarée sans fichier à l'archivage n'est plus « non couverte » (corrigée, se ferme avec la livraison). Trois mutations du verdict rouges sur le disque (3, 3, 4 essais), plus une pour E2. Vitest 680 fichiers, 8174 essais verts ; WebKit E1, E2, E3 verts (4 essais). Pas de verdict complet.
+
+**La suite** : les mots de Grégoire (Cowork), puis la consigne de livraison.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 5 h 16 : **E3 (#1024, « RENVOYER AUX ARCHIVES ») CODÉ SUR `claude/e3-renvoyer-trimestre` (`2cf725f0`, demande `ae4f06cd`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
 
 **Consigne** : Cowork, 4 h 36 (E3 ; arrêt au point 6). Consigne et archive commitées et poussées sur `main` (`7af302e0`).
 
