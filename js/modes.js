@@ -1068,16 +1068,92 @@ function _raisonNonEnregistre(error) {
  * L'événement du codex (« donnees-enregistrees ») part tout de suite, comme avant : la
  * donnée a changé dans l'application.
  */
-function _annoncerEnregistre(temoin, cleEffective, geste) {
-    const attente = typeof db.commitEnAttente === 'function' ? db.commitEnAttente(cleEffective) : null;
-    if (!attente) { temoin.enregistre(cleEffective); return; }
-    const attendre = attente.grosse || (typeof temoin.echecSur === 'function' && temoin.echecSur(cleEffective));
-    if (!attendre) temoin.enregistre(cleEffective);
-    else if (typeof window.signalerEcritureUsager === 'function') window.signalerEcritureUsager(cleEffective);
-    attente.commit.then(
-        () => { if (attendre) temoin.enregistre(cleEffective); },
-        (error) => temoin.nonEnregistre(_raisonNonEnregistre(error), geste, cleEffective)
-    );
+function _annoncerEnregistre(temoin, cles, geste, lot) {
+    // #982 : un geste peut écrire PLUSIEURS clés ; il ne dit qu'UN « Enregistré », après la
+    // dernière (et après tous les commits attendus). Les autres clés préviennent le codex.
+    const liste = (Array.isArray(cles) ? cles : [cles]).filter((c, i, t) => c && t.indexOf(c) === i);
+    if (liste.length === 0) return;
+    const derniere = liste[liste.length - 1];
+    const autres = liste.slice(0, -1);
+    // `lot` (#982) : les clés ont déjà prévenu le codex à l'appel, et les commits attendus
+    // ont été CAPTURÉS à l'appel (un échec survenu entre-temps ne doit pas se faire
+    // effacer par un « Enregistré »).
+    const signaler = (c) => {
+        if (lot) return;
+        if (typeof window.signalerEcritureUsager === 'function') window.signalerEcritureUsager(c);
+    };
+    const echecSur = (c) => typeof temoin.echecSur === 'function' && temoin.echecSur(c);
+    const attenteDe = (c) => lot ? (lot.attentes.get(c) || null)
+        : (typeof db.commitEnAttente === 'function' ? db.commitEnAttente(c) : null);
+    const attentes = liste.map((c) => ({ cle: c, attente: attenteDe(c) })).filter((a) => a.attente);
+    // Un LOT (#982) attend toujours ses commits : la fenêtre retarde déjà l'annonce, et un
+    // commit de petite clé prend ~1 ms — aucun délai perçu, et jamais « Enregistré » avant
+    // qu'un échec ait pu se dire.
+    const attendre = (lot && attentes.length > 0) || attentes.some((a) => a.attente.grosse || echecSur(a.cle));
+    const dire = () => {
+        autres.forEach((c) => { if (typeof temoin.fermerSi === 'function') temoin.fermerSi(c); });
+        temoin.enregistre(derniere);
+    };
+    autres.forEach(signaler);
+    if (!attendre) dire();
+    else signaler(derniere);
+    if (attentes.length === 0) return;
+    Promise.all(attentes.map((a) => a.attente.commit.then(null, (error) => { throw { cle: a.cle, error }; })))
+        .then(
+            () => { if (attendre) dire(); },
+            (e) => temoin.nonEnregistre(_raisonNonEnregistre(e.error), geste, e.cle)
+        );
+}
+
+// #982 — la fenêtre qui regroupe les annonces d'un même geste (voir plus bas).
+const FENETRE_LOT_MS = 100;
+const _lotAnnonce = { cles: [], attentes: new Map(), geste: undefined, minuterie: null };
+
+function _viderLotAnnonce() {
+    const lot = { cles: _lotAnnonce.cles, attentes: _lotAnnonce.attentes };
+    const geste = _lotAnnonce.geste;
+    _lotAnnonce.cles = [];
+    _lotAnnonce.attentes = new Map();
+    _lotAnnonce.geste = undefined;
+    _lotAnnonce.minuterie = null;
+    const temoin = window.temoinEnregistrement;
+    if (temoin && lot.cles.length) _annoncerEnregistre(temoin, lot.cles, geste, lot);
+}
+
+/**
+ * #982 (5 oct. 2026) — L'ANNONCE PUBLIQUE d'un geste de l'usager qui écrit hors des trois
+ * écrivains annonceurs (`db` direct, entité, file d'attente). Décision de Grégoire (5 oct.,
+ * 18 h 32) : « Enregistré » partout, de la même façon. La règle du lot 1 s'y applique : grosse
+ * clé → « Enregistré » au commit ; échec → « Non enregistré » qui reste. Le codex est prévenu
+ * comme avant (`signalerEcritureUsager`).
+ *
+ * Remplace `signalerEcritureUsager(cle)` aux gestes de l'usager ; une écriture de la machine
+ * garde `signalerEcritureUsager` (le codex apprend, l'écran se tait).
+ * @param {string|string[]} cles - la clé écrite, ou TOUTES celles d'un même geste (un seul
+ *   « Enregistré », après la dernière)
+ * @param {Object} [options] - `{ geste }`, dit sur un échec
+ */
+function annoncerEcritureUsager(cles, options) {
+    const { geste } = options || {};
+    const liste = (Array.isArray(cles) ? cles : [cles]).filter(Boolean);
+    // Le codex apprend tout de suite, comme avant (« pas à jour » sans délai).
+    liste.forEach((c) => {
+        if (typeof window.signalerEcritureUsager === 'function') window.signalerEcritureUsager(c);
+    });
+    if (!window.temoinEnregistrement) return;
+    // UN geste peut appeler plusieurs fois (suppression d'une ressource : la ressource, la
+    // corbeille, le dossier ; une boucle d'import) : les clés reçues dans une courte fenêtre,
+    // relancée à chaque appel, forment un seul lot et un seul « Enregistré », après la dernière.
+    liste.forEach((c) => {
+        const i = _lotAnnonce.cles.indexOf(c);
+        if (i >= 0) _lotAnnonce.cles.splice(i, 1);
+        _lotAnnonce.cles.push(c);
+        const attente = typeof db.commitEnAttente === 'function' ? db.commitEnAttente(c) : null;
+        if (attente) _lotAnnonce.attentes.set(c, attente);
+    });
+    if (geste) _lotAnnonce.geste = geste;
+    clearTimeout(_lotAnnonce.minuterie);
+    _lotAnnonce.minuterie = setTimeout(_viderLotAnnonce, FENETRE_LOT_MS);
 }
 
 /**
@@ -1571,6 +1647,7 @@ window.contexteImposeNoteProvisoire = contexteImposeNoteProvisoire;   // lot N2 
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.modifierEtAnnoncer = modifierEtAnnoncer;
 window.ecrireEtAnnoncer = ecrireEtAnnoncer;
+window.annoncerEcritureUsager = annoncerEcritureUsager;
 window.anonymiserNom = anonymiserNom;
 window.anonymiserGroupe = anonymiserGroupe;
 // 14 sept. 2026 : lu par la liste d'élèves du Cadre (trimestre-v2-etudiants.js), qui

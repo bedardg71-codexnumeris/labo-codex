@@ -93,7 +93,7 @@ async function ajouterEchelleALaBibliotheque(echelle) {
         bibliotheque.push(echelleBiblio);
         return bibliotheque;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_ECHELLES);   // lot F : geste hors témoin (ajouterEchelleALaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_ECHELLES);   // lot F : geste hors témoin (ajouterEchelleALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -272,7 +272,7 @@ async function retirerEchelleDeLaBibliotheque(echelleId) {
         retiree = true;
         return restants;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_ECHELLES);   // lot F : geste hors témoin (retirerEchelleDeLaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_ECHELLES);   // lot F : geste hors témoin (retirerEchelleDeLaBibliotheque)
 
     if (!retiree) {
         return false;

@@ -1478,7 +1478,7 @@ async function sauvegarderMetadonnees() {
 
     // Sauvegarder
     await db.set(cleStockage, liste);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleStockage);   // lot F : geste hors témoin (sauvegarderMetadonnees)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleStockage);   // lot F : geste hors témoin (sauvegarderMetadonnees)
 
     // Fermer le modal
     fermerModalEditionMetadonnees();

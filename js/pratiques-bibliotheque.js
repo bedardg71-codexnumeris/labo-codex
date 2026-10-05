@@ -381,7 +381,7 @@ async function ajouterPratiqueALaBibliotheque(configuration) {
         bibliotheque.push(configBiblio);
         return bibliotheque;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (ajouterPratiqueALaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (ajouterPratiqueALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -442,7 +442,7 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
         retiree = true;
         return restants;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (retirerPratiqueDeLaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (retirerPratiqueDeLaBibliotheque)
 
     if (!retiree) {
         return false;

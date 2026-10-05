@@ -356,7 +356,7 @@ async function dupliquerProduction(id) {
         copieCreee = copie;
         return productions;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (dupliquerProduction)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (dupliquerProduction)
 
     if (!copieCreee) return;
     const copie = copieCreee;
@@ -411,7 +411,7 @@ async function supprimerProductionActive() {
     const ecritLotF = await db.modifier(getCleProductions(), (lues) => {
         return (lues || []).filter(e => e.id !== productionEnEdition);
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionActive)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionActive)
 
     // Fermer le formulaire et retourner à l'accueil
     annulerFormProduction();

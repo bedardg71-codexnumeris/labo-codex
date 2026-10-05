@@ -114,7 +114,7 @@ async function ajouterALaBibliotheque(production) {
         bibliotheque.push(productionBiblio);
         return bibliotheque;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRODUCTIONS);   // lot F : geste hors témoin (ajouterALaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_PRODUCTIONS);   // lot F : geste hors témoin (ajouterALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -143,7 +143,7 @@ async function retirerDeLaBibliotheque(productionId) {
         retiree = true;
         return restants;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_PRODUCTIONS);   // lot F : geste hors témoin (retirerDeLaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_PRODUCTIONS);   // lot F : geste hors témoin (retirerDeLaBibliotheque)
 
     if (!retiree) {
         return false;

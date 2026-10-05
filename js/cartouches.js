@@ -2031,7 +2031,7 @@ window.confirmerImportCartouches = async function(donnees) {
 
             return bibliotheque;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportCartouches)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportCartouches)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeCartouches')) {
@@ -4401,7 +4401,7 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
 
     // security-ok: la source est une copie d'archive écrite par l'app elle-même, pas un fichier externe.
     await db.set(cleDest, garde.liste);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleDest);   // lot F : geste hors témoin (copierCartoucheDepuisTrimestre)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleDest);   // lot F : geste hors témoin (copierCartoucheDepuisTrimestre)
     return { ajoutee: true, conflit: null, grilleCreee: null, grilleAccueil };
 }
 
@@ -4634,7 +4634,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
 
         return cartouches;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle(`cartouches_${grilleIdLocal}`));   // lot F : geste hors témoin (ajouterCartoucheIndividuelle)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle(`cartouches_${grilleIdLocal}`));   // lot F : geste hors témoin (ajouterCartoucheIndividuelle)
 
         // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
         if (grilleManquante) {
@@ -4682,7 +4682,7 @@ async function retirerCartoucheDeBibliotheque(id, grilleId) {
         trouvee = true;
         return cartouches;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (retirerCartoucheDeBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (retirerCartoucheDeBibliotheque)
 
     if (trouvee) {
         // Rafraîchir le modal et la sidebar
@@ -4750,7 +4750,7 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     const ecritLotF = await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
         return (lues || []).filter(c => c.id !== id);
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (supprimerCartoucheDefinitivement)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (supprimerCartoucheDefinitivement)
 
     // Suppression du store partagé
     if (typeof retirerCartoucheDeLaBibliotheque === 'function') {

@@ -406,7 +406,7 @@
         reprendreStock913(eleve);
         eleve.resultatsUlterieurs = eleve.resultatsUlterieurs.concat([{ cours, trimestre, note }]);
         await db.set(NOM_CLE, registre); // security-ok: texte saisi par l'enseignant·e dans son propre champ, borné à 40 caractères, rendu par textContent
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
         return { ok: true };
     }
 
@@ -420,7 +420,7 @@
         reprendreStock913(eleve);
         eleve.resultatsUlterieurs = eleve.resultatsUlterieurs.filter((r, i) => i !== index);
         await db.set(NOM_CLE, registre); // security-ok: même objet, une entrée en moins
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
         return { ok: true };
     }
 
@@ -449,7 +449,7 @@
         delete registre.eleves[da];
         purgerModeles(registre);
         await db.set(NOM_CLE, registre); // security-ok: le même registre, un·e élève en moins
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
         return { ok: true };
     }
 
@@ -585,7 +585,7 @@
         // Lot 3 : ce que le Cadre (#913) avait rangé pour ce DA est recopié ici, une fois ; l'ancienne clé ne bouge pas.
         reprendreStock913(registre.eleves[da]);
         await db.set(NOM_CLE, registre); // security-ok: copie de données déjà rangées par l'app, aucune source externe ; rendu par textContent
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(NOM_CLE);   // lot F : geste hors témoin (registre)
         const resume = resumerDossiers(dossiersNeufs);
         resume.poidsModelesOctets = poidsModeles;
         return { ok: true, resume, recapture: !!existant };

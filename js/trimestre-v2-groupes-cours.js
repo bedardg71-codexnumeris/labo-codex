@@ -879,7 +879,7 @@ async function supprimerGroupeCoursV2() {
     // Supprimer de la liste (relue : l'écriture du codex à part a pris du temps)
     const groupesCoursFiltre = db.getSync(cleGC, []).filter(g => g.id !== groupeCoursEnEditionId);
     db.setSync(cleGC, groupesCoursFiltre);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleGC);   // lot F : geste hors témoin (supprimer un groupe-cours)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleGC);   // lot F : geste hors témoin (supprimer un groupe-cours)
 
     // Si c'était le groupe-cours actif, le désactiver.
     // #390 (audit 5 août, rapport B6) : groupeCoursActif est un OBJET —
@@ -1069,7 +1069,7 @@ async function supprimerGroupeCoursDepuisBibliotheque(gcId, nomGC) {
     // Supprimer de la liste
     groupesCours = groupesCours.filter(gc => gc.id !== gcId);
     db.setSync(cleGC, groupesCours);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleGC);   // lot F : geste hors témoin (supprimer un groupe-cours depuis la bibliothèque)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleGC);   // lot F : geste hors témoin (supprimer un groupe-cours depuis la bibliothèque)
 
     // Si c'était le groupe-cours actif, désactiver.
     // #390 : purger AUSSI infoCours (le couple s'écrit et s'efface ensemble).

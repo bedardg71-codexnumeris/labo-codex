@@ -458,7 +458,7 @@ function ecrireNotesRapportEnAttente() {
         toutes[String(da)] = texte;
     }
     db.setSync(cle('notesRapport'), toutes); // security-ok: texte saisi par l'enseignant dans son propre champ (aucune source externe), échappé par echapperHtml au rendu
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('notesRapport'));   // lot F : geste hors témoin (ecrireNotesRapportEnAttente)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('notesRapport'));   // lot F : geste hors témoin (ecrireNotesRapportEnAttente)
 }
 
 /**

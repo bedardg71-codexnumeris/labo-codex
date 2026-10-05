@@ -51,8 +51,8 @@
      */
     function _ecrire(modalites, options) {
         db.setSync(cle('modalitesEvaluation'), modalites);
-        if (!(options && options.discret) && window.signalerEcritureUsager) {
-            window.signalerEcritureUsager(cle('modalitesEvaluation'));
+        if (!(options && options.discret) && window.annoncerEcritureUsager) {
+            window.annoncerEcritureUsager(cle('modalitesEvaluation'));
         }
     }
 

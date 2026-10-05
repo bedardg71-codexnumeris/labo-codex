@@ -1,26 +1,25 @@
-# Consigne du jour – enregistrement, lot 2 : « Enregistré » partout (#982) et les anciens guides rangés (#984)
+# Consigne du jour – livrer le lot 2 de l'enregistrement (#982, #984)
 
-> Écrite par Cowork le 5 octobre 2026 à 18 h 34 (Toronto, mesurée par `date`). Remplace la consigne de livraison du lot 1, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-05-enregistrement-livraison.md`.
+> Écrite par Cowork le 5 octobre 2026 à 19 h 12 (Toronto, mesurée par `date`). Remplace la consigne du lot 2, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-05-enregistrement-partout.md`.
 
 ## Où on en est
 
-1.186.1 est en ligne ; la porte terrain du lot 1 est passée sur l'iPad (dix rangées sur dix). Grégoire a tranché les trois décisions du chantier : lis `DECISIONS-2026-10-05-chantier-enregistrement.md` en entier (décisions et ordre des lots). Ce lot est le lot 2.
+Le lot 2 (`6c85c6ed`, `480e7752`, `claude/enregistrement-partout`) est relu par Cowork : **vert, sans correction**. Acceptés : `annoncerEcritureUsager` et sa fenêtre de 100 ms (le commit capturé à l'appel est ce qui la rend sûre) ; un lot qui attend toujours ses commits ; `changerPratiqueActive` qui annonce ses deux clés ; les trois écritures de la machine laissées silencieuses ; ta supposition sur les réglages d'interface (règle de Grégoire : partout, de la même façon).
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork (les décisions, cette consigne, son archive), à écrire dans `BACKLOG.md`, et à travailler sur une branche `claude/enregistrement-partout`. **Ne pousse pas le lot et ne fais pas de release** : tu t'arrêtes au point 5. Pousse `RELAIS.md` seul sur `main` en t'arrêtant.
+**Le main local a divergé** : une session parallèle (audit du démo, lecture seule) y a commité `c9fc8f4c` (son rapport) sans le pousser, alors que `origin/main` a reçu ton relais `62f7e5ad`. Les deux ne touchent que des documents.
 
-## Les décisions de Cowork (techniques)
-
-1. **#982** : aux gestes de la liste figée par `sentinelle-lot-F-gestes-hors-temoin.test.js`, l'appel `signalerEcritureUsager(cle)` devient l'annonce du témoin par le point unique du lot 1 (`_annoncerEnregistre` ou son équivalent public), pour que la règle du lot 1 s'applique partout : grosse clé → « Enregistré » au commit ; échec → « Non enregistré » qui reste. Le codex continue d'être marqué « pas à jour » comme avant. Un geste qui écrit plusieurs clés n'affiche qu'**un** « Enregistré », après la dernière. Mesure d'abord : ceux des gestes de la liste qui ne sont **pas** des gestes de l'usager (écritures discrètes) gardent leur silence ; dis lesquels.
-2. **#984** : `git mv` des deux guides vers `docs/archive/` ; corrige les liens qui y pointent dans le dépôt (le BACKLOG et les rapports peuvent garder leur mention historique).
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, à fusionner la branche dans `main`, à faire la release et à pousser.
 
 ## Ce que tu fais, dans cet ordre
 
-1. **Commite** les décisions, cette consigne et son archive sur `main`, pousse `main`.
-2. **Mesure** le point 1 (gestes de l'usager ou écritures discrètes).
-3. **Code** sur la branche.
-4. **Tests** : la sentinelle de la liste devient : chaque geste de l'usager annonce « Enregistré » (et pas deux fois) ; un échec provoqué sur un geste de la liste → « Non enregistré ». Mutations rouges : un geste rendu muet ; deux annonces pour un geste ; l'annonce avant le commit d'une grosse clé. Vitest complet ; les bancs WebKit du témoin et voisins (résumé lu sans filtre).
-5. **Arrête-toi et rends** : le commit sur la branche ; `DEMANDE-RELECTURE-2026-10-05-enregistrement-partout.md` ; pour Grégoire, la liste des écrans où « Enregistré » apparaît désormais, en gestes d'enseignant.
+1. **Commite** cette consigne et son archive sur la branche.
+2. **Réconcilie `main`** : rebase le main local (`c9fc8f4c`, le rapport d'audit du démo) sur `origin/main`, sans modifier le rapport. La **version non suivie** du même rapport qui traîne dans l'arbre : ne la touche pas et ne la commite pas ; dis-moi son chemin et en quoi elle diffère de la version commitée (un `diff --stat` suffit).
+3. **Vitest complet**, puis **le verdict Playwright complet** (Mac sur secteur, garde-éveil ; résumé final lu sans filtre).
+4. **Fusionne** la branche dans `main`, **release** par `scripts/release.mjs` selon le skill `release-et-changelog` (patch). Ligne des Nouvelles, telle quelle :
+   « Enregistrement : les gestes qui enregistraient sans rien dire affichent désormais « Enregistré », comme partout ailleurs ; un échec dit « Non enregistré », et le message reste. »
+   Coche #982 et #984.
+5. **Pousse**, mesure la mise en ligne chez Netlify, écris `RELAIS.md`.
 
 ## Ce que tu rends
 
-À Grégoire, deux lignes : ce qui change à l'écran. Ce que tu as supposé, en une ligne.
+La version en ligne et son heure mesurée ; le verdict Playwright (échecs, instables) ; la ligne sur la version non suivie du rapport d'audit.

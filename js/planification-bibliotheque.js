@@ -40,7 +40,7 @@ async function obtenirTousLesAlignementsBibliotheque() {
 async function sauvegarderBibliotheque(items) {
     try {
         await db.set(CLE_BIBLIOTHEQUE_ALIGNEMENTS, items);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_ALIGNEMENTS);   // lot F : geste hors témoin
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_ALIGNEMENTS);   // lot F : geste hors témoin
     } catch (e) {
         console.warn('[BiblioAlignements] Erreur sauvegarde:', e);
     }

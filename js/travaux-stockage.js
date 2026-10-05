@@ -294,7 +294,7 @@
      */
     function _signalerSiGeste(cleEcrite, options) {
         if (options && options.discret) return;
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleEcrite);
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleEcrite);
     }
 
     /**
@@ -487,7 +487,7 @@
      * @param {Object} modifications - Map { fichierId: { champs a modifier } }
      * @returns {number} Nombre de fichiers mis a jour
      */
-    function mettreAJourFichiersBatch(modifications) {
+    function mettreAJourFichiersBatch(modifications, options) {
         const fichiers = obtenirFichiersTravaux();
         let compteur = 0;
 
@@ -513,7 +513,7 @@
         }
 
         if (compteur > 0) {
-            sauvegarderFichiersTravaux(fichiers);
+            sauvegarderFichiersTravaux(fichiers, options);
         }
         return compteur;
     }
