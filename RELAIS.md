@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 13 h 41 : **ENREGISTREMENT, LOT 1 + 1 BIS (#962, #986, #1029) PRÊT SUR `claude/enregistrement-temoin` (`a8329002`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 13 h 48 : **1.186.1 (ENREGISTREMENT, LOT 1 : #962, #986, #1029) PRÊTE SUR `claude/enregistrement-temoin`, RELEASE COMMITÉE (`92cec6c2`) ; VERDICT PLAYWRIGHT COMPLET, AVANCE DE `main` ET PUSH À SUIVRE**
+
+**Consigne** : Cowork, 13 h 44 (livraison ; message tranché par Grégoire). Consigne et archive commitées (`c8f07aaf`).
+
+**Ce qui est fait** : le message de Grégoire pour un échec qui reste malgré la réouverture (`079c9e1f` : `db.js` nomme l'échec `ConnexionPerdue`, `modes.js` répond « Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire. ») ; essais qui le lisent, deux mutations rouges. `main` intégrée dans la branche (`5d9e7608`) ; release patch 1.186.1 (build 1005-1347), ligne des Nouvelles consolidée dans l'entrée 1.186 ; #962, #986, #1029 cochées.
+
+**Tests** : Vitest 684 fichiers, 8227 essais verts après le commit du bump.
+
+**La suite** : verdict complet sur le commit de ce relais, puis `main` avancée sur la branche et `git push origin main`, puis la mise en ligne mesurée chez Netlify. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-10-05-enregistrement-temoin.md`, à publier par Cowork.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 13 h 41 : **ENREGISTREMENT, LOT 1 + 1 BIS (#962, #986, #1029) PRÊT SUR `claude/enregistrement-temoin` (`a8329002`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
 
 **Consigne** : Cowork, 12 h 50 (verdict vert du lot 1, #1029 entré dans le lot), exécutée jusqu'à son point 6 (arrêt voulu). Verdict, consigne et archive commités sur la branche (`f3ac924a`).
 
