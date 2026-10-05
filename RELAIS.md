@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 17 h 27 : **1.186.1 (ENREGISTREMENT, LOT 1 : #962, #986, #1029) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `95f37ad3` (PUBLIÉ À 17 h 18) ; SECOND VERDICT COMPLET VERT ; FICHES COCHÉES**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 19 h 08 : **ENREGISTREMENT, LOT 2 (#982 « ENREGISTRÉ » PARTOUT, #984 GUIDES RANGÉS) PRÊT SUR `claude/enregistrement-partout` (`480e7752`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+
+**Consigne** : Cowork, 18 h 34, exécutée jusqu'à son point 5 (arrêt voulu). Décisions de Grégoire, consigne et archive commitées et poussées sur `main` (`12cc8ac5`).
+
+**Ce qui est fait** : `annoncerEcritureUsager` (`modes.js`) aux 100 gestes de la liste du lot F (le codex prévenu tout de suite ; fenêtre de 100 ms qui regroupe un geste ; commits capturés à l'appel et attendus avant « Enregistré ») ; deux écritures de la machine restent silencieuses (migration des cartouches ; migrations au chargement d'une carte) ; la correction des copies au démarrage passe `discret`. Les deux guides dans `docs/archive/`. Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-05-enregistrement-partout.md` (avec la liste des écrans pour Grégoire).
+
+**Tests** : Vitest 685 fichiers, 8234 essais verts ; bancs WebKit du témoin, voisins, lot F et CO-01 : 100 passés, résumé lu en entier ; 5 mutations rouges. **Suite Playwright complète non lancée** (consigne : à la livraison).
+
+**⚠ Arbre partagé** : une autre session a commité sur le `main` LOCAL un audit du chantier du démo (`c9fc8f4c`, 19 h 06, non poussé), et une version différente de `Rapports/AUDIT-2026-10-05-chantier-demo.md` est en cours, non suivie, dans l'arbre principal. Ni l'un ni l'autre n'a été touché. Ce relais a été poussé depuis `origin/main` par un worktree : le `main` local devra intégrer `origin/main` avant son push.
+
+**La suite** : verdict de Cowork ; puis le lot 3 (#976, « Corriger le DA… »).
+
+---
+
+## (relais précédent) 5 OCT. 2026, 17 h 27 : **1.186.1 (ENREGISTREMENT, LOT 1 : #962, #986, #1029) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `95f37ad3` (PUBLIÉ À 17 h 18) ; SECOND VERDICT COMPLET VERT ; FICHES COCHÉES**
 
 **Consigne** : Cowork, 13 h 44 (livraison), exécutée jusqu'au bout.
 
