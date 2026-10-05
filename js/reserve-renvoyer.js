@@ -300,8 +300,24 @@ async function comparer(source, trimestre, onProg) {
     donneesTexte = null;
     var listees = {};
     (await source.listerCopies()).forEach(function(x) { listees[x.nom] = true; });
-    var manquantes = Object.keys(empreintesCopies).filter(function(n) { return !listees[n]; }).length;
+    var nomsArchive = Object.keys(empreintesCopies).sort();
+    var manquantes = nomsArchive.filter(function(n) { return !listees[n]; }).length;
     if (manquantes) return refus('copiesAbsentes', { manquantes: manquantes });
+
+    // Le CONTENU de chaque copie de l'archive, relu et empreinté maintenant, une à la fois, y
+    // compris celles que l'application n'a plus (une reprise). Verdict de Cowork (5 oct., 7 h 19,
+    // correction 1) : le renvoi est le seul moment où l'archive devient l'unique exemplaire, et
+    // « vérifiée » peut dater de semaines (iCloud évince ou remplace un fichier sans que la liste
+    // change). Une seule illisible, tronquée ou différente → refus, rien retiré.
+    for (var q = 0; q < nomsArchive.length; q++) {
+        onProg(q, nomsArchive.length * 2);
+        var lu = await source.lireCopie(nomsArchive[q]);
+        if (!lu || lu.probleme) return refus('changeeDepuis');
+        var empreinteArchive = await RV.sha256(lu.octets);
+        lu = null;
+        if (empreinteArchive !== empreintesCopies[nomsArchive[q]]) return refus('changeeDepuis');
+        if (q % 5 === 4) await _yield();
+    }
 
     // ── Les clés : celles du trimestre, et les séances de ses groupes (archive et application) ──
     var prefixe = trimestre + '_';
@@ -317,7 +333,13 @@ async function comparer(source, trimestre, onProg) {
     for (var c = 0; c < aComparer.length; c++) {
         var cle = aComparer[c];
         var valeur = await window.db.get(cle, null);
-        if (valeur === null || valeur === undefined) continue; // une clé vide ne garde rien
+        // Une clé vide ne garde rien, et E1 ne l'archive pas : elle part avec les autres, jamais
+        // « née depuis » (verdict de Cowork, correction 2 : sinon le retrait la disait nouvelle,
+        // le renvoi était refusé en boucle, et une clé vide restée faisait « inachevé » à jamais).
+        if (valeur === null || valeur === undefined) {
+            if (cle.indexOf(prefixe) === 0) res.aRetirer.cles.push(cle); else res.aRetirer.seances.push(cle);
+            continue;
+        }
         if (!_a(empreintesCles, cle)) { res.differences.push({ type: 'nee', cle: cle }); continue; }
         if ((await RV.sha256Texte(JSON.stringify(valeur))) !== empreintesCles[cle]) { res.differences.push({ type: 'changee', cle: cle }); continue; }
         if (cle.indexOf(prefixe) === 0) res.aRetirer.cles.push(cle); else res.aRetirer.seances.push(cle);
@@ -337,7 +359,7 @@ async function comparer(source, trimestre, onProg) {
     var tousLesIds = Object.keys(ids).sort();
     for (var p = 0; p < tousLesIds.length; p++) {
         var id = tousLesIds[p];
-        onProg(p, tousLesIds.length);
+        onProg(nomsArchive.length + Math.round((p / Math.max(tousLesIds.length, 1)) * nomsArchive.length), nomsArchive.length * 2);
         var ici = null;
         try { ici = await window.travauxStockage.recupererBlob(id); } catch (e) { ici = null; }
         if (ici) {
@@ -355,7 +377,7 @@ async function comparer(source, trimestre, onProg) {
         if (nomDansArchive[id] && presentes.has('thumbnail_' + id)) res.aRetirer.vignettes.push(id);
         if (p % 5 === 4) await _yield();
     }
-    onProg(tousLesIds.length, tousLesIds.length);
+    onProg(1, 1);
 
     res.aRetirer.registre = !!_entreeRegistre(trimestre);
     res.etat = res.differences.length ? 'different' : 'identique';

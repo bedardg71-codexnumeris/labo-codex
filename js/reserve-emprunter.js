@@ -266,7 +266,10 @@ async function emprunter(source, entree, onProg) {
     // identiques → laissées ; différentes → refus. Une clé du trimestre que l'archive n'a pas → débris.
     var presentes = await _toutesLesCles();
     for (var kp of presentes) {
-        if (typeof kp === 'string' && kp.indexOf(prefixe) === 0 && !_a(donnees, kp)) return refus('debris');
+        if (typeof kp !== 'string' || kp.indexOf(prefixe) !== 0 || _a(donnees, kp)) continue;
+        // Une clé vide ne garde rien (E1 ne l'archive pas) : ni débris, ni réécrite.
+        var vide = await window.db.get(kp, null);
+        if (vide !== null && vide !== undefined) return refus('debris');
     }
     var aEcrire = [];
     for (var s = 0; s < cles.length; s++) {

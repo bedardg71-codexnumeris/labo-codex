@@ -208,15 +208,15 @@ function monter(db, magasin, options = {}) {
 }
 
 /** Archive h2032 (mode fichier), le vérifie, retient la vérification ; rend le ZIP. */
-async function archiverEtVerifier(banc, forcerVerifiee) {
+async function archiverEtVerifier(banc, sansFichier) {
     await banc.win.ReserveTrimestre.archiverTrimestre(TRIM, { sansConfirmation: true });
     const zip = banc.journal.telechargements.at(-1).blob;
     const RV = banc.win.ReserveVerifier;
     const rapport = await RV.verifierArchive(RV.sourceFichier(zip), banc.win.Reserve.lireManifesteLocal().archives[DOSSIER], DOSSIER);
-    // Une fiche sans fichier à l'archivage rend l'archive « incomplète » (fiche non couverte,
-    // mesuré le 5 oct. : trouvaille inscrite). Pour atteindre la garde « copie absente de
-    // l'archive » d'E3, le banc force l'état (une archive vérifiée par une version antérieure).
-    if (forcerVerifiee) { expect(rapport.nonCouvertes).toEqual(['FT_h3']); rapport.etat = 'verifiee'; }
+    // #1027 (corrigée dans ce lot) : une fiche sans fichier à l'archivage, déclarée par
+    // `nombre_fichiers_manquants`, n'est plus « non couverte » ; l'archive est vérifiée d'elle-même.
+    if (sansFichier) expect(rapport.manquantesALArchivage).toEqual(['FT_h3']);
+    expect(rapport.nonCouvertes).toEqual([]);
     expect(rapport.etat).toBe('verifiee');
     RV.retenirResultat(DOSSIER, rapport);
     banc.zip = zip;
@@ -227,7 +227,7 @@ async function preparer(o = {}) {
     const db = o.db || creerDb(o.corpus);
     const magasin = creerMagasin(db, o.copies);
     const banc = monter(db, magasin, { muter: o.muter });
-    await archiverEtVerifier(banc, o.forcerVerifiee);
+    await archiverEtVerifier(banc, o.sansFichier);
     db.journal.length = 0;
     return banc;
 }
@@ -447,7 +447,7 @@ describe('E3 · (d) les refus : rien retiré', () => {
     it('une copie que l\'archive n\'a pas (sa fiche y était, le fichier manquait) : différence, rien retiré', async () => {
         const copies = Object.assign({}, COPIES);
         delete copies.FT_h3;
-        const banc = await preparer({ copies, forcerVerifiee: true });
+        const banc = await preparer({ copies, sansFichier: true });
         banc.magasin._blobs.set('FT_h3', new Blob([COPIES.FT_h3]));
         const avant = await photo(banc);
         const r = await renvoyer(banc);
@@ -470,6 +470,118 @@ describe('E3 · (d) les refus : rien retiré', () => {
         const avant = await photo(banc);
         expect((await banc.win.ReserveRenvoyer.retirer(res)).etat).toBe('different');
         expect(await photo(banc)).toEqual(avant);
+    });
+});
+
+describe('E3 · correction 1 (verdict) : le contenu des copies de l\'archive est relu au renvoi', () => {
+    /** Le ZIP d'origine, une copie de l'archive remplacée par d'autres octets (meta.json intact). */
+    async function copieAlteree(blob, id, octetsNeufs) {
+        const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+        const n = Object.keys(zip.files).find((x) => x.includes('/travaux/' + id + '.'));
+        zip.file(n, octetsNeufs);
+        return new Blob([await zip.generateAsync({ type: 'uint8array' })]);
+    }
+
+    it('une copie de l\'archive altérée après « Vérifier » (même nom, même meta.json) : refus, rien retiré', async () => {
+        const banc = await preparer();
+        const alteree = await copieAlteree(banc.zip, 'FT_h2', octets(25 * 1024 + 3, 77));
+        const avant = await photo(banc);
+        const r = await renvoyer(banc, alteree);
+        expect(r.comparaison).toMatchObject({ etat: 'refus', motif: 'changeeDepuis' });
+        expect(await photo(banc)).toEqual(avant);
+        expect(banc.db.journal).toEqual([]);
+        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toBe('L\'archive ne concorde plus avec sa vérification. Rien n\'a été retiré. Vérifie-la de nouveau.');
+    });
+
+    it('tronquée : refus aussi ; et en reprise, une copie que l\'application n\'a plus est relue elle aussi', async () => {
+        const banc = await preparer();
+        expect((await renvoyer(banc, await copieAlteree(banc.zip, 'FT_h1', COPIES.FT_h1.slice(0, 1000)))).comparaison.motif).toBe('changeeDepuis');
+        // Une reprise : FT_hc est déjà partie de l'application, son exemplaire d'archive est abîmé.
+        let n = 0;
+        banc.magasin.echouer = () => ++n === 2;
+        expect((await renvoyer(banc)).bilan.etat).toBe('interrompu');
+        banc.magasin.echouer = null;
+        const avant = await photo(banc);
+        const r = await renvoyer(banc, await copieAlteree(banc.zip, 'FT_h1', octets(40 * 1024, 55)));
+        expect(banc.magasin._blobs.has('FT_h1')).toBe(false); // partie au premier passage
+        expect(r.comparaison.motif).toBe('changeeDepuis');
+        expect(await photo(banc)).toEqual(avant);
+    });
+
+    it('TÉMOIN — la relecture du contenu neutralisée : la copie altérée passe, le trimestre part', async () => {
+        const banc = await preparer({ muter: { [MODULE]: (s) => s.replace(
+            "if (empreinteArchive !== empreintesCopies[nomsArchive[q]]) return refus('changeeDepuis');", '') } });
+        const r = await renvoyer(banc, await copieAlteree(banc.zip, 'FT_h2', octets(25 * 1024 + 3, 77)));
+        expect(r.bilan && r.bilan.etat).toBe('fait'); // le premier essai aurait rougi
+    });
+});
+
+describe('E3 · correction 2 (verdict) : une clé du trimestre qui vaut null', () => {
+    function corpusAvecVide() { return Object.assign(structuredClone(CORPUS), { h2032_presencesVides: null }); }
+
+    it('se renvoie, la clé vide part avec les autres, rien ne reste « inachevé » ; « Faire revenir » rend le reste', async () => {
+        const banc = await preparer({ corpus: corpusAvecVide() });
+        const r = await renvoyer(banc);
+        expect(r.comparaison.etat).toBe('identique');
+        expect(r.bilan.etat).toBe('fait');
+        expect(banc.db._map.has('h2032_presencesVides')).toBe(false);
+        expect(banc.win.ReserveRenvoyer.estInacheve(TRIM)).toBe(false);
+        expect((await faireRevenir(banc)).etat).toBe('fait');
+    });
+
+    it('une clé vide restée après un renvoi interrompu n\'empêche ni la reprise ni « Faire revenir »', async () => {
+        const banc = await preparer({ corpus: corpusAvecVide() });
+        banc.db.echouer = (op, k) => op === 'remove' && k === 'h2032_notesRapport';
+        expect((await renvoyer(banc)).bilan.etat).toBe('interrompu');
+        banc.db.echouer = null;
+        expect((await faireRevenir(banc)).etat).toBe('fait');
+    });
+
+    it('TÉMOIN — le traitement de la clé vide retiré : le renvoi est refusé (« née depuis »)', async () => {
+        const banc = await preparer({ corpus: corpusAvecVide(), muter: { [MODULE]: (s) => s.replace(
+            "            if (cle.indexOf(prefixe) === 0) res.aRetirer.cles.push(cle); else res.aRetirer.seances.push(cle);\n            continue;",
+            "            continue;") } });
+        const r = await renvoyer(banc);
+        expect(r.bilan && r.bilan.etat).toBe('different'); // le premier essai aurait rougi
+    });
+});
+
+describe('E3 · correction 3 (verdict) : #1027, une fiche sans fichier à l\'archivage', () => {
+    function sansH3() { const c = Object.assign({}, COPIES); delete c.FT_h3; return c; }
+
+    it('l\'archive est « vérifiée », le trimestre se renvoie, puis revient (la fiche sans copie dans l\'archive)', async () => {
+        const banc = await preparer({ copies: sansH3(), sansFichier: true });
+        const r = await renvoyer(banc);
+        expect(r.bilan.etat).toBe('fait');
+        const bilan = await faireRevenir(banc);
+        expect(bilan.etat).toBe('fait');
+        expect(bilan.sansFichier).toEqual(['FT_h3']);
+        expect(banc.db._map.get('h2032_fichiersTravaux').map((f) => f.id)).toContain('FT_h3');
+    });
+
+    it('un compte déclaré qui ne concorde pas : l\'ancienne règle, la fiche reste non couverte', async () => {
+        const db = creerDb();
+        const magasin = creerMagasin(db, sansH3());
+        const banc = monter(db, magasin);
+        await banc.win.ReserveTrimestre.archiverTrimestre(TRIM, { sansConfirmation: true });
+        const zip = await JSZip.loadAsync(await banc.journal.telechargements.at(-1).blob.arrayBuffer());
+        const n = 'trimestres/' + DOSSIER + '/meta.json';
+        zip.file(n, (await zip.file(n).async('string')).replace('"nombre_fichiers_manquants": 1', '"nombre_fichiers_manquants": 0'));
+        const RV = banc.win.ReserveVerifier;
+        const rapport = await RV.verifierArchive(RV.sourceFichier(new Blob([await zip.generateAsync({ type: 'uint8array' })])), banc.win.Reserve.lireManifesteLocal().archives[DOSSIER], DOSSIER);
+        expect(rapport.nonCouvertes).toEqual(['FT_h3']);
+        expect(rapport.etat).toBe('incomplete');
+    });
+
+    it('TÉMOIN — l\'ancienne règle remise : l\'archive n\'est plus vérifiée', async () => {
+        const db = creerDb();
+        const banc = monter(db, creerMagasin(db, sansH3()), { muter: { 'js/reserve-verifier.js': (s) => s.replace(
+            "if (!idsArchive[f.id] && !manquantesALArchivage[f.id]) rapport.nonCouvertes.push(f.id);",
+            "if (!idsArchive[f.id]) rapport.nonCouvertes.push(f.id);") } });
+        await banc.win.ReserveTrimestre.archiverTrimestre(TRIM, { sansConfirmation: true });
+        const RV = banc.win.ReserveVerifier;
+        const rapport = await RV.verifierArchive(RV.sourceFichier(banc.journal.telechargements.at(-1).blob), banc.win.Reserve.lireManifesteLocal().archives[DOSSIER], DOSSIER);
+        expect(rapport.etat).toBe('incomplete'); // le premier essai aurait rougi
     });
 });
 
@@ -575,7 +687,7 @@ describe('E3 · (g) témoins : le banc rougit', () => {
         const copies = Object.assign({}, COPIES);
         delete copies.FT_h3;
         const banc = await preparer({
-            copies, forcerVerifiee: true,
+            copies, sansFichier: true,
             muter: { [MODULE]: (s) => s.replace(
                 "res.differences.push({ type: 'copieAbsente', id: id });",
                 "res.aRetirer.copies.push(id);"
