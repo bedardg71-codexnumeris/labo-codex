@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.186 (#1028 : archiver les copies d'un trimestre clos) — ligne acceptée par Grégoire
+            // le 5 oct. 2026 à 10 h 10 (MOTS-2026-10-05-1028-archiver-copies.md), posée telle quelle.
+            // Titre de Claude Code.
+            version: '1.186',
+            couleur: 'vert',
+            titre: 'Archiver les copies d\'un trimestre clos',
+            items: [
+                'Archives&nbsp;: «&nbsp;Archiver les copies…&nbsp;» retire de l\'application les copies d\'un trimestre clos que son archive vérifiée garde à l\'identique&nbsp;; toutes ses données restent (résultats, grilles, rétroactions), et le codex s\'allège d\'autant. «&nbsp;Faire revenir&nbsp;» ramène les copies.'
+            ]
+        },
+        {
             // 1.185 (#1024, E3 : renvoyer un trimestre aux archives) — ligne de Cowork, acceptée par
             // Grégoire le 5 oct. 2026 (consigne de 7 h 51), posée telle quelle. Titre de Claude Code.
             version: '1.185',
