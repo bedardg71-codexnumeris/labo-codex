@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 9 h 31 : **#1028 (ARCHIVER LES COPIES D'UN TRIMESTRE CLOS, SES DONNÉES RESTENT) CODÉE SUR `claude/1028-archiver-copies` (`ab24f7d0`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CROISÉE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 10 h 00 : **#1028 : LES CORRECTIONS DU VERDICT DE COWORK FAITES SUR `claude/1028-archiver-copies` (`ce564b52`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE**
+
+**Consigne** : Cowork, 9 h 35 (verdict vert, trois corrections et un essai de plus) ; verdict, consigne et archive commités sur la branche (`214ae7ee`).
+
+**Ce qui est fait** : (1) toute copie sans fichier (aux archives, manquante, introuvable) s'ouvre à sa place dans la visionneuse, la précédente ne reste jamais à l'écran ; (2) « Fusionner » refuse une copie sans fichier et ne peut plus l'effacer ; (3) `notifications.avertissement` → `warning`, avec une sentinelle sur toute l'API ; l'essai de plus : codex et import d'un ZIP qui portent la marque, puis « Faire revenir ». Chaque correction a son essai et sa mutation rouge. Détail : § 9 de `plans de travail/DEMANDE-RELECTURE-2026-10-05-1028-archiver-copies.md` (sur la branche).
+
+**Tests** : Vitest 682 fichiers, 8204 essais verts ; WebKit E1, E2, E3, A3 et lot : 11 sur 11.
+
+**La suite** : la consigne de livraison de Cowork, avec les mots de Grégoire. ⚠ La branche n'existe que sur ce Mac.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 9 h 31 : **#1028 (ARCHIVER LES COPIES D'UN TRIMESTRE CLOS, SES DONNÉES RESTENT) CODÉE SUR `claude/1028-archiver-copies` (`ab24f7d0`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CROISÉE**
 
 **Consigne** : Cowork, 9 h 02 (commitée sur `main`, `ff1abd6d`). Arrêt au point 6, comme demandé : ni push du lot, ni verdict complet, ni release.
 
