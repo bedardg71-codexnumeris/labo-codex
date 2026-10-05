@@ -15,7 +15,9 @@
 
 **Tests** : Vitest 684 fichiers, 8227 essais verts après le commit du bump.
 
-**La suite** : verdict complet sur le commit de ce relais, puis `main` avancée sur la branche et `git push origin main`, puis la mise en ligne mesurée chez Netlify. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-10-05-enregistrement-temoin.md`, à publier par Cowork.
+**Premier verdict (`76bdb11a`) : 2 rouges, 0 instable** — CO-01 (`pratique-edition-preserve-enveloppe`), régression du lot 1 (bissection : `dd0a8d8e` vert, `da9dc970` rouge) : la lecture synchrone d'`innerHeight` par le témoin forçait la mise en page de l'assistant ouvert (icône refusée sous `file://`). Corrigé en `3ea9a69d` (placement à la prochaine image) ; mutation « placement synchrone » : CO-01 rouge. Vitest 8227 vert après le correctif.
+
+**La suite** : second verdict complet sur le commit de ce relais, puis `main` avancée sur la branche et `git push origin main`, puis la mise en ligne mesurée chez Netlify. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-10-05-enregistrement-temoin.md`, à publier par Cowork.
 
 ---
 
