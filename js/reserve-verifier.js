@@ -140,12 +140,9 @@ function _versionApp() {
     return typeof window.VERSION_MAJEURE === 'string' ? window.VERSION_MAJEURE : 'inconnue';
 }
 
+/** La taille, au format de tout l'écran des archives (reserve.js). */
 function _formaterTaille(octets) {
-    if (!octets) return '0 o';
-    if (octets < 1024) return octets + ' o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    return window.Reserve.formaterTaille(octets);
 }
 
 function _jour(iso) {
@@ -436,7 +433,7 @@ async function verifierArchive(source, entree, dossier, onProg) {
     var rapport = {
         etat: null, mode: source.mode, dossier: dossier,
         uuid: null, meta_sha256: null, version_archive: null, date_archive: null,
-        total: 0, verifiees: 0, problemes: [], enTrop: [], nonCouvertes: [],
+        total: 0, verifiees: 0, problemes: [], enTrop: [], nonCouvertes: [], manquantesALArchivage: [],
         couvertureMesuree: false, donneesConcordent: null,
         nombreFichiers: 0, tailleFichiers: 0,
         // E1 (#1022) : l'archive d'un trimestre entier porte aussi une empreinte par clé.
@@ -483,6 +480,7 @@ async function verifierArchive(source, entree, dossier, onProg) {
     rapport.donneesConcordent = donneesTexte != null && !!attenduDonnees &&
         (await _sha256Texte(donneesTexte)) === attenduDonnees;
     var tailleFiche = {};
+    var idsFichesArchive = {};
     var trimestreDesDonnees = (entree && entree.trimestre) || (rapport.trimestreEntier ? meta.trimestre : null);
     var donnees = null;
     if (donneesTexte != null) {
@@ -493,7 +491,10 @@ async function verifierArchive(source, entree, dossier, onProg) {
         ['_fichiersTravaux', '_corbeilleFichiers'].forEach(function(suffixe) {
             var fichesArchive = donnees[trimestreDesDonnees + suffixe];
             if (Array.isArray(fichesArchive)) {
-                fichesArchive.forEach(function(f) { if (f && f.id && f.tailleFichier > 0) tailleFiche[f.id] = f.tailleFichier; });
+                fichesArchive.forEach(function(f) {
+                    if (f && f.id && f.tailleFichier > 0) tailleFiche[f.id] = f.tailleFichier;
+                    if (f && f.id) idsFichesArchive[f.id] = true;
+                });
             }
         });
     }
@@ -550,11 +551,23 @@ async function verifierArchive(source, entree, dossier, onProg) {
         rapport.couvertureMesuree = true;
         var idsArchive = {};
         noms.forEach(function(n) { idsArchive[_idDeLaCopie(n)] = true; });
+        // #1027 (verdict de Cowork, 5 oct., correction 3) : une fiche que l'archive déclare SANS
+        // FICHIER à l'archivage n'est pas « non couverte » : l'archive la garde telle qu'elle était.
+        // Déclarée = sa fiche est dans les données de l'archive, sans copie dans ses empreintes, ET
+        // le compte de ces fiches égale `contenu.nombre_fichiers_manquants` (le seul nombre que
+        // l'archive écrit). Un compte qui ne concorde pas : l'ancienne règle, toutes non couvertes.
+        // Une fiche dont le fichier est revenu dans l'application reste une différence pour E3.
+        var sansFichier = Object.keys(idsFichesArchive).filter(function(id) { return !idsArchive[id]; });
+        var declares = meta.contenu && typeof meta.contenu.nombre_fichiers_manquants === 'number'
+            ? meta.contenu.nombre_fichiers_manquants : null;
+        var manquantesALArchivage = {};
+        if (sansFichier.length && declares === sansFichier.length) sansFichier.forEach(function(id) { manquantesALArchivage[id] = true; });
+        rapport.manquantesALArchivage = Object.keys(manquantesALArchivage);
         var vus = {};
         fiches.forEach(function(f) {
             if (vus[f.id]) return;
             vus[f.id] = true;
-            if (!idsArchive[f.id]) rapport.nonCouvertes.push(f.id);
+            if (!idsArchive[f.id] && !manquantesALArchivage[f.id]) rapport.nonCouvertes.push(f.id);
         });
     }
 

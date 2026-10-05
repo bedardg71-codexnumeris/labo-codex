@@ -23,6 +23,9 @@
      dès qu'une séance existe refuserait donc tout emprunt après une suppression. Une séance
      ou une copie déjà là et IDENTIQUE à l'archive est laissée telle quelle (« déjà là »),
      jamais réécrite ni retirée ; différente, c'est le refus entier.
+     E3 (#1024, 5 oct.) : la même règle vaut pour une clé `<trimestre>_*` restée là sans entrée
+     au registre (un renvoi aux archives interrompu, reserve-renvoyer.js) : identique →
+     laissée ; différente, ou absente de l'archive → refus « débris ».
 
    Ce qui est écrit, dans cet ordre (décision 4)
      1. les fichiers des copies (travail et corbeille), un à la fois, chacun recomparé à son
@@ -94,7 +97,7 @@ var MOTS = {
         titre: 'Impossible de faire revenir le trimestre',
         // Le cas « déjà là » : refusé, sans option « remplacer » (décision de Grégoire, 4 oct.).
         dejaLa: function(nom) { return nom + ' est déjà dans l\'application : ouvre-le depuis la bibliothèque des trimestres. Rien n\'a été écrit.'; },
-        debris: function(nom) { return 'Des données de ' + nom + ' sont déjà dans l\'application, sans qu\'il soit dans la bibliothèque des trimestres. Rien n\'a été écrit.'; },
+        debris: function(nom) { return 'Des données de ' + nom + ' sont déjà dans l\'application, sans qu\'il soit dans la bibliothèque des trimestres, et ne concordent pas avec l\'archive. Rien n\'a été écrit.'; },
         differe: function(nom) { return 'Une séance ou une copie de ' + nom + ' est déjà dans l\'application et ne concorde pas avec l\'archive. Rien n\'a été écrit.'; },
         nonVerifiee: 'Cette archive n\'est pas vérifiée dans ce navigateur. Vérifie-la d\'abord.',
         changeeDepuis: 'Cette archive ne concorde plus avec sa vérification. Rien n\'a été écrit. Vérifie-la de nouveau.',
@@ -158,12 +161,13 @@ function _supprimes(donnees, trimestre) {
     return window.dasElevesEcartes(donnees[trimestre + '_elevesDesinscrits'] || [], donnees[trimestre + '_groupeEtudiants'] || []);
 }
 
-/** Le refus « déjà là », lu dans l'application seule (sans l'archive) ; null s'il n'y en a pas. */
+/**
+ * Le refus « déjà là », lu dans l'application seule (sans l'archive) ; null s'il n'y en a pas.
+ * Une clé `<trimestre>_*` sans entrée au registre n'est plus refusée ici (E3) : elle se juge
+ * contre l'archive, dans emprunter().
+ */
 async function refusDejaLa(trimestre) {
     if (_registre().some(function(t) { return t && t.id === trimestre; })) return 'dejaLa';
-    var prefixe = trimestre + '_';
-    var cles = await _toutesLesCles();
-    for (var k of cles) { if (typeof k === 'string' && k.indexOf(prefixe) === 0) return 'debris'; }
     return null;
 }
 
@@ -174,9 +178,7 @@ async function refusDejaLa(trimestre) {
  */
 function refusDejaLaImmediat(trimestre) {
     if (_registre().some(function(t) { return t && t.id === trimestre; })) return 'dejaLa';
-    var prefixe = trimestre + '_';
-    var cles = typeof window.db.keysSync === 'function' ? window.db.keysSync() : [];
-    return cles.some(function(k) { return typeof k === 'string' && k.indexOf(prefixe) === 0; }) ? 'debris' : null;
+    return null;
 }
 
 /**
@@ -208,7 +210,7 @@ async function emprunter(source, entree, onProg) {
     var trimestre = entree && entree.trimestre;
     var bilan = {
         etat: null, motif: null, trimestre: trimestre, nom: _nomDe(trimestre),
-        cles: [], seancesDejaLa: [], revenues: [], dejaLa: [], supprimes: [], sansFichier: [],
+        cles: [], seancesDejaLa: [], clesDejaLa: [], revenues: [], dejaLa: [], supprimes: [], sansFichier: [],
         registre: false, retire: null, resteEcrit: null
     };
     function refus(motif) { bilan.etat = 'refus'; bilan.motif = motif; return bilan; }
@@ -260,16 +262,22 @@ async function emprunter(source, entree, onProg) {
         if ((await RV.sha256Texte(JSON.stringify(donnees[cle]))) !== empreintesCles[cle]) return refus('changeeDepuis');
     }
 
-    // Les séances déjà là : identiques → laissées ; différentes → refus.
+    // Les séances, et les clés du trimestre restées d'un renvoi interrompu (E3), déjà là :
+    // identiques → laissées ; différentes → refus. Une clé du trimestre que l'archive n'a pas → débris.
     var presentes = await _toutesLesCles();
+    for (var kp of presentes) {
+        if (typeof kp !== 'string' || kp.indexOf(prefixe) !== 0 || _a(donnees, kp)) continue;
+        // Une clé vide ne garde rien (E1 ne l'archive pas) : ni débris, ni réécrite.
+        var vide = await window.db.get(kp, null);
+        if (vide !== null && vide !== undefined) return refus('debris');
+    }
     var aEcrire = [];
     for (var s = 0; s < cles.length; s++) {
         var k = cles[s];
         if (!presentes.has(k)) { aEcrire.push(k); continue; }
-        if (k.indexOf(prefixe) === 0) return refus('debris'); // apparue depuis le premier regard
         var ici = await window.db.get(k, null);
-        if ((await RV.sha256Texte(JSON.stringify(ici))) !== empreintesCles[k]) return refus('differe');
-        bilan.seancesDejaLa.push(k);
+        if ((await RV.sha256Texte(JSON.stringify(ici))) !== empreintesCles[k]) return refus(k.indexOf(prefixe) === 0 ? 'debris' : 'differe');
+        if (k.indexOf(prefixe) === 0) bilan.clesDejaLa.push(k); else bilan.seancesDejaLa.push(k);
     }
 
     // Les copies : leur fiche (travail ou corbeille) dans l'archive, et ce que le navigateur a déjà.

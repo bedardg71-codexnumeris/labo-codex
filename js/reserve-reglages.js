@@ -49,13 +49,10 @@ function _formaterDate(iso) {
     }
 }
 
+/** La taille, au format de tout l'écran des archives (reserve.js) ; « — » quand la liste ne la connaît pas. */
 function _formaterTaille(octets) {
     if (!octets || octets <= 0) return '—';
-    var ko = octets / 1024;
-    if (ko < 1024) return Math.round(ko) + ' Ko';
-    var mo = ko / 1024;
-    if (mo < 1024) return mo.toFixed(1) + ' Mo';
-    return (mo / 1024).toFixed(2) + ' Go';
+    return window.Reserve.formaterTaille(octets);
 }
 
 /** Lot A2 : ce que la liste dit de la vérification d'une archive (mots dans ReserveVerifier.MOTS). */
@@ -107,6 +104,22 @@ function _boutonEmprunter(entree) {
         'data-param="' + _echapper(entree._dossier) + '" ' +
         'title="' + _echapper(RE.MOTS.infobulle) + '">' +
         _echapper(RE.MOTS.bouton) +
+    '</button> ';
+}
+
+/**
+ * E3 (#1024) : « Terminer le renvoi », offert seulement quand le renvoi aux archives de ce
+ * trimestre s'est arrêté en cours de route (absent du registre, des clés restent). Les gardes
+ * sont aussi dans l'action. Mots dans ReserveRenvoyer.MOTS.
+ */
+function _boutonTerminerLeRenvoi(entree) {
+    var RR = window.ReserveRenvoyer;
+    if (!RR || typeof RR.actionReprendre !== 'function' || !RR.estInacheve(entree.trimestre)) return '';
+    return '<button class="btn btn-secondaire btn-compact" ' +
+        'data-action="ReserveRenvoyer.actionReprendre" ' +
+        'data-param="' + _echapper(entree._dossier) + '" ' +
+        'title="' + _echapper(RR.MOTS.reprise.infobulle) + '">' +
+        _echapper(RR.MOTS.reprise.bouton) +
     '</button> ';
 }
 
@@ -277,7 +290,7 @@ function _rendreTableau() {
                 '<td class="u-text-center">' +
                     _boutonVerifier(e._dossier) +
                     // « Faire revenir » ne connaît que l'archive d'un groupe ; un trimestre s'emprunte (E2).
-                    (estTrimestre ? _boutonEmprunter(e) : _boutonFaireRevenir(e)) +
+                    (estTrimestre ? _boutonEmprunter(e) + _boutonTerminerLeRenvoi(e) : _boutonFaireRevenir(e)) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +

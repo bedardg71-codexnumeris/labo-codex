@@ -387,7 +387,7 @@ describe('E1 · (e) rien n\'est écrit dans les données ; refusé hors d\'un tr
         expect(banc.journal.telechargements).toEqual([]);
         expect(banc.journal.fenetres[0]).toEqual({
             titre: 'Archiver Hiver 2032 ?',
-            message: 'L\'archive emporte tout le trimestre : 3 étudiant·es, 2 groupes, 4 copies (dont 1 à la corbeille), environ 80.0 Ko.\nRien n\'est retiré de l\'application : le trimestre reste là, clos.',
+            message: 'L\'archive emporte tout le trimestre : 3 étudiant·es, 2 groupes, 4 copies (dont 1 à la corbeille), environ 80,0 Ko.\nRien n\'est retiré de l\'application : le trimestre reste là, clos.',
             bouton: 'Archiver'
         });
     });
