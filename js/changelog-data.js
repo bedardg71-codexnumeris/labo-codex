@@ -26,12 +26,15 @@
             // Titre de Claude Code.
             // 1.186.1 (#962, #986, #1029 : l'enregistrement, lot 1) — ligne de la consigne de Cowork
             // du 5 oct. 2026 à 13 h 44, posée telle quelle (patch consolidé dans l'entrée 1.186).
+            // 1.186.2 (#982, #984 : l'enregistrement, lot 2) — ligne de la consigne de Cowork du
+            // 5 oct. 2026 à 19 h 12, posée telle quelle (patch consolidé dans l'entrée 1.186).
             version: '1.186',
             couleur: 'vert',
             titre: 'Archiver les copies d\'un trimestre clos',
             items: [
                 'Archives&nbsp;: «&nbsp;Archiver les copies…&nbsp;» retire de l\'application les copies d\'un trimestre clos que son archive vérifiée garde à l\'identique&nbsp;; toutes ses données restent (résultats, grilles, rétroactions), et le codex s\'allège d\'autant. «&nbsp;Faire revenir&nbsp;» ramène les copies.',
-                'Enregistrement&nbsp;: quand une écriture échoue, l\'application dit «&nbsp;Non enregistré&nbsp;» et le message reste, au lieu d\'afficher «&nbsp;Enregistré&nbsp;». Sur l\'iPad, elle rétablit seule sa liaison après une mise en arrière-plan, et le témoin s\'affiche au-dessus du clavier.'
+                'Enregistrement&nbsp;: quand une écriture échoue, l\'application dit «&nbsp;Non enregistré&nbsp;» et le message reste, au lieu d\'afficher «&nbsp;Enregistré&nbsp;». Sur l\'iPad, elle rétablit seule sa liaison après une mise en arrière-plan, et le témoin s\'affiche au-dessus du clavier.',
+                'Enregistrement&nbsp;: les gestes qui enregistraient sans rien dire affichent désormais «&nbsp;Enregistré&nbsp;», comme partout ailleurs&nbsp;; un échec dit «&nbsp;Non enregistré&nbsp;», et le message reste.'
             ]
         },
         {
