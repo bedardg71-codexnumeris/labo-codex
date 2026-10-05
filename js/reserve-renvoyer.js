@@ -36,7 +36,7 @@
 
    Interrompu, il se reprend (décision 5)
      Le geste s'arrête à la première écriture refusée ; ce qui reste est identique à l'archive.
-     Le relancer (depuis la ligne de l'archive : « Finir de renvoyer ») refait la même
+     Le relancer (depuis la ligne de l'archive : « Terminer le renvoi ») refait la même
      comparaison sur ce qui reste et achève. « Faire revenir » sait aussi ramener le trimestre
      depuis ce qui reste (reserve-emprunter.js : identique → laissé).
 
@@ -61,15 +61,14 @@
 /* ===============================
    LES MOTS — UN SEUL ENDROIT
    ===============================
-   PROVISOIRES (5 oct. 2026) : soumis à Grégoire par Cowork avec la demande de relecture.
+   Tranchés par Grégoire le 5 oct. 2026 (7 h 43-7 h 45, verdict de Cowork) : « Terminer le renvoi »
+   (l'ancien mot provisoire écarté) ; virgule décimale ; une seule date dans la fenêtre.
 */
 function _pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
 
+/** La taille, au format de tout l'écran des archives (reserve.js). */
 function _formaterTaille(octets) {
-    if (!octets) return '0 o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    return window.Reserve.formaterTaille(octets);
 }
 
 function _jour(iso) {
@@ -87,57 +86,57 @@ var MOTS = {
     fenetre: {
         titre: function(nom) { return 'Renvoyer ' + nom + ' aux archives ?'; },
         texte: function(c) {
-            return c.nom + ' quitte l\'application : ' +
+            return c.nom + ' quittera l\'application : ' +
                 _pluriel(c.etudiants, 'étudiant·e', 'étudiant·es') + ', ' +
-                _pluriel(c.copies, 'copie', 'copies') + ', environ ' + _formaterTaille(c.taille) + '.\n\n' +
-                'Son archive du ' + _jour(c.dateArchive) + ', vérifiée le ' + _jour(c.dateVerification) +
-                ', le garde à l\'identique : « Faire revenir » le ramènera tel quel. ' +
-                'Garde cette archive : une fois le trimestre renvoyé, c\'est son seul exemplaire.\n\n' +
-                'Rien d\'autre n\'est touché : les autres trimestres, les cours et les réglages restent tels quels.';
+                _pluriel(c.copies, 'copie', 'copies') + ', environ ' + _formaterTaille(c.taille) + '.\n' +
+                'Son archive, vérifiée le ' + _jour(c.dateVerification) + ', le garde tel quel : « Faire revenir » le ramènera.\n' +
+                'Garde bien cette archive : c\'est elle qui le conserve.\n' +
+                'Les autres trimestres, les cours et les réglages ne sont pas touchés.';
         },
         confirmer: 'Renvoyer aux archives'
     },
     different: {
         titre: function(nom) { return nom + ' a changé depuis son archive'; },
         texte: function(c) {
-            var lignes = [c.nom + ' ne concorde plus avec son archive du ' + _jour(c.dateArchive) + ' : ' +
-                _pluriel(c.total, 'différence', 'différences') + '. Rien n\'a été retiré.', ''];
-            if (c.changees) lignes.push(_pluriel(c.changees, 'donnée changée depuis', 'données changées depuis'));
-            if (c.nees) lignes.push(_pluriel(c.nees, 'donnée née depuis', 'données nées depuis'));
-            if (c.copiesAbsentes) lignes.push(_pluriel(c.copiesAbsentes, 'copie absente de l\'archive', 'copies absentes de l\'archive'));
-            if (c.copiesDifferentes) lignes.push(_pluriel(c.copiesDifferentes, 'copie différente de l\'archive', 'copies différentes de l\'archive'));
-            lignes.push('');
-            lignes.push(c.reprise
-                ? 'Fais-le revenir pour le consulter, puis archive-le de nouveau avant de le renvoyer.'
-                : 'Archive-le de nouveau pour que l\'archive le garde tel qu\'il est, vérifie la nouvelle archive, puis renvoie-le.');
+            var parts = [];
+            if (c.changees) parts.push(_pluriel(c.changees, 'donnée modifiée', 'données modifiées'));
+            if (c.nees) parts.push(_pluriel(c.nees, 'donnée ajoutée', 'données ajoutées'));
+            if (c.copiesAbsentes) parts.push(_pluriel(c.copiesAbsentes, 'copie ajoutée', 'copies ajoutées'));
+            if (c.copiesDifferentes) parts.push(_pluriel(c.copiesDifferentes, 'copie modifiée', 'copies modifiées'));
+            var lignes = ['Rien n\'a été retiré.', 'Depuis son archive du ' + _jour(c.dateArchive) + ' : ' + parts.join(', ') + '.'];
+            if (c.reprise) {
+                lignes.push('Fais-le revenir pour le consulter, puis archive-le de nouveau avant de le renvoyer.');
+            } else {
+                lignes.push('C\'est normal si tu l\'as consulté : l\'application recalcule certaines données à l\'ouverture.');
+                lignes.push('Pour le renvoyer : archive-le de nouveau, vérifie la nouvelle archive, puis renvoie-le.');
+            }
             return lignes.join('\n');
         },
         confirmer: 'Archiver de nouveau'
     },
     bilan: {
-        titre: 'Trimestre renvoyé aux archives',
+        titre: function(nom) { return nom + ' est renvoyé aux archives'; },
         texte: function(b) {
-            return b.nom + ' n\'est plus dans l\'application. Son archive le garde : « Faire revenir » le ramène depuis Réglages › Données › Archives.\n\n' +
-                _pluriel(b.cles, 'donnée retirée', 'données retirées') + ', ' + _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.';
+            return 'Il n\'est plus dans l\'application ; son archive le garde.\n' +
+                'Pour le faire revenir : Réglages › Données › Archives, « Faire revenir ».\n' +
+                _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' +
+                (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + _formaterTaille(b.taille) + '.' : '');
         }
     },
     interrompu: {
         titre: 'Renvoi inachevé',
         texte: function(b) {
-            return 'Le renvoi de ' + b.nom + ' s\'est arrêté en cours de route (' + b.raison + '). Rien n\'est perdu : ce qui reste est identique à l\'archive.\n\n' +
-                'Il reste ' + _pluriel(b.cles, 'donnée', 'données') + ' et ' + _pluriel(b.copies, 'copie', 'copies') + ' dans l\'application.\n\n' +
-                'Pour finir : Réglages › Données › Archives, ligne de ' + b.nom + ', « ' + MOTS.reprise.bouton + ' ». « Faire revenir » le ramène aussi en entier.';
-        },
-        nonRetire: 'l\'espace du navigateur a refusé un retrait'
+            return 'Le renvoi de ' + b.nom + ' s\'est arrêté en cours de route. Rien n\'est perdu : son archive garde tout.\n' +
+                'Pour finir : Réglages › Données › Archives, ligne de ' + b.nom + ', « ' + MOTS.reprise.bouton + ' ».\n' +
+                'Pour annuler : « Faire revenir », au même endroit.';
+        }
     },
     reprise: {
-        bouton: 'Finir de renvoyer',
-        infobulle: 'Le renvoi de ce trimestre s\'est arrêté en cours de route : retirer ce qui reste',
-        titre: function(nom) { return 'Finir de renvoyer ' + nom + ' ?'; },
+        bouton: 'Terminer le renvoi',
+        infobulle: 'Le renvoi s\'est arrêté en cours de route : retirer ce qui reste',
+        titre: function(nom) { return 'Terminer le renvoi de ' + nom + ' ?'; },
         texte: function(c) {
-            return 'Le renvoi de ' + c.nom + ' aux archives s\'est arrêté en cours de route. Il en reste ' +
-                _pluriel(c.cles, 'donnée', 'données') + ' et ' + _pluriel(c.copies, 'copie', 'copies') +
-                ' dans l\'application, identiques à son archive : elles sont retirées. L\'archive garde tout.';
+            return 'Une partie de ' + c.nom + ' est restée dans l\'application, identique à son archive. Elle sera retirée ; l\'archive garde tout.';
         }
     },
     refus: {
@@ -145,11 +144,12 @@ var MOTS = {
         introuvable: 'Ce trimestre n\'est pas dans la bibliothèque.',
         pasClos: 'Seul un trimestre clos peut être renvoyé aux archives. Clos-le, puis archive-le.',
         actif: 'C\'est le trimestre actif : active un autre trimestre d\'abord.',
-        sansArchive: 'Ce trimestre n\'a pas d\'archive dans la liste. Archive-le d\'abord (« Archiver le trimestre… »), puis vérifie l\'archive.',
+        sansArchive: 'Ce trimestre n\'a pas d\'archive dans la liste. Archive-le d\'abord, puis vérifie l\'archive.',
         nonVerifiee: 'Son archive n\'est pas vérifiée dans ce navigateur. Vérifie-la d\'abord (Réglages › Données › Archives).',
-        changeeDepuis: 'L\'archive ne concorde plus avec sa vérification. Rien n\'a été retiré. Vérifie-la de nouveau.',
-        copiesAbsentes: function(n) { return _pluriel(n, 'copie promise par l\'archive en est absente', 'copies promises par l\'archive en sont absentes') + '. Rien n\'a été retiré. Vérifie l\'archive de nouveau.'; },
-        sansEmpreintes: 'Cette archive ne porte pas les empreintes de ses données. Archive de nouveau ce trimestre.',
+        // Un seul message pour les deux cas (mots de Grégoire, 5 oct.).
+        changeeDepuis: 'Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.',
+        copiesAbsentes: 'Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.',
+        sansEmpreintes: 'Cette archive est trop ancienne pour un renvoi. Archive le trimestre de nouveau.',
         pasUnTrimestre: 'Cette archive n\'est pas celle de ce trimestre.',
         rien: 'Ce trimestre n\'est plus dans l\'application : il n\'y a rien à renvoyer.',
         sansMagasin: 'Le stockage des copies n\'est pas disponible dans cette page.'
@@ -268,7 +268,7 @@ async function comparer(source, trimestre, onProg) {
         etat: null, motif: null, trimestre: trimestre, nom: _nomDe(trimestre), reprise: !_entreeRegistre(trimestre),
         differences: [], copiesAbsentesArchive: 0,
         aRetirer: { registre: false, copies: [], vignettes: [], seances: [], cles: [] },
-        taille: 0, etudiants: 0, entree: null
+        taille: 0, tailles: {}, etudiants: 0, entree: null
     };
     function refus(motif, extra) { res.etat = 'refus'; res.motif = motif; if (extra) Object.assign(res, extra); return res; }
 
@@ -370,7 +370,7 @@ async function comparer(source, trimestre, onProg) {
                 var taille = ici.size || 0;
                 var empreinte = await RV.sha256(await _octets(ici));
                 if (empreinte !== empreintesCopies[nomDansArchive[id]]) res.differences.push({ type: 'copieDifferente', id: id });
-                else { res.aRetirer.copies.push(id); res.taille += taille; }
+                else { res.aRetirer.copies.push(id); res.taille += taille; res.tailles[id] = taille; }
             }
             ici = null;
         }
@@ -400,7 +400,7 @@ async function retirer(res, onProg) {
     var trimestre = res.trimestre;
     var prefixe = trimestre + '_';
     var a = res.aRetirer;
-    var bilan = { etat: null, motif: null, trimestre: trimestre, nom: res.nom, cles: 0, copies: 0, reste: null };
+    var bilan = { etat: null, motif: null, trimestre: trimestre, nom: res.nom, cles: 0, copies: 0, taille: 0, reste: null };
     if (res.etat !== 'identique') throw new Error('retirer() n\'accepte qu\'une comparaison identique');
 
     // Rien n'est né depuis la comparaison (une clé du trimestre de plus) : sinon, on ne retire rien.
@@ -448,6 +448,7 @@ async function retirer(res, onProg) {
             await window.travauxStockage.supprimerBlob(id);
             if (await window.travauxStockage.recupererBlob(id)) throw new Abandon('nonRetire');
             bilan.copies++;
+            bilan.taille += (res.tailles && res.tailles[id]) || 0;
             if (vignettes[id]) { await _retirerVignette(id); delete vignettes[id]; }
             onProg(++fait, total);
             if (i % 5 === 4) await _yield();
@@ -563,13 +564,10 @@ function compteRendu(comparaison, bilan) {
     if (bilan && bilan.etat === 'interrompu') {
         return {
             titre: MOTS.interrompu.titre,
-            message: MOTS.interrompu.texte({
-                nom: bilan.nom, raison: MOTS.interrompu.nonRetire,
-                cles: bilan.reste ? bilan.reste.cles : 0, copies: bilan.reste ? bilan.reste.copies : 0
-            })
+            message: MOTS.interrompu.texte({ nom: bilan.nom })
         };
     }
-    return { titre: MOTS.bilan.titre, message: MOTS.bilan.texte({ nom: bilan.nom, cles: bilan.cles, copies: bilan.copies }) };
+    return { titre: MOTS.bilan.titre(bilan.nom), message: MOTS.bilan.texte({ copies: bilan.copies, taille: bilan.taille }) };
 }
 
 /** La fenêtre qui offre le geste (comparaison identique). */
@@ -577,7 +575,7 @@ function fenetreIdentique(res) {
     if (res.reprise) {
         return {
             titre: MOTS.reprise.titre(res.nom),
-            message: MOTS.reprise.texte({ nom: res.nom, cles: res.aRetirer.cles.length + res.aRetirer.seances.length, copies: res.aRetirer.copies.length }),
+            message: MOTS.reprise.texte({ nom: res.nom }),
             texteConfirmer: MOTS.reprise.bouton
         };
     }
@@ -697,7 +695,7 @@ function actionRenvoyer(trimestre) {
     _lancer(trimestre);
 }
 
-/** « Finir de renvoyer » d'une ligne de la liste des archives (data-param = dossier). */
+/** « Terminer le renvoi » d'une ligne de la liste des archives (data-param = dossier). */
 function actionReprendre(dossier) {
     var Reserve = window.Reserve;
     if (!dossier || !Reserve || typeof Reserve.lireManifesteLocal !== 'function') return;

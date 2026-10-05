@@ -369,11 +369,19 @@ async function _statutHandleReserve() {
    UTILITAIRES
    =============================== */
 
+/**
+ * La taille, telle que tout l'écran des archives la dit (une seule fonction : reserve-trimestre,
+ * -verifier, -reglages et -renvoyer s'en servent). Virgule décimale (« 1,08 Go », « 80,0 Ko »),
+ * décision de Grégoire du 5 oct. 2026 (mots d'E3).
+ */
 function _formaterTaille(octets) {
-    if (octets < 1024) return octets + ' o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    if (!octets) return '0 o';
+    var texte;
+    if (octets < 1024) texte = octets + ' o';
+    else if (octets < 1024 * 1024) texte = (octets / 1024).toFixed(1) + ' Ko';
+    else if (octets < 1024 * 1024 * 1024) texte = (octets / (1024 * 1024)).toFixed(1) + ' Mo';
+    else texte = (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    return texte.replace('.', ',');
 }
 
 function _normaliserGroupe(g) {
@@ -1883,6 +1891,7 @@ window.Reserve = {
     // E1 (#1022) : l'archive d'un trimestre entier (reserve-trimestre.js) passe par le même
     // dépôt et les mêmes empreintes.
     deposerArchive: _deposerArchive,
+    formaterTaille: _formaterTaille,
     empreinteDeLaCopie: _empreinteDeLaCopie,
     empreinteDuTexte: _calculerSHA256,
     extensionDuNom: _extensionDepuisNomFichier,

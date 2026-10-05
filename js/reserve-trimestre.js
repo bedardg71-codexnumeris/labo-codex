@@ -94,11 +94,9 @@ function _yield() {
     return new Promise(function(resolve) { setTimeout(resolve, 0); });
 }
 
+/** La taille, au format de tout l'écran des archives (reserve.js). */
 function _formaterTaille(octets) {
-    if (!octets) return '0 o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    return window.Reserve.formaterTaille(octets);
 }
 
 function _entreeRegistre(trimestre) {
