@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 12 h 41 : **CHANTIER DE L'ENREGISTREMENT, LOT 1 (#962, #986) PRÊT SUR `claude/enregistrement-temoin` (`da9dc970`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 13 h 41 : **ENREGISTREMENT, LOT 1 + 1 BIS (#962, #986, #1029) PRÊT SUR `claude/enregistrement-temoin` (`a8329002`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+
+**Consigne** : Cowork, 12 h 50 (verdict vert du lot 1, #1029 entré dans le lot), exécutée jusqu'à son point 6 (arrêt voulu). Verdict, consigne et archive commités sur la branche (`f3ac924a`).
+
+**Ce qui est fait** : `db.js` rouvre une connexion IndexedDB perdue une fois (réouverture partagée), refait l'écriture, la suppression ou la lecture avec la dernière valeur de la clé ; `onclose`/`onversionchange` posés. Mesuré au navigateur : connexion réellement fermée → « Enregistré », valeur relue après rechargement. #1030 (suppression muette, hors connexion fermée) et #1031 (copies sans réouverture) inscrits. Porte : rangée « arrière-plan » ajoutée. **Correction** : deux essais du lot B étaient rouges depuis `da9dc970` (annoncés verts par erreur) ; adaptés à la règle #962, verts. Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-05-enregistrement-temoin.md`, §§ 9 à 11.
+
+**Tests** : Vitest 684 fichiers, 8224 essais verts ; bancs WebKit du témoin et voisins 95/95, 0 instable ; 4 mutations rouges pour #1029. **Suite Playwright complète non lancée** (consigne : à la livraison).
+
+**La suite** : verdict de Cowork ; phrase d'issue proposée pour Grégoire (§ 9) ; puis la livraison : suite complète, fusion dans `main`, release, push, porte terrain publiée par Cowork.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 12 h 41 : **CHANTIER DE L'ENREGISTREMENT, LOT 1 (#962, #986) PRÊT SUR `claude/enregistrement-temoin` (`da9dc970`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
 
 **Consigne** : Cowork, 12 h 01, exécutée jusqu'à son point 5 (arrêt voulu). Consigne et archive commitées et poussées sur `main` (`521ae21f`).
 
