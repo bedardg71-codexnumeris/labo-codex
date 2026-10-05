@@ -71,11 +71,36 @@ const GROSSE = `Array.from({ length: 60 }, (_, i) => ({ id: 'EVAL' + i, commenta
 test.describe('#962 · un échec IndexedDB ne se tait jamais', () => {
     test.setTimeout(90000);
 
-    test('connexion fermée, grosse clé : « Non enregistré » avec le geste, et il RESTE au-delà de 2 s', async ({ page }) => {
+    test('#1029 · connexion fermée, grosse clé : rouverte une fois, « Enregistré » après le commit, la valeur relue après rechargement', async ({ page }) => {
+        const erreurs = brancherEcouteurs(page);
+        await ouvrirVide(page);
+        const avant = await page.evaluate(`(() => {
+            window.__connexionFermee = db.db;
+            db.db.close();   // comme une connexion perdue après la mise en arrière-plan sur l'iPad
+            sauvegarderDonneesSelonMode('evaluationsSauvegardees', ${GROSSE}.concat([{ id: 'APRES-ARRIERE-PLAN' }]));
+            const t = document.getElementById('temoin-enregistrement');
+            return !!(t && t.querySelector('.temoin-enregistrement-succes.visible'));
+        })()`);
+        expect(avant, '« Enregistré » ne s\'affiche pas avant le commit d\'une grosse clé').toBe(false);
+        await expect.poll(() => page.evaluate(LIRE)).toEqual({ enregistre: true, echec: null });
+        expect(await page.evaluate(() => db.db !== window.__connexionFermee), 'une connexion neuve').toBe(true);
+        await page.evaluate(() => db.flush());
+        await page.reload();
+        await page.waitForFunction(() => window.db && db.ready, null, { timeout: 30000 });
+        const relue = await page.evaluate(() => {
+            const v = db.getSync(window.cle('evaluationsSauvegardees'), []);
+            return v.length ? v[v.length - 1].id : null;
+        });
+        expect(relue).toBe('APRES-ARRIERE-PLAN');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('connexion fermée ET réouverture impossible : « Non enregistré » avec le geste, et il RESTE au-delà de 2 s', async ({ page }) => {
         const erreurs = brancherEcouteurs(page);
         await ouvrirVide(page);
         const apresAppel = await page.evaluate(`(() => {
-            db.db.close();   // comme une connexion perdue après la mise en arrière-plan sur l'iPad
+            db._initIndexedDB = () => Promise.reject(new Error('Erreur ouverture IndexedDB'));   // doublure : la réouverture échoue
+            db.db.close();
             sauvegarderDonneesSelonMode('evaluationsSauvegardees', ${GROSSE}, { geste: 'Verrouillage de l\\'évaluation' });
             const t = document.getElementById('temoin-enregistrement');
             return !!(t && t.querySelector('.temoin-enregistrement-succes.visible'));

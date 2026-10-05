@@ -128,6 +128,11 @@ describe('#353 Option C · removeSync tracke la suppression (drainage flush/Opti
             db: ctrl.connection,
             _pendingWrites: pendingWrites,
             _trackOperation: db._trackOperation,   // le vrai helper
+            // #1029 : l'opération IDB passe par la reprise (réouverture d'une connexion
+            // perdue). VRAIES méthodes, connexion saine : elles ne font rien de plus ici.
+            _ecrireIDB: db._ecrireIDB, _supprimerIDB: db._supprimerIDB,
+            _avecReprise: db._avecReprise, _connexionFermee: db._connexionFermee,
+            _dernieresValeurs: new Map(), _connexionPerdue: false, _reouverture: null,
             _removeIndexedDB: db._removeIndexedDB,  // la vraie méthode
         };
 

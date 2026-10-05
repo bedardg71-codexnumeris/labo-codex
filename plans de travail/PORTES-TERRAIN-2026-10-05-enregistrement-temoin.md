@@ -30,6 +30,16 @@
 |---|---|---|---|
 | 2.1 | Évalue une copie : change un niveau, et laisse l'enregistrement automatique se faire. | « Enregistré » paraît sans délai perceptible. | Délai perçu : aucun / court / gênant |
 
+## §2 bis · Au retour d'une mise en arrière-plan · #1029
+
+> **POURQUOI** — Sur l'iPad, après quelques minutes dans une autre app ou écran verrouillé, Safari peut couper le lien de l'application avec sa mémoire. Avant, rien ne le rétablissait : tout ce qu'on saisissait ensuite se perdait au rechargement. Maintenant, l'application rétablit le lien toute seule et refait l'enregistrement.
+
+| # | Geste | Attendu | Mesure |
+|---|---|---|---|
+| 2b.1 | Ouvre une évaluation ou les présences. Passe à une autre app (ou verrouille l'écran) **pendant au moins 5 minutes**. | — | Durée réelle : |
+| 2b.2 | Reviens dans Safari, et fais une saisie qui s'enregistre (un niveau, une présence). | « Enregistré », **pas** « Non enregistré ». | |
+| 2b.3 | Recharge la page. | Ta saisie de 2b.2 est toujours là. | |
+
 ## §3 · Rien n'a changé sur le Mac
 
 | # | Geste | Attendu |
