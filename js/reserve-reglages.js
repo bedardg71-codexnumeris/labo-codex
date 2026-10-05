@@ -110,6 +110,22 @@ function _boutonEmprunter(entree) {
     '</button> ';
 }
 
+/**
+ * E3 (#1024) : « Finir de renvoyer », offert seulement quand le renvoi aux archives de ce
+ * trimestre s'est arrêté en cours de route (absent du registre, des clés restent). Les gardes
+ * sont aussi dans l'action. Mots dans ReserveRenvoyer.MOTS.
+ */
+function _boutonFinirDeRenvoyer(entree) {
+    var RR = window.ReserveRenvoyer;
+    if (!RR || typeof RR.actionReprendre !== 'function' || !RR.estInacheve(entree.trimestre)) return '';
+    return '<button class="btn btn-secondaire btn-compact" ' +
+        'data-action="ReserveRenvoyer.actionReprendre" ' +
+        'data-param="' + _echapper(entree._dossier) + '" ' +
+        'title="' + _echapper(RR.MOTS.reprise.infobulle) + '">' +
+        _echapper(RR.MOTS.reprise.bouton) +
+    '</button> ';
+}
+
 function _badgeMode(mode) {
     if (mode === 'fsapi') {
         return '<span class="badge-mode-fsapi">Disque (FSAPI)</span>';
@@ -277,7 +293,7 @@ function _rendreTableau() {
                 '<td class="u-text-center">' +
                     _boutonVerifier(e._dossier) +
                     // « Faire revenir » ne connaît que l'archive d'un groupe ; un trimestre s'emprunte (E2).
-                    (estTrimestre ? _boutonEmprunter(e) : _boutonFaireRevenir(e)) +
+                    (estTrimestre ? _boutonEmprunter(e) + _boutonFinirDeRenvoyer(e) : _boutonFaireRevenir(e)) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +
