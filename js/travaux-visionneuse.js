@@ -39,6 +39,7 @@
        =============================== */
 
     let fichierActuel = null;       // Metadonnees du fichier ouvert
+    let ouvertAuxArchives = false;  // #1028 : la copie ouverte n'a pas son fichier, il est aux archives
     let pdfDocument = null;         // Instance PDF.js
     let pageActuelle = 1;
     let nombrePagesTotal = 1;
@@ -155,6 +156,12 @@
         // Recuperer le blob
         const blob = await travauxStockage.recupererBlob(fichierId);
         if (!blob) {
+            // #1028 : une copie aux archives s'ouvre quand même — sa note, sa grille et sa
+            // rétroaction restent consultables — et la page le dit, sans plantage.
+            if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichierId)) {
+                ouvrirAuxArchives(fichier);
+                return true;
+            }
             console.error('[Travaux-Visionneuse] Blob introuvable:', fichierId);
             return false;
         }
@@ -168,6 +175,7 @@
         cachePages.clear();
 
         fichierActuel = fichier;
+        ouvertAuxArchives = false;
         pageActuelle = 1;
         modeZoom = ZOOM_FIT;
 
@@ -189,6 +197,32 @@
         // Double requestAnimationFrame pour attendre le rendu complet
         requestAnimationFrame(() => { requestAnimationFrame(() => recentrerVue()); });
         return true;
+    }
+
+    /**
+     * #1028 — Une copie dont le fichier est aux archives : l'ancienne copie et ses annotations
+     * quittent l'écran (« travaux-fichier-ferme »), celle-ci devient la copie ouverte, et la
+     * page dit où est son fichier. Aucune page n'est rendue : aucune annotation n'est dessinée.
+     * @param {Object} fichier - la fiche de la copie
+     */
+    function ouvrirAuxArchives(fichier) {
+        if (pdfDocument) {
+            try { pdfDocument.cleanup(); } catch (_) { console.warn('[Visionneuse] PDF cleanup skipped:', _.message || _); }
+            pdfDocument = null;
+        }
+        cachePages.clear();
+        window.dispatchEvent(new CustomEvent('travaux-fichier-ferme'));
+        fichierActuel = fichier;
+        ouvertAuxArchives = true;
+        pageActuelle = 1;
+        nombrePagesTotal = 1;
+        modeZoom = ZOOM_FIT;
+        window.dispatchEvent(new CustomEvent('travaux-fichier-ouvert', { detail: { fichier: fichier } }));
+        const RC = window.ReserveCopies;
+        const t = RC.trimestreDeLaCopie(fichier.id);
+        const lignes = RC.MOTS.copie.message(RC.nomDuTrimestre(t)).split('\n');
+        afficherErreur(RC.MOTS.copie.etiquette, null, { couleur: '#495057', lignes: lignes });
+        mettreAJourNavigation();
     }
 
     /**
@@ -488,17 +522,40 @@
      * Affiche un message d'erreur dans la visionneuse
      * @param {string} message - Le message d'erreur
      */
-    function afficherErreur(message, precision) {
+    function afficherErreur(message, precision, options) {
         initialiserCanvas();
         if (!canvasDocument) return;
 
-        canvasDocument.width = 400;
-        canvasDocument.height = 200;
+        // #1028 : `options.lignes` (un texte en plusieurs lignes, coupé à la largeur) et
+        // `options.couleur` (une information, pas une erreur).
+        const lignes = [];
+        if (options && Array.isArray(options.lignes)) {
+            ctxDocument.font = '13px sans-serif';
+            options.lignes.forEach(function(texte) {
+                let courante = '';
+                String(texte).split(' ').forEach(function(mot) {
+                    const essai = courante ? courante + ' ' + mot : mot;
+                    if (courante && ctxDocument.measureText(essai).width > 440) { lignes.push(courante); courante = mot; }
+                    else courante = essai;
+                });
+                if (courante) lignes.push(courante);
+            });
+        }
+        const largeur = lignes.length ? 480 : 400;
+        const hauteur = lignes.length ? Math.max(200, 90 + lignes.length * 20) : 200;
+        canvasDocument.width = largeur;
+        canvasDocument.height = hauteur;
         ctxDocument.fillStyle = '#f8f9fa';
-        ctxDocument.fillRect(0, 0, 400, 200);
-        ctxDocument.fillStyle = '#dc3545';
+        ctxDocument.fillRect(0, 0, largeur, hauteur);
+        ctxDocument.fillStyle = (options && options.couleur) || '#dc3545';
         ctxDocument.font = '16px sans-serif';
         ctxDocument.textAlign = 'center';
+        if (lignes.length) {
+            ctxDocument.fillText(message, largeur / 2, 50);
+            ctxDocument.font = '13px sans-serif';
+            lignes.forEach(function(l, i) { ctxDocument.fillText(l, largeur / 2, 80 + i * 20); });
+            return;
+        }
         ctxDocument.fillText(message, 200, precision ? 90 : 100);
         if (precision) {
             ctxDocument.font = '13px sans-serif';
@@ -1207,6 +1264,7 @@
             try { pdfDocument.destroy(); } catch (_) { /* deja detruit, ignorer */ }
         }
         fichierActuel = null;
+        ouvertAuxArchives = false;
         pdfDocument = null;
         pageActuelle = 1;
         nombrePagesTotal = 1;
@@ -1324,6 +1382,7 @@
         configurerGestesZoom: configurerGestesZoom,
         // Accesseurs
         getFichierActuel: getFichierActuel,
+        estOuvertAuxArchives: function() { return ouvertAuxArchives; },
         getPageActuelle: getPageActuelle,
         getNombrePagesTotal: getNombrePagesTotal,
         getZoomActuel: getZoomActuel,

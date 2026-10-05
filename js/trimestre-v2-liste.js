@@ -202,6 +202,10 @@ function ouvrirBibliothequeTrimestreV2() {
             if (window.ReserveTrimestre) {
                 actions.push({ label: ReserveTrimestre.MOTS.menu, action: ReserveTrimestre.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveTrimestre.MOTS.menuTitre });
             }
+            // #1028 : archiver les copies d'un trimestre clos, ses données restent (mots dans ReserveCopies.MOTS)
+            if (window.ReserveCopies && !estActif) {
+                actions.push({ label: ReserveCopies.MOTS.menu, action: ReserveCopies.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveCopies.MOTS.menuTitre });
+            }
             // E3 (#1024) : renvoyer aux archives un trimestre clos dont l'archive vérifiée le garde (mots dans ReserveRenvoyer.MOTS)
             if (window.ReserveRenvoyer && !estActif) {
                 actions.push({ label: ReserveRenvoyer.MOTS.menu, action: ReserveRenvoyer.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveRenvoyer.MOTS.menuTitre });

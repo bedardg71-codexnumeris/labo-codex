@@ -1,0 +1,365 @@
+import { test, expect } from '@playwright/test';
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const racineProjet = path.resolve(__dirname, '..', '..');
+const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
+
+// =======================================================================
+// #1028 — ARCHIVER LES COPIES D'UN TRIMESTRE CLOS, LE GESTE DE L'ÉCRAN (5 oct. 2026)
+// =======================================================================
+//
+// Le trajet de la consigne de Cowork (5 oct., 9 h 02, point 4), dans la vraie page, sous WebKit,
+// à la largeur d'un iPad en portrait. L'espace d'E3 : un trimestre en cours (a2032) et un
+// trimestre clos fictif h2032 (copies dont une à la corbeille, une vignette, une annotation).
+//
+//   1. ARCHIVER h2032 (E1), le VÉRIFIER par le vrai bouton ;
+//   2. « Archiver les copies… » par le vrai menu ⋮, le vrai sélecteur, la vraie fenêtre, le bilan ;
+//      → les fichiers et la vignette partent, rien d'autre ;
+//   3. « Archiver le trimestre… » refuse (point 4 b) ;
+//   4. h2032 activé : chaque lecteur du fichier d'une copie, sans plantage (visionneuse, badge,
+//      export PDF, aperçu, « Dossier PDF », éditeur de pages, export des travaux, codex) ;
+//   5. a2032 de nouveau actif ; « Faire revenir » par le vrai bouton de la ligne de l'archive
+//      → chaque fichier égal à l'avant, la marque levée ;
+//   6. (second test) un arrêt provoqué au milieu, puis la reprise depuis le même menu.
+//
+// Le détail (ordre, refus, mutations, E3 après le geste) est jugé par Vitest
+// (sentinelle-1028-archiver-copies). Noms fictifs.
+
+const IPAD_PORTRAIT = { width: 820, height: 1180 };
+const COPIES_H = ['FT_h1', 'FT_h2', 'FT_hc'];
+
+const patternsAttendus = [
+    /version\.json.*access control/i,
+    /Cross origin requests are only supported/i,
+    /Not allowed to load local resource.*\.(svg|png)/i,
+    /Failed to load resource/i
+];
+
+function brancherEcouteurs(page) {
+    const erreurs = [];
+    const alertes = [];
+    const estAttendue = (m) => patternsAttendus.some((re) => re.test(m)) || /\[Archives\] Archivage des copies interrompu/.test(m);
+    page.on('pageerror', (e) => { const m = `pageerror: ${e.message}`; if (!estAttendue(m)) erreurs.push(m); });
+    page.on('console', (msg) => { if (msg.type() === 'error') { const m = `console.error: ${msg.text()}`; if (!estAttendue(m)) erreurs.push(m); } });
+    page.on('dialog', (d) => { alertes.push(d.message()); d.accept().catch(() => {}); });
+    return { erreurs, alertes };
+}
+
+/** Le magasin des copies en mémoire (WebKit éphémère refuse un Blob dans IndexedDB). */
+async function monterMagasin(page, ids) {
+    await page.evaluate(async (ids) => {
+        window.__copies = new Map();
+        window.__refuserRetrait = null;
+        db.storeBlob = async (enr) => { window.__copies.set(enr.id, enr); };
+        db.getBlob = async (id) => window.__copies.get(id) || null;
+        db.deleteBlob = async (id) => {
+            if (window.__refuserRetrait && window.__refuserRetrait(id)) throw new Error('retrait refusé (banc)');
+            window.__copies.delete(id);
+        };
+        db.listBlobIds = async () => [...window.__copies.keys()];
+        const octets = (n, g) => { const u = new Uint8Array(n); let x = g; for (let i = 0; i < n; i++) { x = (x * 1103515245 + 12345) >>> 0; u[i] = x >>> 24; } return u; };
+        const toutes = { FT_h1: [120000, 1, '0000001'], FT_h2: [64000, 2, '0000009'], FT_hc: [9000, 3, '0000002'], FT_a1: [5000, 4, '0000009'] };
+        for (const id of ids) await travauxStockage.stockerBlob(id, new Blob([octets(toutes[id][0], toutes[id][1])], { type: 'application/pdf' }), toutes[id][2], '');
+        window.SecuriteExportPreview.previewZipEtConfirmer = async () => true;
+        window.FichierSortant.telecharger = (blob, nom) => { window.__archive = { blob, nom }; return { methode: 'banc' }; };
+        window.FichierSortant.confirmerTelechargement = async () => true;
+        window.__notifications = [];
+        const info = notifications.info;
+        notifications.info = (t, d) => { window.__notifications.push([t, d]); return info(t, d); };
+    }, ids);
+}
+
+async function poserEspace(page) {
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(800);
+    await page.evaluate(async () => {
+        localStorage.clear();
+        if (window.db && db.memoryCache) db.memoryCache.clear();
+        await new Promise((res) => {
+            const req = indexedDB.deleteDatabase('LaboCodexDB');
+            req.onsuccess = req.onerror = req.onblocked = () => res();
+            setTimeout(res, 1500);
+        });
+    });
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+    await page.evaluate(async () => {
+        const ecrire = (k, v) => db.setSync(k, v);
+        ecrire('trimestres', [
+            { id: 'a2032', nom: 'Automne 2032', actif: true },
+            { id: 'h2032', nom: 'Hiver 2032', archive: true, dateFin: '2032-05-20' }
+        ]);
+        ecrire('trimestreActif', 'a2032');
+        ecrire('backupNePlusRappeler', 'true'); // le rappel de sauvegarde masquerait l'écran (a2032 a une copie)
+        ecrire('cours', [{ id: 'C1', codeCours: '601-101-MQ', nomCours: 'Cours fictif' }]);
+        ecrire('profilEnseignant', { nom: 'Enseignant fictif', courriel: 'avant@exemple.test' });
+        ecrire('h2032_groupesCours', [{ id: 'GC_H1', coursId: 'C1', groupeNum: '1' }, { id: 'GC_H2', coursId: 'C1', groupeNum: '2' }]);
+        ecrire('h2032_groupeEtudiants', [
+            { da: '0000001', nom: 'Élève fictive Une', groupe: '1' },
+            { da: '0000002', nom: 'Élève fictif Deux', groupe: '2' },
+            { da: '0000009', nom: 'Élève fictif Doubleur', groupe: '2' }
+        ]);
+        ecrire('h2032_evaluationsSauvegardees', [{ id: 'EV1', etudiantDA: '0000001', productionId: 'P1', note: 80 }]);
+        ecrire('h2032_productions', [{ id: 'P1', titre: 'Production fictive', coursId: 'C1' }]);
+        ecrire('h2032_annotationsTravaux', [{ id: 'AN1', fichierId: 'FT_h1', pages: { 1: [] } }]);
+        ecrire('h2032_fichiersTravaux', [
+            { id: 'FT_h1', nomFichier: 'copie-une.pdf', etudiantDA: '0000001', productionId: 'P1', groupeCoursId: 'GC_H1', tailleFichier: 120000, typeMIME: 'application/pdf' },
+            { id: 'FT_h2', nomFichier: 'copie-deux.pdf', etudiantDA: '0000009', groupeCoursId: 'GC_H2', tailleFichier: 64000, typeMIME: 'application/pdf' }
+        ]);
+        ecrire('h2032_corbeilleFichiers', [
+            { id: 'FT_hc', nomFichier: 'jetee.pdf', etudiantDA: '0000002', groupeCoursId: 'GC_H2', tailleFichier: 9000, dateSuppression: '2032-03-01T00:00:00.000Z' }
+        ]);
+        ecrire('seancesCompletes_gc_GC_H1', [{ id: 'S1' }]);
+        ecrire('thumbnail_FT_h1', 'data:image/png;base64,AAAA');
+        ecrire('thumbnail_FT_a1', 'data:image/png;base64,CCCC');
+        ecrire('a2032_groupesCours', [{ id: 'GC_A1', coursId: 'C1', groupeNum: '1' }]);
+        ecrire('a2032_groupeEtudiants', [{ da: '0000009', nom: 'Élève fictif Doubleur', groupe: '1' }]);
+        ecrire('a2032_fichiersTravaux', [{ id: 'FT_a1', nomFichier: 'a.pdf', etudiantDA: '0000009', groupeCoursId: 'GC_A1', typeMIME: 'application/pdf' }]);
+        await db.flush();
+    });
+    await page.waitForTimeout(800);
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2500);
+    await monterMagasin(page, ['FT_h1', 'FT_h2', 'FT_hc', 'FT_a1']);
+}
+
+async function photo(page) {
+    return page.evaluate(async () => {
+        const cles = {};
+        for (const k of await db.keys()) cles[k] = JSON.stringify(await db.get(k));
+        const copies = {};
+        for (const id of await db.listBlobIds()) {
+            const b = await travauxStockage.recupererBlob(id);
+            const u8 = new Uint8Array(await b.arrayBuffer());
+            let h = 0; for (let i = 0; i < u8.length; i++) h = (h * 31 + u8[i]) >>> 0;
+            copies[id] = b.size + ':' + h;
+        }
+        return { cles, copies };
+    });
+}
+
+function sauf(cles, exclues) {
+    const r = {};
+    for (const k of Object.keys(cles)) if (!exclues.includes(k)) r[k] = cles[k];
+    return r;
+}
+
+async function lireFenetre(page) {
+    const fenetre = page.locator('#overlay-ui-dialogue');
+    await expect(fenetre).toBeVisible({ timeout: 30000 });
+    const titre = await fenetre.locator('#ui-dialogue-titre').innerText();
+    const message = await fenetre.locator('.modal-section').innerText();
+    return { fenetre, titre, message };
+}
+
+async function attendreFenetre(page, titre) {
+    await expect(page.locator('#ui-dialogue-titre')).toHaveText(titre, { timeout: 30000 });
+    return lireFenetre(page);
+}
+
+async function fermerFenetre(page) {
+    const fenetre = page.locator('#overlay-ui-dialogue');
+    await fenetre.locator('.modal-actions button').first().click();
+    await expect(fenetre).toHaveCount(0);
+}
+
+async function archiverEtVerifier(page, dossierTmp) {
+    await page.evaluate(() => { window.__archive = null; });
+    await page.evaluate(() => ReserveTrimestre.archiverTrimestre('h2032', { sansConfirmation: true }));
+    await page.waitForFunction(() => window.__archive && window.__archive.blob, null, { timeout: 30000 });
+    const rendu = await page.evaluate(async () => {
+        const u8 = new Uint8Array(await window.__archive.blob.arrayBuffer());
+        let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+        return { base64: btoa(s), nom: window.__archive.nom };
+    });
+    const fichier = path.join(dossierTmp, rendu.nom);
+    writeFileSync(fichier, Buffer.from(rendu.base64, 'base64'));
+    await page.evaluate(() => ReserveReglages.rafraichir());
+    const attente = page.waitForEvent('filechooser');
+    await page.evaluate(() => document.querySelector('[data-action="ReserveVerifier.actionVerifier"][data-param="h2032-trimestre"]').click());
+    await (await attente).setFiles(fichier);
+    expect((await lireFenetre(page)).titre).toBe('Archive vérifiée');
+    await fermerFenetre(page);
+    return fichier;
+}
+
+async function ouvrirArchives(page) {
+    await page.evaluate(() => { afficherSection('reglages'); });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { afficherSousSection('reglages-donnees'); });
+    await page.waitForTimeout(500);
+    const accordeon = page.locator('#accordeon-reserve');
+    if (await accordeon.evaluate((el) => el.classList.contains('ferme'))) await accordeon.locator('.accordeon-header').click();
+    await page.waitForTimeout(300);
+}
+
+/** Le menu ⋮ de la carte h2032 : « Archiver les copies… », puis le fichier. */
+async function archiverCopiesParLeMenu(page, fichier) {
+    await page.evaluate(() => ouvrirBibliothequeTrimestreV2());
+    const modale = page.locator('#modalBibliothequeTrimestres');
+    await expect(modale).toBeVisible();
+    const geste = modale.locator('[data-action="ReserveCopies.actionArchiverCopies"]');
+    await expect(geste).toHaveCount(1);
+    await expect(geste).toHaveAttribute('data-param', 'h2032');
+    await modale.locator('[data-param="biblio-menu-h2032"]').click();
+    await expect(geste).toBeVisible();
+    await expect(geste).toHaveText('Archiver les copies…');
+    const boite = await geste.boundingBox();
+    expect(boite.x).toBeGreaterThanOrEqual(0);
+    expect(boite.x + boite.width).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
+    const attente = page.waitForEvent('filechooser');
+    await geste.click();
+    await (await attente).setFiles(fichier);
+}
+
+async function activer(page, trimestre, copiesPresentes) {
+    await page.evaluate((t) => changerTrimestreActifV2(t), trimestre);
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => db.flush());
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(3000);
+    await monterMagasin(page, copiesPresentes);
+}
+
+test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fichier, largeur iPad)', () => {
+    test.setTimeout(300000);
+    test.use({ viewport: IPAD_PORTRAIT });
+
+    test('l\'aller-retour, le refus d\'E1, chaque lecteur sans plantage, puis « Faire revenir »', async ({ page }) => {
+        page.setDefaultTimeout(15000);
+        const { erreurs, alertes } = brancherEcouteurs(page);
+        await poserEspace(page);
+        await ouvrirArchives(page);
+        const dossierTmp = path.join(__dirname, '.tmp-1028');
+        mkdirSync(dossierTmp, { recursive: true });
+        try {
+            // 1. Archiver, vérifier.
+            const fichier = await archiverEtVerifier(page, dossierTmp);
+            const avant = await photo(page);
+
+            // 2. Archiver les copies par le vrai menu ; la fenêtre ; le bilan.
+            await archiverCopiesParLeMenu(page, fichier);
+            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
+            expect(f.message).toContain('3 copies quitteront l\'application, environ 188,5 Ko.\n');
+            expect(f.message).toContain('Les notes, les grilles, les rétroactions et les annotations restent dans l\'application.');
+            expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
+            test.info().annotations.push({ type: 'fenêtre', description: f.message });
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
+            f = await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            expect(f.message).toContain('3 copies retirées, environ 188,5 Ko libérés.');
+            test.info().annotations.push({ type: 'bilan', description: f.message });
+            await fermerFenetre(page);
+
+            const apres = await photo(page);
+            expect(Object.keys(apres.copies)).toEqual(['FT_a1']);
+            expect(apres.cles.thumbnail_FT_h1).toBeUndefined();
+            expect(sauf(apres.cles, ['_copiesAuxArchives'])).toEqual(sauf(avant.cles, ['thumbnail_FT_h1']));
+            expect(Object.keys(JSON.parse(apres.cles._copiesAuxArchives).h2032.ids).sort()).toEqual(COPIES_H);
+
+            // 3. « Archiver le trimestre… » refuse, et le dit.
+            await page.evaluate(() => { window.__archive = null; ReserveTrimestre.actionArchiver('h2032'); });
+            f = await attendreFenetre(page, 'Archive non écrite');
+            expect(f.message).toContain('3 copies de Hiver 2032 sont aux archives');
+            await fermerFenetre(page);
+            expect(await page.evaluate(() => window.__archive)).toBeNull();
+
+            // 4. h2032 activé : les lecteurs.
+            await activer(page, 'h2032', ['FT_a1']);
+            const lecteurs = await page.evaluate(async () => {
+                const r = {};
+                r.ouverte = await travauxVisionneuse.ouvrirFichier('FT_h1');
+                r.fichierActuel = travauxVisionneuse.getFichierActuel() && travauxVisionneuse.getFichierActuel().id;
+                r.auxArchives = travauxVisionneuse.estOuvertAuxArchives();
+                return r;
+            });
+            expect(lecteurs).toEqual({ ouverte: true, fichierActuel: 'FT_h1', auxArchives: true });
+            // Export du PDF annoté : la fenêtre dit « aux archives ».
+            await page.evaluate(() => travauxExportPDF.exporterPDF('FT_h1'));
+            await expect.poll(() => alertes.length).toBeGreaterThan(0);
+            expect(alertes.at(-1)).toContain('Cette copie est aux archives.');
+            // L'aperçu du PDF.
+            await page.evaluate(() => travauxExportPDF.previsualiserPDF('FT_h1'));
+            await expect(page.locator('.preview-pdf-chargement')).toHaveText('Cette copie est aux archives.');
+            // « Dossier PDF » : la synthèse seule, et il le dit.
+            await page.evaluate(() => travauxExportPDF.exporterDossierComplet('0000001', 'P1').catch((e) => { window.__dossierErreur = String(e); }));
+            await expect.poll(() => page.evaluate(() => window.__notifications.map((n) => n[1]).join('|'))).toContain('le dossier ne contient que la synthèse');
+            // L'éditeur de pages : refusé (la fusion effaçait une copie sans fichier).
+            const nAlertes = alertes.length;
+            await page.evaluate(() => travauxUI.ouvrirEditeurPages && travauxUI.ouvrirEditeurPages('FT_h1'));
+            if (await page.evaluate(() => typeof travauxUI.ouvrirEditeurPages === 'function')) {
+                await expect.poll(() => alertes.length).toBeGreaterThan(nAlertes);
+                expect(alertes.at(-1)).toBe('Cette copie est aux archives : fais-la revenir avant de modifier ses pages.');
+            }
+            // Le codex : les copies aux archives ne sont pas « manquantes ».
+            const codex = await page.evaluate(async () => {
+                let averti = null;
+                const r = await Codex.generer({ confirmerCopiesManquantes: async (m, a) => { averti = [m, a]; return true; } });
+                return { averti, copies: r && r.manifeste && r.manifeste.contenu.nombreFichiersTravaux };
+            });
+            expect(codex).toEqual({ averti: null, copies: 1 });
+            test.info().annotations.push({ type: 'alertes vues', description: alertes.join(' ⏐ ') });
+
+            // 5. a2032 de nouveau actif ; « Faire revenir » par la ligne de l'archive.
+            await activer(page, 'a2032', ['FT_a1']);
+            await ouvrirArchives(page);
+            await page.evaluate(() => ReserveReglages.rafraichir());
+            const ligne = page.locator('#reserve-reglages-table-conteneur tr', { hasText: 'Trimestre entier' });
+            await expect(ligne.locator('[data-action="ReserveEmprunter.actionEmprunter"]')).toHaveCount(0);
+            const bouton = ligne.locator('[data-action="ReserveRevenir.actionFaireRevenir"]');
+            await expect(bouton).toHaveText('Faire revenir');
+            const attente = page.waitForEvent('filechooser');
+            await bouton.click();
+            await (await attente).setFiles(fichier);
+            f = await attendreFenetre(page, 'Faire revenir les copies');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
+            f = await attendreFenetre(page, 'Copies revenues');
+            test.info().annotations.push({ type: 'retour', description: f.message });
+            expect(f.message).toContain('3 copies revenues');
+            await fermerFenetre(page);
+            const retour = await photo(page);
+            for (const id of COPIES_H) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
+            expect(retour.cles._copiesAuxArchives).toBeUndefined();
+        } finally {
+            rmSync(dossierTmp, { recursive: true, force: true });
+        }
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un arrêt au milieu, puis la reprise depuis le même menu', async ({ page }) => {
+        page.setDefaultTimeout(15000);
+        const { erreurs } = brancherEcouteurs(page);
+        await poserEspace(page);
+        await ouvrirArchives(page);
+        const dossierTmp = path.join(__dirname, '.tmp-1028b');
+        mkdirSync(dossierTmp, { recursive: true });
+        try {
+            const fichier = await archiverEtVerifier(page, dossierTmp);
+            await page.evaluate(() => { let n = 0; window.__refuserRetrait = () => ++n === 2; });
+            await archiverCopiesParLeMenu(page, fichier);
+            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
+            f = await attendreFenetre(page, 'Archivage des copies inachevé');
+            test.info().annotations.push({ type: 'interrompu', description: f.message });
+            await fermerFenetre(page);
+            expect(Object.keys((await photo(page)).copies).sort()).toEqual(['FT_a1', 'FT_h2', 'FT_hc']);
+            await page.evaluate(() => { window.__refuserRetrait = null; });
+            await archiverCopiesParLeMenu(page, fichier);
+            f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
+            expect(f.message).toContain('2 copies quitteront');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
+            await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            await fermerFenetre(page);
+            expect(Object.keys((await photo(page)).copies)).toEqual(['FT_a1']);
+        } finally {
+            rmSync(dossierTmp, { recursive: true, force: true });
+        }
+        expect(erreurs).toEqual([]);
+    });
+});

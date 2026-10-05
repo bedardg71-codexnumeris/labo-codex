@@ -34,6 +34,7 @@
        empreinteDuTexte, extensionDuNom, nouvelUuid, appareil, versionApp
      - db.js (window.db), trimestres.js (window.obtenirTrimestres)
      - travaux-stockage.js (window.travauxStockage.recupererBlob)
+     - reserve-copies.js (window.ReserveCopies, #1028) : refus tant que des copies sont aux archives
      - ui-dialogues.js, progression.js, utils-notifications.js
    =============================== */
 
@@ -257,6 +258,15 @@ async function archiverTrimestre(trimestre, options) {
     }
     var t = _entreeRegistre(trimestre);
     var nom = t.nom || trimestre;
+
+    // #1028 : tant que des copies du trimestre sont aux archives, cette archive ne les
+    // contiendrait pas, et elle REMPLACERAIT celle qui les garde (même dossier). Refus : les
+    // faire revenir d'abord. (Les reprendre de l'archive précédente demanderait de la relire
+    // pendant qu'on écrit par-dessus, et en mode fichier de la redemander : écarté.)
+    if (window.ReserveCopies && window.ReserveCopies.idsMarques(trimestre).length &&
+        !(await window.ReserveCopies.permettreArchive(trimestre, null, { silencieux: !!options.sansConfirmation }))) {
+        return { succes: false, refus: 'copiesAuxArchives' };
+    }
 
     if (!options.sansConfirmation) {
         var fiches = fichesDuTrimestre(trimestre);

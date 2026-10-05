@@ -255,6 +255,58 @@ class Abandon extends Error {
    =============================== */
 
 /**
+ * L'archive du trimestre, telle qu'elle a été vérifiée, relue AU MOMENT DU GESTE : meta.json à
+ * l'empreinte retenue par « Vérifier », donnees.json à la sienne, chaque copie promise présente,
+ * puis le CONTENU de chaque copie relu et empreinté, une à la fois. N'écrit rien.
+ * Partagée avec « Archiver les copies » (#1028, reserve-copies.js) : les deux gestes font de
+ * l'archive l'unique exemplaire de ce qu'ils retirent.
+ * @returns {Promise<Object>} { motif } (refus) ou { meta, empreintesCles, empreintesCopies }
+ */
+async function relireArchive(source, trimestre, entree, onProg) {
+    onProg = onProg || function() {};
+    var RV = window.ReserveVerifier;
+    await source.ouvrir();
+    var metaTexte = await source.lireTexte('meta.json');
+    if (metaTexte == null) throw new Error(RV.MOTS.erreurs.sansMeta);
+    var meta;
+    try { meta = JSON.parse(metaTexte); } catch (e) { throw new Error(RV.MOTS.erreurs.metaIllisible); }
+    if (!meta || typeof meta !== 'object') throw new Error(RV.MOTS.erreurs.metaIllisible);
+    if (meta.type_archive !== 'trimestre' || meta.trimestre !== trimestre) return { motif: 'pasUnTrimestre' };
+    if (entree.uuid && meta.uuid !== entree.uuid) return { motif: 'changeeDepuis' };
+    if ((await RV.sha256Texte(metaTexte)) !== entree.verification.meta_sha256) return { motif: 'changeeDepuis' };
+    var integrite = meta.integrite || {};
+    var empreintesCles = integrite.cles_sha256;
+    var empreintesCopies = integrite.travaux_sha256;
+    if (!empreintesCles || typeof empreintesCles !== 'object' || !empreintesCopies || typeof empreintesCopies !== 'object') {
+        return { motif: 'sansEmpreintes' };
+    }
+    var donneesTexte = await source.lireTexte('donnees.json');
+    if (donneesTexte == null || (await RV.sha256Texte(donneesTexte)) !== integrite.donnees_json_sha256) return { motif: 'changeeDepuis' };
+    donneesTexte = null;
+    var listees = {};
+    (await source.listerCopies()).forEach(function(x) { listees[x.nom] = true; });
+    var nomsArchive = Object.keys(empreintesCopies).sort();
+    var manquantes = nomsArchive.filter(function(n) { return !listees[n]; }).length;
+    if (manquantes) return { motif: 'copiesAbsentes', manquantes: manquantes };
+
+    // Le CONTENU de chaque copie de l'archive, relu et empreinté maintenant, une à la fois, y
+    // compris celles que l'application n'a plus (une reprise). Verdict de Cowork (5 oct., 7 h 19,
+    // correction 1) : le renvoi est le seul moment où l'archive devient l'unique exemplaire, et
+    // « vérifiée » peut dater de semaines (iCloud évince ou remplace un fichier sans que la liste
+    // change). Une seule illisible, tronquée ou différente → refus, rien retiré.
+    for (var q = 0; q < nomsArchive.length; q++) {
+        onProg(q, nomsArchive.length * 2);
+        var lu = await source.lireCopie(nomsArchive[q]);
+        if (!lu || lu.probleme) return { motif: 'changeeDepuis' };
+        var empreinteArchive = await RV.sha256(lu.octets);
+        lu = null;
+        if (empreinteArchive !== empreintesCopies[nomsArchive[q]]) return { motif: 'changeeDepuis' };
+        if (q % 5 === 4) await _yield();
+    }
+    return { meta: meta, empreintesCles: empreintesCles, empreintesCopies: empreintesCopies };
+}
+
+/**
  * Relit l'archive, puis compare le trimestre à l'archive. N'écrit rien.
  * @param {Object} source - ReserveVerifier.sourceFichier(...) ou sourceDossier(...)
  * @param {string} trimestre
@@ -278,46 +330,12 @@ async function comparer(source, trimestre, onProg) {
     var entree = entreeArchive(trimestre);
     res.entree = entree;
 
-    // ── L'archive, telle qu'elle a été vérifiée ──
-    await source.ouvrir();
-    var metaTexte = await source.lireTexte('meta.json');
-    if (metaTexte == null) throw new Error(RV.MOTS.erreurs.sansMeta);
-    var meta;
-    try { meta = JSON.parse(metaTexte); } catch (e) { throw new Error(RV.MOTS.erreurs.metaIllisible); }
-    if (!meta || typeof meta !== 'object') throw new Error(RV.MOTS.erreurs.metaIllisible);
-    if (meta.type_archive !== 'trimestre' || meta.trimestre !== trimestre) return refus('pasUnTrimestre');
-    if (entree.uuid && meta.uuid !== entree.uuid) return refus('changeeDepuis');
-    if ((await RV.sha256Texte(metaTexte)) !== entree.verification.meta_sha256) return refus('changeeDepuis');
-    var integrite = meta.integrite || {};
-    var empreintesCles = integrite.cles_sha256;
-    var empreintesCopies = integrite.travaux_sha256;
-    if (!empreintesCles || typeof empreintesCles !== 'object' || !empreintesCopies || typeof empreintesCopies !== 'object') {
-        return refus('sansEmpreintes');
-    }
-    res.empreintes = empreintesCles; // le retrait recompare chaque clé juste avant de la retirer
-    var donneesTexte = await source.lireTexte('donnees.json');
-    if (donneesTexte == null || (await RV.sha256Texte(donneesTexte)) !== integrite.donnees_json_sha256) return refus('changeeDepuis');
-    donneesTexte = null;
-    var listees = {};
-    (await source.listerCopies()).forEach(function(x) { listees[x.nom] = true; });
+    var archive = await relireArchive(source, trimestre, entree, onProg);
+    if (archive.motif) return refus(archive.motif, archive.manquantes ? { manquantes: archive.manquantes } : null);
+    var empreintesCles = archive.empreintesCles;
+    var empreintesCopies = archive.empreintesCopies;
     var nomsArchive = Object.keys(empreintesCopies).sort();
-    var manquantes = nomsArchive.filter(function(n) { return !listees[n]; }).length;
-    if (manquantes) return refus('copiesAbsentes', { manquantes: manquantes });
-
-    // Le CONTENU de chaque copie de l'archive, relu et empreinté maintenant, une à la fois, y
-    // compris celles que l'application n'a plus (une reprise). Verdict de Cowork (5 oct., 7 h 19,
-    // correction 1) : le renvoi est le seul moment où l'archive devient l'unique exemplaire, et
-    // « vérifiée » peut dater de semaines (iCloud évince ou remplace un fichier sans que la liste
-    // change). Une seule illisible, tronquée ou différente → refus, rien retiré.
-    for (var q = 0; q < nomsArchive.length; q++) {
-        onProg(q, nomsArchive.length * 2);
-        var lu = await source.lireCopie(nomsArchive[q]);
-        if (!lu || lu.probleme) return refus('changeeDepuis');
-        var empreinteArchive = await RV.sha256(lu.octets);
-        lu = null;
-        if (empreinteArchive !== empreintesCopies[nomsArchive[q]]) return refus('changeeDepuis');
-        if (q % 5 === 4) await _yield();
-    }
+    res.empreintes = empreintesCles; // le retrait recompare chaque clé juste avant de la retirer
 
     // ── Les clés : celles du trimestre, et les séances de ses groupes (archive et application) ──
     var prefixe = trimestre + '_';
@@ -481,6 +499,11 @@ async function retirer(res, onProg) {
         return bilan;
     }
 
+    // #1028 : le trimestre a quitté l'application ; la marque de ses copies aux archives n'a
+    // plus d'objet (son archive garde tout). Une marque restée serait sans effet : levée sans arrêt.
+    if (window.ReserveCopies) {
+        try { await window.ReserveCopies.lever(trimestre, true); } catch (e) { console.warn('[Archives] Marque des copies non levée :', e && e.message || e); }
+    }
     bilan.etat = 'fait';
     if (typeof window.signalerEcritureUsager === 'function') window.signalerEcritureUsager('trimestres');
     return bilan;
@@ -710,6 +733,7 @@ window.ReserveRenvoyer = {
     refusImmediat: refusImmediat,
     estInacheve: estInacheve,
     entreeArchive: entreeArchive,
+    relireArchive: relireArchive,
     comparer: comparer,
     retirer: retirer,
     renvoyer: renvoyer,

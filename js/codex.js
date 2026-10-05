@@ -814,6 +814,8 @@ async function chargerCodex(fichierZip) {
         ? LISTES_DE_FICHIERS.filter(function(l) { return l === 'fichiersTravaux' || manifeste.contenu.listesDeFichiers.indexOf(l) !== -1; })
         : ['fichiersTravaux'];
     const clesFTImport = _clesDesListesDeFichiers(Object.keys(donnees), listesDeclarees).map(function(c) { return c.cle; });
+    var auxArchives = (window.ReserveCopies && typeof window.ReserveCopies.idsDansDonnees === 'function')
+        ? window.ReserveCopies.idsDansDonnees(donnees) : {};
     if (clesFTImport.length > 0 && typeof travauxStockage !== 'undefined') {
         var fichiers = [];
         clesFTImport.forEach(function(cle) {
@@ -825,7 +827,9 @@ async function chargerCodex(fichierZip) {
             var f = fichiers[j];
             // Un statut 'exporte' n'a légitimement pas de blob dans le ZIP
             // (le blob avait déjà quitté l'app au moment de l'export).
-            var blobAttendu = f.blobStatut !== 'exporte';
+            // #1028 : ni une copie aux archives (la marque `_copiesAuxArchives` voyage dans le
+            // codex) : elle n'est jamais dite « manquante ».
+            var blobAttendu = f.blobStatut !== 'exporte' && !auxArchives[f.id];
             if (blobAttendu) nbBlobsAttendus++;
             try {
                 var pattern = new RegExp('^' + DOSSIER_TRAVAUX + '/' + _echapperRegex(f.id) + '\\.');
@@ -1173,6 +1177,9 @@ function _creerCompteDesCopies() {
     var compte = { attendues: 0, manquantes: 0 };
     compte.noter = function(copie, trouvee) {
         if (copie.blobStatut === 'exporte') return;
+        // #1028 : une copie aux archives a quitté l'application, c'est voulu ; la marque voyage
+        // dans le codex, qui ne prétend donc pas la contenir.
+        if (!trouvee && window.ReserveCopies && window.ReserveCopies.estAuxArchives(copie.id)) return;
         compte.attendues++;
         if (!trouvee) compte.manquantes++;
     };

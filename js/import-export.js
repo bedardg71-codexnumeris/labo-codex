@@ -1485,6 +1485,8 @@ async function _restaurerBlobsDepuisZip(donnees) {
 
     let nbRestores = 0;
     const idsManquants = [];
+    const auxArchives = (window.ReserveCopies && typeof window.ReserveCopies.idsDansDonnees === 'function')
+        ? window.ReserveCopies.idsDansDonnees(donnees) : {};
     for (const f of metadonnees) {
         // #613 : même garde que `chargerCodex` (codex.js, chemin « ouvrir » —
         // PAS la fusion, qui itère sur les entrées réellement présentes dans le
@@ -1493,7 +1495,9 @@ async function _restaurerBlobsDepuisZip(donnees) {
         // n'a LÉGITIMEMENT pas de blob dans le ZIP (le blob avait quitté l'app
         // au moment de l'export). Le compter manquant annoncerait « partiel »
         // un import où rien n'est perdu.
-        const blobAttendu = f.blobStatut !== 'exporte';
+        // #1028 : ni une copie aux archives (marquée ici, ou dans les données importées).
+        const blobAttendu = f.blobStatut !== 'exporte' && !auxArchives[f.id] &&
+            !(window.ReserveCopies && window.ReserveCopies.estAuxArchives(f.id));
         try {
             const entries = _entreesZipDeLaCopie(zip, f.id);
             if (entries.length > 0) {

@@ -544,7 +544,7 @@ describe('E3 · correction 1 (verdict) : le contenu des copies de l\'archive est
 
     it('TÉMOIN — la relecture du contenu neutralisée : la copie altérée passe, le trimestre part', async () => {
         const banc = await preparer({ muter: { [MODULE]: (s) => s.replace(
-            "if (empreinteArchive !== empreintesCopies[nomsArchive[q]]) return refus('changeeDepuis');", '') } });
+            "if (empreinteArchive !== empreintesCopies[nomsArchive[q]]) return { motif: 'changeeDepuis' };", '') } });
         const r = await renvoyer(banc, await copieAlteree(banc.zip, 'FT_h2', octets(25 * 1024 + 3, 77)));
         expect(r.bilan && r.bilan.etat).toBe('fait'); // le premier essai aurait rougi
     });
