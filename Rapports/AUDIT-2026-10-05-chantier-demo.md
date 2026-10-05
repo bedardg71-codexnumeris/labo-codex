@@ -199,6 +199,46 @@ Le pack contient dix élèves, 11 productions, 101 évaluations (toutes au statu
 
 ---
 
+## 5 bis. Complément après comparaison (2026-10-05, 19 h 20)
+
+Cowork a exécuté la même consigne en parallèle, sur le disque. Sa version n'est pas commitée et sert seulement de comparaison. Sept points n'y figuraient que chez lui. Je les ai revérifiés moi-même à `HEAD` = `42824121` (1.186.2, qui contient la fusion du lot 2 de l'enregistrement), sans me fier à ses numéros de ligne. Le pack a été lu par `node`, sans rien exécuter de l'application.
+
+| # | Point de Cowork | Verdict | Ce que dit le code à `HEAD` |
+|---|---|---|---|
+| C1 | 98 des 101 évaluations du pack sont verrouillées, et le verrou grise production, grille, cartouche et échelle | **Confirmé** [lu] | Le pack contient 98 évaluations `verrouillee: true`. Trois sont libres : DEMO004 › Artefact 7, DEMO020 › Évaluation terminale, DEMO006 › Évaluation terminale. Il y a deux couples sans évaluation : DEMO015 › Artefact 3 et Artefact 4. Au chargement d'une évaluation verrouillée, `evaluation.js:747-751` appelle `desactiverFormulaireEvaluation(true)`, qui désactive `selectGroupeEval`, `selectProduction1`, `selectGrille1`, `selectCartoucheEval`, `selectEchelle1`, `remiseProduction1` et `statutIntegrite` (`evaluation.js:2748-2769`), ainsi que les critères et la rétroaction. **C'est le seul mécanisme lu qui grise exactement production, échelle et cartouche ensemble.** Il vit dans le formulaire d'évaluation, et non dans la file d'import : la correspondance avec ce qu'a vu Grégoire reste à confirmer (M1) [inféré]. Ma lecture du §3 l'avait manqué. |
+| C2 | La garde C n'est atteinte que par le verrouillage ; une évaluation déverrouillée ne peut plus être reverrouillée | **Confirmé** [lu] | Le seul bouton est `btnVerrouillerEvaluation` → `basculerVerrouillageEvaluationCourante` (`index.html:8409`), et la copie y mène par le cadenas (`travaux-ui.js:5336`). Le verrouillage appelle `sauvegarderEvaluation` (`evaluation.js:2634`), qui passe par la garde (`evaluation-sauvegarde.js:412`) ou renvoie à `sauvegarderEvaluationModifiee`, gardée elle aussi (`evaluation.js:1678`). Le déverrouillage écrit `verrouillee = false` sans aucune vérification (`evaluation.js:2639-2650`). **Si M2 confirme le refus** [inféré] : une copie évaluée en présentation reste en brouillon, et une évaluation du pack déverrouillée ne se reverrouille plus. **T5 passe alors avant T1.** |
+| C3 | Quitter la démo pendant un import écrirait les copies suivantes dans le trimestre restauré | **Confirmé** [lu] pour le mécanisme, [inféré] pour l'effet | `importerTous` attend (`await`) chaque fichier dans sa boucle (`travaux-import.js:878-926`). `ajouterFichierTravail` relit et réécrit `cle('fichiersTravaux')` au moment de l'écriture (`travaux-stockage.js:283-320`). `importEnCours` est exposé (`travaux-import.js:2131`) mais n'est lu nulle part dans `demo-activation.js` (recherche vide). La garde de #340 (`productions-namespace-garde.js`) ne protège que `<trimestre>_productions`. Effet probable : les fiches des copies restantes s'**ajoutent** à la vraie liste du trimestre restauré, avec des DA démo. |
+| C4 | Les vignettes vivent sous une clé globale `thumbnail_<id>` | **Confirmé** [lu] | `stockerThumbnail` écrit `db.set('thumbnail_' + fichierId, …)` (`travaux-stockage.js:734`), sans `cle()`. `genererCodex` prend toutes les clés, donc il les emporte aussi. Un export filtré les range parmi les clés globales [inféré, d'après `_filtrerDonneesPourExport`]. La Réserve les traite déjà par id (`reserve-copies.js:355`, `reserve-renvoyer.js:528`) : c'est le modèle à suivre. |
+| C5 | T1 : la coupe par `indexOf(resultat.da)` casse si le DA est normalisé | **Confirmé** [lu], comme contrainte de conception | `parserNomFichierLea` coupe à `partieIdentite.indexOf(resultat.da)` (`travaux-import.js:141`). Aujourd'hui, `detecterDA` rend la sous-chaîne telle qu'écrite, donc l'index est juste. Une normalisation en `DEMO###` faite **dans** `detecterDA` rendrait −1 pour un fichier `demo004` [inféré]. Il faut couper à la position du motif trouvé. |
+| C6 | L'export de sélection propose le trimestre « Démo » | **Confirmé** [lu] ; **M7 tranché par lecture** | `actionExporterSelection` (`codex.js:4215`) liste les trimestres détectés, `demo` compris (`:4243-4262`). Il n'y a **pas de case à cocher par défaut** : on tape des numéros, et « tous » inclut la démo (`:4276-4277`). |
+| C7 | `configPAN.portfolio.methodeSelection` vaut « recents » ; la pratique `demo-std-litt` dit « meilleurs » | **Confirmé pour les données** [lu] ; **risque d'écran réfuté en grande partie** [lu/inféré] | Les deux valeurs sont bien dans le pack. Mais le moteur de la note (`profil-etudiant-actions.js:170-185`), le panneau du portfolio (`portfolio.js:168-181`) et la pratique PAN (`pratique-pan-standards.js:575-588`) lisent tous **la pratique active** (`obtenirConfigPratiqueActive`), et non le `configPAN` (commentaire « Phase G2-a » : plus de repli sur ce `configPAN`). Le `configPAN` n'est lu que par une instance simulée qui l'injecte (#307, `pratique-pan-standards.js:578-580`). Le profil devrait donc dire « meilleurs » [inféré : la pratique active résolue en démo n'a pas été suivie jusqu'au bout]. |
+
+### Ajouts aux listes
+
+**§3, à corriger** : il y a un quatrième mécanisme, D. Le verrou d'une évaluation grise production, grille, cartouche et échelle (C1). 98 des 101 évaluations du pack sont verrouillées, donc presque chaque élève et chaque production ouvre un formulaire grisé.
+
+**§4, à ajouter** : en démo, il ne reste que trois couples élève-production évaluables sans déverrouiller (DEMO004 › Artefact 7 ; DEMO020 et DEMO006 › Évaluation terminale), plus deux couples vierges (DEMO015 › Artefact 3 et Artefact 4) [lu].
+
+**Décisions techniques proposées à Cowork** :
+
+| # | Proposition | Pourquoi |
+|---|---|---|
+| T7 | Bloquer « Quitter la démo » (et le décochage de l'accueil) tant que `travauxImport.importEnCours` est vrai, avec un avis. À défaut, figer la clé de destination au début de `importerTous`. | C'est la mécanique de #340, transposée aux copies. Elle n'est couverte par aucune garde. |
+| T2/T3, précisés | Inclure `thumbnail_<id>`, sélectionnés par les ids des trois listes `demo_` (fiches, corbeille, annotations), au modèle de `reserve-copies.js`. | C4 |
+| T1, précisé | Couper nom et production à la position du motif trouvé, et non par `indexOf` du DA normalisé. Banc : `X_Y_demo004_Artefact_1_Remis_le_…` donne DA `DEMO004`, nom `X Y`, production `Artefact 1`. | C5 |
+| Ordre | Si M2 confirme le refus : **T5 avant T1**. | C2 |
+
+**À mesurer, ajouts et mises à jour** :
+
+| # | Mesure |
+|---|---|
+| M1, précisé | Vérifier en premier si l'écran grisé de Grégoire est le formulaire d'évaluation d'un couple verrouillé (C1), par exemple ouvert depuis une copie. |
+| M7 | **Tranché par lecture** (C6) : rien à mesurer. |
+| M9 | Avec un profil jetable : lancer un import de plusieurs copies en démo, quitter la démo pendant l'import, puis lire `<trimestre>_fichiersTravaux` du trimestre restauré (C3). Vérifier aussi si le bandeau « Quitter la démo » reste cliquable pendant l'import. |
+| M10 | Au profil d'un élève démo : la note du portfolio retient-elle « les meilleurs » ? Et le Comparateur, qui simule, lit-il le `configPAN` « recents » ? (C7) |
+
+---
+
 ## 6. Dispositions
 
 Ce rapport ne porte encore aucune disposition. Chaque ligne de G, T et M doit recevoir *inscrit* (n°), *refusé* (motif) ou *périmé* avant que l'audit soit clos.
