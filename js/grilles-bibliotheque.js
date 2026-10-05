@@ -102,7 +102,7 @@ async function ajouterGrilleALaBibliotheque(grille) {
         bibliotheque.push(grilleBiblio);
         return bibliotheque;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_GRILLES);   // lot F : geste hors témoin (ajouterGrilleALaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_GRILLES);   // lot F : geste hors témoin (ajouterGrilleALaBibliotheque)
 
     if (dejaPresente) {
         return false;
@@ -131,7 +131,7 @@ async function retirerGrilleDeLaBibliotheque(grilleId) {
         retiree = true;
         return restants;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_GRILLES);   // lot F : geste hors témoin (retirerGrilleDeLaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_GRILLES);   // lot F : geste hors témoin (retirerGrilleDeLaBibliotheque)
 
     if (!retiree) {
         return false;

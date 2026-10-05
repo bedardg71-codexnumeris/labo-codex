@@ -1143,7 +1143,7 @@ window.confirmerImportEchelles = async function(donnees) {
 
             return bibliotheque;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportEchelles)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportEchelles)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeEchelles')) {
@@ -1487,7 +1487,7 @@ async function ajouterEchelleIndividuelle(id) {
             echelle = trouvee;
             return echelles;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (ajouterEchelleIndividuelle)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (ajouterEchelleIndividuelle)
 
         if (nomEnConflit) {
             alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
@@ -1529,7 +1529,7 @@ async function retirerEchelleDeBibliotheque(id) {
         echelle.dansBibliotheque = false;
         return echelles;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (retirerEchelleDeBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (retirerEchelleDeBibliotheque)
 
     // Rafraîchir les affichages
     await afficherListeEchelles();

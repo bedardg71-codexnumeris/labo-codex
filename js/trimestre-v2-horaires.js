@@ -471,7 +471,7 @@ function supprimerSeanceV2(index) {
     horaire.splice(index, 1);
     const cleSauvegarde = typeof cleHoraire === 'function' ? cleHoraire() : cle('horaireHebdo');
     db.setSync(cleSauvegarde, horaire);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleSauvegarde);   // lot F : geste hors témoin (supprimer une séance)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleSauvegarde);   // lot F : geste hors témoin (supprimer une séance)
 
     notifications.succes('Séance supprimée');
 
@@ -1074,7 +1074,7 @@ async function supprimerHoraireV2() {
     // #1007 : relue après l'attente de la fenêtre ; celle d'avant ne vaut plus rien.
     horaires = db.getSync(cleHoraires, []).filter(h => h.id !== horaireEnEditionId);
     db.setSync(cleHoraires, horaires);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleHoraires);   // lot F : geste hors témoin (supprimer un horaire)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleHoraires);   // lot F : geste hors témoin (supprimer un horaire)
 
     // 🆕 FIX (22 jan 2026) : Resynchroniser horaireHebdo après suppression
     // CT-04 : même source unique qu'à la sauvegarde.

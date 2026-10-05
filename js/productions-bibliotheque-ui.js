@@ -347,7 +347,7 @@ async function ajouterProductionIndividuelle(id) {
 
         return productions;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cleProductions);   // lot F : geste hors témoin (ajouterProductionIndividuelle)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleProductions);   // lot F : geste hors témoin (ajouterProductionIndividuelle)
 
         // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
         if (titreEnConflit) {
@@ -671,7 +671,7 @@ async function retirerProductionDeBibliotheque(id) {
             trouvee = true;
             return productions;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (retirerProductionDeBibliotheque)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (retirerProductionDeBibliotheque)
 
         if (!trouvee) {
             throw new Error('Production introuvable');
@@ -718,7 +718,7 @@ async function supprimerProductionDefinitivement(id) {
     const ecritLotF = await db.modifier(getCleProductions(), (lues) => {
         return (lues || []).filter(p => p.id !== id);
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionDefinitivement)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionDefinitivement)
 
     // Suppression du store partagé
     if (typeof retirerDeLaBibliotheque === 'function') {

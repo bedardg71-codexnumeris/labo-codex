@@ -16,6 +16,14 @@ import { fileURLToPath } from 'node:url';
 // cette sentinelle tient aussi celles que le banc n'atteint pas sans l'écran (élèves suivis,
 // questions du tirage, verrou d'une date de présences, outils d'annotation).
 //
+// #982 (5 oct. 2026, décision de Grégoire : « Enregistré » partout) : chaque raccord d'un GESTE
+// de l'usager est devenu `annoncerEcritureUsager(cle)` (`modes.js`) : « Enregistré » à l'écran,
+// avec la règle du lot 1 (grosse clé → au commit ; échec → « Non enregistré » qui reste), et le
+// codex prévenu comme avant. Le cliquet compte désormais les ANNONCES. Les écritures de la
+// MACHINE gardent `signalerEcritureUsager` (le codex apprend, l'écran se tait) : elles sont
+// nommées une à une dans SILENCES. Un geste qui écrit plusieurs clés ne dit qu'UN « Enregistré » :
+// éprouvé par sentinelle-982-annoncer-ecriture-usager.test.js et lot-f-gestes-hors-temoin.spec.js.
+//
 // ⛔ Moratoire #622 : l'archivage d'un trimestre (`trimestres.js`, `trimestre-v2-liste.js`)
 // n'est pas raccordé — ses fichiers ne changent pas. Créer un trimestre depuis la liste et
 // l'export « format recherche » restent donc sans signal, assumé.
@@ -23,13 +31,13 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
 
-const RACCORDS = {
+const ANNONCES = {
     'js/bibliotheque-ui.js': 2,
     'js/bilan-reflexif-core.js': 2,
     'js/bilan-reflexif-csv.js': 1,
     'js/bilan-reflexif-rapport.js': 1,
     'js/boite-outils.js': 6,
-    'js/cartouches-bibliotheque.js': 2,
+    'js/cartouches-bibliotheque.js': 1,   // + 1 silence (#982 : la migration au démarrage)
     'js/cartouches.js': 5,
     'js/cc-license.js': 1,
     'js/cours.js': 5,
@@ -72,18 +80,31 @@ const RACCORDS = {
     'js/trimestre-v2-horaires.js': 2
 };
 
-const compter = (f) => (readFileSync(path.join(racineProjet, f), 'utf8').match(/signalerEcritureUsager\(/g) || []).length;
+// Les écritures de la machine qui se taisent (mesurées le 5 oct. 2026) : fichier → nombre.
+const SILENCES = {
+    // Seul appelant : la migration des cartouches au démarrage (cartouches.js, init).
+    'js/cartouches-bibliotheque.js': 1,
+    // Migrations et réparation des liens au chargement d'une carte (`machine`).
+    'js/planification-donnees.js': 1
+};
 
-describe('Lot F : raccords des gestes hors témoin', () => {
-    for (const [fichier, attendu] of Object.entries(RACCORDS)) {
-        it(`${fichier} porte ${attendu} raccord(s)`, () => {
+const lire = (f) => readFileSync(path.join(racineProjet, f), 'utf8');
+const compter = (f) => (lire(f).match(/annoncerEcritureUsager\(/g) || []).length;
+const compterSilences = (f) => (lire(f).match(/signalerEcritureUsager\(/g) || []).length;
+
+describe('Lot F et #982 : chaque geste hors témoin annonce « Enregistré »', () => {
+    for (const [fichier, attendu] of Object.entries(ANNONCES)) {
+        it(`${fichier} porte ${attendu} annonce(s), et ${SILENCES[fichier] || 0} silence(s)`, () => {
             expect(compter(fichier)).toBe(attendu);
+            expect(compterSilences(fichier), 'un raccord resté muet : geste de l\'usager, ou écriture de la machine à nommer dans SILENCES').toBe(SILENCES[fichier] || 0);
         });
     }
 
     it('le moratoire #622 tient : aucun raccord dans les fichiers de l\'archivage d\'un trimestre', () => {
-        expect(compter('js/trimestres.js')).toBe(0);
-        expect(compter('js/trimestre-v2-liste.js')).toBe(0);
+        for (const f of ['js/trimestres.js', 'js/trimestre-v2-liste.js']) {
+            expect(compter(f)).toBe(0);
+            expect(compterSilences(f)).toBe(0);
+        }
     });
 
     it('le point d\'accroche émet l\'événement du codex, sans rien afficher', () => {

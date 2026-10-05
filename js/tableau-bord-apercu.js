@@ -173,7 +173,7 @@ function obtenirEtudiantsSuivis() {
 
 function sauvegarderEtudiantsSuivis(liste) {
     db.setSync(cleEtudiantsSuivis(), liste);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cleEtudiantsSuivis());   // lot F : geste hors témoin (ajouter, retirer, vider)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleEtudiantsSuivis());   // lot F : geste hors témoin (ajouter, retirer, vider)
 }
 
 /**

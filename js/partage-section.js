@@ -94,7 +94,7 @@
 
     function ecrire(cle, valeur) {
         db.setSync(cle, valeur);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle);   // lot F : geste hors témoin (ecrire)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle);   // lot F : geste hors témoin (ecrire)
     }
 
     function echapper(s) {

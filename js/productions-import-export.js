@@ -450,7 +450,7 @@ window.confirmerImportProductions = async function(donnees) {
 
             return bibliotheque;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportProductions)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportProductions)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequeProductions')) {

@@ -141,7 +141,7 @@ window.marquerRessourceSupprimee = function(id) {
     if (!supprimees.includes(id)) {
         supprimees.push(id);
         db.setSync('ressourcesSupprimees', supprimees);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager('ressourcesSupprimees');   // lot F : geste hors témoin (marquerRessourceSupprimee)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('ressourcesSupprimees');   // lot F : geste hors témoin (marquerRessourceSupprimee)
     }
 };
 
