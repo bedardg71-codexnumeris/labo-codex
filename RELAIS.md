@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 8 h 55 : **1.185.0 (E3, #1024 : « RENVOYER AUX ARCHIVES ») EN LIGNE, MESURÉ CHEZ NETLIFY SUR `b2fad2c8` (PUBLIÉ À 8 h 55) ; VERDICT COMPLET VERT ; #1024 ET #1027 CLOSES ; #1028 INSCRITE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 9 h 33 : **#1028 (ARCHIVER LES COPIES D'UN TRIMESTRE CLOS, SES DONNÉES RESTENT) CODÉE SUR `claude/1028-archiver-copies` (`ab24f7d0`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CROISÉE**
+
+**Consigne** : Cowork, 9 h 02 (commitée sur `main`, `ff1abd6d`). Arrêt au point 6, comme demandé : ni push du lot, ni verdict complet, ni release.
+
+**Ce qui est fait** : `js/reserve-copies.js` (« Archiver les copies… » au menu ⋮ d'un trimestre clos ; marque `_copiesAuxArchives`) ; E1 et l'archive d'un groupe refusent tant que des copies sont aux archives ; E3 lève la marque ; « Faire revenir » (#1000) lit aussi la corbeille d'une archive de trimestre ; les lecteurs disent « aux archives » (visionneuse, exports, codex, éditeur et fusion refusés). Détail, mesures et mots provisoires : `plans de travail/DEMANDE-RELECTURE-2026-10-05-1028-archiver-copies.md` (sur la branche).
+
+**Tests** : Vitest 681 fichiers, 8201 essais verts ; bancs WebKit E1, E2, E3, A3 et #1028 : 9 sur 9. Mesuré à 394 copies (1 092 Mo) : comparaison 2,4 s, retrait 0,6 s, retour 2,1 s, pic de la page 209 Mo.
+
+**La suite** : le verdict de Cowork sur la demande de relecture, puis les mots de Grégoire. ⚠ La branche n'existe que sur ce Mac.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 8 h 55 : **1.185.0 (E3, #1024 : « RENVOYER AUX ARCHIVES ») EN LIGNE, MESURÉ CHEZ NETLIFY SUR `b2fad2c8` (PUBLIÉ À 8 h 55) ; VERDICT COMPLET VERT ; #1024 ET #1027 CLOSES ; #1028 INSCRITE**
 
 **Consigne** : Cowork, 7 h 51 (livraison). Verdict, consigne et archive commités (`9c95dc4a`).
 
