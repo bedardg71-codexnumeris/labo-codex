@@ -209,6 +209,13 @@ describe('#962 · modes.js : « Enregistré » après le commit d\'une grosse cl
         expect(b.appels).toEqual([['nonEnregistre', expect.stringMatching(/mémoire du navigateur est pleine/), undefined, 'a2026_fichiersTravaux']]);
     });
 
+    it('#1029 · connexion perdue malgré la réouverture : le message tranché par Grégoire (13 h 44), au tutoiement', () => {
+        const b = monter();
+        const e = new Error('Connexion IndexedDB perdue'); e.name = 'ConnexionPerdue';
+        b.abonneEchec()('a2026_presences', e);
+        expect(b.appels.at(-1)[1]).toBe('le navigateur a refusé l\'écriture. Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire.');
+    });
+
     it('ecrireEtAnnoncer suit la même règle (grosse clé : après le commit)', async () => {
         const b = monter();
         const d = b.attendre('cours', true);

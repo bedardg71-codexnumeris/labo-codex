@@ -319,10 +319,32 @@
             } catch (erreur) {
                 if (!this._connexionFermee(erreur)) throw erreur;
                 // Déjà remplacée par une autre opération : ne pas fermer la neuve.
-                if (this.db === connexion) await this._rouvrirConnexion();
-                else if (this._reouverture) await this._reouverture;
-                return await operation();
+                try {
+                    if (this.db === connexion) await this._rouvrirConnexion();
+                    else if (this._reouverture) await this._reouverture;
+                } catch (eReouverture) {
+                    throw this._erreurConnexionPerdue(eReouverture);
+                }
+                try {
+                    return await operation();
+                } catch (eTentative) {
+                    // Une autre raison (mémoire pleine…) garde la sienne.
+                    if (this._connexionFermee(eTentative)) throw this._erreurConnexionPerdue(eTentative);
+                    throw eTentative;
+                }
             }
+        }
+
+        /**
+         * L'échec qui reste MALGRÉ la réouverture (réouverture impossible, ou connexion
+         * encore fermée à la nouvelle tentative) porte un nom à lui : `modes.js` y répond
+         * par le message tranché par Grégoire (5 oct. 2026, 13 h 44) — noter, recharger.
+         */
+        _erreurConnexionPerdue(cause) {
+            const e = new Error('Connexion IndexedDB perdue, réouverture sans effet');
+            e.name = 'ConnexionPerdue';
+            e.cause = cause;
+            return e;
         }
 
         /**

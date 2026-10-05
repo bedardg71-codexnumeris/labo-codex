@@ -119,7 +119,27 @@ describe('#1029 · la connexion fermée se rouvre une fois, et l\'opération abo
         b.db.setSync('a2026_presences', [1]);
         await tours();
         expect(b.ouvertures).toHaveLength(1);
-        expect(b.echecs.map((e) => e[0])).toEqual(['a2026_presences']);
+        expect(b.echecs).toEqual([['a2026_presences', 'ConnexionPerdue']]);
+    });
+
+    it('nouvelle tentative refusée parce que la connexion reste fermée : « ConnexionPerdue »', async () => {
+        const b = monter();
+        const ouvrir = b.db._initIndexedDB.bind(b.db);
+        b.db._initIndexedDB = () => ouvrir().then(() => { b.db.db = fermee(); });   // rouverte… et aussitôt perdue
+        b.db.setSync('a2026_presences', [1]);
+        await tours();
+        expect(b.echecs).toEqual([['a2026_presences', 'ConnexionPerdue']]);
+    });
+
+    it('nouvelle tentative refusée pour une AUTRE raison (mémoire pleine) : cette raison est gardée', async () => {
+        const b = monter();
+        const ouvrir = b.db._initIndexedDB.bind(b.db);
+        b.db._initIndexedDB = () => ouvrir().then(() => {
+            b.db.db = { transaction() { const e = new Error('quota'); e.name = 'QuotaExceededError'; throw e; }, close() {} };
+        });
+        b.db.setSync('a2026_presences', [1]);
+        await tours();
+        expect(b.echecs).toEqual([['a2026_presences', 'QuotaExceededError']]);
     });
 
     it('`close` reçu : la prochaine écriture rouvre AVANT d\'essayer (rien n\'est tenté sur l\'ancienne)', async () => {
