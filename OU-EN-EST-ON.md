@@ -15,11 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-**EN RELECTURE (4 OCTOBRE 2026, 19 h 35) — EMPRUNTER UN TRIMESTRE ARCHIVÉ (E2)** : pas encore en ligne ; pas encore « fait ».
+✅ **EN LIGNE EN 1.184.0 (4 OCTOBRE 2026 ; en ligne depuis 21 h 04, mesuré chez Netlify : déploiement de production prêt sur `59018be9` ; tes mots) — FAIRE REVENIR UN TRIMESTRE ARCHIVÉ**
 
-**Ce que tu verras, une fois livré** : dans Réglages › Données › Archives, la ligne « Trimestre entier » d'une archive vérifiée offre « Emprunter ». Le trimestre revient tel qu'il a été archivé, clos, avec ses copies ; rien d'autre ne bouge. S'il est déjà là, c'est refusé, sans rien écrire.
+**Ce que tu verras** : dans Réglages › Données › Archives, la ligne « Trimestre entier » d'une archive vérifiée offre « Faire revenir ». Le trimestre revient tel qu'il a été archivé, clos, avec ses copies ; les autres trimestres, les cours et les réglages ne bougent pas. S'il est déjà là : « … est déjà dans l'application : ouvre-le depuis la bibliothèque des trimestres. Rien n'a été écrit. »
 
-**Où en est la vérification** : un banc sur un espace fictif (archiver, supprimer, faire évoluer l'espace, emprunter) et le vrai bouton à la largeur d'un iPad, sous le moteur de Safari ; mémoire sur 1,15 Go : 210 Mo. Relecture de Cowork à venir ; **les mots sont à toi** (`plans de travail/DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre.md`, § 4).
+**Vérifié comment** : un banc sur un espace fictif (archiver, supprimer, faire évoluer l'espace, faire revenir) : le trimestre revient identique, et seule la liste des trimestres change hors de lui ; chaque refus et chaque échec provoqué laisse l'espace tel qu'avant ; écrire une donnée partagée, écrire la liste des trimestres trop tôt ou oublier de recomparer une copie fait échouer le banc. Le vrai bouton à la largeur d'un iPad, sous le moteur de Safari. Mémoire sur 1,15 Go de copies : 210 Mo, 2,3 s. Vérification complète au navigateur verte sur le commit livré. **Pas vérifié** : ton Safari, ton iPad, Chrome avec un vrai dossier, une vraie archive de l'hiver 2026.
+
+**Tes données** : rien n'est écrit chez toi ; aucun trimestre n'a été archivé ni ramené. **Pas fait** : les vignettes des copies revenues (trop lent, inscrit).
+
+**Ta vérification** : aucune maintenant ; la porte viendra avec « Renvoyer aux archives » (E3), quand l'hiver 2026 sera clos et archivé.
 
 ---
 

@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 19 h 34 : **E2 (#1023, EMPRUNTER UN TRIMESTRE) CODÉ SUR `claude/e2-emprunter-trimestre` (`3dd4fddc`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 21 h 06 : **1.184.0 (E2, #1023 : « FAIRE REVENIR » UN TRIMESTRE ARCHIVÉ) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `59018be9` (PUBLIÉ À 21 h 04) ; VERDICT COMPLET VERT ; #1023 CLOSE**
+
+**Consigne** : Cowork, 19 h 46 (verdict vert avec une correction ; mots « Faire revenir » de Grégoire ; release minor). Consigne, archive, verdict et mots au plan commités tels quels (`e29a45a0`).
+
+**Ce qui est fait** : la garde #340 ne déroge que pour le trimestre qu'on fait revenir, pendant l'écriture de ses clés (marqueur retiré dans un `finally` ; deux mutations rouges) ; mots « Faire revenir », « Trimestre revenu », « Impossible de faire revenir le trimestre », refus « déjà là » retouché ; sentinelle « aucun emprunt dans un texte lu » (rouge démontré). **Vignettes non faites** : mesurées à 60,7 s pour 394 copies PDF (contre 2,3 s) et 1,4 Go retenus par le processus graphique ; code retiré, **#1026 inscrite**. Fiche d'E3 (#1024) : « Renvoyer aux archives ».
+
+**Release** : 1.184.0 (`59018be9`, build 1004-1959). Vitest 679 fichiers, 8135 essais verts. Verdict Playwright complet vert sur `59018be9` : 0 échec ; **5 instables** au second essai (bulles-au-doigt-540, cartouches-import-trimestre, codex-1012 (1), doublons-cadre-ct15, evaluation-961 R2) ; éveil complet tenu (batterie, 0 veille) ; échange au plus haut 11,9 Go, pression 2 (le Mac était chargé : sondes de mémoire de la session). `main` avancée sur le commit jugé (avance rapide), poussée par `git push origin main`.
+
+**Porte** : aucune maintenant ; celle d'E2 s'écrira avec celle d'E3, quand l'hiver 2026 sera clos et archivé.
+
+**La suite** : renvoyer un trimestre aux archives (E3, #1024), sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 4 OCT. 2026, 19 h 34 : **E2 (#1023, EMPRUNTER UN TRIMESTRE) CODÉ SUR `claude/e2-emprunter-trimestre` (`3dd4fddc`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
 
 **Consigne** : Cowork, 19 h 06 (E2 ; arrêt au point 6). Consigne et archive commitées et poussées sur `main` (`1847b3d3`).
 
