@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 9 h 33 : **#1028 (ARCHIVER LES COPIES D'UN TRIMESTRE CLOS, SES DONNÉES RESTENT) CODÉE SUR `claude/1028-archiver-copies` (`ab24f7d0`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CROISÉE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 9 h 31 : **#1028 (ARCHIVER LES COPIES D'UN TRIMESTRE CLOS, SES DONNÉES RESTENT) CODÉE SUR `claude/1028-archiver-copies` (`ab24f7d0`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CROISÉE**
 
 **Consigne** : Cowork, 9 h 02 (commitée sur `main`, `ff1abd6d`). Arrêt au point 6, comme demandé : ni push du lot, ni verdict complet, ni release.
 
