@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 7 h 57 : **1.185.0 (E3, #1024, « RENVOYER AUX ARCHIVES ») FUSIONNÉE ET COMMITÉE SUR `main` (`b3a9c9a1`) ; VERDICT PLAYWRIGHT COMPLET EN COURS, PUIS PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 8 h 55 : **1.185.0 (E3, #1024 : « RENVOYER AUX ARCHIVES ») EN LIGNE, MESURÉ CHEZ NETLIFY SUR `b2fad2c8` (PUBLIÉ À 8 h 55) ; VERDICT COMPLET VERT ; #1024 ET #1027 CLOSES ; #1028 INSCRITE**
+
+**Consigne** : Cowork, 7 h 51 (livraison). Verdict, consigne et archive commités (`9c95dc4a`).
+
+**Ce qui est fait** : mots de Grégoire dans `ReserveRenvoyer.MOTS` ; « Terminer le renvoi » partout ; `Reserve.formaterTaille`, seule fonction de taille de l'écran des archives, à virgule décimale ; **#1028 inscrite** (archiver les copies d'un trimestre clos en gardant ses données ; non prioritaire). Branche fusionnée (`5260f253`), release minor 1.185.0 (`b3a9c9a1`, build 1005-0756).
+
+**Tests** : Vitest 680 fichiers, 8176 essais verts après le commit du bump. Verdict Playwright complet vert sur `b2fad2c8` : 0 échec ; **1 instable** au second essai (cours-actif-hors-bibliotheque-916) ; éveil complet tenu **sur batterie** (la consigne demandait le Mac branché ; il ne l'était pas), 0 veille, échange 4,9 Go, pression 1. Poussé par `git push origin main`.
+
+**Porte** : aucune maintenant ; celle d'E2 et d'E3 s'écrira quand l'hiver 2026 sera clos et archivé (la première fois sur l'hiver 2026 revient à Grégoire).
+
+**La suite** : sur une consigne de Cowork.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 7 h 57 : **1.185.0 (E3, #1024, « RENVOYER AUX ARCHIVES ») FUSIONNÉE ET COMMITÉE SUR `main` (`b3a9c9a1`) ; VERDICT PLAYWRIGHT COMPLET EN COURS, PUIS PUSH**
 
 **Consigne** : Cowork, 7 h 51 (livraison ; corrections vertes, mots tranchés par Grégoire). Verdict, consigne et archive commités (`9c95dc4a`).
 
