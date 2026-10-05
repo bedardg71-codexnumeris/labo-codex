@@ -1,22 +1,27 @@
-# Consigne du jour – enregistrement, lot 1 bis : rouvrir la connexion perdue (#1029)
+# Consigne du jour – livrer le lot 1 de l'enregistrement (#962, #986, #1029)
 
-> Écrite par Cowork le 5 octobre 2026 à 12 h 50 (Toronto, mesurée par `date`). Remplace la consigne de 12 h 01, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-05-enregistrement-temoin.md`.
+> Écrite par Cowork le 5 octobre 2026 à 13 h 44 (Toronto, mesurée par `date`). Remplace la consigne du lot 1 bis, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-05-enregistrement-1029.md`.
 
 ## Où on en est
 
-Le lot 1 (`da9dc970`, `claude/enregistrement-temoin`) est relu : **vert, avec un ajout avant la livraison**, dans `VERDICT-RELECTURE-2026-10-05-enregistrement-temoin.md`. Lis-le en entier.
+Le lot 1 bis (`a8329002`) est relu par Cowork : **vert**. Acceptés : la réouverture étendue à la lecture (sans elle, les éditeurs de la Conception échoueraient) ; #1030 et #1031 inscrites ; ta correction du compte des essais du lot B et sa cause (une ligne « failed » coupée par un filtre) : à l'avenir, lis le résumé final de Playwright en entier, jamais filtré.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork sur la branche, à écrire dans `BACKLOG.md`, et à travailler sur la même branche. **Ne pousse pas le lot et ne fais pas de release.** Pousse `RELAIS.md` seul sur `main` en t'arrêtant.
+**Le message tranché par Grégoire** (à 13 h 44), pour un échec qui reste malgré la réouverture, au tutoiement comme toute l'application :
+
+> « Non enregistré : le navigateur a refusé l'écriture. Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire. »
+
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md`, à fusionner la branche dans `main`, à faire la release et à pousser.
 
 ## Ce que tu fais, dans cet ordre
 
-1. **Commite** le verdict, cette consigne et son archive sur la branche.
-2. **#1029** comme au verdict : réouverture unique, nouvelle tentative de la dernière valeur, `onclose`/`onversionchange`. Essais et trois mutations rouges.
-3. **Inscris** la suppression muette (issue 2), ou dis que la réouverture la couvre.
-4. **Ajoute** la rangée « arrière-plan » au fichier de la porte terrain.
-5. **Vitest complet** ; les bancs WebKit du témoin et voisins. **Pas encore** la suite Playwright complète : elle se fera à la livraison.
-6. **Arrête-toi et rends.**
+1. **Commite** cette consigne et son archive sur la branche.
+2. **Le message** ci-dessus, pour ce seul cas (connexion fermée et réouverture impossible, ou nouvelle tentative refusée) ; les autres raisons (mémoire pleine…) gardent leur texte. Un essai qui le lit.
+3. **Vitest complet**, puis **le verdict Playwright complet** (garde-éveil, Mac sur secteur). Lis son résumé final sans filtre.
+4. **Fusionne** dans `main`, **release** par `scripts/release.mjs` selon le skill `release-et-changelog` (correctifs : patch). Ligne des Nouvelles, telle quelle :
+   « Enregistrement : quand une écriture échoue, l'application dit « Non enregistré » et le message reste, au lieu d'afficher « Enregistré ». Sur l'iPad, elle rétablit seule sa liaison après une mise en arrière-plan, et le témoin s'affiche au-dessus du clavier. »
+   Coche #962, #986, #1029.
+5. **Pousse**, mesure la mise en ligne chez Netlify, écris `RELAIS.md`.
 
 ## Ce que tu rends
 
-En une ligne chacun : #1029 fait, sa mesure, ses mutations ; la suppression muette ; la phrase d'issue que tu proposes pour un échec qui reste malgré la réouverture.
+La version en ligne et son heure mesurée ; le verdict Playwright (échecs, instables) ; le chemin du fichier de la porte terrain à jour.
