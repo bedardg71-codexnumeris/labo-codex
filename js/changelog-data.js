@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.185 (#1024, E3 : renvoyer un trimestre aux archives) — ligne de Cowork, acceptée par
+            // Grégoire le 5 oct. 2026 (consigne de 7 h 51), posée telle quelle. Titre de Claude Code.
+            version: '1.185',
+            couleur: 'vert',
+            titre: 'Renvoyer un trimestre aux archives',
+            items: [
+                'Archives&nbsp;: «&nbsp;Renvoyer aux archives&nbsp;» retire de l\'application un trimestre clos que son archive vérifiée garde à l\'identique&nbsp;; «&nbsp;Faire revenir&nbsp;» le ramène tel quel. Si le trimestre a changé depuis son archive, rien n\'est retiré.'
+            ]
+        },
+        {
             // 1.184 (#1023, E2 : faire revenir un trimestre archivé) — ligne de Cowork, acceptée par
             // Grégoire le 4 oct. 2026 (consigne de 19 h 46), posée telle quelle. Titre de Claude Code.
             version: '1.184',
