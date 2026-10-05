@@ -41,3 +41,72 @@ Sans elle, le geste peut être inutilisable sur les données de Grégoire, et le
 ## Les mots
 
 Soumis à Grégoire par Cowork ; ils arriveront avec la consigne de livraison.
+
+## Les mots tranchés par Grégoire (5 oct. 2026, 7 h 43)
+
+**Fenêtre « identique » : acceptée**, telle que proposée par Cowork :
+
+> Titre : « Renvoyer Hiver 2026 aux archives ? »
+> « Hiver 2026 quittera l'application : 130 étudiant·es, 394 copies, environ 1,08 Go.
+> Son archive, vérifiée le 5 octobre 2026, le garde tel quel : « Faire revenir » le ramènera.
+> Garde bien cette archive : c'est elle qui le conserve.
+> Les autres trimestres, les cours et les réglages ne sont pas touchés. »
+> Bouton : « Renvoyer aux archives »
+
+Avec : une seule date (celle de la vérification) ; « c'est elle qui le conserve » remplace « c'est son seul exemplaire » (un ancien codex peut encore le contenir) ; la virgule décimale (« 1,08 Go »), à aligner dans tout l'écran des archives (« 80.0 Ko » d'E1 devient « 80,0 Ko »).
+
+**Fenêtre « différent » : acceptée** (7 h 45), telle que proposée par Cowork :
+
+> Titre : « Hiver 2026 a changé depuis son archive »
+> « Rien n'a été retiré.
+> Depuis son archive du 5 octobre 2026 : 3 données modifiées, 7 données ajoutées.
+> C'est normal si tu l'as consulté : l'application recalcule certaines données à l'ouverture.
+> Pour le renvoyer : archive-le de nouveau, vérifie la nouvelle archive, puis renvoie-le. »
+> Bouton : « Archiver de nouveau »
+
+Les copies suivent la même règle : « N copies ajoutées » (absentes de l'archive), « N copies modifiées » (différentes de l'archive). Le cas « reprise » garde sa dernière ligne propre, dans les mêmes mots (« Fais-le revenir pour le consulter, puis archive-le de nouveau avant de le renvoyer. »).
+
+**Bilan : accepté**, tel que proposé par Cowork :
+
+> Titre : « Hiver 2026 est renvoyé aux archives »
+> « Il n'est plus dans l'application ; son archive le garde.
+> Pour le faire revenir : Réglages › Données › Archives, « Faire revenir ».
+> 394 copies retirées. Ton prochain codex sera plus léger d'environ 1,08 Go. »
+
+(Le compte des données retirées disparaît.)
+
+**Interrompu : accepté**, tel que proposé par Cowork :
+
+> Titre : « Renvoi inachevé »
+> « Le renvoi de Hiver 2026 s'est arrêté en cours de route. Rien n'est perdu : son archive garde tout.
+> Pour finir : Réglages › Données › Archives, ligne de Hiver 2026, « Terminer le renvoi ».
+> Pour annuler : « Faire revenir », au même endroit. »
+
+(La cause technique et le compte de ce qui reste disparaissent.)
+
+**Reprise : acceptée**, avec le mot de Grégoire. **« Finir de renvoyer » est remplacé partout par « Terminer le renvoi »** (bouton, titre, fenêtre « Renvoi inachevé », aide, tests) ; motif de Grégoire : « finir de renvoyer » s'entend comme « continuer de vomir ».
+
+> Bouton sur la ligne de l'archive : « Terminer le renvoi » (infobulle : « Le renvoi s'est arrêté en cours de route : retirer ce qui reste »)
+> Titre : « Terminer le renvoi de Hiver 2026 ? »
+> « Une partie de Hiver 2026 est restée dans l'application, identique à son archive. Elle sera retirée ; l'archive garde tout. »
+> Bouton : « Terminer le renvoi »
+
+(Le compte de ce qui reste disparaît.)
+
+**Refus : acceptés** (titre inchangé, « Trimestre non renvoyé »). Inchangés : `pasClos`, `actif`, `rien` ; `sansArchive` sans la parenthèse : « Ce trimestre n'a pas d'archive dans la liste. Archive-le d'abord, puis vérifie l'archive. » ; `nonVerifiee` tel quel. Changés :
+
+> `changeeDepuis` ET `copiesAbsentes` (un seul message) : « Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau. »
+> `sansEmpreintes` : « Cette archive est trop ancienne pour un renvoi. Archive le trimestre de nouveau. »
+
+`introuvable`, `pasUnTrimestre`, `sansMagasin` : laissés (cas techniques, non soumis).
+
+Menu et son infobulle : inchangés (« Renvoyer aux archives… », nom décidé par Grégoire le 4 oct.).
+
+## Relecture des corrections (`d17b0749`, Cowork, 5 oct., 7 h 51) : verte
+
+Lu le diff de `reserve-renvoyer.js`, `reserve-verifier.js`, `reserve-emprunter.js`. Les trois corrections font ce que le verdict demande ; la supposition sur #1027 (le compte des fiches sans fichier doit égaler `nombre_fichiers_manquants`, sinon l'ancienne règle) est acceptée : elle ne peut que refuser davantage.
+
+## À inscrire au BACKLOG (décision de Grégoire, 5 oct. 2026)
+
+Une fiche neuve, **non prioritaire, après la livraison d'E3** : « Archiver les copies d'un trimestre clos en gardant ses données » (retirer de l'application les seules copies, que l'archive vérifiée garde à l'identique ; les données restent consultables). Grégoire juge cette option « assez probable » chez les utilisateurs. Elle reprend l'intention de #1001 (fermée le 4 oct., dépassée par E3) et s'appuiera sur la comparaison et le retrait d'E3 (copies et vignettes seulement). On termine d'abord le chantier actuel.
+
