@@ -60,7 +60,9 @@ var RE_TRIMESTRE = /^[aeh]\d{4}$/;
 var SAISONS = { a: 'Automne', h: 'Hiver', e: 'Été' };
 
 /* ===============================
-   LES MOTS — UN SEUL ENDROIT (provisoires, à trancher par Grégoire)
+   LES MOTS — UN SEUL ENDROIT (tranchés par Grégoire le 5 octobre 2026 :
+   plans de travail/MOTS-2026-10-05-1028-archiver-copies.md). Règle : ne jamais promettre
+   que les annotations se voient sans leur copie.
    =============================== */
 function _pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
 
@@ -76,6 +78,9 @@ function _jour(iso) {
 }
 
 var CHEMIN = 'Réglages › Données › Archives';
+var DONNEES = 'résultats des étudiant·es et du groupe, grilles, rétroactions';
+var ANNOTATIONS = 'Les annotations restent aussi, mais ne se voient qu\'avec leur copie.';
+function _revenir(nom) { return CHEMIN + ', ligne de ' + nom + ', « Faire revenir »'; }
 
 var MOTS = {
     menu: 'Archiver les copies…',
@@ -88,7 +93,7 @@ var MOTS = {
             var lignes = [
                 _pluriel(c.copies, 'copie quittera', 'copies quitteront') + ' l\'application, environ ' + _formaterTaille(c.taille) + '.',
                 'Son archive, vérifiée le ' + _jour(c.dateVerification) + ', les garde telles quelles : « Faire revenir » les ramènera.',
-                'Les notes, les grilles, les rétroactions et les annotations restent dans l\'application.',
+                'Toutes les données de ' + c.nom + ' restent dans l\'application : ' + DONNEES + '. ' + ANNOTATIONS,
                 'Garde bien cette archive : c\'est elle qui conserve les copies.'
             ];
             if (c.laissees) lignes.push(_pluriel(c.laissees, 'copie d\'un·e étudiant·e supprimé·e reste', 'copies d\'étudiant·es supprimé·es restent') + ' dans l\'application.');
@@ -104,23 +109,24 @@ var MOTS = {
             if (c.copiesDifferentes) parts.push(_pluriel(c.copiesDifferentes, 'copie modifiée', 'copies modifiées'));
             return ['Rien n\'a été retiré.',
                 'Depuis son archive du ' + _jour(c.dateArchive) + ' : ' + parts.join(', ') + '.',
-                'Pour archiver ses copies : archive le trimestre de nouveau, vérifie la nouvelle archive, puis recommence.'].join('\n');
+                'Pour archiver ses copies : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses copies.'].join('\n');
         },
         confirmer: 'Archiver de nouveau'
     },
     bilan: {
         titre: function(nom) { return 'Les copies de ' + nom + ' sont aux archives'; },
         texte: function(b) {
-            return _pluriel(b.copies, 'copie retirée', 'copies retirées') + (b.taille ? ', environ ' + _formaterTaille(b.taille) + ' libérés' : '') + '. Ses données restent dans l\'application.\n' +
-                'Pour les faire revenir : ' + CHEMIN + ', ligne de ' + b.nom + ', « Faire revenir ».';
+            return _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' + (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + _formaterTaille(b.taille) + '.' : '') + '\n' +
+                'Toutes les données de ' + b.nom + ' restent dans l\'application : ' + DONNEES + '. ' + ANNOTATIONS + '\n' +
+                'Pour faire revenir les copies : ' + _revenir(b.nom) + '.';
         }
     },
     interrompu: {
         titre: 'Archivage des copies inachevé',
         texte: function(b) {
             return 'L\'archivage des copies de ' + b.nom + ' s\'est arrêté en cours de route. Rien n\'est perdu : son archive les garde toutes.\n' +
-                'Pour finir : relance « ' + MOTS.menu + ' » depuis le même menu.\n' +
-                'Pour annuler : « Faire revenir », ' + CHEMIN + '.';
+                'Pour finir : relance « ' + MOTS.menu + ' » depuis le menu ⋮ de ' + b.nom + '.\n' +
+                'Pour annuler : « Faire revenir », dans ' + CHEMIN + '.';
         }
     },
     refus: {
@@ -135,8 +141,9 @@ var MOTS = {
         badge: 'ARC',
         infobulle: 'Copie aux archives : sa note, sa grille, sa rétroaction et ses annotations restent dans l\'application',
         message: function(nom) {
-            return 'Cette copie est aux archives. Sa note, sa grille, sa rétroaction et ses annotations restent dans l\'application.\n' +
-                'Pour la revoir : ' + CHEMIN + ', ligne de ' + nom + ', « Faire revenir ».';
+            return 'Cette copie est aux archives.\n' +
+                'Ses résultats, sa grille et sa rétroaction restent dans l\'application ; ses annotations aussi, mais elles ne se voient qu\'avec la copie.\n' +
+                'Pour la revoir : fais revenir les copies de ' + nom + ' (' + _revenir(nom) + ').';
         },
         // Dans le bilan d'un export, à la place de « Blob introuvable ».
         raison: 'aux archives',
@@ -149,10 +156,12 @@ var MOTS = {
     },
     // E1 et l'archive d'un groupe, tant que des copies sont aux archives.
     refusArchiver: {
-        titre: 'Archive non écrite',
+        titre: 'Trimestre non archivé',
+        // Le texte tranché parle des copies du trimestre sans les compter : n reste dans la
+        // signature pour l'appelant, il ne s'imprime plus.
         texte: function(n, nom) {
-            return _pluriel(n, 'copie de ' + nom + ' est', 'copies de ' + nom + ' sont') + ' aux archives : une nouvelle archive ne ' + (n > 1 ? 'les' : 'la') + ' contiendrait pas.\n' +
-                'Fais-' + (n > 1 ? 'les' : 'la') + ' revenir d\'abord (' + CHEMIN + ', « Faire revenir »), puis archive de nouveau.';
+            return 'Les copies de ' + nom + ' sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.\n' +
+                'Fais-les revenir d\'abord (' + _revenir(nom) + '), puis archive de nouveau.';
         }
     }
 };
@@ -478,7 +487,7 @@ function fenetreIdentique(res) {
     return {
         titre: MOTS.fenetre.titre(res.nom),
         message: MOTS.fenetre.texte({
-            copies: res.aRetirer.copies.length, taille: res.taille, laissees: res.laissees,
+            nom: res.nom, copies: res.aRetirer.copies.length, taille: res.taille, laissees: res.laissees,
             dateVerification: res.entree && res.entree.verification && res.entree.verification.date
         }),
         texteConfirmer: MOTS.fenetre.confirmer

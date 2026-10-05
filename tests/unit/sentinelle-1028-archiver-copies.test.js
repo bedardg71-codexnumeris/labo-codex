@@ -289,20 +289,45 @@ describe('#1028 · (a) l\'aller-retour : archiver les copies, faire évoluer les
         expect(RC.idsDansDonnees({ [CLE_MARQUE]: banc.db._map.get(CLE_MARQUE) })).toEqual({ FT_h1: true, FT_h2: true, FT_h3: true, FT_hc: true });
     });
 
-    it('la fenêtre et le bilan (mots provisoires)', async () => {
+    it('la fenêtre et le bilan (mots tranchés par Grégoire le 5 octobre 2026)', async () => {
         const banc = await preparer();
         const RC = banc.win.ReserveCopies;
         const res = await RC.comparer(banc.win.ReserveVerifier.sourceFichier(banc.zip), TRIM);
         const f = RC.fenetreIdentique(res);
         expect(f.titre).toBe('Archiver les copies de Hiver 2032 ?');
-        expect(f.message.split('\n')[0]).toBe('4 copies quitteront l\'application, environ 80,0 Ko.');
+        const l = f.message.split('\n');
+        expect(l[0]).toBe('4 copies quitteront l\'application, environ 80,0 Ko.');
+        expect(l[1]).toMatch(/^Son archive, vérifiée le .+, les garde telles quelles : « Faire revenir » les ramènera\.$/);
+        expect(l.slice(2)).toEqual([
+            'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.',
+            'Garde bien cette archive : c\'est elle qui conserve les copies.'
+        ]);
         expect(f.texteConfirmer).toBe('Archiver les copies');
         const bilan = await RC.retirer(res);
         expect(RC.compteRendu(res, bilan)).toEqual({
             titre: 'Les copies de Hiver 2032 sont aux archives',
-            message: '4 copies retirées, environ 80,0 Ko libérés. Ses données restent dans l\'application.\n' +
-                'Pour les faire revenir : Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir ».'
+            message: '4 copies retirées. Ton prochain codex sera plus léger d\'environ 80,0 Ko.\n' +
+                'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.\n' +
+                'Pour faire revenir les copies : Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir ».'
         });
+    });
+
+    it('copies changées, interrompu, une copie aux archives (mots tranchés) : aucune promesse que les annotations se voient', async () => {
+        const banc = await preparer();
+        const M = banc.win.ReserveCopies.MOTS;
+        expect(M.different.texte({ copiesAbsentes: 2, copiesDifferentes: 1, dateArchive: '2032-06-01T12:00:00' }).split('\n')).toEqual([
+            'Rien n\'a été retiré.',
+            'Depuis son archive du 1 juin 2032 : 2 copies ajoutées, 1 copie modifiée.',
+            'Pour archiver ses copies : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses copies.'
+        ]);
+        expect(M.interrompu.texte({ nom: 'Hiver 2032' })).toBe(
+            'L\'archivage des copies de Hiver 2032 s\'est arrêté en cours de route. Rien n\'est perdu : son archive les garde toutes.\n' +
+            'Pour finir : relance « Archiver les copies… » depuis le menu ⋮ de Hiver 2032.\n' +
+            'Pour annuler : « Faire revenir », dans Réglages › Données › Archives.');
+        expect(M.copie.message('Hiver 2032')).toBe(
+            'Cette copie est aux archives.\n' +
+            'Ses résultats, sa grille et sa rétroaction restent dans l\'application ; ses annotations aussi, mais elles ne se voient qu\'avec la copie.\n' +
+            'Pour la revoir : fais revenir les copies de Hiver 2032 (Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir »).');
     });
 
     it('relancé quand tout est parti : « rien à archiver », rien écrit', async () => {
@@ -345,15 +370,15 @@ describe('#1028 · (c) aucune nouvelle archive sans les copies parties', () => {
         expect(banc.journal.telechargements.length).toBe(n + 1);
     });
 
-    it('le refus d\'E1 se dit à l\'usager (mots provisoires)', async () => {
+    it('le refus d\'E1 se dit à l\'usager (mots tranchés)', async () => {
         const banc = await preparer();
         await archiverCopies(banc);
         banc.journal.fenetres.length = 0;
         await banc.win.ReserveTrimestre.archiverTrimestre(TRIM);
         expect(banc.journal.fenetres).toEqual([{
-            titre: 'Archive non écrite',
-            message: '4 copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas.\n' +
-                'Fais-les revenir d\'abord (Réglages › Données › Archives, « Faire revenir »), puis archive de nouveau.'
+            titre: 'Trimestre non archivé',
+            message: 'Les copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.\n' +
+                'Fais-les revenir d\'abord (Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir »), puis archive de nouveau.'
         }]);
     });
 

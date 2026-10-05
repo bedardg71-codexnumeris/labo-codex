@@ -248,12 +248,12 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await archiverCopiesParLeMenu(page, fichier);
             let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
             expect(f.message).toContain('3 copies quitteront l\'application, environ 188,5 Ko.\n');
-            expect(f.message).toContain('Les notes, les grilles, les rétroactions et les annotations restent dans l\'application.');
+            expect(f.message).toContain('Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
             test.info().annotations.push({ type: 'fenêtre', description: f.message });
             await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
             f = await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
-            expect(f.message).toContain('3 copies retirées, environ 188,5 Ko libérés.');
+            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 188,5 Ko.\n');
             test.info().annotations.push({ type: 'bilan', description: f.message });
             await fermerFenetre(page);
 
@@ -265,8 +265,8 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
 
             // 3. « Archiver le trimestre… » refuse, et le dit.
             await page.evaluate(() => { window.__archive = null; ReserveTrimestre.actionArchiver('h2032'); });
-            f = await attendreFenetre(page, 'Archive non écrite');
-            expect(f.message).toContain('3 copies de Hiver 2032 sont aux archives');
+            f = await attendreFenetre(page, 'Trimestre non archivé');
+            expect(f.message).toContain('Les copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.');
             await fermerFenetre(page);
             expect(await page.evaluate(() => window.__archive)).toBeNull();
 
@@ -347,6 +347,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
             f = await attendreFenetre(page, 'Archivage des copies inachevé');
             test.info().annotations.push({ type: 'interrompu', description: f.message });
+            expect(f.message).toContain('Pour finir : relance « Archiver les copies… » depuis le menu ⋮ de Hiver 2032.');
             await fermerFenetre(page);
             expect(Object.keys((await photo(page)).copies).sort()).toEqual(['FT_a1', 'FT_h2', 'FT_hc']);
             await page.evaluate(() => { window.__refuserRetrait = null; });
@@ -362,6 +363,107 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
         }
         expect(erreurs).toEqual([]);
     });
+    // Consigne de livraison (Cowork, 5 oct., 10 h 10, point 3) : « Rouvrir » un trimestre dont les
+    // copies sont aux archives. Mesuré : il est rouvert ; la marque n'y est pas touchée.
+    // Exigé : rien n'est perdu, les copies restent « aux archives » (jamais « manquantes »), et
+    // « Archiver le trimestre… » refuse tant qu'elles ne sont pas revenues.
+    test('« Rouvrir » un trimestre dont les copies sont aux archives : rien de perdu, toujours « aux archives », E1 refuse, « Faire revenir » les ramène', async ({ page }) => {
+        page.setDefaultTimeout(15000);
+        const { erreurs } = brancherEcouteurs(page);
+        await poserEspace(page);
+        await ouvrirArchives(page);
+        const dossierTmp = path.join(__dirname, '.tmp-1028r');
+        mkdirSync(dossierTmp, { recursive: true });
+        try {
+            const fichier = await archiverEtVerifier(page, dossierTmp);
+            const avant = await photo(page);
+            await archiverCopiesParLeMenu(page, fichier);
+            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
+            await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            await fermerFenetre(page);
+            const parties = await photo(page);
+
+            // « Rouvrir », le vrai bouton de la carte close.
+            await page.evaluate(() => ouvrirBibliothequeTrimestreV2());
+            const modale = page.locator('#modalBibliothequeTrimestres');
+            await expect(modale).toBeVisible();
+            const rouvrir = modale.locator('[data-action="desarchiverTrimestre"][data-param="h2032"]');
+            await expect(rouvrir).toHaveText('Rouvrir');
+            await rouvrir.click();
+            await expect.poll(() => page.evaluate(() => obtenirTrimestres().find((t) => t.id === 'h2032').archive)).toBe(false);
+            await page.evaluate(() => db.flush());
+            const rouvert = await photo(page);
+            // Ce que « Rouvrir » change : le registre (et les copies de modèles de la clôture, #359).
+            const changees = Object.keys({ ...parties.cles, ...rouvert.cles }).filter((k) => parties.cles[k] !== rouvert.cles[k]).sort();
+            test.info().annotations.push({ type: 'clés changées par « Rouvrir »', description: changees.join(', ') });
+            expect(changees).toContain('trimestres');
+            expect(changees.filter((k) => k !== 'trimestres' && !/^h2032_/.test(k))).toEqual([]);
+            expect(rouvert.cles._copiesAuxArchives).toBe(parties.cles._copiesAuxArchives);
+            expect(rouvert.cles.h2032_fichiersTravaux).toBe(parties.cles.h2032_fichiersTravaux);
+            expect(rouvert.cles.h2032_corbeilleFichiers).toBe(parties.cles.h2032_corbeilleFichiers);
+            expect(rouvert.copies).toEqual(parties.copies);
+            expect(await page.evaluate((ids) => ids.map((id) => ReserveCopies.estAuxArchives(id)), COPIES_H)).toEqual([true, true, true]);
+
+            // Rouvert, « Archiver le trimestre… » n'est plus offert (carte close seulement) et E1
+            // refuse un trimestre qui n'est pas clos : rien n'est téléchargé.
+            const e1 = await page.evaluate(async () => {
+                window.__archive = null;
+                const r = await ReserveTrimestre.archiverTrimestre('h2032', { sansConfirmation: true });
+                return { r, pasClos: ReserveTrimestre.MOTS.refus.pasClos, archive: window.__archive };
+            });
+            expect(e1.r).toEqual({ succes: false, refus: e1.pasClos });
+            expect(e1.archive).toBeNull();
+            await page.evaluate(() => { const m = document.getElementById('modalBibliothequeTrimestres'); if (m) m.remove(); });
+
+            // Rouvert ET actif : toujours « aux archives », jamais « manquantes ».
+            await activer(page, 'h2032', ['FT_a1']);
+            const actif = await page.evaluate(async (ids) => {
+                const fiches = [...(await db.get('h2032_fichiersTravaux', [])), ...(await db.get('h2032_corbeilleFichiers', []))];
+                let averti = null;
+                await Codex.generer({ confirmerCopiesManquantes: async (m, a) => { averti = [m, a]; return true; } });
+                return {
+                    aux: ids.map((id) => ReserveCopies.estAuxArchives(id)),
+                    manquantes: fiches.filter((x) => x && x.blobStatut === 'manquant').map((x) => x.id),
+                    averti
+                };
+            }, COPIES_H);
+            expect(actif).toEqual({ aux: [true, true, true], manquantes: [], averti: null });
+
+            // Clos de nouveau : « Archiver le trimestre… » refuse tant que les copies ne sont pas revenues.
+            await activer(page, 'a2032', ['FT_a1']);
+            const clore = await page.evaluate(() => archiverTrimestre('h2032'));
+            expect(clore.success).toBe(true);
+            await page.evaluate(() => { window.__archive = null; ReserveTrimestre.actionArchiver('h2032'); });
+            f = await attendreFenetre(page, 'Trimestre non archivé');
+            expect(f.message).toContain('Les copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.');
+            await fermerFenetre(page);
+            expect(await page.evaluate(() => window.__archive)).toBeNull();
+            expect(await page.evaluate((ids) => ids.map((id) => ReserveCopies.estAuxArchives(id)), COPIES_H)).toEqual([true, true, true]);
+
+            // « Faire revenir » par la ligne de l'archive : chaque fichier égal à l'avant, la marque levée.
+            await ouvrirArchives(page);
+            await page.evaluate(() => ReserveReglages.rafraichir());
+            const ligne = page.locator('#reserve-reglages-table-conteneur tr', { hasText: 'Trimestre entier' });
+            const bouton = ligne.locator('[data-action="ReserveRevenir.actionFaireRevenir"]');
+            await expect(bouton).toHaveText('Faire revenir');
+            const attente = page.waitForEvent('filechooser');
+            await bouton.click();
+            await (await attente).setFiles(fichier);
+            f = await attendreFenetre(page, 'Faire revenir les copies');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
+            f = await attendreFenetre(page, 'Copies revenues');
+            expect(f.message).toContain('3 copies revenues');
+            await fermerFenetre(page);
+            const retour = await photo(page);
+            for (const id of COPIES_H) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
+            expect(retour.cles._copiesAuxArchives).toBeUndefined();
+        } finally {
+            rmSync(dossierTmp, { recursive: true, force: true });
+        }
+        expect(erreurs).toEqual([]);
+    });
+
     test('verdict de Cowork : une copie sans fichier (manquante, introuvable) s\'ouvre à sa place ; « Fusionner » la refuse et n\'efface rien', async ({ page }) => {
         page.setDefaultTimeout(15000);
         const { erreurs, alertes } = brancherEcouteurs(page);
