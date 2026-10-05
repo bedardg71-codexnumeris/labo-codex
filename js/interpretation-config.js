@@ -172,7 +172,7 @@ function chargerSeuilsInterpretation() {
 function sauvegarderSeuilsInterpretation(seuils) {
     try {
         db.setSync('seuilsInterpretation', seuils);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager('seuilsInterpretation');   // lot F : geste hors témoin (sauvegarderSeuilsInterpretation)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('seuilsInterpretation');   // lot F : geste hors témoin (sauvegarderSeuilsInterpretation)
         return true;
     } catch (e) {
         console.error('❌ Erreur lors de la sauvegarde des seuils:', e);

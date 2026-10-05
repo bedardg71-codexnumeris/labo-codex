@@ -106,7 +106,7 @@ async function ajouterCartoucheALaBibliotheque(cartouche) {
         bibliotheque.push(cartoucheBiblio);
         return bibliotheque;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_CARTOUCHES);   // lot F : geste hors témoin (ajouterCartoucheALaBibliotheque)
+    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_CARTOUCHES);   // lot F : geste hors témoin (ajouterCartoucheALaBibliotheque)   // #982 : machine (seul appelant : la migration au démarrage) — le codex apprend, l'écran se tait
 
     if (dejaPresente) {
         return false;
@@ -135,7 +135,7 @@ async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
         retiree = true;
         return restants;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE_CARTOUCHES);   // lot F : geste hors témoin (retirerCartoucheDeLaBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_CARTOUCHES);   // lot F : geste hors témoin (retirerCartoucheDeLaBibliotheque)
 
     if (!retiree) {
         return false;

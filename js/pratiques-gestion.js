@@ -663,7 +663,7 @@ function copierPratiqueDepuisTrimestre(pratiqueSource, srcId) {
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
     configurations.push(nouvellePratique);
     db.setSync(cle('pratiquesConfigurables'), configurations);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (copierPratiqueDepuisTrimestre)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (copierPratiqueDepuisTrimestre)
 
     return { pratique: nouvellePratique, depsManquantes: verifierDependancesPratique(nouvellePratique) };
 }
@@ -895,7 +895,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         // ne fait que refuser un doublon ; elle n'introduit aucune donnée neuve.
         return gardePratique.liste;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (ajouterPratiqueALaSelection)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (ajouterPratiqueALaSelection)
 
     if (verdict === 'deja') {
         notifications.info('Cette pratique est déjà dans ta sélection.');
@@ -945,7 +945,7 @@ async function retirerPratiqueDeLaSelection(pratiqueId) {
         retiree = true;
         return configurations;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (retirerPratiqueDeLaSelection)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (retirerPratiqueDeLaSelection)
 
     if (retiree) {
         // Rafraîchir la sidebar AVANT de réouvrir le modal
@@ -986,7 +986,7 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
     const ecritLotF = await db.modifier(cle('pratiquesConfigurables'), (lues) => {
         return (lues || []).filter(p => p.id !== pratiqueId);
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueDefinitivement)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueDefinitivement)
 
     // Rafraîchir UI
     fermerModalBibliothequePratiques();
@@ -2499,7 +2499,7 @@ window.confirmerImportPratiques = async function(donnees) {
 
             return bibliotheque;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportPratiques)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportPratiques)
 
         // Rafraîchir le modal de bibliothèque s'il est ouvert
         if (document.getElementById('modalBibliothequePratiques')) {

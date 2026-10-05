@@ -82,7 +82,7 @@ const PratiqueManager = {
         // mais on ne la laisse pas contredire ce qui vient d'être activé).
         gcActif.pratiqueId = pratiqueId;
         db.setSync('groupeCoursActif', gcActif);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager('groupeCoursActif');   // lot F : geste hors témoin (changerPratiqueActive)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager([cle('groupesCours'), 'groupeCoursActif']);   // #982 : les deux clés du geste, un seul « Enregistré » (lot F : changerPratiqueActive)
 
         // Invalider le cache de pratique-registre.js
         if (window.invaliderCachePratique) {
@@ -209,8 +209,8 @@ const PratiqueManager = {
 
         pratiques.push(pratique);
         db.setSync(cle('pratiquesConfigurables'), pratiques);
-        if (!(options && options.discret) && window.signalerEcritureUsager) {
-            window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin
+        if (!(options && options.discret) && window.annoncerEcritureUsager) {
+            window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin
         }
 
     },
@@ -237,7 +237,7 @@ const PratiqueManager = {
 
         pratiques.splice(index, 1);
         db.setSync(cle('pratiquesConfigurables'), pratiques);
-        if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratique)
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratique)
 
     },
 

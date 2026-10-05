@@ -307,7 +307,7 @@ function getPratiqueParDefaut() {
  */
 function definirPratiqueParDefaut(pratiqueId) {
     db.setSync('pratiqueParDefaut', pratiqueId);
-    if (window.signalerEcritureUsager) window.signalerEcritureUsager('pratiqueParDefaut');   // lot F : geste hors témoin (definirPratiqueParDefaut)
+    if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('pratiqueParDefaut');   // lot F : geste hors témoin (definirPratiqueParDefaut)
 
     const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Standards';
 
@@ -1041,7 +1041,7 @@ async function adopterMaquette(id) {
         nomAdoptee = pratique.nom || 'Sans titre';
         return pratiques;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (adopterMaquette)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (adopterMaquette)
 
     if (nomAdoptee === null) return false;   // introuvable, ou déjà adoptée
 
@@ -1482,7 +1482,7 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
         trouvee = true;
         return pratiques;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (retirerPratiqueDeBibliotheque)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (retirerPratiqueDeBibliotheque)
 
     if (!trouvee) {
         alert('Pratique introuvable');
@@ -1512,7 +1512,7 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
         trouvee = true;
         return pratiques;
     }, []);
-    if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (ajouterPratiqueIndividuelle)
+    if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (ajouterPratiqueIndividuelle)
 
     if (!trouvee) {
         alert('Pratique introuvable');
@@ -1577,7 +1577,7 @@ async function supprimerPratiqueHorsBibliotheque(pratiqueId) {
             fraiches.splice(index, 1);
             return fraiches;
         }, []);
-        if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueHorsBibliotheque)
+        if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueHorsBibliotheque)
 
 
         // Rafraîchir le modal

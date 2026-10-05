@@ -889,7 +889,7 @@
         }
         try {
             db.setSync(cle, null);
-            if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle);   // lot F : geste hors témoin (supprimerParametreConfig)
+            if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle);   // lot F : geste hors témoin (supprimerParametreConfig)
             notifications.succes('Paramètre « ' + label + ' » supprimé');
             afficherTableauParametresV2(document.getElementById('table-ressources-container'));
         } catch(e) {
@@ -1692,7 +1692,7 @@
             let configurables = db.getSync(cle('pratiquesConfigurables')) || [];
             configurables = configurables.filter(p => p.id !== pratiqueId);
             db.setSync(cle('pratiquesConfigurables'), configurables);
-            if (window.signalerEcritureUsager) window.signalerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueDefinitivement)
+            if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (supprimerPratiqueDefinitivement)
         } catch (e) {
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);
         }
@@ -1737,7 +1737,7 @@
                 if (restants.length === templates.length) return undefined;
                 return restants;
             }, []);
-            if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('grillesTemplates'));   // lot F : geste hors témoin (supprimerGrilleDefinitivement)
+            if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('grillesTemplates'));   // lot F : geste hors témoin (supprimerGrilleDefinitivement)
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression grille templates:', e.message);
         }
@@ -1787,7 +1787,7 @@
                 if (restants.length === templates.length) return undefined;
                 return restants;
             }, []);
-            if (ecritLotF !== undefined && window.signalerEcritureUsager) window.signalerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (supprimerEchelleDefinitivement)
+            if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (supprimerEchelleDefinitivement)
         } catch (e) {
             console.warn('[donnees-v2] Erreur suppression échelle templates:', e.message);
         }
