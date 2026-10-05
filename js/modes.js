@@ -1040,10 +1040,15 @@ function titreInterventionAffiche(intervention, repli, nom) {
 const RAISONS_NON_ENREGISTRE = {
     quota: 'la mémoire du navigateur est pleine. Pour libérer de la place : Cadre › Trimestre › Bibliothèque, « Supprimer… » sur un ancien trimestre.',
     erreur: 'le navigateur a refusé l\'écriture.',
-    garde: 'ces données ne correspondent pas au trimestre ouvert.'
+    garde: 'ces données ne correspondent pas au trimestre ouvert.',
+    // #1029 — connexion IndexedDB perdue, et la réouverture n'y a rien fait (message
+    // tranché par Grégoire, 5 oct. 2026, 13 h 44) : seul le rechargement rétablit l'accès,
+    // et il perd ce qui n'a pas été écrit.
+    connexion: 'le navigateur a refusé l\'écriture. Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire.'
 };
 
 function _raisonNonEnregistre(error) {
+    if (error && error.name === 'ConnexionPerdue') return RAISONS_NON_ENREGISTRE.connexion;
     const quota = error && (error.name === 'QuotaExceededError' ||
         (error.message && error.message.includes('quota')));
     return quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur;
@@ -1193,7 +1198,7 @@ async function modifierEtAnnoncer(cleEffective, mutateur, defaut = null, options
         const quota = error && (error.name === 'QuotaExceededError' ||
             (error.message && error.message.includes('quota')));
         console.error(`❌ Écriture échouée ${cleEffective}${quota ? ' (quota)' : ''}:`, error);
-        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste, cleEffective);
+        if (temoin) temoin.nonEnregistre(_raisonNonEnregistre(error), geste, cleEffective);
         throw error;
     }
 }
@@ -1224,7 +1229,7 @@ async function ecrireEtAnnoncer(cleEffective, ecrire, options) {
         const quota = error && (error.name === 'QuotaExceededError' ||
             (error.message && error.message.includes('quota')));
         console.error(`❌ Écriture échouée ${cleEffective}${quota ? ' (quota)' : ''}:`, error);
-        if (temoin) temoin.nonEnregistre(quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur, geste, cleEffective);
+        if (temoin) temoin.nonEnregistre(_raisonNonEnregistre(error), geste, cleEffective);
         throw error;
     }
 }

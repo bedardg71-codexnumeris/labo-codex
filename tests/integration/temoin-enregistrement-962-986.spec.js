@@ -106,7 +106,7 @@ test.describe('#962 · un échec IndexedDB ne se tait jamais', () => {
             return !!(t && t.querySelector('.temoin-enregistrement-succes.visible'));
         })()`);
         expect(apresAppel, '« Enregistré » ne s\'affiche pas avant le commit d\'une grosse clé').toBe(false);
-        await expect.poll(() => page.evaluate(LIRE).then((e) => e.echec)).toBe('Non enregistré – Verrouillage de l\'évaluation : le navigateur a refusé l\'écriture.');
+        await expect.poll(() => page.evaluate(LIRE).then((e) => e.echec)).toBe('Non enregistré – Verrouillage de l\'évaluation : le navigateur a refusé l\'écriture. Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire.');
         await page.waitForTimeout(2600);
         const ensuite = await page.evaluate(LIRE);
         expect(ensuite.enregistre).toBe(false);
