@@ -202,6 +202,10 @@ function ouvrirBibliothequeTrimestreV2() {
             if (window.ReserveTrimestre) {
                 actions.push({ label: ReserveTrimestre.MOTS.menu, action: ReserveTrimestre.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveTrimestre.MOTS.menuTitre });
             }
+            // E3 (#1024) : renvoyer aux archives un trimestre clos dont l'archive vérifiée le garde (mots dans ReserveRenvoyer.MOTS)
+            if (window.ReserveRenvoyer && !estActif) {
+                actions.push({ label: ReserveRenvoyer.MOTS.menu, action: ReserveRenvoyer.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveRenvoyer.MOTS.menuTitre });
+            }
             // #361 : suppression définitive (jamais sur le trimestre actif)
             actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else if (!estActif) {

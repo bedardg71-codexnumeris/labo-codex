@@ -94,11 +94,9 @@ function _yield() {
     return new Promise(function(resolve) { setTimeout(resolve, 0); });
 }
 
+/** La taille, au format de tout l'écran des archives (reserve.js). */
 function _formaterTaille(octets) {
-    if (!octets) return '0 o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    return window.Reserve.formaterTaille(octets);
 }
 
 function _entreeRegistre(trimestre) {
@@ -389,6 +387,10 @@ async function archiverTrimestre(trimestre, options) {
             meta: meta,
             patch: patch,
             blobs: copies.blobs,
+            // E3 (#1024) : en mode dossier, les copies d'une archive précédente que celle-ci ne
+            // range plus sont mises de côté (hors-archive-<date>/), sans quoi « Vérifier » les
+            // dirait « en trop » et le trimestre ne pourrait jamais être renvoyé aux archives.
+            mettreDeCote: true,
             stats: {
                 etudiants: collecte.stats.nombreEtudiants,
                 cles: collecte.stats.nombreCles,

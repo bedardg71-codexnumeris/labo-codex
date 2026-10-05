@@ -369,11 +369,19 @@ async function _statutHandleReserve() {
    UTILITAIRES
    =============================== */
 
+/**
+ * La taille, telle que tout l'écran des archives la dit (une seule fonction : reserve-trimestre,
+ * -verifier, -reglages et -renvoyer s'en servent). Virgule décimale (« 1,08 Go », « 80,0 Ko »),
+ * décision de Grégoire du 5 oct. 2026 (mots d'E3).
+ */
 function _formaterTaille(octets) {
-    if (octets < 1024) return octets + ' o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    if (!octets) return '0 o';
+    var texte;
+    if (octets < 1024) texte = octets + ' o';
+    else if (octets < 1024 * 1024) texte = (octets / 1024).toFixed(1) + ' Ko';
+    else if (octets < 1024 * 1024 * 1024) texte = (octets / (1024 * 1024)).toFixed(1) + ' Mo';
+    else texte = (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
+    return texte.replace('.', ',');
 }
 
 function _normaliserGroupe(g) {
@@ -995,8 +1003,13 @@ async function _ecrireFichierBlob(dossierHandle, nomFichier, blob) {
  * entierement ecrits. Le manifeste global est fusionne ensuite (voir
  * _fusionnerManifesteGlobal). Les blobs orphelins (un fichier supprime
  * entre archives) restent en place et doivent etre purges manuellement.
+ *
+ * E3 (#1024, 5 oct. 2026) : avec `options.mettreDeCote` (l'archive d'un trimestre entier), les
+ * copies d'une archive précédente que celle-ci ne range plus sont DÉPLACÉES dans un dossier
+ * frère `hors-archive-<date>/`, jamais effacées : « Vérifier » ne les dit plus « en trop » (et
+ * « Renvoyer aux archives » devient possible), et rien ne se perd (règle du 20 sept.).
  */
-async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patch, blobs, onProg) {
+async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patch, blobs, onProg, options) {
     var dossierTrim = await handleRacine.getDirectoryHandle('trimestres', { create: true });
     var dossierVersement = await dossierTrim.getDirectoryHandle(dossier, { create: true });
     var dossierTravaux = await dossierVersement.getDirectoryHandle('travaux', { create: true });
@@ -1014,6 +1027,10 @@ async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patc
         }
     }
 
+    if (options && options.mettreDeCote) {
+        await _mettreDeCoteLesAnciennes(dossierVersement, dossierTravaux, blobs, meta && meta.date_archive);
+    }
+
     onProg(94, 'Écriture des fichiers…', '');
     await _ecrireFichierTexte(dossierVersement, 'manifeste-archives-patch.json', JSON.stringify(patch, null, 2));
 
@@ -1022,6 +1039,35 @@ async function _ecrireVersementDirect(handleRacine, dossier, donnees, meta, patc
     await _ecrireFichierTexte(dossierVersement, 'meta.json', JSON.stringify(meta, null, 2));
 
     return { cheminDossier: 'trimestres/' + dossier + '/' };
+}
+
+/**
+ * E3 (#1024) : déplace hors de travaux/ les copies que cette archive ne range pas (celles d'une
+ * archive précédente du même dossier), dans `hors-archive-<date>/`. Copie, relue à sa taille,
+ * PUIS retrait de l'original. Les fichiers du système (`.DS_Store`…) restent où ils sont.
+ * @returns {Promise<number>} le nombre de copies mises de côté
+ */
+async function _mettreDeCoteLesAnciennes(dossierVersement, dossierTravaux, blobs, dateArchive) {
+    var gardees = {};
+    blobs.forEach(function(b) { gardees[b.id + '.' + b.ext] = true; });
+    var aDeplacer = [];
+    for await (var paire of dossierTravaux.entries()) {
+        var nom = paire[0];
+        if (!paire[1] || paire[1].kind !== 'file' || gardees[nom]) continue;
+        if (nom.charAt(0) === '.' || nom === 'Thumbs.db' || nom === 'desktop.ini') continue;
+        aDeplacer.push(paire[1]);
+    }
+    if (!aDeplacer.length) return 0;
+    var date = String(dateArchive || new Date().toISOString()).slice(0, 19).replace(/[:T]/g, '-');
+    var cote = await dossierVersement.getDirectoryHandle('hors-archive-' + date, { create: true });
+    for (var i = 0; i < aDeplacer.length; i++) {
+        var fichier = await aDeplacer[i].getFile();
+        await _ecrireFichierBlob(cote, aDeplacer[i].name, fichier);
+        var relu = await (await cote.getFileHandle(aDeplacer[i].name)).getFile();
+        if (relu.size !== fichier.size) throw new Error('Copie mise de côté incomplète : ' + aDeplacer[i].name);
+        await dossierTravaux.removeEntry(aDeplacer[i].name);
+    }
+    return aDeplacer.length;
 }
 
 /**
@@ -1203,6 +1249,7 @@ async function _hydrateManifesteDepuisFSAPI(handleRacine) {
  * @param {Object} o.patch - { dossier, patch } : l'entrée de la liste
  * @param {Array<{id, ext, blob}>} o.blobs - les copies, par référence
  * @param {Object} o.stats - les comptes rendus à l'appelant (sans la taille du ZIP)
+ * @param {boolean} [o.mettreDeCote] - E3 : mode dossier, déplacer les copies d'une archive précédente
  * @param {Object} o.mots - { archive(stats, chemin), telecharge(stats, taille), nonArchive }
  * @returns {Promise<Object|null>} le résultat ; null si l'aperçu est annulé
  */
@@ -1217,7 +1264,8 @@ async function _deposerArchive(o) {
         await _yield();
 
         var ecriture = await _ecrireVersementDirect(
-            o.handleReserve, dossier, o.donnees, o.meta, patch, o.blobs, _prog
+            o.handleReserve, dossier, o.donnees, o.meta, patch, o.blobs, _prog,
+            { mettreDeCote: !!o.mettreDeCote }
         );
 
         _prog(98, 'Mise à jour du manifeste global…', '');
@@ -1843,6 +1891,7 @@ window.Reserve = {
     // E1 (#1022) : l'archive d'un trimestre entier (reserve-trimestre.js) passe par le même
     // dépôt et les mêmes empreintes.
     deposerArchive: _deposerArchive,
+    formaterTaille: _formaterTaille,
     empreinteDeLaCopie: _empreinteDeLaCopie,
     empreinteDuTexte: _calculerSHA256,
     extensionDuNom: _extensionDepuisNomFichier,

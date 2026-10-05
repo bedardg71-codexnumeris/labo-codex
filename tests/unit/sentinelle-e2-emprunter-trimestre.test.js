@@ -380,11 +380,29 @@ describe('E2 · (b) les refus n\'écrivent RIEN', () => {
         expect(banc.win.ReserveEmprunter.refusDejaLaImmediat(TRIM)).toBe('dejaLa');
     });
 
-    it('une seule clé h2032_* sans entrée au registre : « débris »', async () => {
+    it('une seule clé h2032_* sans entrée au registre, que l\'archive n\'a pas : « débris »', async () => {
         const banc = await preparer();
         banc.db._map.set('h2032_presences', {});
         await refuse(banc, 'debris');
-        expect(banc.win.ReserveEmprunter.refusDejaLaImmediat(TRIM)).toBe('debris');
+        // E3 (#1024) : le débris se juge contre l'archive, plus avant le sélecteur de fichier.
+        expect(banc.win.ReserveEmprunter.refusDejaLaImmediat(TRIM)).toBe(null);
+    });
+
+    it('E3 : une clé h2032_* restée d\'un renvoi interrompu, mais DIFFÉRENTE de l\'archive : « débris »', async () => {
+        const banc = await preparer();
+        banc.db._map.set('h2032_productions', [{ id: 'P1', titre: 'Changée depuis', coursId: 'C1' }]);
+        await refuse(banc, 'debris');
+    });
+
+    it('E3 : des clés h2032_* restées d\'un renvoi interrompu, IDENTIQUES à l\'archive : laissées, le reste revient', async () => {
+        const banc = await preparer();
+        banc.db._map.set('h2032_productions', structuredClone(CORPUS.h2032_productions));
+        banc.db._map.set('h2032_groupesCours', structuredClone(CORPUS.h2032_groupesCours));
+        const bilan = await emprunter(banc);
+        expect(bilan.etat).toBe('fait');
+        expect(bilan.clesDejaLa).toEqual(['h2032_groupesCours', 'h2032_productions']);
+        expect(banc.db.journal).not.toContain('set:h2032_productions');
+        for (const k of CLES_H) expect(banc.db._map.get(k)).toEqual(CORPUS[k]);
     });
 
     it('une clé voisine (h2032x_…) n\'est pas un débris', async () => {
