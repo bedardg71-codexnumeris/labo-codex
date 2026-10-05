@@ -1043,6 +1043,38 @@ const RAISONS_NON_ENREGISTRE = {
     garde: 'ces données ne correspondent pas au trimestre ouvert.'
 };
 
+function _raisonNonEnregistre(error) {
+    const quota = error && (error.name === 'QuotaExceededError' ||
+        (error.message && error.message.includes('quota')));
+    return quota ? RAISONS_NON_ENREGISTRE.quota : RAISONS_NON_ENREGISTRE.erreur;
+}
+
+/**
+ * #962 (5 oct. 2026) — le succès d'une écriture, dit au bon moment. `db.setSync` rend la
+ * main AVANT le commit IndexedDB :
+ *   - une GROSSE clé (au-delà du seuil de `db.js`) ne vit qu'en mémoire jusqu'au commit :
+ *     « Enregistré » attend le commit (mesuré au banc WebKit : ≤ 4 ms pour 20 Mo) ;
+ *   - une petite clé qui porte le « Non enregistré » affiché ne l'efface pas avant que SON
+ *     commit ait réussi (l'échec précédent venait justement d'un commit) ;
+ *   - toute autre petite clé : « Enregistré » tout de suite, comme avant.
+ * Un commit qui échoue fait dire l'échec, avec le geste. L'abonné de `db.surEchecEcriture`
+ * (plus bas) le dit aussi, sans geste, pour les écritures directes : il passe en premier,
+ * celui-ci après, et c'est le texte avec le geste qui reste.
+ * L'événement du codex (« donnees-enregistrees ») part tout de suite, comme avant : la
+ * donnée a changé dans l'application.
+ */
+function _annoncerEnregistre(temoin, cleEffective, geste) {
+    const attente = typeof db.commitEnAttente === 'function' ? db.commitEnAttente(cleEffective) : null;
+    if (!attente) { temoin.enregistre(cleEffective); return; }
+    const attendre = attente.grosse || (typeof temoin.echecSur === 'function' && temoin.echecSur(cleEffective));
+    if (!attendre) temoin.enregistre(cleEffective);
+    else if (typeof window.signalerEcritureUsager === 'function') window.signalerEcritureUsager(cleEffective);
+    attente.commit.then(
+        () => { if (attendre) temoin.enregistre(cleEffective); },
+        (error) => temoin.nonEnregistre(_raisonNonEnregistre(error), geste, cleEffective)
+    );
+}
+
 /**
  * Sauvegarde des données selon le mode actif
  * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
@@ -1095,7 +1127,7 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
         // une entrée déjà retirée : gratuite.
         invaliderCacheLecture(cleEffective);
         if (modeActuel === MODES.ANONYMISATION) _poserEmpreintes(cle, donnees);   // R1
-        if (temoin && !discret) temoin.enregistre(cleEffective);
+        if (temoin && !discret) _annoncerEnregistre(temoin, cleEffective, geste);
         return true;
     } catch (error) {
         // #618 : l'ancien toast disait « Les données sont sauvegardées » sur un quota
@@ -1154,7 +1186,7 @@ async function modifierEtAnnoncer(cleEffective, mutateur, defaut = null, options
         }
         if (ecrit) {
             invaliderCacheLecture(cleEffective);
-            if (temoin && !discret) temoin.enregistre(cleEffective);
+            if (temoin && !discret) _annoncerEnregistre(temoin, cleEffective, geste);
         }
         return resultat;
     } catch (error) {
@@ -1185,7 +1217,7 @@ async function ecrireEtAnnoncer(cleEffective, ecrire, options) {
     const temoin = window.temoinEnregistrement;
     try {
         const resultat = await ecrire();
-        if (resultat && temoin && !discret) temoin.enregistre(cleEffective);
+        if (resultat && temoin && !discret) _annoncerEnregistre(temoin, cleEffective, geste);
         if (resultat) invaliderCacheLecture(cleEffective);
         return resultat;
     } catch (error) {
@@ -1514,6 +1546,18 @@ if (typeof db !== 'undefined' && typeof db.surEcriture === 'function') {
 } else {
     // Pas de garde muette : si le crochet disparaît, on veut le savoir.
     console.error('[#447] db.surEcriture indisponible — le cache de lecture #397 peut servir des valeurs périmées.');
+}
+
+// #962 — un échec d'écriture IndexedDB d'arrière-plan (après `db.setSync`, quel que soit
+// l'écrivain, même discret) fait dire « Non enregistré » au témoin. Avant : un
+// `console.warn`, et le témoin avait déjà dit « Enregistré ».
+if (typeof db !== 'undefined' && typeof db.surEchecEcriture === 'function') {
+    db.surEchecEcriture((cleEcrite, error) => {
+        const temoin = window.temoinEnregistrement;
+        if (temoin) temoin.nonEnregistre(_raisonNonEnregistre(error), undefined, cleEcrite);
+    });
+} else {
+    console.error('[#962] db.surEchecEcriture indisponible — un échec d\'écriture IndexedDB serait muet.');
 }
 window.definirContexteSimulation = definirContexteSimulation;
 window.effacerContexteSimulation = effacerContexteSimulation;
