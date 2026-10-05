@@ -22,7 +22,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //   4. le cas « consulté » : activer h2032, revenir à a2032, renvoyer → la fenêtre « a changé »,
 //      rien retiré ; « Archiver de nouveau », vérifier, renvoyer → passe ; faire revenir → la
 //      version consultée ;
-//   5. (second test) un arrêt provoqué au milieu, « Finir de renvoyer » sur la ligne ; le refus
+//   5. (second test) un arrêt provoqué au milieu, « Terminer le renvoi » sur la ligne ; le refus
 //      du trimestre actif (le menu ne l'offre pas, l'action le refuse).
 //
 // Le détail (ordre, refus, mutations) est jugé par Vitest (sentinelle-e3-renvoyer-trimestre).
@@ -254,12 +254,13 @@ test.describe('E3 — « Renvoyer aux archives » un trimestre clos (mode fichie
             // 2. Renvoyer par le vrai menu ; la fenêtre ; le bilan.
             await renvoyerParLeMenu(page, fichier);
             let f = await attendreFenetre(page, 'Renvoyer Hiver 2032 aux archives ?');
-            expect(f.message).toContain('Hiver 2032 quitte l\'application : 3 étudiant·es, 3 copies, environ 188.5 Ko.');
-            expect(f.message).toContain('« Faire revenir » le ramènera tel quel.');
+            expect(f.message).toContain('Hiver 2032 quittera l\'application : 3 étudiant·es, 3 copies, environ 188,5 Ko.\n');
+            expect(f.message).toContain('le garde tel quel : « Faire revenir » le ramènera.\nGarde bien cette archive : c\'est elle qui le conserve.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
             test.info().annotations.push({ type: 'fenêtre identique', description: f.message });
             await f.fenetre.locator('.modal-actions button', { hasText: 'Renvoyer aux archives' }).click();
-            f = await attendreFenetre(page, 'Trimestre renvoyé aux archives');
+            f = await attendreFenetre(page, 'Hiver 2032 est renvoyé aux archives');
+            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 188,5 Ko.');
             test.info().annotations.push({ type: 'bilan', description: f.message });
             await fermerFenetre(page);
 
@@ -344,7 +345,7 @@ test.describe('E3 — « Renvoyer aux archives » un trimestre clos (mode fichie
             await renvoyerParLeMenu(page, fichier2);
             f = await attendreFenetre(page, 'Renvoyer Hiver 2032 aux archives ?');
             await f.fenetre.locator('.modal-actions button', { hasText: 'Renvoyer aux archives' }).click();
-            await attendreFenetre(page, 'Trimestre renvoyé aux archives');
+            await attendreFenetre(page, 'Hiver 2032 est renvoyé aux archives');
             await fermerFenetre(page);
             await faireRevenir(page, fichier2);
             const ensuite = await photo(page);
@@ -357,7 +358,7 @@ test.describe('E3 — « Renvoyer aux archives » un trimestre clos (mode fichie
         expect(erreurs).toEqual([]);
     });
 
-    test('un arrêt au milieu, « Finir de renvoyer » sur la ligne de l\'archive ; le trimestre actif n\'est pas offert', async ({ page }) => {
+    test('un arrêt au milieu, « Terminer le renvoi » sur la ligne de l\'archive ; le trimestre actif n\'est pas offert', async ({ page }) => {
         page.setDefaultTimeout(15000);
         const erreurs = brancherEcouteurs(page);
         await poserEspace(page);
@@ -391,7 +392,7 @@ test.describe('E3 — « Renvoyer aux archives » un trimestre clos (mode fichie
             // La ligne de l'archive offre de finir.
             await page.evaluate(() => { window.__refuserRetrait = null; ReserveReglages.rafraichir(); });
             const finir = page.locator('#reserve-reglages-table-conteneur tr', { hasText: 'Trimestre entier' }).locator('[data-action="ReserveRenvoyer.actionReprendre"]');
-            await expect(finir).toHaveText('Finir de renvoyer');
+            await expect(finir).toHaveText('Terminer le renvoi');
             await finir.scrollIntoViewIfNeeded();
             const boite = await finir.boundingBox();
             expect(boite.x + boite.width).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
@@ -399,10 +400,10 @@ test.describe('E3 — « Renvoyer aux archives » un trimestre clos (mode fichie
             const attente = page.waitForEvent('filechooser');
             await finir.click();
             await (await attente).setFiles(fichier);
-            f = await attendreFenetre(page, 'Finir de renvoyer Hiver 2032 ?');
+            f = await attendreFenetre(page, 'Terminer le renvoi de Hiver 2032 ?');
             test.info().annotations.push({ type: 'fenêtre de reprise', description: f.message });
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Finir de renvoyer' }).click();
-            await attendreFenetre(page, 'Trimestre renvoyé aux archives');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Terminer le renvoi' }).click();
+            await attendreFenetre(page, 'Hiver 2032 est renvoyé aux archives');
             await fermerFenetre(page);
             const fin = await photo(page);
             expect(Object.keys(fin.cles).filter(DU_TRIMESTRE)).toEqual([]);
