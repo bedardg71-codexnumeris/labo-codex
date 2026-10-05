@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 19 h 08 : **ENREGISTREMENT, LOT 2 (#982 « ENREGISTRÉ » PARTOUT, #984 GUIDES RANGÉS) PRÊT SUR `claude/enregistrement-partout` (`480e7752`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 19 h 18 : **1.186.2 (ENREGISTREMENT, LOT 2 : #982, #984) SUR `main` LOCAL, RELEASE COMMITÉE (`42824121`) ; VERDICT PLAYWRIGHT COMPLET ET PUSH À SUIVRE**
+
+**Consigne** : Cowork, 19 h 12 (livraison ; relecture verte). Consigne et archive commitées sur la branche (`a0569594`).
+
+**Ce qui est fait** : `main` local rebasé sur `origin/main` (le rapport d'audit du démo de la session parallèle, intact : `e4cdfdca`) ; branche `claude/enregistrement-partout` fusionnée (`07a97b6f`) ; release patch 1.186.2 (build 1005-1917), ligne des Nouvelles consolidée dans l'entrée 1.186 ; #982, #984 cochées. La version non suivie du rapport d'audit (celle de Cowork) est dans `Claude outputs/AUDIT-2026-10-05-chantier-demo-version-cowork.md`, non touchée.
+
+**Tests** : Vitest 685 fichiers, 8234 essais verts après le commit du bump.
+
+**La suite** : verdict complet sur le commit de ce relais, puis `git push origin main`, puis la mise en ligne mesurée chez Netlify.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 19 h 08 : **ENREGISTREMENT, LOT 2 (#982 « ENREGISTRÉ » PARTOUT, #984 GUIDES RANGÉS) PRÊT SUR `claude/enregistrement-partout` (`480e7752`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
 
 **Consigne** : Cowork, 18 h 34, exécutée jusqu'à son point 5 (arrêt voulu). Décisions de Grégoire, consigne et archive commitées et poussées sur `main` (`12cc8ac5`).
 
