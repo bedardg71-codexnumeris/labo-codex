@@ -67,3 +67,61 @@ Défaut corrigé en chemin dans MON banc : la doublure de `visualViewport` posai
 | 3 | Évaluer une copie (grosse clé) avec enregistrement automatique. | « Enregistré » paraît sans délai perceptible. |
 | 4 | Fermer le clavier pendant qu'un message est affiché. | Le message redescend en bas à gauche. |
 | 5 | Sur le Mac, n'importe quelle saisie. | Rien n'a changé : en bas à gauche, à 16 px du bord. |
+
+---
+
+## 9 · L'ajout du verdict de 12 h 50 : rouvrir la connexion perdue (#1029)
+
+**Ce qui est fait** (`js/db.js`) :
+- **`_avecReprise(operation)`** enveloppe l'écriture (`setSync` par `_trackWrite`, `set`), la suppression (`removeSync`, `remove`, le rejeu d'avant l'init) et la lecture (`get`, que `db.modifier` fait avant d'écrire) du magasin clé-valeur.
+- **Connexion connue perdue** : la réouverture vient d'abord.
+- **Échec par connexion fermée** (`InvalidStateError`, ou message « connection … lost/closing ») : réouverture une fois, puis nouvelle tentative. Seul l'échec de cette nouvelle tentative remonte, et devient « Non enregistré » (#962).
+- **Une seule réouverture à la fois** (`_reouverture`, partagée). Une opération qui échoue sur une connexion **déjà remplacée** attend la neuve sans la fermer.
+- **Dernière valeur** : chaque tentative écrit la valeur la plus récente demandée pour la clé (`_dernieresValeurs`, tenue par `_ecrireIDB` pour `setSync` comme pour `set`, libérée quand l'écriture qui l'a posée se termine).
+- **`onclose` et `onversionchange`** posés à chaque ouverture. `versionchange` ferme la connexion, pour céder à l'autre onglet.
+
+**Mesure, au navigateur (WebKit, connexion réellement fermée)** :
+- L'écriture d'une grosse clé aboutit : « Enregistré », aucun échec, une connexion neuve, et la valeur est relue après rechargement. Avant ce lot : « Non enregistré » à chaque écriture, jusqu'au rechargement.
+- Réouverture impossible (doublure) : « Non enregistré », toujours là après 2,6 s.
+
+**Essais** : Vitest `sentinelle-1029-rouvrir-connexion-perdue.test.js` (8, `db.js` réel sur un `indexedDB.open` simulé) ; WebKit, deux essais dans `temoin-enregistrement-962-986.spec.js` (12/12 sur trois répétitions pour le bloc #962).
+
+**Mutations, toutes rouges** :
+- sans réouverture (Vitest + WebKit) ;
+- deux réouvertures concurrentes (Vitest) ;
+- nouvelle tentative avec une valeur périmée (Vitest) ;
+- `onclose` muet (Vitest).
+
+Défaut corrigé en chemin dans MON banc : la doublure ne comptait que les ouvertures servies. La mutation des deux réouvertures restait donc verte. Elle compte maintenant les ouvertures demandées.
+
+**Ce qui n'est pas couvert, inscrit** :
+- **#1030** : la suppression muette, réduite aux échecs autres que la connexion fermée, que la réouverture couvre désormais.
+- **#1031** : les sept opérations du magasin `fichiers` (les copies) ne rouvrent pas elles-mêmes. Elles profitent d'une connexion déjà rouverte.
+
+**Supposé** : la lecture `get` entre dans la reprise, alors que le verdict nommait l'écriture et la suppression. Sans elle, `db.modifier` (les éditeurs de la Conception) échouerait sur sa lecture après une mise en arrière-plan, avant même d'écrire.
+
+### Phrase d'issue proposée (non codée), pour un échec qui reste malgré la réouverture
+
+> Non enregistré : le navigateur a refusé l'écriture. Notez ce que vous venez de saisir, puis rechargez la page : la saisie sera à refaire.
+
+**Pourquoi ces mots** :
+- Après une réouverture ratée, seul le rechargement rétablit l'accès, et il perd ce qui n'a pas été écrit. Dire « rechargez » sans « notez » ferait perdre la saisie une seconde fois.
+- « Sera à refaire » annonce la perte au lieu de la laisser découvrir.
+
+À soumettre à Grégoire par Cowork.
+
+## 10 · Correction de mon rapport du lot 1 (§ 7) : deux rouges que j'avais annoncés verts
+
+**Mon § 7 disait faux.** Il annonçait « 92 essais verts, aucun instable » pour les bancs voisins. En réalité, **deux essais du lot B étaient rouges** sur `da9dc970` ; je l'ai mesuré en rejouant ce commit dans un worktree jetable. Mon `tail -3` avait coupé la ligne « 2 failed ».
+
+**Les deux essais** (`temoin-enregistrement-lot-b.spec.js`) : « un seul nœud… l'échec RESTE » et « R3 rétroaction ». Tous deux relisaient le témoin tout de suite après une écriture réussie de la clé qui porte l'échec, et attendaient l'échec effacé. Or la règle de #962, acceptée par ton verdict, ne l'efface qu'au commit IndexedDB de cette écriture.
+
+**Correction** : les deux essais attendent maintenant le commit (`db.flush()`) avant de relire. Le premier vérifie en plus que l'échec est **encore là avant** le commit : la règle est désormais éprouvée au navigateur, et plus seulement par Vitest. Le banc du lot B donne 14/14.
+
+**Règle pour la suite** : je lis la ligne de bilan entière (`passed`, `failed`, `flaky`), jamais par `tail`.
+
+## 11 · Vérifications du lot 1 bis (bilan lu en entier)
+
+- **Vitest complet** : 684 fichiers, 8224 essais verts. En route, deux sentinelles #353 (`durabilite-set-async-tracke`, `durabilite-remove-idb`) appelaient `set` et `removeSync` sur un `this` minimal : je leur ai branché les vraies méthodes de reprise, connexion saine. Leur objet, le suivi dans `_pendingWrites`, est inchangé.
+- **Bancs WebKit du témoin et voisins** (962-986, lot B, présences lot D, anonymisation lot A, verrouiller lot C, codex lot G, E1, E2, E3, #1012) : **95 passés, 0 échoué, 0 instable**, en 12,7 min.
+- **Suite Playwright complète** : non lancée, conformément à la consigne. Elle se fera à la livraison.

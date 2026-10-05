@@ -155,6 +155,14 @@
             // #962 — l'abonné aux échecs des écritures IDB d'arrière-plan
             // (voir `surEchecEcriture`).
             this._surEchecEcriture = null;
+            // #1029 — la connexion IndexedDB est-elle connue pour perdue
+            // (`close` / `versionchange` reçus) ? Et la réouverture en cours,
+            // partagée par toutes les opérations qui l'attendent.
+            this._connexionPerdue = false;
+            this._reouverture = null;
+            // #1029 — la dernière valeur demandée par clé, tant qu'une écriture IDB de
+            // cette clé est en vol (voir `_ecrireIDB`).
+            this._dernieresValeurs = new Map();
         }
 
         /**
@@ -265,6 +273,82 @@
         }
 
         /**
+         * #1029 (5 oct. 2026) — ROUVRIR LA CONNEXION PERDUE, UNE FOIS.
+         *
+         * Sur l'iPad, après une mise en arrière-plan, la connexion IndexedDB peut être
+         * perdue : `transaction()` lève `InvalidStateError` (ou la transaction avorte,
+         * « connection … lost »). Rien ne la rouvrait : chaque écriture échouait jusqu'au
+         * rechargement, et le rechargement perdait ces écritures (le démarrage relit
+         * IndexedDB). Depuis #962, chacune disait « Non enregistré » — un aveu sans issue.
+         *
+         * `_avecReprise(operation)` : si la connexion est connue perdue, la rouvrir
+         * d'abord ; si l'opération échoue parce que la connexion est fermée, la rouvrir
+         * UNE fois et refaire l'opération. Seul l'échec de cette nouvelle tentative
+         * remonte (et devient « Non enregistré »). `operation` est une fonction rappelée
+         * à chaque tentative : l'écriture relit alors la DERNIÈRE valeur demandée pour
+         * sa clé (`_dernieresValeurs`), jamais une valeur périmée.
+         */
+        _connexionFermee(erreur) {
+            if (this._connexionPerdue) return true;
+            if (!erreur) return false;
+            if (erreur.name === 'InvalidStateError') return true;
+            return /connection.*(lost|clos)/i.test(String(erreur.message || ''));
+        }
+
+        /** Une seule réouverture à la fois : les opérations en vol attendent la même. */
+        _rouvrirConnexion() {
+            if (!this._reouverture) {
+                const ancienne = this.db;
+                try { if (ancienne) ancienne.close(); } catch (e) { /* déjà fermée */ }
+                this._reouverture = this._initIndexedDB().finally(() => {
+                    this._reouverture = null;
+                });
+            }
+            return this._reouverture;
+        }
+
+        async _avecReprise(operation) {
+            if (this._reouverture) {
+                try { await this._reouverture; } catch (e) { /* l'opération dira l'échec */ }
+            } else if (this._connexionPerdue) {
+                try { await this._rouvrirConnexion(); } catch (e) { /* idem */ }
+            }
+            const connexion = this.db;
+            try {
+                return await operation();
+            } catch (erreur) {
+                if (!this._connexionFermee(erreur)) throw erreur;
+                // Déjà remplacée par une autre opération : ne pas fermer la neuve.
+                if (this.db === connexion) await this._rouvrirConnexion();
+                else if (this._reouverture) await this._reouverture;
+                return await operation();
+            }
+        }
+
+        /**
+         * Écriture IDB de la clé-valeur, par `setSync` comme par `set` : chaque tentative
+         * écrit la valeur la plus récente demandée pour cette clé. Le registre ne garde
+         * que la dernière, et la libère quand SON écriture se termine.
+         */
+        _ecrireIDB(key, value) {
+            const entree = { value: value };
+            this._dernieresValeurs.set(key, entree);
+            const ecriture = this._avecReprise(() => {
+                const derniere = this._dernieresValeurs.get(key);
+                return this._setIndexedDB(key, derniere ? derniere.value : value);
+            });
+            const liberer = () => {
+                if (this._dernieresValeurs.get(key) === entree) this._dernieresValeurs.delete(key);
+            };
+            ecriture.then(liberer, liberer);
+            return ecriture;
+        }
+
+        _supprimerIDB(key) {
+            return this._avecReprise(() => this._removeIndexedDB(key));
+        }
+
+        /**
          * #962 — le commit IndexedDB que la dernière écriture synchrone de cette clé
          * attend encore : `{ commit, grosse }`, ou `null` s'il n'y en a pas (commit
          * fait, écriture par `set` qui l'attend elle-même, IndexedDB absent).
@@ -322,7 +406,7 @@
                 if (op.type === 'set') {
                     this._trackWrite(op.key, op.value);
                 } else {
-                    this._trackOperation(this._removeIndexedDB(op.key), 'suppression', op.key);
+                    this._trackOperation(this._supprimerIDB(op.key), 'suppression', op.key);
                 }
             }
         }
@@ -350,7 +434,19 @@
                 };
 
                 request.onsuccess = (event) => {
-                    this.db = event.target.result;
+                    const connexion = event.target.result;
+                    // #1029 : savoir la connexion perdue AVANT la prochaine écriture.
+                    // `close` : perte anormale (iPad, après une mise en arrière-plan) ;
+                    // `versionchange` : un autre onglet change le schéma, on lui cède.
+                    connexion.onclose = () => {
+                        if (this.db === connexion) this._connexionPerdue = true;
+                    };
+                    connexion.onversionchange = () => {
+                        try { connexion.close(); } catch (e) { /* déjà fermée */ }
+                        if (this.db === connexion) this._connexionPerdue = true;
+                    };
+                    this.db = connexion;
+                    this._connexionPerdue = false;
                     resolve();
                 };
 
@@ -393,7 +489,7 @@
             }
 
             if (this.useIndexedDB) {
-                return await this._getIndexedDB(key, defaultValue);
+                return await this._avecReprise(() => this._getIndexedDB(key, defaultValue));
             } else {
                 return this._getLocalStorage(key, defaultValue);
             }
@@ -505,7 +601,7 @@
                 // awaité (fire-and-forget) reste drainable par flush() / Option B.
                 // _trackOperation retourne la promesse d'origine → `await` ci-dessous
                 // conserve la durabilité (commit via Option A) et la propagation d'erreur.
-                await this._trackOperation(this._setIndexedDB(key, value), 'écriture', key);
+                await this._trackOperation(this._ecrireIDB(key, value), 'écriture', key);
 
                 // Seuil IDB-first (#334 D) : harmonisé avec setSync — au-delà du
                 // seuil, on NE tente PAS localStorage (évite un QuotaExceededError
@@ -850,7 +946,7 @@
 
             if (this.useIndexedDB) {
                 // Supprimer d'IndexedDB (stockage persistant)
-                await this._removeIndexedDB(key);
+                await this._supprimerIDB(key);
 
                 // AUSSI supprimer de localStorage (cache synchrone) si elle y est
                 try {
@@ -1660,7 +1756,7 @@
          */
         _trackWrite(key, value, grosse) {
             var self = this;
-            var commit = this._trackOperation(this._setIndexedDB(key, value), 'écriture', key);
+            var commit = this._trackOperation(this._ecrireIDB(key, value), 'écriture', key);
             // #962 : le commit attendu de cette clé, puis l'échec dit à l'abonné.
             var attente = { commit: commit, grosse: !!grosse };
             this._commitsEnAttente.set(key, attente);
@@ -1698,7 +1794,7 @@
             //    déchargement, comme les écritures setSync. Sans ce tracking, une
             //    suppression émise près d'un hard refresh n'était jamais drainée.
             if (this.ready && this.useIndexedDB) {
-                this._trackOperation(this._removeIndexedDB(key), 'suppression', key);
+                this._trackOperation(this._supprimerIDB(key), 'suppression', key);
             } else if (!this.ready) {
                 // #392 — symétrique de setSync : une suppression pré-init non
                 // rejouée laissait la copie IDB ressusciter la clé au boot.

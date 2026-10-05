@@ -253,6 +253,11 @@ test('lot B · le témoin : un seul nœud, rôles justes, l\'échec RESTE jusqu\
         sauvegarderDonneesSelonMode('banc_autre', [1]);
         out.apresAutreCle = window.__lireTemoin();
         out.retourSucces = sauvegarderDonneesSelonMode('banc_lotB', [2]);
+        // #962 (verdict de Cowork, 5 oct.) : la clé qui porte l'échec affiché ne dit
+        // « Enregistré » — et n'efface l'échec — qu'au commit IndexedDB de SA nouvelle écriture.
+        out.avantCommit = window.__lireTemoin();
+        await db.flush();
+        await pause(50);
         out.succes = window.__lireTemoin();
         for (let i = 0; i < 5; i++) sauvegarderDonneesSelonMode('banc_lotB', [3 + i]);
         out.apresCinq = window.__lireTemoin();
@@ -276,6 +281,7 @@ test('lot B · le témoin : un seul nœud, rôles justes, l\'échec RESTE jusqu\
     expect(r.apresAutreCle.succes, 'une autre clé réussit : « Enregistré »').toBe('Enregistré');
     expect(r.apresAutreCle.echec, 'R1 : le succès d\'une autre clé ne retire pas l\'échec').toBe(r.echec.echec);
     expect(r.retourSucces).toBe(true);
+    expect(r.avantCommit.echec, '#962 : l\'échec reste jusqu\'au commit de la même clé').toBe(r.echec.echec);
     expect(r.succes.succes).toBe('Enregistré');
     expect(r.succes.echec, 'une écriture réussie efface le « Non enregistré »').toBe(null);
     expect(r.succes.roleSucces).toBe('status');
@@ -456,9 +462,12 @@ test('lot B · R3 rétroaction : sur un échec, la fenêtre reste ouverte avec l
     expect(echec.temoin.echec).toMatch(/^Non enregistré – Enregistrement de la rétroaction : le navigateur a refusé/);
     expect(echec.inchangee).toBe(true);
 
-    const ok = await page.evaluate(() => {
+    const ok = await page.evaluate(async () => {
         window.__toasts = [];
         travauxUI.sauvegarderRetroactionDepuisModal('F1');
+        // #962 : l'échec de cette clé ne s'efface qu'au commit IndexedDB de la nouvelle écriture.
+        await db.flush();
+        await new Promise((res) => setTimeout(res, 50));
         return { ouverte: !!document.getElementById('travaux-modal-retroaction'), toasts: window.__toasts.slice(),
             temoin: window.__lireTemoin(), texte: db.getSync(cle('evaluationsSauvegardees'), [])[0].retroactionFinale };
     });

@@ -67,6 +67,11 @@ describe('#353 Option C volet 3 · set() async tracke son écriture IDB (W1)', (
             _signalerEcriture: db._signalerEcriture,
             _setIndexedDB: db._setIndexedDB,
             _trackOperation: db._trackOperation,   // helper du volet 1
+            // #1029 : l'opération IDB passe par la reprise (réouverture d'une connexion
+            // perdue). VRAIES méthodes, connexion saine : elles ne font rien de plus ici.
+            _ecrireIDB: db._ecrireIDB, _supprimerIDB: db._supprimerIDB,
+            _avecReprise: db._avecReprise, _connexionFermee: db._connexionFermee,
+            _dernieresValeurs: new Map(), _connexionPerdue: false, _reouverture: null,
             _estimateSize: () => 10,               // sous le seuil IDB-first
             // #401 : set() sérialise une fois et écrit la chaîne (helpers neufs)
             _estimateSizeFromString: () => 10,
