@@ -39,7 +39,7 @@
        =============================== */
 
     let fichierActuel = null;       // Metadonnees du fichier ouvert
-    let ouvertAuxArchives = false;  // #1028 : la copie ouverte n'a pas son fichier, il est aux archives
+    let ouvertSansFichier = null;   // #1028 : la copie ouverte n'a pas son fichier ('archives' | 'manquant' | 'introuvable')
     let pdfDocument = null;         // Instance PDF.js
     let pageActuelle = 1;
     let nombrePagesTotal = 1;
@@ -154,16 +154,18 @@
         }
 
         // Recuperer le blob
-        const blob = await travauxStockage.recupererBlob(fichierId);
+        let blob = null;
+        try { blob = await travauxStockage.recupererBlob(fichierId); } catch (e) {
+            console.warn('[Travaux-Visionneuse] Lecture du fichier refusée :', fichierId, e && e.message || e);
+        }
         if (!blob) {
-            // #1028 : une copie aux archives s'ouvre quand même — sa note, sa grille et sa
-            // rétroaction restent consultables — et la page le dit, sans plantage.
-            if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichierId)) {
-                ouvrirAuxArchives(fichier);
-                return true;
-            }
-            console.error('[Travaux-Visionneuse] Blob introuvable:', fichierId);
-            return false;
+            // #1028 (verdict de Cowork) : une copie SANS FICHIER — aux archives, manquante ou
+            // introuvable — s'ouvre quand même et le dit. Jamais la copie précédente laissée à
+            // l'écran : « Évaluer » s'enchaînait sur elle (une note sur la mauvaise copie).
+            const raison = (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichierId)) ? 'archives'
+                : (fichier.blobStatut === 'manquant' ? 'manquant' : 'introuvable');
+            ouvrirSansFichier(fichier, raison);
+            return true;
         }
 
         // 🔧 FIX (5 mars 2026) : Nettoyer l'ancien document PDF et le cache de pages
@@ -175,7 +177,7 @@
         cachePages.clear();
 
         fichierActuel = fichier;
-        ouvertAuxArchives = false;
+        ouvertSansFichier = null;
         pageActuelle = 1;
         modeZoom = ZOOM_FIT;
 
@@ -199,13 +201,20 @@
         return true;
     }
 
+    /** #1028 — Ce que dit la page d'une copie sans fichier qui n'est pas aux archives. */
+    const MOTS_SANS_FICHIER = {
+        manquant: 'Fichier manquant — rouvre le codex après avoir libéré de l\'espace',
+        introuvable: 'Le fichier de cette copie est introuvable.'
+    };
+
     /**
-     * #1028 — Une copie dont le fichier est aux archives : l'ancienne copie et ses annotations
-     * quittent l'écran (« travaux-fichier-ferme »), celle-ci devient la copie ouverte, et la
-     * page dit où est son fichier. Aucune page n'est rendue : aucune annotation n'est dessinée.
+     * #1028 — Une copie sans fichier : l'ancienne copie et ses annotations quittent l'écran
+     * (« travaux-fichier-ferme »), celle-ci devient la copie ouverte, et la page dit pourquoi
+     * son fichier n'est pas là. Aucune page n'est rendue : aucune annotation n'est dessinée.
      * @param {Object} fichier - la fiche de la copie
+     * @param {string} raison - 'archives' | 'manquant' | 'introuvable'
      */
-    function ouvrirAuxArchives(fichier) {
+    function ouvrirSansFichier(fichier, raison) {
         if (pdfDocument) {
             try { pdfDocument.cleanup(); } catch (_) { console.warn('[Visionneuse] PDF cleanup skipped:', _.message || _); }
             pdfDocument = null;
@@ -213,15 +222,19 @@
         cachePages.clear();
         window.dispatchEvent(new CustomEvent('travaux-fichier-ferme'));
         fichierActuel = fichier;
-        ouvertAuxArchives = true;
+        ouvertSansFichier = raison;
         pageActuelle = 1;
         nombrePagesTotal = 1;
         modeZoom = ZOOM_FIT;
         window.dispatchEvent(new CustomEvent('travaux-fichier-ouvert', { detail: { fichier: fichier } }));
-        const RC = window.ReserveCopies;
-        const t = RC.trimestreDeLaCopie(fichier.id);
-        const lignes = RC.MOTS.copie.message(RC.nomDuTrimestre(t)).split('\n');
-        afficherErreur(RC.MOTS.copie.etiquette, null, { couleur: '#495057', lignes: lignes });
+        if (raison === 'archives') {
+            const RC = window.ReserveCopies;
+            const t = RC.trimestreDeLaCopie(fichier.id);
+            const lignes = RC.MOTS.copie.message(RC.nomDuTrimestre(t)).split('\n');
+            afficherErreur(RC.MOTS.copie.etiquette, null, { couleur: '#495057', lignes: lignes });
+        } else {
+            afficherErreur(MOTS_SANS_FICHIER[raison]);
+        }
         mettreAJourNavigation();
     }
 
@@ -1264,7 +1277,7 @@
             try { pdfDocument.destroy(); } catch (_) { /* deja detruit, ignorer */ }
         }
         fichierActuel = null;
-        ouvertAuxArchives = false;
+        ouvertSansFichier = null;
         pdfDocument = null;
         pageActuelle = 1;
         nombrePagesTotal = 1;
@@ -1382,7 +1395,10 @@
         configurerGestesZoom: configurerGestesZoom,
         // Accesseurs
         getFichierActuel: getFichierActuel,
-        estOuvertAuxArchives: function() { return ouvertAuxArchives; },
+        estOuvertAuxArchives: function() { return ouvertSansFichier === 'archives'; },
+        // #1028 : la raison pour laquelle la copie ouverte n'a pas son fichier, ou null.
+        raisonSansFichier: function() { return ouvertSansFichier; },
+        MOTS_SANS_FICHIER: MOTS_SANS_FICHIER,
         getPageActuelle: getPageActuelle,
         getNombrePagesTotal: getNombrePagesTotal,
         getZoomActuel: getZoomActuel,

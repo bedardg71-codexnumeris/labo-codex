@@ -117,3 +117,12 @@ Réseau 37 à 55 Mo, GPU 119 Mo. Le bilan dit « 394 copies retirées, environ 1
 ## 8 · Ce qui reste à Grégoire
 
 La première fois sur l'hiver 2026 : archiver le trimestre (E1), vérifier, puis « Archiver les copies… ». C'est une porte terrain, qui revient à Cowork.
+
+## 9 · Les corrections du verdict de 9 h 35
+
+1. **Visionneuse** : toute copie sans fichier (aux archives, « manquante », ou introuvable, y compris si la lecture du magasin lève) s'ouvre à sa place et le dit ; la copie précédente ne reste jamais à l'écran. Mots : celui qui existait pour « manquant » ; sinon « Le fichier de cette copie est introuvable. » (badge et page). *Essai* : WebKit, deux copies sans fichier ouvertes l'une après l'autre. *Mutation* : l'ancien `return false` hors archives → rouge.
+2. **« Fusionner »** (et l'ajout à une fusion) : refusé dès qu'une copie n'a pas son fichier — « Le fichier de cette copie est introuvable : elle ne peut pas être fusionnée. » ; et, au chargement, une image sans fichier arrête la fusion au lieu d'être sautée (elle restait dans la liste des copies à effacer). L'éditeur de pages d'une copie « manquante » garde son erreur d'avant (elle n'efface rien). *Essai* : WebKit, rien d'effacé, pas d'éditeur ouvert. *Mutation* : le refus d'entrée retiré → rouge.
+3. **`notifications.avertissement`** (deux appels, « Re-déposer ») → `warning`. Le grep n'en trouve pas d'autre. *Essai* : `sentinelle-1028-api-notifications` lit l'API exposée et chaque appel `notifications.<nom>(` de `js/`. *Témoin* : l'ancien appel remis → rouge.
+4. **L'essai de plus** (WebKit) : un codex écrit quand trois copies sont aux archives, ouvert dans un espace neuf → la marque y est, aucune copie « manquante », aucune « absente du ZIP » ; puis l'import d'un ZIP de travaux dont seules les DONNÉES portent la marque → 0 manquant ; puis « Faire revenir » (l'archive listée a voyagé) → les trois copies égales à l'avant. `_restaurerBlobsDepuisZip` est exposé « pour ses essais », comme ses voisines. *Mutations* : la garde de l'ouverture du codex retirée → rouge ; celle de l'import retirée → rouge.
+
+Vitest complet : 682 fichiers, 8 204 essais verts. WebKit (E1, E2, E3, A3, lot ; largeur iPad) : 11 sur 11.

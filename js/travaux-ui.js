@@ -2311,7 +2311,7 @@
                 // permettait à un blob de rejoindre la mauvaise ligne sans trace.
                 const bilan = travauxImport.reattacherBlobs(input.files);
                 if (bilan.ignores.length > 0) {
-                    notifications.avertissement(
+                    notifications.warning(
                         bilan.ignores.length + ' fichier(s) non reconnu(s)',
                         bilan.ignores.join(', ') + ' \u2014 nom ou taille diff\u00e9rents de ce qui \u00e9tait dans la file. '
                         + 'V\u00e9rifie qu\u2019il s\u2019agit bien des fichiers d\u00e9pos\u00e9s au d\u00e9part.'
@@ -2325,7 +2325,7 @@
                 if (bilan.rejeu) {
                     bilan.rejeu.then(function(r) {
                         if (r.echecs.length > 0) {
-                            notifications.avertissement(
+                            notifications.warning(
                                 'R\u00e9glages sp\u00e9cifiques non r\u00e9appliqu\u00e9s',
                                 r.echecs.join(', ') + ' \u2014 ces fichiers sont rattach\u00e9s sans correction. Rouvre leurs r\u00e9glages sp\u00e9cifiques avant d\u2019importer.'
                             );
@@ -3513,8 +3513,10 @@
                         badgeStatut.textContent = 'Exporte';
                         badgeStatut.className = 'travaux-badge-exporte';
                         badgeStatut.classList.remove('u-hide');
-                    } else if (statut === 'manquant') {
-                        badgeStatut.textContent = 'Fichier manquant — rouvre le codex après avoir libéré de l\'espace';
+                    } else if (statut === 'manquant' || (travauxVisionneuse.raisonSansFichier && travauxVisionneuse.raisonSansFichier())) {
+                        // #1028 : « manquant » déclaré, ou un fichier introuvable à l'ouverture.
+                        const raison = statut === 'manquant' ? 'manquant' : travauxVisionneuse.raisonSansFichier();
+                        badgeStatut.textContent = travauxVisionneuse.MOTS_SANS_FICHIER[raison];
                         badgeStatut.className = 'travaux-badge-manquant';
                         badgeStatut.classList.remove('u-hide');
                     } else {
@@ -6210,19 +6212,24 @@
      * Ouvre l'editeur de pages pour un fichier importe
      * @param {string} fichierId - ID du fichier
      */
+    /** #1028 (verdict de Cowork) : « Fusionner » une copie dont le fichier n'est pas là. */
+    const MOT_FUSION_SANS_FICHIER = 'Le fichier de cette copie est introuvable : elle ne peut pas être fusionnée.';
+
     /**
      * #1028 — Un geste qui transforme le fichier (éditer les pages, fusionner) est refusé quand
-     * une des copies est aux archives : la fusion effaçait en silence une copie sans fichier
-     * (l'image sautée restait dans la liste des copies à supprimer). Rend true s'il refuse.
+     * une des copies n'a pas son fichier : la fusion effaçait en silence une copie sans fichier
+     * (l'image sautée restait dans la liste des copies à supprimer). Une copie aux archives a
+     * son mot ; une autre, `motIntrouvable` (null : le geste suit son cours d'avant, qui dit
+     * déjà l'erreur sans rien effacer). Rend true s'il refuse.
      */
-    async function _refuserSiAuxArchives(ids) {
+    async function _refuserSansFichier(ids, motIntrouvable) {
         const RC = window.ReserveCopies;
-        if (!RC) return false;
         for (const id of ids) {
-            if (!RC.estAuxArchives(id)) continue;
             let blob = null;
             try { blob = await travauxStockage.recupererBlob(id); } catch (e) { blob = null; }
-            if (!blob) { alert(RC.MOTS.copie.refusGeste); return true; }
+            if (blob) continue;
+            if (RC && RC.estAuxArchives(id)) { alert(RC.MOTS.copie.refusGeste); return true; }
+            if (motIntrouvable) { alert(motIntrouvable); return true; }
         }
         return false;
     }
@@ -6233,7 +6240,7 @@
             console.warn('[Editeur Pages] Fichier introuvable:', fichierId);
             return;
         }
-        if (await _refuserSiAuxArchives([fichierId])) return;
+        if (await _refuserSansFichier([fichierId], null)) return;
 
         // Accepter PDF et images
         const estPDF = fichier.typeMIME === 'application/pdf';
@@ -6905,7 +6912,7 @@
 
         var idsSelectionnes = [];
         checks.forEach(function(cb) { idsSelectionnes.push(cb.value); });
-        if (await _refuserSiAuxArchives(idsSelectionnes)) return;
+        if (await _refuserSansFichier(idsSelectionnes, MOT_FUSION_SANS_FICHIER)) return;
 
         // Fermer la modale
         fermerModalFusionEditeur();
@@ -7019,7 +7026,7 @@
             .filter(Boolean);
 
         if (fichiers.length < 2) return;
-        if (await _refuserSiAuxArchives(fichiersIds)) return;
+        if (await _refuserSansFichier(fichiersIds, MOT_FUSION_SANS_FICHIER)) return;
 
         // Verifier que tous sont du meme etudiant
         const das = new Set(fichiers.map(function(f) { return f.etudiantDA; }));
@@ -7068,7 +7075,9 @@
                 } else {
                     // Image : charger comme page unique
                     const blob = await travauxStockage.recupererBlob(f.id);
-                    if (!blob) continue;
+                    // #1028 : jamais sautée — elle resterait dans `editionFichiersASupprimer` et
+                    // serait effacée à l'enregistrement. Le chargement s'arrête et le dit.
+                    if (!blob) throw new Error(MOT_FUSION_SANS_FICHIER);
 
                     const dataUrl = await new Promise(function(resolve, reject) {
                         const reader = new FileReader();

@@ -3649,6 +3649,7 @@ window.ecarterElevesDesinscrits = ecarterElevesDesinscrits; // #1012, l'élève 
 window.dasElevesSupprimes = dasElevesSupprimes; // #1013 : la lecture que les vues appellent (Liste des évaluations, Travaux)
 window.compterDatesPresences = compterDatesPresences; // #1012, les mots : exposé pour ses essais
 window.ligneElevesEcartes = ligneElevesEcartes; // #1012, les mots : exposé pour ses essais
+window._restaurerBlobsDepuisZip = _restaurerBlobsDepuisZip; // #1028 (verdict) : exposé pour ses essais — une copie aux archives n'est jamais « manquante »
 window.analyserRessourcesDetaillees = analyserRessourcesDetaillees; // #1012, les mots : exposé pour l'essai du compte de l'aperçu
 window.signatureContenu = signatureContenu;         // #448
 

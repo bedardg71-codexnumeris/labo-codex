@@ -362,4 +362,129 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
         }
         expect(erreurs).toEqual([]);
     });
+    test('verdict de Cowork : une copie sans fichier (manquante, introuvable) s\'ouvre à sa place ; « Fusionner » la refuse et n\'efface rien', async ({ page }) => {
+        page.setDefaultTimeout(15000);
+        const { erreurs, alertes } = brancherEcouteurs(page);
+        await poserEspace(page);
+        // a2032 (actif) : une copie image présente, une « manquante » déclarée, une introuvable.
+        await page.evaluate(async () => {
+            const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+            await travauxStockage.stockerBlob('FT_ap', new Blob([png], { type: 'image/png' }), '0000009', '');
+            const liste = await db.get('a2032_fichiersTravaux');
+            liste.push(
+                { id: 'FT_ap', nomFichier: 'presente.png', etudiantDA: '0000009', groupeCoursId: 'GC_A1', typeMIME: 'image/png' },
+                { id: 'FT_am', nomFichier: 'manquante.png', etudiantDA: '0000009', groupeCoursId: 'GC_A1', typeMIME: 'image/png', blobStatut: 'manquant' },
+                { id: 'FT_ai', nomFichier: 'introuvable.png', etudiantDA: '0000009', groupeCoursId: 'GC_A1', typeMIME: 'image/png' }
+            );
+            await db.set('a2032_fichiersTravaux', liste);
+        });
+        const ouvrir = (id) => page.evaluate(async (id) => {
+            const ok = await travauxVisionneuse.ouvrirFichier(id);
+            return { ok, actuel: travauxVisionneuse.getFichierActuel() && travauxVisionneuse.getFichierActuel().id, raison: travauxVisionneuse.raisonSansFichier() };
+        }, id);
+        // La copie précédente ne reste jamais à l'écran (avant : `false`, l'écran gardait l'autre).
+        // Une copie présente n'est pas ouverte ici : son image ne se charge pas hors d'Annoter.
+        expect(await ouvrir('FT_am')).toEqual({ ok: true, actuel: 'FT_am', raison: 'manquant' });
+        expect(await ouvrir('FT_ai')).toEqual({ ok: true, actuel: 'FT_ai', raison: 'introuvable' });
+
+        // « Fusionner » une copie présente et une introuvable : refusé, rien effacé.
+        await page.evaluate(() => { try { travauxUI.toggleSelectionFusion('FT_ap'); } catch (e) {} try { travauxUI.toggleSelectionFusion('FT_ai'); } catch (e) {} });
+        const n = alertes.length;
+        await page.evaluate(() => travauxUI.fusionnerFichiers());
+        await expect.poll(() => alertes.length).toBeGreaterThan(n);
+        expect(alertes.at(-1)).toBe('Le fichier de cette copie est introuvable : elle ne peut pas être fusionnée.');
+        const ids = await page.evaluate(async () => (await db.get('a2032_fichiersTravaux')).map((f) => f.id));
+        expect(ids).toEqual(['FT_a1', 'FT_ap', 'FT_am', 'FT_ai']);
+        expect(await page.evaluate(() => (document.getElementById('evaluations-contenu-import') || { textContent: '' }).textContent.includes('Fusion :'))).toBe(false);
+        expect(erreurs).toEqual([]);
+    });
+    test('verdict de Cowork : la marque voyage dans le codex et dans l\'import d\'un ZIP ; les copies y sont « aux archives », jamais « manquantes » ; « Faire revenir » les ramène', async ({ page }) => {
+        page.setDefaultTimeout(15000);
+        const { erreurs, alertes } = brancherEcouteurs(page);
+        await poserEspace(page);
+        await ouvrirArchives(page);
+        const dossierTmp = path.join(__dirname, '.tmp-1028c');
+        mkdirSync(dossierTmp, { recursive: true });
+        try {
+            const fichier = await archiverEtVerifier(page, dossierTmp);
+            const avant = await photo(page);
+            await archiverCopiesParLeMenu(page, fichier);
+            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
+            await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            await fermerFenetre(page);
+
+            // 1. Le codex, écrit maintenant : aucune copie aux archives dite manquante.
+            const codex = await page.evaluate(async () => {
+                let averti = null;
+                const r = await Codex.generer({ confirmerCopiesManquantes: async (m, a) => { averti = [m, a]; return true; } });
+                const u8 = new Uint8Array(await r.blob.arrayBuffer());
+                let b = ''; for (let i = 0; i < u8.length; i += 0x8000) b += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+                return { averti, base64: btoa(b), marque: !!r.donnees._copiesAuxArchives };
+            });
+            expect(codex.averti).toBeNull();
+            expect(codex.marque).toBe(true);
+
+            // 2. Un espace neuf ; le codex y est ouvert.
+            await page.evaluate(async () => {
+                localStorage.clear();
+                if (window.db && db.memoryCache) db.memoryCache.clear();
+                await new Promise((res) => { const req = indexedDB.deleteDatabase('LaboCodexDB'); req.onsuccess = req.onerror = req.onblocked = () => res(); setTimeout(res, 1500); });
+            });
+            await page.reload();
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(2500);
+            await monterMagasin(page, []);
+            const ouvert = await page.evaluate(async (b64) => {
+                const u8 = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+                const r = await Codex.charger(new File([u8], 'codex-1028.zip', { type: 'application/zip' }));
+                const ft = await db.get('h2032_fichiersTravaux');
+                const corb = await db.get('h2032_corbeilleFichiers');
+                return {
+                    statuts: ft.concat(corb).map((x) => x.id + ':' + (x.blobStatut || '')),
+                    marque: Object.keys(((await db.get('_copiesAuxArchives')) || {}).h2032 ? (await db.get('_copiesAuxArchives')).h2032.ids : {}).sort(),
+                    auxArchives: ['FT_h1', 'FT_h2', 'FT_hc'].map((id) => ReserveCopies.estAuxArchives(id)),
+                    bilan: { attendus: r.stats.nbBlobsAttendus, absents: r.stats.blobsAbsentsDuZip }
+                };
+            }, codex.base64);
+            test.info().annotations.push({ type: 'ouverture du codex', description: JSON.stringify(ouvert) });
+            expect(ouvert.statuts).toEqual(['FT_h1:', 'FT_h2:', 'FT_hc:']);
+            expect(ouvert.marque).toEqual(['FT_h1', 'FT_h2', 'FT_hc']);
+            expect(ouvert.auxArchives).toEqual([true, true, true]);
+            // Seule FT_a1 (l'autre trimestre) est attendue ; aucune copie aux archives n'est « absente du ZIP ».
+            expect(ouvert.bilan).toEqual({ attendus: 1, absents: [] });
+
+            // 3. L'import d'un ZIP de travaux dont les DONNÉES portent la marque (l'espace ne l'a
+            //    pas) et qui n'a pas ces copies : rien de « manquant ».
+            const imp = await page.evaluate(async () => {
+                const marque = await db.get('_copiesAuxArchives');
+                await db.remove('_copiesAuxArchives'); db.removeSync('_copiesAuxArchives');
+                const donnees = { h2032_fichiersTravaux: await db.get('h2032_fichiersTravaux'), _copiesAuxArchives: marque, _zipTravaux: new JSZip() };
+                const bilan = await window._restaurerBlobsDepuisZip(donnees);
+                const statuts = (await db.get('h2032_fichiersTravaux')).map((x) => x.id + ':' + (x.blobStatut || ''));
+                await db.set('_copiesAuxArchives', marque);
+                return { bilan, statuts };
+            });
+            expect(imp).toEqual({ bilan: { restaures: 0, manquants: 0 }, statuts: ['FT_h1:', 'FT_h2:'] });
+
+            // 4. L'archive est listée (le manifeste a voyagé) : « Faire revenir » les ramène.
+            await ouvrirArchives(page);
+            await page.evaluate(() => ReserveReglages.rafraichir());
+            const bouton = page.locator('#reserve-reglages-table-conteneur tr', { hasText: 'Trimestre entier' }).locator('[data-action="ReserveRevenir.actionFaireRevenir"]');
+            const attente = page.waitForEvent('filechooser');
+            await bouton.click();
+            await (await attente).setFiles(fichier);
+            f = await attendreFenetre(page, 'Faire revenir les copies');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
+            f = await attendreFenetre(page, 'Copies revenues');
+            expect(f.message).toContain('3 copies revenues');
+            await fermerFenetre(page);
+            const retour = await photo(page);
+            for (const id of ['FT_h1', 'FT_h2', 'FT_hc']) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
+            expect(retour.cles._copiesAuxArchives).toBeUndefined();
+        } finally {
+            rmSync(dossierTmp, { recursive: true, force: true });
+        }
+        expect(erreurs).toEqual([]);
+    });
 });
