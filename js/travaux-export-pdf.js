@@ -35,13 +35,24 @@
         _grilleExport = (typeof codesAnnotation !== 'undefined' && fichier) ? codesAnnotation.grilleDeCopie(fichier) : null;
     }
 
+    /**
+     * #1028 — L'erreur d'un fichier de copie absent : « aux archives » quand il l'est (le bilan
+     * de l'export le nomme ainsi, jamais « introuvable »), sinon celle d'avant.
+     */
+    function _erreurFichierAbsent(fichierId) {
+        if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichierId)) {
+            return Object.assign(new Error(window.ReserveCopies.MOTS.copie.raison), { auxArchives: true });
+        }
+        return new Error('Blob introuvable');
+    }
+
     async function genererDocPDF(fichierId, productionIdOverride) {
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) throw new Error('Fichier introuvable');
         _poserGrilleExport(fichier);
 
         const blob = await travauxStockage.recupererBlob(fichierId);
-        if (!blob) throw new Error('Blob introuvable');
+        if (!blob) throw _erreurFichierAbsent(fichierId);
 
         const annotation = travauxStockage.obtenirAnnotationFichier(fichierId);
 
@@ -89,6 +100,10 @@
                 alert('Le PDF a été exporté, mais ' + synthese.avertissement + '.');
             }
         } catch (e) {
+            if (e && e.auxArchives) {
+                alert(window.ReserveCopies.MOTS.copie.message(window.ReserveCopies.nomDuTrimestre(window.ReserveCopies.trimestreDeLaCopie(fichierId))));
+                return;
+            }
             console.error('[Travaux-Export] Erreur export PDF:', e);
             alert('Erreur lors de l\'export PDF. Voir la console.');
         } finally {
@@ -830,6 +845,12 @@
 
         const blob = await travauxStockage.recupererBlob(fichier.id);
         if (!blob) {
+            // #1028 : la copie est aux archives — le dossier rend la synthèse seule (comme #912),
+            // et le dit.
+            if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichier.id)) {
+                if (typeof notifications !== 'undefined') notifications.info(window.ReserveCopies.MOTS.copie.etiquette, window.ReserveCopies.MOTS.copie.dossierPdf);
+                return exporterSyntheseSeule(da, productionId);
+            }
             alert('Impossible de récupérer le fichier.');
             return;
         }
@@ -1256,6 +1277,11 @@
             await rendrePagePreviewPDF(1);
 
         } catch (e) {
+            if (e && e.auxArchives) {
+                overlay.innerHTML = '<div class="preview-pdf-chargement">' + echapperHtml(window.ReserveCopies.MOTS.copie.apercu) + '</div>'; // security-ok: constante des mots, échappée
+                setTimeout(() => overlay.remove(), 3000);
+                return;
+            }
             console.error('[Travaux-Export] Erreur previsualisation:', e);
             overlay.innerHTML = '<div class="preview-pdf-chargement">Erreur de génération.</div>';
             setTimeout(() => overlay.remove(), 2000);

@@ -169,7 +169,11 @@
      */
     async function _ajouterFichierAuZip(conteneur, fichier, chemins) {
         const blob = await travauxStockage.recupererBlob(fichier.id);
-        if (!blob) throw new Error('Blob introuvable');
+        if (!blob) {
+            // #1028 : le bilan dit « aux archives », jamais « introuvable », pour une copie qui l'est.
+            if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichier.id)) throw new Error(window.ReserveCopies.MOTS.copie.raison);
+            throw new Error('Blob introuvable');
+        }
         conteneur.file(chemins.original, blob);
 
         if (chemins.annote) {

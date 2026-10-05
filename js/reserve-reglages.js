@@ -91,6 +91,13 @@ function _boutonFaireRevenir(entree) {
     '</button> ';
 }
 
+/** #1028 : le trimestre de cette archive est dans l'application, et des copies y sont marquées aux archives. */
+function _copiesAuxArchives(entree) {
+    var RC = window.ReserveCopies;
+    return !!(RC && window.ReserveTrimestre && window.ReserveTrimestre.estDansLApplication(entree.trimestre) &&
+        RC.idsMarques(entree.trimestre).length);
+}
+
 /**
  * E2 (#1023) : « Emprunter », offert seulement pour l'archive VÉRIFIÉE d'un trimestre entier
  * (les gardes sont aussi dans l'action). Mots dans ReserveEmprunter.MOTS.
@@ -289,8 +296,11 @@ function _rendreTableau() {
                 '<td>' + _badgeVerification(e) + '</td>' +
                 '<td class="u-text-center">' +
                     _boutonVerifier(e._dossier) +
-                    // « Faire revenir » ne connaît que l'archive d'un groupe ; un trimestre s'emprunte (E2).
-                    (estTrimestre ? _boutonEmprunter(e) + _boutonTerminerLeRenvoi(e) : _boutonFaireRevenir(e)) +
+                    // L'archive d'un groupe : « Faire revenir » ses copies. Celle d'un trimestre : E2 le ramène,
+                    // sauf s'il est là et que ses copies sont aux archives (#1028) : elles reviennent.
+                    (estTrimestre
+                        ? (_copiesAuxArchives(e) ? _boutonFaireRevenir(e) : _boutonEmprunter(e) + _boutonTerminerLeRenvoi(e))
+                        : _boutonFaireRevenir(e)) +
                     '<button class="btn btn-secondaire btn-compact" ' +
                         'data-action="ReserveReglages.actionPurgerEntree" ' +
                         'data-param="' + _echapper(e._dossier) + '" ' +

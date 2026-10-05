@@ -38,6 +38,7 @@
      - reserve.js (window.Reserve) : lireManifesteLocal, supporteFSAPI, obtenirHandle
      - travaux-stockage.js (window.travauxStockage) : recupererBlob, stockerBlob
      - import-export.js (window.dasElevesEcartes) : les élèves supprimés du trimestre de l'archive
+     - reserve-copies.js (window.ReserveCopies, #1028) : lever la marque des copies revenues
      - db.js, progression.js, ui-dialogues.js, utils-notifications.js
    =============================== */
 
@@ -146,9 +147,15 @@ async function faireRevenir(source, entree, onProg) {
 
     var trimestre = entree.trimestre;
     var cleFT = trimestre + '_fichiersTravaux';
-    var fiches = window.db.getSync(cleFT, []) || [];
+    var fiches = (await window.db.get(cleFT, [])) || [];
     var parId = {};
     (Array.isArray(fiches) ? fiches : []).forEach(function(f) { if (f && f.id && !parId[f.id]) parId[f.id] = f; });
+    // #1028 : l'archive d'un trimestre entier range aussi la corbeille ; ses copies aux archives
+    // reviennent sous leur fiche de la corbeille.
+    if (entree.type_archive === 'trimestre') {
+        var corbeille = (await window.db.get(trimestre + '_corbeilleFichiers', [])) || [];
+        (Array.isArray(corbeille) ? corbeille : []).forEach(function(f) { if (f && f.id && !parId[f.id]) parId[f.id] = f; });
+    }
     var supprimes = _supprimesDuTrimestre(trimestre);
     var presentes = {};
     (await source.listerCopies()).forEach(function(c) { if (!RV.fichierDuSysteme(c.nom)) presentes[c.nom] = true; });
@@ -223,6 +230,10 @@ async function faireRevenir(source, entree, onProg) {
     }
     if ((bilan.revenues.length > 0 || bilan.fichesRemises > 0) && window.signalerEcritureUsager) {
         window.signalerEcritureUsager(cleFT);
+    }
+    // #1028 : la marque « aux archives » des copies dont le fichier est là est levée.
+    if (window.ReserveCopies && window.ReserveCopies.idsMarques(trimestre).length) {
+        bilan.restentAuxArchives = (await window.ReserveCopies.lever(trimestre)).length;
     }
     bilan.etat = 'fait';
     return bilan;
@@ -308,8 +319,8 @@ function actionFaireRevenir(dossier) {
         return;
     }
     entree = Object.assign({ dossier: dossier }, entree);
-    // E1 (#1022) : l'archive d'un trimestre entier n'a pas ce bouton (reserve-reglages.js) ; son retour
-    // sera E2. Aucune garde ici : rien d'autre que ce bouton n'appelle l'action.
+    // L'archive d'un trimestre entier n'a ce bouton que quand le trimestre est dans l'application
+    // et que des copies y sont aux archives (#1028, reserve-reglages.js) ; sinon son retour est E2.
     if (!RV.etatVerification(entree).verifiee) {
         _informer({ titre: MOTS.refus.titre, message: MOTS.refus.nonVerifiee });
         return;

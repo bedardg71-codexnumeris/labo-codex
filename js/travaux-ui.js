@@ -3133,12 +3133,16 @@
         let html = '';
         fichiers.forEach(f => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = contenuApercuAbsent(f, { etat: f.blobStatut === 'manquant' ? 'absent' : 'attente' });
+            // #1028 : sans vignette, une copie marquée aux archives (la vignette part avec son fichier).
+            const auxArchives = !thumb && !!(window.ReserveCopies && window.ReserveCopies.estAuxArchives(f.id));
+            const icone = contenuApercuAbsent(f, { etat: (f.blobStatut === 'manquant' || auxArchives) ? 'absent' : 'attente' });
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
 
             // Badge cycle de vie
             let badge = '';
-            if (f.blobStatut === 'facsimile') {
+            if (auxArchives) {
+                badge = '<span class="travaux-badge-exporte" title="' + echapperHtml(window.ReserveCopies.MOTS.copie.infobulle) + '">' + echapperHtml(window.ReserveCopies.MOTS.copie.badge) + '</span>';
+            } else if (f.blobStatut === 'facsimile') {
                 badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
             } else if (f.blobStatut === 'exporte') {
                 badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
@@ -3198,13 +3202,17 @@
         for (let i = indexDebut; i < indexFin; i++) {
             const f = fichiersPourScroll[i];
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const icone = contenuApercuAbsent(f, { etat: f.blobStatut === 'manquant' ? 'absent' : 'attente' });
+            // #1028 : sans vignette, une copie marquée aux archives (la vignette part avec son fichier).
+            const auxArchives = !thumb && !!(window.ReserveCopies && window.ReserveCopies.estAuxArchives(f.id));
+            const icone = contenuApercuAbsent(f, { etat: (f.blobStatut === 'manquant' || auxArchives) ? 'absent' : 'attente' });
             const actif = travauxVisionneuse.getFichierActuel()?.id === f.id ? ' actif' : '';
             const top = i * HAUTEUR_MINIATURE;
 
             // Badge cycle de vie
             let badge = '';
-            if (f.blobStatut === 'facsimile') {
+            if (auxArchives) {
+                badge = '<span class="travaux-badge-exporte" title="' + echapperHtml(window.ReserveCopies.MOTS.copie.infobulle) + '">' + echapperHtml(window.ReserveCopies.MOTS.copie.badge) + '</span>';
+            } else if (f.blobStatut === 'facsimile') {
                 badge = '<span class="travaux-badge-facsimile" title="Version allegee">FAC</span>';
             } else if (f.blobStatut === 'exporte') {
                 badge = '<span class="travaux-badge-exporte" title="Exporte">EXP</span>';
@@ -3492,7 +3500,12 @@
 
                 // Badge
                 if (badgeStatut) {
-                    if (statut === 'facsimile') {
+                    // #1028 : une copie dont le fichier est aux archives se dit « aux archives », jamais « manquante ».
+                    if (travauxVisionneuse.estOuvertAuxArchives && travauxVisionneuse.estOuvertAuxArchives()) {
+                        badgeStatut.textContent = window.ReserveCopies.MOTS.copie.etiquette;
+                        badgeStatut.className = 'travaux-badge-exporte';
+                        badgeStatut.classList.remove('u-hide');
+                    } else if (statut === 'facsimile') {
                         badgeStatut.textContent = 'Version allegee';
                         badgeStatut.className = 'travaux-badge-facsimile';
                         badgeStatut.classList.remove('u-hide');
@@ -5865,6 +5878,11 @@
         try {
             const blob = await travauxStockage.recupererBlob(fichierId);
             if (!blob) {
+                // #1028 : une copie aux archives le dit, au lieu d'un clic sans effet.
+                if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichierId)) {
+                    notifications.info(window.ReserveCopies.MOTS.copie.etiquette, window.ReserveCopies.MOTS.copie.apercu);
+                    return;
+                }
                 console.warn('[Travaux-UI] Blob introuvable pour preview:', fichierId);
                 return;
             }
@@ -6192,12 +6210,30 @@
      * Ouvre l'editeur de pages pour un fichier importe
      * @param {string} fichierId - ID du fichier
      */
+    /**
+     * #1028 — Un geste qui transforme le fichier (éditer les pages, fusionner) est refusé quand
+     * une des copies est aux archives : la fusion effaçait en silence une copie sans fichier
+     * (l'image sautée restait dans la liste des copies à supprimer). Rend true s'il refuse.
+     */
+    async function _refuserSiAuxArchives(ids) {
+        const RC = window.ReserveCopies;
+        if (!RC) return false;
+        for (const id of ids) {
+            if (!RC.estAuxArchives(id)) continue;
+            let blob = null;
+            try { blob = await travauxStockage.recupererBlob(id); } catch (e) { blob = null; }
+            if (!blob) { alert(RC.MOTS.copie.refusGeste); return true; }
+        }
+        return false;
+    }
+
     async function ouvrirEditeurPages(fichierId) {
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) {
             console.warn('[Editeur Pages] Fichier introuvable:', fichierId);
             return;
         }
+        if (await _refuserSiAuxArchives([fichierId])) return;
 
         // Accepter PDF et images
         const estPDF = fichier.typeMIME === 'application/pdf';
@@ -6869,6 +6905,7 @@
 
         var idsSelectionnes = [];
         checks.forEach(function(cb) { idsSelectionnes.push(cb.value); });
+        if (await _refuserSiAuxArchives(idsSelectionnes)) return;
 
         // Fermer la modale
         fermerModalFusionEditeur();
@@ -6982,6 +7019,7 @@
             .filter(Boolean);
 
         if (fichiers.length < 2) return;
+        if (await _refuserSiAuxArchives(fichiersIds)) return;
 
         // Verifier que tous sont du meme etudiant
         const das = new Set(fichiers.map(function(f) { return f.etudiantDA; }));

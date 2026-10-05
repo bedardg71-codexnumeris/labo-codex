@@ -1454,6 +1454,11 @@ async function verserGroupeCours(trimestre, groupeCoursId) {
     var dossier = _nomDossier(trimestre, gc);
     var uuid = _genererUUIDv4();
 
+    // #1028 : tant que des copies du trimestre sont aux archives, une nouvelle archive ne les
+    // contiendrait pas. Lu sans attente d'abord : sans marque, le clic garde son geste (#995).
+    if (window.ReserveCopies && window.ReserveCopies.idsMarques(trimestre).length &&
+        !(await window.ReserveCopies.permettreArchive(trimestre))) return null;
+
     // Detection du mode FSAPI : appel TOT pour preserver le user gesture du clic.
     // Retourne null si non supporte (Safari) ou si l'utilisateur annule le picker.
     var handleReserve;

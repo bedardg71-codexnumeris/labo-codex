@@ -285,7 +285,8 @@ describe('#614 · sentinelle statique — ce que le fichier doit continuer de di
         // chemins RÉELLEMENT présents dans le ZIP, donc un `exporte` n'y entre
         // jamais — cas structurellement absent, pas gardé. La garde ci-dessous
         // appartient au chemin « ouvrir » et ne doit pas être déplacée ici.
-        expect(codeSeul).toMatch(/var blobAttendu = f\.blobStatut !== 'exporte';/);
+        // #1028 : la garde porte aussi les copies aux archives ; « exporte » reste gardé.
+        expect(codeSeul).toMatch(/var blobAttendu = f\.blobStatut !== 'exporte'( && !auxArchives\[f\.id\])?;/);
         expect(corpsDe('_fusionnerTravaux')).not.toMatch(/blobStatut/);
     });
 
