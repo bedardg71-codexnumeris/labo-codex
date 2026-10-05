@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 10 h 23 : **1.186.0 (#1028 : « ARCHIVER LES COPIES… ») PRÊTE SUR `claude/1028-archiver-copies`, RELEASE COMMITÉE ; VERDICT PLAYWRIGHT COMPLET, FUSION DANS `main` ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 11 h 26 : **1.186.0 (#1028 : « ARCHIVER LES COPIES… ») EN LIGNE, MESURÉ CHEZ NETLIFY SUR `dd0a8d8e` (PUBLIÉ À 11 h 24) ; VERDICT COMPLET VERT ; #1028 CLOSE**
+
+**Consigne** : Cowork, 10 h 10 (livraison), exécutée jusqu'au bout.
+
+**Ce qui est fait** : voir le relais de 10 h 23 juste dessous (mots de Grégoire, essai « Rouvrir », release 1.186.0). Branche `claude/1028-archiver-copies` arrivée sur `main` par avance rapide (`82c3e05f..dd0a8d8e`), poussée depuis son worktree par `git push origin HEAD:main`.
+
+**« Rouvrir » sur un trimestre dont les copies sont aux archives** : rouvert ; seul le registre `trimestres` change ; les copies restent « aux archives », E1 refuse, « Faire revenir » les ramène.
+
+**Tests** : Vitest 682 fichiers, 8205 essais verts (et au pre-push). Verdict Playwright complet vert sur `dd0a8d8e` : 0 échec, **0 instable** ; secteur, éveil complet tenu, 0 veille, échange 3,9 Go, pression 2 ; rendu à 11 h 23. Le hook : « verdict vert à jour pour ce commit ».
+
+**Porte** : aucune maintenant. La première fois sur les données de Grégoire (l'hiver 2026, une fois clos et archivé) lui revient, comme pour E2 et E3.
+
+**La suite** : rien d'inscrit par cette consigne.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 10 h 23 : **1.186.0 (#1028 : « ARCHIVER LES COPIES… ») PRÊTE SUR `claude/1028-archiver-copies`, RELEASE COMMITÉE ; VERDICT PLAYWRIGHT COMPLET, FUSION DANS `main` ET PUSH À SUIVRE**
 
 **Consigne** : Cowork, 10 h 10 (livraison ; relecture des corrections `ce564b52` verte). Mots, consigne et archive commités sur la branche (`087ff2ee`).
 
