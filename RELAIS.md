@@ -7,7 +7,31 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 11 h 26 : **1.186.0 (#1028 : « ARCHIVER LES COPIES… ») EN LIGNE, MESURÉ CHEZ NETLIFY SUR `dd0a8d8e` (PUBLIÉ À 11 h 24) ; VERDICT COMPLET VERT ; #1028 CLOSE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 13 h 41 : **ENREGISTREMENT, LOT 1 + 1 BIS (#962, #986, #1029) PRÊT SUR `claude/enregistrement-temoin` (`a8329002`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+
+**Consigne** : Cowork, 12 h 50 (verdict vert du lot 1, #1029 entré dans le lot), exécutée jusqu'à son point 6 (arrêt voulu). Verdict, consigne et archive commités sur la branche (`f3ac924a`).
+
+**Ce qui est fait** : `db.js` rouvre une connexion IndexedDB perdue une fois (réouverture partagée), refait l'écriture, la suppression ou la lecture avec la dernière valeur de la clé ; `onclose`/`onversionchange` posés. Mesuré au navigateur : connexion réellement fermée → « Enregistré », valeur relue après rechargement. #1030 (suppression muette, hors connexion fermée) et #1031 (copies sans réouverture) inscrits. Porte : rangée « arrière-plan » ajoutée. **Correction** : deux essais du lot B étaient rouges depuis `da9dc970` (annoncés verts par erreur) ; adaptés à la règle #962, verts. Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-05-enregistrement-temoin.md`, §§ 9 à 11.
+
+**Tests** : Vitest 684 fichiers, 8224 essais verts ; bancs WebKit du témoin et voisins 95/95, 0 instable ; 4 mutations rouges pour #1029. **Suite Playwright complète non lancée** (consigne : à la livraison).
+
+**La suite** : verdict de Cowork ; phrase d'issue proposée pour Grégoire (§ 9) ; puis la livraison : suite complète, fusion dans `main`, release, push, porte terrain publiée par Cowork.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 12 h 41 : **CHANTIER DE L'ENREGISTREMENT, LOT 1 (#962, #986) PRÊT SUR `claude/enregistrement-temoin` (`da9dc970`), BRANCHE LOCALE, NI POUSSÉE NI PUBLIÉE ; EN RELECTURE CHEZ COWORK**
+
+**Consigne** : Cowork, 12 h 01, exécutée jusqu'à son point 5 (arrêt voulu). Consigne et archive commitées et poussées sur `main` (`521ae21f`).
+
+**Ce qui est fait** : un échec d'écriture IndexedDB d'arrière-plan se dit « Non enregistré » et reste (`db.surEchecEcriture`, abonné dans `modes.js`) ; pour une grosse clé, « Enregistré » attend le commit (`db.commitEnAttente`, `_annoncerEnregistre`) ; le témoin remonte au-dessus du clavier de l'iPad (`visualViewport`). Aucun mot nouveau. Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-05-enregistrement-temoin.md` ; porte : `plans de travail/PORTES-TERRAIN-2026-10-05-enregistrement-temoin.md`. #1029 inscrit (connexion IndexedDB jamais rouverte).
+
+**Tests** : Vitest 683 fichiers, 8216 essais verts ; WebKit 962-986 7/7 (35/35 répétés), bancs voisins du témoin 92 verts, 0 instable ; 9 mutations rouges. **Suite Playwright complète non lancée.**
+
+**La suite** : relecture de Cowork ; puis, sur son verdict, la suite complète, la fusion dans `main`, la release et le push (non faits, consigne).
+
+---
+
+## (relais précédent) 5 OCT. 2026, 11 h 26 : **1.186.0 (#1028 : « ARCHIVER LES COPIES… ») EN LIGNE, MESURÉ CHEZ NETLIFY SUR `dd0a8d8e` (PUBLIÉ À 11 h 24) ; VERDICT COMPLET VERT ; #1028 CLOSE**
 
 **Consigne** : Cowork, 10 h 10 (livraison), exécutée jusqu'au bout.
 
