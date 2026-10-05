@@ -6131,12 +6131,15 @@ a.soutien-action:focus {
      À 420 px de large, le message le plus long (mémoire pleine) ne fait que
      ~116 px de haut et passe sous la navigation (marge mesurée : 10 px à
      1024 × 768). D'où : à gauche, 420 px au plus à partir de 900 px.
+   #986 : sur l'iPad, au-dessus du clavier à l'écran — `--temoin-hauteur-clavier`,
+   posée par temoin-enregistrement.js depuis `visualViewport` ; 0 sur le Mac.
    =============================== */
 
 .temoin-enregistrement {
+    --temoin-hauteur-clavier: 0px;   /* #986 : remplacée par le script sur l'iPad */
     position: fixed;
     left: 16px;
-    bottom: 16px;
+    bottom: calc(16px + var(--temoin-hauteur-clavier, 0px));
     z-index: 11000;
     max-width: min(270px, calc(100vw - 32px));
     pointer-events: none;

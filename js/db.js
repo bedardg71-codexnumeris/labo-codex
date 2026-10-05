@@ -149,6 +149,12 @@
             // par clé. Voir `modifier()` : c'est ce qui empêche deux rafales
             // d'autosave de lire le même instantané et de s'entre-écraser.
             this._filesModification = new Map();
+            // #962 — le commit IDB attendu, par clé, de la DERNIÈRE écriture
+            // synchrone (`_trackWrite`) : { commit, grosse }. Voir `commitEnAttente`.
+            this._commitsEnAttente = new Map();
+            // #962 — l'abonné aux échecs des écritures IDB d'arrière-plan
+            // (voir `surEchecEcriture`).
+            this._surEchecEcriture = null;
         }
 
         /**
@@ -229,6 +235,45 @@
          */
         surEcriture(rappel) {
             this._surEcriture = typeof rappel === 'function' ? rappel : null;
+        }
+
+        /**
+         * #962 (5 oct. 2026) — UN ÉCHEC D'ÉCRITURE NE SE TAIT JAMAIS.
+         *
+         * `setSync` rend la main avant le commit IndexedDB : son échec (quota,
+         * transaction avortée, connexion fermée après une mise en arrière-plan sur
+         * l'iPad) n'était qu'un `console.warn` de `_trackOperation`, alors que le
+         * témoin avait déjà dit « Enregistré ». Au rechargement, le démarrage relit
+         * IndexedDB : la valeur perdue disparaît, et pour une petite clé, l'ancienne
+         * copie d'IndexedDB réécrit même celle de localStorage
+         * (`syncToLocalStorageCache`).
+         *
+         * Même forme que `surEcriture` : `db.js` émet, `modes.js` (couche du témoin)
+         * s'abonne. Un seul abonné, le besoin est unique.
+         * @param {function(string, Error)} rappel - (clé, erreur)
+         */
+        surEchecEcriture(rappel) {
+            this._surEchecEcriture = typeof rappel === 'function' ? rappel : null;
+        }
+
+        _signalerEchecEcriture(key, erreur) {
+            var abonne = this._surEchecEcriture;
+            if (typeof abonne !== 'function') return;
+            try { abonne(key, erreur); } catch (e) {
+                console.warn('[DB] abonné _surEchecEcriture a levé une exception :', e && e.message);
+            }
+        }
+
+        /**
+         * #962 — le commit IndexedDB que la dernière écriture synchrone de cette clé
+         * attend encore : `{ commit, grosse }`, ou `null` s'il n'y en a pas (commit
+         * fait, écriture par `set` qui l'attend elle-même, IndexedDB absent).
+         * `commit` est la promesse d'ORIGINE : elle rejette sur l'échec. `grosse` :
+         * la valeur dépasse `SEUIL_IDB_FIRST`, elle ne vit qu'en mémoire jusqu'au
+         * commit (aucune copie en localStorage).
+         */
+        commitEnAttente(key) {
+            return this._commitsEnAttente.get(key) || null;
         }
 
         /**
@@ -1541,7 +1586,7 @@
                 // Supprimer l'éventuelle ancienne version de localStorage
                 try { localStorage.removeItem(key); } catch (ex) {}
                 // Écriture IDB en arrière-plan (trackée pour flush)
-                this._trackWrite(key, value);
+                this._trackWrite(key, value, true);
                 return true;
             }
 
@@ -1613,8 +1658,17 @@
          * Lance une écriture IDB et la tracke dans _pendingWrites
          * pour permettre le drainage au déchargement (flush() / Option B).
          */
-        _trackWrite(key, value) {
-            this._trackOperation(this._setIndexedDB(key, value), 'écriture', key);
+        _trackWrite(key, value, grosse) {
+            var self = this;
+            var commit = this._trackOperation(this._setIndexedDB(key, value), 'écriture', key);
+            // #962 : le commit attendu de cette clé, puis l'échec dit à l'abonné.
+            var attente = { commit: commit, grosse: !!grosse };
+            this._commitsEnAttente.set(key, attente);
+            commit.then(function() {}, function(erreur) {
+                self._signalerEchecEcriture(key, erreur);
+            }).then(function() {
+                if (self._commitsEnAttente.get(key) === attente) self._commitsEnAttente.delete(key);
+            });
         }
 
         /**

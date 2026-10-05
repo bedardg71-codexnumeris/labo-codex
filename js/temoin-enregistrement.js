@@ -32,6 +32,9 @@
 //   fermerSi(cle)                     → le retire SEULEMENT s'il porte cette clé, sans
 //                                       rien annoncer (lot G : le codex écrit, son
 //                                       échec s'efface ; `enregistre` dirait « pas à jour »).
+//   echecSur(cle)                     → vrai si le « Non enregistré » affiché porte cette
+//                                       clé (#962 : `modes.js` attend alors le commit
+//                                       IndexedDB avant de dire « Enregistré »).
 //
 // Lot G (#988) : `nonEnregistre` prend un 4ᵉ argument, le verdict, quand l'échec n'est
 // pas celui d'une écriture dans l'application : « Codex non mis à jour : ‹raison› ».
@@ -46,7 +49,8 @@
 // qu'on évalue). Seul le visuel réapparaît.
 //
 // Placement : en bas à gauche, loin du témoin du Codex (menu du haut, D4 / lot F)
-// et des toasts (en haut à droite). `pointer-events: none` hors du bouton Fermer :
+// et des toasts (en haut à droite). #986 : AU-DESSUS du clavier à l'écran de l'iPad,
+// qui le cachait (constat de Grégoire, 29 sept.) — voir `placerAuDessusDuClavier`. `pointer-events: none` hors du bouton Fermer :
 // le témoin ne capte ni le Pencil ni un clic destiné à ce qu'il survole.
 //
 // Sécurité : texte par textContent, jamais innerHTML.
@@ -91,7 +95,32 @@
         temoin.appendChild(echec);
 
         document.body.appendChild(temoin);
+        placerAuDessusDuClavier();
         return temoin;
+    }
+
+    /**
+     * #986 (5 oct. 2026) — sur l'iPad, le clavier à l'écran recouvre le bas de la page sans
+     * la redimensionner : un élément `position: fixed; bottom` reste derrière lui. Seule la
+     * zone VISIBLE (`visualViewport`) rétrécit. Le témoin remonte de la hauteur cachée.
+     * Sur le Mac, cette hauteur est nulle : rien ne bouge. Un zoom au pincement (échelle
+     * ≠ 1) n'est pas un clavier : rien ne bouge non plus.
+     */
+    function hauteurSousLeClavier() {
+        const vv = window.visualViewport;
+        if (!vv || Math.abs(vv.scale - 1) > 0.01) return 0;
+        return Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    }
+
+    function placerAuDessusDuClavier() {
+        const temoin = document.getElementById(ID);
+        if (!temoin) return;
+        temoin.style.setProperty('--temoin-hauteur-clavier', hauteurSousLeClavier() + 'px');
+    }
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', placerAuDessusDuClavier);
+        window.visualViewport.addEventListener('scroll', placerAuDessusDuClavier);
     }
 
     /**
@@ -108,6 +137,7 @@
         annoncerEcriture(cle);
         if (!document.body) return;
         const temoin = _noeud();
+        placerAuDessusDuClavier();
         if (cleEchec !== null && cle === cleEchec) fermerEchec();
         const succes = temoin.querySelector('.temoin-enregistrement-succes');
         if (succes.textContent !== 'Enregistré') succes.textContent = 'Enregistré';
@@ -119,6 +149,7 @@
     function nonEnregistre(raison, geste, cle, verdict) {
         if (!document.body) return;
         const temoin = _noeud();
+        placerAuDessusDuClavier();
         cleEchec = cle === undefined ? '' : cle;
         clearTimeout(minuterieEnregistre);
         temoin.querySelector('.temoin-enregistrement-succes').classList.remove('visible');
@@ -143,7 +174,11 @@
         if (cleEchec !== null && cle === cleEchec) fermerEchec();
     }
 
-    window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec, fermerSi };
+    function echecSur(cle) {
+        return cleEchec !== null && cle === cleEchec;
+    }
+
+    window.temoinEnregistrement = { enregistre, nonEnregistre, fermer: fermerEchec, fermerSi, echecSur };
 
     /**
      * Lot F (relecture de Cowork, 29 sept.) : un geste de l'usager qui écrit en `db` DIRECT,
