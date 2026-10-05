@@ -389,6 +389,10 @@ async function archiverTrimestre(trimestre, options) {
             meta: meta,
             patch: patch,
             blobs: copies.blobs,
+            // E3 (#1024) : en mode dossier, les copies d'une archive précédente que celle-ci ne
+            // range plus sont mises de côté (hors-archive-<date>/), sans quoi « Vérifier » les
+            // dirait « en trop » et le trimestre ne pourrait jamais être renvoyé aux archives.
+            mettreDeCote: true,
             stats: {
                 etudiants: collecte.stats.nombreEtudiants,
                 cles: collecte.stats.nombreCles,
