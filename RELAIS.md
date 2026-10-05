@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 13 h 48 : **1.186.1 (ENREGISTREMENT, LOT 1 : #962, #986, #1029) PRÊTE SUR `claude/enregistrement-temoin`, RELEASE COMMITÉE (`92cec6c2`) ; VERDICT PLAYWRIGHT COMPLET, AVANCE DE `main` ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 17 h 27 : **1.186.1 (ENREGISTREMENT, LOT 1 : #962, #986, #1029) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `95f37ad3` (PUBLIÉ À 17 h 18) ; SECOND VERDICT COMPLET VERT ; FICHES COCHÉES**
+
+**Consigne** : Cowork, 13 h 44 (livraison), exécutée jusqu'au bout.
+
+**Ce qui est fait** : voir le relais juste dessous (message de Grégoire, release 1.186.1, régression CO-01 trouvée au premier verdict et corrigée en `3ea9a69d`). `main` avancée sur `claude/enregistrement-temoin` (avance rapide, `1f8a5a20..95f37ad3`), poussée par `git push origin main` ; workflow GitHub « Tests » vert (`37375081505`).
+
+**Tests** : Vitest 684 fichiers, 8227 essais verts (et au pre-push). Second verdict Playwright complet sur `95f37ad3` : **0 échec, 0 instable** ; secteur, éveil complet tenu, 0 veille ; rendu à 17 h 17. Premier verdict (`76bdb11a`) : 2 rouges (CO-01), cause et remède dans `plans de travail/DEMANDE-RELECTURE-2026-10-05-enregistrement-temoin.md`, § 12.
+
+**Porte** : `plans de travail/PORTES-TERRAIN-2026-10-05-enregistrement-temoin.md` (iPad : clavier, grosse donnée, retour d'arrière-plan ; Mac), à publier par Cowork sur la version en ligne.
+
+**La suite** : #1030 et #1031 restent au BACKLOG.
+
+---
+
+## (relais précédent) 5 OCT. 2026, 13 h 48 : **1.186.1 (ENREGISTREMENT, LOT 1 : #962, #986, #1029) PRÊTE SUR `claude/enregistrement-temoin`, RELEASE COMMITÉE (`92cec6c2`) ; VERDICT PLAYWRIGHT COMPLET, AVANCE DE `main` ET PUSH À SUIVRE**
 
 **Consigne** : Cowork, 13 h 44 (livraison ; message tranché par Grégoire). Consigne et archive commitées (`c8f07aaf`).
 
