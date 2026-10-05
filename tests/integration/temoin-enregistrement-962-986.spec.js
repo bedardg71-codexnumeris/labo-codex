@@ -65,6 +65,7 @@ const LIRE = () => {
     return { enregistre: !!s, echec: e ? e.querySelector('.temoin-enregistrement-echec-texte').textContent : null };
 };
 
+// Le témoin se place à la PROCHAINE image (voir `planifierPlacement`) : chaque mesure attend deux images.
 // Une valeur au-delà de SEUIL_IDB_FIRST (25 Ki caractères), de la forme des évaluations.
 const GROSSE = `Array.from({ length: 60 }, (_, i) => ({ id: 'EVAL' + i, commentaire: 'x'.repeat(1000) }))`;
 
@@ -174,8 +175,9 @@ test.describe('#986 · le témoin se voit au-dessus du clavier de l\'iPad', () =
             }, clavier);
             const erreurs = brancherEcouteurs(page);
             await ouvrirVide(page);
-            const mesure = await page.evaluate(() => {
+            const mesure = await page.evaluate(async () => {
                 sauvegarderDonneesSelonMode('presences', [{ da: '1', date: '2026-10-05', heures: 2 }]);
+                await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));   // deux images
                 const r = document.querySelector('.temoin-enregistrement-succes.visible').getBoundingClientRect();
                 return { bas: Math.round(r.bottom), haut: Math.round(r.top), zone: window.visualViewport.height };
             });
@@ -197,7 +199,10 @@ test.describe('#986 · le témoin se voit au-dessus du clavier de l\'iPad', () =
         const erreurs = brancherEcouteurs(page);
         await ouvrirVide(page);
         const basDe = () => page.evaluate(() => Math.round(document.querySelector('.temoin-enregistrement-echec.visible').getBoundingClientRect().bottom));
-        await page.evaluate(() => window.temoinEnregistrement.nonEnregistre('le navigateur a refusé l\'écriture.', undefined, 'k'));
+        await page.evaluate(async () => {
+            window.temoinEnregistrement.nonEnregistre('le navigateur a refusé l\'écriture.', undefined, 'k');
+            await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));   // deux images
+        });
         expect(await basDe()).toBe(1180 - 16);
         await page.evaluate(() => { window.__clavier = 400; window.visualViewport.dispatchEvent(new Event('resize')); });
         expect(await basDe()).toBe(1180 - 400 - 16);
@@ -215,8 +220,9 @@ test.describe('#986 · le témoin se voit au-dessus du clavier de l\'iPad', () =
             Object.defineProperty(window, 'visualViewport', { configurable: true, get: () => vv });
         });
         await ouvrirVide(page);
-        const bas = await page.evaluate(() => {
+        const bas = await page.evaluate(async () => {
             sauvegarderDonneesSelonMode('presences', [{ da: '1', date: '2026-10-05', heures: 2 }]);
+            await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));   // deux images
             return Math.round(document.querySelector('.temoin-enregistrement-succes.visible').getBoundingClientRect().bottom);
         });
         expect(bas).toBe(900 - 16);

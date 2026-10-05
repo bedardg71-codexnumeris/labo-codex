@@ -95,7 +95,7 @@
         temoin.appendChild(echec);
 
         document.body.appendChild(temoin);
-        placerAuDessusDuClavier();
+        planifierPlacement();
         return temoin;
     }
 
@@ -118,6 +118,20 @@
         temoin.style.setProperty('--temoin-hauteur-clavier', hauteurSousLeClavier() + 'px');
     }
 
+    /**
+     * Quand le témoin PARLE, la place se calcule à la prochaine image, pas tout de suite :
+     * lire `innerHeight` force la mise en page, au moment même où l'écran qui vient
+     * d'écrire (l'assistant d'une pratique, par exemple) est encore affiché. Mesuré au
+     * verdict de 1.186.1 : sous file://, cette mise en page forcée faisait demander les
+     * icônes masquées de l'assistant, refusées (CORS), juste avant sa fermeture.
+     * Les événements du clavier, eux, placent tout de suite.
+     */
+    let imagePrevue = 0;
+    function planifierPlacement() {
+        if (imagePrevue || typeof window.requestAnimationFrame !== 'function') return;
+        imagePrevue = window.requestAnimationFrame(() => { imagePrevue = 0; placerAuDessusDuClavier(); });
+    }
+
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', placerAuDessusDuClavier);
         window.visualViewport.addEventListener('scroll', placerAuDessusDuClavier);
@@ -137,7 +151,7 @@
         annoncerEcriture(cle);
         if (!document.body) return;
         const temoin = _noeud();
-        placerAuDessusDuClavier();
+        planifierPlacement();
         if (cleEchec !== null && cle === cleEchec) fermerEchec();
         const succes = temoin.querySelector('.temoin-enregistrement-succes');
         if (succes.textContent !== 'Enregistré') succes.textContent = 'Enregistré';
@@ -149,7 +163,7 @@
     function nonEnregistre(raison, geste, cle, verdict) {
         if (!document.body) return;
         const temoin = _noeud();
-        placerAuDessusDuClavier();
+        planifierPlacement();
         cleEchec = cle === undefined ? '' : cle;
         clearTimeout(minuterieEnregistre);
         temoin.querySelector('.temoin-enregistrement-succes').classList.remove('visible');

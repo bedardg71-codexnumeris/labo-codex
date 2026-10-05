@@ -125,3 +125,17 @@ Défaut corrigé en chemin dans MON banc : la doublure ne comptait que les ouver
 - **Vitest complet** : 684 fichiers, 8224 essais verts. En route, deux sentinelles #353 (`durabilite-set-async-tracke`, `durabilite-remove-idb`) appelaient `set` et `removeSync` sur un `this` minimal : je leur ai branché les vraies méthodes de reprise, connexion saine. Leur objet, le suivi dans `_pendingWrites`, est inchangé.
 - **Bancs WebKit du témoin et voisins** (962-986, lot B, présences lot D, anonymisation lot A, verrouiller lot C, codex lot G, E1, E2, E3, #1012) : **95 passés, 0 échoué, 0 instable**, en 12,7 min.
 - **Suite Playwright complète** : non lancée, conformément à la consigne. Elle se fera à la livraison.
+
+## 12 · Livraison (consigne de 13 h 44) : le verdict a trouvé une régression du lot 1, corrigée
+
+**Verdict complet sur `76bdb11a`** (1.186.1 commitée) : **2 rouges, 0 instable**, éveil tenu, sur le secteur. Les deux essais de `pratique-edition-preserve-enveloppe.spec.js` (CO-01) rougissaient sur deux `console.error` CORS. La ressource demandée était `icons/icons8-process.svg`, l'icône masquée de l'avatar Primo de l'assistant ; je l'ai identifiée par `requestfailed`.
+
+**Bissection** (worktrees jetables) : `dd0a8d8e` (1.186.0) vert ; `da9dc970` (lot 1), `a8329002` et `079c9e1f` rouges. **C'est le lot 1 qui l'a introduit.**
+
+**Cause** : quand le témoin parle, `placerAuDessusDuClavier` lisait `innerHeight` de façon synchrone. Cela forçait la mise en page alors que l'assistant était encore affiché, et le navigateur demandait ses icônes masquées, refusées sous `file://`. Avant le lot, l'assistant se fermait sans qu'aucune image ne soit rendue.
+
+**Correctif** : quand le témoin parle, son placement se fait à la prochaine image (`planifierPlacement`, `requestAnimationFrame`). Les événements du clavier placent toujours tout de suite. Les essais de placement attendent désormais deux images avant de mesurer.
+
+**Mutations** : CSS, calcul à 0, zoom, placement jamais fait, et **placement redevenu synchrone**. La dernière fait rougir CO-01, qui verrouille donc le remède. Le tout est vert : 962-986 et CO-01, 10/10.
+
+**Ce qui ne change pas à l'écran** : sur l'iPad, si le clavier est déjà ouvert quand le témoin paraît pour la première fois, il se place une image plus tard (environ 16 ms).
