@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 4 OCT. 2026, 21 h 06 : **1.184.0 (E2, #1023 : « FAIRE REVENIR » UN TRIMESTRE ARCHIVÉ) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `59018be9` (PUBLIÉ À 21 h 04) ; VERDICT COMPLET VERT ; #1023 CLOSE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 5 h 20 : **E3 (#1024, « RENVOYER AUX ARCHIVES ») CODÉ SUR `claude/e3-renvoyer-trimestre` (`2cf725f0`, demande `ae4f06cd`), EN RELECTURE CROISÉE ; NI POUSSÉ NI PUBLIÉ**
+
+**Consigne** : Cowork, 4 h 36 (E3 ; arrêt au point 6). Consigne et archive commitées et poussées sur `main` (`7af302e0`).
+
+**Ce qui est fait, sur la branche (locale, non poussée)** : `js/reserve-renvoyer.js` (menu ⋮ d'un trimestre clos ; compare le trimestre à son archive vérifiée ; identique → retire registre, copies et vignettes, séances, clés en dernier ; différent → rien retiré, « Archiver de nouveau » ; « Finir de renvoyer » sur la ligne de l'archive après un arrêt) ; « Faire revenir » laisse une clé restée identique à l'archive ; en mode dossier, la ré-archive d'un trimestre met de côté (`hors-archive-<date>/`) au lieu de laisser « en trop ». Mots provisoires. Vitest 680 fichiers, 8165 essais verts ; WebKit E1, E2, E3 verts (4 essais) ; dix mutations rouges. Mesuré à 394 copies (1,08 Go) : 1,3 s + 0,8 s, pic de la page 203 Mo. **#845** (cache mémoire de `db.remove`) arrêtait le renvoi à cette taille : contourné dans le lot. **#1027 inscrite** (« Vérifier » et une fiche sans fichier : bloquerait E3 sur un tel trimestre). Pas de verdict complet.
+
+**Pour Cowork** : `plans de travail/DEMANDE-RELECTURE-2026-10-05-e3-renvoyer-trimestre.md` (les mots exacts au § 4, cinq points à juger au § 5).
+
+**La suite** : verdict de Cowork, mots de Grégoire, puis release. La première fois sur l'hiver 2026 revient à Grégoire (après clôture et archivage) ; savoir d'abord si H2026 porte une fiche sans fichier (#1027).
+
+---
+
+## (relais précédent) 4 OCT. 2026, 21 h 06 : **1.184.0 (E2, #1023 : « FAIRE REVENIR » UN TRIMESTRE ARCHIVÉ) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `59018be9` (PUBLIÉ À 21 h 04) ; VERDICT COMPLET VERT ; #1023 CLOSE**
 
 **Consigne** : Cowork, 19 h 46 (verdict vert avec une correction ; mots « Faire revenir » de Grégoire ; release minor). Consigne, archive, verdict et mots au plan commités tels quels (`e29a45a0`).
 
