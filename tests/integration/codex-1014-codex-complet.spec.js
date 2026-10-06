@@ -159,9 +159,12 @@ test.describe('#1014 — le codex emporte la corbeille et la Modélisation', () 
     test('« Exporter une sélection » emporte aussi la corbeille et la Modélisation', async ({ page }) => {
         await fabriquerCodex(page);
         const sortie = await page.evaluate(async () => {
-            // Un second trimestre : la sélection en exige deux. Les dialogues répondent « tous »,
+            // Deux trimestres : la sélection en exige deux. Les dialogues répondent « tous »,
             // puis « Continuer » ; la destination est une poignée qui garde ce qu'on lui écrit.
+            // T2 du chantier du démo (G1, 6 oct. 2026) : le démo ne compte plus parmi eux — il
+            // était, sur cette page sans trimestre actif, le premier des deux.
             db.setSync('h2032_groupeEtudiants', [{ da: '9001015', nom: 'Fictif', prenom: 'Camille', groupe: '00002' }]);
+            db.setSync('a2032_groupeEtudiants', [{ da: '9001016', nom: 'Fictif', prenom: 'Dominique', groupe: '00003' }]);
             await db.flush();
             uiDialogues.demanderSaisie = async () => 'tous';
             uiDialogues.confirmerAction = async () => true;
@@ -177,12 +180,14 @@ test.describe('#1014 — le codex emporte la corbeille et la Modélisation', () 
             return {
                 selection: manifeste.exportSelectif === true,
                 listes: manifeste.contenu.listesDeFichiers || null,
+                clesDuDemo: Object.keys(JSON.parse(await zip.file('donnees.json').async('string'))).filter((c) => c.indexOf('demo_') === 0),
                 entrees: Object.keys(zip.files).filter((n) => n.indexOf('travaux/') === 0 && !n.endsWith('/')).sort()
             };
         });
         expect(sortie, 'la sélection a été écrite').not.toBeNull();
         expect(sortie.selection).toBe(true);
         expect(sortie.listes).toEqual(['fichiersTravaux', 'corbeilleFichiers', 'fichiersModelisation']);
+        expect(sortie.clesDuDemo, 'T2 : la sélection n\'emporte pas le démo').toEqual([]);
         expect(sortie.entrees).toEqual([
             'travaux/' + MODELE + '.png', 'travaux/' + JETEE + '.png', 'travaux/' + ACTIVE + '.png'
         ].sort());
