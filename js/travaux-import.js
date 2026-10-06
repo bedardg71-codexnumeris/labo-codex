@@ -84,6 +84,21 @@
         /[_\-\s](\d{7})\./,               // _1234567. avant extension
     ];
 
+    /**
+     * T1 (chantier du demo, 6 oct. 2026) — DA du pack demo : « DEMO » + trois
+     * chiffres (`DEMO011`). Aucun motif a sept chiffres ne le lit : les pages
+     * d'une remise demo restaient sans DA, donc sans `groupeDocumentId`, et la
+     * deuxieme tombait sur la garde de doublon (« Doublon detecte » vecu par
+     * Gregoire, 5 oct.). C'est une DETECTION, pas une creation de DA : la regle
+     * des sept chiffres reste intacte, et le motif n'est essaye qu'en mode demo,
+     * APRES les motifs a sept chiffres.
+     *
+     * Tolerant a la casse et a l'accent (« demo », « démo », « De\u0301mo » en
+     * NFD tel que macOS peut nommer un fichier) ; le DA rendu est normalise en
+     * `DEMO###`, la forme du pack.
+     */
+    const PATTERN_DA_DEMO = /(?:^|[^a-z0-9\u00e0-\u00ff])(d(?:e|\u00e9|e\u0301)mo(\d{3}))(?![0-9])/i;
+
     /* ===============================
        PARSER NOM FICHIER LEA
        =============================== */
@@ -133,18 +148,18 @@
             );
         }
 
-        // Extraire le DA depuis la partie identite
-        resultat.da = detecterDA(partieIdentite);
+        // Extraire le DA depuis la partie identite. T1 — on coupe a la POSITION
+        // du motif trouve, pas par `indexOf(da)` : un DA demo normalise
+        // (`DEMO004`) n'est pas la sous-chaine ecrite (`demo004`).
+        const trouve = localiserDA(partieIdentite);
+        resultat.da = trouve ? trouve.da : '';
 
-        if (resultat.da) {
-            // Trouver la position du DA dans la chaine
-            const indexDA = partieIdentite.indexOf(resultat.da);
-
+        if (trouve) {
             // Nom = tout avant le DA (nettoye des separateurs)
-            resultat.nom = partieIdentite.substring(0, indexDA).replace(/[_\-]+$/, '').replace(/_/g, ' ').trim();
+            resultat.nom = partieIdentite.substring(0, trouve.debut).replace(/[_\-]+$/, '').replace(/_/g, ' ').trim();
 
             // Production = tout apres le DA (nettoye des separateurs)
-            resultat.nomProduction = partieIdentite.substring(indexDA + resultat.da.length).replace(/^[_\-]+/, '').replace(/_/g, ' ').trim();
+            resultat.nomProduction = partieIdentite.substring(trouve.fin).replace(/^[_\-]+/, '').replace(/_/g, ' ').trim();
 
             // #603 — Detacher le suffixe de page AVANT que `nomProduction` ne
             // serve de cle de regroupement. Sans cela, « -p1 » et « -p2 »
@@ -263,13 +278,34 @@
      * @returns {string} Le DA detecte ou chaine vide
      */
     function detecterDA(nomFichier) {
+        const trouve = localiserDA(nomFichier);
+        return trouve ? trouve.da : '';
+    }
+
+    /**
+     * DA detecte ET sa place dans la chaine, pour que le parseur Lea coupe nom
+     * et production au bon endroit.
+     * @param {string} chaine
+     * @returns {{da: string, debut: number, fin: number}|null}
+     */
+    function localiserDA(chaine) {
         for (const pattern of PATTERNS_DA) {
-            const match = nomFichier.match(pattern);
+            const match = chaine.match(pattern);
             if (match && match[1]) {
-                return match[1];
+                // Sept chiffres : position de la premiere occurrence, comme avant T1.
+                const debut = chaine.indexOf(match[1]);
+                return { da: match[1], debut: debut, fin: debut + match[1].length };
             }
         }
-        return '';
+        // T1 — DA demo, en mode demo seulement, apres les sept chiffres.
+        if (typeof estEnModeDemo === 'function' && estEnModeDemo()) {
+            const match = chaine.match(PATTERN_DA_DEMO);
+            if (match) {
+                const debut = match.index + match[0].length - match[1].length;
+                return { da: 'DEMO' + match[2], debut: debut, fin: debut + match[1].length };
+            }
+        }
+        return null;
     }
 
     /**
