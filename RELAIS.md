@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 10 h 22 : **1.186.3 (T1 DU CHANTIER DU DÉMO : LE DA `DEMO###` LU À L'IMPORT, EN DÉMO SEULEMENT) COMMITÉE SUR `main` LOCAL (`551bc478`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 11 h 30 : **1.186.3 (T1 DU CHANTIER DU DÉMO) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `0da20f79` (PUBLIÉ À 11 h 25) ; VERDICT COMPLET VERT (0 INSTABLE)**
+
+**Ce qui est fait** : relecture de Cowork approuvée sur `551bc478` (rien à corriger) ; verdict Playwright complet sur `0da20f79` : 0 échec, 0 instable, 0 veille (rendu à 11 h 24) ; `git push origin main` (`6a5f0c7d..0da20f79`, hook : Vitest vert, verdict à jour) ; workflow « Tests » `37487344438` vert ; Netlify : `commit_ref` `0da20f79`, `state` ready.
+
+**La suite** : Grégoire retire du démo les copies d'essai du 5 oct. (Évaluations › Liste des évaluations › Supprimer › « Déplacer à la corbeille »), puis importe les 30 copies renommées. M2 reste à mesurer (T5 avant toute suite si le refus se confirme).
+
+---
+
+## (relais précédent) 6 OCT. 2026, 10 h 22 : **1.186.3 (T1 DU CHANTIER DU DÉMO : LE DA `DEMO###` LU À L'IMPORT, EN DÉMO SEULEMENT) COMMITÉE SUR `main` LOCAL (`551bc478`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
 
 **Consigne** : choix de Grégoire en séance (« T1 tout de suite », puis « commit + livraison ») ; relais de Cowork sur le symptôme vécu (« Doublon détecté » sur deux pages `DEMO011` de Curie).
 
