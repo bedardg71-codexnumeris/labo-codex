@@ -358,6 +358,71 @@ function _clesDesListesDeFichiers(cles, listes) {
 }
 
 /**
+ * T2 du chantier du démo (décision G1 de Grégoire, 6 oct. 2026) : le codex n'emporte pas le
+ * démo, et ouvrir un codex ne le touche plus. Le démo se réinstalle depuis l'application.
+ * Les listes du démo dont les ids désignent des fichiers : copies, corbeille, annotations
+ * (celles-ci par `fichierId`).
+ */
+var LISTES_DU_DEMO = ['demo_fichiersTravaux', 'demo_corbeilleFichiers', 'demo_annotationsTravaux'];
+
+function _estCleDuDemo(cle) {
+    return typeof cle === 'string' && cle.indexOf('demo_') === 0;
+}
+
+/** Les ids de fichier que portent les listes du démo de `donnees`. */
+function _idsDuDemo(donnees) {
+    var ids = {};
+    LISTES_DU_DEMO.forEach(function(cle) {
+        var liste = donnees && donnees[cle];
+        if (!Array.isArray(liste)) return;
+        liste.forEach(function(e) {
+            var id = e && (cle === 'demo_annotationsTravaux' ? e.fichierId : e.id);
+            if (id) ids[id] = true;
+        });
+    });
+    return ids;
+}
+
+/**
+ * T2 — la part du démo dans `donnees` (fonction pure) : toute clé `demo_*`, et la vignette
+ * `thumbnail_<id>` de chaque fichier du démo (constat C4 : la vignette vit sous une clé
+ * globale). Sélection par IDENTITÉ, au modèle de la Réserve (reserve-copies.js) : un id que
+ * porte aussi une liste réelle reste à la copie réelle, sa vignette avec elle.
+ * @returns {{cles: Object<string, boolean>, ids: Object<string, boolean>}} `ids` : les
+ *   fichiers du démo seulement
+ */
+function _partDuDemo(donnees) {
+    var cles = {};
+    var toutes = Object.keys(donnees || {});
+    toutes.forEach(function(c) { if (_estCleDuDemo(c)) cles[c] = true; });
+    var idsReels = {};
+    toutes.forEach(function(c) {
+        if (_estCleDuDemo(c) || !Array.isArray(donnees[c])) return;
+        var annotations = /^(?:[aeh]\d{4}_)?annotationsTravaux$/.test(c);
+        if (!annotations && _clesDesListesDeFichiers([c], LISTES_DE_FICHIERS).length === 0) return;
+        donnees[c].forEach(function(e) {
+            var id = e && (annotations ? e.fichierId : e.id);
+            if (id) idsReels[id] = true;
+        });
+    });
+    var ids = {};
+    Object.keys(_idsDuDemo(donnees)).forEach(function(id) {
+        if (idsReels[id]) return;
+        ids[id] = true;
+        if (Object.prototype.hasOwnProperty.call(donnees, 'thumbnail_' + id)) cles['thumbnail_' + id] = true;
+    });
+    return { cles: cles, ids: ids };
+}
+
+/** T2 — `donnees` sans la part du démo (nouvel objet ; l'original n'est pas touché). */
+function _sansLeDemo(donnees, part) {
+    var p = part || _partDuDemo(donnees);
+    var reste = {};
+    Object.keys(donnees || {}).forEach(function(c) { if (!p.cles[c]) reste[c] = donnees[c]; });
+    return reste;
+}
+
+/**
  * #1014 — l'extension d'une entrée du codex. Celle du nom de fichier quand elle tient dans la
  * liste blanche de l'export (lettres et chiffres), sinon 'bin' : un nom de Modélisation est celui
  * du fichier choisi sur l'appareil, et une extension hors liste bloquerait tout le codex.
@@ -389,7 +454,7 @@ async function genererCodex(options = {}) {
     // 1. Collecter toutes les clés depuis IndexedDB
     const toutesLesCles = await db.keys();
     const clesFiltrees = toutesLesCles.filter(function(c) { return !c.startsWith('_codex_'); });
-    const donnees = {};
+    let donnees = {};
     for (var i = 0; i < clesFiltrees.length; i++) {
         var valeur = await db.get(clesFiltrees[i], null);
         if (valeur !== null) {
@@ -404,6 +469,12 @@ async function genererCodex(options = {}) {
             await _yield();
         }
     }
+
+    // 1 bis. T2 : le démo n'entre pas dans le codex (ni ses clés, ni ses fichiers, ni leurs
+    //        vignettes). Les listes de fichiers et le manifeste se lisent après ce retrait.
+    const partDuDemo = _partDuDemo(donnees);
+    donnees = _sansLeDemo(donnees, partDuDemo);
+    const clesDuCodex = clesFiltrees.filter(function(c) { return !partDuDemo.cles[c]; });
 
     // 2. Construire le ZIP
     _prog(20, 'Préparation du ZIP…');
@@ -421,7 +492,7 @@ async function genererCodex(options = {}) {
     // etc.). find() ne retournait que la premiere, les blobs des autres
     // trimestres etaient ignores. (H5)
     // #1014 : et celles de la corbeille et de la Modélisation, par le même chemin.
-    const clesFT = _clesDesListesDeFichiers(toutesLesCles, LISTES_DE_FICHIERS);
+    const clesFT = _clesDesListesDeFichiers(clesDuCodex, LISTES_DE_FICHIERS);
     zip.folder(DOSSIER_TRAVAUX);
     // Lot J0 (#988) : les copies ne sont plus confiées à JSZip, qui les lisait toutes en
     // mémoire dès leur dépôt. On n'en garde que la référence ; `FichierSortant.assemblerZip`
@@ -520,7 +591,7 @@ async function genererCodex(options = {}) {
         userAgent: navigator.userAgent,             // #244 (string complète pour diagnostic)
         trimestre: trimestreActif,
         contenu: {
-            cles: toutesLesCles.filter(c => !c.startsWith('_codex_')),
+            cles: clesDuCodex,
             nombreFichiersTravaux: nbBlobs,
             tailleTotaleOctets: new Blob([json]).size + tailleTotale,
             listesDeFichiers: LISTES_DE_FICHIERS.slice()   // #1014
@@ -727,7 +798,9 @@ async function chargerCodex(fichierZip) {
     // 2. Extraire et charger les données JSON
     _majProgression(15, 'Extraction des données…');
     const jsonStr = await zip.file(NOM_DONNEES).async('string');
-    const donnees = JSON.parse(jsonStr);
+    // T2 : un codex d'avant G1 peut porter le démo ; il n'est pas écrit, ses fichiers ne
+    // sont ni restaurés ni comptés dans le bilan, et le démo installé reste tel quel.
+    const donnees = _sansLeDemo(JSON.parse(jsonStr));
 
     // 2 bis. Garde de modèle antérieur (#335 Lot A) : AVANT toute écriture.
     var detectionModele = _detecterModeleAnterieur(donnees, manifeste);
@@ -966,7 +1039,12 @@ async function chargerCodex(fichierZip) {
     try {
         var clesStockage = await db.keys();
         var blobIdsStockage = (typeof db.listBlobIds === 'function') ? await db.listBlobIds() : [];
-        var planPurge = _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage);
+        // T2 : le codex ne porte plus le démo ; les fichiers du démo installé ne sont pas des résidus.
+        var listesDuDemoInstalle = {};
+        for (var ld = 0; ld < LISTES_DU_DEMO.length; ld++) {
+            listesDuDemoInstalle[LISTES_DU_DEMO[ld]] = await db.get(LISTES_DU_DEMO[ld], null);
+        }
+        var planPurge = _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage, _idsDuDemo(listesDuDemoInstalle));
         _dernierPlanPurge = planPurge;
         if (planPurge.clesOrphelines.length === 0 && planPurge.blobsOrphelins.length === 0) {
             console.warn('[Codex] #336 purge (preview) : aucun orphelin — espace déjà propre.');
@@ -1408,12 +1486,18 @@ async function lireCodexExterne(fichierZip) {
 
     // 2. Extraire les données JSON en mémoire
     var jsonStr = await zip.file(NOM_DONNEES).async('string');
-    var donnees = JSON.parse(jsonStr);
+    // T2 : la fusion n'écrit pas le démo d'un codex d'avant G1, ni ses fichiers.
+    var brut = JSON.parse(jsonStr);
+    var partDuDemo = _partDuDemo(brut);
+    var donnees = _sansLeDemo(brut, partDuDemo);
 
     // 3. Lister les fichiers travaux (sans les extraire)
     var travauxListe = [];
     zip.forEach(function(cheminRelatif) {
         if (cheminRelatif.startsWith(DOSSIER_TRAVAUX + '/') && !cheminRelatif.endsWith('/')) {
+            var nom = cheminRelatif.slice(DOSSIER_TRAVAUX.length + 1);
+            var point = nom.lastIndexOf('.');
+            if (partDuDemo.ids[point > 0 ? nom.slice(0, point) : nom]) return;
             travauxListe.push(cheminRelatif);
         }
     });
@@ -2039,9 +2123,11 @@ function _restaurerPlanPurge() {
  * @param {Object} donnees - dataset du codex qui vient d'être écrit
  * @param {string[]} clesStockage - toutes les clés présentes en stockage (db.keys())
  * @param {string[]} blobIdsStockage - tous les ids du store fichiers (db.listBlobIds())
+ * @param {Object<string, boolean>} [idsDuDemoInstalle] - T2 : les fichiers du démo installé,
+ *   que le codex ne porte plus ; jamais orphelins
  * @returns {{clesOrphelines: string[], blobsOrphelins: string[]}}
  */
-function _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage) {
+function _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage, idsDuDemoInstalle) {
     // Clés du nouvel espace — même filtre que la phase d'écriture (les
     // entrées `_…` du dataset ne sont pas écrites, elles ne comptent pas).
     var clesNouvelEspace = {};
@@ -2073,7 +2159,7 @@ function _planifierPurgeEspace(donnees, clesStockage, blobIdsStockage) {
         liste.forEach(function(f) { if (f && f.id) idsReferences[f.id] = true; });
     });
     var blobsOrphelins = (blobIdsStockage || []).filter(function(id) {
-        return !idsReferences[id];
+        return !idsReferences[id] && !(idsDuDemoInstalle && idsDuDemoInstalle[id]);
     });
 
     return { clesOrphelines: clesOrphelines, blobsOrphelins: blobsOrphelins };
@@ -2169,6 +2255,9 @@ async function _analyserFusion(local, externe, ancetre) {
         Object.keys(clesAncetre).forEach(function(c) { toutesLesCles.add(c); });
     }
 
+    // T2 : le démo ne se fusionne pas — ni écrit, ni supprimé, ni compté.
+    var horsFusion = _partDuDemo(local).cles;
+
     var resultat = {
         ajouteesLocal: [],
         ajouteesExterne: [],
@@ -2183,6 +2272,7 @@ async function _analyserFusion(local, externe, ancetre) {
     for (var cle of toutesLesCles) {
         // Ignorer les clés internes du codex
         if (cle.startsWith('_codex_')) continue;
+        if (_estCleDuDemo(cle) || horsFusion[cle]) continue;
 
         var dansLocal = cle in local;
         var dansExterne = cle in externe;
@@ -4239,6 +4329,9 @@ async function actionExporterSelection() {
 
     _masquerProgression();
 
+    // T2 : le démo n'est pas un trimestre qu'un codex emporte.
+    donnees = _sansLeDemo(donnees);
+
     // 2. Détecter les trimestres disponibles
     var trimestres = _detecterTrimestresDisponibles(donnees);
 
@@ -4540,6 +4633,7 @@ window.Codex = {
     _verifierEcritureTemoins: _verifierEcritureTemoins,
     _detecterModeleAnterieur: _detecterModeleAnterieur,
     _planifierPurgeEspace: _planifierPurgeEspace,
+    _partDuDemo: _partDuDemo,   // T2 du chantier du démo
     _executerPurgeEspace: _executerPurgeEspace,
     _restaurerPlanPurge: _restaurerPlanPurge,
     // #614 — la fusion est une voie d'entrée de blobs vers le store `fichiers`
