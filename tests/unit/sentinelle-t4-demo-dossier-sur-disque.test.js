@@ -8,16 +8,17 @@ import { fileURLToPath } from 'node:url';
 // =====================================================================
 //
 // Rapports/AUDIT-2026-10-05-chantier-demo.md : avec un dossier sur disque branché (FSAPI),
-// `stockerBlob` écrit la copie DANS ce dossier, celui des vraies copies de l'enseignant.
-// En démo, les copies du démo y entraient. Choix (6 oct. 2026) : refuser, plutôt qu'écrire en
-// IndexedDB seulement — la lecture passe elle aussi par le dossier quand il est branché.
+// `stockerBlob` écrivait la copie DANS ce dossier, celui des vraies copies de l'enseignant.
+// En démo, les copies du démo y entraient. Décision technique de Cowork (relecture de 1.186.6) :
+// en démo, le dossier n'est jamais lu ni écrit ; les copies passent par IndexedDB seulement
+// (un refus d'import bloquait la présentation : aucune interface ne débranche le dossier).
 //
-// CE QUE CE BANC JUGE, par le vrai js/travaux-stockage.js et le vrai `importerTous` :
-//   (a) en démo, dossier branché : `stockerBlob` refuse et le dossier reste vide ;
-//   (b) hors démo, dossier branché : la copie entre dans le dossier (le refus ne déborde pas) ;
-//   (c) en démo, sans dossier : la copie va en IndexedDB comme avant ;
-//   (d) `importerTous` refuse avant tout fichier, avec un seul avis.
-// TÉMOINS : une mutation par garde ; une mutation inerte est refusée. Noms fictifs.
+// CE QUE CE BANC JUGE, par le vrai js/travaux-stockage.js :
+//   (a) en démo, dossier branché : la copie s'écrit en IndexedDB, se relit, se supprime, et le
+//       dossier reste intact (ni écrit, ni lu, ni vidé) ;
+//   (b) hors démo, dossier branché : la copie entre dans le dossier, comme avant ;
+//   (c) en démo, sans dossier : IndexedDB, comme avant.
+// TÉMOINS : une mutation par clause de la condition ; une mutation inerte est refusée. Noms fictifs.
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const consoleMuette = { log() {}, warn() {}, info() {}, debug() {}, error() {} };
@@ -26,10 +27,12 @@ function fauxDossier() {
     const fichiers = new Map();
     const dossier = {
         _fichiers: fichiers,
+        _lus: [],
         getDirectoryHandle: async () => dossier,
+        removeEntry: async (nom) => { fichiers.delete(nom); },
         getFileHandle: async (nom) => ({
             createWritable: async () => ({ write: async (b) => { fichiers.set(nom, b); }, close: async () => {} }),
-            getFile: async () => fichiers.get(nom)
+            getFile: async () => { dossier._lus.push(nom); return fichiers.get(nom); }
         })
     };
     return dossier;
@@ -46,6 +49,8 @@ function monterStockage({ demo, dossier, muter }) {
     };
     const db = {
         storeBlob: async (r) => { blobsIdb.set(r.id, r.blob); },
+        getBlob: async (id) => (blobsIdb.has(id) ? { blob: blobsIdb.get(id) } : null),
+        deleteBlob: async (id) => { blobsIdb.delete(id); },
         getSync: (k, d) => d, setSync() {}, get: async (k, d) => d, set: async () => {}
     };
     const nav = { storage: { getDirectory: async () => ({}) } };
@@ -62,22 +67,31 @@ describe('T4 · le harnais', () => {
     });
 });
 
-describe('T4 · stockerBlob', () => {
-    it('(a) en démo, dossier branché : refus, le dossier reste vide', async () => {
+describe('T4 · en démo, le dossier sur disque n\'est jamais touché', () => {
+    it('(a) en démo, dossier branché : écrite, relue et supprimée en IndexedDB ; le dossier intact', async () => {
         const dossier = fauxDossier();
+        dossier._fichiers.set('FT_reel_1', copie());   // une vraie copie, déjà là
         const { stockage, blobsIdb } = monterStockage({ demo: true, dossier });
         expect(await stockage.configurerRepertoireFSAPI()).toBe(true);
-        await expect(stockage.stockerBlob('FT_demo_1', copie(), '9000001', 'PD1')).rejects.toThrow(/Quitte la démo/);
-        expect(dossier._fichiers.size).toBe(0);
+        await stockage.stockerBlob('FT_demo_1', copie(), '9000001', 'PD1');
+        expect([...blobsIdb.keys()]).toEqual(['FT_demo_1']);
+        expect(await stockage.recupererBlob('FT_demo_1')).toBeInstanceOf(Blob);
+        expect(await stockage.recupererBlob('FT_reel_1')).toBeNull();   // le dossier n'est pas lu
+        await stockage.supprimerBlob('FT_reel_1');                       // ni vidé
+        await stockage.supprimerBlob('FT_demo_1');
         expect(blobsIdb.size).toBe(0);
+        expect([...dossier._fichiers.keys()]).toEqual(['FT_reel_1']);
+        expect(dossier._lus).toEqual([]);
     });
 
-    it('(b) hors démo, dossier branché : la copie entre dans le dossier', async () => {
+    it('(b) hors démo, dossier branché : la copie entre dans le dossier et s\'y relit', async () => {
         const dossier = fauxDossier();
-        const { stockage } = monterStockage({ demo: false, dossier });
+        const { stockage, blobsIdb } = monterStockage({ demo: false, dossier });
         await stockage.configurerRepertoireFSAPI();
         await stockage.stockerBlob('FT_reel_1', copie(), '0000001', 'P1');
         expect([...dossier._fichiers.keys()]).toEqual(['FT_reel_1']);
+        expect(await stockage.recupererBlob('FT_reel_1')).toBeInstanceOf(Blob);
+        expect(blobsIdb.size).toBe(0);
     });
 
     it('(c) en démo, sans dossier : la copie va en IndexedDB comme avant', async () => {
@@ -86,36 +100,38 @@ describe('T4 · stockerBlob', () => {
         expect([...blobsIdb.keys()]).toEqual(['FT_demo_1']);
     });
 
-    it('break-test : sans la garde, la copie du démo entre dans le dossier réel (rouge attendu)', async () => {
+    it('break-test : sans la condition de mode, la copie du démo entre dans le dossier réel (rouge attendu)', async () => {
         const dossier = fauxDossier();
-        const { stockage } = monterStockage({ demo: true, dossier, muter: (s) => s.replace(
-            'if (refusDuDemoSurDisque()) {\n            const refus', 'if (false) {\n            const refus') });
+        const { stockage, blobsIdb } = monterStockage({ demo: true, dossier, muter: (s) => s.replace(
+            "return fsapiActif && !(typeof window.estEnModeDemo === 'function' && window.estEnModeDemo());",
+            'return fsapiActif;') });
         await stockage.configurerRepertoireFSAPI();
         await stockage.stockerBlob('FT_demo_1', copie(), '9000001', 'PD1');
         expect([...dossier._fichiers.keys()]).toEqual(['FT_demo_1']);
+        expect(blobsIdb.size).toBe(0);
     });
 
-    it('break-test : sans la clause du dossier, le démo sans dossier est refusé lui aussi (rouge attendu)', async () => {
-        const { stockage } = monterStockage({ demo: true, dossier: null, muter: (s) => s.replace(
-            'return fsapiActif && typeof window.estEnModeDemo', 'return typeof window.estEnModeDemo') });
-        await expect(stockage.stockerBlob('FT_demo_1', copie(), '9000001', 'PD1')).rejects.toThrow(/Quitte la démo/);
-    });
-});
-
-describe('T4 · importerTous refuse avant tout fichier, avec un seul avis', () => {
-    const source = readFileSync(path.join(racine, 'js/travaux-import.js'), 'utf8');
-    const debut = source.indexOf('async function importerTous(');
-    const corps = source.slice(debut, source.indexOf('function purgerFichiersImportes(', debut));
-
-    it('le refus précède la levée de importEnCours et la boucle', () => {
-        const refus = corps.indexOf('travauxStockage.refusDuDemoSurDisque()');
-        expect(refus).toBeGreaterThan(-1);
-        expect(refus).toBeLessThan(corps.indexOf('importEnCours = true'));
-        expect(corps.slice(refus, corps.indexOf('importEnCours = true'))).toMatch(/notifications\.warning\([^;]*AVIS_DEMO_DOSSIER\);\s*return \{[^}]*refuse: true/);
+    it('break-test : sans la clause du dossier, hors démo la copie va en IndexedDB (rouge attendu)', async () => {
+        const dossier = fauxDossier();
+        const { stockage, blobsIdb } = monterStockage({ demo: false, dossier, muter: (s) => s.replace(
+            "return fsapiActif && !(typeof window.estEnModeDemo", "return false && !(typeof window.estEnModeDemo") });
+        await stockage.configurerRepertoireFSAPI();
+        await stockage.stockerBlob('FT_reel_1', copie(), '0000001', 'P1');
+        expect(dossier._fichiers.size).toBe(0);
+        expect([...blobsIdb.keys()]).toEqual(['FT_reel_1']);
     });
 
-    it('les deux écrans d\'import se taisent après le refus (pas de « 0 importé »)', () => {
-        const ui = readFileSync(path.join(racine, 'js/travaux-ui.js'), 'utf8');
-        expect(ui.match(/if \(resultat\.refuse\)/g)).toHaveLength(2);
-    });
+    for (const fn of ['recupererBlob', 'supprimerBlob']) {
+        it(`break-test : ${fn} qui relit fsapiActif seul touche le dossier en démo (rouge attendu)`, async () => {
+            const dossier = fauxDossier();
+            dossier._fichiers.set('FT_reel_1', copie());
+            const appel = fn === 'recupererBlob' ? 'return await recupererBlobFSAPI(id);' : 'await supprimerBlobFSAPI(id);';
+            const { stockage } = monterStockage({ demo: true, dossier, muter: (s) => s.replace(
+                `if (dossierEnJeu()) {   // jamais en démo (T4)\n            ${appel}`, `if (fsapiActif) {\n            ${appel}`) });
+            await stockage.configurerRepertoireFSAPI();
+            await stockage[fn]('FT_reel_1');
+            if (fn === 'recupererBlob') expect(dossier._lus).toEqual(['FT_reel_1']);
+            else expect(dossier._fichiers.size).toBe(0);
+        });
+    }
 });

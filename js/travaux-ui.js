@@ -3301,7 +3301,6 @@
         // Rafraichir l'affichage
         afficherImport();
 
-        if (resultat.refuse) return;   // T4 : l'avis est déjà donné
         alert(`Import terminé : ${resultat.importes} ${window.pluriel(resultat.importes, 'fichier', 'fichiers')} ${window.pluriel(resultat.importes, 'importé', 'importés')}, ${resultat.erreurs} ${window.pluriel(resultat.erreurs, 'erreur', 'erreurs')}`);
     }
 
@@ -4193,7 +4192,6 @@
             const texte = document.getElementById('pipeline-traitement-texte');
             if (texte) texte.textContent = `${i}/${totalImport} fichier(s) importés...`;
         });
-        if (resultat.refuse) { afficherImport(); return; }   // T4 : l'avis est déjà donné
 
         // Phase 4 : traiter les doublons détectés
         if (resultat.doublons && resultat.doublons.length > 0) {

@@ -180,16 +180,15 @@
        =============================== */
 
     /**
-     * T4 du chantier du démo (6 oct. 2026) : en démo, avec un dossier sur disque branché,
-     * une copie s'écrirait dans le dossier RÉEL de l'enseignant. On refuse plutôt que
-     * d'écrire en IndexedDB seulement : la lecture d'une copie passe elle aussi par le
-     * dossier quand il est branché, la copie serait illisible.
+     * T4 du chantier du démo (6 oct. 2026, décision technique de Cowork) : en démo, le dossier
+     * sur disque branché (FSAPI) n'est jamais lu ni écrit — il porte les vraies copies de
+     * l'enseignant. Les copies du démo passent par IndexedDB seulement, à l'écriture, à la
+     * lecture et à la suppression. Seules ces trois fonctions touchent au dossier (les
+     * vignettes sont des clés `thumbnail_<id>`, en base).
+     * @returns {boolean} true si le dossier sur disque sert
      */
-    const AVIS_DEMO_DOSSIER = 'Tu es dans la démo et ton dossier de copies sur disque est branché : '
-        + 'les copies de la démo y entreraient. Quitte la démo pour importer tes vraies copies.';
-
-    function refusDuDemoSurDisque() {
-        return fsapiActif && typeof window.estEnModeDemo === 'function' && window.estEnModeDemo();
+    function dossierEnJeu() {
+        return fsapiActif && !(typeof window.estEnModeDemo === 'function' && window.estEnModeDemo());
     }
 
     /**
@@ -211,15 +210,8 @@
         // pré-vol d'import (#334 A) et un vrai QuotaExceededError est journalisé
         // par l'import (#334 B). Retirée le 11 juin 2026, décision Grégoire.
 
-        // T4 : rien du démo n'entre dans le dossier réel, quel que soit l'écrivain.
-        if (refusDuDemoSurDisque()) {
-            const refus = new Error(AVIS_DEMO_DOSSIER);
-            refus.name = 'DemoDossierSurDisque';
-            throw refus;
-        }
-
-        // FSAPI: fichier sur disque
-        if (fsapiActif) {
+        // FSAPI: fichier sur disque (jamais en démo, T4)
+        if (dossierEnJeu()) {
             await stockerBlobFSAPI(id, blob);
             return;
         }
@@ -249,7 +241,7 @@
      */
     async function recupererBlob(id) {
         // FSAPI: fichier sur disque
-        if (fsapiActif) {
+        if (dossierEnJeu()) {   // jamais en démo (T4)
             return await recupererBlobFSAPI(id);
         }
 
@@ -265,7 +257,7 @@
      */
     async function supprimerBlob(id) {
         // FSAPI: fichier sur disque
-        if (fsapiActif) {
+        if (dossierEnJeu()) {   // jamais en démo (T4)
             await supprimerBlobFSAPI(id);
             return;
         }
@@ -346,7 +338,7 @@
             typeMIME: metadonnees.typeMIME || '',
             tailleFichier: metadonnees.tailleFichier || 0,
             nombrePages: metadonnees.nombrePages || 1,
-            stockage: fsapiActif ? 'fsapi' : 'indexeddb',
+            stockage: dossierEnJeu() ? 'fsapi' : 'indexeddb',
             thumbnailDataUrl: metadonnees.thumbnailDataUrl || '',
             dateImport: new Date().toISOString(),
             dateModification: new Date().toISOString(),
@@ -1390,9 +1382,6 @@
        =============================== */
 
     window.travauxStockage = {
-        // T4 du chantier du démo
-        refusDuDemoSurDisque: refusDuDemoSurDisque,
-        AVIS_DEMO_DOSSIER: AVIS_DEMO_DOSSIER,
         initialiser: initialiserStockageTravaux,
         // Blobs
         stockerBlob: stockerBlob,
