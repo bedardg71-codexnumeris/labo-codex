@@ -7,6 +7,20 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 10 h 22 : **1.186.3 (T1 DU CHANTIER DU DÉMO : LE DA `DEMO###` LU À L'IMPORT, EN DÉMO SEULEMENT) COMMITÉE SUR `main` LOCAL (`551bc478`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : choix de Grégoire en séance (« T1 tout de suite », puis « commit + livraison ») ; relais de Cowork sur le symptôme vécu (« Doublon détecté » sur deux pages `DEMO011` de Curie).
+
+**Ce qui est fait** : `localiserDA` (`js/travaux-import.js`) lit `d[ée]mo\d{3}` (casse, accent NFC/NFD), normalisé en `DEMO###`, APRÈS les sept chiffres et seulement si `estEnModeDemo()` ; `parserNomFichierLea` coupe à la position du motif (C5). Clé de #873 inchangée. Pas de ligne aux Nouvelles (effet en démo seulement). Sous `551bc478`, `28dc4da8` (rapport d'audit, documentation) part avec ce push.
+
+**Tests** : banc `tests/unit/sentinelle-t1-da-demo-import.test.js` (9 essais) ; break-test garde de mode / motif / coupe → trois rouges attendus. Vitest 686 fichiers, 8243 essais verts après le commit du bump. Playwright : pas encore.
+
+**Stock** : les copies déjà importées en démo (dont la page 1 de Curie) ne bougent pas ; la reprise de Cowork prévoit de retirer les copies d'essai avant l'import des 30 copies renommées.
+
+**La suite** : relecture de Cowork sur `551bc478` ; puis verdict complet, `git push origin main`, mise en ligne mesurée chez Netlify ; puis Grégoire importe les copies renommées (sous-dossier « renommés selon les DA du pack démo »). M2 n'est pas mesuré : s'il confirme le refus, T5 suit.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 20 h 25 : **1.186.2 (ENREGISTREMENT, LOT 2 : #982, #984) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `d24a3daa` (PUBLIÉ À 20 h 20) ; VERDICT COMPLET VERT ; FICHES COCHÉES**
 
 **Consigne** : Cowork, 19 h 12 (livraison), exécutée jusqu'au bout.
