@@ -369,11 +369,25 @@
      *   1. Préfixe `demo-` sur l'id (convention Phase 2 pour dropdowns natifs)
      *   2. Lookup dans la collection + flag `isDemo` ou auteur « Labo Codex »
      *
+     * T5 (chantier du démo, 6 oct. 2026) — `options.cible` : la clé où l'écriture va
+     * atterrir. Une écriture DANS le namespace démo (`demo_…`, trimestre actif « demo »)
+     * peut désigner le matériel du pack : c'est même tout l'objet de la présentation.
+     * Sans ça, verrouiller une évaluation de démo était refusé (M2, mesuré le 6 oct.).
+     * Hors démo, rien ne change.
+     *
      * @param {Array<{id:string, collection:string, labelType:string}>} references
+     * @param {{cible?: string}} [options]
      * @returns {Object|null} { type, nom, message } si violation, null sinon
      */
-    BibliothequeUI.verifierReferencesPasDemo = function (references) {
+    var TYPES_FEMININS = ['grille', 'échelle', 'pratique', 'production'];
+    function debutMessage(labelType) {
+        var type = labelType || 'élément';
+        if (/^[aeéèêiouh]/i.test(type)) return 'L\'' + type;   // l'échelle, l'élément, l'horaire
+        return TYPES_FEMININS.indexOf(type) !== -1 ? 'La ' + type : 'Le ' + type;
+    }
+    BibliothequeUI.verifierReferencesPasDemo = function (references, options) {
         if (!references || !references.length) return null;
+        if (options && typeof options.cible === 'string' && options.cible.indexOf('demo_') === 0) return null;
         for (var i = 0; i < references.length; i++) {
             var ref = references[i];
             if (!ref || !ref.id) continue;
@@ -383,7 +397,7 @@
                 return {
                     type: ref.labelType || 'élément',
                     nom: '',
-                    message: 'Le ' + (ref.labelType || 'élément') + ' sélectionné est un exemple fourni par Labo Codex. Clique sur « Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l\'utiliser.'
+                    message: debutMessage(ref.labelType) + (TYPES_FEMININS.indexOf(ref.labelType) !== -1 ? ' sélectionnée' : ' sélectionné') + ' est un exemple fourni par Labo Codex. Clique sur « Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l\'utiliser.'
                 };
             }
 
@@ -401,7 +415,7 @@
                     return {
                         type: ref.labelType || 'élément',
                         nom: nom,
-                        message: 'Le ' + (ref.labelType || 'élément') + (nom ? ' « ' + nom + ' »' : '') + ' est un exemple fourni par Labo Codex. Clique sur « Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l\'utiliser.'
+                        message: debutMessage(ref.labelType) + (nom ? ' « ' + nom + ' »' : '') + ' est un exemple fourni par Labo Codex. Clique sur « Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l\'utiliser.'
                     };
                 }
             }
