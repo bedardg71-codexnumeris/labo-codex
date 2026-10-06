@@ -1676,9 +1676,11 @@ function _validerReferencesMod(etudiant, production, grille, etudiantDA, product
 function _validerReferencesNonDemoMod(productionId, grilleId) {
     if (typeof BibliothequeUI === 'undefined' || !BibliothequeUI.verifierReferencesPasDemo) return true;
     const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
-        { id: productionId, collection: (typeof getCleProductions === 'function' ? getCleProductions() : cle('productions')), labelType: 'production' },
+        // T5 — la collection en nom NU : la garde la passe elle-même par cle() (getCleProductions()
+        // la rendait déjà préfixée, d'où « demo_productions » passé une seconde fois à cle()).
+        { id: productionId, collection: 'productions', labelType: 'production' },
         { id: grilleId, collection: 'grillesTemplates', labelType: 'grille' }
-    ]);
+    ], { cible: cle('evaluationsSauvegardees') });   // T5 — écrire dans la démo n'est pas refusé
     if (violationDemo) {
         notifications.erreur('Référence démo non autorisée', violationDemo.message);
         return false;
