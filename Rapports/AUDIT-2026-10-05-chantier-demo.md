@@ -205,7 +205,7 @@ Cowork a exécuté la même consigne en parallèle, sur le disque. Sa version n'
 
 | # | Point de Cowork | Verdict | Ce que dit le code à `HEAD` |
 |---|---|---|---|
-| C1 | 98 des 101 évaluations du pack sont verrouillées, et le verrou grise production, grille, cartouche et échelle | **Confirmé** [lu] | Le pack contient 98 évaluations `verrouillee: true`. Trois sont libres : DEMO004 › Artefact 7, DEMO020 › Évaluation terminale, DEMO006 › Évaluation terminale. Il y a deux couples sans évaluation : DEMO015 › Artefact 3 et Artefact 4. Au chargement d'une évaluation verrouillée, `evaluation.js:747-751` appelle `desactiverFormulaireEvaluation(true)`, qui désactive `selectGroupeEval`, `selectProduction1`, `selectGrille1`, `selectCartoucheEval`, `selectEchelle1`, `remiseProduction1` et `statutIntegrite` (`evaluation.js:2748-2769`), ainsi que les critères et la rétroaction. **C'est le seul mécanisme lu qui grise exactement production, échelle et cartouche ensemble.** Il vit dans le formulaire d'évaluation, et non dans la file d'import : la correspondance avec ce qu'a vu Grégoire reste à confirmer (M1) [inféré]. Ma lecture du §3 l'avait manqué. |
+| C1 | 98 des 101 évaluations du pack sont verrouillées, et le verrou grise production, grille, cartouche et échelle | **Confirmé** [lu] | Le pack contient 98 évaluations `verrouillee: true`. Trois sont libres : DEMO004 › Artefact 7, DEMO020 › Évaluation terminale, DEMO006 › Évaluation terminale. Il y a deux couples sans évaluation : DEMO015 › Artefact 3 et Artefact 4. Au chargement d'une évaluation verrouillée, `evaluation.js:747-751` appelle `desactiverFormulaireEvaluation(true)`, qui désactive `selectGroupeEval`, `selectProduction1`, `selectGrille1`, `selectCartoucheEval`, `selectEchelle1`, `remiseProduction1` et `statutIntegrite` (`evaluation.js:2748-2769`), ainsi que les critères et la rétroaction. ~~Hypothèse la plus probable pour M1~~ : **attribution retirée** (§5 ter). M1 désigne le mécanisme A, et non ce verrou. Seul le décompte reste, comme fait du §4. |
 | C2 | La garde C n'est atteinte que par le verrouillage ; une évaluation déverrouillée ne peut plus être reverrouillée | **Confirmé** [lu] | Le seul bouton est `btnVerrouillerEvaluation` → `basculerVerrouillageEvaluationCourante` (`index.html:8409`), et la copie y mène par le cadenas (`travaux-ui.js:5336`). Le verrouillage appelle `sauvegarderEvaluation` (`evaluation.js:2634`), qui passe par la garde (`evaluation-sauvegarde.js:412`) ou renvoie à `sauvegarderEvaluationModifiee`, gardée elle aussi (`evaluation.js:1678`). Le déverrouillage écrit `verrouillee = false` sans aucune vérification (`evaluation.js:2639-2650`). **Si M2 confirme le refus** [inféré] : une copie évaluée en présentation reste en brouillon, et une évaluation du pack déverrouillée ne se reverrouille plus. **T5 passe alors avant T1.** |
 | C3 | Quitter la démo pendant un import écrirait les copies suivantes dans le trimestre restauré | **Confirmé** [lu] pour le mécanisme, [inféré] pour l'effet | `importerTous` attend (`await`) chaque fichier dans sa boucle (`travaux-import.js:878-926`). `ajouterFichierTravail` relit et réécrit `cle('fichiersTravaux')` au moment de l'écriture (`travaux-stockage.js:283-320`). `importEnCours` est exposé (`travaux-import.js:2131`) mais n'est lu nulle part dans `demo-activation.js` (recherche vide). La garde de #340 (`productions-namespace-garde.js`) ne protège que `<trimestre>_productions`. Effet probable : les fiches des copies restantes s'**ajoutent** à la vraie liste du trimestre restauré, avec des DA démo. |
 | C4 | Les vignettes vivent sous une clé globale `thumbnail_<id>` | **Confirmé** [lu] | `stockerThumbnail` écrit `db.set('thumbnail_' + fichierId, …)` (`travaux-stockage.js:734`), sans `cle()`. `genererCodex` prend toutes les clés, donc il les emporte aussi. Un export filtré les range parmi les clés globales [inféré, d'après `_filtrerDonneesPourExport`]. La Réserve les traite déjà par id (`reserve-copies.js:355`, `reserve-renvoyer.js:528`) : c'est le modèle à suivre. |
@@ -215,7 +215,7 @@ Cowork a exécuté la même consigne en parallèle, sur le disque. Sa version n'
 
 ### Ajouts aux listes
 
-**§3, à corriger** : il y a un quatrième mécanisme, D. Le verrou d'une évaluation grise production, grille, cartouche et échelle (C1). 98 des 101 évaluations du pack sont verrouillées, donc presque chaque élève et chaque production ouvre un formulaire grisé.
+**§3, à compléter** : il y a un quatrième mécanisme, D. Le verrou d'une évaluation grise production, grille, cartouche et échelle (C1). 98 des 101 évaluations du pack sont verrouillées, donc presque chaque élève et chaque production ouvre un formulaire grisé. Ce n'est **pas** l'écran de M1 (§5 ter).
 
 **§4, à ajouter** : en démo, il ne reste que trois couples élève-production évaluables sans déverrouiller (DEMO004 › Artefact 7 ; DEMO020 et DEMO006 › Évaluation terminale), plus deux couples vierges (DEMO015 › Artefact 3 et Artefact 4) [lu].
 
@@ -232,10 +232,35 @@ Cowork a exécuté la même consigne en parallèle, sur le disque. Sa version n'
 
 | # | Mesure |
 |---|---|
-| M1, précisé | Vérifier en premier si l'écran grisé de Grégoire est le formulaire d'évaluation d'un couple verrouillé (C1), par exemple ouvert depuis une copie. |
+| M1 | **Mesuré par Grégoire** (§5 ter) : rien à mesurer. |
 | M7 | **Tranché par lecture** (C6) : rien à mesurer. |
 | M9 | Avec un profil jetable : lancer un import de plusieurs copies en démo, quitter la démo pendant l'import, puis lire `<trimestre>_fichiersTravaux` du trimestre restauré (C3). Vérifier aussi si le bandeau « Quitter la démo » reste cliquable pendant l'import. |
 | M10 | Au profil d'un élève démo : la note du portfolio retient-elle « les meilleurs » ? Et le Comparateur, qui simule, lit-il le `configPAN` « recents » ? (C7) |
+
+## 5 ter. M1 mesuré, et le modèle d'échelle et de cartouche (2026-10-05, 20 h 30)
+
+### M1 — l'écran grisé est la fiche de production (mécanisme A)
+
+**Mesuré par Grégoire** (capture, 5 oct., 19 h 22, mode démo). Le menu verrouillé est l'« Échelle de performance » de la fiche de production (Artefact 1, Conception › Productions), sous le bandeau « Exemple fourni par Labo Codex (lecture seule) ». C'est le mécanisme A du §3 : `appliquerModeLectureSeuleDemo`, appelé par `productions-liste.js:202` pour une production qui porte `isDemo: true`, estampille posée par `peuplerNamespace` [lu]. Ce n'est pas le verrou des évaluations (C1), dont l'attribution est retirée. Le décompte de C1 (98 évaluations verrouillées sur 101, trois libres, deux couples sans évaluation) reste un fait du §4.
+
+### L'échelle et la cartouche de la production ne sont qu'un modèle — [lu] à `HEAD` = `6a5f0c7d`
+
+`_modeleProductionPourEval` (`js/evaluation-chargement.js:665-684`) lit les évaluations non remplacées de la production qui ont une grille. Si toutes ont la même grille, la fonction rend cette grille, plus l'échelle et la cartouche **si elles aussi sont uniques, sinon une chaîne vide**. La fonction ne retombe sur les champs de la production (`prod.echelleId`, `prod.cartoucheId`, aujourd'hui absents, donc « Aucune ») que s'il n'y a **aucune** évaluation liée ou si la grille n'est pas unique (`:683`).
+
+J'ai recompté dans le pack, par `node`, sur une copie : l'échelle n'est pas unique pour Artefact 3 et Artefact 5, la cartouche ne l'est pas pour Artefact 4 et Artefact 5. Le compte concorde avec celui de Cowork.
+
+**Conséquence** [inféré]. Les deux couples sans évaluation, DEMO015 › Artefact 3 et Artefact 4, s'ouvrent avec un champ à choisir dans le formulaire d'évaluation : l'échelle pour Artefact 3, la cartouche pour Artefact 4. Ce restera vrai **même après le changement (B)** : ces productions ont des évaluations dont la grille est unique, donc le défaut posé sur la production n'est pas lu pour elles.
+
+### Ce qu'on ne fait pas
+
+- **Ne pas déverrouiller la fiche de production** : la lecture seule protège le pack.
+- **« Dupliquer » n'est pas un chemin pour le pack de présentation** [lu pour le principe] : la copie reçoit un nouvel identifiant (fork de `bibliotheque-ui.js`), et les évaluations démo, qui pointent vers l'ancien, ne la suivraient pas.
+
+### Changement (B) — préparé, non appliqué
+
+Le pack démo recevra une échelle et une cartouche par défaut sur ses productions : c'est une exception à « le pack reste tel quel », accordée par Grégoire le 5 oct. au soir. La règle est de Cowork : une valeur n'est posée que si toutes les évaluations non remplacées de la production concordent. Ma copie d'essai donne exactement la liste de Cowork : neuf productions touchées, Artefact 5 et Portfolio laissés vides, la version passe de 21.1 à 21.2.
+
+Le changement, sa sentinelle et le break-test sont prêts hors du dépôt. Ils seront appliqués à la prochaine session de travail, puis livrés à la prochaine release normale.
 
 ---
 
