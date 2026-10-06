@@ -1549,7 +1549,7 @@ async function sauvegarderConfigPratiqueMat() {
     if (echelleIdCourante && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
         const violationDemo = BibliothequeUI.verifierReferencesPasDemo([
             { id: echelleIdCourante, collection: 'echellesTemplates', labelType: 'échelle' }
-        ]);
+        ], { cible: cle('pratiquesConfigurables') });   // chantier du démo : écrire dans la démo n'est pas refusé
         if (violationDemo) {
             notifications.erreur('Référence démo non autorisée', violationDemo.message);
             // Revert le champ pour que l'utilisateur ne soit pas bloqué

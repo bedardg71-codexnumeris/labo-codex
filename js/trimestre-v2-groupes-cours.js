@@ -707,10 +707,11 @@ function sauvegarderGroupeCoursV2() {
     if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.verifierReferencesPasDemo) {
         const violation = BibliothequeUI.verifierReferencesPasDemo([
             { id: coursId, collection: 'cours', labelType: 'cours' },
-            { id: horaireId, collection: cle('horaires'), labelType: 'horaire' },
+            // Chantier du démo : la collection en nom NU, la garde la passe elle-même par cle().
+            { id: horaireId, collection: 'horaires', labelType: 'horaire' },
             { id: enseignantId, collection: 'enseignants', labelType: 'enseignant' },
             { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }
-        ]);
+        ], { cible: cle('groupesCours') });   // écrire dans la démo n'est pas refusé
         if (violation) {
             if (!creation) _remettreGroupeCoursEnBaseV2();
             return _refuserGroupeCoursV2(violation.message, geste);
