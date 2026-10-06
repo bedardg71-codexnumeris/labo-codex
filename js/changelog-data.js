@@ -30,6 +30,8 @@
             // 5 oct. 2026 à 19 h 12, posée telle quelle (patch consolidé dans l'entrée 1.186).
             // 1.186.4 (#1032) — ligne de Cowork, acceptée par Grégoire le 6 oct. 2026, posée telle
             // quelle (patch consolidé dans l'entrée 1.186).
+            // 1.186.6 (T2 du chantier du démo) — ligne validée par Grégoire le 6 oct. 2026, par Cowork,
+            // posée telle quelle (patch consolidé dans l'entrée 1.186).
             version: '1.186',
             couleur: 'vert',
             titre: 'Archiver les copies d\'un trimestre clos',
@@ -37,7 +39,8 @@
                 'Archives&nbsp;: «&nbsp;Archiver les copies…&nbsp;» retire de l\'application les copies d\'un trimestre clos que son archive vérifiée garde à l\'identique&nbsp;; toutes ses données restent (résultats, grilles, rétroactions), et le codex s\'allège d\'autant. «&nbsp;Faire revenir&nbsp;» ramène les copies.',
                 'Enregistrement&nbsp;: quand une écriture échoue, l\'application dit «&nbsp;Non enregistré&nbsp;» et le message reste, au lieu d\'afficher «&nbsp;Enregistré&nbsp;». Sur l\'iPad, elle rétablit seule sa liaison après une mise en arrière-plan, et le témoin s\'affiche au-dessus du clavier.',
                 'Enregistrement&nbsp;: les gestes qui enregistraient sans rien dire affichent désormais «&nbsp;Enregistré&nbsp;», comme partout ailleurs&nbsp;; un échec dit «&nbsp;Non enregistré&nbsp;», et le message reste.',
-                'Évaluation&nbsp;: une évaluation verrouillée ne demande plus, à chaque ouverture, s\'il faut garder ou remplacer sa rétroaction finale&nbsp;; elle reste telle qu\'enregistrée. La question revient si on la déverrouille.'
+                'Évaluation&nbsp;: une évaluation verrouillée ne demande plus, à chaque ouverture, s\'il faut garder ou remplacer sa rétroaction finale&nbsp;; elle reste telle qu\'enregistrée. La question revient si on la déverrouille.',
+                'Démo&nbsp;: ton codex n\'emporte plus la démo, et ouvrir un codex ne la modifie plus.'
             ]
         },
         {
