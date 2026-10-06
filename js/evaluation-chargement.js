@@ -1084,7 +1084,11 @@ function cartoucheSelectionnee() {
 
         // DÉTECTION AUTOMATIQUE : Si l'évaluation a des codes sauvegardés, forcer le mode catégorisation
         // Cela préserve les données existantes et la rétroaction précise
-        if (evaluationEnCours?.donneesAlgorithmiques?.[critere.id]?.codes) {
+        // #1034 — « Modifier » (`_initEvaluationEnCoursPourModif`) ne pose que le pivot `window` :
+        // la liaison nue de config.js ne portait pas les codes de l'évaluation rouverte. Le pivot
+        // `window` d'une évaluation en modification est lu d'abord.
+        const pivotModif = (window.evaluationEnCours && window.evaluationEnCours.idModification) ? window.evaluationEnCours : null;
+        if ((pivotModif || evaluationEnCours)?.donneesAlgorithmiques?.[critere.id]?.codes) {
             categorisationActive = true;
         }
 

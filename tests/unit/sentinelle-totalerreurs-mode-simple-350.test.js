@@ -157,7 +157,9 @@ describe('#350 · détection automatique du mode catégorisation (volet 1)', () 
 
     it('force le mode catégories quand des codes sont sauvegardés, même flag absent', () => {
         // La détection lit donneesAlgorithmiques[...].codes et relève categorisationActive.
-        expect(srcChargement).toMatch(/evaluationEnCours\?\.donneesAlgorithmiques\?\.\[critere\.id\]\?\.codes/);
+        // #1034 — la détection lit d'abord le pivot `window` d'une évaluation en modification
+        // (« Modifier » ne pose que lui), puis la liaison nue.
+        expect(srcChargement).toMatch(/\(pivotModif \|\| evaluationEnCours\)\?\.donneesAlgorithmiques\?\.\[critere\.id\]\?\.codes/);
         expect(srcChargement).toContain('categorisationActive = true');
     });
 
