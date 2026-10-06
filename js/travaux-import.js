@@ -917,6 +917,13 @@
             return { importes: 0, erreurs: 0 };
         }
 
+        // T4 du chantier du démo : un seul avis, avant tout fichier (stockerBlob refuse aussi,
+        // fichier par fichier, ce qui laisserait une erreur par copie).
+        if (travauxStockage.refusDuDemoSurDisque()) {
+            notifications.warning('Import refusé dans la démo', travauxStockage.AVIS_DEMO_DOSSIER);
+            return { importes: 0, erreurs: 0, doublons: [], total: fichiersEnAttente.length, refuse: true };
+        }
+
         importEnCours = true;
         let importes = 0;
         let erreurs = 0;
