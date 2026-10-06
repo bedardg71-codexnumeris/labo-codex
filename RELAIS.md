@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 19 h 18 : **1.186.2 (ENREGISTREMENT, LOT 2 : #982, #984) SUR `main` LOCAL, RELEASE COMMITÉE (`42824121`) ; VERDICT PLAYWRIGHT COMPLET ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 5 OCT. 2026, 20 h 25 : **1.186.2 (ENREGISTREMENT, LOT 2 : #982, #984) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `d24a3daa` (PUBLIÉ À 20 h 20) ; VERDICT COMPLET VERT ; FICHES COCHÉES**
+
+**Consigne** : Cowork, 19 h 12 (livraison), exécutée jusqu'au bout.
+
+**Ce qui est fait** : voir le relais juste dessous (rebase de `main`, fusion `07a97b6f`, release `42824121`). Le sommet poussé, `d24a3daa`, est le complément d'audit de la session parallèle du chantier du démo (`Rapports/AUDIT-2026-10-05-chantier-demo.md`, documentation seulement), commité au-dessus de mon relais pendant la livraison, et poussé avec, sur entente avec elle. Workflow GitHub « Tests » vert (`37393505466`).
+
+**Tests** : Vitest 685 fichiers, 8234 essais verts (et au pre-push). Verdict Playwright complet sur `d24a3daa` : **0 échec, 0 instable** ; secteur, éveil complet tenu, 0 veille ; rendu à 20 h 19.
+
+**Arbre partagé** : la session du chantier du démo (`monitorage-v6-79`) reprend l'arbre après ce relais. Elle prévoit un ajout au rapport d'audit et un changement de `js/pack-demo-10.js` (+ une sentinelle), à livrer à la prochaine release normale. La version de l'audit écrite par Cowork : `Claude outputs/AUDIT-2026-10-05-chantier-demo-version-cowork.md`, non suivie, non touchée.
+
+**La suite** : le lot 3 du chantier (#976, « Corriger le DA… »).
+
+---
+
+## (relais précédent) 5 OCT. 2026, 19 h 18 : **1.186.2 (ENREGISTREMENT, LOT 2 : #982, #984) SUR `main` LOCAL, RELEASE COMMITÉE (`42824121`) ; VERDICT PLAYWRIGHT COMPLET ET PUSH À SUIVRE**
 
 **Consigne** : Cowork, 19 h 12 (livraison ; relecture verte). Consigne et archive commitées sur la branche (`a0569594`).
 
