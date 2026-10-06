@@ -19,7 +19,9 @@
 
 **Trouvailles, non corrigées** : `trimestre-v2-groupes-cours.js:710` passe aussi `cle('horaires')` à la garde (double préfixe, sans effet observable) ; le rendu sans cartouche n'a pas de mode codes (un geste y remplace les codes par le total).
 
-**La suite** : relecture de Cowork sur `ee56f2b5` et `dd5f3143` ; verdict complet ; `git push origin main` ; mesure chez Netlify.
+**Relecture de Cowork** : aucun défaut bloquant ; deux points inscrits au SUIVI-BUGS sous #1034 (pivot `window` non remis à zéro au changement d'élève, à mesurer ; deux autres appelants de la garde sans `{ cible }`, à rattacher au chantier du démo).
+
+**La suite** : verdict complet ; `git push origin main` ; mesure chez Netlify.
 
 ---
 
