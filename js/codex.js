@@ -4622,6 +4622,7 @@ window.Codex = {
     lireManifeste: lireManifeste,
     estUnFichierDeCodex: estUnFichierDeCodex,
     lireExterne: lireCodexExterne,
+    partDuDemo: _partDuDemo,   // T2 du chantier du démo : aussi pour les fichiers anciens (import-export.js)
     construireBilanImport: construireBilanImport,
     construireAvertissementCopiesManquantes: construireAvertissementCopiesManquantes,
     construireAvertissementSelectionIncomplete: construireAvertissementSelectionIncomplete,
@@ -4633,7 +4634,6 @@ window.Codex = {
     _verifierEcritureTemoins: _verifierEcritureTemoins,
     _detecterModeleAnterieur: _detecterModeleAnterieur,
     _planifierPurgeEspace: _planifierPurgeEspace,
-    _partDuDemo: _partDuDemo,   // T2 du chantier du démo
     _executerPurgeEspace: _executerPurgeEspace,
     _restaurerPlanPurge: _restaurerPlanPurge,
     // #614 — la fusion est une voie d'entrée de blobs vers le store `fichiers`

@@ -174,13 +174,13 @@ describe('T2 · (b) un id commun reste à la copie réelle', () => {
     };
 
     it('la vignette et le fichier d\'un id que porte aussi une liste réelle voyagent', () => {
-        const part = monterCodex(creerDb({}), creerMagasin())._partDuDemo(PARTAGE);
+        const part = monterCodex(creerDb({}), creerMagasin()).partDuDemo(PARTAGE);
         expect(part.ids).toEqual({});
         expect(Object.keys(part.cles)).toEqual(['demo_fichiersTravaux']);
     });
 
     it('break-test : sans la priorité au réel, la vignette réelle est retirée (rouge attendu)', () => {
-        const part = monterCodex(creerDb({}), creerMagasin(), (s) => s.replace('        if (idsReels[id]) return;\n', ''))._partDuDemo(PARTAGE);
+        const part = monterCodex(creerDb({}), creerMagasin(), (s) => s.replace('        if (idsReels[id]) return;\n', '')).partDuDemo(PARTAGE);
         expect(part.cles.thumbnail_FT_commun).toBe(true);
     });
 });
@@ -284,5 +284,52 @@ describe('T2 · (d) fusionner : le démo n\'est ni écrit, ni supprimé, ni comp
         const externeLu = await monterCodex(creerDb({}), creerMagasin(), (s) => s.replace(
             '            if (partDuDemo.ids[point > 0 ? nom.slice(0, point) : nom]) return;\n', '')).lireExterne(await codexDAvantG1());
         expect(externeLu.travauxListe).toContain('travaux/FT_demo_ancien.pdf');
+    });
+});
+
+// Relecture de Cowork (6 oct.) — l'ancien chemin d'ouverture par la case : un fichier ancien sans
+// manifeste (format « localStorage brut ») écrivait toutes ses clés, `demo_*` comprises (import
+// complet : db.set sur chaque clé ; par cases : endsWith('_presences'), includes('fichiersTravaux')…).
+// Le démo est retiré là où le fichier devient `configCompleteEnAttente`, avant l'aperçu.
+describe('T2 · (e) un fichier ancien ouvert par la case n\'apporte pas le démo', () => {
+    const source = readFileSync(path.join(racine, 'js/import-export.js'), 'utf8');
+    const debut = source.indexOf('function _sansLeDemoDuFichier(');
+    const texte = source.slice(debut, source.indexOf('\nfunction confierAuCodex(', debut));
+
+    function sansLeDemoDuFichier(muterCodex) {
+        const Codex = monterCodex(creerDb({}), creerMagasin(), muterCodex);
+        // eslint-disable-next-line no-new-func
+        return new Function('window', texte + '\nreturn _sansLeDemoDuFichier;')({ Codex });
+    }
+
+    // Les valeurs d'un ancien fichier peuvent être des chaînes JSON.
+    const ANCIEN = {
+        h2026_groupeEtudiants: JSON.stringify([{ da: '0000001', nom: 'Fictif' }]),
+        demo_groupeEtudiants: '[]',
+        demo_presences: [{ date: '2031-09-02', da: '9000001' }],
+        demo_fichiersTravaux: JSON.stringify([{ id: 'FT_demo_1' }]),
+        thumbnail_FT_demo_1: 'data:image/png;base64,REVNTzE=',
+        thumbnail_FT_reel_1: 'data:image/png;base64,UkVFTA==',
+        h2026_fichiersTravaux: JSON.stringify([{ id: 'FT_reel_1' }]),
+        _zipTravaux: { leZip: true }
+    };
+
+    it('ni clé demo_*, ni vignette du démo (même en chaîne JSON) ; le réel et le ZIP restent tels quels', () => {
+        const reste = sansLeDemoDuFichier()(ANCIEN);
+        expect(Object.keys(reste).sort()).toEqual(['_zipTravaux', 'h2026_fichiersTravaux', 'h2026_groupeEtudiants', 'thumbnail_FT_reel_1']);
+        expect(reste.h2026_groupeEtudiants).toBe(ANCIEN.h2026_groupeEtudiants);
+        expect(reste._zipTravaux).toBe(ANCIEN._zipTravaux);
+    });
+
+    it('break-test : sans la sélection du démo, tout le fichier passe (rouge attendu)', () => {
+        const reste = sansLeDemoDuFichier((s) => s.replace(
+            "toutes.forEach(function(c) { if (_estCleDuDemo(c)) cles[c] = true; });", ''))(ANCIEN);
+        expect(Object.keys(reste)).toContain('demo_presences');
+    });
+
+    it('les trois entrées du format ancien passent par le retrait, avant l\'aperçu', () => {
+        const appels = source.match(/configCompleteEnAttente = _sansLeDemoDuFichier\(configCompleteEnAttente\);[^\n]*\n\s*configCompleteEnAttente\._format = 'localStorage-brut';\n\s*afficherModalPreviewLocalStorageBrut\(configCompleteEnAttente,/g);
+        expect(appels).toHaveLength(3);
+        expect(source.match(/_format = 'localStorage-brut'/g)).toHaveLength(3);
     });
 });
