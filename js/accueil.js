@@ -340,6 +340,11 @@ function toggleDemoHandler(el) {
     if (el.checked) {
         if (typeof activerModeDemo === 'function') activerModeDemo();
     } else {
+        // T7 : pendant un import de copies, la case reste cochée (l'avis est donné par la garde).
+        if (typeof window.importEmpecheDeQuitterLaDemo === 'function' && window.importEmpecheDeQuitterLaDemo()) {
+            el.checked = true;
+            return;
+        }
         if (typeof desactiverModeDemo === 'function') desactiverModeDemo();
     }
 }
