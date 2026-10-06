@@ -298,8 +298,11 @@ function genererRetroaction(num) {
     // #961 R2 — stock d'avant D7 (clé absente, texte non vide) : on demande, une fois par copie,
     // et rien ne s'écrit avant la réponse. Pendant un chargement, ni question ni écriture : le
     // chargeur pose ensuite le texte enregistré (neutralité #960).
+    // Verrouillée (BUG_grégoire_2026-10-06_13-49-17) : lecture seule, ni question ni texte
+    // régénéré — l'auto-save ne réécrit pas une évaluation verrouillée, la réponse se perdait
+    // et la question revenait à chaque ouverture. Déverrouillée, la question revient.
     if (_estADemander()) {
-        if (!_chargementEnCours()) _demanderPourLeStock();
+        if (!_chargementEnCours() && !_copieVerrouillee()) _demanderPourLeStock();
         return;
     }
     if (!evaluationEnCours || !evaluationEnCours.grilleId) {
@@ -395,6 +398,19 @@ function _estADemander() {
     const zone = document.getElementById('retroactionFinale1');
     const cleCopie = _cleCopieRetroaction();
     return !!(zone && zone.dataset && cleCopie && zone.dataset.aDemanderPour === cleCopie);
+}
+
+/** L'évaluation enregistrée de la copie ouverte est-elle verrouillée ? Lue en base, comme
+ *  l'auto-save la trouve (`_autoSauvegarderCriteres`) : c'est lui qui refuserait d'écrire. */
+function _copieVerrouillee() {
+    const c = (typeof window.etatVivantEvaluationEnCours === 'function')
+        ? window.etatVivantEvaluationEnCours() : (window.evaluationEnCours || {});
+    if (!c || !c.etudiantDA || !c.productionId) return false;
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+    const e = evaluations.find(function(x) {
+        return x && !x.remplaceeParId && x.etudiantDA === c.etudiantDA && x.productionId === c.productionId;
+    });
+    return !!(e && e.verrouillee === true);
 }
 
 function _chargementEnCours() {

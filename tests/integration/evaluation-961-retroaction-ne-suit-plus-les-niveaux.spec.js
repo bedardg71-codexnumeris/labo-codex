@@ -20,7 +20,7 @@ const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwA
 const T = 't961';
 const A_LA_MAIN = 'Réécrite à la main : relis ta conclusion à voix haute avant de la remettre.';
 
-async function monter(page, { analytique = false, marque, deuxieme = false, sansEvaluation = false, sansCommentaires = false, retroaction = A_LA_MAIN } = {}) {
+async function monter(page, { analytique = false, marque, deuxieme = false, sansEvaluation = false, sansCommentaires = false, retroaction = A_LA_MAIN, verrouillee = false } = {}) {
     const erreurs = [];
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
@@ -28,7 +28,7 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.travauxUI && window.travauxStockage
         && typeof window.evaluerProduction === 'function');
-    await page.evaluate(({ png, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation, sansCommentaires, retroaction }) => {
+    await page.evaluate(({ png, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation, sansCommentaires, retroaction, verrouillee }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
         const coursId = 'cours-961';
         const crit = [{ id: 'c1', nom: 'Contenu', ponderation: 60, type: 'holistique' },
@@ -61,7 +61,7 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
         const evaluation = {
             id: 'EV961', etudiantDA: 'TEST961', productionId: 'p961', groupeCoursId: 'GC961',
             grilleId: 'G961', echelleId: 'E961', cartoucheId: 'CT961', statutRemise: 'evalue', statutIntegrite: 'recevable',
-            dateEvaluation: '2026-09-15T08:00:00.000Z', noteFinale: 74, niveauFinal: 'D', verrouillee: false,
+            dateEvaluation: '2026-09-15T08:00:00.000Z', noteFinale: 74, niveauFinal: 'D', verrouillee,
             criteres: [
                 { critereId: 'c1', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 60, retroaction: 'CARTOUCHE c1_M' },
                 { critereId: 'c2', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 40, retroaction: 'CARTOUCHE c2_D' }
@@ -89,7 +89,7 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
         const copie = new Blob([octets], { type: 'image/png' });
         const original = window.travauxStockage.recupererBlob;
         window.travauxStockage.recupererBlob = async function (id) { return id === 'FT961' ? copie : original.apply(this, arguments); };
-    }, { png: PNG, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation, sansCommentaires, retroaction });
+    }, { png: PNG, T, A_LA_MAIN, analytique, marque, deuxieme, sansEvaluation, sansCommentaires, retroaction, verrouillee });
     return erreurs;
 }
 
@@ -254,6 +254,41 @@ test('#961 R2 · stock sans clé, Échap : garder', async ({ page }) => {
     expect.soft(await zone(page)).toBe(A_LA_MAIN);
     expect((await base(page)).retroactionReecrite).toBe(true);
 });
+
+// BUG_grégoire_2026-10-06_13-49-17 — le pack démo : 98 évaluations verrouillées, d'avant D7.
+// La question revenait à chaque ouverture : l'auto-save ne réécrit pas une évaluation
+// verrouillée, la réponse ne s'écrivait jamais. Verrouillée = lecture seule : ni question ni
+// texte régénéré. Déverrouillée, la question revient et sa réponse s'écrit.
+for (const chemin of ['copie', 'liste']) {
+    test(`#961 R2 · verrouillée, stock sans clé, par ${nom(chemin)} : aucune question, le texte reste ; déverrouillée, la question revient et s'écrit`, async ({ page }) => {
+        test.setTimeout(90000);
+        await monter(page, { verrouillee: true });
+        await ouvrir(page, chemin);
+        // Le geste qui régénérerait, appelé tel quel : sur une évaluation verrouillée, le
+        // formulaire ne laisse changer aucun niveau. Sonde synchrone, puis après un délai.
+        const sonde = await page.evaluate(() => {
+            window.genererRetroaction(1);
+            return { question: !!document.getElementById('overlay-ui-dialogue'),
+                zone: document.getElementById('retroactionFinale1').value };
+        });
+        expect.soft(sonde.question, 'aucune question, sonde synchrone').toBe(false);
+        expect.soft(sonde.zone, 'le texte enregistré reste').toBe(A_LA_MAIN);
+        await page.waitForTimeout(APRES_AUTOSAVE);
+        expect.soft(await questionOuverte(page), 'aucune question, après l\'auto-save').toBe(false);
+        expect.soft(await zone(page), 'le texte enregistré reste').toBe(A_LA_MAIN);
+        expect.soft((await base(page)).retroactionReecrite, 'rien écrit').toBeUndefined();
+        // Témoin : déverrouillée, la question revient, et « Garder la mienne » s'écrit.
+        await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());
+        await page.waitForFunction(() => window.db.getSync('t961_evaluationsSauvegardees', []).find(e => e.id === 'EV961').verrouillee === false);
+        await page.evaluate(() => { window.genererRetroaction(1); });
+        const q = await question(page);
+        expect.soft(q.message, 'les mots').toBe(QUESTION);
+        await page.evaluate(() => Array.from(document.querySelectorAll('#overlay-ui-dialogue button')).find(b => b.textContent === 'Garder la mienne').click());
+        await page.waitForFunction(() => !document.getElementById('overlay-ui-dialogue'));
+        await page.waitForTimeout(APRES_AUTOSAVE);
+        expect((await base(page)).retroactionReecrite, 'réponse en base').toBe(true);
+    });
+}
 
 test('#961 R2 · clé absente et rétroaction VIDE : aucune question, la génération se fait', async ({ page }) => {
     test.setTimeout(90000);
