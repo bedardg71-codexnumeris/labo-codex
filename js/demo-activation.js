@@ -482,7 +482,24 @@ function retirerItemsDemoDesGlobaux() {
  * Point clé Phase 5.C : ne supprime PAS les clés demo_* (elles sont
  * permanentes pour Phase 1). Corrige le bug question 3 à la source.
  */
+/**
+ * T7 du chantier du démo (6 oct. 2026) : un import de copies attend chaque fichier, et chaque
+ * fiche s'écrit sous la clé du trimestre actif AU MOMENT de son écriture. Quitter la démo en
+ * cours de route rangerait les copies suivantes du démo dans le trimestre restauré. Mécanique
+ * de #340, transposée aux copies : on bloque la sortie tant que l'import tourne, avec un avis.
+ * @returns {boolean} true si la sortie est bloquée (l'avis est alors donné)
+ */
+function importEmpecheDeQuitterLaDemo() {
+    if (!window.travauxImport || !window.travauxImport.importEnCours) return false;
+    if (window.notifications && typeof window.notifications.warning === 'function') {
+        window.notifications.warning('Import en cours',
+            'Attends la fin de l\'import des copies avant de quitter la démo.');
+    }
+    return true;
+}
+
 async function desactiverModeDemo() {
+    if (importEmpecheDeQuitterLaDemo()) return;
     try {
         var etat = db.getSync('demo-etat-precedent', null);
 
@@ -582,6 +599,7 @@ async function desactiverModeDemo() {
 
 window.activerModeDemo = activerModeDemo;
 window.desactiverModeDemo = desactiverModeDemo;
+window.importEmpecheDeQuitterLaDemo = importEmpecheDeQuitterLaDemo;   // T7
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
 window.migrerResidusPhase5 = migrerResidusPhase5;
