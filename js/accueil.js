@@ -337,14 +337,14 @@ function initialiserAccueil() {
  * (cochage) et desactiverModeDemo (décochage) dans js/demo-activation.js.
  * Le legacy donnees-demo.js a été retiré en Phase 5.D. */
 function toggleDemoHandler(el) {
+    // T7 : pendant un import de copies, la case garde son état (l'avis est donné par la garde).
+    if (typeof window.importEmpecheLaBascule === 'function' && window.importEmpecheLaBascule(el.checked)) {
+        el.checked = !el.checked;
+        return;
+    }
     if (el.checked) {
         if (typeof activerModeDemo === 'function') activerModeDemo();
     } else {
-        // T7 : pendant un import de copies, la case reste cochée (l'avis est donné par la garde).
-        if (typeof window.importEmpecheDeQuitterLaDemo === 'function' && window.importEmpecheDeQuitterLaDemo()) {
-            el.checked = true;
-            return;
-        }
         if (typeof desactiverModeDemo === 'function') desactiverModeDemo();
     }
 }
