@@ -1321,6 +1321,12 @@ function _initEvaluationEnCoursPourModif(evaluation, evaluationId) {
         // réouverture (`verifierEtChargerEvaluationExistante`) les y remet déjà.
         pointsAnalytiques: (evaluation.pointsAnalytiques && typeof evaluation.pointsAnalytiques === 'object')
             ? JSON.parse(JSON.stringify(evaluation.pointsAnalytiques)) : {},
+        // #1034 — posées AVANT le rendu des critères : la détection des codes
+        // (`evaluation-chargement.js`) les lit pour faire naître le critère algorithmique en
+        // mode catégories. Absentes, il naissait en mode simple, sans champ pour les codes, et
+        // le premier geste écrivait 0 erreur en base (BUG_grégoire_2026-10-06_15-34-54).
+        donneesAlgorithmiques: (evaluation.donneesAlgorithmiques && typeof evaluation.donneesAlgorithmiques === 'object')
+            ? JSON.parse(JSON.stringify(evaluation.donneesAlgorithmiques)) : {},
         idModification: evaluationId
     };
 
@@ -1467,10 +1473,13 @@ function _restaurerDonneesAlgorithmiquesModif(evaluation) {
             const inputMots = document.getElementById(`eval_mots_${critereId}`);
             if (inputMots) inputMots.value = donnees.mots;
         }
-        // Restaurer le champ d'erreurs (mode simple sans catégorisation)
-        if (donnees.erreurs !== undefined) {
+        // Restaurer le champ d'erreurs (mode simple sans catégorisation). #1034 — repli sur
+        // `totalErreurs`, comme le jumeau `verifierEtChargerEvaluationExistante` : le calcul en
+        // mode catégories n'écrit pas `erreurs`.
+        const nbErreurs = donnees.erreurs !== undefined ? donnees.erreurs : donnees.totalErreurs;
+        if (nbErreurs !== undefined) {
             const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
-            if (inputErreurs) inputErreurs.value = donnees.erreurs;
+            if (inputErreurs) inputErreurs.value = nbErreurs;
         }
 
         // Déclencher le recalcul pour afficher les résultats (attendre que le DOM soit prêt)
