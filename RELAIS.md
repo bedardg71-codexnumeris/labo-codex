@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 11 h 30 : **1.186.3 (T1 DU CHANTIER DU DÉMO) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `0da20f79` (PUBLIÉ À 11 h 25) ; VERDICT COMPLET VERT (0 INSTABLE)**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 14 h 15 : **1.186.4 (#1032 : UNE ÉVALUATION VERROUILLÉE NE REPOSE PLUS LA QUESTION « ENREGISTRÉE AVANT LE 26 SEPTEMBRE ») COMMITÉE SUR `main` LOCAL (`c8a7bb38`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : retour de Grégoire (`BUG_grégoire_2026-10-06_13-49-17`, démo), « Maintenant » choisi en séance.
+
+**Ce qui est fait** : `_copieVerrouillee` (`js/evaluation-retroaction.js`) ; verrouillée = ni question ni texte régénéré ; déverrouillée, la question revient et s'écrit. #1032 au SUIVI-BUGS ; #1033 (supprimer plusieurs copies d'un coup, `FEEDBACK_…_13-59-40`) inscrit, non commencé. Compteur du BACKLOG à #1033. Pas encore de ligne aux Nouvelles (à fournir par Cowork à la relecture si voulue : le correctif touche aussi le réel, évaluations verrouillées avant le 26 sept.).
+
+**Tests** : spec #961 26/26 (2 essais neufs) ; mutations : garde retirée → rouge « aucune question » (copie et Liste) ; copie toujours vue verrouillée → rouge du témoin. Vitest 686 fichiers, 8243 essais après le commit du bump. Verdict complet : pas encore.
+
+**La suite** : relecture de Cowork sur `c8a7bb38` ; verdict complet ; `git push origin main` ; mesure chez Netlify. Grégoire a retiré cinq copies d'essai du démo (13 h 58) ; l'import des 30 copies renommées reste à faire.
+
+---
+
+## (relais précédent) 6 OCT. 2026, 11 h 30 : **1.186.3 (T1 DU CHANTIER DU DÉMO) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `0da20f79` (PUBLIÉ À 11 h 25) ; VERDICT COMPLET VERT (0 INSTABLE)**
 
 **Ce qui est fait** : relecture de Cowork approuvée sur `551bc478` (rien à corriger) ; verdict Playwright complet sur `0da20f79` : 0 échec, 0 instable, 0 veille (rendu à 11 h 24) ; `git push origin main` (`6a5f0c7d..0da20f79`, hook : Vitest vert, verdict à jour) ; workflow « Tests » `37487344438` vert ; Netlify : `commit_ref` `0da20f79`, `state` ready.
 
