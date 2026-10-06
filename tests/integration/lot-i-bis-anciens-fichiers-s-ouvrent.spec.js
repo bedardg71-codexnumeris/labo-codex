@@ -78,6 +78,27 @@ const CLES_GARDEES_PAR_1012 = ['demo_groupeEtudiants'];
 const bilan1012 = (bilan) => bilan.replace('315 date(s) de présences', '2 date(s) de présences');
 const sauf1012 = (empreintes) => Object.fromEntries(Object.entries(empreintes).filter(([c]) => !CLES_GARDEES_PAR_1012.includes(c)));
 
+// T2 DU CHANTIER DU DÉMO (décision G1 de Grégoire, 6 oct. 2026) — LA RÉFÉRENCE N'EST PAS RÉAJUSTÉE NON PLUS.
+// Les deux fichiers de 1.172.0 portent le démo de ce jour-là (`demo_*`). À 1.172.0, l'ouverture par
+// la case en versait les 11 productions dans la clé de productions de l'espace (ici `productions`, la
+// page n'ayant pas de trimestre actif) — une fuite du démo vers une clé réelle — et cochait le
+// groupe-cours, l'horaire et le calendrier du démo. Le démo du fichier n'entre plus : `productions`
+// ne garde que la vraie (PROD_BANC_1), ces trois cases disparaissent, et le bilan le dit. Tout le
+// reste se compare comme avant.
+const CLES_CHANGEES_PAR_T2 = ['productions'];
+const CASES_DU_DEMO_T2 = ['import-calendrier', 'import-groupesCours', 'import-horaires'];
+const bilanT2 = (bilan) => bilan
+    .replace('12 production(s)', '1 production(s)')
+    .replace('1 groupe-cours\n1 horaire(s)\n2 config(s) calendrier\n', '')
+    .replace('Total : 23 élément(s)', 'Total : 9 élément(s)')
+    .replace('Total : 24 élément(s)', 'Total : 10 élément(s)');
+const saufT2 = (empreintes) => Object.fromEntries(Object.entries(empreintes).filter(([c]) => !CLES_CHANGEES_PAR_T2.includes(c)));
+const casesT2 = (cases) => cases.filter((c) => !CASES_DU_DEMO_T2.includes(c));
+/** T2 : la clé de productions de l'espace ne reçoit que la vraie production du fichier. */
+function verifierProductionsSansLeDemo(r) {
+    expect(JSON.parse(r.apres.productions).map((p) => p.id), 'T2 : aucune production du démo n\'entre').toEqual(['PROD_BANC_1']);
+}
+
 function empreintesDeLEcart(avant, apres) {
     const ecart = {};
     for (const c of Object.keys(apres)) if (avant[c] !== apres[c]) ecart[c] = sha(apres[c]);
@@ -170,11 +191,12 @@ test.describe('Lot I bis — une ancienne copie de secours s\'ouvre encore, par 
         }
         // (2) Empreintes : tout ce que l'ouverture a écrit, comme à 1.172.0.
         expect(Object.keys(REFERENCE.json.empreintes).length, 'la référence n\'est pas vide').toBeGreaterThan(5);
-        expect(r.empreintes).toEqual(sauf1012(REFERENCE.json.empreintes));
+        expect(saufT2(r.empreintes)).toEqual(saufT2(sauf1012(REFERENCE.json.empreintes)));
+        verifierProductionsSansLeDemo(r);
         expect(r.avant.demo_groupeEtudiants, '#1012 : l\'espace neuf a un groupe démo').toBeDefined();
         expect(r.apres.demo_groupeEtudiants, '#1012 : le groupe démo de l\'espace n\'est pas vidé').toBe(r.avant.demo_groupeEtudiants);
-        expect(r.bilan).toBe(bilan1012(REFERENCE.json.bilan));
-        expect(r.fenetre.cases).toEqual(REFERENCE.json.cases);
+        expect(r.bilan).toBe(bilanT2(bilan1012(REFERENCE.json.bilan)));
+        expect(r.fenetre.cases).toEqual(casesT2(REFERENCE.json.cases));
         expect(r.fenetre.etiquette).toBe(REFERENCE.json.etiquette);
     });
 
@@ -209,12 +231,13 @@ test.describe('Lot I bis — une ancienne copie de secours s\'ouvre encore, par 
         expect(JSON.parse(r.apres['a2031_fichiersTravaux']).map((f) => f.id)).toEqual(['FT_BANC_1']);
         // (2) Empreintes : comme à 1.172.0.
         expect(Object.keys(REFERENCE.zip.empreintes).length, 'la référence n\'est pas vide').toBeGreaterThan(5);
-        expect(r.empreintes).toEqual(sauf1012(REFERENCE.zip.empreintes));
+        expect(saufT2(r.empreintes)).toEqual(saufT2(sauf1012(REFERENCE.zip.empreintes)));
+        verifierProductionsSansLeDemo(r);
         expect(r.avant.demo_groupeEtudiants, '#1012 : l\'espace neuf a un groupe démo').toBeDefined();
         expect(r.apres.demo_groupeEtudiants, '#1012 : le groupe démo de l\'espace n\'est pas vidé').toBe(r.avant.demo_groupeEtudiants);
         expect(blobs).toEqual(REFERENCE.zip.blobs);
-        expect(r.bilan).toBe(bilan1012(REFERENCE.zip.bilan));
-        expect(r.fenetre.cases).toEqual(REFERENCE.zip.cases);
+        expect(r.bilan).toBe(bilanT2(bilan1012(REFERENCE.zip.bilan)));
+        expect(r.fenetre.cases).toEqual(casesT2(REFERENCE.zip.cases));
         expect(r.fenetre.etiquette).toBe(REFERENCE.zip.etiquette);
     });
 

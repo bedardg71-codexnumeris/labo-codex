@@ -1029,6 +1029,29 @@ function fermerModalImport() {
  * « Ouvre un codex ou une configuration partagée ». La fenêtre d'import se ferme : la suite
  * (progression, bilan, rechargement) appartient au codex.
  */
+/**
+ * T2 du chantier du démo (décision G1 de Grégoire, 6 oct. 2026) — un fichier ancien sans
+ * manifeste (format « localStorage brut ») porte souvent le démo d'un autre jour. Ni l'aperçu,
+ * ni l'import complet, ni l'import par cases ne l'écrivent : même sélection, par identité, que
+ * l'ouverture d'un codex (`Codex.partDuDemo`). Les valeurs de ces anciens fichiers peuvent être
+ * des chaînes JSON : la sélection lit leur forme parsée, le fichier garde la sienne.
+ * @param {Object} donnees - le contenu du fichier (avec `_zipTravaux` éventuel)
+ * @returns {Object} un nouvel objet, sans les clés `demo_*` ni les vignettes du démo
+ */
+function _sansLeDemoDuFichier(donnees) {
+    if (!donnees || !window.Codex || typeof window.Codex.partDuDemo !== 'function') return donnees;
+    const vue = {};
+    Object.keys(donnees).forEach(c => {
+        let v = donnees[c];
+        if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { /* une chaîne */ } }
+        vue[c] = v;
+    });
+    const part = window.Codex.partDuDemo(vue);
+    const reste = {};
+    Object.keys(donnees).forEach(c => { if (!part.cles[c]) reste[c] = donnees[c]; });
+    return reste;
+}
+
 function confierAuCodex(fichier) {
     fermerModalImport();
     return window.Codex.ouvrirFichier(fichier);
@@ -1107,8 +1130,9 @@ async function previsualiserImport(event) {
                 if (format === 'configuration-complete') {
                     afficherModalPreviewConfigComplete(donnees);
                 } else {
+                    configCompleteEnAttente = _sansLeDemoDuFichier(configCompleteEnAttente);   // T2 (G1)
                     configCompleteEnAttente._format = 'localStorage-brut';
-                    afficherModalPreviewLocalStorageBrut(donnees, nomFichier);
+                    afficherModalPreviewLocalStorageBrut(configCompleteEnAttente, nomFichier);
                 }
             } catch (err) {
                 alert('Erreur lors de la lecture du fichier ZIP.\n\nDétails dans la console (F12).');
@@ -1148,8 +1172,9 @@ async function previsualiserImport(event) {
                 afficherModalPreviewConfigComplete(donnees);
             } else {
                 // Format localStorage brut → nouveau modal avec checkboxes
+                configCompleteEnAttente = _sansLeDemoDuFichier(configCompleteEnAttente);   // T2 (G1)
                 configCompleteEnAttente._format = 'localStorage-brut';
-                afficherModalPreviewLocalStorageBrut(donnees, nomFichier);
+                afficherModalPreviewLocalStorageBrut(configCompleteEnAttente, nomFichier);
             }
         } catch (err) {
             alert('Erreur lors de l\'analyse du fichier.\n\nDétails dans la console (F12).');
@@ -1647,8 +1672,9 @@ function previsualiserConfigComplete(event) {
             } else if (formatDetecte === 'localStorage-brut') {
                 // Ancien format (export localStorage brut)
                 configCompleteEnAttente = config;
+                configCompleteEnAttente = _sansLeDemoDuFichier(configCompleteEnAttente);   // T2 (G1)
                 configCompleteEnAttente._format = 'localStorage-brut';
-                afficherModalPreviewLocalStorageBrut(config, fichier.name);
+                afficherModalPreviewLocalStorageBrut(configCompleteEnAttente, fichier.name);
 
             } else {
                 alert('Fichier non reconnu.\n\nFormats acceptés :\n• Configuration complète (Beta 91+)\n• Export localStorage brut');
