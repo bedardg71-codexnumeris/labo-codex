@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 15 h 12 : **1.186.4 (#1032) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `76ec8500` (PUBLIÉ À 15 h 07) ; VERDICT COMPLET VERT (0 INSTABLE)**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 16 h 08 : **1.186.5 (T5 + #1034) COMMITÉE SUR `main` LOCAL (`ee56f2b5`, `dd5f3143`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : Cowork, après `BUG_grégoire_2026-10-06_15-34-54` (M2 mesuré, refus confirmé) ; « Corriger dans la 1.186.5 » choisi par Grégoire pour le constat 3.
+
+**Ce qui est fait** : T5 (`ee56f2b5`) : `verifierReferencesPasDemo(references, { cible })` ne refuse pas une écriture dans `demo_…` ; les deux appelants de l'évaluation passent la cible et la collection en nom nu ; article accordé et élidé. #1034 (`dd5f3143`) : « Modifier » pose `donneesAlgorithmiques` avant le rendu, la détection des codes lit le pivot de modification, la relecture se rabat sur `totalErreurs` ; sentinelle #350 ajustée. #1035 inscrit (cause à mesurer dans `demo_fichiersTravaux`). Compteur du BACKLOG à #1035.
+
+**Tests** : banc T5 (8 essais, 5 mutations) ; spec #1034 (3 essais, rouge avant correctif, 3 mutations) ; specs voisins 33/33 ; Vitest 687 fichiers, 8251 essais après le commit du build. Verdict complet : pas encore.
+
+**Stock (#1034)** : une évaluation réelle déjà réécrite par ce chemin garde sa note fausse — NON MESURÉ ; toute réparation remonte à Grégoire.
+
+**Trouvailles, non corrigées** : `trimestre-v2-groupes-cours.js:710` passe aussi `cle('horaires')` à la garde (double préfixe, sans effet observable) ; le rendu sans cartouche n'a pas de mode codes (un geste y remplace les codes par le total).
+
+**La suite** : relecture de Cowork sur `ee56f2b5` et `dd5f3143` ; verdict complet ; `git push origin main` ; mesure chez Netlify.
+
+---
+
+## (relais précédent) 6 OCT. 2026, 15 h 12 : **1.186.4 (#1032) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `76ec8500` (PUBLIÉ À 15 h 07) ; VERDICT COMPLET VERT (0 INSTABLE)**
 
 **Ce qui est fait** : relecture de Cowork approuvée sur `c8a7bb38` ; ligne des Nouvelles de Cowork, acceptée par Grégoire, consolidée dans l'entrée 1.186 (`76ec8500`, jeton `changelog-data.js?v=20261006b` exigé par le hook anti-cache) ; verdict complet sur `76ec8500` : 0 échec, 0 instable, 0 veille (rendu à 15 h 06) ; `git push origin main` (`22c63691..76ec8500`) ; workflow « Tests » `37516523840` vert ; Netlify : `commit_ref` `76ec8500`, `state` ready.
 
