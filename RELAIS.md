@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 14 h 15 : **1.186.4 (#1032 : UNE ÉVALUATION VERROUILLÉE NE REPOSE PLUS LA QUESTION « ENREGISTRÉE AVANT LE 26 SEPTEMBRE ») COMMITÉE SUR `main` LOCAL (`c8a7bb38`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 15 h 12 : **1.186.4 (#1032) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `76ec8500` (PUBLIÉ À 15 h 07) ; VERDICT COMPLET VERT (0 INSTABLE)**
+
+**Ce qui est fait** : relecture de Cowork approuvée sur `c8a7bb38` ; ligne des Nouvelles de Cowork, acceptée par Grégoire, consolidée dans l'entrée 1.186 (`76ec8500`, jeton `changelog-data.js?v=20261006b` exigé par le hook anti-cache) ; verdict complet sur `76ec8500` : 0 échec, 0 instable, 0 veille (rendu à 15 h 06) ; `git push origin main` (`22c63691..76ec8500`) ; workflow « Tests » `37516523840` vert ; Netlify : `commit_ref` `76ec8500`, `state` ready.
+
+**La suite** : Grégoire importe les 30 copies renommées (sous-dossier « renommés selon les DA du pack démo ») : vérifie T1 sur le terrain. M2 à mesurer (T5 si le refus se confirme). #1033 (supprimer plusieurs copies d'un coup) inscrit, non commencé. Lot 3 de l'enregistrement (#976) toujours en attente.
+
+---
+
+## (relais précédent) 6 OCT. 2026, 14 h 15 : **1.186.4 (#1032 : UNE ÉVALUATION VERROUILLÉE NE REPOSE PLUS LA QUESTION « ENREGISTRÉE AVANT LE 26 SEPTEMBRE ») COMMITÉE SUR `main` LOCAL (`c8a7bb38`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
 
 **Consigne** : retour de Grégoire (`BUG_grégoire_2026-10-06_13-49-17`, démo), « Maintenant » choisi en séance.
 
