@@ -180,6 +180,19 @@
        =============================== */
 
     /**
+     * T4 du chantier du démo (6 oct. 2026) : en démo, avec un dossier sur disque branché,
+     * une copie s'écrirait dans le dossier RÉEL de l'enseignant. On refuse plutôt que
+     * d'écrire en IndexedDB seulement : la lecture d'une copie passe elle aussi par le
+     * dossier quand il est branché, la copie serait illisible.
+     */
+    const AVIS_DEMO_DOSSIER = 'Tu es dans la démo et ton dossier de copies sur disque est branché : '
+        + 'les copies de la démo y entreraient. Quitte la démo pour importer tes vraies copies.';
+
+    function refusDuDemoSurDisque() {
+        return fsapiActif && typeof window.estEnModeDemo === 'function' && window.estEnModeDemo();
+    }
+
+    /**
      * Stocke un blob (fichier) dans IndexedDB
      * @param {string} id - ID du fichier travail (FT_xxx)
      * @param {Blob} blob - Le contenu du fichier
@@ -197,6 +210,13 @@
         // 36 Go mesurés sur l'iPad réel). Le quota global est gardé par le
         // pré-vol d'import (#334 A) et un vrai QuotaExceededError est journalisé
         // par l'import (#334 B). Retirée le 11 juin 2026, décision Grégoire.
+
+        // T4 : rien du démo n'entre dans le dossier réel, quel que soit l'écrivain.
+        if (refusDuDemoSurDisque()) {
+            const refus = new Error(AVIS_DEMO_DOSSIER);
+            refus.name = 'DemoDossierSurDisque';
+            throw refus;
+        }
 
         // FSAPI: fichier sur disque
         if (fsapiActif) {
@@ -1370,6 +1390,9 @@
        =============================== */
 
     window.travauxStockage = {
+        // T4 du chantier du démo
+        refusDuDemoSurDisque: refusDuDemoSurDisque,
+        AVIS_DEMO_DOSSIER: AVIS_DEMO_DOSSIER,
         initialiser: initialiserStockageTravaux,
         // Blobs
         stockerBlob: stockerBlob,
