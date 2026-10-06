@@ -232,6 +232,7 @@ function fusionnerDemoVersGlobaux() {
  * Active le mode démo. Appelée par toggleDemoHandler quand la case est cochée.
  */
 async function activerModeDemo() {
+    if (importEmpecheLaBascule(true)) return;
     try {
         // Guard résidu : si flag actif mais pas de bandeau, c'est un résidu
         if (db.getSync('demo-actif', null) === 'true') {
@@ -484,22 +485,27 @@ function retirerItemsDemoDesGlobaux() {
  */
 /**
  * T7 du chantier du démo (6 oct. 2026) : un import de copies attend chaque fichier, et chaque
- * fiche s'écrit sous la clé du trimestre actif AU MOMENT de son écriture. Quitter la démo en
- * cours de route rangerait les copies suivantes du démo dans le trimestre restauré. Mécanique
- * de #340, transposée aux copies : on bloque la sortie tant que l'import tourne, avec un avis.
- * @returns {boolean} true si la sortie est bloquée (l'avis est alors donné)
+ * fiche s'écrit sous la clé du trimestre actif AU MOMENT de son écriture. Basculer entre la démo
+ * et le trimestre réel en cours de route rangerait les copies suivantes du mauvais côté : les
+ * copies du démo dans le trimestre restauré (en sortant), ou les vraies copies dans
+ * `demo_fichiersTravaux` (en entrant ; avec T2 elles sortiraient du codex). Mécanique de #340,
+ * transposée aux copies : la bascule est bloquée tant que l'import tourne, avec un avis.
+ * Mots validés par Grégoire (6 oct., par Cowork).
+ * @param {boolean} versLaDemo - true pour l'entrée dans la démo, false pour la sortie
+ * @returns {boolean} true si la bascule est bloquée (l'avis est alors donné)
  */
-function importEmpecheDeQuitterLaDemo() {
+function importEmpecheLaBascule(versLaDemo) {
     if (!window.travauxImport || !window.travauxImport.importEnCours) return false;
     if (window.notifications && typeof window.notifications.warning === 'function') {
-        window.notifications.warning('Import en cours',
-            'Attends la fin de l\'import des copies avant de quitter la démo.');
+        window.notifications.warning('Import en cours', versLaDemo
+            ? 'Attends la fin de l\'import des copies avant d\'entrer dans la démo.'
+            : 'Attends la fin de l\'import des copies avant de quitter la démo.');
     }
     return true;
 }
 
 async function desactiverModeDemo() {
-    if (importEmpecheDeQuitterLaDemo()) return;
+    if (importEmpecheLaBascule(false)) return;
     try {
         var etat = db.getSync('demo-etat-precedent', null);
 
@@ -599,7 +605,7 @@ async function desactiverModeDemo() {
 
 window.activerModeDemo = activerModeDemo;
 window.desactiverModeDemo = desactiverModeDemo;
-window.importEmpecheDeQuitterLaDemo = importEmpecheDeQuitterLaDemo;   // T7
+window.importEmpecheLaBascule = importEmpecheLaBascule;   // T7
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
 window.migrerResidusPhase5 = migrerResidusPhase5;
