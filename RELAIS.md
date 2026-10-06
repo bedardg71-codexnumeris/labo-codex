@@ -7,7 +7,29 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 18 h 50 : **1.186.5 (T5 + #1034) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a98d87d6` (PUBLIÉ À 18 h 46) ; VERDICT COMPLET VERT (0 INSTABLE)**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 19 h 27 : **1.186.6 (T2, T4, T7, #1034 b) COMMITÉE SUR `main` LOCAL (`43aae20d`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : Cowork, 18 h 56 (`d861cc9f`), décision G1 de Grégoire : le codex n'emporte pas le démo.
+
+**Ce qui est fait** :
+- T2 (`5b7fb6ae`, `0114abdc`, `eb61e1dd`) : `genererCodex` retire toute clé `demo_*`, les fichiers des trois listes du démo et leurs `thumbnail_<id>` (sélection par identité ; un id que porte aussi une liste réelle reste au réel). À l'ouverture (`chargerCodex`), à la fusion (`lireCodexExterne`, `_analyserFusion`) et à l'export sélectif, le démo d'un codex d'avant G1 n'est ni écrit, ni restauré, ni compté au bilan ; le plan de purge ne range plus les fichiers du démo installé parmi les résidus (4ᵉ argument de `_planifierPurgeEspace`).
+- T4 (`8077f6e4`) : **supposition** — refuser plutôt qu'écrire en IndexedDB seulement, parce que `recupererBlob` lit aussi le dossier quand il est branché. `stockerBlob` refuse en démo avec dossier branché (tous les écrivains) ; `importerTous` refuse avant tout fichier, un seul avis ; les deux écrans d'import se taisent après.
+- T7 (`7c437f9e`) : `importEmpecheDeQuitterLaDemo()` (demo-activation.js) bloque « Quitter la démo » et le décochage de l'accueil tant que `travauxImport.importEnCours` ; la case reste cochée.
+- #1034 b (`f07d0b73`) : refus en démo mesuré par lecture (le pack porte `isDemo`, ses pratiques l'id `demo-…`) ; `pratiques-gestion.js` et `trimestre-v2-groupes-cours.js` passent `{ cible }`, l'horaire en nom nu.
+
+**Tests** : bancs neufs `sentinelle-t2-codex-sans-le-demo` (13), `sentinelle-t4-demo-dossier-sur-disque` (8), `sentinelle-t7-quitter-la-demo-pendant-un-import` (5), `sentinelle-gardes-demo-pratique-et-groupe-cours` (7), chacun avec témoins par mutation (rouges attendus constatés). Sentinelle #336 D ajustée (appel à 4 arguments). Spec #1014 : sur une page sans trimestre actif, le démo était le premier des deux trimestres de « Exporter une sélection » ; un second trimestre réel fictif est ajouté, et l'essai vérifie qu'aucune clé `demo_` ne part (rouge par mutation du retrait). Specs voisins (codex, démo, import) : 63/63 après cet ajustement (un `page.goto` instable à 15 s, vert à la relance). Vitest après le commit du build : 691 fichiers, 8 284 essais. **Verdict complet : pas encore.**
+
+**Stock** : T2 tarit la source ; les codex déjà écrits portent le démo, et c'est voulu qu'ils s'ouvrent sans l'écrire (rien à réparer). T4, T7, #1034 b : aucun stock (refus ou écriture qui ne se faisait pas).
+
+**Trouvailles (non corrigées)** : (2, inscrire) le chemin « ouvrir par la case » (import-export.js, ancien ZIP) n'est pas couvert par T2 — non mesuré s'il écrit des clés `demo_*` ; (2, inscrire) ACTIVER la démo pendant un import de copies réelles rangerait les copies suivantes dans `demo_`, symétrique de T7, non gardé ; (3) `actionFusionner` prend la première clé contenant `fichiersTravaux`, qui peut être celle du démo (sans effet observable mesuré).
+
+**Mots d'écran à faire valider par Grégoire (par Cowork)** : avis T4 et T7 posés provisoirement, voir le rapport de session.
+
+**La suite** : relecture de Cowork ; verdict complet ; `git push origin main` ; mesure chez Netlify. Puis T3 et T6 (décisions G3, G4).
+
+---
+
+## (relais précédent) 6 OCT. 2026, 18 h 50 : **1.186.5 (T5 + #1034) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a98d87d6` (PUBLIÉ À 18 h 46) ; VERDICT COMPLET VERT (0 INSTABLE)**
 
 **Ce qui est fait** : relecture de Cowork sans défaut bloquant (deux points inscrits sous #1034, `a98d87d6`) ; verdict complet sur `a98d87d6` : 0 échec, 0 instable, 0 veille (rendu à 18 h 45) ; `git push origin main` (`65287435..a98d87d6`) ; workflow « Tests » `37542691469` vert ; Netlify : `commit_ref` `a98d87d6`, `state` ready.
 
