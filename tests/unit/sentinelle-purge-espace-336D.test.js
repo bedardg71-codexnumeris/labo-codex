@@ -195,7 +195,7 @@ describe('#336 D · câblage dans chargerCodex (sentinelle statique)', () => {
 
     it('la preview est calculée dans chargerCodex, APRÈS la vérification de persistance', () => {
         const idxPersistance = src.indexOf('var ecartsPersistance = await _verifierEcritureTemoins(donnees)');
-        const idxPurge = src.indexOf('_planifierPurgeEspace(donnees, clesStockage, blobIdsStockage)');
+        const idxPurge = src.indexOf('_planifierPurgeEspace(donnees, clesStockage, blobIdsStockage, ');   // T2 : + les fichiers du démo installé
         expect(idxPersistance).toBeGreaterThan(-1);
         expect(idxPurge).toBeGreaterThan(idxPersistance);
     });
