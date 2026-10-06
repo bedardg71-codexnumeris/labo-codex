@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 16 h 08 : **1.186.5 (T5 + #1034) COMMITÉE SUR `main` LOCAL (`ee56f2b5`, `dd5f3143`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 18 h 50 : **1.186.5 (T5 + #1034) EN LIGNE, MESURÉ CHEZ NETLIFY SUR `a98d87d6` (PUBLIÉ À 18 h 46) ; VERDICT COMPLET VERT (0 INSTABLE)**
+
+**Ce qui est fait** : relecture de Cowork sans défaut bloquant (deux points inscrits sous #1034, `a98d87d6`) ; verdict complet sur `a98d87d6` : 0 échec, 0 instable, 0 veille (rendu à 18 h 45) ; `git push origin main` (`65287435..a98d87d6`) ; workflow « Tests » `37542691469` vert ; Netlify : `commit_ref` `a98d87d6`, `state` ready.
+
+**La suite** (une décision par session, à Grégoire) : #1035 (mesurer `demo_fichiersTravaux` : production et groupe des 30 copies) ; stock de #1034 au réel (mesure en lecture seule) ; les deux points de la relecture sous #1034 ; #1033 ; lot 3 de l'enregistrement (#976).
+
+---
+
+## (relais précédent) 6 OCT. 2026, 16 h 08 : **1.186.5 (T5 + #1034) COMMITÉE SUR `main` LOCAL (`ee56f2b5`, `dd5f3143`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
 
 **Consigne** : Cowork, après `BUG_grégoire_2026-10-06_15-34-54` (M2 mesuré, refus confirmé) ; « Corriger dans la 1.186.5 » choisi par Grégoire pour le constat 3.
 
