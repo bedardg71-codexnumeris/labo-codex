@@ -7,7 +7,28 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 19 h 27 : **1.186.6 (T2, T4, T7, #1034 b) COMMITÉE SUR `main` LOCAL (`43aae20d`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 19 h 46 : **1.186.6 REVUE APRÈS LA RELECTURE DE COWORK (build `1006-1945`, `99ab7ef9`) SUR `main` LOCAL ; SECONDE RELECTURE COURTE DE COWORK, PUIS VERDICT ET PUSH**
+
+**Consigne** : relecture de Cowork sur `d861cc9f..c45661d5` — T2 et #1034 b acceptés ; trois corrections.
+
+**Ce qui est fait** :
+- (1) T4 revu (`1c742f5b`) : le refus d'import est retiré (travaux-import.js et travaux-ui.js reviennent à leur état d'avant T4). En démo, `stockerBlob`, `recupererBlob` et `supprimerBlob` contournent le dossier (`dossierEnJeu()`) et passent par IndexedDB. Mesuré : ce sont les trois seules fonctions qui touchent le dossier des copies ; les vignettes sont des clés `thumbnail_<id>` en base (aucun filet nécessaire). Banc : écrite, relue, supprimée en IndexedDB, dossier simulé ni écrit, ni lu, ni vidé ; hors démo, le dossier reçoit la copie ; témoins par clause et par fonction.
+- (2) T7 dans les deux sens (`ddc5c8a9`) : `importEmpecheLaBascule(versLaDemo)` garde `activerModeDemo` comme `desactiverModeDemo` ; la case de l'accueil garde son état dans les deux sens. Avis validé : « Attends la fin de l'import des copies avant d'entrer dans la démo. », titre « Import en cours ».
+- (3) Ancien chemin par la case (`3e2d58f3`) — **mesuré, il écrivait le démo** : l'import complet d'un fichier « localStorage brut » faisait `db.set` de toutes ses clés (`demo_*` comprises) et restaurait les copies du démo ; l'import par cases versait les productions de `demo_productions` dans la clé de productions de l'espace (fuite vers une clé réelle). `_sansLeDemoDuFichier` (import-export.js, via `Codex.partDuDemo`, valeurs en chaîne JSON comprises) s'applique aux trois entrées du format, avant l'aperçu. Spec des anciens fichiers de 1.172.0 : référence intacte, écart nommé (productions 12 → 1, cases calendrier, groupe-cours et horaires du démo, total du bilan), et aucune production du démo n'entre (rouge par mutation).
+- Nouvelles (`038d84b7`) : « Démo : ton codex n'emporte plus la démo, et ouvrir un codex ne la modifie plus. », consolidée dans l'entrée 1.186.
+- Build refait (`99ab7ef9`), version inchangée 1.186.6.
+
+**Tests** : Vitest après le commit du build : 691 fichiers, 8 292 essais. Specs voisins (démo, import, codex, chemin par la case) : 48/48, plus 20 sur le chemin par la case et les anciens fichiers. **Verdict complet : pas encore.**
+
+**À l'écran (Grégoire)** : en démo, sur le Mac avec le dossier branché, importer une copie fonctionne, et rien n'apparaît dans le dossier réel.
+
+**Hors lot, resté** : « Stockage sur disque actif » s'affiche encore en démo dans l'écran d'import (les copies du démo vont pourtant en IndexedDB) — mots d'écran, non touchés ; (3) `actionFusionner` prend la première clé contenant `fichiersTravaux`, qui peut être celle du démo (sans effet observable mesuré).
+
+**La suite** : seconde relecture courte de Cowork ; verdict complet ; `git push origin main` ; mesure chez Netlify. Puis T3 et T6 (G3, G4).
+
+---
+
+## (relais précédent) 6 OCT. 2026, 19 h 27 : **1.186.6 (T2, T4, T7, #1034 b) COMMITÉE SUR `main` LOCAL (`43aae20d`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
 
 **Consigne** : Cowork, 18 h 56 (`d861cc9f`), décision G1 de Grégoire : le codex n'emporte pas le démo.
 
