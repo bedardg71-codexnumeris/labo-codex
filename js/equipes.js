@@ -47,10 +47,23 @@ function analyserReste(n, taille) {
 }
 
 /**
+ * La question du reste se pose-t-elle ? Seulement s'il y a un reste ET une équipe
+ * complète — et jamais en équipes de 2 avec un reste de 1 (une équipe de 3, d'office).
+ */
+function resteDemande(n, taille) {
+    const { completes, reste } = analyserReste(n, taille);
+    return reste > 0 && completes > 0 && !(taille === 2 && reste === 1);
+}
+
+/**
  * Tailles des équipes selon le choix du reste.
- * 'petite'   : les équipes complètes, plus une équipe du reste ;
- * 'agrandir' : le reste réparti, un élève de plus par équipe (en boucle si besoin).
- * Moins d'élèves qu'une équipe : une seule équipe.
+ * 'petite'   : reste de 2 ou plus → les équipes complètes, plus une équipe du reste ;
+ *              reste de 1 → « des équipes plus petites » : une équipe de plus, tailles
+ *              aussi égales que possible (9 en 4 → 3, 3, 3) ;
+ * 'agrandir' : le reste réparti, un de plus par équipe (en boucle si besoin).
+ * Équipes de 2 avec un reste de 1 : une équipe de 3, quel que soit le mode.
+ * Moins de personnes qu'une équipe : une seule équipe.
+ * Reste de 1 tranché par Grégoire le 7 oct. 2026 : jamais d'équipe d'une seule personne.
  */
 function taillesEquipes(n, taille, modeReste) {
     if (n <= 0) return [];
@@ -58,9 +71,16 @@ function taillesEquipes(n, taille, modeReste) {
     if (completes === 0) return [n];
     const tailles = new Array(completes).fill(taille);
     if (reste === 0) return tailles;
+    if (reste === 1 && taille === 2) modeReste = 'agrandir';
     if (modeReste === 'agrandir') {
         for (let i = 0; i < reste; i++) tailles[i % completes] += 1;
         return tailles;
+    }
+    if (reste === 1) {
+        const k = completes + 1;
+        const base = Math.floor(n / k);
+        const plus = n % k;
+        return Array.from({ length: k }, (_, i) => base + (i < plus ? 1 : 0));
     }
     tailles.push(reste);
     return tailles;
@@ -120,7 +140,7 @@ function formerEquipes(das, taille, modeReste, pairesDejaFaites, rng) {
     return meilleur;
 }
 
-window.EquipesLogique = { separerAbsentsDuJour, analyserReste, taillesEquipes, pairesDe, formerEquipes };
+window.EquipesLogique = { separerAbsentsDuJour, analyserReste, resteDemande, taillesEquipes, pairesDe, formerEquipes };
 
 /* ===============================
    ÉCRAN (panneau « Équipes » de l'Animation)
@@ -201,12 +221,15 @@ function rendreEquipes() {
             <span>${t}</span>
         </label>`).join('');
 
-    // Le reste : demandé seulement s'il y en a un ET s'il y a au moins une équipe complète.
+    // Le reste : demandé seulement s'il y en a un ET s'il y a au moins une équipe complète ;
+    // en équipes de 2 avec un reste de 1, pas de question : l'écran dit l'équipe de 3.
     let blocReste = '';
     let resteAChoisir = false;
     if (taille) {
-        const { completes, reste } = analyserReste(n, taille);
-        if (reste > 0 && completes > 0) {
+        const { reste } = analyserReste(n, taille);
+        if (taille === 2 && reste === 1 && n > 2) {
+            blocReste = `<p class="equipes-note">${etudiants(n)} en équipes de 2 : une équipe sera de 3.</p>`;
+        } else if (resteDemande(n, taille)) {
             resteAChoisir = !etatEquipes.modeReste;
             const petite = decrireTailles(taillesEquipes(n, taille, 'petite'));
             const grandes = decrireTailles(taillesEquipes(n, taille, 'agrandir'));
@@ -215,7 +238,7 @@ function rendreEquipes() {
                 <legend>${etudiants(n)} en équipes de ${taille} : il en reste ${reste}.</legend>
                 <label class="equipes-choix-ligne">
                     <input type="radio" name="equipes-reste" value="petite" data-on-change="choisirResteEquipes" ${etatEquipes.modeReste === 'petite' ? 'checked' : ''}>
-                    <span>Une équipe plus petite <span class="text-muted">(${petite})</span></span>
+                    <span>${reste === 1 ? 'Des équipes plus petites' : 'Une équipe plus petite'} <span class="text-muted">(${petite})</span></span>
                 </label>
                 <label class="equipes-choix-ligne">
                     <input type="radio" name="equipes-reste" value="agrandir" data-on-change="choisirResteEquipes" ${etatEquipes.modeReste === 'agrandir' ? 'checked' : ''}>

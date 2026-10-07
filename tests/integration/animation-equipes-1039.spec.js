@@ -69,20 +69,23 @@ test('#1039 · barre latérale, absent du jour écarté, reste demandé, chaque 
     await expect(former).toBeDisabled();
     await page.locator('input[name="equipes-taille"][value="4"]').check();
 
-    const reste = presents % 4;
-    if (reste > 0) {
-        // Le reste est DEMANDÉ : pas de choix par défaut, bouton inerte jusqu'à la réponse.
-        await expect(page.locator('input[name="equipes-reste"]:checked')).toHaveCount(0);
-        await expect(page.locator('#equipes-contenu legend').nth(1)).toContainText(`il en reste ${reste}`);
-        await expect(former).toBeDisabled();
-        await page.locator('input[name="equipes-reste"][value="petite"]').check();
-    }
+    // Le pack démo : 10 étudiant·es, 1 absence posée → 9 présent·es, soit un reste de 1 en équipes de 4.
+    // Reste de 1 (tranché par Grégoire le 7 oct. 2026, 12 h 42) : jamais d'équipe d'une seule personne.
+    expect(presents).toBe(9);
+    // Le reste est DEMANDÉ : pas de choix par défaut, bouton inerte jusqu'à la réponse.
+    await expect(page.locator('input[name="equipes-reste"]:checked')).toHaveCount(0);
+    await expect(page.locator('#equipes-contenu legend').nth(1)).toContainText('9 étudiant·es en équipes de 4 : il en reste 1.');
+    await expect(page.locator('#equipes-contenu label', { has: page.locator('input[value="petite"]') })).toContainText('Des équipes plus petites (3 de 3)');
+    await expect(page.locator('#equipes-contenu label', { has: page.locator('input[value="agrandir"]') })).toContainText('Des équipes plus grandes (1 de 5, 1 de 4)');
+    await expect(former).toBeDisabled();
+    await page.locator('input[name="equipes-reste"][value="petite"]').check();
     await expect(former).toBeEnabled();
     await former.click();
 
     const equipes = page.locator('.equipes-carte');
-    const attendu = Math.floor(presents / 4) + (reste > 0 ? 1 : 0);
-    await expect(equipes).toHaveCount(attendu);
+    await expect(equipes).toHaveCount(3);
+    const tailles = await equipes.evaluateAll((cartes) => cartes.map((c) => c.querySelectorAll('li').length));
+    expect(tailles).toEqual([3, 3, 3]);
     const noms = await page.locator('.equipes-carte li').allTextContents();
     expect(noms.length).toBe(presents);
     expect(new Set(noms).size).toBe(presents);
@@ -100,6 +103,15 @@ test('#1039 · barre latérale, absent du jour écarté, reste demandé, chaque 
     const memoire = await page.evaluate(() => db.getSync('equipesAnimation_' + db.getSync('infoCours', null)?.id, null));
     expect(memoire.formations).toBe(1);
     expect(memoire.paires.length).toBeGreaterThan(0);
+
+    // Équipes de 2 avec un reste de 1 : pas de question, l'écran dit l'équipe de 3 et forme ainsi.
+    await page.locator('input[name="equipes-taille"][value="2"]').check();
+    await expect(page.locator('input[name="equipes-reste"]')).toHaveCount(0);
+    await expect(page.locator('#equipes-contenu .equipes-note')).toContainText('9 étudiant·es en équipes de 2 : une équipe sera de 3.');
+    await expect(former).toBeEnabled();
+    await former.click();
+    const tailles2 = await page.locator('.equipes-carte').evaluateAll((cartes) => cartes.map((c) => c.querySelectorAll('li').length).sort());
+    expect(tailles2).toEqual([2, 2, 2, 3]);
 
     expect(erreurs).toEqual([]);
 });
