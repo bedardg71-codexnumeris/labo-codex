@@ -199,7 +199,19 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
     expect(base, 'ses données sont toujours en base').toEqual({ copies: COPIES_DE_LUI, evaluations: 2, presences: 1 });
 
     const codex = await page.evaluate(async (da) => {
-        const rendu = await Codex.generer({ nom: 'Codex du banc 1013' });
+        // G1 (1.186.6) : le codex n'emporte plus la démo. Le banc vit dans la démo ; le temps de la
+        // génération, ses clés sont présentées au codex sous un trimestre réel fictif (a2031_),
+        // sans rien écrire en base. Les copies, elles, se lisent par leur id, inchangé.
+        const { keys, get } = db;
+        db.keys = async () => (await keys.call(db)).map((k) => k.replace(/^demo_/, 'a2031_'));
+        db.get = (k, d) => get.call(db, k.replace(/^a2031_/, 'demo_'), d);
+        let rendu;
+        try {
+            rendu = await Codex.generer({ nom: 'Codex du banc 1013' });
+        } finally {
+            db.keys = keys;
+            db.get = get;
+        }
         const zip = await JSZip.loadAsync(await rendu.blob.arrayBuffer());
         const donnees = JSON.parse(await zip.file('donnees.json').async('string'));
         const de = (suffixe) => Object.keys(donnees).filter((c) => c.endsWith(suffixe)).flatMap((c) => {

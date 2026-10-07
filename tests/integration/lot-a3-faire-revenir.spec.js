@@ -60,6 +60,22 @@ async function demarrerDemo(page) {
     await page.waitForTimeout(1500);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(3000);
+    // G1 (1.186.6) : le codex n'emporte plus la démo. Le banc vit dans la démo ; le temps de la
+    // génération, ses clés sont présentées au codex sous un trimestre réel fictif (a2031_),
+    // sans rien écrire en base. Les copies, elles, se lisent par leur id, inchangé.
+    await page.evaluate(() => {
+        window.__codexDuBanc = async (options) => {
+            const { keys, get } = db;
+            db.keys = async () => (await keys.call(db)).map((k) => k.replace(/^demo_/, 'a2031_'));
+            db.get = (k, d) => get.call(db, k.replace(/^a2031_/, 'demo_'), d);
+            try {
+                return await Codex.generer(options);
+            } finally {
+                db.keys = keys;
+                db.get = get;
+            }
+        };
+    });
 }
 
 const IDS = ['FT_r1', 'FT_r2', 'FT_r3', 'FT_c4', 'FT_d5', 'FT_s6', 'FT_a7', 'FT_ok8'];
@@ -174,7 +190,7 @@ const instantane = (page) => page.evaluate(async () => {
 /** Le compte du codex (#1012) : combien de copies attendues, combien manquent. La génération s'arrête là. */
 const compteDuCodex = (page) => page.evaluate(async () => {
     let compte = null;
-    const r = await Codex.generer({ confirmerCopiesManquantes: async (m, a) => { compte = { manquantes: m, attendues: a }; return false; } });
+    const r = await window.__codexDuBanc({ confirmerCopiesManquantes: async (m, a) => { compte = { manquantes: m, attendues: a }; return false; } });
     // Rien ne manque : la fenêtre n'est pas appelée, le compte est dans le codex généré.
     return compte || (r && r.copies) || null;
 });
@@ -279,7 +295,7 @@ test.describe('Lot A3 — « Faire revenir » les copies d\'une archive vérifi�
             // Le codex : la fenêtre n'est pas appelée, et la copie revenue est dans le fichier.
             const codex = await page.evaluate(async () => {
                 let fenetre = false;
-                const r = await Codex.generer({ confirmerCopiesManquantes: async () => { fenetre = true; return false; } });
+                const r = await window.__codexDuBanc({ confirmerCopiesManquantes: async () => { fenetre = true; return false; } });
                 const noms = r ? (await ReserveVerifier.lireRepertoireZip(r.blob)).map((e) => e.nom) : [];
                 return { fenetre, copies: r && r.copies, r1: noms.filter((n) => /\/FT_r1\.pdf$/.test(n)).length };
             });
