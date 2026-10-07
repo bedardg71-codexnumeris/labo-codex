@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.187 (T3 du chantier du démo) — ligne validée par Grégoire le 7 oct. 2026, par Cowork,
+            // posée telle quelle. Titre de Claude Code.
+            version: '1.187',
+            couleur: 'vert',
+            titre: 'Retirer les copies de la démo',
+            items: [
+                'Démo&nbsp;: un bouton «&nbsp;Retirer les copies&nbsp;» dans le bandeau vert efface les copies importées dans la démo, sans toucher à tes vraies copies.'
+            ]
+        },
+        {
             // 1.186 (#1028 : archiver les copies d'un trimestre clos) — ligne acceptée par Grégoire
             // le 5 oct. 2026 à 10 h 10 (MOTS-2026-10-05-1028-archiver-copies.md), posée telle quelle.
             // Titre de Claude Code.
