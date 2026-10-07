@@ -152,6 +152,24 @@ function initialiserTirage() {
         reinitialiserAffichage();
     }
 
+    // #1039 : le panneau Équipes suit le même rafraîchissement (navigation, changement de groupe).
+    if (typeof window.initialiserEquipes === 'function') window.initialiserEquipes();
+}
+
+/**
+ * #1039 : barre latérale de l'Animation — un outil affiché à la fois.
+ * @param {'questions'|'tirage'|'equipes'} nom
+ */
+function changerOutilAnimation(nom) {
+    document.querySelectorAll('#suivi-animation [data-outil-animation]').forEach(panneau => {
+        panneau.hidden = panneau.dataset.outilAnimation !== nom;
+    });
+    document.querySelectorAll('#suivi-animation .sidebar-item[data-action="changerOutilAnimation"]').forEach(bouton => {
+        const actif = bouton.dataset.param === nom;
+        bouton.classList.toggle('active', actif);
+        bouton.setAttribute('aria-pressed', actif ? 'true' : 'false');
+    });
+    if (nom === 'equipes' && typeof window.initialiserEquipes === 'function') window.initialiserEquipes();
 }
 
 /**
@@ -1191,6 +1209,7 @@ window.toggleExclusionEtudiant = toggleExclusionEtudiant;
 window.appliquerParamsTirage = appliquerParamsTirage;
 window.reinitialiserTirageComplet = reinitialiserTirageComplet;
 window.initialiserTirage = initialiserTirage;
+window.changerOutilAnimation = changerOutilAnimation;
 
 // Questions Flash
 window.lancerTirageQuestion = lancerTirageQuestion;
