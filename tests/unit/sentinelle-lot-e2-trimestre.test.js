@@ -41,6 +41,8 @@ function monter({ registre = [], champs = {}, donnees = {} } = {}) {
         elements[id] = { value: champs[id] || '' };
     }
     elements['v2-btnCreerTrimestre'] = { classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c), contains: (c) => classes.has(c) } };
+    const classesAnnuler = new Set(['u-hide']);
+    elements['v2-btnAnnulerCreationTrimestre'] = { classList: { add: (c) => classesAnnuler.add(c), remove: (c) => classesAnnuler.delete(c), contains: (c) => classesAnnuler.has(c) } };
     const temoin = { nonEnregistre: vi.fn(), enregistre: vi.fn() };
     const notifications = { erreur: vi.fn(), succes: vi.fn() };
     const sauvegarder = vi.fn((cleBase, valeur, options) => {
@@ -58,7 +60,7 @@ function monter({ registre = [], champs = {}, donnees = {} } = {}) {
         document: { getElementById: (id) => elements[id] || null, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] },
         setTimeout: () => 0, setValue: () => {}
     }, { temoinEnregistrement: temoin, raisonPourTemoin: (r) => r, afficherStatistiquesTrimestreV2() {}, uiDialogues });
-    return { win, store, db, elements, temoin, notifications, sauvegarder, ecritures, genererCalendrierComplet, fiches, boutonCache: () => classes.has('u-hide') };
+    return { win, store, db, elements, temoin, notifications, sauvegarder, ecritures, genererCalendrierComplet, fiches, boutonCache: () => classes.has('u-hide'), annulerCache: () => classesAnnuler.has('u-hide') };
 }
 
 const AUTOMNE_VIDE = [{ id: 'a2026', nom: 'Automne 2026', session: 'A', annee: 2026, actif: true }];
@@ -278,6 +280,76 @@ describe('#975 · un trimestre actif — « + Nouveau trimestre » ouvre la fich
         expect(liste).not.toContain('créé avec succès');
         expect(html).not.toContain('ouvrirModalNouveauTrimestre');
         expect(html).toMatch(/data-action="ouvrirCreationTrimestreV2">\s*\+ Nouveau trimestre/);
+    });
+});
+
+// #975 suite (décisions de Grégoire, 7 oct. 2026) — « Annuler » à côté de « Créer le trimestre »,
+// seulement quand un trimestre actif est à retrouver ; son clic n'écrit rien. Pas de question
+// de sortie dans l'application (« on s'en passe ») : seule la question native au rechargement.
+describe('#975 suite · « Annuler » quitte la création demandée sans rien écrire', () => {
+    const AUTOMNE = [{ id: 'a2026', nom: 'Automne 2026', session: 'A', annee: 2026, actif: true }];
+    const CADRE = { dateDebut: '2026-08-25', finCours: '2026-12-11', finTrimestre: '2026-12-22' };
+    const monterAvecActif = () => monter({
+        registre: AUTOMNE,
+        champs: { 'v2-nomTrimestre': 'Automne 2026', 'v2-sessionTrimestre': 'automne', 'v2-anneeTrimestre': '2026', 'v2-debutTrimestre': '2026-08-25' },
+        donnees: { a2026_cadreCalendrier: { ...CADRE }, a2026_calendrierComplet: { '2026-08-25': {}, '2026-12-22': {} } }
+    });
+
+    it('un trimestre actif : « Annuler » paraît avec « Créer le trimestre »', () => {
+        const e = monterAvecActif();
+        expect(e.annulerCache()).toBe(true);
+        e.win.ouvrirCreationTrimestreV2();
+        expect(e.boutonCache()).toBe(false);
+        expect(e.annulerCache()).toBe(false);
+    });
+
+    it('aucun trimestre actif (poste vierge) : « Créer le trimestre » paraît, « Annuler » non', () => {
+        const e = monter({ registre: [] });
+        e.win.chargerIdentificationTrimestreV2();
+        expect(e.boutonCache()).toBe(false);
+        expect(e.annulerCache()).toBe(true);
+        e.win.ouvrirCreationTrimestreV2();
+        expect(e.boutonCache()).toBe(false);
+        expect(e.annulerCache()).toBe(true);
+    });
+
+    it('le clic : rien d\'écrit (registre, cadre), la fiche du trimestre actif revient, les deux boutons disparaissent', () => {
+        const e = monterAvecActif();
+        e.win.ouvrirCreationTrimestreV2();
+        for (const [id, v] of Object.entries({ 'v2-nomTrimestre': 'Hiver fictif', 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '2027', 'v2-debutTrimestre': '2027-01-19' })) {
+            e.elements[id].value = v;
+        }
+        const avant = JSON.parse(JSON.stringify(e.store));
+        expect(e.win.annulerCreationTrimestreV2()).toBe(true);
+        expect(e.ecritures).toEqual([]);
+        expect(e.sauvegarder).not.toHaveBeenCalled();
+        expect(e.store).toEqual(avant);
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Automne 2026');
+        expect(e.elements['v2-sessionTrimestre'].value).toBe('automne');
+        expect(e.elements['v2-anneeTrimestre'].value).toBe(2026);
+        expect(e.elements['v2-debutTrimestre'].value).toBe('2026-08-25');
+        expect(e.elements['v2-finTrimestre'].value).toBe('2026-12-22');
+        expect(e.boutonCache()).toBe(true);
+        expect(e.annulerCache()).toBe(true);
+        // La création est bien quittée : les champs écrivent de nouveau dans le trimestre actif.
+        expect(e.fiches.trimestre()).toBe(false);
+        e.elements['v2-nomTrimestre'].value = 'Automne fictif';
+        expect(e.win.sauvegarderNomTrimestreV2()).toBe(true);
+        expect(e.store.trimestres[0].nom).toBe('Automne fictif');
+    });
+
+    it('hors création demandée, « Annuler » ne fait rien', () => {
+        const e = monterAvecActif();
+        expect(e.win.annulerCreationTrimestreV2()).toBe(false);
+        expect(e.elements['v2-debutTrimestre'].value).toBe('2026-08-25');
+        expect(e.ecritures).toEqual([]);
+    });
+
+    it('index.html : « Annuler », bouton secondaire, caché d\'abord, à côté de « Créer le trimestre » ; aucune question de sortie branchée', () => {
+        const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+        expect(html).toMatch(/<button id="v2-btnAnnulerCreationTrimestre" class="btn btn-secondaire btn-tres-compact u-hide" data-action="annulerCreationTrimestreV2">Annuler<\/button>\s*<button id="v2-btnCreerTrimestre"/);
+        const code = readFileSync(path.join(racine, 'js/trimestre-v2-init.js'), 'utf8');
+        expect(code).not.toMatch(/quitterCreationSiConfirme\(\s*['"]trimestre/);
     });
 });
 
