@@ -72,6 +72,7 @@ describe('#353 Option C volet 3 · set() async tracke son écriture IDB (W1)', (
             _ecrireIDB: db._ecrireIDB, _supprimerIDB: db._supprimerIDB,
             _avecReprise: db._avecReprise, _connexionFermee: db._connexionFermee,
             _dernieresValeurs: new Map(), _connexionPerdue: false, _reouverture: null,
+            _suppressionsEnVol: new Map(),         // #1030 : `_signalerEcriture` retire la suppression en vol
             _estimateSize: () => 10,               // sous le seuil IDB-first
             // #401 : set() sérialise une fois et écrit la chaîne (helpers neufs)
             _estimateSizeFromString: () => 10,

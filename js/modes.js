@@ -1631,7 +1631,8 @@ if (typeof db !== 'undefined' && typeof db.surEcriture === 'function') {
 
 // #962 — un échec d'écriture IndexedDB d'arrière-plan (après `db.setSync`, quel que soit
 // l'écrivain, même discret) fait dire « Non enregistré » au témoin. Avant : un
-// `console.warn`, et le témoin avait déjà dit « Enregistré ».
+// `console.warn`, et le témoin avait déjà dit « Enregistré ». #1030 : une suppression
+// d'arrière-plan (`db.removeSync`) qui échoue passe par le même abonné, mêmes mots.
 if (typeof db !== 'undefined' && typeof db.surEchecEcriture === 'function') {
     db.surEchecEcriture((cleEcrite, error) => {
         const temoin = window.temoinEnregistrement;
