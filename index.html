@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261005c"> <!-- Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261007a"> <!-- #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -8096,13 +8096,29 @@
                 <!-- Sous-section: Animation (outils interactifs en classe — migré depuis Labo le 27 mai 2026) -->
                 <div id="suivi-animation" class="sous-section">
                     <h2>Animation</h2>
-                    <p class="text-muted">Outils interactifs pour l'animation en classe : tirage au sort d'étudiant·es et questions flash.</p>
+                    <p class="text-muted">Outils pour animer la classe : questions flash, tirage au sort et équipes.</p>
 
-                    <!-- Container flex pour les deux cartes -->
-                    <div class="outils-grid">
+                    <!-- #1039 : barre latérale d'outils, sur le modèle du profil (remplace les deux cartes côte à côte) -->
+                    <div class="layout-sidebar-2col animation-layout">
 
-                        <!-- CARTE 1: Questions Flash -->
-                        <div id="questions-container" class="outil-carte">
+                        <nav class="sidebar-navigation" aria-label="Outils d'animation">
+                            <div class="sidebar-liste">
+                                <button type="button" class="sidebar-item active" data-action="changerOutilAnimation" data-param="questions" aria-pressed="true">
+                                    <span class="sidebar-item-titre">Questions flash</span>
+                                </button>
+                                <button type="button" class="sidebar-item" data-action="changerOutilAnimation" data-param="tirage" aria-pressed="false">
+                                    <span class="sidebar-item-titre">Tirage au sort</span>
+                                </button>
+                                <button type="button" class="sidebar-item" data-action="changerOutilAnimation" data-param="equipes" aria-pressed="false">
+                                    <span class="sidebar-item-titre">Équipes</span>
+                                </button>
+                            </div>
+                        </nav>
+
+                        <div class="zone-principale">
+
+                        <!-- OUTIL 1: Questions Flash -->
+                        <div id="questions-container" class="outil-carte" data-outil-animation="questions">
                             <div class="outil-carte-header">
                                 <h3 class="outil-carte-titre" data-tooltip="outil-questions-flash">Questions Flash</h3>
                                 <button id="btn-params-questions"
@@ -8144,8 +8160,8 @@
                             </div>
                         </div>
 
-                        <!-- CARTE 2: Tirage au sort -->
-                        <div id="tirage-container" class="outil-carte">
+                        <!-- OUTIL 2: Tirage au sort -->
+                        <div id="tirage-container" class="outil-carte" data-outil-animation="tirage" hidden>
                             <div class="outil-carte-header">
                                 <h3 class="outil-carte-titre" data-tooltip="outil-tirage">Tirage au sort</h3>
                                 <button id="btn-params-tirage"
@@ -8179,7 +8195,16 @@
                             </div>
                         </div>
 
-                    </div><!-- fin outils-grid -->
+                        <!-- OUTIL 3: Équipes (#1039) — contenu rendu par js/equipes.js -->
+                        <div id="equipes-container" class="outil-carte" data-outil-animation="equipes" hidden>
+                            <div class="outil-carte-header">
+                                <h3 class="outil-carte-titre">Équipes</h3>
+                            </div>
+                            <div id="equipes-contenu" class="equipes-contenu"></div>
+                        </div>
+
+                        </div><!-- fin zone-principale -->
+                    </div><!-- fin animation-layout -->
 
                 </div><!-- FIN sous-section suivi-animation -->
 
@@ -14394,7 +14419,8 @@
     <script src="js/profil-etudiant-sections-affichage.js?v=20260927c"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20260917b"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
-    <script src="js/boite-outils.js?v=20261006a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
+    <script src="js/boite-outils.js?v=20261007a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
+    <script src="js/equipes.js?v=20261007a"></script> <!-- #1039 : générateur d'équipes (Animation) -->
     <script src="js/modelisation.js?v=20261006a"></script> <!-- Modélisation : annotation en projection -->
     <script src="js/rythme.js?v=20261001b"></script> <!-- Semaine dimanche→samedi (format direction des études, 6 août) -->
 

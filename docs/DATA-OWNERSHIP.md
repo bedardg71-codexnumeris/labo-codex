@@ -115,6 +115,7 @@ ci-dessous.
 | `listeCours` | G | `cours.js` (11 écritures littérales) | 14 lecteurs | **5 écrivains : contexte, cours, demo-activation, migrations, trimestre-v2-cours** (violation critique #13) |
 | `cours` | G | `cours.js` (cible) | large usage (lookup cours) | **3 écrivains : demo-activation, migrations, trimestre-v2-cours** (violation mineure héritée, clé legacy `listeCours` = fallback) |
 | `enseignants` | G | `trimestre-v2-enseignants.js` (cible — post-refactor 17 mai) | export-pdf, primo-questions | **4 écrivains : demo-activation, import-export, migrations, trimestre-v2-enseignants** (violation critique #14) |
+| `equipesAnimation_<coursId>` | G (composée par groupe-cours, comme `questionsFlash_<coursId>` et `etatTirage`, tous trois de l'Animation ; **#1039, 7 oct. 2026**) | `equipes.js` (`retenirEquipes` écrit, `oublierEquipesRetenues` retire — au GESTE seulement) | `equipes.js` seul | `{ paires: ['da1\|da2', …], formations: n }` : les paires d'élèves des équipes RETENUES, pour ne pas refaire les mêmes. Contient des DA (donnée d'élève). Rien d'écrit tant que l'enseignant ne clique pas « Retenir ces équipes ». Lit `presences` (absents du jour) sans l'écrire |
 
 ---
 
