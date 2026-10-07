@@ -41,3 +41,17 @@ Typographie du fichier : espaces insécables (`&nbsp;`) dans les guillemets et a
 **Les deux mots en attente** (bouton pour quitter la création sans créer, titre de la question de sortie) : ne rien écrire. Note-les dans le relais comme « mots en attente de Grégoire ».
 
 Puis : commit du changelog, Chrome et Safari fermés, verdict complet, push, vérification de la mise en ligne chez Netlify. Rapport en gestes d'utilisateur.
+
+
+## Suite 2 – le bouton « Annuler » de la création d'un trimestre (7 oct. 2026, 9 h 38, Toronto)
+
+1.188.0 est en ligne (relais `24bf0fda`). Deux décisions de Grégoire, prises ce matin par Cowork :
+
+- **« Annuler »** (« oui », vers 9 h 20) : pendant la création demandée par « + Nouveau trimestre », un bouton « Annuler » à côté de « Créer le trimestre ». Il ne paraît que si un trimestre est actif (au premier trimestre d'un poste vierge, il n'y a rien à retrouver). Au clic : rien n'est écrit, la création demandée est quittée, la fiche du trimestre actif revient (`chargerIdentificationTrimestreV2`) et « Créer le trimestre » disparaît. Style : bouton secondaire, selon `design-system.html`. Mot unique, tel quel.
+- **Pas de question de sortie dans l'application** (« on s'en passe », 9 h 38) : quitter le Cadre pendant une création perd la saisie, et c'est accepté ; seule reste la question native du navigateur au rechargement. Écris-le en commentaire là où la question aurait vécu, pour qu'aucune session ne la rajoute.
+
+Fichiers : `js/trimestre-v2-init.js`, `index.html` (et le bloc de jetons). Banc avec break-test : le bouton paraît en création avec un trimestre actif, ne paraît pas sans trimestre actif, et son clic n'écrit rien dans `trimestres` ni dans le cadre du trimestre actif. Specs voisins (#478, #466), Vitest complet. Noms manifestement fictifs.
+
+Release patch par `scripts/release.mjs`. Ligne des Nouvelles proposée dans ton rapport, à part, non écrite. Puis arrête-toi : relecture de Cowork, verdict, push.
+
+Rapport en gestes d'utilisateur. Geste à l'écran, sans rien créer : « + Nouveau trimestre », puis « Annuler » ; la fiche de l'automne 2026 revient. La création elle-même attend sa vraie création de l'hiver 2027, son choix.
