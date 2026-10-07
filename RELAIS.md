@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 7 h 52 : **1.188.0 (LOTS 3 ET 5 DE L'ENREGISTREMENT : #1030, #1031, #975) COMMITÉE SUR `main` LOCAL (build `1007-0751`, `a7b37615`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 7 h 58 : **1.188.0 (LOTS 3 ET 5 DE L'ENREGISTREMENT : #1030, #1031, #975) RELUE PAR COWORK, NOUVELLES POSÉES ; VERDICT COMPLET ET PUSH EN COURS**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 7 h 29) ; plan
 `plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`. **Rien n'est poussé.**
@@ -30,8 +30,14 @@ erreur hors essai. Specs voisins WebKit (9 fichiers, dont #478, #466, lot E2, t�
 immédiatement ? » disparaît ; revenir à l'ancien : bibliothèque, « Activer ») ; une suppression
 dépassée par une réécriture de la même clé ne dit rien.
 
-**Suite** : relecture de Cowork → ligne des Nouvelles (proposée dans le rapport, non écrite) →
-Chrome et Safari fermés → verdict complet → push → Netlify → relais.
+**Relecture de Cowork** (7 h 57) : rien ne bloque (tests non relancés par Cowork). Les trois
+lignes des Nouvelles, validées par Grégoire, posées telles quelles dans l'entrée 1.188 de
+`js/changelog-data.js` (titre de Claude Code : « Créer un trimestre par son formulaire »).
+
+**Mots en attente de Grégoire** (rien d'écrit) : le bouton pour quitter la création sans créer,
+et le titre de la question de sortie (#975).
+
+**Suite** : Chrome et Safari fermés → verdict complet → push → Netlify → relais.
 
 ## (relais précédent) 7 OCT. 2026, 7 h 24 : **1.187.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `60e1ad80` (PUBLIÉ À 7 h 22) ; VERDICT COMPLET VERT ; CHANTIER DU DÉMO CLOS**
 

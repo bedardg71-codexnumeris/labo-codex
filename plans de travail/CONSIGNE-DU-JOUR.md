@@ -24,3 +24,20 @@ Avant le verdict complet : Chrome et Safari fermés.
 ## Ton rapport à Grégoire
 
 En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste à vérifier à l'écran en une ligne (pour #975 : créer un trimestre depuis la bibliothèque ; #1030 et #1031 n'en ont pas, les bancs suffisent).
+
+
+## Suite – relecture de Cowork (7 oct. 2026, 7 h 57, Toronto)
+
+**Relecture faite, rien ne bloque.** Lus : `61129bd3` (#1030), `ae576a70` (#1031), `60c24821` (#975), et le chemin `changerTrimestreActif` que « Créer le trimestre » emprunte quand un trimestre était actif. Tests non relancés par Cowork.
+
+**Ligne des Nouvelles validée par Grégoire** (« oui », 7 h 57). Pose ces trois items tels quels dans l'entrée 1.188 de `js/changelog-data.js` (titre : le tien), avec le commentaire de provenance habituel :
+
+1. Cadre : « + Nouveau trimestre » ouvre maintenant le formulaire du trimestre, comme pour ton premier. « Créer le trimestre » le crée et l'active, sans fenêtre à remplir.
+2. Une suppression qui n'a pas pu être enregistrée le dit maintenant (« Non enregistré »), au lieu de réapparaître au rechargement suivant.
+3. iPad : une copie importée juste après un retour dans l'application ne se perd plus.
+
+Typographie du fichier : espaces insécables (`&nbsp;`) dans les guillemets et avant le deux-points, comme dans les entrées voisines.
+
+**Les deux mots en attente** (bouton pour quitter la création sans créer, titre de la question de sortie) : ne rien écrire. Note-les dans le relais comme « mots en attente de Grégoire ».
+
+Puis : commit du changelog, Chrome et Safari fermés, verdict complet, push, vérification de la mise en ligne chez Netlify. Rapport en gestes d'utilisateur.
