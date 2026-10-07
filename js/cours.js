@@ -183,8 +183,15 @@ function peupleSelecteurTrimestre() {
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleCours() {
-    migrerCoursVersPratiques();
-    migrerCoursDansBibliotheque();
+    // #981 (7 oct. 2026) — les deux migrations écrivent `cours` ; appelées au chargement, AVANT
+    // `db-ready`, leur écriture était parfois réécrasée par la synchronisation du démarrage
+    // (mesuré au banc : `cours` écrit, puis relu sans les champs ajoutés). La migration se
+    // rejouait alors à l'ouverture suivante : `cours` réécrit sans geste, d'une ouverture à
+    // l'autre. Lancées une fois les données lisibles, elles n'écrivent que si un champ manque.
+    window.auDbPret(function () {
+        migrerCoursVersPratiques();
+        migrerCoursDansBibliotheque();
+    });
 }
 
 /* ===============================
