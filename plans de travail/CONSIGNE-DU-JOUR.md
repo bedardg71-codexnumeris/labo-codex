@@ -55,3 +55,16 @@ Fichiers : `js/trimestre-v2-init.js`, `index.html` (et le bloc de jetons). Banc 
 Release patch par `scripts/release.mjs`. Ligne des Nouvelles proposée dans ton rapport, à part, non écrite. Puis arrête-toi : relecture de Cowork, verdict, push.
 
 Rapport en gestes d'utilisateur. Geste à l'écran, sans rien créer : « + Nouveau trimestre », puis « Annuler » ; la fiche de l'automne 2026 revient. La création elle-même attend sa vraie création de l'hiver 2027, son choix.
+
+
+## Suite 3 – relecture de 1.188.1 (7 oct. 2026, 10 h 18, Toronto)
+
+**Relecture faite, rien ne bloque.** Lus : `e3e194a5` (« Annuler »), `d595aec2` (release). « Annuler » n'écrit rien et recharge les onze champs vidés par la création. `btn-secondaire` retenu : 23 « Annuler » de l'application le portent, 14 portent `btn-annuler`. Tests non relancés par Cowork.
+
+**Ligne des Nouvelles validée par Grégoire** (« oui », 10 h 18). Ajoute-la telle quelle comme quatrième item de l'entrée 1.188 de `js/changelog-data.js`, avec le commentaire de provenance habituel (1.188.1 consolidé dans 1.188) :
+
+4. Cadre : pendant la création d'un trimestre, « Annuler » ramène la fiche de ton trimestre actif sans rien créer.
+
+Typographie du fichier : espaces insécables (`&nbsp;`) dans les guillemets et avant le deux-points.
+
+Puis : commit du changelog, Chrome et Safari fermés, verdict complet, push, vérification de la mise en ligne chez Netlify. Rapport en gestes d'utilisateur.
