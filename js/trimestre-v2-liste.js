@@ -495,91 +495,11 @@ function changerTrimestreActifV2(valeur) {
     }
 }
 
-/**
- * Ouvre la modal pour créer un nouveau trimestre
- */
-function ouvrirModalNouveauTrimestre() {
-    // Demander la session
-    const sessionChoix = prompt(
-        'Créer un nouveau trimestre\n\n' +
-        'Quelle session ?\n' +
-        '  A = Automne\n' +
-        '  H = Hiver\n' +
-        '  E = Été\n\n' +
-        'Entre A, H ou E :'
-    );
+// #975 (7 oct. 2026) : « + Nouveau trimestre » ouvre la fiche d'identification du Cadre en
+// création (`ouvrirCreationTrimestreV2`, trimestre-v2-init.js) — le chemin du lot E2. L'ancien
+// chemin par `prompt` et `alert` (ouvrirModalNouveauTrimestre) est retiré.
 
-    if (!sessionChoix) return; // Annulé
-
-    const session = sessionChoix.trim().toUpperCase();
-    if (session !== 'A' && session !== 'H' && session !== 'E') {
-        alert('Session invalide. Veuillez entrer A (Automne), H (Hiver) ou E (Été).');
-        return;
-    }
-
-    // Demander l'année
-    const anneeActuelle = new Date().getFullYear();
-    const anneeChoix = prompt(
-        `Quelle année ?\n\n` +
-        `Exemples : ${anneeActuelle}, ${anneeActuelle + 1}\n\n` +
-        `Entre l'année (4 chiffres) :`
-    );
-
-    if (!anneeChoix) return; // Annulé
-
-    const annee = anneeChoix.trim();
-    if (!/^\d{4}$/.test(annee)) {
-        alert('Année invalide. Veuillez entrer 4 chiffres (ex: 2026).');
-        return;
-    }
-
-    // Vérifier si ce trimestre existe déjà
-    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
-    const id = `${session.toLowerCase()}${annee}`;
-    if (trimestres.find(t => t.id === id)) {
-        alert(`Le trimestre ${nomSession(session)} ${annee} existe déjà.`);
-        return;
-    }
-
-    // Demander si on veut l'activer — seulement s'il y a un trimestre actif à désactiver.
-    // #478 (c) : sans trimestre actif, un trimestre créé inactif laissait TOUT le Cadre sans
-    // préfixe de trimestre (mesuré : un groupe-cours partait dans la clé nue et restait
-    // invisible après activation jusqu'au rechargement), et le formulaire du groupe-cours
-    // n'avait rien à présélectionner. Le premier trimestre d'un poste vierge est donc actif.
-    const aucunTrimestreActif = !(typeof obtenirTrimestreActif === 'function' && obtenirTrimestreActif());
-    const activer = aucunTrimestreActif || confirm(
-        `Créer le trimestre ${nomSession(session)} ${annee} ?\n\n` +
-        `Veux-tu l'activer immédiatement ?\n` +
-        `(Le trimestre actuel sera désactivé)`
-    );
-
-    // Créer le trimestre
-    const result = creerTrimestre(session, annee, activer);
-
-    if (result) {
-        alert(`Trimestre "${result.nom}" créé avec succès !`);
-
-        // Rafraîchir l'interface
-        populerDropdownTrimestreV2();
-
-        if (activer) {
-            // 🔧 #466/CT-05 (21 août 2026) : la création-avec-activation passait
-            // par 4 recharges PARTIELLES (identification/cadre/journées/stats) au
-            // lieu du chemin complet — le contexte de l'ANCIEN trimestre survivait
-            // partout ailleurs : groupeCoursActif et infoCours pointaient l'ancien,
-            // le miroir trimestreActif restait périmé, le dropdown Horaire offrait
-            // les horaires de l'ancien namespace (édition ensuite REFUSÉE par le
-            // garde du 29 mai, sans explication), l'en-tête listait l'ancien GC.
-            // C'est le scénario type d'une rentrée. UN SEUL chemin de bascule
-            // désormais : le même que le sélecteur (recharges + resets + miroirs).
-            changerTrimestreActifV2(id);
-        }
-    } else {
-        alert('Erreur lors de la création du trimestre.');
-    }
-}
-
-// Exports — 11 fonctions migrées du bloc principal résidu (L4470-4480 originelles).
+// Exports — fonctions migrées du bloc principal résidu (L4470-4480 originelles) ; #975 en retire ouvrirModalNouveauTrimestre.
 window.trierTrimestresChronologique = trierTrimestresChronologique;
 window.populerDropdownTrimestreV2 = populerDropdownTrimestreV2;
 window.confirmerArchivage = confirmerArchivage;
@@ -590,7 +510,6 @@ window.fermerModalBibliothequeTrimestres = fermerModalBibliothequeTrimestres;
 window.archiverTrimestreActif = archiverTrimestreActif;
 window.confirmerSuppressionTrimestre = confirmerSuppressionTrimestre;
 window.changerTrimestreActifV2 = changerTrimestreActifV2;
-window.ouvrirModalNouveauTrimestre = ouvrirModalNouveauTrimestre;
 
 })();
 

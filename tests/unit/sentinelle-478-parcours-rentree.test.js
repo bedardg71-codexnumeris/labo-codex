@@ -82,11 +82,13 @@ describe('#478 B — le refus d\'un menu vide dit où naît un groupe', () => {
 });
 
 describe('#478 C — le premier trimestre d\'un poste est actif', () => {
-    it('la question d\'activation est court-circuitée quand aucun trimestre n\'est actif', () => {
-        const corps = corpsDe(liste, 'ouvrirModalNouveauTrimestre');
-        expect(corps).toMatch(/const aucunTrimestreActif = !\(typeof obtenirTrimestreActif === 'function' && obtenirTrimestreActif\(\)\);/);
-        expect(corps).toMatch(/const activer = aucunTrimestreActif \|\| confirm\(/);
-        // Un seul confirm d'activation : pas de second chemin qui reposerait la question.
-        expect(corps.match(/confirm\(/g)).toHaveLength(1);
+    // ↻ #975 (7 oct. 2026) : l'ancien chemin (prompt, confirm « l'activer ? ») est retiré ; la
+    // création passe par « Créer le trimestre » (lot E2), qui active toujours ce qu'il crée.
+    it('« Créer le trimestre » active ce qu\'il crée ; plus aucune question d\'activation', () => {
+        const init = lire('js/trimestre-v2-init.js');
+        const corps = corpsDe(init, 'creerTrimestreV2');
+        expect(corps).toMatch(/trimestres\.forEach\(t => t\.actif = false\);\s*trimestres\.push\(\{[\s\S]*?actif: true\s*\}\);/);
+        expect(corps).not.toContain('confirm(');
+        expect(liste).not.toContain('function ouvrirModalNouveauTrimestre');
     });
 });

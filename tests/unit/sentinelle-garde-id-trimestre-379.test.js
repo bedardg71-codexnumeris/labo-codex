@@ -146,37 +146,8 @@ describe('#379 — gardes sur le changement d\'id du trimestre actif', () => {
     });
 });
 
-describe('#379 volet B2 — création+activation recharge l\'identification affichée', () => {
-    // RÉALIGNÉE #466/CT-05 (21 août 2026) : la création+activation ne fait plus
-    // ses 4 recharges partielles — elle passe par le chemin COMPLET de bascule
-    // (changerTrimestreActifV2), qui appelle les mêmes recharges parmi toutes
-    // les autres. L'invariant de #379 (l'identification est rechargée) reste
-    // exercé, à travers le chemin unique ; le harnais fournit désormais
-    // changerTrimestreActif (succès) que le chemin complet exige.
-    it('ouvrirModalNouveauTrimestre(activer) recharge l\'identification via le chemin complet de bascule', () => {
-        const reponsesPrompt = ['A', '2027'];
-        const win = chargerScript('js/trimestre-v2-liste.js', {
-            db: { getSync: () => [], setSync: () => {} },
-            prompt: () => reponsesPrompt.shift(),
-            confirm: () => true,
-            alert: () => {},
-            nomSession: (s) => s,
-            creerTrimestre: () => ({ id: 'a2027', nom: 'Automne 2027' }),
-            obtenirTrimestres: () => [],
-            cle: (k) => k
-        });
-        // #466 : le chemin complet exige window.changerTrimestreActif — le poser
-        // sur win (les globals de chargerScript sont lexicaux, pas des propriétés window).
-        win.changerTrimestreActif = () => true;
-        win.chargerIdentificationTrimestreV2 = vi.fn();
-        win.chargerCadreCalendrierV2 = vi.fn();
-        win.chargerJourneesSansCoursV2 = vi.fn();
-        win.afficherStatistiquesTrimestreV2 = vi.fn();
-        win.chargerDropdownCoursV2 = vi.fn();    // appel non gardé du chemin complet
-
-        win.ouvrirModalNouveauTrimestre();
-
-        expect(win.chargerIdentificationTrimestreV2).toHaveBeenCalledTimes(1);
-        expect(win.chargerCadreCalendrierV2).toHaveBeenCalledTimes(1);
-    });
-});
+// #379 volet B2 (création+activation recharge l'identification, par le chemin complet de
+// bascule) : ↻ #975 (7 oct. 2026), l'ancien chemin `ouvrirModalNouveauTrimestre` est retiré.
+// L'invariant est tenu par « Créer le trimestre » quand un trimestre était actif :
+// sentinelle-lot-e2-trimestre.test.js (#975, `changerTrimestreActifV2` appelé avec le nouvel id)
+// et, au navigateur, bascule-trimestre-466.spec.js (CT-05 v1).

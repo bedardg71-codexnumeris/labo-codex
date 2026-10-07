@@ -92,12 +92,12 @@ test('CT-05 v1 · création + activation d\'un trimestre = bascule COMPLÈTE (mi
         (new Function('db', setupSrc))(window.db);
         // Simuler l'ancien contexte vivant d'a2026
         window.db.setSync('groupeCoursActif', { id: 'GC1', trimestreId: 'a2026' });
-        // Stubs des dialogues natifs de la modale de création
-        const reponses = ['E', '2027'];
-        window.prompt = () => reponses.shift();
-        window.confirm = () => true;   // « l'activer immédiatement »
-        window.alert = () => {};
-        window.ouvrirModalNouveauTrimestre();
+        // ↻ #975 (7 oct. 2026) : « + Nouveau trimestre » ouvre la fiche du Cadre en création
+        // (chemin du lot E2) ; « Créer le trimestre » crée et active, par le chemin complet.
+        window.ouvrirCreationTrimestreV2();
+        document.getElementById('v2-sessionTrimestre').value = 'ete';
+        document.getElementById('v2-anneeTrimestre').value = '2027';
+        window.creerTrimestreV2();
         await new Promise(res => setTimeout(res, 700));
         return {
             miroir: window.db.getSync('trimestreActif', null),
