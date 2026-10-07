@@ -7,7 +7,33 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 7 h 24 : **1.187.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `60e1ad80` (PUBLIÉ À 7 h 22) ; VERDICT COMPLET VERT ; CHANTIER DU DÉMO CLOS**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 7 h 52 : **1.188.0 (LOTS 3 ET 5 DE L'ENREGISTREMENT : #1030, #1031, #975) COMMITÉE SUR `main` LOCAL (build `1007-0751`, `a7b37615`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 7 h 29) ; plan
+`plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`. **Rien n'est poussé.**
+
+**Commits** : `6d87ad1c` consigne, archive, plan ; `61129bd3` #1030 (une suppression IDB
+d'arrière-plan qui avorte le dit par le témoin, la valeur gardée par IndexedDB revient) ;
+`ae576a70` #1031 (les sept opérations du magasin `fichiers` sous `_avecReprise`) ; `60c24821`
+#975 (« + Nouveau trimestre » ouvre la fiche du Cadre en création, chemin E2, plus de `prompt`
+ni d'`alert` ; `ouvrirModalNouveauTrimestre` retiré) ; `22888c5f` BACKLOG (trois fiches closes,
+#1037 inscrite : les 14 `alert`, 3 `confirm`, 1 `prompt` de la bibliothèque, hors création) ;
+`a7b37615` release 1.188.0 (minor : le geste de création change).
+
+**Mesuré** : Vitest complet après le commit de release : 693 fichiers, 8 320 essais verts, aucune
+erreur hors essai. Specs voisins WebKit (9 fichiers, dont #478, #466, lot E2, témoin #962/#986,
+#1028) : 57 verts. Break-tests : 6 mutations #1030, 2 #1031, 8 #975 en Vitest, 1 au navigateur
+(spec #478), chacune rouge sur le bon cas. Verdict complet : **non lancé**.
+
+**Suppositions nommées** : le moratoire #622 vise « Archiver un trimestre », pas la création ;
+« Créer le trimestre » active toujours ce qu'il crée (la question « Veux-tu l'activer
+immédiatement ? » disparaît ; revenir à l'ancien : bibliothèque, « Activer ») ; une suppression
+dépassée par une réécriture de la même clé ne dit rien.
+
+**Suite** : relecture de Cowork → ligne des Nouvelles (proposée dans le rapport, non écrite) →
+Chrome et Safari fermés → verdict complet → push → Netlify → relais.
+
+## (relais précédent) 7 OCT. 2026, 7 h 24 : **1.187.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `60e1ad80` (PUBLIÉ À 7 h 22) ; VERDICT COMPLET VERT ; CHANTIER DU DÉMO CLOS**
 
 **Mesuré** : verdict complet par `scripts/pousser.sh` sur `60e1ad80` : code 0, 0 échec connu,
 aucune spec instable, aucune veille, échange 2,1 Go. Hook pré-push : Vitest vert. Poussé
