@@ -32,3 +32,9 @@ Avant le verdict complet : Chrome et Safari fermés.
 ## Ton rapport à Grégoire
 
 En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Pas de geste à l'écran (les bancs suffisent), sauf si la mesure en fait apparaître un. Ce que tu as supposé, en une ligne par supposition.
+
+## Suite – relecture de 1.188.2 (7 oct. 2026, 12 h 58, Toronto)
+
+**Relecture faite, rien ne bloque.** Lus : `033cfe72` (les deux migrations de `cours.js` passent par `auDbPret`, qui rattrape un `db-ready` déjà émis), `236d6f1d` (release), et la clôture de #983 par la mesure. Tests non relancés par Cowork. Ta supposition sur l'ordre (lot 4 avant #1038) : l'ordre n'était pas voulu, Cowork n'avait pas vu #1038 en écrivant la consigne ; sans conséquence, #1038 vient ensuite.
+
+Puis : Chrome et Safari fermés, verdict complet, push, vérification de la mise en ligne chez Netlify. Rapport en gestes d'utilisateur. Arrête-toi après : la session de `claude/1039-equipes` attend ce push pour se rebaser.
