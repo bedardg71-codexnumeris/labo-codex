@@ -7,7 +7,18 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 10 h 19 : **1.188.1 (« ANNULER » DE LA CRÉATION D'UN TRIMESTRE, #975 SUITE) RELUE PAR COWORK, NOUVELLES POSÉES ; VERDICT COMPLET ET PUSH EN COURS**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 11 h 20 : **1.188.1 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `66c21dab` (PUBLIÉ À 11 h 19) ; VERDICT COMPLET VERT**
+
+**Mesuré** : verdict complet par `scripts/pousser.sh` sur `66c21dab` : code 0, 0 échec connu,
+aucune spec instable, aucune veille, échange 1,6 Go (Chrome et Safari fermés, mesuré). Hook
+pré-push : Vitest vert. Poussé `24bf0fda..66c21dab`. **Chez Netlify** : déploiement de
+production `6ac6630a589644000707c730`, `commit_ref` `66c21dab`, `state: ready`, publié à
+15:19:52 Z.
+
+**Reste ouvert** : #1037 (les dialogues natifs de la bibliothèque des trimestres, hors création).
+Aucun mot en attente de Grégoire.
+
+## (relais précédent) 7 OCT. 2026, 10 h 19 : **1.188.1 (« ANNULER » DE LA CRÉATION D'UN TRIMESTRE, #975 SUITE) RELUE PAR COWORK, NOUVELLES POSÉES ; VERDICT COMPLET ET PUSH EN COURS**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md`, « Suite 2 » (Cowork, 9 h 38). **Rien n'est poussé.**
 
