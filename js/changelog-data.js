@@ -24,13 +24,16 @@
             // 1.188 (#975, #1030, #1031 : l'enregistrement, lots 3 et 5) — lignes validées par Grégoire
             // le 7 oct. 2026 à 7 h 57, par Cowork (relecture de la consigne du jour), posées telles
             // quelles. Titre de Claude Code.
+            // 1.188.1 (#975 suite : « Annuler ») — ligne validée par Grégoire le 7 oct. 2026 à 10 h 18,
+            // par Cowork, posée telle quelle (patch consolidé dans l'entrée 1.188).
             version: '1.188',
             couleur: 'vert',
             titre: 'Créer un trimestre par son formulaire',
             items: [
                 'Cadre&nbsp;: «&nbsp;+ Nouveau trimestre&nbsp;» ouvre maintenant le formulaire du trimestre, comme pour ton premier. «&nbsp;Créer le trimestre&nbsp;» le crée et l\'active, sans fenêtre à remplir.',
                 'Une suppression qui n\'a pas pu être enregistrée le dit maintenant («&nbsp;Non enregistré&nbsp;»), au lieu de réapparaître au rechargement suivant.',
-                'iPad&nbsp;: une copie importée juste après un retour dans l\'application ne se perd plus.'
+                'iPad&nbsp;: une copie importée juste après un retour dans l\'application ne se perd plus.',
+                'Cadre&nbsp;: pendant la création d\'un trimestre, «&nbsp;Annuler&nbsp;» ramène la fiche de ton trimestre actif sans rien créer.'
             ]
         },
         {

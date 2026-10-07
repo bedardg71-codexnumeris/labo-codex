@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 9 h 45 : **1.188.1 (« ANNULER » DE LA CRÉATION D'UN TRIMESTRE, #975 SUITE) COMMITÉE SUR `main` LOCAL (build `1007-0944`, `d595aec2`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 10 h 19 : **1.188.1 (« ANNULER » DE LA CRÉATION D'UN TRIMESTRE, #975 SUITE) RELUE PAR COWORK, NOUVELLES POSÉES ; VERDICT COMPLET ET PUSH EN COURS**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md`, « Suite 2 » (Cowork, 9 h 38). **Rien n'est poussé.**
 
@@ -27,8 +27,10 @@ a aussi un `btn-annuler` orange, non retenu : la consigne dit « secondaire »).
 
 **Mots en attente de Grégoire** : aucun (« Annuler » tranché ; la question de sortie abandonnée).
 
-**Suite** : relecture de Cowork → ligne des Nouvelles (proposée dans le rapport, non écrite) →
-Chrome et Safari fermés → verdict complet → push → Netlify → relais.
+**Relecture de Cowork** (10 h 18) : rien ne bloque (tests non relancés par Cowork). La ligne des
+Nouvelles, validée par Grégoire, posée telle quelle comme quatrième item de l'entrée 1.188.
+
+**Suite** : Chrome et Safari fermés → verdict complet → push → Netlify → relais.
 
 ## (relais précédent) 7 OCT. 2026, 9 h 08 : **1.188.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `2abd450e` (PUBLIÉ À 9 h 02) ; VERDICT COMPLET VERT**
 
