@@ -65,6 +65,62 @@ describe('#1039 · le reste de la division', () => {
     });
 });
 
+// Reste de 1 — tranché par Grégoire le 7 oct. 2026 à 12 h 42 : jamais d'équipe d'une seule personne.
+describe('#1039 · reste de 1 : jamais d\'équipe d\'une personne', () => {
+    const L = charger();
+
+    it('équipes de 3 ou 4, « plus petites » : autant d\'équipes que nécessaire, tailles égales autant que possible', () => {
+        expect(L.taillesEquipes(9, 4, 'petite')).toEqual([3, 3, 3]);
+        expect(L.taillesEquipes(10, 3, 'petite')).toEqual([3, 3, 2, 2]);
+        expect(L.taillesEquipes(5, 4, 'petite')).toEqual([3, 2]);
+    });
+
+    it('équipes de 3 ou 4, « plus grandes » : inchangé', () => {
+        expect(L.taillesEquipes(9, 4, 'agrandir')).toEqual([5, 4]);
+    });
+
+    it('équipes de 2 : pas de question, une équipe de 3, quel que soit le mode reçu', () => {
+        expect(L.resteDemande(9, 2)).toBe(false);
+        expect(L.taillesEquipes(9, 2, 'petite')).toEqual([3, 2, 2, 2]);
+        expect(L.taillesEquipes(9, 2, null)).toEqual([3, 2, 2, 2]);
+    });
+
+    it('la question n\'est posée que s\'il y a un reste, une équipe complète, et pas le cas « 2 avec reste 1 »', () => {
+        expect(L.resteDemande(9, 4)).toBe(true);
+        expect(L.resteDemande(27, 4)).toBe(true);
+        expect(L.resteDemande(24, 4)).toBe(false);
+        expect(L.resteDemande(3, 4)).toBe(false);
+    });
+
+    it('un reste de 2 ou plus ne change pas : « une équipe plus petite » garde l\'équipe du reste', () => {
+        expect(L.taillesEquipes(27, 4, 'petite')).toEqual([4, 4, 4, 4, 4, 4, 3]);
+        expect(L.taillesEquipes(10, 4, 'petite')).toEqual([4, 4, 2]);
+    });
+
+    it('balayage : de 2 à 60 étudiant·es, tailles 2-3-4, les deux modes — aucune équipe d\'une personne, personne d\'oublié', () => {
+        const fautes = [];
+        for (let n = 2; n <= 60; n++) {
+            for (const t of [2, 3, 4]) {
+                for (const mode of ['petite', 'agrandir']) {
+                    const tailles = L.taillesEquipes(n, t, mode);
+                    const somme = tailles.reduce((a, b) => a + b, 0);
+                    if (Math.min(...tailles) < 2 || somme !== n) fautes.push(`${n}/${t}/${mode} → ${tailles.join(',')}`);
+                }
+            }
+        }
+        expect(fautes).toEqual([]);
+    });
+
+    it('par le tirage réel : aucune équipe d\'une personne', () => {
+        for (let graine = 1; graine <= 10; graine++) {
+            for (const t of [2, 3, 4]) {
+                const { equipes } = L.formerEquipes(das(9), t, 'petite', [], rngFixe(graine));
+                expect(Math.min(...equipes.map(e => e.length))).toBeGreaterThanOrEqual(2);
+            }
+        }
+    });
+});
+
 describe('#1039 · les absents du jour', () => {
     const L = charger();
     const eleves = [{ da: 'A' }, { da: 'B' }, { da: 'C' }, { da: 'D' }];
