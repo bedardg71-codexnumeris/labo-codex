@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 6 h 22 : **1.187.0 RELUE PAR COWORK (VERTE, AUCUNE CORRECTION), LIGNE DES NOUVELLES POSÉE (build `1007-0620`, `2dd472d3`) ; VERDICT COMPLET ET PUSH EN COURS**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 7 h 24 : **1.187.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `60e1ad80` (PUBLIÉ À 7 h 22) ; VERDICT COMPLET VERT ; CHANTIER DU DÉMO CLOS**
+
+**Mesuré** : verdict complet par `scripts/pousser.sh` sur `60e1ad80` : code 0, 0 échec connu,
+aucune spec instable, aucune veille, échange 2,1 Go. Hook pré-push : Vitest vert. Poussé
+`2060d42f..60e1ad80`. **Chez Netlify** : déploiement de production `6ac62b7cdb4ffc000874a299`,
+état « ready », `commit_ref` `60e1ad80`, publié à 7 h 22 (Toronto). La page servie n'a pas été lue.
+
+**Chantier du démo** (`Rapports/AUDIT-2026-10-05-chantier-demo.md`) : clos, T1 à T7 en ligne.
+Restent inscrits à part, hors chantier : #1033, #1035, #1036.
+
+**Reste** : le geste à l'écran pour Grégoire (en démo, importer une copie fait apparaître
+« Retirer la copie (1) » dans le bandeau vert ; « Retirer » l'efface, ses vraies copies restent).
+
+## (relais précédent) 7 OCT. 2026, 6 h 22 : **1.187.0 RELUE PAR COWORK (VERTE, AUCUNE CORRECTION), LIGNE DES NOUVELLES POSÉE (build `1007-0620`, `2dd472d3`) ; VERDICT COMPLET ET PUSH EN COURS**
 
 **Relecture de Cowork** sur `1aa9f219..09dead94` : verte. Les quatre suppositions sont confirmées
 par Grégoire (titre « Retirer les copies », singulier, corbeille comprise dans N, aucun message
