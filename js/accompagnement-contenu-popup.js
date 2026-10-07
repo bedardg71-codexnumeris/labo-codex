@@ -1171,6 +1171,11 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Labo Codex embarque un jeu complet de données de démonstration : un cours fictif « Écriture et littérature », 10 étudiants, 11 productions, 101 évaluations, 313 présences, 3 grilles, 2 échelles et une carte mentale d'alignement pédagogique. Coche la case « Données démo » sur l'accueil pour activer ce matériel et explorer l'outil sans toucher à tes vraies données."
             },
             {
+                // T6 du chantier du démo (décision G4 de Grégoire, 7 oct. 2026, par Cowork) : phrase validée.
+                type: 'texte',
+                contenu: "Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les copies » efface les copies importées."
+            },
+            {
                 type: 'texte',
                 contenu: "Ce matériel est publié sous licence CC BY-NC-SA 4.0 (Attribution, pas d'utilisation commerciale, partage à l'identique). L'auteur est affiché partout sous le nom « Labo Codex ». Il sert de modèle et t'accompagne vers l'autonomie selon le modèle de l'enseignement explicite."
             },
