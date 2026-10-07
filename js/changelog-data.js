@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.189 (#1039 : générateur d'équipes, barre d'outils d'animation) — lignes et titre validés
+            // par Grégoire le 7 oct. 2026 à 16 h 21, par Cowork (plans de travail/MOTS-2026-10-07-1039-equipes.md),
+            // posés tels quels.
+            version: '1.189',
+            couleur: 'vert',
+            titre: 'Former des équipes en classe',
+            items: [
+                'Suivi › Animation&nbsp;: un nouvel outil forme des équipes au hasard, sans les absent·es du jour. Tu choisis la taille (2, 3 ou 4) et, s\'il reste des étudiant·es, comment les répartir&nbsp;; «&nbsp;Retenir ces équipes&nbsp;» évite ensuite de remettre ensemble les mêmes.',
+                'Les trois outils d\'animation (questions flash, tirage au sort, équipes) se choisissent maintenant dans une barre à gauche.'
+            ]
+        },
+        {
             // 1.188 (#975, #1030, #1031 : l'enregistrement, lots 3 et 5) — lignes validées par Grégoire
             // le 7 oct. 2026 à 7 h 57, par Cowork (relecture de la consigne du jour), posées telles
             // quelles. Titre de Claude Code.
