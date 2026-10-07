@@ -74,7 +74,7 @@ const GUIDAGE_TEXTES = {
     },
     'suivi-animation': {
         titre: 'Animation',
-        texte: 'Outils interactifs pour l\u2019animation en classe\u00a0: tirage au sort d\u2019\u00e9tudiants pour les mises en situation, les pr\u00e9sentations ou les exercices collaboratifs.'
+        texte: 'Outils pour animer la classe\u00a0: questions flash, tirage au sort d\u2019\u00e9tudiant\u00b7es et formation d\u2019\u00e9quipes.'
     },
     'conception-carte': {
         titre: 'Planification \u2014 Carte mentale',

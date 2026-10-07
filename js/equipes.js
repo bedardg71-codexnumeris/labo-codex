@@ -129,9 +129,11 @@ window.EquipesLogique = { separerAbsentsDuJour, analyserReste, taillesEquipes, p
 // État d'écran : ne voyage pas. Seules les paires RETENUES sont écrites (clé par cours).
 let etatEquipes = { coursId: null, taille: null, modeReste: null, equipes: null, pairesRefaites: 0, retenues: false };
 
-const NOMBRES = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix'];
-function nombre(n) { return n <= 10 ? NOMBRES[n] : String(n); }
-function pluriel(n, mot) { return n > 1 ? mot + 's' : mot; }
+// Mots arrêtés par Grégoire le 7 oct. 2026 (plans de travail/MOTS-2026-10-07-1039-equipes.md) :
+// « étudiant·es », accordé selon le nombre.
+function etudiants(n) { return n > 1 ? n + ' étudiant·es' : n + ' étudiant·e'; }
+function presents(n) { return n > 1 ? 'présent·es' : 'présent·e'; }
+function absences(n) { return n > 1 ? n + ' absences écartées' : n + ' absence écartée'; }
 
 function coursActifId() {
     const infoCours = db.getSync('infoCours', null);
@@ -182,15 +184,15 @@ function rendreEquipes() {
     const memoire = lirePairesRetenues();
 
     if (n === 0 && absents.length === 0) {
-        conteneur.innerHTML = '<p class="outil-placeholder">Aucun élève dans le groupe actif.</p>'; // security-ok: constante
+        conteneur.innerHTML = '<p class="outil-placeholder">Aucun·e étudiant·e dans le groupe actif.</p>'; // security-ok: constante
         return;
     }
 
     const constat = fichesDuJour === 0
-        ? (n > 1 ? `Présences du jour non prises : les ${n} élèves du groupe sont comptés.` : 'Présences du jour non prises : l\'élève du groupe est compté.')
+        ? (n > 1 ? `Présences du jour non prises : les ${n} étudiant·es du groupe sont compté·es.` : 'Présences du jour non prises : l\'étudiant·e du groupe est compté·e.')
         : (absents.length === 0
-            ? `${n} ${pluriel(n, 'élève')} ${pluriel(n, 'présent')} aujourd'hui.`
-            : `${n} ${pluriel(n, 'élève')} ${pluriel(n, 'présent')} aujourd'hui ; ${absents.length} ${pluriel(absents.length, 'absent')} ${pluriel(absents.length, 'écarté')} d'après les présences.`);
+            ? `${etudiants(n)} ${presents(n)} aujourd'hui.`
+            : `${etudiants(n)} ${presents(n)} aujourd'hui ; ${absences(absents.length)} d'après les présences.`);
 
     const taille = etatEquipes.taille;
     const tailleRadios = [2, 3, 4].map(t => `
@@ -210,7 +212,7 @@ function rendreEquipes() {
             const grandes = decrireTailles(taillesEquipes(n, taille, 'agrandir'));
             blocReste = `
             <fieldset class="equipes-groupe">
-                <legend>${n} élèves en équipes de ${taille} : il en reste ${reste}.</legend>
+                <legend>${etudiants(n)} en équipes de ${taille} : il en reste ${reste}.</legend>
                 <label class="equipes-choix-ligne">
                     <input type="radio" name="equipes-reste" value="petite" data-on-change="choisirResteEquipes" ${etatEquipes.modeReste === 'petite' ? 'checked' : ''}>
                     <span>Une équipe plus petite <span class="text-muted">(${petite})</span></span>
@@ -234,10 +236,10 @@ function rendreEquipes() {
                 <ul>${eq.map(da => `<li>${echapperHtml(nomAffiche(parDa.get(da) || { da }))}</li>`).join('')}</ul>
             </div>`).join('');
         const avertissement = etatEquipes.pairesRefaites > 0
-            ? `<p class="equipes-note">Impossible d'éviter toutes les équipes retenues : ${etatEquipes.pairesRefaites} ${pluriel(etatEquipes.pairesRefaites, 'paire')} d'élèves se ${etatEquipes.pairesRefaites > 1 ? 'répètent' : 'répète'}.</p>`
+            ? `<p class="equipes-note">Impossible d'éviter toutes les équipes retenues : ${etatEquipes.pairesRefaites > 1 ? etatEquipes.pairesRefaites + ' paires d\'étudiant·es se retrouvent' : '1 paire d\'étudiant·es se retrouve'} ensemble.</p>`
             : '';
         const retenir = etatEquipes.retenues
-            ? '<p class="equipes-note">Équipes retenues : les prochaines éviteront de les refaire.</p>'
+            ? '<p class="equipes-note">Équipes retenues : les prochains tirages éviteront de remettre ensemble les mêmes étudiant·es.</p>'
             : '<button type="button" class="btn btn-secondaire" data-action="retenirEquipes">Retenir ces équipes</button>';
         blocResultat = `
             <div class="equipes-resultat">${cartes}</div>
@@ -246,14 +248,14 @@ function rendreEquipes() {
     }
 
     const blocMemoire = memoire.formations > 0
-        ? `<p class="equipes-memoire text-muted">${nombre(memoire.formations).replace(/^./, c => c.toUpperCase())} ${pluriel(memoire.formations, 'formation')} ${pluriel(memoire.formations, 'retenue')} pour ce groupe.
+        ? `<p class="equipes-memoire text-muted">Ce groupe a des équipes retenues.
                <button type="button" class="btn-lien" data-action="oublierEquipesRetenues">Oublier les équipes retenues</button></p>`
         : '';
 
     conteneur.innerHTML = `
         <p class="equipes-constat">${constat}</p>
         <fieldset class="equipes-groupe">
-            <legend>Élèves par équipe</legend>
+            <legend>Étudiant·es par équipe</legend>
             <div class="equipes-choix-rangee">${tailleRadios}</div>
         </fieldset>
         ${blocReste}
