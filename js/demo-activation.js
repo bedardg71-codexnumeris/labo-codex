@@ -50,6 +50,7 @@ function afficherBandeauDemo(show) {
     } else {
         document.body.classList.remove('mode-demo');
     }
+    majBoutonRetirerCopiesDemo();   // T3
 }
 
 /**
@@ -600,12 +601,138 @@ async function desactiverModeDemo() {
 }
 
 // ============================================
+// T3 — Retirer les copies importées dans la démo
+// ============================================
+
+/*
+ * T3 du chantier du démo (décision G3 de Grégoire, 7 oct. 2026, par Cowork). Un bouton du
+ * bandeau vert, « Retirer les copies (N) », visible en démo seulement, s'il y a des copies à
+ * retirer et hors d'un import. Le retrait SUPPRIME POUR DE BON les copies importées dans la
+ * démo : décision explicite de Grégoire, qui ne couvre que ce geste et que ces copies.
+ * Mesuré : le pack (js/pack-demo-10.js) ne livre aucune copie ; tout ce que portent les
+ * listes du démo a donc été importé.
+ * Sélection par IDENTITÉ (skill hygiene-donnees-partagees, constat C4 de l'audit) : les ids
+ * des trois listes du démo (annotations par `fichierId`), moins tout id que porte aussi une
+ * liste réelle. La règle est celle du codex (`Codex.partDuDemo`, T2), reprise telle quelle.
+ * Rien hors des clés `demo_` et des vignettes `thumbnail_<id>` de ces ids. Les évaluations
+ * ne sont pas touchées : elles tiennent à l'élève et à la production, pas à la copie.
+ */
+var LISTES_DES_COPIES_DU_DEMO = ['demo_fichiersTravaux', 'demo_corbeilleFichiers', 'demo_annotationsTravaux'];
+
+/** Les listes qui désignent des fichiers, du démo et des trimestres réels (motif du codex). */
+function _estListeDeFichiers(c) {
+    return c.indexOf('fichiersTravaux') !== -1
+        || /^(?:(?:[aeh]\d{4}|demo)_)?(?:corbeilleFichiers|fichiersModelisation|annotationsTravaux)$/.test(c);
+}
+
+/**
+ * La passe à blanc : ce que le retrait emporterait, sans rien écrire.
+ * @returns {Promise<{ids: Object<string, boolean>, copies: number}>} `ids` : les fichiers du
+ *   démo seulement ; `copies` : le N du bouton (copies et corbeille du démo, sans les annotations)
+ */
+async function planDuRetraitDesCopiesDuDemo() {
+    var donnees = {};
+    var cles = await db.keys();
+    for (var i = 0; i < cles.length; i++) {
+        if (_estListeDeFichiers(cles[i])) donnees[cles[i]] = await db.get(cles[i], null);
+    }
+    var ids = window.Codex.partDuDemo(donnees).ids;
+    var copies = {};
+    ['demo_fichiersTravaux', 'demo_corbeilleFichiers'].forEach(function(c) {
+        (Array.isArray(donnees[c]) ? donnees[c] : []).forEach(function(f) {
+            if (f && ids[f.id]) copies[f.id] = true;
+        });
+    });
+    return { ids: ids, copies: Object.keys(copies).length };
+}
+
+/** Le retrait, sans confirmation. Ne fait rien hors démo ni pendant un import. */
+async function retirerCopiesDuDemo() {
+    if (!_enDemo() || _importEnCours()) return null;
+    var plan = await planDuRetraitDesCopiesDuDemo();
+    var ids = Object.keys(plan.ids);
+    for (var i = 0; i < ids.length; i++) {
+        await window.travauxStockage.supprimerBlob(ids[i]);   // en démo : IndexedDB seulement (T4)
+        await window.travauxStockage.supprimerThumbnail(ids[i]);
+        db.removeSync('thumbnail_' + ids[i]);
+    }
+    LISTES_DES_COPIES_DU_DEMO.forEach(function(c) {
+        var liste = db.getSync(c, null);
+        if (!Array.isArray(liste)) return;
+        var champ = c === 'demo_annotationsTravaux' ? 'fichierId' : 'id';
+        var reste = liste.filter(function(e) { return !(e && plan.ids[e[champ]]); });
+        if (reste.length !== liste.length) db.setSync(c, reste);
+    });
+    return { copies: plan.copies, fichiers: ids.length };
+}
+
+/** Les mots du bouton et de la confirmation, validés par Grégoire (7 oct.), accordés à N. */
+function _motsDuRetrait(n) {
+    var un = n === 1;
+    return {
+        bouton: (un ? 'Retirer la copie' : 'Retirer les copies') + ' (' + n + ')',
+        question: (un ? 'Retirer la copie importée dans la démo ? ' : 'Retirer les ' + n + ' copies importées dans la démo ? ')
+            + 'Tes vraies copies et tes données ne sont pas touchées. '
+            + (un ? 'Pour la retrouver, il faudra l\'importer de nouveau.' : 'Pour les retrouver, il faudra les importer de nouveau.')
+    };
+}
+
+var _compteEnCours = 0;
+
+/** Montre ou cache le bouton du bandeau, et y met le compte. */
+async function majBoutonRetirerCopiesDemo() {
+    var bouton = document.getElementById('bandeau-demo-retirer-copies');
+    if (!bouton) return;
+    var tour = ++_compteEnCours;
+    var n = 0;
+    if (_enDemo() && !_importEnCours() && window.Codex) {
+        n = (await planDuRetraitDesCopiesDuDemo()).copies;
+    }
+    if (tour !== _compteEnCours) return;   // un compte plus récent est parti
+    if (n > 0) bouton.textContent = _motsDuRetrait(n).bouton;
+    if (typeof toggleDisplay === 'function') toggleDisplay(bouton, n > 0);
+    else bouton.classList.toggle('u-hide', n === 0);
+}
+
+/** Le bouton du bandeau : compte frais, confirmation, retrait. */
+async function actionRetirerCopiesDuDemo() {
+    if (!_enDemo() || _importEnCours()) return;
+    var n = (await planDuRetraitDesCopiesDuDemo()).copies;
+    if (n > 0) {
+        var accepte = await window.uiDialogues.confirmerAction({
+            titre: 'Retirer les copies',
+            message: _motsDuRetrait(n).question,
+            texteAnnuler: 'Annuler',
+            texteConfirmer: 'Retirer',
+            variante: 'danger'   // « Annuler » a le focus ; Entrée le suit
+        });
+        if (accepte === true) {
+            await retirerCopiesDuDemo();
+            if (window.travauxUI && typeof window.travauxUI.rafraichirUI === 'function') window.travauxUI.rafraichirUI();
+        }
+    }
+    await majBoutonRetirerCopiesDemo();
+}
+
+function _enDemo() {
+    return typeof window.estEnModeDemo === 'function' && window.estEnModeDemo();
+}
+
+function _importEnCours() {
+    return !!(window.travauxImport && window.travauxImport.importEnCours);
+}
+
+// ============================================
 // Exports
 // ============================================
 
 window.activerModeDemo = activerModeDemo;
 window.desactiverModeDemo = desactiverModeDemo;
 window.importEmpecheLaBascule = importEmpecheLaBascule;   // T7
+window.majBoutonRetirerCopiesDemo = majBoutonRetirerCopiesDemo;   // T3
+window.actionRetirerCopiesDuDemo = actionRetirerCopiesDuDemo;     // T3, le bouton du bandeau
+window.planDuRetraitDesCopiesDuDemo = planDuRetraitDesCopiesDuDemo;
+window.retirerCopiesDuDemo = retirerCopiesDuDemo;
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
 window.migrerResidusPhase5 = migrerResidusPhase5;

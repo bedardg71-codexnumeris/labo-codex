@@ -317,6 +317,15 @@
     function sauvegarderFichiersTravaux(fichiers, options) {
         db.setSync(cle('fichiersTravaux'), fichiers);
         _signalerSiGeste(cle('fichiersTravaux'), options);
+        _recompterLesCopiesDuDemo();
+    }
+
+    /**
+     * T3 du chantier du démo : le compte du bouton « Retirer les copies (N) » du bandeau suit
+     * chaque écriture des copies ou de la corbeille (les deux seuls écrivains de ces listes).
+     */
+    function _recompterLesCopiesDuDemo() {
+        if (typeof window.majBoutonRetirerCopiesDemo === 'function') window.majBoutonRetirerCopiesDemo();
     }
 
     /**
@@ -988,6 +997,7 @@
     function sauvegarderCorbeille(corbeille, options) {
         db.setSync(cle('corbeilleFichiers'), corbeille);
         _signalerSiGeste(cle('corbeilleFichiers'), options);
+        _recompterLesCopiesDuDemo();
     }
 
     /**
@@ -1422,6 +1432,7 @@
         // FSAPI
         estFSAPIDisponible: estFSAPIDisponible,
         estFSAPIActif: estFSAPIActif,
+        dossierEnJeu: dossierEnJeu,   // T4 : le dossier sert-il ? (jamais en démo)
         configurerRepertoireFSAPI: configurerRepertoireFSAPI,
         // Nettoyage
         selectionnerCopiesARetirer: selectionnerCopiesARetirer,

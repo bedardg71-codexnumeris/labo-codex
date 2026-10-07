@@ -918,6 +918,7 @@
         }
 
         importEnCours = true;
+        if (typeof window.majBoutonRetirerCopiesDemo === 'function') window.majBoutonRetirerCopiesDemo();   // T3 : caché pendant l'import
         let importes = 0;
         let erreurs = 0;
         const doublonsDetectes = [];
@@ -960,6 +961,7 @@
         }
 
         importEnCours = false;
+        if (typeof window.majBoutonRetirerCopiesDemo === 'function') window.majBoutonRetirerCopiesDemo();   // T3
 
         // Nettoyer les fichiers importes avec succes
         fichiersEnAttente = fichiersEnAttente.filter(f => f.statut !== 'importe');
