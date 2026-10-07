@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 6 h 18 : **1.187.0 (T3, rangement en démo, T6, #1036 inscrit) COMMITÉE SUR `main` LOCAL (build `1007-0617`, `845b3caf`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 6 h 22 : **1.187.0 RELUE PAR COWORK (VERTE, AUCUNE CORRECTION), LIGNE DES NOUVELLES POSÉE (build `1007-0620`, `2dd472d3`) ; VERDICT COMPLET ET PUSH EN COURS**
+
+**Relecture de Cowork** sur `1aa9f219..09dead94` : verte. Les quatre suppositions sont confirmées
+par Grégoire (titre « Retirer les copies », singulier, corbeille comprise dans N, aucun message
+après le retrait). Ligne des Nouvelles validée, posée dans une entrée 1.187 neuve (`55bdb63a`,
+titre de Claude Code : « Retirer les copies de la démo »), puis build (`2dd472d3`). Vitest
+complet après le build : 692 fichiers, 8 305 essais verts. Chrome et Safari fermés (échange 2,1 Go).
+**Suite** : verdict complet → push → Netlify → relais. À la mise en ligne, le chantier du démo
+est clos ; #1033, #1035, #1036 restent inscrits à part.
+
+## (relais précédent) 7 OCT. 2026, 6 h 18 : **1.187.0 (T3, rangement en démo, T6, #1036 inscrit) COMMITÉE SUR `main` LOCAL (build `1007-0617`, `845b3caf`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 6 h 03), dernier lot du chantier du démo.
 
