@@ -7,9 +7,18 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 12 h 08 : **1.188.2 (LOT 4 DE L'ENREGISTREMENT : #981, #983) COMMITÉE SUR `main` LOCAL ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 15 h 15 : **1.188.2 (LOT 4 DE L'ENREGISTREMENT : #981, #983) EN LIGNE**
 
-**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 37). **Rien n'est poussé.**
+**En ligne** (mesuré chez Netlify par le connecteur, 15 h 15) : déploiement `6ac69a46`, `state: ready`,
+`commit_ref` = `42185c6c`, publié à 15 h 15. Relecture de Cowork : rien ne bloque.
+**Verdict** : premier `pousser.sh` rouge sur #929 seul (Mac endormi sur batterie à 2 %, éveil non tenu ;
+rejoué seul sur secteur : 9 verts sur 9) ; second verdict complet vert sur secteur, éveil tenu, aucune veille
+(un instable : #773, la poignée de la palette). Push `e35db7e2..42185c6c`.
+**Suite** : la session `claude/1039-equipes` se rebase sur ce `main` ; #1038 vient ensuite.
+
+### Historique de la section (12 h 08, avant relecture)
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 37).
 
 **Commits** : `fe386827` consigne ; `35a2d0eb` fiches #1038 et #1039 de Cowork (et les trois fichiers
 de Mathieu, que Cowork avait mis en attente de commit) ; `033cfe72` correctif #981 ; `9bb5f102` fiches ;
