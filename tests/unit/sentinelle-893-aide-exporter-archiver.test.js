@@ -103,7 +103,7 @@ describe('#893 · le bloc d\'espace parle français, accents compris', () => {
     it('les phrases validées par Grégoire le 20 septembre sont en place', () => {
         expect(rendu).toContain('utilisés sur');
         expect(rendu).toContain("window.pluriel(stats.nombre, 'fichier', 'fichiers')} de travaux");
-        expect(rendu).toContain("Rangement : ${fsapiActif ? 'fichiers sur ton disque' : 'dans le navigateur'}");
+        expect(rendu).toContain("Rangement : ${travauxStockage.dossierEnJeu() ? 'fichiers sur ton disque' : 'dans le navigateur'}");
         expect(rendu).toContain("<strong>L'espace est presque plein.</strong>");
         expect(rendu).toContain("Exporte tes anciens travaux avant d'en importer d'autres.");
     });

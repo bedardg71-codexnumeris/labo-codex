@@ -919,6 +919,9 @@
 
         const fsapiDispo = travauxStockage.estFSAPIDisponible();
         const fsapiActif = travauxStockage.estFSAPIActif();
+        // T4/T3 du chantier du démo : en démo, le dossier branché ne sert pas (les copies vont
+        // dans le navigateur) ; son statut « actif » ne s'affiche donc pas.
+        const dossierTaitEnDemo = fsapiActif && !travauxStockage.dossierEnJeu();
 
         const nbImages = queue.filter(f => f.estImage).length;
 
@@ -969,7 +972,7 @@
                     </div>
                 </div>
 
-                ${fsapiDispo ? `
+                ${fsapiDispo && !dossierTaitEnDemo ? `
                 <div class="travaux-fsapi-config" data-tooltip="travaux-fsapi-config">
                     ${fsapiActif
                         ? '<span class="travaux-fsapi-statut actif">Stockage sur disque actif</span>'
@@ -3704,7 +3707,7 @@
             </div>
             <p>${quota.utiliseFormate} utilisés sur ${quota.totalFormate} (${pourcent}&nbsp;%)</p>
             <p>${stats.nombre} ${window.pluriel(stats.nombre, 'fichier', 'fichiers')} de travaux (${stats.tailleFormatee})</p>
-            <p class="texte-muted">Rangement : ${fsapiActif ? 'fichiers sur ton disque' : 'dans le navigateur'}</p>
+            <p class="texte-muted">Rangement : ${travauxStockage.dossierEnJeu() ? 'fichiers sur ton disque' : 'dans le navigateur'}</p>
             ${quota.alerteQuota ? `
                 <div class="alerte alerte-attention" style="margin-top: 8px; padding: 10px; border-radius: 8px;">
                     <strong>L'espace est presque plein.</strong>
