@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 7 h 58 : **1.188.0 (LOTS 3 ET 5 DE L'ENREGISTREMENT : #1030, #1031, #975) RELUE PAR COWORK, NOUVELLES POSÉES ; VERDICT COMPLET ET PUSH EN COURS**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 9 h 08 : **1.188.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `2abd450e` (PUBLIÉ À 9 h 02) ; VERDICT COMPLET VERT**
+
+**Mesuré** : verdict complet par `scripts/pousser.sh` sur `2abd450e` : code 0, 0 échec connu,
+aucune spec instable, aucune veille, échange 1,6 Go (Chrome et Safari fermés, mesuré). Hook
+pré-push : Vitest vert. Poussé `520296ae..2abd450e`. Workflow « Tests » de GitHub vert.
+**Chez Netlify** : déploiement de production `6ac642cb4b8d0b00071528d4`, `commit_ref`
+`2abd450e`, `state: ready`, publié à 13:02:21 Z.
+
+**Reste ouvert** : les deux mots en attente de Grégoire (ci-dessous) ; #1037 inscrite.
+
+## (relais précédent) 7 OCT. 2026, 7 h 58 : **1.188.0 (LOTS 3 ET 5 DE L'ENREGISTREMENT : #1030, #1031, #975) RELUE PAR COWORK, NOUVELLES POSÉES ; VERDICT COMPLET ET PUSH EN COURS**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 7 h 29) ; plan
 `plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`. **Rien n'est poussé.**
