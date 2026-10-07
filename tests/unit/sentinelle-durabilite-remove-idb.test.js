@@ -134,6 +134,9 @@ describe('#353 Option C · removeSync tracke la suppression (drainage flush/Opti
             _avecReprise: db._avecReprise, _connexionFermee: db._connexionFermee,
             _dernieresValeurs: new Map(), _connexionPerdue: false, _reouverture: null,
             _removeIndexedDB: db._removeIndexedDB,  // la vraie méthode
+            // #1030 : la suppression d'arrière-plan passe par `_trackSuppression` (VRAIE
+            // méthode : elle tracke par `_trackOperation`, puis dit un échec éventuel).
+            _trackSuppression: db._trackSuppression, _suppressionsEnVol: new Map(),
         };
 
         db.removeSync.call(fakeThis, 'K');

@@ -163,6 +163,9 @@
             // #1029 — la dernière valeur demandée par clé, tant qu'une écriture IDB de
             // cette clé est en vol (voir `_ecrireIDB`).
             this._dernieresValeurs = new Map();
+            // #1030 — la suppression IDB d'arrière-plan en vol, par clé : un jeton que
+            // toute écriture de la clé retire (`_signalerEcriture`). Voir `_trackSuppression`.
+            this._suppressionsEnVol = new Map();
         }
 
         /**
@@ -228,6 +231,8 @@
          * ne fait que notifier.
          */
         _signalerEcriture(key) {
+            // #1030 : une écriture postérieure rend caduque la suppression en vol.
+            this._suppressionsEnVol.delete(key);
             var abonne = this._surEcriture;
             if (typeof abonne !== 'function') return;
             try { abonne(key); } catch (e) {
@@ -428,7 +433,7 @@
                 if (op.type === 'set') {
                     this._trackWrite(op.key, op.value);
                 } else {
-                    this._trackOperation(this._supprimerIDB(op.key), 'suppression', op.key);
+                    this._trackSuppression(op.key);
                 }
             }
         }
@@ -1790,6 +1795,72 @@
         }
 
         /**
+         * #1030 (7 oct. 2026) — UN ÉCHEC DE SUPPRESSION NE SE TAIT PLUS.
+         *
+         * `removeSync` retire la clé de localStorage et de la mémoire, puis lance la
+         * suppression IDB sans l'attendre. Son échec (transaction avortée ; la connexion
+         * fermée est déjà reprise par `_avecReprise`, #1029) n'était qu'un `console.warn` :
+         * l'usager croyait avoir supprimé, et le démarrage suivant relisait la clé
+         * d'IndexedDB. Désormais :
+         *   - l'échec est dit à l'abonné de `surEchecEcriture` (« Non enregistré » et
+         *     pourquoi, mêmes mots que l'écriture) ;
+         *   - la donnée n'est pas tenue pour supprimée : la valeur qu'IndexedDB garde
+         *     revient dans les couches synchrones (ce que montrerait un rechargement),
+         *     sauf si la clé a été réécrite entre-temps (le jeton est alors retiré) :
+         *     rien n'est remis ni dit, l'issue de cette écriture décide.
+         */
+        _trackSuppression(key) {
+            var self = this;
+            var jeton = {};
+            this._suppressionsEnVol.set(key, jeton);
+            var suppression = this._trackOperation(this._supprimerIDB(key), 'suppression', key);
+            var liberer = function() {
+                if (self._suppressionsEnVol.get(key) === jeton) self._suppressionsEnVol.delete(key);
+            };
+            suppression.then(liberer, function(erreur) {
+                // Réécrite entre-temps : c'est l'issue de cette écriture qui compte.
+                if (self._suppressionsEnVol.get(key) !== jeton) return;
+                return self._restaurerApresEchecSuppression(key, jeton).then(function() {
+                    liberer();
+                    self._signalerEchecEcriture(key, erreur);
+                });
+            });
+        }
+
+        /**
+         * #1030 — remet dans localStorage ou la mémoire la valeur qu'IndexedDB garde
+         * après une suppression avortée (même partage par taille que `setSync`).
+         * Rien si la clé a été réécrite pendant la relecture, ou si la relecture échoue.
+         */
+        _restaurerApresEchecSuppression(key, jeton) {
+            var self = this;
+            var absente = {};
+            return this._avecReprise(function() { return self._getIndexedDB(key, absente); })
+                .then(function(valeur) {
+                    if (valeur === absente || self._suppressionsEnVol.get(key) !== jeton) return;
+                    var jsonString = JSON.stringify(valeur);
+                    var dansLocalStorage = false;
+                    if (self._estimateSizeFromString(jsonString) <= SEUIL_IDB_FIRST) {
+                        try {
+                            self._setLocalStorageString(key, jsonString);
+                            dansLocalStorage = true;
+                        } catch (e) { /* quota : la mémoire la porte */ }
+                    }
+                    if (dansLocalStorage) self.memoryCache.delete(key);
+                    else self.memoryCache.set(key, valeur);
+                    // Le cache de lecture (#397) ne doit pas garder l'absence.
+                    var abonne = self._surEcriture;
+                    if (typeof abonne === 'function') {
+                        try { abonne(key); } catch (e) {
+                            console.warn('[DB] abonné _surEcriture a levé une exception :', e && e.message);
+                        }
+                    }
+                }, function(e) {
+                    console.warn('[DB] Relecture après suppression avortée impossible, clé "' + key + '":', e && e.message);
+                });
+        }
+
+        /**
          * Attend que toutes les écritures IDB pendantes soient terminées.
          * Utile avant un rechargement volontaire de page.
          * @returns {Promise<void>}
@@ -1816,7 +1887,7 @@
             //    déchargement, comme les écritures setSync. Sans ce tracking, une
             //    suppression émise près d'un hard refresh n'était jamais drainée.
             if (this.ready && this.useIndexedDB) {
-                this._trackOperation(this._supprimerIDB(key), 'suppression', key);
+                this._trackSuppression(key);
             } else if (!this.ready) {
                 // #392 — symétrique de setSync : une suppression pré-init non
                 // rejouée laissait la copie IDB ressusciter la clé au boot.

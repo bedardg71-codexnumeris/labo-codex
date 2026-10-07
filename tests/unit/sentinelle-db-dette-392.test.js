@@ -53,7 +53,9 @@ describe('#392 C3 · opérations synchrones pré-init rejouées vers IndexedDB',
         win.db.ready = true;
         win.db.useIndexedDB = true;
         win.db._trackWrite = vi.fn();
-        win.db._trackOperation = vi.fn();
+        // #1030 : `_trackOperation` rend la promesse d'origine (contrat réel) ; la suppression
+        // rejouée l'attend pour dire un échec éventuel.
+        win.db._trackOperation = vi.fn((promesse) => promesse);
         win.db._removeIndexedDB = vi.fn(() => Promise.resolve());
         win.db._rejouerOperationsAvantInit();
         expect(win.db._trackWrite).toHaveBeenCalledWith('cleA', [1, 2]);
