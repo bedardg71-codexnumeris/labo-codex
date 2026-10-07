@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 21 h 44 : **1.186.6 PAS EN LIGNE : `main` LOCAL A 17 COMMITS D'AVANCE ; SECOND VERDICT NON JUGÉ (GARDE MÉMOIRE) ; À RELANCER APRÈS UN REDÉMARRAGE DU MAC**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 22 h 48 : **1.186.6 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `b59cc7fd` (PUBLIÉ À 22 h 46) ; VERDICT COMPLET VERT (1 INSTABLE, #916)**
+
+**Mesuré** : verdict complet par `scripts/pousser.sh` sur `b59cc7fd` : 0 échec, 0 échec connu,
+1 spec verte au second essai (`cours-actif-hors-bibliotheque-916`, déjà vue instable le 1er oct.).
+Échange 2,2 Go tout du long, après que Grégoire a fermé Chrome et Safari (ce sont eux qui
+tenaient les 11 à 12 Go d'échange qui avaient arrêté les deux passes précédentes : pas besoin de
+redémarrer). Hook pré-push : Vitest vert. Poussé `bfe1f565..b59cc7fd`. **Chez Netlify** :
+déploiement de production `6ac5b27ea40308000827cbdf`, état « ready », `commit_ref` `b59cc7fd`,
+publié à 22 h 46 (Toronto). La page servie n'a pas été lue.
+
+**Reste** : le geste à l'écran pour Grégoire (en démo, Mac avec dossier branché : importer une
+copie fonctionne, rien n'apparaît dans son dossier réel) ; signaler à Cowork l'adaptation des
+bancs #1013 et A3 (`b5eeff85`, tests seulement), poussée sans seconde relecture.
+
+## (relais précédent) 6 OCT. 2026, 21 h 44 : **1.186.6 PAS EN LIGNE : `main` LOCAL A 17 COMMITS D'AVANCE ; SECOND VERDICT NON JUGÉ (GARDE MÉMOIRE) ; À RELANCER APRÈS UN REDÉMARRAGE DU MAC**
 
 **Second verdict sur `b5eeff85`** : arrêté par la garde mémoire de pousser.sh (échange 12,4 Go,
 seuil 12 Go), non jugé, rien poussé. L'échange reste à 12,6 Go sans processus lourd visible :
