@@ -1204,13 +1204,13 @@
             let nbBlobs = 0;
             if (this.useIndexedDB && this.db) {
                 try {
-                    nbBlobs = await new Promise((resolve) => {
+                    nbBlobs = await this._avecReprise(() => new Promise((resolve) => {
                         const tx = this.db.transaction(['fichiers'], 'readonly');
                         const store = tx.objectStore('fichiers');
                         const req = store.count();
                         req.onsuccess = () => resolve(req.result);
                         req.onerror = () => resolve(0);
-                    });
+                    }));
                 } catch (e) { console.warn('[DB] blob count query skipped:', e.message || e); }
             }
 
@@ -1362,6 +1362,10 @@
         // ============================================
         // MÉTHODES BLOB (Store fichiers)
         // ============================================
+        // #1031 (7 oct. 2026) : chaque opération du magasin `fichiers` passe par
+        // `_avecReprise` (#1029), comme celles du magasin clé-valeur. Avant, une copie
+        // importée comme PREMIÈRE opération après une connexion perdue (iPad, retour
+        // d'arrière-plan) échouait ; elle ne profitait que d'une réouverture déjà faite.
 
         /**
          * Stocke un enregistrement blob dans le store fichiers
@@ -1373,7 +1377,7 @@
             if (!this.useIndexedDB || !this.db) {
                 throw new Error('[DB] IndexedDB requis pour storeBlob');
             }
-            return new Promise((resolve, reject) => {
+            return this._avecReprise(() => new Promise((resolve, reject) => {
                 const tx = this.db.transaction(['fichiers'], 'readwrite');
                 const store = tx.objectStore('fichiers');
                 const request = store.put(record);
@@ -1391,7 +1395,7 @@
                 request.onerror = () => {
                     console.error(`[DB] Erreur storeBlob "${record.id}":`, request.error);
                 };
-            });
+            }));
         }
 
         /**
@@ -1402,7 +1406,7 @@
         async getBlob(id) {
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return null;
-            return new Promise((resolve, reject) => {
+            return this._avecReprise(() => new Promise((resolve, reject) => {
                 const tx = this.db.transaction(['fichiers'], 'readonly');
                 const store = tx.objectStore('fichiers');
                 const request = store.get(id);
@@ -1411,7 +1415,7 @@
                     console.error(`[DB] Erreur getBlob "${id}":`, request.error);
                     reject(request.error);
                 };
-            });
+            }));
         }
 
         /**
@@ -1422,7 +1426,7 @@
         async deleteBlob(id) {
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return;
-            return new Promise((resolve, reject) => {
+            return this._avecReprise(() => new Promise((resolve, reject) => {
                 const tx = this.db.transaction(['fichiers'], 'readwrite');
                 const store = tx.objectStore('fichiers');
                 const request = store.delete(id);
@@ -1439,7 +1443,7 @@
                 request.onerror = () => {
                     console.error(`[DB] Erreur deleteBlob "${id}":`, request.error);
                 };
-            });
+            }));
         }
 
         /**
@@ -1449,7 +1453,7 @@
         async listBlobIds() {
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return [];
-            return new Promise((resolve, reject) => {
+            return this._avecReprise(() => new Promise((resolve, reject) => {
                 const tx = this.db.transaction(['fichiers'], 'readonly');
                 const store = tx.objectStore('fichiers');
                 const request = store.getAllKeys();
@@ -1458,7 +1462,7 @@
                     console.error('[DB] Erreur listBlobIds:', request.error);
                     reject(request.error);
                 };
-            });
+            }));
         }
 
         /**
@@ -1469,7 +1473,7 @@
         async listBlobsByStudent(etudiantDA) {
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return [];
-            return new Promise((resolve, reject) => {
+            return this._avecReprise(() => new Promise((resolve, reject) => {
                 const tx = this.db.transaction(['fichiers'], 'readonly');
                 const store = tx.objectStore('fichiers');
                 const index = store.index('etudiantDA');
@@ -1479,7 +1483,7 @@
                     console.error(`[DB] Erreur listBlobsByStudent "${etudiantDA}":`, request.error);
                     reject(request.error);
                 };
-            });
+            }));
         }
 
         /**
@@ -1596,7 +1600,7 @@
         async clearBlobs() {
             if (!this.ready) await this.init();
             if (!this.useIndexedDB || !this.db) return;
-            return new Promise((resolve, reject) => {
+            return this._avecReprise(() => new Promise((resolve, reject) => {
                 const tx = this.db.transaction(['fichiers'], 'readwrite');
                 const store = tx.objectStore('fichiers');
                 const request = store.clear();
@@ -1615,7 +1619,7 @@
                 request.onerror = () => {
                     console.error('[DB] Erreur clearBlobs:', request.error);
                 };
-            });
+            }));
         }
 
         // ============================================
