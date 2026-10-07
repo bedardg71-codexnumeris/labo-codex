@@ -56,6 +56,28 @@ function repondreAuxDialogues(page, reponses) {
     return journal;
 }
 
+/**
+ * #975 (7 oct. 2026) — « + Nouveau trimestre » ouvre la fiche d'identification du Cadre en
+ * création (chemin du lot E2) : plus de `prompt`, plus d'`alert`. Le geste réel : le bouton,
+ * la session et l'année, puis « Créer le trimestre ».
+ */
+async function creerParLaFiche(page, session, annee) {
+    await page.evaluate(async ({ session, annee }) => {
+        const pause = (ms) => new Promise((res) => setTimeout(res, ms));
+        naviguerVers('calendrier', 'trimestre');
+        await pause(600);
+        document.querySelector('[data-action="ouvrirCreationTrimestreV2"]').click();
+        const champSession = document.getElementById('v2-sessionTrimestre');
+        champSession.value = session;
+        champSession.dispatchEvent(new Event('change', { bubbles: true }));
+        const champAnnee = document.getElementById('v2-anneeTrimestre');
+        champAnnee.value = annee;
+        champAnnee.dispatchEvent(new Event('change', { bubbles: true }));
+        document.getElementById('v2-btnCreerTrimestre').click();
+        await pause(800);
+    }, { session, annee });
+}
+
 async function posteVierge(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
@@ -78,12 +100,11 @@ test('#478 (c) · poste vierge, UN trimestre créé : actif sans question, prés
     test.setTimeout(60000);
     const erreurs = brancherErreurs(page);
     await posteVierge(page);
-    const reponses = ['A', '2026'];
+    const reponses = [];
     reponses.confirmer = false; // un confirm résiduel serait REFUSÉ : l'ancien comportement laisserait le trimestre inactif
     const journal = repondreAuxDialogues(page, reponses);
 
-    await page.evaluate(() => window.ouvrirModalNouveauTrimestre());
-    await page.waitForTimeout(1500);
+    await creerParLaFiche(page, 'automne', '2026');
 
     const etat = await page.evaluate(async () => {
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -104,7 +125,7 @@ test('#478 (c) · poste vierge, UN trimestre créé : actif sans question, prés
         return out;
     });
 
-    expect(journal, 'sans trimestre actif, la création ne doit plus demander d\'activer').not.toContain('confirm');
+    expect(journal, 'sans trimestre actif, la création ne passe par aucun dialogue natif (#975)').toEqual([]);
     expect(etat.registre).toEqual([{ id: 'a2026', actif: true }]);
     expect(etat.cleTrimestreActif).toBe('a2026');
     expect(etat.cleGroupesCours, 'le Cadre doit écrire sous le préfixe du trimestre').toBe('a2026_groupesCours');
@@ -113,7 +134,10 @@ test('#478 (c) · poste vierge, UN trimestre créé : actif sans question, prés
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
-test('#478 (c) · un trimestre ACTIF existe déjà : la question d\'activation reste posée', async ({ page }) => {
+// ↻ #975 (7 oct. 2026) : la question native « Veux-tu l'activer immédiatement ? » est retirée
+// avec l'ancien chemin. « Créer le trimestre » (lot E2) crée ET active, sans dialogue ; pendant la
+// saisie, les champs n'écrivent rien dans le trimestre actif.
+test('#478 (c) · un trimestre ACTIF existe déjà : la fiche crée et active le nouveau, sans dialogue, sans toucher l\'ancien', async ({ page }) => {
     test.setTimeout(60000);
     const erreurs = brancherErreurs(page);
     await posteVierge(page);
@@ -121,21 +145,26 @@ test('#478 (c) · un trimestre ACTIF existe déjà : la question d\'activation r
         db.setSync('trimestres', [{ id: 'h2026', nom: 'Hiver 2026', annee: 2026, session: 'H', actif: true }]);
         db.setSync('trimestreActif', 'h2026');
     });
-    const reponses = ['A', '2026'];
-    reponses.confirmer = false; // on refuse : le nouveau trimestre reste inactif, l'ancien reste actif
+    const reponses = [];
     const journal = repondreAuxDialogues(page, reponses);
 
-    await page.evaluate(() => window.ouvrirModalNouveauTrimestre());
-    await page.waitForTimeout(1500);
+    await creerParLaFiche(page, 'automne', '2026');
 
     const etat = await page.evaluate(() => ({
-        registre: db.getSync('trimestres', []).map((t) => ({ id: t.id, actif: t.actif })),
-        cleTrimestreActif: db.getSync('trimestreActif', null)
+        registre: db.getSync('trimestres', []).map((t) => ({ id: t.id, nom: t.nom, session: t.session, actif: t.actif })),
+        cleTrimestreActif: db.getSync('trimestreActif', null),
+        boutonCreerMasque: document.getElementById('v2-btnCreerTrimestre').classList.contains('u-hide'),
+        nomAffiche: document.getElementById('v2-nomTrimestre').value
     }));
 
-    expect(journal, 'avec un trimestre actif, activer le nouveau reste une QUESTION').toContain('confirm');
-    expect(etat.registre).toEqual([{ id: 'h2026', actif: true }, { id: 'a2026', actif: false }]);
-    expect(etat.cleTrimestreActif).toBe('h2026');
+    expect(journal, 'aucun prompt, alert ni confirm (#975)').toEqual([]);
+    expect(etat.registre, 'l\'ancien garde son identification ; le nouveau est actif').toEqual([
+        { id: 'h2026', nom: 'Hiver 2026', session: 'H', actif: false },
+        { id: 'a2026', nom: 'Automne 2026', session: 'A', actif: true }
+    ]);
+    expect(etat.cleTrimestreActif).toBe('a2026');
+    expect(etat.boutonCreerMasque, 'la fiche quitte la création').toBe(true);
+    expect(etat.nomAffiche).toBe('Automne 2026');
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 

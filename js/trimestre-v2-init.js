@@ -103,6 +103,8 @@ window.initialiserModuleTrimestre = function () {
  * Charge l'identification du trimestre actif dans les champs v2-
  */
 function chargerIdentificationTrimestreV2() {
+    // #975 : relire la fiche depuis le stock quitte la création demandée.
+    _creationDemandee = false;
     const trimestre = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
 
     const elemNom = document.getElementById('v2-nomTrimestre');
@@ -137,6 +139,33 @@ function rendreModeFicheTrimestreV2(enCreation) {
     if (btn && btn.classList) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
 }
 
+/**
+ * #975 (7 oct. 2026) — « + Nouveau trimestre » ouvre CETTE fiche en création, même quand un
+ * trimestre est actif : plus de `prompt` ni d'`alert`, le geste est « Créer le trimestre »
+ * (lot E2). Tant que la création est demandée, les champs n'écrivent rien dans le trimestre
+ * actif ; rien n'est écrit avant le clic. Relire la fiche (bascule, retour au Cadre) la quitte.
+ */
+let _creationDemandee = false;
+
+/** #975 : la fiche crée (aucun trimestre actif, ou « + Nouveau trimestre » demandé). */
+function _ficheEnCreation() {
+    return _creationDemandee || !_trimestreActifDuRegistre();
+}
+
+/** #975 : « + Nouveau trimestre » — la fiche d'identification, vide, en création. */
+function ouvrirCreationTrimestreV2() {
+    ['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
+        'v2-finCours', 'v2-finTrimestre', 'v2-remiseNotes', 'v2-semainePlanificationDebut',
+        'v2-semainePlanificationFin', 'v2-semaineExamensDebut', 'v2-semaineExamensFin'].forEach(function(id) {
+        const champ = document.getElementById(id);
+        if (champ) champ.value = '';
+    });
+    _creationDemandee = true;
+    rendreModeFicheTrimestreV2(true);
+    const session = document.getElementById('v2-sessionTrimestre');
+    if (session && typeof session.focus === 'function') session.focus();
+}
+
 /** Lot E2 : le trimestre actif du registre, ou null (lecture synchrone du stock). */
 function _trimestreActifDuRegistre() {
     // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
@@ -147,7 +176,7 @@ function _trimestreActifDuRegistre() {
 
 /** Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js, rechargement). */
 function trimestreEnCreationSaisi() {
-    if (_trimestreActifDuRegistre()) return false;
+    if (!_ficheEnCreation()) return false;
     const valeur = (id) => (document.getElementById(id)?.value || '').trim();
     return ['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
         'v2-finCours', 'v2-finTrimestre'].some(id => valeur(id));
@@ -208,7 +237,8 @@ function _refuserIdentificationV2(phrase, geste) {
         const raison = typeof window.raisonPourTemoin === 'function' ? window.raisonPourTemoin(phrase) : phrase;
         window.temoinEnregistrement.nonEnregistre(raison, geste || GESTE_IDENTIFICATION, 'trimestres');
     }
-    chargerIdentificationTrimestreV2();
+    // #975 : relire la fiche quitterait la création demandée, et perdrait la saisie.
+    if (!_creationDemandee) chargerIdentificationTrimestreV2();
     return false;
 }
 
@@ -225,8 +255,8 @@ function _rafraichirListesTrimestresV2() {
  * comme avant. Sans trimestre actif, rien : c'est « Créer le trimestre » qui écrit.
  */
 function sauvegarderNomTrimestreV2() {
+    if (_ficheEnCreation()) return false;
     const actif = _trimestreActifDuRegistre();
-    if (!actif) return false;
     const champ = document.getElementById('v2-nomTrimestre');
     let nom = champ?.value?.trim() || '';
     if (!nom) {
@@ -258,8 +288,8 @@ function sauvegarderNomTrimestreV2() {
  * @returns {boolean} true si l'identification en base est celle des champs
  */
 function sauvegarderIdentificationTrimestreV2() {
+    if (_ficheEnCreation()) return false;
     const actif = _trimestreActifDuRegistre();
-    if (!actif) return false;
     const saisie = _identificationSaisieV2();
     if (!saisie) return false;                         // état intermédiaire : ni écriture, ni erreur
     if (saisie.id === actif.id) return true;           // rien ne change (le nom a son propre champ)
@@ -300,7 +330,8 @@ function sauvegarderIdentificationTrimestreV2() {
  */
 function creerTrimestreV2() {
     const geste = 'Créer le trimestre';
-    if (_trimestreActifDuRegistre()) return false;
+    if (!_ficheEnCreation()) return false;
+    const ancienActif = _trimestreActifDuRegistre();
     const saisie = _identificationSaisieV2();
     if (!saisie) {
         return _refuserIdentificationV2('Choisis la session et l\'année du trimestre ; elles déterminent où ses données sont rangées.', geste);
@@ -322,6 +353,7 @@ function creerTrimestreV2() {
         actif: true
     });
     if (!sauvegarderDonneesSelonMode('trimestres', trimestres, { geste })) return false;
+    _creationDemandee = false;
     window.trimestreActif = saisie.id;
     db.setSync('trimestreActif', saisie.id);
     // Le cadre, sous l'id qui vient d'être posé (cle() le lit dans trimestreActif).
@@ -330,6 +362,11 @@ function creerTrimestreV2() {
     if (champNom) champNom.value = saisie.nom;
     rendreModeFicheTrimestreV2(false);
     _rafraichirListesTrimestresV2();
+    // #975 : un trimestre était actif — le chemin complet de la bascule (#466/CT-05), pour que
+    // rien du trimestre quitté ne survive (groupe-cours, éditeurs, miroirs, vues).
+    if (ancienActif && typeof window.changerTrimestreActifV2 === 'function') {
+        window.changerTrimestreActifV2(saisie.id);
+    }
     notifications.succes(`Trimestre «\u00a0${saisie.nom}\u00a0» créé.`);
     return true;
 }
@@ -408,7 +445,7 @@ function chargerCadreCalendrierV2() {
  * @returns {boolean} true si le cadre a été écrit
  */
 function sauvegarderCadreCalendrierV2(options) {
-    if (!_trimestreActifDuRegistre()) return false;
+    if (_ficheEnCreation()) return false;
     const cadre = {
         dateDebut: document.getElementById('v2-debutTrimestre')?.value || '',
         finCours: document.getElementById('v2-finCours')?.value || '',
@@ -797,6 +834,7 @@ window.chargerCadreCalendrierV2 = chargerCadreCalendrierV2;
 window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
 window.sauvegarderNomTrimestreV2 = sauvegarderNomTrimestreV2;
 window.creerTrimestreV2 = creerTrimestreV2;
+window.ouvrirCreationTrimestreV2 = ouvrirCreationTrimestreV2;
 window.rendreModeFicheTrimestreV2 = rendreModeFicheTrimestreV2;
 window.reinitialiserBornesTrimestreV2 = reinitialiserBornesTrimestreV2;
 window.reinitialiserSemainesSpecialesV2 = reinitialiserSemainesSpecialesV2;

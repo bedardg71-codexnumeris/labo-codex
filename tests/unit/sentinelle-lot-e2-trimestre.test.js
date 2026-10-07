@@ -198,6 +198,89 @@ describe('lot E2 · aucun trimestre actif — « Créer le trimestre »', () => 
     });
 });
 
+// #975 (7 oct. 2026) — « + Nouveau trimestre » passe par CETTE fiche, même quand un trimestre
+// est actif : plus de `prompt`, plus d'`alert`. Pendant la création demandée, les champs
+// n'écrivent rien dans le trimestre actif ; « Créer le trimestre » crée, active, et prend le
+// chemin complet de la bascule (#466/CT-05).
+describe('#975 · un trimestre actif — « + Nouveau trimestre » ouvre la fiche en création', () => {
+    const HIVER = [{ id: 'h2026', nom: 'Hiver 2026', session: 'H', annee: 2026, actif: true }];
+    const ouvrir = (opts) => {
+        const e = monter({ registre: HIVER, champs: { 'v2-nomTrimestre': 'Hiver 2026', 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '2026', 'v2-debutTrimestre': '2026-01-20' }, ...opts });
+        e.win.changerTrimestreActifV2 = vi.fn();
+        e.win.ouvrirCreationTrimestreV2();
+        return e;
+    };
+    const saisir = (e, valeurs) => { for (const [id, v] of Object.entries(valeurs)) e.elements[id].value = v; };
+
+    it('la fiche se vide, « Créer le trimestre » paraît, rien n\'est écrit', () => {
+        const e = ouvrir();
+        expect(e.boutonCache()).toBe(false);
+        for (const id of ['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre']) {
+            expect(e.elements[id].value, id).toBe('');
+        }
+        expect(e.ecritures).toEqual([]);
+    });
+
+    it('pendant la saisie, ni le nom, ni la session et l\'année, ni les dates n\'écrivent dans le trimestre actif', () => {
+        const e = ouvrir();
+        saisir(e, { 'v2-nomTrimestre': 'Automne fictif', 'v2-sessionTrimestre': 'automne', 'v2-anneeTrimestre': '2026', 'v2-debutTrimestre': '2026-08-25' });
+        expect(e.win.sauvegarderNomTrimestreV2()).toBe(false);
+        expect(e.win.sauvegarderIdentificationTrimestreV2()).toBe(false);
+        expect(e.win.sauvegarderCadreCalendrierV2()).toBe(false);
+        expect(e.sauvegarder).not.toHaveBeenCalled();
+        expect(e.store.trimestres).toEqual(HIVER);
+    });
+
+    it('« Créer le trimestre » : l\'ancien désactivé, intact ; le nouveau actif, son cadre sous son id ; la bascule complète ; aucun dialogue', () => {
+        const e = ouvrir();
+        saisir(e, { 'v2-sessionTrimestre': 'automne', 'v2-anneeTrimestre': '2026', 'v2-debutTrimestre': '2026-08-25', 'v2-finCours': '2026-12-11', 'v2-finTrimestre': '2026-12-22' });
+        expect(e.win.creerTrimestreV2()).toBe(true);
+        expect(e.store.trimestres).toEqual([
+            { id: 'h2026', nom: 'Hiver 2026', session: 'H', annee: 2026, actif: false },
+            expect.objectContaining({ id: 'a2026', nom: 'Automne 2026', session: 'A', annee: 2026, actif: true })
+        ]);
+        expect(e.store.trimestreActif).toBe('a2026');
+        expect(e.store.a2026_cadreCalendrier).toMatchObject({ dateDebut: '2026-08-25', finTrimestre: '2026-12-22' });
+        expect(e.store.h2026_cadreCalendrier).toBeUndefined();
+        expect(e.win.changerTrimestreActifV2).toHaveBeenCalledWith('a2026');
+        expect(e.sauvegarder.mock.calls[0][2]).toEqual({ geste: 'Créer le trimestre' });
+        expect(e.notifications.succes).toHaveBeenCalledWith('Trimestre «\u00a0Automne 2026\u00a0» créé.');
+        expect(e.boutonCache()).toBe(true);
+    });
+
+    it('un trimestre qui existe déjà : refus par le témoin (mots d\'E2), la saisie reste, la fiche reste en création', () => {
+        const e = ouvrir();
+        saisir(e, { 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '2026' });
+        expect(e.win.creerTrimestreV2()).toBe(false);
+        expect(e.temoin.nonEnregistre).toHaveBeenCalledWith('Le trimestre « h2026 » existe déjà ; active-le depuis la bibliothèque des trimestres.', 'Créer le trimestre', 'trimestres');
+        expect(e.elements['v2-sessionTrimestre'].value).toBe('hiver');
+        expect(e.boutonCache()).toBe(false);
+        expect(e.win.changerTrimestreActifV2).not.toHaveBeenCalled();
+        expect(e.store.trimestres).toEqual(HIVER);
+    });
+
+    it('la question de sortie retient une saisie en création demandée ; relire la fiche (bascule) quitte la création', () => {
+        const e = ouvrir();
+        expect(e.fiches.trimestre()).toBe(false);          // vide : rien à perdre
+        saisir(e, { 'v2-sessionTrimestre': 'automne' });
+        expect(e.fiches.trimestre()).toBe(true);
+        e.win.chargerIdentificationTrimestreV2();
+        expect(e.boutonCache()).toBe(true);
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Hiver 2026');
+        expect(e.fiches.trimestre()).toBe(false);
+    });
+
+    it('l\'ancien chemin est retiré : plus de prompt ni d\'alert de création ; le bouton mène à la fiche', () => {
+        const liste = readFileSync(path.join(racine, 'js/trimestre-v2-liste.js'), 'utf8');
+        const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+        expect(liste).not.toContain('function ouvrirModalNouveauTrimestre');
+        expect(liste).not.toMatch(/prompt\(\s*['`]Créer un nouveau trimestre/);
+        expect(liste).not.toContain('créé avec succès');
+        expect(html).not.toContain('ouvrirModalNouveauTrimestre');
+        expect(html).toMatch(/data-action="ouvrirCreationTrimestreV2">\s*\+ Nouveau trimestre/);
+    });
+});
+
 describe('lot E2 · index.html — chaque champ a son écrivain, au changement', () => {
     const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
     const balise = (id) => (html.match(new RegExp('<[^>]*id="' + id + '"[^>]*>')) || [''])[0];

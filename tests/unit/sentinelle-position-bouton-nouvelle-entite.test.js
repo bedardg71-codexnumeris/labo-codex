@@ -25,7 +25,7 @@ const lire = (f) => readFileSync(new URL(`../../${f}`, import.meta.url), 'utf-8'
 
 // Les six accordéons, dans l'ordre du document : menu déroulant → bouton.
 const ACCORDEONS = [
-    { nom: 'Trimestre', menu: 'id="selectTrimestreActif"', action: 'ouvrirModalNouveauTrimestre' },
+    { nom: 'Trimestre', menu: 'id="selectTrimestreActif"', action: 'ouvrirCreationTrimestreV2' },
     { nom: 'Cours', menu: 'id="v2-selectCours"', action: 'nouveauCoursV2' },
     { nom: 'Enseignant·e', menu: 'id="v2-selectEnseignant"', action: 'nouveauProfilEnseignantV2' },
     { nom: 'Groupe d\'étudiant·es', menu: 'id="v2-selectGroupe"', action: 'creerNouveauGroupeV2' },
