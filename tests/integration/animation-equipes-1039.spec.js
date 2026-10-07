@@ -62,7 +62,7 @@ test('#1039 · barre latérale, absent du jour écarté, reste demandé, chaque 
     await expect(page.locator('#suivi-animation .sidebar-item[data-param="equipes"]')).toHaveAttribute('aria-pressed', 'true');
 
     const presents = prep.das.length - 1;
-    await expect(page.locator('.equipes-constat')).toContainText(`${presents} élèves présents aujourd'hui ; 1 absent écarté`);
+    await expect(page.locator('.equipes-constat')).toContainText(`${presents} étudiant·es présent·es aujourd'hui ; 1 absence écartée d'après les présences.`);
 
     // Bouton inerte tant que la taille n'est pas choisie.
     const former = page.locator('[data-action="formerEquipesAnimation"]');
@@ -96,7 +96,7 @@ test('#1039 · barre latérale, absent du jour écarté, reste demandé, chaque 
 
     // Retenir : la clé du cours reçoit les paires, et l'écran le dit.
     await page.locator('[data-action="retenirEquipes"]').click();
-    await expect(page.locator('.equipes-memoire')).toContainText('Une formation retenue pour ce groupe.');
+    await expect(page.locator('.equipes-memoire')).toContainText('Ce groupe a des équipes retenues.');
     const memoire = await page.evaluate(() => db.getSync('equipesAnimation_' + db.getSync('infoCours', null)?.id, null));
     expect(memoire.formations).toBe(1);
     expect(memoire.paires.length).toBeGreaterThan(0);
