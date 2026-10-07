@@ -7,7 +7,30 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 9 h 08 : **1.188.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `2abd450e` (PUBLIÉ À 9 h 02) ; VERDICT COMPLET VERT**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 9 h 45 : **1.188.1 (« ANNULER » DE LA CRÉATION D'UN TRIMESTRE, #975 SUITE) COMMITÉE SUR `main` LOCAL (build `1007-0944`, `d595aec2`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md`, « Suite 2 » (Cowork, 9 h 38). **Rien n'est poussé.**
+
+**Commits** : `89595936` consigne ; `e3e194a5` « Annuler » (bouton secondaire à côté de « Créer
+le trimestre », seulement avec un trimestre actif ; au clic rien n'est écrit, la fiche du
+trimestre actif revient – identification ET dates –, les deux boutons disparaissent ;
+commentaire « pas de question de sortie » posé au-dessus de `_creationDemandee`) ; `d595aec2`
+release 1.188.1 (patch).
+
+**Mesuré** : Vitest complet après le commit de release : 693 fichiers, 8 325 essais verts.
+Specs voisins WebKit (lot E2 du Cadre, #478, #466) : 18 verts, dont l'essai neuf. Break-tests :
+7 mutations en Vitest, 1 au navigateur, chacune rouge sur le bon cas. Verdict complet : **non lancé**.
+
+**Suppositions nommées** : « Annuler » recharge aussi les dates du cadre (vidées à l'ouverture
+de la création), pas seulement l'identification ; classe `btn-secondaire` (design-system.html
+a aussi un `btn-annuler` orange, non retenu : la consigne dit « secondaire »).
+
+**Mots en attente de Grégoire** : aucun (« Annuler » tranché ; la question de sortie abandonnée).
+
+**Suite** : relecture de Cowork → ligne des Nouvelles (proposée dans le rapport, non écrite) →
+Chrome et Safari fermés → verdict complet → push → Netlify → relais.
+
+## (relais précédent) 7 OCT. 2026, 9 h 08 : **1.188.0 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `2abd450e` (PUBLIÉ À 9 h 02) ; VERDICT COMPLET VERT**
 
 **Mesuré** : verdict complet par `scripts/pousser.sh` sur `2abd450e` : code 0, 0 échec connu,
 aucune spec instable, aucune veille, échange 1,6 Go (Chrome et Safari fermés, mesuré). Hook
