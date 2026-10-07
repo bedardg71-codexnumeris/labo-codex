@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 21 h 24 : **1.186.6 : SECONDE RELECTURE DE COWORK VERTE ; PREMIER VERDICT ROUGE (4 SPECS, CONSÉQUENCE DE G1), BANCS ADAPTÉS ; SECOND VERDICT ET PUSH EN COURS**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 21 h 44 : **1.186.6 PAS EN LIGNE : `main` LOCAL A 17 COMMITS D'AVANCE ; SECOND VERDICT NON JUGÉ (GARDE MÉMOIRE) ; À RELANCER APRÈS UN REDÉMARRAGE DU MAC**
+
+**Second verdict sur `b5eeff85`** : arrêté par la garde mémoire de pousser.sh (échange 12,4 Go,
+seuil 12 Go), non jugé, rien poussé. L'échange reste à 12,6 Go sans processus lourd visible :
+il ne redescend qu'au redémarrage. **Prochain geste** : redémarrer le Mac, puis
+`scripts/pousser.sh origin main` (verdict complet → push), puis vérifier chez Netlify par le
+connecteur (commit_ref, state), puis relais. Rien d'autre à faire : relecture de Cowork verte,
+bancs #1013 et A3 adaptés et rejoués (5/5).
+
+### Détail, 21 h 24 : premier verdict rouge (4 specs, conséquence de G1), bancs adaptés
 
 **Premier verdict complet sur `7a535d5e`** : 4 specs nouvellement rouges, rien poussé.
 `eleve-supprime-masque-1013` (le codex écrit les copies d'un élève supprimé) et trois cas de
