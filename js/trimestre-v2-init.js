@@ -137,6 +137,11 @@ function chargerIdentificationTrimestreV2() {
 function rendreModeFicheTrimestreV2(enCreation) {
     const btn = document.getElementById('v2-btnCreerTrimestre');
     if (btn && btn.classList) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
+    // #975 suite (décision de Grégoire, 7 oct. 2026) : « Annuler » seulement s'il y a un trimestre
+    // actif à retrouver ; au premier trimestre d'un poste vierge, il n'y a rien à retrouver.
+    const annuler = document.getElementById('v2-btnAnnulerCreationTrimestre');
+    const avecActif = enCreation && !!_trimestreActifDuRegistre();
+    if (annuler && annuler.classList) annuler.classList[avecActif ? 'remove' : 'add']('u-hide');
 }
 
 /**
@@ -144,6 +149,12 @@ function rendreModeFicheTrimestreV2(enCreation) {
  * trimestre est actif : plus de `prompt` ni d'`alert`, le geste est « Créer le trimestre »
  * (lot E2). Tant que la création est demandée, les champs n'écrivent rien dans le trimestre
  * actif ; rien n'est écrit avant le clic. Relire la fiche (bascule, retour au Cadre) la quitte.
+ *
+ * ⛔ PAS DE QUESTION DE SORTIE DANS L'APPLICATION pour cette fiche (décision de Grégoire,
+ * 7 oct. 2026, 9 h 38 : « on s'en passe ») : quitter le Cadre pendant une création perd la
+ * saisie, et c'est accepté. Ne pas brancher cette fiche sur `quitterCreationSiConfirme` (ui-dialogues.js).
+ * Seule reste la question native du navigateur au rechargement (`declarerFicheEnCreation`,
+ * plus bas). Pour quitter sans créer : « Annuler » (`annulerCreationTrimestreV2`).
  */
 let _creationDemandee = false;
 
@@ -164,6 +175,17 @@ function ouvrirCreationTrimestreV2() {
     rendreModeFicheTrimestreV2(true);
     const session = document.getElementById('v2-sessionTrimestre');
     if (session && typeof session.focus === 'function') session.focus();
+}
+
+/**
+ * #975 suite — « Annuler » : quitte la création demandée sans rien écrire ; la fiche du
+ * trimestre actif revient (identification et dates), « Créer le trimestre » disparaît.
+ */
+function annulerCreationTrimestreV2() {
+    if (!_creationDemandee) return false;
+    chargerIdentificationTrimestreV2();   // remet _creationDemandee à false, rend le mode fiche
+    chargerCadreCalendrierV2();           // les dates vidées par ouvrirCreationTrimestreV2
+    return true;
 }
 
 /** Lot E2 : le trimestre actif du registre, ou null (lecture synchrone du stock). */
@@ -835,6 +857,7 @@ window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
 window.sauvegarderNomTrimestreV2 = sauvegarderNomTrimestreV2;
 window.creerTrimestreV2 = creerTrimestreV2;
 window.ouvrirCreationTrimestreV2 = ouvrirCreationTrimestreV2;
+window.annulerCreationTrimestreV2 = annulerCreationTrimestreV2;
 window.rendreModeFicheTrimestreV2 = rendreModeFicheTrimestreV2;
 window.reinitialiserBornesTrimestreV2 = reinitialiserBornesTrimestreV2;
 window.reinitialiserSemainesSpecialesV2 = reinitialiserSemainesSpecialesV2;

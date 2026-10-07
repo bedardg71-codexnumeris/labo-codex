@@ -368,3 +368,48 @@ test('placement : « Fermer » et « Créer le cours » à 360, 768, 1024 et 118
         await page.evaluate(() => { window.temoinEnregistrement.fermer(); });
     }
 });
+
+// #975 suite (décisions de Grégoire, 7 oct. 2026) — « + Nouveau trimestre », puis « Annuler » :
+// rien d'écrit, la fiche du trimestre actif revient, les deux boutons disparaissent. Le vrai
+// bouton de la bibliothèque, le vrai bouton « Annuler », sur la page de démonstration.
+test('#975 suite · « + Nouveau trimestre » puis « Annuler » : rien d\'écrit, la fiche du trimestre actif revient', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirCadre(page);
+    await page.evaluate(() => window.initialiserModuleTrimestre());
+    await pause(page, 600);
+    const avant = await page.evaluate(() => ({
+        trimestres: JSON.stringify(db.getSync('trimestres', [])),
+        cadre: JSON.stringify(db.getSync(cle('cadreCalendrier'), null)),
+        actif: db.getSync('trimestreActif', null),
+        nom: document.getElementById('v2-nomTrimestre').value,
+        debut: document.getElementById('v2-debutTrimestre').value
+    }));
+    expect(avant.debut, 'la démonstration a un cadre').not.toBe('');
+    expect(await visible(page, '#v2-btnAnnulerCreationTrimestre'), 'hors création : pas d\'« Annuler »').toBe(false);
+
+    await page.evaluate(() => document.querySelector('[data-action="ouvrirCreationTrimestreV2"]').click());
+    await pause(page, 400);
+    expect(await visible(page, '#v2-btnCreerTrimestre')).toBe(true);
+    expect(await visible(page, '#v2-btnAnnulerCreationTrimestre'), 'un trimestre actif : « Annuler » paraît').toBe(true);
+    expect(await page.evaluate(() => document.getElementById('v2-btnAnnulerCreationTrimestre').textContent.trim())).toBe('Annuler');
+    await page.evaluate(() => {
+        document.getElementById('v2-nomTrimestre').value = 'Trimestre fictif annulé';
+        document.getElementById('v2-sessionTrimestre').value = 'hiver';
+        document.getElementById('v2-anneeTrimestre').value = '2031';
+    });
+
+    await page.evaluate(() => document.getElementById('v2-btnAnnulerCreationTrimestre').click());
+    await pause(page, 600);
+    const apres = await page.evaluate(() => ({
+        trimestres: JSON.stringify(db.getSync('trimestres', [])),
+        cadre: JSON.stringify(db.getSync(cle('cadreCalendrier'), null)),
+        actif: db.getSync('trimestreActif', null),
+        nom: document.getElementById('v2-nomTrimestre').value,
+        debut: document.getElementById('v2-debutTrimestre').value
+    }));
+    expect(apres).toEqual(avant);
+    expect(await visible(page, '#v2-btnCreerTrimestre')).toBe(false);
+    expect(await visible(page, '#v2-btnAnnulerCreationTrimestre')).toBe(false);
+    expect(await questionOuverte(page), 'aucune question de sortie').toBe('');
+    expect(await page.evaluate(() => window.__toasts)).toEqual([]);
+});
