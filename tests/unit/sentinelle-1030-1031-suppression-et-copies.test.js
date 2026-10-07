@@ -179,3 +179,56 @@ describe('#1030 · une suppression d\'arrière-plan qui avorte le dit, et la don
         expect(b.db.getSync('a2026_notesFictives', null)).toEqual(['Zéphyrin Tartempion']);
     });
 });
+
+describe('#1031 · les opérations du magasin `fichiers` rouvrent la connexion perdue', () => {
+    const copie = { id: 'copie-fictive-1', etudiantDA: '0000001', productionId: 'p1', blob: 'octets' };
+
+    it('storeBlob en PREMIÈRE opération après la perte : rouverte, la copie est rangée', async () => {
+        const b = monter({ connexionInitiale: 'fermée' });
+        await b.db.storeBlob(copie);
+        expect(b.fichiers.get('copie-fictive-1')).toEqual(copie);
+        expect(b.db.db.nom).toBe('c1');
+    });
+
+    it('getBlob, listBlobIds, listBlobsByStudent : chacune rouvre si elle est la première', async () => {
+        const b1 = monter({ connexionInitiale: 'fermée' });
+        b1.fichiers.set(copie.id, copie);
+        expect(await b1.db.getBlob('copie-fictive-1')).toEqual(copie);
+
+        const b2 = monter({ connexionInitiale: 'fermée' });
+        b2.fichiers.set(copie.id, copie);
+        expect(await b2.db.listBlobIds()).toEqual(['copie-fictive-1']);
+
+        const b3 = monter({ connexionInitiale: 'fermée' });
+        b3.fichiers.set(copie.id, copie);
+        expect(await b3.db.listBlobsByStudent('0000001')).toEqual([copie]);
+    });
+
+    it('deleteBlob et clearBlobs : rouverte, l\'opération aboutit', async () => {
+        const b1 = monter({ connexionInitiale: 'fermée' });
+        b1.fichiers.set(copie.id, copie);
+        await b1.db.deleteBlob('copie-fictive-1');
+        expect(b1.fichiers.size).toBe(0);
+
+        const b2 = monter({ connexionInitiale: 'fermée' });
+        b2.fichiers.set(copie.id, copie);
+        await b2.db.clearBlobs();
+        expect(b2.fichiers.size).toBe(0);
+    });
+
+    it('info : le compte des copies rouvre aussi (avant : 0 en silence)', async () => {
+        const b = monter({ connexionInitiale: 'fermée' });
+        b.fichiers.set(copie.id, copie);
+        b.db.keys = async () => [];
+        const info = await b.db.info();
+        expect(info.nbBlobs).toBe(1);
+    });
+
+    it('les sept opérations du magasin `fichiers` passent toutes par `_avecReprise` (compte au code)', () => {
+        const code = readFileSync(path.join(racine, 'js/db.js'), 'utf8');
+        const transactions = code.match(/this\.db\.transaction\(\['fichiers'\]/g) || [];
+        const enveloppees = code.match(/this\._avecReprise\(\(\) => new Promise\(\(resolve(?:, reject)?\) => \{\s*const tx = this\.db\.transaction\(\['fichiers'\]/g) || [];
+        expect(transactions).toHaveLength(7);
+        expect(enveloppees).toHaveLength(7);
+    });
+});

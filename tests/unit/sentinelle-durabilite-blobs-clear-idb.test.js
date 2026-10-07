@@ -59,10 +59,17 @@ const tick = () => new Promise((r) => setTimeout(r, 0));
 
 // Chaque méthode est invoquée en ISOLATION via .call(fakeThis) pour ne déclencher
 // QUE la transaction testée (pas les écritures de fond de l'instance).
+// #1031 (7 oct. 2026) : les opérations du magasin `fichiers` passent par la reprise (#1029).
+// VRAIES méthodes, connexion saine : elles ne font rien de plus ici.
+const avecReprise = (db, ctrl) => ({
+    ready: true, useIndexedDB: true, db: ctrl.connection,
+    _avecReprise: db._avecReprise, _connexionFermee: db._connexionFermee,
+    _connexionPerdue: false, _reouverture: null
+});
 const CAS = [
-    { nom: 'storeBlob', invoke: (db, ctrl) => db.storeBlob.call({ ready: true, useIndexedDB: true, db: ctrl.connection }, { id: 'B1', blob: 'x' }) },
-    { nom: 'deleteBlob', invoke: (db, ctrl) => db.deleteBlob.call({ ready: true, useIndexedDB: true, db: ctrl.connection }, 'B1') },
-    { nom: 'clearBlobs', invoke: (db, ctrl) => db.clearBlobs.call({ ready: true, useIndexedDB: true, db: ctrl.connection }) },
+    { nom: 'storeBlob', invoke: (db, ctrl) => db.storeBlob.call(avecReprise(db, ctrl), { id: 'B1', blob: 'x' }) },
+    { nom: 'deleteBlob', invoke: (db, ctrl) => db.deleteBlob.call(avecReprise(db, ctrl), 'B1') },
+    { nom: 'clearBlobs', invoke: (db, ctrl) => db.clearBlobs.call(avecReprise(db, ctrl)) },
     { nom: '_clearIndexedDB', invoke: (db, ctrl) => db._clearIndexedDB.call({ db: ctrl.connection }) },
 ];
 
