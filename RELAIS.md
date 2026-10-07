@@ -7,7 +7,25 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 19 h 46 : **1.186.6 REVUE APRÈS LA RELECTURE DE COWORK (build `1006-1945`, `99ab7ef9`) SUR `main` LOCAL ; SECONDE RELECTURE COURTE DE COWORK, PUIS VERDICT ET PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 21 h 24 : **1.186.6 : SECONDE RELECTURE DE COWORK VERTE ; PREMIER VERDICT ROUGE (4 SPECS, CONSÉQUENCE DE G1), BANCS ADAPTÉS ; SECOND VERDICT ET PUSH EN COURS**
+
+**Premier verdict complet sur `7a535d5e`** : 4 specs nouvellement rouges, rien poussé.
+`eleve-supprime-masque-1013` (le codex écrit les copies d'un élève supprimé) et trois cas de
+`lot-a3-faire-revenir` (le compte de #1012). Cause : les deux bancs montent leurs copies dans
+la démo, et G1 fait que le codex n'emporte plus la démo (0 copie écrite, 0 attendue). Ce n'est
+pas une régression du produit ; c'est le changement voulu, vu par des bancs bâtis sur la démo.
+
+**Adaptation (tests seulement, aucun js/ touché)** : le temps de `Codex.generer`, les clés
+`demo_*` du banc sont présentées au codex sous un trimestre réel fictif `a2031_` (enveloppe
+de `db.keys` / `db.get`, restaurée en `finally`, rien d'écrit en base, garde #340 hors jeu).
+Le chemin du codex sous test reste réel ; les copies se lisent par leur id. Témoin : sans
+la vue, le rouge du premier verdict. Rejoués : 5/5 verts. Décision technique prise seule
+(règle 2 : correction → verdict → push, sans nouvelle relecture) ; à signaler à Cowork.
+
+**Geste à vérifier pour Grégoire après la mise en ligne** : en démo, sur le Mac avec le
+dossier branché, importer une copie fonctionne et rien n'apparaît dans son dossier réel.
+
+## (relais précédent) 6 OCT. 2026, 19 h 46 : **1.186.6 REVUE APRÈS LA RELECTURE DE COWORK (build `1006-1945`, `99ab7ef9`) SUR `main` LOCAL ; SECONDE RELECTURE COURTE DE COWORK, PUIS VERDICT ET PUSH**
 
 **Consigne** : relecture de Cowork sur `d861cc9f..c45661d5` — T2 et #1034 b acceptés ; trois corrections.
 
