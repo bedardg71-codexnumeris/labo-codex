@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 15 h 15 : **1.188.2 (LOT 4 DE L'ENREGISTREMENT : #981, #983) EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 16 h 22 : **1.189.0 (GÉNÉRATEUR D'ÉQUIPES, #1039) FUSIONNÉE SUR `main` LOCAL ; VERDICT, PUSH, NETLIFY À SUIVRE**
+
+**Consigne** : `plans de travail/MOTS-2026-10-07-1039-equipes.md`, section « Relecture de 1.189.0 et
+Nouvelles » (Cowork, 16 h 21). Relecture de Cowork de `39ec40ad` : rien ne bloque.
+**Fusion** : `claude/1039-equipes` → `main` en avance rapide, `eb780784..6c8494c6` — `b03ea9ea` générateur
+et barre d'outils ; `c57f2218` mots arrêtés ; `6f61253a` reste de 1 ; `abb25226` #1041 inscrite (sans
+correctif) ; `39ec40ad` release 1.189.0 ; `6c8494c6` entrée 1.189 des Nouvelles (validée par Grégoire,
+16 h 21, posée telle quelle) et fichier des mots commité.
+**Tests** : Vitest complet vert sur `39ec40ad` (695 fichiers, 8 349 tests) ; sentinelles du changelog vertes
+sur `6c8494c6` (14 fichiers, 579 tests). **Rien n'est poussé.**
+**Suite** : Chrome et Safari fermés, verdict complet (`pousser.sh`), push, mise en ligne mesurée chez
+Netlify. Ensuite #1038.
+
+### Historique de la section précédente (15 h 15) : 1.188.2 (LOT 4 DE L'ENREGISTREMENT : #981, #983) EN LIGNE
 
 **En ligne** (mesuré chez Netlify par le connecteur, 15 h 15) : déploiement `6ac69a46`, `state: ready`,
 `commit_ref` = `42185c6c`, publié à 15 h 15. Relecture de Cowork : rien ne bloque.
