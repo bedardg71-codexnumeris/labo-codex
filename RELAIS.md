@@ -7,7 +7,37 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 6 OCT. 2026, 22 h 48 : **1.186.6 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `b59cc7fd` (PUBLIÉ À 22 h 46) ; VERDICT COMPLET VERT (1 INSTABLE, #916)**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 6 h 18 : **1.187.0 (T3, rangement en démo, T6, #1036 inscrit) COMMITÉE SUR `main` LOCAL (build `1007-0617`, `845b3caf`) ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH À SUIVRE**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 6 h 03), dernier lot du chantier du démo.
+
+**Mesuré avant d'écrire** : le pack (`js/pack-demo-10.js`) ne livre aucune liste de copies ; tout
+ce que portent `demo_fichiersTravaux` / `demo_corbeilleFichiers` / `demo_annotationsTravaux` a
+été importé. N compte donc toutes leurs copies (corbeille comprise), sauf un id partagé.
+
+**Commits** : `1aa9f219` consigne ; `273673cb` T3 (bouton « Retirer les copies (N) », retrait par
+identité via `Codex.partDuDemo`, banc Vitest 13 essais) ; `87abb643` rangement en démo
+(`travauxStockage.dossierEnJeu` exporté ; spec WebKit `t3-retirer-les-copies-du-demo`, 2 essais,
+rougi par mutation de chaque affichage) ; `deb68b2d` T6 (phrase validée) ; `a750494c` #1036
+inscrit au SUIVI-BUGS (stock éventuel de copies du démo dans le dossier réel, non touché) ;
+`845b3caf` build 1.187.0.
+
+**Suppositions nommées** : titre de la confirmation « Retirer les copies » (repris du libellé
+validé) ; N = 1 accordé « Retirer la copie (1) » et « Retirer la copie importée dans la démo ?
+… Pour la retrouver, il faudra l'importer de nouveau. » ; la corbeille du démo compte dans N ;
+en démo avec dossier branché, le bloc du dossier de l'écran d'import est masqué entier (aucun
+mot neuf). Aucune notification après le retrait (pas de mots validés) : le bouton disparaît.
+
+**Mesures** : Vitest complet après le build, 692 fichiers, 8 305 essais verts ; specs voisins
+53/53 ; break-tests T3 (filtre par identité, garde hors démo, garde d'import) et rangement
+(deux affichages) rouges par la bonne assertion.
+
+**Ligne des Nouvelles** : proposée dans le rapport, NON écrite (remonte à Grégoire).
+
+**Suite** : relecture de Cowork, puis Chrome et Safari fermés, verdict complet, push, Netlify.
+Fichier de Cowork non commité, hors lot : `plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`.
+
+## (relais précédent) 6 OCT. 2026, 22 h 48 : **1.186.6 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `b59cc7fd` (PUBLIÉ À 22 h 46) ; VERDICT COMPLET VERT (1 INSTABLE, #916)**
 
 **Mesuré** : verdict complet par `scripts/pousser.sh` sur `b59cc7fd` : 0 échec, 0 échec connu,
 1 spec verte au second essai (`cours-actif-hors-bibliotheque-916`, déjà vue instable le 1er oct.).
