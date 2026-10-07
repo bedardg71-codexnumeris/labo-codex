@@ -7,7 +7,40 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 11 h 20 : **1.188.1 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `66c21dab` (PUBLIÉ À 11 h 19) ; VERDICT COMPLET VERT**
+## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 12 h 08 : **1.188.2 (LOT 4 DE L'ENREGISTREMENT : #981, #983) COMMITÉE SUR `main` LOCAL ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 37). **Rien n'est poussé.**
+
+**Commits** : `fe386827` consigne ; `35a2d0eb` fiches #1038 et #1039 de Cowork (et les trois fichiers
+de Mathieu, que Cowork avait mis en attente de commit) ; `033cfe72` correctif #981 ; `9bb5f102` fiches ;
+`236d6f1d` release 1.188.2 (patch).
+
+**Mesuré** (sonde WebKit jetable, pack démo et mode réel, trois ouvertures de suite) :
+- **#981** : seuls écrivains de `cours` à l'ouverture, les deux migrations de `cours.js`, conditionnelles.
+  Appelées avant `db-ready`, leur écriture était parfois réécrasée par la synchronisation du démarrage
+  (banc : 3 rouges sur 8), et la migration se rejouait à l'ouverture suivante. **Source corrigée** : elles
+  passent par `auDbPret` (8 verts sur 8).
+- **#983** : `portfoliosEleves` ne s'écrit jamais à l'ouverture. Son écrivain `auto: true` est dans le code
+  mort de #722 (aucun conteneur dans la page). Rien n'est corrigé ; la fiche est close par la mesure.
+- **Autres clés écrites à l'ouverture** : inscrites en **#1040** (indices réécrits pour un horodatage ;
+  présences, horaire, trimestre actif, cartouches réécrits à l'identique).
+- **Garde-fou** : les dix notes du pack démo et les indices A, C, P (sans horodatage) sont identiques avant
+  et après, sur trois ouvertures.
+
+**Tests** : banc `tests/integration/ouverture-sans-geste-981-983.spec.js` (2 essais) et
+`tests/unit/sentinelle-981-migrations-cours-apres-db-ready.test.js`. Break-test : 3 mutations en Vitest,
+3 au navigateur, chacune rouge sur la bonne assertion. La première mutation de `portfolio.js` survivait
+(elle n'écrivait rien) : assertion élargie à toute clé `…portfoliosEleves`, puis seconde mutation rouge.
+Specs voisins WebKit : 9 verts. Vitest complet après le commit de release : 694 fichiers, 8 327 essais verts.
+Verdict complet : **non lancé**.
+
+**Stock** : rien à réparer ; les cours déjà complétés le restent.
+
+**Nouvelles** : aucune ligne (rien ne change à l'écran).
+
+**Suite** : relecture de Cowork → Chrome et Safari fermés → verdict complet → push → Netlify → relais.
+
+## (relais précédent) 7 OCT. 2026, 11 h 20 : **1.188.1 EN LIGNE, MESURÉ CHEZ NETLIFY SUR `66c21dab` (PUBLIÉ À 11 h 19) ; VERDICT COMPLET VERT**
 
 **Mesuré** : verdict complet par `scripts/pousser.sh` sur `66c21dab` : code 0, 0 échec connu,
 aucune spec instable, aucune veille, échange 1,6 Go (Chrome et Safari fermés, mesuré). Hook
