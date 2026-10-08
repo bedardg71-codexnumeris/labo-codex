@@ -7,10 +7,10 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 7 h 06 : **1.190.0 (LOT 6 DE L'ENREGISTREMENT : « ÉCRASER » UN HOMONYME EMPLOYÉ, #967) COMMITÉE SUR `main` LOCAL ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 8 h 51 : **1.190.0 (LOT 6 DE L'ENREGISTREMENT : « ÉCRASER » UN HOMONYME EMPLOYÉ, #967) EN LIGNE**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 18 h 59) ; plan
-`plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`, lot 6. **Rien n'est poussé.**
+`plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`, lot 6.
 
 **Commits** : `61dec81f` consigne, archive, consigne de démarrage de Cowork ; `f785400b` #967 (refus
 dans `verifierEtGererDoublon`, avant le codex ; compteurs neufs de la grille et de la cartouche ;
@@ -34,7 +34,10 @@ porte déjà ce nom. », l'entrée 1.190 des Nouvelles (bleu, « Un modèle empl
 Commits `b7d6bce9` (mots, plan, fiche, bancs, consigne de Cowork) et `0f216018` (Nouvelles). Vitest
 complet vert après eux (696 fichiers, 8 362 essais) ; banc WebKit #967 7/7.
 
-**Suite** : Chrome et Safari fermés → verdict complet (`pousser.sh`) → push → Netlify → relais.
+**En ligne** (8 h 51) : verdict complet vert sur `eae9caf7` (0 échec connu, 0 instable ; éveil tenu, 0 veille ;
+Chrome fermé, **Safari ouvert pendant le verdict, à la demande de Grégoire**) ; Vitest du pré-push vert ;
+poussé `9f9c304d..eae9caf7`. Netlify : déploiement `6ac791c17f6c760008999fae`, `commit_ref` = `eae9caf7`,
+`state` ready, publié à 8 h 51. Ce relais est poussé seul par `git push origin main`.
 
 ## (relais précédent) 7 OCT. 2026, 17 h 23 : **1.189.0 (GÉNÉRATEUR D'ÉQUIPES, #1039) EN LIGNE**
 
