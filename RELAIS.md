@@ -7,7 +7,25 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, APRÈS-MIDI : **#976 « CORRIGER LE DA… » CODÉ SUR `main` LOCAL, NI RELEASÉ NI POUSSÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 15 h 30 : **1.191.0 (#976 « CORRIGER LE DA… », LES GLOBALES SUIVENT) RELEASÉ SUR `main` LOCAL, NON POUSSÉ**
+
+**Consigne** : section « Suite – relecture de #976 et décisions de Grégoire » de `plans de travail/CONSIGNE-DU-JOUR.md`
+(Cowork, 14 h 50) : relecture de `11bc90ad` sans blocage ; décision 1, le registre longitudinal, les jetons et la
+dénotation suivent ; décision 2, les mots.
+
+**Commits** : `9ef6b2c0` consigne et décisions ; `f959844b` les globales suivent (module, fenêtre, phrase d'aide,
+bancs) ; `dfe10664` #1043 au BACKLOG ; `a139233d` release 1.191.0 (minor, entrée des Nouvelles validée) ; fiche #976
+et ce relais.
+
+**Mesuré** : Vitest complet après le commit de release, 697 fichiers, 8 384 essais ; banc `correction-da-976`
+19 essais, 20 mutations / 20 rouges ; spec WebKit `976-corriger-le-da` étendu aux globales (+ lot E2), 11/11, et
+deux mutations ciblées rouges (lignes de la fenêtre ; dénotation comptée sans être déplacée, vérification muette).
+Verdict complet : **non lancé**.
+
+**Suite, dans l'ordre** : relecture de Cowork du volet des globales (il déplace des données d'élèves) ; verdict
+(Chrome et Safari fermés) ; push. **Aucun push avant la relecture.**
+
+## (relais précédent) 8 OCT. 2026, APRÈS-MIDI : **#976 « CORRIGER LE DA… » CODÉ SUR `main` LOCAL, NI RELEASÉ NI POUSSÉ**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 8 oct., 14 h 18), lot 7 du chantier de l'enregistrement.
 La sonde de Mathieu (#1038) n'était pas arrivée.
