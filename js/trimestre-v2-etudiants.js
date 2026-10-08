@@ -874,6 +874,12 @@ async function corrigerDAEtudiantV2() {
         '',
         'Les autres trimestres et les archives gardent l\'ancien DA.'
     ];
+    // Décision de Grégoire (8 oct., 14 h 50) : les trois globales suivent ; la fenêtre les compte quand il y en a.
+    const hors = [];
+    if (c.jetons) hors.push('• ' + c.jetons + ' ' + pluriel(c.jetons, 'jeton', 'jetons'));
+    if (c.denotation) hors.push('• ' + c.denotation + ' ' + pluriel(c.denotation, 'jugement de dénotation', 'jugements de dénotation'));
+    if (c.longitudinal) hors.push('• ' + c.longitudinal + ' ' + pluriel(c.longitudinal, 'entrée au suivi longitudinal', 'entrées au suivi longitudinal'));
+    if (hors.length) lignes.push('', 'Suivent aussi, hors trimestre :', ...hors);
     if (marque) lignes.push('', 'Une correction vers ' + String(marque.vers) + ' s\'est arrêtée en chemin : ce DA la termine.');
     lignes.push('', 'Nouveau DA :');
     const saisie = await uiDialogues.demanderSaisie({

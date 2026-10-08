@@ -40,7 +40,11 @@ Légende : **NS** = préfixée `<trim>_` par `cle()` ; **NS composée** = `<trim
 | `<trim>_pipeline_queue` | en `sessionStorage`, file d'import en cours | laissée : éphémère, ne survit pas à l'onglet |
 | magasin IndexedDB `fichiers`, index `etudiantDA` | champ du blob | **laissé** : aucun lecteur (`listerBlobsEtudiant` n'a aucun appelant, mesuré par grep) et `reassocierFichier` ne le tient déjà pas à jour ; le réécrire réécrirait chaque copie entière (issue 3, commentaire dans le code) |
 
-## C. Clés globales qui portent un DA : non touchées (consigne § 1)
+## C. Clés globales qui portent un DA
+
+> **Mise à jour, 8 oct. 2026, après 14 h 50 — décision de Grégoire : les trois clés de résultats SUIVENT** (`registreLongitudinal` : `eleves[da]` et son champ `da`, les copies datées des dossiers gardent le DA de leur capture ; `jetonsEtudiants` : une entrée vide sous le nouveau DA est remplacée ; `jugementsDenotation`), avec les mêmes garanties que les clés du trimestre. Le refus décrit ci-dessous est retiré. Les autres globales restent telles quelles.
+
+Version d'avant la décision (le tableau reste lisible pour ses autres lignes) :
 
 | Clé | NS/G | Écrivain | Forme | Ce que le geste fait |
 |---|---|---|---|---|

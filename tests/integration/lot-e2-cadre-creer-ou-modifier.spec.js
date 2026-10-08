@@ -250,7 +250,7 @@ test('(c ter) étudiant·e : le DA d\'une fiche existante ne se modifie pas, au 
     await pause(page, 500);
     expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').readOnly)).toBe(true);
     await expect(page.locator('#v2-etudiantDAAide')).toBeVisible();
-    await expect(page.locator('#v2-etudiantDAAide')).toHaveText('Le DA ne se modifie pas ici : il relie les évaluations et les présences de l\'étudiant·e.');
+    await expect(page.locator('#v2-etudiantDAAide')).toHaveText('Le DA relie les évaluations et les présences de l\'étudiant·e. Pour corriger une coquille, utilise «\u00a0Corriger le DA…\u00a0» : ses données suivent.');   // #976
     // Au clavier : le champ ne bouge pas.
     await page.focus('#v2-etudiantDA');
     await page.keyboard.press('End');

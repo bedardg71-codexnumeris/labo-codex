@@ -108,7 +108,8 @@ describe('lot E2 · fiche existante — champ par champ, par le témoin', () => 
 
     it('la phrase sous le DA, mot pour mot, et le champ n\'écrit plus rien de lui-même', () => {
         const html = readFileSync(path.resolve(__dirname, '../../index.html'), 'utf8');
-        expect(html).toContain('<p id="v2-etudiantDAAide" class="texte-aide u-mt-5 u-hide">Le DA ne se modifie pas ici : il relie les évaluations et les présences de l\'étudiant·e.</p>');
+        // #976 (8 oct. 2026) : la phrase renvoie au geste « Corriger le DA… » (mots de Grégoire).
+        expect(html).toContain('<p id="v2-etudiantDAAide" class="texte-aide u-mt-5 u-hide">Le DA relie les évaluations et les présences de l\'étudiant·e. Pour corriger une coquille, utilise «&nbsp;Corriger le DA…&nbsp;» : ses données suivent.</p>');
         expect(html.match(/<input[^>]*id="v2-etudiantDA"[^>]*>/)[0]).not.toMatch(/data-on-change/);
     });
 
