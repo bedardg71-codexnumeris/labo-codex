@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 7 OCTOBRE 2026 : 1.188.0, 1.188.1, 1.188.2, 1.189.0 (la dernière publiée à 17 h 23, mesurée chez Netlify sur `9f9c304d` ; verdict complet vert sur chacune) — CRÉER UN TRIMESTRE PAR SON FORMULAIRE ; FORMER DES ÉQUIPES EN CLASSE**
+
+**Ce que tu verras** :
+- « + Nouveau trimestre », dans la bibliothèque des trimestres, ouvre la fiche du Cadre en création : plus de petite fenêtre à remplir ni de message d'alerte. « Annuler », à côté de « Créer le trimestre », ne crée rien et ramène la fiche du trimestre actif.
+- Dans Suivi › Animation, une barre d'outils à gauche (Questions flash, Tirage au sort, Équipes) ; le générateur forme des équipes de 2, 3 ou 4 dans la liste du tirage, écarte les absents du jour, te demande quoi faire du reste et s'il faut éviter de refaire les mêmes.
+- Le reste ne se voit pas : une suppression qui échoue le dit au lieu de revenir au rechargement ; une copie importée sur l'iPad au retour d'une mise en arrière-plan ne se perd plus ; la liste des cours ne se réécrit plus à chaque ouverture.
+
+**Vérifié comment** : tes deux portes passées le 7 (création d'un trimestre et « Annuler » ; former et refaire des équipes sans les retenir), rapportées par Cowork. Pour le reste, des bancs seulement : essais au navigateur (WebKit) et Vitest complet verts, chaque correctif retiré fait échouer son banc ; verdict complet au navigateur vert sur chaque commit publié. **Pas vérifié** : la copie sur ton iPad après une mise en arrière-plan.
+
+**Tes données** : rien n'est réécrit. « Créer le trimestre » active toujours ce qu'il crée.
+
+**Ce qui reste** : les autres petites fenêtres de la bibliothèque des trimestres (hors création) (#1037) ; dans un très petit groupe, « Des équipes plus grandes » peut empiler tout le reste sur une seule équipe (#1041) ; les élèves que Mathieu ne voit pas à l'import (#1038, sonde envoyée, résultat attendu).
+
+**La suite** : « Écraser » une échelle, une grille ou une cartouche du même nom, quand une évaluation l'emploie (#967).
+
+---
+
 ✅ **EN LIGNE EN 1.184.0 (4 OCTOBRE 2026 ; en ligne depuis 21 h 04, mesuré chez Netlify : déploiement de production prêt sur `59018be9` ; tes mots) — FAIRE REVENIR UN TRIMESTRE ARCHIVÉ**
 
 **Ce que tu verras** : dans Réglages › Données › Archives, la ligne « Trimestre entier » d'une archive vérifiée offre « Faire revenir ». Le trimestre revient tel qu'il a été archivé, clos, avec ses copies ; les autres trimestres, les cours et les réglages ne bougent pas. S'il est déjà là : « … est déjà dans l'application : ouvre-le depuis la bibliothèque des trimestres. Rien n'a été écrit. »
