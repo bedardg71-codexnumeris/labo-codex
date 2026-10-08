@@ -1,38 +1,28 @@
-# Consigne du jour – carte d'alignement, lots 1 et 2 : les mots de Grégoire, un défaut de relecture, puis arrêt
+# Consigne du jour – carte d'alignement : release 1.192, verdict, push
 
-> Écrite par Cowork le 8 octobre 2026 à 19 h 06 (Toronto, mesurée par `date`). Remplace la consigne des lots 1 et 2, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-08-carte-lots-1-2.md`.
+> Écrite par Cowork le 8 octobre 2026 à 19 h 33 (Toronto, mesurée par `date`). Remplace la consigne des mots et du plein écran, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-08-carte-mots-et-plein-ecran.md`.
 
 ## Où on en est
 
-Lots 1 et 2 commités sur `main` local (7745b1c7, 65c71613), relais en f0a936aa. Version en ligne : 1.191.1. Cowork a relu les deux commits : le tableau des raccourcis correspond au code, les champs `dateDebut` / `finTrimestre` sont bien ceux qu'écrit `sauvegarderCadreCalendrierV2`, le lien vise un champ qui existe. Un seul défaut, ci-dessous.
+Lots 1 et 2 (7745b1c7, 65c71613) et correctif de relecture (cfc90613) sur `main` local. Cowork a relu cfc90613 : rien à redire. Version en ligne : 1.191.1.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter cette consigne et son archive avec ton correctif.
+Grégoire t'autorise, en te transmettant cette consigne, à commiter cette consigne et son archive, à faire la release minor, à lancer le verdict et à pousser sur `main`.
 
-## 1 · Les mots, validés par Grégoire (19 h 05)
+## 1 · La ligne des Nouvelles, validée par Grégoire (19 h 33)
 
-Dans `RACCOURCIS_CARTE`, deux libellés changent ; tous les autres sont validés tels quels, ainsi que les « autres mots ajoutés » de ton rapport.
+À poser telle quelle dans `js/changelog-data.js` (mise en forme habituelle : `&nbsp;` devant « : », « › » et dans les guillemets), avec le commentaire de provenance habituel (validée par Grégoire le 8 oct. 2026 à 19 h 33, par Cowork, `plans de travail/CONSIGNE-DU-JOUR.md`).
 
-- `glisser` : « Déplacer un bloc ; par le cadre d'une leçon ou d'une séquence, tout le groupe suit »
-- `recherche-echap` : « Recherche : refermer la liste ; une seconde fois, tout effacer »
+- version : `1.192` · couleur : `vert`
+- titre : Un menu « Vue » sur la carte d'alignement
+- item 1 : Conception › Carte d'alignement : un menu « Vue » réunit « Vue plein écran », « Recentrer la carte », « Tout voir », la couleur du fond et, en bas, tous les raccourcis clavier. « Recentrer la carte » se fait maintenant avec la touche R (au lieu de ⌘1).
+- item 2 : Planificateur : les dates du trimestre s'affichent à côté du titre ; si elles manquent, un lien mène à Cadre › Trimestre pour les entrer. La réserve « Non planifié » ne se place plus à gauche de la grille : elle est toujours dessous.
 
-Si un banc compare ces libellés au texte, mets-le à jour.
+## 2 · Release, verdict, push
 
-## 2 · Défaut de relecture – le lien de l'invitation en plein écran (ton lot, donc à finir)
+Dans l'ordre du §4.5 de `fin-de-session` : `node scripts/release.mjs minor` (1.192.0), commit, **verdict complet avec Chrome et Safari fermés**, puis push. Si le verdict n'est pas vert, ne pousse pas : arrête-toi et dis ce qui échoue.
 
-Inférence de Cowork, non vue à l'écran : la palette du planificateur reste visible en « Vue plein écran ». Un clic sur « Cadre › Trimestre » appelle `naviguerVersReglagesTrimestre()` sans quitter le plein écran : `body.planif-plein-ecran-actif` reste posé, l'en-tête et la navigation restent masqués hors de la carte. Sur l'iPad, sans Échap, l'usager est coincé dans Cadre sans navigation.
-
-- Vérifie d'abord l'inférence au banc. Si elle tient : `ouvrirCadreTrimestre()` quitte le plein écran avant de naviguer.
-- Un essai au navigateur : plein écran actif, dates absentes, clic sur le lien → la navigation principale est visible et le champ « Début du trimestre » a le focus. Break-test.
-- Si l'inférence ne tient pas, dis-le en une ligne et ne change rien.
-
-## 3 · La ligne des Nouvelles
-
-Propose-la dans ton rapport, non écrite dans `js/changelog-data.js` (skill `release-et-changelog`). Elle passe par Grégoire.
-
-## 4 · Puis arrête-toi
-
-Specs `planif-*` sous WebKit, Vitest complet. Un commit. **Pas de release, pas de push** : la suite (release minor, verdict avec Chrome et Safari fermés, push) viendra dans la consigne suivante, une fois la ligne des Nouvelles validée.
+Après le push : mesure le déploiement Netlify (commit_ref, état `ready`, heure lue par `TZ=America/Toronto date`), mets à jour `OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` et `RELAIS.md`.
 
 ## Ton rapport à Grégoire
 
-Court : ce que le correctif change à l'écran, en une phrase ; la ligne des Nouvelles proposée ; ce que tu as supposé, une ligne par supposition.
+Trois lignes : la version en ligne et l'heure ; le geste à faire à l'écran (Conception › Carte d'alignement, menu « Vue », puis le titre du planificateur) ; tout ce que tu as dû supposer.
