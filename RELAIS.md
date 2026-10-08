@@ -28,8 +28,13 @@ changerait leurs notes ») ; les cartouches de l'ancrage comptent comme porteurs
 part par `alert` (comme les autres refus de ces éditeurs) ; le témoin de la cartouche ouverte dit « la
 cartouche du même nom est ouverte. » (mots neufs, à relire).
 
-**Suite** : relecture de Cowork → ligne des Nouvelles (proposée dans le rapport, non écrite) → Chrome et
-Safari fermés → verdict complet → push → Netlify → relais.
+**Relecture de Cowork** (7 h 09) : rien ne bloque. Trois décisions de Grégoire posées telles quelles :
+« changerait des notes » (au lieu de « leurs notes »), la raison du témoin « tu as ouvert la cartouche qui
+porte déjà ce nom. », l'entrée 1.190 des Nouvelles (bleu, « Un modèle employé n'est plus remplacé »).
+Commits `b7d6bce9` (mots, plan, fiche, bancs, consigne de Cowork) et `0f216018` (Nouvelles). Vitest
+complet vert après eux (696 fichiers, 8 362 essais) ; banc WebKit #967 7/7.
+
+**Suite** : Chrome et Safari fermés → verdict complet (`pousser.sh`) → push → Netlify → relais.
 
 ## (relais précédent) 7 OCT. 2026, 17 h 23 : **1.189.0 (GÉNÉRATEUR D'ÉQUIPES, #1039) EN LIGNE**
 
