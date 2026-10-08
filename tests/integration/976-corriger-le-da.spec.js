@@ -16,7 +16,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //  (b) après « Corriger le DA » : mêmes nombres sous le nouveau DA, zéro sous l'ancien, la fiche
 //      reste ouverte sous son nouveau DA, le témoin dit « Enregistré » ;
 //  (c) les deux refus (sept chiffres ; DA d'une autre fiche) : « Non enregistré », rien n'a bougé ;
-//  (d) en anonymisation, le bouton n'est pas offert.
+//  (d) en anonymisation, le bouton n'est pas offert ;
+//  (e) les trois globales (un jeton, un jugement de dénotation, une entrée longitudinale) suivent,
+//      et la fenêtre les compte (décision de Grégoire, 8 oct., 14 h 50).
 // La mécanique (familles de clés, échec au milieu, reprise, autre trimestre) est éprouvée par
 // tests/unit/correction-da-976.test.js.
 
@@ -69,6 +71,18 @@ async function demarrer(page) {
         db.setSync(cleF, (db.getSync(cleF, []) || []).concat([
             { id: 'FT_BANC_976', etudiantDA: choisi.da, productionId: 'PROD_BANC', groupeDocumentId: choisi.da + '_auto', statut: 'actif' }
         ]));
+        // (e) Une donnée dans chacune des trois globales.
+        const jetons = db.getSync('jetonsEtudiants', {}) || {};
+        jetons[choisi.da] = { JETON_BANC: 1, _historique: [{ jetonId: 'JETON_BANC', action: 'attribue' }] };
+        db.setSync('jetonsEtudiants', jetons);
+        const cleDen = cle('jugementsDenotation');
+        const den = db.getSync(cleDen, {}) || {};
+        den.PRAT_BANC_976 = Object.assign({}, den.PRAT_BANC_976, { [choisi.da]: { noteFinale: 80, ciblesAtteintes: {}, justification: '', date: '2026-10-08' } });
+        db.setSync(cleDen, den);
+        const reg = db.getSync('registreLongitudinal', null) || { format: 'registre-longitudinal', version: 1, eleves: {}, modeles: { grilles: {}, echelles: {} } };
+        reg.eleves = reg.eleves || {};
+        reg.eleves[choisi.da] = { da: choisi.da, nom: choisi.nom, prenom: choisi.prenom, inscritLe: '2026-10-08', dossiers: [], resultatsUlterieurs: [] };
+        db.setSync('registreLongitudinal', reg);
         await db.flush();
         const autre = fiches.find((f) => f.da !== choisi.da);
         return { ancien: choisi.da, nom: choisi.prenom + ' ' + choisi.nom, autre: autre.da };
@@ -101,9 +115,10 @@ const temoinEchec = (page) => page.evaluate(() => {
 // Ce que le trimestre actif porte sous un DA (la passe à blanc), et le texte brut de ses clés.
 const mesurer = (page, da) => page.evaluate((da) => {
     const prefixe = obtenirTrimestreId() + '_';
+    const globales = ['registreLongitudinal', 'jetonsEtudiants', cle('jugementsDenotation')];
     let brut = 0;
     for (const k of db.keysSync()) {
-        if (!k.startsWith(prefixe)) continue;
+        if (!k.startsWith(prefixe) && !globales.includes(k)) continue;
         brut += JSON.stringify(db.getSync(k, null)).split('"' + da + '"').length - 1;
     }
     return { comptes: CorrectionDA.passeABlanc(da, '').comptes, brut };
@@ -126,6 +141,7 @@ test.describe('#976 — « Corriger le DA… » sur le pack démo', () => {
         expect(avant.comptes.evaluations, 'l\'élève choisi porte des évaluations').toBeGreaterThan(0);
         expect(avant.comptes.presences, 'et des présences').toBeGreaterThan(0);
         expect(avant.comptes.copies).toBe(1);
+        expect([avant.comptes.jetons, avant.comptes.denotation, avant.comptes.longitudinal]).toEqual([1, 1, 1]);
 
         // (a) Le bouton, le codex proposé, la fenêtre.
         await ouvrirFiche(page, ancien);
@@ -141,6 +157,7 @@ test.describe('#976 — « Corriger le DA… » sur le pack démo', () => {
         expect(f.texte).toContain(avant.comptes.presences + ' présence');
         expect(f.texte).toContain('1 copie');
         expect(f.texte).toContain('dans ce trimestre seulement');
+        expect(f.texte).toContain('Suivent aussi, hors trimestre :\n• 1 jeton\n• 1 jugement de dénotation\n• 1 entrée au suivi longitudinal');
         expect(f.boutons).toEqual(['Annuler', 'Corriger le DA']);
 
         // (b) La correction.
@@ -151,6 +168,12 @@ test.describe('#976 — « Corriger le DA… » sur le pack démo', () => {
         expect(apres.comptes).toEqual(avant.comptes);
         expect(apres.brut).toBe(avant.brut);
         expect((await mesurer(page, ancien)).brut).toBe(0);
+        const globalesApres = await page.evaluate(({ ancien, nouveau }) => ({
+            jeton: Object.keys(db.getSync('jetonsEtudiants', {})).filter((k) => k === ancien || k === nouveau),
+            den: Object.keys(db.getSync(cle('jugementsDenotation'), {}).PRAT_BANC_976),
+            reg: [db.getSync('registreLongitudinal', {}).eleves[nouveau]?.da, !!db.getSync('registreLongitudinal', {}).eleves[ancien]]
+        }), { ancien, nouveau: NOUVEAU });
+        expect(globalesApres).toEqual({ jeton: [NOUVEAU], den: [NOUVEAU], reg: [NOUVEAU, false] });
         await expect(page.locator('#v2-etudiantDA')).toHaveValue(NOUVEAU);
         await page.evaluate(() => db.flush());
 

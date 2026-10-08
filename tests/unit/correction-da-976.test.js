@@ -9,8 +9,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 // (une valeur lue est une copie) :
 //  1. un DA corrigé garde évaluations, présences, indices et copies : même nombre avant et
 //     après, zéro sous l'ancien DA, rien d'autre ne bouge (autre élève, autre trimestre) ;
-//  2. les refus (forme du DA, DA d'une autre fiche, données déjà sous le nouveau DA, ancien DA
-//     retenu par une clé globale) n'écrivent rien ;
+//  2. les refus (forme du DA, DA d'une autre fiche, données déjà sous le nouveau DA, dans le
+//     trimestre ou dans une des trois globales) n'écrivent rien ;
+//  2 bis. les trois globales qui portent des résultats (registre longitudinal, jetons, dénotation)
+//     suivent (décision de Grégoire, 8 oct., 14 h 50) ;
 //  3. un échec au milieu ne laisse ni doublon ni perte, et refaire le geste finit la correction.
 // Noms et DA fictifs.
 
@@ -57,6 +59,13 @@ function semis() {
         [`${T}_notesRapport`]: { [ANCIEN]: 'à revoir' },
         [`${T}_confidentielEtudiants`]: { [ANCIEN]: { categorie: 'x' } },
         [`${T}_mapping_anonymisation`]: { [ANCIEN]: { numero: 1 }, [AUTRE]: { numero: 2 } },
+        // Les trois globales (sans préfixe). La copie datée du dossier garde le DA de sa capture.
+        registreLongitudinal: { format: 'registre-longitudinal', version: 1, eleves: {
+            [ANCIEN]: { da: ANCIEN, nom: 'Coquille', dossiers: [{ trimestre: 'h2026', evaluations: [{ etudiantDA: ANCIEN }] }] },
+            [AUTRE]: { da: AUTRE, nom: 'Témoin', dossiers: [] }
+        } },
+        jetonsEtudiants: { [ANCIEN]: { J1: 1, _historique: [{ jetonId: 'J1', action: 'attribue' }] }, [AUTRE]: {} },
+        jugementsDenotation: { PR1: { [ANCIEN]: { noteFinale: 80 }, [AUTRE]: { noteFinale: 70 } }, PR2: { [AUTRE]: { noteFinale: 60 } } },
         // Un autre trimestre : le même élève, la même coquille — pas touché.
         'h2026_groupeEtudiants': [{ da: ANCIEN, nom: 'Coquille', prenom: 'Alix' }],
         'h2026_presences': [{ date: '2026-02-01', da: ANCIEN }],
@@ -98,13 +107,17 @@ function monter(options = {}) {
     return { w, magasin, temoin, lire: (k) => (magasin.has(k) ? JSON.parse(magasin.get(k)) : null) };
 }
 
-// Toutes les occurrences d'un DA dans les clés d'un trimestre (texte sérialisé : clés d'objet,
-// champs, éléments de tableau, préfixes d'id — tout).
+// Toutes les occurrences d'un DA dans les clés d'un trimestre et dans les trois globales (texte
+// sérialisé : clés d'objet, champs, éléments de tableau, préfixes d'id — tout).
+const GLOBALES = ['registreLongitudinal', 'jetonsEtudiants', 'jugementsDenotation'];
 function occurrences(magasin, prefixe, da) {
     let n = 0;
-    for (const [k, v] of magasin) if (k.startsWith(prefixe)) n += v.split(da).length - 1;
+    for (const [k, v] of magasin) if (k.startsWith(prefixe) || GLOBALES.includes(k)) n += v.split(da).length - 1;
     return n;
 }
+// Les occurrences de l'ancien DA qui restent exprès : les noms du fichier déposé (2), la copie
+// datée du dossier longitudinal (1).
+const RESTENT = 3;
 
 describe('#976 — un DA corrigé garde tout, dans le trimestre actif seulement', () => {
     let m;
@@ -117,6 +130,9 @@ describe('#976 — un DA corrigé garde tout, dans le trimestre actif seulement'
         expect(mesure.comptes.presences).toBe(3);
         expect(mesure.comptes.copies).toBe(2);
         expect(mesure.comptes.resultats).toBeGreaterThanOrEqual(5);   // A, C/P, portfolio, intervention, snapshots
+        expect(mesure.comptes.jetons).toBe(1);
+        expect(mesure.comptes.denotation).toBe(1);
+        expect(mesure.comptes.longitudinal).toBe(1);
         expect(JSON.stringify([...m.magasin])).toBe(avant);
     });
 
@@ -130,8 +146,8 @@ describe('#976 — un DA corrigé garde tout, dans le trimestre actif seulement'
         expect(res.ok).toBe(true);
         expect(m.w.CorrectionDA.passeABlanc(NOUVEAU, '').comptes).toEqual(avant);
         // Zéro sous l'ancien, hors des noms de fichiers déposés (gardés tels quels, exprès).
-        expect(occurrences(m.magasin, T + '_', ANCIEN)).toBe(2);   // nomFichier, leaParsed.raw
-        expect(occurrences(m.magasin, T + '_', NOUVEAU)).toBe(occAncien - 2);
+        expect(occurrences(m.magasin, T + '_', ANCIEN)).toBe(RESTENT);
+        expect(occurrences(m.magasin, T + '_', NOUVEAU)).toBe(occAncien - RESTENT);
         expect(occurrences(m.magasin, T + '_', AUTRE)).toBe(occAutre);
         expect(JSON.stringify([...m.magasin].filter(([k]) => k.startsWith('h2026_')))).toBe(autreTrimestre);
 
@@ -146,6 +162,13 @@ describe('#976 — un DA corrigé garde tout, dans le trimestre actif seulement'
             .toEqual([['EVAL_1', NOUVEAU, null], ['EVAL_2', NOUVEAU, 'EVAL_3'], ['EVAL_3', NOUVEAU, null], ['EVAL_4', AUTRE, null]]);
         expect(m.lire(`${T}_indicesAssiduite`).sommatif[NOUVEAU]).toEqual({ indice: 0.66 });
         expect(m.lire(`${T}_mapping_anonymisation`)[NOUVEAU]).toEqual({ numero: 1 });
+        // Les globales ont suivi, l'autre élève non.
+        const reg = m.lire('registreLongitudinal').eleves;
+        expect(Object.keys(reg).sort()).toEqual([AUTRE, NOUVEAU]);
+        expect(reg[NOUVEAU].da).toBe(NOUVEAU);
+        expect(reg[NOUVEAU].dossiers[0].evaluations[0].etudiantDA).toBe(ANCIEN);   // la capture datée
+        expect(m.lire('jetonsEtudiants')).toEqual({ [NOUVEAU]: { J1: 1, _historique: [{ jetonId: 'J1', action: 'attribue' }] }, [AUTRE]: {} });
+        expect(m.lire('jugementsDenotation')).toEqual({ PR1: { [NOUVEAU]: { noteFinale: 80 }, [AUTRE]: { noteFinale: 70 } }, PR2: { [AUTRE]: { noteFinale: 60 } } });
         expect(m.temoin.dits).toEqual([['enregistre', `${T}_groupeEtudiants`]]);
     });
 });
@@ -157,9 +180,9 @@ describe('#976 — les refus n\'écrivent rien', () => {
         ['le DA d\'une autre fiche du trimestre', AUTRE, {}, /autre étudiant·e de ce trimestre/],
         ['des données déjà sous le nouveau DA', NOUVEAU, { ajouts: { [`${T}_notesRapport`]: { [ANCIEN]: 'a', [NOUVEAU]: 'b' } } }, /portent déjà ce DA/],
         ['une présence orpheline sous le nouveau DA', NOUVEAU, { ajouts: { [`${T}_presences`]: [{ date: '2026-09-01', da: ANCIEN }, { date: '2026-09-09', da: NOUVEAU }] } }, /portent déjà ce DA/],
-        ['l\'ancien DA retenu par les jetons (clé globale)', NOUVEAU, { ajouts: { jetonsEtudiants: { [ANCIEN]: { J1: 1 } } } }, /jetons attribués/],
-        ['l\'ancien DA au registre longitudinal (clé globale)', NOUVEAU, { ajouts: { registreLongitudinal: { eleves: { [ANCIEN]: { da: ANCIEN } } } } }, /registre longitudinal/],
-        ['l\'ancien DA dans les jugements de dénotation (clé globale)', NOUVEAU, { ajouts: { jugementsDenotation: { PR1: { [ANCIEN]: { noteFinale: 80 } } } } }, /dénotation/]
+        ['des jetons déjà sous le nouveau DA', NOUVEAU, { ajouts: { jetonsEtudiants: { [ANCIEN]: { J1: 1 }, [NOUVEAU]: { J2: 1 } } } }, /^Ce DA porte déjà des jetons :/],
+        ['une entrée longitudinale déjà sous le nouveau DA', NOUVEAU, { ajouts: { registreLongitudinal: { eleves: { [ANCIEN]: { da: ANCIEN }, [NOUVEAU]: { da: NOUVEAU } } } } }, /^Ce DA porte déjà une entrée au suivi longitudinal :/],
+        ['un jugement de dénotation déjà sous le nouveau DA', NOUVEAU, { ajouts: { jugementsDenotation: { PR1: { [ANCIEN]: { noteFinale: 80 } }, PR2: { [NOUVEAU]: { noteFinale: 75 } } } } }, /^Ce DA porte déjà un jugement de dénotation :/]
     ];
     for (const [nom, nouveau, options, motif] of casDeRefus) {
         it(nom, async () => {
@@ -176,7 +199,8 @@ describe('#976 — les refus n\'écrivent rien', () => {
 
 describe('#976 — un échec au milieu : ni doublon ni perte, et la reprise finit', () => {
     // 1re écriture = la marque ; 2e, 3e, … = les clés ; la dernière = la fiche.
-    for (const echouerA of [2, 4, 7]) {
+    // 15 = le registre longitudinal, 17 = la dénotation : un échec sur une globale se reprend aussi.
+    for (const echouerA of [2, 4, 7, 15, 17]) {
         it(`échec à l'écriture n° ${echouerA}`, async () => {
             const m = monter({ echouerA });
             const total = occurrences(m.magasin, T + '_', ANCIEN);
@@ -194,6 +218,15 @@ describe('#976 — un échec au milieu : ni doublon ni perte, et la reprise fini
             const fiche = m.lire(`${T}_groupeEtudiants`)[0];
             expect(fiche.da).toBe(ANCIEN);
             expect(fiche.correctionDA.vers).toBe(NOUVEAU);
+            // Où l'échec est tombé : sur le registre (15), sur la dénotation après les jetons (17).
+            if (echouerA === 15) {
+                expect(m.lire(`${T}_mapping_anonymisation`)).toHaveProperty(NOUVEAU);
+                expect(m.lire('registreLongitudinal').eleves).toHaveProperty(ANCIEN);
+            }
+            if (echouerA === 17) {
+                expect(m.lire('jetonsEtudiants')).toHaveProperty(NOUVEAU);
+                expect(m.lire('jugementsDenotation').PR1).toHaveProperty(ANCIEN);
+            }
 
             // Une reprise vers un AUTRE DA est refusée ; vers le même, elle finit.
             const refus = await m.w.CorrectionDA.corriger(ANCIEN, '5555555');
@@ -201,7 +234,7 @@ describe('#976 — un échec au milieu : ni doublon ni perte, et la reprise fini
             const fin = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
             expect(fin.ok).toBe(true);
             expect(m.w.CorrectionDA.passeABlanc(NOUVEAU, '').comptes).toEqual(avant);
-            expect(occurrences(m.magasin, T + '_', ANCIEN)).toBe(2);   // noms de fichiers déposés
+            expect(occurrences(m.magasin, T + '_', ANCIEN)).toBe(RESTENT);
             expect(m.lire(`${T}_groupeEtudiants`)[0]).not.toHaveProperty('correctionDA');
         });
     }
@@ -247,6 +280,23 @@ describe('#976 — reprise : une clé d\'objet qui porte les deux DA bloque, san
         const res = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
         expect(res.ok).toBe(false);
         expect(res.refus).toMatch(/portent déjà ce DA/);
+        expect(JSON.stringify([...m.magasin])).toBe(avant);
+    });
+});
+
+describe('#976 — jetons : une entrée VIDE sous le nouveau DA n\'est pas un conflit', () => {
+    it('`{}` posé par initialiserJetonsEtudiant est remplacé, les jetons de l\'élève passent', async () => {
+        const m = monter({ ajouts: { jetonsEtudiants: { [ANCIEN]: { J1: 2, _historique: [{ jetonId: 'J1' }] }, [NOUVEAU]: {}, [AUTRE]: {} } } });
+        expect(m.w.CorrectionDA.passeABlanc(ANCIEN, '').comptes.jetons).toBe(2);
+        const res = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
+        expect(res.ok).toBe(true);
+        expect(m.lire('jetonsEtudiants')).toEqual({ [NOUVEAU]: { J1: 2, _historique: [{ jetonId: 'J1' }] }, [AUTRE]: {} });
+    });
+    it('une entrée qui porte un historique n\'est pas vide : refus, rien d\'écrit', async () => {
+        const m = monter({ ajouts: { jetonsEtudiants: { [ANCIEN]: { J1: 1 }, [NOUVEAU]: { _historique: [{ jetonId: 'J1', action: 'retire' }] } } } });
+        const avant = JSON.stringify([...m.magasin]);
+        const res = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
+        expect(res.refus).toMatch(/^Ce DA porte déjà des jetons :/);
         expect(JSON.stringify([...m.magasin])).toBe(avant);
     });
 });

@@ -17,9 +17,11 @@
      autres passent. Entre l'échec et la reprise, rien n'est perdu ni doublé, mais les
      données déjà passées ne s'affichent plus sous la fiche.
 
-   Les clés GLOBALES ne sont pas touchées (consigne du 8 oct.). Trois d'entre elles
-   portent des résultats (registre longitudinal, jetons, notes de dénotation) : si
-   l'ancien DA y figure, le geste REFUSE plutôt que de laisser quelque chose derrière.
+   Trois clés GLOBALES portent des résultats de l'élève : le registre longitudinal, les
+   jetons, les jugements de dénotation. Elles suivent aussi (décision de Grégoire, 8 oct.,
+   14 h 50), avec les mêmes garanties : une écriture par clé, un conflit refuse sans rien
+   écrire, comptées par la passe à blanc et par le recompte, reprises comme les autres.
+   Les autres globales qui portent un DA (états d'animation, validations d'écran) restent.
    =============================== */
 
 (function () {
@@ -59,11 +61,15 @@
 
     // { [da]: … } — un conflit (les deux DA présents) ne se fusionne pas : il est compté,
     // et la clé n'est pas réécrite (voir `transformer`).
-    function cleDObjet(obj, ancien, nouveau, etat) {
+    // `estVide(entrée)` (facultatif) : une entrée VIDE sous le nouveau DA n'est pas un conflit,
+    // elle est remplacée — rien ne s'y perd (les jetons : `initialiserJetonsEtudiant` pose `{}`).
+    function cleDObjet(obj, ancien, nouveau, etat, estVide) {
         if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return 0;
         const cles = Object.keys(obj).filter((k) => memeDA(k, ancien));
         if (cles.length === 0) return 0;
-        if (Object.keys(obj).some((k) => memeDA(k, nouveau))) { etat.conflit = true; return 0; }
+        const cible = Object.keys(obj).filter((k) => memeDA(k, nouveau));
+        if (cible.length && !(estVide && cible.every((k) => estVide(obj[k])))) { etat.conflit = true; return 0; }
+        cible.forEach((k) => { delete obj[k]; });
         // Une seule entrée sous l'ancien DA, en pratique ; s'il y en avait deux (« 1234567 »
         // et « 1234567 » avec espace), deux entrées sous le même nouveau DA serait un doublon.
         if (cles.length > 1) { etat.conflit = true; return 0; }
@@ -142,23 +148,54 @@
             }
         },
         { nom: 'etudiantsSuivis_gc_', compose: true, categorie: 'autres', deplacer: (v, a, n) => champDeTableau(v, 'da', a, n) },
-        { nom: 'mapping_anonymisation', brute: true, categorie: 'autres', deplacer: cleDObjet }
+        { nom: 'mapping_anonymisation', brute: true, categorie: 'autres', deplacer: cleDObjet },
+        // Les trois globales (décision du 8 oct., 14 h 50). `cleReelle` : la clé que lit leur
+        // propriétaire (registre-longitudinal.js, evaluation-jetons.js, denotation-jugements.js).
+        {
+            nom: 'registreLongitudinal', globale: true, cleReelle: () => 'registreLongitudinal', categorie: 'longitudinal',
+            // `eleves[da]` et son champ `da`. Les copies datées du dossier gardent le DA qu'elles
+            // portaient à la capture : ce sont les trimestres d'alors, que la correction ne touche pas.
+            deplacer: (v, a, n, e) => {
+                if (!v || typeof v !== 'object' || !v.eleves) return 0;
+                const k = cleDObjet(v.eleves, a, n, e);
+                if (k && v.eleves[n] && memeDA(v.eleves[n].da, a)) v.eleves[n].da = n;
+                return k;
+            }
+        },
+        {
+            nom: 'jetonsEtudiants', globale: true, cleReelle: () => 'jetonsEtudiants', categorie: 'jetons',
+            deplacer: (v, a, n, e) => cleDObjet(v, a, n, e, jetonsVides),
+            // Ce qui compte comme « déjà sous le nouveau DA » : une entrée qui n'est pas vide.
+            presentSous: (v, da) => (v && typeof v === 'object'
+                ? Object.keys(v).filter((k) => memeDA(k, da) && !jetonsVides(v[k])).length : 0),
+            // La fenêtre compte les jetons attribués, pas l'entrée.
+            afficher: (v, da) => {
+                const k = v && typeof v === 'object' ? Object.keys(v).find((x) => memeDA(x, da)) : null;
+                if (!k || !v[k] || typeof v[k] !== 'object') return 0;
+                return Object.keys(v[k]).filter((j) => j !== '_historique')
+                    .reduce((s, j) => s + (typeof v[k][j] === 'number' && v[k][j] > 0 ? v[k][j] : 0), 0);
+            }
+        },
+        {
+            nom: 'jugementsDenotation', globale: true, cleReelle: () => cle('jugementsDenotation'), categorie: 'denotation',
+            deplacer: (v, a, n, e) => {
+                if (!v || typeof v !== 'object') return 0;
+                return Object.keys(v).reduce((s, p) => s + cleDObjet(v[p], a, n, e), 0);
+            }
+        }
         // ⚠ Laissés exprès (mesure, § B) : les `_backup_v1` figés d'une migration ; la file
         // d'import en sessionStorage ; le champ `etudiantDA` des blobs du magasin IndexedDB
         // `fichiers` — aucun lecteur (`listerBlobsEtudiant` sans appelant), déjà non tenu par
         // `reassocierFichier`, et le réécrire réécrirait chaque copie entière.
     ];
 
-    // Globales qui portent des résultats : comptées, jamais écrites (mesure, § C).
-    const GLOBALES = [
-        { nom: 'registreLongitudinal', libelle: 'le registre longitudinal', compter: (v, da) => (v && v.eleves && Object.keys(v.eleves).some((k) => memeDA(k, da)) ? 1 : 0) },
-        { nom: 'jetonsEtudiants', libelle: 'les jetons attribués', compter: (v, da) => (v && typeof v === 'object' && Object.keys(v).some((k) => memeDA(k, da)) ? 1 : 0) },
-        {
-            nom: 'jugementsDenotation', libelle: 'les jugements de dénotation',
-            compter: (v, da) => (v && typeof v === 'object'
-                ? Object.values(v).filter((p) => p && typeof p === 'object' && Object.keys(p).some((k) => memeDA(k, da))).length : 0)
-        }
-    ];
+    // Une entrée de jetons sans jeton ni historique : rien à perdre.
+    function jetonsVides(entree) {
+        if (!entree || typeof entree !== 'object') return true;
+        return Object.keys(entree).every((j) => (j === '_historique'
+            ? !Array.isArray(entree[j]) || entree[j].length === 0
+            : !(typeof entree[j] === 'number' && entree[j] > 0)));
+    }
 
     /** Applique une famille à une COPIE de la valeur. @returns {{valeur, n, conflit}} */
     function transformer(famille, valeur, ancien, nouveau) {
@@ -178,14 +215,16 @@
         return id ? id + '_' : '';
     }
 
-    /** Les clés réelles du trimestre actif, famille par famille. */
+    /** Les clés réelles du trimestre actif, famille par famille, puis les trois globales. */
     function clesDuTrimestre() {
         const prefixe = prefixeTrimestre();
         if (!prefixe) return [];
         const toutes = typeof db.keysSync === 'function' ? db.keysSync() : [];
         const liste = [];
         FAMILLES.forEach((f) => {
-            if (f.compose) {
+            if (f.globale) {
+                liste.push({ cle: f.cleReelle(), famille: f });
+            } else if (f.compose) {
                 toutes.filter((k) => k.startsWith(prefixe + f.nom)).sort().forEach((k) => liste.push({ cle: k, famille: f }));
             } else if (f.brute) {
                 liste.push({ cle: prefixe + f.nom, famille: f });
@@ -208,7 +247,7 @@
 
     /**
      * La passe à blanc : ce que l'ancien DA porte, clé par clé ; ce que le nouveau porte
-     * déjà ; les globales qui le retiennent. N'écrit rien.
+     * déjà. N'écrit rien.
      */
     function passeABlanc(ancien, nouveau) {
         const cleFiches = cle('groupeEtudiants');
@@ -221,21 +260,20 @@
             return {
                 cle: k, famille,
                 ancien: compter(famille, v, ancien),
-                nouveau: nouveau ? compter(famille, v, nouveau) : 0,
+                nouveau: !nouveau ? 0 : (famille.presentSous ? famille.presentSous(v, nouveau) : compter(famille, v, nouveau)),
                 conflit: t.conflit
             };
         });
-        const comptes = { evaluations: 0, presences: 0, copies: 0, resultats: 0, autres: 0 };
-        parCle.forEach((c) => { comptes[c.famille.categorie] += c.ancien; });
-        const globales = GLOBALES
-            .map((g) => ({ nom: g.nom, libelle: g.libelle, n: g.compter(db.getSync(g.nom, null), ancien) }))
-            .filter((g) => g.n > 0);
-        return { cleFiches, fiche, reprise, parCle, comptes, globales };
+        const comptes = { evaluations: 0, presences: 0, copies: 0, resultats: 0, autres: 0, jetons: 0, denotation: 0, longitudinal: 0 };
+        parCle.forEach((c) => {
+            comptes[c.famille.categorie] += c.famille.afficher ? c.famille.afficher(lireBrut(c.cle), ancien) : c.ancien;
+        });
+        return { cleFiches, fiche, reprise, parCle, comptes };
     }
 
     /**
-     * Le refus, ou null. Ordre : la forme du DA, une autre fiche, les globales, les données
-     * déjà sous le nouveau DA (hors reprise de la même correction).
+     * Le refus, ou null. Ordre : une reprise vers un autre DA, la forme du DA, une autre fiche,
+     * les données déjà sous le nouveau DA (hors reprise de la même correction).
      */
     function refus(ancien, nouveau, mesure) {
         if (!mesure.fiche) return 'Étudiant·e introuvable : la liste a changé depuis l\'ouverture de la fiche.';
@@ -249,16 +287,24 @@
         if (memeDA(nouveau, ancien)) return 'Le nouveau DA est le même que l\'ancien.';
         const etudiants = lireBrut(mesure.cleFiches) || [];
         if (ficheDe(etudiants, nouveau)) return 'Ce DA est déjà celui d\'un·e autre étudiant·e de ce trimestre.';
-        if (mesure.globales.length) {
-            return 'L\'ancien DA figure aussi dans ' + mesure.globales.map((g) => g.libelle).join(', ') +
-                ', hors de ce trimestre : rien n\'a été déplacé.';
-        }
         // En reprise, le nouveau DA porte déjà ce qui est passé au premier essai (le premier essai
         // a refusé toute donnée antérieure sous ce DA) : seul un conflit de clés d'objet bloque.
         const deja = mesure.parCle.filter((c) => c.conflit || (c.nouveau > 0 && !mesure.reprise));
+        const dejaHors = deja.filter((c) => c.famille.globale);
+        if (dejaHors.length) {
+            return 'Ce DA porte déjà ' + dejaHors.map((c) => LIBELLES_GLOBALES[c.famille.categorie]).join(', ') +
+                ' : rien n\'a été déplacé.';
+        }
         if (deja.length) return 'Des données portent déjà ce DA dans ce trimestre : rien n\'a été déplacé.';
         return null;
     }
+
+    // Mots du refus d'un conflit hors trimestre (proposés, à Grégoire).
+    const LIBELLES_GLOBALES = {
+        longitudinal: 'une entrée au suivi longitudinal',
+        jetons: 'des jetons',
+        denotation: 'un jugement de dénotation'
+    };
 
     function totalSous(da) {
         return clesDuTrimestre().reduce((s, { cle: k, famille }) => s + compter(famille, lireBrut(k), da), 0);
@@ -346,5 +392,5 @@
         return { ok: true, deplaces: mesure.comptes };
     }
 
-    window.CorrectionDA = { FAMILLES, GLOBALES, MARQUE, transformer, compter, passeABlanc, refus, corriger, clesDuTrimestre };
+    window.CorrectionDA = { FAMILLES, MARQUE, transformer, compter, passeABlanc, refus, corriger, clesDuTrimestre };
 })();
