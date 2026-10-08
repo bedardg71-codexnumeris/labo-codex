@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.191 (#976 : « Corriger le DA… ») — titre et ligne validés par Grégoire le 8 oct. 2026 à
+            // 14 h 50, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md, « Suite – relecture de #976 et
+            // décisions de Grégoire »), posés tels quels.
+            version: '1.191',
+            couleur: 'vert',
+            titre: 'Corriger un DA mal tapé',
+            items: [
+                'Une coquille dans un DA se corrige maintenant depuis la fiche de l\'étudiant·e (Cadre&nbsp;› Groupe d\'étudiant·es, «&nbsp;Corriger le DA…&nbsp;»)&nbsp;: ses évaluations, présences, copies et résultats du trimestre suivent le nouveau DA.'
+            ]
+        },
+        {
             // 1.190 (#967 : « Écraser » un homonyme employé) — titre et ligne validés par Grégoire le
             // 8 oct. 2026 à 7 h 09, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md, « Suite – relecture
             // de 1.190.0 et mots de Grégoire »), posés tels quels. 1.190.1 (#1042 : « + Nouvelle … » après
