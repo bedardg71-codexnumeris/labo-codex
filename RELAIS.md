@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 15 h 30 : **1.191.0 (#976 « CORRIGER LE DA… », LES GLOBALES SUIVENT) RELEASÉ SUR `main` LOCAL, NON POUSSÉ**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 15 h 45 : **1.191.1 (#976, RECOMPTE DES JETONS VIDES) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
+
+**Consigne** : « Suite – relecture du volet des globales » (Cowork, 15 h 41) : un recompte qui ne tombait jamais juste
+(aucun jeton sous l'ancien DA, entrée vide sous le nouveau) ; « Suivent aussi : » et le refus hors trimestre validés.
+
+**Commits** : `c9920ab1` correctif (l'attendu = la valeur transformée comptée comme le recompte) ; `dd2fc77a` release
+1.191.1 (patch plutôt qu'un amendement de 1.191.0 : rien de réécrit) ; ce relais.
+
+**Mesuré** : Vitest complet après le commit de release, 697 fichiers, 8 387 essais ; banc 22 essais, l'ancienne formule
+rougit le cas exact, 20 mutations précédentes / 20 rouges ; spec WebKit vert.
+
+**Suite** : verdict complet (Chrome et Safari fermés), push, vérification chez Netlify.
+
+## (relais précédent) 8 OCT. 2026, 15 h 30 : **1.191.0 (#976 « CORRIGER LE DA… », LES GLOBALES SUIVENT) RELEASÉ SUR `main` LOCAL, NON POUSSÉ**
 
 **Consigne** : section « Suite – relecture de #976 et décisions de Grégoire » de `plans de travail/CONSIGNE-DU-JOUR.md`
 (Cowork, 14 h 50) : relecture de `11bc90ad` sans blocage ; décision 1, le registre longitudinal, les jetons et la
