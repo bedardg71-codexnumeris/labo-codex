@@ -1,70 +1,46 @@
-# Consigne du jour – chantier de l'enregistrement, lot 7 : « Corriger le DA… » (#976)
+# Consigne du jour – carte d'alignement, lots 1 et 2 : le menu « Vue » ; le planificateur vertical et ses dates
 
-> Écrite par Cowork le 8 octobre 2026 à 14 h 18 (Toronto, mesurée par `date`). Remplace la consigne du petit lot #1042, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-08-verrou-exemple-1042.md`.
+> Écrite par Cowork le 8 octobre 2026 à 18 h 03 (Toronto, mesurée par `date`). Remplace la consigne du lot 7 de l'enregistrement, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-08-enregistrement-lot-7-976.md`.
 
 ## Où on en est
 
-1.190.1 est en ligne (`4cca460e`, Netlify à 11 h 22) ; porte de #1042 passée par Grégoire à 14 h 16. Dernier lot du chantier de l'enregistrement : plan `PLAN-2026-10-07-chantier-enregistrement-suite.md`, **lot 7**. Décisions : `DECISIONS-2026-10-05-chantier-enregistrement.md`, § #976 (forme, 5 oct. ; **portée, 8 oct. : le trimestre actif seulement**). Lis-les d'abord.
+1.191.1 est en ligne (Netlify à 16 h 49) ; porte de #976 passée à 17 h 59. **Chantier de l'enregistrement clos** (décision de Grégoire, 8 oct.). **Chantier de la carte d'alignement ouvert.** Lis d'abord :
+- `plans de travail/PLAN-2026-10-08-chantier-carte-alignement.md` — propositions de Grégoire, **et surtout ses décisions après la mesure** (fin du fichier) ;
+- `plans de travail/MESURE-2026-10-08-barre-carte-alignement.md` — la mesure du lot 0.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork, à écrire dans `BACKLOG.md` et `SUIVI-BUGS.md`, et à faire la release sur `main` local. **Pas de push avant la relecture de Cowork** : ce lot déplace des données d'élèves, la relecture croisée est obligatoire (règle 2 de `PROTOCOLE.md`).
+Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork (cette consigne, son archive, le plan, la mesure du lot 0, la consigne du lot 0), à écrire dans `BACKLOG.md` et `SUIVI-BUGS.md`, et à faire la release sur `main` local. **Pas de push avant la relecture de Cowork.**
 
 ## 0 · Avant tout
 
 Si le résultat de la sonde de Mathieu (#1038) est arrivé dans `Retours des testeurs/`, arrête-toi et dis-le en une ligne.
 
-## 1 · Mesurer d'abord (sans écrire)
+## 1 · Lot 1 – le menu « Vue »
 
-Inventaire **par clé** de tout ce qui porte un DA dans le trimestre actif : évaluations, présences, indices (A, C, P), portfolios, interventions et RàI, rencontres, dépistage, suivi, jetons, copies (magasin `fichiers`, index `etudiantDA`), correspondance d'anonymisation, tout autre. Pour chaque clé : son écrivain propriétaire (`docs/DATA-OWNERSHIP.md`), et si le DA y est une clé d'objet, un champ, ou une partie de nom de fichier. Écris l'inventaire dans `plans de travail/MESURE-2026-10-08-976-cles-qui-portent-un-DA.md`. ⚠ Une clé globale (non préfixée par le trimestre) qui porte un DA : **ne la touche pas**, signale-la dans ton rapport (la portée est le trimestre actif).
+Décisions de Grégoire (plan, fin) :
+- Un nouveau menu **« Vue »** dans la barre de la carte. Dans l'ordre : **« Vue plein écran »** (remplace l'icône des flèches vers l'extérieur, `planif-btn-plein-ecran`), **« Recentrer la carte »** (remplace le double cercle, `planif-btn-recentrer`), **« Tout voir »** (remplace les flèches vers l'intérieur, `planif-btn-tout-voir`) ; puis un sous-titre **« Fond du canevas »** avec les couleurs (même modèle que le menu « Annoter » d'« Annoter et évaluer ») ; puis **les raccourcis clavier**, en bas du menu.
+- **Retirés de la barre** : la palette des couleurs de fond (`planif-btn-fond`), les trois icônes ci-dessus, la palette indépendante des raccourcis (`planif-palette-raccourcis-btn`, `planif-raccourcis-panel`). Zéro-dette : retire ce qui est remplacé, sans alias.
+- **Chaque raccourci affiché marche dans Chrome et Safari.** Un raccourci pris par le navigateur (⌘1, probablement : vérifie-le) est remplacé par une touche libre, de ton choix, affichée telle quelle. Les descriptions inexactes de la mesure (⌘0, « Ctrl+Z » du bouton « Annuler ») sont corrigées ; les huit raccourcis qui marchent sans être décrits entrent dans la liste.
+- Trouvailles du lot 0 à régler ici : « Recentrer » branché deux fois ; les deux couleurs de fond (carte et Annoter) inscrites à `docs/DATA-OWNERSHIP.md`.
+- Le menu se manie au clavier et sur l'iPad (cibles tactiles), selon `design-system.html`.
 
-## 2 · Le geste, selon la décision
+## 2 · Lot 2 – le planificateur vertical et ses dates
 
-- Un bouton « Corriger le DA… » dans la fiche de l'étudiant·e (Cadre › Groupe d'étudiant·es), là où le DA est en lecture seule depuis 1.166.0.
-- Sa fenêtre : l'ancien et le nouveau DA ; **ce qui sera déplacé, compté pour de vrai** (évaluations, présences, copies, résultats) ; la portée (« dans ce trimestre seulement »).
-- Refus : un DA qui n'a pas 7 chiffres ; un DA déjà porté par un·e autre étudiant·e du trimestre.
-- **Le codex proposé avant** (règle du 1er oct. pour ce qui touche les élèves ; même mécanisme que les suppressions de 1.176.0).
-- **Rien ne reste sous l'ancien DA ; rien n'est effacé** : on déplace, on ne copie pas puis efface. Ordre : passe à blanc qui compte → écriture → vérification qui recompte sous le nouveau DA et confirme zéro sous l'ancien. Un échec en cours de route ne doit laisser **ni doublon ni perte** (dis comment tu le garantis ; si une écriture partielle reste possible, arrête-toi et dis-le).
-- Le témoin commun dit l'issue (« Enregistré », ou « Non enregistré » et pourquoi).
+- **Retire la présentation horizontale** (la réserve « Non planifié » à gauche de la grille) et son bouton. Un usager qui l'avait choisie retombe sur la verticale : **rien n'est effacé**, sa préférence cesse d'être lue (dis la clé dans ton rapport).
+- À côté du titre « PLANIFICATEUR » : les dates **« Début du trimestre »** et **« Fin du trimestre »** du Cadre. Forme : « PLANIFICATEUR · du 25 août au 19 décembre 2026 » (année une fois si les deux dates sont la même année ; sinon les deux).
+- Si elles manquent : « Les dates du trimestre ne sont pas entrées. Ajoute-les dans Cadre › Trimestre. », où « Cadre › Trimestre » est un lien qui ouvre cette section. Cela remplace l'avis actuel qui renvoie vers « Réglages » (trouvaille du lot 0).
 
-## 3 · Les mots
+## 3 · Mots
 
-Propose-les dans ton rapport, à part, **non écrits ailleurs que dans le code de la branche** : libellé du bouton, titre et texte de la fenêtre, les deux refus, le bouton de confirmation, la ligne des Nouvelles. Ils passent par Grégoire avant la release.
+Les mots ci-dessus sont arrêtés. **Propose à part, non écrits ailleurs que dans le code**, ceux qui manquent : le libellé de chaque raccourci dans le menu, le nom de la touche qui remplace ⌘1, la ligne des Nouvelles. Ils passent par Grégoire avant la release.
 
 ## 4 · Tests
 
-Bancs avec break-test : un DA corrigé garde évaluations, présences, indices et copies (même nombre avant/après, zéro sous l'ancien) ; les deux refus ; un autre trimestre n'est pas touché ; un échec simulé au milieu ne laisse ni doublon ni perte. Spec WebKit sur le pack démo (noms et DA manifestement fictifs). Specs voisins, Vitest complet.
+Bancs avec break-test : le menu « Vue » et ses trois commandes ; chaque raccourci de la liste déclenche ce qu'il dit (un test par raccourci, au navigateur) ; la couleur de fond choisie dans le menu s'applique et se garde ; plus de bouton horizontal, une préférence horizontale enregistrée mène à la verticale ; les dates s'affichent, l'invitation et son lien quand elles manquent. Specs voisins de la carte, Vitest complet. Noms manifestement fictifs.
 
 ## 5 · Puis arrête-toi
 
-Commits séparés, **pas de release avant les mots** : rapport à Grégoire, relecture de Cowork, mots, release minor, verdict (Chrome et Safari fermés), push.
+Commits séparés par lot. **Pas de release avant les mots** : rapport à Grégoire, relecture de Cowork, mots, release minor, verdict (Chrome et Safari fermés), push.
 
 ## Ton rapport à Grégoire
 
-En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste à l'écran **en démo** (jamais sur ses vraies données). Ce que tu as supposé, une ligne par supposition.
-
-## Suite – relecture de #976 et décisions de Grégoire (8 oct. 2026, 14 h 50, Toronto)
-
-**Relecture de `11bc90ad` : rien ne bloque.** Lus : `js/correction-da.js` en entier (familles, `cleDObjet` et ses conflits, passe à blanc, refus, marque, reprise, recompte avant la fiche, fiche en dernier), la mesure `MESURE-2026-10-08-976-…`. Tests non relancés par Cowork.
-
-**Décision 1 – les trois clés globales suivent** (« oui » ; consignée dans `DECISIONS-2026-10-05-chantier-enregistrement.md`, § #976). `registreLongitudinal` (`eleves[da]`), `jetonsEtudiants` (`[da]`) et `jugementsDenotation` (`[…][da]`) passent sous le nouveau DA pour l'étudiant·e corrigé·e, **avec les mêmes garanties** que les clés du trimestre : écriture d'un bloc par clé, conflit (les deux DA présents) = refus sans écriture, comptées dans la passe à blanc et dans le recompte, reprise possible. Le refus « L'ancien DA figure aussi dans … » disparaît. Banc avec break-test (un jeton, un jugement de dénotation, une entrée longitudinale suivent ; un conflit refuse sans rien écrire ; un échec simulé sur une globale se reprend). Inscris au backlog la trouvaille « jetons et jugements de dénotation rangés en global alors qu'ils appartiennent à un trimestre », sans la corriger.
-
-**Décision 2 – les mots, validés tels quels sauf :**
-- Phrase d'aide sous le DA (`index.html`, `v2-etudiantDAAide`) : « Le DA relie les évaluations et les présences de l'étudiant·e. Pour corriger une coquille, utilise « Corriger le DA… » : ses données suivent. »
-- La liste de la fenêtre compte aussi, quand il y en a : les jetons, les jugements de dénotation, l'entrée au suivi longitudinal (libellés au même modèle que les autres lignes, accordés).
-- Nouvelles, entrée 1.191, couleur vert, avec le commentaire de provenance : titre « Corriger un DA mal tapé » ; ligne : « Une coquille dans un DA se corrige maintenant depuis la fiche de l'étudiant·e (Cadre › Groupe d'étudiant·es, « Corriger le DA… ») : ses évaluations, présences, copies et résultats du trimestre suivent le nouveau DA. »
-- Tous les autres mots de ton rapport : tels quels.
-
-Typographie : guillemets français, espaces insécables (`&nbsp;`) dans le changelog.
-
-**Puis** : release minor par `scripts/release.mjs`, commits séparés, relais. **Arrête-toi avant le verdict** : Cowork relit le volet des globales (il déplace des données d'élèves). Rapport en gestes d'utilisateur, avec le geste en démo (« DEMO004 » vers 7654321).
-
-## Suite – relecture du volet des globales (8 oct. 2026, 15 h 41, Toronto)
-
-**Relecture de `f959844b` : un défaut à corriger avant le verdict.**
-
-- **Le recompte final ne tombe jamais juste dans un cas** : l'ancien DA n'a aucune entrée dans `jetonsEtudiants`, le nouveau DA y a une entrée **vide** (que l'application pose d'elle-même). La passe à blanc compte `c.nouveau` par `presentSous` (non vide : 0) ; la famille est sautée (`c.ancien === 0`) ; mais `totalSous(nouveau)` compte l'entrée vide par `compter` (1). `sousNouveau = attendu + 1` : « le recompte ne tombe pas juste », à chaque essai, et refaire le geste n'y change rien. (Lu au code, non exécuté.) **Corrige** pour que l'attendu et le recompte comptent de la même façon (par exemple : `attendu` avec `compter` brut sous le nouveau DA, `presentSous` réservé au refus), et cherche si une autre famille a le même écart entre ce que la passe à blanc compte et ce que le recompte compte. Banc avec break-test sur ce cas exact (et sa variante : les deux entrées existent, celle du nouveau DA vide).
-
-**Les deux phrases neuves, validées par Grégoire** (« oui », 15 h 41) :
-- Au-dessus des lignes jetons, dénotation, suivi longitudinal : **« Suivent aussi : »** (au lieu de « Suivent aussi, hors trimestre : »).
-- Le refus d'un conflit hors trimestre, tel que tu l'as écrit : « Ce DA porte déjà des jetons : rien n'a été déplacé. » (même forme pour « un jugement de dénotation », « une entrée au suivi longitudinal »).
-
-Puis : commits, release patch si la 1.191.0 doit être refaite (ou amende la release locale non poussée, à ton choix, en le disant), Chrome et Safari fermés, verdict complet, push, vérification chez Netlify. Rapport en gestes d'utilisateur, avec le geste en démo (« DEMO004 » vers 7654321).
+En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste à l'écran, en démo dans une fenêtre privée. Ce que tu as supposé, une ligne par supposition.
