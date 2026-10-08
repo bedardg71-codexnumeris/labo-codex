@@ -90,11 +90,11 @@
             notation: 'crochet'
         },
 
-        // Disposition de la réserve « Non planifié » du planificateur
-        // (7 août 2026) : 'bas' = sous la grille (défaut historique),
-        // 'gauche' = en colonne à côté. Choix de l'utilisateur selon l'espace
-        // dont il dispose — le compromis dépend de son écran, pas du nôtre.
-        planifReserveDisposition: 'bas',
+        // (`planifReserveDisposition`, la réserve « Non planifié » à gauche de
+        // la grille, est retirée le 8 oct. 2026 — lot 2 du chantier de la
+        // carte. Une valeur déjà enregistrée reste dans le stockage : plus rien
+        // ne la lit, et `definirPreference` réécrit le stockage ENTIER, ce qui
+        // la conserve.)
 
         // Affichage des deux palettes flottantes du module Alignement
         // (7 août 2026) : elles se commandent depuis la barre d'outils de la

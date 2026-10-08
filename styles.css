@@ -21033,61 +21033,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* Le titre de la zone coiffe la rangée, il n'entre pas dans le flux latéral. */
 .planif-grille-nonplanifie-titre { flex: 0 0 100%; }
 
-/* === RÉSERVE EN COLONNE (7 août 2026) — disposition au choix ===
-   Deux dispositions, l'utilisateur tranche selon son écran : la réserve sous la
-   grille (défaut), ou À CÔTÉ. En colonne, elle cesse de défiler avec la grille
-   — c'est tout l'objet : on y puise des pastilles pendant que la grille défile
-   dessous (l'auto-défilement du glisser, 1.45.1, fait le reste).
-
-   ⚠ ARITHMÉTIQUE. La colonne prend 170 px. À 360 px de palette (316 utiles), il
-   n'en resterait que ~142 pour la grille — UNE pastille par rangée, soit pire
-   que ce qu'on remplace. C'est pourquoi la bascule élève la palette au plancher
-   de 520 px (PLANCHER_PALETTE_COTE_A_COTE, js/planification-carte.js), qui
-   laisse ~300 px de cellule. La sentinelle géométrique verrouille ce calcul —
-   c'est le défaut de 1.47.0, où un côte à côte juste était inerte faute de
-   place. */
-.planif-cotecote {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-}
-.planif-cotecote .planif-grille {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-.planif-reserve-colonne {
-    flex: 0 0 170px;
-    max-height: 60vh;
-    overflow-y: auto;
-    align-content: flex-start;
-    padding: 4px;
-    border: 1px dashed var(--bordure-discrete, rgba(128,128,128,.28));
-    border-radius: 8px;
-}
-
-/* Le bouton de bascule, dans la barre du planificateur. Il reprend
-   .planif-palette-toggle : aucune taille ni couleur nouvelle.
-
-   LE GLYPHE DÉPEINT LA DISPOSITION COURANTE (idée de Grégoire, 7 août) :
-   ◧ montre la moitié pleine à GAUCHE — la réserve en colonne. Pivoté de −90°,
-   cette moitié passe EN BAS : la réserve sous la grille. Un seul caractère,
-   deux états lisibles.
-
-   Pourquoi une rotation CSS et pas un second caractère : le bloc Unicode sûr
-   (Formes géométriques) ne contient PAS de « carré moitié basse noircie » —
-   ⬓ (U+2B13) vit dans Miscellaneous Symbols and Arrows, celui-là même qui a
-   donné le carré vide de 1.53.1. La rotation garde le glyphe dans le bloc sûr.
-
-   ⚠ La forme, et non la couleur, porte l'état : un état signalé par la seule
-   couleur est invisible à qui la distingue mal. */
-#planif-btn-disposition-reserve {
-    transition: transform 0.15s;
-}
-/* Sans .actif = disposition « bas » : la moitié pleine descend. */
-#planif-btn-disposition-reserve:not(.actif) {
-    transform: rotate(-90deg);
-}
-
 /* Pas de media query ici, volontairement : le repli doit suivre la largeur de
    la PALETTE (redimensionnable, 1.36.0), pas celle de la fenêtre. La largeur
    plancher au-dessus le fait déjà — deux blocs qui ne tiennent pas passent à
@@ -21104,6 +21049,24 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-muted, #5a7a88);
     padding: 4px 6px;
     line-height: 1.35;
+}
+/* Lot 2 (8 oct. 2026) : l'invitation à entrer les dates du trimestre. */
+#planif-invitation-dates { margin: 0; }
+.planif-lien-cadre {
+    color: var(--accent-primaire);
+    text-decoration: underline;
+}
+.planif-lien-cadre:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width, 3px) var(--focus-ring-color, #6aacb8);
+    border-radius: 2px;
+}
+/* Les dates, à côté du titre « PLANIFICATEUR » : elles ne passent pas en
+   capitales avec lui (« AOÛT » se lirait mal), et restent plus discrètes. */
+.planif-palette-dates {
+    text-transform: none;
+    font-weight: 400;
+    letter-spacing: 0;
 }
 .planif-grille-contexte {
     margin-left: 6px;
@@ -21634,13 +21597,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 11px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.5px; color: var(--texte-secondaire, #8aa4b0);
 }
-
-.planif-palette-toggle {
-    width: 20px; height: 20px; border: none; background: none;
-    font-size: 16px; line-height: 1; cursor: pointer; color: var(--texte-muted, #5a7a88);
-    border-radius: 4px; display: flex; align-items: center; justify-content: center;
-}
-.planif-palette-toggle:hover { background: rgba(106, 172, 184, 0.1); color: var(--texte-principal, #d0e0e4); }
 
 .planif-palette-contenu {
     padding: 6px;

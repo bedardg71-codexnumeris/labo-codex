@@ -15,9 +15,13 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // leçon ne pouvait quitter le calendrier par le glisser.
 //
 // Ce banc fait les gestes de l'écran, dans l'ordre du terrain : tout planifier
-// (glisser la séquence sur une semaine), voir la zone vide, cliquer ◧ deux
-// fois, puis glisser une leçon sur la zone VIDE et une autre sur la zone
-// PLEINE — les deux écritures doivent être les mêmes (arrêt de la consigne).
+// (glisser la séquence sur une semaine), voir la zone vide, puis glisser une
+// leçon sur la zone VIDE et une autre sur la zone PLEINE — les deux écritures
+// doivent être les mêmes (arrêt de la consigne).
+//
+// Le bouton ◧ et la réserve « à gauche » sont retirés le 8 oct. 2026 (lot 2 du
+// chantier de la carte) : leurs étapes sont parties avec eux ; le retrait se
+// verrouille dans `planif-planificateur-dates.spec.js`.
 
 const PHRASE = 'Glisse ici une leçon pour la retirer du calendrier.';
 const ZONE = '#planif-sommaire [data-grille-semaine=""]';
@@ -72,7 +76,7 @@ test.describe('#929 · zone « Non planifié » toujours rendue', () => {
     // Haut, pour que la palette et la zone en pied de grille tiennent à l'écran.
     test.use({ viewport: { width: 1280, height: 1500 } });
 
-    test('tout planifié → zone vide visible ; ◧ la déplace ; une leçon glissée dessus quitte sa semaine', async ({ page }) => {
+    test('tout planifié → zone vide visible ; une leçon glissée dessus quitte sa semaine', async ({ page }) => {
         await ouvrirCarte(page);
 
         const initial = await lireLecons(page);
@@ -105,22 +109,6 @@ test.describe('#929 · zone « Non planifié » toujours rendue', () => {
         const enBas = await geometrie();
         expect(enBas.zy).toBeGreaterThanOrEqual(Math.floor(enBas.gbas)); // SOUS la grille
 
-        // 3. ◧ déplace quelque chose de visible : à gauche, puis retour.
-        const bouton = page.locator('#planif-btn-disposition-reserve');
-        await bouton.click();
-        await expect(page.locator('#planif-sommaire .planif-cotecote')).toHaveCount(1);
-        await expect(zone).toBeVisible();
-        await expect(zone.locator('.planif-grille-nonplanifie-vide')).toHaveText(PHRASE);
-        const aGauche = await geometrie();
-        expect(aGauche.zx).toBeLessThan(aGauche.gx);                 // À GAUCHE de la grille
-        expect(Math.round(aGauche.zw)).toBe(170);                     // LARGEUR_RESERVE_COLONNE
-        expect(await page.evaluate(() => window.planificationCarte.LARGEUR_RESERVE_COLONNE)).toBe(170);
-
-        await bouton.click();
-        await expect(page.locator('#planif-sommaire .planif-cotecote')).toHaveCount(0);
-        const retour = await geometrie();
-        expect(retour.zy).toBeGreaterThanOrEqual(Math.floor(retour.gbas));
-
         // 4. Une leçon glissée sur la zone VIDE quitte sa semaine et entre dans la zone.
         await glisser(page, l1.id, ZONE);
         await expect(zone.locator(`[data-grille-id="${l1.id}"]`)).toHaveCount(1);
@@ -138,13 +126,10 @@ test.describe('#929 · zone « Non planifié » toujours rendue', () => {
         // Chaque leçon retrouve EXACTEMENT ses métadonnées d'avant planification.
         expect(apresVide.metadata).toEqual(l1.metadata);
         expect(apresPleine.metadata).toEqual(l2.metadata);
-
-        // La préférence garde son format : une chaîne, 'bas' après l'aller-retour.
-        expect(await page.evaluate(() => window.obtenirPreference('planifReserveDisposition'))).toBe('bas');
     });
 
-    // TROUVÉ PAR CE BANC. L'étape 3 ci-dessus clique ◧ juste après un glisser :
-    // avant le correctif, ce premier clic ne faisait RIEN sous WebKit. Relâchée
+    // TROUVÉ PAR CE BANC (20 sept.). Le clic sur ◧ juste après un glisser — ◧
+    // retiré depuis — ne faisait RIEN sous WebKit. Relâchée
     // sur un autre élément que celui saisi, la souris n'y produit aucun `click` ;
     // l'avaleur « once » posé au pointerup restait armé et mangeait le prochain
     // clic de l'écran. L'essai ci-dessous garde l'autre moitié : quand le clic
@@ -174,42 +159,8 @@ test.describe('#929 · zone « Non planifié » toujours rendue', () => {
         expect(await page.evaluate(() => window.__passes)).toBe(0);
 
         // Le clic SUIVANT, lui, passe : l'avaleur n'a pas survécu au geste.
-        await page.locator('#planif-btn-disposition-reserve').click();
-        await expect(page.locator('#planif-sommaire .planif-cotecote')).toHaveCount(1);
-    });
-});
-
-test.describe('#929 · à 768 px, la phrase ne déborde pas de la colonne', () => {
-    test.use({ viewport: { width: 768, height: 1500 } });
-
-    test('colonne vide à gauche : 170 px, phrase contenue, rien ne défile à l’horizontale', async ({ page }) => {
-        await ouvrirCarte(page);
-        const idSeq = await page.evaluate(() =>
-            Array.from(window.planificationCarte.etat.noeuds.values()).find(n => n.type === 'sequence').id);
-        await glisser(page, idSeq, '#planif-sommaire [data-grille-semaine="1"]');
-        await expect(page.locator(ZONE + ' .planif-grille-nonplanifie-vide')).toHaveText(PHRASE);
-
-        await page.locator('#planif-btn-disposition-reserve').click();
-        await expect(page.locator('#planif-sommaire .planif-cotecote')).toHaveCount(1);
-
-        const m = await page.evaluate((sel) => {
-            const z = document.querySelector(sel);
-            const p = z.querySelector('.planif-grille-nonplanifie-vide');
-            const rz = z.getBoundingClientRect();
-            const rp = p.getBoundingClientRect();
-            return {
-                largeurZone: Math.round(rz.width),
-                deborde: z.scrollWidth > z.clientWidth,
-                phraseDansZone: rp.left >= rz.left - 0.5 && rp.right <= rz.right + 0.5,
-                hauteurPhrase: Math.round(rp.height),
-                zoneDansEcran: rz.left >= 0 && rz.right <= window.innerWidth
-            };
-        }, ZONE);
-
-        expect(m.largeurZone).toBe(170);
-        expect(m.deborde).toBe(false);
-        expect(m.phraseDansZone).toBe(true);
-        expect(m.hauteurPhrase).toBeGreaterThan(16); // elle passe à la ligne au lieu d'élargir
-        expect(m.zoneDansEcran).toBe(true);
+        // (Il visait ◧ jusqu'au 8 oct. 2026 ; il vise la pastille elle-même.)
+        await item.click();
+        await expect.poll(() => page.evaluate(() => window.__passes)).toBe(1);
     });
 });
