@@ -23,7 +23,8 @@
         {
             // 1.191 (#976 : « Corriger le DA… ») — titre et ligne validés par Grégoire le 8 oct. 2026 à
             // 14 h 50, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md, « Suite – relecture de #976 et
-            // décisions de Grégoire »), posés tels quels.
+            // décisions de Grégoire »), posés tels quels. 1.191.1 (relecture du volet des globales : le
+            // recompte des jetons vides) consolidé, sans ligne : rien de neuf à l'écran.
             version: '1.191',
             couleur: 'vert',
             titre: 'Corriger un DA mal tapé',
