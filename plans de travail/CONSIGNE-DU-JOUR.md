@@ -56,3 +56,15 @@ En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste �
 Typographie : guillemets français, espaces insécables (`&nbsp;`) dans le changelog.
 
 **Puis** : release minor par `scripts/release.mjs`, commits séparés, relais. **Arrête-toi avant le verdict** : Cowork relit le volet des globales (il déplace des données d'élèves). Rapport en gestes d'utilisateur, avec le geste en démo (« DEMO004 » vers 7654321).
+
+## Suite – relecture du volet des globales (8 oct. 2026, 15 h 41, Toronto)
+
+**Relecture de `f959844b` : un défaut à corriger avant le verdict.**
+
+- **Le recompte final ne tombe jamais juste dans un cas** : l'ancien DA n'a aucune entrée dans `jetonsEtudiants`, le nouveau DA y a une entrée **vide** (que l'application pose d'elle-même). La passe à blanc compte `c.nouveau` par `presentSous` (non vide : 0) ; la famille est sautée (`c.ancien === 0`) ; mais `totalSous(nouveau)` compte l'entrée vide par `compter` (1). `sousNouveau = attendu + 1` : « le recompte ne tombe pas juste », à chaque essai, et refaire le geste n'y change rien. (Lu au code, non exécuté.) **Corrige** pour que l'attendu et le recompte comptent de la même façon (par exemple : `attendu` avec `compter` brut sous le nouveau DA, `presentSous` réservé au refus), et cherche si une autre famille a le même écart entre ce que la passe à blanc compte et ce que le recompte compte. Banc avec break-test sur ce cas exact (et sa variante : les deux entrées existent, celle du nouveau DA vide).
+
+**Les deux phrases neuves, validées par Grégoire** (« oui », 15 h 41) :
+- Au-dessus des lignes jetons, dénotation, suivi longitudinal : **« Suivent aussi : »** (au lieu de « Suivent aussi, hors trimestre : »).
+- Le refus d'un conflit hors trimestre, tel que tu l'as écrit : « Ce DA porte déjà des jetons : rien n'a été déplacé. » (même forme pour « un jugement de dénotation », « une entrée au suivi longitudinal »).
+
+Puis : commits, release patch si la 1.191.0 doit être refaite (ou amende la release locale non poussée, à ton choix, en le disant), Chrome et Safari fermés, verdict complet, push, vérification chez Netlify. Rapport en gestes d'utilisateur, avec le geste en démo (« DEMO004 » vers 7654321).
