@@ -7,7 +7,30 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 8 h 51 : **1.190.0 (LOT 6 DE L'ENREGISTREMENT : « ÉCRASER » UN HOMONYME EMPLOYÉ, #967) EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 10 h 07 : **1.190.1 (VERROU D'UN EXEMPLE #1042, MOTS DE « CONFLIT DE NOM ») COMMITÉE SUR `main` LOCAL — RELECTURE DE COWORK À SUIVRE, PAS POUSSÉE**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 8 oct., 9 h 52).
+
+**Commits** : `c45465f6` consigne et archive du lot 6 ; `759a8835` #1042 (`BibliothequeUI.quitterModeLectureSeuleDemo`,
+appelée au début des créations d'échelle, de grille, de cartouche et de production ; fiche au BACKLOG et ligne
+au SUIVI-BUGS ; banc) ; `53e0ebf6` mots de « Conflit de nom » (`js/modal-doublon.js`, banc) ; `2f247642` release
+1.190.1 (patch) ; ce relais.
+
+**Mesuré** : le défaut, au banc WebKit, sur les quatre fiches avant correctif (quatre rouges par « la fiche neuve
+n'est pas verrouillée ») ; la démo ne porte aucune cartouche d'exemple, le banc en marque une. Après : 4/4.
+Mots : 3/3 ; break-test par l'ancien fichier (3 rouges), puis par la seule phrase sous « Remplacer » (rouge).
+Voisins WebKit : lot E1, #967, duplication 476 — 51/51. Vitest complet après le commit de release : 696 fichiers,
+8 362 essais. Verdict complet : **non lancé**.
+
+**Suppositions nommées** : la pratique n'a pas le défaut sous cette forme (« + Nouvelle pratique » ouvre
+l'assistant ; lu, non mesuré) ; le mode réel suit le même chemin de code, couvert par le même correctif, sans
+exemple en lecture seule mesuré chez Grégoire ; le type reste en gras dans la phrase d'ouverture, comme avant ;
+« Une » sert aussi pour la production et la pratique (féminines).
+
+**Suite** : relecture de Cowork, verdict (Chrome et Safari fermés), push. Porte : en démo, fenêtre privée,
+« IDME 4 niv » puis « + Nouvelle échelle » ; le nom se saisit.
+
+## (relais précédent) 8 OCT. 2026, 8 h 51 : **1.190.0 (LOT 6 DE L'ENREGISTREMENT : « ÉCRASER » UN HOMONYME EMPLOYÉ, #967) EN LIGNE**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 18 h 59) ; plan
 `plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`, lot 6.
