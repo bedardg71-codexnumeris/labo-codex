@@ -7,7 +7,19 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 10 h 07 : **1.190.1 (VERROU D'UN EXEMPLE #1042, MOTS DE « CONFLIT DE NOM ») COMMITÉE SUR `main` LOCAL — RELECTURE DE COWORK À SUIVRE, PAS POUSSÉE**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 11 h 22 : **1.190.1 (VERROU D'UN EXEMPLE #1042, MOTS DE « CONFLIT DE NOM ») EN LIGNE**
+
+**Relecture de Cowork** (10 h 10) : rien ne bloque. Ligne des Nouvelles validée par Grégoire (10 h 10), posée
+telle quelle dans l'entrée 1.190 : `4cca460e` (avec la consigne de Cowork). Vitest complet vert après lui
+(696 fichiers, 8 362 essais).
+
+**En ligne** : verdict complet vert sur `4cca460e` (0 échec connu, 0 instable ; éveil tenu, 0 veille ; sur
+batterie ; Safari quitté, **Chrome resté actif sans fenêtre**, ≈ 290 Mo) ; Vitest du pré-push vert ; poussé
+`ccbf0cac..4cca460e`. GitHub « Tests » 37800169393 : success. Netlify : déploiement `6ac7b519391e8f0008a0f62e`,
+`commit_ref` = `4cca460e`, `state` ready, publié à 11 h 22. Ce relais est poussé seul par `git push origin main`.
+**Porte à passer** : en démo, fenêtre privée, « IDME 4 niv » puis « + Nouvelle échelle » ; le nom se saisit (#1042).
+
+### Historique de la section (10 h 07, avant relecture)
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 8 oct., 9 h 52).
 
