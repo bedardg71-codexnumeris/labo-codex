@@ -3771,7 +3771,10 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     sousCritere:           { premiere: 'Supprimer ce sous-critère l\'efface pour de bon.', pronom: 'le' },
     niveau:                { premiere: 'Supprimer ce niveau l\'efface pour de bon.', pronom: 'le' },
     cible:                 { premiere: 'Retirer cette cible l\'efface pour de bon.', pronom: 'la' },
-    cibles:                { premiere: 'Retirer ces cibles les efface pour de bon.', pronom: 'les' }
+    cibles:                { premiere: 'Retirer ces cibles les efface pour de bon.', pronom: 'les' },
+    // #976 (8 oct. 2026) : un geste qui DÉPLACE, sans rien effacer — `infinitif` remplace
+    // « supprimer » dans le titre et les boutons. Mots proposés, à Grégoire avant la release.
+    corrigerDA:            { premiere: 'Corriger ce DA déplace sous le nouveau DA tout ce que porte l\'ancien.', pronom: 'le', infinitif: 'corriger' }
 };
 
 /**
@@ -3808,13 +3811,15 @@ async function proposerCodexAvantSuppression(geste) {
     if (_etat.actif && !_etat.modificationsDepuis) return true;
 
     var sansCodex = !_etat.actif;
+    var verbe = PROPOSITIONS_AVANT_SUPPRESSION[geste].infinitif || 'supprimer';   // #976
+    var Verbe = verbe.charAt(0).toUpperCase() + verbe.slice(1);
     var choix = await uiDialogues.demanderAction({
-        titre: sansCodex ? 'Écrire un codex avant de supprimer ?' : 'Mettre ton codex à jour avant de supprimer ?',
+        titre: sansCodex ? 'Écrire un codex avant de ' + verbe + ' ?' : 'Mettre ton codex à jour avant de ' + verbe + ' ?',
         message: message,
         texteFermer: 'Annuler',   // sans bouton « principal », c'est lui qui a le focus
         actions: [
-            { valeur: 'sans', texte: sansCodex ? 'Supprimer sans codex' : 'Supprimer sans mettre à jour' },
-            { valeur: 'maj', texte: sansCodex ? 'Écrire un codex, puis supprimer' : 'Mettre à jour, puis supprimer' }
+            { valeur: 'sans', texte: sansCodex ? Verbe + ' sans codex' : Verbe + ' sans mettre à jour' },
+            { valeur: 'maj', texte: sansCodex ? 'Écrire un codex, puis ' + verbe : 'Mettre à jour, puis ' + verbe }
         ]
     });
     if (choix === 'sans') return true;

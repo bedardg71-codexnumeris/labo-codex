@@ -838,6 +838,67 @@ function _verrouillerDAV2(verrouille) {
     if (champ) champ.readOnly = !!verrouille;
     const aide = document.getElementById('v2-etudiantDAAide');
     if (aide && aide.classList) aide.classList[verrouille ? 'remove' : 'add']('u-hide');
+    // #976 : « Corriger le DA… » sur une fiche existante — pas en anonymisation, où le DA ne se montre pas.
+    const btn = document.getElementById('v2-btnCorrigerDA');
+    if (btn && btn.classList) btn.classList[verrouille && !_anonymisationV2() ? 'remove' : 'add']('u-hide');
+}
+
+/**
+ * #976 (lot 7 du chantier de l'enregistrement, 8 oct. 2026) — « Corriger le DA… » : tout ce
+ * que porte l'ancien DA dans le trimestre actif passe sous le nouveau (`js/correction-da.js`).
+ * Le codex est proposé d'abord (règle du 1er oct., même porte que les suppressions) ; la
+ * fenêtre montre l'ancien DA, ce qui sera déplacé (compté par la passe à blanc) et la
+ * portée ; le témoin dit l'issue. Une correction interrompue se reprend ici, vers le même DA.
+ * Mots proposés, à Grégoire avant la release.
+ * @returns {Promise<boolean>} true si le DA a été corrigé
+ */
+async function corrigerDAEtudiantV2() {
+    const geste = 'Corriger le DA';
+    if (etudiantEnEditionDA === null || _anonymisationV2() || !window.CorrectionDA) return false;
+    const ancien = etudiantEnEditionDA;
+    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('corrigerDA'))) return false;
+    const mesure = window.CorrectionDA.passeABlanc(ancien, '');
+    if (!mesure.fiche) {
+        return _refuserEtudiantV2('Étudiant·e introuvable : la liste a changé depuis l\'ouverture de la fiche.', geste);
+    }
+    const marque = mesure.fiche[window.CorrectionDA.MARQUE] || null;
+    const c = mesure.comptes;
+    const lignes = [
+        'DA actuel : ' + String(ancien),
+        '',
+        'Passera sous le nouveau DA, dans ce trimestre seulement :',
+        '• ' + c.evaluations + ' ' + pluriel(c.evaluations, 'évaluation', 'évaluations'),
+        '• ' + c.presences + ' ' + pluriel(c.presences, 'présence', 'présences'),
+        '• ' + c.copies + ' ' + pluriel(c.copies, 'copie', 'copies'),
+        '• ' + c.resultats + ' ' + pluriel(c.resultats, 'résultat calculé', 'résultats calculés') + ' (indices, portfolio, interventions)',
+        '',
+        'Les autres trimestres et les archives gardent l\'ancien DA.'
+    ];
+    if (marque) lignes.push('', 'Une correction vers ' + String(marque.vers) + ' s\'est arrêtée en chemin : ce DA la termine.');
+    lignes.push('', 'Nouveau DA :');
+    const saisie = await uiDialogues.demanderSaisie({
+        titre: 'Corriger le DA de ' + _nomAfficheV2(mesure.fiche),
+        message: lignes.join('\n'),
+        preformate: true,
+        valeurInitiale: marque ? String(marque.vers) : '',
+        placeholder: '1234567',
+        texteConfirmer: 'Corriger le DA'
+    });
+    if (saisie === null) return false;
+    const nouveau = String(saisie).trim();
+    const res = await window.CorrectionDA.corriger(ancien, nouveau, { geste });
+    if (!res.ok) {
+        if (res.refus) return _refuserEtudiantV2(res.refus, geste);
+        if (window.temoinEnregistrement) window.temoinEnregistrement.nonEnregistre(res.raison, geste, cle('groupeEtudiants'));
+        chargerListeEtudiantsV2();
+        return false;
+    }
+    // La fiche reste ouverte, sous son nouveau DA.
+    etudiantEnEditionDA = nouveau;
+    const champ = document.getElementById('v2-etudiantDA');
+    if (champ) champ.value = nouveau;
+    chargerListeEtudiantsV2();
+    return true;
 }
 
 /**
@@ -1619,6 +1680,7 @@ window.remarqueEtudiantV2Handler = remarqueEtudiantV2Handler;
 window.changerStatutEtudiantV2 = changerStatutEtudiantV2;
 window.soumettreEtudiantV2 = soumettreEtudiantV2;
 window.fermerFicheEtudiantV2 = fermerFicheEtudiantV2;
+window.corrigerDAEtudiantV2 = corrigerDAEtudiantV2; // #976
 window.sauvegarderChampEtudiantV2 = sauvegarderChampEtudiantV2;
 window.creerNouveauGroupeV2 = creerNouveauGroupeV2;
 window.filtrerParGroupeV2 = filtrerParGroupeV2;
