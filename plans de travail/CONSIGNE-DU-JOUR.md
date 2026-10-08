@@ -29,3 +29,15 @@ Release patch par `scripts/release.mjs`, commits séparés, relais écrit. Ligne
 ## Ton rapport à Grégoire
 
 En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste à l'écran, en démo dans une fenêtre privée : ouvrir l'échelle « IDME 4 niv », puis « + Nouvelle échelle » ; le nom se saisit. Ce que tu as supposé, une ligne par supposition.
+
+## Suite – relecture de 1.190.1 (8 oct. 2026, 10 h 10, Toronto)
+
+**Relecture faite, rien ne bloque.** Lus : `759a8835` (`quitterModeLectureSeuleDemo`, appelé avant la remise à neuf dans les quatre créations ; `estItemDemo(null)` rend faux), `53e0ebf6` (mots), `2f247642` (release). Tests non relancés par Cowork.
+
+**Ligne des Nouvelles validée par Grégoire** (« oui », 10 h 10). Ajoute-la telle quelle comme item de l'entrée 1.190 (1.190.1 consolidé), avec le commentaire de provenance habituel :
+
+- Conception : après l'ouverture d'un exemple, « + Nouvelle échelle » (ou grille, cartouche, production) ouvre un formulaire que tu peux remplir.
+
+Typographie du fichier : espaces insécables (`&nbsp;`) dans les guillemets et avant le deux-points.
+
+Puis : commit du changelog, Chrome et Safari fermés, verdict complet, push, vérification de la mise en ligne chez Netlify. Rapport en gestes d'utilisateur, avec le geste en démo de ton rapport.
