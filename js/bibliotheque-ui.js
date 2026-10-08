@@ -351,6 +351,19 @@
     };
 
     /**
+     * #1042 — « + Nouvelle … » ouvre le MÊME formulaire qu'un exemple vient peut-être de
+     * verrouiller : chaque création le déverrouille par ici AVANT de remettre ses champs à
+     * neuf (sinon le nom ne se saisit pas et le bandeau de l'exemple reste). Avant, pas
+     * après : ce déverrouillage rouvre tous les champs, et la création pose ensuite les
+     * siens (menus de la cartouche, etc.).
+     *
+     * @param {HTMLElement} conteneur - Le conteneur passé à appliquerModeLectureSeuleDemo
+     */
+    BibliothequeUI.quitterModeLectureSeuleDemo = function (conteneur) {
+        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, null, '');
+    };
+
+    /**
      * Fork générique : crée une copie d'un item avec `inspireDe` (Plan §4.3),
      * retire le flag `isDemo`, remplace l'auteur par l'identité CC utilisateur,
      * et purge les métadonnées héritées (`metadata_cc`, `auteurOriginal`).

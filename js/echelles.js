@@ -1882,6 +1882,8 @@ async function creerNouvelleEchelle() {
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
     rendreModeFicheEchelle(true);
 
+    // #1042 — un exemple ouvert juste avant a verrouillé ce formulaire : le rouvrir d'abord.
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.quitterModeLectureSeuleDemo) BibliothequeUI.quitterModeLectureSeuleDemo(document.getElementById('conteneurEditionEchelle'));
     // Réinitialiser le formulaire
     document.getElementById('nomEchelleTemplate').value = '';
     document.getElementById('descriptionEchelle').value = '';

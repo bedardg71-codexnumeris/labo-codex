@@ -239,6 +239,8 @@ async function creerNouvelleProduction() {
     if (btnDupliquer) btnDupliquer.classList.add('u-hide');
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
 
+    // #1042 — un exemple ouvert juste avant a verrouillé ce formulaire : le rouvrir d'abord.
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.quitterModeLectureSeuleDemo) BibliothequeUI.quitterModeLectureSeuleDemo(document.getElementById('formulaireProduction'));
     // Réinitialiser le formulaire
     document.getElementById('productionActivite').value = '';
     document.getElementById('productionTitre').value = '';

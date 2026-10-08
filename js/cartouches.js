@@ -3749,6 +3749,8 @@ async function creerNouvelleCartouche() {
     if (messageAccueil) messageAccueil.classList.add('u-hide');
     if (infoCartouche) infoCartouche.classList.remove('u-hide');
 
+    // #1042 — un exemple ouvert juste avant a verrouillé ce formulaire : le rouvrir d'abord.
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.quitterModeLectureSeuleDemo) BibliothequeUI.quitterModeLectureSeuleDemo(document.getElementById('infoCartouche'));
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
