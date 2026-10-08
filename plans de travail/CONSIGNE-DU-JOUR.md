@@ -39,3 +39,19 @@ Ces trois écritures partent avec la release du lot, pas seules.
 ## Ton rapport à Grégoire
 
 En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Un geste à l'écran **qui n'écrit rien dans ses vraies données** (en démo si nécessaire), ou dis pourquoi il n'y en a pas. Ce que tu as supposé, une ligne par supposition.
+
+## Suite – relecture de 1.190.0 et mots de Grégoire (8 oct. 2026, 7 h 09, Toronto)
+
+**Relecture faite, rien ne bloque.** Lus : `f785400b` (refus dans `verifierEtGererDoublon` par `options.porteursHomonymes` ; comptes `compterPorteursHomonymesEchelle`, `compterPorteursHomonymesGrille`, cartouches), `32d9156f` (release). Tests non relancés par Cowork. L'`alert` du refus est accepté pour ce lot (même forme que les autres refus de ces éditeurs) ; la grille ouverte pendant la question (motif faux) reste en commentaire, comme tu l'as classée.
+
+**Trois décisions de Grégoire, à poser telles quelles :**
+
+1. **Phrase de refus** : « leurs notes » devient « des notes », au singulier comme au pluriel. Exemple : « Une échelle porte déjà ce nom, et 1 évaluation l'emploie : l'écraser changerait des notes. Donne un autre nom à la nouvelle. » Mets à jour le plan (`PLAN-2026-10-07-chantier-enregistrement-suite.md`, lot 6) et les bancs qui lisent la phrase.
+2. **Témoin de la cartouche ouverte** : la raison devient « tu as ouvert la cartouche qui porte déjà ce nom. » (le témoin affiche « Non enregistré : » devant).
+3. **Nouvelles**, entrée 1.190, couleur bleu, avec le commentaire de provenance habituel :
+   - Titre : Un modèle employé n'est plus remplacé
+   - Conception : « Remplacer l'existante » refuse maintenant de remplacer une échelle, une grille ou une cartouche que des évaluations ou des productions emploient. La fenêtre dit combien, et rien n'est modifié ; donne un autre nom à la nouvelle.
+
+Typographie du fichier : espaces insécables (`&nbsp;`) dans les guillemets et avant le deux-points.
+
+Puis : commits (mots, changelog), Chrome et Safari fermés, verdict complet, push, vérification de la mise en ligne chez Netlify. Rapport en gestes d'utilisateur, avec le geste en démo de ton rapport (attendu : « … 23 évaluations l'emploient : l'écraser changerait des notes. … »).

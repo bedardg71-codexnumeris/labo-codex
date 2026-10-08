@@ -9,7 +9,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Décision de Grégoire (7 oct. 2026, par Cowork) : un homonyme EMPLOYÉ n'est pas écrasé.
 // Refus avec la phrase validée, même forme pour les trois éditeurs, compte réel :
 //   « Une échelle porte déjà ce nom, et 12 évaluations et 2 productions l'emploient :
-//     l'écraser changerait leurs notes. Donne un autre nom à la nouvelle. »
+//     l'écraser changerait des notes. Donne un autre nom à la nouvelle. »
 // Un homonyme que rien n'emploie s'écrase comme avant. Remplacer un modèle employé reste
 // le rôle de « Supprimer » (#648).
 //
@@ -141,13 +141,17 @@ describe('#967 · C — la phrase validée par Grégoire', () => {
     const win = charger(magasins());
     it('l\'exemple de la décision, mot pour mot', () => {
         expect(win.phraseRefusEcrasement('echelle', { evaluations: 12, productions: 2, total: 14 }))
-            .toBe('Une échelle porte déjà ce nom, et 12 évaluations et 2 productions l\'emploient : l\'écraser changerait leurs notes. Donne un autre nom à la nouvelle.');
+            .toBe('Une échelle porte déjà ce nom, et 12 évaluations et 2 productions l\'emploient : l\'écraser changerait des notes. Donne un autre nom à la nouvelle.');
+    });
+    it('« des notes » au singulier aussi (décision de Grégoire, 8 oct.)', () => {
+        expect(win.phraseRefusEcrasement('echelle', { evaluations: 1, total: 1 }))
+            .toBe('Une échelle porte déjà ce nom, et 1 évaluation l\'emploie : l\'écraser changerait des notes. Donne un autre nom à la nouvelle.');
     });
     it('« Une grille », « Une cartouche » ; « l\'emploie » au singulier', () => {
         expect(win.phraseRefusEcrasement('grille', { cartouches: 1, total: 1 }))
-            .toBe('Une grille porte déjà ce nom, et 1 cartouche l\'emploie : l\'écraser changerait leurs notes. Donne un autre nom à la nouvelle.');
+            .toBe('Une grille porte déjà ce nom, et 1 cartouche l\'emploie : l\'écraser changerait des notes. Donne un autre nom à la nouvelle.');
         expect(win.phraseRefusEcrasement('cartouche', { evaluations: 1, productions: 1, total: 2 }))
-            .toBe('Une cartouche porte déjà ce nom, et 1 évaluation et 1 production l\'emploient : l\'écraser changerait leurs notes. Donne un autre nom à la nouvelle.');
+            .toBe('Une cartouche porte déjà ce nom, et 1 évaluation et 1 production l\'emploient : l\'écraser changerait des notes. Donne un autre nom à la nouvelle.');
     });
 });
 
@@ -183,7 +187,7 @@ describe('#967 · D — le refus est posé dans la question commune, avant le co
     });
     it('cartouche ouverte pendant la question : rien n\'est écrit avant modifierEtAnnoncer', () => {
         const c = corps(lire('js/cartouches.js'), 'sauvegarderNomCartouche');
-        const garde = c.indexOf("nonEnregistre('la cartouche du même nom est ouverte.'");
+        const garde = c.indexOf("nonEnregistre('tu as ouvert la cartouche qui porte déjà ce nom.'");
         expect(garde).toBeGreaterThan(-1);
         expect(garde).toBeLessThan(c.indexOf('modifierEtAnnoncer('));
     });
