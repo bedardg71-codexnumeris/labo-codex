@@ -14,6 +14,8 @@ Le 5 oct., sur 1.186.1 : dix rangées sur dix (iPad : clavier, 2 s jugées assez
 
 **Décidé : la forme proposée par Cowork.** Un geste « Corriger le DA… » dans la fiche de l'étudiant·e (Cadre › Groupe d'étudiant·es). Sa fenêtre montre l'ancien et le nouveau DA et dit ce qui suit (évaluations, présences, copies, résultats). Refus : un DA qui n'a pas 7 chiffres ; un DA déjà porté par un·e autre étudiant·e. Le codex est proposé avant (règle du 1er oct. pour ce qui touche les élèves). Rien ne reste sous l'ancien DA ; rien n'est effacé. Les mots exacts seront soumis à Grégoire avec le lot.
 
+**Portée, décidée le 8 oct. 2026 à 14 h 18 (« oui », par Cowork) : le trimestre actif seulement**, et la fenêtre le dit. Les trimestres passés et les archives gardent l'historique réel (données closes, notes remises) ; une même coquille dans un autre trimestre se corrige là, séparément.
+
 ## #984 : les anciens guides (5 oct., 18 h 34)
 
 **Décidé : les ranger, pas les réécrire.** `docs/utilisateur/DEMARRAGE_RAPIDE.md` et `GUIDE_TESTEURS.md` (Beta 91.1, vouvoiement, écrans périmés, aucun renvoi depuis l'application, mesuré par grep) passent dans `docs/archive/` par `git mv`. Les tutoriels du blogue (codexnumeris.org/tutoriels, liés depuis l'accueil) font ce travail.
