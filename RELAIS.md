@@ -7,7 +7,23 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 11 h 22 : **1.190.1 (VERROU D'UN EXEMPLE #1042, MOTS DE « CONFLIT DE NOM ») EN LIGNE**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, APRÈS-MIDI : **#976 « CORRIGER LE DA… » CODÉ SUR `main` LOCAL, NI RELEASÉ NI POUSSÉ**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 8 oct., 14 h 18), lot 7 du chantier de l'enregistrement.
+La sonde de Mathieu (#1038) n'était pas arrivée.
+
+**Commits** : `803f2c5d` consigne et archive ; `b2daf0f3` mesure (`plans de travail/MESURE-2026-10-08-976-cles-qui-portent-un-DA.md`) ;
+`11bc90ad` le geste (`js/correction-da.js`, bouton dans la fiche, codex proposé avec le verbe « corriger », bancs) ;
+`5ef7c8d0` fiche du BACKLOG ; ce relais.
+
+**Mesuré** : Vitest complet 697 fichiers, 8 380 essais ; banc `correction-da-976` 15 essais, 13 mutations / 13 rouges ;
+spec WebKit `976-corriger-le-da` sur le pack démo, 6 mutations / 6 rouges ; voisins WebKit (codex proposé ×2, lot E2,
+anonymisation de la liste) 18/18. Verdict complet : **non lancé**.
+
+**Suite, dans l'ordre** : relecture croisée de Cowork (le lot déplace des données d'élèves) ; mots à Grégoire (dans
+le rapport de session) ; release **minor** ; verdict (Chrome et Safari fermés) ; push. **Aucun push avant la relecture.**
+
+## (relais précédent) 8 OCT. 2026, 11 h 22 : **1.190.1 (VERROU D'UN EXEMPLE #1042, MOTS DE « CONFLIT DE NOM ») EN LIGNE**
 
 **Relecture de Cowork** (10 h 10) : rien ne bloque. Ligne des Nouvelles validée par Grégoire (10 h 10), posée
 telle quelle dans l'entrée 1.190 : `4cca460e` (avec la consigne de Cowork). Vitest complet vert après lui
