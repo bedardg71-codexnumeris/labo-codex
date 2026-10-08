@@ -16,6 +16,8 @@ Le 5 oct., sur 1.186.1 : dix rangées sur dix (iPad : clavier, 2 s jugées assez
 
 **Portée, décidée le 8 oct. 2026 à 14 h 18 (« oui », par Cowork) : le trimestre actif seulement**, et la fenêtre le dit. Les trimestres passés et les archives gardent l'historique réel (données closes, notes remises) ; une même coquille dans un autre trimestre se corrige là, séparément.
 
+**Clés globales, décidé le 8 oct. 2026 à 14 h 49 (« oui », par Cowork) : elles suivent.** Les jetons attribués, les jugements de dénotation et le registre longitudinal passent sous le nouveau DA pour l'étudiant·e corrigé·e (au lieu du refus livré dans `11bc90ad`). Motif : jetons et dénotation appartiennent au trimestre (mal rangés en global) et les laisser détacherait des éléments de la note ; le refus bloquerait le cas réel ; une entrée longitudinale sous une coquille est fausse de toute façon. La fenêtre les compte avant la confirmation.
+
 ## #984 : les anciens guides (5 oct., 18 h 34)
 
 **Décidé : les ranger, pas les réécrire.** `docs/utilisateur/DEMARRAGE_RAPIDE.md` et `GUIDE_TESTEURS.md` (Beta 91.1, vouvoiement, écrans périmés, aucun renvoi depuis l'application, mesuré par grep) passent dans `docs/archive/` par `git mv`. Les tutoriels du blogue (codexnumeris.org/tutoriels, liés depuis l'accueil) font ce travail.
