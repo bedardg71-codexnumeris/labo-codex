@@ -1,46 +1,38 @@
-# Consigne du jour – carte d'alignement, lots 1 et 2 : le menu « Vue » ; le planificateur vertical et ses dates
+# Consigne du jour – carte d'alignement, lots 1 et 2 : les mots de Grégoire, un défaut de relecture, puis arrêt
 
-> Écrite par Cowork le 8 octobre 2026 à 18 h 03 (Toronto, mesurée par `date`). Remplace la consigne du lot 7 de l'enregistrement, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-08-enregistrement-lot-7-976.md`.
+> Écrite par Cowork le 8 octobre 2026 à 19 h 06 (Toronto, mesurée par `date`). Remplace la consigne des lots 1 et 2, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-08-carte-lots-1-2.md`.
 
 ## Où on en est
 
-1.191.1 est en ligne (Netlify à 16 h 49) ; porte de #976 passée à 17 h 59. **Chantier de l'enregistrement clos** (décision de Grégoire, 8 oct.). **Chantier de la carte d'alignement ouvert.** Lis d'abord :
-- `plans de travail/PLAN-2026-10-08-chantier-carte-alignement.md` — propositions de Grégoire, **et surtout ses décisions après la mesure** (fin du fichier) ;
-- `plans de travail/MESURE-2026-10-08-barre-carte-alignement.md` — la mesure du lot 0.
+Lots 1 et 2 commités sur `main` local (7745b1c7, 65c71613), relais en f0a936aa. Version en ligne : 1.191.1. Cowork a relu les deux commits : le tableau des raccourcis correspond au code, les champs `dateDebut` / `finTrimestre` sont bien ceux qu'écrit `sauvegarderCadreCalendrierV2`, le lien vise un champ qui existe. Un seul défaut, ci-dessous.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork (cette consigne, son archive, le plan, la mesure du lot 0, la consigne du lot 0), à écrire dans `BACKLOG.md` et `SUIVI-BUGS.md`, et à faire la release sur `main` local. **Pas de push avant la relecture de Cowork.**
+Grégoire t'autorise, en te transmettant cette consigne, à commiter cette consigne et son archive avec ton correctif.
 
-## 0 · Avant tout
+## 1 · Les mots, validés par Grégoire (19 h 05)
 
-Si le résultat de la sonde de Mathieu (#1038) est arrivé dans `Retours des testeurs/`, arrête-toi et dis-le en une ligne.
+Dans `RACCOURCIS_CARTE`, deux libellés changent ; tous les autres sont validés tels quels, ainsi que les « autres mots ajoutés » de ton rapport.
 
-## 1 · Lot 1 – le menu « Vue »
+- `glisser` : « Déplacer un bloc ; par le cadre d'une leçon ou d'une séquence, tout le groupe suit »
+- `recherche-echap` : « Recherche : refermer la liste ; une seconde fois, tout effacer »
 
-Décisions de Grégoire (plan, fin) :
-- Un nouveau menu **« Vue »** dans la barre de la carte. Dans l'ordre : **« Vue plein écran »** (remplace l'icône des flèches vers l'extérieur, `planif-btn-plein-ecran`), **« Recentrer la carte »** (remplace le double cercle, `planif-btn-recentrer`), **« Tout voir »** (remplace les flèches vers l'intérieur, `planif-btn-tout-voir`) ; puis un sous-titre **« Fond du canevas »** avec les couleurs (même modèle que le menu « Annoter » d'« Annoter et évaluer ») ; puis **les raccourcis clavier**, en bas du menu.
-- **Retirés de la barre** : la palette des couleurs de fond (`planif-btn-fond`), les trois icônes ci-dessus, la palette indépendante des raccourcis (`planif-palette-raccourcis-btn`, `planif-raccourcis-panel`). Zéro-dette : retire ce qui est remplacé, sans alias.
-- **Chaque raccourci affiché marche dans Chrome et Safari.** Un raccourci pris par le navigateur (⌘1, probablement : vérifie-le) est remplacé par une touche libre, de ton choix, affichée telle quelle. Les descriptions inexactes de la mesure (⌘0, « Ctrl+Z » du bouton « Annuler ») sont corrigées ; les huit raccourcis qui marchent sans être décrits entrent dans la liste.
-- Trouvailles du lot 0 à régler ici : « Recentrer » branché deux fois ; les deux couleurs de fond (carte et Annoter) inscrites à `docs/DATA-OWNERSHIP.md`.
-- Le menu se manie au clavier et sur l'iPad (cibles tactiles), selon `design-system.html`.
+Si un banc compare ces libellés au texte, mets-le à jour.
 
-## 2 · Lot 2 – le planificateur vertical et ses dates
+## 2 · Défaut de relecture – le lien de l'invitation en plein écran (ton lot, donc à finir)
 
-- **Retire la présentation horizontale** (la réserve « Non planifié » à gauche de la grille) et son bouton. Un usager qui l'avait choisie retombe sur la verticale : **rien n'est effacé**, sa préférence cesse d'être lue (dis la clé dans ton rapport).
-- À côté du titre « PLANIFICATEUR » : les dates **« Début du trimestre »** et **« Fin du trimestre »** du Cadre. Forme : « PLANIFICATEUR · du 25 août au 19 décembre 2026 » (année une fois si les deux dates sont la même année ; sinon les deux).
-- Si elles manquent : « Les dates du trimestre ne sont pas entrées. Ajoute-les dans Cadre › Trimestre. », où « Cadre › Trimestre » est un lien qui ouvre cette section. Cela remplace l'avis actuel qui renvoie vers « Réglages » (trouvaille du lot 0).
+Inférence de Cowork, non vue à l'écran : la palette du planificateur reste visible en « Vue plein écran ». Un clic sur « Cadre › Trimestre » appelle `naviguerVersReglagesTrimestre()` sans quitter le plein écran : `body.planif-plein-ecran-actif` reste posé, l'en-tête et la navigation restent masqués hors de la carte. Sur l'iPad, sans Échap, l'usager est coincé dans Cadre sans navigation.
 
-## 3 · Mots
+- Vérifie d'abord l'inférence au banc. Si elle tient : `ouvrirCadreTrimestre()` quitte le plein écran avant de naviguer.
+- Un essai au navigateur : plein écran actif, dates absentes, clic sur le lien → la navigation principale est visible et le champ « Début du trimestre » a le focus. Break-test.
+- Si l'inférence ne tient pas, dis-le en une ligne et ne change rien.
 
-Les mots ci-dessus sont arrêtés. **Propose à part, non écrits ailleurs que dans le code**, ceux qui manquent : le libellé de chaque raccourci dans le menu, le nom de la touche qui remplace ⌘1, la ligne des Nouvelles. Ils passent par Grégoire avant la release.
+## 3 · La ligne des Nouvelles
 
-## 4 · Tests
+Propose-la dans ton rapport, non écrite dans `js/changelog-data.js` (skill `release-et-changelog`). Elle passe par Grégoire.
 
-Bancs avec break-test : le menu « Vue » et ses trois commandes ; chaque raccourci de la liste déclenche ce qu'il dit (un test par raccourci, au navigateur) ; la couleur de fond choisie dans le menu s'applique et se garde ; plus de bouton horizontal, une préférence horizontale enregistrée mène à la verticale ; les dates s'affichent, l'invitation et son lien quand elles manquent. Specs voisins de la carte, Vitest complet. Noms manifestement fictifs.
+## 4 · Puis arrête-toi
 
-## 5 · Puis arrête-toi
-
-Commits séparés par lot. **Pas de release avant les mots** : rapport à Grégoire, relecture de Cowork, mots, release minor, verdict (Chrome et Safari fermés), push.
+Specs `planif-*` sous WebKit, Vitest complet. Un commit. **Pas de release, pas de push** : la suite (release minor, verdict avec Chrome et Safari fermés, push) viendra dans la consigne suivante, une fois la ligne des Nouvelles validée.
 
 ## Ton rapport à Grégoire
 
-En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste à l'écran, en démo dans une fenêtre privée. Ce que tu as supposé, une ligne par supposition.
+Court : ce que le correctif change à l'écran, en une phrase ; la ligne des Nouvelles proposée ; ce que tu as supposé, une ligne par supposition.

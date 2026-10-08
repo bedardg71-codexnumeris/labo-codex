@@ -9858,6 +9858,11 @@ function mettreAJourDatesPlanificateur() {
 
 /** Le lien « Cadre › Trimestre » de l'invitation : même chemin que le bandeau d'archive. */
 function ouvrirCadreTrimestre() {
+    // En « Vue plein écran », la palette du planificateur reste visible : sans
+    // ceci, le lien menait au Cadre en gardant en-tête et navigation masqués —
+    // et sur l'iPad, sans Échap, plus aucun chemin pour en sortir (relecture de
+    // Cowork, 8 oct. 2026, vérifiée au banc).
+    if (_planifPleinEcran) togglePleinEcranCarte();
     if (typeof window.naviguerVersReglagesTrimestre === 'function') window.naviguerVersReglagesTrimestre();
     var champ = document.getElementById('v2-debutTrimestre');
     if (champ && champ.offsetParent !== null) champ.focus();
@@ -12452,7 +12457,7 @@ var RACCOURCIS_CARTE = [
     { id: 'tout-selectionner',  mac: '⌘A',                   autre: 'Ctrl+A',                libelle: 'Tout sélectionner' },
     { id: 'multi-selection',    mac: '⌘+clic',               autre: 'Ctrl+clic',             libelle: 'Ajouter un bloc à la sélection, ou l’en retirer' },
     { id: 'selection-zone',     mac: 'Glisser sur le fond',  autre: 'Glisser sur le fond',   libelle: 'Sélectionner une zone (souris)' },
-    { id: 'glisser',            mac: 'Glisser',              autre: 'Glisser',               libelle: 'Un bloc se déplace seul ; saisir le cadre d’une leçon ou d’une séquence déplace le groupe' },
+    { id: 'glisser',            mac: 'Glisser',              autre: 'Glisser',               libelle: 'Déplacer un bloc ; par le cadre d’une leçon ou d’une séquence, tout le groupe suit' },
     { id: 'dupliquer',          mac: '⌘D',                   autre: 'Ctrl+D',                libelle: 'Dupliquer la sélection (copie indépendante)' },
     { id: 'dupliquer-clone',    mac: '⇧⌘D',                  autre: 'Maj+Ctrl+D',            libelle: 'Dupliquer la sélection (clone lié)' },
     { id: 'alt-glisser',        mac: '⌥+glisser',            autre: 'Alt+glisser',           libelle: 'Dupliquer en déplaçant (copie indépendante)' },
@@ -12462,7 +12467,7 @@ var RACCOURCIS_CARTE = [
     { id: 'retablir',           mac: '⇧⌘Z',                  autre: 'Maj+Ctrl+Z',            libelle: 'Rétablir' },
     { id: 'recherche-entree',   mac: 'Entrée / ⇧Entrée',     autre: 'Entrée / Maj+Entrée',   libelle: 'Recherche : résultat suivant / précédent' },
     { id: 'recherche-fleches',  mac: '↓ / ↑',                autre: '↓ / ↑',                 libelle: 'Recherche : résultat suivant / précédent' },
-    { id: 'recherche-echap',    mac: 'Échap',                autre: 'Échap',                 libelle: 'Recherche : refermer la liste, puis effacer' },
+    { id: 'recherche-echap',    mac: 'Échap',                autre: 'Échap',                 libelle: 'Recherche : refermer la liste ; une seconde fois, tout effacer' },
     { id: 'echap',              mac: 'Échap',                autre: 'Échap',                 libelle: 'Fermer la loupe ou quitter le plein écran ; sinon, tout désélectionner' }
 ];
 
