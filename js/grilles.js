@@ -3548,6 +3548,8 @@ async function creerNouvelleGrille() {
     if (btnSupprimer) btnSupprimer.classList.add('u-hide');
     rendreModeFicheGrille(true);
 
+    // #1042 — un exemple ouvert juste avant a verrouillé ce formulaire : le rouvrir d'abord.
+    if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.quitterModeLectureSeuleDemo) BibliothequeUI.quitterModeLectureSeuleDemo(document.getElementById('conteneurEditionGrille'));
     // Réinitialiser grilleTemplateActuelle
     grilleTemplateActuelle = null;
 
