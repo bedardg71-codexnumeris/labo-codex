@@ -1,7 +1,7 @@
 # Consigne de démarrage – la session Cowork qui prend le relais
 
-> **Réécrite le mercredi 30 septembre 2026, 17 h 56 (Toronto)**, à la demande de Grégoire, après la mise en ligne de 1.172.0 (lot A2 des archives) et sa décision sur l'ordre des chantiers : le codex d'abord.
-> Elle REMPLACE toute version précédente ; celle du 30 à 16 h 57 est dans git (`bf0b9065`), celle du 30 à 5 h 31 sous `plans de travail/_ancienne-CONSIGNE-DEMARRAGE-COWORK-2026-09-30-05h31.md` (sections 1, 5, 6 reprises, erreur 40 ajoutée ; section 2, un compte mis à jour ; 3 et 4 réécrites).
+> **Réécrite le mercredi 7 octobre 2026, 18 h 58 (Toronto)**, à la demande de Grégoire, après la mise en ligne de 1.189.0 (les équipes de Mathieu) et sa décision de s'arrêter avant le lot « Écraser » (#967).
+> Elle REMPLACE toute version précédente ; la précédente (1er oct.) est dans git (`682d47fc`). Sections 1, 2, 5, 6 reprises ; 3 et 4 réécrites ; deux erreurs ajoutées au § 5.
 >
 > ⚠ **Ce fichier porte un nom sans date, exprès.** La date d'écriture est en tête ; c'est elle qui fait foi.
 > ⛔ **Il ne porte que ce qui PÉRIME** : l'état mesuré, le mandat, ce qui est dû, et les erreurs déjà payées.
@@ -60,48 +60,41 @@ chose à côté est exactement le scénario des deux kills mémoire. Lecture git
 
 ---
 
-## 3 · L'ÉTAT MESURÉ – le 30 septembre 2026, 17 h 56 (Toronto)
+## 3 · L'ÉTAT MESURÉ – le 7 octobre 2026, 18 h 58 (Toronto)
 
-**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` · `git --no-optional-locks log --oneline -1 origin/main` · `git --no-optional-locks branch --list 'lot-*'` · `ls .git/worktrees` · `git --no-optional-locks status --porcelain` · `TZ=America/Toronto date`. Détail : premier bloc de `RELAIS.md`, page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, à jour du 30 à 17 h 56).
-⮕ **« En ligne » se lit chez Netlify** : le connecteur Netlify répond depuis Cowork (`get-project` sur le site `f06b34ab-3511-4bf5-9beb-4736cc56ca8c` → `currentDeploy.id` ; `get-deploy-for-site` → `commit_ref`, `state`, `published_at` en UTC).
+**Remesure, ne recopie pas** : `cat version.json` · `git --no-optional-locks log --oneline -3 main` · `git --no-optional-locks log --oneline -1 origin/main` · `ls .git/worktrees` · `TZ=America/Toronto date`.
+⮕ **« En ligne » se lit chez Netlify** (connecteur ; site `f06b34ab-3511-4bf5-9beb-4736cc56ca8c`).
 
-- **`main` = `origin/main` = `bf0b9065` : 1.172.0** (build `0930-1703`), **en ligne** : Netlify « ready », `commit_ref` `bf0b9065`, `published_at` 21:52:16 Z, constaté par Cowork le 30 à 17 h 55 (la release `95ed3124` était en ligne à 17 h 50, rapporté par Claude Code). Aucune branche de lot en cours (les six `lot-*` listées sont anciennes), aucun worktree, arbre propre hors les non-suivis qui ne sont pas à Cowork.
-- **Passé le 30** : 1.170.1, 1.170.2, 1.171.0 (un gros codex se met à jour sur l'iPad ; porte passée à 10 h 38) ; le lot de mesure des archives ; 1.171.1 (lot A1 : archiver sans charger la mémoire, une empreinte par copie ; porte passée dans Chrome à 16 h 22, 205 sur 205) ; **1.172.0** (lot A2 : « Vérifier » une archive ; relecture de Cowork « le lot part après une correction », les fichiers cachés du système ; mots et ligne des Nouvelles acceptés par Grégoire).
-- ⚠⚠ **TROIS CHANTIERS SONT OUVERTS** (règle 11 de `PROTOCOLE.md`, écrite ce jour). **Ordre arrêté par Grégoire le 30 à 17 h 25** : finir le codex, puis les archives, puis le reste du plan du 29. Son motif : il est le seul à porter un gros codex, ce chantier défriche le terrain pour les autres.
-  1. **Le codex – en cours, en premier.** ⮕⮕ **Le 1er oct. à 2 h 12 : lot I bis codé (`820fe58e`, branche `lot-i-bis-un-seul-terme`), relu par Cowork (« le lot part après deux corrections », `VERDICT-RELECTURE-2026-10-01-lot-I-bis-un-seul-terme.md`), mots validés par Grégoire, consigne de corrections et de release écrite. Dû ensuite : publier l'artefact de la porte (`PORTES-TERRAIN-2026-09-30-lot-I-bis.md`) une fois le lot en ligne ; Grégoire n'y supprime aucun trimestre. Puis dire le chantier du codex « clos » sur la page (règle 11) et revenir aux archives (A3).** ⮕ **Le 30 à 20 h 18 : mots validés par Grégoire (règle : « un seul terme », codex ; aucun écran ne dit plus « copie de secours »), consigne écrite dans `plans de travail/CONSIGNE-DU-JOUR.md` (lot I bis, branche `lot-i-bis-un-seul-terme`), relayée ou non : à remesurer.** La suppression d'un trimestre sera refusée tant que le codex n'est pas à jour (son choix). Il reste le lot I bis (D9) du plan `PLAN-2026-09-29-fin-carte-et-enregistrement.md` : la copie de secours disparaît, ses anciens fichiers restent ouvrables, et la suppression d'un trimestre garde son filet, qui devient « mettre à jour le codex » (limite du 20 sept.). Mots neufs à Grégoire. #985 reste ouverte pour lui.
-  2. **Les archives – suspendues après A2.** Plan `PLAN-2026-09-30-chantier-archives.md`. En ligne : A1, A2. Dû : la porte du lot A2. Restent A3 (faire revenir), A5 (les mots « clos », recommandé avant A4), A4 (alléger, le seul qui retire ; il exigera les deux identifiants égaux, l'empreinte de `meta.json` et la couverture mesurée). Fiches #1000 à #1002.
-  3. **La carte d'alignement et l'enregistrement – suspendus.** Restent, au plan du 29 : J (l'export du plan dit vrai, la carte démo), K (la carte, côté technique), L (« Écraser » un homonyme, #967), M (écritures sans geste, #981, #983, #962), N (créer un trimestre par la bibliothèque, #975 ; vérifier le moratoire #622), O (le clavier de l'iPad, #986). Questions à Grégoire à l'ouverture de leur lot : #982, #976, #984.
-- **Porte du lot A2 : PASSÉE le 30 à 20 h 09, 6 rangées sur 6** (résultat et trois trouvailles à la fin de `PORTES-TERRAIN-2026-09-30-lot-A2-verifier.md` ; à inscrire par Claude Code : Chrome demande le droit de MODIFIER pour une vérification qui ne fait que lire). Elle se faisait dans Chrome sur le Mac. Artefact publié par une autre session Cowork : « Porte · Vérifier une archive », https://claude.ai/artifact/JoWkDNb6mssddeGzaeD9n3 (six rangées, 1.172.0). Trace : `plans de travail/PORTES-TERRAIN-2026-09-30-lot-A2-verifier.md`. Son archive : `Réserve_LaboCodex Backup/trimestres/h2026-601-101-gr00008` (iCloud ; ce dossier n'est pas connecté d'office à une session neuve). **Non prouvé** pour A1 comme pour A2 : le chemin de Safari, et l'iPad.
-- ⚠ **Le 30, deux sessions Cowork ont travaillé en même temps** : une sur son Mac (relecture du lot A2, porte), une dans le cloud pendant que le Mac était fermé (la page du tri, cette consigne). Elles ne se voient pas. **Avant de republier la page du tri, relis-la** ; avant de réécrire ce fichier, regarde son heure.
-- **Comptes, par ensembles** (30 sept. 17 h 55, sur `main`) : backlog **218** fiches ouvertes (219 cases `- [ ]` de premier niveau, moins le gabarit `#XX` ; lu par « première occurrence de `#nnn` sur la ligne », pas par `**#nnn**`, qui n'en voit que 91), page **219** ; seul écart, #974, qui vit au registre des retours.
-- ⮕ **Le 30 à 21 h 15, remesuré** : `main` = `origin/main` = `3736e044` (documents seulement, 1.172.0 inchangée). Porte, règle 11 et #1005 sont commités et poussés. Le lot I bis n'est PAS commencé (aucune branche `lot-i*`). ⚠ **Une session Claude Code a lancé toute la suite Playwright à son ouverture (20 h 12 → 20 h 44, tuée, sans verdict), pendant que Cowork écrivait dans le dépôt** : je ne pouvais pas le voir. La correction du skill est dans la consigne du lot I bis, § 0.
-- **Fichiers de Cowork à faire commiter (liste de 17 h 56, périmée : voir la consigne du jour, § 0)** : `CONSIGNE-DEMARRAGE-COWORK.md`, `PROTOCOLE.md` (règle 11), `plans de travail/PORTES-TERRAIN-2026-09-30-lot-A2-verifier.md` (résultat de la porte). ⚠ D'autres non suivis ne sont pas à Cowork (`Claude outputs/`, `docs/projet de développement/`, `guide-alignement-actuel.md`, `Retours des testeurs/jean-françois/`, `Modèle de consigne…txt`) : ne pas les faire commiter sans Grégoire.
+- **`main` = `origin/main` = `9f9c304d` : 1.189.0** (build `1007-1539`), **en ligne** chez Netlify depuis le 7 à 17 h 23 (rapporté par Claude Code, mesuré par son connecteur). Worktree résiduel : `.git/worktrees/1039-equipes` (branche fusionnée en avance rapide, à retirer par Claude Code).
+- **Livré le 7** : 1.188.0 (une suppression qui échoue le dit, #1030 ; copies iPad après arrière-plan, #1031 ; « + Nouveau trimestre » par la fiche du Cadre, #975) ; 1.188.1 (« Annuler » de la création, pas de question de sortie ; **porte passée**) ; 1.188.2 (la liste des cours ne se réécrit plus à l'ouverture, #981 ; #983 close par la mesure) ; 1.189.0 (équipes de Mathieu, #1039 ; **porte passée** : former et refaire sans retenir). Mots et décisions : `plans de travail/MOTS-2026-10-07-1039-equipes.md`.
+- **Porte en attente d'un cas réel** : créer un trimestre (#975) attend la vraie création de l'hiver 2027, décision de Grégoire (il ne crée pas de trimestre d'essai).
+- **Chantier ouvert : l'enregistrement** (plan `plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`). Lots 3, 4, 5 en ligne. **Restent** : lot 6, « Écraser » un homonyme **employé** refusé (#967, décision prise le 7 à 6 h 08, phrase validée dans le plan) ; lot 7, « Corriger le DA » (#976, **décision de Grégoire à prendre** : le geste, ses mots, ce qu'il déplace).
+- **En attente d'un tiers** : #1038 (Mathieu ne voit que « Jeton de reprise » à l'import ; sonde en lecture seule envoyée le 7, résultat attendu). Retour testeur : passe AVANT le chantier dès que le résultat arrive.
+- **Inscrites le 7, sans lot** : #1037 (fenêtres natives de la bibliothèque des trimestres, hors création), #1040 (autres clés réécrites à l'identique à l'ouverture), #1041 (« Des équipes plus grandes » empile le reste dans un très petit groupe ; question de didactique si un cas réel se présente).
+- ⚠ **`RELAIS.md` sur `main` dit encore « Rien n'est poussé » pour 1.189.0** : écrit avant le verdict. Décision de Cowork : corrigé au début de la prochaine session Claude Code (consigne du jour, étape 1), pas par un push isolé (45 min de suite pour une ligne).
+- ⚠ **`OU-EN-EST-ON.md` n'a pas été mis à jour le 7** : à faire par Claude Code (consigne du jour, étape 1).
+- **La page du tri** (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN) est à jour au 7 à 17 h 40 (version 193). ⚠ Ses `FICHES` s'arrêtent à #1026, plus #975 et #1037 : #1027 à #1036 et #1038 à #1041 n'y sont pas. Comptes par ensembles à refaire.
 
 ---
 
 ## 4 · CE QUI EST DÛ – dans l'ordre
 
-**a) À l'ouverture** : remesurer (§ 3). Un retour de la CoP, de l'orthopédagogue ou d'un·e testeur·se passe AVANT tout. Si un verdict tourne chez lui : lecture git seule (§ 2).
+**a) À l'ouverture** : remesurer (§ 3). Un retour de la CoP, de l'orthopédagogue ou d'un·e testeur·se passe AVANT tout — d'abord le résultat de la sonde de Mathieu (#1038), s'il est arrivé.
 
-**b) Faire inscrire les trouvailles de la porte du lot A2** (fin de `PORTES-TERRAIN-2026-09-30-lot-A2-verifier.md`) dans la prochaine consigne à Claude Code, avec les fichiers de Cowork à commiter (ce fichier, `PROTOCOLE.md`, le markdown de la porte).
+**b) Le lot 6, « Écraser » refusé pour un homonyme employé (#967)** : sa consigne est écrite (`plans de travail/CONSIGNE-DU-JOUR.md`, le 7 au soir) ; Grégoire n'a qu'à coller la ligne. Aucun arbitrage : la décision et la phrase sont dans le plan. Lot laborieux (trois éditeurs), un verdict complet à prévoir.
 
-**c) Le lot I bis (D9) : la copie de secours disparaît.** C'est le chantier du codex, que Grégoire veut finir en premier. Avant la consigne : remesurer l'inventaire du lot I (§ 3 de sa mesure) ; proposer à Grégoire les mots neufs, un écran à la fois (Réglages › Données, Aide, FAQ, la confirmation de suppression d'un trimestre). ⛔ Le filet avant la suppression d'un trimestre ne disparaît pas.
+**c) Puis le lot 7, « Corriger le DA » (#976)** : la décision de Grégoire est à prendre, une question à la fois (le geste, ses mots, ce qu'il déplace ; aucune suppression irréversible, sa limite du 20 sept.).
 
-**d) Puis les archives : A3, A5, A4**, dans l'ordre du plan. Avant A4 : Grégoire clôt l'hiver 2026 dans l'application (plan § 5) ; le nom de l'état d'une copie partie aux archives, les mots du refus et de la confirmation sont à lui ; la copie marquée « manquante » (#997) se répare en A3 ou A4 et se lui dit à ce moment-là.
+**d) La page du tri** : réconcilier `FICHES` avec le backlog (fiches #1027 à #1041), par ensembles.
 
-**e) Puis le reste du plan du 29** : J, K, L, M, N, O.
-
-**f) Avant d'ouvrir quoi que ce soit d'autre : la règle 11.** L'état du chantier qu'on quitte s'écrit sur la page du tri et au § 3.
-
-**g) À Grégoire, une à la fois, au moment où elles se posent** : la taille du codex dite en Go par l'application et autrement par iPadOS (#993) ; le message d'échec qui nomme l'espace quelle que soit l'erreur (#994) ; mesurer dans son Chrome pourquoi un onglet garde l'ancienne version (#1004 : Réseau › `index.html`, et le bandeau) ; le codex data dit anonymisable (#989) ; le seuil par défaut des spécifications (#935) ; la vérification planifiée de GitHub annulée à 60 min, qui n'a plus conclu depuis le 25 (#979).
-
-**h) Trous de preuve connus, sans lot** : le chemin de Safari pour « Archiver… » et « Vérifier » sur ses vraies copies ; tout le chantier des archives sur l'iPad ; le refus du mauvais dossier dans un vrai Chrome ; le partage qui charge le fichier entier en mémoire au banc du Mac (#996, à mesurer sur l'iPad) ; une note à quatre décimales juste sous une demie (59,4996 → 59) dans `portfolio.js` ; la garde « évaluation précédente sans critère » du bilan de l'élève ; `pousser.sh` qui juge la branche de l'arbre (#980).
-
-**i) CE QUI NE SE ROUVRE PAS** : inchangé (archive du 17) ; #915 reste ouverte exprès jusqu'au retour de la porte des lots 3-4.
+**e) Avant d'ouvrir un autre chantier : la règle 11.** L'état du chantier qu'on quitte s'écrit sur la page du tri et au § 3.
 
 ---
 
 ## 5 · LES ERREURS QUE J'AI PAYÉES – ne les refais pas
+
+- **(7 oct.) Une consigne écrite sans relire le registre des retours testeurs.** Le lot 4 est parti à 11 h 37 alors que #1038 (Mathieu, bloquant) était inscrite à 11 h 30 ; Claude Code a cru l'ordre voulu. Sans conséquence ici (#1038 attend une sonde), mais la règle tient : **avant chaque consigne, `grep` des dernières entrées du SUIVI-BUGS**.
+- **(7 oct.) Le geste à l'écran proposé par Claude Code était faux** (« créer un trimestre depuis la bibliothèque » : le bouton est dans Cadre › Trimestre, colonne de gauche) et **il aurait écrit dans les vraies données** (un trimestre réel, activé). Relis toujours le geste au code ET demande-toi s'il écrit chez Grégoire avant de le lui transmettre.
 
 0. ⚠⚠⚠ **MON MOTIF NE VOIT PAS LES SYNONYMES.** 5 balises comptées pour 6 réelles ; 112 découpes pour 167 ; **153 fiches au lieu de 225**,
    parce que le motif exigeait `- [ ] **#nnn` et que des dizaines commencent par un emoji ; et 6 candidats rendus dont 4 faux, mon motif
