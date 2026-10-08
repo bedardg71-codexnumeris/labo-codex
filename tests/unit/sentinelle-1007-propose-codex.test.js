@@ -84,7 +84,9 @@ const PORTES = [
     { g: 'Critère (zone d\'édition)', f: 'js/grilles.js', sig: 'async function supprimerCritereGrille(', cle: "'critere'", question: "if (!confirm('Es-tu sûr de vouloir supprimer ce critère ?')) {", efface: 'g.criteres.splice(critereIndex, 1);' },
     { g: 'Sous-critère', f: 'js/grilles.js', sig: 'async function supprimerSousCritere(', cle: "'sousCritere'", question: "if (!confirm('Supprimer ce sous-critère ?')) return;", efface: '.sousCriteres.splice(sousCritereIndex, 1);' },
     { g: 'Niveau d\'échelle', f: 'js/echelles.js', sig: 'async function supprimerNiveauEchelle(', cle: "'niveau'", question: "if (!confirm('Supprimer ce niveau ?')) return;", efface: 'echelle.niveaux.splice(index, 1);' },
-    { g: 'Cible de dénotation', f: 'js/pratiques/editeur-cibles.js', sig: 'async function confirmerRetraitCibles(', cle: "nbCochees > 1 ? 'cibles' : 'cible'", question: 'const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);', efface: 'return confirm(message);' }
+    { g: 'Cible de dénotation', f: 'js/pratiques/editeur-cibles.js', sig: 'async function confirmerRetraitCibles(', cle: "nbCochees > 1 ? 'cibles' : 'cible'", question: 'const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);', efface: 'return confirm(message);' },
+    // #976 (8 oct. 2026) : un geste qui déplace sans effacer — la même porte, son verbe à lui (« corriger »).
+    { g: 'Corriger le DA', f: 'js/trimestre-v2-etudiants.js', sig: 'async function corrigerDAEtudiantV2(', cle: "'corrigerDA'", question: "const mesure = window.CorrectionDA.passeABlanc(ancien, '');", efface: 'await window.CorrectionDA.corriger(ancien, nouveau' }
 ];
 
 // Relecture de Cowork (3 oct. 2026, 7 h 55) : la fenêtre peut attendre des minutes (une mise

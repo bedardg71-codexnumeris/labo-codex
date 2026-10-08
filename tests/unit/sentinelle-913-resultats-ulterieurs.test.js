@@ -151,7 +151,12 @@ describe('#913 — ce qui reste du bloc du Cadre : un stock LU, plus aucun écri
             }
         };
         parcourir('js');
-        expect(nomment.sort()).toEqual(['js/registre-longitudinal.js', 'js/trimestres.js']);
+        // #976 (8 oct. 2026) : « Corriger le DA… » renomme le DA dans ce stock comme dans toute clé du
+        // trimestre qui le porte (rien ne reste sous l'ancien DA) ; il n'y ajoute ni n'y retire rien.
+        expect(nomment.sort()).toEqual(['js/correction-da.js', 'js/registre-longitudinal.js', 'js/trimestres.js']);
+        const correction = lire('js/correction-da.js').split('\n').filter((l) => /resultatsUlterieurs/.test(l));
+        expect(correction).toHaveLength(1);
+        expect(correction[0]).toMatch(/^\s*\{ nom: 'resultatsUlterieurs', categorie: 'resultats', deplacer: cleDObjet \},$/);
         expect(lire('js/trimestres.js')).not.toMatch(/(set|setSync|remove|removeSync)\([^)]*resultatsUlterieurs/);
         // Dans le registre, l'ancienne clé ne passe QUE par lireDe (lecture par cleSource) : une déclaration, un usage.
         const module = lire('js/registre-longitudinal.js');
