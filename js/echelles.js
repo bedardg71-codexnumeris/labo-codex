@@ -3359,6 +3359,20 @@ function lireMagasinsEchelleSync() {
     };
 }
 
+/**
+ * #967 — les porteurs réunis des homonymes qu'« Écraser » retirerait (trimestre actif).
+ * Lecture hors file : elle sert à refuser, jamais de base à une écriture.
+ */
+async function compterPorteursHomonymesEchelle(homonymes) {
+    const magasins = await lireMagasinsEchelle();
+    const nb = { evaluations: 0, productions: 0, pratiques: 0, grilles: 0, cartouches: 0, total: 0 };
+    (homonymes || []).forEach(h => {
+        const n = compterPorteursEchelleDans(h.id, magasins);
+        Object.keys(nb).forEach(k => { nb[k] += n[k]; });
+    });
+    return nb;
+}
+
 /** « 12 évaluations, 2 productions et 1 pratique de notation » — pour l'enseignant. */
 function decrirePorteursEchelle(nb) {
     const n = nb || {};
@@ -3543,7 +3557,10 @@ async function sauvegarderEchelleComplete() {
     let ecraserHomonyme = false;
 
     if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
-        const resultat = await verifierEtGererDoublon('echelle', nom, echelles, idActuel);
+        // #967 — un homonyme employé est refusé par la question elle-même.
+        const resultat = await verifierEtGererDoublon('echelle', nom, echelles, idActuel, {
+            porteursHomonymes: (homonymes) => compterPorteursHomonymesEchelle(homonymes)
+        });
 
         if (resultat === null) {
             // Utilisateur a annulé
@@ -3558,7 +3575,8 @@ async function sauvegarderEchelleComplete() {
         // Relecture du lot E1, trouvaille 1 (a) : « Écraser » ne retire plus l'homonyme
         // ICI, avant les vérifications — une échelle sans niveau (ou aux repères refusés)
         // supprimait l'ancienne sans créer la nouvelle. Le retrait part dans l'écriture
-        // de création, comme pour la grille. Les références à l'ancien id : BACKLOG #967.
+        // de création, comme pour la grille. #967 : seul un homonyme que rien n'emploie
+        // arrive ici ; il part sans laisser de référence.
         if (resultat && resultat.action === 'ecraser') ecraserHomonyme = true;
     }
 
@@ -3777,6 +3795,7 @@ window.compterPorteursEchelleDans = compterPorteursEchelleDans;
 window.lireMagasinsEchelle = lireMagasinsEchelle;
 window.lireMagasinsEchelleSync = lireMagasinsEchelleSync;
 window.decrirePorteursEchelle = decrirePorteursEchelle;
+window.compterPorteursHomonymesEchelle = compterPorteursHomonymesEchelle;
 window.remplacerEchellePartout = remplacerEchellePartout;
 window.supprimerOuRemplacerEchelle = supprimerOuRemplacerEchelle;
 window.notifierEchelleSupprimee = notifierEchelleSupprimee;

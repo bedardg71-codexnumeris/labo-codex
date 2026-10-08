@@ -682,7 +682,15 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     const isNameChange = grilleTemplateActuelle && grilleTemplateActuelle.nom !== nomGrille;
 
     if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
-        const resultat = await verifierEtGererDoublon('grille', nomGrille, grilles, idActuel);
+        // #967 — un homonyme employé est refusé par la question elle-même.
+        // ⚠ Issue 3, notée en mesurant #967 : le nom part au `change`, donc au clic dans
+        // la liste ; si ce clic ouvre l'homonyme pendant la question, l'écriture plus bas
+        // vise la grille ouverte, ne la trouve plus après le retrait par le nom et refuse
+        // (« Elle n'appartient pas au trimestre actif ») : rien n'est écrit, rien ne
+        // disparaît, mais le motif dit est faux et le nouveau nom n'est pas posé.
+        const resultat = await verifierEtGererDoublon('grille', nomGrille, grilles, idActuel, {
+            porteursHomonymes: (homonymes) => compterPorteursHomonymesGrille(homonymes)
+        });
 
         if (resultat === null) {
             // Utilisateur a annulé
@@ -696,6 +704,7 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
 
         if (resultat && resultat.action === 'ecraser') {
             // Le retrait de l'homonyme est REPORTÉ dans la file, avec l'écriture.
+            // #967 : seul un homonyme que rien n'emploie arrive ici.
             ecraserLeDoublon = true;
         }
     }
@@ -994,6 +1003,51 @@ async function chargerGrilleEnEdition(grilleId) {
  * 3. Sauvegarde dans localStorage
  * 4. Rafraîchit le modal
  */
+/**
+ * #967 — tout ce qui nomme une grille, dans des magasins déjà lus. Pure.
+ * Même forme que `compterPorteursEchelleDans` (echelles.js) : la phrase de refus
+ * les décrit par `decrirePorteursEchelle`. Les cartouches ne nomment pas leur
+ * grille par un champ : elles vivent sous `cartouches_<grilleId>` (#624).
+ * @param {string} grilleId
+ * @param {{evaluations: Array, productions: Array, pratiques: Array, cartouchesParGrille: Object}} magasins
+ */
+function compterPorteursGrilleDans(grilleId, magasins) {
+    const liste = (x) => Array.isArray(x) ? x : (x ? [x] : []);
+    const m = magasins || {};
+    const nommeLaGrille = (x) => !!x && x.grilleId === grilleId;
+    const nb = {
+        evaluations: liste(m.evaluations).filter(nommeLaGrille).length,
+        productions: liste(m.productions).filter(nommeLaGrille).length,
+        pratiques: liste(m.pratiques).filter(p => !!p && p.configuration && p.configuration.grilleId === grilleId).length,
+        cartouches: Array.isArray((m.cartouchesParGrille || {})[grilleId]) ? m.cartouchesParGrille[grilleId].length : 0
+    };
+    nb.total = nb.evaluations + nb.productions + nb.pratiques + nb.cartouches;
+    return nb;
+}
+
+/**
+ * #967 — les porteurs réunis des homonymes qu'« Écraser » retirerait (trimestre actif).
+ * Lecture hors file : elle sert à refuser, jamais de base à une écriture.
+ */
+async function compterPorteursHomonymesGrille(homonymes) {
+    const cartouchesParGrille = {};
+    for (const h of (homonymes || [])) {
+        if (h && h.id) cartouchesParGrille[h.id] = await db.get(cle(`cartouches_${h.id}`));
+    }
+    const magasins = {
+        evaluations: await db.get(cle('evaluationsSauvegardees')) || [],
+        productions: await db.get(cle('productions')) || [],
+        pratiques: await db.get(cle('pratiquesConfigurables')) || [],
+        cartouchesParGrille
+    };
+    const nb = { evaluations: 0, productions: 0, pratiques: 0, cartouches: 0, total: 0 };
+    (homonymes || []).forEach(h => {
+        const n = compterPorteursGrilleDans(h.id, magasins);
+        Object.keys(nb).forEach(k => { nb[k] += n[k]; });
+    });
+    return nb;
+}
+
 async function supprimerGrille(grilleId) {
     // #624 — PORTE NUE REFERMEE. Ce chemin supprimait sans vérifier AUCUNE
     // dépendance : les cartouches ancrées sous `cartouches_<grilleId>` devenaient
@@ -2177,6 +2231,8 @@ function reinitialiserEditeurGrillesApresBascule() {
 }
 window.reinitialiserEditeurGrillesApresBascule = reinitialiserEditeurGrillesApresBascule;
 window.sauvegarderNomGrille = sauvegarderNomGrille;
+window.compterPorteursGrilleDans = compterPorteursGrilleDans;
+window.compterPorteursHomonymesGrille = compterPorteursHomonymesGrille;
 window.afficherGrillesCriteres = afficherGrillesCriteres;
 window.fermerModalGrilles = fermerModalGrilles;
 window.chargerGrilleEnEdition = chargerGrilleEnEdition;
