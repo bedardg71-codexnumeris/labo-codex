@@ -300,3 +300,27 @@ describe('#976 — jetons : une entrée VIDE sous le nouveau DA n\'est pas un co
         expect(JSON.stringify([...m.magasin])).toBe(avant);
     });
 });
+
+describe('#976 — relecture de Cowork (8 oct., 15 h 41) : l\'attendu compte comme le recompte', () => {
+    // Le cas exact : l'ancien DA n'a aucune entrée de jetons, le nouveau a l'entrée VIDE que
+    // l'application pose d'elle-même. Avant : « le recompte ne tombe pas juste » à chaque essai.
+    it('aucun jeton sous l\'ancien DA, une entrée vide sous le nouveau : la correction passe', async () => {
+        const m = monter({ ajouts: { jetonsEtudiants: { [NOUVEAU]: {}, [AUTRE]: {} } } });
+        const res = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
+        expect(res).toEqual(expect.objectContaining({ ok: true }));
+        expect(m.lire('jetonsEtudiants')).toEqual({ [NOUVEAU]: {}, [AUTRE]: {} });
+        expect(m.lire(`${T}_groupeEtudiants`)[0].da).toBe(NOUVEAU);
+    });
+    it('variante : les deux entrées existent, vides toutes les deux — une seule reste, sous le nouveau DA', async () => {
+        const m = monter({ ajouts: { jetonsEtudiants: { [ANCIEN]: {}, [NOUVEAU]: { _historique: [] }, [AUTRE]: {} } } });
+        const res = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
+        expect(res.ok).toBe(true);
+        expect(m.lire('jetonsEtudiants')).toEqual({ [NOUVEAU]: {}, [AUTRE]: {} });
+    });
+    it('variante : l\'ancienne remplie, la nouvelle vide — les jetons passent, l\'entrée vide est remplacée', async () => {
+        const m = monter({ ajouts: { jetonsEtudiants: { [ANCIEN]: { J1: 1 }, [NOUVEAU]: {} } } });
+        const res = await m.w.CorrectionDA.corriger(ANCIEN, NOUVEAU);
+        expect(res.ok).toBe(true);
+        expect(m.lire('jetonsEtudiants')).toEqual({ [NOUVEAU]: { J1: 1 } });
+    });
+});
