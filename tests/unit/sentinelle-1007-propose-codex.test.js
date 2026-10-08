@@ -203,7 +203,8 @@ describe('#1007, second lot — aucune porte n\'efface sans le codex proposé', 
         const ligne = c.split('\n').find((l) => l.includes(APPEL));
         expect(ligne).toMatch(/^\s*if \(resultat && resultat\.action === 'ecraser' && .*\) return null;$/);
         for (const f of ['js/echelles.js', 'js/grilles.js', 'js/cartouches.js', 'js/productions.js']) {
-            expect(lire(f), f).toMatch(/await verifierEtGererDoublon\([^\n]*\);\n(?:\s*\/\/[^\n]*\n)*\s*if \(resultat === null\)/);
+            // #967 : l'appel peut porter ses options sur plusieurs lignes (`porteursHomonymes`).
+            expect(lire(f), f).toMatch(/await verifierEtGererDoublon\([^;]*\);\n(?:\s*\/\/[^\n]*\n)*\s*if \(resultat === null\)/);
         }
     });
 

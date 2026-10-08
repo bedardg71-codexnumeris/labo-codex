@@ -904,6 +904,42 @@ async function sauvegarderContexteSpecifiqueCartouche() {
     signalerAutosaveCartoucheMuette(ecrit);
 }
 
+/**
+ * #967 — tout ce qui nomme une cartouche, dans des magasins déjà lus. Pure.
+ * Même forme que `compterPorteursEchelleDans` (echelles.js) : la phrase de refus
+ * les décrit par `decrirePorteursEchelle`.
+ * @param {string} cartoucheId
+ * @param {{evaluations: Array, productions: Array}} magasins
+ */
+function compterPorteursCartoucheDans(cartoucheId, magasins) {
+    const liste = (x) => Array.isArray(x) ? x : (x ? [x] : []);
+    const m = magasins || {};
+    const nommeLaCartouche = (x) => !!x && x.cartoucheId === cartoucheId;
+    const nb = {
+        evaluations: liste(m.evaluations).filter(nommeLaCartouche).length,
+        productions: liste(m.productions).filter(nommeLaCartouche).length
+    };
+    nb.total = nb.evaluations + nb.productions;
+    return nb;
+}
+
+/**
+ * #967 — les porteurs réunis des homonymes qu'« Écraser » retirerait (trimestre actif).
+ * Lecture hors file : elle sert à refuser, jamais de base à une écriture.
+ */
+async function compterPorteursHomonymesCartouche(homonymes) {
+    const magasins = {
+        evaluations: await db.get(cle('evaluationsSauvegardees')) || [],
+        productions: await db.get(cle('productions')) || []
+    };
+    const nb = { evaluations: 0, productions: 0, total: 0 };
+    (homonymes || []).forEach(h => {
+        const n = compterPorteursCartoucheDans(h.id, magasins);
+        Object.keys(nb).forEach(k => { nb[k] += n[k]; });
+    });
+    return nb;
+}
+
 /** Lot E1 : la cartouche ouverte est-elle en base ? (lecture synchrone du stock) */
 function cartoucheEstEnBase(cartouche) {
     if (!cartouche || !cartouche.id || !cartouche.grilleId) return false;
@@ -937,7 +973,10 @@ async function sauvegarderNomCartouche() {
 
     let ecraserLeDoublon = false;
     if (typeof verifierEtGererDoublon === 'function') {
-        const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, cible.id);
+        // #967 — un homonyme employé est refusé par la question elle-même.
+        const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, cible.id, {
+            porteursHomonymes: (homonymes) => compterPorteursHomonymesCartouche(homonymes)
+        });
         // Relecture R1 : pendant la question, l'usager a pu ouvrir une AUTRE cartouche
         // (le `change` part au blur, donc au clic dans la liste). Le champ montre alors
         // le nom de celle-là : le réécrire lui donnerait le nom de `cible`, et le
@@ -953,6 +992,17 @@ async function sauvegarderNomCartouche() {
             if (champDeLaCible) champ.value = nom;
         }
         if (resultat && resultat.action === 'ecraser') ecraserLeDoublon = true;
+    }
+
+    // #967 (cas noté à la fiche, en appliquant R1) — l'homonyme que l'usager a OUVERT
+    // pendant la question ne disparaît pas sous ses yeux : rien n'est écrit, le témoin
+    // le dit. Seul un homonyme que rien n'emploie arrive ici (le refus est en amont).
+    if (ecraserLeDoublon && cartoucheActuel && cartoucheActuel !== cible
+        && cartouches.some(c => c.id === cartoucheActuel.id && c.id !== cible.id && c.nom === nom)) {
+        if (window.temoinEnregistrement) {
+            window.temoinEnregistrement.nonEnregistre('la cartouche du même nom est ouverte.', 'Modifier la cartouche', cle(`cartouches_${cible.grilleId}`));
+        }
+        return;
     }
 
     const resultat = await modifierEtAnnoncer(cle(`cartouches_${cible.grilleId}`), (lues) => {
@@ -1091,7 +1141,10 @@ async function sauvegarderCartouche() {
     const isNameChange = cartoucheOriginale && cartoucheOriginale.nom !== nom;
 
     if ((isCreation || isNameChange) && typeof verifierEtGererDoublon === 'function') {
-        const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, idActuel);
+        // #967 — un homonyme employé est refusé par la question elle-même.
+        const resultat = await verifierEtGererDoublon('cartouche', nom, cartouches, idActuel, {
+            porteursHomonymes: (homonymes) => compterPorteursHomonymesCartouche(homonymes)
+        });
 
         if (resultat === null) {
             // Utilisateur a annulé
@@ -3130,6 +3183,8 @@ window.dupliquerCartouche = dupliquerCartouche;
 window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
 window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
 window.sauvegarderCartouche = sauvegarderCartouche;
+window.compterPorteursCartoucheDans = compterPorteursCartoucheDans;                     // #967
+window.compterPorteursHomonymesCartouche = compterPorteursHomonymesCartouche;         // #967
 window.sauvegarderCommentaire = sauvegarderCommentaire;
 window.persisterCartouchePartielle = persisterCartouchePartielle;           // #517
 window.sauvegarderContexteSpecifiqueCartouche = sauvegarderContexteSpecifiqueCartouche; // lot E1

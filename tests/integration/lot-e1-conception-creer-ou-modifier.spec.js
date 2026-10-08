@@ -349,17 +349,23 @@ test('R1 : question du doublon annulée pendant qu\'une autre cartouche s\'ouvre
 
 // Trouvaille 1 (a), décision de Grégoire : « Écraser » un homonyme ne supprime rien si la
 // création échoue à ses vérifications. Avant : l'ancienne échelle partait, la nouvelle n'était
-// pas créée. (Les références à l'ancien id quand tout réussit : BACKLOG #967, lot à part.)
+// pas créée. Depuis #967 (8 oct.), un homonyme EMPLOYÉ est refusé avant : l'essai porte donc sur
+// un homonyme libre, créé par le même geste — sinon il passerait sans rien éprouver.
 test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancienne échelle est toujours là', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirDemo(page);
-    const ancienne = await page.evaluate(() => {
-        const e = (db.getSync(cle('echellesTemplates'), []) || []).find(x => x && x.nom);
-        return e ? { id: e.id, nom: e.nom } : null;
-    });
-    expect(ancienne, 'la démonstration doit porter une échelle').toBeTruthy();
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
     await pause(page, 800);
+    await cliquer(page, '[data-action="creerNouvelleEchelle"]');
+    await page.evaluate(() => { document.getElementById('nomEchelleTemplate').value = 'Échelle fictive Aulne E1'; });
+    await cliquer(page, '#btnCreerEchelle');
+    const ancienne = await page.evaluate(() => {
+        const e = (db.getSync(cle('echellesTemplates'), []) || []).find(x => x && x.nom === 'Échelle fictive Aulne E1');
+        return e ? { id: e.id, nom: e.nom } : null;
+    });
+    expect(ancienne, 'l\'homonyme libre est créé').toBeTruthy();
+    expect(await page.evaluate((id) => window.compterPorteursHomonymesEchelle([{ id }]).then(n => n.total), ancienne.id),
+        'rien ne l\'emploie : « Écraser » n\'est pas refusé').toBe(0);
     const avant = await page.evaluate(() => (db.getSync(cle('echellesTemplates'), []) || []).length);
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate((nom) => { document.getElementById('nomEchelleTemplate').value = nom; }, ancienne.nom);
@@ -371,6 +377,11 @@ test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancien
     expect(await page.evaluate(() => document.getElementById('modalConflitDoublon')?.classList.contains('actif')),
         'la question du doublon est ouverte').toBe(true);
     await cliquer(page, '#btnDoublonEcraser');
+    // La proposition du codex (#1007) suit « Remplacer l'existante » : on la passe.
+    await page.evaluate(() => {
+        const b = [...document.querySelectorAll('#overlay-ui-dialogue button')].find(x => /sans (codex|mettre à jour)/.test(x.textContent));
+        if (b) b.click();
+    });
     await pause(page, 600);
 
     const apres = await page.evaluate((id) => {

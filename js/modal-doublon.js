@@ -274,6 +274,20 @@
 
         // Afficher le modal
         const resultat = await afficherModalDoublon(typeRessource, nomNouveau, options);
+        // #967 (décision de Grégoire, 7 oct. 2026) — un homonyme EMPLOYÉ n'est pas écrasé :
+        // la nouvelle a un autre id, tout ce qui nommait l'ancien pointerait dans le vide.
+        // L'appelant compte ses porteurs (`options.porteursHomonymes`) ; le refus vaut
+        // l'annulation (null) : rien n'est écrit, et le codex n'est pas proposé pour rien.
+        // Remplacer un modèle employé reste le rôle de « Supprimer » (#648).
+        if (resultat && resultat.action === 'ecraser' && typeof options.porteursHomonymes === 'function') {
+            const homonymes = listeExistante.filter(item =>
+                item.nom === nomNouveau && (!idActuel || item.id !== idActuel));
+            const nb = await options.porteursHomonymes(homonymes);
+            if (nb && nb.total > 0) {
+                alert(phraseRefusEcrasement(typeRessource, nb));
+                return null;
+            }
+        }
         // #1007 (2a-2) — « Remplacer l'existante » l'efface pour de bon : le codex est proposé
         // après ce choix, avant le remplacement ; « Annuler » vaut l'annulation de la modale.
         // Les cinq appelants retirent l'homonyme au moment d'écrire (file, ids rejoués).
@@ -281,9 +295,21 @@
         return resultat;
     }
 
+    // #967 — la phrase validée par Grégoire (7 oct. 2026), même forme pour les trois
+    // éditeurs. Les porteurs sont décrits par `decrirePorteursEchelle` (echelles.js) :
+    // ses clés (évaluations, productions, pratiques, grilles, cartouches) couvrent aussi
+    // les porteurs d'une grille et d'une cartouche.
+    const SUJETS_REFUS = { echelle: 'Une échelle', grille: 'Une grille', cartouche: 'Une cartouche' };
+    function phraseRefusEcrasement(typeRessource, nb) {
+        const sujet = SUJETS_REFUS[typeRessource] || 'Un modèle';
+        const verbe = nb.total >= 2 ? 'l\'emploient' : 'l\'emploie';
+        return `${sujet} porte déjà ce nom, et ${window.decrirePorteursEchelle(nb)} ${verbe} : l'écraser changerait leurs notes. Donne un autre nom à la nouvelle.`;
+    }
+
     // Exposer globalement
     window.afficherModalDoublon = afficherModalDoublon;
     window.verifierEtGererDoublon = verifierEtGererDoublon;
+    window.phraseRefusEcrasement = phraseRefusEcrasement;
     window.genererNomSuggere = genererNomSuggere;
     window.nomExiste = nomExiste;
 
