@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 16 h 49 : **1.191.1 (#976, RECOMPTE DES JETONS VIDES) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 18 h 47 : **CARTE D'ALIGNEMENT, LOTS 1 ET 2 COMMITÉS SUR `main` LOCAL, NON POUSSÉS ; MOTS À FAIRE VALIDER**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 18 h 03), lots 1 (menu « Vue ») et 2 (planificateur
+vertical, dates du trimestre). **Commits** : `8103bed5` fichiers de Cowork ; `7745b1c7` lot 1 ; `65c71613` lot 2 ; ce relais.
+En ligne : toujours 1.191.1 (`b986a3a3`). **Pas de release, pas de push** : la consigne les place après le rapport à
+Grégoire, la relecture de Cowork et la validation des mots (libellés des 20 raccourcis, touche R qui remplace ⌘1,
+ligne des Nouvelles).
+
+**Mesuré** : Vitest complet 698 fichiers / 8 377 essais ; specs `planif-*` 59/59 (WebKit) ; break-test 16 mutations
+(lot 1) et 9 (lot 2), toutes rouges sur l'assertion visée, témoins verts, empreintes restaurées.
+
+**Suite** : mots validés → `release-et-changelog` (minor) → verdict complet (Chrome et Safari fermés) → push → Netlify.
+
+## (relais précédent) 8 OCT. 2026, 16 h 49 : **1.191.1 (#976, RECOMPTE DES JETONS VIDES) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac801ec`, `commit_ref` `b986a3a3`, `state: ready`,
 publié à 20:49:59 Z (16 h 49, Toronto). Verdict Playwright complet sur `b986a3a3` : code 0, 0 échec connu, aucun
