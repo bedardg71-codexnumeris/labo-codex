@@ -7,7 +7,31 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 7 OCT. 2026, 16 h 22 : **1.189.0 (GÉNÉRATEUR D'ÉQUIPES, #1039) FUSIONNÉE SUR `main` LOCAL ; VERDICT, PUSH, NETLIFY À SUIVRE**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 7 h 06 : **1.190.0 (LOT 6 DE L'ENREGISTREMENT : « ÉCRASER » UN HOMONYME EMPLOYÉ, #967) COMMITÉE SUR `main` LOCAL ; RELECTURE DE COWORK, PUIS VERDICT ET PUSH**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 7 oct., 18 h 59) ; plan
+`plans de travail/PLAN-2026-10-07-chantier-enregistrement-suite.md`, lot 6. **Rien n'est poussé.**
+
+**Commits** : `61dec81f` consigne, archive, consigne de démarrage de Cowork ; `f785400b` #967 (refus
+dans `verifierEtGererDoublon`, avant le codex ; compteurs neufs de la grille et de la cartouche ;
+cartouche ouverte pendant la question ; jetons anti-cache) ; `9c76b132` BACKLOG (#967 close) ;
+`32d9156f` release 1.190.0 (minor : le geste visible change) ; ce relais, avec `OU-EN-EST-ON.md` (7 oct.)
+et la correction de la section 1.189.0 ci-dessous. Worktree `1039-equipes` retiré, branche supprimée.
+
+**Mesuré** : Vitest complet après le commit de release : 696 fichiers, 8 361 essais verts. WebKit :
+`ecraser-homonyme-employe-967.spec.js` 7/7, `lot-e1-conception-creer-ou-modifier.spec.js` 11/11.
+Huit mutations, chacune rouge (Vitest ou WebKit). Stock du pack démo : aucune référence orpheline.
+Verdict complet : **non lancé**.
+
+**Suppositions nommées** : « leurs notes » gardé au singulier aussi (« 1 évaluation l'emploie : l'écraser
+changerait leurs notes ») ; les cartouches de l'ancrage comptent comme porteurs d'une grille ; le refus
+part par `alert` (comme les autres refus de ces éditeurs) ; le témoin de la cartouche ouverte dit « la
+cartouche du même nom est ouverte. » (mots neufs, à relire).
+
+**Suite** : relecture de Cowork → ligne des Nouvelles (proposée dans le rapport, non écrite) → Chrome et
+Safari fermés → verdict complet → push → Netlify → relais.
+
+## (relais précédent) 7 OCT. 2026, 17 h 23 : **1.189.0 (GÉNÉRATEUR D'ÉQUIPES, #1039) EN LIGNE**
 
 **Consigne** : `plans de travail/MOTS-2026-10-07-1039-equipes.md`, section « Relecture de 1.189.0 et
 Nouvelles » (Cowork, 16 h 21). Relecture de Cowork de `39ec40ad` : rien ne bloque.
@@ -16,9 +40,11 @@ et barre d'outils ; `c57f2218` mots arrêtés ; `6f61253a` reste de 1 ; `abb2522
 correctif) ; `39ec40ad` release 1.189.0 ; `6c8494c6` entrée 1.189 des Nouvelles (validée par Grégoire,
 16 h 21, posée telle quelle) et fichier des mots commité.
 **Tests** : Vitest complet vert sur `39ec40ad` (695 fichiers, 8 349 tests) ; sentinelles du changelog vertes
-sur `6c8494c6` (14 fichiers, 579 tests). **Rien n'est poussé.**
-**Suite** : Chrome et Safari fermés, verdict complet (`pousser.sh`), push, mise en ligne mesurée chez
-Netlify. Ensuite #1038.
+sur `6c8494c6` (14 fichiers, 579 tests).
+**En ligne** (corrigé le 8 oct. ; mesure de Cowork chez Netlify) : déploiement `6ac6b845`, `commit_ref` =
+`9f9c304d`, publié le 7 à 17 h 23. Verdict complet vert sur `9f9c304d` (`scripts/.verdict-playwright.json` :
+code 0, aucun instable, éveil tenu, aucune veille) ; `origin/main` = `9f9c304d` (mesuré le 8 par `git fetch`).
+**Suite** : lot 6 du plan (#967) ; #1038 attend la sonde de Mathieu.
 
 ### Historique de la section précédente (15 h 15) : 1.188.2 (LOT 4 DE L'ENREGISTREMENT : #981, #983) EN LIGNE
 
