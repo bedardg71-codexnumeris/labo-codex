@@ -261,7 +261,11 @@
                 cle: k, famille,
                 ancien: compter(famille, v, ancien),
                 nouveau: !nouveau ? 0 : (famille.presentSous ? famille.presentSous(v, nouveau) : compter(famille, v, nouveau)),
-                conflit: t.conflit
+                conflit: t.conflit,
+                // Ce que la clé portera sous le nouveau DA une fois écrite : la valeur TRANSFORMÉE,
+                // comptée comme le recompte compte (relecture de Cowork, 8 oct., 15 h 41 — une entrée
+                // de jetons vide sous le nouveau DA faisait « attendu + 1 » à chaque essai).
+                apres: nouveau && !t.conflit ? compter(famille, t.valeur, nouveau) : 0
             };
         });
         const comptes = { evaluations: 0, presences: 0, copies: 0, resultats: 0, autres: 0, jetons: 0, denotation: 0, longitudinal: 0 };
@@ -299,7 +303,7 @@
         return null;
     }
 
-    // Mots du refus d'un conflit hors trimestre (proposés, à Grégoire).
+    // Mots du refus d'un conflit hors trimestre (validés par Grégoire, 8 oct., 15 h 41).
     const LIBELLES_GLOBALES = {
         longitudinal: 'une entrée au suivi longitudinal',
         jetons: 'des jetons',
@@ -325,7 +329,7 @@
         const r = refus(ancien, nouveau, mesure);
         if (r) return { ok: false, refus: r };
 
-        const attendu = mesure.parCle.reduce((s, c) => s + c.ancien + c.nouveau, 0);
+        const attendu = mesure.parCle.reduce((s, c) => s + c.apres, 0);
         const ecrites = [];
         const ecrire = async (k, mutateur) => {
             let refuseParGarde = true;

@@ -157,7 +157,7 @@ test.describe('#976 — « Corriger le DA… » sur le pack démo', () => {
         expect(f.texte).toContain(avant.comptes.presences + ' présence');
         expect(f.texte).toContain('1 copie');
         expect(f.texte).toContain('dans ce trimestre seulement');
-        expect(f.texte).toContain('Suivent aussi, hors trimestre :\n• 1 jeton\n• 1 jugement de dénotation\n• 1 entrée au suivi longitudinal');
+        expect(f.texte).toContain('Suivent aussi :\n• 1 jeton\n• 1 jugement de dénotation\n• 1 entrée au suivi longitudinal');
         expect(f.boutons).toEqual(['Annuler', 'Corriger le DA']);
 
         // (b) La correction.
