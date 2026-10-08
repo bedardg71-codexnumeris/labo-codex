@@ -7,7 +7,14 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 15 h 45 : **1.191.1 (#976, RECOMPTE DES JETONS VIDES) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 16 h 49 : **1.191.1 (#976, RECOMPTE DES JETONS VIDES) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac801ec`, `commit_ref` `b986a3a3`, `state: ready`,
+publié à 20:49:59 Z (16 h 49, Toronto). Verdict Playwright complet sur `b986a3a3` : code 0, 0 échec connu, aucun
+instable, éveil tenu, 0 veille ; Vitest du hook pré-push vert ; 16 commits poussés (`bf9bd70c..b986a3a3`).
+Rien en attente sur #976. Reste à Grégoire : refaire le geste en démo (« DEMO004 » vers 7654321).
+
+## (relais précédent) 8 OCT. 2026, 15 h 45 : **1.191.1 (#976, RECOMPTE DES JETONS VIDES) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
 
 **Consigne** : « Suite – relecture du volet des globales » (Cowork, 15 h 41) : un recompte qui ne tombait jamais juste
 (aucun jeton sous l'ancien DA, entrée vide sous le nouveau) ; « Suivent aussi : » et le refus hors trimestre validés.
