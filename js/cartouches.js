@@ -1000,7 +1000,7 @@ async function sauvegarderNomCartouche() {
     if (ecraserLeDoublon && cartoucheActuel && cartoucheActuel !== cible
         && cartouches.some(c => c.id === cartoucheActuel.id && c.id !== cible.id && c.nom === nom)) {
         if (window.temoinEnregistrement) {
-            window.temoinEnregistrement.nonEnregistre('la cartouche du même nom est ouverte.', 'Modifier la cartouche', cle(`cartouches_${cible.grilleId}`));
+            window.temoinEnregistrement.nonEnregistre('tu as ouvert la cartouche qui porte déjà ce nom.', 'Modifier la cartouche', cle(`cartouches_${cible.grilleId}`));
         }
         return;
     }

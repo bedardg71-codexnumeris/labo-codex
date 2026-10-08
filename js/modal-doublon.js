@@ -303,7 +303,7 @@
     function phraseRefusEcrasement(typeRessource, nb) {
         const sujet = SUJETS_REFUS[typeRessource] || 'Un modèle';
         const verbe = nb.total >= 2 ? 'l\'emploient' : 'l\'emploie';
-        return `${sujet} porte déjà ce nom, et ${window.decrirePorteursEchelle(nb)} ${verbe} : l'écraser changerait leurs notes. Donne un autre nom à la nouvelle.`;
+        return `${sujet} porte déjà ce nom, et ${window.decrirePorteursEchelle(nb)} ${verbe} : l'écraser changerait des notes. Donne un autre nom à la nouvelle.`;
     }
 
     // Exposer globalement

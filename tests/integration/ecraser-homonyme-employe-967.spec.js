@@ -82,7 +82,7 @@ function decrire(nb) {
 }
 function phrase(sujet, nb) {
     const total = Object.values(nb).reduce((a, b) => a + b, 0);
-    return `${sujet} porte déjà ce nom, et ${decrire(nb)} ${total >= 2 ? 'l\'emploient' : 'l\'emploie'} : l'écraser changerait leurs notes. Donne un autre nom à la nouvelle.`;
+    return `${sujet} porte déjà ce nom, et ${decrire(nb)} ${total >= 2 ? 'l\'emploient' : 'l\'emploie'} : l'écraser changerait des notes. Donne un autre nom à la nouvelle.`;
 }
 
 // Tout ce qui nomme un id, dans le trimestre actif (pour « aucune référence orpheline »).
@@ -357,5 +357,5 @@ test('cartouche : l\'homonyme ouvert pendant la question reste — rien n\'est �
     expect(alertes).toEqual([]);
     expect(await photo(page), 'rien n\'est écrit : l\'homonyme ouvert reste, A garde son nom').toBe(avant);
     expect(await page.evaluate(() => document.getElementById('nomCartouche').value), 'le champ ouvert est intact').toBe(copie.nom);
-    expect(await temoinEchec(page)).toContain('la cartouche du même nom est ouverte.');
+    expect(await temoinEchec(page)).toContain('tu as ouvert la cartouche qui porte déjà ce nom.');
 });
