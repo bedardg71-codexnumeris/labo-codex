@@ -16,11 +16,11 @@
 
     // Types de ressources en francais
     const TYPES_FR = {
-        'grille': 'grille de criteres',
-        'echelle': 'echelle de performance',
+        'grille': 'grille de critères',
+        'echelle': 'échelle de performance',
         'production': 'production',
         'pratique': 'pratique de notation',
-        'cartouche': 'cartouche de retroaction'
+        'cartouche': 'cartouche de rétroaction'
     };
 
     /**
@@ -73,9 +73,8 @@
 
                 <div class="modal-section">
                     <p style="margin-bottom: 15px;">
-                        Une <strong id="doublonType">ressource</strong> portant le nom
-                        <strong style="color: var(--accent-primaire);">"<span id="doublonNomExistant"></span>"</strong>
-                        existe deja.
+                        Une <strong id="doublonType">ressource</strong> porte déjà le nom
+                        <strong style="color: var(--accent-primaire);">«&nbsp;<span id="doublonNomExistant"></span>&nbsp;»</strong>.
                     </p>
 
                     <p style="margin-bottom: 20px; color: var(--gris-moyen);">
@@ -108,8 +107,8 @@
                         Remplacer l'existante
                     </label>
                     <p style="font-size: 0.9rem; color: var(--gris-moyen); margin: 0 0 10px 0;">
-                        La ressource existante sera ecrasee par la nouvelle.
-                        <strong style="color: var(--gris-fonce);">Cette action est irreversible.</strong>
+                        L'existante sera remplacée par la nouvelle, si rien ne l'emploie.
+                        <strong style="color: var(--gris-fonce);">Cette action est irréversible.</strong>
                     </p>
                     <button id="btnDoublonEcraser"
                             class="btn btn-supprimer"
@@ -125,7 +124,7 @@
                         Ignorer cette ressource
                     </label>
                     <p style="font-size: 0.9rem; color: var(--gris-moyen); margin: 0 0 10px 0;">
-                        La ressource ne sera pas importee. L'existante reste inchangee.
+                        La ressource ne sera pas importée. L'existante reste inchangée.
                     </p>
                     <button id="btnDoublonIgnorer"
                             class="btn btn-secondaire"
