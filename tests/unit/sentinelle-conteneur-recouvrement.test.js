@@ -188,7 +188,8 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         expect(sourceIndex).not.toMatch(/⌘\+Glisser/);
         expect(sourceCarte).not.toMatch(/⌘\+Glisser/);
         const liste = tranche(sourceCarte, 'var RACCOURCIS_CARTE = [', '];');
-        expect(liste).toMatch(/Un bloc se déplace seul/);
+        // Mots validés par Grégoire le 8 oct. 2026, 19 h 05.
+        expect(liste).toContain('Déplacer un bloc ; par le cadre d’une leçon ou d’une séquence, tout le groupe suit');
     });
 
     it('l’inspecteur offre « Dans la leçon » — le chemin SANS geste (iPad)', () => {

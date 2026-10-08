@@ -159,3 +159,26 @@ test('sans dates : l’invitation, mot pour mot, et son lien ouvre Cadre › Tri
     });
     expect(erreurs).toEqual([]);
 });
+
+// Défaut de relecture (Cowork, 8 oct. 2026, 19 h 06) : en « Vue plein écran », la
+// palette du planificateur reste visible ; son lien menait à Cadre › Trimestre SANS
+// quitter le plein écran — en-tête et navigation restaient masqués, et sur l'iPad,
+// sans Échap, plus aucun chemin pour en sortir.
+test('en plein écran, le lien de l’invitation quitte le plein écran avant d’ouvrir Cadre › Trimestre', async ({ page }) => {
+    const erreurs = await ouvrirCarteDemo(page);
+    await avecCadre(page, { dateDebut: null, finTrimestre: null }, async () => {
+        await page.click('#planif-btn-vue');
+        await page.click('#planif-vue-plein-ecran');
+        await expect(page.locator('body')).toHaveClass(/planif-plein-ecran-actif/);
+        const lien = page.locator('#planif-invitation-dates a', { hasText: 'Cadre › Trimestre' });
+        await expect(lien).toBeVisible();
+
+        await lien.click();
+        await expect(page.locator('body')).not.toHaveClass(/planif-plein-ecran-actif/);
+        await expect(page.locator('.navigation-principale')).toBeVisible();
+        await expect(page.locator('#v2-debutTrimestre')).toBeFocused();
+        // La coche du menu « Vue » suit : au retour sur la carte, plus de plein écran.
+        await expect(page.locator('#planif-vue-plein-ecran')).toHaveAttribute('aria-pressed', 'false');
+    });
+    expect(erreurs).toEqual([]);
+});
