@@ -182,9 +182,13 @@ describe('F6/F7 · invariants statiques des gestes', () => {
         expect(onUpB).toMatch(/reLayoutAvecAnimation\(donnees\.parent\)/);
     });
 
-    it('le nouveau modèle est documenté dans le panneau Raccourcis', () => {
+    it('le nouveau modèle est documenté dans la liste des raccourcis', () => {
+        // Le panneau Raccourcis est devenu le bas du menu « Vue » (8 oct. 2026) :
+        // sa liste vient de RACCOURCIS_CARTE, la source unique, dans le module.
         expect(sourceIndex).not.toMatch(/⌘\+Glisser/);
-        expect(sourceIndex).toMatch(/Un bloc se déplace seul/);
+        expect(sourceCarte).not.toMatch(/⌘\+Glisser/);
+        const liste = tranche(sourceCarte, 'var RACCOURCIS_CARTE = [', '];');
+        expect(liste).toMatch(/Un bloc se déplace seul/);
     });
 
     it('l’inspecteur offre « Dans la leçon » — le chemin SANS geste (iPad)', () => {

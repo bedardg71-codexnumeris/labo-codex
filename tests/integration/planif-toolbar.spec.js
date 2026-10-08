@@ -70,8 +70,10 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     await expect(h2).toBeVisible();
     await expect(sousTitres.first()).toBeVisible();
 
-    // Entrer en plein écran par le vrai bouton (dispatcher data-action).
-    await page.click('#planif-btn-plein-ecran');
+    // Entrer en plein écran par la vraie commande du menu « Vue » (8 oct. 2026 ;
+    // dispatcher data-action).
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-plein-ecran');
     await page.waitForTimeout(300);
 
     // 1. Le titre et le sous-titre disparaissent.
@@ -128,7 +130,7 @@ test('planificateur — il CADRE la carte, il ne la filtre plus ; palettes comma
     await expect(page.locator('#planif-toolbar-lecons')).toHaveCount(0);
     await expect(page.locator('#planif-btn-largeur')).toHaveCount(0);
     await expect(page.locator('#planif-btn-hauteur')).toHaveCount(0);
-    await expect(page.locator('#planif-btn-recentrer')).toBeVisible();
+    await expect(page.locator('#planif-btn-vue')).toBeVisible();
 
     const sequencesSom = page.locator('#planif-sommaire .planif-som-seq');
     const leconsSom = page.locator('#planif-sommaire .planif-som-lecon');
