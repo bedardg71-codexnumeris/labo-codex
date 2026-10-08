@@ -7,7 +7,14 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 18 h 47 : **CARTE D'ALIGNEMENT, LOTS 1 ET 2 COMMITÉS SUR `main` LOCAL, NON POUSSÉS ; MOTS À FAIRE VALIDER**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 19 h 36 : **1.192.0 (CARTE D'ALIGNEMENT, MENU « VUE » ET DATES DU PLANIFICATEUR) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 19 h 33). **Commits** : `cfc90613` mots validés et lien
+qui quitte le plein écran ; `4a23d6d2` release 1.192.0 (minor, entrée des Nouvelles validée à 19 h 33) ; ce relais.
+**Mesuré** : Vitest complet après le commit de release, 698 fichiers, 8 377 essais ; specs `planif-*` 60/60.
+**Suite** : verdict complet (Chrome et Safari fermés), push, vérification chez Netlify.
+
+## (relais précédent) 8 OCT. 2026, 18 h 47 : **CARTE D'ALIGNEMENT, LOTS 1 ET 2 COMMITÉS SUR `main` LOCAL, NON POUSSÉS ; MOTS À FAIRE VALIDER**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 18 h 03), lots 1 (menu « Vue ») et 2 (planificateur
 vertical, dates du trimestre). **Commits** : `8103bed5` fichiers de Cowork ; `7745b1c7` lot 1 ; `65c71613` lot 2 ; ce relais.
