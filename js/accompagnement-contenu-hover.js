@@ -602,7 +602,7 @@ const TOOLTIPS = {
     'planif-boutons-action':
         'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan, décloner la sélection) et annule le dernier geste.',
     'planif-zoom':
-        'Niveau de zoom courant. Zoome à la molette ou au pincement ; « Recentrer » (⌘1) ramène toute la carte à l\'écran.',
+        'Niveau de zoom courant. Zoome à la molette ou au pincement ; le menu « Vue » offre « Recentrer la carte » (R) et « Tout voir ».',
 
     // --- Catégories pédagogiques ---
 

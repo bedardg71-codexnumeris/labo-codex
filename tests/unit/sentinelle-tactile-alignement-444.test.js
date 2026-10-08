@@ -33,9 +33,10 @@ const css = readFileSync(path.join(racine, 'styles.css'), 'utf8');
 const carte = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'utf8');
 const prefs = readFileSync(path.join(racine, 'js', 'preferences.js'), 'utf8');
 
+// Le bouton des raccourcis a quitté la barre le 8 oct. 2026 (lot 1 du chantier
+// de la carte) : les raccourcis sont au bas du menu « Vue ». Ses trois voisins restent.
 const BOUTONS = [
     'planif-palette-inspecteur-btn',
-    'planif-palette-raccourcis-btn',
     'planif-palette-aide-btn',
     'planif-palette-bibliotheque-btn'
 ];

@@ -18971,31 +18971,6 @@ body.travaux-plein-ecran-actif .sous-nav {
     display: none !important;
 }
 
-/* Sélecteur fond carte mentale */
-.planif-fond-picker {
-    position: relative;
-    display: inline-block;
-}
-.planif-fond-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 6px;
-    z-index: 100;
-    padding: 6px;
-    background: var(--surface-carte, #1a3040);
-    border: 1px solid var(--bleu-carte, rgba(106,172,184,0.2));
-    border-radius: 8px;
-    box-shadow: var(--shadow-prononce);
-    gap: 4px;
-    flex-wrap: wrap;
-    width: 152px;
-}
-.planif-fond-dropdown.visible {
-    display: flex;
-}
-
 /* Plein écran carte mentale */
 /* FIX terrain alignement 601-101 (4 août) : le fond était posé par .planif-plein-ecran
    seul, mais #conception-carte { background: none } (plus spécifique) le neutralisait →
@@ -22401,7 +22376,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 /* Séparateur de la barre d'outils : marque la frontière entre les commandes
-   de VUE (palettes, zoom, fond) et les OUTILS montés par #444. */
+   de VUE (palettes, menu « Vue », loupe, zoom) et les OUTILS montés par #444. */
 .planif-toolbar-separateur {
     width: 1px;
     align-self: stretch;
@@ -22409,45 +22384,85 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: var(--planif-couleur-bordure, rgba(106, 172, 184, 0.3));
 }
 
-/* === PANNEAU RACCOURCIS FLOTTANT === */
-#planif-raccourcis-panel {
-    top: 12px;
+/* === MENU « VUE » DE LA CARTE (lot 1, 8 oct. 2026) ===
+   Même boîte que « Actions ▾ » (.planif-actions-dropdown), ancrée à DROITE :
+   le bouton vit dans le groupe de droite, un menu ancré à gauche déborderait
+   de l'écran. Les raccourcis, en bas, se lisent : la liste défile si le menu
+   dépasse la hauteur de la fenêtre (iPad en paysage). */
+.planif-vue-dropdown {
     left: auto;
-    right: 12px;
+    right: 0;
+    min-width: 300px;
+    max-width: min(380px, calc(100vw - 24px));
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
 }
-.planif-raccourcis-panel-contenu {
-    padding: 8px 10px;
+.planif-vue-dropdown .planif-action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+/* L'état du plein écran se lit à la coche, pas à la couleur seule. */
+.planif-vue-dropdown .planif-action-item[aria-pressed="true"]::after {
+    content: "✓";
+    color: var(--accent-primaire);
+    font-weight: 600;
+}
+.planif-vue-touche {
+    padding: 1px 6px;
+    background: rgba(106, 172, 184, 0.06);
+    border: 1px solid var(--planif-couleur-bordure);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 11px;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+.planif-vue-dropdown .planif-action-item:focus-visible,
+.planif-vue-dropdown .travaux-fond-swatch:focus-visible,
+#planif-btn-vue:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width, 3px) var(--focus-ring-color, #6aacb8);
 }
 .planif-raccourcis-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--texte-secondaire, #8aa4b0);
+    margin: 0 0 6px;
 }
 .planif-raccourcis-table td {
     padding: 3px 4px;
+    vertical-align: top;
 }
 .planif-raccourcis-table td:first-child {
-    width: 70px;
+    width: 1%;
+    white-space: nowrap;
     text-align: right;
+    padding-left: 14px;
     padding-right: 8px;
 }
+.planif-raccourcis-table td:last-child { padding-right: 14px; }
 .planif-raccourcis-table kbd {
     padding: 1px 5px;
     background: rgba(106, 172, 184, 0.06);
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 3px;
     font-family: inherit;
-    font-size: 10px;
+    font-size: 11px;
 }
-.planif-raccourcis-panel-replier,
-.planif-raccourcis-panel-fermer {
-    width: 20px; height: 20px; border: none; background: none;
-    font-size: 16px; line-height: 1; cursor: pointer; color: var(--texte-muted, #5a7a88);
-    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+.mode-clair .planif-raccourcis-table { color: var(--texte-secondaire); }
+.mode-clair .planif-raccourcis-table kbd,
+.mode-clair .planif-vue-touche {
+    background: rgba(3, 46, 92, 0.04);
+    border-color: rgba(3, 46, 92, 0.2);
 }
-.planif-raccourcis-panel-replier:hover,
-.planif-raccourcis-panel-fermer:hover { background: rgba(106, 172, 184, 0.1); color: var(--texte-principal, #d0e0e4); }
+/* Au doigt (iPad) : chaque commande et le bouton du menu montent à 44 px ;
+   les pastilles y montent déjà (#568). */
+@media (pointer: coarse) {
+    #planif-btn-vue { min-height: 44px; }
+    .planif-vue-dropdown .planif-action-item { min-height: 44px; }
+}
 
 /* === PANNEAU GUIDE FLOTTANT (#167) === */
 .planif-guide-flottante {
@@ -24244,18 +24259,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-family: inherit;
     font-size: 10px;
 }
-
-#planif-btn-recentrer {
-    padding: 2px 8px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 4px;
-    background: var(--surface-carte, #1a3040);
-    color: var(--texte-secondaire, #8aa4b0);
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-#planif-btn-recentrer:hover { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); }
 
 #planif-zoom-info {
     margin-left: auto;

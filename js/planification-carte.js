@@ -8940,64 +8940,6 @@ function initialiser() {
         });
     }
 
-    // Raccourcis flottant — bouton 🛎️ de la palette
-    var raccourcisPanel = document.getElementById('planif-raccourcis-panel');
-    var btnRaccourcis = document.getElementById('planif-palette-raccourcis-btn');
-    if (btnRaccourcis && raccourcisPanel) {
-        btnRaccourcis.addEventListener('click', function() {
-            var estVisible = raccourcisPanel.style.display !== 'none';
-            raccourcisPanel.style.display = estVisible ? 'none' : '';
-        });
-        var raccFermerBtn = raccourcisPanel.querySelector('.planif-raccourcis-panel-fermer');
-        if (raccFermerBtn) {
-            raccFermerBtn.addEventListener('click', function() {
-                raccourcisPanel.style.display = 'none';
-            });
-        }
-        var raccReplierBtn = raccourcisPanel.querySelector('.planif-raccourcis-panel-replier');
-        if (raccReplierBtn) {
-            raccReplierBtn.addEventListener('click', function() {
-                var contenu = raccourcisPanel.querySelector('.planif-raccourcis-panel-contenu');
-                if (!contenu) return;
-                var estReplie = contenu.style.display === 'none';
-                contenu.style.display = estReplie ? '' : 'none';
-                raccReplierBtn.textContent = estReplie ? '−' : '+';
-                raccReplierBtn.title = estReplie ? 'Replier' : 'Déplier';
-            });
-        }
-        // Drag panneau raccourcis
-        var raccBarre = raccourcisPanel.querySelector('.planif-guide-barre');
-        if (raccBarre) {
-            raccBarre.addEventListener('pointerdown', function(e) {
-                if (e.target.closest('.planif-raccourcis-panel-fermer') || e.target.closest('.planif-raccourcis-panel-replier')) return;
-                if (!e.isPrimary || e.button > 0) return;
-                e.preventDefault();
-                var pid = e.pointerId;
-                var startX = e.clientX;
-                var startY = e.clientY;
-                var rect = raccourcisPanel.getBoundingClientRect();
-                var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
-                var startLeft = rect.left - wrapperRect.left;
-                var startTop = rect.top - wrapperRect.top;
-                function onMove(e2) {
-                    if (e2.pointerId !== pid) return;
-                    raccourcisPanel.style.left = (startLeft + e2.clientX - startX) + 'px';
-                    raccourcisPanel.style.top = (startTop + e2.clientY - startY) + 'px';
-                    raccourcisPanel.style.right = 'auto';
-                }
-                function onUp(e2) {
-                    if (e2 && e2.pointerId !== pid) return;
-                    document.removeEventListener('pointermove', onMove);
-                    document.removeEventListener('pointerup', onUp);
-                    document.removeEventListener('pointercancel', onUp);
-                }
-                document.addEventListener('pointermove', onMove);
-                document.addEventListener('pointerup', onUp);
-                document.addEventListener('pointercancel', onUp);
-            });
-        }
-    }
-
     // Guide flottant — bouton 📔 de la palette (#167)
     var btnAidePalette = document.getElementById('planif-palette-aide-btn');
     if (btnAidePalette) {
@@ -9063,15 +9005,13 @@ function initialiser() {
         });
     }
 
-    // Clic sur un panneau flottant = premier plan
+    // Clic sur le guide flottant = premier plan
     var _zIndexPanneaux = 81;
-    [raccourcisPanel, guidePanel].forEach(function(panel) {
-        if (panel) {
-            panel.addEventListener('pointerdown', function() {
-                panel.style.zIndex = ++_zIndexPanneaux;
-            });
-        }
-    });
+    if (guidePanel) {
+        guidePanel.addEventListener('pointerdown', function() {
+            guidePanel.style.zIndex = ++_zIndexPanneaux;
+        });
+    }
 
     zoneTravail.addEventListener('dragover', function(e) {
         e.preventDefault();
@@ -9254,6 +9194,7 @@ function initialiser() {
     if (btnActions && dropdown) {
         btnActions.addEventListener('click', function(e) {
             e.stopPropagation();
+            fermerMenuVue(false);
             dropdown.classList.toggle('ouvert');
         });
         document.addEventListener('click', function() {
@@ -9493,10 +9434,6 @@ function initialiser() {
         });
     }
 
-    // Recentrer
-    var btnRecentrer = document.getElementById('planif-btn-recentrer');
-    if (btnRecentrer) btnRecentrer.addEventListener('click', function() { centrerVueSurContenu(); });
-
     // Boutons de zoom prédéfinis (100%, 75%, 50%, 25%)
     document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -9521,9 +9458,12 @@ function initialiser() {
 function gererKeydown(e) {
     if (!planificationActive) return;
 
+    // SELECT compris (lot 1, 8 oct. 2026) : R et L, sans modificateur, ne
+    // doivent pas agir sur la carte quand on choisit une carte au clavier.
     var pasDansChamp = !document.activeElement.isContentEditable
         && document.activeElement.tagName !== 'INPUT'
-        && document.activeElement.tagName !== 'TEXTAREA';
+        && document.activeElement.tagName !== 'TEXTAREA'
+        && document.activeElement.tagName !== 'SELECT';
 
     // Vérifier qu'on est bien dans la section structure (carte mentale)
     var sectionPlanif = document.getElementById('section-conception');
@@ -9565,7 +9505,10 @@ function gererKeydown(e) {
         return;
     }
 
-    if ((e.metaKey || e.ctrlKey) && e.key === '1' && pasDansChamp) {
+    // R — recentrer (lot 1, 8 oct. 2026). Remplace ⌘1, que Chrome et Safari
+    // réservent au passage au premier onglet. Sans modificateur : ⌘R recharge
+    // la page et doit rester au navigateur.
+    if (!e.metaKey && !e.ctrlKey && !e.altKey && (e.key === 'r' || e.key === 'R') && pasDansChamp) {
         e.preventDefault();
         recentrerVue();
         return;
@@ -9591,8 +9534,10 @@ function gererKeydown(e) {
         annuler();
         return;
     }
-    if (((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') ||
-        ((e.metaKey || e.ctrlKey) && e.key === 'y')) {
+    // ⇧⌘Z seul (lot 1) : ⌘Y, que rien n'annonçait, ouvre l'historique de Safari.
+    // Les deux casses, comme ⇧⌘D : avec ⇧, `e.key` peut arriver en majuscule
+    // selon le navigateur.
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
         if (pasDansChamp) {
             e.preventDefault();
             retablir();
@@ -9602,6 +9547,9 @@ function gererKeydown(e) {
 
     if (e.key === 'Delete' || e.key === 'Backspace') {
         if (pasDansChamp) {
+            // ⚠ Sans lui, Retour arrière ramène WebKit à la page précédente
+            // (vu au banc du menu « Vue », 8 oct. 2026).
+            e.preventDefault();
             if (etat.multiSelection.size > 0) {
                 enregistrerPourUndo();
                 _undoBatch = true;
@@ -11502,7 +11450,7 @@ function cadrerSurSequence(seqId) {
     mettreAJourPlanificateur();
 }
 
-// Recentrer la vue (bouton ◎ de la barre + ⌘1). Le canevas n'a plus qu'un seul
+// Recentrer la vue (menu « Vue » + touche R, qui remplace ⌘1 depuis le lot 1 du 8 oct. 2026). Le canevas n'a plus qu'un seul
 // état d'affichage depuis le retrait du filtrage par séquence : recentrer, c'est
 // donc toujours cadrer sur TOUT le contenu.
 function recentrerVue() {
@@ -11543,7 +11491,7 @@ function encadrementContenu() {
  * ça devient un outil de navigation — on prend du recul, on repère la zone, on
  * lit à la loupe, on clique pour y aller.
  *
- * ⚠ Ce n'est PAS ce que faisait « Recentrer » (⌘1), qui ne touchait jamais au
+ * ⚠ Ce n'est PAS ce que faisait « Recentrer » (alors ⌘1, R depuis le 8 oct. 2026), qui ne touchait jamais au
  * zoom : il défilait, à l'échelle courante. À 100 % sur une grande carte, il
  * déposait l'utilisateur au milieu du nuage sans rien lui montrer de plus.
  * Les deux commandes coexistent — recentrer sans changer d'échelle reste utile.
@@ -12519,30 +12467,192 @@ window.planificationCarte = {
     togglePleinEcran: togglePleinEcranCarte
 };
 
-// === COULEUR DE FOND CANEVAS ===
-(function() {
-    var btnFond = document.getElementById('planif-btn-fond');
-    var dropdown = document.getElementById('planif-fond-dropdown');
-    if (!btnFond || !dropdown) return;
+// === MENU « VUE » (lot 1 du chantier de la carte, 8 oct. 2026) ===
+//
+// Décisions de Grégoire : « Vue plein écran », « Recentrer la carte » et
+// « Tout voir » en mots, la couleur du fond sous « Fond du canevas » (même
+// modèle que le menu « Annoter » d'« Annoter et évaluer »), puis les
+// raccourcis clavier en bas. Remplace trois icônes, la palette de fond et la
+// palette flottante des raccourcis.
+//
+// ▣ RACCOURCIS_CARTE est la SOURCE UNIQUE de la liste affichée : le banc
+// `planif-menu-vue.spec.js` exige un essai par `id`, et un essai qui
+// manquerait pour une ligne ajoutée le fait échouer. Une ligne n'entre ici que
+// si son geste est branché ET marche dans Chrome et Safari (demande de
+// Grégoire : « chaque raccourci décrit doit fonctionner »).
+//
+// ⚠ ⌘1 n'y est plus : Chrome et Safari le réservent au passage au premier
+// onglet. Recentrer passe à R, sans modificateur, comme L pour la loupe.
+var RACCOURCIS_CARTE = [
+    { id: 'recentrer',          mac: 'R',                    autre: 'R',                     libelle: 'Recentrer la carte' },
+    { id: 'loupe',              mac: 'L',                    autre: 'L',                     libelle: 'Loupe : lire sans changer le zoom' },
+    { id: 'zoom-avant-arriere', mac: '⌘+ / ⌘−',              autre: 'Ctrl++ / Ctrl+−',       libelle: 'Zoom avant / arrière' },
+    { id: 'zoom-100',           mac: '⌘0',                   autre: 'Ctrl+0',                libelle: 'Zoom à 100 %, carte recentrée' },
+    { id: 'zoom-molette',       mac: 'Pincer ou Ctrl+molette', autre: 'Ctrl+molette',        libelle: 'Zoom à la souris ou au trackpad' },
+    { id: 'tout-selectionner',  mac: '⌘A',                   autre: 'Ctrl+A',                libelle: 'Tout sélectionner' },
+    { id: 'multi-selection',    mac: '⌘+clic',               autre: 'Ctrl+clic',             libelle: 'Ajouter un bloc à la sélection, ou l’en retirer' },
+    { id: 'selection-zone',     mac: 'Glisser sur le fond',  autre: 'Glisser sur le fond',   libelle: 'Sélectionner une zone (souris)' },
+    { id: 'glisser',            mac: 'Glisser',              autre: 'Glisser',               libelle: 'Un bloc se déplace seul ; saisir le cadre d’une leçon ou d’une séquence déplace le groupe' },
+    { id: 'dupliquer',          mac: '⌘D',                   autre: 'Ctrl+D',                libelle: 'Dupliquer la sélection (copie indépendante)' },
+    { id: 'dupliquer-clone',    mac: '⇧⌘D',                  autre: 'Maj+Ctrl+D',            libelle: 'Dupliquer la sélection (clone lié)' },
+    { id: 'alt-glisser',        mac: '⌥+glisser',            autre: 'Alt+glisser',           libelle: 'Dupliquer en déplaçant (copie indépendante)' },
+    { id: 'alt-glisser-clone',  mac: '⇧⌥+glisser',           autre: 'Maj+Alt+glisser',       libelle: 'Dupliquer en déplaçant (clone lié)' },
+    { id: 'supprimer',          mac: 'Suppr ou ⌫',           autre: 'Suppr ou Retour arrière', libelle: 'Supprimer la sélection' },
+    { id: 'annuler',            mac: '⌘Z',                   autre: 'Ctrl+Z',                libelle: 'Annuler' },
+    { id: 'retablir',           mac: '⇧⌘Z',                  autre: 'Maj+Ctrl+Z',            libelle: 'Rétablir' },
+    { id: 'recherche-entree',   mac: 'Entrée / ⇧Entrée',     autre: 'Entrée / Maj+Entrée',   libelle: 'Recherche : résultat suivant / précédent' },
+    { id: 'recherche-fleches',  mac: '↓ / ↑',                autre: '↓ / ↑',                 libelle: 'Recherche : résultat suivant / précédent' },
+    { id: 'recherche-echap',    mac: 'Échap',                autre: 'Échap',                 libelle: 'Recherche : refermer la liste, puis effacer' },
+    { id: 'echap',              mac: 'Échap',                autre: 'Échap',                 libelle: 'Fermer la loupe ou quitter le plein écran ; sinon, tout désélectionner' }
+];
 
-    btnFond.addEventListener('click', function(e) {
+// Exposée ici et non dans l'objet `window.planificationCarte` plus haut : à ce
+// moment-là, la `var` ci-dessus vaut encore `undefined`.
+window.planificationCarte.RACCOURCIS_CARTE = RACCOURCIS_CARTE;
+
+/** Le Mac et l'iPad affichent ⌘ ⌥ ⇧ ; Windows et les autres, Ctrl, Alt, Maj. */
+function claviersMac() {
+    var plateforme = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+    return /Mac|iPhone|iPad|iPod/i.test(plateforme);
+}
+
+function toucheAffichee(raccourci) {
+    return claviersMac() ? raccourci.mac : raccourci.autre;
+}
+
+/** Rend la liste des raccourcis en bas du menu « Vue » (createElement : aucun innerHTML). */
+function rendreRaccourcisMenuVue() {
+    var table = document.getElementById('planif-vue-raccourcis');
+    if (!table) return;
+    while (table.firstChild) table.removeChild(table.firstChild);
+    RACCOURCIS_CARTE.forEach(function(r) {
+        var tr = document.createElement('tr');
+        tr.dataset.raccourci = r.id;
+        var tdTouche = document.createElement('td');
+        var kbd = document.createElement('kbd');
+        kbd.textContent = toucheAffichee(r);
+        tdTouche.appendChild(kbd);
+        var tdLibelle = document.createElement('td');
+        tdLibelle.textContent = r.libelle;
+        tr.appendChild(tdTouche);
+        tr.appendChild(tdLibelle);
+        table.appendChild(tr);
+    });
+}
+
+function menuVueOuvert() {
+    var dd = document.getElementById('planif-vue-dropdown');
+    return !!(dd && dd.classList.contains('ouvert'));
+}
+
+function ouvrirMenuVue(focusPremier) {
+    var dd = document.getElementById('planif-vue-dropdown');
+    var btn = document.getElementById('planif-btn-vue');
+    if (!dd || !btn) return;
+    var actions = document.getElementById('planif-actions-dropdown');
+    if (actions) actions.classList.remove('ouvert');
+    dd.classList.add('ouvert');
+    btn.setAttribute('aria-expanded', 'true');
+    if (focusPremier) {
+        var premier = dd.querySelector('button');
+        if (premier) premier.focus();
+    }
+}
+
+function fermerMenuVue(rendreFocus) {
+    var dd = document.getElementById('planif-vue-dropdown');
+    var btn = document.getElementById('planif-btn-vue');
+    if (!dd || !btn) return;
+    dd.classList.remove('ouvert');
+    btn.setAttribute('aria-expanded', 'false');
+    if (rendreFocus) btn.focus();
+}
+
+/** Flèches ↑ / ↓ : passer d'une commande à l'autre, pastilles comprises. */
+function deplacerFocusMenuVue(sens) {
+    var dd = document.getElementById('planif-vue-dropdown');
+    if (!dd) return;
+    var boutons = Array.prototype.slice.call(dd.querySelectorAll('button'));
+    if (boutons.length === 0) return;
+    var i = boutons.indexOf(document.activeElement);
+    var suivant = i === -1 ? (sens > 0 ? 0 : boutons.length - 1)
+                           : (i + sens + boutons.length) % boutons.length;
+    boutons[suivant].focus();
+}
+
+function initialiserMenuVue() {
+    var menu = document.getElementById('planif-vue-menu');
+    var btn = document.getElementById('planif-btn-vue');
+    var dd = document.getElementById('planif-vue-dropdown');
+    if (!menu || !btn || !dd) return;
+
+    rendreRaccourcisMenuVue();
+
+    // Le bouton « Annuler » disait « Ctrl+Z » sur un Mac (mesure du lot 0).
+    var btnAnnuler = document.getElementById('planif-btn-annuler');
+    if (btnAnnuler) btnAnnuler.title = 'Annuler (' + (claviersMac() ? '⌘Z' : 'Ctrl+Z') + ')';
+
+    btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        dropdown.classList.toggle('visible');
+        // `detail === 0` : clic produit par le clavier (Entrée, Espace) — on
+        // entre alors dans le menu, comme le ferait un menu natif.
+        if (menuVueOuvert()) fermerMenuVue(false);
+        else ouvrirMenuVue(e.detail === 0);
     });
 
-    dropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
+    // Une commande ou une pastille referme le menu ; un clic dans la liste
+    // des raccourcis, qui se LIT, ne le referme pas.
+    // ⚠ AUCUN stopPropagation ici : les trois commandes passent par le
+    // répartiteur `data-action`, délégué au document (main.js). L'arrêter
+    // rendait les commandes muettes — vu au banc le 8 oct.
+    dd.addEventListener('click', function(e) {
+        if (e.target.closest('button')) fermerMenuVue(false);
+    });
+    document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target)) fermerMenuVue(false);
+    });
+
+    // ⚠ stopPropagation sur Échap : sans lui, `gererKeydown` (document)
+    // désélectionnerait aussi, et l'écouteur du plein écran le quitterait.
+    menu.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && menuVueOuvert()) {
+            e.preventDefault();
+            e.stopPropagation();
+            fermerMenuVue(true);
+            return;
+        }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!menuVueOuvert()) ouvrirMenuVue(false);
+            deplacerFocusMenuVue(e.key === 'ArrowDown' ? 1 : -1);
+        }
+    });
+    menu.addEventListener('focusout', function(e) {
+        if (e.relatedTarget && !menu.contains(e.relatedTarget)) fermerMenuVue(false);
+    });
+}
+
+// Câblé au CHARGEMENT, comme la couleur de fond ci-dessous, et non dans
+// `initialiser()` : les trois commandes passent par `data-action` et marchaient
+// avant que la carte soit initialisée — le menu qui les porte doit en faire
+// autant (le spec du plein écran ne l'initialise pas : vu au banc, 8 oct.).
+initialiserMenuVue();
+
+// === COULEUR DE FOND CANEVAS (rubrique « Fond du canevas » du menu « Vue ») ===
+// ⚠ Clé GLOBALE, à dessein : la couleur vaut pour toutes les cartes et tous
+// les trimestres (registre : docs/DATA-OWNERSHIP.md). C'est pourquoi elle est
+// dans « Vue » et non sous le nom d'une carte (décision de Grégoire, 8 oct.).
+(function() {
+    var pastilles = document.getElementById('planif-fond-swatches');
+    if (!pastilles) return;
+
+    pastilles.addEventListener('click', function(e) {
         var swatch = e.target.closest('[data-fond]');
         if (!swatch) return;
         var couleur = swatch.dataset.fond;
         var zone = document.getElementById('planif-zone-wrapper');
         if (zone) zone.style.background = couleur || '';
         db.setSync('planif-fond-canvas', couleur);
-        dropdown.classList.remove('visible');
-    });
-
-    document.addEventListener('click', function() {
-        dropdown.classList.remove('visible');
     });
 
     // Restaurer
@@ -12561,11 +12671,10 @@ function togglePleinEcranCarte() {
     _planifPleinEcran = !_planifPleinEcran;
     zone.classList.toggle('planif-plein-ecran', _planifPleinEcran);
     document.body.classList.toggle('planif-plein-ecran-actif', _planifPleinEcran);
-    var btn = document.getElementById('planif-btn-plein-ecran');
-    if (btn) {
-        btn.innerHTML = _planifPleinEcran ? '<img src="icons/icon-collapse.svg" alt="" class="planif-icon">' : '<img src="icons/icon-fit-to-width.svg" alt="" class="planif-icon">';
-        btn.title = _planifPleinEcran ? 'Quitter le plein \u00e9cran' : 'Plein \u00e9cran';
-    }
+    // L'état se lit à la coche de « Vue plein écran » (menu « Vue »), pas à
+    // une icône qui change : l'ancienne icône active était celle de « Tout voir ».
+    var item = document.getElementById('planif-vue-plein-ecran');
+    if (item) item.setAttribute('aria-pressed', _planifPleinEcran ? 'true' : 'false');
 }
 
 document.addEventListener('keydown', function(e) {

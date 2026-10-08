@@ -75,7 +75,9 @@ async function centreDe(page, id) {
 test('« Tout voir » fait tenir la carte ENTIÈRE, isolé compris', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
 
-    await page.click('#planif-btn-tout-voir');
+    // « Tout voir » vit dans le menu « Vue » depuis le 8 oct. 2026.
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
 
     const bilan = await page.evaluate(() => {
@@ -110,7 +112,9 @@ test('« Tout voir » fait tenir la carte ENTIÈRE, isolé compris', async ({ pa
 
 test('la loupe montre CE QU’ON VISE, et l’atterrissage y mène', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
-    await page.click('#planif-btn-tout-voir');
+    // « Tout voir » vit dans le menu « Vue » depuis le 8 oct. 2026.
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
 
     const cible = await centreDe(page, 'planif-noeud_cible');
@@ -159,7 +163,9 @@ test('la loupe montre CE QU’ON VISE, et l’atterrissage y mène', async ({ pa
 
 test('⚠ la loupe voit le pointeur MÊME sous la grille du Planificateur', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
-    await page.click('#planif-btn-tout-voir');
+    // « Tout voir » vit dans le menu « Vue » depuis le 8 oct. 2026.
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
     await page.click('#planif-btn-loupe');
 
@@ -187,7 +193,9 @@ test('⚠ la loupe voit le pointeur MÊME sous la grille du Planificateur', asyn
 
 test('⚠ iPad : glisser le doigt en mode loupe ne déplace AUCUN bloc', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
-    await page.click('#planif-btn-tout-voir');
+    // « Tout voir » vit dans le menu « Vue » depuis le 8 oct. 2026.
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
     await page.click('#planif-btn-loupe');
 

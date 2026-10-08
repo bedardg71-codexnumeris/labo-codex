@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261008a"> <!-- #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261008b"> <!-- Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4215,7 +4215,7 @@
                                         <!-- Panneau de nettoyage des repères de semaine (même patron) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-nettoyage-titres-panel"></div>
                                     </div>
-                                    <button class="planif-btn-carte" id="planif-btn-annuler" title="Ctrl+Z"><img src="icons/icon-undo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Annuler</button>
+                                    <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (⌘Z)"><img src="icons/icon-undo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Annuler</button>
                                     <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
                                 </div>
                                 <!-- Recherche dans la carte (15 août 2026). Elle mord sur les
@@ -4247,39 +4247,49 @@
                                          l'état survit au rechargement (préférences). -->
                                     <button class="planif-btn-vue planif-btn-palette" id="planif-btn-palette-noeuds" title="Masquer la palette « Nœuds »" aria-pressed="true">Nœuds</button>
                                     <button class="planif-btn-vue planif-btn-palette" id="planif-btn-palette-planificateur" title="Masquer la palette « Planificateur »" aria-pressed="true">Planificateur</button>
-                                    <button class="planif-btn-vue" id="planif-btn-recentrer" title="Recentrer la carte (⌘1)" data-action="planificationCarte.recentrerVue"><img src="icons/icon-final-state.svg" alt="" class="planif-icon"></button>
-                                    <!-- « Tout voir » et la loupe vont ENSEMBLE (11 août 2026) : on prend
-                                         du recul pour repérer, on lit à la loupe, on clique pour y aller.
-                                         Le bouton loupe n'est pas un doublon du raccourci L : sur iPad il
-                                         n'y a pas de clavier, c'est le seul chemin. -->
-                                    <button class="planif-btn-vue" id="planif-btn-tout-voir" title="Tout voir — ajuster le zoom pour afficher la carte entière" aria-label="Tout voir" data-action="planificationCarte.ajusterVueSurTout"><img src="icons/icon-collapse.svg" alt="" class="planif-icon"></button>
-                                    <button class="planif-btn-vue" id="planif-btn-loupe" title="Loupe — lire sans changer le zoom (L)" aria-label="Loupe" aria-pressed="false" data-action="planificationCarte.basculerLoupe"><img src="icons/icons8-chercher.svg" alt="" class="planif-icon"></button>
-                                    <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
-                                    <div class="planif-fond-picker" id="planif-fond-picker">
-                                        <button class="planif-btn-vue" id="planif-btn-fond" title="Couleur de fond"><img src="icons/icon-paint-palette.svg" alt="" class="planif-icon"></button>
-                                        <div class="planif-fond-dropdown" id="planif-fond-dropdown">
-                                            <button class="travaux-fond-swatch" data-fond="" title="D&eacute;faut" style="background:var(--surface-page, #0c1a22); border:2px solid var(--accent-primaire)"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#142428" title="Oc&eacute;an" style="background:#142428"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#1a2744" title="Nuit" style="background:#1a2744"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#2c3e50" title="Ardoise" style="background:#2c3e50"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#4a6580" title="Acier" style="background:#4a6580"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#3d3d3d" title="Graphite" style="background:#3d3d3d"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#4a4a3e" title="S&eacute;pia" style="background:#4a4a3e"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#6b7b6e" title="Lichen" style="background:#6b7b6e"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#8a9aaa" title="Brume" style="background:#8a9aaa"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#c5cdd5" title="Givre" style="background:#c5cdd5"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#d4cfc4" title="Parchemin" style="background:#d4cfc4"></button>
-                                            <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr&egrave;me" style="background:#e8e4da"></button>
+                                    <!-- Menu « Vue » (lot 1 du chantier de la carte, 8 oct. 2026, décisions
+                                         de Grégoire) : des mots au lieu de trois icônes ambiguës, la couleur
+                                         du fond (modèle : le menu « Annoter » d'« Annoter et évaluer »), et
+                                         les raccourcis clavier en bas — la palette des raccourcis a disparu.
+                                         La liste des raccourcis est rendue par le JS depuis RACCOURCIS_CARTE,
+                                         sa source unique. -->
+                                    <div class="planif-actions-menu planif-vue-menu" id="planif-vue-menu">
+                                        <button class="planif-btn-carte" id="planif-btn-vue" aria-haspopup="true" aria-expanded="false" aria-controls="planif-vue-dropdown">Vue ▾</button>
+                                        <div class="planif-actions-dropdown planif-vue-dropdown" id="planif-vue-dropdown">
+                                            <button class="planif-action-item" id="planif-vue-plein-ecran" aria-pressed="false" data-action="planificationCarte.togglePleinEcran">Vue plein écran</button>
+                                            <button class="planif-action-item" id="planif-vue-recentrer" data-action="planificationCarte.recentrerVue">Recentrer la carte<kbd class="planif-vue-touche">R</kbd></button>
+                                            <button class="planif-action-item" id="planif-vue-tout-voir" data-action="planificationCarte.ajusterVueSurTout">Tout voir</button>
+                                            <hr class="planif-action-sep">
+                                            <div class="actions-sous-titre">Fond du canevas</div>
+                                            <div class="actions-fond-swatches" id="planif-fond-swatches">
+                                                <button class="travaux-fond-swatch" data-fond="" title="D&eacute;faut" style="background:var(--surface-page, #0c1a22); border:2px solid var(--accent-primaire)"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#142428" title="Oc&eacute;an" style="background:#142428"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#1a2744" title="Nuit" style="background:#1a2744"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#2c3e50" title="Ardoise" style="background:#2c3e50"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#4a6580" title="Acier" style="background:#4a6580"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#3d3d3d" title="Graphite" style="background:#3d3d3d"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#4a4a3e" title="S&eacute;pia" style="background:#4a4a3e"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#6b7b6e" title="Lichen" style="background:#6b7b6e"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#8a9aaa" title="Brume" style="background:#8a9aaa"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#c5cdd5" title="Givre" style="background:#c5cdd5"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#d4cfc4" title="Parchemin" style="background:#d4cfc4"></button>
+                                                <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr&egrave;me" style="background:#e8e4da"></button>
+                                            </div>
+                                            <hr class="planif-action-sep">
+                                            <div class="actions-sous-titre">Raccourcis clavier</div>
+                                            <table class="planif-raccourcis-table" id="planif-vue-raccourcis"></table>
                                         </div>
                                     </div>
-                                    <button class="planif-btn-vue" id="planif-btn-plein-ecran" title="Plein &eacute;cran" data-action="planificationCarte.togglePleinEcran"><img src="icons/icon-fit-to-width.svg" alt="" class="planif-icon"></button>
+                                    <!-- Le bouton loupe n'est pas un doublon du raccourci L : sur iPad il
+                                         n'y a pas de clavier, c'est le seul chemin (11 août 2026). -->
+                                    <button class="planif-btn-vue" id="planif-btn-loupe" title="Loupe — lire sans changer le zoom (L)" aria-label="Loupe" aria-pressed="false" data-action="planificationCarte.basculerLoupe"><img src="icons/icons8-chercher.svg" alt="" class="planif-icon"></button>
+                                    <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
                                     <!-- #444 : les quatre boutons du bas de la palette montent ICI.
                                          Motif : sur iPad la palette dépasse l'écran et les coupait —
                                          l'Inspecteur devenait inatteignable au doigt, or le
                                          double-clic ne l'ouvre pas non plus (constat du 10 août). -->
                                     <span class="planif-toolbar-separateur" aria-hidden="true"></span>
                                     <button class="planif-btn-vue" id="planif-palette-inspecteur-btn" title="Inspecteur (double-tap sur un bloc)" aria-label="Inspecteur"><img src="icons/icon-advanced-search.svg" alt="" class="planif-icon"></button>
-                                    <button class="planif-btn-vue" id="planif-palette-raccourcis-btn" title="Raccourcis clavier" aria-label="Raccourcis clavier"><img src="icons/icon-shortcut.svg" alt="" class="planif-icon"></button>
                                     <button class="planif-btn-vue" id="planif-palette-aide-btn" data-tooltip="planif-aide" aria-label="Guide"><img src="icons/icon-book.svg" alt="" class="planif-icon"></button>
                                     <button class="planif-btn-vue" id="planif-palette-bibliotheque-btn" title="Biblioth&egrave;que de cartes d'alignement" aria-label="Biblioth&egrave;que"><img src="icons/icons8-library-2.svg" alt="" class="planif-icon"></button>
                                 </div>
@@ -4389,33 +4399,6 @@
                             <div id="planif-corbeille" class="planif-corbeille" title="Glisse un bloc ici pour le supprimer" aria-label="Corbeille — glisse un bloc ici pour le supprimer">
                                 <img src="icons/icons8-trash.svg" alt="" class="palette-icon">
                                 <span class="planif-corbeille-libelle">Déposer ici pour supprimer</span>
-                            </div>
-                            <!-- Panneau raccourcis flottant -->
-                            <div id="planif-raccourcis-panel" class="planif-guide-flottante" style="display: none;">
-                                <div class="planif-guide-barre">
-                                    <span class="planif-palette-titre">Raccourcis</span>
-                                    <div class="planif-guide-barre-actions">
-                                        <button class="planif-raccourcis-panel-replier" title="Replier">−</button>
-                                        <button class="planif-raccourcis-panel-fermer" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                                    </div>
-                                </div>
-                                <div class="planif-raccourcis-panel-contenu">
-                                    <table class="planif-raccourcis-table">
-                                        <tr><td><kbd>Suppr</kbd></td><td>Supprimer</td></tr>
-                                        <tr><td><kbd>⌘A</kbd></td><td>Tout sélectionner</td></tr>
-                                        <tr><td><kbd>⌘+Clic</kbd></td><td>Multi-sélection</td></tr>
-                                        <tr><td><kbd>Rectangle</kbd></td><td>Sélection par zone</td></tr>
-                                        <tr><td><kbd>⌘+/-</kbd></td><td>Zoom avant/arrière</td></tr>
-                                        <tr><td><kbd>⌘0</kbd></td><td>Reset zoom</td></tr>
-                                        <tr><td><kbd>⌘1</kbd></td><td>Recentrer</td></tr>
-                                        <tr><td><kbd>⌘D</kbd></td><td>Dupliquer</td></tr>
-                                        <tr><td><kbd>⌥+Glisser</kbd></td><td>Dupliquer en déplaçant</td></tr>
-                                        <tr><td><kbd>Glisser</kbd></td><td>Un bloc se déplace seul ; saisir le cadre d'une leçon/séquence déplace le groupe</td></tr>
-                                        <tr><td><kbd>⌘Z</kbd></td><td>Annuler</td></tr>
-                                        <tr><td><kbd>Entrée</kbd></td><td>Recherche : aller au résultat suivant (<kbd>⇧Entrée</kbd> précédent)</td></tr>
-                                        <tr><td><kbd>Échap</kbd></td><td>Recherche : refermer la liste, puis effacer</td></tr>
-                                    </table>
-                                </div>
                             </div>
                             <!-- Planificateur : grille des semaines + réserve « Non planifié ».
                                  Il NAVIGUE dans la carte (cadrage + sélection) ; il ne la filtre plus. -->
@@ -11577,9 +11560,9 @@
 
                             <p><strong>Outils de navigation :</strong></p>
                             <ul>
-                                <li><strong>Zoom</strong> : molette ou pincement ; le pourcentage s'affiche dans la barre. <strong>Recentrer</strong> (⌘1) ramène toute la carte à l'écran</li>
-                                <li><strong>Plein écran</strong> : masque le titre de section et ne laisse que la carte</li>
-                                <li><strong>Annuler</strong> : Ctrl+Z, ou le bouton <strong>Annuler</strong> de la barre (le seul chemin sur iPad)</li>
+                                <li><strong>Zoom</strong> : molette ou pincement ; le pourcentage s'affiche dans la barre. <strong>Vue &#9656; Recentrer la carte</strong> (touche R) ramène la carte au centre sans changer le zoom ; <strong>Vue &#9656; Tout voir</strong> la fait tenir entière à l'écran. Tous les raccourcis sont au bas du menu <strong>Vue</strong></li>
+                                <li><strong>Vue &#9656; Vue plein écran</strong> : masque le titre de section et ne laisse que la carte (Échap pour en sortir)</li>
+                                <li><strong>Annuler</strong> : ⌘Z (Ctrl+Z sous Windows), ou le bouton <strong>Annuler</strong> de la barre (le seul chemin sur iPad)</li>
                                 <li><strong>Supprimer un bloc</strong> : glisse-le sur la <strong>corbeille</strong> de la palette</li>
                                 <li><strong>Multi-cartes</strong> : crée plusieurs cartes, duplique-les, passe de l'une à l'autre</li>
                                 <li><strong>Importer</strong> : une carte exportée en JSON, ou la carte d'un cours donné à un trimestre précédent</li>
@@ -14442,7 +14425,7 @@
     <script src="js/planification-donnees.js?v=20261006a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=20261006a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20261006a"></script> <!-- Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20261008a"></script> <!-- Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260928c"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14547,7 +14530,7 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261001b"></script> <!-- Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20261008a"></script> <!-- Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20261007c"></script> <!-- Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260917b"></script>
     <script src="js/guides-pedagogiques.js?v=20260917b"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->

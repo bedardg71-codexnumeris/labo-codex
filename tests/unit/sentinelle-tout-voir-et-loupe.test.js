@@ -181,7 +181,8 @@ describe('Loupe · les invariants qui la rendent utilisable sur iPad', () => {
     it('iPad : les deux commandes existent en BOUTON, pas seulement au clavier', () => {
         // Sur iPad il n'y a pas de clavier : la touche L n'est qu'un raccourci,
         // le bouton est le chemin. Et l'état se lit sur aria-pressed.
-        expect(sourceIndex).toMatch(/id="planif-btn-tout-voir"[^>]*data-action="planificationCarte\.ajusterVueSurTout"/);
+        // « Tout voir » est une commande du menu « Vue » depuis le 8 oct. 2026.
+        expect(sourceIndex).toMatch(/id="planif-vue-tout-voir"[^>]*data-action="planificationCarte\.ajusterVueSurTout"/);
         expect(sourceIndex).toMatch(/id="planif-btn-loupe"[^>]*aria-pressed="false"[^>]*data-action="planificationCarte\.basculerLoupe"/);
     });
 
