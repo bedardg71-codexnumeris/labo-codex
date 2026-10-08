@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.190 (#967 : « Écraser » un homonyme employé) — titre et ligne validés par Grégoire le
+            // 8 oct. 2026 à 7 h 09, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md, « Suite – relecture
+            // de 1.190.0 et mots de Grégoire »), posés tels quels.
+            version: '1.190',
+            couleur: 'bleu',
+            titre: 'Un modèle employé n\'est plus remplacé',
+            items: [
+                'Conception&nbsp;: «&nbsp;Remplacer l\'existante&nbsp;» refuse maintenant de remplacer une échelle, une grille ou une cartouche que des évaluations ou des productions emploient. La fenêtre dit combien, et rien n\'est modifié&nbsp;; donne un autre nom à la nouvelle.'
+            ]
+        },
+        {
             // 1.189 (#1039 : générateur d'équipes, barre d'outils d'animation) — lignes et titre validés
             // par Grégoire le 7 oct. 2026 à 16 h 21, par Cowork (plans de travail/MOTS-2026-10-07-1039-equipes.md),
             // posés tels quels.
