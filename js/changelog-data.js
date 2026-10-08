@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.192 (chantier de la carte d'alignement, lots 1 et 2 : menu « Vue », planificateur
+            // vertical et dates du trimestre) — titre et lignes validés par Grégoire le 8 oct. 2026
+            // à 19 h 33, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md), posés tels quels.
+            version: '1.192',
+            couleur: 'vert',
+            titre: 'Un menu «&nbsp;Vue&nbsp;» sur la carte d\'alignement',
+            items: [
+                'Conception&nbsp;› Carte d\'alignement&nbsp;: un menu «&nbsp;Vue&nbsp;» réunit «&nbsp;Vue plein écran&nbsp;», «&nbsp;Recentrer la carte&nbsp;», «&nbsp;Tout voir&nbsp;», la couleur du fond et, en bas, tous les raccourcis clavier. «&nbsp;Recentrer la carte&nbsp;» se fait maintenant avec la touche R (au lieu de ⌘1).',
+                'Planificateur&nbsp;: les dates du trimestre s\'affichent à côté du titre&nbsp;; si elles manquent, un lien mène à Cadre&nbsp;› Trimestre pour les entrer. La réserve «&nbsp;Non planifié&nbsp;» ne se place plus à gauche de la grille&nbsp;: elle est toujours dessous.'
+            ]
+        },
+        {
             // 1.191 (#976 : « Corriger le DA… ») — titre et ligne validés par Grégoire le 8 oct. 2026 à
             // 14 h 50, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md, « Suite – relecture de #976 et
             // décisions de Grégoire »), posés tels quels. 1.191.1 (relecture du volet des globales : le
