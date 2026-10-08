@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261008b"> <!-- Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261008c"> <!-- Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4404,11 +4404,13 @@
                                  Il NAVIGUE dans la carte (cadrage + sélection) ; il ne la filtre plus. -->
                             <div id="planif-palette-nav" class="planif-palette-flottante">
                                 <div class="planif-palette-barre">
-                                    <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Planificateur</span>
-                                    <button class="planif-palette-toggle" id="planif-btn-disposition-reserve" title="Réserve « Non planifié » : à gauche de la grille" aria-pressed="false">◧</button>
+                                    <span class="planif-palette-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Planificateur<span class="planif-palette-dates" id="planif-dates-trimestre"></span></span>
                                 </div>
                                 <div class="planif-palette-poignee" role="separator" aria-label="Redimensionner le planificateur" title="Glisser pour redimensionner · double-clic pour revenir à la taille par défaut"></div>
                                 <div class="planif-palette-contenu planif-nav-contenu">
+                                    <!-- Lot 2 du chantier de la carte (8 oct. 2026), mots de Grégoire. Remplace
+                                         l'avis « Semaines dérivées des leçons… (Réglages) ». -->
+                                    <p class="planif-grille-avis" id="planif-invitation-dates" hidden>Les dates du trimestre ne sont pas entrées. Ajoute-les dans <a href="#" class="planif-lien-cadre" data-action="planificationCarte.ouvrirCadreTrimestre" data-prevent>Cadre › Trimestre</a>.</p>
                                     <div id="planif-sommaire" class="planif-sommaire"></div>
                                     <div id="planif-jauge-temps" class="planif-jauge-temps" style="display:none"></div>
                                 </div>
@@ -14266,7 +14268,7 @@
     <script src="js/securite-echappement.js?v=20260821a"></script> <!-- CT-29 : echapperAttribut — echapperHtml n'encode pas les guillemets, insuffisant en contexte d'attribut -->
     <script src="js/identite-naturelle.js?v=20260824a"></script> <!-- CT-15 : source unique de l'identite NATURELLE d'une entite du cadre (code de cours #455, courriel, triplet du groupe-cours) -->
     <script src="js/navigation.js?v=20260918a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
-    <script src="js/preferences.js?v=20260929b"></script> <!-- API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
+    <script src="js/preferences.js?v=20261008a"></script> <!-- Lot 2 de la carte (8 oct.) : défaut planifReserveDisposition retiré · API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
     <script src="js/modes.js?v=20261007c"></script> <!-- Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
@@ -14425,7 +14427,7 @@
     <script src="js/planification-donnees.js?v=20261006a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=20261006a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20261008a"></script> <!-- Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20261008b"></script> <!-- Lot 2 de la carte (8 oct.) : planificateur vertical seul, dates du trimestre · Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260928c"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 

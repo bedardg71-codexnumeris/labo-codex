@@ -116,7 +116,7 @@ describe('lot 2 · rangées dérivées du calendrier (D5)', () => {
         expect(html).not.toContain('planif-grille-avis');
     });
 
-    it('sans calendrier, repli sur les semaines saisies + avis explicite', () => {
+    it('sans calendrier, repli sur les semaines saisies — sans l’ancien avis « (Réglages) »', () => {
         poser(api, 'planif-l1', 'lecon', { titre: 'Accueil', metadata: { semaine: 4 } });
 
         api.mettreAJourPlanificateur();
@@ -124,8 +124,11 @@ describe('lot 2 · rangées dérivées du calendrier (D5)', () => {
 
         const nums = [...html.matchAll(/planif-grille-num">([^<]+)</g)].map((m) => m[1]);
         expect(nums).toEqual(['1', '2', '3', '4']);
-        expect(html).toContain('planif-grille-avis');
-        expect(html).toContain('Cadre du trimestre');
+        // L'avis qui renvoyait vers « Réglages » est remplacé (lot 2 de la carte,
+        // 8 oct. 2026) par l'invitation à entrer les dates, hors du rendu de la
+        // grille : `planif-planificateur-dates.spec.js` et la sentinelle de la réserve.
+        expect(html).not.toContain('planif-grille-avis');
+        expect(html).not.toContain('Réglages');
     });
 });
 

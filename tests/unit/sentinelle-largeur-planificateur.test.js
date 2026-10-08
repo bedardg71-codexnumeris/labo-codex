@@ -167,60 +167,9 @@ describe('Sentinelle · géométrie du planificateur — le côte à côte doit 
         expect(cellule['flex-wrap']).toBe('wrap');
     });
 
-    // --- Volet 3 : LE SECOND CAS — réserve en COLONNE (7 août 2026) ------
-    //
-    // Cette sentinelle ne couvrait que la disposition « réserve en bas », où la
-    // grille dispose de toute la largeur utile. En mode « réserve à gauche », la
-    // colonne en PRÉLÈVE une part fixe — et l'inégalité doit être re-vérifiée
-    // sur ce qui reste. Sans ce volet, on pouvait livrer une bascule
-    // parfaitement écrite qui ne laisse qu'une pastille par rangée : le défaut
-    // de 1.47.0, à l'identique, dans son deuxième costume.
-
-    const colonne = declarations('.planif-reserve-colonne');
-    const cotecote = declarations('.planif-cotecote');
-
-    /** Largeurs LUES dans le JS — jamais recopiées ici, sinon la sentinelle
-     *  validerait sa propre copie plutôt que le code. */
-    const plancherPalette = parseFloat(
-        /var PLANCHER_PALETTE_COTE_A_COTE = (\d+)/.exec(sourceCarte)[1]
-    );
-    const largeurColonneJs = parseFloat(
-        /var LARGEUR_RESERVE_COLONNE = (\d+)/.exec(sourceCarte)[1]
-    );
-
-    it('la colonne CSS et la constante JS déclarent la même largeur', () => {
-        // Deux sources qui divergent, c'est l'arithmétique qui ment.
-        expect(px(colonne['flex'])).toBe(largeurColonneJs);
-    });
-
-    it('AU PLANCHER, deux blocs tiennent encore côte à côte À CÔTÉ de la réserve', () => {
-        const utile = plancherPalette - chrome() - largeurColonneJs - px(cotecote.gap);
-        const requis = 2 * px(bloc['min-width']) + gapColonne();
-        expect(utile).toBeGreaterThanOrEqual(requis);
-    });
-
-    it('le plancher est INDISPENSABLE — à la largeur par défaut, ça ne tiendrait pas', () => {
-        // C'est ce qui justifie que la bascule élargisse la palette d'office.
-        // Si un jour cette assertion échoue, c'est que le plancher est devenu
-        // inutile : le retirer alors, plutôt que de le garder « au cas où ».
-        const utileDefaut = px(palette.width) - chrome() - largeurColonneJs - px(cotecote.gap);
-        const requis = 2 * px(bloc['min-width']) + gapColonne();
-        expect(utileDefaut).toBeLessThan(requis);
-    });
-
-    it('le plancher ne dépasse pas le plafond de la palette', () => {
-        expect(plancherPalette).toBeLessThanOrEqual(px(palette['max-width']));
-    });
-
-    it('la colonne défile pour elle-même — sinon une longue réserve étire la grille', () => {
-        expect(colonne['overflow-y']).toBe('auto');
-        expect(colonne['max-height']).toBeTruthy();
-    });
-
-    it('l’enveloppe côte à côte est bien un flex à deux colonnes', () => {
-        expect(cotecote.display).toBe('flex');
-        expect(px(cotecote.gap)).toBeGreaterThan(0);
-    });
+    // (Le volet « réserve en COLONNE » du 7 août est retiré avec la colonne
+    // elle-même, le 8 oct. 2026 — lot 2 du chantier de la carte. La grille
+    // dispose de nouveau de toute la largeur utile : le volet 2 suffit.)
 
     // --- Volet 3 : la poignée existe et est câblée ----------------------
 

@@ -8796,7 +8796,6 @@ function initialiser() {
             // Pointer Events : couvre souris, doigt (iPad) et Apple Pencil.
             // Nécessite touch-action:none sur .planif-palette-barre (styles.css).
             paletteBarre.addEventListener('pointerdown', function(e) {
-                if (e.target.closest('.planif-palette-toggle')) return;
                 if (!e.isPrimary) return;
                 e.preventDefault();
                 var pointerId = e.pointerId;
@@ -9259,15 +9258,6 @@ function initialiser() {
             panneauCoursCarte.classList.remove('ouvert');
         });
         panneauCoursCarte.addEventListener('click', function(e) { e.stopPropagation(); });
-    }
-
-    var btnDisposition = document.getElementById('planif-btn-disposition-reserve');
-    if (btnDisposition) {
-        btnDisposition.addEventListener('click', function(e) {
-            e.stopPropagation(); // la barre porte le glisser de la palette
-            basculerDispositionReserve();
-        });
-        mettreAJourBoutonDisposition();
     }
 
     Object.keys(PALETTES_FLOTTANTES).forEach(function(quoi) {
@@ -9812,67 +9802,65 @@ function mettreAJourJaugeTemps(sequences) {
 // Leçons dont le déroulé est déplié dans la grille (état d'affichage, non persisté).
 var _leconsDepliees = new Set();
 
-// === DISPOSITION DE LA RÉSERVE « NON PLANIFIÉ » (7 août 2026) ===
+// === DATES DU TRIMESTRE, À CÔTÉ DU TITRE « PLANIFICATEUR » (lot 2, 8 oct. 2026) ===
 //
-// Proposition de Grégoire du 6 août, tranchée le 7 : offrir DEUX dispositions
-// et laisser l'utilisateur choisir. ▣ GÉNÉRAL — quand un compromis d'affichage
-// dépend de l'écran de l'utilisateur, le lui offrir vaut mieux que de trancher
-// à sa place.
+// Décisions de Grégoire : « Début du trimestre » et « Fin du trimestre » du
+// Cadre (`dateDebut` et `finTrimestre` de `cadreCalendrier`), sous la forme
+// « PLANIFICATEUR · du 25 août au 19 décembre 2026 » — l'année une seule fois
+// quand les deux dates la partagent. Sans elles, une invitation menant au
+// Cadre ; elle remplace l'avis « Semaines dérivées des leçons… (Réglages) »,
+// qui renvoyait vers une section d'un autre nom.
 //
-//   'bas'    — la réserve sous la grille (défaut historique) ;
-//   'gauche' — la réserve en colonne À CÔTÉ. Elle cesse alors de défiler avec
-//              la grille, ce qui est tout l'objet : on y PUISE des pastilles
-//              pendant que la grille défile dessous (l'auto-défilement du
-//              glisser, livré en 1.45.1, fait le reste).
-//
-// ⚠ PLANCHER DE LARGEUR — la leçon de 1.47.0, où un côte à côte parfaitement
-// écrit était INERTE faute de place. À 360 px (largeur par défaut), la palette
-// offre 316 px utiles ; une colonne de réserve de 170 px n'en laisserait que
-// ~142 à la grille, soit UNE pastille par rangée : la grille redeviendrait une
-// file verticale et la fonction serait pire que ce qu'elle remplace.
-// Basculer à gauche élargit donc la palette au plancher si elle est en dessous.
-// Revenir en bas ne la rétrécit PAS : la largeur est un réglage de l'utilisateur.
-var LARGEUR_RESERVE_COLONNE = 170;
-var PLANCHER_PALETTE_COTE_A_COTE = 520;
-
-/** Disposition courante, lue de la préférence. Repli sûr sur le défaut. */
-function dispositionReserve() {
-    try {
-        if (typeof obtenirPreference !== 'function') return 'bas';
-        return obtenirPreference('planifReserveDisposition') === 'gauche' ? 'gauche' : 'bas';
-    } catch (e) {
-        return 'bas';
-    }
-}
+// ▣ La présentation « réserve à gauche » est RETIRÉE par le même lot (on ne
+// pouvait pas y glisser une leçon arrivant à la hauteur de la réserve). La
+// préférence qu'elle écrivait, `planifReserveDisposition`, reste telle quelle
+// dans `preferencesUtilisateur` : rien n'est effacé, plus rien ne la lit.
+var MOIS_DATES_TRIMESTRE = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
 /**
- * Permute la disposition. En passant à gauche, garantit le plancher de largeur
- * — sans quoi la bascule ne rendrait service qu'à qui a pensé à élargir la
- * palette d'abord, ce que personne ne devine.
+ * « du 25 août au 19 décembre 2026 » ; « du 1er décembre 2026 au 8 janvier 2027 »
+ * quand les années diffèrent. `null` si l'une des dates manque ou est mal formée.
  */
-function basculerDispositionReserve() {
-    var vers = dispositionReserve() === 'gauche' ? 'bas' : 'gauche';
-    try {
-        if (typeof definirPreference === 'function') {
-            definirPreference('planifReserveDisposition', vers);
-        }
-    } catch (e) {
-        console.warn('[Planification] Préférence de disposition non enregistrée :', e);
+function formaterDatesTrimestre(debut, fin) {
+    var re = /^(\d{4})-(\d{2})-(\d{2})$/;
+    var d = re.exec(debut || ''), f = re.exec(fin || '');
+    if (!d || !f) return null;
+    function jourMois(m) {
+        var jour = parseInt(m[3], 10);
+        var mois = MOIS_DATES_TRIMESTRE[parseInt(m[2], 10) - 1];
+        if (!mois || jour < 1 || jour > 31) return null;
+        return (jour === 1 ? '1er' : String(jour)) + ' ' + mois;
     }
+    var jd = jourMois(d), jf = jourMois(f);
+    if (!jd || !jf) return null;
+    return d[1] === f[1]
+        ? 'du ' + jd + ' au ' + jf + ' ' + f[1]
+        : 'du ' + jd + ' ' + d[1] + ' au ' + jf + ' ' + f[1];
+}
 
-    if (vers === 'gauche') {
-        var palette = document.getElementById('planif-palette-nav');
-        if (palette) {
-            var cs = window.getComputedStyle(palette);
-            var max = parseFloat(cs.maxWidth);
-            var plancher = isNaN(max) ? PLANCHER_PALETTE_COTE_A_COTE
-                                      : Math.min(PLANCHER_PALETTE_COTE_A_COTE, max);
-            if (palette.offsetWidth < plancher) palette.style.width = plancher + 'px';
-        }
-    }
+/** Les dates du trimestre actif, formatées ; `null` si le Cadre ne les a pas. */
+function datesTrimestreDuCadre() {
+    var cadre = null;
+    try { cadre = db.getSync(cle('cadreCalendrier'), null); } catch (e) { cadre = null; }
+    if (!cadre || typeof cadre !== 'object') return null;
+    // `debutTrimestre` : ancien nom du champ, que trimestre-v2.js lit encore.
+    return formaterDatesTrimestre(cadre.dateDebut || cadre.debutTrimestre, cadre.finTrimestre);
+}
 
-    mettreAJourPlanificateur();
-    mettreAJourBoutonDisposition();
+function mettreAJourDatesPlanificateur() {
+    var dates = datesTrimestreDuCadre();
+    var span = document.getElementById('planif-dates-trimestre');
+    var invitation = document.getElementById('planif-invitation-dates');
+    if (span) span.textContent = dates ? ' · ' + dates : '';
+    if (invitation) invitation.hidden = !!dates;
+}
+
+/** Le lien « Cadre › Trimestre » de l'invitation : même chemin que le bandeau d'archive. */
+function ouvrirCadreTrimestre() {
+    if (typeof window.naviguerVersReglagesTrimestre === 'function') window.naviguerVersReglagesTrimestre();
+    var champ = document.getElementById('v2-debutTrimestre');
+    if (champ && champ.offsetParent !== null) champ.focus();
 }
 
 // =========== AFFICHAGE DES PALETTES FLOTTANTES (7 août 2026) ===========
@@ -9943,23 +9931,6 @@ function appliquerAffichagePalettes() {
                             : 'Afficher la palette « ' + def.nom + ' »';
         btn.setAttribute('aria-label', btn.title);
     });
-}
-
-function mettreAJourBoutonDisposition() {
-    var btn = document.getElementById('planif-btn-disposition-reserve');
-    if (!btn) return;
-    var aGauche = dispositionReserve() === 'gauche';
-    btn.setAttribute('aria-pressed', aGauche ? 'true' : 'false');
-    btn.classList.toggle('actif', aGauche);
-    // Le glyphe dépeint la disposition COURANTE (rotation CSS via `.actif`) ;
-    // le title dit ce que le CLIC produira. Les deux se complètent au lieu de
-    // se répéter.
-    btn.title = aGauche
-        ? 'Réserve « Non planifié » : la remettre sous la grille'
-        : 'Réserve « Non planifié » : la mettre à gauche de la grille';
-    btn.setAttribute('aria-label', aGauche
-        ? 'Réserve en colonne à gauche — cliquer pour la remettre sous la grille'
-        : 'Réserve sous la grille — cliquer pour la mettre en colonne à gauche');
 }
 
 function basculerDetailLecon(leconId) {
@@ -10392,6 +10363,7 @@ function initialiserDragGrille() {
 function mettreAJourPlanificateur() {
     var conteneur = document.getElementById('planif-sommaire');
     if (!conteneur) return;
+    mettreAJourDatesPlanificateur();
 
     var derive = deriverRangeesGrille();
     var cadre = cadreSemainesGrille(derive.rangees);
@@ -10413,11 +10385,6 @@ function mettreAJourPlanificateur() {
     // n'y a donc plus de vue à quitter pour y revenir.)
     var html = '';
 
-    if (derive.source === 'repli' && derive.rangees.length > 0) {
-        html += '<div class="planif-grille-avis">Semaines dérivées des leçons — configure le Cadre du trimestre (Réglages) pour les rangées réelles.</div>';
-    }
-
-    var aGauche = dispositionReserve() === 'gauche';
     // La grille se construit à part, puis se COMPOSE avec la réserve. Assembler
     // par concaténation dans l'ordre voulu évite de retoucher du HTML déjà bâti.
     var htmlGrille = '<div class="planif-grille">';
@@ -10480,27 +10447,22 @@ function mettreAJourPlanificateur() {
                                       _leconsDepliees.has(toutesLecons[l2].id));
         }
     }
-    // Elle se rend en COLONNE avant la grille, ou en bloc après — mais son
-    // balisage est le MÊME : `data-grille-semaine=""` porte la sémantique
-    // « déposer ici = désancrer », et le glisser ne doit pas connaître la
-    // disposition. Un mode qui changerait l'attribut casserait le dépôt en
-    // silence.
+    // Elle se rend en bloc après la grille (la colonne à gauche est retirée
+    // depuis le lot 2 du 8 oct. 2026). `data-grille-semaine=""` porte la
+    // sémantique « déposer ici = désancrer ».
     // #929 (tranché par Grégoire, 20 sept. 2026) : la zone se rend MÊME VIDE.
     // Elle est la seule cible de désancrage — absente, plus aucune leçon ne
-    // pouvait quitter le calendrier par le glisser — et le bouton de
-    // disposition pivotait sans rien avoir à déplacer. Vide ou pleine, le
+    // pouvait quitter le calendrier par le glisser. Vide ou pleine, le
     // balisage de la cible est le même : le dépôt ne connaît pas l'état.
     var zoneReserve =
-        '<div class="planif-grille-nonplanifie' + (aGauche ? ' planif-reserve-colonne' : '') + '"' +
+        '<div class="planif-grille-nonplanifie"' +
         ' data-grille-semaine="">' +
         '<div class="planif-grille-nonplanifie-titre">Non planifié</div>' +
         (nonPlanifie ||
             '<div class="planif-grille-nonplanifie-vide">Glisse ici une leçon pour la retirer du calendrier.</div>') +
         '</div>';
 
-    html += aGauche
-        ? '<div class="planif-cotecote">' + zoneReserve + htmlGrille + '</div>'
-        : htmlGrille + zoneReserve;
+    html += htmlGrille + zoneReserve;
 
     conteneur.innerHTML = html;
     mettreAJourJaugeTemps(hierarchie.filter(function(e) { return e.niveau === 0; })
@@ -12390,15 +12352,13 @@ window.planificationCarte = {
     basculerDetailLecon: basculerDetailLecon,
     // Lot 3 : déplacement dans la grille + annulation
     deposerDansGrille: deposerDansGrille,
-    dispositionReserve: dispositionReserve,
-    basculerDispositionReserve: basculerDispositionReserve,
+    formaterDatesTrimestre: formaterDatesTrimestre,
+    ouvrirCadreTrimestre: ouvrirCadreTrimestre,
     // Affichage des palettes flottantes (barre d'outils)
     PALETTES_FLOTTANTES: PALETTES_FLOTTANTES,
     paletteVisible: paletteVisible,
     basculerPalette: basculerPalette,
     appliquerAffichagePalettes: appliquerAffichagePalettes,
-    LARGEUR_RESERVE_COLONNE: LARGEUR_RESERVE_COLONNE,
-    PLANCHER_PALETTE_COTE_A_COTE: PLANCHER_PALETTE_COTE_A_COTE,
     analyserRepereTitre: analyserRepereTitre,
     inventaireReperesTitres: inventaireReperesTitres,
     retirerRepereTitre: retirerRepereTitre,
