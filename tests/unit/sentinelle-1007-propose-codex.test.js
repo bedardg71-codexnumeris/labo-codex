@@ -59,7 +59,8 @@ const PORTES = [
     { g: 'P34', f: 'js/productions-bibliotheque-ui.js', sig: 'async function supprimerProductionDefinitivement(', cle: "'production'", question: 'const okSuppr = await uiDialogues.confirmerAction(', efface: 'db.modifier(getCleProductions()' },
     { g: 'P35', f: 'js/productions-bibliotheque-ui.js', sig: 'async function supprimerProductionDeBibliothequePartagee(', cle: "'productionBibliotheque'", question: 'const okSuppr = await uiDialogues.confirmerAction(', efface: 'retirerDeLaBibliotheque(' },
     { g: 'P36', f: 'js/tampons-bibliotheque.js', sig: 'async function supprimerDeBibliotheque(', cle: "'tampon'", question: 'await retirerDeLaBibliotheque(tamponId)', efface: 'await retirerDeLaBibliotheque(tamponId)' },
-    { g: 'P37a', f: 'js/planification-carte.js', sig: 'async function supprimerCarteActive(', cle: "'carte'", question: "if (!confirm('Supprimer la carte « '", efface: 'planificationDonnees.supprimerCarte(' },
+    // P37a (« Actions ▸ Supprimer cette carte ») est retirée au lot 3 de la carte (9 oct. 2026) :
+    // la suppression ne passe plus que par la Bibliothèque, P37b ci-dessous.
     { g: 'P37b', f: 'js/planification-bibliotheque.js', sig: 'async function supprimerAlignementDuTrimestre(', cle: "'carte'", question: 'const okSuppr = await uiDialogues.confirmerAction(', efface: 'planificationDonnees.supprimerCarte(' },
     { g: 'P38', f: 'js/planification-bibliotheque.js', sig: 'async function supprimerAlignementDeBibliotheque(', cle: "'carteBibliotheque'", question: 'const okSuppr = await uiDialogues.confirmerAction(', efface: 'await retirerAlignementDeLaBibliotheque(id)' },
     { g: 'G1', f: 'js/liste-evaluations.js', sig: 'async function supprimerFichierDefinitivement(', cle: "'copieCorbeille'", question: 'const fichierCible = travauxStockage.obtenirCorbeille()', efface: 'await travauxStockage.supprimerDefinitivement(id)' },
@@ -99,7 +100,6 @@ const RELECTURES = [
     { g: 'P3', relit: "db.getSync('enseignants', [])" },
     { g: 'P4', relit: 'db.getSync(cleHoraires, [])' },
     { g: 'P8', relit: "evaluations = db.getSync(cle('evaluationsSauvegardees'), []);" },
-    { g: 'P37a', relit: 'index = window.planificationDonnees.getIndex();' },
     { g: 'P37b', relit: 'index = window.planificationDonnees.getIndex();' },
     // Lot 2a-2 : la séance affichée a changé pendant l'attente → rien n'est réinitialisé.
     { g: 'P5', relit: "document.getElementById('date-cours').value !== dateStr" }

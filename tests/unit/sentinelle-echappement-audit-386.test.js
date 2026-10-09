@@ -118,8 +118,11 @@ describe('#386 · planification : titre de nœud échappé, attributs value= coe
     });
 
     it('bibliothèque d\'alignements : nom de carte et attributs data-* échappés', () => {
-        expect(biblio).toMatch(/echapperHtml\(c\.nom\)/);
-        expect(biblio).toMatch(/data-param="' \+ echapperHtml\(code\) \+ '" data-param2="' \+ echapperHtml\(c\.id\) \+ '"/);
-        expect(biblio).not.toMatch(/'<span>' \+ c\.nom \+ '/);
+        // Lot 3 (9 oct. 2026) : les lignes « Importer » / « Reprendre » passent par
+        // `ligneCarteTrimestre` — nom, détail et identifiants échappés.
+        expect(biblio).toMatch(/'<span>' \+ echapperHtml\(nom\) \+ ' <small class="text-muted">\(' \+ echapperHtml\(detail\) \+ '\)/);
+        expect(biblio).toMatch(/data-param="' \+ echapperHtml\(trimestreId\) \+ '" data-param2="' \+ echapperHtml\(carteId\) \+ '"/);
+        expect(biblio).toMatch(/'<option value="' \+ echapperHtml\(t\.id\) \+ '">' \+ echapperHtml\(t\.nom\)/);
+        expect(biblio).not.toMatch(/'<span>' \+ (c\.)?nom \+ '/);
     });
 });

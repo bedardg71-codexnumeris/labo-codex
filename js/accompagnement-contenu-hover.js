@@ -600,9 +600,7 @@ const TOOLTIPS = {
     'planif-palette':
         'Glisse un élément vers le canevas pour l\'ajouter à la carte. Glisse un bloc sur la corbeille pour le supprimer. Un bloc posé n\'est pas figé : le menu de son en-tête le change en un autre type de la MÊME famille, sans perdre son titre, sa durée ni ses liens.',
     'planif-boutons-action':
-        'Choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, imports, export du plan, décloner la sélection) et annule le dernier geste.',
-    'planif-zoom':
-        'Niveau de zoom courant. Zoome à la molette ou au pincement ; le menu « Vue » offre « Recentrer la carte » (R) et « Tout voir ».',
+        'Consulte la bibliothèque pour importer, exporter, dupliquer ou supprimer une carte ; choisis la carte affichée, ouvre le menu Actions (nouvelle carte, cours rattaché, export du plan, décloner la sélection), puis annule ou rétablis le dernier geste.',
 
     // --- Catégories pédagogiques ---
 

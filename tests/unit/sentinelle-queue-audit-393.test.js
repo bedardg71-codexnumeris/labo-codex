@@ -52,9 +52,15 @@ describe('#393 · filet des imports interrompus + voie canonique + ablation comp
         expect(src).toMatch(/catch \(erreur\) \{[\s\S]{0,600}syncToLocalStorageCache\(\)/);
     });
 
-    it('planification-bibliotheque passe par cleSource()', () => {
+    it('planification-bibliotheque ne lit aucun trimestre en direct : planificationDonnees le fait, par cleSource()', () => {
+        // Lot 3 de la carte (9 oct. 2026) : la Bibliothèque importe vers le trimestre
+        // actif par `planificationDonnees` (listerTrimestresAvecCartes, reprise).
         const src = lire('planification-bibliotheque.js');
-        expect(src).toMatch(/cleSource\('planification_mindmap', codeTrimestre\)/);
+        expect(src).not.toMatch(/_planification_mindmap/);
+        expect(src).not.toMatch(/planification_mindmap/);
+        expect(src).toContain('listerTrimestresAvecCartes()');
+        const donnees = lire('planification-donnees.js');
+        expect(donnees).toMatch(/db\.getSync\(cleSource\(CLE_DONNEES, t\.id\), null\)/);
     });
 
     it('les fonctions compat 0 appelant ne reviennent pas (cliquet)', () => {

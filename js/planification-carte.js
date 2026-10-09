@@ -2835,7 +2835,11 @@ let _loupeContenu = null;      // l'enveloppe qui porte la copie et la décale
 let _loupeCopieValide = false;
 let _loupeDernierPoint = null; // dernier point d'espace visé {x, y}
 
-const LOUPE_L = 420;   // largeur du cadre, en px écran
+// Lot 3 (9 oct. 2026) : la loupe devient la « longue-vue », et son cadre un
+// CERCLE. Diamètre : un bloc fait au plus 240 px de large (`.planif-noeud`) ;
+// à 300 px, une ligne de titre posée au centre tient entière, avec 30 px de
+// marge de chaque côté (la corde reste à ~298 px sur deux lignes de titre).
+const LOUPE_L = 300;   // diamètre du cadre, en px écran
 const LOUPE_H = 300;
 
 // === UTILITAIRES DE COORDONNÉES ===
@@ -2883,24 +2887,25 @@ function zoomer(clientX, clientY, facteur) {
     mettreAJourBoutonsZoomPreset();
 }
 
-// Le seul affichage qui doive suivre un pincement image par image : les deux
-// badges de pourcentage. Détaché de `mettreAJourBoutonsZoomPreset()`, qui
-// parcourt en plus les boutons de préréglage — inutile à chaque frame.
-function afficherPourcentageZoom(zoom) {
-    var texte = Math.round(zoom * 100) + '%';
-    var infoHeader = document.getElementById('planif-zoom-info-header');
-    if (infoHeader) infoHeader.textContent = texte;
-    var infoFooter = document.getElementById('planif-zoom-info');
-    if (infoFooter) infoFooter.textContent = texte;
-}
-
+// Les quatre niveaux de la rubrique « Zoom » du menu « Vue » (lot 3, 9 oct.
+// 2026) : coché, le niveau en cours ; aucun quand le zoom est entre deux
+// (pincement, molette, « Tout voir »). Ils remplacent l'indicateur « 100% »
+// de la barre, qui ne faisait qu'afficher. Rien à suivre pendant un
+// pincement : la coche se pose à la fin du geste (`finirApercuZoom`).
 function mettreAJourBoutonsZoomPreset() {
     var zoomArrondi = Math.round(etat.zoom * 100);
-    document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
+    document.querySelectorAll('.planif-vue-zoom').forEach(function(btn) {
         var presetVal = Math.round(parseFloat(btn.dataset.zoom) * 100);
-        btn.classList.toggle('actif', presetVal === zoomArrondi);
+        btn.setAttribute('aria-checked', presetVal === zoomArrondi ? 'true' : 'false');
     });
-    afficherPourcentageZoom(etat.zoom);
+}
+
+/** Un niveau de la rubrique « Zoom » : le point au centre de la vue y reste.
+    Par `zoomer()`, comme ⌘+ et ⌘− : un seul chemin borne le zoom. */
+function zoomerAuNiveau(niveau) {
+    if (!zoneTravail || !(niveau > 0)) return;
+    var rect = zoneTravail.getBoundingClientRect();
+    zoomer(rect.left + rect.width / 2, rect.top + rect.height / 2, niveau / etat.zoom);
 }
 
 // === ARITHMÉTIQUE DU ZOOM AUTOUR D'UN POINT ===
@@ -2977,7 +2982,6 @@ function majApercuZoom(zoomVise) {
         // `#planif-espace` a `transform-origin: 0 0` : un point d'espace E se
         // pose donc en E × z + t.
         espace.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + z + ')';
-        afficherPourcentageZoom(z);
     });
 }
 
@@ -5854,6 +5858,13 @@ function enregistrerPourUndo() {
     pileUndo.push(clonerEtatPersistant());
     if (pileUndo.length > UNDO_MAX) pileUndo.shift();
     pileRedo = [];
+    majBoutonRetablir();
+}
+
+/** « Rétablir » (lot 3) : grisé quand rien n'est à rétablir. */
+function majBoutonRetablir() {
+    var btn = document.getElementById('planif-btn-retablir');
+    if (btn) btn.disabled = pileRedo.length === 0;
 }
 
 /**
@@ -6359,12 +6370,14 @@ function annuler() {
     if (pileUndo.length === 0) return;
     pileRedo.push(clonerEtatPersistant());
     restaurerSnapshot(pileUndo.pop());
+    majBoutonRetablir();
 }
 
 function retablir() {
     if (pileRedo.length === 0) return;
     pileUndo.push(clonerEtatPersistant());
     restaurerSnapshot(pileRedo.pop());
+    majBoutonRetablir();
 }
 
 // === SAUVEGARDE ===
@@ -6399,6 +6412,7 @@ function viderCanvas() {
     etat.multiSelection.clear();
     pileUndo = [];
     pileRedo = [];
+    majBoutonRetablir();
     fermerPanneau();
     fermerMenuLien();
 }
@@ -6560,6 +6574,7 @@ function chargerCarte(carteId) {
 
     pileUndo = [];
     pileRedo = [];
+    majBoutonRetablir();
 }
 
 function centrerVueSurContenu() {
@@ -8591,94 +8606,36 @@ function exporterCarte() {
     URL.revokeObjectURL(url);
 }
 
-function importerCarte(fichier) {
-    var lecteur = new FileReader();
-    lecteur.onload = function(e) {
-        try {
-            var donnees = JSON.parse(e.target.result);
-            if (!donnees.noeuds || !Array.isArray(donnees.noeuds)) {
-                console.warn('[Planification] Format de fichier invalide.');
-                return;
-            }
-            var nom = donnees.nom || fichier.name.replace('.json', '') || 'Importée';
-            var index = window.planificationDonnees.getIndex();
-            if (!index) index = { active: null, compteurCartes: 0, cartes: [] };
-            var id = 'carte_' + (++index.compteurCartes);
-            index.cartes.push(window.planificationDonnees.creerEntreeIndex(id, nom));
-            index.active = id;
-            window.planificationDonnees.sauvegarderIndex(index);
-            // Migration anciens types de connaissances → Anderson (fichiers importés)
-            for (var mi = 0; mi < donnees.noeuds.length; mi++) {
-                var nm = donnees.noeuds[mi];
-                if (nm.type === 'connaissance') nm.type = 'factuelle';
-                else if (nm.type === 'strategie') nm.type = 'procedurale';
-                else if (nm.type === 'condition') nm.type = 'procedurale';
-                else if (nm.type === 'prerequis') {
-                    nm.type = 'factuelle';
-                    if (!nm.metadata) nm.metadata = {};
-                    nm.metadata.prealable = true;
-                }
-            }
-            var contenu = {
-                compteur: donnees.compteur || 0,
-                compteurLiens: donnees.compteurLiens || 0,
-                noeuds: donnees.noeuds,
-                liens: donnees.liens || []
-            };
-            window.planificationDonnees.sauvegarderCarte(id, contenu);
-            mettreAJourListeCartes();
-            chargerCarte(id);
-        } catch (err) {
-            console.warn('[Planification] Erreur importation :', err.message);
-        }
-    };
-    lecteur.readAsText(fichier);
-}
-
-async function supprimerCarteActive() {
-    var index = window.planificationDonnees.getIndex();
-    if (!index || index.cartes.length <= 1) {
-        console.warn('[Planification] Impossible de supprimer la dernière carte.');
-        return;
-    }
-    var carte = index.cartes.find(function(c) { return c.id === index.active; });
-    // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
-    if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('carte'))) return;
-    if (!confirm('Supprimer la carte « ' + (carte ? carte.nom : '') + ' » ?')) return;
-    // #1007 : l'index est relu après l'attente de la fenêtre ; celui d'avant ne vaut plus rien.
-    var idVise = carte ? carte.id : index.active;
-    index = window.planificationDonnees.getIndex();
-    if (!index || index.cartes.length <= 1 || index.active !== idVise) return;
-
-    window.planificationDonnees.supprimerCarte(index.active);
-    index.cartes = index.cartes.filter(function(c) { return c.id !== index.active; });
-    index.active = index.cartes[0].id;
-    window.planificationDonnees.sauvegarderIndex(index);
-    mettreAJourListeCartes();
-    chargerCarte(index.active);
-}
-
-function dupliquerCarteActive() {
+/**
+ * Dupliquer une carte du trimestre actif — n'importe laquelle, depuis le menu
+ * « ⋮ » de la Bibliothèque (lot 3). La copie est profonde : l'original n'est
+ * pas touché. La carte affichée est d'abord enregistrée, pour que la copie
+ * prenne son dernier geste.
+ */
+function dupliquerCarte(carteId) {
     sauvegarder();
     var index = window.planificationDonnees.getIndex();
-    if (!index) return;
-    var carteOrigine = index.cartes.find(function(c) { return c.id === index.active; });
-    var nomOrigine = carteOrigine ? carteOrigine.nom : 'Sans titre';
+    if (!index) return null;
+    var carteOrigine = index.cartes.find(function(c) { return c.id === carteId; });
+    var source = carteOrigine ? window.planificationDonnees.chargerCarte(carteId) : null;
+    if (!source) return null;
+    var nomOrigine = carteOrigine.nom || 'Sans titre';
     var nom = prompt('Nom de la copie :', nomOrigine + ' (copie)');
-    if (nom === null) return;
+    if (nom === null) return null;
     var id = 'carte_' + (++index.compteurCartes);
     index.cartes.push(window.planificationDonnees.creerEntreeIndex(id, nom.trim() || nomOrigine + ' (copie)'));
-    var contenu = {
-        compteur: etat.compteur,
-        compteurLiens: etat.compteurLiens,
-        noeuds: Array.from(etat.noeuds.values()),
-        liens: Array.from(etat.liens.values())
-    };
+    var contenu = JSON.parse(JSON.stringify({
+        compteur: source.compteur || 0,
+        compteurLiens: source.compteurLiens || 0,
+        noeuds: source.noeuds || [],
+        liens: source.liens || []
+    }));
     window.planificationDonnees.sauvegarderCarte(id, contenu);
     index.active = id;
     window.planificationDonnees.sauvegarderIndex(index);
     mettreAJourListeCartes();
     chargerCarte(id);
+    return id;
 }
 
 function changerCarte(carteId) {
@@ -8968,7 +8925,8 @@ function initialiser() {
     // vide — est exactement le comportement d'avant.
     initialiserAccordeonsPalette();
 
-    // Inspecteur — bouton 🔎 de la palette
+    // Inspecteur — le mot « Inspecteur » de la barre (lot 3). Sans bloc
+    // sélectionné, il le DIT : avant, le clic ne produisait rien.
     var btnInspecteur = document.getElementById('planif-palette-inspecteur-btn');
     if (btnInspecteur) {
         btnInspecteur.addEventListener('click', function() {
@@ -8976,11 +8934,13 @@ function initialiser() {
                 fermerPanneau();
             } else if (etat.selection) {
                 ouvrirPanneau(etat.selection);
+            } else {
+                afficherToastLien('Sélectionne un bloc pour l’inspecter.');
             }
         });
     }
 
-    // Guide flottant — bouton 📔 de la palette (#167)
+    // Guide flottant — le mot « Guide » de la barre (#167, lot 3)
     var btnAidePalette = document.getElementById('planif-palette-aide-btn');
     if (btnAidePalette) {
         btnAidePalette.addEventListener('click', function() {
@@ -9255,36 +9215,9 @@ function initialiser() {
         });
     }
 
-    var btnSupprimerCarte = document.getElementById('planif-btn-supprimer-carte');
-    if (btnSupprimerCarte) btnSupprimerCarte.addEventListener('click', supprimerCarteActive);
-
-    var btnDupliquerCarte = document.getElementById('planif-btn-dupliquer-carte');
-    if (btnDupliquerCarte) btnDupliquerCarte.addEventListener('click', dupliquerCarteActive);
-
-    var btnImporterCarte = document.getElementById('planif-btn-importer-carte');
-    if (btnImporterCarte) {
-        btnImporterCarte.addEventListener('click', function() {
-            document.getElementById('planif-fichier-import').click();
-        });
-    }
-
-    // Import inter-trimestre (4 août 2026, patron Brique C) : copie une carte
-    // d'un autre trimestre vers le trimestre actif — sans sortir de l'app.
-    var btnImportTri = document.getElementById('planif-btn-import-trimestre');
-    var panneauImportTri = document.getElementById('planif-import-tri-panel');
-    if (btnImportTri && panneauImportTri) {
-        btnImportTri.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var dropdownActions = document.getElementById('planif-actions-dropdown');
-            if (dropdownActions) dropdownActions.classList.remove('ouvert');
-            rendrePanneauImportTrimestre();
-            panneauImportTri.classList.add('ouvert');
-        });
-        document.addEventListener('click', function() {
-            panneauImportTri.classList.remove('ouvert');
-        });
-        panneauImportTri.addEventListener('click', function(e) { e.stopPropagation(); });
-    }
+    // Importer (fichier ou autre trimestre), exporter, dupliquer et supprimer
+    // une carte vivent dans la Bibliothèque depuis le lot 3 (9 oct. 2026),
+    // comme dans les bibliothèques de la Conception : planification-bibliotheque.js.
 
     var btnCoursCarte = document.getElementById('planif-btn-cours-carte');
     var panneauCoursCarte = document.getElementById('planif-cours-carte-panel');
@@ -9367,37 +9300,8 @@ function initialiser() {
 
     var btnAnnuler = document.getElementById('planif-btn-annuler');
     if (btnAnnuler) btnAnnuler.addEventListener('click', annuler);
-
-    var fichierImport = document.getElementById('planif-fichier-import');
-    if (fichierImport) {
-        fichierImport.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                importerCarte(e.target.files[0]);
-                e.target.value = '';
-            }
-        });
-    }
-
-    // Bouton exporter carte (menu Actions)
-    var btnExporterCarte = document.getElementById('planif-btn-exporter-carte');
-    if (btnExporterCarte) {
-        btnExporterCarte.addEventListener('click', function() {
-            var idx = window.planificationDonnees.getIndex();
-            if (idx && idx.active && typeof exporterAlignementJSON === 'function') {
-                exporterAlignementJSON(idx.active);
-            }
-        });
-    }
-
-    // Bouton bibliothèque (palette d'éléments)
-    var btnBibliotheque = document.getElementById('planif-palette-bibliotheque-btn');
-    if (btnBibliotheque) {
-        btnBibliotheque.addEventListener('click', function() {
-            if (typeof afficherBibliothequeAlignements === 'function') {
-                afficherBibliothequeAlignements();
-            }
-        });
-    }
+    var btnRetablir = document.getElementById('planif-btn-retablir');
+    if (btnRetablir) btnRetablir.addEventListener('click', retablir);
 
     // Renommer la carte active (menu Actions — remplace l'ancien titre éditable
     // du centre de la barre, retiré le 4 août 2026 : il dupliquait le sélecteur)
@@ -9466,14 +9370,10 @@ function initialiser() {
         });
     }
 
-    // Boutons de zoom prédéfinis (100%, 75%, 50%, 25%)
-    document.querySelectorAll('.planif-btn-zoom-preset').forEach(function(btn) {
+    // Rubrique « Zoom » du menu « Vue » (lot 3) : 100, 75, 50, 25 %.
+    document.querySelectorAll('.planif-vue-zoom').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            var niveauZoom = parseFloat(btn.dataset.zoom);
-            etat.zoom = niveauZoom;
-            appliquerZoom();
-            mettreAJourBoutonsZoomPreset();
-            centrerVueSurContenu();
+            zoomerAuNiveau(parseFloat(btn.dataset.zoom));
         });
     });
 
@@ -10522,63 +10422,6 @@ function mettreAJourPlanificateur() {
     });
 }
 
-// === IMPORT INTER-TRIMESTRE — panneau (données : planification-donnees.js) ===
-function rendrePanneauImportTrimestre() {
-    var panneau = document.getElementById('planif-import-tri-panel');
-    if (!panneau) return;
-    var sources = window.planificationDonnees.listerTrimestresAvecCartes();
-    if (!sources.length) {
-        panneau.innerHTML = '<div class="planif-import-tri-vide">Aucune carte dans les autres trimestres.</div>';
-        return;
-    }
-    // Les cartes du MÊME COURS remontent en tête (lot 2) : c'est le geste de
-    // rentrée, et le fouiller dans la liste complète était justement la corvée
-    // de #368. Elles restent listées à leur place ensuite — le groupe du haut
-    // est un raccourci, pas un filtre qui cacherait le reste.
-    var coursEnJeu = coursEnJeuPourReprise();
-    var reprises = coursEnJeu ? window.planificationDonnees.listerReprisesPourCours(coursEnJeu) : [];
-
-    var html = '';
-    if (reprises.length) {
-        html += '<div class="planif-import-tri-groupe">Même cours</div>';
-        for (var r = 0; r < reprises.length; r++) {
-            var rep = reprises[r];
-            html += '<div class="planif-import-tri-ligne">' +
-                    '<span class="planif-import-tri-nom" title="' + echapperHtml(rep.carte.nom) + '">' + echapperHtml(rep.carte.nom) + '</span>' +
-                    '<span class="planif-import-tri-nb">' + echapperHtml(rep.trimestreNom) + '</span>' +
-                    '<button type="button" class="planif-btn-carte planif-import-tri-btn" data-tid="' + echapperHtml(rep.trimestreId) + '" data-cid="' + echapperHtml(rep.carte.id) + '">Reprendre</button>' +
-                    '</div>';
-        }
-    }
-
-    for (var i = 0; i < sources.length; i++) {
-        var t = sources[i];
-        html += '<div class="planif-import-tri-groupe">' + echapperHtml(t.nom) + '</div>';
-        for (var j = 0; j < t.cartes.length; j++) {
-            var c = t.cartes[j];
-            html += '<div class="planif-import-tri-ligne">' +
-                    '<span class="planif-import-tri-nom" title="' + echapperHtml(c.nom) + '">' + echapperHtml(c.nom) + '</span>' +
-                    '<span class="planif-import-tri-nb">' + c.nbNoeuds + ' nœud' + (c.nbNoeuds > 1 ? 's' : '') + '</span>' +
-                    '<button type="button" class="planif-btn-carte planif-import-tri-btn" data-tid="' + echapperHtml(t.id) + '" data-cid="' + echapperHtml(c.id) + '">Importer</button>' +
-                    '</div>';
-        }
-    }
-    panneau.innerHTML = html;
-    panneau.querySelectorAll('.planif-import-tri-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var nouvelId = window.planificationDonnees.importerCarteDepuisTrimestre(btn.dataset.tid, btn.dataset.cid);
-            panneau.classList.remove('ouvert');
-            if (nouvelId) {
-                mettreAJourListeCartes();
-                chargerCarte(nouvelId);
-                afficherToastLien('Carte importée — copie indépendante, la source reste intacte.');
-            } else {
-                afficherToastLien("L'import a échoué — rien n'a été modifié.");
-            }
-        });
-    });
-}
-
 // === EXPORT DU PLAN — PANNEAU NIVEAU × FORMAT (portage #424, 8 août 2026) ===
 //
 // La mémoire du choix vit le temps de la session d'écran, pas en préférence :
@@ -11262,12 +11105,11 @@ function ajouterOffreDeReprise(hote) {
         });
     } else {
         bouton.textContent = 'Reprendre une carte de ce cours (' + reprises.length + ')…';
+        // Le choix vit dans la Bibliothèque depuis le lot 3 : les cartes du
+        // même cours y sont listées en tête de « Importer depuis un autre trimestre ».
         bouton.addEventListener('click', function(e) {
             e.stopPropagation();
-            var panneau = document.getElementById('planif-import-tri-panel');
-            if (!panneau) return;
-            rendrePanneauImportTrimestre();
-            panneau.classList.add('ouvert');
+            if (typeof afficherBibliothequeAlignements === 'function') afficherBibliothequeAlignements();
         });
     }
 
@@ -11771,10 +11613,10 @@ function basculerLoupe() {
 
 /** Le bouton dit s'il est enfoncé — sur iPad c'est le SEUL indicateur. */
 function majBoutonLoupe() {
-    var btn = document.getElementById('planif-btn-loupe');
+    var btn = document.getElementById('planif-vue-longue-vue');
     if (!btn) return;
     btn.setAttribute('aria-pressed', etat.loupeActive ? 'true' : 'false');
-    btn.title = etat.loupeActive ? 'Quitter la loupe (L ou Échap)' : 'Loupe — lire sans changer le zoom (L)';
+    btn.title = etat.loupeActive ? 'Quitter la longue-vue (L ou Échap)' : 'Longue-vue : lire sans changer le zoom (L)';
 }
 
 /** Les deux afficheurs de zoom + les boutons de préréglage, en un seul appel.
@@ -12470,6 +12312,11 @@ window.planificationCarte = {
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,
+    zoomerAuNiveau: zoomerAuNiveau,
+    // Pour la Bibliothèque (lot 3) : elle porte désormais la gestion des cartes.
+    dupliquerCarte: dupliquerCarte,
+    reprisesDisponibles: reprisesDisponibles,
+    reprendreCarte: reprendreCarte,
     // Plein écran
     togglePleinEcran: togglePleinEcranCarte
 };
@@ -12494,7 +12341,7 @@ window.planificationCarte = {
 // onglet. Recentrer passe à R, sans modificateur, comme L pour la loupe.
 var RACCOURCIS_CARTE = [
     { id: 'recentrer',          mac: 'R',                    autre: 'R',                     libelle: 'Recentrer la carte' },
-    { id: 'loupe',              mac: 'L',                    autre: 'L',                     libelle: 'Loupe : lire sans changer le zoom' },
+    { id: 'loupe',              mac: 'L',                    autre: 'L',                     libelle: 'Longue-vue : lire sans changer le zoom' },
     { id: 'zoom-avant-arriere', mac: '⌘+ / ⌘−',              autre: 'Ctrl++ / Ctrl+−',       libelle: 'Zoom avant / arrière' },
     { id: 'zoom-100',           mac: '⌘0',                   autre: 'Ctrl+0',                libelle: 'Zoom à 100 %, carte recentrée' },
     { id: 'zoom-molette',       mac: 'Pincer ou Ctrl+molette', autre: 'Ctrl+molette',        libelle: 'Zoom à la souris ou au trackpad' },
@@ -12512,7 +12359,7 @@ var RACCOURCIS_CARTE = [
     { id: 'recherche-entree',   mac: 'Entrée / ⇧Entrée',     autre: 'Entrée / Maj+Entrée',   libelle: 'Recherche : résultat suivant / précédent' },
     { id: 'recherche-fleches',  mac: '↓ / ↑',                autre: '↓ / ↑',                 libelle: 'Recherche : résultat suivant / précédent' },
     { id: 'recherche-echap',    mac: 'Échap',                autre: 'Échap',                 libelle: 'Recherche : refermer la liste ; une seconde fois, tout effacer' },
-    { id: 'echap',              mac: 'Échap',                autre: 'Échap',                 libelle: 'Fermer la loupe ou quitter le plein écran ; sinon, tout désélectionner' }
+    { id: 'echap',              mac: 'Échap',                autre: 'Échap',                 libelle: 'Fermer la longue-vue ou quitter le plein écran ; sinon, tout désélectionner' }
 ];
 
 // Exposée ici et non dans l'objet `window.planificationCarte` plus haut : à ce
@@ -12598,6 +12445,8 @@ function initialiserMenuVue() {
     // Le bouton « Annuler » disait « Ctrl+Z » sur un Mac (mesure du lot 0).
     var btnAnnuler = document.getElementById('planif-btn-annuler');
     if (btnAnnuler) btnAnnuler.title = 'Annuler (' + (claviersMac() ? '⌘Z' : 'Ctrl+Z') + ')';
+    var btnRetablir = document.getElementById('planif-btn-retablir');
+    if (btnRetablir) btnRetablir.title = 'Rétablir (' + (claviersMac() ? '⇧⌘Z' : 'Maj+Ctrl+Z') + ')';
 
     btn.addEventListener('click', function(e) {
         e.stopPropagation();
