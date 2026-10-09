@@ -3456,6 +3456,10 @@
      */
     function confirmerImportTampons(donnees) {
         try {
+            // #467 — noms, catégories et symboles reçus n'entrent pas bruts : toute
+            // chaîne du fichier perd ses balises (import-export.js). Aucun schéma ne
+            // couvre cette structure ; rien n'est jeté.
+            donnees = window.retirerBalisesProfond(donnees);
             var contenu = donnees.contenu || donnees;
             var tamponsImport = contenu.tampons || [];
             var categoriesImport = contenu.categories || [];

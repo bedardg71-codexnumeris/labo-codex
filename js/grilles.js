@@ -1900,117 +1900,6 @@ async function exporterGrilleActive() {
 }
 
 /**
- * Importe un fichier JSON pour remplacer la grille actuellement en cours d'édition
- * NOUVEAU (Beta 92): Support métadonnées Creative Commons
- */
-async function importerDansGrilleActive(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Récupérer l'ID de la grille active
-    if (!grilleTemplateActuelle) {
-        alert('Aucune grille sélectionnée. Sélectionne d\'abord la grille à remplacer.');
-        event.target.value = ''; // Reset input
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const donnees = JSON.parse(e.target.result);
-
-            // Valider que c'est bien une grille
-            if (!donnees || typeof donnees !== 'object') {
-                alert('Le fichier JSON n\'est pas valide.');
-                event.target.value = '';
-                return;
-            }
-
-            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
-            let grilleImportee;
-            let metadata = null;
-
-            if (donnees.contenu) {
-                // Nouveau format avec CC metadata
-                metadata = donnees.metadata;
-                grilleImportee = donnees.contenu;
-            } else {
-                // Ancien format direct
-                grilleImportee = donnees;
-            }
-
-            // Afficher badge CC si présent
-            let messageConfirmation = '';
-            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
-                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
-                    `👤 Auteur: ${metadata.auteur_original}\n` +
-                    `📅 Créé le: ${metadata.date_creation}\n\n`;
-            }
-
-            // Confirmer le remplacement
-            const confirmation = confirm(
-                messageConfirmation +
-                `⚠️ ATTENTION: Cette action va remplacer la grille actuelle.\n\n` +
-                `Veux-tu continuer ?`
-            );
-
-            if (!confirmation) {
-                event.target.value = '';
-                return;
-            }
-
-            // Préserver l'ID original et remplacer les données
-            const grilleMiseAJour = {
-                ...grilleImportee,
-                id: grilleTemplateActuelle // Garder l'ID original
-            };
-
-            // Préserver les métadonnées CC si présentes
-            if (metadata) {
-                grilleMiseAJour.metadata_cc = metadata;
-            }
-
-            // ⚠ La collection est relue DANS la file : celle d'avant la
-            // confirmation ne vaut plus rien. security-ok: `grilleImportee` est
-            // déjà passée par la validation d'import en amont.
-            let remplacee = false;
-            await db.modifier(cle('grillesTemplates'), (lues) => {
-                const grilles = lues || [];
-                const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
-                if (index === -1) return undefined;
-
-                // Remplacer dans le tableau
-                grilles[index] = grilleMiseAJour;
-                remplacee = true;
-                return grilles;
-            }, []);
-
-            if (!remplacee) {
-                alert('Grille introuvable.');
-                event.target.value = '';
-                return;
-            }
-
-            // Recharger la grille dans le formulaire
-            await chargerGrillePourModif(grilleTemplateActuelle);
-
-            // Rafraîchir la liste
-            await afficherGrillesExistantes();
-
-            notifications.succes('Grille importée et remplacée avec succès');
-
-        } catch (error) {
-            console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
-        } finally {
-            event.target.value = ''; // Reset input
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-/**
  * Importe des grilles depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -2115,6 +2004,8 @@ window.confirmerImportGrilles = async function(donnees) {
         if (!Array.isArray(grillesImportees)) {
             throw new Error('Format invalide: grilles doit être un tableau');
         }
+        // #467 — un nom reçu n'entre pas brut dans la Bibliothèque (import-export.js).
+        grillesImportees = grillesImportees.map(g => window.assainirImportJson(g, 'grille'));
 
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeGrilles
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
@@ -2248,7 +2139,6 @@ window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
 // Export/Import avec licence CC
 window.exporterGrilles = exporterGrilles;
 window.exporterGrilleActive = exporterGrilleActive;
-window.importerDansGrilleActive = importerDansGrilleActive;
 window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;

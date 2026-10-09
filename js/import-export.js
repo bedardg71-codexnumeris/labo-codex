@@ -577,6 +577,81 @@ function assainirObjet(obj, schema) {
     return resultat;
 }
 
+/**
+ * #467 (CO-39, 9 oct. 2026) — L'IMPORT D'UN FICHIER JSON DANS UNE BIBLIOTHÈQUE.
+ *
+ * Les cinq imports JSON de Bibliothèque (grilles, échelles, cartouches, productions,
+ * pratiques) faisaient
+ * `JSON.parse` puis fusionnaient tel quel : un nom reçu arrivait brut dans le
+ * stockage, puis dans le `innerHTML` du destinataire.
+ *
+ * Pourquoi pas `assainirObjet` seul, comme les autres chemins : la liste blanche
+ * fait DISPARAÎTRE ce qu'elle ne nomme pas (#511). Mesuré le 9 oct. sur le codex
+ * de banc (fixture 1.172.0) : une grille y perdait `pratiques`, ses codes de
+ * pratique, `criteres[].estStandard`, `metadata_cc.date_creation` ; une production `regles`
+ * et `code` ; une cartouche perdrait `description`. Tout cela voyage aujourd'hui
+ * par le fichier JSON. Compléter les listes blanches est l'affaire de l'import
+ * sélectif (lot suivant), pas de celui-ci.
+ *
+ * Donc : toute chaîne perd ses balises ; une chaîne que le schéma nomme est en
+ * plus bornée à sa longueur, comme sur les autres chemins. Les autres valeurs
+ * (nombres, booléens, clés inconnues) sont gardées telles quelles. Rien n'est jeté.
+ */
+const CLES_RESERVEES_PROTOTYPE = ['__proto__', 'constructor', 'prototype'];
+
+function retirerBalisesProfond(valeur) {
+    if (typeof valeur === 'string') return valeur.replace(/<[^>]*>/g, '');
+    if (Array.isArray(valeur)) return valeur.map(retirerBalisesProfond);
+    if (valeur && typeof valeur === 'object') {
+        const resultat = {};
+        for (const k of Object.keys(valeur)) {
+            if (CLES_RESERVEES_PROTOTYPE.includes(k)) continue;
+            resultat[k] = retirerBalisesProfond(valeur[k]);
+        }
+        return resultat;
+    }
+    return valeur;
+}
+
+/**
+ * Superpose les CHAÎNES de `selonSchema` (bornées en longueur) à `profond`, en
+ * descendant dans les objets et tableaux. Seule une chaîne restée chaîne est
+ * reprise du schéma : ses coercitions de type ne le sont pas. Mesuré le 9 oct.
+ * dans le codex de banc (fixture 1.172.0) : `niveaux[].valeurCalcul` y vaut « 40 »
+ * (une chaîne), que le type `number` du schéma ramène à 0.
+ */
+function superposerAssaini(profond, selonSchema) {
+    if (Array.isArray(profond) && Array.isArray(selonSchema)) {
+        return profond.map((v, i) => superposerAssaini(v, selonSchema[i]));
+    }
+    const estObjet = (v) => v && typeof v === 'object' && !Array.isArray(v);
+    if (estObjet(profond) && estObjet(selonSchema)) {
+        const resultat = { ...profond };
+        for (const k of Object.keys(selonSchema)) {
+            if (k in profond) resultat[k] = superposerAssaini(profond[k], selonSchema[k]);
+        }
+        return resultat;
+    }
+    return (typeof profond === 'string' && typeof selonSchema === 'string') ? selonSchema : profond;
+}
+
+/**
+ * Assainit un élément reçu par un fichier JSON avant qu'il entre dans une Bibliothèque.
+ * @param {*} item - L'élément lu dans le fichier
+ * @param {string} type - Clé de `SCHEMAS_IMPORT` ('grille', 'echelle', 'cartouche', 'production', 'pratique')
+ * @returns {*} Copie assainie (l'original n'est pas modifié)
+ */
+function assainirImportJson(item, type) {
+    const schema = SCHEMAS_IMPORT[type];
+    if (!schema) throw new Error('assainirImportJson : type inconnu « ' + type + ' »');
+    const profond = retirerBalisesProfond(item);
+    if (!profond || typeof profond !== 'object' || Array.isArray(profond)) return profond;
+    // `assainirObjet` laisse passer tel quel un `array` ou un `object` sans
+    // sous-schéma : la sortie du schéma repasse donc, elle aussi, par le retrait
+    // des balises (sans effet sur une chaîne déjà assainie).
+    return superposerAssaini(profond, retirerBalisesProfond(assainirObjet(item, schema)));
+}
+
 /** Sous-schéma `metadata_cc` réutilisé sur tous les types partageables. */
 const SCHEMA_METADATA_CC = {
     type: 'object',
@@ -3670,6 +3745,8 @@ window.filtrerRessourcesNonDemo = filtrerRessourcesNonDemo;
 // devrait passer par `assainirObjet(item, SCHEMAS_IMPORT.<type>)` avant `db.set`.
 window.assainirObjet = assainirObjet;
 window.assainirChaine = assainirChaine;
+window.assainirImportJson = assainirImportJson; // #467 : les cinq imports JSON de Bibliothèque
+window.retirerBalisesProfond = retirerBalisesProfond; // #467 : l'import JSON des tampons (travaux-outils.js)
 window.SCHEMAS_IMPORT = SCHEMAS_IMPORT;
 window.CLES_ECHELLE_NON_TRANSPORTEES = CLES_ECHELLE_NON_TRANSPORTEES;
 window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;

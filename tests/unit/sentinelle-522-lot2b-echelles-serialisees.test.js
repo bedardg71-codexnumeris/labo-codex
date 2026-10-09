@@ -294,7 +294,10 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // retirait l'homonyme dans sa propre écriture, AVANT les vérifications de
         // « Créer l'échelle » ; le retrait passe dans l'écriture de création. Deux
         // écritures deviennent une, toujours par la file.
-        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(19);
+        // #467 (9 oct. 2026) : 19 → 18. `importerDansEchelleActive` est partie :
+        // aucun déclencheur (inventaire du lot F, 29 sept. : « code mort »), et un
+        // import JSON brut de moins. Aucune écriture directe de plus.
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(18);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {
