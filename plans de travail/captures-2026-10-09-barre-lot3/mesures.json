@@ -1,0 +1,56 @@
+[
+  {
+    "navigateur": "chrome",
+    "format": "mac",
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 1,
+    "hauteur": 28,
+    "depasse": [],
+    "largeurEcran": 1440
+  },
+  {
+    "navigateur": "chrome",
+    "format": "ipad-paysage",
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 2,
+    "hauteur": 94,
+    "depasse": [],
+    "largeurEcran": 1180
+  },
+  {
+    "navigateur": "chrome",
+    "format": "ipad-portrait",
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 2,
+    "hauteur": 94,
+    "depasse": [],
+    "largeurEcran": 820
+  },
+  {
+    "navigateur": "safari",
+    "format": "mac",
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 1,
+    "hauteur": 28,
+    "depasse": [],
+    "largeurEcran": 1440
+  },
+  {
+    "navigateur": "safari",
+    "format": "ipad-paysage",
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 2,
+    "hauteur": 94,
+    "depasse": [],
+    "largeurEcran": 1180
+  },
+  {
+    "navigateur": "safari",
+    "format": "ipad-portrait",
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 2,
+    "hauteur": 94,
+    "depasse": [],
+    "largeurEcran": 820
+  }
+]
