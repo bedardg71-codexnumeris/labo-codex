@@ -370,18 +370,25 @@ function filtrerRessourcesNonDemo(ressources, type) {
    =============================== */
 
 /**
- * Assainit une chaîne importée : vérifie le type, tronque, retire les balises HTML
+ * Assainit une chaîne importée : vérifie le type, retire les balises HTML, tronque
  * @param {*} str - Valeur à assainir
  * @param {number} maxLen - Longueur maximale (défaut 500)
  * @returns {string} Chaîne nettoyée
+ *
+ * #585 (décision de Grégoire, 28 août 2026) : les balises partent AVANT la
+ * troncature. Dans l'ordre inverse, une balise coupée par `maxLen` perdait son
+ * `>` et `/<[^>]*>/` ne mordait plus : `'<img src=x onerror=alert(1)>M'` sur
+ * 20 caractères ressortait en `'<img src=x onerror=a'`.
+ * Ce qui reste hors de portée de cette fonction : un `<` sans `>` qui le ferme
+ * (« note < 60 ») traverse, comme avant. C'est l'échappement à l'affichage
+ * (`echapperHtml`, règle 1) qui le couvre, pas le filtre d'import.
  */
 function assainirChaine(str, maxLen = 500) {
     if (typeof str !== 'string') return '';
-    // Tronquer si trop long
-    let resultat = str.length > maxLen ? str.substring(0, maxLen) : str;
     // Retirer les balises HTML (<...>)
-    resultat = resultat.replace(/<[^>]*>/g, '');
-    return resultat;
+    const resultat = str.replace(/<[^>]*>/g, '');
+    // Puis tronquer si trop long
+    return resultat.length > maxLen ? resultat.substring(0, maxLen) : resultat;
 }
 
 /**
