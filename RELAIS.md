@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 8 h 53 : **1.192.2 (EXPORT DU PLAN, CHAMP SEMAINE DE L'INSPECTEUR) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 12 h 58 : **1.193.0 (CARTE D'ALIGNEMENT, LOT 3 : LA BARRE EN MOTS) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 26), puis deux relectures de Cowork (alignement de
+« Vue ▾ », puis toute la barre à 44 px au doigt et le guide) ; mots et Nouvelles validés par Grégoire. **Commits** :
+`07f23100` consigne ; `873fc3dc` lot 3 ; `ec3a3d76` captures ; `2ce2dc78` #1044 au BACKLOG ; `8c855111` Vue à 32 px
+(annulé par la suite) ; `c3acf01f` captures ; `6aa05301` barre à 44 px et guide ; `e2ef1249` captures ; `27b8ca10`
+release 1.193.0 ; ce relais. **Mesuré** : Vitest complet après le commit de release, 700 fichiers, 8 389 essais ; specs
+voisins de la carte 86/86 sous WebKit (un instable au chargement, `planif-menu-vue`) ; banc `planif-barre-lot3` 13 essais,
+21 mutations toutes rouges. **Suite** : verdict complet (Chrome et Safari fermés), push, vérification chez Netlify.
+
+## (relais précédent) 9 OCT. 2026, 8 h 53 : **1.192.2 (EXPORT DU PLAN, CHAMP SEMAINE DE L'INSPECTEUR) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac8e3a6`, `commit_ref` `8761a3fe`, `state: ready`, publié à
 12:53:05 Z (8 h 53, Toronto). Verdict Playwright complet sur `8761a3fe` : code 0, 0 échec connu, un instable au second essai
