@@ -55,7 +55,7 @@ async function verser(browser, erreurs, { cartouchesNues, pratiques } = {}) {
         window.db.setSync('a2025_echellesTemplates', [{ id: 'E637', nom: 'Échelle 637', niveaux: [] }]);
         if (pratiques) {
             // #953 : la forme nue des pratiques n'est plus écrite depuis la migration du
-            // 24 mai (main.js) : elle reste figée, et le versement la copie quand même.
+            // 24 mai (main.js) : elle reste figée. Depuis #956, le versement ne la copie plus.
             // security-ok: fixture littérale du banc, aucune source externe.
             window.db.setSync('pratiquesConfigurables', [{ id: 'PRAT_A', nom: 'Pratique nue A (figée)', config: {} }]);
             // security-ok: fixture littérale du banc, aucune source externe.
@@ -112,6 +112,7 @@ async function rouvrir(browser, erreurs, base64, { dejaLa, injecter, reimporter 
         const zip = await JSZip.loadAsync(octets);
         const cheminDonnees = Object.keys(zip.files).find(f => /donnees\.json$/.test(f));
         const donnees = JSON.parse(await zip.file(cheminDonnees).async('text'));
+        const clesVersees = Object.keys(donnees);
         let fichier = new File([octets], 'archive-637.zip');
         if (injecter) {
             // Archive plus ancienne : une clé nue héritée ajoutée au donnees.json du versement.
@@ -140,7 +141,7 @@ async function rouvrir(browser, erreurs, base64, { dejaLa, injecter, reimporter 
             apres = { cle: cle('grillesTemplates'), grillesTrim,
                 cartouchesSousGrillePresente: cartouchesTrim.filter(c => grillesTrim.includes(c.grilleId)).map(c => c.id) };
         }
-        return { clesArchive, lignes, doublons, grilles, echelles, pratiques, apres };
+        return { clesVersees, clesArchive, lignes, doublons, grilles, echelles, pratiques, apres };
     }, { base64, dejaLa: !!dejaLa, injecter: injecter || null, reimporter: !!reimporter });
     await ctx.close();
     return r;
@@ -237,9 +238,15 @@ test('#953 · grilles et échelles : les deux formes coexistent et divergent, la
 test('#953 · pratiques : la forme nue figée est ignorée, la namespacée l\'emporte', async ({ browser }) => {
     const erreurs = [];
     const zip = await verser(browser, erreurs, { cartouchesNues: false, pratiques: true });
-    const r = await rouvrir(browser, erreurs, zip);
+    // Archive d'avant #956 : le versement copiait aussi la forme nue figée.
+    const r = await rouvrir(browser, erreurs, zip, { injecter: {
+        pratiquesConfigurables: [{ id: 'PRAT_A', nom: 'Pratique nue A (figée)', config: {} }]
+    } });
     console.log('RÉOUVERTURE (#953, pratiques) →', JSON.stringify({ cles: r.clesArchive.filter(k => /pratiques/.test(k)), pratiques: r.pratiques }));
-    // Témoin : le versement copie les DEUX formes.
+    // #956 : le versement n'emporte plus que la forme namespacée.
+    expect(r.clesVersees).toContain('a2025_pratiquesConfigurables');
+    expect(r.clesVersees).not.toContain('pratiquesConfigurables');
+    // Témoin : l'archive rouverte porte les DEUX formes.
     expect(r.clesArchive).toEqual(expect.arrayContaining(['pratiquesConfigurables', 'a2025_pratiquesConfigurables']));
     const tout = r.pratiques.join(' | ');
     expect(r.pratiques).toHaveLength(2);

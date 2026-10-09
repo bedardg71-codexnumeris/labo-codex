@@ -63,7 +63,9 @@ var CLES_GLOBALES_INCLUSES = [
     // namespacées (`<trim>_grillesTemplates`) et capturées par le pass préfixe
     // (CLES_SANS_FILTRE, l. 111-112). La clé globale héritée est vidée au boot.
     'productionsTemplates',
-    'pratiquesConfigurables',
+    // #956 (9 oct. 2026) : `pratiquesConfigurables` RETIRÉE à son tour — plus aucun code n'écrit
+    // la forme nue depuis la migration du 24 mai ; la forme du trimestre part par le pass préfixe.
+    // Une archive d'avant la porte encore : la réouverture la relit (`_lireDeuxFormes`).
     'modalitesEvaluation',
     'infoCours',
     'profilEnseignant',
@@ -776,8 +778,6 @@ async function _collecterDonnees(trimestre, gc, onProg) {
             // plus dans ce pass — cf. CLES_GLOBALES_INCLUSES).
             if (cg === 'productionsTemplates' && typeof window.filtrerRessourcesNonDemo === 'function') {
                 v = window.filtrerRessourcesNonDemo(v, 'production');
-            } else if (cg === 'pratiquesConfigurables' && typeof window.filtrerRessourcesNonDemo === 'function') {
-                v = window.filtrerRessourcesNonDemo(v, 'pratique');
             } else if (cg === 'listeCours' && typeof window.filtrerRessourcesNonDemo === 'function') {
                 v = window.filtrerRessourcesNonDemo(v, 'cours');
             }
