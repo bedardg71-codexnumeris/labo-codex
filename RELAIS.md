@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 22 h 30 : **1.192.1 (MENU « VUE » À SA LARGEUR, PALETTE DES RACCOURCIS REVENUE) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 8 h 53 : **1.192.2 (EXPORT DU PLAN, CHAMP SEMAINE DE L'INSPECTEUR) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac8e3a6`, `commit_ref` `8761a3fe`, `state: ready`, publié à
+12:53:05 Z (8 h 53, Toronto). Verdict Playwright complet sur `8761a3fe` : code 0, 0 échec connu, un instable au second essai
+(`temoin-enregistrement-lot-b`), éveil tenu sur secteur, 0 veille ; Vitest du hook pré-push vert ; poussé `3fa07963..8761a3fe`
+(port 443). **Commits** : `e0547e52` export (#969, #974) ; `4425b6e7` fiches (#970-#973) et champ Semaine ; `42626f2c` suivi ;
+`e3431b21` consigne ; `8761a3fe` release 1.192.2 ; puis ce relais, **sans verdict propre** (documents). **Suite** : lot 3
+(barre, icône par icône avec Grégoire).
+
+## (relais précédent) 8 OCT. 2026, 22 h 30 : **1.192.1 (MENU « VUE » À SA LARGEUR, PALETTE DES RACCOURCIS REVENUE) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac851bd`, `commit_ref` `554508a9`, `state: ready`, publié à
 02:30:31 Z (22 h 30, Toronto). Verdict Playwright complet sur `554508a9` : code 0, 0 échec connu, aucun instable, éveil tenu,
