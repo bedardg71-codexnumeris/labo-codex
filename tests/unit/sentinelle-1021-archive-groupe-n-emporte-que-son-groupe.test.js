@@ -27,7 +27,9 @@ import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
 //   (e) #829 : la liste des élèves suivis du groupe part, celle de l'autre groupe non, et
 //       l'archivage ne dit plus « clé non reconnue » ;
 //   (f) rétro-compatibilité : une archive faite AVANT le lot (forme d'alors, figée ci-dessous)
-//       se vérifie toujours, et sa forme nue des pratiques se relit toujours à la réouverture.
+//       se vérifie toujours, et sa forme nue des pratiques se relit toujours à la réouverture ;
+//   (g) #1005 : « Vérifier » ne demande que la LECTURE du dossier (sélecteur et permission) ;
+//       « Archiver… » ensuite, sur la même page, redemande l'ÉCRITURE — et l'obtient.
 //
 // TÉMOINS : chaque invariant a le sien, par mutation de la source EN MÉMOIRE ; une mutation qui
 // ne remplace rien est refusée (« Témoin inerte »). Noms fictifs.
@@ -371,3 +373,47 @@ describe('#1021 · (f) une archive d\'avant le lot', () => {
     }, 20000);
 });
 
+describe('#1005 · (g) « Vérifier » lit, « Archiver… » écrit', () => {
+    /** Le dossier des archives, avec les permissions de Chrome : chaque mode demandé est consigné. */
+    function dossierAvecPermissions(racineDisque) {
+        const accordes = new Set();
+        const demandes = [];
+        return Object.assign(racineDisque, {
+            _demandes: demandes,
+            async queryPermission({ mode }) {
+                demandes.push('query:' + mode);
+                return accordes.has(mode) || (mode === 'read' && accordes.has('readwrite')) ? 'granted' : 'prompt';
+            },
+            async requestPermission({ mode }) { demandes.push('request:' + mode); accordes.add(mode); return 'granted'; },
+            _accorder(mode) { accordes.add(mode); }
+        });
+    }
+
+    it('Vérifier : sélecteur et permission en lecture seule ; puis Archiver… redemande l\'écriture', async () => {
+        // Une première archive, faite dans un autre onglet : le dossier existe, la liste la connaît.
+        const disque = fauxDossier('Archives_LaboCodex');
+        const premier = monter(creerDb(ESPACE), { dossier: disque });
+        await premier.reserve.verserGroupeCours(T, 'GC_UN');
+        const registre = premier.db.getSync('_manifesteReserve', null);
+        expect(registre.archives[DOSSIER].mode_archive).toBe('fsapi');
+
+        // Une page neuve : aucun dossier en session. « Vérifier ».
+        const dossier = dossierAvecPermissions(disque);
+        const banc = monter(creerDb(Object.assign({}, ESPACE, { _manifesteReserve: registre })), { dossier, verifier: true });
+        banc.verifier.actionVerifier(DOSSIER);
+        const verification = () => ((banc.db.getSync('_manifesteReserve', null) || { archives: {} }).archives[DOSSIER] || {}).verification;
+        for (let i = 0; i < 200 && !verification(); i++) await new Promise((r) => setTimeout(r, 10));
+        expect(verification().etat).toBe('verifiee'); // la vérification a bien eu lieu, par ce dossier
+        expect(banc.journal.selecteurs).toEqual(['read']);
+        expect(dossier._demandes.filter((d) => /readwrite/.test(d))).toEqual([]);
+        expect(banc.journal.notifications.map((n) => n.type)).not.toContain('erreur');
+
+        // Sur la même page, le dossier accordé en lecture : « Archiver… » demande l'écriture.
+        dossier._demandes.length = 0;
+        dossier._accorder('read');
+        const rendu = await banc.reserve.verserGroupeCours(T, 'GC_UN');
+        expect(rendu && rendu.succes).toBe(true);
+        expect(dossier._demandes).toEqual(['query:readwrite', 'request:readwrite']);
+        expect(banc.journal.selecteurs).toEqual(['read']); // pas de second sélecteur
+    }, 20000);
+});

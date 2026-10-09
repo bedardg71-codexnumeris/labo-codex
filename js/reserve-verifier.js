@@ -712,7 +712,8 @@ function actionVerifier(dossier) {
         return;
     }
     if (entree.mode_archive === 'fsapi' && typeof Reserve.supporteFSAPI === 'function' && Reserve.supporteFSAPI()) {
-        Reserve.obtenirHandle().then(function(handle) {
+        // #1005 : « Vérifier » ne fait que lire ; il demande la lecture seule.
+        Reserve.obtenirHandle({ lecture: true }).then(function(handle) {
             if (!handle) return;
             return _executer(dossier, entree, sourceDossier(handle, dossier));
         }).catch(function(e) {

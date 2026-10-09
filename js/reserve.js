@@ -371,17 +371,23 @@ function _supprimerHandlePersiste() {
 }
 
 /**
- * Verifie ou redemande la permission readwrite sur un handle.
+ * Verifie ou redemande la permission sur un handle, dans le mode demandé.
  * Doit etre appelee dans un user gesture (clic) si la permission est 'prompt'.
+ * #1005 : `mode` vaut 'read' pour un geste qui ne fait que lire (« Vérifier ») — Chrome
+ * demandait « Autoriser ce site à modifier les fichiers ? » à un geste qui n'écrit rien.
+ * L'écriture couvre la lecture ; la lecture ne couvre pas l'écriture : au prochain
+ * « Archiver… », Chrome repose la question, pour l'écriture cette fois.
+ * @param {string} [mode='readwrite']
  * @returns {Promise<boolean>} true si permission accordee
  */
-async function _verifierPermissionHandle(handle) {
+async function _verifierPermissionHandle(handle, mode) {
     if (!handle || typeof handle.queryPermission !== 'function') return false;
+    var acces = mode === 'read' ? 'read' : 'readwrite';
     try {
-        var perm = await handle.queryPermission({ mode: 'readwrite' });
+        var perm = await handle.queryPermission({ mode: acces });
         if (perm === 'granted') return true;
         if (perm === 'prompt') {
-            var demande = await handle.requestPermission({ mode: 'readwrite' });
+            var demande = await handle.requestPermission({ mode: acces });
             return demande === 'granted';
         }
         return false;
@@ -396,21 +402,24 @@ async function _verifierPermissionHandle(handle) {
  *
  * @param {Object} [opts]
  * @param {boolean} [opts.forcer=false] - Force le picker meme si un handle est persiste
+ * @param {boolean} [opts.lecture=false] - #1005 : le geste ne fait que lire (« Vérifier ») ;
+ *   la permission et le sélecteur demandent la lecture seule
  * @returns {Promise<FileSystemDirectoryHandle|null>} null si non supporte ou annule
  */
 async function _obtenirHandleReserve(opts) {
     if (!_supporteFSAPI()) return null;
     var forcer = !!(opts && opts.forcer);
+    var mode = opts && opts.lecture ? 'read' : 'readwrite';
 
     if (!forcer) {
         // Lot A2 : le dossier de cette page d'abord (sa permission est revérifiée).
         if (_handleSession) {
-            if (await _verifierPermissionHandle(_handleSession)) return _handleSession;
+            if (await _verifierPermissionHandle(_handleSession, mode)) return _handleSession;
             _handleSession = null;
         }
         var persiste = await _lireHandlePersiste();
         if (persiste) {
-            var ok = await _verifierPermissionHandle(persiste);
+            var ok = await _verifierPermissionHandle(persiste, mode);
             if (ok) { _handleSession = persiste; return persiste; }
             await _supprimerHandlePersiste();
         }
@@ -420,7 +429,7 @@ async function _obtenirHandleReserve(opts) {
     try {
         nouveau = await window.showDirectoryPicker({
             id: 'reserve-labo-codex',
-            mode: 'readwrite',
+            mode: mode,
             startIn: 'documents'
         });
     } catch (e) {
