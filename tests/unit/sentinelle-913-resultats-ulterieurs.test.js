@@ -153,7 +153,11 @@ describe('#913 — ce qui reste du bloc du Cadre : un stock LU, plus aucun écri
         parcourir('js');
         // #976 (8 oct. 2026) : « Corriger le DA… » renomme le DA dans ce stock comme dans toute clé du
         // trimestre qui le porte (rien ne reste sous l'ancien DA) ; il n'y ajoute ni n'y retire rien.
-        expect(nomment.sort()).toEqual(['js/correction-da.js', 'js/registre-longitudinal.js', 'js/trimestres.js']);
+        // #1021 (9 oct. 2026) : l'archive d'un groupe la FILTRE par élève (elle partait entière) ;
+        // elle y figure une fois, dans la liste des clés par DA, et n'est jamais écrite.
+        expect(nomment.sort()).toEqual(['js/correction-da.js', 'js/registre-longitudinal.js', 'js/reserve.js', 'js/trimestres.js']);
+        const reserve = lire('js/reserve.js').split('\n').filter((l) => /resultatsUlterieurs/.test(l));
+        expect(reserve).toEqual(["    'resultatsUlterieurs',"]);
         const correction = lire('js/correction-da.js').split('\n').filter((l) => /resultatsUlterieurs/.test(l));
         expect(correction).toHaveLength(1);
         expect(correction[0]).toMatch(/^\s*\{ nom: 'resultatsUlterieurs', categorie: 'resultats', deplacer: cleDObjet \},$/);
