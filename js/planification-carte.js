@@ -9004,8 +9004,8 @@ function initialiser() {
         });
     }
 
-    // Clic sur le guide flottant = premier plan
-    var _zIndexPanneaux = 81;
+    // Clic sur le guide flottant = premier plan (compteur partagé avec la
+    // palette des raccourcis, déclaré avec elle).
     if (guidePanel) {
         guidePanel.addEventListener('pointerdown', function() {
             guidePanel.style.zIndex = ++_zIndexPanneaux;
@@ -12437,8 +12437,10 @@ window.planificationCarte = {
 // Décisions de Grégoire : « Vue plein écran », « Recentrer la carte » et
 // « Tout voir » en mots, la couleur du fond sous « Fond du canevas » (même
 // modèle que le menu « Annoter » d'« Annoter et évaluer »), puis les
-// raccourcis clavier en bas. Remplace trois icônes, la palette de fond et la
-// palette flottante des raccourcis.
+// raccourcis clavier en bas. Remplace trois icônes et la palette de fond.
+// Les raccourcis eux-mêmes vivent dans leur palette flottante, que la ligne
+// « Raccourcis clavier » du menu ouvre (1.192.1 : listés dans le menu, ils le
+// tassaient).
 //
 // ▣ RACCOURCIS_CARTE est la SOURCE UNIQUE de la liste affichée : le banc
 // `planif-menu-vue.spec.js` exige un essai par `id`, et un essai qui
@@ -12485,9 +12487,9 @@ function toucheAffichee(raccourci) {
     return claviersMac() ? raccourci.mac : raccourci.autre;
 }
 
-/** Rend la liste des raccourcis en bas du menu « Vue » (createElement : aucun innerHTML). */
-function rendreRaccourcisMenuVue() {
-    var table = document.getElementById('planif-vue-raccourcis');
+/** Rend la table de la palette des raccourcis (createElement : aucun innerHTML). */
+function rendreRaccourcisPalette() {
+    var table = document.getElementById('planif-raccourcis-table');
     if (!table) return;
     while (table.firstChild) table.removeChild(table.firstChild);
     RACCOURCIS_CARTE.forEach(function(r) {
@@ -12551,8 +12553,6 @@ function initialiserMenuVue() {
     var dd = document.getElementById('planif-vue-dropdown');
     if (!menu || !btn || !dd) return;
 
-    rendreRaccourcisMenuVue();
-
     // Le bouton « Annuler » disait « Ctrl+Z » sur un Mac (mesure du lot 0).
     var btnAnnuler = document.getElementById('planif-btn-annuler');
     if (btnAnnuler) btnAnnuler.title = 'Annuler (' + (claviersMac() ? '⌘Z' : 'Ctrl+Z') + ')';
@@ -12565,8 +12565,8 @@ function initialiserMenuVue() {
         else ouvrirMenuVue(e.detail === 0);
     });
 
-    // Une commande ou une pastille referme le menu ; un clic dans la liste
-    // des raccourcis, qui se LIT, ne le referme pas.
+    // Une commande, une pastille ou la ligne « Raccourcis clavier » referme
+    // le menu.
     // ⚠ AUCUN stopPropagation ici : les trois commandes passent par le
     // répartiteur `data-action`, délégué au document (main.js). L'arrêter
     // rendait les commandes muettes — vu au banc le 8 oct.
@@ -12602,6 +12602,102 @@ function initialiserMenuVue() {
 // avant que la carte soit initialisée — le menu qui les porte doit en faire
 // autant (le spec du plein écran ne l'initialise pas : vu au banc, 8 oct.).
 initialiserMenuVue();
+
+// === PALETTE FLOTTANTE DES RACCOURCIS (revenue en 1.192.1, 8 oct. 2026) ===
+//
+// Décision de Grégoire : la liste dans le menu « Vue » le tassait (libellés
+// réduits à quelques lettres). La palette d'avant le lot 1 revient — barre de
+// déplacement, −/+, croix, premier plan au toucher —, ouverte par la ligne
+// « Raccourcis clavier » au bas du menu, et PAS par une icône dans la barre.
+// Sa table vient de RACCOURCIS_CARTE, la source unique.
+//
+// Câblée au chargement, comme le menu qui l'ouvre (voir plus bas).
+
+var _zIndexPanneaux = 81;
+
+function paletteRaccourcisOuverte() {
+    var panel = document.getElementById('planif-raccourcis-panel');
+    return !!(panel && panel.style.display !== 'none');
+}
+
+function basculerPaletteRaccourcis() {
+    var panel = document.getElementById('planif-raccourcis-panel');
+    if (!panel) return;
+    afficherPaletteRaccourcis(!paletteRaccourcisOuverte());
+}
+
+function afficherPaletteRaccourcis(ouvrir) {
+    var panel = document.getElementById('planif-raccourcis-panel');
+    if (!panel) return;
+    panel.style.display = ouvrir ? '' : 'none';
+    if (ouvrir) panel.style.zIndex = ++_zIndexPanneaux;
+    var ligne = document.getElementById('planif-vue-raccourcis-btn');
+    if (ligne) ligne.setAttribute('aria-pressed', ouvrir ? 'true' : 'false');
+}
+
+function initialiserPaletteRaccourcis() {
+    var raccourcisPanel = document.getElementById('planif-raccourcis-panel');
+    var ligne = document.getElementById('planif-vue-raccourcis-btn');
+    if (!raccourcisPanel || !ligne) return;
+
+    rendreRaccourcisPalette();
+    ligne.addEventListener('click', basculerPaletteRaccourcis);
+
+    var raccFermerBtn = raccourcisPanel.querySelector('.planif-raccourcis-panel-fermer');
+    if (raccFermerBtn) {
+        raccFermerBtn.addEventListener('click', function() {
+            afficherPaletteRaccourcis(false);
+        });
+    }
+    var raccReplierBtn = raccourcisPanel.querySelector('.planif-raccourcis-panel-replier');
+    if (raccReplierBtn) {
+        raccReplierBtn.addEventListener('click', function() {
+            var contenu = raccourcisPanel.querySelector('.planif-raccourcis-panel-contenu');
+            if (!contenu) return;
+            var estReplie = contenu.style.display === 'none';
+            contenu.style.display = estReplie ? '' : 'none';
+            raccReplierBtn.textContent = estReplie ? '−' : '+';
+            raccReplierBtn.title = estReplie ? 'Replier' : 'Déplier';
+        });
+    }
+    // Déplacement par la barre — même patron que le guide flottant.
+    var raccBarre = raccourcisPanel.querySelector('.planif-guide-barre');
+    if (raccBarre) {
+        raccBarre.addEventListener('pointerdown', function(e) {
+            if (e.target.closest('.planif-raccourcis-panel-fermer') || e.target.closest('.planif-raccourcis-panel-replier')) return;
+            if (!e.isPrimary || e.button > 0) return;
+            e.preventDefault();
+            var pid = e.pointerId;
+            var startX = e.clientX;
+            var startY = e.clientY;
+            var rect = raccourcisPanel.getBoundingClientRect();
+            var wrapperRect = document.getElementById('planif-zone-wrapper').getBoundingClientRect();
+            var startLeft = rect.left - wrapperRect.left;
+            var startTop = rect.top - wrapperRect.top;
+            function onMove(e2) {
+                if (e2.pointerId !== pid) return;
+                raccourcisPanel.style.left = (startLeft + e2.clientX - startX) + 'px';
+                raccourcisPanel.style.top = (startTop + e2.clientY - startY) + 'px';
+                raccourcisPanel.style.right = 'auto';
+            }
+            function onUp(e2) {
+                if (e2 && e2.pointerId !== pid) return;
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup', onUp);
+                document.removeEventListener('pointercancel', onUp);
+            }
+            document.addEventListener('pointermove', onMove);
+            document.addEventListener('pointerup', onUp);
+            document.addEventListener('pointercancel', onUp);
+        });
+    }
+    // Toucher la palette = premier plan.
+    raccourcisPanel.addEventListener('pointerdown', function() {
+        raccourcisPanel.style.zIndex = ++_zIndexPanneaux;
+    });
+}
+
+initialiserPaletteRaccourcis();
 
 // === COULEUR DE FOND CANEVAS (rubrique « Fond du canevas » du menu « Vue ») ===
 // ⚠ Clé GLOBALE, à dessein : la couleur vaut pour toutes les cartes et tous

@@ -22343,15 +22343,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* === MENU « VUE » DE LA CARTE (lot 1, 8 oct. 2026) ===
    Même boîte que « Actions ▾ » (.planif-actions-dropdown), ancrée à DROITE :
    le bouton vit dans le groupe de droite, un menu ancré à gauche déborderait
-   de l'écran. Les raccourcis, en bas, se lisent : la liste défile si le menu
-   dépasse la hauteur de la fenêtre (iPad en paysage). */
-.planif-vue-dropdown {
+   de l'écran.
+   ⚠ Les deux classes, pas une (1.192.1) : `.planif-actions-dropdown`, plus bas
+   dans ce fichier, à spécificité égale, reprenait `left: 0` et
+   `min-width: 200px` — le menu tombait à 200 px, les pastilles en débordaient
+   et la liste des raccourcis s'y tassait. Ancré à droite seulement, le menu
+   prend la largeur de son contenu : six pastilles, à 28 px au pointeur fin
+   comme à 44 px au doigt. */
+.planif-actions-dropdown.planif-vue-dropdown {
     left: auto;
     right: 0;
-    min-width: 300px;
-    max-width: min(380px, calc(100vw - 24px));
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
+    min-width: 240px;
+    max-width: calc(100vw - 24px);
 }
 .planif-vue-dropdown .planif-action-item {
     display: flex;
@@ -22380,12 +22383,43 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     outline: none;
     box-shadow: 0 0 0 var(--focus-ring-width, 3px) var(--focus-ring-color, #6aacb8);
 }
+/* === PALETTE FLOTTANTE DES RACCOURCIS (revenue en 1.192.1) ===
+   Ouverte par « Vue ▸ Raccourcis clavier ». Plus large que le guide
+   (340 px) : vingt raccourcis, dont certains en deux touches.
+   ⚠ ABSOLUE dans le canevas (#planif-zone-wrapper), pas fixe comme le guide :
+   fixe à 12 px du haut, elle passait sous l'en-tête de l'app — sa barre
+   devenait insaisissable —, et son déplacement, calculé depuis le coin du
+   canevas, la faisait sauter d'autant (mesuré au banc, 8 oct. 2026). */
+#planif-raccourcis-panel {
+    position: absolute;
+    top: 12px;
+    left: auto;
+    right: 12px;
+    width: 420px;
+    max-width: calc(100% - 24px);
+    max-height: calc(100% - 24px);
+    display: flex;
+    flex-direction: column;
+}
+.planif-raccourcis-panel-contenu {
+    padding: 8px 10px;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.planif-raccourcis-panel-replier,
+.planif-raccourcis-panel-fermer {
+    width: 20px; height: 20px; border: none; background: none;
+    font-size: 16px; line-height: 1; cursor: pointer; color: var(--texte-muted, #5a7a88);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+}
+.planif-raccourcis-panel-replier:hover,
+.planif-raccourcis-panel-fermer:hover { background: rgba(106, 172, 184, 0.1); color: var(--texte-principal, #d0e0e4); }
 .planif-raccourcis-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 11.5px;
     color: var(--texte-secondaire, #8aa4b0);
-    margin: 0 0 6px;
 }
 .planif-raccourcis-table td {
     padding: 3px 4px;
@@ -22395,10 +22429,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     width: 1%;
     white-space: nowrap;
     text-align: right;
-    padding-left: 14px;
     padding-right: 8px;
 }
-.planif-raccourcis-table td:last-child { padding-right: 14px; }
 .planif-raccourcis-table kbd {
     padding: 1px 5px;
     background: rgba(106, 172, 184, 0.06);
@@ -22418,6 +22450,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 @media (pointer: coarse) {
     #planif-btn-vue { min-height: 44px; }
     .planif-vue-dropdown .planif-action-item { min-height: 44px; }
+    .planif-raccourcis-panel-replier,
+    .planif-raccourcis-panel-fermer { width: 44px; height: 44px; }
 }
 
 /* === PANNEAU GUIDE FLOTTANT (#167) === */

@@ -407,14 +407,13 @@ const ESSAIS_RACCOURCIS = {
 
 test('chaque raccourci affiché a son essai, et chaque essai son raccourci affiché', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
-    await page.click('#planif-btn-vue');
-    const affiches = await page.$$eval('#planif-vue-raccourcis tr', (trs) => trs.map((t) => t.dataset.raccourci));
+    const affiches = await page.$$eval('#planif-raccourcis-table tr', (trs) => trs.map((t) => t.dataset.raccourci));
     const source = await etat(page, () => window.planificationCarte.RACCOURCIS_CARTE.map((r) => r.id));
     expect(affiches).toEqual(source);
     expect(affiches.length).toBeGreaterThan(0);
     expect([...affiches].sort()).toEqual(Object.keys(ESSAIS_RACCOURCIS).sort());
     // Sur Mac (la cible WebKit est « Desktop Safari ») : ⌘, et plus ⌘1.
-    const touches = await page.$$eval('#planif-vue-raccourcis kbd', (ks) => ks.map((k) => k.textContent));
+    const touches = await page.$$eval('#planif-raccourcis-table kbd', (ks) => ks.map((k) => k.textContent));
     expect(touches).toContain('⌘A');
     expect(touches.join(' ')).not.toContain('⌘1');
     expect(erreurs).toEqual([]);
@@ -428,7 +427,7 @@ for (const id of Object.keys(ESSAIS_RACCOURCIS)) {
     });
 }
 
-test('menu « Vue » : trois commandes dans l’ordre, puis le fond, puis les raccourcis ; l’ancienne barre a disparu', async ({ page }) => {
+test('menu « Vue » : trois commandes dans l’ordre, puis le fond, puis la ligne des raccourcis ; l’ancienne barre a disparu', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
     const dd = page.locator('#planif-vue-dropdown');
     await expect(dd).toBeHidden();
@@ -438,14 +437,16 @@ test('menu « Vue » : trois commandes dans l’ordre, puis le fond, puis les ra
 
     const ordre = await page.evaluate(() => {
         const d = document.getElementById('planif-vue-dropdown');
-        return Array.from(d.querySelectorAll('.planif-action-item, .actions-sous-titre, #planif-vue-raccourcis'))
-            .map((el) => el.id === 'planif-vue-raccourcis' ? '[raccourcis]' : el.childNodes[0].textContent.trim());
+        return Array.from(d.querySelectorAll('.planif-action-item, .actions-sous-titre'))
+            .map((el) => el.childNodes[0].textContent.trim());
     });
-    expect(ordre).toEqual(['Vue plein écran', 'Recentrer la carte', 'Tout voir', 'Fond du canevas', 'Raccourcis clavier', '[raccourcis]']);
+    expect(ordre).toEqual(['Vue plein écran', 'Recentrer la carte', 'Tout voir', 'Fond du canevas', 'Raccourcis clavier']);
+    // La liste n'est plus dans le menu : elle le tassait (1.192.1).
+    await expect(dd.locator('table')).toHaveCount(0);
     await expect(page.locator('#planif-fond-swatches .travaux-fond-swatch')).toHaveCount(12);
 
     for (const ancien of ['#planif-btn-plein-ecran', '#planif-btn-recentrer', '#planif-btn-tout-voir',
-        '#planif-btn-fond', '#planif-fond-dropdown', '#planif-palette-raccourcis-btn', '#planif-raccourcis-panel']) {
+        '#planif-btn-fond', '#planif-fond-dropdown', '#planif-palette-raccourcis-btn']) {
         await expect(page.locator(ancien), ancien).toHaveCount(0);
     }
     expect(erreurs).toEqual([]);
@@ -525,8 +526,8 @@ test('au clavier : Entrée ouvre et entre dans le menu, les flèches y circulent
     await expect(page.locator('#planif-vue-recentrer')).toBeFocused();
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowUp');
-    // Le dernier bouton du menu : la dernière pastille.
-    await expect(page.locator('#planif-fond-swatches .travaux-fond-swatch').last()).toBeFocused();
+    // Le dernier bouton du menu : la ligne « Raccourcis clavier ».
+    await expect(page.locator('#planif-vue-raccourcis-btn')).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(page.locator('#planif-vue-dropdown')).toBeHidden();
     await expect(page.locator('#planif-btn-vue')).toBeFocused();
@@ -538,5 +539,154 @@ test('au clavier : Entrée ouvre et entre dans le menu, les flèches y circulent
 test('le bouton « Annuler » annonce ⌘Z sur un Mac, plus « Ctrl+Z »', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
     await expect(page.locator('#planif-btn-annuler')).toHaveAttribute('title', 'Annuler (⌘Z)');
+    expect(erreurs).toEqual([]);
+});
+
+// === 1.192.1 — LE MENU TIENT DANS SA LARGEUR ; LA PALETTE DES RACCOURCIS REVIENT ===
+//
+// Constat de Grégoire (8 oct., 20 h 49, Chrome sur Mac) : menu tombé à 200 px
+// (une règle plus bas reprenait la largeur), dernière pastille de chaque
+// rangée coupée, libellés des raccourcis tassés à quelques lettres, défilement
+// horizontal. Les bancs du lot 1 mesuraient les cibles au doigt, pas que le
+// contenu tienne. Ces essais le mesurent, aux deux largeurs de la consigne :
+// celle de la capture (~1 800 px) et l'iPad Air en paysage (1 180 px).
+
+/** Largeur, dans la police de la cellule, de douze caractères moyens. */
+async function largeurDouzeCaracteres(page, selecteur) {
+    return page.evaluate((sel) => {
+        const td = document.querySelector(sel);
+        const sonde = document.createElement('span');
+        sonde.textContent = 'aaaaaaaaaaaa';
+        sonde.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;';
+        td.appendChild(sonde);
+        const l = sonde.getBoundingClientRect().width;
+        sonde.remove();
+        return l;
+    }, selecteur);
+}
+
+for (const [nomLargeur, viewport] of [['capture (1 800 × 1 100)', { width: 1800, height: 1100 }],
+    ['iPad Air paysage (1 180 × 820)', { width: 1180, height: 820 }]]) {
+    test.describe(`largeur ${nomLargeur}`, () => {
+        test.use({ viewport });
+
+        test('le menu « Vue » ouvert tient dans sa largeur : douze pastilles entières, aucun défilement horizontal', async ({ page }) => {
+            const erreurs = await ouvrirCarte(page);
+            await page.click('#planif-btn-vue');
+            await expect(page.locator('#planif-vue-dropdown')).toBeVisible();
+            const m = await page.evaluate(() => {
+                const d = document.getElementById('planif-vue-dropdown');
+                const r = d.getBoundingClientRect();
+                const pastilles = Array.from(d.querySelectorAll('.travaux-fond-swatch')).map((p) => p.getBoundingClientRect());
+                return {
+                    scrollWidth: d.scrollWidth, clientWidth: d.clientWidth,
+                    dansLaFenetre: r.left >= 0 && r.right <= window.innerWidth,
+                    pastillesDehors: pastilles.filter((q) => q.left < r.left || q.right > r.right
+                        || q.top < r.top || q.bottom > r.bottom).length,
+                    nbPastilles: pastilles.length
+                };
+            });
+            expect(m.nbPastilles).toBe(12);
+            expect(m.scrollWidth, 'défilement horizontal du menu').toBeLessThanOrEqual(m.clientWidth);
+            expect(m.pastillesDehors, 'pastilles coupées').toBe(0);
+            expect(m.dansLaFenetre).toBe(true);
+            expect(erreurs).toEqual([]);
+        });
+
+        test('la palette des raccourcis ouverte tient dans sa largeur ; chaque libellé a la place de douze caractères', async ({ page }) => {
+            const erreurs = await ouvrirCarte(page);
+            await page.click('#planif-btn-vue');
+            await page.click('#planif-vue-raccourcis-btn');
+            const panel = page.locator('#planif-raccourcis-panel');
+            await expect(panel).toBeVisible();
+            const m = await page.evaluate(() => {
+                const p = document.getElementById('planif-raccourcis-panel');
+                const c = p.querySelector('.planif-raccourcis-panel-contenu');
+                const r = p.getBoundingClientRect();
+                return {
+                    panel: [p.scrollWidth, p.clientWidth], contenu: [c.scrollWidth, c.clientWidth],
+                    dansLaFenetre: r.left >= 0 && r.right <= window.innerWidth,
+                    libelles: Array.from(p.querySelectorAll('#planif-raccourcis-table td:last-child'))
+                        .map((td) => td.getBoundingClientRect().width)
+                };
+            });
+            expect(m.panel[0], 'défilement horizontal de la palette').toBeLessThanOrEqual(m.panel[1]);
+            expect(m.contenu[0], 'défilement horizontal du contenu').toBeLessThanOrEqual(m.contenu[1]);
+            expect(m.dansLaFenetre).toBe(true);
+            const douze = await largeurDouzeCaracteres(page, '#planif-raccourcis-table td:last-child');
+            expect(douze).toBeGreaterThan(0);
+            expect(m.libelles.length).toBeGreaterThan(0);
+            expect(Math.min(...m.libelles), 'libellé le plus étroit').toBeGreaterThanOrEqual(douze);
+            expect(erreurs).toEqual([]);
+        });
+    });
+}
+
+test('« Raccourcis clavier » referme le menu et ouvre la palette ; une seconde fois, la referme ; aucune icône dans la barre', async ({ page }) => {
+    const erreurs = await ouvrirCarte(page);
+    const panel = page.locator('#planif-raccourcis-panel');
+    const ligne = page.locator('#planif-vue-raccourcis-btn');
+    await expect(panel).toBeHidden();
+    await page.click('#planif-btn-vue');
+    await ligne.click();
+    await expect(page.locator('#planif-vue-dropdown')).toBeHidden();
+    await expect(panel).toBeVisible();
+    await expect(ligne).toHaveAttribute('aria-pressed', 'true');
+    await page.click('#planif-btn-vue');
+    await ligne.click();
+    await expect(panel).toBeHidden();
+    await expect(ligne).toHaveAttribute('aria-pressed', 'false');
+    // La barre reste désencombrée : aucun bouton n'y ouvre la palette.
+    await expect(page.locator('#planif-palette-raccourcis-btn')).toHaveCount(0);
+    const ouvreurs = await page.$$eval('[aria-controls="planif-raccourcis-panel"]', (els) => els.map((e) => e.id));
+    expect(ouvreurs).toEqual(['planif-vue-raccourcis-btn']);
+    expect(erreurs).toEqual([]);
+});
+
+test('la palette des raccourcis se déplace par sa barre, se replie, passe au premier plan et se ferme', async ({ page }) => {
+    const erreurs = await ouvrirCarte(page);
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-raccourcis-btn');
+    const panel = page.locator('#planif-raccourcis-panel');
+    await expect(panel).toBeVisible();
+
+    // Déplacement : la palette suit le pointeur, du même pas.
+    const avant = await panel.boundingBox();
+    const titre = await panel.locator('.planif-palette-titre').boundingBox();
+    const x0 = titre.x + titre.width / 2, y0 = titre.y + titre.height / 2;
+    await page.mouse.move(x0, y0);
+    await page.mouse.down();
+    for (let i = 1; i <= 10; i++) await page.mouse.move(x0 - 15 * i, y0 + 8 * i);
+    await page.mouse.up();
+    const apres = await panel.boundingBox();
+    expect(Math.abs((apres.x - avant.x) - (-150)), 'pas horizontal').toBeLessThanOrEqual(2);
+    expect(Math.abs((apres.y - avant.y) - 80), 'pas vertical').toBeLessThanOrEqual(2);
+
+    // Premier plan : toucher le guide le passe devant ; toucher la palette
+    // la repasse devant lui (compteur partagé).
+    await page.click('#planif-palette-aide-btn');
+    const guide = page.locator('#planif-guide-panel');
+    await expect(guide).toBeVisible();
+    const zIndex = (id) => page.evaluate((i) => Number(document.getElementById(i).style.zIndex || 0), id);
+    await guide.locator('.planif-guide-barre').dispatchEvent('pointerdown', { isPrimary: true, button: 0, pointerId: 7 });
+    await page.mouse.up();
+    expect(await zIndex('planif-guide-panel')).toBeGreaterThan(await zIndex('planif-raccourcis-panel'));
+    await panel.locator('.planif-raccourcis-table').dispatchEvent('pointerdown', { isPrimary: true, button: 0, pointerId: 8 });
+    expect(await zIndex('planif-raccourcis-panel')).toBeGreaterThan(await zIndex('planif-guide-panel'));
+    const replier = panel.locator('.planif-raccourcis-panel-replier');
+    const contenu = panel.locator('.planif-raccourcis-panel-contenu');
+
+    // Repli, puis dépli.
+    await replier.click();
+    await expect(contenu).toBeHidden();
+    await expect(replier).toHaveText('+');
+    await replier.click();
+    await expect(contenu).toBeVisible();
+    await expect(replier).toHaveText('−');
+
+    // Fermeture : la ligne du menu le dit aussi.
+    await panel.locator('.planif-raccourcis-panel-fermer').click();
+    await expect(panel).toBeHidden();
+    await expect(page.locator('#planif-vue-raccourcis-btn')).toHaveAttribute('aria-pressed', 'false');
     expect(erreurs).toEqual([]);
 });

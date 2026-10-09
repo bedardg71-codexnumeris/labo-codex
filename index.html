@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261008d"> <!-- Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261008e"> <!-- 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4250,9 +4250,10 @@
                                     <!-- Menu « Vue » (lot 1 du chantier de la carte, 8 oct. 2026, décisions
                                          de Grégoire) : des mots au lieu de trois icônes ambiguës, la couleur
                                          du fond (modèle : le menu « Annoter » d'« Annoter et évaluer »), et
-                                         les raccourcis clavier en bas — la palette des raccourcis a disparu.
-                                         La liste des raccourcis est rendue par le JS depuis RACCOURCIS_CARTE,
-                                         sa source unique. -->
+                                         en bas, la ligne « Raccourcis clavier », qui ouvre et referme la palette
+                                         flottante des raccourcis (correctif 1.192.1 : la liste dans le menu le
+                                         tassait). La liste est rendue par le JS depuis RACCOURCIS_CARTE, sa
+                                         source unique. -->
                                     <div class="planif-actions-menu planif-vue-menu" id="planif-vue-menu">
                                         <button class="planif-btn-carte" id="planif-btn-vue" aria-haspopup="true" aria-expanded="false" aria-controls="planif-vue-dropdown">Vue ▾</button>
                                         <div class="planif-actions-dropdown planif-vue-dropdown" id="planif-vue-dropdown">
@@ -4276,8 +4277,7 @@
                                                 <button class="travaux-fond-swatch" data-fond="#e8e4da" title="Cr&egrave;me" style="background:#e8e4da"></button>
                                             </div>
                                             <hr class="planif-action-sep">
-                                            <div class="actions-sous-titre">Raccourcis clavier</div>
-                                            <table class="planif-raccourcis-table" id="planif-vue-raccourcis"></table>
+                                            <button class="planif-action-item" id="planif-vue-raccourcis-btn" aria-pressed="false" aria-controls="planif-raccourcis-panel">Raccourcis clavier</button>
                                         </div>
                                     </div>
                                     <!-- Le bouton loupe n'est pas un doublon du raccourci L : sur iPad il
@@ -4399,6 +4399,21 @@
                             <div id="planif-corbeille" class="planif-corbeille" title="Glisse un bloc ici pour le supprimer" aria-label="Corbeille — glisse un bloc ici pour le supprimer">
                                 <img src="icons/icons8-trash.svg" alt="" class="palette-icon">
                                 <span class="planif-corbeille-libelle">Déposer ici pour supprimer</span>
+                            </div>
+                            <!-- Palette flottante des raccourcis : revenue en 1.192.1 (décision de
+                                 Grégoire, 8 oct.), ouverte par « Vue ▸ Raccourcis clavier ». La table est
+                                 rendue par le JS depuis RACCOURCIS_CARTE, sa source unique. -->
+                            <div id="planif-raccourcis-panel" class="planif-guide-flottante" style="display: none;">
+                                <div class="planif-guide-barre">
+                                    <span class="planif-palette-titre">Raccourcis</span>
+                                    <div class="planif-guide-barre-actions">
+                                        <button class="planif-raccourcis-panel-replier" title="Replier">−</button>
+                                        <button class="planif-raccourcis-panel-fermer" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+                                    </div>
+                                </div>
+                                <div class="planif-raccourcis-panel-contenu">
+                                    <table class="planif-raccourcis-table" id="planif-raccourcis-table"></table>
+                                </div>
                             </div>
                             <!-- Planificateur : grille des semaines + réserve « Non planifié ».
                                  Il NAVIGUE dans la carte (cadrage + sélection) ; il ne la filtre plus. -->
@@ -14427,7 +14442,7 @@
     <script src="js/planification-donnees.js?v=20261006a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
     <script src="js/planification-bibliotheque.js?v=20261006a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20261008d"></script> <!-- Mots validés (8 oct., 19 h 05) et lien de l'invitation qui quitte le plein écran · Lot 2 de la carte (8 oct.) : planificateur vertical seul, dates du trimestre · Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-carte.js?v=20261008e"></script> <!-- 1.192.1 (8 oct.) : palette des raccourcis revenue, ouverte par le menu « Vue » · Mots validés (8 oct., 19 h 05) et lien de l'invitation qui quitte le plein écran · Lot 2 de la carte (8 oct.) : planificateur vertical seul, dates du trimestre · Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20260928c"></script> <!-- LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14519,7 +14534,7 @@
     <script src="js/guidage-demo.js?v=20261008a"></script> <!-- #1039 : bandeau de l'Animation · Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20261008g"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20261008h"></script> <!-- Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->

@@ -24,6 +24,8 @@
             // 1.192 (chantier de la carte d'alignement, lots 1 et 2 : menu « Vue », planificateur
             // vertical et dates du trimestre) — titre et lignes validés par Grégoire le 8 oct. 2026
             // à 19 h 33, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md), posés tels quels.
+            // 1.192.1 (le menu tient dans sa largeur ; les raccourcis dans leur palette, ouverte
+            // au bas du menu) consolidé, sans ligne : « en bas, tous les raccourcis » reste vrai.
             version: '1.192',
             couleur: 'vert',
             titre: 'Un menu «&nbsp;Vue&nbsp;» sur la carte d\'alignement',
