@@ -396,3 +396,36 @@ test('Vue ▸ Longue-vue : ronde, cochée ; L la referme et la rouvre', async ({
     expect(raccourcis.toLowerCase()).not.toContain('loupe');
     expect(erreurs).toEqual([]);
 });
+
+// ─── 7. Au doigt : toute la barre à 44 px, chaque rangée d'une seule hauteur ─
+// Relecture de Cowork du lot 3 (9 oct. 2026) : règle du projet, zones de toucher
+// d'au moins 44 px sur l'iPad. Le select natif ignore `min-height` sous WebKit
+// (21 px mesurés) : c'est lui que cet essai a d'abord fait rougir.
+
+for (const [nom, viewport] of [['paysage', { width: 1180, height: 820 }], ['portrait', { width: 820, height: 1180 }]]) {
+    test.describe(`iPad ${nom}`, () => {
+        test.use({ viewport, hasTouch: true, isMobile: true });
+
+        test(`au doigt (${nom}) : chaque commande de la barre fait au moins 44 px, et ses voisins de rangée la même hauteur`, async ({ page }) => {
+            const erreurs = await ouvrirCarte(page);
+            const mesure = await page.evaluate(() => {
+                const t = document.querySelector('.planif-header-toolbar');
+                const ctrl = Array.from(t.querySelectorAll('button, select'))
+                    .filter((e) => e.offsetParent !== null && !e.hidden && !e.closest('.planif-actions-dropdown')
+                        && !e.closest('.planif-recherche-resultats') && !e.closest('.planif-toolbar-recherche'));
+                const boites = ctrl.map((e) => { const r = e.getBoundingClientRect(); return { id: e.id, h: Math.round(r.height), centre: (r.top + r.bottom) / 2 }; });
+                return {
+                    grossier: matchMedia('(pointer: coarse)').matches,
+                    petites: boites.filter((b) => b.h < 44).map((b) => b.id + ':' + b.h),
+                    hauteurs: [...new Set(boites.map((b) => b.h))],
+                    nb: boites.length
+                };
+            });
+            expect(mesure.grossier).toBe(true);
+            expect(mesure.nb).toBe(10);
+            expect(mesure.petites).toEqual([]);
+            expect(mesure.hauteurs).toEqual([44]);
+            expect(erreurs).toEqual([]);
+        });
+    });
+}

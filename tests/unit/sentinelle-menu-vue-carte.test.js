@@ -42,13 +42,20 @@ const grossierToutes = blocsPointeurGrossier(css);
 describe('menu « Vue » · A — au doigt, 44 px', () => {
     const grossier = blocsPointeurGrossier(css);
 
-    it('chaque commande du menu monte à 44 px ; le bouton « Vue ▾ » prend la hauteur de ses voisins de rangée', () => {
-        // Lot 3 (9 oct. 2026, relecture de Cowork) : à 44 px, « Vue ▾ » dépassait seul
-        // sur la deuxième rangée de l'iPad. Il suit la règle de ses voisins.
-        const voisins = (css.match(/@media \(hover: none\) \{\s*\.planif-btn-palette \{ min-height: (\d+)px;/) || [])[1];
-        expect(voisins).toBeDefined();
-        const vue = (grossier.match(/#planif-btn-vue\s*\{[^}]*min-height:\s*(\d+)px/) || [])[1];
-        expect(vue).toBe(voisins);
+    it('chaque commande du menu et toute la barre montent à 44 px, « Vue ▾ » à la même hauteur que ses voisins', () => {
+        // Lot 3 (9 oct. 2026, relecture de Cowork) : zones de toucher d'au moins 44 px.
+        // « Vue ▾ » et ses voisins de rangée partagent UNE règle : ils ne peuvent plus diverger.
+        const regle = (grossier.match(/([^{}]*#planif-btn-vue[^{}]*)\{([^}]*)\}/) || []);
+        expect(regle[1]).toBeDefined();
+        for (const sel of ['#planif-btn-vue', '.planif-header-toolbar .planif-btn-palette', '#planif-btn-actions', '#planif-btn-annuler', '#planif-btn-retablir']) {
+            expect(regle[1], sel).toContain(sel);
+        }
+        const h = Number((regle[2].match(/min-height:\s*(\d+)px/) || [])[1]);
+        expect(h).toBeGreaterThanOrEqual(44);
+        // Le select natif ignore min-height sous WebKit : hauteur fixe, apparence retirée.
+        expect(grossier).toMatch(/#planif-selecteur-cartes #planif-liste-cartes\s*\{[^}]*height:\s*44px;[^}]*-webkit-appearance:\s*none/);
+        // Plus aucune hauteur plus basse ne vise les voisins au doigt.
+        expect(css).not.toMatch(/\.planif-btn-palette\s*\{[^}]*min-height:\s*(?:[0-3]\d|4[0-3])px/);
         expect(grossier).toMatch(/\.planif-vue-dropdown \.planif-action-item\s*\{[^}]*min-height:\s*44px/);
     });
 

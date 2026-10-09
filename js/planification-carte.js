@@ -2014,7 +2014,8 @@ var GUIDE_PAGES = [
         // Réécrite le 8 août 2026 (1.57.0 a supprimé la page « Plan de la
         // leçon » et l'import MD) : la page documente le RÉEL — le menu
         // Actions, les niveaux par usage, le Personnalisé, et les deux
-        // imports qui existent encore (JSON, inter-trimestre).
+        // imports qui existent encore (JSON, inter-trimestre) — dans la
+        // Bibliothèque depuis le lot 3 (9 oct. 2026).
         titre: 'Exporte ton plan',
         contenu:
             '<p class="planif-guide-pourquoi">Ta carte sait produire le document que tu remets\u00a0: plan de cours, déroulement pour la classe, ou preuve d\u2019alignement. Un geste, neuf documents possibles.</p>' +
@@ -2032,8 +2033,9 @@ var GUIDE_PAGES = [
             '<div class="planif-guide-astuce">Le document copié se retravaille où tu veux — avec une IA, un collègue, ton traitement de texte. C\u2019est un document de SORTIE\u00a0: la carte reste la source.</div>' +
             '<p><strong>Importer</strong></p>' +
             '<ol>' +
-                '<li><strong>Importer une carte (fichier)</strong> recharge une carte exportée en JSON.</li>' +
-                '<li><strong>Importer d\u2019un autre trimestre\u2026</strong> reprend la carte d\u2019un cours donné à une session précédente — copie indépendante, la source reste intacte.</li>' +
+                '<li>Clique <strong>Consulter la bibliothèque</strong> (à gauche de la barre).</li>' +
+                '<li><strong>Importer une carte (JSON)</strong> recharge une carte exportée en JSON.</li>' +
+                '<li><strong>Importer depuis un autre trimestre</strong> reprend la carte d\u2019un cours donné à une session précédente — copie indépendante, la source reste intacte.</li>' +
             '</ol>'
     }
 ];

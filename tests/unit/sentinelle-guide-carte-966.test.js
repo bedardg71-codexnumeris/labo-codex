@@ -157,10 +157,29 @@ const P5_POINT3 = '<li>Dans l’<strong>Inspecteur</strong> d’une activité ou
 const P5_POINT4_AVANT = 'Le bloc doit être dans la même leçon que l’objectif.</li>';
 const P5_POINT4 = 'Une activité ou un exposé doit être dans la même leçon que l’objectif ; une évaluation, dans cette leçon ou une leçon placée après.</li>';
 
-describe('#966 — les pages 3, 7 et 9 ne changent pas ; la page 5, de ses deux retouches seulement', () => {
+describe('#966 — les pages 3 et 7 ne changent pas, la 9 hors de sa section « Importer » (lot 3) ; la page 5, de ses deux retouches seulement', () => {
     const empreinte = (titre, contenu) => crypto.createHash('sha256').update(titre + '|' + contenu).digest('hex').slice(0, 16);
-    it('pages 3, 7 et 9 : même empreinte qu\'avant le lot (mesurée sur main, df359bf)', () => {
-        expect([2, 6, 8].map((i) => empreinte(pages[i].titre, pages[i].contenu))).toEqual(['4f95ffea44a91cab', '1e4fe6a19353548d', '6e57061b206939f8']);
+    it('pages 3 et 7 : même empreinte qu\'avant le lot (mesurée sur main, df359bf)', () => {
+        expect([2, 6].map((i) => empreinte(pages[i].titre, pages[i].contenu))).toEqual(['4f95ffea44a91cab', '1e4fe6a19353548d']);
+    });
+    it('page 9 : seule la section « Importer » a changé, au lot 3 de la carte (9 oct. 2026) — les imports vivent dans la Bibliothèque', () => {
+        const contenu = pages[8].contenu;
+        const NOUVEAU = "'<li>Clique <strong>Consulter la bibliothèque</strong> (à gauche de la barre).</li>' +"
+            .replace(/^'|' \+$/g, '');
+        expect(contenu).toContain(NOUVEAU);
+        expect(contenu).toContain('<strong>Importer une carte (JSON)</strong>');
+        expect(contenu).toContain('<strong>Importer depuis un autre trimestre</strong>');
+        expect(contenu).not.toContain('Importer une carte (fichier)');
+        expect(contenu).not.toContain('autre trimestre\u2026');
+        // Remise à l'ancienne, la section « Importer » rend l'empreinte d'avant le lot :
+        // rien d'autre de la page n'a bougé.
+        const i = contenu.indexOf('<p><strong>Importer</strong></p>');
+        expect(i).toBeGreaterThan(0);
+        const ancienne = contenu.slice(0, i) + '<p><strong>Importer</strong></p><ol>' +
+            '<li><strong>Importer une carte (fichier)</strong> recharge une carte exportée en JSON.</li>' +
+            '<li><strong>Importer d\u2019un autre trimestre\u2026</strong> reprend la carte d\u2019un cours donné à une session précédente — copie indépendante, la source reste intacte.</li>' +
+            '</ol>';
+        expect(empreinte(pages[8].titre, ancienne)).toBe('6e57061b206939f8');
     });
     it('page 5 : les deux phrases acceptées le 28 sept., une fois chacune', () => {
         expect(pages[4].contenu.split(P5_POINT3).length - 1).toBe(1);
