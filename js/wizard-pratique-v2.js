@@ -2078,11 +2078,11 @@ function genererRecapitulatif() {
         if (r.echelleId) {
             const echelles = db.getSync(cle('echellesTemplates'), []);
             const echelle = echelles.find(e => e.id === r.echelleId);
-            html += `<p><strong>Échelle (rétroaction) :</strong> ${echelle?.nom || r.echelleId}</p>`;
+            html += `<p><strong>Échelle (rétroaction) :</strong> ${echapperHtml(echelle?.nom || r.echelleId)}</p>`;
         }
         if (r.grilleId) {
             const grille = grillesDuWizard().find(g => g.id === r.grilleId);
-            html += `<p><strong>Grille (rétroaction) :</strong> ${grille?.nom || r.grilleId}</p>`;
+            html += `<p><strong>Grille (rétroaction) :</strong> ${echapperHtml(grille?.nom || r.grilleId)}</p>`;
         }
         html += '</div>';
     }
@@ -2096,7 +2096,7 @@ function genererRecapitulatif() {
         if (r.echelleId) {
             const echelles = db.getSync(cle('echellesTemplates'), []);
             const echelle = echelles.find(e => e.id === r.echelleId);
-            html += `<p><strong>Échelle\u00a0:</strong> ${echelle?.nom || r.echelleId}</p>`;
+            html += `<p><strong>Échelle\u00a0:</strong> ${echapperHtml(echelle?.nom || r.echelleId)}</p>`;
             // #577 : le récapitulatif dit si les deux repères sont posés — et ce
             // que leur absence coûte, plutôt que de la taire.
             if (echelle) {
@@ -2108,7 +2108,7 @@ function genererRecapitulatif() {
         }
         if (r.grilleId) {
             const grille = grillesDuWizard().find(g => g.id === r.grilleId);
-            html += `<p><strong>Grille\u00a0:</strong> ${grille?.nom || r.grilleId}</p>`;
+            html += `<p><strong>Grille\u00a0:</strong> ${echapperHtml(grille?.nom || r.grilleId)}</p>`;
         } else {
             html += `<p><strong>Grille\u00a0:</strong> <em>À configurer plus tard</em></p>`;
         }

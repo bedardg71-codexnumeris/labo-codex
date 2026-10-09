@@ -55,7 +55,7 @@ async function preparerDonneesBibliothequeProductions() {
 
     // Section 1
     const cartesSection1 = productionsDansSelection.map(prod => ({
-        nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
+        nom: `${BibliothequeUI.formaterTitreDemo(echapperHtml(prod.titre), BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}`,
         id: prod.id,
         afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
@@ -123,7 +123,8 @@ async function preparerDonneesBibliothequeProductions() {
         actionsMenu.push({ label: 'Supprimer', action: 'supprimerProductionDeBibliothequePartagee', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
 
         cartesSection2.push({
-            nom: `${BibliothequeUI.formaterTitreDemo(prod.titre, BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,
+            nom: `${BibliothequeUI.formaterTitreDemo(echapperHtml(prod.titre), BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}`,
+            libelle: `${BibliothequeUI.formaterTitre(prod.titre)}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,   // #467 : texte brut, select des dossiers
             id: prod.id,
             afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
@@ -162,12 +163,13 @@ async function afficherBibliothequeProductions() {
 
     // #327 — enregistre la biblio « productions » auprès du helper générique de
     // répertoires (idempotent). Les items de Section 2 sont des cartes-config
-    // déjà libellées : labelItem lit leur .nom tel quel.
+    // déjà libellées : labelItem lit leur .libelle (texte brut ; le .nom est du HTML
+    // échappé depuis #467, et le select l'échapperait une seconde fois).
     BibliothequeUI.repertoires.enregistrer('productions', {
         rafraichir: afficherBibliothequeProductions,
         ajouterItem: (id) => ajouterProductionIndividuelle(id),
         supprimerItem: (id) => supprimerProductionDeBibliothequePartagee(id),
-        labelItem: (c) => c.nom,
+        labelItem: (c) => c.libelle,
         labelPluriel: 'productions'
     });
 
@@ -481,7 +483,7 @@ function mettreAJourFiltreCoursTrimestreProductions() {
     // Peupler le dropdown cours
     let optionsHTML = '<option value="">Tous les cours</option>';
     coursMap.forEach((nom, id) => {
-        optionsHTML += `<option value="${id}">${nom}</option>`;
+        optionsHTML += `<option value="${echapperHtml(id)}">${echapperHtml(nom)}</option>`;
     });
     selectCours.innerHTML = optionsHTML;
 
@@ -529,9 +531,9 @@ function afficherProductionsTrimestreModal() {
         html += `
             <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <strong>${prod.titre || 'Sans titre'}</strong>
-                    ${(prod.activiteApprentissage || prod.description) ? ` - ${prod.activiteApprentissage || prod.description}` : ''}
-                    <br><small style="color: var(--gris-moyen);">Type: ${prod.type || 'N/A'} • Pondération: ${prod.ponderation || 0}%${coursLabel ? ' • ' + coursLabel : ''}</small>
+                    <strong>${echapperHtml(prod.titre || 'Sans titre')}</strong>
+                    ${(prod.activiteApprentissage || prod.description) ? ` - ${echapperHtml(prod.activiteApprentissage || prod.description)}` : ''}
+                    <br><small style="color: var(--gris-moyen);">Type: ${echapperHtml(prod.type || 'N/A')} • Pondération: ${echapperHtml(prod.ponderation || 0)}%${coursLabel ? ' • ' + echapperHtml(coursLabel) : ''}</small>
                 </div>
                 <button data-action="importerUneProductionTrimestre" data-param="${cleSelectionnee}" data-param2="${prod.id}" class="btn btn-confirmer btn-tres-compact">
                     Importer

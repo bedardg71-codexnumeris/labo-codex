@@ -451,77 +451,6 @@ function viderAffichageCoursV2() {
     }
 }
 
-/**
- * Affiche les détails d'un cours (aperçu)
- * 🆕 BETA 95.2 : Simplifié - affiche uniquement les informations du cours
- * (Enseignant, Horaire, Session sont dans leurs sections respectives)
- */
-function afficherDetailsCoursV2(cours) {
-    const conteneur = document.getElementById('v2-apercuCours');
-    if (!conteneur) return;
-
-    // Normaliser le sigle (codeCours, sigle, code ou numero)
-    // 🆕 FIX (4 fév 2026) : Priorité codeCours, ajouter code pour Primo
-    const sigle = cours.codeCours || cours.sigle || cours.code || cours.numero || '—';
-
-    // Normaliser le nom du cours
-    const nomCours = cours.titre || cours.nomCours || '—';
-
-    // Discipline
-    const discipline = cours.discipline || '—';
-
-    // Compétence
-    const competence = cours.competence || '—';
-    const numeroCompetence = cours.numeroCompetence || '';
-
-    // Éléments de compétence (afficher seulement si présents)
-    const elementsCompetence = cours.elementsCompetence || '';
-
-    // Un service n'a ni code, ni discipline, ni compétence : on montre sa nature et son nom, rien d'autre.
-    if (cours.nature === 'service') {
-        const mots = motsNature(cours);
-        conteneur.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div>
-                <label class="text-muted">Nature</label>
-                <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">${mots.nature}</div>
-            </div>
-            <div>
-                <label class="text-muted">Nom du ${mots.objet}</label>
-                <div style="font-weight: 600;">${echapperHtml(nomCours)}</div>
-            </div>
-        </div>`;
-        return;
-    }
-
-    conteneur.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div>
-                <label class="text-muted">Code du cours</label>
-                <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-primaire);">${sigle}</div>
-            </div>
-            <div>
-                <label class="text-muted">Nom du cours</label>
-                <div style="font-weight: 600;">${nomCours}</div>
-            </div>
-            <div>
-                <label class="text-muted">Discipline</label>
-                <div>${discipline}</div>
-            </div>
-            <div>
-                <label class="text-muted">Compétence${numeroCompetence ? ` (${numeroCompetence})` : ''}</label>
-                <div>${competence}</div>
-            </div>
-        </div>
-        ${elementsCompetence ? `
-        <div style="margin-top: 15px;">
-            <label class="text-muted">Éléments de compétence</label>
-            <div style="font-size: 0.9rem; white-space: pre-line;">${elementsCompetence}</div>
-        </div>
-        ` : ''}
-    `;
-}
-
 // Variable pour stocker l'ID du cours en édition
 let coursEnEditionV2 = null;
 
@@ -1150,7 +1079,7 @@ function afficherSyntheseHoraire(horaire) {
     const joursStr = Array.from(joursSet).join(', ');
 
     sidebar.innerHTML = `
-        <div class="apercu-titre">${horaire.nom || 'Horaire'}</div>
+        <div class="apercu-titre">${echapperHtml(horaire.nom || 'Horaire')}</div>
         <div class="apercu-detail">${nbSeances} séance${nbSeances > 1 ? 's' : ''}/sem. • ${heuresStr}</div>
         <div class="apercu-detail">Jours : ${joursStr || '—'}</div>
     `;
@@ -1635,7 +1564,6 @@ function ouvrirModalNouveauCours() {
 window.chargerDropdownCoursV2 = chargerDropdownCoursV2;
 window.changerCoursSelectionneV2 = changerCoursSelectionneV2;
 window.viderAffichageCoursV2 = viderAffichageCoursV2;
-window.afficherDetailsCoursV2 = afficherDetailsCoursV2;
 window.afficherFormCoursV2 = afficherFormCoursV2;
 window.nouveauCoursV2 = nouveauCoursV2;
 window.supprimerCoursV2 = supprimerCoursV2;

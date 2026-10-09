@@ -704,11 +704,11 @@ async function afficherMatriceRetroaction() {
 
             html += `
                     <td>
-                        <textarea id="comm_${key}"
-                                  data-critere="${critere.id}"
-                                  data-niveau="${niveau.code}"
+                        <textarea id="comm_${echapperHtml(key)}"
+                                  data-critere="${echapperHtml(critere.id)}"
+                                  data-niveau="${echapperHtml(niveau.code)}"
                                   placeholder="Commentaire pour ${nomCritereEchappe} - ${nomNiveauEchappe}"
-                                  data-on-change="sauvegarderCommentaire" data-param="${key}">${commentaireEchappe}</textarea>
+                                  data-on-change="sauvegarderCommentaire" data-param="${echapperHtml(key)}">${commentaireEchappe}</textarea>
                     </td>
             `;
         });
@@ -3849,7 +3849,7 @@ function genererChecklistCriteresImport() {
     const html = criteres.map(crit => {
         return `
             <label>
-                <input type="checkbox" value="${crit.nom.toUpperCase()}">
+                <input type="checkbox" value="${echapperHtml(crit.nom.toUpperCase())}">
                 <span>${echapperHtml(crit.nom)}</span>
             </label>
         `;
@@ -3913,7 +3913,7 @@ async function preparerDonneesBibliothequeCartouches() {
     Object.keys(cartouchesParGrilleSection1).sort().forEach(grilleNom => {
         cartouchesParGrilleSection1[grilleNom].forEach(cartouche => {
             cartesSection1.push({
-                nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
+                nom: BibliothequeUI.formaterTitreDemo(echapperHtml(cartouche.nom || 'Sans titre'), BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 afficherId: true,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
@@ -3946,7 +3946,7 @@ async function preparerDonneesBibliothequeCartouches() {
         cartouchesParGrille[grilleNom].forEach(cartouche => {
             const dejaPresent = cartouchesDansBibliotheque.some(c => c.id === cartouche.id || c.idOriginal === cartouche.id);
             cartesSection2.push({
-                nom: BibliothequeUI.formaterTitreDemo(cartouche.nom || 'Sans titre', BibliothequeUI.estItemDemo(cartouche)),
+                nom: BibliothequeUI.formaterTitreDemo(echapperHtml(cartouche.nom || 'Sans titre'), BibliothequeUI.estItemDemo(cartouche)),
                 id: cartouche.id,
                 afficherId: true,
                 badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
@@ -3957,7 +3957,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 description: cartouche.description || '',
                 dejaPresent: dejaPresent,
                 classeItem: 'cartouche-disponible-item',
-                dataAttrs: `data-grille="${grilleNom}"`,
+                dataAttrs: `data-grille="${echapperHtml(grilleNom)}"`,
                 boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCartoucheIndividuelle', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à ta sélection' },
                 actionsMenu: [
                     { label: 'Supprimer', action: 'supprimerCartoucheDeBibliothequePartagee', param: cartouche.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
@@ -3984,7 +3984,7 @@ async function afficherBibliothequeCartouches() {
         data.cartesSection1.forEach(carte => {
             if (carte.groupe && carte.groupe !== groupeCourant) {
                 groupeCourant = carte.groupe;
-                contenuSection1 += `<h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
+                contenuSection1 += `<h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--gris-moyen);">${echapperHtml(groupeCourant)}</h4>`;
             }
             contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
         });
@@ -4004,7 +4004,7 @@ async function afficherBibliothequeCartouches() {
             <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par grille :</label>
             <select id="filtreGrilleCartouches" class="controle-form" data-on-change="filtrerCartouchesParGrille" style="max-width: 300px;">
                 <option value="">Toutes les grilles</option>
-                ${data.disciplines.map(g => `<option value="${g}">${g}</option>`).join('')}
+                ${data.disciplines.map(g => `<option value="${echapperHtml(g)}">${echapperHtml(g)}</option>`).join('')}
             </select>
         </div>
         ${BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeCartouches')}`;
@@ -4016,7 +4016,7 @@ async function afficherBibliothequeCartouches() {
     cartesAffichables.forEach(carte => {
         if (carte.groupe && carte.groupe !== groupeCourant) {
             groupeCourant = carte.groupe;
-            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${groupeCourant}</h4>`;
+            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${echapperHtml(groupeCourant)}</h4>`;
         }
         contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
     });

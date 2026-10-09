@@ -324,18 +324,21 @@ function afficherBibliothequeTampons() {
 
     var htmlMesTampons = '';
     Object.keys(parCat).forEach(function(catId) {
-        var nomCat = nomsCat[catId] || catId;
+        // #467 — noms de catégorie importables (fichier de tampons) : échappés une fois ici,
+        // pour le titre, la carte et les attributs plus bas.
+        var nomCat = echapperHtml(nomsCat[catId] || catId);
+        var catIdHtml = echapperHtml(catId);
         var nbCat = parCat[catId].length;
         htmlMesTampons += '<div style="margin-bottom:16px;">';
         htmlMesTampons += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">';
         htmlMesTampons += '<span style="font-weight:600; color:var(--accent-primaire); font-size:0.85em;">' + nomCat + ' (' + nbCat + ')</span>';
         htmlMesTampons += '<div style="display:flex; gap:4px;">';
-        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.partagerCategorie" data-param="' + catId + '" title="Ajouter toute la catégorie à la bibliothèque">Partager</button>';
-        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.exporterCategorie" data-param="' + catId + '" title="Exporter cette catégorie en JSON">Exporter</button>';
+        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.partagerCategorie" data-param="' + catIdHtml + '" title="Ajouter toute la catégorie à la bibliothèque">Partager</button>';
+        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.exporterCategorie" data-param="' + catIdHtml + '" title="Exporter cette catégorie en JSON">Exporter</button>';
         htmlMesTampons += '</div></div>';
         parCat[catId].forEach(function(t) {
             htmlMesTampons += BibliothequeUI.renderCarteSelection({
-                nom: t.nom,
+                nom: echapperHtml(t.nom),
                 id: t.id,
                 badgeSource: t.custom
                     ? '<span class="badge-source badge-source--locale">Personnalisé</span>'
@@ -375,11 +378,11 @@ function afficherBibliothequeTampons() {
     } else {
         biblioItems.forEach(function(item) {
             var dejaPresent = idsActuels.has(item.id);
-            var meta = (item.categorie ? (nomsCat[item.categorie] || item.categorie) : '') +
-                (item.metadata_cc && (item.metadata_cc.auteur_original || item.metadata_cc.auteur) ? ' · ' + (item.metadata_cc.auteur_original || item.metadata_cc.auteur) : '') +
+            var meta = (item.categorie ? echapperHtml(nomsCat[item.categorie] || item.categorie) : '') +
+                (item.metadata_cc && (item.metadata_cc.auteur_original || item.metadata_cc.auteur) ? ' · ' + echapperHtml(item.metadata_cc.auteur_original || item.metadata_cc.auteur) : '') +
                 (item.dateAjoutBiblio ? ' · ' + new Date(item.dateAjoutBiblio).toLocaleDateString('fr-CA') : '');
             htmlBiblio += BibliothequeUI.renderCarteDisponible({
-                nom: item.nom || 'Sans titre',
+                nom: echapperHtml(item.nom || 'Sans titre'),
                 id: item.id,
                 badgeSource: '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>',
                 metadonnees: meta,

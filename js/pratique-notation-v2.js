@@ -393,7 +393,7 @@
                 <tr data-index="${index}">
                     <td>${index + 1}</td>
                     <td>
-                        <input type="text" class="form-control" value="${obj.nom || ''}"
+                        <input type="text" class="form-control" value="${echapperHtml(obj.nom || '')}"
                                data-on-change="_onChangeObjectifNom" data-param="${index}"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
@@ -668,12 +668,12 @@
                 <tr data-id="${type.id}">
                     <td>${index + 1}</td>
                     <td>
-                        <input type="text" class="form-control" value="${type.nom || ''}"
+                        <input type="text" class="form-control" value="${echapperHtml(type.nom || '')}"
                                data-on-change="_onChangeTypeTravailNom" data-param="${type.id}"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td>
-                        <input type="text" class="form-control" value="${type.description || ''}"
+                        <input type="text" class="form-control" value="${echapperHtml(type.description || '')}"
                                data-on-change="_onChangeTypeTravailDescription" data-param="${type.id}"
                                placeholder="Ex: Analyse littéraire"
                                style="width: 100%; padding: 4px 8px;">
@@ -880,7 +880,7 @@
         `;
 
         typesTravaux.forEach(type => {
-            html += `<th style="min-width: 80px; text-align: center;" title="${type.description || ''}">${type.nom}</th>`;
+            html += `<th style="min-width: 80px; text-align: center;" title="${echapperHtml(type.description || '')}">${echapperHtml(type.nom)}</th>`;
         });
 
         html += `
@@ -897,7 +897,7 @@
             html += `
                 <tr data-id="${forfait.id}">
                     <td>
-                        <input type="text" class="form-control" value="${forfait.lettre || ''}"
+                        <input type="text" class="form-control" value="${echapperHtml(forfait.lettre || '')}"
                                data-on-change="_onChangeForfaitLettre" data-param="${forfait.id}"
                                style="width: 50px; padding: 4px 8px; text-align: center; font-weight: bold;">
                     </td>

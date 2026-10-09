@@ -41,7 +41,9 @@ const scriptAudit = path.join(racineProjet, 'scripts', 'audit-innerhtml.sh');
 // CT-09 a échappé ~13 sites d'interpolation ; ce compteur n'en a enregistré
 // qu'UN (107 → 106). Il garde la porte d'entrée, pas le contenu : ne pas le
 // lire comme une mesure de la dette d'échappement réelle.
-const SEUIL_SUSPECTS_MAX = 106;
+// 9 oct. 2026 (#467, passe d'échappement de Cadre et Conception, retraits de code
+// mort) : mesuré 102 après la passe. Seuil ramené à la mesure.
+const SEUIL_SUSPECTS_MAX = 102;
 
 describe('Défense I · F · lint sécurité statique', () => {
     // Le script audite ~112 fichiers .js (~8 s sur Mac M3). On invoque

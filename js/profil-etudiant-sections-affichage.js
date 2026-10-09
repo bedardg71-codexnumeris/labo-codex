@@ -3742,9 +3742,9 @@ function _genererBlocForcesDefisSRPNF(da) {
     const legendeHTML = `
         <div class="legende-idme-container">
             ${legendePositions.map(item => `
-                <div class="legende-idme-item" style="left: ${item.position}%; color: ${item.couleur};">
-                    <span class="legende-idme-code">${item.code}</span>
-                    <span class="legende-idme-nom">${item.nom}</span>
+                <div class="legende-idme-item" style="left: ${item.position}%; color: ${echapperHtml(item.couleur)};">
+                    <span class="legende-idme-code">${echapperHtml(item.code)}</span>
+                    <span class="legende-idme-nom">${echapperHtml(item.nom)}</span>
                 </div>
             `).join('')}
         </div>

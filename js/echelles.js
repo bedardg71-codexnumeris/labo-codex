@@ -1112,7 +1112,7 @@ async function afficherListeEchelles() {
         const nbNiveaux = echelle.niveaux?.length || 0;
         return `
             <div class="sidebar-item" data-id="${echelle.id}" data-action="ouvrirEchelleDepuisListe" data-param="${echelle.id}">
-                <div class="sidebar-item-titre">${nomEchelle}</div>
+                <div class="sidebar-item-titre">${echapperHtml(nomEchelle)}</div>
                 <div class="sidebar-item-badges"><span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
             </div>
         `;
@@ -1148,7 +1148,7 @@ async function preparerDonneesBibliothequeEchelles() {
 
     // Section 1
     const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
-        nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)),
+        nom: BibliothequeUI.formaterTitreDemo(echapperHtml(echelle.nom || 'Sans titre'), BibliothequeUI.estItemDemo(echelle)),
         id: echelle.id,
         afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
@@ -1188,7 +1188,8 @@ async function preparerDonneesBibliothequeEchelles() {
         actionsMenu.push({ label: 'Supprimer', action: 'supprimerEchelleDeBibliothequePartagee', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
 
         return {
-            nom: BibliothequeUI.formaterTitreDemo(echelle.nom || 'Sans titre', BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
+            nom: BibliothequeUI.formaterTitreDemo(echapperHtml(echelle.nom || 'Sans titre'), BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
+            libelle: BibliothequeUI.formaterTitre(echelle.nom || 'Sans titre'),   // #467 : texte brut, pour le select des dossiers
             id: echelle.id,
             afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
@@ -1216,12 +1217,13 @@ async function preparerDonneesBibliothequeEchelles() {
 async function afficherBibliothequeEchelles() {
     // #327 — enregistre la biblio « echelles » auprès du helper générique de
     // répertoires (idempotent). Les items de Section 2 sont des cartes-config
-    // déjà libellées : labelItem lit leur .nom tel quel.
+    // déjà libellées : labelItem lit leur .libelle (texte brut ; le .nom est du HTML
+    // échappé depuis #467, et le select l'échapperait une seconde fois).
     BibliothequeUI.repertoires.enregistrer('echelles', {
         rafraichir: afficherBibliothequeEchelles,
         ajouterItem: (id) => ajouterEchelleIndividuelle(id),
         supprimerItem: (id) => supprimerEchelleDeBibliothequePartagee(id),
-        labelItem: (c) => c.nom,
+        labelItem: (c) => c.libelle,
         labelPluriel: 'échelles'
     });
 
@@ -1256,7 +1258,7 @@ async function afficherBibliothequeEchelles() {
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
                         <option value="">-- Choisir un trimestre --</option>
-                        ${trimestres.map(t => `<option value="${echapperHtml(t.cle)}">${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
+                        ${trimestres.map(t => `<option value="${echapperHtml(t.cle)}">${echapperHtml(t.nom)} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
                     <button data-action="afficherEchellesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les échelles</button>
                     <button data-action="importerToutEchellesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
@@ -1652,9 +1654,9 @@ function afficherEchellesTrimestreModal() {
         html += `
             <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <strong>${echelle.nom || 'Sans titre'}</strong>
-                    ${echelle.discipline ? ` - ${echelle.discipline}` : ''}
-                    <br><small style="color: var(--gris-moyen);">${nbNiveaux} niveau(x)${echelle.auteurOriginal ? ' • ' + echelle.auteurOriginal : ''}</small>
+                    <strong>${echapperHtml(echelle.nom || 'Sans titre')}</strong>
+                    ${echelle.discipline ? ` - ${echapperHtml(echelle.discipline)}` : ''}
+                    <br><small style="color: var(--gris-moyen);">${nbNiveaux} niveau(x)${echelle.auteurOriginal ? ' • ' + echapperHtml(echelle.auteurOriginal) : ''}</small>
                 </div>
                 <button data-action="importerUneEchelleTrimestre" data-param="${cleSelectionnee}" data-param2="${echelle.id}" class="btn btn-confirmer btn-tres-compact">
                     Importer

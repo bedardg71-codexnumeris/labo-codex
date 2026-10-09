@@ -62,11 +62,13 @@
         var inputId = 'travaux-couleur-perso-' + (++_compteurPickerCouleur);
         var summaryClass = opts.summaryClass || 'travaux-retro-couleur';
         var summaryContent = opts.summaryContent || '';
-        var dataPastilleAttr = opts.dataPastilleId ? ' data-pastille-id="' + opts.dataPastilleId + '"' : '';
+        // #467 — catégories et couleurs viennent aussi d'un fichier de tampons importé.
+        var couleurHtml = echapperHtml(couleurCourante || '');
+        var dataPastilleAttr = opts.dataPastilleId ? ' data-pastille-id="' + echapperHtml(opts.dataPastilleId) + '"' : '';
         var inputDataAttrs = '';
         if (opts.dataAttrs) {
             Object.keys(opts.dataAttrs).forEach(function(key) {
-                inputDataAttrs += ' data-' + key + '="' + opts.dataAttrs[key] + '"';
+                inputDataAttrs += ' data-' + key + '="' + echapperHtml(opts.dataAttrs[key]) + '"';
             });
         }
         var inputExtra = opts.inputExtra || '';
@@ -80,7 +82,7 @@
                  + 'title="' + c.nom + '"></button>';
         }).join('');
         return '<details class="travaux-retro-couleur-picker">'
-             +   '<summary class="' + summaryClass + '" style="background:' + couleurCourante + ';"' + dataPastilleAttr + ' title="Changer la couleur">' + summaryContent + '</summary>'
+             +   '<summary class="' + summaryClass + '" style="background:' + couleurHtml + ';"' + dataPastilleAttr + ' title="Changer la couleur">' + summaryContent + '</summary>'
              +   '<div class="travaux-retro-couleur-popover">'
              +     '<div class="travaux-retro-couleur-grille">' + grille + '</div>'
              +     '<label class="travaux-btn-couleur-perso" for="' + inputId + '">Personnalisé&hellip;</label>'
@@ -89,7 +91,7 @@
              + '<input type="color" class="travaux-retro-couleur-input" id="' + inputId + '"'
              +   inputDataAttrs
              +   inputExtra
-             +   ' value="' + couleurCourante + '">';
+             +   ' value="' + couleurHtml + '">';
     }
 
     /**
@@ -1449,14 +1451,14 @@
                 var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
                 var actif = (getAutocollantActif() === a.id) ? ' actif' : '';
                 var racc = obtenirRaccourciPourItem(a.id);
-                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' data-action="travauxOutils.setAutocollantActif" data-param="' + a.id + '" title="' + a.nom + (racc ? ' [' + racc + ']' : '') + '">';
+                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' data-action="travauxOutils.setAutocollantActif" data-param="' + echapperHtml(a.id) + '" title="' + echapperHtml(a.nom) + (racc ? ' [' + racc + ']' : '') + '">';
                 if (racc) r += '<span class="raccourci-badge raccourci-badge--coin">' + racc + '</span>';
                 if (imgSrc) {
-                    r += '<img src="' + imgSrc + '" alt="' + a.nom + '">';
+                    r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '">';
                 } else {
                     r += '<span style="font-size:24px; opacity:0.3;">?</span>';
                 }
-                r += '<span>' + a.nom + '</span></div>';
+                r += '<span>' + echapperHtml(a.nom) + '</span></div>';
             });
             return r;
         }
@@ -1484,17 +1486,17 @@
                     if (elemMasques.indexOf(id) !== -1) return;
                     var outil = OUTILS[id];
                     var actif = outilActif === id ? ' actif' : '';
-                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + id + '" title="' + outil.nom + '">';
-                    html += '<span style="font-size:24px; color:' + outil.couleurBouton + '; font-weight:bold;">' + outil.icone + '</span>';
-                    html += '<span>' + outil.nom + '</span></div>';
+                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + id + '" title="' + echapperHtml(outil.nom) + '">';
+                    html += '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;">' + echapperHtml(outil.icone) + '</span>';
+                    html += '<span>' + echapperHtml(outil.nom) + '</span></div>';
                 });
                 obtenirSymbolesPerso().forEach(function(s) {
                     var outil = OUTILS[s.id];
                     if (!outil) return;
                     var actif = outilActif === s.id ? ' actif' : '';
-                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + s.id + '" title="' + outil.nom + '">';
-                    html += '<span style="font-size:24px; color:' + outil.couleurBouton + '; font-weight:bold;">' + outil.icone + '</span>';
-                    html += '<span>' + outil.nom + '</span></div>';
+                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + echapperHtml(s.id) + '" title="' + echapperHtml(outil.nom) + '">';
+                    html += '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;">' + echapperHtml(outil.icone) + '</span>';
+                    html += '<span>' + echapperHtml(outil.nom) + '</span></div>';
                 });
                 html += _htmlTamponsImage('symboles', coulCat);
                 html += '</div>';
@@ -1928,7 +1930,7 @@
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(id);
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}${raccourci ? ' [' + raccourci + ']' : ''}">${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">${echapperHtml(outil.icone)}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
             // Bouton Dupliquer juste apres Selection
             if (id === 'selection') {
                 html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
@@ -1946,9 +1948,9 @@
         outilsFormes.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
-            const styleCouleur = outil.couleurBouton ? ` style="color:${outil.couleurBouton}; font-weight:bold;"` : '';
+            const styleCouleur = outil.couleurBouton ? ` style="color:${echapperHtml(outil.couleurBouton)}; font-weight:bold;"` : '';
             const raccourci = obtenirRaccourciPourItem(id);
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${outil.nom}${raccourci ? ' [' + raccourci + ']' : ''}"${styleCouleur}>${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}"${styleCouleur}>${echapperHtml(outil.icone)}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
         });
 
         html += '</div></div>';
@@ -2550,10 +2552,10 @@
             var menuCatHTML = BibliothequeUI.renderMenuActions([
                 { label: 'Supprimer la cat\u00e9gorie', action: 'travauxOutils.supprimerCategorieRetroObs', param: catId, classe: 'btn-supprimer', title: 'Supprimer cette cat\u00e9gorie' }
             ], 'cat-' + catId);
-            html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' draggable="true">';
+            html += '<div class="travaux-retro-cat-draggable" style="display:flex; gap:8px; align-items:center;" data-cat-row="' + echapperHtml(catId) + '"' + (estPerso ? ' data-cat-perso-id="' + echapperHtml(catId) + '"' : '') + ' draggable="true">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
             html += renderPickerCouleur(coulCat, { dataAttrs: { 'color-cat-id': catId } });
-            html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + catId + '"' + (estPerso ? ' data-cat-perso-id="' + catId + '"' : '') + ' value="' + (nomsCat[catId] || '') + '">';
+            html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + echapperHtml(catId) + '"' + (estPerso ? ' data-cat-perso-id="' + echapperHtml(catId) + '"' : '') + ' value="' + echapperHtml((nomsCat[catId] || '')) + '">';
             html += menuCatHTML;
             html += '</div>';
         });
@@ -2570,15 +2572,15 @@
             var r = '<div class="travaux-retro-row travaux-retro-draggable" data-obs-id="' + a.id + '"' + estCustom + ' draggable="true">';
             r += '<div class="travaux-retro-row-haut">';
             r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
-            r += '<div class="travaux-retro-img-upload" data-obs-id="' + a.id + '" title="Cliquer pour changer l\'image">';
-            r += '<img src="' + imgSrc + '" alt="' + a.nom + '" data-img-id="' + a.id + '"' + (imgSrc ? '' : ' style="opacity:0.3"') + '>';
-            r += '<input type="file" accept="image/*" data-file-id="' + a.id + '" hidden>';
+            r += '<div class="travaux-retro-img-upload" data-obs-id="' + echapperHtml(a.id) + '" title="Cliquer pour changer l\'image">';
+            r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '" data-img-id="' + echapperHtml(a.id) + '"' + (imgSrc ? '' : ' style="opacity:0.3"') + '>';
+            r += '<input type="file" accept="image/*" data-file-id="' + echapperHtml(a.id) + '" hidden>';
             r += '</div>';
-            r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + a.id + '" value="' + a.nom + '"' + (a.custom ? ' placeholder="Nom du tampon"' : '') + '>';
-            r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + a.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
+            r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + echapperHtml(a.id) + '" value="' + echapperHtml(a.nom) + '"' + (a.custom ? ' placeholder="Nom du tampon"' : '') + '>';
+            r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + echapperHtml(a.id) + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             r += menuHTML;
             r += '</div>';
-            r += '<textarea class="travaux-retro-textarea" data-retro-id="' + a.id + '" rows="3">' + texte + '</textarea>';
+            r += '<textarea class="travaux-retro-textarea" data-retro-id="' + echapperHtml(a.id) + '" rows="3">' + echapperHtml(texte) + '</textarea>';
             r += '</div>';
             return r;
         }
@@ -2596,12 +2598,12 @@
             r += '<div class="travaux-retro-row-haut">';
             if (estCustom) r += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
             r += renderPickerCouleur(couleur, { dataAttrs: { 'color-id': id } });
-            r += '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + id + '" value="' + outil.icone + '" title="Caract\u00e8re Unicode" style="color:' + couleur + ';">';
-            r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="' + outil.nom + '"' + (estCustom ? ' placeholder="Nom du symbole"' : '') + '>';
-            r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
+            r += '<input type="text" class="travaux-retro-icone-input" data-icone-id="' + echapperHtml(id) + '" value="' + echapperHtml(outil.icone) + '" title="Caract\u00e8re Unicode" style="color:' + echapperHtml(couleur) + ';">';
+            r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + echapperHtml(id) + '" value="' + echapperHtml(outil.nom) + '"' + (estCustom ? ' placeholder="Nom du symbole"' : '') + '>';
+            r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + echapperHtml(id) + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             r += menuHTML;
             r += '</div>';
-            r += '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3">' + texte + '</textarea>';
+            r += '<textarea class="travaux-retro-textarea" data-retro-id="' + echapperHtml(id) + '" rows="3">' + echapperHtml(texte) + '</textarea>';
             r += '</div>';
             return r;
         }
@@ -2613,7 +2615,7 @@
         ordreCategories.forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
             var nomCat = nomsCat[catId] || catId;
-            html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);" data-cat-section="' + catId + '">' + nomCat + '</div>';
+            html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);" data-cat-section="' + echapperHtml(catId) + '">' + echapperHtml(nomCat) + '</div>';
 
             if (catId === 'symboles') {
                 // Symboles built-in
@@ -3597,7 +3599,7 @@
             const menuErrHTML = BibliothequeUI.renderMenuActions([
                 { label: 'R\u00e9initialiser au d\u00e9faut', action: 'travauxOutils.reinitialiserCodeErrFr', param: c.id, classe: 'btn-secondaire', title: 'Restaurer le nom et la couleur d\u2019origine' }
             ], 'errfr-' + c.id);
-            html += '<div class="travaux-retro-row travaux-retro-draggable" data-err-id="' + c.id + '" draggable="true">';
+            html += '<div class="travaux-retro-row travaux-retro-draggable" data-err-id="' + echapperHtml(c.id) + '" draggable="true">';
             html += '<div class="travaux-retro-row-haut">';
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner">\u2630</span>';
             html += renderPickerCouleur(c.couleur, {
@@ -3607,11 +3609,11 @@
                 dataPastilleId: c.id
             });
             var raccourci = obtenirRaccourciPourItem(c.id) || '';
-            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + c.id + '" value="' + c.nom + '">';
-            html += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + c.id + '" value="' + raccourci + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
+            html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + echapperHtml(c.id) + '" value="' + echapperHtml(c.nom) + '">';
+            html += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + echapperHtml(c.id) + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             html += menuErrHTML;
             html += '</div>';
-            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + c.id + '" rows="3">' + texte + '</textarea>';
+            html += '<textarea class="travaux-retro-textarea" data-retro-id="' + echapperHtml(c.id) + '" rows="3">' + echapperHtml(texte) + '</textarea>';
             html += '</div>';
         });
         html += '</div>';

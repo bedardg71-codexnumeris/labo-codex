@@ -313,7 +313,11 @@ const PAR_LA_FILE = {
     // 28 → 27 le 9 octobre 2026 (#467) : `importerDansGrilleActive` est partie, sans
     // déclencheur (inventaire du lot F, 29 sept. : « code mort ») ; un import JSON
     // brut de moins.
-    'js/grilles.js': 27,
+    // 27 → 25 le même jour (#467) : l'îlot de la fenêtre des catégories d'erreurs est
+    // parti (sans déclencheur) ; elle semait les catégories à l'ouverture
+    // (`afficherConfigurationCategoriesErreurs`) et les enregistrait
+    // (`sauvegarderCategoriesErreurs`), deux écritures par la file.
+    'js/grilles.js': 25,
     'js/cartouches.js': 1,
     // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
     // code mort, zéro consommateur vivant. Son unique site écrivait bien par la

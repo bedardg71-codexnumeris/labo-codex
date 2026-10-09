@@ -134,7 +134,7 @@ async function afficherBibliothequeAlignements() {
             var nbNoeuds = donnees ? (donnees.noeuds || []).length : 0;
             var nbLiens = donnees ? (donnees.liens || []).length : 0;
             contenuSection1 += BibliothequeUI.renderCarteSelection({
-                nom: carte.nom || 'Sans titre',
+                nom: echapperHtml(carte.nom || 'Sans titre'),
                 id: carte.id,
                 badgeSource: '<span class="badge-source badge-source--locale">Trimestre actif</span>',
                 metadonnees: nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)',
@@ -159,11 +159,11 @@ async function afficherBibliothequeAlignements() {
             var auteur = item.auteur || (item.metadata_cc && item.metadata_cc.auteur_original) || '';
             var licence = (item.metadata_cc && item.metadata_cc.licence) || '';
             var meta = nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)';
-            if (auteur) meta += ' \u00b7 ' + auteur;
-            if (licence) meta += ' \u00b7 ' + licence;
+            if (auteur) meta += ' \u00b7 ' + echapperHtml(auteur);     // #467
+            if (licence) meta += ' \u00b7 ' + echapperHtml(licence);
 
             contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: item.nom || 'Sans titre',
+                nom: echapperHtml(item.nom || 'Sans titre'),
                 id: item.id,
                 badgeSource: '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>',
                 metadonnees: meta,
