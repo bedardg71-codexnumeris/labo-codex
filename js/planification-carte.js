@@ -8180,7 +8180,9 @@ function chargerProductions() {
             // cours exporté (`nomProduction`, cf. planification-export.js:444). Le
             // défaut ne s'était jamais vu parce que le même écran n'avait aucune
             // production à offrir : les deux se couvraient l'un l'autre.
-            return { id: p.id, titre: p.titre, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, dateEcheance: dateEch };
+            // #969 — `echelleId` suit : l'échelle vit sur la production, et
+            // l'export du plan la lit dans cette projection.
+            return { id: p.id, titre: p.titre, type: p.type || 'autre', ponderation: p.ponderation || 0, grilleId: p.grilleId, echelleId: p.echelleId, dateEcheance: dateEch };
         });
     } catch(e) { return []; }
 }
@@ -8437,14 +8439,21 @@ function afficherDetailsProduction(productionId, productions) {
     if (!prod) return null;
     var nomGrille = 'Aucune grille';
     var nomEchelle = 'Aucune échelle';
+    // #969 (9 oct. 2026) — l'échelle vit sur la PRODUCTION (`production.echelleId`,
+    // écrit par productions.js), pas sur la grille : l'éditeur de grille n'écrit
+    // plus `grille.echelleId` depuis #574/#578. La lire sur la grille faisait dire
+    // « Aucune échelle » à toute production de l'export du plan. Même lecture
+    // que le modèle #963 (planification-export.js), `idOriginal` compris.
     try {
-        if (typeof db !== 'undefined' && typeof window.cle === 'function' && prod.grilleId) {
-            var grilles = db.getSync(window.cle('grillesTemplates'), []);
-            var grille = grilles.find(function(g) { return g.id === prod.grilleId; });
-            if (grille) {
-                nomGrille = grille.nom || nomGrille;
+        if (typeof db !== 'undefined' && typeof window.cle === 'function') {
+            if (prod.grilleId) {
+                var grilles = db.getSync(window.cle('grillesTemplates'), []);
+                var grille = grilles.find(function(g) { return g && g.id === prod.grilleId; });
+                if (grille) nomGrille = grille.nom || nomGrille;
+            }
+            if (prod.echelleId) {
                 var echelles = db.getSync(window.cle('echellesTemplates'), []);
-                var echelle = echelles.find(function(e) { return e.id === grille.echelleId; });
+                var echelle = echelles.find(function(e) { return e && (e.id === prod.echelleId || e.idOriginal === prod.echelleId); });
                 if (echelle) nomEchelle = echelle.nom || nomEchelle;
             }
         }
