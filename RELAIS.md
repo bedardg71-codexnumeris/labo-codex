@@ -7,7 +7,14 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 19 h 36 : **1.192.0 (CARTE D'ALIGNEMENT, MENU « VUE » ET DATES DU PLANIFICATEUR) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 20 h 41 : **1.192.0 (CARTE D'ALIGNEMENT : MENU « VUE », DATES DU PLANIFICATEUR) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac83838`, `commit_ref` `2f7b3d73`, `state: ready`, publié à
+00:41:38 Z (20 h 41, Toronto). Verdict Playwright complet sur `2f7b3d73` : code 0, 0 échec connu, aucun instable, éveil tenu,
+0 veille ; Vitest du hook pré-push vert ; poussé `35ac7f2b..2f7b3d73`. Rien en attente sur les lots 1 et 2. Suite du chantier :
+lot 3 (barre, icône par icône avec Grégoire), puis lot 4.
+
+## (relais précédent) 8 OCT. 2026, 19 h 36 : **1.192.0 (CARTE D'ALIGNEMENT, MENU « VUE » ET DATES DU PLANIFICATEUR) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 19 h 33). **Commits** : `cfc90613` mots validés et lien
 qui quitte le plein écran ; `4a23d6d2` release 1.192.0 (minor, entrée des Nouvelles validée à 19 h 33) ; ce relais.
