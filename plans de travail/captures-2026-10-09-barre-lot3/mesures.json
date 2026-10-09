@@ -9,24 +9,6 @@
     "largeurEcran": 1440
   },
   {
-    "navigateur": "chrome",
-    "format": "ipad-paysage",
-    "nomCarte": "Écriture et littérature (démo)",
-    "rangees": 2,
-    "hauteur": 94,
-    "depasse": [],
-    "largeurEcran": 1180
-  },
-  {
-    "navigateur": "chrome",
-    "format": "ipad-portrait",
-    "nomCarte": "Écriture et littérature (démo)",
-    "rangees": 2,
-    "hauteur": 94,
-    "depasse": [],
-    "largeurEcran": 820
-  },
-  {
     "navigateur": "safari",
     "format": "mac",
     "nomCarte": "Écriture et littérature (démo)",
@@ -36,20 +18,66 @@
     "largeurEcran": 1440
   },
   {
-    "navigateur": "safari",
+    "navigateur": "chrome",
     "format": "ipad-paysage",
+    "deuxieme": [
+      "planif-btn-palette-noeuds:32@636",
+      "planif-btn-palette-planificateur:32@636",
+      "planif-btn-vue:32@636",
+      "planif-palette-inspecteur-btn:32@636",
+      "planif-palette-aide-btn:32@636"
+    ],
     "nomCarte": "Écriture et littérature (démo)",
     "rangees": 2,
-    "hauteur": 94,
+    "hauteur": 82,
+    "depasse": [],
+    "largeurEcran": 1180
+  },
+  {
+    "navigateur": "chrome",
+    "format": "ipad-portrait",
+    "deuxieme": [
+      "planif-btn-palette-noeuds:32@610",
+      "planif-btn-palette-planificateur:32@610",
+      "planif-btn-vue:32@610",
+      "planif-palette-inspecteur-btn:32@610",
+      "planif-palette-aide-btn:32@610"
+    ],
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 2,
+    "hauteur": 82,
+    "depasse": [],
+    "largeurEcran": 820
+  },
+  {
+    "navigateur": "safari",
+    "format": "ipad-paysage",
+    "deuxieme": [
+      "planif-btn-palette-noeuds:32@636",
+      "planif-btn-palette-planificateur:32@636",
+      "planif-btn-vue:32@636",
+      "planif-palette-inspecteur-btn:32@636",
+      "planif-palette-aide-btn:32@636"
+    ],
+    "nomCarte": "Écriture et littérature (démo)",
+    "rangees": 2,
+    "hauteur": 82,
     "depasse": [],
     "largeurEcran": 1180
   },
   {
     "navigateur": "safari",
     "format": "ipad-portrait",
+    "deuxieme": [
+      "planif-btn-palette-noeuds:32@610",
+      "planif-btn-palette-planificateur:32@610",
+      "planif-btn-vue:32@610",
+      "planif-palette-inspecteur-btn:32@610",
+      "planif-palette-aide-btn:32@610"
+    ],
     "nomCarte": "Écriture et littérature (démo)",
     "rangees": 2,
-    "hauteur": 94,
+    "hauteur": 82,
     "depasse": [],
     "largeurEcran": 820
   }
