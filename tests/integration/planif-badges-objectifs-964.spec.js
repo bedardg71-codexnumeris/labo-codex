@@ -61,7 +61,11 @@ const preparer = (page) => page.evaluate(() => {
         const bouts = [api.etat.noeuds.get(l.source), api.etat.noeuds.get(l.cible)];
         if (bouts.some(n => n && n.type === 'evaluation')) api.etat.liens.delete(id);
     }
-    api.definirObjectifsServis(ev2.id, []);
+    // #970 — la démo fait aussi COCHER à chaque évaluation l'objectif de sa
+    // leçon : décochées toutes, pour la même raison.
+    lecons.forEach((l) => l.enfants.map(id => api.etat.noeuds.get(id))
+        .filter(n => n && n.type === 'evaluation')
+        .forEach(n => api.definirObjectifsServis(n.id, [])));
     return { l1: l1.id, l1Titre: l1.titre, l2: l2.id, o1, ev2: ev2.id };
 });
 

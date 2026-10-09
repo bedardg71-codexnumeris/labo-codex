@@ -57,6 +57,26 @@ test.describe('#963 · faire relire sa carte par une IA', () => {
             .toHaveText('Évaluer ce qu\'on enseigne, et enseigner ce qu\'on évalue, au même niveau d\'exigence.');
     });
 
+    // #973 — la semaine présélectionnée est la dernière qui contient une leçon,
+    // à l'écran (Vitest ne garde que `semaineParDefautModele`).
+    test('« Télécharger un modèle » présélectionne la dernière semaine qui contient une leçon', async ({ page }) => {
+        await ouvrirCarte(page);
+        await page.evaluate(() => {
+            const api = window.planificationCarte;
+            const lecons = [...api.etat.noeuds.values()].filter(n => n.type === 'lecon')
+                .sort((a, b) => a.titre.localeCompare(b.titre));
+            api.definirSemaineLecon(lecons[0].id, 2);
+            api.definirSemaineLecon(lecons[1].id, 4);
+        });
+        await page.click('#planif-btn-actions');
+        await page.click('#planif-btn-modele-ia');
+        const choix = page.locator('#planif-modele-ia-semaine');
+        await expect(choix).toBeVisible();
+        await expect(choix).toHaveValue('4');
+        // La liste va au-delà : le défaut n'est pas simplement la dernière option.
+        expect(await choix.locator('option').count()).toBeGreaterThan(4);
+    });
+
     test('Actions ▸ Télécharger un modèle : le fichier porte les choix, et rien n\'est écrit', async ({ page }) => {
         await ouvrirCarte(page);
         const avant = await instantane(page);

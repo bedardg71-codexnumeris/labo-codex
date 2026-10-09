@@ -54,7 +54,7 @@ const preparer = (page) => page.evaluate(() => {
     const ev = enfants(l1).find(n => n.type === 'evaluation');
     const ordre = l1.enfants;
     api.definirObjectifsServis(ev.id, []);
-    return { ev: ev.id, l2: l2.id, oAvant, oJamais, oTard, actAuDessus: ordre.indexOf(act1.id) < ordre.indexOf(ev.id) };
+    return { ev: ev.id, l1: l1.id, l2: l2.id, oAvant, oJamais, oTard, actAuDessus: ordre.indexOf(act1.id) < ordre.indexOf(ev.id) };
 });
 
 const ETATS = [
@@ -85,12 +85,23 @@ test.describe('#965 · la pastille d’une évaluation', () => {
                 await expect(pastille).toHaveClass(new RegExp('planif-eval-pastille--' + e.cle + '(\\s|$)'));
                 await expect(pastille).toHaveText(e.symbole);
                 await expect(pastille).toHaveAttribute('title', e.texte);
+                // #972 — ce qu'un lecteur d'écran entend : une image nommée.
+                await expect(page.locator('#' + ids.ev).getByRole('img', { name: e.texte, exact: true })).toHaveCount(1);
                 if (dossier) {
                     await page.locator('#' + ids.ev).screenshot({ path: path.join(dossier, `965-${theme}-${e.cle}.png`) });
                 }
                 if (e.apres) await page.evaluate(e.apres, ids);
             }
         }
+
+        // #972 — la pastille d'un objectif aussi : une image, nommée par son état.
+        // Elle vit dans la liste des objectifs : on la déplie par le badge 🎯.
+        await page.locator('#' + ids.l1 + ' .planif-badge-objectif').click();
+        const pObjectif = page.locator('#' + ids.l1 + ' .planif-obj-pastille[data-obj-id="' + ids.oAvant + '"]');
+        const nomObjectif = await pObjectif.getAttribute('aria-label');
+        expect(nomObjectif).toBeTruthy();
+        await expect(page.locator('#' + ids.l1).getByRole('img', { name: nomObjectif, exact: true }).first()).toBeVisible();
+        await expect(pObjectif).toHaveAttribute('role', 'img');
 
         await page.locator('#' + ids.ev).dispatchEvent('dblclick');
         const legende = page.locator('#planif-panneau .planif-legende-pastilles')
