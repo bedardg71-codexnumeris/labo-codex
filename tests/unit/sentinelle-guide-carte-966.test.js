@@ -57,7 +57,7 @@ const PAGE_1 = [
     'Les badges de chaque bloc (gauche = ce qui le relie en amont, droite = ce qui le relie en aval) : ✓ quand le lien est posé (le badge prend la couleur du bloc), ! sur fond gris quand il en manque un.',
     'Le ⚠ sur une compétence ou une idée maîtresse : aucune évaluation ne vérifie encore un objectif qui s\'y rattache.',
     'Les pastilles des objectifs et des évaluations : elles disent si ce que tu enseignes est évalué, et si ce que tu évalues a été enseigné avant (pages 5 et 8).',
-    'Ce guide te propose 8 repères pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.',
+    'Ce guide te propose 8 repères pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment par le bouton « Guide » de la barre.',
     'Références :',
     'Anderson, L. W. (2026). Curriculum alignment (Educational Practices Series, no 37). International Academy of Education ; Bureau international d\'éducation de l\'UNESCO.',
     'Biggs, J. (2014). Constructive alignment in university teaching. HERDSA Review of Higher Education, 1, 5-22.',
