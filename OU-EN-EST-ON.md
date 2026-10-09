@@ -15,6 +15,21 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 9 OCTOBRE 2026 : 1.192.2 (publiée à 8 h 53, mesurée chez Netlify sur `8761a3fe` ; verdict complet vert) — L'EXPORT DU PLAN DIT VRAI ; LE CHAMP « SEMAINE » DES LEÇONS À OBJECTIFS REMARCHE**
+
+**Ce que tu verras** :
+- Conception › Carte d'alignement, « Exporter le plan… » : chaque production porte sa vraie échelle (au lieu de « Aucune échelle » partout), et un bloc qui ne sert que les objectifs d'une autre leçon (un clone, un bloc déplacé) porte « Aucun objectif de cette leçon » au lieu d'une case vide, dans le texte, le Markdown et le tableau.
+- Dans l'Inspecteur d'une leçon qui porte des objectifs, le champ « Semaine » fonctionne de nouveau (il ne réagissait plus).
+- Sans geste visible : la carte démo fait cocher à chaque évaluation l'objectif de sa leçon (plus de lien « se vérifie par ») ; les pastilles sont lues comme des images nommées par un lecteur d'écran ; les pastilles d'une grande carte se recalculent environ dix fois plus vite.
+
+**Vérifié comment** : des bancs seulement — Vitest complet vert (700 fichiers) ; les essais au navigateur (WebKit) de la carte, 67 sur 67, dont la semaine présélectionnée du modèle IA ; chaque correctif retiré fait échouer son banc (20 sur 20) ; verdict complet au navigateur vert sur le commit publié. **Pas vérifié** : l'export sur ta propre carte ; un lecteur d'écran réel.
+
+**Tes données** : rien n'est réécrit. Une démo déjà installée garde l'ancienne carte (avec ses liens « se vérifie par ») : seule une démo installée de neuf montre le nouveau geste. Assumé, non réparé.
+
+**Ce qui reste** : le reste de la barre de la carte, icône par icône, avec toi (lot 3). La sonde envoyée à Mathieu (7 oct.) est toujours attendue.
+
+---
+
 ✅ **EN LIGNE LE 8 OCTOBRE 2026 : 1.192.0 puis 1.192.1 (la dernière publiée à 22 h 30, mesurée chez Netlify sur `554508a9` ; verdict complet vert sur chacune) — UN MENU « VUE » SUR LA CARTE D'ALIGNEMENT ; LES DATES DU TRIMESTRE AU PLANIFICATEUR**
 
 **Ce que tu verras** :

@@ -1,5 +1,13 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 9 octobre 2026, 8 h 53 (Toronto) : `1.192.2` EN LIGNE** (build `1009-0718`) — Netlify
+> `6ac8e3a6`, `commit_ref` `8761a3fe`, `state: ready`, publié à 12:53:05 Z. Verdict Playwright complet vert sur `8761a3fe` (code 0,
+> 0 échec connu, un instable passé au second essai — `temoin-enregistrement-lot-b`, 360 px clair —, éveil tenu sur secteur, 0 veille) ;
+> poussé `3fa07963..8761a3fe` (par le port 443, le 22 ne répondait pas). **Lot 4 de la carte LIVRÉ** : #969 et #974 (export du plan)
+> corrigés en 1.192.2 ; #970 à #973 cochés ; correctif de l'Inspecteur (la légende des pastilles détruisait l'écouteur du champ
+> Semaine). Stock assumé : une démo déjà installée garde l'ancienne carte. **MANDAT COURANT** : le lot 3 (le reste de la barre,
+> **une icône à la fois avec Grégoire**). #1038 (Mathieu) : toujours attendu. #968 hors lot, toujours ouvert.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 8 octobre 2026, 22 h 30 (Toronto) : `1.192.1` EN LIGNE** (build `1008-2120`) — Netlify
 > `6ac851bd`, `commit_ref` `554508a9`, `state: ready`, publié à 02:30:31 Z. Verdict Playwright complet vert sur `554508a9` (code 0,
 > 0 échec connu, aucun instable, 0 veille) ; poussé `7c808584..554508a9`. 1.192.1 : le menu « Vue » tient dans sa largeur, la palette
