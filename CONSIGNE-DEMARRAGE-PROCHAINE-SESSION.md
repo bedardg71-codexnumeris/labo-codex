@@ -1,6 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ par Claude Code le 8 octobre 2026, 20 h 41 (Toronto) : `1.192.0` EN LIGNE** (build `1008-1934`) — Netlify
+> ↻ **ÉTAT MESURÉ par Claude Code le 8 octobre 2026, 22 h 30 (Toronto) : `1.192.1` EN LIGNE** (build `1008-2120`) — Netlify
+> `6ac851bd`, `commit_ref` `554508a9`, `state: ready`, publié à 02:30:31 Z. Verdict Playwright complet vert sur `554508a9` (code 0,
+> 0 échec connu, aucun instable, 0 veille) ; poussé `7c808584..554508a9`. 1.192.1 : le menu « Vue » tient dans sa largeur, la palette
+> des raccourcis revient (ouverte par « Raccourcis clavier » au bas du menu). Le commit de documents qui suit (suivi + commentaire
+> sur le déplacement du guide) n'a pas de verdict propre. **MANDAT COURANT inchangé** : lot 3, puis lot 4.
+>
+> ↻ (état précédent) **ÉTAT MESURÉ par Claude Code le 8 octobre 2026, 20 h 41 (Toronto) : `1.192.0` EN LIGNE** (build `1008-1934`) — Netlify
 > `6ac83838`, `commit_ref` `2f7b3d73`, `state: ready`, publié à 00:41:38 Z. `origin/main` = `2f7b3d73` avant le commit de documents
 > de ce soir ; verdict Playwright complet vert sur ce SHA (code 0, 0 échec connu, aucun instable, 0 veille) ; Vitest 698 / 8 377.
 > **Chantier de la carte d'alignement** (`plans de travail/PLAN-2026-10-08-chantier-carte-alignement.md`) : lots 0, 1 et 2 LIVRÉS

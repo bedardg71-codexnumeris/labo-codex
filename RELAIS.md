@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 20 h 41 : **1.192.0 (CARTE D'ALIGNEMENT : MENU « VUE », DATES DU PLANIFICATEUR) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 8 OCT. 2026, 22 h 30 : **1.192.1 (MENU « VUE » À SA LARGEUR, PALETTE DES RACCOURCIS REVENUE) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac851bd`, `commit_ref` `554508a9`, `state: ready`, publié à
+02:30:31 Z (22 h 30, Toronto). Verdict Playwright complet sur `554508a9` : code 0, 0 échec connu, aucun instable, éveil tenu,
+0 veille ; Vitest du hook pré-push vert ; poussé `7c808584..554508a9`. **Commits** : `ebb79169` correctif, `e82be094` release
+1.192.1, `554508a9` consigne ; puis ce relais, avec un commentaire d'une ligne au-dessus du déplacement du guide flottant
+(probablement le même saut que la palette, non vécu : pas de BACKLOG, consigne de Cowork) — **sans verdict propre** (documents
+et commentaire). **Suite** : lot 3 (barre, icône par icône avec Grégoire), puis lot 4.
+
+## (relais précédent) 8 OCT. 2026, 20 h 41 : **1.192.0 (CARTE D'ALIGNEMENT : MENU « VUE », DATES DU PLANIFICATEUR) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac83838`, `commit_ref` `2f7b3d73`, `state: ready`, publié à
 00:41:38 Z (20 h 41, Toronto). Verdict Playwright complet sur `2f7b3d73` : code 0, 0 échec connu, aucun instable, éveil tenu,

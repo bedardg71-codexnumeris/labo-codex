@@ -8971,6 +8971,7 @@ function initialiser() {
         });
     }
 
+    // Probablement le même saut que la palette (fixe, mais déplacé par rapport à #planif-zone-wrapper) : voir le correctif ebb79169, non vécu ici.
     // Drag panneau guide flottant — même pattern que la palette
     var guideBarre = guidePanel ? guidePanel.querySelector('.planif-guide-barre') : null;
     if (guideBarre) {
