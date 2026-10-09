@@ -227,3 +227,59 @@ describe('#806 · la grille de dépistage ne s\'efface pas toute seule', () => {
             .not.toMatch(/function chargerGrillesDisponibles\s*\(/);
     });
 });
+
+// #829 (9 oct. 2026) — EN DÉMO, le sélecteur montrait « Grille enregistrée, introuvable dans ce
+// trimestre » pendant que le profil calculait avec une grille du pack (#749), et un choix dans le
+// pack ÉCRASAIT la préférence globale de l'enseignant (classe #806).
+describe('#829 · en démo, le sélecteur de grille de dépistage', () => {
+    // Le panneau entier : dropdown peuplé par `grillesTemplates` du pack, puis valeurs lues.
+    function panneauDemo(demo) {
+        const select = fauxSelect([], '');
+        Object.defineProperty(select, 'innerHTML', { set() { this.options = [{ value: '', textContent: '-- Sélectionner une grille --' }]; } });
+        const prefs = { grilleReferenceDepistage: 'GR_REEL' };
+        const document = {
+            readyState: 'complete', addEventListener: () => {},
+            getElementById: (id) => (id === 'v2-pref-grille-reference' ? select : null),
+            createElement: () => ({ dataset: {}, value: '', textContent: '' }),
+            querySelector: () => null, querySelectorAll: () => [],
+            body: { classList: { add: () => {}, remove: () => {} } },
+            documentElement: { addEventListener: () => {} }
+        };
+        const win = chargerScript('js/preferences-v2.js', {
+            document,
+            db: { getSync: (k, d) => (String(k).indexOf('grillesTemplates') !== -1 ? [{ id: 'GR_DEMO', nom: 'Grille du pack' }] : (d !== undefined ? d : null)), setSync: () => {} },
+            cle: (k) => (demo ? 'demo_' : 'a2026_') + k,
+            obtenirPreference: (nom) => prefs[nom],
+            definirPreference: (nom, valeur) => { prefs[nom] = valeur; },
+            estEnModeDemo: () => demo,
+            // La résolution à la lecture de #749 (profil-etudiant-helpers.js) : la grille du pack.
+            diagnostiquerGrilleReferenceDepistage: () => ({ grille: { id: 'GR_DEMO' }, raison: null, message: null })
+        });
+        win.initialiserPreferencesV2();
+        return { win, select, prefs };
+    }
+
+    it('montre la grille avec laquelle le profil calcule, pas « introuvable »', () => {
+        const { select } = panneauDemo(true);
+        expect(select.value).toBe('GR_DEMO');
+        expect(select.options.filter((o) => o.dataset && o.dataset.grilleIntrouvable)).toEqual([]);
+    });
+
+    it('choisir une grille du pack, ou toucher une case voisine, n\'écrit pas la préférence réelle', () => {
+        const { win, select, prefs } = panneauDemo(true);
+        select.value = 'GR_DEMO';
+        win.sauvegarderPreferencesV2();
+        select.value = '';
+        win.sauvegarderPreferencesV2();
+        expect(prefs.grilleReferenceDepistage).toBe('GR_REEL');
+    });
+
+    it('hors démo, rien ne change : la grille réelle absente est dite, un choix s\'écrit', () => {
+        const { win, select, prefs } = panneauDemo(false);
+        expect(select.value).toBe('GR_REEL');
+        expect(select.options.some((o) => o.dataset && o.dataset.grilleIntrouvable)).toBe(true);
+        select.value = 'GR_DEMO';
+        win.sauvegarderPreferencesV2();
+        expect(prefs.grilleReferenceDepistage).toBe('GR_DEMO');
+    });
+});

@@ -157,7 +157,14 @@
         // synchronisé, donc `_sauvegarderGrilleReferenceSiFiable` réécrira cette
         // même valeur au lieu de s'abstenir — jamais un `''`.
         const grilleReference = document.getElementById('v2-pref-grille-reference');
-        const grilleRefId = obtenirPreference('grilleReferenceDepistage');
+        let grilleRefId = obtenirPreference('grilleReferenceDepistage');
+        // #829 (9 oct. 2026) — EN DÉMO, le sélecteur montre la grille avec laquelle le profil
+        // calcule (résolue à la lecture, #749), pas « introuvable dans ce trimestre » : la
+        // préférence porte l'id d'une grille du trimestre réel, absente du pack.
+        if (_estEnDemo() && typeof diagnostiquerGrilleReferenceDepistage === 'function') {
+            const resolue = diagnostiquerGrilleReferenceDepistage().grille;
+            if (resolue && resolue.id) grilleRefId = resolue.id;
+        }
         if (grilleReference && grilleRefId) {
             const offerte = Array.from(grilleReference.options || []).some(o => o.value === grilleRefId);
             if (!offerte) {
@@ -255,6 +262,10 @@
     function _sauvegarderGrilleReferenceSiFiable() {
         const select = document.getElementById('v2-pref-grille-reference');
         if (!select) return;
+        // #829 (9 oct. 2026) — EN DÉMO, RIEN N'EST ÉCRIT. La préférence est globale
+        // (`preferencesUtilisateur`) : choisir une grille du pack écrasait le choix RÉEL de
+        // l'enseignant (classe #806). La démo résout sa grille à la lecture (#749).
+        if (_estEnDemo()) return;
         // Lot E3 : rend le résultat de l'écriture (undefined quand rien n'est écrit).
 
         const choisie = select.value || '';
@@ -272,6 +283,10 @@
             console.warn('[preferences-v2] Sélecteur de grille désynchronisé — la préférence "'
                 + actuelle + '" est CONSERVÉE plutôt qu\'effacée (#806)');
         }
+    }
+
+    function _estEnDemo() {
+        return typeof estEnModeDemo === 'function' && estEnModeDemo();
     }
 
     // Lot E3 (D0 point 2) : les gestes nommés par le témoin commun.
