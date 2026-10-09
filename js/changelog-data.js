@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.194 (lot 1 de la file sans Grégoire : #1021, #1005) — ligne validée par Grégoire le
+            // 9 oct. 2026, transmise par la relecture de Cowork, posée telle quelle ; titre validé par
+            // Grégoire le même jour.
+            version: '1.194',
+            couleur: 'orange',
+            titre: 'L\'archive d\'un groupe n\'emporte que ce groupe',
+            items: [
+                'Archiver un groupe&nbsp;: l\'archive n\'emporte plus que ce groupe, et elle garde maintenant ses rencontres et son assiduité. Dans Chrome, «&nbsp;Vérifier&nbsp;» une archive ne demande plus la permission de modifier les fichiers.'
+            ]
+        },
+        {
             // 1.193 (chantier de la carte d'alignement, lot 3 : la barre sans icône seule) — titre
             // et lignes validés par Grégoire le 9 oct. 2026, transmis par la relecture de Cowork,
             // posés tels quels.
