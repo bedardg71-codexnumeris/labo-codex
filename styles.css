@@ -22444,10 +22444,13 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: rgba(3, 46, 92, 0.04);
     border-color: rgba(3, 46, 92, 0.2);
 }
-/* Au doigt (iPad) : chaque commande et le bouton du menu montent à 44 px ;
-   les pastilles y montent déjà (#568). */
+/* Au doigt (iPad) : chaque commande du menu monte à 44 px ; les pastilles y
+   montent déjà (#568). Le bouton « Vue ▾ », lui, prend la hauteur de ses
+   voisins de rangée (Nœuds, Planificateur, Inspecteur, Guide : 32 px, règle
+   `.planif-btn-palette` plus haut) — relecture de Cowork du lot 3 (9 oct.
+   2026) : à 44 px, il dépassait seul sur la deuxième rangée de l'iPad. */
 @media (pointer: coarse) {
-    #planif-btn-vue { min-height: 44px; }
+    #planif-btn-vue { min-height: 32px; }
     .planif-vue-dropdown .planif-action-item { min-height: 44px; }
     .planif-raccourcis-panel-replier,
     .planif-raccourcis-panel-fermer { width: 44px; height: 44px; }
