@@ -1,5 +1,14 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 8 octobre 2026, 20 h 41 (Toronto) : `1.192.0` EN LIGNE** (build `1008-1934`) — Netlify
+> `6ac83838`, `commit_ref` `2f7b3d73`, `state: ready`, publié à 00:41:38 Z. `origin/main` = `2f7b3d73` avant le commit de documents
+> de ce soir ; verdict Playwright complet vert sur ce SHA (code 0, 0 échec connu, aucun instable, 0 veille) ; Vitest 698 / 8 377.
+> **Chantier de la carte d'alignement** (`plans de travail/PLAN-2026-10-08-chantier-carte-alignement.md`) : lots 0, 1 et 2 LIVRÉS
+> (mesure, menu « Vue », planificateur vertical et dates). **MANDAT COURANT** : le lot 3 (le reste de la barre, **une icône à la
+> fois avec Grégoire**, propositions de Cowork d'après `MESURE-2026-10-08-barre-carte-alignement.md`), puis le lot 4 (#974, #970,
+> #971, #972, #973) — demander à l'ouverture si #974 (export du plan) doit passer avant. Non vérifié : vrai clavier de Chrome et
+> Safari pour les raccourcis ⌘ ; 44 px sur l'iPad. #1038 (Mathieu) : sonde envoyée le 7 oct., résultat attendu. Les blocs
+> ci-dessous sont historiques.
 > ↻ **ÉTAT MESURÉ par Claude Code le 15 septembre 2026, soir (Toronto) : `1.142.2` RELEASÉE (#862, l'encadré Loi 25 de l'Aide)
 > après `1.142.1` (#872, session parallèle) et `1.142.0` (#868) — voir `RELAIS.md` pour l'état du push.** **MANDAT COURANT** :
 > (1) **#871 est PRÊT À CORRIGER** — Grégoire a tranché le 15 au soir (« 90 % (22,5 / 25) » : la fraction montre les présences

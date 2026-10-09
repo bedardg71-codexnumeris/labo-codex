@@ -15,6 +15,20 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 8 OCTOBRE 2026 : 1.192.0 (publiée à 20 h 41, mesurée chez Netlify sur `2f7b3d73` ; verdict complet vert) — UN MENU « VUE » SUR LA CARTE D'ALIGNEMENT ; LES DATES DU TRIMESTRE AU PLANIFICATEUR**
+
+**Ce que tu verras** :
+- Conception › Carte d'alignement : un menu « Vue » réunit « Vue plein écran », « Recentrer la carte », « Tout voir », la couleur du fond et, en bas, tous les raccourcis clavier. Recentrer se fait avec la touche R (au lieu de ⌘1, que Chrome et Safari prennent pour changer d'onglet). Les trois icônes, la palette de fond et la palette des raccourcis ont quitté la barre.
+- Le planificateur affiche « PLANIFICATEUR · du … au … » d'après « Début du trimestre » et « Fin du trimestre » du Cadre ; sans elles, une invitation dont le lien ouvre Cadre › Trimestre (en sortant du plein écran au besoin). La réserve « Non planifié » est toujours sous la grille.
+
+**Vérifié comment** : des bancs seulement — un essai au navigateur (WebKit) par raccourci affiché, et une liste qui ne peut pas grandir sans son essai ; le fond qui se garde au rechargement ; les dates, l'invitation et son lien, en plein écran compris ; Vitest complet vert ; chaque correctif retiré fait échouer son banc ; verdict complet au navigateur vert sur le commit publié. **Pas vérifié** : au vrai clavier de Chrome et de Safari, qu'aucun raccourci affiché n'est pris par le navigateur (⌘D, ⌘0, ⌘+) ; les 44 px au doigt sur ton iPad.
+
+**Tes données** : rien n'est réécrit. Si tu avais mis la réserve à gauche, ce réglage reste enregistré ; il n'est simplement plus lu.
+
+**Ce qui reste** : le reste de la barre de la carte, icône par icône, avec toi (lot 3) ; puis les cinq fiches inscrites au chantier (l'export du plan qui laisse « Objectifs servis » vide, la démo qui enseigne l'ancien geste…) (lot 4).
+
+---
+
 ✅ **EN LIGNE LE 7 OCTOBRE 2026 : 1.188.0, 1.188.1, 1.188.2, 1.189.0 (la dernière publiée à 17 h 23, mesurée chez Netlify sur `9f9c304d` ; verdict complet vert sur chacune) — CRÉER UN TRIMESTRE PAR SON FORMULAIRE ; FORMER DES ÉQUIPES EN CLASSE**
 
 **Ce que tu verras** :
