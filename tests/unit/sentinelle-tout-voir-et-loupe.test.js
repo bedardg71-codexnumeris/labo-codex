@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // TOUT VOIR + LOUPE (11 août 2026) — demande de Grégoire en préparant A26 :
 // « la vue complète de la carte de mon cours est à 25 %, c'est évidemment
@@ -183,7 +184,9 @@ describe('Loupe · les invariants qui la rendent utilisable sur iPad', () => {
         // le bouton est le chemin. Et l'état se lit sur aria-pressed.
         // « Tout voir » est une commande du menu « Vue » depuis le 8 oct. 2026.
         expect(sourceIndex).toMatch(/id="planif-vue-tout-voir"[^>]*data-action="planificationCarte\.ajusterVueSurTout"/);
-        expect(sourceIndex).toMatch(/id="planif-btn-loupe"[^>]*aria-pressed="false"[^>]*data-action="planificationCarte\.basculerLoupe"/);
+        // La loupe est devenue la « longue-vue », une commande du même menu (lot 3, 9 oct. 2026).
+        expect(sourceIndex).toMatch(/id="planif-vue-longue-vue"[^>]*aria-pressed="false"[^>]*data-action="planificationCarte\.basculerLoupe">Longue-vue<kbd class="planif-vue-touche">L<\/kbd>/);
+        expect(sourceIndex).not.toContain('planif-btn-loupe');
     });
 
     it('⚠ le clic ATTERRIT depuis la carte, pas seulement depuis le cadre', () => {
@@ -205,20 +208,38 @@ describe('Loupe · les invariants qui la rendent utilisable sur iPad', () => {
         expect(bloc).toMatch(/if \(!dansCadre && !dansCarte\) return;/);
     });
 
-    it('le pointeur montre la ZONE examinée, au ratio exact du cadre', () => {
+    it('le pointeur montre la ZONE examinée, de la forme du cadre', () => {
         // Demande de Grégoire : « un petit rectangle dans les mêmes
         // proportions que la loupe ». Une flèche désigne un point ; ici on
-        // choisit un cadrage. 420 × 300 → 42 × 30, et le point d'accroche est
-        // au CENTRE — c'est lui qui correspond au centre du cadre.
+        // choisit un cadrage. Lot 3 (9 oct. 2026) : la longue-vue est ronde,
+        // le pointeur aussi — un cercle, point d'accroche au CENTRE.
         const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
         const i = css.indexOf('#planif-zone-travail.planif-loupe-mode,');
         const bloc = css.slice(i, i + 1400);
         const m = bloc.match(/width='(\d+)' height='(\d+)'/);
         expect(m).not.toBeNull();
-        expect(Number(m[1]) / Number(m[2])).toBeCloseTo(420 / 300, 5);
-        expect(bloc).toMatch(/\) 21 15, crosshair/);
+        expect(Number(m[1])).toBe(Number(m[2]));
+        expect(bloc).toMatch(/%3Ccircle cx='15' cy='15' r='13'/);
+        expect(bloc).not.toMatch(/%3Crect/);
+        expect(bloc).toMatch(/\) 15 15, crosshair/);
         // Les deux surfaces montrent la même zone : même curseur sur les deux.
         expect(bloc).toMatch(/#planif-loupe \{/);
+    });
+
+    it('la longue-vue est un cercle, au diamètre où un titre de bloc tient entier', () => {
+        const css = readFileSync(path.join(racineProjet, 'styles.css'), 'utf8');
+        const bloc = tranche(css, '#planif-loupe {', '#planif-loupe.planif-loupe-visible');
+        expect(bloc).toMatch(/border-radius:\s*50%/);
+        expect(bloc).toMatch(/width:\s*300px/);
+        expect(bloc).toMatch(/height:\s*300px/);
+        // Le JS place et décale la copie avec le même diamètre que la CSS.
+        expect(sourceCarte).toMatch(/const LOUPE_L = 300;/);
+        expect(sourceCarte).toMatch(/const LOUPE_H = 300;/);
+        // Un bloc fait au plus 240 px : le diamètre doit le dépasser.
+        const noeud = tranche(css, '\n.planif-noeud {', '\n}');
+        const max = Number((noeud.match(/max-width:\s*(\d+)px/) || [])[1]);
+        expect(max).toBeGreaterThan(0);
+        expect(300).toBeGreaterThan(max);
     });
 
     it('« Aller ici » respecte la cible tactile de 44 px', () => {

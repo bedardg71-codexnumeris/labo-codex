@@ -34,11 +34,12 @@ const carte = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'u
 const prefs = readFileSync(path.join(racine, 'js', 'preferences.js'), 'utf8');
 
 // Le bouton des raccourcis a quitté la barre le 8 oct. 2026 (lot 1 du chantier
-// de la carte) : les raccourcis sont au bas du menu « Vue ». Ses trois voisins restent.
+// de la carte) : les raccourcis sont au bas du menu « Vue ». Au lot 3 (9 oct.),
+// la Bibliothèque passe à gauche (« Consulter la bibliothèque », planif-btn-bibliotheque) ;
+// l'Inspecteur et le Guide restent à droite, en mots.
 const BOUTONS = [
     'planif-palette-inspecteur-btn',
-    'planif-palette-aide-btn',
-    'planif-palette-bibliotheque-btn'
+    'planif-palette-aide-btn'
 ];
 
 describe('#444 · A — les quatre boutons sont dans la barre d’outils', () => {
@@ -64,7 +65,20 @@ describe('#444 · A — les quatre boutons sont dans la barre d’outils', () =>
     });
 
     it('l’Inspecteur garde un nom accessible — au doigt, le survol n’existe pas', () => {
-        expect(html).toMatch(/id="planif-palette-inspecteur-btn"[^>]*aria-label="/);
+        // Lot 3 : le nom accessible est le MOT lui-même, sans icône seule.
+        expect(html).toMatch(/id="planif-palette-inspecteur-btn"[^>]*>Inspecteur<\/button>/);
+        expect(html).toMatch(/id="planif-palette-aide-btn"[^>]*>Guide<\/button>/);
+    });
+
+    it('la Bibliothèque est à gauche, avant la liste des cartes, au style de la Conception', () => {
+        const gauche = html.indexOf('<div id="planif-selecteur-cartes"');
+        const bouton = html.indexOf('id="planif-btn-bibliotheque"', gauche);
+        const liste = html.indexOf('<select id="planif-liste-cartes"', gauche);
+        expect(gauche).toBeGreaterThan(-1);
+        expect(bouton).toBeGreaterThan(gauche);
+        expect(bouton).toBeLessThan(liste);
+        expect(html).toMatch(/<button class="btn btn-principal[^"]*" id="planif-btn-bibliotheque" data-action="afficherBibliothequeAlignements">Consulter la bibliothèque<\/button>/);
+        expect(html).not.toContain('planif-palette-bibliotheque-btn');
     });
 });
 

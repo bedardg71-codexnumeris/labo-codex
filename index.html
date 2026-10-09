@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261009a"> <!-- 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261009b"> <!-- 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4181,6 +4181,10 @@
                         <div class="planif-header">
                             <div class="planif-header-toolbar">
                                 <div id="planif-selecteur-cartes" class="planif-toolbar-gauche" data-tooltip="planif-boutons-action">
+                                    <!-- Lot 3 (9 oct. 2026, décision de Grégoire) : la Bibliothèque devient le lieu
+                                         où l'on gère ses cartes (importer, exporter, dupliquer, supprimer), comme
+                                         les bibliothèques de la Conception — même bouton, même style. -->
+                                    <button class="btn btn-principal planif-btn-bibliotheque" id="planif-btn-bibliotheque" data-action="afficherBibliothequeAlignements">Consulter la bibliothèque</button>
                                     <select id="planif-liste-cartes" data-tooltip="planif-selecteur-cours"></select>
                                     <div class="planif-actions-menu">
                                         <button class="planif-btn-carte" id="planif-btn-actions">Actions ▾</button>
@@ -4194,37 +4198,28 @@
                                                  voisins — et la barre débordait déjà sur iPad en portrait. -->
                                             <button class="planif-action-item" id="planif-btn-liens-contourner">Liens : contourner les blocs</button>
                                             <button class="planif-action-item" id="planif-btn-detacher-clone" data-tooltip="planif-detacher-clone">Décloner la sélection</button>
-                                            <button class="planif-action-item" id="planif-btn-dupliquer-carte">Dupliquer cette carte</button>
-                                            <button class="planif-action-item" id="planif-btn-importer-carte">Importer une carte (fichier)</button>
-                                            <button class="planif-action-item" id="planif-btn-import-trimestre">Importer d'un autre trimestre…</button>
                                             <button class="planif-action-item" id="planif-btn-exporter-plan">Exporter le plan&hellip;</button>
-                                            <button class="planif-action-item" id="planif-btn-exporter-carte">Exporter cette carte</button>
                                             <!-- #963 : faire relire sa carte par une IA (aller simple, rien n'est écrit) -->
                                             <button class="planif-action-item" id="planif-btn-modele-ia">Télécharger un modèle&hellip;</button>
-                                            <hr class="planif-action-sep">
-                                            <button class="planif-action-item planif-danger" id="planif-btn-supprimer-carte">Supprimer cette carte</button>
                                         </div>
                                         <!-- Panneau d'export du plan : 3 niveaux × 3 formats (portage #424, même patron) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-export-plan-panel"></div>
                                         <!-- Panneau du modèle « relire ma carte par une IA » (#963, même patron) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-modele-ia-panel"></div>
-                                        <!-- Panneau import inter-trimestre (rempli par JS, patron Brique C) -->
-                                        <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-import-tri-panel"></div>
                                         <!-- Panneau du cours rattaché (même patron, rempli par JS) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-cours-carte-panel"></div>
                                         <!-- Panneau de nettoyage des repères de semaine (même patron) -->
                                         <div class="planif-actions-dropdown planif-import-tri-panel" id="planif-nettoyage-titres-panel"></div>
                                     </div>
                                     <button class="planif-btn-carte" id="planif-btn-annuler" title="Annuler (⌘Z)"><img src="icons/icon-undo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Annuler</button>
-                                    <input type="file" id="planif-fichier-import" accept=".json" style="display:none">
+                                    <!-- Lot 3 : sur l'iPad, sans clavier, une annulation de trop ne se rattrapait pas. -->
+                                    <button class="planif-btn-carte" id="planif-btn-retablir" title="Rétablir (⇧⌘Z)" disabled><img src="icons/icon-redo.svg" alt="" class="planif-icon" style="width:14px;height:14px;margin-right:3px;vertical-align:middle;">Rétablir</button>
                                 </div>
                                 <!-- Recherche dans la carte (15 août 2026). Elle mord sur les
                                      titres, les descriptions, les objectifs des leçons et le
                                      libellé du type de bloc.
-                                     ⚠ AUCUNE ICÔNE DE LOUPE ICI, volontairement : la barre en
-                                     porte DÉJÀ deux — le bouton Loupe (icons8-chercher) et
-                                     l'Inspecteur (icon-advanced-search). Une troisième aurait
-                                     rendu les trois indistinctes. Le libellé du champ suffit.
+                                     Aucune icône ici : depuis le lot 3 (9 oct. 2026) la barre
+                                     ne porte plus d'icône seule. Le libellé du champ suffit.
                                      `type="search"` n'est pas décoratif : c'est ce qui exempte
                                      le champ du gel des saisies en mode archive (règle CSS
                                      `body.mode-archive input:not([type="search"])`) — chercher
@@ -4260,6 +4255,15 @@
                                             <button class="planif-action-item" id="planif-vue-plein-ecran" aria-pressed="false" data-action="planificationCarte.togglePleinEcran">Vue plein écran</button>
                                             <button class="planif-action-item" id="planif-vue-recentrer" data-action="planificationCarte.recentrerVue">Recentrer la carte<kbd class="planif-vue-touche">R</kbd></button>
                                             <button class="planif-action-item" id="planif-vue-tout-voir" data-action="planificationCarte.ajusterVueSurTout">Tout voir</button>
+                                            <button class="planif-action-item" id="planif-vue-longue-vue" aria-pressed="false" data-action="planificationCarte.basculerLoupe">Longue-vue<kbd class="planif-vue-touche">L</kbd></button>
+                                            <hr class="planif-action-sep">
+                                            <!-- Lot 3 : remplace l'indicateur « 100% » de la barre, qui ne servait
+                                                 qu'à lire. Coché : le niveau en cours ; aucun s'il est entre deux. -->
+                                            <div class="actions-sous-titre">Zoom</div>
+                                            <button class="planif-action-item planif-vue-zoom" data-zoom="1" role="menuitemradio" aria-checked="false">100 %</button>
+                                            <button class="planif-action-item planif-vue-zoom" data-zoom="0.75" role="menuitemradio" aria-checked="false">75 %</button>
+                                            <button class="planif-action-item planif-vue-zoom" data-zoom="0.5" role="menuitemradio" aria-checked="false">50 %</button>
+                                            <button class="planif-action-item planif-vue-zoom" data-zoom="0.25" role="menuitemradio" aria-checked="false">25 %</button>
                                             <hr class="planif-action-sep">
                                             <div class="actions-sous-titre">Fond du canevas</div>
                                             <div class="actions-fond-swatches" id="planif-fond-swatches">
@@ -4280,18 +4284,12 @@
                                             <button class="planif-action-item" id="planif-vue-raccourcis-btn" aria-pressed="false" aria-controls="planif-raccourcis-panel">Raccourcis clavier</button>
                                         </div>
                                     </div>
-                                    <!-- Le bouton loupe n'est pas un doublon du raccourci L : sur iPad il
-                                         n'y a pas de clavier, c'est le seul chemin (11 août 2026). -->
-                                    <button class="planif-btn-vue" id="planif-btn-loupe" title="Loupe — lire sans changer le zoom (L)" aria-label="Loupe" aria-pressed="false" data-action="planificationCarte.basculerLoupe"><img src="icons/icons8-chercher.svg" alt="" class="planif-icon"></button>
-                                    <span id="planif-zoom-info-header" class="planif-zoom-info-header" data-tooltip="planif-zoom">100%</span>
-                                    <!-- #444 : les quatre boutons du bas de la palette montent ICI.
-                                         Motif : sur iPad la palette dépasse l'écran et les coupait —
-                                         l'Inspecteur devenait inatteignable au doigt, or le
-                                         double-clic ne l'ouvre pas non plus (constat du 10 août). -->
+                                    <!-- #444 : l'Inspecteur et le Guide montent ICI (sur iPad la palette
+                                         dépasse l'écran et les coupait). Lot 3 (9 oct. 2026) : des mots,
+                                         plus d'icône seule ; l'Inspecteur est le seul chemin sur l'iPad. -->
                                     <span class="planif-toolbar-separateur" aria-hidden="true"></span>
-                                    <button class="planif-btn-vue" id="planif-palette-inspecteur-btn" title="Inspecteur (double-tap sur un bloc)" aria-label="Inspecteur"><img src="icons/icon-advanced-search.svg" alt="" class="planif-icon"></button>
-                                    <button class="planif-btn-vue" id="planif-palette-aide-btn" data-tooltip="planif-aide" aria-label="Guide"><img src="icons/icon-book.svg" alt="" class="planif-icon"></button>
-                                    <button class="planif-btn-vue" id="planif-palette-bibliotheque-btn" title="Biblioth&egrave;que de cartes d'alignement" aria-label="Biblioth&egrave;que"><img src="icons/icons8-library-2.svg" alt="" class="planif-icon"></button>
+                                    <button class="planif-btn-vue planif-btn-palette" id="planif-palette-inspecteur-btn" title="Inspecteur (double-tap sur un bloc)">Inspecteur</button>
+                                    <button class="planif-btn-vue planif-btn-palette" id="planif-palette-aide-btn" data-tooltip="planif-aide">Guide</button>
                                 </div>
                             </div>
                         </div>
@@ -4476,8 +4474,6 @@
                             </div>
                         </div><!-- fin planif-zone-wrapper -->
 
-                        <!-- planif-zoom-info conservé pour compatibilité JS (6 lecteurs dans planification-carte.js) -->
-                        <span class="u-hide" id="planif-zoom-info">100%</span>
 
                     </div><!-- fin planif-wrapper -->
                 </div><!-- fin sous-section conception-carte (#155 : ces fermetures avaient été
@@ -14441,8 +14437,8 @@
     <!-- Module Planification (Carte mentale) -->
     <script src="js/planification-donnees.js?v=20261006a"></script> <!-- #425 préalable : vivacité de productionId à la reprise (8 août) -->
 
-    <script src="js/planification-bibliotheque.js?v=20261006a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
-    <script src="js/planification-carte.js?v=20261009a"></script> <!-- Lot 4 (9 oct.) : export, échelle de la production (#969) ; index par passe (#971), role="img" (#972), champ Semaine des leçons à objectifs · Commentaire sur le guide (8 oct.) · 1.192.1 (8 oct.) : palette des raccourcis revenue, ouverte par le menu « Vue » · Mots validés (8 oct., 19 h 05) et lien de l'invitation qui quitte le plein écran · Lot 2 de la carte (8 oct.) : planificateur vertical seul, dates du trimestre · Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
+    <script src="js/planification-bibliotheque.js?v=20261009a"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 migration boutonPrincipal/actionsMenu -->
+    <script src="js/planification-carte.js?v=20261009b"></script> <!-- Lot 4 (9 oct.) : export, échelle de la production (#969) ; index par passe (#971), role="img" (#972), champ Semaine des leçons à objectifs · Commentaire sur le guide (8 oct.) · 1.192.1 (8 oct.) : palette des raccourcis revenue, ouverte par le menu « Vue » · Mots validés (8 oct., 19 h 05) et lien de l'invitation qui quitte le plein écran · Lot 2 de la carte (8 oct.) : planificateur vertical seul, dates du trimestre · Lot 1 de la carte (8 oct.) : menu « Vue », R remplace ⌘1 · Décloner (3 sept.) : bouton dans l'Inspecteur, message d'après-geste unique (annoncerDeclonage) · Portage #424 : générateur unique, rétroaction formative, panneau Exporter le plan (8 août) -->
     <script src="js/planification-export.js?v=20261009a"></script> <!-- Lot 4 (9 oct.) : « Aucun objectif de cette leçon » (#974) · LE générateur d'export : 3 niveaux × 3 formats (portage #424, 8 août) — #416 lot C : la date dérivée du groupe-cours choisi -->
     <script src="js/planification.js?v=20260808a"></script> <!-- Refonte nav SP4 : hooks nomSection 'conception' + idSousSection conception-* -->
 
@@ -14547,7 +14543,7 @@
     <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261008c"></script> <!-- Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20261009a"></script> <!-- Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20261007c"></script> <!-- Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20260917b"></script>
     <script src="js/guides-pedagogiques.js?v=20260917b"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->

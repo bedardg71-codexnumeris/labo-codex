@@ -391,17 +391,19 @@ test('import inter-trimestre — copie vers le trimestre actif, source intacte, 
         return JSON.stringify(db.getSync('h9099_planification_mindmap'));
     });
 
-    // Menu Actions → « Importer d'un autre trimestre… » → le panneau liste la carte
-    await page.click('#planif-btn-actions');
-    await page.click('#planif-btn-import-trimestre');
-    const panneau = page.locator('#planif-import-tri-panel');
-    await expect(panneau).toBeVisible();
-    await expect(panneau).toContainText('Hiver 9099 (test)');
+    // Lot 3 (9 oct. 2026) : l'import d'un autre trimestre vit dans la Bibliothèque
+    // (« Consulter la bibliothèque ») et non plus dans « Actions ▾ ».
+    await expect(page.locator('#planif-btn-import-trimestre')).toHaveCount(0);
+    await page.click('#planif-btn-bibliotheque');
+    await page.selectOption('#biblio-alignements-import-trimestre', 'h9099');
+    await page.click('[data-action="importerAlignementsTrimestre"]');
+    const panneau = page.locator('#biblio-alignements-cartes-trimestre');
     await expect(panneau).toContainText('Alignement 601-101 test');
     await expect(panneau).toContainText('3 nœuds');
+    await expect(page.locator('#biblio-alignements-import-trimestre')).toContainText('Hiver 9099 (test)');
 
     // Importer → la carte devient active dans le trimestre courant
-    await panneau.locator('.planif-import-tri-btn').first().click();
+    await panneau.locator('[data-action="importerCarteTrimestreVersActif"]').first().click();
     await page.waitForTimeout(500);
 
     const resultat = await page.evaluate(() => {

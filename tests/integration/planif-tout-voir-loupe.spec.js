@@ -118,8 +118,10 @@ test('la loupe montre CE QU’ON VISE, et l’atterrissage y mène', async ({ pa
     await page.waitForTimeout(400);
 
     const cible = await centreDe(page, 'planif-noeud_cible');
-    await page.click('#planif-btn-loupe');
-    expect(await page.getAttribute('#planif-btn-loupe', 'aria-pressed')).toBe('true');
+    // La loupe est la « longue-vue » du menu « Vue » depuis le lot 3 (9 oct. 2026).
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-longue-vue');
+    expect(await page.getAttribute('#planif-vue-longue-vue', 'aria-pressed')).toBe('true');
 
     await page.mouse.move(cible[0], cible[1]);
     await page.waitForTimeout(250);
@@ -167,7 +169,9 @@ test('⚠ la loupe voit le pointeur MÊME sous la grille du Planificateur', asyn
     await page.click('#planif-btn-vue');
     await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
-    await page.click('#planif-btn-loupe');
+    // La loupe est la « longue-vue » du menu « Vue » depuis le lot 3 (9 oct. 2026).
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-longue-vue');
 
     // Un point réellement couvert par un calque : c'est le cas qui a fait
     // échouer l'écouteur posé sur #planif-zone-travail.
@@ -197,7 +201,9 @@ test('⚠ iPad : glisser le doigt en mode loupe ne déplace AUCUN bloc', async (
     await page.click('#planif-btn-vue');
     await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
-    await page.click('#planif-btn-loupe');
+    // La loupe est la « longue-vue » du menu « Vue » depuis le lot 3 (9 oct. 2026).
+    await page.click('#planif-btn-vue');
+    await page.click('#planif-vue-longue-vue');
 
     const avant = await page.evaluate(() => {
         const o = {};

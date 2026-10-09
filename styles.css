@@ -18852,7 +18852,7 @@ tr.ligne-import-ecartee td {
     cursor: default;
 }
 
-/* Zoom presets — style comme planif-btn-zoom-preset */
+/* Zoom presets */
 .travaux-btn-zoom {
     padding: 2px 8px;
     border: 1px solid var(--planif-couleur-bordure);
@@ -18868,7 +18868,7 @@ tr.ligne-import-ecartee td {
     color: var(--texte-principal);
 }
 
-/* Indicateur zoom — style comme planif-zoom-info-header */
+/* Indicateur zoom */
 .travaux-zoom-info {
     font-size: 11px;
     font-weight: 600;
@@ -20616,17 +20616,20 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: color-mix(in srgb, var(--planif-couleur-selection) 12%, #ffffff);
 }
 
+/* La longue-vue (lot 3, 9 oct. 2026 : la loupe, devenue ronde). Le diametre
+   (LOUPE_L = LOUPE_H dans planification-carte.js) est choisi pour qu'une ligne
+   de titre de bloc tienne entiere au centre. */
 #planif-loupe {
     position: fixed;
     left: 0;
     top: 0;
-    width: 420px;
+    width: 300px;
     height: 300px;
     display: none;
     overflow: hidden;
     z-index: 9000;
     border: 2px solid var(--planif-couleur-selection);
-    border-radius: 10px;
+    border-radius: 50%;
     background: var(--surface-page, #0c1a22);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     /* Le pointeur est defini plus bas, avec celui du canevas : les deux
@@ -20653,10 +20656,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* « Aller ici » — sur iPad il n'y a pas de survol et un doigt leve ne peut pas
    « cliquer dans la loupe » de facon fiable. Ce bouton est le chemin explicite,
    et il respecte la cible tactile de 44 px du projet. */
+/* Dans un cercle, le coin n'existe plus : le bouton se centre en bas. */
 .planif-loupe-aller {
     position: absolute;
-    right: 10px;
-    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 14px;
     min-height: 44px;
     min-width: 44px;
     padding: 0 16px;
@@ -20680,17 +20685,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
    Gregoire : « je voudrais que le pointeur se transforme en petit rectangle
    dans les memes proportions que la loupe »). Une fleche designe un POINT ;
    ici on ne designe pas un point, on choisit un CADRAGE. Le rectangle est
-   au ratio EXACT du cadre : 420 x 300 = 7:5, donc 42 x 30 au dixieme.
-   (Premier jet a 44 x 32 = 1,375 au lieu de 1,400 — assez proche pour ne pas
-   se voir, et assez faux pour ne pas etre ce qui a ete demande.)
+   au ratio EXACT du cadre. Depuis le lot 3 (9 oct. 2026) le cadre est un
+   cercle : le pointeur aussi, 30 px de diametre.
    Double trait — sombre dessous, clair dessus — pour rester lisible sur un
    fond clair comme sur un fond sombre : la carte peut porter l'un ou l'autre
    selon la couleur de fond choisie. Point central = le repere vise.
-   Le point d'accroche est au CENTRE du rectangle (21 15), pas en haut a
-   gauche : c'est le centre qui correspond au centre du cadre de la loupe. */
+   Le point d'accroche est au CENTRE du cercle (15 15), pas en haut a
+   gauche : c'est le centre qui correspond au centre du cadre de la longue-vue. */
 #planif-zone-travail.planif-loupe-mode,
 #planif-loupe {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='30'%3E%3Crect x='2' y='2' width='38' height='26' rx='2' fill='none' stroke='%23000' stroke-opacity='0.55' stroke-width='3'/%3E%3Crect x='2' y='2' width='38' height='26' rx='2' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='21' cy='15' r='1.5' fill='%23fff' stroke='%23000' stroke-opacity='0.55' stroke-width='1'/%3E%3C/svg%3E") 21 15, crosshair;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='13' fill='none' stroke='%23000' stroke-opacity='0.55' stroke-width='3'/%3E%3Ccircle cx='15' cy='15' r='13' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='15' cy='15' r='1.5' fill='%23fff' stroke='%23000' stroke-opacity='0.55' stroke-width='1'/%3E%3C/svg%3E") 15 15, crosshair;
 }
 #planif-zone-travail.planif-loupe-mode { touch-action: none; }
 /* Le bouton « Aller ici » reste un bouton : il retrouve le pointeur normal,
@@ -20840,13 +20844,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .mode-clair .travaux-btn-nav:disabled .nav-seq-icon {
     filter: brightness(0) invert(0.7);
-}
-.planif-zoom-info-header {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--texte-secondaire, #8aa4b0);
-    min-width: 32px;
-    text-align: right;
 }
 
 /* Le badge « 🔧 Présentement en développement actif » et sa note de bas de
@@ -22362,8 +22359,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     justify-content: space-between;
     gap: 12px;
 }
-/* L'état du plein écran se lit à la coche, pas à la couleur seule. */
-.planif-vue-dropdown .planif-action-item[aria-pressed="true"]::after {
+/* L'état du plein écran (et de la longue-vue) se lit à la coche, pas à la
+   couleur seule ; le niveau de zoom en cours aussi (lot 3). */
+.planif-vue-dropdown .planif-action-item[aria-pressed="true"]::after,
+.planif-vue-dropdown .planif-action-item[aria-checked="true"]::after {
     content: "✓";
     color: var(--accent-primaire);
     font-weight: 600;
@@ -24250,23 +24249,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 10px;
 }
 
-#planif-zoom-info {
-    margin-left: auto;
-}
-
-.planif-btn-zoom-preset {
-    padding: 2px 6px;
-    border: 1px solid var(--planif-couleur-bordure);
-    border-radius: 4px;
-    background: var(--surface-carte, #1a3040);
-    color: var(--texte-secondaire, #8aa4b0);
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
-    min-width: 0;
-}
-.planif-btn-zoom-preset:hover { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); }
-.planif-btn-zoom-preset.actif { background: rgba(106, 172, 184, 0.1); color: var(--planif-couleur-texte); font-weight: 600; }
 
 /* === SÉLECTEUR DE CARTES === */
 #planif-selecteur-cartes {
@@ -24306,6 +24288,31 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 .planif-btn-carte:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
+/* « Rétablir » grisé quand rien n'est à rétablir (lot 3). */
+.planif-btn-carte:disabled,
+.planif-btn-carte:disabled:hover {
+    opacity: 0.45;
+    cursor: default;
+    background: var(--surface-carte, #1a3040);
+    color: var(--texte-secondaire, #8aa4b0);
+    border-color: var(--planif-couleur-bordure);
+}
+.mode-clair .planif-btn-carte:disabled,
+.mode-clair .planif-btn-carte:disabled:hover { background: #ffffff; }
+
+/* « Consulter la bibliothèque » (lot 3) : le bouton des bibliothèques de la
+   Conception (btn-principal), ramené à la hauteur de ses voisins de barre.
+   Au doigt, `.btn` monte à 44 px (T-A10) : la règle n'y touche pas. */
+.planif-btn-bibliotheque {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+}
+@media (pointer: coarse) {
+    .planif-btn-bibliotheque { height: auto; }
+}
 
 /* Menu déroulant Actions */
 .planif-actions-menu { position: relative; }
@@ -24951,16 +24958,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .mode-clair .planif-action-item.planif-danger {
     color: #dc2626;
-}
-.mode-clair .planif-btn-zoom-preset {
-    background: #ffffff;
-    border-color: rgba(3, 46, 92, 0.12);
-    color: var(--texte-secondaire);
-}
-.mode-clair .planif-btn-zoom-preset:hover,
-.mode-clair .planif-btn-zoom-preset.actif {
-    background: rgba(6, 93, 187, 0.08);
-    color: var(--texte-principal);
 }
 
 /* Poste de preparation — mode clair */
