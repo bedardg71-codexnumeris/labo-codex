@@ -278,13 +278,11 @@ describe('transport des échelles · AC — importer une échelle ne l\'ampute p
 
 describe('transport des échelles · AD — élargir la liste n\'ouvre pas une porte', () => {
     it('AD.a un repère porteur de balise est assaini, pas recopié', () => {
-        // ⚠ CHARGE COURTE, ET C'EST DÉLIBÉRÉ. `assainirChaine` TRONQUE À
-        // `maxLen` AVANT de retirer les balises (import-export.js:365-371) :
-        // sur `seuilMaitrise` (maxLen 20), une charge de 29 caractères ressort
-        // en `<img src=x onerror=a` — le `>` a été coupé, donc `/<[^>]*>/` ne
-        // mord plus. Ce banc n'est pas l'endroit pour verrouiller ce
-        // comportement-là ; il est inscrit comme constat au §12 de
-        // `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md`.
+        // Charge courte : la charge longue, qu'une troncature couperait en deux,
+        // est tenue par `sentinelle-585-assainir-avant-de-tronquer.test.js`
+        // (#585, corrigé le 9 oct. 2026 : les balises partent avant la
+        // troncature ; constat d'origine au §12 de
+        // `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md`).
         const hostile = { ...ECHELLE_COMPLETE, seuilMaitrise: '<b>M</b>' };
         const apres = win.assainirObjet(hostile, win.SCHEMAS_IMPORT.echelle);
         expect(apres.seuilMaitrise).not.toContain('<');
