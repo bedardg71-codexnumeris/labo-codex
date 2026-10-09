@@ -2258,7 +2258,7 @@ async function preparerDonneesBibliothequeGrilles() {
 
     // Section 1 : cartes pour les grilles dans la sélection
     const cartesSection1 = grillesDansBibliotheque.map(grille => ({
-        nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
+        nom: BibliothequeUI.formaterTitreDemo(echapperHtml(grille.nom || 'Sans titre'), BibliothequeUI.estItemDemo(grille)),
         id: grille.id,
         afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
@@ -2295,7 +2295,8 @@ async function preparerDonneesBibliothequeGrilles() {
         actionsMenu.push({ label: 'Supprimer', action: 'supprimerGrilleDeBibliothequePartagee', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
 
         return {
-            nom: BibliothequeUI.formaterTitreDemo(grille.nom || 'Sans titre', BibliothequeUI.estItemDemo(grille)),
+            nom: BibliothequeUI.formaterTitreDemo(echapperHtml(grille.nom || 'Sans titre'), BibliothequeUI.estItemDemo(grille)),
+            libelle: BibliothequeUI.formaterTitre(grille.nom || 'Sans titre'),   // #467 : texte brut, pour le select des dossiers
             id: grille.id,
             afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
@@ -2319,12 +2320,13 @@ async function preparerDonneesBibliothequeGrilles() {
 async function afficherBibliothequeGrilles() {
     // #327 — enregistre la biblio « grilles » auprès du helper générique de
     // répertoires (idempotent). Les items de Section 2 sont des cartes-config
-    // déjà libellées : labelItem lit leur .nom tel quel.
+    // déjà libellées : labelItem lit leur .libelle (texte brut ; le .nom est du HTML
+    // échappé depuis #467, et le select l'échapperait une seconde fois).
     BibliothequeUI.repertoires.enregistrer('grilles', {
         rafraichir: afficherBibliothequeGrilles,
         ajouterItem: (id) => ajouterGrilleIndividuelle(id),
         supprimerItem: (id) => supprimerGrilleDeBibliothequePartagee(id),
-        labelItem: (c) => c.nom,
+        labelItem: (c) => c.libelle,
         labelPluriel: 'grilles'
     });
 
@@ -3556,7 +3558,7 @@ function afficherCriteresTemp() {
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Descripteur</label>
                     <input type="text"
                            class="controle-form"
-                           value="${critere.description || ''}"
+                           value="${echapperHtml(critere.description || '')}"
                            placeholder="Ex: Qualité de la langue, structure du texte..."
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
@@ -5527,126 +5529,6 @@ window.deplacerCritereTempHaut = deplacerCritereTempHaut;
 window.deplacerCritereTempBas = deplacerCritereTempBas;
 window.deplacerCritereGrilleHaut = deplacerCritereGrilleHaut;
 window.deplacerCritereGrilleBas = deplacerCritereGrilleBas;
-/**
- * Affiche la configuration des catégories d'erreurs pour un critère algorithmique
- * @param {string} grilleId - ID de la grille
- * @param {number} critereIndex - Index du critère
- */
-async function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
-    const grille = await obtenirGrilleParId(grilleId);
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) {
-        alert('Critère introuvable');
-        return;
-    }
-
-    const critere = grille.criteres[critereIndex];
-
-    // Catégories par défaut basées sur votre système
-    const categoriesParDefaut = [
-        { code: "0", retroaction: "Le nombre d'erreurs de français est trop petit pour cibler un objectif de travail précis." },
-        { code: "1", retroaction: "La plupart des erreurs concernent la construction syntaxique (sujet, prédicat, complément de phrase ou autres compléments) ou l'accord du verbe (accord avec le sujet, conjugaison, etc.). Il arrive que certaines phrases sont incomplètes ou confuses, ou encore que le lien entre le verbe et son sujet soit erroné. Vérifie que chaque phrase a bien un sujet et un verbe (et parfois un complément) en les identifiant dans l'interligne. Assure-toi qu'il n'y a pas trop de compléments (ce qui pourrait rendre la phrase confuse). Vérifie également la conjugaison et l'accord des verbes en utilisant des tableaux de conjugaison." },
-        { code: "2", retroaction: "La plupart des erreurs sont causées par des subordonnées employées seules. Elles sont construites comme des compléments qui ne se rattachent à aucun prédicat. Relis la phrase pour vérifier sa clarté et assure-toi que chaque subordonnée est rattachée à une phrase principale par un mot de liaison. On peut parfois aussi ajuster la ponctuation pour y remédier." },
-        { code: "3", retroaction: "La plupart des erreurs concernent l'utilisation de la ponctuation. Elle peut être relative au coordonnant, au complément de phrase, au complément du nom, à l'organisateur textuel, à une énumération (dont la juxtaposition de phrases) ou encore à une citation. La ponctuation fautive vient embrouiller la structure et la clarté des idées. Vérifie les règles de ponctuation pour les différents types de phrases et de propositions. Certaines conjonctions rendent obligatoire l'usage de la virgule. Utilise des guides de ponctuation pour vérifier cet usage." },
-        { code: "4", retroaction: "La plupart des erreurs concernent l'accord en genre et en nombre dans le groupe du nom (déterminant, nom, adjectif). Il devient plus difficile de comprendre le lien entre les mots si ces accords ne sont pas faits. Identifie dans l'interligne le genre et le nombre du nom, puis assure-toi que tous les éléments du groupe concordent." },
-        { code: "5", retroaction: "La plupart des erreurs concernent l'accord du pronom ou le lien avec son antécédent. Il devient plus difficile de comprendre l'objet dont on parle ou ce à quoi on fait référence quand il y a de l'ambiguïté sur ce plan. Relis ta phrase pour clarifier à quoi ou à qui chaque pronom se réfère. Assure-toi qu'il n'y a pas d'autres noms qui pourraient faire écran entre les deux. Vérifie le lien du pronom avec son antécédent et assure-toi que l'accord est correct." },
-        { code: "6", retroaction: "La plupart des erreurs concernent l'accord du participe passé. Révise les règles d'accord du participe passé avec avoir (accord avec le COD s'il est placé avant) et avec être (accord avec le sujet). Identifie ces éléments dans l'interligne, fais des flèches et vérifie les accords." },
-        { code: "7", retroaction: "La plupart des erreurs concernent les mots invariables, plus précisément l'usage de la préposition, de l'adverbe ou de la conjonction. L'orthographe de ces mots ne change jamais. Consulte les listes de mots invariables et l'usage qu'on en fait. Vérifie surtout le sens de ces mots, car ils sont parfois confondus les uns avec les autres." },
-        { code: "8", retroaction: "La plupart des erreurs concernent l'usage du déterminant. Choisis le déterminant approprié en fonction du nom et du contexte, puis vérifie qu'il concorde en genre et en nombre avec le nom qu'il accompagne." },
-        { code: "9", retroaction: "La plupart des erreurs concernent le vocabulaire, c'est-à-dire le sens d'un mot ou son utilisation dans un certain contexte. L'utilisation inexacte d'une citation entre aussi dans cette catégorie. Utilise systématiquement un dictionnaire pour vérifier le sens des mots. Surtout, méfie-toi des synonymes parce qu'ils renvoient toujours à un contexte très précis qui n'est peut-être pas celui dans lequel tu écris. Vérifie tes citations en les relisant attentivement dans l'oeuvre. Évite les anglicismes (dû à, mettre l'emphase, canceller)." },
-        { code: "10", retroaction: "La plupart des erreurs concernent l'orthographe d'usage (lettre, chiffre) ou des éléments de typographie (majuscule, minuscule, soulignement, italique, etc.). Relis ton texte et vérifie systématiquement dans le dictionnaire les mots dont l'orthographe est incertain. Dans le cas de mots étrangers ou de noms de personnages, relis bien ton oeuvre. N'oublie pas également que les titres d'oeuvres ou de chapitres requièrent respectivement l'italique ou le soulignement (les guillemets fonctionnent aussi)." }
-    ];
-
-    // Initialiser avec les catégories par défaut si elles n'existent pas encore
-    if (!critere.categoriesErreurs) {
-        critere.categoriesErreurs = categoriesParDefaut;
-
-        // Sauvegarder immédiatement dans localStorage
-        await db.modifier(cle('grillesTemplates'), (lues) => {
-            const grilles = lues || [];
-            const grilleIndex = grilles.findIndex(g => g.id === grilleId);
-            if (grilleIndex === -1) return undefined;
-            grilles[grilleIndex] = grille;
-            return grilles;
-        }, []);
-    }
-
-    // Créer le modal de configuration
-    const modalHtml = `
-        <div id="modalCategoriesErreurs" class="modal-js-overlay" style="z-index: 9999;">
-            <div class="modal-js-contenu" style="max-width: 900px; width: 90%;">
-                <h3 style="margin-top: 0; color: var(--accent-primaire);">⚙️ Configuration des catégories d'erreurs</h3>
-                <p style="color: var(--gris-moyen); font-size: 0.9rem;">Personnalisez les catégories d'erreurs (codes 0-10) et leurs rétroactions associées.</p>
-
-                <div id="listeCategoriesErreurs" style="margin-top: 20px;">
-                    ${critere.categoriesErreurs.map((cat, idx) => `
-                        <div class="categorie-erreur-item" style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-moyen);">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                <strong style="color: var(--accent-primaire); font-size: 1.1rem;">Code ${cat.code}</strong>
-                            </div>
-                            <textarea id="cat_retro_${idx}"
-                                      class="controle-form"
-                                      rows="4"
-                                      placeholder="Rétroaction pour cette catégorie..."
-                                      style="width: 100%; font-size: 0.85rem; line-height: 1.5;">${cat.retroaction || ''}</textarea>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
-                    <button class="btn btn-annuler" data-action="fermerModalCategoriesErreurs">Annuler</button>
-                    <button class="btn btn-confirmer" data-action="sauvegarderCategoriesErreurs" data-param="${grilleId}" data-param2="${critereIndex}">Enregistrer</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Insérer le modal dans le DOM
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-
-/**
- * Sauvegarde les catégories d'erreurs configurées
- */
-async function sauvegarderCategoriesErreurs(grilleId, critereIndex) {
-    const grille = await obtenirGrilleParId(grilleId);
-    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
-
-    const critere = grille.criteres[critereIndex];
-
-    // Récupérer les rétroactions depuis les textareas
-    critere.categoriesErreurs.forEach((cat, idx) => {
-        const textarea = document.getElementById(`cat_retro_${idx}`);
-        if (textarea) {
-            cat.retroaction = textarea.value.trim();
-        }
-    });
-
-    // Sauvegarder dans localStorage
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const grilleIndex = grilles.findIndex(g => g.id === grilleId);
-        if (grilleIndex === -1) return undefined;
-        grilles[grilleIndex] = grille;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-
-    // Fermer le modal et rafraîchir l'affichage
-    fermerModalCategoriesErreurs();
-    afficherCriteresGrille(grille);
-
-    notifications.succes('Catégories d\'erreurs enregistrées !');
-}
-
-/**
- * Ferme le modal de configuration des catégories
- */
-function fermerModalCategoriesErreurs() {
-    const modal = document.getElementById('modalCategoriesErreurs');
-    if (modal) {
-        modal.remove();
-    }
-}
-
 window.chargerGrillePourModif = chargerGrillePourModif;
 window.dupliquerGrilleDepuisSidebar = dupliquerGrilleDepuisSidebar;
 window.supprimerGrilleDepuisSidebar = supprimerGrilleDepuisSidebar;
@@ -5714,9 +5596,6 @@ window.marquerChampRefuse = marquerChampRefuse;                             // #
 window.REFUS_NOM_CRITERE = REFUS_NOM_CRITERE;
 window.ajouterCritereGrille = ajouterCritereGrille;
 window.supprimerCritereGrille = supprimerCritereGrille;
-window.afficherConfigurationCategoriesErreurs = afficherConfigurationCategoriesErreurs;
-window.sauvegarderCategoriesErreurs = sauvegarderCategoriesErreurs;
-window.fermerModalCategoriesErreurs = fermerModalCategoriesErreurs;
 // Exports des fonctions de gestion des sous-critères
 window.initialiserSousCriteresParDefaut = initialiserSousCriteresParDefaut;
 window.ajouterSousCritere = ajouterSousCritere;

@@ -290,7 +290,8 @@
         var suffixe = '';
         if (contribs.length === 1) suffixe = ' +1 contrib.';
         else if (contribs.length > 1) suffixe = ' +' + contribs.length + ' contrib.';
-        return 'par ' + auteur + suffixe;
+        // #467 — l'auteur vient du fichier reçu ; la ligne part dans le HTML de la carte.
+        return 'par ' + echapperHtml(auteur) + suffixe;
     };
 
     /**
@@ -701,14 +702,14 @@
             : opts.quantite;
         if (qte) parts.push(qte);
 
+        // #467 : l'ancien repli sur `item.auteur` est retiré — formaterAttribution le lit déjà.
         var att = BibliothequeUI.formaterAttribution(item);
         if (att) parts.push(att);
-        else if (item && item.auteur) parts.push('par ' + item.auteur);
 
         var disc = null;
         if (opts.discipline === true && item) disc = item.discipline;
         else if (typeof opts.discipline === 'string') disc = opts.discipline;
-        if (disc) parts.push(disc);
+        if (disc) parts.push(echapperHtml(disc));   // #467
 
         return parts.join(' • ');
     };
@@ -861,10 +862,10 @@
         return '<span class="biblio-menu-wrapper">' +
             '<button type="button" class="biblio-menu-trigger btn btn-mini"' +
             ' data-action="BibliothequeUI.toggleMenuActions"' +
-            ' data-param="' + menuId + '"' +
+            ' data-param="' + echapperHtml(menuId) + '"' +
             ' aria-haspopup="menu" aria-expanded="false"' +
             ' aria-label="Plus d\'actions" title="Plus d\'actions">⋮</button>' +
-            '<div id="' + menuId + '" class="biblio-menu-popover" role="menu">' +
+            '<div id="' + echapperHtml(menuId) + '" class="biblio-menu-popover" role="menu">' +   // #467 : contextId peut venir d'un id importé
                 itemsHTML +
             '</div>' +
         '</span>';
@@ -907,7 +908,8 @@
      * Phase C #267 — API : bouton principal + menu d'actions secondaires.
      *
      * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges)
+     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges) — #467 : le nom
+     *        reçu s'échappe AVANT, chez l'appelant (`echapperHtml`) ; ce rendu ne le fait pas.
      * @param {string} opts.id - ID complet (sert de contextId pour le menu)
      * @param {string} opts.badgeSource - HTML du badge source
      * @param {string} opts.metadonnees - Ligne de métadonnées
@@ -958,7 +960,8 @@
      * Phase C #267 — API : bouton principal + menu d'actions secondaires.
      *
      * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges)
+     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges) — #467 : le nom
+     *        reçu s'échappe AVANT, chez l'appelant (`echapperHtml`) ; ce rendu ne le fait pas.
      * @param {string} opts.id - ID complet (sert de contextId pour le menu)
      * @param {string} opts.badgeSource - HTML du badge source
      * @param {string} opts.metadonnees - Ligne de métadonnées

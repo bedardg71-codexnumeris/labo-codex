@@ -281,7 +281,7 @@ async function afficherTableauProductions() {
         <div class="item-liste" style="background: ${bgColor}; border-color: ${borderColor}; border-width: 2px;">
             <div class="production-header">
                 <strong class="production-titre">
-                    ${estPortfolio ? '📁 ' : ''}${prod.titre}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}
+                    ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}
                 </strong>
                 <div class="production-actions">
                     ${window.boutonsReordonnerBloc({
@@ -307,7 +307,7 @@ async function afficherTableauProductions() {
                 ${!estPortfolio ? `
                 <div>
                     <label class="production-champ-label">Grilles de critères</label>
-                    <input type="text" value="${nomGrille}" class="controle-form ${!grilleAssociee ? 'production-champ-input-placeholder' : 'production-champ-input'}" readonly>
+                    <input type="text" value="${echapperHtml(nomGrille)}" class="controle-form ${!grilleAssociee ? 'production-champ-input-placeholder' : 'production-champ-input'}" readonly>
                 </div>
                 ` : ''}
             </div>
@@ -322,8 +322,8 @@ async function afficherTableauProductions() {
             ` : ''}
             ${prod.objectif || prod.tache ? `
                 <div class="production-details">
-                    ${prod.objectif ? `<p><strong>Objectif:</strong> ${prod.objectif}</p>` : ''}
-                    ${prod.tache ? `<p><strong>Tâche:</strong> ${prod.tache}</p>` : ''}
+                    ${prod.objectif ? `<p><strong>Objectif:</strong> ${echapperHtml(prod.objectif)}</p>` : ''}
+                    ${prod.tache ? `<p><strong>Tâche:</strong> ${echapperHtml(prod.tache)}</p>` : ''}
                 </div>
             ` : ''}
         </div>
@@ -2739,7 +2739,7 @@ async function chargerArtefactsDisponibles() {
                background: var(--bleu-tres-pale); border-radius: 4px; cursor: pointer;">
             <input type="checkbox" name="artefactPortfolio" value="${echapperHtml(art.id)}"
                    class="u-mr-10">
-            <strong>${art.description || art.titre}</strong>
+            <strong>${echapperHtml(art.description || art.titre)}</strong>
         </label>
     `).join('');
 }

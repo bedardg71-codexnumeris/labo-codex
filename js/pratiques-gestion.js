@@ -146,7 +146,7 @@ async function afficherListePratiquesMateriel() {
         const badgeActive = (pratique.id === pratiqueActiveId) ? ' <span class="sidebar-item-badge badge-pratique-active">Active</span>' : '';
         return `
             <div class="sidebar-item" data-id="${pratique.id}" data-action="chargerPratiquePourModif" data-param="${pratique.id}">
-                <div class="sidebar-item-titre">${nomPratique}</div>
+                <div class="sidebar-item-titre">${echapperHtml(nomPratique)}</div>
                 <div class="sidebar-item-badges">${badgeType} ${badgesCaracteristiques}${badgeActive}</div>
             </div>
         `;
@@ -252,7 +252,7 @@ function genererBadgeCaracteristiques(pratique) {
 
     // Formater chaque caractéristique en badge (couleur gérée par CSS via var(--accent-primaire))
     return caracteristiques.map(c =>
-        `<span class="badge-caracteristique">${c}</span>`
+        `<span class="badge-caracteristique">${echapperHtml(c)}</span>`
     ).join(' ');
 }
 
@@ -356,7 +356,7 @@ async function afficherBibliothequePratiques() {
     } else {
         pratiquesDansBibliotheque.forEach(pratique => {
             contenuSection1 += BibliothequeUI.renderCarteSelection({
-                nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+                nom: BibliothequeUI.formaterTitre(echapperHtml(pratique.nom || 'Sans titre')),
                 id: pratique.id,
                 afficherId: true,
                 badgesPratiques: genererBadgeTypePratique(pratique),
@@ -480,7 +480,7 @@ async function afficherBibliothequePratiques() {
         actionsMenu.push({ label: 'Supprimer', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque', showAlways: true });
 
         return BibliothequeUI.renderCarteDisponible({
-            nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+            nom: BibliothequeUI.formaterTitre(echapperHtml(pratique.nom || 'Sans titre')),
             id: pratique.id,
             afficherId: true,
             badgesPratiques: genererBadgeTypePratique(pratique),
@@ -489,7 +489,7 @@ async function afficherBibliothequePratiques() {
             description: pratique.description || '',
             inspireDe: BibliothequeUI.formaterInspireDe(pratique),
             classeItem: 'pratique-dispo-item',
-            dataAttrs: `data-type="${pratique.type || ''}" data-discipline="${pratique.discipline || ''}"`,
+            dataAttrs: `data-type="${echapperHtml(pratique.type || '')}" data-discipline="${echapperHtml(pratique.discipline || '')}"`,
             styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
             boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' },
             actionsMenu: actionsMenu
@@ -1812,7 +1812,7 @@ async function afficherPreviewEchelleMat() {
 
     let html = '';
     echelle.niveaux.forEach(n => {
-        html += `<div style="margin-bottom: 4px;"><span style="font-weight: 600;">${n.code || n.nom}</span>: ${n.nom}</div>`;
+        html += `<div style="margin-bottom: 4px;"><span style="font-weight: 600;">${echapperHtml(n.code || n.nom)}</span>: ${echapperHtml(n.nom)}</div>`;
     });
 
     contenu.innerHTML = html;
@@ -1852,7 +1852,7 @@ function peuplerDropdownNoteMaximaleMat() {
     echelle.niveaux.forEach(n => {
         const label = n.code ? `${n.code} (${n.nom})` : n.nom;
         const value = n.code || n.nom;
-        html += `<option value="${value}">${label}</option>`;
+        html += `<option value="${echapperHtml(value)}">${echapperHtml(label)}</option>`;
     });
 
     select.innerHTML = html;
@@ -1881,8 +1881,8 @@ function afficherTypesTravauxMat(typesTravaux) {
     typesTravaux.forEach((t, index) => {
         html += `
             <tr>
-                <td><input type="text" class="controle-form" value="${t.nom || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="nom"></td>
-                <td><input type="text" class="controle-form" value="${t.description || ''}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="description"></td>
+                <td><input type="text" class="controle-form" value="${echapperHtml(t.nom || '')}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="nom"></td>
+                <td><input type="text" class="controle-form" value="${echapperHtml(t.description || '')}" data-on-change="modifierTypeTravailMatHandler" data-mat-index="${index}" data-champ="description"></td>
                 <td style="text-align: center;">
                     <button data-action="supprimerTypeTravailMat" data-param="${index}" class="btn btn-supprimer btn-tres-compact"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
                 </td>
@@ -1994,7 +1994,7 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
     html += '<thead><tr><th>Lettre</th><th>Note (%)</th>';
 
     typesTravaux.forEach(t => {
-        html += `<th>${t.nom}</th>`;
+        html += `<th>${echapperHtml(t.nom)}</th>`;
     });
 
     html += '<th style="width: 80px;">Actions</th></tr></thead>';
@@ -2002,7 +2002,7 @@ function afficherForfaitsMat(forfaits, typesTravaux) {
 
     forfaits.forEach((f, index) => {
         html += `<tr>
-            <td><input type="text" class="controle-form" value="${f.lettre || ''}" style="width: 50px;" data-on-change="modifierForfaitMatHandler" data-mat-index="${index}" data-champ="lettre"></td>
+            <td><input type="text" class="controle-form" value="${echapperHtml(f.lettre || '')}" style="width: 50px;" data-on-change="modifierForfaitMatHandler" data-mat-index="${index}" data-champ="lettre"></td>
             <td><input type="number" class="controle-form" value="${f.note || 0}" style="width: 60px;" data-on-change="modifierForfaitMatHandler" data-mat-index="${index}" data-champ="note"></td>`;
 
         typesTravaux.forEach(t => {

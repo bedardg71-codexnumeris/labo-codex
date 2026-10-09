@@ -89,7 +89,7 @@ function afficherListeEnsemblesObjectifs() {
         const nbObjectifs = ensemble.objectifs ? ensemble.objectifs.length : 0;
         html += `
             <div class="sidebar-item" data-action="afficherEnsembleObjectifs" data-param="${ensemble.id}">
-                <div class="sidebar-item-titre">${ensemble.nom}</div>
+                <div class="sidebar-item-titre">${echapperHtml(ensemble.nom)}</div>
                 <div class="sidebar-item-badges"><span class="badge-caracteristique">${nbObjectifs} objectifs</span></div>
             </div>
         `;
@@ -254,7 +254,7 @@ function genererFormulaireEnsemble(ensemble) {
                     <input type="text"
                            id="ensembleAuteur"
                            class="controle-form"
-                           value="${ensemble.auteur || ''}"
+                           value="${echapperHtml(ensemble.auteur || '')}"
                            placeholder="Ton nom"
                            data-on-input="marquerEnsembleModifie">
                 </div>
@@ -263,7 +263,7 @@ function genererFormulaireEnsemble(ensemble) {
                     <input type="text"
                            id="ensembleEtablissement"
                            class="controle-form"
-                           value="${ensemble.etablissement || ''}"
+                           value="${echapperHtml(ensemble.etablissement || '')}"
                            placeholder="Ex: Cégep de..."
                            data-on-input="marquerEnsembleModifie">
                 </div>
@@ -274,7 +274,7 @@ function genererFormulaireEnsemble(ensemble) {
                 <input type="text"
                        id="ensembleDiscipline"
                        class="controle-form"
-                       value="${ensemble.discipline || ''}"
+                       value="${echapperHtml(ensemble.discipline || '')}"
                        placeholder="Ex: Mathématiques, Biologie..."
                        data-on-input="marquerEnsembleModifie">
             </div>
@@ -285,7 +285,7 @@ function genererFormulaireEnsemble(ensemble) {
                           class="controle-form"
                           rows="2"
                           placeholder="Description optionnelle de cet ensemble d'objectifs"
-                          data-on-input="marquerEnsembleModifie">${ensemble.description || ''}</textarea>
+                          data-on-input="marquerEnsembleModifie">${echapperHtml(ensemble.description || '')}</textarea>
             </div>
         </div>
 

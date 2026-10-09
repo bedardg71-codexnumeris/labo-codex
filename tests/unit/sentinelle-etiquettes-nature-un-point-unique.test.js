@@ -192,18 +192,15 @@ describe('B · le formulaire du Cadre : la VALEUR reste \'service\' après l\'al
         expect(opts.map(o => o.textContent)).toEqual(['Enseignement', 'Orthopédagogie']);
     });
 
-    it('la synthèse d\'un service dit « Orthopédagogie » ; celle de la liste des cours suffixe « — Orthopédagogie »', () => {
+    it('la synthèse d\'un service dit « Orthopédagogie »', () => {
         const b = monterForm({});
         b.store.cours = [{ id: 'S1', nature: 'service', nomCours: 'Aide' }, { id: 'C1', nature: 'cours', codeCours: '601-101-MQ', nomCours: 'Écriture' }];
         b.store.infoCours = { id: 'S1' };
         b.win.afficherSyntheseCours(b.store.cours[0]);
         expect(b.elements['v2-apercuCoursSidebar'].innerHTML).toContain('<div class="apercu-code">Orthopédagogie</div>');
         expect(b.elements['v2-apercuCoursSidebar'].innerHTML).toContain('Service d’orthopédagogie actif');
-        b.win.afficherDetailsCoursV2(b.store.cours[0]);
-        expect(b.elements['v2-detailsCours'] ? true : true).toBe(true);
-        const detailsHtml = Object.values(b.elements).map(e => e._html).join('\n');
-        expect(detailsHtml).toMatch(/Nature<\/label>\s*<div[^>]*>Orthopédagogie<\/div>/);
-        expect(detailsHtml).not.toMatch(/>Service<\/div>/);
+        // #467 (9 oct. 2026) : `afficherDetailsCoursV2` est partie (aucun appelant, et ses
+        // champs entraient bruts dans le HTML) ; la synthèse ci-dessus est le seul aperçu.
     });
 });
 
