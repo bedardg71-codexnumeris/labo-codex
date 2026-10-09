@@ -26,12 +26,18 @@
             // à 19 h 33, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md), posés tels quels.
             // 1.192.1 (le menu tient dans sa largeur ; les raccourcis dans leur palette, ouverte
             // au bas du menu) consolidé, sans ligne : « en bas, tous les raccourcis » reste vrai.
+            // 1.192.2 (lot 4 : l'export du plan dit vrai, #969 et #974 ; le champ Semaine de
+            // l'Inspecteur) — deux lignes validées par Grégoire le 9 oct. 2026 à 7 h 17, par
+            // Cowork (plans de travail/CONSIGNE-DU-JOUR.md), posées telles quelles ; pas de
+            // ligne pour la carte démo.
             version: '1.192',
             couleur: 'vert',
             titre: 'Un menu «&nbsp;Vue&nbsp;» sur la carte d\'alignement',
             items: [
                 'Conception&nbsp;› Carte d\'alignement&nbsp;: un menu «&nbsp;Vue&nbsp;» réunit «&nbsp;Vue plein écran&nbsp;», «&nbsp;Recentrer la carte&nbsp;», «&nbsp;Tout voir&nbsp;», la couleur du fond et, en bas, tous les raccourcis clavier. «&nbsp;Recentrer la carte&nbsp;» se fait maintenant avec la touche R (au lieu de ⌘1).',
-                'Planificateur&nbsp;: les dates du trimestre s\'affichent à côté du titre&nbsp;; si elles manquent, un lien mène à Cadre&nbsp;› Trimestre pour les entrer. La réserve «&nbsp;Non planifié&nbsp;» ne se place plus à gauche de la grille&nbsp;: elle est toujours dessous.'
+                'Planificateur&nbsp;: les dates du trimestre s\'affichent à côté du titre&nbsp;; si elles manquent, un lien mène à Cadre&nbsp;› Trimestre pour les entrer. La réserve «&nbsp;Non planifié&nbsp;» ne se place plus à gauche de la grille&nbsp;: elle est toujours dessous.',
+                'Conception&nbsp;› Carte d\'alignement, «&nbsp;Exporter le plan…&nbsp;»&nbsp;: chaque production porte sa vraie échelle, et un bloc qui ne sert que les objectifs d\'une autre leçon porte «&nbsp;Aucun objectif de cette leçon&nbsp;» au lieu d\'une case vide.',
+                'Dans l\'Inspecteur d\'une leçon qui porte des objectifs, le champ «&nbsp;Semaine&nbsp;» fonctionne de nouveau.'
             ]
         },
         {
