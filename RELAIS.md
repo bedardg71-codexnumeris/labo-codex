@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 12 h 58 : **1.193.0 (CARTE D'ALIGNEMENT, LOT 3 : LA BARRE EN MOTS) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 14 h 17 : **1.193.0 (CARTE D'ALIGNEMENT, LOT 3 : LA BARRE EN MOTS) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac92ea3`, `commit_ref` `152aa197`, `state: ready`, publié à
+18:13:03 Z (14 h 13, Toronto) ; `version.json` du commit : `1.193.0`, build `1009-1257`. Verdict Playwright complet sur
+`152aa197` : code 0, 0 échec connu, aucun instable, 0 veille (sur batterie, `-s` inopérant) ; Vitest du hook pré-push vert ;
+poussé `81151c79..152aa197` sur le « oui » de Grégoire. Puis ce relais, **sans verdict propre** (document). **Suite du
+chantier** : lot 3 livré. En suspens : la phrase validée de la page 1 du guide (« depuis la palette », fausse depuis #444),
+proposition « par le bouton Guide de la barre » à soumettre à Grégoire.
+
+## (relais précédent) 9 OCT. 2026, 12 h 58 : **1.193.0 (CARTE D'ALIGNEMENT, LOT 3 : LA BARRE EN MOTS) RELEASÉ SUR `main` LOCAL ; VERDICT PUIS PUSH**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 11 h 26), puis deux relectures de Cowork (alignement de
 « Vue ▾ », puis toute la barre à 44 px au doigt et le guide) ; mots et Nouvelles validés par Grégoire. **Commits** :
