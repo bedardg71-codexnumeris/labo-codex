@@ -115,6 +115,7 @@ function construireElement(nd, contexte) {
         retroactionRendu: null,   // sur le rendu (évaluation)
         production: null,
         objectifsServis: [],
+        objectifsHorsLecon: false, // #974 — voir plus bas
         liens: liensDe(nd.id)
     };
 
@@ -155,8 +156,28 @@ function construireElement(nd, contexte) {
                 .map(function(id) { return contexte.objectifsParId[id]; })
                 .filter(Boolean);
         }
+        // #974 (décision de Grégoire, 9 oct. 2026) — la leçon parente fait foi,
+        // mais l'export ne se tait plus : un bloc qui ne sert que des objectifs
+        // d'une AUTRE leçon (un clone, un bloc déplacé) le dit, au lieu de
+        // laisser la case vide comme s'il ne servait rien. Une référence morte
+        // (objectif retiré, #968) ne compte pas : elle ne sert rien du tout.
+        if (el.objectifsServis.length === 0 && contexte.objectifsParId
+                && nd.metadata && Array.isArray(nd.metadata.objectifsServis)
+                && nd.metadata.objectifsServis.length > 0) {
+            var idxCarte = c.indexObjectifsCarte();
+            el.objectifsHorsLecon = nd.metadata.objectifsServis.some(function(id) { return !!idxCarte[id]; });
+        }
     }
     return el;
+}
+
+// #974 — les mots arrêtés par Grégoire (9 oct. 2026), pour toutes les sorties.
+var AUCUN_OBJECTIF_DE_LA_LECON = 'Aucun objectif de cette leçon';
+
+/** Ce que l'export écrit sous « Objectifs servis » d'un élément ; '' si rien. */
+function objectifsServisTexte(el) {
+    if (el.objectifsServis.length > 0) return el.objectifsServis.join(' ; ');
+    return el.objectifsHorsLecon ? AUCUN_OBJECTIF_DE_LA_LECON : '';
 }
 
 // ---------------------------------------------------------------------------
@@ -725,8 +746,8 @@ function rendreElementTexte(el, inc, indent) {
     if (inc.retroactions && el.retroactionRendu) {
         txt += indent + '  Rétroaction sur le rendu : ' + libelleRetroaction(el.retroactionRendu) + '\n';
     }
-    if (el.objectifsServis.length > 0 && inc.liens) {
-        txt += indent + '  Sert : ' + el.objectifsServis.join(' ; ') + '\n';
+    if (objectifsServisTexte(el) && inc.liens) {
+        txt += indent + '  Sert : ' + objectifsServisTexte(el) + '\n';
     }
     if (inc.liens) {
         formaterLiens(el.liens).forEach(function(l) { txt += indent + '  ' + l + '\n'; });
@@ -909,7 +930,7 @@ var CATALOGUE_COLONNES = {
             : (c.lecon.objectifDerive || '');
     } },
     objectifsServis: { libelle: 'Objectifs servis', valeur: function(c) {
-        return c.estLecon || !c.el ? '' : c.el.objectifsServis.join(' ; ');
+        return c.estLecon || !c.el ? '' : objectifsServisTexte(c.el);
     } },
     liens:       { libelle: 'Liens',           valeur: function(c) {
         if (c.estLecon) return formaterLiens(c.lecon.liens).join(' ; ');
@@ -1370,8 +1391,8 @@ function rendreLeconMD(lecon, inc, ordre) {
                 if (inc.retroactions && el.retroactionRendu) details.push('Rétroaction sur le rendu : ' + libelleRetroaction(el.retroactionRendu));
                 if (details.length) md += ' — ' + details.join(' · ');
                 md += '\n';
-                if (inc.liens && el.objectifsServis.length > 0) {
-                    md += '    - sert : ' + el.objectifsServis.join(' ; ') + '\n';
+                if (inc.liens && objectifsServisTexte(el)) {
+                    md += '    - sert : ' + objectifsServisTexte(el) + '\n';
                 }
                 if (inc.liens) {
                     formaterLiens(el.liens).forEach(function(l) { md += '    - ' + l + '\n'; });

@@ -45,10 +45,12 @@ function monterTout() {
         // Productions du trimestre actif (a2026) — échéance résolue en repli
         // direct (obtenirEcheanceEffective absent du sandbox).
         'a2026_productions': [
-            { id: 'prod-dissert', titre: 'Dissertation critique', type: 'travail', ponderation: 25, grilleId: 'grille-1', dateEcheance: '2026-10-15' },
+            { id: 'prod-dissert', titre: 'Dissertation critique', type: 'travail', ponderation: 25, grilleId: 'grille-1', echelleId: 'ech-1', dateEcheance: '2026-10-15' },
             { id: 'prod-quiz', titre: 'Quiz de lecture', type: 'quiz', ponderation: 10, grilleId: null, dateEcheance: null }
         ],
-        'a2026_grillesTemplates': [{ id: 'grille-1', nom: 'Grille SRPNF', echelleId: 'ech-1' }],
+        // #969 — l'échelle vit sur la PRODUCTION ; l'éditeur de grille n'écrit
+        // plus `grille.echelleId` depuis #574/#578.
+        'a2026_grillesTemplates': [{ id: 'grille-1', nom: 'Grille SRPNF' }],
         'a2026_echellesTemplates': [{ id: 'ech-1', nom: 'Échelle IDME' }],
         // LE PORTEUR HISTORIQUE : rétroactions/productions posées par
         // l'Organisateur sur des ACTIVITÉS (clé composite #367).
