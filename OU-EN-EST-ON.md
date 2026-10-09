@@ -15,6 +15,22 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 9 OCTOBRE 2026 : 1.193.0 puis 1.194.0 (la dernière publiée à 19 h 08, mesurée chez Netlify sur `9c7ebb26` ; verdict complet vert sur chacune) — L'ARCHIVE D'UN GROUPE N'EMPORTE QUE CE GROUPE ; « VÉRIFIER » NE DEMANDE PLUS LA PERMISSION DE MODIFIER**
+
+**Ce que tu verras** :
+- Archiver un groupe : l'archive n'emporte plus que ce groupe (rien des élèves d'un autre groupe), et elle garde maintenant ses rencontres et son assiduité (#1021, #956).
+- Dans Chrome, « Vérifier » une archive demande seulement la lecture du dossier ; « Archiver… » demande toujours l'écriture (#1005).
+- En démo, choisir une grille de dépistage ne touche plus ta préférence réelle (#829).
+- 1.193.0 : la barre de la carte d'alignement dit ses boutons en mots, à 44 px au doigt.
+
+**Vérifié comment** : des bancs seulement — un espace fictif à deux groupes, chaque famille par élève remplie : 13 clés partaient avec l'autre groupe avant, aucune après ; une archive d'avant se relit ; chaque correctif retiré fait échouer son banc ; verdict complet au navigateur vert sur le commit publié. **Pas vérifié** : « Vérifier » dans ton Chrome, sur ton vrai dossier (porte due).
+
+**Tes données** : rien n'est réécrit. Les archives déjà faites gardent ce qu'elles ont emporté. Limite gardée : une rencontre qui réunit des élèves de deux groupes part dans l'archive de chacun avec son texte libre entier (#1045).
+
+**Ce qui reste** : les portes dues chez toi (#1005, #660, #915, #1012). Côté sessions, sans toi : que tout nom ou texte reçu de l'extérieur (partage, import, archive) s'affiche sans pouvoir s'exécuter (#467, #585).
+
+---
+
 ✅ **EN LIGNE LE 9 OCTOBRE 2026 : 1.192.2 (publiée à 8 h 53, mesurée chez Netlify sur `8761a3fe` ; verdict complet vert) — L'EXPORT DU PLAN DIT VRAI ; LE CHAMP « SEMAINE » DES LEÇONS À OBJECTIFS REMARCHE**
 
 **Ce que tu verras** :

@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 14 h 17 : **1.193.0 (CARTE D'ALIGNEMENT, LOT 3 : LA BARRE EN MOTS) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 19 h 15 : **1.194.0 (L'ARCHIVE D'UN GROUPE N'EMPORTE QUE CE GROUPE ; « VÉRIFIER » EN LECTURE SEULE) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify à 19 h 14) : déploiement `6ac973c7`, `commit_ref` `9c7ebb26`, `state: ready`,
+publié à 23:08:04 Z (19 h 08, Toronto) ; `version.json` : `1.194.0`, build `1009-1627`. Verdict Playwright complet sur
+`9c7ebb26` : code 0, 0 échec connu, aucun instable, 0 veille (sur batterie). **Lot 1 de la file sans Grégoire LIVRÉ** :
+#1021, #956, #1005, #829 (`06d3a65f`, `947724ce`, `2e9531d0`, `2283deb6`) ; #1045 inscrite (limite gardée). Puis ce relais,
+**sans verdict propre** (documents). **Portes dues, chez Grégoire** : « Vérifier » dans Chrome (#1005) ; #660, #915, #1012.
+**Suite** : lot 2 de la file (#467, #585 : ce qui entre de l'extérieur est échappé), consigne de Cowork du 9 oct., 19 h 10.
+
+## (relais précédent) 9 OCT. 2026, 14 h 17 : **1.193.0 (CARTE D'ALIGNEMENT, LOT 3 : LA BARRE EN MOTS) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6ac92ea3`, `commit_ref` `152aa197`, `state: ready`, publié à
 18:13:03 Z (14 h 13, Toronto) ; `version.json` du commit : `1.193.0`, build `1009-1257`. Verdict Playwright complet sur

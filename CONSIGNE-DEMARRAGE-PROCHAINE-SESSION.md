@@ -1,5 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 9 octobre 2026, 19 h 14 (Toronto) : `1.194.0` EN LIGNE** (build `1009-1627`) — Netlify
+> `6ac973c7`, `commit_ref` `9c7ebb26`, `state: ready`, publié à 23:08:04 Z. Verdict Playwright complet vert sur `9c7ebb26` (code 0,
+> 0 échec connu, aucun instable, 0 veille). Entre-temps, 1.193.0 (lot 3 de la carte, la barre en mots) est en ligne depuis 14 h 13.
+> **Règle de Grégoire (9 oct., 14 h 42)** : d'abord ce qui se fait sans lui, puis la qualité (robustesse, logique). **File de Cowork,
+> lot 1 LIVRÉ** : #1021, #956, #1005, #829 ; #1045 inscrite (limite gardée). Portes dues : « Vérifier » dans Chrome (#1005) ; #660,
+> #915, #1012. **MANDAT COURANT** : lot 2 de la file (#467, #585), selon `plans de travail/CONSIGNE-DU-JOUR.md` ; un lot à la fois.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 9 octobre 2026, 8 h 53 (Toronto) : `1.192.2` EN LIGNE** (build `1009-0718`) — Netlify
 > `6ac8e3a6`, `commit_ref` `8761a3fe`, `state: ready`, publié à 12:53:05 Z. Verdict Playwright complet vert sur `8761a3fe` (code 0,
 > 0 échec connu, un instable passé au second essai — `temoin-enregistrement-lot-b`, 360 px clair —, éveil tenu sur secteur, 0 veille) ;
