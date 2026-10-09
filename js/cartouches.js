@@ -2055,7 +2055,8 @@ window.confirmerImportCartouches = async function(donnees) {
 
             // Aplatir les cartouches de toutes les grilles pour la bibliothèque
             for (const grilleId of Object.keys(cartouchesData)) {
-                const cartouchesImportees = cartouchesData[grilleId];
+                // #467 — un nom reçu n'entre pas brut dans la Bibliothèque (import-export.js).
+                const cartouchesImportees = cartouchesData[grilleId].map(c => window.assainirImportJson(c, 'cartouche'));
 
                 cartouchesImportees.forEach(importee => {
                     // Préserver metadata_cc pour batch export aussi
@@ -2833,118 +2834,6 @@ async function exporterCartoucheActive() {
 }
 
 /**
- * Importe un fichier JSON pour remplacer la cartouche actuellement en cours d'édition
- * NOUVEAU (Beta 92): Support métadonnées Creative Commons
- */
-function importerDansCartoucheActive(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Récupérer l'ID de la cartouche active
-    if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
-        alert('Aucune cartouche sélectionnée. Sélectionne d\'abord la cartouche à remplacer.');
-        event.target.value = ''; // Reset input
-        return;
-    }
-
-    const grilleId = cartoucheActuel.grilleId;
-    const cartoucheId = cartoucheActuel.id;
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const donnees = JSON.parse(e.target.result);
-
-            // Valider que c'est bien une cartouche
-            if (!donnees || typeof donnees !== 'object') {
-                alert('Le fichier JSON n\'est pas valide.');
-                event.target.value = '';
-                return;
-            }
-
-            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
-            let cartoucheImportee;
-            let metadata = null;
-
-            if (donnees.contenu) {
-                // Nouveau format avec CC metadata
-                metadata = donnees.metadata;
-                cartoucheImportee = donnees.contenu;
-            } else {
-                // Ancien format direct
-                cartoucheImportee = donnees;
-            }
-
-            // Afficher badge CC si présent
-            let messageConfirmation = '';
-            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
-                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
-                    `👤 Auteur: ${metadata.auteur_original}\n` +
-                    `📅 Créé le: ${metadata.date_creation}\n\n`;
-            }
-
-            // Confirmer le remplacement
-            const confirmation = confirm(
-                messageConfirmation +
-                `⚠️ ATTENTION: Cette action va remplacer la cartouche actuelle.\n\n` +
-                `Veux-tu continuer ?`
-            );
-
-            if (!confirmation) {
-                event.target.value = '';
-                return;
-            }
-
-            // Préserver l'ID original et le grilleId, puis remplacer les données
-            const cartoucheMiseAJour = {
-                ...cartoucheImportee,
-                id: cartoucheId, // Garder l'ID original
-                grilleId: grilleId // Garder le grilleId original
-            };
-
-            // Préserver les métadonnées CC si présentes
-            if (metadata) {
-                cartoucheMiseAJour.metadata_cc = metadata;
-            }
-
-            // ⚠ La collection est relue DANS la file : celle d'avant la
-            // confirmation ne vaut plus rien. security-ok: `cartoucheImportee`
-            // est déjà passée par la validation d'import en amont.
-            let remplacee = false;
-            await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
-                const cartouches = lues || [];
-                const index = cartouches.findIndex(c => c.id === cartoucheId);
-                if (index === -1) return undefined;
-
-                // Remplacer dans le tableau
-                cartouches[index] = cartoucheMiseAJour;
-                remplacee = true;
-                return cartouches;
-            }, []);
-
-            if (!remplacee) {
-                alert('Cartouche introuvable.');
-                event.target.value = '';
-                return;
-            }
-
-            // Recharger la cartouche dans le formulaire
-            await chargerCartouchePourModif(cartoucheId, grilleId);
-
-            notifications.succes('Cartouche importée et remplacée avec succès');
-
-        } catch (error) {
-            console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
-        } finally {
-            event.target.value = ''; // Reset input
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-/**
  * Supprime la cartouche actuellement en cours d'édition
  */
 async function supprimerCartoucheActive() {
@@ -3215,14 +3104,12 @@ window.importerDepuisMarkdown = importerDepuisMarkdown;
 window.importerPartiel = importerPartiel;
 window.exporterCartouches = exporterCartouches;
 window.importerCartouches = importerCartouches;
-window.importerCartoucheJSON = importerCartoucheJSON;
 window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
 window.exporterCartoucheEnTexte = exporterCartoucheEnTexte;
 
 // Nouvelles fonctions Beta 90 (boutons dans formulaire)
 window.dupliquerCartoucheActive = dupliquerCartoucheActive;
 window.exporterCartoucheActive = exporterCartoucheActive;
-window.importerDansCartoucheActive = importerDansCartoucheActive;
 window.supprimerCartoucheActive = supprimerCartoucheActive;
 window.annulerFormCartouche = annulerFormCartouche;
 window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
@@ -3938,62 +3825,6 @@ function importerPartiel() {
  */
 // OBSOLÈTE : Fonction dupliquée supprimée (exportait dans l'ancien format sans métadonnées CC)
 // La fonction exporterCartoucheActive() correcte est définie plus haut (ligne 1885) et utilise ajouterMetadonnéesCC()
-
-/**
- * Importe une cartouche depuis un fichier JSON
- *
- * @param {Event} event - Événement change du input file
- */
-function importerCartoucheJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const cartouches = JSON.parse(e.target.result);
-
-            if (!Array.isArray(cartouches) || cartouches.length === 0) {
-                alert('Fichier JSON invalide');
-                return;
-            }
-
-            const cartouche = cartouches[0]; // Prendre la première
-
-            // Demander quelle grille utiliser
-            const grilles = await db.get(cle('grillesTemplates')) || [];
-            if (grilles.length === 0) {
-                alert('Crée d\'abord une grille de critères');
-                return;
-            }
-
-            const grilleId = grilles[0].id; // Utiliser la première grille par défaut
-
-            // Générer nouvel ID
-            cartouche.id = genererIdUnique('CART_');
-            cartouche.grilleId = grilleId;
-
-            // Sauvegarder. security-ok: `cartouche` vient du fichier importé,
-            // déjà validé en amont, et reçoit ici un identifiant neuf.
-            await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
-                const cartouchesExistantes = lues || [];
-                cartouchesExistantes.push(cartouche);
-                return cartouchesExistantes;
-            }, []);
-
-            // Rafraîchir l'affichage
-            await afficherBanqueCartouches();
-            await chargerCartouchePourModif(cartouche.id, grilleId);
-
-            notifications.succes('Cartouche importée avec succès !');
-
-        } catch (error) {
-            console.error('Erreur import JSON:', error);
-            alert('Erreur lors de l\'importation du fichier JSON');
-        }
-    };
-    reader.readAsText(file);
-}
 
 /**
  * Génère la checklist des critères pour l'import partiel

@@ -754,102 +754,6 @@ function exporterTousObjectifs() {
     URL.revokeObjectURL(url);
 }
 
-/**
- * Déclenche l'import
- */
-function importerObjectifs() {
-    document.getElementById('importObjectifsInput').click();
-}
-
-/**
- * Traite le fichier importé
- * @param {Event} event - Événement du file input
- */
-function traiterImportObjectifs(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            let ensemblesAImporter = [];
-            let metadata = null;
-
-            // Détecter si c'est un fichier avec métadonnées CC
-            if (data.metadata && data.contenu) {
-                metadata = data.metadata;
-
-                // Extraire le contenu
-                if (Array.isArray(data.contenu)) {
-                    ensemblesAImporter = data.contenu;
-                } else if (data.contenu.id && data.contenu.objectifs) {
-                    ensemblesAImporter = [data.contenu];
-                } else {
-                    throw new Error('Format du contenu non reconnu');
-                }
-            }
-            // Détecter si c'est un ensemble unique ou un tableau (ancien format)
-            else if (Array.isArray(data)) {
-                ensemblesAImporter = data;
-            } else if (data.id && data.objectifs) {
-                ensemblesAImporter = [data];
-            } else {
-                throw new Error('Format non reconnu');
-            }
-
-            // Afficher les informations CC si disponibles
-            if (metadata && metadata.licence) {
-                const infosCC = `
-Matériel sous licence ${metadata.licence}
-Auteur original : ${metadata.auteur_original}
-Date de création : ${metadata.date_creation}
-
-Tu peux utiliser, modifier et partager ce matériel selon les conditions de la licence CC BY-NC-SA 4.0.
-                `.trim();
-
-                if (!confirm(infosCC + '\n\nImporter ce matériel ?')) {
-                    return;
-                }
-            }
-
-            // Valider et importer
-            const ensemblesExistants = chargerEnsemblesObjectifs();
-            let nbImportes = 0;
-
-            ensemblesAImporter.forEach(ensemble => {
-                // Vérifier que l'ID n'existe pas déjà
-                if (ensemblesExistants.find(e => e.id === ensemble.id)) {
-                    ensemble.id = genererIdUnique('objectifs_');
-                }
-
-                // Préserver les métadonnées CC dans l'ensemble importé
-                if (metadata) {
-                    ensemble.metadata_cc = {
-                        auteur_original: metadata.auteur_original,
-                        date_creation: metadata.date_creation,
-                        licence: metadata.licence,
-                        contributeurs: metadata.contributeurs || []
-                    };
-                }
-
-                ensemblesExistants.push(ensemble);
-                nbImportes++;
-            });
-
-            sauvegarderEnsemblesObjectifs(ensemblesExistants);
-            alert(`✅ ${nbImportes} ensemble(s) importé(s) !`);
-
-        } catch (error) {
-            alert('❌ Erreur lors de l\'import : ' + error.message);
-        }
-    };
-    reader.readAsText(file);
-
-    // Réinitialiser l'input
-    event.target.value = '';
-}
-
 // ============================================================================
 // CONFIGURATION PRATIQUE MULTI-OBJECTIFS
 // ============================================================================
@@ -894,8 +798,6 @@ window.supprimerEnsembleObjectifs = supprimerEnsembleObjectifs;
 window.dupliquerEnsembleObjectifs = dupliquerEnsembleObjectifs;
 window.exporterEnsembleObjectifs = exporterEnsembleObjectifs;
 window.exporterTousObjectifs = exporterTousObjectifs;
-window.importerObjectifs = importerObjectifs;
-window.traiterImportObjectifs = traiterImportObjectifs;
 window.chargerEnsemblesObjectifs = chargerEnsemblesObjectifs;
 
 // Nouvelles fonctions pour pratique multi-objectifs

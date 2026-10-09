@@ -901,117 +901,6 @@ async function exporterEchelleActive() {
 }
 
 /**
- * Importe un fichier JSON pour remplacer l'échelle actuellement en cours d'édition
- * NOUVEAU (Beta 92): Support métadonnées Creative Commons
- */
-async function importerDansEchelleActive(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Récupérer l'ID de l'échelle active
-    if (!echelleTemplateActuelle || !echelleTemplateActuelle.id) {
-        alert('Aucune échelle sélectionnée. Sélectionne d\'abord l\'échelle à remplacer.');
-        event.target.value = ''; // Reset input
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const donnees = JSON.parse(e.target.result);
-
-            // Valider que c'est bien une échelle
-            if (!donnees || typeof donnees !== 'object') {
-                alert('Le fichier JSON n\'est pas valide.');
-                event.target.value = '';
-                return;
-            }
-
-            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
-            let echelleImportee;
-            let metadata = null;
-
-            if (donnees.contenu) {
-                // Nouveau format avec CC metadata
-                metadata = donnees.metadata;
-                echelleImportee = donnees.contenu;
-            } else {
-                // Ancien format direct
-                echelleImportee = donnees;
-            }
-
-            // Afficher badge CC si présent
-            let messageConfirmation = '';
-            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
-                messageConfirmation = `Matériel sous licence ${metadata.licence}\n` +
-                    `Auteur: ${metadata.auteur_original}\n` +
-                    `Créé le: ${metadata.date_creation}\n\n`;
-            }
-
-            // Confirmer le remplacement
-            const confirmation = confirm(
-                messageConfirmation +
-                `ATTENTION : cette action va remplacer l'échelle actuelle.\n\n` +
-                `Veux-tu continuer ?`
-            );
-
-            if (!confirmation) {
-                event.target.value = '';
-                return;
-            }
-
-            // Préserver l'ID original et remplacer les données
-            const echelleMiseAJour = {
-                ...echelleImportee,
-                id: echelleTemplateActuelle.id // Garder l'ID original
-            };
-
-            // Préserver les métadonnées CC si présentes
-            if (metadata) {
-                echelleMiseAJour.metadata_cc = metadata;
-            }
-
-            // ⚠ La collection est relue DANS la file : celle d'avant la
-            // confirmation ne vaut plus rien. security-ok: `echelleImportee` est
-            // déjà passée par la validation d'import en amont.
-            let remplacee = false;
-            await db.modifier(cle('echellesTemplates'), (lues) => {
-                const echelles = lues || [];
-                const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
-                if (index === -1) return undefined;
-
-                // Remplacer dans le tableau
-                echelles[index] = echelleMiseAJour;
-                remplacee = true;
-                return echelles;
-            }, []);
-
-            if (!remplacee) {
-                alert('Échelle introuvable.');
-                event.target.value = '';
-                return;
-            }
-
-            // Recharger l'échelle dans le formulaire
-            await chargerEchellePourModif(echelleTemplateActuelle.id);
-
-            // Rafraîchir la liste
-            afficherEchellesExistantes();
-
-            notifications.succes('Échelle importée et remplacée avec succès');
-
-        } catch (error) {
-            console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
-        } finally {
-            event.target.value = ''; // Reset input
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-/**
  * Importe des échelles depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -1116,6 +1005,8 @@ window.confirmerImportEchelles = async function(donnees) {
         if (!Array.isArray(echellesImportees)) {
             throw new Error('Format invalide: échelles doit être un tableau');
         }
+        // #467 — un nom reçu n'entre pas brut dans la Bibliothèque (import-export.js).
+        echellesImportees = echellesImportees.map(e => window.assainirImportJson(e, 'echelle'));
 
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequeEchelles
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale
@@ -1178,7 +1069,6 @@ window.sauvegarderNomEchelle = sauvegarderNomEchelle;
 // Export/Import avec licence CC
 window.exporterEchelles = exporterEchelles;
 window.exporterEchelleActive = exporterEchelleActive;
-window.importerDansEchelleActive = importerDansEchelleActive;
 window.importerEchelles = importerEchelles;
 
 /* ===============================

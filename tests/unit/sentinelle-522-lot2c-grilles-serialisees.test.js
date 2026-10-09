@@ -310,7 +310,10 @@ const PAR_LA_FILE = {
     // 27 → 28 le 4 septembre 2026 (lot 4, §8 f) : `_deplacerSousCritere` — un sous-critère
     // se déplace aux chevrons, comme un critère. Par la file, comme les autres : c'est
     // ce que cette sentinelle exige, et le compte monte parce qu'un geste est né.
-    'js/grilles.js': 28,
+    // 28 → 27 le 9 octobre 2026 (#467) : `importerDansGrilleActive` est partie, sans
+    // déclencheur (inventaire du lot F, 29 sept. : « code mort ») ; un import JSON
+    // brut de moins.
+    'js/grilles.js': 27,
     'js/cartouches.js': 1,
     // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
     // code mort, zéro consommateur vivant. Son unique site écrivait bien par la

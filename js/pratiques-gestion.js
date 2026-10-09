@@ -2466,6 +2466,8 @@ window.confirmerImportPratiques = async function(donnees) {
         if (!Array.isArray(pratiquesImportees)) {
             throw new Error('Format invalide: les pratiques doivent être un tableau');
         }
+        // #467 — un nom reçu n'entre pas brut dans la Bibliothèque (import-export.js).
+        pratiquesImportees = pratiquesImportees.map(p => window.assainirImportJson(p, 'pratique'));
 
         // ✅ CORRIGÉ (8 janvier 2026) : Ajouter UNIQUEMENT dans bibliothequePratiques
         // L'utilisateur consulte puis choisit lesquelles ajouter à sa barre latérale

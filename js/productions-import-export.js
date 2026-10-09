@@ -168,125 +168,6 @@ async function exporterProductionActive() {
 }
 
 /**
- * Importe un fichier JSON pour remplacer la production actuellement en cours d'édition
- * NOUVEAU (Beta 92): Support métadonnées Creative Commons
- */
-async function importerDansProductionActive(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Récupérer l'ID de la production active
-    const itemActif = document.querySelector('.sidebar-item.active');
-    if (!itemActif) {
-        alert('Aucune production sélectionnée. Veuillez d\'abord sélectionner une production à remplacer.');
-        event.target.value = ''; // Reset input
-        return;
-    }
-
-    const productionId = itemActif.getAttribute('data-id');
-    if (!productionId) {
-        alert('Impossible de déterminer la production à remplacer.');
-        event.target.value = '';
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const donnees = JSON.parse(e.target.result);
-
-            // Valider que c'est bien une production
-            if (!donnees || typeof donnees !== 'object') {
-                alert('Le fichier JSON n\'est pas valide.');
-                event.target.value = '';
-                return;
-            }
-
-            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
-            let productionImportee;
-            let metadata = null;
-
-            if (donnees.contenu) {
-                // Nouveau format avec CC metadata
-                metadata = donnees.metadata;
-                productionImportee = donnees.contenu;
-            } else {
-                // Ancien format direct
-                productionImportee = donnees;
-            }
-
-            // Afficher badge CC si présent
-            let messageConfirmation = '';
-            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
-                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
-                    `👤 Auteur: ${metadata.auteur_original}\n` +
-                    `📅 Créé le: ${metadata.date_creation}\n\n`;
-            }
-
-            // Confirmer le remplacement
-            const confirmation = confirm(
-                messageConfirmation +
-                `ATTENTION : cette action va remplacer la production actuelle.\n\n` +
-                `Veux-tu continuer ?`
-            );
-
-            if (!confirmation) {
-                event.target.value = '';
-                return;
-            }
-
-            // Préserver l'ID original et remplacer les données
-            const productionMiseAJour = {
-                ...productionImportee,
-                id: productionId // Garder l'ID original
-            };
-
-            // Préserver les métadonnées CC si présentes
-            if (metadata) {
-                productionMiseAJour.metadata_cc = metadata;
-            }
-
-            // ⚠ La collection est relue DANS la file : celle d'avant la
-            // confirmation ne vaut plus rien. security-ok: `productionImportee`
-            // est déjà passée par la validation d'import en amont.
-            let remplacee = false;
-            await db.modifier(getCleProductions(), (lues) => {
-                const productions = lues || [];
-                const index = productions.findIndex(p => p.id === productionId);
-                if (index === -1) return undefined;
-
-                // Remplacer dans le tableau
-                productions[index] = productionMiseAJour;
-                remplacee = true;
-                return productions;
-            }, []);
-
-            if (!remplacee) {
-                alert('Production introuvable.');
-                event.target.value = '';
-                return;
-            }
-
-            // Recharger la production dans le formulaire
-            await afficherFormProduction(productionId);
-
-            // Rafraîchir la liste
-            await afficherListeProductions();
-
-            notifications.succes('Production importée et remplacée avec succès');
-
-        } catch (error) {
-            console.error('Erreur lors de l\'import:', error);
-            alert('Erreur lors de la lecture du fichier JSON. Assure-toi qu\'il s\'agit d\'un fichier valide.');
-        } finally {
-            event.target.value = ''; // Reset input
-        }
-    };
-
-    reader.readAsText(file);
-}
-
-/**
  * Importe des productions depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -392,6 +273,8 @@ window.confirmerImportProductions = async function(donnees) {
         if (!Array.isArray(productionsImportees)) {
             throw new Error('Format invalide: productions doit être un tableau');
         }
+        // #467 — un nom reçu n'entre pas brut dans la Bibliothèque (import-export.js).
+        productionsImportees = productionsImportees.map(p => window.assainirImportJson(p, 'production'));
 
         // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
         const grillesExistantes = await db.get(cle('grillesTemplates')) || [];
@@ -682,7 +565,6 @@ function ouvrirFilePickerImportProductions() {
 
 window.exporterProductions = exporterProductions;
 window.exporterProductionActive = exporterProductionActive;
-window.importerDansProductionActive = importerDansProductionActive;
 window.importerProductions = importerProductions;
 // window.confirmerImportProductions est assigné inline ci-dessus (préservation comportementale)
 window.verifierMigrationCategories = verifierMigrationCategories;
