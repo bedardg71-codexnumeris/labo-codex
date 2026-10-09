@@ -42,8 +42,13 @@ const grossierToutes = blocsPointeurGrossier(css);
 describe('menu « Vue » · A — au doigt, 44 px', () => {
     const grossier = blocsPointeurGrossier(css);
 
-    it('le bouton « Vue ▾ » et chaque commande du menu montent à 44 px', () => {
-        expect(grossier).toMatch(/#planif-btn-vue\s*\{[^}]*min-height:\s*44px/);
+    it('chaque commande du menu monte à 44 px ; le bouton « Vue ▾ » prend la hauteur de ses voisins de rangée', () => {
+        // Lot 3 (9 oct. 2026, relecture de Cowork) : à 44 px, « Vue ▾ » dépassait seul
+        // sur la deuxième rangée de l'iPad. Il suit la règle de ses voisins.
+        const voisins = (css.match(/@media \(hover: none\) \{\s*\.planif-btn-palette \{ min-height: (\d+)px;/) || [])[1];
+        expect(voisins).toBeDefined();
+        const vue = (grossier.match(/#planif-btn-vue\s*\{[^}]*min-height:\s*(\d+)px/) || [])[1];
+        expect(vue).toBe(voisins);
         expect(grossier).toMatch(/\.planif-vue-dropdown \.planif-action-item\s*\{[^}]*min-height:\s*44px/);
     });
 
