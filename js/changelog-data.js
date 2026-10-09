@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.193 (chantier de la carte d'alignement, lot 3 : la barre sans icône seule) — titre
+            // et lignes validés par Grégoire le 9 oct. 2026, transmis par la relecture de Cowork,
+            // posés tels quels.
+            version: '1.193',
+            couleur: 'bleu',
+            titre: 'Une barre en mots sur la carte d\'alignement',
+            items: [
+                'Conception&nbsp;› Carte d\'alignement&nbsp;: la barre n\'a plus de bouton à icône seule. «&nbsp;Consulter la bibliothèque&nbsp;», à gauche, est le lieu où l\'on importe, exporte, duplique ou supprime une carte. «&nbsp;Rétablir&nbsp;» suit «&nbsp;Annuler&nbsp;».',
+                'Le menu «&nbsp;Vue&nbsp;» accueille la longue-vue (touche L), maintenant ronde, et le zoom&nbsp;: 100, 75, 50 ou 25&nbsp;%.'
+            ]
+        },
+        {
             // 1.192 (chantier de la carte d'alignement, lots 1 et 2 : menu « Vue », planificateur
             // vertical et dates du trimestre) — titre et lignes validés par Grégoire le 8 oct. 2026
             // à 19 h 33, par Cowork (plans de travail/CONSIGNE-DU-JOUR.md), posés tels quels.
