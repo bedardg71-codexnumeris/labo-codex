@@ -73,15 +73,30 @@ var CLES_GLOBALES_INCLUSES = [
 ];
 
 // Clés à filtrer par DA dans la collecte (passe 2)
-// Forme acceptée : tableau d'entrées avec `da`/`etudiantDA`, OU objet `{[da]: ...}`
+// Forme acceptée : tableau d'entrées avec `da`/`etudiantDA`, OU objet `{[da]: ...}` ;
+// `interventions` et `indicesAssiduite` ont leur forme à elles (voir `_filtrerParDA`).
+// #1021 (9 oct. 2026) : les sept dernières partaient ENTIÈRES (clés inconnues, ou rangées
+// « sans filtre »), avec les élèves des autres groupes. Mesuré au banc :
+// tests/unit/sentinelle-1021-archive-groupe-n-emporte-que-son-groupe.test.js.
 var CLES_FILTRER_PAR_DA = [
     'presences',
     'evaluationsSauvegardees',
+    'evaluationsSauvegardees_backup_v1',
     'interventions',
     'objectifsAssignes',
     'indicesAssiduite',
     'indicesCP',
-    'portfoliosEleves'
+    'portfoliosEleves',
+    'indicesEvaluation',
+    'indicesPatternsRaI',
+    'resultatsUlterieurs',
+    'notesRapport',
+    'confidentielEtudiants',
+    'chronoEvaluations',
+    'etudiantsSuivis',
+    // La trace des élèves retirés (« Supprimer ») : un retiré n'est plus dans aucun groupe,
+    // le filtre ne garde donc rien. Sans groupe connu, sa trace ne voyage pas avec un groupe.
+    'elevesDesinscrits'
 ];
 
 // Clés à NE PAS filtrer (partagées entre groupes du même cours/trimestre)
@@ -95,8 +110,6 @@ var CLES_SANS_FILTRE = [
     'seancesHoraire',
     'horaireSelectionne',
     'noteDePassage',
-    'indicesEvaluation',
-    'indicesPatternsRaI',
     'preferencesUtilisateur',
     // Trimestre-shared (cadre temporel / planification / horaires)
     'cadreCalendrier',
@@ -120,13 +133,135 @@ var CLES_SANS_FILTRE = [
     // etc. — incluons-les sans filtre pour préserver l’état archivé.
     'grillesTemplates',
     'echellesTemplates',
-    'pratiquesConfigurables'
+    'pratiquesConfigurables',
+    // #1021 : partagées par le trimestre, sans élève dedans — elles partaient déjà entières,
+    // comme clés inconnues ; les voici nommées.
+    'modalitesEvaluation',
+    'collectionsProjection',
+    'planification_seances',
+    'preferencesRapport',
+    'dureePeriode',
+    'datesVerrouillees',
+    // Le bilan réflexif : le questionnaire, le parcours et l'auto-réflexion de l'enseignant ;
+    // les résultats sont AGRÉGÉS (nombre de répondants, réponses par question), sans DA.
+    'questionnaireBilan',
+    'parcoursBilan',
+    'autoreflexionBilan',
+    'resultatsBilan',
+    // Les témoins de migrations du trimestre : sans données, ils évitent de rejouer une migration.
+    'migrationRLO_evals_v1_done',
+    'migration_snapshot_v1',
+    'migration_fichierId_supprime_v1'
 ];
 
 // Clés à filtrer par groupeCoursId sur chaque entrée (tableau)
 var CLES_FILTRER_PAR_GC = [
-    'corbeilleFichiers'
+    'corbeilleFichiers',
+    'fichiersTravaux_backup_v1',
+    'corbeilleFichiers_backup_v1'
 ];
+
+// #1021 + #829 : familles composées `<nom><groupeCoursId>` — seule celle du groupe archivé part.
+var PREFIXES_PAR_GC = [
+    'snapshots_',
+    'etudiantsSuivis_gc_',
+    'datesVerrouillees_gc_'
+];
+
+// #1021 : ce qui ne voyage pas. Les états d'écran (une recherche tapée peut porter un nom) et
+// `archivesBundles`, sans écrivain ni forme connue : ils ne partent pas plutôt que partir entiers.
+var CLES_EXCLUES_ARCHIVE = [
+    'presences_date',
+    'presences_groupe',
+    'presences_tri',
+    'recherchePresences',
+    'groupeSelectionne',
+    'pipeline_queue',
+    'archivesBundles'
+];
+
+/**
+ * #1021 — La règle d'une clé du trimestre (sans son préfixe) dans l'archive d'un groupe :
+ * 'eleves', 'copies', 'annotations', 'groupe', 'par-gc', 'suffixe-gc', 'par-da',
+ * 'sans-filtre', 'exclue' ; `null` pour une clé que personne n'a classée. Une clé `null`
+ * ne part pas (elle partait entière avant le lot) : le banc exige une règle pour chaque
+ * nom du registre des trimestres (CLES_NAMESPACEES).
+ */
+function _classerCleTrimestre(nomCourt) {
+    if (nomCourt === 'groupeEtudiants') return 'eleves';
+    if (nomCourt === 'fichiersTravaux') return 'copies';
+    if (nomCourt === 'annotationsTravaux') return 'annotations';
+    if (nomCourt === 'groupesCours') return 'groupe';
+    if (PREFIXES_PAR_GC.some(function(p) { return nomCourt.indexOf(p) === 0; })) return 'suffixe-gc';
+    // Cartouches namespacés par trimestre : globales du trimestre
+    if (nomCourt.indexOf('cartouches_') === 0) return 'sans-filtre';
+    if (CLES_FILTRER_PAR_GC.indexOf(nomCourt) !== -1) return 'par-gc';
+    if (CLES_FILTRER_PAR_DA.indexOf(nomCourt) !== -1) return 'par-da';
+    if (CLES_SANS_FILTRE.indexOf(nomCourt) !== -1) return 'sans-filtre';
+    if (CLES_EXCLUES_ARCHIVE.indexOf(nomCourt) !== -1) return 'exclue';
+    return null;
+}
+
+/** `{ [da]: … }` → la part des DA du groupe, ou null. */
+function _garderLesDA(objet, das) {
+    if (!objet || typeof objet !== 'object' || Array.isArray(objet)) return null;
+    var sortie = {};
+    var garde = false;
+    Object.keys(objet).forEach(function(k) {
+        if (das.has(String(k))) { sortie[k] = objet[k]; garde = true; }
+    });
+    return garde ? sortie : null;
+}
+
+/**
+ * #1021 — La part d'une clé par DA qui revient au groupe, ou null.
+ *   - tableau d'entrées portant `da` ou `etudiantDA` ;
+ *   - `interventions` : une rencontre part si un élève du groupe y était ; ses `etudiants`,
+ *     `notesIndividuelles` et `snapshotAvant` sont réduits au groupe (avant le lot, le filtre
+ *     cherchait un `da` qu'une rencontre n'a pas : AUCUNE ne partait) ;
+ *   - `indicesAssiduite` : `{ sommatif: { [da]: … }, dateCalcul }` (même raison : ne partait pas) ;
+ *   - sinon `{ [da]: … }`.
+ */
+function _filtrerParDA(nomCourt, valeur, das) {
+    if (nomCourt === 'interventions') {
+        if (!Array.isArray(valeur)) return null;
+        var rencontres = valeur.filter(function(it) {
+            return it && Array.isArray(it.etudiants) && it.etudiants.some(function(da) { return das.has(String(da)); });
+        }).map(function(it) {
+            var copie = Object.assign({}, it);
+            copie.etudiants = it.etudiants.filter(function(da) { return das.has(String(da)); });
+            ['notesIndividuelles', 'snapshotAvant'].forEach(function(champ) {
+                if (it[champ] && typeof it[champ] === 'object') copie[champ] = _garderLesDA(it[champ], das) || {};
+            });
+            return copie;
+        });
+        return rencontres.length ? rencontres : null;
+    }
+    if (Array.isArray(valeur)) {
+        var entrees = valeur.filter(function(item) {
+            if (!item) return false;
+            var da = String(item.da || item.etudiantDA || '');
+            return da !== '' && das.has(da);
+        });
+        return entrees.length ? entrees : null;
+    }
+    if (!valeur || typeof valeur !== 'object') return null;
+    if (nomCourt === 'indicesAssiduite') {
+        var indices = {};
+        var eleve = false;
+        Object.keys(valeur).forEach(function(k) {
+            var v = valeur[k];
+            if (v && typeof v === 'object' && !Array.isArray(v)) {
+                var part = _garderLesDA(v, das);
+                if (part) { indices[k] = part; eleve = true; }
+            } else {
+                indices[k] = v; // dateCalcul
+            }
+        });
+        return eleve ? indices : null;
+    }
+    return _garderLesDA(valeur, das);
+}
 
 /* ===============================
    FSAPI — File System Access API (Chrome/Edge)
@@ -670,17 +805,19 @@ async function _collecterDonnees(trimestre, gc, onProg) {
         var valeur = await db.get(cleComplete, null);
         if (valeur === null || valeur === undefined) continue;
 
-        // Snapshots : namespace par groupe-cours dans le suffixe de clé
-        if (nomCourt.indexOf('snapshots_') === 0) {
-            var suffixe = nomCourt.substring('snapshots_'.length);
-            if (suffixe === groupeCoursId) {
+        var classe = _classerCleTrimestre(nomCourt);
+
+        // #1021 + #829 : `<nom><groupeCoursId>` — seule la famille du groupe archivé part.
+        if (classe === 'suffixe-gc') {
+            var prefixeGc = PREFIXES_PAR_GC.filter(function(p) { return nomCourt.indexOf(p) === 0; })[0];
+            if (nomCourt.substring(prefixeGc.length) === groupeCoursId) {
                 donnees[cleComplete] = valeur;
             }
             continue;
         }
 
         // Clés à filtrer par groupeCoursId (tableau d'entrées)
-        if (CLES_FILTRER_PAR_GC.indexOf(nomCourt) !== -1) {
+        if (classe === 'par-gc') {
             if (Array.isArray(valeur)) {
                 var entreesGc = valeur.filter(function(item) {
                     return item && item.groupeCoursId === groupeCoursId;
@@ -692,7 +829,7 @@ async function _collecterDonnees(trimestre, gc, onProg) {
 
         // annotationsTravaux : filtrage par fichierId (les fichiers de ce groupe)
         // Doit s'exécuter APRÈS le traitement de fichiersTravaux pour avoir la liste.
-        if (nomCourt === 'annotationsTravaux') {
+        if (classe === 'annotations') {
             if (Array.isArray(valeur)) {
                 var fichiersFiltresPourAnnotations = donnees[prefixe + 'fichiersTravaux'] || [];
                 var idsFichiersDuGroupe = new Set(
@@ -712,39 +849,20 @@ async function _collecterDonnees(trimestre, gc, onProg) {
         }
 
         // Clés à filtrer par DA
-        if (CLES_FILTRER_PAR_DA.indexOf(nomCourt) !== -1) {
-            if (Array.isArray(valeur)) {
-                var entreesFiltrees = valeur.filter(function(item) {
-                    if (!item) return false;
-                    var da = String(item.da || item.etudiantDA || '');
-                    return da !== '' && dasDuGroupe.has(da);
-                });
-                if (entreesFiltrees.length > 0) {
-                    donnees[cleComplete] = entreesFiltrees;
-                }
-            } else if (valeur && typeof valeur === 'object') {
-                // Forme objet indexé par DA : { '1234567': {...} }
-                var sousObjet = {};
-                var conserve = false;
-                Object.keys(valeur).forEach(function(k) {
-                    if (dasDuGroupe.has(String(k))) {
-                        sousObjet[k] = valeur[k];
-                        conserve = true;
-                    }
-                });
-                if (conserve) donnees[cleComplete] = sousObjet;
-            }
+        if (classe === 'par-da') {
+            var partDuGroupe = _filtrerParDA(nomCourt, valeur, dasDuGroupe);
+            if (partDuGroupe) donnees[cleComplete] = partDuGroupe;
             continue;
         }
 
         // Clés sans filtre (partagées trimestre)
-        if (CLES_SANS_FILTRE.indexOf(nomCourt) !== -1) {
+        if (classe === 'sans-filtre') {
             donnees[cleComplete] = valeur;
             continue;
         }
 
         // groupesCours : filtrer pour ne garder que l'entité du groupe ciblé
-        if (nomCourt === 'groupesCours') {
+        if (classe === 'groupe') {
             if (Array.isArray(valeur)) {
                 var entiteGc = valeur.filter(function(g) { return g && g.id === groupeCoursId; });
                 if (entiteGc.length > 0) donnees[cleComplete] = entiteGc;
@@ -752,19 +870,16 @@ async function _collecterDonnees(trimestre, gc, onProg) {
             continue;
         }
 
-        // Cartouches namespacés par trimestre archivé : laisser passer (globales du trimestre)
-        if (nomCourt.indexOf('cartouches_') === 0) {
-            donnees[cleComplete] = valeur;
-            continue;
-        }
+        if (classe === 'exclue') continue;
 
-        // Inconnue : inclure sans filtre + warning
-        donnees[cleComplete] = valeur;
+        // #1021 : une clé que personne n'a classée NE PART PAS (elle partait entière, avec les
+        // élèves des autres groupes). Elle est dite ; le banc exige une règle pour chaque nom
+        // du registre des trimestres.
         clesInconnues.push(nomCourt);
     }
 
     if (clesInconnues.length > 0) {
-        console.warn('[Archives] Clés trimestre non reconnues, incluses sans filtrage :',
+        console.warn('[Archives] Clés trimestre non classées, laissées hors de l\'archive du groupe :',
             clesInconnues.join(', '));
     }
 
@@ -1893,6 +2008,8 @@ window.Reserve = {
     fusionnerManifesteRecu: _fusionnerManifesteRecu,
     purgerEntreeManifeste: _purgerEntreeManifesteLocal,
     hydrateDepuisFSAPI: _hydrateManifesteDepuisFSAPI,
+    // #1021 : la règle de chaque clé du trimestre (le banc la demande pour tout le registre).
+    classerCleTrimestre: _classerCleTrimestre,
     // E1 (#1022) : l'archive d'un trimestre entier (reserve-trimestre.js) passe par le même
     // dépôt et les mêmes empreintes.
     deposerArchive: _deposerArchive,
