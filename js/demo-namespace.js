@@ -28,6 +28,13 @@ const CLE_VERSION = 'demo-version-installee';
 // ============================================
 // CARTE MENTALE DÉMO (alignement pédagogique)
 // Écrite dans demo_planification_mindmap par peuplerNamespace.
+//
+// #970 (9 oct. 2026) — la carte enseigne le geste d'aujourd'hui : chaque leçon
+// porte un objectif, l'activité le sert et l'évaluation le COCHE
+// (`metadata.objectifsServis`). Les deux liens « se vérifie par » vers une
+// évaluation sont retirés : ce geste n'existe plus depuis #964. Les textes des
+// objectifs reprennent l'idée maîtresse qui se concrétise dans chaque leçon.
+// Une démo déjà installée garde l'ancienne carte jusqu'au prochain pack.
 // ============================================
 
 const CARTE_DEMO_ALIGNEMENT = {
@@ -60,18 +67,18 @@ const CARTE_DEMO_ALIGNEMENT = {
                 { id: 'planif-noeud_19', type: 'idee-maitresse', titre: 'Appliquer différentes stratégies de lecture', description: '', x: -1039.9693420352505, y: 51.23377180784709, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
                 { id: 'planif-noeud_20', type: 'idee-maitresse', titre: 'Mettre en œuvre une méthode d’annotation', description: '', x: -1750.4115500096973, y: 52.816054087974415, parent: null, enfants: [], metadata: { niveauCognitif: 'appliquer' }, cloneSourceId: null },
                 { id: 'planif-noeud_11', type: 'sequence', titre: 'Semaine 1 (introduction)', description: 'description\n', x: -1626.3487399504672, y: 197.32957752851541, parent: null, enfants: ['planif-noeud_10', 'planif-noeud_9'], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_9', type: 'lecon', titre: 'Séance 1 (2 périodes)', description: '', x: -1596.3487399504672, y: 272.3295775285154, parent: 'planif-noeud_11', enfants: ['planif-noeud_7', 'planif-noeud_26', 'planif-noeud_17', 'planif-noeud_12', 'planif-noeud_24'], metadata: { enseignementExplicite: false }, cloneSourceId: null },
-                { id: 'planif-noeud_10', type: 'lecon', titre: 'Séance 2 (2 périodes)', description: '', x: -1284.9499182684067, y: 278.46050312184747, parent: 'planif-noeud_11', enfants: ['planif-noeud_8', 'planif-noeud_18', 'planif-noeud_3', 'planif-noeud_13', 'planif-noeud_22'], metadata: {}, cloneSourceId: null },
+                { id: 'planif-noeud_9', type: 'lecon', titre: 'Séance 1 (2 périodes)', description: '', x: -1596.3487399504672, y: 272.3295775285154, parent: 'planif-noeud_11', enfants: ['planif-noeud_7', 'planif-noeud_26', 'planif-noeud_17', 'planif-noeud_12', 'planif-noeud_24'], metadata: { enseignementExplicite: false, objectifs: [{ id: 'obj_demo_1', texte: 'Mettre en œuvre une méthode d’annotation' }] }, cloneSourceId: null },
+                { id: 'planif-noeud_10', type: 'lecon', titre: 'Séance 2 (2 périodes)', description: '', x: -1284.9499182684067, y: 278.46050312184747, parent: 'planif-noeud_11', enfants: ['planif-noeud_8', 'planif-noeud_18', 'planif-noeud_3', 'planif-noeud_13', 'planif-noeud_22'], metadata: { objectifs: [{ id: 'obj_demo_2', texte: 'Appliquer différentes stratégies de lecture' }] }, cloneSourceId: null },
                 { id: 'planif-noeud_7', type: 'factuelle', titre: 'Distinguer différentes postures de lecture', description: '', x: -1566.3487399504672, y: 347.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
                 { id: 'planif-noeud_26', type: 'procedurale', titre: 'Appliquer une méthode d’annotation efficace', description: '', x: -1566.3487399504672, y: 492.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
                 { id: 'planif-noeud_17', type: 'procedurale', titre: 'Noter ses réactions spontanées', description: '', x: -1558.3487399504672, y: 637.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_12', type: 'activite', titre: 'Analyser «Pour que nous puissions vivre»', description: '', x: -1566.3487399504672, y: 762.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_24', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1526.8487399504672, y: 907.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { visee: 'formative' }, cloneSourceId: null },
+                { id: 'planif-noeud_12', type: 'activite', titre: 'Analyser «Pour que nous puissions vivre»', description: '', x: -1566.3487399504672, y: 762.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { objectifsServis: ['obj_demo_1'] }, cloneSourceId: null },
+                { id: 'planif-noeud_24', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1526.8487399504672, y: 907.3295775285154, parent: 'planif-noeud_9', enfants: [], metadata: { visee: 'formative', objectifsServis: ['obj_demo_1'] }, cloneSourceId: null },
                 { id: 'planif-noeud_8', type: 'factuelle', titre: 'Reconnaitre différents procédés littéraires (insistance et opposition)', description: '', x: -1254.9499182684067, y: 353.46050312184747, parent: 'planif-noeud_10', enfants: [], metadata: { prealable: true }, cloneSourceId: null },
                 { id: 'planif-noeud_18', type: 'procedurale', titre: 'Observer le paratexte', description: '', x: -1215.4499182684067, y: 518.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
                 { id: 'planif-noeud_3', type: 'procedurale', titre: 'Observer les motifs et les contrastes', description: '', x: -1254.9499182684067, y: 643.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_13', type: 'activite', titre: 'Annoter le texte «Marine»', description: '', x: -1229.4499182684067, y: 788.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: {}, cloneSourceId: null },
-                { id: 'planif-noeud_22', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1215.4499182684067, y: 913.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: { visee: 'formative' }, cloneSourceId: null }
+                { id: 'planif-noeud_13', type: 'activite', titre: 'Annoter le texte «Marine»', description: '', x: -1229.4499182684067, y: 788.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: { objectifsServis: ['obj_demo_2'] }, cloneSourceId: null },
+                { id: 'planif-noeud_22', type: 'evaluation', titre: 'Rétroaction formative', description: '', x: -1215.4499182684067, y: 913.4605031218475, parent: 'planif-noeud_10', enfants: [], metadata: { visee: 'formative', objectifsServis: ['obj_demo_2'] }, cloneSourceId: null }
             ],
             liens: [
                 { id: 'planif-lien_38', source: 'planif-noeud_1', cible: 'planif-noeud_2', type: 'se_decline_en' },
@@ -83,11 +90,9 @@ const CARTE_DEMO_ALIGNEMENT = {
                 { id: 'planif-lien_43', source: 'planif-noeud_7', cible: 'planif-noeud_26', type: 'complete' },
                 { id: 'planif-lien_42', source: 'planif-noeud_26', cible: 'planif-noeud_17', type: 'conduit_a' },
                 { id: 'planif-lien_32', source: 'planif-noeud_17', cible: 'planif-noeud_12', type: 's_acquiert_par' },
-                { id: 'planif-lien_33', source: 'planif-noeud_12', cible: 'planif-noeud_24', type: 'se_verifie_par' },
                 { id: 'planif-lien_45', source: 'planif-noeud_8', cible: 'planif-noeud_18', type: 'complete' },
                 { id: 'planif-lien_35', source: 'planif-noeud_18', cible: 'planif-noeud_3', type: 'complete' },
-                { id: 'planif-lien_44', source: 'planif-noeud_3', cible: 'planif-noeud_13', type: 's_acquiert_par' },
-                { id: 'planif-lien_37', source: 'planif-noeud_13', cible: 'planif-noeud_22', type: 'se_verifie_par' }
+                { id: 'planif-lien_44', source: 'planif-noeud_3', cible: 'planif-noeud_13', type: 's_acquiert_par' }
             ]
         }
     }

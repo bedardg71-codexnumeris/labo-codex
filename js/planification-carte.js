@@ -214,7 +214,17 @@ function objectifsServisPar(n) {
  * ⚠ Les blocs NON-évaluation gardent `objectifsServisPar` et sa règle : un bloc
  * sert les objectifs de SA leçon.
  */
+// #971 (9 oct. 2026) — ce que la passe en cours de `mettreAJourTousLesBadges`
+// a déjà bâti. Chaque évaluation redemandait l'index des objectifs (pastille
+// #965, badge « Vérifie N objectifs ») et la liste des blocs qui servent un
+// objectif (pastille #965) : une passe les bâtissait autant de fois qu'il y a
+// d'évaluations. Pendant la passe, rien n'écrit dans les objectifs ni dans les
+// blocs : un seul exemplaire sert à toutes. null hors passe, et chaque appel
+// rebâtit, comme avant.
+var _passeBadges = null;
+
 function indexObjectifsCarte() {
+    if (_passeBadges && _passeBadges.index) return _passeBadges.index;
     var index = {};
     for (var entryIO of etat.noeuds) {
         var n = entryIO[1];
@@ -1756,12 +1766,7 @@ function evaluerPastilleEvaluation(evaluation) {
     if (objectifs.length === 0) return { etat: 'aucun', message: libelle('aucun'), inconclusif: false };
 
     var leconEval = leconParenteDe(evaluation);
-    var servants = [];
-    for (var entryPE of etat.noeuds) {
-        var n = entryPE[1];
-        if (n.type === 'evaluation' || TYPES_SERVANTS_OBJECTIF.indexOf(n.type) === -1) continue;
-        servants.push({ noeud: n, objectifs: objectifsServisPar(n) });
-    }
+    var servants = blocsServantsObjectifs();
 
     var inconclusif = false;
     // 'avant' | 'apres' | 'inconnu' pour un bloc servant, relativement à l'évaluation.
@@ -1795,14 +1800,29 @@ function evaluerPastilleEvaluation(evaluation) {
     return { etat: pire, message: libelle(pire), inconclusif: inconclusif };
 }
 
+/** Les blocs (hors évaluation) qui peuvent servir un objectif, avec ceux qu'ils servent. Un exemplaire par passe (#971). */
+function blocsServantsObjectifs() {
+    if (_passeBadges && _passeBadges.servants) return _passeBadges.servants;
+    var servants = [];
+    for (var entryPE of etat.noeuds) {
+        var n = entryPE[1];
+        if (n.type === 'evaluation' || TYPES_SERVANTS_OBJECTIF.indexOf(n.type) === -1) continue;
+        servants.push({ noeud: n, objectifs: objectifsServisPar(n) });
+    }
+    if (_passeBadges) _passeBadges.servants = servants;
+    return servants;
+}
+
 /** La pastille, rendue dans l'en-tête du bloc Évaluation (même facture que celle d'un objectif). */
 function pastilleEvaluationHTML(n) {
     if (!n || n.type !== 'evaluation') return '';
     var res = evaluerPastilleEvaluation(n);
     // security-ok: res.etat vaut l'une des cinq clés littérales de
     // SYMBOLES_PASTILLE_EVALUATION ; le message est un littéral de ce fichier.
+    // #972 — `role="img"` : sans rôle, un lecteur d'écran ignore l'aria-label
+    // d'un span générique, et la pastille ne dit rien.
     return '<span class="planif-obj-pastille planif-eval-pastille planif-eval-pastille--' + res.etat + '"' +
-           ' title="' + echapperHtml(res.message) + '" aria-label="' + echapperHtml(res.message) + '">' +
+           ' role="img" title="' + echapperHtml(res.message) + '" aria-label="' + echapperHtml(res.message) + '">' +
            SYMBOLES_PASTILLE_EVALUATION[res.etat] + '</span>';
 }
 
@@ -2514,8 +2534,9 @@ function pastilleObjectifHTML(lecon, objectifId) {
     // security-ok: res.etat ne peut valoir que 'invitation', 'servi' ou
     // 'verifie' — trois littéraux rendus par evaluerObjectif, jamais de donnée
     // utilisateur. L'id et le message, eux, sont échappés.
+    // #972 — `role="img"`, pour que l'aria-label soit lu (voir pastilleEvaluationHTML).
     return '<span class="planif-obj-pastille planif-obj-pastille--' + res.etat + '"' +
-           ' data-obj-id="' + echapperHtml(objectifId) + '"' +
+           ' role="img" data-obj-id="' + echapperHtml(objectifId) + '"' +
            ' title="' + echapperHtml(res.message) + '"' +
            ' aria-label="' + echapperHtml(res.message) + '">' +
            SYMBOLES_PASTILLE_OBJECTIF[res.etat] + '</span>';
@@ -2765,8 +2786,14 @@ function mettreAJourBadge(donnees) {
 }
 
 function mettreAJourTousLesBadges() {
-    for (var entry of etat.noeuds) {
-        mettreAJourBadge(entry[1]);
+    _passeBadges = {};
+    try {
+        _passeBadges.index = indexObjectifsCarte();
+        for (var entry of etat.noeuds) {
+            mettreAJourBadge(entry[1]);
+        }
+    } finally {
+        _passeBadges = null;
     }
 }
 
@@ -3146,9 +3173,14 @@ function ouvrirPanneau(id) {
     // Affichée seulement quand la leçon PORTE des objectifs : sans eux il n'y a
     // aucune pastille à l'écran, et la légende serait du bruit.
     if (donnees.type === 'lecon' && objectifsDeLecon(donnees).length > 0) {
-        extra.innerHTML +=
+        // ⚠ PAS `extra.innerHTML +=` (9 oct. 2026, lot 4) : il re-sérialise le
+        // panneau et détruisait l'écouteur du champ « Semaine » posé plus haut.
+        // Toute leçon À OBJECTIFS avait un champ Semaine inerte dans
+        // l'Inspecteur ; la carte démo, qui en porte depuis #970, l'a montré.
+        // security-ok: littéraux de ce fichier (légende des pastilles).
+        extra.insertAdjacentHTML('beforeend',
             '<label>Pastilles des objectifs</label>' +
-            legendePastillesObjectifHTML();
+            legendePastillesObjectifHTML());
     }
     // #965 — même raison pour la pastille d'une évaluation : toujours affichée,
     // puisque l'évaluation porte toujours sa pastille (« ! » sans objectif).

@@ -60,6 +60,10 @@ async function choisirSeanceEnTete(page, rang) {
 test.describe('#695 · la date réelle dans l’Inspecteur', () => {
     test('sans cours rattaché, la ligne le dit', async ({ page }) => {
         await ouvrirCarteRattachee(page);
+        // Lot 4 (9 oct.) — la leçon porte des objectifs (#970) : c'est le cas où
+        // la légende des pastilles détruisait l'écouteur du champ Semaine.
+        expect(await page.evaluate((id) => window.planificationCarte.objectifsDeLecon(
+            window.planificationCarte.etat.noeuds.get(id)).length, LECON)).toBeGreaterThan(0);
         await page.locator('#' + LECON).dispatchEvent('dblclick');
         await page.locator('#planif-panneau-semaine').fill('3');
         await choisirSeanceEnTete(page, 1);
