@@ -20369,10 +20369,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: color-mix(in srgb, var(--planif-couleur-selection) 12%, #ffffff);
     color: var(--texte-principal);
 }
-/* iPad : la barre d'outils est tactile — cible de 44 px de haut sans deformer
-   la rangee, en elargissant la zone cliquable sous le bouton. */
+/* iPad : la barre d'outils est tactile — le padding s'elargit au doigt ; la
+   hauteur (44 px, toute la barre) est posee plus bas, avec le menu « Vue ». */
 @media (hover: none) {
-    .planif-btn-palette { min-height: 32px; padding: 0 12px; }
+    .planif-btn-palette { padding: 0 12px; }
 }
 
 /* ── RECHERCHE DANS LA CARTE (15 aout 2026) ─────────────────────────────
@@ -22445,12 +22445,32 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     border-color: rgba(3, 46, 92, 0.2);
 }
 /* Au doigt (iPad) : chaque commande du menu monte à 44 px ; les pastilles y
-   montent déjà (#568). Le bouton « Vue ▾ », lui, prend la hauteur de ses
-   voisins de rangée (Nœuds, Planificateur, Inspecteur, Guide : 32 px, règle
-   `.planif-btn-palette` plus haut) — relecture de Cowork du lot 3 (9 oct.
-   2026) : à 44 px, il dépassait seul sur la deuxième rangée de l'iPad. */
+   montent déjà (#568). Et TOUTE la barre monte à 44 px, à la même hauteur
+   (relecture de Cowork du lot 3, 9 oct. 2026 : règle du projet, zones de
+   toucher d'au moins 44 px). Avant : « Vue ▾ » à 44 px dépassait seul ses
+   voisins à 32 px, et « Actions », « Annuler », « Rétablir » restaient à 28 px.
+   Le bouton de la Bibliothèque est un `.btn`, déjà à 44 px (T-A10). */
 @media (pointer: coarse) {
-    #planif-btn-vue { min-height: 32px; }
+    #planif-btn-vue,
+    .planif-header-toolbar .planif-btn-palette,
+    #planif-btn-actions,
+    #planif-btn-annuler,
+    #planif-btn-retablir { min-height: 44px; }
+    /* La liste des cartes : un <select> natif ignore `min-height` sous WebKit
+       (21 px mesurés). Hauteur fixe, apparence retirée, chevron redessiné —
+       patron de `.select-nav-mobile`. Deux id (2,0,0) : la règle
+       `.mode-clair #planif-selecteur-cartes select` (1,1,1) pose `background`
+       en raccourci et effacerait le chevron. */
+    #planif-selecteur-cartes #planif-liste-cartes {
+        height: 44px;
+        padding: 0 30px 0 10px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
     .planif-vue-dropdown .planif-action-item { min-height: 44px; }
     .planif-raccourcis-panel-replier,
     .planif-raccourcis-panel-fermer { width: 44px; height: 44px; }
