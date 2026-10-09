@@ -1906,7 +1906,7 @@ var GUIDE_PAGES = [
                 '<li>Le <span class="guide-glyphe guide-glyphe--warning">\u26A0</span> sur une compétence ou une idée maîtresse\u00a0: aucune évaluation ne vérifie encore un objectif qui s\u2019y rattache.</li>' +
                 '<li>Les <strong>pastilles</strong> des objectifs et des évaluations\u00a0: elles disent si ce que tu enseignes est évalué, et si ce que tu évalues a été enseigné avant (pages 5 et 8).</li>' +
             '</ul>' +
-            '<p>Ce guide te propose 8\u00a0repères pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment depuis la palette.</p>' +
+            '<p>Ce guide te propose 8\u00a0repères pour construire ta carte et exporter ton plan. Tu peux le consulter à tout moment par le bouton «\u00a0Guide\u00a0» de la barre.</p>' +
             '<p class="planif-guide-ref"><strong>Références\u00a0:</strong><br>' +
                 'Anderson, L.\u00a0W. (2026). <em>Curriculum alignment</em> (Educational Practices Series, no\u00a037). International Academy of Education\u00a0; Bureau international d\u2019éducation de l\u2019UNESCO.<br>' +
                 'Biggs, J. (2014). Constructive alignment in university teaching. <em>HERDSA Review of Higher Education, 1</em>, 5-22.<br>' +
