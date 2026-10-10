@@ -15,6 +15,19 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 10 OCTOBRE 2026 À 17 h 22 : 1.197.0 (mesurée chez Netlify sur `16e3cbe5` ; verdict complet vert) — RIEN NE SE PERD EN SILENCE**
+
+**Ce que tu verras** :
+- Rouvrir une pratique de notation dans l'assistant, puis l'enregistrer, ne lui fait plus perdre ce que tu avais réglé au formulaire : ses jetons, son réglage « notes finales », l'affichage de la note en lettre (#938).
+- Deux gestes faits coup sur coup ne s'effacent plus l'un l'autre : sur les cours (retirer, ajouter, importer, déposer), la copie d'une cartouche d'un autre trimestre, les métadonnées d'une ressource, la capture d'une séance, le réimport de tampons, la fusion des copies d'un codex (#522).
+- Ce qu'on supprime disparaît aussitôt de l'écran, sans attendre un rechargement (#845).
+
+**Vérifié comment** : des bancs seulement — la vraie base de l'application sous un stockage simulé qui copie chaque écriture : pratique créée par l'assistant, réglée au formulaire, rouverte par l'assistant, rien de perdu dans les quatre familles ; deux gestes lancés ensemble, les deux effets restent ; une grosse clé supprimée n'est plus lue. Chaque correctif retiré fait échouer son banc. Verdict complet au navigateur vert sur le commit publié. **Pas vérifié** : sur tes vraies pratiques (le geste ci-dessous).
+
+**Tes données** : rien n'est réécrit. Une pratique rééditée par l'assistant avant ce lot a pu perdre ses jetons ou son réglage « notes finales » ; elle ne les retrouve pas seule. **Ton geste, une fois** : Conception › Pratiques de notation, la carte de ta pratique active doit afficher « N jetons » si tu en avais réglé, et « notes finalisées » si tu étais passé en notes finales ; s'il en manque une, remets-la au formulaire.
+
+**Ce qui reste** : côté sessions, sans toi : onze gestes plus rares (import sélectif, Réserve) ne sont pas encore protégés contre deux clics rapides (#522).
+
 ✅ **EN LIGNE LE 10 OCTOBRE 2026 : 1.195.0 puis 1.196.0 (la dernière publiée à 14 h 13, mesurée chez Netlify sur `9588f5b2` ; verdict complet vert sur chacune) — CE QU'ON IMPORTE D'UNE ANCIENNE SAUVEGARDE ARRIVE ENTIER ET BIEN RANGÉ ; CE QU'ON REÇOIT D'UN COLLÈGUE RESTE DU TEXTE**
 
 **Ce que tu verras** :
