@@ -26,8 +26,8 @@ _SOURCE_OBSERVABLE="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/.
 
 # Construit le motif grep depuis la liste de la CI. Une entrée qui finit par
 # `/` couvre le dossier ; sinon c'est un fichier exact (`chemin == entrée`).
-# Depuis le 20 sept. 2026, la CI ne porte plus de copie de cette règle : sa
-# garde (scripts/ci-garde-inutilite.sh) appelle `lot_observable` elle aussi.
+# La CI ne porte pas de copie de cette règle. (Sa garde de nuit, qui appelait
+# `lot_observable` elle aussi, est retirée avec le passage de nuit : #1048, 10 oct. 2026.)
 _motif_observable() {
     local liste entree echappee motif=''
     liste=$(sed -n 's/^[[:space:]]*OBSERVABLE:[[:space:]]*"\(.*\)"[[:space:]]*$/\1/p' \

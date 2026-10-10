@@ -2,8 +2,9 @@
 #
 # Trigger : push sur main + toute pull request vers main — SAUF quand le commit
 # ne touche que de la documentation (voir `paths-ignore` et son cliquet) : c'est
-# la voie de VITEST. Depuis le 20 sept. 2026 (point 7), PLAYWRIGHT a la sienne :
-# une fois par jour (`schedule`) et à la demande (`workflow_dispatch`).
+# la voie de VITEST. Depuis le 20 sept. 2026 (point 7), PLAYWRIGHT a la sienne ;
+# depuis le 10 oct. 2026 (point 8), elle n'est plus qu'à la demande
+# (`workflow_dispatch`) : le passage de nuit (`schedule`) est retiré.
 # Runner : ubuntu-latest.
 # Note : Playwright WebKit Linux ≠ Safari macOS — la validation device-
 # spécifique (Safari Mac, iPad Air) reste manuelle locale par Grégoire.
@@ -154,6 +155,26 @@
 #        sur le commit du push, mais sur le `main` de 4 h. Un écart entre le SHA
 #        jugé et HEAD est NORMAL (rituel d'ouverture, §2.1).
 #
+# (8) 10 OCT. 2026 — LE PASSAGE DE NUIT EST RETIRÉ ; PLAYWRIGHT NE PART PLUS
+#     QU'À LA DEMANDE. Décision de Grégoire (12 h 43, #1048), sur mesure : les
+#     huit derniers runs planifiés (3 au 10 oct.) ont tous été coupés à 60 min
+#     par `timeout-minutes` (job Playwright, 60 min pile à chaque fois), et le
+#     cron de 8 h UTC partait avec 5 à 9 h de retard. Le job ne jugeait plus
+#     rien et consommait une heure de minutes par jour ; le plafond avait déjà
+#     été relevé deux fois (15 → 40 → 60, points 4a et 6) : on ne le relève pas
+#     une troisième. Le garde-fou réel est le verdict complet du Mac avant
+#     chaque push de code (`scripts/pousser.sh`).
+#     a) Retirés : le déclencheur `schedule` ; le job `garde` et son script
+#        (scripts/ci-garde-inutilite.sh) — sur `workflow_dispatch` il répondait
+#        toujours « oui », il ne triait que les nuits ; la condition
+#        `if: github.event_name != 'schedule'` de `vitest`, devenue sans objet.
+#     b) Gardé : `workflow_dispatch` (`gh workflow run tests.yml`), qui lance
+#        Vitest et Playwright ; `timeout-minutes: 60` tel quel ; la liste
+#        `OBSERVABLE`, qui a encore deux lecteurs (lot-observable.sh, le cliquet).
+#     c) Ce qui ne s'y lit plus : un run GitHub sans job Playwright n'est ni un
+#        manque ni un succès — le verdict au navigateur est celui du Mac
+#        (`scripts/.verdict-playwright.json`, rituel d'ouverture §2.1).
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -199,23 +220,20 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: *doc
-  # Point (7) : la voie de Playwright. UTC — 4 h à Toronto l'été, 3 h l'hiver.
-  schedule:
-    - cron: '0 8 * * *'
+  # Point (8) : la seule voie de Playwright. Plus de `schedule` depuis le 10 oct. 2026.
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Par ÉVÉNEMENT (point 7e) : un push ne doit pas annuler le run planifié.
+# Par ÉVÉNEMENT (point 7e) : un push ne doit pas annuler un run lancé à la demande.
 concurrency:
   group: tests-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 env:
   # ⚠ UNE SEULE SOURCE DE VÉRITÉ, trois lecteurs (point 7d) :
-  # scripts/lot-observable.sh — donc `pousser.sh`, le hook pre-push et la garde
-  # du job `garde` —, et le cliquet tests/unit/sentinelle-ci-paths-ignore
+  # scripts/lot-observable.sh — donc `pousser.sh` et le hook pre-push —, et le cliquet tests/unit/sentinelle-ci-paths-ignore
   # (bloc 2), qui vérifie qu'aucun spec Playwright ne LIT un chemin absent
   # d'ici. Une entrée finissant par `/` couvre le dossier ; sinon, c'est un
   # fichier exact. Playwright ouvre index.html en file:// : tout ce
@@ -226,10 +244,8 @@ env:
 
 jobs:
   # ── Job 1 : Vitest, sur CHAQUE push et pull request (et à la demande). ──
-  # Pas sur le `schedule` : le push l'a déjà jugé (point 7a).
   vitest:
     name: Vitest
-    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -252,65 +268,11 @@ jobs:
         working-directory: tests
         run: npm run test:unit
 
-  # ── Job 2 : la garde d'inutilité (point 7c). Quelques secondes, rien d'installé. ──
-  garde:
-    name: Garde (Playwright doit-il tourner ?)
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      actions: read
-    outputs:
-      juger: ${{ steps.garde.outputs.juger }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # L'historique complet : le diff doit pouvoir atteindre le dernier
-          # SHA jugé, qui peut être plusieurs jours derrière.
-          fetch-depth: 0
-
-      - name: Rien d'observable n'a bougé ? Alors on ne paie pas la suite
-        id: garde
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENEMENT: ${{ github.event_name }}
-        run: |
-          set -uo pipefail
-          # Le dernier run planifié qui a CONCLU, celui-ci exclu. `gh` muet ou
-          # en échec : DERNIER reste vide, et le script juge (dans le doute).
-          DERNIER=$(gh run list --workflow tests.yml --event schedule --limit 30 \
-            --json databaseId,headSha,conclusion \
-            --jq '[.[] | select(.databaseId != ${{ github.run_id }}) | select(.conclusion == "success" or .conclusion == "failure")][0].headSha // ""' \
-            2>/dev/null) || DERNIER=""
-          export DERNIER
-          IFS=$'\t' read -r juger raison < <(bash scripts/ci-garde-inutilite.sh)
-          [ "$juger" = "non" ] || juger=oui
-          echo "juger=$juger" >> "$GITHUB_OUTPUT"
-          # Le texte de repli vit dans une variable : écrit dans `${raison:-…}`, son
-          # apostrophe ouvrait une chaîne que bash ne refermait jamais (« unexpected
-          # EOF », run planifié du 21 sept. 2026 : garde en échec, Vitest et
-          # Playwright sautés).
-          REPLI="la garde n'a rien rendu : on juge"
-          {
-            echo "## Playwright : ${juger^^}"
-            echo ""
-            echo "${raison:-$REPLI}"
-            echo ""
-            echo "Commit : \`${GITHUB_SHA:0:8}\` · dernier SHA jugé par un run planifié : \`${DERNIER:0:8}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "Playwright : $juger — ${raison:-}"
-
-  # ── Job 3 : Playwright, une fois par jour et à la demande — JAMAIS sur un push. ──
-  # ⚠ Sauté = `skipped`, jamais `success`. C'est ce que le rituel d'ouverture lit.
-  # Sur un push, `garde` est sauté, donc celui-ci aussi.
+  # ── Job 2 : Playwright, à la demande seulement — JAMAIS sur un push (point 8). ──
+  # ⚠ Sauté = `skipped`, jamais `success`. Sur un push, il est sauté.
   playwright:
     name: Playwright (WebKit)
-    needs: garde
-    if: needs.garde.outputs.juger == 'oui'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     # 2 sept. 2026 : 15 -> 40 (point 4a). 20 sept. 2026 : 40 -> 60 (point 6),
     # sur mesure — 29 jobs coupés à 40 min en six jours. Le plafond se DÉPLACE,
