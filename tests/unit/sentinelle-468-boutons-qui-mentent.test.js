@@ -505,7 +505,13 @@ function chargerCours(store, journal) {
         get: async (k) => (k in store ? store[k] : null),
         getSync: (k, d) => (k in store ? store[k] : (d !== undefined ? d : null)),
         set: async (k, v) => { store[k] = v; },
-        setSync: (k, v) => { store[k] = v; }
+        setSync: (k, v) => { store[k] = v; },
+        // #522 lot 5 : le site écrit par `db.modifier` ; même contrat (un `undefined` n'écrit rien).
+        modifier: async (k, mutateur, defaut = null) => {
+            const r = await mutateur(k in store ? store[k] : defaut);
+            if (r !== undefined) store[k] = r;
+            return r;
+        }
     };
     const lien = { href: '', download: '', click: () => { journal.telechargements.push(lien.download); } };
     return chargerScript('js/cours.js', {

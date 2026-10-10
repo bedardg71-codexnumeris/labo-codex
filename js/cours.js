@@ -393,14 +393,17 @@ function fermerModalBibliothequeCours() {
  * @param {string} id - ID du cours à retirer
  */
 async function retirerCoursDeBibliotheque(id) {
-    const cours = await db.get('cours') || [];
-    const coursIndex = cours.findIndex(c => c.id === id);
-
-    if (coursIndex !== -1) {
+    // #522 lot 5 : lire, modifier, écrire dans la file de la clé (db.modifier).
+    const ecrite = await db.modifier('cours', (lus) => {
+        const cours = lus || [];
+        const coursIndex = cours.findIndex(c => c.id === id);
+        if (coursIndex === -1) return undefined;
         cours[coursIndex].dansBibliotheque = false;
         cours[coursIndex].actif = false; // Un cours retiré ne peut plus être actif
+        return cours;
+    }, []);
 
-        await db.set('cours', cours);
+    if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (retirer un cours de ma sélection)
         fermerModalBibliothequeCours();
         alert('Cours retiré de ta sélection');
@@ -590,13 +593,16 @@ async function supprimerFicheCours(id) {
  * @param {string} id - ID du cours à ajouter
  */
 async function ajouterCoursIndividuel(id) {
-    const cours = await db.get('cours') || [];
-    const coursIndex = cours.findIndex(c => c.id === id);
-
-    if (coursIndex !== -1) {
+    // #522 lot 5 : lire, modifier, écrire dans la file de la clé (db.modifier).
+    const ecrite = await db.modifier('cours', (lus) => {
+        const cours = lus || [];
+        const coursIndex = cours.findIndex(c => c.id === id);
+        if (coursIndex === -1) return undefined;
         cours[coursIndex].dansBibliotheque = true;
+        return cours;
+    }, []);
 
-        await db.set('cours', cours);
+    if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (ajouter un cours à ma sélection)
         fermerModalBibliothequeCours();
         alert('Cours ajouté à ta sélection avec succès !');
@@ -684,46 +690,53 @@ async function importerCoursSimple(eventOuEl) {
                 return;
             }
 
-            const coursExistants = await db.get('cours') || [];
+            // #522 lot 5 : la garde des doublons et l'ajout dans la file de la clé —
+            // la garde portait sur une liste lue hors file, un cours ajouté entre-temps passait.
             let nbAjoutes = 0;
             let nbDoublons = 0;
+            await db.modifier('cours', (lus) => {
+                const coursExistants = lus || [];
+                nbAjoutes = 0;
+                nbDoublons = 0;
 
-            coursImportes.forEach(coursImporte => {
-                // #455 : doublon = même CODE, point. Le cours est global (le
-                // devis ministériel ne change pas d'un trimestre à l'autre) ;
-                // comparer aussi session/année laissait entrer un « 601-101
-                // d'automne » à côté du 601-101 existant — deux fiches pour la
-                // même chose (famille #346/#454). session/annee sur les fiches
-                // legacy sont historiques, non décisionnels.
-                //
-                // CT-15 (23 août 2026) : la comparaison était ici un `===`
-                // BRUT, quand le formulaire, lui, normalisait casse et
-                // espaces. « 601-101-mq » importé à côté d'un « 601-101-MQ »
-                // existant n'était donc PAS vu comme un doublon — refusé à la
-                // main, accepté par fichier. Une seule règle désormais,
-                // `cleNaturelleCours`.
-                const doublon = trouverDoublonNaturel(
-                    coursExistants, coursImporte, cleNaturelleCours);
+                coursImportes.forEach(coursImporte => {
+                    // #455 : doublon = même CODE, point. Le cours est global (le
+                    // devis ministériel ne change pas d'un trimestre à l'autre) ;
+                    // comparer aussi session/année laissait entrer un « 601-101
+                    // d'automne » à côté du 601-101 existant — deux fiches pour la
+                    // même chose (famille #346/#454). session/annee sur les fiches
+                    // legacy sont historiques, non décisionnels.
+                    //
+                    // CT-15 (23 août 2026) : la comparaison était ici un `===`
+                    // BRUT, quand le formulaire, lui, normalisait casse et
+                    // espaces. « 601-101-mq » importé à côté d'un « 601-101-MQ »
+                    // existant n'était donc PAS vu comme un doublon — refusé à la
+                    // main, accepté par fichier. Une seule règle désormais,
+                    // `cleNaturelleCours`.
+                    const doublon = trouverDoublonNaturel(
+                        coursExistants, coursImporte, cleNaturelleCours);
 
-                if (doublon) {
-                    nbDoublons++;
-                } else {
-                    // Ajouter avec nouvel ID et flag dansBibliotheque = false
-                    const nouveauCours = {
-                        ...coursImporte,
-                        id: genererIdUnique('COURS_'),
-                        dansBibliotheque: false, // Disponible à ajouter
-                        actif: false, // Les cours importés ne sont jamais actifs par défaut
-                        dateEnregistrement: new Date().toISOString()
-                    };
+                    if (doublon) {
+                        nbDoublons++;
+                    } else {
+                        // Ajouter avec nouvel ID et flag dansBibliotheque = false
+                        const nouveauCours = {
+                            ...coursImporte,
+                            id: genererIdUnique('COURS_'),
+                            dansBibliotheque: false, // Disponible à ajouter
+                            actif: false, // Les cours importés ne sont jamais actifs par défaut
+                            dateEnregistrement: new Date().toISOString()
+                        };
 
-                    coursExistants.push(nouveauCours);
-                    nbAjoutes++;
-                }
-            });
+                        coursExistants.push(nouveauCours);
+                        nbAjoutes++;
+                    }
+                });
+
+                return nbAjoutes > 0 ? coursExistants : undefined;
+            }, []);
 
             if (nbAjoutes > 0) {
-                await db.set('cours', coursExistants);
                 if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (importer des cours)
             }
 
@@ -784,17 +797,24 @@ async function partagerCours(id) {
             return; // Annulé par l'utilisateur
         }
 
-        // Marquer comme partagé (retirer de ma sélection).
+        // Marquer comme partagé (retirer de ma sélection) : dans la file, plus bas.
         // #468/CT-13 : `actif` suit, comme dans retirerCoursDeBibliotheque — un
         // cours qui a quitté la sélection ne peut pas rester le cours actif.
-        coursAPartager.dansBibliotheque = false;
-        coursAPartager.actif = false;
-
-        // Ajouter métadonnées CC
-        coursAPartager.metadata_cc = metadata;
-
-        // Sauvegarder
-        await db.set('cours', cours);
+        // #522 lot 5 : la question est posée sur la liste lue plus haut ; l'écriture
+        // relit DANS la file — ce qui s'est enregistré pendant la question reste.
+        const ecrite = await db.modifier('cours', (lus) => {
+            const liste = lus || [];
+            const cible = liste.find(c => c.id === id);
+            if (!cible) return undefined;
+            cible.dansBibliotheque = false;
+            cible.actif = false;
+            cible.metadata_cc = metadata;   // Ajouter métadonnées CC
+            return liste;
+        }, []);
+        if (!ecrite) {
+            alert('Cours introuvable');
+            return;
+        }
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (déposer un cours)
 
         // Rafraîchir modal

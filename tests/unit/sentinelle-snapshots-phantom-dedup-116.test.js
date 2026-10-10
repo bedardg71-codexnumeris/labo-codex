@@ -66,7 +66,13 @@ function creerSandbox() {
         getSync: (k, d) => (stores.has(k) ? stores.get(k) : (d !== undefined ? d : null)),
         setSync: (k, v) => { stores.set(k, v); },
         get: async (k) => (stores.has(k) ? stores.get(k) : null),
-        set: async (k, v) => { stores.set(k, v); }
+        set: async (k, v) => { stores.set(k, v); },
+        // #522 lot 5 : le site écrit par `db.modifier` ; même contrat (un `undefined` n'écrit rien).
+        modifier: async (k, mutateur, defaut = null) => {
+            const r = await mutateur(stores.has(k) ? stores.get(k) : defaut);
+            if (r !== undefined) stores.set(k, r);
+            return r;
+        }
     };
 
     const win = chargerScript('js/snapshots.js', {

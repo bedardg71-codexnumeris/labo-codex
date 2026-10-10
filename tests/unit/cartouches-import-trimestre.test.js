@@ -52,7 +52,13 @@ function faireDb(initial) {
         async get(cle) { return cle in donnees ? donnees[cle] : null; },
         async set(cle, valeur) { donnees[cle] = valeur; },
         getSync(cle, defaut) { return cle in donnees ? donnees[cle] : (defaut !== undefined ? defaut : null); },
-        setSync(cle, valeur) { donnees[cle] = valeur; }
+        setSync(cle, valeur) { donnees[cle] = valeur; },
+        // #522 lot 5 : le site écrit par `db.modifier` ; même contrat (un `undefined` n'écrit rien).
+        async modifier(cle, mutateur, defaut = null) {
+            const r = await mutateur(cle in donnees ? donnees[cle] : defaut);
+            if (r !== undefined) donnees[cle] = r;
+            return r;
+        }
     };
 }
 

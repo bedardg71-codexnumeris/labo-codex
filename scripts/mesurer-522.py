@@ -11,7 +11,8 @@ lot 5 (15 / 29, +93 %). #599 n'etait meme pas compte : la ligne
 ⮕ NE JAMAIS PARTIR DU CHIFFRE DE L'AUDIT. Relancer ce script.
 
 USAGE
-    python3 scripts/mesurer-522.py                 # tout le depot
+    python3 scripts/mesurer-522.py ""              # tout le depot (motif vide)
+    python3 scripts/mesurer-522.py                 # SANS argument : les cles du lot 3 seulement
     python3 scripts/mesurer-522.py cartouches_     # les cles contenant ce motif
     python3 scripts/mesurer-522.py "cle('productions')"
 

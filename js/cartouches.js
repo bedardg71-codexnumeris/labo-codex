@@ -4272,7 +4272,6 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
 
     // Chemin 2 — la grille de même lignée est déjà là : la cartouche s'y range.
     const cleDest = cle(`cartouches_${grilleAccueil.id}`);
-    const existantes = await db.get(cleDest) || [];
 
     const copie = {
         ...marquerProvenanceCartouche(cartoucheSource, srcId),
@@ -4282,13 +4281,17 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
 
     // #476 — garde d'identité AU POINT D'ÉCRITURE : réimporter deux fois la même
     // cartouche ne doit pas en empiler deux exemplaires silencieusement.
-    const garde = ajouterAvecGardeIdentite(existantes, copie);
+    // #522 lot 5 : dans la file de la clé — lue hors file, la garde laissait passer
+    // un exemplaire rangé entre-temps (deux copies rapprochées).
+    // security-ok: la source est une copie d'archive écrite par l'app elle-même, pas un fichier externe.
+    let garde = null;
+    await db.modifier(cleDest, (lues) => {
+        garde = ajouterAvecGardeIdentite(lues || [], copie);
+        return garde.ajoute ? garde.liste : undefined;
+    }, []);
     if (!garde.ajoute) {
         return { ajoutee: false, conflit: garde.conflit, grilleCreee: null, grilleAccueil };
     }
-
-    // security-ok: la source est une copie d'archive écrite par l'app elle-même, pas un fichier externe.
-    await db.set(cleDest, garde.liste);
     if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleDest);   // lot F : geste hors témoin (copierCartoucheDepuisTrimestre)
     return { ajoutee: true, conflit: null, grilleCreee: null, grilleAccueil };
 }

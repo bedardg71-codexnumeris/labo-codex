@@ -1174,25 +1174,33 @@ async function appliquerReimport() {
         }
 
         // Tampons : fusion manuelle (pas d'API publique dédiée)
+        // #522 lot 5 : dans la file de la clé (db.modifier) — lue par getSync puis écrite par
+        // `await db.set`, la liste perdait un tampon enregistré pendant l'aller-retour. Les
+        // compteurs du rapport se font dans le mutateur, sur la liste qu'il écrit.
         if (selection.tampons.length > 0 && window.db) {
-            var actuels = db.getSync('tamponsPersonnalises', []) || [];
-            if (!Array.isArray(actuels)) actuels = [];
-            var idsActuels = new Set(actuels.map(function(t) { return t.id; }));
-            for (var i = 0; i < selection.tampons.length; i++) {
-                var src = selection.tampons[i];
-                var item;
-                if (copieEnDouble && src._doublon) {
-                    item = _faireCopie(src, 'TAMPON');
-                    rapport.copies++;
-                } else {
-                    item = _nettoyerMarqueurs(src);
-                    if (idsActuels.has(item.id)) continue;
+            var copiesTampons = 0, tamponsAjoutes = 0;
+            await db.modifier('tamponsPersonnalises', function(lus) {
+                var actuels = Array.isArray(lus) ? lus : [];
+                var idsActuels = new Set(actuels.map(function(t) { return t.id; }));
+                copiesTampons = 0; tamponsAjoutes = 0;
+                for (var i = 0; i < selection.tampons.length; i++) {
+                    var src = selection.tampons[i];
+                    var item;
+                    if (copieEnDouble && src._doublon) {
+                        item = _faireCopie(src, 'TAMPON');
+                        copiesTampons++;
+                    } else {
+                        item = _nettoyerMarqueurs(src);
+                        if (idsActuels.has(item.id)) continue;
+                    }
+                    actuels.push(item);
+                    idsActuels.add(item.id);
+                    tamponsAjoutes++;
                 }
-                actuels.push(item);
-                idsActuels.add(item.id);
-                rapport.tampons++;
-            }
-            await db.set('tamponsPersonnalises', actuels);
+                return actuels;
+            }, []);
+            rapport.copies += copiesTampons;
+            rapport.tampons += tamponsAjoutes;
         }
 
         var totalAjoutes = rapport.grilles + rapport.echelles + rapport.tampons +

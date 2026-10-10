@@ -60,7 +60,13 @@ function vraiEstEtudiantExclu() {
 function monter(eleves) {
     const store = { test_evaluationsSauvegardees: EVALUATIONS, test_productions: PRODUCTIONS, infoCours: { id: 'GC1', _groupeCoursId: 'GC1' } };
     const db = { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync() {}, get: async (k) => (k in store ? clone(store[k]) : null),
-        set: async (k, v) => { store[k] = clone(v); }, useIndexedDB: false, memoryCache: new Map() };
+        set: async (k, v) => { store[k] = clone(v); }, useIndexedDB: false, memoryCache: new Map(),
+        // #522 lot 5 : le site écrit par `db.modifier` ; même contrat (un `undefined` n'écrit rien).
+        modifier: async (k, mutateur, d = null) => {
+            const r = await mutateur(k in store ? clone(store[k]) : d);
+            if (r !== undefined) store[k] = clone(r);
+            return r;
+        } };
     const win = { addEventListener() {}, removeEventListener() {}, dateLocaleYMD: () => '2026-05-15' };
     chargerPredicatsCopie(win);
     chargerScript('js/snapshots.js', { db, cle: (k) => 'test_' + k, echapperHtml: (s) => String(s),
