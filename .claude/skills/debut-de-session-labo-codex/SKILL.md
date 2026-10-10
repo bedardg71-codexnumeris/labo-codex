@@ -181,17 +181,19 @@ l'allait chercher. Le hook pré-push n'y peut rien (il laisse passer faute de ve
 local, par décision du 26 août — Grégoire pousse depuis GitHub Desktop) ; la CI juge
 chaque push de toute façon. **Le manque était la lecture.**
 
-⚠⚠ **DEPUIS LE 20 SEPTEMBRE 2026, IL Y A DEUX VERDICTS, DE DEUX RUNS DIFFÉRENTS.**
-Décision de Grégoire (journal de `tests.yml`, point 7) : sur GitHub, la suite au
-navigateur ne tourne plus à chaque push, mais **une fois par jour** (`schedule`, 8 h UTC
-= 4 h à Toronto l'été, 3 h l'hiver) et à la demande (`workflow_dispatch`). Donc :
-· **le verdict de Vitest** vient du run du **dernier push** ;
-· **le verdict au navigateur** vient du **dernier run planifié (ou demandé) dont le job
-  Playwright a conclu** — avec SON SHA. **Un écart entre ce SHA et `HEAD` est NORMAL,
-  pas un défaut** : c'est le `main` de 4 h du matin qui a été jugé. Ce qui serait un
-  défaut : un SHA jugé vieux de plusieurs jours alors que du code a été poussé depuis.
-Sur le run d'un push, `Garde` et `Playwright (WebKit)` sont `skipped` : c'est la forme
-attendue, pas un « non jugé » à signaler.
+⚠⚠ **DEPUIS LE 10 OCTOBRE 2026, GITHUB NE JUGE PLUS AU NAVIGATEUR QU'À LA DEMANDE.**
+Décision de Grégoire (journal de `tests.yml`, point 8 ; #1048) : le passage de nuit
+(`schedule`) est retiré — ses huit derniers runs étaient coupés à 60 min et ne jugeaient
+plus rien. Le job `Garde` est retiré avec lui. Donc :
+· **le verdict de Vitest** vient du run du **dernier push** (GitHub) ;
+· **le verdict au navigateur** est celui du **Mac** : le jeton
+  `scripts/.verdict-playwright.json` (ci-dessus), rendu par `pousser.sh` avant chaque push
+  de code. **Aucun run GitHub planifié n'existe : son absence n'est ni un manque ni un
+  succès — ne pas la rapporter.**
+· un run **demandé** (`workflow_dispatch`) peut exister, si Grégoire l'a lancé : alors,
+  et alors seulement, lire ses jobs.
+Sur le run d'un push, `Playwright (WebKit)` est `skipped` : c'est la forme attendue, pas
+un « non jugé » à signaler.
 
 **La mesure, dix secondes — pas de script neuf :**
 
@@ -199,39 +201,29 @@ attendue, pas un « non jugé » à signaler.
 # 1. Vitest : le run du dernier push
 gh run list --branch main --event push --limit 1 --json databaseId,conclusion,createdAt,headSha \
   --jq '.[0] | "push · run \(.databaseId) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
-# 2. Navigateur : les derniers runs planifiés ou demandés, et LEURS JOBS
-for ev in schedule workflow_dispatch; do
-  gh run list --workflow tests.yml --event $ev --limit 3 --json databaseId,conclusion,createdAt,headSha \
-    --jq ".[] | \"$ev · run \(.databaseId) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])\""
-done
-gh run view <id du plus récent> --json jobs --jq '.jobs[] | "  \(.name) · \(.conclusion)"'
+# 2. Navigateur, à la demande seulement (souvent vide : c'est normal)
+gh run list --workflow tests.yml --event workflow_dispatch --limit 3 --json databaseId,conclusion,createdAt,headSha \
+  --jq '.[] | "workflow_dispatch · run \(.databaseId) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
+gh run view <id du plus récent, s'il y en a un> --json jobs --jq '.jobs[] | "  \(.name) · \(.conclusion)"'
 git rev-parse --short=8 HEAD
 ```
 
-⚠ **Un run planifié `success` avec Playwright `skipped` n'a rien jugé** : la garde
-d'inutilité (`scripts/ci-garde-inutilite.sh`) a constaté que rien d'observable n'avait
-bougé depuis le dernier SHA jugé ; son résumé d'étape le dit. Le verdict au navigateur
-est alors celui du run planifié PRÉCÉDENT où Playwright a conclu : remonter jusqu'à lui.
-⚠ **Besoin d'un verdict tout de suite** : `gh workflow run tests.yml --ref main` — mais
-c'est 35 à 55 minutes facturées : le proposer à Grégoire, ne pas le lancer de soi-même.
+⚠ **Besoin d'un verdict GitHub au navigateur** : `gh workflow run tests.yml --ref main` —
+mais c'est 35 à 55 minutes facturées, et le plafond de 60 min peut le couper : le proposer
+à Grégoire, ne pas le lancer de soi-même.
 
 ⚠⚠ **LIRE LES JOBS, PAS SEULEMENT LE RUN** (depuis le 2 septembre au soir). Le workflow
-a trois jobs : `Vitest` (push, pull request, à la demande), `Garde` et
-`Playwright (WebKit)` (planifié et à la demande seulement ; Playwright **seulement si la
-garde répond oui**). **Un run peut donc rendre `success` avec Playwright `skipped`** — et c'est exactement la confusion qui a
-coûté deux jours : un verdict absent pris pour un verdict bon. La seconde commande rend
-un état PAR JOB ; c'est lui qu'on rapporte.
+a deux jobs : `Vitest` (push, pull request, à la demande) et `Playwright (WebKit)` (à la
+demande seulement). **Un run de push rend donc `success` avec Playwright `skipped`** — et
+c'est exactement la confusion qui a coûté deux jours : un verdict absent pris pour un
+verdict bon. La seconde commande rend un état PAR JOB ; c'est lui qu'on rapporte.
 
-⮕ **À rendre en français, dans le rapport d'état, en distinguant QUATRE états** :
+⮕ **À rendre en français, dans le rapport d'état, pour un run DEMANDÉ, en distinguant
+TROIS états** :
 · **jugé et vert** — les deux jobs `success` ;
 · **jugé et rouge** — un job `failure` : lequel, et (`gh run view <id> --log-failed`)
-  quelle étape, quel(s) fichier(s) ;
-· **NON JUGÉ, et pourquoi** — sur un run PLANIFIÉ, Playwright `skipped` : *« Playwright
-  n'a pas tourné : rien d'observable au navigateur n'a bougé depuis le commit <sha> »*.
-  ⚠ Vérifier que c'est vrai : `git diff --name-only <sha jugé> <sha du run>` ne doit
-  montrer aucun chemin de `OBSERVABLE`. Si du code a bougé et que Playwright a sauté
-  quand même, **la garde est trop étroite : le dire**, ne pas la corriger dans le rituel.
-  (Sur le run d'un PUSH, `skipped` est la forme normale depuis le 20 septembre.)
+  quelle étape, quel(s) fichier(s) ; un job `cancelled` après 60 min est coupé par le
+  plafond, pas rouge : le dire ;
 · **jugé PARTIELLEMENT, N essais exclus de cette plateforme** — depuis le 2 septembre
   au soir, six essais (cinq specs du planificateur et un bandeau) ne tournent pas sur le
   runner WebKit Linux, où ils ne peuvent pas juger ; ils restent jugés par
@@ -249,7 +241,7 @@ Et toujours : *le <date>, sur le commit <sha>* — **et si ce commit est `HEAD`*
 il porte.** Un vert vieux de trois semaines n'est pas un vert.
 
 ⚠ **Pour le verdict de VITEST, si le SHA ne correspond pas à `HEAD`, deux cas, à
-distinguer avant de conclure** (pour le verdict au navigateur, l'écart est normal — voir
+distinguer avant de conclure** (le verdict au navigateur, lui, est le jeton du Mac — voir
 plus haut) **:**
 · `HEAD` ne touche que de la documentation (`paths-ignore` de
   `.github/workflows/tests.yml`) → **aucun run ne le porte, et c'est normal** ; le verdict
@@ -470,3 +462,4 @@ aucun commit, aucun push. En particulier :
 | 2026-09-02 (soir, 2) | §2.1 : quatrième état — *jugé partiellement, N essais exclus de cette plateforme* (six essais du planificateur exclus sur WebKit Linux, dits par le nom d'une étape du job Playwright). Un vert Playwright sur GitHub porte sur 233, pas 239. |
 | 2026-09-02 (soir) | §2.1 : la commande lit les JOBS, pas le run — le workflow est devenu deux jobs et Playwright peut être `skipped` sans que le run cesse d'être `success`. Trois états à distinguer, dont NON JUGÉ. |
 | 2026-09-02 | §2.1 : le verdict de GitHub entre dans le rituel (une commande `gh`, une ligne rendue, SHA comparé à `HEAD`, deux cas d'écart distingués, conduite à tenir devant un rouge, conduite sans `gh`). Motif : « je ne vois pas de rouge » alors que huit runs consécutifs étaient rouges sur `main`. |
+| 2026-10-10 | §2.1 : le passage Playwright de nuit est retiré (#1048, décision de Grégoire) ; le job `Garde` aussi. Le verdict au navigateur est le jeton du Mac ; un run GitHub n'existe qu'à la demande, et son absence ne se rapporte pas. Trois états pour un run demandé (le « non jugé » de la garde est parti avec elle). |

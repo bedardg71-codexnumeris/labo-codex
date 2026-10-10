@@ -18,7 +18,8 @@ ROUGE** (3 specs) : deux bancs figeaient l'avant-lot — #654 sélectif lisait l
 **Verdict complet sur `9588f5b2`** (Chrome, Safari, Cowork fermés) : code 0, 0 échec, aucun instable, 0 veille. Vitest 705 / 8 474 vert.
 **Trouvailles** : #1046, #1047 inscrites (Cowork les place). La trouvaille du lot 2 (listes blanches, « 40 ») est livrée avec le lot (`95c98004`) ; elle n'avait pas de fiche.
 **Stock** : doublons de cartouches et cartouches sous clé nue déjà écrits chez les gens : ni fusionnés ni déplacés (fiches #954, #655).
-**Suite** : #1048 (passage Playwright de nuit retiré, décision de Grégoire, 12 h 43), commit séparé ; puis la file de Cowork.
+**#1048 fait** (commit séparé, après) : passage Playwright de nuit retiré, décision de Grégoire (12 h 43) ; Playwright sur GitHub à la demande seulement ; garde et `scripts/ci-garde-inutilite.sh` retirés ; rituel d'ouverture §2.1 ajusté. Pas de verdict navigateur propre (workflow et documents).
+**Suite** : la file de Cowork.
 
 ## (relais précédent) 10 OCT. 2026, 10 h 31 : **LOT 3 DE LA FILE (IMPORT SÉLECTIF ; #664, #952, #954, #655, LISTES BLANCHES) CODÉ SUR `main` LOCAL, NON POUSSÉ ; PAS DE RELEASE**
 
