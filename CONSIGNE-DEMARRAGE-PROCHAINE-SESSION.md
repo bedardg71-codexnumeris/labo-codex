@@ -1,5 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 10 octobre 2026, 14 h 17 (Toronto) : `1.196.0` EN LIGNE** (build `1010-1143`) — Netlify
+> `6aca8026`, `commit_ref` `9588f5b2`, `state: ready`, publié à 18:13:07 Z. Verdict Playwright complet vert sur `9588f5b2` (code 0,
+> 0 échec connu, aucun instable, 0 veille). 1.195.0 (lot 2 : #467, #585) en ligne depuis 8 h 54. **File de Cowork, lot 3 LIVRÉ** :
+> #664, #952, #954, #655 et les listes blanches ; #1046, #1047 inscrites ; #545 ouverte (l'import exclu). Le premier verdict de la
+> release était rouge : deux bancs figeaient l'avant-lot (voir `RELAIS.md`). **MANDAT COURANT** : #1048 (retirer le passage
+> Playwright de nuit, décision de Grégoire), puis le lot suivant de la file, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 9 octobre 2026, 19 h 14 (Toronto) : `1.194.0` EN LIGNE** (build `1009-1627`) — Netlify
 > `6ac973c7`, `commit_ref` `9c7ebb26`, `state: ready`, publié à 23:08:04 Z. Verdict Playwright complet vert sur `9c7ebb26` (code 0,
 > 0 échec connu, aucun instable, 0 veille). Entre-temps, 1.193.0 (lot 3 de la carte, la barre en mots) est en ligne depuis 14 h 13.

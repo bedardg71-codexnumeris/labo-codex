@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 10 h 31 : **LOT 3 DE LA FILE (IMPORT SÉLECTIF ; #664, #952, #954, #655, LISTES BLANCHES) CODÉ SUR `main` LOCAL, NON POUSSÉ ; PAS DE RELEASE**
+## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 14 h 17 : **1.196.0 (CE QU'ON IMPORTE D'UNE ANCIENNE SAUVEGARDE ARRIVE ENTIER ET BIEN RANGÉ ; #664, #952, #954, #655) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6aca8026`, `commit_ref` `9588f5b2`, `state: ready`, publié à 18:13:07 Z
+(14 h 13, Toronto). Titre et ligne des Nouvelles retenus par Grégoire (11 h 42), posés tels quels ; la ligne du bilan d'import aussi.
+**Relecture de Cowork** : deux corrections, `63e96d47` (même nom ⇒ même grille seulement aux mêmes ids de critères / codes de niveaux)
+et `490568c9` (sous-schéma : valeur non-objet omise) ; 6 essais neufs, 8 mutations, 8 rouges. **Premier verdict sur la release `bd9d55c4`
+ROUGE** (3 specs) : deux bancs figeaient l'avant-lot — #654 sélectif lisait la clé nue (#655), lot I bis comparait l'empreinte 1.172.0 de
+`grillesTemplates` (celle de la perte des champs). Mis à jour en `9588f5b2` (référence non réajustée ; preuve positive ; 2 mutations, 2 rouges).
+**Verdict complet sur `9588f5b2`** (Chrome, Safari, Cowork fermés) : code 0, 0 échec, aucun instable, 0 veille. Vitest 705 / 8 474 vert.
+**Trouvailles** : #1046, #1047 inscrites (Cowork les place). La trouvaille du lot 2 (listes blanches, « 40 ») est livrée avec le lot (`95c98004`) ; elle n'avait pas de fiche.
+**Stock** : doublons de cartouches et cartouches sous clé nue déjà écrits chez les gens : ni fusionnés ni déplacés (fiches #954, #655).
+**Suite** : #1048 (passage Playwright de nuit retiré, décision de Grégoire, 12 h 43), commit séparé ; puis la file de Cowork.
+
+## (relais précédent) 10 OCT. 2026, 10 h 31 : **LOT 3 DE LA FILE (IMPORT SÉLECTIF ; #664, #952, #954, #655, LISTES BLANCHES) CODÉ SUR `main` LOCAL, NON POUSSÉ ; PAS DE RELEASE**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 10 h 13). **Commits locaux** : `95c98004` listes blanches et nombre en texte ;
 `c2be076a` ordre, tables, identité des cartouches, trimestre actif ; puis BACKLOG et `plans de travail/DEMANDE-RELECTURE-2026-10-10-lot3-import-selectif.md`.
