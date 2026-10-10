@@ -1,38 +1,29 @@
-# Consigne du jour – lot 3, après relecture : deux corrections avant la release
+# Consigne du jour – lot 3 : la release
 
-> Écrite par Cowork le 10 octobre 2026 à 11 h 31 (Toronto, mesurée par `date`). Remplace la consigne du lot 3, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-10-lot3-import-selectif.md`. Tu peux commiter ce fichier avec tes corrections.
+> Écrite par Cowork le 10 octobre 2026 à 11 h 42 (Toronto, mesurée par `date`). Remplace la consigne de relecture du lot 3, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-10-lot3-relecture.md`. Tu peux commiter ce fichier avec la release.
 
-## Verdict de relecture
+## Verdict de Cowork
 
-Relus : `95c98004`, `c2be076a`, `af6b93e5` et `DEMANDE-RELECTURE-2026-10-10-lot3-import-selectif.md`. L'ordre des blocs, les tables, `rebrancher`, la clé `cle('cartouches_…')`, `nombreImporte` et les listes blanches sont justes. L'identité des cartouches (#954) tient aussi pour une cartouche réelle : ce qu'écrit `cartouches.js` à la création (≈ 464) est entièrement dans la liste blanche, `metadata_cc.auteur_original` compris. Deux corrections avant la release ; le reste est accepté.
+Corrections relues : `63e96d47` (mêmes ids de critères, mêmes codes de niveaux) et `490568c9` (sous-schéma : valeur non-objet omise) font ce qui était demandé. Le lot 3 est accepté. #1046 et #1047 inscrites : je les place dans la file à la prochaine recomposition.
 
-## Correction 1 – « même nom » ne suffit pas pour rebrancher (ta première supposition)
+## Décisions de Grégoire (10 oct., 11 h 42)
 
-Ta supposition : une grille ou une échelle écartée parce qu'une de même nom est déjà là est tenue pour la même, et ce qui la désignait suit celle-là. L'écart lui-même date d'avant le lot ; la **redirection** est neuve, et elle peut rattacher à tort.
+- **Ligne du bilan d'import, retenue telle quelle** : « N cartouche(s) déjà présente(s) à l'identique, non ajoutée(s) ».
+- **Nouvelles, retenues** (mineure) :
+  - Titre : « Ce qu'on importe d'une ancienne sauvegarde arrive entier et bien rangé »
+  - Item : « Quand on importe une sélection depuis une ancienne sauvegarde, les cartouches restent liées à leur grille et apparaissent dans le trimestre ouvert ; une cartouche déjà présente n'est plus ajoutée en double ; la méthode de calcul d'une pratique et les règles d'une production arrivent complètes. »
 
-Cas : le fichier vient d'un collègue (l'import sélectif lit aussi ces fichiers, d'où `auteurSource`). Sa grille « Grille de rédaction » (critères `CR_x`, `CR_y`) a le même nom qu'une grille locale aux critères différents. Avant le lot, ses cartouches dormaient sous une clé que personne ne lisait. Avec le lot, elles apparaissent sous la grille locale, avec des commentaires indexés sur des critères qui n'y sont pas ; ses productions désignent une grille qui n'est pas la leur. Un lien rompu se voit ; un lien faux ne se voit pas.
+## La release, dans cet ordre
 
-À faire : ne rebrancher sur la grille de même nom que si elle porte **les mêmes ids de critères** (même ensemble, ordre indifférent) ; pour une échelle, **les mêmes codes de niveaux**. Sinon, aucune entrée dans la table : le comportement d'avant le lot. Ton cas A.b (second passage) doit rester vert, puisque la grille renommée au premier passage a les mêmes critères. Ajoute au banc le cas « même nom, critères différents → aucune redirection », pour la grille et pour l'échelle, avec break-test.
+1. `node scripts/release.mjs minor`, l'entrée des Nouvelles ci-dessus dans `js/changelog-data.js` (mots exacts), commit de release.
+2. **Verdict complet sur le commit de release** : `cd tests && npm test`, Chrome, Safari et Cowork fermés. Le verdict porte sur ce commit, pas sur un commit antérieur. Grégoire te dira quand c'est fermé.
+3. Push seulement si le verdict est vert. Un instable déjà connu hors lot (la barre des présences à 360 px) ne bloque pas, à condition de le nommer.
+4. Après le push : Netlify `ready` sur le bon `commit_ref`, l'heure mesurée par `TZ=America/Toronto date` ; BACKLOG (#664, #952, #954, #655 et la trouvaille du lot 2 livrées ; #545 reste ouverte avec son exclusion) ; `OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `RELAIS.md`.
 
-## Correction 2 – un sous-schéma ne laisse plus passer une valeur brute
+## Ton constat d'ouverture
 
-Dans `assainirObjet`, `case 'object'` : quand `spec.schema` existe mais que la valeur n'est pas un objet, la valeur passe **telle quelle** (`resultat[cle] = valeur`). C'est d'avant le lot, mais le lot l'étend à trois champs neufs (`calcul_note`, `echelle` d'une pratique, `regles` d'une production) : une chaîne à cet endroit entrerait sans `assainirChaine`. À faire : avec un `spec.schema`, une valeur qui n'est pas un objet non nul (tableau compris) est omise. Sans `spec.schema` (`configuration`, `config`), rien ne change : c'est le compromis déjà assumé, que l'échappement à l'affichage du lot 2 couvre. Un essai au banc, avec break-test.
-
-## Ce qui est accepté sans changement
-
-- Tes trois autres suppositions (renommages internes au lot entrant non rebranchés ; `auteurOriginal` hors identité ; échelle cachée dans `configuration`/`config` non rebranchée).
-- Les quatre champs laissés hors du transport.
-- Le stock assumé, tel qu'écrit au BACKLOG.
-
-## Tes deux trouvailles
-
-- **Issue 2, inscrite** : l'import sélectif ne propose pas les grilles, échelles, pratiques et cartouches namespacées d'une sauvegarde récente. Inscris la fiche au BACKLOG avec ta mesure ; Cowork la place dans la file à la prochaine recomposition. Ne la code pas dans ce lot.
-- **Issue 3, inscrite** : `executerImportLocalStorageBrut` est du code mort. Inscris-la ; elle rejoint le nettoyage du code mort de la file.
-
-## Mots d'écran
-
-La ligne neuve du bilan (« N cartouche(s) déjà présente(s) à l'identique, non ajoutée(s) ») et la ligne des Nouvelles sont soumises à Grégoire par Cowork. **N'y touche pas** tant que Cowork ne t'a pas transmis sa décision.
+Les 8 derniers passages Playwright planifiés annulés sur GitHub : **inscris-le** au BACKLOG, avec la cause mesurée (concurrence, délai, désactivation…). Ne change rien au flux de travail : toucher aux minutes GitHub, c'est la décision de Grégoire (règle 7).
 
 ## Puis arrête-toi
 
-Un commit par correction, en local. `cd tests && npm test` (suite complète) avant la release : `import-export.js` est sous les règles de sécurité ; Chrome, Safari et Cowork fermés. Rapport court : ce qui a changé pour l'usager, le banc et ses mutations, le verdict. **Pas de release** avant le retour de Cowork sur les mots d'écran.
+Rapport court : la version en ligne, l'heure, le verdict (et ses instables nommés), et le geste que Grégoire peut vérifier à l'écran.
