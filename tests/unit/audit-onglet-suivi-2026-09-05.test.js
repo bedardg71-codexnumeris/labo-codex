@@ -224,6 +224,12 @@ function monter(jeu, opts = {}) {
         get: async (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)),
         set: async (k, v) => { store[k] = clone(v); ecritures.push(k); },
         keys: async () => Object.keys(store),
+        // #522 lot 5 : le site écrit par `db.modifier` ; même contrat (un `undefined` n'écrit rien).
+        modifier: async (k, mutateur, d = null) => {
+            const r = await mutateur(k in store ? clone(store[k]) : d);
+            if (r !== undefined) { store[k] = clone(r); ecritures.push(k); }
+            return r;
+        },
         useIndexedDB: false, memoryCache: new Map()
     };
     const cle = (k) => (String(k).startsWith('test_') ? k : 'test_' + k);

@@ -1444,40 +1444,45 @@ async function sauvegarderMetadonnees() {
     // Parser les disciplines
     const disciplines = disciplineStr ? disciplineStr.split(',').map(d => d.trim()).filter(d => d) : [];
 
-    // Mettre à jour la ressource
-    let liste = await db.get(cleStockage) || [];
-    const index = liste.findIndex(r => r.id === ressourceId);
+    // Mettre à jour la ressource. #522 lot 5 : lire, modifier, écrire dans la file
+    // de la clé (db.modifier) ; la ressource mise à jour sert au panneau, plus bas.
+    let ressource = null;
+    await db.modifier(cleStockage, (lus) => {
+        const liste = lus || [];
+        const index = liste.findIndex(r => r.id === ressourceId);
+        if (index === -1) return undefined;
 
-    if (index === -1) {
+        // Initialiser metadata si nécessaire
+        if (!liste[index].metadata_cc && !liste[index].metadata) {
+            liste[index].metadata = {};
+        }
+
+        // Utiliser metadata_cc si existant, sinon metadata
+        const metaKey = liste[index].metadata_cc ? 'metadata_cc' : 'metadata';
+        if (!liste[index][metaKey]) {
+            liste[index][metaKey] = {};
+        }
+
+        // Mettre à jour les champs
+        liste[index][metaKey].auteur_original = auteur;
+        liste[index][metaKey].institution = institution;
+        liste[index][metaKey].discipline = disciplines;
+        liste[index][metaKey].description_courte = description;
+        liste[index][metaKey].date_modification = new Date().toISOString().split('T')[0];
+
+        // Aussi mettre à jour au niveau ressource pour compatibilité
+        if (auteur) liste[index].auteur = auteur;
+        if (institution) liste[index].institution = institution;
+        if (description) liste[index].description = description;
+
+        ressource = liste[index];
+        return liste;
+    }, []);
+
+    if (!ressource) {
         alert('Ressource non trouvée');
         return;
     }
-
-    // Initialiser metadata si nécessaire
-    if (!liste[index].metadata_cc && !liste[index].metadata) {
-        liste[index].metadata = {};
-    }
-
-    // Utiliser metadata_cc si existant, sinon metadata
-    const metaKey = liste[index].metadata_cc ? 'metadata_cc' : 'metadata';
-    if (!liste[index][metaKey]) {
-        liste[index][metaKey] = {};
-    }
-
-    // Mettre à jour les champs
-    liste[index][metaKey].auteur_original = auteur;
-    liste[index][metaKey].institution = institution;
-    liste[index][metaKey].discipline = disciplines;
-    liste[index][metaKey].description_courte = description;
-    liste[index][metaKey].date_modification = new Date().toISOString().split('T')[0];
-
-    // Aussi mettre à jour au niveau ressource pour compatibilité
-    if (auteur) liste[index].auteur = auteur;
-    if (institution) liste[index].institution = institution;
-    if (description) liste[index].description = description;
-
-    // Sauvegarder
-    await db.set(cleStockage, liste);
     if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleStockage);   // lot F : geste hors témoin (sauvegarderMetadonnees)
 
     // Fermer le modal
@@ -1486,7 +1491,7 @@ async function sauvegarderMetadonnees() {
     // Rafraîchir l'affichage du panneau métadonnées
     const panneau = document.querySelector(`.panneau-metadata[data-id="${ressourceId}"]`);
     if (panneau) {
-        const nouveauPanneau = genererPanneauMetadonnees(liste[index], typeRessource);
+        const nouveauPanneau = genererPanneauMetadonnees(ressource, typeRessource);
         panneau.outerHTML = nouveauPanneau;
     }
 

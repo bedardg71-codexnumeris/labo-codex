@@ -2858,9 +2858,9 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
     }
 
     // Fusionner la liste fichiersTravaux locale avec les nouvelles entrées
+    // #522 lot 5 : la liste locale est lue, complétée et écrite dans la file de la clé
+    // (db.modifier) — une copie enregistrée pendant la fusion n'est plus écrasée.
     if (cleFT && importes > 0) {
-        var listeLocale = await db.get(cleFT, []);
-        var idsLocaux = new Set(listeLocale.map(function(f) { return f.id; }));
 
         // Set d'IDs reellement importes : on extrait l'id depuis chaque chemin
         // avec la meme logique que dans la boucle d'import (lastIndexOf('.')).
@@ -2875,17 +2875,18 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
             idsImportes.add(id);
         });
 
-        var ajoutees = 0;
-        donneesExternes[cleFT].forEach(function(f) {
-            if (!idsLocaux.has(f.id) && idsImportes.has(f.id)) {
-                listeLocale.push(f);
-                ajoutees++;
-            }
-        });
-
-        if (ajoutees > 0) {
-            await db.set(cleFT, listeLocale);
-        }
+        await db.modifier(cleFT, function(lue) {
+            var listeLocale = lue || [];
+            var idsLocaux = new Set(listeLocale.map(function(f) { return f.id; }));
+            var ajoutees = 0;
+            donneesExternes[cleFT].forEach(function(f) {
+                if (!idsLocaux.has(f.id) && idsImportes.has(f.id)) {
+                    listeLocale.push(f);
+                    ajoutees++;
+                }
+            });
+            return ajoutees > 0 ? listeLocale : undefined;
+        }, []);
     }
 
 

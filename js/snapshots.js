@@ -612,49 +612,52 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         };
 
         // ⚡ SAUVEGARDE DANS INDEXEDDB (pas localStorage - trop grand!)
-        // Lire depuis IndexedDB (async)
-        let snapshots = await db.get(cleSnapshots());
+        // #522 lot 5 : lire, modifier, écrire dans la file de la clé (db.modifier) —
+        // deux captures rapprochées (deux séances) ne s'écrasent plus l'une l'autre.
+        await db.modifier(cleSnapshots(), (lus) => {
+            let snapshots = lus;
 
-        // Initialiser structure si première utilisation
-        if (!snapshots) {
-            snapshots = {
-                hebdomadaires: [],
-                interventions: [],
-                metadata: {
+            // Initialiser structure si première utilisation
+            if (!snapshots) {
+                snapshots = {
+                    hebdomadaires: [],
+                    interventions: [],
+                    metadata: {
+                        version: '1.0.0',
+                        dateCreation: new Date().toISOString(),
+                        dernierSnapshotHebdo: null,
+                        dernierSnapshotIntervention: null
+                    }
+                };
+            }
+
+            // Vérifier que la structure metadata existe (compatibilité anciennes versions)
+            if (!snapshots.metadata) {
+                snapshots.metadata = {
                     version: '1.0.0',
                     dateCreation: new Date().toISOString(),
                     dernierSnapshotHebdo: null,
                     dernierSnapshotIntervention: null
-                }
-            };
-        }
+                };
+            }
 
-        // Vérifier que la structure metadata existe (compatibilité anciennes versions)
-        if (!snapshots.metadata) {
-            snapshots.metadata = {
-                version: '1.0.0',
-                dateCreation: new Date().toISOString(),
-                dernierSnapshotHebdo: null,
-                dernierSnapshotIntervention: null
-            };
-        }
+            // 🔧 FIX #116-B (2 juillet 2026) : dédoublonnage par séance — un snapshot
+            // existant pour la même dateSeance est REMPLACÉ (recapture = rafraîchir),
+            // jamais empilé. Le coursId fait déjà partie de la clé de stockage
+            // (cleSnapshots est scopée par groupe-cours), la dateSeance suffit ici.
+            const idxExistant = snapshots.hebdomadaires.findIndex(s =>
+                s.dateSeance === dateSeance || s.id === `SEANCE-${dateSeance}`
+            );
+            if (idxExistant >= 0) {
+                snapshots.hebdomadaires[idxExistant] = snapshot;
+            } else {
+                snapshots.hebdomadaires.push(snapshot);
+            }
+            snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
 
-        // 🔧 FIX #116-B (2 juillet 2026) : dédoublonnage par séance — un snapshot
-        // existant pour la même dateSeance est REMPLACÉ (recapture = rafraîchir),
-        // jamais empilé. Le coursId fait déjà partie de la clé de stockage
-        // (cleSnapshots est scopée par groupe-cours), la dateSeance suffit ici.
-        const idxExistant = snapshots.hebdomadaires.findIndex(s =>
-            s.dateSeance === dateSeance || s.id === `SEANCE-${dateSeance}`
-        );
-        if (idxExistant >= 0) {
-            snapshots.hebdomadaires[idxExistant] = snapshot;
-        } else {
-            snapshots.hebdomadaires.push(snapshot);
-        }
-        snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
-
-        // ⚡ Sauvegarder dans IndexedDB (plusieurs GB disponibles)
-        await db.set(cleSnapshots(), snapshots);
+            // ⚡ Sauvegarder dans IndexedDB (plusieurs GB disponibles)
+            return snapshots;
+        }, null);
 
         return snapshot;
 

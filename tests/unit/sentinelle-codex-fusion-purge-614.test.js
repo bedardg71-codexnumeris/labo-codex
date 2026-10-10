@@ -55,7 +55,9 @@ const dbStub = {
     keys: async () => [],
     listBlobIds: async () => [],
     getSync: (k, def = null) => def,
-    setSync: () => {}
+    setSync: () => {},
+    // #522 lot 5 : le site écrit par `db.modifier` ; même contrat (un `undefined` n'écrit rien).
+    modifier: async (k, mutateur, def = null) => mutateur(def)
 };
 
 let Codex;
