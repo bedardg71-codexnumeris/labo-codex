@@ -511,14 +511,12 @@ async function retirer(res, onProg) {
 
 /**
  * Retire une clé, et s'assure qu'elle est partie.
- * `db.remove` attend le commit d'IndexedDB et en rend l'échec, mais laisse la clé dans le
- * cache mémoire (`getSync` et `keysSync` la voient jusqu'au rechargement : mesuré le 5 oct. sur
- * 394 copies, le renvoi s'arrêtait à `h2026_fichiersTravaux`) ; `removeSync` vide ce cache
- * (son retrait d'IndexedDB, déjà fait, est sans effet).
+ * `db.remove` attend le commit d'IndexedDB, en rend l'échec, et vide le cache mémoire depuis
+ * #845 (mesuré le 5 oct. sur 394 copies : avant, le renvoi s'arrêtait à `h2026_fichiersTravaux`,
+ * que `getSync` voyait encore).
  */
 async function _retirerCle(cle) {
     await window.db.remove(cle);
-    if (typeof window.db.removeSync === 'function') window.db.removeSync(cle);
     if (window.db.getSync(cle, null) !== null) throw new Abandon('nonRetire');
 }
 

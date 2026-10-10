@@ -229,7 +229,6 @@ async function _ecrireMarque(m) {
     if (Object.keys(m).length) await window.db.set(CLE, m);
     else {
         await window.db.remove(CLE);
-        if (typeof window.db.removeSync === 'function') window.db.removeSync(CLE);
     }
 }
 
@@ -446,12 +445,11 @@ async function retirer(res, onProg) {
     return bilan;
 }
 
-/** Retire une clé de vignette, et s'assure qu'elle est partie (même raison qu'E3 : le cache mémoire). */
+/** Retire une clé de vignette, et s'assure qu'elle est partie. */
 async function _retirerVignette(id) {
     if (typeof window.travauxStockage.supprimerThumbnail === 'function') await window.travauxStockage.supprimerThumbnail(id);
     var cle = 'thumbnail_' + id;
     await window.db.remove(cle);
-    if (typeof window.db.removeSync === 'function') window.db.removeSync(cle);
     if (window.db.getSync(cle, null) !== null) throw new Abandon('nonRetire');
 }
 

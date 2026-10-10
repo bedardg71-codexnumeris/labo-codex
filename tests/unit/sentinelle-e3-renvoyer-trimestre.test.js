@@ -110,13 +110,13 @@ function creerDb(initial = CORPUS) {
         },
         remove: async (k) => {
             if (db.echouer && db.echouer('remove', k)) throw new Error('retrait refusé (banc)');
-            journal.push('remove:' + k); map.delete(k);
+            journal.push('remove:' + k); map.delete(k); db.cacheMemoire.delete(k);
         },
         keys: async () => [...map.keys()],
         keysSync: () => [...map.keys()],
         getSync: (k, def = null) => (map.has(k) ? map.get(k) : (db.cacheMemoire.has(k) ? db.cacheMemoire.get(k) : def)),
         setSync: (k, v) => { map.set(k, v); },
-        // Le cache mémoire de la vraie `db` : `remove` le laisse, `removeSync` le vide (db.js).
+        // Le cache mémoire de la vraie `db` : `remove` le vide depuis #845 (db.js).
         cacheMemoire: new Map(),
         removeSync: (k) => { db.cacheMemoire.delete(k); map.delete(k); },
         flush: async () => {}
@@ -353,7 +353,7 @@ describe('E3 · les mots tranchés par Grégoire (5 oct.)', () => {
 describe('E3 · (a bis) le cache mémoire de la vraie `db`', () => {
     it('une clé tenue par le cache mémoire (trop grosse pour localStorage) part quand même ; le renvoi n\'est pas dit inachevé', async () => {
         const banc = await preparer();
-        // Mesuré le 5 oct. (394 copies) : `db.remove` laisse la clé au cache mémoire.
+        // Mesuré le 5 oct. (394 copies) : `db.remove` laissait la clé au cache mémoire (#845).
         for (const k of ['h2032_fichiersTravaux', 'thumbnail_FT_h1']) banc.db.cacheMemoire.set(k, banc.db._map.get(k));
         const r = await renvoyer(banc);
         expect(r.bilan.etat).toBe('fait');
