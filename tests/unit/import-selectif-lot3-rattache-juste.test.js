@@ -366,3 +366,26 @@ describe('Lot 3 · G — relecture du 10 oct. : « même nom » ne suffit pas po
         expect(lire(espace, 'cartouches_GR_LOC')).toBe(null);
     });
 });
+
+describe('Lot 3 · H — relecture du 10 oct. : un sous-schéma ne laisse plus passer une valeur brute', () => {
+    const win = chargerScript('js/import-export.js');
+    const S = win.SCHEMAS_IMPORT;
+    const BRUT = '<img src=x onerror=alert(1)>';
+
+    it('H.a une chaîne, un tableau ou null à la place d\'un objet sous-schématisé est omis', () => {
+        for (const brut of [BRUT, ['a', BRUT], null, 42]) {
+            const prod = win.assainirObjet({ id: 'P', regles: brut }, S.production);
+            expect('regles' in prod).toBe(false);
+            const prat = win.assainirObjet({ id: 'Q', calcul_note: brut, echelle: brut }, S.pratique);
+            expect('calcul_note' in prat).toBe(false);
+            expect('echelle' in prat).toBe(false);
+        }
+    });
+
+    it('H.b un objet passe par son sous-schéma, et un champ sans sous-schéma reste recopié', () => {
+        const prod = win.assainirObjet({ regles: { nombreARetenir: '2', intrus: BRUT } }, S.production);
+        expect(prod.regles).toEqual({ nombreARetenir: 2 });
+        const prat = win.assainirObjet({ configuration: 'brut' }, S.pratique);
+        expect(prat.configuration).toBe('brut');
+    });
+});

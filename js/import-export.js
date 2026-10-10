@@ -560,9 +560,16 @@ function assainirObjet(obj, schema) {
                 }
                 break;
             case 'object':
-                if (spec.schema && typeof valeur === 'object' && valeur !== null) {
-                    resultat[cle] = assainirObjet(valeur, spec.schema);
+                if (spec.schema) {
+                    // Relecture du lot 3 (10 oct. 2026) : avec un sous-schéma, une valeur
+                    // qui n'est pas un objet non nul (tableau compris) est OMISE. Avant,
+                    // elle passait telle quelle — une chaîne entrait sans assainirChaine.
+                    if (typeof valeur === 'object' && valeur !== null && !Array.isArray(valeur)) {
+                        resultat[cle] = assainirObjet(valeur, spec.schema);
+                    }
                 } else {
+                    // Sans sous-schéma (`configuration`, `config`) : recopiée telle quelle,
+                    // compromis assumé que l'échappement à l'affichage (lot 2) couvre.
                     resultat[cle] = valeur;
                 }
                 break;
