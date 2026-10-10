@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 19 h 15 : **1.194.0 (L'ARCHIVE D'UN GROUPE N'EMPORTE QUE CE GROUPE ; « VÉRIFIER » EN LECTURE SEULE) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 20 h 30 : **LOT 2 DE LA FILE (#467, #585) CODÉ SUR `main` LOCAL, NON POUSSÉ ; VERDICT PLAYWRIGHT NON JUGÉ (MÉMOIRE)**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 19 h 10). **Commits locaux** : `30033ad6` #585 ; `2be60b00` #467
+imports JSON ; `880e391c` #467 affichage ; puis BACKLOG et `plans de travail/DEMANDE-RELECTURE-2026-10-09-lot2-echappement.md`.
+**Mesuré** : Vitest complet 704 fichiers / 8 454 essais vert ; trois bancs neufs, 8 + 18 + 24 essais, 35 mutations toutes rouges.
+**Suite Playwright NON JUGÉE** sur `880e391c` : la garde mémoire l'a arrêtée (échange 12,6 Go, seuil 12). **Suite** : relecture
+de Cowork ; verdict complet machine déchargée (Chrome, Safari, Cowork fermés) ; mots des Nouvelles à Grégoire ; release ; push.
+`main` local a 4 commits d'avance sur `origin/main` : rien de ce lot n'est en ligne.
+
+## (relais précédent) 9 OCT. 2026, 19 h 15 : **1.194.0 (L'ARCHIVE D'UN GROUPE N'EMPORTE QUE CE GROUPE ; « VÉRIFIER » EN LECTURE SEULE) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify à 19 h 14) : déploiement `6ac973c7`, `commit_ref` `9c7ebb26`, `state: ready`,
 publié à 23:08:04 Z (19 h 08, Toronto) ; `version.json` : `1.194.0`, build `1009-1627`. Verdict Playwright complet sur
