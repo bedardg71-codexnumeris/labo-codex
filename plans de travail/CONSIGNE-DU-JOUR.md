@@ -1,44 +1,38 @@
-# Consigne du jour – carte d'alignement, lot 3 : une barre sans icône seule
+# Consigne du jour – lot 3, après relecture : deux corrections avant la release
 
-> Écrite par Cowork le 9 octobre 2026 à 11 h 26 (Toronto, mesurée par `date`). Remplace la consigne de la release 1.192.2, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-09-carte-release-1922.md`.
+> Écrite par Cowork le 10 octobre 2026 à 11 h 31 (Toronto, mesurée par `date`). Remplace la consigne du lot 3, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-10-lot3-import-selectif.md`. Tu peux commiter ce fichier avec tes corrections.
 
-## Où on en est
+## Verdict de relecture
 
-1.192.2 est en ligne (`8761a3fe`, Netlify à 8 h 53) ; porte de l'export passée par Grégoire le 9 au matin. Dernier lot du chantier : **le reste de la barre**. Toutes les décisions sont prises, une à une, ce matin : `plans de travail/PLAN-2026-10-08-chantier-carte-alignement.md`, section **« Lot 3 – le reste de la barre »** (fin du fichier). Lis-la d'abord ; elle fait foi.
+Relus : `95c98004`, `c2be076a`, `af6b93e5` et `DEMANDE-RELECTURE-2026-10-10-lot3-import-selectif.md`. L'ordre des blocs, les tables, `rebrancher`, la clé `cle('cartouches_…')`, `nombreImporte` et les listes blanches sont justes. L'identité des cartouches (#954) tient aussi pour une cartouche réelle : ce qu'écrit `cartouches.js` à la création (≈ 464) est entièrement dans la liste blanche, `metadata_cc.auteur_original` compris. Deux corrections avant la release ; le reste est accepté.
 
-Grégoire t'autorise, en te transmettant cette consigne, à commiter les fichiers de Cowork (cette consigne, son archive, le plan), à écrire dans `BACKLOG.md` et `SUIVI-BUGS.md`, et à faire la release sur `main` local. **Pas de push avant la relecture de Cowork.**
+## Correction 1 – « même nom » ne suffit pas pour rebrancher (ta première supposition)
 
-## 0 · Avant tout
+Ta supposition : une grille ou une échelle écartée parce qu'une de même nom est déjà là est tenue pour la même, et ce qui la désignait suit celle-là. L'écart lui-même date d'avant le lot ; la **redirection** est neuve, et elle peut rattacher à tort.
 
-Si le résultat de la sonde de Mathieu (#1038) est arrivé dans `Retours des testeurs/`, arrête-toi et dis-le en une ligne.
+Cas : le fichier vient d'un collègue (l'import sélectif lit aussi ces fichiers, d'où `auteurSource`). Sa grille « Grille de rédaction » (critères `CR_x`, `CR_y`) a le même nom qu'une grille locale aux critères différents. Avant le lot, ses cartouches dormaient sous une clé que personne ne lisait. Avec le lot, elles apparaissent sous la grille locale, avec des commentaires indexés sur des critères qui n'y sont pas ; ses productions désignent une grille qui n'est pas la leur. Un lien rompu se voit ; un lien faux ne se voit pas.
 
-## 1 · Ce que le lot fait (résumé du plan)
+À faire : ne rebrancher sur la grille de même nom que si elle porte **les mêmes ids de critères** (même ensemble, ordre indifférent) ; pour une échelle, **les mêmes codes de niveaux**. Sinon, aucune entrée dans la table : le comportement d'avant le lot. Ton cas A.b (second passage) doit rester vert, puisque la grille renommée au premier passage a les mêmes critères. Ajoute au banc le cas « même nom, critères différents → aucune redirection », pour la grille et pour l'échelle, avec break-test.
 
-1. **Longue-vue** : la loupe devient « Longue-vue », quitte la barre pour le menu « Vue » (sous « Tout voir », touche L) ; son cadre devient **un cercle**, d'un diamètre où un titre de bloc tient entier au centre. « Loupe » devient « longue-vue » partout où l'outil est nommé (raccourcis, aide, guide, infobulles, commentaires visibles).
-2. **« Inspecteur »** : le mot, sans icône, reste dans la barre ; sans bloc sélectionné : « Sélectionne un bloc pour l'inspecter. »
-3. **« Guide »** : le mot, sans icône.
-4. **La Bibliothèque** : bouton bleu foncé **« Consulter la bibliothèque »**, même style que dans la Conception (Productions, Grilles), **à gauche de la barre, avant la liste des cartes**. Elle devient le lieu où l'on gère ses cartes : quittent « Actions ▾ » « Importer une carte (fichier) », « Importer d'un autre trimestre… », « Exporter cette carte », « Supprimer cette carte » (déjà présents dans la Bibliothèque) ; « Dupliquer » entre dans le menu « ⋮ » de chaque carte de la Bibliothèque. « Actions ▾ » garde 8 commandes (liste au plan). **Mesure d'abord** les bibliothèques de la Conception et aligne celle-ci sur elles (disposition, menu « ⋮ », mots) ; un écart que tu ne peux pas trancher par la mesure remonte, sans être écrit.
-5. **Zoom** : l'indicateur « 100% » quitte la barre ; dans le menu « Vue », une rubrique « Zoom » : 100 %, 75 %, 50 %, 25 % ; le niveau en cours coché, aucun entre deux ; le centre de la vue est gardé.
-6. **« Rétablir »** juste après « Annuler », même forme (mot, flèche en miroir), grisé quand rien n'est à rétablir ; même effet que ⇧⌘Z.
+## Correction 2 – un sous-schéma ne laisse plus passer une valeur brute
 
-Zéro-dette : retire ce qui est remplacé (icônes, indicateur, commandes déplacées), sans alias. Toute commande retirée d'un endroit doit exister à son nouvel endroit avant le commit.
+Dans `assainirObjet`, `case 'object'` : quand `spec.schema` existe mais que la valeur n'est pas un objet, la valeur passe **telle quelle** (`resultat[cle] = valeur`). C'est d'avant le lot, mais le lot l'étend à trois champs neufs (`calcul_note`, `echelle` d'une pratique, `regles` d'une production) : une chaîne à cet endroit entrerait sans `assainirChaine`. À faire : avec un `spec.schema`, une valeur qui n'est pas un objet non nul (tableau compris) est omise. Sans `spec.schema` (`configuration`, `config`), rien ne change : c'est le compromis déjà assumé, que l'échappement à l'affichage du lot 2 couvre. Un essai au banc, avec break-test.
 
-## 2 · Mots
+## Ce qui est accepté sans changement
 
-Ceux du plan sont arrêtés. **Propose à part, non écrits ailleurs que dans le code**, ceux qui manquent : le libellé exact de « Dupliquer » dans le « ⋮ », le titre de la rubrique « Zoom » s'il en faut un autre, la ligne des Nouvelles. Ils passent par Grégoire avant la release.
+- Tes trois autres suppositions (renommages internes au lot entrant non rebranchés ; `auteurOriginal` hors identité ; échelle cachée dans `configuration`/`config` non rebranchée).
+- Les quatre champs laissés hors du transport.
+- Le stock assumé, tel qu'écrit au BACKLOG.
 
-## 3 · Captures, avant la release
+## Tes deux trouvailles
 
-La barre et le menu « Vue » ouvert, **Chrome et Safari, largeur Mac et largeur iPad (portrait et paysage)**, et la longue-vue ronde sur une carte en « Tout voir ». Dépose-les dans `plans de travail/captures-2026-10-09-barre-lot3/` : Cowork les regarde avant la sortie. Si la barre déborde sur l'iPad, dis-le et propose ; ne retire rien d'autre de toi-même.
+- **Issue 2, inscrite** : l'import sélectif ne propose pas les grilles, échelles, pratiques et cartouches namespacées d'une sauvegarde récente. Inscris la fiche au BACKLOG avec ta mesure ; Cowork la place dans la file à la prochaine recomposition. Ne la code pas dans ce lot.
+- **Issue 3, inscrite** : `executerImportLocalStorageBrut` est du code mort. Inscris-la ; elle rejoint le nettoyage du code mort de la file.
 
-## 4 · Tests
+## Mots d'écran
 
-Bancs avec break-test : chaque commande déplacée marche à son nouvel endroit et n'existe plus à l'ancien ; « Inspecteur » sans sélection affiche sa phrase ; les quatre niveaux de zoom ; « Rétablir » (grisé, puis actif après « Annuler ») ; la longue-vue ronde (touche L et menu) ; « Dupliquer » dans la Bibliothèque crée une copie, sans toucher l'original. Specs voisins de la carte, Vitest complet. Noms manifestement fictifs.
+La ligne neuve du bilan (« N cartouche(s) déjà présente(s) à l'identique, non ajoutée(s) ») et la ligne des Nouvelles sont soumises à Grégoire par Cowork. **N'y touche pas** tant que Cowork ne t'a pas transmis sa décision.
 
-## 5 · Puis arrête-toi
+## Puis arrête-toi
 
-Commits séparés, **pas de release avant les mots et les captures** : rapport à Grégoire, relecture de Cowork, mots, release minor, verdict (Chrome et Safari fermés), push.
-
-## Ton rapport à Grégoire
-
-En gestes d'utilisateur, numéros entre parenthèses en fin de ligne. Le geste à l'écran, en démo dans une fenêtre privée. Ce que tu as supposé, une ligne par supposition.
+Un commit par correction, en local. `cd tests && npm test` (suite complète) avant la release : `import-export.js` est sous les règles de sécurité ; Chrome, Safari et Cowork fermés. Rapport court : ce qui a changé pour l'usager, le banc et ses mutations, le verdict. **Pas de release** avant le retour de Cowork sur les mots d'écran.

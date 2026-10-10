@@ -313,3 +313,56 @@ describe('Lot 3 · F — le message de fin garde son ordre', () => {
         expect([...ordre].sort((a, b) => a - b)).toEqual(ordre);
     });
 });
+
+describe('Lot 3 · G — relecture du 10 oct. : « même nom » ne suffit pas pour rebrancher', () => {
+    // Le fichier vient d'un collègue : sa grille et son échelle portent le nom des
+    // locales, mais pas les mêmes critères ni les mêmes niveaux.
+    const espaceCommun = () => ({
+        db: fauxDb({
+            [PREFIXE + 'grillesTemplates']: [{ id: 'GR_LOC', nom: 'Grille de rédaction', criteres: [{ id: 'CR_L1' }, { id: 'CR_L2' }] }],
+            [PREFIXE + 'echellesTemplates']: [{ id: 'ECH_LOC', nom: 'Échelle commune', niveaux: [{ code: 'I' }, { code: 'M' }] }]
+        })
+    });
+    const fichierCollegue = (criteres, niveaux) => ({
+        infoCours: { prenomEnseignant: 'Camille', nomEnseignant: 'Fictive' },
+        grillesTemplates: [{ id: 'GR_COL', nom: 'Grille de rédaction', criteres }],
+        echellesTemplates: [{ id: 'ECH_COL', nom: 'Échelle commune', niveaux }],
+        cartouches_GR_COL: [{ id: 'CART_COL', nom: 'Cartouche du collègue', grilleId: 'GR_COL', echelleId: 'ECH_COL',
+            commentaires: { CR_x_A: 'Rétroaction fictive' } }],
+        pratiquesConfigurables: [{ id: 'PRAT_COL', nom: 'Pratique du collègue', echelleId: 'ECH_COL' }],
+        productions: [{ id: 'PROD_COL', titre: 'Production du collègue', grilleId: 'GR_COL', echelleId: 'ECH_COL' }]
+    });
+    const COCHES = { grilles: ['GR_COL'], echelles: ['ECH_COL'], cartouches: ['cartouches_GR_COL'],
+        pratiques: ['PRAT_COL'], productions: ['PROD_COL'] };
+
+    it('G.a grille de même nom, critères différents : rien ne tombe sous la grille locale', async () => {
+        const espace = espaceCommun();
+        await importer(espace, fichierCollegue([{ id: 'CR_x' }, { id: 'CR_y' }], [{ code: 'I' }, { code: 'M' }]), COCHES);
+        expect(lire(espace, 'cartouches_GR_LOC')).toBe(null);
+        expect(lire(espace, 'cartouches_GR_COL').map((c) => c.grilleId)).toEqual(['GR_COL']);
+        expect(lire(espace, 'productions').find((p) => p.id === 'PROD_COL').grilleId).toBe('GR_COL');
+    });
+
+    it('G.b échelle de même nom, codes de niveaux différents : rien ne la désigne', async () => {
+        const espace = espaceCommun();
+        await importer(espace, fichierCollegue([{ id: 'CR_L1' }, { id: 'CR_L2' }], [{ code: 'A' }, { code: 'B' }]), COCHES);
+        expect(lire(espace, 'pratiquesConfigurables').find((p) => p.id === 'PRAT_COL').echelleId).toBe('ECH_COL');
+        expect(lire(espace, 'productions').find((p) => p.id === 'PROD_COL').echelleId).toBe('ECH_COL');
+        expect(lire(espace, 'cartouches_GR_LOC')[0].echelleId).toBe('ECH_COL');
+    });
+
+    it('G.c mêmes critères et mêmes niveaux, dans un autre ordre : la redirection a lieu', async () => {
+        const espace = espaceCommun();
+        await importer(espace, fichierCollegue([{ id: 'CR_L2' }, { id: 'CR_L1' }], [{ code: 'M' }, { code: 'I' }]), COCHES);
+        expect(lire(espace, 'cartouches_GR_COL')).toBe(null);
+        expect(lire(espace, 'cartouches_GR_LOC')[0].grilleId).toBe('GR_LOC');
+        expect(lire(espace, 'pratiquesConfigurables').find((p) => p.id === 'PRAT_COL').echelleId).toBe('ECH_LOC');
+        expect(lire(espace, 'productions').find((p) => p.id === 'PROD_COL').grilleId).toBe('GR_LOC');
+    });
+
+    it('G.d un sous-ensemble de critères ne suffit pas', async () => {
+        const espace = espaceCommun();
+        await importer(espace, fichierCollegue([{ id: 'CR_L1' }], [{ code: 'I' }, { code: 'M' }]), COCHES);
+        expect(lire(espace, 'cartouches_GR_LOC')).toBe(null);
+    });
+});
