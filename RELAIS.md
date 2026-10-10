@@ -7,7 +7,21 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 14 h 17 : **1.196.0 (CE QU'ON IMPORTE D'UNE ANCIENNE SAUVEGARDE ARRIVE ENTIER ET BIEN RANGÉ ; #664, #952, #954, #655) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 17 h 22 : **1.197.0 (RIEN NE SE PERD EN SILENCE ; #845, #938, #522 LOT 5B) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6acaac76`, `commit_ref` `16e3cbe5`, `state: ready`, publié à 21:22:09 Z
+(17 h 22, Toronto). Titre et ligne des Nouvelles retenus par Grégoire (15 h 48), posés tels quels.
+**Relecture de Cowork** : `72479fef` (#845), `ed77035c` (#938), `e02fbe6c` (#522 lot 5b), `72bef975` acceptés sans correction.
+**Verdict complet sur `16e3cbe5`** (Chrome, Safari, Cowork fermés) : code 0, 0 échec, aucun instable, 0 veille. Aucun banc ne figeait
+l'avant-lot. ⚠ Un premier passage lancé sur batterie a été invalidé par une veille du Mac : arrêté, rien poussé, relancé sur secteur.
+Vitest complet vert (hook pré-push).
+**Stock** : #938 — les pratiques déjà rééditées par l'assistant restent sans leurs jetons plats, `affichageNote`, `notesFinales` ;
+rien n'est réparé, le geste de vérification est proposé à Grégoire (carte de la pratique active). #845, #522 : sans stock.
+**Trouvailles** : les 11 gestes R1 hors liste, inscrits à #522 ; `migrerCartouchesVersBibliotheque` rattachée à #1040 ;
+`executerMigrationsBeta96` sans appelant (issue 3).
+**Suite** : la file de Cowork.
+
+## (relais précédent) 10 OCT. 2026, 14 h 17 : **1.196.0 (CE QU'ON IMPORTE D'UNE ANCIENNE SAUVEGARDE ARRIVE ENTIER ET BIEN RANGÉ ; #664, #952, #954, #655) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6aca8026`, `commit_ref` `9588f5b2`, `state: ready`, publié à 18:13:07 Z
 (14 h 13, Toronto). Titre et ligne des Nouvelles retenus par Grégoire (11 h 42), posés tels quels ; la ligne du bilan d'import aussi.

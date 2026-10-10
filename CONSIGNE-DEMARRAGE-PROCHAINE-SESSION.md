@@ -1,5 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 10 octobre 2026, 17 h 22 (Toronto) : `1.197.0` EN LIGNE** (build `1010-1549`) — Netlify
+> `6acaac76`, `commit_ref` `16e3cbe5`, `state: ready`, publié à 21:22:09 Z. Verdict Playwright complet vert sur `16e3cbe5` (code 0,
+> 0 échec connu, aucun instable, 0 veille, sur secteur ; un premier passage, sur batterie, avait été invalidé par une veille et arrêté).
+> **File de Cowork, lot 4 LIVRÉ** (« Rien ne se perd en silence ») : #845, #938 cochées ; #522 bloc 5b livré, les 11 gestes R1
+> restants (`import-export.js` ×7, Réserve ×4) inscrits à la fiche. Relu par Cowork sans correction. **MANDAT COURANT** : le lot
+> suivant de la file, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 10 octobre 2026, 14 h 17 (Toronto) : `1.196.0` EN LIGNE** (build `1010-1143`) — Netlify
 > `6aca8026`, `commit_ref` `9588f5b2`, `state: ready`, publié à 18:13:07 Z. Verdict Playwright complet vert sur `9588f5b2` (code 0,
 > 0 échec connu, aucun instable, 0 veille). 1.195.0 (lot 2 : #467, #585) en ligne depuis 8 h 54. **File de Cowork, lot 3 LIVRÉ** :
