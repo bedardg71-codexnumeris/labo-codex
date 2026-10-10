@@ -985,6 +985,13 @@
             } else {
                 this._removeLocalStorage(key);
             }
+
+            // #845 — le cache mémoire aussi, comme removeSync : get() et getSync()
+            // le lisent EN PREMIER, et une grosse clé n'y vit que là. Sans ce
+            // retrait, la clé supprimée restait lue jusqu'au rechargement. Après
+            // le commit IndexedDB : si la suppression échoue, la clé reste visible
+            // partout, comme elle reste sur le disque.
+            this.memoryCache.delete(key);
         }
 
         /**
