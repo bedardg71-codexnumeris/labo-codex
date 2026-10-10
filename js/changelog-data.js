@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.196 (lot 3 de la file sans Grégoire : #664, #952, #954, #655) — titre et ligne
+            // retenus par Grégoire le 10 oct. 2026 (11 h 42), transmis par Cowork, posés tels quels.
+            version: '1.196',
+            couleur: 'bleu',
+            titre: 'Ce qu\'on importe d\'une ancienne sauvegarde arrive entier et bien rangé',
+            items: [
+                'Quand on importe une sélection depuis une ancienne sauvegarde, les cartouches restent liées à leur grille et apparaissent dans le trimestre ouvert&nbsp;; une cartouche déjà présente n\'est plus ajoutée en double&nbsp;; la méthode de calcul d\'une pratique et les règles d\'une production arrivent complètes.'
+            ]
+        },
+        {
             // 1.195 (lot 2 de la file sans Grégoire : #467, #585) — titre et ligne validés par
             // Grégoire le 10 oct. 2026, transmis par la relecture de Cowork, posés tels quels.
             version: '1.195',
