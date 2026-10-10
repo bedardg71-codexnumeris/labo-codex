@@ -129,12 +129,15 @@ function signatureContenu(valeur, champsIgnores) {
  * @param {Array} existants
  * @param {Array} entrants
  * @param {string} nomCollection - pour le journal console
+ * @param {string[]} [champsPosesParLImport] - #954 : champs que le chemin d'import pose
+ *   lui-même sur l'entrant (`dateImport`…), exclus de la comparaison d'identité.
  * @returns {{liste: Array, ajoutes: number, ignores: number, conflits: number,
  *            renommages: Object<string, string>}} `renommages` : ancienId → id
  *          neuf de chaque entrant renommé pour conflit (#654 — sans lui, rien ne
  *          peut rebrancher ce qui le référençait).
  */
-function fusionnerParIdentite(existants, entrants, nomCollection) {
+function fusionnerParIdentite(existants, entrants, nomCollection, champsPosesParLImport) {
+    const champsHorsIdentite = ['id'].concat(champsPosesParLImport || []);
     const base = Array.isArray(existants) ? existants.slice() : [];
     const arrivants = Array.isArray(entrants) ? entrants : [];
 
@@ -161,8 +164,8 @@ function fusionnerParIdentite(existants, entrants, nomCollection) {
 
         // Même id : est-ce le MÊME élément ? L'id est identique par
         // hypothèse, on ne compare donc que le reste.
-        const sigEnPlace = signatureContenu(enPlace, ['id']);
-        const sigEntrant = signatureContenu(entrant, ['id']);
+        const sigEnPlace = signatureContenu(enPlace, champsHorsIdentite);
+        const sigEntrant = signatureContenu(entrant, champsHorsIdentite);
         if (sigEnPlace !== null && sigEnPlace === sigEntrant) {
             ignores++;   // déjà là, à l'identique : rien à faire
             continue;
@@ -191,6 +194,13 @@ function fusionnerParIdentite(existants, entrants, nomCollection) {
     // l'existant — celle-là reste du ressort de `verifierUniciteIds`.
     return { liste: verifierUniciteIds(base, nomCollection), ajoutes, ignores, conflits, renommages };
 }
+
+/**
+ * #954 (lot 3, 10 oct. 2026) — les champs que l'import sélectif pose sur chaque élément
+ * reçu : l'instant de l'import et l'auteur de la source. Ils ne disent rien du CONTENU ;
+ * comparés, ils rendaient une cartouche identique différente de celle en place.
+ */
+const CHAMPS_POSES_PAR_L_IMPORT = ['dateImport', 'auteurOriginal'];
 
 /**
  * Vérifie l'unicité des IDs dans un tableau d'objets.
@@ -3142,32 +3152,21 @@ async function executerImportSelectif() {
         const auteurSource = analyseImportEnCours?.auteurImport || '';
 
         // ========== RESSOURCES PÉDAGOGIQUES (fusion avec sélection individuelle) ==========
-
-        // Pratiques - ✅ MODIFIÉ pour import sélectif individuel
-        if (hasCheckedItems('pratiques') && donnees.pratiquesConfigurables) {
-            const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
-            const selectedIds = getCheckedItemIds('pratiques');
-
-            if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
-                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || [];
-                const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
-                // 🆕 FIX (31 jan 2026) : Filtrer par ID (pas par nom) pour préserver les références
-                const pratiquesNouvelles = pratiquesImport
-                    .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
-                    .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
-                    .map(p => ({
-                        ...assainirObjet(p, SCHEMAS_IMPORT.pratique),
-                        // IMPORTANT: Garder l'ID original pour préserver les références
-                        dateImport: new Date().toISOString(),
-                        auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
-                    }));
-                if (pratiquesNouvelles.length > 0) {
-                    db.setSync(cle('pratiquesConfigurables'), fusionnerParIdentite(pratiquesExistantes, pratiquesNouvelles, 'pratiques').liste);
-                    compteurs.ressources += pratiquesNouvelles.length;
-                    details.push(`${pratiquesNouvelles.length} pratique(s)`);
-                }
-            }
-        }
+        // Lot 3 de la file (#664, #952 — 10 oct. 2026) : L'ORDRE EST CELUI DES DÉPENDANCES.
+        // Grilles et échelles d'abord : ce sont elles que l'import renomme pour conflit, et
+        // chacun de leurs blocs tient sa table ancien id → nouvel id. Puis les cartouches, les
+        // pratiques et les productions, qui les désignent et sont rebranchées par ces tables —
+        // le patron de l'import complet ci-dessus et de `reserve-ouvrir.js`. Avant, les
+        // pratiques passaient les premières et aucune table n'existait : une production reçue
+        // gardait l'id d'une grille renommée, donc désignait la grille LOCALE de même id.
+        // Le message de fin garde son ordre d'avant (pratiques, grilles, échelles, cartouches,
+        // productions) : chaque bloc range sa ligne dans `bilan`, assemblé à la fin.
+        const remapGrilles = {};
+        const remapEchelles = {};
+        const remapCartouches = {};
+        const bilan = {};
+        const rebrancher = (id, table) =>
+            (id && Object.prototype.hasOwnProperty.call(table, id)) ? table[id] : id;
 
         // Grilles - ✅ MODIFIÉ pour import sélectif individuel
         if (hasCheckedItems('grilles')) {
@@ -3175,22 +3174,29 @@ async function executerImportSelectif() {
             const selectedIds = getCheckedItemIds('grilles');
             let grillesNouvelles = [];
 
-            ['grillesTemplates', 'bibliothequeGrilles'].forEach(cle => {
-                if (donnees[cle]) {
-                    const grillesImport = parseValeur(donnees[cle]);
+            ['grillesTemplates', 'bibliothequeGrilles'].forEach(cleSource => {
+                if (donnees[cleSource]) {
+                    const grillesImport = parseValeur(donnees[cleSource]);
                     if (Array.isArray(grillesImport)) {
                         grillesImport.forEach(g => {
                             // Vérifier si cet item est sélectionné
                             const estSelectionne = selectedIds.includes(g.id) || selectedIds.includes(g.nom);
-                            if (estSelectionne &&
-                                !grillesExistantes.some(ge => ge.nom === g.nom) &&
-                                !grillesNouvelles.some(gn => gn.nom === g.nom)) {
-                                // Vérifier si l'ID existe déjà
+                            if (!estSelectionne) return;
+                            // Une grille de même nom est tenue pour déjà là, et écartée. Ce qui
+                            // désigne la grille reçue suit alors celle-là (#952) : sinon, au
+                            // second passage, ses cartouches iraient sous la grille LOCALE de même id.
+                            const memeNom = grillesExistantes.find(ge => ge.nom === g.nom) ||
+                                grillesNouvelles.find(gn => gn.nom === g.nom);
+                            if (memeNom) {
+                                if (g.id && memeNom.id && memeNom.id !== g.id) remapGrilles[g.id] = memeNom.id;
+                            } else {
+                                // Garder l'ID original sauf si conflit d'ID — et alors, le noter (#952)
                                 const idExiste = grillesExistantes.some(ge => ge.id === g.id);
+                                const nouvelId = idExiste ? genererIdUnique('GRILLE_') : null;
+                                if (nouvelId) remapGrilles[g.id] = nouvelId;
                                 grillesNouvelles.push({
                                     ...assainirObjet(g, SCHEMAS_IMPORT.grille),
-                                    // Garder l'ID original sauf si conflit d'ID
-                                    ...(idExiste ? { id: genererIdUnique('GRILLE_') } : {}),
+                                    ...(nouvelId ? { id: nouvelId } : {}),
                                     dateImport: new Date().toISOString(),
                                     auteurOriginal: assainirChaine(auteurSource || g.auteurOriginal || '', 100)
                                 });
@@ -3203,7 +3209,7 @@ async function executerImportSelectif() {
             if (grillesNouvelles.length > 0) {
                 db.setSync(cle('grillesTemplates'), fusionnerParIdentite(grillesExistantes, grillesNouvelles, 'grilles').liste);
                 compteurs.ressources += grillesNouvelles.length;
-                details.push(`${grillesNouvelles.length} grille(s)`);
+                bilan.grilles = `${grillesNouvelles.length} grille(s)`;
             }
         }
 
@@ -3216,14 +3222,21 @@ async function executerImportSelectif() {
                 const echellesExistantes = db.getSync(cle('echellesTemplates'), []);
                 const echellesNouvelles = echellesImport
                     .filter(e => selectedIds.includes(e.id) || selectedIds.includes(e.nom))
-                    .filter(e => !echellesExistantes.some(ee => ee.nom === e.nom))
+                    .filter(e => {
+                        // Même règle que les grilles (#952) : une échelle de même nom est tenue
+                        // pour déjà là ; ce qui désigne l'échelle reçue suit celle-là.
+                        const memeNom = echellesExistantes.find(ee => ee.nom === e.nom);
+                        if (memeNom && e.id && memeNom.id && memeNom.id !== e.id) remapEchelles[e.id] = memeNom.id;
+                        return !memeNom;
+                    })
                     .map(e => {
-                        // Vérifier si l'ID existe déjà
+                        // Garder l'ID original sauf si conflit d'ID — et alors, le noter (#952)
                         const idExiste = echellesExistantes.some(ee => ee.id === e.id);
+                        const nouvelId = idExiste ? genererIdUnique('ECH_') : null;
+                        if (nouvelId) remapEchelles[e.id] = nouvelId;
                         return {
                             ...assainirObjet(e, SCHEMAS_IMPORT.echelle),
-                            // Garder l'ID original sauf si conflit d'ID
-                            ...(idExiste ? { id: genererIdUnique('ECH_') } : {}),
+                            ...(nouvelId ? { id: nouvelId } : {}),
                             dateImport: new Date().toISOString(),
                             auteurOriginal: assainirChaine(auteurSource || e.auteurOriginal || '', 100)
                         };
@@ -3231,7 +3244,7 @@ async function executerImportSelectif() {
                 if (echellesNouvelles.length > 0) {
                     db.setSync(cle('echellesTemplates'), fusionnerParIdentite(echellesExistantes, echellesNouvelles, 'échelles').liste);
                     compteurs.ressources += echellesNouvelles.length;
-                    details.push(`${echellesNouvelles.length} échelle(s)`);
+                    bilan.echelles = `${echellesNouvelles.length} échelle(s)`;
                 }
             }
         }
@@ -3239,8 +3252,6 @@ async function executerImportSelectif() {
         // #654 (26 sept. 2026) — les cartouches passent AVANT les productions : une
         // cartouche en conflit reçoit un id neuf dans `fusionnerParIdentite`, et la
         // production importée qui la désignait est rebranchée dessus (plus bas).
-        // ⚠ Ce bloc écrit sous la clé NUE (#655, inscrit, hors de ce lot).
-        const remapCartouches = {};
         // Cartouches - #383 (audit 5 août, rapport A2) : la modale liste UNE ligne
         // par grille avec data-item-id = clé `cartouches_<grilleId>` — le filtre
         // se fait donc PAR CLÉ. L'ancien filtre comparait les ids AGRÉGÉS de la
@@ -3250,31 +3261,84 @@ async function executerImportSelectif() {
         if (hasCheckedItems('cartouches')) {
             const selectedIds = getCheckedItemIds('cartouches');
             let nbCartouches = 0;
-            Object.keys(donnees).forEach(cle => {
-                if (cle.startsWith('cartouches_') && selectedIds.includes(cle)) {
-                    const cartouches = parseValeur(donnees[cle]);
+            let nbDejaPresentes = 0;
+            Object.keys(donnees).forEach(cleFichier => {
+                if (cleFichier.startsWith('cartouches_') && selectedIds.includes(cleFichier)) {
+                    const cartouches = parseValeur(donnees[cleFichier]);
                     if (Array.isArray(cartouches) && cartouches.length > 0) {
-                        const cartouchesExistantes = db.getSync(cle, []);
+                        // #655 — rangées dans le TRIMESTRE ACTIF, par `cle()`, comme à l'import
+                        // complet. La variable de boucle s'appelait `cle` et masquait la fonction :
+                        // les cartouches allaient sous la clé nue du fichier, que le trimestre
+                        // actif ne lit pas (namespacée depuis S5/#623).
+                        // #952 — et sous le nouvel id de leur grille, si elle a été renommée.
+                        const grilleIdFichier = cleFichier.slice('cartouches_'.length);
+                        const cleCible = cle('cartouches_' + rebrancher(grilleIdFichier, remapGrilles));
+                        const cartouchesExistantes = db.getSync(cleCible, []);
                         // Assainir via SCHEMAS_IMPORT.cartouche (descend dans
                         // criteres, niveaux, commentaires — MODELE-MENACES §3.1.bis).
                         const cartouchesSelectionnees = cartouches
-                            .map(c => ({
-                                ...assainirObjet(c, SCHEMAS_IMPORT.cartouche),
-                                dateImport: new Date().toISOString(),
-                                auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
-                            }));
+                            .map(c => {
+                                const assainie = assainirObjet(c, SCHEMAS_IMPORT.cartouche);
+                                if (assainie.grilleId) assainie.grilleId = rebrancher(assainie.grilleId, remapGrilles);
+                                if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
+                                return {
+                                    ...assainie,
+                                    dateImport: new Date().toISOString(),
+                                    auteurOriginal: assainirChaine(auteurSource || c.auteurOriginal || '', 100)
+                                };
+                            });
                         if (cartouchesSelectionnees.length > 0) {
-                            const fusionC = fusionnerParIdentite(cartouchesExistantes, cartouchesSelectionnees, 'cartouches');
-                            db.setSync(cle, fusionC.liste);
+                            // #954 — l'identité se juge SANS les champs que l'import pose lui-même :
+                            // `dateImport` (l'instant) rendait chaque cartouche différente de
+                            // celle en place, qui entrait en conflit et naissait en double.
+                            const fusionC = fusionnerParIdentite(cartouchesExistantes, cartouchesSelectionnees,
+                                'cartouches', CHAMPS_POSES_PAR_L_IMPORT);
+                            db.setSync(cleCible, fusionC.liste);
                             Object.assign(remapCartouches, fusionC.renommages);
-                            nbCartouches += cartouchesSelectionnees.length;
+                            nbCartouches += fusionC.ajoutes + fusionC.conflits;
+                            nbDejaPresentes += fusionC.ignores;
                         }
                     }
                 }
             });
             if (nbCartouches > 0) {
                 compteurs.ressources += nbCartouches;
-                details.push(`${nbCartouches} cartouche(s)`);
+                bilan.cartouches = `${nbCartouches} cartouche(s)`;
+            }
+            // #954 — mots neufs, à relire par Cowork.
+            if (nbDejaPresentes > 0) {
+                bilan.cartouchesDejaPresentes = `${nbDejaPresentes} cartouche(s) déjà présente(s) à l'identique, non ajoutée(s)`;
+            }
+        }
+
+        // Pratiques - ✅ MODIFIÉ pour import sélectif individuel
+        // #664 — après les échelles : son `echelleId` suit une échelle renommée pour conflit.
+        if (hasCheckedItems('pratiques') && donnees.pratiquesConfigurables) {
+            const pratiquesImport = parseValeur(donnees.pratiquesConfigurables);
+            const selectedIds = getCheckedItemIds('pratiques');
+
+            if (Array.isArray(pratiquesImport) && pratiquesImport.length > 0) {
+                const pratiquesExistantes = db.getSync(cle('pratiquesConfigurables'), null) || [];
+                const idsPratiquesExistants = new Set(pratiquesExistantes.map(p => p.id));
+                // 🆕 FIX (31 jan 2026) : Filtrer par ID (pas par nom) pour préserver les références
+                const pratiquesNouvelles = pratiquesImport
+                    .filter(p => selectedIds.includes(p.id) || selectedIds.includes(p.nom))
+                    .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
+                    .map(p => {
+                        const assainie = assainirObjet(p, SCHEMAS_IMPORT.pratique);
+                        if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
+                        return {
+                            ...assainie,
+                            // IMPORTANT: Garder l'ID original pour préserver les références
+                            dateImport: new Date().toISOString(),
+                            auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
+                        };
+                    });
+                if (pratiquesNouvelles.length > 0) {
+                    db.setSync(cle('pratiquesConfigurables'), fusionnerParIdentite(pratiquesExistantes, pratiquesNouvelles, 'pratiques').liste);
+                    compteurs.ressources += pratiquesNouvelles.length;
+                    bilan.pratiques = `${pratiquesNouvelles.length} pratique(s)`;
+                }
             }
         }
 
@@ -3293,11 +3357,11 @@ async function executerImportSelectif() {
         }
 
         // 2. Clés productions et *_productions (namespacées)
-        Object.keys(donnees).forEach(cle => {
-            if (cle === 'productions' || cle.endsWith('_productions')) {
-                const prods = parseValeur(donnees[cle]);
+        Object.keys(donnees).forEach(cleSource => {
+            if (cleSource === 'productions' || cleSource.endsWith('_productions')) {
+                const prods = parseValeur(donnees[cleSource]);
                 if (Array.isArray(prods) && prods.length > 0) {
-                    clesProdsSource.push(cle);
+                    clesProdsSource.push(cleSource);
                     allProdsImport = allProdsImport.concat(prods);
                 }
             }
@@ -3324,12 +3388,16 @@ async function executerImportSelectif() {
                 .map(p => {
                     // Vérifier si l'ID existe déjà
                     const idExiste = prodsExistantes.some(pe => pe.id === p.id);
+                    const assainie = assainirObjet(p, SCHEMAS_IMPORT.production);
+                    // #952 — rebranchée sur la grille et l'échelle renommées pour conflit ;
+                    // #654 — et sur la cartouche.
+                    if (assainie.grilleId) assainie.grilleId = rebrancher(assainie.grilleId, remapGrilles);
+                    if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
+                    if (assainie.cartoucheId) assainie.cartoucheId = rebrancher(assainie.cartoucheId, remapCartouches);
                     return {
-                        ...assainirObjet(p, SCHEMAS_IMPORT.production),
+                        ...assainie,
                         // Garder l'ID original sauf si conflit d'ID
                         ...(idExiste ? { id: genererIdUnique('PROD_') } : {}),
-                        // #654 — rebranchée si sa cartouche a été renommée pour conflit.
-                        ...(p.cartoucheId && remapCartouches[p.cartoucheId] ? { cartoucheId: remapCartouches[p.cartoucheId] } : {}),
                         dateImport: new Date().toISOString(),
                         auteurOriginal: assainirChaine(auteurSource || p.auteurOriginal || '', 100)
                     };
@@ -3337,10 +3405,13 @@ async function executerImportSelectif() {
             if (prodsNouvelles.length > 0) {
                 db.setSync(cleProductions, fusionnerParIdentite(prodsExistantes, prodsNouvelles, 'productions').liste);
                 compteurs.ressources += prodsNouvelles.length;
-                details.push(`${prodsNouvelles.length} production(s)`);
+                bilan.productions = `${prodsNouvelles.length} production(s)`;
             }
         }
 
+        ['pratiques', 'grilles', 'echelles', 'cartouches', 'cartouchesDejaPresentes', 'productions'].forEach(famille => {
+            if (bilan[famille]) details.push(bilan[famille]);
+        });
         // ========== DONNÉES DU COURS ==========
         // #1012 : « Étudiants », « Présences », « Notes » et « Annotations » s'AJOUTENT à ce que
         // l'espace a (fusionnerDonneesPersoImportees) ; les comptes disent ce qui est entré.
