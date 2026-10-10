@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.197 (lot 4 de la file sans Grégoire : #845, #938, #522 lot 5b) — titre et ligne
+            // retenus par Grégoire le 10 oct. 2026 (15 h 48), transmis par Cowork, posés tels quels.
+            version: '1.197',
+            couleur: 'orange',
+            titre: 'Rien ne se perd en silence',
+            items: [
+                'Rouvrir une pratique de notation dans l\'assistant ne lui fait plus perdre ses jetons ni son réglage «&nbsp;notes finales&nbsp;»&nbsp;; deux gestes faits coup sur coup ne s\'effacent plus l\'un l\'autre&nbsp;; et ce qu\'on supprime disparaît aussitôt de l\'écran.'
+            ]
+        },
+        {
             // 1.196 (lot 3 de la file sans Grégoire : #664, #952, #954, #655) — titre et ligne
             // retenus par Grégoire le 10 oct. 2026 (11 h 42), transmis par Cowork, posés tels quels.
             version: '1.196',
