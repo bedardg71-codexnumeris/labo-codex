@@ -15,6 +15,21 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 10 OCTOBRE 2026 : 1.195.0 puis 1.196.0 (la dernière publiée à 14 h 13, mesurée chez Netlify sur `9588f5b2` ; verdict complet vert sur chacune) — CE QU'ON IMPORTE D'UNE ANCIENNE SAUVEGARDE ARRIVE ENTIER ET BIEN RANGÉ ; CE QU'ON REÇOIT D'UN COLLÈGUE RESTE DU TEXTE**
+
+**Ce que tu verras** :
+- « Importer » une sélection depuis une ancienne sauvegarde : les cartouches restent liées à leur grille et apparaissent dans le trimestre ouvert ; une cartouche déjà là n'entre plus en double, et le bilan le dit (« N cartouche(s) déjà présente(s) à l'identique, non ajoutée(s) ») ; la méthode de calcul d'une pratique et les règles d'une production arrivent complètes (#664, #952, #954, #655).
+- Une grille d'un collègue qui porte le même nom qu'une des tiennes, mais pas les mêmes critères, ne s'y rattache pas.
+- 1.195.0 : un nom reçu d'un collègue (grille, échelle, cartouche, pratique, tampon) s'affiche toujours comme du texte, même importé avant (#467, #585).
+
+**Vérifié comment** : des bancs seulement — le vrai geste d'import (fichier déposé, cases cochées, « Importer la sélection ») sur un espace fictif : liens suivis, cartouche identique écartée au premier et au second passage, rien sous une clé hors trimestre ; chaque correctif retiré fait échouer son banc ; une ancienne copie de secours (1.172.0) s'ouvre avec ses grilles entières ; verdict complet au navigateur vert sur le commit publié. **Pas vérifié** : un import sélectif sur tes vrais fichiers.
+
+**Tes données** : rien n'est réécrit. Les cartouches déjà importées en double, ou rangées hors du trimestre par une version d'avant, restent où elles sont.
+
+**Ce qui reste** : côté sessions, sans toi : l'import sélectif ne propose pas encore les grilles d'une sauvegarde récente rangées par trimestre (#1046).
+
+---
+
 ✅ **EN LIGNE LE 9 OCTOBRE 2026 : 1.193.0 puis 1.194.0 (la dernière publiée à 19 h 08, mesurée chez Netlify sur `9c7ebb26` ; verdict complet vert sur chacune) — L'ARCHIVE D'UN GROUPE N'EMPORTE QUE CE GROUPE ; « VÉRIFIER » NE DEMANDE PLUS LA PERMISSION DE MODIFIER**
 
 **Ce que tu verras** :

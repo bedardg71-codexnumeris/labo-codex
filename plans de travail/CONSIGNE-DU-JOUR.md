@@ -27,3 +27,17 @@ Les 8 derniers passages Playwright planifiés annulés sur GitHub : **inscris-le
 ## Puis arrête-toi
 
 Rapport court : la version en ligne, l'heure, le verdict (et ses instables nommés), et le geste que Grégoire peut vérifier à l'écran.
+
+## Ajout de Cowork (12 h 43) – décision de Grégoire sur #1048
+
+**Décision de Grégoire (10 oct., 12 h 43) : on arrête le passage Playwright de nuit sur GitHub.** Il ne se lance plus qu'à la demande (`workflow_dispatch` garde). On ne relève pas `timeout-minutes`.
+
+Motif : le job est coupé à 60 min depuis au moins le 3 octobre, il ne juge plus rien et consomme une heure de minutes par jour ; la limite a déjà été relevée deux fois (15 → 40 → 60). Le garde-fou réel est le verdict complet local avant chaque push.
+
+**Quand :** APRÈS le push de 1.196.0 et ses documents, dans un commit séparé. Rien avant que le verdict en cours soit rendu.
+
+À faire :
+1. `.github/workflows/tests.yml` : retirer le déclencheur `schedule` ; garder `workflow_dispatch` ; mettre à jour le commentaire d'en-tête (ligne 6) et celui du job 3, avec la date et le motif.
+2. Le rituel d'ouverture lit l'état de ce job (« Sauté = `skipped`, jamais `success` ») : vérifie ce qui le lit (`garde`, `DERNIER`, rituel d'ouverture, `CLAUDE.md`, `PROTOCOLE.md`) et ajuste pour qu'un passage de nuit absent ne soit plus lu comme un manque ni comme un succès.
+3. #1048 au BACKLOG : inscrite avec ta mesure, et close par cette décision.
+4. Push (fichier de workflow et documents seulement : aucun verdict navigateur requis, Vitest au push suffit).
