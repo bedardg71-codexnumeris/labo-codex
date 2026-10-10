@@ -7,7 +7,14 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 20 h 30 : **LOT 2 DE LA FILE (#467, #585) CODÉ SUR `main` LOCAL, NON POUSSÉ ; VERDICT PLAYWRIGHT NON JUGÉ (MÉMOIRE)**
+## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 21 h 52 : **LOT 2 (#467, #585) RELU, CORRIGÉ, VERDICT VERT SUR `7c6954bf` ; NON POUSSÉ, PAS DE RELEASE**
+
+**Relecture de Cowork** : un défaut bloquant (icônes `<img>` constantes de la palette échappées) corrigé en `7c6954bf`, banc et break-test ;
+trouvaille hors lot (import sélectif) NON inscrite, elle entre dans la consigne du lot 3. **Verdict Playwright complet sur `7c6954bf`** :
+code 0, 0 échec, 0 instable, 0 veille, échange 3,8 Go au plus haut (20 h 45 → 21 h 51). **Suite** : ligne des Nouvelles validée par
+Grégoire (proposée au § 8 de la demande de relecture), puis release mineure et push. `main` local : 5 commits d'avance (6 avec ce relais).
+
+## (relais précédent) 9 OCT. 2026, 20 h 30 : **LOT 2 DE LA FILE (#467, #585) CODÉ SUR `main` LOCAL, NON POUSSÉ ; VERDICT PLAYWRIGHT NON JUGÉ (MÉMOIRE)**
 
 **Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 19 h 10). **Commits locaux** : `30033ad6` #585 ; `2be60b00` #467
 imports JSON ; `880e391c` #467 affichage ; puis BACKLOG et `plans de travail/DEMANDE-RELECTURE-2026-10-09-lot2-echappement.md`.
