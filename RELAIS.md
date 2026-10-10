@@ -7,7 +7,14 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 8 h 56 : **1.195.0 (CE QU'ON REÇOIT D'UN COLLÈGUE RESTE DU TEXTE ; #467, #585) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 10 h 31 : **LOT 3 DE LA FILE (IMPORT SÉLECTIF ; #664, #952, #954, #655, LISTES BLANCHES) CODÉ SUR `main` LOCAL, NON POUSSÉ ; PAS DE RELEASE**
+
+**Consigne** : `plans de travail/CONSIGNE-DU-JOUR.md` (Cowork, 10 h 13). **Commits locaux** : `95c98004` listes blanches et nombre en texte ;
+`c2be076a` ordre, tables, identité des cartouches, trimestre actif ; puis BACKLOG et `plans de travail/DEMANDE-RELECTURE-2026-10-10-lot3-import-selectif.md`.
+**Mesuré** : Vitest complet 705 / 8 468 vert ; banc neuf 13 essais, 12 mutations toutes rouges. **#545** : l'import exclu par la mesure, fiche ouverte.
+**Suite** : relecture de Cowork ; puis verdict Playwright complet (`import-export.js` est sous les règles de sécurité), ligne des Nouvelles à Grégoire, release mineure.
+
+## (relais précédent) 10 OCT. 2026, 8 h 56 : **1.195.0 (CE QU'ON REÇOIT D'UN COLLÈGUE RESTE DU TEXTE ; #467, #585) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6aca3562`, `commit_ref` `976fc133`, `state: ready`, publié à 12:54:05 Z
 (8 h 54, Toronto). Titre et ligne des Nouvelles validés par Grégoire, posés tels quels. **Verdict complet sur `976fc133`** (Chrome, Safari,
