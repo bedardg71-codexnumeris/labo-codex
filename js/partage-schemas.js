@@ -566,7 +566,10 @@
         dateAjoutBiblio: 'date d\'ajout à la bibliothèque de CETTE personne — un état local ; la duplication chez le destinataire la retire aussi',
         estDemo: 'drapeau du pack démo — retiré silencieusement à la réception (CHAMPS_RETIRES_SILENCIEUSEMENT)',
         isDemo: 'drapeau du pack démo — retiré silencieusement à la réception (CHAMPS_RETIRES_SILENCIEUSEMENT)',
-        verrouille: 'verrou posé par CETTE personne sur son échelle — le destinataire décide du sien'
+        verrouille: 'verrou posé par CETTE personne sur son échelle — le destinataire décide du sien',
+        // Lot 3 (10 oct. 2026) : connus de l'import sélectif depuis ce jour ; le partage n'a pas changé.
+        metadata: 'résidu du formulaire CC quand metadata_cc manque — la licence et l\'attribution voyagent par metadata_cc et le manifeste',
+        institution: 'copie à la racine de metadata_cc.institution (cc-license.js) — l\'attribution voyage par le manifeste, pas par la racine'
     };
 
     // ------------------------------------------------------------------

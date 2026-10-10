@@ -437,6 +437,23 @@ const CLES_ECHELLE_NON_TRANSPORTEES = {
 };
 
 /**
+ * Lot 3 (10 oct. 2026) — UN NOMBRE ÉCRIT EN TEXTE EST UN NOMBRE. Les éditeurs
+ * d'échelles écrivent `niveaux[].valeurCalcul` tel que le champ le rend, en texte
+ * (« 40 », mesuré dans le codex de banc 1.172.0). Le type `'number'` le ramenait à 0 :
+ * l'échelle importée calculait avec des valeurs que personne n'avait choisies.
+ * Seul un texte qui est un nombre décimal simple est converti (virgule acceptée) ;
+ * tout le reste retombe à 0, comme avant.
+ */
+function nombreImporte(valeur) {
+    if (typeof valeur === 'number') return valeur;
+    if (typeof valeur === 'string') {
+        const texte = valeur.trim().replace(',', '.');
+        if (/^-?\d+(\.\d+)?$/.test(texte)) return Number(texte);
+    }
+    return 0;
+}
+
+/**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
  * @param {Object} obj - Objet à assainir
  * @param {Object} schema - Schéma { nomProp: { type, maxLen?, schema? } }
@@ -465,7 +482,7 @@ function assainirObjet(obj, schema) {
                 resultat[cle] = assainirChaine(valeur, spec.maxLen || 500);
                 break;
             case 'number':
-                resultat[cle] = typeof valeur === 'number' ? valeur : 0;
+                resultat[cle] = nombreImporte(valeur);
                 break;
             case 'numberOrNull':
                 // Un nombre dont `null` est une VALEUR, pas une absence.
@@ -476,8 +493,7 @@ function assainirObjet(obj, schema) {
                 // mais elle rattraperait une donnée déjà fausse EN BASE, et
                 // `_palierNeuf` (`grilles.js:4874`) lit les paliers bruts sans
                 // passer par ce rattrapage.
-                resultat[cle] = valeur === null ? null
-                    : (typeof valeur === 'number' ? valeur : 0);
+                resultat[cle] = valeur === null ? null : nombreImporte(valeur);
                 break;
             case 'boolean':
                 resultat[cle] = !!valeur;
@@ -663,10 +679,47 @@ const SCHEMA_METADATA_CC = {
             type: 'array',
             schema: {
                 nom: { type: 'string', maxLen: 100 },
-                date: { type: 'string', maxLen: 50 }
+                date: { type: 'string', maxLen: 50 },
+                modifications: { type: 'string', maxLen: 1000 }
             }
-        }
+        },
+        // Lot 3 (10 oct. 2026) — ce que `ajouterMetadonnéesCC` (cc-license.js) écrit
+        // aussi, et que la liste blanche faisait disparaître à l'import sélectif et à
+        // l'ajout en Bibliothèque. Recensé dans le code, pas seulement dans les fixtures.
+        date_creation: { type: 'string', maxLen: 50 },
+        date_modification: { type: 'string', maxLen: 50 },
+        licence_url: { type: 'string', maxLen: 500 },
+        licence_resume: { type: 'string', maxLen: 1000 },
+        email_auteur: { type: 'string', maxLen: 200 },
+        site_auteur: { type: 'string', maxLen: 500 },
+        type: { type: 'string', maxLen: 100 },
+        nom: { type: 'string', maxLen: 200 },
+        version: { type: 'string', maxLen: 50 },
+        attribution: { type: 'string', maxLen: 1000 },
+        niveau: { type: 'string', maxLen: 100 },
+        institution: { type: 'string', maxLen: 200 },
+        discipline: { type: 'arrayStrings', maxLen: 100 },
+        // La forme qu'écrit le formulaire CC d'une pratique (pratiques.js, cc-license.js).
+        auteur: { type: 'string', maxLen: 100 },
+        courriel: { type: 'string', maxLen: 200 },
+        siteWeb: { type: 'string', maxLen: 500 }
     }
+};
+
+/**
+ * Lot 3 (10 oct. 2026) — les deux champs CC que `cc-license.js` écrit à la RACINE
+ * d'une ressource : `metadata` (quand `metadata_cc` manque, même contenu) et
+ * `institution`. Communs aux cinq types.
+ *
+ * Ce qui reste HORS des listes blanches, délibérément (recensé le même jour) :
+ * `idOriginal` et `inspireDeTrimestre` (traces locales d'un import ou d'un emprunt —
+ * voir `CLES_ECHELLE_NON_TRANSPORTEES`, #542), `coursId` d'une production
+ * (`CLES_PRODUCTION_NON_TRANSPORTEES`), `etablissement` d'une pratique (donnée
+ * d'auteur, interdite au partage : `partage-schemas.js`), `inspireDe.idOriginal`.
+ */
+const CHAMPS_CC_RACINE = {
+    metadata: SCHEMA_METADATA_CC,
+    institution: { type: 'string', maxLen: 200 }
 };
 
 /** Sous-schéma `inspireDe` (filiation Plan §4.3) réutilisé sur tous les types.
@@ -699,6 +752,7 @@ const SCHEMAS_IMPORT = {
                 niveauSOLO: { type: 'string', maxLen: 50 },
                 verrouille: { type: 'boolean' },
                 obligatoire: { type: 'boolean' },
+                estStandard: { type: 'boolean' },   // Lot 3 — critère d'un gabarit STD
                 // Codes par grille (3 sept. 2026) — le geste d'activation voyage avec la grille.
                 codesDepuisSousCriteres: { type: 'boolean' },
                 facteurNormalisation: { type: 'number' },
@@ -735,7 +789,8 @@ const SCHEMAS_IMPORT = {
                         motsReference: { type: 'number' },
                         erreursTolerees: { type: 'number' },
                         nomServiceAide: { type: 'string', maxLen: 200 },
-                        lienServiceAide: { type: 'string', maxLen: 500 }
+                        lienServiceAide: { type: 'string', maxLen: 500 },
+                        libelleSignalement: { type: 'string', maxLen: 200 }   // Lot 3 — #790
                     }
                 },
                 paliersProjection: {
@@ -744,6 +799,7 @@ const SCHEMAS_IMPORT = {
                         cle: { type: 'string', maxLen: 100 },
                         libelle: { type: 'string', maxLen: 200 },
                         sansErreur: { type: 'boolean' },
+                        leveSignalement: { type: 'boolean' },   // Lot 3 — #790
                         // `null` = palier TERMINAL. Voir `numberOrNull` : le
                         // type `'number'` en ferait un 0, c'est-à-dire un seuil.
                         ratioMax: { type: 'numberOrNull' },
@@ -819,8 +875,15 @@ const SCHEMAS_IMPORT = {
         description: { type: 'string', maxLen: 500 },
         dansBibliotheque: { type: 'boolean' },
         dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        // Lot 3 — perdus jusqu'ici (codex de banc 1.172.0, gabarits-utils.js, grilles.js).
+        pratiques: { type: 'arrayStrings', maxLen: 50 },          // codes de pratique d'un gabarit
+        pratiquesCompatibles: { type: 'arrayStrings', maxLen: 50 },
+        estGabarit: { type: 'boolean' },
+        baseSur: { type: 'string', maxLen: 100 },                 // filiation, lue par grilles.js
+        discipline: { type: 'string', maxLen: 100 },
         metadata_cc: SCHEMA_METADATA_CC,
-        inspireDe: SCHEMA_INSPIRE_DE
+        inspireDe: SCHEMA_INSPIRE_DE,
+        ...CHAMPS_CC_RACINE
     },
     echelle: {
         id: { type: 'string', maxLen: 100 },
@@ -891,7 +954,8 @@ const SCHEMAS_IMPORT = {
         dansBibliotheque: { type: 'boolean' },
         dateAjoutBiblio: { type: 'string', maxLen: 50 },
         metadata_cc: SCHEMA_METADATA_CC,
-        inspireDe: SCHEMA_INSPIRE_DE
+        inspireDe: SCHEMA_INSPIRE_DE,
+        ...CHAMPS_CC_RACINE
     },
     pratique: {
         id: { type: 'string', maxLen: 100 },
@@ -933,8 +997,42 @@ const SCHEMAS_IMPORT = {
         discipline: { type: 'string', maxLen: 100 },
         dansBibliotheque: { type: 'boolean' },
         dateAjoutBiblio: { type: 'string', maxLen: 50 },
+        // Lot 3 — LA CONFIGURATION DE CALCUL SE PERDAIT. `calcul_note.methode` décide
+        // comment la note est calculée (wizard-pratique-v2.js) ; sans lui, la pratique
+        // reçue retombait sur un défaut. Mesuré sur le codex de banc 1.172.0.
+        calcul_note: {
+            type: 'object',
+            schema: {
+                methode: { type: 'string', maxLen: 60 },
+                // Aucun écrivain actuel ; même compromis que `configuration`.
+                conditions_speciales: { type: 'array' }
+            }
+        },
+        echelle: {
+            type: 'object',
+            schema: {
+                type: { type: 'string', maxLen: 60 },
+                niveaux: {
+                    type: 'array',
+                    schema: {
+                        code: { type: 'string', maxLen: 20 },
+                        label: { type: 'string', maxLen: 100 },
+                        valeur_pourcentage: { type: 'number' },
+                        ordre: { type: 'number' }
+                    }
+                }
+            }
+        },
+        // Config exécutable résolue (pratiques.js, pratique-manager.js) : même
+        // compromis que `configuration` ci-dessus, copiée brute.
+        config: { type: 'object' },
+        variante: { type: 'string', maxLen: 60 },
+        reglesSpeciales: { type: 'arrayStrings', maxLen: 100 },
+        nbEvaluationsPrevues: { type: 'number' },
+        estMaquette: { type: 'boolean' },
         metadata_cc: SCHEMA_METADATA_CC,
-        inspireDe: SCHEMA_INSPIRE_DE
+        inspireDe: SCHEMA_INSPIRE_DE,
+        ...CHAMPS_CC_RACINE
     },
     production: {
         id: { type: 'string', maxLen: 100 },
@@ -1004,9 +1102,21 @@ const SCHEMAS_IMPORT = {
                 date: { type: 'string', maxLen: 50 }
             }
         },
+        // Lot 3 — perdus jusqu'ici (pack démo, codex de banc 1.172.0). `regles` est lu
+        // par portfolio.js et productions.js : combien de productions retenir.
+        regles: {
+            type: 'object',
+            schema: {
+                nombreARetenir: { type: 'number' },
+                minimumCompletion: { type: 'number' },
+                nombreTotal: { type: 'number' }
+            }
+        },
+        code: { type: 'string', maxLen: 50 },
 
         metadata_cc: SCHEMA_METADATA_CC,
-        inspireDe: SCHEMA_INSPIRE_DE
+        inspireDe: SCHEMA_INSPIRE_DE,
+        ...CHAMPS_CC_RACINE
     },
     cartouche: {
         id: { type: 'string', maxLen: 100 },
@@ -1032,6 +1142,10 @@ const SCHEMAS_IMPORT = {
         // rétroaction. Vecteur principal d'injection sur les cartouches : tous
         // les commentaires sont assainis par `mapStrings`.
         commentaires: { type: 'mapStrings', maxLen: 1000 },
+        // Lot 3 — le contenu que cartouches.js écrit et que la liste blanche jetait.
+        description: { type: 'string', maxLen: 2000 },
+        contexteSpecifique: { type: 'string', maxLen: 2000 },
+        pratiquesCompatibles: { type: 'arrayStrings', maxLen: 50 },
         verrouille: { type: 'boolean' },
         auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },
@@ -1043,7 +1157,8 @@ const SCHEMAS_IMPORT = {
         dansBibliotheque: { type: 'boolean' },
         dateAjoutBiblio: { type: 'string', maxLen: 50 },
         metadata_cc: SCHEMA_METADATA_CC,
-        inspireDe: SCHEMA_INSPIRE_DE
+        inspireDe: SCHEMA_INSPIRE_DE,
+        ...CHAMPS_CC_RACINE
     },
     tampon: {
         id: { type: 'string', maxLen: 100 },

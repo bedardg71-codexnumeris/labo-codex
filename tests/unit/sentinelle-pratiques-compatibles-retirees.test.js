@@ -87,8 +87,10 @@ describe('pratiques compatibles retirées · P.b — les deux témoins de la con
         expect(typeof G.lirePratiquesSelectionnees).toBe('function');
     });
 
-    it('P.b.2 TÉMOIN INVERSE — le transport n\'a pas bougé : import-export.js compte toujours trois `pratiquesCompatibles`, et le partage le déclare', () => {
-        expect((source('js/import-export.js').match(/pratiquesCompatibles/g) || []).length).toBe(3);
+    // Lot 3 de la file (10 oct. 2026) : trois → cinq. Le champ « voyage toujours » (décision
+    // ci-dessus) ; la liste blanche le jetait encore sur les grilles et les cartouches.
+    it('P.b.2 TÉMOIN INVERSE — le transport n\'a pas reculé : import-export.js compte cinq `pratiquesCompatibles`, et le partage le déclare', () => {
+        expect((source('js/import-export.js').match(/pratiquesCompatibles/g) || []).length).toBe(5);
         expect(source('js/partage-schemas.js')).toMatch(/pratiquesCompatibles/);
     });
 });
