@@ -107,10 +107,11 @@ test('#654 · import sélectif : la production importée désigne la cartouche v
     const erreurs = [];
     await ouvrir(page, erreurs);
     await page.evaluate(({ CART_LOCALE }) => {
-        // ⚠ Ce chemin écrit les cartouches sous la clé NUE (#655, hors lot) : la collision
-        // se pose donc là où il lit.
+        // Depuis #655 (lot 3, 10 oct. 2026), ce chemin range les cartouches sous la clé du
+        // trimestre actif, `cle('cartouches_…')` : la collision se pose donc là. (Avant, il
+        // écrivait sous la clé NUE, et ce banc posait et lisait là.)
         // security-ok: fixture littérale du banc, aucune source externe.
-        window.db.setSync('cartouches_G654', [CART_LOCALE]);
+        window.db.setSync(cle('cartouches_G654'), [CART_LOCALE]);
         window.db.setSync(cle('productions'), []);
     }, { CART_LOCALE });
     await choisirFichierImport(page, 'brut-654.json',
@@ -119,7 +120,7 @@ test('#654 · import sélectif : la production importée désigne la cartouche v
         const cases = [...document.querySelectorAll('.import-item-productions, .import-item-cartouches')];
         cases.forEach(c => { c.checked = true; });
         await window.executerImportSelectif();
-        const cartouches = window.db.getSync('cartouches_G654', []);
+        const cartouches = window.db.getSync(cle('cartouches_G654'), []);
         const prod = (window.db.getSync(cle('productions'), []) || []).find(p => p.titre === 'Analyse 654') || {};
         const designee = cartouches.find(c => c.id === prod.cartoucheId) || null;
         return { nbCases: cases.length, nbCartouches: cartouches.length, cartoucheId: prod.cartoucheId, designee: designee && designee.nom };
