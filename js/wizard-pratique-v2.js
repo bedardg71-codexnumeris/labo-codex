@@ -2918,6 +2918,58 @@ function conserverConfigurationSpecifications(pratique, existante) {
 }
 
 /**
+ * #938 (10 oct. 2026) — L'ASSISTANT GARDE CE QU'IL N'ÉDITE PAS.
+ * Il reconstruit l'objet à neuf ; tout champ réglé ailleurs (formulaire de gestion, partage CC) partait au premier
+ * enregistrement. Mesuré par le vrai code, une pratique passée au formulaire puis rouverte par l'assistant perdait :
+ * le bloc plat `jetons` (sommative, standards, dénotation — le moteur le lit en dernier recours), `affichageNote`
+ * (lu par l'évaluation : note en lettre), `configuration.notesFinales` (lu par le calcul de la note finale), et les
+ * catégories inactives d'une Standards. On nomme donc ce que l'assistant ÉDITE ; le reste de la pratique enregistrée
+ * passe tel quel. S'il édite un champ, sa valeur l'emporte, même absente (une règle décochée, un seuil vidé).
+ * - Les jetons : l'assistant n'écrit que `configuration.jetons`, et seulement pour une spécification ; le moteur le lit
+ *   AVANT le bloc plat du formulaire. Aucun conflit : chacun garde le sien, le moteur tranche comme avant.
+ * - La configuration ne passe que si la famille ne change pas : celle d'une autre famille ne s'applique pas.
+ *   Les spécifications ont déjà leur passage (`conserverConfigurationSpecifications`, lot N4).
+ * - Les catégories d'une Standards : leur absence dit « inactives ». Un bloc enregistré inactif reste ; un bloc actif
+ *   que l'assistant n'écrit plus a été désactivé par lui (sortie du mode hybride) et ne revient pas.
+ * Mute et rend `pratique`.
+ * @param {Object} pratique - l'objet reconstruit par l'assistant
+ * @param {Object} existante - l'objet enregistré qu'il remplace
+ * @returns {Object} pratique
+ */
+const CHAMPS_EDITES_PAR_L_ASSISTANT = ['id', 'nom', 'auteur', 'etablissement', 'description', 'discipline', 'type',
+    'variante', 'pratiques', 'dansBibliotheque', 'dateCreation', 'configuration', 'calcul_note', 'seuils',
+    'nbEvaluationsPrevues', 'reglesSpeciales'];
+const CONFIGURATION_EDITEE_PAR_L_ASSISTANT = {
+    sommative: ['conditions_speciales'],
+    standards: ['approcheEvaluation', 'echelleId', 'grilleId', 'portfolio', 'categories'],
+    denotation: ['type', 'modeDEN', 'objectifs', 'suggestion', 'echelleId', 'grilleId']
+};
+function conserverCeQueLAssistantNEditePas(pratique, existante) {
+    if (!pratique || !existante) return pratique;
+    const clone = (v) => JSON.parse(JSON.stringify(v));
+    for (const champ of Object.keys(existante)) {
+        if (!CHAMPS_EDITES_PAR_L_ASSISTANT.includes(champ) && pratique[champ] === undefined && existante[champ] !== undefined) {
+            pratique[champ] = clone(existante[champ]);
+        }
+    }
+    const canon = (t) => (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(t) : t);
+    const editee = CONFIGURATION_EDITEE_PAR_L_ASSISTANT[canon(pratique.type)];
+    const avant = existante.configuration;
+    if (!editee || canon(pratique.type) !== canon(existante.type) || !avant) return pratique;
+    pratique.configuration = pratique.configuration || {};
+    for (const champ of Object.keys(avant)) {
+        if (!editee.includes(champ) && pratique.configuration[champ] === undefined && avant[champ] !== undefined) {
+            pratique.configuration[champ] = clone(avant[champ]);
+        }
+    }
+    if (canon(pratique.type) === 'standards' && pratique.configuration.categories === undefined
+        && avant.categories && avant.categories.actif !== true) {
+        pratique.configuration.categories = clone(avant.categories);
+    }
+    return pratique;
+}
+
+/**
  * Sauvegarde la pratique dans le stockage
  * 🆕 FIX (20 jan 2026) : Sauvegarde robuste avec vérification
  * @param {Object} pratique - Objet pratique à sauvegarder
@@ -2931,15 +2983,11 @@ async function sauvegarderPratique(pratique) {
     const index = pratiques.findIndex(p => p.id === pratique.id);
     if (index >= 0) {
         // CO-01 (Bloquant, audit Conception 20-21 août 2026) : l'édition wizard
-        // reconstruit l'objet à neuf — on FUSIONNE ici l'enveloppe que l'assistant
-        // ne sait pas éditer, au lieu de la détruire. Invariant CC (SPEC D §3.1) :
-        // inspireDe n'est JAMAIS effacé.
+        // reconstruit l'objet à neuf — on FUSIONNE l'enveloppe que l'assistant ne
+        // sait pas éditer, au lieu de la détruire. Invariant CC (SPEC D §3.1) :
+        // inspireDe n'est JAMAIS effacé. #938 : l'enveloppe n'est plus une liste de
+        // quatre champs, c'est tout ce que l'assistant n'édite pas (plus bas).
         const existante = pratiques[index];
-        ['inspireDe', 'estMaquette', 'metadata_cc', 'isDemo'].forEach((champ) => {
-            if (pratique[champ] === undefined && existante[champ] !== undefined) {
-                pratique[champ] = existante[champ];
-            }
-        });
         // La construction réécrit dateCreation et force dansBibliotheque:true —
         // l'édition ne change ni la date de naissance, ni le statut de sidebar
         // (une maquette adoptée passe par « Adopter », pas par « Enregistrer »).
@@ -2951,6 +2999,7 @@ async function sauvegarderPratique(pratique) {
         conserverReglesRetirees(pratique, existante);
         conserverReglagesSansLecteur(pratique, existante);           // lot N6 (#900)
         conserverConfigurationSpecifications(pratique, existante);   // lot N4 (#854)
+        conserverCeQueLAssistantNEditePas(pratique, existante);      // #938 (inspireDe, metadata_cc… compris)
         pratiques[index] = pratique;
     } else {
         pratiques.push(pratique);
