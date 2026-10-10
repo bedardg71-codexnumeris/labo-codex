@@ -94,6 +94,23 @@ const bilanT2 = (bilan) => bilan
     .replace('Total : 24 élément(s)', 'Total : 10 élément(s)');
 const saufT2 = (empreintes) => Object.fromEntries(Object.entries(empreintes).filter(([c]) => !CLES_CHANGEES_PAR_T2.includes(c)));
 const casesT2 = (cases) => cases.filter((c) => !CASES_DU_DEMO_T2.includes(c));
+
+// LOT 3 DE LA FILE (10 oct. 2026, `95c98004`) — LA RÉFÉRENCE N'EST PAS RÉAJUSTÉE NON PLUS.
+// À 1.172.0, les grilles du fichier (`bibliothequeGrilles`) entraient dans `grillesTemplates` amputées
+// de `pratiques`, `estGabarit` et du `estStandard` de leurs critères : la liste blanche de l'import ne
+// les connaissait pas. Le lot 3 les fait voyager ; l'empreinte relevée à 1.172.0 est donc celle de la
+// perte. La clé sort de la comparaison, et `verifierGrillesEntieres` dit à la place ce qui doit y être :
+// chaque grille du fichier, entière, aux marques de l'import près.
+const CLES_CHANGEES_PAR_LOT3 = ['grillesTemplates'];
+const saufLot3 = (empreintes) => Object.fromEntries(Object.entries(empreintes).filter(([c]) => !CLES_CHANGEES_PAR_LOT3.includes(c)));
+function verifierGrillesEntieres(r) {
+    const source = JSON.parse(fs.readFileSync(path.join(FIXTURES, 'copie-de-secours.json'), 'utf8')).bibliothequeGrilles;
+    const grilles = typeof source === 'string' ? JSON.parse(source) : source;
+    const sansMarques = ({ dateImport, auteurOriginal, ...reste }) => reste;
+    expect(grilles.some((g) => g.estGabarit === true), 'le fichier porte bien un champ que 1.172.0 perdait').toBe(true);
+    expect(JSON.parse(r.apres.grillesTemplates).map(sansMarques), 'lot 3 : les grilles du fichier entrent entières')
+        .toEqual(grilles.map((g) => stable(sansMarques(g))));
+}
 /** T2 : la clé de productions de l'espace ne reçoit que la vraie production du fichier. */
 function verifierProductionsSansLeDemo(r) {
     expect(JSON.parse(r.apres.productions).map((p) => p.id), 'T2 : aucune production du démo n\'entre').toEqual(['PROD_BANC_1']);
@@ -191,8 +208,9 @@ test.describe('Lot I bis — une ancienne copie de secours s\'ouvre encore, par 
         }
         // (2) Empreintes : tout ce que l'ouverture a écrit, comme à 1.172.0.
         expect(Object.keys(REFERENCE.json.empreintes).length, 'la référence n\'est pas vide').toBeGreaterThan(5);
-        expect(saufT2(r.empreintes)).toEqual(saufT2(sauf1012(REFERENCE.json.empreintes)));
+        expect(saufLot3(saufT2(r.empreintes))).toEqual(saufLot3(saufT2(sauf1012(REFERENCE.json.empreintes))));
         verifierProductionsSansLeDemo(r);
+        verifierGrillesEntieres(r);
         expect(r.avant.demo_groupeEtudiants, '#1012 : l\'espace neuf a un groupe démo').toBeDefined();
         expect(r.apres.demo_groupeEtudiants, '#1012 : le groupe démo de l\'espace n\'est pas vidé').toBe(r.avant.demo_groupeEtudiants);
         expect(r.bilan).toBe(bilanT2(bilan1012(REFERENCE.json.bilan)));
@@ -231,8 +249,9 @@ test.describe('Lot I bis — une ancienne copie de secours s\'ouvre encore, par 
         expect(JSON.parse(r.apres['a2031_fichiersTravaux']).map((f) => f.id)).toEqual(['FT_BANC_1']);
         // (2) Empreintes : comme à 1.172.0.
         expect(Object.keys(REFERENCE.zip.empreintes).length, 'la référence n\'est pas vide').toBeGreaterThan(5);
-        expect(saufT2(r.empreintes)).toEqual(saufT2(sauf1012(REFERENCE.zip.empreintes)));
+        expect(saufLot3(saufT2(r.empreintes))).toEqual(saufLot3(saufT2(sauf1012(REFERENCE.zip.empreintes))));
         verifierProductionsSansLeDemo(r);
+        verifierGrillesEntieres(r);
         expect(r.avant.demo_groupeEtudiants, '#1012 : l\'espace neuf a un groupe démo').toBeDefined();
         expect(r.apres.demo_groupeEtudiants, '#1012 : le groupe démo de l\'espace n\'est pas vidé').toBe(r.avant.demo_groupeEtudiants);
         expect(blobs).toEqual(REFERENCE.zip.blobs);
