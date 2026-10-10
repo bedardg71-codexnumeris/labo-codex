@@ -125,7 +125,8 @@ const FICHIERS = [
 const ADMISES = {
     'js/bibliotheque-ui.js': ['+ config.titre +'],          // titre de fenêtre passé par le code appelant
     'js/echelles.js': ['${ph.code}', '${ph.nom}'],          // exemples de placeholder, table du code
-    'js/travaux-outils.js': ['+ c.nom +', '${m.titre}'],    // COULEURS et modes de pointe : tables du code
+    'js/travaux-outils.js': ['+ c.nom +', '${m.titre}',     // COULEURS et modes de pointe : tables du code
+        '${outil.icone}', '${outil.icone}'],                 // icônes <img> des outils et formes (OUTILS) : D.a
     'js/wizard-pratique-v2.js': ['${opt.description}', '${opt.description}', '${badge.code}', '${badge.description}'],
     // ↑ définitions de l'assistant et TYPE_BADGES : tables du code
     'js/profil-etudiant-sections-affichage.js': ['${niveauRai.description}']   // determinerNiveauRaiPedagogique : table du code
@@ -210,4 +211,39 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
         expect([...ligne.matchAll(GABARIT)].length).toBe(1);
         expect([...'<div>${echapperHtml(grille.nom)}</div>'.matchAll(GABARIT)].length).toBe(0);
     });
+});
+
+/* ------------- D — ce que l'application écrit elle-même n'est pas échappé (relecture de Cowork) */
+
+// L'échappement vaut pour une donnée REÇUE. L'icône des outils et des formes est une
+// balise <img> écrite par l'application (OUTILS) : échappée, le bouton afficherait son
+// code. Défaut de la première version du lot, trouvé par la relecture de Cowork.
+describe('#467 · D — la palette d\'annotation montre ses icônes, pas leur code', () => {
+    class ImageStub { constructor() { this.src = ''; } addEventListener() {} removeEventListener() {} }
+
+    function palette(reglages = {}) {
+        const stock = new Map(Object.entries(reglages));
+        const db = {
+            ready: false,
+            getSync: (k, d) => (stock.has(k) && stock.get(k) !== null ? JSON.parse(JSON.stringify(stock.get(k))) : d),
+            setSync: (k, v) => { stock.set(k, v); },
+            removeSync: (k) => { stock.delete(k); }
+        };
+        const { document } = conteneurs([]);
+        const fenetre = { addEventListener: () => {}, removeEventListener: () => {} };
+        const w = chargerScript('js/travaux-outils.js', { db, Image: ImageStub, document, echapperHtml }, fenetre);
+        return w.travauxOutils;
+    }
+
+    it('D.a chaque bouton d\'outil et de forme porte une vraie balise <img>', () => {
+        const html = palette().genererHTMLPalette();
+        const boutons = html.match(/<button class="travaux-btn-outil[^"]*" data-outil="[^"]+"[\s\S]*?<\/button>/g) || [];
+        expect(boutons.length, 'la palette rend bien ses boutons d\'outil').toBeGreaterThanOrEqual(11);
+        for (const b of boutons) {
+            expect(b, b.slice(0, 120)).not.toContain('&lt;img');
+        }
+        expect(html).toContain('<img src="');
+    });
+    // Le symbole personnel, lui, est saisi par l'usager : son icône reste échappée
+    // (palette des tampons) ; le cliquet C relève `+ outil.icone +` s'il redevient brut.
 });

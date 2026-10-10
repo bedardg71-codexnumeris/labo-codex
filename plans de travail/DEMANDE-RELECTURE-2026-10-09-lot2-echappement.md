@@ -54,9 +54,33 @@ Compteurs ajustés, motif écrit à côté : #522 (échelles 19 → 18, grilles 
 
 **Pas vérifié** : un vrai fichier reçu d'un collègue ; l'affichage à l'œil sous Safari et sur l'iPad (aucun mot ni gabarit visuel ne change ; aucune porte terrain proposée : une machine répond).
 
-## 7 · Trouvaille hors lot – inscrite ici, pour le lot 3
+## 6 bis · Après ta relecture (9 oct., soir) : le défaut bloquant, et la même recherche partout
 
-Les listes blanches de `SCHEMAS_IMPORT` perdent aujourd'hui, à l'import sélectif et à l'ajout en Bibliothèque, les champs nommés au § 3 ; et le type `number` du schéma d'échelle ramène à 0 un `valeurCalcul` stocké en chaîne (vu dans le codex de banc : « 40 »). Ce sont deux chemins de « ce qui voyage », le lot 3. Je ne l'ai pas inscrit au BACKLOG (pas de symptôme vécu) : à toi de le rattacher au lot 3 ou de l'écarter.
+**Corrigé** : `js/travaux-outils.js`, palette d'annotation, sections « Outils » et « Formes » : `outil.icone` y repart tel quel (balise `<img>` écrite par l'application dans `OUTILS`). Vérifié que rien ne la réécrit : `appliquerPersonnalisations` ne touche l'icône que des trois symboles intégrés, l'import des tampons aussi. L'échappement reste sur les symboles (intégrés et personnels) et dans le champ `value` de leur éditeur. Le nom de l'outil reste échappé dans le `title` (texte).
+
+**Banc** : volet D de `sentinelle-467-affichage-echappe` — rend la vraie palette (`genererHTMLPalette`), exige au moins onze boutons d'outil, aucun « &lt;img », et une vraie balise `<img src="`. Break-test : l'échappement remis sur les outils, rouge ; sur les formes, rouge. Les deux icônes constantes sont inscrites aux exceptions nommées du cliquet, avec leur raison.
+
+**Même motif, vérifié dans tout le lot** (chaque `echapperHtml(…)` ajouté, source remontée) :
+
+| Valeur échappée | Source | Verdict |
+|---|---|---|
+| `outil.icone`, outils et formes | `OUTILS`, balise `<img>` | **était fautif, corrigé** |
+| `outil.icone`, symboles intégrés | caractères Unicode, personnalisables par import | juste |
+| `outil.icone`, symboles personnels et champ `value` de l'éditeur | saisie de l'usager | juste |
+| `outil.nom`, `outil.couleurBouton` | constantes en texte, ou personnalisation | juste (texte, attribut) |
+| `c`, badges de caractéristiques de pratique | textes construits (« 3 meilleures », « notes finalisées », code d'échelle) | juste, aucun balisage |
+| `nomGrille` (productions) | nom de grille, ou « Aucune grille » | juste |
+| `disc`, auteur (métadonnées de carte) | `item.discipline`, `metadata_cc` ; aucun appelant ne passe de chaîne HTML | juste |
+| titres de cartes | nom reçu ; les badges voulus (`gabaritBadge`, `badgesPratiques`, `badgeSource`, `quantite`) restent hors de l'échappement | juste |
+| `menuId`, `catId`, ids, `key` | ids en texte | juste (attribut) |
+| `prod.type`, `prod.ponderation`, `t.nom` (trimestre), `horaire.nom` | texte ou nombre | juste |
+| imports : `retirerBalisesProfond` / `assainirImportJson` | champs longs (`detailTache`, `contenu`, rétroactions) : champs texte (textarea), pas de texte riche ; `imageBase64` sans chevron | juste |
+
+Vitest complet après la correction : 704 fichiers, 8 455 essais, vert.
+
+## 7 · Trouvaille hors lot – pour le lot 3
+
+Les listes blanches de `SCHEMAS_IMPORT` perdent aujourd'hui, à l'import sélectif et à l'ajout en Bibliothèque, les champs nommés au § 3 ; et le type `number` du schéma d'échelle ramène à 0 un `valeurCalcul` stocké en chaîne (vu dans le codex de banc : « 40 »). Ce sont deux chemins de « ce qui voyage », le lot 3. Disposition de Cowork (relecture du 9 oct.) : non inscrite ; elle entre dans la consigne du lot 3.
 
 ## 8 · Proposition pour la release
 

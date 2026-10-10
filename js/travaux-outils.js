@@ -1925,12 +1925,16 @@
         html += '<div class="travaux-palette-label">Outils</div>';
         html += '<div class="travaux-palette-outils">';
 
+        // #467 (relecture de Cowork, 9 oct.) : l'icône des outils et des formes est une balise
+        // <img> écrite par l'application (OUTILS) ; aucune personnalisation ni import ne la
+        // réécrit (appliquerPersonnalisations ne touche que les trois symboles). Elle part donc
+        // telle quelle ; seul le nom, qui reste du texte, est échappé dans le title.
         const outilsDessin = ['position', 'selection', 'stylo', 'surligneur', 'gomme', 'texte'];
         outilsDessin.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(id);
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">${echapperHtml(outil.icone)}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
             // Bouton Dupliquer juste apres Selection
             if (id === 'selection') {
                 html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
@@ -1950,7 +1954,7 @@
             const actif = outilActif === id ? ' actif' : '';
             const styleCouleur = outil.couleurBouton ? ` style="color:${echapperHtml(outil.couleurBouton)}; font-weight:bold;"` : '';
             const raccourci = obtenirRaccourciPourItem(id);
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}"${styleCouleur}>${echapperHtml(outil.icone)}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
+            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}"${styleCouleur}>${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
         });
 
         html += '</div></div>';
