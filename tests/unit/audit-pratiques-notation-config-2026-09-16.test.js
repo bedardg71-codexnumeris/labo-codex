@@ -1147,6 +1147,48 @@ describe('lot N6 · une pratique NEUVE ne porte plus les champs sans lecteur (#9
     });
 });
 
+describe('#938 · rouvrir par l\'assistant une pratique réglée au formulaire : rien de ce qu\'il n\'édite ne se perd', () => {
+    // Mesuré le 10 oct. sur l'ancien code : `affichageNote` (quatre familles), le bloc plat `jetons` (SOM, STD, DEN),
+    // `configuration.notesFinales` (SOM, STD, DEN), `configuration.echelleId` vide (SOM), les catégories inactives (STD).
+    const CAS = [
+        ['sommative', jeuSOM, { nom: 'SOM', calcNoteFinale: 'moyenne', reglesSommatives: [] }],
+        ['standards', () => jeuSTD({ a6Valide: true }), REPONSES_STD('derniers', { minAvantCalculFormatif: 2 })],
+        ['spécifications', jeuSPE, { nom: 'SPE', calcNoteFinale: 'acceptable', seuilAcceptabilite: 70, utiliserJetons: true, nbJetonsDelai: 4, dureeDelaiJours: 5, nbJetonsReprise: 3 }],
+        ['dénotation', jeuDEN, { nom: 'DEN', calcNoteFinale: 'jugement', ciblesDenotation: [{ id: 'c1', nom: 'Lire' }], methodeSuggestionDen: 'mediane', echelleId: 'E1', grilleId: 'G1' }]
+    ];
+    for (const [famille, jeu, reponses] of CAS) {
+        it(`${famille} · formulaire (note en lettre, notes finales, jetons réglés) puis assistant : aucun champ perdu`, async () => {
+            const p0 = await creerParAssistant(monter(jeu()), reponses);
+            const { ecrite } = await enregistrerParFormulaire(p0);
+            // Des réglages qui ne sont pas les défauts : sans eux, une perte suivie d'un défaut identique passerait.
+            ecrite.affichageNote = 'lettre';
+            ecrite.configuration.notesFinales = true;
+            if (ecrite.jetons) Object.assign(ecrite.jetons, { actif: true, nombre: 5, delaiDuree: 4 });
+            const b = monter(jeu(), { pratiques: [ecrite], pratiqueId: ecrite.id });
+            const { apres } = await rouvrirEtResauver(b, ecrite.id);
+            expect(diff(ecrite, apres, []).filter(d => d.apres === '(absent)')).toEqual([]);
+            expect(apres.affichageNote).toBe('lettre');
+            expect(apres.configuration.notesFinales).toBe(true);
+            if (famille !== 'spécifications') expect(apres.jetons).toMatchObject({ actif: true, nombre: 5, delaiDuree: 4 });
+        });
+    }
+
+    it('ce que l\'assistant édite, sa valeur l\'emporte : une règle décochée ne revient pas ; changer de famille n\'emporte pas la configuration', async () => {
+        const b = monter(jeuSOM());
+        const p0 = await creerParAssistant(b, { nom: 'SOM', calcNoteFinale: 'moyenne', reglesSommatives: ['double_verrou'] });
+        expect(p0.configuration.conditions_speciales).toHaveLength(1);
+        b.store.test_pratiquesConfigurables[0].configuration.notesFinales = true;
+        b.win.wizardState.reponses = {}; b.win.chargerPratiqueExistante(p0.id);
+        const r = Object.assign(clone(b.win.wizardState.reponses), { reglesSommatives: [] });
+        const apres = await creerParAssistant(b, r, p0.id);
+        expect(apres.configuration.conditions_speciales).toBeUndefined();
+        expect(apres.configuration.notesFinales).toBe(true);
+        const enStd = await creerParAssistant(b, REPONSES_STD('derniers'), p0.id);
+        expect(enStd.type).toBe('standards');
+        expect(enStd.configuration.notesFinales).toBeUndefined();
+    });
+});
+
 describe('lot N6 · une pratique ANCIENNE qui porte ces champs : s\'ouvre, calcule, s\'enregistre, la note ne bouge pas', () => {
     it('sommative · rang, moyenne, doublon des règles et portfolio passent tels quels ; 50 avant, 50 après (assistant et formulaire)', async () => {
         const p0 = clone(STOCK_SOM_TROIS_REGLES);
@@ -1175,9 +1217,8 @@ describe('lot N6 · une pratique ANCIENNE qui porte ces champs : s\'ouvre, calcu
         const b = monter(jeuSTD({ a6Valide: true }), { pratiques: [p0], pratiqueId: p0.id });
         expect(noteDe(b, DA.STD, p0.id).riche).toBe(80.95);
         const { apres } = await rouvrirEtResauver(b, p0.id);
-        // ⚠ HORS LOT, mesuré ici : la réédition par l'assistant perd TOUT le bloc plat `jetons` du formulaire (l'enveloppe
-        // de `sauvegarderPratique` ne le recopie pas) — avant N6 comme après. Le reste de l'objet est intact.
-        expect(diff(p0, apres, ['jetons'])).toEqual([]);
+        // #938 : la réédition par l'assistant garde le bloc plat `jetons` du formulaire (avant : il partait entier).
+        expect(diff(p0, apres, [])).toEqual([]);
         expect(noteDe(b, DA.STD, p0.id).riche).toBe(80.95);
         const { ecrite } = await enregistrerParFormulaire(p0);
         expect(ecrite.configuration.varianteCalcul).toBe('n-recents');
