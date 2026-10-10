@@ -203,6 +203,30 @@ function fusionnerParIdentite(existants, entrants, nomCollection, champsPosesPar
 const CHAMPS_POSES_PAR_L_IMPORT = ['dateImport', 'auteurOriginal'];
 
 /**
+ * Lot 3, relecture du 10 oct. 2026 — deux grilles (ou deux échelles) de même nom ne
+ * sont tenues pour la même que si leurs éléments portent les mêmes identifiants :
+ * ids de critères pour une grille, codes de niveaux pour une échelle (même ensemble,
+ * ordre indifférent). Le nom seul ne suffit pas : la grille « Grille de rédaction »
+ * d'un collègue peut porter d'autres critères que la locale, et rebrancher sur
+ * celle-ci rangerait ses cartouches sous des critères qui n'y sont pas. Un lien
+ * rompu se voit ; un lien faux ne se voit pas.
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @param {string} champ - 'criteres' ou 'niveaux'
+ * @param {string} cleElement - 'id' ou 'code'
+ * @returns {boolean}
+ */
+function memesIdentifiantsElements(a, b, champ, cleElement) {
+    const ensemble = o => Array.from(new Set(
+        (Array.isArray(o && o[champ]) ? o[champ] : []).map(x => String(x && x[cleElement]))
+    )).sort();
+    const ea = ensemble(a);
+    const eb = ensemble(b);
+    return ea.length === eb.length && ea.every((v, i) => v === eb[i]);
+}
+
+/**
  * Vérifie l'unicité des IDs dans un tableau d'objets.
  *
  * #454 — un doublon interne au contenu IDENTIQUE est ÉCARTÉ, plus jamais
@@ -3185,10 +3209,15 @@ async function executerImportSelectif() {
                             // Une grille de même nom est tenue pour déjà là, et écartée. Ce qui
                             // désigne la grille reçue suit alors celle-là (#952) : sinon, au
                             // second passage, ses cartouches iraient sous la grille LOCALE de même id.
+                            // Seulement si elle porte les mêmes ids de critères (relecture du
+                            // 10 oct.) : sinon, aucune entrée dans la table — l'état d'avant le lot.
                             const memeNom = grillesExistantes.find(ge => ge.nom === g.nom) ||
                                 grillesNouvelles.find(gn => gn.nom === g.nom);
                             if (memeNom) {
-                                if (g.id && memeNom.id && memeNom.id !== g.id) remapGrilles[g.id] = memeNom.id;
+                                if (g.id && memeNom.id && memeNom.id !== g.id &&
+                                    memesIdentifiantsElements(g, memeNom, 'criteres', 'id')) {
+                                    remapGrilles[g.id] = memeNom.id;
+                                }
                             } else {
                                 // Garder l'ID original sauf si conflit d'ID — et alors, le noter (#952)
                                 const idExiste = grillesExistantes.some(ge => ge.id === g.id);
@@ -3224,9 +3253,13 @@ async function executerImportSelectif() {
                     .filter(e => selectedIds.includes(e.id) || selectedIds.includes(e.nom))
                     .filter(e => {
                         // Même règle que les grilles (#952) : une échelle de même nom est tenue
-                        // pour déjà là ; ce qui désigne l'échelle reçue suit celle-là.
+                        // pour déjà là ; ce qui désigne l'échelle reçue suit celle-là — si elle
+                        // porte les mêmes codes de niveaux (relecture du 10 oct.).
                         const memeNom = echellesExistantes.find(ee => ee.nom === e.nom);
-                        if (memeNom && e.id && memeNom.id && memeNom.id !== e.id) remapEchelles[e.id] = memeNom.id;
+                        if (memeNom && e.id && memeNom.id && memeNom.id !== e.id &&
+                            memesIdentifiantsElements(e, memeNom, 'niveaux', 'code')) {
+                            remapEchelles[e.id] = memeNom.id;
+                        }
                         return !memeNom;
                     })
                     .map(e => {
