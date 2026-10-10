@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 9 OCT. 2026, 21 h 52 : **LOT 2 (#467, #585) RELU, CORRIGÉ, VERDICT VERT SUR `7c6954bf` ; NON POUSSÉ, PAS DE RELEASE**
+## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 8 h 56 : **1.195.0 (CE QU'ON REÇOIT D'UN COLLÈGUE RESTE DU TEXTE ; #467, #585) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6aca3562`, `commit_ref` `976fc133`, `state: ready`, publié à 12:54:05 Z
+(8 h 54, Toronto). Titre et ligne des Nouvelles validés par Grégoire, posés tels quels. **Verdict complet sur `976fc133`** (Chrome, Safari,
+Cowork fermés, 7 h 45 → 8 h 53) : code 0, 0 échec, 0 veille ; 1 instable hors lot, vert au second essai :
+`presences-lot-d-enregistrement.spec.js` › barre des présences à 360 px (#534/#685 : à surveiller s'il revient). Vitest 704 / 8 455 vert.
+**Stock** : assumé dans la demande de relecture (§ 8) — l'échappement à l'affichage couvre aussi les noms importés avant 1.195.0 ; rien n'est réécrit.
+**Suite** : lot 3 de la file (import sélectif ; la trouvaille de relecture y entre). Ce relais n'a pas de verdict propre (documents seuls).
+
+## (relais précédent) 9 OCT. 2026, 21 h 52 : **LOT 2 (#467, #585) RELU, CORRIGÉ, VERDICT VERT SUR `7c6954bf` ; NON POUSSÉ, PAS DE RELEASE**
 
 **Relecture de Cowork** : un défaut bloquant (icônes `<img>` constantes de la palette échappées) corrigé en `7c6954bf`, banc et break-test ;
 trouvaille hors lot (import sélectif) NON inscrite, elle entre dans la consigne du lot 3. **Verdict Playwright complet sur `7c6954bf`** :
