@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.195 (lot 2 de la file sans Grégoire : #467, #585) — titre et ligne validés par
+            // Grégoire le 10 oct. 2026, transmis par la relecture de Cowork, posés tels quels.
+            version: '1.195',
+            couleur: 'orange',
+            titre: 'Ce qu\'on reçoit d\'un collègue reste du texte',
+            items: [
+                'Un nom de grille, d\'échelle, de cartouche, de pratique ou de tampon reçu d\'un collègue (fichier partagé, import, archive) ne peut plus agir sur la page&nbsp;: il s\'affiche toujours comme du texte, même s\'il a été importé avant cette version.'
+            ]
+        },
+        {
             // 1.194 (lot 1 de la file sans Grégoire : #1021, #1005) — ligne validée par Grégoire le
             // 9 oct. 2026, transmise par la relecture de Cowork, posée telle quelle ; titre validé par
             // Grégoire le même jour.
