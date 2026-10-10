@@ -51,7 +51,9 @@ describe('#383 · import sélectif des cartouches par clé de grille', () => {
     });
 
     it('le filtre d\'import est PAR CLÉ (selectedIds contient des clés cartouches_<grilleId>)', () => {
-        expect(source).toMatch(/cle\.startsWith\('cartouches_'\) && selectedIds\.includes\(cle\)/);
+        // Lot 3 (#655) : la variable de boucle s'appelle `cleFichier` — nommée `cle`, elle
+        // masquait la fonction `cle()` et les cartouches tombaient sous la clé nue.
+        expect(source).toMatch(/cleFichier\.startsWith\('cartouches_'\) && selectedIds\.includes\(cleFichier\)/);
     });
 
     it('ne réintroduit pas le filtre par id individuel (jamais matché par les ids agrégés)', () => {
