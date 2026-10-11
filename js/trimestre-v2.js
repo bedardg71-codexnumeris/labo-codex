@@ -257,10 +257,17 @@ function populerDropdownGroupesAssemblageV2() {
         }
     });
 
+    // #925 (lot 6, 11 oct. 2026) : le COMPTE suit le cours du champ 2. Deux cours peuvent avoir chacun
+    // leur « 00001 » : sans ce filtre, « 00001 (N étud.) » additionnait les deux. Une fiche sans coursId
+    // (stock d'avant #887) compte partout, comme `obtenirEtudiantsCoursActif` l'accepte. La LISTE des
+    // numéros, elle, reste entière : un groupe-cours enregistré ne perd jamais le sien à l'édition.
+    const coursChoisi = document.getElementById('v2-gc-cours')?.value || '';
+    const duCours = e => !coursChoisi || !e.coursId || e.coursId === coursChoisi;
+
     const groupesTries = Array.from(groupesSet).sort();
     let html = '<option value="">— Choisir un groupe —</option>';
     groupesTries.forEach(grp => {
-        const nbEtudiants = etudiants.filter(e => String(e.groupe).padStart(5, '0') === grp).length;
+        const nbEtudiants = etudiants.filter(e => duCours(e) && String(e.groupe).padStart(5, '0') === grp).length;
         // CT-09 : grp vient du collage CSV des étudiants.
         html += `<option value="${echapperAttribut(grp)}">${echapperHtml(grp)} (${nbEtudiants} étud.)</option>`;
     });
