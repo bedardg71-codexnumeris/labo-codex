@@ -3730,9 +3730,7 @@ window.exporterPDFDepuisApercu = exporterPDFDepuisApercu;
 window.afficherFormulairePDFDepuisEchelle = afficherFormulairePDFDepuisEchelle;
 window.afficherFormulairePDFDepuisCartouche = afficherFormulairePDFDepuisCartouche;
 window.afficherFormulairePDFDepuisProduction = afficherFormulairePDFDepuisProduction;
-// Modal de préparation PDF (Beta 96.1)
-window.ouvrirModalExportPDF = ouvrirModalExportPDF;
-window.fermerModalExportPDF = fermerModalExportPDF;
+// Modal de préparation PDF (Beta 96.1) — exportée plus haut (#587 : une seule pose).
 // Formulaire inline de préparation PDF (Beta 96.1)
 window.afficherFormulairePDFInline = afficherFormulairePDFInline;
 window.fermerFormulairePDFInline = fermerFormulairePDFInline;
