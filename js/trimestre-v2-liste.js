@@ -217,11 +217,11 @@ function ouvrirBibliothequeTrimestreV2() {
             actions.push({ label: 'Clore', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
             // #361 : suppression définitive (jamais sur le trimestre actif)
             actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
-        } else {
-            // Actif courant : aucune action primaire (déjà actif). Menu : archiver pour basculer ailleurs avant.
-            // Pas de « Supprimer » ici — garde anti-actif (#361).
-            actions.push({ label: 'Clore', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
         }
+        // Actif courant : aucune action. Ni « Supprimer » (garde anti-actif, #361), ni « Clore » :
+        // #1018 (lot 8, décision de Cowork, 11 oct. 2026) — `archiverTrimestre` refuse toujours le
+        // trimestre actif ; un geste qui ne peut que refuser ne s'offre pas. Sans action, la carte n'a
+        // pas de menu ⋮ (`renderMenuActions` ne dessine rien pour une liste vide).
 
         return BibliothequeUI.renderCarteSelection({
             nom: echapperHtml(t.nom || t.id) + badgeActif,
