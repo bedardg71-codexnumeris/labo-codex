@@ -658,6 +658,7 @@ function copierPratiqueDepuisTrimestre(pratiqueSource, srcId) {
     nouvellePratique.dateCreation = new Date().toISOString();
     delete nouvellePratique.metadata_cc;
     delete nouvellePratique.auteurOriginal;
+    delete nouvellePratique.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
     delete nouvellePratique.estGabarit;
 
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
@@ -2179,6 +2180,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     copie.dateCreation = new Date().toISOString();
     delete copie.metadata_cc;
     delete copie.auteurOriginal;
+    delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
     delete copie.estGabarit;
 
     // #522 — l'ajout de la copie se fait DANS la file : la collection lue plus

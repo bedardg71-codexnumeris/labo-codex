@@ -475,6 +475,7 @@
         copie.dateCreation = new Date().toISOString();
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
         // ✅ D7 (arbitrage du 24 août) — la copie d'un gabarit n'est plus un
         // gabarit. Verdict de Grégoire : c'est le comportement de
         // `dupliquerPratiqueBibliotheque` qui fait foi. Avant, `forkerItem` ne
@@ -639,6 +640,7 @@
             // partage de la source n'ont plus cours.
             delete copie.metadata_cc;
             delete copie.auteurOriginal;
+            delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
             if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
 
             liste.push(copie);
