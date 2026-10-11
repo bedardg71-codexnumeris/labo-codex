@@ -4905,7 +4905,7 @@ function afficherCriteresGrille(grille) {
 
     // Ajouter un bouton pour ajouter un nouveau critère
     const btnAjouterCritere = `
-        <button class="btn btn-principal" data-action="ajouterCritereGrille" data-param="${grille.id}" class="u-mt-10">
+        <button class="btn btn-principal u-mt-10" data-action="ajouterCritereGrille" data-param="${grille.id}">
             + Ajouter un critère
         </button>
     `;

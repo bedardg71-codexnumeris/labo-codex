@@ -3007,7 +3007,7 @@ async function afficherToutesLesProductionsParType() {
                     ${portfolio ? genererHtmlProduction(portfolio, 0, 1) : ''}
                     ${artefacts.map((art, idx) => genererHtmlProduction(art, idx, artefacts.length)).join('')}
                     ${!portfolio ? `
-                        <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="portfolio" class="u-mt-10">
+                        <button class="btn btn-confirmer u-mt-10" data-action="ajouterProductionAuType" data-param="portfolio">
                             + Ajouter un portfolio
                         </button>
                     ` : ''}
@@ -3034,7 +3034,7 @@ async function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${sommatives.map((prod, idx) => genererHtmlProduction(prod, idx, sommatives.length)).join('')}
-                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="examen" class="u-mt-10">
+                    <button class="btn btn-confirmer u-mt-10" data-action="ajouterProductionAuType" data-param="examen">
                         + Ajouter une évaluation sommative
                     </button>
                 </div>
@@ -3057,7 +3057,7 @@ async function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${formatives.map((prod, idx) => genererHtmlProduction(prod, idx, formatives.length)).join('')}
-                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="examen-formatif" class="u-mt-10">
+                    <button class="btn btn-confirmer u-mt-10" data-action="ajouterProductionAuType" data-param="examen-formatif">
                         + Ajouter une évaluation formative
                     </button>
                 </div>
