@@ -13,7 +13,7 @@ import vm from 'node:vm';
 //
 // LE MÉCANISME, mesuré sous WebKit sur deux passages de la même base : le semis
 // est idempotent PAR IDENTIFIANT. `assurerEchelleIdmeDeDepart` et
-// `assurerGrilleGenerique` vérifient la présence de l'id dans le mutateur et
+// `assurerGrilleDeDepart` vérifient la présence de l'id dans le mutateur et
 // sortent sans écrire si l'objet est là. Ils ne recréent pas, DONC ILS NE
 // RENOMMENT JAMAIS. Un espace neuf reçoit le nom neuf ; une base déjà semée
 // garde l'ancien, indéfiniment.

@@ -94,7 +94,7 @@ describe('Lot B1 · grilles.js — éditeur de grilles namespacé par trimestre'
         });
         it('GARDE archive : initialiserModuleGrilles saute la migration/injection en archive', () => {
             expect(src).toMatch(
-                /estTrimestreArchive[\s\S]{0,160}migrerGrillesVersBibliotheque[\s\S]{0,160}assurerGrilleGenerique/
+                /estTrimestreArchive[\s\S]{0,160}migrerGrillesVersBibliotheque[\s\S]{0,160}assurerGrilleDeDepart/
             );
         });
     });

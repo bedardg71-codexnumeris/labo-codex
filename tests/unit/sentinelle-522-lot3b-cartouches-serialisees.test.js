@@ -17,8 +17,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // (la question du doublon), `supprimerCartoucheConfirm` et
 // `supprimerCartoucheDefinitivement` (une confirmation).
 //
-// ⮕ ET `assurerCartoucheGenerique` VÉRIFIAIT SA PRÉSENCE HORS FILE — défaut
-// jumeau d'`assurerGrilleGenerique`, corrigé au lot 2c : deux appels concurrents
+// ⮕ ET `assurerCartoucheDeDepart` VÉRIFIAIT SA PRÉSENCE HORS FILE — défaut
+// jumeau d'`assurerGrilleDeDepart`, corrigé au lot 2c : deux appels concurrents
 // au démarrage semaient DEUX cartouches d'exemple.
 // ⚠ CE CAS-LÀ N'A PAS DE VÉRIFICATION DE COMPORTEMENT, et il faut le dire : la
 // fonction n'est pas exportée, elle n'est atteignable que par
@@ -330,12 +330,12 @@ describe('#522 lot 3b · C — la course ne peut pas se rouvrir en silence', () 
         }
     });
 
-    it('C.e assurerCartoucheGenerique vérifie sa présence DANS le mutateur', () => {
+    it('C.e assurerCartoucheDeDepart vérifie sa présence DANS le mutateur', () => {
         // Vérifier avant d'entrer dans la file laisserait deux semis concurrents
         // passer tous les deux — c'est le défaut jumeau corrigé au lot 2c.
         const src = lire('js/cartouches.js');
-        const debut = src.indexOf('function assurerCartoucheGenerique(');
-        expect(debut, 'assurerCartoucheGenerique introuvable').toBeGreaterThan(-1);
+        const debut = src.indexOf('function assurerCartoucheDeDepart(');
+        expect(debut, 'assurerCartoucheDeDepart introuvable').toBeGreaterThan(-1);
         const corps = src.slice(debut, debut + 6000);
         const posFile = corps.search(/(?:db\.modifier|modifierEtAnnoncer)\(/);   // lot E1 : la même file, annoncée
         const posTest = corps.indexOf("some(c => c.id === 'CART_GENERIQUE')");

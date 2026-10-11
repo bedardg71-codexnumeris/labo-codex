@@ -373,7 +373,7 @@ async function migrerEchellesVersBibliotheque() {
  */
 async function assurerEchelleIdmeDeDepart() {
     // 🆕 Garde anti-resemage du global hérité — JUMELLE de celle
-    // d'`assurerGrilleGenerique` (#358). Au boot, avant que `trimestreActif` soit
+    // d'`assurerGrilleDeDepart` (#358). Au boot, avant que `trimestreActif` soit
     // réhydraté, `cle()` retombe sur la clé GLOBALE nue : semer là recréerait
     // l'exemple dans le global que #358 retire. La navigation vers la section
     // rappelle ce module une fois le trimestre actif établi.

@@ -17,7 +17,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Plus `mettreAJourConfigurationPratique`, le versement one-shot des huit
 // échelles collègues, et les trois `creer*SPESiInexistante`.
 //
-// ⮕ ET LES TROIS CRÉATIONS SPE PORTAIENT LE DÉFAUT D'`assurerGrilleGenerique`
+// ⮕ ET LES TROIS CRÉATIONS SPE PORTAIENT LE DÉFAUT D'`assurerGrilleDeDepart`
 // (corrigé au lot 2c) : elles vérifiaient l'existence HORS file, donc deux
 // appels concurrents au démarrage semaient DEUX gabarits.
 //
