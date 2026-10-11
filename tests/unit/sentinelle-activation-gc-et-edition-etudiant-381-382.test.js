@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // SENTINELLES — #381 + #382 (audit qualité 5 août 2026, rapports B3 et B4) —
 //
@@ -74,7 +78,7 @@ function envEtudiants(etudiants) {
     };
     const elements = {};
     ['v2-etudiantDA', 'v2-etudiantNom', 'v2-etudiantPrenom', 'v2-etudiantGroupe',
-     'v2-etudiantProgramme', 'v2-etudiantSA', 'v2-formEtudiantTitre'].forEach(id => {
+     'v2-etudiantProgramme', 'v2-etudiantSA', 'v2-etudiantCAF', 'v2-formEtudiantTitre'].forEach(id => {
         elements[id] = { value: '', textContent: '', classList: { add: () => {}, remove: () => {} } };
     });
     const fauxDocument = {
@@ -132,5 +136,37 @@ describe('#382 · éditer un étudiant préserve ses champs hors formulaire et v
         expect(temoin.nonEnregistre.mock.calls[0][0]).toMatch(/^Étudiant·e introuvable : la liste a changé depuis l'ouverture du formulaire\. Resélectionne l'étudiant·e\.$/);
         expect(notifications.succes).not.toHaveBeenCalled();
         expect(store.groupeEtudiants).toHaveLength(0); // rien écrit
+    });
+});
+
+// #792 (lot 10, 11 oct. 2026) — « Mesure d'aide » (`caf`) se saisit à l'écran, à côté de SA.
+// Avant : lue par le profil, aucune saisie vivante (son seul écrivain, l'import de `groupe.js`, est mort).
+// Break-test : retirer `caf` de l'objet écrit, ou sa relecture à l'édition → rouge.
+describe('#792 · la « Mesure d\'aide » se saisit dans la fiche de l\'élève', () => {
+    it('cocher « Oui » sur une fiche existante l\'écrit dans `caf`', async () => {
+        const { win, store, elements } = envEtudiants([{ da: '1111111', nom: 'Fictif', prenom: 'Léa', groupe: '00001' }]);
+        win.editerEtudiantV2('1111111');
+        elements['v2-etudiantCAF'].value = 'Oui';
+        await win.sauvegarderChampEtudiantV2();
+        expect(store.groupeEtudiants[0].caf).toBe('Oui');
+    });
+
+    it('une fiche qui porte déjà la mesure la garde quand on corrige le nom', async () => {
+        const { win, store, elements } = envEtudiants([{ da: '1111111', nom: 'Fictf', prenom: 'Léa', groupe: '00001', caf: 'Oui' }]);
+        win.editerEtudiantV2('1111111');
+        expect(elements['v2-etudiantCAF'].value).toBe('Oui');
+        elements['v2-etudiantNom'].value = 'Fictif';
+        await win.sauvegarderChampEtudiantV2();
+        expect(store.groupeEtudiants[0]).toMatchObject({ nom: 'Fictif', caf: 'Oui' });
+    });
+
+    it('la page porte le contrôle, avec le libellé de #790, à côté de SA', () => {
+        const html = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
+        const iSA = html.indexOf('id="v2-etudiantSA"');
+        const iCAF = html.indexOf('id="v2-etudiantCAF"');
+        expect(iSA).toBeGreaterThan(-1);
+        expect(iCAF).toBeGreaterThan(iSA);
+        expect(html.slice(iSA, iCAF)).toContain('<label for="v2-etudiantCAF">Mesure d\'aide</label>');
+        expect(html.slice(iCAF, iCAF + 200)).toContain('data-on-change="sauvegarderChampEtudiantV2"');
     });
 });

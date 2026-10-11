@@ -675,6 +675,7 @@ async function soumettreEtudiantV2() {
     }
     const programme = document.getElementById('v2-etudiantProgramme')?.value?.trim();
     const sa = document.getElementById('v2-etudiantSA')?.value;
+    const caf = document.getElementById('v2-etudiantCAF')?.value;   // #792 : « Mesure d'aide »
     const groupeInput = document.getElementById('v2-etudiantGroupe')?.value?.trim();
     // #735 (lot D, 19 sept. 2026) : date d'arrivée FACULTATIVE, « AAAA-MM-JJ » (le format d'un champ date, et
     // celui des dates de présences). Vide : la clé n'est PAS écrite sur la fiche — une fiche sans date se lit
@@ -715,7 +716,8 @@ async function soumettreEtudiantV2() {
         prenom: prenom,
         groupe: groupe,
         programme: programme || '',
-        sa: sa || ''
+        sa: sa || '',
+        caf: caf || ''
     };
     // #872 B : à l'AJOUT, l'élève rejoint le cours de l'entrée choisie au menu Groupe (« la liste
     // qu'on regarde »), sinon le cours actif. En ÉDITION, `coursId` n'est PAS dans l'objet : la
@@ -937,6 +939,7 @@ async function editerEtudiantV2(da) {
     document.getElementById('v2-etudiantGroupe').value = etudiant.groupe || '';
     document.getElementById('v2-etudiantProgramme').value = etudiant.programme || '';
     document.getElementById('v2-etudiantSA').value = etudiant.sa || '';
+    document.getElementById('v2-etudiantCAF').value = etudiant.caf || '';
     const champDateArriveeEdition = document.getElementById('v2-etudiantDateArrivee');
     if (champDateArriveeEdition) champDateArriveeEdition.value = etudiant.dateArrivee || '';   // #735
 
@@ -976,6 +979,7 @@ function reinitialiserFormEtudiantV2() {
     document.getElementById('v2-etudiantGroupe').value = getGroupeSelectionneV2()?.groupe || '';
     document.getElementById('v2-etudiantProgramme').value = '';
     document.getElementById('v2-etudiantSA').value = '';
+    document.getElementById('v2-etudiantCAF').value = '';
     const champDateArriveeVide = document.getElementById('v2-etudiantDateArrivee');
     if (champDateArriveeVide) champDateArriveeVide.value = '';   // #735
 
