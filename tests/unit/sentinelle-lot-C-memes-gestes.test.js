@@ -187,7 +187,8 @@ describe('lot C · D — les sources des sites touchés', () => {
         const e = sansCommentaires(source('js/echelles.js'));
         expect(e).not.toContain('>Ordre<');
         expect(e).not.toContain('btn btn-supprimer btn-compact');
-        expect((e.match(/class="bloc-coin-outils"/g) || []).length).toBe(2);
+        // ↻ 11 oct. 2026 (#574) : 2 → 3, le coin du niveau en attente (sa seule corbeille).
+        expect((e.match(/class="bloc-coin-outils"/g) || []).length).toBe(3);
         // ↻ 13 sept. 2026 (#658) : l'assertion « une seule `outils-rangee` » est retirée avec son
         // sujet. Cette rangée d'outils était celle de l'ancien tableau de niveaux
         // (`afficherTableauNiveaux`), rendu dans un conteneur caché d'index.html et parti avec lui.
