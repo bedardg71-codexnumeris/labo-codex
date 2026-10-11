@@ -2946,6 +2946,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   celui de #627.
 
 - [ ] **#656 — À TRANCHER (Grégoire, à froid) · Le report D-C4 devait être statué au pas 4 de la Brique C ; le pas 4 est livré, D-C4 n'a jamais été statué**.
+  **11 oct. 2026 (lot 9) : statuée par la consigne de Cowork (« rattachée comme à l'import, patron du lot 3 »), `12a45010`, non publiée.** `partageSection.rattacherEchelle` : id présent à destination gardé, sinon l'échelle locale de même nom aux mêmes codes de niveaux, sinon l'id source. Trois chemins : Voûte, copie d'une grille d'un autre trimestre, copie d'une cartouche d'un autre trimestre (ses deux branches). La grille garde son `echelleId`, comme à l'import. Aucune donnée réécrite : les copies déjà faites gardent leur id (stock assumé, il se résout par le pool).
   Inscrit le 31 août 2026 par `kuekatsheu-f2`, **avant tout usage**, sur mandat de `kuekatsheu-14`. **Ce n'est pas un
   constat de défaut : c'est une décision de conception restée ouverte, à prendre à froid.** Rien n'est cassé aujourd'hui.
   **(i) Ce que le cadrage a écrit.** `plans de travail/CADRAGE-briques-C-D-namespacing.md` §2.4 : « **Report assumé D-C4**
@@ -3508,6 +3509,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   ⏳ **Test manuel dû (Mac et iPad)** : enregistrer une production (le formulaire doit se rouvrir) · supprimer la
   production affichée (l'accueil revient, aucun surlignage résiduel) · annuler le formulaire.
 - [ ] **#634 — Le repli vers la bibliothèque de pratiques partagée n'a jamais fonctionné : faut-il qu'il fonctionne ?**
+  **11 oct. 2026 (lot 9) : recadrée par la consigne, `a1beeb09`, non publiée.** Le seuil de « N évaluations en attente » (barre P) se lit désormais par la résolution de la note (`obtenirConfigPratiqueActive` : id normalisé #711, forme `.config` #712, 7 si le portfolio ne dit pas son minimum). La question d'origine (brancher `bibliothequePratiques`) reste sans réponse : ni l'aperçu ni la note ne la lisent.
   Inscrit le 31 août 2026 par `kuekatsheu-f3`, à la demande de `kuekatsheu-e5` (S8 / #626), **avant tout usage**.
   `tableau-bord-apercu.js:1446` lisait `bibliotheque-pratiques` (kebab) ; la vraie clé est `bibliothequePratiques`.
   Le repli n'a donc **jamais** rien trouvé. S8 le RETIRE, ce qui préserve le comportement à l'identique.
@@ -5574,6 +5576,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
 
 
 - [ ] **#590 — Trois résolveurs d'échelle qui ne reconnaissent pas les mêmes identifiants.**
+  **11 oct. 2026 (lot 9) : corrigée, `52a10502`, non publiée.** Remesurée sur main : `consolidation.js` retiré, restent `obtenirEchelleResolue` et `resoudreModeleParId`. Option A appliquée sans le diagnostic dû (consigne de Cowork : « déjà tranchée ») : `resoudreModeleParId` reconnaît `idOriginal` pour les ÉCHELLES (pas les grilles : des évaluations d'H2026 pointent des grilles absentes) ; l'IDME 50/65/80/95 de `construireConfigComplete` est retirée, une échelle introuvable reste vide et marquée `introuvable`, la pratique se charge (note du banc E6 inchangée, 79,45). ⚠ **Non fait, sans symptôme vécu** : le repli au pool dans `obtenirEchelleResolue` — `echellesComparables` lit une échelle introuvable comme une absence (ligne « Progrès » du PDF élève) ; la rendre trouvable changerait ce que lisent des élèves. Le diagnostic garde cette cause.
   Créé le 28 août 2026. Audit : `Rapports/AUDIT-copies-echelle-reperes-2026-08-28.md`, §8.
   ✅ **ARBITRÉ PAR GRÉGOIRE le 28 août 2026 — option A, avec sa note : « Rien codé en dur ! »**
   ⚠ **MAIS LE CHANTIER NE S'OUVRE PAS AVANT UNE MESURE.** Grégoire lance lui-même
@@ -5842,6 +5845,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   IDME de Grégoire en repli (`:374-379`) et choisit l'échelle par `find(e => !e.estDemo) || echelles[0]`,
   sans `echelleId` — la cartouche neuve porte les colonnes de la PREMIÈRE échelle, pas de celle choisie.
 - [ ] **#574 — Depuis #527, l'échelle générique et les gabarits d'échelle sont NON CALCULABLES : aucun ne porte de `valeurCalcul`.**
+  **11 oct. 2026 (lot 9) : niveau neuf corrigé, `17825b6b`, non publié.** « + Ajouter un niveau » ouvre un niveau EN ATTENTE (`_niveauEnAttente`), écrit en base seulement quand code, nom, bornes et valeur ponctuelle passent `refusChampNiveau` ; les deux ajouts de l'échelle neuve naissent vides ; l'enregistrement d'une échelle neuve refuse un niveau incomplet. ⚠ **Vu, non touché** : les quatre niveaux proposés à la création d'une échelle neuve portent encore des plages et valeurs choisies par le projet (90-100/95, 75-89/82, 60-74/67, 0-59/30) — même principe (option B), mais c'est l'offre de départ, pas un niveau neuf : à Grégoire.
   🟠 **PARTIEL le 29 août 2026 — LE RETRAIT EST LIVRÉ, la sonde est due, le niveau neuf n'est pas tranché.**
   ✅ **Retrait (option B)** : `assurerEchelleGenerique` retirée d'`echelles.js` (fonction, appel au boot, export) ;
   `GABARITS_ECHELLES_DEFAUT` retiré de `gabarits-utils.js` (semis et export) ; `GRILLE_GENERIQUE` et
