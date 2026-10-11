@@ -1363,7 +1363,7 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
  *
  * @param {string} da - Numéro de DA
  * @param {boolean} pourDepistage - Si true, utilise fenêtre de dépistage (3). Si false, utilise N pour note finale (4)
- * @returns {Object} - { performance, idmeMoyen, nbArtefacts }
+ * @returns {Object} - { performance, nbArtefacts }
  */
 function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Déterminer le nombre d'artefacts selon l'usage
@@ -1396,7 +1396,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     );
 
     if (evaluationsEleve.length === 0) {
-        return { performance: 0, idmeMoyen: 0, nbArtefacts: 0 };
+        return { performance: 0, nbArtefacts: 0 };
     }
 
     // Trier par date de création (la plus récente d'abord)
@@ -1413,34 +1413,11 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Calculer la performance moyenne (notes)
     const performance = troisDerniers.reduce((sum, e) => sum + e.noteFinale, 0) / troisDerniers.length / 100;
 
-    // Moyenne des niveaux finaux — #529.
-    //
-    // CE QUI A ÉTÉ RETIRÉ : `.filter(n => ['I','D','M','E'].includes(n))`. Ce
-    // filtre écartait tout niveau final dont le code n'était pas IDME. Pour une
-    // échelle A/B/C/D, il écartait TOUS les niveaux, la moyenne tombait à 0 —
-    // et 0 n'est pas « aucune donnée », c'est la pire note possible. Le calcul
-    // en aval traitait donc un élève sans niveau lisible comme un élève en
-    // échec total, sans un mot.
-    //
-    // Il n'y a plus de liste de codes admis : un niveau compte s'il est
-    // convertible par SON échelle, et rien d'autre ne le qualifie.
-    const cacheTablesNiveaux = new Map();
-    const scoresNiveauxFinaux = troisDerniers
-        .map(e => convertirNiveauEnScore(e.niveauFinal, tableConversionPourEvaluation(e, cacheTablesNiveaux)))
-        .filter(s => s !== null);
-
-    // ⚠ LE ZÉRO EST CONSERVÉ ICI, DÉLIBÉRÉMENT (#529, 26 août 2026).
-    //
-    // Rendre `null` serait plus juste — rien de convertible n'est pas la même
-    // chose qu'une moyenne de zéro. Mais le contrat de cette fonction distingue
-    // déjà l'absence par `nbArtefacts` (cf. le retour anticipé plus haut :
-    // `{performance:0, idmeMoyen:0, nbArtefacts:0}`), et ses
-    // consommateurs s'y fient. Changer la convention DANS un chantier de
-    // dé-codage-en-dur mêlerait deux corrections dans le même diff, et la
-    // seconde n'a pas été demandée. Inscrit au backlog plutôt que glissé ici.
-    const idmeMoyen = scoresNiveauxFinaux.length > 0
-        ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
-        : 0;
+    // #536 (11 oct. 2026) — `idmeMoyen` RETIRÉ. Il rendait 0 quand aucun niveau final
+    // n'était convertible (le zéro conservé par #529 en attendant cette fiche), mais
+    // `grep` ne lui trouve AUCUN lecteur : les appelants lisent `performance` et
+    // `nbArtefacts`. Un champ que personne ne lit n'a pas à dire « pas de donnée » :
+    // il part, avec sa conversion des niveaux finaux.
 
     // ⚠⚠ #537 (27 août 2026) — LE CALCUL DE `francaisMoyen` A ÉTÉ RETIRÉ, ET
     // AVEC LUI LA DERNIÈRE RECONNAISSANCE D'UN CRITÈRE PAR SON NOM DANS CE
@@ -1468,7 +1445,6 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
 
     return {
         performance: performance,
-        idmeMoyen: idmeMoyen,
         nbArtefacts: troisDerniers.length
     };
 }
