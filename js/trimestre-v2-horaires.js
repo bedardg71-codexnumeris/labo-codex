@@ -883,6 +883,10 @@ function _fermerFormHoraireV2() {
     // Désélectionner dans le dropdown
     const select = document.getElementById('v2-selectHoraire');
     if (select) select.value = '';
+    // #477 (CT-16) : oublier aussi l'horaire mémorisé, comme le choix « aucun horaire » du menu
+    // (`changerHoraireSelectionneV2`). Sinon, au prochain `chargerHorairesV2` (démarrage, changement
+    // de trimestre), l'horaire fermé se rouvrait en édition.
+    db.setSync(cle('horaireSelectionne'), null);
     mettreAJourCarteResumeHoraireV2(null);
 }
 
@@ -1040,6 +1044,8 @@ function sauvegarderHoraireV2() {
 
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
+    // #472 : le nom et la carte des groupes-cours qui désignent cette entité se refont.
+    if (typeof window.rafraichirAffichageGroupesCoursV2 === 'function') window.rafraichirAffichageGroupesCoursV2();
     return true;
 }
 
@@ -1096,6 +1102,8 @@ async function supprimerHoraireV2() {
 
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
+    // #472 : le nom et la carte des groupes-cours qui désignent cette entité se refont.
+    if (typeof window.rafraichirAffichageGroupesCoursV2 === 'function') window.rafraichirAffichageGroupesCoursV2();
 
 
     notifications.succes(`Horaire "${nomHoraire}" supprimé`);

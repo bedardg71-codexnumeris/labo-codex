@@ -233,47 +233,34 @@
        =============================== */
 
     /**
-     * Obtient la liste de tous les trimestres
-     * 🆕 FIX (23 jan 2026): Nettoie automatiquement les doublons
-     * @returns {Array} Liste des trimestres (sans doublons)
+     * Obtient la liste de tous les trimestres, sans doublon d'id.
+     *
+     * #477 (lot 8, 11 oct. 2026, constat CT-19) : LECTURE SEULE. Les doublons se règlent à la lecture
+     * (le premier de chaque id est gardé) ; la liste enregistrée n'est jamais réécrite. Avant, la
+     * fonction détectait aussi les noms jumeaux, mais ne dédoublonnait que par id, puis RÉÉCRIVAIT
+     * le stockage : deux trimestres de même nom et d'ids différents la faisaient réécrire et avertir
+     * à chaque appel (donc à chaque `cle()`), sans jamais converger. Deux noms jumeaux sont deux
+     * trimestres : ils restent. (Même prudence qu'`enumererTrimestres` : avant `db-ready`, `getSync`
+     * peut rendre une liste périmée ; la persister effacerait des trimestres réels.)
+     * @returns {Array} Liste des trimestres (sans doublon d'id)
      */
     function obtenirTrimestres() {
-        let trimestres = db.getSync('trimestres', []);
+        return dedoublonnerTrimestresParId(db.getSync('trimestres', []));
+    }
 
-        // 🆕 FIX (23 jan 2026): Détecter et corriger les doublons
+    /**
+     * #477 : le premier trimestre de chaque id, dans l'ordre de la liste. Une liste qui n'en est pas
+     * une rend []. Ne modifie pas la liste reçue.
+     */
+    function dedoublonnerTrimestresParId(trimestres) {
+        if (!Array.isArray(trimestres)) return [];
         const idsVus = new Set();
-        const nomsVus = new Set();
-        let aDesDoublons = false;
-
-        trimestres.forEach(t => {
-            if (idsVus.has(t.id) || (t.nom && nomsVus.has(t.nom))) {
-                aDesDoublons = true;
-            }
+        return trimestres.filter(t => {
+            if (!t) return false;
+            if (idsVus.has(t.id)) return false;
             idsVus.add(t.id);
-            if (t.nom) nomsVus.add(t.nom);
+            return true;
         });
-
-        if (aDesDoublons) {
-            console.warn('[Trimestres] ⚠️ Doublons détectés, nettoyage...');
-            // Garder le premier de chaque ID (priorité à l'ID)
-            const trimestresUniques = [];
-            const idsGardes = new Set();
-
-            trimestres.forEach(t => {
-                if (!idsGardes.has(t.id)) {
-                    idsGardes.add(t.id);
-                    trimestresUniques.push(t);
-                } else {
-                }
-            });
-
-            // Sauvegarder la liste nettoyée
-            db.setSync('trimestres', trimestresUniques);
-
-            return trimestresUniques;
-        }
-
-        return trimestres;
     }
 
     /**
@@ -296,9 +283,8 @@
      * @returns {Array} Trimestres dont l'`id` est non vide.
      */
     function enumererTrimestres() {
-        const trimestres = db.getSync('trimestres', []);
-        if (!Array.isArray(trimestres)) return [];
-        return trimestres.filter(t => t && t.id);
+        // #477 : sans doublon d'id, comme `obtenirTrimestres`.
+        return dedoublonnerTrimestresParId(db.getSync('trimestres', [])).filter(t => t && t.id);
     }
 
     /**
