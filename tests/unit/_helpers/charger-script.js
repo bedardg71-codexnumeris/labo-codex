@@ -45,7 +45,7 @@ export function poserSetSyncSiChange(dbHarnais) {
             const r = (ignorer && ignorer.length) ? (k, v) => (ignorer.indexOf(k) !== -1 ? undefined : v) : undefined;
             const ABSENTE = {};
             const actuel = dbHarnais.getSync(key, ABSENTE);
-            if (actuel !== ABSENTE && JSON.stringify(actuel, r) === JSON.stringify(value, r)) return 'inchange';
+            if (actuel !== ABSENTE && actuel !== value && JSON.stringify(actuel, r) === JSON.stringify(value, r)) return 'inchange';   // même référence : on écrit (db.js)
             return dbHarnais.setSync(key, value);
         };
     }

@@ -1785,7 +1785,11 @@
             // `getSync(key, undefined)` retomberait sur le défaut `null` : une sentinelle dit l'absence.
             var ABSENTE = {};
             var actuel = this.getSync(key, ABSENTE);
-            if (actuel !== ABSENTE) {
+            // ⚠ Relecture de Cowork (11 oct., bloquant) : au-delà de SEUIL_IDB_FIRST, `getSync` rend
+            // l'objet de `memoryCache` PAR RÉFÉRENCE. Un appelant qui l'a lu, modifié en place puis
+            // repassé ici (portfolio.js, indicesCP) comparerait l'objet à lui-même : « inchangé »,
+            // et IndexedDB garderait l'ancien. Même référence : on ne peut rien conclure, on écrit.
+            if (actuel !== ABSENTE && actuel !== value) {
                 try {
                     if (JSON.stringify(actuel, remplacant) === JSON.stringify(value, remplacant)) return 'inchange';
                 } catch (e) { /* non sérialisable : on écrit, comme avant */ }

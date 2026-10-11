@@ -90,6 +90,28 @@ describe('#1040 · A — db.setSyncSiChange', () => {
     });
 });
 
+describe('#1040 · A bis — l\'objet lu, modifié en place (relecture de Cowork, bloquant)', () => {
+    it('au-delà de 25 Ki, la valeur rendue par référence puis modifiée est ÉCRITE', () => {
+        const { db, ecritures } = monterDb();
+        // Le chemin réel : une grosse valeur vit dans memoryCache (IDB-first), getSync la rend par référence.
+        const gros = { dateCalcul: 'T1', bourrage: 'x'.repeat(30 * 1024), E1: { actuel: { date: 'T1', P: 70 } } };
+        db.memoryCache.set('a2031_indicesCP', gros);
+        const lu = db.getSync('a2031_indicesCP');
+        expect(lu).toBe(gros);   // même objet : le piège existe
+        lu.E1 = { actuel: { date: 'T2', P: 71 } };
+        lu.dateCalcul = 'T2';
+        expect(db.setSyncSiChange('a2031_indicesCP', lu, ['dateCalcul', 'date'])).not.toBe('inchange');
+        expect(ecritures).toEqual(['a2031_indicesCP']);
+    });
+    it('une copie égale (autre objet) reste sautée', () => {
+        const { db, ecritures } = monterDb();
+        const gros = { bourrage: 'x'.repeat(30 * 1024), P: 70 };
+        db.memoryCache.set('k', gros);
+        expect(db.setSyncSiChange('k', JSON.parse(JSON.stringify(gros)))).toBe('inchange');
+        expect(ecritures).toEqual([]);
+    });
+});
+
 describe('#1040 · B — les sites mesurés', () => {
     const SITES = [
         ['trimestres.js', "db.setSyncSiChange('trimestreActif', actif.id)"],
