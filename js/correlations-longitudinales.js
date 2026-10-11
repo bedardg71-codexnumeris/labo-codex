@@ -182,6 +182,40 @@ function calculerCorrelationsLongitudinales() {
 
     resultat.evenementsInterventions = evenementsInterventions;
 
+    // #241 (lot 11, 11 oct. 2026) — « P sans reprises » sur les courbes d'intervention : une reprise
+    // relève P après coup et peut se lire comme l'effet d'une intervention. Même calcul que le profil
+    // individuel (`deltasReprisesParSeance`, impact-jetons.js), par élève, puis moyenné sur le groupe.
+    // `null` quand aucune reprise ne change P dans ce groupe : pas de courbe à tracer.
+    var datesSnapshots = snapshots.map(function(sn) { return sn.dateSeance || sn.dateDebut || ''; });
+    var cacheReprises = {};
+    function infoReprises(da) {
+        if (!(da in cacheReprises)) {
+            cacheReprises[da] = (typeof window.deltasReprisesParSeance === 'function')
+                ? window.deltasReprisesParSeance(da, datesSnapshots) : null;
+        }
+        return cacheReprises[da];
+    }
+    function moyennesPDuGroupe(estDansGroupe, idxDebut) {
+        var avec = [], sans = [], ecartVu = false;
+        for (var sp = 0; sp < snapshots.length; sp++) {
+            if (sp < idxDebut) { avec.push(null); sans.push(null); continue; }
+            var etus = snapshots[sp].etudiants || [];
+            var somP = 0, somSans = 0, nbP = 0;
+            for (var ep = 0; ep < etus.length; ep++) {
+                if (!estDansGroupe(etus[ep].da) || etus[ep].P == null || isNaN(etus[ep].P)) continue;
+                var ecart = (typeof window.ecartReprisesALaSeance === 'function')
+                    ? window.ecartReprisesALaSeance(infoReprises(etus[ep].da), sp) : 0;
+                if (ecart !== 0) ecartVu = true;
+                somP += etus[ep].P;
+                somSans += etus[ep].P - ecart;
+                nbP++;
+            }
+            avec.push(nbP > 0 ? Math.round(somP / nbP * 10) / 10 : null);
+            sans.push(nbP > 0 ? Math.round(somSans / nbP * 10) / 10 : null);
+        }
+        return { moyP: avec, moyPSansReprises: ecartVu ? sans : null };
+    }
+
     // Construire les courbes P par intervention (groupes figés)
     // Chaque intervention a son propre groupe d'étudiants ciblés, fixe dans le temps
     var tousLesCibles = {}; // DA → true pour tous les étudiants ciblés par au moins une intervention N2
@@ -203,22 +237,7 @@ function calculerCorrelationsLongitudinales() {
         }
 
         // Calculer moy P de ce groupe figé à chaque séance (null avant l'intervention)
-        var moyP = [];
-        for (var sp = 0; sp < snapshots.length; sp++) {
-            if (sp < idxDebut) {
-                moyP.push(null);
-                continue;
-            }
-            var etusSnap = snapshots[sp].etudiants || [];
-            var somP = 0, nbP = 0;
-            for (var ep = 0; ep < etusSnap.length; ep++) {
-                if (dasCibles.indexOf(etusSnap[ep].da) !== -1 && etusSnap[ep].P != null && !isNaN(etusSnap[ep].P)) {
-                    somP += etusSnap[ep].P;
-                    nbP++;
-                }
-            }
-            moyP.push(nbP > 0 ? Math.round(somP / nbP * 10) / 10 : null);
-        }
+        var moyennesInterv = moyennesPDuGroupe(function(da) { return dasCibles.indexOf(da) !== -1; }, idxDebut);
 
         var titreCourtInterv = (typeof window.titreInterventionAffiche === 'function' ? window.titreInterventionAffiche(interv) : interv.titre) || ('Intervention ' + (ci + 1));   // Lot A, R4
         if (titreCourtInterv.length > 20) titreCourtInterv = titreCourtInterv.substring(0, 18) + '…';
@@ -227,28 +246,19 @@ function calculerCorrelationsLongitudinales() {
             titre: titreCourtInterv,
             nbEtudiants: dasCibles.length,
             niveauRai: interv.niveauRai || 2,
-            moyP: moyP
+            moyP: moyennesInterv.moyP,
+            moyPSansReprises: moyennesInterv.moyPSansReprises
         });
     }
 
     // Courbe contrôle : étudiants jamais ciblés par aucune intervention
-    var moyPControle = [];
-    for (var sc = 0; sc < snapshots.length; sc++) {
-        var etusCtrl = snapshots[sc].etudiants || [];
-        var somCtrl = 0, nbCtrl = 0;
-        for (var ec = 0; ec < etusCtrl.length; ec++) {
-            if (!tousLesCibles[etusCtrl[ec].da] && etusCtrl[ec].P != null && !isNaN(etusCtrl[ec].P)) {
-                somCtrl += etusCtrl[ec].P;
-                nbCtrl++;
-            }
-        }
-        moyPControle.push(nbCtrl > 0 ? Math.round(somCtrl / nbCtrl * 10) / 10 : null);
-    }
+    var moyennesControle = moyennesPDuGroupe(function(da) { return !tousLesCibles[da]; }, 0);
     resultat.interventionsCourbes.push({
         titre: 'Contrôle',
         nbEtudiants: null,
         niveauRai: 0,
-        moyP: moyPControle
+        moyP: moyennesControle.moyP,
+        moyPSansReprises: moyennesControle.moyPSansReprises
     });
 
     // Mapper les artefacts aux séances via leur échéance
@@ -478,6 +488,24 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                 yAxisID: 'yPct',
                 _intervIndex: ci
             });
+            // #241 : la même courbe sans l'apport des reprises, en pointillé fin, seulement si une
+            // reprise a changé P dans ce groupe. Mot de la légende : celui du profil individuel.
+            if (courbe.moyPSansReprises) {
+                datasets.push({
+                    label: 'P sans reprises · ' + (estControle ? 'contrôle' : courbe.titre),
+                    data: courbe.moyPSansReprises,
+                    borderColor: couleurInterv,
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.5,
+                    borderDash: [2, 3],
+                    tension: 0.25,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    spanGaps: true,
+                    yAxisID: 'yPct',
+                    _intervIndex: ci
+                });
+            }
         }
 
         // Datasets overlay : moyennes A, C, P (axe Y secondaire, masqués par défaut)
