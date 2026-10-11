@@ -155,7 +155,7 @@ const A_JOUR = 'Ton codex est à jour';
 const PAS_A_JOUR = 'Ton codex n\'a pas tes derniers changements';
 const TITRE_PRET = 'Ton codex est prêt';
 // Les mots acceptés par Grégoire le 30 sept. 2026 ; la taille est celle que dit déjà le message d'échec.
-const MESSAGE_PRET = /^Le fichier \(environ \d+ (Ko|Mo)\) est préparé\. Touche « Enregistrer » pour choisir où le ranger\.$/;
+const MESSAGE_PRET = /^Le fichier \(environ \d+ (Ko|Mo)\) est préparé\. Appuie sur « Enregistrer » pour choisir où le ranger\.$/;
 const REFUS_WEBKIT = 'The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission.';
 // Lot J0 ter : les mots acceptés par Grégoire le 30 sept. 2026 ; pas de barre, pas de bouton.
 const TITRE_ATTENTE = 'Ouverture de la feuille de partage…';

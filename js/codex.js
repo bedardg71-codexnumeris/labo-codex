@@ -3499,12 +3499,14 @@ function _avertissementDesCopies() {
 async function _ecrireLeCodexPrepare(resultat, reglage) {
     var taille = window.FichierSortant.tailleEnviron(resultat.blob.size);
     // Lot J0 bis (#988) : la fenêtre du toucher frais. Mots acceptés par Grégoire le
-    // 30 sept. 2026. « Enregistrer » résout dans son clic : le partage part dans le geste.
+    // 30 sept. 2026 ; « Touche » devenu « Appuie sur » le 11 oct. (décision de Grégoire : depuis
+    // #995, la fenêtre se voit aussi à la souris). « Enregistrer » résout dans son clic : le
+    // partage (ou la fenêtre de choix) part dans le geste.
     var toucherFrais = async function(motif) {
         _noterTentative({ toucherFrais: 'demandé (' + motif + ')' });
         var accorde = await uiDialogues.confirmerAction({
             titre: 'Ton codex est prêt',
-            message: 'Le fichier (' + taille + ') est préparé. Touche « Enregistrer » pour choisir où le ranger.',
+            message: 'Le fichier (' + taille + ') est préparé. Appuie sur « Enregistrer » pour choisir où le ranger.',
             texteAnnuler: 'Annuler',
             texteConfirmer: 'Enregistrer'
         }) === true;
