@@ -4254,6 +4254,9 @@ function marquerProvenanceCartouche(cartoucheSource, srcId) {
  */
 async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSource) {
     const grillesLocales = await db.get(cle('grillesTemplates')) || [];
+    // #656 — l'échelle de la cartouche se rattache comme à l'import, sur les deux chemins.
+    const lireEchelleSource = (id) => (db.getSync(cleSource('echellesTemplates', srcId), []) || [])
+        .find(e => e && e.id === id) || null;
     const grilleAccueil = grillesLocales.find(g => memeIdentite(g, grilleSource)) || null;
 
     // Chemin 1 — aucune grille d'accueil : la cartouche n'aurait aucun magasin
@@ -4265,7 +4268,8 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
         });
         const res = partageSection.dupliquerGrillePartagee(
             source,
-            () => [marquerProvenanceCartouche(cartoucheSource, srcId)]
+            () => [marquerProvenanceCartouche(cartoucheSource, srcId)],
+            lireEchelleSource
         );
         return { ajoutee: true, conflit: null, grilleCreee: res.grille, grilleAccueil: null };
     }
@@ -4278,6 +4282,7 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
         id: genererIdUnique('CART_'),
         grilleId: grilleAccueil.id
     };
+    if (copie.echelleId) copie.echelleId = partageSection.rattacherEchelle(copie.echelleId, lireEchelleSource);
 
     // #476 — garde d'identité AU POINT D'ÉCRITURE : réimporter deux fois la même
     // cartouche ne doit pas en empiler deux exemplaires silencieusement.

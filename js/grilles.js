@@ -2439,8 +2439,8 @@ async function afficherBibliothequeGrilles() {
    trimestre actif (id neuf + trace inspireDe), la source n'est jamais mutée.
    Outils réutilisés (livrés aux pas 2-3) : cleSource() (lecture d'un trimestre
    nommé sans swap) et partageSection.dupliquerGrillePartagee() (copie grille +
-   cartouches, lecteur de cartouches injecté). D-C4 reporté : l'echelleId d'une
-   cartouche copiée n'est PAS remappé ici (verrouillé par un test-témoin).
+   cartouches, lecteur de cartouches injecté). D-C4 statué le 11 oct. 2026 (#656) :
+   l'echelleId d'une cartouche copiée se rattache comme à l'import (rattacherEchelle).
    =================================================================== */
 
 /**
@@ -2495,7 +2495,10 @@ function copierGrilleDepuisTrimestre(grilleSource, srcId) {
         inspireDeTrimestre: srcId
     });
     const lireCartouchesParCle = (g) => db.getSync(cleSource('cartouches_' + g.id, srcId), []) || [];
-    return partageSection.dupliquerGrillePartagee(source, lireCartouchesParCle);
+    // #656 — l'échelle d'une cartouche se reconnaît telle qu'elle est dans le trimestre source.
+    const lireEchelleSource = (id) => (db.getSync(cleSource('echellesTemplates', srcId), []) || [])
+        .find(e => e && e.id === id) || null;
+    return partageSection.dupliquerGrillePartagee(source, lireCartouchesParCle, lireEchelleSource);
 }
 
 /** État de la section d'import, à reposer après reconstruction du modal. */
