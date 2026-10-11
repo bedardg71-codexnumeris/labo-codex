@@ -3,6 +3,11 @@
 **Version** : Beta 95.2
 **Date** : 6 janvier 2026
 
+> ⚠ **DOCUMENT PÉRIMÉ** (bandeau du 11 oct. 2026, #471 ; écarts mesurés par l'audit du 20 août, constat CT-25).
+> Faux au moins sur : `js/entites-ui.js` (archivé sous `js/_archives/`, non chargé) ; la clé `horaires` dite
+> non namespacée (elle l'est) ; les gabarits prédéfinis et l'import/export de trimestre « à implémenter »
+> (livrés). Le **principe** (bibliothèque, puis assemblage) tient ; les noms de fichiers et de clés, non.
+
 ---
 
 ## Vue d'ensemble

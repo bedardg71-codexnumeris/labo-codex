@@ -4,6 +4,13 @@
 **Version** : Beta 95
 **Derniere mise a jour** : 1er janvier 2026
 
+> ⚠ **DOCUMENT PÉRIMÉ** (bandeau du 11 oct. 2026, #471 ; écarts mesurés par l'audit du 20 août, constat CT-25).
+> Faux au moins sur : `evenementsPrevus` / `evenementsImprevus`, fusionnées en `journeesSansCours` (#374) ;
+> `grillesTemplates`, `echellesTemplates`, `pratiquesConfigurables`, `modalitesEvaluation` dites globales
+> (namespacées, #358 et #328) ; le mode démo « groupe 9999 » (aujourd'hui le trimestre `demo` et `cleDemo()`) ;
+> la session « H ou A » (l'été existe) ; le module, éclaté en plus de huit fichiers `trimestre*`.
+> **Fait foi** : le code, `docs/architecture/ECOSYSTEME-DONNEES.md` et `docs/DATA-OWNERSHIP.md`.
+
 ---
 
 ## Objectif
