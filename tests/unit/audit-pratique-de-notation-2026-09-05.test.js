@@ -1028,12 +1028,15 @@ describe('E · dans quoi la note du cours se lit', () => {
         expect(l.raison).toBe('note-chiffree');
         expect(propre.raison).toBe('note-chiffree');
     });
-    it('E6 · STD configurable dont l\'echelleId ne se résout pas (#590) : construireConfigComplete pose une IDME codée en dur (50/65/80/95) — sans bornes, elle ne situe rien ; le calcul, lui, n\'y touche pas', () => {
+    it('E6 · STD configurable dont l\'echelleId ne se résout pas (↻ #590, 11 oct. : plus d\'IDME codée en dur) : l\'échelle embarquée est VIDE et marquée introuvable, la pratique se charge, elle ne situe rien ; le calcul n\'y touche pas', () => {
         const b = monter(jeuSTD({ echelleId: 'ECHELLE_DISPARUE' }));
         const inst = b.win.obtenirPratiqueParId('std-banc');
         const situe = b.win.situerPourcentageDansEchelle(79.45, inst.config.echelle);
         noter('E6', { echelleEmbarquee: inst.config.echelle && inst.config.echelle.niveaux.map(n => n.code + ':' + n.valeur_pourcentage), situe, note: r2(b.win.calculerDetailsNoteFinale(DA.STD).noteFinale) });
-        expect(inst.config.echelle.niveaux.map(n => n.valeur_pourcentage)).toEqual([50, 65, 80, 95]);
+        expect(inst, 'la pratique doit encore se charger').not.toBeNull();
+        expect(inst.config.echelle.niveaux).toEqual([]);
+        expect(inst.config.echelle.introuvable).toBe(true);
+        expect(inst.config.echelle.echelle_id).toBe('ECHELLE_DISPARUE');
         expect(situe).toBeNull();
         expect(r2(b.win.calculerDetailsNoteFinale(DA.STD).noteFinale)).toBe(79.45);
     });

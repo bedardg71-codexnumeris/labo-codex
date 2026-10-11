@@ -376,7 +376,7 @@ function zoneDuNiveau(code, echelleId = null) {
  *
  *   | capacité                      | obtenirEchelleResolue | resoudreModeleParId |
  *   |-------------------------------|-----------------------|---------------------|
- *   | `idOriginal` (échelle importée)| oui                  | NON                 |
+ *   | `idOriginal` (échelle importée)| oui                  | oui (#590)          |
  *   | identifiant `pratique-*`      | oui                   | NON                 |
  *   | repli pool inter-trimestre    | NON                   | oui                 |
  *   | refus d'une échelle sans niveaux | oui                | non                 |
@@ -384,9 +384,14 @@ function zoneDuNiveau(code, echelleId = null) {
  * `resoudreModeleParId` n'est appelé pour une ÉCHELLE que par
  * `pratique-registre.js` (`construireConfigComplete`) depuis le retrait du
  * module « Consolidation » (10 septembre 2026) — il en avait un second
- * appelant, `consolidation.js`, parti avec lui. Quand la résolution échoue,
- * la pratique retombe sur une échelle IDME codée en dur qui contredit celle
- * de l'utilisateur.
+ * appelant, `consolidation.js`, parti avec lui.
+ *
+ * ⮕ #590 (11 oct. 2026, option A de Grégoire) : `resoudreModeleParId` reconnaît
+ * `idOriginal`, et la pratique dont l'échelle est introuvable ne retombe plus sur
+ * une IDME codée en dur. Restent deux causes : `echelle-de-pratique` et
+ * `pool-inter-trimestre`. La seconde n'a pas été réconciliée : `echellesComparables`
+ * lit une échelle introuvable comme une absence (rétroaction « Progrès ») — la
+ * rendre trouvable au pool changerait ce que lisent des élèves.
  *
  * ⮕ CE QUE CE DIAGNOSTIC TRANCHE, ET QU'AUCUNE LECTURE DE CODE NE PEUT DIRE :
  * si la divergence touche des données RÉELLES, ou si elle reste théorique.
@@ -429,11 +434,6 @@ function _diagnostiquerResolutionEchelles() {
     recenser(productions, 'productions');
     recenser(evaluations, 'evaluations');
 
-    var echelles = [];
-    try {
-        echelles = db.getSync((typeof cle === 'function') ? cle('echellesTemplates') : 'echellesTemplates', []) || [];
-    } catch (e) { echelles = []; }
-
     var lignes = Object.keys(usages).map(function (id) {
         var parResolue = (typeof obtenirEchelleResolue === 'function')
             ? !!obtenirEchelleResolue(id) : null;
@@ -444,11 +444,8 @@ function _diagnostiquerResolutionEchelles() {
         // vérifiée sur les données, et « indéterminée » reste une réponse.
         var cause = null;
         if (parResolue !== parRegistre) {
-            var porteuse = echelles.find(function (e) { return e && e.idOriginal === id; }) || null;
             if (String(id).indexOf('pratique-') === 0) {
                 cause = 'echelle-de-pratique';
-            } else if (porteuse) {
-                cause = 'idOriginal';
             } else if (parRegistre && !parResolue) {
                 cause = 'pool-inter-trimestre';
             } else {
