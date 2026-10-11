@@ -472,7 +472,10 @@ async function recenserDependancesCours(coursId) {
             total: valeur.length
         });
         if (k === 'groupesCours' || k.endsWith('_groupesCours')) {
-            retire.forEach(g => { if (g && g.id) gcDependants.push({ gc: g, trim: k.replace(/_?groupesCours$/, '') || '(sans trimestre)' }); });
+            // #477 (CT-22) : `prefixe` est celui des clés à lire ; « (sans trimestre) » n'est qu'un libellé.
+            // Avant, une clé nue faisait lire `(sans trimestre)_groupeEtudiants`, qui n'existe pas (toujours 0).
+            const trim = k.replace(/_?groupesCours$/, '');
+            retire.forEach(g => { if (g && g.id) gcDependants.push({ gc: g, trim: trim || '(sans trimestre)', prefixe: trim ? trim + '_' : '' }); });
         }
     }
 
@@ -486,15 +489,15 @@ async function recenserDependancesCours(coursId) {
     for (const d of gcDependants) {
         d.nbEtu = 0; d.nbEval = 0; d.nbPres = 0;
         try {
-            const etu = await db.get(d.trim + '_groupeEtudiants', []) || [];
+            const etu = await db.get(d.prefixe + 'groupeEtudiants', []) || [];
             d.nbEtu = (Array.isArray(etu) ? etu : []).filter(e => e && (e.groupeCoursId === d.gc.id || e.coursId === coursId)).length;
-            const ev = await db.get(d.trim + '_evaluationsSauvegardees', []) || [];
+            const ev = await db.get(d.prefixe + 'evaluationsSauvegardees', []) || [];
             d.nbEval = (Array.isArray(ev) ? ev : []).filter(e => e && e.coursId === coursId).length;
-            const pr = await db.get(d.trim + '_presences', []) || [];
+            const pr = await db.get(d.prefixe + 'presences', []) || [];
             d.nbPres = (Array.isArray(pr) ? pr : []).filter(p => p && p.coursId === coursId).length;
         } catch (e) { /* comptage best-effort */ }
         if (d.nbEtu || d.nbEval || d.nbPres) risqueGC.push(d);
-        const cleSnap = d.trim + '_snapshots_' + d.gc.id;
+        const cleSnap = d.prefixe + 'snapshots_' + d.gc.id;
         if (toutes.indexOf(cleSnap) !== -1) clesSnapshots.push(cleSnap);
     }
 
@@ -937,7 +940,8 @@ function ouvrirFilePickerImportCours() {
  */
 async function _diagnostiquerModeleCours() {
     const cours = db.getSync('cours', []);
-    const trimestres = db.getSync('trimestres', []);
+    // #477 (CT-19) : sans doublon d'id.
+    const trimestres = typeof window.obtenirTrimestres === 'function' ? window.obtenirTrimestres() : db.getSync('trimestres', []);
 
     // Suffixes de clés namespacées dont les items portent un champ .coursId
     // (#449 : registre unique du module, partagé avec le recensement)
@@ -974,11 +978,19 @@ async function _diagnostiquerModeleCours() {
                 arr.forEach(item => { if (item && item.coursId) ajouter(item.coursId, suf, 1); });
             }
         }
-        // Snapshots : coursId encodé dans la clé {trim}_snapshots_{coursId}
+        // Snapshots : la clé est {trim}_snapshots_{contexte}. #477 (CT-22) : le contexte est le plus
+        // souvent un GROUPE-COURS (`cleSnapshots`, snapshots.js → modes.js : `_groupeCoursId || id`),
+        // pas un cours. Il est rattaché au `coursId` de son groupe-cours ; un suffixe qui n'en est pas
+        // un (mode cours, ancien format) compte tel quel. Avant, les ids de groupes-cours sortaient
+        // parmi les « orphelins » et les cours étaient sous-comptés.
+        const gcDuTrimestre = await db.get(`${t.id}_groupesCours`) || [];
+        const coursDuContexte = {};
+        (Array.isArray(gcDuTrimestre) ? gcDuTrimestre : []).forEach(gc => { if (gc && gc.id && gc.coursId) coursDuContexte[gc.id] = gc.coursId; });
         const prefixe = `${t.id}_snapshots_`;
         toutesCles.forEach(k => {
             if (typeof k === 'string' && k.startsWith(prefixe)) {
-                ajouter(k.slice(prefixe.length), 'snapshots', 1);
+                const contexte = k.slice(prefixe.length);
+                ajouter(coursDuContexte[contexte] || contexte, 'snapshots', 1);
             }
         });
     }
