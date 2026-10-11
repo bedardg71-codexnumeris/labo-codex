@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // =====================================================================
 // #663, #627 — L'ÉCHELLE D'UNE PRATIQUE SUIT L'ÉCHELLE RENOMMÉE (11 oct. 2026)
@@ -70,9 +71,8 @@ describe('#663 · B — la réouverture d\'archive', () => {
     const src = lireSource('js/reserve-ouvrir.js');
 
     it('B.a la branche « pratique » de _patcherReferences passe par le rebranchement commun', () => {
-        const debut = src.indexOf('function _patcherReferences');
-        const bloc = src.slice(debut, src.indexOf('function _preparerEtPatcher', debut));
-        const branche = bloc.slice(bloc.indexOf("type === 'pratique'"));
+        const bloc = tranche(src, 'function _patcherReferences', 'function _preparerEtPatcher');
+        const branche = tranche(bloc, "type === 'pratique'");
         expect(branche).toContain('_rebrancherEchellePratique(item, remapEchelles)');
         expect(branche).not.toMatch(/item\.config\.echelleId\s*=/);
     });

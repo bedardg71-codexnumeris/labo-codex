@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // =====================================================================
 // #793 — APRÈS UN IMPORT, LES CINQ BIBLIOTHÈQUES CONDUISENT L'ŒIL (11 oct. 2026)
@@ -82,9 +83,7 @@ describe('#793 · B — les cinq confirmations d\'import passent par le geste', 
     FAMILLES.forEach(([fichier, fonction, modale]) => {
         it(`B · ${fonction}`, () => {
             const src = readFileSync(path.join(racine, 'js', fichier), 'utf8');
-            const debut = src.indexOf('window.' + fonction + ' = async function');
-            expect(debut).toBeGreaterThan(-1);
-            const corps = src.slice(debut, src.indexOf('\n};', debut));
+            const corps = tranche(src, 'window.' + fonction + ' = async function', '\n};');
             expect(corps).toMatch(new RegExp("conduireAuxImportes\\(\\s*'" + modale + "'"));
             expect(corps).toMatch(/idsImportes\.push\(/);
             expect(corps).toMatch(/ligneMasquee \|\| /);
