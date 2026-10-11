@@ -1290,6 +1290,67 @@ function _sansLeDemoDuFichier(donnees) {
     return reste;
 }
 
+/**
+ * #1046 (lot 7, 11 oct. 2026) — LES RESSOURCES DES TRIMESTRES D'UN FICHIER RÉCENT.
+ *
+ * Depuis #358 et S5/#623, grilles, échelles, pratiques et cartouches vivent sous la clé de leur
+ * trimestre (`a2031_grillesTemplates`, `a2031_cartouches_<grille>`). L'import sélectif ne les
+ * cherchait que sous les clés nues : un fichier récent n'offrait pas ses grilles. Cette vue les
+ * REPLIE sur les clés nues, avant l'aperçu et avant l'import : elles prennent ensuite exactement
+ * le chemin des clés nues (assainissement, renommages, rebranchements, identité des cartouches
+ * du lot 3) et entrent dans le trimestre actif.
+ *
+ * Règles :
+ *   · seuls les préfixes de trimestre (`a|e|h` + année) : `demo_…` n'est jamais proposé, même si
+ *     le retrait du démo (`_sansLeDemoDuFichier`) n'a pas eu lieu ;
+ *   · la clé nue d'abord, telle quelle : un fichier ancien (clés nues seules) donne la même vue
+ *     qu'avant, à l'identique ;
+ *   · puis les trimestres, du plus récent au plus ancien. Une ressource dont l'id est déjà là
+ *     n'est ajoutée qu'une fois : même id, même contenu, c'est la même ; même id, contenu
+ *     différent, la plus récente l'emporte (supposition de Claude Code, écrite à la demande de
+ *     relecture du lot 7). Une ressource sans id n'est jamais fusionnée.
+ * Ne modifie pas `donnees` : rend une copie superficielle.
+ */
+const FAMILLES_DES_TRIMESTRES = ['grillesTemplates', 'echellesTemplates', 'pratiquesConfigurables'];
+function _ressourcesDesTrimestresSurLesClesNues(donnees) {
+    if (!donnees || typeof donnees !== 'object') return donnees;
+    const lireListe = (v) => {
+        if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { return null; } }
+        return Array.isArray(v) ? v : null;
+    };
+    // h < e < a dans une même année : l'ordre du calendrier.
+    const rang = (t) => Number(t.slice(1)) * 10 + ({ h: 1, e: 2, a: 3 })[t.charAt(0)];
+    const parCible = {};   // clé nue → [{ trimestre, liste }]
+    Object.keys(donnees).forEach(c => {
+        const m = /^([aeh]\d{4})_(.+)$/.exec(c);
+        if (!m) return;
+        const nom = m[2];
+        if (FAMILLES_DES_TRIMESTRES.indexOf(nom) === -1 && nom.indexOf('cartouches_') !== 0) return;
+        const liste = lireListe(donnees[c]);
+        if (!liste || liste.length === 0) return;
+        (parCible[nom] = parCible[nom] || []).push({ trimestre: m[1], liste: liste });
+    });
+    const cibles = Object.keys(parCible);
+    if (cibles.length === 0) return donnees;
+
+    const vue = { ...donnees };
+    cibles.forEach(nom => {
+        const fusion = (lireListe(donnees[nom]) || []).slice();
+        const vus = new Set(fusion.filter(r => r && r.id).map(r => r.id));
+        parCible[nom].sort((x, y) => rang(y.trimestre) - rang(x.trimestre)).forEach(source => {
+            source.liste.forEach(r => {
+                if (r && r.id) {
+                    if (vus.has(r.id)) return;
+                    vus.add(r.id);
+                }
+                fusion.push(r);
+            });
+        });
+        vue[nom] = fusion;
+    });
+    return vue;
+}
+
 function confierAuCodex(fichier) {
     fermerModalImport();
     return window.Codex.ouvrirFichier(fichier);
@@ -2355,6 +2416,8 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
  * @returns {Object} Détails des ressources et données par type
  */
 function analyserRessourcesDetaillees(config) {
+    // #1046 : les ressources des trimestres du fichier, repliées sur les clés nues.
+    config = _ressourcesDesTrimestresSurLesClesNues(config);
     const result = {
         // Ressources pédagogiques (bibliothèques)
         ressources: {
@@ -3123,7 +3186,8 @@ async function executerImportSelectif() {
     const config = configCompleteEnAttente;
 
     // Retirer la propriété interne _format
-    const donnees = { ...config };
+    // #1046 : les ressources des trimestres du fichier, repliées sur les clés nues (la même vue que l'aperçu).
+    const donnees = _ressourcesDesTrimestresSurLesClesNues({ ...config });
     delete donnees._format;
 
     // Helper pour parser les valeurs JSON
@@ -3987,6 +4051,7 @@ window.compterDatesPresences = compterDatesPresences; // #1012, les mots : expos
 window.ligneElevesEcartes = ligneElevesEcartes; // #1012, les mots : exposé pour ses essais
 window._restaurerBlobsDepuisZip = _restaurerBlobsDepuisZip; // #1028 (verdict) : exposé pour ses essais — une copie aux archives n'est jamais « manquante »
 window.analyserRessourcesDetaillees = analyserRessourcesDetaillees; // #1012, les mots : exposé pour l'essai du compte de l'aperçu
+window._ressourcesDesTrimestresSurLesClesNues = _ressourcesDesTrimestresSurLesClesNues; // #1046 : exposé pour l'essai « ce qui voyage »
 window.signatureContenu = signatureContenu;         // #448
 
 })();
