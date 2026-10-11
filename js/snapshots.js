@@ -576,13 +576,22 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         // ✅ NOUVEAU (11 déc 2025): Calculer C global = taux de remise du dernier travail
         let cGlobal = null;
         if (dernierTravail) {
-            const nbRemis = evaluationsCache.filter(e =>
-                e.productionId === dernierTravail.id &&
-                window.evaluationEntreDansLaNote(e) &&   // lot A (16 sept. 2026) : les deux prédicats de pratique-registre.js
-                !window.evaluationNonRemise(e) &&
-                !window.evaluationNonRecevable(e)   // lot 30 (17 sept. 2026)
-            ).length;
-            cGlobal = Math.round((nbRemis / nbEtudiants) * 100);
+            // #726 (lot 6, 11 oct. 2026) : le numérateur compte les seuls élèves du dénominateur
+            // (actifs du groupe, non exclus), chacun une fois. Avant, il comptait les évaluations de
+            // tout le trimestre (l'autre groupe du cours, les exclus, une reprise en double) : le C
+            // global pouvait dépasser 100 %. Stock : les snapshots déjà capturés gardent leur nombre.
+            const dasDuGroupe = new Set(etudiants.map(e => String(e.da)));
+            const dasRemis = new Set();
+            evaluationsCache.forEach(e => {
+                if (e.productionId === dernierTravail.id &&
+                    dasDuGroupe.has(String(e.etudiantDA)) &&
+                    window.evaluationEntreDansLaNote(e) &&   // lot A (16 sept. 2026) : les deux prédicats de pratique-registre.js
+                    !window.evaluationNonRemise(e) &&
+                    !window.evaluationNonRecevable(e)) {   // lot 30 (17 sept. 2026)
+                    dasRemis.add(String(e.etudiantDA));
+                }
+            });
+            cGlobal = Math.round((dasRemis.size / nbEtudiants) * 100);
         }
 
         // Calculer statistiques groupe (gérer null)
