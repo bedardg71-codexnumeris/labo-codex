@@ -4,6 +4,12 @@
 **Version** : Beta 95
 **Derniere mise a jour** : 1er janvier 2026
 
+> ⚠ **DOCUMENT PÉRIMÉ** (bandeau du 11 oct. 2026, #471 ; écarts mesurés par l'audit du 20 août, constat CO-30).
+> Faux au moins sur : le champ `nom` d'une production (le code écrit `titre` et `activiteApprentissage`) ;
+> `grillesTemplates` dite globale (namespacée par trimestre depuis #358) ; les types de production
+> (manquent `terminale`, `portfolio`, `laboratoire`…) ; des champs non documentés (`echelleId`, `cartoucheId`,
+> `echeancesParGroupe`, `metadata_cc`…). **Fait foi** : le code, et `docs/DATA-OWNERSHIP.md` pour les clés.
+
 ---
 
 ## Objectif
