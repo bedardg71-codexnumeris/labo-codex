@@ -1601,7 +1601,7 @@ async function migrerGrillesVersBibliotheque() {
  * Assure la présence de la grille générique dans la bibliothèque
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
-async function assurerGrilleGenerique() {
+async function assurerGrilleDeDepart() {
     // 🆕 #358 — Garde anti-resemage du global hérité. Au boot (DOMContentLoaded,
     // AVANT db-ready) avec localStorage saturé (#353), `trimestreActif` n'est pas
     // encore réhydraté → obtenirTrimestreId() est vide → cle('grillesTemplates')
@@ -1665,7 +1665,7 @@ async function initialiserModuleGrilles() {
         await migrerGrillesVersBibliotheque();
 
         // ✅ AJOUT (3 janvier 2026) : Assurer présence de la grille générique
-        await assurerGrilleGenerique();
+        await assurerGrilleDeDepart();
     }
 
     // Charger la liste des grilles
@@ -2140,7 +2140,7 @@ window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
 // Exposée pour la sentinelle #358 (garde anti-resemage du global hérité).
-window.assurerGrilleGenerique = assurerGrilleGenerique;
+window.assurerGrilleDeDepart = assurerGrilleDeDepart;
 
 // ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
 window.afficherBibliothequeGrilles = afficherBibliothequeGrilles;

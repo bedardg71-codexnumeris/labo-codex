@@ -147,7 +147,7 @@ async function initialiserModuleCartouches() {
     await migrerCartouchesVersBibliotheque();
 
     // ✅ AJOUT (3 janvier 2026) : Assurer présence de la cartouche générique
-    await assurerCartoucheGenerique();
+    await assurerCartoucheDeDepart();
 
 }
 
@@ -155,7 +155,7 @@ async function initialiserModuleCartouches() {
  * Assure la présence de la cartouche générique dans la bibliothèque
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
-async function assurerCartoucheGenerique() {
+async function assurerCartoucheDeDepart() {
     // Vérifier que la grille générique existe
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const grilleGenerique = grilles.find(g => g.id === 'GRILLE_GENERIQUE');
@@ -165,7 +165,7 @@ async function assurerCartoucheGenerique() {
     // La suppression volontaire ne dépend pas de la collection : ce test reste
     // ici. La PRÉSENCE, elle, se vérifie DANS la file — vérifiée avant, deux
     // appels concurrents au démarrage sèment deux fois (défaut jumeau de
-    // `assurerGrilleGenerique`, corrigé au lot 2c).
+    // `assurerGrilleDeDepart`, corrigé au lot 2c).
     if (window.estRessourceSupprimee('CART_GENERIQUE')) return;
 
     const cartoucheGenerique = {

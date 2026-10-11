@@ -57,10 +57,10 @@ async function poserUnTrimestreEtSemer(page) {
         if (typeof window.assurerEchelleIdmeDeDepart !== 'function') {
             return { erreur: 'window.assurerEchelleIdmeDeDepart absent — le semis du §2 n\'est pas livré' };
         }
-        if (typeof window.assurerGrilleGenerique !== 'function') {
-            return { erreur: 'window.assurerGrilleGenerique absent' };
+        if (typeof window.assurerGrilleDeDepart !== 'function') {
+            return { erreur: 'window.assurerGrilleDeDepart absent' };
         }
-        await window.assurerGrilleGenerique();
+        await window.assurerGrilleDeDepart();
         await window.assurerEchelleIdmeDeDepart();
         return {
             echelles: (window.db.getSync('a2026_echellesTemplates', []) || []).map(e => ({
