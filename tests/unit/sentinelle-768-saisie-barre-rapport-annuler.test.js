@@ -63,9 +63,9 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
 
         // Et le JS ne doit fabriquer aucun BOUTON DE LA BARRE : une balise
         // `<button` suivie de près par une action de la barre est la signature
-        // d'un gabarit recopié. On borne à la barre, et non à tout `<button` du
-        // module : l'en-tête de la colonne « Présence » construit légitimement
-        // les siens, dont le libellé dépend du nombre de périodes de la séance.
+        // d'un gabarit recopié. On borne à la barre ; l'en-tête de la colonne
+        // « Présence » a sa propre sentinelle depuis #783 (11 oct. 2026), qui lui
+        // retire aussi son second gabarit (sentinelle-783-en-tete-presence-un-gabarit).
         // (Chercher les libellés eux-mêmes serait faux — les commentaires du
         // module les citent, et cette sentinelle a rougi là-dessus au premier jet.)
         const { actions } = barreStatique();
