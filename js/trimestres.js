@@ -1816,7 +1816,7 @@
         const actif = obtenirTrimestreActif();
         if (actif) {
             window.trimestreActif = actif.id;
-            db.setSync('trimestreActif', actif.id);
+            db.setSyncSiChange('trimestreActif', actif.id);   // #1040 : rien si inchangé
         }
 
         // Mettre à jour l'affichage du bandeau d'archivage
