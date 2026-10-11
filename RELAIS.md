@@ -7,7 +7,22 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 10 OCT. 2026, 17 h 22 : **1.197.0 (RIEN NE SE PERD EN SILENCE ; #845, #938, #522 LOT 5B) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 11 OCT. 2026, 11 h 26 : **1.198.0 (MOINS DE MÉMOIRE, DES COMPTES JUSTES ; LOTS 5, 6, 7) EN LIGNE ; `main` À JOUR ; LOT 8 SUR `lot8-cadre`**
+
+**En ligne** (mesuré par le connecteur Netlify) : déploiement `6acbaa82`, `commit_ref` `21228642`, `state: ready`, publié à 15:26:05 Z
+(11 h 26, Toronto). Titre et trois items des Nouvelles retenus par Grégoire (8 h 19, 8 h 43), posés tels quels.
+**Contenu** : lot 5 (#991, #1025, #995), lot 6 (#726, #925, « Appuie sur » ; #728 close sur la mesure ; #727 close sur la décision de
+Grégoire), lot 7 (#1046 et sa correction, #522 lot 7). Chaque lot relu par Cowork. Release `479a519f` ; règle 7 de `PROTOCOLE.md`
+(cadence des verdicts) `21228642`.
+**Verdict complet sur `21228642`** (signal de Grégoire à 10 h ; Chrome, Safari, Cowork fermés ; secteur ; charge 3,9 au lancement ;
+Time Machine à l'arrêt) : code 0, 0 échec, aucun instable, 0 veille, ≈ 66 min. Vitest complet vert (hook pré-push).
+**Stock** : #726, les relevés déjà capturés gardent leur nombre. Les autres : sans stock.
+**Branche `lot8-cadre`** (10 commits, partie de `e24a2d0f`, acceptée par Cowork à 10 h 11) : #1049 (urgent : « Recalculer les captures »
+efface les captures d'intervention — Grégoire prévenu de ne pas cliquer), #1018, #990, #477, #472, #475, #474. Item des Nouvelles du
+lot 8 retenu par Grégoire (10 h 12), dans `plans de travail/CONSIGNE-DU-JOUR.md` de la branche. **Suite** : fusionner `lot8-cadre`
+dans `main`, release suivante avec son verdict (règle 7), puis la file de Cowork.
+
+## (relais précédent) 10 OCT. 2026, 17 h 22 : **1.197.0 (RIEN NE SE PERD EN SILENCE ; #845, #938, #522 LOT 5B) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6acaac76`, `commit_ref` `16e3cbe5`, `state: ready`, publié à 21:22:09 Z
 (17 h 22, Toronto). Titre et ligne des Nouvelles retenus par Grégoire (15 h 48), posés tels quels.
