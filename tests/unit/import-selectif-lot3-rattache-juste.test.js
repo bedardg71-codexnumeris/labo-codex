@@ -184,6 +184,31 @@ describe('Lot 3 · A — #664 / #952 : ce qui désigne une grille ou une échell
     });
 });
 
+describe('#627 / #663 (11 oct. 2026) — la pratique désigne son échelle sous `configuration`', () => {
+    // La forme réelle des pratiques (assistant, gestion) : `configuration.echelleId`. Le lot 3 ne
+    // rebranchait que `echelleId` à la racine, que les pratiques d'aujourd'hui n'écrivent pas.
+    const FICHIER_CONF = Object.assign({}, FICHIER, {
+        pratiquesConfigurables: [{ id: 'PRAT_CONF', nom: 'Pratique reçue Delta', configuration: { echelleId: 'ECH_A', seuil: 60 } }]
+    });
+    const COCHES = { echelles: ['ECH_A'], pratiques: ['PRAT_CONF'] };
+
+    it('A.c l\'échelle reçue est renommée : `configuration.echelleId` suit, le reste de la configuration reste', async () => {
+        const espace = espaceDeDepart();
+        await importer(espace, FICHIER_CONF, COCHES);
+        const echelle = lire(espace, 'echellesTemplates').find((e) => e.nom === 'Échelle reçue Bêta');
+        expect(echelle.id).not.toBe('ECH_A');
+        const pratique = lire(espace, 'pratiquesConfigurables').find((p) => p.id === 'PRAT_CONF');
+        expect(pratique.configuration).toEqual({ echelleId: echelle.id, seuil: 60 });
+    });
+
+    it('A.d sans conflit, rien ne bouge', async () => {
+        const espace = { db: fauxDb({}) };
+        await importer(espace, FICHIER_CONF, COCHES);
+        const pratique = lire(espace, 'pratiquesConfigurables').find((p) => p.id === 'PRAT_CONF');
+        expect(pratique.configuration.echelleId).toBe('ECH_A');
+    });
+});
+
 describe('Lot 3 · B — #954 : une cartouche identique à celle en place n\'entre pas en double', () => {
     it('B.a la cartouche Gamma, créée ici, reste seule après deux imports', async () => {
         const espace = espaceDeDepart();

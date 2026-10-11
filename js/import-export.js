@@ -123,6 +123,33 @@ function signatureContenu(valeur, champsIgnores) {
 }
 
 /**
+ * #663, #627 (11 oct. 2026) — rebranche l'échelle d'une PRATIQUE sur l'échelle renommée
+ * pour conflit. Une pratique désigne son échelle à trois endroits selon son âge :
+ * `configuration.echelleId` (ce qu'écrivent l'assistant et la gestion), `config.echelleId`
+ * (forme d'import #712, pratiques anciennes) et `echelleId` à la racine (schéma d'import).
+ * Avant, la réouverture d'archive ne regardait que `config` et l'import sélectif que la
+ * racine : la pratique gardait l'ancien id. Les trois sont traités, aucun n'en remplace un
+ * autre. Le sous-objet rebranché est COPIÉ : celui de l'archive lue n'est pas touché.
+ * @param {Object} pratique - modifiée en place (racine), sous-objets remplacés par copie
+ * @param {Object<string, string>} table - ancien id d'échelle → id neuf
+ * @returns {number} nombre de références rebranchées
+ */
+function rebrancherEchellePratique(pratique, table) {
+    if (!pratique || !table) return 0;
+    const a = (id) => !!id && Object.prototype.hasOwnProperty.call(table, id);
+    let n = 0;
+    if (a(pratique.echelleId)) { pratique.echelleId = table[pratique.echelleId]; n++; }
+    ['configuration', 'config'].forEach((champ) => {
+        const sous = pratique[champ];
+        if (sous && typeof sous === 'object' && a(sous.echelleId)) {
+            pratique[champ] = Object.assign({}, sous, { echelleId: table[sous.echelleId] });
+            n++;
+        }
+    });
+    return n;
+}
+
+/**
  * Fusionne une collection ENTRANTE dans une collection EXISTANTE en traitant
  * une collision d'id comme une IDENTITÉ, pas comme un accident.
  *
@@ -3365,7 +3392,7 @@ async function executerImportSelectif() {
                     .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
                     .map(p => {
                         const assainie = assainirObjet(p, SCHEMAS_IMPORT.pratique);
-                        if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
+                        rebrancherEchellePratique(assainie, remapEchelles); // #627 : `configuration` aussi
                         return {
                             ...assainie,
                             // IMPORTANT: Garder l'ID original pour préserver les références
@@ -3997,6 +4024,7 @@ window.CLES_ECHELLE_NON_TRANSPORTEES = CLES_ECHELLE_NON_TRANSPORTEES;
 window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
+window.rebrancherEchellePratique = rebrancherEchellePratique; // #663 : aussi pour reserve-ouvrir.js
 window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé pour ses essais
 window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
 window.dasElevesEcartes = dasElevesEcartes; // #1012, l'élève désinscrit : exposé pour ses essais

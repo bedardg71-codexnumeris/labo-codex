@@ -177,6 +177,14 @@
                     && item.grilleId && correspondance.grille[item.grilleId]) {
                     item.grilleId = correspondance.grille[item.grilleId];
                 }
+                // #663 : l'échelle d'une pratique, rangée sous `configuration` (le schéma de
+                // partage n'a ni `config` ni `echelleId` à la racine) — même règle : seulement
+                // si elle est dans le package. Le clone profond ci-dessus protège le package lu.
+                if (type === 'pratique' && item.configuration
+                    && item.configuration.echelleId
+                    && correspondance.echelle[item.configuration.echelleId]) {
+                    item.configuration.echelleId = correspondance.echelle[item.configuration.echelleId];
+                }
 
                 // Trace de provenance (D7) : idOriginal toujours posé ;
                 // un inspireDe d'une lignée antérieure est complété, pas écrasé.
