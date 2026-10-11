@@ -997,43 +997,6 @@
         );
     }
 
-    // -------------------------------------------------------------------------
-    // MODÈLES PRÉDÉFINIS (Mode exploratoire)
-    // -------------------------------------------------------------------------
-
-    /**
-     * Définitions des modèles prédéfinis pour PAN-Spécifications
-     */
-    /**
-     * ⚠ #687 — CETTE CONSTANTE N'A AUCUN LECTEUR, ET C'EST MESURÉ.
-     * `grep -n "MODELES_SPECIFICATIONS" js/*.js js/**\/*.js` rend UNE ligne :
-     * celle-ci. Ni dans ce fichier, ni ailleurs. Les deux entrées qui se
-     * réclamaient d'une discipline sont parties ; `modele-simple` reste SEUL
-     * dans une structure que personne ne lit.
-     * ⮕ Le retrait complet et le passage à `MODELES_PRATIQUES_PREDEFINIS`
-     * comme source unique pour SPE sont INSCRITS (#688), pas exécutés ici :
-     * ils touchent `modele-simple`, hors du périmètre de ce lot.
-     */
-    const MODELES_SPECIFICATIONS = {
-        'modele-simple': {
-            nom: 'Modèle simple',
-            description: 'Pour commencer avec PAN-Spécifications',
-            typesTravaux: [
-                { id: 1, nom: 'Projet', description: 'Travail pratique ou créatif' },
-                { id: 2, nom: 'Examen', description: 'Évaluation sommative' }
-            ],
-            forfaits: [
-                { id: 1, lettre: 'Excellence', note: 90, travaux: { 1: 2, 2: 1 } },
-                { id: 2, lettre: 'Réussite', note: 70, travaux: { 1: 1, 2: 1 } }
-            ]
-        },
-    };
-
-    /**
-     * Applique un modèle prédéfini pour PAN-Spécifications
-     * Appelé depuis le wizard Primo (mode exploratoire)
-     */
-
     // =========================================================================
     // ALIASES POUR RÉTROCOMPATIBILITÉ (exports anciens noms)
     // =========================================================================
