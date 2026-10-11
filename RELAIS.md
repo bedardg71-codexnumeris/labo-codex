@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 11 OCT. 2026, 19 h 09 : **1.199.0 COMMITÉE SUR `main` (LOTS 8 À 19), NON POUSSÉE ; EN LIGNE : 1.198.0**
+
+**Le travail le plus récent vit sur le `main` LOCAL du Mac de Grégoire**, en avance sur `origin/main` : release `039b523d` (1.199.0, build 1011-1808, « Rien d'inventé, rien de perdu »). Une session du nuage qui part d'`origin/main` ne le voit pas.
+**Contenu** : lots 8 à 19 et leurs corrections, tous relus par Cowork le 11 oct. (verdicts et décisions de Grégoire à la fin de `plans de travail/CONSIGNE-DU-JOUR.md`). Mots d'écran et Nouvelles tranchés par Grégoire (18 h 02 à 18 h 04). Vitest complet vert.
+**Suite** : au signal de fin de journée de Grégoire, verdict Playwright complet, puis push si vert (§ 4.5 de `fin-de-session`). La branche `lot8-cadre` n'a plus rien qui ne soit sur `main`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 OCT. 2026, 11 h 26 : **1.198.0 (MOINS DE MÉMOIRE, DES COMPTES JUSTES ; LOTS 5, 6, 7) EN LIGNE ; `main` À JOUR ; LOT 8 SUR `lot8-cadre`**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6acbaa82`, `commit_ref` `21228642`, `state: ready`, publié à 15:26:05 Z
