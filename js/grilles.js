@@ -2932,6 +2932,24 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
     if (!grille) return false;
 
     const nomGrille = grille.nom || 'cette grille';
+
+    // #624 (11 oct. 2026) — UNE GRILLE QUI PORTE DES NOTES NE PART PAS. Ce chemin ne
+    // comptait que les cartouches : une grille employée par des évaluations ou des
+    // productions, sans cartouche, partait sur un « Supprimer ? » et les laissait sans
+    // référence. L'onglet Données bloquait déjà ce cas (`verifierDependancesGrille`,
+    // donnees-v2.js) : même règle ici, mêmes mots pour les comptes. Aucune issue n'est
+    // offerte : rattacher des évaluations à une autre grille changerait leurs notes.
+    // Lecture sous `cle()`, comme la grille elle-même : même trimestre.
+    const nbEvaluations = (db.getSync(cle('evaluationsSauvegardees'), []) || []).filter(ev => ev && ev.grilleId === grilleId).length;
+    const nbProductions = (db.getSync(cle('productions'), []) || []).filter(p => p && p.grilleId === grilleId).length;
+    if (nbEvaluations > 0 || nbProductions > 0) {
+        const emplois = [];
+        if (nbEvaluations > 0) emplois.push(`Utilisée par ${nbEvaluations} évaluation(s)`);
+        if (nbProductions > 0) emplois.push(`Utilisée par ${nbProductions} production(s)`);
+        alert(`Impossible de supprimer la grille « ${nomGrille} ».\n\n${emplois.join('\n')}\n\nSans elle, ces notes n'auraient plus de grille.`);
+        return false;
+    }
+
     const utilisation = await verifierUtilisationGrille(grilleId);
 
     if (utilisation.utilisee) {
