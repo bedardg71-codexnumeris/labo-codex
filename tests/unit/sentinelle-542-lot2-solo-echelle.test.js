@@ -132,7 +132,11 @@ describe('#542 lot 2 · le champ est posé dans les DEUX éditeurs, par le MÊME
 
     it('chaque éditeur câble SON propre handler', () => {
         expect(SRC).toMatch(/data-on-change="modifierNiveauTempHandler"[^>]*data-champ="niveauSOLO"/);
-        expect(SRC).toMatch(/data-on-change="modifierNiveauEchelleHandler"[^>]*data-champ="niveauSOLO"/);
+        // ↻ 11 oct. 2026 (#574) : la ligne de l'échelle enregistrée est une fonction partagée
+        // avec le niveau en attente ; le handler lui est passé par l'appelant.
+        expect(SRC).toMatch(/\$\{attrs\} data-champ="niveauSOLO"/);
+        expect(SRC).toMatch(/ligneNiveauEchelleHtml\(\s*niveau,\s*`data-on-change="modifierNiveauEchelleHandler"/);
+        expect(SRC).toMatch(/`data-on-change="modifierNiveauEnAttenteHandler"/);
     });
 
     it('les options viennent d\'UN SEUL producteur — pas de liste dupliquée', () => {

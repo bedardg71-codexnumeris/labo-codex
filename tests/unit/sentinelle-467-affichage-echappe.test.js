@@ -186,8 +186,12 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // échappés n'y figurent plus). Un nom qu'on désescape fait MONTER le compte.
     // ⚠ Un compte qui BAISSE (échappement ou retrait de plus) se met à jour ici,
     // à la baisse seulement, avec sa raison dans le commit.
+    // ↻ 11 oct. 2026 (#574) : echelles.js 23 → 24, SANS désescape. La ligne de niveau
+    // est devenue une fonction (`ligneNiveauEchelleHtml`) partagée avec le niveau en
+    // attente : ses six `${index}` sont devenus un `${index}` et six `${attrs}` — le
+    // même fragment d'identifiants, construit une fois. Aucun nom n'y passe.
     const NUES = {
-        'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 23,
+        'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 24,
         'js/grilles.js': 65, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 90, 'js/pratique-notation-v2.js': 7,

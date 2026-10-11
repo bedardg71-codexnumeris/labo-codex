@@ -139,21 +139,36 @@ const ECHELLES = () => ([
 
 const echelleDe = (liste, id) => liste.find((e) => e.id === id);
 
+// ↻ 11 oct. 2026 (#574) : « + Ajouter un niveau » n'écrit plus rien — le niveau est tenu
+// en attente jusqu'à ce que ses cinq champs obligatoires soient valides. L'ÉCRITURE de
+// l'ajout (et donc sa course) a lieu au dernier champ : c'est elle que ces cas mettent
+// en rafale. Les quatre premiers champs sont posés AVANT la rafale (tampon seulement).
+const NIVEAU_NEUF = { code: 'X', nom: 'Extra', min: 0, max: 10, valeurCalcul: 5 };
+async function preparerNiveauEnAttente(win, id) {
+    await win.ajouterNiveauEchelle(id);
+    for (const champ of ['code', 'nom', 'min', 'max']) {
+        await win.modifierNiveauEnAttente(id, champ, NIVEAU_NEUF[champ]);
+    }
+}
+const acheverNiveau = (win, id) => win.modifierNiveauEnAttente(id, 'valeurCalcul', NIVEAU_NEUF.valeurCalcul);
+
 /* --------------------------------------- A — la course, sur le chemin réel */
 
 describe('#522 lot 2b · A — deux gestes en rafale gardent LEURS DEUX effets', () => {
 
-    it('A.a deux ajouts de niveau sur la MÊME échelle en donnent deux', async () => {
+    it('A.a un niveau achevé et un niveau modifié sur la MÊME échelle : les deux tiennent', async () => {
         const { db, win } = await monterEchelles();
         await db.set(CLE, ECHELLES());   // security-ok: littéral de banc, aucune source externe
+        await preparerNiveauEnAttente(win, 'ECH_A');
 
         await Promise.all([
-            win.ajouterNiveauEchelle('ECH_A'),
-            win.ajouterNiveauEchelle('ECH_A')
+            acheverNiveau(win, 'ECH_A'),
+            win.modifierNiveauEchelle('ECH_A', 0, 'nom', 'Renommé')
         ]);
 
-        const liste = await db.get(CLE);
-        expect(echelleDe(liste, 'ECH_A').niveaux, 'trois niveaux, plus les deux ajoutés').toHaveLength(5);
+        const a = echelleDe(await db.get(CLE), 'ECH_A');
+        expect(a.niveaux, 'trois niveaux, plus celui achevé').toHaveLength(4);
+        expect(a.niveaux[0].nom, 'la modification tient').toBe('Renommé');
     });
 
     it('A.b deux échelles modifiées en même temps : aucune ne perd sa modification', async () => {
@@ -162,22 +177,26 @@ describe('#522 lot 2b · A — deux gestes en rafale gardent LEURS DEUX effets',
         const { db, win } = await monterEchelles();
         await db.set(CLE, ECHELLES());   // security-ok: littéral de banc, aucune source externe
 
+        await preparerNiveauEnAttente(win, 'ECH_A');
+
         await Promise.all([
-            win.ajouterNiveauEchelle('ECH_A'),
-            win.ajouterNiveauEchelle('ECH_B')
+            acheverNiveau(win, 'ECH_A'),
+            win.modifierNiveauEchelle('ECH_B', 1, 'nom', 'Changé')
         ]);
 
         const liste = await db.get(CLE);
         expect(echelleDe(liste, 'ECH_A').niveaux, 'A a gardé son niveau').toHaveLength(4);
-        expect(echelleDe(liste, 'ECH_B').niveaux, 'B a gardé le sien').toHaveLength(4);
+        expect(echelleDe(liste, 'ECH_B').niveaux[1].nom, 'B a gardé le sien').toBe('Changé');
     });
 
     it('A.c un ajout et un retrait concurrents s\'appliquent tous les deux', async () => {
         const { db, win } = await monterEchelles();
         await db.set(CLE, ECHELLES());   // security-ok: littéral de banc, aucune source externe
 
+        await preparerNiveauEnAttente(win, 'ECH_A');
+
         await Promise.all([
-            win.ajouterNiveauEchelle('ECH_A'),
+            acheverNiveau(win, 'ECH_A'),
             win.supprimerNiveauEchelle('ECH_B', 0)
         ]);
 
@@ -190,9 +209,11 @@ describe('#522 lot 2b · A — deux gestes en rafale gardent LEURS DEUX effets',
         const { db, win } = await monterEchelles();
         await db.set(CLE, ECHELLES());   // security-ok: littéral de banc, aucune source externe
 
+        await preparerNiveauEnAttente(win, 'ECH_B');
+
         await Promise.all([
             win.deplacerNiveauEchelleHaut('ECH_A', 1),
-            win.ajouterNiveauEchelle('ECH_B')
+            acheverNiveau(win, 'ECH_B')
         ]);
 
         const liste = await db.get(CLE);
