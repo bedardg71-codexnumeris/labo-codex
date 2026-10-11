@@ -72,7 +72,8 @@ function monter(fichier) {
         notifications: { succes() {}, erreur() {}, info() {}, avertissement() {} },
         document: fauxDocument(),
         BibliothequeUI: { obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null, repertoires: { rendre() {} },
-            pointerVersItems: () => ({ trouves: [], absents: [] }) },
+            pointerVersItems: () => ({ trouves: [], absents: [] }),
+            conduireAuxImportes: async () => null },   // #793 : le geste commun des cinq imports
         obtenirIdentiteCCUtilisateur: () => 'banc',
         grilleTemplateActuelle: null
     };

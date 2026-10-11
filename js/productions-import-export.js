@@ -313,14 +313,17 @@ window.confirmerImportProductions = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
 
             // Fusionner dans la Bibliothèque uniquement
             productionsImportees.forEach(prod => {
+                if (prod.id) idsImportes.push(prod.id);
                 const indexBiblio = bibliotheque.findIndex(p => p.id === prod.id);
                 if (indexBiblio >= 0) {
                     bibliotheque[indexBiblio] = { ...prod, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
@@ -335,17 +338,15 @@ window.confirmerImportProductions = async function(donnees) {
         }, []);
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportProductions)
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
-        if (document.getElementById('modalBibliothequeProductions')) {
-            if (typeof afficherBibliothequeProductions === 'function') {
-                await afficherBibliothequeProductions();
-            }
-        }
+        // #793 — la bibliothèque ouverte est redessinée, puis l'œil conduit aux cartes importées.
+        // (productions-bibliotheque-ui.js est chargé après ce fichier : lu à l'appel.)
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequeProductions', () => window.afficherBibliothequeProductions(), idsImportes);
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) production(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} production(s) mise(s) à jour.`);
-        details.push('Consulte « Productions disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Productions disponibles » pour les ajouter à ta barre latérale.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {

@@ -2479,17 +2479,20 @@ window.confirmerImportPratiques = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
 
             for (const config of pratiquesImportees) {
                 // Ajouter avec un nouvel ID si nécessaire
                 if (!config.id) {
                     config.id = genererIdUnique('PRAT_');
                 }
+                idsImportes.push(config.id);
 
                 const indexBiblio = bibliotheque.findIndex(c => c.id === config.id);
                 if (indexBiblio >= 0) {
@@ -2505,17 +2508,14 @@ window.confirmerImportPratiques = async function(donnees) {
         }, []);
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportPratiques)
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
-        if (document.getElementById('modalBibliothequePratiques')) {
-            if (typeof afficherBibliothequePratiques === 'function') {
-                await afficherBibliothequePratiques();
-            }
-        }
+        // #793 — la bibliothèque ouverte est redessinée, puis l'œil conduit aux cartes importées.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequePratiques', afficherBibliothequePratiques, idsImportes);
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} pratique(s) mise(s) à jour.`);
-        details.push('Consulte « Pratiques disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Pratiques disponibles » pour les ajouter à ta barre latérale.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {

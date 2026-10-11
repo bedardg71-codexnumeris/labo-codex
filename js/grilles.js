@@ -2055,29 +2055,14 @@ window.confirmerImportGrilles = async function(donnees) {
         // l'était — la carte arrivait en fin de liste, à 8 548 px sous le bas de
         // la fenêtre, sur une modale que la reconstruction remet en haut.
         // Un rafraîchissement qu'on ne voit pas ne se distingue pas d'une panne.
-        let pointage = null;
-        if (document.getElementById('modalBibliothequeGrilles')) {
-            await afficherBibliothequeGrilles();
-            pointage = BibliothequeUI.pointerVersItems(idsImportes);
-        }
+        // #793 : le geste vit dans `BibliothequeUI.conduireAuxImportes`, pour les cinq familles.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequeGrilles', afficherBibliothequeGrilles, idsImportes);
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
-        // L'écriture a réussi mais AUCUNE carte ne la porte : un filtre mange le
-        // résultat (« Masquer les éléments déjà dans la barre latérale », ou le
-        // masquage des items démo en mode normal). Mesuré le 8 septembre : dans
-        // ces deux cas l'app annonçait « 1 grille ajoutée » devant une liste
-        // inchangée. On le dit, plutôt que d'annoncer un succès invisible.
-        if (pointage && pointage.trouves.length === 0 && pointage.absents.length > 0) {
-            const masquageCoche = typeof BibliothequeUI.estMasquerDejaPresentActif === 'function'
-                && BibliothequeUI.estMasquerDejaPresentActif();
-            details.push(masquageCoche
-                ? 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans la barre latérale » pour les voir.'
-                : 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.');
-        } else {
-            details.push('Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
-        }
+        details.push(ligneMasquee || 'Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
