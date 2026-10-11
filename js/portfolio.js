@@ -742,7 +742,7 @@ function _calculerEtStockerIndicesCPInterne() {
             };
         });
         indicesCP.dateCalcul = dateCalcul;
-        db.setSync(cleIndices, indicesCP);
+        db.setSyncSiChange(cleIndices, indicesCP, ['dateCalcul', 'date']);   // #1040 : l'horodatage seul ne réécrit pas
         return indicesCP;
     }
 
@@ -801,7 +801,9 @@ function _calculerEtStockerIndicesCPInterne() {
     indicesCP.dateCalcul = dateCalcul;
 
     // 🔧 FIX Beta 97.4 : Sauvegarde synchrone (localStorage + IndexedDB en arrière-plan)
-    db.setSync(cleIndices, indicesCP);
+    // #1040 (11 oct. 2026) : rien n'est écrit si seuls les horodatages (`dateCalcul`,
+    // `actuel.date`) changent — aucun lecteur ne les consulte (grep du 11 oct.).
+    db.setSyncSiChange(cleIndices, indicesCP, ['dateCalcul', 'date']);
 
 
     return indicesCP;

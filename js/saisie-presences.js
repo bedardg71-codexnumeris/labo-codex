@@ -1269,13 +1269,13 @@ function initialiserSaisiePresences() {
     // Sauvegarder les paramètres actuels pour persistance — PAR TRIMESTRE
     // (#749 lot 3, S-6 ; voir initialiserModuleSaisiePresences).
     if (dateInput && dateInput.value) {
-        db.setSync(cle('presences_date'), dateInput.value);
+        db.setSyncSiChange(cle('presences_date'), dateInput.value);   // #1040
     }
     if (selectGroupe) {
-        db.setSync(cle('presences_groupe'), selectGroupe.value);
+        db.setSyncSiChange(cle('presences_groupe'), selectGroupe.value);   // #1040
     }
     if (selectTri) {
-        db.setSync(cle('presences_tri'), selectTri.value);
+        db.setSyncSiChange(cle('presences_tri'), selectTri.value);   // #1040
     }
 
     if (!dateInput || !dateInput.value) {
