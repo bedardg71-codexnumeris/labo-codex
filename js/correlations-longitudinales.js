@@ -230,8 +230,10 @@ function calculerCorrelationsLongitudinales() {
         var dasCibles = interv.etudiants.slice(); // copie figée
         for (var dc = 0; dc < dasCibles.length; dc++) tousLesCibles[dasCibles[dc]] = true;
 
-        // Trouver l'index de la séance de l'intervention (ou la plus proche après)
-        var idxDebut = 0;
+        // Trouver l'index de la séance de l'intervention (ou la plus proche après).
+        // #729 (11 oct. 2026) — aucune séance à sa date ou après (intervention postérieure à la
+        // dernière séance) : la courbe reste vide. Le défaut 0 la faisait partir du tout début.
+        var idxDebut = resultat.dates.length;
         for (var sd = 0; sd < resultat.dates.length; sd++) {
             if (resultat.dates[sd] >= dateInterv) { idxDebut = sd; break; }
         }
