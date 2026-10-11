@@ -713,7 +713,8 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         const b = monter(jeuSTD());
         noter('B3', { exposee: typeof b.win.chargerPortfolioEleveDetail, toggleExpose: typeof b.win.toggleArtefactPortfolioFromEl, profil: r2(b.win.calculerDetailsNoteFinale(DA.STD).noteFinale) });
         expect(typeof b.win.chargerPortfolioEleveDetail).toBe('undefined');
-        expect(typeof b.win.toggleArtefactPortfolioFromEl).toBe('function');   // exporté, mais son seul HTML porteur naît dans la fonction morte
+        // ↻ #722 (11 oct. 2026) : le panneau et sa bascule sont retirés ; la bascule n'est plus exposée.
+        expect(typeof b.win.toggleArtefactPortfolioFromEl).toBe('undefined');
     });
 
     it('B3b · STD — le VRAI panneau Portfolio du profil (genererSectionPerformance) : l\'indice P y est juste (79 %), mais la « Méthodologie de calcul » ne retrouve aucun artefact retenu et écrit « Calcul impossible »', () => {

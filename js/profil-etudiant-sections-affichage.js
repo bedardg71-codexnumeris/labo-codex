@@ -45,7 +45,6 @@
    
    Éléments HTML requis:
    - #contenuProfilEtudiant : Conteneur principal du profil
-   - #portfolioEleveDetail : Conteneur du portfolio
    - #etudiants-profil : Sous-section (gérée par 02-navigation.js)
    
    LocalStorage utilisé:
@@ -2714,18 +2713,7 @@ function afficherProfilComplet(daOuEl) {
    📁 GESTION DU PORTFOLIO
    =============================== */
 
-/* ⚠️ CODE SUPPRIMÉ - 23 octobre 2025
- *
- * Les fonctions chargerPortfolioDetail() et toggleArtefactPortfolio()
- * étaient dupliquées dans ce fichier.
- *
- * UTILISER DÉSORMAIS les fonctions de portfolio.js:
- * - chargerPortfolioEleveDetail(da)
- * - toggleArtefactPortfolio(da, portfolioId, nombreARetenir)
- *
- * Ces fonctions sont globalement accessibles et gèrent le portfolio étudiant.
- * Les appels HTML (onchange) utilisent automatiquement les fonctions de portfolio.js.
- */
+/* #722 (11 oct. 2026) : l'ancien panneau de détail du portfolio (portfolio.js) est retiré. */
 
 /**
 * Génère le HTML de la section assiduité
