@@ -206,6 +206,9 @@ async function verifierFenetreDuCodexAPart(page, phrase) {
  * si `nom` est donné, la ressaisie du nom. Sans `nom` : « Annuler », rien ne suit.
  */
 async function repondreSuppressionX1(page, nom) {
+    // Relecture de Cowork : 60 s, comme l'ancienne attente du premier dialogue — la question ne
+    // vient qu'après la génération du codex à part, qui prend des secondes.
+    await expect.poll(async () => (await fenetre(page))?.titre ?? null, { timeout: 60000 }).toBe(QUESTION_X1_TITRE);
     expect(await attendreFenetre(page, QUESTION_X1_TITRE)).toEqual({
         titre: QUESTION_X1_TITRE, texte: QUESTION_X1_TEXTE, boutons: ['Annuler', 'Supprimer'], focus: 'Annuler', devant: true
     });
