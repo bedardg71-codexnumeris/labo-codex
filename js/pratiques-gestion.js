@@ -8,12 +8,10 @@
 
    Distinction avec les autres modules « pratique » :
    - pratiques.js — configuration globale du cours (quelle pratique appliquer)
-   - pratique-notation-v2.js — wizard V2 (création initiale)
    - pratiques-bibliotheque.js — gabarits et fonctions de bibliothèque
 
    Dépendances:
    - pratiques-bibliotheque.js (gabarits et fonctions de bibliothèque)
-   - pratique-notation-v2.js (fonctions de configuration détaillée)
    - db.js (stockage IndexedDB/localStorage)
    =============================== */
 

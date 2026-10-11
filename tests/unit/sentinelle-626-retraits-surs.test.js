@@ -43,7 +43,6 @@ const src = {};
 const FICHIERS = [
     'js/pratiques-gestion.js',
     'js/pratiques.js',
-    'js/pratique-notation-v2.js',
     'js/pratiques/pratique-interface.js',
     'js/cc-license.js',
     'js/tableau-bord-apercu.js',
@@ -219,32 +218,16 @@ describe('#626 · M5 — les écrivains morts sur DOM disparu sont retirés', ()
 
     // Leurs cibles `v2-*` ont quitté index.html avec #434 (9 août 2026). Rappelés,
     // ils écrasaient les champs de `modalitesEvaluation` avec des chaînes vides.
-    it('pratique-notation-v2.js ne porte plus le trio mort', () => {
-        const c = code('js/pratique-notation-v2.js');
+    // #469 (11 oct. 2026) — `pratique-notation-v2.js` est RETIRÉ en entier : ses 14 cibles
+    // `v2-*` avaient toutes quitté index.html, et ses trois appelants gardés ne faisaient rien.
+    // Le trio que ce bloc surveillait ne peut revenir que par un autre fichier : on le cherche
+    // partout dans js/.
+    it('pratique-notation-v2.js n\'existe plus, et le trio mort n\'est défini nulle part', () => {
+        expect(existsSync(path.join(racine, 'js', 'pratique-notation-v2.js'))).toBe(false);
+        const tous = readdirSync(path.join(racine, 'js')).filter((f) => f.endsWith('.js'))
+            .map((f) => readFileSync(path.join(racine, 'js', f), 'utf8')).join('\n');
         for (const nom of ['changerVariantePANStandards', 'sauvegarderPratiqueBaseV2', 'sauvegarderModeCalculObjectifs']) {
-            expect(c, `${nom} ne doit plus être défini`).not.toMatch(new RegExp(`function\\s+${nom}\\s*\\(`));
-            expect(c, `${nom} ne doit plus être appelé`).not.toMatch(new RegExp(`(?<!function\\s)\\b${nom}\\s*\\(`));
-            expect(c, `window.${nom} ne doit plus être exposé`).not.toMatch(new RegExp(`window\\.${nom}\\s*=`));
-        }
-    });
-
-    it('aucune cible `v2-*` PROPRE AU TRIO n\'est plus lue', () => {
-        // ⚠ La borne est le TRIO, pas le préfixe `v2-`. `v2-objectifs-mode-calcul`
-        // reste lu par `chargerConfigParObjectifs` et `changerModeCalculObjectifs`,
-        // que la sentinelle #338 verrouille comme vivants : l'assertion doit
-        // porter sur les ids que les fonctions retirées lisaient, sinon elle
-        // réclamerait un retrait que le plan n'a pas demandé.
-        const c = code('js/pratique-notation-v2.js');
-        for (const id of ['v2-variante-calcul', 'v2-variante-description', 'v2-pratique-nom', 'v2-pratique-type', 'v2-echelle-id']) {
-            expect(c, `${id} ne doit plus être lu`).not.toContain(id);
-        }
-    });
-
-    // TÉMOIN — le moteur de config consommé par la bibliothèque reste entier.
-    it('TÉMOIN · le flux vivant de pratique-notation-v2.js est intact', () => {
-        const c = code('js/pratique-notation-v2.js');
-        for (const nom of ['chargerConfigParObjectifs', 'chargerConfigSpecifications', 'afficherTypesTravauxSpec', 'afficherForfaitsSpec']) {
-            expect(c, `${nom} doit rester défini`).toMatch(new RegExp(`function\\s+${nom}\\s*\\(`));
+            expect(tous, `${nom} ne doit plus être défini`).not.toMatch(new RegExp(`function\\s+${nom}\\s*\\(`));
         }
     });
 

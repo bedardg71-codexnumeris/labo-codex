@@ -117,7 +117,7 @@ const FICHIERS = [
     'js/bibliotheque-ui.js', 'js/pratiques-gestion.js', 'js/echelles.js', 'js/grilles.js',
     'js/cartouches.js', 'js/objectifs.js', 'js/productions.js', 'js/productions-bibliotheque-ui.js',
     'js/tampons-bibliotheque.js', 'js/planification-bibliotheque.js', 'js/travaux-outils.js',
-    'js/pratique-notation-v2.js', 'js/wizard-pratique-v2.js', 'js/profil-etudiant-sections-affichage.js',
+    'js/wizard-pratique-v2.js', 'js/profil-etudiant-sections-affichage.js',
     'js/trimestre-v2-cours.js'
 ];
 
@@ -194,7 +194,7 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
         'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 24,
         'js/grilles.js': 65, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
-        'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 90, 'js/pratique-notation-v2.js': 7,
+        'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 90,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 111, 'js/trimestre-v2-cours.js': 4
     };
     it('C.n les interpolations nues ne montent pas', () => {
