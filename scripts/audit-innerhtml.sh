@@ -41,7 +41,7 @@ for arg in "$@"; do
 done
 
 # Modules d'affichage prioritaires (cf. MODELE-MENACES.md §8.2 défense E).
-PRIORITAIRES="grilles.js echelles.js cartouches.js pratiques.js productions.js tampons-bibliotheque.js evaluation.js evaluations-apercu.js wizard-pratique-v2.js pratique-notation-v2.js bibliotheque-ui.js"
+PRIORITAIRES="grilles.js echelles.js cartouches.js pratiques.js productions.js tampons-bibliotheque.js evaluation.js evaluations-apercu.js wizard-pratique-v2.js bibliotheque-ui.js"
 
 # Patterns d'interpolation : ${...}, ' +, " +, + ', + "
 PATTERN_INTERP='\$\{|'\''[[:space:]]*\+|"[[:space:]]*\+|\+[[:space:]]*'\''|\+[[:space:]]*"'

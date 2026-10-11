@@ -12,14 +12,12 @@ import { tranche } from './_helpers/tranche.js';
 // Une pratique désigne son échelle sous `configuration.echelleId` (ce qu'écrivent l'assistant
 // et la gestion), sous `config.echelleId` (pratiques anciennes, import #712) ou à la racine
 // (schéma d'import). Rouvrir une archive en « copie en double » ne rebranchait que `config` ;
-// l'import sélectif, que la racine ; le partage, rien. La pratique gardait l'ancien id.
+// l'import sélectif, que la racine. La pratique gardait l'ancien id.
 //
 // CE QUE CE BANC JUGE :
 //   A — `rebrancherEchellePratique` (import-export.js) : les trois formes, sans toucher l'objet lu ;
 //   B — la réouverture d'archive (reserve-ouvrir.js) passe par elle, et sa détection
 //       « échelle manquante » lit `configuration` ;
-//   C — le partage (partage-import.js) rebranche `configuration.echelleId` vers l'échelle
-//       préfixée du même package, et seulement elle.
 // L'essai de bout en bout de l'import sélectif vit dans import-selectif-lot3-rattache-juste (A.c).
 // Source seulement : les pratiques déjà écrites chez l'utilisateur ne sont pas réécrites.
 
@@ -84,36 +82,6 @@ describe('#663 · B — la réouverture d\'archive', () => {
     });
 });
 
-describe('#663 · C — le partage', () => {
-    function charger() {
-        const db = { getSync: (k, d) => d, setSync() {} };
-        const w = chargerScript('js/partage-schemas.js', { db });
-        chargerScript('js/trust-tofu.js', { db }, w);
-        chargerScript('js/partage-import.js', { db }, w);
-        return w;
-    }
-    const pkg = (echelleIdPratique) => ({
-        manifest: { dateExport: '2031-01-01', auteur: { nom: 'Auteur fictif' }, item_principal: { type: 'pratique', id: 'PR_1' } },
-        entites: {
-            grilles: [], cartouches: [], productions: [],
-            echelles: [{ id: 'ECH_1', nom: 'Échelle fictive', niveaux: [] }],
-            pratiques: [{ id: 'PR_1', nom: 'Pratique fictive', configuration: { echelleId: echelleIdPratique, seuil: 60 } }]
-        }
-    });
-
-    it('C.a l\'échelle du package est préfixée : la pratique la désigne sous son nouvel id', () => {
-        const w = charger();
-        const paquet = pkg('ECH_1');
-        const r = w.partageImport.prefixerEntites(paquet, 'IMP_abc');
-        const ech = r.parType.echelle[0];
-        expect(ech.id).toBe('PARTAGE_abc_ECH_1');
-        expect(r.parType.pratique[0].configuration).toEqual({ echelleId: ech.id, seuil: 60 });
-        expect(paquet.entites.pratiques[0].configuration.echelleId).toBe('ECH_1');
-    });
-
-    it('C.b une échelle hors du package : la référence reste telle quelle', () => {
-        const w = charger();
-        const r = w.partageImport.prefixerEntites(pkg('ECH_AILLEURS'), 'IMP_abc');
-        expect(r.parType.pratique[0].configuration.echelleId).toBe('ECH_AILLEURS');
-    });
-});
+// (#663 · C, le partage, est retiré à la relecture de Cowork du 11 oct. : un paquet de pratique
+// ne porte jamais son échelle — `rassemblerDependances`, partage-format.js — la branche ne pouvait
+// pas se déclencher.)

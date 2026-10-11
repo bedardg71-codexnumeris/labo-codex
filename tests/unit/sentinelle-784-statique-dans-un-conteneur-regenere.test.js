@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { conteneursRegeneres } from './_helpers/conteneurs-regeneres.js';
@@ -27,5 +28,27 @@ describe('#784 · cliquet des conteneurs régénérés qui logent du statique', 
     });
     it('TÉMOIN · l\'en-tête « Présence », réglé par #783, n\'y est plus', () => {
         expect(mesure).not.toContain('colonneHeuresTitre');
+    });
+});
+
+describe('#784 · TÉMOIN POSITIF — le détecteur trouve le statique sous un conteneur réécrit', () => {
+    it('sur un dépôt fabriqué : seul le conteneur réécrit ET porteur d\'un bouton à action est trouvé', () => {
+        const d = mkdtempSync(path.join(tmpdir(), 'conteneurs-784-'));
+        try {
+            mkdirSync(path.join(d, 'js', 'pratiques'), { recursive: true });
+            writeFileSync(path.join(d, 'index.html'), [
+                '<div id="porteur"><div><button data-action="reporter">Reporter</button></div></div>',
+                '<div id="vide"><p>Chargement…</p></div>',
+                '<div id="non-reecrit"><button id="b">x</button></div>',
+                '<div id="par-variable"><span id="compteur"></span></div>'
+            ].join('\n'));
+            writeFileSync(path.join(d, 'js', 'banc.js'), [
+                "document.getElementById('porteur').innerHTML = '';",
+                "document.getElementById('vide').innerHTML = '';",
+                "const zone = document.getElementById('par-variable');",
+                "zone.innerHTML = '<b>neuf</b>';"
+            ].join('\n'));
+            expect(conteneursRegeneres(d)).toEqual(['par-variable', 'porteur']);
+        } finally { rmSync(d, { recursive: true, force: true }); }
     });
 });

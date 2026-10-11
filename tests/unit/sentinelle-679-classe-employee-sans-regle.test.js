@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { classesSansRegle } from './_helpers/classes-sans-regle.js';
@@ -29,5 +30,24 @@ describe('#679 · cliquet des classes sans règle', () => {
     it('TÉMOIN · le détecteur voit une classe neuve écrite en toutes lettres', () => {
         expect(fige.length).toBeGreaterThan(100);
         expect(mesure).not.toContain('js/travaux-ui.js:travaux-bandeau-da-inconnu');   // le cas du 1er sept., réglé
+    });
+});
+
+describe('#679 · TÉMOIN POSITIF — le détecteur trouve une classe posée sans règle', () => {
+    it('sur un dépôt fabriqué : la classe sans règle est trouvée, la stylée, l\'interpolée et la concaténée ne le sont pas', () => {
+        const d = mkdtempSync(path.join(tmpdir(), 'classes-679-'));
+        try {
+            mkdirSync(path.join(d, 'js', 'pratiques'), { recursive: true });
+            mkdirSync(path.join(d, 'css'));
+            writeFileSync(path.join(d, 'index.html'), '<style>.dans-le-html{}</style>');
+            writeFileSync(path.join(d, 'styles.css'), '.stylee { color: red; }');
+            writeFileSync(path.join(d, 'js', 'banc.js'), [
+                'const a = `<div class="stylee fantome-banc dans-le-html ${x}">`;',
+                "el.className = 'autre-fantome';",
+                "el.classList.add('fantome-ajoute');",
+                "const b = '<p class=\"' + c + '\">';"
+            ].join('\n'));
+            expect(classesSansRegle(d)).toEqual(['js/banc.js:autre-fantome', 'js/banc.js:fantome-ajoute', 'js/banc.js:fantome-banc']);
+        } finally { rmSync(d, { recursive: true, force: true }); }
     });
 });
