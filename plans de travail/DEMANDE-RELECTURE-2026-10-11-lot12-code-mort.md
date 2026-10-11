@@ -18,6 +18,8 @@ Rien à l'écran. Le navigateur charge deux fichiers de moins (`groupe.js`, `pra
 | #469 (trouvaille de #792) | `ee9a0e1d` | `js/groupe.js` entier, sa balise, ses deux appels gardés (`main.js`, `contexte.js`) | aucun de ses éléments cibles n'existe dans la page ; aucun nom de premier niveau lu ailleurs (homonyme privé dans `partage-import.js`) |
 | #469 | `9d0b0071` | `js/pratiques/pratique-test.js` (pratique factice auto-enregistrée) | aucun lecteur hors de ses essais et de `testerPratiqueTest` (console) |
 
+**⚠ Un défaut de découpage, découvert après coup.** La suppression de `js/groupe.js` avait été mise en scène (`git rm`) avant le premier commit du lot. Elle est donc partie dans `18e4253f` (#641), et non dans `ee9a0e1d`, qui retire seulement sa balise et ses appels. Entre ces deux commits, `index.html` charge un fichier absent : l'état intermédiaire est cassé, l'état final est juste. Je n'ai pas réécrit l'historique : les empreintes sont déjà citées dans les fiches, et rien n'est poussé. La même erreur a été rattrapée au lot 13 (commits de #471 refaits avant d'être cités).
+
 **Sentinelles mises à jour, avec le motif écrit dans chacune.** Ce sont des comptes ou des listes de fichiers ; aucune n'a été affaiblie sur ce qu'elle protège :
 - #795 : rechargements d'import, de 3 à 2 ;
 - flush avant rechargement : de 6 à 5 ;
