@@ -11,6 +11,8 @@ Le remède est à la **lecture** : `construireConfigComplete` ne tient plus une 
 
 Sentinelle : essai F de `sentinelle-590-un-identifiant-une-echelle`, avec les vrais modules (`pratique-configurable.js`, `pratique-registre.js`, `pratiques.js`) et la vraie validation de sauvegarde. Le test duplique pendant l'absence de l'échelle, puis la fait revenir. Une mutation rouge (retrait de la ligne). Une seconde mutation (le repli sur `echelle_id` de la marque) survivait : ce repli était redondant, je l'ai **retiré** plutôt que gardé.
 
+**Correction après le verdict de Cowork (15 h 17)** : le repli n'était pas redondant (forme `.config` de #712, copie sans autre référence). Remis ; essai G sur la forme `.config`, la mutation qui survivait rougit maintenant par son assertion (« la copie doit se charger pendant l'absence de l'échelle ») ; Vitest complet vert, 8 586 essais.
+
 #634 : le relevé 7 / 3 est écrit dans la fiche, sans correction.
 
 ## 1 · Ce qui change pour l'usager
