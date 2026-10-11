@@ -164,6 +164,29 @@ describe('#1046 · D — même id, contenu différent dans deux trimestres', () 
         const { apercu } = await importer({ db: fauxDb({}) }, fichier, null);
         expect(apercu.ressources.grilles.items.map((g) => g.nom)).toEqual(['Version d\'hiver']);
     });
+    // Correction de Cowork (11 oct. 2026, 8 h 42) : dans un fichier récent, la clé nue est un reste
+    // (migration S5/#623 inachevée, import d'avant le lot 3) ; elle passe APRÈS les trimestres.
+    it('D.2 même id dans la clé nue et dans un trimestre, contenus différents → la version du trimestre, à l\'aperçu et à l\'import', async () => {
+        const fichier = {
+            infoCours: FICHIER.infoCours,
+            grillesTemplates: [{ ...GRILLE_1, nom: 'Reste de la clé nue' }],
+            h2032_grillesTemplates: [{ ...GRILLE_1, nom: 'Version du trimestre' }]
+        };
+        const { apercu } = await importer({ db: fauxDb({}) }, fichier, null);
+        expect(apercu.ressources.grilles.items.map((g) => g.nom)).toEqual(['Version du trimestre']);
+        const espace = { db: fauxDb({}) };
+        await importer(espace, fichier, { grilles: ['GR_1'] });
+        expect(lire(espace, 'grillesTemplates').map((g) => g.nom)).toEqual(['Version du trimestre']);
+    });
+    it('D.3 dans un fichier mixte, ce que porte la seule clé nue reste proposé, après les trimestres', async () => {
+        const fichier = {
+            infoCours: FICHIER.infoCours,
+            grillesTemplates: [GRILLE_2],
+            h2032_grillesTemplates: [GRILLE_1]
+        };
+        const { apercu } = await importer({ db: fauxDb({}) }, fichier, null);
+        expect(ids(apercu.ressources.grilles.items)).toEqual(['GR_1', 'GR_2']);
+    });
 });
 
 describe('#1046 · E — ce qui voyage : un fichier ancien donne la même vue qu\'avant', () => {

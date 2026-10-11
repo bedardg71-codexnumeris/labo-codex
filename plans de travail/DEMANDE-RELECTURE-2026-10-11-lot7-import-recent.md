@@ -62,3 +62,12 @@ Aucun. #1046 lit un fichier et écrit comme le lot 3 ; #522 ne change que la sé
 ## 7 · Proposition d'un item de Nouvelles (il rejoindra l'entrée du soir)
 
 « Importer une sélection depuis une sauvegarde récente propose maintenant ses grilles, échelles, pratiques et cartouches, rangées dans le trimestre ouvert. »
+
+## 8 · Correction 1 du verdict de Cowork (8 h 42), faite
+
+La clé nue passe désormais **après** les trimestres (du plus récent au plus ancien) : à id égal et contenu différent, la version du trimestre l'emporte sur le reste de la clé nue. Un fichier ancien (clé nue seule) est toujours rendu tel quel : E.1 vert sans retouche.
+
+- Essai **D.2** : même id dans la clé nue et dans `h2032`, contenus différents → la version du trimestre, à l'aperçu et à l'import. Sur l'ordre d'avant (clé nue d'abord) : D.2 seul rouge.
+- Essai **D.3**, ajouté parce qu'aucun essai ne voyait une clé nue oubliée dans un fichier mixte : ce que porte la seule clé nue reste proposé, après le trimestre. Mutations : clé nue oubliée → D.3 rouge ; clé nue d'abord → D.2 et D.3 rouges.
+
+Vitest complet : 711 fichiers, 8 525 essais verts.
