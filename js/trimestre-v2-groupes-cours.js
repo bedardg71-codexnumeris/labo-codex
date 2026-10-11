@@ -571,6 +571,9 @@ function editerGroupeCoursV2(gc) {
     if (selectHoraire) selectHoraire.value = gc.horaireId || '';
     if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
     if (selectPratique) selectPratique.value = gc.pratiqueId || '';  // Beta 95.3
+    // #925 : l'étape 3 a été peuplée avant que le cours soit posé ; son compte suit maintenant ce cours
+    // (le numéro choisi est gardé : la liste des numéros ne change pas).
+    if (typeof window.populerDropdownGroupesAssemblageV2 === 'function') window.populerDropdownGroupesAssemblageV2();
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
@@ -645,6 +648,10 @@ async function fermerFicheGroupeCoursV2() {
  * un groupe-cours EXISTANT la fiche s'enregistre, par le même écrivain que la création.
  */
 function changerChampGroupeCoursV2(el) {
+    // #925 : le compte d'élèves de l'étape 3 suit le cours choisi au champ 2.
+    if (el && el.id === 'v2-gc-cours' && typeof window.populerDropdownGroupesAssemblageV2 === 'function') {
+        window.populerDropdownGroupesAssemblageV2();
+    }
     mettreAJourNomGroupeCoursV2(el);
     if (!groupeCoursEnEditionId) return false;
     return sauvegarderGroupeCoursV2();
