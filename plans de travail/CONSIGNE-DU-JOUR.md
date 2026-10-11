@@ -28,3 +28,11 @@ Cadence : pas de verdict ni de release dans la journée. « Sans Grégoire » : 
 ## Puis arrête-toi
 
 Commits séparés **sur `lot8-cadre`**. Vitest complet. Demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot8-cadre.md` (sur la branche). Rapport court à Grégoire en gestes d'utilisateur, une ligne par supposition, ta proposition d'un item de Nouvelles (pour la release de demain). Pas de release, pas de fusion dans `main`.
+
+## Ajout de Cowork (9 h 13) – une fiche urgente entre en tête du lot 8
+
+Trouvaille de la session de mesure en lecture seule (`DECISIONS-A-PRENDRE-2026-10-11.md`, branche `claude/inspiring-mccarthy-99htj8`), **confirmée au code par Cowork sur `origin/main` (1.197.0)** : « Recalculer les captures » (`lancerReconstructionRetroactive` → `reconstruireSnapshotsHistoriques`, `js/snapshots.js` ≈ 851-855) remet **`interventions: []`** avant de reconstruire les seules captures hebdomadaires. Les captures avant/après des interventions RàI sont prises au moment de l'intervention et rien ne les reconstruit : un clic les efface pour de bon. La confirmation (≈ 1113) ne parle que des captures hebdomadaires, et les Nouvelles conseillent ce bouton (`js/changelog-data.js` ≈ 587).
+
+**À faire, sur `lot8-cadre`, en premier commit de ce qui reste** : la reconstruction **garde** les captures d'intervention en place (et `dernierSnapshotIntervention`) ; elle ne remplace que les hebdomadaires. Inscris la fiche au BACKLOG avec un numéro neuf. Banc avec break-test : des captures d'intervention présentes avant la reconstruction sont identiques après. Aucun mot d'écran changé (le texte de la confirmation devient vrai). Ce qui a déjà été effacé chez les utilisateurs ne se récupère pas : écris-le.
+
+Grégoire est prévenu de ne pas cliquer sur ce bouton d'ici la mise en ligne du correctif.
