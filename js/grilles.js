@@ -832,8 +832,13 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     // (créer, « Sauvegarder la grille ») le CONFIRME, sans bloquer. L'éditeur montrait déjà
     // le total en couleur ; rien ne le disait au moment d'enregistrer. Même somme que
     // `calculerTotalPonderationCriteres`. Les sauvegardes automatiques se taisent.
+    // Relecture de Cowork (11 oct.) : « Supprimer un critère » passe aussi ici, non silencieux,
+    // AVEC une modification à appliquer ; il ne doit pas confirmer un total (l'ajout et le
+    // changement de pondération se taisent). Le geste explicite, lui, n'en apporte aucune :
+    // « Sauvegarder la grille » (enregistrerCommeGrille) et sauvegarderGrilleComplete.
+    const gesteExplicite = !silencieux && !appliquer;
     const criteresEnregistres = (grilleTemplateActuelle && grilleTemplateActuelle.criteres) || [];
-    if (!silencieux && criteresEnregistres.length > 0) {
+    if (gesteExplicite && criteresEnregistres.length > 0) {
         const totalPonderation = criteresEnregistres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
         if (totalPonderation !== 100) {
             notifications.warning(`Grille enregistrée : ses critères totalisent ${totalPonderation}\u00a0%, pas 100\u00a0%.`);
