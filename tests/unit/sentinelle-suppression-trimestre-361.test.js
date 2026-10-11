@@ -139,6 +139,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
     let codexAPart; // les phrases passées à Codex.ecrireAPartAvantSuppression
     let codexEcrit; // ce que rend le codex à part
     let saisies;    // les options de la ressaisie du nom (#1037)
+    let confirmations; // les options de la première fenêtre
 
     function creerUI(avecCodex) {
         alertes = [];
@@ -146,6 +147,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
         codexAPart = [];
         codexEcrit = true;
         saisies = [];
+        confirmations = [];
         supprimerTrimestreMock = vi.fn(async () => ({ success: true, nbCles: 4, nom: 'Automne 2024' }));
 
         win = chargerScript('js/trimestre-v2-liste.js', {
@@ -160,7 +162,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
                 warning: (m, d) => alertes.push(String(m) + ' ' + String(d || '')), info: (m) => alertes.push(String(m))
             },
             uiDialogues: {
-                confirmerAction: async (o) => { questions.push(o.titre + ' ' + o.message); return reponses.confirm.shift(); },
+                confirmerAction: async (o) => { questions.push(o.titre + ' ' + o.message); confirmations.push(o); return reponses.confirm.shift(); },
                 demanderSaisie: async (o) => { saisies.push(o); return reponses.prompt.shift(); }
             },
             alert: () => { throw new Error('alert natif appelé (#1037)'); },
@@ -228,6 +230,14 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
         ]);
         expect(supprimerTrimestreMock).toHaveBeenCalledWith('a2024');
         expect(saisies[0].variante).toBe('danger');   // relecture de Cowork : la ressaisie est destructive aussi
+        // Mots de Grégoire (11 oct., 18 h 02), exactement.
+        expect(confirmations[0]).toMatchObject({ titre: 'Supprimer définitivement le trimestre « Automne 2024 » ?',
+            message: 'Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.',
+            texteConfirmer: 'Supprimer', variante: 'danger' });
+        expect(saisies[0].titre).toBe('Confirmation finale : cette action est irréversible.');
+        expect(saisies[0].message).toBe('Pour supprimer « Automne 2024 » et toutes ses données, retape son nom exactement :');
+        expect(saisies[0].texteConfirmer).toBe('Supprimer');
+        expect(alertes).toContain('Trimestre « Automne 2024 » supprimé (4 clés de données effacées).');
         expect(alertes.join(' ')).toMatch(/supprimé/i);
     });
 
