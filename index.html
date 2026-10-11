@@ -14339,7 +14339,7 @@
     <script src="js/bibliotheque-ui.js?v=20261011b"></script> <!-- Beta 99.40 b0510-1500 : Phase C #267 (menu ⋮ kebab + refactor renderCarte) · #522 lot 4 : le contrat du helper passe de lireListe/ecrireListe à modifierListe(mutateur), sérialisé par db.modifier -->
     <script src="js/repertoires-bibliotheque.js?v=20261006a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20261006a"></script> <!-- #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20261011b"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
+    <script src="js/pratiques-gestion.js?v=20261011c"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20261010a"></script> <!-- #829 (9 oct.) : en démo, la grille de dépistage n'écrit plus la préférence réelle · Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20261011a"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20260923b"></script>
@@ -14385,7 +14385,7 @@
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-pan-standards.js?v=20260923b"></script>
     <script src="js/pratiques/pratique-sommative.js?v=20260927c"></script>
-    <script src="js/pratiques/pratique-pan-specifications.js?v=20260923d"></script>
+    <script src="js/pratiques/pratique-pan-specifications.js?v=20261011a"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
     <script src="js/pratiques/pratiques-predefines.js?v=20260902f"></script>
@@ -14508,7 +14508,7 @@
     <script src="js/partage-import.js?v=20261011a"></script>
     <script src="js/partage-section.js?v=20261011a"></script>
     <script src="js/import-export.js?v=20261011c"></script> <!-- #1028 (5 oct., verdict) : copie sans fichier, fusion, notifications · #1028 (5 oct.) : les copies aux archives · #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
-    <script src="js/codex.js?v=20261011a"></script> <!-- #976 : la fenêtre du codex dit « corriger » pour un déplacement · #1028 (5 oct.) : les copies aux archives · Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
+    <script src="js/codex.js?v=20261011b"></script> <!-- #976 : la fenêtre du codex dit « corriger » pour un déplacement · #1028 (5 oct.) : les copies aux archives · Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
     <script src="js/liste-evaluations.js?v=20261004c"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>
     <script src="js/snapshots.js?v=20261011m"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
@@ -14522,7 +14522,7 @@
     <script src="js/evaluation-chargement.js?v=20261011a"></script> <!-- Beta 99.48 : session A étape 3 refactor (17 fonctions Chargement+Auto-save) ; #564 déclencheur auto-save rétroaction -->
     <script src="js/evaluation-calcul.js?v=20260927c"></script> <!-- Beta 99.48 : session B 1er sous-module (6 fonctions Calcul + couleurs) -->
     <script src="js/evaluation-retroaction.js?v=20261006b"></script> <!-- Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20261006b"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation-sauvegarde.js?v=20261011a"></script> <!-- Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20261006c"></script> <!-- #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20260927c"></script> <!-- Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 

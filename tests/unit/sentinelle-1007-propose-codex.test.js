@@ -86,6 +86,10 @@ const PORTES = [
     { g: 'Sous-critère', f: 'js/grilles.js', sig: 'async function supprimerSousCritere(', cle: "'sousCritere'", question: "if (!confirm('Supprimer ce sous-critère ?')) return;", efface: '.sousCriteres.splice(sousCritereIndex, 1);' },
     { g: 'Niveau d\'échelle', f: 'js/echelles.js', sig: 'async function supprimerNiveauEchelle(', cle: "'niveau'", question: "if (!confirm('Supprimer ce niveau ?')) return;", efface: 'echelle.niveaux.splice(index, 1);' },
     { g: 'Cible de dénotation', f: 'js/pratiques/editeur-cibles.js', sig: 'async function confirmerRetraitCibles(', cle: "nbCochees > 1 ? 'cibles' : 'cible'", question: 'const retraits = ciblesRetireesCochees(pratiqueId, anciennes, nouvelles);', efface: 'return confirm(message);' },
+    // #1015 (11 oct. 2026) : un type de production ou un forfait des spécifications, seulement si
+    // une évaluation porte sur une production de ses types. Aucune question ne suivait.
+    { g: 'Type de production (spécifications)', f: 'js/pratiques-gestion.js', sig: 'async function supprimerTypeTravailMat(', cle: "'typeTravail'", question: 'let typesApres = null;', efface: 'configurations[index].configuration.typesTravaux.splice(indexType, 1);' },
+    { g: 'Forfait (spécifications)', f: 'js/pratiques-gestion.js', sig: 'async function supprimerForfaitMat(', cle: "'forfait'", question: 'let apres = null;', efface: 'configurations[index].configuration.forfaits.splice(indexForfait, 1);' },
     // #976 (8 oct. 2026) : un geste qui déplace sans effacer — la même porte, son verbe à lui (« corriger »).
     { g: 'Corriger le DA', f: 'js/trimestre-v2-etudiants.js', sig: 'async function corrigerDAEtudiantV2(', cle: "'corrigerDA'", question: "const mesure = window.CorrectionDA.passeABlanc(ancien, '');", efface: 'await window.CorrectionDA.corriger(ancien, nouveau' }
 ];
