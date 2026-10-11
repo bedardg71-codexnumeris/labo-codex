@@ -1570,9 +1570,9 @@ function calculerNote() {
     }
     // #941 lot S1 — en points, le niveau général ne s'AFFICHE nulle part (case masquée ici,
     // `niveauFinalAffichable` ailleurs). Il reste CALCULÉ et écrit quand une échelle est là
-    // (décision A : « en coulisse ») : une pratique qui convertit les niveaux en note
-    // (`calculerParConversionNiveaux`) compte une copie re-enregistrée comme avant. Sans
-    // échelle, `niveauDuPourcentage` n'a rien à rendre : « -- ».
+    // (décision A : « en coulisse »). (La méthode citée ici, `calculerParConversionNiveaux`,
+    // n'avait aucun appelant : retirée le 11 oct. 2026, #469.) Sans échelle,
+    // `niveauDuPourcentage` n'a rien à rendre : « -- ».
 
     // #674 — L'ÉCRAN RETIENT LA CONCLUSION QUAND LA PORTÉE EST INCOMPLÈTE, ET DIT
     // POURQUOI. Un « 95,0 % » calculé sur 80 % de la grille n'est pas une note sur
