@@ -1044,6 +1044,8 @@ function sauvegarderHoraireV2() {
 
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
+    // #472 : le nom et la carte des groupes-cours qui désignent cette entité se refont.
+    if (typeof window.rafraichirAffichageGroupesCoursV2 === 'function') window.rafraichirAffichageGroupesCoursV2();
     return true;
 }
 
@@ -1100,6 +1102,8 @@ async function supprimerHoraireV2() {
 
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();
+    // #472 : le nom et la carte des groupes-cours qui désignent cette entité se refont.
+    if (typeof window.rafraichirAffichageGroupesCoursV2 === 'function') window.rafraichirAffichageGroupesCoursV2();
 
 
     notifications.succes(`Horaire "${nomHoraire}" supprimé`);
