@@ -1931,7 +1931,7 @@ function obtenirDetailsAssiduite(da) {
 // l'application, de `pratique.identifierPattern(da)` et de
 // `pratique.genererCibleIntervention(da)`. Sa mort rend donc muettes les CINQ
 // implementations de `identifierPattern` des pratiques (PAN-Standards,
-// Sommative, PAN-Specifications, Configurable, Test) : elles ne sont plus
+// Sommative, PAN-Specifications, Configurable, et Test jusqu'au 11 oct. 2026) : elles ne sont plus
 // atteintes que par `testerPratiqueTest`, une fonction de console jamais
 // appelee. (`testerPratiqueFrancois` en etait la seconde : son fichier,
 // `js/pratiques/config-francois-chimie.js`, est parti avec #687 — zero lecteur

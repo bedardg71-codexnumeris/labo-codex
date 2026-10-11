@@ -53,7 +53,7 @@ function copies() {
 
 const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/pratiques/pratique-configurable.js',
     'js/pratiques/pratique-registre.js', 'js/pratiques/pratique-manager.js', 'js/pratiques/pratique-sommative.js',
-    'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-pan-specifications.js', 'js/pratiques/pratique-test.js',
+    'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-pan-specifications.js',
     'js/pratiques/denotation-jugements.js', 'js/portfolio.js', 'js/indices.js', { chemin: 'js/saisie-presences.js', internes: [] },
     'js/profil-etudiant-actions.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js', 'js/profil-etudiant-rapport.js',
     { chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionMobilisationEngagement'] }];
@@ -177,10 +177,7 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
             expect([nom, p.calculerCompletion(DA.ASSIDU), p.calculerCompletion(DA.TEMOIN)]).toEqual([nom].concat(AVANT[nom]));
             expect(p.calculerCompletion(DA.ASSIDU)).toBe(d1.remis / d1.total);
         });
-        const test = new win.PratiqueTest();
-        expect(test.calculerDetailsCompletion(DA.ASSIDU)).toEqual({ remis: 8, total: 10 });
-        expect(test.calculerCompletion(DA.ASSIDU)).toBe(0.8);
-        expect(test.calculerCompletion('x')).toBe(null);
+        // #469 (lot 12, 11 oct. 2026) : la pratique factice « test » (`pratique-test.js`) est retirée, ses trois essais avec elle.
     });
 
     it('(e) la fraction SUIT la règle de chaque famille, elle ne la corrige pas : un artefact dû plus tard entre au dénominateur des standards (8 / 11), pas à celui des autres ; le surplus des spécifications est plafonné (7 / 7)', () => {
@@ -313,7 +310,7 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         expect((corps.match(/Indice C = \$\{indices\.C === null \? '—' : indices\.C \+ '%'\} — \$\{detailsC\.remis\}/g) || []).length).toBe(1);
         expect((corps.match(/\$\{detailsC\.remis\}\/\$\{detailsC\.total\}/g) || []).length).toBe(1);
         expect(/\$\{nbRemis\}\s*\/\s*\$\{nbTotal\}/.test(corps)).toBe(false);
-        ['configurable', 'sommative', 'pan-standards', 'pan-specifications', 'test'].forEach(f => {
+        ['configurable', 'sommative', 'pan-standards', 'pan-specifications'].forEach(f => {
             const src = source('js/pratiques/pratique-' + f + '.js');
             const i = src.indexOf('    calculerCompletion(da) {');
             const methode = src.slice(i, src.indexOf('\n    }\n', i));
