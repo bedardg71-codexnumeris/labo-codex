@@ -265,7 +265,7 @@
                     var actif = (typeof window.obtenirTrimestreActif === 'function')
                         ? window.obtenirTrimestreActif() : null;
                     var nomActif = (actif && (actif.nom || actif.id)) || 'trimestre actif';
-                    carte.appendChild(el('p', 'texte-avertissement',
+                    carte.appendChild(el('p', 'alerte alerte-attention',
                         'Cette grille est utilisée dans ' + porteurs.length + ' trimestres ('
                         + porteurs.join(', ') + '). Les cartouches envoyées sont celles de « '
                         + nomActif + ' » — les autres trimestres peuvent en avoir de différentes.'));
