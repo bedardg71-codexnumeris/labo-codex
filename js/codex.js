@@ -1639,7 +1639,8 @@ async function _ecrireViaHandle(handle, blob) {
  * @param {boolean} [options.sansRepli=false] - Un échec du partage est rendu, pas replié
  * @param {boolean} [options.telechargementDirect=false] - Stratégie 3 seule
  * @param {function(string): Promise<boolean>} [options.toucherFrais] - Lot J0 bis : appelée
- *   avant le partage quand le toucher n'est plus actif ; rend true si l'usager en a donné un
+ *   avant le partage (et, depuis #995, avant la fenêtre de choix de fichier) quand le toucher
+ *   n'est plus actif ; rend true si l'usager en a donné un
  *   frais, false s'il renonce (rendu `annule`, avec `toucherRefuse`)
  * @param {function(boolean): void} [options.attentePartage] - Lot J0 ter : appelée, de façon
  *   synchrone, avec true juste avant `navigator.share`, puis avec false quand il se termine
@@ -1665,6 +1666,13 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
 
     // Stratégie 1b : File System Access API avec dialogue (Chrome/Edge sur Mac/PC)
     if (window.showSaveFilePicker) {
+        // #995 : la fenêtre de choix exige aussi un toucher actif. Mesuré le 11 oct. 2026 sous
+        // Chrome 154 : actif à 4,8 s, éteint à 5 s ; au-delà, SecurityError (« Must be handling a
+        // user gesture to show a file picker ») et « Codex non mis à jour ». Même remède que le partage.
+        var motifFenetre = options && typeof options.toucherFrais === 'function' ? _motifToucherFrais() : null;
+        if (motifFenetre && !(await options.toucherFrais(motifFenetre))) {
+            return { methode: 'annule', strategie: 'fenêtre de choix (FSAPI)', toucherRefuse: true };
+        }
         try {
             var handle = await window.showSaveFilePicker({
                 suggestedName: nomFichier,
