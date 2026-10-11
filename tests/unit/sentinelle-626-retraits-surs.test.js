@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { tranche } from './_helpers/tranche.js';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -165,7 +166,7 @@ describe('#626 · M4 — deux des trois couches d\'override de productions.js so
     });
 
     // TÉMOIN — la surface d'exports du dispatcher data-action ne bouge pas, et
-    // `annulerFormProduction` reste exposé, wrapper compris, jusqu'à #633.
+    // `annulerFormProduction` reste exposé (une seule couche depuis #633).
     it('TÉMOIN · les trois noms restent exposés, chacun atteignable depuis window', () => {
         const c = code('js/productions.js');
         for (const nom of FUSIONNES) {
@@ -198,14 +199,19 @@ describe('#626 · M4 — deux des trois couches d\'override de productions.js so
         expect(corps).not.toContain('afficherTableauProductions()');
     });
 
-    // ⚠ TÉMOIN DE MISE À L'ÉCART — tant que #633 n'est pas livré, les DEUX corps
-    // d'`annulerFormProduction` doivent être là. Si l'un disparaît sans l'autre,
-    // c'est que quelqu'un a fusionné à moitié en lisant M4 sans lire #633.
-    it('MISE À L\'ÉCART #633 · les deux couches d\'`annulerFormProduction` sont encore là', () => {
+    // #633 (11 oct. 2026) — LIVRÉ : la mise à l'écart se retourne. Un seul corps, exposé une
+    // fois, qui fait l'union des deux d'avant (accueil, surlignage ET `productionEnEdition`).
+    it('#633 · `annulerFormProduction` n\'a plus qu\'un corps, qui fait les gestes des deux', () => {
         const c = code('js/productions.js');
-        expect(c).toMatch(/function\s+annulerFormProduction\s*\(/);
-        expect(c).toMatch(/window\.annulerFormProduction\s*=\s*function\b/);
-        expect(c).toMatch(/const\s+annulerFormProductionOriginale\s*=/);
+        expect(c.match(/(?:^|\n)\s*function\s+annulerFormProduction\s*\(/g) || []).toHaveLength(1);
+        expect(c).not.toMatch(/window\.annulerFormProduction\s*=\s*function\b/);
+        expect(c).not.toMatch(/const\s+annulerFormProductionOriginale\s*=/);
+        expect(c.match(/(?:^|\n)\s*window\.annulerFormProduction\s*=\s*annulerFormProduction\s*;/g) || []).toHaveLength(1);
+        const corps = tranche(c, 'function annulerFormProduction() {', '\n}\n');
+        for (const geste of ["getElementById('accueilProductions')", "item.classList.remove('active')",
+            "getElementById('optionsImportExportProductions')", 'productionEnEdition = null;']) {
+            expect(corps, geste).toContain(geste);
+        }
     });
 });
 
