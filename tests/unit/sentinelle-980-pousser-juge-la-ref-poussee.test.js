@@ -14,8 +14,12 @@ const juger = (branche, args) => spawnSync('bash', ['-c', '. scripts/ref-poussee
 describe('#980 · pousser.sh refuse une autre référence que la branche courante', () => {
     const CAS = [
         [[], 0], [['origin', 'main'], 0], [['origin', 'refs/heads/main'], 0], [['origin', 'HEAD:main'], 0],
-        [['-u', 'origin', 'main'], 0], [['origin', '--force'], 0],
-        [['origin', 'lot-e3'], 1], [['origin', 'HEAD:lot-e3'], 1], [['origin', 'lot-e3:main'], 1], [['-u', 'origin', 'lot-e3'], 1]
+        [['-u', 'origin', 'main'], 0],
+        // Relecture de Cowork : `origin --force` est accepté parce qu'aucune référence n'est nommée
+        // (git pousse la branche courante), plus parce que le 2e argument est une option.
+        [['origin', '--force'], 0], [['origin', 'HEAD'], 0], [['origin', 'main', '--force'], 0],
+        [['origin', 'lot-e3'], 1], [['origin', 'HEAD:lot-e3'], 1], [['origin', 'lot-e3:main'], 1], [['-u', 'origin', 'lot-e3'], 1],
+        [['origin', '--force', 'lot-e3'], 1], [['origin', 'main', 'lot-e3'], 1], [['origin', '+lot-e3'], 1]
     ];
     CAS.forEach(([args, attendu]) => {
         it(`branche « main », pousser.sh ${args.join(' ') || '(sans argument)'} → ${attendu === 0 ? 'accepté' : 'refusé'}`, () => {
