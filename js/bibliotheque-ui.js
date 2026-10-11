@@ -1306,6 +1306,30 @@
     };
 
     /**
+     * #793 (11 oct. 2026) — APRÈS UN IMPORT, CONDUIRE L'ŒIL AU RÉSULTAT, pour les cinq
+     * familles. Le geste des grilles (rapport testeur du 8 sept.) : la bibliothèque ouverte
+     * est redessinée, puis les cartes importées sont pointées. Si l'écriture a réussi mais
+     * qu'aucune carte ne la porte (un filtre d'affichage la masque), la phrase qui le dit est
+     * rendue, pour ne pas annoncer un succès invisible. Bibliothèque fermée : rien à pointer.
+     *
+     * @param {string} modalId - id de la modale de bibliothèque de la famille
+     * @param {Function} rafraichir - redessine la bibliothèque (async ou non)
+     * @param {string[]} ids - ids des éléments importés
+     * @returns {Promise<string|null>} la phrase « masqué par un filtre », ou null
+     */
+    BibliothequeUI.conduireAuxImportes = async function (modalId, rafraichir, ids) {
+        if (typeof document === 'undefined' || !document.getElementById(modalId)) return null;
+        await rafraichir();
+        var pointage = BibliothequeUI.pointerVersItems(ids);
+        if (pointage.trouves.length > 0 || pointage.absents.length === 0) return null;
+        var masquageCoche = typeof BibliothequeUI.estMasquerDejaPresentActif === 'function'
+            && BibliothequeUI.estMasquerDejaPresentActif();
+        return masquageCoche
+            ? 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans la barre latérale » pour les voir.'
+            : 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.';
+    };
+
+    /**
      * Crée et injecte une modale complète de bibliothèque
      * @param {Object} config
      * @param {string} config.modalId - ID unique du modal (ex: "modalBibliothequeGrilles")

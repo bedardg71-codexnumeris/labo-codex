@@ -2048,11 +2048,13 @@ window.confirmerImportCartouches = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
 
             // Aplatir les cartouches de toutes les grilles pour la bibliothèque
             for (const grilleId of Object.keys(cartouchesData)) {
@@ -2072,6 +2074,7 @@ window.confirmerImportCartouches = async function(donnees) {
 
                     // S'assurer que la cartouche a sa grilleId
                     importee.grilleId = importee.grilleId || grilleId;
+                    if (importee.id) idsImportes.push(importee.id);
 
                     const indexBiblio = bibliotheque.findIndex(c => c.id === importee.id);
                     if (indexBiblio >= 0) {
@@ -2088,17 +2091,14 @@ window.confirmerImportCartouches = async function(donnees) {
         }, []);
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportCartouches)
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
-        if (document.getElementById('modalBibliothequeCartouches')) {
-            if (typeof afficherBibliothequeCartouches === 'function') {
-                await afficherBibliothequeCartouches();
-            }
-        }
+        // #793 — la bibliothèque ouverte est redessinée, puis l'œil conduit aux cartes importées.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequeCartouches', afficherBibliothequeCartouches, idsImportes);
 
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) cartouche(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
-        message += `\nConsulte « Cartouches disponibles » pour les ajouter à ta sélection.`;
+        message += '\n' + (ligneMasquee || 'Consulte « Cartouches disponibles » pour les ajouter à ta sélection.');
         notifications.succes(message);
 
     } catch (error) {
