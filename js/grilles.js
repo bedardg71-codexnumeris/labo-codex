@@ -2069,7 +2069,7 @@ window.confirmerImportGrilles = async function(donnees) {
         // Un rafraîchissement qu'on ne voit pas ne se distingue pas d'une panne.
         // #793 : le geste vit dans `BibliothequeUI.conduireAuxImportes`, pour les cinq familles.
         const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
-            'modalBibliothequeGrilles', afficherBibliothequeGrilles, idsImportes);
+            'modalBibliothequeGrilles', afficherBibliothequeGrilles, idsImportes, { repliFiltre: true });
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);

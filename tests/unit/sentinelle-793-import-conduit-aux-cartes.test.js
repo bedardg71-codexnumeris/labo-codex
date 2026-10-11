@@ -19,7 +19,7 @@ import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-function monter({ modaleOuverte = true, cartes = [], masquage = false } = {}) {
+function monter({ modaleOuverte = true, cartes = [], masquage = false, avecCase = true } = {}) {
     const pointees = [];
     let defilee = 0;
     const carte = (id) => ({
@@ -27,7 +27,10 @@ function monter({ modaleOuverte = true, cartes = [], masquage = false } = {}) {
         scrollIntoView: () => { defilee++; }
     });
     const document = {
-        getElementById: (id) => (modaleOuverte && id === 'modalBiblio' ? {} : null),
+        getElementById: (id) => (modaleOuverte && id === 'modalBiblio' ? {
+            // La case « Masquer… » de la modale redessinée : présente (grilles, échelles, cartouches) ou non.
+            querySelector: (sel) => (avecCase && sel.includes('biblio-toggle-deja-present') ? { checked: masquage } : null)
+        } : null),
         querySelectorAll: (sel) => {
             const m = /data-biblio-item-id="([^"]+)"/.exec(sel);
             return m && cartes.includes(m[1]) ? [carte(m[1])] : [];
@@ -65,10 +68,25 @@ describe('#793 · A — conduireAuxImportes', () => {
         expect(ligne).toContain('décoche « Masquer les éléments déjà dans la barre latérale »');
     });
 
-    it('A.d aucune carte, sans la case : la phrase nomme un filtre d\'affichage', async () => {
+    it('A.d aucune carte, case présente mais décochée (un dossier, un autre filtre) : rien n\'est dit', async () => {
         const { w } = monter({ cartes: [], masquage: false });
-        const ligne = await w.BibliothequeUI.conduireAuxImportes('modalBiblio', () => {}, ['ECH_1']);
-        expect(ligne).toBe('Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.');
+        expect(await w.BibliothequeUI.conduireAuxImportes('modalBiblio', () => {}, ['ECH_1'])).toBe(null);
+    });
+
+    it('A.d bis les GRILLES gardent leur phrase d\'avant (repliFiltre), les autres non', async () => {
+        const { w } = monter({ cartes: [], masquage: false });
+        expect(await w.BibliothequeUI.conduireAuxImportes('modalBiblio', () => {}, ['G1'], { repliFiltre: true }))
+            .toBe('Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.');
+        const src = readFileSync(path.join(racine, 'js', 'grilles.js'), 'utf8');
+        expect(src).toContain("idsImportes, { repliFiltre: true })");
+        for (const f of ['echelles.js', 'cartouches.js', 'pratiques-gestion.js', 'productions-import-export.js']) {
+            expect(readFileSync(path.join(racine, 'js', f), 'utf8'), f).not.toContain('repliFiltre');
+        }
+    });
+
+    it('A.e aucune carte, préférence cochée mais modale SANS case (Productions, Pratiques) : rien n\'est dit', async () => {
+        const { w } = monter({ cartes: [], masquage: true, avecCase: false });
+        expect(await w.BibliothequeUI.conduireAuxImportes('modalBiblio', () => {}, ['ECH_1'])).toBe(null);
     });
 });
 
