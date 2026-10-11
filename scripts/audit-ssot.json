@@ -15,14 +15,14 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/db.js": [
-          1723,
-          1753,
-          1770
+          1982,
+          2012,
+          2029
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/db.js": [
-          1703
+          1962
         ]
       },
       "status": "ssot-ok"
@@ -33,12 +33,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          1213
+          1274
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          1180
+          1241
         ]
       },
       "status": "ssot-ok"
@@ -49,15 +49,15 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modelisation.js": [
-          432
+          435
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          890
+          945
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          882
+          936
         ]
       },
       "status": "violation-mineure"
@@ -68,72 +68,52 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          808
+          1329
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          797
+          1318
         ]
       },
       "status": "ssot-ok"
     },
     {
-      "key": "bibliotheque-pratiques",
+      "key": "autoreflexionBilan",
+      "writers_count": 1,
+      "readers_count": 0,
+      "writers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/bilan-reflexif-core.js": [
+          335
+        ]
+      },
+      "readers": {},
+      "status": "ssot-ok"
+    },
+    {
+      "key": "bibliothequePratiques",
       "writers_count": 0,
       "readers_count": 1,
       "writers": {},
       "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          1446
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-gestion.js": [
+          1012
         ]
       },
       "status": "no-literal-writer"
     },
     {
-      "key": "bibliothequePratiques",
-      "writers_count": 1,
-      "readers_count": 2,
-      "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          408
-        ]
-      },
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          400
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-gestion.js": [
-          981
-        ]
-      },
-      "status": "ssot-ok"
-    },
-    {
-      "key": "bibliothequeProductions",
-      "writers_count": 1,
-      "readers_count": 1,
-      "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/donnees-v2.js": [
-          1666
-        ]
-      },
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/donnees-v2.js": [
-          1664
-        ]
-      },
-      "status": "ssot-ok"
-    },
-    {
       "key": "cadreCalendrier",
-      "writers_count": 1,
-      "readers_count": 9,
+      "writers_count": 2,
+      "readers_count": 10,
       "writers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rencontres.js": [
+          354
+        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          357,
-          407,
-          451
+          482,
+          533,
+          575
         ]
       },
       "readers": {
@@ -141,24 +121,27 @@
           454
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/correlations-longitudinales.js": [
-          272
+          282
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          618,
-          1706
+          542,
+          1345
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-carte.js": [
+          9789
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions.js": [
-          951,
-          1833
+          961,
+          1866
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/snapshots.js": [
-          251,
-          528
+          236,
+          468
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          272,
-          402,
-          446
+          404,
+          527,
+          569
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
           157
@@ -167,12 +150,12 @@
           57
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1373,
-          1473,
-          1720
+          1630,
+          1730,
+          2004
         ]
       },
-      "status": "ssot-ok"
+      "status": "violation-mineure"
     },
     {
       "key": "calendrierComplet",
@@ -186,40 +169,40 @@
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          25
+          32
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cours.js": [
           156
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          555,
-          756
+          601,
+          802
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-carte.js": [
-          9390
+          9900
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-apercu.js": [
-          118,
-          166,
-          201,
-          292
+          122,
+          170,
+          205,
+          296
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions.js": [
-          1272
+          1274
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          703
+          709
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          169,
-          189,
-          237
+          227,
+          247,
+          295
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
-          869
+          848
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          306
+          438
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
           179
@@ -228,7 +211,7 @@
           41
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1356
+          1613
         ]
       },
       "status": "ssot-ok"
@@ -242,8 +225,8 @@
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/accompagnement.js": [
           537
         ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/partage-validation.js": [
-          623
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-ouvrir.js": [
+          337
         ]
       },
       "status": "no-literal-writer"
@@ -254,19 +237,19 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          875,
-          2682,
-          2780,
-          3282
+          938,
+          2934,
+          3033,
+          3540
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          866,
-          1264,
-          2292,
-          2674,
-          3051
+          929,
+          1432,
+          2544,
+          2926,
+          3305
         ]
       },
       "status": "ssot-ok"
@@ -277,13 +260,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          697,
-          2779
+          760,
+          3032
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          693
+          756
         ]
       },
       "status": "ssot-ok"
@@ -320,19 +303,17 @@
       "status": "no-literal-writer"
     },
     {
-      "key": "configEchelle",
+      "key": "confidentielEtudiants",
       "writers_count": 1,
       "readers_count": 1,
       "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          741,
-          1052
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-confidentiel.js": [
+          304
         ]
       },
       "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          902,
-          1000
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-confidentiel.js": [
+          302
         ]
       },
       "status": "ssot-ok"
@@ -346,7 +327,7 @@
           215
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          940
+          998
         ]
       },
       "readers": {
@@ -355,7 +336,7 @@
           174
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          932
+          989
         ]
       },
       "status": "violation-mineure"
@@ -382,18 +363,18 @@
       "readers_count": 2,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          706,
-          848,
-          2783
+          769,
+          911,
+          3036
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/synthese-retroaction-data.js": [
-          459
+          625
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          702,
-          844
+          765,
+          907
         ]
       },
       "status": "ssot-ok"
@@ -401,31 +382,27 @@
     {
       "key": "cours",
       "writers_count": 5,
-      "readers_count": 19,
+      "readers_count": 23,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          157
+          164
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cours.js": [
           75,
           107,
-          390,
-          536,
-          566,
-          692,
-          762
+          574
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          177,
-          412
+          178,
+          435
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           626
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
           143,
-          538,
-          1271
+          517,
+          1401
         ]
       },
       "readers": {
@@ -433,31 +410,28 @@
           495
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          121,
-          144
+          128,
+          151
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cours.js": [
           64,
           96,
           126,
-          209,
-          281,
-          383,
-          437,
-          535,
-          560,
-          585,
-          653,
-          737,
-          784,
+          216,
+          290,
+          454,
+          573,
+          628,
+          788,
           843,
-          883
+          902,
+          942
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          98,
-          169,
-          253,
-          412
+          99,
+          170,
+          258,
+          435
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           245,
@@ -467,66 +441,82 @@
           576
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          718
+          531,
+          815
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-carte.js": [
-          7859,
-          9169,
-          10705
+          8549,
+          9693,
+          11221
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-donnees.js": [
           109,
-          522
+          540
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          225,
-          255,
-          283
+          208,
+          238,
+          266
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          451
+          499
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/registre-longitudinal.js": [
+          231
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rencontres.js": [
+          96
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-trimestre.js": [
+          223
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve.js": [
-          449,
-          819
+          689,
+          1049
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6646
+          7308
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
           138,
           176,
-          304,
-          353,
-          530,
-          604,
-          659,
-          1115,
-          1268
+          308,
+          367,
+          509,
+          583,
+          637,
+          1104,
+          1310,
+          1398,
+          1530
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-etudiants.js": [
+          86,
+          127
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          212,
-          353,
-          815
+          221,
+          316,
+          414,
+          1005
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
           201
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
           68,
-          176,
-          225
+          177,
+          226
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          267,
-          536,
-          537
+          307,
+          562,
+          563
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          564,
-          1065,
-          1125,
-          1700
+          629,
+          1399,
+          1984
         ]
       },
       "status": "violation-critique"
@@ -544,31 +534,14 @@
       "status": "no-literal-writer"
     },
     {
-      "key": "datesVerrouillees",
-      "writers_count": 1,
-      "readers_count": 1,
-      "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          738
-        ]
-      },
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          718,
-          726
-        ]
-      },
-      "status": "ssot-ok"
-    },
-    {
       "key": "demo-actif",
       "writers_count": 1,
-      "readers_count": 5,
+      "readers_count": 4,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          239,
-          262,
-          366
+          244,
+          267,
+          386
         ]
       },
       "readers": {
@@ -576,18 +549,15 @@
           84
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          65,
-          89,
-          234
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          983
+          66,
+          90,
+          239
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modal-backup-reminder.js": [
-          38
+          43
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          1053
+          1577
         ]
       },
       "status": "ssot-ok"
@@ -598,13 +568,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          245
+          250
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          123,
-          466
+          124,
+          511
         ]
       },
       "status": "ssot-ok"
@@ -616,7 +586,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          180
+          181
         ]
       },
       "status": "no-literal-writer"
@@ -628,7 +598,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          296
+          301
         ]
       },
       "status": "no-literal-writer"
@@ -640,8 +610,8 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          155,
-          289
+          156,
+          294
         ]
       },
       "status": "no-literal-writer"
@@ -653,7 +623,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          200
+          201
         ]
       },
       "status": "no-literal-writer"
@@ -661,19 +631,16 @@
     {
       "key": "dernieresSelectionsEvaluation",
       "writers_count": 1,
-      "readers_count": 2,
+      "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          434,
-          462
+          455,
+          483
         ]
       },
       "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          470
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          4699
+          5151
         ]
       },
       "status": "ssot-ok"
@@ -685,14 +652,14 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          344
+          390
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           347,
           421
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1310
+          1567
         ]
       },
       "status": "no-literal-writer"
@@ -704,8 +671,8 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          714,
-          1765
+          921,
+          1999
         ]
       },
       "status": "no-literal-writer"
@@ -713,14 +680,14 @@
     {
       "key": "echellesTemplates",
       "writers_count": 2,
-      "readers_count": 24,
+      "readers_count": 23,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          4764
+          3877
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          2427,
-          2800
+          2925,
+          3284
         ]
       },
       "readers": {
@@ -728,13 +695,14 @@
           519
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cartouches.js": [
-          451,
-          619,
-          1283,
-          2670,
-          3562,
-          3666,
-          3721
+          445,
+          622,
+          1452,
+          2588,
+          3439,
+          3516,
+          3561,
+          3610
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cc-license.js": [
           1302
@@ -747,41 +715,38 @@
           163,
           525,
           745,
-          1376
+          1218,
+          1452
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          217,
-          384,
-          671,
-          722,
-          794,
-          1804,
-          1872,
-          2239,
-          2293,
-          2569,
-          2615,
-          2682,
-          3408,
-          4323,
-          4450,
-          4745
+          191,
+          769,
+          837,
+          1080,
+          1130,
+          1395,
+          1445,
+          1499,
+          2257,
+          2941,
+          3027,
+          3418,
+          3533,
+          3858
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-calcul.js": [
-          122,
-          258,
-          431,
-          540,
-          717
+          1453,
+          1644
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           289,
-          841,
-          1034
+          818,
+          1064,
+          1291
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          324,
-          1120
+          345,
+          980
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           910,
@@ -794,58 +759,55 @@
           3530,
           3612
         ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          378
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          2398,
-          2784,
-          3171
+          2896,
+          3257,
+          3765
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-registre.js": [
-          252
+          258
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-bibliotheque.js": [
+          877
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-gestion.js": [
-          232,
-          610,
-          1685,
-          1741,
-          1781
+          243,
+          621,
+          1746,
+          1802,
+          1842
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          2251,
-          2293
+          2112,
+          2154
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions.js": [
-          3196
+          3411
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-calculs.js": [
           124
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-helpers.js": [
-          147
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          3403
+          150
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          531
+          579
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-ouvrir.js": [
-          217
+          271
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          713,
-          1764
+          920,
+          1998
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1697
+          1960
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          1728,
-          1781,
-          2123,
-          2142
+          1670,
+          1726,
+          2079,
+          2097
         ]
       },
       "status": "violation-mineure"
@@ -856,43 +818,56 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          748,
-          889,
-          2693,
-          2781,
-          3283
+          811,
+          952,
+          2945,
+          3034,
+          3541
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          745,
-          880,
-          1265,
-          2364,
-          3052
+          808,
+          943,
+          1433,
+          2616,
+          3306
         ]
       },
       "status": "ssot-ok"
     },
     {
+      "key": "elevesDesinscrits",
+      "writers_count": 0,
+      "readers_count": 1,
+      "writers": {},
+      "readers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
+          1683
+        ]
+      },
+      "status": "no-literal-writer"
+    },
+    {
       "key": "enseignants",
       "writers_count": 4,
-      "readers_count": 12,
+      "readers_count": 13,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          189,
-          419
+          190,
+          442
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          3021
+          3602
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           560
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-enseignants.js": [
           53,
-          314,
-          372
+          356,
+          385,
+          440
         ]
       },
       "readers": {
@@ -903,13 +878,13 @@
           1130
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          122
+          129
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          99,
-          181,
-          254,
-          419
+          100,
+          182,
+          259,
+          442
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           192,
@@ -918,33 +893,40 @@
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           499
         ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rencontres.js": [
+          395
+        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6647
+          7309
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
-          1116
+          1105
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-enseignants.js": [
           37,
-          105,
-          150,
-          259,
-          354
+          92,
+          175,
+          225,
+          346,
+          377,
+          419,
+          439
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          366,
-          816
+          429,
+          441,
+          1006
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
           69
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          336,
-          540,
-          541
+          356,
+          566,
+          567
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          2956
+          3086
         ]
       },
       "status": "violation-critique"
@@ -955,12 +937,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          3592
+          3859
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          3596
+          3864
         ]
       },
       "status": "ssot-ok"
@@ -988,59 +970,56 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          2163
+          2024
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          2172
+          2033
         ]
       },
       "status": "ssot-ok"
     },
     {
       "key": "evaluationsSauvegardees",
-      "writers_count": 8,
-      "readers_count": 35,
+      "writers_count": 7,
+      "readers_count": 36,
       "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          4305
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
-          1404,
-          1430
+          2047,
+          2089
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-jetons.js": [
-          236
+          277
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          426,
-          447
+          455,
+          481
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          1840,
-          1973,
-          1999,
-          2025,
-          2458,
-          2523,
-          2563,
-          2605,
-          2649
+          1838,
+          1979,
+          2008,
+          2033,
+          2466,
+          2528,
+          2565,
+          2606,
+          2656
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          2081,
-          2131,
-          2828,
-          2912
+          2303,
+          2369,
+          2982,
+          3082
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migration-diagnostic.js": [
           214,
-          277
+          280
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          3579,
-          6609
+          3834,
+          7275
         ]
       },
       "readers": {
@@ -1048,196 +1027,209 @@
           175,
           236
         ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/consolidation.js": [
-          56
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cartouches.js": [
+          932,
+          1726,
+          4617
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          4271,
-          4295
+          3318,
+          3334
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/etudiants.js": [
-          920
+          912
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-calcul.js": [
+          476
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
-          592,
-          593,
-          1393
+          353,
+          668,
+          669,
+          1484,
+          1822,
+          1857,
+          2036
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-jetons.js": [
-          169,
-          312,
-          393,
-          455,
-          577
+          206,
+          349,
+          438,
+          503,
+          666
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-retroaction.js": [
-          585,
-          621,
-          978
+          409,
+          823,
+          859,
+          1260
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          413,
-          625,
-          704,
-          808
+          442,
+          669,
+          748,
+          852,
+          1029
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          591,
-          902,
-          1171,
-          1236,
-          1909,
-          1988,
-          2014,
-          2135,
-          2192,
-          2445,
-          2498,
-          2546,
-          2584,
-          2636,
-          3009
+          521,
+          1058,
+          1104,
+          1907,
+          1997,
+          2022,
+          2143,
+          2200,
+          2453,
+          2503,
+          2548,
+          2585,
+          2639,
+          3094
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          474,
-          2394,
-          3836,
-          4000,
-          4001
+          398,
+          2022,
+          3464,
+          3628,
+          3629
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/grilles.js": [
+          1038,
+          3397
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/impact-jetons.js": [
           56,
-          188
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          421
+          187
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/journal.js": [
           104,
-          255,
-          321
+          257,
+          323
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          225,
-          263,
-          348,
-          944,
-          1471,
-          1658,
-          1704,
-          1792,
-          2033,
-          2109,
-          2295,
-          2327,
-          2819,
-          2902
+          228,
+          266,
+          351,
+          1224,
+          1841,
+          1967,
+          2000,
+          2088,
+          2224,
+          2285,
+          2347,
+          2430,
+          2921,
+          2971,
+          3024,
+          3072
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migration-diagnostic.js": [
           27,
           173,
           241,
-          327
+          330
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/portfolio.js": [
-          127,
-          845,
-          949
+          159,
+          982,
+          1086
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-configurable.js": [
-          439,
-          440
+          587,
+          588
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-specifications.js": [
-          750,
-          751
+          908,
+          909
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-standards.js": [
-          795,
-          797
+          618,
+          619
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-registre.js": [
+          885,
+          886
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-sommative.js": [
-          750,
-          752
+          705,
+          706
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          52,
-          443
+          51,
+          451
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-calculs.js": [
-          676,
-          748,
-          815,
-          950,
-          1198,
-          1429,
-          1624
+          705,
+          777,
+          944,
+          992,
+          1153,
+          1384,
+          1583,
+          1773
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
-          60
+          66
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
           403,
-          841,
-          2011,
-          2085,
-          2749,
-          3426,
-          3618,
-          3923,
-          4160,
-          4647
+          939,
+          955,
+          2182,
+          2923,
+          3416,
+          3486,
+          3802,
+          4527
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          510
+          558
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
           52,
           172
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/snapshots.js": [
-          207,
-          553,
-          859
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/spe-specifications.js": [
-          342
+          206,
+          293,
+          493,
+          815
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          1418
+          1688,
+          2933
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-archivage.js": [
-          108,
-          166,
-          226,
-          311,
-          374
+          234,
+          335,
+          386
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-export-pdf.js": [
-          767
+          807
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-resolution.js": [
           26,
           167
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          528
+          582
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          2637,
-          2746,
-          3577,
-          3991,
-          4105,
-          4165,
-          5109,
-          6602,
-          6669
+          2806,
+          2915,
+          3829,
+          4251,
+          4357,
+          4493,
+          4560,
+          5708,
+          7261,
+          7331
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1135,
-          1688,
-          2434
+          1950
         ]
       },
       "status": "violation-critique"
@@ -1265,24 +1257,24 @@
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migration-diagnostic.js": [
           213,
-          313
+          316
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          292
+          318
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migration-diagnostic.js": [
           26,
           172,
-          303,
-          326
+          306,
+          329
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
           177
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          284
+          296
         ]
       },
       "status": "violation-mineure"
@@ -1309,12 +1301,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          461
+          463
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          468
+          470
         ]
       },
       "status": "ssot-ok"
@@ -1337,34 +1329,31 @@
       "readers_count": 2,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/db.js": [
-          1338,
-          1340
+          1517,
+          1519
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/db.js": [
-          1326
+          1505
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve.js": [
-          176
+          326
         ]
       },
       "status": "ssot-ok"
     },
     {
       "key": "grillesTemplates",
-      "writers_count": 3,
-      "readers_count": 26,
+      "writers_count": 2,
+      "readers_count": 27,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/grilles.js": [
-          4347
+          6334
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          2453,
-          2772
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          1893
+          2951,
+          3245
         ]
       },
       "readers": {
@@ -1373,25 +1362,26 @@
           535
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cartouches.js": [
-          161,
-          226,
-          272,
-          410,
-          1457,
-          2101,
-          2669,
-          2731,
-          3383,
-          3412,
-          3542,
-          3657,
-          3720,
-          3959,
-          4036,
-          4291,
-          4405,
-          4466,
-          4617
+          160,
+          228,
+          274,
+          404,
+          1721,
+          2017,
+          2587,
+          2649,
+          3191,
+          3220,
+          3398,
+          3419,
+          3552,
+          3609,
+          3872,
+          4256,
+          4326,
+          4477,
+          4623,
+          4684
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cc-license.js": [
           1297,
@@ -1401,30 +1391,39 @@
           161,
           363,
           698,
-          1360
+          1434
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
+          3312,
+          3328,
+          3400
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-calcul.js": [
-          233,
-          515
+          275,
+          452,
+          1472
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           218,
-          735,
-          815,
-          1013,
-          1385
+          341,
+          865,
+          871,
+          1038,
+          1270,
+          2028
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-retroaction.js": [
-          269,
-          598
+          251,
+          331,
+          836
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          385
+          410
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          1465,
-          1513,
-          1928
+          1343,
+          1390,
+          1926
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           773,
@@ -1438,76 +1437,77 @@
           3611
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          3838
+          3466
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/grilles.js": [
           104,
-          168,
-          626,
-          795,
-          898,
-          983,
-          1213,
-          1627,
-          1694,
-          2116,
-          2166,
-          2621,
-          2671,
-          2741,
-          3142,
-          3448,
-          4327
+          187,
+          480,
+          676,
+          872,
+          975,
+          1094,
+          1329,
+          1769,
+          1836,
+          2187,
+          2238,
+          2699,
+          2806,
+          2945,
+          3128,
+          4761,
+          4955,
+          6314
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          2399,
-          2742,
-          3172
+          2897,
+          3203,
+          3766
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-standards.js": [
-          840
+          678
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-gestion.js": [
-          614,
-          1710
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          447
+          625,
+          1771
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/preferences-v2.js": [
           49
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions-import-export.js": [
-          397
+          280
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions.js": [
           259,
-          2701
+          2906
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-helpers.js": [
-          735
+          780,
+          798
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          4001
+          940,
+          3879
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          528
+          576
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-ouvrir.js": [
-          216
+          270
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/synthese-retroaction-data.js": [
-          1223
+          1649
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
+          2934
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          676,
-          1696
+          762,
+          1959
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          1843,
-          1891,
-          2128,
-          2155
+          42
         ]
       },
       "status": "violation-mineure"
@@ -1515,92 +1515,106 @@
     {
       "key": "groupeCoursActif",
       "writers_count": 8,
-      "readers_count": 14,
+      "readers_count": 18,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          104
+          111
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          299,
-          493
+          304,
+          538
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/entites/groupe-cours.js": [
-          229
+          232
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          810
+          830
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          97
+          84
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          719,
-          780,
-          963,
-          999
+          892,
+          970,
+          1156,
+          1192
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
           25,
-          180,
-          214,
-          401
+          181,
+          215,
+          408
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          504
+          569
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          248
+          253
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/donnees-v2.js": [
+          836
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           65,
-          1352
+          1987
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          399
+          428
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
           85,
-          127
+          163
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interventions.js": [
+          545
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          802
+          822
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          1253
+          533,
+          1841
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          78
+          65
         ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-registre.js": [
-          644
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
+          136
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve.js": [
-          1488
+          1853
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
+          790
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
+          125
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-import.js": [
-          688
+          849
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          412,
-          949
+          448,
+          1009
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6642
+          4115,
+          7304
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
           47,
           95,
-          397,
-          778,
-          812,
-          961,
-          997
+          494,
+          968,
+          1002,
+          1154,
+          1190
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
           72,
-          131
+          132
         ]
       },
       "status": "violation-critique"
@@ -1612,80 +1626,76 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/comparateur-pratiques.js": [
-          322
+          323
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/etudiants.js": [
           146,
-          805,
-          1462
+          786,
+          1464
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           67,
           112,
           141,
-          1345
+          1980
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-retroaction.js": [
-          138
+          142
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          381
+          406
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          897,
-          1224,
-          1924,
-          2136
+          265,
+          1092,
+          1922,
+          2144
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          3014,
-          3990,
-          3991
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/groupe.js": [
-          100,
-          504,
-          568,
-          616,
-          744,
-          816
+          2651,
+          3618,
+          3619
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          853
+          899
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
+          1683
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          111,
-          263
+          108,
+          157,
+          331,
+          532
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interventions.js": [
-          532,
-          657,
-          1167,
-          1363,
-          1490
+          733,
+          734,
+          911,
+          1790,
+          1920
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          192,
-          353,
-          947,
-          1695,
-          2298,
-          2330,
-          2689
+          195,
+          356,
+          1227,
+          1991,
+          2433,
+          2794
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          185,
-          186,
-          1159
+          187,
+          188,
+          1736
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/navigation.js": [
-          605
+          654
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/portfolio.js": [
-          580
+          696
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-apercu.js": [
-          27
+          31
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-rapport.js": [
           15,
@@ -1693,82 +1703,80 @@
           227
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          711
+          700
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-confidentiel.js": [
-          78
+          97
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
-          52,
-          180
+          55,
+          175
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          774,
-          1643,
-          2302,
-          2303,
-          2751
+          866,
+          1805,
+          2415,
+          2416,
+          2925
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          442,
-          443
+          490,
+          491
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          114,
-          792,
-          1107,
-          1460
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/spe-specifications.js": [
-          512,
-          513
+          168,
+          967,
+          1467
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          1097
+          1312
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-archivage.js": [
-          80,
-          142,
-          204,
-          256,
-          414,
-          583,
-          644
+          203,
+          295,
+          440,
+          616,
+          687
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-export-pdf.js": [
-          837
+          883,
+          949
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-import.js": [
-          266,
-          286,
-          367,
-          1300
+          318,
+          338,
+          493,
+          1527
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-resolution.js": [
           145,
           252
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          1196,
-          2576,
-          3074,
-          5458,
-          5484
+          1273,
+          2744,
+          3248,
+          3747,
+          6062,
+          6088
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
-          1013
+          1002
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-etudiants.js": [
+          187,
+          673,
+          1331
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
-          672
+          673
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          544,
-          545
+          570,
+          571
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1132,
-          1683,
-          2433
+          1940
         ]
       },
       "status": "no-literal-writer"
@@ -1779,39 +1787,30 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          306
+          311
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-etudiants.js": [
-          295
+          584,
+          1052
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-etudiants.js": [
-          280
+          559
         ]
       },
       "status": "violation-mineure"
     },
     {
-      "key": "groupeVerrouille",
-      "writers_count": 0,
-      "readers_count": 1,
-      "writers": {},
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/groupe.js": [
-          737,
-          922
-        ]
-      },
-      "status": "no-literal-writer"
-    },
-    {
       "key": "groupesCours",
-      "writers_count": 1,
-      "readers_count": 13,
+      "writers_count": 2,
+      "readers_count": 17,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          92
+          79
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
+          890
         ]
       },
       "readers": {
@@ -1822,45 +1821,58 @@
           1978
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          130
+          166
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interventions.js": [
+          552
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          1257
+          1845
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          83
+          70
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-rapport.js": [
           180
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions.js": [
-          979,
-          1842
+          989,
+          1875
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
+          137
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
+          1760
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rencontres.js": [
+          98
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
           179,
-          594,
-          620
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          1434
+          600,
+          626
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-import.js": [
-          289
+          341
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          2577,
-          6641
+          2745,
+          7303
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
+          269,
+          740
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
           191
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          552,
-          553
+          578,
+          579
         ]
       },
-      "status": "ssot-ok"
+      "status": "violation-mineure"
     },
     {
       "key": "horaireActif",
@@ -1869,21 +1881,24 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          520
+          568
         ]
       },
       "status": "no-literal-writer"
     },
     {
       "key": "horaireHebdo",
-      "writers_count": 3,
+      "writers_count": 4,
       "readers_count": 5,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/entites/groupe-cours.js": [
-          252
+          255
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
+          1019
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
-          246
+          251
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre.js": [
           73
@@ -1891,13 +1906,13 @@
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          156
+          202
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           257
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          637
+          643
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
           82,
@@ -1909,7 +1924,7 @@
           77
         ]
       },
-      "status": "violation-mineure"
+      "status": "violation-critique"
     },
     {
       "key": "horaireSelectionne",
@@ -1917,63 +1932,67 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          305
+          310
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
-          526,
-          573,
-          588,
-          596,
-          1015
+          527,
+          574,
+          589,
+          597,
+          889,
+          1095
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
-          513
+          514
         ]
       },
       "status": "violation-mineure"
     },
     {
       "key": "horaires",
-      "writers_count": 1,
+      "writers_count": 2,
       "readers_count": 8,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           716
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
+          1008
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          137
+          183
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          599
+          605
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6648
+          7310
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          220,
-          272,
-          381
+          229,
+          333,
+          473
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
           282,
-          514
+          515
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
-          243
+          248
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          548,
-          549
+          574,
+          575
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre.js": [
           69
         ]
       },
-      "status": "ssot-ok"
+      "status": "violation-mineure"
     },
     {
       "key": "indicesAssiduite",
@@ -1981,30 +2000,30 @@
       "readers_count": 6,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          278
+          342
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          3026
+          2663
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          491,
-          567
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          2179
+          515,
+          593
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-apercu.js": [
-          31
+          35
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          1622
+          1781
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          119,
-          1106,
-          1496
+          262,
+          1321,
+          1719
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
+          1964
         ]
       },
       "status": "ssot-ok"
@@ -2016,7 +2035,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-sommative.js": [
-          526
+          470
         ]
       },
       "status": "no-literal-writer"
@@ -2024,25 +2043,22 @@
     {
       "key": "indicesCP",
       "writers_count": 0,
-      "readers_count": 5,
+      "readers_count": 4,
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          403
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          2183
+          472
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-configurable.js": [
-          178,
-          481
+          271,
+          669
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          121,
-          1107
+          264,
+          1322
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1699
+          1962
         ]
       },
       "status": "no-literal-writer"
@@ -2053,15 +2069,15 @@
       "readers_count": 2,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          746
+          735
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          758
+          747
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          625
+          819
         ]
       },
       "status": "ssot-ok"
@@ -2069,74 +2085,74 @@
     {
       "key": "infoCours",
       "writers_count": 8,
-      "readers_count": 33,
+      "readers_count": 35,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          138,
-          153
+          145,
+          160
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cours.js": [
-          537
+          576
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          292,
-          490
+          297,
+          535
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/entites/groupe-cours.js": [
-          225
+          228
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
-          211,
-          223,
-          539,
-          1261,
-          1272
+          214,
+          226,
+          518,
+          1391,
+          1402
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          781,
-          964,
-          1000
+          971,
+          1157,
+          1193
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
           25,
-          191,
-          230,
-          402
+          192,
+          235,
+          409
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          503
+          568
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/boite-outils.js": [
           68,
-          491,
-          536
+          509,
+          554
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cc-license.js": [
           134,
           494,
-          1543
+          1550
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/codex.js": [
-          2410,
-          2504
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/consolidation.js": [
-          64
+          2944,
+          3038
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/correlations-longitudinales.js": [
-          271
+          281
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cours.js": [
-          484,
-          837
+          504,
+          896
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          247
+          252
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          4500
+          3590
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/equipes.js": [
+          159
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           279,
@@ -2145,98 +2161,105 @@
           1127
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-resultats-finaux.js": [
-          130
+          139
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          616,
-          841,
-          1712,
-          3910
+          540,
+          766,
+          1351,
+          3538
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/grilles.js": [
-          694
+          764
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          1485
+          1531
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/impact-jetons.js": [
           95,
-          226
+          222
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          1142,
-          1633
+          2130
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interventions.js": [
+          546
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/labo-codex-data.js": [
           500
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
-          362
+          365
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          506,
-          1223,
-          1270
+          538,
+          563,
+          579,
+          1802,
+          1858
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-carte.js": [
-          7572,
-          7821
+          8221,
+          8511
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-export.js": [
+          1932
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-standards.js": [
-          330,
-          565
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-registre.js": [
-          665
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-sommative.js": [
-          280
+          365
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions.js": [
-          1735
+          1739
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-calculs.js": [
+          1751
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          2683,
-          3338
+          2840,
+          3349
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          454,
-          496,
           502,
-          504
+          544,
+          550,
+          552
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rencontres.js": [
+          46
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/snapshots.js": [
-          78,
-          1097
+          1064
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/synthese-retroaction-data.js": [
-          194,
-          1206
+          251,
+          1625
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          443
+          623
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-import.js": [
-          687
+          848
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
           177,
-          516,
-          605,
-          660,
-          966,
-          1259
+          321,
+          495,
+          584,
+          638,
+          946,
+          1389
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-etudiants.js": [
-          337,
-          766,
-          938
+          83,
+          129,
+          704,
+          1623
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-horaires.js": [
           89
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          2133
+          2446
         ]
       },
       "status": "violation-critique"
@@ -2247,14 +2270,15 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interventions.js": [
-          102,
-          1442
+          388,
+          1686,
+          1869
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interventions.js": [
-          67,
-          1441
+          194,
+          1868
         ]
       },
       "status": "ssot-ok"
@@ -2265,17 +2289,17 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-jetons.js": [
-          789,
-          865,
-          895
+          898,
+          974,
+          1004
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-jetons.js": [
-          785,
-          816,
-          852,
-          877
+          894,
+          925,
+          961,
+          986
         ]
       },
       "status": "ssot-ok"
@@ -2286,8 +2310,8 @@
       "readers_count": 4,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          682,
-          704
+          804,
+          826
         ]
       },
       "readers": {
@@ -2295,10 +2319,10 @@
           457
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          488,
-          594,
-          645,
-          702
+          609,
+          715,
+          766,
+          824
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
           158
@@ -2315,8 +2339,8 @@
       "readers_count": 4,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          165,
-          407
+          166,
+          427
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           192
@@ -2327,10 +2351,10 @@
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          97,
-          156,
-          252,
-          407
+          98,
+          157,
+          257,
+          427
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           34,
@@ -2345,8 +2369,8 @@
           734
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve.js": [
-          470,
-          840
+          710,
+          1072
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
           135
@@ -2361,7 +2385,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          287
+          294
         ]
       },
       "status": "no-literal-writer"
@@ -2372,12 +2396,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          853
+          1374
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
-          837
+          949,
+          1358
         ]
       },
       "status": "ssot-ok"
@@ -2388,13 +2413,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1497,
-          1532
+          1754,
+          1789
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1447
+          1704
         ]
       },
       "status": "ssot-ok"
@@ -2405,12 +2430,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          134
+          135
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          86
+          87
         ]
       },
       "status": "ssot-ok"
@@ -2449,13 +2474,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          182,
-          189
+          177,
+          184
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          135
+          130
         ]
       },
       "status": "ssot-ok"
@@ -2482,8 +2507,8 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          114,
-          116
+          113,
+          115
         ]
       },
       "readers": {
@@ -2494,17 +2519,17 @@
       "status": "ssot-ok"
     },
     {
-      "key": "migration_decoupler_pn_done",
+      "key": "migration_cartouches_namespacees_done",
       "writers_count": 1,
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          425
+          731
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          376
+          708
         ]
       },
       "status": "ssot-ok"
@@ -2515,12 +2540,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          758
+          778
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          733
+          753
         ]
       },
       "status": "ssot-ok"
@@ -2531,12 +2556,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          455
+          424
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          437
+          406
         ]
       },
       "status": "ssot-ok"
@@ -2547,12 +2572,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          721
+          690
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          696
+          665
         ]
       },
       "status": "ssot-ok"
@@ -2563,12 +2588,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          350
+          372
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          347
+          369
         ]
       },
       "status": "ssot-ok"
@@ -2579,12 +2604,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          526
+          495
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          483
+          452
         ]
       },
       "status": "ssot-ok"
@@ -2595,12 +2620,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          817
+          837
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          767
+          787
         ]
       },
       "status": "ssot-ok"
@@ -2611,12 +2636,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          681
+          650
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          663
+          632
         ]
       },
       "status": "ssot-ok"
@@ -2627,12 +2652,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          367
+          389
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          357
+          379
         ]
       },
       "status": "ssot-ok"
@@ -2640,76 +2665,67 @@
     {
       "key": "modalitesEvaluation",
       "writers_count": 1,
-      "readers_count": 18,
+      "readers_count": 17,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/modalites-evaluation.js": [
-          49
+          53
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          250
+          255
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/etudiants.js": [
-          380,
-          471
+          360
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
-          858
+          1082
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-jetons.js": [
-          137
+          153,
+          192
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          720
+          764
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          3205
+          3799
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          185,
-          439
+          211,
+          408
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-standards.js": [
           111
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          394
+          380
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-helpers.js": [
-          59
+          62
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
-          97,
-          141
+          136
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          1021,
-          4204
+          1156
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          513
+          561
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
           43
         ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/spe-specifications.js": [
-          335,
-          514,
-          708
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          782,
-          825,
-          1402,
-          2644,
-          2792
+          1668,
+          2972,
+          3123
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1698
+          1961
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          2730
+          2659
         ]
       },
       "status": "ssot-ok"
@@ -2720,8 +2736,8 @@
       "readers_count": 8,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          310,
-          505
+          315,
+          550
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
           41,
@@ -2730,74 +2746,42 @@
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          249
+          254
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           75,
           146
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/groupe.js": [
-          430,
-          929
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/modes.js": [
           24,
           36
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          3344
+          3355
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          474
+          522
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          256,
-          454,
-          1885,
-          1944,
-          2162,
-          2207,
-          2384,
-          2429,
-          2608
+          424,
+          634,
+          2133,
+          2192,
+          2418,
+          2463,
+          2640,
+          2685,
+          2875,
+          2938
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-etudiants.js": [
+          354
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1597
+          1854
         ]
       },
       "status": "violation-mineure"
-    },
-    {
-      "key": "mode_actuel",
-      "writers_count": 0,
-      "readers_count": 1,
-      "writers": {},
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/groupe.js": [
-          669
-        ]
-      },
-      "status": "no-literal-writer"
-    },
-    {
-      "key": "niveauxEchelle",
-      "writers_count": 1,
-      "readers_count": 1,
-      "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          735,
-          1536,
-          1689
-        ]
-      },
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          901,
-          1023,
-          1564
-        ]
-      },
-      "status": "ssot-ok"
     },
     {
       "key": "nomsCategoriesTampons",
@@ -2805,15 +2789,32 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          679,
-          829,
-          2771
+          742,
+          892,
+          3024
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          675,
-          825
+          738,
+          888
+        ]
+      },
+      "status": "ssot-ok"
+    },
+    {
+      "key": "notesRapport",
+      "writers_count": 1,
+      "readers_count": 1,
+      "writers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
+          460
+        ]
+      },
+      "readers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
+          435,
+          454
         ]
       },
       "status": "ssot-ok"
@@ -2837,14 +2838,18 @@
     {
       "key": "ordreAutocollants_",
       "writers_count": 1,
-      "readers_count": 0,
+      "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          946,
-          2767
+          1009,
+          3020
         ]
       },
-      "readers": {},
+      "readers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
+          1108
+        ]
+      },
       "status": "ssot-ok"
     },
     {
@@ -2853,12 +2858,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          838
+          901
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          837
+          900
         ]
       },
       "status": "ssot-ok"
@@ -2869,7 +2874,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2774
+          3027
         ]
       },
       "readers": {},
@@ -2881,12 +2886,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2773
+          3026
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          833
+          896
         ]
       },
       "status": "ssot-ok"
@@ -2897,7 +2902,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2777
+          3030
         ]
       },
       "readers": {},
@@ -2909,7 +2914,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2775
+          3028
         ]
       },
       "readers": {},
@@ -2921,7 +2926,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2776
+          3029
         ]
       },
       "readers": {},
@@ -2933,7 +2938,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2772
+          3025
         ]
       },
       "readers": {},
@@ -2945,15 +2950,15 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          737,
-          861,
-          2782
+          800,
+          924,
+          3035
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          724,
-          852
+          787,
+          915
         ]
       },
       "status": "ssot-ok"
@@ -2961,18 +2966,14 @@
     {
       "key": "ordreErreursFr",
       "writers_count": 1,
-      "readers_count": 1,
+      "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          971,
-          3486
+          1138,
+          3752
         ]
       },
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          965
-        ]
-      },
+      "readers": {},
       "status": "ssot-ok"
     },
     {
@@ -2981,13 +2982,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          961,
-          3485
+          1130,
+          3751
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          957
+          1126
         ]
       },
       "status": "ssot-ok"
@@ -2998,13 +2999,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          664,
-          2770
+          727,
+          3023
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          660
+          723
         ]
       },
       "status": "ssot-ok"
@@ -3015,12 +3016,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-carte.js": [
-          11801
+          12609
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-carte.js": [
-          11810
+          12613
         ]
       },
       "status": "ssot-ok"
@@ -3031,18 +3032,18 @@
       "readers_count": 2,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          521
+          490
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-donnees.js": [
-          576
+          594
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          485
+          454
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-donnees.js": [
-          552
+          570
         ]
       },
       "status": "violation-mineure"
@@ -3054,39 +3055,30 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          540
+          509
         ]
       },
       "status": "no-literal-writer"
     },
     {
       "key": "portfoliosEleves",
-      "writers_count": 2,
-      "readers_count": 3,
+      "writers_count": 1,
+      "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/portfolio.js": [
           41,
-          219,
-          373
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          4046
+          277,
+          431
         ]
       },
       "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          433
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/portfolio.js": [
           33,
-          131,
-          363
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          4173
+          163,
+          421
         ]
       },
-      "status": "violation-mineure"
+      "status": "ssot-ok"
     },
     {
       "key": "pratiqueParDefaut",
@@ -3094,15 +3086,15 @@
       "readers_count": 2,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          324
+          309
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          310
+          295
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          428
+          474
         ]
       },
       "status": "ssot-ok"
@@ -3110,30 +3102,30 @@
     {
       "key": "pratiquesConfigurables",
       "writers_count": 6,
-      "readers_count": 25,
+      "readers_count": 23,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/donnees-v2.js": [
-          1553
+          1694
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          2733
+          3377
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          148,
-          181,
-          214,
+          143,
+          176,
+          211,
           239
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-gestion.js": [
-          654
+          665
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
-          113,
-          491,
-          2426
+          112,
+          452,
+          2287
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          2883
+          3010
         ]
       },
       "readers": {
@@ -3145,144 +3137,107 @@
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/donnees-v2.js": [
           249,
-          1005,
-          1152,
-          1551
+          1014,
+          1692
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
+          3320,
+          3336
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-calcul.js": [
-          528
+          1442
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           258,
-          829,
-          1028
+          1052,
+          1285
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-jetons.js": [
-          101
+          117
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          93,
-          530,
-          1114
+          974
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/grilles.js": [
+          1040
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js": [
-          2720
+          3360
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          665
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/portfolio.js": [
-          1047
+          634
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-manager.js": [
-          58,
-          115,
-          132,
-          198,
+          110,
+          127,
+          195,
           223,
-          267,
-          282
+          268,
+          283
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-registre.js": [
-          398,
-          509
+          423
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-bibliotheque.js": [
-          502
+          340
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques-gestion.js": [
           115,
-          323,
-          652,
-          887,
-          944,
-          1062,
-          1657,
-          2091,
-          2176,
-          2282,
-          2320
+          334,
+          663,
+          840,
+          914,
+          972,
+          1095,
+          1571,
+          2161,
+          2288,
+          2326
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques.js": [
           74,
-          475,
-          728,
-          926,
-          957,
-          965,
-          1072,
-          1116,
-          1347,
-          1408,
-          1677,
-          1744,
-          1795,
-          2032,
-          2047,
-          2405
+          436,
+          611,
+          784,
+          815,
+          823,
+          930,
+          974,
+          1205,
+          1266,
+          1537,
+          1605,
+          1656,
+          1893,
+          1908,
+          2266
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          179,
-          420
+          148
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-calculs.js": [
           83
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-ouvrir.js": [
-          224
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          1441
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-export-pdf.js": [
-          927
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6544
+          278
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-cours.js": [
-          1120
+          1109
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
+          458
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          357
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          743
+          378
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          2854,
-          2995
+          1929,
+          2726,
+          2980,
+          3126
         ]
       },
       "status": "violation-critique"
-    },
-    {
-      "key": "pratiquesPersonnalisees",
-      "writers_count": 1,
-      "readers_count": 1,
-      "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          420
-        ]
-      },
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          412
-        ]
-      },
-      "status": "ssot-ok"
-    },
-    {
-      "key": "pratiques_configurations",
-      "writers_count": 0,
-      "readers_count": 1,
-      "writers": {},
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cc-license.js": [
-          1325
-        ]
-      },
-      "status": "no-literal-writer"
     },
     {
       "key": "preferencesRapport",
@@ -3290,12 +3245,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
-          368
+          506
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
-          377
+          515
         ]
       },
       "status": "ssot-ok"
@@ -3306,77 +3261,74 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          533
+          539
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          491
+          497
         ]
       },
       "status": "ssot-ok"
     },
     {
       "key": "preferencesUtilisateur",
-      "writers_count": 2,
-      "readers_count": 2,
+      "writers_count": 1,
+      "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/accompagnement.js": [
           156
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          396
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/accompagnement.js": [
           140
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          394
         ]
       },
-      "status": "violation-mineure"
+      "status": "ssot-ok"
     },
     {
       "key": "presences",
       "writers_count": 1,
-      "readers_count": 8,
+      "readers_count": 9,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          1534
+          1068,
+          2441
         ]
       },
       "readers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/equipes.js": [
+          175
+        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/etudiants.js": [
-          205,
-          938,
-          1187
+          208
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          148,
-          300
+          201,
+          364
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-apercu.js": [
-          34
+          38
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-rapport.js": [
           575,
           576
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          1642
+          1804
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          1114,
-          1593
+          954,
+          1034,
+          1472,
+          1843
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tableau-bord-apercu.js": [
-          1412
+          1681
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1138,
-          1689
+          1951
         ]
       },
       "status": "ssot-ok"
@@ -3387,12 +3339,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          916
+          1272
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          67
+          88
         ]
       },
       "status": "ssot-ok"
@@ -3403,12 +3355,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          919
+          1275
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          68
+          89
         ]
       },
       "status": "ssot-ok"
@@ -3419,12 +3371,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          922
+          1278
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          69
+          90
         ]
       },
       "status": "ssot-ok"
@@ -3432,10 +3384,10 @@
     {
       "key": "productions",
       "writers_count": 1,
-      "readers_count": 39,
+      "readers_count": 38,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
-          1036
+          1038
         ]
       },
       "readers": {
@@ -3449,44 +3401,47 @@
           228
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cartouches.js": [
-          2687,
-          3591
+          933,
+          2605,
+          3468
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cc-license.js": [
           1307
         ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/consolidation.js": [
-          59
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/correlations-longitudinales.js": [
-          269
+          279
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/donnees-v2.js": [
-          939,
-          1085
+          948,
+          1094
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
+          3319,
+          3335
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/etudiants.js": [
-          918
+          910
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-chargement.js": [
           195,
           196,
-          531,
-          532,
-          631,
-          1347
+          607,
+          608,
+          719,
+          1982
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-retroaction.js": [
-          255,
-          979
+          317,
+          1261
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation-sauvegarde.js": [
-          383,
-          706
+          408,
+          750
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/evaluation.js": [
-          1926,
-          2137
+          1924,
+          2145,
+          2955
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           1116,
@@ -3496,91 +3451,90 @@
           3607
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/graphiques-progression.js": [
-          475,
-          614,
-          840,
-          1711,
-          2416,
-          3894,
-          3895
+          399,
+          538,
+          765,
+          1350,
+          2044,
+          3522,
+          3523
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/grilles.js": [
+          1039
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/impact-jetons.js": [
           87,
-          190
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/indices.js": [
-          434
+          189
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/liste-evaluations.js": [
           65,
           106,
-          227,
-          355,
-          422,
-          948,
-          1168,
-          1463,
-          1562,
-          2299,
-          2331,
-          2690
+          230,
+          358,
+          425,
+          838,
+          1228,
+          1484,
+          1833,
+          2434,
+          2795
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           1025,
           1026
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-donnees.js": [
-          463
+          481
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/portfolio.js": [
-          114,
-          581,
-          844,
-          948
+          146,
+          697,
+          981,
+          1085
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratique-notation-v2.js": [
-          794
+          704
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-configurable.js": [
-          436,
-          437
+          584,
+          585
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-specifications.js": [
-          760,
-          761
+          922,
+          923
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-pan-standards.js": [
           170,
-          819,
-          1440
+          632,
+          1219
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/pratiques/pratique-sommative.js": [
-          761,
-          763
+          721,
+          723
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-actions.js": [
-          444
+          458
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-calculs.js": [
-          951,
-          1199,
-          1432,
-          1625
+          993,
+          1154,
+          1387,
+          1584,
+          1749
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-rapport.js": [
-          58
+          65
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
           401,
-          2012,
-          2750,
-          3617,
-          4134,
-          4641
+          2924,
+          3485,
+          4116,
+          4521
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          466,
-          525
+          514,
+          573
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
           32,
@@ -3589,21 +3543,18 @@
           170
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/snapshots.js": [
-          214,
-          520
-        ],
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/spe-specifications.js": [
-          432
+          213,
+          460
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-archivage.js": [
-          133,
-          257,
-          415,
-          649
+          209,
+          296,
+          441,
+          692
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-import.js": [
-          582,
-          1022
+          710,
+          1207
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-resolution.js": [
           168,
@@ -3614,20 +3565,20 @@
           115,
           164,
           165,
-          1197,
-          1701,
-          2417,
-          2636,
-          2745,
-          3725,
-          3926,
-          4417,
-          4846,
-          6147
+          1274,
+          1832,
+          2585,
+          2805,
+          2914,
+          3748,
+          4018,
+          4276,
+          4851,
+          5441,
+          6788
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          768,
-          1687
+          1944
         ]
       },
       "status": "ssot-ok"
@@ -3650,7 +3601,7 @@
       "readers_count": 5,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-enseignants.js": [
-          317
+          319
         ]
       },
       "readers": {
@@ -3658,17 +3609,19 @@
           491
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/codex.js": [
-          2500
+          3034
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/export-pdf.js": [
           186
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-enseignants.js": [
-          36
+          36,
+          307
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          186,
-          363
+          192,
+          426,
+          438
         ]
       },
       "status": "ssot-ok"
@@ -3679,7 +3632,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-diagnostics.js": [
-          787
+          364
         ]
       },
       "readers": {},
@@ -3692,7 +3645,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/planification-donnees.js": [
-          257
+          275
         ]
       },
       "status": "no-literal-writer"
@@ -3703,16 +3656,16 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          904,
-          1023,
-          1053,
-          1073
+          967,
+          1188,
+          1218,
+          1238
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          893,
-          1008
+          956,
+          1173
         ]
       },
       "status": "ssot-ok"
@@ -3723,12 +3676,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          362
+          384
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          359
+          381
         ]
       },
       "status": "ssot-ok"
@@ -3739,12 +3692,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          292
+          314
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          291
+          313
         ]
       },
       "status": "ssot-ok"
@@ -3755,35 +3708,56 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          1896
+          2187
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          988
+          1345
         ]
       },
       "status": "ssot-ok"
     },
     {
+      "key": "registreLongitudinal",
+      "writers_count": 0,
+      "readers_count": 1,
+      "writers": {},
+      "readers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
+          1970
+        ]
+      },
+      "status": "no-literal-writer"
+    },
+    {
       "key": "ressourcesSupprimees",
       "writers_count": 1,
-      "readers_count": 2,
+      "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          130
+          143
         ]
       },
       "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles-bibliotheque.js": [
-          144
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          122,
-          127
+          135,
+          140
         ]
       },
       "status": "ssot-ok"
+    },
+    {
+      "key": "resultatsUlterieurs",
+      "writers_count": 0,
+      "readers_count": 1,
+      "writers": {},
+      "readers": {
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
+          1969
+        ]
+      },
+      "status": "no-literal-writer"
     },
     {
       "key": "retroactionsErreursFr",
@@ -3791,13 +3765,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          651,
-          3484
+          714,
+          3750
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          643
+          706
         ]
       },
       "status": "ssot-ok"
@@ -3808,13 +3782,14 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          647,
-          2769
+          710,
+          3022
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          639
+          702,
+          1069
         ]
       },
       "status": "ssot-ok"
@@ -3826,7 +3801,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          326
+          332
         ]
       },
       "status": "no-literal-writer"
@@ -3838,7 +3813,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          414
+          420
         ]
       },
       "status": "no-literal-writer"
@@ -3849,7 +3824,7 @@
       "readers_count": 0,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          559
+          605
         ]
       },
       "readers": {},
@@ -3861,10 +3836,10 @@
       "readers_count": 7,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          491
+          537
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
-          247
+          252
         ]
       },
       "readers": {
@@ -3872,8 +3847,8 @@
           188
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/horaire.js": [
-          162,
-          455
+          208,
+          501
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           261,
@@ -3881,20 +3856,20 @@
           665
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/presences-apercu.js": [
-          205,
-          296
+          209,
+          300
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/profil-etudiant-sections-affichage.js": [
-          1660
+          1822
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rythme.js": [
-          633
+          639
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
-          248,
-          341,
-          373,
-          887
+          306,
+          399,
+          431,
+          1216
         ]
       },
       "status": "violation-mineure"
@@ -3905,20 +3880,20 @@
       "readers_count": 2,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interpretation-config.js": [
-          108,
-          119
+          163,
+          174
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/preferences-v2.js": [
-          294
+          423
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/interpretation-config.js": [
-          100
+          150
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/preferences-v2.js": [
-          174,
-          262
+          197,
+          364
         ]
       },
       "status": "violation-mineure"
@@ -3930,8 +3905,7 @@
       "writers": {},
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          1141,
-          1690
+          1952
         ]
       },
       "status": "no-literal-writer"
@@ -3942,13 +3916,13 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          688,
-          2778
+          751,
+          3031
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          684
+          747
         ]
       },
       "status": "ssot-ok"
@@ -3959,60 +3933,45 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tampons-bibliotheque.js": [
-          167
+          168
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tampons-bibliotheque.js": [
-          165
+          166
         ]
       },
       "status": "ssot-ok"
     },
     {
       "key": "tamponsPersonnalises",
-      "writers_count": 3,
+      "writers_count": 2,
       "readers_count": 3,
       "writers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-ouvrir.js": [
-          1145
-        ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tampons-bibliotheque.js": [
-          161
+          162
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          2749,
-          2785,
-          3261
+          3001,
+          3038,
+          3519
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-ouvrir.js": [
-          218,
-          1128
+          272
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/tampons-bibliotheque.js": [
-          149,
-          365
+          150,
+          370
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-outils.js": [
-          360,
-          743
+          368,
+          806,
+          1060
         ]
       },
       "status": "violation-mineure"
-    },
-    {
-      "key": "test_spe",
-      "writers_count": 0,
-      "readers_count": 1,
-      "writers": {},
-      "readers": {
-        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/spe-specifications.js": [
-          979
-        ]
-      },
-      "status": "no-literal-writer"
     },
     {
       "key": "thumbnail_",
@@ -4020,14 +3979,14 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          701,
-          1188,
-          1203
+          755,
+          1249,
+          1264
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-stockage.js": [
-          718
+          772
         ]
       },
       "status": "ssot-ok"
@@ -4038,12 +3997,12 @@
       "readers_count": 1,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6945
+          7561
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/travaux-ui.js": [
-          6955
+          7565
         ]
       },
       "status": "ssot-ok"
@@ -4051,18 +4010,18 @@
     {
       "key": "trimestreActif",
       "writers_count": 3,
-      "readers_count": 7,
+      "readers_count": 9,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          280
+          285
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          208,
-          237
+          343,
+          380
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          491,
-          1562
+          556,
+          1819
         ]
       },
       "readers": {
@@ -4079,69 +4038,82 @@
           234
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rapport-bug.js": [
-          495,
-          570
+          543,
+          618
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-renvoyer.js": [
+          196
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/saisie-presences.js": [
+          70,
+          818
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          538
+          637
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          248,
-          532,
-          533
+          288,
+          558,
+          559
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/wizard-pratique-v2.js": [
-          2949
+          3079
         ]
       },
       "status": "violation-mineure"
     },
     {
       "key": "trimestres",
-      "writers_count": 3,
-      "readers_count": 19,
+      "writers_count": 4,
+      "readers_count": 26,
       "writers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          118,
-          279,
-          472
+          119,
+          284,
+          517
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-emprunter.js": [
+          368
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          204,
-          235
+          295,
+          337,
+          377
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          208,
-          290,
-          460,
-          486,
-          632,
-          983,
-          1227,
-          1411
+          339,
+          525,
+          551,
+          714,
+          1298,
+          1484,
+          1668
         ]
       },
       "readers": {
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cartouches.js": [
-          3169
+          2977
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/contexte.js": [
-          83
+          90
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/cours.js": [
-          884
+          944
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/demo-activation.js": [
-          116,
-          243,
-          265,
-          472
+          117,
+          248,
+          270,
+          517
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles-bibliotheque.js": [
+          207
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/echelles.js": [
-          519
+          430
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/entites/cours-entite.js": [
-          271
+          278
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/entites/enseignants.js": [
           206
@@ -4153,48 +4125,72 @@
           131
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/main.js": [
-          441,
-          489,
-          567,
-          667,
-          749,
-          773,
-          832
+          410,
+          458,
+          536,
+          636,
+          769,
+          793,
+          852
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/migrations.js": [
           240,
           735
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/preferences.js": [
-          430
+          428
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/productions-namespace-garde.js": [
-          132
+          132,
+          172
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/registre-longitudinal.js": [
+          223
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/rencontres.js": [
+          41,
+          345
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-copies.js": [
+          221
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-emprunter.js": [
+          147,
+          369
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-renvoyer.js": [
+          178,
+          460
+        ],
+        "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve-trimestre.js": [
+          106
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/reserve.js": [
-          1376
+          1741
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-groupes-cours.js": [
-          200
+          210
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-init.js": [
-          165
+          195,
+          292,
+          321,
+          363
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2-orchestre.js": [
           50,
-          406
+          413
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestre-v2.js": [
-          247
+          287
         ],
         "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/trimestres.js": [
-          178,
-          236,
-          1706,
-          2421
+          248,
+          287,
+          1990
         ]
       },
-      "status": "violation-mineure"
+      "status": "violation-critique"
     },
     {
       "key": "trimestresDisponibles",
@@ -4224,17 +4220,17 @@
   "destructive_operations": [
     {
       "file": "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/db.js",
-      "line": 991,
+      "line": 1166,
       "op": "localStorage.clear()"
     },
     {
       "file": "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js",
-      "line": 1423,
+      "line": 1919,
       "op": "localStorage.clear()"
     },
     {
       "file": "/Users/kuekatsheu/Documents/GitHub/Monitorage_v6/js/import-export.js",
-      "line": 1427,
+      "line": 1923,
       "op": "db.clear()"
     }
   ],
@@ -4244,16 +4240,16 @@
       "hits": 51
     },
     {
-      "file": "js/trimestres.js",
-      "hits": 30
+      "file": "js/demo-activation.js",
+      "hits": 26
     },
     {
-      "file": "js/demo-activation.js",
-      "hits": 25
+      "file": "js/trimestres.js",
+      "hits": 26
     },
     {
       "file": "js/main.js",
-      "hits": 25
+      "hits": 22
     },
     {
       "file": "js/migrations.js",
@@ -4261,38 +4257,26 @@
     },
     {
       "file": "js/import-export.js",
-      "hits": 20
+      "hits": 14
     },
     {
       "file": "js/codex.js",
-      "hits": 13
-    },
-    {
-      "file": "js/trimestre-v2-groupes-cours.js",
       "hits": 12
     },
     {
-      "file": "js/trimestre-v2-horaires.js",
+      "file": "js/trimestre-v2-groupes-cours.js",
       "hits": 11
+    },
+    {
+      "file": "js/trimestre-v2-horaires.js",
+      "hits": 10
     },
     {
       "file": "js/trimestre-v2-orchestre.js",
       "hits": 10
     },
     {
-      "file": "js/cours.js",
-      "hits": 9
-    },
-    {
-      "file": "js/snapshots.js",
-      "hits": 9
-    },
-    {
       "file": "js/trimestre-v2-cours.js",
-      "hits": 9
-    },
-    {
-      "file": "js/trimestre-v2-init.js",
       "hits": 9
     },
     {
@@ -4300,15 +4284,7 @@
       "hits": 8
     },
     {
-      "file": "js/saisie-presences.js",
-      "hits": 8
-    },
-    {
       "file": "js/demo-namespace.js",
-      "hits": 7
-    },
-    {
-      "file": "js/echelles.js",
       "hits": 7
     },
     {
@@ -4328,11 +4304,31 @@
       "hits": 7
     },
     {
+      "file": "js/saisie-presences.js",
+      "hits": 7
+    },
+    {
+      "file": "js/snapshots.js",
+      "hits": 7
+    },
+    {
       "file": "js/travaux-stockage.js",
       "hits": 7
     },
     {
       "file": "js/contexte.js",
+      "hits": 5
+    },
+    {
+      "file": "js/cours.js",
+      "hits": 5
+    },
+    {
+      "file": "js/modal-backup-reminder.js",
+      "hits": 5
+    },
+    {
+      "file": "js/portfolio.js",
       "hits": 5
     },
     {
@@ -4344,35 +4340,15 @@
       "hits": 4
     },
     {
-      "file": "js/modal-backup-reminder.js",
-      "hits": 4
-    },
-    {
       "file": "js/planification-carte.js",
       "hits": 4
     },
     {
-      "file": "js/portfolio.js",
-      "hits": 4
-    },
-    {
-      "file": "js/trimestre-v2-enseignants.js",
+      "file": "js/registre-longitudinal.js",
       "hits": 4
     },
     {
       "file": "js/actions-rlo.js",
-      "hits": 3
-    },
-    {
-      "file": "js/bilan-reflexif-core.js",
-      "hits": 3
-    },
-    {
-      "file": "js/cartouches.js",
-      "hits": 3
-    },
-    {
-      "file": "js/donnees-v2.js",
       "hits": 3
     },
     {
@@ -4389,14 +4365,6 @@
     },
     {
       "file": "js/evaluation-jetons.js",
-      "hits": 3
-    },
-    {
-      "file": "js/groupe.js",
-      "hits": 3
-    },
-    {
-      "file": "js/interventions.js",
       "hits": 3
     },
     {
@@ -4432,6 +4400,10 @@
       "hits": 2
     },
     {
+      "file": "js/bilan-reflexif-core.js",
+      "hits": 2
+    },
+    {
       "file": "js/bilan-reflexif-csv.js",
       "hits": 2
     },
@@ -4440,7 +4412,11 @@
       "hits": 2
     },
     {
-      "file": "js/cc-license.js",
+      "file": "js/cartouches.js",
+      "hits": 2
+    },
+    {
+      "file": "js/donnees-v2.js",
       "hits": 2
     },
     {
@@ -4452,7 +4428,15 @@
       "hits": 2
     },
     {
+      "file": "js/init-inline.js",
+      "hits": 2
+    },
+    {
       "file": "js/interpretation-config.js",
+      "hits": 2
+    },
+    {
+      "file": "js/interventions.js",
       "hits": 2
     },
     {
@@ -4468,7 +4452,23 @@
       "hits": 2
     },
     {
+      "file": "js/profil-etudiant-rapport.js",
+      "hits": 2
+    },
+    {
+      "file": "js/rencontres.js",
+      "hits": 2
+    },
+    {
+      "file": "js/reserve-emprunter.js",
+      "hits": 2
+    },
+    {
       "file": "js/rythme.js",
+      "hits": 2
+    },
+    {
+      "file": "js/tableau-bord-apercu.js",
       "hits": 2
     },
     {
@@ -4476,7 +4476,15 @@
       "hits": 2
     },
     {
+      "file": "js/trimestre-v2-enseignants.js",
+      "hits": 2
+    },
+    {
       "file": "js/trimestre-v2-etudiants.js",
+      "hits": 2
+    },
+    {
+      "file": "js/trimestre-v2-init.js",
       "hits": 2
     },
     {
@@ -4484,11 +4492,15 @@
       "hits": 2
     },
     {
-      "file": "js/wizard-pratique-v2.js",
-      "hits": 2
+      "file": "js/cc-license.js",
+      "hits": 1
     },
     {
-      "file": "js/echelles-bibliotheque.js",
+      "file": "js/echelles.js",
+      "hits": 1
+    },
+    {
+      "file": "js/equipes.js",
       "hits": 1
     },
     {
@@ -4528,10 +4540,6 @@
       "hits": 1
     },
     {
-      "file": "js/preferences-v2.js",
-      "hits": 1
-    },
-    {
       "file": "js/productions-liste.js",
       "hits": 1
     },
@@ -4544,19 +4552,7 @@
       "hits": 1
     },
     {
-      "file": "js/profil-etudiant-confidentiel.js",
-      "hits": 1
-    },
-    {
       "file": "js/profil-etudiant-diagnostics.js",
-      "hits": 1
-    },
-    {
-      "file": "js/profil-etudiant-rapport.js",
-      "hits": 1
-    },
-    {
-      "file": "js/profil-etudiant-sections-affichage.js",
       "hits": 1
     },
     {
@@ -4564,11 +4560,7 @@
       "hits": 1
     },
     {
-      "file": "js/reserve-ouvrir.js",
-      "hits": 1
-    },
-    {
-      "file": "js/tableau-bord-apercu.js",
+      "file": "js/reserve-copies.js",
       "hits": 1
     },
     {
