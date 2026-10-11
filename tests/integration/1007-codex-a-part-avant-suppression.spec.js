@@ -41,7 +41,7 @@ const PHRASE_X1 = 'Supprimer le trimestre « ' + NOM + ' » efface pour de bon s
 // des `confirm`/`prompt` natifs ; mêmes mots, le titre et le message séparés.
 const QUESTION_X1_TITRE = 'Supprimer définitivement le trimestre « ' + NOM + ' » ?';
 const QUESTION_X1_TEXTE = 'Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.';
-const SAISIE_X1_TITRE = 'Confirmation finale — cette action est IRRÉVERSIBLE.';
+const SAISIE_X1_TITRE = 'Confirmation finale : cette action est irréversible.';   // mots de Grégoire, 11 oct. 18 h 02
 const NOM_A_PART = /^codex-.+-avant-suppression-\d{4}-\d{2}-\d{2}-\d{2}h\d{2}\.zip$/;
 
 /** Écoute la page. Les dialogues natifs sont consignés ; `reponses` dit quoi répondre, dans l'ordre. */
@@ -219,7 +219,7 @@ async function repondreSuppressionX1(page, nom) {
     }
     await cliquerDansFenetre(page, 'Supprimer');
     const saisie = await attendreFenetre(page, SAISIE_X1_TITRE);
-    expect(saisie.texte).toContain('retape son nom exactement');
+    expect(saisie.texte).toBe('Pour supprimer « ' + NOM + ' » et toutes ses données, retape son nom exactement :');
     await page.locator('#overlay-ui-dialogue input').fill(nom);
     await cliquerDansFenetre(page, 'Supprimer');
     await aucuneFenetre(page);

@@ -182,7 +182,7 @@ function ouvrirBibliothequeTrimestreV2() {
 
     if (trimestres.length === 0) {
         // #1037 (11 oct. 2026) : la notification de l'application, mêmes mots.
-        notifications.info('Aucun trimestre dans la bibliothèque.', 'Cliquez sur "+ Nouveau trimestre" pour en créer un.');
+        notifications.info('Aucun trimestre dans la bibliothèque.', 'Clique sur « + Nouveau trimestre » pour en créer un.');   // mots de Grégoire, 11 oct. 18 h 02
         return;
     }
 
@@ -345,8 +345,8 @@ async function confirmerSuppressionTrimestre(id) {
 
     // Confirmation forte : ressaisir le nom exact du trimestre
     const saisie = await uiDialogues.demanderSaisie({
-        titre: 'Confirmation finale — cette action est IRRÉVERSIBLE.',
-        message: `Pour supprimer "${trimestre.nom}" et toutes ses données, retape son nom exactement :`,
+        titre: 'Confirmation finale : cette action est irréversible.',   // mots de Grégoire, 11 oct. 18 h 02
+        message: `Pour supprimer « ${trimestre.nom} » et toutes ses données, retape son nom exactement :`,
         texteConfirmer: 'Supprimer',
         variante: 'danger'
     });
@@ -358,7 +358,7 @@ async function confirmerSuppressionTrimestre(id) {
 
     supprimerTrimestre(id).then(function(result) {
         if (result.success) {
-            notifications.succes(`Trimestre "${trimestre.nom}" supprimé (${result.nbCles} clés de données effacées).`);
+            notifications.succes(`Trimestre « ${trimestre.nom} » supprimé (${result.nbCles} clés de données effacées).`);
             populerDropdownTrimestreV2();
             // Rafraîchir la modale bibliothèque si elle est ouverte
             if (document.getElementById('modalBibliothequeTrimestres')) {

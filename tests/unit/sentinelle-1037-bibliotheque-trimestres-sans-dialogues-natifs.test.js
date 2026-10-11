@@ -28,3 +28,10 @@ describe('#1037 · aucun dialogue natif hors de l\'archivage', () => {
         expect(natifs(tranche(src, 'function ouvrirBibliothequeTrimestreV2(', 'function fermerModalBibliothequeTrimestres('))).toBe(0);
     });
 });
+
+describe('#1037 · les mots de Grégoire (11 oct., 18 h 02)', () => {
+    it('bibliothèque vide : le titre et le détail, tutoyés, guillemets français', () => {
+        expect(src).toContain("notifications.info('Aucun trimestre dans la bibliothèque.', 'Clique sur « + Nouveau trimestre » pour en créer un.');");
+        expect(src).not.toContain('Cliquez sur');
+    });
+});
