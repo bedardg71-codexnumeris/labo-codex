@@ -170,6 +170,9 @@ function rouvrir({ enBase = [evaluationEnregistree()], idModification = 'EV9', n
         obtenirConfigJetons: () => ({}), verifierDisponibiliteJeton: () => true, compterJetonsUtilises: () => 0,
         copierEnFormatTSV() {}, setTimeout: () => 0, clearTimeout() {},
         pluriel: (n, s, p) => (n > 1 ? p : s),
+        // #580 (11 oct. 2026) — evaluation-chargement.js résout l'échelle par LA résolution
+        // (profil-etudiant-calculs.js, non chargé ici) : même lecture du magasin du banc.
+        obtenirEchelleResolue: (id) => (lire('test_echellesTemplates', []).find((e) => e.id === id) || null),
         calculerNote: (...a) => win.calculerNote(...a),
         genererRetroaction: (...a) => win.genererRetroaction(...a)
     };
