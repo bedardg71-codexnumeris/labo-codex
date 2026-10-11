@@ -36,3 +36,13 @@ Trouvaille de la session de mesure en lecture seule (`DECISIONS-A-PRENDRE-2026-1
 **À faire, sur `lot8-cadre`, en premier commit de ce qui reste** : la reconstruction **garde** les captures d'intervention en place (et `dernierSnapshotIntervention`) ; elle ne remplace que les hebdomadaires. Inscris la fiche au BACKLOG avec un numéro neuf. Banc avec break-test : des captures d'intervention présentes avant la reconstruction sont identiques après. Aucun mot d'écran changé (le texte de la confirmation devient vrai). Ce qui a déjà été effacé chez les utilisateurs ne se récupère pas : écris-le.
 
 Grégoire est prévenu de ne pas cliquer sur ce bouton d'ici la mise en ligne du correctif.
+
+## Ajout de Cowork (10 h 11) – verdict du lot 8
+
+**Lot 8 accepté sans correction.** Relus sur `lot8-cadre` : `7b9d5bbd` (#1018), `927d9b5d` (#990), `ee231214`, `f587ee00` (#477), `162cf991` (#472), `697b378a` (#475), `59dd80ac` (#474), `ae2c2976` (#1049), `92cffa93`. Tes trois suppositions sont retenues. L'ordre des commits (#474 avant #1049) est sans conséquence.
+
+**#474, la purge de « mon profil » à la suppression** : elle reste pour Grégoire ; Cowork la verse dans la liste des décisions à prendre. **#1050** (couleur du badge « Actif ») : inscrite, hors file pour l'instant.
+
+**La branche reste à part** : elle rejoint `main` après la mise en ligne des lots 5, 6 et 7, et part dans la release suivante. L'item des Nouvelles du lot 8 te sera transmis avec cette release.
+
+**Décision de Grégoire (10 h 12) : item des Nouvelles du lot 8 retenu**, mots exacts : « Recalculer les captures ne fait plus perdre les mesures avant et après des interventions ; dans le Cadre, les noms des groupes-cours et le compteur « X/5 configurés » sont à jour, et « Clore » n'est plus proposé sur le trimestre en cours. »
