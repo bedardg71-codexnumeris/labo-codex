@@ -1246,6 +1246,16 @@
      * de gabarits. Remplace les lectures `db.getSync('grillesTemplates'/'echellesTemplates')`
      * suivies d'un `.find(id)` aux sites de résolution-par-id (pratique-
      * registre, pan-standards). Retourne l'objet modèle ou null.
+     *
+     * ⮕ #590 (option A de Grégoire, 28 août 2026) — L'ANCIEN IDENTIFIANT D'UNE ÉCHELLE
+     * EST RECONNU. Une échelle importée porte un id neuf et garde l'ancien dans
+     * `idOriginal` ; ce qui a été écrit avant l'import pointe l'ancien. Ce résolveur ne
+     * comparait que `m.id` quand `obtenirEchelleResolue` lisait aussi `idOriginal` : un
+     * même identifiant résolvait selon l'appelant. Ordre : l'id exact avant
+     * `idOriginal`, le trimestre actif avant le pool. `obtenirEchelleResolue` se replie
+     * ici : une seule règle pour les deux.
+     * ⚠ Les GRILLES n'apprennent pas `idOriginal` : des évaluations d'H2026 pointent des
+     * grilles absentes, et les rattacher changerait des notes déjà remises.
      * @param {'grille'|'echelle'} type
      * @param {string} id
      * @returns {Object|null}
@@ -1253,10 +1263,11 @@
     function resoudreModeleParId(type, id) {
         if (!id) return null;
         const nomCle = type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates';
+        const chercher = (liste) => liste.find(m => m && m.id === id)
+            || (type === 'echelle' ? liste.find(m => m && m.idOriginal === id) : null)
+            || null;
         const actif = db.getSync(cle(nomCle), []) || [];
-        const trouve = actif.find(m => m && m.id === id);
-        if (trouve) return trouve;
-        return _toutesModelesTravail(nomCle).find(m => m && m.id === id) || null;
+        return chercher(actif) || chercher(_toutesModelesTravail(nomCle));
     }
 
     /**

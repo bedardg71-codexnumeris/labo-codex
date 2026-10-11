@@ -259,16 +259,17 @@ function construireConfigComplete(pratiqueData) {
                     niveaux: echelleRef.niveaux
                 };
             } else {
-                console.warn(`[construireConfigComplete] Échelle "${echelleId}" non trouvée, utilisation échelle par défaut`);
-                // Échelle par défaut pour éviter l'erreur
+                // #590 (option A de Grégoire, 28 août 2026 : « Rien codé en dur ! ») —
+                // l'échelle IDME 50/65/80/95 posée ici contredisait celle de
+                // l'utilisateur. Une échelle introuvable reste VIDE et le dit : la
+                // pratique se charge encore (sa note ne passe pas par ces niveaux,
+                // `calculerNoteFinale` n'a aucun appelant), et aucun niveau n'est inventé.
+                console.warn(`[construireConfigComplete] Échelle "${echelleId}" introuvable : aucun niveau n'est inventé (#590)`);
                 echelle = {
                     type: 'niveaux',
-                    niveaux: [
-                        { code: 'I', label: 'Incomplet', valeur_pourcentage: 50, ordre: 1 },
-                        { code: 'D', label: 'en Développement', valeur_pourcentage: 65, ordre: 2 },
-                        { code: 'M', label: 'Maîtrisé', valeur_pourcentage: 80, ordre: 3 },
-                        { code: 'E', label: 'Étendu', valeur_pourcentage: 95, ordre: 4 }
-                    ]
+                    echelle_id: echelleId,
+                    introuvable: true,
+                    niveaux: []
                 };
             }
         }

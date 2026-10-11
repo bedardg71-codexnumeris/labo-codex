@@ -14298,7 +14298,7 @@
     <script src="js/demo-activation.js?v=20261007c"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestres.js?v=20261011m"></script> <!-- #1006 (4 oct.) : « Exporter les données » retiré, sans écran ni lecteur · Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
+    <script src="js/trimestres.js?v=20261011n"></script> <!-- #1006 (4 oct.) : « Exporter les données » retiré, sans écran ni lecteur · Fusion #374 : clé journeesSansCours dans CLES_NAMESPACEES (5 août) -->
     <script src="js/productions-namespace-garde.js?v=20261005a"></script> <!-- E2 (4 oct.) : seul le trimestre qu'on fait revenir, le temps du geste, n'est pas jugé · #340 : garde-fou anti-contamination productions inter-trimestres (db.set/setSync) -->
     <script src="js/horaire-fusion.js?v=20260821a"></script> <!-- CT-04 : source unique de la fusion entités horaires → horaireHebdo (dédup par jour ET heure) -->
     <script src="js/trimestre.js?v=20260805a"></script> <!-- #368 relais : numérotation paquet de 5, golden master officiel (5 août) -->
@@ -14369,7 +14369,7 @@
     <script src="js/pratiques/editeur-cibles.js?v=20261004b"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
     <script src="js/pratiques/pratique-configurable.js?v=20260923c"></script>
-    <script src="js/pratiques/pratique-registre.js?v=20260921c"></script>
+    <script src="js/pratiques/pratique-registre.js?v=20261011a"></script>
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
@@ -14410,7 +14410,7 @@
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=20261006a"></script> <!-- Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20260923b"></script> <!-- Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-calculs.js?v=20260923b"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-calculs.js?v=20261011a"></script> <!-- Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20261006a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
