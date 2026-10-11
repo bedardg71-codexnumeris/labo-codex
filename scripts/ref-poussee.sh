@@ -12,22 +12,27 @@
 #   . "$REPO_ROOT/scripts/ref-poussee.sh"
 #   ref_poussee_conforme "$BRANCHE" "$@" || exit 1
 #
-# Rend 0 si les arguments ne nomment pas de référence (aucune après les options), ou si la
-# référence nommée (source ET destination d'un `a:b`) est la branche courante (ou HEAD en
-# source). Sinon écrit pourquoi sur la sortie d'erreur et rend 1.
+# Relecture de Cowork (11 oct.) : TOUS les arguments qui ne sont pas des options sont lus. Le
+# premier est le dépôt distant ; chacun des suivants est une référence (`src` ou `src:dst`), et
+# chacune doit désigner la branche courante : source = branche ou HEAD, destination = branche
+# (ou HEAD, qui y renvoie). `origin --force lot-x` et `origin main lot-x` sont refusés.
+# Sans référence nommée (aucun argument, ou seulement le dépôt) : git pousse la branche
+# courante, rien à refuser. Sinon écrit pourquoi sur la sortie d'erreur et rend 1.
 ref_poussee_conforme() {
     _branche="$1"; shift
-    # Les options en tête (`-u`, `--force`…) ne nomment rien : on les passe.
-    while [ $# -gt 0 ]; do case "$1" in -*) shift ;; *) break ;; esac; done
-    [ $# -ge 2 ] || return 0
-    case "$2" in -*) return 0 ;; esac
-    _src="${2%%:*}"
-    case "$2" in *:*) _dst="${2#*:}" ;; *) _dst="$_src" ;; esac
-    _src="${_src#refs/heads/}"; _dst="${_dst#refs/heads/}"
-    if { [ "$_src" = "$_branche" ] || [ "$_src" = "HEAD" ]; } && { [ "$_dst" = "$_branche" ] || { [ "$_src" = "$_branche" ] && [ "$_dst" = "$_src" ]; }; }; then
-        return 0
-    fi
-    printf '✗ pousser.sh juge l’arbre de travail, posé sur « %s » ; la référence demandée est « %s ».\n' "$_branche" "$2" >&2
-    printf '  Le verdict porterait sur un autre code que celui qui part. Pousse « %s » depuis un worktree posé sur elle.\n' "$_dst" >&2
-    return 1
+    _depot=''
+    for _arg in "$@"; do
+        case "$_arg" in -*) continue ;; esac
+        if [ -z "$_depot" ]; then _depot="$_arg"; continue; fi
+        _src="${_arg%%:*}"
+        case "$_arg" in *:*) _dst="${_arg#*:}" ;; *) _dst="$_src" ;; esac
+        _src="${_src#+}"; _src="${_src#refs/heads/}"; _dst="${_dst#refs/heads/}"
+        if { [ "$_src" = "$_branche" ] || [ "$_src" = "HEAD" ]; } && { [ "$_dst" = "$_branche" ] || [ "$_dst" = "HEAD" ]; }; then
+            continue
+        fi
+        printf '✗ pousser.sh juge l’arbre de travail, posé sur « %s » ; la référence demandée est « %s ».\n' "$_branche" "$_arg" >&2
+        printf '  Le verdict porterait sur un autre code que celui qui part. Pousse « %s » depuis un worktree posé sur elle.\n' "$_dst" >&2
+        return 1
+    done
+    return 0
 }
