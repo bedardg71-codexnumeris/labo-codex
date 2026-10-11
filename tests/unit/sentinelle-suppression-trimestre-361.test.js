@@ -138,12 +138,14 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
     let questions;  // les textes de la confirmation (titre + message)
     let codexAPart; // les phrases passées à Codex.ecrireAPartAvantSuppression
     let codexEcrit; // ce que rend le codex à part
+    let saisies;    // les options de la ressaisie du nom (#1037)
 
     function creerUI(avecCodex) {
         alertes = [];
         questions = [];
         codexAPart = [];
         codexEcrit = true;
+        saisies = [];
         supprimerTrimestreMock = vi.fn(async () => ({ success: true, nbCles: 4, nom: 'Automne 2024' }));
 
         win = chargerScript('js/trimestre-v2-liste.js', {
@@ -159,7 +161,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
             },
             uiDialogues: {
                 confirmerAction: async (o) => { questions.push(o.titre + ' ' + o.message); return reponses.confirm.shift(); },
-                demanderSaisie: async () => reponses.prompt.shift()
+                demanderSaisie: async (o) => { saisies.push(o); return reponses.prompt.shift(); }
             },
             alert: () => { throw new Error('alert natif appelé (#1037)'); },
             confirm: () => { throw new Error('confirm natif appelé (#1037)'); },
@@ -225,6 +227,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
             'Supprimer définitivement le trimestre « Automne 2024 » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.'
         ]);
         expect(supprimerTrimestreMock).toHaveBeenCalledWith('a2024');
+        expect(saisies[0].variante).toBe('danger');   // relecture de Cowork : la ressaisie est destructive aussi
         expect(alertes.join(' ')).toMatch(/supprimé/i);
     });
 

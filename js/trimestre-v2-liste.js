@@ -347,7 +347,8 @@ async function confirmerSuppressionTrimestre(id) {
     const saisie = await uiDialogues.demanderSaisie({
         titre: 'Confirmation finale — cette action est IRRÉVERSIBLE.',
         message: `Pour supprimer "${trimestre.nom}" et toutes ses données, retape son nom exactement :`,
-        texteConfirmer: 'Supprimer'
+        texteConfirmer: 'Supprimer',
+        variante: 'danger'
     });
     if (saisie === null) return; // annulé
     if (saisie.trim() !== trimestre.nom) {
