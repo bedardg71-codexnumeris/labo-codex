@@ -856,18 +856,29 @@ async function reconstruireSnapshotsHistoriques() {
         if (datesCours.length > 0) {
         }
 
-        // Effacer snapshots existants (reconstruction complète)
-        // ⚡ Utiliser IndexedDB (pas localStorage - trop grand!)
-        await db.set(cleSnapshots(), {
-            hebdomadaires: [],
-            interventions: [],
-            metadata: {
-                version: '1.0.0',
-                dateCreation: new Date().toISOString(),
-                dernierSnapshotHebdo: null,
-                dernierSnapshotIntervention: null
-            }
-        });
+        // Vider les seules captures HEBDOMADAIRES (celles que la boucle ci-dessous refait).
+        // #1049 (11 oct. 2026, fiche urgente) : les captures d'INTERVENTION (avant/après d'une
+        // intervention RàI) sont prises au moment de l'intervention et rien ne les reconstruit ;
+        // la reconstruction les remettait à `[]`, un clic les effaçait pour de bon. Elles restent
+        // en place, avec `dernierSnapshotIntervention`. Ce qui a déjà été effacé chez les
+        // utilisateurs ne se récupère pas.
+        // ⚡ IndexedDB, dans la file de la clé (#522).
+        await db.modifier(cleSnapshots(), (lus) => {
+            const avant = lus && typeof lus === 'object' ? lus : {};
+            const meta = avant.metadata && typeof avant.metadata === 'object' ? avant.metadata : {};
+            return {
+                ...avant,
+                hebdomadaires: [],
+                interventions: Array.isArray(avant.interventions) ? avant.interventions : [],
+                metadata: {
+                    ...meta,
+                    version: meta.version || '1.0.0',
+                    dateCreation: meta.dateCreation || new Date().toISOString(),
+                    dernierSnapshotHebdo: null,
+                    dernierSnapshotIntervention: meta.dernierSnapshotIntervention || null
+                }
+            };
+        }, null);
 
         // ✨ NOUVEAU : Capturer snapshot pour CHAQUE SÉANCE
         let nbSnapshots = 0;

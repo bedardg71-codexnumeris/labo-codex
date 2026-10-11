@@ -1133,8 +1133,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // MODULE 09-2: Saisie des présences (lit seancesCompletes)
+    // #990 (lot 8, 11 oct. 2026) : par le portillon `auDbPret`, jamais avant `db-ready`. Quand
+    // « trimestres » ne tient plus dans le localStorage (vécu sur l'iPad à 85 %), elle est encore
+    // inconnue ici : `cle()` rendait des clés NUES, le module écrivait `{}` dans `calendrierComplet`
+    // et rendait l'écran sans ses élèves, sans que rien ne le refasse. Famille de #142.
+    // STOCK : les clés nues déjà écrites ne sont pas nettoyées (assumé, fiche #990).
     if (typeof initialiserModuleSaisiePresences === 'function') {
-        initialiserModuleSaisiePresences();
+        window.auDbPret(function() { initialiserModuleSaisiePresences(); });
     }
 
     // ===============================

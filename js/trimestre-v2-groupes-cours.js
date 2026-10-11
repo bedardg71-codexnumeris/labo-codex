@@ -159,7 +159,7 @@ function populerDropdownGroupeCoursV2() {
 
     let html = '<option value="">— Choisir pour modifier —</option>';
     reels.forEach(gc => {
-        html += `<option value="${echapperHtml(gc.id)}">${echapperHtml(gc.nom || gc.id)}</option>`;
+        html += `<option value="${echapperHtml(gc.id)}">${echapperHtml(nomAfficheGroupeCours(gc))}</option>`;   // #472
     });
     select.innerHTML = html;
 
@@ -201,10 +201,14 @@ function afficherEnseignantGroupeCoursV2() {
  * Génère le nom du groupe-cours à partir des sélections
  * Format: H2026-601-101-MQ-00001 (Mer-PM / Ven-AM)
  */
-function _obtenirNomTrimestreSelectionne() {
-    const trimestreSelectionne = document.getElementById('v2-gc-trimestre')?.value;
-    const trimestres = db.getSync('trimestres', []);
-    const trimestre = trimestres.find(t => t.id === trimestreSelectionne)
+// #472 (lot 8, 11 oct. 2026, constat CT-03) : le nom se fabrique à partir des IDENTIFIANTS, par une
+// seule fonction, qui sert à l'aperçu du formulaire ET à l'affichage. Avant, il était calculé une fois,
+// à l'enregistrement, puis figé dans `gc.nom` : renommer un cours ou changer les séances d'un horaire
+// laissait l'ancien nom dans le menu et la carte. `gc.nom` s'écrit encore à l'enregistrement (des
+// lecteurs comme reserve.js en dépendent) ; il n'est plus lu pour l'affichage, sauf en repli.
+function _nomTrimestrePourGC(trimestreId) {
+    const trimestres = typeof window.obtenirTrimestres === 'function' ? window.obtenirTrimestres() : db.getSync('trimestres', []);
+    const trimestre = trimestres.find(t => t.id === trimestreId)
         || (typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null);
     if (!trimestre) return '';
     const sessionLettre = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' }[trimestre.session]
@@ -212,8 +216,7 @@ function _obtenirNomTrimestreSelectionne() {
     return `${sessionLettre}${trimestre.annee}`;
 }
 
-function _obtenirCodeCoursSelectionne() {
-    const coursId = document.getElementById('v2-gc-cours')?.value;
+function _codeCoursPourGC(coursId) {
     if (!coursId) return '';
     const cours = db.getSync('cours', []);
     const coursObj = cours.find(c => c.id === coursId || c.sigle === coursId || c.codeCours === coursId || c.code === coursId);
@@ -221,8 +224,7 @@ function _obtenirCodeCoursSelectionne() {
     return coursObj?.codeCours || coursObj?.sigle || coursObj?.code || (coursObj?.nature === 'service' ? coursObj.nomCours : '') || '';
 }
 
-function _obtenirResumeHoraireSelectionne() {
-    const horaireId = document.getElementById('v2-gc-horaire')?.value;
+function _resumeHorairePourGC(horaireId) {
     if (!horaireId) return '';
     const horaires = db.getSync(cle('horaires'), []);
     const horaire = horaires.find(h => h.id === horaireId);
@@ -230,11 +232,16 @@ function _obtenirResumeHoraireSelectionne() {
     return horaire.seances.map(s => `${abrevierJour(s.jour)}-${obtenirPeriodeJournee(s.heureDebut)}`).join(' / ');
 }
 
-function genererNomGroupeCoursV2() {
-    const trimestreNom = _obtenirNomTrimestreSelectionne();
-    const codeCours = _obtenirCodeCoursSelectionne();
-    const groupeNum = document.getElementById('v2-gc-groupe')?.value || '';
-    const horaireResume = _obtenirResumeHoraireSelectionne();
+/**
+ * Le nom d'un groupe-cours. Format : H2026-601-101-MQ-00001 (Mer-PM / Ven-AM)
+ * @param {{trimestreId?: string, coursId?: string, groupeNum?: string, horaireId?: string}} gc
+ * @returns {string} le nom, ou '—' si rien ne le compose
+ */
+function nomGroupeCours(gc) {
+    const trimestreNom = _nomTrimestrePourGC(gc && gc.trimestreId);
+    const codeCours = _codeCoursPourGC(gc && gc.coursId);
+    const groupeNum = (gc && gc.groupeNum) || '';
+    const horaireResume = _resumeHorairePourGC(gc && gc.horaireId);
 
     let nom = '';
     if (trimestreNom) nom += trimestreNom;
@@ -242,6 +249,37 @@ function genererNomGroupeCoursV2() {
     if (groupeNum) nom += (nom ? '-' : '') + groupeNum;
     if (horaireResume) nom += ` (${horaireResume})`;
     return nom || '—';
+}
+
+/** Le nom affiché d'un groupe-cours enregistré : recalculé ; le nom stocké en repli seulement. */
+function nomAfficheGroupeCours(gc) {
+    if (!gc) return '';
+    const nom = nomGroupeCours(gc);
+    return nom !== '—' ? nom : (gc.nom || gc.id);
+}
+
+/**
+ * #472 : après l'enregistrement d'une entité qu'un groupe-cours désigne (horaire, cours), son nom
+ * et sa carte se refont : le menu des groupes-cours, la carte du groupe-cours ouvert, l'en-tête.
+ */
+function rafraichirAffichageGroupesCoursV2() {
+    populerDropdownGroupeCoursV2();
+    const id = groupeCoursEnEditionId || document.getElementById('v2-selectGroupeCours')?.value || '';
+    if (id) {
+        const gc = (db.getSync(cle('groupesCours'), []) || []).find(g => g && g.id === id);
+        if (gc) mettreAJourCarteResumeGroupeCoursV2(gc);
+    }
+    if (typeof window.peuplerDropdownGroupeCoursActif === 'function') window.peuplerDropdownGroupeCoursActif();
+}
+
+/** L'aperçu du formulaire : le même nom, à partir des sélections. */
+function genererNomGroupeCoursV2() {
+    return nomGroupeCours({
+        trimestreId: document.getElementById('v2-gc-trimestre')?.value,
+        coursId: document.getElementById('v2-gc-cours')?.value,
+        groupeNum: document.getElementById('v2-gc-groupe')?.value || '',
+        horaireId: document.getElementById('v2-gc-horaire')?.value
+    });
 }
 
 /**
@@ -393,6 +431,35 @@ function _resoudreEnseignantPourCarteGC(gc) {
     return ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
 }
 
+/** #475 : l'enseignant désigné existe — le profil (`'profil'`) s'il est rempli, sinon une fiche, démo comprise. */
+function _enseignantExistePourGC(gc) {
+    if (!gc.enseignantId) return false;
+    if (gc.enseignantId === 'profil') {
+        const profil = db.getSync('profilEnseignant', {}) || {};
+        return !!(profil.prenom && profil.nom);
+    }
+    const listes = [db.getSync('enseignants', []) || []];
+    if (typeof cleDemo === 'function') listes.push(db.getSync(cleDemo('enseignants'), []) || []);
+    return listes.some(l => Array.isArray(l) && l.some(e => e && e.id === gc.enseignantId));
+}
+
+/**
+ * #475 : la pratique désignée existe — dans les pratiques du trimestre (avec la normalisation des ids
+ * legacy, `trouverPratiqueEnBibliotheque`), dans le registre des pratiques prédéfinies, ou au démo.
+ * Aucune instance construite.
+ */
+function _pratiqueExistePourGC(gc) {
+    if (!gc.pratiqueId) return false;
+    if (typeof window.trouverPratiqueEnBibliotheque === 'function' && window.trouverPratiqueEnBibliotheque(gc.pratiqueId)) return true;
+    if (typeof window.pratiqueEstDisponible === 'function') {
+        const canonique = typeof window.normaliserIdPratique === 'function' ? window.normaliserIdPratique(gc.pratiqueId) : gc.pratiqueId;
+        if (window.pratiqueEstDisponible(canonique)) return true;
+    }
+    const listes = [db.getSync(cle('pratiquesConfigurables'), []) || []];
+    if (typeof cleDemo === 'function') listes.push(db.getSync(cleDemo('pratiquesConfigurables'), []) || []);
+    return listes.some(l => Array.isArray(l) && l.some(p => p && p.id === gc.pratiqueId));
+}
+
 function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const carte = document.getElementById('v2-carteResumeGroupeCours');
     if (!carte) return;
@@ -414,8 +481,11 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     if (gc.groupeNum) score++;
     // Un service sans horaire est complet : l'horaire n'est pas attendu (cadrage « Rencontres »).
     if ((gc.horaireId && horaireObj) || (coursObj && coursObj.nature === 'service' && !gc.horaireId)) score++;
-    if (gc.enseignantId) score++;
-    if (gc.pratiqueId) score++;
+    // #475 (lot 8, 11 oct. 2026, constat CT-14) : une référence ne compte que si ce qu'elle désigne
+    // existe, comme le cours et l'horaire ci-dessus. Avant, un enseignant ou une pratique supprimés
+    // comptaient encore : « Complet » pour un groupe-cours qui pointait dans le vide.
+    if (_enseignantExistePourGC(gc)) score++;
+    if (_pratiqueExistePourGC(gc)) score++;
 
     const estComplet = score === 5;
     const classeCompletude = estComplet ? 'complet' : 'incomplet';
@@ -427,7 +497,7 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
 
     carte.innerHTML = `
         ${badgeActif}
-        <div class="resume-gc-nom">${echapperHtml(gc.nom || gc.id)}</div>
+        <div class="resume-gc-nom">${echapperHtml(nomAfficheGroupeCours(gc))}</div>
         <div class="resume-gc-details">
             <div><span class="label-gc">${motsNature(coursObj).Objet}</span><span>${echapperHtml(coursNom)}</span></div>
             <div><span class="label-gc">Groupe</span><span>${echapperHtml(gc.groupeNum || '—')}</span></div>
@@ -1176,6 +1246,8 @@ window.populerDropdownGroupeCoursV2 = populerDropdownGroupeCoursV2;
 // changement de trimestre, n'a donc JAMAIS tourné depuis sa livraison.
 window.afficherEtatVideGroupeCoursV2 = afficherEtatVideGroupeCoursV2;
 window.mettreAJourCarteResumeGroupeCoursV2 = mettreAJourCarteResumeGroupeCoursV2;
+window.rafraichirAffichageGroupesCoursV2 = rafraichirAffichageGroupesCoursV2;   // #472
+window.nomGroupeCours = nomGroupeCours;   // #472
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;
 window.changerGroupeCoursSelectionneV2 = changerGroupeCoursSelectionneV2;
 window.fermerFicheGroupeCoursV2 = fermerFicheGroupeCoursV2;

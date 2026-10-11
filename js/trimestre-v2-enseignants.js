@@ -288,10 +288,35 @@ function viderFormulaireEnseignantV2() {
     mettreAJourCarteEnseignant();
 }
 
+/**
+ * #474 (lot 8, 11 oct. 2026, constat CT-10) : `profilEnseignant` est « mon profil », la copie que
+ * lisent en repli le groupe-cours (`'profil'`), l'attribution CC, l'export PDF et le codex. Avant, CHAQUE
+ * profil enregistré l'écrasait : modifier la fiche d'un collègue faisait de lui « moi ». Le marqueur
+ * explicite est `profilEnseignant.enseignantId`. Il se pose par un geste qui écrit déjà la copie,
+ * jamais au chargement (aucune écriture dans le stock) :
+ *   · copie marquée : seul le profil de cet id la met à jour ;
+ *   · copie d'avant ce lot (sans marque) : c'est le profil qui porte le même courriel (la clé naturelle
+ *     de CT-15), tel qu'il était en base avant ce geste ;
+ *   · aucune copie : le premier profil enregistré est celui de l'utilisateur (supposition, écrite à
+ *     la demande de relecture du lot 8).
+ * @param {Object} profil - les champs écrits
+ * @param {string} idEcrit - l'id du profil écrit
+ * @param {Object|null} enBase - le profil tel qu'il était avant ce geste (null à la création)
+ */
+function _estMonProfil(idEcrit, enBase) {
+    const copie = db.getSync('profilEnseignant', null);
+    if (!copie || typeof copie !== 'object') return true;
+    if (copie.enseignantId) return copie.enseignantId === idEcrit;
+    if (!enBase) return false;
+    const cleCopie = cleNaturelleEnseignant(copie);
+    return !!cleCopie && cleCopie === cleNaturelleEnseignant(enBase);
+}
+
 /** Après une écriture : menus et carte relus du stock. */
-function _apresEcritureEnseignant(profil) {
-    // Synchroniser profilEnseignant (utilisé en fallback par d'autres modules)
-    db.setSync('profilEnseignant', profil);
+function _apresEcritureEnseignant(profil, idEcrit, enBase) {
+    // Synchroniser profilEnseignant (utilisé en fallback par d'autres modules) — #474 : seulement
+    // pour le profil de l'utilisateur, marqué par son id.
+    if (_estMonProfil(idEcrit, enBase)) db.setSync('profilEnseignant', { ...profil, enseignantId: idEcrit });
     populerDropdownEnseignantsV2();
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
@@ -329,7 +354,7 @@ function sauvegarderChampEnseignantV2(el) {
     if (index < 0) return false;
     enseignants[index] = { ...enseignants[index], ...profil };
     if (!sauvegarderDonneesSelonMode('enseignants', enseignants, { geste })) return false;
-    _apresEcritureEnseignant(profil);
+    _apresEcritureEnseignant(profil, enBase.id, enBase);
     return true;
 }
 
@@ -359,7 +384,7 @@ function creerProfilEnseignantV2() {
     enseignants.push(nouveauProfil);
     if (!sauvegarderDonneesSelonMode('enseignants', enseignants, { geste })) return false;
     enseignantEnEditionId = nouveauProfil.id;
-    _apresEcritureEnseignant(profil);
+    _apresEcritureEnseignant(profil, nouveauProfil.id, null);
     const select = document.getElementById('v2-selectEnseignant');
     if (select) select.value = nouveauProfil.id;
     rendreModeFicheEnseignantV2(false);
