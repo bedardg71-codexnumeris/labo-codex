@@ -1,115 +1,15 @@
-# Module Pratiques de Notation
+# Module Pratiques de notation
 
-**Fichiers principaux** : `js/pratiques/`
-**Version** : Beta 95
-**Derniere mise a jour** : 1er janvier 2026
+> Remplacé le 11 octobre 2026 (#804). L'ancienne version (Beta 95, 1er janvier 2026) décrivait trois familles, `pan-maitrise`, le wizard Primo et un `GUIDE_AJOUT_PRATIQUE.md` qui n'existe pas. Un document de module faux vaut moins qu'un renvoi juste.
 
----
+**Périmètre** : `js/pratiques/` (registre, quatre familles, assistant de configuration, Comparateur), avec `js/pratiques.js` et `js/pratiques-gestion.js` pour la bibliothèque et le formulaire de gestion. Les fichiers se comptent par `ls js/pratiques/`, ils ne s'inscrivent pas ici.
 
-## Objectif
+**Les quatre familles canoniques** : `sommative`, `standards`, `specifications`, `denotation`. Les anciens identifiants (`pan-maitrise`, `pan-standards`…) se résolvent au registre par `normaliserIdPratique` (`pratique-registre.js`).
 
-Supporter plusieurs pratiques de notation sans modifier le coeur de l'application.
+**Où lire le reste, à jour :**
 
----
+- Le moteur de calcul, la résolution d'une pratique, la simulation et ses pièges : le skill `.claude/skills/pratiques-notation/SKILL.md`.
+- Qui écrit et qui lit chaque clé (`pratiquesConfigurables`, `modalitesEvaluation`…) : `docs/DATA-OWNERSHIP.md`.
+- L'aperçu de l'architecture générale : le skill `labo-codex`, § 5.
 
-## Architecture modulaire
-
-### Principe
-
-Toute nouvelle pratique DOIT implementer l'interface `IPratique`.
-JAMAIS coder en dur des calculs specifiques dans le module principal.
-
-### Structure des fichiers
-
-```
-js/pratiques/
-    pratique-interface.js        # Documentation du contrat IPratique
-    pratique-registre.js         # Registre central (detection auto)
-    pratique-pan-maitrise.js     # PAN-Maitrise (IDME + SRPNF)
-    pratique-sommative.js        # Sommative traditionnelle
-    pratique-pan-standards.js    # PAN-Standards (objectifs/artefacts)
-```
-
----
-
-## Interface IPratique
-
-Chaque pratique doit implementer :
-
-```javascript
-interface IPratique {
-    // Identification
-    id: string;
-    nom: string;
-    description: string;
-
-    // Calculs obligatoires
-    calculerPerformance(da: string): number;     // 0-1
-    calculerCompletion(da: string): number;      // 0-1
-
-    // Diagnostic
-    identifierPattern(da: string): string;
-    calculerNiveauRai(da: string): number;       // 1, 2 ou 3
-    determinerCibleIntervention(da: string): object;
-
-    // Affichage
-    obtenirDonneesProfil(da: string): object;
-}
-```
-
----
-
-## Pratiques implementees
-
-### PAN-Maitrise (Gregoire Bedard)
-- **Echelle** : IDME (Insuffisant, Developpement, Maitrise, Etendu)
-- **Criteres** : SRPNF (Structure, Rigueur, Plausibilite, Nuance, Francais)
-- **Calcul P** : Moyenne des N meilleurs artefacts
-- **Fichier** : `pratique-pan-maitrise.js`
-
-### Sommative
-- **Calcul P** : Moyenne ponderee de toutes les evaluations
-- **Defis** : Detection generique (< 65%)
-- **Fichier** : `pratique-sommative.js`
-
-### PAN-Standards
-- **Variantes** : Par objectifs ou par artefacts
-- **4 modes de calcul** :
-  1. Comptage (nb objectifs maitrises)
-  2. Moyenne ponderee
-  3. Seuils critiques (Xavier C.-T.)
-  4. Holistique (jugement professionnel)
-- **Fichier** : `pratique-pan-standards.js`
-
----
-
-## Configuration
-
-La pratique active est stockee dans :
-
-```javascript
-modalitesEvaluation: {
-    pratique: 'pan-maitrise',  // ou 'sommative', 'pan-standards'
-    // ... autres parametres
-}
-```
-
----
-
-## Ajouter une nouvelle pratique
-
-1. Creer `js/pratiques/pratique-[nom].js`
-2. Implementer l'interface `IPratique`
-3. Enregistrer dans `pratique-registre.js`
-4. Ajouter option dans le wizard Primo
-
-Voir `GUIDE_AJOUT_PRATIQUE.md` pour guide detaille.
-
----
-
-## Systeme universel (Beta 93+)
-
-Le systeme est 100% universel :
-- Criteres lus dynamiquement depuis la grille de reference
-- Detection forces/defis pour n'importe quels criteres
-- Recommandations RaI configurables avec fallback generique
+**À ne pas croire** : `pratique-notation-v2.js` est chargé, mais ses 14 cibles n'existent plus dans la page (#469, remesuré le 11 oct. 2026). La grappe `calculerNoteFinale` de `pratique-configurable.js` n'a aucun appelant (#903) : la note passe par chaque famille.

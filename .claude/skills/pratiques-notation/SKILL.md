@@ -219,6 +219,10 @@ configuration: {
   tableBundles: [ { noteFixe, requis: { typeId: nb } }, … ] // palier plancher : requis null
 }
 ```
+⚠ **Ce que l'application ÉCRIT n'est pas cette forme** (#708, audit du 16 sept., relu le 11 oct. 2026) :
+l'éditeur et le gabarit « Modèle simple » écrivent `forfaits: [ { lettre, note, travaux: { typeId: n } } ]`
+et `seuilAcceptable` ; `pratique-pan-specifications.js` traduit `forfaits` → `tableBundles` **à la lecture**.
+L'assistant n'écrit pas les types de travaux (constat A-3) : ils se règlent au formulaire.
 
 **Source canonique** : depuis la **Phase G2-a (24 mai 2026)**, la config portfolio est lue
 **uniquement** depuis `pratiquesConfigurables`. Plus de fallback sur
@@ -408,10 +412,14 @@ pratique non calculable n'empêche pas les autres de calculer).
 - **Schéma `pratiquesConfigurables` ≠ `{id, nom, configuration}` seul** :
   `PratiqueConfigurable.valider()` exige `id`, `nom`, `calcul_note` **à la racine** ; et
   `echelle` (racine) si `calcul_note.methode ∈ {conversion_niveaux, pan_par_objectif}`.
-  `construireConfigComplete` lit bien `configuration.{type,portfolio,seuils,objectifs}`,
-  mais applique `calcul_note` **défaut `conversion_niveaux`** si absent → échelle alors
-  exigée. Une config réduite à `{id, nom, configuration}` échoue à l'instanciation
-  (« Champ obligatoire manquant : echelle »). Vérifié 6 juin 2026 (seed démo C0).
+  `construireConfigComplete` lit bien `configuration.{type,portfolio,seuils,objectifs}`.
+  ⚠ **PÉRIMÉ depuis #762** : sans `calcul_note`, la méthode se déduit **de la famille**
+  (`METHODE_PAR_FAMILLE` : sommative → `moyenne_ponderee`, specifications → `specifications`,
+  denotation → `jugement_global`, standards → `conversion_niveaux`). Seule une standards sans échelle reste
+  refusée (« Champ obligatoire manquant : echelle »). Relu le 11 oct. 2026.
+- **`_lireIndiceStocke` rend `null`** (pratique-configurable.js) quand le cache `indicesCP` est
+  vide (#709), quand l'entrée est non constructible (1.142.24), ou quand elle a été calculée pour
+  une autre pratique. Un `null` y veut dire « non calculable », jamais zéro.
 - **SPE configurable délègue à `PratiquePanSpecifications`** (depuis 6 juin 2026) :
   `PratiqueConfigurable.calculerPerformance` cas `'specifications'` instancie une
   `PanSpecifications` jetable, la configure avec `this.config.configuration`

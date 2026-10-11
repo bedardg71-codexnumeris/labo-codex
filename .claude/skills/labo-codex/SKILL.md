@@ -95,7 +95,7 @@ Les modules ne s'importent pas entre eux — ils communiquent via `window.*` et 
 | Données | `codex.js`, `import-export.js`, `reserve.js` | Codex (ZIP portable), import/export, réserve (archivage) |
 | Trimestre / Cours | `trimestre-v2.js`, `trimestres.js`, `cours.js`, `horaire.js`, `groupe.js` | Gestion de la session, des cours et des groupes |
 | Planification | `planification-carte.js`, `planification.js`, `planification-donnees.js`, `organisateur.js` | Carte mentale, séquences, organisateur de leçons |
-| Pratiques de notation | `pratiques.js`, `pratique-notation-v2.js`, 14 modules dans `js/pratiques/` | Configuration et calcul selon la pratique choisie |
+| Pratiques de notation | `pratiques.js`, `pratiques-gestion.js`, les modules de `js/pratiques/` (compter par `ls`) ; `pratique-notation-v2.js` est chargé mais mort (#469) | Configuration et calcul selon la pratique choisie |
 | Dépistage / RàI | `snapshots.js`, `interventions.js`, `correlations-longitudinales.js` | Snapshots de progression, interventions RàI, analyse longitudinale |
 | Bibliothèques | `grilles-bibliotheque.js`, `echelles-bibliotheque.js`, `productions-bibliotheque.js`, `cartouches-bibliotheque.js`, `tampons-bibliotheque.js`, `pratiques-bibliotheque.js`, `planification-bibliotheque.js` | Gestion des entités réutilisables |
 
@@ -198,8 +198,8 @@ complètes et validation empirique** : le skill `ecosysteme-classe`.
 > (`sommative`/`standards`/`specifications`/`denotation`, sans préfixe `pan-`) datent de
 > la canonicalisation Session A — détail dans le skill dédié.
 
-L'application supporte 4 familles. 14 modules dans `js/pratiques/` (compter par
-`ls js/pratiques/` ; ne pas figer le nombre).
+L'application supporte 4 familles. Les modules de `js/pratiques/` se comptent par
+`ls js/pratiques/` ; ne pas figer le nombre (il était écrit « 14 », et périmait).
 
 ### 5.1 Sommative (traditionnelle)
 - **Identifiant** : `sommative`
@@ -208,21 +208,22 @@ L'application supporte 4 familles. 14 modules dans `js/pratiques/` (compter par
 - **Fichier** : `js/pratiques/pratique-sommative.js`
 
 ### 5.2 PAN-Standards
-- **Identifiant** : `pan-standards`
+- **Identifiant** : `standards` (l'ancien `pan-standards` se résout au registre, avec les défauts de la famille — #711)
 - **Échelle** : Niveaux de maîtrise discrets (ex: IDME)
-- **Calcul** : Conversion du profil de niveaux en % — 4 modes configurables :
-  - **Comptage** (Bruno V.) : grille nb objectifs maîtrisés → note
-  - **Moyenne pondérée** (Michel B.) : moyenne des niveaux × pondération
-  - **Seuils critiques** (Xavier C.-T.) : tous objectifs ≥ niveau 3
-  - **Holistique** (Isabelle M.) : suggestion statistique + jugement professionnel
-- **Variante par-objectifs** : standards évalués individuellement, meilleur résultat retenu.
-  **Foldée dans Standards** (Session C Lot 4, 5 juin 2026) — `pratique-pan-objectifs.js` supprimé.
+- **Calcul** : conversion du profil de niveaux en %, sur les artefacts retenus par le portfolio
+  (nombre à retenir, mode de sélection). ⚠ Les quatre modes « par objectifs » (comptage,
+  moyenne pondérée, seuils critiques, holistique) sont **retirés** par #435 (9 août 2026) ;
+  seuls `_calculerNiveauxParObjectif` et `suggererNoteHolistique` survivent, pour la
+  suggestion holistique de la dénotation.
+- **Variante par-objectifs** : foldée dans Standards (Session C Lot 4, 5 juin 2026), puis
+  **retirée** avec son routage par #435 ; une pratique stockée qui la porte s'ouvre sur son
+  `methodeSelection` réel (lecture seule, `console.warn`).
 - **Portfolio** : configurable (nombre à retenir, mode de sélection, artefacts obligatoires)
 - **Reprises** : Multiples, niveau non-rétrogradable
 - **Fichier** : `js/pratiques/pratique-pan-standards.js`
 
 ### 5.3 PAN-Spécifications
-- **Identifiant** : `pan-specifications`
+- **Identifiant** : `specifications` (l'ancien `pan-specifications` se résout au registre)
 - **État** : **Complet** (V2.0, décembre 2025)
 - **Échelle** : Dichotomique (Conforme / Non-conforme)
 - **Calcul** : Note fixe selon forfait complété (ex: C=60%, B=80%, A=100%)
@@ -246,7 +247,7 @@ js/pratiques/pratique-interface.js          # Interface commune IPratique
 js/pratiques/pratique-configurable.js       # Configuration générique
 js/pratiques/pratique-registre.js           # Registre des pratiques disponibles
 js/pratiques/pratique-manager.js            # Gestion de la pratique active
-js/pratique-notation-v2.js                  # Interface de configuration (UI)
+js/pratique-notation-v2.js                  # MORT : ses 14 cibles n'existent plus dans la page (#469, 11 oct. 2026)
 js/wizard-pratique-v2.js                    # Assistant de configuration
 ```
 
