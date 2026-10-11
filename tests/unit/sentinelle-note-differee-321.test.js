@@ -59,10 +59,12 @@ describe('#321 — les notes par travail passent par le masque', () => {
         expect(occ).toBeGreaterThanOrEqual(5);
     });
 
-    it('portfolio : la note par artefact de carte est gardée', () => {
+    // ↻ #722 (11 oct. 2026) : la note par artefact de portfolio.js vivait dans l'ancien panneau
+    // de détail, retiré (aucun conteneur dans la page). Plus rien à garder là ; aucun autre
+    // rendu de note par artefact n'y est né.
+    it('portfolio : plus aucune note par artefact rendue sans garde', () => {
         const src = lire('js/portfolio.js');
-        expect(src).toContain('badgeNoteDifferee()');
-        expect(src).toContain('noteDiffereeActive');
+        expect(src).not.toMatch(/noteFinale[^;\n]*%<\/span>/);
     });
 });
 
