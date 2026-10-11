@@ -1796,7 +1796,7 @@ async function _ajouterCopiesImportees(listesDuFichier, zipTravaux) {
 
 /**
  * 🆕 Restaure les blobs travaux depuis un ZIP importé
- * Utilisé par executerImportLocalStorageBrut() et _ajouterCopiesImportees()
+ * Utilisé par _ajouterCopiesImportees()
  * @param {Object} donnees - Données importées, avec éventuellement _zipTravaux
  * @returns {Promise<{restaures: number, manquants: number}>} Bilan de la restauration
  */
@@ -2832,7 +2832,7 @@ function fermerModalPreviewConfigComplete() {
 
 /**
  * Exécute l'import de la configuration complète avec gestion des conflits d'ID
- * Supporte deux formats : configuration-complete (Beta 91+) et localStorage-brut
+ * Le format brut passe par sa propre modale (`executerImportSelectif`) ; #1047 a retiré sa branche morte ici.
  */
 async function executerImportConfigComplete() {
     if (!configCompleteEnAttente) {
@@ -2842,11 +2842,6 @@ async function executerImportConfigComplete() {
 
     const config = configCompleteEnAttente;
 
-    // 🆕 BETA 95.1 : Gérer les deux formats
-    if (config._format === 'localStorage-brut') {
-        await executerImportLocalStorageBrut(config);
-        return;
-    }
 
     // Format configuration-complete (Beta 91+)
     const contenu = config.contenu;
@@ -3109,78 +3104,6 @@ async function executerImportConfigComplete() {
         configCompleteEnAttente = null;
         console.error('Erreur lors de l\'import de la configuration:', erreur);
         alert('Erreur lors de l\'import de la configuration.\n\n' + erreur.message);
-    }
-}
-
-/**
- * 🆕 BETA 95.1 : Exécute l'import d'un export localStorage brut
- * Réutilise la logique de executerImport() mais via le modal unifié
- * @param {Object} config - Données brutes localStorage
- */
-async function executerImportLocalStorageBrut(config) {
-    // Retirer les propriétés internes avant import
-    const donnees = { ...config };
-    const zipTravaux = donnees._zipTravaux;
-    delete donnees._format;
-    delete donnees._zipTravaux;
-
-    try {
-        const cles = Object.keys(donnees);
-        let nbCles = 0;
-
-        for (const cle of cles) {
-            let valeur = donnees[cle];
-
-            // Parser les strings JSON (backups de l'ancienne version localStorage)
-            if (typeof valeur === 'string') {
-                try {
-                    valeur = JSON.parse(valeur);
-                } catch (e) {
-                    // Garder comme string si ce n'est pas du JSON valide
-                }
-            }
-
-            // Utiliser db.set (async/IndexedDB)
-            await db.set(cle, valeur);
-            nbCles++;
-        }
-
-        // Synchroniser le cache localStorage avec IndexedDB
-        if (typeof db.syncToLocalStorageCache === 'function') {
-            await db.syncToLocalStorageCache();
-        }
-
-        // 🆕 Restauration des blobs travaux depuis le ZIP
-        const resBlobs = await _restaurerBlobsDepuisZip({ ...donnees, _zipTravaux: zipTravaux });
-
-        // Fermer le modal
-        fermerModalPreviewConfigComplete();
-
-        const msgBlobs = resBlobs.restaures > 0 ? ` + ${resBlobs.restaures} fichier(s) travaux` : '';
-        // #613 : ne jamais annoncer « réussi » sur un import amputé. Le compte
-        // exact et la conduite à tenir, une seule fois, à la fin.
-        const msgManquants = resBlobs.manquants
-            ? `\n\nAttention : ${resBlobs.manquants} fichier(s) n'ont pas pu être restaurés (espace insuffisant ou contenu refusé). Ils sont marqués « manquant » ; libère de l'espace et refais l'import du même ZIP.`
-            : '';
-
-        // Notification et rechargement
-        alert(`Import ${resBlobs.manquants ? 'partiel' : 'réussi'}\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.${msgManquants}`);
-
-        // Écritures IDB pendantes terminées AVANT le reload (bug terrain
-        // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
-        await db.flush();
-        if (confirm('Recharger la page pour appliquer les changements ?')) {
-            await window.rechargerSiLeServeurRepond(); // #795
-        }
-
-    } catch (erreur) {
-        configCompleteEnAttente = null;
-        console.error('Erreur lors de l\'import localStorage brut:', erreur);
-        // #393 (audit 5 août, rapport A8) : les clés écrites AVANT l'échec
-        // restent écrites — resynchroniser le cache et le dire, plutôt qu'une
-        // erreur muette sur un état à moitié importé.
-        try { await db.syncToLocalStorageCache(); } catch (e2) { /* best-effort */ }
-        alert('Import interrompu : ' + erreur.message + '\n\nLes éléments déjà importés avant l\'erreur sont conservés. Recharge la page pour repartir d\'un état à jour.');
     }
 }
 

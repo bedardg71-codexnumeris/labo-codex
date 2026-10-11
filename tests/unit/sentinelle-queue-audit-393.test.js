@@ -48,7 +48,8 @@ describe('#393 · filet des imports interrompus + voie canonique + ablation comp
     it('les catch d\'import resynchronisent le cache et annoncent l\'état partiel', () => {
         const src = lire('import-export.js');
         const occurrences = src.match(/Import interrompu : /g) || [];
-        expect(occurrences.length).toBe(2);
+        // #1047 (lot 12, 11 oct. 2026) : 2 → 1, le second vivait dans `executerImportLocalStorageBrut`, code mort retiré.
+        expect(occurrences.length).toBe(1);
         expect(src).toMatch(/catch \(erreur\) \{[\s\S]{0,600}syncToLocalStorageCache\(\)/);
     });
 
