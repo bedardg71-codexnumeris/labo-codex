@@ -1747,8 +1747,13 @@ async function _ajouterCopiesImportees(listesDuFichier, zipTravaux) {
     let ajoutees = 0;
 
     for (const cleFT of Object.keys(listesDuFichier)) {
-        const fusion = fusionnerCopiesImportees(await db.get(cleFT, []), listesDuFichier[cleFT]);
-        if (fusion.nouvelles.length > 0) await db.set(cleFT, fusion.liste);
+        // #522 lot 7 : lire, fusionner, écrire dans la file de la clé (db.modifier) — une copie
+        // déposée pendant l'aller-retour n'est plus écrasée. N'écrit que s'il y a du neuf, comme avant.
+        let fusion;
+        await db.modifier(cleFT, (lus) => {
+            fusion = fusionnerCopiesImportees(lus, listesDuFichier[cleFT]);
+            return fusion.nouvelles.length > 0 ? fusion.liste : undefined;
+        }, []);
         ajoutees += fusion.nouvelles.length;
         if (!magasinOffert) continue;
 
@@ -1772,13 +1777,15 @@ async function _ajouterCopiesImportees(listesDuFichier, zipTravaux) {
     }
     if (revenues.size > 0) {
         for (const cleFT of Object.keys(listesDuFichier)) {
-            const liste = await db.get(cleFT, []);
-            if (!Array.isArray(liste)) continue;
-            let change = false;
-            liste.forEach(f => {
-                if (f && revenues.has(f.id) && f.blobStatut === 'manquant') { f.blobStatut = 'present'; change = true; }
-            });
-            if (change) await db.set(cleFT, liste);
+            // #522 lot 7 : dans la file de la clé ; n'écrit que si un statut change, comme avant.
+            await db.modifier(cleFT, (liste) => {
+                if (!Array.isArray(liste)) return undefined;
+                let change = false;
+                liste.forEach(f => {
+                    if (f && revenues.has(f.id) && f.blobStatut === 'manquant') { f.blobStatut = 'present'; change = true; }
+                });
+                return change ? liste : undefined;
+            }, []);
         }
     }
     return { ajoutees: ajoutees, blobs: bilan };
@@ -1863,12 +1870,14 @@ async function _restaurerBlobsDepuisZip(donnees) {
     if (idsManquants.length > 0) {
         const manquants = new Set(idsManquants);
         for (const cleFT of Object.keys(donnees).filter(c => c.includes('fichiersTravaux'))) {
-            const liste = await db.get(cleFT, []);
-            if (!Array.isArray(liste)) continue;
-            liste.forEach(f => {
-                if (manquants.has(f.id) && f.blobStatut !== 'exporte') f.blobStatut = 'manquant';
-            });
-            await db.set(cleFT, liste);
+            // #522 lot 7 : dans la file de la clé ; écrit comme avant (toute liste lue, même inchangée).
+            await db.modifier(cleFT, (liste) => {
+                if (!Array.isArray(liste)) return undefined;
+                liste.forEach(f => {
+                    if (manquants.has(f.id) && f.blobStatut !== 'exporte') f.blobStatut = 'manquant';
+                });
+                return liste;
+            }, []);
         }
     }
     return { restaures: nbRestores, manquants: idsManquants.length };
@@ -3534,8 +3543,13 @@ async function executerImportSelectif() {
                     var etudiants = parseValeur(donnees[cleEtu]);
                     if (Array.isArray(etudiants)) {
                         etudiants = ecarterElevesDesinscrits(etudiants, 'etudiants', (await elevesEcartes(cleEtu, 'groupeEtudiants')).das, null, dasEcartesVus);
-                        var resEtu = fusionnerDonneesPersoImportees(await db.get(cleEtu, null), etudiants, 'etudiants');
-                        if (resEtu.ecrire) await db.set(cleEtu, resEtu.valeur);
+                        // #522 lot 7 : lire, fusionner, écrire dans la file de la clé (db.modifier) ; n'écrit que si
+                        // la fusion le demande, comme avant.
+                        var resEtu;
+                        await db.modifier(cleEtu, function(lus) {
+                            resEtu = fusionnerDonneesPersoImportees(lus, etudiants, 'etudiants');
+                            return resEtu.ecrire ? resEtu.valeur : undefined;
+                        }, null);
                         nbEtudiants += resEtu.entrees;
                     }
                 }
@@ -3554,8 +3568,13 @@ async function executerImportSelectif() {
                     var presences = parseValeur(donnees[clePres]);
                     if (presences && typeof presences === 'object') {
                         presences = ecarterElevesDesinscrits(presences, 'presences', (await elevesEcartes(clePres, 'presences')).das, null, dasEcartesVus);
-                        var resPres = fusionnerDonneesPersoImportees(await db.get(clePres, null), presences, 'presences');
-                        if (resPres.ecrire) await db.set(clePres, resPres.valeur);
+                        // #522 lot 7 : lire, fusionner, écrire dans la file de la clé (db.modifier) ; n'écrit que si
+                        // la fusion le demande, comme avant.
+                        var resPres;
+                        await db.modifier(clePres, function(lus) {
+                            resPres = fusionnerDonneesPersoImportees(lus, presences, 'presences');
+                            return resPres.ecrire ? resPres.valeur : undefined;
+                        }, null);
                         // #1012, les mots : les dates distinctes des fiches ENTRÉES, pas les fiches.
                         // Une fiche entrée est une fiche du fichier que la fusion a gardée telle quelle.
                         var gardeesPres = new Set(Array.isArray(resPres.valeur) ? resPres.valeur : []);
@@ -3583,8 +3602,13 @@ async function executerImportSelectif() {
                         var nomEval = cleEval.endsWith('evaluationsSauvegardees') ? 'evaluationsSauvegardees'
                             : cleEval.endsWith('notesEtudiants') ? 'notesEtudiants' : 'evaluations';
                         data = ecarterElevesDesinscrits(data, 'notes', (await elevesEcartes(cleEval, nomEval)).das, null, dasEcartesVus);
-                        var resEval = fusionnerDonneesPersoImportees(await db.get(cleEval, null), data, 'notes');
-                        if (resEval.ecrire) await db.set(cleEval, resEval.valeur);
+                        // #522 lot 7 : lire, fusionner, écrire dans la file de la clé (db.modifier) ; n'écrit que si
+                        // la fusion le demande, comme avant.
+                        var resEval;
+                        await db.modifier(cleEval, function(lus) {
+                            resEval = fusionnerDonneesPersoImportees(lus, data, 'notes');
+                            return resEval.ecrire ? resEval.valeur : undefined;
+                        }, null);
                         nbEvals += resEval.entrees;
                     }
                 }
@@ -3722,8 +3746,13 @@ async function executerImportSelectif() {
                     if (Array.isArray(annotations) && annotations.length > 0) {
                         var ecartesAT = await elevesEcartes(cleAT, 'annotationsTravaux');
                         annotations = ecarterElevesDesinscrits(annotations, 'annotations', ecartesAT.das, ecartesAT.copies, dasEcartesVus);
-                        var resAT = fusionnerDonneesPersoImportees(await db.get(cleAT, null), annotations, 'annotations');
-                        if (resAT.ecrire) await db.set(cleAT, resAT.valeur);
+                        // #522 lot 7 : lire, fusionner, écrire dans la file de la clé (db.modifier) ; n'écrit que si
+                        // la fusion le demande, comme avant.
+                        var resAT;
+                        await db.modifier(cleAT, function(lus) {
+                            resAT = fusionnerDonneesPersoImportees(lus, annotations, 'annotations');
+                            return resAT.ecrire ? resAT.valeur : undefined;
+                        }, null);
                         nbAnnotations += resAT.entrees;
                     }
                 }

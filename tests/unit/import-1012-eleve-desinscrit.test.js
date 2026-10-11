@@ -82,12 +82,13 @@ describe('#1012 — verrous de structure', () => {
         const fonction = tranche(sourceImport, 'async function executerImportSelectif(', '// Synchroniser le cache après tous les imports');
         const familles = [...fonction.matchAll(/ecarterElevesDesinscrits\(\w+, '(\w+)'/g)].map((m) => m[1]);
         expect(familles).toEqual(['etudiants', 'presences', 'notes', 'copies', 'annotations']);
+        // #522 lot 7 (11 oct. 2026) : la fusion se fait dans la file de la clé, sur la valeur lue (`lus`).
         for (const [ecart, fusion] of [
-            ["ecarterElevesDesinscrits(etudiants, 'etudiants'", 'fusionnerDonneesPersoImportees(await db.get(cleEtu'],
-            ["ecarterElevesDesinscrits(presences, 'presences'", 'fusionnerDonneesPersoImportees(await db.get(clePres'],
-            ["ecarterElevesDesinscrits(data, 'notes'", 'fusionnerDonneesPersoImportees(await db.get(cleEval'],
+            ["ecarterElevesDesinscrits(etudiants, 'etudiants'", 'fusionnerDonneesPersoImportees(lus, etudiants,'],
+            ["ecarterElevesDesinscrits(presences, 'presences'", 'fusionnerDonneesPersoImportees(lus, presences,'],
+            ["ecarterElevesDesinscrits(data, 'notes'", 'fusionnerDonneesPersoImportees(lus, data,'],
             ["ecarterElevesDesinscrits(fichiersTravaux, 'copies'", '_ajouterCopiesImportees(listesCopies'],
-            ["ecarterElevesDesinscrits(annotations, 'annotations'", 'fusionnerDonneesPersoImportees(await db.get(cleAT']
+            ["ecarterElevesDesinscrits(annotations, 'annotations'", 'fusionnerDonneesPersoImportees(lus, annotations,']
         ]) {
             expect(fonction.indexOf(ecart), ecart).toBeGreaterThan(-1);
             expect(fonction.indexOf(ecart), ecart).toBeLessThan(fonction.indexOf(fusion));

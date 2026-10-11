@@ -123,7 +123,8 @@ describe('#1012 — verrou de structure : les quatre cases passent par la fusion
     it('chaque case appelle la fusion de sa famille, et aucune n\'écrit la valeur du fichier', () => {
         const fonction = tranche(sourceImport, 'async function executerImportSelectif(', '// Synchroniser le cache après tous les imports');
         const corps = tranche(fonction, '// Étudiants', '// Configuration') + tranche(fonction, '// Annotations travaux', undefined);
-        const familles = [...corps.matchAll(/fusionnerDonneesPersoImportees\([^)]*\), [\w]+, '(\w+)'\)/g)].map((m) => m[1]);
+        // #522 lot 7 (11 oct. 2026) : la fusion se fait dans la file de la clé, sur la valeur lue (`lus`).
+        const familles = [...corps.matchAll(/fusionnerDonneesPersoImportees\(lus, \w+, '(\w+)'\)/g)].map((m) => m[1]);
         expect(familles).toEqual(['etudiants', 'presences', 'notes', 'annotations']);
         for (const brut of ['db.set(cleEtu, etudiants)', 'db.set(clePres, presences)', 'db.set(cleEval, data)', 'db.set(cleAT, annotations)']) {
             expect(corps).not.toContain(brut);

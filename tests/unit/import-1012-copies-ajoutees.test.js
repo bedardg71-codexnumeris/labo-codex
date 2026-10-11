@@ -94,8 +94,14 @@ describe('#1012 — verrou de structure : l\'import par cases ne remplace plus l
         expect(f).toBeGreaterThan(d);
         const tranche = sourceImport.slice(d, f);
         expect(tranche.length).toBeGreaterThan(1500);
-        const ecritures = tranche.match(/db\.set(Sync)?\([^)]*\)/g) || [];
-        expect(ecritures).toEqual(['db.set(cleFT, fusion.liste)', 'db.set(cleFT, liste)']);
-        expect(tranche).toContain('fusionnerCopiesImportees(await db.get(cleFT, []), listesDuFichier[cleFT])');
+        // #522 lot 7 (11 oct. 2026) : les deux écritures passent dans la file de la clé (db.modifier) ;
+        // aucune écriture directe ne reste. Ce que chacune écrit est jugé dans son mutateur : la fusion,
+        // ou la liste lue dont un statut a changé — jamais la liste du fichier.
+        expect(tranche.match(/db\.set(Sync)?\(/g) || []).toEqual([]);
+        expect((tranche.match(/db\.modifier\(cleFT,/g) || []).length).toBe(2);
+        expect(tranche).toContain('fusion = fusionnerCopiesImportees(lus, listesDuFichier[cleFT]);');
+        expect(tranche).toContain('return fusion.nouvelles.length > 0 ? fusion.liste : undefined;');
+        expect(tranche).toContain('return change ? liste : undefined;');
+        expect(tranche).not.toMatch(/return listesDuFichier/);
     });
 });
