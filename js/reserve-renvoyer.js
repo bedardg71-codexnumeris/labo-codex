@@ -450,9 +450,13 @@ async function retirer(res, onProg) {
     try {
         // 1. Le registre : le trimestre quitte la bibliothèque.
         if (a.registre) {
-            var liste = await window.db.get('trimestres', []);
-            if (Array.isArray(liste) && liste.some(function(t) { return t && t.id === trimestre; })) {
-                await window.db.set('trimestres', liste.filter(function(t) { return !t || t.id !== trimestre; }));
+            // #522 lot 7 : dans la file de la clé ; n'écrit que si le trimestre y est, relu comme avant.
+            var retire = false;
+            await window.db.modifier('trimestres', function(liste) {
+                retire = Array.isArray(liste) && liste.some(function(t) { return t && t.id === trimestre; });
+                return retire ? liste.filter(function(t) { return !t || t.id !== trimestre; }) : undefined;
+            }, []);
+            if (retire) {
                 var relu = await window.db.get('trimestres', []);
                 if (Array.isArray(relu) && relu.some(function(t) { return t && t.id === trimestre; })) throw new Abandon('nonRetire');
             }

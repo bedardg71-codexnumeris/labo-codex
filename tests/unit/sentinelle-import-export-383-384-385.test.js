@@ -137,7 +137,8 @@ describe('#613 · la restauration ZIP compte, marque et ne ment plus sur le rés
 
     it('marque blobStatut manquant et réécrit les clés fichiersTravaux', () => {
         expect(corpsRestauration).toMatch(/blobStatut = 'manquant'/);
-        expect(corpsRestauration).toMatch(/await db\.set\(cleFT, liste\)/);
+        // #522 lot 7 (11 oct. 2026) : la réécriture passe par la file de la clé ; elle rend la liste lue.
+        expect(corpsRestauration).toMatch(/await db\.modifier\(cleFT, \(liste\) => \{[\s\S]*?return liste;/);
     });
 
     it('n\'écrase JAMAIS un « exporte » par « manquant » au marquage', () => {

@@ -220,13 +220,16 @@ async function faireRevenir(source, entree, onProg) {
     // Les fiches « manquant » dont le fichier est là redeviennent présentes (#997, par le geste).
     var ids = Object.keys(aRemettre);
     if (ids.length > 0) {
-        var liste = await window.db.get(cleFT, []);
-        if (Array.isArray(liste)) {
+        // #522 lot 7 : dans la file de la clé ; n'écrit que si une fiche change, comme avant.
+        await window.db.modifier(cleFT, function(liste) {
+            if (!Array.isArray(liste)) return undefined;
+            var remises = 0;
             liste.forEach(function(f) {
-                if (f && aRemettre[f.id] && f.blobStatut === 'manquant') { f.blobStatut = 'present'; bilan.fichesRemises++; }
+                if (f && aRemettre[f.id] && f.blobStatut === 'manquant') { f.blobStatut = 'present'; remises++; }
             });
-            if (bilan.fichesRemises > 0) await window.db.set(cleFT, liste);
-        }
+            bilan.fichesRemises = remises;
+            return remises > 0 ? liste : undefined;
+        }, []);
     }
     if ((bilan.revenues.length > 0 || bilan.fichesRemises > 0) && window.signalerEcritureUsager) {
         window.signalerEcritureUsager(cleFT);

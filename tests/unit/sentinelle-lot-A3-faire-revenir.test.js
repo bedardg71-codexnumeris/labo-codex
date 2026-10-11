@@ -45,7 +45,7 @@ const CLE_FT = TRIMESTRE + '_fichiersTravaux';
 
 function creerDb(initial = {}) {
     const map = new Map(Object.entries(structuredClone(initial)));
-    return {
+    const db = {
         _map: map,
         get: async (k, def = null) => (map.has(k) ? structuredClone(map.get(k)) : def),
         set: async (k, v) => { map.set(k, structuredClone(v)); },
@@ -53,6 +53,15 @@ function creerDb(initial = {}) {
         getSync: (k, def = null) => (map.has(k) ? map.get(k) : def),
         setSync: (k, v) => { map.set(k, v); }
     };
+    // #522 lot 7 : le contrat de la vraie `db.modifier` (lire, muter, écrire si défini), par le get
+    // et le set de ce faux : le journal et les refus simulés voient l'écriture comme avant.
+    db.modifier = async (k, mutateur, def = null) => {
+        const r = await mutateur(await db.get(k, def));
+        if (r === undefined) return undefined;
+        await db.set(k, r);
+        return r;
+    };
+    return db;
 }
 
 function octets(taille, graine) {

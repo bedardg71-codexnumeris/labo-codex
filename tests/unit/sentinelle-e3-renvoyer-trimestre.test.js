@@ -121,6 +121,14 @@ function creerDb(initial = CORPUS) {
         removeSync: (k) => { db.cacheMemoire.delete(k); map.delete(k); },
         flush: async () => {}
     };
+    // #522 lot 7 : le contrat de la vraie `db.modifier` (lire, muter, écrire si défini), par le get
+    // et le set de ce faux : le journal et les refus simulés voient l'écriture comme avant.
+    db.modifier = async (k, mutateur, def = null) => {
+        const r = await mutateur(await db.get(k, def));
+        if (r === undefined) return undefined;
+        await db.set(k, r);
+        return r;
+    };
     return db;
 }
 

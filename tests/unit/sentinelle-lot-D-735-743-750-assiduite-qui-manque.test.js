@@ -163,7 +163,7 @@ describe('lot D · verrous structurels', () => {
         // l'espace (fusionnerDonneesPersoImportees) — fiches entières des deux côtés, sans liste de champs.
         // #1012, l'élève désinscrit (2 oct. 2026) : avant la fusion, un `filter` retire les élèves supprimés
         // (ecarterElevesDesinscrits) ; il garde les fiches entières.
-        expect(code).toMatch(/cleEtu\.endsWith\('_groupeEtudiants'\)\)\s*\{\s*var etudiants = parseValeur\(donnees\[cleEtu\]\);\s*if \(Array\.isArray\(etudiants\)\) \{\s*etudiants = ecarterElevesDesinscrits\(etudiants, 'etudiants', \(await elevesEcartes\(cleEtu, 'groupeEtudiants'\)\)\.das, null, dasEcartesVus\);\s*var resEtu = fusionnerDonneesPersoImportees\(await db\.get\(cleEtu, null\), etudiants, 'etudiants'\);/);
+        expect(code).toMatch(/cleEtu\.endsWith\('_groupeEtudiants'\)\)\s*\{\s*var etudiants = parseValeur\(donnees\[cleEtu\]\);\s*if \(Array\.isArray\(etudiants\)\) \{\s*etudiants = ecarterElevesDesinscrits\(etudiants, 'etudiants', \(await elevesEcartes\(cleEtu, 'groupeEtudiants'\)\)\.das, null, dasEcartesVus\);[\s\S]{0,400}?resEtu = fusionnerDonneesPersoImportees\(lus, etudiants, 'etudiants'\);/);   // #522 lot 7 : la fusion, dans la file de la clé
         expect(code).toMatch(/return \{ valeur: base\.concat\(nouvelles\), ecrire: nouvelles\.length > 0, entrees: nouvelles\.length \};/);
         expect(code).not.toMatch(/SCHEMAS_IMPORT\.etudiant/);
     });

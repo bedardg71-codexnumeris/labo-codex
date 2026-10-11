@@ -390,10 +390,11 @@ async function _retirer(trimestre, ecrit, bilan) {
     var reste = { cles: 0, copies: 0 };
     if (ecrit.registre) {
         try {
-            var liste = await window.db.get('trimestres', []);
-            if (Array.isArray(liste) && liste.some(function(t) { return t && t.id === trimestre; })) {
-                await window.db.set('trimestres', liste.filter(function(t) { return !t || t.id !== trimestre; }));
-            }
+            // #522 lot 7 : dans la file de la clé ; n'écrit que si le trimestre y est, comme avant.
+            await window.db.modifier('trimestres', function(liste) {
+                if (!(Array.isArray(liste) && liste.some(function(t) { return t && t.id === trimestre; }))) return undefined;
+                return liste.filter(function(t) { return !t || t.id !== trimestre; });
+            }, []);
         } catch (e) { console.warn('[Archives] Registre non rétabli :', e && e.message || e); reste.cles++; }
     }
     for (var i = ecrit.cles.length - 1; i >= 0; i--) {

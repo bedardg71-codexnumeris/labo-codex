@@ -397,17 +397,20 @@ async function retirer(res, onProg) {
     try {
         // 1. La marque, AVANT tout retrait : une copie retirée est toujours marquée.
         if (a.copies.length) {
-            var m = await window.db.get(CLE, null);
-            if (!m || typeof m !== 'object' || Array.isArray(m)) m = {};
+            // #522 lot 7 : la marque se lit et s'écrit dans la file de sa clé (db.modifier) ; même
+            // marque, même moment (avant tout retrait), relue juste après comme avant.
             var e = res.entree || {};
-            var t = m[trimestre] && typeof m[trimestre] === 'object' ? m[trimestre] : { ids: {} };
-            t.dossier = e.dossier || t.dossier || null;
-            t.uuid = e.uuid || t.uuid || null;
-            t.date = new Date().toISOString();
-            t.ids = t.ids && typeof t.ids === 'object' ? t.ids : {};
-            a.copies.forEach(function(id) { t.ids[id] = true; });
-            m[trimestre] = t;
-            await window.db.set(CLE, m);
+            await window.db.modifier(CLE, function(m) {
+                if (!m || typeof m !== 'object' || Array.isArray(m)) m = {};
+                var t = m[trimestre] && typeof m[trimestre] === 'object' ? m[trimestre] : { ids: {} };
+                t.dossier = e.dossier || t.dossier || null;
+                t.uuid = e.uuid || t.uuid || null;
+                t.date = new Date().toISOString();
+                t.ids = t.ids && typeof t.ids === 'object' ? t.ids : {};
+                a.copies.forEach(function(id) { t.ids[id] = true; });
+                m[trimestre] = t;
+                return m;
+            }, null);
             var relue = await window.db.get(CLE, null);
             if (!relue || !relue[trimestre] || a.copies.some(function(id) { return !_a(relue[trimestre].ids || {}, id); })) throw new Abandon('marqueNonEcrite');
         }
