@@ -431,6 +431,35 @@ function _resoudreEnseignantPourCarteGC(gc) {
     return ensObj ? `${ensObj.prenom || ''} ${ensObj.nom || ''}`.trim() : '—';
 }
 
+/** #475 : l'enseignant désigné existe — le profil (`'profil'`) s'il est rempli, sinon une fiche, démo comprise. */
+function _enseignantExistePourGC(gc) {
+    if (!gc.enseignantId) return false;
+    if (gc.enseignantId === 'profil') {
+        const profil = db.getSync('profilEnseignant', {}) || {};
+        return !!(profil.prenom && profil.nom);
+    }
+    const listes = [db.getSync('enseignants', []) || []];
+    if (typeof cleDemo === 'function') listes.push(db.getSync(cleDemo('enseignants'), []) || []);
+    return listes.some(l => Array.isArray(l) && l.some(e => e && e.id === gc.enseignantId));
+}
+
+/**
+ * #475 : la pratique désignée existe — dans les pratiques du trimestre (avec la normalisation des ids
+ * legacy, `trouverPratiqueEnBibliotheque`), dans le registre des pratiques prédéfinies, ou au démo.
+ * Aucune instance construite.
+ */
+function _pratiqueExistePourGC(gc) {
+    if (!gc.pratiqueId) return false;
+    if (typeof window.trouverPratiqueEnBibliotheque === 'function' && window.trouverPratiqueEnBibliotheque(gc.pratiqueId)) return true;
+    if (typeof window.pratiqueEstDisponible === 'function') {
+        const canonique = typeof window.normaliserIdPratique === 'function' ? window.normaliserIdPratique(gc.pratiqueId) : gc.pratiqueId;
+        if (window.pratiqueEstDisponible(canonique)) return true;
+    }
+    const listes = [db.getSync(cle('pratiquesConfigurables'), []) || []];
+    if (typeof cleDemo === 'function') listes.push(db.getSync(cleDemo('pratiquesConfigurables'), []) || []);
+    return listes.some(l => Array.isArray(l) && l.some(p => p && p.id === gc.pratiqueId));
+}
+
 function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const carte = document.getElementById('v2-carteResumeGroupeCours');
     if (!carte) return;
@@ -452,8 +481,11 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     if (gc.groupeNum) score++;
     // Un service sans horaire est complet : l'horaire n'est pas attendu (cadrage « Rencontres »).
     if ((gc.horaireId && horaireObj) || (coursObj && coursObj.nature === 'service' && !gc.horaireId)) score++;
-    if (gc.enseignantId) score++;
-    if (gc.pratiqueId) score++;
+    // #475 (lot 8, 11 oct. 2026, constat CT-14) : une référence ne compte que si ce qu'elle désigne
+    // existe, comme le cours et l'horaire ci-dessus. Avant, un enseignant ou une pratique supprimés
+    // comptaient encore : « Complet » pour un groupe-cours qui pointait dans le vide.
+    if (_enseignantExistePourGC(gc)) score++;
+    if (_pratiqueExistePourGC(gc)) score++;
 
     const estComplet = score === 5;
     const classeCompletude = estComplet ? 'complet' : 'incomplet';
