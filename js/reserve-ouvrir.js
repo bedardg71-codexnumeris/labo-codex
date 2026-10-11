@@ -19,7 +19,8 @@
        évaluations, travaux) ; mode consultation namespace temporaire.
 
    Dépendances
-     - JSZip (libs/jszip.min.js)
+     - ReserveVerifier.lireRepertoireZip, lireTexteDeLEntree, MOTS (reserve-verifier.js) :
+       la lecture par tranches (#1025 : l'archive n'est plus chargée entière par JSZip)
      - validerZipSecurite (window.validerZipSecurite, depuis import-export.js)
      - importerGrillesExternes, importerEchellesExternes (window.*)
      - genererIdUnique (window.genererIdUnique, depuis main.js)
@@ -73,41 +74,67 @@ function _formaterDate(iso) {
  */
 async function chargerDepuisFichier(file) {
     if (!file) throw new Error('Aucun fichier fourni.');
-    if (typeof JSZip === 'undefined') {
+    if (!window.ReserveVerifier || typeof window.ReserveVerifier.lireRepertoireZip !== 'function') {
         throw new Error('Bibliothèque de compression non chargée.');
     }
 
-    var zip;
+    // #1025 : l'archive n'est plus chargée entière (JSZip.loadAsync la lisait toute en mémoire,
+    // copies comprises : 1,3 Go de pic pour une archive de 1,15 Go). On lit son répertoire
+    // central, puis ses seuls textes, un à un, par tranches, comme « Vérifier ».
+    var entrees;
     try {
-        zip = await JSZip.loadAsync(file);
+        entrees = await window.ReserveVerifier.lireRepertoireZip(file);
     } catch (e) {
+        // Un nom suspect est refusé dès le répertoire : on rend le message de
+        // validerZipSecurite, comme avant ; toute autre erreur garde le message d'avant.
+        var prefixeSuspect = window.ReserveVerifier.MOTS.erreurs.nomSuspect;
+        var message = e && e.message ? e.message : '';
+        if (message.indexOf(prefixeSuspect) === 0 && typeof window.validerZipSecurite === 'function') {
+            var nomSuspect = message.slice(prefixeSuspect.length);
+            var refus = window.validerZipSecurite({ files: { [nomSuspect]: { dir: false } } });
+            if (!refus.valide) throw new Error('Validation sécurité : ' + refus.erreur);
+        }
         throw new Error('Le fichier choisi n\'est pas un ZIP valide.');
     }
 
+    // La même défense qu'avant (règle 3), sur la forme que lit validerZipSecurite.
+    var parNom = {};
+    entrees.forEach(function(e) { parNom[e.nom] = { dir: e.dir, _data: { uncompressedSize: e.tailleReelle }, entree: e }; });
     if (typeof window.validerZipSecurite === 'function') {
-        var validation = window.validerZipSecurite(zip);
+        var validation = window.validerZipSecurite({ files: parNom });
         if (!validation.valide) {
             throw new Error('Validation sécurité : ' + validation.erreur);
         }
+    }
+
+    function _lecteur(nom) {
+        var f = parNom[nom];
+        if (!f) return null;
+        return function() {
+            return window.ReserveVerifier.lireTexteDeLEntree(file, f.entree).then(function(texte) {
+                if (texte === null) throw new Error('entrée tronquée : ' + nom);
+                return texte;
+            });
+        };
     }
 
     // Localiser le dossier d’archive et les fichiers manifestes
     var fichierDonnees = null;
     var fichierMeta = null;
     var fichierPatch = null;
-    var fichierManifesteGlobal = zip.files['manifeste-archives.json'] || null;
+    var fichierManifesteGlobal = _lecteur('manifeste-archives.json');
     var dossierVersement = null;
 
-    Object.keys(zip.files).forEach(function(chemin) {
+    Object.keys(parNom).forEach(function(chemin) {
         var m = chemin.match(/^trimestres\/([^\/]+)\/(donnees|meta|manifeste-archives-patch)\.json$/);
         if (!m) return;
         if (m[2] === 'donnees' && !fichierDonnees) {
-            fichierDonnees = zip.files[chemin];
+            fichierDonnees = _lecteur(chemin);
             dossierVersement = m[1];
         } else if (m[2] === 'meta' && !fichierMeta) {
-            fichierMeta = zip.files[chemin];
+            fichierMeta = _lecteur(chemin);
         } else if (m[2] === 'manifeste-archives-patch' && !fichierPatch) {
-            fichierPatch = zip.files[chemin];
+            fichierPatch = _lecteur(chemin);
         }
     });
 
@@ -117,14 +144,14 @@ async function chargerDepuisFichier(file) {
 
     var donnees, meta = null;
     try {
-        donnees = JSON.parse(await fichierDonnees.async('text'));
+        donnees = JSON.parse(await fichierDonnees());
     } catch (e) {
         throw new Error('Échec de lecture de donnees.json : ' + (e.message || e));
     }
 
     if (fichierMeta) {
         try {
-            meta = JSON.parse(await fichierMeta.async('text'));
+            meta = JSON.parse(await fichierMeta());
         } catch (e) {
             console.warn('[ReserveOuvrir] meta.json invalide, ignoré', e.message || e);
         }
@@ -133,7 +160,7 @@ async function chargerDepuisFichier(file) {
     // Auto-hydration du manifeste local (#248). Le simple fait d'ouvrir un
     // ZIP enregistre l’archive dans l'historique de l'app, peu importe
     // s'il a été créé avant ou après #248.
-    await _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, fichierManifesteGlobal, meta);
+    await _hydrateManifesteDepuisZip(dossierVersement, fichierPatch, fichierManifesteGlobal, meta);
 
     var ressources = _extraireRessources(donnees);
 
@@ -153,12 +180,12 @@ async function chargerDepuisFichier(file) {
  *   3. fallback : entrée minimum reconstruite depuis meta.json
  * Silencieux : aucun affichage si rien ne change ou si Reserve n'est pas chargé.
  */
-async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, fichierManifesteGlobal, meta) {
+async function _hydrateManifesteDepuisZip(dossierVersement, lirePatch, lireManifesteGlobal, meta) {
     if (!window.Reserve) return;
 
     try {
-        if (fichierManifesteGlobal && typeof window.Reserve.fusionnerManifesteRecu === 'function') {
-            var manifesteTexte = await fichierManifesteGlobal.async('text');
+        if (lireManifesteGlobal && typeof window.Reserve.fusionnerManifesteRecu === 'function') {
+            var manifesteTexte = await lireManifesteGlobal();
             var manifeste = JSON.parse(manifesteTexte);
             window.Reserve.fusionnerManifesteRecu(manifeste);
             return;
@@ -171,8 +198,8 @@ async function _hydrateManifesteDepuisZip(zip, dossierVersement, fichierPatch, f
     if (!dossierVersement) return;
 
     try {
-        if (fichierPatch) {
-            var patchTexte = await fichierPatch.async('text');
+        if (lirePatch) {
+            var patchTexte = await lirePatch();
             var patchObj = JSON.parse(patchTexte);
             var entree = patchObj && patchObj.patch ? patchObj.patch : patchObj;
             if (entree && typeof entree === 'object') {
