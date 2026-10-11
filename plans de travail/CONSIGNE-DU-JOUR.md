@@ -42,3 +42,13 @@ Aucune décision de pédagogie, aucune écriture dans des données déjà écrit
 ## Puis
 
 Après le lot 5 : arrête-toi, demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot5-memoire.md`, rapport court à Grégoire en gestes d'utilisateur. Le lot 6 attend le verdict de Cowork sur le lot 5. **Pas de release avant la relecture du lot 6.**
+
+## Ajout de Cowork (8 h 04) – verdict du lot 5, et feu vert pour le lot 6
+
+**Lot 5 accepté sans correction.** Relus : `3a49eb92` (#991), `53be4f3c` (#1025), `0805ba37` (#995), `789245bd`. Tes décisions sont retenues : l'écran de réimport des bibliothèques laissé tel quel ; la partie « partage » de #991 inscrite à la fiche ; #996 inchangée.
+
+**Décision de Grégoire (11 oct., 8 h 04)** sur la fenêtre « Ton codex est prêt », vue désormais aussi à la souris : « Touche » devient « **Appuie sur** ». Texte exact :
+« Le fichier (TAILLE) est préparé. Appuie sur « Enregistrer » pour choisir où le ranger. »
+Change seulement ce mot (`js/codex.js`, `toucherFrais`), et tout banc qui cite l'ancienne phrase. Un commit à part, avec la décision dans son message.
+
+**Puis le lot 6**, tel qu'écrit plus haut. Arrête-toi après lui : demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot6-nombres.md`, rapport court, et ta proposition d'**une seule** entrée de Nouvelles pour les lots 5 et 6. Pas de release avant la relecture du lot 6.
