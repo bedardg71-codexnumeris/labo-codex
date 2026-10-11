@@ -295,7 +295,10 @@ describe('#626 · M2 / D5 — les clés mortes ne sont plus lues', () => {
 
     // TÉMOIN — la vraie clé de la bibliothèque n'est pas emportée au passage.
     it('TÉMOIN · `bibliothequePratiques` reste la clé du module propriétaire', () => {
-        expect(code('js/tableau-bord-apercu.js')).toContain("cle('pratiquesConfigurables')");
+        // ↻ 11 oct. 2026 (#634) : l'aperçu ne lit plus `pratiquesConfigurables` lui-même ; il
+        // passe par la résolution de la note, qui la lit (pratique-registre.js). Tenu par
+        // `sentinelle-634-seuil-p-comme-la-note`, sur les modules réels.
+        expect(code('js/tableau-bord-apercu.js')).toContain('obtenirConfigPratiqueActive()');
     });
 });
 
