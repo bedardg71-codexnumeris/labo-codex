@@ -96,3 +96,47 @@ describe('#590 · construireConfigComplete n\'invente aucun niveau', () => {
         avert.mockRestore(); erreurs.mockRestore();
     });
 });
+
+describe('#590 · une copie faite pendant que l\'échelle est introuvable ne s\'y fige pas', () => {
+    // Verdict de Cowork (11 oct.) : « Dupliquer » et « Dériver une variante » embarquent la
+    // config résolue — marque `introuvable` comprise — dans `copie.config`. Le registre lisait
+    // `config.echelle` embarquée AVANT la référence : la copie restait vide pour toujours.
+    // Modules RÉELS : pratique-configurable.js (validation de sauvegarde), pratique-registre.js,
+    // pratiques.js (dupliquerPratique).
+    it('F · la copie est enregistrée, puis se résout par référence quand l\'échelle revient', async () => {
+        const avert = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const pratiques = [{ id: 'std', nom: 'STD', type: 'standards', calcul_note: { methode: 'conversion_niveaux' },
+            configuration: { type: 'standards', echelleId: 'ECH' } }];
+        let echelleRetrouvee = null;
+        const win = { PratiqueManager: {} };
+        const globaux = {
+            db: { getSync: (k, d) => (String(k).indexOf('pratiquesConfigurables') !== -1 ? pratiques : (d !== undefined ? d : null)),
+                get: async () => null, set: async () => {}, setSync() {} },
+            cle: (k) => 'test_' + k,
+            resoudreModeleParId: () => echelleRetrouvee
+        };
+        chargerScript('js/pratiques/pratique-configurable.js', globaux, win);
+        chargerScript('js/pratiques/pratique-registre.js', Object.assign({ PratiqueConfigurable: win.PratiqueConfigurable }, globaux), win);
+        const PratiqueManager = {
+            // La VRAIE validation de sauvegarde : new PratiqueConfigurable(pratique.config).
+            sauvegarderPratique: async (p) => { new win.PratiqueConfigurable(p.config); pratiques.push(p); }
+        };
+        const ui = chargerScript('js/pratiques.js', Object.assign({}, globaux, {
+            PratiqueManager,
+            BibliothequeUI: { obtenirAuteurActif: () => 'Auteur fictif', forgerInspireDe: (s) => ({ sourceId: s.id }) },
+            construireConfigComplete: win.construireConfigComplete,
+            genererIdUnique: (p) => p + 'copie',
+            afficherListePratiques: async () => {}
+        }));
+
+        const id = await ui.dupliquerPratique('std', { nom: 'Copie', silencieux: true });
+        const copie = pratiques.find(p => p.id === id);
+        expect(copie, 'la copie doit être enregistrée malgré l\'échelle introuvable').toBeTruthy();
+
+        echelleRetrouvee = { id: 'ECH', nom: 'Échelle revenue', niveaux: [{ code: 'M', valeur_pourcentage: 85 }] };
+        const config = win.construireConfigComplete(copie);
+        expect(config.echelle.introuvable).toBeUndefined();
+        expect(config.echelle.niveaux).toEqual([{ code: 'M', valeur_pourcentage: 85 }]);
+        avert.mockRestore();
+    });
+});

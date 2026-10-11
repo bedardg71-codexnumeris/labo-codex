@@ -243,6 +243,11 @@ function construireConfigComplete(pratiqueData) {
 
     // Résoudre l'échelle (embarquée ou par référence ID)
     let echelle = config.echelle || pratiqueData.echelle;
+    // #590 (verdict de Cowork, 11 oct.) : la marque `introuvable` posée plus bas voyage dans les
+    // données — « Dupliquer » et « Dériver une variante » embarquent la config résolue. Embarquée,
+    // elle passerait avant toute référence et figerait la copie sur une échelle vide. Elle reste
+    // stockée (la validation de sauvegarde exige `config.echelle`), mais ne vaut pas résolution.
+    if (echelle && echelle.introuvable) echelle = null;
     if (!echelle) {
         // Chercher par ID dans configuration ou config
         const echelleId = pratiqueData.configuration?.echelleId || config.echelleId;
