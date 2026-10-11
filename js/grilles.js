@@ -827,6 +827,18 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     if (!silencieux && isCreation) {
         notifications.succes(`Grille «\u00a0${nomGrille}\u00a0» créée.`);
     }
+
+    // #483 (11 oct. 2026) — des pondérations qui ne font pas 100 % : le geste explicite
+    // (créer, « Sauvegarder la grille ») le CONFIRME, sans bloquer. L'éditeur montrait déjà
+    // le total en couleur ; rien ne le disait au moment d'enregistrer. Même somme que
+    // `calculerTotalPonderationCriteres`. Les sauvegardes automatiques se taisent.
+    const criteresEnregistres = (grilleTemplateActuelle && grilleTemplateActuelle.criteres) || [];
+    if (!silencieux && criteresEnregistres.length > 0) {
+        const totalPonderation = criteresEnregistres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
+        if (totalPonderation !== 100) {
+            notifications.warning(`Grille enregistrée : ses critères totalisent ${totalPonderation}\u00a0%, pas 100\u00a0%.`);
+        }
+    }
 }
 
 /* ===============================
