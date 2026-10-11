@@ -1107,11 +1107,6 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserAccueil();
     }
 
-    // MODULE 11: Gestion du groupe
-    if (typeof initialiserModuleGroupe === 'function') {
-        initialiserModuleGroupe();
-    }
-
     // MODULE 12: Pratiques de notation
     if (typeof initialiserModulePratiques === 'function') {
         initialiserModulePratiques();

@@ -206,15 +206,6 @@ function rafraichirVuesApresCours() {
         }
     }
 
-    // Rafraîchir les statistiques du groupe
-    if (typeof mettreAJourStatistiquesGroupes === 'function') {
-        try {
-            mettreAJourStatistiquesGroupes();
-        } catch (e) {
-            console.warn('   ⚠️ Erreur rafraîchissement statistiques:', e);
-        }
-    }
-
     // Rafraîchir le dropdown V2 si présent (section Réglages)
     if (typeof chargerDropdownCoursV2 === 'function') {
         try {

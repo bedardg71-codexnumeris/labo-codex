@@ -355,7 +355,7 @@ async function chargerListeEtudiantsV2() {
     const rangees = enAnonymisation ? anonymiserDonnees('groupeEtudiants', etudiants) : etudiants;
 
     // Trier par nom — en anonymisation, l'ordre aléatoire d'anonymiserDonnees est gardé
-    // (comme dans groupe.js) : trier sur les pseudonymes ne dirait rien.
+    // (comme dans l'ancien groupe.js, retiré le 11 oct. 2026) : trier sur les pseudonymes ne dirait rien.
     if (!enAnonymisation) {
         rangees.sort((a, b) => {
             const nomA = `${a.nom || ''} ${a.prenom || ''}`.toLowerCase();
@@ -1227,7 +1227,7 @@ function importerFichierEtudiantsV2(event) {
     // Lire d'abord en UTF-8 (cas standard : Excel, exports .csv UTF-8), puis
     // rebasculer en Windows-1252 (Omnivox, Excel français — FIX #49) seulement
     // si on détecte des caractères corrompus. Forcer Windows-1252 cassait les
-    // fichiers UTF-8 (« Ã© » au lieu de « é »). Même logique que groupe.js.
+    // fichiers UTF-8 (« Ã© » au lieu de « é »). Même logique que l'ancien groupe.js (retiré le 11 oct. 2026).
     const reader = new FileReader();
     reader.onload = function(e) {
         const contenu = e.target.result;
