@@ -814,9 +814,8 @@ function genererSectionMobilisationEngagement(da) {
                             const bordure = art.retenu ? '3px' : '2px';
 
                             return `
-                                <div class="badge-artefact"
+                                <div class="badge-artefact hover-opaque"
                                      style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure}; cursor: pointer;"
-                                     class="hover-opaque"
                                      data-action="evaluerProduction" data-param="${da}" data-param2="${art.id}"
                                      title="${echapperHtml(art.description)}">
                                     <span class="badge-artefact-titre" style="color: ${couleurBadge};">
