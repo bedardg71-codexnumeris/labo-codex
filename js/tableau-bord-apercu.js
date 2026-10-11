@@ -1641,7 +1641,7 @@ function horaireSansAucunePeriode(seances) {
  * portfolio ne dit pas son minimum (profil-etudiant-actions.js). L'aperçu cherchait l'id
  * brut, en `.configuration`, `.portfolio` ou `.regles` : sur une pratique importée, ou
  * désignée par un id ancien, il annonçait un autre seuil que celui de la note.
- * ⚠ La bibliothèque PARTAGÉE (`bibliothequePratiques`) n'est toujours pas consultée :
+ * ⚠ La clé `bibliothequePratiques` n'est toujours pas consultée :
  * le moteur ne la lit pas non plus (#626 avait retiré un repli qui ne trouvait rien).
  * G2-b (#436, 9 août 2026) : le miroir `configPAN.portfolio` est retiré du repli — il ne se
  * rafraîchit qu'à l'APPLICATION d'une pratique. `config.portfolio` (racine des modalités) reste.
