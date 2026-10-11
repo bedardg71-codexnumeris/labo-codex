@@ -2090,12 +2090,10 @@ function nommerDefiAvecSOLO(defi) {
  *     `interventions.js`, 0,75 dans `sections-affichage.js` et
  *     `pratique-pan-standards.js`). C'est le point de convergence du §6 de la
  *     consigne #552/#537/#535.
- *   · La branche « Décrochage » ci-dessous N'EST JAMAIS ATTEINTE depuis ici :
- *     `interpreterMobilisation` ne rend ce niveau que si son 3e argument
- *     `statutDecrochage` est vrai, et cet appel ne le passe pas. Le statut
- *     existe pourtant dans le modèle (`trimestre-v2-etudiants.js`). CONSTAT
- *     INSCRIT, PAS CORRIGÉ : brancher un site mort est un geste distinct, qui
- *     demande son propre item.
+ *   · #554 (11 oct. 2026) : la branche « Décrochage » reçoit le statut de la
+ *     fiche (Cadre › Trimestre, `trimestre-v2-etudiants.js`). Rien ne change à
+ *     l'écran aujourd'hui : le seul appelant vivant (`tableau-bord-apercu.js`)
+ *     écarte déjà les élèves exclus (`estEtudiantExclu`) et ne lit que `.pattern`.
  *
  * @param {string} da - Le DA de l'élève
  * @returns {Object} { cible, pattern, niveau, couleur }
@@ -2129,8 +2127,11 @@ function determinerCibleIntervention(da) {
     const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
 
     // La mobilisation prime sur le dépistage : un élève décroché ne se lit pas
-    // dans ses critères. Voir le constat ci-dessus sur l'argument manquant.
-    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
+    // dans ses critères. #554 : le statut vient de la fiche du groupe-cours actif.
+    const fiche = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif().find(e => e.da === da) : null;
+    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100,
+        !!fiche && fiche.statut === 'décrochage');
     if (interpMobilisation.niveau === 'Décrochage') {
         return { cible: 'Décrochage', pattern: M, niveau: 3, couleur: '#9e9e9e' };
     }
