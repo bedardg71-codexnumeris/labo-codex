@@ -135,7 +135,7 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
     let alertes;
     let supprimerTrimestreMock;
     let reponses;   // { confirm: [...], prompt: [...] }
-    let questions;  // les textes passés à confirm()
+    let questions;  // les textes de la confirmation (titre + message)
     let codexAPart; // les phrases passées à Codex.ecrireAPartAvantSuppression
     let codexEcrit; // ce que rend le codex à part
 
@@ -151,9 +151,19 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
             obtenirTrimestreActif: () => REGISTRE().find(t => t.actif),
             supprimerTrimestre: supprimerTrimestreMock,
             Codex: avecCodex ? { ecrireAPartAvantSuppression: async (phrase) => { codexAPart.push(phrase); return codexEcrit; } } : undefined,
-            alert: (msg) => { alertes.push(String(msg)); },
-            confirm: (msg) => { questions.push(String(msg)); return reponses.confirm.shift(); },
-            prompt: () => reponses.prompt.shift()
+            // #1037 (11 oct. 2026) : les fenêtres et notifications de l'application, plus les
+            // natives. `questions` reçoit « titre message » de la confirmation, comme avant.
+            notifications: {
+                succes: (m) => alertes.push(String(m)), erreur: (m) => alertes.push(String(m)),
+                warning: (m, d) => alertes.push(String(m) + ' ' + String(d || '')), info: (m) => alertes.push(String(m))
+            },
+            uiDialogues: {
+                confirmerAction: async (o) => { questions.push(o.titre + ' ' + o.message); return reponses.confirm.shift(); },
+                demanderSaisie: async () => reponses.prompt.shift()
+            },
+            alert: () => { throw new Error('alert natif appelé (#1037)'); },
+            confirm: () => { throw new Error('confirm natif appelé (#1037)'); },
+            prompt: () => { throw new Error('prompt natif appelé (#1037)'); }
         });
     }
 
@@ -177,6 +187,17 @@ describe('#361 · confirmerSuppressionTrimestre (parcours UI, trimestre-v2-liste
         expect(supprimerTrimestreMock).not.toHaveBeenCalled();
         expect(codexAPart).toEqual([]);
         expect(questions).toEqual([]);
+    });
+
+    it('« Annuler » à la confirmation : ni ressaisie du nom, ni suppression (#1037)', async () => {
+        reponses.confirm = [false];
+        reponses.prompt = ['Automne 2024'];
+
+        await win.confirmerSuppressionTrimestre('a2024');
+
+        expect(questions.length).toBe(1);
+        expect(reponses.prompt).toEqual(['Automne 2024']);   // la saisie n'a pas été demandée
+        expect(supprimerTrimestreMock).not.toHaveBeenCalled();
     });
 
     it('nom ressaisi inexact → suppression annulée', async () => {

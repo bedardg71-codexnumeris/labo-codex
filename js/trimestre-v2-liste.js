@@ -181,7 +181,8 @@ function ouvrirBibliothequeTrimestreV2() {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
 
     if (trimestres.length === 0) {
-        alert('Aucun trimestre dans la bibliothèque.\n\nCliquez sur "+ Nouveau trimestre" pour en créer un.');
+        // #1037 (11 oct. 2026) : la notification de l'application, mêmes mots.
+        notifications.info('Aucun trimestre dans la bibliothèque.', 'Cliquez sur "+ Nouveau trimestre" pour en créer un.');
         return;
     }
 
@@ -309,15 +310,18 @@ async function confirmerSuppressionTrimestre(id) {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const trimestre = trimestres.find(t => t.id === id);
 
+    // #1037 (11 oct. 2026) — « Supprimer… » parle par les fenêtres et les notifications de
+    // l'application, plus par alert/confirm/prompt ; les mots sont ceux d'avant. « Clore » et
+    // « Rouvrir » gardent les leurs : l'archivage est sous moratoire (#622).
     if (!trimestre) {
-        alert('Trimestre non trouvé');
+        notifications.erreur('Trimestre non trouvé');
         return;
     }
 
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
     if ((trimestreActif && trimestreActif.id === id) || trimestre.actif === true) {
-        alert(
-            'Le trimestre actif ne peut pas être supprimé.\n\n' +
+        notifications.warning(
+            'Le trimestre actif ne peut pas être supprimé.',
             'Active un autre trimestre d\'abord, ou clos-le pour le conserver en lecture seule.'
         );
         return;
@@ -331,26 +335,29 @@ async function confirmerSuppressionTrimestre(id) {
     if (!ecrit) return;
 
     // Mots validés par Grégoire le 1er oct. 2026 ; la phrase sur le codex à jour est retirée (#1007).
-    const continuer = confirm(
-        `Supprimer définitivement le trimestre « ${trimestre.nom} » ? ` +
-        `Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.`
-    );
+    const continuer = await uiDialogues.confirmerAction({
+        titre: `Supprimer définitivement le trimestre « ${trimestre.nom} » ?`,
+        message: 'Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.',
+        texteConfirmer: 'Supprimer',
+        variante: 'danger'
+    });
     if (!continuer) return;
 
     // Confirmation forte : ressaisir le nom exact du trimestre
-    const saisie = prompt(
-        `Confirmation finale — cette action est IRRÉVERSIBLE.\n\n` +
-        `Pour supprimer "${trimestre.nom}" et toutes ses données, retape son nom exactement :`
-    );
+    const saisie = await uiDialogues.demanderSaisie({
+        titre: 'Confirmation finale — cette action est IRRÉVERSIBLE.',
+        message: `Pour supprimer "${trimestre.nom}" et toutes ses données, retape son nom exactement :`,
+        texteConfirmer: 'Supprimer'
+    });
     if (saisie === null) return; // annulé
     if (saisie.trim() !== trimestre.nom) {
-        alert('Le nom saisi ne correspond pas. Suppression annulée.');
+        notifications.erreur('Le nom saisi ne correspond pas. Suppression annulée.');
         return;
     }
 
     supprimerTrimestre(id).then(function(result) {
         if (result.success) {
-            alert(`Trimestre "${trimestre.nom}" supprimé (${result.nbCles} clés de données effacées).`);
+            notifications.succes(`Trimestre "${trimestre.nom}" supprimé (${result.nbCles} clés de données effacées).`);
             populerDropdownTrimestreV2();
             // Rafraîchir la modale bibliothèque si elle est ouverte
             if (document.getElementById('modalBibliothequeTrimestres')) {
@@ -358,10 +365,10 @@ async function confirmerSuppressionTrimestre(id) {
                 ouvrirBibliothequeTrimestreV2();
             }
         } else {
-            alert(`Erreur : ${result.error}`);
+            notifications.erreur(`Erreur : ${result.error}`);
         }
     }).catch(function(e) {
-        alert(`Erreur : ${e.message}`);
+        notifications.erreur(`Erreur : ${e.message}`);
     });
 }
 
