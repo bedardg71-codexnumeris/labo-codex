@@ -24,3 +24,9 @@ describe('#469 · la grappe de la note finale configurable ne revient pas', () =
         expect(src).toMatch(/this\.appliquerDoubleVerrou\(/);
     });
 });
+
+describe('#469 · initialiserPratiquesPredefines ne revient pas', () => {
+    it('elle n\'est définie nulle part dans js/ (aucun appelant au retrait, 11 oct. 2026)', () => {
+        expect(tous).not.toMatch(/initialiserPratiquesPredefines\s*\(\s*\)\s*\{/);
+    });
+});
