@@ -1,30 +1,56 @@
-# Consigne du jour – lot 8 : le Cadre, les petits défauts sans décision (sur une branche)
+# Consigne du jour – une série de lots, une seule vérification à la fin
 
-> Écrite par Cowork le 11 octobre 2026 à 8 h 58 (Toronto, mesurée par `date`). Remplace la consigne du lot 7, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lot7.md`. **La release du soir est décrite dans les deux archives `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lots5-6.md` et `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lot7.md` : relis-les au signal de Grégoire.** Tu peux commiter ce fichier sur `main` avant de créer la branche.
+> Écrite par Cowork le 11 octobre 2026 à 11 h 37 (Toronto, mesurée par `date`). L'ancienne consigne de `main` est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lot8-main.md`. La consigne du lot 8 et ses ajouts (verdict, item des Nouvelles) vivent sur `lot8-cadre` (`5415b265`). Tu peux commiter ce fichier.
 
-## Décision de Grégoire (11 oct., vers 8 h 55, de vive voix)
+## Où on en est
 
-**La release de ce soir ne porte que les lots 5, 6 et 7** (`main` jusqu'à `479c37f6` plus le commit de ce fichier). **Le lot 8 se code maintenant, sur une branche `lot8-cadre` partie de `main`**, avec sa relecture ; il ne rejoint `main` qu'**après** la mise en ligne de ce soir, et sera mis en ligne demain, à part. Motif : si le verdict du soir rougit, on sait dans quel paquet chercher.
+1.198.0 en ligne (11 h 26, lots 5, 6, 7). Le lot 8 (le Cadre, et la fiche urgente « Recalculer les captures », #1049) est relu et accepté sur `lot8-cadre`.
 
-Au signal du soir : reviens sur `main` avant la release ; aucun commit du lot 8 ne doit y être.
+## La méthode (décisions de Grégoire du 11 oct., règle 7 de `PROTOCOLE.md`)
 
-## Rappels
+Les lots s'enchaînent dans la journée : pour chacun, **remesure d'abord**, commits séparés, break-tests, Vitest complet, demande de relecture, **arrêt** pour la relecture de Cowork, corrections. Puis le lot suivant, sur feu vert de Cowork. **Aucun verdict Playwright ni release** tant que Grégoire n'a pas donné son signal ; alors, une seule release groupe tout ce qui a été relu, avec un seul verdict complet.
 
-Cadence : pas de verdict ni de release dans la journée. « Sans Grégoire » : aucune décision de pédagogie, **aucune écriture dans des données déjà écrites chez l'utilisateur**, aucune zone protégée (`js/config.js`, `js/navigation.js`, `noms_stables.json`), **aucune suppression de données d'utilisateur**. Les mots d'écran neufs reviennent à Grégoire, par Cowork.
+« Sans Grégoire » : aucune décision de pédagogie, **aucune écriture dans des données déjà écrites chez l'utilisateur** (le stock s'écrit et s'assume), aucune zone protégée (`js/config.js`, `js/navigation.js`, `noms_stables.json`), aucune suppression de données d'utilisateur. Un mot d'écran neuf : écris-le dans le code, cite-le, Cowork le soumet à Grégoire. Un lot qui dépasse ce qu'on peut relire d'un coup se coupe : livre la moitié sûre, inscris le reste avec la mesure.
 
-## Lot 8 – ce qu'il fait
+## Étape 0 – le lot 8 rejoint main
 
-**Remesure d'abord** chaque fiche au code actuel : elles datent d'août (audit Cadre, `TRIAGE-audits-2026-08-21.md`), et le lot E2 du 28 sept. en a déjà réglé une partie (`DEMANDE-RELECTURE-2026-09-28-lot-E2-cadre-eleves.md`, ligne de #477). Une fiche morte se ferme sur sa preuve.
+Fusionne `lot8-cadre` dans `main` (sans release). Vitest complet sur le résultat. Le lot 8 partira avec la prochaine release ; ses Nouvelles sont dans `5415b265`.
 
-1. **#477** – annuler un horaire qui colle (« Fermer » ne vide pas l'horaire mémorisé), trimestres en double, schéma de l'outil de diagnostic. **Les doublons se règlent à la lecture** (dédoublonner ce qu'on affiche et ce qu'on calcule) ; la liste des trimestres enregistrée n'est pas réécrite.
-2. **#472** – le nom du groupe-cours recalculé à l'affichage, et la carte et l'en-tête rafraîchis après l'enregistrement d'un horaire ou d'un cours.
-3. **#474** – « mon profil » ne doit plus être remplacé par le dernier profil d'enseignant modifié : un marqueur explicite. **Sans la purge** : la fiche demande aussi d'effacer `profilEnseignant` à la suppression d'un profil ; ne le fais pas (suppression de donnée), inscris-le à la fiche pour Grégoire.
-4. **#475** – le compteur « X/5 configurés » ne compte une référence que si ce qu'elle désigne existe.
-5. **#1018** – « Clore » offert sur le trimestre actif, puis toujours refusé. **Décision de Cowork : retirer l'offre** sur le trimestre actif (un geste qui ne peut que refuser ne s'offre pas ; aucun mot neuf). Si le retrait laisse le menu vide ou bancal, écris-le et arrête-toi sur cette fiche.
-6. **#990** – au démarrage, la saisie des présences s'initialise avant que le trimestre soit connu : elle doit attendre `db-ready` (famille de #142) et ne plus écrire de clés nues. **Le stock** (les clés nues déjà écrites chez Grégoire : `calendrierComplet`, `presences_date`, `presences_groupe`, `presences_tri`) **ne se nettoie pas** : assumé, écrit à la fiche. Banc sous WebKit, la sonde de la fiche (« trimestres » hors du localStorage).
+## La source des lots suivants
 
-**Aucun mot d'écran changé.** Si un correctif en demande un, écris-le dans le code et cite-le.
+La remesure du 11 oct. des 69 fiches qui attendaient Grégoire, faite en lecture seule par une session du nuage : `git fetch origin claude/inspiring-mccarthy-99htj8` puis `git show FETCH_HEAD:"plans de travail/DECISIONS-A-PRENDRE-2026-10-11.md"`, section « Sans décision réelle (21) ». Elle a été faite sur 1.197.0 : remesure chaque fiche sur `main` avant d'y toucher. Ne copie pas ce fichier dans `main` (Cowork s'en charge).
 
-## Puis arrête-toi
+## Lot 9 – les échelles et les cartouches qui disent juste
 
-Commits séparés **sur `lot8-cadre`**. Vitest complet. Demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot8-cadre.md` (sur la branche). Rapport court à Grégoire en gestes d'utilisateur, une ligne par supposition, ta proposition d'un item de Nouvelles (pour la release de demain). Pas de release, pas de fusion dans `main`.
+1. #590 – retirer l'échelle de repli écrite en dur et reconnaître les anciens identifiants d'échelle (option A, déjà tranchée).
+2. #574 – un niveau d'échelle neuf tenu en attente au lieu de valeurs inventées (principe tranché le 28 août).
+3. #656 – l'échelle d'une cartouche copiée d'un autre trimestre rattachée comme à l'import (patron du lot 3).
+4. #634 – l'aperçu lit le seuil du portfolio par la même résolution que la note.
+
+## Lot 10 – les élèves et les interventions
+
+1. #554 – le statut « décrochage » branché jusqu'à la cible d'intervention.
+2. #838 – un élève déjà inscrit à un cours entre aussi dans le service.
+3. #792 – le contrôle « Mesure d'aide » à l'écran, à côté de SA ; avec la trouvaille 4 du rapport du nuage (`js/groupe.js` ≈ 756-762, champ `etudiantCAF` absent de la page) : mesure si la fonction est morte.
+4. #548 – marquer le trimestre sur chaque **nouvelle** production, pour remettre en marche la garde contre les travaux mal rangés. Les productions déjà écrites ne sont pas réécrites : la garde doit tolérer leur absence de marque, et c'est écrit.
+5. #854 – le formulaire de gestion écrit les jetons là où le calcul les lit. Croise avec #938 (lot 4) : l'assistant garde désormais ce qu'il n'édite pas ; vérifie que les deux chemins s'accordent.
+
+**Hors de la série** : #1043 (ranger les jetons et jugements de dénotation par trimestre en copiant le stock) écrit dans les données existantes : il attend Grégoire.
+
+## Lot 11 – le confort, sans mot neuf
+
+1. #241 – « P sans reprises » sur les courbes d'intervention.
+2. #865 – doubles attributs de classe dans cinq gabarits.
+3. #324 (morte au sens du rapport) – la ligne « Reprises » du Comparateur dit encore « Non permises » pour une sommative : aligne-la sur la décision #903. **C'est un mot d'écran** : écris la phrase proposée, Cowork la soumet.
+
+## Lot 12 – le code mort
+
+#469 (le gros stock : vieilles pratiques de test, ancienne notation v2, vieux horaires, outil de diagnostic), #641, #688, #1047, la fonction `comptesDansDepistage` (`portfolio.js`, versée à #469 le 11 oct.). Rien ne change à l'écran ; chaque retrait prouvé par une recherche d'appelants **et** par Vitest. #469 est laborieuse : coupe-la si elle déborde.
+
+## Lot 13 – la documentation
+
+#471 (documentation technique et registre des données), #804 (documentation des pratiques de notation), le volet documentation de #629, #989 (le codex data : « prévu, non codé »), et la ligne `BACKLOG.md` de #476 qui dit encore « dû par Grégoire » (relevé du 26 août : sans objet). Motif à garder en tête : une personne qui reprendrait le code doit pouvoir s'y fier (rencontre du 23 sept. avec le service informatique).
+
+## Après chaque lot
+
+Arrête-toi : demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lotN-<sujet>.md`, rapport court à Grégoire en gestes d'utilisateur (numéros entre parenthèses en fin de ligne), une ligne par supposition, ta proposition d'**un item** de Nouvelles. Ne commence le lot suivant qu'au feu vert de Cowork, transmis par Grégoire.
