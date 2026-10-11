@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 11 OCTOBRE 2026 À 11 h 26 : 1.198.0 (mesurée chez Netlify sur `21228642` ; verdict complet vert) — MOINS DE MÉMOIRE, DES COMPTES JUSTES**
+
+**Ce que tu verras** :
+- « Exporter une sélection » et « Ouvrir une archive… » ne chargent plus tout le fichier en mémoire : l'iPad est ménagé (#991, #1025).
+- Sous Chrome, une mise à jour du codex longue à préparer affiche « Ton codex est prêt » et demande un clic sur « Enregistrer », au lieu de finir sur « Codex non mis à jour » ; la fenêtre dit maintenant « Appuie sur » (#995).
+- Le taux de remise du dernier travail d'un groupe, dans le suivi hebdomadaire, ne dépasse plus 100 % (#726) ; l'étape 3 d'un groupe-cours compte les élèves du seul cours choisi (#925).
+- Importer une sélection depuis une sauvegarde récente propose ses grilles, échelles, pratiques et cartouches, rangées dans le trimestre ouvert (#1046).
+- Onze gestes plus rares (import par cases, archives) ne s'effacent plus l'un l'autre quand ils se suivent de près (#522).
+
+**Vérifié comment** : mesures au banc sous WebKit (pic de mémoire de 6,4 Go à celui du repos pour l'export, de 1,3 Go à celui du repos pour l'ouverture d'archive), vrai Chrome pour le toucher (refus reproduit avant, fenêtre ouverte après), bancs d'aller-retour et de comportement relus par Cowork ; Vitest complet et suite Playwright complète vertes sur le commit poussé.
+
+**Tes données** : rien n'est réécrit. Les relevés hebdomadaires déjà capturés gardent leur ancien taux de remise ; seuls les nouveaux suivent la règle corrigée.
+
+**Ce qui attend, sur une branche (`lot8-cadre`, relue par Cowork, en ligne demain)** : ⚠ **« Recalculer les captures » efface encore les captures d'intervention dans la version en ligne : ne clique pas sur ce bouton d'ici demain** (#1049) ; et les petits défauts du Cadre (« Clore » sur le trimestre actif, noms des groupes-cours, compteur « X/5 », « mon profil », saisie des présences sur l'iPad).
+
+**Ce qui te revient** : un formatif compte dans C (tranché ce matin, rien changé) ; effacer « mon profil » quand on le supprime (#474, dans la liste des décisions de Cowork).
+
 ✅ **EN LIGNE LE 10 OCTOBRE 2026 À 17 h 22 : 1.197.0 (mesurée chez Netlify sur `16e3cbe5` ; verdict complet vert) — RIEN NE SE PERD EN SILENCE**
 
 **Ce que tu verras** :

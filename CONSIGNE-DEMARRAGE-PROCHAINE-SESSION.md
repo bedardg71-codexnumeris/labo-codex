@@ -1,5 +1,12 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 11 octobre 2026, 11 h 26 (Toronto) : `1.198.0` EN LIGNE** (build `1011-1014`) — Netlify
+> `6acbaa82`, `commit_ref` `21228642`, `state: ready`, publié à 15:26:05 Z. Verdict Playwright complet vert sur `21228642` (code 0,
+> 0 échec connu, aucun instable, 0 veille, sur secteur). **Lots 5, 6, 7 de la file LIVRÉS** (« Moins de mémoire, des comptes justes »).
+> **Nouvelle cadence (règle 7 de `PROTOCOLE.md`)** : les lots le jour, une seule release et un seul verdict au signal de Grégoire.
+> **Lot 8 sur la branche `lot8-cadre`** (accepté par Cowork ; #1049 urgent dedans). **MANDAT COURANT** : fusionner `lot8-cadre`,
+> release suivante au signal, puis la file, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 10 octobre 2026, 17 h 22 (Toronto) : `1.197.0` EN LIGNE** (build `1010-1549`) — Netlify
 > `6acaac76`, `commit_ref` `16e3cbe5`, `state: ready`, publié à 21:22:09 Z. Verdict Playwright complet vert sur `16e3cbe5` (code 0,
 > 0 échec connu, aucun instable, 0 veille, sur secteur ; un premier passage, sur batterie, avait été invalidé par une veille et arrêté).
