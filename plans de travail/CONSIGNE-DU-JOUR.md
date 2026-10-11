@@ -52,3 +52,40 @@ Après le lot 5 : arrête-toi, demande de relecture `plans de travail/DEMANDE-RE
 Change seulement ce mot (`js/codex.js`, `toucherFrais`), et tout banc qui cite l'ancienne phrase. Un commit à part, avec la décision dans son message.
 
 **Puis le lot 6**, tel qu'écrit plus haut. Arrête-toi après lui : demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot6-nombres.md`, rapport court, et ta proposition d'**une seule** entrée de Nouvelles pour les lots 5 et 6. Pas de release avant la relecture du lot 6.
+
+## Ajout de Cowork (8 h 18) – verdict du lot 6, et décision de Grégoire sur #727
+
+**Lot 6 accepté sans correction.** Relus : `03d24786` (« Appuie sur »), `705a4750` (#726), `f31a6643` (#728), `2deb4e8a` (#925), `9bbd4fe2`. #728 : ta mesure est confirmée par Cowork (`interventions.js`, libellé « Durée (périodes) », `heures = dureeIntervention`) ; la fiche se ferme sur la mesure.
+
+**Décision de Grégoire (11 oct., 8 h 18) sur #727 : « un formatif compte dans C ».** La règle actuelle reste, dans le C du jour comme dans l'historique. Motif retenu : C mesure ce que l'élève remet de ce qui est demandé ; ce qui sort un travail du compte, c'est « facultatif », pas sa fonction formative. #727 se ferme sur cette décision, sans changement de calcul. La fonction que rien n'utilise et qui suit la règle inverse : inscris-la au BACKLOG pour le lot du code mort (#469), ne la retire pas dans ce lot.
+
+Les Nouvelles suivent dans un ajout séparé, après la décision de Grégoire. Ne lance pas la release avant.
+
+## Ajout de Cowork (8 h 19) – la release commune des lots 5 et 6
+
+**Nouvelles retenues par Grégoire (11 oct., 8 h 19)**, une entrée, deux items, mots exacts (espaces insécables avant les points-virgules, comme ailleurs) :
+- Titre : « Moins de mémoire, des comptes justes »
+- Item 1 : « Exporter une sélection et ouvrir une archive ménagent la mémoire de l'iPad ; sous Chrome, une longue mise à jour du codex demande un clic au lieu d'échouer. »
+- Item 2 : « Le taux de remise d'un groupe ne dépasse plus 100 %, et l'étape 3 d'un groupe-cours compte les élèves du seul cours choisi. »
+
+Dans cet ordre :
+1. Inscris au BACKLOG ce que demande l'ajout précédent (#727 close sur la décision, la fonction inverse pour #469), commit de documentation.
+2. `node scripts/release.mjs minor`, l'entrée ci-dessus dans `js/changelog-data.js`, commit de release.
+3. **Un seul verdict complet** sur le commit de release : `cd tests && npm test`, Chrome, Safari et Cowork fermés, **Mac sur secteur**. Si un banc fige l'ancien comportement : mise à jour avec sa raison écrite, vérifier qu'il peut encore échouer, nouveau verdict complet. Si un échec vient d'un lot, nomme le lot.
+4. Push seulement si vert. Puis Netlify `ready` sur le bon `commit_ref`, heure par `TZ=America/Toronto date` ; BACKLOG (#991, #1025, #995, #726, #925, #728, #727 livrées ou closes ; #996 ouverte) ; `OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `RELAIS.md`.
+
+Rapport court : la version en ligne, l'heure, le verdict, et le geste que Grégoire peut voir à l'écran (s'il y en a un sur ses vraies données). Puis arrête-toi.
+
+## Ajout de Cowork (8 h 26) – nouvelle cadence des verdicts, décision de Grégoire du 11 oct.
+
+**Elle remplace l'étape 3 de l'ajout précédent (« un seul verdict complet » tout de suite) : la release des lots 5 et 6 attend.**
+
+Décision de Grégoire (11 oct., matinée, de vive voix) : le verdict Playwright mobilise tout son Mac pendant une heure et l'empêche de travailler en parallèle. Désormais :
+
+- **Pendant la journée**, les lots s'enchaînent, chacun avec sa relecture croisée par Cowork, ses break-tests et Vitest complet. Aucun verdict Playwright, aucune release.
+- **Le soir**, une seule release groupe tout ce qui a passé la relecture dans la journée, avec **un seul** verdict complet sur le commit de release. **Tu ne lances ni la release ni le verdict tant que Grégoire n'a pas dit que sa journée est finie** et que Chrome, Safari et Cowork sont fermés. D'ici là, tu accumules les lots relus et tu attends.
+- **La nuit** : Grégoire laisse le Mac ouvert, branché, sans mise en veille ; le verdict peut tourner pendant qu'il dort. Un Mac endormi ou sous pression mémoire fait échouer le verdict ou redémarrer la machine : vérifie le secteur et la charge avant de lancer, et dis-le s'ils ne conviennent pas.
+- **Exception** : un défaut gênant peut aller en ligne tout de suite, à la demande de Grégoire, avec son verdict à ce moment-là. Un lot qui touche une zone sous les règles de sécurité (`import-export.js`, `db.js`, `travaux-stockage.js`) garde son verdict obligatoire : il attend simplement celui du soir.
+- **À inscrire dans `PROTOCOLE.md`** (règle 7, la cadence des verdicts) dans le commit de documentation de la prochaine release, pour que toute session la tienne sans qu'il ait à la redemander.
+
+**Pour maintenant** : fais l'étape 1 de l'ajout précédent (BACKLOG : #727 close, la fonction inverse pour #469). Puis arrête-toi : la release des lots 5 et 6 et leur verdict attendent le signal de fin de journée de Grégoire. Cowork t'enverra entre-temps la consigne du lot suivant.
