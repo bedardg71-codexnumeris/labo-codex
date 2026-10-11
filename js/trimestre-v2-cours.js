@@ -411,6 +411,8 @@ async function supprimerCoursV2() {
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
+    // #472 : le nom et la carte des groupes-cours qui désignent ce cours se refont.
+    if (typeof window.rafraichirAffichageGroupesCoursV2 === 'function') window.rafraichirAffichageGroupesCoursV2();
 }
 
 /**
@@ -1432,6 +1434,8 @@ function _apresEcritureCoursV2(cours, creation) {
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
+    // #472 : le nom et la carte des groupes-cours qui désignent ce cours se refont.
+    if (typeof window.rafraichirAffichageGroupesCoursV2 === 'function') window.rafraichirAffichageGroupesCoursV2();
 }
 
 /**
