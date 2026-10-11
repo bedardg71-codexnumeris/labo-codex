@@ -80,3 +80,143 @@ Ceci remplace « Après chaque lot » et le dernier paragraphe du verdict du lot
 - Toujours **aucun push, aucune release, aucun verdict Playwright** (règle 7).
 
 **À la fin du lot 13, un seul arrêt** : rapport court à Grégoire, un paragraphe par lot en gestes d'utilisateur (les numéros entre parenthèses en fin de ligne), une ligne par supposition, un item de Nouvelles proposé par lot. Cowork relit les quatre lots et la correction ; les corrections suivent ; puis la release groupée et le verdict complet, au signal de Grégoire.
+
+## Ajout de Cowork (15 h 17) – verdict des lots 10 à 13 et de la correction de #590
+
+**Série acceptée, une correction avant la release.** Relus : `b5774567` à `95f665f9` (22 commits). Tes suppositions des quatre lots sont retenues. Tes trois coupures du lot 10 (#838, #548, #854) sont justes : elles vont dans la liste des décisions de Grégoire, Cowork s'en charge. Le défaut de découpage de `18e4253f` / `ee9a0e1d` est accepté tel quel (rien n'est poussé ; c'est écrit dans ta demande). Mon remède du verdict du lot 9 était faux (la validation exige `config.echelle`) : ton remède à la lecture est le bon.
+
+**Correction (#590, `b5774567`) : le repli sur `echelle_id` de la marque n'était pas redondant, il faut le remettre.** Ta mutation survivait parce que l'essai F ne couvre que la forme `configuration.echelleId`. Cas réel : une pratique **importée sous la forme `.config`** (#712, schéma d'import `echelleId` en `config`) dont l'échelle est introuvable, puis « Dupliquer ». La copie reçoit `config` = la config résolue, qui ne porte pas `echelleId` (le `return` de `construireConfigComplete` ne le recopie pas), et `configuration` vide. Avec la marque écartée, plus aucune référence : `echelle` reste vide et `PratiqueConfigurable` lève « Champ obligatoire manquant : echelle ». La copie s'enregistre, puis ne se charge plus ; avant ton correctif, elle se chargeait sans niveaux. Remède : quand la marque est écartée, son `echelle_id` sert de référence si ni `configuration.echelleId` ni `config.echelleId` n'existe. Un essai sur la forme `.config`, et la mutation qui survivait doit rougir.
+
+**RELAIS.md** : réécrit par Cowork (15 h 17), le travail vit sur le `main` local, 41 commits devant `origin/main` ; `lot8-cadre` n'a plus rien qui ne soit sur `main`.
+
+**Mots d'écran et items des Nouvelles** : soumis à Grégoire ; sa décision te sera transmise ici.
+
+**Après la correction** : commit, une ligne dans la demande du lot 10, et arrêt. La release attend le signal de Grégoire.
+
+**Décision de Grégoire (15 h 18) : la phrase « Reprises » du Comparateur (#324) et les légendes « P sans reprises · <titre> » / « P sans reprises · contrôle » (#241) sont retenues telles quelles.** Les items des Nouvelles lui seront soumis avec la release.
+
+## Ajout de Cowork (15 h 22) – la série suivante : lots 14 à 19
+
+**Source** : les fiches sans décision des deux mesures du 9 oct. (`MESURE-2026-10-09-fiches-rapides-et-intermediaires.md`, `MESURE-2026-10-09-fiches-a-trier.md` § 2), moins celles faites depuis. Toutes sont encore `[ ]` au BACKLOG (relevé de Cowork à 15 h 22). Ordre : d'abord la robustesse des données, puis la logique, puis le confort et l'outillage. **Remesure chaque fiche sur `main` avant d'y toucher** : la mesure date de 1.193.0.
+
+**Méthode** : celle des lots 10 à 13 (ajout de 13 h 32), inchangée. Tu commences après la correction de #590, sans attendre de feu vert ; tu enchaînes les six lots ; une demande de relecture par lot ; **un seul arrêt, à la fin du lot 19**. Mêmes limites « sans Grégoire ». Toujours aucun push, aucune release, aucun verdict Playwright.
+
+### Lot 14 – les liens entre pratiques et échelles qui tiennent
+- #663 – une archive rouverte : la pratique garde l'ancien lien vers son échelle.
+- #627 – Réserve ouverte ou import en double : les liens pratiques ↔ échelles (la table `remapCartouches` existe, celle des échelles ?).
+- #586 – dupliquer une échelle (barre latérale, bibliothèque) garde son identifiant : deux jumelles confondues.
+- #580 – l'échelle venue de la pratique active perd en route ce qui n'est pas ses niveaux.
+- #579 – une pratique ancienne qui porte sa propre échelle (`config.echelle`) ne peut pas recevoir de repères.
+- #793 – après un import de cartouches, d'échelles, de pratiques ou de productions, rien ne montre ce qui est arrivé (les grilles le font déjà : même geste).
+Prolonge le lot 9 et la règle d'import du lot 3. Source seulement : les liens déjà écrits chez l'utilisateur ne sont pas réécrits, et c'est dit.
+
+### Lot 15 – rien ne s'écrit ni ne se perd en silence
+- #1040 – des clés se réécrivent à l'identique à chaque ouverture.
+- #646 – l'évaluation en cours rangée à deux endroits sous un même nom.
+- #653 – la fenêtre de suppression peut réafficher les avertissements d'une suppression précédente.
+- #1015 – retirer un type de travail ou un forfait PAN sans question alors que des évaluations l'emploient : mesure d'abord ; s'il y en a, la même fenêtre que les autres suppressions (décision de Grégoire du 4 oct., sans repasser par lui).
+- #624 – supprimer une échelle ou une grille peut laisser des évaluations sans référence : mesure et garde à la source ; rien n'est rattaché après coup (les notes d'A2025 et d'H2026 ne sont pas rouvertes).
+
+### Lot 16 – les interventions et le calendrier
+- #978 – une intervention modifiée après sa complétion : les présences ne suivent pas.
+- #729 – une intervention après la dernière séance : sa courbe part du tout début.
+- #582 – la comparaison horaire ↔ devis suppose une période d'une heure.
+- #430 et #428 – deux nettoyages provisoires échus en septembre (reprise des anciennes activités de planification, vieille archive de notes de leçon) : à retirer s'ils n'ont plus rien à traiter ; s'ils peuvent encore trouver des données anciennes chez quelqu'un, dis-le et laisse.
+
+### Lot 17 – des fenêtres qui parlent comme l'application
+- #1037 – la bibliothèque des trimestres parle par les fenêtres d'alerte du navigateur.
+- #951 – l'avertissement avant d'exporter un partage n'a aucune mise en forme.
+- #783 – le titre de la colonne « Présence » existe en deux versions.
+- #633 – fermer le formulaire d'une production ne fait pas la même chose selon le bouton.
+- #483 – des pondérations qui ne font pas 100 % : confirmer, et ne plus compter en silence.
+- #536 – « pas de donnée » au lieu de 0 quand aucun niveau n'est convertible.
+Garde les mots existants quand une alerte devient une notification. Les mots neufs (#483, #536) : écrits dans le code, cités dans la demande.
+**Hors de ce lot** : #678 (les 46 alertes du tutoriel) est laborieuse ; ne l'ouvre que si le lot reste petit, sinon inscris la mesure.
+
+### Lot 18 – le code mort, la suite
+- #469, ce que tu as coupé au lot 12 : `pratique-notation-v2.js` (et ses dix fichiers de test), l'îlot de `pratiques.js`, la grappe `calculerNoteFinale`, `initialiserPratiquesPredefines`, l'ancienne génération des grilles, échelles et cartouches, l'outil de diagnostic I14.
+- #628 – le faux sélecteur de grilles et sa fonction.
+- #722 – l'ancien panneau de détail du portfolio.
+- #791 – probablement morte avec `groupe.js` : mesure et ferme.
+- #689 – deux fonctions « Générique » qui créent du matériel « de départ » : le nom suit.
+- #587 – les homonymes qui restent (la dernière chargée gagne).
+Coupe encore si ça déborde ; chaque retrait prouvé par grep d'appelants et Vitest.
+
+### Lot 19 – l'outillage qui dit vrai
+- #685 – le test « semer puis noter » qui ne réussit parfois qu'au second essai.
+- #616 – des sentinelles qui lisent le code « à N caractères ».
+- #642 et #679 – un nom caché par un paramètre ; un style employé jamais défini : un détecteur chacun.
+- #784 – aucun test ne repère un bouton placé dans une zone redessinée.
+- #595 – des couleurs appelées par un nom qui n'existe pas (71 noms tolérés).
+- #980 – le script d'envoi juge la branche courante, pas celle demandée.
+- #979 et #955 – les essais planifiés de GitHub : mesure, puis répare ou retire.
+Rien ne change à l'écran, sauf #595 (des couleurs qui reviennent) : décris ce qui change.
+
+**Écartées de la série**, parce qu'elles reviennent à Grégoire : #588 et #696 (des mots à écrire), #439 (le contenu de deux guides), #997 et #682 (ses données), #721 (déplace le stock des jetons), #690 (le contenu des pratiques prédéfinies), #1004 (son Chrome), #1019 (supprimerait des fichiers de copies). Laborieuses gardées pour une série suivante : #465, #470, #522 (s'il reste quelque chose), #584, #596, #598, #602, #615, #678, #738.
+
+**À la fin du lot 19** : le rapport court à Grégoire, comme pour les lots 10 à 13.
+
+**Cowork (15 h 22) : correction de #590 relue (`ed6d4a76`), acceptée.** Les lots 8 à 13 sont prêts pour la release, au signal de Grégoire.
+
+## Ajout de Cowork (17 h 29) – verdict des lots 14 à 19
+
+**Série acceptée sous condition : une correction bloquante et cinq à faire, puis arrêt.** Relus : `eec2354d` à `99df924a` (35 commits), en relecture adverse par lot. Tenus et vérifiés : les retraits du lot 18 (aucun appel restant, y compris aux noms de `pratique-notation-v2.js` ; #587 garde bien la version qui gagnait), #536, #951, #783, #653, #624, #729, #1015, #595, les quatre cliquets (non tautologiques, ils retrouvent exactement leur figé), et la suppression d'un trimestre par les fenêtres de l'application (focus sur « Annuler », Échap et clic hors fenêtre n'effacent rien, `await` avant `supprimerTrimestre`, codex écrit avant). Tes suppositions sont retenues ; tes cinq questions à Grégoire lui seront soumises une à la fois.
+
+### Bloquant
+
+**1. #1040 : `setSyncSiChange` saute l'écriture quand l'appelant a modifié en place l'objet lu.** Au-dessus de 25 Ki, `getSync` rend l'objet de `memoryCache` **par référence** (`db.js` ≈ 1652). `portfolio.js` (≈ 394, 436, 497) lit `indicesCP`, le modifie en place, puis appelle `setSyncSiChange` : la relecture rend le même objet, le JSON est identique, `'inchange'`, aucune écriture IndexedDB. L'écran reste juste dans la séance, mais IndexedDB et le codex gardent l'ancien C/P. Le seuil tombe vers 160 élèves cumulés dans le trimestre : probable chez Grégoire. Remède : dans `setSyncSiChange`, écrire quand `actuel === value` (même référence : on ne peut rien conclure). Un essai par le vrai `db.js` avec une valeur > 25 Ki, modifiée en place ; break-test.
+
+### À corriger
+
+**2. #580 : les menus et le calcul ne lisent plus la même échelle.** `evaluation-chargement.js` ≈ 1056 et 1274 passent par `obtenirEchelleResolue` (qui reconnaît `idOriginal`), mais le calcul (`evaluation-calcul.js` ≈ 1437) et la garde d'enregistrement (`evaluation-chargement.js` ≈ 2059) restent sur l'id exact. Une évaluation qui désigne une échelle par son ancien id voit ses niveaux dans les menus, mais sa note reste « -- » et elle ne s'enregistre pas. **Remède : retire `6f48c2ae`** (un `git revert`, ou l'équivalent à la main). Aligner aussi le calcul ferait apparaître des notes sur des évaluations d'A2025 ou d'H2026 restées « -- », et ces trimestres ne sont pas rouverts. Écris-le dans #580 : c'est à Grégoire.
+
+**3. #793 : la notification accuse une case qui n'existe pas.** La préférence « Masquer… » est commune aux cinq bibliothèques, mais sa case n'existe que dans trois modales (grilles, échelles, cartouches). Dans Productions et Pratiques, ou pour un élément rangé dans un dossier, le message renvoie à une case ou à un filtre absents. Remède : la phrase sur la case seulement là où la case existe ; ailleurs, aucune phrase neuve, la mise en évidence se tait.
+
+**4. #483 : l'avertissement des 100 % part sur un geste qui n'est pas un enregistrement.** Supprimer un critère (`grilles.js` ≈ 525) passe par `sauvegarderGrilleTemplate(false, …)` et affiche « Grille enregistrée : ses critères totalisent N %… », alors qu'ajouter un critère ou changer une pondération reste silencieux. Remède : l'avertissement sur les gestes explicites seulement (créer, « Sauvegarder la grille »), comme annoncé ; un essai sur la suppression d'un critère.
+
+**5. #980 : `ref-poussee.sh` se contourne par le scénario même de #980.** `pousser.sh origin --force lot-x` passe (`case "$2" in -*) return 0`), et `pousser.sh origin main lot-x` aussi (seul `$2` est lu). Remède : examiner tous les arguments non-options après le dépôt distant ; chaque référence doit désigner la branche courante (`HEAD` compris, refusé aujourd'hui à tort). Le cas du banc `['origin','--force'] → 0` change de sens.
+
+**6. #1037, deux petites choses.** (a) La ressaisie du nom porte un « Supprimer » en `btn-principal` (bleu) : une variante danger pour `demanderSaisie`, comme la première fenêtre. (b) Spec 1007 : l'attente de la première fenêtre après « Écrire le codex à part » est passée de 60 s à 30 s alors que la génération prend des secondes ; remets 60 s, pour que le verdict de ce soir ne rougisse pas à tort.
+
+### Mineurs, à écrire dans la fiche ou en commentaire, sans code
+- #663 : la branche du partage ne se déclenche jamais (un paquet de pratique ne porte pas son échelle, `partage-format.js` ≈ 241) ; c'est ton code neuf : retire-la avec son essai, ou dis pourquoi la garder.
+- #586 : retirer `idOriginal` aveugle `_sonder574` (`echelles.js` ≈ 444) et `estVisee` (`echelles-bibliotheque.js` ≈ 188) pour les copies futures : dans #586.
+- #1040 : la recopie d'une petite clé restée seulement dans localStorage n'a plus lieu à l'ouverture : dans #1040, accepté.
+- #633 : « Fermer » juste après une frappe sans quitter le champ peut perdre le titre (garde `productionEnEdition !== id`) ; fenêtre étroite, déjà présente par `u-hide` : dans #633.
+- `sentinelle-ssot-modalites-ecrivains-L0` (≈ 86) vise un fichier retiré, son assertion est vide ; `scripts/audit-innerhtml.sh:44` le liste encore ; les témoins de #679 et #784 sont négatifs seulement : un témoin positif chacun.
+
+**Après les corrections** : une demande `DEMANDE-RELECTURE-2026-10-11-corrections-14-19.md`, Vitest complet, et arrêt. Toujours rien de poussé.
+
+## Ajout de Cowork (18 h 02) – corrections des lots 14 à 19 relues
+
+**Acceptées** (`a6753d01` à `792896ad`). #1040 : `actuel !== value` est le bon remède, il vaut pour tout appelant futur. #580 annulé proprement ; le texte de sa fiche (ta demande, § 3) sera posé au BACKLOG avec la décision de Grégoire. `ref-poussee.sh` : `-o ci.skip origin main` est encore refusé (la valeur d'option est prise pour le dépôt) ; refus sans danger, laissé. **Les lots 8 à 19 sont relus.** Reste avant la release : les mots d'écran des lots 15 et 17 et les items des Nouvelles, soumis à Grégoire ; sa décision te sera transmise ici.
+
+**Décision de Grégoire (18 h 02) : les mots de la suppression d'un trimestre (#1037).** À poser exactement :
+- Première fenêtre. Titre : « Supprimer définitivement le trimestre « X » ? » Message : « Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. » Bouton : « Supprimer » (destructif).
+- Seconde fenêtre. Titre : « Confirmation finale : cette action est irréversible. » Message : « Pour supprimer « X » et toutes ses données, retape son nom exactement : » Bouton : « Supprimer » (destructif).
+- Bibliothèque vide : « Aucun trimestre dans la bibliothèque. » ; détail : « Clique sur « + Nouveau trimestre » pour en créer un. »
+- Les notifications « Trimestre "X" supprimé (N clés…) » : guillemets français aussi (« Trimestre « X » supprimé… »).
+
+**Décision de Grégoire (18 h 03) : les mots du lot 15 (deux phrases du codex, refus de supprimer une grille) et l'avertissement des 100 % (#483) sont retenus tels quels.** Tous les mots d'écran des lots 8 à 19 sont tranchés. Restent les Nouvelles.
+
+## Ajout de Cowork (18 h 04) – préparer la release des lots 8 à 19
+
+**Décision de Grégoire (18 h 04) : l'entrée des Nouvelles est retenue**, mots exacts, couleur `bleu` :
+
+Titre : « Rien d'inventé, rien de perdu »
+1. « Recalculer les captures ne fait plus perdre les mesures avant et après des interventions ; dans le Cadre, les noms des groupes-cours et le compteur « X/5 configurés » sont à jour, et « Clore » n'est plus proposé sur le trimestre en cours. »
+2. « Ajouter un niveau à une échelle ne pose plus de valeurs à ta place : le niveau attend que tu aies rempli son code, son nom, ses bornes et sa valeur. »
+3. « Dans la fiche d'un élève (Cadre › Trimestre), la mesure d'aide se coche maintenant à côté de SA. »
+4. « Sur les courbes d'intervention du tableau de bord, une courbe pointillée montre P sans l'apport des reprises. »
+5. « Après un import, la carte importée est mise en évidence, et une copie faite par « Dupliquer » ne se confond plus avec son original. »
+6. « Une grille qu'emploient des évaluations ne peut plus être supprimée depuis la Conception. »
+7. « Supprimer un trimestre se fait dans les fenêtres de l'application, et une grille dont les pondérations ne font pas 100 % te le signale. »
+
+**Ce que tu fais maintenant**, dans l'ordre, sans attendre :
+1. Pose les mots de la suppression d'un trimestre décidés à 18 h 02 (plus haut), avec la spec 1007 et le banc #361 alignés ; Vitest complet ; un commit.
+2. L'entrée ci-dessus dans `js/changelog-data.js`, puis `node scripts/release.mjs minor` (1.199.0) ; un commit de release. Les deux par le skill `release-et-changelog`.
+3. Arrête-toi et dis-le à Grégoire en une ligne. **Le verdict complet et le push attendent son signal** de fin de journée (règle 7 : Chrome, Safari, Claude fermés ; Mac branché, sans veille). À son signal : verdict, puis push si vert, comme au § 4.5 de `fin-de-session`.
+
+## Ajout de Cowork (19 h 09) – avant le verdict
+
+Release 1.199.0 relue (`05d70e6c`, `039b523d`) : les mots de 18 h 02 et l'entrée des Nouvelles sont posés tels que décidés. **Avant de lancer le verdict, commite `RELAIS.md` et ce fichier** (« docs : relais et consigne du 11 oct., Cowork ») pour qu'ils partent avec le push. Puis, au signal de Grégoire : verdict complet, push si vert.
