@@ -273,45 +273,9 @@ const PratiqueManager = {
         }
 
         return pratique;
-    },
-
-    /**
-     * Initialise les pratiques prédéfinies
-     * À appeler lors du premier lancement
-     */
-    async initialiserPratiquesPredefines() {
-        const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
-
-        if (pratiques.length > 0) {
-            return;
-        }
-
-
-        // Charger les pratiques prédéfinies
-        if (window.PRATIQUES_PREDEFINES) {
-            const predefines = window.PRATIQUES_PREDEFINES;
-
-            for (const [key, config] of Object.entries(predefines)) {
-                const pratique = {
-                    id: config.id,
-                    nom: config.nom,
-                    auteur: config.auteur,
-                    etablissement: config.etablissement,
-                    description: config.description,
-                    config: config
-                };
-
-                try {
-                    await this.sauvegarderPratique(pratique, { discret: true });   // prédéfinies (lot F)
-                } catch (error) {
-                    console.error(`   ❌ Erreur sauvegarde ${pratique.nom}:`, error);
-                }
-            }
-
-        } else {
-            console.warn('[PratiqueManager] ⚠️ PRATIQUES_PREDEFINES non chargé');
-        }
     }
+    // #469 (11 oct. 2026) — `initialiserPratiquesPredefines` RETIRÉE : aucun appelant. Elle
+    // semait les pratiques prédéfinies dans un trimestre vide ; rien ne la déclenchait plus.
 };
 
 // ============================================================================
