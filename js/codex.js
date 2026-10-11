@@ -4430,7 +4430,11 @@ async function actionExporterSelection() {
     // 7b. Blobs travaux associés aux trimestres sélectionnés
     var nbBlobs = 0;
     var tailleTotale = 0;
-    var dossier = zip.folder(DOSSIER_TRAVAUX);
+    zip.folder(DOSSIER_TRAVAUX);
+    // #991 : les copies ne sont plus confiées à JSZip ; on n'en garde que la référence, et
+    // `FichierSortant.assemblerZip` les range, comme pour « Mettre à jour le codex » (lot J0).
+    var copies = [];
+    var rangDeLaCopie = {};
 
     // Collecter les IDs de fichiers référencés dans les données filtrées
     // #1014 : les trois listes, comme le codex entier ; seules les copies de travail comptent
@@ -4459,7 +4463,16 @@ async function actionExporterSelection() {
                 if (blob) {
                     copieTrouvee = true;
                     var ext = _extensionDansLeCodex(f.nomFichier);
-                    dossier.file(f.id + '.' + ext, blob);
+                    // Comme `genererCodex` : un tampon d'octets est enveloppé, et un même nom
+                    // déposé deux fois garde le dernier (ce que faisait JSZip).
+                    if (!(blob instanceof Blob)) blob = new Blob([blob]);
+                    var nomEntree = DOSSIER_TRAVAUX + '/' + f.id + '.' + ext;
+                    if (Object.prototype.hasOwnProperty.call(rangDeLaCopie, nomEntree)) {
+                        copies[rangDeLaCopie[nomEntree]].blob = blob;
+                    } else {
+                        rangDeLaCopie[nomEntree] = copies.length;
+                        copies.push({ nom: nomEntree, blob: blob });
+                    }
                     nbBlobs++;
                     tailleTotale += blob.size || 0;
                 }
@@ -4521,13 +4534,10 @@ async function actionExporterSelection() {
 
     // 8. Générer le blob
     _majProgression(65, 'Compression du ZIP…');
-    var zipBlob = await zip.generateAsync(
-        { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
-        function(meta) {
-            _majProgression(65 + Math.round(meta.percent * 0.30),
-                'Compression du ZIP…', Math.round(meta.percent) + '%');
-        }
-    );
+    var zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
+        _majProgression(65 + Math.round(pourcent * 0.30),
+            'Compression du ZIP…', Math.round(pourcent) + '%');
+    });
 
     _majProgression(98, 'Enregistrement…');
     await _yield();
