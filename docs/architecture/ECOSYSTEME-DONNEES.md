@@ -188,7 +188,7 @@ trimestres/
 **Vocation** : format léger pour la recherche et l'analyse longitudinale.
 
 Le codex data est un extrait de les archives, sans blobs, destiné au Labo.
-Il peut combiner plusieurs trimestres, être anonymisé, être partagé.
+Il peut combiner plusieurs trimestres et se charger au Labo. **L'anonymisation est prévue, non codée** (#989) : `js/codex-data.js` écrit toujours `metadata.anonymise: false`, et aucune fonction ne remplace les noms ni ne retire les DA (mesuré le 29 sept. et le 11 oct. 2026). Un codex data porte donc des noms d'élèves : il ne se partage pas.
 
 | Propriété         | Valeur                                      |
 |-------------------|---------------------------------------------|
@@ -197,10 +197,10 @@ Il peut combiner plusieurs trimestres, être anonymisé, être partagé.
 | Format            | `.codex-data.json` (JSON compressible)      |
 | Taille attendue   | 5–30 Mo                                     |
 | Fréquence         | En fin de trimestre, ou sur demande         |
-| Destination       | Labo (lecture seule), voûte (si anonymisé)  |
+| Destination       | Labo (lecture seule) ; voûte : une fois l'anonymisation codée |
 
 **Verbes** : *extraire* (archives → codex data), *charger* (codex data → Labo),
-*anonymiser* (optionnel, avant partage).
+*anonymiser* (prévu, non codé — #989).
 
 **Structure du fichier** :
 
@@ -248,17 +248,16 @@ refléter la granularité réelle. Chaque entrée correspond à une archive
 de les archives (un groupe-cours d'un trimestre), identifié par son UUID.
 ```
 
-**Anonymisation** :
+**Anonymisation — prévue, non codée (#989)**. Ce que la conception en attend :
 - Remplacement des noms/prénoms par des identifiants (Étudiant-001, etc.)
 - Retrait des DA (numéros d'admission)
 - Conservation des indices, résultats, présences (données de recherche)
 - L'anonymisation est irréversible — elle se fait sur la copie, jamais
   sur les archives
 
-**Ce qui change par rapport à l'existant** :
-- Concept nouveau. N'existe pas encore dans l'application.
-- Le Labo (actuellement dans la section Suivi) deviendrait le consommateur
-  principal de ce format.
+**État au 11 oct. 2026** :
+- *Extraire* et *charger* sont codés (`js/codex-data.js`, `js/labo-codex-data.js`).
+- *Anonymiser* ne l'est pas (#989, ci-dessus).
 
 ---
 
@@ -468,7 +467,7 @@ spécifiques ci-dessus.
 4. **Codex data** — extraction depuis les archives, format JSON.
 5. **Labo autonome** — sortir le Labo de la section Suivi, lui permettre
    de charger des codex data.
-6. **Anonymisation** — dans le flux d'extraction du codex data.
+6. **Anonymisation** — dans le flux d'extraction du codex data. *Non codée au 11 oct. 2026 (#989).*
 7. **Voûte** — format de dépôt, mécanisme d'emprunt. D'abord par fichiers,
    puis serveur institutionnel.
 
