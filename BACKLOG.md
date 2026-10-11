@@ -7856,8 +7856,8 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
       Critère : marque démo **ET** id absent de `PACK_DEMARRAGE` — le drapeau seul libérerait les
       exemples fournis. **Refus d'exécution si le pack n'est pas chargé** : le critère deviendrait
       universel et libérerait la démo entière. Sentinelle 7 cas, 2 break-tests ROUGE.
-      ⏳ **DÛ PAR GRÉGOIRE** : coller le script en console, `await reparer476()`, rapporter le plan
-      AVANT d'exécuter.
+      ✅ **SANS OBJET — relevé du 26 août 2026** (`plans de travail/PORTES-TERRAIN-2026-08-26-correctifs-audit-conception.md`,
+      §1 : « dry-run à 0 copie, aucune écriture due »). Rien n'est dû par Grégoire. Ligne corrigée le 11 oct. 2026 (lot 13).
     - **2.2 — la quatrième correction non arbitrée : GARDER.** Même défaut, même remède ; c'est la
       convergence D0 appliquée sans exception.
   - **⏳ RESTE AVANT FUSION DANS `main`** : les **3 portes terrain** (Safari, corpus réel) — grille
