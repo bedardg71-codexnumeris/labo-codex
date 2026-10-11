@@ -258,20 +258,14 @@ function _resoudreEchellePratique() {
     const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
     const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
     if (!pratiqueData) return null;
-    // #580 (11 oct. 2026) — l'échelle passe par LA résolution (`obtenirEchelleResolue`,
-    // profil-etudiant-calculs.js) et garde tous ses champs : la liste blanche
-    // {id, nom, niveaux, type} amputait en silence tout champ métier neuf (repères…).
-    // Seuls l'id d'option, le nom affiché et la source sont posés ici. Une échelle
-    // sans niveau n'est plus offerte (la résolution la refuse).
-    const id = `pratique-${pratiqueId}`;
-    const echelle = (typeof obtenirEchelleResolue === 'function') ? obtenirEchelleResolue(id) : null;
-    if (!echelle) return null;
-    return Object.assign({}, echelle, {
-        id,
-        nom: `${(pratiqueData.config && pratiqueData.config.nom) || pratiqueData.nom} (Pratique active)`,
-        type: echelle.type || 'niveaux',
+    if (!pratiqueData.config || !pratiqueData.config.echelle) return null;
+    return {
+        id: `pratique-${pratiqueId}`,
+        nom: `${pratiqueData.config.nom} (Pratique active)`,
+        niveaux: pratiqueData.config.echelle.niveaux || [],
+        type: pratiqueData.config.echelle.type || 'niveaux',
         source: 'pratique'
-    });
+    };
 }
 
 function _renderOptionsEchelles(select, echelles, echellePratique) {
@@ -1050,12 +1044,26 @@ function cartoucheSelectionnee() {
     // Cela permet d'utiliser des échelles avec plus ou moins de niveaux que la cartouche
     // NOUVEAU (Beta 92): Support échelles de pratiques configurables
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    // #580 (11 oct. 2026) — échelle de pratique (`pratique-…`) ou échelle de la bibliothèque :
-    // LA résolution, au lieu de deux reconstructions parallèles. Elle reconnaît aussi
-    // `idOriginal`, et refuse une échelle sans niveau (repli sur ceux de la cartouche).
-    const echelleSelectionnee = (echelleId && typeof obtenirEchelleResolue === 'function')
-        ? obtenirEchelleResolue(echelleId)
-        : null;
+    let echelleSelectionnee = null;
+
+    // Vérifier si c'est une échelle de pratique configurable
+    if (echelleId && echelleId.startsWith('pratique-')) {
+        const pratiqueId = echelleId.replace('pratique-', '');
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+
+        if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
+            echelleSelectionnee = {
+                id: echelleId,
+                niveaux: pratiqueData.config.echelle.niveaux || [],
+                type: pratiqueData.config.echelle.type || 'niveaux'
+            };
+        }
+    } else {
+        // Échelle personnalisée classique
+        const echelles = db.getSync(cle('echellesTemplates'), []);
+        echelleSelectionnee = echelles.find(e => e.id === echelleId);
+    }
 
     // Fallback: Si pas d'échelle sélectionnée ou non trouvée, utiliser les niveaux de la cartouche
     const niveauxDisponibles = (echelleSelectionnee && echelleSelectionnee.niveaux)
@@ -1270,11 +1278,22 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     }
 
     // Récupérer les niveaux de l'échelle
-    // #580 — même résolution que `chargerEchellePerformance` (pratique ou bibliothèque).
-    const echelleResolue = (echelleId && typeof obtenirEchelleResolue === 'function')
-        ? obtenirEchelleResolue(echelleId)
-        : null;
-    let niveauxDisponibles = (echelleResolue && echelleResolue.niveaux) || [];
+    let niveauxDisponibles = [];
+
+    if (echelleId && echelleId.startsWith('pratique-')) {
+        const pratiqueId = echelleId.replace('pratique-', '');
+        const pratiquesConfigurables = db.getSync(cle('pratiquesConfigurables'), null) || [];
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+        if (pratiqueData?.config?.echelle?.niveaux) {
+            niveauxDisponibles = pratiqueData.config.echelle.niveaux;
+        }
+    } else {
+        const echelles = db.getSync(cle('echellesTemplates'), []);
+        const echelle = echelles.find(e => e.id === echelleId);
+        if (echelle?.niveaux) {
+            niveauxDisponibles = echelle.niveaux;
+        }
+    }
 
     // Fallback: niveaux IDME par défaut
     if (niveauxDisponibles.length === 0) {
