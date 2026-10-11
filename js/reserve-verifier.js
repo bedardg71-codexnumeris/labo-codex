@@ -304,6 +304,12 @@ async function _octetsDeLEntree(fichier, e) {
     throw new Error(MOTS.erreurs.methodeInconnue);
 }
 
+/** Le texte d'UNE entrée, ou null (mêmes refus que `_octetsDeLEntree`). #1025 : « Ouvrir une archive… » l'emploie aussi. */
+async function _texteDeLEntree(fichier, e) {
+    var octets = await _octetsDeLEntree(fichier, e);
+    return octets ? new TextDecoder('utf-8').decode(octets) : null;
+}
+
 /* ===============================
    LES DEUX SOURCES
    ===============================
@@ -328,8 +334,7 @@ function sourceFichier(fichier) {
         async lireTexte(nom) {
             var e = parNom[base + nom];
             if (!e) return null;
-            var octets = await _octetsDeLEntree(fichier, e);
-            return octets ? new TextDecoder('utf-8').decode(octets) : null;
+            return _texteDeLEntree(fichier, e);
         },
         async listerCopies() {
             var prefixe = base + 'travaux/';
@@ -731,6 +736,7 @@ function actionVerifier(dossier) {
 window.ReserveVerifier = {
     MOTS: MOTS,
     lireRepertoireZip: lireRepertoireZip,
+    lireTexteDeLEntree: _texteDeLEntree,
     sourceFichier: sourceFichier,
     sourceDossier: sourceDossier,
     verifierArchive: verifierArchive,
