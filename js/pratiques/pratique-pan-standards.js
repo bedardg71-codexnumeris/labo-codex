@@ -910,7 +910,7 @@ class PratiquePANStandards {
      *
      * @private
      * @param {string} da - Numéro DA
-     * @returns {Object} { performance, idmeMoyen, nbArtefacts }
+     * @returns {Object} { performance, nbArtefacts }
      */
     _calculerIndicesTroisDerniersArtefacts(da) {
         const config = this._lireConfiguration();
@@ -928,7 +928,6 @@ class PratiquePANStandards {
         if (evaluationsEleve.length === 0) {
             return {
                 performance: 0,
-                idmeMoyen: 0,
                 nbArtefacts: 0
             };
         }
@@ -945,20 +944,8 @@ class PratiquePANStandards {
         // Performance moyenne
         const performance = derniers.reduce((sum, e) => sum + e.noteFinale, 0) / derniers.length / 100;
 
-        // Moyenne des niveaux finaux — #529.
-        // Retiré : `.filter(n => ['I','D','M','E','0'].includes(n))`. Ce filtre
-        // écartait tout code étranger à IDME ; pour une échelle A/B/C/D il les
-        // écartait TOUS et la moyenne tombait à 0 — la pire note possible, là
-        // où il n'y avait aucune donnée. Un niveau compte s'il est convertible
-        // par SON échelle, rien d'autre ne le qualifie.
-        const cacheTables = new Map();
-        const scoresNiveauxFinaux = derniers
-            .map(e => this._convertirNiveauEnScore(e.niveauFinal, this._tablePour(e, cacheTables)))
-            .filter(s => s !== null);
-
-        const idmeMoyen = scoresNiveauxFinaux.length > 0
-            ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
-            : 0;
+        // #536 (11 oct. 2026) — `idmeMoyen` retiré, avec sa conversion des niveaux finaux
+        // et `_tablePour` : aucun lecteur (jumeau du retrait dans profil-etudiant-calculs).
 
         // #553 — la « moyenne du critère de langue » est retirée. Elle reconnaissait ce
         // critère par son NOM (`startsWith('francais')`), et sa valeur n'avait plus aucun
@@ -967,7 +954,6 @@ class PratiquePANStandards {
 
         return {
             performance: performance,
-            idmeMoyen: idmeMoyen,
             nbArtefacts: derniers.length
         };
     }
@@ -1118,18 +1104,6 @@ class PratiquePANStandards {
      * Obtient la table de conversion IDME (niveaux → scores)
      * @private
      */
-    /**
-     * Table de conversion de l'échelle qui a produit CETTE évaluation (#529).
-     * @private
-     */
-    _tablePour(evaluation, cache) {
-        const id = (evaluation && evaluation.echelleId) || '';
-        if (cache && cache.has(id)) return cache.get(id);
-        const table = this._obtenirTableConversionNiveaux(id || null);
-        if (cache) cache.set(id, table);
-        return table;
-    }
-
     _obtenirTableConversionNiveaux(echelleId) {
         // #529 — le repli qui vivait ici est RETIRÉ. Il rendait
         // {I:0.55, D:0.70, M:0.80, E:0.90} — des valeurs qui n'étaient celles
