@@ -526,60 +526,6 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
    🔧 FONCTIONS HELPERS POUR SUPPORT SOM ET PAN
    =============================== */
 
-/**
- * Détermine le mode de pratique pédagogique du cours actif
- *
- * NOUVEAU (Beta 91) : Utilise la pratique associée au cours actif
- * au lieu d'une configuration globale.
- *
- * @returns {string} - 'SOM' (sommative) ou 'PAN' (pan-maitrise)
- *
- * SOURCE : getPratiqueCours(getCoursActifId())
- * - 'sommative' → retourne 'SOM'
- * - 'pan-maitrise' → retourne 'PAN'
- * - Par défaut (si non configuré) → retourne 'PAN' (rétrocompatibilité)
- */
-function obtenirModePratique() {
-    // NOUVEAU : Utiliser la pratique du cours actif
-    const coursActifId = getCoursActifId();
-
-    if (!coursActifId) {
-        console.warn('[obtenirModePratique] Aucun cours actif, utilisation PAN par défaut');
-        return 'PAN';
-    }
-
-    const pratiqueId = getPratiqueCours(coursActifId);
-
-    return pratiqueId === 'sommative' ? 'SOM' : 'PAN';
-}
-
-/**
- * Détermine si une production compte dans le dépistage (indices C et P)
- *
- * @param {Object} production - Objet production avec propriété 'type'
- * @param {string} mode - 'SOM' ou 'PAN'
- * @returns {boolean} - true si la production doit être comptée
- *
- * LOGIQUE :
- * - Mode PAN : Seuls les 'artefact-portfolio' comptent
- * - Mode SOM : Tous les types SAUF formatifs et conteneurs
- *   - ✅ Compte : examen, travail, quiz, presentation, autre
- *   - ❌ Ne compte PAS : *-formatif, portfolio (conteneur)
- */
-function comptesDansDepistage(production, mode) {
-    const type = production.type;
-
-    if (mode === 'PAN') {
-        // En PAN, seuls les artefacts-portfolio comptent
-        return type === 'artefact-portfolio';
-    } else {
-        // En SOM, tous les types sommative comptent (pas les formatifs ni le conteneur portfolio)
-        const estFormatif = type.endsWith('-formatif');
-        const estConteneur = type === 'portfolio';
-        return !estFormatif && !estConteneur;
-    }
-}
-
 // ⮕ #575 (lot 4 du plan SOLO, B1+B2) — `convertirNiveauEnPourcentage` A ÉTÉ
 // SUPPRIMÉE ICI, AVEC SON REPLI ET SA CLÉ MORTE.
 //
