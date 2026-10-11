@@ -538,9 +538,17 @@ délibéré, pas une compression.
 
 ---
 
-## Règle 7 — un vert local ne prouve rien sur ce que la CI exécute
+## Règle 7 — la cadence des verdicts : les lots le jour, un seul verdict le soir (11 octobre 2026)
 
-⮕ Déplacée le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.1 (geste de clôture).
+**Décision de Grégoire (11 oct. 2026, de vive voix)** : le verdict Playwright mobilise tout son Mac pendant environ une heure et l'empêche de travailler en parallèle.
+
+1. **Pendant la journée**, les lots s'enchaînent, chacun avec sa relecture croisée par Cowork (règle 2), ses break-tests et Vitest complet. **Aucun verdict Playwright, aucune release.** Les lots relus s'accumulent.
+2. **Le soir**, au signal de Grégoire (sa journée est finie ; Chrome, Safari et Cowork fermés ; Mac sur secteur), **une seule release** groupe tout ce qui a passé la relecture, avec **un seul verdict complet**, pris sur le commit de release (jamais sur un commit antérieur). Push seulement si vert. Si le verdict rougit, les commits séparés disent quel lot : le nommer.
+3. **La nuit**, le Mac reste ouvert, branché, sans mise en veille : le verdict peut tourner pendant que Grégoire dort. Un Mac endormi ou sous pression mémoire fait échouer le verdict ou redémarrer la machine : **vérifier le secteur et la charge avant de lancer**, et le dire s'ils ne conviennent pas.
+4. **Exception** : un défaut gênant peut aller en ligne tout de suite, à la demande de Grégoire, avec son verdict à ce moment-là. Un lot qui touche une zone sous les règles de sécurité (`import-export.js`, `db.js`, `travaux-stockage.js`) garde son verdict obligatoire : il attend celui du soir.
+5. **Un lot codé pendant qu'une release attend** se fait sur une branche partie de `main` ; il ne rejoint `main` qu'après la mise en ligne de la release, et part dans la suivante (premier cas : `lot8-cadre`, 11 oct. 2026). Motif : si le verdict rougit, on sait dans quel paquet chercher.
+
+*Ancien contenu de la règle 7 (« un vert local ne prouve rien sur ce que la CI exécute ») : déplacé le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.1 (geste de clôture).*
 
 ## Règle 8 — le verdict Playwright local ne se prend pas à deux outils ouverts (12 septembre 2026)
 
