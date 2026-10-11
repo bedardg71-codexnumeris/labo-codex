@@ -247,10 +247,17 @@ function construireConfigComplete(pratiqueData) {
     // données — « Dupliquer » et « Dériver une variante » embarquent la config résolue. Embarquée,
     // elle passerait avant toute référence et figerait la copie sur une échelle vide. Elle reste
     // stockée (la validation de sauvegarde exige `config.echelle`), mais ne vaut pas résolution.
-    if (echelle && echelle.introuvable) echelle = null;
+    // Son `echelle_id` reste la référence de dernier recours : la copie d'une pratique de forme
+    // `.config` (#712) ne porte ni `configuration.echelleId` ni `config.echelleId` (le `return`
+    // plus bas ne le recopie pas). Sans ce repli, plus aucune référence, et la copie ne se charge plus.
+    let idDeLaMarque = null;
+    if (echelle && echelle.introuvable) {
+        idDeLaMarque = echelle.echelle_id || null;
+        echelle = null;
+    }
     if (!echelle) {
-        // Chercher par ID dans configuration ou config
-        const echelleId = pratiqueData.configuration?.echelleId || config.echelleId;
+        // Chercher par ID dans configuration ou config, puis dans la marque écartée
+        const echelleId = pratiqueData.configuration?.echelleId || config.echelleId || idDeLaMarque;
         if (echelleId) {
             // 🆕 #358 (Option A) : résolution namespacée par id (actif puis repli pool).
             const echelleRef = (typeof resoudreModeleParId === 'function')

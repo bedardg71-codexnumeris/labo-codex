@@ -139,4 +139,53 @@ describe('#590 · une copie faite pendant que l\'échelle est introuvable ne s\'
         expect(config.echelle.niveaux).toEqual([{ code: 'M', valeur_pourcentage: 85 }]);
         avert.mockRestore();
     });
+
+    // Verdict de Cowork (11 oct., 15 h 17) : le repli sur `echelle_id` de la marque n'est pas
+    // redondant. Une pratique importée sous la forme `.config` (#712) ne donne à sa copie ni
+    // `configuration.echelleId` (vide) ni `config.echelleId` (non recopié par la config résolue) :
+    // la marque est sa seule référence. Sans le repli, « Champ obligatoire manquant : echelle ».
+    it('G · forme `.config` : la copie se charge pendant l\'absence, puis se résout au retour', async () => {
+        const avert = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const erreurs = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const pratiques = [{ id: 'imp', nom: 'Importée', config: { id: 'imp', nom: 'Importée', type: 'standards',
+            echelleId: 'ECH', calcul_note: { methode: 'conversion_niveaux' } } }];
+        let echelleRetrouvee = null;
+        const win = { PratiqueManager: {} };
+        const globaux = {
+            db: { getSync: (k, d) => (String(k).indexOf('pratiquesConfigurables') !== -1 ? pratiques : (d !== undefined ? d : null)),
+                get: async () => null, set: async () => {}, setSync() {} },
+            cle: (k) => 'test_' + k,
+            resoudreModeleParId: () => echelleRetrouvee
+        };
+        chargerScript('js/pratiques/pratique-configurable.js', globaux, win);
+        chargerScript('js/pratiques/pratique-registre.js', Object.assign({ PratiqueConfigurable: win.PratiqueConfigurable }, globaux), win);
+        const PratiqueManager = {
+            sauvegarderPratique: async (p) => { new win.PratiqueConfigurable(p.config); pratiques.push(p); }
+        };
+        const ui = chargerScript('js/pratiques.js', Object.assign({}, globaux, {
+            PratiqueManager,
+            BibliothequeUI: { obtenirAuteurActif: () => 'Auteur fictif', forgerInspireDe: (s) => ({ sourceId: s.id }) },
+            construireConfigComplete: win.construireConfigComplete,
+            genererIdUnique: (p) => p + 'copie',
+            afficherListePratiques: async () => {}
+        }));
+
+        const id = await ui.dupliquerPratique('imp', { nom: 'Copie', silencieux: true });
+        const copie = pratiques.find(p => p.id === id);
+        expect(copie, 'la copie doit être enregistrée').toBeTruthy();
+        // La forme exacte du cas : aucune référence hors de la marque.
+        expect(copie.configuration?.echelleId).toBeUndefined();
+        expect(copie.config.echelleId).toBeUndefined();
+        expect(copie.config.echelle).toMatchObject({ echelle_id: 'ECH', introuvable: true });
+
+        expect(win.obtenirPratiqueParId(id), 'la copie doit se charger pendant l\'absence de l\'échelle').not.toBeNull();
+        expect(win.construireConfigComplete(copie).echelle).toMatchObject({ echelle_id: 'ECH', introuvable: true, niveaux: [] });
+
+        echelleRetrouvee = { id: 'ECH', nom: 'Échelle revenue', niveaux: [{ code: 'M', valeur_pourcentage: 85 }] };
+        const config = win.construireConfigComplete(copie);
+        expect(config.echelle.introuvable).toBeUndefined();
+        expect(config.echelle.niveaux).toEqual([{ code: 'M', valeur_pourcentage: 85 }]);
+        expect(erreurs).not.toHaveBeenCalled();
+        avert.mockRestore(); erreurs.mockRestore();
+    });
 });
