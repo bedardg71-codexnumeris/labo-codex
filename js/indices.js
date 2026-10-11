@@ -268,6 +268,9 @@ function calculerAssiduite(da, dateLimite) {
             if (pf.periodesPresentes !== undefined && pf.periodesPresentes !== null) {
                 pPeriodes = pf.periodesPresentes;
             } else if (pf.heures !== undefined && pf.heures !== null) {
+                // #728 (mesuré le 11 oct. 2026) : pas de conversion, et c'est juste. Le seul écrivain
+                // d'une présence facultative (`interventions.js`, présences d'une intervention RàI) range
+                // dans `heures` la « Durée (périodes) » de son formulaire : ce sont déjà des périodes.
                 pPeriodes = pf.heures;
             }
             if (pPeriodes > 0) periodesInterventions += pPeriodes;
