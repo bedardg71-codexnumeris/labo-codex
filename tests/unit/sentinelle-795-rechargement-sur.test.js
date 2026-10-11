@@ -100,9 +100,10 @@ describe('#795 · les quatre chemins post-import passent par la sonde', () => {
         expect(codex).not.toMatch(/preformate: true\s*\n\s*\}\)\) \{\s*\n\s*window\.location\.reload\(\);/);
     });
 
-    it('les trois rechargements d\'import-export sont branchés', () => {
+    it('les deux rechargements d\'import-export sont branchés', () => {
+        // #1047 (lot 12, 11 oct. 2026) : trois → deux, le troisième vivait dans `executerImportLocalStorageBrut`, code mort retiré.
         const appels = importExport.match(/await window\.rechargerSiLeServeurRepond\(\);/g) || [];
-        expect(appels).toHaveLength(3);
+        expect(appels).toHaveLength(2);
         // Chacun suit immédiatement un confirm() de rechargement.
         const nus = importExport.match(/confirm\('[^']*[Rr]echarger[^']*'\)\) \{\s*\n\s*location\.reload\(\);/g) || [];
         expect(nus).toHaveLength(0);
