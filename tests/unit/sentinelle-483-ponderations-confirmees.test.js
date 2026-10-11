@@ -61,6 +61,13 @@ describe('#483 · enregistrer une grille dit un total qui n\'est pas 100 %', () 
         await win.sauvegarderGrilleTemplate(false);
         expect(avertis).toEqual([]);
     });
+    it('supprimer un critère (non silencieux, avec une modification) d\'une grille qui tombe à 60 % : rien', async () => {
+        const g = { id: 'GR_1', nom: 'Grille fictive', criteres: [{ id: 'c1', nom: 'A', ponderation: 60 }, { id: 'c2', nom: 'B', ponderation: 40 }] };
+        const { win, avertis } = monter([], g);
+        await win.sauvegarderGrilleTemplate(false, (x) => { x.criteres = x.criteres.filter((c) => c.id !== 'c2'); });
+        expect(avertis).toEqual([]);
+    });
+
     it('sauvegarde automatique (silencieuse) d\'une grille à 90 % : rien', async () => {
         const g = { id: 'GR_1', nom: 'Grille fictive', criteres: [{ id: 'c1', nom: 'A', ponderation: 90 }] };
         const { win, avertis } = monter([], g);
