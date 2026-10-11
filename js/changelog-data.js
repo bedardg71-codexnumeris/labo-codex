@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.198 (lots 5, 6 et 7 de la file sans Grégoire : #991, #1025, #995 ; #726, #925, « Appuie sur » ;
+            // #1046, #522 lot 7) — titre et trois items retenus par Grégoire le 11 oct. 2026 (8 h 19 et
+            // 8 h 43), transmis par Cowork, posés tels quels.
+            version: '1.198',
+            couleur: 'orange',
+            titre: 'Moins de mémoire, des comptes justes',
+            items: [
+                'Exporter une sélection et ouvrir une archive ménagent la mémoire de l\'iPad&nbsp;; sous Chrome, une longue mise à jour du codex demande un clic au lieu d\'échouer.',
+                'Le taux de remise d\'un groupe ne dépasse plus 100&nbsp;%, et l\'étape 3 d\'un groupe-cours compte les élèves du seul cours choisi.',
+                'Importer une sélection depuis une sauvegarde récente propose maintenant ses grilles, échelles, pratiques et cartouches, rangées dans le trimestre ouvert.'
+            ]
+        },
+        {
             // 1.197 (lot 4 de la file sans Grégoire : #845, #938, #522 lot 5b) — titre et ligne
             // retenus par Grégoire le 10 oct. 2026 (15 h 48), transmis par Cowork, posés tels quels.
             version: '1.197',
