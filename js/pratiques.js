@@ -1461,12 +1461,9 @@ async function ouvrirModalBibliothequePratiques() {
 /**
  * Ferme le modal de bibliothèque de pratiques
  */
-function fermerModalBibliothequePratiques() {
-    const modal = document.getElementById('modalBibliothequePratiques');
-    if (modal) {
-        modal.remove();
-    }
-}
+// #587 (11 oct. 2026) — `fermerModalBibliothequePratiques` n'est plus définie ici : son
+// homonyme de pratiques-gestion.js fait la même chose (`BibliothequeUI.fermerModal`, qui retire
+// la modale). Ce fichier, chargé après, l'emportait sur `window`. Un nom, une définition.
 
 /**
  * Retire une pratique de la bibliothèque
@@ -1866,7 +1863,6 @@ function alertFonctionnaliteAVenir() {
 
 window.afficherListePratiquesSidebar = afficherListePratiquesSidebar;
 window.ouvrirModalBibliothequePratiques = ouvrirModalBibliothequePratiques;
-window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
 window.retirerPratiqueDeBibliotheque = retirerPratiqueDeBibliotheque;
 window.ajouterPratiqueIndividuelle = ajouterPratiqueIndividuelle;
 window.supprimerPratiqueHorsBibliotheque = supprimerPratiqueHorsBibliotheque; // 🆕 (1er fév 2026)
