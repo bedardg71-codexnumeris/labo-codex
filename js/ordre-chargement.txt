@@ -23,7 +23,6 @@ PRIORITÉ 3 - Modules fonctionnels
 10. calendrier-vue.js         # Vue calendaire
 11. calendrier-saisie.js      # Saisie des présences
 12. horaire.js                # Horaire des cours
-13. groupe.js                 # Gestion du groupe
 14. pratiques.js              # Pratiques de notation
 
 PRIORITÉ 4 - Modules avancés

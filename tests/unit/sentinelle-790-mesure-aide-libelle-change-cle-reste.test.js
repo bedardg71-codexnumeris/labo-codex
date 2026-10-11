@@ -15,6 +15,10 @@
  * (`etudiantCAF`) à renommer. Il n'existe pas. Toute la famille `etudiant*` a disparu d'`index.html` au
  * profit de `v2-etudiant*`, qui ne porte AUCUN champ pour cette donnée — elle n'entre donc que par
  * import CSV. Voir les deux trouvailles inscrites au BACKLOG plutôt que corrigées ici.
+ *
+ * ↻ 11 oct. 2026 (lot 12, #469) : `js/groupe.js` — l'import et l'export CSV qui portaient `caf` — était mort
+ * en entier (aucun de ses éléments dans la page) ; il est retiré. La clé voyage maintenant par la fiche
+ * (#792, `v2-etudiantCAF`) et le profil. Les trois essais qui lisaient `groupe.js` sont partis avec lui.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -28,8 +32,7 @@ describe('#790 volet C · « Mesure d\'aide » — le libellé change, la clé r
     it('la CLÉ `caf` est intacte partout où elle voyage', () => {
         // Import, export et lecture du profil doivent parler de la même clé. Si l'un des trois
         // migrait vers un nom neuf, les fichiers d'élèves déjà constitués cesseraient de se relire.
-        expect(lire('js/groupe.js')).toContain('caf: [');
-        expect(lire('js/groupe.js')).toContain('s.caf');
+        expect(lire('js/trimestre-v2-etudiants.js')).toContain("caf: caf || ''");
         expect(lire('js/profil-etudiant-sections-affichage.js')).toContain("etudiant.caf === 'Oui'");
         expect(lire('js/profil-etudiant-sections-affichage.js')).toContain("eleve.caf === 'Oui'");
     });
@@ -41,19 +44,5 @@ describe('#790 volet C · « Mesure d\'aide » — le libellé change, la clé r
         expect(src).not.toMatch(/>CAF</);
         expect(src).not.toMatch(/'CAF'/);
         expect(src).toContain("Mesure d\\'aide");
-    });
-
-    it('l\'en-tête d\'export porte le nom neuf', () => {
-        expect(lire('js/groupe.js')).toContain("SA,Mesure d\\'aide");
-    });
-
-    it('⮕ ET IL SE RELIT : « mesure d\'aide » est reconnu à l\'import, sans que les anciens sortent', () => {
-        // Le point qui fait qu'un fichier réexporté aujourd'hui n'est pas perdu demain. Les anciens
-        // en-têtes restent dans la liste : un fichier de l'an dernier se relit toujours.
-        const alias = lire('js/groupe.js');
-        expect(alias).toContain("'mesure d\\'aide'");
-        expect(alias).toContain("'caf'");
-        expect(alias).toContain("'centre d\\'aide'");
-        expect(alias).toContain("'aide français'");
     });
 });

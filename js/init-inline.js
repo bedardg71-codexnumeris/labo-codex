@@ -33,8 +33,6 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('click', function (e) {
     if (e.target.matches('[data-sous-onglet="reglages-groupe"]')) {
         setTimeout(function () {
-            // Note: initialiserModuleGroupe() est maintenant appelé automatiquement par navigation.js
-
             // Clonage anonymisé (section avancée)
             if (typeof obtenirEtudiantsGroupe1 === 'function') {
                 mettreAJourStatistiquesClonage();

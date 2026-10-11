@@ -12,7 +12,7 @@
 
 /* ===============================
    WRAPPERS NOTIFICATIONS
-   (les fonctions originales sont dans evaluation.js / groupe.js,
+   (les fonctions originales sont dans evaluation.js,
     pas encore chargées quand ce module s'exécute)
    =============================== */
 
