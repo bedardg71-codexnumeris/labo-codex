@@ -29,3 +29,15 @@ Aucune décision de pédagogie, aucune écriture dans des données déjà écrit
 ## Puis arrête-toi
 
 Commits séparés, en local. Vitest complet. Demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot7-import-recent.md`. Rapport court à Grégoire en gestes d'utilisateur, une ligne par supposition, ta proposition d'**un item** de Nouvelles pour ce lot (il rejoindra l'entrée du soir). Pas de release.
+
+## Ajout de Cowork (8 h 42) – verdict du lot 7 : une correction
+
+Relus : `b6640cd7` (#1046), `7ccdfbd5` (#522, onze gestes), `b05d78cf`. L'incident de `reserve-copies.js` est clos : les cinq fichiers touchés sont identiques à `HEAD` (empreintes relevées par Cowork), aucun fichier vide ne reste. Les onze conversions sont acceptées (patron des lots précédents, mêmes marques au même moment).
+
+**Correction 1 – la clé nue passe après les trimestres, pas avant.** `_ressourcesDesTrimestresSurLesClesNues` met la clé nue d'abord, puis les trimestres du plus récent au plus ancien : à id égal et contenu différent, c'est donc la clé nue qui l'emporte. Or dans un fichier récent, une clé nue est un reste : celui d'une migration S5/#623 inachevée, ou d'un import sélectif d'avant le lot 3 (le stock assumé de #655). Elle n'est pas plus récente que le trimestre. Ta propre règle (« la plus récente l'emporte ») demande l'inverse : **les trimestres d'abord, du plus récent au plus ancien, puis la clé nue**. Un fichier ancien (clé nue seule) reste identique : le banc qui le prouve doit rester vert sans retouche. Ajoute l'essai « même id dans la clé nue et dans un trimestre, contenus différents → la version du trimestre », avec break-test.
+
+Ta supposition « la plus récente l'emporte » entre trimestres est retenue.
+
+**Nouvelles** : l'item du lot 7 est soumis à Grégoire par Cowork ; il te sera transmis avec le signal du soir. Commit de la correction, Vitest complet, rapport court, puis arrête-toi.
+
+**Décision de Grégoire (8 h 43) : item des Nouvelles du lot 7 retenu tel quel**, à joindre à l'entrée du soir après les deux items des lots 5 et 6 : « Importer une sélection depuis une sauvegarde récente propose maintenant ses grilles, échelles, pratiques et cartouches, rangées dans le trimestre ouvert. »

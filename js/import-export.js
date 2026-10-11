@@ -1303,12 +1303,13 @@ function _sansLeDemoDuFichier(donnees) {
  * Règles :
  *   · seuls les préfixes de trimestre (`a|e|h` + année) : `demo_…` n'est jamais proposé, même si
  *     le retrait du démo (`_sansLeDemoDuFichier`) n'a pas eu lieu ;
- *   · la clé nue d'abord, telle quelle : un fichier ancien (clés nues seules) donne la même vue
- *     qu'avant, à l'identique ;
- *   · puis les trimestres, du plus récent au plus ancien. Une ressource dont l'id est déjà là
- *     n'est ajoutée qu'une fois : même id, même contenu, c'est la même ; même id, contenu
- *     différent, la plus récente l'emporte (supposition de Claude Code, écrite à la demande de
- *     relecture du lot 7). Une ressource sans id n'est jamais fusionnée.
+ *   · un fichier ancien (clés nues seules) est rendu tel quel : la même vue qu'avant, à l'identique ;
+ *   · sinon, les trimestres d'abord, du plus récent au plus ancien, PUIS la clé nue. Une ressource
+ *     dont l'id est déjà là n'est ajoutée qu'une fois : même id, même contenu, c'est la même ; même
+ *     id, contenu différent, la plus récente l'emporte (supposition retenue par Cowork, lot 7).
+ *     La clé nue passe en dernier (correction de Cowork, 11 oct. 2026, 8 h 42) : dans un fichier
+ *     récent, elle est un reste (migration S5/#623 inachevée, import sélectif d'avant le lot 3),
+ *     jamais plus récente qu'un trimestre. Une ressource sans id n'est jamais fusionnée.
  * Ne modifie pas `donnees` : rend une copie superficielle.
  */
 const FAMILLES_DES_TRIMESTRES = ['grillesTemplates', 'echellesTemplates', 'pratiquesConfigurables'];
@@ -1335,10 +1336,12 @@ function _ressourcesDesTrimestresSurLesClesNues(donnees) {
 
     const vue = { ...donnees };
     cibles.forEach(nom => {
-        const fusion = (lireListe(donnees[nom]) || []).slice();
-        const vus = new Set(fusion.filter(r => r && r.id).map(r => r.id));
-        parCible[nom].sort((x, y) => rang(y.trimestre) - rang(x.trimestre)).forEach(source => {
-            source.liste.forEach(r => {
+        const sources = parCible[nom].sort((x, y) => rang(y.trimestre) - rang(x.trimestre)).map(x => x.liste);
+        sources.push(lireListe(donnees[nom]) || []);   // la clé nue en dernier
+        const fusion = [];
+        const vus = new Set();
+        sources.forEach(liste => {
+            liste.forEach(r => {
                 if (r && r.id) {
                     if (vus.has(r.id)) return;
                     vus.add(r.id);
