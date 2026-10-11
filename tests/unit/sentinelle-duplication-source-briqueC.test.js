@@ -16,8 +16,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   3. REMAP — id neuf + cc.grilleId = id de la copie ; snapshots internes intacts ;
 //   4. DESTINATION — la copie va dans cle() (`<trim>_grillesTemplates`), PAS le global :
 //      la migration des writers (report assumé en Brique C) est LIVRÉE par la Brique D (#358) ;
-//   5. TÉMOIN D-C4 — echelleId d'une copie N'EST PAS remappé au pas 3 (report assumé ;
-//      ce test rougira quand le pas 4 ajoutera le remappage d'échelle).
+//   5. D-C4 — statué le 11 oct. 2026 (#656) : rattachement par la règle de l'import ;
+//      ici le cas « rien à quoi se rattacher », le reste dans sentinelle-656.
 
 function fauxDb(deepCopy = true) {
     const donnees = {};
@@ -175,15 +175,15 @@ describe('Brique C · dupliquerGrillePartagee — lecture de cartouches injecté
         expect(copie.commentaires).toEqual({ C1_M: 'Bien structuré' });
     });
 
-    it('TÉMOIN D-C4 (report assumé) — echelleId NON remappé au pas 3', () => {
+    it('D-C4 statué (#656, 11 oct. 2026) — sans échelle à quoi se rattacher, l\'echelleId est gardé', () => {
+        // Le report n'a jamais rugi : il est statué par la règle de l'import, tenue par
+        // `sentinelle-656-echelle-cartouche-copiee-rattachee`. Ici, aucune échelle locale ni
+        // source lisible : la grille ET la cartouche gardent l'id source (règle, cas 3).
         const grille = { id: 'GR_E', nom: 'E', criteres: [], echelleId: 'ECH_A25' };
         db.setSync('a2025_cartouches_GR_E', [{ id: 'CART_E', grilleId: 'GR_E', echelleId: 'ECH_A25' }]);
         const r = w.partageSection.dupliquerGrillePartagee(grille, lireCartouchesParCle);
-        // deep-copy sans remappage : echelleId source conservé sur la grille ET la cartouche.
         expect(r.grille.echelleId).toBe('ECH_A25');
         expect(db.getSync(DEST(r.grille.id), [])[0].echelleId).toBe('ECH_A25');
-        // → quand le pas 4 (D-C4) copiera+remappera l'échelle, CES assertions rougiront
-        //   et signaleront qu'il faut mettre à jour ce témoin.
     });
 
     it('IDEMPOTENCE — deux duplications successives : ids distincts, source intouchée', () => {
