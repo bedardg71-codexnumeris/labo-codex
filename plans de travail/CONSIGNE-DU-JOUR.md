@@ -1,43 +1,30 @@
-# Consigne du jour – lot 7 : importer d'une sauvegarde récente
+# Consigne du jour – lot 8 : le Cadre, les petits défauts sans décision (sur une branche)
 
-> Écrite par Cowork le 11 octobre 2026 à 8 h 29 (Toronto, mesurée par `date`). Remplace la consigne des lots 5 et 6, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lots5-6.md` : **ses sections sur la release commune et la cadence restent en vigueur** (relis-les avant le signal du soir). Tu peux commiter ce fichier avec ton premier commit.
+> Écrite par Cowork le 11 octobre 2026 à 8 h 58 (Toronto, mesurée par `date`). Remplace la consigne du lot 7, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lot7.md`. **La release du soir est décrite dans les deux archives `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lots5-6.md` et `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lot7.md` : relis-les au signal de Grégoire.** Tu peux commiter ce fichier sur `main` avant de créer la branche.
 
-## Où on en est
+## Décision de Grégoire (11 oct., vers 8 h 55, de vive voix)
 
-1.197.0 en ligne. Lots 5 et 6 relus, acceptés, **en attente de la release du soir** (10 commits locaux, `1d459e0c` en tête). Nouvelles des lots 5 et 6 déjà retenues par Grégoire : voir l'archive.
+**La release de ce soir ne porte que les lots 5, 6 et 7** (`main` jusqu'à `479c37f6` plus le commit de ce fichier). **Le lot 8 se code maintenant, sur une branche `lot8-cadre` partie de `main`**, avec sa relecture ; il ne rejoint `main` qu'**après** la mise en ligne de ce soir, et sera mis en ligne demain, à part. Motif : si le verdict du soir rougit, on sait dans quel paquet chercher.
 
-## La cadence (décision de Grégoire du 11 oct., rappel)
+Au signal du soir : reviens sur `main` avant la release ; aucun commit du lot 8 ne doit y être.
 
-Pas de verdict Playwright ni de release pendant la journée. Chaque lot : mesure, commits, Vitest complet, demande de relecture, arrêt. Le soir, au signal de Grégoire (journée finie, Chrome, Safari et Cowork fermés, Mac sur secteur), une seule release groupe tout ce qui a été relu, avec un seul verdict complet. La cadence entre dans `PROTOCOLE.md` (règle 7) avec la documentation de cette release.
+## Rappels
 
-## La règle « sans Grégoire » (rappel)
+Cadence : pas de verdict ni de release dans la journée. « Sans Grégoire » : aucune décision de pédagogie, **aucune écriture dans des données déjà écrites chez l'utilisateur**, aucune zone protégée (`js/config.js`, `js/navigation.js`, `noms_stables.json`), **aucune suppression de données d'utilisateur**. Les mots d'écran neufs reviennent à Grégoire, par Cowork.
 
-Aucune décision de pédagogie, aucune écriture dans des données déjà écrites chez l'utilisateur (le stock s'écrit et s'assume), aucune zone protégée (`js/config.js`, `js/navigation.js`, `noms_stables.json`), aucune suppression définitive. Les mots d'écran neufs reviennent à Grégoire, par Cowork.
+## Lot 8 – ce qu'il fait
 
-## Lot 7 – ce qu'il fait
+**Remesure d'abord** chaque fiche au code actuel : elles datent d'août (audit Cadre, `TRIAGE-audits-2026-08-21.md`), et le lot E2 du 28 sept. en a déjà réglé une partie (`DEMANDE-RELECTURE-2026-09-28-lot-E2-cadre-eleves.md`, ligne de #477). Une fiche morte se ferme sur sa preuve.
 
-**Mesure d'abord**, écrite dans la demande de relecture.
+1. **#477** – annuler un horaire qui colle (« Fermer » ne vide pas l'horaire mémorisé), trimestres en double, schéma de l'outil de diagnostic. **Les doublons se règlent à la lecture** (dédoublonner ce qu'on affiche et ce qu'on calcule) ; la liste des trimestres enregistrée n'est pas réécrite.
+2. **#472** – le nom du groupe-cours recalculé à l'affichage, et la carte et l'en-tête rafraîchis après l'enregistrement d'un horaire ou d'un cours.
+3. **#474** – « mon profil » ne doit plus être remplacé par le dernier profil d'enseignant modifié : un marqueur explicite. **Sans la purge** : la fiche demande aussi d'effacer `profilEnseignant` à la suppression d'un profil ; ne le fais pas (suppression de donnée), inscris-le à la fiche pour Grégoire.
+4. **#475** – le compteur « X/5 configurés » ne compte une référence que si ce qu'elle désigne existe.
+5. **#1018** – « Clore » offert sur le trimestre actif, puis toujours refusé. **Décision de Cowork : retirer l'offre** sur le trimestre actif (un geste qui ne peut que refuser ne s'offre pas ; aucun mot neuf). Si le retrait laisse le menu vide ou bancal, écris-le et arrête-toi sur cette fiche.
+6. **#990** – au démarrage, la saisie des présences s'initialise avant que le trimestre soit connu : elle doit attendre `db-ready` (famille de #142) et ne plus écrire de clés nues. **Le stock** (les clés nues déjà écrites chez Grégoire : `calendrierComplet`, `presences_date`, `presences_groupe`, `presences_tri`) **ne se nettoie pas** : assumé, écrit à la fiche. Banc sous WebKit, la sonde de la fiche (« trimestres » hors du localStorage).
 
-1. **#1046 – une sauvegarde récente ne propose pas ses grilles.** L'aperçu de l'import sélectif et `executerImportSelectif` ne cherchent grilles, échelles, pratiques et cartouches que sous des clés nues ; dans un fichier récent, elles sont sous `<trimestre>_…`. À faire : l'aperçu propose aussi celles des trimestres du fichier, et l'import les reçoit dans le trimestre actif, avec le même chemin que les clés nues (assainissement, tables de renommage, rebranchements, identité des cartouches du lot 3).
-   - **Le démo** : les clés `demo_…` ne sont jamais proposées (le pack démo n'entre pas dans les données réelles).
-   - **Plusieurs trimestres dans le fichier** : mesure ce que contient un vrai codex récent (le codex de banc, et un fichier fabriqué à deux trimestres). Si une même ressource (même id, même contenu) apparaît dans plusieurs trimestres, elle n'est proposée qu'une fois. Si l'aperçu doit dire de quel trimestre vient une ressource, **écris les mots dans le code et cite-les** : Cowork les relit, Grégoire les tranche.
-   - **Ce qui voyage** : un fichier ancien (clés nues) s'importe exactement comme au lot 3 ; un banc le prouve (codex de banc 1.172.0).
-2. **#522 – les onze derniers gestes en course.** `import-export.js` ×7 (`_ajouterCopiesImportees` ×2, `_restaurerBlobsDepuisZip`, `executerImportSelectif` ×4) et la Réserve ×4 (`reserve-copies.js` `retirer`, `reserve-emprunter.js` `_retirer`, `reserve-renvoyer.js` `retirer`, `reserve-revenir.js` `faireRevenir`), par `db.modifier`, au patron des lots précédents (banc sous IndexedDB simulé qui **clone**). Remesure d'abord avec `python3 scripts/mesurer-522.py ""`. Si la conversion d'un site de la Réserve change ce qui est retiré ou quand, arrête-toi sur ce site et écris pourquoi : on ne change que la sérialisation.
-
-**Aucun mot d'écran changé**, sauf ce que Cowork aura relu. `import-export.js` est sous les règles de sécurité : son verdict est celui du soir.
+**Aucun mot d'écran changé.** Si un correctif en demande un, écris-le dans le code et cite-le.
 
 ## Puis arrête-toi
 
-Commits séparés, en local. Vitest complet. Demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot7-import-recent.md`. Rapport court à Grégoire en gestes d'utilisateur, une ligne par supposition, ta proposition d'**un item** de Nouvelles pour ce lot (il rejoindra l'entrée du soir). Pas de release.
-
-## Ajout de Cowork (8 h 42) – verdict du lot 7 : une correction
-
-Relus : `b6640cd7` (#1046), `7ccdfbd5` (#522, onze gestes), `b05d78cf`. L'incident de `reserve-copies.js` est clos : les cinq fichiers touchés sont identiques à `HEAD` (empreintes relevées par Cowork), aucun fichier vide ne reste. Les onze conversions sont acceptées (patron des lots précédents, mêmes marques au même moment).
-
-**Correction 1 – la clé nue passe après les trimestres, pas avant.** `_ressourcesDesTrimestresSurLesClesNues` met la clé nue d'abord, puis les trimestres du plus récent au plus ancien : à id égal et contenu différent, c'est donc la clé nue qui l'emporte. Or dans un fichier récent, une clé nue est un reste : celui d'une migration S5/#623 inachevée, ou d'un import sélectif d'avant le lot 3 (le stock assumé de #655). Elle n'est pas plus récente que le trimestre. Ta propre règle (« la plus récente l'emporte ») demande l'inverse : **les trimestres d'abord, du plus récent au plus ancien, puis la clé nue**. Un fichier ancien (clé nue seule) reste identique : le banc qui le prouve doit rester vert sans retouche. Ajoute l'essai « même id dans la clé nue et dans un trimestre, contenus différents → la version du trimestre », avec break-test.
-
-Ta supposition « la plus récente l'emporte » entre trimestres est retenue.
-
-**Nouvelles** : l'item du lot 7 est soumis à Grégoire par Cowork ; il te sera transmis avec le signal du soir. Commit de la correction, Vitest complet, rapport court, puis arrête-toi.
-
-**Décision de Grégoire (8 h 43) : item des Nouvelles du lot 7 retenu tel quel**, à joindre à l'entrée du soir après les deux items des lots 5 et 6 : « Importer une sélection depuis une sauvegarde récente propose maintenant ses grilles, échelles, pratiques et cartouches, rangées dans le trimestre ouvert. »
+Commits séparés **sur `lot8-cadre`**. Vitest complet. Demande de relecture `plans de travail/DEMANDE-RELECTURE-2026-10-11-lot8-cadre.md` (sur la branche). Rapport court à Grégoire en gestes d'utilisateur, une ligne par supposition, ta proposition d'un item de Nouvelles (pour la release de demain). Pas de release, pas de fusion dans `main`.
