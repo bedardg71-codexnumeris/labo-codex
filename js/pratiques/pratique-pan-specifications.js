@@ -963,6 +963,8 @@ class PratiquePanSpecifications {
 window.PratiquePanSpecifications = PratiquePanSpecifications;
 // #708 — la traduction forfaits → tableBundles, réutilisable (sonde de stock, attributs)
 window.normaliserConfigurationSpecifications = normaliserConfigurationSpecifications;
+// #1015 — l'appariement production ↔ type de travail, lu avant de retirer un type (evaluation-sauvegarde.js)
+window.productionEstDuType = _productionEstDuType;
 
 
 

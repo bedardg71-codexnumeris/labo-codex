@@ -1958,14 +1958,35 @@ async function modifierTypeTravailMat(indexType, propriete, valeur) {
     }, [], { geste: 'Modifier la pratique' });
 }
 
+/**
+ * #1015 (11 oct. 2026) — un type de travail entre dans la note des spécifications : s'il porte
+ * déjà des notes (une évaluation porte sur une production de ce type), le codex est proposé
+ * avant de le retirer, comme pour un critère ou un niveau (#1007, lot 2b). Un forfait, lui,
+ * fixe la note de quiconque a des travaux de ses types : il porte des notes dès qu'un des
+ * types de la pratique en porte. Lecture seule.
+ */
+function _typesPortentDesNotes(types) {
+    return typeof window.ligneEmployeeParUneEvaluation === 'function'
+        && (types || []).some(t => t && window.ligneEmployeeParUneEvaluation({ typeTravail: t }));
+}
+
+function _pratiqueEnEditionLue() {
+    return (db.getSync(cle('pratiquesConfigurables'), []) || []).find(p => p && p.id === pratiqueEnEditionMateriel) || null;
+}
+
 async function supprimerTypeTravailMat(indexType) {
     if (!pratiqueEnEditionMateriel) return;
+    const typeLu = ((_pratiqueEnEditionLue() || {}).configuration?.typesTravaux || [])[indexType];
+    const porteDesNotes = !!typeLu && _typesPortentDesNotes([typeLu]);
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('typeTravail'))) return;
 
     let typesApres = null;
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1 || !configurations[index].configuration?.typesTravaux) return undefined;
+        // #1015 — relu après l'attente : si la ligne a changé pendant la fenêtre, rien n'est retiré.
+        if (typeLu && JSON.stringify(configurations[index].configuration.typesTravaux[indexType]) !== JSON.stringify(typeLu)) return undefined;
 
         configurations[index].configuration.typesTravaux.splice(indexType, 1);
         typesApres = configurations[index].configuration.typesTravaux;
@@ -2082,12 +2103,18 @@ async function modifierTravailForfaitMat(indexForfait, typeTravailId, valeur) {
 
 async function supprimerForfaitMat(indexForfait) {
     if (!pratiqueEnEditionMateriel) return;
+    const configLue = (_pratiqueEnEditionLue() || {}).configuration || {};
+    const porteDesNotes = !!(configLue.forfaits || [])[indexForfait] && _typesPortentDesNotes(configLue.typesTravaux);
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('forfait'))) return;
 
     let apres = null;
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1 || !configurations[index].configuration?.forfaits) return undefined;
+        // #1015 — relu après l'attente : si la ligne a changé pendant la fenêtre, rien n'est retiré.
+        const forfaitLu = (configLue.forfaits || [])[indexForfait];
+        if (forfaitLu && JSON.stringify(configurations[index].configuration.forfaits[indexForfait]) !== JSON.stringify(forfaitLu)) return undefined;
 
         configurations[index].configuration.forfaits.splice(indexForfait, 1);
         apres = configurations[index].configuration;
