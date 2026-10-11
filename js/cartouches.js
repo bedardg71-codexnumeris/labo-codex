@@ -1574,6 +1574,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             // cette voie les conservait, contrairement à sa voisine de bibliothèque.
             delete nouveauCartouche.metadata_cc;
             delete nouveauCartouche.auteurOriginal;
+            delete nouveauCartouche.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
 
             cartouches.push(nouveauCartouche); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
             copieCreee = nouveauCartouche;
