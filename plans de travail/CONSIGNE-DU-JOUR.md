@@ -73,3 +73,35 @@ Les fiches « à Grégoire » (une dizaine, cochées « ⏳ » au BACKLOG le 12 
 - Les deux points qui reviennent à Grégoire (cinq noms morts dans `noms_stables.json`, l'enveloppe de la navigation) : inscris-les au BACKLOG avec « ⏳ À Grégoire », s'ils n'y sont pas. Cowork les lui soumettra.
 
 **Ensuite** : un commit, la demande `DEMANDE-RELECTURE-2026-10-12-captures-et-mineurs.md`, et arrêt. L'entrée des Nouvelles sera soumise à Grégoire ; la release et le verdict attendent son signal du soir.
+
+## Ajout de Cowork (12 oct., 10 h 56) – verdict des captures et des mineurs
+
+**Acceptés** (`599001a2`). Captures regardées par Cowork (Accueil, visite guidée, profil, visionneuse, WebKit et Chrome, 1 280 et 820 px) et relevé lu : les boutons principaux ont bien leur fond (`rgb(3, 46, 92)`), les en-têtes du profil sont alignés, le worker PDF est demandé avec `?v=3.11.174` et la copie s'affiche. #678 et #627 tenus ; #1052 et #1053 inscrits.
+
+**Deux mesures avant la release, en lecture d'abord** :
+1. **« Chargement... »** reste affiché en haut à gauche de la visionneuse, dans les deux navigateurs, alors que la copie est rendue (`*-4-visionneuse-pdf.png`). Dis quel élément le porte, et s'il était déjà là sur 1.199.0 (`git worktree add` de `bd533702` hors du dépôt, même script de capture). Nouveau depuis #602 : c'est ton lot, corrige. Déjà là : une ligne dans la fiche qui le concerne, sans code.
+2. **Le 404 du premier passage** (`chromium-1280`, « Failed to load resource ») : nomme l'adresse. Une icône ou un fichier de banc : rien à faire. Une bibliothèque de `libs/` ou un script de l'application : c'est #602, corrige.
+
+**Décisions de Cowork sur tes trois trouvailles** :
+- Le bandeau qui recouvre la bulle de la visite guidée à 820 px : une ligne dans **#678**, dont le motif est le premier contact (décision de Grégoire du 1er sept.). Pas de fiche neuve, pas de code aujourd'hui.
+- `previsualiserConfigComplete` sans appelant : une ligne dans le reste de **#469**.
+- Les deux en-têtes RLO qu'on ne voit pas en démo : rien ; le banc #679 les tient.
+
+**Ensuite** : un commit, une ligne de réponse dans `DEMANDE-RELECTURE-2026-10-12-captures-et-mineurs.md`, et arrêt. Toujours ni push, ni release, ni verdict avant le signal de Grégoire.
+
+## Ajout de Cowork (12 oct., 12 h 10) – préparer la release des lots 20 à 24
+
+Ta réponse de `a7584ec0` est acceptée : rien à corriger. Cowork a rectifié une ligne de #678 au BACKLOG (c'est la notification « Tes premières évaluations sont enregistrées… » qui recouvre la bulle, pas le bandeau vert) ; elle est dans l'arbre de travail, non commitée.
+
+**Décision de Grégoire (12 h 10) : l'entrée des Nouvelles est retenue**, mots exacts, couleur `bleu` :
+
+Titre : « Moins de fenêtres qui bloquent »
+1. « Créer un trimestre, un cours ou un groupe-cours, ou importer des étudiant·es : les messages s'affichent dans l'application, sans bloquer l'écran. »
+2. « Supprimer un cours qui porte encore des données : la fenêtre dit ce qui s'y rattache. »
+3. « Les boutons principaux de l'Accueil, de l'aide et de la visite guidée ont retrouvé leur couleur, et les en-têtes du profil d'un·e étudiant·e sont alignés. »
+4. « Quand une grille, une échelle ou une cartouche change d'identifiant à l'import, tout ce qui la désigne la suit. »
+
+**Ce que tu fais maintenant**, dans l'ordre :
+1. Un commit de documentation avec `BACKLOG.md` et ce fichier.
+2. L'entrée ci-dessus dans `js/changelog-data.js`, puis `node scripts/release.mjs minor` ; un commit de release, par le skill `release-et-changelog`. Le relais de cette release porte pour la première fois la ligne « complexité » (lot 24).
+3. Arrête-toi et dis-le en une ligne. **Le verdict complet et le push attendent le signal de fin de journée de Grégoire** (Chrome, Safari, Claude fermés ; Mac branché, sans veille). À son signal : verdict, puis push si vert ; si `origin/main` a avancé (les sessions du nuage), fusion, pas rebase.
