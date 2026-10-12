@@ -45,3 +45,18 @@ Rien ne change à l'écran : dis-le si quelque chose change.
 ## Hors de la série
 
 Les fiches « à Grégoire » (une dizaine, cochées « ⏳ » au BACKLOG le 12 oct.), #465 (le moteur des pratiques touche des notes), #470 (la vitesse, trop large pour une journée de vérification unique), #595 (68 couleurs : un choix de palette par nom, à lui montrer), #598, #584, #738, #615 (peut recouper les candidats de la session d'audit).
+
+## Ajout de Cowork (12 oct., 7 h 59) – lot 24, contenir la complexité
+
+**Décision de Grégoire (7 h 58) : le chantier « contenir » entre dans cette série ; le moment est laissé à Cowork.** Il vient **après le lot 23**, et **l'arrêt unique de la série passe à la fin du lot 24**. Motifs : relevé après le lot 22, il ne fige pas le code mort que ce lot retire ; posé avant les lots qui suivront les décisions de Grégoire (une quarantaine attendent au tri, dont certaines touchent des fonctions déjà très chargées, l'import sélectif, le moteur des pratiques), il contient la croissance au moment où elle peut se produire.
+
+**Le plan** : `plans de travail/PLAN-contenir-la-complexite.md`, écrit par une session du nuage sur la branche `claude/kind-allen-6gw2ik` (`d499ac6d`), absent de `main` au moment où j'écris. S'il n'y est toujours pas : `git fetch origin claude/kind-allen-6gw2ik` puis `git show FETCH_HEAD:"plans de travail/PLAN-contenir-la-complexite.md"`. Ne fusionne pas cette branche : elle porte aussi `ETAT-PROJET.md`, que tu ne touches pas.
+
+**Ce qui change par rapport au plan** (relecture de Cowork, retenue par Grégoire) :
+1. **Bloquants** : les règles 1 (aucune fonction neuve au-dessus de 30 ; les existantes figées une à une, elles ne peuvent que descendre) et 2 (le nombre de fonctions au-dessus de 15 ne peut que descendre). La liste suit le code, comme `sentinelle-858` ; une hausse assumée s'écrit, avec sa raison.
+2. **La règle 3 (« aucun fichier ne franchit 1 000 lignes de code ») n'est pas bloquante** : mesurée et imprimée seulement. Motif : couper un fichier oblige ici à toucher `index.html` (210 scripts), l'ordre de chargement et les jetons anti-cache.
+3. **Le relevé se fait sur `main` à la fin du lot 23**, pas sur les chiffres du plan, pris sur 1.198.0 (il fige encore des rappels de `groupe.js`, retiré au lot 12).
+4. **Contre le découpage de façade** : le module imprime aussi, sans bloquer, la somme des complexités des fonctions au-dessus de 15. Si le compte baisse et que la somme ne bouge pas, la complexité a été déplacée, pas réduite ; Cowork le lira à la relecture.
+5. **L'option du § 3.2 est retenue** : une ligne « complexité » dans le relais de chaque release (Δ des gros fichiers, Δ au-dessus de 15, Δ au-dessus de 30, Δ de la somme). Inscris-la dans le rituel de release, là où il est écrit (skill `release-et-changelog`), en une ligne.
+
+**Le reste du plan tient** : `acorn` en `devDependency` de `tests/`, verrouillé dans `package-lock.json` ; le module `tests/unit/_helpers/complexite.js` ; la définition d'ESLint 8.57 ; l'exclusion nommée de `pratique-interface.js` ; les garde-fous (plus de 200 fichiers, plus de 10 000 fonctions) ; les trois break-tests. Aucun fichier de `js/`, ni `index.html`, `styles.css`, `docs/`, `ETAT-PROJET.md`. Inscris une fiche au BACKLOG pour le chantier. Dans la demande `DEMANDE-RELECTURE-2026-10-12-lot24-contenir.md` : les chiffres du relevé (au-dessus de 15, au-dessus de 30, maximum, somme, gros fichiers), le coût mesuré sur Vitest, et, sous « Documents à mettre à jour », ce que la session de la relève devrait savoir de ce banc.
