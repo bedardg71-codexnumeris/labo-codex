@@ -213,7 +213,7 @@ foi. Écarts connus au 12 octobre 2026 :
 | « Réserve », « verser », et l'interdiction d'« archiver » (ADR-011) | L'interface dit « Archives » et « Archiver… » ; « Réserve » ne survit que dans le code |
 | Le codex data est « anonymisé » (README, ADR-011) | L'anonymisation n'est pas écrite ; le codex data porte des noms |
 | Échelle IDME : « Insuffisant, Développement, Maîtrisé, Étendu » (README, ADR-005) | L'application affiche « Incomplet, Développement, Maîtrise, Étendu » |
-| Niveaux RàI « Préventif » et « Intensif » (README, Aide) | Le formulaire d'intervention dit « Groupe ciblé » (niveau 2) et « Individuel » (niveau 3) |
+| Paliers RàI « Préventif » et « Intensif » (README, Aide, profil de l'élève) | Le formulaire d'intervention dit « Groupe ciblé » (niveau 2) et « Individuel » (niveau 3) : l'application emploie les deux noms selon l'écran |
 | « Tableau de bord », « Aperçu » | La sous-section s'appelle « Suivi du groupe » |
 | « Mode sombre (par défaut) » (Aide) | Le thème par défaut est clair |
 | Un export JSON complet dans Réglages › Données (Aide, ancienne doc) | Retiré ; la sauvegarde passe par le Codex |
