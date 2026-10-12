@@ -1,6 +1,6 @@
 # Demande de relecture – lot 24 : contenir la complexité
 
-> Claude Code, 12 octobre 2026, 8 h 40 (mesuré par `date`). Consigne : ajout de Cowork de 7 h 59 à `CONSIGNE-DU-JOUR.md` ; plan `plans de travail/PLAN-contenir-la-complexite.md` (maintenant sur `main` par la fusion `41632ab1`).
+> Claude Code, 12 octobre 2026, 8 h 30 (mesuré par `date`). Consigne : ajout de Cowork de 7 h 59 à `CONSIGNE-DU-JOUR.md` ; plan `plans de travail/PLAN-contenir-la-complexite.md` (maintenant sur `main` par la fusion `41632ab1`).
 > Sur `main`, **non poussé, pas de release, pas de verdict Playwright**. Vitest complet vert (750 fichiers, 8 752 essais).
 
 ## 1 · Ce qui change pour l'usager
