@@ -394,14 +394,9 @@ document.addEventListener('click', (event) => {
     enregistrerAction('clic', description);
 }, true);
 
-// Intercepter les changements de navigation (si la fonction existe)
-const originalAfficherSection = window.afficherSection;
-if (typeof originalAfficherSection === 'function') {
-    window.afficherSection = function(section, sousSection) {
-        enregistrerAction('navigation', `${section} > ${sousSection || 'défaut'}`);
-        return originalAfficherSection.apply(this, arguments);
-    };
-}
+// #587 (12 oct. 2026) : l'interception de `afficherSection` est retirée. Ce fichier est chargé
+// AVANT navigation.js : la fonction n'existait pas encore, l'interception ne s'est jamais posée,
+// et le journal n'a jamais porté de navigation. Les clics, eux, y sont (écouteur ci-dessus).
 
 // ===============================
 // COLLECTE D'INFORMATIONS

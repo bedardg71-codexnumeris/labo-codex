@@ -200,12 +200,24 @@ describe('#557 · une seule définition de supprimerEvaluation', () => {
     //   de profil-etudiant-actions.js, écrasée au chargement par evaluation.js,
     //   visait deux identifiants inexistants ; retirée, avec la copie locale de
     //   liste-evaluations.js. evaluation.js garde la définition unique.
+    // ⮕ DE QUATRE À TROIS LE 12 OCT. 2026 (#587, lot 22) : `afficherTableauProductions` de
+    //   donnees-v2.js, écrasée par productions.js et dont le conteneur n'existe pas, est retirée.
+    //   L'interception de `afficherSection` par rapport-bug.js aussi (chargé avant navigation.js,
+    //   elle ne s'est jamais posée).
+    // ⮕ LES TROIS QUI RESTENT SONT DES EXCEPTIONS JUSTIFIÉES (règle de Grégoire, 28 août : « l'alias
+    //   devient l'exception justifiée »), pas des doublons à retirer :
+    //   · `afficherSection`, `afficherSousSection` — bilan-reflexif.js et planification.js les
+    //     ENVELOPPENT (chaque enveloppe appelle la précédente, puis navigation.js) : c'est le seul
+    //     point d'extension de la navigation, et navigation.js est en zone protégée. Les retirer
+    //     demande un événement de navigation, donc l'accord de Grégoire sur navigation.js.
+    //   · `_apresOuvertureFichier` — un emplacement de rappel à usage unique, pas une fonction :
+    //     posé par l'écran qui ouvre une copie, consommé et vidé par travaux-ui.js.
     const DOUBLONS_CONNUS = [
-        '_apresOuvertureFichier',            // profil-etudiant-actions.js / liste-evaluations.js
-        'afficherSection',                   // rapport-bug.js / bilan-reflexif.js / planification.js
-        'afficherSousSection',               // bilan-reflexif.js / planification.js
-        'afficherTableauProductions'         // donnees-v2.js / productions.js
+        '_apresOuvertureFichier',            // emplacement de rappel : evaluation / liste-evaluations / profil-etudiant-actions
+        'afficherSection',                   // enveloppes : bilan-reflexif.js / planification.js
+        'afficherSousSection'                // enveloppes : bilan-reflexif.js / planification.js
         // 'fermerModalBibliothequePratiques' : réglé par #587 (11 oct. 2026), une seule pose.
+        // 'afficherTableauProductions' : réglé par #587 (12 oct. 2026), productions.js seul.
     ];
 
     it('aucun NOUVEAU nom de fonction n\'est posé sur window par deux modules', () => {
@@ -243,6 +255,12 @@ describe('#557 · une seule définition de supprimerEvaluation', () => {
         // Le cliquet ne descend pas tout seul : si un doublon connu est corrigé,
         // ce banc rougit pour le dire, et la liste se raccourcit à la main.
         expect(doublons).toEqual(DOUBLONS_CONNUS);
+    });
+
+    it('#587 · rapport-bug.js, chargé avant navigation.js, n\'enveloppe plus afficherSection', () => {
+        // L'enveloppe ne pouvait pas se poser (la fonction n'existait pas encore) : retirée.
+        // La liste ci-dessus ne le verrait pas revenir, le nom y restant pour les deux autres.
+        expect(sansCommentaires(lire('js/rapport-bug.js'))).not.toMatch(/window\.afficherSection\s*=/);
     });
 
     it('supprimerEvaluation n\'est pas dans la liste des doublons tolérés', () => {
