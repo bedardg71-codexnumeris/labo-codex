@@ -27,40 +27,42 @@ const lireSource = (f) => readFileSync(path.join(racine, f), 'utf8');
 describe('#663 · A — rebrancherEchellePratique', () => {
     const w = chargerScript('js/import-export.js', {});
     const T = { ECH_VIEUX: 'ECH_NEUF' };
+    // #627 (12 oct. 2026) : atteinte par la règle commune `rebrancherReferences`, seule exportée.
+    const reb = (p, table) => w.rebrancherReferences(p, 'pratique', { echelles: table });
 
     it('A.a `configuration.echelleId` suit, le reste de la configuration est gardé', () => {
         const p = { id: 'P', configuration: { echelleId: 'ECH_VIEUX', seuil: 60 } };
-        expect(w.rebrancherEchellePratique(p, T)).toBe(1);
+        expect(reb(p, T)).toBe(1);
         expect(p.configuration).toEqual({ echelleId: 'ECH_NEUF', seuil: 60 });
     });
 
     it('A.b `config.echelleId` (forme ancienne) suit aussi', () => {
         const p = { id: 'P', config: { echelleId: 'ECH_VIEUX' } };
-        expect(w.rebrancherEchellePratique(p, T)).toBe(1);
+        expect(reb(p, T)).toBe(1);
         expect(p.config.echelleId).toBe('ECH_NEUF');
     });
 
     it('A.c la racine `echelleId` (schéma d\'import) suit', () => {
         const p = { id: 'P', echelleId: 'ECH_VIEUX' };
-        expect(w.rebrancherEchellePratique(p, T)).toBe(1);
+        expect(reb(p, T)).toBe(1);
         expect(p.echelleId).toBe('ECH_NEUF');
     });
 
     it('A.d les trois à la fois : trois rebranchements', () => {
         const p = { echelleId: 'ECH_VIEUX', config: { echelleId: 'ECH_VIEUX' }, configuration: { echelleId: 'ECH_VIEUX' } };
-        expect(w.rebrancherEchellePratique(p, T)).toBe(3);
+        expect(reb(p, T)).toBe(3);
     });
 
     it('A.e le sous-objet lu (celui de l\'archive) n\'est pas modifié', () => {
         const lu = { echelleId: 'ECH_VIEUX' };
         const p = { configuration: lu };
-        w.rebrancherEchellePratique(p, T);
+        reb(p, T);
         expect(lu.echelleId).toBe('ECH_VIEUX');
     });
 
     it('A.f une échelle absente de la table, ou une clé héritée, ne bouge pas', () => {
         const p = { configuration: { echelleId: 'ECH_AUTRE' }, echelleId: 'toString' };
-        expect(w.rebrancherEchellePratique(p, T)).toBe(0);
+        expect(reb(p, T)).toBe(0);
         expect(p).toEqual({ configuration: { echelleId: 'ECH_AUTRE' }, echelleId: 'toString' });
     });
 });
@@ -68,11 +70,10 @@ describe('#663 · A — rebrancherEchellePratique', () => {
 describe('#663 · B — la réouverture d\'archive', () => {
     const src = lireSource('js/reserve-ouvrir.js');
 
-    it('B.a la branche « pratique » de _patcherReferences passe par le rebranchement commun', () => {
+    it('B.a _patcherReferences passe par le rebranchement commun (#627 : pour tous les types)', () => {
         const bloc = tranche(src, 'function _patcherReferences', 'function _preparerEtPatcher');
-        const branche = tranche(bloc, "type === 'pratique'");
-        expect(branche).toContain('_rebrancherEchellePratique(item, remapEchelles)');
-        expect(branche).not.toMatch(/item\.config\.echelleId\s*=/);
+        expect(bloc).toContain('_rebrancherReferences(item, type, tables)');
+        expect(bloc).not.toMatch(/item\.config\.echelleId\s*=/);
     });
 
     it('B.b « échelle manquante » se lit sous `configuration` d\'abord', () => {

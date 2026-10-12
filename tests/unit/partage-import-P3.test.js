@@ -35,6 +35,8 @@ function charger() {
     w = chargerScript('js/partage-schemas.js', { db });
     chargerScript('js/trust-tofu.js', { db }, w);
     chargerScript('js/partage-import.js', { db }, w);
+    // #627 : les références internes suivent par la règle commune des imports, posée par import-export.js.
+    chargerScript('js/import-export.js', { db }, w);
     return w;
 }
 
