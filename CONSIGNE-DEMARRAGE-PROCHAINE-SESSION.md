@@ -1,5 +1,13 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 12 octobre 2026, 16 h 17 (Toronto) : `1.200.0` EN LIGNE** (build `1012-1211`) — Netlify
+> `6acd3140`, `commit_ref` `239de979`, `state: ready`, publié à 19:13:16 Z (15 h 13). Verdict Playwright complet vert sur
+> `6ddf3531` (code 0, 0 échec connu, aucun instable, 0 veille, sur secteur) ; `239de979` n'y ajoute qu'une fusion documentaire.
+> **Lots 20 à 24 LIVRÉS** (« Moins de fenêtres qui bloquent ») ; 5 fiches cochées, 7 en partie faites avec leur reste daté.
+> **Neuf : le cliquet de complexité** (`sentinelle-contenir-complexite`) bloque toute fonction neuve au-dessus de 30 et toute hausse du
+> nombre au-dessus de 15 ; chaque release porte une ligne « complexité » au relais (skill `release-et-changelog`, § 6).
+> **MANDAT COURANT** : la prochaine consigne de Cowork, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 12 octobre 2026, 7 h 20 (Toronto) : `1.199.0` EN LIGNE** (build `1011-1808`) — Netlify
 > `6acc41e0`, `commit_ref` `437d48ec`, `state: ready`, publié à 02:11:55 Z (11 oct., 22 h 11). Verdict Playwright complet vert sur
 > `2104120e` (code 0, 0 échec connu, aucun instable, 0 veille, sur secteur) ; `437d48ec` n'y ajoute qu'une fusion documentaire.
