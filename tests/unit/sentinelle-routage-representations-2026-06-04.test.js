@@ -14,7 +14,6 @@ const lire = (rel) => readFileSync(path.join(racineProjet, rel), 'utf8');
 
 describe('Session B Lot 2 · routage des représentations', () => {
     const donneesV2 = lire('js/donnees-v2.js');
-    const notationV2 = lire('js/pratique-notation-v2.js');
     const gestion = lire('js/pratiques-gestion.js');
 
     it('donnees-v2 · badge des familles routé vers genererBadgePratiqueHTML', () => {
@@ -24,13 +23,8 @@ describe('Session B Lot 2 · routage des représentations', () => {
         expect(donneesV2).not.toMatch(/'denominateur':/); // clé boguée retirée
     });
 
-    it('pratique-notation-v2 · aucune table de badge locale (badge de l’éditeur autonome retiré #338)', () => {
-        // #338 (juin 2026) : mettreAJourBadgePratiqueV2 — qui rendait le badge via
-        // obtenirRepresentationPratiqueStricte dans l'éditeur autonome mort — a été
-        // retiré avec la chaîne morte. Le guard zéro-dette demeure : pas de
-        // réintroduction d'une table de badge locale {pan-standards:{classe:'std'…}}.
-        expect(notationV2).not.toMatch(/'pan-standards':\s*\{\s*classe:\s*'std'/);
-    });
+    // L'essai « pratique-notation-v2 · aucune table de badge locale » est tombé avec le
+    // fichier, retiré le 11 oct. 2026 (#469).
 
     it('pratiques-gestion · code dérivé du registre (typeMapping local retiré)', () => {
         expect(gestion).toMatch(/obtenirRepresentationPratiqueStricte/);

@@ -732,7 +732,7 @@ function calculerEtStockerPatternsGroupe() {
     });
 
     // Stocker avec namespace trimestre
-    db.setSync(cle('indicesPatternsRaI'), patternsGroupe);
+    db.setSyncSiChange(cle('indicesPatternsRaI'), patternsGroupe, ['dateCalcul']);   // #1040
 
 
     return patternsGroupe;

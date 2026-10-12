@@ -124,7 +124,9 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
         const liste = lire('js', 'trimestre-v2-liste.js');
         // Le badge « Clos » vivait dans la liste sans conteneur, retirée le 4 oct. 2026 (#1006).
         expect(liste).toContain('titreSection2 = \'Trimestres clos\';');
-        expect(liste.match(/\{ label: 'Clore', action: 'confirmerArchivage'/g)).toHaveLength(2);
+        // #1018 (lot 8, 11 oct. 2026) : « Clore » n'est plus offert sur le trimestre actif (il y était
+        // toujours refusé) ; il reste sur le trimestre disponible, une seule fois.
+        expect(liste.match(/\{ label: 'Clore', action: 'confirmerArchivage'/g)).toHaveLength(1);
         expect(liste).toContain('{ label: \'Rouvrir\', action: \'desarchiverTrimestre\'');
     });
 

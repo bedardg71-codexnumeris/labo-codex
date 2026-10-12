@@ -101,7 +101,7 @@ describe('Lot N1b · les lecteurs suivent la désignation unique', () => {
 
     it('l\'écrivain d\'indicesCP pose `completionConstructible: false` sans pratique, et le lecteur en fait un `null`', () => {
         const portfolio = fs.readFileSync(path.join(DOSSIER_JS, 'portfolio.js'), 'utf8');
-        const bloc = tranche(portfolio, 'if (!pratique) {', 'db.setSync(cleIndices, indicesCP);');
+        const bloc = tranche(portfolio, 'if (!pratique) {', 'db.setSyncSiChange(cleIndices, indicesCP');
         expect(bloc).toContain('completionConstructible: false');
         const indices = fs.readFileSync(path.join(DOSSIER_JS, 'indices.js'), 'utf8');
         expect(indices).toContain('C: completionConstructible ? Math.round(C * 100) : null,');

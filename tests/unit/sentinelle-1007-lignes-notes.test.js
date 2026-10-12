@@ -46,10 +46,10 @@ function fauxDb(initial) {
 }
 
 /** La vraie fonction de lecture, tirée de son fichier, sur le magasin du banc. */
-function lectureSur(db) {
+function lectureSur(db, fenetre = {}) {
     const src = tranche(lire('js/evaluation-sauvegarde.js'), 'function ligneEmployeeParUneEvaluation(', '\n}\n', { longueurMin: 300 });
     // eslint-disable-next-line no-new-func
-    return new Function('db', 'cle', src + '\n}\nreturn ligneEmployeeParUneEvaluation;')(db, cle);
+    return new Function('db', 'cle', 'window', src + '\n}\nreturn ligneEmployeeParUneEvaluation;')(db, cle, fenetre);
 }
 
 /** Codex : compte les fenêtres et rend la réponse posée. */
@@ -313,5 +313,87 @@ describe('#1007, lot 2b — les deux écrans de la cible attendent la réponse',
             expect(appels.length, f).toBe(1);
             expect(appels[0], f).toContain('await window.EditeurCibles.confirmerRetraits(');
         }
+    });
+});
+
+// =====================================================================
+// #1015 (11 oct. 2026) — un type de production ou un forfait des spécifications
+// =====================================================================
+// Une évaluation ne cite ni type ni forfait : elle les emploie par sa production (l'appariement
+// du moteur, `productionEstDuType`, par id ou par nom). Le codex n'est proposé que si une
+// évaluation porte sur une production d'un type de la pratique.
+describe('#1015 — type de production et forfait des spécifications', () => {
+    const PRATIQUE = { id: 'PR_SPE', nom: 'Spécifications du banc', configuration: {
+        typesTravaux: [{ id: 'projet', nom: 'Projet' }, { id: 'quiz', nom: 'Quiz' }],
+        forfaits: [{ lettre: 'A', note: 90, travaux: { projet: 2 } }, { lettre: 'B', note: 80, travaux: { projet: 1 } }] } };
+    const fenetreSpe = () => {
+        const w = {};
+        chargerScript('js/pratiques/pratique-pan-specifications.js', {}, w);
+        return w;
+    };
+    function magasinSpe(evaluations) {
+        return fauxDb({
+            [cle('pratiquesConfigurables')]: [PRATIQUE],
+            [cle('productions')]: [{ id: 'P_PROJET', titre: 'Projet fictif', type: 'projet' }, { id: 'P_QUIZ', titre: 'Quiz fictif', type: 'quiz' }],
+            [cle('evaluationsSauvegardees')]: evaluations
+        });
+    }
+    function monterSpe(db, codex, questions) {
+        const win = monter('js/pratiques-gestion.js', db, codex, questions);
+        win.ligneEmployeeParUneEvaluation = lectureSur(db, fenetreSpe());
+        win.EditeurCibles = { poser() {}, lire: () => [] };   // l'éditeur des cibles (dénotation), sans objet ici
+        return win;
+    }
+
+    it('A. la lecture : un type est employé si une évaluation porte sur une production de ce type', () => {
+        const employe = lectureSur(magasinSpe([{ id: 'E1', productionId: 'P_PROJET' }]), fenetreSpe());
+        expect(employe({ typeTravail: PRATIQUE.configuration.typesTravaux[0] })).toBe(true);
+        expect(employe({ typeTravail: PRATIQUE.configuration.typesTravaux[1] })).toBe(false);
+        expect(employe({ typeTravail: { nom: 'Projet' } })).toBe(true);   // par le nom aussi
+    });
+
+    it('type non employé : aucune fenêtre, retiré', async () => {
+        const db = magasinSpe([{ id: 'E1', productionId: 'P_PROJET' }]); const codex = fauxCodex(false);
+        const win = monterSpe(db, codex, []);
+        await win.chargerPratiquePourModif('PR_SPE');
+        await win.supprimerTypeTravailMat(1);
+        expect(codex.fenetres).toEqual([]);
+        expect(db.getSync(cle('pratiquesConfigurables'))[0].configuration.typesTravaux.map((t) => t.id)).toEqual(['projet']);
+    });
+
+    it('type employé : la fenêtre ; « Annuler » n\'écrit rien', async () => {
+        const db = magasinSpe([{ id: 'E1', productionId: 'P_PROJET' }]); const codex = fauxCodex(false);
+        const win = monterSpe(db, codex, []);
+        await win.chargerPratiquePourModif('PR_SPE');
+        await win.supprimerTypeTravailMat(0);
+        expect(codex.fenetres).toEqual(['typeTravail']);
+        expect(db.ecritures).toBe(0);
+    });
+
+    it('forfait, une évaluation sur un type de la pratique : la fenêtre ; sans évaluation : aucune', async () => {
+        const avec = magasinSpe([{ id: 'E1', productionId: 'P_QUIZ' }]); const c1 = fauxCodex(false);
+        const w1 = monterSpe(avec, c1, []); await w1.chargerPratiquePourModif('PR_SPE');
+        await w1.supprimerForfaitMat(1);
+        expect(c1.fenetres).toEqual(['forfait']);
+        expect(avec.ecritures).toBe(0);
+        const sans = magasinSpe([]); const c2 = fauxCodex(false);
+        const w2 = monterSpe(sans, c2, []); await w2.chargerPratiquePourModif('PR_SPE');
+        await w2.supprimerForfaitMat(1);
+        expect(c2.fenetres).toEqual([]);
+        expect(sans.getSync(cle('pratiquesConfigurables'))[0].configuration.forfaits.map((f) => f.lettre)).toEqual(['A']);
+    });
+
+    it('relu après l\'attente : si le type a changé de place pendant la fenêtre, rien n\'est retiré', async () => {
+        const db = magasinSpe([{ id: 'E1', productionId: 'P_PROJET' }]);
+        const codex = { fenetres: [], async proposerAvantSuppression(g) {
+            this.fenetres.push(g);
+            await db.modifier(cle('pratiquesConfigurables'), (ps) => { ps[0].configuration.typesTravaux.unshift({ id: 'neuf', nom: 'Neuf' }); return ps; });
+            return true;
+        } };
+        const win = monterSpe(db, codex, []);
+        await win.chargerPratiquePourModif('PR_SPE');
+        await win.supprimerTypeTravailMat(0);
+        expect(codex.fenetres).toEqual(['typeTravail']);
+        expect(db.getSync(cle('pratiquesConfigurables'))[0].configuration.typesTravaux.map((t) => t.id)).toEqual(['neuf', 'projet', 'quiz']);
     });
 });

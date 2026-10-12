@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
 // SENTINELLE — LE DIAGNOSTIC DES DEUX RÉSOLVEURS D'ÉCHELLE DIT-IL VRAI ?
+// (#590, 11 oct. 2026 : `idOriginal` n'est plus une cause ; restent la pratique et le pool.)
 //
 // `_diagnostiquerResolutionEchelles` existe pour trancher une question qu'aucune
 // lecture de code ne peut trancher : la divergence entre `obtenirEchelleResolue`
@@ -28,15 +29,15 @@ let productionsEnBase = [];
 let evaluationsEnBase = [];
 let ecrituresInterdites = [];
 
-// Le résolveur de l'AUTRE famille, injecté : il ne connaît que `m.id === id`,
-// sur le trimestre actif puis le pool. C'est sa cécité à `idOriginal` et à
-// `pratique-*` que le diagnostic doit rendre visible.
+// Le résolveur de l'AUTRE famille, injecté, à sa règle depuis #590 (11 oct.) :
+// l'id exact puis `idOriginal`, sur le trimestre actif puis le pool. Sa cécité à
+// `pratique-*` et son repli au pool sont ce que le diagnostic rend visible ; le
+// vrai résolveur est tenu par `sentinelle-590-un-identifiant-une-echelle`.
 let poolInterTrimestre = [];
 function resoudreModeleParIdStub(type, id) {
     if (type !== 'echelle' || !id) return null;
-    return echellesEnBase.find(e => e && e.id === id)
-        || poolInterTrimestre.find(e => e && e.id === id)
-        || null;
+    const chercher = (l) => l.find(e => e && e.id === id) || l.find(e => e && e.idOriginal === id) || null;
+    return chercher(echellesEnBase) || chercher(poolInterTrimestre);
 }
 
 beforeAll(() => {
@@ -129,7 +130,7 @@ describe('diagnostic résolveurs · A — il lit vraiment, et n\'invente rien', 
 /* --------------------------------------- B — les trois causes réelles, nommées */
 
 describe('diagnostic résolveurs · B — il détecte ET nomme la cause', () => {
-    it('B.a `idOriginal` : la rétroaction résout, la consolidation NON', () => {
+    it('B.a `idOriginal` : depuis #590, les deux résolvent — ce n\'est plus une divergence', () => {
         // Le scénario réel : `ajouterEchelleIndividuelle` pose `idOriginal` sur
         // l'échelle ajoutée depuis la bibliothèque, et des productions plus
         // anciennes désignent encore l'identifiant d'origine.
@@ -137,11 +138,10 @@ describe('diagnostic résolveurs · B — il détecte ET nomme la cause', () => 
         productionsEnBase = [{ id: 'P1', echelleId: 'ECH_ANCIEN' }];
 
         const r = win._diagnostiquerResolutionEchelles();
-        expect(r.divergents).toHaveLength(1);
-        expect(r.divergents[0].resolueParRetroaction).toBe(true);
-        expect(r.divergents[0].resolueParRegistre).toBe(false);
-        expect(r.divergents[0].cause).toBe('idOriginal');
-        expect(r.parCause.idOriginal).toBe(1);
+        expect(r.total).toBe(1);
+        expect(r.lignes[0].resolueParRetroaction).toBe(true);
+        expect(r.lignes[0].resolueParRegistre).toBe(true);
+        expect(r.divergents).toHaveLength(0);
     });
 
     it('B.b `pratique-*` : né sur une ÉVALUATION, pas sur une production', () => {
@@ -176,16 +176,15 @@ describe('diagnostic résolveurs · B — il détecte ET nomme la cause', () => 
         pratiquesEnBase = [{ id: 'PRAT_1', config: { echelle: { niveaux: ECHELLE.niveaux } } }];
         productionsEnBase = [
             { id: 'P1', echelleId: 'ECH_LOCALE' },      // sain
-            { id: 'P2', echelleId: 'ECH_ANCIEN' },      // idOriginal
+            { id: 'P2', echelleId: 'ECH_ANCIEN' },      // idOriginal : accord depuis #590
             { id: 'P3', echelleId: 'ECH_AILLEURS' }     // pool
         ];
         evaluationsEnBase = [{ id: 'EV1', echelleId: 'pratique-PRAT_1' }];
 
         const r = win._diagnostiquerResolutionEchelles();
         expect(r.total).toBe(4);
-        expect(r.divergents).toHaveLength(3);
+        expect(r.divergents).toHaveLength(2);
         expect(r.parCause).toEqual({
-            idOriginal: 1,
             'pool-inter-trimestre': 1,
             'echelle-de-pratique': 1
         });

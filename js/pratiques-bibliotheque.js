@@ -581,22 +581,9 @@ async function appliquerConfigurationPratique(configId) {
 
     window.modalitesEvaluation.remplacer(modalites);
 
-    // Rafraîchir l'interface selon le type
-    if (typeConfig === 'specifications') {
-        // Rafraîchir interface SPE
-        if (typeof chargerConfigSpecifications === 'function') {
-            chargerConfigSpecifications();
-        }
-        if (typeof afficherTypesTravauxSpec === 'function') {
-            afficherTypesTravauxSpec(modalites.specifications?.typesTravaux || []);
-        }
-        if (typeof afficherForfaitsSpec === 'function') {
-            afficherForfaitsSpec(
-                modalites.specifications?.forfaits || [],
-                modalites.specifications?.typesTravaux || []
-            );
-        }
-    }
+    // #469 (11 oct. 2026) — le rafraîchissement « interface SPE » qui suivait est RETIRÉ, avec
+    // l'ancien éditeur (`pratique-notation-v2.js`) qui portait ses trois fonctions : leurs
+    // cibles (`v2-spec-*`) n'existent plus dans index.html, chaque appel sortait sans rien faire.
     // #434 (9 août 2026) — le bloc de rafraîchissement « interface STD » qui
     // suivait est RETIRÉ : ses six `getElementById` visaient des ids `v2-*`
     // (`v2-variante-calcul`, `v2-portfolio-selection`, `v2-portfolio-nombre`,

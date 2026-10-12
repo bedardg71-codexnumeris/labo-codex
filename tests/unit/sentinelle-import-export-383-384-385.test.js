@@ -154,12 +154,8 @@ describe('#613 · la restauration ZIP compte, marque et ne ment plus sur le rés
 });
 
 describe('#613 · les appelants n\'annoncent plus « réussi » sur un import partiel', () => {
-    const corpsImportBrut = corpsSansCommentaires(source, 'async function executerImportLocalStorageBrut');
-
-    it('l\'import complet dit « partiel » dès qu\'un blob manque', () => {
-        expect(corpsImportBrut).toMatch(/resBlobs\.manquants \? 'partiel' : 'réussi'/);
-        expect(corpsImportBrut).not.toMatch(/Import réussi !/);
-    });
+    // #1047 (lot 12, 11 oct. 2026) : l'essai de l'« import complet » (`executerImportLocalStorageBrut`) est
+    // parti avec la fonction, code mort : aucun format ne l'atteignait (le brut passe par l'import sélectif).
 
     it('les deux appelants lisent le champ restaures, jamais le retour nu', () => {
         expect(source).not.toMatch(/const nbRestores = await _restaurerBlobsDepuisZip/);

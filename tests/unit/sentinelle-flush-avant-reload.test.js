@@ -44,11 +44,12 @@ describe('sentinelle · flush des écritures IDB avant tout confirm + reload', (
         expect(fautifs, 'sites confirm+reload sans flush préalable').toEqual([]);
     });
 
-    it('le patron protège bien les 6 sites connus (1 codex.js + 5 import-export.js)', () => {
+    // #1047 (lot 12, 11 oct. 2026) : 6 → 5, un site vivait dans `executerImportLocalStorageBrut`, code mort retiré.
+    it('le patron protège bien les 5 sites connus (1 codex.js + 4 import-export.js)', () => {
         const total = FICHIERS
             .map(f => readFileSync(path.join(racine, f), 'utf8'))
             .map(src => (src.match(/await db\.flush\(\)/g) || []).length)
             .reduce((a, b) => a + b, 0);
-        expect(total).toBeGreaterThanOrEqual(6);
+        expect(total).toBeGreaterThanOrEqual(5);
     });
 });

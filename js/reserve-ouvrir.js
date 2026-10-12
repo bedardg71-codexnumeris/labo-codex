@@ -375,7 +375,9 @@ function _extraireRessources(donnees) {
     });
 
     pratiques.forEach(function(p) {
-        var echelleId = (p.config && p.config.echelleId) ? p.config.echelleId : null;
+        // #663 : la référence se lit où la pratique la range, quel que soit son âge.
+        var echelleId = (p.configuration && p.configuration.echelleId)
+            || (p.config && p.config.echelleId) || p.echelleId || null;
         p._refEchelle = echelleId;
         p._refEchelleManquante = !!(echelleId && !idsEchellesDispo.has(echelleId));
     });
@@ -1044,6 +1046,13 @@ function _nettoyerMarqueurs(item) {
     return clone;
 }
 
+// #663 — délégué à import-export.js (lu à l'appel ; ce fichier est chargé avant lui) : une
+// seule règle pour les deux chemins.
+function _rebrancherEchellePratique(item, table) {
+    return (typeof window.rebrancherEchellePratique === 'function')
+        ? window.rebrancherEchellePratique(item, table) : 0;
+}
+
 function _faireCopie(item, prefixId) {
     var copie = _nettoyerMarqueurs(item);
     if (typeof window.genererIdUnique === 'function') {
@@ -1103,7 +1112,7 @@ async function appliquerReimport() {
     // Tables de remapping (ancienId -> nouveauId) pour les ressources référencées
     // par d'autres : grilles, échelles et cartouches ont des références entrantes
     // (productions.grilleId/echelleId/cartoucheId, cartouches.grilleId,
-    // pratiques.config.echelleId).
+    // pratiques.configuration/config.echelleId — #663).
     // Peuplées uniquement quand l'item est copié en double ; sinon l'ID reste stable.
     var remapGrilles = {};
     var remapEchelles = {};
@@ -1141,10 +1150,9 @@ async function appliquerReimport() {
                 rapport.refsRemappees++;
             }
         } else if (type === 'pratique') {
-            if (item.config && item.config.echelleId && remapEchelles[item.config.echelleId]) {
-                item.config.echelleId = remapEchelles[item.config.echelleId];
-                rapport.refsRemappees++;
-            }
+            // #663 : `configuration.echelleId` (ce qu'écrivent les pratiques d'aujourd'hui),
+            // `config.echelleId` (anciennes) et la racine — un seul rebranchement pour les trois.
+            rapport.refsRemappees += _rebrancherEchellePratique(item, remapEchelles);
         }
         return item;
     }

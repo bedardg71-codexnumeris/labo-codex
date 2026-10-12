@@ -86,7 +86,7 @@ function monter(grilles) {
         echapperHtml: (t) => String(t == null ? '' : t),
         genererIdUnique: (p) => (p || 'ID_') + Math.random().toString(36).slice(2, 8),
         alert() {}, confirm: () => true, prompt: () => 'Copie',
-        notifications: { succes() {}, erreur() {}, info() {}, avertissement() {} },
+        notifications: { succes() {}, erreur() {}, info() {}, avertissement() {}, warning() {} },   // #483 : warning, le vrai nom
         BibliothequeUI: { obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null,
                           filtrerParModeDemo: (l) => l, repertoires: { rendre() {} } },
         obtenirIdentiteCCUtilisateur: () => 'banc',

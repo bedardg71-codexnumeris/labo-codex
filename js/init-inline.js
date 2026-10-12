@@ -33,8 +33,6 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('click', function (e) {
     if (e.target.matches('[data-sous-onglet="reglages-groupe"]')) {
         setTimeout(function () {
-            // Note: initialiserModuleGroupe() est maintenant appelé automatiquement par navigation.js
-
             // Clonage anonymisé (section avancée)
             if (typeof obtenirEtudiantsGroupe1 === 'function') {
                 mettreAJourStatistiquesClonage();
@@ -101,8 +99,8 @@ function definirModeExpertFromEl(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.js au chargement : la version du
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
-let VERSION_MAJEURE = '1.198.0';
-let BUILD_ID = '1011-1014';
+let VERSION_MAJEURE = '1.199.0';
+let BUILD_ID = '1011-1808';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 

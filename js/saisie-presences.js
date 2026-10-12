@@ -1269,13 +1269,13 @@ function initialiserSaisiePresences() {
     // Sauvegarder les paramètres actuels pour persistance — PAR TRIMESTRE
     // (#749 lot 3, S-6 ; voir initialiserModuleSaisiePresences).
     if (dateInput && dateInput.value) {
-        db.setSync(cle('presences_date'), dateInput.value);
+        db.setSyncSiChange(cle('presences_date'), dateInput.value);   // #1040
     }
     if (selectGroupe) {
-        db.setSync(cle('presences_groupe'), selectGroupe.value);
+        db.setSyncSiChange(cle('presences_groupe'), selectGroupe.value);   // #1040
     }
     if (selectTri) {
-        db.setSync(cle('presences_tri'), selectTri.value);
+        db.setSyncSiChange(cle('presences_tri'), selectTri.value);   // #1040
     }
 
     if (!dateInput || !dateInput.value) {
@@ -1610,29 +1610,25 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         nbEtudiants.textContent = '(' + etudiantsFiltres.length + ' ' + window.pluriel(etudiantsFiltres.length, 'étudiant·e', 'étudiant·es') + ')';
     }
 
-    // Mettre à jour le titre de la colonne Présence avec bouton
+    // Mettre à jour le titre de la colonne Présence et ses deux boutons.
+    // #783 (11 oct. 2026) — UN SEUL GABARIT : celui d'index.html. Avant, cette fonction
+    // réécrivait l'en-tête entier, et perdait au passage l'infobulle « Présence »
+    // (`data-tooltip`) du gabarit statique ; un bouton ajouté là-bas aurait disparu au
+    // premier rendu. Ne changent ici que ce qui dépend de la séance : le nombre de
+    // périodes du premier bouton (🆕 BETA 95.1, en périodes) et l'état verrouillé.
     const colonnePresenceTitre = document.getElementById('colonneHeuresTitre');
     if (colonnePresenceTitre) {
-        // 🆕 BETA 95.1 : Afficher en périodes
-        colonnePresenceTitre.innerHTML = `
-            Présence
-            <div class="mt-8-flex-col-gap4">
-                <button class="btn btn-principal btn-tres-compact"
-                        data-action="tousPresents"
-                        ${estVerrouille ? 'disabled' : ''}
-                        title="Mettre tout le monde présent (${nombrePeriodesSeance} périodes)"
-                        aria-label="Mettre tout le monde présent (${nombrePeriodesSeance} périodes)">
-                    <span aria-hidden="true">✓ ${nombrePeriodesSeance} pér.</span>
-                </button>
-                <button class="btn btn-annuler btn-tres-compact"
-                        data-action="reinitialiserSaisie"
-                        ${estVerrouille ? 'disabled' : ''}
-                        title="Réinitialiser (tout le monde absent)"
-                        aria-label="Réinitialiser (tout le monde absent)">
-                    <span aria-hidden="true">↻</span>
-                </button>
-            </div>
-        `;
+        const btnTous = colonnePresenceTitre.querySelector('[data-action="tousPresents"]');
+        const btnReinitCol = colonnePresenceTitre.querySelector('[data-action="reinitialiserSaisie"]');
+        if (btnTous) {
+            const libelle = `Mettre tout le monde présent (${nombrePeriodesSeance} périodes)`;
+            btnTous.title = libelle;
+            btnTous.setAttribute('aria-label', libelle);
+            btnTous.disabled = !!estVerrouille;
+            const visible = btnTous.querySelector('span[aria-hidden="true"]');
+            if (visible) visible.textContent = `✓ ${nombrePeriodesSeance} pér.`;
+        }
+        if (btnReinitCol) btnReinitCol.disabled = !!estVerrouille;
     }
 
     // Gérer l'état des boutons principaux

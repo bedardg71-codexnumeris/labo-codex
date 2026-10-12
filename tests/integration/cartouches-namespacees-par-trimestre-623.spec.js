@@ -113,7 +113,7 @@ test('#623 · barre latérale et matrice montrent les cartouches du trimestre AC
         db.setSync(cleSource('cartouches_GR_S5_ROUTE', 'a2025'), [cart('CART_A', 'Cartouche Automne', 'Commentaire A2025.')]);   // security-ok: cartouche littérale du spec, et la clé est calculée par `cleSource` — la fonction de routage de production elle-même.
 
         // Lecture SCOPÉE à la grille du cas. Le démarrage re-sème l'exemple
-        // générique (`assurerGrilleGenerique` / `assurerCartoucheGenerique`) dans la
+        // générique (`assurerGrilleDeDepart` / `assurerCartoucheDeDepart`) dans la
         // collection du trimestre actif : il partagerait la barre sans rien dire du
         // routage. On le neutralise en LISANT le sujet, plutôt qu'en écrivant un
         // tombstone global qui déteindrait sur les autres specs de la suite.
@@ -334,7 +334,7 @@ const LIRE_ANNONCE = `async (grilleId) => {
     const promesse = window.partageExport.exporterPourPartager('grille', grilleId);
     await attendre(500);
     const overlay = document.getElementById('modalPartageExport');
-    const avert = overlay ? overlay.querySelector('.texte-avertissement') : null;
+    const avert = overlay ? overlay.querySelector('.alerte-attention') : null;
     const lecture = {
         entiteResolue: !!entite,
         modaleOuverte: !!overlay,

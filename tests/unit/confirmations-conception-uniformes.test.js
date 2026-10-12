@@ -34,7 +34,6 @@ const MODULES_CONCEPTION = [
     'js/pratiques.js',
     'js/pratiques-gestion.js',
     'js/pratiques-bibliotheque.js',
-    'js/pratique-notation-v2.js',
     'js/wizard-pratique-v2.js',
     'js/comparateur-pratiques.js',
     'js/planification-carte.js'

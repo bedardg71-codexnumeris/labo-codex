@@ -184,23 +184,6 @@ async function exporterBibliothequeCartouches() {
 }
 
 /**
- * Migrer les cartouches d'un trimestre vers la Bibliothèque
- * @param {string} cleSource - Clé source (ex: 'a2025_cartouches')
- * @returns {Promise<{ajoutees: number, existantes: number}>}
- */
-async function migrerCartouchesVersBibliotheque(cleSource) {
-    const cartouches = db.getSync(cleSource, null);
-    if (!cartouches) {
-        return { ajoutees: 0, existantes: 0 };
-    }
-    if (!Array.isArray(cartouches)) {
-        return { ajoutees: 0, existantes: 0 };
-    }
-
-    return await importerCartouchesDansBibliotheque(cartouches);
-}
-
-/**
  * Obtenir le nombre de cartouches dans la bibliothèque
  * @returns {number}
  */
@@ -220,7 +203,6 @@ window.ajouterCartoucheALaBibliotheque = ajouterCartoucheALaBibliotheque;
 window.retirerCartoucheDeLaBibliotheque = retirerCartoucheDeLaBibliotheque;
 window.importerCartouchesDansBibliotheque = importerCartouchesDansBibliotheque;
 window.exporterBibliothequeCartouches = exporterBibliothequeCartouches;
-window.migrerCartouchesVersBibliotheque = migrerCartouchesVersBibliotheque;
 window.getNombreCartouchesBibliotheque = getNombreCartouchesBibliotheque;
 window.CLE_BIBLIOTHEQUE_CARTOUCHES = CLE_BIBLIOTHEQUE_CARTOUCHES;
 

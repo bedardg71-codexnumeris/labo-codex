@@ -11,9 +11,8 @@
    - supprimerProductionActive (bouton Supprimer)
    - importerProductionsExternes (consommé par reserve-ouvrir.js etc.)
 
-   Wrappers délégation (sauvegarderProductionOriginale, annulerFormProductionOriginale,
-   supprimerProductionOriginale) restent dans le résidu productions.js — anti-pattern
-   §5.3 (variables module-scope à garder groupées).
+   Plus aucun wrapper de délégation dans productions.js : fusionnés par #626 (31 août)
+   et #633 (11 oct. 2026, annulerFormProduction).
 
    Dépendances (toutes via globales/window) :
    - getCleProductions (productions.js)
@@ -353,6 +352,7 @@ async function dupliquerProduction(id) {
         };
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
 
         productions.push(copie);
         copieCreee = copie;

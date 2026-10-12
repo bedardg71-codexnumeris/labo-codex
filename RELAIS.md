@@ -7,6 +7,31 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS — 12 OCT. 2026, 7 h 20 : **1.199.0 (RIEN D'INVENTÉ, RIEN DE PERDU ; LOTS 8 À 19) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify, Claude Code, 12 oct.) : déploiement `6acc41e0`, `commit_ref` `437d48ec`, `state: ready`,
+publié à 02:11:55 Z (11 oct., 22 h 11, Toronto). Release `039b523d` (build 1011-1808).
+**Verdict complet sur `2104120e`** (au signal de Grégoire, 11 oct. au soir ; secteur, éveil tenu, 0 veille, échange 0 Mo) : code 0,
+0 échec connu, aucun instable. Un premier verdict, à 20 h 49, était rouge sur trois specs restées sur l'ancien comportement
+(#574, #951) ; alignées en `2104120e`, sans toucher au code. Vitest complet vert (hook pré-push).
+**Push** : refusé une fois (« fetch first ») par `f6acfef7`, commit documentaire d'une session du nuage poussé pendant la suite ;
+fusionné (`437d48ec`, pas de rebase, pour garder les SHA jugés) ; entre `2104120e` et `437d48ec`, seuls `ETAT-PROJET.md` et
+`RELAIS.md` changent. Le hook a averti « aucun verdict local » pour le SHA de fusion, comme attendu.
+**BACKLOG** : 41 fiches cochées (37 livrées, 4 closes sur la mesure : #685, #791, #955, #979) ; 22 restées ouvertes reçoivent une
+ligne datée, « en partie livré » ou « à Grégoire » (écrit par Cowork, relu par Claude Code : aucun texte d'origine perdu).
+**`lot8-cadre`** : plus rien qui ne soit sur `main`.
+**Suite** : la prochaine consigne de Cowork, dans `plans de travail/CONSIGNE-DU-JOUR.md`.
+
+---
+
+## (relais précédent) 11 OCT. 2026, 19 h 09 : **1.199.0 COMMITÉE SUR `main` (LOTS 8 À 19), NON POUSSÉE ; EN LIGNE : 1.198.0**
+
+**Le travail le plus récent vit sur le `main` LOCAL du Mac de Grégoire**, en avance sur `origin/main` : release `039b523d` (1.199.0, build 1011-1808, « Rien d'inventé, rien de perdu »). Une session du nuage qui part d'`origin/main` ne le voit pas.
+**Contenu** : lots 8 à 19 et leurs corrections, tous relus par Cowork le 11 oct. (verdicts et décisions de Grégoire à la fin de `plans de travail/CONSIGNE-DU-JOUR.md`). Mots d'écran et Nouvelles tranchés par Grégoire (18 h 02 à 18 h 04). Vitest complet vert.
+**Suite** : au signal de fin de journée de Grégoire, verdict Playwright complet, puis push si vert (§ 4.5 de `fin-de-session`). La branche `lot8-cadre` n'a plus rien qui ne soit sur `main`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS — 11 OCT. 2026, 11 h 26 : **1.198.0 (MOINS DE MÉMOIRE, DES COMPTES JUSTES ; LOTS 5, 6, 7) EN LIGNE ; `main` À JOUR ; LOT 8 SUR `lot8-cadre`**
 
 **En ligne** (mesuré par le connecteur Netlify) : déploiement `6acbaa82`, `commit_ref` `21228642`, `state: ready`, publié à 15:26:05 Z

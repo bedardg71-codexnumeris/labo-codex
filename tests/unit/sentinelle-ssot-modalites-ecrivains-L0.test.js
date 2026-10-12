@@ -83,7 +83,7 @@ describe('Sentinelle SSOT · écrivains de modalitesEvaluation (Lot 0)', () => {
 
     it('les anciens écrivains du domaine sont bien routés (acquis Lot 1)', () => {
         for (const ancien of [
-            'js/pratique-notation-v2.js', 'js/pratiques.js', 'js/objectifs.js',
+            'js/pratiques.js', 'js/objectifs.js',   // pratique-notation-v2.js : retiré (#469, 11 oct. 2026)
             'js/wizard-pratique-v2.js', 'js/pratiques/pratique-manager.js',
             'js/pratiques-bibliotheque.js', 'js/preferences.js',
             'js/import-export.js', 'js/demo-activation.js', 'js/evaluation-chargement.js'

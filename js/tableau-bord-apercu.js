@@ -1630,6 +1630,35 @@ function horaireSansAucunePeriode(seances) {
 }
 
 /**
+ * Combien d'évaluations le groupe doit avoir avant que P se calcule — la ligne
+ * « N évaluations en attente » du tableau de bord.
+ *
+ * Ordre : la pratique active, sinon `config.portfolio` des modalités, sinon 3.
+ *
+ * ⮕ #634 (11 oct. 2026) — LA PRATIQUE ACTIVE SE LIT COMME LA LIT LA NOTE. Le moteur passe
+ * par `obtenirConfigPratiqueActive()` (portfolio.js) : pointeur du groupe-cours, id brut
+ * puis normalisé (#711), forme `.configuration` ou `.config` (#712), et 7 quand le
+ * portfolio ne dit pas son minimum (profil-etudiant-actions.js). L'aperçu cherchait l'id
+ * brut, en `.configuration`, `.portfolio` ou `.regles` : sur une pratique importée, ou
+ * désignée par un id ancien, il annonçait un autre seuil que celui de la note.
+ * ⚠ La clé `bibliothequePratiques` n'est toujours pas consultée :
+ * le moteur ne la lit pas non plus (#626 avait retiré un repli qui ne trouvait rien).
+ * G2-b (#436, 9 août 2026) : le miroir `configPAN.portfolio` est retiré du repli — il ne se
+ * rafraîchit qu'à l'APPLICATION d'une pratique. `config.portfolio` (racine des modalités) reste.
+ *
+ * @param {Object} config - modalitesEvaluation
+ * @returns {number}
+ */
+function seuilEvaluationsPourP(config) {
+    const configPratique = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive() : null;
+    const portfolioPratique = configPratique && configPratique.portfolio;
+    if (portfolioPratique) return portfolioPratique.minimumCompletion || 7;
+    const configPortfolio = (config && config.portfolio) || {};
+    if (configPortfolio.minimumCompletion !== undefined) return configPortfolio.minimumCompletion;
+    return 3;
+}
+
+/**
  * Affiche les métriques globales du groupe avec barres de distribution
  * Chaque étudiant est représenté par une ligne verticale sur l'échelle
  *
@@ -1669,55 +1698,8 @@ function afficherMetriquesGlobales(etudiants) {
     const seuilA = 1;
     const seuilC = 1;
 
-    // Lire le seuil P depuis la configuration de la pratique active
-    // Ordre de priorité : pratique active > modalitesEvaluation > défaut (3)
-    let seuilP = 3; // Défaut
-    let seuilTrouve = false;
-    const groupesCours = obtenirDonneesSelonMode('groupesCours') || [];
-    const groupeActif = groupesCours.find(gc => gc.actif);
-
-
-    // 1. Chercher dans la configuration de la pratique active
-    if (groupeActif && groupeActif.pratiqueId) {
-        // 1a. Chercher dans pratiquesConfigurables
-        const pratiquesConfig = db.getSync(cle('pratiquesConfigurables'), null) || [];
-        let pratiqueActive = pratiquesConfig.find(p => p.id === groupeActif.pratiqueId);
-
-        // #626 (31 août 2026) — le repli « chercher dans la bibliothèque
-        // partagée » est retiré : il lisait une clé en kebab que RIEN n'écrit
-        // (la vraie s'écrit en camel, module propriétaire pratiques-bibliotheque.js).
-        // Le retrait est neutre — le repli n'a jamais rien trouvé. Le corriger en
-        // pointant la vraie clé ferait TROUVER un seuil là où il n'y en avait
-        // pas : changement de comportement, arbitrage de Grégoire, item #634.
-
-        if (pratiqueActive) {
-            // Chercher minimumCompletion dans différents chemins possibles
-            const minComp = pratiqueActive.configuration?.portfolio?.minimumCompletion
-                || pratiqueActive.portfolio?.minimumCompletion
-                || pratiqueActive.regles?.minimumCompletion;
-
-            if (minComp !== undefined) {
-                seuilP = minComp;
-                seuilTrouve = true;
-            } else {
-            }
-        } else {
-        }
-    }
-
-    // 2. Sinon, repli sur modalitesEvaluation.
-    // G2-b (#436, 9 août 2026) : le miroir `configPAN.portfolio` est retiré de ce
-    // repli. Il ne se rafraîchit qu'à l'APPLICATION d'une pratique — il pouvait
-    // donc contredire le seuil que l'étape 1 lit à la SSOT, sur le même écran.
-    // `config.portfolio` (racine des modalités) reste, il n'appartient pas au miroir.
-    if (!seuilTrouve) {
-        const configPortfolio = config.portfolio || {};
-        if (configPortfolio.minimumCompletion !== undefined) {
-            seuilP = configPortfolio.minimumCompletion;
-            seuilTrouve = true;
-        }
-    }
-
+    // Le seuil P : la pratique active (même résolution que la note, #634), sinon les modalités, sinon 3.
+    const seuilP = seuilEvaluationsPourP(config);
 
     // Calculer ce qui manque (0 si le seuil est atteint)
     const seancesManquantesA = Math.max(0, seuilA - nbSeancesGroupe);
@@ -3550,6 +3532,7 @@ window.togglerCritereTrajectoires = togglerCritereTrajectoires;
 window.changerMesureTrajectoires = changerMesureTrajectoires;
 window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
 window.determinerModeAffichageTableauBord = determinerModeAffichageTableauBord;
+window.seuilEvaluationsPourP = seuilEvaluationsPourP;   // #634
 window.horaireSansAucunePeriode = horaireSansAucunePeriode;
 window.libelleCriteresMultiSurveilles = libelleCriteresMultiSurveilles;   // lot 4, volet B
 // 7 sept. 2026 — exposée pour la sentinelle des bulles au doigt : le toucher

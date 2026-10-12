@@ -69,13 +69,7 @@ const EMPLOIS_CONNUS = {
     // l'échelle (`echelle.seuilMaitrise`, deux fois : garde + résolution du
     // niveau) pour nommer le niveau « Maîtrisé à partir de » — sur l'échelle.
     'js/cartouches.js': 2,
-    // ⚠ EXCEPTION NOMMÉE — le POURCENTAGE 0-100 du mode « par objectifs »,
-    // retiré par #435 (#443). Son écran n'existe plus dans index.html
-    // (`v2-config-par-objectifs`, `v2-comptage-seuil-maitrise` : 0 occurrence),
-    // ce code est MORT. On ne renomme pas du code mort : on le retire, et ce
-    // retrait est inscrit au backlog (#592). Le jour où il tombe, cette ligne
-    // tombe avec lui — un cliquet ne descend pas seul.
-    'js/pratique-notation-v2.js': 4
+    // (L'exception `js/pratique-notation-v2.js`, code mort, est tombée avec lui : #469, 11 oct. 2026.)
 };
 
 const FICHIERS_EXCLUS = ['_archives', 'pack-demo'];

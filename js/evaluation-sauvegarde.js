@@ -1019,6 +1019,9 @@ async function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
  *   dans les catégories saisies du critère (`donneesAlgorithmiques[critereId].codes`) ;
  * - `{ echelleId, niveauCode }` : une évaluation de cette échelle porte ce code de niveau
  *   (`niveauSelectionne` d'un critère, ou `niveauFinal`).
+ * - `{ typeTravail }` (#1015) : une évaluation porte sur une production de ce type de travail
+ *   (appariement du moteur des spécifications, `productionEstDuType` : id ou nom). Une
+ *   évaluation ne cite ni type ni forfait ; c'est par sa production qu'elle les emploie.
  * Les évaluations sont lues sous `cle()`, comme les grilles et les échelles que les éditeurs
  * écrivent : même trimestre par construction. Brouillons compris : ils portent des notes
  * en devenir. (Les cibles de dénotation ont leur propre lecture : `EditeurCibles`.)
@@ -1027,6 +1030,13 @@ async function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
 function ligneEmployeeParUneEvaluation(ligne) {
     if (!ligne) return false;
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+    if (ligne.typeTravail) {
+        if (typeof window.productionEstDuType !== 'function') return false;
+        const productions = db.getSync(cle('productions'), []) || [];
+        const idsDuType = new Set(productions
+            .filter(p => p && window.productionEstDuType(p, ligne.typeTravail)).map(p => p.id));
+        return evaluations.some(ev => ev && idsDuType.has(ev.productionId));
+    }
     if (ligne.echelleId) {
         const code = ligne.niveauCode;
         if (code === undefined || code === null || String(code).trim() === '') return false;

@@ -22,7 +22,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // et trois suppressions à confirmation. Tout ce qui s'enregistrait pendant que
 // la question était à l'écran était écrasé par la collection lue AVANT.
 //
-// ⮕ ET `assurerGrilleGenerique` VÉRIFIAIT SA PRÉSENCE HORS FILE : deux appels
+// ⮕ ET `assurerGrilleDeDepart` VÉRIFIAIT SA PRÉSENCE HORS FILE : deux appels
 // concurrents au démarrage semaient deux fois la même grille d'exemple, ou en
 // perdaient une. La présence se vérifie désormais À L'INSTANT DE L'ÉCRITURE.
 //
@@ -204,13 +204,13 @@ describe('#522 lot 2c · A — deux gestes en rafale gardent LEURS DEUX effets',
         expect(grilleDe(liste, 'GR_B').criteres, 'la suppression tient').toHaveLength(1);
     });
 
-    it('A.e assurerGrilleGenerique — deux appels concurrents ne sèment QU\'UNE grille', async () => {
+    it('A.e assurerGrilleDeDepart — deux appels concurrents ne sèment QU\'UNE grille', async () => {
         // Le semis vérifiait sa présence hors file : deux appels au démarrage
         // pouvaient créer deux exemplaires de la même grille d'exemple.
         const { db, win } = await monterGrilles();
         await db.set(CLE, []);   // security-ok: littéral de banc, aucune source externe
 
-        await Promise.all([win.assurerGrilleGenerique(), win.assurerGrilleGenerique()]);
+        await Promise.all([win.assurerGrilleDeDepart(), win.assurerGrilleDeDepart()]);
 
         const semees = (await db.get(CLE)).filter((g) => g.id === 'GRILLE_GENERIQUE');
         expect(semees, 'une seule grille générique').toHaveLength(1);
@@ -382,11 +382,11 @@ describe('#522 lot 2c · C — la course ne peut pas se rouvrir en silence', () 
         }
     });
 
-    it('C.e assurerGrilleGenerique vérifie sa présence DANS le mutateur', () => {
+    it('C.e assurerGrilleDeDepart vérifie sa présence DANS le mutateur', () => {
         // Vérifier avant d'entrer dans la file laisserait deux semis concurrents
         // passer tous les deux.
         const src = lire('js/grilles.js');
-        const debut = src.indexOf('function assurerGrilleGenerique(');
+        const debut = src.indexOf('function assurerGrilleDeDepart(');
         const corps = src.slice(debut, src.indexOf('function initialiserModuleGrilles', debut));
         const posFile = corps.search(/(?:db\.modifier|modifierEtAnnoncer)\(/);   // lot E1 : la même file, annoncée
         const posTest = corps.indexOf("some(g => g.id === 'GRILLE_GENERIQUE')");

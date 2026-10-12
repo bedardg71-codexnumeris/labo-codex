@@ -136,322 +136,13 @@ function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreAReten
     }
 }
 
-/**
- * Charge et affiche le portfolio détaillé d'un étudiant
- * @param {string} da - DA de l'étudiant
+/*
+ * #722 (11 oct. 2026) — `chargerPortfolioEleveDetail` et `toggleArtefactPortfolio` RETIRÉES
+ * (≈ 310 lignes) : leur conteneur `#portfolioEleveDetail` n'existe pas dans la page, et le
+ * seul appel au panneau vivait dans le repli de la bascule. `selectionnerArtefactsSelonModalite`
+ * (ci-dessus) n'a plus d'appelant, mais porte la règle « Hybride » tranchée par Grégoire le
+ * 10 sept. (banc #816) : gardée, et signalée.
  */
-function chargerPortfolioEleveDetail(da) {
-    try {
-        // Récupérer les données
-        const productions = obtenirDonneesSelonMode('productions');
-        const portfolio = productions.find(p => p.type === 'portfolio');
-
-        if (!portfolio) {
-            document.getElementById('portfolioEleveDetail').innerHTML =
-                '<p class="text-muted">Aucun portfolio configuré dans Conception › Productions.</p>';
-            return;
-        }
-
-        // Récupérer tous les artefacts-portfolio créés
-        const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-
-        // Récupérer les évaluations de cet élève
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-        const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-
-        // Récupérer les sélections de portfolio
-        const selectionsPortfolios = db.getSync(cle('portfoliosEleves'), {});
-        const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
-
-        // #394 (L10) : configuration depuis pratiquesConfigurables (source canonique
-        // G2-a, la même que le calcul) — plus de lecture du snapshot configPAN qui
-        // driftait ; fallback conservé sur portfolio.regles (ancien format productions).
-        const configPratique = (typeof obtenirConfigPratiqueActive === 'function'
-            ? obtenirConfigPratiqueActive() : null) || {};
-        const configPortfolio = configPratique.portfolio || {};
-        // #816 — la config Sélection/Obligatoires, LA MÊME SOURCE que le moteur de
-        // la note (`profil-etudiant-actions.js`). Sans elle, le panneau cochait
-        // « les N meilleures » là où la note comptait « N meilleures + obligatoires ».
-        const configCategories = configPratique.categories
-            || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
-
-        const nombreTotal = configPortfolio.nombreTotal || portfolio.regles?.nombreTotal || artefactsPortfolio.length;
-        const minimumRequis = configPortfolio.minimumCompletion || portfolio.regles?.minimumCompletion || 7;
-        const nombreARetenir = configPortfolio.nombreARetenir || portfolio.regles?.nombreARetenir || 3;
-        const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
-
-        // #816 — LE plafond de la sélection manuelle. En hybride, la note retient
-        // N meilleures de la Sélection PLUS toutes les Obligatoires : plafonner à
-        // `nombreARetenir` empêchait de reproduire à la main ce que le moteur
-        // compte, dès que les deux nombres divergent.
-        const estHybrideActif = !!(configCategories && configCategories.actif)
-            || methodeSelection === 'hybride';
-        const plafondSelection = estHybrideActif
-            ? ((configCategories && configCategories.selection
-                && configCategories.selection.nombreARetenir) || nombreARetenir)
-              + artefactsPortfolio.filter(p => p.categorie === 'obligatoire').length
-            : nombreARetenir;
-
-        // Construire la liste des artefacts avec leur statut
-        const artefacts = [];
-        
-        // Ajouter les artefacts existants
-        artefactsPortfolio.forEach(art => {
-            const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
-            artefacts.push({
-                id: art.id,
-                // #816 — le comparateur de récence de la SSOT lit `productionId`.
-                productionId: art.id,
-                // #816 — 'selection' | 'obligatoire' | null : c'est elle qui range
-                // un artefact dans son bloc en mode hybride.
-                categorie: art.categorie || null,
-                titre: art.titre,
-                description: art.description || '',
-                numero: art.numero || parseInt(art.id.match(/\d+/)?.[0]) || 0, // AJOUT (24 jan 2026)
-                remis: !!evaluation,
-                note: evaluation?.noteFinale || null,
-                niveau: evaluation ? ((typeof niveauFinalAffichable === 'function') ? (niveauFinalAffichable(evaluation) || null) : (evaluation.niveauFinal || null)) : null,   // #941 lot S1
-                retenu: selectionEleve.artefactsRetenus.includes(art.id),
-                existe: true
-            });
-        });
-
-        // Ajouter les artefacts "à venir" si nécessaire
-        const artefactsManquants = nombreTotal - artefactsPortfolio.length;
-        for (let i = 0; i < artefactsManquants; i++) {
-            artefacts.push({
-                id: null,
-                titre: `Artefact #${artefactsPortfolio.length + i + 1}`,
-                description: 'À venir',
-                remis: false,
-                note: null,
-                niveau: null,
-                retenu: false,
-                existe: false
-            });
-        }
-
-        // Trier : artefacts remis en premier, puis existants, puis à venir
-        artefacts.sort((a, b) => {
-            if (a.remis && !b.remis) return -1;
-            if (!a.remis && b.remis) return 1;
-            if (a.existe && !b.existe) return -1;
-            if (!a.existe && b.existe) return 1;
-            return 0;
-        });
-
-        // ✨ SÉLECTION AUTOMATIQUE selon la modalité configurée
-        if (selectionEleve.artefactsRetenus.length === 0) {
-            // Récupérer les artefacts remis avec note (non triés - le tri se fait dans la fonction)
-            // #816 — le `dateRemise: new Date()` posé ici valait le MÊME instant pour
-            // tous les artefacts : le tri par date ne départageait rien. La récence
-            // se lit sur le numéro de production, via le comparateur de la SSOT.
-            const artefactsRemisAvecNote = artefacts.filter(a => a.remis && a.note !== null);
-
-            // Sélectionner selon la modalité configurée
-            const artefactsSelectionnes = selectionnerArtefactsSelonModalite(
-                artefactsRemisAvecNote,
-                nombreARetenir,
-                methodeSelection,
-                { productions: artefactsPortfolio, configCategories }
-            );
-
-            if (artefactsSelectionnes.length > 0) {
-                // Mettre à jour la sélection
-                selectionEleve.artefactsRetenus = artefactsSelectionnes.map(a => a.id);
-
-                // Sauvegarder dans localStorage
-                if (!selectionsPortfolios[da]) {
-                    selectionsPortfolios[da] = {};
-                }
-                selectionsPortfolios[da][portfolio.id] = {
-                    artefactsRetenus: selectionEleve.artefactsRetenus,
-                    dateSelection: new Date().toISOString(),
-                    auto: true, // Flag pour indiquer sélection automatique
-                    modalite: methodeSelection, // Tracer quelle modalité a été utilisée
-                    // #816 — la modalité configurée ne suffit pas à relire ce qui a
-                    // été fait : les catégories ont priorité sur elle. Tracer les deux
-                    // permet de départager après coup une écriture d'une autre.
-                    categoriesActives: !!(configCategories && configCategories.actif)
-                };
-                db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
-
-                // 🔄 Recalculer les indices C et P après sélection automatique
-                if (typeof calculerEtStockerIndicesCP === 'function') {
-                    calculerEtStockerIndicesCP();
-                }
-
-                // Mettre à jour le flag retenu dans les artefacts
-                artefacts.forEach(art => {
-                    art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
-                });
-
-            }
-        }
-
-        // Statistiques
-        const nbRemis = artefacts.filter(a => a.remis).length;
-        const nbRetenus = selectionEleve.artefactsRetenus.length;
-
-        // Calculer les notes
-        const artefactsAvecNote = artefacts.filter(a => a.remis && a.note !== null);
-        const noteProvisoire = artefactsAvecNote.length > 0
-            ? artefactsAvecNote.reduce((sum, a) => sum + a.note, 0) / artefactsAvecNote.length
-            : null;
-
-        const artefactsRetenusAvecNote = artefacts.filter(a => a.retenu && a.note !== null);
-        const noteFinale = nbRetenus === nombreARetenir && artefactsRetenusAvecNote.length > 0
-            ? artefactsRetenusAvecNote.reduce((sum, a) => sum + a.note, 0) / artefactsRetenusAvecNote.length
-            : null;
-
-        // Générer le HTML
-        const container = document.getElementById('portfolioEleveDetail');
-        container.innerHTML = `
-            <!-- Barre de progression -->
-            <div class="portfolio-progression">
-                <div class="portfolio-progression-header">
-                    <span><strong>Progression :</strong> ${nbRemis}/${minimumRequis} remis ${nombreTotal > minimumRequis ? `(${nombreTotal} artefacts prévus)` : ''}</span>
-                    <span style="color: ${nbRemis >= minimumRequis ? 'green' : 'orange'};">
-                        ${nbRemis >= minimumRequis ? '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Minimum atteint' : 'Minimum requis'}
-                    </span>
-                </div>
-                <div class="portfolio-barre-progression">
-                    <div class="portfolio-barre-remplissage" style="width: ${Math.min((nbRemis / minimumRequis) * 100, 100)}%;"></div>
-                </div>
-                <p class="portfolio-progression-aide">
-                    <strong>${nombreARetenir}</strong> artefacts à retenir pour la note finale
-                </p>
-            </div>
-
-            <!-- Liste des artefacts -->
-            <div class="portfolio-artefacts-section">
-                <h4 class="portfolio-artefacts-titre">📑 Artefacts du portfolio (${artefacts.length})</h4>
-                ${artefacts.map((art, index) => `
-                    <div class="portfolio-artefact-carte ${art.retenu ? 'portfolio-artefact-retenu' : (art.existe ? 'portfolio-artefact-disponible' : 'portfolio-artefact-avenir')}">
-                        ${art.existe ? `
-                        <label class="portfolio-artefact-label" style="cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
-                            <input type="checkbox"
-                                   name="artefactRetenu"
-                                   value="${echapperHtml(art.id)}"
-                                   ${art.retenu ? 'checked' : ''}
-                                   ${!art.remis ? 'disabled' : ''}
-                                   data-on-change="toggleArtefactPortfolioFromEl"
-                                   data-da="${da}" data-portfolio-id="${portfolio.id}" data-nombre-a-retenir="${plafondSelection}">
-                            <div class="portfolio-artefact-contenu">
-                                <div class="portfolio-artefact-titre ${art.retenu ? 'portfolio-artefact-titre-retenu' : 'portfolio-artefact-titre-normal'}">
-                                    ${echapperHtml(art.description || art.titre)}
-                                </div>
-                                <div class="portfolio-artefact-meta">
-                                    ${art.remis
-                                        ? `<span class="u-texte-succes"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Remis</span>
-                                           <span>${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `<strong>Note :</strong> ${art.note}/100`}</span>
-                                           ${art.niveau ? `<span><strong>Niveau :</strong> ${echapperHtml(art.niveau)}</span>` : ''}`
-                                        : '<span class="portfolio-texte-gris-fade">— Non remis</span>'}
-                                </div>
-                            </div>
-                        </label>
-                        ` : `
-                        <div class="portfolio-artefact-placeholder">
-                            <div class="portfolio-artefact-checkbox-vide"></div>
-                            <div class="portfolio-artefact-contenu">
-                                <div class="portfolio-artefact-avenir-titre">
-                                    ${echapperHtml(art.description || art.titre)}
-                                </div>
-                                <div class="portfolio-artefact-avenir-info">
-                                    Artefact à venir (non encore créé dans Conception › Productions)
-                                </div>
-                            </div>
-                        </div>
-                        `}
-                    </div>
-                `).join('')}
-            </div>
-
-            <!-- Calcul de la note -->
-            <div class="portfolio-note-carte ${nbRetenus === nombreARetenir ? 'portfolio-note-finale' : 'portfolio-note-provisoire'}">
-                <h4>
-                    ${nbRetenus === nombreARetenir ? '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Mode FINAL actif' : '<span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Mode PROVISOIRE'}
-                </h4>
-
-                ${noteProvisoire !== null
-                    ? `<p><strong>Note provisoire :</strong> ${noteProvisoire.toFixed(2)}/100
-                       <span class="portfolio-note-detail">(moyenne de ${artefactsAvecNote.length} artefact${artefactsAvecNote.length > 1 ? 's' : ''})</span></p>`
-                    : ''}
-
-                ${noteFinale !== null
-                    ? `<p class="u-texte-grand"><strong>Note finale :</strong>
-                       <span class="portfolio-note-valeur">${noteFinale.toFixed(2)}/100</span>
-                       <span class="portfolio-note-detail">(moyenne des ${nombreARetenir} retenus)</span></p>`
-                    : ''}
-
-                <p>
-                    ${nbRetenus === nombreARetenir
-                        ? `Les ${nombreARetenir} artefacts sélectionnés déterminent la note finale`
-                        : `Sélectionne ${nombreARetenir - nbRetenus} artefact${nombreARetenir - nbRetenus > 1 ? 's' : ''} supplémentaire${nombreARetenir - nbRetenus > 1 ? 's' : ''} pour activer le mode FINAL`}
-                </p>
-            </div>
-        `;
-
-    } catch (error) {
-        console.error('Erreur chargement portfolio:', error);
-        document.getElementById('portfolioEleveDetail').innerHTML =
-            '<p class="u-texte-danger">Erreur lors du chargement du portfolio.</p>';
-    }
-}
-
-/**
- * Bascule la sélection d'un artefact pour le portfolio
- * @param {string} da - DA de l'étudiant
- * @param {string} portfolioId - ID du portfolio
- * @param {number} nombreARetenir - Nombre max d'artefacts à retenir
- */
-function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
-    try {
-        const checkboxes = document.querySelectorAll('input[name="artefactRetenu"]:checked');
-        const artefactsRetenus = Array.from(checkboxes).map(cb => cb.value);
-
-        // Limiter au nombre défini
-        if (artefactsRetenus.length > nombreARetenir) {
-            alert(`Tu ne peux sélectionner que ${nombreARetenir} artefact${nombreARetenir > 1 ? 's' : ''} maximum.`);
-            event.target.checked = false;
-            return;
-        }
-
-        // Sauvegarder la sélection
-        let selectionsPortfolios = db.getSync(cle('portfoliosEleves'), {});
-        if (!selectionsPortfolios[da]) {
-            selectionsPortfolios[da] = {};
-        }
-
-        selectionsPortfolios[da][portfolioId] = {
-            artefactsRetenus: artefactsRetenus,
-            dateSelection: new Date().toISOString()
-        };
-
-        db.setSync(cle('portfoliosEleves'), selectionsPortfolios);
-        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('portfoliosEleves'));   // lot F : geste hors témoin (cocher un artefact)
-
-        // 🔄 Recalculer les indices C et P après modification de sélection
-        if (typeof calculerEtStockerIndicesCP === 'function') {
-            calculerEtStockerIndicesCP();
-        }
-
-        // Recharger TOUT le profil pour mettre à jour les indices A-C-P-M-R
-        if (typeof afficherProfilComplet === 'function') {
-            afficherProfilComplet(da);
-            // Lot 4 du cadrage 11 (11 sept. 2026) : l'ancien « rouvrir le panneau Portfolio »
-            // appelait `toggleDetailIndice`, privée d'une autre IIFE (jamais atteinte) et
-            // sans conteneur dans la page ; la fonction est retirée avec cet appel.
-        } else {
-            // Fallback : recharger uniquement le portfolio
-            chargerPortfolioEleveDetail(da);
-        }
-
-    } catch (error) {
-        console.error('Erreur toggle artefact:', error);
-        alert('Erreur lors de l\'enregistrement');
-    }
-}
 
 /* ===============================
    📌 NOTES
@@ -525,60 +216,6 @@ function toggleArtefactPortfolio(event, da, portfolioId, nombreARetenir) {
 /* ===============================
    🔧 FONCTIONS HELPERS POUR SUPPORT SOM ET PAN
    =============================== */
-
-/**
- * Détermine le mode de pratique pédagogique du cours actif
- *
- * NOUVEAU (Beta 91) : Utilise la pratique associée au cours actif
- * au lieu d'une configuration globale.
- *
- * @returns {string} - 'SOM' (sommative) ou 'PAN' (pan-maitrise)
- *
- * SOURCE : getPratiqueCours(getCoursActifId())
- * - 'sommative' → retourne 'SOM'
- * - 'pan-maitrise' → retourne 'PAN'
- * - Par défaut (si non configuré) → retourne 'PAN' (rétrocompatibilité)
- */
-function obtenirModePratique() {
-    // NOUVEAU : Utiliser la pratique du cours actif
-    const coursActifId = getCoursActifId();
-
-    if (!coursActifId) {
-        console.warn('[obtenirModePratique] Aucun cours actif, utilisation PAN par défaut');
-        return 'PAN';
-    }
-
-    const pratiqueId = getPratiqueCours(coursActifId);
-
-    return pratiqueId === 'sommative' ? 'SOM' : 'PAN';
-}
-
-/**
- * Détermine si une production compte dans le dépistage (indices C et P)
- *
- * @param {Object} production - Objet production avec propriété 'type'
- * @param {string} mode - 'SOM' ou 'PAN'
- * @returns {boolean} - true si la production doit être comptée
- *
- * LOGIQUE :
- * - Mode PAN : Seuls les 'artefact-portfolio' comptent
- * - Mode SOM : Tous les types SAUF formatifs et conteneurs
- *   - ✅ Compte : examen, travail, quiz, presentation, autre
- *   - ❌ Ne compte PAS : *-formatif, portfolio (conteneur)
- */
-function comptesDansDepistage(production, mode) {
-    const type = production.type;
-
-    if (mode === 'PAN') {
-        // En PAN, seuls les artefacts-portfolio comptent
-        return type === 'artefact-portfolio';
-    } else {
-        // En SOM, tous les types sommative comptent (pas les formatifs ni le conteneur portfolio)
-        const estFormatif = type.endsWith('-formatif');
-        const estConteneur = type === 'portfolio';
-        return !estFormatif && !estConteneur;
-    }
-}
 
 // ⮕ #575 (lot 4 du plan SOLO, B1+B2) — `convertirNiveauEnPourcentage` A ÉTÉ
 // SUPPRIMÉE ICI, AVEC SON REPLI ET SA CLÉ MORTE.
@@ -796,7 +433,7 @@ function _calculerEtStockerIndicesCPInterne() {
             };
         });
         indicesCP.dateCalcul = dateCalcul;
-        db.setSync(cleIndices, indicesCP);
+        db.setSyncSiChange(cleIndices, indicesCP, ['dateCalcul', 'date']);   // #1040 : l'horodatage seul ne réécrit pas
         return indicesCP;
     }
 
@@ -855,7 +492,9 @@ function _calculerEtStockerIndicesCPInterne() {
     indicesCP.dateCalcul = dateCalcul;
 
     // 🔧 FIX Beta 97.4 : Sauvegarde synchrone (localStorage + IndexedDB en arrière-plan)
-    db.setSync(cleIndices, indicesCP);
+    // #1040 (11 oct. 2026) : rien n'est écrit si seuls les horodatages (`dateCalcul`,
+    // `actuel.date`) changent — aucun lecteur ne les consulte (grep du 11 oct.).
+    db.setSyncSiChange(cleIndices, indicesCP, ['dateCalcul', 'date']);
 
 
     return indicesCP;
@@ -1261,24 +900,9 @@ function obtenirConfigCategories(pratiqueIdDemande = null) {
     return config.categories;
 }
 
-/**
- * Wrapper pour data-on-change : lit les params depuis les data-attributes de l'élément.
- * @param {HTMLElement} el - L'élément checkbox
- */
-function toggleArtefactPortfolioFromEl(el) {
-    var da = el.getAttribute('data-da');
-    var portfolioId = el.getAttribute('data-portfolio-id');
-    var nombreARetenir = parseInt(el.getAttribute('data-nombre-a-retenir'), 10);
-    // Créer un pseudo-event avec target pour compatibilité
-    var pseudoEvent = { target: el };
-    toggleArtefactPortfolio(pseudoEvent, da, portfolioId, nombreARetenir);
-}
-
 /* ===============================
    EXPORTS GLOBAUX
    =============================== */
-
-window.toggleArtefactPortfolioFromEl = toggleArtefactPortfolioFromEl;
 
 // Exporter les fonctions multi-objectifs pour utilisation par d'autres modules
 window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;

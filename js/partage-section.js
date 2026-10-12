@@ -157,6 +157,42 @@
         });
     }
 
+    /** Lecteur des échelles SOURCE pour la Voûte : la collection plate partage_echelles. */
+    function lireEchellePartageeParId(id) {
+        return lire(CLES_STOCKAGE.echelle).find(function (e) { return e && e.id === id; }) || null;
+    }
+
+    /**
+     * #656 (11 oct. 2026) — L'ÉCHELLE D'UNE CARTOUCHE COPIÉE SE RATTACHE COMME À L'IMPORT.
+     *
+     * Le cadrage des briques C-D (§2.4) reportait « D-C4 » au pas 4 : une cartouche copiée
+     * gardait l'`echelleId` de sa source. Le pas 4 est passé à côté, et le report n'a jamais
+     * été statué. L'import, lui, rattache depuis le lot 3 du 10 oct. (#952) : une échelle de
+     * MÊME NOM et aux MÊMES CODES de niveaux est tenue pour déjà là, et ce qui la désignait la
+     * suit. La copie applique la même règle, sur l'échelle telle qu'elle est dans la source :
+     *   1. l'id existe dans le trimestre actif → gardé ;
+     *   2. sinon, une échelle locale de même nom aux mêmes codes → son id ;
+     *   3. sinon → gardé tel quel (il se résout encore par le pool inter-trimestre).
+     * Rien n'est copié ni écrit ici : on choisit seulement l'id posé sur la copie.
+     *
+     * @param {string} echelleId - l'échelle désignée par l'objet copié
+     * @param {Function} [lireEchelleSource] - (id) => l'échelle dans la source, ou null
+     * @returns {string} l'id à poser sur la copie
+     */
+    function rattacherEchelle(echelleId, lireEchelleSource) {
+        if (!echelleId) return echelleId;
+        var locales = lire(window.cle('echellesTemplates'));
+        if (locales.some(function (e) { return e && e.id === echelleId; })) return echelleId;
+        var source = (typeof lireEchelleSource === 'function') ? lireEchelleSource(echelleId) : null;
+        if (source && source.nom && typeof memesIdentifiantsElements === 'function') {
+            var memeNom = locales.find(function (e) { return e && e.nom === source.nom; });
+            if (memeNom && memeNom.id && memesIdentifiantsElements(source, memeNom, 'niveaux', 'code')) {
+                return memeNom.id;
+            }
+        }
+        return echelleId;
+    }
+
     /**
      * Duplique une grille (d'une SOURCE quelconque) + ses cartouches liées vers
      * les documents de l'utilisateur. Retourne { grille, nbCartouches }.
@@ -171,14 +207,17 @@
      * Les cartouches restent ancrées par `cartouches_{nouvelId}` (clé neuve, non
      * namespacée par modèle — hors périmètre #358).
      *
-     * Report ASSUMÉ au pas 4 (D-C4) : une cartouche copiée conserve son echelleId
-     * source (pas de remappage d'échelle ici) — verrouillé par un test-témoin.
+     * #656 : l'`echelleId` de chaque cartouche copiée est rattaché par `rattacherEchelle`
+     * (D-C4, jamais statué, l'est ici). Celui de la grille ne bouge pas : l'import ne le
+     * rebranche pas non plus.
      *
      * @param {Object} grilleSource - grille à copier (objet déjà résolu par le caller)
      * @param {Function} [lireCartouchesDe] - (grille) => Array des cartouches liées ;
      *                   défaut = lecteur Voûte (collection plate)
+     * @param {Function} [lireEchelleSource] - (id) => échelle dans la source ;
+     *                   défaut = lecteur Voûte (partage_echelles)
      */
-    function dupliquerGrillePartagee(grilleSource, lireCartouchesDe) {
+    function dupliquerGrillePartagee(grilleSource, lireCartouchesDe, lireEchelleSource) {
         var copie = copiePropre(grilleSource, 'grille');
         ajouterACollection(window.cle('grillesTemplates'), copie);
 
@@ -188,6 +227,10 @@
             var copies = cartouchesLiees.map(function (c) {
                 var cc = copiePropre(c, 'cartouche');
                 cc.grilleId = copie.id;
+                if (cc.echelleId) {
+                    cc.echelleId = rattacherEchelle(cc.echelleId,
+                        (typeof lireEchelleSource === 'function') ? lireEchelleSource : lireEchellePartageeParId);
+                }
                 return cc;
             });
             // Clé neuve (ancrage de la grille copiée) — rien d'existant à préserver.
@@ -652,6 +695,7 @@
     // l'appellera avec un lecteur de cartouches par CLÉ via cleSource) et pour
     // la sentinelle storage-pur. copiePropre reste interne tant qu'aucun caller externe.
     partageSection.dupliquerGrillePartagee = dupliquerGrillePartagee;
+    partageSection.rattacherEchelle = rattacherEchelle;   // #656 — aussi pour copierCartoucheDepuisTrimestre
 
     window.partageSection = partageSection;
 })();

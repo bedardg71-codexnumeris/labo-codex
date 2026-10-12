@@ -711,7 +711,7 @@ function genererSeancesCompletes(coursId = null) {
     // groupe-cours actif a effectivement une séance configurée dans son horaire.
 
     // 🆕 BETA 95 : Stocker dans clé spécifique au cours
-    db.setSync(cleOutput, seancesCompletes);
+    db.setSyncSiChange(cleOutput, seancesCompletes);   // #1040 : rien si inchangé
 
     if (idCours) {
     }

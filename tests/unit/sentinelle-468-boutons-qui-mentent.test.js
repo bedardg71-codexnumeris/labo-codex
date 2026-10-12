@@ -195,12 +195,19 @@ describe('#468 · S2 (CO-05) — les gestes de l\'éditeur d\'échelles vont au 
     });
 
     it('ajouter un niveau : l\'échelle grandit sans TypeError', async () => {
+        // ↻ 11 oct. 2026 (#574) : l'ajout ouvre un niveau EN ATTENTE ; il rejoint
+        // l'échelle quand ses cinq champs obligatoires sont posés.
         const store = { a2026_echellesTemplates: [JSON.parse(JSON.stringify(ECHELLE_2_NIVEAUX))] };
-        const { win } = chargerEchelles(store);
+        const { win, appels } = chargerEchelles(store);
 
         await win.ajouterNiveauEchelle('ECH_TEST_468');
+        expect(store.a2026_echellesTemplates[0].niveaux.length, 'rien d\'écrit à l\'ouverture').toBe(2);
+        for (const [champ, v] of [['code', 'E'], ['nom', 'Étendu'], ['min', 90], ['max', 100], ['valeurCalcul', 95]]) {
+            await win.modifierNiveauEnAttente('ECH_TEST_468', champ, v);
+        }
 
         expect(store.a2026_echellesTemplates[0].niveaux.length).toBe(3);
+        expect(appels.notifiees.some(m => m.includes('Niveau ajouté'))).toBe(true);
     });
 
     it('retirer un niveau : l\'échelle rétrécit sans TypeError', async () => {

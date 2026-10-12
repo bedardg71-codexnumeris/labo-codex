@@ -167,6 +167,7 @@
      * @param {boolean}[options.multiligne]     true → <textarea> (Entrée n'envoie pas).
      * @param {string} [options.texteConfirmer] Libellé du bouton (défaut « OK »).
      * @param {string} [options.texteAnnuler]   Libellé d'annulation (défaut « Annuler »).
+     * @param {string} [options.variante]       'danger' → bouton d'action destructif (rouge).
      * @returns {Promise<string|null>} la chaîne saisie, ou null si annulé.
      */
     function demanderSaisie(options) {
@@ -190,7 +191,8 @@
             base.section.appendChild(champ);
 
             const btnAnnuler = _creer('button', { className: 'btn btn-neutre', texte: options.texteAnnuler || 'Annuler' });
-            const btnOk = _creer('button', { className: 'btn btn-principal', texte: options.texteConfirmer || 'OK' });
+            // #1037 (relecture, 11 oct.) : `variante: 'danger'` → bouton destructif, comme confirmerAction.
+            const btnOk = _creer('button', { className: 'btn ' + (options.variante === 'danger' ? 'btn-supprimer' : 'btn-principal'), texte: options.texteConfirmer || 'OK' });
 
             let termine = false;
             function repondre(valeur) {

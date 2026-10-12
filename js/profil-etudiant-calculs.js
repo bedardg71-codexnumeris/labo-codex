@@ -376,7 +376,7 @@ function zoneDuNiveau(code, echelleId = null) {
  *
  *   | capacité                      | obtenirEchelleResolue | resoudreModeleParId |
  *   |-------------------------------|-----------------------|---------------------|
- *   | `idOriginal` (échelle importée)| oui                  | NON                 |
+ *   | `idOriginal` (échelle importée)| oui                  | oui (#590)          |
  *   | identifiant `pratique-*`      | oui                   | NON                 |
  *   | repli pool inter-trimestre    | NON                   | oui                 |
  *   | refus d'une échelle sans niveaux | oui                | non                 |
@@ -384,9 +384,14 @@ function zoneDuNiveau(code, echelleId = null) {
  * `resoudreModeleParId` n'est appelé pour une ÉCHELLE que par
  * `pratique-registre.js` (`construireConfigComplete`) depuis le retrait du
  * module « Consolidation » (10 septembre 2026) — il en avait un second
- * appelant, `consolidation.js`, parti avec lui. Quand la résolution échoue,
- * la pratique retombe sur une échelle IDME codée en dur qui contredit celle
- * de l'utilisateur.
+ * appelant, `consolidation.js`, parti avec lui.
+ *
+ * ⮕ #590 (11 oct. 2026, option A de Grégoire) : `resoudreModeleParId` reconnaît
+ * `idOriginal`, et la pratique dont l'échelle est introuvable ne retombe plus sur
+ * une IDME codée en dur. Restent deux causes : `echelle-de-pratique` et
+ * `pool-inter-trimestre`. La seconde n'a pas été réconciliée : `echellesComparables`
+ * lit une échelle introuvable comme une absence (rétroaction « Progrès ») — la
+ * rendre trouvable au pool changerait ce que lisent des élèves.
  *
  * ⮕ CE QUE CE DIAGNOSTIC TRANCHE, ET QU'AUCUNE LECTURE DE CODE NE PEUT DIRE :
  * si la divergence touche des données RÉELLES, ou si elle reste théorique.
@@ -429,11 +434,6 @@ function _diagnostiquerResolutionEchelles() {
     recenser(productions, 'productions');
     recenser(evaluations, 'evaluations');
 
-    var echelles = [];
-    try {
-        echelles = db.getSync((typeof cle === 'function') ? cle('echellesTemplates') : 'echellesTemplates', []) || [];
-    } catch (e) { echelles = []; }
-
     var lignes = Object.keys(usages).map(function (id) {
         var parResolue = (typeof obtenirEchelleResolue === 'function')
             ? !!obtenirEchelleResolue(id) : null;
@@ -444,11 +444,8 @@ function _diagnostiquerResolutionEchelles() {
         // vérifiée sur les données, et « indéterminée » reste une réponse.
         var cause = null;
         if (parResolue !== parRegistre) {
-            var porteuse = echelles.find(function (e) { return e && e.idOriginal === id; }) || null;
             if (String(id).indexOf('pratique-') === 0) {
                 cause = 'echelle-de-pratique';
-            } else if (porteuse) {
-                cause = 'idOriginal';
             } else if (parRegistre && !parResolue) {
                 cause = 'pool-inter-trimestre';
             } else {
@@ -1366,7 +1363,7 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
  *
  * @param {string} da - Numéro de DA
  * @param {boolean} pourDepistage - Si true, utilise fenêtre de dépistage (3). Si false, utilise N pour note finale (4)
- * @returns {Object} - { performance, idmeMoyen, nbArtefacts }
+ * @returns {Object} - { performance, nbArtefacts }
  */
 function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Déterminer le nombre d'artefacts selon l'usage
@@ -1399,7 +1396,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     );
 
     if (evaluationsEleve.length === 0) {
-        return { performance: 0, idmeMoyen: 0, nbArtefacts: 0 };
+        return { performance: 0, nbArtefacts: 0 };
     }
 
     // Trier par date de création (la plus récente d'abord)
@@ -1416,34 +1413,11 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Calculer la performance moyenne (notes)
     const performance = troisDerniers.reduce((sum, e) => sum + e.noteFinale, 0) / troisDerniers.length / 100;
 
-    // Moyenne des niveaux finaux — #529.
-    //
-    // CE QUI A ÉTÉ RETIRÉ : `.filter(n => ['I','D','M','E'].includes(n))`. Ce
-    // filtre écartait tout niveau final dont le code n'était pas IDME. Pour une
-    // échelle A/B/C/D, il écartait TOUS les niveaux, la moyenne tombait à 0 —
-    // et 0 n'est pas « aucune donnée », c'est la pire note possible. Le calcul
-    // en aval traitait donc un élève sans niveau lisible comme un élève en
-    // échec total, sans un mot.
-    //
-    // Il n'y a plus de liste de codes admis : un niveau compte s'il est
-    // convertible par SON échelle, et rien d'autre ne le qualifie.
-    const cacheTablesNiveaux = new Map();
-    const scoresNiveauxFinaux = troisDerniers
-        .map(e => convertirNiveauEnScore(e.niveauFinal, tableConversionPourEvaluation(e, cacheTablesNiveaux)))
-        .filter(s => s !== null);
-
-    // ⚠ LE ZÉRO EST CONSERVÉ ICI, DÉLIBÉRÉMENT (#529, 26 août 2026).
-    //
-    // Rendre `null` serait plus juste — rien de convertible n'est pas la même
-    // chose qu'une moyenne de zéro. Mais le contrat de cette fonction distingue
-    // déjà l'absence par `nbArtefacts` (cf. le retour anticipé plus haut :
-    // `{performance:0, idmeMoyen:0, nbArtefacts:0}`), et ses
-    // consommateurs s'y fient. Changer la convention DANS un chantier de
-    // dé-codage-en-dur mêlerait deux corrections dans le même diff, et la
-    // seconde n'a pas été demandée. Inscrit au backlog plutôt que glissé ici.
-    const idmeMoyen = scoresNiveauxFinaux.length > 0
-        ? scoresNiveauxFinaux.reduce((sum, s) => sum + s, 0) / scoresNiveauxFinaux.length
-        : 0;
+    // #536 (11 oct. 2026) — `idmeMoyen` RETIRÉ. Il rendait 0 quand aucun niveau final
+    // n'était convertible (le zéro conservé par #529 en attendant cette fiche), mais
+    // `grep` ne lui trouve AUCUN lecteur : les appelants lisent `performance` et
+    // `nbArtefacts`. Un champ que personne ne lit n'a pas à dire « pas de donnée » :
+    // il part, avec sa conversion des niveaux finaux.
 
     // ⚠⚠ #537 (27 août 2026) — LE CALCUL DE `francaisMoyen` A ÉTÉ RETIRÉ, ET
     // AVEC LUI LA DERNIÈRE RECONNAISSANCE D'UN CRITÈRE PAR SON NOM DANS CE
@@ -1471,7 +1445,6 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
 
     return {
         performance: performance,
-        idmeMoyen: idmeMoyen,
         nbArtefacts: troisDerniers.length
     };
 }
@@ -2093,12 +2066,10 @@ function nommerDefiAvecSOLO(defi) {
  *     `interventions.js`, 0,75 dans `sections-affichage.js` et
  *     `pratique-pan-standards.js`). C'est le point de convergence du §6 de la
  *     consigne #552/#537/#535.
- *   · La branche « Décrochage » ci-dessous N'EST JAMAIS ATTEINTE depuis ici :
- *     `interpreterMobilisation` ne rend ce niveau que si son 3e argument
- *     `statutDecrochage` est vrai, et cet appel ne le passe pas. Le statut
- *     existe pourtant dans le modèle (`trimestre-v2-etudiants.js`). CONSTAT
- *     INSCRIT, PAS CORRIGÉ : brancher un site mort est un geste distinct, qui
- *     demande son propre item.
+ *   · #554 (11 oct. 2026) : la branche « Décrochage » reçoit le statut de la
+ *     fiche (Cadre › Trimestre, `trimestre-v2-etudiants.js`). Rien ne change à
+ *     l'écran aujourd'hui : le seul appelant vivant (`tableau-bord-apercu.js`)
+ *     écarte déjà les élèves exclus (`estEtudiantExclu`) et ne lit que `.pattern`.
  *
  * @param {string} da - Le DA de l'élève
  * @returns {Object} { cible, pattern, niveau, couleur }
@@ -2132,8 +2103,11 @@ function determinerCibleIntervention(da) {
     const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
 
     // La mobilisation prime sur le dépistage : un élève décroché ne se lit pas
-    // dans ses critères. Voir le constat ci-dessus sur l'argument manquant.
-    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
+    // dans ses critères. #554 : le statut vient de la fiche du groupe-cours actif.
+    const fiche = (typeof obtenirEtudiantsCoursActif === 'function')
+        ? obtenirEtudiantsCoursActif().find(e => e.da === da) : null;
+    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100,
+        !!fiche && fiche.statut === 'décrochage');
     if (interpMobilisation.niveau === 'Décrochage') {
         return { cible: 'Décrochage', pattern: M, niveau: 3, couleur: '#9e9e9e' };
     }

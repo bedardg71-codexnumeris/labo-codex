@@ -233,47 +233,34 @@
        =============================== */
 
     /**
-     * Obtient la liste de tous les trimestres
-     * 🆕 FIX (23 jan 2026): Nettoie automatiquement les doublons
-     * @returns {Array} Liste des trimestres (sans doublons)
+     * Obtient la liste de tous les trimestres, sans doublon d'id.
+     *
+     * #477 (lot 8, 11 oct. 2026, constat CT-19) : LECTURE SEULE. Les doublons se règlent à la lecture
+     * (le premier de chaque id est gardé) ; la liste enregistrée n'est jamais réécrite. Avant, la
+     * fonction détectait aussi les noms jumeaux, mais ne dédoublonnait que par id, puis RÉÉCRIVAIT
+     * le stockage : deux trimestres de même nom et d'ids différents la faisaient réécrire et avertir
+     * à chaque appel (donc à chaque `cle()`), sans jamais converger. Deux noms jumeaux sont deux
+     * trimestres : ils restent. (Même prudence qu'`enumererTrimestres` : avant `db-ready`, `getSync`
+     * peut rendre une liste périmée ; la persister effacerait des trimestres réels.)
+     * @returns {Array} Liste des trimestres (sans doublon d'id)
      */
     function obtenirTrimestres() {
-        let trimestres = db.getSync('trimestres', []);
+        return dedoublonnerTrimestresParId(db.getSync('trimestres', []));
+    }
 
-        // 🆕 FIX (23 jan 2026): Détecter et corriger les doublons
+    /**
+     * #477 : le premier trimestre de chaque id, dans l'ordre de la liste. Une liste qui n'en est pas
+     * une rend []. Ne modifie pas la liste reçue.
+     */
+    function dedoublonnerTrimestresParId(trimestres) {
+        if (!Array.isArray(trimestres)) return [];
         const idsVus = new Set();
-        const nomsVus = new Set();
-        let aDesDoublons = false;
-
-        trimestres.forEach(t => {
-            if (idsVus.has(t.id) || (t.nom && nomsVus.has(t.nom))) {
-                aDesDoublons = true;
-            }
+        return trimestres.filter(t => {
+            if (!t) return false;
+            if (idsVus.has(t.id)) return false;
             idsVus.add(t.id);
-            if (t.nom) nomsVus.add(t.nom);
+            return true;
         });
-
-        if (aDesDoublons) {
-            console.warn('[Trimestres] ⚠️ Doublons détectés, nettoyage...');
-            // Garder le premier de chaque ID (priorité à l'ID)
-            const trimestresUniques = [];
-            const idsGardes = new Set();
-
-            trimestres.forEach(t => {
-                if (!idsGardes.has(t.id)) {
-                    idsGardes.add(t.id);
-                    trimestresUniques.push(t);
-                } else {
-                }
-            });
-
-            // Sauvegarder la liste nettoyée
-            db.setSync('trimestres', trimestresUniques);
-
-            return trimestresUniques;
-        }
-
-        return trimestres;
     }
 
     /**
@@ -296,9 +283,8 @@
      * @returns {Array} Trimestres dont l'`id` est non vide.
      */
     function enumererTrimestres() {
-        const trimestres = db.getSync('trimestres', []);
-        if (!Array.isArray(trimestres)) return [];
-        return trimestres.filter(t => t && t.id);
+        // #477 : sans doublon d'id, comme `obtenirTrimestres`.
+        return dedoublonnerTrimestresParId(db.getSync('trimestres', [])).filter(t => t && t.id);
     }
 
     /**
@@ -1260,6 +1246,16 @@
      * de gabarits. Remplace les lectures `db.getSync('grillesTemplates'/'echellesTemplates')`
      * suivies d'un `.find(id)` aux sites de résolution-par-id (pratique-
      * registre, pan-standards). Retourne l'objet modèle ou null.
+     *
+     * ⮕ #590 (option A de Grégoire, 28 août 2026) — L'ANCIEN IDENTIFIANT D'UNE ÉCHELLE
+     * EST RECONNU. Une échelle importée porte un id neuf et garde l'ancien dans
+     * `idOriginal` ; ce qui a été écrit avant l'import pointe l'ancien. Ce résolveur ne
+     * comparait que `m.id` quand `obtenirEchelleResolue` lisait aussi `idOriginal` : un
+     * même identifiant résolvait selon l'appelant. Ordre : l'id exact avant
+     * `idOriginal`, le trimestre actif avant le pool. `obtenirEchelleResolue` se replie
+     * ici : une seule règle pour les deux.
+     * ⚠ Les GRILLES n'apprennent pas `idOriginal` : des évaluations d'H2026 pointent des
+     * grilles absentes, et les rattacher changerait des notes déjà remises.
      * @param {'grille'|'echelle'} type
      * @param {string} id
      * @returns {Object|null}
@@ -1267,10 +1263,11 @@
     function resoudreModeleParId(type, id) {
         if (!id) return null;
         const nomCle = type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates';
+        const chercher = (liste) => liste.find(m => m && m.id === id)
+            || (type === 'echelle' ? liste.find(m => m && m.idOriginal === id) : null)
+            || null;
         const actif = db.getSync(cle(nomCle), []) || [];
-        const trouve = actif.find(m => m && m.id === id);
-        if (trouve) return trouve;
-        return _toutesModelesTravail(nomCle).find(m => m && m.id === id) || null;
+        return chercher(actif) || chercher(_toutesModelesTravail(nomCle));
     }
 
     /**
@@ -1819,7 +1816,7 @@
         const actif = obtenirTrimestreActif();
         if (actif) {
             window.trimestreActif = actif.id;
-            db.setSync('trimestreActif', actif.id);
+            db.setSyncSiChange('trimestreActif', actif.id);   // #1040 : rien si inchangé
         }
 
         // Mettre à jour l'affichage du bandeau d'archivage

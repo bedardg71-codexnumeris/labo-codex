@@ -762,12 +762,12 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         expect(dansGroupe).toBe(false);
     });
 
-    it('D6 · #554 : un élève en décrochage n\'est jamais lu « Décrochage » par la cible (le troisième argument n\'est pas passé)', () => {
+    it('D6 · #554 (branché le 11 oct. 2026, lot 10) : un élève en décrochage est lu « Décrochage » par la cible', () => {
         const jeu = jeuBase(); jeu.etudiants[1].statut = 'décrochage';
         const b = monter(jeu); b.calculerTout();
         const cible = b.win.determinerCibleIntervention(DA.ABSENT);
         noter('D6', { cible: cible.cible, niveau: cible.niveau });
-        expect(cible.cible).not.toBe('Décrochage');
+        expect(cible.cible).toBe('Décrochage');
     });
 });
 

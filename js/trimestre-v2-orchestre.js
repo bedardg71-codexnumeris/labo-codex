@@ -33,7 +33,7 @@
 /* ===============================
    WRAPPERS NOTIFICATIONS
    (dupliqués des autres sous-modules — les fonctions originales sont
-    dans evaluation.js / groupe.js, pas encore chargées quand ce
+    dans evaluation.js, pas encore chargées quand ce
     module s'exécute. Consolidation prévue dans un chantier séparé
     post-refactor — voir SESSION.md L78.)
    =============================== */

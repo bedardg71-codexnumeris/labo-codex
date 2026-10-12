@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,10 +26,7 @@ const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 // morte ne revient pas et que le flux VIVANT de configuration des pratiques
 // (bibliothèque / PratiqueManager) reste en place.
 //
-// NB : js/pratique-notation-v2.js (moteur de config VIVANT consommé par
-// pratiques-bibliotheque.js) n'est PAS couvert ici — son trio mort
-// (chargerValeursDepuisStorage/sauvegarderPratiqueBaseV2/sauvegarderStructureV2)
-// + bootstrap est un passage ultérieur dédié.
+// NB : js/pratique-notation-v2.js est retiré en entier depuis le 11 oct. 2026 (#469).
 
 // Symboles retirés des deux passages (ne doivent plus être ni définis ni exportés).
 const SYMBOLES_RETIRES = [
@@ -98,23 +95,16 @@ const V2_RETIRES = [
     'appliquerModeleSpecifications',
     'initialiserComptageObjectifsV2'
 ];
-const V2_VIVANTS = [
-    'chargerConfigParObjectifs',
-    'chargerConfigSpecifications',
-    'afficherTypesTravauxSpec',
-    'afficherForfaitsSpec'
-];
+// (V2_VIVANTS est tombé le 11 oct. 2026 : le fichier entier est retiré, #469.)
 
 let source;
 let productions;
 let productionsListe;
-let v2;
 
 beforeAll(() => {
     source = readFileSync(path.join(racine, 'js/pratiques.js'), 'utf8');
     productions = readFileSync(path.join(racine, 'js/productions.js'), 'utf8');
     productionsListe = readFileSync(path.join(racine, 'js/productions-liste.js'), 'utf8');
-    v2 = readFileSync(path.join(racine, 'js/pratique-notation-v2.js'), 'utf8');
 });
 
 describe('#338 · ablation du vieil éditeur de pratique mort (pratiques.js, 2 passages)', () => {
@@ -145,20 +135,15 @@ describe('#338 · ablation du vieil éditeur de pratique mort (pratiques.js, 2 p
     });
 });
 
-describe('#338 · branche pratique-notation-v2.js (éditeur autonome mort retiré, moteur vivant conservé)', () => {
-
-    it('le bootstrap autonome et la chaîne morte sont retirés', () => {
-        // Plus de bootstrap DOMContentLoaded/db-ready de l'éditeur autonome.
-        expect(v2.includes("document.readyState === 'loading'")).toBe(false);
+describe('#338 · branche pratique-notation-v2.js — fichier retiré en entier (#469, 11 oct. 2026)', () => {
+    // Le « moteur vivant » que ce bloc gardait ne l'était plus : ses 14 cibles `v2-*` avaient
+    // quitté index.html, ses trois appelants gardés ne faisaient rien. Le fichier est retiré ;
+    // la chaîne morte ne peut revenir que dans un autre fichier de js/.
+    it('aucun symbole de la chaîne morte n\'est défini dans js/', () => {
+        const tous = readdirSync(path.join(racine, 'js')).filter((f) => f.endsWith('.js'))
+            .map((f) => readFileSync(path.join(racine, 'js', f), 'utf8')).join('\n');
         for (const sym of V2_RETIRES) {
-            expect(v2.includes(`function ${sym}(`), `${sym} ne doit plus être défini`).toBe(false);
-            expect(v2.includes(`window.${sym} =`), `window.${sym} ne doit plus être exporté`).toBe(false);
-        }
-    });
-
-    it('le moteur de configuration consommé par la bibliothèque reste défini', () => {
-        for (const sym of V2_VIVANTS) {
-            expect(v2.includes(`function ${sym}(`), `${sym} doit rester défini`).toBe(true);
+            expect(tous.includes(`function ${sym}(`), `${sym} ne doit plus être défini`).toBe(false);
         }
     });
 });
