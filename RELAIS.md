@@ -21,6 +21,9 @@ Time Machine à l'arrêt) : code 0, 0 échec, aucun instable, 0 veille, ≈ 66 m
 efface les captures d'intervention — Grégoire prévenu de ne pas cliquer), #1018, #990, #477, #472, #475, #474. Item des Nouvelles du
 lot 8 retenu par Grégoire (10 h 12), dans `plans de travail/CONSIGNE-DU-JOUR.md` de la branche. **Suite** : fusionner `lot8-cadre`
 dans `main`, release suivante avec son verdict (règle 7), puis la file de Cowork.
+**Ajout du 12 oct. (Claude Code, cloud)** : `main` reçoit un commit **documentaire seul** (`ETAT-PROJET.md` §00 : grille d'audit
+remesurée, tableau de bord de la complexité ; ce fichier-ci). Aucun code, version inchangée. `lot8-cadre` n'était toujours pas sur
+`origin` le 12 oct. : sa fusion ne sera plus un fast-forward. Branche invisible d'ici : conflit probable sur `RELAIS.md`, possible sur `ETAT-PROJET.md` (non vérifié).
 
 ## (relais précédent) 10 OCT. 2026, 17 h 22 : **1.197.0 (RIEN NE SE PERD EN SILENCE ; #845, #938, #522 LOT 5B) EN LIGNE ; `main` À JOUR**
 
