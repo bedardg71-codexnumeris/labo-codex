@@ -12,7 +12,13 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 9 août 2026, PM (Claude Code) — bêta publique **1.65.2** / build `0809-1101`.
+> **Dernière mise à jour** : 12 octobre 2026 (Claude Code), bêta publique **1.198.0** / build `1011-1014`.
+> **Nouveau §00 : la grille des 25 sous-audits de mai remesurée au code, barème strict**, et le
+> **tableau de bord de la complexité** qui sert de ligne de départ à l'objectif fixé par Grégoire
+> le 12 octobre (contrôler la complexité). Le §00 est la seule section revue ce jour-là : tout le
+> reste garde sa date et sa réserve ci-dessous.
+>
+> *Mise à jour précédente* : 9 août 2026, PM (Claude Code) — bêta publique **1.65.2** / build `0809-1101`.
 > Repère au **§0** (8 août) ; audit du répertoire `plans de travail/` au **§4bis** (8 août) ;
 > **vérification au code des 43 plans non tranchés au §4ter (9 août matin)** ;
 > **audit de `Plan Accompagnement/`, le dernier angle mort, au §4quater (9 août PM)**.
@@ -35,6 +41,178 @@
 | **À faire** | Identifié, non démarré |
 | **Optionnel** | Utile mais non requis ; n'engage pas la stabilité |
 | **Long terme** | Reporté explicitement (Q3 2026+ ou audit dédié requis) |
+
+---
+
+## 00. Grille d'audit remesurée (12 octobre 2026)
+
+> **Demande de Grégoire (12 oct.)** : pilotage interne, **barème strict**. Son objectif à ce
+> moment-ci du développement : **contrôler la complexité de l'application** et laisser le code
+> dans le meilleur état possible. Simplifier, assainir, rendre plus robuste : ce sont les chantiers
+> candidats des prochains mois (§00.6), **non lancés**. La question d'une relève humaine
+> (documentation à jour) est traitée dans une autre session : l'axe 4 ci-dessous la mesure, sans
+> plus.
+>
+> **Code mesuré** : `304c3b58` (= `origin/main`, 1.198.0). Le lot 8 (branche `lot8-cadre`, absente
+> d'`origin` le 12 oct.) **n'est pas vu**.
+>
+> **Méthode** : les 25 sous-audits d'`AUDIT.md`, avec les outils et réglages de mai (§00.5),
+> **étalonnés** : rejoués sur le commit audité en mai (`9cd3e0e`), ils redonnent exactement les
+> chiffres publiés (136 432 LOC, cyc max 118, 1,44 % de duplication, 10 443 alertes de lint ;
+> 677 symboles inutilisés, 6 cycles, 47 sites `modalitesEvaluation`). Les écarts ci-dessous
+> viennent donc du code, pas des outils.
+>
+> **Barème** : celui du protocole (`audit annuel/audit/`), appliqué à la lettre. Ce n'est pas une
+> re-certification : l'audit formel reste prévu en mai 2027 (ADR-012). `AUDIT.md`, public, n'est
+> pas touché.
+
+### 00.1 Distribution
+
+| Date | 🟢 | 🟡 | 🔴 | Non mesuré / partiel |
+|---|:-:|:-:|:-:|:-:|
+| 14 mai 2026 (audit) | 5 | 10 | 8 | 2 |
+| 25 mai 2026 (tableau détaillé d'`AUDIT.md`) | 13 | 9 | 1 | 2 |
+| **12 oct. 2026 (barème strict)** | **5** | **12** | **6** | **2** |
+
+⚠ Le résumé d'`AUDIT.md` annonce « ~14 / 6 / 3 / 2 » pour le 25 mai ; ses propres lignes donnent
+13 / 9 / 1 / 2. C'est le tableau détaillé qui sert de référence ici.
+
+**La baisse a trois causes, à ne pas confondre :**
+
+1. **Régressions réelles.** CodeQL retiré le 28 juin (`fa94f5ee`, dépôt privé sans Advanced
+   Security) ; protection de branche inactive ; 6 PR Dependabot ouvertes depuis mai-août. Fonctions
+   à cyc > 30 : 80 le 25 mai, **91** aujourd'hui. Deux modules ont presque doublé
+   (`planification-carte.js`, `grilles.js`).
+2. **Barème réappliqué.** 2.1 (rouge dès qu'un fichier dépasse 1 000 LOC) et 2.2 (rouge dès qu'une
+   fonction dépasse cyc 15) n'ont jamais été jaunes au sens du protocole ; le 25 mai les jugeait sur
+   une liste de 14 fonctions.
+3. **Croissance.** 129 → 209 fichiers JS, lignes physiques 194 732 → 237 396 (+22 %). Sur les 37
+   cycles, 19 sont internes à une famille découpée en mai (`evaluation-*`, `trimestre-v2-*`,
+   `reserve-*`) : des appels internes devenus des liens entre fichiers (inféré).
+
+**Progrès réels depuis mai** : #328 (`modalitesEvaluation` : 14 écrivains → 1, sentinelles L0-L3) ;
+duplication 1,44 % → 1,12 % ; écart T3 et tables IDME en dur corrigés (#823, #529, #575) ; décision
+SPDX (ADR-013) ; doc opérationnelle obsolète retirée (`22dcbfb`) ; `DEPLOY.md` v1.10 couvre le régime
+Access du 1er sept.
+
+### 00.2 Les 25 sous-audits
+
+M = mesuré (commande au §00.5), I = inféré.
+
+| SA | 14 mai | 25 mai | 12 oct. | Constat |
+|---|:-:|:-:|:-:|---|
+| 1.1 Traçabilité | 🟡 | 🟢 | 🟡 | Une seule définition par fonction de la chaîne (`calculerIPB`, `diagnostiquerSuiviApprentissage`, `determinerNiveauRaiPedagogique`, `calculerAssiduite`) (M). Mais `docs/modules/depistage-et-suivi.md` renvoie à `profil-etudiant.js`, disparu, et les seuils du pattern individuel ont une deuxième source dans `pratique-pan-standards.js:983` (M) |
+| 1.2 Calculs | 🟢 | 🟢 | 🟢 | 14 fichiers Vitest des bancs de septembre, 307/307 verts (M). Trou : 5 des 8 libellés du diagnostic n'ont pas d'essai de comportement (Difficulté résolue, Progression, Plateau, Difficulté constante, Progression lente) (M). Les 156 cas de mai (snippets console) ne sont pas dans le dépôt et ne se rejouent pas |
+| 1.3 Lexique | 🟡 | 🟢 | 🟡 | L'interface est nettoyée (M). L'Aide décrit encore l'indice R retiré : `index.html` « RISQUE D'ÉCHEC (1-A×C×P) », « Échec probable », « prédictions de risque », R=(2A+C+P)/4 (M) |
+| 2.1 LOC | 🔴 | 🟡 | 🔴 | 36 fichiers > 1 000 LOC sur 209 (mai : 35 sur 130) (M) |
+| 2.2 Complexité | 🔴 | 🟡 | 🔴 | cyc > 15 : 387 → 465 ; cyc > 30 : 97 → 91 (80 le 25 mai) ; max 118 → 130 (M) |
+| 2.3 Duplication | 🟡 | 🟡 | 🟡 | 1,44 % → 1,12 % ; à couverture totale 2,57 % → 1,74 % (M) |
+| 2.4 Code mort | 🟢 | 🟢 | 🟢 | 0 fichier orphelin ; 3 non cités dans `index.html`, tous chargés à la demande ou documentaires (M) |
+| 2.5 Lint / SAST | 🔴 | 🟢 | 🔴 | Le vert reposait sur CodeQL, retiré le 28 juin. Aucune config ESLint projet, aucun lint en CI. RegExp non littérales 14 → 29 ; `no-eval` 1 → 0 (M) |
+| 3.1 SSOT | 🔴 | 🟡 | 🟡 | `modalitesEvaluation` : 1 écrivain (M). 14 clés sur 32 encore à ≥ 2 écrivains ; accès `localStorage` hors `db.js` : 23 fichiers / 95 lignes → 17 / 69 (M) |
+| 3.2 Modularité | 🔴 | 🟡 | 🔴 | Modules > 20 symboles publics 26 → 31 ; maximum `grilles.js` (140) ; symboles inutilisés 677 → 810 ; `<script src>` dans `index.html` : 126 → 213 (M) |
+| 3.3 Isolation | 🔴 | 🔴 | 🔴 | Cycles 6 → 37 ; `reserve.js` 2 034 lignes, **pas** découpé en 3 couches ; fan-in max 59 (`modes.js`), fan-out max 24 (`codex.js`) (M) |
+| 4.1 Documentation | 🟡 | 🟢 | 🟡 | Liens relatifs du README vivants ; chiffres périmés (« 97/97 tests », « 12 ADRs ») ; liens GitHub inaccessibles au public depuis la privatisation (M) |
+| 4.2 Bus factor | 🟡 | 🟡 | 🟡 | Un seul humain depuis le 14 mai ; aucun co-mainteneur (M) |
+| 4.3 Onboarding | 🟢 | 🟢 | 🟢 | Pas retesté ; test annuel dû en mai 2027 (I) |
+| 4.4 Déploiement | 🔴 | 🟢 | 🟢 | `DEPLOY.md` v1.10 à jour ; trois passages périmés (§2.4, §8.2, 2FA « [À COMPLÉTER] ») (M) |
+| 4.5 Licences | 🟡 | 🟡 | 🟡 | `libs/VERSIONS.md` sans `libheif-bundle.js` (ajouté le 30 août) ; `LICENSE.md` titre « CC BY-SA » puis écrit NC-SA (M) |
+| 4.6 Scorecard | 🟡 | 🟢 | 🔴 | CodeQL retiré ; protection de branche inactive ; Dependabot non traité ; Playwright CI à la demande depuis le 10 oct. (`fd1338a1`, #1048) (M) |
+| 5.1 OWASP | 🟡 | 🟡 | 🟡 | 0 `eval` ; `console.log` 21 → 36 ; `netlify.toml` ne pose **aucun** en-tête de sécurité HTTP (cache seulement), donc pas de `frame-ancestors` (M). pdf.js 3.11.174 (CVE-2024-4367) probablement neutralisé par la CSP sans `unsafe-eval` (I) |
+| 5.2 Veracode | 🟢 | 🟢 | 🟢 | Pas de backend ; contexte inchangé (I) |
+| 5.3 Inventaire | 🟡 | 🟢 | 🟡 | Des renseignements personnels restent dans l'historique git ; la purge #781 est préparée, non exécutée (M) |
+| 5.4 Loi 25 | 🟡 | 🟡 | 🟡 | Avis PRP non reçu ; ÉFVP non faite ; `PRIVACY.md` écrit « dépôt public » (faux depuis le 23 juin) ; `INFO-ELEVES.md` renvoie vers un dépôt privé (M) |
+| 5.5 Lighthouse BP | 🟢 | 🟢 | non mesuré | Aucune mesure depuis mai |
+| 6.1 axe / Lighthouse | 🔴 | 🟢 | 🟡 | axe-core : 1 règle violée (contraste, 5 nœuds, `.accueil-section-label`, `.accueil-pied-*`) ; Lighthouse a11y 97 (M, accueil seulement) |
+| 6.2 Clavier / VoiceOver | ⏳ | ⏳ | non mesuré | Section C toujours « reportée » depuis le 23 mai (M) |
+| 6.3 iPad réel | ⏳ | ⏳ | 🟡 | Usage réel quotidien et portes terrain sur iPad (M) ; le protocole d'accessibilité (section D) n'a jamais été passé |
+
+### 00.3 Tableau de bord de la complexité (ligne de départ)
+
+Ce sont les chiffres que l'objectif du 12 octobre doit faire baisser, ou au moins empêcher de
+monter. Toute session qui les remesure écrit la date, le commit et la commande (§00.5).
+
+| Indicateur | 14 mai | 12 oct. |
+|---|--:|--:|
+| Lignes de code JS (`cloc`, colonne *code*, `js/`) | 136 432 | 151 094 |
+| Fichiers JS | 130 | 209 |
+| Fichiers > 1 000 lignes de code | 35 | 36 |
+| Fonctions cyc > 15 | 387 | 465 |
+| Fonctions cyc > 30 | 97 | 91 |
+| cyc maximale | 118 | 130 |
+| Duplication jscpd, réglages de mai / couverture totale | 1,44 % / 2,57 % | 1,12 % / 1,74 % |
+| Cycles directs entre modules | 6 | 37 |
+| Modules > 20 symboles publics | 26 | 31 |
+| Symboles publics inutilisés | 677 (41 %) | 810 (36 %) |
+| Fichiers qui touchent `localStorage` hors `db.js` | 23 | 17 |
+| Clés à ≥ 2 écrivains (sur 32) | 15 | 14 |
+
+⚠ **Défaut connu du script de mai** (`analyse-fan-in-out.py`) : son `DEFINE_RE` compte
+`typeof window.X === 'function'` comme une définition. Corrigé (`=(?!=)`), mai → oct. donne : globaux
+multi-définis 39 → 28 (bruts : 85 → 162), cycles 8 → 40, modules > 20 symboles 26 → 30. Le verdict
+ne change pas ; les chiffres bruts restent ceux du tableau pour rester comparables à mai.
+
+**Les dix fonctions les plus complexes** : `executerImportSelectif` 130 (`import-export.js`),
+`calculerCorrelationsLongitudinales` 101, `creerPratiqueV2` 86, `creerGraphiqueTrajectoiresProduction`
+84, `chargerCodex` 83, `emprunter` 83, `auDbReady` 70, `genererSectionProductions` 66,
+`remplirFormulairePratique` 64, `genererSectionMobilisationEngagement` 64.
+
+### 00.4 Où la complexité se concentre
+
+| Module | Constat (M) |
+|---|---|
+| `planification-carte.js` | Premier module de code : 4 536 → 8 267 LOC (12 640 lignes physiques) ; 7 fonctions cyc > 30 (`gererKeydown` 60, `ouvrirPanneau` 59) ; 231 lignes dupliquées à l'intérieur du fichier |
+| `grilles.js` | 2 363 → 3 696 LOC (6 343 physiques) ; 140 symboles publics, le plus large du dépôt |
+| `import-export.js` | `executerImportSelectif` 118 → 130, première fonction du dépôt |
+| `reserve.js` + famille `reserve-*` | `reserve.js` 2 034 lignes, FSAPI, métier et dialogue toujours mêlés ; `emprunter` 83, `verifierArchive` 59, `faireRevenir` 51 ; deux premières paires de duplication du dépôt (`reserve-copies` ↔ `reserve-renvoyer` 119 lignes, `reserve-emprunter` ↔ `reserve-revenir` 84) ; 7 cycles passent par `reserve.js`. Le découpage en 3 couches n'a **aucun** item au BACKLOG |
+| `codex.js` | 1 935 → 2 980 LOC ; `chargerCodex` 22 → 83 ; fan-out maximal (24) |
+| `main.js` | `auDbReady` 70 |
+| `modes.js` | Fan-in 59 : le module dont dépendent le plus d'autres |
+| `profil-etudiant-sections-affichage.js` | 3 074 LOC ; `genererSectionMobilisationEngagement` 43 → 64, alors que le §5.1 l'actait comme héritage « sous N=50 » |
+| `evaluation-sauvegarde.js` ↔ `evaluation.js` | 104 lignes dupliquées : l'ancien code est resté à côté du nouveau, ce que la règle zéro-dette exclut |
+
+### 00.5 Rejouer la mesure
+
+Les outils s'installent hors du dépôt (`npx` dans un répertoire de travail). Versions du 12 oct. :
+cloc 1.96, ESLint 8.57 + `eslint-plugin-security` 3.0.1, jscpd 4.1.1, axe-core 4.11.4,
+Lighthouse 13.3.0.
+
+- **2.1** : `npx --yes cloc --by-file --json js/` (colonne *code*).
+- **2.2 et 2.5** : `eslint --no-eslintrc -c "audit annuel/audit/.eslintrc.audit.json" --format json js/`.
+- **2.3** : `npx --yes jscpd@4 --min-tokens 50 --min-lines 5 --threshold 3 --max-lines 30000 --ignore
+  "**/*.min.js,**/vendor/**,**/node_modules/**,**/_archives/**,js/pack-demo-20.js" js/` (commande de
+  mai, `02-3-duplication.md`). Ajouter `--max-size 5mb` pour la couverture totale : par défaut, jscpd
+  ignore les fichiers de plus de 100 Ko (27 écartés en octobre, 24 en mai).
+- **3.x** : scripts `audit/reports/03-architecture/{ecrivains-par-cle,analyse-isolation,analyse-fan-in-out}.py`
+  de la branche `audit/2026-mai` (`git show origin/audit/2026-mai:<chemin>`), constantes `ROOT` et
+  `REPORTS` à adapter, `python3 -I`. Recoupement possible avec `scripts/audit-ssot.py`.
+- **6.1** : axe-core injecté par Playwright (Chromium) sur `index.html` servi en local, page
+  d'accueil seulement.
+
+### 00.6 Dispositions des constats
+
+Règle de `CLAUDE.md` : un audit n'est terminé que lorsque chaque constat porte une disposition. Les
+constats de dette structurelle n'ont aucun symptôme vécu : ils **n'entrent pas au BACKLOG** (règle du
+24 août) et sont versés aux **candidats du chantier complexité**, à arbitrer par Grégoire.
+
+| Constat | Disposition |
+|---|---|
+| Renseignements personnels dans l'historique git (5.3) | **Inscrit : #781**, préparé, attend le signal de Grégoire |
+| `PRIVACY.md` « dépôt public », `INFO-ELEVES.md`, `SECURITY.md`, liens GitHub du README (4.1, 4.6, 5.4) | **Remonte à Grégoire** : textes publics, catégorie 4 de `CLAUDE.md`. Non inscrit en attendant sa décision |
+| L'Aide décrit l'indice R retiré (1.3) | **Remonte à Grégoire** : prose lue par les utilisateurs |
+| Contradictions d'`AUDIT.md` (résumé ≠ tableau ; « dépôt volontairement public ») | **Remonte à Grégoire** : document public, à revoir au plus tard à l'audit de mai 2027 |
+| `libs/VERSIONS.md` sans libheif ; titre de `LICENSE.md` ; renvois périmés de `depistage-et-suivi.md` ; table « Violations connues » de `docs/DATA-OWNERSHIP.md` qui donne encore #328 ouvert | **Session documentation** (en cours en parallèle, 12 oct.) |
+| Playwright CI à la demande | **Refusé** : décision du 10 oct. (`fd1338a1`, #1048) ; le verdict local fait foi (`PROTOCOLE.md`, règle 7) |
+| 6.2 VoiceOver, 6.3 protocole iPad (section D) | **Refusé** : reportés par décision de Grégoire le 23 mai ; restent « non mesurés » |
+| Points chauds du §00.4 ; complexité (2.1, 2.2) ; cycles et `reserve.js` (3.3) ; doublon `evaluation-sauvegarde` ↔ `evaluation` ; seuils du pattern en double (1.1) | **Candidat « simplifier »** |
+| Aucun SAST depuis CodeQL ; pas d'ESLint projet ; en-têtes de sécurité absents de `netlify.toml` ; pdf.js 3.11.174 ; 6 PR Dependabot ; `console.log` 21 → 36 ; 29 RegExp non littérales (`cartouches.js:869/2174` à trier) ; 5 libellés du diagnostic sans essai ; 5 nœuds de contraste ; lien d'aide `details-calculs-risque-…` sans cible (`profil-etudiant-sections-affichage.js:2700`) | **Candidat « assainir / robustesse »** |
+| Défaut `DEFINE_RE` du script de mai ; mesure non versionnée dans le dépôt | **Candidat « contenir »** (outil de mesure) |
+
+**Les trois familles de candidats** (non lancées, ni découpées, ni chiffrées) :
+- **Contenir** : empêcher la complexité de remonter pendant qu'on la réduit.
+- **Simplifier** : réduire les points chauds du §00.4.
+- **Assainir / robustesse** : rendre au filet de sécurité ce que la privatisation lui a retiré, et
+  fermer les petits écarts.
 
 ---
 
@@ -130,6 +308,7 @@ annuel (`AUDIT.md`, ADR-012). Trois objectifs orientent toute décision de déve
 
 | Axe | État global | Détail |
 |---|---|---|
+| **Grille d'audit remesurée au code (12 oct., barème strict)** | **5 🟢 / 12 🟡 / 6 🔴 / 2 non mesurés** (25 mai : 13 / 9 / 1 / 2) ; ligne de départ de l'objectif « contrôler la complexité » | §00 |
 | Audit annuel 2026 — Phase 1 (corrections) | **Fait** | §3 |
 | Audit annuel 2026 — Phase 2 (refactoring god modules + transverse) | **Fait** | §3, §5 |
 | Lancement public (bêta 1.0.0, AQPC 3 juin) | **Fait** | §8 |
@@ -697,3 +876,4 @@ Synthèse :
 | 2026-08-09 (suite, Claude Code) | 0809-0835 | **1.61.0 → 1.63.0.** Phases B/C de la note finale : constatées LIVRÉES (verrou 11 break-tests) + rectificatif du §4ter (je les avais annoncées « à faire » en lisant les titres du plan au lieu du code). #434 Phase D (sélecteur unique). Puis **#435 sur question de Grégoire** : #434 avait rendu atteignable le mode STD « par-objectifs » que la décision #396 condamnait — même défaut de naissance (`objectifId` sans écrivain), panneau jamais affiché, 4 gabarits sans aucun objectif. **Ablation complète** (moteur 4 modes, panneau, 10 fonctions, 4 gabarits, projections), pratiques legacy normalisées en lecture seule, dépendances DEN préservées et break-testées. Leçon consignée : vérifier l'HISTORIQUE avant de rendre disponible, pas seulement le code. 1.62 consolidée dans 1.63 (jamais déployée). Vitest 1998/1998. |
 | 2026-08-09 (PM, Claude Code) | 0809-1101 | **1.65.1 → 1.65.2.** Nouveau **§4quater** : audit de `Plan Accompagnement/`, le dernier angle mort désigné par le §4ter — 14 documents traités au code. **7 terminés, 3 consommés, 2 partiels, 1 jamais amorcé.** ⚠ **Le compte de plans ouverts BAISSE** : sur les trois documents que le §4ter accusait, **deux étaient intégralement livrés** — `SPEC_mini-guide_cours_balises` (popup, bulle de survol ET le renommage OQLF « heures d'enseignement ») et `PLAN_decouvrabilite_guides` (les cinq lots). *La règle « un plan ne dit pas son propre état » vaut dans les deux sens ; on ne l'applique spontanément que dans celui qui inquiète.* Reste ouvert : `pan-rrec` (4 pages déjà rédigées), le guide « Enseignement explicite », le chantier 3 de SOLO, et le SRPNF codé en dur — versés en **#439/#440/📐#441**. Le §7 du plan maître disait « signalé pour le backlog » le 23 mai : il n'y était **jamais arrivé**. **Nettoyage zéro-dette du jour même** : patron `.option-accompagnement` (~51 lignes de `styles.css`) sans porteur depuis la refonte en accordéons du 26 mai, retiré, cliquet générique posé, **4 break-tests ROUGE** — dont un qui a d'abord été VERT et a révélé une assertion en sous-chaîne dans ma propre sentinelle. Vitest 2062/2062. En-tête du document recalé (il annonçait 1.64.0 alors que `main` portait 1.65.1). |
 | 2026-08-09 (fin, Claude Code) | 0809-0906 | **1.63.1 → 1.64.0.** Correctif du badge « par objectifs » survivant à #435 (il lisait un champ que les pratiques STOCKÉES portent encore, et masquait le badge portfolio de ces mêmes pratiques). Puis **#436 Phase G2-b** : fin du miroir `configPAN` — 9 lectures d'affichage migrées (chiffre rectifié au rituel de fin — annoncé 7), les 2 écrivains de `pratiques.js` retirés (dont une migration qui tournait à chaque boot), l'îlot multi-objectifs supprimé. **Le plan de refonte de la note finale est CLOS** (A, E, F, G1, G2-a, B, C, D, G2-b). ⚠ Deux valeurs affichées GELÉES en constantes explicites, décision en attente (dénominateur de l'indice C ; quota des jetons) — les brancher sur la SSOT changerait ce que l'utilisateur voit. Deux survivants légitimes break-testés. Le miroir stocké subsiste dans les données (purge = migration destructive, à décider ; recoupe #353). Vitest 2018/2018. |
+| 2026-10-12 (Claude Code) | 1011-1014 | **1.198.0, documentaire.** Nouveau **§00** : les 25 sous-audits de mai remesurés au code (`304c3b58`), outils de mai étalonnés sur le commit audité, barème strict à la demande de Grégoire : **5 🟢 / 12 🟡 / 6 🔴 / 2 non mesurés** (25 mai : 13 / 9 / 1 / 2). La baisse mêle régressions réelles (CodeQL retiré, complexité remontée), barème réappliqué (2.1, 2.2) et croissance (+22 %). Tableau de bord de la complexité (§00.3), points chauds (§00.4), commandes pour rejouer (§00.5), dispositions de chaque constat (§00.6). Objectif fixé par Grégoire : contrôler la complexité ; candidats « contenir / simplifier / assainir » non lancés. Le lot 8 (`lot8-cadre`, absent d'`origin`) n'est pas vu. ⚠ Sections 0 à 11 **non revues**. |
