@@ -52,3 +52,7 @@ Aucun.
 ## 6 · Ce qui attend
 
 L'entrée des Nouvelles, à soumettre à Grégoire ; la release et le verdict Playwright attendent son signal du soir.
+
+## 7 · Réponse au verdict de 10 h 56 (11 h 03)
+
+« Chargement... » : le `<p class="texte-muted">` statique d'`index.html` dans `#evaluations-contenu-fichiers`, déjà là sur 1.199.0 (`bd533702`, même script, deux navigateurs, deux largeurs) ; artefact du banc, qui appelait `afficherVisionneuse()` sans passer par les deux vrais chemins qui vident le conteneur (`travaux-ui.js:1123`, `:3382`) — une ligne dans #602, aucun code. Le 404 : `/favicon.ico`, demandé d'office par Chrome — rien à faire. Lignes inscrites dans #678 (bandeau à 820 px) et #469 (`previsualiserConfigComplete`).
