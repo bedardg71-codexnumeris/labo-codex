@@ -66,7 +66,7 @@
 
     // Chemin servi du worker PDF.js. Le garde pre-commit et release.mjs (#602)
     // lisent l'affectation de workerSrc ci-dessous : la garder litterale.
-    const CHEMIN_WORKER_PDF = 'libs/pdf.worker.min.js';
+    const CHEMIN_WORKER_PDF = 'libs/pdf.worker.min.js?v=3.11.174';   // #602 : la version de PDF.js, comme pdf.min.js
 
     // Promesse du worker charge UNE fois pour la vie de l'onglet. Un echec
     // n'y reste jamais : elle est remise a null pour que l'essai suivant
@@ -79,7 +79,7 @@
     function configurerPDFjs() {
         if (typeof pdfjsLib !== 'undefined') {
             if (!promesseWorkerPDF) {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js?v=3.11.174';
             }
             // Precharge sans attendre ni signaler : a l'entree du module la
             // session est le plus souvent fraiche. Un echec ici est repris,
