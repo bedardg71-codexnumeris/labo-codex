@@ -3,7 +3,7 @@ import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { masquagesDeCle } from './_helpers/masquages-cle.js';
+import { masquagesDeCle, masquagesActifs } from './_helpers/masquages-cle.js';
 
 // =====================================================================
 // #642 — LES MASQUAGES DU HELPER `cle()` (11 oct. 2026)
@@ -26,6 +26,36 @@ describe('#642 · cliquet des masquages de cle()', () => {
     it('un compte qui baisse est reporté dans la liste figée (le cliquet descend)', () => {
         const baisses = Object.keys(fige).filter((f) => (mesure[f] || 0) < fige[f]).map((f) => `${f} : ${fige[f]} → ${mesure[f] || 0}`);
         expect(baisses).toEqual([]);
+    });
+});
+
+// TRI DU LOT 23 (12 oct. 2026) — LES MASQUAGES QUI RESTENT SONT VOULUS, ET VOICI POURQUOI.
+// 139 sites mesurés : 138 sont INERTES (aucun appel `cle(…)` dans leur portée : un paramètre
+// nommé `cle` dans un `forEach`, une boucle sur des clés, une clé de stockage locale). Un seul ne
+// l'était pas, l'alias `const cle = window.cle || (k => k)` de `mettreAJourBarreContexte`
+// (trimestre-v2.js) : retiré. La règle est désormais celle-ci, vérifiée site par site : un
+// masquage est toléré tant qu'aucun appel `cle(` ne vit dans sa portée. Le compte par fichier
+// reste un cliquet qui descend.
+describe('#642 · le tri : aucun masquage n\'a d\'appel cle( dans sa portée', () => {
+    it('zéro masquage actif dans js/', () => {
+        expect(masquagesActifs(racine)).toEqual([]);
+    });
+    it('TÉMOIN — un alias qui appelle, fabriqué, est vu ; un paramètre inerte ne l\'est pas', () => {
+        const dossier = mkdtempSync(path.join(tmpdir(), 'masquages-actifs-642-'));
+        try {
+            mkdirSync(path.join(dossier, 'js', 'pratiques'), { recursive: true });
+            writeFileSync(path.join(dossier, 'js', 'banc.js'), [
+                'function inerte(cle) { return cle.length; }',
+                'function actif() {',
+                '    const cle = window.cle || (k => k);',
+                '    return cle(\'productions\');',
+                '}',
+                'const f = (a, cle) => cle(a);'
+            ].join('\n'));
+            expect(masquagesActifs(dossier).sort()).toEqual(['js/banc.js:3', 'js/banc.js:6']);
+        } finally {
+            rmSync(dossier, { recursive: true, force: true });
+        }
     });
 });
 
