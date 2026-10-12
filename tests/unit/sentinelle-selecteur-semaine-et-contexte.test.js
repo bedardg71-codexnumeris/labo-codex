@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-import { tranche } from './_helpers/tranche.js';
+import { tranche, suitDansLaFonction } from './_helpers/tranche.js';
 
 // LA PAIRE DU 7 AOÛT — le sélecteur de semaine, et l'étiquette de contexte.
 //
@@ -225,7 +225,7 @@ describe('Sélecteur de semaine · les deux gestes ne peuvent pas diverger', () 
         // Au doigt, la pression et le glisser sont le même début de geste :
         // sans stopPropagation, le sélecteur serait inutilisable sur iPad.
         const bloc = tranche(sourceCarte, "var selSemaine = el.querySelector('.planif-noeud-semaine')", '// === POIGNÉE DE REDIMENSIONNEMENT');
-        expect(bloc).toMatch(/'pointerdown', 'mousedown', 'click'[\s\S]{0,220}stopPropagation/);
+        expect(suitDansLaFonction(bloc, /'pointerdown', 'mousedown', 'click'/, /stopPropagation/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 
@@ -252,7 +252,7 @@ describe('Sélecteur de semaine · l’INSPECTEUR resynchronise le bloc (#150, t
         // Une leçon déplacée en semaine 3 change l'étendue de sa séquence :
         // synchroniser le seul bloc leçon laisserait la séquence mentir.
         const bloc = blocInspecteurSemaine();
-        expect(bloc).toMatch(/parent[\s\S]{0,200}sequence[\s\S]{0,120}synchroniserSelecteurSemaine/);
+        expect(suitDansLaFonction(bloc, /parent/, /sequence/, /synchroniserSelecteurSemaine/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('… SANS reconstruireDOM — le handler est sur `input`, le focus doit survivre', () => {
@@ -267,7 +267,7 @@ describe('Sélecteur de semaine · l’INSPECTEUR resynchronise le bloc (#150, t
         // premier contact, le <select> n'a qu'une seule option. L'état de
         // premier rendu (une option + dataset.peuple effacé) est le seul état
         // sûr — la liste complète revient au prochain contact.
-        expect(sourceCarte).toMatch(/function synchroniserSelecteurSemaine[\s\S]{0,900}delete select\.dataset\.peuple/);
+        expect(suitDansLaFonction(sourceCarte, /function synchroniserSelecteurSemaine/, /delete select\.dataset\.peuple/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 

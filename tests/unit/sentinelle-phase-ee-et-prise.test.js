@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CHANGER DE TYPE SANS RECRÉER LE BLOC
@@ -442,6 +443,6 @@ describe('C · le verbe devenu inexact est DIT, jamais réécrit (verdict 3.4)',
         expect(source).toMatch(/accordeAvant\[.+?\]\s*&&\s*!verbeEstSuggere/);
         // Et le relevé est bien pris AVANT l'écriture, pas après — sans quoi il
         // compterait l'état d'arrivée contre lui-même et ne dirait jamais rien.
-        expect(source).toMatch(/releverVerbesDeNoeud\(id\)[\s\S]{0,400}?paire\[1\]\(id/);
+        expect(suitDansLaFonction(source, /releverVerbesDeNoeud\(id\)/, /paire\[1\]\(id/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });

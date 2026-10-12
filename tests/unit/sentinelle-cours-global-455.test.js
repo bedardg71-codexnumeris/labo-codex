@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { chargerScript } from './_helpers/charger-script.js';
 import { globauxIdentiteNaturelle } from './_helpers/identite-naturelle.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // =======================================================================
 // SENTINELLE #455 — le cours est GLOBAL : son identité est le CODE seul
@@ -139,7 +140,7 @@ describe('#455 · le cours est global : identité = code seul', () => {
         // sur `codeCours` — c'était précisément le trou, « 601-101-mq »
         // s'installait à côté de « 601-101-MQ ». L'import passe par la même
         // clé que le formulaire et que l'entité.
-        expect(source).toMatch(/trouverDoublonNaturel\([\s\S]{0,80}cleNaturelleCours/);
+        expect(suitDansLaFonction(source, /trouverDoublonNaturel\(/, /cleNaturelleCours/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         // …et plus AUCUNE comparaison de période dans un prédicat de doublon.
         expect(source).not.toMatch(/session\s*===\s*coursImporte\.session/);
         expect(source).not.toMatch(/annee\s*===\s*coursImporte\.annee/);

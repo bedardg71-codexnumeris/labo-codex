@@ -18,6 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml } from './_helpers/bac-suivi.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.resolve(__dirname, '..', '..');
@@ -355,7 +356,7 @@ describe('#717 · sentinelle : aucun id de cible positionnel dans js/', () => {
         const wizard = readFileSync(path.join(RACINE, 'js/wizard-pratique-v2.js'), 'utf8');
         const gestion = readFileSync(path.join(RACINE, 'js/pratiques-gestion.js'), 'utf8');
         const index = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
-        expect(wizard).toMatch(/id: 'ciblesDenotation',[\s\S]{0,200}type: 'liste-cibles'/);
+        expect(suitDansLaFonction(wizard, /id: 'ciblesDenotation',/, /type: 'liste-cibles'/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect(wizard).toContain('window.EditeurCibles.lire(element)');
         expect(gestion).toContain("window.EditeurCibles.lire(document.getElementById('mat-den-cibles'))");
         expect(index).not.toMatch(/<textarea id="mat-den-cibles"/);

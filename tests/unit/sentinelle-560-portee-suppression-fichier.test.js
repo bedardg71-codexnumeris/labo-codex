@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // SENTINELLE #560 (3 septembre 2026) — LA PORTÉE D'UNE SUPPRESSION EST CELLE
 // QU'ON ANNONCE : supprimer pour de bon la copie d'un élève.
@@ -118,6 +119,6 @@ describe('#560 · C — le message d\'après dit ce qui est parti', () => {
         // Réancré le 26 sept. 2026 (lot A de l'enregistrement) : plus de branche de refus en
         // anonymisation. Puis le 27 sept. (lot B, #618) : le compte n'est posé que sur `=== true`
         // — un refus rendu ne compte plus comme des évaluations supprimées.
-        expect(modale).toMatch(/if \(sauvegarderDonneesSelonMode\('evaluationsSauvegardees', evaluations,[\s\S]{0,80}?\) === true\) \{\s*nbEvalsRetirees = avant - evaluations\.length;/);
+        expect(suitDansLaFonction(modale, /if \(sauvegarderDonneesSelonMode\('evaluationsSauvegardees', evaluations,/, /\) === true\) \{\s*nbEvalsRetirees = avant - evaluations\.length;/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });

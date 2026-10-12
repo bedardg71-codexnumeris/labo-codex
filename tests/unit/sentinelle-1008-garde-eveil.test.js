@@ -16,6 +16,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 import {
     lireEchangeMo, lirePression, lireCapacites, lireAlimentation,
     lireAssertionsSysteme, lireAssertionsDuProcessus, jugerEveil,
@@ -185,7 +186,7 @@ describe('#1008 · E — la structure de verifier-playwright.mjs', () => {
     });
 
     it('E.d la surveillance juge la mémoire et arrête le groupe entier', () => {
-        expect(VERIF).toMatch(/jugerMemoire\(releves,[\s\S]{0,500}arreterLaSuite\(\)/);
+        expect(suitDansLaFonction(VERIF, /jugerMemoire\(releves,/, /arreterLaSuite\(\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect(VERIF).toMatch(/process\.kill\(-suite\.pid/);
     });
 
