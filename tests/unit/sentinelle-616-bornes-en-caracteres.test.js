@@ -11,7 +11,10 @@ import { fileURLToPath } from 'node:url';
 // cassé. La bonne forme : découper le corps (`tranche()`), retirer les commentaires, comparer des
 // positions. CLIQUET : le compte du jour par fichier de banc qui lit la source (85 lignes dans
 // 44 fichiers ; 31 fichiers le 30 août) ne peut que descendre, et aucun fichier neuf n'en porte.
-// Les reborner un à un reste à faire (fiche #616).
+// Lot 23 (12 oct. 2026) : 43 lignes de 21 bancs rebornées par `suitDansLaFonction` (tranche.js :
+// l'ordre des marqueurs dans la fonction qui les contient, commentaires ôtés). Restent, au
+// compte figé : les bornes sur du HTML ou du YAML, les expressions à plusieurs lignes, les
+// `.not.toMatch` et les captures — à reborner un à un.
 
 const ici = path.dirname(fileURLToPath(import.meta.url));
 const MOI = path.basename(fileURLToPath(import.meta.url));
@@ -23,7 +26,10 @@ function mesurer() {
     for (const f of readdirSync(ici).filter((x) => x.endsWith('.test.js') && x !== MOI)) {
         const s = readFileSync(path.join(ici, f), 'utf8');
         if (!s.includes('readFileSync')) continue;
-        const n = s.split('\n').filter((l) => /\{0,\d+\}/.test(l)).length;
+        // Lot 23 (12 oct. 2026) : seules les bornes « tout caractère » ([\s\S]{0,N}) jugent une
+        // distance dans une source ; `{0,3}` d'une expression sur du texte, `[^\n]{0,40}` sur une
+        // ligne, ou une borne citée en commentaire n'en sont pas.
+        const n = s.split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l) && /\[\\{1,2}s\\{1,2}S\]\{0,\d+\}/.test(l)).length;
         if (n) comptes[f] = n;
     }
     return comptes;
@@ -36,5 +42,18 @@ describe('#616 · cliquet des bornes en caractères', () => {
     });
     it('un compte qui baisse est reporté dans la liste figée', () => {
         expect(Object.keys(FIGE).filter((f) => (mesure[f] || 0) < FIGE[f]).map((f) => `${f} : ${FIGE[f]} → ${mesure[f] || 0}`)).toEqual([]);
+    });
+});
+
+describe('#616 · TÉMOIN — suitDansLaFonction juge un ordre, pas une distance', () => {
+    it('un long commentaire entre A et B ne change rien ; B dans une autre fonction, ou avant A, rend faux', async () => {
+        const { suitDansLaFonction } = await import('./_helpers/tranche.js');
+        const long = '    // ' + 'commentaire '.repeat(100) + '\n';
+        const src = 'function a() {\n    x();\n' + long + '    if (z) { w(); }\n    y();\n}\nfunction b() { v(); }';
+        expect(suitDansLaFonction(src, 'x()', 'y()')).toBe(true);
+        expect(suitDansLaFonction(src, /w\(\)/, 'y()')).toBe(true);
+        expect(suitDansLaFonction(src, 'y()', 'x()')).toBe(false);
+        expect(suitDansLaFonction(src, 'x()', 'v()')).toBe(false);
+        expect(suitDansLaFonction('function a() {\n    // y();\n    x();\n}', 'x()', 'y()')).toBe(false);
     });
 });

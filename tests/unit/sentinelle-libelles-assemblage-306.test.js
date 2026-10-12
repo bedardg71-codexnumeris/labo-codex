@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // Sentinelle — #306 Lot 1 (3 juillet 2026, vague 3) : uniformisation des
 // libellés « Créer / Enregistrer » sur la page d'assemblage du groupe-cours
@@ -99,8 +100,8 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         // ↻ Lot E2 (28 sept. 2026, D3) : Cours — plus de bouton « Enregistrer » en édition (la fiche
         // s'enregistre champ par champ) ; « Créer le cours » / « Créer le service » paraît en
         // création seulement, son mot vient du point unique (mots-nature.js, clé `creer`).
-        expect(cours).toMatch(/_titrerFormCoursV2\('nouveau'\);[\s\S]{0,200}rendreModeFicheCoursV2\(true\);/);
-        expect(cours).toMatch(/_titrerFormCoursV2\('modifier'\);[\s\S]{0,200}rendreModeFicheCoursV2\(false\);/);
+        expect(suitDansLaFonction(cours, /_titrerFormCoursV2\('nouveau'\);/, /rendreModeFicheCoursV2\(true\);/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
+        expect(suitDansLaFonction(cours, /_titrerFormCoursV2\('modifier'\);/, /rendreModeFicheCoursV2\(false\);/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect(cours).toMatch(/btnCreer\.textContent = mots\.creer;/);
         expect(cours).not.toMatch(/titre\.textContent = '(Nouveau|Modifier le|Dupliquer le) cours'/);
         // Horaire (ENTITÉ) : « Nouvel horaire » → « Créer » (était « Ajouter »).
@@ -108,12 +109,12 @@ describe('sentinelle · libellés Créer/Enregistrer de l\'assemblage (#306 Lot 
         // à dessein — c'est un ajout à une collection, comme le Groupe d'étudiants
         // (décision du 29 mai : modèle « ajout immédiat » conservé).
         // ↻ Lot E2 (D3) : Horaire — « Créer l'horaire » en création seulement, plus de bouton en édition.
-        expect(horaires).toMatch(/titre\.textContent = 'Nouvel horaire';[\s\S]{0,120}rendreModeFicheHoraireV2\(true\);/);
-        expect(horaires).toMatch(/titre\.textContent = 'Modifier l\\'horaire';[\s\S]{0,120}rendreModeFicheHoraireV2\(false\);/);
+        expect(suitDansLaFonction(horaires, /titre\.textContent = 'Nouvel horaire';/, /rendreModeFicheHoraireV2\(true\);/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
+        expect(suitDansLaFonction(horaires, /titre\.textContent = 'Modifier l\\'horaire';/, /rendreModeFicheHoraireV2\(false\);/), "titre\\.textContent = 'Modifier l\\\\'horaire';[\\s\\S]{0,120}ren").toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect(horaires).not.toContain('v2-btnTexteHoraire');   // le sous-formulaire de séance garde le sien
         // ↻ Lot E2 (D3) : Groupe-cours — « Créer le groupe-cours » en création seulement.
-        expect(gc).toMatch(/titre\.textContent = 'Nouveau groupe-cours';[\s\S]{0,120}rendreModeFicheGroupeCoursV2\(true\);/);
-        expect(gc).toMatch(/titre\.textContent = 'Modifier le groupe-cours';[\s\S]{0,120}rendreModeFicheGroupeCoursV2\(false\);/);
+        expect(suitDansLaFonction(gc, /titre\.textContent = 'Nouveau groupe-cours';/, /rendreModeFicheGroupeCoursV2\(true\);/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
+        expect(suitDansLaFonction(gc, /titre\.textContent = 'Modifier le groupe-cours';/, /rendreModeFicheGroupeCoursV2\(false\);/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect(gc).not.toContain('v2-btnTexteGroupeCours');
     });
 

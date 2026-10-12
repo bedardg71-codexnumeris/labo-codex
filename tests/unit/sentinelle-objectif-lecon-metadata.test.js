@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // F1 (exercice d'alignement 601-101, 6 août 2026) — L'objectif de leçon était
 // introuvable : il vivait dans `planification_seances` (clé NUE partagée entre
@@ -451,7 +452,7 @@ describe('F1 · invariants de rendu et de routage', () => {
         // Reconstruire à chaque caractère ferait perdre le focus : l'écriture
         // passe par appliquerObjectifs (mutation seule), pas par la porte
         // publique qui re-rend.
-        expect(source).toMatch(/ligne\.addEventListener\('input'[\s\S]{0,120}appliquerObjectifs/);
+        expect(suitDansLaFonction(source, /ligne\.addEventListener\('input'/, /appliquerObjectifs/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('l’en-tête porte le TYPE, et le titre est décalé SOUS les objectifs', () => {
@@ -472,7 +473,7 @@ describe('F1 · invariants de rendu et de routage', () => {
     });
 
     it('les boutons n’enclenchent pas le déplacement du bloc', () => {
-        expect(source).toMatch(/btn\.addEventListener\('pointerdown'[\s\S]{0,160}stopPropagation/);
+        expect(suitDansLaFonction(source, /btn\.addEventListener\('pointerdown'/, /stopPropagation/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('la ligne d’accueil porte AUSSI ses commandes + et −', () => {
@@ -512,12 +513,12 @@ describe('F1 · invariants de rendu et de routage', () => {
         );
         expect(source).toContain('data-accueil');
         // Le rendu doit savoir ouvrir cette ligne au bon rang.
-        expect(source).toMatch(/rangAccueil[\s\S]{0,600}data-accueil="1"/);
+        expect(suitDansLaFonction(source, /rangAccueil/, /data-accueil="1"/), "rangAccueil[\\s\\S]{0,600}data-accueil=\"1\"").toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('l’état d’accueil est nettoyé au repli et au changement de carte', () => {
         expect(source).toMatch(/objectifDeplie;\s*\n\s*_ajoutObjectif = null;/);
-        expect(source).toMatch(/function chargerCarte[\s\S]{0,160}_ajoutObjectif = null;/);
+        expect(suitDansLaFonction(source, /function chargerCarte/, /_ajoutObjectif = null;/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('la hauteur d’en-tête est MESURÉE, plus jamais figée à une constante', () => {
@@ -541,15 +542,15 @@ describe('F1 · invariants de rendu et de routage', () => {
     });
 
     it('la frappe redispose le conteneur (titre ET objectifs), throttlée en rAF', () => {
-        expect(source).toMatch(/titreEl\.addEventListener\('input', throttleRAF[\s\S]{0,400}reLayoutConteneur\(id\)/);
-        expect(source).toMatch(/ligne\.addEventListener\('input', throttleRAF[\s\S]{0,1100}reLayoutConteneur\(id\)/);
+        expect(suitDansLaFonction(source, /titreEl\.addEventListener\('input', throttleRAF/, /reLayoutConteneur\(id\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
+        expect(suitDansLaFonction(source, /ligne\.addEventListener\('input', throttleRAF/, /reLayoutConteneur\(id\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('le badge n’enclenche pas le déplacement du bloc', () => {
         // Le pointerdown du bloc démarre le drag (#148 — le canevas est passé
         // en Pointer Events, une garde mousedown ne stopperait plus rien) :
         // le badge doit intercepter le MÊME événement que l'entrée écoute.
-        expect(source).toMatch(/badgeObjectif\.addEventListener\('pointerdown'[\s\S]{0,120}stopPropagation/);
+        expect(suitDansLaFonction(source, /badgeObjectif\.addEventListener\('pointerdown'/, /stopPropagation/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 

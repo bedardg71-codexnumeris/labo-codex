@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-import { tranche } from './_helpers/tranche.js';
+import { tranche, suitDansLaFonction } from './_helpers/tranche.js';
 
 // =======================================================================
 // LA DURÉE DESCEND DANS L'EN-TÊTE DU NŒUD — 8 août 2026 (lot B)
@@ -262,7 +262,7 @@ describe('le champ dans l’en-tête · un contrôle vivant sur un bloc qui se g
             sourceCarte.indexOf("var champDuree = el.querySelector('.planif-noeud-duree')"),
             sourceCarte.indexOf('=== POIGNÉE DE REDIMENSIONNEMENT')
         );
-        expect(corps).toMatch(/\['pointerdown', 'mousedown', 'click', 'dblclick'\][\s\S]{0,200}stopPropagation/);
+        expect(suitDansLaFonction(corps, /\['pointerdown', 'mousedown', 'click', 'dblclick'\]/, /stopPropagation/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('la saisie est annulable, et se propage aux instances clonées', () => {
