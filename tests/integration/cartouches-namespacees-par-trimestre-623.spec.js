@@ -334,7 +334,7 @@ const LIRE_ANNONCE = `async (grilleId) => {
     const promesse = window.partageExport.exporterPourPartager('grille', grilleId);
     await attendre(500);
     const overlay = document.getElementById('modalPartageExport');
-    const avert = overlay ? overlay.querySelector('.texte-avertissement') : null;
+    const avert = overlay ? overlay.querySelector('.alerte-attention') : null;
     const lecture = {
         entiteResolue: !!entite,
         modaleOuverte: !!overlay,
