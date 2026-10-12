@@ -140,11 +140,8 @@ test.describe('Lot F — gestes hors témoin raccordés au codex', () => {
             await monterEvaluation(prods[0].id);
         })).toBe(0);
 
-        // Pratiques et modalités.
-        expect(await signauxPendant(page, () => {
-            const p = (db.getSync(cle('pratiquesConfigurables'), []) || [])[0];
-            definirPratiqueParDefaut(p.id);
-        })).toBeGreaterThan(0);
+        // Pratiques et modalités. (`definirPratiqueParDefaut` est partie avec l'îlot de
+        // pratiques.js, #469, 12 oct. 2026 : aucun geste ne l'atteignait.)
         expect(await signauxPendant(page, () => modalitesEvaluation.modifier((m) => { m.__banc = 1; }))).toBeGreaterThan(0);
         expect(await signauxPendant(page, () => modalitesEvaluation.modifier((m) => { m.__banc = 2; }, { discret: true }))).toBe(0);
 
