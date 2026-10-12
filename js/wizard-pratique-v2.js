@@ -3324,9 +3324,8 @@ window.conserverReglagesSansLecteur = conserverReglagesSansLecteur;
 window.calculerExempleConsequence = calculerExempleConsequence; // #319 Lot 4 a8 (testabilité)
 window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8/a9 (testabilité du rendu)
 window.genererContenuEtape = genererContenuEtape;
-// #691 — TYPE_BADGES devient LISIBLE hors de ce fichier. Le commentaire de la
-// l. 1977 le disait déjà « SSOT partagé avec l'écran Partir d'un modèle », mais
-// rien ne l'exposait : l'écran ne pouvait pas nommer la famille qu'il filtre.
+// #691 l'exposait pour le sélecteur de modèles de pratiques-bibliotheque.js, retiré avec
+// lui (#469, 12 oct. 2026, cible absente) ; la pose reste pour les bancs (#577).
 window.TYPE_BADGES = TYPE_BADGES;               // #577 (testabilité du rendu d'une étape)
 window.afficherEtapeWizardV2 = afficherEtapeWizardV2;           // #577 (spec WebKit : rendre une étape dans le vrai DOM)
 
