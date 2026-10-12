@@ -142,6 +142,9 @@ describe('#477 · C — le schéma de l\'outil de diagnostic (CT-22)', () => {
         const r = await win._diagnostiquerModeleCours();
         expect(r.orphelins, 'l\'id du groupe-cours n\'est pas un cours orphelin').toEqual([]);
         expect(r.scores.COURS_A.snapshots).toBe(1);
+        // I14 / #469 (12 oct. 2026) : le rapport est rendu, plus imprimé en console.
+        expect(r.rapport[0]).toBe('[Diagnostic modèle cours] 1 cours · 1 trimestres');
+        expect(r.rapport).toContain('601-101-MQ : 1 objet(s)');
     });
     it('C.2 un groupe-cours sous la clé nue : ses élèves sont lus sous la clé nue, pas sous « (sans trimestre)_… »', async () => {
         const win = monterCours({

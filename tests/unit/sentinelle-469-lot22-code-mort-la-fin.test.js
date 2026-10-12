@@ -90,3 +90,11 @@ describe('#469 · C — l\'ancienne génération des grilles, échelles et carto
         expect(absents(NOMS)).toEqual([]);
     });
 });
+
+describe('#469 · D — I14 : l\'outil de diagnostic rend son rapport (règle n°5)', () => {
+    it('cours.js et trimestre-v2-cours.js n\'écrivent plus en console que warn/error', () => {
+        for (const f of ['js/cours.js', 'js/trimestre-v2-cours.js']) {
+            expect(sansCommentaires(lire(f)), f).not.toMatch(/console\.(?:log|info|group|groupEnd|debug)\(/);
+        }
+    });
+});
