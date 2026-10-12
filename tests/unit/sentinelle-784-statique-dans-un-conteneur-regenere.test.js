@@ -18,8 +18,20 @@ import { conteneursRegeneres } from './_helpers/conteneurs-regeneres.js';
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const fige = JSON.parse(readFileSync(path.join(racine, 'tests', 'fixtures', 'cliquets', 'conteneurs-regeneres-784.json'), 'utf8'));
 
+// TRI DU LOT 23 (12 oct. 2026) — 9 → 2. Sept étaient des homonymes (une variable du même nom
+// réécrite par une AUTRE fonction du fichier) : le détecteur cherche maintenant dans la portée
+// de la déclaration. Les deux qui restent sont VOULUS, et voici pourquoi :
+const VOULUS = {
+    'carte-indicateurs-acpe': 'tableau-bord-apercu.js garde explicitement le titre, le panneau de suivi et la note (outerHTML) avant de réécrire ; les clics y sont délégués (closest)',
+    conteneurRencontres: 'rencontres.js recrée lui-même #listeRencontres, le seul élément à id qu\'il loge'
+};
+
 describe('#784 · cliquet des conteneurs régénérés qui logent du statique', () => {
     const mesure = conteneursRegeneres(racine);
+    it('chaque conteneur de la liste figée a sa raison écrite', () => {
+        expect(fige.filter((c) => !VOULUS[c])).toEqual([]);
+        expect(Object.keys(VOULUS).filter((c) => !fige.includes(c))).toEqual([]);
+    });
     it('aucun conteneur neuf (mets le gabarit dans le JS, ou ne réécris que ce qui change)', () => {
         expect(mesure.filter((c) => !fige.includes(c))).toEqual([]);
     });
