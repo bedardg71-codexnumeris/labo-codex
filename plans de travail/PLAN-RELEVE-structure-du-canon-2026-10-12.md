@@ -185,10 +185,15 @@ serait à refaire. D'où l'ordre :
   skills deviennent des renvois au canon (**avec l'accord de Grégoire**, puisque ça touche sa
   façon de travailler) ; sentinelles sur la doc ; test du lecteur neuf.
 
-**Proposition pour ouvrir la phase 1** (à confirmer) : Claude Code rédige 1, 2 et 3 en
-brouillon à partir des sources existantes, et Grégoire corrige. Les documents 5 (erreurs
+**Ouverture de la phase 1** (approuvée par Grégoire le 12 oct.) : Claude Code rédige 1, 2 et 3
+en brouillon à partir des sources existantes, et Grégoire corrige. Les documents 5 (erreurs
 raisonnables) et 13 (pratiques) passent par des entretiens courts, un thème à la fois, parce
 qu'une partie de leur contenu n'existe que dans la tête de Grégoire.
+
+**Avancement au 12 oct. au soir** : brouillons de 1, 2 et 3 écrits dans `docs/guide/`, avec un
+index (`docs/guide/README.md`). Emplacement et nommage fixés : `docs/guide/NN-titre.md`. Le
+document 2 pose à Grégoire une question pédagogique de fond (P6 : le socle SOLO, IDME, RàI, A-C-P
+est-il assumé ou à rendre configurable ?) et une proposition de gouvernance après l'auteur.
 
 ---
 
@@ -259,7 +264,7 @@ Règle de `CLAUDE.md` : un audit n'est terminé que lorsque chaque constat porte
 
 | Constat | Disposition |
 |---|---|
-| `scripts/hooks/pre-push` (l. 197-204) affirme que « la CI lance Vitest ET Playwright WebKit à CHAQUE push » et affiche « Push laissé passer — la CI le jugera ». Faux depuis le 10 oct. (`fd1338a1`, #1048) : un push de code observable sans verdict local n'est jugé par personne, et le message dit le contraire | **Proposé à l'inscription** : code étranger à ce lot, mais il empêche le document 7 de dire vrai. Numéro non pris ici, pour ne pas croiser le compteur unique d'une autre session |
+| `scripts/hooks/pre-push` (l. 197-204) affirme que « la CI lance Vitest ET Playwright WebKit à CHAQUE push » et affiche « Push laissé passer — la CI le jugera ». Faux depuis le 10 oct. (`fd1338a1`, #1048) : un push de code observable sans verdict local n'est jugé par personne, et le message dit le contraire | **N'entre pas au BACKLOG** (aucun symptôme vécu, règle du 24 août) ; **candidat « assainir »** au sens d'`ETAT-PROJET` §00.6. Il bloquera le document 7 (phase 2), qui devra le trancher pour dire vrai |
 | `netlify.toml` publie tout le dépôt (`publish = "."`) : plans, journaux et backlog seraient servis en ligne | **À mesurer** avec le document 15, phase 1. Inférence non vérifiée : aucune requête faite |
 | `.claude/commands/creer-nouveau-module.md` propose un gabarit contraire aux règles (`console.log`, modification de `navigation.js`, sans IIFE ni jeton `?v=`) | **Absorbé** : phase 3, avec les renvois des outils Claude au canon |
 
@@ -267,3 +272,25 @@ Règle de `CLAUDE.md` : un audit n'est terminé que lorsque chaque constat porte
 
 `PRIVACY.md` « dépôt public », l'Aide qui décrit l'indice R retiré, les contradictions d'`AUDIT.md` :
 déjà disposés dans `ETAT-PROJET` §00.6. Pas repris ici.
+
+### Trouvés pendant la rédaction de la phase 1 (12 oct., soir)
+
+Relevés par trois explorations en lecture seule (application, principes, glossaire), vérifiés
+au code sur les points cités.
+
+| Constat | Disposition |
+|---|---|
+| **L'Aide intégrée se contredit et contredit le code** : deux glossaires sur la même page (définitions de A et de C, noms IDME, grille définie par SRPNF, indice de risque, mécanisme de la démo, « retourne 0 ») ; « Mode sombre (par défaut) » ; règle de calcul du palier RàI différente du code (#744) ; guide SOM qui dit la sommative « par défaut » alors que sans pratique il n'y a pas de note (#710) ; FAQ qui renvoie à un export JSON retiré ; info-bulle d'« Exporter et archiver » qui promet un allègement retiré | **Remonte à Grégoire** : textes lus par les utilisateurs. Les écarts principaux sont nommés au document 1, §1.9, et au document 3 |
+| **Textes publics démentis** : codex data dit « anonymisé » (`PRIVACY.md`, `README.md`, `INFO-ELEVES.md`) ; « les outils d'IA ne voient que des données fictives » (`INFO-ELEVES.md`) ; « en-têtes durcis via `netlify.toml` » (`SECURITY.md`) ; « code sous CC BY-NC-SA » (`PRIVACY.md`, `INFO-ELEVES.md`) ; registre `INCIDENTS.md` vide alors que sa propre définition couvre les données identifiantes trouvées le 22 sept. | **Remonte à Grégoire** : engagement public (catégorie 4). Tableau au document 2, §2.6 |
+| `LICENSE.md` exige une autorisation écrite pour tout usage commercial, ce qui semble contredire l'AGPL | **Question juridique**, ajoutée au document 2, §2.4 et au §8 de ce plan |
+| Le socle présenté comme commun (SOLO, IDME, RàI, A-C-P, fenêtre de trois productions, pratique par défaut `standards`) est un choix de l'auteur | **Remonte à Grégoire** : pédagogie (catégorie 1). Question posée au document 2, P6 |
+| La privatisation du dépôt (23 juin) n'a aucun motif écrit | **Remonte à Grégoire**, pour l'ADR correspondant (document 6) |
+| `docs/architecture/CONVENTIONS-NOMMAGE.md` §5 traduit faussement le domaine (« PAN » = « Plan d'Aide à l'Apprentissage Numérique », SPE « spécifique », DEN « dénombrement », niveau « R pour Réussite ») | **Absorbé** : le glossaire (document 3) fait foi ; retrait ou renvoi en phase 3 |
+| Skills périmés : fichiers inexistants, formule d'indice obsolète et affirmation empirique que `ecosysteme-classe` interdit (`labo-codex`) ; indice E encore cité (`depistage-rai`, `securite-donnees`, `alignement`) ; « Réserve » au lieu d'« Archives » ; cartouches dites communes (`integrite-globaux`) ; description du skill `alignement` | **Absorbé** : phase 3, quand les skills deviennent des renvois au canon |
+| ADR : renvois croisés faux (002 → 011, 005 et 006 → 001, 009 → un ADR inexistant) ; ADR-011 non réaligné sur « Archives » ; ADR-010 non révisé depuis « décide puis dis-le » ; statuts de l'index différents des fichiers | **Absorbé** : document 6 |
+| `noms_stables.json` : numéros de ligne périmés ; la commande `.claude/commands/verifier-noms-stables.md` vérifie des noms absents du registre | **Absorbé** : document 8 (phase 2) et phase 3 |
+| `docs/DATA-OWNERSHIP.md` : clés hors registre (`jetonsEtudiants`, `seancesCompletes_gc_*`, `bibliothequeTampons`) ; clés dites par trimestre mais communes de fait (`infoCours`, `jugementsDenotation`) | **Absorbé** : registre régénéré, document 8 (phase 2). Pièges nommés au document 3, §H |
+| `docs/utilisateur/README_DONNEES_DEMO.md` et `PACK_DEMARRAGE_README.md` décrivent une démo et un fichier qui n'existent plus ; `POUR-LE-PROJET-CLAUDE.md` définit faussement la cartouche | **Absorbé** : phase 3 (retrait ou correction) |
+| Préférence « Ouvrir directement sur le tableau de bord » : la valeur `modeExpert` est écrite mais lue nulle part (case sans effet) | **N'entre pas au BACKLOG** (aucun symptôme vécu) ; **candidat « assainir »** |
+| `copierCriteresSRPNF` sans appelant ; `js/pratiques/pratiques-predefines.js` déclaré mort mais exporté | **Candidat « simplifier »** (code mort) |
+| Commentaire de `js/evaluation-jetons.js` : « da - Code permanent » (faux) | **Refusé** : sans conséquence observable ; la bonne définition est au document 3 |
