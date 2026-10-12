@@ -230,28 +230,34 @@ async function migrerCartouchesVersBibliotheque() {
 
     for (const grille of grilles) {
         const cleCartouches = cle(`cartouches_${grille.id}`);
-        let cartouches = await db.get(cleCartouches) || [];
-        // #1040 (11 oct. 2026) — n'écrire que si la migration a changé quelque chose :
-        // avant, chaque ouverture réécrivait toutes les cartouches à l'identique.
-        let aChange = false;
+        // #522 lot 20 (12 oct. 2026) — dans la file de la clé : la migration court à
+        // chaque entrée dans la section (navigation.js), donc à côté des gestes qui
+        // écrivent les cartouches, eux-mêmes déjà dans la file.
+        await db.modifier(cleCartouches, (lues) => {
+            let cartouches = lues || [];
+            // #1040 (11 oct. 2026) — n'écrire que si la migration a changé quelque chose :
+            // avant, chaque ouverture réécrivait toutes les cartouches à l'identique.
+            let aChange = false;
 
-        // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
-        if (cartouches && !Array.isArray(cartouches)) {
-            cartouches = [cartouches];
-            aChange = true;
-        }
-
-        cartouches.forEach(cartouche => {
-            if (cartouche.dansBibliotheque === undefined) {
-                cartouche.dansBibliotheque = true;
-                nbMigrees++;
+            // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+            if (cartouches && !Array.isArray(cartouches)) {
+                cartouches = [cartouches];
                 aChange = true;
             }
-        });
 
-        if (aChange && cartouches.length > 0) {
-            await db.set(cleCartouches, cartouches);
-        }
+            cartouches.forEach(cartouche => {
+                if (cartouche.dansBibliotheque === undefined) {
+                    cartouche.dansBibliotheque = true;
+                    nbMigrees++;
+                    aChange = true;
+                }
+            });
+
+            if (aChange && cartouches.length > 0) {
+                return cartouches;
+            }
+            return undefined;
+        }, []);
     }
 
     if (nbMigrees > 0) {
