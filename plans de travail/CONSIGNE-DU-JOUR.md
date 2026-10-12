@@ -220,3 +220,20 @@ Titre : « Rien d'inventé, rien de perdu »
 ## Ajout de Cowork (19 h 09) – avant le verdict
 
 Release 1.199.0 relue (`05d70e6c`, `039b523d`) : les mots de 18 h 02 et l'entrée des Nouvelles sont posés tels que décidés. **Avant de lancer le verdict, commite `RELAIS.md` et ce fichier** (« docs : relais et consigne du 11 oct., Cowork ») pour qu'ils partent avec le push. Puis, au signal de Grégoire : verdict complet, push si vert.
+
+## Ajout de Cowork (20 h 49) – diagnostic du verdict rouge : trois specs à aligner, pas le code
+
+Mesuré par Cowork dans les specs et le code ; **les trois échecs sont des specs restées sur l'ancien comportement**, voulu changé par des lots relus.
+
+1. **`ecraser-homonyme-employe-967` (échelle) et `lot-e1-conception-creer-ou-modifier` (trouvaille 1 (a))** : les deux créent l'« homonyme libre » en ne donnant qu'un nom, puis « Créer ». `creerNouvelleEchelle` propose quatre niveaux aux codes et noms **vides** (`echelles.js` ≈ 1790) ; depuis #574 (lot 9, relu et accepté), `sauvegarderEchelleComplete` refuse un niveau incomplet (« Niveau 1 — Le code du niveau est obligatoire. », par `alert`, que Playwright ferme seul). Rien n'est créé : « 0 au lieu de 1 ». Avant le lot 9, ces specs créaient des niveaux au code vide, la collision de #524. **Remède : dans les deux specs, remplir code et nom des quatre niveaux proposés avant « Créer »** (un petit utilitaire partagé, noms fictifs). Ne touche pas `echelles.js`. Vérifie que la spec 967 n'attrape pas l'`alert` du refus dans sa liste `alertes` (« aucun refus ») une fois les niveaux remplis.
+2. **`cartouches-namespacees-par-trimestre-623`** : `LIRE_ANNONCE` (≈ 337) cherche `.texte-avertissement` dans `#modalPartageExport`. #951 (lot 17, `6a956db5`) a remplacé cette classe par `alerte alerte-attention`. **Remède : la spec lit `.alerte-attention`.** Cherche d'abord (`grep -rn "texte-avertissement" tests js`) tout autre lecteur de l'ancienne classe et aligne-le.
+
+**Ensuite** : les trois specs lancées seules, 3 sur 3 chacune ; Vitest complet ; un commit (« test : trois specs alignées sur #574 et #951 ») ; puis **le verdict complet à nouveau, et le push s'il est vert**. Le signal de Grégoire de ce soir vaut toujours ; s'il est trop tard pour un verdict d'une heure, dis-le-lui et attends son signal suivant.
+
+## Ajout de Cowork (12 oct., 4 h 18) – 1.199.0 en ligne : les écritures de clôture
+
+**Constaté chez Netlify** : déploiement `6acc41e0`, `commit_ref` `437d48ec`, `state: ready`, publié le 11 oct. à 22 h 11 (Toronto). La fusion de `f6acfef7` est propre : entre `2104120e` (le commit jugé) et `437d48ec`, seuls `ETAT-PROJET.md` et `RELAIS.md` changent. Ta marche à suivre au push refusé (fusion plutôt que rebase, pour garder les SHA jugés) est la bonne.
+
+**BACKLOG.md, écrit par Cowork, non commité** : 41 fiches cochées (37 livrées en 1.199.0, 4 closes sur la mesure : #685, #791, #955, #979) ; 22 fiches restées ouvertes reçoivent une ligne datée, « en partie livré » ou « à Grégoire », dont le texte de #580 que ta demande des corrections réservait à Cowork. Copie d'avant, hors du dépôt : `/tmp/BACKLOG.avant-1199.md` du shell de Cowork.
+
+**À faire en ouvrant ta prochaine session, avant tout lot** : relis le diff de `BACKLOG.md` (63 lignes, une par fiche), puis un seul commit de documentation avec `BACKLOG.md` et ce fichier (« docs(1.199.0) : en ligne à 22 h 11 ; lots 8 à 19 cochés au BACKLOG »). Mets à jour dans le même commit l'en-tête de `RELAIS.md` (1.199.0 EN LIGNE, `main` à jour), `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, comme pour 1.198.0 (`304c3b58`). Rien d'autre ne dépend de ce commit.

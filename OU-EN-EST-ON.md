@@ -15,6 +15,23 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 11 OCTOBRE 2026 À 22 h 11 : 1.199.0 (mesurée chez Netlify sur `437d48ec` ; verdict complet vert) — RIEN D'INVENTÉ, RIEN DE PERDU**
+
+**Ce que tu verras** (les mots de tes Nouvelles) :
+- « Recalculer les captures » ne fait plus perdre les mesures avant et après des interventions : le bouton peut de nouveau servir. Dans le Cadre, les noms des groupes-cours et le compteur « X/5 configurés » sont à jour, et « Clore » n'est plus proposé sur le trimestre en cours (#1049, #472, #475, #1018).
+- Ajouter un niveau à une échelle ne pose plus de valeurs à ta place : le niveau attend que tu aies rempli son code, son nom, ses bornes et sa valeur (#574).
+- Dans la fiche d'un élève (Cadre › Trimestre), la mesure d'aide se coche maintenant à côté de SA (#792).
+- Sur les courbes d'intervention du tableau de bord, une courbe pointillée montre P sans l'apport des reprises (#241).
+- Après un import, la carte importée est mise en évidence, et une copie faite par « Dupliquer » ne se confond plus avec son original (#793).
+- Une grille qu'emploient des évaluations ne peut plus être supprimée depuis la Conception.
+- Supprimer un trimestre se fait dans les fenêtres de l'application, et une grille dont les pondérations ne font pas 100 % te le signale (#1037, #483).
+
+**Vérifié comment** : chaque lot relu par Cowork en relecture adverse ; mots d'écran et Nouvelles tranchés par toi le 11 oct. ; Vitest complet et suite Playwright complète vertes sur le code poussé (un premier passage rouge venait de trois tests restés sur l'ancien comportement, alignés sans toucher à l'application).
+
+**Tes données** : rien n'est réécrit ; la série s'est faite sans aucune écriture dans des données déjà enregistrées chez toi. Si l'ancien « Recalculer » a déjà effacé des captures, elles ne reviennent pas.
+
+**Ce qui te revient** : une dizaine de décisions, marquées « À Grégoire » au BACKLOG le 11 oct. (entre autres : l'élève déjà inscrit à un autre cours dans un service, la lecture « théorie + labo » du devis, les repères d'une échelle embarquée, le nettoyage des fichiers d'avant le 8 août).
+
 ✅ **EN LIGNE LE 11 OCTOBRE 2026 À 11 h 26 : 1.198.0 (mesurée chez Netlify sur `21228642` ; verdict complet vert) — MOINS DE MÉMOIRE, DES COMPTES JUSTES**
 
 **Ce que tu verras** :

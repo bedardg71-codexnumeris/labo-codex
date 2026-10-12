@@ -1,5 +1,11 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 12 octobre 2026, 7 h 20 (Toronto) : `1.199.0` EN LIGNE** (build `1011-1808`) — Netlify
+> `6acc41e0`, `commit_ref` `437d48ec`, `state: ready`, publié à 02:11:55 Z (11 oct., 22 h 11). Verdict Playwright complet vert sur
+> `2104120e` (code 0, 0 échec connu, aucun instable, 0 veille, sur secteur) ; `437d48ec` n'y ajoute qu'une fusion documentaire.
+> **Lots 8 à 19 de la file LIVRÉS** (« Rien d'inventé, rien de perdu ») ; 41 fiches cochées au BACKLOG. `lot8-cadre` est absorbée.
+> **MANDAT COURANT** : la prochaine consigne de Cowork, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 11 octobre 2026, 11 h 26 (Toronto) : `1.198.0` EN LIGNE** (build `1011-1014`) — Netlify
 > `6acbaa82`, `commit_ref` `21228642`, `state: ready`, publié à 15:26:05 Z. Verdict Playwright complet vert sur `21228642` (code 0,
 > 0 échec connu, aucun instable, 0 veille, sur secteur). **Lots 5, 6, 7 de la file LIVRÉS** (« Moins de mémoire, des comptes justes »).
