@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,38 @@ import { classesSansRegle } from './_helpers/classes-sans-regle.js';
 const ici = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(ici, '..', '..');
 const fige = JSON.parse(readFileSync(path.join(racine, 'tests', 'fixtures', 'cliquets', 'classes-sans-regle-679.json'), 'utf8'));
+
+// TRI DU LOT 23 (12 oct. 2026) — 305 couples, 248 classes. Deux familles :
+//   CROCHETS (voulus) : la classe est LUE par le JS (sélecteur '.x', classList.contains/toggle,
+//     matches, getElementsByClassName) ; elle sert au code, pas au style. Reconnus ci-dessous,
+//     automatiquement : c'est leur raison écrite.
+//   MUETTES : ni règle ni lecteur ; posées pour rien, ou un style attendu qui manque. Deux fautes
+//     nettes corrigées ce jour-là (`btn-primaire` → `btn-principal`, le nom de la palette ;
+//     `u-flex-between-mb15/20`, dont la règle existait sous un nom `d-` que rien ne posait).
+//     Les autres sont inscrites à #679 avec cette mesure : leur compte ne fait que descendre.
+const MUETTES_MAX = 103;
+const sourcesJs = (() => {
+    const lister = (d) => readdirSync(path.join(racine, d), { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? (e.name === '_archives' ? [] : lister(path.join(d, e.name))) : (e.name.endsWith('.js') ? [path.join(d, e.name)] : []));
+    return lister('js').map((f) => readFileSync(path.join(racine, f), 'utf8')).join('\n');
+})();
+const echapper = (c) => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const estUnCrochet = (classe) => new RegExp('[\'"`][^\'"`]*\\.' + echapper(classe) + '(?![\\w-])').test(sourcesJs)
+    || new RegExp('(?:contains|getElementsByClassName|toggle|matches)\\(\\s*[\'"`]\\.?' + echapper(classe) + '[\'"`]').test(sourcesJs);
+
+describe('#679 · le tri : crochets voulus, muettes comptées', () => {
+    const classes = [...new Set(fige.map((c) => c.split(':').pop()))];
+    const muettes = classes.filter((c) => !estUnCrochet(c));
+    it(`les classes muettes (ni règle ni lecteur) ne dépassent pas ${MUETTES_MAX}`, () => {
+        expect(muettes.length).toBeLessThanOrEqual(MUETTES_MAX);
+    });
+    it('TÉMOIN · un crochet connu est reconnu, une faute corrigée ne revient pas', () => {
+        expect(classes.length).toBeGreaterThan(100);
+        expect(muettes.length).toBeLessThan(classes.length);
+        expect(fige.some((c) => c.endsWith(':btn-primaire'))).toBe(false);
+        expect(fige.some((c) => c.endsWith(':u-flex-between-mb15'))).toBe(false);
+    });
+});
 
 describe('#679 · cliquet des classes sans règle', () => {
     const mesure = classesSansRegle(racine);
