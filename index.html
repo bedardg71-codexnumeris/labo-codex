@@ -3352,13 +3352,14 @@
         }
 
         /* Flexbox between avec marges */
-        .d-flex-between-mb15 {
+        /* #679 (12 oct. 2026) : nommées u- comme le JS qui les pose ; d- n'était posé nulle part. */
+        .u-flex-between-mb15 {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        .d-flex-between-mb20 {
+        .u-flex-between-mb20 {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -14532,7 +14533,7 @@
     <script src="js/migrations.js?v=20260927d"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=20261007a"></script> <!-- Refonte nav SP5 : data-param calendrier -->
+    <script src="js/accueil.js?v=20261011a"></script> <!-- Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=20261008a"></script> <!-- #1039 : bandeau de l'Animation · Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
@@ -14547,7 +14548,7 @@
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          visite guidée et glossaire. API publique : window.accompagnement. -->
     <link rel="stylesheet" href="css/accompagnement.css?v=2026042002">
-    <script src="js/accompagnement.js?v=20260910b"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
+    <script src="js/accompagnement.js?v=20261011a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=20261009c"></script> <!-- Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->

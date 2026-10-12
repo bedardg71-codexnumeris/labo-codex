@@ -776,7 +776,7 @@ function rendreSectionAide(section) {
             const classeA = section.niveau === 'important' ? 'aide-alerte-important' : 'aide-alerte-attention';
             return `<div class="aide-alerte ${classeA}"><span class="aide-icone">${iconeA}</span><div class="aide-alerte-contenu">${section.contenu}</div></div>`;
         case 'action':
-            return `<div class="aide-action"><button class="btn btn-primaire" data-action="${section.action}"${section.param ? ` data-param="${section.param}"` : ''}>${section.libelle}</button></div>`;
+            return `<div class="aide-action"><button class="btn btn-principal" data-action="${section.action}"${section.param ? ` data-param="${section.param}"` : ''}>${section.libelle}</button></div>`;
         default:
             return `<p>${section.contenu || ''}</p>`;
     }
@@ -1226,7 +1226,7 @@ function afficherPanneauEtape(etape) {
     function ajouterBouton(label, type, handler) {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'tour-btn btn ' + (type === 'primaire' ? 'btn-primaire' : 'btn-secondaire');
+        btn.className = 'tour-btn btn ' + (type === 'primaire' ? 'btn-principal' : 'btn-secondaire');
         btn.textContent = label;
         btn.addEventListener('click', handler);
         actions.appendChild(btn);
