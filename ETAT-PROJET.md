@@ -12,10 +12,11 @@
 > bascule de session importante. Le §11 (journal) trace les révisions. Chaque ligne d'état porte
 > idéalement sa source et sa date de vérification, pour éviter de propager un état périmé.
 >
-> **Dernière mise à jour** : 12 octobre 2026 (Claude Code), bêta publique **1.198.0** / build `1011-1014`.
+> **Dernière mise à jour** : 12 octobre 2026 (Claude Code), bêta publique **1.199.0** en ligne. Le §00 a
+> été mesuré le 11 au soir sur **1.198.0** / build `1011-1014` ; le chantier « contenir » y est renvoyé à son plan.
 > **Nouveau §00 : la grille des 25 sous-audits de mai remesurée au code, barème strict**, et le
 > **tableau de bord de la complexité** qui sert de ligne de départ à l'objectif fixé par Grégoire
-> le 12 octobre (contrôler la complexité). Le §00 est la seule section revue ce jour-là : tout le
+> le 11 octobre (contrôler la complexité). Le §00 est la seule section revue ce jour-là : tout le
 > reste garde sa date et sa réserve ci-dessous.
 >
 > *Mise à jour précédente* : 9 août 2026, PM (Claude Code) — bêta publique **1.65.2** / build `0809-1101`.
@@ -44,9 +45,9 @@
 
 ---
 
-## 00. Grille d'audit remesurée (12 octobre 2026)
+## 00. Grille d'audit remesurée (11 octobre 2026)
 
-> **Demande de Grégoire (12 oct.)** : pilotage interne, **barème strict**. Son objectif à ce
+> **Demande de Grégoire (11 oct.)** : pilotage interne, **barème strict**. Son objectif à ce
 > moment-ci du développement : **contrôler la complexité de l'application** et laisser le code
 > dans le meilleur état possible. Simplifier, assainir, rendre plus robuste : ce sont les chantiers
 > candidats des prochains mois (§00.6), **non lancés**. La question d'une relève humaine
@@ -54,7 +55,9 @@
 > plus.
 >
 > **Code mesuré** : `304c3b58` (= `origin/main`, 1.198.0). Le lot 8 (branche `lot8-cadre`, absente
-> d'`origin` le 12 oct.) **n'est pas vu**.
+> d'`origin` le 11 oct.) **n'est pas vu**.
+> **1.199.0 (lots 8 à 19) est sortie après cette mesure** (11 oct., 22 h 11) : elle n'est pas remesurée.
+> *(Corrigé le 12 oct. : ce §00 était daté du 12, en heure UTC ; à Toronto, la mesure date du 11 au soir.)*
 >
 > **Méthode** : les 25 sous-audits d'`AUDIT.md`, avec les outils et réglages de mai (§00.5),
 > **étalonnés** : rejoués sur le commit audité en mai (`9cd3e0e`), ils redonnent exactement les
@@ -72,7 +75,7 @@
 |---|:-:|:-:|:-:|:-:|
 | 14 mai 2026 (audit) | 5 | 10 | 8 | 2 |
 | 25 mai 2026 (tableau détaillé d'`AUDIT.md`) | 13 | 9 | 1 | 2 |
-| **12 oct. 2026 (barème strict)** | **5** | **12** | **6** | **2** |
+| **11 oct. 2026 (barème strict)** | **5** | **12** | **6** | **2** |
 
 ⚠ Le résumé d'`AUDIT.md` annonce « ~14 / 6 / 3 / 2 » pour le 25 mai ; ses propres lignes donnent
 13 / 9 / 1 / 2. C'est le tableau détaillé qui sert de référence ici.
@@ -99,7 +102,7 @@ Access du 1er sept.
 
 M = mesuré (commande au §00.5), I = inféré.
 
-| SA | 14 mai | 25 mai | 12 oct. | Constat |
+| SA | 14 mai | 25 mai | 11 oct. | Constat |
 |---|:-:|:-:|:-:|---|
 | 1.1 Traçabilité | 🟡 | 🟢 | 🟡 | Une seule définition par fonction de la chaîne (`calculerIPB`, `diagnostiquerSuiviApprentissage`, `determinerNiveauRaiPedagogique`, `calculerAssiduite`) (M). Mais `docs/modules/depistage-et-suivi.md` renvoie à `profil-etudiant.js`, disparu, et les seuils du pattern individuel ont une deuxième source dans `pratique-pan-standards.js:983` (M) |
 | 1.2 Calculs | 🟢 | 🟢 | 🟢 | 14 fichiers Vitest des bancs de septembre, 307/307 verts (M). Trou : 5 des 8 libellés du diagnostic n'ont pas d'essai de comportement (Difficulté résolue, Progression, Plateau, Difficulté constante, Progression lente) (M). Les 156 cas de mai (snippets console) ne sont pas dans le dépôt et ne se rejouent pas |
@@ -108,7 +111,7 @@ M = mesuré (commande au §00.5), I = inféré.
 | 2.2 Complexité | 🔴 | 🟡 | 🔴 | cyc > 15 : 387 → 465 ; cyc > 30 : 97 → 91 (80 le 25 mai) ; max 118 → 130 (M) |
 | 2.3 Duplication | 🟡 | 🟡 | 🟡 | 1,44 % → 1,12 % ; à couverture totale 2,57 % → 1,74 % (M) |
 | 2.4 Code mort | 🟢 | 🟢 | 🟢 | 0 fichier orphelin ; 3 non cités dans `index.html`, tous chargés à la demande ou documentaires (M) |
-| 2.5 Lint / SAST | 🔴 | 🟢 | 🔴 | Le vert reposait sur CodeQL, retiré le 28 juin. Aucune config ESLint projet, aucun lint en CI. RegExp non littérales 14 → 29 ; `no-eval` 1 → 0 (M) |
+| 2.5 Lint / SAST | 🔴 | 🟢 | 🔴 | Le vert reposait sur CodeQL, retiré le 28 juin. Aucune config ESLint projet, aucun ESLint en CI ; le seul garde statique est le cliquet `innerHTML` de `lint-securite.test.js` (Vitest, à chaque push). RegExp non littérales 14 → 29 ; `no-eval` 1 → 0 (M) |
 | 3.1 SSOT | 🔴 | 🟡 | 🟡 | `modalitesEvaluation` : 1 écrivain (M). 14 clés sur 32 encore à ≥ 2 écrivains ; accès `localStorage` hors `db.js` : 23 fichiers / 95 lignes → 17 / 69 (M) |
 | 3.2 Modularité | 🔴 | 🟡 | 🔴 | Modules > 20 symboles publics 26 → 31 ; maximum `grilles.js` (140) ; symboles inutilisés 677 → 810 ; `<script src>` dans `index.html` : 126 → 213 (M) |
 | 3.3 Isolation | 🔴 | 🔴 | 🔴 | Cycles 6 → 37 ; `reserve.js` 2 034 lignes, **pas** découpé en 3 couches ; fan-in max 59 (`modes.js`), fan-out max 24 (`codex.js`) (M) |
@@ -129,10 +132,10 @@ M = mesuré (commande au §00.5), I = inféré.
 
 ### 00.3 Tableau de bord de la complexité (ligne de départ)
 
-Ce sont les chiffres que l'objectif du 12 octobre doit faire baisser, ou au moins empêcher de
+Ce sont les chiffres que l'objectif du 11 octobre doit faire baisser, ou au moins empêcher de
 monter. Toute session qui les remesure écrit la date, le commit et la commande (§00.5).
 
-| Indicateur | 14 mai | 12 oct. |
+| Indicateur | 14 mai | 11 oct. |
 |---|--:|--:|
 | Lignes de code JS (`cloc`, colonne *code*, `js/`) | 136 432 | 151 094 |
 | Fichiers JS | 130 | 209 |
@@ -173,7 +176,7 @@ ne change pas ; les chiffres bruts restent ceux du tableau pour rester comparabl
 
 ### 00.5 Rejouer la mesure
 
-Les outils s'installent hors du dépôt (`npx` dans un répertoire de travail). Versions du 12 oct. :
+Les outils s'installent hors du dépôt (`npx` dans un répertoire de travail). Versions du 11 oct. :
 cloc 1.96, ESLint 8.57 + `eslint-plugin-security` 3.0.1, jscpd 4.1.1, axe-core 4.11.4,
 Lighthouse 13.3.0.
 
@@ -201,7 +204,7 @@ constats de dette structurelle n'ont aucun symptôme vécu : ils **n'entrent pas
 | `PRIVACY.md` « dépôt public », `INFO-ELEVES.md`, `SECURITY.md`, liens GitHub du README (4.1, 4.6, 5.4) | **Remonte à Grégoire** : textes publics, catégorie 4 de `CLAUDE.md`. Non inscrit en attendant sa décision |
 | L'Aide décrit l'indice R retiré (1.3) | **Remonte à Grégoire** : prose lue par les utilisateurs |
 | Contradictions d'`AUDIT.md` (résumé ≠ tableau ; « dépôt volontairement public ») | **Remonte à Grégoire** : document public, à revoir au plus tard à l'audit de mai 2027 |
-| `libs/VERSIONS.md` sans libheif ; titre de `LICENSE.md` ; renvois périmés de `depistage-et-suivi.md` ; table « Violations connues » de `docs/DATA-OWNERSHIP.md` qui donne encore #328 ouvert | **Session documentation** (en cours en parallèle, 12 oct.) |
+| `libs/VERSIONS.md` sans libheif ; titre de `LICENSE.md` ; renvois périmés de `depistage-et-suivi.md` ; table « Violations connues » de `docs/DATA-OWNERSHIP.md` qui donne encore #328 ouvert | **Session documentation** (en cours en parallèle, 11 oct.) |
 | Playwright CI à la demande | **Refusé** : décision du 10 oct. (`fd1338a1`, #1048) ; le verdict local fait foi (`PROTOCOLE.md`, règle 7) |
 | 6.2 VoiceOver, 6.3 protocole iPad (section D) | **Refusé** : reportés par décision de Grégoire le 23 mai ; restent « non mesurés » |
 | Points chauds du §00.4 ; complexité (2.1, 2.2) ; cycles et `reserve.js` (3.3) ; doublon `evaluation-sauvegarde` ↔ `evaluation` ; seuils du pattern en double (1.1) | **Candidat « simplifier »** |
@@ -209,7 +212,8 @@ constats de dette structurelle n'ont aucun symptôme vécu : ils **n'entrent pas
 | Défaut `DEFINE_RE` du script de mai ; mesure non versionnée dans le dépôt | **Candidat « contenir »** (outil de mesure) |
 
 **Les trois familles de candidats** (non lancées, ni découpées, ni chiffrées) :
-- **Contenir** : empêcher la complexité de remonter pendant qu'on la réduit.
+- **Contenir** : empêcher la complexité de remonter pendant qu'on la réduit. Développé le 12 oct. :
+  `plans de travail/PLAN-contenir-la-complexite.md` (proposé, non lancé).
 - **Simplifier** : réduire les points chauds du §00.4.
 - **Assainir / robustesse** : rendre au filet de sécurité ce que la privatisation lui a retiré, et
   fermer les petits écarts.
@@ -308,7 +312,7 @@ annuel (`AUDIT.md`, ADR-012). Trois objectifs orientent toute décision de déve
 
 | Axe | État global | Détail |
 |---|---|---|
-| **Grille d'audit remesurée au code (12 oct., barème strict)** | **5 🟢 / 12 🟡 / 6 🔴 / 2 non mesurés** (25 mai : 13 / 9 / 1 / 2) ; ligne de départ de l'objectif « contrôler la complexité » | §00 |
+| **Grille d'audit remesurée au code (11 oct., barème strict)** | **5 🟢 / 12 🟡 / 6 🔴 / 2 non mesurés** (25 mai : 13 / 9 / 1 / 2) ; ligne de départ de l'objectif « contrôler la complexité » | §00 |
 | Audit annuel 2026 — Phase 1 (corrections) | **Fait** | §3 |
 | Audit annuel 2026 — Phase 2 (refactoring god modules + transverse) | **Fait** | §3, §5 |
 | Lancement public (bêta 1.0.0, AQPC 3 juin) | **Fait** | §8 |
@@ -876,4 +880,5 @@ Synthèse :
 | 2026-08-09 (suite, Claude Code) | 0809-0835 | **1.61.0 → 1.63.0.** Phases B/C de la note finale : constatées LIVRÉES (verrou 11 break-tests) + rectificatif du §4ter (je les avais annoncées « à faire » en lisant les titres du plan au lieu du code). #434 Phase D (sélecteur unique). Puis **#435 sur question de Grégoire** : #434 avait rendu atteignable le mode STD « par-objectifs » que la décision #396 condamnait — même défaut de naissance (`objectifId` sans écrivain), panneau jamais affiché, 4 gabarits sans aucun objectif. **Ablation complète** (moteur 4 modes, panneau, 10 fonctions, 4 gabarits, projections), pratiques legacy normalisées en lecture seule, dépendances DEN préservées et break-testées. Leçon consignée : vérifier l'HISTORIQUE avant de rendre disponible, pas seulement le code. 1.62 consolidée dans 1.63 (jamais déployée). Vitest 1998/1998. |
 | 2026-08-09 (PM, Claude Code) | 0809-1101 | **1.65.1 → 1.65.2.** Nouveau **§4quater** : audit de `Plan Accompagnement/`, le dernier angle mort désigné par le §4ter — 14 documents traités au code. **7 terminés, 3 consommés, 2 partiels, 1 jamais amorcé.** ⚠ **Le compte de plans ouverts BAISSE** : sur les trois documents que le §4ter accusait, **deux étaient intégralement livrés** — `SPEC_mini-guide_cours_balises` (popup, bulle de survol ET le renommage OQLF « heures d'enseignement ») et `PLAN_decouvrabilite_guides` (les cinq lots). *La règle « un plan ne dit pas son propre état » vaut dans les deux sens ; on ne l'applique spontanément que dans celui qui inquiète.* Reste ouvert : `pan-rrec` (4 pages déjà rédigées), le guide « Enseignement explicite », le chantier 3 de SOLO, et le SRPNF codé en dur — versés en **#439/#440/📐#441**. Le §7 du plan maître disait « signalé pour le backlog » le 23 mai : il n'y était **jamais arrivé**. **Nettoyage zéro-dette du jour même** : patron `.option-accompagnement` (~51 lignes de `styles.css`) sans porteur depuis la refonte en accordéons du 26 mai, retiré, cliquet générique posé, **4 break-tests ROUGE** — dont un qui a d'abord été VERT et a révélé une assertion en sous-chaîne dans ma propre sentinelle. Vitest 2062/2062. En-tête du document recalé (il annonçait 1.64.0 alors que `main` portait 1.65.1). |
 | 2026-08-09 (fin, Claude Code) | 0809-0906 | **1.63.1 → 1.64.0.** Correctif du badge « par objectifs » survivant à #435 (il lisait un champ que les pratiques STOCKÉES portent encore, et masquait le badge portfolio de ces mêmes pratiques). Puis **#436 Phase G2-b** : fin du miroir `configPAN` — 9 lectures d'affichage migrées (chiffre rectifié au rituel de fin — annoncé 7), les 2 écrivains de `pratiques.js` retirés (dont une migration qui tournait à chaque boot), l'îlot multi-objectifs supprimé. **Le plan de refonte de la note finale est CLOS** (A, E, F, G1, G2-a, B, C, D, G2-b). ⚠ Deux valeurs affichées GELÉES en constantes explicites, décision en attente (dénominateur de l'indice C ; quota des jetons) — les brancher sur la SSOT changerait ce que l'utilisateur voit. Deux survivants légitimes break-testés. Le miroir stocké subsiste dans les données (purge = migration destructive, à décider ; recoupe #353). Vitest 2018/2018. |
-| 2026-10-12 (Claude Code) | 1011-1014 | **1.198.0, documentaire.** Nouveau **§00** : les 25 sous-audits de mai remesurés au code (`304c3b58`), outils de mai étalonnés sur le commit audité, barème strict à la demande de Grégoire : **5 🟢 / 12 🟡 / 6 🔴 / 2 non mesurés** (25 mai : 13 / 9 / 1 / 2). La baisse mêle régressions réelles (CodeQL retiré, complexité remontée), barème réappliqué (2.1, 2.2) et croissance (+22 %). Tableau de bord de la complexité (§00.3), points chauds (§00.4), commandes pour rejouer (§00.5), dispositions de chaque constat (§00.6). Objectif fixé par Grégoire : contrôler la complexité ; candidats « contenir / simplifier / assainir » non lancés. Le lot 8 (`lot8-cadre`, absent d'`origin`) n'est pas vu. ⚠ Sections 0 à 11 **non revues**. |
+| 2026-10-11 (soir, Claude Code) | 1011-1014 | **1.198.0, documentaire.** Nouveau **§00** : les 25 sous-audits de mai remesurés au code (`304c3b58`), outils de mai étalonnés sur le commit audité, barème strict à la demande de Grégoire : **5 🟢 / 12 🟡 / 6 🔴 / 2 non mesurés** (25 mai : 13 / 9 / 1 / 2). La baisse mêle régressions réelles (CodeQL retiré, complexité remontée), barème réappliqué (2.1, 2.2) et croissance (+22 %). Tableau de bord de la complexité (§00.3), points chauds (§00.4), commandes pour rejouer (§00.5), dispositions de chaque constat (§00.6). Objectif fixé par Grégoire : contrôler la complexité ; candidats « contenir / simplifier / assainir » non lancés. Le lot 8 (`lot8-cadre`, absent d'`origin`) n'est pas vu. ⚠ Sections 0 à 11 **non revues**. |
+| 2026-10-12 (Claude Code) | 1011-1808 | **1.199.0, documentaire.** §00 : dates corrigées (le §00 portait le 12 en heure UTC ; mesure du 11 au soir, Toronto) ; note que 1.199.0 est sortie après la mesure ; ligne 2.5 précisée (le cliquet `innerHTML` de `lint-securite.test.js` est un garde statique en CI). Le chantier « contenir » est développé dans `plans de travail/PLAN-contenir-la-complexite.md` : proposé, non lancé. |
