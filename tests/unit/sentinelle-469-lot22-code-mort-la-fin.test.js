@@ -14,10 +14,15 @@ const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 const sources = () => readdirSync(path.join(RACINE, 'js')).filter((f) => f.endsWith('.js'))
     .map((f) => ['js/' + f, lire('js/' + f)]).concat([['index.html', lire('index.html')]]);
 
+// Un nom cité dans un commentaire (l'histoire d'un correctif) n'est pas un appel : hors compte.
+const sansCommentaires = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '')
+    .split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
+
 function absents(noms) {
     const trouves = [];
     for (const [f, src] of sources()) {
-        for (const nom of noms) if (new RegExp('\\b' + nom + '\\b').test(src)) trouves.push(f + ' : ' + nom);
+        const code = sansCommentaires(src);
+        for (const nom of noms) if (new RegExp('\\b' + nom + '\\b').test(code)) trouves.push(f + ' : ' + nom);
     }
     return trouves;
 }
@@ -36,5 +41,33 @@ describe('#469 · A — le trio « modèles de pratiques » et ce qu\'il entraî
     it('témoin : appliquerConfigurationPratique, vivante, est toujours là et appelée', () => {
         expect(lire('js/pratiques-bibliotheque.js')).toMatch(/async function appliquerConfigurationPratique\(/);
         expect(lire('js/pratiques-gestion.js')).toMatch(/await appliquerConfigurationPratique\(/);
+    });
+});
+
+describe('#469 · B — l\'îlot de pratiques.js', () => {
+    // Graphe d'appels interne (12 oct. 2026) : racines = noms cités hors du fichier (js/, index.html,
+    // data-action compris) ou par son code de module ; une fonction n'est morte que si aucune
+    // fonction vivante ne l'appelle. 54 fonctions, 28 mortes, retirées (1 035 lignes). Après : 26,
+    // toutes vivantes au même graphe. Le bouton qui ouvrait l'ancienne « Bibliothèque de
+    // pratiques » de ce fichier n'existe plus : la bibliothèque vivante est celle de
+    // pratiques-gestion.js.
+    const NOMS = ['definirPratiqueParDefaut', 'changerPratiqueParDefaut', 'genererSelecteurPratiqueParDefaut',
+        'togglePratique', 'activerPratique', 'editerPratiqueActive', 'activerPratiqueAffichee',
+        'exporterPratiqueVersJSON', 'importerPratiqueJSON', 'ouvrirModalBibliothequePratiques',
+        'retirerPratiqueDeBibliotheque', 'ajouterPratiqueIndividuelle', 'supprimerPratiqueHorsBibliotheque',
+        'partagerPratique', 'exporterPratiqueActive', 'afficherConfigSpecType', 'ajouterTypeTravailSpec',
+        'retirerTypeTravailSpec', 'ajouterPalierBundle', 'retirerPalierBundle', 'genererObjectifsSpec',
+        'alertFonctionnaliteAVenir', 'listerPratiquesConfigurables', 'supprimerPratiqueParNom',
+        'toggleAccordeon', 'onEchelleConformiteChange', 'populerSelecteursAvecEchelle', 'calculerSeuilMaxNiveau'];
+    it('aucun des vingt-huit noms ne revient dans js/ ni index.html', () => {
+        expect(NOMS.length).toBe(28);
+        expect(absents(NOMS)).toEqual([]);
+    });
+    it('témoin : le flux vivant reste (initialisation, chargement d\'une configuration, règles de conformité)', () => {
+        const src = lire('js/pratiques.js');
+        for (const nom of ['initialiserModulePratiques', 'chargerConfigurationPratique',
+                           'initialiserReglesConformite', 'populerSelecteursNiveaux']) {
+            expect(src, nom).toMatch(new RegExp('function ' + nom + '\\('));
+        }
     });
 });
