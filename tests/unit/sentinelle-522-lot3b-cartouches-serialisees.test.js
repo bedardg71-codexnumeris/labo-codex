@@ -302,7 +302,7 @@ describe('#522 lot 3b · C — la course ne peut pas se rouvrir en silence', () 
     // 29 sept. : « code mort »), deux imports JSON bruts de moins.
     it('C.b les quatorze écritures-modifications passent par la file', () => {
         const n = (lire('js/cartouches.js').match(/(?:db\.modifier|modifierEtAnnoncer)\(\s*(?:cle\()?\s*[`']cartouches_/g) || []).length;
-        expect(n, 'lot 3b, lot 4 et les conversions antérieures, moins la bascule retirée par #864, plus le nom (lot E1), moins les deux imports morts (#467)').toBe(14);
+        expect(n, 'lot 3b, lot 4 et les conversions antérieures, moins la bascule retirée par #864, plus le nom (lot E1), moins les deux imports morts (#467), moins importerDepuisMarkdown et importerPartiel (#469, 12 oct.)').toBe(12);
     });
 
     it('C.c la seule écriture directe restante du dépôt est NOMMÉE, et sa raison tient', () => {

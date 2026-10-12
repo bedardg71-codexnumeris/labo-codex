@@ -916,8 +916,8 @@ function changerFiltreCategorieFromEl(el) {
 // ========================================
 // EXPORT DES ÉCHELLES DE PERFORMANCE
 // ========================================
-// Les fonctions exporterEchelles() et exporterEchelleActive() sont définies dans js/echelles.js
-// Elles exportent les échelles avec métadonnées CC BY-NC-SA 4.0
+// La fonction exporterEchelles() est définie dans js/echelles.js
+// Elle exporte les échelles avec métadonnées CC BY-NC-SA 4.0
 
 // ========================================
 // EXPORT DES PRODUCTIONS

@@ -71,3 +71,22 @@ describe('#469 · B — l\'îlot de pratiques.js', () => {
         }
     });
 });
+
+describe('#469 · C — l\'ancienne génération des grilles, échelles et cartouches (la moitié sûre)', () => {
+    // Même graphe d'appels sur grilles.js, echelles.js, cartouches.js et les trois
+    // *-bibliotheque.js : 48 fonctions mortes. Retirées ici les 27 sans banc, sans nom
+    // protégé (noms_stables.json) et qui ne sont pas des outils de console. Les 21 autres sont
+    // mesurées dans la demande de relecture du lot 22.
+    const NOMS = ['genererBadgeSourceGrille', 'genererIdCourtGrille', 'exporterGrilleActive', 'ajouterGrillesABibliotheque',
+        'genererBadgeSourceEchelle', 'genererIdCourtEchelle', 'mettreAJourOptionsEchelle', 'exporterEchelleActive',
+        'ajouterEchellesABibliotheque', 'genererBadgeSourceCartouche', 'genererIdCourtCartouche',
+        'afficherImportCommentaires', 'populerDropdownGrilleCartouche', 'importerDepuisMarkdown', 'importerPartiel',
+        'ajouterCartouchesABibliotheque', 'obtenirGrillesParDiscipline', 'exporterBibliothequeGrilles',
+        'getNombreGrillesBibliotheque', 'obtenirEchellesParDiscipline', 'exporterBibliothequeEchelles',
+        'getNombreEchellesBibliotheque', 'obtenirCartouchesParDiscipline', 'obtenirDisciplinesDisponiblesCartouches',
+        'importerCartouchesDansBibliotheque', 'exporterBibliothequeCartouches', 'getNombreCartouchesBibliotheque'];
+    it('aucun des vingt-sept noms ne revient dans js/ ni index.html', () => {
+        expect(NOMS.length).toBe(27);
+        expect(absents(NOMS)).toEqual([]);
+    });
+});

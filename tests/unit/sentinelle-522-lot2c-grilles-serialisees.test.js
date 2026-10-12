@@ -317,8 +317,8 @@ const PAR_LA_FILE = {
     // parti (sans déclencheur) ; elle semait les catégories à l'ouverture
     // (`afficherConfigurationCategoriesErreurs`) et les enregistrait
     // (`sauvegarderCategoriesErreurs`), deux écritures par la file.
-    'js/grilles.js': 25,
-    'js/cartouches.js': 1,
+    'js/grilles.js': 24,   // #469 (12 oct. 2026) : ajouterGrillesABibliotheque partie
+    'js/cartouches.js': 0,   // #469 (12 oct. 2026) : son seul site partait avec une fonction sans appelant
     // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
     // code mort, zéro consommateur vivant. Son unique site écrivait bien par la
     // file ; c'est le fichier qui est parti.

@@ -67,20 +67,6 @@ let critereEnEdition = null;
    Fonctions pour identifier les grilles avec des noms similaires
    =============================== */
 
-/**
- * Générer un badge de source pour une grille
- * @param {Object} grille - La grille
- * @param {Array} grillesLocales - Grilles locales pour vérifier la source
- * @returns {string} HTML du badge
- */
-function genererBadgeSourceGrille(grille, grillesLocales) {
-    return BibliothequeUI.genererBadgeSource(grille, grillesLocales);
-}
-
-function genererIdCourtGrille(id) {
-    return BibliothequeUI.genererIdCourt(id);
-}
-
 /* ===============================
    FONCTION: CHARGER LISTE GRILLES
    Charge les grilles dans le select
@@ -1842,81 +1828,6 @@ async function exporterGrilles() {
 }
 
 /**
- * Exporte la grille actuellement en cours d'édition
- */
-async function exporterGrilleActive() {
-    if (!grilleTemplateActuelle) {
-        alert('Aucune grille sélectionnée à exporter.');
-        return;
-    }
-
-    const grilles = await db.get(cle('grillesTemplates')) || [];
-    const grille = grilles.find(g => g.id === grilleTemplateActuelle);
-
-    if (!grille) {
-        alert('Grille introuvable.');
-        return;
-    }
-
-    // NOUVEAU (Beta 91): Demander métadonnées enrichies
-    const metaEnrichies = await demanderMetadonneesEnrichies(
-        'Grille de critères',
-        grille.nom
-    );
-
-    if (!metaEnrichies) {
-        return;
-    }
-
-    // Préparer le contenu pour l'export
-    let contenuExport = { ...grille };
-
-    // Si la grille a été importée avec des métadonnées CC, ajouter l'utilisateur actuel comme contributeur
-    if (grille.metadata_cc) {
-        // Demander le nom de l'utilisateur s'il modifie le matériel
-        const nomUtilisateur = prompt(
-            'Tu exportes un matériel créé par ' + grille.metadata_cc.auteur_original + '.\n\n' +
-            'Entre ton nom pour être crédité comme contributeur :\n' +
-            '(Laisse vide si tu n\'as fait aucune modification)'
-        );
-
-        if (nomUtilisateur && nomUtilisateur.trim()) {
-            // Ajouter le contributeur
-            const contributeurs = grille.metadata_cc.contributeurs || [];
-            contributeurs.push({
-                nom: nomUtilisateur.trim(),
-                date: new Date().toISOString().split('T')[0],
-                modifications: 'Modifications et adaptations'
-            });
-
-            // Créer les métadonnées enrichies
-            contenuExport.metadata_cc = {
-                ...grille.metadata_cc,
-                contributeurs: contributeurs
-            };
-        }
-    }
-
-    // Ajouter les métadonnées CC enrichies
-    const exportAvecCC = ajouterMetadonnéesCC(contenuExport, 'grille-criteres', grille.nom, metaEnrichies);
-
-    const json = JSON.stringify(exportAvecCC, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    // 🆕 Beta 95.3 : Nommage standardisé
-    const nomFichier = typeof genererNomFichierExport === 'function'
-        ? genererNomFichierExport('grille', { nom: grille.nom, discipline: grille.discipline, inclureLicence: true })
-        : `grille-${grille.nom.replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
-    a.download = nomFichier;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    notifications.succes(`Grille "${grille.nom}" exportée avec succès`);
-}
-
-/**
  * Importe des grilles depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -2140,7 +2051,6 @@ window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
 
 // Export/Import avec licence CC
 window.exporterGrilles = exporterGrilles;
-window.exporterGrilleActive = exporterGrilleActive;
 window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
@@ -2150,7 +2060,6 @@ window.assurerGrilleDeDepart = assurerGrilleDeDepart;
 // ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
 window.afficherBibliothequeGrilles = afficherBibliothequeGrilles;
 window.retirerGrilleDeBibliotheque = retirerGrilleDeBibliotheque;
-window.ajouterGrillesABibliotheque = ajouterGrillesABibliotheque;
 window.fermerModalBibliothequeGrilles = fermerModalBibliothequeGrilles;
 window.ajouterGrilleIndividuelle = ajouterGrilleIndividuelle;
 // Brique C namespacing — pas 4 : import inter-trimestre de grilles (data-action).
@@ -3194,63 +3103,6 @@ async function dupliquerGrilleBibliotheque(id) {
             await afficherBibliothequeGrilles();
         }
     });
-}
-
-/**
- * ✅ AJOUT (8 décembre 2025) : Ajouter les grilles sélectionnées à la bibliothèque
- */
-async function ajouterGrillesABibliotheque() {
-    const checkboxes = document.querySelectorAll('#listeGrillesDisponibles input[type="checkbox"]:checked');
-
-    if (checkboxes.length === 0) {
-        alert('Sélectionne au moins une grille à ajouter.');
-        return;
-    }
-
-    const grillesBibliotheque = await obtenirToutesLesGrillesBibliotheque();
-
-    let nbAjoutees = 0;
-
-    await db.modifier(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        nbAjoutees = 0;
-
-        checkboxes.forEach(checkbox => {
-            const grilleId = checkbox.value;
-
-            // Trouver la grille dans la bibliothèque
-            const grilleBiblio = grillesBibliotheque.find(g => g.id === grilleId);
-            if (!grilleBiblio) return;
-
-            // Vérifier si déjà présente
-            const grilleExistante = grilles.find(g => g.id === grilleId);
-
-            if (grilleExistante) {
-                // Réactiver une grille retirée
-                grilleExistante.dansBibliotheque = true;
-                nbAjoutees++;
-            } else {
-                // Ajouter nouvelle grille
-                const nouvelleGrille = {
-                    ...grilleBiblio,
-                    id: grilleId + '-local',  // Ajouter suffix pour éviter conflits
-                    dansBibliotheque: true
-                };
-                grilles.push(nouvelleGrille);
-                nbAjoutees++;
-            }
-        });
-
-        return grilles;
-    }, []);
-
-    // Rafraîchir les affichages
-    await afficherListeGrilles();
-    fermerModalBibliothequeGrilles();
-
-    if (nbAjoutees > 0) {
-        notifications.succes(`${nbAjoutees} grille(s) ajoutée(s) à la barre latérale`);
-    }
 }
 
 // #327 — filtrerGrillesParDiscipline retiré : le filtre par discipline n'existe

@@ -37,21 +37,6 @@ function obtenirToutesLesEchellesBibliothequeSync() {
     return bibliotheque;
 }
 
-/**
- * Obtenir les échelles d'une discipline spécifique
- * @param {string} discipline - Nom de la discipline
- * @returns {Array} Tableau des échelles de cette discipline
- */
-function obtenirEchellesParDiscipline(discipline) {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_ECHELLES) || [];
-    if (!discipline || discipline === 'toutes') {
-        return bibliotheque;
-    }
-    return bibliotheque.filter(e =>
-        e.discipline && e.discipline.toLowerCase() === discipline.toLowerCase()
-    );
-}
-
 // #327 — obtenirDisciplinesDisponiblesEchelles retiré (code mort) : le seul
 // appelant était le filtre par discipline de la modale, supprimé au profit du
 // classement par dossiers.
@@ -308,25 +293,6 @@ async function importerEchellesDansBibliotheque(echelles) {
 }
 
 /**
- * Exporter toute la bibliothèque d'échelles
- * @returns {Promise<Object>} Objet JSON exportable
- */
-async function exporterBibliothequeEchelles() {
-    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
-    const echelles = typeof ajouterMetadonnéesCC === 'function'
-        ? bibliotheque.map(e => ajouterMetadonnéesCC(e, 'echelle', e.nom || '').contenu || e)
-        : bibliotheque;
-
-    return {
-        version: '1.0',
-        type: 'echelles',
-        dateExport: new Date().toISOString(),
-        nombreEchelles: echelles.length,
-        echelles
-    };
-}
-
-/**
  * Migrer les échelles d'un trimestre vers la Bibliothèque
  * @param {string} cleSource - Clé source (ex: 'a2025_echelles')
  * @returns {Promise<{ajoutees: number, existantes: number}>}
@@ -411,30 +377,18 @@ function obtenirEchellesTrimestre(cleOuCode) {
     return [];
 }
 
-/**
- * Obtenir le nombre d'échelles dans la bibliothèque
- * @returns {number}
- */
-function getNombreEchellesBibliotheque() {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_ECHELLES) || [];
-    return bibliotheque.length;
-}
-
 // ===========================
 // EXPORTS GLOBAUX
 // ===========================
 window.obtenirToutesLesEchellesBibliotheque = obtenirToutesLesEchellesBibliotheque;
 window.obtenirToutesLesEchellesBibliothequeSync = obtenirToutesLesEchellesBibliothequeSync;
-window.obtenirEchellesParDiscipline = obtenirEchellesParDiscipline;
 window.ajouterEchelleALaBibliotheque = ajouterEchelleALaBibliotheque;
 window.retirerEchelleDeLaBibliotheque = retirerEchelleDeLaBibliotheque;
 window.importerEchellesDansBibliotheque = importerEchellesDansBibliotheque;
-window.exporterBibliothequeEchelles = exporterBibliothequeEchelles;
 window.migrerEchellesVersBibliotheque = migrerEchellesVersBibliotheque;
 window.listerTrimestresAvecEchelles = listerTrimestresAvecEchelles;
 window.formaterNomTrimestreEchelles = formaterNomTrimestreEchelles;
 window.obtenirEchellesTrimestre = obtenirEchellesTrimestre;
-window.getNombreEchellesBibliotheque = getNombreEchellesBibliotheque;
 window.CLE_BIBLIOTHEQUE_ECHELLES = CLE_BIBLIOTHEQUE_ECHELLES;
 
 // Rétrocompatibilité: ECHELLES_BIBLIOTHEQUE vide (plus de hardcodé)
