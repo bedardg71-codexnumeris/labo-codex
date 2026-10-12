@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { remplirNiveauxProposes } from './remplir-niveaux-echelle.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -358,6 +359,8 @@ test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancien
     await pause(page, 800);
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate(() => { document.getElementById('nomEchelleTemplate').value = 'Échelle fictive Aulne E1'; });
+    // #574 : un niveau au code ou au nom vide est refusé ; on remplit ceux que la fiche propose.
+    await remplirNiveauxProposes(page);
     await cliquer(page, '#btnCreerEchelle');
     const ancienne = await page.evaluate(() => {
         const e = (db.getSync(cle('echellesTemplates'), []) || []).find(x => x && x.nom === 'Échelle fictive Aulne E1');

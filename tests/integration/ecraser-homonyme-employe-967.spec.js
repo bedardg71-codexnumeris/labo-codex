@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { remplirNiveauxProposes } from './remplir-niveaux-echelle.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -144,6 +145,7 @@ test('échelle : un homonyme que rien n\'emploie s\'écrase comme avant, sans la
     // L'homonyme libre, créé par le même geste.
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate((nom) => { document.getElementById('nomEchelleTemplate').value = nom; }, NOM);
+    await remplirNiveauxProposes(page);
     await cliquer(page, '#btnCreerEchelle');
     const ancien = await page.evaluate((nom) => (db.getSync(cle('echellesTemplates'), []) || []).filter(e => e.nom === nom).map(e => e.id), NOM);
     expect(ancien.length, 'l\'homonyme libre est créé').toBe(1);
@@ -151,6 +153,7 @@ test('échelle : un homonyme que rien n\'emploie s\'écrase comme avant, sans la
 
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate((nom) => { document.getElementById('nomEchelleTemplate').value = nom; }, NOM);
+    await remplirNiveauxProposes(page);
     await cliquer(page, '#btnCreerEchelle');
     expect(await questionDoublonOuverte(page)).toBe(true);
     await cliquer(page, '#btnDoublonEcraser');
