@@ -921,7 +921,7 @@ function ouvrirFilePickerImportCours() {
 
 /**
  * Diagnostic LECTURE SEULE du modèle cours actuel, AVANT toute migration.
- * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures + console.
+ * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures ; le rapport est rendu (I14).
  * À lancer en console : await _diagnostiquerModeleCours()
  *
  * Produit, pour chaque codeCours :
@@ -936,7 +936,7 @@ function ouvrirFilePickerImportCours() {
  * `getSync` ne voit que le trimestre actif préchargé en memoryCache. Snapshots : énumère
  * l'UNION des clés localStorage + IDB (le coursId est dans la clé `{trim}_snapshots_{id}`).
  *
- * @returns {Promise<{parCode:Object, scores:Object, orphelins:string[], nbCours:number, nbCanonique:number}>}
+ * @returns {Promise<{parCode:Object, scores:Object, orphelins:string[], nbCours:number, nbCanonique:number, rapport:string[]}>}
  */
 async function _diagnostiquerModeleCours() {
     const cours = db.getSync('cours', []);
@@ -1007,36 +1007,38 @@ async function _diagnostiquerModeleCours() {
     const orphelins = Object.keys(scores).filter(id => !idsConnus.has(id));
     const nbCanonique = cours.filter(c => estCanonique(c.id)).length;
 
-    // Rapport console
+    // I14 / #469 (12 oct. 2026) — le rapport est RENDU, plus imprimé : la règle n°5 ne tolère
+    // que warn/error en console, et un outil dont la sortie est la fonctionnalité la rend.
+    // En console, `await _diagnostiquerModeleCours()` affiche l'objet ; `rapport` en est la
+    // lecture ligne à ligne (mêmes mots qu'avant).
     const codesDoublons = Object.keys(parCode).filter(code => parCode[code].length > 1);
-    console.group(`[Diagnostic modèle cours] ${cours.length} cours · ${trimestres.length} trimestres`);
-    console.log(`Doublons par code : ${codesDoublons.length} code(s) sur ${Object.keys(parCode).length}`);
-    console.log(`IDs à ré-identifier (non COURS_*) : ${cours.length - nbCanonique} sur ${cours.length}`);
+    const rapport = [
+        `[Diagnostic modèle cours] ${cours.length} cours · ${trimestres.length} trimestres`,
+        `Doublons par code : ${codesDoublons.length} code(s) sur ${Object.keys(parCode).length}`,
+        `IDs à ré-identifier (non COURS_*) : ${cours.length - nbCanonique} sur ${cours.length}`
+    ];
 
     Object.keys(parCode).sort().forEach(code => {
         const objets = parCode[code]
             .map(c => ({ c, score: totalScore(c.id) }))
             .sort((a, b) => b.score - a.score);
         const marqueur = objets.length > 1 ? ' ⚠️ DOUBLON' : '';
-        console.group(`${code} : ${objets.length} objet(s)${marqueur}`);
+        rapport.push(`${code} : ${objets.length} objet(s)${marqueur}`);
         objets.forEach(({ c, score }, i) => {
             const s = scores[c.id] || {};
             const detail = Object.entries(s).filter(([, n]) => n > 0).map(([k, n]) => `${k}:${n}`).join(', ') || 'aucune donnée';
             const role = objets.length > 1 ? (i === 0 ? ' → canonique probable' : ' → doublon') : '';
             const idType = estCanonique(c.id) ? 'COURS_*' : 'estampillé';
-            console.log(`${idType} | ${c.id} | ${(c.session || '?') + (c.annee || '')} | score ${score} (${detail})${role}`);
+            rapport.push(`  ${idType} | ${c.id} | ${(c.session || '?') + (c.annee || '')} | score ${score} (${detail})${role}`);
         });
-        console.groupEnd();
     });
 
     if (orphelins.length) {
-        console.group(`⚠️ coursId orphelins (référencés par des données mais absents de 'cours') : ${orphelins.length}`);
-        orphelins.forEach(id => console.warn(`${id} | score ${totalScore(id)}`));
-        console.groupEnd();
+        rapport.push(`⚠️ coursId orphelins (référencés par des données mais absents de 'cours') : ${orphelins.length}`);
+        orphelins.forEach(id => rapport.push(`  ${id} | score ${totalScore(id)}`));
     }
-    console.groupEnd();
 
-    return { parCode, scores, orphelins, nbCours: cours.length, nbCanonique };
+    return { parCode, scores, orphelins, nbCours: cours.length, nbCanonique, rapport };
 }
 
 /* ===============================

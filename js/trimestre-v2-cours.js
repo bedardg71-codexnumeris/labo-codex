@@ -141,7 +141,7 @@ function _migrerListeCoursVersCoursV2() {
 
     if (ajouts.length > 0) {
         db.setSync('cours', [...coursExistants, ...ajouts]); // security-ok: cours legacy locaux, déjà persistés dans listeCours
-        console.info(`[Migration listeCours] ${ajouts.length} cours legacy fusionné(s) dans « cours »`);
+        console.warn(`[Migration listeCours] ${ajouts.length} cours legacy fusionné(s) dans « cours »`);
     }
     db.setSync('listeCours', []); // security-ok: vidage clé legacy après migration
 
