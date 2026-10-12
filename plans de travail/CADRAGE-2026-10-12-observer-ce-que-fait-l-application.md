@@ -7,6 +7,7 @@ Décrire ce que Labo Codex fait réellement, indépendamment de ce que Grégoire
 
 ### Temps 1 : sceller les intentions
 Un analyste autorisé à tout lire (CLAUDE.md, OBJECTIF-COHORTE-1.md, plans de travail, documentation ; BACKLOG, SESSION et RELAIS par recherches ciblées seulement) rédige, geste d'utilisateur par geste, ce que l'application est censée faire. Pour chaque geste : ce qui est censé changer dans les données ; ce qui est censé en sortir (écran, fichier, calcul). Il ajoute ce qui est censé se produire sans geste (au chargement d'une page, à intervalle). Grégoire corrige ce texte. Une fois corrigé, il est scellé : rangé dans « plans de travail/observation/1-intentions-scellees.md », il n'est plus modifié et n'est relu qu'au temps 3. Grégoire ne voit aucun résultat du temps 2 avant d'avoir corrigé ce texte.
+L'analyste du temps 1 ne lit pas le code.
 
 ### Temps 2 : observer à l'aveugle
 Préparation, par une session distincte de celle qui analysera :
