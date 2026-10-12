@@ -24,7 +24,12 @@
     let sidebarManuelReplie = false;
     let modeCourant = 'annoter'; // 'annoter' | 'evaluer' — n'écrire que par _setModeCourant (#798)
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
-    let productionFiltreActive = sessionStorage.getItem('travaux-filtre-production') || '';
+    // #596 (12 oct. 2026) — les clés de session qui portent un identifiant (production, copie)
+    // sont namespacées par trimestre : un onglet qui change de trimestre ne ressert plus
+    // celles de l'autre. Ce qu'un onglet déjà ouvert a rangé sous l'ancien nom meurt avec lui.
+    // Sans `cle` (trimestres.js absent), nom nu : même repli que `pipeline_queue` (travaux-import.js).
+    const cleSession = (nom) => (typeof cle === 'function' ? cle(nom) : nom);
+    let productionFiltreActive = sessionStorage.getItem(cleSession('travaux-filtre-production')) || '';
     // #558 B2 — le choix « Rés. max. » ne vivait QUE dans le DOM. Le select est
     // re-généré à chaque rendu du pipeline avec `selected` codé en dur sur 250 :
     // un autre choix était silencieusement écrasé, alors que la valeur est
@@ -261,14 +266,13 @@
 
     function sauvegarderEtatSession() {
         const fichier = travauxVisionneuse.getFichierActuel();
-        if (fichier) sessionStorage.setItem('travaux-dernier-fichier', fichier.id);
-        sessionStorage.setItem('travaux-mode-courant', modeCourant);
+        if (fichier) sessionStorage.setItem(cleSession('travaux-dernier-fichier'), fichier.id);
     }
 
     function restaurerEtatSession() {
         // Toujours demarrer en mode "annoter" (l'utilisateur bascule manuellement vers Evaluer)
         _setModeCourant('annoter');
-        return sessionStorage.getItem('travaux-dernier-fichier');
+        return sessionStorage.getItem(cleSession('travaux-dernier-fichier'));
     }
 
     /* ===============================
@@ -751,7 +755,7 @@
                 // Cas 2 : pas de fichier ouvert mais un dernier fichier en session
                 // (le module a ete initialise depuis un autre onglet, la restauration
                 // initiale a ete ignoree car sousSectionActive n'etait pas 'annoter')
-                const dernierFichier = sessionStorage.getItem('travaux-dernier-fichier');
+                const dernierFichier = sessionStorage.getItem(cleSession('travaux-dernier-fichier'));
                 if (dernierFichier) {
                     const fichiers = travauxStockage.obtenirFichiersGroupeActif();
                     if (fichiers.some(function(f) { return f.id === dernierFichier; })) {
@@ -1836,7 +1840,7 @@
         // l'afficher dans le sélecteur global créait la divergence visuelle du bug.
         const prodActuelle = travauxImport.getProductionGlobale()
             || queue.find(f => f.productionId && !f.productionIdParLea && !f.productionIdParFichier)?.productionId
-            || sessionStorage.getItem('travaux-pipeline-production')
+            || sessionStorage.getItem(cleSession('travaux-pipeline-production'))
             || '';
 
         // Jetons de reprise : vérifier si le système est actif
@@ -1944,7 +1948,7 @@
         // Sous-sélecteur : quelle production le jeton cible-t-il ?
         if (prodActuelle === '__jeton_reprise__' || modeJetonActif) {
             const prodJeton = queue.find(f => f.estReprise && f.productionId)?.productionId
-                || sessionStorage.getItem('travaux-jeton-production')
+                || sessionStorage.getItem(cleSession('travaux-jeton-production'))
                 || '';
             colCentre += `<div class="pipeline-jeton-sous-select" id="pipeline-jeton-production">
                 <label>Pour quelle production ?</label>
@@ -2495,7 +2499,7 @@
                 f.productionIdParLea = false; // l'utilisateur a explicitement choisi jeton
             });
             travauxImport.setProductionGlobale('__jeton_reprise__');
-            sessionStorage.setItem('travaux-pipeline-production', '__jeton_reprise__');
+            sessionStorage.setItem(cleSession('travaux-pipeline-production'), '__jeton_reprise__');
             rafraichirPipelineUI();
             return;
         }
@@ -2519,8 +2523,8 @@
             }
         });
         travauxImport.setProductionGlobale(productionId);
-        sessionStorage.setItem('travaux-pipeline-production', productionId || '');
-        sessionStorage.removeItem('travaux-jeton-production');
+        sessionStorage.setItem(cleSession('travaux-pipeline-production'), productionId || '');
+        sessionStorage.removeItem(cleSession('travaux-jeton-production'));
         identifierAutoPipeline();
         rafraichirPipelineUI();
     }
@@ -2537,7 +2541,7 @@
             }
         });
         // Persister le choix pour que le sous-sélecteur le retrouve au rafraîchissement
-        sessionStorage.setItem('travaux-jeton-production', productionId || '');
+        sessionStorage.setItem(cleSession('travaux-jeton-production'), productionId || '');
         rafraichirPipelineUI();
     }
 
@@ -3015,7 +3019,7 @@
 
         // Persister le filtre production (cohérence avec les badges toolbar)
         productionFiltreActive = filtreProduction;
-        sessionStorage.setItem('travaux-filtre-production', filtreProduction);
+        sessionStorage.setItem(cleSession('travaux-filtre-production'), filtreProduction);
 
         let nbVisibles = 0;
         const lignes = tableau.querySelectorAll('tbody tr');
@@ -3056,7 +3060,7 @@
         const select = selectElement || document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
         const productionId = select ? select.value : '';
         productionFiltreActive = productionId;
-        sessionStorage.setItem('travaux-filtre-production', productionId);
+        sessionStorage.setItem(cleSession('travaux-filtre-production'), productionId);
 
         // Scoper au conteneur parent du select pour éviter d'affecter les autres onglets
         // Le select peut être dans .travaux-grille-fichiers (archivage) ou .annot-toolbar (toolbar fixe)
@@ -5422,7 +5426,7 @@
             if (select && select.value !== prodId) {
                 select.value = prodId;
                 productionFiltreActive = prodId;
-                sessionStorage.setItem('travaux-filtre-production', prodId);
+                sessionStorage.setItem(cleSession('travaux-filtre-production'), prodId);
                 filtrerBadgesParProduction(select);
             }
         }
@@ -5477,7 +5481,7 @@
             if (select && select.value !== prodId) {
                 select.value = prodId;
                 productionFiltreActive = prodId;
-                sessionStorage.setItem('travaux-filtre-production', prodId);
+                sessionStorage.setItem(cleSession('travaux-filtre-production'), prodId);
                 filtrerBadgesParProduction(select);
             }
         }
@@ -7670,7 +7674,7 @@
         // Filtre production (appelé depuis liste-evaluations pour pré-sélectionner)
         setProductionFiltre: function(prodId) {
             productionFiltreActive = prodId || '';
-            sessionStorage.setItem('travaux-filtre-production', productionFiltreActive);
+            sessionStorage.setItem(cleSession('travaux-filtre-production'), productionFiltreActive);
         },
         // Preview inline
         ouvrirPreviewInline: ouvrirPreviewInline,
