@@ -38,38 +38,6 @@ function obtenirToutesLesCartouchesBibliothequeSync() {
 }
 
 /**
- * Obtenir les cartouches d'une discipline spécifique
- * @param {string} discipline - Nom de la discipline
- * @returns {Array} Tableau des cartouches de cette discipline
- */
-function obtenirCartouchesParDiscipline(discipline) {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
-    if (!discipline || discipline === 'toutes') {
-        return bibliotheque;
-    }
-    return bibliotheque.filter(c =>
-        c.discipline && c.discipline.toLowerCase() === discipline.toLowerCase()
-    );
-}
-
-/**
- * Obtenir la liste des disciplines disponibles dans la bibliothèque
- * @returns {Array} Tableau des noms de disciplines uniques
- */
-function obtenirDisciplinesDisponiblesCartouches() {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
-    const disciplines = new Set();
-
-    bibliotheque.forEach(cartouche => {
-        if (cartouche.discipline) {
-            disciplines.add(cartouche.discipline);
-        }
-    });
-
-    return Array.from(disciplines).sort();
-}
-
-/**
  * Ajouter une cartouche à la Bibliothèque
  * @param {Object} cartouche - La cartouche à ajouter
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
@@ -143,67 +111,13 @@ async function retirerCartoucheDeLaBibliotheque(cartoucheId) {
     return true;
 }
 
-/**
- * Importer des cartouches dans la bibliothèque
- * @param {Array} cartouches - Tableau de cartouches à importer
- * @returns {Promise<{ajoutees: number, existantes: number}>}
- */
-async function importerCartouchesDansBibliotheque(cartouches) {
-    let ajoutees = 0;
-    let existantes = 0;
-
-    for (const cartouche of cartouches) {
-        const resultat = await ajouterCartoucheALaBibliotheque(cartouche);
-        if (resultat) {
-            ajoutees++;
-        } else {
-            existantes++;
-        }
-    }
-
-    return { ajoutees, existantes };
-}
-
-/**
- * Exporter toute la bibliothèque de cartouches
- * @returns {Promise<Object>} Objet JSON exportable
- */
-async function exporterBibliothequeCartouches() {
-    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
-    const cartouches = typeof ajouterMetadonnéesCC === 'function'
-        ? bibliotheque.map(c => ajouterMetadonnéesCC(c, 'cartouche', c.nom || '').contenu || c)
-        : bibliotheque;
-
-    return {
-        version: '1.0',
-        type: 'cartouches',
-        dateExport: new Date().toISOString(),
-        nombreCartouches: cartouches.length,
-        cartouches
-    };
-}
-
-/**
- * Obtenir le nombre de cartouches dans la bibliothèque
- * @returns {number}
- */
-function getNombreCartouchesBibliotheque() {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_CARTOUCHES) || [];
-    return bibliotheque.length;
-}
-
 // ===========================
 // EXPORTS GLOBAUX
 // ===========================
 window.obtenirToutesLesCartouchesBibliotheque = obtenirToutesLesCartouchesBibliotheque;
 window.obtenirToutesLesCartouchesBibliothequeSync = obtenirToutesLesCartouchesBibliothequeSync;
-window.obtenirCartouchesParDiscipline = obtenirCartouchesParDiscipline;
-window.obtenirDisciplinesDisponiblesCartouches = obtenirDisciplinesDisponiblesCartouches;
 window.ajouterCartoucheALaBibliotheque = ajouterCartoucheALaBibliotheque;
 window.retirerCartoucheDeLaBibliotheque = retirerCartoucheDeLaBibliotheque;
-window.importerCartouchesDansBibliotheque = importerCartouchesDansBibliotheque;
-window.exporterBibliothequeCartouches = exporterBibliothequeCartouches;
-window.getNombreCartouchesBibliotheque = getNombreCartouchesBibliotheque;
 window.CLE_BIBLIOTHEQUE_CARTOUCHES = CLE_BIBLIOTHEQUE_CARTOUCHES;
 
 // Rétrocompatibilité: CARTOUCHES_BIBLIOTHEQUE vide (plus de hardcodé)
