@@ -550,8 +550,8 @@ function mettreAJourBarreContexte() {
     const barre = document.getElementById('barreConvergence');
     if (!barre || typeof db === 'undefined' || !db.getSync) return;
 
-    const cle = window.cle || (k => k);
-
+    // #642 (12 oct. 2026) : plus d'alias local `cle` (il masquait le helper) ; `window.cle`
+    // est posé par trimestres.js, chargé avant.
     // Vérifier chaque composante
     const etapes = {
         'trimestre': {
