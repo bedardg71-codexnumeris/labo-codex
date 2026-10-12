@@ -1250,7 +1250,7 @@ function importerFichierEtudiantsV2(event) {
 function previsualiserDonneesV2() {
     const donnees = document.getElementById('v2-donneesCollees')?.value || '';
     if (!donnees.trim()) {
-        notifications.warning('Veuillez coller des données à importer.');
+        notifications.warning('Colle des données à importer.');
         return;
     }
     traiterDonneesImportV2(donnees);
