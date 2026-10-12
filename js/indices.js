@@ -339,7 +339,12 @@ function calculerEtSauvegarderIndicesAssiduite() {
             indices.sommatif[etudiant.da] = calculerAssiduite(etudiant.da, null);
         });
 
-        sauvegarderDonneesSelonMode('indicesAssiduite', indices, { discret: true });   // recalcul : l'usager n'a rien écrit
+        // #1040 (11 oct. 2026) : rien n'est écrit si seul `dateCalcul` change (aucun lecteur).
+        var sansDate = function (k, v) { return k === 'dateCalcul' ? undefined : v; };
+        var stockees = obtenirDonneesSelonMode('indicesAssiduite');
+        if (!stockees || JSON.stringify(stockees, sansDate) !== JSON.stringify(indices, sansDate)) {
+            sauvegarderDonneesSelonMode('indicesAssiduite', indices, { discret: true });   // recalcul : l'usager n'a rien écrit
+        }
 
         if (typeof calculerEtStockerIndicesCP === 'function') {
             calculerEtStockerIndicesCP();

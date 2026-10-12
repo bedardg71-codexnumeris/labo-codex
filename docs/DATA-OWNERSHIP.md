@@ -6,6 +6,9 @@
 > **Audit annuel de référence** : `audit/reports/03-1-ssot.md` (Beta 99.42, 12 mai 2026)
 > **Objectif** : documenter qui a le droit d'écrire dans chaque clé pour prévenir
 >               les violations SSOT, et tracer la dette résiduelle pour Sprint C.
+> **Inventaire régénéré le 11 oct. 2026 (1.198.0, lot 13)** : `scripts/audit-ssot.{json,md}` sont à jour ; les
+> 83 clés que ce registre ne déclarait pas sont listées en annexe, sans propriétaire déclaré. Les tables
+> ci-dessous n'ont pas été réécrites : leurs listes de contourneurs datent toujours du 22 mai.
 > **Note de currency (3 juillet 2026, #363)** : les colonnes NS/G des modèles de
 > travail ont été réalignées sur le code post-#358 (`grillesTemplates`,
 > `echellesTemplates`, `pratiquesConfigurables` = namespacées). Les listes de
@@ -66,7 +69,7 @@ ci-dessous.
 | ~~`niveauxEchelle`~~ | G (nue — jamais passée par `cle()`) | ~~`echelles.js`~~ — **aucun depuis #658 (13 sept. 2026)** | ~~aucun~~ | **ORPHELINE.** Copie « de travail » des niveaux de l'ancien éditeur, dont le tableau rendait dans `#tableauNiveaux`, un conteneur caché d'index.html. Écrite par `chargerEchelleTemplate`, les six gestes de ce tableau et un miroir conditionnel de l'éditeur vivant ; lue par `chargerConfigurationEchelle`. Tout est retiré avec le bloc « Conteneurs cachés pour compatibilité ». Les niveaux vivent dans `echellesTemplates[].niveaux`. **Stock** : au plus une clé par base, restée en place, inerte — l'effacer est un geste sur les données, qui revient à Grégoire. Sentinelle `sentinelle-658` C | < 10 Ko |
 | ~~`configEchelle`~~ | G (nue) | ~~`echelles.js`~~ — **aucun depuis #658 (13 sept. 2026)** | ~~aucun~~ | **ORPHELINE.** Dernier écrivain `chargerEchelleTemplate` (sans déclencheur vivant), seul lecteur `chargerConfigurationEchelle` (posait des `.value` sur des `<div>`) : retirés tous deux. L'écriture aplatie à chaque entrée dans la section (#659) était tarie depuis #520. La configuration d'une échelle vit dans `echellesTemplates[].config` (lue par `export-pdf.js`). **Stock** : au plus une clé par base, peut-être aplatie (`seuilReussite: 60`, `typeEchelle` absent) — inerte, non purgée (à Grégoire). Sentinelles `sentinelle-658` C, `sentinelle-520` C | < 1 Ko |
 | `collectionsProjection` | NS (`CLES_NAMESPACEES`, **lot B du 5 sept. 2026**) — un jeu NOMMÉ de réglages de projection `{ id, nom, dateCreation, modeleId, params, paliers }`, COPIÉ dans un critère au choix (décision de Grégoire : la copie ; le critère ne garde aucun lien) | `collections-projection.js` (écrit par `db.modifier` seulement) | grilles.js (menu de projection, gabarit) | aucun | < 50 Ko |
-| `cartouches_[grilleId]` | G | `cartouches.js` | evaluation-*, cartouches-bibliotheque | import-export, primo-modal (au cas par cas) | < 100 Ko |
+| `cartouches_[grilleId]` | NS (verdict **D1** du 21 août 2026, migration au démarrage `main.js`, drapeau `migration_cartouches_namespacees_done` ; corrigé ici le 11 oct. 2026) | `cartouches.js` | evaluation-*, cartouches-bibliotheque | import-export, primo-modal (au cas par cas) | < 100 Ko |
 | `pratiquesConfigurables` | NS (namespacée par trimestre depuis le 24 mai 2026, `CLES_NAMESPACEES` ; copie d'archive via `CLES_TEMPLATES_ARCHIVES`) | `pratiques.js` | evaluation-*, wizard-pratique-v2, pratique-* | **4 contourneurs : donnees-v2, import-export, pratique-manager, wizard-pratique-v2** (violation #5) | < 200 Ko |
 | `modalitesEvaluation` | NS | **`js/pratiques/modalites-evaluation.js`** (module propriétaire #328 Lot 1 — API `lire()`/`modifier()`/`remplacer()`, seul écrivain de la clé NS) | evaluation-*, pratique-notation-v2, pratiques, profil-etudiant-*, tableau-bord (39 fichiers lecteurs) | Violation #1 **RÉSORBÉE côté écriture** (10 juin 2026) : Lot 0 intrus extraits (horaire, preferences-v2), Lot 1 les 12 écrivains du domaine routés sur le module. **Lot 3 LIVRÉ (11 juin 2026)** : fallbacks de lecture clé nue purgés partout (~57 sites), `pratiques/migration-pratiques.js` supprimé (ids legacy résolus à la volée par `normaliserIdPratique`), seul lecteur clé nue restant = migration namespacing bornée de `main.js` ; champ legacy `dureePeriodeMinutes` purgé des données par `purgerLegacy()` (module, appelé au boot). Sentinelle `tests/unit/sentinelle-ssot-modalites-purge-L3.test.js`. **Lot 2 LIVRÉ** (L2-a/b1 le 11 juin, L2-b2 le 12 juin `e3179c41`, L2-c le 27 juin PR #67 — fin de #328 en 1.22.0) : les champs miroirs (`pratique`, `pratiqueId`, `approcheEvaluation`, `configPAN.jetons`) DÉRIVENT de la pratique active, miroir mort purgé par `purgerLegacy()`. Sentinelle ratchet `tests/unit/sentinelle-ssot-modalites-ecrivains-L0.test.js` + contrat `tests/unit/modalites-evaluation-proprietaire-L1.test.js`. Audit : `Rapports/AUDIT-SSOT-MODALITES-EVALUATION-2026-06-10.md` | < 50 Ko |
 
@@ -171,6 +174,15 @@ Ces clés sont des flags one-shot, lues une fois au démarrage, écrites une foi
 | `_migration_thumbnails_done` | `travaux-stockage.js` | Extraction thumbnails 27 mars 2026 |
 
 ---
+
+## Décisions de régime (triage du 21 août 2026)
+
+| Verdict | Décision | État mesuré le 11 oct. 2026 |
+|---|---|---|
+| **D1** — régime des cartouches | Namespacer par trimestre (seule famille encore globale, partagée réel ↔ démo, orpheline à la suppression de sa grille) | **Exécuté** : `cartouches.js` écrit ``cle(`cartouches_${grilleId}`)`` ; la migration du stock tourne au démarrage (`main.js`, drapeau `migration_cartouches_namespacees_done`) |
+| **D2** — huit échelles « collègues » codées en dur | Les retirer du code, vers la bibliothèque et les paquets de partage | **Exécuté** : aucun nom de collègue dans `js/echelles.js` (grep) ; le matériel de collègues passe par `partage_*` (#329) |
+
+Source : `plans de travail/TRIAGE-audits-2026-08-21.md`, lignes D1 et D2 (#471, lot 13).
 
 ## Patterns exemplaires (à reproduire)
 
@@ -301,6 +313,102 @@ du matériel qui NE DOIT PAS entrer dans ces flux.
 
 ---
 
+## Annexe — clés vues par l'inventaire du 11 oct. 2026, non déclarées ci-dessus
+
+> Générée le 11 oct. 2026 (lot 13, #471 et volet documentation de #629) par `python3 scripts/audit-ssot.py`.
+> **C'est un INVENTAIRE, pas une déclaration de propriétaire** : la colonne « Écrivains » liste les fichiers où
+> le script voit une écriture littérale, sans dire lequel devrait être le propriétaire. Déclarer un propriétaire
+> se fait clé par clé, dans les tables ci-dessus, quand un chantier touche la clé. Les violations viennent en tête.
+> 83 clés sur 137 inventoriées.
+
+| Clé | Statut du script | Écrivains (fichiers) | Lecteurs |
+|---|---|---|---|
+| `groupeSelectionne` | violation-mineure | `demo-activation.js`, `trimestre-v2-etudiants.js` | 1 |
+| `horaireSelectionne` | violation-mineure | `demo-activation.js`, `trimestre-v2-horaires.js` | 1 |
+| `horaires` | violation-mineure | `migrations.js`, `trimestre-v2-horaires.js` | 8 |
+| `planification_seances` | violation-mineure | `main.js`, `planification-donnees.js` | 2 |
+| `cartouches_` | no-literal-writer | — | 2 |
+| `chronoEvaluations` | no-literal-writer | — | 2 |
+| `coursActif` | no-literal-writer | — | 1 |
+| `demo_enseignants` | no-literal-writer | — | 1 |
+| `demo_groupesCours` | no-literal-writer | — | 1 |
+| `demo_listeCours` | no-literal-writer | — | 1 |
+| `demo_modalitesEvaluation` | no-literal-writer | — | 1 |
+| `echellePerformanceActive` | no-literal-writer | — | 1 |
+| `elevesDesinscrits` | no-literal-writer | — | 1 |
+| `flechesDidactiquesActives` | no-literal-writer | — | 1 |
+| `horaireActif` | no-literal-writer | — | 1 |
+| `indicesAssiduiteDetailles` | no-literal-writer | — | 1 |
+| `mapping_anonymisation` | no-literal-writer | — | 1 |
+| `planification_seances_archive_pre367` | no-literal-writer | — | 1 |
+| `productionsPedagogiques` | no-literal-writer | — | 1 |
+| `proto_carte_mentale` | no-literal-writer | — | 1 |
+| `resultatsUlterieurs` | no-literal-writer | — | 1 |
+| `rythmeColonnesT1` | no-literal-writer | — | 1 |
+| `rythmeColonnesT2` | no-literal-writer | — | 1 |
+| `trimestresDisponibles` | no-literal-writer | — | 1 |
+| `xxx` | no-literal-writer | — | 1 |
+| `anonymisation_afficher_da_reel` | ssot-ok | `modes.js` | 1 |
+| `autoreflexionBilan` | ssot-ok | `bilan-reflexif-core.js` | 0 |
+| `categoriesMasquees` | ssot-ok | `travaux-outils.js` | 1 |
+| `categoriesPerso` | ssot-ok | `travaux-outils.js` | 1 |
+| `cc-derniere-description` | ssot-ok | `cc-license.js` | 1 |
+| `confidentielEtudiants` | ssot-ok | `profil-etudiant-confidentiel.js` | 1 |
+| `corbeilleFichiers_backup_v1` | ssot-ok | `migration-diagnostic.js` | 1 |
+| `couleursCategories` | ssot-ok | `travaux-outils.js` | 2 |
+| `demo-actif` | ssot-ok | `demo-activation.js` | 4 |
+| `demo-etat-precedent` | ssot-ok | `demo-activation.js` | 1 |
+| `dernieresSelectionsEvaluation` | ssot-ok | `evaluation.js` | 1 |
+| `elementsMasques` | ssot-ok | `travaux-outils.js` | 1 |
+| `errfrModeSynthese` | ssot-ok | `travaux-outils.js` | 1 |
+| `etatsAccordeonsV2` | ssot-ok | `pratiques.js` | 1 |
+| `evaluationsSauvegardees_backup_v1` | ssot-ok | `migration-diagnostic.js` | 1 |
+| `fichiersTravaux_backup_v1` | ssot-ok | `migration-diagnostic.js` | 1 |
+| `filtresListeEvaluations` | ssot-ok | `liste-evaluations.js` | 1 |
+| `fsapi_persistance_handles` | ssot-ok | `db.js` | 2 |
+| `mapping_groupes_anonymes` | ssot-ok | `modes.js` | 1 |
+| `migrationBeta96Date` | ssot-ok | `migrations.js` | 0 |
+| `migration_cartouches_namespacees_done` | ssot-ok | `main.js` | 1 |
+| `migration_estEssai_to_estMaquette_done` | ssot-ok | `main.js` | 1 |
+| `migration_modalites_namespacees_done` | ssot-ok | `main.js` | 1 |
+| `migration_modeles_namespacees_done` | ssot-ok | `main.js` | 1 |
+| `migration_planification_seances_done` | ssot-ok | `main.js` | 1 |
+| `migration_pratiqueId_to_configurable_id_done` | ssot-ok | `main.js` | 1 |
+| `migration_pratiques_namespacees_done` | ssot-ok | `main.js` | 1 |
+| `nomsCategoriesTampons` | ssot-ok | `travaux-outils.js` | 1 |
+| `notesRapport` | ssot-ok | `profil-etudiant-rapport.js` | 1 |
+| `objectifsTemplates` | ssot-ok | `objectifs.js` | 1 |
+| `ordreAutocollants_` | ssot-ok | `travaux-outils.js` | 1 |
+| `ordreAutocollants_action` | ssot-ok | `travaux-outils.js` | 1 |
+| `ordreAutocollants_comprehension` | ssot-ok | `travaux-outils.js` | 0 |
+| `ordreAutocollants_contenu` | ssot-ok | `travaux-outils.js` | 1 |
+| `ordreAutocollants_diagnostic` | ssot-ok | `travaux-outils.js` | 0 |
+| `ordreAutocollants_observations` | ssot-ok | `travaux-outils.js` | 0 |
+| `ordreAutocollants_qualite` | ssot-ok | `travaux-outils.js` | 0 |
+| `ordreAutocollants_symboles` | ssot-ok | `travaux-outils.js` | 0 |
+| `ordreCategories` | ssot-ok | `travaux-outils.js` | 1 |
+| `ordreErreursFr` | ssot-ok | `travaux-outils.js` | 0 |
+| `personnalisationErreursFr` | ssot-ok | `travaux-outils.js` | 1 |
+| `personnalisationObservations` | ssot-ok | `travaux-outils.js` | 1 |
+| `pratiqueParDefaut` | ssot-ok | `pratiques.js` | 2 |
+| `preferencesRythme` | ssot-ok | `rythme.js` | 1 |
+| `presences_date` | ssot-ok | `saisie-presences.js` | 1 |
+| `presences_groupe` | ssot-ok | `saisie-presences.js` | 1 |
+| `presences_tri` | ssot-ok | `saisie-presences.js` | 1 |
+| `profilOngletDeveloppementActif` | ssot-ok | `profil-etudiant-diagnostics.js` | 0 |
+| `raccourcisAnnotation` | ssot-ok | `travaux-outils.js` | 1 |
+| `recalculerIndicesCP` | ssot-ok | `main.js` | 1 |
+| `recherchePresences` | ssot-ok | `saisie-presences.js` | 1 |
+| `ressourcesSupprimees` | ssot-ok | `main.js` | 1 |
+| `retroactionsErreursFr` | ssot-ok | `travaux-outils.js` | 1 |
+| `retroactionsObservations` | ssot-ok | `travaux-outils.js` | 1 |
+| `seancesCompletes` | ssot-ok | `horaire.js` | 0 |
+| `symbolesUnicodePerso` | ssot-ok | `travaux-outils.js` | 1 |
+| `tamponsImages` | ssot-ok | `tampons-bibliotheque.js` | 1 |
+| `thumbnail_` | ssot-ok | `travaux-stockage.js` | 1 |
+
+---
+
 ## Méthodologie — comment ce registre est mis à jour
 
 1. Lancer `python3 scripts/audit-ssot.py` à la racine du repo.
@@ -313,5 +421,5 @@ du matériel qui NE DOIT PAS entrer dans ces flux.
 
 ---
 
-**Dernière mise à jour** : 22 mai 2026, Sprint A (Beta 99.62, build 0522-0650).
+**Dernière mise à jour** : 11 oct. 2026 (annexe de l'inventaire, lot 13) ; tables déclarées : 22 mai 2026, Sprint A (Beta 99.62, build 0522-0650).
 **Prochaine mise à jour prévue** : à la clôture du Sprint B (cartographies 3.2 + 3.3) post-AQPC, puis à la clôture du Sprint C (Tier 6.5 `modalitesEvaluation`) été 2026.

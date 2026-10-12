@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { poserSetSyncSiChange } from './_helpers/charger-script.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -85,7 +86,7 @@ function storeBase() {
 
 function monter(store) {
     const journal = [];
-    const db = dbBanc(store, journal);
+    const db = poserSetSyncSiChange(dbBanc(store, journal));   // #1040
     const elements = {};
     const document = fauxDocument(elements);
     const win = { addEventListener() {}, obtenirTrimestreId: () => 'test', trimestreActif: 'test', cle, db,

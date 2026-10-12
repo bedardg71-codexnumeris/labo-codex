@@ -1766,6 +1766,38 @@
         }
 
         /**
+         * #1040 (11 oct. 2026) — `setSync`, sauf si la valeur stockée est DÉJÀ la même.
+         * Des clés se réécrivaient à l'identique à chaque ouverture, sans geste
+         * (famille de #981) : chaque écriture fait parler le témoin, part en IDB et
+         * passe la garde #340 pour rien. La comparaison se fait sur le JSON ; les
+         * champs nommés dans `ignorer` (un horodatage de calcul), à TOUTE profondeur,
+         * n'y comptent pas — s'ils sont seuls à changer, rien n'est écrit et la
+         * valeur stockée garde son ancien horodatage.
+         * @param {string} key
+         * @param {*} value
+         * @param {string[]} [ignorer] - noms de champs hors comparaison, à toute profondeur
+         * @returns {boolean|string} 'inchange' si rien n'est écrit, sinon le retour de setSync
+         */
+        setSyncSiChange(key, value, ignorer) {
+            var remplacant = (ignorer && ignorer.length)
+                ? function (k, v) { return ignorer.indexOf(k) !== -1 ? undefined : v; }
+                : undefined;
+            // `getSync(key, undefined)` retomberait sur le défaut `null` : une sentinelle dit l'absence.
+            var ABSENTE = {};
+            var actuel = this.getSync(key, ABSENTE);
+            // ⚠ Relecture de Cowork (11 oct., bloquant) : au-delà de SEUIL_IDB_FIRST, `getSync` rend
+            // l'objet de `memoryCache` PAR RÉFÉRENCE. Un appelant qui l'a lu, modifié en place puis
+            // repassé ici (portfolio.js, indicesCP) comparerait l'objet à lui-même : « inchangé »,
+            // et IndexedDB garderait l'ancien. Même référence : on ne peut rien conclure, on écrit.
+            if (actuel !== ABSENTE && actuel !== value) {
+                try {
+                    if (JSON.stringify(actuel, remplacant) === JSON.stringify(value, remplacant)) return 'inchange';
+                } catch (e) { /* non sérialisable : on écrit, comme avant */ }
+            }
+            return this.setSync(key, value);
+        }
+
+        /**
          * Tracke une opération IDB (écriture OU suppression) dans _pendingWrites
          * pour permettre son drainage par flush() / Option B
          * (visibilitychange/pagehide). Primitive unique partagée par _trackWrite,

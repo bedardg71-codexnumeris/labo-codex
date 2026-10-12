@@ -2325,6 +2325,13 @@ async function sauvegarderProduction() {
  * 3. Réinitialise la variable productionEnEdition
  */
 function annulerFormProduction() {
+    // #633 (11 oct. 2026) — UN SEUL CORPS pour les quatre sites (« Fermer », fin de la
+    // création, « Supprimer » de la barre et de la fiche). Avant, deux corps vivaient sous
+    // ce nom : celui-ci (atteint depuis l'IIFE) remettait `productionEnEdition` à null sans
+    // toucher l'écran ; la couche posée sur `window` (atteinte par « Fermer » et la
+    // suppression de la fiche) rendait l'accueil et retirait le surlignage, mais laissait
+    // `productionEnEdition` sur la production fermée — ou supprimée. Les deux, ici.
+
     // Cacher le formulaire
     const form = document.getElementById('formulaireProduction');
     if (form) form.classList.add('u-hide');
@@ -2332,6 +2339,18 @@ function annulerFormProduction() {
     // Réafficher le bouton d'ajout (si l'élément existe - pas présent dans layout sidebar)
     const btnAjouter = document.getElementById('btnajouterProduction');
     if (btnAjouter) btnAjouter.classList.remove('u-hide');
+
+    const options = document.getElementById('optionsImportExportProductions');
+    if (options) options.classList.add('u-hide');
+
+    // Afficher le message d'accueil
+    const accueil = document.getElementById('accueilProductions');
+    if (accueil) accueil.classList.remove('u-hide');
+
+    // Retirer le surlignage de la barre latérale
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
 
     // Réinitialiser la variable d'édition
     productionEnEdition = null;
@@ -3007,7 +3026,7 @@ async function afficherToutesLesProductionsParType() {
                     ${portfolio ? genererHtmlProduction(portfolio, 0, 1) : ''}
                     ${artefacts.map((art, idx) => genererHtmlProduction(art, idx, artefacts.length)).join('')}
                     ${!portfolio ? `
-                        <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="portfolio" class="u-mt-10">
+                        <button class="btn btn-confirmer u-mt-10" data-action="ajouterProductionAuType" data-param="portfolio">
                             + Ajouter un portfolio
                         </button>
                     ` : ''}
@@ -3034,7 +3053,7 @@ async function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${sommatives.map((prod, idx) => genererHtmlProduction(prod, idx, sommatives.length)).join('')}
-                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="examen" class="u-mt-10">
+                    <button class="btn btn-confirmer u-mt-10" data-action="ajouterProductionAuType" data-param="examen">
                         + Ajouter une évaluation sommative
                     </button>
                 </div>
@@ -3057,7 +3076,7 @@ async function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${formatives.map((prod, idx) => genererHtmlProduction(prod, idx, formatives.length)).join('')}
-                    <button class="btn btn-confirmer" data-action="ajouterProductionAuType" data-param="examen-formatif" class="u-mt-10">
+                    <button class="btn btn-confirmer u-mt-10" data-action="ajouterProductionAuType" data-param="examen-formatif">
                         + Ajouter une évaluation formative
                     </button>
                 </div>
@@ -3414,40 +3433,6 @@ async function peuplerEchellesProduction() {
 }
 
 
-/**
- * Adapte la fonction annulerFormProduction pour le nouveau layout
- *
- * ⚠ #633 — CETTE COUCHE RESTE, ET C'EST DÉLIBÉRÉ. #626 a fusionné les deux
- * autres couches d'override de ce fichier (constat M4) mais PAS celle-ci : ses
- * deux corps sont vivants, pas un seul. Ce wrapper est atteint depuis `window`
- * (data-action « annulerFormProduction », productions-liste.js) ; la fonction
- * plus haut est atteinte depuis l'IIFE (fin de `sauvegarderProduction`, et le
- * `supprimerProduction` ci-dessous), où le nom résout vers le module, pas vers
- * `window`. Les deux corps DIFFÈRENT : celui-ci ne remet pas `productionEnEdition`
- * à null, l'autre ne touche ni les options, ni l'accueil, ni le surlignage.
- * Fusionner change quatre sites d'appel et répare au passage un défaut latent
- * (le surlignage de la barre latérale survit à la suppression de la production
- * affichée) : c'est un changement de comportement, il demande son propre item et
- * un test manuel. Ne pas le faire ici.
- */
-const annulerFormProductionOriginale = window.annulerFormProduction;
-window.annulerFormProduction = function() {
-    // Masquer le formulaire
-    const formulaire = document.getElementById('formulaireProduction');
-    if (formulaire) formulaire.classList.add('u-hide');
-
-    const options = document.getElementById('optionsImportExportProductions');
-    if (options) options.classList.add('u-hide');
-
-    // Afficher le message d'accueil
-    const accueil = document.getElementById('accueilProductions');
-    if (accueil) accueil.classList.remove('u-hide');
-
-    // Retirer le highlight
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-};
 
 /**
  * Supprime une production après confirmation.

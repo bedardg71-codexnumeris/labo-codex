@@ -138,6 +138,22 @@ describe('#316 · uiDialogues.demanderSaisie', () => {
         await expect(p).resolves.toBe('Dossier A');
     });
 
+    it('#1037 · variante danger : le bouton d\'action est destructif ; sans elle, principal', async () => {
+        const p = uiDialogues.demanderSaisie({ titre: 'X', texteConfirmer: 'Supprimer', variante: 'danger' });
+        expect(bouton('Supprimer').className).toContain('btn-supprimer');
+        expect(bouton('Supprimer').className).not.toContain('btn-principal');
+        cliquer(bouton('Annuler'));
+        await p;
+    });
+
+    it('#1037 · sans variante, le bouton d\'action reste principal', async () => {
+        const p = uiDialogues.demanderSaisie({ titre: 'X' });
+        expect(bouton('OK').className).toContain('btn-principal');
+        champSaisie().value = 'y';
+        cliquer(bouton('OK'));
+        await expect(p).resolves.toBe('y');
+    });
+
     it('valeur initiale pré-remplie ; Entrée la renvoie', async () => {
         const p = uiDialogues.demanderSaisie({ titre: 'X', valeurInitiale: 'prérempli' });
         expect(champSaisie().value).toBe('prérempli');

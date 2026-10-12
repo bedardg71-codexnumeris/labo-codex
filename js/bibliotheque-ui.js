@@ -475,6 +475,7 @@
         copie.dateCreation = new Date().toISOString();
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
         // ✅ D7 (arbitrage du 24 août) — la copie d'un gabarit n'est plus un
         // gabarit. Verdict de Grégoire : c'est le comportement de
         // `dupliquerPratiqueBibliotheque` qui fait foi. Avant, `forkerItem` ne
@@ -639,6 +640,7 @@
             // partage de la source n'ont plus cours.
             delete copie.metadata_cc;
             delete copie.auteurOriginal;
+            delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
             if (typeof d.retoucherCopie === 'function') d.retoucherCopie(copie, source);
 
             liste.push(copie);
@@ -1301,6 +1303,40 @@
         }, 2200);
 
         return resultat;
+    };
+
+    /**
+     * #793 (11 oct. 2026) — APRÈS UN IMPORT, CONDUIRE L'ŒIL AU RÉSULTAT, pour les cinq
+     * familles. Le geste des grilles (rapport testeur du 8 sept.) : la bibliothèque ouverte
+     * est redessinée, puis les cartes importées sont pointées. Si l'écriture a réussi mais
+     * qu'aucune carte ne la porte ET que la case « Masquer… » est là, cochée, dans la modale
+     * redessinée, la phrase qui le dit est rendue. Relecture de Cowork (11 oct.) : la préférence
+     * est commune aux cinq familles, mais la case n'existe que dans trois modales, et un
+     * élément rangé dans un dossier n'a pas de carte visible non plus ; ailleurs, on se tait
+     * plutôt que de renvoyer à une case ou à un filtre absents. Seules les GRILLES gardent leur
+     * phrase d'avant (`options.repliFiltre`, 8 sept., le filtre démo, éprouvé par leur spec) :
+     * elle n'est pas neuve chez elles. Bibliothèque fermée : rien.
+     *
+     * @param {string} modalId - id de la modale de bibliothèque de la famille
+     * @param {Function} rafraichir - redessine la bibliothèque (async ou non)
+     * @param {string[]} ids - ids des éléments importés
+     * @param {{repliFiltre?: boolean}} [options] - grilles seulement : la phrase générique d'avant
+     * @returns {Promise<string|null>} la phrase « masqué par un filtre », ou null
+     */
+    BibliothequeUI.conduireAuxImportes = async function (modalId, rafraichir, ids, options) {
+        if (typeof document === 'undefined' || !document.getElementById(modalId)) return null;
+        await rafraichir();
+        var pointage = BibliothequeUI.pointerVersItems(ids);
+        if (pointage.trouves.length > 0 || pointage.absents.length === 0) return null;
+        var modal = document.getElementById(modalId);
+        var caseMasquer = (modal && typeof modal.querySelector === 'function')
+            ? modal.querySelector('.biblio-toggle-deja-present input[type="checkbox"]') : null;
+        if (caseMasquer && caseMasquer.checked) {
+            return 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans la barre latérale » pour les voir.';
+        }
+        return (options && options.repliFiltre)
+            ? 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.'
+            : null;
     };
 
     /**

@@ -8,12 +8,10 @@
 
    Distinction avec les autres modules « pratique » :
    - pratiques.js — configuration globale du cours (quelle pratique appliquer)
-   - pratique-notation-v2.js — wizard V2 (création initiale)
    - pratiques-bibliotheque.js — gabarits et fonctions de bibliothèque
 
    Dépendances:
    - pratiques-bibliotheque.js (gabarits et fonctions de bibliothèque)
-   - pratique-notation-v2.js (fonctions de configuration détaillée)
    - db.js (stockage IndexedDB/localStorage)
    =============================== */
 
@@ -658,6 +656,7 @@ function copierPratiqueDepuisTrimestre(pratiqueSource, srcId) {
     nouvellePratique.dateCreation = new Date().toISOString();
     delete nouvellePratique.metadata_cc;
     delete nouvellePratique.auteurOriginal;
+    delete nouvellePratique.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
     delete nouvellePratique.estGabarit;
 
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
@@ -1957,14 +1956,35 @@ async function modifierTypeTravailMat(indexType, propriete, valeur) {
     }, [], { geste: 'Modifier la pratique' });
 }
 
+/**
+ * #1015 (11 oct. 2026) — un type de travail entre dans la note des spécifications : s'il porte
+ * déjà des notes (une évaluation porte sur une production de ce type), le codex est proposé
+ * avant de le retirer, comme pour un critère ou un niveau (#1007, lot 2b). Un forfait, lui,
+ * fixe la note de quiconque a des travaux de ses types : il porte des notes dès qu'un des
+ * types de la pratique en porte. Lecture seule.
+ */
+function _typesPortentDesNotes(types) {
+    return typeof window.ligneEmployeeParUneEvaluation === 'function'
+        && (types || []).some(t => t && window.ligneEmployeeParUneEvaluation({ typeTravail: t }));
+}
+
+function _pratiqueEnEditionLue() {
+    return (db.getSync(cle('pratiquesConfigurables'), []) || []).find(p => p && p.id === pratiqueEnEditionMateriel) || null;
+}
+
 async function supprimerTypeTravailMat(indexType) {
     if (!pratiqueEnEditionMateriel) return;
+    const typeLu = ((_pratiqueEnEditionLue() || {}).configuration?.typesTravaux || [])[indexType];
+    const porteDesNotes = !!typeLu && _typesPortentDesNotes([typeLu]);
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('typeTravail'))) return;
 
     let typesApres = null;
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1 || !configurations[index].configuration?.typesTravaux) return undefined;
+        // #1015 — relu après l'attente : si la ligne a changé pendant la fenêtre, rien n'est retiré.
+        if (typeLu && JSON.stringify(configurations[index].configuration.typesTravaux[indexType]) !== JSON.stringify(typeLu)) return undefined;
 
         configurations[index].configuration.typesTravaux.splice(indexType, 1);
         typesApres = configurations[index].configuration.typesTravaux;
@@ -2081,12 +2101,18 @@ async function modifierTravailForfaitMat(indexForfait, typeTravailId, valeur) {
 
 async function supprimerForfaitMat(indexForfait) {
     if (!pratiqueEnEditionMateriel) return;
+    const configLue = (_pratiqueEnEditionLue() || {}).configuration || {};
+    const porteDesNotes = !!(configLue.forfaits || [])[indexForfait] && _typesPortentDesNotes(configLue.typesTravaux);
+    if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('forfait'))) return;
 
     let apres = null;
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
         const configurations = lues || [];
         const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
         if (index === -1 || !configurations[index].configuration?.forfaits) return undefined;
+        // #1015 — relu après l'attente : si la ligne a changé pendant la fenêtre, rien n'est retiré.
+        const forfaitLu = (configLue.forfaits || [])[indexForfait];
+        if (forfaitLu && JSON.stringify(configurations[index].configuration.forfaits[indexForfait]) !== JSON.stringify(forfaitLu)) return undefined;
 
         configurations[index].configuration.forfaits.splice(indexForfait, 1);
         apres = configurations[index].configuration;
@@ -2179,6 +2205,7 @@ async function dupliquerPratiqueMateriel(pratiqueId) {
     copie.dateCreation = new Date().toISOString();
     delete copie.metadata_cc;
     delete copie.auteurOriginal;
+    delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
     delete copie.estGabarit;
 
     // #522 — l'ajout de la copie se fait DANS la file : la collection lue plus
@@ -2477,17 +2504,20 @@ window.confirmerImportPratiques = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
 
             for (const config of pratiquesImportees) {
                 // Ajouter avec un nouvel ID si nécessaire
                 if (!config.id) {
                     config.id = genererIdUnique('PRAT_');
                 }
+                idsImportes.push(config.id);
 
                 const indexBiblio = bibliotheque.findIndex(c => c.id === config.id);
                 if (indexBiblio >= 0) {
@@ -2503,17 +2533,14 @@ window.confirmerImportPratiques = async function(donnees) {
         }, []);
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportPratiques)
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
-        if (document.getElementById('modalBibliothequePratiques')) {
-            if (typeof afficherBibliothequePratiques === 'function') {
-                await afficherBibliothequePratiques();
-            }
-        }
+        // #793 — la bibliothèque ouverte est redessinée, puis l'œil conduit aux cartes importées.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequePratiques', afficherBibliothequePratiques, idsImportes);
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} pratique(s) mise(s) à jour.`);
-        details.push('Consulte « Pratiques disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Pratiques disponibles » pour les ajouter à ta barre latérale.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {

@@ -9734,7 +9734,7 @@ body.mode-clair .bloc-rlo-separateur {
 
 .carte-resume-etudiants {
     background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     padding: 15px;
     text-align: center;
     margin-bottom: 15px;
@@ -9836,7 +9836,7 @@ body.mode-clair .bloc-rlo-separateur {
 .zone-preview {
     background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bleu-leger);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     padding: 15px;
     margin-top: 15px;
 }
@@ -9867,7 +9867,7 @@ body.mode-clair .bloc-rlo-separateur {
     overflow-y: auto;
     margin-bottom: 15px;
     border: 1px solid var(--bleu-leger);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     background: var(--surface-carte, #1a3040);
 }
 
@@ -9907,7 +9907,7 @@ body.mode-clair .bloc-rlo-separateur {
 
 .formulaire-ajout-etudiant {
     background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     padding: 15px;
     margin-top: auto;
 }
@@ -10246,7 +10246,7 @@ summary.rl-tuile-entete::after {
 
 .carte-resume-horaire {
     background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     padding: 15px;
     margin-bottom: 15px;
     min-height: 120px;
@@ -10302,14 +10302,14 @@ summary.rl-tuile-entete::after {
 
 .section-config-periode {
     background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     padding: 12px;
     margin-top: 15px;
 }
 
 .resume-format-horaire {
     background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-moyen);
     padding: 10px 15px;
     margin-bottom: 15px;
     font-size: 0.9rem;
@@ -10337,7 +10337,7 @@ summary.rl-tuile-entete::after {
     padding: 10px;
     background: var(--surface-carte, #1a3040);
     border: 1px solid var(--bleu-leger);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-moyen);
 }
 
 .seance-horaire-ligne label {
@@ -10418,7 +10418,7 @@ summary.rl-tuile-entete::after {
 
 .carte-resume-groupe-cours {
     background: var(--bleu-pale);
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-grand);
     padding: 15px;
     margin-bottom: 15px;
     min-height: 100px;
@@ -10459,7 +10459,7 @@ summary.rl-tuile-entete::after {
 .apercu-nom-groupe-cours {
     background: #244858;
     color: white;
-    border-radius: var(--radius-standard);
+    border-radius: var(--radius-moyen);
     padding: 15px;
     margin-bottom: 20px;
     text-align: center;
@@ -18639,7 +18639,7 @@ tr.ligne-import-ecartee td {
 }
 .rythme-jour {
     background: var(--surface-secondaire, rgba(128,128,128,.06));
-    border-radius: var(--radius-md, 8px);
+    border-radius: var(--radius-moyen);
     padding: .75rem;
     min-height: 120px;
 }
@@ -18679,7 +18679,7 @@ tr.ligne-import-ecartee td {
     background: var(--bleu-principal, #032e5c);
     color: #fff;
     padding: 4px 8px;
-    border-radius: var(--radius-sm, 4px);
+    border-radius: var(--radius-petit);
     margin-top: 4px;
 }
 .rythme-tache small { color: rgba(255, 255, 255, .85); }
@@ -18741,7 +18741,7 @@ tr.ligne-import-ecartee td {
 .rythme-heatmap-cellule {
     background: var(--bleu-principal, #032e5c);
     color: #fff;
-    border-radius: var(--radius-sm, 4px);
+    border-radius: var(--radius-petit);
     text-align: center;
     font-size: .8rem;
     font-weight: 600;
@@ -18771,7 +18771,7 @@ tr.ligne-import-ecartee td {
     background: var(--surface-section, #1a2a30);
     color: var(--texte-principal, #e0e0e0);
     border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-md, 8px);
+    border-radius: var(--radius-moyen);
     padding: 12px 24px;
     font-size: .9rem;
     box-shadow: 0 4px 20px rgba(0,0,0,.3);
@@ -26081,7 +26081,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex: 1;
     min-width: 160px;
     padding: 6px 8px;
-    border-radius: var(--radius-sm, 4px);
+    border-radius: var(--radius-petit);
     border: 1px solid var(--bordure, #2a3a4a);
     background: var(--surface-1, #1a2332);
     color: var(--texte, #e0e8f0);
@@ -26096,7 +26096,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     overflow-y: auto;
     max-height: 45vh;
     border: 1px solid var(--bordure, #2a3a4a);
-    border-radius: var(--radius-sm, 4px);
+    border-radius: var(--radius-petit);
     background: var(--surface-1, #1a2332);
 }
 .fusion-fichier-item {
@@ -26693,7 +26693,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: var(--texte-secondaire);
     font-size: 1.2rem;
     cursor: pointer;
-    border-radius: var(--radius-sm, 4px);
+    border-radius: var(--radius-petit);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -26798,7 +26798,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-weight: bold;
     padding: 0;
     border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-sm, 4px);
+    border-radius: var(--radius-petit);
     background: var(--surface-2, #243244);
 }
 

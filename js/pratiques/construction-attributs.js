@@ -110,13 +110,12 @@
 
     function _reprises(config, famille) {
         if (famille === 'denotation') return 's.o.';
-        if (famille === 'sommative') {
-            var rp = _lire(config, 'reprisesPermises');
-            if (rp === 'non' || rp === false) return 'Non permises';
-            if (rp === 'limitees' || rp === 'limited') return 'Limitées';
-            if (rp === 'illimitees' || rp === true) return 'Illimitées';
-            return 'Non permises';
-        }
+        // #324 (lot 11, 11 oct. 2026) — aligné sur #903 : le déclaratif des reprises d'une sommative
+        // (`reprisesPermises`) n'est appliqué par rien, et une pratique créée depuis #903 ne le porte plus.
+        // Ce qui vaut, quel que soit le réglage enregistré : une reprise prend la place de la copie d'origine
+        // (`remplaceeParId`, écartée de la note par `evaluationEntreDansLaNote`). « Non permises »,
+        // « Limitées » et « Illimitées » promettaient une règle. MOT D'ÉCRAN NEUF, soumis à Grégoire.
+        if (famille === 'sommative') return 'La reprise prend la place de la copie d\'origine dans la note';
         if (famille === 'specifications') {
             var jetons = _lire(config, 'jetons') || {};
             if (jetons.activer === true || (jetons.reprise && jetons.reprise.nombre)) {

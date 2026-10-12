@@ -336,20 +336,8 @@ describe('#687 · E — plus de discipline dans le matériel OFFERT', () => {
      */
     const DISCIPLINES = /(Chimie|Biologie|Philosophie|Géographie|Comptabilité|Mathémat|Informatique)/i;
 
-    it('E.a les quatre modes de calcul ont perdu leur parenthèse disciplinaire', () => {
-        const src = readFileSync(path.join(racine, 'js/pratique-notation-v2.js'), 'utf8');
-        ['Comptage', 'Moyenne pondérée', 'Seuils critiques', 'Holistique'].forEach(mode => {
-            expect(src, `« ${mode} » porte encore une matière`)
-                .not.toMatch(new RegExp(`nom: '${mode} \\(`));
-        });
-    });
-
-    it('E.b TÉMOIN — les quatre modes existent toujours : on a débaptisé, pas supprimé', () => {
-        const src = readFileSync(path.join(racine, 'js/pratique-notation-v2.js'), 'utf8');
-        ['Comptage', 'Moyenne pondérée', 'Seuils critiques', 'Holistique'].forEach(mode => {
-            expect(src).toMatch(new RegExp(`nom: '${mode}'`));
-        });
-    });
+    // E.a et E.b portaient sur les quatre modes de calcul de `pratique-notation-v2.js`,
+    // retiré en entier le 11 oct. 2026 (#469, code mort). Rien à débaptiser : ils sont partis.
 
     it('E.c aucun `nom:` de modèle offert ne nomme une discipline', () => {
         Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).forEach(m => {

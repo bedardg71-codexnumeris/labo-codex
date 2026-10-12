@@ -3783,6 +3783,10 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     niveau:                { premiere: 'Supprimer ce niveau l\'efface pour de bon.', pronom: 'le' },
     cible:                 { premiere: 'Retirer cette cible l\'efface pour de bon.', pronom: 'la' },
     cibles:                { premiere: 'Retirer ces cibles les efface pour de bon.', pronom: 'les' },
+    // #1015 (11 oct. 2026) : seulement si une évaluation porte sur une production de ses types.
+    // Mots neufs, à Grégoire avant la release.
+    typeTravail:           { premiere: 'Retirer ce type de production l\'efface pour de bon, et la note des spécifications change.', pronom: 'le' },
+    forfait:               { premiere: 'Retirer ce forfait l\'efface pour de bon, et la note des spécifications change.', pronom: 'le' },
     // #976 (8 oct. 2026) : un geste qui DÉPLACE, sans rien effacer — `infinitif` remplace
     // « supprimer » dans le titre et les boutons. Mots proposés, à Grégoire avant la release.
     corrigerDA:            { premiere: 'Corriger ce DA déplace sous le nouveau DA tout ce que porte l\'ancien.', pronom: 'le', infinitif: 'corriger' }

@@ -243,9 +243,21 @@ function construireConfigComplete(pratiqueData) {
 
     // Résoudre l'échelle (embarquée ou par référence ID)
     let echelle = config.echelle || pratiqueData.echelle;
+    // #590 (verdict de Cowork, 11 oct.) : la marque `introuvable` posée plus bas voyage dans les
+    // données — « Dupliquer » et « Dériver une variante » embarquent la config résolue. Embarquée,
+    // elle passerait avant toute référence et figerait la copie sur une échelle vide. Elle reste
+    // stockée (la validation de sauvegarde exige `config.echelle`), mais ne vaut pas résolution.
+    // Son `echelle_id` reste la référence de dernier recours : la copie d'une pratique de forme
+    // `.config` (#712) ne porte ni `configuration.echelleId` ni `config.echelleId` (le `return`
+    // plus bas ne le recopie pas). Sans ce repli, plus aucune référence, et la copie ne se charge plus.
+    let idDeLaMarque = null;
+    if (echelle && echelle.introuvable) {
+        idDeLaMarque = echelle.echelle_id || null;
+        echelle = null;
+    }
     if (!echelle) {
-        // Chercher par ID dans configuration ou config
-        const echelleId = pratiqueData.configuration?.echelleId || config.echelleId;
+        // Chercher par ID dans configuration ou config, puis dans la marque écartée
+        const echelleId = pratiqueData.configuration?.echelleId || config.echelleId || idDeLaMarque;
         if (echelleId) {
             // 🆕 #358 (Option A) : résolution namespacée par id (actif puis repli pool).
             const echelleRef = (typeof resoudreModeleParId === 'function')
@@ -259,16 +271,17 @@ function construireConfigComplete(pratiqueData) {
                     niveaux: echelleRef.niveaux
                 };
             } else {
-                console.warn(`[construireConfigComplete] Échelle "${echelleId}" non trouvée, utilisation échelle par défaut`);
-                // Échelle par défaut pour éviter l'erreur
+                // #590 (option A de Grégoire, 28 août 2026 : « Rien codé en dur ! ») —
+                // l'échelle IDME 50/65/80/95 posée ici contredisait celle de
+                // l'utilisateur. Une échelle introuvable reste VIDE et le dit : la
+                // pratique se charge encore (sa note ne passe pas par ces niveaux,
+                // `calculerNoteFinale` n'a aucun appelant), et aucun niveau n'est inventé.
+                console.warn(`[construireConfigComplete] Échelle "${echelleId}" introuvable : aucun niveau n'est inventé (#590)`);
                 echelle = {
                     type: 'niveaux',
-                    niveaux: [
-                        { code: 'I', label: 'Incomplet', valeur_pourcentage: 50, ordre: 1 },
-                        { code: 'D', label: 'en Développement', valeur_pourcentage: 65, ordre: 2 },
-                        { code: 'M', label: 'Maîtrisé', valeur_pourcentage: 80, ordre: 3 },
-                        { code: 'E', label: 'Étendu', valeur_pourcentage: 95, ordre: 4 }
-                    ]
+                    echelle_id: echelleId,
+                    introuvable: true,
+                    niveaux: []
                 };
             }
         }

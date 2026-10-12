@@ -70,7 +70,7 @@ function genererCalendrierComplet() {
     if (horairesEntites.length > 0) {
         const toutesSeances = fusionnerSeancesHoraires(horairesEntites);
         if (toutesSeances.length > 0) {
-            db.setSync(cle('horaireHebdo'), toutesSeances);
+            db.setSyncSiChange(cle('horaireHebdo'), toutesSeances);   // #1040 : rien si inchangé
         }
     }
 
@@ -240,8 +240,8 @@ function genererCalendrierComplet() {
         dateActuelle.setDate(dateActuelle.getDate() + 1);
     }
 
-    // STOCKER dans localStorage - LA SOURCE UNIQUE
-    db.setSync(cle('calendrierComplet'), calendrier);
+    // STOCKER dans localStorage - LA SOURCE UNIQUE (#1040 : rien si inchangé)
+    db.setSyncSiChange(cle('calendrierComplet'), calendrier);
 
     return calendrier;
 }

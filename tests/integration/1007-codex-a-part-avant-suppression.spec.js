@@ -37,7 +37,11 @@ const NOM = 'Automne 2030 (banc)';
 const TITRE = 'Avant de supprimer, un codex à part';
 const SUITE = 'L\'application va d\'abord écrire un codex à part, sous un autre nom. Tes prochaines mises à jour n\'y toucheront pas : il te permettra de revenir en arrière.';
 const PHRASE_X1 = 'Supprimer le trimestre « ' + NOM + ' » efface pour de bon ses étudiant·es, ses évaluations, ses présences, ses productions, ses captures et ses modèles.';
-const QUESTION_X1 = 'Supprimer définitivement le trimestre « ' + NOM + ' » ? Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.';
+// #1037 (11 oct. 2026) : la question et la ressaisie du nom sont des fenêtres de l'application, plus
+// des `confirm`/`prompt` natifs ; mêmes mots, le titre et le message séparés.
+const QUESTION_X1_TITRE = 'Supprimer définitivement le trimestre « ' + NOM + ' » ?';
+const QUESTION_X1_TEXTE = 'Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles.';
+const SAISIE_X1_TITRE = 'Confirmation finale : cette action est irréversible.';   // mots de Grégoire, 11 oct. 18 h 02
 const NOM_A_PART = /^codex-.+-avant-suppression-\d{4}-\d{2}-\d{2}-\d{2}h\d{2}\.zip$/;
 
 /** Écoute la page. Les dialogues natifs sont consignés ; `reponses` dit quoi répondre, dans l'ordre. */
@@ -197,6 +201,30 @@ async function verifierFenetreDuCodexAPart(page, phrase) {
     });
 }
 
+/**
+ * #1037 — la confirmation de « Supprimer… » (fenêtre de l'application, « Annuler » a le focus), puis,
+ * si `nom` est donné, la ressaisie du nom. Sans `nom` : « Annuler », rien ne suit.
+ */
+async function repondreSuppressionX1(page, nom) {
+    // Relecture de Cowork : 60 s, comme l'ancienne attente du premier dialogue — la question ne
+    // vient qu'après la génération du codex à part, qui prend des secondes.
+    await expect.poll(async () => (await fenetre(page))?.titre ?? null, { timeout: 60000 }).toBe(QUESTION_X1_TITRE);
+    expect(await attendreFenetre(page, QUESTION_X1_TITRE)).toEqual({
+        titre: QUESTION_X1_TITRE, texte: QUESTION_X1_TEXTE, boutons: ['Annuler', 'Supprimer'], focus: 'Annuler', devant: true
+    });
+    if (nom === undefined) {
+        await cliquerDansFenetre(page, 'Annuler');
+        await aucuneFenetre(page);
+        return;
+    }
+    await cliquerDansFenetre(page, 'Supprimer');
+    const saisie = await attendreFenetre(page, SAISIE_X1_TITRE);
+    expect(saisie.texte).toBe('Pour supprimer « ' + NOM + ' » et toutes ses données, retape son nom exactement :');
+    await page.locator('#overlay-ui-dialogue input').fill(nom);
+    await cliquerDansFenetre(page, 'Supprimer');
+    await aucuneFenetre(page);
+}
+
 /** Ce que l'application contient pour le trimestre visé : son entrée au registre, et chacune de ses clés. */
 const contenuX1 = (page) => page.evaluate(async (T) => {
     const toutes = Array.from(new Set([...(await db.keys()), ...Object.keys(localStorage)]));
@@ -276,12 +304,11 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         await page.evaluate(() => { window.__choix.annuler = false; });
 
         // ----- 4. le fichier à part écrit, puis « Annuler » à la confirmation du geste : rien d'effacé
-        ecoute.reponses.push(false);
         await cliquerSupprimerTrimestre(page);
         await attendreFenetre(page, TITRE);
         await cliquerDansFenetre(page, 'Écrire le codex à part');
-        await expect.poll(() => ecoute.dialogues.length, { timeout: 60000 }).toBe(1);
-        expect(ecoute.dialogues[0]).toEqual({ type: 'confirm', message: QUESTION_X1 });
+        await repondreSuppressionX1(page);
+        expect(ecoute.dialogues).toEqual([]);
         let t = await traces(page);
         expect(t.fenetres.length).toBe(3);   // le codex habituel, le choix annulé, le fichier à part
         const aPart = t.fenetres[2];
@@ -293,16 +320,12 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         expect(await contenuX1(page)).toEqual(avant);
 
         // ----- 5. le chemin entier : le fichier à part, la confirmation, le nom, l'effacement
-        ecoute.reponses.push(true, NOM, true);
         await cliquerSupprimerTrimestre(page);
         await attendreFenetre(page, TITRE);
         await cliquerDansFenetre(page, 'Écrire le codex à part');
-        await expect.poll(() => ecoute.dialogues.length, { timeout: 60000 }).toBe(4);
-        expect(ecoute.dialogues[1]).toEqual({ type: 'confirm', message: QUESTION_X1 });
-        expect(ecoute.dialogues[2].type).toBe('prompt');
-        expect(ecoute.dialogues[2].message).toContain('retape son nom exactement');
-        expect(ecoute.dialogues[3].message).toMatch(/^Trimestre "Automne 2030 \(banc\)" supprimé \(\d+ clés de données effacées\)\.$/);
-        expect(await contenuX1(page)).toEqual({ auRegistre: [], cles: {} });
+        await repondreSuppressionX1(page, NOM);
+        await expect.poll(() => contenuX1(page), { timeout: 30000 }).toEqual({ auRegistre: [], cles: {} });
+        expect(ecoute.dialogues).toEqual([]);
         t = await traces(page);
         expect(t.fenetres.length).toBe(4);
         expect(t.fenetres[3]).toMatch(NOM_A_PART);
@@ -341,12 +364,12 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         expect(await contenuX1(page)).toEqual(avant);
 
         await page.evaluate(() => { window.__choix.partageEchoue = false; });
-        ecoute.reponses.push(true, NOM, true);
         await cliquerSupprimerTrimestre(page);
         await attendreFenetre(page, TITRE);
         await cliquerDansFenetre(page, 'Écrire le codex à part');
-        await expect.poll(() => ecoute.dialogues.length, { timeout: 60000 }).toBe(3);
-        expect(ecoute.dialogues[0]).toEqual({ type: 'confirm', message: QUESTION_X1 });
+        await repondreSuppressionX1(page, NOM);
+        expect(ecoute.dialogues).toEqual([]);
+        await expect.poll(() => contenuX1(page), { timeout: 30000 }).toEqual({ auRegistre: [], cles: {} });
         const t = await traces(page);
         expect(t.partages).toHaveLength(2);
         expect(t.partages[1]).toMatch(NOM_A_PART);
@@ -373,15 +396,15 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         expect(ecoute.dialogues).toEqual([]);
         expect(await contenuX1(page)).toEqual(avant);
 
-        ecoute.reponses.push(true, NOM, true);
         await cliquerSupprimerTrimestre(page);
         await attendreFenetre(page, TITRE);
         await cliquerDansFenetre(page, 'Écrire le codex à part');
         await attendreFenetre(page, 'Téléchargement lancé');
         expect(ecoute.dialogues).toEqual([]);   // rien avant « Il y est »
         await cliquerDansFenetre(page, 'Il y est');
-        await expect.poll(() => ecoute.dialogues.length, { timeout: 30000 }).toBe(3);
-        expect(ecoute.dialogues[0]).toEqual({ type: 'confirm', message: QUESTION_X1 });
+        await repondreSuppressionX1(page, NOM);
+        expect(ecoute.dialogues).toEqual([]);
+        await expect.poll(() => contenuX1(page), { timeout: 30000 }).toEqual({ auRegistre: [], cles: {} });
         const t = await traces(page);
         expect(t.liens).toHaveLength(2);
         t.liens.forEach((n) => expect(n).toMatch(NOM_A_PART));

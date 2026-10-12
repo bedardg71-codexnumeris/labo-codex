@@ -31,7 +31,7 @@
  * autre balise → B rougit en nommant la signature de trop.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -93,5 +93,26 @@ describe('#787 · B — aucune balise d\'index.html ne porte deux attributs `cla
             'Le navigateur ignore le second en silence. Fusionner les deux valeurs en un\n' +
             'seul attribut (premier puis second) — ne pas inscrire le cas dans DETTE_CONNUE.'
         ).toEqual(DETTE_CONNUE);
+    });
+});
+
+// #865 (lot 11, 11 oct. 2026) — la même dette dans les gabarits HTML écrits en JavaScript.
+// Cinq cas au 14 sept. : `grilles.js` (u-mt-10), `productions.js` ×3 (u-mt-10),
+// `profil-etudiant-sections-affichage.js` (hover-opaque, sur une balise écrite sur plusieurs
+// lignes). Fusionnés (premier, puis second). L'interdit s'étend à tout le dossier js/.
+// Break-test : remettre un second `class="u-mt-10"` sur un des boutons → C rougit en le nommant.
+describe('#865 · C — aucun gabarit de js/ ne porte deux attributs `class`', () => {
+    it('la liste est vide', () => {
+        const vues = [];
+        const dossier = path.join(racineProjet, 'js');
+        for (const f of readdirSync(dossier, { recursive: true })) {
+            if (!String(f).endsWith('.js')) continue;
+            const code = readFileSync(path.join(dossier, f), 'utf8');
+            for (const m of code.matchAll(/<[a-zA-Z][^<>]*>/g)) {
+                const occ = [...m[0].matchAll(/(?:^|\s)class\s*=\s*"([^"]*)"/g)].map((x) => x[1]);
+                if (occ.length > 1) vues.push(`${f} | ${occ.join(' | ')}`);
+            }
+        }
+        expect(vues, 'Fusionner les deux valeurs en un seul attribut (premier puis second).').toEqual([]);
     });
 });

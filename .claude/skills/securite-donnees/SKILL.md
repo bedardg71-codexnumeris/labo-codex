@@ -176,7 +176,9 @@ une erreur. Deux options :
   personne ne peut remonter.
 → À trancher avec les contacts Loi 25.
 
-### 3.2 Opérations d'anonymisation (codex data)
+### 3.2 Opérations d'anonymisation (codex data) — PRÉVUES, NON CODÉES
+
+⚠ #989 (11 oct. 2026) : `js/codex-data.js` écrit toujours `anonymise: false` et n'anonymise rien. Ce tableau est la cible, pas l'état.
 
 | Donnée                    | Traitement                                    |
 |---------------------------|-----------------------------------------------|

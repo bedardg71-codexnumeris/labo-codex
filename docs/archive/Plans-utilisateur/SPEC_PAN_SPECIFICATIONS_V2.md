@@ -5,6 +5,10 @@
 **Basé sur** : Article de François Arseneault-Hubert (2025) et Nilson (2014)
 **Statut** : Document de spécifications pour refonte complète
 
+> **Schéma réel (encart du 11 oct. 2026, #804)** : ce document est une archive de conception. La forme que
+> l'application écrit et lit aujourd'hui est décrite au skill `pratiques-notation`, § 5 (`forfaits` écrits,
+> `tableBundles` lus, traduits à la lecture — #708). En cas d'écart, c'est le skill qui fait foi.
+
 ---
 
 ## 📚 PHILOSOPHIE FONDAMENTALE

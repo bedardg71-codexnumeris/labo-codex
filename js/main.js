@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '1011-1014';
+window._SCRIPT_BUILD_main = '1011-1808';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -1107,11 +1107,6 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserAccueil();
     }
 
-    // MODULE 11: Gestion du groupe
-    if (typeof initialiserModuleGroupe === 'function') {
-        initialiserModuleGroupe();
-    }
-
     // MODULE 12: Pratiques de notation
     if (typeof initialiserModulePratiques === 'function') {
         initialiserModulePratiques();
@@ -1133,8 +1128,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // MODULE 09-2: Saisie des présences (lit seancesCompletes)
+    // #990 (lot 8, 11 oct. 2026) : par le portillon `auDbPret`, jamais avant `db-ready`. Quand
+    // « trimestres » ne tient plus dans le localStorage (vécu sur l'iPad à 85 %), elle est encore
+    // inconnue ici : `cle()` rendait des clés NUES, le module écrivait `{}` dans `calendrierComplet`
+    // et rendait l'écran sans ses élèves, sans que rien ne le refasse. Famille de #142.
+    // STOCK : les clés nues déjà écrites ne sont pas nettoyées (assumé, fiche #990).
     if (typeof initialiserModuleSaisiePresences === 'function') {
-        initialiserModuleSaisiePresences();
+        window.auDbPret(function() { initialiserModuleSaisiePresences(); });
     }
 
     // ===============================

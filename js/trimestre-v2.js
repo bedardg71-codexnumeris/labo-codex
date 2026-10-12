@@ -12,7 +12,7 @@
 
 /* ===============================
    WRAPPERS NOTIFICATIONS
-   (les fonctions originales sont dans evaluation.js / groupe.js,
+   (les fonctions originales sont dans evaluation.js,
     pas encore chargées quand ce module s'exécute)
    =============================== */
 
@@ -283,7 +283,8 @@ function populerDropdownsAssemblageV2() {
     // Beta 95.2: Dropdown Trimestres
     const selectTrimestre = document.getElementById('v2-gc-trimestre');
     if (selectTrimestre) {
-        const trimestres = db.getSync('trimestres', []);
+        // #477 (CT-19) : la liste du menu, sans doublon d'id (dédoublonnée à la lecture, jamais réécrite).
+        const trimestres = typeof window.obtenirTrimestres === 'function' ? window.obtenirTrimestres() : db.getSync('trimestres', []);
         const trimestreActif = db.getSync('trimestreActif', '');
 
         let html = '<option value="">— Choisir un trimestre —</option>';

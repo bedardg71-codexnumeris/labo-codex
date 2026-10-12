@@ -140,10 +140,10 @@ describe('#326 R3 · SPÉCIFICATIONS', () => {
 
 describe('#326 R3 · SOMMATIVE', () => {
     const cfg = { type: 'sommative', configuration: { reprisesPermises: 'limitees' }, reglesSpeciales: ['remplacement', 'plafonnement'] };
-    it('pondération par production, reprises (select)', () => {
+    it('pondération par production ; reprises : ce qui s\'applique, pas le déclaratif (#324, lot 11)', () => {
         const r = extraire(cfg);
         expect(val(r, 'ponderation')).toMatch(/production/i);
-        expect(val(r, 'reprises')).toBe('Limitées');
+        expect(val(r, 'reprises')).toBe('La reprise prend la place de la copie d\'origine dans la note');
     });
     it('toutes les évaluations comptent ; pas d\'échelle (SOM par design)', () => {
         const r = extraire(cfg);

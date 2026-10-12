@@ -204,8 +204,8 @@ describe('#557 · une seule définition de supprimerEvaluation', () => {
         '_apresOuvertureFichier',            // profil-etudiant-actions.js / liste-evaluations.js
         'afficherSection',                   // rapport-bug.js / bilan-reflexif.js / planification.js
         'afficherSousSection',               // bilan-reflexif.js / planification.js
-        'afficherTableauProductions',        // donnees-v2.js / productions.js
-        'fermerModalBibliothequePratiques'   // pratiques-gestion.js / pratiques.js
+        'afficherTableauProductions'         // donnees-v2.js / productions.js
+        // 'fermerModalBibliothequePratiques' : réglé par #587 (11 oct. 2026), une seule pose.
     ];
 
     it('aucun NOUVEAU nom de fonction n\'est posé sur window par deux modules', () => {

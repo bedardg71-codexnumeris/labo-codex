@@ -147,7 +147,7 @@ async function initialiserModuleCartouches() {
     await migrerCartouchesVersBibliotheque();
 
     // ✅ AJOUT (3 janvier 2026) : Assurer présence de la cartouche générique
-    await assurerCartoucheGenerique();
+    await assurerCartoucheDeDepart();
 
 }
 
@@ -155,7 +155,7 @@ async function initialiserModuleCartouches() {
  * Assure la présence de la cartouche générique dans la bibliothèque
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
-async function assurerCartoucheGenerique() {
+async function assurerCartoucheDeDepart() {
     // Vérifier que la grille générique existe
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const grilleGenerique = grilles.find(g => g.id === 'GRILLE_GENERIQUE');
@@ -165,7 +165,7 @@ async function assurerCartoucheGenerique() {
     // La suppression volontaire ne dépend pas de la collection : ce test reste
     // ici. La PRÉSENCE, elle, se vérifie DANS la file — vérifiée avant, deux
     // appels concurrents au démarrage sèment deux fois (défaut jumeau de
-    // `assurerGrilleGenerique`, corrigé au lot 2c).
+    // `assurerGrilleDeDepart`, corrigé au lot 2c).
     if (window.estRessourceSupprimee('CART_GENERIQUE')) return;
 
     const cartoucheGenerique = {
@@ -231,20 +231,25 @@ async function migrerCartouchesVersBibliotheque() {
     for (const grille of grilles) {
         const cleCartouches = cle(`cartouches_${grille.id}`);
         let cartouches = await db.get(cleCartouches) || [];
+        // #1040 (11 oct. 2026) — n'écrire que si la migration a changé quelque chose :
+        // avant, chaque ouverture réécrivait toutes les cartouches à l'identique.
+        let aChange = false;
 
         // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
         if (cartouches && !Array.isArray(cartouches)) {
             cartouches = [cartouches];
+            aChange = true;
         }
 
         cartouches.forEach(cartouche => {
             if (cartouche.dansBibliotheque === undefined) {
                 cartouche.dansBibliotheque = true;
                 nbMigrees++;
+                aChange = true;
             }
         });
 
-        if (cartouches.length > 0) {
+        if (aChange && cartouches.length > 0) {
             await db.set(cleCartouches, cartouches);
         }
     }
@@ -1574,6 +1579,7 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
             // cette voie les conservait, contrairement à sa voisine de bibliothèque.
             delete nouveauCartouche.metadata_cc;
             delete nouveauCartouche.auteurOriginal;
+            delete nouveauCartouche.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
 
             cartouches.push(nouveauCartouche); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
             copieCreee = nouveauCartouche;
@@ -2047,11 +2053,13 @@ window.confirmerImportCartouches = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
 
             // Aplatir les cartouches de toutes les grilles pour la bibliothèque
             for (const grilleId of Object.keys(cartouchesData)) {
@@ -2071,6 +2079,7 @@ window.confirmerImportCartouches = async function(donnees) {
 
                     // S'assurer que la cartouche a sa grilleId
                     importee.grilleId = importee.grilleId || grilleId;
+                    if (importee.id) idsImportes.push(importee.id);
 
                     const indexBiblio = bibliotheque.findIndex(c => c.id === importee.id);
                     if (indexBiblio >= 0) {
@@ -2087,17 +2096,14 @@ window.confirmerImportCartouches = async function(donnees) {
         }, []);
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportCartouches)
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
-        if (document.getElementById('modalBibliothequeCartouches')) {
-            if (typeof afficherBibliothequeCartouches === 'function') {
-                await afficherBibliothequeCartouches();
-            }
-        }
+        // #793 — la bibliothèque ouverte est redessinée, puis l'œil conduit aux cartes importées.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequeCartouches', afficherBibliothequeCartouches, idsImportes);
 
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) cartouche(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
-        message += `\nConsulte « Cartouches disponibles » pour les ajouter à ta sélection.`;
+        message += '\n' + (ligneMasquee || 'Consulte « Cartouches disponibles » pour les ajouter à ta sélection.');
         notifications.succes(message);
 
     } catch (error) {
@@ -4254,6 +4260,9 @@ function marquerProvenanceCartouche(cartoucheSource, srcId) {
  */
 async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSource) {
     const grillesLocales = await db.get(cle('grillesTemplates')) || [];
+    // #656 — l'échelle de la cartouche se rattache comme à l'import, sur les deux chemins.
+    const lireEchelleSource = (id) => (db.getSync(cleSource('echellesTemplates', srcId), []) || [])
+        .find(e => e && e.id === id) || null;
     const grilleAccueil = grillesLocales.find(g => memeIdentite(g, grilleSource)) || null;
 
     // Chemin 1 — aucune grille d'accueil : la cartouche n'aurait aucun magasin
@@ -4265,7 +4274,8 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
         });
         const res = partageSection.dupliquerGrillePartagee(
             source,
-            () => [marquerProvenanceCartouche(cartoucheSource, srcId)]
+            () => [marquerProvenanceCartouche(cartoucheSource, srcId)],
+            lireEchelleSource
         );
         return { ajoutee: true, conflit: null, grilleCreee: res.grille, grilleAccueil: null };
     }
@@ -4278,6 +4288,7 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
         id: genererIdUnique('CART_'),
         grilleId: grilleAccueil.id
     };
+    if (copie.echelleId) copie.echelleId = partageSection.rattacherEchelle(copie.echelleId, lireEchelleSource);
 
     // #476 — garde d'identité AU POINT D'ÉCRITURE : réimporter deux fois la même
     // cartouche ne doit pas en empiler deux exemplaires silencieusement.

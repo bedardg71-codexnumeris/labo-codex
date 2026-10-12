@@ -54,7 +54,6 @@ const ANNONCES = {
     'js/partage-section.js': 1,
     'js/planification-bibliotheque.js': 1,
     'js/planification-donnees.js': 1,
-    'js/portfolio.js': 1,
     'js/pratiques-bibliotheque.js': 2,
     'js/pratiques-gestion.js': 5,
     'js/pratiques.js': 5,

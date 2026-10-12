@@ -373,7 +373,7 @@ async function migrerEchellesVersBibliotheque() {
  */
 async function assurerEchelleIdmeDeDepart() {
     // 🆕 Garde anti-resemage du global hérité — JUMELLE de celle
-    // d'`assurerGrilleGenerique` (#358). Au boot, avant que `trimestreActif` soit
+    // d'`assurerGrilleDeDepart` (#358). Au boot, avant que `trimestreActif` soit
     // réhydraté, `cle()` retombe sur la clé GLOBALE nue : semer là recréerait
     // l'exemple dans le global que #358 retire. La navigation vers la section
     // rappelle ce module une fois le trimestre actif établi.
@@ -1016,12 +1016,15 @@ window.confirmerImportEchelles = async function(donnees) {
         // concurrents s'écrasaient l'un l'autre.
         let nbAjoutees = 0;
         let nbMisesAJour = 0;
+        let idsImportes = [];
 
         const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE, (lues) => {
             const bibliotheque = lues || [];
             nbAjoutees = 0;
             nbMisesAJour = 0;
+            idsImportes = [];
             echellesImportees.forEach(echelle => {
+                if (echelle.id) idsImportes.push(echelle.id);
                 const indexBiblio = bibliotheque.findIndex(e => e.id === echelle.id);
                 if (indexBiblio >= 0) {
                     bibliotheque[indexBiblio] = { ...echelle, dateAjoutBiblio: bibliotheque[indexBiblio].dateAjoutBiblio };
@@ -1036,15 +1039,14 @@ window.confirmerImportEchelles = async function(donnees) {
         }, []);
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE);   // lot F : geste hors témoin (confirmerImportEchelles)
 
-        // Rafraîchir le modal de bibliothèque s'il est ouvert
-        if (document.getElementById('modalBibliothequeEchelles')) {
-            await afficherBibliothequeEchelles();
-        }
+        // #793 — la bibliothèque ouverte est redessinée, puis l'œil conduit aux cartes importées.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequeEchelles', afficherBibliothequeEchelles, idsImportes);
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} échelle(s) mise(s) à jour.`);
-        details.push('Consulte « Échelles disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Échelles disponibles » pour les ajouter à ta barre latérale.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -1811,15 +1813,10 @@ async function creerNouvelleEchelle() {
  */
 function ajouterPremierNiveau() {
     // Créer une structure temporaire pour la nouvelle échelle
+    // #574 — vide : aucune valeur choisie à la place de l'utilisateur (option B,
+    // 28 août). L'enregistrement de l'échelle refuse un niveau incomplet.
     const niveauxTemp = [
-        {
-            code: 'N1',
-            nom: 'Nouveau niveau',
-            min: 0,
-            max: 100,
-            valeurCalcul: 50,
-            couleur: '#3498db'
-        }
+        { code: '', nom: '', min: '', max: '', valeurCalcul: '', couleur: '#3498db' }
     ];
 
     // Stocker temporairement les niveaux
@@ -2159,12 +2156,13 @@ function ajouterNiveauTemp() {
     const nbNiveaux = window._niveauxNouvelleEchelle.length;
     const couleur = couleurs[nbNiveaux % couleurs.length];
 
+    // #574 — ni plage 0-100 ni valeur 50 : l'utilisateur les pose.
     window._niveauxNouvelleEchelle.push({
         code: '',
         nom: '',
-        min: 0,
-        max: 100,
-        valeurCalcul: 50,
+        min: '',
+        max: '',
+        valeurCalcul: '',
         couleur: couleur
     });
     afficherNiveauxNouvelleEchelle();
@@ -2240,6 +2238,7 @@ function annulerFormEchelle() {
     // Nettoyer les niveaux temporaires, et les repères qui vont avec (#555 (e))
     window._niveauxNouvelleEchelle = null;
     window._reperesNouvelleEchelle = null;
+    window._niveauEnAttente = null;   // #574 — jamais écrit : rien à perdre en base
     // Masquer l'éditeur et réafficher l'accueil
     document.getElementById('conteneurEditionEchelle').classList.add('u-hide');
     // Note: Section optionsImportExportEchelles supprimée (Beta 92)
@@ -2256,6 +2255,7 @@ function annulerFormEchelle() {
 }
 
 async function chargerEchellePourModif(id) {
+    window._niveauEnAttente = null;   // #574 — le niveau en attente reste à l'échelle quittée
     const echelles = await db.get(cle('echellesTemplates')) ||  [];
     const echelle = echelles.find(e => e.id === id);
 
@@ -2317,6 +2317,113 @@ async function dupliquerEtEditerEchelle(id) {
     });
 }
 
+/**
+ * Une ligne de niveau de l'éditeur d'une échelle ENREGISTRÉE — partagée par ses
+ * niveaux et par le niveau en attente (#574), pour qu'ils ne divergent pas.
+ * @param {Object} niveau
+ * @param {string} attrs - attributs `data-*` des champs (handler, échelle, index)
+ * @param {Object} attrsCouleur - les mêmes, pour le sélecteur de couleur
+ * @param {string} outils - le coin d'outils (ordre, retrait), déjà rendu
+ */
+function ligneNiveauEchelleHtml(niveau, attrs, attrsCouleur, outils) {
+    return `
+        <div class="item-liste" style="position: relative; padding: 15px 150px 15px 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
+            ${/* Lot C (5 sept. 2026) — les chevrons et la corbeille en coin, sur la même ligne (le
+                  modèle des productions) ; la cellule « Ordre » de la grille n'existe plus. */''}
+${outils}
+            <div class="echelle-niveau-grille">
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Code <span class="champ-requis" title="Champ obligatoire">*</span></label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${echapperHtml(niveau.code)}"
+                           maxlength="3"
+                           ${attrs} data-champ="code"
+                           style="font-weight: 600; text-align: center;">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau <span class="champ-requis" title="Champ obligatoire">*</span></label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${echapperHtml(niveau.nom)}"
+                           ${attrs} data-champ="nom"
+                           style="font-weight: 500;">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Min (%) <span class="champ-requis" title="Champ obligatoire">*</span>
+                        <span class="primo-aide" data-target="echelle-plage-notes"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
+                    </label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${echapperHtml(niveau.min)}"
+                           min="0"
+                           max="100"
+                           ${attrs} data-champ="min" data-parse-float>
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Max (%) <span class="champ-requis" title="Champ obligatoire">*</span></label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${echapperHtml(niveau.max)}"
+                           min="0"
+                           max="100"
+                           ${attrs} data-champ="max" data-parse-float>
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle <span class="champ-requis" title="Champ obligatoire">*</span>
+                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
+                    </label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${echapperHtml(niveau.valeurCalcul)}"
+                           min="0"
+                           max="100"
+                           step="0.01"
+                           ${attrs} data-champ="valeurCalcul" data-parse-float>
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Couleur</label>
+                    ${window.travauxOutils.renderPickerCouleur(niveau.couleur, {
+                        dataAttrs: Object.assign({ 'champ': 'couleur' }, attrsCouleur)
+                    })}
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Palier SOLO du niveau
+                        <span class="echelle-texte-petit"> (facultatif)</span>
+                    </label>
+                    <select class="controle-form"
+                            ${attrs} data-champ="niveauSOLO">
+                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
+                    </select>
+                </div>
+            </div>
+        </div>
+`;
+}
+
+/**
+ * #574 — la ligne du niveau en attente, sous les niveaux de l'échelle. Ses
+ * champs écrivent dans le tampon (`modifierNiveauEnAttenteHandler`), pas en base.
+ */
+function ligneNiveauEnAttenteHtml(echelle) {
+    const attente = window._niveauEnAttente;
+    if (!attente || !echelle || attente.echelleId !== echelle.id) return '';
+    const outils = `<div class="bloc-coin-outils">
+                ${window.boutonRetirerBloc({
+                    action: 'retirerNiveauEnAttente',
+                    param: echelle.id,
+                    titre: 'Retirer ce niveau en attente'
+                })}
+            </div>
+            <p class="echelle-texte-petit">Niveau en attente : il rejoint l'échelle quand son code, son nom, ses deux bornes et sa valeur ponctuelle sont remplis.</p>`;
+    return ligneNiveauEchelleHtml(
+        attente.niveau,
+        `data-on-change="modifierNiveauEnAttenteHandler" data-echelle-id="${echelle.id}"`,
+        { 'on-change': 'modifierNiveauEnAttenteHandler', 'echelle-id': echelle.id },
+        outils
+    );
+}
+
 function afficherNiveauxEchelle(echelle) {
     const container = document.getElementById('tableauNiveauxEchelle');
     const apercuContainer = document.getElementById('apercuEchelleNiveaux');
@@ -2327,7 +2434,8 @@ function afficherNiveauxEchelle(echelle) {
         return;
     }
 
-    if (!echelle.niveaux || echelle.niveaux.length === 0) {
+    const enAttente = !!(window._niveauEnAttente && window._niveauEnAttente.echelleId === echelle.id);
+    if ((!echelle.niveaux || echelle.niveaux.length === 0) && !enAttente) {
         console.warn('⚠️ Aucun niveau défini pour cette échelle');
         container.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun niveau défini</p>';
         if (apercuContainer) apercuContainer.innerHTML = '';
@@ -2335,11 +2443,11 @@ function afficherNiveauxEchelle(echelle) {
     }
 
     // Afficher le tableau des niveaux en mode édition
-    const html = echelle.niveaux.map((niveau, index) => `
-        <div class="item-liste" style="position: relative; padding: 15px 150px 15px 15px; background: var(--surface-conteneur, #162c36); margin-bottom: 10px;">
-            ${/* Lot C (5 sept. 2026) — les chevrons et la corbeille en coin, sur la même ligne (le
-                  modèle des productions) ; la cellule « Ordre » de la grille n'existe plus. */''}
-            <div class="bloc-coin-outils">
+    const html = (echelle.niveaux || []).map((niveau, index) => ligneNiveauEchelleHtml(
+        niveau,
+        `data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}"`,
+        { 'on-change': 'modifierNiveauEchelleHandler', 'echelle-id': echelle.id, 'niveau-index': index },
+        `<div class="bloc-coin-outils">
                 ${window.boutonsReordonnerBloc({
                     actionHaut: 'deplacerNiveauEchelleHaut', actionBas: 'deplacerNiveauEchelleBas',
                     param: echelle.id,
@@ -2353,80 +2461,9 @@ function afficherNiveauxEchelle(echelle) {
                     param2: index,
                     titre: 'Supprimer ce niveau'
                 }) : ''}
-            </div>
-            <div class="echelle-niveau-grille">
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Code <span class="champ-requis" title="Champ obligatoire">*</span></label>
-                    <input type="text"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.code)}"
-                           maxlength="3"
-                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="code"
-                           style="font-weight: 600; text-align: center;">
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-niveau">Nom du niveau <span class="champ-requis" title="Champ obligatoire">*</span></label>
-                    <input type="text"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.nom)}"
-                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="nom"
-                           style="font-weight: 500;">
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Min (%) <span class="champ-requis" title="Champ obligatoire">*</span>
-                        <span class="primo-aide" data-target="echelle-plage-notes"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                    </label>
-                    <input type="number"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.min)}"
-                           min="0"
-                           max="100"
-                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="min" data-parse-float>
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Max (%) <span class="champ-requis" title="Champ obligatoire">*</span></label>
-                    <input type="number"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.max)}"
-                           min="0"
-                           max="100"
-                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="max" data-parse-float>
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail" data-tooltip="cn-echelle-valeur-ponctuelle">Valeur ponctuelle <span class="champ-requis" title="Champ obligatoire">*</span>
-                        <span class="primo-aide" data-target="echelle-valeur-ponctuelle"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                    </label>
-                    <input type="number"
-                           class="controle-form"
-                           value="${echapperHtml(niveau.valeurCalcul)}"
-                           min="0"
-                           max="100"
-                           step="0.01"
-                           data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="valeurCalcul" data-parse-float>
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Couleur</label>
-                    ${window.travauxOutils.renderPickerCouleur(niveau.couleur, {
-                        dataAttrs: {
-                            'on-change': 'modifierNiveauEchelleHandler',
-                            'echelle-id': echelle.id,
-                            'niveau-index': index,
-                            'champ': 'couleur'
-                        }
-                    })}
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Palier SOLO du niveau
-                        <span class="echelle-texte-petit"> (facultatif)</span>
-                    </label>
-                    <select class="controle-form"
-                            data-on-change="modifierNiveauEchelleHandler" data-echelle-id="${echelle.id}" data-niveau-index="${index}" data-champ="niveauSOLO">
-                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
-                    </select>
-                </div>
-            </div>
-        </div>
-    `).join('');
+            </div>`
+    )).join('')
+        + ligneNiveauEnAttenteHtml(echelle);
 
     // Ajouter un bouton pour ajouter un nouveau niveau
     const btnAjouterNiveau = `
@@ -2866,38 +2903,94 @@ async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
     return { ok: true };
 }
 
+/* =====================================================================
+   #574 — LE NIVEAU NEUF D'UNE ÉCHELLE ENREGISTRÉE EST TENU EN ATTENTE
+   =====================================================================
+
+   Avant (11 oct. 2026) : « + Ajouter un niveau » écrivait EN BASE un niveau
+   `code: 'N'`, plage 0-100, valeur ponctuelle 50. Tant que l'utilisateur ne
+   l'avait pas corrigé, toute note de 0 à 100 tombait aussi dans sa plage, et
+   ce « N » valait 50 : des valeurs choisies par le projet, ce que l'option B
+   de Grégoire (28 août : n'offrir que des échelles que l'utilisateur
+   complète) et #526/#527 interdisent. Le faire naître VIDE en base aurait
+   écrit un code vide — la collision de clés de #524.
+
+   ⮕ Patron du tampon des repères (#555 (e)) : le niveau vit ici, hors de la
+   base, jusqu'à ce que ses cinq champs obligatoires passent `refusChampNiveau`.
+   À ce moment seulement, il rejoint l'échelle, par la file de `db.modifier`.
+   Un seul niveau en attente à la fois ; il est oublié si on quitte l'échelle.
+   ===================================================================== */
+
+const CHAMPS_REQUIS_NIVEAU = ['code', 'nom', 'min', 'max', 'valeurCalcul'];
+
+/** Le premier refus d'un niveau incomplet, ou `null` s'il peut partir en base. */
+function refusNiveauIncomplet(niveau) {
+    for (const champ of CHAMPS_REQUIS_NIVEAU) {
+        const refus = refusChampNiveau(champ, niveau ? niveau[champ] : '');
+        if (refus) return refus;
+    }
+    return null;
+}
+
+/** `{ echelleId, niveau }` ou `null`. */
+window._niveauEnAttente = null;
+
 /**
- * Ajoute un nouveau niveau à une échelle
+ * « + Ajouter un niveau » : ouvre le niveau en attente, n'écrit RIEN.
  * @param {string} echelleId - ID de l'échelle
  */
 async function ajouterNiveauEchelle(echelleId) {
+    const echelles = db.getSync(cle('echellesTemplates'), []) || [];
+    const echelle = echelles.find(e => e && e.id === echelleId);
+    if (!echelle) {
+        console.error('❌ Échelle non trouvée:', echelleId);
+        alert('Erreur: Échelle non trouvée');
+        return;
+    }
+    const attente = window._niveauEnAttente;
+    if (!attente || attente.echelleId !== echelleId) {
+        window._niveauEnAttente = {
+            echelleId: echelleId,
+            niveau: { code: '', nom: '', min: '', max: '', valeurCalcul: '', couleur: '#cccccc' }
+        };
+    }
+    afficherNiveauxEchelle(echelleTemplateActuelle && echelleTemplateActuelle.id === echelleId
+        ? echelleTemplateActuelle : echelle);
+}
+
+/** Retire le niveau en attente : il n'a jamais été dans l'échelle, rien à écrire. */
+function retirerNiveauEnAttente(echelleId) {
+    window._niveauEnAttente = null;
+    if (echelleTemplateActuelle && echelleTemplateActuelle.id === echelleId) {
+        afficherNiveauxEchelle(echelleTemplateActuelle);
+    }
+}
+
+/**
+ * Un champ du niveau en attente. Tant qu'il manque un champ obligatoire, seul
+ * le tampon change (et l'écran n'est pas redessiné : le curseur reste où il
+ * est). Complet, le niveau part en base et le tampon se vide.
+ */
+async function modifierNiveauEnAttente(echelleId, champ, valeur) {
+    const attente = window._niveauEnAttente;
+    if (!attente || attente.echelleId !== echelleId) return { refuse: null };
+
+    const refus = CHAMPS_REQUIS_NIVEAU.includes(champ) ? refusChampNiveau(champ, valeur) : null;
+    if (refus) return { refuse: refus };
+    if (champ === 'niveauSOLO' && !valeur) delete attente.niveau.niveauSOLO;
+    else attente.niveau[champ] = valeur;
+
+    if (refusNiveauIncomplet(attente.niveau)) return { refuse: null };
+
+    const niveau = Object.assign({}, attente.niveau);
     let echelleApres = null;
     await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
         const echelles = lues || [];
         const index = echelles.findIndex(e => e.id === echelleId);
         if (index === -1) return undefined;
-
         const echelle = echelles[index];
-
-        // Initialiser le tableau de niveaux si nécessaire
-        if (!echelle.niveaux) {
-            echelle.niveaux = [];
-        }
-
-        // Créer un nouveau niveau avec des valeurs par défaut
-        const nouveauNiveau = {
-            code: 'N',
-            nom: 'Nouveau niveau',
-            min: 0,
-            max: 100,
-            valeurCalcul: 50,
-            couleur: '#cccccc'
-        };
-
-        // Ajouter le niveau à l'échelle
-        echelle.niveaux.push(nouveauNiveau);
-
-        // IMPORTANT: Mettre à jour l'échelle dans le tableau AVANT de sauvegarder
+        if (!echelle.niveaux) echelle.niveaux = [];
+        echelle.niveaux.push(niveau);
         echelles[index] = echelle;
         echelleApres = echelle;
         return echelles;
@@ -2905,28 +2998,23 @@ async function ajouterNiveauEchelle(echelleId) {
 
     if (!echelleApres) {
         console.error('❌ Échelle non trouvée:', echelleId);
-        alert('Erreur: Échelle non trouvée');
-        return;
+        return { refuse: null };
     }
+    if (window._niveauEnAttente === attente) window._niveauEnAttente = null;
 
     // La file rend la valeur ÉCRITE : plus besoin de relire la collection.
     echelleTemplateActuelle = echelleApres;
-
-    // Réafficher la liste des niveaux
     afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    // Mettre à jour la sidebar.
     // #468/CO-05 (21 août 2026) : l'écriture dans #nbNiveauxEchelle est RETIRÉE —
-    // l'élément n'existe nulle part dans index.html, si bien que chaque ajout ou
-    // retrait de niveau levait un TypeError et n'allait jamais jusqu'au bout.
+    // l'élément n'existe nulle part dans index.html.
     await afficherListeEchelles();
 
-    // Notification de succès
-    // Lot E1 (D3) : le niveau est déjà écrit ; le message ne demande plus d'enregistrer.
     notifications.succes(
         'Niveau ajouté.',
-        `L'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x). Ajuste son code, son nom, ses bornes et sa valeur : chaque champ s'enregistre tout seul.`
+        `L'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x).`
     );
+    return { refuse: null };
 }
 
 /**
@@ -3092,6 +3180,7 @@ async function dupliquerEchelleDepuisSidebar(id) {
         };
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
 
         echelles.push(copie);
         copieCreee = copie;
@@ -3483,6 +3572,14 @@ async function sauvegarderEchelleComplete() {
             return;
         }
 
+        // #574 — un niveau incomplet ne part pas en base : un code vide y ferait
+        // collision (#524), une borne ou une valeur vide le rendrait non calculable.
+        const incomplet = niveaux.findIndex(n => refusNiveauIncomplet(n));
+        if (incomplet !== -1) {
+            alert('Niveau ' + (incomplet + 1) + ' — ' + refusNiveauIncomplet(niveaux[incomplet]) + '.');
+            return;
+        }
+
         // #555 lot 2 (e) — les repères posés dans le tampon, revérifiés contre
         // les niveaux FINAUX : un code renommé après avoir été désigné ne part
         // pas en base en silence. Le refus se dit, et l'enregistrement attend.
@@ -3596,6 +3693,13 @@ function modifierNiveauEchelleHandler(el) {
         .then(function (resultat) { marquerChampRefuseEchelle(el, resultat && resultat.refuse); });
 }
 
+/** #574 — un champ du niveau en attente ; le refus se voit sur le champ. */
+function modifierNiveauEnAttenteHandler(el) {
+    var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
+    Promise.resolve(modifierNiveauEnAttente(el.dataset.echelleId, el.dataset.champ, valeur))
+        .then(function (resultat) { marquerChampRefuseEchelle(el, resultat && resultat.refuse); });
+}
+
 /** #555 lot 2 (e) — pose un repère sur l'échelle NEUVE (tampon), et rend visible un refus. */
 function modifierRepereTempHandler(el) {
     var resultat = modifierRepereTemp(el.dataset.champ, el.value);
@@ -3661,6 +3765,8 @@ window.sauvegarderEchelleComplete = sauvegarderEchelleComplete;
 window.deplacerNiveauEchelleHaut = deplacerNiveauEchelleHaut;
 window.deplacerNiveauEchelleBas = deplacerNiveauEchelleBas;
 window.ajouterNiveauEchelle = ajouterNiveauEchelle;
+window.modifierNiveauEnAttente = modifierNiveauEnAttente;                     // #574
+window.retirerNiveauEnAttente = retirerNiveauEnAttente;                       // #574
 window.ajouterPremierNiveau = ajouterPremierNiveau;
 window.afficherNiveauxNouvelleEchelle = afficherNiveauxNouvelleEchelle;
 window.afficherNiveauxEchelle = afficherNiveauxEchelle;                     // #505 — pour que la sentinelle puisse EXÉCUTER ce rendu
@@ -3713,6 +3819,7 @@ window.importerUneEchelleTrimestre = importerUneEchelleTrimestre;
 // Phase 5 : Exports wrappers délégation
 window.modifierNiveauTempHandler = modifierNiveauTempHandler;
 window.modifierNiveauEchelleHandler = modifierNiveauEchelleHandler;
+window.modifierNiveauEnAttenteHandler = modifierNiveauEnAttenteHandler;       // #574
 window.modifierRepereEchelleHandler = modifierRepereEchelleHandler;          // #555
 window.modifierRepereTempHandler = modifierRepereTempHandler;                // #555 lot 2 (e)
 window.modifierRepereTemp = modifierRepereTemp;                              // #555 lot 2 (e)

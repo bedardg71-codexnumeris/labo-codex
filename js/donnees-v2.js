@@ -1519,6 +1519,9 @@
             listeDependances.innerHTML = dependances.map(d => `<li>${escapeHtml(d)}</li>`).join('');
             divDependances.classList.remove('u-hide');
         } else {
+            // #653 (11 oct. 2026) — masqué ET vidé : la liste d'une suppression précédente
+            // ne doit pas survivre sous le masque (un lecteur du texte s'y est déjà trompé).
+            listeDependances.innerHTML = '';   // security-ok: chaîne vide constante
             divDependances.classList.add('u-hide');
         }
 
@@ -1529,6 +1532,7 @@
             listeAvertissements.innerHTML = avertissements.map(a => `<li>${escapeHtml(a)}</li>`).join('');
             divAvertissements.classList.remove('u-hide');
         } else {
+            listeAvertissements.innerHTML = '';   // security-ok: chaîne vide constante (#653 : masqué ET vidé)
             divAvertissements.classList.add('u-hide');
         }
 

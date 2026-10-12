@@ -32,8 +32,29 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
  * répond ; sinon, délégation au `db` du harnais (même retour, même rejet). Le témoin lui-même
  * est éprouvé par sentinelle-lot-e1-modifier-et-annoncer.test.js, sur le vrai modes.js.
  */
+/**
+ * #1040 (11 oct. 2026) — `db.setSyncSiChange` (db.js) posé sur un faux `db` de banc qui ne l'a
+ * pas, avec la même règle (JSON comparé, champs `ignorer` exclus à toute profondeur), sur SON
+ * getSync/setSync. Le vrai est éprouvé par sentinelle-1040-reecritures-a-l-identique.
+ * Rend le `db` reçu.
+ */
+export function poserSetSyncSiChange(dbHarnais) {
+    if (dbHarnais && typeof dbHarnais === 'object' && typeof dbHarnais.setSyncSiChange !== 'function'
+        && typeof dbHarnais.getSync === 'function' && typeof dbHarnais.setSync === 'function') {
+        dbHarnais.setSyncSiChange = function (key, value, ignorer) {
+            const r = (ignorer && ignorer.length) ? (k, v) => (ignorer.indexOf(k) !== -1 ? undefined : v) : undefined;
+            const ABSENTE = {};
+            const actuel = dbHarnais.getSync(key, ABSENTE);
+            if (actuel !== ABSENTE && actuel !== value && JSON.stringify(actuel, r) === JSON.stringify(value, r)) return 'inchange';   // même référence : on écrit (db.js)
+            return dbHarnais.setSync(key, value);
+        };
+    }
+    return dbHarnais;
+}
+
 export function completerEcrivainsParDefaut(globaux, fauxWindow) {
     const dbHarnais = globaux.db;
+    poserSetSyncSiChange(dbHarnais);   // #1040
     const ajouts = {};
     if (typeof globaux.modifierEtAnnoncer !== 'function') {
         ajouts.modifierEtAnnoncer = function (cle, mutateur, defaut, options) {

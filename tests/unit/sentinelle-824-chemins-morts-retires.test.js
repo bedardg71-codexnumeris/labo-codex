@@ -87,8 +87,9 @@ describe('#824 · les chemins morts sous les réglages du dépistage', () => {
         const pratiques = SOURCES.filter((s) => s.fichier.startsWith('js/pratiques/'));
         const detecterDefis = pratiques.filter((s) => /^\s*detecterDefis\(da\)\s*\{/m.test(s.code)).length;
         const identifierPattern = pratiques.filter((s) => /^\s*identifierPattern\(da\)\s*\{/m.test(s.code)).length;
-        expect(detecterDefis, 'des `detecterDefis` de pratiques ont disparu').toBeGreaterThanOrEqual(5);
-        expect(identifierPattern, 'les `identifierPattern` gardés par #551 ont bougé').toBe(5);
+        // #469 (lot 12, 11 oct. 2026) : 5 → 4, la pratique factice « test » (`pratique-test.js`) est retirée.
+        expect(detecterDefis, 'des `detecterDefis` de pratiques ont disparu').toBeGreaterThanOrEqual(4);
+        expect(identifierPattern, 'les `identifierPattern` gardés par #551 ont bougé').toBe(4);
         const standards = pratiques.find((s) => s.fichier.endsWith('pratique-pan-standards.js')).code;
         expect(standards).toMatch(/_diagnostiquerForcesChallenges\(moyennes\)\s*\{/);
     });

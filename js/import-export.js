@@ -123,6 +123,33 @@ function signatureContenu(valeur, champsIgnores) {
 }
 
 /**
+ * #663, #627 (11 oct. 2026) — rebranche l'échelle d'une PRATIQUE sur l'échelle renommée
+ * pour conflit. Une pratique désigne son échelle à trois endroits selon son âge :
+ * `configuration.echelleId` (ce qu'écrivent l'assistant et la gestion), `config.echelleId`
+ * (forme d'import #712, pratiques anciennes) et `echelleId` à la racine (schéma d'import).
+ * Avant, la réouverture d'archive ne regardait que `config` et l'import sélectif que la
+ * racine : la pratique gardait l'ancien id. Les trois sont traités, aucun n'en remplace un
+ * autre. Le sous-objet rebranché est COPIÉ : celui de l'archive lue n'est pas touché.
+ * @param {Object} pratique - modifiée en place (racine), sous-objets remplacés par copie
+ * @param {Object<string, string>} table - ancien id d'échelle → id neuf
+ * @returns {number} nombre de références rebranchées
+ */
+function rebrancherEchellePratique(pratique, table) {
+    if (!pratique || !table) return 0;
+    const a = (id) => !!id && Object.prototype.hasOwnProperty.call(table, id);
+    let n = 0;
+    if (a(pratique.echelleId)) { pratique.echelleId = table[pratique.echelleId]; n++; }
+    ['configuration', 'config'].forEach((champ) => {
+        const sous = pratique[champ];
+        if (sous && typeof sous === 'object' && a(sous.echelleId)) {
+            pratique[champ] = Object.assign({}, sous, { echelleId: table[sous.echelleId] });
+            n++;
+        }
+    });
+    return n;
+}
+
+/**
  * Fusionne une collection ENTRANTE dans une collection EXISTANTE en traitant
  * une collision d'id comme une IDENTITÉ, pas comme un accident.
  *
@@ -1796,7 +1823,7 @@ async function _ajouterCopiesImportees(listesDuFichier, zipTravaux) {
 
 /**
  * 🆕 Restaure les blobs travaux depuis un ZIP importé
- * Utilisé par executerImportLocalStorageBrut() et _ajouterCopiesImportees()
+ * Utilisé par _ajouterCopiesImportees()
  * @param {Object} donnees - Données importées, avec éventuellement _zipTravaux
  * @returns {Promise<{restaures: number, manquants: number}>} Bilan de la restauration
  */
@@ -2832,7 +2859,7 @@ function fermerModalPreviewConfigComplete() {
 
 /**
  * Exécute l'import de la configuration complète avec gestion des conflits d'ID
- * Supporte deux formats : configuration-complete (Beta 91+) et localStorage-brut
+ * Le format brut passe par sa propre modale (`executerImportSelectif`) ; #1047 a retiré sa branche morte ici.
  */
 async function executerImportConfigComplete() {
     if (!configCompleteEnAttente) {
@@ -2842,11 +2869,6 @@ async function executerImportConfigComplete() {
 
     const config = configCompleteEnAttente;
 
-    // 🆕 BETA 95.1 : Gérer les deux formats
-    if (config._format === 'localStorage-brut') {
-        await executerImportLocalStorageBrut(config);
-        return;
-    }
 
     // Format configuration-complete (Beta 91+)
     const contenu = config.contenu;
@@ -3113,78 +3135,6 @@ async function executerImportConfigComplete() {
 }
 
 /**
- * 🆕 BETA 95.1 : Exécute l'import d'un export localStorage brut
- * Réutilise la logique de executerImport() mais via le modal unifié
- * @param {Object} config - Données brutes localStorage
- */
-async function executerImportLocalStorageBrut(config) {
-    // Retirer les propriétés internes avant import
-    const donnees = { ...config };
-    const zipTravaux = donnees._zipTravaux;
-    delete donnees._format;
-    delete donnees._zipTravaux;
-
-    try {
-        const cles = Object.keys(donnees);
-        let nbCles = 0;
-
-        for (const cle of cles) {
-            let valeur = donnees[cle];
-
-            // Parser les strings JSON (backups de l'ancienne version localStorage)
-            if (typeof valeur === 'string') {
-                try {
-                    valeur = JSON.parse(valeur);
-                } catch (e) {
-                    // Garder comme string si ce n'est pas du JSON valide
-                }
-            }
-
-            // Utiliser db.set (async/IndexedDB)
-            await db.set(cle, valeur);
-            nbCles++;
-        }
-
-        // Synchroniser le cache localStorage avec IndexedDB
-        if (typeof db.syncToLocalStorageCache === 'function') {
-            await db.syncToLocalStorageCache();
-        }
-
-        // 🆕 Restauration des blobs travaux depuis le ZIP
-        const resBlobs = await _restaurerBlobsDepuisZip({ ...donnees, _zipTravaux: zipTravaux });
-
-        // Fermer le modal
-        fermerModalPreviewConfigComplete();
-
-        const msgBlobs = resBlobs.restaures > 0 ? ` + ${resBlobs.restaures} fichier(s) travaux` : '';
-        // #613 : ne jamais annoncer « réussi » sur un import amputé. Le compte
-        // exact et la conduite à tenir, une seule fois, à la fin.
-        const msgManquants = resBlobs.manquants
-            ? `\n\nAttention : ${resBlobs.manquants} fichier(s) n'ont pas pu être restaurés (espace insuffisant ou contenu refusé). Ils sont marqués « manquant » ; libère de l'espace et refais l'import du même ZIP.`
-            : '';
-
-        // Notification et rechargement
-        alert(`Import ${resBlobs.manquants ? 'partiel' : 'réussi'}\n\n${nbCles} clé(s) de données importée(s)${msgBlobs}.${msgManquants}`);
-
-        // Écritures IDB pendantes terminées AVANT le reload (bug terrain
-        // iPad 10 juin 2026 — cf. codex.js actionOuvrir, même patron).
-        await db.flush();
-        if (confirm('Recharger la page pour appliquer les changements ?')) {
-            await window.rechargerSiLeServeurRepond(); // #795
-        }
-
-    } catch (erreur) {
-        configCompleteEnAttente = null;
-        console.error('Erreur lors de l\'import localStorage brut:', erreur);
-        // #393 (audit 5 août, rapport A8) : les clés écrites AVANT l'échec
-        // restent écrites — resynchroniser le cache et le dire, plutôt qu'une
-        // erreur muette sur un état à moitié importé.
-        try { await db.syncToLocalStorageCache(); } catch (e2) { /* best-effort */ }
-        alert('Import interrompu : ' + erreur.message + '\n\nLes éléments déjà importés avant l\'erreur sont conservés. Recharge la page pour repartir d\'un état à jour.');
-    }
-}
-
-/**
  * 🆕 BETA 95.1 : Import sélectif basé sur les checkboxes
  * ✅ MODIFIÉ (6 jan 2026) : Support des checkboxes individuelles par élément
  * Importe uniquement les éléments cochés par l'utilisateur
@@ -3442,7 +3392,7 @@ async function executerImportSelectif() {
                     .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
                     .map(p => {
                         const assainie = assainirObjet(p, SCHEMAS_IMPORT.pratique);
-                        if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
+                        rebrancherEchellePratique(assainie, remapEchelles); // #627 : `configuration` aussi
                         return {
                             ...assainie,
                             // IMPORTANT: Garder l'ID original pour préserver les références
@@ -4074,6 +4024,7 @@ window.CLES_ECHELLE_NON_TRANSPORTEES = CLES_ECHELLE_NON_TRANSPORTEES;
 window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
+window.rebrancherEchellePratique = rebrancherEchellePratique; // #663 : aussi pour reserve-ouvrir.js
 window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé pour ses essais
 window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
 window.dasElevesEcartes = dasElevesEcartes; // #1012, l'élève désinscrit : exposé pour ses essais

@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.199 (lots 8 à 19 de la file sans Grégoire) — titre et sept items retenus par Grégoire
+            // le 11 oct. 2026 (18 h 04), transmis par Cowork, posés tels quels.
+            version: '1.199',
+            couleur: 'bleu',
+            titre: 'Rien d\'inventé, rien de perdu',
+            items: [
+                'Recalculer les captures ne fait plus perdre les mesures avant et après des interventions&nbsp;; dans le Cadre, les noms des groupes-cours et le compteur «&nbsp;X/5 configurés&nbsp;» sont à jour, et «&nbsp;Clore&nbsp;» n\'est plus proposé sur le trimestre en cours.',
+                'Ajouter un niveau à une échelle ne pose plus de valeurs à ta place&nbsp;: le niveau attend que tu aies rempli son code, son nom, ses bornes et sa valeur.',
+                'Dans la fiche d\'un élève (Cadre › Trimestre), la mesure d\'aide se coche maintenant à côté de SA.',
+                'Sur les courbes d\'intervention du tableau de bord, une courbe pointillée montre P sans l\'apport des reprises.',
+                'Après un import, la carte importée est mise en évidence, et une copie faite par «&nbsp;Dupliquer&nbsp;» ne se confond plus avec son original.',
+                'Une grille qu\'emploient des évaluations ne peut plus être supprimée depuis la Conception.',
+                'Supprimer un trimestre se fait dans les fenêtres de l\'application, et une grille dont les pondérations ne font pas 100&nbsp;% te le signale.'
+            ]
+        },
+        {
             // 1.198 (lots 5, 6 et 7 de la file sans Grégoire : #991, #1025, #995 ; #726, #925, « Appuie sur » ;
             // #1046, #522 lot 7) — titre et trois items retenus par Grégoire le 11 oct. 2026 (8 h 19 et
             // 8 h 43), transmis par Cowork, posés tels quels.

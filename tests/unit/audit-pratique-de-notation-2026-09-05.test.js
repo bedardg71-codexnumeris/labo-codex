@@ -713,7 +713,8 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         const b = monter(jeuSTD());
         noter('B3', { exposee: typeof b.win.chargerPortfolioEleveDetail, toggleExpose: typeof b.win.toggleArtefactPortfolioFromEl, profil: r2(b.win.calculerDetailsNoteFinale(DA.STD).noteFinale) });
         expect(typeof b.win.chargerPortfolioEleveDetail).toBe('undefined');
-        expect(typeof b.win.toggleArtefactPortfolioFromEl).toBe('function');   // exporté, mais son seul HTML porteur naît dans la fonction morte
+        // ↻ #722 (11 oct. 2026) : le panneau et sa bascule sont retirés ; la bascule n'est plus exposée.
+        expect(typeof b.win.toggleArtefactPortfolioFromEl).toBe('undefined');
     });
 
     it('B3b · STD — le VRAI panneau Portfolio du profil (genererSectionPerformance) : l\'indice P y est juste (79 %), mais la « Méthodologie de calcul » ne retrouve aucun artefact retenu et écrit « Calcul impossible »', () => {
@@ -1028,12 +1029,15 @@ describe('E · dans quoi la note du cours se lit', () => {
         expect(l.raison).toBe('note-chiffree');
         expect(propre.raison).toBe('note-chiffree');
     });
-    it('E6 · STD configurable dont l\'echelleId ne se résout pas (#590) : construireConfigComplete pose une IDME codée en dur (50/65/80/95) — sans bornes, elle ne situe rien ; le calcul, lui, n\'y touche pas', () => {
+    it('E6 · STD configurable dont l\'echelleId ne se résout pas (↻ #590, 11 oct. : plus d\'IDME codée en dur) : l\'échelle embarquée est VIDE et marquée introuvable, la pratique se charge, elle ne situe rien ; le calcul n\'y touche pas', () => {
         const b = monter(jeuSTD({ echelleId: 'ECHELLE_DISPARUE' }));
         const inst = b.win.obtenirPratiqueParId('std-banc');
         const situe = b.win.situerPourcentageDansEchelle(79.45, inst.config.echelle);
         noter('E6', { echelleEmbarquee: inst.config.echelle && inst.config.echelle.niveaux.map(n => n.code + ':' + n.valeur_pourcentage), situe, note: r2(b.win.calculerDetailsNoteFinale(DA.STD).noteFinale) });
-        expect(inst.config.echelle.niveaux.map(n => n.valeur_pourcentage)).toEqual([50, 65, 80, 95]);
+        expect(inst, 'la pratique doit encore se charger').not.toBeNull();
+        expect(inst.config.echelle.niveaux).toEqual([]);
+        expect(inst.config.echelle.introuvable).toBe(true);
+        expect(inst.config.echelle.echelle_id).toBe('ECHELLE_DISPARUE');
         expect(situe).toBeNull();
         expect(r2(b.win.calculerDetailsNoteFinale(DA.STD).noteFinale)).toBe(79.45);
     });

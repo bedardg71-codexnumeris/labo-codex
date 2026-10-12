@@ -172,15 +172,14 @@ function calculerImpactJetons() {
    =============================== */
 
 /**
- * Calcule la courbe « P sans reprises » pour un étudiant.
- * Embranchement pointillé à partir du premier jeton de reprise.
+ * #241 — les écarts de note de chaque reprise d'un élève (reprise − originale), rangés à la séance
+ * de l'échéance de leur production. Partagé par le profil et les courbes d'intervention.
  *
  * @param {string} da - Numéro DA de l'étudiant
- * @param {Array} snapshots - Snapshots avec dateSeance
- * @param {Array} donneesP - Tableau de valeurs P (0-1, avec offset) du graphique individuel
- * @returns {Array|null} - Tableau parallèle à donneesP (null avant le premier jeton), ou null si pas de jetons
+ * @param {Array<string>} datesSeances - dates des séances (AAAA-MM-JJ), dans l'ordre
+ * @returns {{deltas:Array<{indexSeance:number, delta:number}>, nbEvals:number}|null} - null sans reprise qui change la note
  */
-function genererPSansReprises(da, snapshots, donneesP) {
+function deltasReprisesParSeance(da, datesSeances) {
     var evaluations = [];
     var productions = [];
     try {
@@ -205,9 +204,6 @@ function genererPSansReprises(da, snapshots, donneesP) {
         if (e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null) nbEvals++;
     });
     if (nbEvals === 0) nbEvals = 1;
-
-    // Extraire les dates de séance
-    var datesSeances = snapshots.map(function(s) { return s.dateSeance || ''; });
 
     // Calculer les deltas par index de séance
     var deltasParIndex = []; // [{ indexSeance, delta }]
@@ -248,8 +244,43 @@ function genererPSansReprises(da, snapshots, donneesP) {
     });
 
     if (deltasParIndex.length === 0) return null;
-
     deltasParIndex.sort(function(a, b) { return a.indexSeance - b.indexSeance; });
+    return { deltas: deltasParIndex, nbEvals: nbEvals };
+}
+
+/**
+ * #241 (lot 11, 11 oct. 2026) — l'écart cumulé des reprises à la séance `s`, en points de P (0-100) :
+ * la somme des (note de la reprise − note de l'originale) dont l'échéance est atteinte, répartie
+ * sur les évaluations actives de l'élève. 0 avant la première.
+ * @param {{deltas:Array, nbEvals:number}|null} info - rendu de `deltasReprisesParSeance`
+ * @param {number} s - index de séance
+ * @returns {number}
+ */
+function ecartReprisesALaSeance(info, s) {
+    if (!info) return 0;
+    var cumul = 0;
+    for (var d = 0; d < info.deltas.length; d++) {
+        if (info.deltas[d].indexSeance <= s) cumul += info.deltas[d].delta;
+    }
+    return cumul / info.nbEvals;
+}
+
+/**
+ * Calcule la courbe « P sans reprises » pour un étudiant.
+ * Embranchement pointillé à partir du premier jeton de reprise.
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {Array} snapshots - Snapshots avec dateSeance
+ * @param {Array} donneesP - Tableau de valeurs P (0-1, avec offset) du graphique individuel
+ * @returns {Array|null} - Tableau parallèle à donneesP (null avant le premier jeton), ou null si pas de jetons
+ */
+function genererPSansReprises(da, snapshots, donneesP) {
+    // #241 : le calcul des écarts est partagé avec les courbes d'intervention (correlations-longitudinales.js).
+    var info = deltasReprisesParSeance(da, snapshots.map(function(s) { return s.dateSeance || ''; }));
+    if (!info) return null;
+    var deltasParIndex = info.deltas;
+    var nbEvals = info.nbEvals;
+
     var premierIdx = deltasParIndex[0].indexSeance;
 
     // Construire la courbe : null avant le premier jeton, P ajusté après
@@ -259,14 +290,8 @@ function genererPSansReprises(da, snapshots, donneesP) {
         if (s < premierIdx || donneesP[s] == null) {
             resultat.push(null);
         } else {
-            var cumulDelta = 0;
-            for (var d = 0; d < deltasParIndex.length; d++) {
-                if (deltasParIndex[d].indexSeance <= s) {
-                    cumulDelta += deltasParIndex[d].delta;
-                }
-            }
-            // Convertir delta (0-100) en échelle du graphique (0-1)
-            var pSans = donneesP[s] - (cumulDelta / nbEvals / 100);
+            // Convertir l'écart (0-100) en échelle du graphique (0-1)
+            var pSans = donneesP[s] - (ecartReprisesALaSeance(info, s) / 100);
             resultat.push(pSans);
         }
     }
@@ -469,5 +494,7 @@ function creerGraphiqueImpactJetons(canvasId) {
 window.creerGraphiqueImpactJetons = creerGraphiqueImpactJetons;
 window.calculerImpactJetons = calculerImpactJetons;
 window.genererPSansReprises = genererPSansReprises;
+window.deltasReprisesParSeance = deltasReprisesParSeance;   // #241
+window.ecartReprisesALaSeance = ecartReprisesALaSeance;   // #241
 
 })();

@@ -827,6 +827,23 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     if (!silencieux && isCreation) {
         notifications.succes(`Grille «\u00a0${nomGrille}\u00a0» créée.`);
     }
+
+    // #483 (11 oct. 2026) — des pondérations qui ne font pas 100 % : le geste explicite
+    // (créer, « Sauvegarder la grille ») le CONFIRME, sans bloquer. L'éditeur montrait déjà
+    // le total en couleur ; rien ne le disait au moment d'enregistrer. Même somme que
+    // `calculerTotalPonderationCriteres`. Les sauvegardes automatiques se taisent.
+    // Relecture de Cowork (11 oct.) : « Supprimer un critère » passe aussi ici, non silencieux,
+    // AVEC une modification à appliquer ; il ne doit pas confirmer un total (l'ajout et le
+    // changement de pondération se taisent). Le geste explicite, lui, n'en apporte aucune :
+    // « Sauvegarder la grille » (enregistrerCommeGrille) et sauvegarderGrilleComplete.
+    const gesteExplicite = !silencieux && !appliquer;
+    const criteresEnregistres = (grilleTemplateActuelle && grilleTemplateActuelle.criteres) || [];
+    if (gesteExplicite && criteresEnregistres.length > 0) {
+        const totalPonderation = criteresEnregistres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
+        if (totalPonderation !== 100) {
+            notifications.warning(`Grille enregistrée : ses critères totalisent ${totalPonderation}\u00a0%, pas 100\u00a0%.`);
+        }
+    }
 }
 
 /* ===============================
@@ -1589,7 +1606,7 @@ async function migrerGrillesVersBibliotheque() {
  * Assure la présence de la grille générique dans la bibliothèque
  * Facilite la compréhension du système pour les nouveaux utilisateurs
  */
-async function assurerGrilleGenerique() {
+async function assurerGrilleDeDepart() {
     // 🆕 #358 — Garde anti-resemage du global hérité. Au boot (DOMContentLoaded,
     // AVANT db-ready) avec localStorage saturé (#353), `trimestreActif` n'est pas
     // encore réhydraté → obtenirTrimestreId() est vide → cle('grillesTemplates')
@@ -1653,7 +1670,7 @@ async function initialiserModuleGrilles() {
         await migrerGrillesVersBibliotheque();
 
         // ✅ AJOUT (3 janvier 2026) : Assurer présence de la grille générique
-        await assurerGrilleGenerique();
+        await assurerGrilleDeDepart();
     }
 
     // Charger la liste des grilles
@@ -2055,29 +2072,14 @@ window.confirmerImportGrilles = async function(donnees) {
         // l'était — la carte arrivait en fin de liste, à 8 548 px sous le bas de
         // la fenêtre, sur une modale que la reconstruction remet en haut.
         // Un rafraîchissement qu'on ne voit pas ne se distingue pas d'une panne.
-        let pointage = null;
-        if (document.getElementById('modalBibliothequeGrilles')) {
-            await afficherBibliothequeGrilles();
-            pointage = BibliothequeUI.pointerVersItems(idsImportes);
-        }
+        // #793 : le geste vit dans `BibliothequeUI.conduireAuxImportes`, pour les cinq familles.
+        const ligneMasquee = await BibliothequeUI.conduireAuxImportes(
+            'modalBibliothequeGrilles', afficherBibliothequeGrilles, idsImportes, { repliFiltre: true });
 
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
-        // L'écriture a réussi mais AUCUNE carte ne la porte : un filtre mange le
-        // résultat (« Masquer les éléments déjà dans la barre latérale », ou le
-        // masquage des items démo en mode normal). Mesuré le 8 septembre : dans
-        // ces deux cas l'app annonçait « 1 grille ajoutée » devant une liste
-        // inchangée. On le dit, plutôt que d'annoncer un succès invisible.
-        if (pointage && pointage.trouves.length === 0 && pointage.absents.length > 0) {
-            const masquageCoche = typeof BibliothequeUI.estMasquerDejaPresentActif === 'function'
-                && BibliothequeUI.estMasquerDejaPresentActif();
-            details.push(masquageCoche
-                ? 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans la barre latérale » pour les voir.'
-                : 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.');
-        } else {
-            details.push('Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
-        }
+        details.push(ligneMasquee || 'Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -2143,7 +2145,7 @@ window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
 // Exposée pour la sentinelle #358 (garde anti-resemage du global hérité).
-window.assurerGrilleGenerique = assurerGrilleGenerique;
+window.assurerGrilleDeDepart = assurerGrilleDeDepart;
 
 // ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
 window.afficherBibliothequeGrilles = afficherBibliothequeGrilles;
@@ -2439,8 +2441,8 @@ async function afficherBibliothequeGrilles() {
    trimestre actif (id neuf + trace inspireDe), la source n'est jamais mutée.
    Outils réutilisés (livrés aux pas 2-3) : cleSource() (lecture d'un trimestre
    nommé sans swap) et partageSection.dupliquerGrillePartagee() (copie grille +
-   cartouches, lecteur de cartouches injecté). D-C4 reporté : l'echelleId d'une
-   cartouche copiée n'est PAS remappé ici (verrouillé par un test-témoin).
+   cartouches, lecteur de cartouches injecté). D-C4 statué le 11 oct. 2026 (#656) :
+   l'echelleId d'une cartouche copiée se rattache comme à l'import (rattacherEchelle).
    =================================================================== */
 
 /**
@@ -2495,7 +2497,10 @@ function copierGrilleDepuisTrimestre(grilleSource, srcId) {
         inspireDeTrimestre: srcId
     });
     const lireCartouchesParCle = (g) => db.getSync(cleSource('cartouches_' + g.id, srcId), []) || [];
-    return partageSection.dupliquerGrillePartagee(source, lireCartouchesParCle);
+    // #656 — l'échelle d'une cartouche se reconnaît telle qu'elle est dans le trimestre source.
+    const lireEchelleSource = (id) => (db.getSync(cleSource('echellesTemplates', srcId), []) || [])
+        .find(e => e && e.id === id) || null;
+    return partageSection.dupliquerGrillePartagee(source, lireCartouchesParCle, lireEchelleSource);
 }
 
 /** État de la section d'import, à reposer après reconstruction du modal. */
@@ -2944,6 +2949,24 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
     if (!grille) return false;
 
     const nomGrille = grille.nom || 'cette grille';
+
+    // #624 (11 oct. 2026) — UNE GRILLE QUI PORTE DES NOTES NE PART PAS. Ce chemin ne
+    // comptait que les cartouches : une grille employée par des évaluations ou des
+    // productions, sans cartouche, partait sur un « Supprimer ? » et les laissait sans
+    // référence. L'onglet Données bloquait déjà ce cas (`verifierDependancesGrille`,
+    // donnees-v2.js) : même règle ici, mêmes mots pour les comptes. Aucune issue n'est
+    // offerte : rattacher des évaluations à une autre grille changerait leurs notes.
+    // Lecture sous `cle()`, comme la grille elle-même : même trimestre.
+    const nbEvaluations = (db.getSync(cle('evaluationsSauvegardees'), []) || []).filter(ev => ev && ev.grilleId === grilleId).length;
+    const nbProductions = (db.getSync(cle('productions'), []) || []).filter(p => p && p.grilleId === grilleId).length;
+    if (nbEvaluations > 0 || nbProductions > 0) {
+        const emplois = [];
+        if (nbEvaluations > 0) emplois.push(`Utilisée par ${nbEvaluations} évaluation(s)`);
+        if (nbProductions > 0) emplois.push(`Utilisée par ${nbProductions} production(s)`);
+        alert(`Impossible de supprimer la grille « ${nomGrille} ».\n\n${emplois.join('\n')}\n\nSans elle, ces notes n'auraient plus de grille.`);
+        return false;
+    }
+
     const utilisation = await verifierUtilisationGrille(grilleId);
 
     if (utilisation.utilisee) {
@@ -4902,7 +4925,7 @@ function afficherCriteresGrille(grille) {
 
     // Ajouter un bouton pour ajouter un nouveau critère
     const btnAjouterCritere = `
-        <button class="btn btn-principal" data-action="ajouterCritereGrille" data-param="${grille.id}" class="u-mt-10">
+        <button class="btn btn-principal u-mt-10" data-action="ajouterCritereGrille" data-param="${grille.id}">
             + Ajouter un critère
         </button>
     `;
@@ -5355,6 +5378,7 @@ async function dupliquerGrilleDepuisSidebar(id) {
         };
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
+        delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
 
         grilles.push(copie);
         copieCreee = copie;

@@ -22,7 +22,8 @@
 #
 # USAGE
 #   scripts/pousser.sh              # pousse la branche courante vers origin
-#   scripts/pousser.sh origin main  # arguments passés tels quels à git push
+#   scripts/pousser.sh origin main  # arguments passés tels quels à git push ; « main »
+#                                   # doit être la branche courante (#980)
 #
 # La suite Playwright n'est lancée que si le lot emporte du code observable au
 # navigateur ; un push documentaire part directement.
@@ -75,6 +76,11 @@ cd "$REPO_ROOT"
 
 BRANCHE=$(git rev-parse --abbrev-ref HEAD)
 DISTANTE="origin/$BRANCHE"
+
+# #980 — une référence qui n'est pas la branche courante est refusée : le verdict jouerait
+# l'arbre de travail, pas ce qui part (scripts/ref-poussee.sh).
+. "$REPO_ROOT/scripts/ref-poussee.sh"
+ref_poussee_conforme "$BRANCHE" "$@" || exit 1
 
 # Un travail non commité ne part pas — et le verdict porterait sur autre chose
 # que ce qui est poussé. Mieux vaut le dire que le découvrir après.

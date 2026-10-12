@@ -3,7 +3,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 // Sentinelle #358 — Garde anti-resemage du global hérité par les exemples génériques.
 //
-// CE QU'ELLE VERROUILLE : `assurerGrilleGenerique` ne doit JAMAIS écrire l'exemple
+// CE QU'ELLE VERROUILLE : `assurerGrilleDeDepart` ne doit JAMAIS écrire l'exemple
 // générique dans la clé GLOBALE nue (⚠ #574, 29 août 2026 : sa jumelle
 // `assurerEchelleGenerique` est RETIRÉE — plus aucune échelle n'est semée par le
 // code ; ce banc ne garde que la moitié grille)
@@ -69,7 +69,7 @@ describe('#358 · garde anti-resemage du global par les exemples génériques', 
         expect(winT.cle('grillesTemplates')).toBe('grillesTemplates');
         expect(winT.cle('echellesTemplates')).toBe('echellesTemplates');
 
-        await winG.assurerGrilleGenerique();
+        await winG.assurerGrilleDeDepart();
         // #574 : plus de semis d'échelle du tout — la fonction n'existe plus.
         expect(winE.assurerEchelleGenerique).toBeUndefined();
 
@@ -86,7 +86,7 @@ describe('#358 · garde anti-resemage du global par les exemples génériques', 
         expect(winT.cle('grillesTemplates')).toBe('h2026_grillesTemplates');
         expect(winT.cle('echellesTemplates')).toBe('h2026_echellesTemplates');
 
-        await winG.assurerGrilleGenerique();
+        await winG.assurerGrilleDeDepart();
 
         // Semé dans la copie namespacée… (grille seulement : #574 a retiré l'échelle)
         expect((store.h2026_grillesTemplates || []).map(g => g.id)).toContain('GRILLE_GENERIQUE');
@@ -100,8 +100,8 @@ describe('#358 · garde anti-resemage du global par les exemples génériques', 
         const store = { trimestres: [{ id: 'h2026', actif: true }] };
         const { winG } = setup(store);
 
-        await winG.assurerGrilleGenerique();
-        await winG.assurerGrilleGenerique();
+        await winG.assurerGrilleDeDepart();
+        await winG.assurerGrilleDeDepart();
 
         const nb = (store.h2026_grillesTemplates || []).filter(g => g.id === 'GRILLE_GENERIQUE').length;
         expect(nb).toBe(1);

@@ -45,7 +45,6 @@
    
    Éléments HTML requis:
    - #contenuProfilEtudiant : Conteneur principal du profil
-   - #portfolioEleveDetail : Conteneur du portfolio
    - #etudiants-profil : Sous-section (gérée par 02-navigation.js)
    
    LocalStorage utilisé:
@@ -814,9 +813,8 @@ function genererSectionMobilisationEngagement(da) {
                             const bordure = art.retenu ? '3px' : '2px';
 
                             return `
-                                <div class="badge-artefact"
+                                <div class="badge-artefact hover-opaque"
                                      style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure}; cursor: pointer;"
-                                     class="hover-opaque"
                                      data-action="evaluerProduction" data-param="${da}" data-param2="${art.id}"
                                      title="${echapperHtml(art.description)}">
                                     <span class="badge-artefact-titre" style="color: ${couleurBadge};">
@@ -1932,7 +1930,7 @@ function obtenirDetailsAssiduite(da) {
 // l'application, de `pratique.identifierPattern(da)` et de
 // `pratique.genererCibleIntervention(da)`. Sa mort rend donc muettes les CINQ
 // implementations de `identifierPattern` des pratiques (PAN-Standards,
-// Sommative, PAN-Specifications, Configurable, Test) : elles ne sont plus
+// Sommative, PAN-Specifications, Configurable, et Test jusqu'au 11 oct. 2026) : elles ne sont plus
 // atteintes que par `testerPratiqueTest`, une fonction de console jamais
 // appelee. (`testerPratiqueFrancois` en etait la seconde : son fichier,
 // `js/pratiques/config-francois-chimie.js`, est parti avec #687 — zero lecteur
@@ -2715,18 +2713,7 @@ function afficherProfilComplet(daOuEl) {
    📁 GESTION DU PORTFOLIO
    =============================== */
 
-/* ⚠️ CODE SUPPRIMÉ - 23 octobre 2025
- *
- * Les fonctions chargerPortfolioDetail() et toggleArtefactPortfolio()
- * étaient dupliquées dans ce fichier.
- *
- * UTILISER DÉSORMAIS les fonctions de portfolio.js:
- * - chargerPortfolioEleveDetail(da)
- * - toggleArtefactPortfolio(da, portfolioId, nombreARetenir)
- *
- * Ces fonctions sont globalement accessibles et gèrent le portfolio étudiant.
- * Les appels HTML (onchange) utilisent automatiquement les fonctions de portfolio.js.
- */
+/* #722 (11 oct. 2026) : l'ancien panneau de détail du portfolio (portfolio.js) est retiré. */
 
 /**
 * Génère le HTML de la section assiduité

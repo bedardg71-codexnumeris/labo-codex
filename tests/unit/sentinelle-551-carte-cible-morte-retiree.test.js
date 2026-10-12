@@ -51,8 +51,8 @@ const PRATIQUES = [
     'js/pratiques/pratique-pan-standards.js',
     'js/pratiques/pratique-sommative.js',
     'js/pratiques/pratique-pan-specifications.js',
-    'js/pratiques/pratique-configurable.js',
-    'js/pratiques/pratique-test.js'
+    'js/pratiques/pratique-configurable.js'
+    // #469 (lot 12, 11 oct. 2026) : `pratique-test.js` retiré.
 ];
 
 describe('#551 · la carte « Cible d\'intervention » morte est retirée', () => {

@@ -84,30 +84,8 @@ describe('lot C · A — le dossier de la bibliothèque : la corbeille, la confi
 });
 
 /* ============================================================ B — LA PRATIQUE V2 */
-
-describe('lot C · B — la pratique de notation v2 : les trois tables', () => {
-    it('B.a objectifs, types de production, forfaits : la corbeille avec la même action, le même paramètre, le même titre ; plus de « ✕ »', async () => {
-        const { win, document } = monter('js/pratique-notation-v2.js');
-        win.afficherListeObjectifs([{ nom: 'Lire', essentiel: true, ponderation: 50 }, { nom: 'Écrire', essentiel: false, ponderation: 50 }], 'comptage');
-        const objectifs = document.getElementById('v2-objectifs-liste').innerHTML;
-        expect(objectifs).not.toContain('✕');
-        expect(objectifs).not.toContain('btn-danger');
-        expect(compter(objectifs, 'icons8-trash.svg')).toBe(2);
-        expect(objectifs).toMatch(/data-action="supprimerObjectif" data-param="1"/);
-        expect(objectifs).toContain('aria-label="Supprimer cet objectif"');
-        win.afficherTypesTravauxSpec([{ id: 't1', nom: 'Analyse', description: '' }]);
-        await new Promise((r) => setTimeout(r, 0));
-        const types = document.getElementById('v2-spec-types-travaux-liste').innerHTML;
-        expect(types).not.toContain('✕');
-        expect(types).toMatch(/data-action="supprimerTypeTravailSpecV2" data-param="t1"/);
-        expect(types).toContain('aria-label="Supprimer ce type"');
-        win.afficherForfaitsSpec([{ id: 'f1', lettre: 'A', note: 100, travaux: { t1: 2 } }], [{ id: 't1', nom: 'Analyse' }]);
-        const forfaits = document.getElementById('v2-spec-forfaits-liste').innerHTML;
-        expect(forfaits).not.toContain('✕');
-        expect(forfaits).toMatch(/data-action="supprimerForfaitSpec" data-param="f1"/);
-        expect(forfaits).toContain('aria-label="Supprimer ce forfait"');
-    });
-});
+// Le bloc B jugeait les trois tables de `pratique-notation-v2.js`, retiré en entier le
+// 11 oct. 2026 (#469 : ses cibles `v2-*` n'existaient plus dans index.html).
 
 /* ============================================================ C — L'ÉDITEUR D'ÉCHELLES */
 
@@ -176,8 +154,6 @@ describe('lot C · C — l\'éditeur d\'échelles : la table et les deux cartes'
 describe('lot C · D — les sources des sites touchés', () => {
     it('D.a plus aucun « ✕ » de suppression dans la bibliothèque ni dans la pratique v2 ; la corbeille sait confirmer et se désactiver', () => {
         expect(sansCommentaires(source('js/bibliotheque-ui.js'))).not.toContain('✕');
-        expect(sansCommentaires(source('js/pratique-notation-v2.js'))).not.toContain('✕');
-        expect(sansCommentaires(source('js/pratique-notation-v2.js'))).not.toContain('btn-danger');
         const ui = source('js/ui-blocs.js');
         expect(ui).toMatch(/const confirme = o\.confirm \? ` data-confirm="\$\{esc\(o\.confirm\)\}"` : '';/);
         expect(ui).toMatch(/const inactif = o\.disabled \? ' disabled' : '';/);
@@ -187,7 +163,8 @@ describe('lot C · D — les sources des sites touchés', () => {
         const e = sansCommentaires(source('js/echelles.js'));
         expect(e).not.toContain('>Ordre<');
         expect(e).not.toContain('btn btn-supprimer btn-compact');
-        expect((e.match(/class="bloc-coin-outils"/g) || []).length).toBe(2);
+        // ↻ 11 oct. 2026 (#574) : 2 → 3, le coin du niveau en attente (sa seule corbeille).
+        expect((e.match(/class="bloc-coin-outils"/g) || []).length).toBe(3);
         // ↻ 13 sept. 2026 (#658) : l'assertion « une seule `outils-rangee` » est retirée avec son
         // sujet. Cette rangée d'outils était celle de l'ancien tableau de niveaux
         // (`afficherTableauNiveaux`), rendu dans un conteneur caché d'index.html et parti avec lui.
@@ -233,7 +210,7 @@ describe('lot C · E — les règles : sept colonnes, le coin, 44 px, l\'empilem
 
     it('E.d les jetons des cinq fichiers du lot ont bougé', () => {
         const html = source('index.html');
-        for (const f of ['js/ui-blocs.js', 'js/bibliotheque-ui.js', 'js/pratique-notation-v2.js', 'js/echelles.js']) {
+        for (const f of ['js/ui-blocs.js', 'js/bibliotheque-ui.js', 'js/echelles.js']) {   // pratique-notation-v2.js retiré (#469)
             { const j = jetonAuMoins(html, f, '20260905a'); expect(j.ok, j.message).toBe(true); }
         }
         { const j = jetonAuMoins(html, 'styles.css', '20260905e'); expect(j.ok, j.message).toBe(true); }
