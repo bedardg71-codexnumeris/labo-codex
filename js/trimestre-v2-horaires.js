@@ -335,7 +335,7 @@ function modifierSeanceV2(index) {
     const seance = horaire[index];
 
     if (!seance) {
-        alert('Séance non trouvée.');
+        notifications.erreur('Séance non trouvée.');
         return;
     }
 

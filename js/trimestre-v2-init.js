@@ -716,7 +716,7 @@ function modifierEvenementV2(id) {
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
-        alert('Journée introuvable');
+        notifications.erreur('Journée introuvable');
         return;
     }
 
@@ -754,12 +754,12 @@ function confirmerEvenementV2() {
     }
 
     if (!dateEvenement || !description) {
-        alert('Remplis la date et la description.');
+        notifications.warning('Remplis la date et la description.');
         return;
     }
 
     if (dateReprise && !horaireReprise) {
-        alert('Indique quel jour de cours est remplacé.');
+        notifications.warning('Indique quel jour de cours est remplacé.');
         return;
     }
 
