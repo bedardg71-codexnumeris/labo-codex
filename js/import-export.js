@@ -150,6 +150,43 @@ function rebrancherEchellePratique(pratique, table) {
 }
 
 /**
+ * #627 (12 oct. 2026) — LA règle de rebranchement d'un import : une seule pour les quatre
+ * chemins (import complet, import sélectif, réouverture d'archive « en double », partage).
+ * Avant, chacun portait sa liste de champs, et chacun en oubliait un autre : la réouverture
+ * ne suivait pas `cartouche.echelleId`, l'import complet ni `cartouche.grilleId` ni
+ * `cartouche.echelleId`, le partage que `grilleId`.
+ *   production : grilleId, echelleId, cartoucheId
+ *   cartouche  : grilleId, echelleId (la CLÉ de stockage `cartouches_<grilleId>` reste
+ *                à la charge de l'appelant, qui la calcule depuis la même table)
+ *   pratique   : `rebrancherEchellePratique` (racine, `configuration`, `config`)
+ * Un id absent de sa table ne bouge pas : la table ne contient que ce qui a changé d'id
+ * (ou, pour le partage, ce qui est dans le paquet).
+ * @param {Object} item - modifié en place
+ * @param {'production'|'cartouche'|'pratique'} type
+ * @param {{grilles?: Object, echelles?: Object, cartouches?: Object}} tables - ancien id → id neuf
+ * @returns {number} nombre de références rebranchées
+ */
+function rebrancherReferences(item, type, tables) {
+    if (!item || !tables) return 0;
+    const table = (nom) => tables[nom] || {};
+    const suivre = (champ, t) => {
+        const id = item[champ];
+        if (!id || !Object.prototype.hasOwnProperty.call(t, id)) return 0;
+        item[champ] = t[id];
+        return 1;
+    };
+    if (type === 'production') {
+        return suivre('grilleId', table('grilles')) + suivre('echelleId', table('echelles'))
+            + suivre('cartoucheId', table('cartouches'));
+    }
+    if (type === 'cartouche') {
+        return suivre('grilleId', table('grilles')) + suivre('echelleId', table('echelles'));
+    }
+    if (type === 'pratique') return rebrancherEchellePratique(item, table('echelles'));
+    return 0;
+}
+
+/**
  * Fusionne une collection ENTRANTE dans une collection EXISTANTE en traitant
  * une collision d'id comme une IDENTITÉ, pas comme un accident.
  *
@@ -2918,6 +2955,7 @@ async function executerImportConfigComplete() {
         const remapEchelles = {};
         const remapGrilles = {};
         const remapCartouches = {};   // #654 — rempli par la fusion des cartouches
+        const tables = { grilles: remapGrilles, echelles: remapEchelles, cartouches: remapCartouches }; // #627
 
         // Récupérer les ressources existantes
         const echellesExistantes = db.getSync(cle('echellesTemplates'), []);
@@ -2993,16 +3031,18 @@ async function executerImportConfigComplete() {
                 // Déterminer la bonne clé à utiliser (remappée ou originale)
                 const grilleIdFinal = remapGrilles[ancienGrilleId] || ancienGrilleId;
 
-                if (remapGrilles[ancienGrilleId]) {
-                }
-
                 // Récupérer les cartouches existantes pour cette grille
                 const cartouchesExistantes = db.getSync(cle(`cartouches_${grilleIdFinal}`), []);
 
                 // Sanitiser chaque cartouche reçu avant fusion. Les commentaires
                 // (clés dynamiques `<critereId>_<niveauCode>`) sont assainis via
                 // le type `mapStrings`. Voir MODELE-MENACES.md §3.1.bis (D-01).
-                const cartouchesAssainis = cartouchesGrille.map(c => assainirObjet(c, SCHEMAS_IMPORT.cartouche));
+                // #627 — et rebrancher leurs champs `grilleId`/`echelleId` : seule la CLÉ suivait.
+                const cartouchesAssainis = cartouchesGrille.map(c => {
+                    const assainie = assainirObjet(c, SCHEMAS_IMPORT.cartouche);
+                    rebrancherReferences(assainie, 'cartouche', tables);
+                    return assainie;
+                });
 
                 // Fusionner par IDENTITÉ (#448) : une cartouche déjà présente
                 // à l'identique n'est pas réimportée. C'est ce chemin qui a
@@ -3045,23 +3085,12 @@ async function executerImportConfigComplete() {
                 }
                 // Sinon, garder l'ID original pour préserver les références
 
-                // Mettre à jour la référence à la grille si elle a été remappée
-                if (prod.grilleId && remapGrilles[prod.grilleId]) {
-                    prod.grilleId = remapGrilles[prod.grilleId];
-                }
-
-                // Mettre à jour la référence à l'échelle si elle a été remappée
-                if (prod.echelleId && remapEchelles[prod.echelleId]) {
-                    prod.echelleId = remapEchelles[prod.echelleId];
-                }
-
-                // #654 — rebrancher sur la cartouche renommée pour conflit. SAUF une
-                // production déjà en place à l'identique : `fusionnerParIdentite`
-                // l'écarte, et la toucher ici la ferait passer pour différente — une
-                // production jumelle naîtrait. Celle en place garde sa cartouche.
-                if (!identiqueEnPlace && prod.cartoucheId && remapCartouches[prod.cartoucheId]) {
-                    prod.cartoucheId = remapCartouches[prod.cartoucheId];
-                }
+                // #627 — grille, échelle et cartouche renommées : la règle commune.
+                // #654 — SAUF la cartouche d'une production déjà en place à l'identique :
+                // `fusionnerParIdentite` l'écarte, et la toucher ici la ferait passer pour
+                // différente — une production jumelle naîtrait. Celle en place garde sa cartouche.
+                rebrancherReferences(prod, 'production',
+                    identiqueEnPlace ? { grilles: remapGrilles, echelles: remapEchelles } : tables);
 
                 return prod;
             });
@@ -3221,6 +3250,7 @@ async function executerImportSelectif() {
         const remapGrilles = {};
         const remapEchelles = {};
         const remapCartouches = {};
+        const tables = { grilles: remapGrilles, echelles: remapEchelles, cartouches: remapCartouches }; // #627
         const bilan = {};
         const rebrancher = (id, table) =>
             (id && Object.prototype.hasOwnProperty.call(table, id)) ? table[id] : id;
@@ -3345,8 +3375,7 @@ async function executerImportSelectif() {
                         const cartouchesSelectionnees = cartouches
                             .map(c => {
                                 const assainie = assainirObjet(c, SCHEMAS_IMPORT.cartouche);
-                                if (assainie.grilleId) assainie.grilleId = rebrancher(assainie.grilleId, remapGrilles);
-                                if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
+                                rebrancherReferences(assainie, 'cartouche', tables); // #627
                                 return {
                                     ...assainie,
                                     dateImport: new Date().toISOString(),
@@ -3392,7 +3421,7 @@ async function executerImportSelectif() {
                     .filter(p => !idsPratiquesExistants.has(p.id)) // Éviter doublons par ID uniquement
                     .map(p => {
                         const assainie = assainirObjet(p, SCHEMAS_IMPORT.pratique);
-                        rebrancherEchellePratique(assainie, remapEchelles); // #627 : `configuration` aussi
+                        rebrancherReferences(assainie, 'pratique', tables); // #627 : `configuration` aussi
                         return {
                             ...assainie,
                             // IMPORTANT: Garder l'ID original pour préserver les références
@@ -3457,9 +3486,7 @@ async function executerImportSelectif() {
                     const assainie = assainirObjet(p, SCHEMAS_IMPORT.production);
                     // #952 — rebranchée sur la grille et l'échelle renommées pour conflit ;
                     // #654 — et sur la cartouche.
-                    if (assainie.grilleId) assainie.grilleId = rebrancher(assainie.grilleId, remapGrilles);
-                    if (assainie.echelleId) assainie.echelleId = rebrancher(assainie.echelleId, remapEchelles);
-                    if (assainie.cartoucheId) assainie.cartoucheId = rebrancher(assainie.cartoucheId, remapCartouches);
+                    rebrancherReferences(assainie, 'production', tables); // #627
                     return {
                         ...assainie,
                         // Garder l'ID original sauf si conflit d'ID
@@ -4024,7 +4051,7 @@ window.CLES_ECHELLE_NON_TRANSPORTEES = CLES_ECHELLE_NON_TRANSPORTEES;
 window.CLES_PRODUCTION_NON_TRANSPORTEES = CLES_PRODUCTION_NON_TRANSPORTEES;
 window.verifierUniciteIds = verifierUniciteIds; // #292 : exposé pour chargerCodex (codex.js)
 window.fusionnerParIdentite = fusionnerParIdentite; // #448
-window.rebrancherEchellePratique = rebrancherEchellePratique; // #663 : aussi pour reserve-ouvrir.js
+window.rebrancherReferences = rebrancherReferences; // #627 : aussi pour reserve-ouvrir.js et partage-import.js
 window.fusionnerCopiesImportees = fusionnerCopiesImportees; // #1012 : exposé pour ses essais
 window.fusionnerDonneesPersoImportees = fusionnerDonneesPersoImportees; // #1012, les quatre cases : exposé pour ses essais
 window.dasElevesEcartes = dasElevesEcartes; // #1012, l'élève désinscrit : exposé pour ses essais
