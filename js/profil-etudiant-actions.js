@@ -70,7 +70,7 @@ function consulterEvaluation(da, productionId) {
     if (fichierId && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
         // Mettre le filtre production sur la bonne production AVANT d'ouvrir le fichier
         if (productionId) {
-            sessionStorage.setItem('travaux-filtre-production', productionId);
+            sessionStorage.setItem(cle('travaux-filtre-production'), productionId);
         }
         // Workflow visionneuse : naviguer vers Annoter, attendre l'init du module,
         // puis ouvrir le fichier. Le callback _apresOuvertureFichier est appelé
