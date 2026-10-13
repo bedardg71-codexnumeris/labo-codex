@@ -141,7 +141,6 @@
 - Recherches non faites : SESSION.md pour l'Évaluation, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 7 : l'état du tirage par groupe et le bouton « Réinitialiser » de l'Animation (voulus, livraison non documentée) ; ouvrir une intervention depuis un signalement (voulu le 7 sept. 2026, livraison non documentée).
 - Parties 8 et 9 : aucun geste documenté pour Labo › Données et Labo › Études ; les mots finals de « Faire revenir un trimestre » (1.184) ne sont écrits nulle part.
 
 **Comment corriger** : écran par écran, directement dans le texte (corriger, rayer, ajouter). Une intention qui manque parce qu'elle n'est écrite nulle part, c'est à toi de l'ajouter.
@@ -2863,8 +2862,8 @@ Où vit le dépistage, d'après les documents : il se RÈGLE dans Labo › Outil
 - Quand les évaluations d'un élève ne se convertissent pas (aucune échelle désignée, échelle introuvable), le dépistage l'annonce et nomme la cause (changelog 1.102) ; une évaluation dont l'échelle a disparu est écartée, l'encadré « Dépistage incomplet » le dit (changelog 1.103).
 - En démonstration, la famille « Défi spécifique » du Suivi du groupe se calcule sur la grille du pack, sans toucher la grille de référence de l'enseignant (changelog 1.131).
 - Le suivi des fondations décrit la persistance des difficultés et sa direction, et ne rend plus de palier ; une seule production récente sous le seuil s'écrit « Difficulté récente » (CADRAGE-2026-09-16, lot C, mot choisi le 17 sept. 2026 ; changelog 1.142) (#744).
-- Le bilan des fondamentaux du Suivi du groupe écrit « récente » là où il écrivait « émergente » ; le tableau de l'Aide « Comment interpréter les diagnostics ? » n'a plus de colonne « Niveau RàI » et porte la ligne « Progression lente » (changelog 1.142 ; OU-EN-EST-ON, 17 sept. 2026).
-- Non tranché : « Progression lente » compte dans le total du bilan des fondamentaux sans phrase propre ; la phrase est à écrire par Grégoire (OU-EN-EST-ON, 17 sept. 2026).
+- Le bilan des fondamentaux du Suivi du groupe écrit « récente » là où il écrivait « émergente » ; le tableau de l'Aide « Comment interpréter les diagnostics ? » n'a plus de colonne « Niveau RàI » et porte la ligne « En consolidation » (décision de Grégoire, 13 oct. 2026) (changelog 1.142 ; OU-EN-EST-ON, 17 sept. 2026).
+- Sortie : un critère resté sous le seuil sur au moins trois productions, dont les résultats montent, se dit « En consolidation » (et non plus « Progression lente ») ; il a sa place dans la phrase du bilan des fondamentaux, par exemple « (1 récente, 2 constantes, 1 en consolidation) », et dans l'Aide (décision de Grégoire, 13 oct. 2026).
 
 ### Écran 57 · Suivi › Profils individuels › Accompagnement : la carte RàI et les niveaux RàI
 
@@ -2877,8 +2876,8 @@ Où vit le dépistage, d'après les documents : il se RÈGLE dans Labo › Outil
 - Un élève jamais présent et sans copie, « En attente », ne compte pas dans la barre des profils d'apprentissage du groupe (OU-EN-EST-ON, 17 sept. 2026).
 - La carte nomme le défi principal et place après chaque critère une flèche (→ ou ←, ou un trait sans variation) réglée par la sensibilité des flèches (changelog 1.129 ; CADRAGE-2026-09-10 § 4.4).
 - La cible d'intervention nomme la cause : « Difficulté persistante », le nom du critère tiré de la grille de l'utilisateur, et son niveau SOLO configuré ; plus de « Remédiation », « CAF » ni « Pratique guidée » (CONSIGNE-552 § 10.2, décision de Grégoire du 27 août 2026).
-- Contradiction : la CONSIGNE-552 (27 août 2026) fait venir l'intensité de la cible de la persistance × direction ; le CADRAGE-2026-09-16 (lot C, 16 sept. 2026) et le changelog 1.142 la font suivre la carte RàI ; retenu : la carte RàI.
-- Contradiction : le CADRAGE-2026-09-16 (Cowork, 16 sept. 2026) retire comme code mort la branche « Décrochage » de la cible ; le BACKLOG (#554, 11 oct. 2026) la branche sur le statut de la fiche ; aucun écran ne change dans l'un ni l'autre cas.
+- Données : l'intensité de la cible d'intervention suit le niveau de la carte RàI (CADRAGE-2026-09-16-regles-du-depistage, lot C ; changelog 1.142).
+- Données : quand la fiche porte la remarque « Décrochage », la cible d'intervention de l'élève le nomme comme cause (BACKLOG #554 ; décision de Grégoire, 13 oct. 2026).
 - Le signalement du travail diagnostique s'affiche à côté du palier, jamais dedans (CADRAGE-2026-09-07, décision 3, 7 sept. 2026 ; changelog 1.125).
 - L'historique d'accompagnement, les graphiques et le compteur de la Liste ne montrent que les interventions du groupe-cours où l'on est ; celles d'avant le 12 sept. 2026 restent visibles partout (changelog 1.140) (#746).
 
@@ -2902,8 +2901,7 @@ Où vit le dépistage, d'après les documents : il se RÈGLE dans Labo › Outil
 - Sans échelle commune aux évaluations, la carte affiche la cause (aucune évaluation, échelle non résolue, échelles divergentes) ; les critères hors de toute plage sont nommés sous les blocs (CONSIGNE-542-lot3, 27 août 2026).
 - Les critères à valeur 0 restent exclus : le 0 est un jugement suspendu, pas une performance (PLAN-SOLO D4, mots de Grégoire du 26 août 2026 ; CONSIGNE-542-lot3, 27 août 2026).
 - Le préstructurel se décrit « Aucun aspect pertinent n'est traité » (CONSIGNE-542-lot3, texte de Grégoire du 27 août 2026).
-- Le critère de langue y apparaît comme les autres (CONSIGNE-552 § 2.4 et § 10.2, 27 août 2026 ; changelog 1.104).
-- Contradiction : la CONSIGNE-542-lot3 (pas 3c-3, 27 août 2026, fin de matinée) garde le critère « Français » écarté de la carte ; la CONSIGNE-552 (27 août 2026, fin de journée) et le changelog 1.104 l'y font entrer ; retenu : il y entre.
+- Le critère de langue y apparaît comme les autres, s'il existe : une grille peut n'en avoir aucun (chimie, éducation physique…), et rien ne suppose qu'il y en ait un (CONSIGNE-552 § 2.4 et § 10.2, 27 août 2026 ; changelog 1.104 ; décision de Grégoire, 13 oct. 2026).
 
 ### Écran 59 · Le dépistage du français en semaine 1 : le travail diagnostique et son signalement
 
@@ -2927,14 +2925,13 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Sortie : le signalement apparaît à côté du palier RàI de l'élève et dans la vue du groupe, avec le nombre d'élèves concernés (changelog 1.125).
 - Sortie : il se lève automatiquement dès le palier « Risqué » coché ; Grégoire ne valide pas de liste élève par élève (CADRAGE-2026-09-07, décision 4 et « tranché », 7 sept. 2026).
 - Sortie : rien n'est écrit sur la copie de l'élève (changelog 1.125).
-- Incertain : le cadrage et la consigne du 7 sept. 2026 veulent que le signalement puisse « ouvrir une intervention » ; aucun document lu ne dit que ce geste a été livré.
+- Sortie : depuis le signalement, un geste ouvre une intervention pour l'élève (CADRAGE-2026-09-07-depistage-du-francais-semaine-1, 7 sept. 2026 ; reconduit par Grégoire le 13 oct. 2026).
 
 #### Sans geste
 
 - Le signalement ne se stocke pas : il se recalcule à chaque lecture, donc décocher un palier le fait disparaître partout (CADRAGE-2026-09-07, 7 sept. 2026 ; changelog 1.125 ; BACKLOG #790).
 - Une copie encore en brouillon ne lève pas de signalement ; il paraît quand la copie est enregistrée (CADRAGE-2026-09-16, tranché le 17 sept. 2026 ; changelog 1.142) (#905).
 - Le signalement reste distinct de la mesure d'aide inscrite sur la fiche de l'élève : l'un dit qu'il « devrait » être référé, l'autre qu'il « est » inscrit (CADRAGE-2026-09-07, décision 5, 7 sept. 2026).
-- Contradiction : le CADRAGE-2026-09-07 et sa consigne (7 sept. 2026) renomment le champ « CAF » en « Aide en français » ; la PORTE du 8 sept. 2026 (« ton choix d'aujourd'hui »), le BACKLOG #790 et le changelog 1.199 disent « Mesure d'aide » ; retenu : « Mesure d'aide ».
 
 ### Écran 60 · Suivi › Interventions
 
@@ -2956,7 +2953,6 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Sortie : fermer ou recharger avant de créer pose la question « Cette intervention n'est pas encore créée. » avec « Rester » / « Quitter sans créer » (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2, 28 sept. 2026).
 - Sortie : changer de sous-onglet pendant une création ne pose pas la question ; au retour, la création en cours est toujours à l'écran (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2 ; PORTES-TERRAIN-2026-09-28-lot-E3 § 3).
 - Sortie : après la création, « Intervention créée. », et la fiche se rouvre comme existante (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2, 28 sept. 2026).
-- Contradiction : le changelog 1.139 (12 sept. 2026) écrit l'intervention au clic sur « Enregistrer », et « Annuler » ne demande rien ; la consigne du lot E3 et le changelog 1.167 (28 sept. 2026) remplacent par « Créer l'intervention », « Fermer » et une question de sortie ; retenu : 1.167.
 
 #### Geste : Modifier une intervention existante
 
@@ -2977,10 +2973,10 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 
 #### Geste : Lire le bilan avant / après d'une intervention complétée
 
-- Sortie : la lettre et le pourcentage s'accordent avec le reste de l'application (un 64,5 % est « D » dans le bilan comme dans la suggestion), par les mêmes seuils (changelog 1.139 ; OU-EN-EST-ON, 12 sept. 2026).
 - Sortie : la note écrite pour un élève qui n'est plus dans le groupe reste visible, grisée, avec son nom (ou son DA s'il n'est plus au trimestre) suivi de « (n'est plus dans le groupe) » ; le compteur « Notes individuelles » compte les lignes affichées (_ancienne-CONSIGNE-DU-JOUR-2026-09-12-interventions-lot-5, tranché par Grégoire le 11 sept. 2026) (#748).
 - Données : les interventions déjà enregistrées gardent leur bilan (changelog 1.152).
-- Non tranché : qu'un bilan traduise une moyenne en lettre est une règle didactique laissée à Grégoire ; les seuils d'alerte restent gelés jusqu'aux usages d'octobre (_ancienne-CONSIGNE-DU-JOUR-2026-09-12-interventions-lot-5 ; CADRAGE-2026-09-16) (#742).
+- Sortie : le bilan avant / après dit le pourcentage seulement, sans lettre : une moyenne ne se traduit pas en niveau d'échelle (décision de Grégoire, 13 oct. 2026) (#742).
+- Données : les seuils d'alerte restent gelés jusqu'aux usages d'octobre (_ancienne-CONSIGNE-DU-JOUR-2026-09-12-interventions-lot-5 ; CADRAGE-2026-09-16-regles-du-depistage).
 
 #### Geste : Marquer une intervention « Complétée »
 
@@ -2990,7 +2986,7 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Données : une intervention de type MIO n'a ni question ni case et n'écrit pas de présences (DEMANDE-RELECTURE-2026-09-28-lot-E3-case-de-report, 28 sept. 2026).
 - Données : la même question se pose à la création d'une intervention déjà « Complétée » ; « Annuler » n'y écrit rien (même source).
 - Données : c'est l'enseignant qui juge si un rattrapage reprend une absence ; rien n'est automatisé au-delà de son choix (BACKLOG #747, fermé par Grégoire le 7 sept. 2026).
-- Non tranché : reporter une présence pour un participant ajouté après la complétion, ou déplacer les présences d'une date corrigée, attend un cas réel ; repasser « En préparation », changer la date puis recompléter case cochée laisse l'ancienne date (BACKLOG #978, 11 oct. 2026).
+- Données : quand on ajoute un participant à une intervention complétée, ou qu'on corrige sa date, l'application explique le report des présences et demande s'il faut le faire ; la réponse vaut pour tous les participants concernés, et la question est la même qu'à la complétion (décision de Grégoire, 13 oct. 2026) (#978).
 
 #### Geste : Supprimer une intervention
 
@@ -3021,7 +3017,6 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Le bloc se refait avec la liste à chaque fois ; ouvrir « Rencontres » n'écrit rien (OU-EN-EST-ON, 12 sept. 2026 ; consigne accueil-et-porte-ortho, lot D).
 - Une rencontre née dans un autre service n'apparaît pas (consigne accueil-et-porte-ortho, lot D, 12 sept. 2026).
 - Sur un service, la barre du Suivi n'a pas d'onglet « Interventions » ; si l'on était sur « Interventions » en passant au service, on arrive sur « Rencontres » ; la barre suit un changement de contexte fait depuis le Suivi (OU-EN-EST-ON, 12 sept. 2026).
-- Contradiction : la consigne des lots 1-2 (11 sept. 2026) voulait que « Rencontres » montre, sur un groupe-cours ordinaire, la liste filtrée sur ce groupe ; Grégoire a tranché le 12 sept. 2026 (21 h 02) que « Rencontres » ne liste que les services ; retenu : services seulement.
 - Non tranché : la fusion des sous-onglets Interventions et Rencontres se rejuge après le mois d'usage de l'orthopédagogue (CADRAGE-2026-09-11-rencontres, 12 sept. 2026 ; BACKLOG #836).
 
 #### Geste : Entrer par l'accueil (« Tu es orthopédagogue ? » › « Commencer → »)
@@ -3040,8 +3035,8 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Données : en démonstration, le service créé est retiré quand on quitte la démonstration (PORTES-TERRAIN-2026-09-12-rencontres § 1).
 - Sortie : une notification « Service créé », avec le nombre d'élèves ajoutés ; le service devient le groupe-cours actif, l'en-tête bascule, l'écran passe à la liste des rencontres (PORTES-TERRAIN-2026-09-12-rencontres, rangée 9 ; consigne des lots 1-2, 11 sept. 2026).
 - Sortie : les trois questions créent « ton service d'orthopédagogie » et le bouton dit « Créer mon service d'orthopédagogie » (changelog 1.136).
-- Non tranché : un élève déjà inscrit à un autre cours du trimestre n'entre pas dans le service ; changer le modèle d'identité (une fiche par élève et ses inscriptions) attend la décision de Grégoire (BACKLOG #838, 11 oct. 2026).
-- Non tranché : garder le numéro de groupe d'origine d'une ligne Omnivox attend les retours de l'orthopédagogue (BACKLOG #837).
+- Données : un élève a une seule fiche et plusieurs inscriptions ; déjà inscrit à un cours du trimestre, il peut aussi entrer dans un service (décision de Grégoire, 13 oct. 2026) (#838).
+- Données : à l'inscription dans un service, le numéro de groupe d'origine n'est pas gardé : un même numéro peut désigner des groupes différents d'une discipline à l'autre (chimie, biologie), et ce numéro ne sert qu'à créer le groupe-cours (décision de Grégoire, 13 oct. 2026) (#837).
 
 #### Geste : Créer une rencontre (« + Nouvelle rencontre »)
 
@@ -3052,7 +3047,6 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Données : rien n'est écrit avant « Créer la rencontre » ; la question de sortie dit « Cette rencontre n'est pas encore créée. » ; après création, « Rencontre créée. » (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2, 28 sept. 2026 ; changelog 1.167).
 - Sortie : le témoin dit « Enregistré » à la création d'une rencontre (DEMANDE-RELECTURE-2026-10-05-enregistrement-partout, 5 oct. 2026).
 - Sortie : sur la carte de la liste, la rencontre porte « Individuelle », pas « Niveau 3 » (PORTES-TERRAIN-2026-09-12-rencontres, rangée 11).
-- Contradiction : la porte du 12 sept. 2026 attend « Enregistre » et « Rencontre enregistrée » ; le lot E3 (28 sept. 2026) remplace par « Créer la rencontre » et « Rencontre créée. » ; retenu : lot E3.
 
 #### Geste : Modifier, compléter ou supprimer une rencontre
 
@@ -3069,13 +3063,14 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 
 - « Tout est manuel, comme si elle écrivait sur papier », pour un mois : la présence se note dans la rencontre (participants) ; ses retours d'octobre trancheront (consigne des lots 1-2, décision de Grégoire du 11 sept. 2026, 20 h 10).
 - Un service sans pratique de notation ne produit pas de note (BACKLOG #839, 12 sept. 2026 ; cochée le 9 oct. 2026).
-- Contradiction : la consigne des lots 1-2 (11 sept. 2026) veut l'assiduité et la complétion muettes et la carte RàI absente sur un service ; la fiche du 12 sept. 2026 laisse ce comportement tel quel (« ne rien inventer là »), en attente d'une décision didactique (BACKLOG #836).
-- Non tranché : le sens de l'assiduité et de la complétion sur un service, et si un rendez-vous manqué vaut une absence (CADRAGE-2026-09-11-rencontres § 7 ; BACKLOG #836).
+- Sortie : sur un service, l'assiduité et la complétion restent muettes et la carte RàI ne s'affiche pas, jusqu'au retour de l'orthopédagogue (consigne des lots 1-2, 11 sept. 2026 ; décision de Grégoire, 13 oct. 2026) (#836).
+- Données : sur un service, un rendez-vous manqué vaut une absence (décision de Grégoire, 13 oct. 2026).
+- Non tranché : le sens de l'assiduité et de la complétion sur un service (CADRAGE-2026-09-11-rencontres § 7 ; BACKLOG #836).
 - Non tranché : afficher ou non la carte RàI d'un élève de service (CADRAGE-2026-09-11-rencontres § 7).
-- Non tranché : nommer un sous-groupe récurrent pour ne pas le recomposer à chaque rencontre (CADRAGE-2026-09-11-rencontres § 7 ; BACKLOG #836).
-- Non tranché : une vue par mois des rendez-vous (le calendrier du trimestre portant une couche de rencontres par date) ; candidate « pas pour lundi », après les premiers retours (CADRAGE-2026-09-11-rencontres § 7 ; BACKLOG #836).
-- Non tranché : « Durée (périodes) » du formulaire de rencontre, le bouton « Guide RàI » et les cartes « Patterns d'apprentissage / Niveaux RàI » de l'aperçu, mots à valider pour un service (BACKLOG #836).
-- Non tranché : le dossier qui suit l'élève d'un trimestre à l'autre (rencontres, volet confidentiel) ; rien avant son mois d'usage (CADRAGE-2026-09-11-rencontres § 7).
+- Données : les participants se choisissent à chaque rencontre ; aucun sous-groupe récurrent n'est gardé (décision de Grégoire, 13 oct. 2026).
+- Sortie : le calendrier du trimestre montre, par date, les rencontres d'un service, en vue mensuelle (décision de Grégoire, 13 oct. 2026) (#836).
+- Sortie : sur un service, le formulaire de rencontre dit « Durée (périodes) », et l'aperçu garde le bouton « Guide RàI » et les cartes « Patterns d'apprentissage / Niveaux RàI » (décision de Grégoire, 13 oct. 2026).
+- Données : les rencontres et le volet confidentiel d'un élève suivent sa fiche d'un trimestre à l'autre (décision de Grégoire, 13 oct. 2026).
 - Le transfert (dissertations, PFR, EUF) se fait hors application, à la main (BACKLOG #838, tranché par Grégoire le 12 sept. 2026).
 
 ### Écran 62 · Suivi › Animation
@@ -3094,7 +3089,7 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Sortie : les noms (prénom et nom) défilent à l'écran et quelqu'un est choisi (CONSIGNE-SUIVANTE-lot-6-animation, mots de Grégoire du 11 sept. 2026).
 - Sortie : en mode anonymisation, les noms projetés sont anonymes (CONSIGNE-SUIVANTE-lot-6-animation, porte, rangée 3).
 - Sortie : le tirage va jusqu'à ce que le groupe soit épuisé ; le bouton se désactive alors, et « Réinitialiser » repart pour un nouveau cycle ; pas de remise à zéro automatique (CONSIGNE-SUIVANTE-lot-6-animation § B, 11 sept. 2026).
-- Incertain : la consigne du lot 6 (11 sept. 2026) veut aussi un bouton « Réinitialiser » à côté du tirage quand le groupe est épuisé, une infobulle qui dit la même chose et un état du tirage gardé par groupe-cours et par trimestre ; aucun document lu ne dit ce lot livré (CADRAGE-2026-09-11-onglet-suivi-lecture § 7 : « Lot suivant : 6, l'Animation », 12 sept. 2026).
+- Sortie : quand le groupe est épuisé, un bouton « Réinitialiser » paraît à côté du tirage, avec une infobulle qui le dit ; l'état du tirage est gardé par groupe-cours et par trimestre (CONSIGNE-SUIVANTE-lot-6-animation, 11 sept. 2026 ; reconduit par Grégoire le 13 oct. 2026).
 
 #### Geste : Poser une question flash ; gérer la banque de questions
 
@@ -3109,7 +3104,7 @@ Les gestes se font dans Conception (fiche du travail, gabarit de la grille) ; ce
 - Sortie : s'il reste des étudiant·es, une question « 27 étudiant·es en équipes de 4 : il en reste 3. » et deux choix, « Une équipe plus petite (…) » ou « Des équipes plus grandes (…) » ; rien n'est coché d'office (MOTS-2026-10-07-1039-equipes).
 - Sortie : jamais d'équipe d'une seule personne ; pour un reste de 1 en équipes de 3 ou 4, le premier choix devient « Des équipes plus petites », tailles aussi égales que possible, jamais moins de 2 ; en équipes de 2, pas de question : « 9 étudiant·es en équipes de 2 : une équipe sera de 3. » (MOTS-2026-10-07-1039-equipes, tranché le 7 oct. 2026 à 12 h 42).
 - Sortie : boutons « Former les équipes » / « Refaire les équipes » / « Retenir ces équipes » (MOTS-2026-10-07-1039-equipes).
-- Non tranché : dans un très petit groupe, « Des équipes plus grandes » peut tout empiler sur une seule équipe ; la taille maximale acceptable est une question de didactique, si un cas réel se présente (BACKLOG #1041, 7 oct. 2026).
+- Sortie : « Des équipes plus grandes » répartit le reste une personne par équipe, sans qu'aucune équipe dépasse d'une personne la taille demandée ; si c'est impossible, ce choix n'est pas offert (décision de Grégoire, 13 oct. 2026) (#1041).
 
 #### Geste : Retenir ces équipes ; oublier les équipes retenues
 
