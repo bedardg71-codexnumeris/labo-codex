@@ -140,8 +140,7 @@
 - Huit analystes ont travaillé en parallèle, un par zone, puis leurs textes ont été assemblés. Six écrans couverts par deux d'entre eux ont été fusionnés : archiver un groupe-cours, exporter une sélection, la bibliothèque des trimestres, Labo › Outils d'observation, « Recalculer les captures », le mode démonstration. Des redites peuvent rester entre les règles communes d'une section et ses écrans.
 - Recherches non faites : SESSION.md pour l'Évaluation, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
-**Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 9 : les mots finals de « Faire revenir un trimestre » (1.184) ne sont écrits nulle part.
+**Ce que les documents ne disent pas** : les questions relevées par les analystes ont toutes été tranchées par Grégoire le 13 octobre 2026, partie par partie, et leurs réponses sont écrites dans les écrans.
 
 **Comment corriger** : écran par écran, directement dans le texte (corriger, rayer, ajouter). Une intention qui manque parce qu'elle n'est écrite nulle part, c'est à toi de l'ajouter.
 
@@ -2379,6 +2378,7 @@ Nom de la section : « Évaluation », au singulier, comme « Conception » (dé
 - Sortie : le compteur annonce le nombre de PDF réellement produits (N PDF pour N étudiant·e(s), et le nombre d'évaluations sans fichier, donc sans PDF) (changelog 1.106 ; BACKLOG #566) (#566).
 - Sortie : un élève en échec n'avorte pas le lot ; un bilan final dit « N réussis, M échoués : … », et une copie sans page de synthèse y est signalée (BACKLOG #565, 28 août 2026) (#565).
 - Sortie : en anonymisation, le PDF se nomme « Élève 32_Artefact-2-rév_Evalue.pdf », et l'en-tête de sa page de rétroaction dit « Élève 32 · Gr. A », sans DA (changelog 1.159 ; OU-EN-EST-ON, 25 sept. 2026) (#950).
+- Sortie : une note en ,5 s'arrondit vers le haut (changelog 1.152).
 
 #### Geste : « Proposer un nettoyage » (quand l'espace manque)
 
@@ -3369,9 +3369,8 @@ Règles qui valent pour toutes les archives :
 - Les tailles s'écrivent avec la virgule décimale dans tout l'écran des archives (« 1,08 Go », « 80,0 Ko ») (VERDICT-RELECTURE-2026-10-05-e3-renvoyer-trimestre, Grégoire, 5 oct. 2026).
 - Un nom ou un texte reçu d'une archive, d'un import ou d'un partage s'affiche toujours comme du texte, même s'il est entré avant (changelog 1.195) (#467, #585).
 - Deux gestes d'archives faits coup sur coup ne s'effacent pas l'un l'autre (archiver les copies, faire revenir, renvoyer) (changelog 1.198 ; DEMANDE-RELECTURE-2026-10-11-lot7-import-recent, 11 oct. 2026) (#522).
-- Contradiction : le 30 sept. 2026, « à l'archivage, les copies seulement quittent l'application ; les données restent » (CADRAGE-2026-09-30 §9) ; le 4 oct., c'est le trimestre entier qui part (PLAN-2026-10-04) ; le 5 oct., Grégoire fait ajouter l'option de n'archiver que les copies en gardant les données (VERDICT-RELECTURE-2026-10-05-e3, livrée en 1.186). Retenu : les deux gestes coexistent.
 
-- Incertain : aucun document lu ne décrit un écran « Réglages › Import » ; PLAN-PARTAGE-RESSOURCES (21 avr. 2026) nommait « Réglages › Import/Export », que le changelog remplace par Réglages › Données.
+- Sortie : il n'y a pas d'écran « Réglages › Import » ; les imports se font dans Réglages › Données (« Ouverture et partage », « Partage entre collègues ») et dans les bibliothèques (décision de Grégoire, 13 oct. 2026).
 - « Archiver un groupe-cours » et « Exporter une sélection » sont décrits avec le menu Codex (partie 1) ; le menu ⋮ d'un trimestre clos, avec la bibliothèque des trimestres (partie 2).
 
 ### Écran 71 · Réglages › Données › carte « Archives »
@@ -3387,10 +3386,10 @@ Règles qui valent pour toutes les archives :
 - Sortie : aucun défaut ne passe pour « vérifiée » (OU-EN-EST-ON, 30 sept. 2026).
 - Sortie : la ligne dit ensuite « Vérifiée le [date] » et le reste après un rechargement (PORTES-TERRAIN-2026-09-30-lot-A2-verifier, 30 sept. 2026).
 - Sortie : dans Chrome, « Vérifier » ne demande que la lecture du dossier ; « Archiver… » demande toujours l'écriture (changelog 1.194 ; OU-EN-EST-ON, 9 oct. 2026) (#1005).
-- Sortie : choisir le dossier « trimestres » ou celui d'une archive au lieu de la racine est refusé : « Dossier à choisir de nouveau. Choisis le dossier qui contient « trimestres » (la racine de tes archives), pas « trimestres » lui-même ni le dossier d'une archive. » (PORTES-TERRAIN-2026-09-30-lot-A2-verifier, résultat du 30 sept. 2026 ; OU-EN-EST-ON, 30 sept. 2026) (#1003).
+- Sortie : choisir le dossier « trimestres » ou celui d'une archive au lieu de la racine est refusé : « Dossier à choisir de nouveau. Choisis le dossier qui contient « trimestres » (la racine de tes archives), pas « trimestres » lui-même ni le dossier d'une archive. » (PORTES-TERRAIN-2026-09-30-lot-A2-verifier, résultat du 30 sept. 2026 ; OU-EN-EST-ON, 30 sept. 2026 ; mots acceptés par Grégoire, 13 oct. 2026) (#1003).
 - Sortie : les fichiers que le système pose dans un dossier (nom commençant par un point, « Thumbs.db », « desktop.ini ») ne comptent ni comme copie ni comme fichier en trop (VERDICT-RELECTURE-2026-09-30-lot-A2-verifier, 30 sept. 2026 ; OU-EN-EST-ON, 30 sept. 2026).
 - Sortie : une fiche que l'archive déclare sans fichier dès l'archivage n'empêche pas « vérifiée » (VERDICT-RELECTURE-2026-10-05-e3, correction 3, 5 oct. 2026) (#1027).
-- Incertain : les mots « Ce n'est pas cette archive » et « Dossier à choisir de nouveau » ont été soumis à Grégoire ; leur acceptation n'est pas écrite dans les documents lus (VERDICT-RELECTURE-2026-09-30-lot-A2-verifier, 30 sept. 2026).
+- Sortie : le fichier d'une autre archive est refusé : « Ce n'est pas cette archive », « Le fichier choisi est l'archive d'un autre groupe ou d'une autre date. Choisis le fichier de cette ligne. » (DEMANDE-RELECTURE-2026-09-30-lot-A2-verifier, § 5 ; mots acceptés par Grégoire, 13 oct. 2026).
 
 #### Geste : Faire revenir les copies d'un groupe
 
@@ -3414,7 +3413,10 @@ Règles qui valent pour toutes les archives :
 - Sortie : refus s'il est déjà là : « … est déjà dans l'application : ouvre-le depuis la bibliothèque des trimestres. Rien n'a été écrit. » (OU-EN-EST-ON, 4 oct. 2026, mots de Grégoire).
 - Sortie : refus, rien écrit, si l'archive n'est pas vérifiée dans ce navigateur ou ne concorde plus avec sa vérification (DEMANDE-RELECTURE-2026-10-04-e2 §4, 4 oct. 2026).
 - Sortie : le trimestre revenu se trouve, clos, dans la bibliothèque des trimestres (DEMANDE-RELECTURE-2026-10-04-e2, 4 oct. 2026).
-- Incertain : les mots exacts de la fenêtre et du bilan livrés en 1.184 (les propositions du 4 oct. disaient « Emprunter », remplacé par « Faire revenir ») ne sont pas écrits dans les documents lus (DEMANDE-RELECTURE-2026-10-04-e2 ; PLAN-2026-10-04).
+- Sortie : le bouton dit « Faire revenir », avec l'infobulle « Ramener ce trimestre dans l'application, clos, pour le consulter » (DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre, § 4, « emprunter » remplacé par « faire revenir » ; mots acceptés par Grégoire, 13 oct. 2026).
+- Sortie : la fenêtre « Faire revenir ‹trimestre› ? » dit « ‹trimestre› revient dans l'application tel qu'il a été archivé, clos : N étudiant·es, N copies. Rien d'autre n'est touché : les autres trimestres, les cours et les réglages restent tels quels. », avec les boutons « Annuler » et « Faire revenir » (DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre, § 4, « emprunter » remplacé par « faire revenir » ; mots acceptés par Grégoire, 13 oct. 2026).
+- Sortie : le bilan « Trimestre revenu » dit « ‹trimestre› est revenu, clos. Tu le trouves dans la bibliothèque des trimestres. », puis, selon le cas, « N copies revenues », « N copies déjà là », « 1 copie d'un·e étudiant·e supprimé·e, laissée dans l'archive », « 1 fiche sans copie dans l'archive » (DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre, § 4, « emprunter » remplacé par « faire revenir » ; mots acceptés par Grégoire, 13 oct. 2026).
+- Sortie : un échec en route dit « Le retour s'est arrêté en cours de route (‹raison›). Ce qu'il avait écrit a été retiré : l'application est comme avant. » (DEMANDE-RELECTURE-2026-10-04-e2-emprunter-trimestre, § 4, « emprunter » remplacé par « faire revenir » ; mots acceptés par Grégoire, 13 oct. 2026).
 
 #### Geste : Terminer le renvoi
 
@@ -3466,7 +3468,7 @@ Règles qui valent pour toutes les archives :
 - Sortie : l'aperçu et le bilan comptent les présences en dates de cours ; au bilan, seules les dates où quelque chose est entré ; une ligne « 1 élève que tu avais supprimé n'a pas été ramené. » quand l'import en écarte un (OU-EN-EST-ON, 2 oct. 2026).
 - Sortie : le message de fin annonce ce qui est réellement entré, pas ce qui a été reçu (changelog 1.75).
 - Sortie : une restauration qui n'a pas pu rendre des documents les compte, les marque manquants et le dit une seule fois (changelog 1.106).
-- Non tranché : les cases « Configuration du cours », « Cadre du trimestre », « Groupe-cours », « Horaires » et « Enseignants » (non cochées par défaut) remplacent encore ce qu'on a ; inscrites, hors chantier tant que Grégoire n'en vit pas le symptôme (OU-EN-EST-ON, 2 oct. 2026).
+- Données : les cases « Configuration du cours », « Cadre du trimestre », « Groupe-cours », « Horaires » et « Enseignants » ajoutent ce qui manque sans rien remplacer de ce qu'on a (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : Importer une sélection depuis une sauvegarde
 
@@ -3482,8 +3484,7 @@ Règles qui valent pour toutes les archives :
 #### Sans geste
 
 - La première carte s'appelle « Ouverture et partage » et n'a plus que deux cases ; aucune fenêtre ni aucun texte ne dit plus « Copie de secours » (OU-EN-EST-ON, 1er oct. 2026 ; changelog 1.173).
-- Contradiction : changelog 1.168 (« La sauvegarde de Réglages › Données s'appelle maintenant « Copie de secours » ») ; changelog 1.173 (1er oct. 2026) : le bouton « Faire une copie de secours » disparaît, mettre son codex à jour en tient lieu. Retenu : 1.173.
-- Incertain : changelog 1.144 dit que le registre longitudinal est conservé par « l'export complet (Réglages › Données) » et que l'écran le rappelle ; la copie de secours (« Toutes les clés ») a disparu en 1.173 ; on ne sait pas ce que l'écran nomme aujourd'hui « export complet ».
+- Données : le registre longitudinal est conservé par le codex (« Mettre à jour le codex »), pas par l'archive d'un trimestre ; l'écran du registre le rappelle en nommant le codex (décision de Grégoire, 13 oct. 2026 ; changelog 1.144, 1.173).
 
 ### Écran 74 · Réglages › Données › « Partage entre collègues » et « Packages importés »
 
@@ -3493,10 +3494,9 @@ Règles qui valent pour toutes les archives :
 - Sortie : vérification de la structure du fichier, de la signature et de la continuité de la clé de l'auteur·e, puis prévisualisation (contenu, auteur·e, licence) avant d'accepter (changelog 1.11).
 - Données : au premier import d'une personne, sa clé de signature est mémorisée ; un fichier ultérieur sous son nom avec une autre clé déclenche une alerte bloquante qui demande de confirmer par un autre canal (changelog 1.11).
 - Données : les items importés restent à part, en lecture seule, dans « Partagés par des collègues » de chaque bibliothèque ; rien n'est mélangé aux documents de l'utilisateur (changelog 1.11).
-- Données : une ressource modifiée en transit est signalée (empreinte scellée à l'export, vérifiée à l'import) (changelog, version bêta).
+- Données : une ressource modifiée en transit est refusée (empreinte scellée à l'export, vérifiée à l'import) (changelog, version bêta ; OU-EN-EST-ON, version 1.127 ; décision de Grégoire, 13 oct. 2026).
 - Données : une grille d'un collègue de même nom qu'une des tiennes, mais pas aux mêmes critères, ne s'y rattache pas (OU-EN-EST-ON, 10 oct. 2026).
-- Incertain : un fichier qui se dit de « Demo Labo Codex » devait être rejeté (PLAN-PARTAGE-RESSOURCES §9 ; PLAN-AUTONOMISATION-UTILISATEUR §4.5, 21 avr. 2026) ; rien dans les documents lus ne dit si c'est appliqué.
-- Contradiction : PLAN-PARTAGE-RESSOURCES (21 avr. 2026) place l'import dans « Réglages › Import/Export » avec une signature seulement déclarative ; changelog 1.10 et 1.11 : Réglages › Données, signature par une clé personnelle vérifiée. Retenu : le changelog.
+- Sortie : un fichier de partage qui se dit de « Demo Labo Codex » est refusé à l'import (PLAN-PARTAGE-RESSOURCES § 9 ; PLAN-AUTONOMISATION-UTILISATEUR § 4.5, 21 avr. 2026 ; reconduit par Grégoire le 13 oct. 2026).
 
 #### Geste : Retirer un package importé
 
@@ -3527,13 +3527,6 @@ Règles qui valent pour toutes les archives :
 - Sortie : un·e étudiant·e supprimé·e dans le Cadre en est écarté·e (changelog 1.180).
 - Données : un export déjà produit n'est pas corrigé ; il faut le générer de nouveau (changelog 1.142).
 
-#### Geste : Export pour Léa
-
-- Incertain : les documents placent l'export Léa dans Évaluation › Exporter et archiver (carte « Export Léa »), pas dans les Réglages (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver, 20 sept. 2026).
-- Sortie : la copie annotée et son évaluation (note et rétroaction) en un PDF prêt à téléverser dans Léa (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver, 20 sept. 2026).
-- Sortie : en anonymisation, le PDF se nomme « Élève 32_Artefact-2_Evalue.pdf » et sa page de rétroaction n'affiche que « Élève 32 » et le groupe (changelog 1.159).
-- Sortie : le compteur annonce le nombre de PDF réellement produits ; un élève supprimé en est écarté ; une note en ,5 s'arrondit vers le haut (changelog 1.106 ; changelog 1.180 ; changelog 1.152).
-
 #### Sans geste
 
 - Les captures automatiques ne se font pas les jours où seul un autre groupe a cours ; recapturer une même séance ne fait pas de doublon (changelog 1.27).
@@ -3562,7 +3555,7 @@ Règles qui valent pour toutes les archives :
 - Données : efface toutes les données de l'application (DECISIONS-2026-10-02-1007 §7).
 - Sortie : la fenêtre « Avant de supprimer, un codex à part » vient d'abord, sa première phrase adaptée (« toutes tes données… ») ; le codex à part est écrit sous un autre nom et confirmé (« Il y est ») avant les confirmations habituelles (DECISIONS-2026-10-02-1007 §5-7, Grégoire, 2 oct. 2026 ; changelog 1.175).
 - Sortie : « Annuler » ou un échec, à n'importe quelle étape : rien n'est supprimé (OU-EN-EST-ON, 3 oct. 2026).
-- Non tranché : la question « As-tu exporté tes données ? », devenue redondante, est inscrite sans décision (OU-EN-EST-ON, 3 oct. 2026).
+- Sortie : la question « As-tu exporté tes données ? » disparaît : le codex à part, écrit juste avant, en tient lieu (décision de Grégoire, 13 oct. 2026).
 
 #### Sans geste
 - Non documenté dans les sources lues.
@@ -3582,7 +3575,6 @@ Règles qui valent pour toutes les archives :
 #### Sans geste
 
 - Les préférences sont reprises au démarrage (changelog 1.55).
-- Contradiction : changelog 1.20 et 1.127 placent « Masquer les notes par travail » (note différée) dans Réglages › Préférences ; changelog 1.129 (plus récent) dit que son réglage est dans Labo › Outils d'observation. Retenu : Labo › Outils d'observation.
 
 ### Écran 79 · Réglages › À propos
 
