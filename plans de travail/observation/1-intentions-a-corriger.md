@@ -141,7 +141,6 @@
 - Recherches non faites : SESSION.md pour les Évaluations, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 4 : les plus anciennes fonctions de la carte d'alignement ne sont attestées que par le changelog ; aucune réponse trouvée aux choix 3.1 à 3.4 de l'import de cartouches d'un autre trimestre, ni de livraison pour la comparaison côte à côte des doublons.
 - Partie 5 : l'éditeur de pages ; le départ du chronomètre ; le mode côte à côte ; « Transférer » ; la liste complète des filtres de la Liste des évaluations.
 - Partie 6 : le rendu exact des cartes du tableau de bord.
 - Partie 7 : l'état du tirage par groupe et le bouton « Réinitialiser » de l'Animation (voulus, livraison non documentée) ; ouvrir une intervention depuis un signalement (voulu le 7 sept. 2026, livraison non documentée).
@@ -1382,9 +1381,7 @@ Les onglets de Conception :
 - Données : le nom et le contexte spécifique d'une cartouche existante s'enregistrent tout seuls quand on quitte le champ ; il n'y a plus de bouton « Enregistrer » sur une fiche existante (changelog 1.164 ; consigne lot E1, 27 sept. 2026)
 - Sortie : sur l'iPad, toucher directement une autre cartouche dans la liste garde le nom tapé (PORTES-TERRAIN-2026-09-28-lot-E1-conception, passée par Grégoire le 28 sept. 2026)
 - Sortie : « Annuler » devient « Fermer » (changelog 1.164)
-- Contradiction : PORTES-TERRAIN-2026-08-26b-decisions-livrees (26 août 2026) dit que le nom reste au bouton « Enregistrer », délibérément, pour poser la question du doublon ; la décision D3 (26 sept. 2026, changelog 1.164) le fait s'enregistrer seul au changement de champ, la question du doublon passant à ce moment.
-- Contradiction : changelog 1.94 (Conception : le bandeau vert qui glisse en haut à droite confirme chaque sauvegarde) et PORTES-TERRAIN-2026-08-24-confirmations-conception (bandeau « Cartouche "…" sauvegardée ! ») contre changelog 1.161 et 1.164 (un même témoin « Enregistré » en bas de l'écran). Retenu : le témoin.
-- Contradiction : changelog 1.106 (la fiche groupe en tête « Dupliquer, Supprimer, Annuler et Enregistrer ») contre changelog 1.164 (« Annuler » devient « Fermer », « Enregistrer » disparaît sur une fiche existante). Retenu : 1.164.
+- Sortie : si le nouveau nom est déjà pris, la question du doublon se pose quand on quitte le champ (DECISIONS-2026-09-26-enregistrement D3, 26 sept. 2026 ; changelog 1.164).
 
 #### Geste : Donner à une cartouche le nom d'une cartouche existante (« Conflit de nom »)
 
@@ -1438,8 +1435,7 @@ Les onglets de Conception :
 - Les cartouches restent organisées par grille : c'est leur classement (changelog 1.6 ; CADRAGE-327-classement-transversal-biblios, décision de Grégoire du 9 juin 2026)
 - Changer de trimestre referme l'éditeur de cartouche resté ouvert (changelog 1.91)
 - Une cartouche appartient à un trimestre, comme les grilles, les échelles et les productions (décision du 21 août rappelée dans ARBITRAGE-2026-08-26-suites-audit-conception, D3, verdict « plus tard » du 26 août 2026)
-- Incertain : la mise en œuvre de cette appartenance par trimestre n'est datée nulle part ; Grégoire écrit le 14 sept. 2026 « Maintenant que tout est namespacé, je crois que c'est réglé » (_ancienne-CONSIGNE-DU-JOUR-2026-09-14-864-verrouillage-cartouches), et les Nouvelles 1.196 parlent de cartouches « qui apparaissent dans le trimestre ouvert ».
-- Non tranché : supprimer la cartouche (ou la grille) de départ dans un trimestre l'interdit dans tous les trimestres ; corriger changerait le sens de suppressions déjà faites : décision de Grégoire (OU-EN-EST-ON, 1er sept. 2026) (#683)
+- Données : supprimer la cartouche de départ dans un trimestre ne la retire que de ce trimestre ; les autres trimestres, et ceux à venir, la reçoivent encore (décision de Grégoire, 13 oct. 2026) (#683).
 
 ### Écran 30 · Conception › Rétroactions › « Consulter la bibliothèque » (cartouches)
 
@@ -1487,7 +1483,7 @@ Les onglets de Conception :
 #### Geste : Choisir l'affichage de la note (« note en lettre »)
 
 - Données : le choix « Niveau de performance » est enregistré dès qu'on le coche, et le PDF remis à l'élève le respecte (changelog 1.142)
-- Incertain : OU-EN-EST-ON (10 oct. 2026) parle de « l'affichage de la note en lettre » ; changelog 1.142 parle de « Niveau de performance » ; aucun document ne dit explicitement que c'est le même réglage.
+- Données : « Niveau de performance » est le réglage que les documents appellent aussi « note en lettre » : la note s'affiche par le niveau de l'échelle plutôt qu'en chiffre (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : Éditer les cibles d'une pratique par dénotation
 
@@ -1516,7 +1512,7 @@ Les onglets de Conception :
 - Données : la copie d'une pratique-gabarit cesse d'être un gabarit, quel que soit le bouton (ARBITRAGE-2026-08-24-476-volet2-duplications, D7, verdict du 24 août 2026)
 - Sortie : l'invite propose le nom de la pratique source, pas « Copie de pratique » (même source, D8)
 - Sortie : plus de « X (copie) (copie) » (même source, D3)
-- Non tranché : une pratique ancienne qui porte sa propre copie d'échelle (après « Dupliquer » ou « Dériver une variante ») : la relier à l'échelle de référence rendrait ses repères modifiables mais ferait suivre aux notes déjà calculées toute retouche de l'échelle ; décision sur ce qu'une note veut dire, à Grégoire (DEMANDE-RELECTURE-2026-10-11-lot14-liens-pratiques-echelles, 11 oct. 2026) (#579)
+- Données : une pratique ancienne est reliée à l'échelle de référence ; une retouche de l'échelle ne recalcule pas ses notes d'office : le recalcul est proposé, comme pour une échelle déjà employée (décision de Grégoire, 13 oct. 2026) (#579).
 
 #### Geste : Ranger ses pratiques dans « Mes dossiers »
 
@@ -1527,8 +1523,8 @@ Les onglets de Conception :
 #### Énoncé 4, côté pratiques
 
 - Aucune pratique offerte à l'adoption n'affiche de matière ni d'établissement : seules TES pratiques peuvent porter ta discipline (changelog 1.110 ; OU-EN-EST-ON, éprouvé par Grégoire le 2 sept. 2026)
-- Non tranché : la formule « l'algorithme propose, le jugement tranche » attribuée à Voisard reste telle quelle tant que Grégoire n'a pas fourni la référence exacte (OU-EN-EST-ON, 2 sept. 2026)
-- Incertain : changelog 1.63 retire le mode « Par objectifs (4 modes de calcul) » ; changelog 1.109 dit que « les quatre modes de calcul par objectifs perdent leur étiquette de matière » (« Comptage (Chimie) » devient « Comptage ») ; on ne sait pas où ces modes s'affichent encore.
+- Sortie : l'idée « l'algorithme propose, le jugement tranche » est présentée comme inspirée de Bruno Voisard, « La machine à produire des notes », Substack, 4 mai 2026 (section « En guise de conclusion : quelques pistes de solution »), sans guillemets de citation (décision de Grégoire, 13 oct. 2026).
+- Sortie : aucune pratique n'offre plus de mode de calcul « par objectifs » (décision de Grégoire, 13 oct. 2026 ; changelog 1.63).
 
 #### Sans geste
 
@@ -1546,14 +1542,13 @@ Les onglets de Conception :
 - Sortie : au-delà d'environ 15 objectifs, une alerte non bloquante (changelog 1.2)
 - Sortie : l'assistant ne pose plus quatre questions dont la réponse ne servait nulle part (changelog 1.155)
 - Sortie : l'étape « Approche d'évaluation » n'offre plus « Par objectifs d'apprentissage » (changelog 1.69)
-- Contradiction : PLAN_refonte_assistant_pratique_post-audit (5 juin 2026) prévoit la carte Dénotation « désactivée, à venir » ; changelog 1.3 et 1.126 disent que l'assistant configure la dénotation (cibles d'apprentissage, suggestion statistique : mode, médiane ou moyenne). Retenu : la dénotation se configure.
+- Sortie : la carte Dénotation est active : l'assistant configure la dénotation, ses cibles d'apprentissage et sa suggestion statistique (mode, médiane ou moyenne) (changelog 1.3, 1.126).
 
 #### Geste : Configurer une sommative
 
 - Données : restent le verrou « doit être réussie » (nommé « Verrou sur une évaluation » partout), le seuil, les jetons ; l'assistant ne propose plus le plafonnement, le remplacement ni les reprises, que rien n'appliquait à la note (décision de Grégoire du 17 sept. 2026, _ancienne-CONSIGNE-DU-JOUR-2026-09-21-909-903-creer-adopter-pratique ; changelog 1.152, 1.127) (#903)
 - Données : une pratique déjà enregistrée garde les champs qu'elle porte ; une pratique neuve ne les écrit plus (même source)
 - Données : le verrou nommé (le titre de la production) plafonne la note si l'évaluation est sous le seuil (changelog 1.142)
-- Contradiction : PLAN_refonte_assistant_pratique_post-audit (lot 3, 5 juin 2026) et changelog 1.2 posent la question des reprises pour la sommative ; la décision du 17 sept. 2026 (changelog 1.152) la retire. Retenu : plus de reprises dans l'assistant pour une sommative.
 
 #### Geste : Choisir l'échelle de la pratique dans l'assistant
 
@@ -1652,13 +1647,11 @@ Les onglets de Conception :
 #### Geste : Glisser une évaluation sur un objectif
 
 - Sortie : « Objectif coché : cette évaluation le vérifie désormais. » ; « Déjà coché : cette évaluation vérifie cet objectif. » ; refus : « Une évaluation coche les objectifs de sa leçon ou d'une leçon placée avant elle. » (DEMANDE-RELECTURE-2026-09-27-lot-964-badges-objectifs, mots acceptés par Grégoire le 28 sept. 2026, 8 h 19)
-- Contradiction : changelog 1.68 dit qu'on dépose une évaluation sur la ligne d'un objectif de sa leçon et que la case « objectifs servis » se coche ; depuis 1.165 (28 sept. 2026), l'évaluation coche des « objectifs vérifiés », de sa leçon ou d'une leçon placée avant. Retenu : 1.165.
 
 #### Geste : Tracer un lien vers une évaluation
 
 - Données : le geste « se vérifie par » vers une évaluation est retiré ; les liens « se vérifie par » déjà tracés restent stockés, affichés et comptés comme avant ; aucune donnée supprimée ni réécrite (CARTE-ALIGNEMENT-2026-09-27-2, non négociable, 27 sept. 2026 ; changelog 1.165)
 - Sortie : le message oriente vers le bon geste : « Une évaluation se relie à ses objectifs : ouvre son Inspecteur et coche ceux qu'elle vérifie. » (DEMANDE-RELECTURE-2026-09-27-lot-964-badges-objectifs, mots acceptés le 28 sept. 2026)
-- Contradiction : changelog 1.48 et l'ancienne page 8 du guide (relier l'évaluation par « se vérifie par ») contre la décision du 27 sept. 2026 (changelog 1.165). Retenu : 1.165.
 
 #### Geste : Régler une évaluation (niveau cognitif, visée, production)
 
@@ -1674,7 +1667,6 @@ Les onglets de Conception :
 - Données : ⌘D duplique tous les blocs sélectionnés ; une activité sélectionnée avec sa leçon n'est pas copiée deux fois (changelog 1.72)
 - Données : « Décloner » rend le bloc indépendant sans rien supprimer ; sur l'original, tous ses clones deviennent indépendants (changelog 1.113)
 - Sortie : l'Inspecteur d'un bloc cloné offre « Décloner » à côté de « N instances · Voir les autres » ; l'Inspecteur offre « Copier » et « Cloner (lié) » (changelog 1.113, 1.87)
-- Incertain : changelog 1.48 dit que « ⌘+glisser » fait une copie ; changelog 1.28 et 1.87 nomment ⌥ en glissant.
 
 #### Geste : Supprimer un bloc
 
@@ -1715,7 +1707,6 @@ Les onglets de Conception :
 - Couleurs des cinq pastilles, gardées par Grégoire le 28 sept. 2026 : « ! » contour pointillé pâle, couleur de l'évaluation ; « ✕ » rouge d'erreur ; « ⚠ » orange ; « ? » gris, trait plein ; « ✓ » contour de la couleur de l'évaluation (PORTES-TERRAIN-2026-09-28-carte-alignement-963-a-966)
 - La légende « Pastille de l'évaluation » est dans l'Inspecteur d'une évaluation et à la page 8 du guide (RELECTURE-2026-09-28-carte-alignement-apres-rebase, titre gardé par Grégoire)
 - Les pastilles sont lues comme des images nommées par un lecteur d'écran ; celles d'une grande carte se recalculent environ dix fois plus vite (OU-EN-EST-ON, 9 oct. 2026) (#971, #972)
-- Contradiction : CARTE-ALIGNEMENT-2026-09-27-3 (27 sept. 2026) prévoit quatre états et traite une leçon sans semaine comme « avant » ; la décision didactique de Grégoire du 28 sept. 2026 ajoute la pastille « ? » pour ce cas. Retenu : cinq états.
 - Liens déjà tracés d'une connaissance vers une Ouverture ou une Révision passent de « s'acquiert par » à « se réactive dans » à l'ouverture de la carte ; un message dit combien, et lesquels (changelog 1.83)
 - Les liens contournent les blocs par défaut ; le libellé se pose sur la courbe (changelog 1.83)
 - La carte démo fait cocher à chaque évaluation l'objectif de sa leçon, sans lien « se vérifie par » ; une démo déjà installée garde l'ancienne carte (OU-EN-EST-ON, 9 oct. 2026) (#970)
@@ -1729,20 +1720,17 @@ Les onglets de Conception :
 
 - Sortie : de gauche à droite : « Consulter la bibliothèque », la liste des cartes, « Actions ▾ », « Annuler », « Rétablir » ; la recherche ; « Nœuds », « Planificateur », « Vue ▾ », « Inspecteur », « Guide » ; plus aucune icône seule (PLAN-2026-10-08-chantier-carte-alignement, décisions de Grégoire du 9 oct. 2026 ; changelog 1.193)
 - Sortie : les boutons de la barre sont à 44 px au doigt (OU-EN-EST-ON, 9 oct. 2026)
-- Contradiction : changelog 1.66 met dans la barre les boutons Inspecteur, Raccourcis, Guide et Bibliothèque ; les décisions du 8 oct. 2026 retirent le bouton des raccourcis de la barre (palette ouverte depuis « Vue ») et celles du 9 oct. 2026 remplacent la Bibliothèque par « Consulter la bibliothèque » à gauche. Retenu : 8 et 9 oct.
 
 #### Geste : Ouvrir le menu « Vue »
 
 - Sortie : dans l'ordre : « Vue plein écran », « Recentrer la carte », « Tout voir », « Longue-vue », une rubrique « Zoom », un sous-titre « Fond du canevas » avec les couleurs, puis une ligne « Raccourcis clavier » (PLAN-2026-10-08-chantier-carte-alignement, décisions des 8 et 9 oct. 2026 ; changelog 1.192, 1.193)
 - Sortie : le menu tient dans sa largeur : les douze pastilles de couleur visibles en entier, aucun défilement horizontal, sous Chrome et Safari, sur grand écran comme sur iPad en paysage (décision de Grégoire du 8 oct. 2026, 20 h 52, _ancienne-CONSIGNE-DU-JOUR-2026-10-08-carte-palette-raccourcis)
 - Sortie : le menu se manie au clavier et au doigt (_ancienne-CONSIGNE-DU-JOUR-2026-10-08-carte-lots-1-2)
-- Contradiction : la proposition du 8 oct. 2026 à 14 h 26 met les couleurs de fond dans le menu au nom de la carte ; la décision de 14 h 34 le même jour les met dans « Vue » (PLAN-2026-10-08-chantier-carte-alignement). Retenu : « Vue ».
 
 #### Geste : Recentrer la carte, tout voir, passer en plein écran
 
 - Sortie : « Recentrer la carte » ramène la vue sur le contenu, avec la touche R (au lieu de ⌘1) (changelog 1.192)
 - Sortie : « Tout voir » ajuste le zoom pour que la carte entière tienne à l'écran, blocs isolés compris (changelog 1.73)
-- Contradiction : changelog 1.28 et 1.73 donnent ⌘1 pour Recentrer ; changelog 1.192 donne R. Retenu : R.
 
 #### Geste : Choisir la couleur du fond du canevas
 
@@ -1757,13 +1745,11 @@ Les onglets de Conception :
 
 - Sortie : la loupe s'appelle « Longue-vue », passe dans « Vue » sous « Tout voir », touche L ; partout où l'outil est nommé, « loupe » devient « longue-vue » ; le cadre qui grossit le texte est un cercle (décisions de Grégoire du 9 oct. 2026, 11 h 10 et 11 h 12 ; changelog 1.193)
 - Sortie : elle grossit un détail sans changer le zoom ; au doigt sur iPad, glisser en longue-vue ne déplace aucun bloc (PLAN-2026-10-08-chantier-carte-alignement, motif de Grégoire ; changelog 1.73)
-- Contradiction : changelog 1.73 et 1.81 parlent de la « loupe » ; décision du 9 oct. 2026 : « longue-vue ». Retenu : longue-vue.
 
 #### Geste : Ouvrir la palette des raccourcis
 
 - Sortie : la ligne « Raccourcis clavier » au bas de « Vue » referme le menu et ouvre une palette flottante, déplaçable par sa barre, repliable (−/+), fermée par sa croix, au premier plan quand on la touche ; une seconde fois, elle la referme ; pas d'icône dans la barre (décision de Grégoire du 8 oct. 2026, 20 h 52, _ancienne-CONSIGNE-DU-JOUR-2026-10-08-carte-palette-raccourcis ; OU-EN-EST-ON, 8 oct. 2026)
 - Sortie : libellés validés, dont « Déplacer un bloc ; par le cadre d'une leçon ou d'une séquence, tout le groupe suit » et « Recherche : refermer la liste ; une seconde fois, tout effacer » (validés par Grégoire le 8 oct. 2026, 19 h 05)
-- Contradiction : PLAN-2026-10-08-chantier-carte-alignement (14 h 26) et la consigne des lots 1 et 2 (18 h 03) font disparaître la palette indépendante des raccourcis ; la décision de 20 h 52 la fait revenir, ouverte depuis « Vue ». Retenu : la palette revient.
 
 #### Geste : Utiliser un raccourci clavier
 
@@ -1829,7 +1815,6 @@ Les onglets de Conception :
 - Une leçon ancrée hors du cadre du trimestre retombe dans « Non planifié » au lieu de disparaître (changelog 1.48)
 - Le planificateur ne répète le nom d'une séquence que pour les leçons affichées loin d'elle (changelog 1.51)
 - À la rentrée, un planificateur vide propose de reprendre la carte du même cours de la session précédente, en un clic ; la carte d'origine reste intacte (changelog 1.49)
-- Contradiction : changelog 1.53 et 1.151 offrent un bouton qui place la réserve à gauche ; la décision de Grégoire du 8 oct. 2026 (changelog 1.192) la met toujours dessous. Retenu : dessous.
 
 ### Écran 37 · Conception › Carte d'alignement › « Télécharger un modèle… » (faire relire sa carte par une IA)
 
@@ -1843,7 +1828,7 @@ Les onglets de Conception :
 - Sortie : message « Modèle téléchargé : colle-le dans l'IA de ton choix. » ; échec : « Le modèle n'a pas pu être produit : aucune carte active. » (même source)
 - Sortie : aucun contenu disciplinaire écrit dans l'application (ni littérature, ni enseignement explicite comme norme) : tout le vocabulaire vient de la carte (CARTE-ALIGNEMENT-2026-09-27-1, garde-fous)
 - Données : aller simple : aucune réimportation, aucune écriture dans la carte (CARTE-ALIGNEMENT-2026-09-27-1 ; changelog 1.165)
-- Incertain : sans Cadre du trimestre, la phrase s'arrête à « … jusqu'à la semaine N. », sans « sur [total] » ; sans leçon planifiée, le défaut est la dernière semaine du trimestre : choix de la session (DEMANDE-RELECTURE-2026-09-27-lot-963-modele-ia, § 2), que l'acceptation « Tout est ok » de Grégoire ne nomme pas explicitement.
+- Sortie : sans Cadre du trimestre, la phrase s'arrête à « … jusqu'à la semaine N. », sans total ; sans leçon planifiée, le modèle part de la dernière semaine du trimestre (DEMANDE-RELECTURE-2026-09-27-lot-963-modele-ia, § 2 ; décision de Grégoire, 13 oct. 2026).
 
 #### Sans geste
 - Non documenté dans les sources lues.
@@ -1858,8 +1843,8 @@ Les onglets de Conception :
 - Sortie : page 4 « Organise dans le temps » ; page 8 « Vérifie que c'est acquis », avec la légende des pastilles de l'évaluation (même source)
 - Sortie : page 5 : « Dans l'Inspecteur d'une activité ou d'un exposé de cette leçon, coche les objectifs servis ; dans celui d'une évaluation, les objectifs vérifiés, ceux de sa leçon ou d'une leçon placée avant elle. C'est ainsi que tu vérifies qu'aucun objectif ne reste sans moyen. » et « Une activité ou un exposé doit être dans la même leçon que l'objectif ; une évaluation, dans cette leçon ou une leçon placée après. » (retouches acceptées par Grégoire le 28 sept. 2026)
 - Sortie : tous les guides partagent la même présentation ; les pictogrammes de badge (✓, !, ⚠) s'affichent (changelog 1.59)
-- Contradiction : la page 1 validée le 27 sept. 2026 dit « Tu peux le consulter à tout moment depuis la palette » ; la décision du 9 oct. 2026 met « Guide » en mot dans la barre (et changelog 1.66 avait déjà sorti le bouton de la palette). Rien ne dit que la page 1 a été réécrite.
-- Incertain : le lien unesdoc retiré de la page 1 « Grégoire le vérifiera à la main et te dira s'il faut le remettre » (CARTE-ALIGNEMENT-2026-09-27-4) ; aucune suite documentée.
+- Sortie : la page 1 du guide dit « Tu peux le consulter à tout moment par le bouton « Guide » de la barre. » (décision de Grégoire, 13 oct. 2026).
+- Sortie : la page 1 du guide ne porte pas de lien vers unesdoc (décision de Grégoire, 13 oct. 2026).
 
 #### Sans geste
 - Non documenté dans les sources lues.
@@ -1870,7 +1855,6 @@ Les onglets de Conception :
 
 - Sortie : bouton « Consulter la bibliothèque », bleu foncé, même style que dans la Conception, à gauche de la barre juste avant la liste des cartes ; c'est là qu'on importe, exporte, duplique ou supprime une carte (décisions de Grégoire du 9 oct. 2026, 11 h 21 ; changelog 1.193)
 - Sortie : « Importer une carte (fichier) », « Importer d'un autre trimestre… », « Exporter cette carte », « Supprimer cette carte » quittent « Actions ▾ » ; « Dupliquer » passe dans le menu « ⋮ » de chaque carte (même source)
-- Contradiction : changelog 1.30 et 1.49 (« Actions → « Importer d'un autre trimestre… » ») contre la décision du 9 oct. 2026 (changelog 1.193). Retenu : dans la bibliothèque.
 
 #### Geste : Importer une carte d'un autre trimestre
 
@@ -1907,8 +1891,8 @@ Les onglets de Conception :
 - Données : la copie retient l'identifiant précis de son original, pour qu'on remonte la filiation sans ambiguïté, dans les cinq familles (ARBITRAGE-2026-08-24-476-volet2-duplications, D5, verdict du 24 août 2026)
 - Données : la copie ne garde pas la licence de partage de l'original (même source, D4)
 - Données : la copie ne répond plus à l'identifiant de sa source ; deux jumelles ne se confondent plus (changelog 1.199 ; option B de Grégoire du 28 août 2026, DEMANDE-RELECTURE-2026-10-11-lot14-liens-pratiques-echelles) (#586)
-- Incertain : D5 (24 août 2026) veut que la copie retienne l'identifiant de son original ; la correction du 11 oct. 2026 fait que la copie « ne répond plus à l'identifiant de sa source » ; aucun document ne dit si la filiation reste lisible après la copie.
-- Non tranché : selon le bouton, les critères d'une grille copiée sont neufs ou partagés avec l'originale : « à instruire séparément » (ARBITRAGE-2026-08-24-476-volet2-duplications, D6, verdict du 24 août 2026)
+- Données : la copie a son propre identifiant et ne répond plus à celui de sa source, mais elle garde la mention de son original ; la filiation reste lisible (décision de Grégoire, 13 oct. 2026).
+- Données : quel que soit le bouton, une grille copiée reçoit des critères neufs, indépendants de ceux de l'originale ; modifier l'une ne touche pas l'autre (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : Ouvrir un exemplaire « exemple » (matériel fourni ou démo)
 
@@ -1925,7 +1909,7 @@ Les onglets de Conception :
 - Sortie : chaque ligne porte le nom, l'identifiant court, la date de modification, et « Dans ta barre latérale » ou « Bibliothèque partagée » ; un groupe mixte est classé « Copies » avec un numéro de lignée ; tous les groupes sont dépliés (même source, décisions 3.2 et 3.3 de Grégoire, 23 août 2026)
 - Sortie : « Voir » fait défiler jusqu'à la carte et l'entoure d'un cadre orange environ deux secondes ; une carte masquée par un filtre fait dire qu'elle n'est pas affichée, jamais rien en silence (même source, 2.3)
 - Sortie : sur une ligne « Dans ta barre latérale » : « Retirer » et « Supprimer » ; sur une ligne « Bibliothèque partagée » : « Supprimer » seulement ; ces gestes restent aussi dans le menu ⋮ (même source, 2.4 et décision 3.4)
-- Incertain : la comparaison côte à côte des doublons et « Tout fusionner » sont le « prochain chantier » selon Grégoire (décision 3.6, 23 août 2026 ; BACKLOG #291) ; aucun document ne dit qu'ils sont livrés.
+- Sortie : les doublons se comparent côte à côte, et « Tout fusionner » les réunit en un seul (décision de Grégoire, 23 août 2026, reconduite le 13 oct.) (#291).
 
 #### Geste : Ranger dans « Mes dossiers » (grilles, échelles, productions, pratiques)
 
@@ -1937,7 +1921,7 @@ Les onglets de Conception :
 
 - Chaque carte de bibliothèque porte son identifiant court (une puce grise), complet au survol, lisible sur iPad sans zoomer et en mode clair ; aucune puce hors des bibliothèques (changelog 1.92 ; PORTES-TERRAIN-2026-08-23-doublons, 2.1)
 - Après un import, la carte importée est amenée à l'écran et mise en évidence, dans les cinq familles ; si un filtre la masque, la notification le dit (changelog 1.199, 1.125) (#793)
-- Incertain : la phrase qui renvoie à la case « Masquer… » ne doit paraître que là où la case existe (grilles, échelles, cartouches) ; ailleurs, la mise en évidence se tait (CONSIGNE-DU-JOUR, correction demandée le 11 oct. 2026) ; rien ne dit encore que la correction est livrée.
+- Sortie : la phrase qui renvoie à la case « Masquer… » ne paraît que là où cette case existe (grilles, échelles, cartouches) ; ailleurs, elle se tait (CONSIGNE-DU-JOUR, correction demandée par Grégoire le 11 oct. 2026).
 
 ### Écran 41 · Partage entre collègues
 
@@ -1952,7 +1936,6 @@ Les onglets de Conception :
 - Données : une échelle partagée emporte ses deux repères, les descriptions de ses niveaux, leur étiquette SOLO, sa description et sa discipline (changelog 1.159 ; OU-EN-EST-ON, 25 sept. 2026) (#583)
 - Données : le format de partage reste le même (prolongé, pas de nouveau format avant juin 2027) (décision de Grégoire du 25 sept. 2026, _ancienne-CONSIGNE-DU-JOUR-2026-09-26-lot-cartouches)
 - Données : la taille d'un paquet est bornée par un plafond global de 10 Mo (confirmé par Grégoire le 10 juin 2026, BACKLOG #669)
-- Contradiction : PLAN-PARTAGE-RESSOURCES (21 avril 2026) prévoit un ZIP et une entrée « Réglages › Import/Export » ; changelog 1.10 et 1.11 livrent un fichier .lcz, un bouton dans chaque bibliothèque et « Réglages › Données › Partage entre collègues ». Retenu : 1.10 et 1.11.
 
 #### Geste : Importer un partage (.lcz)
 
@@ -1963,9 +1946,8 @@ Les onglets de Conception :
 - Données : les éléments importés restent à part, en lecture seule, dans la section « Partagés par des collègues » ; rien n'est mélangé aux documents de l'utilisateur (changelog 1.11 ; PLAN-PARTAGE-RESSOURCES)
 - Données : chez la personne qui reçoit, la grille calcule comme chez son auteur : son évaluation ne bascule pas de mode à son insu (OBJECTIF-COHORTE-1, énoncé 6) (#669)
 - Données : une grille reçue qui porte le même nom qu'une grille locale, mais pas les mêmes critères, ne s'y rattache pas (changelog 1.196)
-- Incertain : la demande de relecture du lot 14 (11 oct. 2026) dit qu'à l'import d'un partage la pratique suit son échelle quand celle-ci change d'identifiant ; la consigne du jour du même soir dit que cette branche ne se déclenche jamais, un paquet de pratique ne portant pas son échelle (CONSIGNE-DU-JOUR, 11 oct. 2026) (#663)
+- Données : un paquet de pratique emporte son échelle ; à l'import, la pratique suit cette échelle, même si celle-ci change d'identifiant (décision de Grégoire, 13 oct. 2026) (#663).
 - Sortie : un nom reçu d'un collègue (grille, échelle, cartouche, pratique, tampon) s'affiche toujours comme du texte, même importé avant (changelog 1.195)
-- Contradiction : changelog Beta (« alerte si une ressource a été modifiée en transit ») contre OU-EN-EST-ON, version 1.127 (« refuse d'importer un fichier non signé ou modifié »). Retenu : refus.
 
 #### Geste : Utiliser un élément « Partagé par un collègue »
 
@@ -1993,16 +1975,16 @@ Les onglets de Conception :
 #### Geste : Importer une cartouche d'un autre trimestre
 
 - Sortie : la bibliothèque des cartouches a sa section « Importer depuis un autre trimestre », comme les quatre autres ; on choisit le trimestre (son compte de cartouches affiché), « Voir les cartouches » liste ses cartouches groupées par grille, chaque grille annonçant « sa grille est déjà dans ce trimestre » ou « sa grille sera copiée avec elle » (changelog 1.95 ; PORTES-TERRAIN-2026-08-24-cartouches-inter-trimestre, 24 août 2026)
-- Sortie : une phrase explique avant le clic : « Une cartouche arrive toujours avec sa grille : si la grille est déjà dans ce trimestre, la cartouche s'y range ; sinon la grille est copiée avec elle. » (même source, choix 3.4 soumis à Grégoire)
+- Sortie : une phrase explique avant le clic : « Une cartouche arrive toujours avec sa grille : si la grille est déjà dans ce trimestre, la cartouche s'y range ; sinon la grille est copiée avec elle. » (même source, choix 3.4 ; décision de Grégoire, 13 oct. 2026)
 - Données : une cartouche arrive toujours avec sa grille : rangée sous la grille si elle est déjà dans le trimestre, sinon copiée avec elle ; le rattachement se décide sur la filiation de la grille, jamais sur son nom (changelog 1.95)
 - Données : le trimestre source garde ses cartouches (PORTES-TERRAIN-2026-08-24-cartouches-inter-trimestre, § 2 bis)
 - Données : l'échelle d'une cartouche copiée se rattache comme à l'import : la même échelle si elle est déjà là, sinon l'échelle locale de même nom aux mêmes codes de niveaux ; les copies déjà faites ne sont pas réécrites (BACKLOG #656, 11 oct. 2026 ; changelog 1.199)
 - Sortie : importer une cartouche dont la grille est copiée : bandeau vert « … importée dans ce trimestre » et « Sa grille … a été copiée avec elle » ; la grille paraît dans la barre latérale avec cette seule cartouche (PORTES-TERRAIN-2026-08-24-cartouches-inter-trimestre, 1.5)
 - Sortie : importer une autre cartouche de la même grille : bandeau « Rangée dans « … », déjà présente » ; aucune seconde grille du même nom (même source, 1.6)
 - Sortie : réimporter une cartouche déjà présente : bandeau bleu « … est déjà dans ce trimestre. Pour en avoir un second exemplaire, utilise « Dupliquer ». » ; rien n'est ajouté (même source, 1.7 ; changelog 1.95)
-- Sortie : « Tout importer », après confirmation, prend tout le trimestre, toutes grilles confondues, et rend « Import terminé » avec le compte des cartouches copiées, des grilles copiées et de celles déjà présentes (même source, 1.8 et choix 3.2)
-- Données : une cartouche importée arrive directement dans la barre latérale (même source, choix 3.3)
-- Contradiction : dans le même document du 24 août 2026, le choix 3.1 dit « Seuls les trimestres ARCHIVÉS sont proposés » et le § 2 bis montre un trimestre vivant proposé, après correction (« APRÈS : « Hiver 2026 (2 cartouches) » »). Aucune réponse de Grégoire aux choix 3.1 à 3.4 n'est trouvée.
+- Sortie : « Tout importer », après confirmation, prend tout le trimestre, toutes grilles confondues, et rend « Import terminé » avec le compte des cartouches copiées, des grilles copiées et de celles déjà présentes (même source, 1.8 et choix 3.2 ; décision de Grégoire, 13 oct. 2026)
+- Données : une cartouche importée arrive directement dans la barre latérale (même source, choix 3.3 ; décision de Grégoire, 13 oct. 2026)
+- Données : la liste propose tous les autres trimestres présents dans l'application, en cours ou clos (décision de Grégoire, 13 oct. 2026).
 - Données : deux imports faits coup sur coup ne s'effacent pas l'un l'autre (OU-EN-EST-ON, 10 oct. 2026) (#522)
 
 #### Geste : Importer depuis un autre trimestre, dans n'importe quelle bibliothèque
