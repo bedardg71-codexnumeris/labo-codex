@@ -141,7 +141,6 @@
 - Recherches non faites : SESSION.md pour les Évaluations, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 1 : ce que l'application propose au premier lancement aujourd'hui (démo ou espace vide) ; le contenu complet d'Aide › Codex ; ce que fait « Nouveau codex ».
 - Partie 2 : l'export de la liste d'élèves ; la duplication d'un cours ; ce que fait l'ouverture d'un trimestre depuis la bibliothèque ; la liste des options du menu « Remarque ».
 - Partie 3 : ce que la suppression d'une production fait aux données.
 - Partie 4 : les plus anciennes fonctions de la carte d'alignement ne sont attestées que par le changelog ; aucune réponse trouvée aux choix 3.1 à 3.4 de l'import de cartouches d'un autre trimestre, ni de livraison pour la comparaison côte à côte des doublons.
@@ -171,7 +170,7 @@
 - Sortie : une adresse neuve s'ouvre vide, sans trimestre ni cours (PORTES-TERRAIN-2026-09-13-478-parcours-rentree §0, 13 sept. 2026)
 - Données : non documenté, sauf : le rappel du codex n'écrit rien au premier lancement (CONSIGNE-LOT-I-rappel-codex §3, 29 sept. 2026)
 - Sortie : aucun parcours d'accueil propre au premier lancement « à froid » : décision de Grégoire, il est couvert par les chroniques Labo, le système d'aide, l'accompagnement et les données de démonstration (OBJECTIF-COHORTE-1, 1er sept. 2026 ; CONSIGNE-2026-09-01-pret-pour-les-nouveaux-utilisateurs)
-- Incertain : la porte du 13 sept. prévoit qu'un poste vierge « propose la démonstration » (à refuser) ; le plan d'avril (démo installée et case cochée par défaut au premier démarrage) a été défait par un retour arrière ; aucun document ne dit ce que l'application propose aujourd'hui au premier lancement (PORTES-TERRAIN-2026-09-13-478-parcours-rentree, 13 sept. 2026 ; PLAN-AUTONOMISATION-UTILISATEUR, 21-22 avril 2026)
+- Sortie : au premier lancement, l'application propose la démonstration ; la refuser laisse un espace vide, sans trimestre ni cours (décision de Grégoire, 13 oct. 2026 ; PORTES-TERRAIN-2026-09-13-478-parcours-rentree, 13 sept. 2026)
 
 #### Sans geste
 - Non documenté dans les sources lues.
@@ -185,8 +184,6 @@
 - Sortie : « Certains concepts sont nouveaux ? Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ». » (_ancienne-CONSIGNE-DU-JOUR-2026-09-12-accueil-et-porte-ortho §B3, 12 sept. 2026)
 - Sortie : « Ton courriel, une fois par mois. Tu donnes ton courriel, tu reçois un code, et tu n'y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil. », puis l'invitation à la communauté de pratique (idem §B3)
 - Sortie : aucun tiret cadratin dans l'encadré (Grégoire le réserve aux dialogues) (_ancienne-CONSIGNE-DU-JOUR-2026-09-27-accueil-tutoriels §2, 26 sept. 2026)
-- Contradiction : le 12 sept., « Par où commencer ? » avait deux branches (« Je suis enseignant·e » / « Je suis orthopédagogue ») ; le 26 sept., Grégoire accepte les trois étapes et garde la ligne de l'orthopédagogue à part (_ancienne-CONSIGNE-DU-JOUR-2026-09-12-accueil-et-porte-ortho §B2 ; _ancienne-CONSIGNE-DU-JOUR-2026-09-27-accueil-tutoriels)
-- Contradiction : le paragraphe d'identification posé le 31 août (« L'identification est requise pour accéder à Labo Codex… pendant un mois ») est remplacé le 12 sept. par « Ton courriel, une fois par mois. … » (REFERMAGE-2026-09-01-cloudflare-access §8, 31 août 2026 ; _ancienne-CONSIGNE-DU-JOUR-2026-09-12-accueil-et-porte-ortho §B3)
 
 #### Geste : cliquer « Voir les tutoriels ↗ »
 
@@ -206,7 +203,6 @@
 #### Geste : toucher la carte « Ton codex » (sous « Utilitaires »)
 
 - Sortie : titre « Ton codex », sous-titre « Mets-le à jour : une copie complète de tes données. » ; ouvre la fenêtre du rappel « Mets ton codex à jour » (RELECTURE-2026-09-29-lot-I-rappel-codex §4, Grégoire, 29 sept. 2026, 20 h 49 ; PORTES-TERRAIN-2026-09-29-lot-I-rappel-codex rangée 2.1 ; changelog 1.170)
-- Contradiction : en 1.168, cette carte s'appelait « Copie de secours » ; le 29 sept. au soir, Grégoire en fait la carte du codex (changelog 1.168 ; RELECTURE-2026-09-29-lot-I-rappel-codex §4)
 
 #### Geste : toucher la carte « Nouveautés »
 
@@ -232,7 +228,6 @@
 - Sortie : pendant un import de copies, entrer dans la démo est refusé : avis « Import en cours », « Attends la fin de l'import des copies avant d'entrer dans la démo. » ; la case garde son état (RELAIS, 1.186.6 revue, 6 oct. 2026)
 - Données : la bascule est réversible, sans risque pour les vraies données (changelog, version bêta ; SPEC_comparateur_pratiques §3.4).
 - Sortie : dix élèves fictifs, 101 évaluations, les mêmes 32 dates de présence (OU-EN-EST-ON, 13 sept. 2026) (#852).
-- Contradiction : CONSIGNE-renommage-eleves-demo (26 juin 2026) visait vingt élèves fictifs ; OU-EN-EST-ON (13 sept. 2026) en compte dix. Retenu : dix.
 - Sortie : les documents de la démo sont en lecture seule, dans une section « Démo » des sélecteurs ; « Dupliquer » en fait un modèle à soi, avec l'attribution « Inspiré de » (changelog, version bêta ; PLAN-AUTONOMISATION-UTILISATEUR, phases 2 à 4, avril 2026).
 - Sortie : la saisie des présences s'ouvre sur la dernière séance passée, sans bandeau « configuration incomplète » (changelog 1.133).
 - Sortie : le dépistage n'est pas muet : la famille « Défi spécifique » se calcule sur la grille du pack, sans toucher à la grille de référence de l'utilisateur (changelog 1.131).
@@ -245,7 +240,7 @@
 - Données : non documenté (sauf la date rendue au retour, voir plus haut)
 - Sortie : bloqué tant qu'un import de copies est en cours, avec un avis ; la case reste cochée (_ancienne-CONSIGNE-DU-JOUR-2026-10-06-demo-t2-t4-t7, T7, 6 oct. 2026 ; RELAIS, 6 oct. 2026)
 - Sortie : aucune proposition de codex avant de quitter (DECISIONS-2026-10-02-1007-suppressions §2, Grégoire, 2 oct. 2026).
-- Contradiction : PLAN-AUTONOMISATION-UTILISATEUR (21 avr. 2026) retirait le bandeau et son bouton « Quitter la démo » ; cette phase a été tentée puis annulée le 22 avr. 2026 ; les décisions du 7 oct. 2026 placent « Retirer les copies » à côté de « Quitter la démo » dans le bandeau vert. Retenu : le bandeau et son bouton existent.
+- Sortie : le bandeau vert « Mode démonstration » porte le bouton « Quitter la démo », avec « Retirer les copies (N) » à côté (_ancienne-CONSIGNE-DU-JOUR-2026-10-07-demo-t3-t6, 7 oct. 2026).
 
 #### Geste : « Retirer les copies (N) » (bandeau vert)
 
@@ -256,13 +251,12 @@
 #### Geste : importer des copies pendant la démo
 
 - Données : les copies de la démo restent dans le navigateur ; rien de la démo n'entre dans le dossier de copies que l'enseignant a branché sur son disque (RELAIS, 1.186.6 revue, 6 oct. 2026)
-- Contradiction : la première version du lot refusait l'import en démo quand un dossier sur disque était branché ; la relecture du même soir l'a remplacée par l'écriture dans le navigateur seulement (RELAIS, 6 oct. 2026, 19 h 27 ; RELAIS, 6 oct. 2026, 19 h 46)
 
 #### Sans geste
 
 - À une nouvelle version du pack, la démo déjà installée se met à jour d'elle-même ; le pack remplace les évaluations faites dans la démo (changelog 1.139 ; _ancienne-CONSIGNE-DU-JOUR-2026-10-07-demo-t3-t6, G4)
 - L'aide du mode démonstration dit : « Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les copies » efface les copies importées. » (_ancienne-CONSIGNE-DU-JOUR-2026-10-07-demo-t3-t6, G4 et T6, 7 oct. 2026)
-- Non tranché : rendre la démo copiable vers un vrai trimestre (« une question de conception, pas un correctif ») (PLAN-2026-09-01-materiel-seme-et-chemin-d-entree §5, 1er sept. 2026)
+- Données : la démo ne se copie pas vers un vrai trimestre ; seul « Dupliquer » en tire des modèles à soi, un document à la fois (décision de Grégoire, 13 oct. 2026).
 - Le codex n'emporte pas la démo (ni ses données ni ses copies), et ouvrir un codex ne la modifie pas (changelog 1.186 ; _ancienne-CONSIGNE-DU-JOUR-2026-10-06-demo-t2-t4-t7, Grégoire, G1, 6 oct. 2026).
 - Ce que l'utilisateur a dupliqué de la démo n'est jamais touché par une nouvelle version du pack (OU-EN-EST-ON, 13 sept. 2026 ; PLAN-AUTONOMISATION-UTILISATEUR §4.3).
 
@@ -275,19 +269,16 @@
 - Sortie : le détail dit le mode : Chrome et Edge, « mise à jour directe du fichier ouvert » ; Safari et iPad, « téléchargement d'un nouveau fichier à chaque mise à jour », avec « Pense à remplacer toi-même le fichier précédent sur ta clé USB » ; et « Dernière mise à jour : ‹date› » (idem, lignes 6, 7, 9)
 - Données : toute écriture de données par un geste de l'enseignant (évaluation, présence, fiche du Cadre, annotation, carte d'alignement modifiée, tampon, cours retiré…) rend le codex « pas à jour » (_ancienne-CONSIGNE-DU-JOUR-2026-09-29-lot-F-les-mots, étape 1, 28 sept. 2026 ; DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots §1)
 - Données : changer de groupe-cours, de cours ou de trimestre actif, masquer un groupe-cours, l'état du tirage au sort, les réglages d'affichage ne rendent pas le codex « pas à jour » (DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots §2, arbitrages acceptés à la relecture du 29 sept. 2026)
-- Contradiction : le glossaire accepté le 29 sept. à 5 h 59 place le menu Codex « en haut à droite » ; la porte du même matin (7 h 20) le place « en haut à gauche » (DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots, ligne 68 ; PORTES-TERRAIN-2026-09-29-lot-F-codex rangée 1.1)
 
 #### Geste : « Mettre à jour le codex »
 
 - Données : écrit dans un fichier ZIP toutes les données de l'application et les copies des élèves, de tous les trimestres, y compris les copies à la corbeille et les fichiers de Modélisation ; les copies y sont rangées telles quelles (fichier environ 3 % plus lourd) (_ancienne-CONSIGNE-DU-JOUR-2026-10-02-1014-codex-complet §A, décision de Grégoire 2 oct. 2026 ; changelog 1.171, 1.174)
 - Données : le codex n'emporte rien de la démo (ni ses données, ni ses copies) ; la démo se réinstalle depuis l'application (_ancienne-CONSIGNE-DU-JOUR-2026-10-06-demo-t2-t4-t7, décision G1 de Grégoire, 6 oct. 2026 ; changelog 1.186)
-- Contradiction : le document fondateur cité par le cadrage dit qu'un codex porte un seul trimestre ; la décision du 2 oct. fait partir dans le codex les fichiers de tous les trimestres (CADRAGE-2026-09-30-codex-et-archives-coherence §2, document du 26 avril 2026 ; _ancienne-CONSIGNE-DU-JOUR-2026-10-02-1014-codex-complet §A, 2 oct. 2026)
 - Données : l'état « à jour » n'est posé qu'après l'écriture confirmée du fichier ; un aperçu annulé ne dit ni succès ni « à jour » (_ancienne-CONSIGNE-DU-JOUR-2026-09-29-lot-F-les-mots §2 et §4)
 - Sortie : un aperçu (« Confirmer l'export codex », bouton « Télécharger ») dit la taille du fichier ; puis la barre « Compression du ZIP… » monte jusqu'à 100 %, sans que la page se recharge (changelog 1.169 ; PORTES-TERRAIN-2026-09-30-lot-J0-codex-ipad §1 ; PORTES-TERRAIN-2026-10-01-1012-avertissement rangée 1.4)
 - Sortie (Chrome et Edge, fichier déjà tenu) : le même fichier est réécrit sans fenêtre, sous-texte « Dans le même fichier » ; message « Codex mis à jour » (taille, même fichier) (DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots, lignes 2 à 4 ; PORTES-TERRAIN-2026-10-03-1007-propose-codex rangée 3.1)
 - Sortie (Safari et iPad) : un nouveau fichier `codex-‹nom›-‹date›-‹heure›.zip`, sous-texte « Télécharge un nouveau fichier » (PORTES-TERRAIN-2026-09-29-lot-F-codex rangées 1.2 et 1.3)
 - Sortie (iPad, et Chrome quand la préparation dure plus de quelques secondes) : la fenêtre « Ton codex est prêt » dit « Appuie sur « Enregistrer » pour choisir où le ranger » ; sur l'iPad, « Enregistrer » ouvre la feuille de partage (« Enregistrer dans Fichiers ») (changelog 1.171, 1.198 ; DEMANDE-RELECTURE-2026-10-11-lot6-nombres, décision de Grégoire, 11 oct. 2026) (#988, #995)
-- Contradiction : le 30 sept., Grégoire avait accepté « Touche « Enregistrer »… » ; le 11 oct., il le remplace par « Appuie sur » (_ancienne-CONSIGNE-DU-JOUR-2026-09-30-lot-J0-ter §2.2 ; DEMANDE-RELECTURE-2026-10-11-lot6-nombres)
 - Sortie (iPad) : pendant que l'appareil prépare le partage, la fenêtre « Ouverture de la feuille de partage… », « Ton appareil prépare le fichier (taille). Ça peut prendre un moment : elle va s'ouvrir. », sans bouton ; elle disparaît quand le partage se termine, par réussite, échec ou annulation (_ancienne-CONSIGNE-DU-JOUR-2026-09-30-lot-J0-ter §2.1, mots acceptés par Grégoire le 30 sept. 2026)
 - Sortie : réussite : « Codex mis à jour », avec la taille et le lieu (même fichier, fichier choisi, Fichiers, Téléchargements) ; le menu dit « Ton codex est à jour » (DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots, ligne 3 ; PORTES-TERRAIN-2026-09-29-lot-I-rappel-codex rangée 1.1)
 - Sortie : tout échec, sauf un aperçu refusé par l'enseignant : « Codex non mis à jour » en bas à gauche, qui reste affiché, avec la taille ; une fenêtre propose « Réessayer » (le même fichier, sans le refaire) ou « Télécharger à la place » ; le menu garde « n'a pas tes derniers changements » (_ancienne-CONSIGNE-DU-JOUR-2026-09-29-lot-G-codex-ipad §3, 29 sept. 2026 ; changelog 1.169)
@@ -295,9 +286,8 @@
 - Sortie : si des copies attendues ne sont pas dans l'application, avant tout le reste, la fenêtre « Ce codex n'aura pas toutes tes copies » : « … copies sur … ne sont pas dans l'application. Le codex que tu vas écrire ne les contiendra pas. » puis « Si un autre fichier de codex les contient encore, ne le remplace pas : donne un autre nom à celui-ci. » ; « Annuler » (qui a le focus, n'écrit rien) et « Écrire sans ces copies » (rouge) ; ensuite l'application demande où ranger le fichier au lieu de remplacer l'ancien, même dans Chrome (PORTES-TERRAIN-2026-10-01-1012-avertissement rangée 1.2 ; changelog 1.174 ; OU-EN-EST-ON, 1.174.0, 1er oct. 2026) (#1012)
 - Sortie : une copie marquée « exportée » ne compte pas parmi les copies manquantes (PORTES-TERRAIN-2026-10-01-1012-avertissement §1)
 - Sortie : une mise à jour réussie, par le menu, par le rappel ou par « Il y est », repousse le rappel de 14 jours (voir « Rappel ») (changelog 1.170)
-- Contradiction : sous Chrome, le codex s'enregistrait tout seul toutes les 5 minutes ; retiré en 1.168 (option 1 de Grégoire) : le fichier ne change que lorsqu'on le met à jour (changelog 1.168 ; DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots §2, 29 sept. 2026)
-- Non tranché : le message d'échec dit « Si ton appareil manque d'espace, libères-en, puis réessaie » quelle que soit la cause ; ses mots reviennent à Grégoire, plus tard (BACKLOG #994, 30 sept. 2026)
-- Non tranché : une copie vraiment perdue ferait revenir l'avertissement à chaque mise à jour, sans moyen de dire « je le sais » ; en attente d'un cas réel (BACKLOG #1012, décision du 2 oct. 2026)
+- Sortie : en cas d'échec, le message dit la cause quand elle est connue ; il ne parle d'espace que si l'espace manque. Les mots restent à écrire (décision de Grégoire, 13 oct. 2026) (#994).
+- Sortie : l'avertissement permet de marquer une copie perdue comme connue ; il ne revient plus pour elle (décision de Grégoire, 13 oct. 2026) (#1012).
 
 #### Geste : « Mettre à jour dans un autre fichier… »
 
@@ -307,7 +297,7 @@
 #### Geste : créer un codex quand aucun n'est ouvert (« Nouveau codex », ou « Mettre à jour le codex » sans codex)
 
 - Données : le parcours de la mise à jour crée le fichier ; pas de chemin de création à part (MESURE-2026-09-29-lot-I-rappel-codex §1 ; DECISIONS-2026-09-26-enregistrement D8, 29 sept. 2026)
-- Sortie : non documenté au-delà
+- Sortie : « Nouveau codex » demande où ranger le fichier, y écrit toutes les données actuelles de l'application, et ce fichier devient le codex ouvert ; le menu dit ensuite « Ton codex est à jour » (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : « Ouvrir un codex… »
 
@@ -316,14 +306,13 @@
 - Données : un codex écrit avant que le codex emporte corbeille et Modélisation s'ouvre comme avant, sans faux manque (VERDICT-RELECTURE-2026-10-02-1014-codex-complet ; OU-EN-EST-ON, 1.174.6, 2 oct. 2026)
 - Sortie : avant d'ouvrir, l'application vérifie l'espace ; s'il manque : « Espace insuffisant pour ouvrir ce codex. Il a besoin d'environ {besoin}, mais le navigateur n'accorde que {disponible} à l'application. Libère environ {à libérer} sur l'appareil, puis réessaie. Sur un iPad : Réglages → Général → Stockage iPad. » ; et, quand le quota accordé est faible : « Si tu navigues en privé, rouvre l'application dans une fenêtre normale. » (VERDICT-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace, mots tranchés par Grégoire le 1er oct. 2026 à 11 h 10 ; changelog 1.14, 1.173)
 - Sortie : ouverture complète : fenêtre « Recharger la page », qui dit « Ton fichier de codex n'a pas changé : garde-le, c'est ta copie hors de l'application. » (OU-EN-EST-ON, 1.174.5, 2 oct. 2026 ; changelog 1.174)
-- Contradiction : en 1.14, la fenêtre conseillait « le fichier ZIP d'origine reste dans Fichiers, tu peux le supprimer pour récupérer de l'espace » ; le 2 oct., elle dit de le garder (changelog 1.14 ; changelog 1.174)
 - Sortie : ouverture incomplète (l'espace manque en cours de route) : l'ouverture va jusqu'au bout, puis la fenêtre « Codex ouvert, mais incomplet » reste jusqu'à la réponse : « … copies sur … n'ont pas pu revenir, faute d'espace. Tes données, elles, sont complètes, et ton fichier de codex n'a pas changé. » ; « Pour retrouver ces copies : si tu es en navigation privée, rouvre l'application dans une fenêtre normale. Sinon, libère de l'espace sur le disque de l'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex. » ; « Recharger la page pour appliquer les données ? », « Annuler » / « Recharger » ; jamais un « Erreur » nu (PORTES-TERRAIN-2026-10-01-1012-bilan-qui-reste rangée 1.1, 1er oct. 2026 ; changelog 1.173)
 - Sortie : le bilan d'un codex ouvert incomplet dit, pour chaque cause, si le rouvrir peut ramener les copies (changelog 1.174)
 - Sortie : tout autre échec d'ouverture d'un codex porte le titre « Le codex n'a pas pu être ouvert », le détail technique en dessous (VERDICT-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace, Grégoire, 1er oct. 2026, 11 h 11)
 - Données (Chrome) : après une ouverture incomplète, annulée ou refusée, l'application ne tient plus le fichier choisi : la mise à jour suivante demande où écrire au lieu de réécrire ce fichier (VERDICT-RELECTURE-2026-10-01-1011-codex-ouvert-sans-espace ; changelog 1.173 ; PORTES-TERRAIN-2026-10-01-1012-bilan-qui-reste rangée 1.2)
 - Sortie : le rechargement n'est proposé qu'une fois les écritures finies ; si le serveur ne répond pas au moment de recharger, l'application reste ouverte et dit que les données sont enregistrées (changelog 1.11, 1.125)
-- Non tranché : un codex de plus de 2 Go ne se rouvre pas ; ce qu'un codex doit emporter quand il grossit est à décider par Grégoire, après mesure de l'ouverture (BACKLOG #992, 30 sept. 2026)
-- Non tranché : garder pour de bon les nettoyages qui traitent les données d'avant le 8 août, ou refuser à l'ouverture les codex et sauvegardes d'avant le 8 août (DEMANDE-RELECTURE-2026-10-11-lot16-interventions-calendrier §3, 11 oct. 2026 ; OU-EN-EST-ON, 1.199.0)
+- Données : tout codex que l'application écrit doit pouvoir se rouvrir, quelle que soit sa taille (décision de Grégoire, 13 oct. 2026) (#992).
+- Données : un codex ou une sauvegarde d'avant le 8 août 2026 s'ouvre encore ; l'application met ses données au format actuel à l'ouverture, sans rien perdre (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : fermer un codex qui n'est pas à jour
 
@@ -376,7 +365,6 @@
 - Sortie : la fenêtre « Avant de supprimer, un codex à part » : « Supprimer le trimestre « ‹nom› » efface pour de bon ses étudiant·es, ses évaluations, ses présences, ses productions, ses captures et ses modèles. L'application va d'abord écrire un codex à part, sous un autre nom. Tes prochaines mises à jour n'y toucheront pas : il te permettra de revenir en arrière. » (première phrase adaptée au geste) ; « Annuler » et « Écrire le codex à part » (rouge) (DECISIONS-2026-10-02-1007-suppressions §7, mots acceptés par Grégoire, 2 oct. 2026)
 - Sortie : ensuite la destination est demandée, le fichier `codex-‹nom›-avant-suppression-‹date›-‹heure›.zip` est écrit, une notification « Codex à part écrit » le nomme, puis viennent la confirmation finale et la saisie du nom, comme avant (PORTES-TERRAIN-2026-10-03-1007-codex-a-part rangées 1.6 à 1.10)
 - Sortie : rouvert ailleurs, ce codex à part ramène le trimestre supprimé (PORTES-TERRAIN-2026-10-03-1007-codex-a-part §2)
-- Contradiction : en 1.27, supprimer un trimestre téléchargeait un export avant l'effacement ; en 1.173, la suppression était refusée tant que le codex n'était pas à jour (« Mets d'abord ton codex à jour ») ; depuis 1.175, ce refus disparaît au profit du codex à part (changelog 1.27, 1.173 ; DECISIONS-2026-10-02-1007-suppressions §7, 2 oct. 2026)
 
 #### Geste : supprimer un élément qui porte des notes ou du matériel (évaluation, production, grille, pratique, échelle, cartouche, élève, copie de la corbeille, fusion de copies, pages retirées d'une copie, jetons de reprise, remplacement d'un élément du même nom, réinitialisation d'une séance saisie, « Effacer tout » d'une page annotée, registre longitudinal, résultats du bilan réflexif)
 
@@ -394,8 +382,7 @@
 #### Geste : lire le rappel (il s'ouvre au chargement quand il est dû)
 
 - Sortie : titre « Mets ton codex à jour » ; texte « Tes données vivent dans ce navigateur : elles peuvent être perdues si tu effaces les données de sites, changes de navigateur ou d'ordinateur. Ton codex en garde une copie complète, copies de tes étudiant·es comprises, que tu rouvres sur n'importe quel appareil. » ; sélecteur « Rappel : » (7, 14 par défaut, 30 jours, « Ne plus rappeler ») ; boutons « Plus tard » et « Mettre à jour le codex » (DECISIONS-2026-09-26-enregistrement D8, mots acceptés par Grégoire le 29 sept. 2026 ; changelog 1.170)
-- Contradiction : en 1.168, le rappel s'intitulait « Fais une copie de secours » et menait à la copie de secours ; D8 le fait mener au codex (changelog 1.168 ; DECISIONS-2026-09-26-enregistrement D8, 29 sept. 2026)
-- Contradiction : D8 prévoyait d'abord une entrée « Copie datée, sans les copies des étudiant·es » au menu du codex ; D9, le même soir, élimine la copie de secours (DECISIONS-2026-09-26-enregistrement D8 et D9, 29 sept. 2026)
+- Sortie : le menu du codex n'offre ni copie de secours ni copie datée sans les copies des étudiant·es ; le codex est la seule copie (DECISIONS-2026-09-26-enregistrement D9, 29 sept. 2026).
 
 #### Geste : « Mettre à jour le codex » dans le rappel
 
@@ -452,7 +439,6 @@
 - Quand une version plus récente est déployée sur le serveur, le bandeau l'annonce (« Une mise à jour a été déployée… ») avec « Recharger » ; jamais deux boutons côte à côte (idem §B.3 ; OU-EN-EST-ON, 1.139.1)
 - Fermé, le bandeau se tait jusqu'à la version suivante (changelog 1.106, 1.139)
 - Le bandeau ne porte pas le bouton du rapport de bug (idem §B.5 ; changelog 1.127)
-- Contradiction : en 1.125, le bandeau disait où trouver les nouveautés (la carte « Nouveautés ») ; en 1.140, il porte un bouton qui les ouvre (changelog 1.125 ; changelog 1.140)
 
 #### Geste : ouvrir les Nouveautés (carte de l'Accueil ou bouton du bandeau)
 
@@ -505,13 +491,14 @@
 - Sortie : flux de travail : au bureau, « Avant de partir, mets à jour le codex sur ta clé USB (Codex → Mettre à jour le codex) » ; en classe, « Mets à jour le codex avant de partir » (DEMANDE-RELECTURE-2026-09-29-lot-F-les-mots, lignes 18 et 19)
 - Sortie : fonctions du menu : « Mettre à jour le codex » (Chrome et Edge réécrivent le même fichier, sans fenêtre ; Safari et l'iPad téléchargent un nouveau fichier) et « Mettre à jour dans un autre fichier » ; section « Ton codex est-il à jour ? » ; le fichier est « un fichier .zip » (idem, lignes 20 et 21 ; RELECTURE-2026-09-29-lot-F-les-mots, R2)
 - Sortie : la question « Codex ou copie de secours : quelle différence ? » est retirée (DEMANDE-RELECTURE-2026-09-30-lot-I-bis-un-seul-terme §3 ; changelog 1.173)
+- Sortie : Aide › Codex ne contient que le flux de travail, les fonctions du menu et la section « Ton codex est-il à jour ? » (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : lire Aide › Données (« Ouverture et partage de tes données »)
 
 - Sortie : deux options, « Exporter ma config » et « Ouvrir un Codex » (« Ouvre un codex ou une configuration partagée. Le type est détecté automatiquement. ») ; puis « Pour mettre ton travail en sûreté ou le transporter, mets ton codex à jour : menu Codex, en haut de l'écran. » (DEMANDE-RELECTURE-2026-09-30-lot-I-bis-un-seul-terme §3, mots validés par Grégoire les 30 sept. et 1er oct. 2026)
 - Sortie : bonnes pratiques : mettre son codex à jour régulièrement, avant un changement majeur, et le mettre à jour sur l'ancien appareil puis l'ouvrir sur le nouveau ; « Ton codex est ta seule protection. » (idem)
 - Sortie : encadré de la Loi 25 : où vivent les données des élèves, qui en répond, comment les protéger, avec un lien vers la page publique ; « Personne ne met ton codex à jour à ta place : utilise « Mettre à jour le codex » régulièrement. » (changelog 1.142 ; DEMANDE-RELECTURE-2026-09-30-lot-I-bis-un-seul-terme §3)
-- Contradiction : en 1.168 (29 sept.), l'Aide faisait de la copie de secours « ton filet de sécurité » à côté du codex ; D9 (29 sept. au soir) l'élimine, et depuis 1.173 aucun texte de l'application ne dit plus ce mot (changelog 1.168 ; DECISIONS-2026-09-26-enregistrement D9 ; changelog 1.173)
+- Sortie : aucun texte de l'application ne dit plus « copie de secours » ; l'Aide ne présente que le codex comme copie de tes données (DECISIONS-2026-09-26-enregistrement D9, 29 sept. 2026 ; changelog 1.173).
 
 #### Geste : lire la FAQ « Mes données s'enregistrent-elles toutes seules ? »
 
@@ -537,7 +524,7 @@
 
 - Sortie : les exemples tirés de la pratique de Grégoire (601-101, SRPNF, échelle IDME) restent présentés comme des exemples, pas comme la structure du logiciel (AUDIT-AIDE-CONFORMITE-2026-09-10, lot E)
 - Sortie : Aide › Exporter et archiver les travaux décrit les trois exports que l'écran offre vraiment (changelog 1.151) ; Aide › Préparer et importer les travaux dit comment nommer les pages d'une remise en plusieurs fichiers (« -p1, -p2… ») pour qu'elles s'assemblent (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-878-aide-nommer-les-pages, texte validé par Grégoire le 17 sept. 2026)
-- Non tranché : décrire dans l'Aide les trois types de grille et la note différée (prose neuve soumise à Grégoire, non écrite) (AUDIT-AIDE-CONFORMITE-2026-09-10, lot D, D.4 et D.5, 10 sept. 2026)
+- Sortie : l'Aide décrit les trois types de grille (holistique, analytique, algorithmique) et la note différée ; la prose reste à écrire et à faire accepter par Grégoire (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : survoler ou ouvrir l'aide contextuelle
 
