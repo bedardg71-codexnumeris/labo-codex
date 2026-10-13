@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // Poignée de redimensionnement des blocs (exercice d'alignement 601-101,
 // 6 août 2026). Deux comportements, selon la nature du bloc :
@@ -46,9 +47,9 @@ describe('Poignée · rendue sur les feuilles ET les conteneurs, différemment',
     // fichier entier, par sentinelle-ablation-vue-lecon-filtrage (« plus de bloc compact »).
 
     it('la taille libre (largeur ET hauteur) reste réservée aux feuilles', () => {
-        expect(carte).toMatch(/if \(!estConteneur && n\.metadata[\s\S]{0,320}metadata\.largeur\) el\.style\.width/);
+        expect(suitDansLaFonction(carte, /if \(!estConteneur && n\.metadata/, /metadata\.largeur\) el\.style\.width/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         // Sur un conteneur, on ne mémorise QUE le plancher.
-        expect(carte).toMatch(/if \(!estConteneur\) \{[\s\S]{0,220}metadata\.hauteur = Math\.round/);
+        expect(suitDansLaFonction(carte, /if \(!estConteneur\) \{/, /metadata\.hauteur = Math\.round/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 
@@ -56,8 +57,8 @@ describe('Poignée · option B, la largeur plancher des conteneurs', () => {
     it('le plancher est posé en métadonnée, pas en style inline', () => {
         // Poser style.width sur un conteneur serait vain : reLayoutConteneur
         // l'écraserait au passage suivant.
-        expect(carte).toMatch(/if \(estConteneur\)[\s\S]{0,400}metadata\.largeurMin = Math\.round\(w\)/);
-        expect(carte).toMatch(/metadata\.largeurMin = Math\.round\(w\);[\s\S]{0,120}reLayoutConteneur\(id\)/);
+        expect(suitDansLaFonction(carte, /if \(estConteneur\)/, /metadata\.largeurMin = Math\.round\(w\)/), "if \\(estConteneur\\)[\\s\\S]{0,400}metadata\\.largeurMin = Math\\").toBe(true);   // #616 : ordre dans la fonction, plus une distance
+        expect(suitDansLaFonction(carte, /metadata\.largeurMin = Math\.round\(w\);/, /reLayoutConteneur\(id\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('les TROIS fonctions de disposition respectent le plancher', () => {
@@ -74,7 +75,7 @@ describe('Poignée · option B, la largeur plancher des conteneurs', () => {
 
     it('le double-clic efface aussi le plancher et redispose le conteneur', () => {
         expect(carte).toMatch(/delete donnees\.metadata\.largeurMin/);
-        expect(carte).toMatch(/dblclick[\s\S]{0,600}if \(estConteneur\) reLayoutConteneur\(id\)/);
+        expect(suitDansLaFonction(carte, /dblclick/, /if \(estConteneur\) reLayoutConteneur\(id\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 
@@ -84,7 +85,7 @@ describe('Poignée · mécanique', () => {
         // souris pour répondre au doigt et au Pencil (cf.
         // `sentinelle-poignee-tactile-noeud`). L'intention gardée ici est
         // inchangée — la pression sur la poignée ne doit pas remonter au bloc.
-        expect(carte).toMatch(/poignee\.addEventListener\('pointerdown'[\s\S]{0,220}stopPropagation/);
+        expect(suitDansLaFonction(carte, /poignee\.addEventListener\('pointerdown'/, /stopPropagation/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('les deltas sont divisés par le zoom de la carte', () => {
@@ -105,7 +106,7 @@ describe('Poignée · mécanique', () => {
     });
 
     it('le parent est redisposé après coup (il se dimensionne sur ses enfants)', () => {
-        expect(carte).toMatch(/surRelachement[\s\S]{0,600}reLayoutConteneur\(donnees\.parent\)/);
+        expect(suitDansLaFonction(carte, /surRelachement/, /reLayoutConteneur\(donnees\.parent\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('le double-clic rend la main à la taille automatique', () => {
@@ -114,7 +115,7 @@ describe('Poignée · mécanique', () => {
         expect(carte).toMatch(
             /poignee\.addEventListener\('dblclick'[\s\S]{0,400}delete donnees\.metadata\.largeur/
         );
-        expect(carte).toMatch(/dblclick[\s\S]{0,500}el\.style\.width = '';/);
+        expect(suitDansLaFonction(carte, /dblclick/, /el\.style\.width = '';/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('le plafond de largeur (max-width 240 px) est libéré quand on retaille', () => {

@@ -86,20 +86,6 @@ async function obtenirCartouchesGrille(grilleId) {
    Fonctions pour identifier les cartouches avec des noms similaires
    =============================== */
 
-/**
- * Générer un badge de source pour une cartouche
- * @param {Object} cartouche - La cartouche
- * @param {Array} cartouchesLocales - Cartouches locales pour vérifier la source
- * @returns {string} HTML du badge
- */
-function genererBadgeSourceCartouche(cartouche, cartouchesLocales) {
-    return BibliothequeUI.genererBadgeSource(cartouche, cartouchesLocales);
-}
-
-function genererIdCourtCartouche(id) {
-    return BibliothequeUI.genererIdCourt(id);
-}
-
 /* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
@@ -230,28 +216,34 @@ async function migrerCartouchesVersBibliotheque() {
 
     for (const grille of grilles) {
         const cleCartouches = cle(`cartouches_${grille.id}`);
-        let cartouches = await db.get(cleCartouches) || [];
-        // #1040 (11 oct. 2026) — n'écrire que si la migration a changé quelque chose :
-        // avant, chaque ouverture réécrivait toutes les cartouches à l'identique.
-        let aChange = false;
+        // #522 lot 20 (12 oct. 2026) — dans la file de la clé : la migration court à
+        // chaque entrée dans la section (navigation.js), donc à côté des gestes qui
+        // écrivent les cartouches, eux-mêmes déjà dans la file.
+        await db.modifier(cleCartouches, (lues) => {
+            let cartouches = lues || [];
+            // #1040 (11 oct. 2026) — n'écrire que si la migration a changé quelque chose :
+            // avant, chaque ouverture réécrivait toutes les cartouches à l'identique.
+            let aChange = false;
 
-        // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
-        if (cartouches && !Array.isArray(cartouches)) {
-            cartouches = [cartouches];
-            aChange = true;
-        }
-
-        cartouches.forEach(cartouche => {
-            if (cartouche.dansBibliotheque === undefined) {
-                cartouche.dansBibliotheque = true;
-                nbMigrees++;
+            // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+            if (cartouches && !Array.isArray(cartouches)) {
+                cartouches = [cartouches];
                 aChange = true;
             }
-        });
 
-        if (aChange && cartouches.length > 0) {
-            await db.set(cleCartouches, cartouches);
-        }
+            cartouches.forEach(cartouche => {
+                if (cartouche.dansBibliotheque === undefined) {
+                    cartouche.dansBibliotheque = true;
+                    nbMigrees++;
+                    aChange = true;
+                }
+            });
+
+            if (aChange && cartouches.length > 0) {
+                return cartouches;
+            }
+            return undefined;
+        }, []);
     }
 
     if (nbMigrees > 0) {
@@ -1247,18 +1239,6 @@ async function sauvegarderCartouche() {
 /* ===============================
    IMPORT DE COMMENTAIRES
    =============================== */
-
-/**
- * Affiche la zone d'importation de commentaires
- * Masque la matrice pendant l'import
- * 
- * UTILISÉ PAR:
- * - Bouton «Importer des commentaires»
- */
-function afficherImportCommentaires() {
-    document.getElementById('zoneImportCommentaires').classList.remove('u-hide');
-    document.getElementById('matriceRetroaction').classList.add('u-hide');
-}
 
 /**
  * Annule l'import et retourne à la matrice
@@ -3103,11 +3083,8 @@ window.creerNouvelleCartouche = creerNouvelleCartouche;
 
 // Nouvelles fonctions Beta 95 (dropdowns grille + échelle dans formulaire)
 window.populerDropdownsCartouche = populerDropdownsCartouche;
-window.populerDropdownGrilleCartouche = populerDropdownGrilleCartouche; // Alias compatibilité
 window.onChangeSelectionCartouche = onChangeSelectionCartouche;
 window.initialiserNouveauCartoucheAvecEchelle = initialiserNouveauCartoucheAvecEchelle;
-window.importerDepuisMarkdown = importerDepuisMarkdown;
-window.importerPartiel = importerPartiel;
 window.exporterCartouches = exporterCartouches;
 window.importerCartouches = importerCartouches;
 window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
@@ -3495,11 +3472,6 @@ async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled
     adapterFormulaireCartoucheAuTypeGrille(await grilleDeCartouche(grilleId));
 }
 
-// Alias pour compatibilité
-async function populerDropdownGrilleCartouche(selectedId = '', disabled = false) {
-    await populerDropdownsCartouche(selectedId, '', disabled);
-}
-
 /**
  * Gestionnaire unifié de changement de sélection (grille OU échelle)
  * Vérifie si les deux sont sélectionnés pour générer la matrice
@@ -3691,69 +3663,6 @@ function definirCartoucheActive(cartoucheId) {
 }
 
 /**
- * Importe des commentaires depuis le textarea Markdown
- * Réutilise la logique existante de parsing
- */
-function importerDepuisMarkdown() {
-    const textarea = document.getElementById('markdownColle');
-    if (!textarea) return;
-
-    const markdown = textarea.value.trim();
-    if (!markdown) {
-        alert('Colle du texte Markdown dans la zone prévue.');
-        return;
-    }
-
-    // Vérifier qu'une cartouche est chargée
-    if (!window.cartoucheActuel) {
-        alert('Crée ou ouvre d\'abord une cartouche.');
-        return;
-    }
-
-    // Parser le Markdown (réutilise la fonction existante)
-    try {
-        const commentairesParsed = parserMarkdownCartouche(markdown);
-
-        // Compter combien de commentaires seront importés
-        const nbCommentaires = Object.keys(commentairesParsed).length;
-
-        if (nbCommentaires === 0) {
-            alert('Aucun commentaire valide trouvé dans le texte fourni');
-            return;
-        }
-
-        // Confirmation
-        const confirmer = confirm(
-            `${nbCommentaires} commentaire(s) seront importés.\n\n` +
-            'Les commentaires existants seront remplacés. Continuer ?'
-        );
-
-        if (!confirmer) return;
-
-        // Remplir la matrice
-        Object.keys(commentairesParsed).forEach(cleCommentaire => {
-            const textareaComment = document.getElementById(`comment_${cleCommentaire}`);
-            if (textareaComment) {
-                textareaComment.value = commentairesParsed[cleCommentaire];
-            }
-        });
-
-        // Notification succès
-        notifications.succes(`${nbCommentaires} commentaires importés avec succès !`);
-
-        // Vider le textarea
-        textarea.value = '';
-
-        // Recalculer le pourcentage de complétion
-        calculerPourcentageComplet();
-
-    } catch (error) {
-        console.error('Erreur lors du parsing Markdown:', error);
-        alert('Erreur lors de l\'importation : format Markdown invalide');
-    }
-}
-
-/**
  * Parse le markdown et retourne un objet {cle: commentaire}
  * Réutilise la logique existante de la fonction importerCommentaires()
  *
@@ -3778,52 +3687,6 @@ function parserMarkdownCartouche(markdown, niveaux) {
     });
 
     return commentaires;
-}
-
-/**
- * Importe seulement les critères sélectionnés (import partiel)
- */
-function importerPartiel() {
-    const checkboxes = document.querySelectorAll('#checklistCriteresImport input[type="checkbox"]:checked');
-    const textarea = document.getElementById('markdownImportPartiel');
-
-    if (checkboxes.length === 0) {
-        alert('Coche au moins un critère à importer.');
-        return;
-    }
-
-    if (!textarea || !textarea.value.trim()) {
-        alert('Colle du texte Markdown dans la zone prévue.');
-        return;
-    }
-
-    // Parser le markdown
-    const commentairesParsed = parserMarkdownCartouche(textarea.value);
-
-    // Filtrer seulement les critères cochés
-    const criteresSelectionnes = Array.from(checkboxes).map(cb => cb.value);
-    let nbImportes = 0;
-
-    Object.keys(commentairesParsed).forEach(cleCommentaire => {
-        // Extraire le critère de la clé (format: CRITERE_NIVEAU)
-        const critere = cleCommentaire.split('_')[0];
-
-        if (criteresSelectionnes.includes(critere)) {
-            const textareaComment = document.getElementById(`comment_${cleCommentaire}`);
-            if (textareaComment) {
-                textareaComment.value = commentairesParsed[cleCommentaire];
-                nbImportes++;
-            }
-        }
-    });
-
-    if (nbImportes > 0) {
-        notifications.succes(`${nbImportes} commentaires importés (critères sélectionnés)`);
-        textarea.value = '';
-        calculerPourcentageComplet();
-    } else {
-        alert('Aucun commentaire n\'a pu être importé. Vérifie les noms de critères.');
-    }
 }
 
 /**
@@ -4756,77 +4619,6 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
 }
 
 /**
- * Ajouter les cartouches sélectionnées à la bibliothèque
- */
-async function ajouterCartouchesABibliotheque() {
-    const checkboxes = document.querySelectorAll('#listeCartouchesDisponibles input[type="checkbox"]:checked');
-    let nbAjoutees = 0;
-
-    for (const checkbox of checkboxes) {
-        const id = checkbox.value;
-        const grilleId = checkbox.dataset.grilleId;
-
-        // Cas 1: Cartouche locale
-        if (grilleId && grilleId !== 'undefined') {
-            const marquee = await db.modifier(cle(`cartouches_${grilleId}`), (lues) => {
-                const cartouches = lues || [];
-                const cartouche = cartouches.find(c => c.id === id);
-                if (!cartouche) return undefined;
-
-                cartouche.dansBibliotheque = true;
-                return cartouches;
-            }, []);
-            if (marquee) nbAjoutees++;
-        }
-        // Cas 2: Cartouche de la Bibliothèque - copier dans localStorage
-        else {
-            const cartouchesBibliotheque = await obtenirToutesLesCartouchesBibliotheque();
-            const cartouche = cartouchesBibliotheque.find(c => c.id === id);
-
-            if (cartouche) {
-                // Trouver ou créer la grille correspondante. ⚠ La présence est
-                // vérifiée DANS la file : deux ajouts concurrents créaient
-                // sinon deux fois la même grille parente, ou en perdaient une.
-                // security-ok: la grille forgée vient d'une cartouche déjà
-                // validée par le chemin d'import de la bibliothèque.
-                await db.modifier(cle('grillesTemplates'), (lues) => {
-                    const grilles = lues || [];
-                    if (grilles.some(g => g.id === cartouche.grilleId)) return undefined;
-
-                    // Créer une grille minimale si elle n'existe pas
-                    grilles.push({
-                        id: cartouche.grilleId,
-                        nom: cartouche.grilleNom || cartouche.discipline || 'Grille importée',
-                        criteres: cartouche.criteres || [],
-                        discipline: cartouche.discipline || ''
-                    });
-                    return grilles;
-                }, []);
-
-                // Ajouter la cartouche. security-ok: copie d'une cartouche déjà
-                // validée par le chemin d'import de la bibliothèque, avec un
-                // identifiant neuf.
-                await db.modifier(cle(`cartouches_${cartouche.grilleId}`), (lues) => {
-                    const cartouchesGrille = lues || [];
-                    cartouchesGrille.push({
-                        ...cartouche,
-                        id: genererIdUnique('CART_'),
-                        dansBibliotheque: true
-                    });
-                    return cartouchesGrille;
-                }, []);
-                nbAjoutees++;
-            }
-        }
-    }
-
-    if (nbAjoutees > 0) {
-        fermerModalBibliothequeCartouches();
-        await afficherBanqueCartouches();
-    }
-}
-
-/**
  * Filtrer les cartouches disponibles par grille
  */
 function filtrerCartouchesParGrille() {
@@ -4848,7 +4640,6 @@ function fermerModalBibliothequeCartouches() {
 // Exporter les fonctions
 window.afficherBibliothequeCartouches = afficherBibliothequeCartouches;
 window.retirerCartoucheDeBibliotheque = retirerCartoucheDeBibliotheque;
-window.ajouterCartouchesABibliotheque = ajouterCartouchesABibliotheque;
 window.filtrerCartouchesParGrille = filtrerCartouchesParGrille;
 window.fermerModalBibliothequeCartouches = fermerModalBibliothequeCartouches;
 window.ajouterCartoucheIndividuelle = ajouterCartoucheIndividuelle;

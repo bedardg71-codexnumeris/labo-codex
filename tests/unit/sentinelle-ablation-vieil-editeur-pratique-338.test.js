@@ -54,17 +54,20 @@ const SYMBOLES_RETIRES = [
     'supprimerTypeJetonPersonnalise',
     'peuplerDropdownPlafondNoteCiblee',
     'getReglesConformiteConfig',
-    'chargerReglesConformiteConfig'
+    'chargerReglesConformiteConfig',
+    // #469, lot 22 (12 oct. 2026) — graphe d'appels interne de pratiques.js : aucune fonction
+    // vivante ne les appelait plus. `activerPratique` n'était atteinte que par
+    // `activerPratiqueAffichee` (sans appelant) ; `onEchelleConformiteChange` par aucune.
+    'activerPratique',
+    'onEchelleConformiteChange'
 ];
 
 // Le flux VIVANT de configuration des pratiques doit rester intact.
 const SYMBOLES_VIVANTS = [
     'initialiserModulePratiques',
     'chargerConfigurationPratique',
-    'activerPratique',
     'initialiserReglesConformite',
-    'populerSelecteursNiveaux',
-    'onEchelleConformiteChange'
+    'populerSelecteursNiveaux'
 ];
 
 // Branche pratique-notation-v2.js : l'éditeur AUTONOME mort (bootstrap +

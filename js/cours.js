@@ -406,7 +406,7 @@ async function retirerCoursDeBibliotheque(id) {
     if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (retirer un cours de ma sélection)
         fermerModalBibliothequeCours();
-        alert('Cours retiré de ta sélection');
+        notifications.succes('Cours retiré de ta sélection');
     }
 }
 
@@ -513,7 +513,7 @@ async function recenserDependancesCours(coursId) {
  */
 function _refuserLaSuppressionDuCours(plan, coursId) {
     if (plan.fiches.length === 0) {
-        alert('Cette fiche de cours est introuvable — elle a peut-être déjà été supprimée. Recharge la page.');
+        notifications.erreur('Cette fiche de cours est introuvable — elle a peut-être déjà été supprimée. Recharge la page.');
         return true;
     }
     const f = plan.fiches[0];
@@ -526,12 +526,13 @@ function _refuserLaSuppressionDuCours(plan, coursId) {
     plan.clesSnapshots.forEach(k => motifs.push('· captures hebdomadaires : ' + k));
 
     if (motifs.length > 0) {
-        alert('Impossible de supprimer « ' + nom + ' ».\n\n' +
+        // #678 : la fenêtre d'information de l'application (la liste garde ses lignes), mêmes mots.
+        uiDialogues.informer({ titre: 'Impossible de supprimer « ' + nom + ' ».', preformate: true, message:
             'Ce cours porte encore des données :\n' + motifs.join('\n') + '\n\n' +
             'Supprimer la fiche laisserait ces données orphelines — c\'est le\n' +
             'mécanisme du bug des productions inaccessibles d\'août. Retire\n' +
             'd\'abord ce qui s\'y rattache, ou dis-le-moi en session s\'il\n' +
-            's\'agit de données de test à nettoyer.');
+            's\'agit de données de test à nettoyer.' });
         return true;
     }
     return false;
@@ -587,7 +588,7 @@ async function supprimerFicheCours(id) {
     fermerModalBibliothequeCours();
     if (typeof window.chargerDropdownCoursV2 === 'function') window.chargerDropdownCoursV2();
     if (typeof window.populerDropdownsAssemblageV2 === 'function') window.populerDropdownsAssemblageV2();
-    alert('Fiche supprimée (tous trimestres).');
+    notifications.succes('Fiche supprimée (tous trimestres).');
 }
 
 /**
@@ -608,7 +609,7 @@ async function ajouterCoursIndividuel(id) {
     if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (ajouter un cours à ma sélection)
         fermerModalBibliothequeCours();
-        alert('Cours ajouté à ta sélection avec succès !');
+        notifications.succes('Cours ajouté à ta sélection avec succès !');
     }
 }
 
@@ -629,7 +630,7 @@ async function exporterUnCours(id) {
     const cours = tousLesCours.find(c => c.id === id);
 
     if (!cours) {
-        alert('Cours introuvable');
+        notifications.erreur('Cours introuvable');
         return;
     }
 
@@ -663,7 +664,7 @@ async function exporterUnCours(id) {
     link.click();
     URL.revokeObjectURL(url);
 
-    alert(`« ${nomAffiche} » exporté avec métadonnées Creative Commons !`);
+    notifications.succes(`« ${nomAffiche} » exporté avec métadonnées Creative Commons !`);
 }
 
 /**
@@ -689,7 +690,7 @@ async function importerCoursSimple(eventOuEl) {
             const coursImportes = JSON.parse(e.target.result);
 
             if (!Array.isArray(coursImportes)) {
-                alert('Format de fichier invalide : doit être un tableau de cours');
+                notifications.erreur('Format de fichier invalide : doit être un tableau de cours');
                 return;
             }
 
@@ -744,13 +745,12 @@ async function importerCoursSimple(eventOuEl) {
             }
 
             // Message récapitulatif
-            let message = `Import terminé :\n`;
-            message += `✓ ${nbAjoutes} cours ajoutés\n`;
+            let message = `✓ ${nbAjoutes} cours ajoutés`;
             if (nbDoublons > 0) {
-                message += `• ${nbDoublons} doublon(s) ignoré(s)`;
+                message += ` • ${nbDoublons} doublon(s) ignoré(s)`;
             }
 
-            alert(message);
+            notifications.succes('Import terminé', message);
 
             // Fermer et rafraîchir
             fermerModalBibliothequeCours();
@@ -758,7 +758,7 @@ async function importerCoursSimple(eventOuEl) {
 
         } catch (error) {
             console.error('Erreur lors de l\'import :', error);
-            alert('Erreur lors de l\'import du fichier. Vérifie le format JSON.');
+            notifications.erreur('Erreur lors de l\'import du fichier. Vérifie le format JSON.');
         }
     };
 
@@ -789,7 +789,7 @@ async function partagerCours(id) {
         const coursAPartager = cours.find(c => c.id === id);
 
         if (!coursAPartager) {
-            alert('Cours introuvable');
+            notifications.erreur('Cours introuvable');
             return;
         }
 
@@ -815,7 +815,7 @@ async function partagerCours(id) {
             return liste;
         }, []);
         if (!ecrite) {
-            alert('Cours introuvable');
+            notifications.erreur('Cours introuvable');
             return;
         }
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (déposer un cours)
@@ -824,10 +824,10 @@ async function partagerCours(id) {
         fermerModalBibliothequeCours();
         await ouvrirModalBibliothequeCours();
 
-        alert('Cours partagé avec succès !\n\nIl est maintenant disponible dans la section "Cours disponibles à ajouter".');
+        notifications.succes('Cours partagé avec succès !', 'Il est maintenant disponible dans la section "Cours disponibles à ajouter".');
     } catch (error) {
         console.error('Erreur lors du partage:', error);
-        alert('Erreur lors du partage du cours');
+        notifications.erreur('Erreur lors du partage du cours');
     }
 }
 
@@ -844,7 +844,7 @@ async function partagerTousLesCours() {
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
-        alert('Aucun cours à partager dans ta sélection');
+        notifications.info('Aucun cours à partager dans ta sélection');
         return;
     }
 
@@ -879,7 +879,7 @@ async function partagerTousLesCours() {
     link.click();
     URL.revokeObjectURL(url);
 
-    alert(`${coursDansBibliotheque.length} cours exportés avec métadonnées Creative Commons !`);
+    notifications.succes(`${coursDansBibliotheque.length} cours exportés avec métadonnées Creative Commons !`);
 }
 
 /* ===============================
@@ -921,7 +921,7 @@ function ouvrirFilePickerImportCours() {
 
 /**
  * Diagnostic LECTURE SEULE du modèle cours actuel, AVANT toute migration.
- * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures + console.
+ * N'écrit RIEN (aucun db.set/setSync) — uniquement des lectures ; le rapport est rendu (I14).
  * À lancer en console : await _diagnostiquerModeleCours()
  *
  * Produit, pour chaque codeCours :
@@ -936,7 +936,7 @@ function ouvrirFilePickerImportCours() {
  * `getSync` ne voit que le trimestre actif préchargé en memoryCache. Snapshots : énumère
  * l'UNION des clés localStorage + IDB (le coursId est dans la clé `{trim}_snapshots_{id}`).
  *
- * @returns {Promise<{parCode:Object, scores:Object, orphelins:string[], nbCours:number, nbCanonique:number}>}
+ * @returns {Promise<{parCode:Object, scores:Object, orphelins:string[], nbCours:number, nbCanonique:number, rapport:string[]}>}
  */
 async function _diagnostiquerModeleCours() {
     const cours = db.getSync('cours', []);
@@ -1007,36 +1007,38 @@ async function _diagnostiquerModeleCours() {
     const orphelins = Object.keys(scores).filter(id => !idsConnus.has(id));
     const nbCanonique = cours.filter(c => estCanonique(c.id)).length;
 
-    // Rapport console
+    // I14 / #469 (12 oct. 2026) — le rapport est RENDU, plus imprimé : la règle n°5 ne tolère
+    // que warn/error en console, et un outil dont la sortie est la fonctionnalité la rend.
+    // En console, `await _diagnostiquerModeleCours()` affiche l'objet ; `rapport` en est la
+    // lecture ligne à ligne (mêmes mots qu'avant).
     const codesDoublons = Object.keys(parCode).filter(code => parCode[code].length > 1);
-    console.group(`[Diagnostic modèle cours] ${cours.length} cours · ${trimestres.length} trimestres`);
-    console.log(`Doublons par code : ${codesDoublons.length} code(s) sur ${Object.keys(parCode).length}`);
-    console.log(`IDs à ré-identifier (non COURS_*) : ${cours.length - nbCanonique} sur ${cours.length}`);
+    const rapport = [
+        `[Diagnostic modèle cours] ${cours.length} cours · ${trimestres.length} trimestres`,
+        `Doublons par code : ${codesDoublons.length} code(s) sur ${Object.keys(parCode).length}`,
+        `IDs à ré-identifier (non COURS_*) : ${cours.length - nbCanonique} sur ${cours.length}`
+    ];
 
     Object.keys(parCode).sort().forEach(code => {
         const objets = parCode[code]
             .map(c => ({ c, score: totalScore(c.id) }))
             .sort((a, b) => b.score - a.score);
         const marqueur = objets.length > 1 ? ' ⚠️ DOUBLON' : '';
-        console.group(`${code} : ${objets.length} objet(s)${marqueur}`);
+        rapport.push(`${code} : ${objets.length} objet(s)${marqueur}`);
         objets.forEach(({ c, score }, i) => {
             const s = scores[c.id] || {};
             const detail = Object.entries(s).filter(([, n]) => n > 0).map(([k, n]) => `${k}:${n}`).join(', ') || 'aucune donnée';
             const role = objets.length > 1 ? (i === 0 ? ' → canonique probable' : ' → doublon') : '';
             const idType = estCanonique(c.id) ? 'COURS_*' : 'estampillé';
-            console.log(`${idType} | ${c.id} | ${(c.session || '?') + (c.annee || '')} | score ${score} (${detail})${role}`);
+            rapport.push(`  ${idType} | ${c.id} | ${(c.session || '?') + (c.annee || '')} | score ${score} (${detail})${role}`);
         });
-        console.groupEnd();
     });
 
     if (orphelins.length) {
-        console.group(`⚠️ coursId orphelins (référencés par des données mais absents de 'cours') : ${orphelins.length}`);
-        orphelins.forEach(id => console.warn(`${id} | score ${totalScore(id)}`));
-        console.groupEnd();
+        rapport.push(`⚠️ coursId orphelins (référencés par des données mais absents de 'cours') : ${orphelins.length}`);
+        orphelins.forEach(id => rapport.push(`  ${id} | score ${totalScore(id)}`));
     }
-    console.groupEnd();
 
-    return { parCode, scores, orphelins, nbCours: cours.length, nbCanonique };
+    return { parCode, scores, orphelins, nbCours: cours.length, nbCanonique, rapport };
 }
 
 /* ===============================

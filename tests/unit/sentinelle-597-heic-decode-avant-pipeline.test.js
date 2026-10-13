@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { tranche } from './_helpers/tranche.js';
+import { tranche, suitDansLaFonction } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -104,7 +104,7 @@ describe('#597 — le HEIC est converti avant d\'entrer dans le pipeline', () =>
 
         const corpsMeta = importJs.slice(importJs.indexOf('const metadonnees'));
         expect(corpsMeta).toContain('renommerEnJpg');
-        expect(decodeurJs).toMatch(/renommerEnJpg[\s\S]{0,200}\.jpg/);
+        expect(suitDansLaFonction(decodeurJs, /renommerEnJpg/, /\.jpg/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('cas 6 — le libellé ne dit plus « PDF » quand les dimensions manquent', () => {

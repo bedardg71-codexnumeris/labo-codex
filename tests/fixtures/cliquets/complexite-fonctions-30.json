@@ -1,0 +1,179 @@
+{
+ "js/cc-license.js": {
+  "ajouterMetadonnéesCC": 32,
+  "genererPanneauMetadonnees": 59
+ },
+ "js/codex.js": {
+  "genererCodex": 32,
+  "chargerCodex": 83,
+  "_analyserFusion": 56,
+  "actionExporterSelection": 37
+ },
+ "js/correlations-longitudinales.js": {
+  "calculerCorrelationsLongitudinales": 86,
+  "creerGraphiqueCorrelationsLongitudinales": 39
+ },
+ "js/donnees-v2.js": {
+  "ouvrirModalSuppressionRessource": 38
+ },
+ "js/etudiants.js": {
+  "afficherListeEtudiantsConsultation": 42
+ },
+ "js/evaluation-calcul.js": {
+  "etatVivantEvaluationEnCours": 34
+ },
+ "js/evaluation-chargement.js": {
+  "demarrerEvaluationDepuisFichier": 42
+ },
+ "js/evaluation-jetons.js": {
+  "retirerJetonReprise": 33
+ },
+ "js/export-pdf.js": {
+  "obtenirInfosCoursPDF": 60,
+  "genererApercuCombine": 32,
+  "genererPDFCombine": 32,
+  "ouvrirApercuPDFPour": 34
+ },
+ "js/graphiques-progression.js": {
+  "creerGraphiqueTrajectoiresProduction": 84
+ },
+ "js/impact-jetons.js": {
+  "(anonyme)": 35
+ },
+ "js/import-export.js": {
+  "assainirObjet": 43,
+  "afficherModalPreviewLocalStorageBrut": 62,
+  "executerImportConfigComplete": 36,
+  "executerImportSelectif": 130,
+  "exporterConfigurationComplete": 35
+ },
+ "js/indices.js": {
+  "calculerAssiduitePourAffichage": 35
+ },
+ "js/liste-evaluations.js": {
+  "(anonyme)": [
+   37,
+   34,
+   31
+  ],
+  "genererLigneHTML": 43,
+  "genererDropdownActions": 31
+ },
+ "js/main.js": {
+  "(anonyme)": 36,
+  "auDbReady": 70
+ },
+ "js/migration-diagnostic.js": {
+  "reparerReferencesProductions": 35
+ },
+ "js/partage-validation.js": {
+  "validerValeur": 31,
+  "validerPackage": 31
+ },
+ "js/planification-carte.js": {
+  "migrerObjectifsVersMetadata": 35,
+  "evaluerBadge": 47,
+  "ouvrirPanneau": 59,
+  "supprimerNoeud": 33,
+  "chargerCarte": 38,
+  "initialiser": 34,
+  "gererKeydown": 60
+ },
+ "js/planification-export.js": {
+  "construireDonneesModele": 31
+ },
+ "js/pratiques-gestion.js": {
+  "remplirFormulairePratique": 64,
+  "appliquerFormulaireDansCollection": 33
+ },
+ "js/pratiques/pratique-registre.js": {
+  "construireConfigComplete": 51
+ },
+ "js/profil-etudiant-actions.js": {
+  "calculerDetailsNoteFinale": 48
+ },
+ "js/profil-etudiant-sections-affichage.js": {
+  "genererSectionMobilisationEngagement": 64,
+  "genererSectionAccompagnement": 34,
+  "afficherProfilComplet": 32,
+  "genererSectionProductions": 66
+ },
+ "js/rencontres.js": {
+  "creerMonService": 38
+ },
+ "js/reserve-emprunter.js": {
+  "emprunter": 83
+ },
+ "js/reserve-ouvrir.js": {
+  "appliquerReimport": 33
+ },
+ "js/reserve-renvoyer.js": {
+  "comparer": 32,
+  "retirer": 37
+ },
+ "js/reserve-revenir.js": {
+  "faireRevenir": 51
+ },
+ "js/reserve-verifier.js": {
+  "verifierArchive": 59
+ },
+ "js/reserve.js": {
+  "_collecterDonnees": 41
+ },
+ "js/synthese-retroaction-data.js": {
+  "construireNoteProvisoire": 38
+ },
+ "js/synthese-retroaction-rendu.js": {
+  "renderRangeeNote": 44
+ },
+ "js/tableau-bord-apercu.js": {
+  "afficherMetriquesGlobales": 32,
+  "genererBarreDistribution": 58,
+  "genererBarrePatterns": 32
+ },
+ "js/travaux-annotation.js": {
+  "onPointerDown": 56,
+  "onKeyDown": 38,
+  "trouverAnnotationAuPoint": 32,
+  "appliquerRedimensionnement": 41,
+  "dessinerForme": 37,
+  "annuler": 32,
+  "retablir": 32
+ },
+ "js/travaux-export-pdf.js": {
+  "dessinerAnnotationsSurCtx": 32,
+  "dessinerForme": 46,
+  "afficherRevisionExport": 34
+ },
+ "js/travaux-import.js": {
+  "importerFichier": 39
+ },
+ "js/travaux-outils.js": {
+  "migrerIdsActionsRLO": 32
+ },
+ "js/travaux-ui.js": {
+  "initialiserModuleTravaux": 37,
+  "genererEtape2Colonnes": 38,
+  "(anonyme)": 38,
+  "traiterDoublonsImport": 37,
+  "mesurerReassignation": 31,
+  "afficherPalettesEval": 41
+ },
+ "js/trimestre-v2-etudiants.js": {
+  "soumettreEtudiantV2": 33
+ },
+ "js/trimestre-v2-groupes-cours.js": {
+  "sauvegarderGroupeCoursV2": 33
+ },
+ "js/trimestre.js": {
+  "genererCalendrierComplet": 39
+ },
+ "js/trimestres.js": {
+  "exporterFormatRecherche": 34
+ },
+ "js/wizard-pratique-v2.js": {
+  "genererRecapitulatif": 48,
+  "creerPratiqueV2": 86,
+  "chargerPratiqueExistante": 44
+ }
+}

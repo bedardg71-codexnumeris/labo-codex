@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // Sentinelle statique — bug #148 (8 août 2026), le CANEVAS était resté souris.
 //
@@ -63,7 +64,7 @@ describe('sentinelle · glisser du canevas en Pointer Events (#148)', () => {
     it('le lasso reste souris-seulement PAR DÉCISION — pointerType, pas un oubli d’API', () => {
         // Au doigt, glisser sur le fond doit rester le défilement natif du
         // canevas. La garde dit l’intention ; l’ancien mousedown la cachait.
-        expect(carte).toMatch(/espace\.addEventListener\('pointerdown'[\s\S]{0,200}pointerType !== 'mouse'\) return;/);
+        expect(suitDansLaFonction(carte, /espace\.addEventListener\('pointerdown'/, /pointerType !== 'mouse'\) return;/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('touch-action:none sur les surfaces de drag — sans lui, tout ceci est mort', () => {

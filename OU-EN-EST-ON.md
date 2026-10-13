@@ -15,6 +15,24 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **EN LIGNE LE 12 OCTOBRE 2026 À 15 h 13 : 1.200.0 (mesurée chez Netlify sur `239de979` ; verdict complet vert) — MOINS DE FENÊTRES QUI BLOQUENT**
+
+**Ce que tu verras** (les mots de tes Nouvelles) :
+- Créer un trimestre, un cours ou un groupe-cours, ou importer des étudiant·es : les messages s'affichent dans l'application, sans bloquer l'écran (#678).
+- Supprimer un cours qui porte encore des données : la fenêtre dit ce qui s'y rattache (#678).
+- Les boutons principaux de l'Accueil, de l'aide et de la visite guidée ont retrouvé leur couleur, et les en-têtes du profil d'un·e étudiant·e sont alignés (#679).
+- Quand une grille, une échelle ou une cartouche change d'identifiant à l'import, tout ce qui la désigne la suit (#627).
+
+**En coulisse, rien à l'écran** : deux écritures qui se marchaient dessus en entrant dans les cartouches ne se perdent plus ; un onglet qui change de trimestre ne ressert plus les filtres de l'autre ; 61 fonctions mortes retirées ; les bibliothèques et le lecteur PDF se rechargent quand ils changent ; un garde-fou empêche le code de devenir plus compliqué qu'aujourd'hui (#522, #596, #469, #602, #1051).
+
+**Vérifié comment** : chaque lot relu par Cowork ; des captures de l'Accueil, de la visite guidée, du profil et de la visionneuse, dans Chrome et Safari, à la largeur d'un ordinateur et d'un iPad en portrait, regardées par Cowork ; Vitest complet et la suite Playwright complète verts sur la version poussée.
+
+**Tes données** : rien n'est réécrit. Une cartouche importée avant aujourd'hui, dont l'échelle avait été renommée, garde son ancien lien ; dans un onglet déjà ouvert, le filtre de production et la dernière copie ouverte ne seront pas restaurés une fois.
+
+**Ce qui attend** : les fenêtres qui bloquent sur les deux autres parcours de tes chroniques (grilles, échelles, cartouches ; importer des productions), et, sur iPad en portrait, une notification qui recouvre la bulle de la visite guidée (#678).
+
+**Ce qui te revient** : cinq noms protégés qui ne servent plus, et les deux points d'accroche de la navigation ; les deux demandent de toucher une zone protégée (#1052, #1053, Cowork te les soumettra).
+
 ✅ **EN LIGNE LE 11 OCTOBRE 2026 À 22 h 11 : 1.199.0 (mesurée chez Netlify sur `437d48ec` ; verdict complet vert) — RIEN D'INVENTÉ, RIEN DE PERDU**
 
 **Ce que tu verras** (les mots de tes Nouvelles) :

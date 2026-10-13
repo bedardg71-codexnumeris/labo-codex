@@ -37,21 +37,6 @@ function obtenirToutesLesGrillesBibliothequeSync() {
     return bibliotheque;
 }
 
-/**
- * Obtenir les grilles d'une discipline spécifique
- * @param {string} discipline - Nom de la discipline
- * @returns {Array} Tableau des grilles de cette discipline
- */
-function obtenirGrillesParDiscipline(discipline) {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
-    if (!discipline || discipline === 'toutes') {
-        return bibliotheque;
-    }
-    return bibliotheque.filter(g =>
-        g.discipline && g.discipline.toLowerCase() === discipline.toLowerCase()
-    );
-}
-
 // #327 — obtenirDisciplinesDisponiblesGrilles retiré (code mort) : le seul
 // appelant était le filtre par discipline de la modale, supprimé au profit du
 // classement par dossiers.
@@ -167,25 +152,6 @@ async function importerGrillesDansBibliotheque(grilles) {
 }
 
 /**
- * Exporter toute la bibliothèque de grilles
- * @returns {Promise<Object>} Objet JSON exportable
- */
-async function exporterBibliothequeGrilles() {
-    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
-    const grilles = typeof ajouterMetadonnéesCC === 'function'
-        ? bibliotheque.map(g => ajouterMetadonnéesCC(g, 'grille', g.nom || '').contenu || g)
-        : bibliotheque;
-
-    return {
-        version: '1.0',
-        type: 'grilles',
-        dateExport: new Date().toISOString(),
-        nombreGrilles: grilles.length,
-        grilles
-    };
-}
-
-/**
  * Migrer les grilles d'un trimestre vers la Bibliothèque
  * @param {string} cleSource - Clé source (ex: 'a2025_grilles')
  * @returns {Promise<{ajoutees: number, existantes: number}>}
@@ -202,27 +168,15 @@ async function migrerGrillesVersBibliotheque(cleSource) {
     return await importerGrillesDansBibliotheque(grilles);
 }
 
-/**
- * Obtenir le nombre de grilles dans la bibliothèque
- * @returns {number}
- */
-function getNombreGrillesBibliotheque() {
-    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
-    return bibliotheque.length;
-}
-
 // ===========================
 // EXPORTS GLOBAUX
 // ===========================
 window.obtenirToutesLesGrillesBibliotheque = obtenirToutesLesGrillesBibliotheque;
 window.obtenirToutesLesGrillesBibliothequeSync = obtenirToutesLesGrillesBibliothequeSync;
-window.obtenirGrillesParDiscipline = obtenirGrillesParDiscipline;
 window.ajouterGrilleALaBibliotheque = ajouterGrilleALaBibliotheque;
 window.retirerGrilleDeLaBibliotheque = retirerGrilleDeLaBibliotheque;
 window.importerGrillesDansBibliotheque = importerGrillesDansBibliotheque;
-window.exporterBibliothequeGrilles = exporterBibliothequeGrilles;
 window.migrerGrillesVersBibliotheque = migrerGrillesVersBibliotheque;
-window.getNombreGrillesBibliotheque = getNombreGrillesBibliotheque;
 window.CLE_BIBLIOTHEQUE_GRILLES = CLE_BIBLIOTHEQUE_GRILLES;
 
 // Rétrocompatibilité: GRILLES_BIBLIOTHEQUE vide (plus de hardcodé)

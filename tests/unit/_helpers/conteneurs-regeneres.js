@@ -11,6 +11,16 @@ import path from 'node:path';
  *     descendant à `id=` ou à `data-action=` (ce qui serait détruit).
  * Approximation assumée : le nom de variable est lu fichier par fichier, sans portée.
  */
+/** Fin du bloc `{…}` qui contient la position `i` (accolades appariées, chaînes non lues). */
+function finDuBloc(s, i) {
+    let prof = 0;
+    for (let j = i; j < s.length; j++) {
+        if (s[j] === '{') prof++;
+        else if (s[j] === '}' && --prof < 0) return j;
+    }
+    return s.length;
+}
+
 export function conteneursRegeneres(racine) {
     const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
     const fichiers = [
@@ -22,7 +32,11 @@ export function conteneursRegeneres(racine) {
         const s = readFileSync(path.join(racine, f), 'utf8');
         for (const m of s.matchAll(/getElementById\('([\w-]+)'\)\.innerHTML\s*=/g)) reecrits.add(m[1]);
         for (const m of s.matchAll(/(?:const|let|var)\s+([\w$]+)\s*=\s*document\.getElementById\('([\w-]+)'\)/g)) {
-            if (new RegExp(`\\b${m[1].replace(/\$/g, '\\$')}\\.innerHTML\\s*=`).test(s)) reecrits.add(m[2]);
+            // #784, lot 23 (12 oct. 2026) : la réécriture se cherche dans la PORTÉE de la
+            // déclaration (son bloc englobant), plus dans tout le fichier — sept des neuf
+            // conteneurs du 11 oct. étaient des homonymes réécrits par une autre fonction.
+            const portee = s.slice(m.index, finDuBloc(s, m.index));
+            if (new RegExp(`\\b${m[1].replace(/\$/g, '\\$')}\\.innerHTML\\s*=`).test(portee)) reecrits.add(m[2]);
         }
     }
     const sortie = [];

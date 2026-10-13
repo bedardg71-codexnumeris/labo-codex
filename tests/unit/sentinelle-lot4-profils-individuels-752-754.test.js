@@ -37,6 +37,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -241,7 +242,7 @@ describe('A · #754 et F — ce que le code du profil ne fait plus', () => {
     it('A · plus d\'observateur de sous-section dans le module profil ; la sous-section s\'active sous le drapeau du crochet ; la Liste et le Suivi du groupe n\'appellent plus afficherSousSection avant le profil', () => {
         const profil = sansCommentaires(lire('js/profil-etudiant-sections-affichage.js'));
         expect(profil).not.toMatch(/new MutationObserver/);
-        expect(profil).toMatch(/function _activerSousSectionProfil\(\)[\s\S]{0,600}window\._profilAutoChargement = true;[\s\S]{0,200}afficherSousSection\('suivi-profil'\)/);
+        expect(suitDansLaFonction(profil, /function _activerSousSectionProfil\(\)/, /window\._profilAutoChargement = true;/, /afficherSousSection\('suivi-profil'\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect((profil.match(/afficherSousSection\('suivi-profil'\)/g) || []).length).toBe(1);
         const ligneListe = sansCommentaires(lire('js/etudiants.js')).match(/tr\.onclick = function \(\) \{[\s\S]{0,300}?\};/)[0];
         expect(ligneListe).toMatch(/afficherProfilComplet\(etudiant\.da\)/);

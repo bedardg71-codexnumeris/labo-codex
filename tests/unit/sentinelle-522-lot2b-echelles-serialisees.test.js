@@ -318,7 +318,7 @@ describe('#522 lot 2b · C — la course ne peut pas se rouvrir en silence', () 
         // #467 (9 oct. 2026) : 19 → 18. `importerDansEchelleActive` est partie :
         // aucun déclencheur (inventaire du lot F, 29 sept. : « code mort »), et un
         // import JSON brut de moins. Aucune écriture directe de plus.
-        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648').toBe(18);
+        expect(parLaFile, 'lot 2b, lot 4, les conversions antérieures, le semis IDME, et le cœur #648, moins ajouterEchellesABibliotheque (#469, 12 oct.)').toBe(17);
     });
 
     it('C.d les trois fenêtres d\'attente humaine lisent hors file et écrivent DANS la file', () => {

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // MENU « VUE » DE LA CARTE — lot 1 du chantier de la carte d'alignement (8 oct. 2026).
 //
@@ -93,7 +94,7 @@ describe('palette des raccourcis · C — revenue, par le menu seul (1.192.1)', 
     it('sa table est vide dans la page : le JS la remplit depuis RACCOURCIS_CARTE', () => {
         expect(html).toMatch(/<table class="planif-raccourcis-table" id="planif-raccourcis-table"><\/table>/);
         expect(html).not.toMatch(/<kbd>⌘/);
-        expect(carte).toMatch(/function rendreRaccourcisPalette\(\)[\s\S]{0,400}RACCOURCIS_CARTE\.forEach/);
+        expect(suitDansLaFonction(carte, /function rendreRaccourcisPalette\(\)/, /RACCOURCIS_CARTE\.forEach/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('au doigt, son repli et sa croix montent à 44 px', () => {

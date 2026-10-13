@@ -20,9 +20,7 @@
  *   B — CHAQUE FAMILLE garde au moins un modèle. C'est la raison pour laquelle
  *       le sommatif est conservé : sans lui, la famille la plus courante
  *       n'offrirait rien ;
- *   C — l'écran DIT ce qui manque au lieu de ne rien afficher. C'est le défaut
- *       corrigé ailleurs (une grille sans échelle ne produisait rien du tout),
- *       et retirer cinq gabarits en rend l'occurrence plus probable ;
+ *   C — (retiré le 12 oct. 2026 avec le sélecteur qu'il jugeait, #469) ;
  *   D — les forfaits de reprise portent un nom de MÉCANIQUE, et leurs `value`
  *       persistées n'ont PAS changé ;
  *   E — le résidu statique : plus de discipline dans le matériel offert.
@@ -46,15 +44,7 @@ beforeAll(() => {
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')),
         notifications: { info: () => {}, succes: () => {}, erreur: () => {} }
     });
-    // #691 — LE VRAI REGISTRE DE FAMILLES, dans le MÊME sandbox. L'écran nomme
-    // la famille qu'il filtre en lisant `window.TYPE_BADGES` ; un stub testerait
-    // des libellés inventés pour le banc, pas ceux que l'utilisateur lit.
-    chargerScript('js/wizard-pratique-v2.js', {
-        db: { getSync: (_k, d) => (d !== undefined ? d : null), get: async () => null, set: async () => {} },
-        cle: (k) => k,
-        echapperHtml: (t) => (t == null ? '' : String(t)),
-        notifications: { info: () => {}, succes: () => {}, erreur: () => {} }
-    }, biblio);
+    // (Le registre de familles de l'assistant n'est plus chargé ici : seul le cas C, retiré, le lisait.)
 });
 
 /* ================================================ A — LE MATÉRIEL FICTIF EST PARTI */
@@ -237,61 +227,10 @@ describe('#687 · B — chaque famille garde au moins un modèle', () => {
     });
 });
 
-/* ==================================== C — L'ÉCRAN NE SE VIDE PLUS EN SILENCE */
-
-describe('#687 · C — quand il n\'y a rien à offrir, l\'écran le DIT', () => {
-    it('C.a une famille sans aucun modèle produit un message, pas un sélecteur nu', async () => {
-        const html = await biblio.genererSelecteurModelesPratiques('type-qui-nexiste-pas');
-        expect(html).toMatch(/Aucun modèle fourni pour ce type — enregistre le tien/);
-    });
-
-    it('C.a bis ⚠ LE MESSAGE NOMME LA FAMILLE, et il ne le faisait PAS', () => {
-        // Mesuré le 2 septembre : le texte disait « pour ce type de pratique ».
-        // « Aucun modèle » sans dire de quoi laisse chercher — et le commentaire
-        // d'origine affirmait pourtant qu'il nommait la famille, si bien qu'une
-        // consigne l'a cru sur parole trois heures plus tard.
-        // On vide artificiellement la famille sommative pour éprouver le cas.
-        const sauvegarde = biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'];
-        delete biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'];
-        return biblio.genererSelecteurModelesPratiques('sommative').then(html => {
-            biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'] = sauvegarde;
-            // « Sommative » vient de TYPE_BADGES, le registre canonique.
-            expect(html).toMatch(/Aucun modèle « Sommative » fourni — enregistre le tien/);
-        }, (e) => {
-            biblio.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'] = sauvegarde;
-            throw e;
-        });
-    });
-
-    it('C.a ter ⚠ LE MESSAGE RESTE COURT — un texte tronqué ne se lit pas', () => {
-        // Trouvé AU NAVIGATEUR le 2 septembre, jamais par un banc : le texte
-        // finissait par « — crée la tienne avec "Enregistrer la configuration" »
-        // et s'affichait « …avec "Enregistrer la configura▸ » dans le `<option>`.
-        // La limite est empirique : 70 caractères tiennent dans la largeur du
-        // sélecteur observée. Ce n'est pas une élégance, c'est la lisibilité.
-        return biblio.genererSelecteurModelesPratiques('type-qui-nexiste-pas').then(html => {
-            const texte = (html.match(/<option value="" disabled>([^<]*)</) || [])[1] || '';
-            expect(texte.length, `message de ${texte.length} caractères : « ${texte} »`)
-                .toBeLessThanOrEqual(70);
-            expect(texte.length).toBeGreaterThan(10);   // témoin : il existe
-        });
-    });
-
-    it('C.b le message est INERTE — il ne peut pas être choisi par mégarde', () => {
-        // Une option sans `disabled` serait sélectionnable et `appliquerModele`
-        // partirait sur une chaîne vide.
-        return biblio.genererSelecteurModelesPratiques('type-qui-nexiste-pas').then(html => {
-            expect(html).toMatch(/<option value="" disabled>/);
-        });
-    });
-
-    it('C.c TÉMOIN — une famille qui a des modèles les rend, pas le message', async () => {
-        // Sans ce témoin, un message affiché en toutes circonstances passerait C.a.
-        const html = await biblio.genererSelecteurModelesPratiques('sommative');
-        expect(html).toMatch(/Modèle sommatif/);
-        expect(html).not.toMatch(/Aucun modèle/);
-    });
-});
+/* ======================================= C — RETIRÉ AVEC SON ÉCRAN (#469) */
+// Le sélecteur de modèles (`genererSelecteurModelesPratiques`) et son message « Aucun modèle
+// … fourni » sont partis le 12 oct. 2026 : leur cible `v2-spec-dropdown-modeles` n'existait
+// plus, aucun écran ne les montrait. Les cas C sont partis avec eux.
 
 /* ================================== D — LES FORFAITS DISENT LEUR MÉCANIQUE */
 

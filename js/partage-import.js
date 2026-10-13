@@ -138,7 +138,7 @@
     /**
      * Clone les entités d'un packageNettoye en préfixant chaque ID par
      * `PARTAGE_{suffixe de l'idImport}_` et en remappant les références
-     * internes (cartouche.grilleId, production.grilleId) quand leur cible
+     * internes (règle commune `rebrancherReferences`, #627) quand leur cible
      * fait partie du package. Pose `inspireDe.idOriginal` (D7) ; un
      * `inspireDe` déjà présent (lignée de l'auteur) est conservé et
      * seulement complété.
@@ -173,9 +173,14 @@
                 // Références internes : remapper seulement si la cible est
                 // DANS le package (sinon la valeur reste telle quelle — ex.
                 // production.grilleId === '' pour un portfolio sans grille).
-                if ((type === 'cartouche' || type === 'production')
-                    && item.grilleId && correspondance.grille[item.grilleId]) {
-                    item.grilleId = correspondance.grille[item.grilleId];
+                // #627 : la règle commune des imports (import-export.js, chargé après ce
+                // fichier, lu à l'appel) ; la table ne contient que les ids du paquet.
+                if (typeof window.rebrancherReferences === 'function') {
+                    window.rebrancherReferences(item, type, {
+                        grilles: correspondance.grille,
+                        echelles: correspondance.echelle,
+                        cartouches: correspondance.cartouche
+                    });
                 }
 
                 // Trace de provenance (D7) : idOriginal toujours posé ;

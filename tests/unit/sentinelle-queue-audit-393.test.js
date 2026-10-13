@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // SENTINELLE — #393 (audit qualité 5 août 2026, sous-lot mécanique, 🟢) —
 // - Validation #369 étendue : deux journées sans cours à la même date =
@@ -50,7 +51,7 @@ describe('#393 · filet des imports interrompus + voie canonique + ablation comp
         const occurrences = src.match(/Import interrompu : /g) || [];
         // #1047 (lot 12, 11 oct. 2026) : 2 → 1, le second vivait dans `executerImportLocalStorageBrut`, code mort retiré.
         expect(occurrences.length).toBe(1);
-        expect(src).toMatch(/catch \(erreur\) \{[\s\S]{0,600}syncToLocalStorageCache\(\)/);
+        expect(suitDansLaFonction(src, /catch \(erreur\) \{/, /syncToLocalStorageCache\(\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('planification-bibliotheque ne lit aucun trimestre en direct : planificationDonnees le fait, par cleSource()', () => {

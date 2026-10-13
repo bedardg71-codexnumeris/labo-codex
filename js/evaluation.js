@@ -219,7 +219,7 @@ function evaluerProduction(da, productionId) {
         : null;
 
     if (fichier && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
-        if (productionId) sessionStorage.setItem('travaux-filtre-production', productionId);
+        if (productionId) sessionStorage.setItem(cle('travaux-filtre-production'), productionId);
         // Consommé par `ouvrirFichier` une fois la copie chargée — le protocole de « Consulter ».
         window._apresOuvertureFichier = function() { travauxUI.basculerMode('evaluer'); };
         travauxUI.ouvrirFichier(fichier.id);
@@ -244,7 +244,7 @@ function _evaluerSansCopie(da, productionId) {
     // Et l'arrivée ne rouvre aucune copie : ni celle encore dans la visionneuse (drapeau lu par
     // `initialiserModuleTravaux`), ni la dernière de la session (clé lue à la restauration).
     window._evaluerSansCopieEnCours = true;
-    sessionStorage.removeItem('travaux-dernier-fichier');
+    sessionStorage.removeItem(cle('travaux-dernier-fichier'));
     afficherSection('evaluations');
     afficherSousSection('evaluations-annoter');
 

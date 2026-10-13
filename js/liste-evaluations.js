@@ -2108,7 +2108,7 @@ function consulterEvaluationDepuisListe(evaluationId) {
     if (fichierId && typeof travauxUI !== 'undefined' && typeof travauxUI.ouvrirFichier === 'function') {
         // Mettre le filtre production sur la bonne production AVANT d'ouvrir le fichier
         if (evaluation.productionId) {
-            sessionStorage.setItem('travaux-filtre-production', evaluation.productionId);
+            sessionStorage.setItem(cle('travaux-filtre-production'), evaluation.productionId);
         }
         // Workflow visionneuse : ouvrir le fichier, basculer en mode évaluer,
         // puis charger l'évaluation sauvegardée.

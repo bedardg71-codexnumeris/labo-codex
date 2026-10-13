@@ -1046,11 +1046,11 @@ function _nettoyerMarqueurs(item) {
     return clone;
 }
 
-// #663 — délégué à import-export.js (lu à l'appel ; ce fichier est chargé avant lui) : une
-// seule règle pour les deux chemins.
-function _rebrancherEchellePratique(item, table) {
-    return (typeof window.rebrancherEchellePratique === 'function')
-        ? window.rebrancherEchellePratique(item, table) : 0;
+// #627 — délégué à import-export.js (lu à l'appel ; ce fichier est chargé avant lui) : une
+// seule règle de rebranchement pour les quatre chemins d'import.
+function _rebrancherReferences(item, type, tables) {
+    return (typeof window.rebrancherReferences === 'function')
+        ? window.rebrancherReferences(item, type, tables) : 0;
 }
 
 function _faireCopie(item, prefixId) {
@@ -1111,7 +1111,7 @@ async function appliquerReimport() {
 
     // Tables de remapping (ancienId -> nouveauId) pour les ressources référencées
     // par d'autres : grilles, échelles et cartouches ont des références entrantes
-    // (productions.grilleId/echelleId/cartoucheId, cartouches.grilleId,
+    // (productions.grilleId/echelleId/cartoucheId, cartouches.grilleId/echelleId,
     // pratiques.configuration/config.echelleId — #663).
     // Peuplées uniquement quand l'item est copié en double ; sinon l'ID reste stable.
     var remapGrilles = {};
@@ -1130,30 +1130,12 @@ async function appliquerReimport() {
         });
     }
 
+    // #627 : la règle commune (`rebrancherReferences`, import-export.js) — productions
+    // (grille, échelle, cartouche), cartouches (grille, échelle), pratiques (les trois
+    // formes de #663).
+    var tables = { grilles: remapGrilles, echelles: remapEchelles, cartouches: remapCartouches };
     function _patcherReferences(item, type) {
-        if (type === 'production') {
-            if (item.grilleId && remapGrilles[item.grilleId]) {
-                item.grilleId = remapGrilles[item.grilleId];
-                rapport.refsRemappees++;
-            }
-            if (item.echelleId && remapEchelles[item.echelleId]) {
-                item.echelleId = remapEchelles[item.echelleId];
-                rapport.refsRemappees++;
-            }
-            if (item.cartoucheId && remapCartouches[item.cartoucheId]) {
-                item.cartoucheId = remapCartouches[item.cartoucheId];
-                rapport.refsRemappees++;
-            }
-        } else if (type === 'cartouche') {
-            if (item.grilleId && remapGrilles[item.grilleId]) {
-                item.grilleId = remapGrilles[item.grilleId];
-                rapport.refsRemappees++;
-            }
-        } else if (type === 'pratique') {
-            // #663 : `configuration.echelleId` (ce qu'écrivent les pratiques d'aujourd'hui),
-            // `config.echelleId` (anciennes) et la racine — un seul rebranchement pour les trois.
-            rapport.refsRemappees += _rebrancherEchellePratique(item, remapEchelles);
-        }
+        rapport.refsRemappees += _rebrancherReferences(item, type, tables);
         return item;
     }
 

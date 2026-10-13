@@ -25,9 +25,7 @@ describe('Volet B étape 2 · canonisation de la production', () => {
         expect(indexHtml).not.toMatch(/<option value="pan-specifications">/);
     });
 
-    it('Unité 1 · les radios « pratique par défaut » émettent du canonique', () => {
-        expect(pratiques).toMatch(/data-param="standards"/);
-        expect(pratiques).toMatch(/data-param="specifications"/);
+    it('Unité 1 · (le sélecteur « pratique par défaut » est parti avec l\'îlot de pratiques.js, #469, 12 oct. 2026) : aucun identifiant ancien n\'y revient', () => {
         expect(pratiques).not.toMatch(/data-param="pan-standards"/);
         expect(pratiques).not.toMatch(/data-param="pan-specifications"/);
     });
