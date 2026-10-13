@@ -179,6 +179,8 @@ qu'elle ne pouvait pas voir.
 ⮕ La consigne de relais est un fichier **versionné**. Si le travail vit sur une
 branche non mergée, la consigne qui le dit y vit aussi.
 
+⮕ **Ligne « complexité » dans le relais de chaque release** (12 oct. 2026, décision de Grégoire, lot 24) : lancer `node tests/unit/_helpers/complexite.js` et écrire, par rapport à la release précédente, Δ lignes des fichiers de plus de 1 000 lignes, Δ fonctions au-dessus de 15, Δ au-dessus de 30, Δ de la somme des complexités au-dessus de 15.
+
 ---
 
 ## HISTORIQUE
@@ -186,3 +188,4 @@ branche non mergée, la consigne qui le dit y vit aussi.
 | Date | Changement |
 |---|---|
 | 2026-08-17 | Création. Extrait de `CLAUDE.md` (sections « Avant chaque commit » et « Changelog »), désormais réduites à un pointeur. |
+| 2026-10-12 | §6 : ligne « complexité » dans le relais de chaque release (chantier « contenir », lot 24). |

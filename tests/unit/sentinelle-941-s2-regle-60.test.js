@@ -19,6 +19,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -228,7 +229,7 @@ describe('#941 S2 · R.e — la révision du principe du 28 août est écrite', 
     it('l\'écran lit la même règle que le PDF', () => {
         const retro = source('js/evaluation-retroaction.js');
         expect(retro).toContain('window.syntheseRetroactionData.zoneDuCritereDeLaCopie(copieVivante, c, _lecteurZoneBilan)');
-        expect(retro).toMatch(/lignesRecurrentes\(defis\.concat\(signales\),[\s\S]{0,300}copieVivante\);/);
+        expect(suitDansLaFonction(retro, /lignesRecurrentes\(defis\.concat\(signales\),/, /copieVivante\);/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 

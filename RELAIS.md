@@ -7,7 +7,32 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 12 OCT. 2026, 7 h 20 : **1.199.0 (RIEN D'INVENTÉ, RIEN DE PERDU ; LOTS 8 À 19) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 12 OCT. 2026, 16 h 17 : **1.200.0 (MOINS DE FENÊTRES QUI BLOQUENT ; LOTS 20 À 24) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify, Claude Code, 12 oct.) : déploiement `6acd3140`, `commit_ref` `239de979`, `state: ready`,
+publié à 19:13:16 Z (15 h 13, Toronto). Release `df8f386f` (build 1012-1211).
+**Verdict complet sur `6ddf3531`** (au signal de Grégoire ; secteur, éveil tenu, 0 veille, échange 0 Mo) : code 0, 0 échec connu,
+aucun instable. Vitest complet vert après le commit de release (751 fichiers, 8 755 essais) et au hook pré-push.
+**Fusions, pas de rebase** : `6ddf3531` absorbe `b709f2aa` (cadrage « observer ce que fait l'application ») avant le verdict ; le
+premier push est refusé (« fetch first ») par `b4beeeb3` (`plans de travail/observation/0-preparation.md`), poussé par une session du
+nuage pendant la suite ; fusion `239de979`, où seul ce fichier de plan change par rapport au SHA jugé ; poussé par `git push origin main`.
+**Complexité** : ligne au relais précédent (Δ 0 au-dessus de 15, au-dessus de 30 et sur la somme ; −1 676 lignes dans les gros fichiers).
+**BACKLOG** : 5 fiches cochées (#522, #596, #627, #642, #784) ; 7 en partie faites reçoivent une ligne datée avec leur reste (#678,
+#469, #587, #679, #616, #602, #1051). #1052 et #1053 attendent Grégoire.
+**Suite** : la prochaine consigne de Cowork, dans `plans de travail/CONSIGNE-DU-JOUR.md`.
+
+---
+
+## (relais précédent) 12 OCT. 2026, 12 h 13 : **1.200.0 (MOINS DE FENÊTRES QUI BLOQUENT ; LOTS 20 À 24) COMMITÉE SUR `main`, NON POUSSÉE ; EN LIGNE : 1.199.0**
+
+**Le travail le plus récent vit sur le `main` LOCAL du Mac de Grégoire**, en avance sur `origin/main` : release `df8f386f` (1.200.0, build 1012-1211). Une session du nuage qui part d'`origin/main` ne le voit pas.
+**Contenu** : lots 20 à 24 (#522, #596, #627 ; #678 ; #469, #587 ; #642, #679, #784, #616, #602 ; #1051, contenir la complexité), les mineurs du verdict de 9 h 53 et la réponse au verdict de 10 h 56, tous relus par Cowork (verdicts à la fin de `plans de travail/CONSIGNE-DU-JOUR.md`). Nouvelles retenues par Grégoire (12 h 10), posées telles quelles. Vitest complet vert après le commit de release (751 fichiers, 8 755 essais).
+**Complexité** (première ligne, lot 24 ; `node tests/unit/_helpers/complexite.js`, 1.199.0 `bd533702` → 1.200.0, même module sur les deux arbres) : fichiers de plus de 1 000 lignes 36 → 35, leurs lignes 87 668 → 85 992 (Δ −1 676) ; au-dessus de 15 : 455 → 455 (Δ 0) ; au-dessus de 30 : 89 → 89 (Δ 0) ; somme au-dessus de 15 : 11 482 → 11 482 (Δ 0) ; maximum 130. Le code mort retiré au lot 22 était sous le seuil de 15.
+**Suite** : au signal de fin de journée de Grégoire (Chrome, Safari, Claude fermés ; Mac branché, sans veille), verdict Playwright complet, puis push si vert ; si `origin/main` a avancé, fusion, pas rebase.
+
+---
+
+## (relais précédent) 12 OCT. 2026, 7 h 20 : **1.199.0 (RIEN D'INVENTÉ, RIEN DE PERDU ; LOTS 8 À 19) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify, Claude Code, 12 oct.) : déploiement `6acc41e0`, `commit_ref` `437d48ec`, `state: ready`,
 publié à 02:11:55 Z (11 oct., 22 h 11, Toronto). Release `039b523d` (build 1011-1808).

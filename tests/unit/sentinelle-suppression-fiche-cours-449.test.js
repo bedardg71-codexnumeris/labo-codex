@@ -55,7 +55,10 @@ function charger(store, { confirmReponse = false } = {}) {
         genererIdUnique: (p) => p + 'X1',
         notifications: { succes() {}, erreur() {}, info() {} },
         BibliothequeUI: { fermerModal() {}, creerModal() {}, renderCarteSelection: () => '', renderCarteDisponible: () => '', ajouterOptgroupDemo() {} },
-        alert: (m) => alertes.push(String(m)),
+        // #678 (12 oct. 2026) : le refus parle par la fenêtre d'information de l'application ;
+        // `alertes` recueille son titre et son message. Le natif lève : il ne doit plus servir.
+        uiDialogues: { informer: (o) => { alertes.push(String(o.titre) + ' ' + String(o.message)); return Promise.resolve(); } },
+        alert: () => { throw new Error('alert() natif appelé (#678)'); },
         confirm: (m) => { confirms.push(String(m)); return confirmReponse; }
     });
     return { win, journal, alertes, confirms, store };

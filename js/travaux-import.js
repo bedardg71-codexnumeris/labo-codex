@@ -695,7 +695,7 @@
                     prepare.estReprise = true;
                     prepare.productionIdParLea = false;
                     // Le productionId sera défini par le sous-sélecteur de jeton
-                    var jetonProd = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('travaux-jeton-production') : '';
+                    var jetonProd = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem(cle('travaux-jeton-production')) : '';
                     if (jetonProd) {
                         prepare.productionId = jetonProd;
                     }

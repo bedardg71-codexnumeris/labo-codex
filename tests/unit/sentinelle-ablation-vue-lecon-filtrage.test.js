@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // =======================================================================
 // SIMPLIFICATION DU MODULE ALIGNEMENT — 7 août 2026 (soir)
@@ -232,7 +233,7 @@ describe('affichage des palettes · un seul mécanisme, commandé par la barre d
         // Deux blocs jumeaux auraient divergé au premier correctif porté sur un
         // seul des deux. Le registre garantit que les palettes se comportent
         // identiquement parce qu'elles traversent le même code.
-        expect(sourceCarte).toMatch(/var PALETTES_FLOTTANTES = \{[\s\S]{0,400}noeuds:[\s\S]{0,400}planificateur:/);
+        expect(suitDansLaFonction(sourceCarte, /var PALETTES_FLOTTANTES = \{/, /noeuds:/, /planificateur:/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
         expect(sourceCarte).toMatch(/Object\.keys\(PALETTES_FLOTTANTES\)\.forEach/);
     });
 
@@ -285,6 +286,6 @@ describe('données · ce que la vue supprimée avait avalé est récupéré', ()
     });
 
     it('le champ mort est purgé une fois vidé', () => {
-        expect(sourceCarte).toMatch(/recuperes\.forEach[\s\S]{0,200}delete n\.metadata\.objectif;/);
+        expect(suitDansLaFonction(sourceCarte, /recuperes\.forEach/, /delete n\.metadata\.objectif;/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });

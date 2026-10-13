@@ -1250,7 +1250,7 @@ function importerFichierEtudiantsV2(event) {
 function previsualiserDonneesV2() {
     const donnees = document.getElementById('v2-donneesCollees')?.value || '';
     if (!donnees.trim()) {
-        alert('Veuillez coller des données à importer.');
+        notifications.warning('Colle des données à importer.');
         return;
     }
     traiterDonneesImportV2(donnees);
@@ -1319,7 +1319,7 @@ function traiterDonneesImportV2(contenu) {
     donneesImportEnAttenteV2 = analyserListeEtudiantsCollee(contenu);
 
     if (donneesImportEnAttenteV2.length === 0) {
-        alert('Aucune donnée valide trouvée. Vérifie le format.');
+        notifications.erreur('Aucune donnée valide trouvée. Vérifie le format.');
         return;
     }
 
@@ -1476,7 +1476,7 @@ function exporterEtudiantsV2() {
     const cleEtud = cle('groupeEtudiants');
     const etudiants = db.getSync(cleEtud, []);
     if (etudiants.length === 0) {
-        alert('Aucun étudiant à exporter.');
+        notifications.info('Aucun étudiant à exporter.');
         return;
     }
 

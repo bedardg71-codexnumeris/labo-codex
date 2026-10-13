@@ -17,6 +17,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (rel) => readFileSync(path.join(RACINE, rel), 'utf8');
@@ -51,6 +52,6 @@ describe('#796 · où le bandeau dit-il de trouver les nouveautés', () => {
 
     it('la carte de l\'accueil ouvre bien cette modale', () => {
         const accueil = lire('js/accueil.js');
-        expect(accueil).toMatch(/data-action="afficherModalNouveautes"[\s\S]{0,400}Nouveaut/);
+        expect(suitDansLaFonction(accueil, /data-action="afficherModalNouveautes"/, /Nouveaut/), "data-action=\"afficherModalNouveautes\"[\\s\\S]{0,400}Nouveaut").toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });

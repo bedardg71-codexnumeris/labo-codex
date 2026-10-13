@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // SENTINELLE — #380 (audit qualité 5 août 2026, rapport A1, 🔴) —
 // executerImportSelectif écrivait les clés calendrier (cadreCalendrier,
@@ -21,7 +22,7 @@ const source = readFileSync(path.join(racineProjet, 'js', 'import-export.js'), '
 
 describe('#380 · l\'import des clés calendrier exige un consentement explicite', () => {
     it('le bloc d\'import calendrier est GATÉ par isChecked(\'calendrier\')', () => {
-        expect(source).toMatch(/if \(isChecked\('calendrier'\)\) \{[\s\S]{0,800}estCleCalendrierImport\(cleCal\)/);
+        expect(suitDansLaFonction(source, /if \(isChecked\('calendrier'\)\) \{/, /estCleCalendrierImport\(cleCal\)/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('ne réintroduit pas la liste inline non gatée de l\'ancien bloc', () => {

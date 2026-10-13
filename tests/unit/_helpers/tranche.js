@@ -63,3 +63,54 @@ export function tranche(source, debut, fin, { longueurMin = 1 } = {}) {
     }
     return t;
 }
+
+/**
+ * #616, lot 23 (12 oct. 2026) — « B suit A, dans la même fonction » : la forme juste de ce que
+ * `/A[\s\S]{0,N}B/` approchait par une DISTANCE en caractères (un commentaire ajouté la faisait
+ * rougir sans que rien ne change ; un retrait ailleurs pouvait la faire verdir sur un code cassé).
+ * Les commentaires sont blanchis ; pour CHAQUE occurrence de A, la portée est le corps de la
+ * fonction qui la contient (`function …(…) {` ou `=> {`, sinon le fichier) ; vrai si les marqueurs
+ * suivants y paraissent dans l'ordre. Chaque marqueur est une chaîne ou une RegExp.
+ */
+export function suitDansLaFonction(source, ...marqueurs) {
+    const s = source.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+        .replace(/(^|[^:\\'"`])(\/\/[^\n]*)/g, (m, a, b) => a + ' '.repeat(b.length));
+    const chercher = (m, depuis, fin) => {
+        if (typeof m === 'string') { const i = s.indexOf(m, depuis); return i >= 0 && i < fin ? [i, i + m.length] : null; }
+        const re = new RegExp(m.source, m.flags.includes('g') ? m.flags : m.flags + 'g');
+        re.lastIndex = depuis;
+        const r = re.exec(s);
+        return r && r.index < fin ? [r.index, r.index + r[0].length] : null;
+    };
+    const corpsEnglobant = (i) => {
+        let prof = 0;
+        for (let j = i; j >= 0; j--) {
+            if (s[j] === '}') prof++;
+            else if (s[j] === '{') {
+                if (prof > 0) { prof--; continue; }
+                if (/(?:function\b[^{};]*\)|=>)\s*$/.test(s.slice(Math.max(0, j - 300), j))) {
+                    let p = 0;
+                    for (let k = j; k < s.length; k++) {
+                        if (s[k] === '{') p++;
+                        else if (s[k] === '}' && --p === 0) return k;
+                    }
+                    return s.length;
+                }
+            }
+        }
+        return s.length;
+    };
+    for (let depart = 0; ;) {
+        const a = chercher(marqueurs[0], depart, s.length);
+        if (!a) return false;
+        const fin = corpsEnglobant(a[0]);
+        let pos = a[1], ok = true;
+        for (const m of marqueurs.slice(1)) {
+            const r = chercher(m, pos, fin);
+            if (!r) { ok = false; break; }
+            pos = r[1];
+        }
+        if (ok) return true;
+        depart = a[0] + 1;
+    }
+}

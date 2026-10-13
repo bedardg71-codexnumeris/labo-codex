@@ -101,7 +101,7 @@ function genererBanniereBienvenue() {
             <p><strong>Ton courriel, une fois par mois.</strong> Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
-                <button class="btn btn-primaire" data-action="demarrerTourGuide">
+                <button class="btn btn-principal" data-action="demarrerTourGuide">
                     Commencer la visite guid\u00e9e
                 </button>
                 <button class="btn btn-secondaire" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">

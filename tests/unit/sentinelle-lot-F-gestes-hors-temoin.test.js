@@ -56,7 +56,7 @@ const ANNONCES = {
     'js/planification-donnees.js': 1,
     'js/pratiques-bibliotheque.js': 2,
     'js/pratiques-gestion.js': 5,
-    'js/pratiques.js': 5,
+    'js/pratiques.js': 1,   // #469 (12 oct. 2026) : quatre gestes partis avec l'îlot, aucun n'était atteint
     'js/pratiques/denotation-jugements.js': 1,
     'js/pratiques/modalites-evaluation.js': 1,
     'js/pratiques/pratique-manager.js': 3,

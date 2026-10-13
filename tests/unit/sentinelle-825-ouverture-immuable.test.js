@@ -141,14 +141,12 @@ describe('#825 · js/ — les chargements hors index.html portent un ?v=', () =>
         // Cette liste est un CONSTAT, pas une permission : si elle change, c'est
         // qu'on a posé un jeton (la retirer ici) ou ajouté une bibliothèque
         // nue (la nommer ici, ou mieux, lui donner un jeton).
+        // #602, lot 23 (12 oct. 2026) : les jetons sont posés — la version de chaque
+        // bibliothèque (`?v=4.4.1`…), comme `pdf.min.js` l'avait déjà. La liste est vide, et
+        // elle doit le rester : une bibliothèque nue se nomme ici, ou mieux reçoit son jeton.
         const dynNus = tous.filter((t) => !/^(js|css)\//.test(t.chemin) && !t.avecJeton).map((t) => t.chemin);
-        expect(dynNus.sort()).toEqual(['libs/pdf.worker.min.js']);
-        expect([...referencesSansJeton(indexHtml)].sort()).toEqual([
-            'libs/chart.min.js',
-            'libs/chartjs-plugin-annotation.min.js',
-            'libs/jspdf-autotable.min.js',
-            'libs/jspdf.umd.min.js',
-        ]);
+        expect(dynNus.sort()).toEqual([]);
+        expect([...referencesSansJeton(indexHtml)].filter((c) => c.startsWith('libs/')).sort()).toEqual([]);
     });
 
     it('le jeton des deux sites est le build courant, avec un repli — jamais une URL nue', () => {

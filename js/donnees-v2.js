@@ -591,83 +591,6 @@
         container.innerHTML = html;
     }
 
-    /**
-     * Affiche le tableau des productions
-     */
-    function afficherTableauProductions() {
-        const container = document.getElementById('table-ressources-productions');
-        if (!container) return;
-
-        const productions = typeof obtenirToutesLesProductionsBibliothequeSync === 'function' ?
-            obtenirToutesLesProductionsBibliothequeSync() : [];
-
-        if (productions.length === 0) {
-            container.innerHTML = `
-                <div class="alerte alerte-information">
-                    <p>Aucune production dans la bibliothèque.</p>
-                </div>
-            `;
-            return;
-        }
-
-        // Obtenir les usages
-        const usages = calculerUsagesProductions(productions);
-
-        let html = `
-            <table class="table-ressources">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Type</th>
-                        <th>Statut</th>
-                        <th>Usage</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        productions.forEach(p => {
-            const dansSidebar = p.dansBibliotheque !== false;
-            const usage = usages[p.id] || { evaluationsCount: 0 };
-            const typeProduction = p.type || p.categorie || '—';
-            const descAff = p.activiteApprentissage || p.description;
-
-            html += `
-                <tr>
-                    <td>
-                        <strong>${escapeHtml(p.nom)}</strong>
-                        ${descAff ? `<br><small class="text-muted">${escapeHtml(descAff.substring(0, 50))}${descAff.length > 50 ? '...' : ''}</small>` : ''}
-                    </td>
-                    <td>${escapeHtml(typeProduction)}</td>
-                    <td>
-                        ${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}
-                    </td>
-                    <td>
-                        ${usage.evaluationsCount > 0 ?
-                            `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` :
-                            '<span class="badge-statut non-evalue">Non utilisée</span>'}
-                    </td>
-                    <td class="actions-cell">
-                        <button class="btn btn-compact btn-secondaire"
-                                data-action="naviguerVersRessource" data-param="production" data-param2="${p.id}"
-                                title="Consulter cette production">
-                            Voir
-                        </button>
-                        <button class="btn btn-compact"
-                                data-action="ouvrirModalSuppressionRessource" data-param="production" data-param2="${p.id}"
-                                title="Supprimer définitivement">
-                            Supprimer
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        html += '</tbody></table>';
-        container.innerHTML = html;
-    }
-
     // =========================================================================
     // FONCTIONS V2 (avec conteneur passé en paramètre pour dropdown)
     // =========================================================================
@@ -1836,9 +1759,9 @@
             afficherTableauCartouches();
         } else if (accordeonId === 'accordeon-ressources-echelles') {
             afficherTableauEchelles();
-        } else if (accordeonId === 'accordeon-ressources-productions') {
-            afficherTableauProductions();
         }
+        // #587 (12 oct. 2026) : la branche « productions » est partie avec sa fonction, dont le
+        // conteneur n'existe pas ; `window.afficherTableauProductions` est celle de productions.js.
     }
 
     // Écouter les événements d'ouverture d'accordéon
@@ -1869,7 +1792,6 @@
     window.afficherTableauGrilles = afficherTableauGrilles;
     window.afficherTableauCartouches = afficherTableauCartouches;
     window.afficherTableauEchelles = afficherTableauEchelles;
-    window.afficherTableauProductions = afficherTableauProductions;
     window.afficherTableauRessource = afficherTableauRessource;
     window.afficherTableauAlignementsV2 = afficherTableauAlignementsV2;
     window.ouvrirModalSuppressionRessource = ouvrirModalSuppressionRessource;

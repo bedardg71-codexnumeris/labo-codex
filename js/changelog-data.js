@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.200 (lots 20 à 24 de la série sans Grégoire) — titre et quatre items retenus par Grégoire
+            // le 12 oct. 2026 (12 h 10), transmis par Cowork, posés tels quels.
+            version: '1.200',
+            couleur: 'bleu',
+            titre: 'Moins de fenêtres qui bloquent',
+            items: [
+                'Créer un trimestre, un cours ou un groupe-cours, ou importer des étudiant·es&nbsp;: les messages s\'affichent dans l\'application, sans bloquer l\'écran.',
+                'Supprimer un cours qui porte encore des données&nbsp;: la fenêtre dit ce qui s\'y rattache.',
+                'Les boutons principaux de l\'Accueil, de l\'aide et de la visite guidée ont retrouvé leur couleur, et les en-têtes du profil d\'un·e étudiant·e sont alignés.',
+                'Quand une grille, une échelle ou une cartouche change d\'identifiant à l\'import, tout ce qui la désigne la suit.'
+            ]
+        },
+        {
             // 1.199 (lots 8 à 19 de la file sans Grégoire) — titre et sept items retenus par Grégoire
             // le 11 oct. 2026 (18 h 04), transmis par Cowork, posés tels quels.
             version: '1.199',

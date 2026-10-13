@@ -144,20 +144,6 @@ let echelleTemplateActuelle = null;
    Fonctions pour identifier les échelles avec des noms similaires
    =============================== */
 
-/**
- * Générer un badge de source pour une échelle
- * @param {Object} echelle - L'échelle
- * @param {Array} echellesLocales - Échelles locales pour vérifier la source
- * @returns {string} HTML du badge
- */
-function genererBadgeSourceEchelle(echelle, echellesLocales) {
-    return BibliothequeUI.genererBadgeSource(echelle, echellesLocales);
-}
-
-function genererIdCourtEchelle(id) {
-    return BibliothequeUI.genererIdCourt(id);
-}
-
 /* ⚰ #658 (13 sept. 2026) — LA « VUE HIÉRARCHIQUE » EST RETIRÉE, avec
    `ajouterNiveauAEchelle`. Elle rendait dans `#vueEchellesNiveaux`, un <div> vide
    du bloc « Conteneurs cachés pour compatibilité » d'index.html : son rendu, et
@@ -664,51 +650,6 @@ async function supprimerEchelle(echelleId) {
    Pour utilisation dans d'autres modules
    =============================== */
 
-/**
- * Met à jour les options des selects de critères selon l'échelle
- * Utilisé lors de l'évaluation pour afficher les bons niveaux
- * 
- * FONCTIONNEMENT:
- * 1. Récupère tous les selects de critères
- * 2. Pour chaque select:
- *    - Sauvegarde la valeur actuelle
- *    - Reconstruit les options avec les niveaux
- *    - Restaure la valeur si elle existe toujours
- * 
- * PARAMÈTRES:
- * @param {Array} niveaux - Array d'objets niveau à utiliser
- * 
- * UTILISÉ PAR:
- * - Module 04-productions lors du changement d'échelle
- * - Après le chargement d'une échelle pour une évaluation
- * 
- * FORMAT OPTION:
- * - value: code du niveau
- * - text: code - nom (ex: «E - Étendu»)
- */
-function mettreAJourOptionsEchelle(niveaux) {
-    const selects = document.querySelectorAll('#listeSelectsCriteres1 select.critere-select');
-
-    selects.forEach(select => {
-        const valeurActuelle = select.value;
-
-        // Reconstruire les options avec les niveaux de l'échelle
-        let optionsHTML = '<option value="">--</option>';
-        niveaux.forEach(niveau => {
-            const codeEchappe = echapperHtml(niveau.code);
-            const nomEchappe = echapperHtml(niveau.nom);
-            optionsHTML += `<option value="${codeEchappe}">${codeEchappe} - ${nomEchappe}</option>`;
-        });
-
-        select.innerHTML = optionsHTML;
-
-        // Restaurer la valeur si elle existe toujours
-        if (valeurActuelle && niveaux.find(n => n.code === valeurActuelle)) {
-            select.value = valeurActuelle;
-        }
-    });
-}
-
 /* ===============================
    🔔 NOTIFICATIONS
    =============================== */
@@ -822,82 +763,6 @@ async function exporterEchelles() {
     URL.revokeObjectURL(url);
 
     notifications.succes(`${echelles.length} échelle(s) exportée(s) avec succès`);
-}
-
-/**
- * Exporte l'échelle actuellement en cours d'édition
- * Avec support des métadonnées CC et suivi des contributeurs
- */
-async function exporterEchelleActive() {
-    if (!echelleTemplateActuelle) {
-        alert('Aucune échelle sélectionnée à exporter.');
-        return;
-    }
-
-    const echelles = await db.get(cle('echellesTemplates')) ||  [];
-    const echelle = echelles.find(e => e.id === echelleTemplateActuelle.id);
-
-    if (!echelle) {
-        alert('Échelle introuvable.');
-        return;
-    }
-
-    // NOUVEAU (Beta 91): Demander métadonnées enrichies
-    const metaEnrichies = await demanderMetadonneesEnrichies(
-        'Échelle de performance',
-        echelle.nom
-    );
-
-    if (!metaEnrichies) {
-        return;
-    }
-
-    // Préparer le contenu pour l'export
-    let contenuExport = { ...echelle };
-
-    // Si l'échelle a été importée avec des métadonnées CC, ajouter l'utilisateur actuel comme contributeur
-    if (echelle.metadata_cc) {
-        // Demander le nom de l'utilisateur s'il modifie le matériel
-        const nomUtilisateur = prompt(
-            'Tu exportes un matériel créé par ' + echelle.metadata_cc.auteur_original + '.\n\n' +
-            'Entre ton nom pour être crédité comme contributeur :\n' +
-            '(Laisse vide si tu n\'as fait aucune modification)'
-        );
-
-        if (nomUtilisateur && nomUtilisateur.trim()) {
-            // Ajouter le contributeur
-            const contributeurs = echelle.metadata_cc.contributeurs || [];
-            contributeurs.push({
-                nom: nomUtilisateur.trim(),
-                date: new Date().toISOString().split('T')[0],
-                modifications: 'Modifications et adaptations'
-            });
-
-            // Créer les métadonnées enrichies
-            contenuExport.metadata_cc = {
-                ...echelle.metadata_cc,
-                contributeurs: contributeurs
-            };
-        }
-    }
-
-    // Ajouter les métadonnées CC enrichies
-    const exportAvecCC = ajouterMetadonnéesCC(contenuExport, 'echelle-performance', echelle.nom, metaEnrichies);
-
-    const json = JSON.stringify(exportAvecCC, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    // 🆕 Beta 95.3 : Nommage standardisé
-    const nomFichier = typeof genererNomFichierExport === 'function'
-        ? genererNomFichierExport('echelle', { nom: echelle.nom, discipline: echelle.discipline, inclureLicence: true })
-        : `echelle-${(echelle.nom || 'echelle').replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
-    a.download = nomFichier;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    notifications.succes(`Échelle "${echelle.nom}" exportée avec succès`);
 }
 
 /**
@@ -1070,7 +935,6 @@ window.sauvegarderNomEchelle = sauvegarderNomEchelle;
 
 // Export/Import avec licence CC
 window.exporterEchelles = exporterEchelles;
-window.exporterEchelleActive = exporterEchelleActive;
 window.importerEchelles = importerEchelles;
 
 /* ===============================
@@ -1545,63 +1409,6 @@ async function dupliquerEchelleBibliotheque(id) {
             await afficherBibliothequeEchelles();
         }
     });
-}
-
-/**
- * ✅ AJOUT (8 décembre 2025) : Ajouter les échelles sélectionnées à la bibliothèque
- */
-async function ajouterEchellesABibliotheque() {
-    const checkboxes = document.querySelectorAll('#listeEchellesDisponibles input[type="checkbox"]:checked');
-
-    if (checkboxes.length === 0) {
-        alert('Sélectionne au moins une échelle à ajouter.');
-        return;
-    }
-
-    const echellesBibliotheque = obtenirToutesLesEchellesBibliotheque();
-
-    let nbAjoutees = 0;
-
-    await db.modifier(cle('echellesTemplates'), (lues) => {
-        const echelles = lues || [];
-        nbAjoutees = 0;
-
-        checkboxes.forEach(checkbox => {
-            const echelleId = checkbox.value;
-
-            // Trouver l'échelle dans la bibliothèque
-            const echelleBiblio = echellesBibliotheque.find(e => e.id === echelleId);
-            if (!echelleBiblio) return;
-
-            // Vérifier si déjà présente
-            const echelleExistante = echelles.find(e => e.id === echelleId);
-
-            if (echelleExistante) {
-                // Réactiver une échelle retirée
-                echelleExistante.dansBibliotheque = true;
-                nbAjoutees++;
-            } else {
-                // Ajouter nouvelle échelle
-                const nouvelleEchelle = {
-                    ...echelleBiblio,
-                    id: echelleId + '-local',  // Ajouter suffix pour éviter conflits
-                    dansBibliotheque: true
-                };
-                echelles.push(nouvelleEchelle);
-                nbAjoutees++;
-            }
-        });
-
-        return echelles;
-    }, []);
-
-    // Rafraîchir les affichages
-    await afficherListeEchelles();
-    fermerModalBibliothequeEchelles();
-
-    if (nbAjoutees > 0) {
-        notifications.succes(`${nbAjoutees} échelle(s) ajoutée(s) à la barre latérale`);
-    }
 }
 
 // #327 — filtrerEchellesParDiscipline + filtrerEchellesBibliotheque retirés :
@@ -3803,7 +3610,6 @@ window.notifierEchelleSupprimee = notifierEchelleSupprimee;
 // ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
 window.afficherBibliothequeEchelles = afficherBibliothequeEchelles;
 window.retirerEchelleDeBibliotheque = retirerEchelleDeBibliotheque;
-window.ajouterEchellesABibliotheque = ajouterEchellesABibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
 window.ajouterEchelleIndividuelle = ajouterEchelleIndividuelle;
 window.dupliquerEchelleBibliotheque = dupliquerEchelleBibliotheque;

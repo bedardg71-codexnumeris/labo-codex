@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // #367 (7 août 2026) — LES NOTES DE LEÇON : NAMESPACER **ET** COMPOSER.
 //
@@ -144,7 +145,7 @@ describe('#367 · le registre et les portes', () => {
     // #367 ci-dessous restent entiers.)
 
     it('supprimer une leçon purge sa note', () => {
-        expect(sourceCarte).toMatch(/donnees\.type === 'lecon'[\s\S]{0,600}delete notes\[cleNotePurge\]/);
+        expect(suitDansLaFonction(sourceCarte, /donnees\.type === 'lecon'/, /delete notes\[cleNotePurge\]/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 });
 

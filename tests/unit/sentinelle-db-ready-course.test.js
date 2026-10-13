@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { suitDansLaFonction } from './_helpers/tranche.js';
 
 // LA COURSE `db-ready` (7 août 2026) — cause réelle de #367 non migré.
 //
@@ -77,7 +78,7 @@ describe('db-ready · le bloc de migrations rattrape un événement déjà émis
 
     it('maillon 2 · le rattrapage APPELLE réellement le rappel', () => {
         // Tester le drapeau sans rien en faire ne corrigerait rien.
-        expect(corpsAuDbPret).toMatch(/if\s*\(\s*window\.dbReady\s*\)\s*\{[\s\S]{0,200}executer\(/);
+        expect(suitDansLaFonction(corpsAuDbPret, /if\s*\(\s*window\.dbReady\s*\)\s*\{/, /executer\(/)).toBe(true);   // #616 : ordre dans la fonction, plus une distance
     });
 
     it('maillon 2 · l’abonnement est posé AVANT le rattrapage', () => {

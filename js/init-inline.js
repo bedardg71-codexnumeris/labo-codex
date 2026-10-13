@@ -99,8 +99,8 @@ function definirModeExpertFromEl(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.js au chargement : la version du
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
-let VERSION_MAJEURE = '1.199.0';
-let BUILD_ID = '1011-1808';
+let VERSION_MAJEURE = '1.200.0';
+let BUILD_ID = '1012-1211';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -916,8 +916,8 @@ function changerFiltreCategorieFromEl(el) {
 // ========================================
 // EXPORT DES ÉCHELLES DE PERFORMANCE
 // ========================================
-// Les fonctions exporterEchelles() et exporterEchelleActive() sont définies dans js/echelles.js
-// Elles exportent les échelles avec métadonnées CC BY-NC-SA 4.0
+// La fonction exporterEchelles() est définie dans js/echelles.js
+// Elle exporte les échelles avec métadonnées CC BY-NC-SA 4.0
 
 // ========================================
 // EXPORT DES PRODUCTIONS
