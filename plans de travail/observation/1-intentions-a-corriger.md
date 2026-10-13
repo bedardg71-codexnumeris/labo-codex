@@ -141,7 +141,7 @@
 - Recherches non faites : SESSION.md pour l'Évaluation, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Parties 8 et 9 : aucun geste documenté pour Labo › Données et Labo › Études ; les mots finals de « Faire revenir un trimestre » (1.184) ne sont écrits nulle part.
+- Partie 9 : les mots finals de « Faire revenir un trimestre » (1.184) ne sont écrits nulle part.
 
 **Comment corriger** : écran par écran, directement dans le texte (corriger, rayer, ajouter). Une intention qui manque parce qu'elle n'est écrite nulle part, c'est à toi de l'ajouter.
 
@@ -3128,14 +3128,13 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 - Le texte du bloc « Seuils d'interprétation » dit, mot pour mot : « Ces trois seuils colorent les colonnes Assiduité, Complétion, Performance et Mobilisation de la liste des élèves, et qualifient l'engagement dans le profil. Ils ne touchent ni la note ni l'échelle IDME. » ; les champs gardent les noms Fragile / Acceptable / Bon (PORTES-TERRAIN-2026-09-11-mots-depistage, 11 sept. 2026).
 - « collecte » remplace « cueillette », dans l'introduction et dans la case du bloc Micro-données ACP (PORTES-TERRAIN-2026-09-11-mots-depistage, 11 sept. 2026).
 - Plus de bouton « Enregistrer » : chaque réglage s'écrit dès qu'on le change, et le témoin d'enregistrement le dit (consigne lot E3, 28 sept. 2026 ; changelog 1.167).
-- Contradiction : le changelog 1.127 décrit le bouton d'enregistrement « remonté auprès du titre » ; la consigne du lot E3 (28 sept. 2026) et le changelog 1.167 retirent ce bouton ; retenu : aucun bouton.
 - Quand la grille de dépistage enregistrée est introuvable dans le trimestre, le menu le dit au lieu d'afficher « Sélectionner une grille » (changelog 1.127).
 - En démonstration, le choix de grille montre la grille avec laquelle le profil calcule, au lieu de « Grille enregistrée, introuvable dans ce trimestre » (DEMANDE-RELECTURE-2026-10-09-lot1-archive-d-un-groupe, 9 oct. 2026) (#829).
 - Deux réglages n'existent plus : « Découpler Performance (P) et Niveau d'attention (N) » et « Unité d'affichage de l'assiduité » ; rien de ce qui avait été saisi n'est touché (changelog 1.129) (#823).
 - Les trois cartes sont Taxonomie SOLO, Micro-données ACP et Intervention (RàI) ; « Paramètres d'analyse » et « Seuils d'interprétation » sont des blocs visibles (changelog 1.130 ; PORTES-TERRAIN-2026-09-11-forme-outils-observation, 11 sept. 2026).
 - Sous chaque champ chiffré, la plage permise en mots (« De 5 (sensible) à 20 (moins sensible) ») ; les libellés longs sont gardés (PORTES-TERRAIN-2026-09-11-forme-outils-observation §3, Grégoire, 11 sept. 2026).
 - La carte « Consolidation des apprentissages » disparaît du Labo (changelog 1.128).
-- Non tranché : les libellés de zones (« Fragile », « Acceptable », « Bon » ; « Fragile », « Modéré », « Favorable », « Très favorable ») attendent la décision de Grégoire sur ce que prétend une bande de couleur ; rien ne se renomme avant (CONSIGNE-SUIVANTE-nomenclature-des-zones, 10 sept. 2026) (#821).
+- Sortie : les libellés de zones gardent leurs noms d'aujourd'hui (« Fragile », « Acceptable », « Bon » ; « Fragile », « Modéré », « Favorable », « Très favorable »), jusqu'à une décision de Grégoire prise avec l'orthopédagogue (CONSIGNE-SUIVANTE-nomenclature-des-zones ; décision de Grégoire, 13 oct. 2026) (#821).
 
 #### Geste : Choisir la grille de critères pour le dépistage
 
@@ -3143,7 +3142,7 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 - Données : en démonstration, choisir une grille du pack ne touche pas le choix réel de l'enseignant (changelog 1.194 ; OU-EN-EST-ON, 9 oct. 2026) (#829).
 - Sortie : les critères ciblés proposés dans une intervention viennent de cette grille, jamais d'une liste écrite dans le logiciel (consigne accueil-et-porte-ortho, 12 sept. 2026 ; CONSIGNE-552, règle de Grégoire du 27 août 2026).
 - Sortie : le message qui réclame une grille indique Labo › Outils d'observation (changelog 1.127).
-- Contradiction : le changelog 1.127 promet le bon chemin dans le message qui réclame une grille ; OU-EN-EST-ON (12 sept. 2026) note que le formulaire d'intervention sans grille de référence renvoie encore vers « Conception › Grilles de critères », « laissé exprès ».
+- Sortie : un message qui réclame une grille mène à Conception › Grilles de critères quand aucune grille n'existe, et à Labo › Outils d'observation quand une grille existe mais n'est pas choisie (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : Régler la fenêtre d'analyse des patterns
 
@@ -3159,7 +3158,7 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 
 - Sortie : un seul seuil, celui que l'utilisateur règle, départage une force d'un défi dans le diagnostic par critère (changelog 1.128).
 - Sortie : il règle le dépistage seulement ; la « Consolidation des apprentissages » ne le lit pas (changelog 1.106).
-- Contradiction : le changelog 1.128 promet un titre qui affiche la valeur du seuil en vigueur ; le CADRAGE-2026-09-10 (11 sept. 2026) établit que ce titre n'a jamais été affiché et le retire ; retenu : le seuil agit par les badges forces et défis et par le défi principal de la carte RàI, sans titre chiffré (#824).
+- Sortie : le seuil agit par la couleur des badges « Forces et défis » et par le défi principal de la carte RàI, sans titre chiffré (CADRAGE-2026-09-10-ecran-de-reglage-du-depistage, 11 sept. 2026) (#824).
 
 #### Geste : Taper un seuil (progression des artefacts, sensibilité des flèches, défi, Fragile, Acceptable, Bon)
 
@@ -3181,8 +3180,8 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 - Sortie : l'aide « Indicateurs visuels des seuils » dit « Lignes pointillées et étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel. » (CADRAGE-2026-09-10, tranché 11 sept. 2026).
 - Sortie : le repère « note différée » dit « Note différée : la rétroaction passe d'abord. Réglage dans Labo › Outils d'observation. » (CADRAGE-2026-09-10, tranché 11 sept. 2026).
 - Sortie : un bouton « Guide » sur chaque carte ouvre le guide SOLO, ACP ou RàI (changelog 1.1 ; changelog 1.59).
-- Non tranché : les bornes elles-mêmes et les noms des zones (Fragile, Modéré, Favorable, Très favorable) attendent le travail d'automne avec l'orthopédagogue ; gel d'octobre des seuils d'alerte (CADRAGE-2026-09-10 « hors périmètre » ; CADRAGE-2026-09-16) (#821, #742).
-- Non tranché : le devenir des trois seuils IDME du dépistage du risque est parqué, à rouvrir avec l'étiquetage SOLO des échelles (BACKLOG #551, 13 sept. 2026).
+- Sortie : les bornes des zones restent celles d'aujourd'hui, comme leurs noms, jusqu'au travail d'automne avec l'orthopédagogue ; les seuils d'alerte restent gelés jusqu'aux usages d'octobre (CADRAGE-2026-09-10 ; CADRAGE-2026-09-16 ; décision de Grégoire, 13 oct. 2026) (#821, #742).
+- Données : le dépistage du risque n'a pas de seuils propres : il lit les plages de l'échelle de l'utilisateur, comme le reste du dépistage (décision de Grégoire, 13 oct. 2026) (#551, #590).
 
 #### Geste : Arriver par le lien « Régler les outils d'observation »
 
@@ -3218,7 +3217,7 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 - Données : l'ancienne saisie du Cadre n'est ni effacée ni réécrite : elle est recopiée, pas déplacée (CADRAGE-2026-09-17 §6.1).
 - Le mot « capture » n'apparaît plus dans ce que lit l'utilisateur : « copie » (CADRAGE-2026-09-17 §9 bis, Grégoire, 18 sept. 2026).
 - En mode anonymisation, les élèves y sont « Élève R1 », « Élève R2 »… partout, rétroactions comprises (changelog 1.166).
-- Contradiction : CADRAGE-2026-09-17 (17 sept. 2026) met l'anonymisation hors périmètre (« Il est trop tôt pour penser à anonymiser ») ; changelog 1.166 (plus récent) anonymise l'écran. Retenu : 1.166.
+- Sortie : l'aide de l'écran dit que le R des pseudonymes vient de « registre », pour les distinguer des pseudonymes d'un trimestre (« Élève 32 ») (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : Chercher un élève
 
@@ -3266,7 +3265,6 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 - Outil de préparation : comparer pour bien choisir avant d'appliquer, en début de trimestre (RELAIS-326-refonte-banc-decision §4.1, 16 juin 2026).
 - Lecture seule : rien n'est écrit dans les pratiques, les groupes-cours, les évaluations, les captures ni la démo ; la pratique active reste inchangée ; le seul produit est le fichier CSV (SPEC_simulation_pratiques_307 §6 ; SPEC_comparateur_pratiques §5 ; RELAIS-326-refonte-banc-decision §4.3).
 - Le nom « Comparateur de pratiques » est gardé ; le résultat de construction s'appelle « maquette » (RELAIS-326-refonte-banc-decision §4.5, Grégoire, 16 juin 2026).
-- Contradiction : SPEC_comparateur_pratiques (5 juin 2026) : données démo seulement, quatre profils choisis à la main, aucune entrée de menu, « Ta pratique » en référence face à des simulations ; RELAIS-326-refonte-banc-decision (16 juin 2026) et changelog 1.19, 1.26 : profils générés depuis l'échelle de l'utilisateur, colonnes paires sans référence, dans le Labo. Retenu : le plus récent.
 
 #### Geste : Choisir 2 ou 3 pratiques à comparer
 
@@ -3312,7 +3310,7 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 
 - Affiche les comptes des données de l'application, dont le nombre d'interventions (PORTES-TERRAIN-2026-09-12-interventions, 12 sept. 2026).
 - Lit les données telles qu'elles sont rangées : un ancien brouillon peut y être compté, laissé exprès, sans effacement d'office (OU-EN-EST-ON, 12 sept. 2026).
-- Incertain : aucun document lu ne décrit de geste sur cet écran.
+- Sortie : l'écran est en lecture seule : on n'y fait aucun geste, il ne fait qu'afficher les comptes (décision de Grégoire, 13 oct. 2026).
 
 ### Écran 67 · Labo › Bilan réflexif
 
@@ -3328,7 +3326,7 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 #### Geste : Réinitialiser ou importer le questionnaire
 
 - Données : remplace le questionnaire personnalisé (INVENTAIRE-2026-10-02-1007, rangée P17).
-- Incertain : le geste est rangé du côté « propose un codex » (DECISIONS-2026-10-02-1007 §1) ; les Nouvelles 1.176 et 1.177 ne le nomment pas.
+- Sortie : si le codex n'est pas à jour, la proposition de le mettre à jour vient d'abord, comme pour les autres suppressions (DECISIONS-2026-10-02-1007-suppressions, § 1).
 
 ### Écran 68 · Labo › Modélisation
 
@@ -3346,7 +3344,8 @@ L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la p
 #### Sans geste
 
 - Deux graphiques d'analyse : corrélations longitudinales et impact des jetons (changelog, version bêta).
-- Incertain : aucun document lu ne décrit de geste sur cet écran.
+- Sortie : l'écran est en lecture seule : on n'y fait aucun geste, il ne fait qu'afficher ses deux graphiques (décision de Grégoire, 13 oct. 2026).
+- Le sous-onglet « Études » sert à expérimenter une fonction ou à mettre en place une observation ; son contenu peut changer avec le temps, selon les besoins des utilisateurs (décision de Grégoire, 13 oct. 2026).
 
 ### Écran 70 · Labo › Rythme de travail
 
