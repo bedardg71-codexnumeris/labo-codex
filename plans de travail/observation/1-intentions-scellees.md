@@ -1,8 +1,10 @@
-# Temps 1 · Ce que l'application est censée faire (à corriger)
+# Temps 1 · Ce que l'application est censée faire (scellé)
 
-> **À corriger par Grégoire, un écran à la fois.** Une fois corrigé, ce texte est renommé
-> « 1-intentions-scellees.md » : il n'est plus modifié, et il n'est relu qu'au temps 3
-> (CADRAGE-2026-10-12-observer-ce-que-fait-l-application).
+> **Scellé le 13 octobre 2026**, après la correction de Grégoire, partie par partie (un
+> commit par partie, de `d741d0dd` à `2bc3f299`). Ce texte n'est plus modifié ; il n'est
+> relu qu'au temps 3 (CADRAGE-2026-10-12-observer-ce-que-fait-l-application).
+> Trois points restent « Non tranché » par choix de Grégoire (partie 7, services
+> d'orthopédagogie) : le temps 3 ne les compare à rien.
 >
 > Rédigé le 12 octobre 2026 par Claude Code, analyste du temps 1, d'après les documents
 > seulement. **L'analyste du temps 1 ne lit pas le code.** Version de référence : 1.199.0,
@@ -142,7 +144,7 @@
 
 **Ce que les documents ne disent pas** : les questions relevées par les analystes ont toutes été tranchées par Grégoire le 13 octobre 2026, partie par partie, et leurs réponses sont écrites dans les écrans.
 
-**Comment corriger** : écran par écran, directement dans le texte (corriger, rayer, ajouter). Une intention qui manque parce qu'elle n'est écrite nulle part, c'est à toi de l'ajouter.
+**Correction** : faite par Grégoire le 13 octobre 2026, écran par écran ; chaque intention qu'il a décidée ou ajoutée porte « décision de Grégoire, 13 oct. 2026 », « reconduit par Grégoire le 13 oct. 2026 » ou « mots acceptés par Grégoire, 13 oct. 2026 ».
 
 ---
 
