@@ -63,12 +63,12 @@
 41. Partage entre collègues
 42. Importer depuis un autre trimestre (dans chaque bibliothèque)
 
-**Partie 5 · Évaluations**
-43. Évaluations (toute la section)
-44. Évaluations › Liste des évaluations
-45. Évaluations › Préparer et importer
-46. Évaluations › Annoter et évaluer
-47. Évaluations › Exporter et archiver
+**Partie 5 · Évaluation**
+43. Évaluation (toute la section)
+44. Évaluation › Liste des évaluations
+45. Évaluation › Préparer et importer
+46. Évaluation › Annoter et évaluer
+47. Évaluation › Exporter et archiver
 48. Sortie commune : le PDF de rétroaction de l'élève (Dossier PDF, export Léa, page de synthèse)
 
 **Partie 6 · Suivi : le groupe, la liste, les profils, les présences**
@@ -138,10 +138,9 @@
 - Plusieurs documents permis (mesures, audits, demandes de relecture) contiennent eux-mêmes des lectures du code. Seules leurs décisions ont été retenues ; quelques noms d'écrans ou de cartes ne sont attestés que par de telles mesures, et la ligne le dit.
 - Les noms d'écrans viennent des documents, et plusieurs ont changé en cours de route (« Calendrier » devenu « Cadre », « Cartouches de rétroaction » ou « Rétroactions »…). Le nom le plus récent est retenu ; l'écart est signalé.
 - Huit analystes ont travaillé en parallèle, un par zone, puis leurs textes ont été assemblés. Six écrans couverts par deux d'entre eux ont été fusionnés : archiver un groupe-cours, exporter une sélection, la bibliothèque des trimestres, Labo › Outils d'observation, « Recalculer les captures », le mode démonstration. Des redites peuvent rester entre les règles communes d'une section et ses écrans.
-- Recherches non faites : SESSION.md pour les Évaluations, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
+- Recherches non faites : SESSION.md pour l'Évaluation, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 5 : l'éditeur de pages ; le départ du chronomètre ; le mode côte à côte ; « Transférer » ; la liste complète des filtres de la Liste des évaluations.
 - Partie 6 : le rendu exact des cartes du tableau de bord.
 - Partie 7 : l'état du tirage par groupe et le bouton « Réinitialiser » de l'Animation (voulus, livraison non documentée) ; ouvrir une intervention depuis un signalement (voulu le 7 sept. 2026, livraison non documentée).
 - Parties 8 et 9 : aucun geste documenté pour Labo › Données et Labo › Études ; les mots finals de « Faire revenir un trimestre » (1.184) ne sont écrits nulle part.
@@ -1998,12 +1997,11 @@ Les onglets de Conception :
 
 ---
 
-## Partie 5 · Évaluations
+## Partie 5 · Évaluation
 
-Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Liste des évaluations », « Préparer et importer », « Annoter et évaluer », « Exporter et archiver » (PORTES-TERRAIN-2026-09-22-reassigner-une-copie, 22 sept. 2026 ; INVENTAIRE-2026-10-02-1007-gestes-qui-suppriment, 2 oct. 2026 ; OU-EN-EST-ON, 16 et 21 sept. 2026).
-- Contradiction : le texte d'aide validé le 20 sept. écrit « Navigation : Évaluation → Exporter et archiver », et une entrée d'OU-EN-EST-ON (1.131) écrit « Évaluation › Annoter et évaluer », au singulier ; les documents plus récents (22 sept., 2 oct.) disent « Évaluations » ; retenu : le pluriel (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver, 20 sept. 2026 ; INVENTAIRE-2026-10-02-1007, 2 oct. 2026).
+Nom de la section : « Évaluation », au singulier, comme « Conception » (décision de Grégoire, 13 oct. 2026) ; ses quatre onglets : « Liste des évaluations », « Préparer et importer », « Annoter et évaluer », « Exporter et archiver » (PORTES-TERRAIN-2026-09-22-reassigner-une-copie, 22 sept. 2026 ; INVENTAIRE-2026-10-02-1007-gestes-qui-suppriment, 2 oct. 2026 ; OU-EN-EST-ON, 16 et 21 sept. 2026).
 
-### Écran 43 · Évaluations (toute la section)
+### Écran 43 · Évaluation (toute la section)
 
 #### Sans geste
 
@@ -2019,7 +2017,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Les correctifs tarissent la source sans réécrire ce qui est déjà enregistré chez l'utilisateur (CLAUDE.md, « Tarir n'est pas réparer », 1er sept. 2026).
 - Avant d'effacer pour de bon une évaluation, une copie ou un autre élément, si le codex n'est pas à jour, la fenêtre « Mettre ton codex à jour avant de supprimer ? » vient d'abord : « Annuler », « Supprimer sans mettre à jour », « Mettre à jour, puis supprimer » ; codex à jour : rien ne change (DECISIONS-2026-10-02-1007-suppressions, § 8, 2 oct. 2026 ; changelog 1.176) (#1007).
 
-### Écran 44 · Évaluations › Liste des évaluations
+### Écran 44 · Évaluation › Liste des évaluations
 
 #### Geste : Lire et trier la liste
 
@@ -2027,12 +2025,11 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Sortie : la colonne « Note % » affiche la note arrondie au dixième (« 92.5% »), comme la note d'origine d'une reprise affichée à côté ; la note enregistrée ne change pas (changelog 1.124 ; OU-EN-EST-ON, 7 sept. 2026) (#776).
 - Sortie : avec le réglage « Masquer les notes par travail », la note chiffrée est remplacée par le repère « note différée » ; les niveaux restent visibles, aucun calcul n'est modifié (changelog 1.20).
 - Sortie : une évaluation enregistrée mais non verrouillée porte le badge « Non verrouillée », avec l'infobulle « Non verrouillée : ne compte pas encore dans la note. » (DECISIONS-2026-09-26-enregistrement, D1, 26 sept. 2026 ; DEMANDE-RELECTURE-2026-09-27-lot-C-evaluation, mots acceptés le 27 sept. 2026 ; changelog 1.162).
-- Sortie : le filtre Statut offre « Non verrouillée » ; son infobulle propose de filtrer par statut (« …annoté, évalué, non verrouillée (ne compte pas encore dans la note) ») ou par type de jeton (DEMANDE-RELECTURE-2026-09-27-lot-C-evaluation, mots acceptés le 27 sept. 2026).
+- Sortie : le filtre Statut offre « Non verrouillée » ; son infobulle propose de filtrer par statut (« …annotée, évaluée, non verrouillée (ne compte pas encore dans la note) ») ou par type de jeton (DEMANDE-RELECTURE-2026-09-27-lot-C-evaluation, mots acceptés le 27 sept. 2026).
+- Sortie : le filtre Statut offre, dans cet ordre : « Toutes », « Non reçue », « Reçue », « Importée », « Annotée », « Évaluée », « Non verrouillée », « Non évaluée », « Non associée », « Jeton de délai », « Jeton de reprise », « Jeton de reprise ciblée », « Tous les jetons », « Remplacée » ; les statuts s'accordent au féminin, comme production, évaluation et copie (décision de Grégoire, 13 oct. 2026, d'après la liste qu'il voit à l'écran).
 - Sortie : trier par DA, Nom ou Prénom change la flèche de la Liste elle-même, lisible en mode clair ; une reprise ciblée se classe avec les reprises (changelog 1.106).
 - Sortie : la mention « Fichier sous… » ne paraît que lorsqu'elle est la seule trace du fichier, jamais sur les travaux à venir (changelog 1.106).
 - Sortie : le menu « Actions » a la même largeur d'une ligne à l'autre ; sur iPad, le menu d'actions fait 44 px au doigt, sur Mac rien ne change (changelog 1.125, 1.106) (#568).
-- Contradiction : le badge et le filtre disaient « Non enregistrée » (changelog 1.151, 20 sept. 2026) ; D1 (26 sept. 2026) les renomme « Non verrouillée » ; retenu : « Non verrouillée ».
-- Contradiction : le réglage de la note différée est situé dans « Réglages › Préférences » (changelog 1.20 et 1.127) puis dans « Labo › Outils d'observation » (changelog 1.129, plus récent) ; retenu : Labo › Outils d'observation.
 
 #### Geste : Choisir « Évaluer » dans le menu « Actions… »
 
@@ -2073,7 +2070,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 #### Geste : Réassigner une sélection de copies en lot
 
 - Données : les copies cochées passent sous la production cible ; un fichier en conflit va à la corbeille (PORTES-TERRAIN-2026-09-22, Attendu 1.1) (#934).
-- Sortie : une case au début de chaque ligne qui porte une copie, aucune sur une ligne « Non reçu » ; « tout sélectionner » suit le filtre ; une barre « N copies sélectionnées · Réassigner la sélection (N) · Tout décocher » (PORTES-TERRAIN-2026-09-22, Attendu 1.1 et 2.2) (#934).
+- Sortie : une case au début de chaque ligne qui porte une copie, aucune sur une ligne « Non reçue » ; « tout sélectionner » suit le filtre ; une barre « N copies sélectionnées · Réassigner la sélection (N) · Tout décocher » (PORTES-TERRAIN-2026-09-22, Attendu 1.1 et 2.2) (#934).
 - Sortie : une seule question groupée compte les copies, nomme chaque élève avec le nom de son fichier, et un bloc « 1 conflit » nomme le fichier qui part à la corbeille et celui qui le remplace ; le bouton dit « Réassigner N copies » ; « Annuler » ne déplace rien (PORTES-TERRAIN-2026-09-22, Attendu 1.1 ; _ancienne-CONSIGNE-DU-JOUR-2026-09-22-reassigner-une-copie, décision de Cowork) (#934).
 - Sortie : après confirmation, la liste se rafraîchit, notification « N copies réassignées vers « … » » (PORTES-TERRAIN-2026-09-22, Attendu 1.1).
 - Sortie : sur l'iPad, chaque tape coche la bonne ligne du premier coup (PORTES-TERRAIN-2026-09-22, Attendu 2.2).
@@ -2096,7 +2093,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Sortie : la vue Corbeille a ses propres colonnes (Élève, Fichier, Production, Supprimé le, Expire dans, Actions) et nomme la production ; le choix des colonnes disparaît le temps qu'on y est (changelog 1.106).
 - Sortie : la question dit « Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production seront effacés. » quand une évaluation du couple existe ; sinon la question courte d'avant (changelog 1.111 ; BACKLOG #560, mots du 2 sept. 2026).
 - Sortie : en mode anonymisation, si les évaluations liées n'ont pas pu être retirées, l'écran le dit (BACKLOG #560, 29 août 2026).
-- Non tranché : quand d'autres fichiers du même couple restent (une reprise encore active), ils restent sans évaluation et la phrase ne le dit pas ; « décision à froid s'il le faut » (BACKLOG #560, 3 sept. 2026).
+- Sortie : quand d'autres fichiers du même couple restent (une reprise encore active), la question le dit : ils restent, mais sans évaluation (décision de Grégoire, 13 oct. 2026) (#560).
 
 #### Geste : Vider la corbeille
 
@@ -2107,18 +2104,18 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 #### Sans geste
 
 - Les copies d'un élève supprimé ne paraissent pas, et le compte « N résultat(s) » baisse d'autant ; rien n'est effacé (changelog 1.180 ; OU-EN-EST-ON, 4 oct. 2026) (#1013).
-- Un fichier dont le DA n'existe pas dans le groupe a sa ligne « Non associé » au lieu de disparaître ; l'infobulle « Étudiant·e introuvable » ne paraît jamais sur un élève inscrit (BACKLOG #612, 1er sept. 2026 ; OU-EN-EST-ON, « Importer des productions… »).
+- Un fichier dont le DA n'existe pas dans le groupe a sa ligne « Non associée » au lieu de disparaître ; l'infobulle « Étudiant·e introuvable » ne paraît jamais sur un élève inscrit (BACKLOG #612, 1er sept. 2026 ; OU-EN-EST-ON, « Importer des productions… »).
 - Si deux copies existent pour un même élève et une même production, le bandeau « fichiers multiples » les montre (OU-EN-EST-ON, 23 sept. 2026).
 - La corbeille garde un fichier 30 jours ; à la purge des 30 jours, ses annotations partent avec lui (PORTES-TERRAIN-2026-09-22, § 0.2 ; BACKLOG #572, 29 août 2026).
 - Un nom, un DA ou un titre piégé s'affiche dans la liste comme du texte, sans jamais agir sur la page (BACKLOG #562, 29 août 2026 ; CLAUDE.md, règle 1).
 
-### Écran 45 · Évaluations › Préparer et importer
+### Écran 45 · Évaluation › Préparer et importer
 
 #### Geste : Déposer des copies et lancer l'import
 
 - Données : chaque fichier entre comme copie de l'élève et de la production reconnus ; la file d'attente est retenue fichier par fichier, avec la production de chaque fichier, le mode d'import, la date et les réglages (PLAN-chaine-importation-travaux-2026-08-30, S4, critère de fin ; BACKLOG #558, 28 août 2026) (#610).
 - Sortie : sans groupe-cours actif, l'import est refusé et le refus est dit ; aucun fichier n'est écrit (PLAN-chaine-importation-travaux-2026-08-30, décision D2 = A, 30 août 2026 ; changelog 1.107) (#612).
-- Sortie : un numéro d'élève absent du groupe est annoncé avant l'import par le bandeau « DA sans élève dans ce groupe », et le fichier reste visible dans la liste après (« Non associé ») au lieu de disparaître (changelog 1.107 ; BACKLOG #612, 1er sept. 2026) (#612).
+- Sortie : un numéro d'élève absent du groupe est annoncé avant l'import par le bandeau « DA sans élève dans ce groupe », et le fichier reste visible dans la liste après (« Non associée ») au lieu de disparaître (changelog 1.107 ; BACKLOG #612, 1er sept. 2026) (#612).
 - Sortie : les bandeaux de la confirmation disent la conséquence réelle et le geste qui la lève ; le texte du bandeau « sans DA » est celui de Grégoire (BACKLOG #612, 1er sept. 2026).
 - Sortie : un import qui ne peut pas aboutir le dit et dit quoi faire ; il ne laisse jamais de fichiers invisibles (OBJECTIF-COHORTE-1, énoncé 3, 1er sept. 2026) (#612).
 - Sortie : le bouton « Renommer pour distinguer » n'est plus offert à la confirmation (PLAN-chaine-importation-travaux-2026-08-30, décision D3 = A, 30 août 2026) (#615).
@@ -2132,7 +2129,6 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Données : les pages numérotées à la fin du nom (« -p1 », « -p2 », « _p 2 », « page 2 », « partie 2 », « part2 », « (2) ») s'assemblent dans l'ordre ; une lettre finale (« Artefact_1a », « 1b ») crée une autre production (DECISIONS-2026-09-17-apres-midi, #878, texte validé le 17 sept. 2026 ; changelog 1.106).
 - Données : deux photos homonymes venues de deux appareils (deux élèves) ne sont jamais soudées : chaque élève reçoit SA copie (changelog 1.106 ; PORTES-TERRAIN-2026-08-30, Attendu 2.2) (#609).
 - Sortie : les photos ne sont plus annoncées comme doublons à renommer (changelog 1.142).
-- Contradiction : la décision D1 du 30 août 2026 voulait que deux remises d'un même élève à des dates différentes restent deux documents, doublon signalé (PLAN-chaine-importation-travaux-2026-08-30 ; changelog 1.106) ; elle est révisée le 15 sept. 2026 (clé = élève + production, tri à la main) (BACKLOG #609, #873) ; retenu : la révision du 15 sept.
 
 #### Geste : Résoudre un doublon à l'import (remplacer, ou appliquer un jeton de reprise)
 
@@ -2157,7 +2153,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 
 #### Geste : Modifier les pages d'une copie (éditeur de pages)
 
-- Données : non documenté.
+- Données : rien ne change avant « Enregistrer » ; ensuite, les pages retirées, déplacées ou tournées changent la copie elle-même, et une page retirée emporte ses annotations (décision de Grégoire, 13 oct. 2026).
 - Sortie : à « Enregistrer », si une page a été retirée et que le codex n'est pas à jour, le codex est proposé d'abord (_ancienne-CONSIGNE-DU-JOUR-2026-10-03-1007-2a-2, 3 oct. 2026 ; changelog 1.177) (#1007).
 - Sortie : une copie aux archives refuse l'édition : « Cette copie est aux archives : fais-la revenir avant de modifier ses pages. » ; une copie « manquante » garde son message d'erreur d'avant (DEMANDE-RELECTURE-2026-10-05-1028-archiver-copies, § 7 ; MOTS-2026-10-05-1028, supposition acceptée, 5 oct. 2026) (#1028).
 
@@ -2184,7 +2180,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - La production choisie, ou détectée d'après le nom du fichier, n'est pas perdue après un rechargement (changelog 1.20 ; BACKLOG #558).
 - L'ouverture du poste de préparation ne laisse tourner aucun compteur invisible (changelog 1.106).
 
-### Écran 46 · Évaluations › Annoter et évaluer
+### Écran 46 · Évaluation › Annoter et évaluer
 
 #### Geste : Ouvrir une copie dans la visionneuse
 
@@ -2240,6 +2236,17 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Données : les mesures du chronomètre sont propres à chaque trimestre, pas partagées avec les autres ni avec la démonstration (changelog 1.89).
 - Sortie : le chronomètre est dans la barre du haut, à droite, et non dans une palette sur la copie ; les boutons « pleine largeur » et « pleine hauteur » ont quitté cette barre, et la couleur du fond se choisit dans le menu Actions (changelog 1.155 ; RELAIS, 23 sept. 2026) (#937).
 - Sortie : son infobulle dit qu'il « s'arrête au verrouillage » (DEMANDE-RELECTURE-2026-09-27-lot-C-evaluation, § 5, mots acceptés le 27 sept. 2026).
+- Sortie : sur une copie à annoter, le chronomètre démarre à la première annotation ; sans copie, donc sans annotation, l'enseignant le lance lui-même (décision de Grégoire, 13 oct. 2026).
+
+#### Geste : Passer en mode côte à côte
+
+- Données : non documenté.
+- Sortie : deux copies s'affichent côte à côte, par exemple l'originale et sa reprise (décision de Grégoire, 13 oct. 2026 ; la visionneuse a quatre modes, « Annoter, Évaluer, Consulter, côte à côte », DEMANDE-RELECTURE-2026-10-05-1028-archiver-copies, § 2).
+
+#### Geste : Transférer une copie vers un autre groupe-cours (« Transférer »)
+
+- Données : la copie et son évaluation passent au groupe-cours choisi ; l'élève et la production restent les mêmes (décision de Grégoire, 13 oct. 2026 ; PLAN-932-933-934-reassocier-une-copie).
+- Sortie : un message nomme le groupe-cours d'arrivée (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : Attribuer les niveaux (holistique, analytique, algorithmique)
 
@@ -2275,8 +2282,8 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Données : le nombre d'erreurs, le nombre de mots, le statut d'intégrité et ses notes s'enregistrent tout seuls, comme les niveaux, sans autre geste avant de changer d'élève (DECISIONS-2026-09-26-enregistrement, D1 ; changelog 1.162).
 - Données : une évaluation « IA » ou « plagiat » ouverte depuis sa copie garde son statut et ses notes ; à l'élève suivant sans évaluation, le statut repart à « recevable » (changelog 1.160 ; OU-EN-EST-ON, 26 sept. 2026) (#959).
 - Sortie : « IA » posé avant tout niveau crée l'évaluation, non verrouillée (DEMANDE-RELECTURE-2026-09-27-lot-C-evaluation, § 1, relue verte).
-- Sortie : les anciens statuts de remise s'affichent « Évalué » / « Non reçu » (OU-EN-EST-ON, 26 sept. 2026).
-- Contradiction : D1 (26 sept. 2026) veut que le statut de remise s'enregistre aussi tout seul ; la phrase des Nouvelles acceptée le 27 sept. 2026 remplace « statut de remise » par « intégrité », aucun geste ne changeant ce statut à l'écran ; or le changelog 1.142 (15 sept.) dit « pour une non-remise, repasse-le à « Non reçu » » (DECISIONS-2026-09-26-enregistrement ; DEMANDE-RELECTURE-2026-09-27-lot-C, § 3 et § 5 ; changelog 1.142, 1.162).
+- Sortie : les anciens statuts de remise s'affichent « Évaluée » / « Non reçue » (OU-EN-EST-ON, 26 sept. 2026).
+- Données : l'enseignant peut repasser une remise à « Non reçue » ; ce statut s'enregistre tout seul, comme les niveaux (décision de Grégoire, 13 oct. 2026 ; changelog 1.142).
 
 #### Geste : Rédiger et régénérer la rétroaction
 
@@ -2327,7 +2334,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 
 #### Geste : Évaluer sans copie (formulaire sans copie)
 
-- Données : le statut part à « Reçu » (remis, non importé), et les critères s'ouvrent ; pour une non-remise, on le repasse à « Non reçu » (PLAN-2026-09-15-868, statut tranché par Grégoire ; changelog 1.142) (#868).
+- Données : le statut part à « Reçue » (remise, non importée), et les critères s'ouvrent ; pour une non-remise, on le repasse à « Non reçue » (PLAN-2026-09-15-868, statut tranché par Grégoire ; changelog 1.142) (#868).
 - Données : ce qu'on vient de saisir est enregistré avant de changer d'élève ; la production, la grille et l'échelle restent (changelog 1.146).
 - Sortie : le nom de l'élève et de la production en tête ; grille, échelle, cartouche, intégrité, jetons, critères, vues Générale / Spécifique / Bilan, « Copier tout », « Copier », le cadenas ; pas de tampons ni de codes, par nature (PLAN-2026-09-15-868, § 4 ; changelog 1.142) (#868).
 - Sortie : deux flèches en tête du formulaire, « ← Élève 3 de 24 → », qu'on arrive par « Évaluer » ou par « Consulter » (changelog 1.146 ; OU-EN-EST-ON, 18 sept. 2026).
@@ -2350,7 +2357,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - La portée de la note est relue à partir des critères, de la grille et de l'échelle de chaque évaluation déjà en base ; aucune note n'est réécrite (changelog 1.111 ; OU-EN-EST-ON, 2 sept. 2026) (#674).
 - Une évaluation dont un critère a quitté sa grille s'ouvre quand même, sans « Erreur de chargement » (changelog 1.142 ; _ancienne-CONSIGNE-DU-JOUR-2026-09-16-652-890-ouvrir-une-copie, 16 sept. 2026) (#652).
 
-### Écran 47 · Évaluations › Exporter et archiver
+### Écran 47 · Évaluation › Exporter et archiver
 
 #### Geste : Exporter des travaux (« Télécharger »)
 
@@ -2408,14 +2415,13 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Sortie : une copie aux archives se dit « aux archives », jamais « manquante » ; tout ce qui lit son fichier le dit sans planter ; un codex écrit ensuite ne prétend pas la contenir et n'ouvre pas de fenêtre de copies manquantes pour elle (_ancienne-CONSIGNE-DU-JOUR-2026-10-05-1028, point 4 ; changelog 1.186).
 - Sortie : « Dossier PDF » d'une copie aux archives : « Cette copie est aux archives : le dossier ne contient que la synthèse (note, grille, rétroaction). » (DEMANDE-RELECTURE-2026-10-05-1028, § 7 ; MOTS-2026-10-05-1028, autres textes acceptés).
 - Sortie : les mots ne promettent rien de visible des annotations d'une copie aux archives (MOTS-2026-10-05-1028, 5 oct. 2026).
-- Incertain : les vignettes des copies ne reviennent pas avec elles au « Faire revenir » (supposition non citée dans le verdict ; fiche ouverte pour les refaire) (DEMANDE-RELECTURE-2026-10-05-1028, § 3 ; BACKLOG #1026).
+- Données : au « Faire revenir », les copies reviennent avec leurs vignettes, refaites au besoin (décision de Grégoire, 13 oct. 2026) (#1026).
 
 #### Geste : Lire l'aide « Exporter et archiver les travaux »
 
 - Données : aucune.
 - Sortie : sous l'intertitre « Deux façons d'exporter », l'item « Exporter des travaux : les productions en PDF et les évaluations en JSON, dans un ZIP. Laisse « Toutes » et « Tous » pour l'archive de tout le groupe (…) » ; puis « Export Léa » (RELECTURE-2026-09-23-lot-895, texte validé le 23 sept. 2026).
 - Sortie : la fiche « i » s'intitule « Deux modes d'archivage » (RELECTURE-2026-09-23-lot-895).
-- Contradiction : l'aide validée le 20 sept. 2026 décrivait « Trois façons d'exporter » (Exporter des travaux, Trimestre complet, Export Léa) ; le lot du 23 sept. 2026 fusionne les deux premières ; retenu : deux façons (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver ; RELECTURE-2026-09-23-lot-895).
 
 #### Sans geste
 
@@ -2445,7 +2451,7 @@ Nom de la section : « Évaluations », au pluriel ; ses quatre onglets : « Lis
 - Sortie (ce qu'il ne contient pas) : la note privée d'intégrité ; l'avis « critère ajouté depuis » ; le texte d'exemple d'un gabarit de rétroaction (OU-EN-EST-ON, 17 et 19 sept. 2026 ; changelog 1.106) (#912, #705).
 - Sortie (ce qu'il ne contient pas) : en mode anonymisation, ni nom ni DA : « Élève 32 » et le groupe ; le texte libre des rétroactions est anonymisé (changelog 1.159, 1.106 ; BACKLOG #566) (#566, #950).
 - Sortie (note incomplète) : pas de bandeau « Niveau général » ; une phrase nomme les critères en attente, « reste à évaluer » disant à qui revient le geste ; l'export l'annonce à l'enseignant avant la remise (changelog 1.111 ; OU-EN-EST-ON, 2 sept. 2026) (#674).
-- Contradiction : la phrase est « Cette copie n'a pas de niveau général : Langue (20 %) reste à évaluer. » (changelog 1.111 ; OU-EN-EST-ON, 2 sept. 2026 en soirée) ou « Cette copie n'a pas de note ni de niveau général : Langue (20 %) reste à évaluer. » (OU-EN-EST-ON, même section, « variante C, augmentée », passage de clôture du 2 sept. 2026, plus tardif) ; retenu : la variante C augmentée.
+- Sortie (note incomplète) : la phrase est « Cette copie n'a pas de note ni de niveau général : ‹critère› (‹pondération›) reste à évaluer. » (OU-EN-EST-ON, variante C augmentée, 2 sept. 2026 ; décision de Grégoire, 13 oct. 2026) (#674).
 - Sortie (grille en points) : « Note de la copie : 74 % » en tête du bloc « Niveau général », aucun nom de niveau, note cumulée marquée provisoire (DECISIONS-2026-09-24-parcours-sommatif, D1 et D4) (#941).
 - Sortie (lisibilité) : le texte reste lisible sur les couleurs claires de l'échelle (le contraste choisit l'encre ou le papier) ; les tailles du document ne changent pas, par décision de Grégoire, jusqu'aux retours de la communauté de pratique de l'automne (BACKLOG #571, 28 août 2026) (#571).
 
@@ -2501,7 +2507,7 @@ Les onglets de Suivi :
 - Une présence de rattrapage (intervention) ne compense une absence au cours que si l'enseignant le choisit en marquant l'intervention complétée (changelog 1.167 ; décision de Grégoire, 7 sept. 2026 : « C'est l'enseignant qui juge si un rattrapage reprend une absence », BACKLOG #747).
 - Une présence d'intervention seule ne rend pas une séance « saisie » pour le reste du sous-groupe (décision de Grégoire « Corriger dans ce lot », 27 sept. 2026, DEMANDE-RELECTURE-2026-09-27-lot-D-presences).
 - C (complétion) mesure ce que l'élève remet de ce qui est demandé : un travail formatif compte, un travail facultatif sort du compte (décision de Grégoire, 11 oct. 2026, 8 h 18, BACKLOG #727).
-- C mesure la remise, pas la note : un 0 inscrit, un « Non remis » ou un « Non reçu » n'est jamais un travail remis, sous aucune pratique (CADRAGE-2026-09-16-regles-du-depistage, critères du lot A ; changelog 1.142).
+- C mesure la remise, pas la note : un 0 inscrit, une copie « Non remise » ou « Non reçue » n'est jamais un travail remis, sous aucune pratique (CADRAGE-2026-09-16-regles-du-depistage, critères du lot A ; changelog 1.142).
 - C'est la case « Consignes transmises » seule qui décide qu'une production est due pour la complétion et la performance (changelog 1.153).
 - Contradiction : le changelog 1.94 dit qu'une production sans échéance n'entre ni dans C ni dans P ; le changelog 1.153 (21 sept. 2026, plus récent) dit que la case « Consignes transmises » seule décide qu'une production est due. Retenu : 1.153.
 - P (performance) est la note du cours calculée par la pratique assignée au groupe-cours (« Performance : 77% (note du cours) ») (changelog 1.123 ; phrase validée par Grégoire, 5 sept. 2026).
@@ -2690,7 +2696,7 @@ Les onglets de Suivi :
 
 #### Geste : cliquer la vignette d'un travail (« Travaux soumis »)
 
-- Sortie : la section Évaluations s'affiche, puis la copie s'ouvre ; jamais une page vide (changelog 1.123).
+- Sortie : la section Évaluation s'affiche, puis la copie s'ouvre ; jamais une page vide (changelog 1.123).
 
 #### Geste : télécharger le ZIP des travaux de l'élève
 
@@ -2856,7 +2862,7 @@ Où vit le dépistage, d'après les documents : il se RÈGLE dans Labo › Outil
 - Le suivi des fondations ne surveille que les critères multistructurels (les fondations), pas ceux qui visent le relationnel ou l'abstrait étendu (PLAN-SOLO-echelle-et-depistage D1, 26 août 2026).
 - Un critère réglé « Aucun » compte dans la note seulement : pas de barre, pas de défi, pas de cible d'intervention, pas de surveillance des fondations (changelog 1.117 ; changelog 1.142, tranché 16 sept. 2026) (#740).
 - Un critère noté en points est lu à sa note (22/30 = 73 %), comme les courbes ; barres, persistance des fondations et défi disent le même chiffre (changelog 1.142, tranché 16 sept. 2026) (#739).
-- Note, complétion, rapport, dépistage et carte RàI lisent les mêmes copies : une copie enregistrée compte, avec ou sans commentaire final ; un brouillon ne compte nulle part ; un travail « Non reçu » n'entre jamais dans la complétion (changelog 1.142, tranché 16 sept. 2026) (#737, #741, #738).
+- Note, complétion, rapport, dépistage et carte RàI lisent les mêmes copies : une copie enregistrée compte, avec ou sans commentaire final ; un brouillon ne compte nulle part ; une copie « Non reçue » n'entre jamais dans la complétion (changelog 1.142, tranché 16 sept. 2026) (#737, #741, #738).
 - Une reprise remplace l'originale dans le dépistage aussi (fondations, performance du RàI, moyennes par critère, défi principal) (changelog 1.123) (#730).
 - Le critère de langue est un critère comme un autre : aucun statut propre, aucune désignation par l'utilisateur (CONSIGNE-552, décision de Grégoire du 27 août 2026).
 - Un critère dont le nom commence par « Français » figure dans forces et défis ; s'il est le plus faible, il devient le défi principal et la cible ; deux critères de français ont chacun leur valeur (changelog 1.152).
@@ -3536,7 +3542,7 @@ Règles qui valent pour toutes les archives :
 
 #### Geste : Export pour Léa
 
-- Incertain : les documents placent l'export Léa dans Évaluations › Exporter et archiver (carte « Export Léa »), pas dans les Réglages (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver, 20 sept. 2026).
+- Incertain : les documents placent l'export Léa dans Évaluation › Exporter et archiver (carte « Export Léa »), pas dans les Réglages (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver, 20 sept. 2026).
 - Sortie : la copie annotée et son évaluation (note et rétroaction) en un PDF prêt à téléverser dans Léa (_ancienne-CONSIGNE-DU-JOUR-2026-09-20-aide-exporter-archiver, 20 sept. 2026).
 - Sortie : en anonymisation, le PDF se nomme « Élève 32_Artefact-2_Evalue.pdf » et sa page de rétroaction n'affiche que « Élève 32 » et le groupe (changelog 1.159).
 - Sortie : le compteur annonce le nombre de PDF réellement produits ; un élève supprimé en est écarté ; une note en ,5 s'arrondit vers le haut (changelog 1.106 ; changelog 1.180 ; changelog 1.152).
@@ -3624,8 +3630,8 @@ Chaque analyste a noté ce qu'il croisait hors de sa zone. Ces lignes sont des r
 - « Corriger le DA… » dans la fiche d'un·e étudiant·e, qui propose le codex avant (partie 2) (DECISIONS-2026-10-05-chantier-enregistrement, #976)
 - Les noms du matériel semé et leur renommage dans les bases déjà ouvertes, décision de Grégoire en attente (Conception) (BACKLOG #682)
 - Le mode anonymisation : tout s'enregistre, seuls les noms et ce qui identifie sont cachés (zone non déterminée) (DECISIONS-2026-09-26-enregistrement D5)
-- Les boutons qui nomment le geste (« Verrouiller l'évaluation », « Confirmer la séance », « Créer la grille »…) et l'avertissement avant de quitter une création (Évaluations, Suivi, Conception, Cadre) (DECISIONS-2026-09-26-enregistrement D1 à D3)
-- En démo : l'écran d'import dit « Rangement : dans le navigateur » ; le DA de démo lu à l'import ; le dépistage et les évaluations de la démo (Évaluations, Suivi) (_ancienne-CONSIGNE-DU-JOUR-2026-10-07-demo-t3-t6 §5 ; RELAIS, T1 et T5, 6 oct. 2026 ; changelog 1.131)
+- Les boutons qui nomment le geste (« Verrouiller l'évaluation », « Confirmer la séance », « Créer la grille »…) et l'avertissement avant de quitter une création (Évaluation, Suivi, Conception, Cadre) (DECISIONS-2026-09-26-enregistrement D1 à D3)
+- En démo : l'écran d'import dit « Rangement : dans le navigateur » ; le DA de démo lu à l'import ; le dépistage et les évaluations de la démo (Évaluation, Suivi) (_ancienne-CONSIGNE-DU-JOUR-2026-10-07-demo-t3-t6 §5 ; RELAIS, T1 et T5, 6 oct. 2026 ; changelog 1.131)
 - Suivi › Rencontres, où mène la carte de l'orthopédagogue, et la barre de Suivi qui suit le contexte (Suivi) (PORTES-TERRAIN-2026-09-12-accueil)
 
 **Notés par l'analyste « Cadre »**
@@ -3638,7 +3644,7 @@ Chaque analyste a noté ce qu'il croisait hors de sa zone. Ces lignes sont des r
 - « Appliquer au cours actif » une pratique de notation (changelog 1.123) ; Conception.
 - « Ouvrir un Codex… » et l'import par cases qui écarte un élève supprimé (« 1 élève que tu avais supprimé n'a pas été ramené. ») (changelog 1.174 ; _ancienne-CONSIGNE-DU-JOUR-2026-10-02-1012-mots) ; partie 1.
 - « Réinitialiser toutes les données », qui exige aussi un codex à part (DECISIONS-2026-10-02-1007, § 5) ; parties 8 et 9.
-- Une copie « Aux archives » ouverte dans l'évaluation (MOTS-2026-10-05-1028-archiver-copies) ; Évaluations.
+- Une copie « Aux archives » ouverte dans l'évaluation (MOTS-2026-10-05-1028-archiver-copies) ; Évaluation.
 - Le statut d'un élève (décrochage, abandon) lu dans Suivi › Liste et au profil (changelog 1.132, 1.142) ; Suivi.
 - Le volet confidentiel du profil, qui suit la case SA (changelog 1.134) ; Suivi (profil).
 - La barre A du Suivi du groupe qui renvoie à Cadre › Trimestre › Horaire quand aucune séance ne porte ses périodes (changelog 1.156) ; Suivi.
@@ -3678,7 +3684,7 @@ Chaque analyste a noté ce qu'il croisait hors de sa zone. Ces lignes sont des r
 - Avant d'effacer une cartouche, une pratique ou un autre élément, proposer de mettre le codex à jour (codex) (changelog 1.176)
 - Une note finale en ,5 s'arrondit vers le haut (calcul et exports) (changelog 1.152)
 
-**Notés par l'analyste « Évaluations »**
+**Notés par l'analyste « Évaluation »**
 
 - Une grille dont les pondérations ne font pas 100 % le signale, sans bloquer (Conception, partie 3) (changelog 1.199 ; BACKLOG #483).
 - Cases de la grille : « Utiliser ces sous-critères comme codes d'annotation », carte « Bilan », modèle « Français écrit » / « Générique », jeton « {service} » du service d’aide (parties 3 et 4) (CADRAGE-2026-09-05-carte-bilan ; changelog 1.114, 1.119, 1.120 ; OU-EN-EST-ON, 2 sept. 2026).
@@ -3733,8 +3739,8 @@ Chaque analyste a noté ce qu'il croisait hors de sa zone. Ces lignes sont des r
 - Le codex lui-même : mise à jour, ouverture, fenêtre « Ce codex n'aura pas toutes tes copies », bilan d'ouverture incomplète, fenêtre d'ouverture complète, rappel : partie 1 (OU-EN-EST-ON, 1er et 2 oct. 2026).
 - La fenêtre « Mettre ton codex à jour avant de supprimer ? » sur les gestes de Conception et d'Évaluation : parties 3 et 4 (changelog 1.176 à 1.178).
 - Supprimer un groupe-cours, « Supprimer un groupe… », « Vider la liste » (codex à part exigé) : Cadre (DECISIONS-2026-10-02-1007 §5).
-- Exporter des travaux, « Proposer un nettoyage », l'aide « Exporter et archiver » : Évaluations (changelog 1.151, 1.156, 1.159).
-- La corbeille des copies et sa portée de suppression : Évaluations (OU-EN-EST-ON, section « Ce qu'un utilisateur détruit… », 3 sept. 2026).
+- Exporter des travaux, « Proposer un nettoyage », l'aide « Exporter et archiver » : Évaluation (changelog 1.151, 1.156, 1.159).
+- La corbeille des copies et sa portée de suppression : Évaluation (OU-EN-EST-ON, section « Ce qu'un utilisateur détruit… », 3 sept. 2026).
 - Supprimer une cartouche, remplacer une échelle : Conception (OU-EN-EST-ON, section « Ce qu'un utilisateur détruit… », 3 sept. 2026).
 - « Exporter pour partager » et « Supprimer » dans « Partagés par des collègues » des bibliothèques : partie 4 (changelog 1.96, 1.97).
 - La bannière « Gérer mes maquettes » de Conception › Pratiques de notation : partie 4 (RELAIS-326-reactivation-comparateur, 28 juin 2026).
