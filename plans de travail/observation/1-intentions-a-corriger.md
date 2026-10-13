@@ -141,7 +141,6 @@
 - Recherches non faites : SESSION.md pour les Évaluations, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 2 : l'export de la liste d'élèves ; la duplication d'un cours ; ce que fait l'ouverture d'un trimestre depuis la bibliothèque ; la liste des options du menu « Remarque ».
 - Partie 3 : ce que la suppression d'une production fait aux données.
 - Partie 4 : les plus anciennes fonctions de la carte d'alignement ne sont attestées que par le changelog ; aucune réponse trouvée aux choix 3.1 à 3.4 de l'import de cartouches d'un autre trimestre, ni de livraison pour la comparaison côte à côte des doublons.
 - Partie 5 : l'éditeur de pages ; le départ du chronomètre ; le mode côte à côte ; « Transférer » ; la liste complète des filtres de la Liste des évaluations.
@@ -555,7 +554,6 @@
 
 Le nom de la section :
 - La section s'appelle « Cadre » ; elle s'appelait « Calendrier » jusqu'au 27 mai 2026, date où elle a été renommée et la navigation réordonnée (Accueil, Cadre, Conception, Évaluation, Suivi, Labo) (SESSION, 27 mai 2026 ; CADRAGE-guides-pedagogiques-post-AQPC).
-- Contradiction : des documents postérieurs gardent l'ancien nom ou un autre : « Calendrier › Trimestre » (AUDIT-cadre-trimestre-2026-08-20 ; PORTES-TERRAIN-2026-08-21-cadre-CT04-CT09, 21 août 2026), « Calendrier › Cadre » (changelog 1.123), « Réglages › Trimestre » (PORTES-TERRAIN-2026-10-03-1007-codex-a-part, 3 oct. 2026) ; la navigation dit « Cadre » (MESURE-2026-10-08-barre-carte-alignement, 8 oct. 2026).
 - Cadre › Trimestre réunit six accordéons (Trimestre, Groupe d'étudiant·es, Cours et services, Enseignant·e, Horaire, Groupe-cours) ; le bouton « + Nouveau… » y occupe la même place dans les six (PLAN-UNIFORMISATION-ASSEMBLAGE-GROUPE-COURS, 29 mai 2026 ; OU-EN-EST-ON, 1.142.6, 16 sept. 2026).
 
 ### Écran 16 · Cadre (règles communes à toute la section)
@@ -577,7 +575,6 @@ Le nom de la section :
 #### Sans geste
 
 - Le parcours de la chronique 1 (créer un trimestre, créer un groupe-cours, puis prendre les présences) va au bout sans message d'erreur, sans alerte système, sans écran vide inexpliqué (OBJECTIF-COHORTE-1, énoncé 1, arrêté le 1er sept. 2026).
-- Incertain : ce parcours est dit « éprouvé » par Grégoire, mais des fenêtres d'alerte bloquantes y restent, et la fiche qui les porte est ouverte (OU-EN-EST-ON, section « Créer un trimestre, créer un groupe-cours, prendre les présences » ; BACKLOG #678).
 - Ouvrir l'application n'écrit rien dans la liste des cours ni dans la liste des trimestres (BACKLOG #981, 7 oct. 2026 ; DEMANDE-RELECTURE-2026-10-11-lot8-cadre, 11 oct. 2026).
 - Les noms venus d'un import (horaires, profils, locaux de séance) s'affichent tels qu'écrits, même avec des caractères spéciaux (changelog 1.91 ; PORTES-TERRAIN-2026-08-21-cadre-CT04-CT09, 2.4 à 2.6).
 - Sur iPad en portrait, les formulaires à deux colonnes (le groupe-cours) s'empilent, l'étiquette au-dessus du champ (changelog 1.119).
@@ -594,7 +591,6 @@ Le nom de la section :
 - Sortie : aucune petite fenêtre à remplir ni alerte ; « Annuler », à côté de « Créer le trimestre », ne crée rien et ramène la fiche du trimestre actif (changelog 1.188).
 - Sortie : refus par le témoin : « choisis la session et l'année du trimestre ; elles déterminent où ses données sont rangées. » ; « le trimestre « … » existe déjà ; active-le depuis la bibliothèque des trimestres. » (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6).
 - Sortie : « Trimestre « … » créé. » (idem).
-- Contradiction : le 13 sept. 2026, créer passait par deux questions (session, année) et finissait par « Trimestre "Automne 2026" créé avec succès ! » (PORTES-TERRAIN-2026-09-13-478-parcours-rentree, 2.1) ; depuis le 7 oct. 2026, par la fiche du Cadre, sans fenêtre (changelog 1.188). Retenu : 7 oct.
 
 #### Geste : modifier le nom, la session ou l'année du trimestre
 
@@ -603,7 +599,6 @@ Le nom de la section :
 - Données : sur un trimestre vide, changer la session garde l'année ; passer d'Automne 2026 à Hiver 2027 écrit d'abord Hiver 2026 ; si Hiver 2026 existe, il faut changer l'année d'abord (PORTES-TERRAIN-2026-09-28-lot-E2, § 4, limite gardée sur décision de Cowork).
 - Sortie : un refus se dit par le témoin (« Non enregistré », l'identification du trimestre et la raison), les champs reviennent à leur valeur enregistrée, et aucun succès ne suit (D3 ; DEMANDE-RELECTURE-2026-09-28-lot-E2, § 2).
 - Sortie : corriger la session après avoir saisi les dates donne « Changement bloqué », et le témoin dit quoi faire (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 5, piège « dates d'abord » gardé).
-- Contradiction : le 29 mai 2026, Grégoire avait acté « Trimestre → save explicite » (le bouton seul enregistre) (PLAN-UNIFORMISATION-ASSEMBLAGE-GROUPE-COURS) ; D3, le 26 sept. 2026, met la fiche en enregistrement champ par champ. Retenu : D3.
 
 #### Geste : saisir ou modifier les dates du trimestre (bornes et semaines spéciales)
 
@@ -651,7 +646,7 @@ Le nom de la section :
 - Les semaines se numérotent par paquets de cinq jours de cours effectifs, depuis le premier jour du trimestre, sans jour de bascule écrit d'avance (« Il ne faut pas coder en dur ma pratique ») ; une reprise ne change pas la numérotation (décision de Grégoire, 4 août 2026, _archives/RELAIS-cadre-trimestre-2026-08-04 ; clos 5 août, 1.31.1).
 - Les semaines du trimestre se comptent au calendrier, pas au nombre supposé de quinze (changelog 1.102).
 - Aucune échéance de production ne se déplace d'elle-même quand le calendrier change : l'utilisateur fait les changements à la main (décision de Grégoire, 4 août 2026, _archives/RELAIS-cadre-trimestre-2026-08-04).
-- Non tranché : signaler, sans la déplacer, une production accrochée à une semaine qui a changé après un nouveau calendrier de la direction des études (idem ; BACKLOG #378).
+- Sortie : quand un nouveau calendrier change la semaine d'une production, l'application le signale, sans déplacer l'échéance (décision de Grégoire, 13 oct. 2026) (#378).
 
 ### Écran 18 · Cadre › Trimestre › Bibliothèque (la bibliothèque des trimestres)
 
@@ -660,12 +655,11 @@ Le nom de la section :
 - Sortie : une carte par trimestre ; badge « Actif » sur le trimestre actif ; badge « Clos » et section « Trimestres clos » (OU-EN-EST-ON, 1.182.0).
 - Sortie : la carte du trimestre actif n'a pas de menu ⋮ (changelog 1.199 ; BACKLOG #1018).
 - Sortie : bibliothèque vide : « Aucun trimestre dans la bibliothèque. » et « Clique sur « + Nouveau trimestre » pour en créer un. » (décision de Grégoire, 11 oct. 2026, 18 h 02, CONSIGNE-DU-JOUR).
-- Contradiction : la demande de relecture du lot 17 (11 oct. 2026, 16 h 51) gardait « Cliquez sur "+ Nouveau trimestre" pour en créer un. » ; la décision de Grégoire du même jour, 18 h 02, la remplace (DEMANDE-RELECTURE-2026-10-11-lot17-fenetres ; CONSIGNE-DU-JOUR). Retenu : 18 h 02.
 - Sortie : aucun bouton « Exporter les données » (décision de Cowork, BACKLOG #1006 clos ; VERDICT-RELECTURE-2026-10-04-e1-archiver-trimestre).
 
 #### Geste : ouvrir un trimestre depuis la bibliothèque
 
-- Données : non documenté au-delà du changement de trimestre actif.
+- Données : ouvrir un trimestre depuis la bibliothèque fait exactement ce que fait le menu « Trimestre actif » : il devient actif, et un trimestre clos s'ouvre en lecture seule (décision de Grégoire, 13 oct. 2026).
 - Sortie : plusieurs messages y renvoient (« active-le depuis la bibliothèque des trimestres », « ouvre-le depuis la bibliothèque des trimestres ») (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6 ; OU-EN-EST-ON, 1.184.0).
 
 #### Geste : clore un trimestre
@@ -674,9 +668,8 @@ Le nom de la section :
 - Sortie : la question « Clore le trimestre « … » ? » dit qu'un trimestre clos passe en lecture seule, et que « Rouvrir » le rend modifiable (MESURE-2026-09-30-archives, table des textes ; changelog 1.182).
 - Sortie : aucun fichier n'est téléchargé ; un refus dit son motif, jamais « undefined » (changelog 1.182 ; OU-EN-EST-ON, 1.182.0).
 - Sortie : l'aide « Qu'est-ce que clore un trimestre ? » dit « Clore ne libère aucun espace » (OU-EN-EST-ON, 1.182.0).
-- Sortie : « Clore » n'est pas offert sur le trimestre actif (changelog 1.199 ; BACKLOG #1018).
 - Sortie : « Clore » et « Rouvrir » parlent encore par les fenêtres du navigateur, tant que dure le moratoire de l'archivage (DEMANDE-RELECTURE-2026-10-11-lot17-fenetres ; BACKLOG #1037).
-- Contradiction : la Nouvelle de 1.199 dit « Clore » retiré du « trimestre en cours » ; la demande de relecture du lot 8 et la fiche disent « trimestre actif », et ailleurs « en cours » désigne un trimestre ni clos ni archivé (changelog 1.199 ; DEMANDE-RELECTURE-2026-10-11-lot8-cadre ; BACKLOG #1018 ; PLAN-2026-10-04-emprunter-et-rendre-un-trimestre).
+- Sortie : « Clore » n'est pas offert sur le trimestre actif, celui qu'on a choisi ; il l'est sur les autres trimestres en cours (DEMANDE-RELECTURE-2026-10-11-lot8-cadre ; BACKLOG #1018 ; décision de Grégoire, 13 oct. 2026).
 
 #### Geste : rouvrir un trimestre clos
 
@@ -693,8 +686,7 @@ Le nom de la section :
 - Sortie : le fichier proposé s'appelle « codex-‹nom›-avant-suppression-‹date›-‹heure›.zip » ; notification « Codex à part écrit » avec son nom (idem, 1.7 et 1.8).
 - Sortie : puis, dans les fenêtres de l'application : « Supprimer définitivement le trimestre « X » ? » (« Toutes ses données seront effacées : étudiant·es, évaluations, présences, productions, captures et modèles. », bouton « Supprimer ») ; puis « Confirmation finale : cette action est irréversible. » (« Pour supprimer « X » et toutes ses données, retape son nom exactement : », bouton « Supprimer ») ; puis la notification « Trimestre « X » supprimé (N clés…) » (décision de Grégoire, 11 oct. 2026, 18 h 02, CONSIGNE-DU-JOUR ; changelog 1.199).
 - Sortie : quand la mémoire du navigateur est pleine, le message renvoie à Cadre › Trimestre › Bibliothèque, « Supprimer… » (OU-EN-EST-ON, 1.161.0).
-- Incertain : les fichiers des copies du trimestre doivent partir avec lui (« ses copies », INVENTAIRE-2026-10-02-1007, X1) ; la correction est décidée pour la source, pas encore livrée pour ce geste (BACKLOG #1019, 4 oct. 2026).
-- Contradiction : en juillet, la suppression faisait un « export de sauvegarde automatique avant l'effacement » (changelog 1.27) ; le 1er oct., elle demandait un codex à jour (changelog 1.173) ; depuis le 3 oct., elle écrit un codex à part (changelog 1.175). Retenu : le codex à part.
+- Données : les fichiers des copies du trimestre partent avec lui (INVENTAIRE-2026-10-02-1007-gestes-qui-suppriment, X1 ; BACKLOG #1019, 4 oct. 2026).
 - Sortie : le refus « codex pas à jour » disparaît, ainsi que la phrase « Ton codex à jour les contient encore… fais d'abord une copie de ce fichier. » (DECISIONS-2026-10-02-1007-suppressions §7, tranché par Cowork, dit à Grégoire).
 - Sortie : tout se fait dans les fenêtres de l'application, pas dans celles du navigateur (changelog 1.199) (#1037).
 
@@ -750,7 +742,6 @@ Le nom de la section :
 - Données : l'élève rejoint le cours de l'entrée affichée au menu « Groupe » ; sous « Tous les groupes », le cours actif (OU-EN-EST-ON, 1.149.0, suppositions validées par Grégoire le 19 sept. 2026).
 - Sortie : au-dessus du formulaire, « Sera rattaché·e à : ‹cours› » (OU-EN-EST-ON, 1.148.0 et 1.149.0).
 - Sortie : refus par le témoin : « le nom et le prénom sont obligatoires. » ; « le DA est manquant : c'est celui du collège, sept chiffres, rien d'autre. » (ou « invalide ») ; « ce DA est déjà dans le groupe : ‹nom›. » ; la saisie reste dans le formulaire (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6 ; OU-EN-EST-ON, 1.147.2).
-- Contradiction : le 19 sept. 2026, le refus avait pour titre « DA manquant » ou « DA invalide » et disait « Le DA est celui du collège : sept chiffres, rien d'autre. Rien n'a été enregistré. » (OU-EN-EST-ON, 1.147.2) ; le 28 sept., il passe au témoin avec la phrase ci-dessus (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6). Retenu : 28 sept.
 - Sortie : le champ DA porte l'astérisque ; l'iPad ouvre le clavier des chiffres (OU-EN-EST-ON, 1.147.2).
 - Sortie : « Étudiant·e « … » ajouté·e. » ; un groupe qui reçoit son premier élève paraît aussitôt dans « Groupe associé » d'un horaire ouvert et à l'étape 3 du groupe-cours (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6 ; PORTES-TERRAIN-2026-09-13-478, 2.4 ; changelog 1.142).
 
@@ -764,7 +755,6 @@ Le nom de la section :
 - Données : la case « Services adaptés » (SA) de la liste commande le volet confidentiel (changelog 1.134).
 - Données : un champ facultatif « Date d'arrivée » : l'assiduité se compte à partir de cette date, les séances d'avant ne sont pas des absences ; effacer la date la retire (changelog 1.147 ; OU-EN-EST-ON, 1.147.0).
 - Sortie : sous le DA : « Le DA relie les évaluations et les présences de l'étudiant·e. Pour corriger une coquille, utilise « Corriger le DA… » : ses données suivent. » (décision de Grégoire, 8 oct. 2026, _ancienne-CONSIGNE-DU-JOUR-2026-10-08-enregistrement-lot-7-976).
-- Contradiction : le 28 sept. 2026, la phrase était « Le DA ne se modifie pas ici : il relie les évaluations et les présences de l'étudiant·e. » (PORTES-TERRAIN-2026-09-28-lot-E2, § 1). Retenu : 8 oct.
 - Sortie : « Rattaché·e à : ‹cours de la fiche› » ou « Rattaché·e à aucun cours. » (OU-EN-EST-ON, 1.149.0).
 - Sortie : « Fermer » ramène au formulaire d'ajout (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 4).
 
@@ -778,8 +768,9 @@ Le nom de la section :
 
 #### Geste : poser une remarque sur un·e élève (menu « Remarque »)
 
-- Données : la remarque (décrochage, inactivité, réactivation) s'écrit sur la fiche ; « Aucune » efface le statut ; l'élève reste dans la liste (_ancienne-CONSIGNE-DU-JOUR-2026-09-19-phrases-assiduite-inconnue, § 1 bis ; DEMANDE-RELECTURE-2026-10-02-1012-eleve-desinscrit).
+- Données : la remarque (décrochage, inactivité) s'écrit sur la fiche ; « Aucune » efface le statut ; l'élève reste dans la liste (_ancienne-CONSIGNE-DU-JOUR-2026-09-19-phrases-assiduite-inconnue, § 1 bis ; DEMANDE-RELECTURE-2026-10-02-1012-eleve-desinscrit).
 - Sortie : l'option vide de « Remarque » dit « Aucune », celle d'« Action » dit « Choisir… » (mots validés par Grégoire, 19 sept. 2026, OU-EN-EST-ON, 1.147.1).
+- Sortie : le menu « Remarque » offre exactement trois choix : « Aucune », « Décrochage », « Inactivité » (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : supprimer un·e élève (menu « Action », « Supprimer »)
 
@@ -806,7 +797,6 @@ Le nom de la section :
 - Données : un codex à part est écrit avant, comme pour un trimestre (décision de Grégoire, 2 oct. 2026, DECISIONS-2026-10-02-1007, § 5 et 6 ; changelog 1.175).
 - Sortie : le bouton devient « Supprimer le groupe ‹numéro› » quand un groupe est choisi ; sans groupe choisi, il renvoie au menu et ne supprime rien (OU-EN-EST-ON, 1.142.12).
 - Sortie : la fenêtre du codex à part commence par « Supprimer le groupe « ‹libellé› » efface pour de bon ses ‹n› étudiant·es. » ; la question nomme le groupe par son libellé et dit « irréversible » (DEMANDE-RELECTURE-2026-10-02-1007-codex-a-part, § 5, mots acceptés le 3 oct. 2026 ; OU-EN-EST-ON, 1.149.0).
-- Contradiction : le 16 sept. 2026, la question ajoutait « répartis dans N cours » quand le numéro existait dans plusieurs cours (OU-EN-EST-ON, 1.142.12) ; depuis le 19 sept., la mention a disparu (OU-EN-EST-ON, 1.149.0). Retenu : 19 sept.
 
 #### Geste : vider la liste (« Vider la liste »)
 
@@ -827,12 +817,11 @@ Le nom de la section :
 
 #### Geste : exporter la liste
 
-- Données et sortie : non documenté (seul est dit qu'une liste exportée se réimporte sans élève fantôme, changelog 1.142).
+- Données : rien n'est écrit. Sortie : un fichier de la liste du groupe affiché, avec les colonnes du tableau (DA, groupe, nom, prénom, SA, remarque), qui se réimporte tel quel, sans élève fantôme (décision de Grégoire, 13 oct. 2026 ; changelog 1.142).
 
 #### Sans geste
 
 - En mode anonymisation, la liste affiche les pseudonymes ; l'identité (DA, nom, prénom) n'est pas modifiable, le reste (programme, SA, groupe, date d'arrivée) se modifie et s'enregistre ; les messages de la fiche disent le pseudonyme ; l'import montre les noms collés, et un ajout laisse taper le vrai nom (décision D5 de Grégoire, 26 sept. 2026 ; DEMANDE-RELECTURE-2026-09-26-lot-A-anonymisation, § 2 et § 3).
-- Contradiction : le 14 sept. 2026, « Modifier » et « Supprimer » étaient refusés en anonymisation, avec un message qui demandait de repasser en mode normal (changelog 1.140 ; OU-EN-EST-ON, 1.140.9) ; depuis D5 (26 sept.), on travaille normalement et seule l'identité est masquée. Retenu : D5.
 - Le tableau porte les colonnes DA, Grp, Nom, Prénom, SA, Action, Remarque ; son en-tête se lit en mode clair, blanc sur bleu foncé (OU-EN-EST-ON, 1.147.1).
 
 ### Écran 20 · Cadre › Trimestre › Cours et services (et la Bibliothèque de cours)
@@ -855,11 +844,11 @@ Le nom de la section :
 - Sortie : l'horaire saisi est confronté au devis du cours et l'écart est dit, sans jamais bloquer (changelog 1.102 ; BACKLOG #540).
 - Sortie : sur un service, le formulaire dit « Modifier le service », « Nouveau service » dès que « Nature » bascule, « Aucun service sélectionné », « Service : » et « Sélectionner un service... » ; sur un cours, il redit cours (changelog 1.137 ; décision 3.3 « tel quel », 12 sept. 2026).
 - Sortie : enregistrer un cours refait le menu, la carte et l'en-tête des groupes-cours (DEMANDE-RELECTURE-2026-10-11-lot8-cadre) (#472).
-- Non tranché : au réseau collégial, une heure de la pondération vaut-elle une période dans tous les cégeps ? La comparaison entre horaire et devis le suppose (BACKLOG #582, « À Grégoire », 11 oct. 2026).
+- Données : la comparaison entre horaire et devis compte une heure de la pondération pour une période, dans tous les cégeps (décision de Grégoire, 13 oct. 2026) (#582).
 
 #### Geste : dupliquer un cours ou un service
 
-- Données : non documenté.
+- Données : crée une nouvelle fiche, cours ou service, avec les mêmes champs, sous un nom qui la distingue ; l'original n'est pas touché, et la copie ne se confond pas avec lui. Sortie : la copie s'ouvre dans le formulaire, et un message la nomme (décision de Grégoire, 13 oct. 2026).
 - Sortie : sur un service, le formulaire dit « Dupliquer le service » (PORTES-TERRAIN-2026-09-12-section-cours, rangée 2).
 
 #### Geste : supprimer une fiche de cours (bouton « Supprimer » du formulaire, ou Bibliothèque › ⋮ › « Supprimer la fiche »)
@@ -887,7 +876,6 @@ Le nom de la section :
 
 ### Écran 21 · Cadre › Trimestre › Enseignant·e (« mon profil »)
 
-- Incertain : PLAN-AUTONOMISATION-UTILISATEUR (21 avr. 2026) nomme cet écran « Réglages › Enseignant » ; le BACKLOG (15 juin 2026) place ce sélecteur « vraisemblablement » dans Cadre › Trimestre ; le changelog 1.88 parle du « formulaire Enseignant·e du Cadre ».
 
 #### Geste : créer un profil (« + Nouveau profil »)
 
@@ -909,8 +897,8 @@ Le nom de la section :
 
 - Données : le profil part (INVENTAIRE-2026-10-02-1007, P3).
 - Sortie : « Veux-tu vraiment supprimer le profil de ‹nom› ? Cette action est irréversible. » ; codex proposé avant s'il n'est pas à jour (INVENTAIRE-2026-10-02-1007, P3 ; DECISIONS-2026-10-02-1007, § 8).
-- Non tranché : effacer aussi « mon profil » quand on supprime ce profil (sans quoi il peut revenir au chargement suivant) revient à Grégoire (BACKLOG #474 ; DEMANDE-RELECTURE-2026-10-11-lot8-cadre, § 5 ; OU-EN-EST-ON, 1.198.0).
-- Incertain : une garde qui nommerait les groupes-cours touchés avant de supprimer un profil (ou un horaire) est inscrite, non livrée (BACKLOG #463, « après la cohorte »).
+- Données : supprimer le profil marqué « mon profil » efface aussi cette marque ; il ne revient pas au chargement suivant (décision de Grégoire, 13 oct. 2026) (#474).
+- Sortie : avant de supprimer un profil ou un horaire, la question nomme les groupes-cours qui l'emploient (décision de Grégoire, 13 oct. 2026) (#463).
 
 #### Sans geste
 
@@ -928,9 +916,8 @@ Le nom de la section :
 - Sortie : « Créer l'horaire » ; « Horaire « … » créé. » ; le bouton « Supprimer » paraît aussitôt (changelog 1.91 ; DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6).
 - Sortie : refus par le témoin, séance par séance : « séance 1 : heure de début manquante. Sans elle, la durée de la séance ne peut pas être calculée ; c'est cette durée qui sert à l'assiduité. » (et l'heure de fin, les périodes) ; « choisis le groupe associé. » (DEMANDE-RELECTURE-2026-09-28-lot-E2, § 6 ; mots approuvés le 13 sept. 2026).
 - Sortie : sans groupe d'étudiant·es, la bulle dit « Aucun groupe d'étudiant·es pour l'instant », puis « Ajoute ou importe ta liste dans l'accordéon « Groupe d'étudiant·es », juste au-dessus. Un groupe apparaît dans ce menu dès qu'un·e étudiant·e y est inscrit·e. » (texte approuvé par Grégoire, 13 sept. 2026, PORTES-TERRAIN-2026-09-13-478 ; changelog 1.140).
-- Incertain : la lecture de cette bulle jusqu'au bout restait à rejouer sur le nouvel ordre ; une note persistante sous le menu vide est inscrite, à poser seulement si la friction se reproduit (PORTES-TERRAIN-2026-09-13-478, verdict 2.3b) (#478).
 - Sortie : une séance remplie se lit « 08:00 à 10:00 · 2 pér. · Local », le mot « pér. » hors de la case ; jour, heures, périodes et local sur une ligne, deux colonnes sur écran étroit (OU-EN-EST-ON, 1.142.13 et 1.159 ; changelog 1.159).
-- Contradiction : le changelog 1.29 parle d'une « Durée d'une période » réglée dans Cadre › Horaire ; le chantier clos le 26 août 2026 retire ce réglage (changelog 1.29 ; BACKLOG #540). Retenu : 26 août.
+- Sortie : l'Horaire n'a pas de réglage « Durée d'une période » ; la durée d'une séance se calcule à partir de ses heures de début et de fin (BACKLOG #540, chantier clos le 26 août 2026).
 
 #### Geste : modifier un horaire
 
@@ -975,7 +962,7 @@ Le nom de la section :
 - Données : un codex à part est écrit avant (règle de Grégoire, DECISIONS-2026-10-02-1007, § 5 et 6 ; changelog 1.175).
 - Sortie : la fenêtre du codex à part commence par « Supprimer le groupe-cours « ‹nom› » l'efface pour de bon. » (DEMANDE-RELECTURE-2026-10-02-1007-codex-a-part, § 5, accepté le 3 oct. 2026).
 - Sortie : le bouton « Supprimer » est visible dès l'arrivée sur la section (changelog 1.71).
-- Incertain : ses élèves, évaluations et présences restent, sans accès par l'écran ; c'est inscrit comme défaut voisin, sans décision sur ce qu'ils doivent devenir (VERDICT-RELECTURE-2026-10-03-1007-codex-a-part ; INVENTAIRE-2026-10-02-1007, C3).
+- Données : supprimer un groupe-cours emporte ses élèves, ses évaluations et ses présences ; la fenêtre le dit (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : voir la pratique de notation appliquée
 
@@ -984,7 +971,7 @@ Le nom de la section :
 #### Sans geste
 
 - Le badge « X/5 configurés » ne compte un enseignant ou une pratique que s'ils existent encore ; il dit « Complet » quand tout est configuré (changelog 1.199 ; BACKLOG #475 ; CONSIGNE-LOT-478-parcours-de-rentree, § 1).
-- Non tranché : la pratique, « facultative » au formulaire, compte encore dans le « X/5 », et un service complet sans horaire affiche « 4/5 » au lieu de « Complet » (BACKLOG #475, question de produit laissée ; CONSIGNE-LOT-478-parcours-de-rentree, § 4 ; BACKLOG #834).
+- Sortie : le badge compte cinq éléments, dont la pratique de notation ; SOM, active par défaut, la remplit dès le départ, et une autre pratique peut être appliquée plus tard que le cadre du trimestre ; un service n'a pas besoin d'horaire pour être « Complet » (décision de Grégoire, 13 oct. 2026) (#475, #834).
 - Le nom du groupe-cours est recalculé à l'affichage ; rien n'est réécrit (BACKLOG #472).
 - Le groupe-cours laissé actif dans un trimestre revient quand on y retourne (changelog 1.67).
 
@@ -997,7 +984,6 @@ Le nom de la section :
 - Sortie : la carte « Légende » en tête, en deux colonnes : les codes de couleur d'un côté, trois chiffres de l'autre (semaines scolaires, jours de cours, congés avec reprise) ; elle s'empile sous 768 px (décision de Grégoire, 29 juin 2026, BACKLOG #344 ; changelog 1.27).
 - Sortie : les trois chiffres sont calculés depuis le calendrier du trimestre, jamais des valeurs écrites d'avance ; sans calendrier, un état vide explicite plutôt qu'un chiffre inventé ; ils égalent ceux de Cadre › Trimestre (_archives/RELAIS-cadre-trimestre-2026-08-04, correctif attendu, versé et livré le 5 août 2026).
 - Sortie : la semaine s'y lit du dimanche au samedi, ordre du calendrier officiel ; les menus de jour vont du lundi au vendredi (_archives/RELAIS-cadre-trimestre-2026-08-04, clos le 5 août 2026).
-- Contradiction : le correctif attendu du 4 août alignait tous les menus de jour sur l'ordre du calendrier ; la clôture du 5 août garde les menus du lundi au vendredi et corrige plutôt le libellé de reprise (_archives/RELAIS-cadre-trimestre-2026-08-04). Retenu : 5 août.
 - Sortie : les numéros de semaine paraissent aussi sur les jours ouvrables hors de l'horaire du groupe (changelog Beta).
 
 #### Sans geste
