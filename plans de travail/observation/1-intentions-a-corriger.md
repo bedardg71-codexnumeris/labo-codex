@@ -141,7 +141,6 @@
 - Recherches non faites : SESSION.md pour l'Évaluation, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 6 : le rendu exact des cartes du tableau de bord.
 - Partie 7 : l'état du tirage par groupe et le bouton « Réinitialiser » de l'Animation (voulus, livraison non documentée) ; ouvrir une intervention depuis un signalement (voulu le 7 sept. 2026, livraison non documentée).
 - Parties 8 et 9 : aucun geste documenté pour Labo › Données et Labo › Études ; les mots finals de « Faire revenir un trimestre » (1.184) ne sont écrits nulle part.
 
@@ -2509,14 +2508,13 @@ Les onglets de Suivi :
 - C (complétion) mesure ce que l'élève remet de ce qui est demandé : un travail formatif compte, un travail facultatif sort du compte (décision de Grégoire, 11 oct. 2026, 8 h 18, BACKLOG #727).
 - C mesure la remise, pas la note : un 0 inscrit, une copie « Non remise » ou « Non reçue » n'est jamais un travail remis, sous aucune pratique (CADRAGE-2026-09-16-regles-du-depistage, critères du lot A ; changelog 1.142).
 - C'est la case « Consignes transmises » seule qui décide qu'une production est due pour la complétion et la performance (changelog 1.153).
-- Contradiction : le changelog 1.94 dit qu'une production sans échéance n'entre ni dans C ni dans P ; le changelog 1.153 (21 sept. 2026, plus récent) dit que la case « Consignes transmises » seule décide qu'une production est due. Retenu : 1.153.
 - P (performance) est la note du cours calculée par la pratique assignée au groupe-cours (« Performance : 77% (note du cours) ») (changelog 1.123 ; phrase validée par Grégoire, 5 sept. 2026).
 - Une reprise remplace l'originale dans P et dans tout le dépistage (changelog 1.123).
 - Une note qui ne se construit pas encore n'est jamais comptée comme un zéro : elle s'affiche par un tiret (changelog 1.123, 1.155).
 - La « fenêtre d'analyse des patterns » réglée dans Labo s'applique au profil et au « sur N » de fiabilité du Suivi du groupe (changelog 1.129).
 - Les seuils d'interprétation « Fragile / Acceptable / Bon » (70 / 80 / 85 par défaut, réglables dans Labo) colorent les colonnes A, C, P et Mobilisation de la Liste et qualifient l'engagement dans le profil, sans toucher la note ni l'échelle IDME (changelog 1.128, 1.129).
 - Un réglage des seuils déjà déplacé prend effet tel quel ; aucune valeur n'est posée à la place de l'enseignant (changelog 1.128).
-- Non tranché : le nom des bandes (« Fragile · Modéré · Favorable · Très favorable » et « Fragile · Acceptable · Bon ») attend Grégoire et l'orthopédagogue ; ni les noms ni les bornes ne se rouvrent avant (BACKLOG #821, 10 sept. 2026 ; CONSIGNE-SUIVANTE-nomenclature-des-zones ; CADRAGE-2026-09-16-regles-du-depistage).
+- Sortie : les bandes gardent leurs noms et leurs bornes d'aujourd'hui (« Fragile · Modéré · Favorable · Très favorable » ; « Fragile · Acceptable · Bon »), jusqu'à une décision de Grégoire prise avec l'orthopédagogue (BACKLOG #821 ; décision de Grégoire, 13 oct. 2026).
 
 ### Écran 51 · Suivi : les captures hebdomadaires
 
@@ -2531,7 +2529,6 @@ Les onglets de Suivi :
 - Un groupe qui a un élève exclu par son statut garde les mêmes moyennes, courbes et relevés hebdomadaires que sans lui (_ancienne-CONSIGNE-DU-JOUR-2026-09-17-eleve-exclu, 17 sept. 2026).
 - Les semaines déjà capturées gardent leur valeur (stock assumé) ; « Recalculer les captures » (Réglages › Captures et recherche) les met à jour (changelog 1.123, 1.147, 1.155, 1.198).
 - « Recalculer les captures » ne fait pas perdre les mesures avant et après des interventions (changelog 1.199).
-- Incertain : la consigne du 22 sept. 2026 nomme un bouton « Reconstruire » ; le changelog 1.155 et 1.199 nomment « Recalculer les captures » ; on ne sait pas s'il s'agit du même bouton (_ancienne-CONSIGNE-DU-JOUR-2026-09-22-lot-n2-p-historique).
 
 ### Écran 52 · Suivi › Suivi du groupe
 
@@ -2563,7 +2560,7 @@ Les onglets de Suivi :
 - Sortie : les mots des bandes de couleur restent ceux d'aujourd'hui jusqu'à la décision de Grégoire avec l'orthopédagogue (BACKLOG #821 ; CADRAGE-2026-09-11-onglet-suivi-lecture-du-depistage, § 5).
 - Sortie : les courbes du groupe (indice P compris) et les trajectoires en mode « Note finale » ne dessinent ni lignes pointillées ni lettres de niveaux d'une échelle ; le mode « Habiletés » des trajectoires les garde, avec les niveaux de l'échelle des évaluations (changelog 1.142 ; décision de Grégoire, 16 sept. 2026, CADRAGE-2026-09-16-regles-du-depistage, lot F).
 - Sortie : l'aide « Indicateurs visuels des seuils » (Labo) dit que les lignes viennent des niveaux de l'échelle de l'enseignant, sur le graphique par critère du profil et sur les graphiques du Suivi du groupe (PORTES-TERRAIN-2026-09-13-graphique-indices-sans-zones, rangée 0.3 ; BACKLOG #823).
-- Non tranché : le texte de l'aide des trajectoires après le retrait des niveaux en mode « Note finale » était proposé, pas validé (CADRAGE-2026-09-16-regles-du-depistage, tableau, lot F).
+- Sortie : l'aide des trajectoires dit qu'en mode « Note finale », les courbes ne portent pas les niveaux d'une échelle, et qu'en mode « Habiletés », elles les portent ; ses mots restent à faire accepter par Grégoire (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : suivre un élève (clic sur son nom, en mode Détails)
 
@@ -2688,7 +2685,7 @@ Les onglets de Suivi :
 - Sortie : le profil dit combien d'évaluations ont été écartées (ex. « 2 évaluations en brouillon, non comptées ») (changelog 1.122).
 - Sortie : un travail diagnostique ne compte pas parmi les travaux évalués du profil (changelog 1.142).
 - Sortie : la note finale en ,5 s'arrondit vers le haut, comme à l'export (changelog 1.152).
-- Contradiction : le changelog 1.151 dit que le profil écrit « évaluation non enregistrée » ; la décision D1 du 26 sept. 2026 (DECISIONS-2026-09-26-enregistrement) dit qu'au profil « Non enregistrée » devient « Non verrouillée » ; le changelog 1.162 ne nomme que la Liste des évaluations. Retenu : D1 (« Non verrouillée »), application au profil incertaine.
+- Sortie : au profil aussi, une évaluation non verrouillée se dit « non verrouillée », jamais « non enregistrée » (DECISIONS-2026-09-26-enregistrement, D1 ; décision de Grégoire, 13 oct. 2026).
 
 #### Geste : cliquer « Évaluer » dans le profil
 
@@ -2710,7 +2707,6 @@ Les onglets de Suivi :
 - Sortie : un critère noté en points se lit à sa note (22/30 = 73 %) dans les barres, la persistance des fondations et le défi ; un critère réglé « Aucun » au niveau SOLO ne compte que dans la note : ni barre, ni défi, ni cible d'intervention (changelog 1.142).
 - Sortie : dans Forces et défis, un critère dont le nom commence par « Français » figure ; s'il est le plus faible, il devient le défi principal et la cible d'intervention ; deux critères de français ont chacun leur valeur (changelog 1.152).
 - Sortie : le seuil de défi réglé dans Labo agit sur la couleur des badges « Forces et défis » et sur le défi principal de la carte RàI (OU-EN-EST-ON, 1.130.1, 11 sept. 2026).
-- Contradiction : OU-EN-EST-ON 1.128.3 (10 sept. 2026) annonce « seuil force : 70 % » dans le diagnostic par critère ; OU-EN-EST-ON 1.130.1 (11 sept. 2026) dit que ce titre n'a jamais été affiché et que la chaîne qui le produisait est retirée. Retenu : 11 sept.
 - Sortie : la ligne « Consolidation » n'existe plus (changelog 1.128).
 - Sortie : la section est retirée du profil quand « Développement des habiletés » est décoché dans Labo (CADRAGE-2026-09-10-ecran-de-reglage-du-depistage, § 4 ; changelog 1.130).
 
@@ -2721,7 +2717,7 @@ Les onglets de Suivi :
 - Sortie : le graphique par critère garde les niveaux de l'échelle ; il lit l'échelle de chaque évaluation (y compris à trois paliers ou en points) ; une valeur non convertible n'est jamais devinée : le point est absent et le graphique dit « n évaluations sans valeur convertible dans cette échelle » (changelog 1.134, 1.140 ; décision de Grégoire, 11 sept. 2026, 17 h 15 ; mots tels quels).
 - Sortie : quand plusieurs échelles coexistent, le graphique dit laquelle donne les niveaux : « Zones : échelle « … » (n évaluations sur m) » (PORTES-TERRAIN-2026-09-11-profils-individuels, rangée 4 et § 3).
 - Sortie : la section « Progression temporelle ACP » est retirée quand « Graphiques d'évolution ACP » est décoché dans Labo (CADRAGE-2026-09-10-ecran-de-reglage-du-depistage, § 4).
-- Incertain : le changelog 1.134 parle de « zones colorées du fond » ; le CADRAGE-2026-09-16-regles-du-depistage (lot F) remet cette promesse en question ; aucun document lu ne tranche.
+- Sortie : sur le graphique par critère du profil, les niveaux de l'échelle se marquent par des lignes pointillées et des lettres de niveau, sans fond coloré (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : lire la section Accompagnement
 
@@ -2742,7 +2738,6 @@ Les onglets de Suivi :
 - Sortie : enregistrer ne répond jamais « Étudiant·e introuvable » et la barre latérale du profil reste active (changelog 1.141).
 - Sortie : les champs libres du volet sont échappés avant d'entrer dans la page (changelog 1.123).
 - Sortie : en anonymisation, le volet est masqué entier, rien ne s'y écrit, et le bouton ne porte pas de pastille « a des informations » (DEMANDE-RELECTURE-2026-09-26-lot-A-anonymisation ; DECISIONS-2026-09-26-enregistrement, D5).
-- Contradiction : la porte du 11 sept. 2026 (PORTES-TERRAIN-2026-09-11-profils-individuels, § 1) et le changelog 1.141 décrivent un bouton « Enregistrer » dans le volet ; le changelog 1.167 (28 sept. 2026, plus récent) dit que le volet s'enregistre seul, champ par champ. Retenu : 1.167.
 
 #### Geste : cliquer « Rapport »
 
@@ -2761,12 +2756,11 @@ Les onglets de Suivi :
 
 - Données : les cibles atteintes cochées, la note et sa justification (changelog 1.3).
 - Sortie : la suggestion se lit comme un repère ; une garde dit quand la note ne peut pas encore certifier la réussite (changelog 1.3).
-- Non tranché : ranger les jetons et jugements de dénotation par trimestre attend Grégoire (CONSIGNE-DU-JOUR, 11 oct. 2026, « hors de la série », #1043).
+- Données : les jetons et les jugements de dénotation appartiennent au trimestre, comme les évaluations ; ils ne passent pas d'un trimestre à l'autre (décision de Grégoire, 13 oct. 2026) (#1043).
 
 #### Geste : lire une note par travail avec la note différée active
 
 - Sortie : un repère « note différée » remplace la note chiffrée de chaque travail (Engagement, Productions, Complétion, Portfolio) ; niveaux et note finale de session restent visibles ; aucun calcul ne change (changelog 1.20).
-- Contradiction : le changelog 1.20 et 1.127 placent la case dans Réglages › Préférences ; la correction du 11 sept. 2026 (BACKLOG #823, livrée en 1.129.1) dit que l'infobulle renvoie à Labo › Outils d'observation, où la case se trouve. Retenu : Labo › Outils d'observation.
 
 #### Sans geste
 
@@ -2799,7 +2793,6 @@ Les onglets de Suivi :
 - Données : la séance est saisie, tout le monde présent (changelog 1.163).
 - Sortie : le bouton dit « ✓ N pér. » (le nombre de périodes de la séance) ; son infobulle et le lecteur d'écran disent « Mettre tout le monde présent (N périodes) » ; il tient sur une ligne à 1024, 768 et 390 px (décision de Grégoire, 3 oct. 2026, 17 h 48 ; OU-EN-EST-ON, 1.177.1).
 - Sortie : l'en-tête de la colonne « Présence » garde son infobulle après le premier affichage d'une séance (DEMANDE-RELECTURE-2026-10-11-lot17-fenetres, 11 oct. 2026).
-- Contradiction : le changelog 1.177 dit que le bouton dit « ✓ » ; la décision du 3 oct. 2026 (17 h 48) et OU-EN-EST-ON disent « ✓ N pér. ». Retenu : « ✓ N pér. ».
 
 #### Geste : confirmer la séance
 
@@ -2827,8 +2820,8 @@ Les onglets de Suivi :
 - Sortie : quatre notations au choix (crochets ✓/✗, X sur les absences, périodes de présence, périodes d'absence) ; la légende imprimée suit le choix (changelog 1.91).
 - Sortie : options dans une fenêtre (Numéro de DA, Sous-groupe, Programme, Nom du programme, Services adaptés ; Programme et Services adaptés cochés d'office) ; « Tous mes groupes-cours » donne une feuille par groupe, un groupe sans horaire est nommé, jamais imprimé faux (PORTES-TERRAIN-2026-08-21-485-grille-presences, rangées 2.2, 2.12).
 - Sortie : « Rapport » reste disponible une fois la date choisie (changelog 1.123).
-- Non tranché : l'unité des chiffres imprimés (périodes ou heures) attend le verdict de Grégoire (PORTES-TERRAIN-2026-08-21-485-grille-presences, R5, « dus »).
-- Contradiction : le changelog 1.91 place le bouton « dans la barre d'actions, juste à gauche d'« Enregistrer » » et, dans la même entrée, « dans l'en-tête de la saisie des présences » ; « Enregistrer » est devenu « Confirmer la séance » (1.163). Retenu : bouton « Rapport » dans la barre d'actions de la saisie (changelog 1.123).
+- Sortie : les chiffres imprimés sont des périodes (décision de Grégoire, 13 oct. 2026).
+- Sortie : le bouton « Rapport » est dans la barre d'actions de la saisie des présences, juste à gauche de « Confirmer la séance » (changelog 1.91, 1.123, 1.163 ; décision de Grégoire, 13 oct. 2026).
 
 #### Geste : cliquer « Fermer »
 
@@ -2839,7 +2832,7 @@ Les onglets de Suivi :
 - Sortie : au démarrage, quand le stockage du navigateur est presque plein, la saisie attend que le trimestre soit connu et retrouve ses élèves (changelog 1.199 ; DEMANDE-RELECTURE-2026-10-11-lot8-cadre, 11 oct. 2026).
 - Sortie : après une mise en arrière-plan, l'application rétablit seule sa liaison ; le témoin s'affiche au-dessus du clavier et ne recouvre pas les boutons des présences (changelog 1.186 ; OU-EN-EST-ON).
 - Sortie : la barre de boutons passe à la ligne sur un écran étroit et reste dans sa carte (360, 768, 1024, 1180 px) (DEMANDE-RELECTURE-2026-09-27-lot-D-presences, § 1).
-- Non tranché : la taille des contrôles de Suivi pour le doigt (cibles de 44 px) attend une maquette validée par Grégoire (CONSIGNE-SUIVANTE-lot-7-transversal-forme-et-cles-nues, « en construction », 11 sept. 2026).
+- Sortie : sur l'iPad, les contrôles du Suivi offrent des cibles d'au moins 44 px au doigt, comme ailleurs dans l'application (décision de Grégoire, 13 oct. 2026).
 
 #### Sans geste
 - Non documenté dans les sources lues.
