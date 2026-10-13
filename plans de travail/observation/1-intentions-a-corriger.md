@@ -141,7 +141,6 @@
 - Recherches non faites : SESSION.md pour les Évaluations, RELAIS.md pour le Cadre ; les plans d'août de la carte d'alignement (nœuds, durées, exports, recherche) n'ont pas été lus en entier.
 
 **Ce que les documents ne disent pas** (relevé par les analystes ; à toi de dire si une intention existe) :
-- Partie 3 : ce que la suppression d'une production fait aux données.
 - Partie 4 : les plus anciennes fonctions de la carte d'alignement ne sont attestées que par le changelog ; aucune réponse trouvée aux choix 3.1 à 3.4 de l'import de cartouches d'un autre trimestre, ni de livraison pour la comparaison côte à côte des doublons.
 - Partie 5 : l'éditeur de pages ; le départ du chronomètre ; le mode côte à côte ; « Transférer » ; la liste complète des filtres de la Liste des évaluations.
 - Partie 6 : le rendu exact des cartes du tableau de bord.
@@ -1001,8 +1000,6 @@ Les onglets de Conception :
 4. Échelles de performance (même source)
 5. Cartouches de rétroaction (même source)
 6. Pratiques de notation, en dernier (même source ; SESSION, 2 juin 2026, « Pratiques de notation en dernier de Conception »)
-- Contradiction : le changelog 1.61 parle de « six autres onglets » (donc sept), en reprenant la liste du 8 août qui comptait encore « Plan de la leçon » (AUDIT-carte-alignement-exports-productions-2026-08-08) ; or le changelog 1.57 retire cette page, et les documents du 20 août disent « six sous-onglets » (PLAN-AUDIT-cadre-conception-2026-08-20). Retenu : six onglets.
-- Incertain : le cinquième onglet est nommé « Conception › Rétroactions » dans la porte du 28 sept. et la relecture du 10 oct. (PORTES-TERRAIN-2026-09-28-lot-E1-conception ; DEMANDE-RELECTURE-2026-10-10-lot4-rien-ne-se-perd), « Cartouches de rétroaction » ailleurs ; aucun document ne décide d'un renommage.
 
 ### Écran 25 · Conception (commun aux trois écrans)
 
@@ -1020,7 +1017,6 @@ Les onglets de Conception :
 - Données : la fiche est écrite au clic, puis passe en modification, où tout s'enregistre seul (D3 ; DEMANDE-RELECTURE-2026-09-27-lot-E1-conception)
 - Sortie : notification « Grille « … » créée. », « Échelle « … » créée. », « Production « … » créée. » (DEMANDE-RELECTURE-2026-09-27-lot-E1-conception, §5 ; DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2, §4)
 - Sortie : la fiche se rouvre comme fiche existante, avec « Dupliquer », « Supprimer » et « Fermer » (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2)
-- Contradiction : le 24 août, une création disait « sauvegardée », par parité avec la grille (PORTES-TERRAIN-2026-08-24-confirmations-conception, décision 3.2) ; le 26 sept., « Sauvegardé » disparaît au profit de « Enregistré » et les créations disent « créée » (DECISIONS-2026-09-26-enregistrement, D4 ; lot E1, 27 sept.). Retenu : « créée ».
 
 #### Geste : créer avec le nom d'une fiche existante (« Remplacer l'existante », écraser l'homonyme)
 
@@ -1035,7 +1031,6 @@ Les onglets de Conception :
 - Sortie : le témoin commun dit « Enregistré » après chaque écriture ; un échec dit « Non enregistré », le geste et la raison, et ce message reste (D0 ; changelog 1.186)
 - Sortie : un champ vérifié et refusé dit « Non enregistré : ‹raison› », un seul message au lieu de deux (D3 ; changelog 1.164)
 - Sortie : sur l'iPad, le témoin s'affiche au-dessus du clavier (changelog 1.186)
-- Contradiction : le changelog 1.94 promet que toute sauvegarde de Conception se confirme par le bandeau vert en haut à droite ; depuis D0 (26 sept.), l'écriture automatique se confirme par le témoin commun (en bas à gauche selon PORTES-TERRAIN-2026-09-28-lot-E3, 1.1.b). Retenu : le témoin pour l'écriture automatique.
 
 #### Geste : fermer une fiche
 
@@ -1043,7 +1038,7 @@ Les onglets de Conception :
 - Sortie : sur une fiche en création qui porte une saisie, la question « Cette grille n'est pas encore créée. » (et ses jumelles pour l'échelle et la production), texte « Ce que tu as saisi n'est gardé qu'à l'écran. Si tu quittes, il sera perdu. », boutons « Rester » (choisi par défaut, Entrée le suit) et « Quitter sans créer » (DEMANDE-RELECTURE-2026-09-27-lot-E1-conception, §5)
 - Sortie : la même question à l'ouverture d'une autre fiche depuis la liste, à « + Nouvelle … » et au rechargement de la page ; aucune question si rien n'a été tapé (DEMANDE-RELECTURE-2026-09-27-lot-E1-conception, §1-2)
 - Données : « Rester » ne perd rien ; « Quitter sans créer » n'écrit rien (PORTES-TERRAIN-2026-09-28-lot-E1-conception, §2)
-- Incertain : changer de section ne pose pas la question (zone protégée), et sur l'iPad le rechargement peut perdre une création sans question ; écrit comme limite, pas comme décision (PORTES-TERRAIN-2026-09-28-lot-E1-conception, §4)
+- Sortie : limite acceptée : changer de section pendant une création ne pose pas la question, et sur l'iPad un rechargement peut perdre une création sans question (décision de Grégoire, 13 oct. 2026 ; PORTES-TERRAIN-2026-09-28-lot-E1-conception, §4).
 
 #### Geste : dupliquer une fiche (grille, échelle, production)
 
@@ -1097,7 +1092,6 @@ Les onglets de Conception :
 
 - Données : tu ajoutes tes propres champs (« Format et mise en page », « Remise du travail »…), tu les nommes et les ordonnes ; les trois champs d'origine se déplacent et se renomment de la même façon (changelog 1.99)
 - Sortie : un bloc rempli mais sans nom n'est pas conservé ; le reste s'écrit, et le témoin dit « un bloc de consignes est rempli mais n'a pas de nom ; il n'est pas conservé. Donne-lui un nom. » (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2, §4)
-- Contradiction : le 26 août, Grégoire tranche « avertir avant d'enregistrer », l'usager décide (ARBITRAGE-2026-08-26-suites-audit-conception, D4) ; depuis le 28 sept., il n'y a plus d'enregistrement explicite, et le témoin dit que le bloc n'est pas conservé (lot E3, mots acceptés le 28 sept.). Retenu : le témoin.
 
 #### Geste : poser la date d'échéance, cocher « Consignes transmises »
 
@@ -1105,7 +1099,6 @@ Les onglets de Conception :
 - Données : la case existe aussi avec un seul groupe (changelog 1.98) ; chaque groupe reçoit sa date (BACKLOG #493 ; changelog 1.99)
 - Données : une production rattachée à un bloc Évaluation de la carte d'alignement reçoit sa date toute seule, au jour où le groupe se rencontre réellement (changelog 1.98)
 - Sortie : une production pas encore due garde un badge « à planifier » et n'entre ni au calendrier ni dans les indices C et P (changelog 1.94, 1.98)
-- Contradiction : le changelog 1.94 rend une production due dès qu'elle a une date ; le changelog 1.153 confie ce rôle à la seule case « Consignes transmises ». Retenu : 1.153.
 
 #### Geste : cocher la case « Travail diagnostique » (« ne compte dans aucun calcul »)
 
@@ -1133,7 +1126,7 @@ Les onglets de Conception :
 
 #### Geste : supprimer une production
 
-- Données : non documenté au-delà de la production elle-même
+- Données : une production qui a des évaluations ou des copies ne peut pas être supprimée ; le refus dit combien, comme pour une grille. Sans évaluation ni copie, seule la fiche part (décision de Grégoire, 13 oct. 2026).
 - Sortie : la fenêtre du codex est proposée si le codex n'est pas à jour (changelog 1.176)
 - Sortie : supprimer la production affichée ne laisse aucun surlignage dans la barre latérale (DEMANDE-RELECTURE-2026-10-11-lot17-fenetres, 11 oct. 2026) (#633)
 
@@ -1141,7 +1134,7 @@ Les onglets de Conception :
 
 - Données : « Fermer » fait la même chose quel que soit le bouton employé, et remet à zéro la production en édition (DEMANDE-RELECTURE-2026-10-11-lot17-fenetres, 11 oct. 2026) (#633)
 - Sortie : en création, la question « Cette production n'est pas encore créée. » (« Rester » / « Quitter sans créer ») (DEMANDE-RELECTURE-2026-09-28-lot-E3-etapes-1-2, §4)
-- Incertain : changer de sous-onglet pendant une création ne pose pas la question ; ce qu'on retrouve au retour n'est pas mesuré (PORTES-TERRAIN-2026-09-28-lot-E3, §3)
+- Sortie : limite acceptée : changer de sous-onglet pendant une création ne pose pas la question ; au retour, la saisie est retrouvée telle quelle (décision de Grégoire, 13 oct. 2026).
 
 #### Sans geste
 
@@ -1161,7 +1154,7 @@ Les onglets de Conception :
 - Données : le nom de la grille est obligatoire (astérisque rouge et refus) (BACKLOG #524, 26 août 2026 ; ARBITRAGE-2026-08-26-suites-audit-conception, D1)
 - Sortie : une grille créée dont les critères ne totalisent pas 100 % le dit, sans bloquer : « Grille enregistrée : ses critères totalisent N %, pas 100 %. » (DEMANDE-RELECTURE-2026-10-11-lot17-fenetres ; mots retenus par Grégoire le 11 oct. 2026, 18 h 03 ; changelog 1.199) (#483)
 - Données : cet avertissement part sur les gestes explicites seulement ; il se tait en écriture automatique et à la suppression d'un critère (DEMANDE-RELECTURE-2026-10-11-corrections-14-19) (#483)
-- Incertain : depuis que la grille existante n'a plus de bouton « Enregistrer » (lot E1), le seul geste explicite documenté est la création ; une grille existante qui passe à côté de 100 % n'a pas d'avertissement documenté (DEMANDE-RELECTURE-2026-10-11-corrections-14-19, §5)
+- Sortie : une grille existante dont les critères ne totalisent plus 100 % le signale aussi, sans bloquer, par un avis qui reste visible dans l'éditeur tant que le total n'est pas 100 % (décision de Grégoire, 13 oct. 2026) (#483).
 
 #### Geste : choisir le « Type de la grille » (à côté du nom)
 
@@ -1171,7 +1164,7 @@ Les onglets de Conception :
 - Sortie : passer en « Analytique » ou « Algorithmique » une grille dont des critères n'ont pas de type : l'éditeur le dit et offre un bouton pour le leur appliquer ; rien ne change sans ce geste, et les évaluations faites gardent leur note (changelog 1.150)
 - Données : « Mixte » est un constat, pas une case : la grille l'est devenue quand un critère déroge (PLAN-2026-09-03-les-trois-types-de-grille, arrêté 2)
 - Données : une grille s'applique indépendamment de la pratique de notation ; aucune grille n'est réservée à une pratique (CADRAGE-2026-09-03-grille-analytique, principe arrêté le 3 sept. 2026) ; les cases « Pratiques compatibles » sont retirées (changelog 1.114)
-- Non tranché : comment une grille analytique (des points) s'emboîte avec une pratique qui lit des niveaux ; question laissée ouverte volontairement, à trancher par un essai de Grégoire (CADRAGE-2026-09-03-grille-analytique, 3 sept. 2026)
+- Données : pour une pratique qui lit des niveaux, un critère analytique lui passe le niveau que son pourcentage trouve dans l'échelle ; les points ne servent qu'à le trouver (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : ajouter un critère (« + Ajouter un critère »)
 
@@ -1191,7 +1184,7 @@ Les onglets de Conception :
 - Données : « Complexité SOLO du critère » (anciennement « Niveau SOLO ») offre « Aucun » : le critère compte dans la note, le dépistage des fondations ne le surveille pas ; le défaut d'un critère neuf ne change pas (changelog 1.117, 1.127 ; CARTE-2026-09-04-lot4-B-lecteurs-niveauSOLO, sens arrêté)
 - Sortie : aide sous le menu : « “Aucun” retire le critère de la lecture SOLO : il compte dans la note comme les autres, mais le dépistage des fondations ne le surveille pas et aucune étiquette ne l'accompagne dans les exports. » (CARTE-2026-09-04-lot4-B, arrêtée par Grégoire le 4 sept. 2026, 15 h 50)
 - Données : renommer l'étiquette ne change rien de ce qui est enregistré (changelog 1.127)
-- Contradiction : « Aucun » est placé « en tête du menu » (OU-EN-EST-ON, lot 4, 4 sept. 2026) ou « en dernier » (CARTE-2026-09-04-lot4-B, 4 sept. 2026) ; aucune décision ne départage.
+- Sortie : « Aucun » est le premier choix du menu « Complexité SOLO du critère » (décision de Grégoire, 13 oct. 2026).
 
 #### Geste : déplacer ou supprimer un critère, un sous-critère
 
@@ -1207,7 +1200,6 @@ Les onglets de Conception :
 - Sortie : suivent des cartes repliables : la formule, ouverte (elle porte la note) ; « Bilan » et « Ce que l'élève lit », fermées (elles portent les mots) (CADRAGE-2026-09-03-accordeons, règle de Grégoire du 3 sept. ; changelog 1.117, 1.118, 1.120)
 - Données : une carte reste comme on l'a laissée pendant qu'on tape et quand on revient sur un critère, tant qu'on n'a pas quitté l'écran ; le pli n'entre pas dans les données de la grille (CADRAGE-2026-09-03-accordeons ; changelog 1.117)
 - Données : un critère algorithmique neuf naît sans projection ; les critères existants gardent la leur (changelog 1.117)
-- Contradiction : le cadrage du 3 sept. prévoit trois bandes fermées (énoncés, projection, codes) ; 1.117 livre quatre cartes ; 1.119 retire la carte des codes, 1.118 et 1.120 renomment les deux autres. Retenu : la forme de 1.120.
 
 #### Geste : choisir le modèle de formule
 
@@ -1225,7 +1217,6 @@ Les onglets de Conception :
 - Données : la phrase « Aucune annotation » (que seul l'enseignant lit) vit sous la case, dans un pli fermé « Quand la copie ne porte aucun code », en édition d'une grille déjà créée (changelog 1.120 ; CADRAGE-2026-09-05-carte-bilan, point 3)
 - Données : dans le gabarit algorithmique, on parle d'« observation », jamais de « rétroaction », mot réservé à la cartouche (CADRAGE-2026-09-03-codes-par-grille, point 8, décision du 4 sept. 2026, 14 h 15)
 - Données : un code identifie un élément du travail, compté et rattaché aux critères ; un tampon commente le travail et ne touche ni la grille ni la note (CADRAGE-2026-09-03-codes-par-grille, nomenclature de Grégoire, 3 sept. 2026 ; changelog 1.114)
-- Contradiction : la décision du 3 sept. après-midi dit « les tampons SONT les sous-critères » ; le soir même, la nomenclature corrigée réserve ce rôle aux codes (CADRAGE-2026-09-03-codes-par-grille). Retenu : les codes.
 
 #### Geste : régler la carte « Bilan »
 
@@ -1233,7 +1224,6 @@ Les onglets de Conception :
 - Données : le modèle « Français écrit » porte la description « Les phrases parlent du français écrit (« erreurs de français », « la qualité du français »). Pour un critère d'une autre discipline, choisis « Générique », qui nomme le critère tel qu'il est écrit dans la grille. » (CADRAGE-2026-09-05-carte-bilan, mots arrêtés le 5 sept., 11 h 41)
 - Sortie : aide sous le menu, texte de départ : « Fournit le texte de départ des deux phrases du bilan et du décompte de la carte « Ce que l'élève lit ». » (_ancienne-CONSIGNE-DU-JOUR-2026-09-05-carte-bilan-1.120)
 - Données : ces phrases se réécrivent dans tes mots ; vider une zone fait taire la phrase ; elles voyagent avec la grille (changelog 1.108)
-- Contradiction : le menu s'appelle « Modèle de commentaire » (4 sept., 7 h 20), puis « Modèle d'observation » (4 sept., 14 h 15 ; changelog 1.117), puis « Modèle des phrases (bilan et décompte) » (5 sept. ; changelog 1.120). Retenu : le dernier.
 
 #### Geste : régler la carte « Ce que l'élève lit » (projection et paliers)
 
@@ -1280,16 +1270,15 @@ Les onglets de Conception :
 - Données : une grille qu'emploient des évaluations ou des productions ne peut pas être supprimée depuis la Conception ; aucune issue n'est offerte, puisque rattacher ces évaluations ailleurs changerait leurs notes (changelog 1.199 ; DEMANDE-RELECTURE-2026-10-11-lot15-rien-en-silence) (#624)
 - Sortie : « Impossible de supprimer la grille « X ». », puis « Utilisée par N évaluation(s) », « Utilisée par N production(s) », puis « Sans elle, ces notes n'auraient plus de grille. » (DEMANDE-RELECTURE-2026-10-11-lot15, mots retenus le 11 oct. 2026, 18 h 03) (#624)
 - Données : une grille qui porte des cartouches : la suppression bloque, nomme les cartouches et offre de les déplacer vers une autre grille, critères rapprochés par identifiant puis par nom (BACKLOG #624, décision de Grégoire du 31 août 2026)
-- Contradiction : le changelog 1.95 refuse la suppression d'une grille qui porte des cartouches, sans issue ; la décision du 31 août ajoute le déplacement. Retenu : le déplacement offert.
 - Sortie : la fenêtre du codex est proposée si le codex n'est pas à jour (changelog 1.176) ; sur un échec, le témoin dit « Supprimer la grille » (RELECTURE-2026-09-27-lot-E1-conception, R2)
-- Non tranché : supprimer la grille de départ dans un trimestre l'interdit dans tous les trimestres, y compris ceux de demain ; corriger changerait le sens de suppressions déjà faites, donc à Grégoire (BACKLOG #683, 1er sept. 2026)
+- Données : supprimer la grille de départ dans un trimestre ne la retire que de ce trimestre ; les autres trimestres, et ceux à venir, la reçoivent encore (décision de Grégoire, 13 oct. 2026) (#683).
 
 #### Sans geste
 
 - Le badge de composition dit ce qui EST, depuis les critères, jamais depuis le type déclaré : une grille déclarée analytique dont un critère passe en algorithmique affiche MIXTE (changelog 1.115)
 - Une grille d'avant affiche « Non précisé » et la ligne qui décrit ses critères (changelog 1.115)
 - Un espace neuf reçoit une « Grille de départ » ; dans un espace déjà en place, les noms actuels ne changent pas (changelog 1.107)
-- Non tranché : chez un utilisateur déjà en place, le matériel semé garde son ancien nom ; renommer ses données revient à Grégoire (BACKLOG #682 ; CONSIGNE-DU-JOUR du 11 oct., fiche écartée « ses données »)
+- Données : chez un utilisateur déjà en place, le matériel semé garde son ancien nom ; l'application ne renomme jamais ce qui est déjà écrit (décision de Grégoire, 13 oct. 2026) (#682).
 - Le nom de la grille s'imprime dans l'en-tête du PDF de l'élève (changelog 1.111) ; c'est un mot que l'élève lit, qui remonte à Grégoire (CLAUDE.md, 1er sept. 2026)
 
 ### Écran 28 · Conception › Échelles de performance
@@ -1306,15 +1295,13 @@ Les onglets de Conception :
 - Données : les repères « Suffisant à partir de » et « Maîtrisé à partir de » sont demandés dès la création, avec les mêmes refus qu'en modification ; aucune échelle ne naît sans qu'on ait demandé où commence la maîtrise (changelog 1.105, 1.106)
 - Données : une échelle neuve dont un niveau est incomplet ne s'enregistre pas (DEMANDE-RELECTURE-2026-10-11-lot9-echelles ; changelog 1.199) (#574)
 - Sortie : le refus nomme le niveau et le motif (« Niveau 5 », puis « Le code du niveau est obligatoire. ») (DEMANDE-RELECTURE-2026-10-11-lot9-echelles, mots retenus le 11 oct. 2026, 13 h 23)
-- Non tranché : les quatre niveaux proposés à la création portent encore des plages et valeurs choisies par le projet (90-100/95, 75-89/82, 60-74/67, 0-59/30) ; c'est l'offre de départ, à Grégoire (BACKLOG #574, 11 oct. 2026)
-- Contradiction : le 26 août, la valeur ponctuelle est d'abord dite facultative (BACKLOG #525, 1.99.4), puis obligatoire le même jour (BACKLOG #526, 1.99.5). Retenu : obligatoire.
+- Données : une échelle neuve propose quatre lignes de niveau vides ; l'utilisateur remplit lui-même codes, noms, bornes et valeurs, rien n'est posé à sa place (décision de Grégoire, 13 oct. 2026) (#574).
 
 #### Geste : ajouter un niveau (« + Ajouter un niveau »)
 
 - Données : une ligne en attente s'ouvre ; aucune valeur n'est posée à ta place ; le niveau rejoint l'échelle quand son code, son nom, ses deux bornes et sa valeur ponctuelle sont remplis (changelog 1.199 ; DEMANDE-RELECTURE-2026-10-11-lot9-echelles) (#574)
 - Données : quitter l'échelle oublie le niveau en attente, sans question (DEMANDE-RELECTURE-2026-10-11-lot9-echelles, §4, supposition retenue par Cowork le 11 oct.)
 - Sortie : « Niveau en attente : il rejoint l'échelle quand son code, son nom, ses deux bornes et sa valeur ponctuelle sont remplis. » ; corbeille « Retirer ce niveau en attente » ; à l'achèvement, « Niveau ajouté. » / « L'échelle contient maintenant N niveau(x). » (DEMANDE-RELECTURE-2026-10-11-lot9-echelles, §3, retenus le 11 oct. 2026)
-- Contradiction : le message du 27 sept. ajoutait « Ajuste son code, son nom, ses bornes et sa valeur : chaque champ s'enregistre tout seul. » (lot E1) ; le lot 9 (11 oct.) le retire. Retenu : sans cette phrase.
 
 #### Geste : modifier un niveau (code, nom, bornes, valeur, palier SOLO, ordre)
 
@@ -1328,8 +1315,7 @@ Les onglets de Conception :
 
 #### Geste : corriger une échelle déjà employée (sans la supprimer)
 
-- Données : le recalcul des évaluations touchées doit être possible ; il est PROPOSÉ, jamais automatique, et la proposition nomme le compte avant le geste ; refusé dans un trimestre terminé ou archivé, en disant que ça toucherait des notes déjà remises (DECISION-2026-09-03-echelle-remplacement, tranché le 3 sept. 2026)
-- Incertain : décidé le 3 sept., inscrit « sans cadrage » ; aucune livraison n'est documentée (OU-EN-EST-ON, §« Ce qu'un utilisateur détruit » ; 00-CADRAGES-OUVERTS)
+- Données : le recalcul des évaluations touchées doit être possible ; il est PROPOSÉ, jamais automatique, et la proposition nomme le compte avant le geste ; refusé dans un trimestre clos ou archivé, en disant que ça toucherait des notes déjà remises (DECISION-2026-09-03-echelle-remplacement, tranché le 3 sept. 2026)
 
 #### Geste : régler les repères de maîtrise
 
@@ -1363,7 +1349,6 @@ Les onglets de Conception :
 - L'IDME dit les mêmes quatre mots partout dans l'application (changelog 1.129)
 - L'IDME est la pratique de Grégoire et ne s'impose à personne : aucune échelle, aucun code, aucune borne en dur, aucun repli sur une échelle « par défaut » ; on prend toujours ce que l'usager a créé (_ancienne-CONSIGNE-DU-JOUR-2026-09-23-lot-n7-echelle, décision du 22 sept. 2026 ; DEMANDE-RELECTURE-2026-10-11-lot9-echelles) (#590)
 - Aucune autre échelle n'est créée à ta place ; les huit échelles disciplinaires sont retirées, une copie déjà ajoutée reste telle quelle (changelog 1.106, 1.107)
-- Contradiction : le 28 août, Grégoire choisit de n'offrir que des échelles que l'usager complète, sans valeurs choisies par le projet (BACKLOG #574, option B) ; le 1er sept., l'échelle de départ arrive avec ses quatre valeurs (OU-EN-EST-ON ; changelog 1.107). Retenu : l'échelle de départ.
 
 ---
 
