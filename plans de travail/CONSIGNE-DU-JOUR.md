@@ -1,107 +1,50 @@
-# Consigne du jour – lots 20 à 23, une seule vérification le soir
+# Consigne du jour – le nouveau texte « À propos » de l'accueil
 
-> Écrite par Cowork le 12 octobre 2026 à 7 h 26 (Toronto, mesurée par `date`). L'ancienne consigne est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-11-lots-8-a-19.md`. Tu peux commiter ce fichier et le déplacement.
+> Écrite par Cowork le 14 octobre 2026 à 10 h 24 (Toronto, mesurée par `date`). L'ancienne consigne est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-12-lots-20-a-24.md`. Tu peux commiter ce fichier et le déplacement.
 
 ## Où on en est
 
-1.199.0 en ligne depuis le 11 oct. à 22 h 11 (lots 8 à 19) ; `main` à `bd533702`, poussé. Les fiches sources de cette série sont les laborieuses gardées le 11 et les restes coupés des lots 14 à 19 : toutes « sans Grégoire ». **Remesure chaque fiche sur `main` avant d'y toucher.**
+1.200.0 en ligne depuis le 12 oct. ; `main` à `c03969bb` au moment de l'écriture. **Remesure avant de toucher.**
 
-## Ce qui est nouveau : deux sessions du nuage écrivent en même temps que toi
+## Le mandat : un seul lot, du texte
 
-Elles ne touchent pas au code. L'une écrit la documentation destinée à une éventuelle relève (une personne qui reprendrait le code) ; l'autre remet à jour l'audit de mai. Donc, pour toute la série :
+Grégoire a réécrit le texte de présentation de la page d'accueil (l'encadré repliable rendu par `genererBanniereBienvenue()` dans `js/accueil.js`). **Les mots ci-dessous sont arrêtés par lui le 14 oct. 2026 : tu les recopies tels quels**, sans retouche de style. Seules libertés : apostrophes typographiques (’) comme le reste du fichier, et les espaces devant ? ! : « » selon la convention déjà en usage dans ce fichier.
 
-- **Tu ne modifies pas** `docs/`, `ETAT-PROJET.md`, `LICENSE.md`, `libs/VERSIONS.md`. Si un lot rend l'un d'eux faux (une fonction retirée qu'un document nomme, une clé à inscrire au registre `docs/DATA-OWNERSHIP.md`), écris-le dans la demande de relecture du lot, section « Documents à mettre à jour » : Cowork le fera suivre.
-- `RELAIS.md` et `BACKLOG.md` restent partagés. Si un push est refusé parce qu'une de ces sessions a poussé entre-temps : fusion, pas rebase, comme le 11 au soir.
+### Ce qui change
 
-## La méthode (inchangée depuis les lots 14 à 19)
+1. **Le titre de la barre repliable** (`.banniere-bienvenue-titre`, dans le `<button>`) devient : `À propos`
+2. **Le corps** (`#banniere-bienvenue-corps`) est remplacé, de son début jusqu'à `${paragrapheCommunaute}` exclu, par ce qui suit, dans cet ordre. Le gras est indiqué par `**…**`.
 
-Tu enchaînes les quatre lots sans attendre de feu vert entre eux. Pour chacun : remesure d'abord, commits séparés, break-tests, Vitest complet, une demande `plans de travail/DEMANDE-RELECTURE-2026-10-12-lotN-<sujet>.md` déposée avant d'ouvrir le suivant. **Un seul arrêt, à la fin du lot 23**, avec le rapport court à Grégoire en gestes d'utilisateur. Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.
+- Ligne de tête, rendue comme « Par où commencer ? » (même classe) : **Bienvenue dans Labo Codex !**
+- Paragraphe : Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.
+- Paragraphe : L’application te propose de numériser ton travail et de traiter les micro-données que tu crées et recueilles dans ton enseignement et elle les rend visibles et interprétables. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.
+- Paragraphe : Il n’y a aucune intelligence artificielle dans l’application. Aucune décision n’est prise à ta place. L’outil ne fait que t’éclairer et ton jugement professionnel est souverain.
+- Paragraphe : Labo Codex n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.
+- Paragraphe : Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que d’habitude, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !
+- Ligne de tête (inchangée) : **Par où commencer ?**
+- Liste numérotée (même `<ol>` qu'aujourd'hui) :
+  1. **Pose ton cadre.** Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les crées une fois et l’application s’en sert par la suite.
+  2. **Conçois tes productions et tes évaluations.** Tu peux les élaborer seul·e ou les partager avec tes collègues.
+  3. **Apprends pas à pas.** Les tutoriels de Labo Codex, sur le blogue Codex Numeris, te montrent chaque étape en images.
+- Paragraphe (inchangé, garde la constante `QUESTION_ORTHOPEDAGOGUE`) : **Tu es orthopédagogue ?** Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.
+- Paragraphe (inchangé) : **Certains concepts sont nouveaux ?** Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».
+- Paragraphe, **sans** amorce en gras (l'ancienne « Ton courriel, une fois par mois. » disparaît) : Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).
 
-« Sans Grégoire » : aucune décision de pédagogie, aucune écriture dans des données déjà écrites chez l'utilisateur, aucune zone protégée (`js/config.js`, `js/navigation.js`, `noms_stables.json`), aucune suppression de données d'utilisateur. Ce que tu ne tranches pas va dans la demande du lot, et tu continues. Un mot d'écran neuf : écrit dans le code, cité dans la demande. Un lot qui déborde se coupe : la moitié sûre, et la mesure du reste.
+### Ce qui ne change pas
 
-## Lot 20 – des écritures qui ne se marchent plus dessus
+`paragrapheCommunaute` (l'encadré AQPC), les trois boutons, la mécanique de repli (`basculerBanniereBienvenue`, préférence `banniereAccueilRepliee`), l'`id` et les classes de la bannière, la carte de l'orthopédagogue en dessous.
 
-- **#522**, les dix sites encore en course après le lot 7 (`scripts/mesurer-522.py ""`) : ceux qu'un geste de l'usager atteint passent par `db.modifier` ; les autres, dis pourquoi ils sont sûrs.
-- **#596**, six clés `sessionStorage` non namespacées sur cinq fichiers. Ce qu'un onglet ouvert a déjà rangé sous l'ancien nom meurt avec l'onglet : dis-le, ne le recopie pas.
-- **#627**, ce qui reste : l'unification des quatre remaps d'import sur l'implémentation de `reserve-ouvrir.js`. Source seulement : les liens déjà écrits ne sont pas réécrits, et c'est dit.
+### À tenir à jour dans le même lot
 
-## Lot 21 – le premier contact sans fenêtre qui bloque
+- Le JSDoc de `genererBanniereBienvenue()` : son titre cite « Bienvenue dans Labo Codex » ; ajoute une ligne d'historique datée du 14 oct. 2026 (texte réécrit par Grégoire, titre « À propos »).
+- `tests/unit/sentinelle-accueil-porte-ortho-et-champ2-846.test.js` : `MOTS_BANDEAU` épingle l'ancien texte. Remplace-le par les mots ci-dessus (titre « À propos » compris), commentaire daté du 14 oct. Break-test : remets un mot de l'ancien texte dans le rendu, le test doit rougir.
+- Le bloc de jetons d'`index.html` (changement dans `js/`).
+- Si un document de `docs/` cite l'ancien texte : ne le touche pas, liste-le dans la demande de relecture sous « Documents à mettre à jour ».
 
-- **#678**, les `alert()` du parcours de la première chronique (créer un trimestre, créer un groupe-cours). Motif de Grégoire (1er sept.) : le premier contact d'un nouvel utilisateur qui suit le tutoriel. Même patron que #1037 : fenêtres et notifications de l'application, **mots existants gardés** ; un mot neuf est cité dans la demande. Si les 46 alertes débordent, fais d'abord ce parcours-là et inscris la mesure du reste.
+### Source ou stock
 
-## Lot 22 – le code mort, la fin
+Source seulement : du texte rendu, rien n'est écrit chez l'utilisateur. Une personne qui avait replié l'encadré le retrouve replié, sous son nouveau titre : c'est voulu.
 
-- **#469**, le reste : l'îlot de `pratiques.js` (fais d'abord le graphe d'appels interne : une fonction n'est morte que si aucune fonction vivante ne l'appelle), le trio « modèles de pratiques » de `pratiques-bibliotheque.js` et ce qu'il entraîne, l'ancienne génération des grilles, échelles et cartouches, l'outil de diagnostic I14.
-- **#587**, le reste : `afficherSection` (trois fichiers), `afficherSousSection`, `afficherTableauProductions`, `_apresOuvertureFichier`. Garde la version qui gagnait.
-Chaque retrait prouvé par recherche d'appelants **et** Vitest. Pas `selectionnerArtefactsSelonModalite` (#722, à Grégoire) ni `chargerGrilleTemplate` (nom protégé, #628).
+## La méthode
 
-## Lot 23 – l'outillage trié
-
-- **#642, #679, #784** : trier les inventaires figés au lot 19. Voulu : annoté dans le cliquet, avec sa raison. Défaut : corrigé s'il tient en quelques lignes, sinon inscrit avec sa mesure. Le cliquet descend d'autant.
-- **#616**, le rebornage des sentinelles « à N caractères », banc par banc (85 lignes dans 44 bancs) ; le cliquet descend à chaque banc reborné.
-- **#602**, les trois filets anti-cache ne voient que les fichiers portant une balise `<script src>`.
-Rien ne change à l'écran : dis-le si quelque chose change.
-
-## Hors de la série
-
-Les fiches « à Grégoire » (une dizaine, cochées « ⏳ » au BACKLOG le 12 oct.), #465 (le moteur des pratiques touche des notes), #470 (la vitesse, trop large pour une journée de vérification unique), #595 (68 couleurs : un choix de palette par nom, à lui montrer), #598, #584, #738, #615 (peut recouper les candidats de la session d'audit).
-
-## Ajout de Cowork (12 oct., 7 h 59) – lot 24, contenir la complexité
-
-**Décision de Grégoire (7 h 58) : le chantier « contenir » entre dans cette série ; le moment est laissé à Cowork.** Il vient **après le lot 23**, et **l'arrêt unique de la série passe à la fin du lot 24**. Motifs : relevé après le lot 22, il ne fige pas le code mort que ce lot retire ; posé avant les lots qui suivront les décisions de Grégoire (une quarantaine attendent au tri, dont certaines touchent des fonctions déjà très chargées, l'import sélectif, le moteur des pratiques), il contient la croissance au moment où elle peut se produire.
-
-**Le plan** : `plans de travail/PLAN-contenir-la-complexite.md`, écrit par une session du nuage sur la branche `claude/kind-allen-6gw2ik` (`d499ac6d`), absent de `main` au moment où j'écris. S'il n'y est toujours pas : `git fetch origin claude/kind-allen-6gw2ik` puis `git show FETCH_HEAD:"plans de travail/PLAN-contenir-la-complexite.md"`. Ne fusionne pas cette branche : elle porte aussi `ETAT-PROJET.md`, que tu ne touches pas.
-
-**Ce qui change par rapport au plan** (relecture de Cowork, retenue par Grégoire) :
-1. **Bloquants** : les règles 1 (aucune fonction neuve au-dessus de 30 ; les existantes figées une à une, elles ne peuvent que descendre) et 2 (le nombre de fonctions au-dessus de 15 ne peut que descendre). La liste suit le code, comme `sentinelle-858` ; une hausse assumée s'écrit, avec sa raison.
-2. **La règle 3 (« aucun fichier ne franchit 1 000 lignes de code ») n'est pas bloquante** : mesurée et imprimée seulement. Motif : couper un fichier oblige ici à toucher `index.html` (210 scripts), l'ordre de chargement et les jetons anti-cache.
-3. **Le relevé se fait sur `main` à la fin du lot 23**, pas sur les chiffres du plan, pris sur 1.198.0 (il fige encore des rappels de `groupe.js`, retiré au lot 12).
-4. **Contre le découpage de façade** : le module imprime aussi, sans bloquer, la somme des complexités des fonctions au-dessus de 15. Si le compte baisse et que la somme ne bouge pas, la complexité a été déplacée, pas réduite ; Cowork le lira à la relecture.
-5. **L'option du § 3.2 est retenue** : une ligne « complexité » dans le relais de chaque release (Δ des gros fichiers, Δ au-dessus de 15, Δ au-dessus de 30, Δ de la somme). Inscris-la dans le rituel de release, là où il est écrit (skill `release-et-changelog`), en une ligne.
-
-**Le reste du plan tient** : `acorn` en `devDependency` de `tests/`, verrouillé dans `package-lock.json` ; le module `tests/unit/_helpers/complexite.js` ; la définition d'ESLint 8.57 ; l'exclusion nommée de `pratique-interface.js` ; les garde-fous (plus de 200 fichiers, plus de 10 000 fonctions) ; les trois break-tests. Aucun fichier de `js/`, ni `index.html`, `styles.css`, `docs/`, `ETAT-PROJET.md`. Inscris une fiche au BACKLOG pour le chantier. Dans la demande `DEMANDE-RELECTURE-2026-10-12-lot24-contenir.md` : les chiffres du relevé (au-dessus de 15, au-dessus de 30, maximum, somme, gros fichiers), le coût mesuré sur Vitest, et, sous « Documents à mettre à jour », ce que la session de la relève devrait savoir de ce banc.
-
-## Ajout de Cowork (12 oct., 9 h 53) – verdict des lots 20 à 24
-
-**Série acceptée.** Relus : `7d0747e0` à `1306c678`. Vérifié en particulier : `db.modifier` n'appelle le mutateur qu'une fois et n'écrit pas sur `undefined` (#522, le compteur `nbMigrees` est donc juste) ; #596, lecture et écriture passent ensemble par `cle()`, `travaux-mode-courant` n'avait pas de lecteur ; #627, l'exception #654 des productions identiques en place est conservée ; #678, que des `alert()` (aucun `confirm()` changé de sens) ; lot 22, aucune des 61 fonctions retirées n'a d'appelant ni de `data-action` restant, aucune n'est dans `noms_stables.json` ; #642, l'alias retiré était local à la fonction, lu à l'appel, donc identique à `window.cle` ; #602, aucune mise en cache hors ligne (pas de service worker) qui garderait l'ancienne adresse ; lot 24, conforme à la relecture (règle 3 imprimée, somme imprimée, relevé sur `main`, ligne de relais au skill), et la somme baisse avec le compte (11 687 → 11 482) : rien n'a été déplacé. Tes suppositions sont retenues, acorn 8.18.0 compris.
-
-**À faire avant la release, à la place du coup d'œil de Grégoire** : des captures, que Cowork regardera. Trois écrans, chacun dans Chromium et WebKit, à 1 280 px et à 820 px (l'iPad en portrait), en mode démo : l'Accueil et la visite guidée (les boutons `btn-principal`, #679), le profil d'un·e étudiant·e démo (les huit en-têtes de section), une copie démo ouverte dans la visionneuse PDF (#602, le worker porte son jeton). Dépose-les dans `tests/test-results/captures-2026-10-12/` (non versionné) et dis-le : Cowork les ouvrira.
-
-**Mineurs, sans arrêt** :
-- #678 : « Veuillez coller des données à importer. » est le seul vouvoiement du parcours ; l'application tutoie. Remplace par « Colle des données à importer. » (mot d'enseignant, pas d'élève : décision de Cowork).
-- #627 : à l'import complet, une cartouche identique à une cartouche en place, dont seule l'échelle a été renommée, est maintenant rebranchée, donc différente, donc importée à côté. C'est sans doute juste (elle désigne l'échelle reçue, pas la locale), mais c'est l'inverse du choix #654 pour les productions. Un essai qui fige ce comportement, et une ligne dans #627 qui le dit ; pas de code si c'est voulu.
-- Les deux points qui reviennent à Grégoire (cinq noms morts dans `noms_stables.json`, l'enveloppe de la navigation) : inscris-les au BACKLOG avec « ⏳ À Grégoire », s'ils n'y sont pas. Cowork les lui soumettra.
-
-**Ensuite** : un commit, la demande `DEMANDE-RELECTURE-2026-10-12-captures-et-mineurs.md`, et arrêt. L'entrée des Nouvelles sera soumise à Grégoire ; la release et le verdict attendent son signal du soir.
-
-## Ajout de Cowork (12 oct., 10 h 56) – verdict des captures et des mineurs
-
-**Acceptés** (`599001a2`). Captures regardées par Cowork (Accueil, visite guidée, profil, visionneuse, WebKit et Chrome, 1 280 et 820 px) et relevé lu : les boutons principaux ont bien leur fond (`rgb(3, 46, 92)`), les en-têtes du profil sont alignés, le worker PDF est demandé avec `?v=3.11.174` et la copie s'affiche. #678 et #627 tenus ; #1052 et #1053 inscrits.
-
-**Deux mesures avant la release, en lecture d'abord** :
-1. **« Chargement... »** reste affiché en haut à gauche de la visionneuse, dans les deux navigateurs, alors que la copie est rendue (`*-4-visionneuse-pdf.png`). Dis quel élément le porte, et s'il était déjà là sur 1.199.0 (`git worktree add` de `bd533702` hors du dépôt, même script de capture). Nouveau depuis #602 : c'est ton lot, corrige. Déjà là : une ligne dans la fiche qui le concerne, sans code.
-2. **Le 404 du premier passage** (`chromium-1280`, « Failed to load resource ») : nomme l'adresse. Une icône ou un fichier de banc : rien à faire. Une bibliothèque de `libs/` ou un script de l'application : c'est #602, corrige.
-
-**Décisions de Cowork sur tes trois trouvailles** :
-- Le bandeau qui recouvre la bulle de la visite guidée à 820 px : une ligne dans **#678**, dont le motif est le premier contact (décision de Grégoire du 1er sept.). Pas de fiche neuve, pas de code aujourd'hui.
-- `previsualiserConfigComplete` sans appelant : une ligne dans le reste de **#469**.
-- Les deux en-têtes RLO qu'on ne voit pas en démo : rien ; le banc #679 les tient.
-
-**Ensuite** : un commit, une ligne de réponse dans `DEMANDE-RELECTURE-2026-10-12-captures-et-mineurs.md`, et arrêt. Toujours ni push, ni release, ni verdict avant le signal de Grégoire.
-
-## Ajout de Cowork (12 oct., 12 h 10) – préparer la release des lots 20 à 24
-
-Ta réponse de `a7584ec0` est acceptée : rien à corriger. Cowork a rectifié une ligne de #678 au BACKLOG (c'est la notification « Tes premières évaluations sont enregistrées… » qui recouvre la bulle, pas le bandeau vert) ; elle est dans l'arbre de travail, non commitée.
-
-**Décision de Grégoire (12 h 10) : l'entrée des Nouvelles est retenue**, mots exacts, couleur `bleu` :
-
-Titre : « Moins de fenêtres qui bloquent »
-1. « Créer un trimestre, un cours ou un groupe-cours, ou importer des étudiant·es : les messages s'affichent dans l'application, sans bloquer l'écran. »
-2. « Supprimer un cours qui porte encore des données : la fenêtre dit ce qui s'y rattache. »
-3. « Les boutons principaux de l'Accueil, de l'aide et de la visite guidée ont retrouvé leur couleur, et les en-têtes du profil d'un·e étudiant·e sont alignés. »
-4. « Quand une grille, une échelle ou une cartouche change d'identifiant à l'import, tout ce qui la désigne la suit. »
-
-**Ce que tu fais maintenant**, dans l'ordre :
-1. Un commit de documentation avec `BACKLOG.md` et ce fichier.
-2. L'entrée ci-dessus dans `js/changelog-data.js`, puis `node scripts/release.mjs minor` ; un commit de release, par le skill `release-et-changelog`. Le relais de cette release porte pour la première fois la ligne « complexité » (lot 24).
-3. Arrête-toi et dis-le en une ligne. **Le verdict complet et le push attendent le signal de fin de journée de Grégoire** (Chrome, Safari, Claude fermés ; Mac branché, sans veille). À son signal : verdict, puis push si vert ; si `origin/main` a avancé (les sessions du nuage), fusion, pas rebase.
+Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-14-accueil-a-propos.md` avec la ligne de changelog que tu proposes (les mots de la ligne « Nouvelles » remontent à Grégoire). **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire en gestes d'utilisateur : ce qu'il verra en ouvrant l'accueil.
