@@ -36,7 +36,7 @@ function afficherAccueil() {
 }
 
 /**
- * Génère la bannière de bienvenue « Bienvenue dans Labo Codex ».
+ * Génère la bannière de bienvenue, titrée « À propos » (ouverte par « Bienvenue dans Labo Codex ! »).
  *
  * Affichée à TOUS les utilisateurs, en permanence (accueil public par
  * défaut). Elle présente l'application, oriente vers l'onglet Cadre et
@@ -70,6 +70,10 @@ function afficherAccueil() {
  * Cf. ADR-008 (révision 27 août 2026), DEPLOY.md (révision v1.6).
  * Source texte d'origine : docs/refonte-textes/textes-manquants-bloc4.md
  * (validé 19 avril 2026).
+ *
+ * 14 octobre 2026 : texte réécrit par Grégoire (mots arrêtés par lui, recopiés tels
+ * quels) ; la barre repliable s'intitule « À propos ». L'amorce « Ton courriel, une
+ * fois par mois. » disparaît : le paragraphe d'accès est désormais sans amorce.
  */
 // La question de l'orthopédagogue, que disent le bandeau ET la carte : écrite une fois (sentinelle #846, B3).
 const QUESTION_ORTHOPEDAGOGUE = 'Tu es orthopédagogue ?';
@@ -85,20 +89,25 @@ function genererBanniereBienvenue() {
     return `
         <div class="banniere-bienvenue carte ${replie ? 'est-replie' : ''}" id="banniere-bienvenue">
             <button type="button" class="banniere-bienvenue-toggle" data-action="basculerBanniereBienvenue" aria-expanded="${replie ? 'false' : 'true'}" aria-controls="banniere-bienvenue-corps">
-                <span class="banniere-bienvenue-titre">Bienvenue dans Labo Codex !</span>
+                <span class="banniere-bienvenue-titre">À propos</span>
                 <span class="banniere-chevron" aria-hidden="true"></span>
             </button>
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
-            <p>Labo Codex est un outil de soutien à l’enseignement et de suivi des apprentissages. L’application te propose de numériser ton travail. Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que sur papier, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
+            <p class="banniere-bienvenue-titre-etapes"><strong>Bienvenue dans Labo Codex !</strong></p>
+            <p>Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.</p>
+            <p>L’application te propose de numériser ton travail et de traiter les micro-données que tu crées et recueilles dans ton enseignement et elle les rend visibles et interprétables. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.</p>
+            <p>Il n’y a aucune intelligence artificielle dans l’application. Aucune décision n’est prise à ta place. L’outil ne fait que t’éclairer et ton jugement professionnel est souverain.</p>
+            <p>Labo Codex n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.</p>
+            <p>Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que d’habitude, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
             <p class="banniere-bienvenue-titre-etapes"><strong>Par où commencer ?</strong></p>
             <ol class="banniere-bienvenue-etapes">
-                <li><strong>Pose ton cadre.</strong> Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les saisis une fois : l’application s’en sert partout.</li>
+                <li><strong>Pose ton cadre.</strong> Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les crées une fois et l’application s’en sert par la suite.</li>
                 <li><strong>Conçois tes productions et tes évaluations.</strong> Tu peux les élaborer seul·e ou les partager avec tes collègues.</li>
-                <li><strong>Apprends geste par geste.</strong> Les tutoriels de Labo Codex, sur le blogue Codex Numeris, montrent chaque étape en images.</li>
+                <li><strong>Apprends pas à pas.</strong> Les tutoriels de Labo Codex, sur le blogue Codex Numeris, te montrent chaque étape en images.</li>
             </ol>
             <p><strong>${QUESTION_ORTHOPEDAGOGUE}</strong> Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.</p>
             <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».</p>
-            <p><strong>Ton courriel, une fois par mois.</strong> Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil.</p>
+            <p>Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-principal" data-action="demarrerTourGuide">

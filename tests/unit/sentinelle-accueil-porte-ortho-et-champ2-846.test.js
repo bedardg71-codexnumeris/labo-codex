@@ -116,23 +116,33 @@ describe('A · #846 — le champ 2 du groupe-cours dit le même mot sur un servi
 const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des productions',
     'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions'];
 
-// Les mots arrêtés par Grégoire (consigne § 2), dans l'ordre où l'accueil les rend.
+// Les mots arrêtés par Grégoire, dans l'ordre où l'accueil les rend.
 // 27 sept. 2026 — « Par où commencer ? » en trois étapes et la ligne de l'orthopédagogue gardée
 // (texte de Cowork accepté par Grégoire le 26 sept., consigne « accueil et tutoriels »).
+// 14 oct. 2026 — texte réécrit par Grégoire (consigne « le nouveau texte À propos ») : la barre
+// repliable s'intitule « À propos » (TITRE_BANDEAU, épinglé à part : « À propos » s'écrit aussi
+// ailleurs dans js/, Réglages › À propos), le corps s'ouvre sur « Bienvenue dans Labo Codex ! »,
+// et le paragraphe d'accès perd son amorce « Ton courriel, une fois par mois. ».
+const TITRE_BANDEAU = 'À propos';
 const MOTS_BANDEAU = [
+    'Bienvenue dans Labo Codex !',
+    'Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.',
+    'L’application te propose de numériser ton travail et de traiter les micro-données que tu crées et recueilles dans ton enseignement et elle les rend visibles et interprétables. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.',
+    'Il n’y a aucune intelligence artificielle dans l’application. Aucune décision n’est prise à ta place. L’outil ne fait que t’éclairer et ton jugement professionnel est souverain.',
+    'Labo Codex n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.',
+    'Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que d’habitude, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !',
     'Par où commencer ?',
     'Pose ton cadre.',
-    'Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les saisis une fois : l’application s’en sert partout.',
+    'Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les crées une fois et l’application s’en sert par la suite.',
     'Conçois tes productions et tes évaluations.',
     'Tu peux les élaborer seul·e ou les partager avec tes collègues.',
-    'Apprends geste par geste.',
-    'Les tutoriels de Labo Codex, sur le blogue Codex Numeris, montrent chaque étape en images.',
+    'Apprends pas à pas.',
+    'Les tutoriels de Labo Codex, sur le blogue Codex Numeris, te montrent chaque étape en images.',
     'Tu es orthopédagogue ?',
     'Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.',
     'Certains concepts sont nouveaux ?',
     'Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».',
-    'Ton courriel, une fois par mois.',
-    'Tu donnes ton courriel, tu reçois un code, et tu n’y repenses plus. Rien ne se ferme, et tes données restent sur ton appareil.',
+    'Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).',
 ];
 const MOTS_CARTE = ['Tu es orthopédagogue ?', 'Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.', 'Commencer →'];
 
@@ -207,6 +217,17 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         }
         expect(html).not.toContain('Certains concepts sont nouveaux pour toi');
         expect(html).not.toContain('L’identification est requise');
+    });
+
+    it('la barre repliable s\'intitule « À propos », et l\'ancien texte du 27 sept. est parti (14 oct. 2026)', () => {
+        const { html } = rendreAccueil();
+        const titres = [...html.matchAll(/<span class="banniere-bienvenue-titre">([^<]*)<\/span>/g)].map(m => m[1]);
+        expect(titres).toEqual([TITRE_BANDEAU]);
+        expect(html).not.toContain('Ton courriel, une fois par mois.');
+        expect(html).not.toContain('tu n’y repenses plus');
+        expect(html).not.toContain('Les mêmes gestes que sur papier');
+        expect(html).not.toContain('Apprends geste par geste.');
+        expect(html).not.toContain('l’application s’en sert partout');
     });
 
     it('les étapes sont une vraie liste numérotée ; la ligne de l\'orthopédagogue suit la liste, à part ; aucun « — » dans le bandeau', () => {
@@ -284,3 +305,8 @@ describe('B4 · la carte est blanche comme les autres cartes de l\'accueil', () 
 //   B5 index.html — un bord gauche épais ajouté à la carte                                                    → 1 rouge
 //   B6 styles.css — la carte retirée de la règle « mode clair » des cartes de l'accueil                        → 1 rouge
 //   B7 accueil.js — « Ton courriel, une fois par mois ! »                                                     → 2 rouges
+//
+// BREAK-TESTS DU 14 octobre 2026 (texte « À propos ») — copie de référence, mutation, restauration (empreinte identique).
+//   C1 accueil.js — « Apprends pas à pas. » redevient « Apprends geste par geste. »                          → 3 rouges
+//   C2 accueil.js — la barre redevient « Bienvenue dans Labo Codex ! »                                         → 2 rouges
+//   C3 accueil.js — l'amorce « Ton courriel, une fois par mois. » remise devant le paragraphe d'accès          → 1 rouge
