@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.201 (lot « À propos » et préparation de la clôture de l'hiver 2026) — deux items
+            // arrêtés par Grégoire le 14 oct. 2026, transmis par Cowork, posés tels quels.
+            version: '1.201',
+            couleur: 'bleu',
+            titre: 'À propos, clore et rouvrir',
+            items: [
+                'L\'accueil se présente autrement&nbsp;: l\'encadré du haut s\'intitule «&nbsp;À propos&nbsp;» et dit ce que Labo Codex fait, et ce qu\'il ne fait pas.',
+                'Clore et rouvrir un trimestre passent par les fenêtres de l\'application&nbsp;; «&nbsp;Rouvrir&nbsp;» demande maintenant confirmation, et la bibliothèque se met à jour aussitôt.'
+            ]
+        },
+        {
             // 1.200 (lots 20 à 24 de la série sans Grégoire) — titre et quatre items retenus par Grégoire
             // le 12 oct. 2026 (12 h 10), transmis par Cowork, posés tels quels.
             version: '1.200',
